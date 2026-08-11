@@ -1,3 +1,5 @@
+import { InventoryItem } from '../../inventoryItem';
+
 export type GuildShopStockType = 'Common' | 'Rare';
 
 export interface GuildShopReward {
@@ -30,4 +32,9 @@ export interface GuildShopOverview {
   weeklyPeriodKey: string;
   nextWeeklyResetAt: string;
   items: GuildShopItem[];
+}
+
+export interface GuildShopPurchaseResponse extends GuildShopOverview {
+  inventoryGrantId?: string | null;
+  inventoryItemsGranted?: InventoryItem[];
 }

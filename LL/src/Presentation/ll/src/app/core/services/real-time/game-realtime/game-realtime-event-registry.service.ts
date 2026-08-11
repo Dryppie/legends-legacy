@@ -69,10 +69,11 @@ export class GameRealtimeEventRegistry {
           envelope.occurredAt,
           payload.source,
           payload.location,
+          payload.grantId,
         );
       this.injector
         .get(InventoryStateService)
-        .addOrIncrementMany(payload.items ?? []);
+        .applyInventoryGrant(payload.grantId, payload.items ?? []);
     });
 
     this.addHandler(gameRealtimeEventNames.inventorySnapshot, (envelope) => {

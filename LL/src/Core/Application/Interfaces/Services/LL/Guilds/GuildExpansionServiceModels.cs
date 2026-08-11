@@ -2,6 +2,7 @@ using Domain.Models.Guilds;
 using Domain.Models.Guilds.Missions;
 using Domain.Models.Guilds.Buildings;
 using Domain.Models.Guilds.Shop;
+using Domain.Models.Inventories;
 
 namespace Application.Interfaces.Services.LL.Guilds;
 
@@ -148,6 +149,10 @@ public sealed record GuildShopOverviewDto(
     string WeeklyPeriodKey,
     DateTimeOffset NextWeeklyResetAt,
     IReadOnlyList<GuildShopItemDto> Items);
+
+public sealed record GuildShopPurchaseResult(
+    GuildShopOverviewDto Shop,
+    IReadOnlyList<InventoryItem> InventoryItemsGranted);
 
 public sealed record GuildBuildingBenefitDto(
     int Level,

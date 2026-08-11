@@ -130,7 +130,11 @@
               !missions.myWeeklyContribution?.canClaimReward || loading()
             "
             (pressed)="claimWeeklyReward()"
-            text="Claim Weekly"
+            [text]="
+              missions.myWeeklyContribution?.rewardClaimed
+                ? 'Claimed'
+                : 'Claim Weekly'
+            "
           ></app-regular-button>
         </footer>
       </ng-container>
@@ -218,7 +222,7 @@
           <app-regular-button
             [disabled]="!order.canClaimReward || loading()"
             (pressed)="claimOrder(order)"
-            text="Claim"
+            [text]="order.status === 'RewardClaimed' ? 'Claimed' : 'Claim'"
           ></app-regular-button>
         </article>
 

@@ -54,6 +54,14 @@ export function clampFloatingDrawerPosition(
   };
 }
 
+export function shouldUseFloatingChatDrawer(
+  layout: 'docked' | 'floating',
+  isScreenSmall: boolean,
+  isScreenLarge: boolean,
+): boolean {
+  return !isScreenSmall && (layout === 'floating' || !isScreenLarge);
+}
+
 @Component({
   selector: 'app-dashboard',
   imports: [
@@ -83,11 +91,10 @@ export class DashboardComponent implements OnInit {
   isSidebarOpen = false;
   isScreenSmall = false;
   isScreenLarge = false;
-  isChatOpenDesktop = true; // open by default on ≥ lg
+  isChatOpenDesktop = true;
   isFloatingDrawerOpen = false;
   isFloatingDrawerTall = false;
   floatingDrawerPosition: FloatingDrawerPosition | null = null;
-  isFloatingChatOpen = false;
   isMobileChatExpanded = false;
   isSidebarSwiping = false;
   sidebarSwipeOffset = 0;
@@ -117,6 +124,7 @@ export class DashboardComponent implements OnInit {
     this.bootstrapError = this.bootstrapState.error;
     this.idleCombatError = this.state.idleCombatError;
     this.chatLayout = this.chatLayoutPreference.layout;
+    this.isChatOpenDesktop = this.chatLayoutPreference.dockedOpen();
 
     effect(() => {
       this.isResolvingAction =
@@ -152,10 +160,6 @@ export class DashboardComponent implements OnInit {
 
     this.isScreenSmall = nextIsScreenSmall;
     this.isScreenLarge = nextIsScreenLarge;
-
-    if (nextIsScreenLarge) {
-      this.isFloatingChatOpen = false;
-    }
 
     if (!nextIsScreenSmall) {
       this.isMobileChatExpanded = false;
@@ -253,7 +257,6 @@ export class DashboardComponent implements OnInit {
           directionalVelocity >= DashboardComponent.sidebarSwipeFlickVelocity));
 
     if (completedSwipe && !this.sidebarSwipeStartedOpen) {
-      this.isFloatingChatOpen = false;
       this.isFloatingDrawerOpen = false;
       this.isMobileChatExpanded = false;
     }
@@ -275,25 +278,26 @@ export class DashboardComponent implements OnInit {
     this.isMobileChatExpanded = !this.isMobileChatExpanded;
   }
 
-  toggleChat(): void {
-    if (this.chatLayout() === 'floating') {
-      this.isFloatingDrawerOpen = !this.isFloatingDrawerOpen;
-      this.constrainFloatingDrawerAfterResize();
-      return;
-    }
+  get usesFloatingChatDrawer(): boolean {
+    return shouldUseFloatingChatDrawer(
+      this.chatLayout(),
+      this.isScreenSmall,
+      this.isScreenLarge,
+    );
+  }
 
-    if (this.isScreenLarge) {
-      this.isChatOpenDesktop = !this.isChatOpenDesktop;
-      return;
-    }
-
-    this.closeSidebar();
-    this.isFloatingChatOpen = !this.isFloatingChatOpen;
+  setDockedChatCollapsed(collapsed: boolean): void {
+    this.setDockedChatOpen(!collapsed);
   }
 
   setFloatingDrawerCollapsed(collapsed: boolean): void {
     this.isFloatingDrawerOpen = !collapsed;
     this.constrainFloatingDrawerAfterResize();
+  }
+
+  private setDockedChatOpen(open: boolean): void {
+    this.isChatOpenDesktop = open;
+    this.chatLayoutPreference.setDockedOpen(open);
   }
 
   setFloatingDrawerTall(tall: boolean): void {
@@ -388,7 +392,6 @@ export class DashboardComponent implements OnInit {
   }
 
   openSidebar() {
-    this.isFloatingChatOpen = false;
     this.isFloatingDrawerOpen = false;
     this.isMobileChatExpanded = false;
     this.cancelActiveSidebarSwipe();

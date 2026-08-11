@@ -31,6 +31,7 @@ export interface LootReceived {
   items: InventoryItem[];
   source: string;
   location?: string | null;
+  grantId?: string | null;
 }
 
 export interface InventorySnapshot {

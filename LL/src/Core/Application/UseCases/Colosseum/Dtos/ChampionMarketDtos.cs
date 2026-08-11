@@ -1,6 +1,7 @@
 using Application.Common.Mappings;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.UseCases.Colosseum.Models;
+using Application.UseCases.Inventories.Dtos;
 using AutoMapper;
 
 namespace Application.UseCases.Colosseum.Dtos;
@@ -69,6 +70,8 @@ public sealed class PurchaseChampionMarketItemResponseDto : IMapFrom<ChampionMar
     public string? RewardItemId { get; set; }
     public string? RewardItemName { get; set; }
     public int RewardItemQuantity { get; set; }
+    public Guid? InventoryGrantId { get; set; }
+    public List<InventoryItemDto> InventoryItemsGranted { get; set; } = [];
 
     public void Mapping(Profile profile)
     {

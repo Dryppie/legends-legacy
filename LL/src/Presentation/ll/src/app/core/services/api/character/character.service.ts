@@ -94,6 +94,11 @@ export class CharacterService {
     );
   }
 
+  suggestCharacterNames(prefix: string): Observable<string[]> {
+    const params = new HttpParams().set('query', prefix);
+    return this.api.get('Character/Suggestions', params);
+  }
+
   resolveCharacterIdByName(name: string): Observable<string> {
     const params = new HttpParams().set('name', name);
     return this.api.get('Character/resolveName', params).pipe(

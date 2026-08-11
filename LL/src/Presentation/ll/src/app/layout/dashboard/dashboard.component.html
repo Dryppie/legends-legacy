@@ -143,7 +143,7 @@
           class="block min-h-0 flex-1"
           [collapsible]="true"
           [collapsed]="!isChatOpenDesktop"
-          (collapsedChange)="isChatOpenDesktop = !$event"
+          (collapsedChange)="setDockedChatCollapsed($event)"
         ></app-chat>
         <app-loot-tracker *ngIf="isChatOpenDesktop"></app-loot-tracker>
       </div>
@@ -162,11 +162,7 @@
 
 <aside
   #floatingChatDrawer
-  *ngIf="
-    chatLayout() === 'floating' &&
-    !isScreenSmall &&
-    !(isScreenSmall && isSidebarOpen)
-  "
+  *ngIf="usesFloatingChatDrawer"
   class="fixed bottom-20 left-3 right-3 z-40 max-h-[calc(100dvh-6rem)] overflow-hidden rounded-lg shadow-2xl shadow-black/70 transition-[height] duration-200 sm:bottom-4 sm:left-auto sm:right-4 sm:max-h-[calc(100dvh-2rem)] sm:w-[22rem] 2xl:right-6 2xl:w-96"
   [style.left.px]="floatingDrawerPosition?.left"
   [style.top]="
@@ -204,36 +200,4 @@
     (drawerDragMove)="moveFloatingDrawer($event)"
     (drawerDragEnd)="endFloatingDrawerDrag($event)"
   ></app-chat>
-</aside>
-
-<button
-  *ngIf="chatLayout() === 'docked'"
-  type="button"
-  class="ll-floating-panel-trigger fixed bottom-4 right-6 z-40 hidden sm:flex xl:hidden"
-  (click)="toggleChat()"
-  aria-label="Toggle chat"
->
-  <span>Chat</span>
-  <span class="ll-floating-panel-trigger-icon" aria-hidden="true">
-    <img src="icons/ActivePlus.svg" class="h-3.5 w-3.5" alt="" />
-  </span>
-</button>
-
-<div
-  *ngIf="isFloatingChatOpen && !isScreenSmall && !isScreenLarge"
-  class="ll-screen-overlay fixed inset-0 z-40 xl:hidden"
-  (click)="toggleChat()"
-></div>
-
-<aside
-  *ngIf="isFloatingChatOpen && !isScreenSmall && !isScreenLarge"
-  class="fixed inset-y-0 right-0 z-50 h-full w-[min(20rem,85vw)] transform transition-transform duration-200 sm:w-[min(24rem,85vw)] xl:hidden"
-  [class.translate-x-0]="isFloatingChatOpen"
-  [class.translate-x-full]="!isFloatingChatOpen"
-  [attr.aria-hidden]="!isFloatingChatOpen"
-  [attr.inert]="isFloatingChatOpen ? null : ''"
->
-  <div class="ll-panel-strong relative h-full w-full max-w-full rounded-none">
-    <app-chat class="block h-full w-full" (close)="toggleChat()"></app-chat>
-  </div>
 </aside>

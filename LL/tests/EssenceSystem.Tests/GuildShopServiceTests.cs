@@ -106,7 +106,8 @@ public sealed class GuildShopServiceTests
         var result = await service.PurchaseAsync(characterId, blueprint.Key, now, CancellationToken.None);
 
         Assert.True(result.Succeeded);
-        Assert.Equal(50, result.Value!.GuildFavor);
+        Assert.Equal(50, result.Value!.Shop.GuildFavor);
+        Assert.Single(result.Value.InventoryItemsGranted);
         Assert.Contains(db.InventoryItems.Local, item =>
             item.InventoryId == characterId && item.ItemInstance.ItemBaseId == reward.Key);
     }
@@ -135,7 +136,9 @@ public sealed class GuildShopServiceTests
             CancellationToken.None);
 
         Assert.True(result.Succeeded);
-        Assert.Equal(400, result.Value!.GuildFavor);
+        Assert.Equal(400, result.Value!.Shop.GuildFavor);
+        var grantedItem = Assert.Single(result.Value.InventoryItemsGranted);
+        Assert.Equal(2, grantedItem.Quantity);
         Assert.Contains(db.InventoryItems.Local, item =>
             item.InventoryId == characterId
             && item.ItemInstance.ItemBaseId == reward.Key

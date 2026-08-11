@@ -79,6 +79,14 @@ describe('EssenceStateService loadout drafts', () => {
     expect(service.hasDraftChanges()).toBeTrue();
   });
 
+  it('refreshes the creature archive when entering the Creatures view', () => {
+    expect(essences.getCreatureArchive).toHaveBeenCalledTimes(1);
+
+    service.setActiveView('creatures');
+
+    expect(essences.getCreatureArchive).toHaveBeenCalledTimes(2);
+  });
+
   it('still resets the draft during an ordinary post-mutation refresh', () => {
     service.setDraftSlot(0, 'essence-1');
 

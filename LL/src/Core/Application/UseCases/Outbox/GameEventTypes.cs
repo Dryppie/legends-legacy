@@ -21,4 +21,5 @@ public static class GameEventTypes
     public const string ProphecyCompleted = "prophecy.completed";
     public const string PlayerTransferChatMessage = "player_transfer.chat_message";
     public const string GuildVaultChatMessage = "guild_vault.chat_message";
+    public const string InventoryItemsGranted = "inventory.items_granted";
 }

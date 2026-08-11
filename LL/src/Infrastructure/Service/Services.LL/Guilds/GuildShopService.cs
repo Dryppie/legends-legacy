@@ -45,33 +45,35 @@ public class GuildShopService : IGuildShopService
         return state is null ? null : BuildOverview(state.Value, now);
     }
 
-    public async Task<GuildOperationResult<GuildShopOverviewDto>> PurchaseAsync(Guid characterId, string itemKey, DateTimeOffset now, CancellationToken cancellationToken)
+    public async Task<GuildOperationResult<GuildShopPurchaseResult>> PurchaseAsync(Guid characterId, string itemKey, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var state = await LoadStateAsync(characterId, now, cancellationToken);
-        if (state is null) return GuildOperationResult<GuildShopOverviewDto>.Fail("You are not in a guild.");
+        if (state is null) return GuildOperationResult<GuildShopPurchaseResult>.Fail("You are not in a guild.");
 
         var definition = GetActiveItems(state.Value).FirstOrDefault(x => x.Key == itemKey);
-        if (definition is null) return GuildOperationResult<GuildShopOverviewDto>.Fail("Guild shop item was not found.");
+        if (definition is null) return GuildOperationResult<GuildShopPurchaseResult>.Fail("Guild shop item was not found.");
 
         var lockedReason = GetLockedReason(state.Value, definition, now);
         if (lockedReason is not null)
         {
-            return GuildOperationResult<GuildShopOverviewDto>.Fail(lockedReason);
+            return GuildOperationResult<GuildShopPurchaseResult>.Fail(lockedReason);
         }
 
         var rewardLockedReason = await GetRewardLockedReasonAsync(state.Value.Character, definition, cancellationToken);
         if (rewardLockedReason is not null)
         {
-            return GuildOperationResult<GuildShopOverviewDto>.Fail(rewardLockedReason);
+            return GuildOperationResult<GuildShopPurchaseResult>.Fail(rewardLockedReason);
         }
 
         if (state.Value.Character.GuildFavor < definition.GuildFavorCost)
-            return GuildOperationResult<GuildShopOverviewDto>.Fail("Not enough Guild Favor.");
+            return GuildOperationResult<GuildShopPurchaseResult>.Fail("Not enough Guild Favor.");
 
         state.Value.Character.GuildFavor -= definition.GuildFavorCost;
+        var inventoryItemsGranted = new List<Domain.Models.Inventories.InventoryItem>();
         foreach (var reward in definition.Rewards)
         {
-            await ApplyRewardAsync(state.Value.Character, reward, now, cancellationToken);
+            inventoryItemsGranted.AddRange(
+                await ApplyRewardAsync(state.Value.Character, reward, now, cancellationToken));
         }
 
         var purchase = state.Value.Purchases.FirstOrDefault(x => x.ShopItemKey == definition.Key && x.PeriodKey == state.Value.WeeklyPeriodKey);
@@ -103,7 +105,8 @@ public class GuildShopService : IGuildShopService
             $"{definition.Name} purchased from the guild shop.",
             now);
 
-        return GuildOperationResult<GuildShopOverviewDto>.Success(BuildOverview(state.Value, now));
+        return GuildOperationResult<GuildShopPurchaseResult>.Success(
+            new GuildShopPurchaseResult(BuildOverview(state.Value, now), inventoryItemsGranted));
     }
 
     private async Task<ShopState?> LoadStateAsync(Guid characterId, DateTimeOffset now, CancellationToken cancellationToken)
@@ -262,7 +265,7 @@ public class GuildShopService : IGuildShopService
         return null;
     }
 
-    private async Task ApplyRewardAsync(
+    private async Task<IReadOnlyList<Domain.Models.Inventories.InventoryItem>> ApplyRewardAsync(
         Character character,
         GuildShopRewardDto reward,
         DateTimeOffset now,
@@ -272,26 +275,30 @@ public class GuildShopService : IGuildShopService
         {
             case GuildShopRewardType.Cinders:
                 character.Cinders += reward.Amount;
-                break;
+                return [];
             case GuildShopRewardType.Soulstones:
                 character.Soulstones += reward.Amount;
-                break;
+                return [];
             case GuildShopRewardType.FateEcho:
                 character.FateEcho += reward.Amount;
-                break;
+                return [];
             case GuildShopRewardType.SigilFragments:
                 character.SigilFragments += reward.Amount;
-                break;
+                return [];
             case GuildShopRewardType.Item:
-                await ApplyItemRewardAsync(character.Id, reward, cancellationToken);
-                break;
+                return await ApplyItemRewardAsync(character.Id, reward, cancellationToken);
             case GuildShopRewardType.Title:
                 await ApplyTitleRewardAsync(character, reward, now, cancellationToken);
-                break;
+                return [];
+            default:
+                return [];
         }
     }
 
-    private async Task ApplyItemRewardAsync(Guid characterId, GuildShopRewardDto reward, CancellationToken cancellationToken)
+    private async Task<IReadOnlyList<Domain.Models.Inventories.InventoryItem>> ApplyItemRewardAsync(
+        Guid characterId,
+        GuildShopRewardDto reward,
+        CancellationToken cancellationToken)
     {
         var itemBase = await _context.ItemBases.FirstAsync(x => x.Id == reward.Key, cancellationToken);
         var items = _inventoryItemFactory.CreateForQuantity(itemBase, checked((int)reward.Amount), characterId);
@@ -304,6 +311,8 @@ public class GuildShopService : IGuildShopService
 
             await _context.InventoryItems.AddAsync(item, cancellationToken);
         }
+
+        return items;
     }
 
     private async Task ApplyTitleRewardAsync(

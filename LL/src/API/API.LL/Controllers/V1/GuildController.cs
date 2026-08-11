@@ -127,7 +127,7 @@ public class GuildController : BaseController
         await Mediator.Send(new GetGuildShopQuery(CurrentCharacterGuid));
 
     [HttpPost("PurchaseShopItem")]
-    public async Task<ActionResult<Response<GuildShopOverviewDto>>> PurchaseShopItem([FromBody] string itemKey) =>
+    public async Task<ActionResult<Response<PurchaseGuildShopItemResponseDto>>> PurchaseShopItem([FromBody] string itemKey) =>
         await Mediator.Send(new PurchaseGuildShopItemCommand(CurrentCharacterGuid, itemKey));
 
     [HttpPost("DonateVaultItem")]

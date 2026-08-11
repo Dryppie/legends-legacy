@@ -6,7 +6,7 @@ public static class CraftingMasteryProgression
     public const int MaxLevel = 100;
 
     private const int BaseExperienceForFirstLevel = 200;
-    private const double GrowthFactor = 1.15;
+    private const double GrowthFactor = 1.07;
 
     public static int GetLevelForExperience(int experience)
         => GetProgressForExperience(experience).Level;

@@ -120,6 +120,9 @@ public sealed class GameEventOutboxTests
             registry.GetConsumers(GameEventTypes.DungeonRunCompleted));
         Assert.Contains(GameEventOutboxConsumerNames.Quests, registry.GetConsumers(GameEventTypes.TournamentBattleCompleted));
         Assert.Contains(GameEventOutboxConsumerNames.EventQuests, registry.GetConsumers(GameEventTypes.TournamentBattleCompleted));
+        Assert.Equal(
+            [GameEventOutboxConsumerNames.RealtimeInventory],
+            registry.GetConsumers(GameEventTypes.InventoryItemsGranted));
     }
 
     [Fact]

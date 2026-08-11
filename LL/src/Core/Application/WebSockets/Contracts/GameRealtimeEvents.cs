@@ -15,7 +15,8 @@ public sealed record LootReceived(
     Guid CharacterId,
     IReadOnlyList<InventoryItemDto> Items,
     string Source,
-    string? Location) : GameRealtimeEvent;
+    string? Location,
+    Guid? GrantId = null) : GameRealtimeEvent;
 
 public sealed record InventorySnapshot(
     Guid CharacterId,

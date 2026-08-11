@@ -10,6 +10,8 @@ export class GameRealtimeStore {
   private readonly _recentLoot = signal<LootHistoryEntry[]>([]);
   private readonly _lastIdleAction = signal<CharacterActionDto | null>(null);
   private readonly _lastRewardClaim = signal<InventoryItem[]>([]);
+  private readonly processedLootGrantIds = new Set<string>();
+  private readonly processedLootGrantOrder: string[] = [];
 
   readonly recentLoot = computed(() => this._recentLoot());
   readonly lastIdleAction = computed(() => this._lastIdleAction());
@@ -35,8 +37,10 @@ export class GameRealtimeStore {
     receivedAt = new Date().toISOString(),
     source = 'loot',
     location?: string | null,
+    grantId?: string | null,
   ): void {
     if (!items.length) return;
+    if (grantId && !this.markLootGrantProcessed(grantId)) return;
 
     const entries = items.map((item, index) => ({
       id: `live:${receivedAt}:${item.itemInstance.id}:${index}`,
@@ -68,9 +72,26 @@ export class GameRealtimeStore {
     this.clearLootHistory();
     this._lastIdleAction.set(null);
     this._lastRewardClaim.set([]);
+    this.processedLootGrantIds.clear();
+    this.processedLootGrantOrder.length = 0;
   }
 
   clearLootHistory(): void {
     this._recentLoot.set([]);
+  }
+
+  private markLootGrantProcessed(grantId: string): boolean {
+    if (this.processedLootGrantIds.has(grantId)) {
+      return false;
+    }
+
+    this.processedLootGrantIds.add(grantId);
+    this.processedLootGrantOrder.push(grantId);
+    while (this.processedLootGrantOrder.length > 500) {
+      const expired = this.processedLootGrantOrder.shift();
+      if (expired) this.processedLootGrantIds.delete(expired);
+    }
+
+    return true;
   }
 }

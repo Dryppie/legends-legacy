@@ -3,7 +3,10 @@ import { ApiService } from '../api.service';
 import { catchError, map, Observable, throwError } from 'rxjs';
 import { InviteToGuild } from '../../../../shared/models/requestDtos/guilds/inviteToGuild';
 import { GuildMissionOverview } from '../../../../shared/models/Dtos/guild/guildMission';
-import { GuildShopOverview } from '../../../../shared/models/Dtos/guild/guildShop';
+import {
+  GuildShopOverview,
+  GuildShopPurchaseResponse,
+} from '../../../../shared/models/Dtos/guild/guildShop';
 import {
   GuildBuildingOverview,
   GuildBuildingType,
@@ -127,7 +130,7 @@ export class GuildService {
     );
   }
 
-  purchaseShopItem(itemKey: string): Observable<GuildShopOverview> {
+  purchaseShopItem(itemKey: string): Observable<GuildShopPurchaseResponse> {
     return this.api.post('guild/purchaseShopItem', itemKey).pipe(
       map((shop) => {
         return shop;

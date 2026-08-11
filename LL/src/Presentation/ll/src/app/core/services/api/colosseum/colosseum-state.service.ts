@@ -391,9 +391,10 @@ export class ColosseumStateService {
   ): void {
     const character = this.characterState.currentCharacter();
     this.applyGloryBalance(response.gloryRemaining);
-    if (response.rewardItemQuantity > 0) {
-      this.inventoryState.load(true);
-    }
+    this.inventoryState.applyInventoryGrant(
+      response.inventoryGrantId,
+      response.inventoryItemsGranted ?? [],
+    );
 
     if (character) {
       this.characterState.updateCharacter({

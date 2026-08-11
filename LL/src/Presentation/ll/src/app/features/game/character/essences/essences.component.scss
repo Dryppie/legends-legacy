@@ -2,6 +2,8 @@
   display: block;
   min-height: 0;
   height: 100%;
+  container-name: soul-archive-layout;
+  container-type: inline-size;
 }
 
 .soul-archive-page {
@@ -375,7 +377,7 @@
   }
 }
 
-@media (min-width: 66rem) {
+@container soul-archive-layout (min-width: 70rem) {
   .soul-archive-workspace {
     grid-template-columns: 21rem minmax(27rem, 1fr) 18rem;
   }
@@ -407,7 +409,7 @@
   }
 }
 
-@media (max-width: 65.999rem) {
+@container soul-archive-layout (max-width: 69.999rem) {
   .soul-archive-workspace {
     display: block;
     overflow-y: auto;
@@ -425,7 +427,7 @@
   }
 }
 
-@media (max-width: 47.999rem) {
+@container soul-archive-layout (max-width: 47.999rem) {
   .soul-archive-header {
     align-items: stretch;
     flex-direction: column;
@@ -459,7 +461,7 @@
   }
 }
 
-@media (max-width: 39.999rem) {
+@container soul-archive-layout (max-width: 39.999rem) {
   .soul-archive-page {
     gap: 0.5rem;
   }

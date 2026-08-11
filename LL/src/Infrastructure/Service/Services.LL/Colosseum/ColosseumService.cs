@@ -499,7 +499,8 @@ public class ColosseumService : IColosseumService
             sigilFragmentsGranted,
             rewardItemId,
             rewardItemName,
-            rewardItemQuantity);
+            rewardItemQuantity,
+            rewardInventoryItems);
     }
 
     public async Task<int> CountChampionMarketPurchasesAsync(Guid characterId, string itemId, DateTimeOffset? since, CancellationToken cancellationToken)

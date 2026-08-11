@@ -36,4 +36,9 @@ public interface ICharacterRepository
     Task<bool> IsCharacterNameTakenAsync(string name, Guid? excludedCharacterId, CancellationToken cancellationToken);
     Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken);
     Task<Guid?> GetCharacterIdByNameAsync(string name, CancellationToken cancellationToken);
+    Task<IReadOnlyList<string>> SearchCharacterNamesAsync(
+        string prefix,
+        Guid excludedCharacterId,
+        int limit,
+        CancellationToken cancellationToken);
 }

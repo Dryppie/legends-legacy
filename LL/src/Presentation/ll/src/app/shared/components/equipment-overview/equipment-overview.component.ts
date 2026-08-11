@@ -9,12 +9,56 @@ import { ItemComponent } from '../item/item.component';
 import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
 import { EquipmentType } from '../../models/enums/equipmentType';
 
+interface EquipmentSlotGuidance {
+  label: string;
+  accepts: string;
+}
+
 @Component({
-    selector: 'app-equipment-overview',
-    imports: [NgFor, NgIf, NgClass, ItemComponent],
-    templateUrl: './equipment-overview.component.html'
+  selector: 'app-equipment-overview',
+  imports: [NgFor, NgIf, NgClass, ItemComponent],
+  templateUrl: './equipment-overview.component.html',
 })
 export class EquipmentOverviewComponent implements OnInit {
+  readonly slotGuidance: Record<EquipmentSlotType, EquipmentSlotGuidance> = {
+    [EquipmentSlotType.Head]: {
+      label: 'Head',
+      accepts: 'Head armor',
+    },
+    [EquipmentSlotType.Chest]: {
+      label: 'Chest',
+      accepts: 'Chest armor',
+    },
+    [EquipmentSlotType.Legs]: {
+      label: 'Legs',
+      accepts: 'Leg armor',
+    },
+    [EquipmentSlotType.Relic]: {
+      label: 'Relic',
+      accepts: 'Relics',
+    },
+    [EquipmentSlotType.Necklace]: {
+      label: 'Necklace',
+      accepts: 'Necklaces',
+    },
+    [EquipmentSlotType.Ring]: {
+      label: 'Ring',
+      accepts: 'Rings',
+    },
+    [EquipmentSlotType.MainHand]: {
+      label: 'Main hand',
+      accepts: 'One- or two-handed weapons',
+    },
+    [EquipmentSlotType.OffHand]: {
+      label: 'Off hand',
+      accepts: 'One-handed or off-hand items',
+    },
+    [EquipmentSlotType.Tool]: {
+      label: 'Tool',
+      accepts: 'Profession tools',
+    },
+  };
+
   isGhost(slot: EquipmentSlot): boolean {
     return (
       slot.equipmentSlotType === EquipmentSlotType.OffHand &&

@@ -25,6 +25,7 @@ import {
 } from '../../client-side/notifications/notification.service';
 import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
 import { GameEventName } from '../../real-time/game-event/game-event.map';
+import { InventoryStateService } from '../inventory/inventory-state.service';
 
 type GuildRealtimeEventName = Extract<
   GameEventName,
@@ -153,6 +154,7 @@ export class GuildStateService {
     private readonly eventService: GameEventService,
     private readonly auth: AuthService,
     private readonly notificationService: NotificationService,
+    private readonly inventoryState: InventoryStateService,
   ) {
     this.refresh(); // initial fetch
 
@@ -518,10 +520,14 @@ export class GuildStateService {
       .purchaseShopItem(itemKey)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (shop) => {
-          if (shop.guildId === this._guild()?.id) {
-            this._shop.set(shop);
+        next: (response) => {
+          if (response.guildId === this._guild()?.id) {
+            this._shop.set(response);
           }
+          this.inventoryState.applyInventoryGrant(
+            response.inventoryGrantId,
+            response.inventoryItemsGranted ?? [],
+          );
           this.auth.refreshCurrentCharacter();
         },
         error: (e) =>

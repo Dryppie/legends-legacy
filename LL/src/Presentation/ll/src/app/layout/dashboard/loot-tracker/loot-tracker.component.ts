@@ -51,6 +51,7 @@ export class LootTrackerComponent {
             envelope?.occurredAt,
             loot.source ?? 'combat-reward',
             loot.location,
+            loot.grantId,
           );
         }
       },
@@ -95,6 +96,10 @@ export class LootTrackerComponent {
         return entry.location?.trim() || 'Combat';
       case 'dungeon-reward':
         return entry.location?.trim() || 'Dungeon';
+      case 'guild-shop':
+        return entry.location?.trim() || 'Guild Shop';
+      case 'champion-market':
+        return entry.location?.trim() || "Champion's Market";
       default:
         return entry.location?.trim() || 'Loot Reward';
     }

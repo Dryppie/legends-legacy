@@ -22,18 +22,91 @@
   </div>
 
   <div *ngIf="isFormOpen()" class="mt-3 space-y-3">
-    <label class="ll-field block">
-      <span>Player name</span>
-      <input
-        type="text"
-        class="ll-input mt-1 w-full"
-        name="transferRecipientName"
-        autocomplete="off"
-        maxlength="80"
-        [(ngModel)]="recipientName"
-        [disabled]="isTransferring()"
-      />
-    </label>
+    <div class="ll-field block">
+      <label for="transfer-recipient-name">Player name</label>
+      <div class="relative mt-1">
+        <input
+          #recipientInput
+          #recipientOrigin="cdkOverlayOrigin"
+          cdkOverlayOrigin
+          id="transfer-recipient-name"
+          type="text"
+          class="ll-input w-full"
+          name="transferRecipientName"
+          autocomplete="off"
+          maxlength="80"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-controls="transfer-recipient-suggestions"
+          [attr.aria-expanded]="showRecipientSuggestionPanel()"
+          [attr.aria-activedescendant]="
+            activeRecipientSuggestion() >= 0
+              ? 'transfer-recipient-suggestion-' + activeRecipientSuggestion()
+              : null
+          "
+          [ngModel]="recipientName"
+          [disabled]="isTransferring()"
+          (ngModelChange)="onRecipientNameChange($event)"
+          (focus)="openRecipientSuggestions()"
+          (blur)="closeRecipientSuggestions()"
+          (keydown)="handleRecipientKeydown($event)"
+        />
+
+        <ng-template
+          cdkConnectedOverlay
+          [cdkConnectedOverlayOrigin]="recipientOrigin"
+          [cdkConnectedOverlayOpen]="showRecipientSuggestionPanel()"
+          [cdkConnectedOverlayPositions]="recipientSuggestionPositions"
+          [cdkConnectedOverlayPush]="true"
+          [cdkConnectedOverlayViewportMargin]="8"
+        >
+          <div
+            id="transfer-recipient-suggestions"
+            class="max-h-[min(12rem,calc(100dvh-1rem))] overflow-y-auto rounded border border-light_gray bg-texture p-1 shadow-xl shadow-black/60"
+            [style.width.px]="recipientInput.offsetWidth"
+            role="listbox"
+            (click)="$event.stopPropagation()"
+          >
+            <div
+              *ngIf="isSearchingRecipients()"
+              class="px-3 py-2 text-xs text-zinc-400"
+            >
+              Finding players...
+            </div>
+
+            <button
+              *ngFor="let suggestion of recipientSuggestions(); index as i"
+              type="button"
+              class="ll-dropdown-option block w-full rounded px-3 py-2 text-left text-sm transition-colors"
+              [class.ll-dropdown-option-hovered]="
+                activeRecipientSuggestion() === i
+              "
+              [id]="'transfer-recipient-suggestion-' + i"
+              [attr.aria-selected]="activeRecipientSuggestion() === i"
+              role="option"
+              (mouseenter)="activeRecipientSuggestion.set(i)"
+              (mousedown)="selectRecipient($event, suggestion)"
+            >
+              {{ suggestion }}
+            </button>
+
+            <div
+              *ngIf="
+                !isSearchingRecipients() &&
+                recipientSearchCompleted() &&
+                recipientSuggestions().length === 0
+              "
+              class="px-3 py-2 text-xs text-zinc-400"
+            >
+              No matching players
+            </div>
+          </div>
+        </ng-template>
+      </div>
+      <p class="mt-1 text-xs text-zinc-400">
+        Choose the recipient from the matching players.
+      </p>
+    </div>
 
     <label *ngIf="isStackable" class="ll-field block">
       <span>Quantity (maximum {{ inventoryItem.quantity }})</span>
@@ -65,9 +138,7 @@
       <button
         type="button"
         class="ll-button"
-        [disabled]="
-          isTransferring() || !recipientName.trim() || quantity < 1
-        "
+        [disabled]="isTransferring() || !hasSelectedRecipient() || quantity < 1"
         (click)="transfer()"
       >
         {{ isTransferring() ? "Sending..." : "Send" }}

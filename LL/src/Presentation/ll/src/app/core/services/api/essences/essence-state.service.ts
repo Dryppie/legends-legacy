@@ -286,7 +286,13 @@ export class EssenceStateService {
   }
 
   setActiveView(view: EssenceView): void {
+    const enteredCreatureArchive =
+      view === 'creatures' && this._activeView() !== 'creatures';
     this._activeView.set(view);
+
+    if (enteredCreatureArchive && this._creatureArchive()) {
+      this.refreshCreatureArchive();
+    }
   }
 
   refresh(preserveLoadoutDraft = false): void {

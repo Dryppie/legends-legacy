@@ -2,6 +2,7 @@ using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Items;
 using Application.UseCases.Equipments.Dtos;
+using Application.UseCases.Inventories.Dtos;
 
 namespace Application.UseCases.Outbox;
 
@@ -105,6 +106,13 @@ public sealed record GuildVaultChatMessagePayload(
     EquipmentInstanceDto Equipment,
     Guid MessageId,
     DateTimeOffset SentAt);
+
+public sealed record InventoryItemsGrantedPayload(
+    Guid GrantId,
+    Guid CharacterId,
+    IReadOnlyList<InventoryItemDto> Items,
+    string Source,
+    string? Location);
 
 public sealed record OutboxEquipmentItemPayload(
     string ItemBaseId,

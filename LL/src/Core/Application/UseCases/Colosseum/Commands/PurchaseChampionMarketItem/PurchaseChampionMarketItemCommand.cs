@@ -1,6 +1,8 @@
+using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.MediatR.Markers;
 using Application.UseCases.Colosseum.Dtos;
+using Application.UseCases.Outbox;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
@@ -14,11 +16,16 @@ public sealed class PurchaseChampionMarketItemCommandHandler
     : IRequestHandler<PurchaseChampionMarketItemCommand, Response<PurchaseChampionMarketItemResponseDto>>
 {
     private readonly IColosseumService _colosseumService;
+    private readonly IGameEventOutbox _outbox;
     private readonly IMapper _mapper;
 
-    public PurchaseChampionMarketItemCommandHandler(IColosseumService colosseumService, IMapper mapper)
+    public PurchaseChampionMarketItemCommandHandler(
+        IColosseumService colosseumService,
+        IGameEventOutbox outbox,
+        IMapper mapper)
     {
         _colosseumService = colosseumService;
+        _outbox = outbox;
         _mapper = mapper;
     }
 
@@ -35,6 +42,23 @@ public sealed class PurchaseChampionMarketItemCommandHandler
             return Response<PurchaseChampionMarketItemResponseDto>.Fail("Champion's Market purchase failed.");
         }
 
-        return Response<PurchaseChampionMarketItemResponseDto>.Success(_mapper.Map<PurchaseChampionMarketItemResponseDto>(result));
+        var response = _mapper.Map<PurchaseChampionMarketItemResponseDto>(result);
+        if (response.InventoryItemsGranted.Count > 0)
+        {
+            response.InventoryGrantId = Guid.NewGuid();
+            await _outbox.EnqueueAsync(
+                GameEventTypes.InventoryItemsGranted,
+                new InventoryItemsGrantedPayload(
+                    response.InventoryGrantId.Value,
+                    request.CharacterId,
+                    response.InventoryItemsGranted,
+                    "champion-market",
+                    "Champion's Market"),
+                request.CharacterId,
+                null,
+                cancellationToken);
+        }
+
+        return Response<PurchaseChampionMarketItemResponseDto>.Success(response);
     }
 }

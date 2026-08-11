@@ -38,4 +38,7 @@ export interface ChampionMarketPurchaseResponse {
   rewardItemId?: string | null;
   rewardItemName?: string | null;
   rewardItemQuantity: number;
+  inventoryGrantId?: string | null;
+  inventoryItemsGranted?: InventoryItem[];
 }
+import { InventoryItem } from '../../inventoryItem';

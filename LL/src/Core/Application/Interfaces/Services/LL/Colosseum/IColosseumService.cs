@@ -1,6 +1,7 @@
 ﻿using Domain.Models.Colosseum;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Inventories;
 using Domain.Models.Leaderboards;
 
 namespace Application.Interfaces.Services.LL.Colosseum;
@@ -30,7 +31,8 @@ public sealed record ChampionMarketPurchaseResult(
     int SigilFragmentsGranted,
     string? RewardItemId,
     string? RewardItemName,
-    int RewardItemQuantity);
+    int RewardItemQuantity,
+    IReadOnlyList<InventoryItem> InventoryItemsGranted);
 
 public interface IColosseumService
 {

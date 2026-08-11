@@ -54,6 +54,40 @@ public sealed class CharacterRepositoryTests
         Assert.Equal(activityAt, character.CharacterAction.UpdatedAt);
     }
 
+    [Fact]
+    public async Task Character_name_search_is_case_insensitive_limited_and_excludes_sender()
+    {
+        await using var db = CreateDb();
+        var sender = AddCharacter(db, "Ember");
+        AddCharacter(db, "Ember Knight");
+        AddCharacter(db, "Ember Mage");
+        AddCharacter(db, "Emberfall");
+        AddCharacter(db, "Other");
+        await db.SaveChangesAsync();
+        var repository = new CharacterRepository(db);
+
+        var suggestions = await repository.SearchCharacterNamesAsync(
+            "eMbEr",
+            sender.Id,
+            2,
+            CancellationToken.None);
+
+        Assert.Equal(["Ember Knight", "Ember Mage"], suggestions);
+    }
+
+    private static Character AddCharacter(LLDbContext db, string name)
+    {
+        var character = new Character
+        {
+            Id = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            Name = name
+        };
+        character.NormalizeName();
+        db.Characters.Add(character);
+        return character;
+    }
+
     private static LLDbContext CreateDb()
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()

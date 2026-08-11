@@ -5,4 +5,5 @@ public record LootReceivedMsg(
     Guid CharacterId,
     IReadOnlyList<InventoryItemDto> Payload,
     string Source = "combat-reward",
-    string? Location = null) : GameEventMsg;
+    string? Location = null,
+    Guid? GrantId = null) : GameEventMsg;

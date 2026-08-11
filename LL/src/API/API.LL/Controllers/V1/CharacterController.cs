@@ -4,6 +4,7 @@ using Application.UseCases.Characters.Queries.GetCharacterIdByName;
 using Application.UseCases.Characters.Queries.GetCharacterOverview;
 using Application.UseCases.Characters.Queries.GetCharacterOverviewByName;
 using Application.UseCases.Characters.Queries.GetPowerRating;
+using Application.UseCases.Characters.Queries.SearchCharacterNames;
 using Application.UseCases.Characters.Commands.WireCinders;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Common.Primitives;
@@ -46,6 +47,10 @@ public class CharacterController : BaseController
 
         return Ok(result.Data);
     }
+
+    [HttpGet("Suggestions")]
+    public async Task<ActionResult<IReadOnlyList<string>>> Suggestions([FromQuery] string query) =>
+        Ok(await Mediator.Send(new SearchCharacterNamesQuery(CurrentCharacterGuid, query)));
 
     [HttpPost("Wire")]
     public async Task<ActionResult<Response<WireCindersResponseDto>>> Wire(

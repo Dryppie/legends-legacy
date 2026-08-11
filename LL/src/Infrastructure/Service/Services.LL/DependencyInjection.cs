@@ -359,6 +359,7 @@ public static class DependencyInjection
         services.AddScoped<IGameEventOutboxConsumer, AchievementGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, TransferChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, GuildVaultChatGameEventOutboxConsumer>();
+        services.AddScoped<IGameEventOutboxConsumer, RealtimeInventoryGameEventOutboxConsumer>();
         services.AddSingleton<IQuestDefinitionProvider>(sp =>
             new JsonQuestDefinitionProvider(
                 config,

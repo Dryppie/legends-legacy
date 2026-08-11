@@ -133,6 +133,29 @@ public class CharacterRepository : ICharacterRepository
             .Select(c => (Guid?)c.Id)
             .FirstOrDefaultAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<string>> SearchCharacterNamesAsync(
+        string prefix,
+        Guid excludedCharacterId,
+        int limit,
+        CancellationToken cancellationToken)
+    {
+        var normalizedPrefix = IdentityNormalizer.NormalizeOptional(prefix);
+        if (normalizedPrefix is null || normalizedPrefix.Length < 2)
+            return [];
+
+        var resultLimit = Math.Clamp(limit, 1, 20);
+        return await _context.Characters
+            .AsNoTracking()
+            .Where(character =>
+                character.Id != excludedCharacterId &&
+                character.NormalizedName.StartsWith(normalizedPrefix))
+            .OrderBy(character => character.NormalizedName == normalizedPrefix ? 0 : 1)
+            .ThenBy(character => character.NormalizedName)
+            .Select(character => character.Name)
+            .Take(resultLimit)
+            .ToListAsync(cancellationToken);
+    }
+
     private static void SeedEquipmentSlots(Entity entity)
     {
         entity.EquipmentSlots = Enum.GetValues(typeof(EquipmentSlotType))

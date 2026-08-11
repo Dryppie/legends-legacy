@@ -35,7 +35,7 @@
 >
   <ul
     [id]="menuId"
-    class="min-w-40 rounded border border-light_gray bg-texture py-1 shadow-xl shadow-black/60"
+    class="max-h-[min(18rem,calc(100dvh-1rem))] min-w-40 touch-pan-y overflow-y-auto overscroll-contain rounded border border-light_gray bg-texture py-1 shadow-xl shadow-black/60 [-webkit-overflow-scrolling:touch]"
     [attr.data-tour]="tourMenuId"
     role="menu"
     (click)="$event.stopPropagation()"
@@ -68,7 +68,7 @@
 >
   <ul
     [id]="menuId"
-    class="max-h-72 overflow-y-auto rounded border border-light_gray bg-texture py-1 shadow-xl shadow-black/60"
+    class="max-h-[min(18rem,calc(100dvh-1rem))] touch-pan-y overflow-y-auto overscroll-contain rounded border border-light_gray bg-texture py-1 shadow-xl shadow-black/60 [-webkit-overflow-scrolling:touch]"
     [attr.data-tour]="tourMenuId"
     [style.width.px]="dropdownButton.offsetWidth"
     role="listbox"
@@ -90,7 +90,6 @@
       [attr.aria-selected]="isOptionSelected(option)"
       [attr.aria-disabled]="option.disabled || null"
       [attr.tabindex]="option.disabled ? -1 : 0"
-      (pointerdown)="onOptionPointerDown($event, option)"
       (pointerenter)="onOptionPointerEnter(optionIndex)"
       (pointerleave)="onOptionPointerLeave(optionIndex)"
       (click)="onOptionClick(option)"

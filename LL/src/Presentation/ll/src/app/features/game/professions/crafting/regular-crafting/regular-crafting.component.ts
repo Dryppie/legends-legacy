@@ -124,6 +124,7 @@ export function matchesRecipeSearch(
     AttributeValueFormatPipe,
   ],
   templateUrl: './regular-crafting.component.html',
+  styleUrl: './regular-crafting.component.css',
 })
 export class RegularCraftingComponent {
   @Input({ required: true }) recipes!: Signal<Recipe[]>;

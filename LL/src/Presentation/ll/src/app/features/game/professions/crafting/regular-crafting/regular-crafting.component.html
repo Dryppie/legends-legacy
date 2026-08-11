@@ -24,12 +24,12 @@
 </ng-template>
 
 <div
-  class="relative grid h-full min-h-0 w-full grid-cols-1 gap-4 overflow-hidden pb-16 pt-4 lg:grid-cols-[18rem_minmax(0,1fr)] lg:overflow-y-auto lg:pb-4 xl:grid-cols-[19rem_minmax(30rem,1fr)_22rem] xl:overflow-hidden"
+  class="crafting-layout relative grid h-full min-h-0 w-full gap-4 overflow-hidden pb-16 pt-4"
 >
   <!-- Recipe navigation -->
   <section
-    class="min-h-0 flex-col overflow-hidden"
-    [ngClass]="mobilePane() === 'recipes' ? 'flex' : 'hidden lg:flex'"
+    class="crafting-pane crafting-recipes-pane min-h-0 flex-col overflow-hidden"
+    [class.crafting-pane-active]="mobilePane() === 'recipes'"
   >
     <h2 class="ll-heading px-1 text-lg uppercase tracking-wide">Recipes</h2>
     <div
@@ -202,8 +202,8 @@
 
   <!-- Design selection -->
   <section
-    class="ll-panel min-h-0 min-w-0 flex-col overflow-hidden lg:min-h-[34rem]"
-    [ngClass]="mobilePane() === 'blueprints' ? 'flex' : 'hidden lg:flex'"
+    class="crafting-pane crafting-blueprints-pane ll-panel min-h-0 min-w-0 flex-col overflow-hidden"
+    [class.crafting-pane-active]="mobilePane() === 'blueprints'"
     data-tour="selected-recipe"
   >
     <ng-container *ngIf="selectedRecipe() as recipe; else noRecipe">
@@ -288,7 +288,9 @@
         </div>
       </header>
 
-      <div class="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 pb-44 lg:pb-4">
+      <div
+        class="crafting-scroll-content min-h-0 flex-1 space-y-3 overflow-y-auto p-4"
+      >
         <button
           *ngIf="
             blueprintFilter() !== 'locked' &&
@@ -426,12 +428,8 @@
 
   <!-- Persistent crafted-item preview -->
   <aside
-    class="ll-panel min-h-0 overflow-hidden lg:col-start-2 lg:min-h-[34rem] xl:col-start-3 xl:row-start-1"
-    [ngClass]="
-      mobilePane() === 'preview'
-        ? 'flex flex-col'
-        : 'hidden lg:flex lg:flex-col'
-    "
+    class="crafting-pane crafting-preview-pane ll-panel min-h-0 flex-col overflow-hidden"
+    [class.crafting-pane-active]="mobilePane() === 'preview'"
     data-tour="crafting-item-preview"
   >
     <ng-container *ngIf="selectedRecipe() as recipe">
@@ -443,7 +441,9 @@
           Crafted item preview
         </div>
 
-        <div class="min-h-0 flex-1 overflow-y-auto px-5 py-4 pb-44 lg:pb-4">
+        <div
+          class="crafting-scroll-content min-h-0 flex-1 overflow-y-auto px-5 py-4"
+        >
           <ng-container *ngIf="design.itemPreview as preview">
             <div class="flex items-start justify-between gap-3">
               <div>
@@ -643,7 +643,7 @@
           </div>
         </div>
         <footer
-          class="hidden shrink-0 border-t border-white/10 bg-black/10 px-5 py-4 lg:block"
+          class="crafting-desktop-controls shrink-0 border-t border-white/10 bg-black/10 px-5 py-4"
         >
           <div
             class="grid items-end gap-3 sm:grid-cols-[minmax(0,1fr)_7rem_auto]"
@@ -779,7 +779,7 @@
   <ng-container *ngIf="selectedRecipe() as recipe">
     <footer
       *ngIf="mobilePane() !== 'recipes'"
-      class="absolute inset-x-0 bottom-16 z-20 border-t border-white/10 bg-[#0c0c0f]/95 px-4 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.35)] backdrop-blur lg:hidden"
+      class="crafting-compact-controls absolute inset-x-0 bottom-16 z-20 border-t border-white/10 bg-[#0c0c0f]/95 px-4 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.35)] backdrop-blur"
     >
       <div
         *ngIf="tierOptions().length > 1"
@@ -916,7 +916,7 @@
 
   <!-- Mobile pane navigation -->
   <nav
-    class="absolute inset-x-0 bottom-0 z-30 grid h-16 grid-cols-3 border-t border-white/10 bg-[#0a0a0d]/95 p-2 backdrop-blur lg:hidden"
+    class="crafting-pane-navigation absolute inset-x-0 bottom-0 z-30 h-16 grid-cols-3 border-t border-white/10 bg-[#0a0a0d]/95 p-2 backdrop-blur"
     aria-label="Crafting sections"
   >
     <button

@@ -58,6 +58,7 @@ import {
 import { PopoverComponent } from '../../../../shared/components/custom-components/popover/popover.component';
 import { EssenceItemViewService } from '../../../../core/services/api/essences/essence-item-view.service';
 import { Essence } from '../../../../shared/models/essence';
+import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
 
 type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'ready';
 type ArchiveSort = 'name' | 'level' | 'tier';
@@ -94,6 +95,7 @@ export class EssencesComponent implements OnInit {
   private archiveViewport?: CdkVirtualScrollViewport;
 
   private lastPreparedQuestObjective: string | null = null;
+  private lastCreatureArchiveCombatRevision: string | null = null;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly routeEssenceId = toSignal(
@@ -331,6 +333,7 @@ export class EssencesComponent implements OnInit {
     private readonly questPresenter: QuestPresenterService,
     private readonly inventoryState: InventoryStateService,
     private readonly essenceItemView: EssenceItemViewService,
+    private readonly characterActions: CharacterActionsStateService,
   ) {
     effect(() => {
       const view = this.requestedView();
@@ -386,6 +389,35 @@ export class EssencesComponent implements OnInit {
         });
       });
     });
+
+    effect(() => {
+      if (
+        this.essenceState.activeView() !== 'creatures' ||
+        this.characterActions.resolvingOfflineProgress()
+      ) {
+        return;
+      }
+
+      const action = this.characterActions.currentAction();
+      if (!action?.combatSession?.combatResult) return;
+
+      const revision =
+        action.revision ??
+        `${action.updatedAt}:${action.combatSession.combatResult.startedAt}`;
+      if (!this.essenceState.creatureArchive()) {
+        this.lastCreatureArchiveCombatRevision = revision;
+        return;
+      }
+
+      if (this.lastCreatureArchiveCombatRevision === null) {
+        this.lastCreatureArchiveCombatRevision = revision;
+        return;
+      }
+
+      if (revision === this.lastCreatureArchiveCombatRevision) return;
+      this.lastCreatureArchiveCombatRevision = revision;
+      untracked(() => this.essenceState.refreshCreatureArchive());
+    });
   }
 
   public ngOnInit(): void {
@@ -395,6 +427,9 @@ export class EssencesComponent implements OnInit {
       this.essenceState.creatureArchive() &&
       this.essenceState.codex()
     ) {
+      if (this.essenceState.activeView() === 'creatures') {
+        this.essenceState.refreshCreatureArchive();
+      }
       return;
     }
 

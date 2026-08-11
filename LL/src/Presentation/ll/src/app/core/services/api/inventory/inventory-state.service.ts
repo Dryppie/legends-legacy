@@ -22,8 +22,11 @@ export class InventoryStateService {
   readonly error = computed(() => this._error());
   private readonly _lastLoot = signal<InventoryItem[] | null>(null);
   private readonly suppressedLootSignatures = new Set<string>();
+  private readonly processedInventoryGrantIds = new Set<string>();
+  private readonly processedInventoryGrantOrder: string[] = [];
   private readonly eventDeduper = new GameEventDeduper();
   private resetVersion = 0;
+  private loadVersion = 0;
 
   constructor(
     private inventoryService: InventoryService,
@@ -57,7 +60,11 @@ export class InventoryStateService {
             return;
           }
 
-          this._lastLoot.set(loot.payload);
+          if (loot.grantId) {
+            this.applyInventoryGrant(loot.grantId, loot.payload);
+          } else {
+            this._lastLoot.set(loot.payload);
+          }
         }
       },
       { allowSignalWrites: true },
@@ -105,17 +112,34 @@ export class InventoryStateService {
     this._loading.set(true);
     this._error.set(null);
     const requestVersion = this.resetVersion;
+    const loadVersion = ++this.loadVersion;
 
     this.inventoryService
       .getInventory()
-      .pipe(finalize(() => this._loading.set(false)))
+      .pipe(
+        finalize(() => {
+          if (loadVersion === this.loadVersion) {
+            this._loading.set(false);
+          }
+        }),
+      )
       .subscribe({
         next: (dto) => {
-          if (requestVersion !== this.resetVersion) return;
+          if (
+            requestVersion !== this.resetVersion ||
+            loadVersion !== this.loadVersion
+          ) {
+            return;
+          }
           this._items.set(this.sortItems(dto.inventoryItems));
         },
         error: (err) => {
-          if (requestVersion !== this.resetVersion) return;
+          if (
+            requestVersion !== this.resetVersion ||
+            loadVersion !== this.loadVersion
+          ) {
+            return;
+          }
           this._error.set(err.message ?? 'Unknown error');
         },
       });
@@ -123,11 +147,14 @@ export class InventoryStateService {
 
   reset(): void {
     this.resetVersion += 1;
+    this.loadVersion += 1;
     this._items.set([]);
     this._loading.set(false);
     this._error.set(null);
     this._lastLoot.set(null);
     this.suppressedLootSignatures.clear();
+    this.processedInventoryGrantIds.clear();
+    this.processedInventoryGrantOrder.length = 0;
   }
 
   shatterEssences(essence: InventoryItem, shatterAmount: number) {
@@ -233,6 +260,22 @@ export class InventoryStateService {
     this._items.set(this.sortItems(updated));
   }
 
+  applyInventoryGrant(
+    grantId: string | null | undefined,
+    items: InventoryItem[],
+  ): boolean {
+    if (grantId && !this.markInventoryGrantProcessed(grantId)) {
+      return false;
+    }
+
+    const hadInFlightSnapshot = this._loading();
+    this.addOrIncrementMany(items);
+    if (hadInFlightSnapshot) {
+      this.load(true);
+    }
+    return true;
+  }
+
   addOrIncrement(item: InventoryItem): void {
     const items = this._items();
     const index = items.findIndex(
@@ -284,6 +327,21 @@ export class InventoryStateService {
 
     this.suppressedLootSignatures.add(signature);
     setTimeout(() => this.suppressedLootSignatures.delete(signature), 5000);
+  }
+
+  private markInventoryGrantProcessed(grantId: string): boolean {
+    if (this.processedInventoryGrantIds.has(grantId)) {
+      return false;
+    }
+
+    this.processedInventoryGrantIds.add(grantId);
+    this.processedInventoryGrantOrder.push(grantId);
+    while (this.processedInventoryGrantOrder.length > 500) {
+      const expired = this.processedInventoryGrantOrder.shift();
+      if (expired) this.processedInventoryGrantIds.delete(expired);
+    }
+
+    return true;
   }
 
   private getLootSignature(items: InventoryItem[]): string {

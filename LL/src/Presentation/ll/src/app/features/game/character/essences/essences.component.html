@@ -112,10 +112,7 @@
         </div>
       </div>
 
-      <cdk-virtual-scroll-viewport
-        [itemSize]="84"
-        class="h-[420px] min-h-0 xl:h-auto xl:flex-1"
-      >
+      <cdk-virtual-scroll-viewport [itemSize]="84" class="h-[420px] min-h-0">
         <button
           *cdkVirtualFor="
             let essence of filteredArchiveEssences();
