@@ -12,7 +12,8 @@ public class CraftingActionDetailsDto : IMapFrom<CraftingActionDetails>
             .ForMember(
                 destination => destination.CraftingQueueItems,
                 options => options.MapFrom(source => source.CraftingQueueItems
-                    .OrderBy(item => item.AddedAt)
+                    .OrderBy(item => item.Position)
+                    .ThenBy(item => item.AddedAt)
                     .ThenBy(item => item.Id)));
     }
 }

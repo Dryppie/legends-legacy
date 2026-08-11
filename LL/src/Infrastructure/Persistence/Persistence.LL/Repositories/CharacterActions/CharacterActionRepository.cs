@@ -190,6 +190,9 @@ public class CharacterActionRepository : ICharacterActionRepository
         {
             if (craftingDetails.CraftingQueueItems.Count == 0) existingAction.UpdatedAt = now;
 
+            craftingQueueItem.Position = craftingDetails.CraftingQueueItems.Count == 0
+                ? 0
+                : craftingDetails.CraftingQueueItems.Max(item => item.Position) + 1;
             craftingQueueItem.CraftingActionDetailsId = craftingDetails.Id;
             _context.CraftingQueueItems.Add(craftingQueueItem);
         }

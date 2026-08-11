@@ -4,6 +4,7 @@ import {
   isWorldSystemMessage,
   parseWireCommand,
   splitCurrentPlayerMentions,
+  startsNewChatDay,
 } from './chat.component';
 import {
   ChatChannelType,
@@ -140,3 +141,29 @@ describe('getWireErrorMessage', () => {
     ).toBe('You do not have enough Cinders for this wire.');
   });
 });
+
+describe('startsNewChatDay', () => {
+  const messages: ChatMessageDto[] = [
+    chatMessageAt(new Date(2026, 7, 10, 20, 55)),
+    chatMessageAt(new Date(2026, 7, 10, 21, 10)),
+    chatMessageAt(new Date(2026, 7, 11, 11, 10)),
+  ];
+
+  it('starts the list and each local calendar day with a separator', () => {
+    expect(startsNewChatDay(messages, 0)).toBeTrue();
+    expect(startsNewChatDay(messages, 1)).toBeFalse();
+    expect(startsNewChatDay(messages, 2)).toBeTrue();
+  });
+});
+
+function chatMessageAt(sentAt: Date): ChatMessageDto {
+  return {
+    id: sentAt.toISOString(),
+    channelType: ChatChannelType.General,
+    contextKey: 'general',
+    senderId: 'sender-id',
+    senderName: 'Sender',
+    body: 'Message',
+    sentAt,
+  };
+}

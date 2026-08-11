@@ -14,9 +14,9 @@ public sealed class CraftingQueueReorderingTests
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
-        var first = QueueItem(DateTimeOffset.UtcNow);
-        var second = QueueItem(first.AddedAt.AddSeconds(1));
-        var third = QueueItem(first.AddedAt.AddSeconds(2));
+        var first = QueueItem(0);
+        var second = QueueItem(1);
+        var third = QueueItem(2);
         db.CharacterActions.Add(new CharacterAction
         {
             CharacterId = characterId,
@@ -35,12 +35,13 @@ public sealed class CraftingQueueReorderingTests
             CraftingQueueMoveDirection.Up,
             CancellationToken.None);
         await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
 
         Assert.True(moved);
         Assert.Equal(
             [second.Id, first.Id, third.Id],
             await db.CraftingQueueItems
-                .OrderBy(item => item.AddedAt)
+                .OrderBy(item => item.Position)
                 .ThenBy(item => item.Id)
                 .Select(item => item.Id)
                 .ToArrayAsync());
@@ -51,7 +52,7 @@ public sealed class CraftingQueueReorderingTests
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
-        var onlyItem = QueueItem(DateTimeOffset.UtcNow);
+        var onlyItem = QueueItem(0);
         db.CharacterActions.Add(new CharacterAction
         {
             CharacterId = characterId,
@@ -72,11 +73,12 @@ public sealed class CraftingQueueReorderingTests
         Assert.False(moved);
     }
 
-    private static CraftingQueueItem QueueItem(DateTimeOffset addedAt) => new()
+    private static CraftingQueueItem QueueItem(int position) => new()
     {
         Id = Guid.NewGuid(),
         EquipmentInstanceId = Guid.NewGuid(),
-        AddedAt = addedAt
+        AddedAt = DateTimeOffset.UtcNow.AddSeconds(position),
+        Position = position
     };
 
     private static LLDbContext CreateDb()

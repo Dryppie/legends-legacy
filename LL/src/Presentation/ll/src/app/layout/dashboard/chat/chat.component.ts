@@ -158,6 +158,25 @@ export function isWorldSystemMessage(message: ChatMessageDto): boolean {
   );
 }
 
+export function startsNewChatDay(
+  messages: readonly ChatMessageDto[],
+  index: number,
+): boolean {
+  if (index <= 0) return true;
+
+  return (
+    localChatDateKey(messages[index].sentAt) !==
+    localChatDateKey(messages[index - 1].sentAt)
+  );
+}
+
+function localChatDateKey(value: Date | string): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+}
+
 @Component({
   selector: 'app-chat',
   imports: [
@@ -493,6 +512,10 @@ export class ChatComponent implements OnInit, OnDestroy {
         m.channelType === this.activeRoomType &&
         m.contextKey === this.activeRoomKey,
     );
+  }
+
+  startsNewDay(messages: readonly ChatMessageDto[], index: number): boolean {
+    return startsNewChatDay(messages, index);
   }
 
   channelLabel(message: ChatMessageDto): string {

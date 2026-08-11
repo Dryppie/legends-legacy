@@ -41,7 +41,6 @@ export class TemperingComponent {
 
   readonly craftingQueue: Signal<CraftingQueueItem[]>;
   readonly error = signal<string | null>(null);
-  readonly lastOutcome = signal<string | null>(null);
   readonly removingQueueItemId = signal<string | null>(null);
   readonly movingQueueItemId = signal<string | null>(null);
   readonly activeQueueItem = computed<CraftingQueueItem | null>(
@@ -87,25 +86,6 @@ export class TemperingComponent {
           (item) => item.equipmentInstance.id === id,
         ) ?? null)
       : null;
-  });
-
-  readonly selectedQueueStatus = computed<string | null>(() => {
-    const queueItem = this.selectedQueueItem();
-    if (!queueItem) return null;
-
-    const queueIndex = this.craftingQueue().findIndex(
-      (item) => item.id === queueItem.id,
-    );
-
-    if (queueIndex === 0) {
-      return 'Working on this item now.';
-    }
-
-    if (queueIndex === 1) {
-      return 'Queued next. The current working item will finish first.';
-    }
-
-    return `Queued position ${queueIndex + 1}. Current and earlier queued items will finish first.`;
   });
 
   readonly selectedEquipmentInstance = computed<EquipmentInstance | null>(
@@ -171,7 +151,6 @@ export class TemperingComponent {
 
   selectItem(e: ItemInstance): void {
     this.selectedItemId.set(e.id);
-    this.lastOutcome.set(null);
   }
 
   temper(equipment: EquipmentInstance): void {
@@ -198,14 +177,10 @@ export class TemperingComponent {
         .filter((item) => item.itemInstance.id !== equipment.id),
     );
     this.selectedItemId.set(equipment.id);
-    this.lastOutcome.set(
-      `Queued ${equipment.displayName ?? equipment.itemBase.name} for tempering`,
-    );
   }
 
   selectQueuedItem(queueItem: CraftingQueueItem): void {
     this.selectedItemId.set(queueItem.equipmentInstance.id);
-    this.lastOutcome.set(null);
   }
 
   getEstimatedTime(queue: CraftingQueueItem[]): string {
@@ -277,9 +252,6 @@ export class TemperingComponent {
           this.selectedItemId.set(queueItem.equipmentInstance.id);
         }
 
-        this.lastOutcome.set(
-          `Removed ${queueItem.equipmentInstance.displayName ?? queueItem.equipmentInstance.itemBase.name} from the tempering queue`,
-        );
         this.removingQueueItemId.set(null);
       },
       error: (err) => {
@@ -308,9 +280,6 @@ export class TemperingComponent {
         this.craftingService.setQueue(queue);
         this.characterActionsState.applyCurrentActionSnapshot(
           response.currentAction,
-        );
-        this.lastOutcome.set(
-          `Moved ${queueItem.equipmentInstance.displayName ?? queueItem.equipmentInstance.itemBase.name} ${direction.toLowerCase()}`,
         );
         this.movingQueueItemId.set(null);
       },

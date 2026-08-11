@@ -13,13 +13,6 @@
           [showPossibleUpgradeAttributes]="true"
         ></app-equipment-display>
 
-        <div *ngIf="selectedQueueStatus() as queueStatus" class="ll-state mt-4">
-          {{ queueStatus }}
-        </div>
-
-        <div *ngIf="lastOutcome() as outcome" class="ll-state mt-4">
-          {{ outcome }}
-        </div>
         <div
           *ngIf="error() as errorMessage"
           class="ll-state ll-state-danger mt-4"
@@ -46,9 +39,6 @@
       </ng-container>
       <ng-template #noItem>
         <div class="ll-empty-state mt-3">Select an item to view details.</div>
-        <div *ngIf="lastOutcome() as outcome" class="ll-state mt-3">
-          {{ outcome }}
-        </div>
       </ng-template>
     </section>
 
@@ -239,8 +229,7 @@
       >
         {{ unavailableEquipmentCount() }} other equipment
         {{ unavailableEquipmentCount() === 1 ? "item is" : "items are" }}
-        unavailable because it has no Potential, has reached Legacy rarity, or
-        predates the current recipe system.
+        unavailable because it has no Potential or has reached Legacy rarity
       </p>
     </ng-container>
     <ng-template #noItemsToTemper>

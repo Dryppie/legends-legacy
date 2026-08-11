@@ -221,8 +221,6 @@ export class ColosseumStateService {
       .subscribe({
         next: (response) => {
           this.applyChampionMarketPurchase(response);
-          this.loadStatus();
-          this.loadChampionMarket();
           this.showChampionMarketPurchaseToast(itemId, response);
         },
         error: (err) => {
@@ -391,6 +389,7 @@ export class ColosseumStateService {
   ): void {
     const character = this.characterState.currentCharacter();
     this.applyGloryBalance(response.gloryRemaining);
+    this.applyChampionMarketItemPurchase(response);
     this.inventoryState.applyInventoryGrant(
       response.inventoryGrantId,
       response.inventoryItemsGranted ?? [],
@@ -405,6 +404,46 @@ export class ColosseumStateService {
           character.sigilFragments + response.sigilFragmentsGranted,
       });
     }
+  }
+
+  private applyChampionMarketItemPurchase(
+    response: ChampionMarketPurchaseResponse,
+  ): void {
+    const market = this._championMarket();
+    if (!market) return;
+
+    this._championMarket.set({
+      ...market,
+      glory: response.gloryRemaining,
+      items: market.items.map((item) => {
+        if (item.id !== response.itemId) return item;
+
+        const remainingWeeklyPurchases =
+          item.weeklyPurchaseLimit == null
+            ? item.remainingWeeklyPurchases
+            : Math.max(0, item.remainingWeeklyPurchases - response.quantity);
+        const remainingLifetimePurchases =
+          item.lifetimePurchaseLimit == null
+            ? item.remainingLifetimePurchases
+            : Math.max(0, item.remainingLifetimePurchases - response.quantity);
+        const cannotPurchaseReason =
+          remainingWeeklyPurchases <= 0
+            ? 'Weekly limit reached'
+            : remainingLifetimePurchases <= 0
+              ? 'Already purchased'
+              : response.gloryRemaining < item.gloryCost
+                ? 'Not enough Glory'
+                : null;
+
+        return {
+          ...item,
+          remainingWeeklyPurchases,
+          remainingLifetimePurchases,
+          canPurchase: cannotPurchaseReason === null,
+          cannotPurchaseReason,
+        };
+      }),
+    });
   }
 
   private applyArenaBattleStatus(response: StartArenaBattleResponse): void {

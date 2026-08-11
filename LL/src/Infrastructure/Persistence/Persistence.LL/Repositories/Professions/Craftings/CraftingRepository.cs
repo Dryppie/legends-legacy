@@ -54,7 +54,8 @@ public class CraftingRepository : ICraftingRepository
         }
 
         var orderedQueue = craftingDetails.CraftingQueueItems
-            .OrderBy(item => item.AddedAt)
+            .OrderBy(item => item.Position)
+            .ThenBy(item => item.AddedAt)
             .ThenBy(item => item.Id)
             .ToList();
         var currentIndex = orderedQueue.FindIndex(item => item.Id == queueItemId);
@@ -68,10 +69,9 @@ public class CraftingRepository : ICraftingRepository
         (orderedQueue[currentIndex], orderedQueue[targetIndex]) =
             (orderedQueue[targetIndex], orderedQueue[currentIndex]);
 
-        var firstPosition = orderedQueue.Min(item => item.AddedAt);
         for (var index = 0; index < orderedQueue.Count; index++)
         {
-            orderedQueue[index].AddedAt = firstPosition.AddMilliseconds(index);
+            orderedQueue[index].Position = index;
         }
 
         characterAction.RowVersion++;

@@ -24,7 +24,7 @@ export interface ChatMessageDto {
   targetCharacterTitleDisplayName?: string | null;
   body: string;
   linkedItem?: EquipmentInstance | null;
-  sentAt: Date;
+  sentAt: Date | string;
 }
 export enum ChatChannelType {
   General = 'General',
@@ -33,6 +33,35 @@ export enum ChatChannelType {
   Guild = 'Guild',
   Whisper = 'Whisper',
   System = 'System',
+}
+
+export function mergeChatMessagesChronologically(
+  existing: readonly ChatMessageDto[],
+  additions: readonly ChatMessageDto[],
+): ChatMessageDto[] {
+  const messagesById = new Map(
+    existing.map((message) => [message.id, message]),
+  );
+
+  for (const message of additions) {
+    if (!messagesById.has(message.id)) {
+      messagesById.set(message.id, message);
+    }
+  }
+
+  return [...messagesById.values()].sort((left, right) => {
+    const timestampDifference =
+      chatMessageTimestamp(left) - chatMessageTimestamp(right);
+    return timestampDifference || left.id.localeCompare(right.id);
+  });
+}
+
+function chatMessageTimestamp(message: ChatMessageDto): number {
+  const timestamp =
+    message.sentAt instanceof Date
+      ? message.sentAt.getTime()
+      : new Date(message.sentAt).getTime();
+  return Number.isNaN(timestamp) ? Number.MAX_SAFE_INTEGER : timestamp;
 }
 
 @Injectable({
@@ -68,7 +97,7 @@ export class ChatService {
     private auth: AuthService,
   ) {
     this.incoming$.subscribe((msg) => {
-      this.messageList.update((prev) => [...prev, msg]);
+      this.addMessage(msg);
     });
 
     effect(
@@ -297,18 +326,16 @@ export class ChatService {
       this.chatApi.get('chat/GetChatHistory', params),
     );
 
-    history
-      .sort(
-        (a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime(),
-      )
-      .forEach((m) => this.addMessage(m));
+    this.messageList.update((existing) =>
+      mergeChatMessagesChronologically(existing, history),
+    );
   }
 
   /* -------------------- private helpers -------------------- */
 
   private addMessage(msg: ChatMessageDto): void {
     this.messageList.update((prev) =>
-      prev.some((existing) => existing.id === msg.id) ? prev : [...prev, msg],
+      mergeChatMessagesChronologically(prev, [msg]),
     );
   }
 

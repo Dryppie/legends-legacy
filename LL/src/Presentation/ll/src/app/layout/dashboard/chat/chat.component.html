@@ -75,27 +75,38 @@
       aria-live="polite"
     >
       <ng-container *ngIf="filteredMessages.length; else emptyExpandedChat">
-        <article
-          *ngFor="let message of filteredMessages"
-          class="rounded-sm border-l-2 border-l-[var(--ll-color-border-strong)] bg-[var(--ll-color-surface-soft)] px-2 py-1.5"
+        <ng-container
+          *ngFor="let message of filteredMessages; let messageIndex = index"
         >
-          <div class="flex min-w-0 items-baseline gap-1.5 text-[10px]">
-            <time class="shrink-0 text-[var(--ll-color-text-subtle)]">
-              {{ message.sentAt | date: "shortTime" }}
-            </time>
-            <strong class="shrink-0 text-primary">
-              {{ message.senderName }}:
-            </strong>
-            <span class="min-w-0 break-words text-[var(--ll-color-text)]">
-              <ng-container
-                *ngTemplateOutlet="
-                  messageBody;
-                  context: { $implicit: message.body }
-                "
-              ></ng-container>
-            </span>
+          <div
+            *ngIf="startsNewDay(filteredMessages, messageIndex)"
+            class="flex items-center gap-2 py-1 text-[9px] uppercase tracking-wide text-[var(--ll-color-text-subtle)]"
+          >
+            <span class="h-px flex-1 bg-[var(--ll-color-border)]"></span>
+            <time>{{ message.sentAt | date: "mediumDate" }}</time>
+            <span class="h-px flex-1 bg-[var(--ll-color-border)]"></span>
           </div>
-        </article>
+          <article
+            class="rounded-sm border-l-2 border-l-[var(--ll-color-border-strong)] bg-[var(--ll-color-surface-soft)] px-2 py-1.5"
+          >
+            <div class="flex min-w-0 items-baseline gap-1.5 text-[10px]">
+              <time class="shrink-0 text-[var(--ll-color-text-subtle)]">
+                {{ message.sentAt | date: "shortTime" }}
+              </time>
+              <strong class="shrink-0 text-primary">
+                {{ message.senderName }}:
+              </strong>
+              <span class="min-w-0 break-words text-[var(--ll-color-text)]">
+                <ng-container
+                  *ngTemplateOutlet="
+                    messageBody;
+                    context: { $implicit: message.body }
+                  "
+                ></ng-container>
+              </span>
+            </div>
+          </article>
+        </ng-container>
       </ng-container>
       <ng-template #emptyExpandedChat>
         <p class="m-auto text-xs text-[var(--ll-color-text-muted)]">
@@ -282,103 +293,118 @@
         aria-live="polite"
       >
         <ng-container *ngIf="filteredMessages as messages">
-          <article
-            *ngFor="let m of messages; let first = first"
-            class="group rounded-sm border-l-2 bg-[var(--ll-color-surface-soft)] px-2 py-1.5 transition-colors hover:bg-[var(--ll-color-primary-soft)]"
-            [class.mt-auto]="first"
-            [ngClass]="messageRowClasses(m)"
+          <ng-container
+            *ngFor="
+              let m of messages;
+              let messageIndex = index;
+              let first = first
+            "
           >
             <div
-              class="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5"
+              *ngIf="startsNewDay(messages, messageIndex)"
+              class="flex items-center gap-2 px-2 py-1.5 text-[9px] uppercase tracking-wide text-[var(--ll-color-text-subtle)]"
+              [class.mt-auto]="first"
             >
-              <time
-                class="text-[10px] leading-4 text-[var(--ll-color-text-subtle)]"
+              <span class="h-px flex-1 bg-[var(--ll-color-border)]"></span>
+              <time>{{ m.sentAt | date: "mediumDate" }}</time>
+              <span class="h-px flex-1 bg-[var(--ll-color-border)]"></span>
+            </div>
+            <article
+              class="group rounded-sm border-l-2 bg-[var(--ll-color-surface-soft)] px-2 py-1.5 transition-colors hover:bg-[var(--ll-color-primary-soft)]"
+              [ngClass]="messageRowClasses(m)"
+            >
+              <div
+                class="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5"
               >
-                {{ m.sentAt | date: "shortTime" }}
-              </time>
-
-              <span
-                class="rounded border px-1.5 py-0.5 text-[9px] font-semibold uppercase leading-none tracking-normal"
-                [ngClass]="channelBadgeClasses(m)"
-              >
-                {{ channelLabel(m) }}
-              </span>
-
-              <ng-container *ngIf="!m.linkedItem">
-                <ng-container
-                  *ngIf="m.channelType === 'System'; else playerSender"
+                <time
+                  class="text-[10px] leading-4 text-[var(--ll-color-text-subtle)]"
                 >
-                  <span
-                    *ngIf="m.senderName !== channelLabel(m)"
-                    class="text-xs font-semibold text-[var(--ll-color-text-muted)]"
-                  >
-                    {{ m.senderName }}
-                  </span>
-                </ng-container>
+                  {{ m.sentAt | date: "shortTime" }}
+                </time>
 
-                <ng-template #playerSender>
+                <span
+                  class="rounded border px-1.5 py-0.5 text-[9px] font-semibold uppercase leading-none tracking-normal"
+                  [ngClass]="channelBadgeClasses(m)"
+                >
+                  {{ channelLabel(m) }}
+                </span>
+
+                <ng-container *ngIf="!m.linkedItem">
                   <ng-container
-                    *ngIf="m.channelType === 'Whisper'; else normalSender"
+                    *ngIf="m.channelType === 'System'; else playerSender"
                   >
                     <span
-                      class="text-[10px] uppercase text-[var(--ll-color-text-subtle)]"
+                      *ngIf="m.senderName !== channelLabel(m)"
+                      class="text-xs font-semibold text-[var(--ll-color-text-muted)]"
                     >
-                      {{ m.senderId === characterId() ? "to" : "from" }}
+                      {{ m.senderName }}
                     </span>
-                    <app-character-tag
-                      [id]="whisperDisplayId(m)"
-                      [name]="whisperDisplayName(m)"
-                      [titleDisplayName]="whisperDisplayTitle(m)"
-                    ></app-character-tag>
                   </ng-container>
-                </ng-template>
 
-                <ng-template #normalSender>
-                  <app-character-tag
-                    [id]="m.senderId"
-                    [name]="m.senderName"
-                    [titleDisplayName]="m.senderTitleDisplayName"
-                  ></app-character-tag>
-                </ng-template>
-              </ng-container>
-            </div>
+                  <ng-template #playerSender>
+                    <ng-container
+                      *ngIf="m.channelType === 'Whisper'; else normalSender"
+                    >
+                      <span
+                        class="text-[10px] uppercase text-[var(--ll-color-text-subtle)]"
+                      >
+                        {{ m.senderId === characterId() ? "to" : "from" }}
+                      </span>
+                      <app-character-tag
+                        [id]="whisperDisplayId(m)"
+                        [name]="whisperDisplayName(m)"
+                        [titleDisplayName]="whisperDisplayTitle(m)"
+                      ></app-character-tag>
+                    </ng-container>
+                  </ng-template>
 
-            <div
-              class="mt-0.5 flex flex-wrap items-baseline gap-x-1 break-words text-xs leading-5"
-              [ngClass]="{
-                'italic text-[var(--ll-color-text-muted)]':
-                  m.channelType === 'System' && !isWorldAnnouncement(m),
-                'font-medium text-[var(--ll-color-primary)]':
-                  isWorldAnnouncement(m),
-                'text-[var(--ll-color-text)]': m.channelType !== 'System',
-              }"
-            >
-              <span *ngIf="m.linkedItem">
-                {{ m.senderName }}
-                <ng-container
-                  *ngTemplateOutlet="
-                    messageBody;
-                    context: { $implicit: ' ' + m.body }
-                  "
-                ></ng-container>
-              </span>
-              <span *ngIf="!m.linkedItem">
-                <ng-container
-                  *ngTemplateOutlet="
-                    messageBody;
-                    context: { $implicit: m.body }
-                  "
-                ></ng-container>
-              </span>
-              <ng-container *ngIf="m.linkedItem as linkedItem">
-                <app-item
-                  class="decoration-current/40 inline-block max-w-full cursor-help underline underline-offset-2"
-                  [item]="linkedItem"
-                ></app-item>
-                <span>.</span>
-              </ng-container>
-            </div>
-          </article>
+                  <ng-template #normalSender>
+                    <app-character-tag
+                      [id]="m.senderId"
+                      [name]="m.senderName"
+                      [titleDisplayName]="m.senderTitleDisplayName"
+                    ></app-character-tag>
+                  </ng-template>
+                </ng-container>
+              </div>
+
+              <div
+                class="mt-0.5 flex flex-wrap items-baseline gap-x-1 break-words text-xs leading-5"
+                [ngClass]="{
+                  'italic text-[var(--ll-color-text-muted)]':
+                    m.channelType === 'System' && !isWorldAnnouncement(m),
+                  'font-medium text-[var(--ll-color-primary)]':
+                    isWorldAnnouncement(m),
+                  'text-[var(--ll-color-text)]': m.channelType !== 'System',
+                }"
+              >
+                <span *ngIf="m.linkedItem">
+                  {{ m.senderName }}
+                  <ng-container
+                    *ngTemplateOutlet="
+                      messageBody;
+                      context: { $implicit: ' ' + m.body }
+                    "
+                  ></ng-container>
+                </span>
+                <span *ngIf="!m.linkedItem">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      messageBody;
+                      context: { $implicit: m.body }
+                    "
+                  ></ng-container>
+                </span>
+                <ng-container *ngIf="m.linkedItem as linkedItem">
+                  <app-item
+                    class="decoration-current/40 inline-block max-w-full cursor-help underline underline-offset-2"
+                    [item]="linkedItem"
+                  ></app-item>
+                  <span>.</span>
+                </ng-container>
+              </div>
+            </article>
+          </ng-container>
         </ng-container>
       </section>
 

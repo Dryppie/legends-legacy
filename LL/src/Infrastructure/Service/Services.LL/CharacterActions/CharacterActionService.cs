@@ -104,7 +104,10 @@ public class CharacterActionService : ICharacterActionService
     private async Task<TemperingSession?> HandleProfessionActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
         (characterAction.ActionDetails as CraftingActionDetails)!.CraftingQueueItems = [..
-            (characterAction.ActionDetails as CraftingActionDetails)!.CraftingQueueItems.OrderBy(queueItem => queueItem.AddedAt)];
+            (characterAction.ActionDetails as CraftingActionDetails)!.CraftingQueueItems
+                .OrderBy(queueItem => queueItem.Position)
+                .ThenBy(queueItem => queueItem.AddedAt)
+                .ThenBy(queueItem => queueItem.Id)];
 
         var actionsToPerform = characterAction.UpdatedAt.NumberOfXSecondsIntervals(now, TemperingConstants.ActionDurationSeconds);
 
