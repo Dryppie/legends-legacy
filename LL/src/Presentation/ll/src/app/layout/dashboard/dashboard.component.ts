@@ -119,7 +119,9 @@ export class DashboardComponent implements OnInit {
     this.chatLayout = this.chatLayoutPreference.layout;
 
     effect(() => {
-      this.isResolvingAction = this.state.loadingActionRefresh();
+      this.isResolvingAction =
+        this.state.loadingActionRefresh() ||
+        this.state.resolvingOfflineProgress();
     });
   }
 

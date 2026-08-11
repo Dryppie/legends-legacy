@@ -16,13 +16,26 @@ export class CombatActionHandler {
 
   handle(action: CharacterActionDto): void {
     if (!action.combatSession) return;
-    this.combat.startCombatSimulation(action);
-    this.summary.loadCombatSince(action.combatSession);
-    const summary = action.combatSession.combatSummary;
-    if (summary) {
-      this.combatLog.addSession(action.combatSession);
-      this.currency.gainCinders(summary.totalCinders);
-      this.currency.gainSoulstones(summary.totalSoulstones);
+    const hasPendingResolution = action.hasPendingCombatResolution ?? false;
+    const completedSession = this.summary.loadCombatSince(
+      action.combatSession,
+      hasPendingResolution,
+    );
+
+    if (hasPendingResolution) {
+      return;
     }
+
+    const resolvedSession = completedSession ?? action.combatSession;
+    const resolvedSummary = resolvedSession.combatSummary;
+    this.combat.startCombatSimulation(
+      resolvedSession === action.combatSession
+        ? action
+        : { ...action, combatSession: resolvedSession },
+    );
+    this.combat.applyIdleCombatExperience(resolvedSummary.totalExperience);
+    this.currency.gainCinders(resolvedSummary.totalCinders);
+    this.currency.gainSoulstones(resolvedSummary.totalSoulstones);
+    this.combatLog.addSession(resolvedSession);
   }
 }

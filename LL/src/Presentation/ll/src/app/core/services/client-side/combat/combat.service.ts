@@ -81,7 +81,11 @@ export class CombatService {
       combatResult,
       characterAction.nextResolutionAt ?? characterAction.updatedAt,
     );
-    this.levelingService.gainExperience(combatResult.experienceGained);
+  }
+
+  applyIdleCombatExperience(experienceGained: number): void {
+    if (experienceGained <= 0) return;
+    this.levelingService.gainExperience(experienceGained);
   }
 
   simulateFight(combatResult: CombatResultDto) {

@@ -67,6 +67,27 @@ public sealed class CharacterActionFlowTests
     }
 
     [Fact]
+    public async Task Resolve_uses_current_time_so_the_planner_can_resume_the_latest_offline_window()
+    {
+        var repository = new CharacterActionRepositoryStub
+        {
+            Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails())
+            {
+                UpdatedAt = DateTimeOffset.UtcNow.AddHours(-48)
+            },
+        };
+        var combat = new CombatServiceStub();
+        var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
+        var earliestExpectedNow = DateTimeOffset.UtcNow.AddMinutes(-1);
+
+        await service.GetCharacterActionAsync(
+            repository.Current.CharacterId,
+            CancellationToken.None);
+
+        Assert.True(combat.LastNow >= earliestExpectedNow);
+    }
+
+    [Fact]
     public async Task Stop_marks_the_current_combat_action_for_deletion()
     {
         var repository = new CharacterActionRepositoryStub
@@ -118,10 +139,12 @@ public sealed class CharacterActionFlowTests
     {
         public CombatSession Session { get; } = new();
         public int CallCount { get; private set; }
+        public DateTimeOffset LastNow { get; private set; }
 
         public Task<CombatSession> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
         {
             CallCount++;
+            LastNow = now;
             return Task.FromResult(Session);
         }
     }

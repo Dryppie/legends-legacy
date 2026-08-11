@@ -6,5 +6,6 @@ public sealed class IdleCombatProgressionOptions
 
     public int EncounterCadenceSeconds { get; set; } = 10;
     public int MaximumOfflineHours { get; set; } = 24;
+    public int MaximumEncountersPerResolution { get; set; } = 100;
     public int ReferenceWinRateBasisPoints { get; set; } = 8_500;
 }

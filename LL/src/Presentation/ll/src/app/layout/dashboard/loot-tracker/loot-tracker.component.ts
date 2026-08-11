@@ -9,6 +9,7 @@ import { ItemComponent } from '../../../shared/components/item/item.component';
 import { LocalStorageService } from '../../../core/services/client-side/local-storage/local-storage.service';
 import { LootHistoryEntry } from '../../../shared/models/loot-history';
 import { LootHistoryService } from '../../../core/services/api/loot-history/loot-history.service';
+import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 
 @Component({
   selector: 'app-loot-tracker',
@@ -27,6 +28,7 @@ export class LootTrackerComponent {
     private readonly realtimeStore: GameRealtimeStore,
     private readonly storage: LocalStorageService,
     private readonly lootHistory: LootHistoryService,
+    private readonly characterActions: CharacterActionsStateService,
   ) {
     this.expanded.set(this.storage.get<boolean>('lootTrackerExpanded') ?? true);
     this.loadHistory();
@@ -56,6 +58,7 @@ export class LootTrackerComponent {
     );
 
     effect(() => {
+      if (this.characterActions.resolvingOfflineProgress()) return;
       this.entries = this.realtimeStore.recentLoot();
     });
   }

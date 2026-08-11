@@ -67,7 +67,7 @@ public sealed class IdleCombatPlannerTests
     }
 
     [Fact]
-    public void CreatePlan_discards_progress_older_than_the_offline_limit()
+    public void CreatePlan_discards_progress_older_than_the_offline_limit_and_caps_the_batch()
     {
         var now = DateTimeOffset.Parse("2026-06-23T12:00:00Z");
         var action = CreateCombatAction(now.AddHours(-48));
@@ -76,11 +76,12 @@ public sealed class IdleCombatPlannerTests
         var plan = planner.CreatePlan(new IdleCombatOrchestrationRequest(action, now));
 
         Assert.Equal(now.AddHours(-24), plan.From);
-        Assert.Equal(8_641, plan.PlannedEncounterCount);
+        Assert.Equal(100, plan.PlannedEncounterCount);
+        Assert.Equal(now.AddHours(-24).AddSeconds(1_000), plan.ExecutableUntil);
     }
 
     [Fact]
-    public void CreatePlan_processes_all_due_encounters_in_one_plan()
+    public void CreatePlan_limits_due_encounters_to_a_resumable_batch()
     {
         var firstEncounterAt = DateTimeOffset.Parse("2026-06-23T10:00:00Z");
         var now = firstEncounterAt.AddHours(2);
@@ -89,8 +90,8 @@ public sealed class IdleCombatPlannerTests
 
         var plan = planner.CreatePlan(new IdleCombatOrchestrationRequest(action, now));
 
-        Assert.Equal(721, plan.PlannedEncounterCount);
-        Assert.Equal(now.AddSeconds(10), plan.ExecutableUntil);
+        Assert.Equal(100, plan.PlannedEncounterCount);
+        Assert.Equal(firstEncounterAt.AddSeconds(1_000), plan.ExecutableUntil);
     }
 
     private static IdleCombatPlanner CreatePlanner() =>
@@ -100,6 +101,7 @@ public sealed class IdleCombatPlannerTests
             {
                 EncounterCadenceSeconds = 10,
                 MaximumOfflineHours = 24,
+                MaximumEncountersPerResolution = 100,
                 ReferenceWinRateBasisPoints = 8_500
             }));
 

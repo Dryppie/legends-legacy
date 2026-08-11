@@ -39,6 +39,10 @@ export class CharacterActionsStateService {
 
   private readonly _loadingActionRefresh = signal(false);
   readonly loadingActionRefresh = computed(() => this._loadingActionRefresh());
+  private readonly _resolvingOfflineProgress = signal(false);
+  readonly resolvingOfflineProgress = computed(() =>
+    this._resolvingOfflineProgress(),
+  );
   private readonly _idleCombatPhase = signal<IdleCombatPhase>('idle');
   readonly idleCombatPhase = computed(() => this._idleCombatPhase());
   private readonly _idleCombatError = signal<string | null>(null);
@@ -101,7 +105,14 @@ export class CharacterActionsStateService {
             if (action.isDeleted || !action.combatSession?.combatResult) return;
             this._loadingCombat.set(false);
             this.combatHandler.handle(action);
-            this._idleCombatPhase.set('active');
+            const hasPendingResolution =
+              action.hasPendingCombatResolution ?? false;
+            this._idleCombatPhase.set(
+              hasPendingResolution ? 'resolving' : 'active',
+            );
+            if (!hasPendingResolution) {
+              this._resolvingOfflineProgress.set(false);
+            }
             this.gameService.resumeCombat();
           });
           break;
@@ -222,6 +233,7 @@ export class CharacterActionsStateService {
   stopAction(): void {
     const wasCraftingAction = this.isCraftingAction();
     if (this.isCombatAction()) this._idleCombatPhase.set('stopping');
+    this._resolvingOfflineProgress.set(false);
     this.handleDeletionOfCurrentAction();
 
     this.actionsService
@@ -265,6 +277,7 @@ export class CharacterActionsStateService {
 
     this._tickingDuration.set(0);
     this._startTime.set(null);
+    this._resolvingOfflineProgress.set(false);
 
     const action = this._currentAction();
     if (!action) return;
@@ -281,6 +294,7 @@ export class CharacterActionsStateService {
       this.actionRefreshLoadingTimeout = null;
     }
     this._loadingActionRefresh.set(false);
+    this._resolvingOfflineProgress.set(false);
     this._loadingCombat.set(false);
     this._idleCombatPhase.set('idle');
     this._idleCombatError.set(null);
@@ -344,6 +358,14 @@ export class CharacterActionsStateService {
   }
 
   private applyActionUpdate(action: CharacterActionDto | null): void {
+    if (
+      action?.hasPendingCombatResolution &&
+      this._idleCombatError() === null
+    ) {
+      this._resolvingOfflineProgress.set(true);
+      this._idleCombatPhase.set('resolving');
+    }
+
     const current = this._currentAction();
     const currentKey = this.getActionUpdateKey(current);
     const nextKey = this.getActionUpdateKey(action);
@@ -459,6 +481,9 @@ export class CharacterActionsStateService {
       this._currentAction()?.characterActionType === CharacterActionType.Combat
     ) {
       this._idleCombatPhase.set('resolving');
+      if (this._currentAction()?.hasPendingCombatResolution) {
+        this._resolvingOfflineProgress.set(true);
+      }
     }
 
     return this.actionsService.resolveCurrentAction().pipe(
@@ -468,7 +493,9 @@ export class CharacterActionsStateService {
           action?.characterActionType === CharacterActionType.Combat &&
           !action.isDeleted
         ) {
-          this._idleCombatPhase.set('active');
+          this._idleCombatPhase.set(
+            action.hasPendingCombatResolution ? 'resolving' : 'active',
+          );
         }
       }),
     );
@@ -491,6 +518,7 @@ export class CharacterActionsStateService {
     }
 
     this._idleCombatError.set(null);
+    this._resolvingOfflineProgress.set(false);
     this._idleCombatPhase.set('active');
     // A successful command response is authoritative. Polling updates still
     // use freshness checks, but a previously cached/deleted combat action must
@@ -542,6 +570,7 @@ export class CharacterActionsStateService {
   }
 
   private setIdleCombatError(error: unknown): void {
+    this._resolvingOfflineProgress.set(false);
     this._idleCombatPhase.set('error');
 
     if (error instanceof HttpErrorResponse && error.status === 409) {

@@ -1,5 +1,5 @@
 using Application.MediatR.Markers;
-using Application.UseCases.CharacterActions.Commands.ResolveCharacterAction;
+using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Application.UseCases.Characters.Queries.GetCharacter;
 using Application.UseCases.GameBootstrap.Dtos;
 using Application.UseCases.Quests.Queries.GetQuestJournal;
@@ -44,8 +44,11 @@ public sealed class GetGameBootstrapQueryHandler
             new GetQuestJournalQuery(request.CharacterId),
             cancellationToken);
 
+        // Bootstrap is a read-only snapshot. Action advancement is intentionally
+        // owned by CharacterActions/Resolve so reconnecting clients cannot launch
+        // a second, competing offline resolver through this endpoint.
         var currentActionResponse = await _sender.Send(
-            new ResolveCharacterActionCommand(request.CharacterId),
+            new GetCharacterActionQuery(request.CharacterId),
             cancellationToken);
 
         if (!currentActionResponse.IsSuccess)

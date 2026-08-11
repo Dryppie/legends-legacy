@@ -215,6 +215,47 @@ describe('CharacterActionsStateService', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/game/combat']);
     expect(service.idleCombatError()).toBeNull();
   });
+
+  it('keeps offline progress visibly resolving until the final chunk is handled', fakeAsync(() => {
+    const pendingAction: CharacterActionDto = {
+      ...combatAction(),
+      hasPendingCombatResolution: true,
+      revision: 'pending-combat-revision',
+    };
+
+    service.initializeFromBootstrap(pendingAction);
+    const applyUpdate = polling.start.calls.mostRecent().args[1];
+    applyUpdate(pendingAction);
+    flushMicrotasks();
+
+    expect(service.resolvingOfflineProgress()).toBeTrue();
+    expect(service.idleCombatPhase()).toBe('resolving');
+
+    applyUpdate({
+      ...pendingAction,
+      hasPendingCombatResolution: false,
+      revision: 'completed-combat-revision',
+      combatSession: {
+        from: new Date('2026-08-08T12:00:00Z'),
+        to: new Date('2026-08-08T12:16:40Z'),
+        combatResult: {} as never,
+        combatSummary: {
+          totalBattles: 100,
+          wins: 100,
+          losses: 0,
+          draws: 0,
+          totalExperience: 400,
+          totalGold: 0,
+          totalCinders: 12,
+          totalSoulstones: 3,
+        },
+      },
+    });
+    flushMicrotasks();
+
+    expect(service.resolvingOfflineProgress()).toBeFalse();
+    expect(service.idleCombatPhase()).toBe('active');
+  }));
 });
 
 function combatAction(): CharacterActionDto {

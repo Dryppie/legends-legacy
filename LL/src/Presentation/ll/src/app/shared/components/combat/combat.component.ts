@@ -121,9 +121,14 @@ export class CombatComponent implements OnInit, OnDestroy {
     const isStartingCombatSig = this.characterActionService.loadingCombat;
     const isRefreshingActionSig =
       this.characterActionService.loadingActionRefresh;
+    const isResolvingOfflineProgressSig =
+      this.characterActionService.resolvingOfflineProgress;
 
     effect(() => {
-      this.isLoading = isStartingCombatSig() || isRefreshingActionSig();
+      this.isLoading =
+        isStartingCombatSig() ||
+        isRefreshingActionSig() ||
+        isResolvingOfflineProgressSig();
     });
 
     effect(() => {

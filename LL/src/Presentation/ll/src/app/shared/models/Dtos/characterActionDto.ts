@@ -10,6 +10,7 @@ export interface CharacterActionDto {
   updatedAt: Date;
   nextResolutionAt: Date;
   revision: string;
+  hasPendingCombatResolution?: boolean;
   isDeleted: boolean;
   temperingSession?: TemperingSessionDto;
   combatSession?: CombatSessionDto;

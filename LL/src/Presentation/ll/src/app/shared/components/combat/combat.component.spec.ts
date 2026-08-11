@@ -40,6 +40,7 @@ describe('CombatComponent', () => {
       currentAction,
       loadingCombat: signal(false),
       loadingActionRefresh: signal(false),
+      resolvingOfflineProgress: signal(false),
       idleCombatError: signal(null),
       stopAction: jasmine.createSpy('stopAction'),
       clear: jasmine.createSpy('clear'),

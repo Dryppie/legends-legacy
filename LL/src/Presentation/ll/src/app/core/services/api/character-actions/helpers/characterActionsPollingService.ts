@@ -17,6 +17,7 @@ import { TimeSyncService } from '../../time-sync/time-sync.service';
 @Injectable({ providedIn: 'root' })
 export class CharacterActionsPollingService {
   private readonly minPollDelayMs = 1_000;
+  private readonly catchUpPollDelayMs = 100;
   private readonly maxPollDelayMs = 30_000;
   private readonly maxImmediateBackoffMs = 30_000;
   private readonly recentPollDecisions: Array<{
@@ -61,7 +62,14 @@ export class CharacterActionsPollingService {
             action.characterActionType === CharacterActionType.Combat
               ? updatedAt - now
               : environment.baseDuration * 1000 - (now - updatedAt);
-          const nextDelay = this.clampPollDelay(action, rawDelay);
+          const nextDelay = action.hasPendingCombatResolution
+            ? this.catchUpPollDelayMs
+            : this.clampPollDelay(action, rawDelay);
+
+          if (action.hasPendingCombatResolution) {
+            this.consecutiveImmediatePolls = 0;
+            this.recordPollDecision(action, rawDelay, nextDelay);
+          }
 
           return timer(nextDelay).pipe(mergeMap(() => fetch()));
         }),

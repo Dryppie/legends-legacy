@@ -24,10 +24,17 @@ public class CharacterActionDto : IMapFrom<CharacterAction>
         IsDeleted);
 
     public DateTimeOffset NextResolutionAt => UpdatedAt;
+    public bool HasPendingCombatResolution { get; set; }
 
     public void Mapping(Profile profile)
     {
         profile.CreateMap<CharacterAction, CharacterActionDto>()
+            .ForMember(
+                dest => dest.HasPendingCombatResolution,
+                opt => opt.MapFrom(source =>
+                    source.CharacterActionType == CharacterActionType.Combat &&
+                    !source.IsDeleted &&
+                    source.UpdatedAt <= DateTimeOffset.UtcNow))
             .ForMember(dest => dest.CombatActionDetails, opt => opt.MapFrom<CombatActionDetailsResolver>())
             .ForMember(dest => dest.CraftingActionDetails, opt => opt.MapFrom<CraftingActionDetailsResolver>());
     }

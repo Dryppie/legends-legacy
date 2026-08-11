@@ -1,5 +1,6 @@
 import {
   Component,
+  computed,
   ElementRef,
   effect,
   EventEmitter,
@@ -7,6 +8,8 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  Pipe,
+  PipeTransform,
   ViewChild,
 } from '@angular/core';
 import {
@@ -42,6 +45,86 @@ export interface WireCommand {
 export type WireCommandParseResult =
   | { isWire: false }
   | { isWire: true; command: WireCommand | null };
+
+export interface ChatTextSegment {
+  text: string;
+  isCurrentPlayerMention: boolean;
+}
+
+const MENTION_DELIMITER_PATTERN = /[\s.,!?;:()[\]{}"']/u;
+
+/**
+ * Splits a chat body without creating HTML so Angular can render mentions safely.
+ * Only the current player's exact name is marked as a mention on their client.
+ */
+export function splitCurrentPlayerMentions(
+  body: string,
+  playerName: string | null | undefined,
+): ChatTextSegment[] {
+  const trimmedPlayerName = playerName?.trim();
+  if (!trimmedPlayerName) {
+    return [{ text: body, isCurrentPlayerMention: false }];
+  }
+
+  const escapedPlayerName = trimmedPlayerName.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    '\\$&',
+  );
+  const mentionPattern = new RegExp(`@${escapedPlayerName}`, 'giu');
+  const segments: ChatTextSegment[] = [];
+  let bodyCursor = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = mentionPattern.exec(body)) !== null) {
+    const mentionStart = match.index;
+    const mentionEnd = mentionPattern.lastIndex;
+    const previousCharacter = mentionStart > 0 ? body[mentionStart - 1] : null;
+    const nextCharacter = mentionEnd < body.length ? body[mentionEnd] : null;
+    const hasValidStart =
+      previousCharacter === null ||
+      MENTION_DELIMITER_PATTERN.test(previousCharacter);
+    const hasValidEnd =
+      nextCharacter === null || MENTION_DELIMITER_PATTERN.test(nextCharacter);
+
+    if (!hasValidStart || !hasValidEnd) continue;
+
+    if (mentionStart > bodyCursor) {
+      segments.push({
+        text: body.slice(bodyCursor, mentionStart),
+        isCurrentPlayerMention: false,
+      });
+    }
+
+    segments.push({
+      text: body.slice(mentionStart, mentionEnd),
+      isCurrentPlayerMention: true,
+    });
+    bodyCursor = mentionEnd;
+  }
+
+  if (bodyCursor < body.length || segments.length === 0) {
+    segments.push({
+      text: body.slice(bodyCursor),
+      isCurrentPlayerMention: false,
+    });
+  }
+
+  return segments;
+}
+
+@Pipe({
+  name: 'chatMentionSegments',
+  standalone: true,
+  pure: true,
+})
+export class ChatMentionSegmentsPipe implements PipeTransform {
+  transform(
+    body: string,
+    playerName: string | null | undefined,
+  ): ChatTextSegment[] {
+    return splitCurrentPlayerMentions(body, playerName);
+  }
+}
 
 export function parseWireCommand(body: string): WireCommandParseResult {
   const trimmed = body.trim();
@@ -89,6 +172,7 @@ export function isWorldSystemMessage(message: ChatMessageDto): boolean {
     CharacterTagComponent,
     ItemComponent,
     RouterLink,
+    ChatMentionSegmentsPipe,
   ],
   templateUrl: './chat.component.html',
 })
@@ -117,6 +201,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   readonly guild;
   readonly characterId;
+  readonly characterName;
 
   readonly availableRooms: ChatRoom[] = [
     { label: 'All', contextKey: 'all', channelType: ChatChannelType.General },
@@ -225,6 +310,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   ) {
     this.guild = this.guildState.guild;
     this.characterId = this.characterState.currentCharacterId;
+    this.characterName = computed(
+      () => this.characterState.currentCharacter()?.name ?? null,
+    );
     effect(() => {
       const userInfo = this.authService.userInfo();
       if (!userInfo) return;
@@ -489,6 +577,10 @@ export class ChatComponent implements OnInit, OnDestroy {
     return message.senderId === this.characterId()
       ? message.targetCharacterTitleDisplayName
       : message.senderTitleDisplayName;
+  }
+
+  trackMentionSegment(index: number): number {
+    return index;
   }
 
   onDraftChange(): void {

@@ -75,7 +75,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     /// <inheritdoc />
     public async Task<int> ExecuteSqlRawAsync(string sql, CancellationToken token = default, params object[] sqlParams)
     {
-        return await Database.ExecuteSqlRawAsync(sql, sqlParams);
+        return await Database.ExecuteSqlRawAsync(sql, sqlParams, token);
     }
 
     public EntityEntry<TEntity> GetEntry<TEntity>(TEntity entity) where TEntity : class
@@ -86,6 +86,28 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default)
         => Database.BeginTransactionAsync(ct);
+
+    public async Task AcquireCharacterCommandLockAsync(
+        Guid characterId,
+        CancellationToken ct = default)
+    {
+        if (Database.ProviderName != "Npgsql.EntityFrameworkCore.PostgreSQL")
+        {
+            return;
+        }
+
+        if (Database.CurrentTransaction is null)
+        {
+            throw new InvalidOperationException(
+                "A character command advisory lock requires an active transaction.");
+        }
+
+        var lockId = BitConverter.ToInt64(characterId.ToByteArray(), 0);
+        await ExecuteSqlRawAsync(
+            "SELECT pg_advisory_xact_lock({0})",
+            ct,
+            lockId);
+    }
 
     public IDbContextTransaction? CurrentTransaction
         => Database.CurrentTransaction;

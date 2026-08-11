@@ -34,12 +34,17 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         if (!isCommand || isOptOut)
             return await next();
 
+        var characterId = TryGetCharacterId(request);
         if (_db.CurrentTransaction is not null)
         {
-            return await HandleTransactionalCommand(next, ct);
+            if (characterId.HasValue)
+            {
+                await _db.AcquireCharacterCommandLockAsync(characterId.Value, ct);
+            }
+
+            return await HandleTransactionalCommand(next, ct, null);
         }
 
-        var characterId = TryGetCharacterId(request);
         if (characterId.HasValue)
         {
             var commandLock = CharacterCommandLocks.GetOrAdd(
@@ -49,7 +54,7 @@ public sealed class TransactionBehavior<TRequest, TResponse>
             await commandLock.WaitAsync(ct);
             try
             {
-                return await HandleTransactionalCommand(next, ct);
+                return await HandleTransactionalCommand(next, ct, characterId);
             }
             finally
             {
@@ -57,12 +62,13 @@ public sealed class TransactionBehavior<TRequest, TResponse>
             }
         }
 
-        return await HandleTransactionalCommand(next, ct);
+        return await HandleTransactionalCommand(next, ct, null);
     }
 
     private async Task<TResponse> HandleTransactionalCommand(
         RequestHandlerDelegate<TResponse> next,
-        CancellationToken ct)
+        CancellationToken ct,
+        Guid? characterId)
     {
 
         if (_db.CurrentTransaction is not null)
@@ -96,6 +102,11 @@ public sealed class TransactionBehavior<TRequest, TResponse>
             await using var tx = await _db.BeginTransactionAsync(ct);
             try
             {
+                if (characterId.HasValue)
+                {
+                    await _db.AcquireCharacterCommandLockAsync(characterId.Value, ct);
+                }
+
                 var response = await next();
 
                 if (_db.HasChanges)

@@ -54,8 +54,11 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
         }
 
         var elapsed = to - from;
-        var plannedEncounterCount = checked(
+        var dueEncounterCount = checked(
             1 + (int)(elapsed.Ticks / _encounterCadence.Ticks));
+        var plannedEncounterCount = Math.Min(
+            dueEncounterCount,
+            _options.MaximumEncountersPerResolution);
         var executableUntil = from.AddTicks(plannedEncounterCount * _encounterCadence.Ticks);
 
         return new IdleCombatPlan(

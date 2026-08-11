@@ -141,6 +141,7 @@ public static class DependencyInjection
             .Validate(
                 options => options.EncounterCadenceSeconds > 0 &&
                            options.MaximumOfflineHours > 0 &&
+                           options.MaximumEncountersPerResolution > 0 &&
                            options.ReferenceWinRateBasisPoints is > 0 and <= 10_000,
                 "Idle combat progression settings are invalid.")
             .ValidateOnStart();

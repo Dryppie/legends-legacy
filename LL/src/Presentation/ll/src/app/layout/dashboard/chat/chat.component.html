@@ -48,7 +48,14 @@
           class="min-w-0 flex-1 truncate text-[11px]"
         >
           <strong class="text-primary">{{ message.senderName }}:</strong>
-          <span class="text-[var(--ll-color-text)]"> {{ message.body }}</span>
+          <span class="text-[var(--ll-color-text)]">
+            <ng-container
+              *ngTemplateOutlet="
+                messageBody;
+                context: { $implicit: ' ' + message.body }
+              "
+            ></ng-container>
+          </span>
         </p>
         <ng-template #emptyMobileChat>
           <p
@@ -97,7 +104,12 @@
               {{ message.senderName }}:
             </strong>
             <span class="min-w-0 break-words text-[var(--ll-color-text)]">
-              {{ message.body }}
+              <ng-container
+                *ngTemplateOutlet="
+                  messageBody;
+                  context: { $implicit: message.body }
+                "
+              ></ng-container>
             </span>
           </div>
         </article>
@@ -361,8 +373,23 @@
                 'text-[var(--ll-color-text)]': m.channelType !== 'System',
               }"
             >
-              <span *ngIf="m.linkedItem">{{ m.senderName }} {{ m.body }}</span>
-              <span *ngIf="!m.linkedItem">{{ m.body }}</span>
+              <span *ngIf="m.linkedItem">
+                {{ m.senderName }}
+                <ng-container
+                  *ngTemplateOutlet="
+                    messageBody;
+                    context: { $implicit: ' ' + m.body }
+                  "
+                ></ng-container>
+              </span>
+              <span *ngIf="!m.linkedItem">
+                <ng-container
+                  *ngTemplateOutlet="
+                    messageBody;
+                    context: { $implicit: m.body }
+                  "
+                ></ng-container>
+              </span>
               <ng-container *ngIf="m.linkedItem as linkedItem">
                 <app-item
                   class="decoration-current/40 inline-block max-w-full cursor-help underline underline-offset-2"
@@ -496,6 +523,17 @@
       <span class="sr-only">{{ onlinePlayerLabel }}</span>
     </button>
   </ng-template>
+</ng-template>
+
+<ng-template #messageBody let-body>
+  <span
+    *ngFor="
+      let segment of body | chatMentionSegments: characterName();
+      trackBy: trackMentionSegment
+    "
+    [ngClass]="{ 'text-[#89a3ff]': segment.isCurrentPlayerMention }"
+    >{{ segment.text }}</span
+  >
 </ng-template>
 
 <ng-template #drawerDragHandle>

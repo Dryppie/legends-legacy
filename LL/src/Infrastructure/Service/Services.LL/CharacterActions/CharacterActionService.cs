@@ -64,7 +64,6 @@ public class CharacterActionService : ICharacterActionService
     public async Task<CharacterAction?> GetCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
-        var originalNow = now;
 
         var characterAction = await _characterActionRepository.GetCharacterActionAsync(characterId, cancellationToken);
 
@@ -78,9 +77,6 @@ public class CharacterActionService : ICharacterActionService
 
         if (characterAction.ActionDetails == null) return characterAction;
 
-        var isCapped = characterAction.UpdatedAt.AddHours(24) < now;
-        if (isCapped) now = characterAction.UpdatedAt.AddHours(24);
-
         switch (characterAction.CharacterActionType)
         {
             case CharacterActionType.Combat:
@@ -93,11 +89,6 @@ public class CharacterActionService : ICharacterActionService
 
             default:
                 return null;
-        }
-
-        if (isCapped)
-        {
-            characterAction.UpdatedAt = originalNow;
         }
 
         _characterActionRepository.UpdateCharacterAction(characterAction);

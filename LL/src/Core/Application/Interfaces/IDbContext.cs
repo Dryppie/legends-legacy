@@ -171,6 +171,7 @@ public interface IDbContext
 
     IExecutionStrategy CreateExecutionStrategy();
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default);
+    Task AcquireCharacterCommandLockAsync(Guid characterId, CancellationToken ct = default);
     IDbContextTransaction? CurrentTransaction { get; }
     bool HasChanges { get; }
 }
