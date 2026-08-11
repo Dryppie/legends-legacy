@@ -30,6 +30,7 @@ import {
   CraftingRecipe,
 } from '../../../../../shared/models/crafting-v2';
 import { AttributeType } from '../../../../../shared/models/enums/attributeType';
+import { EquipmentType } from '../../../../../shared/models/enums/equipmentType';
 import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { AttributeValueFormatPipe } from '../../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import {
@@ -40,6 +41,7 @@ import {
 import { ONBOARDING_ONE_HANDED_WEAPON_ITEM_BASE_IDS } from '../../../../../shared/models/quest';
 import { QuestStateService } from '../../../../../core/services/api/quest/quest-state.service';
 import { FirstPartyTourService } from '../../../../../core/services/client-side/first-party-tour/first-party-tour.service';
+import { EquipmentSlotType } from '../../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
 
 interface BaseAttributeDisplay {
   attributeType: AttributeType;
@@ -60,6 +62,52 @@ type RecipeFilterMode =
   | 'mastery';
 
 type MobileCraftingPane = 'recipes' | 'blueprints' | 'preview';
+type RecipeEquipmentSlot = EquipmentSlotType | 'all';
+
+const EQUIPMENT_SLOT_BY_TYPE: Record<EquipmentType, EquipmentSlotType> = {
+  [EquipmentType.Head]: EquipmentSlotType.Head,
+  [EquipmentType.Relic]: EquipmentSlotType.Relic,
+  [EquipmentType.Chest]: EquipmentSlotType.Chest,
+  [EquipmentType.Necklace]: EquipmentSlotType.Necklace,
+  [EquipmentType.Legs]: EquipmentSlotType.Legs,
+  [EquipmentType.Ring]: EquipmentSlotType.Ring,
+  [EquipmentType.OneHanded]: EquipmentSlotType.MainHand,
+  [EquipmentType.TwoHanded]: EquipmentSlotType.MainHand,
+  [EquipmentType.OffHand]: EquipmentSlotType.OffHand,
+  [EquipmentType.Tool]: EquipmentSlotType.Tool,
+};
+
+export function getRecipeEquipmentSlot(
+  outputItemType: EquipmentType,
+): EquipmentSlotType {
+  return EQUIPMENT_SLOT_BY_TYPE[outputItemType];
+}
+
+export function matchesRecipeSearch(
+  recipe: CraftingRecipe,
+  queryTerms: readonly string[],
+): boolean {
+  if (!queryTerms.length) return true;
+
+  const searchableText = [
+    recipe.name,
+    recipe.description,
+    recipe.category,
+    recipe.outputItemType,
+    ...recipe.tags,
+    ...recipe.affinityTags,
+    ...recipe.blueprints.flatMap((blueprint) => [
+      blueprint.name,
+      blueprint.craftedItemName,
+      blueprint.description,
+      ...blueprint.tags,
+    ]),
+  ]
+    .join(' ')
+    .toLowerCase();
+
+  return queryTerms.every((term) => searchableText.includes(term));
+}
 
 @Component({
   selector: 'app-regular-crafting',
@@ -91,6 +139,7 @@ export class RegularCraftingComponent {
   readonly recipeSearch = signal('');
   readonly recipeCategory = signal('all');
   readonly recipeSubcategory = signal('all');
+  readonly recipeEquipmentSlot = signal<RecipeEquipmentSlot>('all');
   readonly blueprintSearch = signal('');
   readonly blueprintFilter = signal<'all' | 'craftable' | 'locked'>('all');
   readonly mobilePane = signal<MobileCraftingPane>('recipes');
@@ -297,6 +346,36 @@ export class RegularCraftingComponent {
   readonly recipeSubcategoryLabel = computed(
     () => this.recipeSubcategoryOptions()[0]?.label ?? 'All types',
   );
+  readonly recipeEquipmentSlotOptions = computed<
+    readonly DropdownOption<RecipeEquipmentSlot>[]
+  >(() => {
+    const availableSlots = new Set(
+      this.onboardingScopedRecipes().map((recipe) =>
+        getRecipeEquipmentSlot(recipe.outputItemType),
+      ),
+    );
+    const slotOrder: readonly EquipmentSlotType[] = [
+      EquipmentSlotType.Head,
+      EquipmentSlotType.Chest,
+      EquipmentSlotType.Legs,
+      EquipmentSlotType.MainHand,
+      EquipmentSlotType.OffHand,
+      EquipmentSlotType.Relic,
+      EquipmentSlotType.Necklace,
+      EquipmentSlotType.Ring,
+      EquipmentSlotType.Tool,
+    ];
+
+    return [
+      { label: 'All equipment slots', value: 'all' },
+      ...slotOrder
+        .filter((slot) => availableSlots.has(slot))
+        .map((slot) => ({
+          label: this.formatDisplayLabel(slot),
+          value: slot,
+        })),
+    ];
+  });
 
   private readonly recipeSearchMatches = computed(() => {
     const onboardingRecipes = this.onboardingScopedRecipes();
@@ -309,28 +388,21 @@ export class RegularCraftingComponent {
       .filter(Boolean);
     const category = this.recipeCategory();
     const subcategory = this.recipeSubcategory();
+    const equipmentSlot = this.recipeEquipmentSlot();
 
     return onboardingRecipes.filter((recipe) => {
       if (category !== 'all' && recipe.category !== category) return false;
+      if (
+        equipmentSlot !== 'all' &&
+        getRecipeEquipmentSlot(recipe.outputItemType) !== equipmentSlot
+      )
+        return false;
       if (
         subcategory !== 'all' &&
         !this.matchesRecipeSubcategory(recipe, category, subcategory)
       )
         return false;
-      if (!queryTerms.length) return true;
-
-      const searchableText = [
-        recipe.name,
-        recipe.description,
-        recipe.category,
-        recipe.outputItemType,
-        ...recipe.tags,
-        ...recipe.affinityTags,
-      ]
-        .join(' ')
-        .toLowerCase();
-
-      return queryTerms.every((term) => searchableText.includes(term));
+      return matchesRecipeSearch(recipe, queryTerms);
     });
   });
 
@@ -492,6 +564,13 @@ export class RegularCraftingComponent {
 
   setRecipeSubcategory(selection: DropdownSelection<string>): void {
     this.recipeSubcategory.set(selection.main);
+    this.selectFirstVisibleRecipeIfNeeded();
+  }
+
+  setRecipeEquipmentSlot(
+    selection: DropdownSelection<RecipeEquipmentSlot>,
+  ): void {
+    this.recipeEquipmentSlot.set(selection.main);
     this.selectFirstVisibleRecipeIfNeeded();
   }
 

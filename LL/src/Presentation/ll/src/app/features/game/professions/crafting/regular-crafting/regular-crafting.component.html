@@ -47,7 +47,7 @@
         <input
           type="search"
           class="min-w-0 flex-1 appearance-none border-0 bg-transparent p-0 text-xs text-white outline-none ring-0 placeholder:text-secondary focus:border-0 focus:outline-none focus:ring-0"
-          placeholder="Search recipes..."
+          placeholder="Search recipes &amp; Blueprints..."
           [value]="recipeSearch()"
           (input)="setRecipeSearch($any($event.target).value)"
         />
@@ -61,6 +61,16 @@
         [options]="recipeCategoryOptions()"
         [selectedValue]="recipeCategory()"
         (selection)="setRecipeCategory($event)"
+      ></app-dropdown>
+
+      <app-dropdown
+        class="block w-full"
+        appearance="field"
+        label="All equipment slots"
+        [value]="recipeEquipmentSlot()"
+        [options]="recipeEquipmentSlotOptions()"
+        [selectedValue]="recipeEquipmentSlot()"
+        (selection)="setRecipeEquipmentSlot($event)"
       ></app-dropdown>
 
       <app-dropdown
