@@ -90,6 +90,7 @@
       [attr.aria-selected]="isOptionSelected(option)"
       [attr.aria-disabled]="option.disabled || null"
       [attr.tabindex]="option.disabled ? -1 : 0"
+      (pointerdown)="onOptionPointerDown($event, option)"
       (pointerenter)="onOptionPointerEnter(optionIndex)"
       (pointerleave)="onOptionPointerLeave(optionIndex)"
       (click)="onOptionClick(option)"

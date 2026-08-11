@@ -8,7 +8,11 @@ import {
   OnInit,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Region } from '../../../../shared/models/Dtos/regionDto';
+import {
+  Area,
+  AreaDrop,
+  Region,
+} from '../../../../shared/models/Dtos/regionDto';
 import { RegionService } from '../../../../core/services/client-side/region/region.service';
 import { CombatAreaCardComponent } from '../../../../shared/components/combat/combat-area-card/combat-area-card.component';
 import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
@@ -24,6 +28,7 @@ import { CharacterActionsStateService } from '../../../../core/services/api/char
 import { CharacterActionType } from '../../../../shared/models/enums/characterActionType';
 import { TRAINING_GROUNDS_AREA_ID } from '../../../../shared/models/quest';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
+import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
 
 @Component({
   selector: 'app-region',
@@ -55,6 +60,7 @@ export class RegionComponent implements OnInit, OnDestroy {
     public readonly combatStateService: CombatStateService,
     private readonly combatService: CombatService,
     private readonly questState: QuestStateService,
+    private readonly dungeonState: DungeonStateService,
     characterActions: CharacterActionsStateService,
   ) {
     this.activeBattle = computed(() => {
@@ -70,6 +76,7 @@ export class RegionComponent implements OnInit, OnDestroy {
 
     effect(() => {
       this.questState.areaAccess();
+      this.dungeonState.dungeons();
       this.applyRegionView();
     });
   }
@@ -135,10 +142,47 @@ export class RegionComponent implements OnInit, OnDestroy {
   private withQuestAreaAvailability(region: Region): Region {
     return {
       ...region,
-      areas: region.areas.filter(
-        (area) => this.questState.accessFor(area.id)?.isVisible !== false,
-      ),
+      areas: region.areas
+        .filter(
+          (area) => this.questState.accessFor(area.id)?.isVisible !== false,
+        )
+        .map((area) => ({
+          ...area,
+          possibleDrops: this.possibleDropsFor(area),
+        })),
     };
+  }
+
+  private possibleDropsFor(area: Area): AreaDrop[] {
+    const region = this.areaRegion(area.id);
+    if (region === null) {
+      return [];
+    }
+
+    const drops = new Map<string, AreaDrop>();
+    for (const dungeon of this.dungeonState.dungeons()) {
+      if (
+        dungeon.region !== region ||
+        !dungeon.sigilItemId ||
+        !dungeon.sigilName
+      ) {
+        continue;
+      }
+
+      drops.set(dungeon.sigilItemId, {
+        itemId: dungeon.sigilItemId,
+        name: dungeon.sigilName,
+      });
+    }
+
+    return Array.from(drops.values()).sort((left, right) =>
+      left.name.localeCompare(right.name),
+    );
+  }
+
+  private areaRegion(areaId: string): number | null {
+    const match = /^region_(\d+)_area_/i.exec(areaId);
+    return match ? Number.parseInt(match[1], 10) : null;
   }
 
   closeTrainingSummary(): void {

@@ -64,10 +64,12 @@ export interface DungeonEntryRequirement {
   name: string;
   requiredAmount: number;
   ownedAmount: number;
+  description?: string | null;
 }
 
 export interface DungeonPreviewData {
   id: string;
+  region: number;
   familyId?: string;
   familyTitle?: string;
   number: number | string;

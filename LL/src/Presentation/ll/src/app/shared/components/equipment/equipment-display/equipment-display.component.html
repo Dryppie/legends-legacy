@@ -1,6 +1,11 @@
-<ng-container *ngIf="sideBySideComparison as equipped; else standardEquipment">
+<ng-container *ngIf="sideBySideComparisons.length; else standardEquipment">
   <div
-    class="grid w-[min(34rem,calc(100vw-3rem))] grid-cols-1 overflow-hidden sm:grid-cols-2"
+    class="grid grid-cols-1 overflow-hidden"
+    [ngClass]="
+      sideBySideComparisons.length > 1
+        ? 'w-[min(50rem,calc(100vw-3rem))] sm:grid-cols-3'
+        : 'w-[min(34rem,calc(100vw-3rem))] sm:grid-cols-2'
+    "
   >
     <section class="flex min-w-0 flex-col p-2 sm:pr-4">
       <div class="ll-item-meta text-primary">Hovered</div>
@@ -16,8 +21,8 @@
 
       <div class="mt-3 flex-1 text-sm">
         <div
-          *ngFor="let comparison of comparisonRows"
-          class="grid min-h-7 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3"
+          *ngFor="let comparison of comparisonAttributeRows"
+          class="grid min-h-7 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3"
         >
           <span class="truncate text-secondary">
             {{ comparison.attributeType | attributeTypeFormat }}
@@ -26,21 +31,6 @@
             {{
               comparison.hoveredAmount
                 | attributeValueFormat: comparison.attributeType
-            }}
-          </span>
-          <span
-            data-testid="comparison-difference"
-            [attr.data-attribute]="comparison.attributeType"
-            class="min-w-12 text-right font-semibold tabular-nums"
-            [ngClass]="
-              comparisonClass(
-                comparison.hoveredAmount - comparison.equippedAmount
-              )
-            "
-          >
-            {{
-              comparison.hoveredAmount - comparison.equippedAmount
-                | attributeValueFormat: comparison.attributeType : true
             }}
           </span>
         </div>
@@ -57,44 +47,56 @@
           <span *ngIf="data.potential != null" class="ll-item-meta">
             Potential {{ data.potential }}
           </span>
-          <span
-            class="ml-auto font-semibold tabular-nums"
-            [ngClass]="comparisonClass(data.itemBudget - equipped.itemBudget)"
-          >
-            {{ data.itemBudget - equipped.itemBudget > 0 ? "+" : ""
-            }}{{ data.itemBudget - equipped.itemBudget | number: "1.0-2" }} vs
-            equipped
-          </span>
         </div>
       </div>
     </section>
 
     <section
-      class="flex min-w-0 flex-col border-t border-primary/20 bg-black/20 p-2 opacity-70 sm:border-l sm:border-t-0 sm:pl-4"
+      *ngFor="let equipped of sideBySideComparisons"
+      class="flex min-w-0 flex-col border-t border-primary/20 bg-black/20 p-2 sm:border-l sm:border-t-0 sm:pl-4"
     >
-      <div class="ll-item-meta">Equipped</div>
+      <div class="ll-item-meta">
+        {{ comparisonSlotLabel(equipped.slotType) }}
+      </div>
       <h2
         class="ll-item-detail-title mt-1 truncate"
-        [ngClass]="rarityClass(equipped.rarity)"
+        [ngClass]="rarityClass(equipped.data.rarity)"
       >
-        {{ equipped.name }}
+        {{ equipped.data.name }}
       </h2>
       <div class="ll-item-meta mt-1 truncate">
-        {{ comparisonMeta(equipped) }}
+        {{ comparisonMeta(equipped.data) }}
       </div>
 
       <div class="mt-3 flex-1 text-sm">
         <div
-          *ngFor="let comparison of comparisonRows"
-          class="grid min-h-7 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3"
+          *ngFor="let comparison of comparisonAttributeRows"
+          class="grid min-h-7 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3"
         >
           <span class="truncate text-secondary">
             {{ comparison.attributeType | attributeTypeFormat }}
           </span>
           <span class="font-semibold tabular-nums text-white">
             {{
-              comparison.equippedAmount
+              equippedAmount(equipped, comparison.attributeType)
                 | attributeValueFormat: comparison.attributeType
+            }}
+          </span>
+          <span
+            data-testid="comparison-difference"
+            [attr.data-attribute]="comparison.attributeType"
+            class="min-w-12 text-right font-semibold tabular-nums"
+            [ngClass]="
+              comparisonClass(
+                comparison.hoveredAmount -
+                  equippedAmount(equipped, comparison.attributeType)
+              )
+            "
+          >
+            {{
+              comparison.hoveredAmount -
+                equippedAmount(equipped, comparison.attributeType)
+                | attributeValueFormat: comparison.attributeType : true
             }}
           </span>
         </div>
@@ -103,15 +105,28 @@
       <div class="mt-3 border-t border-primary/20 pt-3">
         <div class="flex items-end justify-between gap-4">
           <span class="ll-item-meta">Gear Value</span>
-          <span class="font-serif text-xl tabular-nums text-white">
-            {{ equipped.itemBudget | number: "1.0-2" }}
+          <span class="flex items-baseline gap-2 tabular-nums">
+            <span class="font-serif text-xl text-white">
+              {{ equipped.data.itemBudget | number: "1.0-2" }}
+            </span>
+            <span
+              class="text-xs font-semibold"
+              [ngClass]="
+                comparisonClass(data.itemBudget - equipped.data.itemBudget)
+              "
+            >
+              {{ data.itemBudget - equipped.data.itemBudget > 0 ? "+" : ""
+              }}{{
+                data.itemBudget - equipped.data.itemBudget | number: "1.0-2"
+              }}
+            </span>
           </span>
         </div>
         <div
-          *ngIf="equipped.potential != null"
+          *ngIf="equipped.data.potential != null"
           class="ll-item-meta mt-1 text-right"
         >
-          Potential {{ equipped.potential }}
+          Potential {{ equipped.data.potential }}
         </div>
       </div>
     </section>

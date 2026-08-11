@@ -190,6 +190,22 @@ public sealed class CraftingRegionOneContentTests
     }
 
     [Fact]
+    public void Shenic_dungeon_sigils_describe_their_region_wide_drop_source()
+    {
+        var items = ReadArray("items/items.json")
+            .ToDictionary(
+                item => item?["id"]?.GetValue<string>() ?? string.Empty,
+                item => item?["description"]?.GetValue<string>() ?? string.Empty,
+                StringComparer.OrdinalIgnoreCase);
+
+        foreach (var sigilId in new[] { "sigil_goblin_mines", "sigil_forgotten_catacombs" })
+        {
+            Assert.True(items.TryGetValue(sigilId, out var description));
+            Assert.Contains("every area of the Shenic Region", description, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    [Fact]
     public void StandardMaterialSources_ListEveryActualCombatAreaAndExcludeTheBazaar()
     {
         var regionDocument = ReadDocument("world/regions.json");

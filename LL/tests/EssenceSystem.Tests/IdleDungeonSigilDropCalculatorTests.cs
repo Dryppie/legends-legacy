@@ -30,6 +30,44 @@ public sealed class IdleDungeonSigilDropCalculatorTests
         Assert.True(boostedDrops.Sum(x => x.Quantity) > baseDrops.Sum(x => x.Quantity));
     }
 
+    [Fact]
+    public async Task RollAsync_only_uses_sigils_from_the_areas_region()
+    {
+        var regionOneSigil = new ItemBase
+        {
+            Id = "item.sigil.region-one",
+            Name = "Region One Sigil",
+            ItemType = ItemType.Resource,
+            Stackable = true
+        };
+        var regionTwoSigil = new ItemBase
+        {
+            Id = "item.sigil.region-two",
+            Name = "Region Two Sigil",
+            ItemType = ItemType.Resource,
+            Stackable = true
+        };
+        var calculator = new IdleDungeonSigilDropCalculator(
+            new StaticDungeonDefinitions(
+            [
+                new DungeonDefinition { Id = "region_one_dungeon", Region = 1, SigilItemId = regionOneSigil.Id },
+                new DungeonDefinition { Id = "region_two_dungeon", Region = 2, SigilItemId = regionTwoSigil.Id }
+            ]),
+            new StaticItemBaseRepository([regionOneSigil, regionTwoSigil]),
+            new QueueRandomSource(Enumerable.Repeat(0.5, 200).ToArray()),
+            new InventoryItemFactory(),
+            new StaticBonusService(new Dictionary<BonusKind, double>()));
+
+        var drops = await calculator.RollAsync(
+            Guid.NewGuid(),
+            new Area { Id = "region_02_area_01" },
+            eligibleVictories: 43200,
+            CancellationToken.None);
+
+        Assert.NotEmpty(drops);
+        Assert.All(drops, drop => Assert.Equal(regionTwoSigil.Id, drop.ItemInstance.ItemBaseId));
+    }
+
     private static IdleDungeonSigilDropCalculator CreateCalculator(double sigilTraceBonusBps)
     {
         return new IdleDungeonSigilDropCalculator(

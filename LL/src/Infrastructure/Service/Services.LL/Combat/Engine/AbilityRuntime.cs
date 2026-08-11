@@ -459,6 +459,8 @@ public sealed record RuntimeBarrierConsumption(
 
 public sealed class RuntimeCombatant
 {
+    public const float DefaultSummonThreat = 100f;
+
     private float _threat;
     private float _regenerationRatePercent;
     private int _regenerationIntervalModifierTicks;
@@ -494,6 +496,7 @@ public sealed class RuntimeCombatant
         Abilities = abilities.Select(x => new RuntimeAbility(x)).ToList();
         ImagePath = imagePath;
         IsSummoned = isSummoned;
+        _threat = isSummoned ? DefaultSummonThreat : 0f;
         RemainingSummonDurationTicks = summonDurationTicks;
         SummonOwner = summonOwner;
         BasicAttackIntervalMultiplier = Math.Max(0.1d, basicAttackIntervalMultiplier);

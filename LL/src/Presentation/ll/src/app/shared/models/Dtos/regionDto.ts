@@ -12,10 +12,15 @@ export interface Area {
   name: string;
   levelRequirement: number;
   creatures: string[];
-  description: string;
+  possibleDrops?: AreaDrop[];
   gatheringTypes?: GatheringType[];
   gatheringNodes?: AreaGatheringNode[];
   // creatures: Creature[];
+}
+
+export interface AreaDrop {
+  itemId: string;
+  name: string;
 }
 
 export interface AreaGatheringNode {

@@ -5,6 +5,11 @@ import {
 import { EquipmentType } from '../../models/enums/equipmentType';
 import { Equipment, EquipmentInstance } from '../../models/item';
 
+export interface EquippedComparison {
+  slotType: EquipmentSlotType;
+  equipmentInstance: EquipmentInstance;
+}
+
 export function getAllowedEquipmentTypesForSlot(
   slot: EquipmentSlotType,
 ): EquipmentType[] {
@@ -65,26 +70,58 @@ export function findEquippedComparison(
   item: Equipment | EquipmentInstance,
   slots: readonly EquipmentSlot[],
 ): EquipmentInstance | null {
+  return findEquippedComparisons(item, slots)[0]?.equipmentInstance ?? null;
+}
+
+export function findEquippedComparisons(
+  item: Equipment | EquipmentInstance,
+  slots: readonly EquipmentSlot[],
+): EquippedComparison[] {
   if (
     isEquipmentInstance(item) &&
     slots.some((slot) => slot.equipmentInstance?.id === item.id)
   ) {
-    return null;
+    return [];
   }
 
   const equipmentType = isEquipmentInstance(item)
     ? item.equipmentBase.equipmentType
     : item.equipmentType;
-  const slotType = getSlotTypeFromEquipmentType(equipmentType);
-  const equipped = slots.find(
-    (slot) => slot.equipmentSlotType === slotType,
-  )?.equipmentInstance;
+  const comparisonSlots = getComparisonSlots(equipmentType);
+  const comparisons: EquippedComparison[] = [];
+  const includedItemIds = new Set<string>();
 
-  if (!equipped) {
-    return null;
+  for (const slotType of comparisonSlots) {
+    const equipped = slots.find(
+      (slot) => slot.equipmentSlotType === slotType,
+    )?.equipmentInstance;
+
+    if (!equipped || includedItemIds.has(equipped.id)) continue;
+    if (
+      equipmentType === EquipmentType.OffHand &&
+      slotType === EquipmentSlotType.MainHand &&
+      equipped.equipmentBase.equipmentType !== EquipmentType.TwoHanded
+    ) {
+      continue;
+    }
+
+    comparisons.push({ slotType, equipmentInstance: equipped });
+    includedItemIds.add(equipped.id);
   }
 
-  return equipped;
+  return comparisons;
+}
+
+function getComparisonSlots(equipmentType: EquipmentType): EquipmentSlotType[] {
+  switch (equipmentType) {
+    case EquipmentType.OneHanded:
+    case EquipmentType.TwoHanded:
+      return [EquipmentSlotType.MainHand, EquipmentSlotType.OffHand];
+    case EquipmentType.OffHand:
+      return [EquipmentSlotType.OffHand, EquipmentSlotType.MainHand];
+    default:
+      return [getSlotTypeFromEquipmentType(equipmentType)];
+  }
 }
 
 function isEquipmentInstance(

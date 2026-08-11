@@ -3120,6 +3120,7 @@ public sealed class AbilitySystemTests
                 }
             ]);
         var friendly = CreateCombatant("friendly", CombatTeam.Friendly, [compiledAbilities["ability.summon.owner.cleanup"]], maxHealth: 50);
+        friendly.AdjustThreat(RuntimeCombatant.DefaultSummonThreat + 100);
         var hostile = CreateCombatant("hostile", CombatTeam.Hostile, [compiledAbilities["ability.kill.owner"]]);
         var engine = new FastCombatEngine(
             new Dictionary<string, CompiledStatus>(),

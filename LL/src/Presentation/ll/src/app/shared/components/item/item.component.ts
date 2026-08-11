@@ -15,7 +15,10 @@ import { PopoverComponent } from '../custom-components/popover/popover.component
 import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
 import { InventoryStateService } from '../../../core/services/api/inventory/inventory-state.service';
 import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
-import { findEquippedComparison } from '../../utils/equipment/equipment.utils';
+import {
+  EquippedComparison,
+  findEquippedComparisons,
+} from '../../utils/equipment/equipment.utils';
 import { BlueprintAttributeSummaryComponent } from '../blueprint-attribute-summary/blueprint-attribute-summary.component';
 
 @Component({
@@ -111,10 +114,10 @@ export class ItemComponent {
       .reduce((total, inventoryItem) => total + inventoryItem.quantity, 0);
   }
 
-  get equippedComparison(): EquipmentInstance | null {
-    if (!this.isEquipment) return null;
+  get equippedComparisons(): EquippedComparison[] {
+    if (!this.isEquipment) return [];
 
-    return findEquippedComparison(
+    return findEquippedComparisons(
       this.itemAsEquipment(this.item),
       this.equipmentState.equipmentSlots(),
     );

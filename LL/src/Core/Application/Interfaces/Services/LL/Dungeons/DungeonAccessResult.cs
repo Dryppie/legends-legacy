@@ -9,4 +9,5 @@ public sealed record DungeonEntryRequirementResult(
     string ItemId,
     string Name,
     int RequiredAmount,
-    int OwnedAmount);
+    int OwnedAmount,
+    string? Description = null);

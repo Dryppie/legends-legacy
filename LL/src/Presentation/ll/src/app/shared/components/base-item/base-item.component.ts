@@ -1,11 +1,6 @@
 import { NgClass, NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import {
-  EssenceItem,
-  Equipment,
-  EquipmentInstance,
-  ItemBase,
-} from '../../models/item';
+import { EssenceItem, Equipment, ItemBase } from '../../models/item';
 import { ItemType } from '../../models/enums/itemType';
 import { Rarity } from '../../models/enums/rarity';
 import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
@@ -14,7 +9,10 @@ import { EssenceDetailsComponent } from '../essences/essence-details/essence-det
 import { EquipmentDisplayComponent } from '../equipment/equipment-display/equipment-display.component';
 import { InventoryStateService } from '../../../core/services/api/inventory/inventory-state.service';
 import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
-import { findEquippedComparison } from '../../utils/equipment/equipment.utils';
+import {
+  EquippedComparison,
+  findEquippedComparisons,
+} from '../../utils/equipment/equipment.utils';
 
 @Component({
   selector: 'app-base-item',
@@ -67,10 +65,10 @@ export class BaseItemComponent {
       .reduce((total, inventoryItem) => total + inventoryItem.quantity, 0);
   }
 
-  get equippedComparison(): EquipmentInstance | null {
-    if (!this.isEquipment) return null;
+  get equippedComparisons(): EquippedComparison[] {
+    if (!this.isEquipment) return [];
 
-    return findEquippedComparison(
+    return findEquippedComparisons(
       this.itemAsEquipment(this.item),
       this.equipmentState.equipmentSlots(),
     );

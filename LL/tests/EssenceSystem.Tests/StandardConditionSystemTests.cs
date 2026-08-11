@@ -510,6 +510,34 @@ public sealed class StandardConditionSystemTests
     }
 
     [Fact]
+    public void Summons_default_to_one_hundred_threat()
+    {
+        var attacker = Combatant(
+            "attacker",
+            CombatTeam.Friendly,
+            [],
+            power: 0,
+            weaponDamage: 10);
+        var owner = Combatant("owner", CombatTeam.Hostile, []);
+        var summon = new RuntimeCombatant(
+            "summon",
+            "Summon",
+            CombatTeam.Hostile,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 1000
+            },
+            [],
+            isSummoned: true);
+
+        Run([attacker], [owner, summon], maxTicks: 1, basicAttackIntervalTicks: 1);
+
+        Assert.Equal(RuntimeCombatant.DefaultSummonThreat, summon.Threat);
+        Assert.Equal(1000, owner.Health);
+        Assert.InRange(1000 - summon.Health, 8, 12);
+    }
+
+    [Fact]
     public void Empower_weaken_haste_slow_and_chill_apply_their_fixed_independent_modifiers()
     {
         var empoweredStrike = Passive(

@@ -97,6 +97,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             previews.Add(new DungeonPreviewDto
             {
                 Id = dungeon.Id,
+                Region = dungeon.Region,
                 FamilyId = DungeonDefinitionIdentity.GetFamilyId(dungeon.Id),
                 FamilyTitle = DungeonDefinitionIdentity.GetFamilyTitle(dungeon.Name),
                 Title = dungeon.Name,

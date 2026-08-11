@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { setAttributeDefinitions } from '../../models/attribute-definition';
 import { ModifierType } from '../../models/Dtos/attributesDto';
+import { EquipmentSlotType } from '../../models/Dtos/equipment-slots/equipmentSlot';
 import { AttributeType } from '../../models/enums/attributeType';
 import { EquipmentType } from '../../models/enums/equipmentType';
 import { ItemQuality } from '../../models/enums/itemQuality';
@@ -186,6 +187,59 @@ describe('EquipmentDisplayComponent', () => {
     );
     expect(difference?.textContent?.trim()).toBe('+4%');
   });
+
+  it('renders separate main-hand and off-hand weapon comparisons', async () => {
+    await TestBed.configureTestingModule({
+      imports: [EquipmentDisplayComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(EquipmentDisplayComponent);
+    const hovered = equipmentInstance(
+      'hovered-weapon',
+      AttributeType.Power,
+      15,
+      EquipmentType.OneHanded,
+    );
+    const mainHand = equipmentInstance(
+      'main-hand-weapon',
+      AttributeType.Power,
+      10,
+      EquipmentType.OneHanded,
+    );
+    const offHand = equipmentInstance(
+      'off-hand-weapon',
+      AttributeType.Power,
+      5,
+      EquipmentType.OffHand,
+    );
+    mainHand.displayName = 'Main Hand Blade';
+    offHand.displayName = 'Off Hand Shield';
+
+    fixture.componentRef.setInput('item', hovered);
+    fixture.componentRef.setInput('comparisonItems', [
+      {
+        slotType: EquipmentSlotType.MainHand,
+        equipmentInstance: mainHand,
+      },
+      {
+        slotType: EquipmentSlotType.OffHand,
+        equipmentInstance: offHand,
+      },
+    ]);
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    const differences = [
+      ...fixture.nativeElement.querySelectorAll(
+        '[data-testid="comparison-difference"]',
+      ),
+    ].map((element: Element) => element.textContent?.trim());
+
+    expect(text).toContain('Equipped · Main Hand');
+    expect(text).toContain('Main Hand Blade');
+    expect(text).toContain('Equipped · Off Hand');
+    expect(text).toContain('Off Hand Shield');
+    expect(differences).toEqual(['+5', '+10']);
+  });
 });
 
 function display(
@@ -213,6 +267,7 @@ function equipmentInstance(
   id: string,
   attributeType: AttributeType,
   amount: number,
+  equipmentType = EquipmentType.Head,
 ): EquipmentInstance {
   const equipmentBase: Equipment = {
     id: `${id}-base`,
@@ -221,7 +276,7 @@ function equipmentInstance(
     itemType: ItemType.Equipment,
     description: '',
     stackable: false,
-    equipmentType: EquipmentType.Head,
+    equipmentType,
     attributeModifiers: [],
     itemBudget: amount,
     itemBudgetTier: 1,
@@ -254,6 +309,7 @@ function equipmentInstance(
     affinityTags: [],
     itemBudget: amount,
     itemBudgetTier: 1,
+    isGuildBorrowed: false,
   };
 }
 
@@ -292,6 +348,7 @@ function toolInstance(amount = 12, id = 'test-tool'): EquipmentInstance {
     affinityTags: [],
     itemBudget: 0,
     itemBudgetTier: 1,
+    isGuildBorrowed: false,
   };
 }
 

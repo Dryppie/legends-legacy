@@ -21,8 +21,6 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
     private const int IdleActionsPerDay = 24 * 60 * 60 / 10;
     private const double TargetSigilDropsPerDay = 2d;
     private const double SigilDropChancePerIdleAction = TargetSigilDropsPerDay / IdleActionsPerDay;
-    private const string DefaultRegionId = "region_01";
-
     public IdleDungeonSigilDropCalculator(
         IDungeonDefinitions dungeons,
         IItemBaseRepository itemBases,
@@ -83,14 +81,14 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
 
     private IReadOnlyList<string> GetSigilIdsForArea(Area area)
     {
-        var regionId = ResolveRegionId(area.Id);
-        if (regionId is null)
+        var region = ResolveRegion(area.Id);
+        if (region is null)
         {
             return [];
         }
 
         return _dungeons.GetAll()
-            .Where(dungeon => ResolveDungeonRegionId(dungeon.RequiredAreaId) == regionId)
+            .Where(dungeon => dungeon.Region == region)
             .Select(dungeon => dungeon.SigilItemId)
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -138,10 +136,7 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
         return sigilIds[index];
     }
 
-    private static string ResolveDungeonRegionId(string? requiredAreaId) =>
-        ResolveRegionId(requiredAreaId) ?? DefaultRegionId;
-
-    private static string? ResolveRegionId(string? areaId)
+    private static int? ResolveRegion(string? areaId)
     {
         if (string.IsNullOrWhiteSpace(areaId))
         {
@@ -151,8 +146,17 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
         const string areaMarker = "_area_";
         var markerIndex = areaId.IndexOf(areaMarker, StringComparison.OrdinalIgnoreCase);
 
-        return markerIndex > 0
-            ? areaId[..markerIndex]
+        const string regionPrefix = "region_";
+        if (markerIndex <= regionPrefix.Length ||
+            !areaId.StartsWith(regionPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        return int.TryParse(
+            areaId.AsSpan(regionPrefix.Length, markerIndex - regionPrefix.Length),
+            out var region)
+            ? region
             : null;
     }
 }

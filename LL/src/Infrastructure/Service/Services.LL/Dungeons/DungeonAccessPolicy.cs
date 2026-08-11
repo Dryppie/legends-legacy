@@ -90,15 +90,15 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
                 cost.ItemId,
                 cancellationToken);
 
-            var itemName = itemBases.TryGetValue(cost.ItemId, out var itemBase)
-                ? itemBase.Name
-                : cost.ItemId;
+            var hasItemBase = itemBases.TryGetValue(cost.ItemId, out var itemBase);
+            var itemName = hasItemBase ? itemBase!.Name : cost.ItemId;
 
             requirements.Add(new DungeonEntryRequirementResult(
                 cost.ItemId,
                 itemName,
                 cost.Amount,
-                owned));
+                owned,
+                hasItemBase ? itemBase!.Description : null));
         }
 
         return requirements;

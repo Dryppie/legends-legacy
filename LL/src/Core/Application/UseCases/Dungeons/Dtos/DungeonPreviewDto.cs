@@ -18,6 +18,7 @@ public sealed class DungeonHubDto
 public sealed class DungeonPreviewDto
 {
     public string Id { get; set; } = string.Empty;
+    public int Region { get; set; }
     public string FamilyId { get; set; } = string.Empty;
     public string FamilyTitle { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
@@ -124,6 +125,7 @@ public sealed class DungeonEntryRequirementDto : IMapFrom<DungeonEntryRequiremen
     public string Name { get; set; } = string.Empty;
     public int RequiredAmount { get; set; }
     public int OwnedAmount { get; set; }
+    public string? Description { get; set; }
 
     public void Mapping(Profile profile) =>
         profile.CreateMap<DungeonEntryRequirementResult, DungeonEntryRequirementDto>();

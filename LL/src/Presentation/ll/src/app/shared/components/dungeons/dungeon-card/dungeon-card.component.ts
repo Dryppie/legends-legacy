@@ -42,6 +42,7 @@ interface EntryRequirementPreview {
   name: string;
   ownedAmount: number;
   requiredAmount: number;
+  description?: string | null;
 }
 
 interface MasteryBonusDisplay {

@@ -43,6 +43,7 @@ public sealed class DungeonAccessPolicyTests
         var assembly = await policy.EvaluateForSigilAssemblyAsync(Guid.NewGuid(), dungeon, CancellationToken.None);
 
         Assert.False(normal.CanEnter);
+        Assert.Equal("A test dungeon sigil.", Assert.Single(normal.EntryRequirements).Description);
         Assert.True(assembly.CanEnter);
         Assert.Single(assembly.EntryRequirements);
     }

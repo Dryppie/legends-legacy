@@ -4,7 +4,10 @@ import { ItemQuality } from '../../models/enums/itemQuality';
 import { ItemType } from '../../models/enums/itemType';
 import { Rarity } from '../../models/enums/rarity';
 import { Equipment, EquipmentInstance } from '../../models/item';
-import { findEquippedComparison } from './equipment.utils';
+import {
+  findEquippedComparison,
+  findEquippedComparisons,
+} from './equipment.utils';
 
 describe('equipment hover comparison', () => {
   it('finds the equipped item in the hovered gear slot', () => {
@@ -40,7 +43,123 @@ describe('equipment hover comparison', () => {
       ]),
     ).toBeNull();
   });
+
+  it('compares one-handed and two-handed weapons with both equipped hands', () => {
+    const equippedMainHand = equipmentInstance(
+      'equipped-main-hand',
+      EquipmentType.OneHanded,
+    );
+    const equippedOffHand = equipmentInstance(
+      'equipped-off-hand',
+      EquipmentType.OffHand,
+    );
+    const slots = [
+      equipmentSlot(
+        'main-hand-slot',
+        EquipmentSlotType.MainHand,
+        equippedMainHand,
+      ),
+      equipmentSlot(
+        'off-hand-slot',
+        EquipmentSlotType.OffHand,
+        equippedOffHand,
+      ),
+    ];
+
+    for (const hoveredType of [
+      EquipmentType.OneHanded,
+      EquipmentType.TwoHanded,
+    ]) {
+      expect(
+        findEquippedComparisons(
+          equipmentInstance(`hovered-${hoveredType}`, hoveredType),
+          slots,
+        ),
+      ).toEqual([
+        {
+          slotType: EquipmentSlotType.MainHand,
+          equipmentInstance: equippedMainHand,
+        },
+        {
+          slotType: EquipmentSlotType.OffHand,
+          equipmentInstance: equippedOffHand,
+        },
+      ]);
+    }
+  });
+
+  it('compares off-hand gear only with the equipped off-hand', () => {
+    const equippedMainHand = equipmentInstance(
+      'equipped-main-hand',
+      EquipmentType.OneHanded,
+    );
+    const equippedOffHand = equipmentInstance(
+      'equipped-off-hand',
+      EquipmentType.OffHand,
+    );
+
+    expect(
+      findEquippedComparisons(
+        equipmentInstance('hovered-off-hand', EquipmentType.OffHand),
+        [
+          equipmentSlot(
+            'main-hand-slot',
+            EquipmentSlotType.MainHand,
+            equippedMainHand,
+          ),
+          equipmentSlot(
+            'off-hand-slot',
+            EquipmentSlotType.OffHand,
+            equippedOffHand,
+          ),
+        ],
+      ),
+    ).toEqual([
+      {
+        slotType: EquipmentSlotType.OffHand,
+        equipmentInstance: equippedOffHand,
+      },
+    ]);
+  });
+
+  it('compares off-hand gear with an equipped two-handed weapon', () => {
+    const equippedTwoHanded = equipmentInstance(
+      'equipped-two-handed',
+      EquipmentType.TwoHanded,
+    );
+
+    expect(
+      findEquippedComparisons(
+        equipmentInstance('hovered-off-hand', EquipmentType.OffHand),
+        [
+          equipmentSlot(
+            'main-hand-slot',
+            EquipmentSlotType.MainHand,
+            equippedTwoHanded,
+          ),
+        ],
+      ),
+    ).toEqual([
+      {
+        slotType: EquipmentSlotType.MainHand,
+        equipmentInstance: equippedTwoHanded,
+      },
+    ]);
+  });
 });
+
+function equipmentSlot(
+  id: string,
+  equipmentSlotType: EquipmentSlotType,
+  equipmentInstance: EquipmentInstance,
+) {
+  return {
+    id,
+    iconPath: equipmentSlotType,
+    equipmentSlotType,
+    equipmentInstance,
+  };
+}
 
 function equipmentInstance(
   id: string,
@@ -77,5 +196,6 @@ function equipmentInstance(
     affinityTags: [],
     itemBudget: 0,
     itemBudgetTier: 1,
+    isGuildBorrowed: false,
   };
 }

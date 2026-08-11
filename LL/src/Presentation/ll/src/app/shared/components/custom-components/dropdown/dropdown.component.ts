@@ -173,6 +173,14 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
     this.selectOption(option);
   }
 
+  onOptionPointerDown(event: PointerEvent, option: DropdownOption<T>): void {
+    if (event.pointerType !== 'mouse') return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    this.selectOption(option);
+  }
+
   onOptionPointerEnter(optionIndex: number): void {
     this.hoveredOptionIndex.set(optionIndex);
   }

@@ -118,7 +118,7 @@ public sealed class DungeonDtoMappingTests
         var mastery = mapper.Map<DungeonMasteryDto>(
             new DungeonMasterySnapshot("test_dungeon", 120, 3, 200, 4));
         var requirement = mapper.Map<DungeonEntryRequirementDto>(
-            new DungeonEntryRequirementResult("sigil", "Sigil", 1, 2));
+            new DungeonEntryRequirementResult("sigil", "Sigil", 1, 2, "Drops throughout Shenic."));
         var reward = mapper.Map<DungeonPreviewRewardDto>(
             new DungeonPreviewReward(
                 new ItemBase { Id = "ore", Name = "Ore" },
@@ -141,6 +141,7 @@ public sealed class DungeonDtoMappingTests
         Assert.Equal(1, mastery.Benefits.AdditionalVisibilityRows);
         Assert.Equal(0.05d, mastery.Benefits.GatheringProcChanceBonus, 3);
         Assert.Equal(2, requirement.OwnedAmount);
+        Assert.Equal("Drops throughout Shenic.", requirement.Description);
         Assert.Equal("ore", reward.Id);
         Assert.Equal("Ore", reward.ItemBase.Name);
         Assert.Equal(DungeonActionOutcomeDto.RestSiteResolved, actionResponse.Outcome);

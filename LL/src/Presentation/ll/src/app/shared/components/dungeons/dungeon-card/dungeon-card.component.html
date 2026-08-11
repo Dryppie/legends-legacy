@@ -560,7 +560,15 @@
               class="ll-list-row px-2 py-2 text-xs"
               [ngClass]="entryRequirementClass(requirement)"
             >
-              <span class="min-w-0 truncate">{{ requirement.name }}</span>
+              <span class="min-w-0">
+                <span class="block truncate">{{ requirement.name }}</span>
+                <span
+                  *ngIf="requirement.description"
+                  class="mt-1 block text-[11px] leading-4 text-zinc-400"
+                >
+                  {{ requirement.description }}
+                </span>
+              </span>
               <span class="shrink-0 tabular-nums">
                 {{ requirement.ownedAmount }}/{{ requirement.requiredAmount }}
               </span>

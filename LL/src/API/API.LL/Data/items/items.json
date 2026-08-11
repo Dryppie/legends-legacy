@@ -24,7 +24,7 @@
   {
     "id": "sigil_goblin_mines",
     "name": "Goblin Sigil",
-    "description": "A sigil used to open a run into the Goblin Mines.",
+    "description": "A sigil used to open a run into the Goblin Mines. It can drop from idle combat in every area of the Shenic Region.",
     "itemType": "Resource",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -35,7 +35,7 @@
   {
     "id": "sigil_forgotten_catacombs",
     "name": "Catacomb Sigil",
-    "description": "A sigil used to open a run into the Forgotten Catacombs.",
+    "description": "A sigil used to open a run into the Forgotten Catacombs. It can drop from idle combat in every area of the Shenic Region.",
     "itemType": "Resource",
     "rarity": "Common",
     "equipmentType": "Head",

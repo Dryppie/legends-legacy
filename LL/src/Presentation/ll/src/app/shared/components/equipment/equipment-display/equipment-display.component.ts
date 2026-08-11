@@ -26,6 +26,17 @@ import {
 import { Rarity } from '../../../models/enums/rarity';
 import { EquipmentType } from '../../../models/enums/equipmentType';
 import { AttributeTooltipDirective } from '../../../directives/attribute-tooltip/attribute-tooltip.directive';
+import { AttributeType } from '../../../models/enums/attributeType';
+import { EquipmentSlotType } from '../../../models/Dtos/equipment-slots/equipmentSlot';
+import { sortAttributes } from '../../../utils/attributes/attribute-order.utils';
+import { EquippedComparison } from '../../../utils/equipment/equipment.utils';
+
+interface EquipmentComparisonView {
+  slotType: EquipmentSlotType | null;
+  data: EquipmentDisplay;
+  rows: EquipmentAttributeComparison[];
+  toolRows: ToolBonusComparison[];
+}
 
 @Component({
   selector: 'app-equipment-display',
@@ -44,6 +55,7 @@ export class EquipmentDisplayComponent {
   @Input({ required: true }) item!: Equipment | EquipmentInstance;
   @Input() useBaseName = false;
   @Input() comparisonItem: EquipmentInstance | null = null;
+  @Input() comparisonItems: readonly EquippedComparison[] = [];
   @Input() compactCraftingDesign = false;
   @Input() showPossibleUpgradeAttributes = false;
   modifierType = ModifierType;
@@ -53,20 +65,51 @@ export class EquipmentDisplayComponent {
   comparisonData: EquipmentDisplay | null = null;
   comparisonRows: EquipmentAttributeComparison[] = [];
   toolComparisonRows: ToolBonusComparison[] = [];
+  comparisonViews: EquipmentComparisonView[] = [];
+  comparisonAttributeRows: EquipmentAttributeComparison[] = [];
 
   ngOnChanges(): void {
     this.data = isInstance(this.item)
       ? mapInstanceToDisplay(this.item)
       : mapEquipmentToDisplay(this.item, this.useBaseName);
-    this.comparisonData = this.comparisonItem
-      ? mapInstanceToDisplay(this.comparisonItem)
-      : null;
+    const comparisonTargets = this.comparisonItems.length
+      ? this.comparisonItems
+      : this.comparisonItem
+        ? [{ slotType: null, equipmentInstance: this.comparisonItem }]
+        : [];
+    this.comparisonViews = comparisonTargets.map((comparison) => {
+      const equipped = mapInstanceToDisplay(comparison.equipmentInstance);
+      return {
+        slotType: comparison.slotType,
+        data: equipped,
+        rows: buildAttributeComparisons(this.data, equipped),
+        toolRows: buildToolBonusComparisons(this.data, equipped),
+      };
+    });
+    this.comparisonData = this.comparisonViews[0]?.data ?? null;
     this.comparisonRows = this.comparisonData
       ? buildAttributeComparisons(this.data, this.comparisonData)
       : [];
     this.toolComparisonRows = this.comparisonData
       ? buildToolBonusComparisons(this.data, this.comparisonData)
       : [];
+    const comparisonRowsByAttribute = new Map<
+      AttributeType,
+      EquipmentAttributeComparison
+    >();
+    for (const comparison of this.comparisonViews) {
+      for (const row of comparison.rows) {
+        if (!comparisonRowsByAttribute.has(row.attributeType)) {
+          comparisonRowsByAttribute.set(row.attributeType, {
+            ...row,
+            equippedAmount: 0,
+          });
+        }
+      }
+    }
+    this.comparisonAttributeRows = sortAttributes([
+      ...comparisonRowsByAttribute.values(),
+    ]);
   }
 
   get rarityClasses() {
@@ -126,8 +169,8 @@ export class EquipmentDisplayComponent {
     return this.data?.equipmentType === EquipmentType.Tool;
   }
 
-  get sideBySideComparison(): EquipmentDisplay | null {
-    return this.isTool ? null : this.comparisonData;
+  get sideBySideComparisons(): EquipmentComparisonView[] {
+    return this.isTool ? [] : this.comparisonViews;
   }
 
   get hasToolDetails(): boolean {
@@ -194,6 +237,21 @@ export class EquipmentDisplayComponent {
     ]
       .filter((value): value is string => !!value)
       .join(' · ');
+  }
+
+  comparisonSlotLabel(slotType: EquipmentSlotType | null): string {
+    if (!slotType) return 'Equipped';
+    return `Equipped · ${slotType.replace(/([A-Z])/g, ' $1').trim()}`;
+  }
+
+  equippedAmount(
+    comparison: EquipmentComparisonView,
+    attributeType: AttributeType,
+  ): number {
+    return (
+      comparison.rows.find((row) => row.attributeType === attributeType)
+        ?.equippedAmount ?? 0
+    );
   }
 
   rarityClass(rarity: Rarity): string {
