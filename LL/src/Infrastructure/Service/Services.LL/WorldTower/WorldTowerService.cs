@@ -1,0 +1,1894 @@
+using System.Globalization;
+using System.Text.Json;
+using Application.Common.Interfaces;
+using Application.Interfaces.Outbox;
+using Application.Interfaces.WebSockets;
+using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.PowerRatings;
+using Application.Interfaces.Services.LL.WorldTower;
+using Application.UseCases.WorldTower.Dtos;
+using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
+using AutoMapper;
+using Application.UseCases.Outbox;
+using Application.WebSockets.Contracts;
+using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Combat;
+using Domain.Models.Entities;
+using Domain.Models.Entities.Characters;
+using Domain.Models.Entities.Creatures;
+using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Regions.Areas;
+using Domain.Models.Snapshots;
+using Domain.Models.WorldTower;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Services.LL.Combat.Engine;
+using Services.LL.Combat.Layers.Resolution.Dungeon;
+using Services.LL.Combat.Layers.Orchestration.Models;
+using Services.LL.Combat.Layers.Resolution.Models;
+using Services.LL.Interfaces;
+using Services.LL.Interfaces.Combat.Resolution;
+
+namespace Services.LL.WorldTower;
+
+public sealed class WorldTowerService : IWorldTowerService
+{
+    private static readonly TowerRallyStatus[] ActiveRallyStatuses =
+    [
+        TowerRallyStatus.Recruiting,
+        TowerRallyStatus.Ready,
+        TowerRallyStatus.InProgress
+    ];
+
+    private readonly IDbContext _db;
+    private readonly IWorldTowerDefinitionProvider _definitions;
+    private readonly ICharacterSnapshotService _snapshots;
+    private readonly IPowerRatingService _powerRatings;
+    private readonly IEntityService _entities;
+    private readonly ICombatSetupService _combatSetup;
+    private readonly ICombatEngineExecutor _combatEngine;
+    private readonly ICombatEncounterResultFactory _resultFactory;
+    private readonly IGameEventOutbox _outbox;
+    private readonly IGameRealtimeBroadcaster _realtime;
+    private readonly IMapper _mapper;
+    private readonly TimeProvider _timeProvider;
+    private readonly WorldTowerOptions _options;
+    private readonly JsonSerializerOptions _jsonOptions;
+    private readonly ILogger<WorldTowerService> _logger;
+
+    public WorldTowerService(
+        IDbContext db,
+        IWorldTowerDefinitionProvider definitions,
+        ICharacterSnapshotService snapshots,
+        IPowerRatingService powerRatings,
+        IEntityService entities,
+        ICombatSetupService combatSetup,
+        ICombatEngineExecutor combatEngine,
+        ICombatEncounterResultFactory resultFactory,
+        IGameEventOutbox outbox,
+        IGameRealtimeBroadcaster realtime,
+        IMapper mapper,
+        IOptions<WorldTowerOptions> options,
+        JsonSerializerOptions jsonOptions,
+        TimeProvider timeProvider,
+        ILogger<WorldTowerService> logger)
+    {
+        _db = db;
+        _definitions = definitions;
+        _snapshots = snapshots;
+        _powerRatings = powerRatings;
+        _entities = entities;
+        _combatSetup = combatSetup;
+        _combatEngine = combatEngine;
+        _resultFactory = resultFactory;
+        _outbox = outbox;
+        _realtime = realtime;
+        _mapper = mapper;
+        _options = options.Value;
+        _jsonOptions = jsonOptions;
+        _timeProvider = timeProvider;
+        _logger = logger;
+    }
+
+    public async Task<TowerOverviewDto> GetOverviewAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        await EnsureFloorProgressAsync(cancellationToken);
+        var progress = await _db.TowerFloorProgresses
+            .AsNoTracking()
+            .Where(x => x.ServerId == _options.ServerId)
+            .ToDictionaryAsync(x => x.FloorNumber, cancellationToken);
+        var rallies = await ActiveRalliesQuery()
+            .AsNoTracking()
+            .Include(x => x.Participants)
+            .Include(x => x.Applications)
+            .OrderBy(x => x.CreatedAt)
+            .ToListAsync(cancellationToken);
+        var summaries = _definitions.GetFloors()
+            .Select(floor => ToFloorSummary(
+                floor,
+                progress[floor.FloorNumber],
+                rallies.Any(x => x.FloorNumber == floor.FloorNumber)))
+            .ToArray();
+        var hall = await GetHallOfFameAsync(cancellationToken);
+        var current = summaries.FirstOrDefault(x => x.State is not (TowerFloorStateType.Locked or TowerFloorStateType.Cleared));
+
+        return new TowerOverviewDto(
+            _options.ServerId,
+            progress.Values.Where(x => x.UnlockedAt.HasValue).Select(x => x.FloorNumber).DefaultIfEmpty(0).Max(),
+            progress.Values.Where(x => x.IsCleared).Select(x => x.FloorNumber).DefaultIfEmpty(0).Max(),
+            IsEchoUnlocked(progress),
+            current,
+            summaries,
+            rallies.Select(ToRallySummary).ToArray(),
+            hall.Take(5).ToArray());
+    }
+
+    public async Task<TowerFloorDetailDto?> GetFloorAsync(
+        Guid characterId,
+        int floorNumber,
+        CancellationToken cancellationToken)
+    {
+        var definition = _definitions.GetFloor(floorNumber);
+        if (definition is null)
+            return null;
+
+        await EnsureFloorProgressAsync(cancellationToken);
+        var progress = await _db.TowerFloorProgresses
+            .AsNoTracking()
+            .Where(x => x.ServerId == _options.ServerId)
+            .ToDictionaryAsync(x => x.FloorNumber, cancellationToken);
+        var currentCharacterRallyId = await ActiveRalliesQuery()
+            .AsNoTracking()
+            .Where(x => x.Participants.Any(participant => participant.CharacterId == characterId))
+            .OrderBy(x => x.CreatedAt)
+            .Select(x => (Guid?)x.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+        var rallies = await ActiveRalliesQuery()
+            .AsNoTracking()
+            .Include(x => x.Participants)
+            .Include(x => x.Applications)
+            .Where(x => x.FloorNumber == floorNumber)
+            .OrderBy(x => x.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        return await ToFloorDetailAsync(
+            characterId,
+            definition,
+            progress,
+            rallies,
+            currentCharacterRallyId,
+            cancellationToken);
+    }
+
+    public async Task<TowerRallyDto?> GetRallyAsync(
+        Guid characterId,
+        Guid rallyId,
+        CancellationToken cancellationToken)
+    {
+        var accountId = await _db.Characters
+            .AsNoTracking()
+            .Where(x => x.Id == characterId)
+            .Select(x => (Guid?)x.UserId)
+            .SingleOrDefaultAsync(cancellationToken);
+        var rally = await _db.TowerRallies
+            .AsNoTracking()
+            .Include(x => x.Participants)
+            .Include(x => x.Applications)
+            .Include(x => x.Attempt)
+                .ThenInclude(x => x!.Playback)
+            .SingleOrDefaultAsync(x => x.Id == rallyId && x.ServerId == _options.ServerId, cancellationToken);
+        return rally is null ? null : ToRallyDto(rally, characterId, accountId);
+    }
+
+    public async Task<TowerBattleReportDto?> GetAttemptReportAsync(
+        Guid characterId,
+        Guid attemptId,
+        CancellationToken cancellationToken)
+    {
+        var json = await _db.TowerAttempts
+            .AsNoTracking()
+            .Where(x => x.Id == attemptId
+                        && x.ServerId == _options.ServerId
+                        && x.Status != TowerAttemptStatus.Started
+                        && x.Status != TowerAttemptStatus.Playback
+                        && x.TowerRally.Participants.Any(participant =>
+                            participant.CharacterId == characterId))
+            .Select(x => x.BattleReportJson)
+            .SingleOrDefaultAsync(cancellationToken);
+        return string.IsNullOrWhiteSpace(json)
+            ? null
+            : JsonSerializer.Deserialize<TowerBattleReportDto>(json, _jsonOptions);
+    }
+
+    public async Task<CombatResultDto?> GetAttemptCombatResultAsync(
+        Guid characterId,
+        Guid attemptId,
+        CancellationToken cancellationToken)
+    {
+        var json = await _db.TowerAttempts
+            .AsNoTracking()
+            .Where(x => x.Id == attemptId
+                        && x.ServerId == _options.ServerId
+                        && x.Status != TowerAttemptStatus.Started
+                        && x.Status != TowerAttemptStatus.Playback
+                        && x.TowerRally.Participants.Any(participant =>
+                            participant.CharacterId == characterId))
+            .Select(x => x.CombatResultJson)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (string.IsNullOrWhiteSpace(json))
+            return null;
+
+        var result = JsonSerializer.Deserialize<CombatResult>(json, _jsonOptions);
+        return result is null ? null : _mapper.Map<CombatResultDto>(result);
+    }
+
+    public async Task<TowerCombatPlaybackDto?> GetAttemptPlaybackAsync(
+        Guid characterId,
+        Guid attemptId,
+        CancellationToken cancellationToken)
+    {
+        var playback = await _db.TowerCombatPlaybacks
+            .AsNoTracking()
+            .Include(x => x.TowerAttempt)
+                .ThenInclude(x => x.TowerRally)
+                    .ThenInclude(x => x.Participants)
+            .SingleOrDefaultAsync(x => x.TowerAttemptId == attemptId
+                && x.TowerAttempt.ServerId == _options.ServerId
+                && x.TowerAttempt.TowerRally.Participants.Any(participant =>
+                    participant.CharacterId == characterId), cancellationToken);
+        return playback is null
+            ? null
+            : ToPlaybackDto(playback, _timeProvider.GetUtcNow());
+    }
+
+    public async Task<IReadOnlyList<TowerHallOfFameEntryDto>> GetHallOfFameAsync(
+        CancellationToken cancellationToken)
+    {
+        var firstClearIds = await _db.TowerFloorProgresses
+            .AsNoTracking()
+            .Where(x => x.ServerId == _options.ServerId && x.FirstClearAttemptId.HasValue)
+            .Select(x => x.FirstClearAttemptId!.Value)
+            .ToListAsync(cancellationToken);
+        if (firstClearIds.Count == 0)
+            return [];
+
+        var attempts = await _db.TowerAttempts
+            .AsNoTracking()
+            .Include(x => x.TowerRally)
+                .ThenInclude(x => x.Participants)
+            .Where(x => firstClearIds.Contains(x.Id))
+            .OrderByDescending(x => x.CompletedAt)
+            .ToListAsync(cancellationToken);
+
+        return attempts.Select(attempt =>
+        {
+            var floor = GetRequiredFloor(attempt.FloorNumber);
+            return new TowerHallOfFameEntryDto(
+                floor.FloorNumber,
+                floor.Name,
+                floor.GuardianName,
+                attempt.Id,
+                attempt.CompletedAt ?? attempt.StartedAt,
+                attempt.AttemptNumberForFloor,
+                attempt.FightDurationSeconds ?? 0,
+                attempt.TowerRally.Participants
+                    .OrderBy(x => x.JoinedAt)
+                    .Select(x => new TowerHallOfFameParticipantDto(
+                        x.CharacterId,
+                        x.CharacterName,
+                        x.GuildName,
+                        x.PowerRating))
+                    .ToArray());
+        }).ToArray();
+    }
+
+    public async Task<TowerOperationResult<TowerRallyDto>> CreateRallyAsync(
+        Guid characterId,
+        int floorNumber,
+        TowerRallyMode mode,
+        CancellationToken cancellationToken)
+    {
+        var definition = _definitions.GetFloor(floorNumber);
+        if (definition is null)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower floor was not found.");
+
+        await EnsureFloorProgressAsync(cancellationToken);
+        await _db.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
+        await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber, cancellationToken);
+        var validation = await ValidateRallyModeAsync(definition, mode, cancellationToken);
+        if (validation is not null)
+            return TowerOperationResult<TowerRallyDto>.Fail(validation);
+
+        var eligibility = await GetJoinEligibilityAsync(characterId, definition, null, cancellationToken);
+        if (eligibility.Error is not null)
+            return TowerOperationResult<TowerRallyDto>.Fail(eligibility.Error);
+
+        var now = DateTimeOffset.UtcNow;
+        var rally = new TowerRally
+        {
+            ServerId = _options.ServerId,
+            FloorNumber = floorNumber,
+            Mode = mode,
+            Status = definition.RequiredSlots == 1 ? TowerRallyStatus.Ready : TowerRallyStatus.Recruiting,
+            CreatedByCharacterId = characterId,
+            RequiredSlots = definition.RequiredSlots,
+            CreatedAt = now
+        };
+        rally.Participants.Add(await CreateParticipantAsync(eligibility, rally, now, cancellationToken));
+        _db.TowerRallies.Add(rally);
+        await EnqueueRallyUpdateAsync(rally, "Created", now, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        return TowerOperationResult<TowerRallyDto>.Success(ToRallyDto(rally, characterId, eligibility.AccountId));
+    }
+
+    public async Task<TowerOperationResult<TowerRallyDto>> ApplyToRallyAsync(
+        Guid characterId,
+        Guid rallyId,
+        CancellationToken cancellationToken)
+    {
+        await _db.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
+        var floorNumber = await _db.TowerRallies
+            .AsNoTracking()
+            .Where(x => x.Id == rallyId && x.ServerId == _options.ServerId)
+            .Select(x => (int?)x.FloorNumber)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (!floorNumber.HasValue)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+        await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber.Value, cancellationToken);
+
+        var rally = await _db.TowerRallies
+            .Include(x => x.Participants)
+            .Include(x => x.Applications)
+            .Include(x => x.Attempt)
+            .SingleOrDefaultAsync(x => x.Id == rallyId && x.ServerId == _options.ServerId, cancellationToken);
+        if (rally is null)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+        if (rally.Status is not (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready))
+            return TowerOperationResult<TowerRallyDto>.Fail("This rally is no longer accepting applications.");
+        if (rally.Participants.Count >= rally.RequiredSlots)
+            return TowerOperationResult<TowerRallyDto>.Fail("This rally is already full.");
+
+        var definition = GetRequiredFloor(rally.FloorNumber);
+        var modeError = await ValidateRallyModeAsync(definition, rally.Mode, cancellationToken);
+        if (modeError is not null)
+            return TowerOperationResult<TowerRallyDto>.Fail(modeError);
+        var eligibility = await GetJoinEligibilityAsync(characterId, definition, rally.Id, cancellationToken);
+        if (eligibility.Error is not null)
+            return TowerOperationResult<TowerRallyDto>.Fail(eligibility.Error);
+        if (rally.Participants.Any(x => x.AccountId == eligibility.AccountId))
+            return TowerOperationResult<TowerRallyDto>.Fail("This account already occupies a slot in the rally.");
+        var existingApplication = rally.Applications.SingleOrDefault(x =>
+            x.AccountId == eligibility.AccountId);
+        if (existingApplication?.Status == TowerRallyApplicationStatus.Pending)
+        {
+            return TowerOperationResult<TowerRallyDto>.Fail("This account has already applied to this rally.");
+        }
+        if (existingApplication?.Status == TowerRallyApplicationStatus.Accepted
+            && rally.Participants.Any(x => x.AccountId == eligibility.AccountId))
+        {
+            return TowerOperationResult<TowerRallyDto>.Fail("This account already occupies a slot in the rally.");
+        }
+
+        var snapshot = await _snapshots.CreateAsync(eligibility.CharacterId, cancellationToken);
+        var now = DateTimeOffset.UtcNow;
+        var application = existingApplication ?? new TowerRallyApplication
+        {
+            TowerRally = rally
+        };
+        application.CharacterId = eligibility.CharacterId;
+        application.AccountId = eligibility.AccountId;
+        application.CharacterName = eligibility.CharacterName;
+        application.GuildId = eligibility.GuildId;
+        application.GuildName = eligibility.GuildName;
+        application.PowerRating = eligibility.PowerRating;
+        application.CharacterSnapshotId = snapshot.Id;
+        application.CharacterSnapshot = snapshot;
+        application.Status = TowerRallyApplicationStatus.Pending;
+        application.AppliedAt = now;
+        application.ResolvedAt = null;
+        application.ResolvedByCharacterId = null;
+        if (existingApplication is null)
+        {
+            rally.Applications.Add(application);
+            _db.TowerRallyApplications.Add(application);
+        }
+        await EnqueueRallyUpdateAsync(rally, "ApplicationSubmitted", now, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        return TowerOperationResult<TowerRallyDto>.Success(ToRallyDto(rally, characterId, eligibility.AccountId));
+    }
+
+    public async Task<TowerOperationResult<TowerRallyDto>> AcceptRallyApplicationAsync(
+        Guid characterId,
+        Guid rallyId,
+        Guid applicationId,
+        CancellationToken cancellationToken)
+    {
+        var floorNumber = await GetRallyFloorNumberAsync(rallyId, cancellationToken);
+        if (!floorNumber.HasValue)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+        var applicantCharacterId = await _db.TowerRallyApplications
+            .AsNoTracking()
+            .Where(x => x.Id == applicationId && x.TowerRallyId == rallyId)
+            .Select(x => (Guid?)x.CharacterId)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (applicantCharacterId.HasValue)
+            await _db.AcquireCharacterCommandLockAsync(applicantCharacterId.Value, cancellationToken);
+        await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber.Value, cancellationToken);
+        var rally = await GetMutableRallyWithApplicationsAsync(rallyId, cancellationToken);
+        if (rally is null)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+        if (rally.CreatedByCharacterId != characterId)
+            return TowerOperationResult<TowerRallyDto>.Fail("Only the rally leader can accept applications.");
+        if (rally.Status != TowerRallyStatus.Recruiting)
+            return TowerOperationResult<TowerRallyDto>.Fail("This rally is no longer accepting applications.");
+        if (rally.Participants.Count >= rally.RequiredSlots)
+            return TowerOperationResult<TowerRallyDto>.Fail("This rally is already full.");
+
+        var application = rally.Applications.SingleOrDefault(x =>
+            x.Id == applicationId && x.Status == TowerRallyApplicationStatus.Pending);
+        if (application is null)
+            return TowerOperationResult<TowerRallyDto>.Fail("The pending rally application was not found.");
+        if (rally.Participants.Any(x => x.AccountId == application.AccountId))
+            return TowerOperationResult<TowerRallyDto>.Fail("This account already occupies a slot in the rally.");
+        var conflicting = await _db.TowerRallyParticipants
+            .AsNoTracking()
+            .AnyAsync(x => x.CharacterId == application.CharacterId
+                           && x.TowerRallyId != rally.Id
+                           && ActiveRallyStatuses.Contains(x.TowerRally.Status), cancellationToken);
+        if (conflicting)
+            return TowerOperationResult<TowerRallyDto>.Fail("This character is already locked into another active Tower rally.");
+
+        var now = DateTimeOffset.UtcNow;
+        application.Status = TowerRallyApplicationStatus.Accepted;
+        application.ResolvedAt = now;
+        application.ResolvedByCharacterId = characterId;
+        var participant = new TowerRallyParticipant
+        {
+            TowerRally = rally,
+            CharacterId = application.CharacterId,
+            AccountId = application.AccountId,
+            CharacterName = application.CharacterName,
+            GuildId = application.GuildId,
+            GuildName = application.GuildName,
+            PowerRating = application.PowerRating,
+            CharacterSnapshotId = application.CharacterSnapshotId,
+            CharacterSnapshot = application.CharacterSnapshot,
+            JoinedAt = now
+        };
+        rally.Participants.Add(participant);
+        _db.TowerRallyParticipants.Add(participant);
+        if (rally.Participants.Count == rally.RequiredSlots)
+        {
+            rally.Status = TowerRallyStatus.Ready;
+            foreach (var pending in rally.Applications.Where(x =>
+                         x.Id != application.Id && x.Status == TowerRallyApplicationStatus.Pending))
+            {
+                pending.Status = TowerRallyApplicationStatus.Declined;
+                pending.ResolvedAt = now;
+                pending.ResolvedByCharacterId = characterId;
+            }
+        }
+        await EnqueueRallyUpdateAsync(rally, "ApplicationAccepted", now, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        var leaderAccountId = await GetAccountIdAsync(characterId, cancellationToken);
+        return TowerOperationResult<TowerRallyDto>.Success(ToRallyDto(rally, characterId, leaderAccountId));
+    }
+
+    public async Task<TowerOperationResult<TowerRallyDto>> DeclineRallyApplicationAsync(
+        Guid characterId,
+        Guid rallyId,
+        Guid applicationId,
+        CancellationToken cancellationToken)
+    {
+        var floorNumber = await GetRallyFloorNumberAsync(rallyId, cancellationToken);
+        if (!floorNumber.HasValue)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+        await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber.Value, cancellationToken);
+        var rally = await GetMutableRallyWithApplicationsAsync(rallyId, cancellationToken);
+        if (rally is null)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+        if (rally.CreatedByCharacterId != characterId)
+            return TowerOperationResult<TowerRallyDto>.Fail("Only the rally leader can decline applications.");
+
+        var application = rally.Applications.SingleOrDefault(x =>
+            x.Id == applicationId && x.Status == TowerRallyApplicationStatus.Pending);
+        if (application is null)
+            return TowerOperationResult<TowerRallyDto>.Fail("The pending rally application was not found.");
+
+        var now = DateTimeOffset.UtcNow;
+        application.Status = TowerRallyApplicationStatus.Declined;
+        application.ResolvedAt = now;
+        application.ResolvedByCharacterId = characterId;
+        await EnqueueRallyUpdateAsync(rally, "ApplicationDeclined", now, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        var leaderAccountId = await GetAccountIdAsync(characterId, cancellationToken);
+        return TowerOperationResult<TowerRallyDto>.Success(ToRallyDto(rally, characterId, leaderAccountId));
+    }
+
+    private async Task<TowerRally?> GetMutableRallyWithApplicationsAsync(
+        Guid rallyId,
+        CancellationToken cancellationToken) =>
+        await _db.TowerRallies
+            .Include(x => x.Participants)
+            .Include(x => x.Applications)
+                .ThenInclude(x => x.CharacterSnapshot)
+            .Include(x => x.Attempt)
+            .SingleOrDefaultAsync(x => x.Id == rallyId && x.ServerId == _options.ServerId, cancellationToken);
+
+    private async Task<int?> GetRallyFloorNumberAsync(Guid rallyId, CancellationToken cancellationToken) =>
+        await _db.TowerRallies
+            .AsNoTracking()
+            .Where(x => x.Id == rallyId && x.ServerId == _options.ServerId)
+            .Select(x => (int?)x.FloorNumber)
+            .SingleOrDefaultAsync(cancellationToken);
+
+    private async Task<Guid?> GetAccountIdAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await _db.Characters
+            .AsNoTracking()
+            .Where(x => x.Id == characterId)
+            .Select(x => (Guid?)x.UserId)
+            .SingleOrDefaultAsync(cancellationToken);
+
+    public async Task<TowerOperationResult<TowerRallyDto>> LeaveRallyAsync(
+        Guid characterId,
+        Guid rallyId,
+        CancellationToken cancellationToken)
+    {
+        var floorNumber = await _db.TowerRallies
+            .AsNoTracking()
+            .Where(x => x.Id == rallyId && x.ServerId == _options.ServerId)
+            .Select(x => (int?)x.FloorNumber)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (!floorNumber.HasValue)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+        await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber.Value, cancellationToken);
+
+        var rally = await _db.TowerRallies
+            .Include(x => x.Participants)
+            .Include(x => x.Applications)
+            .Include(x => x.Attempt)
+            .SingleOrDefaultAsync(x => x.Id == rallyId && x.ServerId == _options.ServerId, cancellationToken);
+        if (rally is null)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+        if (rally.Status is not (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready))
+            return TowerOperationResult<TowerRallyDto>.Fail("Participants cannot leave a started rally.");
+
+        var participant = rally.Participants.SingleOrDefault(x => x.CharacterId == characterId);
+        var application = rally.Applications.SingleOrDefault(x =>
+            x.CharacterId == characterId && x.Status == TowerRallyApplicationStatus.Pending);
+        if (participant is null && application is null)
+            return TowerOperationResult<TowerRallyDto>.Fail("You are not part of this rally and have no pending application.");
+
+        var now = DateTimeOffset.UtcNow;
+        string eventName;
+        Guid? accountId;
+        if (application is not null)
+        {
+            application.Status = TowerRallyApplicationStatus.Withdrawn;
+            application.ResolvedAt = now;
+            application.ResolvedByCharacterId = characterId;
+            eventName = "ApplicationWithdrawn";
+            accountId = application.AccountId;
+        }
+        else if (rally.CreatedByCharacterId == characterId)
+        {
+            rally.Status = TowerRallyStatus.Cancelled;
+            rally.CancelledAt = now;
+            foreach (var pending in rally.Applications.Where(x =>
+                         x.Status == TowerRallyApplicationStatus.Pending))
+            {
+                pending.Status = TowerRallyApplicationStatus.Declined;
+                pending.ResolvedAt = now;
+                pending.ResolvedByCharacterId = characterId;
+            }
+            eventName = "Cancelled";
+            accountId = participant!.AccountId;
+        }
+        else
+        {
+            var acceptedApplication = rally.Applications.SingleOrDefault(x =>
+                x.AccountId == participant!.AccountId
+                && x.Status == TowerRallyApplicationStatus.Accepted);
+            if (acceptedApplication is not null)
+            {
+                acceptedApplication.Status = TowerRallyApplicationStatus.Withdrawn;
+                acceptedApplication.ResolvedAt = now;
+                acceptedApplication.ResolvedByCharacterId = characterId;
+            }
+            rally.Participants.Remove(participant!);
+            _db.TowerRallyParticipants.Remove(participant!);
+            rally.Status = TowerRallyStatus.Recruiting;
+            eventName = "ParticipantLeft";
+            accountId = participant!.AccountId;
+        }
+        await EnqueueRallyUpdateAsync(rally, eventName, now, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        return TowerOperationResult<TowerRallyDto>.Success(ToRallyDto(rally, characterId, accountId));
+    }
+
+    public async Task<TowerOperationResult<TowerRallyDto>> FillRallyWithDevelopmentCharactersAsync(
+        Guid characterId,
+        Guid rallyId,
+        CancellationToken cancellationToken)
+    {
+        if (!_options.DevelopmentToolsEnabled)
+            return TowerOperationResult<TowerRallyDto>.Fail("World Tower development tools are disabled.");
+
+        var floorNumber = await GetRallyFloorNumberAsync(rallyId, cancellationToken);
+        if (!floorNumber.HasValue)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+        await _db.AcquireWorldTowerFloorLockAsync(
+            _options.ServerId,
+            floorNumber.Value,
+            cancellationToken);
+
+        var rally = await GetMutableRallyWithApplicationsAsync(rallyId, cancellationToken);
+        if (rally is null)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+        if (rally.CreatedByCharacterId != characterId)
+            return TowerOperationResult<TowerRallyDto>.Fail("Only the rally leader can fill a development roster.");
+        if (rally.Status != TowerRallyStatus.Recruiting)
+            return TowerOperationResult<TowerRallyDto>.Fail("Only a recruiting rally can be filled.");
+
+        var openSlots = rally.RequiredSlots - rally.Participants.Count;
+        if (openSlots <= 0)
+            return TowerOperationResult<TowerRallyDto>.Fail("This rally is already full.");
+
+        var occupiedCharacterIds = await _db.TowerRallyParticipants
+            .AsNoTracking()
+            .Where(x => ActiveRallyStatuses.Contains(x.TowerRally.Status))
+            .Select(x => x.CharacterId)
+            .ToArrayAsync(cancellationToken);
+        var occupiedAccountIds = rally.Participants.Select(x => x.AccountId).ToHashSet();
+        var candidates = await _db.Characters
+            .AsNoTracking()
+            .Where(x =>
+                x.User.IsGuest
+                && x.User.Username.StartsWith("SeedGuest")
+                && !occupiedCharacterIds.Contains(x.Id)
+                && !occupiedAccountIds.Contains(x.UserId))
+            .OrderBy(x => x.Name)
+            .Select(x => x.Id)
+            .ToArrayAsync(cancellationToken);
+
+        var eligible = new List<JoinEligibility>();
+        foreach (var candidateId in candidates)
+        {
+            var candidate = await GetJoinEligibilityAsync(
+                candidateId,
+                GetRequiredFloor(rally.FloorNumber),
+                rally.Id,
+                cancellationToken);
+            if (candidate.Error is not null)
+                continue;
+
+            eligible.Add(candidate);
+            if (eligible.Count == openSlots)
+                break;
+        }
+
+        if (eligible.Count != openSlots)
+        {
+            return TowerOperationResult<TowerRallyDto>.Fail(
+                $"Only {eligible.Count} eligible seeded development character(s) were available for {openSlots} open slot(s). Restart the API with local guest seeding enabled.");
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        var added = 0;
+        foreach (var candidate in eligible)
+        {
+            var participant = await CreateParticipantAsync(
+                candidate,
+                rally,
+                now.AddTicks(added + 1),
+                cancellationToken);
+            rally.Participants.Add(participant);
+            _db.TowerRallyParticipants.Add(participant);
+            added++;
+        }
+
+        rally.Status = TowerRallyStatus.Ready;
+        foreach (var pending in rally.Applications.Where(x =>
+                     x.Status == TowerRallyApplicationStatus.Pending))
+        {
+            pending.Status = TowerRallyApplicationStatus.Declined;
+            pending.ResolvedAt = now;
+            pending.ResolvedByCharacterId = characterId;
+        }
+        await EnqueueRallyUpdateAsync(rally, "DevelopmentRosterFilled", now, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        var accountId = await GetAccountIdAsync(characterId, cancellationToken);
+        return TowerOperationResult<TowerRallyDto>.Success(
+            ToRallyDto(rally, characterId, accountId));
+    }
+
+    public async Task<TowerOperationResult<TowerAttemptResultDto>> StartRallyAsync(
+        Guid characterId,
+        Guid rallyId,
+        CancellationToken cancellationToken)
+    {
+        TowerAttempt attempt;
+        TowerFloorDefinition definition;
+
+        await using (var transaction = await _db.BeginTransactionAsync(cancellationToken))
+        {
+            var floorNumber = await _db.TowerRallies
+                .AsNoTracking()
+                .Where(x => x.Id == rallyId && x.ServerId == _options.ServerId)
+                .Select(x => (int?)x.FloorNumber)
+                .SingleOrDefaultAsync(cancellationToken);
+            if (!floorNumber.HasValue)
+                return TowerOperationResult<TowerAttemptResultDto>.Fail("Tower rally was not found.");
+
+            await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber.Value, cancellationToken);
+            var rally = await _db.TowerRallies
+                .Include(x => x.Participants)
+                .Include(x => x.Applications)
+                .Include(x => x.Attempt)
+                .SingleOrDefaultAsync(x => x.Id == rallyId && x.ServerId == _options.ServerId, cancellationToken);
+            if (rally is null)
+                return TowerOperationResult<TowerAttemptResultDto>.Fail("Tower rally was not found.");
+
+            if (rally.CreatedByCharacterId != characterId)
+                return TowerOperationResult<TowerAttemptResultDto>.Fail("Only the rally leader can start the attempt.");
+            if (rally.Status != TowerRallyStatus.Ready || rally.Participants.Count != rally.RequiredSlots)
+                return TowerOperationResult<TowerAttemptResultDto>.Fail("The rally must fill every slot before it can start.");
+            if (rally.Attempt is not null)
+                return TowerOperationResult<TowerAttemptResultDto>.Fail("This rally already has an attempt.");
+
+            definition = GetRequiredFloor(rally.FloorNumber);
+            var modeError = await ValidateRallyModeAsync(definition, rally.Mode, cancellationToken);
+            if (modeError is not null)
+                return TowerOperationResult<TowerAttemptResultDto>.Fail(modeError);
+
+            var attemptNumber = await _db.TowerAttempts.CountAsync(
+                x => x.ServerId == _options.ServerId && x.FloorNumber == rally.FloorNumber,
+                cancellationToken) + 1;
+            attempt = new TowerAttempt
+            {
+                TowerRallyId = rally.Id,
+                ServerId = _options.ServerId,
+                FloorNumber = rally.FloorNumber,
+                Mode = rally.Mode,
+                Status = TowerAttemptStatus.Started,
+                AttemptNumberForFloor = attemptNumber,
+                StartedAt = _timeProvider.GetUtcNow()
+            };
+            rally.Status = TowerRallyStatus.InProgress;
+            rally.StartedAt = attempt.StartedAt;
+            rally.Attempt = attempt;
+            _db.TowerAttempts.Add(attempt);
+            await EnqueueRallyUpdateAsync(rally, "Started", attempt.StartedAt, cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }
+
+        TowerCombatOutcome outcome;
+        try
+        {
+            outcome = await ResolveCombatAsync(rallyId, definition, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "World Tower attempt {AttemptId} failed during combat resolution.", attempt.Id);
+            await MarkAttemptErroredAsync(attempt.Id, exception.Message, cancellationToken);
+            return TowerOperationResult<TowerAttemptResultDto>.Fail("The Tower attempt could not be resolved. The failed attempt was recorded.");
+        }
+
+        try
+        {
+            var playback = await PreparePlaybackAsync(attempt.Id, definition, outcome, cancellationToken);
+            return TowerOperationResult<TowerAttemptResultDto>.Success(new TowerAttemptResultDto(
+                attempt.Id,
+                definition.FloorNumber,
+                definition.GuardianName,
+                TowerAttemptStatus.Playback,
+                playback));
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "World Tower attempt {AttemptId} failed while preparing playback.", attempt.Id);
+            await MarkAttemptErroredAsync(attempt.Id, exception.Message, cancellationToken);
+            return TowerOperationResult<TowerAttemptResultDto>.Fail("The Tower battle playback could not be prepared. The failed attempt was recorded.");
+        }
+    }
+
+    public async Task<TowerOperationResult<TowerFloorDetailDto>> ContributeAsync(
+        Guid characterId,
+        int floorNumber,
+        TowerContributionKind kind,
+        int amount,
+        CancellationToken cancellationToken)
+    {
+        if (amount is < 1 or > 5)
+            return TowerOperationResult<TowerFloorDetailDto>.Fail("Contribution amount must be between 1 and 5.");
+        var definition = _definitions.GetFloor(floorNumber);
+        if (definition is null)
+            return TowerOperationResult<TowerFloorDetailDto>.Fail("Tower floor was not found.");
+
+        await EnsureFloorProgressAsync(cancellationToken);
+        await _db.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
+        await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber, cancellationToken);
+        var progress = await _db.TowerFloorProgresses.SingleAsync(
+            x => x.ServerId == _options.ServerId && x.FloorNumber == floorNumber,
+            cancellationToken);
+        if (!progress.UnlockedAt.HasValue || progress.IsCleared)
+            return TowerOperationResult<TowerFloorDetailDto>.Fail("Contributions are only accepted for the current uncleared floor.");
+        if (!await _db.Characters.AnyAsync(x => x.Id == characterId, cancellationToken))
+            return TowerOperationResult<TowerFloorDetailDto>.Fail("Character was not found.");
+
+        var weekKey = GetWeekKey(_timeProvider.GetUtcNow());
+        var isScouting = kind == TowerContributionKind.Research;
+        var allowedKinds = new[]
+        {
+            TowerContributionKind.Research,
+            TowerContributionKind.SupplyWeapons,
+            TowerContributionKind.InscribeWards,
+            TowerContributionKind.ScoutWeakPoints
+        };
+        if (!allowedKinds.Contains(kind))
+            return TowerOperationResult<TowerFloorDetailDto>.Fail("Contribution kind is not supported.");
+
+        if (isScouting)
+        {
+            if (progress.ScoutingProgress >= 100)
+                return TowerOperationResult<TowerFloorDetailDto>.Fail("Scouting is already complete for this floor.");
+            if (progress.ScoutingProgress + amount > 100)
+                return TowerOperationResult<TowerFloorDetailDto>.Fail(
+                    $"Only {100 - progress.ScoutingProgress} more scouting contribution point(s) can benefit this floor.");
+        }
+        else
+        {
+            var preparationTotal = await _db.TowerContributions
+                .Where(x => x.ServerId == _options.ServerId
+                            && x.FloorNumber == floorNumber
+                            && x.WeekKey == weekKey
+                            && x.Kind == kind)
+                .SumAsync(x => x.Amount, cancellationToken);
+            var currentEffect = preparationTotal * _options.PreparationPercentPerPoint;
+            if (currentEffect >= _options.PreparationMaxEffectPercent)
+                return TowerOperationResult<TowerFloorDetailDto>.Fail("This preparation bonus is already maxed.");
+            if (currentEffect + amount * _options.PreparationPercentPerPoint
+                > _options.PreparationMaxEffectPercent)
+            {
+                var remainingPoints = (int)Math.Floor(
+                    (_options.PreparationMaxEffectPercent - currentEffect)
+                    / _options.PreparationPercentPerPoint);
+                return TowerOperationResult<TowerFloorDetailDto>.Fail(
+                    $"Only {remainingPoints} more contribution point(s) can benefit this preparation bonus.");
+            }
+        }
+
+        var used = await _db.TowerContributions
+            .Where(x => x.ServerId == _options.ServerId
+                        && x.FloorNumber == floorNumber
+                        && x.CharacterId == characterId
+                        && x.WeekKey == weekKey
+                        && (isScouting
+                            ? x.Kind == TowerContributionKind.Research
+                            : x.Kind != TowerContributionKind.Research))
+            .SumAsync(x => x.Amount, cancellationToken);
+        var cap = isScouting
+            ? _options.ManualScoutingWeeklyCapPerCharacter
+            : _options.PreparationWeeklyCapPerCharacter;
+        if (used + amount > cap)
+            return TowerOperationResult<TowerFloorDetailDto>.Fail($"This contribution would exceed the weekly cap of {cap}.");
+
+        _db.TowerContributions.Add(new TowerContribution
+        {
+            ServerId = _options.ServerId,
+            FloorNumber = floorNumber,
+            CharacterId = characterId,
+            Kind = kind,
+            Amount = amount,
+            WeekKey = weekKey,
+            CreatedAt = DateTimeOffset.UtcNow
+        });
+        if (isScouting)
+            progress.AddScoutingProgress(amount, DateTimeOffset.UtcNow);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        var detail = await GetFloorAsync(characterId, floorNumber, cancellationToken);
+        return TowerOperationResult<TowerFloorDetailDto>.Success(detail!);
+    }
+
+    private async Task EnsureFloorProgressAsync(CancellationToken cancellationToken)
+    {
+        var ownsTransaction = _db.CurrentTransaction is null;
+        await using var transaction = ownsTransaction
+            ? await _db.BeginTransactionAsync(cancellationToken)
+            : null;
+        await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, 1, cancellationToken);
+
+        var existing = await _db.TowerFloorProgresses
+            .Where(x => x.ServerId == _options.ServerId)
+            .ToDictionaryAsync(x => x.FloorNumber, cancellationToken);
+        var now = DateTimeOffset.UtcNow;
+        var changed = false;
+
+        foreach (var floor in _definitions.GetFloors())
+        {
+            if (!existing.TryGetValue(floor.FloorNumber, out var state))
+            {
+                state = new TowerFloorProgress
+                {
+                    ServerId = _options.ServerId,
+                    FloorNumber = floor.FloorNumber,
+                    UnlockedAt = floor.FloorNumber == 1 ? now : null,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                };
+                existing.Add(floor.FloorNumber, state);
+                _db.TowerFloorProgresses.Add(state);
+                changed = true;
+            }
+
+            if (floor.FloorNumber > 1
+                && !state.UnlockedAt.HasValue
+                && existing.GetValueOrDefault(floor.FloorNumber - 1)?.IsCleared == true)
+            {
+                changed |= state.Unlock(now);
+            }
+        }
+
+        if (changed)
+            await _db.SaveChangesAsync(cancellationToken);
+        if (transaction is not null)
+            await transaction.CommitAsync(cancellationToken);
+    }
+
+    private IQueryable<TowerRally> ActiveRalliesQuery() =>
+        _db.TowerRallies.Where(x =>
+            x.ServerId == _options.ServerId && ActiveRallyStatuses.Contains(x.Status));
+
+    private async Task<string?> ValidateRallyModeAsync(
+        TowerFloorDefinition definition,
+        TowerRallyMode mode,
+        CancellationToken cancellationToken)
+    {
+        var progress = await _db.TowerFloorProgresses
+            .AsNoTracking()
+            .Where(x => x.ServerId == _options.ServerId)
+            .ToDictionaryAsync(x => x.FloorNumber, cancellationToken);
+        var floor = progress[definition.FloorNumber];
+
+        return mode switch
+        {
+            TowerRallyMode.FirstClear when !floor.UnlockedAt.HasValue => "This Tower floor is still locked.",
+            TowerRallyMode.FirstClear when floor.IsCleared => "This Tower floor has already been cleared.",
+            TowerRallyMode.Echo when !IsEchoUnlocked(progress) => "Echo Mode unlocks when Floor 5 is cleared.",
+            TowerRallyMode.Echo when !floor.IsCleared => "Echo rallies require a cleared floor.",
+            TowerRallyMode.Echo when !definition.EchoEnabledAfterClear => "Echo Mode is disabled for this floor.",
+            _ => null
+        };
+    }
+
+    private async Task<JoinEligibility> GetJoinEligibilityAsync(
+        Guid characterId,
+        TowerFloorDefinition definition,
+        Guid? targetRallyId,
+        CancellationToken cancellationToken)
+    {
+        var character = await _db.Characters
+            .AsNoTracking()
+            .Include(x => x.Guild)
+            .SingleOrDefaultAsync(x => x.Id == characterId, cancellationToken);
+        if (character is null)
+            return JoinEligibility.Fail("Character was not found.");
+
+        if (targetRallyId.HasValue)
+        {
+            var accountAlreadyJoined = await _db.TowerRallyParticipants
+                .AsNoTracking()
+                .AnyAsync(x => x.TowerRallyId == targetRallyId.Value
+                               && x.AccountId == character.UserId, cancellationToken);
+            if (accountAlreadyJoined)
+                return JoinEligibility.Fail("This account already occupies a slot in the rally.");
+        }
+
+        var conflicting = await _db.TowerRallyParticipants
+            .AsNoTracking()
+            .AnyAsync(x => x.CharacterId == characterId
+                           && x.TowerRallyId != targetRallyId
+                           && ActiveRallyStatuses.Contains(x.TowerRally.Status), cancellationToken);
+        if (conflicting)
+            return JoinEligibility.Fail("This character is already locked into an active Tower rally.");
+
+        var rating = await _powerRatings.GetCharacterRatingAsync(characterId, cancellationToken);
+        if (rating.State != PowerAnalysisState.Available)
+            return JoinEligibility.Fail(rating.StatusMessage ?? "Power Rating is unavailable for this character.");
+
+        return new JoinEligibility(
+            character.Id,
+            character.UserId,
+            character.Name,
+            character.Guild?.Id,
+            character.Guild?.Name,
+            rating.Overall,
+            null);
+    }
+
+    private async Task<TowerRallyParticipant> CreateParticipantAsync(
+        JoinEligibility eligibility,
+        TowerRally rally,
+        DateTimeOffset joinedAt,
+        CancellationToken cancellationToken)
+    {
+        var snapshot = await _snapshots.CreateAsync(eligibility.CharacterId, cancellationToken);
+        return new TowerRallyParticipant
+        {
+            TowerRally = rally,
+            CharacterId = eligibility.CharacterId,
+            AccountId = eligibility.AccountId,
+            CharacterName = eligibility.CharacterName,
+            GuildId = eligibility.GuildId,
+            GuildName = eligibility.GuildName,
+            PowerRating = eligibility.PowerRating,
+            CharacterSnapshotId = snapshot.Id,
+            CharacterSnapshot = snapshot,
+            JoinedAt = joinedAt
+        };
+    }
+
+    private async Task<TowerCombatOutcome> ResolveCombatAsync(
+        Guid rallyId,
+        TowerFloorDefinition definition,
+        CancellationToken cancellationToken)
+    {
+        var rally = await RallyWithSnapshotsQuery()
+            .AsNoTracking()
+            .SingleAsync(x => x.Id == rallyId && x.ServerId == _options.ServerId, cancellationToken);
+        var itemBaseIds = rally.Participants
+            .SelectMany(x => x.CharacterSnapshot.Equipment)
+            .Select(x => x.ItemBaseId)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var itemBases = await _db.ItemBases
+            .AsNoTracking()
+            .Where(x => itemBaseIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, StringComparer.OrdinalIgnoreCase, cancellationToken);
+
+        var weekKey = GetWeekKey(_timeProvider.GetUtcNow());
+        var contributionTotals = await _db.TowerContributions
+            .AsNoTracking()
+            .Where(x => x.ServerId == _options.ServerId
+                        && x.FloorNumber == definition.FloorNumber
+                        && x.WeekKey == weekKey
+                        && x.Kind != TowerContributionKind.Research)
+            .GroupBy(x => x.Kind)
+            .Select(x => new { Kind = x.Key, Amount = x.Sum(y => y.Amount) })
+            .ToDictionaryAsync(x => x.Kind, x => x.Amount, cancellationToken);
+        var preparation = CreatePreparationModifiers(contributionTotals);
+
+        var friendly = new List<CombatRuntimeParticipant>();
+        foreach (var participant in rally.Participants.OrderBy(x => x.JoinedAt))
+        {
+            var source = RehydrateCharacter(participant.CharacterSnapshot, itemBases);
+            var combatant = _combatSetup.CreatePlayerCombatEntities([source]).Single();
+            combatant.EquippedEssences = participant.CharacterSnapshot.EquippedEssences
+                .OrderBy(x => x.SlotIndex)
+                .Select(x => x.ToPlayerEssence(participant.CharacterId))
+                .ToList();
+            combatant.HasEquippedEssenceSnapshot = true;
+            AddPercentModifier(combatant, AttributeType.Power, preparation.PlayerDamagePercent);
+            AddPercentModifier(combatant, AttributeType.ArmorPenetration, preparation.WeakPointPercent);
+            AddPercentModifier(combatant, AttributeType.MagicPenetration, preparation.WeakPointPercent);
+            friendly.Add(new CombatRuntimeParticipant(
+                new CombatParticipantSlot(participant.CharacterId.ToString(), participant.CharacterId, CombatSide.Friendly),
+                source,
+                combatant));
+        }
+
+        var guardianSource = (await _entities.GetEntitiesByIdsForCombatAsync(
+                [definition.GuardianCreatureId],
+                cancellationToken))
+            .OfType<Creature>()
+            .SingleOrDefault()
+            ?? throw new InvalidOperationException($"Guardian creature '{definition.GuardianCreatureId}' was not found.");
+        var guardian = _combatSetup.CreateCreatureCombatEntities(
+            [guardianSource],
+            new Area { DifficultyTier = 1 }).Single();
+        DungeonEnemyDifficultyScaling.Apply(guardian, 1, definition.GuardianStrengthMultiplier);
+        AddPercentModifier(guardian, AttributeType.Power, -preparation.GuardianDamageReductionPercent);
+        var hostileSlot = new CombatParticipantSlot(
+            definition.GuardianCreatureId.ToString(),
+            definition.GuardianCreatureId,
+            CombatSide.Hostile);
+        var hostile = new CombatRuntimeParticipant(hostileSlot, guardianSource, guardian);
+
+        await _combatSetup.PrepareEntitiesForCombat(
+            [.. friendly.Select(x => x.Combatant), hostile.Combatant]);
+        var startedAt = _timeProvider.GetUtcNow();
+        var plan = new CombatEncounterPlan(
+            Guid.NewGuid(),
+            CombatMode.Raid,
+            1,
+            startedAt,
+            [.. friendly.Select(x => x.Slot), hostileSlot],
+            new RaidEncounterSourceContext(rallyId, 1, $"tower-floor-{definition.FloorNumber}"));
+        var runtime = new CombatEncounterRuntime(plan, friendly, [hostile]);
+        var execution = await _combatEngine.ExecuteWithCheckpointsAsync(
+            runtime,
+            _options.CombatTicksPerFrame,
+            cancellationToken);
+        var combatResult = execution.Result;
+        var resolution = _resultFactory.Create(runtime, combatResult);
+        var succeeded = resolution.Outcome == BattleOutcome.Victory;
+        var readiness = CreateReadiness(rally.Participants, definition);
+        var stats = combatResult.EntityStats.ToDictionary(x => x.EntityId, StringComparer.OrdinalIgnoreCase);
+        var summaries = rally.Participants
+            .OrderBy(x => x.JoinedAt)
+            .Select(participant =>
+            {
+                stats.TryGetValue(participant.CharacterId.ToString(), out var entityStats);
+                var postState = resolution.FriendlyPostState.FirstOrDefault(x =>
+                    string.Equals(x.Id, participant.CharacterId.ToString(), StringComparison.OrdinalIgnoreCase));
+                return new TowerParticipantCombatSummaryDto(
+                    participant.CharacterId,
+                    participant.CharacterName,
+                    entityStats?.DamageDone ?? 0,
+                    entityStats?.DamageTaken ?? 0,
+                    entityStats?.HealingDone ?? 0,
+                    postState?.Health > 0);
+            })
+            .ToArray();
+        var guardianState = resolution.HostilePostState.Single();
+        var healthRemaining = guardianState.MaxHealth <= 0
+            ? 0
+            : Math.Round(100m * guardianState.Health / guardianState.MaxHealth, 2);
+        var duration = Math.Max(0, (int)Math.Ceiling(
+            combatResult.Duration / (double)FastCombatEngine.TicksPerSecond));
+        var failureReason = succeeded ? null : "The rally was defeated before the Guardian fell.";
+        var report = new TowerBattleReportDto(
+            definition.FloorNumber,
+            definition.GuardianName,
+            succeeded,
+            failureReason,
+            duration,
+            healthRemaining,
+            summaries,
+            readiness);
+
+        return new TowerCombatOutcome(
+            combatResult,
+            execution.Checkpoints,
+            report,
+            succeeded,
+            duration,
+            failureReason);
+    }
+
+    private async Task<TowerCombatPlaybackDto> PreparePlaybackAsync(
+        Guid attemptId,
+        TowerFloorDefinition definition,
+        TowerCombatOutcome outcome,
+        CancellationToken cancellationToken)
+    {
+        var attempt = await _db.TowerAttempts
+            .Include(x => x.TowerRally)
+                .ThenInclude(x => x.Participants)
+            .SingleAsync(x => x.Id == attemptId, cancellationToken);
+        if (attempt.Status != TowerAttemptStatus.Started)
+            throw new InvalidOperationException("The Tower attempt is no longer awaiting playback preparation.");
+
+        var frames = outcome.Checkpoints
+            .Select(checkpoint => ToFrameDto(
+                checkpoint,
+                checkpoint.IsFinal ? outcome.CombatResult.Outcome : null))
+            .ToArray();
+        if (frames.Length == 0 || !frames[^1].IsFinal)
+            throw new InvalidOperationException("Combat resolution did not produce a final playback frame.");
+
+        var now = _timeProvider.GetUtcNow();
+        var playback = new TowerCombatPlayback
+        {
+            TowerAttemptId = attempt.Id,
+            TowerAttempt = attempt,
+            TicksPerSecond = FastCombatEngine.TicksPerSecond,
+            TicksPerFrame = _options.CombatTicksPerFrame,
+            TotalTicks = outcome.CombatResult.Duration,
+            FrameCount = frames.Length,
+            TimelineJson = JsonSerializer.Serialize(frames, _jsonOptions),
+            SimulationCompletedAt = now,
+            PlaybackStartedAt = now,
+            PlaybackEndsAt = now.AddSeconds(
+                outcome.CombatResult.Duration / (double)FastCombatEngine.TicksPerSecond)
+        };
+
+        attempt.Status = TowerAttemptStatus.Playback;
+        attempt.FightDurationSeconds = outcome.FightDurationSeconds;
+        attempt.FailureReason = outcome.FailureReason;
+        attempt.CombatResultJson = JsonSerializer.Serialize(outcome.CombatResult, _jsonOptions);
+        attempt.BattleReportJson = JsonSerializer.Serialize(outcome.Report, _jsonOptions);
+        attempt.Playback = playback;
+        _db.TowerCombatPlaybacks.Add(playback);
+        await EnqueueRallyUpdateAsync(attempt.TowerRally, "PlaybackReady", now, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        return ToPlaybackDto(playback, now);
+    }
+
+    public async Task<bool> PublishDuePlaybackFrameAsync(
+        Guid attemptId,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var playback = await _db.TowerCombatPlaybacks
+            .AsNoTracking()
+            .Include(x => x.TowerAttempt)
+                .ThenInclude(x => x.TowerRally)
+                    .ThenInclude(x => x.Participants)
+            .SingleOrDefaultAsync(x => x.TowerAttemptId == attemptId, cancellationToken);
+        if (playback is null)
+            return false;
+
+        var frames = DeserializeFrames(playback);
+        var dueFrame = GetCurrentFrame(playback, frames, now, revealFinal: true);
+        var needsFinalization = dueFrame.IsFinal
+            && playback.TowerAttempt.Status == TowerAttemptStatus.Playback;
+        if (dueFrame.Sequence <= playback.LastPublishedSequence && !needsFinalization)
+            return false;
+
+        if (needsFinalization)
+        {
+            var combatResult = JsonSerializer.Deserialize<CombatResult>(
+                playback.TowerAttempt.CombatResultJson!, _jsonOptions)
+                ?? throw new InvalidOperationException("The stored Tower combat result is invalid.");
+            var report = JsonSerializer.Deserialize<TowerBattleReportDto>(
+                playback.TowerAttempt.BattleReportJson!, _jsonOptions)
+                ?? throw new InvalidOperationException("The stored Tower battle report is invalid.");
+            var outcome = new TowerCombatOutcome(
+                combatResult,
+                [],
+                report,
+                combatResult.Outcome == BattleOutcome.Victory,
+                playback.TowerAttempt.FightDurationSeconds ?? 0,
+                playback.TowerAttempt.FailureReason);
+            await ApplyOutcomeAsync(
+                playback.TowerAttemptId,
+                GetRequiredFloor(playback.TowerAttempt.FloorNumber),
+                outcome,
+                cancellationToken);
+        }
+
+        var participantIds = playback.TowerAttempt.TowerRally.Participants
+            .Select(x => x.CharacterId)
+            .Distinct()
+            .ToArray();
+        if (dueFrame.Sequence > playback.LastPublishedSequence)
+        {
+            await _realtime.PublishAsync(
+                new Audience.Characters(participantIds),
+                new WorldTowerCombatFrameUpdated(
+                    playback.TowerAttemptId,
+                    playback.TowerAttempt.TowerRallyId,
+                    playback.PlaybackStartedAt,
+                    playback.TicksPerSecond,
+                    playback.TicksPerFrame,
+                    dueFrame),
+                nameof(WorldTowerService),
+                cancellationToken);
+        }
+
+        var cursor = await _db.TowerCombatPlaybacks
+            .SingleAsync(x => x.TowerAttemptId == attemptId, cancellationToken);
+        if (cursor.LastPublishedSequence >= dueFrame.Sequence)
+            return true;
+        cursor.LastPublishedSequence = dueFrame.Sequence;
+        cursor.RowVersion++;
+        await _db.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+    private async Task ApplyOutcomeAsync(
+        Guid attemptId,
+        TowerFloorDefinition definition,
+        TowerCombatOutcome outcome,
+        CancellationToken cancellationToken)
+    {
+        await using var transaction = await _db.BeginTransactionAsync(cancellationToken);
+        await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, definition.FloorNumber, cancellationToken);
+
+        var attempt = await _db.TowerAttempts
+            .Include(x => x.TowerRally)
+                .ThenInclude(x => x.Participants)
+            .Include(x => x.TowerRally)
+                .ThenInclude(x => x.Applications)
+            .SingleAsync(x => x.Id == attemptId, cancellationToken);
+        if (attempt.Status is TowerAttemptStatus.Succeeded or TowerAttemptStatus.Failed)
+            return;
+        if (attempt.Status != TowerAttemptStatus.Playback)
+            throw new InvalidOperationException("Only a playing Tower attempt can be finalized.");
+        var progress = await _db.TowerFloorProgresses.SingleAsync(
+            x => x.ServerId == _options.ServerId && x.FloorNumber == definition.FloorNumber,
+            cancellationToken);
+        var now = _timeProvider.GetUtcNow();
+        var createdHallRecord = false;
+        var unlockedNextFloor = false;
+
+        attempt.Succeeded = outcome.Succeeded;
+        attempt.Status = outcome.Succeeded ? TowerAttemptStatus.Succeeded : TowerAttemptStatus.Failed;
+        attempt.CompletedAt = now;
+        attempt.FightDurationSeconds = outcome.FightDurationSeconds;
+        attempt.FailureReason = outcome.FailureReason;
+        attempt.CombatResultJson = JsonSerializer.Serialize(outcome.CombatResult, _jsonOptions);
+        attempt.BattleReportJson = JsonSerializer.Serialize(outcome.Report, _jsonOptions);
+        attempt.TowerRally.Status = TowerRallyStatus.Completed;
+        attempt.TowerRally.CompletedAt = now;
+
+        if (outcome.Succeeded && attempt.Mode == TowerRallyMode.FirstClear && !progress.IsCleared)
+        {
+            createdHallRecord = progress.RecordFirstClear(attempt.Id, now);
+
+            var next = _definitions.GetFloor(definition.FloorNumber + 1);
+            if (next is not null)
+            {
+                var nextProgress = await _db.TowerFloorProgresses.SingleAsync(
+                    x => x.ServerId == _options.ServerId && x.FloorNumber == next.FloorNumber,
+                    cancellationToken);
+                if (!nextProgress.UnlockedAt.HasValue)
+                    unlockedNextFloor = nextProgress.Unlock(now);
+            }
+
+            foreach (var key in definition.UnlockKeys.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                if (!await _db.ServerUnlocks.AnyAsync(
+                        x => x.ServerId == _options.ServerId && x.UnlockKey == key,
+                        cancellationToken))
+                {
+                    _db.ServerUnlocks.Add(new ServerUnlock
+                    {
+                        ServerId = _options.ServerId,
+                        UnlockKey = key,
+                        SourceFloorNumber = definition.FloorNumber,
+                        UnlockedAt = now
+                    });
+                }
+            }
+
+            await GrantCindersAsync(
+                attempt.TowerRally.Participants.Select(x => x.CharacterId),
+                definition.FirstClearCinders,
+                cancellationToken);
+        }
+        else if (outcome.Succeeded && attempt.Mode == TowerRallyMode.Echo)
+        {
+            var weekKey = GetWeekKey(now);
+            var characterIds = attempt.TowerRally.Participants.Select(x => x.CharacterId).ToArray();
+            var alreadyRewarded = await _db.TowerEchoClears
+                .Where(x => x.ServerId == _options.ServerId
+                            && x.FloorNumber == definition.FloorNumber
+                            && x.WeekKey == weekKey
+                            && characterIds.Contains(x.CharacterId))
+                .Select(x => x.CharacterId)
+                .ToListAsync(cancellationToken);
+            var eligible = characterIds.Except(alreadyRewarded).ToArray();
+            foreach (var characterId in eligible)
+            {
+                _db.TowerEchoClears.Add(new TowerEchoClear
+                {
+                    ServerId = _options.ServerId,
+                    FloorNumber = definition.FloorNumber,
+                    CharacterId = characterId,
+                    WeekKey = weekKey,
+                    ClearedAt = now
+                });
+            }
+            await GrantCindersAsync(eligible, definition.EchoCinders, cancellationToken);
+        }
+        else if (!outcome.Succeeded && attempt.Mode == TowerRallyMode.FirstClear)
+        {
+            var weekStart = GetWeekStart(now);
+            var failedAttemptsThisWeek = await _db.TowerAttempts.CountAsync(
+                x => x.ServerId == _options.ServerId
+                     && x.FloorNumber == definition.FloorNumber
+                     && x.Mode == TowerRallyMode.FirstClear
+                     && x.Status == TowerAttemptStatus.Failed
+                     && x.CompletedAt >= weekStart,
+                cancellationToken);
+            if (failedAttemptsThisWeek < _options.FailedAttemptScoutingWeeklyCap)
+                progress.AddScoutingProgress(_options.FailedAttemptScoutingGain, now);
+        }
+
+        await EnqueueRallyUpdateAsync(
+            attempt.TowerRally,
+            outcome.Succeeded ? "CompletedVictory" : "CompletedDefeat",
+            now,
+            cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+    }
+
+    private async Task GrantCindersAsync(
+        IEnumerable<Guid> characterIds,
+        int amount,
+        CancellationToken cancellationToken)
+    {
+        if (amount <= 0)
+            return;
+        var ids = characterIds.Distinct().ToArray();
+        var characters = await _db.Characters
+            .Where(x => ids.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+        foreach (var character in characters)
+            character.Cinders = checked(character.Cinders + amount);
+    }
+
+    private async Task MarkAttemptErroredAsync(
+        Guid attemptId,
+        string failureReason,
+        CancellationToken cancellationToken)
+    {
+        var attempt = await _db.TowerAttempts
+            .Include(x => x.TowerRally)
+                .ThenInclude(x => x.Participants)
+            .Include(x => x.TowerRally)
+                .ThenInclude(x => x.Applications)
+            .SingleAsync(x => x.Id == attemptId, cancellationToken);
+        attempt.Status = TowerAttemptStatus.Errored;
+        attempt.FailureReason = failureReason.Length <= 500 ? failureReason : failureReason[..500];
+        attempt.CompletedAt = DateTimeOffset.UtcNow;
+        attempt.TowerRally.Status = TowerRallyStatus.Completed;
+        attempt.TowerRally.CompletedAt = attempt.CompletedAt;
+        await EnqueueRallyUpdateAsync(
+            attempt.TowerRally,
+            "CompletedError",
+            attempt.CompletedAt.Value,
+            cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    private IQueryable<TowerRally> RallyWithSnapshotsQuery() =>
+        _db.TowerRallies
+            .Include(x => x.Participants)
+                .ThenInclude(x => x.CharacterSnapshot)
+                    .ThenInclude(x => x.BaseAttributes)
+            .Include(x => x.Participants)
+                .ThenInclude(x => x.CharacterSnapshot)
+                    .ThenInclude(x => x.Equipment)
+                        .ThenInclude(x => x.InstanceModifiers)
+            .Include(x => x.Participants)
+                .ThenInclude(x => x.CharacterSnapshot)
+                    .ThenInclude(x => x.EquippedEssences);
+
+    private static Character RehydrateCharacter(
+        Domain.Models.Snapshots.CharacterSnapshot snapshot,
+        IReadOnlyDictionary<string, Domain.Models.Items.ItemBase> itemBases)
+    {
+        var character = new Character
+        {
+            Id = snapshot.CharacterId,
+            Name = snapshot.Name,
+            Level = snapshot.Level,
+            BaseAttributes = snapshot.BaseAttributes
+                .Select(x => new EntityAttribute
+                {
+                    AttributeType = x.AttributeType,
+                    Value = x.Value
+                })
+                .ToList()
+        };
+
+        character.EquipmentSlots = snapshot.Equipment.Select(equipment =>
+        {
+            if (!itemBases.TryGetValue(equipment.ItemBaseId, out var itemBase)
+                || itemBase is not EquipmentBase equipmentBase)
+            {
+                throw new InvalidOperationException(
+                    $"Snapshot equipment definition '{equipment.ItemBaseId}' was not found.");
+            }
+
+            var instance = new EquipmentInstance
+            {
+                Id = equipment.EquipmentInstanceId,
+                ItemBaseId = equipment.ItemBaseId,
+                ItemBase = equipmentBase,
+                BaseRecipeId = equipment.BaseRecipeId,
+                Rarity = equipment.Rarity,
+                Potential = equipment.Potential,
+                ItemXp = equipment.ItemXp,
+                IsMasterpiece = equipment.IsMasterpiece,
+                IsLevelingItem = equipment.IsLevelingItem,
+                InstanceModifiers = equipment.InstanceModifiers
+                    .Select(x => x.ToInstanceModifier(equipment.EquipmentInstanceId))
+                    .ToList()
+            };
+            return new EquipmentSlot
+            {
+                EntityId = character.Id,
+                Entity = character,
+                EquipmentInstanceId = instance.Id,
+                EquipmentInstance = instance,
+                EquipmentSlotType = equipment.Slot
+            };
+        }).ToList();
+
+        return character;
+    }
+
+    private static void AddPercentModifier(CombatEntity entity, AttributeType attribute, decimal amount)
+    {
+        if (amount == 0)
+            return;
+        entity.TemporaryModifiers.Add(new InstanceAttributeModifier(
+            attribute,
+            (float)amount,
+            ModifierType.Multiplicative));
+    }
+
+    private PreparationModifiers CreatePreparationModifiers(
+        IReadOnlyDictionary<TowerContributionKind, int> totals)
+    {
+        decimal Effect(TowerContributionKind kind) => Math.Min(
+            _options.PreparationMaxEffectPercent,
+            totals.GetValueOrDefault(kind) * _options.PreparationPercentPerPoint);
+
+        return new PreparationModifiers(
+            Effect(TowerContributionKind.SupplyWeapons),
+            Effect(TowerContributionKind.InscribeWards),
+            Effect(TowerContributionKind.ScoutWeakPoints));
+    }
+
+    private async Task<TowerFloorDetailDto> ToFloorDetailAsync(
+        Guid characterId,
+        TowerFloorDefinition definition,
+        IReadOnlyDictionary<int, TowerFloorProgress> progress,
+        IReadOnlyList<TowerRally> rallies,
+        Guid? currentCharacterRallyId,
+        CancellationToken cancellationToken)
+    {
+        var floorProgress = progress[definition.FloorNumber];
+        var weekKey = GetWeekKey(DateTimeOffset.UtcNow);
+        var contributions = await _db.TowerContributions
+            .AsNoTracking()
+            .Where(x => x.ServerId == _options.ServerId
+                        && x.FloorNumber == definition.FloorNumber
+                        && x.WeekKey == weekKey)
+            .ToListAsync(cancellationToken);
+        decimal Effect(TowerContributionKind kind) => Math.Min(
+            _options.PreparationMaxEffectPercent,
+            contributions.Where(x => x.Kind == kind).Sum(x => x.Amount)
+            * _options.PreparationPercentPerPoint);
+        var weeklyCharacterPreparation = contributions
+            .Where(x => x.CharacterId == characterId && x.Kind != TowerContributionKind.Research)
+            .Sum(x => x.Amount);
+        var weeklyCharacterResearch = contributions
+            .Where(x => x.CharacterId == characterId && x.Kind == TowerContributionKind.Research)
+            .Sum(x => x.Amount);
+        var state = GetFloorState(floorProgress, rallies.Count > 0);
+
+        return new TowerFloorDetailDto(
+            definition.FloorNumber,
+            definition.Name,
+            definition.Type,
+            state,
+            definition.RequiredSlots,
+            definition.RecommendedPowerRating,
+            !currentCharacterRallyId.HasValue,
+            currentCharacterRallyId,
+            state is TowerFloorStateType.Sealed or TowerFloorStateType.Scouting or TowerFloorStateType.Rallying,
+            floorProgress.IsCleared && definition.EchoEnabledAfterClear && IsEchoUnlocked(progress),
+            floorProgress.ScoutingProgress,
+            weeklyCharacterResearch,
+            _options.ManualScoutingWeeklyCapPerCharacter,
+            new TowerGuardianInfoDto(
+                definition.GuardianName,
+                definition.GuardianImagePath,
+                definition.GuardianTags,
+                definition.ScoutingReveals
+                    .Where(x => x.Threshold <= floorProgress.ScoutingProgress)
+                    .Select(x => new TowerScoutingRevealDto(x.Threshold, x.Title, x.Description))
+                    .ToArray()),
+            new TowerPreparationSummaryDto(
+                Effect(TowerContributionKind.SupplyWeapons),
+                Effect(TowerContributionKind.InscribeWards),
+                Effect(TowerContributionKind.ScoutWeakPoints),
+                weeklyCharacterPreparation,
+                _options.PreparationWeeklyCapPerCharacter,
+                _options.PreparationMaxEffectPercent),
+            rallies.Select(ToRallySummary).ToArray(),
+            definition.UnlockKeys,
+            definition.FirstClearCinders,
+            definition.EchoCinders);
+    }
+
+    private TowerFloorSummaryDto ToFloorSummary(
+        TowerFloorDefinition definition,
+        TowerFloorProgress progress,
+        bool hasActiveRally) =>
+        new(
+            definition.FloorNumber,
+            definition.Name,
+            definition.Type,
+            GetFloorState(progress, hasActiveRally),
+            definition.RequiredSlots,
+            definition.RecommendedPowerRating,
+            progress.ScoutingProgress,
+            definition.GuardianName,
+            definition.GuardianImagePath);
+
+    private static TowerFloorStateType GetFloorState(TowerFloorProgress progress, bool hasActiveRally) =>
+        progress.IsCleared ? TowerFloorStateType.Cleared
+        : !progress.UnlockedAt.HasValue ? TowerFloorStateType.Locked
+        : hasActiveRally ? TowerFloorStateType.Rallying
+        : progress.ScoutingProgress > 0 ? TowerFloorStateType.Scouting
+        : TowerFloorStateType.Sealed;
+
+    private TowerRallyDto ToRallyDto(TowerRally rally, Guid characterId, Guid? accountId)
+    {
+        var definition = GetRequiredFloor(rally.FloorNumber);
+        var isParticipant = rally.Participants.Any(x => x.CharacterId == characterId);
+        var accountOccupiesSlot = accountId.HasValue
+            && rally.Participants.Any(x => x.AccountId == accountId.Value);
+        var isLeader = rally.CreatedByCharacterId == characterId;
+        var accountHasPendingApplication = accountId.HasValue
+            && rally.Applications.Any(x =>
+                x.AccountId == accountId.Value
+                && x.Status == TowerRallyApplicationStatus.Pending);
+        var visibleApplications = rally.Applications
+            .Where(x => isLeader
+                ? x.Status == TowerRallyApplicationStatus.Pending
+                : x.CharacterId == characterId
+                  && x.Status != TowerRallyApplicationStatus.Withdrawn
+                  && (x.Status != TowerRallyApplicationStatus.Accepted || isParticipant))
+            .OrderBy(x => x.AppliedAt)
+            .Select(x => new TowerRallyApplicationDto(
+                x.Id,
+                x.CharacterId,
+                x.CharacterName,
+                x.GuildName,
+                x.PowerRating,
+                x.Status,
+                x.AppliedAt,
+                x.CharacterId == characterId))
+            .ToArray();
+        return new TowerRallyDto(
+            rally.Id,
+            rally.FloorNumber,
+            definition.Name,
+            definition.GuardianName,
+            rally.Mode,
+            rally.Status,
+            rally.CreatedByCharacterId,
+            rally.RequiredSlots,
+            rally.CreatedAt,
+            rally.Participants
+                .OrderBy(x => x.JoinedAt)
+                .Select(x => new TowerRallyParticipantDto(
+                    x.CharacterId,
+                    x.CharacterName,
+                    x.GuildName,
+                    x.PowerRating,
+                    x.JoinedAt,
+                    x.CharacterId == rally.CreatedByCharacterId,
+                    x.CharacterId == characterId))
+                .ToArray(),
+            visibleApplications,
+            CreateReadiness(rally.Participants, definition),
+            !accountOccupiesSlot
+                && !accountHasPendingApplication
+                && rally.Status == TowerRallyStatus.Recruiting
+                && rally.Participants.Count < rally.RequiredSlots,
+            isLeader && rally.Status == TowerRallyStatus.Recruiting,
+            (isParticipant || visibleApplications.Any(x => x.IsCurrentCharacter && x.Status == TowerRallyApplicationStatus.Pending))
+                && rally.Status is (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready),
+            isLeader && rally.Status == TowerRallyStatus.Ready,
+            _options.DevelopmentToolsEnabled,
+            rally.Attempt is null
+                ? null
+                : new TowerAttemptSummaryDto(
+                    rally.Attempt.Id,
+                    rally.Attempt.Status,
+                    rally.Attempt.Succeeded,
+                    rally.Attempt.FightDurationSeconds,
+                    rally.Attempt.FailureReason,
+                    isParticipant
+                        && rally.Attempt.Status is TowerAttemptStatus.Succeeded or TowerAttemptStatus.Failed
+                        && !string.IsNullOrWhiteSpace(rally.Attempt.CombatResultJson),
+                    rally.Attempt.Playback is null || !isParticipant
+                        ? null
+                        : ToPlaybackDto(rally.Attempt.Playback, _timeProvider.GetUtcNow()),
+                    string.IsNullOrWhiteSpace(rally.Attempt.BattleReportJson)
+                        || rally.Attempt.Status is TowerAttemptStatus.Started or TowerAttemptStatus.Playback
+                        ? null
+                        : JsonSerializer.Deserialize<TowerBattleReportDto>(rally.Attempt.BattleReportJson, _jsonOptions)));
+    }
+
+    private TowerCombatPlaybackDto ToPlaybackDto(
+        TowerCombatPlayback playback,
+        DateTimeOffset now)
+    {
+        var frames = DeserializeFrames(playback);
+        var completed = playback.TowerAttempt.Status is TowerAttemptStatus.Succeeded or TowerAttemptStatus.Failed;
+        var current = GetCurrentFrame(playback, frames, now, completed);
+        return new TowerCombatPlaybackDto(
+            playback.TowerAttemptId,
+            playback.TowerAttempt.TowerRallyId,
+            playback.PlaybackStartedAt,
+            playback.PlaybackEndsAt,
+            playback.TicksPerSecond,
+            playback.TicksPerFrame,
+            playback.TotalTicks,
+            playback.FrameCount,
+            current.Sequence,
+            current,
+            completed);
+    }
+
+    private TowerCombatFrameDto[] DeserializeFrames(TowerCombatPlayback playback) =>
+        JsonSerializer.Deserialize<TowerCombatFrameDto[]>(playback.TimelineJson, _jsonOptions)
+        ?? throw new InvalidOperationException(
+            $"Tower playback for attempt '{playback.TowerAttemptId}' is invalid.");
+
+    private static TowerCombatFrameDto GetCurrentFrame(
+        TowerCombatPlayback playback,
+        IReadOnlyList<TowerCombatFrameDto> frames,
+        DateTimeOffset now,
+        bool revealFinal)
+    {
+        if (frames.Count == 0)
+            throw new InvalidOperationException("Tower playback has no frames.");
+
+        var elapsedTicks = Math.Max(0, (int)Math.Floor(
+            (now - playback.PlaybackStartedAt).TotalSeconds * playback.TicksPerSecond));
+        var dueIndex = 0;
+        for (var index = 1; index < frames.Count && frames[index].Tick <= elapsedTicks; index++)
+            dueIndex = index;
+        if (!revealFinal && frames[dueIndex].IsFinal)
+            dueIndex = Math.Max(0, dueIndex - 1);
+        return frames[dueIndex];
+    }
+
+    private TowerCombatFrameDto ToFrameDto(CombatCheckpoint checkpoint, BattleOutcome? outcome) =>
+        new(
+            checkpoint.Sequence,
+            checkpoint.Tick,
+            checkpoint.Friendly.Select(_mapper.Map<SimpleCombatEntityDto>).ToArray(),
+            checkpoint.Hostile.Select(_mapper.Map<SimpleCombatEntityDto>).ToArray(),
+            checkpoint.EntityStats,
+            checkpoint.Events.Select(item => new CombatEventDto(
+                item.Source,
+                item.StatsSource,
+                item.CountsAsActivation,
+                item.Timestamp,
+                item.ActorId,
+                item.TargetId,
+                item.EventType,
+                item.Magnitude,
+                item.Details)).ToArray(),
+            checkpoint.IsFinal,
+            outcome);
+
+    private async Task EnqueueRallyUpdateAsync(
+        TowerRally rally,
+        string eventName,
+        DateTimeOffset occurredAt,
+        CancellationToken cancellationToken)
+    {
+        await _outbox.EnqueueAsync(
+            GameEventTypes.WorldTowerRallyUpdated,
+            new WorldTowerRallyUpdated(
+                rally.Id,
+                rally.FloorNumber,
+                eventName,
+                rally.Status.ToString(),
+                rally.Participants.Count,
+                rally.RequiredSlots,
+                rally.Applications.Count(x => x.Status == TowerRallyApplicationStatus.Pending),
+                occurredAt),
+            characterId: null,
+            accountId: null,
+            cancellationToken);
+    }
+
+    private static TowerRosterReadinessDto CreateReadiness(
+        IEnumerable<TowerRallyParticipant> participants,
+        TowerFloorDefinition definition)
+    {
+        var list = participants.ToArray();
+        var average = list.Length == 0 ? 0 : (int)Math.Round(list.Average(x => x.PowerRating));
+        var ratio = definition.RecommendedPowerRating <= 0
+            ? 1m
+            : (decimal)average / definition.RecommendedPowerRating;
+        var rating = ratio switch
+        {
+            < 0.70m => "VeryWeak",
+            < 0.90m => "Weak",
+            < 1.10m => "Fair",
+            < 1.30m => "Good",
+            < 1.60m => "Excellent",
+            _ => "Overwhelming"
+        };
+        var warnings = new List<string>();
+        if (list.Length < definition.RequiredSlots)
+            warnings.Add($"{definition.RequiredSlots - list.Length} rally slot(s) are still empty.");
+        if (average < definition.RecommendedPowerRating)
+            warnings.Add("Average Power Rating is below the floor recommendation.");
+        if (list.Length > 0 && list.Min(x => x.PowerRating) < definition.RecommendedPowerRating * 0.75m)
+            warnings.Add("At least one build is well below the recommended rating.");
+
+        return new TowerRosterReadinessDto(
+            rating,
+            average,
+            definition.RecommendedPowerRating,
+            warnings);
+    }
+
+    private static TowerRallySummaryDto ToRallySummary(TowerRally rally) =>
+        new(
+            rally.Id,
+            rally.FloorNumber,
+            rally.Mode,
+            rally.Participants.Single(x => x.CharacterId == rally.CreatedByCharacterId).CharacterName,
+            rally.Status,
+            rally.Participants.Count,
+            rally.RequiredSlots,
+            rally.Applications.Count(x => x.Status == TowerRallyApplicationStatus.Pending),
+            rally.CreatedAt);
+
+    private bool IsEchoUnlocked(IReadOnlyDictionary<int, TowerFloorProgress> progress) =>
+        progress.GetValueOrDefault(_options.EchoModeUnlockFloor)?.IsCleared == true;
+
+    private TowerFloorDefinition GetRequiredFloor(int floorNumber) =>
+        _definitions.GetFloor(floorNumber)
+        ?? throw new InvalidOperationException($"World Tower floor {floorNumber} is missing from the catalog.");
+
+    private static int GetWeekKey(DateTimeOffset value)
+    {
+        var date = value.UtcDateTime;
+        return ISOWeek.GetYear(date) * 100 + ISOWeek.GetWeekOfYear(date);
+    }
+
+    private static DateTimeOffset GetWeekStart(DateTimeOffset value)
+    {
+        var date = value.UtcDateTime.Date;
+        var daysSinceMonday = ((int)date.DayOfWeek + 6) % 7;
+        return new DateTimeOffset(date.AddDays(-daysSinceMonday), TimeSpan.Zero);
+    }
+
+    private sealed record JoinEligibility(
+        Guid CharacterId,
+        Guid AccountId,
+        string CharacterName,
+        Guid? GuildId,
+        string? GuildName,
+        int PowerRating,
+        string? Error)
+    {
+        public static JoinEligibility Fail(string error) =>
+            new(Guid.Empty, Guid.Empty, string.Empty, null, null, 0, error);
+    }
+
+    private sealed record PreparationModifiers(
+        decimal PlayerDamagePercent,
+        decimal GuardianDamageReductionPercent,
+        decimal WeakPointPercent);
+
+    private sealed record TowerCombatOutcome(
+        CombatResult CombatResult,
+        IReadOnlyList<CombatCheckpoint> Checkpoints,
+        TowerBattleReportDto Report,
+        bool Succeeded,
+        int FightDurationSeconds,
+        string? FailureReason);
+}

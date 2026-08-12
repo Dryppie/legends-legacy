@@ -46,6 +46,27 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         return execution.Result;
     }
 
+    public async Task<CombatExecutionWithCheckpoints> ExecuteWithCheckpointsAsync(
+        CombatEncounterRuntime runtime,
+        int checkpointIntervalTicks,
+        CancellationToken cancellationToken)
+    {
+        var checkpoints = new List<CombatCheckpoint>();
+        var execution = await ExecuteCoreAsync(
+            runtime,
+            new CombatSimulationOptions(
+                runtime.Plan.EncounterId.GetHashCode(),
+                6000,
+                StartActiveAbilitiesOnCooldown: true),
+            cancellationToken,
+            checkpoint => checkpoints.Add(checkpoint),
+            checkpointIntervalTicks);
+        SyncCombatEntityState(runtime.FriendlyParticipants, execution.Friendly);
+        SyncCombatEntityState(runtime.HostileParticipants, execution.Hostile);
+        execution.Result.StartedAt = runtime.Plan.StartsAt;
+        return new CombatExecutionWithCheckpoints(execution.Result, checkpoints);
+    }
+
     public async Task<CombatResult> ExecuteSimulationAsync(
         CombatEncounterRuntime runtime,
         CombatSimulationOptions options,
@@ -79,7 +100,9 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
     private Task<ExecutionResult> ExecuteCoreAsync(
         CombatEncounterRuntime runtime,
         CombatSimulationOptions options,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Action<CombatCheckpoint>? checkpointObserver = null,
+        int checkpointIntervalTicks = 0)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -116,7 +139,12 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 BasicAttackIntervalTicks: options.BasicAttackIntervalTicks,
                 RandomSeed: options.RandomSeed,
                 StartActiveAbilitiesOnCooldown: options.StartActiveAbilitiesOnCooldown));
-        var result = engine.Run(friendly, hostile, cancellationToken);
+        var result = engine.Run(
+            friendly,
+            hostile,
+            cancellationToken,
+            checkpointObserver,
+            checkpointIntervalTicks);
         return Task.FromResult(new ExecutionResult(result, friendly, hostile));
     }
 

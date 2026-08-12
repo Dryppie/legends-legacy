@@ -8,4 +8,5 @@ public static class GameEventOutboxConsumerNames
     public const string TransferChat = "transfer-chat";
     public const string GuildVaultChat = "guild-vault-chat";
     public const string RealtimeInventory = "realtime-inventory";
+    public const string RealtimeWorldTower = "realtime-world-tower";
 }

@@ -47,6 +47,8 @@ internal sealed class GameRealtimeBroadcaster : IGameRealtimeBroadcaster
     private Task Send(Audience audience, GameRealtimeEnvelope envelope) => audience switch
     {
         Audience.Character character => _hub.Clients.Group(GameHub.CharacterGroup(character.CharacterId)).ReceiveEvent(envelope),
+        Audience.Characters characters => _hub.Clients.Groups(
+            characters.CharacterIds.Distinct().Select(GameHub.CharacterGroup).ToArray()).ReceiveEvent(envelope),
         Audience.Guild guild => _hub.Clients.Group(GameHub.GuildGroup(guild.GuildId)).ReceiveEvent(envelope),
         Audience.World => _hub.Clients.All.ReceiveEvent(envelope),
         _ => throw new ArgumentException($"Unsupported audience type: {audience.GetType().Name}", nameof(audience)),
@@ -55,6 +57,7 @@ internal sealed class GameRealtimeBroadcaster : IGameRealtimeBroadcaster
     private static string DescribeAudience(Audience audience) => audience switch
     {
         Audience.Character character => $"character:{character.CharacterId}",
+        Audience.Characters characters => $"characters:{characters.CharacterIds.Count}",
         Audience.Guild guild => $"guild:{guild.GuildId}",
         Audience.World => "world",
         _ => audience.GetType().Name

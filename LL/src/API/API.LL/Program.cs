@@ -77,6 +77,7 @@ builder.Services.AddApplication();
 builder.Services.AddServices(config, builder.Environment.ContentRootPath, builder.Environment.IsDevelopment());
 builder.Services.AddHostedService<GameEventOutboxWorker>();
 builder.Services.AddHostedService<DungeonPowerCalibrationWorker>();
+builder.Services.AddHostedService<WorldTowerCombatPlaybackWorker>();
 builder.Services.AddRealTime(); // RealTime services must be added after Application and Persistence, as they depend on them
 builder.Services.AddAdminDashboardServices(); // TODO: Application layer makes use of AdminDashboard services, so this is necessary at the moment.
                                               // At some point the application layer should perhaps be split up into two? One for LL, another for Dashboard
@@ -175,7 +176,7 @@ using (var scope = app.Services.CreateScope())
     var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<AppUser>>();
 
     // Migrate and Seed
-    await context.Database.MigrateAsync();
+        await context.Database.MigrateAsync();
     var seedLocalGuestAccounts = config.GetValue<bool>("FeatureManagement:SeedLocalGuestAccounts");
     await context.SeedData(hasher, seedLocalGuestAccounts);
 }

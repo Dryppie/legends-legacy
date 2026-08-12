@@ -37,6 +37,9 @@ using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
 using Domain.Models.Transfers;
 using Domain.Models.Users;
+using Domain.Models.WorldTower;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Design;
@@ -107,6 +110,27 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
             "SELECT pg_advisory_xact_lock({0})",
             ct,
             lockId);
+    }
+
+    public async Task AcquireWorldTowerFloorLockAsync(
+        string serverId,
+        int floorNumber,
+        CancellationToken ct = default)
+    {
+        if (Database.ProviderName != "Npgsql.EntityFrameworkCore.PostgreSQL")
+        {
+            return;
+        }
+
+        if (Database.CurrentTransaction is null)
+        {
+            throw new InvalidOperationException(
+                "A World Tower floor advisory lock requires an active transaction.");
+        }
+
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes($"world-tower:{serverId}:{floorNumber}"));
+        var lockId = BitConverter.ToInt64(bytes, 0);
+        await ExecuteSqlRawAsync("SELECT pg_advisory_xact_lock({0})", ct, lockId);
     }
 
     public IDbContextTransaction? CurrentTransaction
@@ -296,6 +320,16 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<DailyProphecyRerollState> DailyProphecyRerollStates => Set<DailyProphecyRerollState>();
 
     public DbSet<Region> Regions => Set<Region>();
+
+    public DbSet<TowerFloorProgress> TowerFloorProgresses => Set<TowerFloorProgress>();
+    public DbSet<TowerRally> TowerRallies => Set<TowerRally>();
+    public DbSet<TowerRallyParticipant> TowerRallyParticipants => Set<TowerRallyParticipant>();
+    public DbSet<TowerRallyApplication> TowerRallyApplications => Set<TowerRallyApplication>();
+    public DbSet<TowerAttempt> TowerAttempts => Set<TowerAttempt>();
+    public DbSet<TowerCombatPlayback> TowerCombatPlaybacks => Set<TowerCombatPlayback>();
+    public DbSet<TowerContribution> TowerContributions => Set<TowerContribution>();
+    public DbSet<TowerEchoClear> TowerEchoClears => Set<TowerEchoClear>();
+    public DbSet<ServerUnlock> ServerUnlocks => Set<ServerUnlock>();
 
     // Snapshots
     public DbSet<CharacterSnapshot> CharacterSnapshots => Set<CharacterSnapshot>();

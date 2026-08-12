@@ -33,6 +33,7 @@ using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
 using Domain.Models.Transfers;
 using Domain.Models.Users;
+using Domain.Models.WorldTower;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -143,6 +144,16 @@ public interface IDbContext
     DbSet<DailyProphecyRerollState> DailyProphecyRerollStates { get; }
     DbSet<Region> Regions { get; }
 
+    DbSet<TowerFloorProgress> TowerFloorProgresses { get; }
+    DbSet<TowerRally> TowerRallies { get; }
+    DbSet<TowerRallyParticipant> TowerRallyParticipants { get; }
+    DbSet<TowerRallyApplication> TowerRallyApplications { get; }
+    DbSet<TowerAttempt> TowerAttempts { get; }
+    DbSet<TowerCombatPlayback> TowerCombatPlaybacks { get; }
+    DbSet<TowerContribution> TowerContributions { get; }
+    DbSet<TowerEchoClear> TowerEchoClears { get; }
+    DbSet<ServerUnlock> ServerUnlocks { get; }
+
     // Snapshots
 
     DbSet<CharacterSnapshot> CharacterSnapshots { get; }
@@ -172,6 +183,7 @@ public interface IDbContext
     IExecutionStrategy CreateExecutionStrategy();
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default);
     Task AcquireCharacterCommandLockAsync(Guid characterId, CancellationToken ct = default);
+    Task AcquireWorldTowerFloorLockAsync(string serverId, int floorNumber, CancellationToken ct = default);
     IDbContextTransaction? CurrentTransaction { get; }
     bool HasChanges { get; }
 }

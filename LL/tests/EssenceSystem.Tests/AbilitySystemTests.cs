@@ -661,6 +661,59 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Engine_emits_ordered_ten_tick_checkpoints_and_exact_final_frame()
+    {
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, []);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        var checkpoints = new List<CombatCheckpoint>();
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 21, BasicAttackIntervalTicks: 1_000));
+
+        var result = engine.Run(
+            [friendly],
+            [hostile],
+            checkpointObserver: checkpoints.Add,
+            checkpointIntervalTicks: 10);
+
+        Assert.Equal(21, result.Duration);
+        Assert.Equal([0, 10, 20, 21], checkpoints.Select(x => x.Tick));
+        Assert.Equal([0, 1, 2, 3], checkpoints.Select(x => x.Sequence));
+        Assert.DoesNotContain(checkpoints.Take(3), x => x.IsFinal);
+        Assert.True(checkpoints[^1].IsFinal);
+        Assert.Equal((int)friendly.Health, checkpoints[^1].Friendly.Single().Health);
+        Assert.Equal((int)hostile.Health, checkpoints[^1].Hostile.Single().Health);
+    }
+
+    [Fact]
+    public void Checkpoint_capture_does_not_change_deterministic_result()
+    {
+        static CombatResult Run(bool capture)
+        {
+            var friendly = CreateCombatant("friendly", CombatTeam.Friendly, []);
+            var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+            var engine = new FastCombatEngine(
+                new Dictionary<string, CompiledStatus>(),
+                new FastCombatEngineOptions(MaxTicks: 30, BasicAttackIntervalTicks: 3, RandomSeed: 27));
+            return capture
+                ? engine.Run([friendly], [hostile], checkpointObserver: _ => { }, checkpointIntervalTicks: 10)
+                : engine.Run([friendly], [hostile]);
+        }
+
+        var baseline = Run(false);
+        var checkpointed = Run(true);
+
+        Assert.Equal(baseline.Outcome, checkpointed.Outcome);
+        Assert.Equal(baseline.Duration, checkpointed.Duration);
+        Assert.Equal(
+            baseline.EventLog.Select(x => (x.Timestamp, x.ActorId, x.TargetId, x.EventType, x.Magnitude)),
+            checkpointed.EventLog.Select(x => (x.Timestamp, x.ActorId, x.TargetId, x.EventType, x.Magnitude)));
+        Assert.Equal(
+            baseline.EntityStats.Select(x => (x.EntityId, x.DamageDone, x.DamageTaken, x.HealingDone)),
+            checkpointed.EntityStats.Select(x => (x.EntityId, x.DamageDone, x.DamageTaken, x.HealingDone)));
+    }
+
+    [Fact]
     public void Engine_supports_real_catalog_selectors()
     {
         var abilities = AbilityCompiler.CompileAbilities(

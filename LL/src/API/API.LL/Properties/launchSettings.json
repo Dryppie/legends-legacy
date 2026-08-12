@@ -19,7 +19,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "Chat__SystemMessages__BaseUrl": "https://localhost:7095/chat",
         "Chat__SystemMessages__Secret": "local-development-system-chat-secret",
-        "FeatureManagement__SeedLocalGuestAccounts": "true"
+        "FeatureManagement__SeedLocalGuestAccounts": "true",
+        "FeatureManagement__WorldTowerDevelopmentTools": "true"
       }
     },
     "https": {
@@ -32,7 +33,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "Chat__SystemMessages__BaseUrl": "https://localhost:7095/chat",
         "Chat__SystemMessages__Secret": "local-development-system-chat-secret",
-        "FeatureManagement__SeedLocalGuestAccounts": "true"
+        "FeatureManagement__SeedLocalGuestAccounts": "true",
+        "FeatureManagement__WorldTowerDevelopmentTools": "true"
       }
     },
     "IIS Express": {
@@ -43,7 +45,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "Chat__SystemMessages__BaseUrl": "https://localhost:7095/chat",
         "Chat__SystemMessages__Secret": "local-development-system-chat-secret",
-        "FeatureManagement__SeedLocalGuestAccounts": "true"
+        "FeatureManagement__SeedLocalGuestAccounts": "true",
+        "FeatureManagement__WorldTowerDevelopmentTools": "true"
       }
     }
   }

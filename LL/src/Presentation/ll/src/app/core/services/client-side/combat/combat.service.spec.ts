@@ -61,6 +61,23 @@ describe('CombatService', () => {
     expect(state.getIsCombatActive(BattleType.IdleCombat)()).toBeTrue();
     expect(state.getCombatResult(BattleType.IdleCombat)()).toBe(idleResult);
   });
+
+  it('opens and closes a Tower combat result in its own state slot', () => {
+    const result = combatResult(BattleType.Tower);
+
+    service.startTowerBattleSummary(result);
+
+    expect(state.getIsCombatActive(BattleType.Tower)()).toBeTrue();
+    expect(state.getCombatResult(BattleType.Tower)()).toBe(result);
+    expect(state.getCombatOutcome(BattleType.Tower)()).toBe(
+      BattleOutcome.Victory,
+    );
+
+    service.closeCurrentTowerBattle();
+
+    expect(state.getIsCombatActive(BattleType.Tower)()).toBeFalse();
+    expect(state.getCombatResult(BattleType.Tower)()).toBeNull();
+  });
 });
 
 function combatAction(result: CombatResultDto): CharacterActionDto {

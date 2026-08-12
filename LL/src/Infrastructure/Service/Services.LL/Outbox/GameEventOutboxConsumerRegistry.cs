@@ -38,7 +38,8 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
             [GameEventTypes.ProphecyCompleted] = [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.EventQuests],
             [GameEventTypes.PlayerTransferChatMessage] = [GameEventOutboxConsumerNames.TransferChat],
             [GameEventTypes.GuildVaultChatMessage] = [GameEventOutboxConsumerNames.GuildVaultChat],
-            [GameEventTypes.InventoryItemsGranted] = [GameEventOutboxConsumerNames.RealtimeInventory]
+            [GameEventTypes.InventoryItemsGranted] = [GameEventOutboxConsumerNames.RealtimeInventory],
+            [GameEventTypes.WorldTowerRallyUpdated] = [GameEventOutboxConsumerNames.RealtimeWorldTower]
         };
 
     public IReadOnlyList<string> GetConsumers(string eventType) =>

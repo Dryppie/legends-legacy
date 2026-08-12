@@ -1,0 +1,289 @@
+<app-combat
+  *ngIf="combatState.getIsCombatActive(battleType)(); else rallyPage"
+  [battleType]="battleType"
+  (skipBattle)="closeCombatDetails()"
+></app-combat>
+
+<ng-template #rallyPage>
+  <main class="tower-page">
+    <div class="tower-shell" *ngIf="rally() as vm">
+      <a class="back-link" routerLink="/game/world/tower">← Tower overview</a>
+      <header class="tower-hero section ll-panel ll-panel-strong">
+        <div class="card-meta">
+          <span class="floor-number"
+            >{{ vm.mode }} rally · Floor {{ vm.floorNumber }}</span
+          >
+          <span class="badge" [ngClass]="vm.status">{{ vm.status }}</span>
+        </div>
+        <h1>{{ vm.floorName }}</h1>
+        <p class="hero-copy">
+          {{ vm.guardianName }} · {{ vm.participants.length }}/{{
+            vm.requiredSlots
+          }}
+          locked builds
+        </p>
+        <div class="stats">
+          <div class="stat">
+            <span>Readiness</span><strong>{{ vm.readiness.rating }}</strong>
+          </div>
+          <div class="stat">
+            <span>Average rating</span
+            ><strong>{{ vm.readiness.averagePowerRating | number }}</strong>
+          </div>
+          <div class="stat">
+            <span>Recommended</span
+            ><strong>{{ vm.readiness.recommendedPowerRating | number }}</strong>
+          </div>
+          <div class="stat">
+            <span>Created</span
+            ><strong>{{ vm.createdAt | date: "shortTime" }}</strong>
+          </div>
+        </div>
+        <div class="actions">
+          <button
+            class="ll-button ll-button-primary"
+            *ngIf="vm.canApply"
+            [disabled]="!!action()"
+            (click)="apply()"
+          >
+            Apply with locked build
+          </button>
+          <button
+            class="secondary ll-button"
+            *ngIf="vm.canLeave"
+            [disabled]="!!action()"
+            (click)="leave()"
+          >
+            {{
+              currentApplication(vm)?.status === "Pending"
+                ? "Withdraw application"
+                : "Leave rally"
+            }}
+          </button>
+          <button
+            class="ll-button ll-button-primary"
+            *ngIf="vm.canStart"
+            [disabled]="!!action()"
+            (click)="start()"
+          >
+            Start Guardian attempt
+          </button>
+          <button
+            class="secondary ll-button"
+            *ngIf="
+              vm.developmentToolsEnabled &&
+              vm.canManageApplications &&
+              vm.participants.length < vm.requiredSlots
+            "
+            [disabled]="!!action()"
+            (click)="fillDevelopmentRoster()"
+          >
+            {{
+              action() === "development-fill"
+                ? "Filling test roster..."
+                : "Fill with test roster"
+            }}
+          </button>
+          <button
+            class="secondary ll-button"
+            *ngIf="playback() && !playback()?.isCompleted && !watchingPlayback()"
+            [disabled]="!!action()"
+            (click)="viewCombatDetails()"
+          >
+            Watch live battle
+          </button>
+          <button
+            class="secondary ll-button"
+            [disabled]="!!action()"
+            (click)="load()"
+          >
+            Refresh
+          </button>
+        </div>
+        <p class="notice" *ngIf="action() === 'start'">
+          The locked roster is fighting the Guardian. Large rallies may take a
+          moment to resolve.
+        </p>
+      </header>
+
+      <p class="error" *ngIf="error() as message">{{ message }}</p>
+
+      <p class="notice" *ngIf="currentApplication(vm) as application">
+        Your application is {{ application.status | lowercase }}. The build from
+        {{ application.appliedAt | date: "shortTime" }} remains the submitted
+        build.
+      </p>
+
+      <section class="section tower-panel ll-panel">
+        <p class="eyebrow">Locked roster</p>
+        <h2>Ascendants</h2>
+        <div class="roster">
+          <div class="roster-row" *ngFor="let participant of vm.participants">
+            <div class="identity">
+              <strong>
+                <app-character-tag
+                  [id]="participant.characterId"
+                  [name]="participant.characterName"
+                ></app-character-tag>
+                <span class="badge" *ngIf="participant.isLeader">Leader</span>
+              </strong>
+              <span
+                >{{ participant.guildName || "Unaffiliated"
+                }}<ng-container *ngIf="participant.isCurrentCharacter">
+                  · You</ng-container
+                ></span
+              >
+            </div>
+            <strong>{{ participant.powerRating | number }} power</strong>
+          </div>
+          <div class="roster-row" *ngFor="let slot of openSlots(vm)">
+            <div class="identity">
+              <strong>Open slot {{ slot }}</strong
+              ><span>Awaiting an ascendant</span>
+            </div>
+          </div>
+        </div>
+        <div class="notice" *ngIf="vm.readiness.warnings.length">
+          <div *ngFor="let warning of vm.readiness.warnings">{{ warning }}</div>
+        </div>
+      </section>
+
+      <section
+        class="section tower-panel ll-panel"
+        *ngIf="vm.canManageApplications || vm.applications.length"
+      >
+        <p class="eyebrow">Rally applications</p>
+        <h2>Awaiting the leader</h2>
+        <p class="muted" *ngIf="!vm.applications.length">
+          No applications are waiting.
+        </p>
+        <div class="roster" *ngIf="vm.applications.length">
+          <div class="roster-row" *ngFor="let application of vm.applications">
+            <div class="identity">
+              <strong>
+                <app-character-tag
+                  [id]="application.characterId"
+                  [name]="application.characterName"
+                ></app-character-tag>
+              </strong>
+              <span
+                >{{ application.guildName || "Unaffiliated" }} ·
+                {{ application.powerRating | number }} power ·
+                {{ application.status }}</span
+              >
+            </div>
+            <div class="actions" *ngIf="vm.canManageApplications">
+              <button
+                class="ll-button ll-button-primary"
+                [disabled]="!!action()"
+                (click)="accept(application)"
+              >
+                Accept
+              </button>
+              <button
+                class="secondary ll-button"
+                [disabled]="!!action()"
+                (click)="decline(application)"
+              >
+                Decline
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="section tower-panel ll-panel"
+        *ngIf="report() as battle"
+        [class.result-victory]="battle.succeeded"
+        [class.result-defeat]="!battle.succeeded"
+      >
+        <div class="report-header">
+          <div>
+            <p class="eyebrow">Battle report</p>
+            <h2>
+              {{ battle.succeeded ? "Guardian defeated" : "Rally defeated" }}
+            </h2>
+          </div>
+          <span
+            class="badge"
+            [ngClass]="battle.succeeded ? 'Succeeded' : 'Failed'"
+            >{{ battle.succeeded ? "Victory" : "Defeat" }}</span
+          >
+        </div>
+        <p class="muted" *ngIf="battle.mainFailureReason">
+          {{ battle.mainFailureReason }}
+        </p>
+        <div class="stats">
+          <div class="stat">
+            <span>Fight duration</span
+            ><strong>{{ duration(battle.fightDurationSeconds) }}</strong>
+          </div>
+          <div class="stat">
+            <span>Guardian remaining</span
+            ><strong>{{ battle.guardianHealthRemainingPercent }}%</strong>
+          </div>
+          <div class="stat">
+            <span>Roster assessment</span
+            ><strong>{{ battle.rosterSummary.rating }}</strong>
+          </div>
+        </div>
+        <div class="report-grid section">
+          <article
+            class="report-item"
+            *ngFor="let participant of battle.participants"
+          >
+            <div class="card-meta">
+              <h3>
+                <app-character-tag
+                  [id]="participant.characterId"
+                  [name]="participant.characterName"
+                ></app-character-tag>
+              </h3>
+              <span
+                class="badge"
+                [ngClass]="participant.survived ? 'Succeeded' : 'Failed'"
+                >{{ participant.survived ? "Survived" : "Fallen" }}</span
+              >
+            </div>
+            <p class="muted">
+              Damage {{ participant.damageDone | number }} · Taken
+              {{ participant.damageTaken | number }} · Healing
+              {{ participant.healingDone | number }}
+            </p>
+          </article>
+        </div>
+        <div class="actions">
+          <button
+            class="ll-button ll-button-primary"
+            *ngIf="vm.attempt?.canViewCombatResult"
+            [disabled]="!!action()"
+            (click)="viewCombatDetails()"
+          >
+            {{
+              action() === "combat-result"
+                ? "Loading combat..."
+                : "View combat details"
+            }}
+          </button>
+          <a
+            class="button secondary"
+            routerLink="/game/world/tower/hall-of-fame"
+            *ngIf="battle.succeeded"
+            >View Hall of Fame</a
+          >
+          <a
+            class="button"
+            routerLink="/game/world/tower"
+            *ngIf="battle.succeeded"
+            >Continue the ascent</a
+          >
+        </div>
+      </section>
+    </div>
+
+    <div class="tower-shell" *ngIf="loading() && !rally()">
+      <p class="notice">Finding the rally…</p>
+    </div>
+  </main>
+</ng-template>

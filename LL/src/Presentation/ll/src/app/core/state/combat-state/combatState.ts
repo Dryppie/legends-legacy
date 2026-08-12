@@ -10,6 +10,7 @@ export enum BattleType {
   IdleCombat = 'IdleCombat',
   Colosseum = 'Colosseum',
   Dungeon = 'Dungeon',
+  Tower = 'Tower',
   Training = 'Training',
 }
 

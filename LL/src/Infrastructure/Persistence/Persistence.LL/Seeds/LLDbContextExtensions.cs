@@ -21,7 +21,7 @@ namespace Persistence.LL.Seeds;
 public static class LLDbContextExtensions
 {
     public const string CHARACTER_GUID = "11111111-1111-1111-1111-111111111111";
-    private const int LOCAL_GUEST_ACCOUNT_COUNT = 10;
+    private const int LOCAL_GUEST_ACCOUNT_COUNT = 20;
     private const string LOCAL_GUEST_USERNAME_PREFIX = "SeedGuest";
     private const string RETIRED_GOBLIN_MINES_IDLE_AREA_ID = "region_01_area_05";
     private const string RETIRED_GOBLIN_MINES_REPLACEMENT_AREA_ID = "region_01_area_06";

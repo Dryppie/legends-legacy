@@ -34,6 +34,8 @@ import { AchievementUnlockedMsg } from '../achievement/achievement-unlocked';
 import { QuestJournalChangedMsg } from '../quest/quest-journal-changed';
 import { EventQuestChangedMsg } from '../quest/event-quest-changed';
 import { PlayerTransferMsg } from '../transfer/player-transfer';
+import { WorldTowerRallyUpdated } from '../world-tower/world-tower-rally-updated';
+import { WorldTowerCombatFrameUpdated } from '../world-tower/world-tower-combat-frame-updated';
 
 export const gameEventNames = [
   'LootReceivedMsg',
@@ -62,6 +64,8 @@ export const gameEventNames = [
   'QuestJournalChangedMsg',
   'EventQuestChangedMsg',
   'PlayerTransferMsg',
+  'WorldTowerRallyUpdated',
+  'WorldTowerCombatFrameUpdated',
 ] as const;
 
 export type GameEventSignalMap = {
@@ -100,6 +104,8 @@ export interface GameEventMap {
   QuestJournalChangedMsg: QuestJournalChangedMsg;
   EventQuestChangedMsg: EventQuestChangedMsg;
   PlayerTransferMsg: PlayerTransferMsg;
+  WorldTowerRallyUpdated: WorldTowerRallyUpdated;
+  WorldTowerCombatFrameUpdated: WorldTowerCombatFrameUpdated;
   //   SaleCompleted: SaleCompletedMsg;
   //   RiftOpened:    RiftOpenedMsg;
   // 💡 when you add a new C# record and regenerate the client

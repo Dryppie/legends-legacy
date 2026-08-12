@@ -3799,6 +3799,418 @@ namespace Persistence.LL.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
+            modelBuilder.Entity("Domain.Models.WorldTower.ServerUnlock", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ServerId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int?>("SourceFloorNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SourceSystem")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("UnlockKey")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset>("UnlockedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServerId", "UnlockKey")
+                        .IsUnique();
+
+                    b.ToTable("ServerUnlocks");
+                });
+
+            modelBuilder.Entity("Domain.Models.WorldTower.TowerAttempt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AttemptNumberForFloor")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("BattleReportJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CombatResultJson")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FailureReason")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("FightDurationSeconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("FloorNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Mode")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ServerId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("Succeeded")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("TowerRallyId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TowerRallyId")
+                        .IsUnique();
+
+                    b.HasIndex("ServerId", "FloorNumber", "Mode", "Succeeded");
+
+                    b.ToTable("TowerAttempts");
+                });
+
+            modelBuilder.Entity("Domain.Models.WorldTower.TowerCombatPlayback", b =>
+                {
+                    b.Property<Guid>("TowerAttemptId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("FrameCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LastPublishedSequence")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("PlaybackEndsAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("PlaybackStartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("SchemaVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("SimulationCompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("TicksPerFrame")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TicksPerSecond")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TimelineJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("TotalTicks")
+                        .HasColumnType("integer");
+
+                    b.HasKey("TowerAttemptId");
+
+                    b.HasIndex("PlaybackEndsAt", "LastPublishedSequence");
+
+                    b.ToTable("TowerCombatPlaybacks");
+                });
+
+            modelBuilder.Entity("Domain.Models.WorldTower.TowerContribution", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FloorNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ServerId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("WeekKey")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId", "FloorNumber", "WeekKey");
+
+                    b.HasIndex("ServerId", "FloorNumber", "WeekKey");
+
+                    b.ToTable("TowerContributions");
+                });
+
+            modelBuilder.Entity("Domain.Models.WorldTower.TowerEchoClear", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("ClearedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FloorNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ServerId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("WeekKey")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServerId", "FloorNumber", "CharacterId", "WeekKey")
+                        .IsUnique();
+
+                    b.ToTable("TowerEchoClears");
+                });
+
+            modelBuilder.Entity("Domain.Models.WorldTower.TowerFloorProgress", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("ClearedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("FirstClearAttemptId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("FloorNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsCleared")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("ScoutingProgress")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ServerId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset?>("UnlockedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FirstClearAttemptId")
+                        .IsUnique();
+
+                    b.HasIndex("ServerId", "FloorNumber")
+                        .IsUnique();
+
+                    b.ToTable("TowerFloorProgresses");
+                });
+
+            modelBuilder.Entity("Domain.Models.WorldTower.TowerRally", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByCharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("FloorNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Mode")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RequiredSlots")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ServerId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServerId", "FloorNumber", "Mode", "Status");
+
+                    b.ToTable("TowerRallies");
+                });
+
+            modelBuilder.Entity("Domain.Models.WorldTower.TowerRallyApplication", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("AppliedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CharacterName")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid>("CharacterSnapshotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("GuildName")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("PowerRating")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ResolvedByCharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TowerRallyId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("CharacterSnapshotId");
+
+                    b.HasIndex("TowerRallyId", "AccountId")
+                        .IsUnique();
+
+                    b.HasIndex("TowerRallyId", "CharacterId")
+                        .IsUnique();
+
+                    b.HasIndex("TowerRallyId", "Status");
+
+                    b.ToTable("TowerRallyApplications");
+                });
+
+            modelBuilder.Entity("Domain.Models.WorldTower.TowerRallyParticipant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CharacterName")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid>("CharacterSnapshotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("GuildName")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset>("JoinedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("PowerRating")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TowerRallyId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("CharacterSnapshotId");
+
+                    b.HasIndex("TowerRallyId", "AccountId")
+                        .IsUnique();
+
+                    b.HasIndex("TowerRallyId", "CharacterId")
+                        .IsUnique();
+
+                    b.ToTable("TowerRallyParticipants");
+                });
+
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterActionDetails.CombatActionDetails", b =>
                 {
                     b.HasBaseType("Domain.Models.CharacterActions.CharacterActionDetails.ActionDetails");
@@ -4823,6 +5235,74 @@ namespace Persistence.LL.Migrations
                         .HasForeignKey("AppUserId");
                 });
 
+            modelBuilder.Entity("Domain.Models.WorldTower.TowerAttempt", b =>
+                {
+                    b.HasOne("Domain.Models.WorldTower.TowerRally", "TowerRally")
+                        .WithOne("Attempt")
+                        .HasForeignKey("Domain.Models.WorldTower.TowerAttempt", "TowerRallyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TowerRally");
+                });
+
+            modelBuilder.Entity("Domain.Models.WorldTower.TowerCombatPlayback", b =>
+                {
+                    b.HasOne("Domain.Models.WorldTower.TowerAttempt", "TowerAttempt")
+                        .WithOne("Playback")
+                        .HasForeignKey("Domain.Models.WorldTower.TowerCombatPlayback", "TowerAttemptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TowerAttempt");
+                });
+
+            modelBuilder.Entity("Domain.Models.WorldTower.TowerFloorProgress", b =>
+                {
+                    b.HasOne("Domain.Models.WorldTower.TowerAttempt", null)
+                        .WithOne()
+                        .HasForeignKey("Domain.Models.WorldTower.TowerFloorProgress", "FirstClearAttemptId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Domain.Models.WorldTower.TowerRallyApplication", b =>
+                {
+                    b.HasOne("Domain.Models.Snapshots.CharacterSnapshot", "CharacterSnapshot")
+                        .WithMany()
+                        .HasForeignKey("CharacterSnapshotId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.WorldTower.TowerRally", "TowerRally")
+                        .WithMany("Applications")
+                        .HasForeignKey("TowerRallyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CharacterSnapshot");
+
+                    b.Navigation("TowerRally");
+                });
+
+            modelBuilder.Entity("Domain.Models.WorldTower.TowerRallyParticipant", b =>
+                {
+                    b.HasOne("Domain.Models.Snapshots.CharacterSnapshot", "CharacterSnapshot")
+                        .WithMany()
+                        .HasForeignKey("CharacterSnapshotId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.WorldTower.TowerRally", "TowerRally")
+                        .WithMany("Participants")
+                        .HasForeignKey("TowerRallyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CharacterSnapshot");
+
+                    b.Navigation("TowerRally");
+                });
+
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterActionDetails.CombatActionDetails", b =>
                 {
                     b.HasOne("Domain.Models.Regions.Areas.Area", "Area")
@@ -4973,6 +5453,20 @@ namespace Persistence.LL.Migrations
                     b.Navigation("ExternalLogins");
 
                     b.Navigation("RefreshTokens");
+                });
+
+            modelBuilder.Entity("Domain.Models.WorldTower.TowerAttempt", b =>
+                {
+                    b.Navigation("Playback");
+                });
+
+            modelBuilder.Entity("Domain.Models.WorldTower.TowerRally", b =>
+                {
+                    b.Navigation("Applications");
+
+                    b.Navigation("Attempt");
+
+                    b.Navigation("Participants");
                 });
 
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterActionDetails.CraftingActionDetails", b =>

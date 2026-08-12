@@ -19,6 +19,7 @@ using Application.Interfaces.Services.LL.Professions;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Services.LL.Regions;
 using Application.Interfaces.Services.LL.Rewards;
+using Application.Interfaces.Services.LL.WorldTower;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Users;
@@ -87,6 +88,7 @@ using Services.LL.Snapshots;
 using Services.LL.Soulstones;
 using Services.LL.Spawnings;
 using Services.LL.Users;
+using Services.LL.WorldTower;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -290,6 +292,31 @@ public static class DependencyInjection
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<ILeaderboardService, LeaderboardService>();
 
+        services.AddOptions<WorldTowerOptions>()
+            .Bind(config.GetSection(WorldTowerOptions.SectionName))
+            .PostConfigure(options =>
+                options.DevelopmentToolsEnabled =
+                    isDevelopment
+                    && config.GetValue<bool>("FeatureManagement:WorldTowerDevelopmentTools"))
+            .Validate(options =>
+                    !string.IsNullOrWhiteSpace(options.ServerId)
+                    && options.EchoModeUnlockFloor > 0
+                    && options.FailedAttemptScoutingGain > 0
+                    && options.FailedAttemptScoutingWeeklyCap > 0
+                    && options.ManualScoutingWeeklyCapPerCharacter > 0
+                    && options.PreparationWeeklyCapPerCharacter > 0
+                    && options.PreparationPercentPerPoint > 0
+                    && options.PreparationMaxEffectPercent > 0
+                    && options.CombatTicksPerFrame == 10
+                    && options.PlaybackPollMilliseconds is >= 100 and <= 1000,
+                "World Tower settings are invalid.")
+            .ValidateOnStart();
+        services.AddSingleton<IWorldTowerDefinitionProvider>(sp =>
+            new JsonWorldTowerDefinitionProvider(
+                Path.Combine(contentRootPath, config["Content:Root"] ?? "Data", "world-tower", "tower-floors.json"),
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddScoped<IWorldTowerService, WorldTowerService>();
+
         services.AddScoped<ILootService, LootService>();
         services.AddSingleton<IRewardTableDefinitionValidator, RewardTableDefinitionValidator>();
         services.AddSingleton<IRewardTableDefinitionProvider>(sp =>
@@ -360,6 +387,7 @@ public static class DependencyInjection
         services.AddScoped<IGameEventOutboxConsumer, TransferChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, GuildVaultChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RealtimeInventoryGameEventOutboxConsumer>();
+        services.AddScoped<IGameEventOutboxConsumer, RealtimeWorldTowerGameEventOutboxConsumer>();
         services.AddSingleton<IQuestDefinitionProvider>(sp =>
             new JsonQuestDefinitionProvider(
                 config,

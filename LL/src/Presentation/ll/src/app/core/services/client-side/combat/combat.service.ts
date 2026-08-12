@@ -4,8 +4,12 @@ import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActi
 import { CombatStateService } from '../../../state/combat-state/combat-state.service';
 import { EventBusService } from '../event-bus/event-bus.service';
 import { BattleType } from '../../../state/combat-state/combatState';
-import { CombatResultDto } from '../../../../shared/models/Dtos/combatResultDto';
+import {
+  BattleOutcome,
+  CombatResultDto,
+} from '../../../../shared/models/Dtos/combatResultDto';
 import { LevelingService } from '../leveling/leveling.service';
+import { TowerCombatFrame } from '../../api/world-tower/world-tower.service';
 
 @Injectable({
   providedIn: 'root',
@@ -56,6 +60,43 @@ export class CombatService {
     this.simulateFight(combatResult);
   }
 
+  startTowerBattleSummary(combatResult: CombatResultDto): void {
+    if (!combatResult) return;
+
+    combatResult.battleType = BattleType.Tower;
+    this.clearCurrentCombat(combatResult.battleType);
+    this.combatStateService.setCombatActive(combatResult.battleType, true);
+
+    this.simulateFight(combatResult);
+  }
+
+  applyTowerCombatFrame(frame: TowerCombatFrame, reset = false): void {
+    const type = BattleType.Tower;
+    if (reset) this.clearCurrentCombat(type);
+
+    const result: CombatResultDto = {
+      playerTeam: frame.friendly,
+      enemyTeam: frame.hostile,
+      duration: frame.tick,
+      startedAt: new Date(),
+      outcome: frame.outcome ?? BattleOutcome.Draw,
+      loot: [],
+      gatheringRewards: [],
+      experienceGained: 0,
+      battleType: type,
+      entityStats: frame.entityStats,
+    };
+    this.combatStateService.setCombatActive(type, true);
+    this.combatStateService.setPlayerCharacters(type, frame.friendly);
+    this.combatStateService.setEnemyCharacters(type, frame.hostile);
+    this.combatStateService.setEntityStats(type, frame.entityStats);
+    this.combatStateService.setCombatResult(type, result);
+    this.combatStateService.setCombatOutcome(
+      type,
+      frame.isFinal ? frame.outcome : null,
+    );
+  }
+
   startTrainingBattleSummary(combatResult: CombatResultDto): void {
     if (!combatResult) return;
 
@@ -99,6 +140,7 @@ export class CombatService {
     if (
       type === BattleType.Colosseum ||
       type === BattleType.Dungeon ||
+      type === BattleType.Tower ||
       type === BattleType.Training
     ) {
       this.combatStateService.setCombatOutcome(type, combatAction.outcome);
@@ -139,6 +181,19 @@ export class CombatService {
     this.combatStateService.setCombatOutcome(type, combatResult.outcome);
     this.combatStateService.setCombatActive(type, false);
 
+    this.handleCombatComplete(combatResult);
+  }
+
+  closeCurrentTowerBattle(): void {
+    const type = BattleType.Tower;
+
+    if (!this.combatStateService.getIsCombatActive(type)()) return;
+
+    const combatResult = this.combatStateService.getCombatResult(type)();
+    if (!combatResult) return;
+
+    this.combatStateService.setCombatOutcome(type, combatResult.outcome);
+    this.combatStateService.setCombatActive(type, false);
     this.handleCombatComplete(combatResult);
   }
 

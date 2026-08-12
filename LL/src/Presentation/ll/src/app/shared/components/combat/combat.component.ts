@@ -289,6 +289,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     } else if (
       this.battleType === BattleType.Colosseum ||
       this.battleType === BattleType.Dungeon ||
+      this.battleType === BattleType.Tower ||
       this.battleType === BattleType.Training
     ) {
       this.skipCombat();
@@ -298,6 +299,10 @@ export class CombatComponent implements OnInit, OnDestroy {
   combatActionButtonText(): string {
     if (this.battleType === BattleType.IdleCombat) {
       return this.isStoppingCombat ? 'Quitting...' : 'Quit';
+    }
+
+    if (this.battleType === BattleType.Tower && !this.outcome) {
+      return 'Leave Live View';
     }
 
     if (this.isEscapeDismissibleBattleType()) {
@@ -339,7 +344,8 @@ export class CombatComponent implements OnInit, OnDestroy {
   private isEscapeDismissibleBattleType(): boolean {
     return (
       this.battleType === BattleType.Colosseum ||
-      this.battleType === BattleType.Dungeon
+      this.battleType === BattleType.Dungeon ||
+      this.battleType === BattleType.Tower
     );
   }
 
@@ -397,6 +403,7 @@ export class CombatComponent implements OnInit, OnDestroy {
 
     if (this.battleType === BattleType.Dungeon) return 'Dungeon Battle';
     if (this.battleType === BattleType.Colosseum) return 'Arena Battle';
+    if (this.battleType === BattleType.Tower) return 'World Tower Battle';
     if (this.battleType === BattleType.Training) return 'Training Battle';
 
     return 'Battle';

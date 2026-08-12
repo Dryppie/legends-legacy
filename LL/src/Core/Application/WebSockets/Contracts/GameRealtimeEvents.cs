@@ -1,6 +1,7 @@
 using Application.UseCases.CharacterActions.Dtos.Responses;
 using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Inventories.Dtos;
+using Application.UseCases.WorldTower.Dtos;
 
 namespace Application.WebSockets.Contracts;
 
@@ -47,3 +48,21 @@ public sealed record TournamentGroundsUpdated(
     DateTimeOffset? CompletedAtUtc,
     DateTimeOffset? CancelledAtUtc,
     DateTimeOffset OccurredAtUtc) : GameRealtimeEvent;
+
+public sealed record WorldTowerRallyUpdated(
+    Guid RallyId,
+    int FloorNumber,
+    string Event,
+    string Status,
+    int ParticipantCount,
+    int RequiredSlots,
+    int PendingApplicationCount,
+    DateTimeOffset OccurredAtUtc) : GameRealtimeEvent;
+
+public sealed record WorldTowerCombatFrameUpdated(
+    Guid AttemptId,
+    Guid RallyId,
+    DateTimeOffset PlaybackStartedAt,
+    int TicksPerSecond,
+    int TicksPerFrame,
+    TowerCombatFrameDto Frame) : GameRealtimeEvent;

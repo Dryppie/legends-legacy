@@ -84,7 +84,9 @@ public sealed class FastCombatEngine
     public CombatResult Run(
         IReadOnlyList<RuntimeCombatant> friendly,
         IReadOnlyList<RuntimeCombatant> hostile,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Action<CombatCheckpoint>? checkpointObserver = null,
+        int checkpointIntervalTicks = 0)
     {
         var combatants = friendly.Concat(hostile).ToList();
         foreach (var combatant in combatants)
@@ -95,6 +97,13 @@ public sealed class FastCombatEngine
         }
 
         Publish(new CombatEvent(AbilityTriggerEvent.OnCombatStart, null, null, null), combatants);
+        var checkpointSequence = 0;
+        var checkpointLogIndex = 0;
+        if (checkpointObserver is not null && checkpointIntervalTicks > 0)
+        {
+            checkpointObserver(CreateCheckpoint(combatants, checkpointSequence++, checkpointLogIndex, false));
+            checkpointLogIndex = _log.Count;
+        }
 
         while (_currentTick < _maxTicks
                && HasLivingTeam(combatants, CombatTeam.Friendly)
@@ -126,6 +135,33 @@ public sealed class FastCombatEngine
 
             TickSummons(combatants);
             _currentTick++;
+
+            if (checkpointObserver is not null
+                && checkpointIntervalTicks > 0
+                && _currentTick % checkpointIntervalTicks == 0)
+            {
+                var isFinalCheckpoint = _currentTick >= _maxTicks
+                    || !HasLivingTeam(combatants, CombatTeam.Friendly)
+                    || !HasLivingTeam(combatants, CombatTeam.Hostile);
+                checkpointObserver(CreateCheckpoint(
+                    combatants,
+                    checkpointSequence++,
+                    checkpointLogIndex,
+                    isFinalCheckpoint));
+                checkpointLogIndex = _log.Count;
+            }
+        }
+
+        if (checkpointObserver is not null && checkpointIntervalTicks > 0)
+        {
+            if (_currentTick % checkpointIntervalTicks != 0)
+            {
+                checkpointObserver(CreateCheckpoint(
+                    combatants,
+                    checkpointSequence,
+                    checkpointLogIndex,
+                    true));
+            }
         }
 
         var entityStats = _captureEventLog
@@ -140,6 +176,42 @@ public sealed class FastCombatEngine
             EntityStats = [.. entityStats]
         };
     }
+
+    private CombatCheckpoint CreateCheckpoint(
+        IReadOnlyList<RuntimeCombatant> combatants,
+        int sequence,
+        int logIndex,
+        bool isFinal)
+    {
+        var intervalEvents = _log.Skip(logIndex).ToArray();
+        var teams = combatants.ToDictionary(
+            combatant => combatant.Id,
+            combatant => combatant.Team.ToString(),
+            StringComparer.OrdinalIgnoreCase);
+        var entityStats = AddFinalCombatantState(
+            AddHealthRegenerationTelemetry(
+                new CombatStatsAggregator().Aggregate(_log, teams),
+                combatants),
+            combatants);
+        return new CombatCheckpoint(
+            sequence,
+            _currentTick,
+            combatants.Where(x => x.Team == CombatTeam.Friendly).Select(ToSimpleEntity).ToArray(),
+            combatants.Where(x => x.Team == CombatTeam.Hostile).Select(ToSimpleEntity).ToArray(),
+            entityStats,
+            intervalEvents,
+            isFinal);
+    }
+
+    private static SimpleCombatEntity ToSimpleEntity(RuntimeCombatant combatant) => new()
+    {
+        Id = combatant.Id,
+        Name = combatant.Name,
+        ImagePath = combatant.ImagePath,
+        Health = (int)combatant.Health,
+        MaxHealth = (int)combatant.GetAttribute(AttributeType.MaxHealth),
+        Barrier = (int)combatant.Barrier
+    };
 
     private IReadOnlyList<EntityStats> CreateDetailedStats(IReadOnlyList<RuntimeCombatant> combatants)
     {
