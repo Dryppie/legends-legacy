@@ -939,7 +939,6 @@
 
 @container (max-width: 900px) {
   .dungeon-result {
-    overflow: auto;
     align-content: start;
     grid-template-columns: minmax(0, 1fr);
   }
@@ -1055,12 +1054,7 @@
   }
 
   .dungeon-result {
-    overflow-x: hidden;
-    overflow-y: auto;
-    align-content: start;
-    overscroll-behavior-y: contain;
     touch-action: pan-y;
-    -webkit-overflow-scrolling: touch;
   }
 
   .dungeon-layout {
