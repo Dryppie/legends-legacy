@@ -44,6 +44,7 @@ public static class AbilityCompiler
             StackingPolicy = spec.StackingPolicy,
             MaxStacks = spec.MaxStacks,
             DurationTicks = spec.DurationTicks,
+            LockAtMaxStacks = spec.LockAtMaxStacks,
             TriggersByEvent = compiledTriggers
         };
     }
@@ -65,6 +66,7 @@ public static class AbilityCompiler
             ImagePath = spec.ImagePath,
             DurationTicks = spec.DurationTicks,
             MaxActive = spec.MaxActive,
+            CanBasicAttack = spec.CanBasicAttack,
             Tags = new HashSet<string>(spec.Tags, StringComparer.OrdinalIgnoreCase),
             AbilityIds = spec.AbilityIds,
             Attributes = [.. spec.Attributes.Select(CompileSummonAttribute)]
@@ -113,11 +115,16 @@ public static class AbilityCompiler
             ConditionScalingCoefficient = effect.ConditionScalingCoefficient,
             ScalingStatusId = effect.ScalingStatusId,
             StatusScalingCoefficient = effect.StatusScalingCoefficient,
+            HealingScalingAttribute = effect.HealingScalingAttribute,
+            HealingScalingCoefficient = effect.HealingScalingCoefficient,
+            MaximumHealingScalingCoefficient = effect.MaximumHealingScalingCoefficient,
             Attribute = effect.Attribute,
             StatusId = effect.StatusId,
             Condition = effect.Condition,
             AlternativeCondition = effect.AlternativeCondition,
             SummonId = effect.SummonId,
+            SummonGroupId = effect.SummonGroupId,
+            LinkedEffectId = effect.LinkedEffectId,
             SummonPowerMultiplier = effect.SummonPowerMultiplier <= 0 ? 1d : effect.SummonPowerMultiplier,
             SummonHealthMultiplier = effect.SummonHealthMultiplier <= 0 ? 1d : effect.SummonHealthMultiplier,
             Resource = effect.Resource,

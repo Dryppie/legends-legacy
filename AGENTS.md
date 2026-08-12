@@ -14,6 +14,8 @@
 
 ## Working rules
 
+- `LL/src/Presentation/ll` is an npm-only project managed by `package-lock.json`. Never invoke pnpm, pnpx, Yarn, Bun, or their Corepack variants in this repository. If npm fails, diagnose and repair npm instead of switching package managers.
+- Keep package-manager caches outside the repository. In sandboxed Windows sessions, use a directory beneath `$env:TEMP`; never use `.artifacts`, `.tmp`, or another checkout path for an npm cache.
 - Identify the target service before editing files.
 - Keep changes scoped to the requested feature. Do not refactor unrelated code.
 - Follow existing patterns before introducing new abstractions.

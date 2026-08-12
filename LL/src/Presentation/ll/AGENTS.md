@@ -86,6 +86,8 @@ These instructions apply to the LegendsLegacy Angular frontend in this directory
 
 ## Engineering Rules
 
+- This frontend is an npm project. Use `npm ci` with `package-lock.json`; never run pnpm, Yarn, or Bun in this directory because they corrupt the npm-owned `node_modules` tree.
+- Keep npm caches outside the repository. In sandboxed Windows sessions, use a directory beneath `$env:TEMP`, never a path inside the checkout.
 - Keep changes scoped to the requested frontend feature.
 - Follow existing file structure under `src/app`.
 - Keep components thin: presentation and user events in components, data fetching and state transitions in services.

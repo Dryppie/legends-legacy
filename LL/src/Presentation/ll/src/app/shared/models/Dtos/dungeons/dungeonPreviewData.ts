@@ -87,7 +87,6 @@ export interface DungeonPreviewData {
   canAssembleSigil?: boolean;
   sigilAssemblyMissingRequirements?: string[];
   requiredPreviousDungeonId?: string | null;
-  heroImage: string;
   lore: string;
   requiredLevel: number;
   minRooms?: number;

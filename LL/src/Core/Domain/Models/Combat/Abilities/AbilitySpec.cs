@@ -36,7 +36,12 @@ public enum AbilityTriggerEvent
     OnBarrierBroken = 22,
     OnStatusRemoved = 23,
     OnStatusCleansed = 24,
-    OnStatusDispelled = 25
+    OnStatusDispelled = 25,
+    OnSummonChanged = 26,
+    OnBarrierContributionBroken = 27,
+    OnBarrierExpired = 28,
+    OnSummonGroupResolved = 29,
+    OnStatusChanged = 30
 }
 
 public enum AbilityEffectOperation
@@ -63,7 +68,14 @@ public enum AbilityEffectOperation
     ModifyDamageTakenFromCondition = 19,
     ApplyRandomCondition = 20,
     ModifyNextBasicAttackDamage = 21,
-    ModifyNextBasicAttackArmorPenetration = 22
+    ModifyNextBasicAttackArmorPenetration = 22,
+    ModifyAttributePercentOfInitial = 23,
+    TransferAttributePercent = 24,
+    ConsumeConditionStacks = 25,
+    RemoveCondition = 26,
+    SynchronizeAttributePerOwnedSummon = 27,
+    ConsumeOwnedSummon = 28,
+    SynchronizeAttributePerStatusStack = 29
 }
 
 public enum AbilityTargetSelector
@@ -84,7 +96,10 @@ public enum AbilityTargetSelector
     SummonedAllies = 13,
     NonSummonedAllies = 14,
     SummonedEnemies = 15,
-    LowestHealthEnemy = 16
+    LowestHealthEnemy = 16,
+    HighestHealthEnemy = 17,
+    LowestCurrentHealthEnemy = 18,
+    HighestMaxHealthEnemy = 19
 }
 
 public enum AbilityConditionType
@@ -103,7 +118,13 @@ public enum AbilityConditionType
     EventWasCritical = 11,
     EventWasDirectHit = 12,
     EventIdIs = 13,
-    EventSourceIsSelf = 14
+    EventSourceIsSelf = 14,
+    HealthAtOrBelowPercent = 15,
+    AnyEnemyHealthBelowPercent = 16,
+    NoEnemyHealthBelowPercent = 17,
+    EventSourceIsEnemy = 18,
+    EventMagnitudeAtLeast = 19,
+    EventMagnitudeAtMost = 20
 }
 
 public enum StandardConditionType
@@ -229,11 +250,16 @@ public sealed class AbilityEffectSpec
     public float ConditionScalingCoefficient { get; set; }
     public string? ScalingStatusId { get; set; }
     public float StatusScalingCoefficient { get; set; }
+    public AttributeType? HealingScalingAttribute { get; set; }
+    public float HealingScalingCoefficient { get; set; }
+    public float MaximumHealingScalingCoefficient { get; set; }
     public AttributeType? Attribute { get; set; }
     public string? StatusId { get; set; }
     public StandardConditionType? Condition { get; set; }
     public StandardConditionType? AlternativeCondition { get; set; }
     public string? SummonId { get; set; }
+    public string? SummonGroupId { get; set; }
+    public string? LinkedEffectId { get; set; }
     public double SummonPowerMultiplier { get; set; } = 1d;
     public double SummonHealthMultiplier { get; set; } = 1d;
     public AbilityResourceType Resource { get; set; } = AbilityResourceType.Health;
@@ -272,6 +298,7 @@ public sealed class StatusSpec
     public AbilityStatusStackingPolicy StackingPolicy { get; set; }
     public int MaxStacks { get; set; } = 1;
     public int DurationTicks { get; set; }
+    public bool LockAtMaxStacks { get; set; }
     public List<string> Tags { get; set; } = [];
     public List<AbilityTriggerSpec> Triggers { get; set; } = [];
     public List<AbilityEffectSpec> Effects { get; set; } = [];
@@ -285,6 +312,7 @@ public sealed class SummonSpec
     public string ImagePath { get; set; } = string.Empty;
     public int DurationTicks { get; set; }
     public int MaxActive { get; set; }
+    public bool CanBasicAttack { get; set; } = true;
     public List<string> Tags { get; set; } = [];
     public List<string> AbilityIds { get; set; } = [];
     public List<SummonAttributeSpec> Attributes { get; set; } = [];

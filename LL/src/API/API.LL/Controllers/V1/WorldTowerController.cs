@@ -39,6 +39,15 @@ public sealed class WorldTowerController : BaseController
     public async Task<ActionResult<TowerCombatPlaybackDto?>> GetAttemptPlayback(Guid attemptId) =>
         await Mediator.Send(new GetTowerAttemptPlaybackQuery(CurrentCharacterGuid, attemptId));
 
+    [HttpGet("attempts/{attemptId:guid}/playback/frames")]
+    public async Task<ActionResult<TowerCombatFrameBatchDto?>> GetAttemptPlaybackFrames(
+        Guid attemptId,
+        [FromQuery] int after = -1) =>
+        await Mediator.Send(new GetTowerAttemptPlaybackFramesQuery(
+            CurrentCharacterGuid,
+            attemptId,
+            after));
+
     [HttpGet("hall-of-fame")]
     public async Task<ActionResult<IReadOnlyList<TowerHallOfFameEntryDto>>> GetHallOfFame() =>
         Ok(await Mediator.Send(new GetTowerHallOfFameQuery()));

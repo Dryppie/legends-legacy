@@ -1,8 +1,12 @@
-<app-combat
-  *ngIf="combatState.getIsCombatActive(battleType)(); else rallyPage"
-  [battleType]="battleType"
-  (skipBattle)="closeCombatDetails()"
-></app-combat>
+<ng-container *ngIf="combatState.getIsCombatActive(battleType)(); else rallyPage">
+  <p class="realtime-notice" *ngIf="realtimeStatus() !== 'connected'">
+    Reconnecting to the live battle… The last confirmed state remains visible.
+  </p>
+  <app-combat
+    [battleType]="battleType"
+    (skipBattle)="closeCombatDetails()"
+  ></app-combat>
+</ng-container>
 
 <ng-template #rallyPage>
   <main class="tower-page">
@@ -11,16 +15,13 @@
       <header class="tower-hero section ll-panel ll-panel-strong">
         <div class="card-meta">
           <span class="floor-number"
-            >{{ vm.mode }} rally · Floor {{ vm.floorNumber }}</span
+            >{{ vm.mode }} Expedition · Floor {{ vm.floorNumber }}</span
           >
           <span class="badge" [ngClass]="vm.status">{{ vm.status }}</span>
         </div>
-        <h1>{{ vm.floorName }}</h1>
+        <h1>{{ vm.guardianName }}</h1>
         <p class="hero-copy">
-          {{ vm.guardianName }} · {{ vm.participants.length }}/{{
-            vm.requiredSlots
-          }}
-          locked builds
+          {{ vm.participants.length }}/{{ vm.requiredSlots }} locked builds
         </p>
         <div class="stats">
           <div class="stat">
@@ -57,7 +58,7 @@
             {{
               currentApplication(vm)?.status === "Pending"
                 ? "Withdraw application"
-                : "Leave rally"
+                : "Leave Expedition"
             }}
           </button>
           <button
@@ -81,7 +82,7 @@
             {{
               action() === "development-fill"
                 ? "Filling test roster..."
-                : "Fill with test roster"
+                : "Fill with floor test roster"
             }}
           </button>
           <button
@@ -101,8 +102,11 @@
           </button>
         </div>
         <p class="notice" *ngIf="action() === 'start'">
-          The locked roster is fighting the Guardian. Large rallies may take a
-          moment to resolve.
+          The Guardian attempt is queued. The live battle will open when its
+          simulation is ready.
+        </p>
+        <p class="notice" *ngIf="vm.attempt?.status === 'Started' && !playback()">
+          Preparing the battle simulation… This page updates automatically.
         </p>
       </header>
 
@@ -152,7 +156,7 @@
         class="section tower-panel ll-panel"
         *ngIf="vm.canManageApplications || vm.applications.length"
       >
-        <p class="eyebrow">Rally applications</p>
+        <p class="eyebrow">Expedition applications</p>
         <h2>Awaiting the leader</h2>
         <p class="muted" *ngIf="!vm.applications.length">
           No applications are waiting.
@@ -202,7 +206,11 @@
           <div>
             <p class="eyebrow">Battle report</p>
             <h2>
-              {{ battle.succeeded ? "Guardian defeated" : "Rally defeated" }}
+              {{
+                battle.succeeded
+                  ? "Guardian defeated"
+                  : "Expedition defeated"
+              }}
             </h2>
           </div>
           <span
@@ -283,7 +291,7 @@
     </div>
 
     <div class="tower-shell" *ngIf="loading() && !rally()">
-      <p class="notice">Finding the rally…</p>
+      <p class="notice">Finding the Expedition…</p>
     </div>
   </main>
 </ng-template>

@@ -46,10 +46,15 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
   readonly battleType = BattleType.Tower;
   readonly watchingPlayback = signal(false);
   readonly playback = signal<TowerCombatPlayback | null>(null);
+  readonly realtimeStatus = this.events.connectionStatus;
   private rallyId = '';
   private lastRealtimeUpdateId: string | null = null;
   private lastCombatFrameUpdateId: string | null = null;
   private lastCombatSequence = -1;
+  private lastReconnectCount = this.events.reconnectCount();
+  private recoveringFrames = false;
+  private pendingRealtimeFrame: TowerCombatPlayback['currentFrame'] | null =
+    null;
 
   constructor() {
     effect(
@@ -83,21 +88,24 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
         }
 
         this.lastCombatFrameUpdateId = envelope.updateId;
-        this.lastCombatSequence = envelope.payload.frame.sequence;
-        this.playback.update((current) =>
-          current
-            ? {
-                ...current,
-                currentSequence: envelope.payload.frame.sequence,
-                currentFrame: envelope.payload.frame,
-                isCompleted: envelope.payload.frame.isFinal,
-              }
-            : current,
-        );
-        if (this.watchingPlayback()) {
-          this.combat.applyTowerCombatFrame(envelope.payload.frame);
+        if (envelope.payload.frame.sequence > this.lastCombatSequence + 1) {
+          this.pendingRealtimeFrame = envelope.payload.frame;
+          this.recoverMissingFrames();
+          return;
         }
+        this.applyCombatFrame(envelope.payload.frame);
         if (envelope.payload.frame.isFinal) this.load(false);
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        const reconnectCount = this.events.reconnectCount();
+        if (reconnectCount <= this.lastReconnectCount) return;
+        this.lastReconnectCount = reconnectCount;
+        if (this.playback()) this.recoverMissingFrames();
+        else this.load(false);
       },
       { allowSignalWrites: true },
     );
@@ -123,6 +131,10 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => showLoading && this.loading.set(false)))
       .subscribe({
         next: (rally) => {
+          if (!rally) {
+            void this.router.navigate(['/game/world/tower']);
+            return;
+          }
           this.rally.set(rally);
           if (rally.attempt?.playback) {
             this.acceptPlayback(
@@ -189,8 +201,8 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (result) => {
           this.result.set(result);
-          this.acceptPlayback(result.playback, true);
-          this.load();
+          if (result.playback) this.acceptPlayback(result.playback, true);
+          this.load(false);
         },
         error: (error) => {
           this.error.set(this.errorMessage(error));
@@ -246,6 +258,60 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
     }
   }
 
+  private recoverMissingFrames(): void {
+    const attemptId = this.playback()?.attemptId ?? this.rally()?.attempt?.id;
+    if (!attemptId || this.recoveringFrames) return;
+    this.recoveringFrames = true;
+    this.fetchMissingFrames(attemptId);
+  }
+
+  private fetchMissingFrames(attemptId: string): void {
+    this.tower
+      .getAttemptPlaybackFrames(attemptId, this.lastCombatSequence)
+      .pipe(takeUntil(this.destroyed))
+      .subscribe({
+        next: (batch) => {
+          for (const frame of batch.frames) this.applyCombatFrame(frame);
+          if (batch.hasMore) {
+            this.fetchMissingFrames(attemptId);
+            return;
+          }
+          this.recoveringFrames = false;
+          const pendingFrame = this.pendingRealtimeFrame;
+          this.pendingRealtimeFrame = null;
+          if (pendingFrame && pendingFrame.sequence > this.lastCombatSequence) {
+            if (pendingFrame.sequence === this.lastCombatSequence + 1) {
+              this.applyCombatFrame(pendingFrame);
+            } else {
+              this.pendingRealtimeFrame = pendingFrame;
+              this.recoverMissingFrames();
+            }
+          }
+          if (batch.frames.at(-1)?.isFinal) this.load(false);
+        },
+        error: () => {
+          this.recoveringFrames = false;
+          this.load(false);
+        },
+      });
+  }
+
+  private applyCombatFrame(frame: TowerCombatPlayback['currentFrame']): void {
+    if (frame.sequence <= this.lastCombatSequence) return;
+    this.lastCombatSequence = frame.sequence;
+    this.playback.update((current) =>
+      current
+        ? {
+            ...current,
+            currentSequence: frame.sequence,
+            currentFrame: frame,
+            isCompleted: frame.isFinal,
+          }
+        : current,
+    );
+    if (this.watchingPlayback()) this.combat.applyTowerCombatFrame(frame);
+  }
+
   duration(seconds: number | null | undefined): string {
     const total = Math.max(0, seconds ?? 0);
     const minutes = Math.floor(total / 60);
@@ -284,7 +350,7 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
   private errorMessage(error: unknown): string {
     return (
       (error as { errorMessage?: string })?.errorMessage ??
-      'The rally action could not be completed.'
+      'The Expedition action could not be completed.'
     );
   }
 }

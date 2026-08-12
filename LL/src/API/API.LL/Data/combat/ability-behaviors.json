@@ -962,5 +962,419 @@
     ],
     "maxTicks": 1,
     "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.garran.gatehammer.executes",
+    "abilityId": "ability.creature.garran.gatehammer",
+    "friendlyAbilityIds": [
+      "ability.creature.garran.gatehammer"
+    ],
+    "maxTicks": 1,
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.garran.slam_the_gates.executes",
+    "abilityId": "ability.creature.garran.slam_the_gates",
+    "friendlyAbilityIds": [
+      "ability.creature.garran.slam_the_gates"
+    ],
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.garran.gatekeepers_toll.executes",
+    "abilityId": "ability.creature.garran.gatekeepers_toll",
+    "friendlyAbilityIds": [
+      "ability.creature.garran.gatekeepers_toll"
+    ],
+    "maxTicks": 1,
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.garran.the_first_gate.applies_seals",
+    "abilityId": "ability.creature.garran.the_first_gate",
+    "friendlyAbilityIds": [
+      "ability.creature.garran.the_first_gate"
+    ],
+    "maxTicks": 1,
+    "expectedStatuses": [
+      {
+        "combatantId": "friendly",
+        "statusId": "status.garran.gate_seal",
+        "minStacks": 3
+      }
+    ],
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.velka.rending_dive.targets_the_weakest_enemy",
+    "abilityId": "ability.creature.velka.rending_dive",
+    "friendlyAbilityIds": [
+      "ability.creature.velka.rending_dive"
+    ],
+    "hostileCount": 2,
+    "hostileHealth": 100,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.velka.rending_dive.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1
+      }
+    ],
+    "expectedConditions": [
+      {
+        "combatantId": "hostile-1",
+        "condition": "Bleed",
+        "minStacks": 12
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.velka.crimson_gale_hits_and_bleeds_all_enemies",
+    "abilityId": "ability.creature.velka.crimson_gale",
+    "friendlyAbilityIds": [
+      "ability.creature.velka.crimson_gale"
+    ],
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.velka.crimson_gale.damage",
+        "eventType": "Damage",
+        "minCount": 2
+      }
+    ],
+    "expectedConditions": [
+      {
+        "combatantId": "hostile-1",
+        "condition": "Bleed",
+        "minStacks": 10
+      },
+      {
+        "combatantId": "hostile-2",
+        "condition": "Bleed",
+        "minStacks": 10
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.velka.feast_on_wounds_consumes_bleed_and_heals",
+    "abilityId": "ability.creature.velka.feast_on_wounds",
+    "friendlyAbilityIds": [
+      "ability.creature.velka.feast_on_wounds"
+    ],
+    "friendlyHealth": 100,
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "initialConditions": [
+      {
+        "combatantId": "hostile-1",
+        "sourceCombatantId": "friendly",
+        "condition": "Bleed",
+        "stacks": 4,
+        "durationTicks": 100
+      },
+      {
+        "combatantId": "hostile-2",
+        "sourceCombatantId": "friendly",
+        "condition": "Bleed",
+        "stacks": 4,
+        "durationTicks": 100
+      }
+    ],
+    "expectedLogs": [
+      {
+        "source": "effect.creature.velka.feast_on_wounds.consume",
+        "eventType": "Damage",
+        "minCount": 2
+      },
+      {
+        "source": "effect.creature.velka.feast_on_wounds.consume",
+        "eventType": "Heal",
+        "targetId": "friendly",
+        "minCount": 2,
+        "minMagnitude": 3
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.velka.scent_of_weakness_activates_below_thirty_percent",
+    "abilityId": "ability.creature.velka.scent_of_weakness",
+    "friendlyAbilityIds": [
+      "ability.creature.velka.scent_of_weakness",
+      "ability.creature.velka.rending_dive"
+    ],
+    "hostileHealth": 100,
+    "maxTicks": 1,
+    "expectedConditions": [
+      {
+        "combatantId": "friendly",
+        "condition": "Haste",
+        "minStacks": 1
+      }
+    ],
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.vaelor.mirror_lance_hits_both_health_extremes",
+    "abilityId": "ability.creature.vaelor.mirror_lance",
+    "friendlyAbilityIds": [
+      "ability.creature.vaelor.mirror_lance"
+    ],
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.vaelor.mirror_lance.physical",
+        "eventType": "Damage",
+        "minCount": 1
+      },
+      {
+        "source": "effect.creature.vaelor.mirror_lance.magical",
+        "eventType": "Damage",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.vaelor.hall_of_shards_hits_every_enemy_twice",
+    "abilityId": "ability.creature.vaelor.hall_of_shards",
+    "friendlyAbilityIds": [
+      "ability.creature.vaelor.hall_of_shards"
+    ],
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.vaelor.hall_of_shards.magical",
+        "eventType": "Damage",
+        "minCount": 2
+      },
+      {
+        "source": "effect.creature.vaelor.hall_of_shards.physical",
+        "eventType": "Damage",
+        "minCount": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.vaelor.reflective_mirrorplate_reflects_direct_damage",
+    "abilityId": "ability.creature.vaelor.reflective_mirrorplate",
+    "friendlyAbilityIds": [
+      "ability.creature.vaelor.reflective_mirrorplate"
+    ],
+    "hostileAbilityIds": [
+      "ability.creature.goblin.shiv_jab"
+    ],
+    "maxTicks": 1,
+    "expectedConditions": [
+      {
+        "combatantId": "friendly",
+        "condition": "Thorns",
+        "minStacks": 100
+      }
+    ],
+    "expectedLogs": [
+      {
+        "source": "condition.thorns",
+        "eventType": "ReflectedDamage",
+        "targetId": "hostile-1",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.vaelor.mirrorbound_charges_magical_damage_from_physical_hits",
+    "abilityId": "ability.creature.vaelor.mirrorbound",
+    "friendlyAbilityIds": [
+      "ability.creature.vaelor.mirrorbound"
+    ],
+    "hostileAbilityIds": [
+      "ability.creature.goblin.shiv_jab"
+    ],
+    "maxTicks": 1,
+    "expectedStatuses": [
+      {
+        "combatantId": "friendly",
+        "statusId": "status.vaelor.next_magical_damage",
+        "minStacks": 1
+      }
+    ],
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.summon.morrowmaw_broodling.venomous_bite.poisons_random_enemy",
+    "abilityId": "ability.summon.morrowmaw_broodling.venomous_bite",
+    "friendlyAbilityIds": [
+      "ability.summon.morrowmaw_broodling.venomous_bite"
+    ],
+    "hostileCount": 3,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "condition.poison",
+        "eventType": "StatusEffect",
+        "minCount": 1,
+        "minMagnitude": 10
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.morrowmaw.hatch_the_brood.summons_per_enemy",
+    "abilityId": "ability.creature.morrowmaw.hatch_the_brood",
+    "friendlyAbilityIds": [
+      "ability.creature.morrowmaw.hatch_the_brood"
+    ],
+    "hostileCount": 3,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.morrowmaw.hatch_the_brood.summon",
+        "eventType": "Summon",
+        "minCount": 3
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.morrowmaw.spore_eruption.hits_all_enemies",
+    "abilityId": "ability.creature.morrowmaw.spore_eruption",
+    "friendlyAbilityIds": [
+      "ability.creature.morrowmaw.spore_eruption"
+    ],
+    "hostileCount": 3,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.morrowmaw.spore_eruption.damage",
+        "eventType": "Damage",
+        "minCount": 3
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.morrowmaw.devour_the_weak.consumes_and_heals",
+    "abilityId": "ability.creature.morrowmaw.devour_the_weak",
+    "friendlyAbilityIds": [
+      "ability.creature.morrowmaw.hatch_the_brood",
+      "ability.creature.morrowmaw.devour_the_weak"
+    ],
+    "hostileCount": 2,
+    "friendlyHealth": 100,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.morrowmaw.devour_the_weak.consume",
+        "eventType": "SummonExpired",
+        "minCount": 1
+      },
+      {
+        "source": "effect.creature.morrowmaw.devour_the_weak.consume",
+        "eventType": "Heal",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 8
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.morrowmaw.broodmother.scales_with_living_brood",
+    "abilityId": "ability.creature.morrowmaw.broodmother",
+    "friendlyAbilityIds": [
+      "ability.creature.morrowmaw.hatch_the_brood",
+      "ability.creature.morrowmaw.broodmother"
+    ],
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.morrowmaw.broodmother.damage_reduction",
+        "eventType": "Buff",
+        "minCount": 2
+      },
+      {
+        "source": "effect.creature.morrowmaw.broodmother.attack_speed",
+        "eventType": "Buff",
+        "minCount": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.kharad.crushing_verdict.targets_highest_max_health",
+    "abilityId": "ability.creature.kharad.crushing_verdict",
+    "friendlyAbilityIds": [
+      "ability.creature.kharad.crushing_verdict"
+    ],
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "expectedConditions": [
+      {
+        "combatantId": "hostile-1",
+        "condition": "Vulnerable",
+        "minStacks": 2
+      }
+    ],
+    "expectedLogs": [
+      {
+        "source": "effect.creature.kharad.crushing_verdict.damage",
+        "eventType": "Damage",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.kharad.raise_the_twin_pillars.summons_both_pillars",
+    "abilityId": "ability.creature.kharad.raise_the_twin_pillars",
+    "friendlyAbilityIds": [
+      "ability.creature.kharad.raise_the_twin_pillars"
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.kharad.raise_the_twin_pillars.iron",
+        "eventType": "Summon",
+        "minCount": 1
+      },
+      {
+        "source": "effect.creature.kharad.raise_the_twin_pillars.aether",
+        "eventType": "Summon",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.kharad.seal_of_ascension.grants_timed_barrier",
+    "abilityId": "ability.creature.kharad.seal_of_ascension",
+    "friendlyAbilityIds": [
+      "ability.creature.kharad.seal_of_ascension"
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.kharad.seal_of_ascension.barrier",
+        "eventType": "RestoreBarrier",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.kharad.keystone_resonance.rewards_surviving_pillars",
+    "abilityId": "ability.creature.kharad.keystone_resonance",
+    "friendlyAbilityIds": [
+      "ability.creature.kharad.raise_the_twin_pillars",
+      "ability.creature.kharad.keystone_resonance"
+    ],
+    "hostileHealth": 10000,
+    "maxTicks": 120,
+    "expectedStatuses": [
+      {
+        "combatantId": "friendly",
+        "statusId": "status.kharad.resonance",
+        "minStacks": 2
+      }
+    ],
+    "expectedLogs": []
   }
 ]

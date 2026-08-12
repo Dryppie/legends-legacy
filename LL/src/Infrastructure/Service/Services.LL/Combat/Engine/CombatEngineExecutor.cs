@@ -597,6 +597,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             Condition = effect.Condition,
             AlternativeCondition = effect.AlternativeCondition,
             SummonId = effect.SummonId,
+            SummonGroupId = effect.SummonGroupId,
+            LinkedEffectId = effect.LinkedEffectId,
             SummonPowerMultiplier = effect.SummonPowerMultiplier,
             SummonHealthMultiplier = effect.SummonHealthMultiplier,
             Resource = effect.Resource,

@@ -6,6 +6,7 @@ import {
   NavigationTab,
   NavigationTabsComponent,
 } from '../../../../../shared/components/custom-components/tabs/navigation-tabs/navigation-tabs.component';
+import { DefaultHeaderComponent } from '../../../../../shared/components/default-header/default-header.component';
 import {
   TowerContributionKind,
   TowerFloorDetail,
@@ -21,7 +22,12 @@ type TowerWorkspaceTab = 'scouting' | 'preparation' | 'rally';
 
 @Component({
   selector: 'app-tower-overview',
-  imports: [CommonModule, RouterLink, NavigationTabsComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    NavigationTabsComponent,
+    DefaultHeaderComponent,
+  ],
   templateUrl: './tower-overview.component.html',
   styleUrl: '../tower-page.scss',
 })
@@ -38,10 +44,11 @@ export class TowerOverviewComponent implements OnInit {
   readonly loadingFloor = signal(false);
   readonly action = signal<string | null>(null);
   readonly error = signal<string | null>(null);
+  readonly shopOpen = signal(false);
   readonly workspaceTabs: readonly NavigationTab[] = [
     { key: 'scouting', label: 'Scouting' },
     { key: 'preparation', label: 'Preparation' },
-    { key: 'rally', label: 'Rally' },
+    { key: 'rally', label: 'Expedition' },
   ];
 
   constructor() {
@@ -64,6 +71,14 @@ export class TowerOverviewComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+  }
+
+  openShop(): void {
+    this.shopOpen.set(true);
+  }
+
+  closeShop(): void {
+    this.shopOpen.set(false);
   }
 
   load(): void {
@@ -92,10 +107,7 @@ export class TowerOverviewComponent implements OnInit {
   }
 
   selectFloor(floor: TowerFloorSummary): void {
-    if (
-      floor.state === 'Locked' ||
-      this.selectedFloorNumber() === floor.floorNumber
-    ) {
+    if (this.selectedFloorNumber() === floor.floorNumber) {
       return;
     }
 
@@ -130,7 +142,10 @@ export class TowerOverviewComponent implements OnInit {
       .pipe(finalize(() => this.action.set(null)))
       .subscribe({
         next: (rally) =>
-          void this.router.navigate(['/game/world/tower/rallies', rally.id]),
+          void this.router.navigate([
+            '/game/world/tower/expeditions',
+            rally.id,
+          ]),
         error: (error) => this.error.set(this.errorMessage(error)),
       });
   }
@@ -184,7 +199,7 @@ export class TowerOverviewComponent implements OnInit {
   researchActionLabel(floor: TowerFloorDetail): string {
     if (floor.scoutingProgress >= 100) return 'Scouting complete';
     if (this.researchLimitReached(floor)) return 'Weekly limit reached';
-    return 'Contribute research';
+    return 'Scout now';
   }
 
   preparationContributionDisabled(
@@ -193,6 +208,7 @@ export class TowerOverviewComponent implements OnInit {
   ): boolean {
     return (
       !!this.action() ||
+      floor.state === 'Locked' ||
       floor.state === 'Cleared' ||
       floor.preparation.weeklyCharacterContribution >=
         floor.preparation.weeklyCharacterCap ||
@@ -204,6 +220,7 @@ export class TowerOverviewComponent implements OnInit {
     floor: TowerFloorDetail,
     kind: Exclude<TowerContributionKind, 'Research'>,
   ): string {
+    if (floor.state === 'Locked') return 'Floor locked';
     if (this.isPreparationMaxed(floor, kind)) return 'Maxed';
     if (
       floor.preparation.weeklyCharacterContribution >=
@@ -212,14 +229,6 @@ export class TowerOverviewComponent implements OnInit {
       return 'Weekly limit';
     }
     return 'Contribute';
-  }
-
-  nextSovereign(overview: TowerOverview): TowerFloorSummary | null {
-    return (
-      overview.floors.find(
-        (floor) => floor.type === 'Sovereign' && floor.state !== 'Cleared',
-      ) ?? null
-    );
   }
 
   rosterSummary(record: TowerHallOfFameEntry): string {
@@ -239,8 +248,8 @@ export class TowerOverviewComponent implements OnInit {
     return floorNumber.toString().padStart(2, '0');
   }
 
-  guardianImage(path: string): string {
-    return `url('assets/entities/optimized/${path}.webp')`;
+  floorStateLabel(state: TowerFloorSummary['state']): string {
+    return state === 'Rallying' ? 'Expedition forming' : state;
   }
 
   private refreshOverviewSummary(detail: TowerFloorDetail): void {

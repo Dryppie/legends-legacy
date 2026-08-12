@@ -84,5 +84,109 @@
         "minimumValue": 0
       }
     ]
+  },
+  {
+    "id": "morrowmawBroodling",
+    "name": "Broodling",
+    "description": "A newly hatched servant of Morrowmaw.",
+    "imagePath": "",
+    "durationTicks": 0,
+    "maxActive": 0,
+    "tags": [
+      "Summon.Broodling",
+      "Creature.Brood"
+    ],
+    "abilityIds": [
+      "ability.summon.morrowmaw_broodling.venomous_bite"
+    ],
+    "attributes": [
+      {
+        "attribute": "MaxHealth",
+        "baseValue": 0,
+        "minimumValue": 1,
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.1
+      },
+      {
+        "attribute": "Power",
+        "baseValue": 0,
+        "minimumValue": 0,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.08
+      },
+      {
+        "attribute": "AttackSpeed",
+        "baseValue": 0,
+        "minimumValue": 0
+      }
+    ]
+  },
+  {
+    "id": "kharadIronPillar",
+    "name": "Iron Pillar",
+    "description": "An inert warding pillar raised by Kharad.",
+    "imagePath": "golem",
+    "durationTicks": 120,
+    "maxActive": 1,
+    "canBasicAttack": false,
+    "tags": [
+      "Summon.Pillar",
+      "Summon.IronPillar",
+      "Warden.Construct"
+    ],
+    "abilityIds": [],
+    "attributes": [
+      {
+        "attribute": "MaxHealth",
+        "baseValue": 0,
+        "minimumValue": 1,
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.1
+      },
+      {
+        "attribute": "Power",
+        "baseValue": 0,
+        "minimumValue": 0
+      },
+      {
+        "attribute": "AttackSpeed",
+        "baseValue": 0,
+        "minimumValue": 0
+      }
+    ]
+  },
+  {
+    "id": "kharadAetherPillar",
+    "name": "Aether Pillar",
+    "description": "An inert arcane pillar raised by Kharad.",
+    "imagePath": "light_elemental",
+    "durationTicks": 120,
+    "maxActive": 1,
+    "canBasicAttack": false,
+    "tags": [
+      "Summon.Pillar",
+      "Summon.AetherPillar",
+      "Warden.Construct"
+    ],
+    "abilityIds": [],
+    "attributes": [
+      {
+        "attribute": "MaxHealth",
+        "baseValue": 0,
+        "minimumValue": 1,
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.1
+      },
+      {
+        "attribute": "Power",
+        "baseValue": 0,
+        "minimumValue": 0
+      },
+      {
+        "attribute": "AttackSpeed",
+        "baseValue": 0,
+        "minimumValue": 0
+      }
+    ]
   }
 ]

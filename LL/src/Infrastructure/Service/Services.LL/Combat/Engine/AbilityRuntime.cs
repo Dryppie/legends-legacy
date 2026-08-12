@@ -54,11 +54,16 @@ public sealed class CompiledEffect
     public float ConditionScalingCoefficient { get; init; }
     public string? ScalingStatusId { get; init; }
     public float StatusScalingCoefficient { get; init; }
+    public AttributeType? HealingScalingAttribute { get; init; }
+    public float HealingScalingCoefficient { get; init; }
+    public float MaximumHealingScalingCoefficient { get; init; }
     public AttributeType? Attribute { get; init; }
     public string? StatusId { get; init; }
     public StandardConditionType? Condition { get; init; }
     public StandardConditionType? AlternativeCondition { get; init; }
     public string? SummonId { get; init; }
+    public string? SummonGroupId { get; init; }
+    public string? LinkedEffectId { get; init; }
     public double SummonPowerMultiplier { get; init; } = 1d;
     public double SummonHealthMultiplier { get; init; } = 1d;
     public AbilityResourceType Resource { get; init; }
@@ -99,6 +104,7 @@ public sealed class CompiledStatus
     public AbilityStatusStackingPolicy StackingPolicy { get; init; }
     public int MaxStacks { get; init; }
     public int DurationTicks { get; init; }
+    public bool LockAtMaxStacks { get; init; }
     public required IReadOnlyDictionary<AbilityTriggerEvent, IReadOnlyList<CompiledTrigger>> TriggersByEvent { get; init; }
 }
 
@@ -109,6 +115,7 @@ public sealed class CompiledSummon
     public required string ImagePath { get; init; }
     public int DurationTicks { get; init; }
     public int MaxActive { get; init; }
+    public bool CanBasicAttack { get; init; }
     public required IReadOnlySet<string> Tags { get; init; }
     public required IReadOnlyList<string> AbilityIds { get; init; }
     public required IReadOnlyList<CompiledSummonAttribute> Attributes { get; init; }
@@ -229,6 +236,7 @@ public sealed class RuntimeStatus
         Owner = owner;
         StatsSource = string.IsNullOrWhiteSpace(statsSource) ? definition.Name : statsSource;
         Stacks = Math.Clamp(stacks, 1, definition.MaxStacks);
+        HasReachedLockedMaximum = definition.LockAtMaxStacks && Stacks >= definition.MaxStacks;
         _durationTicks = Math.Max(0, durationTicks ?? definition.DurationTicks);
         RemainingDurationTicks = _durationTicks;
     }
@@ -240,11 +248,17 @@ public sealed class RuntimeStatus
     public int Stacks { get; private set; }
     public int DurationTicks => _durationTicks;
     public int RemainingDurationTicks { get; private set; }
-    public bool IsExpired => _durationTicks > 0 && RemainingDurationTicks <= 0;
+    public bool IsExpired => !IsRemovalLocked && _durationTicks > 0 && RemainingDurationTicks <= 0;
+    public bool HasReachedLockedMaximum { get; private set; }
+    public bool IsRemovalLocked => Definition.LockAtMaxStacks && HasReachedLockedMaximum;
 
     public void AddStacks(int amount)
     {
+        if (amount < 0 && IsRemovalLocked)
+            return;
+
         Stacks = Math.Clamp(Stacks + amount, 0, Definition.MaxStacks);
+        HasReachedLockedMaximum |= Definition.LockAtMaxStacks && Stacks >= Definition.MaxStacks;
         if (_durationTicks > 0)
             RemainingDurationTicks = _durationTicks;
     }
@@ -252,6 +266,7 @@ public sealed class RuntimeStatus
     public void Refresh(int stacks)
     {
         Stacks = Math.Clamp(Math.Max(Stacks, stacks), 1, Definition.MaxStacks);
+        HasReachedLockedMaximum |= Definition.LockAtMaxStacks && Stacks >= Definition.MaxStacks;
         if (_durationTicks > 0)
             RemainingDurationTicks = _durationTicks;
     }
@@ -312,12 +327,14 @@ public sealed class RuntimeEffect
         RuntimeCombatant source,
         RuntimeCombatant target,
         string? statsSource = null,
-        double durationMultiplier = 1d)
+        double durationMultiplier = 1d,
+        string? activationId = null)
     {
         Definition = definition;
         Source = source;
         Target = target;
         StatsSource = string.IsNullOrWhiteSpace(statsSource) ? definition.StatsSource : statsSource;
+        ActivationId = activationId;
         RemainingDurationTicks = definition.DurationTicks <= 0
             ? definition.DurationTicks
             : Math.Max(1, (int)Math.Ceiling(definition.DurationTicks * Math.Max(0, durationMultiplier)));
@@ -329,6 +346,7 @@ public sealed class RuntimeEffect
     public RuntimeCombatant Source { get; }
     public RuntimeCombatant Target { get; }
     public string StatsSource { get; }
+    public string? ActivationId { get; }
     public int RemainingDurationTicks { get; private set; }
     public int TicksUntilInterval { get; private set; }
     public int RemainingUses { get; private set; }
@@ -429,16 +447,32 @@ public sealed class RuntimeCondition
 
 public sealed class RuntimeBarrierContribution
 {
-    public RuntimeBarrierContribution(RuntimeCombatant? source, float amount, long applicationOrder)
+    public RuntimeBarrierContribution(
+        RuntimeCombatant? source,
+        float amount,
+        long applicationOrder,
+        string? effectId = null,
+        int durationTicks = 0,
+        string? activationId = null,
+        string? linkedEffectId = null)
     {
         Source = source;
         Remaining = Math.Max(0, amount);
         ApplicationOrder = applicationOrder;
+        EffectId = effectId;
+        RemainingDurationTicks = Math.Max(0, durationTicks);
+        ActivationId = activationId;
+        LinkedEffectId = linkedEffectId;
     }
 
     public RuntimeCombatant? Source { get; }
     public float Remaining { get; private set; }
     public long ApplicationOrder { get; }
+    public string? EffectId { get; }
+    public int RemainingDurationTicks { get; private set; }
+    public string? ActivationId { get; }
+    public string? LinkedEffectId { get; }
+    public bool IsTimed => RemainingDurationTicks > 0;
 
     public float Consume(float amount)
     {
@@ -446,12 +480,25 @@ public sealed class RuntimeBarrierContribution
         Remaining -= consumed;
         return consumed;
     }
+
+    public bool TickDuration()
+    {
+        if (RemainingDurationTicks <= 0 || Remaining <= 0)
+            return false;
+
+        RemainingDurationTicks--;
+        return RemainingDurationTicks <= 0;
+    }
 }
 
 public sealed record RuntimeBarrierConsumptionEntry(
     RuntimeCombatant? Source,
     float Amount,
-    long ApplicationOrder);
+    long ApplicationOrder,
+    string? EffectId,
+    string? ActivationId,
+    string? LinkedEffectId,
+    bool IsDepleted);
 
 public sealed record RuntimeBarrierConsumption(
     float Total,
@@ -468,6 +515,8 @@ public sealed class RuntimeCombatant
     private readonly Dictionary<DamageType, float> _damageDealtPercent = [];
     private readonly Dictionary<DamageType, float> _damageTakenPercent = [];
     private readonly Dictionary<StandardConditionType, float> _damageTakenFromConditionPercent = [];
+    private readonly Dictionary<string, (AttributeType Attribute, float Amount)> _synchronizedAttributeContributions =
+        new(StringComparer.OrdinalIgnoreCase);
     private float _nextBasicAttackDamagePercent;
     private float _nextBasicAttackArmorPenetration;
 
@@ -482,6 +531,9 @@ public sealed class RuntimeCombatant
         bool isSummoned = false,
         int summonDurationTicks = 0,
         RuntimeCombatant? summonOwner = null,
+        bool canBasicAttack = true,
+        string? summonGroupId = null,
+        string? summonGroupInstanceId = null,
         double basicAttackIntervalMultiplier = 1d,
         double basicAttackDamageMultiplier = 1d,
         AttackType basicAttackType = AttackType.Melee,
@@ -491,6 +543,7 @@ public sealed class RuntimeCombatant
         Name = name;
         Team = team;
         Attributes = new Dictionary<AttributeType, float>(attributes);
+        InitialAttributes = new Dictionary<AttributeType, float>(attributes);
         Health = GetAttribute(AttributeType.MaxHealth);
         Tags = new HashSet<string>(tags ?? [], StringComparer.OrdinalIgnoreCase);
         Abilities = abilities.Select(x => new RuntimeAbility(x)).ToList();
@@ -499,6 +552,9 @@ public sealed class RuntimeCombatant
         _threat = isSummoned ? DefaultSummonThreat : 0f;
         RemainingSummonDurationTicks = summonDurationTicks;
         SummonOwner = summonOwner;
+        CanBasicAttack = canBasicAttack;
+        SummonGroupId = summonGroupId;
+        SummonGroupInstanceId = summonGroupInstanceId;
         BasicAttackIntervalMultiplier = Math.Max(0.1d, basicAttackIntervalMultiplier);
         BasicAttackDamageMultiplier = Math.Max(0.1d, basicAttackDamageMultiplier);
         BasicAttackType = basicAttackType;
@@ -511,6 +567,7 @@ public sealed class RuntimeCombatant
     public string ImagePath { get; }
     public CombatTeam Team { get; }
     public Dictionary<AttributeType, float> Attributes { get; }
+    public IReadOnlyDictionary<AttributeType, float> InitialAttributes { get; }
     public HashSet<string> Tags { get; }
     public List<RuntimeAbility> Abilities { get; }
     public List<RuntimeStatus> Statuses { get; } = [];
@@ -527,6 +584,9 @@ public sealed class RuntimeCombatant
     public bool IsSummoned { get; }
     public int RemainingSummonDurationTicks { get; private set; }
     public RuntimeCombatant? SummonOwner { get; }
+    public bool CanBasicAttack { get; }
+    public string? SummonGroupId { get; }
+    public string? SummonGroupInstanceId { get; }
     public double BasicAttackIntervalMultiplier { get; }
     public double BasicAttackDamageMultiplier { get; }
     public AttackType BasicAttackType { get; }
@@ -536,6 +596,9 @@ public sealed class RuntimeCombatant
     public float GetAttribute(AttributeType attributeType) =>
         Attributes.GetValueOrDefault(attributeType);
 
+    public float GetInitialAttribute(AttributeType attributeType) =>
+        InitialAttributes.GetValueOrDefault(attributeType);
+
     public void AdjustAttribute(AttributeType attributeType, float amount)
     {
         var oldMaxHealth = GetAttribute(AttributeType.MaxHealth);
@@ -543,6 +606,31 @@ public sealed class RuntimeCombatant
 
         if (attributeType == AttributeType.MaxHealth)
             SyncHealthAfterMaxHealthChange(oldMaxHealth, GetAttribute(AttributeType.MaxHealth));
+    }
+
+    public float SynchronizeAttributeContribution(
+        string contributionId,
+        AttributeType attributeType,
+        float desiredAmount)
+    {
+        if (_synchronizedAttributeContributions.TryGetValue(contributionId, out var existing)
+            && existing.Attribute != attributeType)
+        {
+            throw new InvalidOperationException(
+                $"Synchronized contribution '{contributionId}' changed attribute from '{existing.Attribute}' to '{attributeType}'.");
+        }
+
+        var currentAmount = existing.Amount;
+        var delta = desiredAmount - currentAmount;
+        if (Math.Abs(delta) > float.Epsilon)
+            AdjustAttribute(attributeType, delta);
+
+        if (Math.Abs(desiredAmount) <= float.Epsilon)
+            _synchronizedAttributeContributions.Remove(contributionId);
+        else
+            _synchronizedAttributeContributions[contributionId] = (attributeType, desiredAmount);
+
+        return delta;
     }
 
     public void AdjustHealth(float amount) =>
@@ -601,12 +689,27 @@ public sealed class RuntimeCombatant
         return RemainingSummonDurationTicks <= 0;
     }
 
-    public float GrantBarrier(RuntimeCombatant? source, float amount, long applicationOrder = 0)
+    public float GrantBarrier(
+        RuntimeCombatant? source,
+        float amount,
+        long applicationOrder = 0,
+        string? effectId = null,
+        int durationTicks = 0,
+        string? activationId = null,
+        string? linkedEffectId = null)
     {
         var cap = Math.Max(0, GetAttribute(AttributeType.MaxHealth) * 2.5f);
         var accepted = Math.Min(Math.Max(0, amount), Math.Max(0, cap - Barrier));
         if (accepted > 0)
-            BarrierContributions.Add(new RuntimeBarrierContribution(source, accepted, applicationOrder));
+            BarrierContributions.Add(
+                new RuntimeBarrierContribution(
+                    source,
+                    accepted,
+                    applicationOrder,
+                    effectId,
+                    durationTicks,
+                    activationId,
+                    linkedEffectId));
 
         return accepted;
     }
@@ -631,7 +734,11 @@ public sealed class RuntimeCombatant
                 consumedContributions.Add(new RuntimeBarrierConsumptionEntry(
                     contribution.Source,
                     fromContribution,
-                    contribution.ApplicationOrder));
+                    contribution.ApplicationOrder,
+                    contribution.EffectId,
+                    contribution.ActivationId,
+                    contribution.LinkedEffectId,
+                    contribution.Remaining <= 0));
             }
 
             if (contribution.Remaining <= 0)

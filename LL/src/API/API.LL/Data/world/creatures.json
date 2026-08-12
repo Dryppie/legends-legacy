@@ -67,6 +67,26 @@
       "archetype": "Support"
     },
     {
+      "id": "00000000-0000-0000-0000-000000000056",
+      "name": "Garran, the Gatekeeper",
+      "imagePath": "garran_the_gatekeeper",
+      "archetype": "Tank",
+      "damageProfile": "Hybrid",
+      "defenseProfile": "Balanced",
+      "baseLevel": 30,
+      "tier": 1
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000059",
+      "name": "Morrowmaw, Broodkeeper",
+      "imagePath": "",
+      "archetype": "Tank",
+      "damageProfile": "Magical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 34,
+      "tier": 1
+    },
+    {
       "id": "00000000-0000-0000-0000-000000000006",
       "name": "Frost Imp",
       "imagePath": "frost_imp",
@@ -287,6 +307,36 @@
       "name": "Vampire Bat",
       "imagePath": "vampire_bat",
       "archetype": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000057",
+      "name": "Velka, the Bloodwing Huntress",
+      "imagePath": "blood_harpy",
+      "archetype": "Bruiser",
+      "damageProfile": "Physical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 32,
+      "tier": 1
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000058",
+      "name": "Vaelor, the Mirrorbound",
+      "imagePath": "doppelganger",
+      "archetype": "Balanced",
+      "damageProfile": "Hybrid",
+      "defenseProfile": "Balanced",
+      "baseLevel": 37,
+      "tier": 1
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000060",
+      "name": "Kharad, the First Warden",
+      "imagePath": "knight",
+      "archetype": "Tank",
+      "damageProfile": "Hybrid",
+      "defenseProfile": "Balanced",
+      "baseLevel": 39,
+      "tier": 1
     },
     {
       "id": "00000000-0000-0000-0000-000000000024",

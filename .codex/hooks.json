@@ -1,0 +1,19 @@
+{
+  "description": "Repository command safeguards.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/enforce-npm-only.mjs\"",
+            "commandWindows": "powershell -NoProfile -NonInteractive -Command \"$ErrorActionPreference = 'Stop'; $repoRoot = git rev-parse --show-toplevel; & node (Join-Path $repoRoot '.codex/hooks/enforce-npm-only.mjs'); exit $LASTEXITCODE\"",
+            "timeout": 10,
+            "statusMessage": "Enforcing the npm-only repository policy"
+          }
+        ]
+      }
+    ]
+  }
+}

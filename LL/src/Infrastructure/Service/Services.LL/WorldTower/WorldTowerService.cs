@@ -4,6 +4,7 @@ using Application.Common.Interfaces;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.WebSockets;
 using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Combat;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Services.LL.WorldTower;
 using Application.UseCases.WorldTower.Dtos;
@@ -14,6 +15,7 @@ using Application.WebSockets.Contracts;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -36,6 +38,7 @@ namespace Services.LL.WorldTower;
 
 public sealed class WorldTowerService : IWorldTowerService
 {
+    private const string EchoModeUnlockKey = "tower_echo_mode_unlock";
     private static readonly TowerRallyStatus[] ActiveRallyStatuses =
     [
         TowerRallyStatus.Recruiting,
@@ -50,6 +53,9 @@ public sealed class WorldTowerService : IWorldTowerService
     private readonly IEntityService _entities;
     private readonly ICombatSetupService _combatSetup;
     private readonly ICombatEngineExecutor _combatEngine;
+    private readonly IWorldTowerDevelopmentRosterFactory _developmentRosters;
+    private readonly ICreatureAbilityDefinitionProvider _creatureAbilities;
+    private readonly IAbilityCatalogProvider _abilityCatalog;
     private readonly ICombatEncounterResultFactory _resultFactory;
     private readonly IGameEventOutbox _outbox;
     private readonly IGameRealtimeBroadcaster _realtime;
@@ -58,6 +64,7 @@ public sealed class WorldTowerService : IWorldTowerService
     private readonly WorldTowerOptions _options;
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly ILogger<WorldTowerService> _logger;
+    private readonly int _echoModeUnlockFloor;
 
     public WorldTowerService(
         IDbContext db,
@@ -67,6 +74,9 @@ public sealed class WorldTowerService : IWorldTowerService
         IEntityService entities,
         ICombatSetupService combatSetup,
         ICombatEngineExecutor combatEngine,
+        IWorldTowerDevelopmentRosterFactory developmentRosters,
+        ICreatureAbilityDefinitionProvider creatureAbilities,
+        IAbilityCatalogProvider abilityCatalog,
         ICombatEncounterResultFactory resultFactory,
         IGameEventOutbox outbox,
         IGameRealtimeBroadcaster realtime,
@@ -83,6 +93,9 @@ public sealed class WorldTowerService : IWorldTowerService
         _entities = entities;
         _combatSetup = combatSetup;
         _combatEngine = combatEngine;
+        _developmentRosters = developmentRosters;
+        _creatureAbilities = creatureAbilities;
+        _abilityCatalog = abilityCatalog;
         _resultFactory = resultFactory;
         _outbox = outbox;
         _realtime = realtime;
@@ -91,6 +104,10 @@ public sealed class WorldTowerService : IWorldTowerService
         _jsonOptions = jsonOptions;
         _timeProvider = timeProvider;
         _logger = logger;
+        _echoModeUnlockFloor = _definitions.GetFloors()
+            .Single(floor => floor.Unlocks.Any(unlock =>
+                string.Equals(unlock.Key, EchoModeUnlockKey, StringComparison.OrdinalIgnoreCase)))
+            .FloorNumber;
     }
 
     public async Task<TowerOverviewDto> GetOverviewAsync(
@@ -98,17 +115,21 @@ public sealed class WorldTowerService : IWorldTowerService
         CancellationToken cancellationToken)
     {
         await EnsureFloorProgressAsync(cancellationToken);
+        var releasedFloors = _definitions.GetFloors();
+        var releasedFloorNumbers = releasedFloors.Select(x => x.FloorNumber).ToArray();
         var progress = await _db.TowerFloorProgresses
             .AsNoTracking()
-            .Where(x => x.ServerId == _options.ServerId)
+            .Where(x => x.ServerId == _options.ServerId
+                        && releasedFloorNumbers.Contains(x.FloorNumber))
             .ToDictionaryAsync(x => x.FloorNumber, cancellationToken);
         var rallies = await ActiveRalliesQuery()
             .AsNoTracking()
             .Include(x => x.Participants)
             .Include(x => x.Applications)
+            .Where(x => releasedFloorNumbers.Contains(x.FloorNumber))
             .OrderBy(x => x.CreatedAt)
             .ToListAsync(cancellationToken);
-        var summaries = _definitions.GetFloors()
+        var summaries = releasedFloors
             .Select(floor => ToFloorSummary(
                 floor,
                 progress[floor.FloorNumber],
@@ -116,12 +137,18 @@ public sealed class WorldTowerService : IWorldTowerService
             .ToArray();
         var hall = await GetHallOfFameAsync(cancellationToken);
         var current = summaries.FirstOrDefault(x => x.State is not (TowerFloorStateType.Locked or TowerFloorStateType.Cleared));
+        var towerTokens = await _db.Characters
+            .AsNoTracking()
+            .Where(x => x.Id == characterId)
+            .Select(x => x.TowerTokens)
+            .SingleAsync(cancellationToken);
 
         return new TowerOverviewDto(
             _options.ServerId,
             progress.Values.Where(x => x.UnlockedAt.HasValue).Select(x => x.FloorNumber).DefaultIfEmpty(0).Max(),
             progress.Values.Where(x => x.IsCleared).Select(x => x.FloorNumber).DefaultIfEmpty(0).Max(),
             IsEchoUnlocked(progress),
+            towerTokens,
             current,
             summaries,
             rallies.Select(ToRallySummary).ToArray(),
@@ -182,7 +209,9 @@ public sealed class WorldTowerService : IWorldTowerService
             .Include(x => x.Attempt)
                 .ThenInclude(x => x!.Playback)
             .SingleOrDefaultAsync(x => x.Id == rallyId && x.ServerId == _options.ServerId, cancellationToken);
-        return rally is null ? null : ToRallyDto(rally, characterId, accountId);
+        return rally is null || _definitions.GetFloor(rally.FloorNumber) is null
+            ? null
+            : ToRallyDto(rally, characterId, accountId);
     }
 
     public async Task<TowerBattleReportDto?> GetAttemptReportAsync(
@@ -246,28 +275,71 @@ public sealed class WorldTowerService : IWorldTowerService
             : ToPlaybackDto(playback, _timeProvider.GetUtcNow());
     }
 
+    public async Task<TowerCombatFrameBatchDto?> GetAttemptPlaybackFramesAsync(
+        Guid characterId,
+        Guid attemptId,
+        int afterSequence,
+        CancellationToken cancellationToken)
+    {
+        var playback = await _db.TowerCombatPlaybacks
+            .AsNoTracking()
+            .Include(x => x.TowerAttempt)
+                .ThenInclude(x => x.TowerRally)
+                    .ThenInclude(x => x.Participants)
+            .SingleOrDefaultAsync(x => x.TowerAttemptId == attemptId
+                && x.TowerAttempt.ServerId == _options.ServerId
+                && x.TowerAttempt.TowerRally.Participants.Any(participant =>
+                    participant.CharacterId == characterId), cancellationToken);
+        if (playback is null)
+            return null;
+
+        var allFrames = DeserializeFrames(playback);
+        var completed = playback.TowerAttempt.Status is TowerAttemptStatus.Succeeded or TowerAttemptStatus.Failed;
+        var current = GetCurrentFrame(playback, allFrames, _timeProvider.GetUtcNow(), completed);
+        var frames = allFrames
+            .Where(frame => frame.Sequence > afterSequence && frame.Sequence <= current.Sequence)
+            .Take(_options.RecoveryFrameLimit)
+            .ToArray();
+        return new TowerCombatFrameBatchDto(
+            attemptId,
+            afterSequence,
+            current.Sequence,
+            frames.Length > 0 && frames[^1].Sequence < current.Sequence,
+            frames);
+    }
+
     public async Task<IReadOnlyList<TowerHallOfFameEntryDto>> GetHallOfFameAsync(
         CancellationToken cancellationToken)
     {
-        var firstClearIds = await _db.TowerFloorProgresses
+        var releasedFloors = _definitions.GetFloors();
+        var releasedFloorNumbers = releasedFloors.Select(x => x.FloorNumber).ToArray();
+        var releasedFloorsByNumber = releasedFloors.ToDictionary(x => x.FloorNumber);
+        var firstClears = await _db.TowerFloorProgresses
             .AsNoTracking()
-            .Where(x => x.ServerId == _options.ServerId && x.FirstClearAttemptId.HasValue)
-            .Select(x => x.FirstClearAttemptId!.Value)
+            .Where(x => x.ServerId == _options.ServerId
+                        && releasedFloorNumbers.Contains(x.FloorNumber)
+                        && x.FirstClearAttemptId.HasValue)
+            .Select(x => new { x.FloorNumber, AttemptId = x.FirstClearAttemptId!.Value })
             .ToListAsync(cancellationToken);
-        if (firstClearIds.Count == 0)
+        if (firstClears.Count == 0)
             return [];
+        var firstClearFloorByAttemptId = firstClears.ToDictionary(x => x.AttemptId, x => x.FloorNumber);
+        var firstClearIds = firstClearFloorByAttemptId.Keys.ToArray();
 
         var attempts = await _db.TowerAttempts
             .AsNoTracking()
             .Include(x => x.TowerRally)
                 .ThenInclude(x => x.Participants)
-            .Where(x => firstClearIds.Contains(x.Id))
+            .Where(x => firstClearIds.Contains(x.Id)
+                        && releasedFloorNumbers.Contains(x.FloorNumber))
             .OrderByDescending(x => x.CompletedAt)
             .ToListAsync(cancellationToken);
 
-        return attempts.Select(attempt =>
+        return attempts
+            .Where(attempt => firstClearFloorByAttemptId[attempt.Id] == attempt.FloorNumber)
+            .Select(attempt =>
         {
-            var floor = GetRequiredFloor(attempt.FloorNumber);
+            var floor = releasedFloorsByNumber[attempt.FloorNumber];
             return new TowerHallOfFameEntryDto(
                 floor.FloorNumber,
                 floor.Name,
@@ -333,13 +405,10 @@ public sealed class WorldTowerService : IWorldTowerService
         CancellationToken cancellationToken)
     {
         await _db.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
-        var floorNumber = await _db.TowerRallies
-            .AsNoTracking()
-            .Where(x => x.Id == rallyId && x.ServerId == _options.ServerId)
-            .Select(x => (int?)x.FloorNumber)
-            .SingleOrDefaultAsync(cancellationToken);
+        var floorNumber = await GetRallyFloorNumberAsync(rallyId, cancellationToken);
         if (!floorNumber.HasValue)
-            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
+        var definition = _definitions.GetFloor(floorNumber.Value)!;
         await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber.Value, cancellationToken);
 
         var rally = await _db.TowerRallies
@@ -348,13 +417,12 @@ public sealed class WorldTowerService : IWorldTowerService
             .Include(x => x.Attempt)
             .SingleOrDefaultAsync(x => x.Id == rallyId && x.ServerId == _options.ServerId, cancellationToken);
         if (rally is null)
-            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
         if (rally.Status is not (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready))
-            return TowerOperationResult<TowerRallyDto>.Fail("This rally is no longer accepting applications.");
+            return TowerOperationResult<TowerRallyDto>.Fail("This Expedition is no longer accepting applications.");
         if (rally.Participants.Count >= rally.RequiredSlots)
-            return TowerOperationResult<TowerRallyDto>.Fail("This rally is already full.");
+            return TowerOperationResult<TowerRallyDto>.Fail("This Expedition is already full.");
 
-        var definition = GetRequiredFloor(rally.FloorNumber);
         var modeError = await ValidateRallyModeAsync(definition, rally.Mode, cancellationToken);
         if (modeError is not null)
             return TowerOperationResult<TowerRallyDto>.Fail(modeError);
@@ -362,17 +430,17 @@ public sealed class WorldTowerService : IWorldTowerService
         if (eligibility.Error is not null)
             return TowerOperationResult<TowerRallyDto>.Fail(eligibility.Error);
         if (rally.Participants.Any(x => x.AccountId == eligibility.AccountId))
-            return TowerOperationResult<TowerRallyDto>.Fail("This account already occupies a slot in the rally.");
+            return TowerOperationResult<TowerRallyDto>.Fail("This account already occupies a slot in the Expedition.");
         var existingApplication = rally.Applications.SingleOrDefault(x =>
             x.AccountId == eligibility.AccountId);
         if (existingApplication?.Status == TowerRallyApplicationStatus.Pending)
         {
-            return TowerOperationResult<TowerRallyDto>.Fail("This account has already applied to this rally.");
+            return TowerOperationResult<TowerRallyDto>.Fail("This account has already applied to this Expedition.");
         }
         if (existingApplication?.Status == TowerRallyApplicationStatus.Accepted
             && rally.Participants.Any(x => x.AccountId == eligibility.AccountId))
         {
-            return TowerOperationResult<TowerRallyDto>.Fail("This account already occupies a slot in the rally.");
+            return TowerOperationResult<TowerRallyDto>.Fail("This account already occupies a slot in the Expedition.");
         }
 
         var snapshot = await _snapshots.CreateAsync(eligibility.CharacterId, cancellationToken);
@@ -412,7 +480,7 @@ public sealed class WorldTowerService : IWorldTowerService
     {
         var floorNumber = await GetRallyFloorNumberAsync(rallyId, cancellationToken);
         if (!floorNumber.HasValue)
-            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
         var applicantCharacterId = await _db.TowerRallyApplications
             .AsNoTracking()
             .Where(x => x.Id == applicationId && x.TowerRallyId == rallyId)
@@ -423,27 +491,27 @@ public sealed class WorldTowerService : IWorldTowerService
         await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber.Value, cancellationToken);
         var rally = await GetMutableRallyWithApplicationsAsync(rallyId, cancellationToken);
         if (rally is null)
-            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
         if (rally.CreatedByCharacterId != characterId)
-            return TowerOperationResult<TowerRallyDto>.Fail("Only the rally leader can accept applications.");
+            return TowerOperationResult<TowerRallyDto>.Fail("Only the Expedition leader can accept applications.");
         if (rally.Status != TowerRallyStatus.Recruiting)
-            return TowerOperationResult<TowerRallyDto>.Fail("This rally is no longer accepting applications.");
+            return TowerOperationResult<TowerRallyDto>.Fail("This Expedition is no longer accepting applications.");
         if (rally.Participants.Count >= rally.RequiredSlots)
-            return TowerOperationResult<TowerRallyDto>.Fail("This rally is already full.");
+            return TowerOperationResult<TowerRallyDto>.Fail("This Expedition is already full.");
 
         var application = rally.Applications.SingleOrDefault(x =>
             x.Id == applicationId && x.Status == TowerRallyApplicationStatus.Pending);
         if (application is null)
-            return TowerOperationResult<TowerRallyDto>.Fail("The pending rally application was not found.");
+            return TowerOperationResult<TowerRallyDto>.Fail("The pending Expedition application was not found.");
         if (rally.Participants.Any(x => x.AccountId == application.AccountId))
-            return TowerOperationResult<TowerRallyDto>.Fail("This account already occupies a slot in the rally.");
+            return TowerOperationResult<TowerRallyDto>.Fail("This account already occupies a slot in the Expedition.");
         var conflicting = await _db.TowerRallyParticipants
             .AsNoTracking()
             .AnyAsync(x => x.CharacterId == application.CharacterId
                            && x.TowerRallyId != rally.Id
                            && ActiveRallyStatuses.Contains(x.TowerRally.Status), cancellationToken);
         if (conflicting)
-            return TowerOperationResult<TowerRallyDto>.Fail("This character is already locked into another active Tower rally.");
+            return TowerOperationResult<TowerRallyDto>.Fail("This character is already locked into another active Tower Expedition.");
 
         var now = DateTimeOffset.UtcNow;
         application.Status = TowerRallyApplicationStatus.Accepted;
@@ -490,18 +558,18 @@ public sealed class WorldTowerService : IWorldTowerService
     {
         var floorNumber = await GetRallyFloorNumberAsync(rallyId, cancellationToken);
         if (!floorNumber.HasValue)
-            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
         await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber.Value, cancellationToken);
         var rally = await GetMutableRallyWithApplicationsAsync(rallyId, cancellationToken);
         if (rally is null)
-            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
         if (rally.CreatedByCharacterId != characterId)
-            return TowerOperationResult<TowerRallyDto>.Fail("Only the rally leader can decline applications.");
+            return TowerOperationResult<TowerRallyDto>.Fail("Only the Expedition leader can decline applications.");
 
         var application = rally.Applications.SingleOrDefault(x =>
             x.Id == applicationId && x.Status == TowerRallyApplicationStatus.Pending);
         if (application is null)
-            return TowerOperationResult<TowerRallyDto>.Fail("The pending rally application was not found.");
+            return TowerOperationResult<TowerRallyDto>.Fail("The pending Expedition application was not found.");
 
         var now = DateTimeOffset.UtcNow;
         application.Status = TowerRallyApplicationStatus.Declined;
@@ -516,20 +584,30 @@ public sealed class WorldTowerService : IWorldTowerService
 
     private async Task<TowerRally?> GetMutableRallyWithApplicationsAsync(
         Guid rallyId,
-        CancellationToken cancellationToken) =>
-        await _db.TowerRallies
+        CancellationToken cancellationToken)
+    {
+        var rally = await _db.TowerRallies
             .Include(x => x.Participants)
             .Include(x => x.Applications)
                 .ThenInclude(x => x.CharacterSnapshot)
             .Include(x => x.Attempt)
             .SingleOrDefaultAsync(x => x.Id == rallyId && x.ServerId == _options.ServerId, cancellationToken);
+        return rally is not null && _definitions.GetFloor(rally.FloorNumber) is not null
+            ? rally
+            : null;
+    }
 
-    private async Task<int?> GetRallyFloorNumberAsync(Guid rallyId, CancellationToken cancellationToken) =>
-        await _db.TowerRallies
+    private async Task<int?> GetRallyFloorNumberAsync(Guid rallyId, CancellationToken cancellationToken)
+    {
+        var floorNumber = await _db.TowerRallies
             .AsNoTracking()
             .Where(x => x.Id == rallyId && x.ServerId == _options.ServerId)
             .Select(x => (int?)x.FloorNumber)
             .SingleOrDefaultAsync(cancellationToken);
+        return floorNumber.HasValue && _definitions.GetFloor(floorNumber.Value) is not null
+            ? floorNumber
+            : null;
+    }
 
     private async Task<Guid?> GetAccountIdAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _db.Characters
@@ -543,13 +621,9 @@ public sealed class WorldTowerService : IWorldTowerService
         Guid rallyId,
         CancellationToken cancellationToken)
     {
-        var floorNumber = await _db.TowerRallies
-            .AsNoTracking()
-            .Where(x => x.Id == rallyId && x.ServerId == _options.ServerId)
-            .Select(x => (int?)x.FloorNumber)
-            .SingleOrDefaultAsync(cancellationToken);
+        var floorNumber = await GetRallyFloorNumberAsync(rallyId, cancellationToken);
         if (!floorNumber.HasValue)
-            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
         await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber.Value, cancellationToken);
 
         var rally = await _db.TowerRallies
@@ -558,15 +632,15 @@ public sealed class WorldTowerService : IWorldTowerService
             .Include(x => x.Attempt)
             .SingleOrDefaultAsync(x => x.Id == rallyId && x.ServerId == _options.ServerId, cancellationToken);
         if (rally is null)
-            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
         if (rally.Status is not (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready))
-            return TowerOperationResult<TowerRallyDto>.Fail("Participants cannot leave a started rally.");
+            return TowerOperationResult<TowerRallyDto>.Fail("Participants cannot leave a started Expedition.");
 
         var participant = rally.Participants.SingleOrDefault(x => x.CharacterId == characterId);
         var application = rally.Applications.SingleOrDefault(x =>
             x.CharacterId == characterId && x.Status == TowerRallyApplicationStatus.Pending);
         if (participant is null && application is null)
-            return TowerOperationResult<TowerRallyDto>.Fail("You are not part of this rally and have no pending application.");
+            return TowerOperationResult<TowerRallyDto>.Fail("You are not part of this Expedition and have no pending application.");
 
         var now = DateTimeOffset.UtcNow;
         string eventName;
@@ -626,7 +700,8 @@ public sealed class WorldTowerService : IWorldTowerService
 
         var floorNumber = await GetRallyFloorNumberAsync(rallyId, cancellationToken);
         if (!floorNumber.HasValue)
-            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
+        var definition = _definitions.GetFloor(floorNumber.Value)!;
         await _db.AcquireWorldTowerFloorLockAsync(
             _options.ServerId,
             floorNumber.Value,
@@ -634,15 +709,15 @@ public sealed class WorldTowerService : IWorldTowerService
 
         var rally = await GetMutableRallyWithApplicationsAsync(rallyId, cancellationToken);
         if (rally is null)
-            return TowerOperationResult<TowerRallyDto>.Fail("Tower rally was not found.");
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
         if (rally.CreatedByCharacterId != characterId)
-            return TowerOperationResult<TowerRallyDto>.Fail("Only the rally leader can fill a development roster.");
+            return TowerOperationResult<TowerRallyDto>.Fail("Only the Expedition leader can fill a development roster.");
         if (rally.Status != TowerRallyStatus.Recruiting)
-            return TowerOperationResult<TowerRallyDto>.Fail("Only a recruiting rally can be filled.");
+            return TowerOperationResult<TowerRallyDto>.Fail("Only a recruiting Expedition can be filled.");
 
         var openSlots = rally.RequiredSlots - rally.Participants.Count;
         if (openSlots <= 0)
-            return TowerOperationResult<TowerRallyDto>.Fail("This rally is already full.");
+            return TowerOperationResult<TowerRallyDto>.Fail("This Expedition is already full.");
 
         var occupiedCharacterIds = await _db.TowerRallyParticipants
             .AsNoTracking()
@@ -666,7 +741,7 @@ public sealed class WorldTowerService : IWorldTowerService
         {
             var candidate = await GetJoinEligibilityAsync(
                 candidateId,
-                GetRequiredFloor(rally.FloorNumber),
+                definition,
                 rally.Id,
                 cancellationToken);
             if (candidate.Error is not null)
@@ -687,11 +762,17 @@ public sealed class WorldTowerService : IWorldTowerService
         var added = 0;
         foreach (var candidate in eligible)
         {
+            var developmentBuild = _developmentRosters.Create(
+                candidate.CharacterId,
+                candidate.CharacterName,
+                definition,
+                added);
             var participant = await CreateParticipantAsync(
-                candidate,
+                candidate with { PowerRating = developmentBuild.PowerRating },
                 rally,
                 now.AddTicks(added + 1),
-                cancellationToken);
+                cancellationToken,
+                developmentBuild.Snapshot);
             rally.Participants.Add(participant);
             _db.TowerRallyParticipants.Add(participant);
             added++;
@@ -718,18 +799,14 @@ public sealed class WorldTowerService : IWorldTowerService
         Guid rallyId,
         CancellationToken cancellationToken)
     {
-        TowerAttempt attempt;
         TowerFloorDefinition definition;
 
         await using (var transaction = await _db.BeginTransactionAsync(cancellationToken))
         {
-            var floorNumber = await _db.TowerRallies
-                .AsNoTracking()
-                .Where(x => x.Id == rallyId && x.ServerId == _options.ServerId)
-                .Select(x => (int?)x.FloorNumber)
-                .SingleOrDefaultAsync(cancellationToken);
+            var floorNumber = await GetRallyFloorNumberAsync(rallyId, cancellationToken);
             if (!floorNumber.HasValue)
-                return TowerOperationResult<TowerAttemptResultDto>.Fail("Tower rally was not found.");
+                return TowerOperationResult<TowerAttemptResultDto>.Fail("Tower Expedition was not found.");
+            definition = _definitions.GetFloor(floorNumber.Value)!;
 
             await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber.Value, cancellationToken);
             var rally = await _db.TowerRallies
@@ -738,24 +815,37 @@ public sealed class WorldTowerService : IWorldTowerService
                 .Include(x => x.Attempt)
                 .SingleOrDefaultAsync(x => x.Id == rallyId && x.ServerId == _options.ServerId, cancellationToken);
             if (rally is null)
-                return TowerOperationResult<TowerAttemptResultDto>.Fail("Tower rally was not found.");
+                return TowerOperationResult<TowerAttemptResultDto>.Fail("Tower Expedition was not found.");
 
             if (rally.CreatedByCharacterId != characterId)
-                return TowerOperationResult<TowerAttemptResultDto>.Fail("Only the rally leader can start the attempt.");
+                return TowerOperationResult<TowerAttemptResultDto>.Fail("Only the Expedition leader can start the attempt.");
             if (rally.Status != TowerRallyStatus.Ready || rally.Participants.Count != rally.RequiredSlots)
-                return TowerOperationResult<TowerAttemptResultDto>.Fail("The rally must fill every slot before it can start.");
+                return TowerOperationResult<TowerAttemptResultDto>.Fail("The Expedition must fill every slot before it can start.");
             if (rally.Attempt is not null)
-                return TowerOperationResult<TowerAttemptResultDto>.Fail("This rally already has an attempt.");
+                return TowerOperationResult<TowerAttemptResultDto>.Fail("This Expedition already has an attempt.");
 
-            definition = GetRequiredFloor(rally.FloorNumber);
             var modeError = await ValidateRallyModeAsync(definition, rally.Mode, cancellationToken);
             if (modeError is not null)
                 return TowerOperationResult<TowerAttemptResultDto>.Fail(modeError);
 
+            var anotherAttemptIsActive = await _db.TowerAttempts
+                .AsNoTracking()
+                .AnyAsync(x => x.ServerId == _options.ServerId
+                               && x.FloorNumber == rally.FloorNumber
+                               && x.TowerRallyId != rally.Id
+                               && (x.Status == TowerAttemptStatus.Started
+                                   || x.Status == TowerAttemptStatus.Playback),
+                    cancellationToken);
+            if (anotherAttemptIsActive)
+            {
+                return TowerOperationResult<TowerAttemptResultDto>.Fail(
+                    "Another Expedition is already attempting this floor. Wait for that attempt to finish.");
+            }
+
             var attemptNumber = await _db.TowerAttempts.CountAsync(
                 x => x.ServerId == _options.ServerId && x.FloorNumber == rally.FloorNumber,
                 cancellationToken) + 1;
-            attempt = new TowerAttempt
+            var attempt = new TowerAttempt
             {
                 TowerRallyId = rally.Id,
                 ServerId = _options.ServerId,
@@ -772,33 +862,35 @@ public sealed class WorldTowerService : IWorldTowerService
             await EnqueueRallyUpdateAsync(rally, "Started", attempt.StartedAt, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
-        }
-
-        TowerCombatOutcome outcome;
-        try
-        {
-            outcome = await ResolveCombatAsync(rallyId, definition, cancellationToken);
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError(exception, "World Tower attempt {AttemptId} failed during combat resolution.", attempt.Id);
-            await MarkAttemptErroredAsync(attempt.Id, exception.Message, cancellationToken);
-            return TowerOperationResult<TowerAttemptResultDto>.Fail("The Tower attempt could not be resolved. The failed attempt was recorded.");
-        }
-
-        try
-        {
-            var playback = await PreparePlaybackAsync(attempt.Id, definition, outcome, cancellationToken);
             return TowerOperationResult<TowerAttemptResultDto>.Success(new TowerAttemptResultDto(
                 attempt.Id,
                 definition.FloorNumber,
                 definition.GuardianName,
-                TowerAttemptStatus.Playback,
-                playback));
+                TowerAttemptStatus.Started,
+                null));
+        }
+    }
+
+    public async Task<bool> SimulateQueuedAttemptAsync(
+        Guid attemptId,
+        string leaseOwner,
+        CancellationToken cancellationToken)
+    {
+        var attempt = await _db.TowerAttempts
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Id == attemptId, cancellationToken);
+        if (attempt is null
+            || attempt.Status != TowerAttemptStatus.Started
+            || attempt.SimulationLeaseOwner != leaseOwner
+            || attempt.SimulationLeaseUntil <= _timeProvider.GetUtcNow())
+            return false;
+
+        var definition = GetRequiredFloor(attempt.FloorNumber);
+        try
+        {
+            var outcome = await ResolveCombatAsync(attempt.TowerRallyId, attempt.Id, definition, cancellationToken);
+            await PreparePlaybackAsync(attempt.Id, leaseOwner, definition, outcome, cancellationToken);
+            return true;
         }
         catch (OperationCanceledException)
         {
@@ -806,9 +898,9 @@ public sealed class WorldTowerService : IWorldTowerService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "World Tower attempt {AttemptId} failed while preparing playback.", attempt.Id);
-            await MarkAttemptErroredAsync(attempt.Id, exception.Message, cancellationToken);
-            return TowerOperationResult<TowerAttemptResultDto>.Fail("The Tower battle playback could not be prepared. The failed attempt was recorded.");
+            _logger.LogError(exception, "World Tower attempt {AttemptId} failed during queued simulation.", attempt.Id);
+            await MarkAttemptErroredAsync(attempt.Id, leaseOwner, exception.Message, cancellationToken);
+            return false;
         }
     }
 
@@ -819,24 +911,11 @@ public sealed class WorldTowerService : IWorldTowerService
         int amount,
         CancellationToken cancellationToken)
     {
-        if (amount is < 1 or > 5)
-            return TowerOperationResult<TowerFloorDetailDto>.Fail("Contribution amount must be between 1 and 5.");
+        if (amount != 1)
+            return TowerOperationResult<TowerFloorDetailDto>.Fail("Scouting and preparation are performed one action at a time.");
         var definition = _definitions.GetFloor(floorNumber);
         if (definition is null)
             return TowerOperationResult<TowerFloorDetailDto>.Fail("Tower floor was not found.");
-
-        await EnsureFloorProgressAsync(cancellationToken);
-        await _db.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
-        await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber, cancellationToken);
-        var progress = await _db.TowerFloorProgresses.SingleAsync(
-            x => x.ServerId == _options.ServerId && x.FloorNumber == floorNumber,
-            cancellationToken);
-        if (!progress.UnlockedAt.HasValue || progress.IsCleared)
-            return TowerOperationResult<TowerFloorDetailDto>.Fail("Contributions are only accepted for the current uncleared floor.");
-        if (!await _db.Characters.AnyAsync(x => x.Id == characterId, cancellationToken))
-            return TowerOperationResult<TowerFloorDetailDto>.Fail("Character was not found.");
-
-        var weekKey = GetWeekKey(_timeProvider.GetUtcNow());
         var isScouting = kind == TowerContributionKind.Research;
         var allowedKinds = new[]
         {
@@ -848,6 +927,20 @@ public sealed class WorldTowerService : IWorldTowerService
         if (!allowedKinds.Contains(kind))
             return TowerOperationResult<TowerFloorDetailDto>.Fail("Contribution kind is not supported.");
 
+        await EnsureFloorProgressAsync(cancellationToken);
+        await _db.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
+        await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber, cancellationToken);
+        var progress = await _db.TowerFloorProgresses.SingleAsync(
+            x => x.ServerId == _options.ServerId && x.FloorNumber == floorNumber,
+            cancellationToken);
+        if (progress.IsCleared)
+            return TowerOperationResult<TowerFloorDetailDto>.Fail("Contributions are not accepted for a cleared floor.");
+        if (!isScouting && !progress.UnlockedAt.HasValue)
+            return TowerOperationResult<TowerFloorDetailDto>.Fail("Preparation requires this floor to be unlocked.");
+        if (!await _db.Characters.AnyAsync(x => x.Id == characterId, cancellationToken))
+            return TowerOperationResult<TowerFloorDetailDto>.Fail("Character was not found.");
+
+        var weekKey = GetWeekKey(_timeProvider.GetUtcNow());
         if (isScouting)
         {
             if (progress.ScoutingProgress >= 100)
@@ -880,18 +973,17 @@ public sealed class WorldTowerService : IWorldTowerService
 
         var used = await _db.TowerContributions
             .Where(x => x.ServerId == _options.ServerId
-                        && x.FloorNumber == floorNumber
                         && x.CharacterId == characterId
                         && x.WeekKey == weekKey
                         && (isScouting
                             ? x.Kind == TowerContributionKind.Research
                             : x.Kind != TowerContributionKind.Research))
-            .SumAsync(x => x.Amount, cancellationToken);
+            .CountAsync(cancellationToken);
         var cap = isScouting
             ? _options.ManualScoutingWeeklyCapPerCharacter
             : _options.PreparationWeeklyCapPerCharacter;
-        if (used + amount > cap)
-            return TowerOperationResult<TowerFloorDetailDto>.Fail($"This contribution would exceed the weekly cap of {cap}.");
+        if (used >= cap)
+            return TowerOperationResult<TowerFloorDetailDto>.Fail($"The weekly limit of {cap} actions has been reached.");
 
         _db.TowerContributions.Add(new TowerContribution
         {
@@ -901,10 +993,10 @@ public sealed class WorldTowerService : IWorldTowerService
             Kind = kind,
             Amount = amount,
             WeekKey = weekKey,
-            CreatedAt = DateTimeOffset.UtcNow
+            CreatedAt = _timeProvider.GetUtcNow()
         });
         if (isScouting)
-            progress.AddScoutingProgress(amount, DateTimeOffset.UtcNow);
+            progress.AddScoutingProgress(amount, _timeProvider.GetUtcNow());
         await _db.SaveChangesAsync(cancellationToken);
 
         var detail = await GetFloorAsync(characterId, floorNumber, cancellationToken);
@@ -922,6 +1014,12 @@ public sealed class WorldTowerService : IWorldTowerService
         var existing = await _db.TowerFloorProgresses
             .Where(x => x.ServerId == _options.ServerId)
             .ToDictionaryAsync(x => x.FloorNumber, cancellationToken);
+        var existingUnlocks = new HashSet<string>(
+            await _db.ServerUnlocks
+                .Where(x => x.ServerId == _options.ServerId)
+                .Select(x => x.UnlockKey)
+                .ToArrayAsync(cancellationToken),
+            StringComparer.OrdinalIgnoreCase);
         var now = DateTimeOffset.UtcNow;
         var changed = false;
 
@@ -947,6 +1045,24 @@ public sealed class WorldTowerService : IWorldTowerService
                 && existing.GetValueOrDefault(floor.FloorNumber - 1)?.IsCleared == true)
             {
                 changed |= state.Unlock(now);
+            }
+
+            if (state.IsCleared)
+            {
+                foreach (var unlock in floor.Unlocks)
+                {
+                    if (!existingUnlocks.Add(unlock.Key))
+                        continue;
+
+                    _db.ServerUnlocks.Add(new ServerUnlock
+                    {
+                        ServerId = _options.ServerId,
+                        UnlockKey = unlock.Key,
+                        SourceFloorNumber = floor.FloorNumber,
+                        UnlockedAt = state.ClearedAt ?? now
+                    });
+                    changed = true;
+                }
             }
         }
 
@@ -975,8 +1091,10 @@ public sealed class WorldTowerService : IWorldTowerService
         {
             TowerRallyMode.FirstClear when !floor.UnlockedAt.HasValue => "This Tower floor is still locked.",
             TowerRallyMode.FirstClear when floor.IsCleared => "This Tower floor has already been cleared.",
-            TowerRallyMode.Echo when !IsEchoUnlocked(progress) => "Echo Mode unlocks when Floor 5 is cleared.",
-            TowerRallyMode.Echo when !floor.IsCleared => "Echo rallies require a cleared floor.",
+            TowerRallyMode.Echo when definition.Type == TowerFloorType.Sovereign => "Sovereign floors cannot be cleared in Echo Mode.",
+            TowerRallyMode.Echo when !IsEchoUnlocked(progress) =>
+                $"Echo Mode unlocks when Floor {_echoModeUnlockFloor} is cleared.",
+            TowerRallyMode.Echo when !floor.IsCleared => "Echo Expeditions require a cleared floor.",
             TowerRallyMode.Echo when !definition.EchoEnabledAfterClear => "Echo Mode is disabled for this floor.",
             _ => null
         };
@@ -1002,7 +1120,7 @@ public sealed class WorldTowerService : IWorldTowerService
                 .AnyAsync(x => x.TowerRallyId == targetRallyId.Value
                                && x.AccountId == character.UserId, cancellationToken);
             if (accountAlreadyJoined)
-                return JoinEligibility.Fail("This account already occupies a slot in the rally.");
+                return JoinEligibility.Fail("This account already occupies a slot in the Expedition.");
         }
 
         var conflicting = await _db.TowerRallyParticipants
@@ -1011,7 +1129,7 @@ public sealed class WorldTowerService : IWorldTowerService
                            && x.TowerRallyId != targetRallyId
                            && ActiveRallyStatuses.Contains(x.TowerRally.Status), cancellationToken);
         if (conflicting)
-            return JoinEligibility.Fail("This character is already locked into an active Tower rally.");
+            return JoinEligibility.Fail("This character is already locked into an active Tower Expedition.");
 
         var rating = await _powerRatings.GetCharacterRatingAsync(characterId, cancellationToken);
         if (rating.State != PowerAnalysisState.Available)
@@ -1023,7 +1141,7 @@ public sealed class WorldTowerService : IWorldTowerService
             character.Name,
             character.Guild?.Id,
             character.Guild?.Name,
-            rating.Overall,
+            CombatRatingDisplay.FromRaw(rating.Overall),
             null);
     }
 
@@ -1031,9 +1149,13 @@ public sealed class WorldTowerService : IWorldTowerService
         JoinEligibility eligibility,
         TowerRally rally,
         DateTimeOffset joinedAt,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Domain.Models.Snapshots.CharacterSnapshot? suppliedSnapshot = null)
     {
-        var snapshot = await _snapshots.CreateAsync(eligibility.CharacterId, cancellationToken);
+        var snapshot = suppliedSnapshot
+            ?? await _snapshots.CreateAsync(eligibility.CharacterId, cancellationToken);
+        if (suppliedSnapshot is not null)
+            _db.CharacterSnapshots.Add(snapshot);
         return new TowerRallyParticipant
         {
             TowerRally = rally,
@@ -1051,6 +1173,7 @@ public sealed class WorldTowerService : IWorldTowerService
 
     private async Task<TowerCombatOutcome> ResolveCombatAsync(
         Guid rallyId,
+        Guid attemptId,
         TowerFloorDefinition definition,
         CancellationToken cancellationToken)
     {
@@ -1077,7 +1200,13 @@ public sealed class WorldTowerService : IWorldTowerService
             .GroupBy(x => x.Kind)
             .Select(x => new { Kind = x.Key, Amount = x.Sum(y => y.Amount) })
             .ToDictionaryAsync(x => x.Kind, x => x.Amount, cancellationToken);
-        var preparation = CreatePreparationModifiers(contributionTotals);
+        var isFloorCleared = await _db.TowerFloorProgresses
+            .AsNoTracking()
+            .AnyAsync(x => x.ServerId == _options.ServerId
+                           && x.FloorNumber == definition.FloorNumber
+                           && x.IsCleared,
+                cancellationToken);
+        var preparation = CreatePreparationModifiers(contributionTotals, isFloorCleared);
 
         var friendly = new List<CombatRuntimeParticipant>();
         foreach (var participant in rally.Participants.OrderBy(x => x.JoinedAt))
@@ -1107,7 +1236,7 @@ public sealed class WorldTowerService : IWorldTowerService
         var guardian = _combatSetup.CreateCreatureCombatEntities(
             [guardianSource],
             new Area { DifficultyTier = 1 }).Single();
-        DungeonEnemyDifficultyScaling.Apply(guardian, 1, definition.GuardianStrengthMultiplier);
+        WorldTowerGuardianScaling.Apply(guardian, definition.GuardianScaling);
         AddPercentModifier(guardian, AttributeType.Power, -preparation.GuardianDamageReductionPercent);
         var hostileSlot = new CombatParticipantSlot(
             definition.GuardianCreatureId.ToString(),
@@ -1119,7 +1248,7 @@ public sealed class WorldTowerService : IWorldTowerService
             [.. friendly.Select(x => x.Combatant), hostile.Combatant]);
         var startedAt = _timeProvider.GetUtcNow();
         var plan = new CombatEncounterPlan(
-            Guid.NewGuid(),
+            attemptId,
             CombatMode.Raid,
             1,
             startedAt,
@@ -1157,7 +1286,7 @@ public sealed class WorldTowerService : IWorldTowerService
             : Math.Round(100m * guardianState.Health / guardianState.MaxHealth, 2);
         var duration = Math.Max(0, (int)Math.Ceiling(
             combatResult.Duration / (double)FastCombatEngine.TicksPerSecond));
-        var failureReason = succeeded ? null : "The rally was defeated before the Guardian fell.";
+        var failureReason = succeeded ? null : "The Expedition was defeated before the Guardian fell.";
         var report = new TowerBattleReportDto(
             definition.FloorNumber,
             definition.GuardianName,
@@ -1179,16 +1308,24 @@ public sealed class WorldTowerService : IWorldTowerService
 
     private async Task<TowerCombatPlaybackDto> PreparePlaybackAsync(
         Guid attemptId,
+        string leaseOwner,
         TowerFloorDefinition definition,
         TowerCombatOutcome outcome,
         CancellationToken cancellationToken)
     {
+        await using var transaction = await _db.BeginTransactionAsync(cancellationToken);
+        await _db.AcquireWorldTowerFloorLockAsync(
+            _options.ServerId,
+            definition.FloorNumber,
+            cancellationToken);
         var attempt = await _db.TowerAttempts
             .Include(x => x.TowerRally)
                 .ThenInclude(x => x.Participants)
             .SingleAsync(x => x.Id == attemptId, cancellationToken);
         if (attempt.Status != TowerAttemptStatus.Started)
             throw new InvalidOperationException("The Tower attempt is no longer awaiting playback preparation.");
+        if (attempt.SimulationLeaseOwner != leaseOwner)
+            throw new InvalidOperationException("The Tower simulation lease is no longer owned by this worker.");
 
         var frames = outcome.Checkpoints
             .Select(checkpoint => ToFrameDto(
@@ -1219,16 +1356,20 @@ public sealed class WorldTowerService : IWorldTowerService
         attempt.FailureReason = outcome.FailureReason;
         attempt.CombatResultJson = JsonSerializer.Serialize(outcome.CombatResult, _jsonOptions);
         attempt.BattleReportJson = JsonSerializer.Serialize(outcome.Report, _jsonOptions);
+        attempt.SimulationLeaseOwner = null;
+        attempt.SimulationLeaseUntil = null;
         attempt.Playback = playback;
         _db.TowerCombatPlaybacks.Add(playback);
         await EnqueueRallyUpdateAsync(attempt.TowerRally, "PlaybackReady", now, cancellationToken);
         await _db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         return ToPlaybackDto(playback, now);
     }
 
     public async Task<bool> PublishDuePlaybackFrameAsync(
         Guid attemptId,
+        string leaseOwner,
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
@@ -1238,7 +1379,9 @@ public sealed class WorldTowerService : IWorldTowerService
                 .ThenInclude(x => x.TowerRally)
                     .ThenInclude(x => x.Participants)
             .SingleOrDefaultAsync(x => x.TowerAttemptId == attemptId, cancellationToken);
-        if (playback is null)
+        if (playback is null
+            || playback.DispatchLeaseOwner != leaseOwner
+            || playback.DispatchLeaseUntil <= now)
             return false;
 
         var frames = DeserializeFrames(playback);
@@ -1291,8 +1434,13 @@ public sealed class WorldTowerService : IWorldTowerService
 
         var cursor = await _db.TowerCombatPlaybacks
             .SingleAsync(x => x.TowerAttemptId == attemptId, cancellationToken);
+        cursor.DispatchLeaseOwner = null;
+        cursor.DispatchLeaseUntil = null;
         if (cursor.LastPublishedSequence >= dueFrame.Sequence)
+        {
+            await _db.SaveChangesAsync(cancellationToken);
             return true;
+        }
         cursor.LastPublishedSequence = dueFrame.Sequence;
         cursor.RowVersion++;
         await _db.SaveChangesAsync(cancellationToken);
@@ -1349,7 +1497,9 @@ public sealed class WorldTowerService : IWorldTowerService
                     unlockedNextFloor = nextProgress.Unlock(now);
             }
 
-            foreach (var key in definition.UnlockKeys.Distinct(StringComparer.OrdinalIgnoreCase))
+            foreach (var key in definition.Unlocks
+                         .Select(x => x.Key)
+                         .Distinct(StringComparer.OrdinalIgnoreCase))
             {
                 if (!await _db.ServerUnlocks.AnyAsync(
                         x => x.ServerId == _options.ServerId && x.UnlockKey == key,
@@ -1365,18 +1515,23 @@ public sealed class WorldTowerService : IWorldTowerService
                 }
             }
 
-            await GrantCindersAsync(
+            await GrantTowerTokensAsync(
                 attempt.TowerRally.Participants.Select(x => x.CharacterId),
-                definition.FirstClearCinders,
+                definition.FirstClearTowerTokens,
                 cancellationToken);
         }
         else if (outcome.Succeeded && attempt.Mode == TowerRallyMode.Echo)
         {
             var weekKey = GetWeekKey(now);
-            var characterIds = attempt.TowerRally.Participants.Select(x => x.CharacterId).ToArray();
+            var characterIds = attempt.TowerRally.Participants
+                .Select(x => x.CharacterId)
+                .Distinct()
+                .OrderBy(x => x)
+                .ToArray();
+            foreach (var characterId in characterIds)
+                await _db.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
             var alreadyRewarded = await _db.TowerEchoClears
                 .Where(x => x.ServerId == _options.ServerId
-                            && x.FloorNumber == definition.FloorNumber
                             && x.WeekKey == weekKey
                             && characterIds.Contains(x.CharacterId))
                 .Select(x => x.CharacterId)
@@ -1393,7 +1548,7 @@ public sealed class WorldTowerService : IWorldTowerService
                     ClearedAt = now
                 });
             }
-            await GrantCindersAsync(eligible, definition.EchoCinders, cancellationToken);
+            await GrantTowerTokensAsync(eligible, definition.TowerTokens, cancellationToken);
         }
         else if (!outcome.Succeeded && attempt.Mode == TowerRallyMode.FirstClear)
         {
@@ -1419,7 +1574,7 @@ public sealed class WorldTowerService : IWorldTowerService
 
     }
 
-    private async Task GrantCindersAsync(
+    private async Task GrantTowerTokensAsync(
         IEnumerable<Guid> characterIds,
         int amount,
         CancellationToken cancellationToken)
@@ -1431,11 +1586,12 @@ public sealed class WorldTowerService : IWorldTowerService
             .Where(x => ids.Contains(x.Id))
             .ToListAsync(cancellationToken);
         foreach (var character in characters)
-            character.Cinders = checked(character.Cinders + amount);
+            character.TowerTokens = checked(character.TowerTokens + amount);
     }
 
     private async Task MarkAttemptErroredAsync(
         Guid attemptId,
+        string leaseOwner,
         string failureReason,
         CancellationToken cancellationToken)
     {
@@ -1445,9 +1601,14 @@ public sealed class WorldTowerService : IWorldTowerService
             .Include(x => x.TowerRally)
                 .ThenInclude(x => x.Applications)
             .SingleAsync(x => x.Id == attemptId, cancellationToken);
+        if (attempt.Status != TowerAttemptStatus.Started
+            || attempt.SimulationLeaseOwner != leaseOwner)
+            return;
         attempt.Status = TowerAttemptStatus.Errored;
         attempt.FailureReason = failureReason.Length <= 500 ? failureReason : failureReason[..500];
         attempt.CompletedAt = DateTimeOffset.UtcNow;
+        attempt.SimulationLeaseOwner = null;
+        attempt.SimulationLeaseUntil = null;
         attempt.TowerRally.Status = TowerRallyStatus.Completed;
         attempt.TowerRally.CompletedAt = attempt.CompletedAt;
         await EnqueueRallyUpdateAsync(
@@ -1537,11 +1698,14 @@ public sealed class WorldTowerService : IWorldTowerService
     }
 
     private PreparationModifiers CreatePreparationModifiers(
-        IReadOnlyDictionary<TowerContributionKind, int> totals)
+        IReadOnlyDictionary<TowerContributionKind, int> totals,
+        bool isFloorCleared)
     {
-        decimal Effect(TowerContributionKind kind) => Math.Min(
-            _options.PreparationMaxEffectPercent,
-            totals.GetValueOrDefault(kind) * _options.PreparationPercentPerPoint);
+        decimal Effect(TowerContributionKind kind) => isFloorCleared
+            ? _options.PreparationMaxEffectPercent
+            : Math.Min(
+                _options.PreparationMaxEffectPercent,
+                totals.GetValueOrDefault(kind) * _options.PreparationPercentPerPoint);
 
         return new PreparationModifiers(
             Effect(TowerContributionKind.SupplyWeapons),
@@ -1558,23 +1722,33 @@ public sealed class WorldTowerService : IWorldTowerService
         CancellationToken cancellationToken)
     {
         var floorProgress = progress[definition.FloorNumber];
-        var weekKey = GetWeekKey(DateTimeOffset.UtcNow);
-        var contributions = await _db.TowerContributions
+        var weekKey = GetWeekKey(_timeProvider.GetUtcNow());
+        var weeklyContributions = await _db.TowerContributions
             .AsNoTracking()
             .Where(x => x.ServerId == _options.ServerId
-                        && x.FloorNumber == definition.FloorNumber
                         && x.WeekKey == weekKey)
             .ToListAsync(cancellationToken);
-        decimal Effect(TowerContributionKind kind) => Math.Min(
-            _options.PreparationMaxEffectPercent,
-            contributions.Where(x => x.Kind == kind).Sum(x => x.Amount)
-            * _options.PreparationPercentPerPoint);
-        var weeklyCharacterPreparation = contributions
+        var floorContributions = weeklyContributions
+            .Where(x => x.FloorNumber == definition.FloorNumber)
+            .ToArray();
+        decimal Effect(TowerContributionKind kind) => floorProgress.IsCleared
+            ? _options.PreparationMaxEffectPercent
+            : Math.Min(
+                _options.PreparationMaxEffectPercent,
+                floorContributions.Where(x => x.Kind == kind).Sum(x => x.Amount)
+                * _options.PreparationPercentPerPoint);
+        var weeklyCharacterPreparation = weeklyContributions
             .Where(x => x.CharacterId == characterId && x.Kind != TowerContributionKind.Research)
-            .Sum(x => x.Amount);
-        var weeklyCharacterResearch = contributions
+            .Count();
+        var weeklyCharacterResearch = weeklyContributions
             .Where(x => x.CharacterId == characterId && x.Kind == TowerContributionKind.Research)
-            .Sum(x => x.Amount);
+            .Count();
+        var echoRewardClaimedThisWeek = await _db.TowerEchoClears
+            .AsNoTracking()
+            .AnyAsync(x => x.ServerId == _options.ServerId
+                           && x.CharacterId == characterId
+                           && x.WeekKey == weekKey,
+                cancellationToken);
         var state = GetFloorState(floorProgress, rallies.Count > 0);
 
         return new TowerFloorDetailDto(
@@ -1593,11 +1767,9 @@ public sealed class WorldTowerService : IWorldTowerService
             _options.ManualScoutingWeeklyCapPerCharacter,
             new TowerGuardianInfoDto(
                 definition.GuardianName,
-                definition.GuardianImagePath,
                 definition.GuardianTags,
-                definition.ScoutingReveals
+                GetGuardianAbilityReveals(definition)
                     .Where(x => x.Threshold <= floorProgress.ScoutingProgress)
-                    .Select(x => new TowerScoutingRevealDto(x.Threshold, x.Title, x.Description))
                     .ToArray()),
             new TowerPreparationSummaryDto(
                 Effect(TowerContributionKind.SupplyWeapons),
@@ -1607,9 +1779,57 @@ public sealed class WorldTowerService : IWorldTowerService
                 _options.PreparationWeeklyCapPerCharacter,
                 _options.PreparationMaxEffectPercent),
             rallies.Select(ToRallySummary).ToArray(),
-            definition.UnlockKeys,
-            definition.FirstClearCinders,
-            definition.EchoCinders);
+            definition.Unlocks
+                .Select(x => new TowerUnlockDto(x.Key, x.Description))
+                .ToArray(),
+            definition.FirstClearTowerTokens,
+            definition.TowerTokens,
+            echoRewardClaimedThisWeek);
+    }
+
+    private IReadOnlyList<TowerScoutingRevealDto> GetGuardianAbilityReveals(
+        TowerFloorDefinition definition)
+    {
+        var profileId = definition.GuardianAbilityProfileId;
+        var catalog = _abilityCatalog.GetCatalog();
+        var abilities = _creatureAbilities.GetAbilityIds(profileId)
+            .Select(abilityId => catalog.AbilitiesById.TryGetValue(abilityId, out var ability)
+                ? ability
+                : throw new InvalidOperationException(
+                    $"World Tower floor {definition.FloorNumber} Guardian '{profileId}' references unknown ability '{abilityId}'."))
+            .OrderBy(ability => ability.Kind == AbilitySpecKind.Passive ? 1 : 0)
+            .ToArray();
+
+        if (abilities.Length == 0)
+            throw new InvalidOperationException(
+                $"World Tower floor {definition.FloorNumber} Guardian '{profileId}' has no configured abilities.");
+        if (abilities.Length > 4)
+            throw new InvalidOperationException(
+                $"World Tower floor {definition.FloorNumber} Guardian '{profileId}' has {abilities.Length} abilities; scouting supports at most four reveals.");
+
+        var thresholds = GetScoutingThresholds(abilities.Length);
+        return abilities
+            .Select((ability, index) => new TowerScoutingRevealDto(
+                thresholds[index],
+                ability.Name,
+                ability.Description,
+                ability.Kind,
+                ability.Kind == AbilitySpecKind.Active
+                    ? (int)Math.Ceiling(ability.CooldownTicks / (double)FastCombatEngine.TicksPerSecond)
+                    : null))
+            .ToArray();
+    }
+
+    private static IReadOnlyList<int> GetScoutingThresholds(int abilityCount)
+    {
+        return abilityCount switch
+        {
+            1 => [100],
+            2 => [25, 100],
+            3 => [25, 50, 100],
+            4 => [25, 50, 75, 100],
+            _ => []
+        };
     }
 
     private TowerFloorSummaryDto ToFloorSummary(
@@ -1624,8 +1844,7 @@ public sealed class WorldTowerService : IWorldTowerService
             definition.RequiredSlots,
             definition.RecommendedPowerRating,
             progress.ScoutingProgress,
-            definition.GuardianName,
-            definition.GuardianImagePath);
+            definition.GuardianName);
 
     private static TowerFloorStateType GetFloorState(TowerFloorProgress progress, bool hasActiveRally) =>
         progress.IsCleared ? TowerFloorStateType.Cleared
@@ -1665,7 +1884,6 @@ public sealed class WorldTowerService : IWorldTowerService
         return new TowerRallyDto(
             rally.Id,
             rally.FloorNumber,
-            definition.Name,
             definition.GuardianName,
             rally.Mode,
             rally.Status,
@@ -1821,7 +2039,7 @@ public sealed class WorldTowerService : IWorldTowerService
         };
         var warnings = new List<string>();
         if (list.Length < definition.RequiredSlots)
-            warnings.Add($"{definition.RequiredSlots - list.Length} rally slot(s) are still empty.");
+            warnings.Add($"{definition.RequiredSlots - list.Length} Expedition slot(s) are still empty.");
         if (average < definition.RecommendedPowerRating)
             warnings.Add("Average Power Rating is below the floor recommendation.");
         if (list.Length > 0 && list.Min(x => x.PowerRating) < definition.RecommendedPowerRating * 0.75m)
@@ -1847,7 +2065,7 @@ public sealed class WorldTowerService : IWorldTowerService
             rally.CreatedAt);
 
     private bool IsEchoUnlocked(IReadOnlyDictionary<int, TowerFloorProgress> progress) =>
-        progress.GetValueOrDefault(_options.EchoModeUnlockFloor)?.IsCleared == true;
+        progress.GetValueOrDefault(_echoModeUnlockFloor)?.IsCleared == true;
 
     private TowerFloorDefinition GetRequiredFloor(int floorNumber) =>
         _definitions.GetFloor(floorNumber)

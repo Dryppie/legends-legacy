@@ -14,6 +14,8 @@ using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunAbilityBalance
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunDungeonSimulation;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunAreaSimulation;
 using Application.Interfaces.Services.LL.Dungeons;
+using Application.Interfaces.Services.LL.WorldTower;
+using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunWorldTowerBalance;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.AdminDashboard.Controllers.V1;
@@ -111,6 +113,13 @@ public class DiagnosticsController : BaseController
         [FromBody] RegionAreaBalanceRequest request)
     {
         return await Mediator.Send(new AnalyzeRegionAreaBalanceQuery(request));
+    }
+
+    [HttpPost("world-tower-balance")]
+    public async Task<ActionResult<WorldTowerBalanceReport>> AnalyzeWorldTowerBalance(
+        [FromBody] WorldTowerBalanceRequest request)
+    {
+        return await Mediator.Send(new RunWorldTowerBalanceQuery(request));
     }
 
 }

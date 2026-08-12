@@ -232,5 +232,92 @@
         "procCoefficient": 0.35
       }
     ]
+  },
+  {
+    "id": "status.garran.gate_seal",
+    "name": "Gate Seal",
+    "description": "Three Gate Seals grant 45% of Garran's combat-start Armor and Resistance; each shattered Seal removes 15%.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 3,
+    "durationTicks": 0,
+    "tags": [
+      "Status.Buff",
+      "Defense.Armor",
+      "Defense.Resistance",
+      "Pattern.HealthThreshold"
+    ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [
+          "effect.garran.gate_seal.armor",
+          "effect.garran.gate_seal.resistance"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.garran.gate_seal.armor",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "EventTarget",
+        "attribute": "Armor",
+        "scalingCoefficient": 0.45,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.garran.gate_seal.resistance",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "EventTarget",
+        "attribute": "Resistance",
+        "scalingCoefficient": 0.45,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "status.vaelor.next_magical_damage",
+    "name": "Mirrored Physical Charge",
+    "description": "Increases the Magical Damage of Vaelor's next damaging ability by 1% per stack.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 30,
+    "durationTicks": 0,
+    "tags": [
+      "Status.Buff",
+      "Damage.Magical",
+      "Pattern.ConsumedBuff"
+    ],
+    "triggers": [],
+    "effects": []
+  },
+  {
+    "id": "status.vaelor.next_physical_damage",
+    "name": "Mirrored Magical Charge",
+    "description": "Increases the Physical Damage of Vaelor's next damaging ability by 1% per stack.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 30,
+    "durationTicks": 0,
+    "tags": [
+      "Status.Buff",
+      "Damage.Physical",
+      "Pattern.ConsumedBuff"
+    ],
+    "triggers": [],
+    "effects": []
+  },
+  {
+    "id": "status.kharad.resonance",
+    "name": "Keystone Resonance",
+    "description": "Each stack grants 7% Power, 5% Attack Speed, and 3% Damage Reduction. Reaching 5 stacks locks Resonance for the rest of combat.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 5,
+    "durationTicks": 0,
+    "lockAtMaxStacks": true,
+    "tags": [
+      "Status.Buff",
+      "Warden.Resonance",
+      "Pattern.StackingBuff"
+    ],
+    "triggers": [],
+    "effects": []
   }
 ]

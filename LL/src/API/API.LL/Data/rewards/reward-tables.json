@@ -9,11 +9,38 @@
           "type": "WeightedWithNoDrop",
           "noDropWeight": 80,
           "entries": [
-            { "id": "pickaxe", "type": "Item", "itemId": "pickaxe", "weight": 5 },
-            { "id": "woodcutting_hatchet", "type": "Item", "itemId": "woodcutting_hatchet", "weight": 5 },
-            { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 8 },
-            { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 1, "tags": [ "rare", "tool" ] },
-            { "id": "rare_hatchet", "type": "Item", "itemId": "rare_hatchet", "weight": 1, "tags": [ "rare", "tool" ] }
+            {
+              "id": "pickaxe",
+              "type": "Item",
+              "itemId": "pickaxe",
+              "weight": 5
+            },
+            {
+              "id": "woodcutting_hatchet",
+              "type": "Item",
+              "itemId": "woodcutting_hatchet",
+              "weight": 5
+            },
+            {
+              "id": "skinning_knife",
+              "type": "Item",
+              "itemId": "skinning_knife",
+              "weight": 8
+            },
+            {
+              "id": "rare_pickaxe",
+              "type": "Item",
+              "itemId": "rare_pickaxe",
+              "weight": 1,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "rare_hatchet",
+              "type": "Item",
+              "itemId": "rare_hatchet",
+              "weight": 1,
+              "tags": ["rare", "tool"]
+            }
           ]
         }
       ]
@@ -27,12 +54,48 @@
           "type": "WeightedWithNoDrop",
           "noDropWeight": 78,
           "entries": [
-            { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 4, "tags": [ "rare", "tool" ] },
-            { "id": "rare_hatchet", "type": "Item", "itemId": "rare_hatchet", "weight": 4, "tags": [ "rare", "tool" ] },
-            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 8, "tags": [ "rare", "tool" ] },
-            { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 1.5, "tags": [ "rare", "tool" ] },
-            { "id": "epic_hatchet", "type": "Item", "itemId": "epic_hatchet", "weight": 1.5, "tags": [ "rare", "tool" ] },
-            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 3, "tags": [ "rare", "tool" ] }
+            {
+              "id": "rare_pickaxe",
+              "type": "Item",
+              "itemId": "rare_pickaxe",
+              "weight": 4,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "rare_hatchet",
+              "type": "Item",
+              "itemId": "rare_hatchet",
+              "weight": 4,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "rare_skinning_knife",
+              "type": "Item",
+              "itemId": "rare_skinning_knife",
+              "weight": 8,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "epic_pickaxe",
+              "type": "Item",
+              "itemId": "epic_pickaxe",
+              "weight": 1.5,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "epic_hatchet",
+              "type": "Item",
+              "itemId": "epic_hatchet",
+              "weight": 1.5,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "epic_skinning_knife",
+              "type": "Item",
+              "itemId": "epic_skinning_knife",
+              "weight": 3,
+              "tags": ["rare", "tool"]
+            }
           ]
         }
       ]
@@ -46,18 +109,90 @@
           "type": "WeightedWithNoDrop",
           "noDropWeight": 72.2,
           "entries": [
-            { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 4, "tags": [ "rare", "tool" ] },
-            { "id": "epic_hatchet", "type": "Item", "itemId": "epic_hatchet", "weight": 4, "tags": [ "rare", "tool" ] },
-            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 8, "tags": [ "rare", "tool" ] },
-            { "id": "unique_pickaxe", "type": "Item", "itemId": "unique_pickaxe", "weight": 2, "tags": [ "rare", "tool" ] },
-            { "id": "unique_hatchet", "type": "Item", "itemId": "unique_hatchet", "weight": 2, "tags": [ "rare", "tool" ] },
-            { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 4, "tags": [ "rare", "tool" ] },
-            { "id": "legendary_pickaxe", "type": "Item", "itemId": "legendary_pickaxe", "weight": 0.75, "tags": [ "rare", "tool" ] },
-            { "id": "legendary_hatchet", "type": "Item", "itemId": "legendary_hatchet", "weight": 0.75, "tags": [ "rare", "tool" ] },
-            { "id": "legendary_skinning_knife", "type": "Item", "itemId": "legendary_skinning_knife", "weight": 1.5, "tags": [ "rare", "tool" ] },
-            { "id": "legacy_pickaxe", "type": "Item", "itemId": "legacy_pickaxe", "weight": 0.2, "tags": [ "rare", "tool" ] },
-            { "id": "legacy_hatchet", "type": "Item", "itemId": "legacy_hatchet", "weight": 0.2, "tags": [ "rare", "tool" ] },
-            { "id": "legacy_skinning_knife", "type": "Item", "itemId": "legacy_skinning_knife", "weight": 0.4, "tags": [ "rare", "tool" ] }
+            {
+              "id": "epic_pickaxe",
+              "type": "Item",
+              "itemId": "epic_pickaxe",
+              "weight": 4,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "epic_hatchet",
+              "type": "Item",
+              "itemId": "epic_hatchet",
+              "weight": 4,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "epic_skinning_knife",
+              "type": "Item",
+              "itemId": "epic_skinning_knife",
+              "weight": 8,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "unique_pickaxe",
+              "type": "Item",
+              "itemId": "unique_pickaxe",
+              "weight": 2,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "unique_hatchet",
+              "type": "Item",
+              "itemId": "unique_hatchet",
+              "weight": 2,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "unique_skinning_knife",
+              "type": "Item",
+              "itemId": "unique_skinning_knife",
+              "weight": 4,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "legendary_pickaxe",
+              "type": "Item",
+              "itemId": "legendary_pickaxe",
+              "weight": 0.75,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "legendary_hatchet",
+              "type": "Item",
+              "itemId": "legendary_hatchet",
+              "weight": 0.75,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "legendary_skinning_knife",
+              "type": "Item",
+              "itemId": "legendary_skinning_knife",
+              "weight": 1.5,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "legacy_pickaxe",
+              "type": "Item",
+              "itemId": "legacy_pickaxe",
+              "weight": 0.2,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "legacy_hatchet",
+              "type": "Item",
+              "itemId": "legacy_hatchet",
+              "weight": 0.2,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "legacy_skinning_knife",
+              "type": "Item",
+              "itemId": "legacy_skinning_knife",
+              "weight": 0.4,
+              "tags": ["rare", "tool"]
+            }
           ]
         }
       ]
@@ -71,13 +206,50 @@
           "type": "WeightedWithNoDrop",
           "noDropWeight": 75.25,
           "entries": [
-            { "id": "blueprint_fury", "type": "Item", "itemId": "blueprint_fury", "weight": 10 },
-            { "id": "blueprint_arcane", "type": "Item", "itemId": "blueprint_arcane", "weight": 5 },
-            { "id": "blueprint_execution", "type": "Item", "itemId": "blueprint_execution", "weight": 5 },
-            { "id": "pickaxe", "type": "Item", "itemId": "pickaxe", "weight": 8 },
-            { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 5 },
-            { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 1, "tags": [ "rare", "tool" ] },
-            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 0.75, "tags": [ "rare", "tool" ] }
+            {
+              "id": "blueprint_fury",
+              "type": "Item",
+              "itemId": "blueprint_fury",
+              "weight": 10
+            },
+            {
+              "id": "blueprint_arcane",
+              "type": "Item",
+              "itemId": "blueprint_arcane",
+              "weight": 5
+            },
+            {
+              "id": "blueprint_execution",
+              "type": "Item",
+              "itemId": "blueprint_execution",
+              "weight": 5
+            },
+            {
+              "id": "pickaxe",
+              "type": "Item",
+              "itemId": "pickaxe",
+              "weight": 8
+            },
+            {
+              "id": "skinning_knife",
+              "type": "Item",
+              "itemId": "skinning_knife",
+              "weight": 5
+            },
+            {
+              "id": "rare_pickaxe",
+              "type": "Item",
+              "itemId": "rare_pickaxe",
+              "weight": 1,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "rare_skinning_knife",
+              "type": "Item",
+              "itemId": "rare_skinning_knife",
+              "weight": 0.75,
+              "tags": ["rare", "tool"]
+            }
           ]
         }
       ]
@@ -91,11 +263,41 @@
           "type": "WeightedWithNoDrop",
           "noDropWeight": 84.1,
           "entries": [
-            { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 7, "tags": [ "rare", "tool" ] },
-            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 5, "tags": [ "rare", "tool" ] },
-            { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 2, "tags": [ "rare", "tool" ] },
-            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 1.5, "tags": [ "rare", "tool" ] },
-            { "id": "unique_pickaxe", "type": "Item", "itemId": "unique_pickaxe", "weight": 0.4, "tags": [ "rare", "tool" ] }
+            {
+              "id": "rare_pickaxe",
+              "type": "Item",
+              "itemId": "rare_pickaxe",
+              "weight": 7,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "rare_skinning_knife",
+              "type": "Item",
+              "itemId": "rare_skinning_knife",
+              "weight": 5,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "epic_pickaxe",
+              "type": "Item",
+              "itemId": "epic_pickaxe",
+              "weight": 2,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "epic_skinning_knife",
+              "type": "Item",
+              "itemId": "epic_skinning_knife",
+              "weight": 1.5,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "unique_pickaxe",
+              "type": "Item",
+              "itemId": "unique_pickaxe",
+              "weight": 0.4,
+              "tags": ["rare", "tool"]
+            }
           ]
         }
       ]
@@ -109,12 +311,48 @@
           "type": "WeightedWithNoDrop",
           "noDropWeight": 82.8,
           "entries": [
-            { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 7, "tags": [ "rare", "tool" ] },
-            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 5, "tags": [ "rare", "tool" ] },
-            { "id": "unique_pickaxe", "type": "Item", "itemId": "unique_pickaxe", "weight": 2.5, "tags": [ "rare", "tool" ] },
-            { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 1.75, "tags": [ "rare", "tool" ] },
-            { "id": "legendary_pickaxe", "type": "Item", "itemId": "legendary_pickaxe", "weight": 0.75, "tags": [ "rare", "tool" ] },
-            { "id": "legacy_pickaxe", "type": "Item", "itemId": "legacy_pickaxe", "weight": 0.2, "tags": [ "rare", "tool" ] }
+            {
+              "id": "epic_pickaxe",
+              "type": "Item",
+              "itemId": "epic_pickaxe",
+              "weight": 7,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "epic_skinning_knife",
+              "type": "Item",
+              "itemId": "epic_skinning_knife",
+              "weight": 5,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "unique_pickaxe",
+              "type": "Item",
+              "itemId": "unique_pickaxe",
+              "weight": 2.5,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "unique_skinning_knife",
+              "type": "Item",
+              "itemId": "unique_skinning_knife",
+              "weight": 1.75,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "legendary_pickaxe",
+              "type": "Item",
+              "itemId": "legendary_pickaxe",
+              "weight": 0.75,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "legacy_pickaxe",
+              "type": "Item",
+              "itemId": "legacy_pickaxe",
+              "weight": 0.2,
+              "tags": ["rare", "tool"]
+            }
           ]
         }
       ]
@@ -128,14 +366,56 @@
           "type": "WeightedWithNoDrop",
           "noDropWeight": 86.25,
           "entries": [
-            { "id": "blueprint_aegis", "type": "Item", "itemId": "blueprint_aegis", "weight": 4 },
-            { "id": "blueprint_endurance", "type": "Item", "itemId": "blueprint_endurance", "weight": 4 },
-            { "id": "blueprint_phoenix", "type": "Item", "itemId": "blueprint_phoenix", "weight": 4 },
-            { "id": "blueprint_spirit", "type": "Item", "itemId": "blueprint_spirit", "weight": 4 },
-            { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 8 },
-            { "id": "pickaxe", "type": "Item", "itemId": "pickaxe", "weight": 4 },
-            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 1, "tags": [ "rare", "tool" ] },
-            { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 0.75, "tags": [ "rare", "tool" ] }
+            {
+              "id": "blueprint_aegis",
+              "type": "Item",
+              "itemId": "blueprint_aegis",
+              "weight": 4
+            },
+            {
+              "id": "blueprint_endurance",
+              "type": "Item",
+              "itemId": "blueprint_endurance",
+              "weight": 4
+            },
+            {
+              "id": "blueprint_phoenix",
+              "type": "Item",
+              "itemId": "blueprint_phoenix",
+              "weight": 4
+            },
+            {
+              "id": "blueprint_spirit",
+              "type": "Item",
+              "itemId": "blueprint_spirit",
+              "weight": 4
+            },
+            {
+              "id": "skinning_knife",
+              "type": "Item",
+              "itemId": "skinning_knife",
+              "weight": 8
+            },
+            {
+              "id": "pickaxe",
+              "type": "Item",
+              "itemId": "pickaxe",
+              "weight": 4
+            },
+            {
+              "id": "rare_skinning_knife",
+              "type": "Item",
+              "itemId": "rare_skinning_knife",
+              "weight": 1,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "rare_pickaxe",
+              "type": "Item",
+              "itemId": "rare_pickaxe",
+              "weight": 0.75,
+              "tags": ["rare", "tool"]
+            }
           ]
         }
       ]
@@ -149,11 +429,41 @@
           "type": "WeightedWithNoDrop",
           "noDropWeight": 85.35,
           "entries": [
-            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 7, "tags": [ "rare", "tool" ] },
-            { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 4, "tags": [ "rare", "tool" ] },
-            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 2, "tags": [ "rare", "tool" ] },
-            { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 1.25, "tags": [ "rare", "tool" ] },
-            { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 0.4, "tags": [ "rare", "tool" ] }
+            {
+              "id": "rare_skinning_knife",
+              "type": "Item",
+              "itemId": "rare_skinning_knife",
+              "weight": 7,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "rare_pickaxe",
+              "type": "Item",
+              "itemId": "rare_pickaxe",
+              "weight": 4,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "epic_skinning_knife",
+              "type": "Item",
+              "itemId": "epic_skinning_knife",
+              "weight": 2,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "epic_pickaxe",
+              "type": "Item",
+              "itemId": "epic_pickaxe",
+              "weight": 1.25,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "unique_skinning_knife",
+              "type": "Item",
+              "itemId": "unique_skinning_knife",
+              "weight": 0.4,
+              "tags": ["rare", "tool"]
+            }
           ]
         }
       ]
@@ -167,12 +477,48 @@
           "type": "WeightedWithNoDrop",
           "noDropWeight": 84.05,
           "entries": [
-            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 7, "tags": [ "rare", "tool" ] },
-            { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 4, "tags": [ "rare", "tool" ] },
-            { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 2.5, "tags": [ "rare", "tool" ] },
-            { "id": "unique_pickaxe", "type": "Item", "itemId": "unique_pickaxe", "weight": 1.5, "tags": [ "rare", "tool" ] },
-            { "id": "legendary_skinning_knife", "type": "Item", "itemId": "legendary_skinning_knife", "weight": 0.75, "tags": [ "rare", "tool" ] },
-            { "id": "legacy_skinning_knife", "type": "Item", "itemId": "legacy_skinning_knife", "weight": 0.2, "tags": [ "rare", "tool" ] }
+            {
+              "id": "epic_skinning_knife",
+              "type": "Item",
+              "itemId": "epic_skinning_knife",
+              "weight": 7,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "epic_pickaxe",
+              "type": "Item",
+              "itemId": "epic_pickaxe",
+              "weight": 4,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "unique_skinning_knife",
+              "type": "Item",
+              "itemId": "unique_skinning_knife",
+              "weight": 2.5,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "unique_pickaxe",
+              "type": "Item",
+              "itemId": "unique_pickaxe",
+              "weight": 1.5,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "legendary_skinning_knife",
+              "type": "Item",
+              "itemId": "legendary_skinning_knife",
+              "weight": 0.75,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "legacy_skinning_knife",
+              "type": "Item",
+              "itemId": "legacy_skinning_knife",
+              "weight": 0.2,
+              "tags": ["rare", "tool"]
+            }
           ]
         }
       ]
@@ -186,14 +532,56 @@
           "type": "WeightedWithNoDrop",
           "noDropWeight": 85.25,
           "entries": [
-            { "id": "blueprint_warden", "type": "Item", "itemId": "blueprint_warden", "weight": 4 },
-            { "id": "blueprint_primal", "type": "Item", "itemId": "blueprint_primal", "weight": 4 },
-            { "id": "blueprint_venom", "type": "Item", "itemId": "blueprint_venom_touched_sword", "weight": 4 },
-            { "id": "blueprint_hive", "type": "Item", "itemId": "blueprint_hivefang_dagger", "weight": 4 },
-            { "id": "woodcutting_hatchet", "type": "Item", "itemId": "woodcutting_hatchet", "weight": 8 },
-            { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 5 },
-            { "id": "rare_hatchet", "type": "Item", "itemId": "rare_hatchet", "weight": 1, "tags": [ "rare", "tool" ] },
-            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 0.75, "tags": [ "rare", "tool" ] }
+            {
+              "id": "blueprint_warden",
+              "type": "Item",
+              "itemId": "blueprint_warden",
+              "weight": 4
+            },
+            {
+              "id": "blueprint_primal",
+              "type": "Item",
+              "itemId": "blueprint_primal",
+              "weight": 4
+            },
+            {
+              "id": "blueprint_venom",
+              "type": "Item",
+              "itemId": "blueprint_venom_touched_sword",
+              "weight": 4
+            },
+            {
+              "id": "blueprint_hive",
+              "type": "Item",
+              "itemId": "blueprint_hivefang_dagger",
+              "weight": 4
+            },
+            {
+              "id": "woodcutting_hatchet",
+              "type": "Item",
+              "itemId": "woodcutting_hatchet",
+              "weight": 8
+            },
+            {
+              "id": "skinning_knife",
+              "type": "Item",
+              "itemId": "skinning_knife",
+              "weight": 5
+            },
+            {
+              "id": "rare_hatchet",
+              "type": "Item",
+              "itemId": "rare_hatchet",
+              "weight": 1,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "rare_skinning_knife",
+              "type": "Item",
+              "itemId": "rare_skinning_knife",
+              "weight": 0.75,
+              "tags": ["rare", "tool"]
+            }
           ]
         }
       ]
@@ -207,11 +595,41 @@
           "type": "WeightedWithNoDrop",
           "noDropWeight": 84.1,
           "entries": [
-            { "id": "rare_hatchet", "type": "Item", "itemId": "rare_hatchet", "weight": 7, "tags": [ "rare", "tool" ] },
-            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 5, "tags": [ "rare", "tool" ] },
-            { "id": "epic_hatchet", "type": "Item", "itemId": "epic_hatchet", "weight": 2, "tags": [ "rare", "tool" ] },
-            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 1.5, "tags": [ "rare", "tool" ] },
-            { "id": "unique_hatchet", "type": "Item", "itemId": "unique_hatchet", "weight": 0.4, "tags": [ "rare", "tool" ] }
+            {
+              "id": "rare_hatchet",
+              "type": "Item",
+              "itemId": "rare_hatchet",
+              "weight": 7,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "rare_skinning_knife",
+              "type": "Item",
+              "itemId": "rare_skinning_knife",
+              "weight": 5,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "epic_hatchet",
+              "type": "Item",
+              "itemId": "epic_hatchet",
+              "weight": 2,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "epic_skinning_knife",
+              "type": "Item",
+              "itemId": "epic_skinning_knife",
+              "weight": 1.5,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "unique_hatchet",
+              "type": "Item",
+              "itemId": "unique_hatchet",
+              "weight": 0.4,
+              "tags": ["rare", "tool"]
+            }
           ]
         }
       ]
@@ -225,12 +643,48 @@
           "type": "WeightedWithNoDrop",
           "noDropWeight": 82.8,
           "entries": [
-            { "id": "epic_hatchet", "type": "Item", "itemId": "epic_hatchet", "weight": 7, "tags": [ "rare", "tool" ] },
-            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 5, "tags": [ "rare", "tool" ] },
-            { "id": "unique_hatchet", "type": "Item", "itemId": "unique_hatchet", "weight": 2.5, "tags": [ "rare", "tool" ] },
-            { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 1.75, "tags": [ "rare", "tool" ] },
-            { "id": "legendary_hatchet", "type": "Item", "itemId": "legendary_hatchet", "weight": 0.75, "tags": [ "rare", "tool" ] },
-            { "id": "legacy_hatchet", "type": "Item", "itemId": "legacy_hatchet", "weight": 0.2, "tags": [ "rare", "tool" ] }
+            {
+              "id": "epic_hatchet",
+              "type": "Item",
+              "itemId": "epic_hatchet",
+              "weight": 7,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "epic_skinning_knife",
+              "type": "Item",
+              "itemId": "epic_skinning_knife",
+              "weight": 5,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "unique_hatchet",
+              "type": "Item",
+              "itemId": "unique_hatchet",
+              "weight": 2.5,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "unique_skinning_knife",
+              "type": "Item",
+              "itemId": "unique_skinning_knife",
+              "weight": 1.75,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "legendary_hatchet",
+              "type": "Item",
+              "itemId": "legendary_hatchet",
+              "weight": 0.75,
+              "tags": ["rare", "tool"]
+            },
+            {
+              "id": "legacy_hatchet",
+              "type": "Item",
+              "itemId": "legacy_hatchet",
+              "weight": 0.2,
+              "tags": ["rare", "tool"]
+            }
           ]
         }
       ]
@@ -248,7 +702,7 @@
               "type": "Item",
               "itemId": "ore",
               "weight": 60,
-              "quantity": { "min": 1, "max": 3 }
+              "quantity": { "min": 5, "max": 15 }
             }
           ]
         }
@@ -267,7 +721,7 @@
               "type": "Item",
               "itemId": "wood",
               "weight": 60,
-              "quantity": { "min": 1, "max": 3 }
+              "quantity": { "min": 5, "max": 15 }
             }
           ]
         }
@@ -286,7 +740,7 @@
               "type": "Item",
               "itemId": "rawhide",
               "weight": 60,
-              "quantity": { "min": 1, "max": 3 }
+              "quantity": { "min": 5, "max": 5 }
             }
           ]
         }
@@ -305,7 +759,7 @@
               "type": "Item",
               "itemId": "wood",
               "weight": 60,
-              "quantity": { "min": 1, "max": 3 }
+              "quantity": { "min": 5, "max": 15 }
             }
           ]
         }

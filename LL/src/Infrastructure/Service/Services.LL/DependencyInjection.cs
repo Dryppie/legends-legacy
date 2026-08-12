@@ -256,6 +256,7 @@ public static class DependencyInjection
         services.AddScoped<IEssenceCombatLoadoutResolver, EssenceSystemService>();
         services.AddScoped<PowerBuildSnapshotFactory>();
         services.AddScoped<CanonicalEquipmentBuildFactory>();
+        services.AddScoped<IWorldTowerDevelopmentRosterFactory, WorldTowerDevelopmentRosterFactory>();
         services.AddScoped<PowerAnalysisSimulationRunner>();
         services.AddScoped<PowerRatingService>();
         services.AddScoped<IPowerRatingService>(sp => sp.GetRequiredService<PowerRatingService>());
@@ -300,7 +301,6 @@ public static class DependencyInjection
                     && config.GetValue<bool>("FeatureManagement:WorldTowerDevelopmentTools"))
             .Validate(options =>
                     !string.IsNullOrWhiteSpace(options.ServerId)
-                    && options.EchoModeUnlockFloor > 0
                     && options.FailedAttemptScoutingGain > 0
                     && options.FailedAttemptScoutingWeeklyCap > 0
                     && options.ManualScoutingWeeklyCapPerCharacter > 0
@@ -308,7 +308,10 @@ public static class DependencyInjection
                     && options.PreparationPercentPerPoint > 0
                     && options.PreparationMaxEffectPercent > 0
                     && options.CombatTicksPerFrame == 10
-                    && options.PlaybackPollMilliseconds is >= 100 and <= 1000,
+                    && options.PlaybackPollMilliseconds is >= 100 and <= 1000
+                    && options.SimulationPollMilliseconds is >= 100 and <= 1000
+                    && options.WorkerLeaseSeconds is >= 10 and <= 300
+                    && options.RecoveryFrameLimit is >= 1 and <= 300,
                 "World Tower settings are invalid.")
             .ValidateOnStart();
         services.AddSingleton<IWorldTowerDefinitionProvider>(sp =>
@@ -316,6 +319,8 @@ public static class DependencyInjection
                 Path.Combine(contentRootPath, config["Content:Root"] ?? "Data", "world-tower", "tower-floors.json"),
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IWorldTowerService, WorldTowerService>();
+        services.AddScoped<IWorldTowerBalanceAnalyzer, WorldTowerBalanceAnalyzer>();
+        services.AddScoped<IWorldTowerWorkLeaseService, WorldTowerWorkLeaseService>();
 
         services.AddScoped<ILootService, LootService>();
         services.AddSingleton<IRewardTableDefinitionValidator, RewardTableDefinitionValidator>();

@@ -18,7 +18,6 @@ type DungeonLeaderboardMode = 'firstClears' | 'mostClears' | 'recentClears';
 const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
   goblin_mines: {
     number: '1',
-    heroImage: 'entities/optimized/hobgoblin.webp',
     lore: 'The goblins have mined deep into cursed stone, guarding ancient relics.',
     requiredLevel: 5,
     dailyEntries: 1,
@@ -34,7 +33,6 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
   },
   forgotten_catacombs: {
     number: '2',
-    heroImage: 'entities/optimized/skeleton_warrior.webp',
     lore: 'An ancient burial site where the dead rise beneath soot-covered stone.',
     requiredLevel: 10,
     dailyEntries: 2,
@@ -47,7 +45,6 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
   },
   hives_abyss: {
     number: '3',
-    heroImage: 'entities/optimized/frost_warg.webp',
     lore: 'A living cave overtaken by roots, spores, and ancient territorial beasts.',
     requiredLevel: 20,
     dailyEntries: 1,
@@ -259,8 +256,6 @@ export class DungeonsComponent implements OnInit {
           familyTitle: selectedBase.familyTitle ?? selectedBase.title,
           title: selectedBase.familyTitle ?? selectedBase.title,
           number: presentation.number ?? index + 1,
-          heroImage:
-            presentation.heroImage ?? 'entities/optimized/hobgoblin.webp',
           lore: presentation.lore ?? '',
           requiredLevel: presentation.requiredLevel ?? 1,
           roomsRange: selectedBase.roomsRange ?? [

@@ -21,11 +21,7 @@
           "id": "combat.1",
           "type": "Combat",
           "weight": 1,
-          "encounterIds": [
-            "goblin",
-            "goblin_archer",
-            "goblin_warrior"
-          ]
+          "encounterIds": ["goblin", "goblin_archer", "goblin_warrior"]
         },
         {
           "id": "boss.1",
@@ -102,8 +98,8 @@
                 {
                   "itemId": "ore",
                   "weight": 100,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
+                  "minQuantity": 4,
+                  "maxQuantity": 12
                 }
               ]
             },
@@ -117,8 +113,8 @@
                 {
                   "itemId": "wood",
                   "weight": 95,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
+                  "minQuantity": 4,
+                  "maxQuantity": 12
                 }
               ]
             },
@@ -132,8 +128,8 @@
                 {
                   "itemId": "rawhide",
                   "weight": 75,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
+                  "minQuantity": 4,
+                  "maxQuantity": 8
                 }
               ]
             }
@@ -200,8 +196,8 @@
                 {
                   "itemId": "ore",
                   "weight": 100,
-                  "minQuantity": 1,
-                  "maxQuantity": 4
+                  "minQuantity": 4,
+                  "maxQuantity": 16
                 }
               ]
             },
@@ -215,8 +211,8 @@
                 {
                   "itemId": "wood",
                   "weight": 90,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
+                  "minQuantity": 4,
+                  "maxQuantity": 12
                 }
               ]
             },
@@ -230,8 +226,8 @@
                 {
                   "itemId": "rawhide",
                   "weight": 70,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
+                  "minQuantity": 4,
+                  "maxQuantity": 8
                 }
               ]
             }
@@ -281,8 +277,8 @@
                 {
                   "itemId": "ore",
                   "weight": 100,
-                  "minQuantity": 1,
-                  "maxQuantity": 4
+                  "minQuantity": 4,
+                  "maxQuantity": 16
                 }
               ]
             },
@@ -296,8 +292,8 @@
                 {
                   "itemId": "wood",
                   "weight": 90,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
+                  "minQuantity": 4,
+                  "maxQuantity": 12
                 }
               ]
             },
@@ -311,8 +307,8 @@
                 {
                   "itemId": "rawhide",
                   "weight": 65,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
+                  "minQuantity": 4,
+                  "maxQuantity": 8
                 }
               ]
             }
@@ -340,51 +336,31 @@
           "id": "combat.1",
           "type": "Combat",
           "weight": 1,
-          "encounterIds": [
-            "blood_zombie",
-            "undead",
-            "skeleton"
-          ]
+          "encounterIds": ["blood_zombie", "undead", "skeleton"]
         },
         {
           "id": "combat.2",
           "type": "Combat",
           "weight": 0.8,
-          "encounterIds": [
-            "grave_hound",
-            "grave_wisp",
-            "skeleton"
-          ]
+          "encounterIds": ["grave_hound", "grave_wisp", "skeleton"]
         },
         {
           "id": "combat.3",
           "type": "Combat",
           "weight": 0.8,
-          "encounterIds": [
-            "lost_soul",
-            "undead",
-            "skeleton"
-          ]
+          "encounterIds": ["lost_soul", "undead", "skeleton"]
         },
         {
           "id": "combat.4",
           "type": "Combat",
           "weight": 0.6,
-          "encounterIds": [
-            "blood_zombie",
-            "grave_wisp",
-            "skeleton"
-          ]
+          "encounterIds": ["blood_zombie", "grave_wisp", "skeleton"]
         },
         {
           "id": "miniboss.1",
           "type": "MiniBoss",
           "weight": 1,
-          "encounterIds": [
-            "grave_hound",
-            "undead",
-            "skeleton"
-          ],
+          "encounterIds": ["grave_hound", "undead", "skeleton"],
           "featuredEncounterId": "skeleton"
         },
         {
@@ -463,8 +439,8 @@
                 {
                   "itemId": "ore",
                   "weight": 95,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
+                  "minQuantity": 4,
+                  "maxQuantity": 12
                 }
               ]
             },
@@ -478,8 +454,8 @@
                 {
                   "itemId": "rawhide",
                   "weight": 90,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
+                  "minQuantity": 4,
+                  "maxQuantity": 12
                 }
               ]
             }
@@ -547,8 +523,8 @@
                 {
                   "itemId": "ore",
                   "weight": 95,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
+                  "minQuantity": 4,
+                  "maxQuantity": 12
                 }
               ]
             },
@@ -562,8 +538,8 @@
                 {
                   "itemId": "rawhide",
                   "weight": 88,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
+                  "minQuantity": 4,
+                  "maxQuantity": 12
                 }
               ]
             }
@@ -630,8 +606,8 @@
                 {
                   "itemId": "ore",
                   "weight": 95,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
+                  "minQuantity": 4,
+                  "maxQuantity": 12
                 }
               ]
             },
@@ -645,8 +621,8 @@
                 {
                   "itemId": "rawhide",
                   "weight": 85,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
+                  "minQuantity": 4,
+                  "maxQuantity": 8
                 }
               ]
             }

@@ -133,6 +133,118 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         await ExecuteSqlRawAsync("SELECT pg_advisory_xact_lock({0})", ct, lockId);
     }
 
+    public Task<IReadOnlyList<Guid>> ClaimWorldTowerSimulationsAsync(
+        string owner,
+        DateTimeOffset now,
+        DateTimeOffset leaseUntil,
+        int limit,
+        CancellationToken ct = default) =>
+        ClaimWorldTowerWorkAsync(
+            """
+            SELECT "Id" AS "Value"
+            FROM "TowerAttempts"
+            WHERE "Status" = {0}
+              AND ("SimulationLeaseUntil" IS NULL OR "SimulationLeaseUntil" <= {1})
+            ORDER BY "StartedAt"
+            LIMIT {2}
+            FOR UPDATE SKIP LOCKED
+            """,
+            [(int)TowerAttemptStatus.Started, now, limit],
+            async ids =>
+            {
+                var rows = await TowerAttempts.Where(x => ids.Contains(x.Id)).ToListAsync(ct);
+                foreach (var row in rows)
+                {
+                    row.SimulationLeaseOwner = owner;
+                    row.SimulationLeaseUntil = leaseUntil;
+                    row.SimulationAttempts++;
+                }
+            },
+            async () => await TowerAttempts
+                .Where(x => x.Status == TowerAttemptStatus.Started
+                            && (x.SimulationLeaseUntil == null || x.SimulationLeaseUntil <= now))
+                .OrderBy(x => x.StartedAt)
+                .Select(x => x.Id)
+                .Take(limit)
+                .ToArrayAsync(ct),
+            ct);
+
+    public Task<IReadOnlyList<Guid>> ClaimWorldTowerPlaybackDispatchesAsync(
+        string owner,
+        DateTimeOffset now,
+        DateTimeOffset leaseUntil,
+        int limit,
+        CancellationToken ct = default) =>
+        ClaimWorldTowerWorkAsync(
+            """
+            SELECT p."TowerAttemptId" AS "Value"
+            FROM "TowerCombatPlaybacks" p
+            INNER JOIN "TowerAttempts" a ON a."Id" = p."TowerAttemptId"
+            WHERE p."PlaybackStartedAt" <= {0}
+              AND (p."LastPublishedSequence" < p."FrameCount" - 1 OR a."Status" = {1})
+              AND (p."DispatchLeaseUntil" IS NULL OR p."DispatchLeaseUntil" <= {0})
+            ORDER BY p."PlaybackStartedAt"
+            LIMIT {2}
+            FOR UPDATE OF p SKIP LOCKED
+            """,
+            [now, (int)TowerAttemptStatus.Playback, limit],
+            async ids =>
+            {
+                var rows = await TowerCombatPlaybacks
+                    .Where(x => ids.Contains(x.TowerAttemptId))
+                    .ToListAsync(ct);
+                foreach (var row in rows)
+                {
+                    row.DispatchLeaseOwner = owner;
+                    row.DispatchLeaseUntil = leaseUntil;
+                }
+            },
+            async () => await TowerCombatPlaybacks
+                .Where(x => x.PlaybackStartedAt <= now
+                            && (x.LastPublishedSequence < x.FrameCount - 1
+                                || x.TowerAttempt.Status == TowerAttemptStatus.Playback)
+                            && (x.DispatchLeaseUntil == null || x.DispatchLeaseUntil <= now))
+                .OrderBy(x => x.PlaybackStartedAt)
+                .Select(x => x.TowerAttemptId)
+                .Take(limit)
+                .ToArrayAsync(ct),
+            ct);
+
+    public async Task ReleaseWorldTowerPlaybackDispatchAsync(
+        Guid attemptId,
+        string owner,
+        CancellationToken ct = default)
+    {
+        var playback = await TowerCombatPlaybacks.SingleOrDefaultAsync(
+            x => x.TowerAttemptId == attemptId && x.DispatchLeaseOwner == owner,
+            ct);
+        if (playback is null)
+            return;
+        playback.DispatchLeaseOwner = null;
+        playback.DispatchLeaseUntil = null;
+        await SaveChangesAsync(ct);
+    }
+
+    private async Task<IReadOnlyList<Guid>> ClaimWorldTowerWorkAsync(
+        string sql,
+        object[] parameters,
+        Func<Guid[], Task> update,
+        Func<Task<Guid[]>> fallbackQuery,
+        CancellationToken ct)
+    {
+        await using var transaction = await Database.BeginTransactionAsync(ct);
+        var ids = Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL"
+            ? await Database.SqlQueryRaw<Guid>(sql, parameters).ToArrayAsync(ct)
+            : await fallbackQuery();
+        if (ids.Length > 0)
+        {
+            await update(ids);
+            await SaveChangesAsync(ct);
+        }
+        await transaction.CommitAsync(ct);
+        return ids;
+    }
+
     public IDbContextTransaction? CurrentTransaction
         => Database.CurrentTransaction;
 

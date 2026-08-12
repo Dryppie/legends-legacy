@@ -13,7 +13,14 @@ namespace EssenceSystem.Tests;
 public sealed class RegionOneIdleAreaSeedTests
 {
     private const double AreaEssenceBaseDropChance = 0.0001;
-    private static readonly HashSet<string> CreatureEssencesPendingImplementation = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly HashSet<string> CreatureEssencesPendingImplementation = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "monster.garran,_the_gatekeeper",
+        "monster.velka,_the_bloodwing_huntress",
+        "monster.morrowmaw,_broodkeeper",
+        "monster.vaelor,_the_mirrorbound",
+        "monster.kharad,_the_first_warden"
+    };
     private static readonly HashSet<string> CreatureEssencesPendingAreaDropTuning = new(StringComparer.OrdinalIgnoreCase);
 
     [Fact]

@@ -173,6 +173,15 @@ public class CombatSetupService : ICombatSetupService
             return Task.FromResult(_essenceCombatLoadoutResolver.Resolve(entity.OriginalId, [monsterEssence]));
         }
 
+        if (!string.IsNullOrWhiteSpace(entity.SourceMonsterId))
+        {
+            return Task.FromResult(new EssenceCombatLoadout(
+                entity.OriginalId,
+                [],
+                [],
+                entity.Tags));
+        }
+
         return _essenceCombatLoadoutResolver.ResolveAsync(entity.OriginalId, CancellationToken.None);
     }
 }

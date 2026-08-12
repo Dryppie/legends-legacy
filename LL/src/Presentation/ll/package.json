@@ -1,6 +1,7 @@
 {
   "name": "ll",
   "version": "0.0.0",
+  "packageManager": "npm@10.9.2",
   "scripts": {
     "generate:version": "tsx ./scripts/write-build-version.ts",
     "validate:guides": "tsx ./scripts/validate-guides.ts",

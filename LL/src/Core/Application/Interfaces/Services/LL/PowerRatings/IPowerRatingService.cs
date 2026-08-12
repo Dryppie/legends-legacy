@@ -14,6 +14,13 @@ public static class PowerRatingAlgorithm
     public const int RecommendationSeedSetVersion = 2;
 }
 
+public static class CombatRatingDisplay
+{
+    public const int Divisor = 10;
+
+    public static int FromRaw(int rating) => Math.Max(0, rating) / Divisor;
+}
+
 public enum PowerRatingConfidence
 {
     Low = 0,

@@ -240,12 +240,27 @@ public static class AbilityCatalogValidator
                 errors.Add($"{label}: scaling attribute '{scalingAttribute}' is runtime-only and cannot be authored.");
             }
 
-            if (effect.Operation == AbilityEffectOperation.ModifyAttribute && effect.Attribute is null)
-                errors.Add($"{label}: ModifyAttribute requires attribute.");
+            if (effect.Operation is AbilityEffectOperation.ModifyAttribute
+                    or AbilityEffectOperation.ModifyAttributePercentOfInitial
+                    or AbilityEffectOperation.TransferAttributePercent
+                    or AbilityEffectOperation.SynchronizeAttributePerOwnedSummon
+                    or AbilityEffectOperation.SynchronizeAttributePerStatusStack
+                && effect.Attribute is null)
+            {
+                errors.Add($"{label}: {effect.Operation} requires attribute.");
+            }
+
+            if (effect.Operation is AbilityEffectOperation.ModifyAttributePercentOfInitial
+                    or AbilityEffectOperation.TransferAttributePercent
+                && effect.ScalingCoefficient is <= -1 or >= 1)
+            {
+                errors.Add($"{label}: {effect.Operation} scalingCoefficient must be greater than -1 and less than 1.");
+            }
 
             if ((effect.Operation == AbilityEffectOperation.ApplyStatus
                  || effect.Operation == AbilityEffectOperation.ModifyStatusStacks
-                 || effect.Operation == AbilityEffectOperation.RemoveStatus)
+                 || effect.Operation == AbilityEffectOperation.RemoveStatus
+                 || effect.Operation == AbilityEffectOperation.SynchronizeAttributePerStatusStack)
                 && string.IsNullOrWhiteSpace(effect.StatusId))
             {
                 errors.Add($"{label}: {effect.Operation} requires statusId.");
@@ -254,8 +269,65 @@ public static class AbilityCatalogValidator
             if (effect.Operation == AbilityEffectOperation.Summon && string.IsNullOrWhiteSpace(effect.SummonId))
                 errors.Add($"{label}: Summon requires summonId.");
 
+            if (effect.Operation == AbilityEffectOperation.Summon
+                && !string.IsNullOrWhiteSpace(effect.SummonGroupId)
+                && effect.DurationTicks <= 0)
+            {
+                errors.Add($"{label}: grouped Summon effects require a positive durationTicks.");
+            }
+
+            if (effect.Operation == AbilityEffectOperation.SynchronizeAttributePerOwnedSummon)
+            {
+                if (string.IsNullOrWhiteSpace(effect.SummonId))
+                    errors.Add($"{label}: SynchronizeAttributePerOwnedSummon requires summonId.");
+                if (effect.BaseValue == 0)
+                    errors.Add($"{label}: SynchronizeAttributePerOwnedSummon requires a non-zero baseValue.");
+            }
+
+            if (effect.Operation == AbilityEffectOperation.SynchronizeAttributePerStatusStack
+                && effect.BaseValue == 0
+                && Math.Abs(effect.ScalingCoefficient) <= float.Epsilon)
+            {
+                errors.Add($"{label}: SynchronizeAttributePerStatusStack requires a non-zero baseValue or scalingCoefficient.");
+            }
+
+            if (effect.Operation == AbilityEffectOperation.ConsumeOwnedSummon)
+            {
+                if (string.IsNullOrWhiteSpace(effect.SummonId))
+                    errors.Add($"{label}: ConsumeOwnedSummon requires summonId.");
+                if (effect.BaseValue <= 0
+                    && (effect.ScalingAttribute is null || effect.ScalingCoefficient <= 0))
+                {
+                    errors.Add($"{label}: ConsumeOwnedSummon requires positive healing.");
+                }
+            }
+
             if (effect.Operation == AbilityEffectOperation.ApplyCondition && effect.Condition is null)
                 errors.Add($"{label}: ApplyCondition requires condition.");
+
+            if (effect.Operation is AbilityEffectOperation.ConsumeConditionStacks
+                    or AbilityEffectOperation.RemoveCondition
+                && effect.Condition is null)
+            {
+                errors.Add($"{label}: {effect.Operation} requires condition.");
+            }
+
+            if (effect.Operation == AbilityEffectOperation.ConsumeConditionStacks)
+            {
+                if (effect.BaseValue <= 0)
+                    errors.Add($"{label}: ConsumeConditionStacks requires a positive baseValue.");
+                if (effect.ScalingAttribute is null || effect.ScalingCoefficient <= 0)
+                    errors.Add($"{label}: ConsumeConditionStacks requires positive damage scaling.");
+                if (effect.HealingScalingCoefficient < 0 || effect.MaximumHealingScalingCoefficient < 0)
+                    errors.Add($"{label}: ConsumeConditionStacks healing coefficients cannot be negative.");
+                if (effect.HealingScalingCoefficient > 0 && effect.HealingScalingAttribute is null)
+                    errors.Add($"{label}: ConsumeConditionStacks healing requires healingScalingAttribute.");
+                if (effect.MaximumHealingScalingCoefficient > 0
+                    && effect.MaximumHealingScalingCoefficient < effect.HealingScalingCoefficient)
+                {
+                    errors.Add($"{label}: ConsumeConditionStacks maximum healing must be at least its per-stack healing.");
+                }
+            }
 
             if (effect.Operation == AbilityEffectOperation.ApplyRandomCondition
                 && (effect.Condition is null || effect.AlternativeCondition is null))
@@ -375,6 +447,13 @@ public static class AbilityCatalogValidator
             if (condition.Type == AbilityConditionType.ChancePercent && condition.Value is < 0 or > 100)
                 errors.Add($"{ownerId}: condition ChancePercent requires value between 0 and 100.");
 
+            if (condition.Type is AbilityConditionType.AnyEnemyHealthBelowPercent
+                    or AbilityConditionType.NoEnemyHealthBelowPercent
+                && condition.Value is < 0 or > 100)
+            {
+                errors.Add($"{ownerId}: condition {condition.Type} requires value between 0 and 100.");
+            }
+
             if (condition.Type == AbilityConditionType.EventIdIs
                 && string.IsNullOrWhiteSpace(condition.StatusId))
             {
@@ -426,7 +505,10 @@ public static class AbilityCatalogValidator
     {
         foreach (var effect in effects)
         {
-            if (effect.Operation != AbilityEffectOperation.Summon || string.IsNullOrWhiteSpace(effect.SummonId))
+            if (effect.Operation is not (AbilityEffectOperation.Summon
+                    or AbilityEffectOperation.SynchronizeAttributePerOwnedSummon
+                    or AbilityEffectOperation.ConsumeOwnedSummon)
+                || string.IsNullOrWhiteSpace(effect.SummonId))
                 continue;
 
             if (!knownSummonIds.Contains(effect.SummonId))

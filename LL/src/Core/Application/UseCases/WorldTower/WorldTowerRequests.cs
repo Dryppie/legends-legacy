@@ -15,6 +15,7 @@ public sealed record GetTowerRallyQuery(Guid CharacterId, Guid RallyId) : IQuery
 public sealed record GetTowerAttemptReportQuery(Guid CharacterId, Guid AttemptId) : IQuery<TowerBattleReportDto?>;
 public sealed record GetTowerAttemptCombatResultQuery(Guid CharacterId, Guid AttemptId) : IQuery<CombatResultDto?>;
 public sealed record GetTowerAttemptPlaybackQuery(Guid CharacterId, Guid AttemptId) : IQuery<TowerCombatPlaybackDto?>;
+public sealed record GetTowerAttemptPlaybackFramesQuery(Guid CharacterId, Guid AttemptId, int AfterSequence) : IQuery<TowerCombatFrameBatchDto?>;
 public sealed record GetTowerHallOfFameQuery : IQuery<IReadOnlyList<TowerHallOfFameEntryDto>>;
 public sealed record CreateTowerRallyCommand(Guid CharacterId, int FloorNumber, TowerRallyMode Mode) : ICommand<Response<TowerRallyDto>>;
 public sealed record ApplyToTowerRallyCommand(Guid CharacterId, Guid RallyId) : ICommand<Response<TowerRallyDto>>;
@@ -70,6 +71,19 @@ public sealed class GetTowerAttemptPlaybackQueryHandler(IWorldTowerService tower
         GetTowerAttemptPlaybackQuery request,
         CancellationToken cancellationToken) =>
         tower.GetAttemptPlaybackAsync(request.CharacterId, request.AttemptId, cancellationToken);
+}
+
+public sealed class GetTowerAttemptPlaybackFramesQueryHandler(IWorldTowerService tower)
+    : IRequestHandler<GetTowerAttemptPlaybackFramesQuery, TowerCombatFrameBatchDto?>
+{
+    public Task<TowerCombatFrameBatchDto?> Handle(
+        GetTowerAttemptPlaybackFramesQuery request,
+        CancellationToken cancellationToken) =>
+        tower.GetAttemptPlaybackFramesAsync(
+            request.CharacterId,
+            request.AttemptId,
+            request.AfterSequence,
+            cancellationToken);
 }
 
 public sealed class GetTowerHallOfFameQueryHandler(IWorldTowerService tower)

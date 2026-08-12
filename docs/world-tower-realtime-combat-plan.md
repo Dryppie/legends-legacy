@@ -1,6 +1,6 @@
 # World Tower real-time combat playback plan
 
-Status: **Partially implemented — durable end-to-end playback is shipped locally**
+Status: **Partially implemented — the durable playback path is horizontally safe and reconnectable**
 
 Last updated: 2026-08-12
 
@@ -17,24 +17,27 @@ Implemented in the repository:
 - participant-character-group SignalR publication and client sequence deduplication;
 - deferred reward, progression, scouting, Echo, and Hall finalization at the playback deadline;
 - incremental updates through the existing shared combat viewer.
+- a separately leased background simulation queue, so Expedition start returns before combat calculation;
+- PostgreSQL `FOR UPDATE SKIP LOCKED` simulation and playback claims with expiring ownership leases;
+- deterministic attempt-seeded retries and atomic playback preparation;
+- bounded, participant-authorized missed-frame recovery after SignalR gaps or reconnects;
+- visible reconnect state while the last authoritative frame remains on screen;
+- one-second health and barrier interpolation between authoritative frames.
 
 Still outstanding before this design is fully shipped:
 
-- a separately leased simulation queue (simulation currently completes within the start request, while playback remains asynchronous);
-- PostgreSQL multi-instance dispatcher leases/`SKIP LOCKED` hardening;
-- bounded reconnect frame ranges, visible reconnect status, and smooth one-second interpolation;
 - richer status/condition and recent-event presentation;
 - playback size limits, retention cleanup, metrics, load tests, and a rollout feature flag;
 - fake-clock component/browser coverage for a full 6,000-tick battle.
 
 ## Goal
 
-World Tower combat should still be calculated quickly and authoritatively by the backend, but rally members should experience it at the engine's real-time rate:
+World Tower combat should still be calculated quickly and authoritatively by the backend, but Expedition members should experience it at the engine's real-time rate:
 
 - the combat engine runs at 10 ticks per simulated second;
 - the backend captures one authoritative checkpoint every 10 ticks and a final checkpoint when combat ends;
 - a 6,000-tick battle therefore plays for 600 seconds, or 10 minutes;
-- each rally participant receives the current checkpoint through authenticated SignalR;
+- each Expedition participant receives the current checkpoint through authenticated SignalR;
 - the frontend animates between checkpoints and updates health, barriers, deaths, events, and performance totals;
 - refreshes, reconnects, API restarts, and duplicate messages do not lose or corrupt playback;
 - rewards, progression, Hall of Fame creation, and the final report are not revealed or applied until playback reaches its final checkpoint.
@@ -45,15 +48,15 @@ The backend should precompute and persist the entire deterministic fight, then r
 
 ```mermaid
 sequenceDiagram
-    participant L as Rally leader
+    participant L as Expedition leader
     participant API as Tower API
     participant S as Simulation worker
     participant DB as Database
     participant P as Playback dispatcher
     participant R as SignalR
-    participant UI as Rally clients
+    participant UI as Expedition clients
 
-    L->>API: Start rally
+    L->>API: Start Expedition
     API->>DB: Create queued attempt
     API-->>L: 202 Accepted + attempt id
     S->>DB: Claim queued attempt
@@ -94,7 +97,7 @@ The engine must behave identically with checkpoint capture enabled or disabled. 
 
 ### Persisted playback
 
-Add a one-to-one `TowerCombatPlayback` dependent for `TowerAttempt`. Keeping the large timeline outside `TowerAttempt` prevents ordinary rally queries from loading it.
+Add a one-to-one `TowerCombatPlayback` dependent for `TowerAttempt`. Keeping the large timeline outside `TowerAttempt` prevents ordinary Expedition queries from loading it.
 
 Recommended fields:
 
@@ -124,8 +127,8 @@ This requires an EF Core migration, but no redundant participant, snapshot, repo
 
 Add two participant-scoped contracts:
 
-- `WorldTowerCombatPlaybackReady`: attempt/rally identifiers, playback start, ticks per second, frame interval, and initial state.
-- `WorldTowerCombatFrameUpdated`: attempt/rally identifiers, sequence, tick, scheduled time, state, interval events/stat deltas, and final marker.
+- `WorldTowerCombatPlaybackReady`: attempt/Expedition identifiers, playback start, ticks per second, frame interval, and initial state.
+- `WorldTowerCombatFrameUpdated`: attempt/Expedition identifiers, sequence, tick, scheduled time, state, interval events/stat deltas, and final marker.
 
 Extend `Audience` with a multi-character audience and publish to the existing authenticated character groups. Do not broadcast combat frames to the world group.
 
@@ -144,8 +147,8 @@ Messages are at-least-once. Clients deduplicate by `(attemptId, sequence)` and i
 
 ### 2. Make Tower start asynchronous
 
-- Change `POST /rallies/{id}/start` to create the attempt and return `202 Accepted` with playback metadata instead of returning the final outcome.
-- Keep the existing floor and rally locks around attempt creation only.
+- Change the compatibility endpoint `POST /rallies/{id}/start` to create the attempt and return `202 Accepted` with playback metadata instead of returning the final outcome.
+- Keep the existing floor and Expedition locks around attempt creation only.
 - Add a simulation worker that claims `Started` attempts with PostgreSQL-safe leasing/`SKIP LOCKED` behavior.
 - Reuse the current snapshot rehydration, preparation modifiers, Guardian creation, combat executor, and result factory.
 - Use a deterministic seed derived from the attempt identifier so a crash can safely retry simulation.
@@ -166,7 +169,7 @@ Messages are at-least-once. Clients deduplicate by `(attemptId, sequence)` and i
 - At the final scheduled checkpoint, run the existing outcome transaction exactly once.
 - Apply Cinders, first-clear progression, scouting, Echo lockouts, unlock keys, and Hall of Fame creation at this point.
 - Guard finalization with attempt status plus the existing floor lock so retries cannot grant twice.
-- Queue the existing durable rally-completed outbox event after finalization.
+- Queue the existing durable Expedition-completed outbox event after finalization.
 - If simulation fails, mark the attempt errored immediately. If playback dispatch fails temporarily, retain `Playback` and resume.
 
 ### 5. Add recovery APIs
@@ -200,7 +203,7 @@ The current snapshot endpoint should calculate where playback ought to be from s
 
 ### 3. Handle lifecycle and reconnects
 
-- All rally members enter the live view when the ready event arrives or rally REST state reports `Playback`.
+- All Expedition members enter the live view when the ready event arrives or Expedition REST state reports `Playback`.
 - On refresh/reconnect, request the current playback snapshot and jump to the correct live point.
 - Show `Reconnecting…` while retaining the last frame; avoid falsely continuing local combat.
 - When the final frame arrives, transition to the existing detailed result and compact Tower report.
@@ -226,7 +229,7 @@ The current snapshot endpoint should calculate where playback ought to be from s
 
 ### SignalR and client
 
-- Frames target all and only rally participant character groups.
+- Frames target all and only Expedition participant character groups.
 - Duplicate/out-of-order frames are harmless.
 - Disconnect/reconnect and page refresh recover the current state.
 - Client timers do not drift more than one frame and never expose the final outcome early.
@@ -239,7 +242,7 @@ The current snapshot endpoint should calculate where playback ought to be from s
 - Record metrics for queued simulations, simulation duration, active playbacks, frame payload bytes, dispatch lag, reconnect recovery, and finalization failures.
 - Put a hard serialized-size limit on timelines and log oversized frames.
 - Retain completed timelines for a defined replay period, then clean them without deleting the attempt report.
-- Load-test 15-player, 6,000-tick fights and concurrent rallies before production enablement.
+- Load-test 15-player, 6,000-tick fights and concurrent Expeditions before production enablement.
 - Roll out behind a `WorldTowerRealtimeCombat` feature flag; retain the current immediate-result path as a temporary fallback during rollout.
 
 ## Delivery order

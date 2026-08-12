@@ -50,6 +50,15 @@
       ]
     },
     {
+      "monsterId": "monster.garran,_the_gatekeeper",
+      "abilityIds": [
+        "ability.creature.garran.gatehammer",
+        "ability.creature.garran.slam_the_gates",
+        "ability.creature.garran.gatekeepers_toll",
+        "ability.creature.garran.the_first_gate"
+      ]
+    },
+    {
       "monsterId": "monster.goblin",
       "abilityIds": [
         "ability.creature.goblin.shiv_jab",
@@ -363,6 +372,42 @@
       "abilityIds": [
         "ability.creature.undead.necrotic_slash",
         "ability.creature.undead.corpse_explosion"
+      ]
+    },
+    {
+      "monsterId": "monster.velka,_the_bloodwing_huntress",
+      "abilityIds": [
+        "ability.creature.velka.rending_dive",
+        "ability.creature.velka.crimson_gale",
+        "ability.creature.velka.feast_on_wounds",
+        "ability.creature.velka.scent_of_weakness"
+      ]
+    },
+    {
+      "monsterId": "monster.vaelor,_the_mirrorbound",
+      "abilityIds": [
+        "ability.creature.vaelor.mirror_lance",
+        "ability.creature.vaelor.hall_of_shards",
+        "ability.creature.vaelor.reflective_mirrorplate",
+        "ability.creature.vaelor.mirrorbound"
+      ]
+    },
+    {
+      "monsterId": "monster.morrowmaw,_broodkeeper",
+      "abilityIds": [
+        "ability.creature.morrowmaw.hatch_the_brood",
+        "ability.creature.morrowmaw.spore_eruption",
+        "ability.creature.morrowmaw.devour_the_weak",
+        "ability.creature.morrowmaw.broodmother"
+      ]
+    },
+    {
+      "monsterId": "monster.kharad,_the_first_warden",
+      "abilityIds": [
+        "ability.creature.kharad.crushing_verdict",
+        "ability.creature.kharad.raise_the_twin_pillars",
+        "ability.creature.kharad.seal_of_ascension",
+        "ability.creature.kharad.keystone_resonance"
       ]
     }
   ]

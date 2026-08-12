@@ -2878,5 +2878,962 @@
       }
     ],
     "owningEssenceId": "essence.undead"
+  },
+  {
+    "id": "ability.creature.garran.gatehammer",
+    "kind": "Active",
+    "name": "Gatehammer",
+    "description": "Strike the target for 230% Physical Damage.",
+    "cooldownTicks": 80,
+    "tags": ["Physical", "Melee"],
+    "effects": [
+      {
+        "id": "effect.creature.garran.gatehammer.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.3,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.garran.slam_the_gates",
+    "kind": "Active",
+    "name": "Slam the Gates",
+    "description": "Bring two spectral gates crashing together, dealing 150% Magical Damage to all enemies.",
+    "cooldownTicks": 140,
+    "tags": ["Magical", "Area"],
+    "effects": [
+      {
+        "id": "effect.creature.garran.slam_the_gates.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.5,
+        "attackType": "None",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.garran.gatekeepers_toll",
+    "kind": "Active",
+    "name": "Gatekeeper’s Toll",
+    "description": "Absorb 15% Power from a random target for the rest of combat.",
+    "cooldownTicks": 180,
+    "tags": ["Debuff", "Power", "Permanent"],
+    "effects": [
+      {
+        "id": "effect.creature.garran.gatekeepers_toll.transfer",
+        "operation": "TransferAttributePercent",
+        "target": "RandomEnemy",
+        "attribute": "Power",
+        "scalingCoefficient": 0.15,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.garran.the_first_gate",
+    "kind": "Passive",
+    "name": "The First Gate",
+    "description": "Begin combat with 3 Gate Seals. Each seal grants 15% Armor and Resistance. A Seal shatters whenever Garran loses 25% of his maximum Health.",
+    "cooldownTicks": 0,
+    "tags": ["Defensive", "Status.Stack", "HealthThreshold"],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.creature.garran.the_first_gate.apply_seals"
+        ]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": [
+          "effect.creature.garran.the_first_gate.shatter_75",
+          "effect.creature.garran.the_first_gate.shatter_75_armor",
+          "effect.creature.garran.the_first_gate.shatter_75_resistance"
+        ],
+        "conditions": [
+          {
+            "type": "HealthAtOrBelowPercent",
+            "subject": "Source",
+            "value": 75
+          },
+          {
+            "type": "StatusStacksAtLeast",
+            "subject": "Source",
+            "statusId": "status.garran.gate_seal",
+            "value": 3
+          }
+        ]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": [
+          "effect.creature.garran.the_first_gate.shatter_50",
+          "effect.creature.garran.the_first_gate.shatter_50_armor",
+          "effect.creature.garran.the_first_gate.shatter_50_resistance"
+        ],
+        "conditions": [
+          {
+            "type": "HealthAtOrBelowPercent",
+            "subject": "Source",
+            "value": 50
+          },
+          {
+            "type": "StatusStacksAtLeast",
+            "subject": "Source",
+            "statusId": "status.garran.gate_seal",
+            "value": 2
+          }
+        ]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": [
+          "effect.creature.garran.the_first_gate.shatter_25",
+          "effect.creature.garran.the_first_gate.shatter_25_armor",
+          "effect.creature.garran.the_first_gate.shatter_25_resistance"
+        ],
+        "conditions": [
+          {
+            "type": "HealthAtOrBelowPercent",
+            "subject": "Source",
+            "value": 25
+          },
+          {
+            "type": "StatusStacksAtLeast",
+            "subject": "Source",
+            "statusId": "status.garran.gate_seal",
+            "value": 1
+          }
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.garran.the_first_gate.apply_seals",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "baseValue": 3,
+        "statusId": "status.garran.gate_seal",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.garran.the_first_gate.shatter_75",
+        "operation": "ModifyStatusStacks",
+        "target": "Self",
+        "statusId": "status.garran.gate_seal",
+        "baseValue": -1,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.garran.the_first_gate.shatter_75_armor",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Armor",
+        "scalingCoefficient": -0.15,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.garran.the_first_gate.shatter_75_resistance",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Resistance",
+        "scalingCoefficient": -0.15,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.garran.the_first_gate.shatter_50",
+        "operation": "ModifyStatusStacks",
+        "target": "Self",
+        "statusId": "status.garran.gate_seal",
+        "baseValue": -1,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.garran.the_first_gate.shatter_50_armor",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Armor",
+        "scalingCoefficient": -0.15,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.garran.the_first_gate.shatter_50_resistance",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Resistance",
+        "scalingCoefficient": -0.15,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.garran.the_first_gate.shatter_25",
+        "operation": "ModifyStatusStacks",
+        "target": "Self",
+        "statusId": "status.garran.gate_seal",
+        "baseValue": -1,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.garran.the_first_gate.shatter_25_armor",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Armor",
+        "scalingCoefficient": -0.15,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.garran.the_first_gate.shatter_25_resistance",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Resistance",
+        "scalingCoefficient": -0.15,
+        "uses": 1,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.velka.rending_dive",
+    "kind": "Active",
+    "name": "Rending Dive",
+    "description": "Dive upon the enemy with the lowest Health percentage, dealing 160% Physical Damage and applying Bleed(12).",
+    "cooldownTicks": 100,
+    "tags": ["Physical", "Melee", "Bleed"],
+    "effects": [
+      {
+        "id": "effect.creature.velka.rending_dive.damage",
+        "operation": "Damage",
+        "target": "LowestHealthEnemy",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.6,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.velka.rending_dive.bleed",
+        "operation": "ApplyCondition",
+        "target": "EventTarget",
+        "baseValue": 12,
+        "condition": "Bleed",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.velka.crimson_gale",
+    "kind": "Active",
+    "name": "Crimson Gale",
+    "description": "Beat her wings violently, dealing 65% Physical Damage to all enemies and applying Bleed(10).",
+    "cooldownTicks": 130,
+    "tags": ["Physical", "Area", "Bleed"],
+    "effects": [
+      {
+        "id": "effect.creature.velka.crimson_gale.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.65,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.velka.crimson_gale.bleed",
+        "operation": "ApplyCondition",
+        "target": "AllEnemies",
+        "baseValue": 10,
+        "condition": "Bleed",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.velka.feast_on_wounds",
+    "kind": "Active",
+    "name": "Feast on Wounds",
+    "description": "Consume up to three Bleed stacks from all enemies. Each consumed stack deals 20% Physical Damage to its target and heals Velka for 0.5% Max Health, capped at 4%.",
+    "cooldownTicks": 210,
+    "tags": ["Physical", "Area", "Bleed", "Healing"],
+    "effects": [
+      {
+        "id": "effect.creature.velka.feast_on_wounds.consume",
+        "operation": "ConsumeConditionStacks",
+        "target": "AllEnemies",
+        "condition": "Bleed",
+        "baseValue": 3,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.2,
+        "healingScalingAttribute": "MaxHealth",
+        "healingScalingCoefficient": 0.005,
+        "maximumHealingScalingCoefficient": 0.04,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "conditions": [
+          {
+            "type": "HasCondition",
+            "subject": "Target",
+            "condition": "Bleed"
+          }
+        ],
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.velka.scent_of_weakness",
+    "kind": "Passive",
+    "name": "Scent of Weakness",
+    "description": "While any enemy is below 30% Health, Velka gains Haste.",
+    "cooldownTicks": 0,
+    "tags": ["Buff", "Haste"],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": ["effect.creature.velka.scent_of_weakness.apply"],
+        "conditions": [
+          {
+            "type": "AnyEnemyHealthBelowPercent",
+            "value": 30
+          }
+        ]
+      },
+      {
+        "event": "OnInterval",
+        "internalCooldownTicks": 50,
+        "effectIds": ["effect.creature.velka.scent_of_weakness.apply"],
+        "conditions": [
+          {
+            "type": "AnyEnemyHealthBelowPercent",
+            "value": 30
+          }
+        ]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": ["effect.creature.velka.scent_of_weakness.apply"],
+        "conditions": [
+          {
+            "type": "EventSourceIsEnemy"
+          },
+          {
+            "type": "AnyEnemyHealthBelowPercent",
+            "value": 30
+          }
+        ]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": ["effect.creature.velka.scent_of_weakness.remove"],
+        "conditions": [
+          {
+            "type": "EventSourceIsEnemy"
+          },
+          {
+            "type": "NoEnemyHealthBelowPercent",
+            "value": 30
+          }
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.velka.scent_of_weakness.apply",
+        "operation": "ApplyCondition",
+        "target": "Self",
+        "baseValue": 1,
+        "condition": "Haste",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.velka.scent_of_weakness.remove",
+        "operation": "RemoveCondition",
+        "target": "Self",
+        "condition": "Haste",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.vaelor.mirror_lance",
+    "kind": "Active",
+    "name": "Mirror Lance",
+    "description": "Strike the enemy with the highest Health for 200% Physical Damage, then fire a mirrored lance at the enemy with the lowest Health for 100% Magical Damage.",
+    "cooldownTicks": 140,
+    "tags": ["Physical", "Magical", "Melee", "Ranged"],
+    "effects": [
+      {
+        "id": "effect.creature.vaelor.mirror_lance.physical",
+        "operation": "Damage",
+        "target": "HighestHealthEnemy",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.0,
+        "scalingStatusId": "status.vaelor.next_physical_damage",
+        "statusScalingCoefficient": 0.02,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.vaelor.mirror_lance.magical",
+        "operation": "Damage",
+        "target": "LowestCurrentHealthEnemy",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.0,
+        "scalingStatusId": "status.vaelor.next_magical_damage",
+        "statusScalingCoefficient": 0.01,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.vaelor.mirror_lance.consume_physical_charge",
+        "operation": "RemoveStatus",
+        "target": "Self",
+        "statusId": "status.vaelor.next_physical_damage",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.vaelor.mirror_lance.consume_magical_charge",
+        "operation": "RemoveStatus",
+        "target": "Self",
+        "statusId": "status.vaelor.next_magical_damage",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.vaelor.hall_of_shards",
+    "kind": "Active",
+    "name": "Hall of Shards",
+    "description": "Deal 50% Magical Damage to all enemies, followed by 50% Physical Damage to all enemies.",
+    "cooldownTicks": 160,
+    "tags": ["Physical", "Magical", "Area"],
+    "effects": [
+      {
+        "id": "effect.creature.vaelor.hall_of_shards.magical",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.5,
+        "scalingStatusId": "status.vaelor.next_magical_damage",
+        "statusScalingCoefficient": 0.005,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.vaelor.hall_of_shards.physical",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.5,
+        "scalingStatusId": "status.vaelor.next_physical_damage",
+        "statusScalingCoefficient": 0.005,
+        "attackType": "Ranged",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.vaelor.hall_of_shards.consume_physical_charge",
+        "operation": "RemoveStatus",
+        "target": "Self",
+        "statusId": "status.vaelor.next_physical_damage",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.vaelor.hall_of_shards.consume_magical_charge",
+        "operation": "RemoveStatus",
+        "target": "Self",
+        "statusId": "status.vaelor.next_magical_damage",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.vaelor.reflective_mirrorplate",
+    "kind": "Active",
+    "name": "Reflective Mirrorplate",
+    "description": "For 5 seconds, reflect 100% of all direct damage received back at the attacker.",
+    "cooldownTicks": 220,
+    "tags": ["Buff", "Retaliation", "Reflection"],
+    "effects": [
+      {
+        "id": "effect.creature.vaelor.reflective_mirrorplate.reflect",
+        "operation": "ApplyCondition",
+        "target": "Self",
+        "baseValue": 100,
+        "durationTicks": 50,
+        "condition": "Thorns",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.vaelor.mirrorbound",
+    "kind": "Passive",
+    "name": "Mirrorbound",
+    "description": "Physical Damage received increases the Magical Damage of Vaelor's next damaging ability by 1%; Magical Damage received instead increases its Physical Damage by 1%. Each bonus stacks to 30% and resets when consumed.",
+    "cooldownTicks": 0,
+    "tags": ["Buff", "Physical", "Magical", "Reactive"],
+    "triggers": [
+      {
+        "event": "OnDamaged",
+        "effectIds": ["effect.creature.vaelor.mirrorbound.magical_charge"],
+        "conditions": [
+          {
+            "type": "EventDamageTypeIs",
+            "damageType": "Physical"
+          }
+        ]
+      },
+      {
+        "event": "OnDamaged",
+        "effectIds": ["effect.creature.vaelor.mirrorbound.physical_charge"],
+        "conditions": [
+          {
+            "type": "EventDamageTypeIs",
+            "damageType": "Magical"
+          }
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.vaelor.mirrorbound.magical_charge",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "baseValue": 1,
+        "statusId": "status.vaelor.next_magical_damage",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.vaelor.mirrorbound.physical_charge",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "baseValue": 1,
+        "statusId": "status.vaelor.next_physical_damage",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.summon.morrowmaw_broodling.venomous_bite",
+    "kind": "Active",
+    "name": "Venomous Bite",
+    "description": "Apply Poison(10) to a random enemy.",
+    "cooldownTicks": 100,
+    "tags": ["Poison", "Summon", "Debuff"],
+    "effects": [
+      {
+        "id": "effect.summon.morrowmaw_broodling.venomous_bite.poison",
+        "operation": "ApplyCondition",
+        "target": "RandomEnemy",
+        "baseValue": 10,
+        "condition": "Poison",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.morrowmaw.hatch_the_brood",
+    "kind": "Active",
+    "name": "Hatch the Brood",
+    "description": "Summon one Broodling for every living enemy.",
+    "cooldownTicks": 180,
+    "tags": ["Summon", "Broodling", "Area"],
+    "effects": [
+      {
+        "id": "effect.creature.morrowmaw.hatch_the_brood.summon",
+        "operation": "Summon",
+        "target": "AllEnemies",
+        "summonId": "morrowmawBroodling",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.morrowmaw.spore_eruption",
+    "kind": "Active",
+    "name": "Spore Eruption",
+    "description": "Deal 55% Magical Damage to all enemies.",
+    "cooldownTicks": 120,
+    "tags": ["Magical", "Area", "Spore"],
+    "effects": [
+      {
+        "id": "effect.creature.morrowmaw.spore_eruption.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.55,
+        "attackType": "None",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.morrowmaw.devour_the_weak",
+    "kind": "Active",
+    "name": "Devour the Weak",
+    "description": "Consume the living Broodling with the lowest Health, healing Morrowmaw for 4% Max Health.",
+    "cooldownTicks": 200,
+    "tags": ["Summon", "Healing", "Broodling"],
+    "effects": [
+      {
+        "id": "effect.creature.morrowmaw.devour_the_weak.consume",
+        "operation": "ConsumeOwnedSummon",
+        "target": "Self",
+        "summonId": "morrowmawBroodling",
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.04,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.morrowmaw.broodmother",
+    "kind": "Passive",
+    "name": "Broodmother",
+    "description": "Each living Broodling grants Morrowmaw 6% Damage Reduction and 5% increased Attack Speed.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Summon", "Defensive", "AttackSpeed"],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.creature.morrowmaw.broodmother.damage_reduction",
+          "effect.creature.morrowmaw.broodmother.attack_speed"
+        ]
+      },
+      {
+        "event": "OnSummonChanged",
+        "effectIds": [
+          "effect.creature.morrowmaw.broodmother.damage_reduction",
+          "effect.creature.morrowmaw.broodmother.attack_speed"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.morrowmaw.broodmother.damage_reduction",
+        "operation": "SynchronizeAttributePerOwnedSummon",
+        "target": "Self",
+        "summonId": "morrowmawBroodling",
+        "attribute": "DamageReduction",
+        "baseValue": 6,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.morrowmaw.broodmother.attack_speed",
+        "operation": "SynchronizeAttributePerOwnedSummon",
+        "target": "Self",
+        "summonId": "morrowmawBroodling",
+        "attribute": "AttackSpeed",
+        "baseValue": 5,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.kharad.crushing_verdict",
+    "kind": "Active",
+    "name": "Crushing Verdict",
+    "description": "Strike the enemy with the highest Max Health for 260% Physical Damage and apply Vulnerability(2).",
+    "cooldownTicks": 140,
+    "tags": ["Physical", "Melee", "Vulnerability"],
+    "effects": [
+      {
+        "id": "effect.creature.kharad.crushing_verdict.damage",
+        "operation": "Damage",
+        "target": "HighestMaxHealthEnemy",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.6,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.kharad.crushing_verdict.vulnerability",
+        "operation": "ApplyCondition",
+        "target": "HighestMaxHealthEnemy",
+        "baseValue": 2,
+        "condition": "Vulnerable",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.kharad.raise_the_twin_pillars",
+    "kind": "Active",
+    "name": "Raise the Twin Pillars",
+    "description": "Summon an Iron Pillar and an Aether Pillar for 12 seconds. Surviving Pillars grant Resonance; destroying both removes one Resonance.",
+    "cooldownTicks": 220,
+    "tags": ["Summon", "Pillar", "Resonance"],
+    "effects": [
+      {
+        "id": "effect.creature.kharad.raise_the_twin_pillars.iron",
+        "operation": "Summon",
+        "target": "Self",
+        "summonId": "kharadIronPillar",
+        "summonGroupId": "summon-group.kharad.twin_pillars",
+        "durationTicks": 120,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.kharad.raise_the_twin_pillars.aether",
+        "operation": "Summon",
+        "target": "Self",
+        "summonId": "kharadAetherPillar",
+        "summonGroupId": "summon-group.kharad.twin_pillars",
+        "durationTicks": 120,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.kharad.seal_of_ascension",
+    "kind": "Active",
+    "name": "Seal of Ascension",
+    "description": "Gain Barrier equal to 5% Max Health for 10 seconds and deal 50% Magical Damage to all enemies every 2 seconds while it holds.",
+    "cooldownTicks": 160,
+    "tags": ["Magical", "Area", "Barrier", "Resonance"],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.creature.kharad.seal_of_ascension.barrier",
+          "effect.creature.kharad.seal_of_ascension.pulse"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.kharad.seal_of_ascension.barrier",
+        "operation": "GrantBarrier",
+        "target": "Self",
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.05,
+        "durationTicks": 100,
+        "linkedEffectId": "effect.creature.kharad.seal_of_ascension.pulse",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.kharad.seal_of_ascension.pulse",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.5,
+        "durationTicks": 100,
+        "intervalTicks": 20,
+        "attackType": "None",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.kharad.keystone_resonance",
+    "kind": "Passive",
+    "name": "Keystone Resonance",
+    "description": "Each Resonance grants 7% Power, 5% Attack Speed, and 3% Damage Reduction. At 5 stacks, Resonance can no longer be removed.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Buff", "Resonance"],
+    "triggers": [
+      {
+        "event": "OnSummonGroupResolved",
+        "effectIds": ["effect.creature.kharad.keystone_resonance.gain_from_pillars"],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "summon-group.kharad.twin_pillars"
+          },
+          {
+            "type": "EventMagnitudeAtLeast",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "event": "OnBarrierContributionBroken",
+        "effectIds": ["effect.creature.kharad.keystone_resonance.lose_from_seal"],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "effect.creature.kharad.seal_of_ascension.barrier"
+          }
+        ]
+      },
+      {
+        "event": "OnBarrierExpired",
+        "effectIds": ["effect.creature.kharad.keystone_resonance.gain_from_seal"],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "effect.creature.kharad.seal_of_ascension.barrier"
+          }
+        ]
+      },
+      {
+        "event": "OnSummonGroupResolved",
+        "effectIds": ["effect.creature.kharad.keystone_resonance.lose_from_pillars"],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "summon-group.kharad.twin_pillars"
+          },
+          {
+            "type": "EventMagnitudeAtMost",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [
+          "effect.creature.kharad.keystone_resonance.power",
+          "effect.creature.kharad.keystone_resonance.attack_speed",
+          "effect.creature.kharad.keystone_resonance.damage_reduction"
+        ],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "status.kharad.resonance"
+          }
+        ]
+      },
+      {
+        "event": "OnStatusChanged",
+        "effectIds": [
+          "effect.creature.kharad.keystone_resonance.power",
+          "effect.creature.kharad.keystone_resonance.attack_speed",
+          "effect.creature.kharad.keystone_resonance.damage_reduction"
+        ],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "status.kharad.resonance"
+          }
+        ]
+      },
+      {
+        "event": "OnStatusRemoved",
+        "effectIds": [
+          "effect.creature.kharad.keystone_resonance.power",
+          "effect.creature.kharad.keystone_resonance.attack_speed",
+          "effect.creature.kharad.keystone_resonance.damage_reduction"
+        ],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "status.kharad.resonance"
+          }
+        ]
+      },
+      {
+        "event": "OnStatusCleansed",
+        "effectIds": [
+          "effect.creature.kharad.keystone_resonance.power",
+          "effect.creature.kharad.keystone_resonance.attack_speed",
+          "effect.creature.kharad.keystone_resonance.damage_reduction"
+        ],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "status.kharad.resonance"
+          }
+        ]
+      },
+      {
+        "event": "OnStatusDispelled",
+        "effectIds": [
+          "effect.creature.kharad.keystone_resonance.power",
+          "effect.creature.kharad.keystone_resonance.attack_speed",
+          "effect.creature.kharad.keystone_resonance.damage_reduction"
+        ],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "status.kharad.resonance"
+          }
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.kharad.keystone_resonance.gain_from_pillars",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.kharad.resonance",
+        "eventMagnitudeCoefficient": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.kharad.keystone_resonance.lose_from_pillars",
+        "operation": "ModifyStatusStacks",
+        "target": "Self",
+        "statusId": "status.kharad.resonance",
+        "baseValue": -1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.kharad.keystone_resonance.lose_from_seal",
+        "operation": "ModifyStatusStacks",
+        "target": "Self",
+        "statusId": "status.kharad.resonance",
+        "baseValue": -1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.kharad.keystone_resonance.gain_from_seal",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.kharad.resonance",
+        "baseValue": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.kharad.keystone_resonance.power",
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.kharad.resonance",
+        "attribute": "Power",
+        "scalingCoefficient": 0.07,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.kharad.keystone_resonance.attack_speed",
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.kharad.resonance",
+        "attribute": "AttackSpeed",
+        "baseValue": 5,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.kharad.keystone_resonance.damage_reduction",
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.kharad.resonance",
+        "attribute": "DamageReduction",
+        "baseValue": 3,
+        "procCoefficient": 1
+      }
+    ]
   }
 ]

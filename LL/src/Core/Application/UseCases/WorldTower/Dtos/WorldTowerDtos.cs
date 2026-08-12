@@ -1,6 +1,7 @@
 using Domain.Models.WorldTower;
 using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Domain.Models.Combat;
+using Domain.Models.Combat.Abilities;
 
 namespace Application.UseCases.WorldTower.Dtos;
 
@@ -9,6 +10,7 @@ public sealed record TowerOverviewDto(
     int HighestUnlockedFloor,
     int HighestClearedFloor,
     bool EchoModeUnlocked,
+    long TowerTokens,
     TowerFloorSummaryDto? CurrentFloor,
     IReadOnlyList<TowerFloorSummaryDto> Floors,
     IReadOnlyList<TowerRallySummaryDto> ActiveRallies,
@@ -22,8 +24,7 @@ public sealed record TowerFloorSummaryDto(
     int RequiredSlots,
     int RecommendedPowerRating,
     int ScoutingProgress,
-    string GuardianName,
-    string GuardianImagePath);
+    string GuardianName);
 
 public sealed record TowerFloorDetailDto(
     int FloorNumber,
@@ -42,17 +43,24 @@ public sealed record TowerFloorDetailDto(
     TowerGuardianInfoDto Guardian,
     TowerPreparationSummaryDto Preparation,
     IReadOnlyList<TowerRallySummaryDto> ActiveRallies,
-    IReadOnlyList<string> UnlockKeys,
-    int FirstClearCinders,
-    int EchoCinders);
+    IReadOnlyList<TowerUnlockDto> Unlocks,
+    int FirstClearTowerTokens,
+    int EchoTowerTokens,
+    bool EchoRewardClaimedThisWeek);
 
 public sealed record TowerGuardianInfoDto(
     string Name,
-    string ImagePath,
     IReadOnlyList<string> Tags,
     IReadOnlyList<TowerScoutingRevealDto> KnownReveals);
 
-public sealed record TowerScoutingRevealDto(int Threshold, string Title, string Description);
+public sealed record TowerUnlockDto(string Key, string Description);
+
+public sealed record TowerScoutingRevealDto(
+    int Threshold,
+    string Title,
+    string Description,
+    AbilitySpecKind Kind,
+    int? CooldownSeconds);
 
 public sealed record TowerPreparationSummaryDto(
     decimal SupplyWeaponsPercent,
@@ -76,7 +84,6 @@ public sealed record TowerRallySummaryDto(
 public sealed record TowerRallyDto(
     Guid Id,
     int FloorNumber,
-    string FloorName,
     string GuardianName,
     TowerRallyMode Mode,
     TowerRallyStatus Status,
@@ -133,7 +140,7 @@ public sealed record TowerAttemptResultDto(
     int FloorNumber,
     string GuardianName,
     TowerAttemptStatus Status,
-    TowerCombatPlaybackDto Playback);
+    TowerCombatPlaybackDto? Playback);
 
 public sealed record TowerCombatPlaybackDto(
     Guid AttemptId,
@@ -157,6 +164,13 @@ public sealed record TowerCombatFrameDto(
     IReadOnlyList<CombatEventDto> Events,
     bool IsFinal,
     BattleOutcome? Outcome);
+
+public sealed record TowerCombatFrameBatchDto(
+    Guid AttemptId,
+    int AfterSequence,
+    int CurrentSequence,
+    bool HasMore,
+    IReadOnlyList<TowerCombatFrameDto> Frames);
 
 public sealed record CombatEventDto(
     string Source,

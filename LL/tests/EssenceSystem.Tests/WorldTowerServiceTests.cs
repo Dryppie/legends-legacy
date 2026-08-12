@@ -4,12 +4,14 @@ using Application.Interfaces.Outbox;
 using Application.Interfaces.WebSockets;
 using Application.Common.Mappings;
 using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Combat;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Services.LL.WorldTower;
 using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
 using AutoMapper;
 using Domain.Models.Combat;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities;
@@ -27,6 +29,7 @@ using Persistence.LL;
 using Persistence.LL.Repositories.Snapshots;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
+using Services.LL.Combat.Engine;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
 using Services.LL.Snapshots;
@@ -36,6 +39,52 @@ namespace EssenceSystem.Tests;
 
 public sealed class WorldTowerServiceTests
 {
+    [Theory]
+    [InlineData(24, 0)]
+    [InlineData(25, 1)]
+    [InlineData(50, 2)]
+    [InlineData(75, 3)]
+    [InlineData(100, 4)]
+    public async Task Scouting_reveals_guardian_abilities_at_quarters_with_passive_last(
+        int scoutingProgress,
+        int expectedCount)
+    {
+        await using var db = CreateDbContext();
+        var character = SeedCharacter(db, "Scout", level: 20, accountId: Guid.NewGuid());
+        db.TowerFloorProgresses.Add(new TowerFloorProgress
+        {
+            ServerId = "test-server",
+            FloorNumber = 1,
+            UnlockedAt = DateTimeOffset.UtcNow,
+            ScoutingProgress = scoutingProgress,
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow
+        });
+        await db.SaveChangesAsync();
+        var service = CreateService(db, new FixedPowerRatingService((character.Id, 1_000)));
+
+        var floor = await service.GetFloorAsync(character.Id, 1, CancellationToken.None);
+
+        Assert.NotNull(floor);
+        Assert.Equal(expectedCount, floor.Guardian.KnownReveals.Count);
+        Assert.Equal(
+            [.. new[] { 25, 50, 75, 100 }.Take(expectedCount)],
+            floor.Guardian.KnownReveals.Select(reveal => reveal.Threshold));
+        if (expectedCount > 0)
+        {
+            Assert.All(floor.Guardian.KnownReveals.Take(Math.Min(3, expectedCount)), reveal =>
+            {
+                Assert.Equal(AbilitySpecKind.Active, reveal.Kind);
+                Assert.NotNull(reveal.CooldownSeconds);
+            });
+        }
+        if (expectedCount == 4)
+        {
+            Assert.Equal(AbilitySpecKind.Passive, floor.Guardian.KnownReveals[^1].Kind);
+            Assert.Null(floor.Guardian.KnownReveals[^1].CooldownSeconds);
+        }
+    }
+
     [Fact]
     public async Task CreateRally_AllowsRatingBelowRecommendation_AndLocksExistingSnapshot()
     {
@@ -52,8 +101,8 @@ public sealed class WorldTowerServiceTests
 
         Assert.True(result.Succeeded, result.Error);
         Assert.NotNull(result.Value);
-        Assert.Equal(250, result.Value.Participants.Single().PowerRating);
-        Assert.Equal(1_000, result.Value.Readiness.RecommendedPowerRating);
+        Assert.Equal(25, result.Value.Participants.Single().PowerRating);
+        Assert.Equal(100, result.Value.Readiness.RecommendedPowerRating);
         Assert.Contains(
             result.Value.Readiness.Warnings,
             warning => warning.Contains("below", StringComparison.OrdinalIgnoreCase));
@@ -61,6 +110,9 @@ public sealed class WorldTowerServiceTests
         var floor = await service.GetFloorAsync(character.Id, 1, CancellationToken.None);
         Assert.False(floor!.CanCreateRally);
         Assert.Equal(result.Value.Id, floor.CurrentCharacterRallyId);
+        Assert.Contains(floor.Unlocks, unlock =>
+            unlock.Key == "test_floor_one_unlock"
+            && unlock.Description == "Test floor one feature");
 
         var snapshotId = await db.TowerRallyParticipants
             .Select(participant => participant.CharacterSnapshotId)
@@ -132,6 +184,7 @@ public sealed class WorldTowerServiceTests
         Assert.True(accepted.Succeeded, accepted.Error);
         Assert.False(conflictingRally.Succeeded);
         Assert.Contains("already locked", conflictingRally.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Expedition", conflictingRally.Error, StringComparison.Ordinal);
         Assert.False(altApplication.Succeeded);
         Assert.Contains("account already occupies", altApplication.Error, StringComparison.OrdinalIgnoreCase);
         Assert.Contains(accepted.Value!.Participants, x => x.CharacterId == guest.Id);
@@ -286,6 +339,13 @@ public sealed class WorldTowerServiceTests
             filled.Value.Participants.Where(x => !x.IsLeader),
             participant => Assert.StartsWith("SeedGuest_Helper_", participant.CharacterName));
         Assert.Equal(4, await db.CharacterSnapshots.CountAsync());
+        var helperSnapshots = await db.CharacterSnapshots
+            .AsNoTracking()
+            .Where(snapshot => helpers.Select(helper => helper.Id).Contains(snapshot.CharacterId))
+            .ToArrayAsync();
+        Assert.Equal(3, helperSnapshots.Length);
+        Assert.All(helperSnapshots, snapshot => Assert.Equal(30, snapshot.Level));
+        Assert.All(helpers, helper => Assert.Equal(10, helper.Level));
         Assert.Contains(
             outbox.RallyEvents,
             towerEvent => towerEvent.Event == "DevelopmentRosterFilled");
@@ -315,13 +375,82 @@ public sealed class WorldTowerServiceTests
 
         Assert.False(outsiderStart.Succeeded);
         Assert.Contains("leader", outsiderStart.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Expedition", outsiderStart.Error, StringComparison.Ordinal);
         Assert.False(leaderStart.Succeeded);
         Assert.Contains("fill every slot", leaderStart.Error, StringComparison.OrdinalIgnoreCase);
         Assert.Empty(await db.TowerAttempts.ToListAsync());
     }
 
     [Fact]
-    public async Task Contributions_KeepResearchAndPreparationCapsSeparate()
+    public async Task StartRally_RejectsAnotherAttemptWhileTheFloorIsActive()
+    {
+        await using var db = CreateDbContext();
+        var characters = Enumerable.Range(1, 8)
+            .Select(number => SeedCharacter(db, $"Concurrent {number}", 30, Guid.NewGuid()))
+            .ToArray();
+        await db.SaveChangesAsync();
+        var service = CreateCombatService(db, characters, BattleOutcome.Defeat, BattleOutcome.Victory);
+        var firstRallyId = await CreateReadyRallyAsync(db, service, characters[..4], TowerRallyMode.FirstClear);
+        var secondRallyId = await CreateReadyRallyAsync(db, service, characters[4..], TowerRallyMode.FirstClear);
+
+        var firstStart = await service.StartRallyAsync(
+            characters[0].Id,
+            firstRallyId,
+            CancellationToken.None);
+        Assert.True(firstStart.Succeeded, firstStart.Error);
+        var playback = await SimulatePlaybackAsync(db, service, firstStart.Value!);
+        db.ChangeTracker.Clear();
+        var secondStart = await service.StartRallyAsync(
+            characters[4].Id,
+            secondRallyId,
+            CancellationToken.None);
+
+        Assert.False(secondStart.Succeeded);
+        Assert.Contains("already attempting", secondStart.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Expedition", secondStart.Error, StringComparison.Ordinal);
+        Assert.Single(await db.TowerAttempts.ToListAsync());
+        Assert.Equal(
+            TowerRallyStatus.Ready,
+            (await db.TowerRallies.SingleAsync(x => x.Id == secondRallyId)).Status);
+
+        await FinalizePlaybackAsync(db, service, playback);
+        db.ChangeTracker.Clear();
+        var startAfterCompletion = await service.StartRallyAsync(
+            characters[4].Id,
+            secondRallyId,
+            CancellationToken.None);
+
+        Assert.True(startAfterCompletion.Succeeded, startAfterCompletion.Error);
+        Assert.Equal(2, await db.TowerAttempts.CountAsync());
+    }
+
+    [Fact]
+    public async Task CreateRally_RejectsEchoModeForASovereignFloor()
+    {
+        await using var db = CreateDbContext();
+        var character = SeedCharacter(db, "Echo Sovereign", 50, Guid.NewGuid());
+        await db.SaveChangesAsync();
+        var service = CreateService(db, new FixedPowerRatingService((character.Id, 1_000)));
+        await service.GetOverviewAsync(character.Id, CancellationToken.None);
+        var now = DateTimeOffset.UtcNow;
+        foreach (var progress in await db.TowerFloorProgresses.Where(x => x.FloorNumber <= 5).ToListAsync())
+            progress.RecordFirstClear(Guid.NewGuid(), now);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        var result = await service.CreateRallyAsync(
+            character.Id,
+            5,
+            TowerRallyMode.Echo,
+            CancellationToken.None);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains("Sovereign", result.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(await db.TowerRallies.ToListAsync());
+    }
+
+    [Fact]
+    public async Task Contributions_KeepThreeClickScoutingAndPreparationCapsSeparate()
     {
         await using var db = CreateDbContext();
         var character = SeedCharacter(db, "Researcher", 20, Guid.NewGuid());
@@ -329,18 +458,17 @@ public sealed class WorldTowerServiceTests
         var service = CreateService(db, new FixedPowerRatingService((character.Id, 1_000)));
         await service.GetOverviewAsync(character.Id, CancellationToken.None);
 
-        Assert.True((await service.ContributeAsync(
-            character.Id,
-            1,
-            TowerContributionKind.Research,
-            5,
-            CancellationToken.None)).Succeeded);
-        var research = await service.ContributeAsync(
-            character.Id,
-            1,
-            TowerContributionKind.Research,
-            5,
-            CancellationToken.None);
+        TowerOperationResult<Application.UseCases.WorldTower.Dtos.TowerFloorDetailDto>? research = null;
+        for (var click = 0; click < 3; click++)
+        {
+            research = await service.ContributeAsync(
+                character.Id,
+                1,
+                TowerContributionKind.Research,
+                1,
+                CancellationToken.None);
+            Assert.True(research.Succeeded, research.Error);
+        }
         var researchOverCap = await service.ContributeAsync(
             character.Id,
             1,
@@ -348,25 +476,28 @@ public sealed class WorldTowerServiceTests
             1,
             CancellationToken.None);
 
-        Assert.True(research.Succeeded, research.Error);
-        Assert.Equal(10, research.Value?.ScoutingProgress);
-        Assert.Equal(10, research.Value?.WeeklyResearchContribution);
-        Assert.Equal(10, research.Value?.WeeklyResearchCap);
+        Assert.Equal(3, research?.Value?.ScoutingProgress);
+        Assert.Equal(3, research?.Value?.WeeklyResearchContribution);
+        Assert.Equal(3, research?.Value?.WeeklyResearchCap);
         Assert.False(researchOverCap.Succeeded);
-        Assert.Contains("weekly cap", researchOverCap.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("weekly limit", researchOverCap.Error, StringComparison.OrdinalIgnoreCase);
 
-        Assert.True((await service.ContributeAsync(
-            character.Id,
-            1,
-            TowerContributionKind.SupplyWeapons,
-            5,
-            CancellationToken.None)).Succeeded);
-        var preparation = await service.ContributeAsync(
-            character.Id,
-            1,
-            TowerContributionKind.InscribeWards,
-            5,
-            CancellationToken.None);
+        foreach (var kind in new[]
+                 {
+                     TowerContributionKind.SupplyWeapons,
+                     TowerContributionKind.InscribeWards,
+                     TowerContributionKind.ScoutWeakPoints
+                 })
+        {
+            var result = await service.ContributeAsync(
+                character.Id,
+                1,
+                kind,
+                1,
+                CancellationToken.None);
+            Assert.True(result.Succeeded, result.Error);
+        }
+        var preparation = await service.GetFloorAsync(character.Id, 1, CancellationToken.None);
         var preparationOverCap = await service.ContributeAsync(
             character.Id,
             1,
@@ -374,16 +505,95 @@ public sealed class WorldTowerServiceTests
             1,
             CancellationToken.None);
 
-        Assert.True(preparation.Succeeded, preparation.Error);
-        Assert.Equal(1.25m, preparation.Value?.Preparation.SupplyWeaponsPercent);
-        Assert.Equal(1.25m, preparation.Value?.Preparation.InscribeWardsPercent);
-        Assert.Equal(10, preparation.Value?.Preparation.WeeklyCharacterContribution);
+        Assert.NotNull(preparation);
+        Assert.Equal(0.25m, preparation.Preparation.SupplyWeaponsPercent);
+        Assert.Equal(0.25m, preparation.Preparation.InscribeWardsPercent);
+        Assert.Equal(0.25m, preparation.Preparation.ScoutWeakPointsPercent);
+        Assert.Equal(3, preparation.Preparation.WeeklyCharacterContribution);
+        Assert.Equal(3, preparation.Preparation.WeeklyCharacterCap);
+        Assert.Equal(10m, preparation.Preparation.MaximumEffectPercent);
         Assert.False(preparationOverCap.Succeeded);
-        Assert.Contains("weekly cap", preparationOverCap.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("weekly limit", preparationOverCap.Error, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
-    public async Task PreparationContribution_RejectsAnyPointsThatCannotIncreaseTheBonus()
+    public async Task Scouting_IsImmediateOnLockedFloors_AndUsesOneTowerWideWeeklyLimit()
+    {
+        await using var db = CreateDbContext();
+        var character = SeedCharacter(db, "Forward Scout", 20, Guid.NewGuid());
+        await db.SaveChangesAsync();
+        var service = CreateService(db, new FixedPowerRatingService((character.Id, 1_000)));
+        await service.GetOverviewAsync(character.Id, CancellationToken.None);
+
+        var lockedFloor = await service.ContributeAsync(
+            character.Id,
+            2,
+            TowerContributionKind.Research,
+            1,
+            CancellationToken.None);
+
+        Assert.True(lockedFloor.Succeeded, lockedFloor.Error);
+        Assert.Equal(TowerFloorStateType.Locked, lockedFloor.Value?.State);
+        Assert.Equal(1, lockedFloor.Value?.ScoutingProgress);
+        Assert.Equal(1, lockedFloor.Value?.WeeklyResearchContribution);
+
+        for (var click = 0; click < 2; click++)
+        {
+            var result = await service.ContributeAsync(
+                character.Id,
+                1,
+                TowerContributionKind.Research,
+                1,
+                CancellationToken.None);
+            Assert.True(result.Succeeded, result.Error);
+        }
+
+        var overCap = await service.ContributeAsync(
+            character.Id,
+            2,
+            TowerContributionKind.Research,
+            1,
+            CancellationToken.None);
+        var preparationOnLockedFloor = await service.ContributeAsync(
+            character.Id,
+            2,
+            TowerContributionKind.SupplyWeapons,
+            1,
+            CancellationToken.None);
+
+        Assert.False(overCap.Succeeded);
+        Assert.Contains("weekly limit", overCap.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.False(preparationOnLockedFloor.Succeeded);
+        Assert.Contains("unlocked", preparationOnLockedFloor.Error, StringComparison.OrdinalIgnoreCase);
+        var refreshedLockedFloor = await service.GetFloorAsync(character.Id, 2, CancellationToken.None);
+        Assert.Equal(3, refreshedLockedFloor?.WeeklyResearchContribution);
+        Assert.Equal(1, refreshedLockedFloor?.ScoutingProgress);
+    }
+
+    [Fact]
+    public async Task Contributions_RequireExactlyOneActionPerRequest()
+    {
+        await using var db = CreateDbContext();
+        var character = SeedCharacter(db, "Single Action", 20, Guid.NewGuid());
+        await db.SaveChangesAsync();
+        var service = CreateService(db, new FixedPowerRatingService((character.Id, 1_000)));
+        await service.GetOverviewAsync(character.Id, CancellationToken.None);
+
+        var result = await service.ContributeAsync(
+            character.Id,
+            1,
+            TowerContributionKind.Research,
+            2,
+            CancellationToken.None);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains("one action", result.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(await db.TowerContributions.ToListAsync());
+        Assert.Equal(0, (await db.TowerFloorProgresses.SingleAsync(x => x.FloorNumber == 1)).ScoutingProgress);
+    }
+
+    [Fact]
+    public async Task PreparationContribution_ReachesTenPercentCapAndRejectsFurtherActions()
     {
         await using var db = CreateDbContext();
         var character = SeedCharacter(db, "Contributor", 20, Guid.NewGuid());
@@ -398,26 +608,22 @@ public sealed class WorldTowerServiceTests
             FloorNumber = 1,
             CharacterId = Guid.NewGuid(),
             Kind = TowerContributionKind.SupplyWeapons,
-            Amount = 19,
+            Amount = 39,
             WeekKey = weekKey,
             CreatedAt = now
         };
         db.TowerContributions.Add(sharedContribution);
         await db.SaveChangesAsync();
 
-        var wouldOverflow = await service.ContributeAsync(
+        var reachesCap = await service.ContributeAsync(
             character.Id,
             1,
             TowerContributionKind.SupplyWeapons,
-            2,
+            1,
             CancellationToken.None);
 
-        Assert.False(wouldOverflow.Succeeded);
-        Assert.Contains("Only 1 more", wouldOverflow.Error, StringComparison.OrdinalIgnoreCase);
-        Assert.False(await db.TowerContributions.AnyAsync(x => x.CharacterId == character.Id));
-
-        sharedContribution.Amount = 20;
-        await db.SaveChangesAsync();
+        Assert.True(reachesCap.Succeeded, reachesCap.Error);
+        Assert.Equal(10m, reachesCap.Value?.Preparation.SupplyWeaponsPercent);
         var alreadyMaxed = await service.ContributeAsync(
             character.Id,
             1,
@@ -427,7 +633,7 @@ public sealed class WorldTowerServiceTests
 
         Assert.False(alreadyMaxed.Succeeded);
         Assert.Contains("already maxed", alreadyMaxed.Error, StringComparison.OrdinalIgnoreCase);
-        Assert.False(await db.TowerContributions.AnyAsync(x => x.CharacterId == character.Id));
+        Assert.Single(await db.TowerContributions.Where(x => x.CharacterId == character.Id).ToListAsync());
     }
 
     [Fact]
@@ -455,7 +661,7 @@ public sealed class WorldTowerServiceTests
     }
 
     [Fact]
-    public async Task EchoRally_RequiresFloorFiveAndTargetFloorClears()
+    public async Task EchoRally_RequiresFloorOneClear()
     {
         await using var db = CreateDbContext();
         var character = SeedCharacter(db, "Echoer", 20, Guid.NewGuid());
@@ -469,13 +675,11 @@ public sealed class WorldTowerServiceTests
             TowerRallyMode.Echo,
             CancellationToken.None);
         Assert.False(locked.Succeeded);
-        Assert.Contains("Floor 5", locked.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Floor 1", locked.Error, StringComparison.OrdinalIgnoreCase);
 
         var now = DateTimeOffset.UtcNow;
         var floorOne = await db.TowerFloorProgresses.SingleAsync(x => x.FloorNumber == 1);
-        var floorFive = await db.TowerFloorProgresses.SingleAsync(x => x.FloorNumber == 5);
         floorOne.RecordFirstClear(Guid.NewGuid(), now);
-        floorFive.RecordFirstClear(Guid.NewGuid(), now);
         await db.SaveChangesAsync();
 
         var available = await service.CreateRallyAsync(
@@ -486,6 +690,10 @@ public sealed class WorldTowerServiceTests
 
         Assert.True(available.Succeeded, available.Error);
         Assert.Equal(TowerRallyMode.Echo, available.Value?.Mode);
+        Assert.Contains(
+            await db.ServerUnlocks.ToArrayAsync(),
+            unlock => unlock.UnlockKey == "tower_echo_mode_unlock"
+                      && unlock.SourceFloorNumber == 1);
     }
 
     [Fact]
@@ -536,7 +744,63 @@ public sealed class WorldTowerServiceTests
         var participant = Assert.Single(entry.Participants);
         Assert.Equal(leader.Id, participant.CharacterId);
         Assert.Equal("First Clearer", participant.CharacterName);
-        Assert.Equal(1_250, participant.PowerRating);
+        Assert.Equal(125, participant.PowerRating);
+    }
+
+    [Fact]
+    public async Task Overview_IgnoresStaleFirstClearReferencesToUnreleasedFloors()
+    {
+        await using var db = CreateDbContext();
+        var character = SeedCharacter(db, "Catalog Boundary", 20, Guid.NewGuid());
+        var staleAttemptId = Guid.NewGuid();
+        var staleRally = new TowerRally
+        {
+            ServerId = "test-server",
+            FloorNumber = 10,
+            Mode = TowerRallyMode.FirstClear,
+            Status = TowerRallyStatus.Completed,
+            RequiredSlots = 1,
+            CreatedByCharacterId = character.Id,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        db.TowerFloorProgresses.Add(new TowerFloorProgress
+        {
+            ServerId = "test-server",
+            FloorNumber = 10,
+            FirstClearAttemptId = staleAttemptId,
+            IsCleared = true,
+            UnlockedAt = DateTimeOffset.UtcNow,
+            ClearedAt = DateTimeOffset.UtcNow,
+            ScoutingProgress = 100,
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow
+        });
+        db.TowerAttempts.Add(new TowerAttempt
+        {
+            Id = staleAttemptId,
+            TowerRally = staleRally,
+            ServerId = "test-server",
+            FloorNumber = 10,
+            Mode = TowerRallyMode.FirstClear,
+            Status = TowerAttemptStatus.Succeeded,
+            AttemptNumberForFloor = 1,
+            StartedAt = DateTimeOffset.UtcNow,
+            CompletedAt = DateTimeOffset.UtcNow,
+            Succeeded = true,
+            FightDurationSeconds = 10
+        });
+        await db.SaveChangesAsync();
+        var service = CreateService(db, new FixedPowerRatingService((character.Id, 1_000)));
+
+        var overview = await service.GetOverviewAsync(character.Id, CancellationToken.None);
+        var directRally = await service.GetRallyAsync(
+            character.Id,
+            staleRally.Id,
+            CancellationToken.None);
+
+        Assert.Equal(5, overview.Floors.Count);
+        Assert.DoesNotContain(overview.RecentClears, entry => entry.FloorNumber == 10);
+        Assert.Null(directRally);
     }
 
     [Fact]
@@ -554,10 +818,52 @@ public sealed class WorldTowerServiceTests
         AssertUniqueIndex<TowerEchoClear>(
             db,
             nameof(TowerEchoClear.ServerId),
-            nameof(TowerEchoClear.FloorNumber),
             nameof(TowerEchoClear.CharacterId),
             nameof(TowerEchoClear.WeekKey));
         AssertUniqueIndex<ServerUnlock>(db, nameof(ServerUnlock.ServerId), nameof(ServerUnlock.UnlockKey));
+    }
+
+    [Fact]
+    public async Task WorkerClaims_ExcludeActiveLeases_AndRecoverExpiredWork()
+    {
+        await using var db = CreateDbContext();
+        var now = DateTimeOffset.UtcNow;
+        var rally = new TowerRally
+        {
+            ServerId = "test-server",
+            FloorNumber = 1,
+            Mode = TowerRallyMode.FirstClear,
+            Status = TowerRallyStatus.InProgress,
+            RequiredSlots = 4,
+            CreatedByCharacterId = Guid.NewGuid(),
+            CreatedAt = now
+        };
+        var attempt = new TowerAttempt
+        {
+            TowerRally = rally,
+            ServerId = "test-server",
+            FloorNumber = 1,
+            Mode = TowerRallyMode.FirstClear,
+            Status = TowerAttemptStatus.Started,
+            AttemptNumberForFloor = 1,
+            StartedAt = now
+        };
+        rally.Attempt = attempt;
+        db.TowerRallies.Add(rally);
+        await db.SaveChangesAsync();
+
+        var firstClaim = await db.ClaimWorldTowerSimulationsAsync(
+            "worker-one", now, now.AddSeconds(30), 1);
+        var competingClaim = await db.ClaimWorldTowerSimulationsAsync(
+            "worker-two", now.AddSeconds(1), now.AddSeconds(31), 1);
+        var recoveredClaim = await db.ClaimWorldTowerSimulationsAsync(
+            "worker-two", now.AddSeconds(31), now.AddSeconds(61), 1);
+
+        Assert.Equal(attempt.Id, Assert.Single(firstClaim));
+        Assert.Empty(competingClaim);
+        Assert.Equal(attempt.Id, Assert.Single(recoveredClaim));
+        Assert.Equal("worker-two", attempt.SimulationLeaseOwner);
+        Assert.Equal(2, attempt.SimulationAttempts);
     }
 
     [Fact]
@@ -578,9 +884,22 @@ public sealed class WorldTowerServiceTests
             : (await db.TowerAttempts.SingleAsync()).FailureReason;
         Assert.True(result.Succeeded, $"{result.Error} {resolutionError}");
         Assert.NotNull(result.Value);
-        Assert.Equal(TowerAttemptStatus.Playback, result.Value.Status);
-        Assert.False(result.Value.Playback.IsCompleted);
-        Assert.All(await db.Characters.ToArrayAsync(), character => Assert.Equal(0, character.Cinders));
+        Assert.Equal(TowerAttemptStatus.Started, result.Value.Status);
+        Assert.Null(result.Value.Playback);
+        var playback = await SimulatePlaybackAsync(db, service, result.Value);
+        Assert.False(playback.IsCompleted);
+        var recovery = await service.GetAttemptPlaybackFramesAsync(
+            characters[0].Id,
+            result.Value.AttemptId,
+            -1,
+            CancellationToken.None);
+        Assert.Equal(0, Assert.Single(recovery!.Frames).Sequence);
+        Assert.Null(await service.GetAttemptPlaybackFramesAsync(
+            Guid.NewGuid(),
+            result.Value.AttemptId,
+            -1,
+            CancellationToken.None));
+        Assert.All(await db.Characters.ToArrayAsync(), character => Assert.Equal(0, character.TowerTokens));
         Assert.Null(await service.GetAttemptCombatResultAsync(
             characters[0].Id,
             result.Value.AttemptId,
@@ -589,15 +908,30 @@ public sealed class WorldTowerServiceTests
             characters[0].Id,
             result.Value.AttemptId,
             CancellationToken.None));
-        await FinalizePlaybackAsync(service, result.Value);
+        await FinalizePlaybackAsync(db, service, playback);
         db.ChangeTracker.Clear();
 
         var progress = await db.TowerFloorProgresses.OrderBy(x => x.FloorNumber).ToArrayAsync();
         Assert.True(progress.Single(x => x.FloorNumber == 1).IsCleared);
         Assert.Equal(100, progress.Single(x => x.FloorNumber == 1).ScoutingProgress);
         Assert.NotNull(progress.Single(x => x.FloorNumber == 2).UnlockedAt);
-        Assert.Equal("test_floor_one_unlock", (await db.ServerUnlocks.SingleAsync()).UnlockKey);
-        Assert.All(await db.Characters.ToArrayAsync(), character => Assert.Equal(100, character.Cinders));
+        Assert.Contains(
+            await db.ServerUnlocks.ToArrayAsync(),
+            unlock => unlock.UnlockKey == "test_floor_one_unlock");
+        Assert.All(await db.Characters.ToArrayAsync(), character =>
+        {
+            Assert.Equal(400, character.TowerTokens);
+            Assert.Equal(0, character.Cinders);
+        });
+        var clearedFloor = await service.GetFloorAsync(
+            characters[0].Id,
+            1,
+            CancellationToken.None);
+        Assert.NotNull(clearedFloor);
+        Assert.Equal(10m, clearedFloor.Preparation.SupplyWeaponsPercent);
+        Assert.Equal(10m, clearedFloor.Preparation.InscribeWardsPercent);
+        Assert.Equal(10m, clearedFloor.Preparation.ScoutWeakPointsPercent);
+        Assert.Equal(0, clearedFloor.Preparation.WeeklyCharacterContribution);
 
         var attempt = await db.TowerAttempts.SingleAsync();
         Assert.Equal(TowerAttemptStatus.Succeeded, attempt.Status);
@@ -644,7 +978,8 @@ public sealed class WorldTowerServiceTests
             var result = await service.StartRallyAsync(characters[0].Id, rallyId, CancellationToken.None);
             Assert.True(result.Succeeded, result.Error);
             Assert.NotNull(result.Value);
-            await FinalizePlaybackAsync(service, result.Value);
+            var playback = await SimulatePlaybackAsync(db, service, result.Value);
+            await FinalizePlaybackAsync(db, service, playback);
             db.ChangeTracker.Clear();
         }
 
@@ -654,12 +989,12 @@ public sealed class WorldTowerServiceTests
         Assert.Equal(30, floorOne.ScoutingProgress);
         Assert.Null(floorTwo.UnlockedAt);
         Assert.Empty(await db.ServerUnlocks.ToListAsync());
-        Assert.All(await db.Characters.ToArrayAsync(), character => Assert.Equal(0, character.Cinders));
+        Assert.All(await db.Characters.ToArrayAsync(), character => Assert.Equal(0, character.TowerTokens));
         Assert.Equal(4, await db.TowerAttempts.CountAsync(x => x.Status == TowerAttemptStatus.Failed));
     }
 
     [Fact]
-    public async Task EchoVictory_GrantsEachCharacterOnlyOneRewardPerFloorAndWeek()
+    public async Task EchoVictory_GrantsEachCharacterOnlyOneRewardAcrossTowerPerWeek()
     {
         await using var db = CreateDbContext();
         var characters = Enumerable.Range(1, 4)
@@ -671,25 +1006,41 @@ public sealed class WorldTowerServiceTests
         db.ChangeTracker.Clear();
         var now = DateTimeOffset.UtcNow;
         var floorOne = await db.TowerFloorProgresses.SingleAsync(x => x.FloorNumber == 1);
-        var floorFive = await db.TowerFloorProgresses.SingleAsync(x => x.FloorNumber == 5);
+        var floorTwo = await db.TowerFloorProgresses.SingleAsync(x => x.FloorNumber == 2);
         floorOne.RecordFirstClear(Guid.NewGuid(), now);
-        floorFive.RecordFirstClear(Guid.NewGuid(), now);
+        floorTwo.RecordFirstClear(Guid.NewGuid(), now);
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
 
-        for (var clearNumber = 0; clearNumber < 2; clearNumber++)
+        foreach (var floorNumber in new[] { 1, 2 })
         {
-            var rallyId = await CreateReadyRallyAsync(db, service, characters, TowerRallyMode.Echo);
+            var rallyId = await CreateReadyRallyAsync(
+                db,
+                service,
+                characters,
+                TowerRallyMode.Echo,
+                floorNumber);
             var result = await service.StartRallyAsync(characters[0].Id, rallyId, CancellationToken.None);
             Assert.True(result.Succeeded, result.Error);
             Assert.NotNull(result.Value);
-            await FinalizePlaybackAsync(service, result.Value);
+            var playback = await SimulatePlaybackAsync(db, service, result.Value);
+            await FinalizePlaybackAsync(db, service, playback);
             db.ChangeTracker.Clear();
         }
 
-        Assert.All(await db.Characters.ToArrayAsync(), character => Assert.Equal(25, character.Cinders));
+        Assert.All(await db.Characters.ToArrayAsync(), character => Assert.Equal(100, character.TowerTokens));
         Assert.Equal(4, await db.TowerEchoClears.CountAsync());
         Assert.Equal(2, await db.TowerAttempts.CountAsync(x => x.Status == TowerAttemptStatus.Succeeded));
+        var floorOneDetails = await service.GetFloorAsync(characters[0].Id, 1, CancellationToken.None);
+        var floorTwoDetails = await service.GetFloorAsync(characters[0].Id, 2, CancellationToken.None);
+        Assert.NotNull(floorOneDetails);
+        Assert.NotNull(floorTwoDetails);
+        Assert.True(floorOneDetails.EchoRewardClaimedThisWeek);
+        Assert.True(floorTwoDetails.EchoRewardClaimedThisWeek);
+        Assert.Equal(100, floorOneDetails.EchoTowerTokens);
+        Assert.Equal(400, floorOneDetails.FirstClearTowerTokens);
+        Assert.Equal(104, floorTwoDetails.EchoTowerTokens);
+        Assert.Equal(416, floorTwoDetails.FirstClearTowerTokens);
     }
 
     [Fact]
@@ -705,9 +1056,7 @@ public sealed class WorldTowerServiceTests
         db.ChangeTracker.Clear();
         var now = DateTimeOffset.UtcNow;
         var floorOne = await db.TowerFloorProgresses.SingleAsync(x => x.FloorNumber == 1);
-        var floorFive = await db.TowerFloorProgresses.SingleAsync(x => x.FloorNumber == 5);
         floorOne.RecordFirstClear(Guid.NewGuid(), now);
-        floorFive.RecordFirstClear(Guid.NewGuid(), now);
         var weekKey = ISOWeek.GetYear(now.UtcDateTime) * 100 + ISOWeek.GetWeekOfYear(now.UtcDateTime);
         db.TowerEchoClears.AddRange(characters.Take(2).Select(character => new TowerEchoClear
         {
@@ -725,13 +1074,14 @@ public sealed class WorldTowerServiceTests
 
         Assert.True(result.Succeeded, result.Error);
         Assert.NotNull(result.Value);
-        await FinalizePlaybackAsync(service, result.Value);
+        var playback = await SimulatePlaybackAsync(db, service, result.Value);
+        await FinalizePlaybackAsync(db, service, playback);
         db.ChangeTracker.Clear();
-        var balances = await db.Characters.ToDictionaryAsync(x => x.Id, x => x.Cinders);
+        var balances = await db.Characters.ToDictionaryAsync(x => x.Id, x => x.TowerTokens);
         Assert.Equal(0, balances[characters[0].Id]);
         Assert.Equal(0, balances[characters[1].Id]);
-        Assert.Equal(25, balances[characters[2].Id]);
-        Assert.Equal(25, balances[characters[3].Id]);
+        Assert.Equal(100, balances[characters[2].Id]);
+        Assert.Equal(100, balances[characters[3].Id]);
         Assert.Equal(4, await db.TowerEchoClears.CountAsync());
     }
 
@@ -754,32 +1104,43 @@ public sealed class WorldTowerServiceTests
         await service.GetOverviewAsync(characters[0].Id, CancellationToken.None);
         db.ChangeTracker.Clear();
 
-        Assert.True((await service.ContributeAsync(
-            characters[0].Id,
-            1,
-            TowerContributionKind.SupplyWeapons,
-            5,
-            CancellationToken.None)).Succeeded);
+        for (var click = 0; click < 3; click++)
+        {
+            Assert.True((await service.ContributeAsync(
+                characters[0].Id,
+                1,
+                TowerContributionKind.SupplyWeapons,
+                1,
+                CancellationToken.None)).Succeeded);
+        }
         db.ChangeTracker.Clear();
-        Assert.True((await service.ContributeAsync(
-            characters[1].Id,
-            1,
-            TowerContributionKind.InscribeWards,
-            4,
-            CancellationToken.None)).Succeeded);
+        for (var click = 0; click < 3; click++)
+        {
+            Assert.True((await service.ContributeAsync(
+                characters[1].Id,
+                1,
+                TowerContributionKind.InscribeWards,
+                1,
+                CancellationToken.None)).Succeeded);
+        }
         db.ChangeTracker.Clear();
-        Assert.True((await service.ContributeAsync(
-            characters[2].Id,
-            1,
-            TowerContributionKind.ScoutWeakPoints,
-            3,
-            CancellationToken.None)).Succeeded);
+        for (var click = 0; click < 3; click++)
+        {
+            Assert.True((await service.ContributeAsync(
+                characters[2].Id,
+                1,
+                TowerContributionKind.ScoutWeakPoints,
+                1,
+                CancellationToken.None)).Succeeded);
+        }
         db.ChangeTracker.Clear();
 
         var rallyId = await CreateReadyRallyAsync(db, service, characters, TowerRallyMode.FirstClear);
         var result = await service.StartRallyAsync(characters[0].Id, rallyId, CancellationToken.None);
 
         Assert.True(result.Succeeded, result.Error);
+        Assert.NotNull(result.Value);
+        await SimulatePlaybackAsync(db, service, result.Value);
         Assert.NotNull(combat.Runtime);
         Assert.All(combat.Runtime.FriendlyParticipants, participant =>
         {
@@ -787,7 +1148,7 @@ public sealed class WorldTowerServiceTests
                 .OfType<InstanceAttributeModifier>()
                 .ToArray();
             Assert.Contains(modifiers, modifier =>
-                modifier.AttributeType == AttributeType.Power && modifier.Amount == 1.25f);
+                modifier.AttributeType == AttributeType.Power && modifier.Amount == 0.75f);
             Assert.Contains(modifiers, modifier =>
                 modifier.AttributeType == AttributeType.ArmorPenetration && modifier.Amount == 0.75f);
             Assert.Contains(modifiers, modifier =>
@@ -797,7 +1158,58 @@ public sealed class WorldTowerServiceTests
             .OfType<InstanceAttributeModifier>()
             .ToArray();
         Assert.Contains(guardianModifiers, modifier =>
-            modifier.AttributeType == AttributeType.Power && modifier.Amount == -1f);
+            modifier.AttributeType == AttributeType.Power && modifier.Amount == -0.75f);
+    }
+
+    [Fact]
+    public async Task EchoAttempt_ReceivesMaximumPreparationAfterFirstClear()
+    {
+        await using var db = CreateDbContext();
+        var characters = Enumerable.Range(1, 4)
+            .Select(number => SeedCharacter(db, $"Echo Prepared {number}", 20, Guid.NewGuid()))
+            .ToArray();
+        await db.SaveChangesAsync();
+        var combat = new CapturingCombatEngineExecutor(BattleOutcome.Victory);
+        var service = CreateService(
+            db,
+            new FixedPowerRatingService(characters.Select(x => (x.Id, 1_000)).ToArray()),
+            new FixedGuardianEntityService(),
+            new SimpleCombatSetupService(),
+            combat,
+            new PassthroughCombatEncounterResultFactory());
+        await service.GetOverviewAsync(characters[0].Id, CancellationToken.None);
+        var now = DateTimeOffset.UtcNow;
+        (await db.TowerFloorProgresses.SingleAsync(x => x.FloorNumber == 1))
+            .RecordFirstClear(Guid.NewGuid(), now);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        var rallyId = await CreateReadyRallyAsync(db, service, characters, TowerRallyMode.Echo);
+        var result = await service.StartRallyAsync(
+            characters[0].Id,
+            rallyId,
+            CancellationToken.None);
+
+        Assert.True(result.Succeeded, result.Error);
+        Assert.NotNull(result.Value);
+        await SimulatePlaybackAsync(db, service, result.Value);
+        Assert.NotNull(combat.Runtime);
+        Assert.All(combat.Runtime.FriendlyParticipants, participant =>
+        {
+            var modifiers = participant.Combatant.TemporaryModifiers
+                .OfType<InstanceAttributeModifier>()
+                .ToArray();
+            Assert.Contains(modifiers, modifier =>
+                modifier.AttributeType == AttributeType.Power && modifier.Amount == 10f);
+            Assert.Contains(modifiers, modifier =>
+                modifier.AttributeType == AttributeType.ArmorPenetration && modifier.Amount == 10f);
+            Assert.Contains(modifiers, modifier =>
+                modifier.AttributeType == AttributeType.MagicPenetration && modifier.Amount == 10f);
+        });
+        Assert.Contains(
+            combat.Runtime.HostileParticipants.Single().Combatant.TemporaryModifiers
+                .OfType<InstanceAttributeModifier>(),
+            modifier => modifier.AttributeType == AttributeType.Power && modifier.Amount == -10f);
     }
 
     [Fact]
@@ -820,8 +1232,9 @@ public sealed class WorldTowerServiceTests
 
         var result = await service.StartRallyAsync(characters[0].Id, rallyId, CancellationToken.None);
 
-        Assert.False(result.Succeeded);
-        Assert.Contains("could not be resolved", result.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.True(result.Succeeded, result.Error);
+        Assert.NotNull(result.Value);
+        Assert.False(await SimulatePlaybackAttemptAsync(db, service, result.Value));
         db.ChangeTracker.Clear();
         Assert.Equal(TowerAttemptStatus.Errored, (await db.TowerAttempts.SingleAsync()).Status);
         Assert.Equal(TowerRallyStatus.Completed, (await db.TowerRallies.SingleAsync()).Status);
@@ -844,7 +1257,8 @@ public sealed class WorldTowerServiceTests
         ICombatEngineExecutor? combatEngine = null,
         ICombatEncounterResultFactory? resultFactory = null,
         IGameEventOutbox? outbox = null,
-        bool developmentToolsEnabled = false)
+        bool developmentToolsEnabled = false,
+        IWorldTowerDevelopmentRosterFactory? developmentRosters = null)
     {
         var snapshotService = new CharacterSnapshotService(new CharacterSnapshotRepository(db));
         return new WorldTowerService(
@@ -855,6 +1269,9 @@ public sealed class WorldTowerServiceTests
             entities ?? new ThrowingEntityService(),
             combatSetup ?? new ThrowingCombatSetupService(),
             combatEngine ?? new ThrowingCombatEngineExecutor(),
+            developmentRosters ?? new FixedDevelopmentRosterFactory(),
+            new FixedCreatureAbilityDefinitionProvider(),
+            new FixedAbilityCatalogProvider(),
             resultFactory ?? new ThrowingCombatEncounterResultFactory(),
             outbox ?? new TestGameEventOutbox(),
             new TestRealtimeBroadcaster(),
@@ -864,13 +1281,12 @@ public sealed class WorldTowerServiceTests
             Options.Create(new WorldTowerOptions
             {
                 ServerId = "test-server",
-                EchoModeUnlockFloor = 5,
                 FailedAttemptScoutingGain = 10,
                 FailedAttemptScoutingWeeklyCap = 3,
-                ManualScoutingWeeklyCapPerCharacter = 10,
-                PreparationWeeklyCapPerCharacter = 10,
+                ManualScoutingWeeklyCapPerCharacter = 3,
+                PreparationWeeklyCapPerCharacter = 3,
                 PreparationPercentPerPoint = 0.25m,
-                PreparationMaxEffectPercent = 5m,
+                PreparationMaxEffectPercent = 10m,
                 DevelopmentToolsEnabled = developmentToolsEnabled
             }),
             new JsonSerializerOptions(JsonSerializerDefaults.Web),
@@ -878,13 +1294,63 @@ public sealed class WorldTowerServiceTests
             NullLogger<WorldTowerService>.Instance);
     }
 
-    private static async Task FinalizePlaybackAsync(
+    private static async Task<Application.UseCases.WorldTower.Dtos.TowerCombatPlaybackDto> SimulatePlaybackAsync(
+        LLDbContext db,
         WorldTowerService service,
         Application.UseCases.WorldTower.Dtos.TowerAttemptResultDto result)
     {
-        Assert.True(await service.PublishDuePlaybackFrameAsync(
+        Assert.True(await SimulatePlaybackAttemptAsync(db, service, result));
+        db.ChangeTracker.Clear();
+        var playback = await db.TowerCombatPlaybacks
+            .AsNoTracking()
+            .SingleAsync(x => x.TowerAttemptId == result.AttemptId);
+        var rallyId = await db.TowerAttempts
+            .Where(x => x.Id == result.AttemptId)
+            .Select(x => x.TowerRallyId)
+            .SingleAsync();
+        return (await service.GetAttemptPlaybackAsync(
+            (await db.TowerRallyParticipants
+                .Where(x => x.TowerRallyId == rallyId)
+                .Select(x => x.CharacterId)
+                .FirstAsync()),
             result.AttemptId,
-            result.Playback.PlaybackEndsAt.AddSeconds(1),
+            CancellationToken.None))!;
+    }
+
+    private static async Task<bool> SimulatePlaybackAttemptAsync(
+        LLDbContext db,
+        WorldTowerService service,
+        Application.UseCases.WorldTower.Dtos.TowerAttemptResultDto result)
+    {
+        const string owner = "test-simulation-worker";
+        var attempt = await db.TowerAttempts.SingleAsync(x => x.Id == result.AttemptId);
+        attempt.SimulationLeaseOwner = owner;
+        attempt.SimulationLeaseUntil = DateTimeOffset.UtcNow.AddMinutes(1);
+        attempt.SimulationAttempts++;
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        return await service.SimulateQueuedAttemptAsync(
+            result.AttemptId,
+            owner,
+            CancellationToken.None);
+    }
+
+    private static async Task FinalizePlaybackAsync(
+        LLDbContext db,
+        WorldTowerService service,
+        Application.UseCases.WorldTower.Dtos.TowerCombatPlaybackDto playback)
+    {
+        const string owner = "test-playback-worker";
+        var entity = await db.TowerCombatPlaybacks.SingleAsync(
+            x => x.TowerAttemptId == playback.AttemptId);
+        entity.DispatchLeaseOwner = owner;
+        entity.DispatchLeaseUntil = playback.PlaybackEndsAt.AddMinutes(1);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        Assert.True(await service.PublishDuePlaybackFrameAsync(
+            playback.AttemptId,
+            owner,
+            playback.PlaybackEndsAt.AddSeconds(1),
             CancellationToken.None));
     }
 
@@ -904,11 +1370,12 @@ public sealed class WorldTowerServiceTests
         LLDbContext db,
         WorldTowerService service,
         IReadOnlyList<Character> characters,
-        TowerRallyMode mode)
+        TowerRallyMode mode,
+        int floorNumber = 1)
     {
         var created = await service.CreateRallyAsync(
             characters[0].Id,
-            1,
+            floorNumber,
             mode,
             CancellationToken.None);
         Assert.True(created.Succeeded, created.Error);
@@ -980,16 +1447,45 @@ public sealed class WorldTowerServiceTests
             {
                 FloorNumber = number,
                 Name = number == 1 ? "The Waking Step" : $"Floor {number}",
-                Type = TowerFloorType.Standard,
+                Type = number == 5 ? TowerFloorType.Sovereign : TowerFloorType.Standard,
                 GuardianCreatureId = Guid.Parse("bfe575f7-f60a-4e09-9452-654a7c8ad1d7"),
                 GuardianName = number == 1 ? "Lumo Sentinel" : $"Guardian {number}",
+                GuardianAbilityProfileId = "monster.test_guardian",
                 RequiredSlots = 4,
-                RecommendedPowerRating = 1_000,
-                GuardianStrengthMultiplier = 2,
-                EchoEnabledAfterClear = true,
-                FirstClearCinders = 100,
-                EchoCinders = 25,
-                UnlockKeys = number == 1 ? ["test_floor_one_unlock"] : []
+                RecommendedPowerRating = 100,
+                GuardianScaling = new TowerGuardianScalingDefinition
+                {
+                    Health = 2,
+                    Offense = 2,
+                    Defense = 2,
+                    Resistance = 2,
+                    Penetration = 2,
+                    Regeneration = 2
+                },
+                BalanceBenchmark = new TowerBalanceBenchmarkDefinition
+                {
+                    CharacterLevel = 30,
+                    EquipmentTier = 1,
+                    EquipmentRarity = Domain.Models.Items.Rarity.Uncommon,
+                    EssenceCount = 4
+                },
+                EchoEnabledAfterClear = number != 5,
+                TowerTokens = new TowerRewardCurveDefinition().Calculate(number),
+                Unlocks = number == 1
+                    ?
+                    [
+                        new TowerUnlockDefinition
+                        {
+                            Key = "test_floor_one_unlock",
+                            Description = "Test floor one feature"
+                        },
+                        new TowerUnlockDefinition
+                        {
+                            Key = "tower_echo_mode_unlock",
+                            Description = "Echo Mode for cleared non-Sovereign floors"
+                        }
+                    ]
+                    : []
             })
             .ToArray();
 
@@ -997,6 +1493,65 @@ public sealed class WorldTowerServiceTests
 
         public TowerFloorDefinition? GetFloor(int floorNumber) =>
             Floors.SingleOrDefault(x => x.FloorNumber == floorNumber);
+    }
+
+    private sealed class FixedDevelopmentRosterFactory : IWorldTowerDevelopmentRosterFactory
+    {
+        public WorldTowerDevelopmentBuild Create(
+            Guid characterId,
+            string characterName,
+            TowerFloorDefinition floor,
+            int rosterIndex) =>
+            new(
+                floor.RecommendedPowerRating,
+                new Domain.Models.Snapshots.CharacterSnapshot
+                {
+                    Id = Guid.NewGuid(),
+                    CharacterId = characterId,
+                    Name = characterName,
+                    Level = floor.BalanceBenchmark.CharacterLevel
+                });
+    }
+
+    private sealed class FixedCreatureAbilityDefinitionProvider : ICreatureAbilityDefinitionProvider
+    {
+        public IReadOnlyList<string> GetAbilityIds(string monsterDefinitionId) =>
+        [
+            "ability.test.guardian.first",
+            "ability.test.guardian.second",
+            "ability.test.guardian.third",
+            "ability.test.guardian.passive"
+        ];
+    }
+
+    private sealed class FixedAbilityCatalogProvider : IAbilityCatalogProvider
+    {
+        private static readonly AbilityCatalog Catalog = new(
+            [
+                CreateAbility("ability.test.guardian.first", "First Strike", AbilitySpecKind.Active, 50),
+                CreateAbility("ability.test.guardian.second", "Second Strike", AbilitySpecKind.Active, 100),
+                CreateAbility("ability.test.guardian.third", "Third Strike", AbilitySpecKind.Active, 150),
+                CreateAbility("ability.test.guardian.passive", "Final Secret", AbilitySpecKind.Passive, 0)
+            ],
+            [],
+            [],
+            new Dictionary<string, string>());
+
+        public AbilityCatalog GetCatalog() => Catalog;
+
+        private static AbilitySpec CreateAbility(
+            string id,
+            string name,
+            AbilitySpecKind kind,
+            int cooldownTicks) =>
+            new()
+            {
+                Id = id,
+                Name = name,
+                Description = $"{name} description.",
+                Kind = kind,
+                CooldownTicks = cooldownTicks
+            };
     }
 
     private sealed class FixedPowerRatingService(params (Guid CharacterId, int Rating)[] ratings)

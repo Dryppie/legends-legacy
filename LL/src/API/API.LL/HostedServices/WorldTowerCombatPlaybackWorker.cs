@@ -1,7 +1,4 @@
-using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL.WorldTower;
-using Domain.Models.WorldTower;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Services.LL.WorldTower;
 
@@ -13,6 +10,8 @@ public sealed class WorldTowerCombatPlaybackWorker(
     IOptions<WorldTowerOptions> options,
     ILogger<WorldTowerCombatPlaybackWorker> logger) : BackgroundService
 {
+    private readonly string workerId = $"{Environment.MachineName}:{Environment.ProcessId}:playback:{Guid.NewGuid():N}";
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var delay = TimeSpan.FromMilliseconds(options.Value.PlaybackPollMilliseconds);
@@ -37,31 +36,34 @@ public sealed class WorldTowerCombatPlaybackWorker(
 
     private async Task DispatchDueFramesAsync(CancellationToken cancellationToken)
     {
-        await using var scope = scopeFactory.CreateAsyncScope();
-        var db = scope.ServiceProvider.GetRequiredService<IDbContext>();
-        var tower = scope.ServiceProvider.GetRequiredService<IWorldTowerService>();
         var now = timeProvider.GetUtcNow();
-        var attemptIds = await db.TowerCombatPlaybacks
-            .AsNoTracking()
-            .Where(x => x.PlaybackStartedAt <= now
-                        && (x.LastPublishedSequence < x.FrameCount - 1
-                            || x.TowerAttempt.Status == TowerAttemptStatus.Playback))
-            .OrderBy(x => x.PlaybackStartedAt)
-            .Select(x => x.TowerAttemptId)
-            .Take(50)
-            .ToListAsync(cancellationToken);
+        IReadOnlyList<Guid> attemptIds;
+        await using (var claimScope = scopeFactory.CreateAsyncScope())
+        {
+            var leases = claimScope.ServiceProvider.GetRequiredService<IWorldTowerWorkLeaseService>();
+            attemptIds = await leases.ClaimPlaybackDispatchesAsync(
+                workerId,
+                now,
+                50,
+                cancellationToken);
+        }
 
         foreach (var attemptId in attemptIds)
         {
+            await using var scope = scopeFactory.CreateAsyncScope();
+            var tower = scope.ServiceProvider.GetRequiredService<IWorldTowerService>();
+            var leases = scope.ServiceProvider.GetRequiredService<IWorldTowerWorkLeaseService>();
             try
             {
-                await tower.PublishDuePlaybackFrameAsync(attemptId, now, cancellationToken);
+                await tower.PublishDuePlaybackFrameAsync(attemptId, workerId, now, cancellationToken);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                logger.LogDebug(
-                    "Another instance advanced Tower playback {AttemptId}.",
-                    attemptId);
+                logger.LogError(exception, "Tower playback {AttemptId} dispatch failed.", attemptId);
+            }
+            finally
+            {
+                await leases.ReleasePlaybackDispatchAsync(attemptId, workerId, cancellationToken);
             }
         }
     }

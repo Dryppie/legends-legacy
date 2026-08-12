@@ -3869,6 +3869,16 @@ namespace Persistence.LL.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<int>("SimulationAttempts")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SimulationLeaseOwner")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset?>("SimulationLeaseUntil")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTimeOffset>("StartedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -3886,6 +3896,8 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("TowerRallyId")
                         .IsUnique();
 
+                    b.HasIndex("Status", "SimulationLeaseUntil");
+
                     b.HasIndex("ServerId", "FloorNumber", "Mode", "Succeeded");
 
                     b.ToTable("TowerAttempts");
@@ -3895,6 +3907,13 @@ namespace Persistence.LL.Migrations
                 {
                     b.Property<Guid>("TowerAttemptId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("DispatchLeaseOwner")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset?>("DispatchLeaseUntil")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("FrameCount")
                         .HasColumnType("integer");
@@ -3932,6 +3951,8 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("TowerAttemptId");
+
+                    b.HasIndex("DispatchLeaseUntil");
 
                     b.HasIndex("PlaybackEndsAt", "LastPublishedSequence");
 
@@ -4001,7 +4022,7 @@ namespace Persistence.LL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ServerId", "FloorNumber", "CharacterId", "WeekKey")
+                    b.HasIndex("ServerId", "CharacterId", "WeekKey")
                         .IsUnique();
 
                     b.ToTable("TowerEchoClears");
@@ -4266,6 +4287,9 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<long>("Soulstones")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TowerTokens")
                         .HasColumnType("bigint");
 
                     b.Property<Guid>("UserId")

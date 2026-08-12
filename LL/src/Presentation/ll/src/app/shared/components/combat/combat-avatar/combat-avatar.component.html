@@ -1,18 +1,8 @@
-<!-- Wrapper with conditional background image applied only when loaded -->
 <div
-  class="relative flex h-40 w-full overflow-visible rounded-md bg-cover transition-all duration-300 lg:h-40 lg:w-72 2xl:h-44 2xl:w-80"
-  [ngStyle]="{
-    'background-image':
-      'url(\'assets/entities/optimized/' + imagePath + '.webp' + '\')',
-    'box-shadow': '0 6px 6px -3px rgba(0, 0, 0, 0.4)',
-  }"
+  class="relative flex h-20 w-full overflow-visible rounded-md border border-primary/30 bg-black/50 transition-all duration-300 lg:w-72 2xl:w-80"
+  style="box-shadow: 0 6px 6px -3px rgba(0, 0, 0, 0.4)"
   [ngClass]="{ 'animate-pulse': isLoading }"
 >
-  <div class="absolute inset-0 p-3">
-    <!-- Optional: add info icon etc. -->
-    <!-- <img src="icons/Info.svg" class="size-6" /> -->
-  </div>
-
   <div class="relative flex h-full w-full items-end">
     <div
       class="border-gradient absolute w-full rounded-md opacity-70"

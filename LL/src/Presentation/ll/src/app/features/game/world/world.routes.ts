@@ -22,8 +22,13 @@ export const WORLD_ROUTES: Routes = [
         component: TowerOverviewComponent,
       },
       {
-        path: 'tower/rallies/:rallyId',
+        path: 'tower/expeditions/:rallyId',
         component: TowerRallyComponent,
+      },
+      {
+        path: 'tower/rallies/:rallyId',
+        redirectTo: 'tower/expeditions/:rallyId',
+        pathMatch: 'full',
       },
       {
         path: 'tower/hall-of-fame',

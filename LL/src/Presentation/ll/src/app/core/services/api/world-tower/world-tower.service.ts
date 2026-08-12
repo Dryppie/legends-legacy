@@ -44,6 +44,7 @@ export interface TowerOverview {
   highestUnlockedFloor: number;
   highestClearedFloor: number;
   echoModeUnlocked: boolean;
+  towerTokens: number;
   currentFloor: TowerFloorSummary | null;
   floors: TowerFloorSummary[];
   activeRallies: TowerRallySummary[];
@@ -59,7 +60,6 @@ export interface TowerFloorSummary {
   recommendedPowerRating: number;
   scoutingProgress: number;
   guardianName: string;
-  guardianImagePath: string;
 }
 
 export interface TowerFloorDetail {
@@ -79,22 +79,29 @@ export interface TowerFloorDetail {
   guardian: TowerGuardianInfo;
   preparation: TowerPreparationSummary;
   activeRallies: TowerRallySummary[];
-  unlockKeys: string[];
-  firstClearCinders: number;
-  echoCinders: number;
+  unlocks: TowerUnlock[];
+  firstClearTowerTokens: number;
+  echoTowerTokens: number;
+  echoRewardClaimedThisWeek: boolean;
 }
 
 export interface TowerGuardianInfo {
   name: string;
-  imagePath: string;
   tags: string[];
   knownReveals: TowerScoutingReveal[];
+}
+
+export interface TowerUnlock {
+  key: string;
+  description: string;
 }
 
 export interface TowerScoutingReveal {
   threshold: number;
   title: string;
   description: string;
+  kind: 'Active' | 'Passive';
+  cooldownSeconds: number | null;
 }
 
 export interface TowerPreparationSummary {
@@ -121,7 +128,6 @@ export interface TowerRallySummary {
 export interface TowerRally {
   id: string;
   floorNumber: number;
-  floorName: string;
   guardianName: string;
   mode: TowerRallyMode;
   status: TowerRallyStatus;
@@ -183,7 +189,7 @@ export interface TowerAttemptResult {
   floorNumber: number;
   guardianName: string;
   status: TowerAttemptStatus;
-  playback: TowerCombatPlayback;
+  playback: TowerCombatPlayback | null;
 }
 
 export interface TowerCombatPlayback {
@@ -209,6 +215,14 @@ export interface TowerCombatFrame {
   events: TowerCombatEvent[];
   isFinal: boolean;
   outcome: BattleOutcome | null;
+}
+
+export interface TowerCombatFrameBatch {
+  attemptId: string;
+  afterSequence: number;
+  currentSequence: number;
+  hasMore: boolean;
+  frames: TowerCombatFrame[];
 }
 
 export interface TowerCombatEvent {
@@ -273,7 +287,7 @@ export class WorldTowerService {
     return this.api.get(`world-tower/floors/${floorNumber}`);
   }
 
-  getRally(rallyId: string): Observable<TowerRally> {
+  getRally(rallyId: string): Observable<TowerRally | null> {
     return this.api.get(`world-tower/rallies/${rallyId}`);
   }
 
@@ -287,6 +301,15 @@ export class WorldTowerService {
 
   getAttemptPlayback(attemptId: string): Observable<TowerCombatPlayback> {
     return this.api.get(`world-tower/attempts/${attemptId}/playback`);
+  }
+
+  getAttemptPlaybackFrames(
+    attemptId: string,
+    afterSequence: number,
+  ): Observable<TowerCombatFrameBatch> {
+    return this.api.get(
+      `world-tower/attempts/${attemptId}/playback/frames?after=${afterSequence}`,
+    );
   }
 
   getHallOfFame(): Observable<TowerHallOfFameEntry[]> {

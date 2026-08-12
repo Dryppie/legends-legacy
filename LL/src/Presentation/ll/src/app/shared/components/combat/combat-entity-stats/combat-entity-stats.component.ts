@@ -15,6 +15,18 @@ type StatsParticipant = {
   name: string;
   team: CombatTeamName;
   entity: SimpleCombatEntityDto;
+  isSummonGroup?: boolean;
+  isSummonChild?: boolean;
+  summonCount?: number;
+  standingCount?: number;
+  summonerName?: string;
+  summonGroupKey?: string;
+  members?: StatsParticipant[];
+};
+
+type SummonIdentity = {
+  ownerId: string;
+  summonId: string;
 };
 
 @Component({
@@ -35,6 +47,9 @@ export class CombatEntityStatsComponent implements OnChanges {
 
   playerParticipants: StatsParticipant[] = [];
   enemyParticipants: StatsParticipant[] = [];
+  private readonly rawStatsById = new Map<string, EntityStats>();
+  private readonly aggregateStats = new Map<string, EntityStats>();
+  private readonly expandedSummonGroups = new Set<string>();
 
   ngOnChanges(changes: SimpleChanges): void {
     if (
@@ -42,23 +57,50 @@ export class CombatEntityStatsComponent implements OnChanges {
       changes['playerTeam'] ||
       changes['enemyTeam']
     ) {
-      this.playerParticipants = this.buildParticipants(
-        'Friendly',
-        this.playerTeam,
+      this.rawStatsById.clear();
+      for (const stats of this.entityStats ?? []) {
+        this.rawStatsById.set(stats.entityId, stats);
+      }
+      this.aggregateStats.clear();
+      this.playerParticipants = this.groupSummons(
+        this.buildParticipants('Friendly', this.playerTeam),
       );
-      this.enemyParticipants = this.buildParticipants(
-        'Hostile',
-        this.enemyTeam,
+      this.enemyParticipants = this.groupSummons(
+        this.buildParticipants('Hostile', this.enemyTeam),
       );
+      this.pruneExpandedSummonGroups();
       this.refreshSelection();
     }
   }
 
-  selectEntity(id: string) {
-    this.selectedStats =
-      this.entityStats?.find((stats) => stats.entityId === id) ??
-      this.createEmptyStats(id);
-    const entity = [...this.playerParticipants, ...this.enemyParticipants].find(
+  get visibleParticipants(): StatsParticipant[] {
+    return [...this.playerParticipants, ...this.enemyParticipants].flatMap(
+      (participant) =>
+        participant.isSummonGroup &&
+        this.expandedSummonGroups.has(participant.id)
+          ? [participant, ...(participant.members ?? [])]
+          : [participant],
+    );
+  }
+
+  activateParticipant(participant: StatsParticipant): void {
+    this.selectEntity(participant.id);
+    if (!participant.isSummonGroup) return;
+
+    if (this.expandedSummonGroups.has(participant.id)) {
+      this.expandedSummonGroups.delete(participant.id);
+    } else {
+      this.expandedSummonGroups.add(participant.id);
+    }
+  }
+
+  isSummonGroupExpanded(participant: StatsParticipant): boolean {
+    return this.expandedSummonGroups.has(participant.id);
+  }
+
+  selectEntity(id: string): void {
+    this.selectedStats = this.statsFor(id) ?? this.createEmptyStats(id);
+    const entity = this.selectableParticipants().find(
       (participant) => participant.id === id,
     );
     this.selectedEntityId = entity?.id ?? '';
@@ -66,7 +108,7 @@ export class CombatEntityStatsComponent implements OnChanges {
   }
 
   statsFor(id: string): EntityStats | null {
-    return this.entityStats?.find((stats) => stats.entityId === id) ?? null;
+    return this.aggregateStats.get(id) ?? this.rawStatsById.get(id) ?? null;
   }
 
   healthPercentage(entity: SimpleCombatEntityDto): number {
@@ -85,6 +127,10 @@ export class CombatEntityStatsComponent implements OnChanges {
 
   barrierStartPercentage(entity: SimpleCombatEntityDto): number {
     return this.healthPercentage(entity);
+  }
+
+  trackParticipant(_index: number, participant: StatsParticipant): string {
+    return `${participant.team}:${participant.id}`;
   }
 
   sortAbilities(column: AbilitySortColumn): void {
@@ -168,10 +214,7 @@ export class CombatEntityStatsComponent implements OnChanges {
   }
 
   private refreshSelection(): void {
-    const participants = [
-      ...this.playerParticipants,
-      ...this.enemyParticipants,
-    ];
+    const participants = this.visibleParticipants;
     if (
       this.selectedEntityId &&
       participants.some(
@@ -237,6 +280,205 @@ export class CombatEntityStatsComponent implements OnChanges {
     );
   }
 
+  private groupSummons(participants: StatsParticipant[]): StatsParticipant[] {
+    const namesById = new Map(
+      participants.map((participant) => [participant.id, participant.name]),
+    );
+    const groups = new Map<string, StatsParticipant[]>();
+    const result: StatsParticipant[] = [];
+
+    for (const participant of participants) {
+      const identity = this.summonIdentity(participant.id);
+      if (!identity) {
+        result.push(participant);
+        continue;
+      }
+
+      const key = `${participant.team}:${identity.ownerId}:${identity.summonId}`;
+      const existing = groups.get(key);
+      if (existing) {
+        existing.push(participant);
+      } else {
+        groups.set(key, [participant]);
+        result.push(
+          this.createSummonGroup(
+            key,
+            identity.ownerId,
+            participant.team,
+            namesById,
+            groups,
+          ),
+        );
+      }
+    }
+
+    // Groups are created when their first member is encountered. Refresh them
+    // after collecting the team so their aggregate includes every instance.
+    return result.map((participant) => {
+      if (!participant.isSummonGroup) return participant;
+      const members = participant.summonGroupKey
+        ? (groups.get(participant.summonGroupKey) ?? [])
+        : [];
+      return this.populateSummonGroup(participant, members);
+    });
+  }
+
+  private createSummonGroup(
+    key: string,
+    ownerId: string,
+    team: CombatTeamName,
+    namesById: Map<string, string>,
+    groups: Map<string, StatsParticipant[]>,
+  ): StatsParticipant {
+    const members = groups.get(key) ?? [];
+    const first = members[0];
+    return {
+      id: `summon-group:${key}`,
+      name: first.name,
+      team,
+      entity: { ...first.entity },
+      isSummonGroup: true,
+      summonGroupKey: key,
+      summonerName: namesById.get(ownerId),
+      members,
+    };
+  }
+
+  private populateSummonGroup(
+    group: StatsParticipant,
+    members: StatsParticipant[],
+  ): StatsParticipant {
+    const children = members.map((member) => ({
+      ...member,
+      isSummonChild: true,
+    }));
+    const knownHealth = members.every((member) =>
+      this.hasKnownHealth(member.entity),
+    );
+    const entity: SimpleCombatEntityDto = {
+      ...group.entity,
+      health: knownHealth
+        ? members.reduce((total, member) => total + member.entity.health, 0)
+        : -1,
+      maxHealth: knownHealth
+        ? members.reduce((total, member) => total + member.entity.maxHealth, 0)
+        : -1,
+      barrier: members.reduce(
+        (total, member) => total + (member.entity.barrier ?? 0),
+        0,
+      ),
+    };
+    const populated = {
+      ...group,
+      entity,
+      members: children,
+      summonCount: members.length,
+      standingCount: members.filter((member) => !this.isDefeated(member.entity))
+        .length,
+    };
+    this.aggregateStats.set(
+      populated.id,
+      this.aggregateSummonStats(populated, members),
+    );
+    return populated;
+  }
+
+  private aggregateSummonStats(
+    group: StatsParticipant,
+    members: StatsParticipant[],
+  ): EntityStats {
+    const stats = members
+      .map((member) => this.rawStatsById.get(member.id))
+      .filter((item): item is EntityStats => !!item);
+    const abilities = new Map<string, AbilityStats>();
+    for (const ability of stats.flatMap((item) => item.abilities ?? [])) {
+      const current = abilities.get(ability.name) ?? {
+        name: ability.name,
+        totalDamage: 0,
+        totalHealing: 0,
+        uses: 0,
+        hits: 0,
+        crits: 0,
+        summons: 0,
+        stuns: 0,
+        selfDamage: 0,
+        alliedDamage: 0,
+        totalBarrier: 0,
+      };
+      abilities.set(ability.name, {
+        name: ability.name,
+        totalDamage: current.totalDamage + (ability.totalDamage ?? 0),
+        totalHealing: current.totalHealing + (ability.totalHealing ?? 0),
+        uses: current.uses + (ability.uses ?? 0),
+        hits: current.hits + (ability.hits ?? 0),
+        crits: current.crits + (ability.crits ?? 0),
+        summons: current.summons + (ability.summons ?? 0),
+        stuns: current.stuns + (ability.stuns ?? 0),
+        selfDamage: current.selfDamage + (ability.selfDamage ?? 0),
+        alliedDamage: current.alliedDamage + (ability.alliedDamage ?? 0),
+        totalBarrier: current.totalBarrier + (ability.totalBarrier ?? 0),
+      });
+    }
+    const sum = (selector: (item: EntityStats) => number): number =>
+      stats.reduce((total, item) => total + (selector(item) ?? 0), 0);
+
+    return {
+      entityId: group.id,
+      entityName: group.name,
+      abilities: [...abilities.values()],
+      damageDone: sum((item) => item.damageDone),
+      damageTaken: sum((item) => item.damageTaken),
+      healingDone: sum((item) => item.healingDone),
+      healingReceived: sum((item) => item.healingReceived),
+      healthRegenerated: sum((item) => item.healthRegenerated),
+      healthRegenerationPotential: sum(
+        (item) => item.healthRegenerationPotential,
+      ),
+      healthRegenerationOverhealed: sum(
+        (item) => item.healthRegenerationOverhealed,
+      ),
+      healthRegenerationPulses: sum((item) => item.healthRegenerationPulses),
+      selfDamageDone: sum((item) => item.selfDamageDone),
+      selfDamageTaken: sum((item) => item.selfDamageTaken),
+      alliedDamageDone: sum((item) => item.alliedDamageDone),
+      alliedDamageTaken: sum((item) => item.alliedDamageTaken),
+      team: group.team,
+      barrierGenerated: sum((item) => item.barrierGenerated),
+      damageBlocked: sum((item) => item.damageBlocked),
+      health: group.entity.health,
+      maxHealth: group.entity.maxHealth,
+      barrier: group.entity.barrier,
+    };
+  }
+
+  private summonIdentity(id: string): SummonIdentity | null {
+    const marker = ':summon:';
+    const markerIndex = id.lastIndexOf(marker);
+    if (markerIndex <= 0) return null;
+    const ownerId = id.slice(0, markerIndex);
+    const summonId = id.slice(markerIndex + marker.length).split(':')[0];
+    return ownerId && summonId ? { ownerId, summonId } : null;
+  }
+
+  private selectableParticipants(): StatsParticipant[] {
+    return [...this.playerParticipants, ...this.enemyParticipants].flatMap(
+      (participant) => [participant, ...(participant.members ?? [])],
+    );
+  }
+
+  private pruneExpandedSummonGroups(): void {
+    const currentGroupIds = new Set(
+      [...this.playerParticipants, ...this.enemyParticipants]
+        .filter((participant) => participant.isSummonGroup)
+        .map((participant) => participant.id),
+    );
+    for (const groupId of this.expandedSummonGroups) {
+      if (!currentGroupIds.has(groupId)) {
+        this.expandedSummonGroups.delete(groupId);
+      }
+    }
+  }
+
   private isStatsForTeam(
     stats: EntityStats,
     team: CombatTeamName,
@@ -249,10 +491,9 @@ export class CombatEntityStatsComponent implements OnChanges {
   }
 
   private createEmptyStats(id: string): EntityStats | null {
-    const participant = [
-      ...this.playerParticipants,
-      ...this.enemyParticipants,
-    ].find((item) => item.id === id);
+    const participant = this.selectableParticipants().find(
+      (item) => item.id === id,
+    );
     if (!participant) return null;
 
     return {

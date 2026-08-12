@@ -184,6 +184,22 @@ public interface IDbContext
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default);
     Task AcquireCharacterCommandLockAsync(Guid characterId, CancellationToken ct = default);
     Task AcquireWorldTowerFloorLockAsync(string serverId, int floorNumber, CancellationToken ct = default);
+    Task<IReadOnlyList<Guid>> ClaimWorldTowerSimulationsAsync(
+        string owner,
+        DateTimeOffset now,
+        DateTimeOffset leaseUntil,
+        int limit,
+        CancellationToken ct = default);
+    Task<IReadOnlyList<Guid>> ClaimWorldTowerPlaybackDispatchesAsync(
+        string owner,
+        DateTimeOffset now,
+        DateTimeOffset leaseUntil,
+        int limit,
+        CancellationToken ct = default);
+    Task ReleaseWorldTowerPlaybackDispatchAsync(
+        Guid attemptId,
+        string owner,
+        CancellationToken ct = default);
     IDbContextTransaction? CurrentTransaction { get; }
     bool HasChanges { get; }
 }

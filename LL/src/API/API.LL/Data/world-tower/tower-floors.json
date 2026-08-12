@@ -1,172 +1,159 @@
 {
+  "releasedThroughFloor": 5,
+  "rewardCurve": {
+    "baseReward": 100,
+    "maximumFloor": 100,
+    "maximumMultiplier": 2.5,
+    "exponent": 0.8
+  },
   "floors": [
     {
       "floorNumber": 1,
       "name": "The Waking Step",
       "type": "Standard",
-      "guardianCreatureId": "00000000-0000-0000-0000-000000000027",
-      "guardianName": "Lumo Sentinel",
-      "guardianImagePath": "lumo_sentinel",
-      "guardianTags": ["Construct", "Physical", "Intro"],
-      "requiredSlots": 4,
-      "recommendedPowerRating": 750,
-      "guardianStrengthMultiplier": 4.0,
+      "guardianCreatureId": "00000000-0000-0000-0000-000000000056",
+      "guardianName": "Garran, the Gatekeeper",
+      "guardianAbilityProfileId": "monster.garran,_the_gatekeeper",
+      "guardianTags": ["Physical", "Magical"],
+      "requiredSlots": 5,
+      "recommendedPowerRating": 149,
+      "guardianScaling": {
+        "health": 30.0,
+        "offense": 45.5,
+        "defense": 4.0,
+        "resistance": 4.0,
+        "penetration": 4.0,
+        "regeneration": 4.0
+      },
+      "balanceBenchmark": {
+        "characterLevel": 30,
+        "equipmentTier": 1,
+        "equipmentRarity": "Rare",
+        "essenceCount": 4
+      },
       "echoEnabledAfterClear": true,
-      "firstClearCinders": 100,
-      "echoCinders": 25,
-      "unlockKeys": [],
-      "scoutingReveals": [
+      "unlocks": [
         {
-          "threshold": 20,
-          "title": "Sentinel Plating",
-          "description": "The Sentinel relies on physical durability."
-        },
-        {
-          "threshold": 60,
-          "title": "Targeting Beam",
-          "description": "Its focused beam punishes exposed ascendants."
-        },
-        {
-          "threshold": 100,
-          "title": "Recommended Counters",
-          "description": "Steady damage and physical protection make this opening trial reliable."
+          "key": "tower_echo_mode_unlock",
+          "description": "Echo Mode for cleared non-Sovereign floors"
         }
       ]
     },
     {
       "floorNumber": 2,
-      "name": "The Twin Oath Gate",
+      "name": "The Bloodwing Roost",
       "type": "Standard",
-      "guardianCreatureId": "00000000-0000-0000-0000-000000000020",
-      "guardianName": "Hobgoblin Oathkeeper",
-      "guardianImagePath": "hobgoblin",
-      "guardianTags": ["Goblinoid", "Physical", "Pressure"],
+      "guardianCreatureId": "00000000-0000-0000-0000-000000000057",
+      "guardianName": "Velka, the Bloodwing Huntress",
+      "guardianAbilityProfileId": "monster.velka,_the_bloodwing_huntress",
+      "guardianTags": ["Physical", "Bleed", "Haste"],
       "requiredSlots": 5,
-      "recommendedPowerRating": 1200,
-      "guardianStrengthMultiplier": 5.5,
+      "recommendedPowerRating": 150,
+      "guardianScaling": {
+        "health": 38.0,
+        "offense": 44.0,
+        "defense": 5.5,
+        "resistance": 5.5,
+        "penetration": 5.5,
+        "regeneration": 5.5
+      },
+      "balanceBenchmark": {
+        "characterLevel": 32,
+        "equipmentTier": 1,
+        "equipmentRarity": "Rare",
+        "essenceCount": 4
+      },
       "echoEnabledAfterClear": true,
-      "firstClearCinders": 150,
-      "echoCinders": 35,
-      "unlockKeys": [],
-      "scoutingReveals": [
-        {
-          "threshold": 25,
-          "title": "Brutal Charge",
-          "description": "The Oathkeeper opens with heavy physical pressure."
-        },
-        {
-          "threshold": 75,
-          "title": "Threatening Presence",
-          "description": "Long fights increasingly favor the Guardian."
-        },
-        {
-          "threshold": 100,
-          "title": "Recommended Counters",
-          "description": "Durability stabilizes the rally while focused damage ends the charge cycle."
-        }
-      ]
+      "unlocks": []
     },
     {
       "floorNumber": 3,
       "name": "The Third Vow",
       "type": "Standard",
-      "guardianCreatureId": "00000000-0000-0000-0000-000000000036",
-      "guardianName": "Giant Vowspinner",
-      "guardianImagePath": "giant_spider",
-      "guardianTags": ["Beast", "Poison", "Control"],
-      "requiredSlots": 3,
-      "recommendedPowerRating": 1800,
-      "guardianStrengthMultiplier": 7.0,
+      "guardianCreatureId": "00000000-0000-0000-0000-000000000059",
+      "guardianName": "Morrowmaw, Broodkeeper",
+      "guardianAbilityProfileId": "monster.morrowmaw,_broodkeeper",
+      "guardianTags": ["Magical", "Summoner"],
+      "requiredSlots": 5,
+      "recommendedPowerRating": 153,
+      "guardianScaling": {
+        "health": 19.5,
+        "offense": 70.0,
+        "defense": 7.0,
+        "resistance": 7.0,
+        "penetration": 7.0,
+        "regeneration": 7.0
+      },
+      "balanceBenchmark": {
+        "characterLevel": 34,
+        "equipmentTier": 1,
+        "equipmentRarity": "Rare",
+        "essenceCount": 4
+      },
       "echoEnabledAfterClear": true,
-      "firstClearCinders": 200,
-      "echoCinders": 50,
-      "unlockKeys": [],
-      "scoutingReveals": [
-        {
-          "threshold": 25,
-          "title": "Carapace",
-          "description": "The Vowspinner is harder to break than its size suggests."
-        },
-        {
-          "threshold": 50,
-          "title": "Web Pressure",
-          "description": "Control and poison pressure test the trio's sustain."
-        },
-        {
-          "threshold": 100,
-          "title": "Recommended Counters",
-          "description": "A balanced trio with sustain performs best."
-        }
-      ]
+      "unlocks": []
     },
     {
       "floorNumber": 4,
-      "name": "The Stonebound Gate",
+      "name": "The Mirrored Hall",
       "type": "Standard",
-      "guardianCreatureId": "00000000-0000-0000-0000-000000000043",
-      "guardianName": "Stonebound Cinder Beetle",
-      "guardianImagePath": "cinder_beetle",
-      "guardianTags": ["Beast", "Fire", "Armor"],
+      "guardianCreatureId": "00000000-0000-0000-0000-000000000058",
+      "guardianName": "Vaelor, the Mirrorbound",
+      "guardianAbilityProfileId": "monster.vaelor,_the_mirrorbound",
+      "guardianTags": ["Physical", "Magical", "Reflection"],
       "requiredSlots": 5,
-      "recommendedPowerRating": 2500,
-      "guardianStrengthMultiplier": 10.0,
+      "recommendedPowerRating": 162,
+      "guardianScaling": {
+        "health": 29.5,
+        "offense": 55.0,
+        "defense": 10.0,
+        "resistance": 10.0,
+        "penetration": 10.0,
+        "regeneration": 10.0
+      },
+      "balanceBenchmark": {
+        "characterLevel": 37,
+        "equipmentTier": 1,
+        "equipmentRarity": "Epic",
+        "essenceCount": 4
+      },
       "echoEnabledAfterClear": true,
-      "firstClearCinders": 250,
-      "echoCinders": 60,
-      "unlockKeys": ["tower_scouting_unlock"],
-      "scoutingReveals": [
+      "unlocks": [
         {
-          "threshold": 20,
-          "title": "Molten Shell",
-          "description": "The Guardian combines armor with punishing heat."
-        },
-        {
-          "threshold": 60,
-          "title": "Stone Barrier",
-          "description": "Its defenses peak as the shell begins to crack."
-        },
-        {
-          "threshold": 100,
-          "title": "Recommended Counters",
-          "description": "Penetration and burst damage shorten the dangerous final phase."
+          "key": "tower_scouting_unlock",
+          "description": "Guardian scouting intelligence"
         }
       ]
     },
     {
       "floorNumber": 5,
-      "name": "The Iron Saint's Chapel",
+      "name": "The First Warden's Bastion",
       "type": "Warden",
-      "guardianCreatureId": "00000000-0000-0000-0000-000000000038",
-      "guardianName": "Blackjaw, the Iron Saint",
-      "guardianImagePath": "blackjaw_spider",
-      "guardianTags": ["Beast", "Physical", "Barrier", "Warden"],
+      "guardianCreatureId": "00000000-0000-0000-0000-000000000060",
+      "guardianName": "Kharad, the First Warden",
+      "guardianAbilityProfileId": "monster.kharad,_the_first_warden",
+      "guardianTags": ["Physical", "Magical", "Barrier", "Summoner"],
       "requiredSlots": 10,
-      "recommendedPowerRating": 3500,
-      "guardianStrengthMultiplier": 14.0,
+      "recommendedPowerRating": 163,
+      "guardianScaling": {
+        "health": 43.0,
+        "offense": 43.0,
+        "defense": 14.0,
+        "resistance": 14.0,
+        "penetration": 14.0,
+        "regeneration": 14.0
+      },
+      "balanceBenchmark": {
+        "characterLevel": 39,
+        "equipmentTier": 1,
+        "equipmentRarity": "Epic",
+        "essenceCount": 4
+      },
       "echoEnabledAfterClear": true,
-      "firstClearCinders": 400,
-      "echoCinders": 100,
-      "unlockKeys": ["tower_echo_mode_unlock", "tower_shop_tier_1"],
-      "scoutingReveals": [
+      "unlocks": [
         {
-          "threshold": 20,
-          "title": "Iron Carapace",
-          "description": "The Warden repeatedly fortifies its armored shell."
-        },
-        {
-          "threshold": 50,
-          "title": "Blackjaw Bite",
-          "description": "Wounded ascendants are vulnerable to a decisive strike."
-        },
-        {
-          "threshold": 80,
-          "title": "Final Toll",
-          "description": "The last phase sharply increases pressure on the rally."
-        },
-        {
-          "threshold": 100,
-          "title": "Recommended Counters",
-          "description": "Bring penetration, defensive protection, and sustain."
+          "key": "tower_shop_tier_1",
+          "description": "Tier 1 Tower shop stock"
         }
       ]
     },
@@ -176,32 +163,26 @@
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000003",
       "guardianName": "Hollow Goblin Archer",
-      "guardianImagePath": "goblin_archer",
+      "guardianAbilityProfileId": "monster.goblin_archer",
       "guardianTags": ["Goblinoid", "Ranged", "Precision"],
       "requiredSlots": 5,
-      "recommendedPowerRating": 4400,
-      "guardianStrengthMultiplier": 12.0,
+      "recommendedPowerRating": 166,
+      "guardianScaling": {
+        "health": 56.0,
+        "offense": 60.0,
+        "defense": 12.0,
+        "resistance": 12.0,
+        "penetration": 12.0,
+        "regeneration": 12.0
+      },
+      "balanceBenchmark": {
+        "characterLevel": 41,
+        "equipmentTier": 1,
+        "equipmentRarity": "Epic",
+        "essenceCount": 5
+      },
       "echoEnabledAfterClear": true,
-      "firstClearCinders": 350,
-      "echoCinders": 85,
-      "unlockKeys": [],
-      "scoutingReveals": [
-        {
-          "threshold": 25,
-          "title": "Precision Shots",
-          "description": "The Guardian targets vulnerable ascendants."
-        },
-        {
-          "threshold": 75,
-          "title": "Poisoned Arrows",
-          "description": "Sustain matters as poison stacks through the fight."
-        },
-        {
-          "threshold": 100,
-          "title": "Recommended Counters",
-          "description": "Protect low-health allies and bring enough burst to end the volley."
-        }
-      ]
+      "unlocks": []
     },
     {
       "floorNumber": 7,
@@ -209,30 +190,29 @@
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000017",
       "guardianName": "Mirror Illusion Fox",
-      "guardianImagePath": "illusion_fox",
+      "guardianAbilityProfileId": "monster.illusion_fox",
       "guardianTags": ["Arcane", "Illusion", "BuildCheck"],
       "requiredSlots": 3,
-      "recommendedPowerRating": 5600,
-      "guardianStrengthMultiplier": 11.0,
+      "recommendedPowerRating": 169,
+      "guardianScaling": {
+        "health": 34.0,
+        "offense": 18.0,
+        "defense": 11.0,
+        "resistance": 11.0,
+        "penetration": 11.0,
+        "regeneration": 11.0
+      },
+      "balanceBenchmark": {
+        "characterLevel": 43,
+        "equipmentTier": 1,
+        "equipmentRarity": "Unique",
+        "essenceCount": 5
+      },
       "echoEnabledAfterClear": true,
-      "firstClearCinders": 400,
-      "echoCinders": 100,
-      "unlockKeys": ["tower_battle_report_unlock"],
-      "scoutingReveals": [
+      "unlocks": [
         {
-          "threshold": 25,
-          "title": "Doomed Reflection",
-          "description": "The Guardian punishes one-dimensional rallies."
-        },
-        {
-          "threshold": 60,
-          "title": "Foxfire",
-          "description": "Magical pressure exposes weak sustain."
-        },
-        {
-          "threshold": 100,
-          "title": "Recommended Counters",
-          "description": "Bring mixed offense, survival, and utility."
+          "key": "tower_battle_report_unlock",
+          "description": "Detailed Tower battle reports"
         }
       ]
     },
@@ -242,30 +222,29 @@
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000005",
       "guardianName": "Flamebound Gatekeeper",
-      "guardianImagePath": "flame_imp",
+      "guardianAbilityProfileId": "monster.flame_imp",
       "guardianTags": ["Elemental", "Fire", "DamageOverTime"],
       "requiredSlots": 10,
-      "recommendedPowerRating": 7000,
-      "guardianStrengthMultiplier": 16.0,
+      "recommendedPowerRating": 174,
+      "guardianScaling": {
+        "health": 90.0,
+        "offense": 80.0,
+        "defense": 16.0,
+        "resistance": 16.0,
+        "penetration": 16.0,
+        "regeneration": 16.0
+      },
+      "balanceBenchmark": {
+        "characterLevel": 46,
+        "equipmentTier": 1,
+        "equipmentRarity": "Unique",
+        "essenceCount": 5
+      },
       "echoEnabledAfterClear": true,
-      "firstClearCinders": 500,
-      "echoCinders": 125,
-      "unlockKeys": ["tower_preparation_unlock"],
-      "scoutingReveals": [
+      "unlocks": [
         {
-          "threshold": 20,
-          "title": "Impish Flame",
-          "description": "Persistent fire pressure builds throughout the fight."
-        },
-        {
-          "threshold": 50,
-          "title": "Firebomb Volley",
-          "description": "The entire rally must withstand repeated bursts."
-        },
-        {
-          "threshold": 100,
-          "title": "Recommended Counters",
-          "description": "Bring resistance, healing, barriers, and steady damage."
+          "key": "tower_preparation_unlock",
+          "description": "Realm-wide Tower preparation"
         }
       ]
     },
@@ -275,32 +254,26 @@
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000040",
       "guardianName": "Rotroot, the Thorned Colossus",
-      "guardianImagePath": "rotroot_shambler",
+      "guardianAbilityProfileId": "monster.rotroot_shambler",
       "guardianTags": ["Nature", "Poison", "Giant", "Attrition"],
       "requiredSlots": 10,
-      "recommendedPowerRating": 9000,
-      "guardianStrengthMultiplier": 18.0,
+      "recommendedPowerRating": 175,
+      "guardianScaling": {
+        "health": 83.0,
+        "offense": 90.0,
+        "defense": 18.0,
+        "resistance": 18.0,
+        "penetration": 18.0,
+        "regeneration": 18.0
+      },
+      "balanceBenchmark": {
+        "characterLevel": 48,
+        "equipmentTier": 1,
+        "equipmentRarity": "Unique",
+        "essenceCount": 5
+      },
       "echoEnabledAfterClear": true,
-      "firstClearCinders": 600,
-      "echoCinders": 150,
-      "unlockKeys": [],
-      "scoutingReveals": [
-        {
-          "threshold": 25,
-          "title": "Decaying Husk",
-          "description": "The Colossus is built for a long battle of attrition."
-        },
-        {
-          "threshold": 60,
-          "title": "Rotburst",
-          "description": "Its pressure peaks when the rally begins to weaken."
-        },
-        {
-          "threshold": 100,
-          "title": "Recommended Counters",
-          "description": "Sustain and broad defensive coverage are essential."
-        }
-      ]
+      "unlocks": []
     },
     {
       "floorNumber": 10,
@@ -308,35 +281,33 @@
       "type": "Sovereign",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000046",
       "guardianName": "The First Crownless King",
-      "guardianImagePath": "undead",
+      "guardianAbilityProfileId": "monster.undead",
       "guardianTags": ["Undead", "Physical", "Arcane", "Sovereign"],
       "requiredSlots": 15,
-      "recommendedPowerRating": 12000,
-      "guardianStrengthMultiplier": 26.0,
-      "echoEnabledAfterClear": true,
-      "firstClearCinders": 1000,
-      "echoCinders": 250,
-      "unlockKeys": ["region_expansion_1", "tower_band_2_unlock"],
-      "scoutingReveals": [
+      "recommendedPowerRating": 179,
+      "guardianScaling": {
+        "health": 300.0,
+        "offense": 92.0,
+        "defense": 26.0,
+        "resistance": 26.0,
+        "penetration": 26.0,
+        "regeneration": 26.0
+      },
+      "balanceBenchmark": {
+        "characterLevel": 50,
+        "equipmentTier": 1,
+        "equipmentRarity": "Legendary",
+        "essenceCount": 6
+      },
+      "echoEnabledAfterClear": false,
+      "unlocks": [
         {
-          "threshold": 20,
-          "title": "Royal Pressure",
-          "description": "The Sovereign combines physical and necrotic pressure."
+          "key": "region_expansion_1",
+          "description": "Region 2"
         },
         {
-          "threshold": 40,
-          "title": "Corpse Explosion",
-          "description": "Fallen ascendants make the final stand more dangerous."
-        },
-        {
-          "threshold": 70,
-          "title": "Crownless Judgment",
-          "description": "The last phase is a severe damage and survival check."
-        },
-        {
-          "threshold": 100,
-          "title": "Recommended Counters",
-          "description": "A balanced rally needs durability, sustain, control, and burst damage."
+          "key": "tower_band_2_unlock",
+          "description": "Tower Floors 11–20"
         }
       ]
     }

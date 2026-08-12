@@ -82,8 +82,10 @@ public sealed class TowerAttemptConfiguration : IEntityTypeConfiguration<TowerAt
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.ServerId).HasMaxLength(64).IsRequired();
+        builder.Property(x => x.SimulationLeaseOwner).HasMaxLength(128);
         builder.HasIndex(x => x.TowerRallyId).IsUnique();
         builder.HasIndex(x => new { x.ServerId, x.FloorNumber, x.Mode, x.Succeeded });
+        builder.HasIndex(x => new { x.Status, x.SimulationLeaseUntil });
         builder.HasOne(x => x.Playback)
             .WithOne(x => x.TowerAttempt)
             .HasForeignKey<TowerCombatPlayback>(x => x.TowerAttemptId)
@@ -97,8 +99,10 @@ public sealed class TowerCombatPlaybackConfiguration : IEntityTypeConfiguration<
     {
         builder.HasKey(x => x.TowerAttemptId);
         builder.Property(x => x.TimelineJson).HasColumnType("jsonb").IsRequired();
+        builder.Property(x => x.DispatchLeaseOwner).HasMaxLength(128);
         builder.Property(x => x.RowVersion).IsConcurrencyToken();
         builder.HasIndex(x => new { x.PlaybackEndsAt, x.LastPublishedSequence });
+        builder.HasIndex(x => x.DispatchLeaseUntil);
     }
 }
 
@@ -119,7 +123,7 @@ public sealed class TowerEchoClearConfiguration : IEntityTypeConfiguration<Tower
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.ServerId).HasMaxLength(64).IsRequired();
-        builder.HasIndex(x => new { x.ServerId, x.FloorNumber, x.CharacterId, x.WeekKey }).IsUnique();
+        builder.HasIndex(x => new { x.ServerId, x.CharacterId, x.WeekKey }).IsUnique();
     }
 }
 

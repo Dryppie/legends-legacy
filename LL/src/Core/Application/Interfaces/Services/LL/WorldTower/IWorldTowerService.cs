@@ -18,6 +18,7 @@ public interface IWorldTowerService
     Task<TowerBattleReportDto?> GetAttemptReportAsync(Guid characterId, Guid attemptId, CancellationToken cancellationToken);
     Task<CombatResultDto?> GetAttemptCombatResultAsync(Guid characterId, Guid attemptId, CancellationToken cancellationToken);
     Task<TowerCombatPlaybackDto?> GetAttemptPlaybackAsync(Guid characterId, Guid attemptId, CancellationToken cancellationToken);
+    Task<TowerCombatFrameBatchDto?> GetAttemptPlaybackFramesAsync(Guid characterId, Guid attemptId, int afterSequence, CancellationToken cancellationToken);
     Task<IReadOnlyList<TowerHallOfFameEntryDto>> GetHallOfFameAsync(CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerRallyDto>> CreateRallyAsync(Guid characterId, int floorNumber, TowerRallyMode mode, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerRallyDto>> ApplyToRallyAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
@@ -26,7 +27,8 @@ public interface IWorldTowerService
     Task<TowerOperationResult<TowerRallyDto>> LeaveRallyAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerRallyDto>> FillRallyWithDevelopmentCharactersAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerAttemptResultDto>> StartRallyAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
-    Task<bool> PublishDuePlaybackFrameAsync(Guid attemptId, DateTimeOffset now, CancellationToken cancellationToken);
+    Task<bool> SimulateQueuedAttemptAsync(Guid attemptId, string leaseOwner, CancellationToken cancellationToken);
+    Task<bool> PublishDuePlaybackFrameAsync(Guid attemptId, string leaseOwner, DateTimeOffset now, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerFloorDetailDto>> ContributeAsync(Guid characterId, int floorNumber, TowerContributionKind kind, int amount, CancellationToken cancellationToken);
 }
 

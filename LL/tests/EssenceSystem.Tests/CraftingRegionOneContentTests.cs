@@ -251,7 +251,7 @@ public sealed class CraftingRegionOneContentTests
     }
 
     [Fact]
-    public void CombatAreaGathering_YieldsAboutFourAverageEquipmentCraftsPerDay()
+    public void CombatAreaGathering_YieldsAboutSixteenAverageEquipmentCraftsPerDay()
     {
         const double encountersPerDay = 24 * 60 * 60 / 10d;
         var recipes = ReadArray("crafting/base-recipes.json");
@@ -285,7 +285,7 @@ public sealed class CraftingRegionOneContentTests
             var procChance = node?["procChance"]?.GetValue<double>() ?? 0;
             var expectedCrafts = encountersPerDay * procChance * averageYield / averageTierOneRecipeCost;
 
-            Assert.InRange(expectedCrafts, 3.9, 4.1);
+            Assert.InRange(expectedCrafts, 15.6, 16.4);
         });
     }
 
