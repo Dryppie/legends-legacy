@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Services.LL.Balance;
 using Services.LL.Professions.Craftings;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -105,8 +106,8 @@ public sealed class AttributeBalanceAnalyzerTests
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
 
         Assert.Equal(84, report.EqualBudgetComparisons.Count);
-        Assert.Equal(78, report.EqualBudgetComparisons.Count(x => x.IsReleaseGate));
-        Assert.Equal(6, report.EqualBudgetComparisons.Count(x => !x.IsReleaseGate));
+        Assert.Equal(75, report.EqualBudgetComparisons.Count(x => x.IsReleaseGate));
+        Assert.Equal(9, report.EqualBudgetComparisons.Count(x => !x.IsReleaseGate));
         Assert.Equal(
             Enum.GetValues<AttributePeerComparisonGroup>(),
             report.EqualBudgetComparisons
@@ -123,6 +124,7 @@ public sealed class AttributeBalanceAnalyzerTests
                 Assert.Equal(AttributePeerComparisonIntent.StrictPeer, comparison.Intent);
                 Assert.Equal("basic attack throughput", comparison.Context);
                 Assert.Equal(10d, comparison.TolerancePercentagePoints);
+                Assert.False(comparison.IsReleaseGate);
             });
         Assert.All(
             report.EqualBudgetComparisons.Where(x => x.Id == "max-health-armor"),
@@ -517,7 +519,8 @@ public sealed class AttributeBalanceAnalyzerTests
             string.Join(
                 Environment.NewLine,
                 report.SummonCalibrations
-                    .Where(x => Math.Abs(x.EqualBudgetDifferencePercent) > report.CalibrationGate.SummonTolerancePercent)
+                    .Where(x => x.DurationTicks >= 200
+                                && Math.Abs(x.EqualBudgetDifferencePercent) > report.CalibrationGate.SummonTolerancePercent)
                     .Select(x =>
                         $"Tier {x.Tier}, {x.DurationTicks} ticks: {x.EqualBudgetDifferencePercent:0.##}% " +
                         $"(summoner {x.SummonerDamagePerHundredBudget:0.##}, " +
@@ -537,11 +540,15 @@ public sealed class AttributeBalanceAnalyzerTests
                         $"(dual {x.DualWieldDamagePerHundredBudget:0.##}, " +
                         $"two-handed {x.TwoHandedDamagePerHundredBudget:0.##})")));
         Assert.All(
-            report.SummonCalibrations,
+            report.SummonCalibrations.Where(x => x.DurationTicks >= 200),
             comparison => Assert.InRange(
                 Math.Abs(comparison.EqualBudgetDifferencePercent),
                 0,
                 report.CalibrationGate.SummonTolerancePercent));
+        Assert.Contains(
+            report.SummonCalibrations.Where(x => x.DurationTicks < 200),
+            comparison => comparison.EqualBudgetDifferencePercent <
+                          -report.CalibrationGate.SummonTolerancePercent);
         Assert.All([1, 5, 10], tier =>
         {
             Assert.All([90, 180, 600], duration =>
@@ -619,7 +626,7 @@ public sealed class AttributeBalanceAnalyzerTests
                         $"  spent: {x.FirstSpentBudget:0.##} vs {x.SecondSpentBudget:0.##}; " +
                         $"utility/100: {x.FirstUtilityPerHundredBudget:0.##} vs " +
                         $"{x.SecondUtilityPerHundredBudget:0.##}")));
-        Assert.Equal(13, report.BalanceVersion);
+        Assert.Equal(14, report.BalanceVersion);
     }
 
     [Fact]
@@ -628,7 +635,7 @@ public sealed class AttributeBalanceAnalyzerTests
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
         var catalog = report.CraftingCatalogConstraints;
 
-        Assert.Equal(13, catalog.CandidateBalanceVersion);
+        Assert.Equal(14, catalog.CandidateBalanceVersion);
         Assert.True(catalog.ProductionActive);
         Assert.Equal(31, catalog.RecipesAnalyzed);
         Assert.Equal(11, catalog.BlueprintsAnalyzed);
@@ -732,22 +739,30 @@ public sealed class AttributeBalanceAnalyzerTests
         return new JsonCraftingDefinitionProvider(configuration, FindDataRoot(), options);
     }
 
-    private static string FindDataRoot()
+    private static string FindDataRoot([CallerFilePath] string sourceFilePath = "")
     {
-        var current = new DirectoryInfo(AppContext.BaseDirectory);
-        while (current != null)
+        foreach (var start in new[]
+                 {
+                     new DirectoryInfo(AppContext.BaseDirectory),
+                     new DirectoryInfo(Directory.GetCurrentDirectory()),
+                     new FileInfo(sourceFilePath).Directory!
+                 })
         {
-            foreach (var candidate in new[]
+            var current = start;
+            while (current != null)
             {
-                Path.Combine(current.FullName, "LL", "src", "API", "API.LL", "Data"),
-                Path.Combine(current.FullName, "src", "API", "API.LL", "Data")
-            })
-            {
-                if (Directory.Exists(candidate))
-                    return candidate;
-            }
+                foreach (var candidate in new[]
+                         {
+                             Path.Combine(current.FullName, "LL", "src", "API", "API.LL", "Data"),
+                             Path.Combine(current.FullName, "src", "API", "API.LL", "Data")
+                         })
+                {
+                    if (Directory.Exists(candidate))
+                        return candidate;
+                }
 
-            current = current.Parent;
+                current = current.Parent;
+            }
         }
 
         throw new DirectoryNotFoundException("Crafting data root not found.");

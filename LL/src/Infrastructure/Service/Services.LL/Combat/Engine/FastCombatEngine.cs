@@ -1902,16 +1902,9 @@ public sealed class FastCombatEngine
             return;
 
         foreach (var ability in combatant.Abilities.Where(x =>
-                     x.Definition.Kind == AbilitySpecKind.Active
-                     && !IsSummonAbility(x.Definition)))
+                     x.Definition.Kind == AbilitySpecKind.Active))
             ability.StartInitialCooldown(combatant.GetAttribute(AttributeType.Cooldown));
     }
-
-    private static bool IsSummonAbility(CompiledAbility ability) =>
-        ability.TriggersByEvent
-            .GetValueOrDefault(AbilityTriggerEvent.OnAbilityUsed)?
-            .SelectMany(trigger => trigger.Effects)
-            .Any(effect => effect.Operation == AbilityEffectOperation.Summon) == true;
 
     private static RuntimeCombatant CreateSummonedCombatant(
         RuntimeCombatant source,

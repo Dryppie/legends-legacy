@@ -69,6 +69,9 @@
   --ll-z-overlay: 50;
   --ll-z-popover: 100;
   --ll-z-modal: 200;
+  /* Popovers portaled to <body> escape their trigger's stacking context, so
+     they must sit above modals they can be opened from. */
+  --ll-z-popover-detached: 300;
 
   --ll-breakpoint-sm: 40rem;
   --ll-breakpoint-md: 48rem;

@@ -77,10 +77,17 @@ public sealed class TemperingMechanicsServiceTests
 
         Assert.True(result.RarityUpgraded);
         Assert.Equal(AttributeType.Power, result.ImprovedStat);
+        var powerImprovement = equipment.InstanceModifiers.Single(x =>
+            x.AttributeType == AttributeType.Power).Amount;
         Assert.Equal(
-            6,
-            equipment.InstanceModifiers.Single(x =>
-                x.AttributeType == AttributeType.Power).Amount);
+            (float)Math.Max(
+                1d,
+                Math.Round(
+                    TemperingConstants.GetDirectedImprovementBudget(equipment.Tier)
+                    / EquipmentStatBudgetCatalog
+                        .Get(AttributeType.Power, equipment.Tier)
+                        .CostPerPoint)),
+            powerImprovement);
     }
 
     [Fact]

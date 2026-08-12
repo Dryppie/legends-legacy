@@ -110,6 +110,23 @@ public sealed class WorldTowerBalanceAnalyzerTests
     }
 
     [Fact]
+    public async Task Floor_one_rejects_full_common_gear_even_with_four_essences()
+    {
+        var report = await CreateAnalyzer().AnalyzeAsync(
+            new WorldTowerBalanceRequest(
+                1,
+                256,
+                130_363,
+                new WorldTowerBalanceLoadout(30, "Common", 4)),
+            CancellationToken.None);
+
+        var floor = Assert.Single(report.Floors);
+        Assert.All(floor.Rosters, roster => Assert.True(
+            roster.WinRate < 10,
+            $"Full-Common {roster.Roster} roster still won {roster.WinRate:N2}% of attempts."));
+    }
+
+    [Fact]
     public async Task Floor_one_is_clearable_at_its_level_thirty_rare_checkpoint()
     {
         var report = await CreateAnalyzer().AnalyzeAsync(
@@ -208,8 +225,12 @@ public sealed class WorldTowerBalanceAnalyzerTests
             creatureEssences,
             new JsonCreatureAbilityDefinitionProvider(configuration, apiRoot, jsonOptions));
         var entities = new InMemoryEntityLookup(new CreatureJsonReader().GetCreaturesFromJson());
+        var craftingDefinitions = new JsonCraftingDefinitionProvider(
+            configuration,
+            apiRoot,
+            jsonOptions);
         var builds = new CanonicalEquipmentBuildFactory(
-            new JsonCraftingDefinitionProvider(configuration, apiRoot, jsonOptions),
+            craftingDefinitions,
             new ItemStatRollService(Options.Create(new CraftingBalanceOptions())),
             new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions())),
             new ItemPotentialService(Options.Create(new CraftingBalanceOptions())),
@@ -218,7 +239,8 @@ public sealed class WorldTowerBalanceAnalyzerTests
         var simulations = new PowerAnalysisSimulationRunner(
             new CombatEngineExecutor(
                 new JsonAbilityCatalogProvider(configuration, apiRoot, jsonOptions),
-                essenceDefinitions),
+                essenceDefinitions,
+                craftingDefinitions),
             combatSetup,
             null!,
             null!,
@@ -233,7 +255,12 @@ public sealed class WorldTowerBalanceAnalyzerTests
             entities,
             combatSetup,
             simulations,
-            builds);
+            builds,
+            Options.Create(new WorldTowerOptions
+            {
+                PreparationPercentPerPoint = 0.25m,
+                PreparationMaxEffectPercent = 10m
+            }));
         return new TowerBalanceFixture(analyzer, definitions, builds);
     }
 

@@ -8,6 +8,7 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Items;
 using Domain.Models.Regions.Areas;
 using Domain.Models.WorldTower;
+using Microsoft.Extensions.Options;
 using Services.LL.Interfaces;
 using Services.LL.PowerRatings;
 
@@ -18,7 +19,6 @@ public sealed class WorldTowerBalanceAnalyzer : IWorldTowerBalanceAnalyzer
     public const int MaximumAttemptsPerRoster = 1_000;
     private const int DefaultSeed = 130_363;
     private const int MaximumCombatTicks = 6_000;
-    private const decimal MaximumPreparationPercent = 5m;
 
     private static readonly IReadOnlyDictionary<string, int[]> RosterWeights =
         new Dictionary<string, int[]>(StringComparer.OrdinalIgnoreCase)
@@ -42,19 +42,22 @@ public sealed class WorldTowerBalanceAnalyzer : IWorldTowerBalanceAnalyzer
     private readonly ICombatSetupService _combatSetup;
     private readonly PowerAnalysisSimulationRunner _simulations;
     private readonly CanonicalEquipmentBuildFactory _builds;
+    private readonly WorldTowerOptions _options;
 
     public WorldTowerBalanceAnalyzer(
         IWorldTowerDefinitionProvider definitions,
         IEntityService entities,
         ICombatSetupService combatSetup,
         PowerAnalysisSimulationRunner simulations,
-        CanonicalEquipmentBuildFactory builds)
+        CanonicalEquipmentBuildFactory builds,
+        IOptions<WorldTowerOptions> options)
     {
         _definitions = definitions;
         _entities = entities;
         _combatSetup = combatSetup;
         _simulations = simulations;
         _builds = builds;
+        _options = options.Value;
     }
 
     public async Task<WorldTowerBalanceReport> AnalyzeAsync(
@@ -193,16 +196,16 @@ public sealed class WorldTowerBalanceAnalyzer : IWorldTowerBalanceAnalyzer
             [source],
             new Area { DifficultyTier = 1 }).Single();
         WorldTowerGuardianScaling.Apply(guardian, definition.GuardianScaling);
-        AddPercentModifier(guardian, AttributeType.Power, -MaximumPreparationPercent);
+        AddPercentModifier(guardian, AttributeType.Power, -_options.PreparationMaxEffectPercent);
         await _combatSetup.PrepareEntitiesForCombat([guardian]);
         return guardian;
     }
 
-    private static void ApplyPreparation(CombatEntity combatant)
+    private void ApplyPreparation(CombatEntity combatant)
     {
-        AddPercentModifier(combatant, AttributeType.Power, MaximumPreparationPercent);
-        AddPercentModifier(combatant, AttributeType.ArmorPenetration, MaximumPreparationPercent);
-        AddPercentModifier(combatant, AttributeType.MagicPenetration, MaximumPreparationPercent);
+        AddPercentModifier(combatant, AttributeType.Power, _options.PreparationMaxEffectPercent);
+        AddPercentModifier(combatant, AttributeType.ArmorPenetration, _options.PreparationMaxEffectPercent);
+        AddPercentModifier(combatant, AttributeType.MagicPenetration, _options.PreparationMaxEffectPercent);
     }
 
     private static void AddPercentModifier(

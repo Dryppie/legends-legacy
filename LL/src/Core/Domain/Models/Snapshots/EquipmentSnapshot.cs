@@ -12,6 +12,7 @@ public sealed class EquipmentSnapshot
     public Guid EquipmentInstanceId { get; init; }
     public string ItemBaseId { get; init; } = default!;
     public string? BaseRecipeId { get; init; }
+    public string? BlueprintId { get; init; }
     public Rarity Rarity { get; init; }
     public int? Potential { get; init; }
     public int ItemXp { get; init; }
@@ -34,6 +35,7 @@ public sealed class EquipmentSnapshot
             EquipmentInstanceId = inst.Id,
             ItemBaseId = inst.ItemBaseId,
             BaseRecipeId = inst.BaseRecipeId,
+            BlueprintId = inst.BlueprintId,
             Rarity = inst.Rarity,
             Potential = inst.Potential,
             ItemXp = inst.ItemXp,

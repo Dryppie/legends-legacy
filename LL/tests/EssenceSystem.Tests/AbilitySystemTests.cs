@@ -629,9 +629,9 @@ public sealed class AbilitySystemTests
     [Fact]
     public void Engine_weights_taunting_targets_for_basic_attacks()
     {
-        var front = CreateCombatant("front", CombatTeam.Friendly, []);
-        var taunter = CreateCombatant("taunter", CombatTeam.Friendly, []);
-        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        var front = CreateCombatant("front", CombatTeam.Friendly, [], maxHealth: 2_000);
+        var taunter = CreateCombatant("taunter", CombatTeam.Friendly, [], maxHealth: 2_000);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, [], maxHealth: 2_000);
         taunter.Conditions.Add(
             new RuntimeCondition(
                 StandardConditionType.Taunt,
@@ -644,20 +644,20 @@ public sealed class AbilitySystemTests
                 "condition.taunt"));
         var engine = new FastCombatEngine(
             new Dictionary<string, CompiledStatus>(),
-            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1));
+            new FastCombatEngineOptions(MaxTicks: 20, BasicAttackIntervalTicks: 1));
 
         var result = engine.Run([front, taunter], [hostile]);
+        var hostileAttacks = result.EventLog
+            .Where(x =>
+                x.ActorId == "hostile"
+                && x.Source == "Basic Attack"
+                && x.EventType == EventType.Damage)
+            .ToList();
+        var attacksAgainstFront = hostileAttacks.Count(x => x.TargetId == "front");
+        var attacksAgainstTaunter = hostileAttacks.Count(x => x.TargetId == "taunter");
 
-        Assert.Contains(result.EventLog, x =>
-            x.ActorId == "hostile"
-            && x.Source == "Basic Attack"
-            && x.EventType == EventType.Damage
-            && x.TargetId == "taunter");
-        Assert.DoesNotContain(result.EventLog, x =>
-            x.ActorId == "hostile"
-            && x.Source == "Basic Attack"
-            && x.EventType == EventType.Damage
-            && x.TargetId == "front");
+        Assert.Equal(20, hostileAttacks.Count);
+        Assert.True(attacksAgainstTaunter > attacksAgainstFront);
     }
 
     [Fact]
@@ -3640,7 +3640,7 @@ public sealed class AbilitySystemTests
             runtime,
             new CombatSimulationOptions(
                 RandomSeed: 1337,
-                MaxTicks: 120,
+                MaxTicks: 300,
                 StartActiveAbilitiesOnCooldown: true,
                 BasicAttackIntervalTicks: 1_000),
             CancellationToken.None);
@@ -3789,7 +3789,7 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
-    public void Engine_starts_summons_ready()
+    public void Engine_starts_summon_abilities_on_cooldown_and_new_summons_ready()
     {
         var summonAbility = new AbilitySpec
         {
@@ -3861,7 +3861,7 @@ public sealed class AbilitySystemTests
             compiledSummons,
             compiledAbilities,
             new FastCombatEngineOptions(
-                MaxTicks: 2,
+                MaxTicks: 102,
                 BasicAttackIntervalTicks: 1000,
                 StartActiveAbilitiesOnCooldown: true));
         var defaultResult = defaultEngine.Run(
@@ -3871,17 +3871,17 @@ public sealed class AbilitySystemTests
             defaultResult.EventLog,
             x => x.EventType == EventType.Summon);
 
-        Assert.Equal(0, summon.Timestamp);
+        Assert.Equal(100, summon.Timestamp);
         Assert.Contains(defaultResult.EventLog, x =>
             x.ActorId == summon.TargetId
             && x.Source == "Ready Strike"
             && x.EventType == EventType.AbilityUse
-            && x.Timestamp == 1);
+            && x.Timestamp == 101);
         Assert.Contains(defaultResult.EventLog, x =>
             x.ActorId == summon.TargetId
             && x.Source == "Basic Attack"
             && x.EventType == EventType.AbilityUse
-            && x.Timestamp == 1);
+            && x.Timestamp == 101);
         var summonStats = Assert.Single(
             defaultResult.EntityStats,
             stats => stats.EntityId == summon.TargetId);
@@ -3990,7 +3990,7 @@ public sealed class AbilitySystemTests
                 }
             ]);
         var friendly = CreateCombatant("friendly", CombatTeam.Friendly, [compiledAbilities["ability.summon.owner.cleanup"]], maxHealth: 50);
-        friendly.AdjustThreat(RuntimeCombatant.DefaultSummonThreat + 100);
+        friendly.AdjustThreat(RuntimeCombatant.BaseThreat);
         var hostile = CreateCombatant("hostile", CombatTeam.Hostile, [compiledAbilities["ability.kill.owner"]]);
         var engine = new FastCombatEngine(
             new Dictionary<string, CompiledStatus>(),

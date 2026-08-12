@@ -73,6 +73,27 @@ base Power was removed. The adjusted anchors preserve the approved equal-budget,
 summon, aggregate-cap, and maximum-progression gates while keeping Tier-1 Epic and max-tier
 canonical Combat Ratings comparable.
 
+### Version 14 tier-pacing correction
+
+The Tier 13 Power anchors kept equal-budget Power competitive with Attack Speed in an
+isolated basic-attack benchmark, but they did not preserve whole-build combat pacing.
+Because the equipment budget grows by tier while Crit Chance, Crit Damage, and Attack
+Speed multiply Power, making Power progressively cheaper caused Tier 10 mirror battles
+to finish much faster than Tier 1 battles.
+
+Version 14 prices Power against final canonical-build pacing instead:
+
+| Attribute | Tier 1 cost | Tier 5 cost | Tier 10 cost |
+| --------- | ----------: | ----------: | -----------: |
+| Power | `24.00` | `12.00` | `18.00` |
+| Status Resistance | `2.00` | `2.00` | `2.20` |
+
+The Status Resistance correction prevents light equipment from purchasing thousands of
+points beyond the useful high-tier envelope after the Power redistribution. Automated
+gates now compare Tier 1, 5, and 10 Balanced Epic builds in both basic-attack mirrors
+and deterministic five-Essence battles. Power-versus-Attack-Speed remains useful as a
+local diagnostic, but it is no longer sufficient evidence for tier progression.
+
 ### Version 13 foundation
 
 Power remains the single, player-facing magnitude attribute. Its internal item-budget

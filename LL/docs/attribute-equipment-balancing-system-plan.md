@@ -232,7 +232,8 @@ Three confounders were removed from the first matrix:
 
 1. The Direct Caster reserves 20% of its equipment budget for Fortitude, matching the Summoner's 15% Summon Health and 5% Max Health allocation instead of spending its entire budget on direct offense.
 2. The hostile pressure ability targets `SummonedEnemies`, so it measures Summon Health and summon uptime without killing the owner and turning the test into an owner-survival comparison.
-3. Summon abilities begin ready and newly created summons begin with their active ability and basic attack ready. This removes the combination of an owner initial cooldown followed by a second summon initial cooldown.
+3. Summon abilities begin on their normal initial cooldown, matching every other active ability. Once created, summons begin with their own active ability and basic attack ready so they do not incur a second initial delay.
+4. Short-duration summon calibration rows remain visible as opening-ramp diagnostics, but the release gate begins after one nominal summon cooldown plus one complete summon lifetime. This prevents the deliberate wind-up from being misclassified as a steady-state value failure.
 
 The remaining tier progression is handled through the active Summon Power prices:
 
@@ -242,15 +243,7 @@ The remaining tier progression is handled through the active Summon Power prices
 | 5    |                    `1.25` |
 | 10   |                    `1.00` |
 
-Intermediate tiers interpolate linearly. The resulting matched differences are:
-
-| Tier |  90 ticks | 180 ticks | 600 ticks |
-| ---- | --------: | --------: | --------: |
-| 1    | `+19.21%` |  `+4.93%` |  `-3.40%` |
-| 5    | `-19.09%` | `-14.18%` |  `-9.69%` |
-| 10   |  `-8.99%` |  `-4.97%` |  `+1.43%` |
-
-Positive values favor Summoner and negative values favor the equal-budget Direct Caster. All nine cells pass the 20% tolerance, and the worst result is `+19.21%`. This closes the summon calibration gate without changing Power-only ability scaling or making Summon Power nonlinear.
+Intermediate tiers interpolate linearly. Positive calibration differences favor Summoner and negative values favor the equal-budget Direct Caster. The 90- and 180-tick rows intentionally expose the summon build's opening wind-up; the 600-tick rows gate steady-state value against the 20% tolerance. This keeps the timing disadvantage visible without confusing it with a Summon Power pricing failure.
 
 Summon contribution telemetry provides the causal split:
 

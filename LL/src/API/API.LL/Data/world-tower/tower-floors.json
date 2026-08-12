@@ -18,12 +18,12 @@
       "requiredSlots": 5,
       "recommendedPowerRating": 149,
       "guardianScaling": {
-        "health": 30.0,
-        "offense": 45.5,
-        "defense": 4.0,
-        "resistance": 4.0,
-        "penetration": 4.0,
-        "regeneration": 4.0
+        "health": 36.0,
+        "offense": 49.25,
+        "defense": 5.0,
+        "resistance": 5.0,
+        "penetration": 5.0,
+        "regeneration": 5.0
       },
       "balanceBenchmark": {
         "characterLevel": 30,
@@ -50,12 +50,12 @@
       "requiredSlots": 5,
       "recommendedPowerRating": 150,
       "guardianScaling": {
-        "health": 38.0,
-        "offense": 44.0,
-        "defense": 5.5,
-        "resistance": 5.5,
-        "penetration": 5.5,
-        "regeneration": 5.5
+        "health": 42.0,
+        "offense": 49.0,
+        "defense": 6.0,
+        "resistance": 6.0,
+        "penetration": 6.0,
+        "regeneration": 6.0
       },
       "balanceBenchmark": {
         "characterLevel": 32,
@@ -77,12 +77,12 @@
       "requiredSlots": 5,
       "recommendedPowerRating": 153,
       "guardianScaling": {
-        "health": 19.5,
-        "offense": 70.0,
-        "defense": 7.0,
-        "resistance": 7.0,
-        "penetration": 7.0,
-        "regeneration": 7.0
+        "health": 25.7,
+        "offense": 75.0,
+        "defense": 8.0,
+        "resistance": 8.0,
+        "penetration": 8.0,
+        "regeneration": 8.0
       },
       "balanceBenchmark": {
         "characterLevel": 34,
@@ -104,12 +104,12 @@
       "requiredSlots": 5,
       "recommendedPowerRating": 162,
       "guardianScaling": {
-        "health": 29.5,
-        "offense": 55.0,
-        "defense": 10.0,
-        "resistance": 10.0,
-        "penetration": 10.0,
-        "regeneration": 10.0
+        "health": 34.0,
+        "offense": 59.0,
+        "defense": 11.0,
+        "resistance": 11.0,
+        "penetration": 11.0,
+        "regeneration": 11.0
       },
       "balanceBenchmark": {
         "characterLevel": 37,
@@ -136,12 +136,12 @@
       "requiredSlots": 10,
       "recommendedPowerRating": 163,
       "guardianScaling": {
-        "health": 43.0,
-        "offense": 43.0,
-        "defense": 14.0,
-        "resistance": 14.0,
-        "penetration": 14.0,
-        "regeneration": 14.0
+        "health": 46.5,
+        "offense": 46.0,
+        "defense": 15.0,
+        "resistance": 15.0,
+        "penetration": 15.0,
+        "regeneration": 15.0
       },
       "balanceBenchmark": {
         "characterLevel": 39,

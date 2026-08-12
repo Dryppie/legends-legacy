@@ -76,6 +76,7 @@ public sealed class PowerAnalysisSimulationRunner
     private const string BenchmarkMagicAbilityId = "power-benchmark.magic-pressure";
     private const string BenchmarkPhysicalDurabilityAbilityId = "power-benchmark.physical-durability-pressure";
     private const string BenchmarkMagicalDurabilityAbilityId = "power-benchmark.magical-durability-pressure";
+    private const string BenchmarkAreaAnchorThreatAbilityId = "power-benchmark.area-anchor-threat";
     private const int DurabilityPressureCooldownTicks = 50;
     private const string CanonicalStrikeAbilityId = "power-benchmark.canonical-strike";
     private const string CanonicalAreaAbilityId = "power-benchmark.canonical-area";
@@ -574,6 +575,9 @@ public sealed class PowerAnalysisSimulationRunner
             AttributeCalculator.CalculateBaseCombatAttributes(combatant);
             switch (scenario)
             {
+                case PowerBenchmarkScenario.MultiTarget when index == 0:
+                    combatant.NativeAbilityIds.Add(BenchmarkAreaAnchorThreatAbilityId);
+                    break;
                 case PowerBenchmarkScenario.PhysicalDurability:
                     combatant.NativeAbilityIds.Add(BenchmarkPhysicalDurabilityAbilityId);
                     break;
@@ -628,6 +632,23 @@ public sealed class PowerAnalysisSimulationRunner
 
     private static IReadOnlyList<AbilitySpec> BenchmarkAbilities { get; } =
     [
+        new AbilitySpec
+        {
+            Id = BenchmarkAreaAnchorThreatAbilityId,
+            Kind = AbilitySpecKind.Passive,
+            Name = BenchmarkAreaAnchorThreatAbilityId,
+            Description = "Pins current-target attacks to the durable multi-target benchmark anchor.",
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = $"{BenchmarkAreaAnchorThreatAbilityId}.effect",
+                    Operation = AbilityEffectOperation.ModifyThreat,
+                    Target = AbilityTargetSelector.Self,
+                    BaseValue = 1_000_000_000
+                }
+            ]
+        },
         CreateDamageAbility(BenchmarkMagicAbilityId, AbilityTargetSelector.CurrentTarget, DamageType.Magical, 1, 0.8f, 20),
         CreateDamageAbility(
             BenchmarkPhysicalDurabilityAbilityId,

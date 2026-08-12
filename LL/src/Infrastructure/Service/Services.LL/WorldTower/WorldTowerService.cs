@@ -1108,10 +1108,18 @@ public sealed class WorldTowerService : IWorldTowerService
     {
         var character = await _db.Characters
             .AsNoTracking()
-            .Include(x => x.Guild)
             .SingleOrDefaultAsync(x => x.Id == characterId, cancellationToken);
         if (character is null)
             return JoinEligibility.Fail("Character was not found.");
+
+        // Guild membership lives in GuildMembers. Character.Guild is NOT the
+        // guild a character belongs to - EF pairs it with Guild.Owner, so it
+        // only resolves for the character who founded the guild.
+        var membership = await _db.GuildMembers
+            .AsNoTracking()
+            .Where(x => x.CharacterId == characterId)
+            .Select(x => new { x.GuildId, GuildName = x.Guild.Name })
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (targetRallyId.HasValue)
         {
@@ -1139,8 +1147,8 @@ public sealed class WorldTowerService : IWorldTowerService
             character.Id,
             character.UserId,
             character.Name,
-            character.Guild?.Id,
-            character.Guild?.Name,
+            membership?.GuildId,
+            membership?.GuildName,
             CombatRatingDisplay.FromRaw(rating.Overall),
             null);
     }
@@ -1665,6 +1673,7 @@ public sealed class WorldTowerService : IWorldTowerService
                 ItemBaseId = equipment.ItemBaseId,
                 ItemBase = equipmentBase,
                 BaseRecipeId = equipment.BaseRecipeId,
+                BlueprintId = equipment.BlueprintId,
                 Rarity = equipment.Rarity,
                 Potential = equipment.Potential,
                 ItemXp = equipment.ItemXp,

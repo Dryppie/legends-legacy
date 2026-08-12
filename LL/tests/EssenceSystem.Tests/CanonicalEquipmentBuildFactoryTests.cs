@@ -1,8 +1,12 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Runtime.CompilerServices;
 using Application.Interfaces.Services.LL.Essences;
+using Domain.Components.Attributes;
 using Domain.Helpers;
 using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Combat;
 using Domain.Models.Items;
 using Domain.Models.Professions.Crafting.V2;
 using Microsoft.Extensions.Configuration;
@@ -286,11 +290,22 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         var summary = string.Join(
             ", ",
             builds.Select(entry =>
-                $"{entry.Key}={entry.Value.Rating.Overall / 10}" +
-                $"(O{entry.Value.Rating.SingleTargetOffense / 10}/" +
-                $"P{entry.Value.Rating.PhysicalDurability / 10}/" +
-                $"M{entry.Value.Rating.MagicalDurability / 10}/" +
-                $"S{entry.Value.Rating.Sustain / 10})"));
+            {
+                var attributes = CombatRatingCalculator.ProjectDirectAttributes(
+                    entry.Value.Character.BaseAttributes,
+                    entry.Value.Equipment.SelectMany(equipment => equipment.AttributeModifiers));
+                return $"{entry.Key}={entry.Value.Rating.Overall / 10}" +
+                       $"(O{entry.Value.Rating.SingleTargetOffense / 10}/" +
+                       $"P{entry.Value.Rating.PhysicalDurability / 10}/" +
+                       $"M{entry.Value.Rating.MagicalDurability / 10}/" +
+                       $"S{entry.Value.Rating.Sustain / 10};" +
+                       $"Pow{attributes.GetValueOrDefault(AttributeType.Power):0.#}/" +
+                       $"HP{attributes.GetValueOrDefault(AttributeType.MaxHealth):0.#}/" +
+                       $"CC{attributes.GetValueOrDefault(AttributeType.CritChance):0.#}/" +
+                       $"CD{attributes.GetValueOrDefault(AttributeType.CritDamage):0.#}/" +
+                       $"AS{attributes.GetValueOrDefault(AttributeType.AttackSpeed):0.#}/" +
+                       $"SR{attributes.GetValueOrDefault(AttributeType.StatusResistance):0.#})";
+            }));
 
         var defensiveToOffense = ratings[CanonicalPartyProfile.Defensive]
                                  / (double)ratings[CanonicalPartyProfile.Offense];
@@ -301,6 +316,101 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         Assert.True(
             ratings.Values.Min() >= ratings.Values.Max() * 0.75,
             $"Tier-10 canonical Combat Ratings diverged too far: {summary}.");
+    }
+
+    [Fact]
+    public void Balanced_epic_basic_attack_pacing_is_stable_across_live_equipment_tiers()
+    {
+        var results = new[] { 1, 5, 10 }
+            .Select(tier =>
+            {
+                var rung = _factory.GetProgressionLadder()
+                    .Single(candidate => candidate.Id == $"t{tier}-standard-epic");
+                var build = _factory.CreateBuild(CanonicalPartyProfile.Balanced, rung);
+                var attributes = AttributeCalculator.CalculateProjectedAttributes(
+                    build.Character.BaseAttributes.ToDictionary(
+                        attribute => attribute.AttributeType,
+                        attribute => attribute.Value),
+                    build.Equipment
+                        .SelectMany(equipment => equipment.AttributeModifiers)
+                        .Cast<AttributeModifierBase>());
+                attributes[AttributeType.Armor] = 30;
+                attributes[AttributeType.Resistance] = 30;
+                attributes[AttributeType.ArmorPenetration] = 0;
+                attributes[AttributeType.MagicPenetration] = 0;
+                attributes[AttributeType.HealthRegeneration] = 0;
+
+                var durations = Enumerable.Range(1, 31)
+                    .Select(seed => RunBasicAttackMirror(attributes, seed))
+                    .Order()
+                    .ToList();
+                return new
+                {
+                    Tier = tier,
+                    Power = attributes[AttributeType.Power],
+                    MaxHealth = attributes[AttributeType.MaxHealth],
+                    CritChance = attributes.GetValueOrDefault(AttributeType.CritChance),
+                    CritDamage = attributes.GetValueOrDefault(AttributeType.CritDamage),
+                    AttackSpeed = attributes.GetValueOrDefault(AttributeType.AttackSpeed),
+                    MedianDuration = durations[durations.Count / 2]
+                };
+            })
+            .ToList();
+        var tierOneDuration = results[0].MedianDuration;
+        var summary = string.Join(
+            ", ",
+            results.Select(result =>
+                $"T{result.Tier}: {result.MedianDuration} ticks, " +
+                $"P{result.Power:0.##}/HP{result.MaxHealth:0.##}/" +
+                $"CC{result.CritChance:0.##}/CD{result.CritDamage:0.##}/" +
+                $"AS{result.AttackSpeed:0.##}"));
+
+        Assert.All(
+            results,
+            result => Assert.True(
+                result.MedianDuration >= tierOneDuration * 0.8
+                && result.MedianDuration <= tierOneDuration * 1.25,
+                $"Balanced basic-attack pacing diverged by tier: {summary}."));
+    }
+
+    [Fact]
+    public void Neutral_essence_battle_pacing_does_not_accelerate_across_equipment_tiers()
+    {
+        var simulator = CreateBalanceSimulator();
+        var results = new[] { 1, 5, 10 }
+            .Select(tier =>
+            {
+                var report = simulator.Run(new AbilityBalanceSimulationRequest(
+                    BattleCount: 300,
+                    TeamSize: 1,
+                    EssencesPerParticipant: 5,
+                    RandomSeed: 1337,
+                    TopResults: 100,
+                    CandidatePoolSize: 100,
+                    CandidateTeams: null,
+                    EquipmentTier: tier));
+                var durations = report.BattleSummaries
+                    .Select(battle => battle.Duration)
+                    .Order()
+                    .ToList();
+                return new
+                {
+                    Tier = tier,
+                    MedianDuration = durations[durations.Count / 2]
+                };
+            })
+            .ToList();
+        var tierOneDuration = results[0].MedianDuration;
+        var summary = string.Join(
+            ", ",
+            results.Select(result => $"T{result.Tier}: {result.MedianDuration} ticks"));
+
+        Assert.All(
+            results,
+            result => Assert.True(
+                result.MedianDuration >= tierOneDuration * 0.75
+                && result.MedianDuration <= tierOneDuration * 1.5,
+                $"Neutral essence battle pacing diverged by tier: {summary}."));
     }
 
     [Fact]
@@ -431,6 +541,27 @@ public sealed class CanonicalEquipmentBuildFactoryTests
                 (essence.Id, essence.EssenceDefinitionId, essence.Level, essence.AscensionTier)));
     }
 
+    private static int RunBasicAttackMirror(
+        IReadOnlyDictionary<AttributeType, float> attributes,
+        int seed)
+    {
+        RuntimeCombatant Combatant(string id, CombatTeam team) =>
+            new(
+                id,
+                id,
+                team,
+                attributes.ToDictionary(pair => pair.Key, pair => pair.Value),
+                [],
+                ["Role.Balance"]);
+
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 6_000, RandomSeed: seed));
+        return engine.Run(
+            [Combatant("friendly", CombatTeam.Friendly)],
+            [Combatant("hostile", CombatTeam.Hostile)]).Duration;
+    }
+
     private static CanonicalEquipmentBuildFactory CreateFactory()
     {
         var apiRoot = FindApiRoot();
@@ -479,22 +610,54 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             essenceDefinitions);
     }
 
-    private static string FindApiRoot()
+    private static AbilityBalanceSimulator CreateBalanceSimulator()
     {
-        var current = new DirectoryInfo(AppContext.BaseDirectory);
-        while (current is not null)
+        var apiRoot = FindApiRoot();
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["Content:Root"] = "Data" })
+            .Build();
+        var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
         {
-            foreach (var candidate in new[]
-            {
-                Path.Combine(current.FullName, "src", "API", "API.LL"),
-                Path.Combine(current.FullName, "LL", "src", "API", "API.LL")
-            })
-            {
-                if (Directory.Exists(Path.Combine(candidate, "Data")))
-                    return candidate;
-            }
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            AllowTrailingCommas = true
+        };
+        jsonOptions.Converters.Add(new JsonStringEnumConverter());
+        var essenceDefinitions = new JsonEssenceDefinitionRepository(
+            configuration,
+            apiRoot,
+            jsonOptions,
+            new EssenceDefinitionValidator());
 
-            current = current.Parent;
+        return new AbilityBalanceSimulator(
+            new JsonAbilityCatalogProvider(configuration, apiRoot, jsonOptions),
+            essenceDefinitions,
+            CreateFactory());
+    }
+
+    private static string FindApiRoot([CallerFilePath] string sourceFilePath = "")
+    {
+        foreach (var start in new[]
+                 {
+                     new DirectoryInfo(AppContext.BaseDirectory),
+                     new DirectoryInfo(Directory.GetCurrentDirectory()),
+                     new FileInfo(sourceFilePath).Directory!
+                 })
+        {
+            var current = start;
+            while (current is not null)
+            {
+                foreach (var candidate in new[]
+                         {
+                             Path.Combine(current.FullName, "src", "API", "API.LL"),
+                             Path.Combine(current.FullName, "LL", "src", "API", "API.LL")
+                         })
+                {
+                    if (Directory.Exists(Path.Combine(candidate, "Data")))
+                        return candidate;
+                }
+
+                current = current.Parent;
+            }
         }
 
         throw new DirectoryNotFoundException("Could not find the API.LL content root.");

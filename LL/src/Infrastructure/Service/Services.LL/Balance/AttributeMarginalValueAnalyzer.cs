@@ -30,6 +30,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     private const double AggregateCapWasteTolerancePercent = 1d;
     private const int NominalSummonDurationTicks = 100;
     private const int NominalRoleAbilityCooldownTicks = NominalSummonDurationTicks;
+    private const int MinimumSummonCalibrationGateDurationTicks =
+        NominalRoleAbilityCooldownTicks + NominalSummonDurationTicks;
     private const int NominalSummonStrikeCooldownTicks = 24;
     private const int NominalSummonBasicAttackIntervalTicks = 20;
     private const int NominalSummonPowerBase = 20;
@@ -110,6 +112,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 BasicAttackThroughputContext,
                 AttributePeerComparisonIntent.StrictPeer,
                 StrictPeerTolerancePercentagePoints,
+                isReleaseGate: false,
                 budgetFraction: MarginalBudgetFraction),
             ContextPeer(
                 "crit-chance-crit-damage-low",
@@ -2441,7 +2444,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 cap.WastedTargetBudgetPercent > AggregateCapWasteTolerancePercent))
             .ToList();
         var summonFailures = summonCalibrations
-            .Where(x => Math.Abs(x.EqualBudgetDifferencePercent) > SummonCalibrationTolerancePercent)
+            .Where(x => x.DurationTicks >= MinimumSummonCalibrationGateDurationTicks
+                        && Math.Abs(x.EqualBudgetDifferencePercent) > SummonCalibrationTolerancePercent)
             .ToList();
         var handFailures = handCalibrations
             .Where(x =>
@@ -3279,7 +3283,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         }
 
         foreach (var comparison in summonCalibrations.Where(x =>
-                     Math.Abs(x.EqualBudgetDifferencePercent) > SummonCalibrationTolerancePercent))
+                     x.DurationTicks >= MinimumSummonCalibrationGateDurationTicks
+                     && Math.Abs(x.EqualBudgetDifferencePercent) > SummonCalibrationTolerancePercent))
         {
             findings.Add(new AttributeBalanceFinding(
                 AttributeBalanceFindingKind.SummonCalibrationMismatch,

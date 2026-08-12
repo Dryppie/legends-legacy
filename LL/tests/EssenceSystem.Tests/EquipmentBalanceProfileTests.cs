@@ -71,17 +71,33 @@ public sealed class EquipmentBalanceProfileTests
 
     [Theory]
     [InlineData(1, 24d)]
-    [InlineData(3, 15.35d)]
-    [InlineData(5, 6.7d)]
-    [InlineData(8, 4.78d)]
-    [InlineData(10, 3.5d)]
-    public void Power_cost_tracks_its_tier_relative_throughput_value(
+    [InlineData(3, 18d)]
+    [InlineData(5, 12d)]
+    [InlineData(8, 15.6d)]
+    [InlineData(10, 18d)]
+    public void Power_cost_tracks_the_tier_stable_pacing_profile(
         int tier,
         double expectedCost)
     {
         Assert.Equal(
             expectedCost,
             EquipmentStatBudgetCatalog.Get(AttributeType.Power, tier).CostPerPoint,
+            precision: 4);
+    }
+
+    [Theory]
+    [InlineData(1, 2d)]
+    [InlineData(5, 2d)]
+    [InlineData(10, 2.2d)]
+    public void Status_resistance_cost_avoids_high_tier_cap_overflow(
+        int tier,
+        double expectedCost)
+    {
+        Assert.Equal(
+            expectedCost,
+            EquipmentStatBudgetCatalog
+                .Get(AttributeType.StatusResistance, tier)
+                .CostPerPoint,
             precision: 4);
     }
 
@@ -118,7 +134,7 @@ public sealed class EquipmentBalanceProfileTests
         Assert.Equal(68d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1));
         Assert.Equal(187d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 5));
         Assert.Equal(412d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 10));
-        Assert.Equal(13, EquipmentBudgetEvaluator.BalanceVersion);
+        Assert.Equal(14, EquipmentBudgetEvaluator.BalanceVersion);
     }
 
     [Fact]
@@ -407,7 +423,7 @@ public sealed class EquipmentBalanceProfileTests
             allocation.AddedPoints[AttributeType.Power]
             > 100d * weights[AttributeType.Power]
             / EquipmentStatBudgetCatalog.Get(AttributeType.Power, 10).CostPerPoint);
-        Assert.Equal(13, EquipmentConstraintProfile.BalanceVersion);
+        Assert.Equal(14, EquipmentConstraintProfile.BalanceVersion);
         Assert.True(EquipmentConstraintProfile.ProductionActive);
     }
 

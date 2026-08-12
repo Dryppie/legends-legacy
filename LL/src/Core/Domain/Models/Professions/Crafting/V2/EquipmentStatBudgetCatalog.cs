@@ -4,7 +4,7 @@ namespace Domain.Models.Professions.Crafting.V2;
 
 public static class EquipmentStatBudgetCatalog
 {
-    public const int BalanceVersion = 13;
+    public const int BalanceVersion = 14;
     public const int MinimumTier = 1;
     public const int MaximumTier = 10;
 
@@ -12,7 +12,7 @@ public static class EquipmentStatBudgetCatalog
         new Dictionary<AttributeType, EquipmentStatBudgetDefinition>
         {
             [AttributeType.Power] =
-                Tiered(1_800, (1, 24d), (5, 6.7d), (10, 3.5d)),
+                Tiered(1_800, (1, 24d), (5, 12d), (10, 18d)),
             [AttributeType.MaxHealth] = Fixed(0.2d, 25_000),
             [AttributeType.Armor] = Tiered(
                 AttributeCombatRules.TypedMitigationCapPercent,
@@ -40,7 +40,7 @@ public static class EquipmentStatBudgetCatalog
             [AttributeType.Cooldown] =
                 Fixed(6d, AttributeCatalog.GetFixedCap(AttributeType.Cooldown)),
             [AttributeType.StatusResistance] =
-                Tiered(5_000, (1, 2d), (5, 0.4d), (10, 0.665d)),
+                Tiered(5_000, (1, 2d), (5, 2d), (10, 2.2d)),
             [AttributeType.CrowdControlResistance] =
                 Fixed(2d, AttributeCatalog.GetFixedCap(AttributeType.CrowdControlResistance)),
             [AttributeType.AttackSpeed] = Fixed(2.8d, 200)

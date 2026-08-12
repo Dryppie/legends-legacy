@@ -510,14 +510,8 @@ public sealed class StandardConditionSystemTests
     }
 
     [Fact]
-    public void Summons_default_to_one_hundred_threat()
+    public void All_combatants_default_to_one_hundred_threat()
     {
-        var attacker = Combatant(
-            "attacker",
-            CombatTeam.Friendly,
-            [],
-            power: 0,
-            weaponDamage: 10);
         var owner = Combatant("owner", CombatTeam.Hostile, []);
         var summon = new RuntimeCombatant(
             "summon",
@@ -530,11 +524,8 @@ public sealed class StandardConditionSystemTests
             [],
             isSummoned: true);
 
-        Run([attacker], [owner, summon], maxTicks: 1, basicAttackIntervalTicks: 1);
-
-        Assert.Equal(RuntimeCombatant.DefaultSummonThreat, summon.Threat);
-        Assert.Equal(1000, owner.Health);
-        Assert.InRange(1000 - summon.Health, 8, 12);
+        Assert.Equal(RuntimeCombatant.BaseThreat, owner.Threat);
+        Assert.Equal(RuntimeCombatant.BaseThreat, summon.Threat);
     }
 
     [Fact]
@@ -674,6 +665,15 @@ public sealed class StandardConditionSystemTests
     [Fact]
     public void Threat_weighting_uses_modified_threat_and_stealth_overrides_it_to_one()
     {
+        var lowThreat = Passive(
+            "low.threat",
+            new AbilityEffectSpec
+            {
+                Id = "threat",
+                Operation = AbilityEffectOperation.ModifyThreat,
+                Target = AbilityTargetSelector.Self,
+                BaseValue = -100
+            });
         var highThreat = Passive(
             "high.threat",
             new AbilityEffectSpec
@@ -684,7 +684,7 @@ public sealed class StandardConditionSystemTests
                 BaseValue = 100
             });
         var attacker = Combatant("attacker", CombatTeam.Friendly, [], power: 0, weaponDamage: 10);
-        var low = Combatant("low", CombatTeam.Hostile, []);
+        var low = Combatant("low", CombatTeam.Hostile, [lowThreat]);
         var high = Combatant("high", CombatTeam.Hostile, [highThreat]);
 
         Run([attacker], [low, high], maxTicks: 1, basicAttackIntervalTicks: 1);

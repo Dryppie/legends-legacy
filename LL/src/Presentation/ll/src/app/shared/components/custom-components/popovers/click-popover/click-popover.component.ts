@@ -12,9 +12,9 @@ import {
 } from '@angular/core';
 
 @Component({
-    selector: 'app-click-popover',
-    imports: [],
-    templateUrl: './click-popover.component.html'
+  selector: 'app-click-popover',
+  imports: [],
+  templateUrl: './click-popover.component.html',
 })
 export class ClickPopoverComponent implements AfterViewInit, OnDestroy {
   /** Template to render inside the popover */
@@ -60,7 +60,9 @@ export class ClickPopoverComponent implements AfterViewInit, OnDestroy {
     // Create container
     const container = document.createElement('div');
     container.style.position = 'fixed';
-    container.style.zIndex = '50';
+    // Appended to <body>, so this must out-rank any surface it can be opened
+    // from - including modal backdrops (--ll-z-modal).
+    container.style.setProperty('z-index', 'var(--ll-z-popover-detached, 300)');
     container.className = this.popoverClass;
     document.body.appendChild(container);
     this.popoverEl = container;
