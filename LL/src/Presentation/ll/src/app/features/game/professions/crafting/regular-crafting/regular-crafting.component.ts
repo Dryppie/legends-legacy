@@ -1,10 +1,4 @@
-import {
-  DecimalPipe,
-  NgClass,
-  NgFor,
-  NgIf,
-  NgTemplateOutlet,
-} from '@angular/common';
+import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
   Component,
   computed,
@@ -22,6 +16,7 @@ import { CraftingService } from '../../../../../core/services/api/crafting/craft
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { CharacterProfession } from '../../../../../shared/models/Dtos/characterProfession';
 import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
+import { HoverPopoverComponent } from '../../../../../shared/components/custom-components/popovers/hover-popover/hover-popover.component';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 import {
   CraftingAttributePreview,
@@ -115,9 +110,9 @@ export function matchesRecipeSearch(
     NgIf,
     NgFor,
     NgClass,
-    NgTemplateOutlet,
     DecimalPipe,
     RegularButtonComponent,
+    HoverPopoverComponent,
     DropdownComponent,
     NumberFormatPipe,
     AttributeTypeFormatPipe,
@@ -130,6 +125,10 @@ export class RegularCraftingComponent {
   @Input({ required: true }) recipes!: Signal<Recipe[]>;
   @Input({ required: true }) inventory!: Signal<InventoryItem[]>;
   @Input({ required: true }) characterProfession!: CharacterProfession;
+
+  /** Panel styling for the portaled material-source tooltip. */
+  readonly materialTooltipClass =
+    'll-panel w-64 max-w-[calc(100vw-2rem)] bg-texture p-3 text-left text-xs font-normal normal-case tracking-normal text-zinc-200 shadow-xl';
 
   readonly recipesV2 = signal<CraftingRecipe[]>([]);
   readonly isLoading = signal(false);

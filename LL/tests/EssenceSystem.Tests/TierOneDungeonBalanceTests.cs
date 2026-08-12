@@ -170,28 +170,28 @@ public sealed class TierOneDungeonBalanceTests
         Domain.Models.Dungeons.Definitions.DungeonTier.Heroic,
         4,
         "t2-standard-epic",
-        203,
+        202,
         false)]
     [InlineData(
         "goblin_mines_iii",
         Domain.Models.Dungeons.Definitions.DungeonTier.Mythic,
         6,
         "t3-standard-epic",
-        275,
+        267,
         false)]
     [InlineData(
         "forgotten_catacombs_ii",
         Domain.Models.Dungeons.Definitions.DungeonTier.Heroic,
         4,
         "t2-standard-epic",
-        203,
+        202,
         false)]
     [InlineData(
         "forgotten_catacombs_iii",
         Domain.Models.Dungeons.Definitions.DungeonTier.Mythic,
         6,
         "t3-standard-epic",
-        275,
+        267,
         false)]
     public async Task Higher_dungeon_tiers_find_an_actual_winning_profile(
         string dungeonId,

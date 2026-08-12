@@ -25,6 +25,19 @@ export class HoverPopoverComponent implements AfterViewInit, OnDestroy {
   @Input() popoverClass =
     'bg-texture border border-light_gray rounded shadow p-2 text-sm text-white sm:w-56';
 
+  /** Context passed to the template (e.g. { $implicit: item }) */
+  @Input() templateContext: any;
+
+  /**
+   * CSS class(es) for the wrapper around the trigger content. Defaults to a
+   * block wrapper; pass an inline value when the trigger sits in inline or
+   * flex content so the wrapper does not disturb the surrounding layout.
+   */
+  @Input() triggerClass = 'relative block';
+
+  /** When true the popover never opens (e.g. there is nothing to show) */
+  @Input() disabled = false;
+
   /** Trigger element */
   @ViewChild('trigger', { static: true }) triggerEl!: ElementRef<HTMLElement>;
 
@@ -41,6 +54,8 @@ export class HoverPopoverComponent implements AfterViewInit, OnDestroy {
     const trigger = this.triggerEl.nativeElement;
     trigger.addEventListener('mouseenter', this.onMouseEnter);
     trigger.addEventListener('mouseleave', this.onMouseLeave);
+    trigger.addEventListener('focusin', this.onMouseEnter);
+    trigger.addEventListener('focusout', this.onMouseLeave);
   }
 
   ngOnDestroy(): void {
@@ -48,9 +63,12 @@ export class HoverPopoverComponent implements AfterViewInit, OnDestroy {
     const trigger = this.triggerEl.nativeElement;
     trigger.removeEventListener('mouseenter', this.onMouseEnter);
     trigger.removeEventListener('mouseleave', this.onMouseLeave);
+    trigger.removeEventListener('focusin', this.onMouseEnter);
+    trigger.removeEventListener('focusout', this.onMouseLeave);
   }
 
   private onMouseEnter = () => {
+    if (this.disabled) return;
     clearTimeout(this.hideTimeout);
     this.hideTimeout = setTimeout(() => {
       if (!this.popoverEl) {
@@ -67,14 +85,16 @@ export class HoverPopoverComponent implements AfterViewInit, OnDestroy {
   private createPopover(): void {
     const container = document.createElement('div');
     container.style.position = 'fixed';
-    container.style.zIndex = '50';
+    // Appended to <body>, so this must out-rank any surface it can be opened
+    // from - including modal backdrops (--ll-z-modal).
+    container.style.setProperty('z-index', 'var(--ll-z-popover-detached, 300)');
     container.className = this.popoverClass;
     document.body.appendChild(container);
 
     this.popoverEl = container;
 
     // Render Angular template
-    this.view = this.vcr.createEmbeddedView(this.template);
+    this.view = this.vcr.createEmbeddedView(this.template, this.templateContext);
     this.view.detectChanges();
     this.view.rootNodes.forEach((n) => container.appendChild(n));
 

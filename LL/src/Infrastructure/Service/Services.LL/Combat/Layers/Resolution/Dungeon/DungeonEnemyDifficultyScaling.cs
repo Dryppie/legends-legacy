@@ -10,8 +10,8 @@ public static class DungeonEnemyDifficultyScaling
     // milestone: Tier I equipment for Normal, Tier II for Heroic, and Tier III
     // for Mythic. Keep these explicit so later tiers cannot accidentally inherit
     // an exponential multiplier unrelated to attainable equipment progression.
-    public const float TierOneStrengthMultiplier = 3.6f;
-    public const float TierTwoStrengthMultiplier = 6.25f;
+    public const float TierOneStrengthMultiplier = 3.5f;
+    public const float TierTwoStrengthMultiplier = 6.05f;
     public const float TierThreeStrengthMultiplier = 8.2f;
 
     private static readonly HashSet<AttributeType> ScaledAttributes =

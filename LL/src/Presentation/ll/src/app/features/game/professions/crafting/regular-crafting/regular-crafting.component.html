@@ -1,9 +1,5 @@
 <ng-template #materialSourceTooltip let-material>
-  <span
-    *ngIf="material.sources?.length"
-    role="tooltip"
-    class="ll-panel pointer-events-none invisible absolute bottom-full left-1/2 z-50 mb-2 w-64 max-w-[calc(100vw-2rem)] -translate-x-1/2 translate-y-1 bg-texture p-3 text-left text-xs font-normal normal-case tracking-normal text-zinc-200 opacity-0 shadow-xl transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus:visible group-focus:translate-y-0 group-focus:opacity-100"
-  >
+  <span role="tooltip" class="block">
     <span class="block text-[0.6rem] uppercase tracking-[0.18em] text-secondary"
       >Where to find</span
     >
@@ -690,72 +686,80 @@
 
           <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
             <span class="text-secondary">Requires:</span>
-            <span
+            <app-hover-popover
               *ngFor="let material of recipe.materialCosts"
-              class="group relative inline-flex items-baseline gap-1 rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
-              tabindex="0"
-              [attr.aria-label]="
-                material.name + '. Where to find: ' + material.sources.join(' ')
-              "
+              [template]="materialSourceTooltip"
+              [templateContext]="{ $implicit: material }"
+              [popoverClass]="materialTooltipClass"
+              [disabled]="!material.sources?.length"
+              triggerClass="inline-flex"
             >
-              {{ material.name
-              }}<ng-container *ngIf="material.tier">
-                T{{ material.tier }}</ng-container
-              >
               <span
-                [ngClass]="{
-                  'text-rose-400':
-                    getOwnedQuantity(material.itemId) <
-                    material.required * quantity(),
-                  'text-primary':
-                    getOwnedQuantity(material.itemId) >=
-                    material.required * quantity(),
-                }"
-              >
-                {{ getOwnedQuantity(material.itemId) | numberFormat }}/{{
-                  material.required * quantity() | numberFormat
-                }}
-              </span>
-              <ng-container
-                *ngTemplateOutlet="
-                  materialSourceTooltip;
-                  context: { $implicit: material }
+                class="inline-flex items-baseline gap-1 rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
+                tabindex="0"
+                [attr.aria-label]="
+                  material.name +
+                  '. Where to find: ' +
+                  material.sources.join(' ')
                 "
-              ></ng-container>
-            </span>
-            <span
+              >
+                {{ material.name
+                }}<ng-container *ngIf="material.tier">
+                  T{{ material.tier }}</ng-container
+                >
+                <span
+                  [ngClass]="{
+                    'text-rose-400':
+                      getOwnedQuantity(material.itemId) <
+                      material.required * quantity(),
+                    'text-primary':
+                      getOwnedQuantity(material.itemId) >=
+                      material.required * quantity(),
+                  }"
+                >
+                  {{ getOwnedQuantity(material.itemId) | numberFormat }}/{{
+                    material.required * quantity() | numberFormat
+                  }}
+                </span></span
+              >
+            </app-hover-popover>
+            <app-hover-popover
               *ngFor="let material of blueprintSpecificMaterialCosts()"
-              class="group relative inline-flex items-baseline gap-1 rounded-sm text-sky-300 outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
-              tabindex="0"
-              [attr.aria-label]="
-                material.name + '. Where to find: ' + material.sources.join(' ')
-              "
+              [template]="materialSourceTooltip"
+              [templateContext]="{ $implicit: material }"
+              [popoverClass]="materialTooltipClass"
+              [disabled]="!material.sources?.length"
+              triggerClass="inline-flex"
             >
-              {{ material.name
-              }}<ng-container *ngIf="material.tier">
-                T{{ material.tier }}</ng-container
-              >
               <span
-                [ngClass]="{
-                  'text-rose-400':
-                    getOwnedQuantity(material.itemId) <
-                    material.required * quantity(),
-                  'text-primary':
-                    getOwnedQuantity(material.itemId) >=
-                    material.required * quantity(),
-                }"
-              >
-                {{ getOwnedQuantity(material.itemId) | numberFormat }}/{{
-                  material.required * quantity() | numberFormat
-                }}
-              </span>
-              <ng-container
-                *ngTemplateOutlet="
-                  materialSourceTooltip;
-                  context: { $implicit: material }
+                class="inline-flex items-baseline gap-1 rounded-sm text-sky-300 outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
+                tabindex="0"
+                [attr.aria-label]="
+                  material.name +
+                  '. Where to find: ' +
+                  material.sources.join(' ')
                 "
-              ></ng-container>
-            </span>
+              >
+                {{ material.name
+                }}<ng-container *ngIf="material.tier">
+                  T{{ material.tier }}</ng-container
+                >
+                <span
+                  [ngClass]="{
+                    'text-rose-400':
+                      getOwnedQuantity(material.itemId) <
+                      material.required * quantity(),
+                    'text-primary':
+                      getOwnedQuantity(material.itemId) >=
+                      material.required * quantity(),
+                  }"
+                >
+                  {{ getOwnedQuantity(material.itemId) | numberFormat }}/{{
+                    material.required * quantity() | numberFormat
+                  }}
+                </span></span
+              >
+            </app-hover-popover>
             <span *ngIf="selectedBlueprint()?.isLocked" class="text-danger">
               Learn this Blueprint first.
             </span>
@@ -804,57 +808,63 @@
 
       <div class="flex flex-wrap items-center gap-1.5 text-[0.65rem]">
         <span class="uppercase tracking-[0.18em] text-secondary">Requires</span>
-        <span
+        <app-hover-popover
           *ngFor="let material of recipe.materialCosts"
-          class="group relative rounded border px-2 py-1 outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
-          tabindex="0"
-          [attr.aria-label]="
-            material.name + '. Where to find: ' + material.sources.join(' ')
-          "
-          [ngClass]="
-            getOwnedQuantity(material.itemId) >= material.required * quantity()
-              ? 'border-emerald-500/35 bg-emerald-500/10 text-emerald-300'
-              : 'border-rose-500/35 bg-rose-500/10 text-rose-300'
-          "
+          [template]="materialSourceTooltip"
+          [templateContext]="{ $implicit: material }"
+          [popoverClass]="materialTooltipClass"
+          [disabled]="!material.sources?.length"
+          triggerClass="inline-flex"
         >
-          {{ material.name
-          }}<ng-container *ngIf="material.tier">
-            T{{ material.tier }}</ng-container
+          <span
+            class="rounded border px-2 py-1 outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
+            tabindex="0"
+            [attr.aria-label]="
+              material.name + '. Where to find: ' + material.sources.join(' ')
+            "
+            [ngClass]="
+              getOwnedQuantity(material.itemId) >=
+              material.required * quantity()
+                ? 'border-emerald-500/35 bg-emerald-500/10 text-emerald-300'
+                : 'border-rose-500/35 bg-rose-500/10 text-rose-300'
+            "
           >
-          {{ getOwnedQuantity(material.itemId) | numberFormat }}/{{
-            material.required * quantity() | numberFormat
-          }}
-          <ng-container
-            *ngTemplateOutlet="
-              materialSourceTooltip;
-              context: { $implicit: material }
-            "
-          ></ng-container>
-        </span>
-        <span
+            {{ material.name
+            }}<ng-container *ngIf="material.tier">
+              T{{ material.tier }}</ng-container
+            >
+            {{ getOwnedQuantity(material.itemId) | numberFormat }}/{{
+              material.required * quantity() | numberFormat
+            }}</span
+          >
+        </app-hover-popover>
+        <app-hover-popover
           *ngFor="let material of blueprintSpecificMaterialCosts()"
-          class="group relative rounded border px-2 py-1 outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
-          tabindex="0"
-          [attr.aria-label]="
-            material.name + '. Where to find: ' + material.sources.join(' ')
-          "
-          [ngClass]="
-            getOwnedQuantity(material.itemId) >= material.required * quantity()
-              ? 'border-sky-400/35 bg-sky-400/10 text-sky-300'
-              : 'border-rose-500/35 bg-rose-500/10 text-rose-300'
-          "
+          [template]="materialSourceTooltip"
+          [templateContext]="{ $implicit: material }"
+          [popoverClass]="materialTooltipClass"
+          [disabled]="!material.sources?.length"
+          triggerClass="inline-flex"
         >
-          + {{ material.name }}
-          {{ getOwnedQuantity(material.itemId) | numberFormat }}/{{
-            material.required * quantity() | numberFormat
-          }}
-          <ng-container
-            *ngTemplateOutlet="
-              materialSourceTooltip;
-              context: { $implicit: material }
+          <span
+            class="rounded border px-2 py-1 outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
+            tabindex="0"
+            [attr.aria-label]="
+              material.name + '. Where to find: ' + material.sources.join(' ')
             "
-          ></ng-container>
-        </span>
+            [ngClass]="
+              getOwnedQuantity(material.itemId) >=
+              material.required * quantity()
+                ? 'border-sky-400/35 bg-sky-400/10 text-sky-300'
+                : 'border-rose-500/35 bg-rose-500/10 text-rose-300'
+            "
+          >
+            + {{ material.name }}
+            {{ getOwnedQuantity(material.itemId) | numberFormat }}/{{
+              material.required * quantity() | numberFormat
+            }}</span
+          >
+        </app-hover-popover>
       </div>
 
       <div class="mt-2 grid grid-cols-[7rem_minmax(0,1fr)] gap-2">

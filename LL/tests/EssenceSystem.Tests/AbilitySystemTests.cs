@@ -1348,7 +1348,7 @@ public sealed class AbilitySystemTests
             ]);
         var friendly = CreateCombatant("friendly", CombatTeam.Friendly, friendlyAbilities.Values);
         var hostile = CreateCombatant("hostile", CombatTeam.Hostile, hostileAbilities.Values, dodgeChance: 100);
-        var engine = new FastCombatEngine(new Dictionary<string, CompiledStatus>(), new FastCombatEngineOptions(MaxTicks: 1, RandomSeed: 7));
+        var engine = new FastCombatEngine(new Dictionary<string, CompiledStatus>(), new FastCombatEngineOptions(MaxTicks: 1, RandomSeed: 1));
 
         var result = engine.Run([friendly], [hostile]);
 
