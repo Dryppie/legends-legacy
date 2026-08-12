@@ -702,7 +702,7 @@
               "type": "Item",
               "itemId": "ore",
               "weight": 60,
-              "quantity": { "min": 5, "max": 15 }
+              "quantity": { "min": 4, "max": 12 }
             }
           ]
         }
@@ -721,7 +721,7 @@
               "type": "Item",
               "itemId": "wood",
               "weight": 60,
-              "quantity": { "min": 5, "max": 15 }
+              "quantity": { "min": 4, "max": 12 }
             }
           ]
         }
@@ -740,7 +740,7 @@
               "type": "Item",
               "itemId": "rawhide",
               "weight": 60,
-              "quantity": { "min": 5, "max": 5 }
+              "quantity": { "min": 4, "max": 12 }
             }
           ]
         }
@@ -759,7 +759,7 @@
               "type": "Item",
               "itemId": "wood",
               "weight": 60,
-              "quantity": { "min": 5, "max": 15 }
+              "quantity": { "min": 4, "max": 12 }
             }
           ]
         }
