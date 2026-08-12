@@ -1045,6 +1045,15 @@
     max-height: 100%;
   }
 
+  .dungeon-result {
+    overflow-x: hidden;
+    overflow-y: auto;
+    align-content: start;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .dungeon-layout {
     display: block;
     min-height: 0;
