@@ -1,13 +1,16 @@
 :host {
   display: block;
-  min-height: 100%;
+  height: 100%;
+  min-height: 0;
   color: var(--ll-color-text);
   font-family: var(--ll-font-body);
 }
 
 .dungeon-shell {
   display: flex;
-  min-height: calc(100vh - 6.5rem);
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
   overflow: hidden;
   flex-direction: column;
   container-type: inline-size;
@@ -94,11 +97,16 @@
   min-height: 0;
   flex: 1;
   padding: clamp(var(--ll-space-6), 5vw, var(--ll-space-10));
-  align-content: center;
+  align-content: safe center;
   grid-template-columns: minmax(0, 38rem) minmax(18rem, 23rem);
+  grid-auto-rows: max-content;
   justify-content: center;
   gap: var(--ll-space-5);
   background: rgba(0, 0, 0, 0.12);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .dungeon-result--failure {
@@ -132,6 +140,7 @@
 .dungeon-result__summary,
 .dungeon-result__loot {
   margin: 0;
+  min-width: 0;
   padding: clamp(var(--ll-space-5), 3vw, var(--ll-space-8));
 }
 
@@ -932,7 +941,7 @@
   .dungeon-result {
     overflow: auto;
     align-content: start;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .dungeon-layout {
