@@ -7,47 +7,69 @@
       </p>
     </header>
 
-    <section *ngIf="establishedBuildings().length > 0" class="building-group">
-      <h2 class="section-label">Built</h2>
+    <ng-template #buildingCard let-building>
       <button
-        *ngFor="let building of establishedBuildings()"
         type="button"
-        class="building-row has-level-track"
+        class="building-row"
         [class.is-selected]="isSelected(building)"
         [class.is-current-target]="isCurrentTarget(building)"
+        [class.is-locked]="isBuildingLocked(building)"
         (click)="select(building)"
       >
-        <span class="building-row-copy">
+        <span class="building-card-heading">
           <strong>{{ building.definition.name }}</strong>
-        </span>
-        <span class="building-level">{{ buildingStatusLabel(building) }}</span>
-        <span class="level-track" aria-hidden="true">
           <span
-            *ngFor="let level of levelSegments(building)"
-            [class.is-filled]="level <= building.level"
-          ></span>
+            *ngIf="buildingCardStatusType(building) !== 'needs-supplies'"
+            class="building-status-badge"
+            [attr.data-status]="buildingCardStatusType(building)"
+          >
+            {{ buildingCardStatus(building) }}
+          </span>
+        </span>
+
+        <span class="building-progress-copy">
+          <span>{{ buildingProgressLabel(building) }}</span>
+          <span
+            *ngIf="
+              !isBuildingLocked(building) &&
+              building.level < building.definition.maxLevel
+            "
+            class="building-progress-value"
+          >
+            {{ overview.guildSupplies | numberFormat }} /
+            {{ building.nextCost?.GuildSupplies ?? 0 | numberFormat }}
+          </span>
+        </span>
+
+        <span
+          *ngIf="
+            !isBuildingLocked(building) &&
+            building.level < building.definition.maxLevel
+          "
+          class="building-progress-track"
+          aria-hidden="true"
+        >
+          <span [style.width.%]="supplyProgress(building)"></span>
         </span>
       </button>
+    </ng-template>
+
+    <section *ngIf="establishedBuildings().length > 0" class="building-group">
+      <h2 class="section-label">Built</h2>
+      <ng-container *ngFor="let building of establishedBuildings()">
+        <ng-container
+          *ngTemplateOutlet="buildingCard; context: { $implicit: building }"
+        ></ng-container>
+      </ng-container>
     </section>
 
     <section *ngIf="readyToBuildBuildings().length > 0" class="building-group">
       <h2 class="section-label">Ready to Build</h2>
-      <button
-        *ngFor="let building of readyToBuildBuildings()"
-        type="button"
-        class="building-row is-buildable"
-        [class.is-selected]="isSelected(building)"
-        [class.is-current-target]="isCurrentTarget(building)"
-        (click)="select(building)"
-      >
-        <span class="building-row-copy">
-          <strong>{{ building.definition.name }}</strong>
-          <small>
-            {{ building.nextCost?.GuildSupplies ?? 0 | numberFormat }} supplies
-          </small>
-        </span>
-        <span class="build-command">Build</span>
-      </button>
+      <ng-container *ngFor="let building of readyToBuildBuildings()">
+        <ng-container
+          *ngTemplateOutlet="buildingCard; context: { $implicit: building }"
+        ></ng-container>
+      </ng-container>
     </section>
 
     <section
@@ -55,46 +77,20 @@
       class="building-group"
     >
       <h2 class="section-label">Awaiting Supplies</h2>
-      <button
-        *ngFor="let building of awaitingSuppliesBuildings()"
-        type="button"
-        class="building-row is-awaiting-resources"
-        [class.is-selected]="isSelected(building)"
-        [class.is-current-target]="isCurrentTarget(building)"
-        (click)="select(building)"
-      >
-        <span class="building-row-copy">
-          <strong>{{ building.definition.name }}</strong>
-          <small>
-            {{ building.nextCost?.GuildSupplies ?? 0 | numberFormat }} supplies
-          </small>
-        </span>
-        <span class="build-command">
-          {{ supplyShortfall(building) | numberFormat }} short
-        </span>
-      </button>
+      <ng-container *ngFor="let building of awaitingSuppliesBuildings()">
+        <ng-container
+          *ngTemplateOutlet="buildingCard; context: { $implicit: building }"
+        ></ng-container>
+      </ng-container>
     </section>
 
-    <section
-      *ngIf="lockedBuildings().length > 0"
-      class="building-group is-locked-group"
-    >
+    <section *ngIf="lockedBuildings().length > 0" class="building-group">
       <h2 class="section-label">Locked</h2>
-      <button
-        *ngFor="let building of lockedBuildings()"
-        type="button"
-        class="building-row is-locked"
-        [class.is-selected]="isSelected(building)"
-        [class.is-current-target]="isCurrentTarget(building)"
-        (click)="select(building)"
-      >
-        <span class="building-row-copy">
-          <strong>{{ building.definition.name }}</strong>
-        </span>
-        <span class="hall-requirement">
-          Hall {{ building.definition.requiredGuildHallLevel }}
-        </span>
-      </button>
+      <ng-container *ngFor="let building of lockedBuildings()">
+        <ng-container
+          *ngTemplateOutlet="buildingCard; context: { $implicit: building }"
+        ></ng-container>
+      </ng-container>
     </section>
   </aside>
 
@@ -112,9 +108,15 @@
           {{ building.definition.description }}
         </p>
         <p class="building-summary">{{ building.definition.unlockSummary }}</p>
-        <p *ngIf="isSelectedCurrentTarget()" class="current-target-summary">
-          Current target · Level {{ overview.currentTarget?.targetLevel }}
-        </p>
+        <div *ngIf="isSelectedCurrentTarget()" class="current-target-summary">
+          <span class="current-target-summary-icon" aria-hidden="true">
+            <span class="current-target-dot"></span>
+          </span>
+          <span>
+            <strong>Current Guild Target</strong>
+            <small>Level {{ overview.currentTarget?.targetLevel }}</small>
+          </span>
+        </div>
         <section
           *ngIf="building.definition.type === 'GuildHall'"
           class="member-capacity-summary"

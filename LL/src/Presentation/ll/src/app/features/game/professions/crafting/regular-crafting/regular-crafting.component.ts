@@ -21,6 +21,7 @@ import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/numb
 import {
   CraftingAttributePreview,
   CraftingBlueprint,
+  CraftingItemPreview,
   CraftingMaterialCost,
   CraftingRecipe,
 } from '../../../../../shared/models/crafting-v2';
@@ -37,6 +38,10 @@ import { ONBOARDING_ONE_HANDED_WEAPON_ITEM_BASE_IDS } from '../../../../../share
 import { QuestStateService } from '../../../../../core/services/api/quest/quest-state.service';
 import { FirstPartyTourService } from '../../../../../core/services/client-side/first-party-tour/first-party-tour.service';
 import { EquipmentSlotType } from '../../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
+import { EquipmentInstance } from '../../../../../shared/models/item';
+import { Rarity } from '../../../../../shared/models/enums/rarity';
+import { mapInstanceToDisplay } from '../../../../../shared/components/equipment/equipment-display';
+import { AttributeModifier } from '../../../../../shared/models/Dtos/attributesDto';
 
 interface BaseAttributeDisplay {
   attributeType: AttributeType;
@@ -47,6 +52,19 @@ interface BaseAttributeDisplay {
   blueprintMinimumChange: number;
   blueprintMaximumChange: number;
   hasBlueprintChange: boolean;
+}
+
+interface CraftedAttributeDisplay extends AttributeModifier {
+  minimumAmount: number;
+  maximumAmount: number;
+  rollPercentage: number;
+}
+
+interface CraftedItemPreviewState {
+  equipment: EquipmentInstance;
+  itemPreview: CraftingItemPreview;
+  masteryXpGained: number;
+  craftedCount: number;
 }
 
 type RecipeFilterMode =
@@ -104,6 +122,18 @@ export function matchesRecipeSearch(
   return queryTerms.every((term) => searchableText.includes(term));
 }
 
+export function getRollPercentage(
+  value: number,
+  minimum: number,
+  maximum: number,
+): number {
+  if (maximum <= minimum) return 100;
+  return Math.min(
+    100,
+    Math.max(0, ((value - minimum) / (maximum - minimum)) * 100),
+  );
+}
+
 @Component({
   selector: 'app-regular-crafting',
   imports: [
@@ -143,6 +173,7 @@ export class RegularCraftingComponent {
   readonly blueprintSearch = signal('');
   readonly blueprintFilter = signal<'all' | 'craftable' | 'locked'>('all');
   readonly mobilePane = signal<MobileCraftingPane>('recipes');
+  readonly craftedItem = signal<CraftedItemPreviewState | null>(null);
   private readonly selectedRecipeId = signal<string | null>(null);
   private readonly selectedBlueprintId = signal<string | null>(null);
   private readonly destroyRef = inject(DestroyRef);
@@ -181,6 +212,44 @@ export class RegularCraftingComponent {
   readonly selectedDesign = computed(
     () => this.selectedBlueprint() ?? this.selectedRecipe(),
   );
+  readonly craftedAttributes = computed<CraftedAttributeDisplay[]>(() => {
+    const crafted = this.craftedItem();
+    if (!crafted) return [];
+
+    const ranges = new Map(
+      crafted.itemPreview.attributes.map((attribute) => [
+        attribute.attributeType,
+        attribute,
+      ]),
+    );
+
+    return mapInstanceToDisplay(crafted.equipment).attributes.map(
+      (attribute) => {
+        const range = ranges.get(attribute.attributeType);
+        const minimumAmount = range?.minimumTotalAmount ?? attribute.amount;
+        const maximumAmount = range?.maximumTotalAmount ?? attribute.amount;
+        return {
+          ...attribute,
+          minimumAmount,
+          maximumAmount,
+          rollPercentage: getRollPercentage(
+            attribute.amount,
+            minimumAmount,
+            maximumAmount,
+          ),
+        };
+      },
+    );
+  });
+  readonly craftedPotentialPercentage = computed(() => {
+    const crafted = this.craftedItem();
+    if (!crafted) return 0;
+    return getRollPercentage(
+      crafted.equipment.potential ?? 0,
+      crafted.itemPreview.minimumStartingPotential,
+      crafted.itemPreview.maximumStartingPotential,
+    );
+  });
   readonly possibleTemperingAttributes = computed(() => {
     const design = this.selectedDesign();
     if (!design) return [];
@@ -487,7 +556,7 @@ export class RegularCraftingComponent {
   });
 
   constructor(
-    private readonly inventoryState: InventoryStateService,
+    readonly inventoryState: InventoryStateService,
     private readonly craftingService: CraftingService,
   ) {
     this.inventoryState.load(true);
@@ -606,7 +675,11 @@ export class RegularCraftingComponent {
   craft(): void {
     const recipe = this.selectedRecipe();
     const blueprint = this.selectedBlueprint();
-    if (!recipe || !this.canCraftSelected()) return;
+    const itemPreview = this.selectedDesign()?.itemPreview;
+    if (!recipe || !itemPreview || !this.canCraftSelected()) return;
+
+    this.isLoading.set(true);
+    this.error.set(null);
 
     this.craftingService
       .craftItems({
@@ -626,10 +699,60 @@ export class RegularCraftingComponent {
             ...inventory,
             ...result.createdItems,
           ]);
+          const newestItem =
+            result.createdItems[result.createdItems.length - 1];
+          const equipment = newestItem?.itemInstance as
+            | EquipmentInstance
+            | undefined;
+          if (newestItem && equipment?.equipmentBase) {
+            this.craftedItem.set({
+              equipment,
+              itemPreview,
+              masteryXpGained: result.masteryXpGained,
+              craftedCount: result.createdItems.length,
+            });
+            this.mobilePane.set('preview');
+          }
           this.loadRecipes(this.targetTier());
         },
-        error: (err) => this.error.set(err.message ?? 'Failed to craft items.'),
+        error: (err) => {
+          this.error.set(err.message ?? 'Failed to craft items.');
+          this.isLoading.set(false);
+        },
       });
+  }
+
+  dismissCraftedItem(): void {
+    this.craftedItem.set(null);
+  }
+
+  craftedItemMeta(crafted: CraftedItemPreviewState): string {
+    return [
+      this.formatDisplayLabel(crafted.equipment.equipmentBase.equipmentType),
+      `${this.formatDisplayLabel(crafted.equipment.quality)} quality`,
+      `crafted at level ${this.characterProfession.level}`,
+    ].join(' · ');
+  }
+
+  rarityClass(rarity: Rarity): string {
+    switch (rarity) {
+      case Rarity.Common:
+        return 'll-rarity-common';
+      case Rarity.Uncommon:
+        return 'll-rarity-uncommon';
+      case Rarity.Rare:
+        return 'll-rarity-rare';
+      case Rarity.Epic:
+        return 'll-rarity-epic';
+      case Rarity.Unique:
+        return 'll-rarity-unique';
+      case Rarity.Legendary:
+        return 'll-rarity-legendary';
+      case Rarity.Legacy:
+        return 'll-rarity-legacy';
+      default:
+        return 'text-primary';
+    }
   }
 
   getOwnedQuantity(itemId: string): number {

@@ -1,6 +1,7 @@
 import {
   getChatSendErrorMessage,
   getWireErrorMessage,
+  isInlineGuildSystemMessage,
   isWorldSystemMessage,
   parseWireCommand,
   splitCurrentPlayerMentions,
@@ -10,6 +11,27 @@ import {
   ChatChannelType,
   ChatMessageDto,
 } from '../../../core/services/ll-chat/chat-service/chat.service';
+
+describe('isInlineGuildSystemMessage', () => {
+  it('recognizes explicitly flagged guild notices', () => {
+    expect(
+      isInlineGuildSystemMessage({
+        channelType: ChatChannelType.Guild,
+        body: 'A guild notice.',
+        isSystemGenerated: true,
+      }),
+    ).toBeTrue();
+  });
+
+  it('recognizes building target notices created before the flag existed', () => {
+    expect(
+      isInlineGuildSystemMessage({
+        channelType: ChatChannelType.Guild,
+        body: 'set the current building target to Guild Hall level 2.',
+      }),
+    ).toBeTrue();
+  });
+});
 
 describe('isWorldSystemMessage', () => {
   const systemMessage: ChatMessageDto = {

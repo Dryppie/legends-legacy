@@ -112,6 +112,27 @@ describe('mapInstanceToDisplay', () => {
       },
     ]);
   });
+
+  it('maps persisted roll ranges for equipment previews', () => {
+    const item = equipmentInstance('rolled-item', AttributeType.MaxHealth, 113);
+    item.rollRange = {
+      minimumPotential: 260,
+      maximumPotential: 380,
+      attributes: [
+        {
+          attributeType: AttributeType.MaxHealth,
+          minimumAmount: 93,
+          maximumAmount: 124,
+        },
+      ],
+    };
+
+    const displayItem = mapInstanceToDisplay(item);
+
+    expect(displayItem.minimumPotential).toBe(260);
+    expect(displayItem.maximumPotential).toBe(380);
+    expect(displayItem.attributeRollRanges).toEqual(item.rollRange.attributes);
+  });
 });
 
 describe('EquipmentDisplayComponent', () => {
@@ -156,6 +177,41 @@ describe('EquipmentDisplayComponent', () => {
     );
 
     expect(difference?.textContent?.trim()).toBe('+8%');
+  });
+
+  it('renders attribute roll ranges and keeps potential as a plain footer value', async () => {
+    await TestBed.configureTestingModule({
+      imports: [EquipmentDisplayComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(EquipmentDisplayComponent);
+    const item = equipmentInstance('rolled-item', AttributeType.MaxHealth, 113);
+    item.potential = 310;
+    item.rollRange = {
+      minimumPotential: 260,
+      maximumPotential: 380,
+      attributes: [
+        {
+          attributeType: AttributeType.MaxHealth,
+          minimumAmount: 93,
+          maximumAmount: 124,
+        },
+      ],
+    };
+
+    fixture.componentRef.setInput('item', item);
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    const fills = [
+      ...fixture.nativeElement.querySelectorAll('.equipment-design-fill'),
+    ] as HTMLElement[];
+
+    expect(text).toContain('Potential');
+    expect(text).toContain('310');
+    expect(text).not.toContain('/ 260–380');
+    expect(text).toContain('/ 93–124');
+    expect(fills.length).toBe(1);
+    expect(Number.parseFloat(fills[0].style.width)).toBeCloseTo(64.52, 1);
   });
 
   it('renders tool affixes using the standard equipment attribute layout', async () => {

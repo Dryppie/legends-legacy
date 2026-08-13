@@ -36,9 +36,22 @@ export interface EquipmentInstance extends ItemInstance {
   affinityTags: string[];
   itemBudget: number;
   itemBudgetTier: number;
+  rollRange?: EquipmentRollRange | null;
   isGuildBorrowed: boolean;
   guildVaultItemId?: string | null;
   borrowedFromGuildName?: string | null;
+}
+
+export interface EquipmentRollRange {
+  minimumPotential: number;
+  maximumPotential: number;
+  attributes: EquipmentAttributeRollRange[];
+}
+
+export interface EquipmentAttributeRollRange {
+  attributeType: AttributeModifier['attributeType'];
+  minimumAmount: number;
+  maximumAmount: number;
 }
 
 export interface ItemBase {

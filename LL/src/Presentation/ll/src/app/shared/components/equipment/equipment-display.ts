@@ -32,7 +32,16 @@ export interface EquipmentDisplay {
 
   // Instance-only
   potential?: number;
+  minimumPotential?: number;
+  maximumPotential?: number;
+  attributeRollRanges?: EquipmentAttributeRollRange[];
   craftingDesign?: EquipmentCraftingDesignMetadata | null;
+}
+
+export interface EquipmentAttributeRollRange {
+  attributeType: AttributeType;
+  minimumAmount: number;
+  maximumAmount: number;
 }
 
 export interface EquipmentAttributeComparison {
@@ -67,6 +76,7 @@ export function mapEquipmentToDisplay(
     toolBonuses: e.toolBonuses ?? [],
     toolAffixes: [],
     baseToolBonuses: e.toolBonuses ?? [],
+    attributeRollRanges: [],
   };
 }
 
@@ -104,6 +114,9 @@ export function mapInstanceToDisplay(
     baseToolBonuses,
 
     potential: inst.potential,
+    minimumPotential: inst.rollRange?.minimumPotential,
+    maximumPotential: inst.rollRange?.maximumPotential,
+    attributeRollRanges: inst.rollRange?.attributes ?? [],
     craftingDesign: inst.craftingDesign,
   };
 }

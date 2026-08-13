@@ -1,4 +1,4 @@
-import { DatePipe, NgFor, NgIf } from '@angular/common';
+import { DatePipe, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
 import { Component, Input, computed, effect, signal } from '@angular/core';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
 import {
@@ -10,7 +10,14 @@ import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/n
 
 @Component({
   selector: 'app-guild-buildings',
-  imports: [DatePipe, NgIf, NgFor, NumberFormatPipe, RegularButtonComponent],
+  imports: [
+    DatePipe,
+    NgIf,
+    NgFor,
+    NgTemplateOutlet,
+    NumberFormatPipe,
+    RegularButtonComponent,
+  ],
   templateUrl: './guild-buildings.component.html',
   styleUrl: './guild-buildings.component.scss',
 })
@@ -35,12 +42,6 @@ export class GuildBuildingsComponent {
     ),
   );
 
-  readonly establishedBuildings = computed(() =>
-    this.visibleBuildings().filter(
-      (building) => building.definition.isPermanent || building.level > 0,
-    ),
-  );
-
   readonly builtCount = computed(
     () =>
       this.visibleBuildings().filter(
@@ -48,37 +49,41 @@ export class GuildBuildingsComponent {
       ).length,
   );
 
-  readonly availableBuildings = computed(() => {
-    const hallLevel = this.overview()?.guildHallLevel ?? 0;
-    return this.visibleBuildings().filter(
-      (building) =>
-        !building.definition.isPermanent &&
-        building.level <= 0 &&
-        building.definition.requiredGuildHallLevel <= hallLevel,
-    );
-  });
+  readonly establishedBuildings = computed(() =>
+    this.visibleBuildings().filter(
+      (building) => building.definition.isPermanent || building.level > 0,
+    ),
+  );
+
+  readonly availableBuildings = computed(() =>
+    this.visibleBuildings().filter(
+      (building) => !this.isBuildingLocked(building),
+    ),
+  );
 
   readonly readyToBuildBuildings = computed(() =>
     this.availableBuildings().filter(
-      (building) => this.supplyShortfall(building) === 0,
+      (building) =>
+        !building.definition.isPermanent &&
+        building.level <= 0 &&
+        this.supplyShortfall(building) === 0,
     ),
   );
 
   readonly awaitingSuppliesBuildings = computed(() =>
     this.availableBuildings().filter(
-      (building) => this.supplyShortfall(building) > 0,
-    ),
-  );
-
-  readonly lockedBuildings = computed(() => {
-    const hallLevel = this.overview()?.guildHallLevel ?? 0;
-    return this.visibleBuildings().filter(
       (building) =>
         !building.definition.isPermanent &&
         building.level <= 0 &&
-        building.definition.requiredGuildHallLevel > hallLevel,
-    );
-  });
+        this.supplyShortfall(building) > 0,
+    ),
+  );
+
+  readonly lockedBuildings = computed(() =>
+    this.visibleBuildings().filter((building) =>
+      this.isBuildingLocked(building),
+    ),
+  );
 
   readonly selectedCost = computed(() => {
     const cost = this.selected()?.nextCost ?? {};
@@ -179,11 +184,6 @@ export class GuildBuildingsComponent {
     return this.selected()?.definition.type === building.definition.type;
   }
 
-  buildingStatusLabel(building: GuildBuilding): string {
-    if (building.level <= 0) return 'Not built';
-    return `Level ${building.level}`;
-  }
-
   supplyProgress(building: GuildBuilding): number {
     const required = building.nextCost?.GuildSupplies ?? 0;
     const available = this.overview()?.guildSupplies ?? 0;
@@ -195,18 +195,56 @@ export class GuildBuildingsComponent {
     return this.overview()?.currentTarget?.type === building.definition.type;
   }
 
+  isBuildingLocked(building: GuildBuilding): boolean {
+    return (
+      !building.definition.isPermanent &&
+      building.level <= 0 &&
+      building.definition.requiredGuildHallLevel >
+        (this.overview()?.guildHallLevel ?? 0)
+    );
+  }
+
+  buildingCardStatusType(
+    building: GuildBuilding,
+  ): 'target' | 'locked' | 'ready' | 'needs-supplies' | 'complete' {
+    if (this.isCurrentTarget(building)) return 'target';
+    if (this.isBuildingLocked(building)) return 'locked';
+    if (building.level >= building.definition.maxLevel) return 'complete';
+    return this.supplyShortfall(building) > 0 ? 'needs-supplies' : 'ready';
+  }
+
+  buildingCardStatus(building: GuildBuilding): string {
+    switch (this.buildingCardStatusType(building)) {
+      case 'target':
+        return 'Current target';
+      case 'locked':
+        return 'Locked';
+      case 'complete':
+        return 'Max level';
+      case 'ready':
+        return building.level <= 0 ? 'Ready to build' : 'Ready to upgrade';
+      default:
+        return 'Needs supplies';
+    }
+  }
+
+  buildingProgressLabel(building: GuildBuilding): string {
+    if (this.isBuildingLocked(building)) {
+      return `Requires Guild Hall ${building.definition.requiredGuildHallLevel}`;
+    }
+    if (building.level >= building.definition.maxLevel) {
+      return 'Maximum level reached';
+    }
+    return building.level > 0
+      ? `Progress to level ${building.level + 1}`
+      : 'Supplies gathered';
+  }
+
   supplyShortfall(building: GuildBuilding): number {
     return Math.max(
       0,
       (building.nextCost?.GuildSupplies ?? 0) -
         (this.overview()?.guildSupplies ?? 0),
-    );
-  }
-
-  levelSegments(building: GuildBuilding): number[] {
-    return Array.from(
-      { length: building.definition.maxLevel },
-      (_, index) => index + 1,
     );
   }
 

@@ -7,6 +7,7 @@ import {
 import { AttributeValueFormatPipe } from '../../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import {
   EquipmentDisplay,
+  EquipmentAttributeRollRange,
   EquipmentAttributeComparison,
   ToolBonusComparison,
   buildAttributeComparisons,
@@ -50,6 +51,7 @@ interface EquipmentComparisonView {
     DecimalPipe,
   ],
   templateUrl: './equipment-display.component.html',
+  styleUrl: './equipment-display.component.css',
 })
 export class EquipmentDisplayComponent {
   @Input({ required: true }) item!: Equipment | EquipmentInstance;
@@ -142,29 +144,6 @@ export class EquipmentDisplayComponent {
     );
   }
 
-  get rarityBadgeClasses() {
-    const rarity = this.item.rarity;
-
-    switch (rarity) {
-      case Rarity.Common:
-        return 'll-rarity-common';
-      case Rarity.Uncommon:
-        return 'll-rarity-uncommon';
-      case Rarity.Rare:
-        return 'll-rarity-rare';
-      case Rarity.Epic:
-        return 'll-rarity-epic';
-      case Rarity.Unique:
-        return 'll-rarity-unique';
-      case Rarity.Legendary:
-        return 'll-rarity-legendary';
-      case Rarity.Legacy:
-        return 'll-rarity-legacy';
-      default:
-        return 'll-item-chip-accent';
-    }
-  }
-
   get isTool(): boolean {
     return this.data?.equipmentType === EquipmentType.Tool;
   }
@@ -177,12 +156,57 @@ export class EquipmentDisplayComponent {
     return this.isTool && this.data.toolBonuses.length > 0;
   }
 
+  get isInstanceItem(): boolean {
+    return isInstance(this.item);
+  }
+
+  get attributeSectionLabel(): string {
+    return this.isTool || !this.isInstanceItem
+      ? 'Attributes'
+      : 'Rolled attributes';
+  }
+
+  equipmentMeta(item: EquipmentDisplay): string {
+    return [
+      this.formatDisplayLabel(item.equipmentType),
+      item.quality
+        ? `${this.formatDisplayLabel(item.quality)} quality`
+        : this.formatDisplayLabel(item.rarity),
+    ].join(' · ');
+  }
+
+  attributeRollRange(
+    item: EquipmentDisplay,
+    attributeType: AttributeType,
+  ): EquipmentAttributeRollRange | null {
+    return (
+      item.attributeRollRanges?.find(
+        (range) => range.attributeType === attributeType,
+      ) ?? null
+    );
+  }
+
+  rollPercentage(value: number, minimum: number, maximum: number): number {
+    if (maximum <= minimum) return 100;
+    return Math.min(
+      100,
+      Math.max(0, ((value - minimum) / (maximum - minimum)) * 100),
+    );
+  }
+
   formatToolBonusType(type: string): string {
     return type
       .replace(/Percent$/, '')
       .replace(/^Specific/, '')
       .replace(/([A-Z])/g, ' $1')
       .trim();
+  }
+
+  private formatDisplayLabel(value: string): string {
+    return value
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/[_-]+/g, ' ')
+      .replace(/^./, (character) => character.toUpperCase());
   }
 
   formatToolBonusAmount(bonus: ToolBonusModifier): string {
@@ -226,17 +250,6 @@ export class EquipmentDisplayComponent {
     if (difference > 0) return 'text-emerald-400';
     if (difference < 0) return 'text-rose-400';
     return 'text-secondary';
-  }
-
-  comparisonMeta(item: EquipmentDisplay): string {
-    return [
-      item.equipmentType,
-      item.craftingDesign?.role,
-      item.rarity,
-      item.quality,
-    ]
-      .filter((value): value is string => !!value)
-      .join(' · ');
   }
 
   comparisonSlotLabel(slotType: EquipmentSlotType | null): string {

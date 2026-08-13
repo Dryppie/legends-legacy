@@ -1,6 +1,8 @@
 ﻿using Application.Common.Mappings;
+using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Inventories.Dtos;
 using AutoMapper;
+using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -31,6 +33,7 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public List<string> AffinityTags { get; set; } = [];
     public double ItemBudget { get; set; }
     public int ItemBudgetTier { get; set; }
+    public EquipmentRollRangeDto? RollRange { get; set; }
     public bool IsGuildBorrowed { get; set; }
     public Guid? GuildVaultItemId { get; set; }
     public string? BorrowedFromGuildName { get; set; }
@@ -50,6 +53,9 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
                 destination => destination.CraftingDesign,
                 options => options.MapFrom<EquipmentCraftingDesignMetadataResolver>())
             .ForMember(
+                destination => destination.RollRange,
+                options => options.MapFrom<EquipmentRollRangeResolver>())
+            .ForMember(
                 destination => destination.IsGuildBorrowed,
                 options => options.MapFrom(source => source.GuildVaultItem != null && source.GuildVaultItem.BorrowedByCharacterId != null))
             .ForMember(
@@ -58,5 +64,58 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
             .ForMember(
                 destination => destination.BorrowedFromGuildName,
                 options => options.MapFrom(source => source.GuildVaultItem == null ? null : source.GuildVaultItem.Guild.Name));
+    }
+}
+
+public sealed class EquipmentRollRangeDto
+{
+    public int MinimumPotential { get; init; }
+    public int MaximumPotential { get; init; }
+    public IReadOnlyList<EquipmentAttributeRollRangeDto> Attributes { get; init; } = [];
+}
+
+public sealed class EquipmentAttributeRollRangeDto
+{
+    public AttributeType AttributeType { get; init; }
+    public float MinimumAmount { get; init; }
+    public float MaximumAmount { get; init; }
+}
+
+public sealed class EquipmentRollRangeResolver
+    : IValueResolver<EquipmentInstance, EquipmentInstanceDto, EquipmentRollRangeDto?>
+{
+    private readonly IEquipmentRollRangeService? _rollRanges;
+
+    public EquipmentRollRangeResolver()
+    {
+    }
+
+    public EquipmentRollRangeResolver(IEquipmentRollRangeService rollRanges)
+    {
+        _rollRanges = rollRanges;
+    }
+
+    public EquipmentRollRangeDto? Resolve(
+        EquipmentInstance source,
+        EquipmentInstanceDto destination,
+        EquipmentRollRangeDto? destinationMember,
+        ResolutionContext context)
+    {
+        var range = _rollRanges?.Resolve(source);
+        if (range is null) return null;
+
+        return new EquipmentRollRangeDto
+        {
+            MinimumPotential = range.MinimumPotential,
+            MaximumPotential = range.MaximumPotential,
+            Attributes = range.Attributes
+                .Select(attribute => new EquipmentAttributeRollRangeDto
+                {
+                    AttributeType = attribute.AttributeType,
+                    MinimumAmount = attribute.MinimumAmount,
+                    MaximumAmount = attribute.MaximumAmount
+                })
+                .ToList()
+        };
     }
 }

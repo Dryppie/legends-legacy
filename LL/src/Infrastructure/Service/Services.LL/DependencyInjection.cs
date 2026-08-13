@@ -176,6 +176,7 @@ public static class DependencyInjection
         services.AddScoped<IItemPotentialService, ItemPotentialService>();
         services.AddScoped<ICraftingRequirementResolver, CraftingRequirementResolver>();
         services.AddScoped<IItemStatRollService, ItemStatRollService>();
+        services.AddScoped<IEquipmentRollRangeService, EquipmentRollRangeService>();
         services.AddSingleton<ICraftingDefinitionProvider>(sp =>
             new JsonCraftingDefinitionProvider(
                 config,

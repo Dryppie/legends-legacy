@@ -314,7 +314,9 @@
               [ngClass]="messageRowClasses(m)"
             >
               <div
-                class="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5"
+                class="flex min-w-0 flex-wrap gap-x-1.5 gap-y-0.5"
+                [class.items-start]="isInlineSystemNotice(m)"
+                [class.items-center]="!isInlineSystemNotice(m)"
               >
                 <time
                   class="text-[10px] leading-4 text-[var(--ll-color-text-subtle)]"
@@ -329,22 +331,35 @@
                   {{ channelLabel(m) }}
                 </span>
 
-                <ng-container *ngIf="m.isSystemGenerated; else regularSender">
-                  <app-character-tag
-                    [id]="m.senderId"
-                    [name]="m.senderName"
-                    [titleDisplayName]="m.senderTitleDisplayName"
-                  ></app-character-tag>
-                  <span
-                    class="min-w-0 break-words text-xs leading-5 text-[var(--ll-color-text)]"
+                <ng-container
+                  *ngIf="isInlineSystemNotice(m); else regularSender"
+                >
+                  <div
+                    class="flex min-w-0 basis-full flex-wrap items-baseline gap-x-1 pl-0.5"
                   >
-                    <ng-container
-                      *ngTemplateOutlet="
-                        messageBody;
-                        context: { $implicit: m.body }
-                      "
-                    ></ng-container>
-                  </span>
+                    <app-character-tag
+                      [id]="m.senderId"
+                      [name]="m.senderName"
+                      [titleDisplayName]="m.senderTitleDisplayName"
+                    ></app-character-tag>
+                    <span
+                      class="min-w-0 flex-1 break-words text-xs italic leading-5 text-[var(--ll-color-text)]"
+                    >
+                      <ng-container
+                        *ngTemplateOutlet="
+                          messageBody;
+                          context: { $implicit: m.body }
+                        "
+                      ></ng-container>
+                    </span>
+                    <ng-container *ngIf="m.linkedItem as linkedItem">
+                      <app-item
+                        class="decoration-current/40 inline-block max-w-full text-xs underline underline-offset-2"
+                        [item]="linkedItem"
+                      ></app-item>
+                      <span class="text-xs text-[var(--ll-color-text)]">.</span>
+                    </ng-container>
+                  </div>
                 </ng-container>
 
                 <ng-template #regularSender>
@@ -389,7 +404,7 @@
               </div>
 
               <div
-                *ngIf="!m.isSystemGenerated"
+                *ngIf="!isInlineSystemNotice(m)"
                 class="mt-0.5 flex flex-wrap items-baseline gap-x-1 break-words text-xs leading-5"
                 [ngClass]="{
                   'italic text-[var(--ll-color-text-muted)]':

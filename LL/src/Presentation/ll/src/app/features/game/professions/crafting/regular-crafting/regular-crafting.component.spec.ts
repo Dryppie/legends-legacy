@@ -2,6 +2,7 @@ import { EquipmentSlotType } from '../../../../../shared/models/Dtos/equipment-s
 import { CraftingRecipe } from '../../../../../shared/models/crafting-v2';
 import { EquipmentType } from '../../../../../shared/models/enums/equipmentType';
 import {
+  getRollPercentage,
   getRecipeEquipmentSlot,
   matchesRecipeSearch,
 } from './regular-crafting.component';
@@ -52,6 +53,18 @@ describe('regular crafting recipe filtering', () => {
     expect(getRecipeEquipmentSlot(EquipmentType.Head)).toBe(
       EquipmentSlotType.Head,
     );
+  });
+
+  it('positions crafted rolls within their preview range', () => {
+    expect(getRollPercentage(93, 93, 124)).toBe(0);
+    expect(getRollPercentage(124, 93, 124)).toBe(100);
+    expect(getRollPercentage(108.5, 93, 124)).toBe(50);
+    expect(getRollPercentage(80, 93, 124)).toBe(0);
+    expect(getRollPercentage(130, 93, 124)).toBe(100);
+  });
+
+  it('treats fixed rolls as complete', () => {
+    expect(getRollPercentage(12, 12, 12)).toBe(100);
   });
 });
 

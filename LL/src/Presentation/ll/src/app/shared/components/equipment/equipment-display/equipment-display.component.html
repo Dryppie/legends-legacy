@@ -1,14 +1,17 @@
 <ng-container *ngIf="sideBySideComparisons.length; else standardEquipment">
   <div
-    class="grid grid-cols-1 overflow-hidden"
+    class="equipment-comparison-grid grid grid-cols-1 bg-texture"
     [ngClass]="
       sideBySideComparisons.length > 1
         ? 'w-[min(50rem,calc(100vw-3rem))] sm:grid-cols-3'
         : 'w-[min(34rem,calc(100vw-3rem))] sm:grid-cols-2'
     "
   >
-    <section class="flex min-w-0 flex-col p-2 sm:pr-4">
-      <div class="ll-item-meta text-primary">Hovered</div>
+    <section class="equipment-comparison-card flex min-w-0 flex-col sm:pr-4">
+      <div class="flex items-start justify-between gap-3">
+        <div class="ll-item-meta text-primary">Hovered</div>
+        <span class="ll-state shrink-0">T{{ data.itemBudgetTier }}</span>
+      </div>
       <h2
         class="ll-item-detail-title mt-1 truncate"
         [ngClass]="rarityClass(data.rarity)"
@@ -16,40 +19,86 @@
         {{ data.name }}
       </h2>
       <div class="ll-item-meta mt-1 truncate">
-        {{ comparisonMeta(data) }}
+        {{ equipmentMeta(data) }}
       </div>
 
       <div class="mt-3 flex-1 text-sm">
         <div
           *ngFor="let comparison of comparisonAttributeRows"
-          class="grid min-h-7 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3"
+          class="border-b border-white/5 py-1.5 last:border-b-0"
         >
-          <span class="truncate text-secondary">
-            {{ comparison.attributeType | attributeTypeFormat }}
-          </span>
-          <span
-            data-testid="hovered-attribute-value"
-            class="font-semibold tabular-nums"
-            [ngClass]="
-              hasAttribute(data, comparison.attributeType)
-                ? 'text-primary'
-                : 'text-secondary'
-            "
+          <div
+            class="grid min-h-6 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3"
           >
-            <ng-container
-              *ngIf="
-                hasAttribute(data, comparison.attributeType);
-                else noHoveredAttribute
+            <span class="truncate text-secondary">
+              {{ comparison.attributeType | attributeTypeFormat }}
+            </span>
+            <span
+              data-testid="hovered-attribute-value"
+              class="equipment-roll-value tabular-nums"
+              [ngClass]="
+                hasAttribute(data, comparison.attributeType)
+                  ? 'text-primary'
+                  : 'text-secondary'
               "
             >
-              {{
-                comparison.hoveredAmount
-                  | attributeValueFormat: comparison.attributeType
-              }}
-            </ng-container>
-            <ng-template #noHoveredAttribute>&mdash;</ng-template>
-          </span>
+              <ng-container
+                *ngIf="
+                  hasAttribute(data, comparison.attributeType);
+                  else noHoveredAttribute
+                "
+              >
+                <strong class="font-medium">
+                  {{
+                    comparison.hoveredAmount
+                      | attributeValueFormat: comparison.attributeType
+                  }}
+                </strong>
+                <span
+                  *ngIf="
+                    attributeRollRange(data, comparison.attributeType) as range
+                  "
+                  class="text-[0.62rem] font-normal text-secondary"
+                >
+                  /
+                  {{
+                    range.minimumAmount
+                      | attributeValueFormat: comparison.attributeType
+                  }}–{{
+                    range.maximumAmount
+                      | attributeValueFormat: comparison.attributeType
+                  }}
+                </span>
+              </ng-container>
+              <ng-template #noHoveredAttribute>&mdash;</ng-template>
+            </span>
+          </div>
+          <div
+            *ngIf="attributeRollRange(data, comparison.attributeType) as range"
+            class="equipment-design-track"
+          >
+            <span
+              class="equipment-design-fill"
+              [style.width.%]="
+                rollPercentage(
+                  comparison.hoveredAmount,
+                  range.minimumAmount,
+                  range.maximumAmount
+                )
+              "
+            ></span>
+          </div>
         </div>
+      </div>
+
+      <div
+        *ngIf="data.potential != null"
+        class="mt-3 flex items-center justify-between gap-4 border-t border-white/10 pt-3 text-xs"
+      >
+        <span class="text-secondary">Potential</span>
+        <span class="font-medium tabular-nums text-primary">
+          {{ data.potential }}
+        </span>
       </div>
 
       <div class="mt-3 border-t border-primary/20 pt-3">
@@ -59,20 +108,20 @@
             {{ data.itemBudget | number: "1.0-2" }}
           </span>
         </div>
-        <div class="mt-1 flex items-center justify-between gap-4 text-xs">
-          <span *ngIf="data.potential != null" class="ll-item-meta">
-            Potential {{ data.potential }}
-          </span>
-        </div>
       </div>
     </section>
 
     <section
       *ngFor="let equipped of sideBySideComparisons"
-      class="flex min-w-0 flex-col border-t border-primary/20 bg-black/20 p-2 sm:border-l sm:border-t-0 sm:pl-4"
+      class="equipment-comparison-card flex min-w-0 flex-col border-t border-primary/20 bg-black/20 sm:border-l sm:border-t-0 sm:pl-4"
     >
-      <div class="ll-item-meta">
-        {{ comparisonSlotLabel(equipped.slotType) }}
+      <div class="flex items-start justify-between gap-3">
+        <div class="ll-item-meta">
+          {{ comparisonSlotLabel(equipped.slotType) }}
+        </div>
+        <span class="ll-state shrink-0">
+          T{{ equipped.data.itemBudgetTier }}
+        </span>
       </div>
       <h2
         class="ll-item-detail-title mt-1 truncate"
@@ -81,52 +130,106 @@
         {{ equipped.data.name }}
       </h2>
       <div class="ll-item-meta mt-1 truncate">
-        {{ comparisonMeta(equipped.data) }}
+        {{ equipmentMeta(equipped.data) }}
       </div>
 
       <div class="mt-3 flex-1 text-sm">
         <div
           *ngFor="let comparison of comparisonAttributeRows"
-          class="grid min-h-7 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3"
+          class="border-b border-white/5 py-1.5 last:border-b-0"
         >
-          <span class="truncate text-secondary">
-            {{ comparison.attributeType | attributeTypeFormat }}
-          </span>
-          <span
-            data-testid="equipped-attribute-value"
-            class="font-semibold tabular-nums text-white"
+          <div
+            class="grid min-h-6 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3"
           >
-            <ng-container
-              *ngIf="
-                hasAttribute(equipped.data, comparison.attributeType);
-                else noEquippedAttribute
+            <span class="truncate text-secondary">
+              {{ comparison.attributeType | attributeTypeFormat }}
+            </span>
+            <span
+              data-testid="equipped-attribute-value"
+              class="equipment-roll-value tabular-nums text-white"
+            >
+              <ng-container
+                *ngIf="
+                  hasAttribute(equipped.data, comparison.attributeType);
+                  else noEquippedAttribute
+                "
+              >
+                <strong class="font-medium">
+                  {{
+                    equippedAmount(equipped, comparison.attributeType)
+                      | attributeValueFormat: comparison.attributeType
+                  }}
+                </strong>
+                <span
+                  *ngIf="
+                    attributeRollRange(
+                      equipped.data,
+                      comparison.attributeType
+                    ) as range
+                  "
+                  class="text-[0.62rem] font-normal text-secondary"
+                >
+                  /
+                  {{
+                    range.minimumAmount
+                      | attributeValueFormat: comparison.attributeType
+                  }}–{{
+                    range.maximumAmount
+                      | attributeValueFormat: comparison.attributeType
+                  }}
+                </span>
+              </ng-container>
+              <ng-template #noEquippedAttribute>&mdash;</ng-template>
+            </span>
+            <span
+              data-testid="comparison-difference"
+              [attr.data-attribute]="comparison.attributeType"
+              class="min-w-12 text-right font-semibold tabular-nums"
+              [ngClass]="
+                comparisonClass(
+                  comparison.hoveredAmount -
+                    equippedAmount(equipped, comparison.attributeType)
+                )
               "
             >
               {{
-                equippedAmount(equipped, comparison.attributeType)
-                  | attributeValueFormat: comparison.attributeType
-              }}
-            </ng-container>
-            <ng-template #noEquippedAttribute>&mdash;</ng-template>
-          </span>
-          <span
-            data-testid="comparison-difference"
-            [attr.data-attribute]="comparison.attributeType"
-            class="min-w-12 text-right font-semibold tabular-nums"
-            [ngClass]="
-              comparisonClass(
                 comparison.hoveredAmount -
                   equippedAmount(equipped, comparison.attributeType)
-              )
+                  | attributeValueFormat: comparison.attributeType : true
+              }}
+            </span>
+          </div>
+          <div
+            *ngIf="
+              attributeRollRange(
+                equipped.data,
+                comparison.attributeType
+              ) as range
             "
+            class="equipment-design-track"
           >
-            {{
-              comparison.hoveredAmount -
-                equippedAmount(equipped, comparison.attributeType)
-                | attributeValueFormat: comparison.attributeType : true
-            }}
-          </span>
+            <span
+              class="equipment-design-fill"
+              [style.width.%]="
+                rollPercentage(
+                  equippedAmount(equipped, comparison.attributeType),
+                  range.minimumAmount,
+                  range.maximumAmount
+                )
+              "
+            ></span>
+          </div>
         </div>
+      </div>
+
+      <div
+        *ngIf="equipped.data.potential != null"
+        class="mt-3 flex items-center justify-between gap-4 border-t border-white/10 pt-3 text-xs"
+      >
+        <span class="text-secondary">Potential</span>
+        <span class="font-medium tabular-nums text-primary">
+          {{ equipped.data.potential }}
+        </span>
       </div>
 
       <div class="mt-3 border-t border-primary/20 pt-3">
@@ -149,45 +252,22 @@
             </span>
           </span>
         </div>
-        <div
-          *ngIf="equipped.data.potential != null"
-          class="ll-item-meta mt-1 text-right"
-        >
-          Potential {{ equipped.data.potential }}
-        </div>
       </div>
     </section>
   </div>
 </ng-container>
 
 <ng-template #standardEquipment>
-  <div class="ll-item-detail">
+  <div class="equipment-design-card bg-texture">
     <div class="flex items-start justify-between gap-3">
       <h2 class="ll-item-detail-title" [ngClass]="rarityClasses">
         {{ data.name }}
       </h2>
-      <div class="flex shrink-0 flex-wrap justify-end gap-2">
-        <span
-          *ngIf="!useBaseName"
-          class="ll-item-chip"
-          [ngClass]="rarityBadgeClasses"
-        >
-          {{ data.rarity }}
-        </span>
-        <span *ngIf="data.quality" class="ll-item-chip ll-item-chip-accent">
-          {{ data.quality }}
-        </span>
-      </div>
+      <span class="ll-state shrink-0">T{{ data.itemBudgetTier }}</span>
     </div>
 
-    <div class="ll-item-meta flex flex-wrap items-center justify-between gap-1">
-      <span>{{ data.equipmentType }}</span>
-      <span
-        *ngIf="data.itemBudget > 0"
-        [title]="'Tier ' + data.itemBudgetTier + ' equipment rates'"
-      >
-        Gear Value {{ data.itemBudget | number: "1.0-2" }}
-      </span>
+    <div class="ll-item-meta mt-1">
+      {{ equipmentMeta(data) }}
     </div>
 
     <p *ngIf="data.description" class="ll-item-description">
@@ -233,49 +313,88 @@
     </div>
 
     <div
-      *ngIf="hasToolDetails"
-      class="ll-item-detail-section"
-      data-testid="tool-attributes"
+      *ngIf="hasToolDetails || data.attributes.length"
+      class="equipment-design-section ll-item-detail-section"
+      [attr.data-testid]="hasToolDetails ? 'tool-attributes' : null"
     >
-      <div class="ll-item-meta">Attributes</div>
+      <div class="ll-item-meta">{{ attributeSectionLabel }}</div>
 
-      <div class="mt-2 text-sm">
-        <div *ngFor="let bonus of data.toolBonuses" class="ll-item-stat-row">
-          <span>{{
-            formatToolBonusLabel(bonus.bonusType, bonus.scopeId)
-          }}</span>
-          <span class="text-primary">{{ formatToolBonusAmount(bonus) }}</span>
-        </div>
+      <div
+        *ngFor="let bonus of data.toolBonuses"
+        class="equipment-design-row ll-item-stat-row"
+      >
+        <span>{{ formatToolBonusLabel(bonus.bonusType, bonus.scopeId) }}</span>
+        <span class="text-primary">{{ formatToolBonusAmount(bonus) }}</span>
       </div>
-    </div>
 
-    <div *ngIf="data.attributes.length" class="ll-item-detail-section">
-      <div class="ll-item-meta">Attributes</div>
-
-      <div class="mt-2 text-sm">
-        <div
-          *ngFor="let attr of data.attributes"
-          class="ll-item-stat-row"
-          [appAttributeTooltip]="attr"
-        >
-          <span>
+      <div
+        *ngFor="let attr of data.attributes"
+        class="equipment-design-row"
+        [appAttributeTooltip]="attr"
+      >
+        <div class="flex items-baseline justify-between gap-3 text-xs">
+          <span class="truncate text-white">
             {{ attr.attributeType | attributeTypeFormat }}
           </span>
-          <span class="text-primary">
-            {{ attr.amount | attributeValueFormat: attr.attributeType : true
-            }}<span *ngIf="shouldAppendModifierPercent(attr)">%</span></span
-          >
+          <span class="equipment-roll-value tabular-nums">
+            <strong class="font-medium text-primary">
+              {{ attr.amount | attributeValueFormat: attr.attributeType : true
+              }}<span *ngIf="shouldAppendModifierPercent(attr)">%</span>
+            </strong>
+            <span
+              *ngIf="attributeRollRange(data, attr.attributeType) as range"
+              class="text-[0.62rem] text-secondary"
+            >
+              /
+              {{
+                range.minimumAmount | attributeValueFormat: attr.attributeType
+              }}–{{
+                range.maximumAmount | attributeValueFormat: attr.attributeType
+              }}
+            </span>
+          </span>
+        </div>
+        <div
+          *ngIf="attributeRollRange(data, attr.attributeType) as range"
+          class="equipment-design-track"
+        >
+          <span
+            class="equipment-design-fill"
+            [style.width.%]="
+              rollPercentage(
+                attr.amount,
+                range.minimumAmount,
+                range.maximumAmount
+              )
+            "
+          ></span>
         </div>
       </div>
     </div>
 
-    <!-- Instance-only -->
     <div
-      *ngIf="data.potential != null"
-      class="ll-item-stat-row ll-item-detail-section"
+      *ngIf="data.potential != null || data.itemBudget > 0"
+      class="equipment-design-section text-xs"
     >
-      <span>Potential</span>
-      <span class="text-primary">{{ data.potential }}</span>
+      <div
+        *ngIf="data.potential != null"
+        class="flex items-center justify-between gap-4"
+      >
+        <span class="text-secondary">Potential</span>
+        <span class="font-medium tabular-nums text-primary">
+          {{ data.potential }}
+        </span>
+      </div>
+      <div
+        *ngIf="data.itemBudget > 0"
+        class="flex items-end justify-between gap-4"
+        [ngClass]="data.potential != null ? 'mt-3 border-t border-white/10 pt-3' : ''"
+      >
+        <span class="ll-item-meta">Gear Value</span>
+        <span class="font-medium tabular-nums text-primary">
+          {{ data.itemBudget | number: "1.0-2" }}
+        </span>
+      </div>
     </div>
 
     <div *ngIf="comparisonData as equipped" class="ll-item-detail-section">

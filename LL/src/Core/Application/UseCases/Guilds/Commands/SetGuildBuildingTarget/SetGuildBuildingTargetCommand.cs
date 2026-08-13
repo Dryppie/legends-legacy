@@ -64,7 +64,7 @@ public sealed class SetGuildBuildingTargetCommandHandler
                 result.Value.GuildId,
                 actor.Id,
                 actor.Name,
-                $"Set the current building target to {target.Name} level {target.TargetLevel}.",
+                $"set the current building target to {target.Name} level {target.TargetLevel}.",
                 messageId,
                 now),
             actor.Id,

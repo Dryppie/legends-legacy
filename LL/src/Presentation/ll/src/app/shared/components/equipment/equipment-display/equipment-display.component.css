@@ -1,0 +1,83 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.equipment-design-card {
+  min-width: min(16rem, calc(100vw - 2rem));
+  max-width: 20rem;
+  padding: 0.75rem;
+}
+
+.equipment-design-section {
+  margin-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 0.875rem;
+}
+
+.equipment-design-row {
+  margin-top: 0.75rem;
+}
+
+.equipment-design-track {
+  position: relative;
+  height: 0.22rem;
+  margin-top: 0.375rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.equipment-design-track::after {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      to right,
+      transparent calc(25% - 0.5px),
+      rgba(0, 0, 0, 0.55) calc(25% - 0.5px),
+      rgba(0, 0, 0, 0.55) calc(25% + 0.5px),
+      transparent calc(25% + 0.5px)
+    ),
+    linear-gradient(
+      to right,
+      transparent calc(50% - 0.5px),
+      rgba(0, 0, 0, 0.55) calc(50% - 0.5px),
+      rgba(0, 0, 0, 0.55) calc(50% + 0.5px),
+      transparent calc(50% + 0.5px)
+    ),
+    linear-gradient(
+      to right,
+      transparent calc(75% - 0.5px),
+      rgba(0, 0, 0, 0.55) calc(75% - 0.5px),
+      rgba(0, 0, 0, 0.55) calc(75% + 0.5px),
+      transparent calc(75% + 0.5px)
+    );
+  content: '';
+  pointer-events: none;
+}
+
+.equipment-design-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ll-color-primary);
+  box-shadow: 0 0 0.35rem rgba(247, 203, 124, 0.2);
+}
+
+.equipment-roll-value {
+  display: flex;
+  flex-shrink: 0;
+  align-items: baseline;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+.equipment-comparison-grid {
+  overflow: hidden;
+  border-radius: var(--ll-radius-sm);
+}
+
+.equipment-comparison-card {
+  padding: 0.75rem;
+}

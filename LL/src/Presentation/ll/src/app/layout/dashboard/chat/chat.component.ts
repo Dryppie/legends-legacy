@@ -158,6 +158,20 @@ export function isWorldSystemMessage(message: ChatMessageDto): boolean {
   );
 }
 
+export function isInlineGuildSystemMessage(
+  message: Pick<ChatMessageDto, 'channelType' | 'body' | 'isSystemGenerated'>,
+): boolean {
+  if (message.channelType !== ChatChannelType.Guild) return false;
+
+  return (
+    message.isSystemGenerated === true ||
+    message.body
+      .trimStart()
+      .toLowerCase()
+      .startsWith('set the current building target to ')
+  );
+}
+
 export function startsNewChatDay(
   messages: readonly ChatMessageDto[],
   index: number,
@@ -582,6 +596,10 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   isWorldAnnouncement(message: ChatMessageDto): boolean {
     return isWorldSystemMessage(message);
+  }
+
+  isInlineSystemNotice(message: ChatMessageDto): boolean {
+    return isInlineGuildSystemMessage(message);
   }
 
   whisperDisplayId(message: ChatMessageDto): string {
