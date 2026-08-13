@@ -1,16 +1,28 @@
 import { DatePipe, NgIf } from '@angular/common';
-import { Component, OnInit, computed, signal } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  computed,
+  effect,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { Subject, finalize, takeUntil } from 'rxjs';
 import { ColosseumService } from '../../../../../core/services/api/colosseum/colosseum.service';
 import { BattleType } from '../../../../../core/state/combat-state/combatState';
 import { CombatStateService } from '../../../../../core/state/combat-state/combat-state.service';
 import { CombatComponent } from '../../../../../shared/components/combat/combat.component';
 import { CombatResultDto } from '../../../../../shared/models/Dtos/combatResultDto';
+import { CombatService } from '../../../../../core/services/client-side/combat/combat.service';
+import { TournamentPlaybackService } from '../../../../../core/services/client-side/combat/tournament-playback.service';
+import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
 import {
   TournamentBracket,
   TournamentDetails,
   TournamentMatch,
+  TournamentPlaybackBundle,
+  TournamentPlaybackManifest,
 } from '../../../../../shared/models/Dtos/colosseum/tournamentGrounds';
 import { HelpLauncherComponent } from '../../../../../shared/help/help-launcher.component';
 
@@ -19,15 +31,24 @@ import { HelpLauncherComponent } from '../../../../../shared/help/help-launcher.
   imports: [CombatComponent, DatePipe, NgIf, RouterLink, HelpLauncherComponent],
   templateUrl: './tournament-replay.component.html',
 })
-export class TournamentReplayComponent implements OnInit {
+export class TournamentReplayComponent implements OnInit, OnDestroy {
   readonly battleType = BattleType.Colosseum;
   readonly tournamentId = signal<string | null>(null);
   readonly matchId = signal<string | null>(null);
   readonly details = signal<TournamentDetails | null>(null);
   readonly bracket = signal<TournamentBracket | null>(null);
   readonly replay = signal<CombatResultDto | null>(null);
+  readonly playback = signal<TournamentPlaybackManifest | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  private readonly destroyed = new Subject<void>();
+  private bundle: TournamentPlaybackBundle | null = null;
+  private playbackTimer: ReturnType<typeof setInterval> | null = null;
+  private playbackClockAtSync = 0;
+  private playbackTickAtSync = 0;
+  private lastSequence = -1;
+  private lastRealtimeUpdateId: string | null = null;
+  private lastReconnectCount = 0;
 
   readonly round = computed(() => {
     const bracket = this.bracket();
@@ -47,8 +68,43 @@ export class TournamentReplayComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly colosseumService: ColosseumService,
+    private readonly combatService: CombatService,
+    private readonly playbackService: TournamentPlaybackService,
+    private readonly eventService: GameEventService,
     public readonly combatStateService: CombatStateService,
-  ) {}
+  ) {
+    this.lastReconnectCount = this.eventService.reconnectCount();
+    effect(
+      () => {
+        const envelope =
+          this.eventService.eventEnvelope.TournamentGroundsUpdated();
+        if (
+          !envelope?.updateId ||
+          envelope.updateId === this.lastRealtimeUpdateId ||
+          envelope.payload.tournamentId !== this.tournamentId()
+        ) {
+          return;
+        }
+
+        this.lastRealtimeUpdateId = envelope.updateId;
+        const tournamentId = this.tournamentId();
+        const matchId = this.matchId();
+        if (tournamentId && matchId) this.loadMetadata(tournamentId, matchId);
+      },
+      { allowSignalWrites: true },
+    );
+    effect(
+      () => {
+        const reconnectCount = this.eventService.reconnectCount();
+        if (reconnectCount <= this.lastReconnectCount) return;
+        this.lastReconnectCount = reconnectCount;
+        const tournamentId = this.tournamentId();
+        const matchId = this.matchId();
+        if (tournamentId && matchId) this.loadMetadata(tournamentId, matchId);
+      },
+      { allowSignalWrites: true },
+    );
+  }
 
   ngOnInit(): void {
     const tournamentId = this.route.snapshot.paramMap.get('tournamentId');
@@ -64,7 +120,17 @@ export class TournamentReplayComponent implements OnInit {
     this.load(tournamentId, matchId);
   }
 
+  ngOnDestroy(): void {
+    this.stopPlaybackTimer();
+    this.destroyed.next();
+    this.destroyed.complete();
+  }
+
   startReplay(): void {
+    if (this.bundle) {
+      this.startCompactPlayback(0);
+      return;
+    }
     const replay = this.replay();
     if (!replay) return;
 
@@ -72,6 +138,7 @@ export class TournamentReplayComponent implements OnInit {
   }
 
   skipBattle(): void {
+    this.stopPlaybackTimer();
     this.colosseumService.skipColosseumMatch();
   }
 
@@ -112,28 +179,149 @@ export class TournamentReplayComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.colosseumService.getTournament(tournamentId).subscribe({
-      next: (details) => this.details.set(details),
-      error: (err: Error) =>
-        this.error.set(err.message ?? 'Failed to load tournament details'),
-    });
-
-    this.colosseumService.getTournamentBracket(tournamentId).subscribe({
-      next: (bracket) => this.bracket.set(bracket),
-      error: (err: Error) =>
-        this.error.set(err.message ?? 'Failed to load tournament bracket'),
-    });
+    this.colosseumService
+      .getTournament(tournamentId)
+      .pipe(takeUntil(this.destroyed))
+      .subscribe({
+        next: (details) => this.details.set(details),
+        error: (err: Error) =>
+          this.error.set(err.message ?? 'Failed to load tournament details'),
+      });
 
     this.colosseumService
+      .getTournamentBracket(tournamentId)
+      .pipe(takeUntil(this.destroyed))
+      .subscribe({
+        next: (bracket) => this.bracket.set(bracket),
+        error: (err: Error) =>
+          this.error.set(err.message ?? 'Failed to load tournament bracket'),
+      });
+
+    this.loadPlayback(tournamentId, matchId);
+  }
+
+  private loadMetadata(tournamentId: string, matchId: string): void {
+    this.colosseumService
+      .getTournamentBracket(tournamentId)
+      .pipe(takeUntil(this.destroyed))
+      .subscribe({
+        next: (bracket) => this.bracket.set(bracket),
+      });
+    this.colosseumService
+      .getTournamentMatchPlayback(tournamentId, matchId)
+      .pipe(takeUntil(this.destroyed))
+      .subscribe({ next: (playback) => this.playback.set(playback) });
+  }
+
+  private loadPlayback(tournamentId: string, matchId: string): void {
+    this.colosseumService
+      .getTournamentMatchPlayback(tournamentId, matchId)
+      .pipe(takeUntil(this.destroyed))
+      .subscribe({
+        next: (playback) => {
+          this.playback.set(playback);
+          this.playbackService
+            .getBundle(tournamentId, matchId, playback.bundleETag)
+            .pipe(
+              takeUntil(this.destroyed),
+              finalize(() => this.loading.set(false)),
+            )
+            .subscribe({
+              next: (bundle) => {
+                if (bundle.schemaVersion !== playback.schemaVersion) {
+                  this.error.set(
+                    'The Tournament playback format is not supported.',
+                  );
+                  return;
+                }
+                this.bundle = bundle;
+                const liveTick = playback.isCompleted
+                  ? 0
+                  : Math.min(
+                      bundle.totalTicks,
+                      Math.max(
+                        0,
+                        Math.floor(
+                          ((Date.parse(playback.serverNowUtc) -
+                            Date.parse(playback.playbackStartedAtUtc)) /
+                            1000) *
+                            bundle.ticksPerSecond,
+                        ),
+                      ),
+                    );
+                this.startCompactPlayback(liveTick);
+              },
+              error: (err: Error) =>
+                this.error.set(
+                  err.message ?? 'Failed to load tournament playback',
+                ),
+            });
+        },
+        error: (err: Error) =>
+          this.loadLegacyReplay(tournamentId, matchId, err),
+      });
+  }
+
+  private loadLegacyReplay(
+    tournamentId: string,
+    matchId: string,
+    playbackError: Error,
+  ): void {
+    this.colosseumService
       .getTournamentMatchReplay(tournamentId, matchId)
-      .pipe(finalize(() => this.loading.set(false)))
+      .pipe(
+        takeUntil(this.destroyed),
+        finalize(() => this.loading.set(false)),
+      )
       .subscribe({
         next: (replay) => {
           this.replay.set(replay);
           this.colosseumService.startTournamentReplay({ ...replay });
         },
-        error: (err: Error) =>
-          this.error.set(err.message ?? 'Failed to load tournament replay'),
+        error: () =>
+          this.error.set(
+            playbackError.message ?? 'Failed to load tournament replay',
+          ),
       });
+  }
+
+  private startCompactPlayback(startTick: number): void {
+    if (!this.bundle) return;
+    this.stopPlaybackTimer();
+    this.playbackTickAtSync = startTick;
+    this.playbackClockAtSync = performance.now();
+    this.lastSequence = -1;
+    this.renderCompactPlayback(true);
+    if (startTick < this.bundle.totalTicks) {
+      this.playbackTimer = setInterval(
+        () => this.renderCompactPlayback(false),
+        250,
+      );
+    }
+  }
+
+  private renderCompactPlayback(reset: boolean): void {
+    const bundle = this.bundle;
+    if (!bundle) return;
+    const tick = Math.min(
+      bundle.totalTicks,
+      this.playbackTickAtSync +
+        Math.floor(
+          ((performance.now() - this.playbackClockAtSync) / 1000) *
+            bundle.ticksPerSecond,
+        ),
+    );
+    const frame = this.playbackService.frameAtTick(bundle, tick);
+    if (frame.sequence !== this.lastSequence || reset) {
+      this.lastSequence = frame.sequence;
+      this.combatService.applyTournamentCombatFrame(frame, reset);
+    }
+    if (tick >= bundle.totalTicks) this.stopPlaybackTimer();
+  }
+
+  private stopPlaybackTimer(): void {
+    if (this.playbackTimer === null) return;
+    clearInterval(this.playbackTimer);
+    this.playbackTimer = null;
   }
 }

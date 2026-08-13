@@ -23,9 +23,9 @@ import {
 } from '../../../../../shared/models/Dtos/colosseum/tournamentGrounds';
 
 @Component({
-    selector: 'app-tournament-grounds',
-    imports: [DatePipe, NgFor, NgIf, RouterLink, CharacterTagComponent],
-    templateUrl: './tournament-grounds.component.html'
+  selector: 'app-tournament-grounds',
+  imports: [DatePipe, NgFor, NgIf, RouterLink, CharacterTagComponent],
+  templateUrl: './tournament-grounds.component.html',
 })
 export class TournamentGroundsComponent implements OnInit {
   readonly status = signal<TournamentGroundsStatus | null>(null);
@@ -44,13 +44,18 @@ export class TournamentGroundsComponent implements OnInit {
   readonly upcoming = computed(() => this.status()?.upcomingTournaments ?? []);
   readonly recent = computed(() => this.status()?.recentTournaments ?? []);
   readonly teams = computed(() => this.details()?.teams ?? []);
-  readonly playerTeam = computed(() => this.teams().find((team) => team.isPlayerTeam) ?? null);
-  readonly openTeams = computed(() => this.teams().filter((team) => team.isOpen));
-  readonly unassignedParticipants = computed(() =>
-    this.details()?.participants.filter(
-      (participant) =>
-        !participant.teamId && participant.status !== 'Withdrawn',
-    ) ?? [],
+  readonly playerTeam = computed(
+    () => this.teams().find((team) => team.isPlayerTeam) ?? null,
+  );
+  readonly openTeams = computed(() =>
+    this.teams().filter((team) => team.isOpen),
+  );
+  readonly unassignedParticipants = computed(
+    () =>
+      this.details()?.participants.filter(
+        (participant) =>
+          !participant.teamId && participant.status !== 'Withdrawn',
+      ) ?? [],
   );
   readonly playerPendingInvites = computed(() => {
     const participantId = this.current()?.playerParticipantId;
@@ -89,7 +94,10 @@ export class TournamentGroundsComponent implements OnInit {
         this.lastRealtimeUpdateId = envelope.updateId;
         this.latestRealtimeUpdate.set(envelope.payload);
         const currentTournamentId = this.current()?.id;
-        if (!currentTournamentId || envelope.payload.tournamentId === currentTournamentId) {
+        if (
+          !currentTournamentId ||
+          envelope.payload.tournamentId === currentTournamentId
+        ) {
           this.refresh();
         } else if (
           envelope.payload.event === 'TournamentCompleted' ||
@@ -176,7 +184,10 @@ export class TournamentGroundsComponent implements OnInit {
     );
   }
 
-  applyToTeam(tournament: TournamentSummary | null, team: TournamentTeam): void {
+  applyToTeam(
+    tournament: TournamentSummary | null,
+    team: TournamentTeam,
+  ): void {
     if (!tournament) return;
 
     this.runAction(
@@ -248,15 +259,21 @@ export class TournamentGroundsComponent implements OnInit {
   }
 
   teamLabel(
-    team: { name: string; seed?: number | null; memberCount?: number | null } | null | undefined,
+    team:
+      | { name: string; seed?: number | null; memberCount?: number | null }
+      | null
+      | undefined,
   ): string {
     if (!team) return 'Pending';
     const name = team.seed ? `#${team.seed} ${team.name}` : team.name;
     return team.memberCount ? `${name} (${team.memberCount}/3)` : name;
   }
 
-  outcomeLabel(match: TournamentBracket['rounds'][number]['matches'][number]): string {
+  outcomeLabel(
+    match: TournamentBracket['rounds'][number]['matches'][number],
+  ): string {
     if (match.status === 'Bye') return 'Advanced by bye';
+    if (match.status === 'Resolving') return 'Live now';
     if (match.status !== 'Completed') return this.enumLabel(match.status);
     const winner =
       match.winnerTeamId === match.playerOne?.teamId
@@ -295,7 +312,8 @@ export class TournamentGroundsComponent implements OnInit {
   }
 
   historyResultLabel(entry: TournamentHistoryEntry): string {
-    if (entry.status === 'Cancelled') return entry.cancellationReason ?? 'Cancelled';
+    if (entry.status === 'Cancelled')
+      return entry.cancellationReason ?? 'Cancelled';
     if (entry.finalPlacement === 1) return 'Champion';
     if (entry.finalPlacement) return `Placed ${entry.finalPlacement}`;
     return this.enumLabel(entry.participantStatus);
@@ -379,9 +397,12 @@ export class TournamentGroundsComponent implements OnInit {
     });
 
     this.colosseumService.getTournamentSeasonLeaderboard().subscribe({
-      next: (seasonLeaderboard) => this.seasonLeaderboard.set(seasonLeaderboard),
+      next: (seasonLeaderboard) =>
+        this.seasonLeaderboard.set(seasonLeaderboard),
       error: (err) =>
-        this.error.set(err.message ?? 'Failed to load tournament season leaderboard'),
+        this.error.set(
+          err.message ?? 'Failed to load tournament season leaderboard',
+        ),
     });
   }
 

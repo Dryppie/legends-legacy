@@ -2,7 +2,6 @@ using Application.Interfaces.WebSockets;
 using Application.WebSockets.Contracts;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
 
 namespace RealTime.LL;
 
@@ -34,11 +33,10 @@ internal sealed class GameRealtimeBroadcaster : IGameRealtimeBroadcaster
         };
 
         _logger.LogInformation(
-            "Game realtime send {Event} target={Target} sender={Sender} payloadBytes={PayloadBytes} sentAt={SentAt:o}",
+            "Game realtime send {Event} target={Target} sender={Sender} sentAt={SentAt:o}",
             envelope.Event,
             DescribeAudience(audience),
             sender,
-            EstimatePayloadBytes(envelope),
             envelope.OccurredAt);
 
         return Send(audience, envelope);
@@ -63,15 +61,4 @@ internal sealed class GameRealtimeBroadcaster : IGameRealtimeBroadcaster
         _ => audience.GetType().Name
     };
 
-    private static int EstimatePayloadBytes(GameRealtimeEnvelope envelope)
-    {
-        try
-        {
-            return JsonSerializer.SerializeToUtf8Bytes(envelope).Length;
-        }
-        catch
-        {
-            return -1;
-        }
-    }
 }

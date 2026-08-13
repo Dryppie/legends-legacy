@@ -63,6 +63,7 @@ public interface IDbContext
     DbSet<TournamentParticipant> TournamentParticipants { get; }
     DbSet<TournamentCombatSnapshot> TournamentCombatSnapshots { get; }
     DbSet<TournamentCombatReplay> TournamentCombatReplays { get; }
+    DbSet<TournamentCombatReplayArtifact> TournamentCombatReplayArtifacts { get; }
     DbSet<TournamentRound> TournamentRounds { get; }
     DbSet<TournamentMatch> TournamentMatches { get; }
     DbSet<TournamentRewardGrant> TournamentRewardGrants { get; }
@@ -150,6 +151,11 @@ public interface IDbContext
     DbSet<TowerRallyApplication> TowerRallyApplications { get; }
     DbSet<TowerAttempt> TowerAttempts { get; }
     DbSet<TowerCombatPlayback> TowerCombatPlaybacks { get; }
+    DbSet<TowerCombatPlaybackArtifact> TowerCombatPlaybackArtifacts { get; }
+    Task<TowerRally?> GetWorldTowerRallyWithSnapshotsAsync(
+        Guid rallyId,
+        string serverId,
+        CancellationToken ct = default);
     DbSet<TowerContribution> TowerContributions { get; }
     DbSet<TowerEchoClear> TowerEchoClears { get; }
     DbSet<ServerUnlock> ServerUnlocks { get; }

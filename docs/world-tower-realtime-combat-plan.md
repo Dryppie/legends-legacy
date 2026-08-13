@@ -1,6 +1,6 @@
 # World Tower real-time combat playback plan
 
-Status: **Partially implemented — the durable playback path is horizontally safe and reconnectable**
+Status: **Superseded by [world-tower-combat-performance-redesign-plan.md](world-tower-combat-performance-redesign-plan.md)**
 
 Last updated: 2026-08-12
 

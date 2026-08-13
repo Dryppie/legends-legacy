@@ -184,6 +184,8 @@ public sealed class TowerAttempt
 
 public sealed class TowerCombatPlayback
 {
+    public const int CompactBundleSchemaVersion = 2;
+
     public Guid TowerAttemptId { get; set; }
     public TowerAttempt TowerAttempt { get; set; } = null!;
     public int SchemaVersion { get; set; } = 1;
@@ -191,7 +193,12 @@ public sealed class TowerCombatPlayback
     public int TicksPerFrame { get; set; } = 10;
     public int TotalTicks { get; set; }
     public int FrameCount { get; set; }
-    public string TimelineJson { get; set; } = "[]";
+    public string? TimelineJson { get; set; }
+    public string? BundleHash { get; set; }
+    public int? BundleLength { get; set; }
+    public string? BundleContentType { get; set; }
+    public string? BundleContentEncoding { get; set; }
+    public TowerCombatPlaybackArtifact? Artifact { get; set; }
     public DateTimeOffset SimulationCompletedAt { get; set; }
     public DateTimeOffset PlaybackStartedAt { get; set; }
     public DateTimeOffset PlaybackEndsAt { get; set; }
@@ -200,6 +207,13 @@ public sealed class TowerCombatPlayback
     public string? DispatchLeaseOwner { get; set; }
     public DateTimeOffset? DispatchLeaseUntil { get; set; }
     public long RowVersion { get; set; }
+}
+
+public sealed class TowerCombatPlaybackArtifact
+{
+    public Guid TowerAttemptId { get; set; }
+    public TowerCombatPlayback Playback { get; set; } = null!;
+    public byte[] BundleBytes { get; set; } = [];
 }
 
 public sealed class TowerContribution

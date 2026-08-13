@@ -1,6 +1,6 @@
 # Legacy's Ascension — World Tower implementation status
 
-Last updated: 2026-08-12
+Last updated: 2026-08-13
 
 This document is the implementation source of truth for Legacy's Ascension. It translates the original design into the system that exists in the repository and tracks what is shipped, partial, or not implemented.
 
@@ -29,7 +29,7 @@ These decisions supersede conflicting details in the original proposal:
 6. **Scouting and preparation share one contribution pipeline.** Contribution kind distinguishes scouting and preparation effects, avoiding parallel command and persistence implementations.
 7. **Attempt reports are embedded in Expedition detail.** A report API is available, but a separate attempt-report route is not required for the MVP UI.
 8. **Expedition membership uses applications.** A non-leader submits a locked build for review; only the Expedition leader can accept or decline it. A roster slot is occupied only after acceptance.
-9. **Realtime is a delivery channel, not a second state store.** Expedition mutations use durable world refresh events; combat frames are sent only to authenticated participant groups and recover from a persisted playback timeline through REST.
+9. **Realtime is a notification channel, not a playback transport.** Version 2 Tower combat is an immutable, participant-authorized, Brotli-compressed bundle downloaded once through REST and played locally from server timestamps. Realtime only causes authorized state refreshes. Version 1 frame delivery remains temporarily readable for rollout compatibility.
 10. **Sovereign floors are first-clear encounters only.** They never expose Echo Expeditions or Echo rewards, even after the realm clears them.
 11. **A floor permits one active attempt at a time.** Other ready Expeditions remain intact, but cannot start while an attempt on the same server and floor is queued or playing back.
 12. **Monster presentation is text and combat state only.** Creature artwork is not rendered in Tower, dungeon, or combat surfaces, and the duplicated frontend creature artwork folders have been removed.
@@ -58,8 +58,8 @@ These decisions supersede conflicting details in the original proposal:
 | Automated coverage        | **Partial** | Catalog, domain invariants, application approval, realtime delivery, Expedition rules, combat outcomes, progression, Echo, Hall projection, controller dispatch, and indexes have focused tests; PostgreSQL concurrency, HTTP integration, and frontend flows need broader coverage.                                                                                     |
 | Frontend automated tests  | **Partial** | The Angular API client has route/payload mapping tests and the complete Angular development build passes; component, browser, and full-suite execution coverage remain.                                                                                                                                                                                                  |
 | Live asynchronous updates | **Shipped** | Every Expedition lifecycle mutation queues a durable outbox event and broadcasts it through the existing authenticated SignalR channel; overview and Expedition clients refresh their authorized server projections automatically.                                                                                                                                       |
-| Real-time combat playback | **Partial** | Start queues a deterministic simulation, PostgreSQL leases make simulation and frame dispatch safe across replicas, participant-scoped SignalR sends one frame per second, bounded REST ranges repair gaps/reconnects, health and barriers interpolate, and rewards finalize only on the scheduled final frame. Metrics, cleanup, and browser fake-time coverage remain. |
-| Database rollout          | **Partial** | Four EF Core migrations exist but have not been applied by this implementation task.                                                                                                                                                                                                                                                                                     |
+| Real-time combat playback | **Shipped** | New attempts use compact cumulative frames, one static entity/ability header, one immutable compressed download, local wall-clock seeking, in-memory/HTTP caching, and due-time server finalization. Refresh, reconnect, route return, and tab wake re-seek without per-frame database reads or SignalR messages. Version 1 remains a compatibility read path. |
+| Database rollout          | **Partial** | The version 2 EF Core migration is generated but has not been applied to a shared or production database. |
 
 ## Shipped implementation
 
@@ -90,6 +90,8 @@ The follow-up migration `20260812081251_AddWorldTowerRallyApplications` introduc
 The migration `20260812103046_AddWorldTowerCombatPlayback` introduces the one-to-one durable combat timeline, playback schedule, and dispatch cursor.
 
 The migration `20260812112124_HardenWorldTowerCombatWorkers` adds expiring simulation and dispatch leases, retry counts, and worker-claim indexes. It must be applied before deploying this version of the API.
+
+The migration `20260813175534_OptimizeWorldTowerPlaybackV2` adds compact playback metadata, a cold one-to-one compressed artifact table, nullable legacy timeline storage, and the playback-end index. It must be applied before enabling `WorldTower:CompactPlaybackEnabled` outside an environment whose schema has been upgraded.
 
 Important database invariants include:
 
@@ -428,7 +430,7 @@ The current status document itself should be updated whenever a Tower item moves
 | Domain             | `LL/src/Core/Domain/Models/WorldTower/`                                                                                                                                                                                                                  |
 | Service            | `LL/src/Infrastructure/Service/Services.LL/WorldTower/`                                                                                                                                                                                                  |
 | Persistence        | `LL/src/Infrastructure/Persistence/Persistence.LL/Configurations/WorldTower/`                                                                                                                                                                            |
-| Migrations         | `LL/src/Infrastructure/Persistence/Persistence.LL/Migrations/20260811185743_AddWorldTowerMvp.cs`, `20260812081251_AddWorldTowerRallyApplications.cs`, `20260812103046_AddWorldTowerCombatPlayback.cs`, `20260812112124_HardenWorldTowerCombatWorkers.cs` |
+| Migrations         | `LL/src/Infrastructure/Persistence/Persistence.LL/Migrations/20260811185743_AddWorldTowerMvp.cs`, `20260812081251_AddWorldTowerRallyApplications.cs`, `20260812103046_AddWorldTowerCombatPlayback.cs`, `20260812112124_HardenWorldTowerCombatWorkers.cs`, `20260813091414_OptimizeWorldTowerCombatProcessing.cs`, `20260813175534_OptimizeWorldTowerPlaybackV2.cs` |
 | Realtime delivery  | `LL/src/Infrastructure/Service/Services.LL/Outbox/RealtimeWorldTowerGameEventOutboxConsumer.cs`, `LL/src/API/API.LL/HostedServices/WorldTowerCombatSimulationWorker.cs`, `WorldTowerCombatPlaybackWorker.cs`                                             |
 | Angular API client | `LL/src/Presentation/ll/src/app/core/services/api/world-tower/`                                                                                                                                                                                          |
 | Angular screens    | `LL/src/Presentation/ll/src/app/features/game/world/tower/`                                                                                                                                                                                              |

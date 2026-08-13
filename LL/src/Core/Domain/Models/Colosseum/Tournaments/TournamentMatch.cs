@@ -17,6 +17,9 @@ public sealed class TournamentMatch
     public TournamentMatchOutcome Outcome { get; set; }
     public Guid? CombatSessionId { get; set; }
     public Guid? BattleHistoryId { get; set; }
+    public DateTimeOffset? ScheduledAtUtc { get; set; }
+    public DateTimeOffset? PlaybackStartedAtUtc { get; set; }
+    public DateTimeOffset? PlaybackEndsAtUtc { get; set; }
     public DateTimeOffset? ResolvedAtUtc { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; }
     public DateTimeOffset UpdatedAtUtc { get; set; }

@@ -20,3 +20,35 @@ public sealed class GetTournamentMatchReplayQueryHandler(ITournamentGroundsServi
         return result is null ? null : mapper.Map<CombatResultDto>(result);
     }
 }
+
+public sealed record GetTournamentMatchPlaybackQuery(Guid CharacterId, Guid TournamentId, Guid MatchId)
+    : IQuery<TournamentPlaybackManifestDto?>;
+
+public sealed class GetTournamentMatchPlaybackQueryHandler(ITournamentGroundsService service)
+    : IRequestHandler<GetTournamentMatchPlaybackQuery, TournamentPlaybackManifestDto?>
+{
+    public Task<TournamentPlaybackManifestDto?> Handle(
+        GetTournamentMatchPlaybackQuery request,
+        CancellationToken cancellationToken) =>
+        service.GetMatchPlaybackAsync(
+            request.CharacterId,
+            request.TournamentId,
+            request.MatchId,
+            cancellationToken);
+}
+
+public sealed record GetTournamentMatchPlaybackBundleQuery(Guid CharacterId, Guid TournamentId, Guid MatchId)
+    : IQuery<TournamentPlaybackBundleContentDto?>;
+
+public sealed class GetTournamentMatchPlaybackBundleQueryHandler(ITournamentGroundsService service)
+    : IRequestHandler<GetTournamentMatchPlaybackBundleQuery, TournamentPlaybackBundleContentDto?>
+{
+    public Task<TournamentPlaybackBundleContentDto?> Handle(
+        GetTournamentMatchPlaybackBundleQuery request,
+        CancellationToken cancellationToken) =>
+        service.GetMatchPlaybackBundleAsync(
+            request.CharacterId,
+            request.TournamentId,
+            request.MatchId,
+            cancellationToken);
+}

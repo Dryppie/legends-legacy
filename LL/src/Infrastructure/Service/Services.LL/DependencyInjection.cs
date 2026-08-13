@@ -154,7 +154,17 @@ public static class DependencyInjection
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IColosseumService, ColosseumService>();
-        services.Configure<TournamentGroundsOptions>(config.GetSection("Colosseum:TournamentGrounds"));
+        services.AddOptions<TournamentGroundsOptions>()
+            .Bind(config.GetSection("Colosseum:TournamentGrounds"))
+            .Validate(options =>
+                    options.ProgressionIntervalSeconds > 0
+                    && options.MatchIntervalMinutes > 0
+                    && options.CombatTicksPerFrame > 0
+                    && options.MaximumBundleUncompressedBytes > 0
+                    && options.MaximumBundleCompressedBytes > 0
+                    && options.MaximumBundleCompressedBytes <= options.MaximumBundleUncompressedBytes,
+                "Tournament Grounds scheduling and playback settings are invalid.")
+            .ValidateOnStart();
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<ITournamentLockService, PostgresTournamentLockService>();
         services.AddScoped<ITournamentGroundsService, TournamentGroundsService>();
@@ -310,13 +320,17 @@ public static class DependencyInjection
                     && options.PreparationMaxEffectPercent > 0
                     && options.CombatTicksPerFrame == 10
                     && options.PlaybackPollMilliseconds is >= 100 and <= 1000
+                    && options.FinalizationPollMilliseconds is >= 250 and <= 5000
                     && options.SimulationPollMilliseconds is >= 100 and <= 1000
                     && options.WorkerLeaseSeconds is >= 10 and <= 300
                     && options.SimulationClaimBatchSize is >= 1 and <= 20
                     && options.SimulationMaxConcurrency >= 1
                     && options.SimulationMaxConcurrency <= options.SimulationClaimBatchSize
                     && options.PlaybackClaimBatchSize is >= 1 and <= 200
-                    && options.RecoveryFrameLimit is >= 1 and <= 300,
+                    && options.RecoveryFrameLimit is >= 1 and <= 300
+                    && options.MaximumBundleUncompressedBytes is >= 1_048_576 and <= 67_108_864
+                    && options.MaximumBundleCompressedBytes is >= 262_144
+                    && options.MaximumBundleCompressedBytes <= options.MaximumBundleUncompressedBytes,
                 "World Tower settings are invalid.")
             .ValidateOnStart();
         services.AddMemoryCache();

@@ -1,5 +1,7 @@
 using System.Text.Json;
 using System.Globalization;
+using System.IO.Compression;
+using Application.UseCases.WorldTower.Dtos;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.WebSockets;
 using Application.Common.Mappings;
@@ -1058,17 +1060,48 @@ public sealed class WorldTowerServiceTests
         Assert.Null(result.Value.Playback);
         var playback = await SimulatePlaybackAsync(db, service, result.Value);
         Assert.False(playback.IsCompleted);
-        var recovery = await service.GetAttemptPlaybackFramesAsync(
+        Assert.Equal(TowerCombatPlayback.CompactBundleSchemaVersion, playback.SchemaVersion);
+        Assert.Null(playback.CurrentFrame);
+        Assert.NotNull(playback.BundleETag);
+        var bundleContent = await service.GetAttemptPlaybackBundleAsync(
             characters[0].Id,
             result.Value.AttemptId,
-            -1,
             CancellationToken.None);
-        Assert.Equal(0, Assert.Single(recovery!.Frames).Sequence);
-        Assert.Null(await service.GetAttemptPlaybackFramesAsync(
-            Guid.NewGuid(),
+        Assert.NotNull(bundleContent);
+        Assert.Equal("br", bundleContent.ContentEncoding);
+        Assert.Equal(playback.BundleETag, bundleContent.ETag);
+        await using var compressed = new MemoryStream(bundleContent.Bytes);
+        await using var decompressed = new BrotliStream(compressed, CompressionMode.Decompress);
+        var bundle = await JsonSerializer.DeserializeAsync<TowerPlaybackBundleDto>(
+            decompressed,
+            new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        Assert.NotNull(bundle);
+        Assert.NotEmpty(bundle.Frames);
+        Assert.True(bundle.Frames[^1].IsFinal);
+        Assert.All(bundle.Frames, frame => Assert.NotNull(frame.EntityStates));
+        var spectatorId = Guid.NewGuid();
+        Assert.NotNull(await service.GetAttemptPlaybackBundleAsync(
+            spectatorId,
+            result.Value.AttemptId,
+            CancellationToken.None));
+        Assert.NotNull(await service.GetAttemptPlaybackAsync(
+            spectatorId,
+            result.Value.AttemptId,
+            CancellationToken.None));
+        Assert.NotNull(await service.GetAttemptPlaybackFramesAsync(
+            spectatorId,
             result.Value.AttemptId,
             -1,
             CancellationToken.None));
+        var spectatorRally = await service.GetRallyAsync(
+            spectatorId,
+            rallyId,
+            CancellationToken.None);
+        Assert.NotNull(spectatorRally);
+        Assert.NotNull(spectatorRally.Attempt);
+        Assert.NotNull(spectatorRally.Attempt.Playback);
+        Assert.False(spectatorRally.Attempt.CanViewCombatResult);
+        Assert.Empty(spectatorRally.Applications);
         Assert.All(await db.Characters.ToArrayAsync(), character => Assert.Equal(0, character.TowerTokens));
         Assert.Null(await service.GetAttemptCombatResultAsync(
             characters[0].Id,
@@ -1119,6 +1152,10 @@ public sealed class WorldTowerServiceTests
         Assert.Equal(BattleOutcome.Victory, replay.Outcome);
         Assert.Equal(4, replay.PlayerTeam.Count);
         Assert.Equal(4, replay.EntityStats.Count);
+        Assert.Null(await service.GetAttemptPlaybackBundleAsync(
+            spectatorId,
+            attempt.Id,
+            CancellationToken.None));
         Assert.Null(await service.GetAttemptCombatResultAsync(
             Guid.NewGuid(),
             attempt.Id,

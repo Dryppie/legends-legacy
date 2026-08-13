@@ -42,6 +42,7 @@ import {
 import { BlueprintAttributeSummaryComponent } from '../../../../../shared/components/blueprint-attribute-summary/blueprint-attribute-summary.component';
 import { EssenceDescriptionComponent } from '../../../../../shared/components/essences/essence-description/essence-description.component';
 import { AbilityTagsComponent } from '../../../../../shared/components/essences/ability-tags/ability-tags.component';
+import { marketplaceCommoditySearchText } from './market-place-commodity-search';
 
 interface Commodity {
   base: ItemBase;
@@ -264,8 +265,7 @@ export class MarketPlaceCommodityComponent implements OnInit {
     let commodities = this.commodities().filter((commodity) => {
       if (
         query &&
-        !commodity.base.name.toLowerCase().includes(query) &&
-        !commodity.base.description?.toLowerCase().includes(query)
+        !marketplaceCommoditySearchText(commodity.base).includes(query)
       ) {
         return false;
       }
@@ -325,6 +325,12 @@ export class MarketPlaceCommodityComponent implements OnInit {
         return this._subcategory() ?? 'Resources';
     }
   });
+
+  readonly catalogueSearchPlaceholder = computed(() =>
+    this._category() === 'essences'
+      ? 'Search essence, ability, or tag...'
+      : 'Search catalogue...',
+  );
 
   readonly selectedListings = computed(() => {
     const selected = this.selectedCommodity();

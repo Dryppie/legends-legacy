@@ -1,5 +1,12 @@
-<ng-container *ngIf="combatState.getIsCombatActive(battleType)(); else rallyPage">
-  <p class="realtime-notice" *ngIf="realtimeStatus() !== 'connected'">
+<ng-container
+  *ngIf="combatState.getIsCombatActive(battleType)(); else rallyPage"
+>
+  <p
+    class="realtime-notice"
+    *ngIf="
+      realtimeStatus() !== 'connected' && (playback()?.schemaVersion ?? 1) < 2
+    "
+  >
     Reconnecting to the live battle… The last confirmed state remains visible.
   </p>
   <app-combat
@@ -87,7 +94,9 @@
           </button>
           <button
             class="secondary ll-button"
-            *ngIf="playback() && !playback()?.isCompleted && !watchingPlayback()"
+            *ngIf="
+              playback() && !playback()?.isCompleted && !watchingPlayback()
+            "
             [disabled]="!!action()"
             (click)="viewCombatDetails()"
           >
@@ -105,7 +114,10 @@
           The Guardian attempt is queued. The live battle will open when its
           simulation is ready.
         </p>
-        <p class="notice" *ngIf="vm.attempt?.status === 'Started' && !playback()">
+        <p
+          class="notice"
+          *ngIf="vm.attempt?.status === 'Started' && !playback()"
+        >
           Preparing the battle simulation… This page updates automatically.
         </p>
       </header>
@@ -207,9 +219,7 @@
             <p class="eyebrow">Battle report</p>
             <h2>
               {{
-                battle.succeeded
-                  ? "Guardian defeated"
-                  : "Expedition defeated"
+                battle.succeeded ? "Guardian defeated" : "Expedition defeated"
               }}
             </h2>
           </div>

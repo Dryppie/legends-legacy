@@ -1,3 +1,9 @@
+import {
+  BattleOutcome,
+  EntityStats,
+  SimpleCombatEntityDto,
+} from '../combatResultDto';
+
 export interface TournamentGroundsStatus {
   nowUtc: string;
   currentTournament: TournamentSummary | null;
@@ -158,6 +164,98 @@ export interface TournamentMatch {
   winnerTeamId?: string | null;
   combatSessionId?: string | null;
   battleHistoryId?: string | null;
+  scheduledAtUtc?: string | null;
+  playbackStartedAtUtc?: string | null;
+  playbackEndsAtUtc?: string | null;
+  hasPlayback: boolean;
+}
+
+export interface TournamentPlaybackManifest {
+  tournamentId: string;
+  matchId: string;
+  schemaVersion: number;
+  ticksPerSecond: number;
+  ticksPerFrame: number;
+  totalTicks: number;
+  frameCount: number;
+  playbackStartedAtUtc: string;
+  playbackEndsAtUtc: string;
+  serverNowUtc: string;
+  currentSequence: number;
+  isCompleted: boolean;
+  bundleETag: string;
+}
+
+export interface TournamentPlaybackBundle {
+  schemaVersion: number;
+  ticksPerSecond: number;
+  ticksPerFrame: number;
+  totalTicks: number;
+  entities: TournamentPlaybackEntity[];
+  abilities: TournamentPlaybackAbility[];
+  frames: TournamentPlaybackFrame[];
+}
+
+export interface TournamentPlaybackEntity {
+  index: number;
+  id: string;
+  name: string;
+  imagePath: string;
+  isFriendly: boolean;
+  maxHealth: number;
+  level: number;
+}
+
+export interface TournamentPlaybackAbility {
+  index: number;
+  entityIndex: number;
+  name: string;
+}
+
+export interface TournamentPlaybackFrame {
+  sequence: number;
+  tick: number;
+  entityStates: TournamentPlaybackEntityState[];
+  entityTotals: TournamentPlaybackEntityTotals[];
+  abilityTotals: TournamentPlaybackAbilityTotals[];
+  isFinal: boolean;
+  outcome?: BattleOutcome | null;
+}
+
+export interface TournamentPlaybackEntityState {
+  entityIndex: number;
+  health: number;
+  barrier: number;
+}
+
+export interface TournamentPlaybackEntityTotals {
+  entityIndex: number;
+  damageDone: number;
+  damageTaken: number;
+  healingDone: number;
+  healingReceived: number;
+  healthRegenerated: number;
+  barrierGenerated: number;
+  damageBlocked: number;
+}
+
+export interface TournamentPlaybackAbilityTotals {
+  abilityIndex: number;
+  uses: number;
+  totalDamage: number;
+  totalHealing: number;
+  totalBarrier: number;
+}
+
+export interface TournamentCombatFrame {
+  sequence: number;
+  tick: number;
+  friendly: SimpleCombatEntityDto[];
+  hostile: SimpleCombatEntityDto[];
+  entityStats: EntityStats[];
+  events: never[];
+  isFinal: boolean;
+  outcome?: BattleOutcome | null;
 }
 
 export interface RegisterTournamentResponse {

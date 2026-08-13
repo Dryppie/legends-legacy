@@ -13,6 +13,8 @@ public sealed class TournamentMatchConfiguration : IEntityTypeConfiguration<Tour
         builder.HasIndex(x => new { x.TournamentId, x.RoundNumber, x.MatchNumber }).IsUnique();
         builder.HasIndex(x => x.RoundId);
         builder.HasIndex(x => new { x.TournamentId, x.Status });
+        builder.HasIndex(x => new { x.TournamentId, x.ScheduledAtUtc });
+        builder.HasIndex(x => new { x.Status, x.PlaybackEndsAtUtc });
         builder.HasIndex(x => x.WinnerParticipantId);
     }
 }

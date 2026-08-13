@@ -18,6 +18,7 @@ public interface IWorldTowerService
     Task<TowerBattleReportDto?> GetAttemptReportAsync(Guid characterId, Guid attemptId, CancellationToken cancellationToken);
     Task<CombatResultDto?> GetAttemptCombatResultAsync(Guid characterId, Guid attemptId, CancellationToken cancellationToken);
     Task<TowerCombatPlaybackDto?> GetAttemptPlaybackAsync(Guid characterId, Guid attemptId, CancellationToken cancellationToken);
+    Task<TowerPlaybackBundleContentDto?> GetAttemptPlaybackBundleAsync(Guid characterId, Guid attemptId, CancellationToken cancellationToken);
     Task<TowerCombatFrameBatchDto?> GetAttemptPlaybackFramesAsync(Guid characterId, Guid attemptId, int afterSequence, CancellationToken cancellationToken);
     Task<IReadOnlyList<TowerHallOfFameEntryDto>> GetHallOfFameAsync(CancellationToken cancellationToken);
     Task<IReadOnlyList<TowerPersonalExpeditionDto>> GetPersonalExpeditionsAsync(Guid characterId, CancellationToken cancellationToken);

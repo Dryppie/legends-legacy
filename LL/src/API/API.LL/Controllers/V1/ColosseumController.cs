@@ -17,6 +17,7 @@ using Common.Primitives;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.LL.Controllers.V1;
+
 public class ColosseumController : BaseController
 {
     public sealed record CreateTournamentTeamRequest(string Name);
@@ -92,6 +93,37 @@ public class ColosseumController : BaseController
     [HttpGet("tournaments/{tournamentId:guid}/matches/{matchId:guid}/replay")]
     public async Task<ActionResult<CombatResultDto?>> GetTournamentMatchReplay(Guid tournamentId, Guid matchId) =>
         await Mediator.Send(new GetTournamentMatchReplayQuery(CurrentCharacterGuid, tournamentId, matchId));
+
+    [HttpGet("tournaments/{tournamentId:guid}/matches/{matchId:guid}/playback")]
+    public async Task<ActionResult<TournamentPlaybackManifestDto?>> GetTournamentMatchPlayback(
+        Guid tournamentId,
+        Guid matchId) =>
+        await Mediator.Send(new GetTournamentMatchPlaybackQuery(
+            CurrentCharacterGuid,
+            tournamentId,
+            matchId));
+
+    [HttpGet("tournaments/{tournamentId:guid}/matches/{matchId:guid}/playback/bundle")]
+    public async Task<IActionResult> GetTournamentMatchPlaybackBundle(Guid tournamentId, Guid matchId)
+    {
+        var bundle = await Mediator.Send(new GetTournamentMatchPlaybackBundleQuery(
+            CurrentCharacterGuid,
+            tournamentId,
+            matchId));
+        if (bundle is null) return NotFound();
+
+        var etag = $"\"{bundle.ETag}\"";
+        Response.Headers.ETag = etag;
+        Response.Headers.CacheControl = "private, max-age=31536000, immutable";
+        Response.Headers.Vary = "Authorization, Accept-Encoding";
+        if (Request.Headers.IfNoneMatch.Any(value => (value ?? string.Empty)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Any(candidate => candidate == "*" || string.Equals(candidate, etag, StringComparison.Ordinal))))
+            return StatusCode(StatusCodes.Status304NotModified);
+
+        Response.Headers.ContentEncoding = bundle.ContentEncoding;
+        return File(bundle.Bytes, bundle.ContentType);
+    }
 
     [HttpGet("tournaments/rewards")]
     public async Task<ActionResult<IReadOnlyList<TournamentRewardGrantDto>>> GetTournamentRewards() =>

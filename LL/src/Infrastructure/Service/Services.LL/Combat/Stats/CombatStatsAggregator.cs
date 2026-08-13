@@ -1,8 +1,8 @@
 using Domain.Models.Combat;
 using Services.LL.Interfaces;
-using System.Collections.Concurrent;
 
 namespace Services.LL.Combat.Stats;
+
 public sealed class CombatStatsAggregator : ICombatStatsAggregator
 {
     public IReadOnlyList<EntityStats> Aggregate(IEnumerable<CombatLogItem> log) =>
@@ -20,7 +20,7 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
 
 public sealed class CombatStatsAccumulator
 {
-    private readonly ConcurrentDictionary<string, WorkEntity> _entityMap = new();
+    private readonly Dictionary<string, WorkEntity> _entityMap = new(StringComparer.OrdinalIgnoreCase);
 
     public void AddRange(
         IEnumerable<CombatLogItem> log,
@@ -28,141 +28,184 @@ public sealed class CombatStatsAccumulator
     {
         foreach (var item in log)
         {
-            // ----- entity context ------------------------------------------------
-            var entity = _entityMap.GetOrAdd(item.ActorId, static id => new WorkEntity(id));
-            var actorTeam = ResolveTeam(item.ActorId, teamsByEntityId);
-            var targetTeam = ResolveTeam(item.TargetId, teamsByEntityId);
-            var relationship = ResolveTargetRelationship(item.ActorId, actorTeam, item.TargetId, targetTeam);
-            entity.SetTeam(actorTeam);
-            var statsSource = string.IsNullOrWhiteSpace(item.StatsSource) ? item.Source : item.StatsSource;
-            if (!string.IsNullOrWhiteSpace(statsSource)
-                && (item.EventType == EventType.AbilityUse || item.CountsAsActivation))
-            {
-                entity.GetOrAddAbility(statsSource).Uses++;
-            }
+            Add(
+                item.Source,
+                item.StatsSource,
+                item.CountsAsActivation,
+                item.ActorId,
+                ResolveTeam(item.ActorId, teamsByEntityId),
+                item.TargetId,
+                ResolveTeam(item.TargetId, teamsByEntityId),
+                item.CombatEntity?.Name,
+                item.EventType,
+                item.Magnitude,
+                item.BarrierAbsorbed,
+                item.IncomingRawDamage,
+                item.AvoidedDamage,
+                item.TypedMitigationPrevented,
+                item.PhysicalMitigationPrevented,
+                item.MagicalMitigationPrevented,
+                item.BlockPrevented,
+                item.DamageReductionPrevented,
+                item.DamageAmplified,
+                item.FinalHealthDamage);
+        }
+    }
 
-            // ----- high-level stats ----------------------------------------------
-            switch (item.EventType)
-            {
-                case EventType.Damage:
-                case EventType.DamageOverTime:
-                case EventType.DamageCrit:
-                case EventType.ReflectedDamage:
-                    if (relationship == DamageTargetRelationship.Opponent)
-                        entity.DamageDone += item.Magnitude;
-                    else if (relationship == DamageTargetRelationship.Self)
-                        entity.SelfDamageDone += item.Magnitude;
-                    else if (relationship == DamageTargetRelationship.Ally)
-                        entity.AlliedDamageDone += item.Magnitude;
+    public void Add(
+        string source,
+        string statsSource,
+        bool countsAsActivation,
+        string actorId,
+        string actorTeam,
+        string targetId,
+        string targetTeam,
+        string? targetName,
+        EventType eventType,
+        int magnitude,
+        int barrierAbsorbed = 0,
+        int incomingRawDamage = 0,
+        int avoidedDamage = 0,
+        int typedMitigationPrevented = 0,
+        int physicalMitigationPrevented = 0,
+        int magicalMitigationPrevented = 0,
+        int blockPrevented = 0,
+        int damageReductionPrevented = 0,
+        int damageAmplified = 0,
+        int finalHealthDamage = 0)
+    {
+        // ----- entity context ------------------------------------------------
+        var entity = GetOrAddEntity(actorId);
+        var relationship = ResolveTargetRelationship(actorId, actorTeam, targetId, targetTeam);
+        entity.SetTeam(actorTeam);
+        statsSource = string.IsNullOrWhiteSpace(statsSource) ? source : statsSource;
+        if (!string.IsNullOrWhiteSpace(statsSource)
+            && (eventType == EventType.AbilityUse || countsAsActivation))
+        {
+            entity.GetOrAddAbility(statsSource).Uses++;
+        }
+
+        // ----- high-level stats ----------------------------------------------
+        switch (eventType)
+        {
+            case EventType.Damage:
+            case EventType.DamageOverTime:
+            case EventType.DamageCrit:
+            case EventType.ReflectedDamage:
+                if (relationship == DamageTargetRelationship.Opponent)
+                    entity.DamageDone += magnitude;
+                else if (relationship == DamageTargetRelationship.Self)
+                    entity.SelfDamageDone += magnitude;
+                else if (relationship == DamageTargetRelationship.Ally)
+                    entity.AlliedDamageDone += magnitude;
+                break;
+            case EventType.Heal:
+            case EventType.HealOverTime:
+            case EventType.HealCrit:
+                entity.HealingDone += magnitude;
+                break;
+            // add more global categories here
+            case EventType.HealthRegeneration:
+                entity.HealthRegenerated += magnitude;
+                break;
+            case EventType.RestoreBarrier:
+                entity.BarrierGenerated += magnitude;
+                break;
+        }
+
+        // ----- ability context -----------------------------------------------
+        switch (eventType)
+        {
+            case EventType.AbilityUse:
+                break;
+
+            case EventType.Damage:
+            case EventType.DamageOverTime:
+            case EventType.DamageCrit:
+            case EventType.ReflectedDamage:
+                if (string.IsNullOrWhiteSpace(statsSource))
                     break;
-                case EventType.Heal:
-                case EventType.HealOverTime:
-                case EventType.HealCrit:
-                    entity.HealingDone += item.Magnitude;
-                    break;
-                // add more global categories here
-                case EventType.HealthRegeneration:
-                    entity.HealthRegenerated += item.Magnitude;
-                    break;
-                case EventType.RestoreBarrier:
-                    entity.BarrierGenerated += item.Magnitude;
-                    break;
-            }
 
-            // ----- ability context -----------------------------------------------
-            switch (item.EventType)
-            {
-                case EventType.AbilityUse:
-                    break;
+                var damageAbility = entity.GetOrAddAbility(statsSource);
+                if (relationship == DamageTargetRelationship.Opponent)
+                    damageAbility.TotalDamage += magnitude;
+                else if (relationship == DamageTargetRelationship.Self)
+                    damageAbility.SelfDamage += magnitude;
+                else if (relationship == DamageTargetRelationship.Ally)
+                    damageAbility.AlliedDamage += magnitude;
+                damageAbility.Hits++;
+                if (eventType == EventType.DamageCrit)
+                    damageAbility.Crits++;
+                break;
 
-                case EventType.Damage:
-                case EventType.DamageOverTime:
-                case EventType.DamageCrit:
-                case EventType.ReflectedDamage:
-                    if (string.IsNullOrWhiteSpace(statsSource))
-                        break;
-
-                    var damageAbility = entity.GetOrAddAbility(statsSource);
-                    if (relationship == DamageTargetRelationship.Opponent)
-                        damageAbility.TotalDamage += item.Magnitude;
-                    else if (relationship == DamageTargetRelationship.Self)
-                        damageAbility.SelfDamage += item.Magnitude;
-                    else if (relationship == DamageTargetRelationship.Ally)
-                        damageAbility.AlliedDamage += item.Magnitude;
-                    damageAbility.Hits++;
-                    if (item.EventType == EventType.DamageCrit)
-                        damageAbility.Crits++;
+            case EventType.Heal:
+            case EventType.HealOverTime:
+            case EventType.HealCrit:
+                if (string.IsNullOrWhiteSpace(statsSource))
                     break;
 
-                case EventType.Heal:
-                case EventType.HealOverTime:
-                case EventType.HealCrit:
-                    if (string.IsNullOrWhiteSpace(statsSource))
-                        break;
+                var healAbility = entity.GetOrAddAbility(statsSource);
+                healAbility.TotalHealing += magnitude;
+                healAbility.Hits++;
+                if (eventType == EventType.HealCrit)
+                    healAbility.Crits++;
+                break;
 
-                    var healAbility = entity.GetOrAddAbility(statsSource);
-                    healAbility.TotalHealing += item.Magnitude;
-                    healAbility.Hits++;
-                    if (item.EventType == EventType.HealCrit)
-                        healAbility.Crits++;
+            case EventType.RestoreBarrier:
+                if (string.IsNullOrWhiteSpace(statsSource))
                     break;
 
-                case EventType.RestoreBarrier:
-                    if (string.IsNullOrWhiteSpace(statsSource))
-                        break;
+                entity.GetOrAddAbility(statsSource).TotalBarrier += magnitude;
+                break;
 
-                    entity.GetOrAddAbility(statsSource).TotalBarrier += item.Magnitude;
+            case EventType.Summon:
+                if (string.IsNullOrWhiteSpace(statsSource))
                     break;
 
-                case EventType.Summon:
-                    if (string.IsNullOrWhiteSpace(statsSource))
-                        break;
-
-                    var summonAbility = entity.GetOrAddAbility(statsSource);
-                    summonAbility.Summons++;
-                    break;
+                var summonAbility = entity.GetOrAddAbility(statsSource);
+                summonAbility.Summons++;
+                break;
 
                 //case EventType.StatusEffect:
                 //    ability.Stuns++;
                 //    break;
-            }
+        }
 
-            // ----- target-side bookkeeping ---------------------------------------
-            if (item.TargetId is { Length: > 0 })
+        // ----- target-side bookkeeping ---------------------------------------
+        if (targetId is { Length: > 0 })
+        {
+            var target = GetOrAddEntity(targetId);
+            target.SetTeam(targetTeam);
+            target.SetName(targetName);
+            if (eventType == EventType.Damage
+                || eventType == EventType.DamageOverTime
+                || eventType == EventType.DamageCrit
+                || eventType == EventType.ReflectedDamage)
             {
-                var target = _entityMap.GetOrAdd(item.TargetId, static id => new WorkEntity(id));
-                target.SetTeam(targetTeam);
-                target.SetName(item.CombatEntity?.Name);
-                if (item.EventType == EventType.Damage
-                    || item.EventType == EventType.DamageOverTime
-                    || item.EventType == EventType.DamageCrit
-                    || item.EventType == EventType.ReflectedDamage)
-                {
-                    target.DamageBlocked += item.BarrierAbsorbed;
-                    target.IncomingRawDamage += item.IncomingRawDamage;
-                    target.TypedMitigationPrevented += item.TypedMitigationPrevented;
-                    target.PhysicalMitigationPrevented += item.PhysicalMitigationPrevented;
-                    target.MagicalMitigationPrevented += item.MagicalMitigationPrevented;
-                    target.BlockPrevented += item.BlockPrevented;
-                    target.DamageReductionPrevented += item.DamageReductionPrevented;
-                    target.DamageAmplified += item.DamageAmplified;
-                    target.FinalHealthDamage += item.FinalHealthDamage;
-                    if (relationship == DamageTargetRelationship.Opponent)
-                        target.DamageTaken += item.Magnitude;
-                    else if (relationship == DamageTargetRelationship.Self)
-                        target.SelfDamageTaken += item.Magnitude;
-                    else if (relationship == DamageTargetRelationship.Ally)
-                        target.AlliedDamageTaken += item.Magnitude;
-                }
-                else if (item.EventType == EventType.Miss)
-                {
-                    target.IncomingRawDamage += item.IncomingRawDamage;
-                    target.AvoidedDamage += item.AvoidedDamage;
-                    target.AvoidedAttacks++;
-                }
-                else if (item.EventType == EventType.Heal || item.EventType == EventType.HealOverTime || item.EventType == EventType.HealCrit)
-                    target.HealingReceived += item.Magnitude;
+                target.DamageBlocked += barrierAbsorbed;
+                target.IncomingRawDamage += incomingRawDamage;
+                target.TypedMitigationPrevented += typedMitigationPrevented;
+                target.PhysicalMitigationPrevented += physicalMitigationPrevented;
+                target.MagicalMitigationPrevented += magicalMitigationPrevented;
+                target.BlockPrevented += blockPrevented;
+                target.DamageReductionPrevented += damageReductionPrevented;
+                target.DamageAmplified += damageAmplified;
+                target.FinalHealthDamage += finalHealthDamage;
+                if (relationship == DamageTargetRelationship.Opponent)
+                    target.DamageTaken += magnitude;
+                else if (relationship == DamageTargetRelationship.Self)
+                    target.SelfDamageTaken += magnitude;
+                else if (relationship == DamageTargetRelationship.Ally)
+                    target.AlliedDamageTaken += magnitude;
             }
+            else if (eventType == EventType.Miss)
+            {
+                target.IncomingRawDamage += incomingRawDamage;
+                target.AvoidedDamage += avoidedDamage;
+                target.AvoidedAttacks++;
+            }
+            else if (eventType == EventType.Heal || eventType == EventType.HealOverTime || eventType == EventType.HealCrit)
+                target.HealingReceived += magnitude;
         }
     }
 
@@ -171,6 +214,13 @@ public sealed class CombatStatsAccumulator
             .Select(e => e.ToImmutable())
             .ToList()
             .AsReadOnly();
+
+    private WorkEntity GetOrAddEntity(string entityId)
+    {
+        if (!_entityMap.TryGetValue(entityId, out var entity))
+            _entityMap[entityId] = entity = new WorkEntity(entityId);
+        return entity;
+    }
 
     private static string ResolveTeam(string entityId, IReadOnlyDictionary<string, string> teamsByEntityId) =>
         !string.IsNullOrWhiteSpace(entityId) && teamsByEntityId.TryGetValue(entityId, out var team) ? team : string.Empty;

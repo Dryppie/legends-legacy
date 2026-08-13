@@ -203,8 +203,72 @@ export interface TowerCombatPlayback {
   totalTicks: number;
   frameCount: number;
   currentSequence: number;
-  currentFrame: TowerCombatFrame;
+  currentFrame: TowerCombatFrame | null;
   isCompleted: boolean;
+  schemaVersion: number;
+  serverNow: string | null;
+  bundleETag: string | null;
+}
+
+export interface TowerPlaybackBundle {
+  schemaVersion: number;
+  ticksPerSecond: number;
+  ticksPerFrame: number;
+  totalTicks: number;
+  entities: TowerPlaybackEntity[];
+  abilities: TowerPlaybackAbility[];
+  frames: TowerPlaybackBundleFrame[];
+}
+
+export interface TowerPlaybackEntity {
+  index: number;
+  id: string;
+  name: string;
+  imagePath: string;
+  isFriendly: boolean;
+  maxHealth: number;
+  level: number;
+}
+
+export interface TowerPlaybackAbility {
+  index: number;
+  entityIndex: number;
+  name: string;
+}
+
+export interface TowerPlaybackBundleFrame {
+  sequence: number;
+  tick: number;
+  entityStates: TowerPlaybackEntityState[];
+  entityTotals: TowerPlaybackEntityTotals[];
+  abilityTotals: TowerPlaybackAbilityTotals[];
+  isFinal: boolean;
+  outcome: BattleOutcome | null;
+}
+
+export interface TowerPlaybackEntityState {
+  entityIndex: number;
+  health: number;
+  barrier: number;
+}
+
+export interface TowerPlaybackEntityTotals {
+  entityIndex: number;
+  damageDone: number;
+  damageTaken: number;
+  healingDone: number;
+  healingReceived: number;
+  healthRegenerated: number;
+  barrierGenerated: number;
+  damageBlocked: number;
+}
+
+export interface TowerPlaybackAbilityTotals {
+  abilityIndex: number;
+  uses: number;
+  totalDamage: number;
+  totalHealing: number;
+  totalBarrier: number;
 }
 
 export interface TowerCombatFrame {
@@ -317,6 +381,10 @@ export class WorldTowerService {
 
   getAttemptPlayback(attemptId: string): Observable<TowerCombatPlayback> {
     return this.api.get(`world-tower/attempts/${attemptId}/playback`);
+  }
+
+  getAttemptPlaybackBundle(attemptId: string): Observable<TowerPlaybackBundle> {
+    return this.api.get(`world-tower/attempts/${attemptId}/playback/bundle`);
   }
 
   getAttemptPlaybackFrames(

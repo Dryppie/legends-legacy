@@ -147,7 +147,11 @@ public sealed record TournamentBracketMatch(
     TournamentTeamEntry? PlayerTwo,
     Guid? WinnerTeamId,
     Guid? CombatSessionId,
-    Guid? BattleHistoryId);
+    Guid? BattleHistoryId,
+    DateTimeOffset? ScheduledAtUtc,
+    DateTimeOffset? PlaybackStartedAtUtc,
+    DateTimeOffset? PlaybackEndsAtUtc,
+    bool HasPlayback);
 
 public sealed record RegisterTournamentResult(
     bool Registered,

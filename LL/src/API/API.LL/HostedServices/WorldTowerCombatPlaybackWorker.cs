@@ -14,7 +14,9 @@ public sealed class WorldTowerCombatPlaybackWorker(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var delay = TimeSpan.FromMilliseconds(options.Value.PlaybackPollMilliseconds);
+        var delay = TimeSpan.FromMilliseconds(options.Value.CompactPlaybackEnabled
+            ? options.Value.FinalizationPollMilliseconds
+            : options.Value.PlaybackPollMilliseconds);
         while (!stoppingToken.IsCancellationRequested)
         {
             try

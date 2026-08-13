@@ -3,6 +3,7 @@ using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Damages;
 using Services.LL.Combat.Stats;
+using System.Runtime.CompilerServices;
 
 namespace Services.LL.Combat.Engine;
 
@@ -42,6 +43,7 @@ public sealed class FastCombatEngine
     private readonly Dictionary<string, int> _balanceDamageDone = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _balanceDamageTaken = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, RuntimeSummonGroup> _summonGroups = new(StringComparer.OrdinalIgnoreCase);
+    private CombatStatsAccumulator? _checkpointStats;
     private int _currentTick;
     private long _applicationOrder;
     private int _eventDepth;
@@ -97,12 +99,13 @@ public sealed class FastCombatEngine
             InitializeActiveAbilityCooldowns(combatant);
         }
 
-        Publish(new CombatEvent(AbilityTriggerEvent.OnCombatStart, null, null, null), combatants);
         var checkpointSequence = 0;
         var checkpointLogIndex = 0;
         var checkpointStats = checkpointObserver is not null && checkpointIntervalTicks > 0
             ? new CombatStatsAccumulator()
             : null;
+        _checkpointStats = checkpointStats;
+        Publish(new CombatEvent(AbilityTriggerEvent.OnCombatStart, null, null, null), combatants);
         if (checkpointObserver is not null && checkpointIntervalTicks > 0)
         {
             checkpointObserver(CreateCheckpoint(
@@ -123,8 +126,12 @@ public sealed class FastCombatEngine
 
             PublishIntervalEvents(combatants);
 
-            foreach (var combatant in combatants.Where(x => x.IsAlive).ToList())
+            var actingCombatantCount = combatants.Count;
+            for (var combatantIndex = 0; combatantIndex < actingCombatantCount; combatantIndex++)
             {
+                var combatant = combatants[combatantIndex];
+                if (!combatant.IsAlive)
+                    continue;
                 if (IsActionBlocked(combatant) || !HasLivingOpponent(combatant, combatants))
                     continue;
 
@@ -176,7 +183,7 @@ public sealed class FastCombatEngine
             }
         }
 
-        var entityStats = _captureEventLog
+        var entityStats = _captureEventLog || checkpointStats is not null
             ? CreateDetailedStats(combatants, checkpointStats)
             : CreateBalanceStats(combatants);
 
@@ -196,12 +203,15 @@ public sealed class FastCombatEngine
         int logIndex,
         bool isFinal)
     {
-        var intervalEvents = _log.Skip(logIndex).ToArray();
-        var teams = combatants.ToDictionary(
-            combatant => combatant.Id,
-            combatant => combatant.Team.ToString(),
-            StringComparer.OrdinalIgnoreCase);
-        stats.AddRange(intervalEvents, teams);
+        var intervalEvents = _captureEventLog ? _log.Skip(logIndex).ToArray() : [];
+        if (_captureEventLog)
+        {
+            var teams = combatants.ToDictionary(
+                combatant => combatant.Id,
+                combatant => combatant.Team.ToString(),
+                StringComparer.OrdinalIgnoreCase);
+            stats.AddRange(intervalEvents, teams);
+        }
         var entityStats = AddFinalCombatantState(
             AddHealthRegenerationTelemetry(
                 stats.Snapshot(),
@@ -256,8 +266,12 @@ public sealed class FastCombatEngine
 
     private void PublishIntervalEvents(IReadOnlyList<RuntimeCombatant> combatants)
     {
-        foreach (var combatant in combatants.Where(x => x.IsAlive).ToList())
+        var intervalCombatantCount = combatants.Count;
+        for (var combatantIndex = 0; combatantIndex < intervalCombatantCount; combatantIndex++)
         {
+            var combatant = combatants[combatantIndex];
+            if (!combatant.IsAlive)
+                continue;
             var hasAbilityListener =
                 combatant.AbilityTriggersByEvent.ContainsKey(AbilityTriggerEvent.OnInterval);
             var hasStatusListener = combatant.Statuses.Any(
@@ -338,11 +352,27 @@ public sealed class FastCombatEngine
         || combatant.HasCondition(StandardConditionType.Stun)
         || combatant.HasCondition(StandardConditionType.Freeze);
 
-    private static bool HasLivingOpponent(RuntimeCombatant actor, IReadOnlyList<RuntimeCombatant> combatants) =>
-        combatants.Any(x => x.Team != actor.Team && x.IsAlive);
+    private static bool HasLivingOpponent(RuntimeCombatant actor, IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        for (var index = 0; index < combatants.Count; index++)
+        {
+            var combatant = combatants[index];
+            if (combatant.Team != actor.Team && combatant.IsAlive)
+                return true;
+        }
+        return false;
+    }
 
-    private static bool HasLivingTeam(IReadOnlyList<RuntimeCombatant> combatants, CombatTeam team) =>
-        combatants.Any(x => x.Team == team && x.IsAlive);
+    private static bool HasLivingTeam(IReadOnlyList<RuntimeCombatant> combatants, CombatTeam team)
+    {
+        for (var index = 0; index < combatants.Count; index++)
+        {
+            var combatant = combatants[index];
+            if (combatant.Team == team && combatant.IsAlive)
+                return true;
+        }
+        return false;
+    }
 
     private bool CanResolveActiveAbility(
         RuntimeAbility ability,
@@ -3169,7 +3199,110 @@ public sealed class FastCombatEngine
         int damageReductionPrevented = 0,
         int damageAmplified = 0,
         int finalHealthDamage = 0)
+        => LogCore(
+            source,
+            target,
+            sourceName,
+            eventType,
+            magnitude,
+            details,
+            statsSource,
+            countsAsActivation,
+            barrierAbsorbed,
+            incomingRawDamage,
+            avoidedDamage,
+            typedMitigationPrevented,
+            physicalMitigationPrevented,
+            magicalMitigationPrevented,
+            blockPrevented,
+            damageReductionPrevented,
+            damageAmplified,
+            finalHealthDamage);
+
+    private void Log(
+        RuntimeCombatant source,
+        RuntimeCombatant? target,
+        string sourceName,
+        EventType eventType,
+        int magnitude,
+        [InterpolatedStringHandlerArgument("")] ref CombatLogDetailsHandler details,
+        string? statsSource = null,
+        bool countsAsActivation = false,
+        int barrierAbsorbed = 0,
+        int incomingRawDamage = 0,
+        int avoidedDamage = 0,
+        int typedMitigationPrevented = 0,
+        int physicalMitigationPrevented = 0,
+        int magicalMitigationPrevented = 0,
+        int blockPrevented = 0,
+        int damageReductionPrevented = 0,
+        int damageAmplified = 0,
+        int finalHealthDamage = 0)
+        => LogCore(
+            source,
+            target,
+            sourceName,
+            eventType,
+            magnitude,
+            details.GetFormattedText(),
+            statsSource,
+            countsAsActivation,
+            barrierAbsorbed,
+            incomingRawDamage,
+            avoidedDamage,
+            typedMitigationPrevented,
+            physicalMitigationPrevented,
+            magicalMitigationPrevented,
+            blockPrevented,
+            damageReductionPrevented,
+            damageAmplified,
+            finalHealthDamage);
+
+    private void LogCore(
+        RuntimeCombatant source,
+        RuntimeCombatant? target,
+        string sourceName,
+        EventType eventType,
+        int magnitude,
+        string details,
+        string? statsSource,
+        bool countsAsActivation,
+        int barrierAbsorbed,
+        int incomingRawDamage,
+        int avoidedDamage,
+        int typedMitigationPrevented,
+        int physicalMitigationPrevented,
+        int magicalMitigationPrevented,
+        int blockPrevented,
+        int damageReductionPrevented,
+        int damageAmplified,
+        int finalHealthDamage)
     {
+        if (_checkpointStats is not null && !_captureEventLog)
+        {
+            _checkpointStats.Add(
+                sourceName,
+                statsSource ?? string.Empty,
+                countsAsActivation,
+                source.Id,
+                source.Team.ToString(),
+                target?.Id ?? string.Empty,
+                target?.Team.ToString() ?? string.Empty,
+                target?.Name,
+                eventType,
+                magnitude,
+                barrierAbsorbed,
+                incomingRawDamage,
+                avoidedDamage,
+                typedMitigationPrevented,
+                physicalMitigationPrevented,
+                magicalMitigationPrevented,
+                blockPrevented,
+                damageReductionPrevented,
+                damageAmplified,
+                finalHealthDamage);
+        }
+
         if (!_captureEventLog)
             return;
 
@@ -3206,6 +3339,36 @@ public sealed class FastCombatEngine
                     Barrier = (int)target.Barrier
                 }
         });
+    }
+
+    [InterpolatedStringHandler]
+    private ref struct CombatLogDetailsHandler
+    {
+        private DefaultInterpolatedStringHandler _builder;
+        private readonly bool _enabled;
+
+        public CombatLogDetailsHandler(
+            int literalLength,
+            int formattedCount,
+            FastCombatEngine engine,
+            out bool shouldAppend)
+        {
+            shouldAppend = engine._captureEventLog;
+            _enabled = shouldAppend;
+            _builder = shouldAppend
+                ? new DefaultInterpolatedStringHandler(literalLength, formattedCount)
+                : default;
+        }
+
+        public void AppendLiteral(string value) => _builder.AppendLiteral(value);
+        public void AppendFormatted<T>(T value) => _builder.AppendFormatted(value);
+        public void AppendFormatted<T>(T value, string? format) => _builder.AppendFormatted(value, format);
+        public void AppendFormatted<T>(T value, int alignment) => _builder.AppendFormatted(value, alignment);
+        public void AppendFormatted<T>(T value, int alignment, string? format) =>
+            _builder.AppendFormatted(value, alignment, format);
+        public string GetFormattedText() => _enabled
+            ? _builder.ToStringAndClear()
+            : string.Empty;
     }
 
     private void TrackBalanceDamage(

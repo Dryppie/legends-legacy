@@ -380,6 +380,7 @@
                     <a
                       *ngIf="
                         rally.status === 'Recruiting' ||
+                        rally.status === 'InProgress' ||
                         rally.id === floor.currentCharacterRallyId
                       "
                       class="tower-button ll-button expedition-apply"

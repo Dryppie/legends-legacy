@@ -1,5 +1,6 @@
 using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Combat;
+using Application.UseCases.Colosseum.Tournaments;
 
 namespace Application.Interfaces.Services.LL.Colosseum;
 
@@ -14,6 +15,10 @@ public interface ITournamentGroundsService
     Task<IReadOnlyList<TournamentSeasonLeaderboardEntry>> GetSeasonLeaderboardAsync(CancellationToken cancellationToken);
     Task<TournamentBracket?> GetBracketAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken);
     Task<CombatResult?> GetMatchReplayAsync(Guid characterId, Guid tournamentId, Guid matchId, CancellationToken cancellationToken);
+    Task<TournamentPlaybackManifestDto?> GetMatchPlaybackAsync(Guid characterId, Guid tournamentId, Guid matchId, CancellationToken cancellationToken) =>
+        Task.FromResult<TournamentPlaybackManifestDto?>(null);
+    Task<TournamentPlaybackBundleContentDto?> GetMatchPlaybackBundleAsync(Guid characterId, Guid tournamentId, Guid matchId, CancellationToken cancellationToken) =>
+        Task.FromResult<TournamentPlaybackBundleContentDto?>(null);
     Task<IReadOnlyList<TournamentRewardGrantEntry>> GetRewardsAsync(Guid characterId, Guid? tournamentId, CancellationToken cancellationToken);
     Task<RegisterTournamentResult?> RegisterAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken);
     Task<WithdrawTournamentResult?> WithdrawAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken);

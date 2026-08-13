@@ -39,6 +39,27 @@ public sealed class WorldTowerController : BaseController
     public async Task<ActionResult<TowerCombatPlaybackDto?>> GetAttemptPlayback(Guid attemptId) =>
         await Mediator.Send(new GetTowerAttemptPlaybackQuery(CurrentCharacterGuid, attemptId));
 
+    [HttpGet("attempts/{attemptId:guid}/playback/bundle")]
+    public async Task<IActionResult> GetAttemptPlaybackBundle(Guid attemptId)
+    {
+        var bundle = await Mediator.Send(
+            new GetTowerAttemptPlaybackBundleQuery(CurrentCharacterGuid, attemptId));
+        if (bundle is null)
+            return NotFound();
+
+        var etag = $"\"{bundle.ETag}\"";
+        Response.Headers.ETag = etag;
+        Response.Headers.CacheControl = "private, max-age=31536000, immutable";
+        Response.Headers.Vary = "Authorization, Accept-Encoding";
+        if (Request.Headers.IfNoneMatch.Any(value => (value ?? string.Empty)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Any(candidate => candidate == "*" || string.Equals(candidate, etag, StringComparison.Ordinal))))
+            return StatusCode(StatusCodes.Status304NotModified);
+
+        Response.Headers.ContentEncoding = bundle.ContentEncoding;
+        return File(bundle.Bytes, bundle.ContentType);
+    }
+
     [HttpGet("attempts/{attemptId:guid}/playback/frames")]
     public async Task<ActionResult<TowerCombatFrameBatchDto?>> GetAttemptPlaybackFrames(
         Guid attemptId,

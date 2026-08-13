@@ -153,8 +153,11 @@ public sealed record TowerCombatPlaybackDto(
     int TotalTicks,
     int FrameCount,
     int CurrentSequence,
-    TowerCombatFrameDto CurrentFrame,
-    bool IsCompleted);
+    TowerCombatFrameDto? CurrentFrame,
+    bool IsCompleted,
+    int SchemaVersion = 1,
+    DateTimeOffset? ServerNow = null,
+    string? BundleETag = null);
 
 public sealed record TowerCombatFrameDto(
     int Sequence,

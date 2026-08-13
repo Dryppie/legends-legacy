@@ -15,6 +15,7 @@ public sealed record GetTowerRallyQuery(Guid CharacterId, Guid RallyId) : IQuery
 public sealed record GetTowerAttemptReportQuery(Guid CharacterId, Guid AttemptId) : IQuery<TowerBattleReportDto?>;
 public sealed record GetTowerAttemptCombatResultQuery(Guid CharacterId, Guid AttemptId) : IQuery<CombatResultDto?>;
 public sealed record GetTowerAttemptPlaybackQuery(Guid CharacterId, Guid AttemptId) : IQuery<TowerCombatPlaybackDto?>;
+public sealed record GetTowerAttemptPlaybackBundleQuery(Guid CharacterId, Guid AttemptId) : IQuery<TowerPlaybackBundleContentDto?>;
 public sealed record GetTowerAttemptPlaybackFramesQuery(Guid CharacterId, Guid AttemptId, int AfterSequence) : IQuery<TowerCombatFrameBatchDto?>;
 public sealed record GetTowerHallOfFameQuery : IQuery<IReadOnlyList<TowerHallOfFameEntryDto>>;
 public sealed record GetPersonalTowerExpeditionsQuery(Guid CharacterId) : IQuery<IReadOnlyList<TowerPersonalExpeditionDto>>;
@@ -72,6 +73,18 @@ public sealed class GetTowerAttemptPlaybackQueryHandler(IWorldTowerService tower
         GetTowerAttemptPlaybackQuery request,
         CancellationToken cancellationToken) =>
         tower.GetAttemptPlaybackAsync(request.CharacterId, request.AttemptId, cancellationToken);
+}
+
+public sealed class GetTowerAttemptPlaybackBundleQueryHandler(IWorldTowerService tower)
+    : IRequestHandler<GetTowerAttemptPlaybackBundleQuery, TowerPlaybackBundleContentDto?>
+{
+    public Task<TowerPlaybackBundleContentDto?> Handle(
+        GetTowerAttemptPlaybackBundleQuery request,
+        CancellationToken cancellationToken) =>
+        tower.GetAttemptPlaybackBundleAsync(
+            request.CharacterId,
+            request.AttemptId,
+            cancellationToken);
 }
 
 public sealed class GetTowerAttemptPlaybackFramesQueryHandler(IWorldTowerService tower)

@@ -283,10 +283,14 @@ public sealed record TournamentMatchDto(
     TournamentTeamDto? PlayerTwo,
     Guid? WinnerTeamId,
     Guid? CombatSessionId,
-    Guid? BattleHistoryId) : IMapFrom<TournamentBracketMatch>
+    Guid? BattleHistoryId,
+    DateTimeOffset? ScheduledAtUtc,
+    DateTimeOffset? PlaybackStartedAtUtc,
+    DateTimeOffset? PlaybackEndsAtUtc,
+    bool HasPlayback) : IMapFrom<TournamentBracketMatch>
 {
     public TournamentMatchDto()
-        : this(Guid.Empty, 0, 0, string.Empty, string.Empty, null, null, null, null, null)
+        : this(Guid.Empty, 0, 0, string.Empty, string.Empty, null, null, null, null, null, null, null, null, false)
     {
     }
 

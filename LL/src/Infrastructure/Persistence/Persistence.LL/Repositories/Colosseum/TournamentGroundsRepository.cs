@@ -16,6 +16,7 @@ public sealed class TournamentGroundsRepository(LLDbContext context) : ITourname
     public IQueryable<TournamentParticipant> Participants => context.TournamentParticipants;
     public IQueryable<TournamentCombatSnapshot> CombatSnapshots => context.TournamentCombatSnapshots;
     public IQueryable<TournamentCombatReplay> CombatReplays => context.TournamentCombatReplays;
+    public IQueryable<TournamentCombatReplayArtifact> CombatReplayArtifacts => context.TournamentCombatReplayArtifacts;
     public IQueryable<TournamentRound> Rounds => context.TournamentRounds;
     public IQueryable<TournamentMatch> Matches => context.TournamentMatches;
     public IQueryable<TournamentRewardGrant> RewardGrants => context.TournamentRewardGrants;

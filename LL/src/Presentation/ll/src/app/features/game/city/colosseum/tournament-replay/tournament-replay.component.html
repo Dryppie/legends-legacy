@@ -25,7 +25,13 @@
         class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between"
       >
         <div class="min-w-0">
-          <p class="ll-stat-label">Tournament Replay</p>
+          <p class="ll-stat-label">
+            {{
+              match()?.status === "Resolving"
+                ? "Live Tournament Battle"
+                : "Tournament Replay"
+            }}
+          </p>
           <h1 class="ll-heading mt-1 text-xl">
             {{ details()?.summary?.name ?? "Tournament Match" }}
           </h1>
@@ -47,10 +53,10 @@
           <button
             type="button"
             class="ll-button-primary px-3 py-2 text-sm"
-            [disabled]="!replay() || loading()"
+            [disabled]="(!replay() && !playback()) || loading()"
             (click)="startReplay()"
           >
-            Play Replay
+            {{ match()?.status === "Resolving" ? "Watch Live" : "Play Replay" }}
           </button>
           <button
             type="button"

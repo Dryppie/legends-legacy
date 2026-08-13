@@ -227,7 +227,9 @@ export class TowerOverviewComponent implements OnInit {
     rally: TowerRallySummary,
     currentCharacterRallyId: string | null,
   ): string {
-    if (rally.status === 'InProgress') return 'View';
+    if (rally.status === 'InProgress') {
+      return rally.id === currentCharacterRallyId ? 'View' : 'Spectate';
+    }
     if (rally.id === currentCharacterRallyId) return 'View';
     if (rally.status === 'Ready') return 'Full';
     return 'Apply';

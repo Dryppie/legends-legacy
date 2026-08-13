@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Persistence.LL;
@@ -12,9 +13,11 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    partial class LLDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260813175534_OptimizeWorldTowerPlaybackV2")]
+    partial class OptimizeWorldTowerPlaybackV2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -674,22 +677,8 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("BattleHistoryId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("BundleContentEncoding")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<string>("BundleContentType")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("BundleHash")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<int?>("BundleLength")
-                        .HasColumnType("integer");
-
                     b.Property<string>("CombatResultJson")
+                        .IsRequired()
                         .HasColumnType("jsonb");
 
                     b.Property<Guid>("CombatSessionId")
@@ -699,9 +688,6 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Duration")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("FrameCount")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("MatchId")
@@ -718,17 +704,8 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("PlayerTwoCharacterId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("SchemaVersion")
-                        .HasColumnType("integer");
-
                     b.Property<DateTimeOffset>("StartedAtUtc")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("TicksPerFrame")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TicksPerSecond")
-                        .HasColumnType("integer");
 
                     b.Property<Guid>("TournamentId")
                         .HasColumnType("uuid");
@@ -747,20 +724,6 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("TournamentId", "MatchId");
 
                     b.ToTable("TournamentCombatReplays");
-                });
-
-            modelBuilder.Entity("Domain.Models.Colosseum.Tournaments.TournamentCombatReplayArtifact", b =>
-                {
-                    b.Property<Guid>("TournamentCombatReplayId")
-                        .HasColumnType("uuid");
-
-                    b.Property<byte[]>("BundleBytes")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.HasKey("TournamentCombatReplayId");
-
-                    b.ToTable("TournamentCombatReplayArtifacts");
                 });
 
             modelBuilder.Entity("Domain.Models.Colosseum.Tournaments.TournamentCombatSnapshot", b =>
@@ -978,12 +941,6 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("Outcome")
                         .HasColumnType("integer");
 
-                    b.Property<DateTimeOffset?>("PlaybackEndsAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("PlaybackStartedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<Guid?>("PlayerOneParticipantId")
                         .HasColumnType("uuid");
 
@@ -998,9 +955,6 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int>("RoundNumber")
                         .HasColumnType("integer");
-
-                    b.Property<DateTimeOffset?>("ScheduledAtUtc")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -1019,10 +973,6 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("RoundId");
 
                     b.HasIndex("WinnerParticipantId");
-
-                    b.HasIndex("Status", "PlaybackEndsAtUtc");
-
-                    b.HasIndex("TournamentId", "ScheduledAtUtc");
 
                     b.HasIndex("TournamentId", "Status");
 
@@ -4673,17 +4623,6 @@ namespace Persistence.LL.Migrations
                     b.Navigation("Tournament");
                 });
 
-            modelBuilder.Entity("Domain.Models.Colosseum.Tournaments.TournamentCombatReplayArtifact", b =>
-                {
-                    b.HasOne("Domain.Models.Colosseum.Tournaments.TournamentCombatReplay", "Replay")
-                        .WithOne("Artifact")
-                        .HasForeignKey("Domain.Models.Colosseum.Tournaments.TournamentCombatReplayArtifact", "TournamentCombatReplayId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Replay");
-                });
-
             modelBuilder.Entity("Domain.Models.Colosseum.Tournaments.TournamentCombatSnapshot", b =>
                 {
                     b.HasOne("Domain.Models.Snapshots.CharacterSnapshot", "CharacterSnapshot")
@@ -5476,11 +5415,6 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterAction", b =>
                 {
                     b.Navigation("ActionDetails");
-                });
-
-            modelBuilder.Entity("Domain.Models.Colosseum.Tournaments.TournamentCombatReplay", b =>
-                {
-                    b.Navigation("Artifact");
                 });
 
             modelBuilder.Entity("Domain.Models.Colosseum.Tournaments.TournamentRound", b =>

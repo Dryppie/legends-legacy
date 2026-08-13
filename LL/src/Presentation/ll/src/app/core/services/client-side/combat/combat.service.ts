@@ -10,6 +10,7 @@ import {
 } from '../../../../shared/models/Dtos/combatResultDto';
 import { LevelingService } from '../leveling/leveling.service';
 import { TowerCombatFrame } from '../../api/world-tower/world-tower.service';
+import { TournamentCombatFrame } from '../../../../shared/models/Dtos/colosseum/tournamentGrounds';
 
 @Injectable({
   providedIn: 'root',
@@ -71,7 +72,21 @@ export class CombatService {
   }
 
   applyTowerCombatFrame(frame: TowerCombatFrame, reset = false): void {
-    const type = BattleType.Tower;
+    this.applyPlaybackFrame(BattleType.Tower, frame, reset);
+  }
+
+  applyTournamentCombatFrame(
+    frame: TournamentCombatFrame,
+    reset = false,
+  ): void {
+    this.applyPlaybackFrame(BattleType.Colosseum, frame, reset);
+  }
+
+  private applyPlaybackFrame(
+    type: BattleType,
+    frame: TowerCombatFrame | TournamentCombatFrame,
+    reset: boolean,
+  ): void {
     if (reset) this.clearCurrentCombat(type);
 
     const result: CombatResultDto = {
@@ -93,7 +108,7 @@ export class CombatService {
     this.combatStateService.setCombatResult(type, result);
     this.combatStateService.setCombatOutcome(
       type,
-      frame.isFinal ? frame.outcome : null,
+      frame.isFinal ? (frame.outcome ?? null) : null,
     );
   }
 

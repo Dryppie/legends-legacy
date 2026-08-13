@@ -98,11 +98,29 @@ public sealed class TowerCombatPlaybackConfiguration : IEntityTypeConfiguration<
     public void Configure(EntityTypeBuilder<TowerCombatPlayback> builder)
     {
         builder.HasKey(x => x.TowerAttemptId);
-        builder.Property(x => x.TimelineJson).HasColumnType("jsonb").IsRequired();
+        builder.Property(x => x.TimelineJson).HasColumnType("jsonb");
+        builder.Property(x => x.BundleHash).HasMaxLength(64);
+        builder.Property(x => x.BundleContentType).HasMaxLength(128);
+        builder.Property(x => x.BundleContentEncoding).HasMaxLength(32);
         builder.Property(x => x.DispatchLeaseOwner).HasMaxLength(128);
         builder.Property(x => x.RowVersion).IsConcurrencyToken();
         builder.HasIndex(x => new { x.NextFrameDueAt, x.LastPublishedSequence });
+        builder.HasIndex(x => x.PlaybackEndsAt);
         builder.HasIndex(x => x.DispatchLeaseUntil);
+        builder.HasOne(x => x.Artifact)
+            .WithOne(x => x.Playback)
+            .HasForeignKey<TowerCombatPlaybackArtifact>(x => x.TowerAttemptId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public sealed class TowerCombatPlaybackArtifactConfiguration
+    : IEntityTypeConfiguration<TowerCombatPlaybackArtifact>
+{
+    public void Configure(EntityTypeBuilder<TowerCombatPlaybackArtifact> builder)
+    {
+        builder.HasKey(x => x.TowerAttemptId);
+        builder.Property(x => x.BundleBytes).HasColumnType("bytea").IsRequired();
     }
 }
 

@@ -5,6 +5,7 @@ using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.WebSockets;
 using Application.MediatR.Attributes;
 using Application.UseCases.Colosseum.Tournaments.Commands;
+using Application.UseCases.Colosseum.Tournaments;
 using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
 using Domain.Models.Colosseum;
@@ -28,6 +29,8 @@ using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.IO.Compression;
 using Quartz;
 using Worker.LL.BackgroundJobs;
 
@@ -599,6 +602,7 @@ public sealed class TournamentGroundsServiceTests
             BattleOutcome.Victory,
             BattleOutcome.Victory);
         var outbox = new RecordingGameEventOutbox();
+        var clock = new MutableTimeProvider(Now);
         var service = CreateService(
             db,
             realtime,
@@ -606,6 +610,7 @@ public sealed class TournamentGroundsServiceTests
             combatSetupService: new SimpleCombatSetupService(),
             combatEngineExecutor: combatExecutor,
             combatEncounterResultFactory: new PassthroughCombatEncounterResultFactory(),
+            timeProvider: clock,
             outbox: outbox);
         var tournament = SeedTournament(db, TournamentStatus.RegistrationClosed);
         tournament.StartsAtUtc = Now.AddMinutes(-1);
@@ -619,6 +624,38 @@ public sealed class TournamentGroundsServiceTests
         tournament.RegisteredParticipantCount = 10;
         await db.SaveChangesAsync();
 
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+
+        Assert.Equal(TournamentStatus.InProgress, tournament.Status);
+        Assert.Equal(1, combatExecutor.ExecutionCount);
+        var liveMatch = Assert.Single(
+            await db.TournamentMatches
+                .Where(m => m.Status == TournamentMatchStatus.Resolving)
+                .ToListAsync());
+        Assert.Null(liveMatch.WinnerParticipantId);
+        Assert.Null(liveMatch.BattleHistoryId);
+        Assert.Empty(await db.ColosseumMatches.ToListAsync());
+        Assert.Empty(await db.TournamentRewardGrants.ToListAsync());
+
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+        Assert.Equal(1, combatExecutor.ExecutionCount);
+        Assert.Equal(TournamentMatchStatus.Resolving, liveMatch.Status);
+
+        clock.SetUtcNow(Now.AddMinutes(1));
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+        Assert.Equal(1, await db.TournamentMatches.CountAsync(m => m.Status == TournamentMatchStatus.Completed));
+        Assert.Equal(1, combatExecutor.ExecutionCount);
+
+        clock.SetUtcNow(Now.AddMinutes(10));
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+        Assert.Equal(2, combatExecutor.ExecutionCount);
+        clock.SetUtcNow(Now.AddMinutes(11));
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+
+        clock.SetUtcNow(Now.AddMinutes(20));
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+        Assert.Equal(3, combatExecutor.ExecutionCount);
+        clock.SetUtcNow(Now.AddMinutes(21));
         await service.AdvanceDueTournamentsAsync(CancellationToken.None);
 
         Assert.Equal(TournamentStatus.Completed, tournament.Status);
@@ -641,6 +678,10 @@ public sealed class TournamentGroundsServiceTests
             Assert.NotNull(match.CombatSessionId);
             Assert.Equal(match.Id, match.BattleHistoryId);
         });
+        Assert.Equal(
+            [10d, 10d],
+            matches.Zip(matches.Skip(1), (left, right) =>
+                (right.ScheduledAtUtc!.Value - left.ScheduledAtUtc!.Value).TotalMinutes));
 
         var championTeam = await db.TournamentTeams.SingleAsync(t => t.Status == TournamentTeamStatus.Champion);
 
@@ -672,6 +713,33 @@ public sealed class TournamentGroundsServiceTests
         Assert.NotNull(replay);
         Assert.NotEmpty(replay.EventLog);
         Assert.Equal(BattleOutcome.Victory, replay.Outcome);
+
+        var spectatorId = Guid.NewGuid();
+        var manifest = await service.GetMatchPlaybackAsync(
+            spectatorId,
+            tournament.Id,
+            replayMatch.Id,
+            CancellationToken.None);
+        Assert.NotNull(manifest);
+        Assert.Equal(TournamentCombatReplay.CompactBundleSchemaVersion, manifest.SchemaVersion);
+        Assert.True(manifest.IsCompleted);
+        var bundleContent = await service.GetMatchPlaybackBundleAsync(
+            spectatorId,
+            tournament.Id,
+            replayMatch.Id,
+            CancellationToken.None);
+        Assert.NotNull(bundleContent);
+        Assert.Equal("br", bundleContent.ContentEncoding);
+        using var compressed = new MemoryStream(bundleContent.Bytes);
+        using var brotli = new BrotliStream(compressed, CompressionMode.Decompress);
+        var playbackJsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        playbackJsonOptions.Converters.Add(new JsonStringEnumConverter());
+        var playbackBundle = await JsonSerializer.DeserializeAsync<TournamentPlaybackBundleDto>(
+            brotli,
+            playbackJsonOptions);
+        Assert.NotNull(playbackBundle);
+        Assert.NotEmpty(playbackBundle.Frames);
+        Assert.True(playbackBundle.Frames[^1].IsFinal);
 
         var historyEntries = await service.GetHistoryAsync(champion.CharacterId, CancellationToken.None);
         var historyEntry = Assert.Single(historyEntries);
@@ -780,12 +848,22 @@ public sealed class TournamentGroundsServiceTests
                 var job = CreateProgressionJob(db, service, options);
 
                 await job.Execute(new TournamentJobExecutionContext(clock.GetUtcNow()));
+                clock.SetUtcNow(new DateTimeOffset(2026, 7, 4, 0, 6, 0, TimeSpan.Zero));
+                await job.Execute(new TournamentJobExecutionContext(clock.GetUtcNow()));
+                clock.SetUtcNow(new DateTimeOffset(2026, 7, 4, 0, 10, 0, TimeSpan.Zero));
+                await job.Execute(new TournamentJobExecutionContext(clock.GetUtcNow()));
+                clock.SetUtcNow(new DateTimeOffset(2026, 7, 4, 0, 11, 0, TimeSpan.Zero));
+                await job.Execute(new TournamentJobExecutionContext(clock.GetUtcNow()));
+                clock.SetUtcNow(new DateTimeOffset(2026, 7, 4, 0, 20, 0, TimeSpan.Zero));
+                await job.Execute(new TournamentJobExecutionContext(clock.GetUtcNow()));
+                clock.SetUtcNow(new DateTimeOffset(2026, 7, 4, 0, 21, 0, TimeSpan.Zero));
+                await job.Execute(new TournamentJobExecutionContext(clock.GetUtcNow()));
 
                 var tournament = await db.ArenaTournaments.SingleAsync(t => t.Id == tournamentId);
                 Assert.Equal(TournamentStatus.Completed, tournament.Status);
                 Assert.Equal(3, combatExecutor.ExecutionCount);
                 Assert.Equal(10, await db.TournamentRewardGrants.CountAsync(r => r.TournamentId == tournamentId));
-                Assert.Equal(2, await db.BackgroundJobExecutions.CountAsync(e => e.JobName == BackgroundJobNames.TournamentGroundsRollover));
+                Assert.Equal(7, await db.BackgroundJobExecutions.CountAsync(e => e.JobName == BackgroundJobNames.TournamentGroundsRollover));
                 Assert.Contains(realtime.Events, e => e.Event == "TournamentCompleted");
             }
         }

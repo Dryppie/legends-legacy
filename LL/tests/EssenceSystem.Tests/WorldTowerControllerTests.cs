@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Security.Claims;
 using API.LL.Controllers.V1;
 using Application.UseCases.WorldTower;
+using Application.UseCases.WorldTower.Dtos;
 using Domain.Models.WorldTower;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -96,6 +97,48 @@ public sealed class WorldTowerControllerTests
     }
 
     [Fact]
+    public async Task PlaybackEndpointsDispatchAuthenticatedCharacter()
+    {
+        var characterId = Guid.NewGuid();
+        var attemptId = Guid.NewGuid();
+        var sender = new RecordingSender();
+        var controller = CreateController(sender, characterId);
+
+        await controller.GetAttemptPlayback(attemptId);
+        await controller.GetAttemptPlaybackFrames(attemptId, 17);
+        var bundleResult = await controller.GetAttemptPlaybackBundle(attemptId);
+
+        Assert.IsType<NotFoundResult>(bundleResult);
+        var manifest = Assert.IsType<GetTowerAttemptPlaybackQuery>(sender.Requests[0]);
+        Assert.Equal((characterId, attemptId), (manifest.CharacterId, manifest.AttemptId));
+        var frames = Assert.IsType<GetTowerAttemptPlaybackFramesQuery>(sender.Requests[1]);
+        Assert.Equal((characterId, attemptId, 17), (frames.CharacterId, frames.AttemptId, frames.AfterSequence));
+        var bundle = Assert.IsType<GetTowerAttemptPlaybackBundleQuery>(sender.Requests[2]);
+        Assert.Equal((characterId, attemptId), (bundle.CharacterId, bundle.AttemptId));
+    }
+
+    [Fact]
+    public async Task PlaybackBundleHonorsStrongETag()
+    {
+        var sender = new RecordingSender
+        {
+            NextResponse = new TowerPlaybackBundleContentDto(
+                [1, 2, 3],
+                "application/json",
+                "br",
+                "content-hash")
+        };
+        var controller = CreateController(sender, Guid.NewGuid());
+        controller.Request.Headers.IfNoneMatch = "\"content-hash\"";
+
+        var result = await controller.GetAttemptPlaybackBundle(Guid.NewGuid());
+
+        Assert.Equal(StatusCodes.Status304NotModified, Assert.IsType<StatusCodeResult>(result).StatusCode);
+        Assert.Equal("\"content-hash\"", controller.Response.Headers.ETag);
+        Assert.Equal("private, max-age=31536000, immutable", controller.Response.Headers.CacheControl);
+    }
+
+    [Fact]
     public void ControllerRequiresAuthorization()
     {
         Assert.NotEmpty(typeof(WorldTowerController).GetCustomAttributes<AuthorizeAttribute>(inherit: true));
@@ -140,13 +183,16 @@ public sealed class WorldTowerControllerTests
     private sealed class RecordingSender : ISender
     {
         public List<object> Requests { get; } = [];
+        public object? NextResponse { get; init; }
 
         public Task<TResponse> Send<TResponse>(
             IRequest<TResponse> request,
             CancellationToken cancellationToken = default)
         {
             Requests.Add(request);
-            return Task.FromResult(default(TResponse)!);
+            return Task.FromResult(NextResponse is TResponse response
+                ? response
+                : default!);
         }
 
         public Task<object?> Send(object request, CancellationToken cancellationToken = default)

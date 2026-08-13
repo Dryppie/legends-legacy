@@ -12,6 +12,7 @@ public interface ITournamentGroundsRepository
     IQueryable<TournamentParticipant> Participants { get; }
     IQueryable<TournamentCombatSnapshot> CombatSnapshots { get; }
     IQueryable<TournamentCombatReplay> CombatReplays { get; }
+    IQueryable<TournamentCombatReplayArtifact> CombatReplayArtifacts { get; }
     IQueryable<TournamentRound> Rounds { get; }
     IQueryable<TournamentMatch> Matches { get; }
     IQueryable<TournamentRewardGrant> RewardGrants { get; }

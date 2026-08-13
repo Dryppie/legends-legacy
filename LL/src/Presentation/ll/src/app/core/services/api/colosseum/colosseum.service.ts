@@ -27,6 +27,8 @@ import {
   TournamentHistoryEntry,
   TournamentRewardGrant,
   TournamentSeasonLeaderboardEntry,
+  TournamentPlaybackManifest,
+  TournamentPlaybackBundle,
   TournamentTeamActionResponse,
   WithdrawTournamentResponse,
 } from '../../../../shared/models/Dtos/colosseum/tournamentGrounds';
@@ -204,6 +206,24 @@ export class ColosseumService {
           return throwError(() => new Error('Failed to get tournament replay'));
         }),
       );
+  }
+
+  getTournamentMatchPlayback(
+    tournamentId: string,
+    matchId: string,
+  ): Observable<TournamentPlaybackManifest> {
+    return this.apiService.get(
+      `colosseum/tournaments/${tournamentId}/matches/${matchId}/playback`,
+    );
+  }
+
+  getTournamentMatchPlaybackBundle(
+    tournamentId: string,
+    matchId: string,
+  ): Observable<TournamentPlaybackBundle> {
+    return this.apiService.get(
+      `colosseum/tournaments/${tournamentId}/matches/${matchId}/playback/bundle`,
+    );
   }
 
   startTournamentReplay(replay: CombatResultDto): void {

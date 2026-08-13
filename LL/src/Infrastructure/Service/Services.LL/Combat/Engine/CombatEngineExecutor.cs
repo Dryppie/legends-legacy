@@ -67,6 +67,34 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         return new CombatExecutionWithCheckpoints(execution.Result, checkpoints);
     }
 
+    public async Task<CombatExecutionWithCheckpoints> ExecuteTowerPlaybackAsync(
+        CombatEncounterRuntime runtime,
+        int checkpointIntervalTicks,
+        CancellationToken cancellationToken)
+        => await ExecuteCompactPlaybackAsync(runtime, checkpointIntervalTicks, cancellationToken);
+
+    public async Task<CombatExecutionWithCheckpoints> ExecuteCompactPlaybackAsync(
+        CombatEncounterRuntime runtime,
+        int checkpointIntervalTicks,
+        CancellationToken cancellationToken)
+    {
+        var checkpoints = new List<CombatCheckpoint>();
+        var execution = await ExecuteCoreAsync(
+            runtime,
+            new CombatSimulationOptions(
+                runtime.Plan.EncounterId.GetHashCode(),
+                6000,
+                StartActiveAbilitiesOnCooldown: true),
+            cancellationToken,
+            checkpoint => checkpoints.Add(checkpoint),
+            checkpointIntervalTicks,
+            captureEventLog: false);
+        SyncCombatEntityState(runtime.FriendlyParticipants, execution.Friendly);
+        SyncCombatEntityState(runtime.HostileParticipants, execution.Hostile);
+        execution.Result.StartedAt = runtime.Plan.StartsAt;
+        return new CombatExecutionWithCheckpoints(execution.Result, checkpoints);
+    }
+
     public async Task<CombatResult> ExecuteSimulationAsync(
         CombatEncounterRuntime runtime,
         CombatSimulationOptions options,
@@ -102,7 +130,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         CombatSimulationOptions options,
         CancellationToken cancellationToken,
         Action<CombatCheckpoint>? checkpointObserver = null,
-        int checkpointIntervalTicks = 0)
+        int checkpointIntervalTicks = 0,
+        bool captureEventLog = true)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -138,7 +167,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 options.MaxTicks,
                 BasicAttackIntervalTicks: options.BasicAttackIntervalTicks,
                 RandomSeed: options.RandomSeed,
-                StartActiveAbilitiesOnCooldown: options.StartActiveAbilitiesOnCooldown));
+                StartActiveAbilitiesOnCooldown: options.StartActiveAbilitiesOnCooldown,
+                CaptureEventLog: captureEventLog));
         var result = engine.Run(
             friendly,
             hostile,

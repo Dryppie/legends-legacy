@@ -714,6 +714,47 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Tower_checkpoint_capture_keeps_cumulative_stats_without_an_event_log()
+    {
+        static (CombatResult Result, IReadOnlyList<CombatCheckpoint> Checkpoints) Run(bool captureEventLog)
+        {
+            var friendly = CreateCombatant("friendly", CombatTeam.Friendly, [], maxHealth: 2_000);
+            var hostile = CreateCombatant("hostile", CombatTeam.Hostile, [], maxHealth: 2_000);
+            var checkpoints = new List<CombatCheckpoint>();
+            var engine = new FastCombatEngine(
+                new Dictionary<string, CompiledStatus>(),
+                new FastCombatEngineOptions(
+                    MaxTicks: 30,
+                    BasicAttackIntervalTicks: 3,
+                    RandomSeed: 91,
+                    CaptureEventLog: captureEventLog));
+            var result = engine.Run(
+                [friendly],
+                [hostile],
+                checkpointObserver: checkpoints.Add,
+                checkpointIntervalTicks: 10);
+            return (result, checkpoints);
+        }
+
+        var detailed = Run(true);
+        var compact = Run(false);
+
+        Assert.NotEmpty(detailed.Result.EventLog);
+        Assert.Empty(compact.Result.EventLog);
+        Assert.Equal(detailed.Result.Outcome, compact.Result.Outcome);
+        Assert.Equal(detailed.Result.Duration, compact.Result.Duration);
+        Assert.Equal(
+            detailed.Result.EntityStats.Select(x =>
+                (x.EntityId, x.DamageDone, x.DamageTaken, x.HealingDone, x.BarrierGenerated, x.DamageBlocked)),
+            compact.Result.EntityStats.Select(x =>
+                (x.EntityId, x.DamageDone, x.DamageTaken, x.HealingDone, x.BarrierGenerated, x.DamageBlocked)));
+        Assert.All(compact.Checkpoints, checkpoint => Assert.Empty(checkpoint.Events));
+        Assert.Equal(
+            compact.Result.EntityStats.Select(x => (x.EntityId, x.DamageDone, x.DamageTaken)),
+            compact.Checkpoints[^1].EntityStats.Select(x => (x.EntityId, x.DamageDone, x.DamageTaken)));
+    }
+
+    [Fact]
     public void Engine_supports_real_catalog_selectors()
     {
         var abilities = AbilityCompiler.CompileAbilities(

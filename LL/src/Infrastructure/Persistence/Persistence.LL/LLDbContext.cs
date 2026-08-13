@@ -50,6 +50,25 @@ using Microsoft.Extensions.Configuration;
 namespace Persistence.LL;
 public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(options), IDbContext
 {
+    public Task<TowerRally?> GetWorldTowerRallyWithSnapshotsAsync(
+        Guid rallyId,
+        string serverId,
+        CancellationToken ct = default) =>
+        TowerRallies
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Include(x => x.Participants)
+                .ThenInclude(x => x.CharacterSnapshot)
+                    .ThenInclude(x => x.BaseAttributes)
+            .Include(x => x.Participants)
+                .ThenInclude(x => x.CharacterSnapshot)
+                    .ThenInclude(x => x.Equipment)
+                        .ThenInclude(x => x.InstanceModifiers)
+            .Include(x => x.Participants)
+                .ThenInclude(x => x.CharacterSnapshot)
+                    .ThenInclude(x => x.EquippedEssences)
+            .SingleOrDefaultAsync(x => x.Id == rallyId && x.ServerId == serverId, ct);
+
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         NormalizeIdentityFields();
@@ -351,6 +370,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<TournamentParticipant> TournamentParticipants => Set<TournamentParticipant>();
     public DbSet<TournamentCombatSnapshot> TournamentCombatSnapshots => Set<TournamentCombatSnapshot>();
     public DbSet<TournamentCombatReplay> TournamentCombatReplays => Set<TournamentCombatReplay>();
+    public DbSet<TournamentCombatReplayArtifact> TournamentCombatReplayArtifacts => Set<TournamentCombatReplayArtifact>();
     public DbSet<TournamentRound> TournamentRounds => Set<TournamentRound>();
     public DbSet<TournamentMatch> TournamentMatches => Set<TournamentMatch>();
     public DbSet<TournamentRewardGrant> TournamentRewardGrants => Set<TournamentRewardGrant>();
@@ -460,6 +480,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<TowerRallyApplication> TowerRallyApplications => Set<TowerRallyApplication>();
     public DbSet<TowerAttempt> TowerAttempts => Set<TowerAttempt>();
     public DbSet<TowerCombatPlayback> TowerCombatPlaybacks => Set<TowerCombatPlayback>();
+    public DbSet<TowerCombatPlaybackArtifact> TowerCombatPlaybackArtifacts => Set<TowerCombatPlaybackArtifact>();
     public DbSet<TowerContribution> TowerContributions => Set<TowerContribution>();
     public DbSet<TowerEchoClear> TowerEchoClears => Set<TowerEchoClear>();
     public DbSet<ServerUnlock> ServerUnlocks => Set<ServerUnlock>();

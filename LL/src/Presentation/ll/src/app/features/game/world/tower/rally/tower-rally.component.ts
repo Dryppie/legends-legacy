@@ -8,11 +8,13 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Subject, finalize, takeUntil } from 'rxjs';
+import { Subject, finalize, fromEvent, takeUntil } from 'rxjs';
 import {
   TowerAttemptResult,
   TowerBattleReport,
   TowerCombatPlayback,
+  TowerCombatFrame,
+  TowerPlaybackBundle,
   TowerRally,
   TowerRallyApplication,
   WorldTowerService,
@@ -23,6 +25,7 @@ import { CombatComponent } from '../../../../../shared/components/combat/combat.
 import { CombatService } from '../../../../../core/services/client-side/combat/combat.service';
 import { CombatStateService } from '../../../../../core/state/combat-state/combat-state.service';
 import { BattleType } from '../../../../../core/state/combat-state/combatState';
+import { TowerPlaybackService } from '../../../../../core/services/client-side/combat/tower-playback.service';
 
 @Component({
   selector: 'app-tower-rally',
@@ -36,6 +39,7 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly events = inject(GameEventService);
   private readonly combat = inject(CombatService);
+  private readonly playbackPlayer = inject(TowerPlaybackService);
   readonly combatState = inject(CombatStateService);
   private readonly destroyed = new Subject<void>();
   readonly rally = signal<TowerRally | null>(null);
@@ -53,8 +57,12 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
   private lastCombatSequence = -1;
   private lastReconnectCount = this.events.reconnectCount();
   private recoveringFrames = false;
-  private pendingRealtimeFrame: TowerCombatPlayback['currentFrame'] | null =
-    null;
+  private pendingRealtimeFrame: TowerCombatFrame | null = null;
+  private compactBundle: TowerPlaybackBundle | null = null;
+  private serverClockAtSync = 0;
+  private monotonicClockAtSync = 0;
+  private playbackTimer: ReturnType<typeof setInterval> | null = null;
+  private lastFinalizationRefreshAt = 0;
 
   constructor() {
     effect(
@@ -78,6 +86,7 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
       () => {
         const envelope =
           this.events.eventEnvelope.WorldTowerCombatFrameUpdated();
+        if ((this.playback()?.schemaVersion ?? 1) >= 2) return;
         if (
           !envelope?.updateId ||
           envelope.updateId === this.lastCombatFrameUpdateId ||
@@ -104,7 +113,8 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
         const reconnectCount = this.events.reconnectCount();
         if (reconnectCount <= this.lastReconnectCount) return;
         this.lastReconnectCount = reconnectCount;
-        if (this.playback()) this.recoverMissingFrames();
+        if ((this.playback()?.schemaVersion ?? 1) >= 2) this.load(false);
+        else if (this.playback()) this.recoverMissingFrames();
         else this.load(false);
       },
       { allowSignalWrites: true },
@@ -112,13 +122,20 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    fromEvent(document, 'visibilitychange')
+      .pipe(takeUntil(this.destroyed))
+      .subscribe(() => this.renderCompactPlayback(true));
     this.route.paramMap.pipe(takeUntil(this.destroyed)).subscribe((params) => {
+      this.stopCompactPlayback();
+      this.compactBundle = null;
+      this.lastCombatSequence = -1;
       this.rallyId = params.get('rallyId') ?? '';
       this.load();
     });
   }
 
   ngOnDestroy(): void {
+    this.stopCompactPlayback();
     this.destroyed.next();
     this.destroyed.complete();
   }
@@ -215,7 +232,11 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
     const currentPlayback = this.playback();
     if (currentPlayback && !currentPlayback.isCompleted) {
       this.watchingPlayback.set(true);
-      this.combat.applyTowerCombatFrame(currentPlayback.currentFrame, true);
+      if (currentPlayback.schemaVersion >= 2) {
+        this.renderCompactPlayback(true);
+      } else if (currentPlayback.currentFrame) {
+        this.combat.applyTowerCombatFrame(currentPlayback.currentFrame, true);
+      }
       return;
     }
 
@@ -240,21 +261,46 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
   }
 
   report(): TowerBattleReport | null {
-    return (
-      this.rally()?.attempt?.battleReport ?? null
-    );
+    return this.rally()?.attempt?.battleReport ?? null;
   }
 
   private acceptPlayback(
     playback: TowerCombatPlayback,
     openViewer: boolean,
   ): void {
+    if (playback.schemaVersion >= 2 && playback.bundleETag) {
+      this.playback.set(playback);
+      this.serverClockAtSync = playback.serverNow
+        ? Date.parse(playback.serverNow)
+        : Date.now();
+      this.monotonicClockAtSync = performance.now();
+      if (openViewer) this.watchingPlayback.set(true);
+      this.playbackPlayer
+        .getBundle(playback.attemptId, playback.bundleETag)
+        .pipe(takeUntil(this.destroyed))
+        .subscribe({
+          next: (bundle) => {
+            if (bundle.schemaVersion !== playback.schemaVersion) {
+              this.error.set('The Tower playback format is not supported.');
+              return;
+            }
+            this.compactBundle = bundle;
+            this.renderCompactPlayback(true);
+            if (!playback.isCompleted) this.startCompactPlayback();
+            else this.stopCompactPlayback();
+          },
+          error: (error) => this.error.set(this.errorMessage(error)),
+        });
+      return;
+    }
+
     if (playback.currentSequence < this.lastCombatSequence) return;
     this.lastCombatSequence = playback.currentSequence;
     this.playback.set(playback);
     if (openViewer) this.watchingPlayback.set(true);
     if (this.watchingPlayback()) {
-      this.combat.applyTowerCombatFrame(playback.currentFrame, true);
+      if (playback.currentFrame)
+        this.combat.applyTowerCombatFrame(playback.currentFrame, true);
     }
   }
 
@@ -296,7 +342,7 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
       });
   }
 
-  private applyCombatFrame(frame: TowerCombatPlayback['currentFrame']): void {
+  private applyCombatFrame(frame: TowerCombatFrame): void {
     if (frame.sequence <= this.lastCombatSequence) return;
     this.lastCombatSequence = frame.sequence;
     this.playback.update((current) =>
@@ -310,6 +356,62 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
         : current,
     );
     if (this.watchingPlayback()) this.combat.applyTowerCombatFrame(frame);
+  }
+
+  private startCompactPlayback(): void {
+    if (this.playbackTimer !== null) return;
+    this.playbackTimer = setInterval(
+      () => this.renderCompactPlayback(false),
+      250,
+    );
+  }
+
+  private stopCompactPlayback(): void {
+    if (this.playbackTimer === null) return;
+    clearInterval(this.playbackTimer);
+    this.playbackTimer = null;
+  }
+
+  private renderCompactPlayback(reset: boolean): void {
+    const playback = this.playback();
+    const bundle = this.compactBundle;
+    if (!playback || playback.schemaVersion < 2 || !bundle) return;
+
+    const serverNow =
+      this.serverClockAtSync +
+      (performance.now() - this.monotonicClockAtSync);
+    const elapsedMilliseconds = Math.max(
+      0,
+      serverNow - Date.parse(playback.playbackStartedAt),
+    );
+    const targetTick = Math.min(
+      bundle.totalTicks,
+      Math.floor((elapsedMilliseconds / 1000) * bundle.ticksPerSecond),
+    );
+    const frame = this.playbackPlayer.frameAtTick(bundle, targetTick);
+    if (frame.sequence !== this.lastCombatSequence || reset) {
+      this.lastCombatSequence = frame.sequence;
+      this.playback.update((current) =>
+        current
+          ? {
+              ...current,
+              currentSequence: frame.sequence,
+              currentFrame: frame,
+            }
+          : current,
+      );
+      if (this.watchingPlayback())
+        this.combat.applyTowerCombatFrame(frame, reset);
+    }
+
+    if (
+      serverNow >= Date.parse(playback.playbackEndsAt) &&
+      !playback.isCompleted &&
+      Date.now() - this.lastFinalizationRefreshAt >= 1000
+    ) {
+      this.lastFinalizationRefreshAt = Date.now();
+      this.load(false);
+    }
   }
 
   duration(seconds: number | null | undefined): string {

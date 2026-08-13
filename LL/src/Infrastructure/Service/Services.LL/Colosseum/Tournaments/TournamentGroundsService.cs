@@ -4,6 +4,7 @@ using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Entities;
 using Application.UseCases.Outbox;
+using Application.UseCases.Colosseum.Tournaments;
 using Domain.Models.Colosseum;
 using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Combat;
@@ -19,12 +20,22 @@ using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.IO.Compression;
+using System.Security.Cryptography;
+using System.Diagnostics.Metrics;
 using TournamentGroundsUpdated = Application.WebSockets.Contracts.TournamentGroundsUpdated;
 
 namespace Services.LL.Colosseum.Tournaments;
 
 public sealed class TournamentGroundsService : ITournamentGroundsService
 {
+    private static readonly Meter TournamentMeter = new("LegendsLegacy.TournamentGrounds");
+    private static readonly Histogram<double> CombatDurationMilliseconds =
+        TournamentMeter.CreateHistogram<double>("tournament_ground.combat.engine.duration", "ms");
+    private static readonly Histogram<long> CombatAllocatedBytes =
+        TournamentMeter.CreateHistogram<long>("tournament_ground.combat.engine.allocated", "By");
+    private static readonly Histogram<long> PlaybackBundleBytes =
+        TournamentMeter.CreateHistogram<long>("tournament_ground.playback.bundle.size", "By");
     private static readonly IReadOnlyList<TournamentRewardTierOptions> DefaultRewardTiers =
     [
         new() { Key = "champion", MaxPlacement = 1, ArenaGlory = 120, Cinders = 600, Soulstones = 12 },
@@ -369,6 +380,11 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             .Include(r => r.Matches)
             .OrderBy(r => r.RoundNumber)
             .ToListAsync(cancellationToken);
+        var replayMatchIds = (await _tournaments.CombatReplays
+                .Where(replay => replay.TournamentId == tournamentId)
+                .Select(replay => replay.MatchId)
+                .ToListAsync(cancellationToken))
+            .ToHashSet();
 
         return new TournamentBracket(
             tournament.Id,
@@ -392,7 +408,11 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                         m.PlayerTwoParticipantId.HasValue && teamMap.TryGetValue(m.PlayerTwoParticipantId.Value, out var p2) ? p2 : null,
                         m.WinnerParticipantId,
                         m.CombatSessionId,
-                        m.BattleHistoryId))
+                        m.BattleHistoryId,
+                        m.ScheduledAtUtc,
+                        m.PlaybackStartedAtUtc,
+                        m.PlaybackEndsAtUtc,
+                        replayMatchIds.Contains(m.Id)))
                     .ToList()))
                 .ToList());
     }
@@ -407,17 +427,93 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             .FirstOrDefaultAsync(r => r.TournamentId == tournamentId && r.MatchId == matchId, cancellationToken);
         if (replay is null) return null;
 
-        var canView = await _tournaments.Participants
-            .AnyAsync(p => p.TournamentId == tournamentId && p.CharacterId == characterId, cancellationToken);
-        if (!canView)
-        {
-            canView = await _tournaments.RewardGrants
-                .AnyAsync(r => r.TournamentId == tournamentId && r.CharacterId == characterId, cancellationToken);
-        }
-
-        if (!canView) return null;
-
+        if (string.IsNullOrWhiteSpace(replay.CombatResultJson)) return null;
         return JsonSerializer.Deserialize<CombatResult>(replay.CombatResultJson, ReplayJsonOptions);
+    }
+
+    public async Task<TournamentPlaybackManifestDto?> GetMatchPlaybackAsync(
+        Guid characterId,
+        Guid tournamentId,
+        Guid matchId,
+        CancellationToken cancellationToken)
+    {
+        var now = UtcNow();
+        var playback = await _tournaments.CombatReplays
+            .Where(replay => replay.TournamentId == tournamentId
+                             && replay.MatchId == matchId
+                             && replay.SchemaVersion == TournamentCombatReplay.CompactBundleSchemaVersion)
+            .Select(replay => new
+            {
+                replay.SchemaVersion,
+                replay.TicksPerSecond,
+                replay.TicksPerFrame,
+                replay.Duration,
+                replay.FrameCount,
+                replay.BundleHash,
+                replay.Match.PlaybackStartedAtUtc,
+                replay.Match.PlaybackEndsAtUtc,
+                replay.Match.Status
+            })
+            .SingleOrDefaultAsync(cancellationToken);
+        if (playback is null
+            || !playback.PlaybackStartedAtUtc.HasValue
+            || !playback.PlaybackEndsAtUtc.HasValue
+            || string.IsNullOrWhiteSpace(playback.BundleHash))
+            return null;
+
+        var elapsedTicks = Math.Max(0, (int)Math.Floor(
+            (now - playback.PlaybackStartedAtUtc.Value).TotalSeconds * playback.TicksPerSecond));
+        var currentSequence = now >= playback.PlaybackEndsAtUtc.Value
+            ? Math.Max(0, playback.FrameCount - 1)
+            : Math.Clamp(
+                elapsedTicks / Math.Max(1, playback.TicksPerFrame),
+                0,
+                Math.Max(0, playback.FrameCount - 1));
+        return new TournamentPlaybackManifestDto(
+            tournamentId,
+            matchId,
+            playback.SchemaVersion,
+            playback.TicksPerSecond,
+            playback.TicksPerFrame,
+            playback.Duration,
+            playback.FrameCount,
+            playback.PlaybackStartedAtUtc.Value,
+            playback.PlaybackEndsAtUtc.Value,
+            now,
+            currentSequence,
+            playback.Status == TournamentMatchStatus.Completed,
+            playback.BundleHash);
+    }
+
+    public async Task<TournamentPlaybackBundleContentDto?> GetMatchPlaybackBundleAsync(
+        Guid characterId,
+        Guid tournamentId,
+        Guid matchId,
+        CancellationToken cancellationToken)
+    {
+        var bundle = await _tournaments.CombatReplays
+            .Where(replay => replay.TournamentId == tournamentId
+                             && replay.MatchId == matchId
+                             && replay.SchemaVersion == TournamentCombatReplay.CompactBundleSchemaVersion)
+            .Select(replay => new
+            {
+                replay.BundleHash,
+                replay.BundleContentType,
+                replay.BundleContentEncoding,
+                Bytes = replay.Artifact!.BundleBytes
+            })
+            .SingleOrDefaultAsync(cancellationToken);
+        if (bundle is null
+            || string.IsNullOrWhiteSpace(bundle.BundleHash)
+            || string.IsNullOrWhiteSpace(bundle.BundleContentType)
+            || string.IsNullOrWhiteSpace(bundle.BundleContentEncoding))
+            return null;
+
+        return new TournamentPlaybackBundleContentDto(
+            bundle.Bytes,
+            bundle.BundleContentType,
+            bundle.BundleContentEncoding,
+            bundle.BundleHash);
     }
 
     public async Task<IReadOnlyList<TournamentRewardGrantEntry>> GetRewardsAsync(Guid characterId, Guid? tournamentId, CancellationToken cancellationToken)
@@ -990,8 +1086,9 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var now = UtcNow();
         var changed = true;
         var changedAny = false;
+        var stopProgression = false;
         var progressionSteps = 0;
-        while (changed)
+        while (changed && !stopProgression)
         {
             progressionSteps++;
             if (progressionSteps > 100)
@@ -1041,7 +1138,9 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                     changed = Touch(tournament, now);
                     break;
                 case TournamentStatus.InProgress:
-                    changed = await ResolveDueRoundsAsync(tournament, now, cancellationToken);
+                    var progression = await ResolveDueRoundsAsync(tournament, now, cancellationToken);
+                    changed = progression.Changed;
+                    stopProgression = progression.StopProgression;
                     break;
             }
 
@@ -1185,71 +1284,184 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         await _tournaments.SaveChangesAsync(cancellationToken);
         await AdvanceCompletedFirstRoundByesAsync(tournament.Id, now, cancellationToken);
+        await ScheduleTournamentMatchesAsync(tournament.Id, tournament.StartsAtUtc, cancellationToken);
+        await _tournaments.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task<bool> ResolveDueRoundsAsync(TournamentInstance tournament, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task<TournamentProgressionResult> ResolveDueRoundsAsync(
+        TournamentInstance tournament,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
     {
-        var round = await _tournaments.Rounds
-            .Where(r => r.TournamentId == tournament.Id && r.Status != TournamentRoundStatus.Completed && r.StartsAtUtc <= now)
+        var rounds = await _tournaments.Rounds
+            .Where(r => r.TournamentId == tournament.Id)
             .OrderBy(r => r.RoundNumber)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (round is null) return false;
-
-        var changed = false;
-        if (round.Status != TournamentRoundStatus.Resolving)
-        {
-            round.Status = TournamentRoundStatus.Resolving;
-            round.UpdatedAtUtc = now;
-            changed = true;
-        }
-
-        var matches = await _tournaments.Matches
-            .Where(m => m.TournamentId == tournament.Id && m.RoundNumber == round.RoundNumber)
-            .OrderBy(m => m.MatchNumber)
             .ToListAsync(cancellationToken);
+        var changed = await EnsureRemainingMatchScheduleAsync(
+            tournament.Id,
+            rounds,
+            now,
+            cancellationToken);
 
-        var readyMatches = matches.Where(m => m.Status == TournamentMatchStatus.Ready).ToList();
-        foreach (var match in readyMatches)
+        foreach (var round in rounds)
         {
-            await ResolveMatchAsync(tournament, match, now, cancellationToken);
-            changed = true;
-        }
+            var matches = await _tournaments.Matches
+                .Where(m => m.TournamentId == tournament.Id && m.RoundNumber == round.RoundNumber)
+                .OrderBy(m => m.MatchNumber)
+                .ToListAsync(cancellationToken);
 
-        if (matches.All(m => m.Status is TournamentMatchStatus.Completed or TournamentMatchStatus.Bye))
-        {
-            round.Status = TournamentRoundStatus.Completed;
-            round.ResolvedAtUtc = now;
-            round.UpdatedAtUtc = now;
-            changed = true;
-            await PublishTournamentEventAsync(tournament, "TournamentRoundResolved", now, cancellationToken);
-
-            var finalMatch = matches.Count == 1 && round.RoundNumber == await GetRoundCountAsync(tournament.Id, cancellationToken);
-            if (finalMatch && matches[0].WinnerParticipantId.HasValue)
+            foreach (var playingMatch in matches.Where(match =>
+                         match.Status == TournamentMatchStatus.Resolving
+                         && match.PlaybackEndsAtUtc <= now))
             {
-                await CompleteTournamentAsync(tournament, matches[0].WinnerParticipantId!.Value, now, cancellationToken);
+                await FinalizeMatchAsync(tournament, playingMatch, now, cancellationToken);
+                changed = true;
             }
+
+            if (matches.All(match => match.Status is TournamentMatchStatus.Completed or TournamentMatchStatus.Bye))
+            {
+                if (round.Status != TournamentRoundStatus.Completed)
+                {
+                    round.Status = TournamentRoundStatus.Completed;
+                    round.ResolvedAtUtc = now;
+                    round.UpdatedAtUtc = now;
+                    changed = true;
+                    await PublishTournamentEventAsync(tournament, "TournamentRoundResolved", now, cancellationToken);
+                }
+
+                var isFinalRound = round.RoundNumber == rounds.Count;
+                if (isFinalRound
+                    && matches.Count == 1
+                    && matches[0].WinnerParticipantId is { } finalWinnerId)
+                {
+                    await CompleteTournamentAsync(
+                        tournament,
+                        finalWinnerId,
+                        now,
+                        cancellationToken);
+                }
+
+                continue;
+            }
+
+            if (round.StartsAtUtc > now)
+                return new TournamentProgressionResult(changed, false);
+
+            if (round.Status != TournamentRoundStatus.Resolving)
+            {
+                round.Status = TournamentRoundStatus.Resolving;
+                round.UpdatedAtUtc = now;
+                changed = true;
+            }
+
+            if (matches.Any(match => match.Status == TournamentMatchStatus.Resolving))
+                return new TournamentProgressionResult(changed, false);
+
+            var dueMatch = matches.FirstOrDefault(match =>
+                match.Status == TournamentMatchStatus.Ready
+                && match.ScheduledAtUtc.HasValue
+                && match.ScheduledAtUtc.Value <= now);
+            if (dueMatch is null)
+                return new TournamentProgressionResult(changed, false);
+
+            await StartMatchPlaybackAsync(tournament, dueMatch, now, cancellationToken);
+            return new TournamentProgressionResult(true, true);
         }
 
-        return changed;
+        return new TournamentProgressionResult(changed, false);
     }
 
-    private async Task ResolveMatchAsync(TournamentInstance tournament, TournamentMatch match, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task StartMatchPlaybackAsync(
+        TournamentInstance tournament,
+        TournamentMatch match,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
     {
         if (!match.PlayerOneParticipantId.HasValue || !match.PlayerTwoParticipantId.HasValue) return;
 
-        match.Status = TournamentMatchStatus.Resolving;
         var p1 = await LoadTeamAsync(match.PlayerOneParticipantId.Value, cancellationToken);
         var p2 = await LoadTeamAsync(match.PlayerTwoParticipantId.Value, cancellationToken);
         if (p1 is null || p2 is null) return;
 
-        var result = await ExecuteTournamentCombatAsync(tournament.Id, match.Id, p1, p2, now, cancellationToken);
+        await ShiftDelayedMatchScheduleAsync(match, now, cancellationToken);
+        var result = await ExecuteTournamentCombatAsync(
+            tournament.Id,
+            match.Id,
+            p1,
+            p2,
+            now,
+            cancellationToken);
+        match.Status = TournamentMatchStatus.Resolving;
+        match.CombatSessionId = result.BattleId;
+        match.PlaybackStartedAtUtc = now;
+        match.PlaybackEndsAtUtc = now.AddSeconds(
+            result.Execution.Result.Duration / (double)Services.LL.Combat.Engine.FastCombatEngine.TicksPerSecond);
+        match.UpdatedAtUtc = now;
+        await SaveTournamentCombatPlaybackAsync(match, p1, p2, result.Execution, now, cancellationToken);
+        await PublishTournamentEventAsync(tournament, "TournamentMatchStarted", now, cancellationToken);
+    }
+
+    private async Task ShiftDelayedMatchScheduleAsync(
+        TournamentMatch startingMatch,
+        DateTimeOffset actualStart,
+        CancellationToken cancellationToken)
+    {
+        if (!startingMatch.ScheduledAtUtc.HasValue || startingMatch.ScheduledAtUtc.Value >= actualStart)
+            return;
+
+        var delay = actualStart - startingMatch.ScheduledAtUtc.Value;
+        var remaining = await _tournaments.Matches
+            .Where(match => match.TournamentId == startingMatch.TournamentId
+                            && match.Status != TournamentMatchStatus.Completed
+                            && match.Status != TournamentMatchStatus.Bye
+                            && match.ScheduledAtUtc >= startingMatch.ScheduledAtUtc)
+            .ToListAsync(cancellationToken);
+        foreach (var match in remaining)
+            match.ScheduledAtUtc = match.ScheduledAtUtc!.Value.Add(delay);
+
+        var roundNumbers = remaining.Select(match => match.RoundNumber).Distinct().ToArray();
+        var rounds = await _tournaments.Rounds
+            .Where(round => round.TournamentId == startingMatch.TournamentId
+                            && roundNumbers.Contains(round.RoundNumber))
+            .ToListAsync(cancellationToken);
+        foreach (var round in rounds)
+        {
+            round.StartsAtUtc = remaining
+                .Where(match => match.RoundNumber == round.RoundNumber)
+                .Min(match => match.ScheduledAtUtc!.Value);
+            round.UpdatedAtUtc = actualStart;
+        }
+    }
+
+    private async Task FinalizeMatchAsync(
+        TournamentInstance tournament,
+        TournamentMatch match,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        if (!match.PlayerOneParticipantId.HasValue || !match.PlayerTwoParticipantId.HasValue) return;
+        var p1 = await LoadTeamAsync(match.PlayerOneParticipantId.Value, cancellationToken);
+        var p2 = await LoadTeamAsync(match.PlayerTwoParticipantId.Value, cancellationToken);
+        if (p1 is null || p2 is null) return;
+
+        var replay = await _tournaments.CombatReplays
+            .SingleAsync(item => item.MatchId == match.Id, cancellationToken);
+        var combatResult = string.IsNullOrWhiteSpace(replay.CombatResultJson)
+            ? new CombatResult
+            {
+                Outcome = Enum.Parse<BattleOutcome>(replay.Outcome),
+                StartedAt = replay.StartedAtUtc,
+                Duration = replay.Duration
+            }
+            : JsonSerializer.Deserialize<CombatResult>(replay.CombatResultJson, ReplayJsonOptions)
+              ?? throw new InvalidOperationException("The stored Tournament combat result is invalid.");
         await EnqueueTournamentBattleEventsAsync(
             tournament.Id,
             match.Id,
             p1.Id,
             p2.Id,
             cancellationToken);
-        var p1Wins = result.Outcome switch
+        var p1Wins = combatResult.Outcome switch
         {
             BattleOutcome.Victory => true,
             BattleOutcome.Defeat => false,
@@ -1261,11 +1473,10 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         match.WinnerParticipantId = winner.Id;
         match.LoserParticipantId = loser.Id;
-        match.Outcome = result.Outcome == BattleOutcome.Draw
+        match.Outcome = combatResult.Outcome == BattleOutcome.Draw
             ? TournamentMatchOutcome.DrawAdvancedBySeed
             : p1Wins ? TournamentMatchOutcome.PlayerOneWin : TournamentMatchOutcome.PlayerTwoWin;
         match.Status = TournamentMatchStatus.Completed;
-        match.CombatSessionId = result.BattleId;
         match.ResolvedAtUtc = now;
         match.UpdatedAtUtc = now;
 
@@ -1274,8 +1485,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             p1,
             p2,
             winner,
-            result.Outcome,
-            result.CombatResult,
+            combatResult.Outcome,
+            combatResult,
             now,
             cancellationToken);
 
@@ -1295,7 +1506,10 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         }
 
         await AdvanceWinnerAsync(tournament.Id, match, winner.Id, now, cancellationToken);
+        await PublishTournamentEventAsync(tournament, "TournamentMatchCompleted", now, cancellationToken);
     }
+
+    private readonly record struct TournamentProgressionResult(bool Changed, bool StopProgression);
 
     private async Task EnqueueTournamentBattleEventsAsync(
         Guid tournamentId,
@@ -1433,7 +1647,172 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         }, cancellationToken);
     }
 
-    private async Task<(Guid BattleId, BattleOutcome Outcome, CombatResult CombatResult)> ExecuteTournamentCombatAsync(
+    private async Task SaveTournamentCombatPlaybackAsync(
+        TournamentMatch match,
+        TournamentTeam playerOne,
+        TournamentTeam playerTwo,
+        CombatExecutionWithCheckpoints execution,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        if (await _tournaments.CombatReplays.AnyAsync(replay => replay.MatchId == match.Id, cancellationToken))
+            return;
+
+        var playerOneRepresentative = await GetTeamRepresentativeAsync(playerOne.Id, cancellationToken);
+        var playerTwoRepresentative = await GetTeamRepresentativeAsync(playerTwo.Id, cancellationToken);
+        if (playerOneRepresentative is null || playerTwoRepresentative is null)
+            throw new InvalidOperationException("Tournament combat teams have no representative.");
+
+        var bundle = CreateTournamentPlaybackBundle(execution);
+        var uncompressedBytes = JsonSerializer.SerializeToUtf8Bytes(bundle, ReplayJsonOptions);
+        if (uncompressedBytes.Length > _options.MaximumBundleUncompressedBytes)
+            throw new InvalidOperationException(
+                $"Tournament playback exceeded the {_options.MaximumBundleUncompressedBytes} byte uncompressed limit.");
+        var compressedBytes = CompressPlaybackBundle(uncompressedBytes);
+        if (compressedBytes.Length > _options.MaximumBundleCompressedBytes)
+            throw new InvalidOperationException(
+                $"Tournament playback exceeded the {_options.MaximumBundleCompressedBytes} byte compressed limit.");
+
+        var hash = Convert.ToHexString(SHA256.HashData(compressedBytes)).ToLowerInvariant();
+        PlaybackBundleBytes.Record(compressedBytes.Length);
+        var replay = new TournamentCombatReplay
+        {
+            Id = match.Id,
+            TournamentId = match.TournamentId,
+            MatchId = match.Id,
+            CombatSessionId = match.CombatSessionId ?? match.Id,
+            BattleHistoryId = match.Id,
+            PlayerOneCharacterId = playerOneRepresentative.CharacterId,
+            PlayerTwoCharacterId = playerTwoRepresentative.CharacterId,
+            Outcome = execution.Result.Outcome.ToString(),
+            StartedAtUtc = match.PlaybackStartedAtUtc ?? now,
+            Duration = execution.Result.Duration,
+            CombatResultJson = JsonSerializer.Serialize(execution.Result, ReplayJsonOptions),
+            SchemaVersion = TournamentCombatReplay.CompactBundleSchemaVersion,
+            TicksPerSecond = Services.LL.Combat.Engine.FastCombatEngine.TicksPerSecond,
+            TicksPerFrame = _options.CombatTicksPerFrame,
+            FrameCount = bundle.Frames.Count,
+            BundleHash = hash,
+            BundleLength = compressedBytes.Length,
+            BundleContentType = "application/json",
+            BundleContentEncoding = "br",
+            CreatedAtUtc = now
+        };
+        replay.Artifact = new TournamentCombatReplayArtifact
+        {
+            TournamentCombatReplayId = replay.Id,
+            Replay = replay,
+            BundleBytes = compressedBytes
+        };
+        await _tournaments.AddAsync(replay, cancellationToken);
+    }
+
+    private TournamentPlaybackBundleDto CreateTournamentPlaybackBundle(
+        CombatExecutionWithCheckpoints execution)
+    {
+        var entityById = new Dictionary<string, TournamentPlaybackEntityDto>(StringComparer.OrdinalIgnoreCase);
+        foreach (var checkpoint in execution.Checkpoints)
+        {
+            AddEntities(checkpoint.Friendly, true);
+            AddEntities(checkpoint.Hostile, false);
+        }
+
+        var entities = entityById.Values.OrderBy(entity => entity.Index).ToArray();
+        var abilityKeys = execution.Checkpoints
+            .SelectMany(checkpoint => checkpoint.EntityStats)
+            .Where(entity => entityById.ContainsKey(entity.EntityId))
+            .SelectMany(entity => entity.Abilities.Select(ability =>
+                (EntityIndex: entityById[entity.EntityId].Index, ability.Name)))
+            .Distinct()
+            .OrderBy(key => key.EntityIndex)
+            .ThenBy(key => key.Name, StringComparer.Ordinal)
+            .ToArray();
+        var abilities = abilityKeys
+            .Select((key, index) => new TournamentPlaybackAbilityDto(index, key.EntityIndex, key.Name))
+            .ToArray();
+        var abilityIndex = abilities.ToDictionary(
+            ability => (ability.EntityIndex, ability.Name),
+            ability => ability.Index);
+
+        var frames = execution.Checkpoints.Select(checkpoint =>
+        {
+            var states = checkpoint.Friendly
+                .Concat(checkpoint.Hostile)
+                .Select(entity => new TournamentPlaybackEntityStateDto(
+                    entityById[entity.Id].Index,
+                    entity.Health,
+                    entity.Barrier))
+                .OrderBy(state => state.EntityIndex)
+                .ToArray();
+            var totals = checkpoint.EntityStats
+                .Where(entity => entityById.ContainsKey(entity.EntityId))
+                .Select(entity => new TournamentPlaybackEntityTotalsDto(
+                    entityById[entity.EntityId].Index,
+                    entity.DamageDone,
+                    entity.DamageTaken,
+                    entity.HealingDone,
+                    entity.HealingReceived,
+                    entity.HealthRegenerated,
+                    entity.BarrierGenerated,
+                    entity.DamageBlocked))
+                .OrderBy(total => total.EntityIndex)
+                .ToArray();
+            var abilityTotals = checkpoint.EntityStats
+                .Where(entity => entityById.ContainsKey(entity.EntityId))
+                .SelectMany(entity => entity.Abilities.Select(ability =>
+                    new TournamentPlaybackAbilityTotalsDto(
+                        abilityIndex[(entityById[entity.EntityId].Index, ability.Name)],
+                        ability.Uses,
+                        ability.TotalDamage,
+                        ability.TotalHealing,
+                        ability.TotalBarrier)))
+                .OrderBy(total => total.AbilityIndex)
+                .ToArray();
+            return new TournamentPlaybackFrameDto(
+                checkpoint.Sequence,
+                checkpoint.Tick,
+                states,
+                totals,
+                abilityTotals,
+                checkpoint.IsFinal,
+                checkpoint.IsFinal ? execution.Result.Outcome : null);
+        }).ToArray();
+
+        return new TournamentPlaybackBundleDto(
+            TournamentCombatReplay.CompactBundleSchemaVersion,
+            Services.LL.Combat.Engine.FastCombatEngine.TicksPerSecond,
+            _options.CombatTicksPerFrame,
+            execution.Result.Duration,
+            entities,
+            abilities,
+            frames);
+
+        void AddEntities(IEnumerable<SimpleCombatEntity> source, bool friendly)
+        {
+            foreach (var entity in source)
+            {
+                if (entityById.ContainsKey(entity.Id)) continue;
+                entityById[entity.Id] = new TournamentPlaybackEntityDto(
+                    entityById.Count,
+                    entity.Id,
+                    entity.Name,
+                    entity.ImagePath,
+                    friendly,
+                    entity.MaxHealth,
+                    entity.Level);
+            }
+        }
+    }
+
+    private static byte[] CompressPlaybackBundle(byte[] bytes)
+    {
+        using var output = new MemoryStream();
+        using (var brotli = new BrotliStream(output, CompressionLevel.SmallestSize, leaveOpen: true))
+            brotli.Write(bytes);
+        return output.ToArray();
+    }
+
+    private async Task<(Guid BattleId, CombatExecutionWithCheckpoints Execution)> ExecuteTournamentCombatAsync(
         Guid tournamentId,
         Guid matchId,
         TournamentTeam playerOne,
@@ -1443,15 +1822,48 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     {
         var playerOneMembers = await GetTeamMembersAsync(playerOne.Id, cancellationToken);
         var playerTwoMembers = await GetTeamMembersAsync(playerTwo.Id, cancellationToken);
-        var characterIds = playerOneMembers.Concat(playerTwoMembers).Select(p => p.CharacterId).ToList();
+        var allMembers = playerOneMembers.Concat(playerTwoMembers).ToArray();
+        var characterIds = allMembers.Select(participant => participant.CharacterId).ToList();
         var entities = await _entityService.GetEntitiesByIdsForCombatAsync(characterIds, cancellationToken);
         if (entities.Count < characterIds.Count)
         {
             var fallback = CreateFallbackCombatResult(BattleOutcome.Draw, now);
-            return (Guid.NewGuid(), fallback.Outcome, fallback);
+            return (Guid.NewGuid(), CreateFallbackExecution(fallback));
         }
 
         var sourceById = entities.Cast<Character>().ToDictionary(e => e.Id);
+        var snapshotIds = allMembers.Select(participant => participant.SnapshotId).ToArray();
+        var snapshotQuery = _tournaments.CombatSnapshots
+            .Where(snapshot => snapshotIds.Contains(snapshot.Id))
+            .Include(snapshot => snapshot.CharacterSnapshot);
+        var snapshotRows = await snapshotQuery
+            .ThenInclude(snapshot => snapshot.BaseAttributes)
+            .ToListAsync(cancellationToken);
+        await snapshotQuery
+            .Include(snapshot => snapshot.CharacterSnapshot)
+                .ThenInclude(snapshot => snapshot.Equipment)
+                    .ThenInclude(equipment => equipment.InstanceModifiers)
+            .LoadAsync(cancellationToken);
+        await snapshotQuery
+            .Include(snapshot => snapshot.CharacterSnapshot)
+                .ThenInclude(snapshot => snapshot.EquippedEssences)
+            .LoadAsync(cancellationToken);
+        var snapshots = snapshotRows.ToDictionary(
+            snapshot => snapshot.Id,
+            snapshot => snapshot.CharacterSnapshot);
+        if (snapshots.Count < snapshotIds.Length)
+        {
+            var fallback = CreateFallbackCombatResult(BattleOutcome.Draw, now);
+            return (Guid.NewGuid(), CreateFallbackExecution(fallback));
+        }
+
+        var itemBases = await _itemBaseRepository.GetItemBasesByIdsAsync(
+            snapshots.Values
+                .SelectMany(snapshot => snapshot.Equipment)
+                .Select(equipment => equipment.ItemBaseId)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray(),
+            cancellationToken);
         var friendlyRuntime = new List<CombatRuntimeParticipant>();
         var hostileRuntime = new List<CombatRuntimeParticipant>();
         var slots = new List<CombatParticipantSlot>();
@@ -1459,15 +1871,9 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         foreach (var participant in playerOneMembers)
         {
-            var snapshot = await LoadSnapshotAsync(participant.SnapshotId, cancellationToken);
-            if (snapshot is null)
-            {
-                var fallback = CreateFallbackCombatResult(BattleOutcome.Draw, now);
-                return (Guid.NewGuid(), fallback.Outcome, fallback);
-            }
-
+            var snapshot = snapshots[participant.SnapshotId];
             var source = sourceById[participant.CharacterId];
-            var combat = await CreateSnapshotCombatEntityAsync(source, snapshot, cancellationToken);
+            var combat = CreateSnapshotCombatEntity(source, snapshot, itemBases);
             combatEntities.Add(combat);
             var slot = new CombatParticipantSlot(participant.CharacterId.ToString(), participant.CharacterId, CombatSide.Friendly);
             slots.Add(slot);
@@ -1476,15 +1882,9 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         foreach (var participant in playerTwoMembers)
         {
-            var snapshot = await LoadSnapshotAsync(participant.SnapshotId, cancellationToken);
-            if (snapshot is null)
-            {
-                var fallback = CreateFallbackCombatResult(BattleOutcome.Draw, now);
-                return (Guid.NewGuid(), fallback.Outcome, fallback);
-            }
-
+            var snapshot = snapshots[participant.SnapshotId];
             var source = sourceById[participant.CharacterId];
-            var combat = await CreateSnapshotCombatEntityAsync(source, snapshot, cancellationToken);
+            var combat = CreateSnapshotCombatEntity(source, snapshot, itemBases);
             combatEntities.Add(combat);
             var slot = new CombatParticipantSlot(participant.CharacterId.ToString(), participant.CharacterId, CombatSide.Hostile);
             slots.Add(slot);
@@ -1510,10 +1910,29 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             friendlyRuntime,
             hostileRuntime);
 
-        var combatResult = await _combatEngineExecutor.ExecuteAsync(runtime, cancellationToken);
-        combatResult = _combatEncounterResultFactory.Create(runtime, combatResult).CombatResult;
-        return (battleId, combatResult.Outcome, combatResult);
+        var engineStartedAt = _timeProvider.GetTimestamp();
+        var allocatedBefore = GC.GetTotalAllocatedBytes(precise: false);
+        var execution = await _combatEngineExecutor.ExecuteCompactPlaybackAsync(
+            runtime,
+            _options.CombatTicksPerFrame,
+            cancellationToken);
+        var elapsedMilliseconds = _timeProvider.GetElapsedTime(engineStartedAt).TotalMilliseconds;
+        var allocatedBytes = Math.Max(
+            0,
+            GC.GetTotalAllocatedBytes(precise: false) - allocatedBefore);
+        CombatDurationMilliseconds.Record(elapsedMilliseconds);
+        CombatAllocatedBytes.Record(allocatedBytes);
+        var resolved = _combatEncounterResultFactory.Create(runtime, execution.Result).CombatResult;
+        execution = execution with { Result = resolved };
+        return (battleId, execution);
     }
+
+    private static CombatExecutionWithCheckpoints CreateFallbackExecution(CombatResult result) =>
+        new(result,
+        [
+            new CombatCheckpoint(0, 0, [], [], [], [], false),
+            new CombatCheckpoint(1, result.Duration, [], [], [], [], true)
+        ]);
 
     private static CombatResult CreateFallbackCombatResult(BattleOutcome outcome, DateTimeOffset now)
     {
@@ -1525,22 +1944,10 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         };
     }
 
-    private async Task<CharacterSnapshot?> LoadSnapshotAsync(Guid tournamentSnapshotId, CancellationToken cancellationToken)
-    {
-        return await _tournaments.CombatSnapshots
-            .Include(x => x.CharacterSnapshot)
-                .ThenInclude(x => x.BaseAttributes)
-            .Include(x => x.CharacterSnapshot)
-                .ThenInclude(x => x.Equipment)
-                    .ThenInclude(x => x.InstanceModifiers)
-            .Include(x => x.CharacterSnapshot)
-                .ThenInclude(x => x.EquippedEssences)
-            .Where(x => x.Id == tournamentSnapshotId)
-            .Select(x => x.CharacterSnapshot)
-            .FirstOrDefaultAsync(cancellationToken);
-    }
-
-    private async Task<CombatEntity> CreateSnapshotCombatEntityAsync(Character sourceCharacter, CharacterSnapshot snapshot, CancellationToken cancellationToken)
+    private CombatEntity CreateSnapshotCombatEntity(
+        Character sourceCharacter,
+        CharacterSnapshot snapshot,
+        IReadOnlyDictionary<string, ItemBase> itemBases)
     {
         var template = _combatSetupService.CreatePlayerCombatEntities([sourceCharacter]).Single();
         template.Name = snapshot.Name;
@@ -1558,10 +1965,6 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             .Select(x => x.ToPlayerEssence(snapshot.CharacterId))
             .ToList();
         template.HasEquippedEssenceSnapshot = true;
-
-        var itemBases = await _itemBaseRepository.GetItemBasesByIdsAsync(
-            snapshot.Equipment.Select(x => x.ItemBaseId).Distinct().ToArray(),
-            cancellationToken);
 
         template.Equipment = snapshot.Equipment
             .OrderBy(x => x.Slot)
@@ -1666,6 +2069,91 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         {
             await AdvanceWinnerAsync(tournamentId, bye, bye.WinnerParticipantId!.Value, now, cancellationToken);
         }
+    }
+
+    private async Task ScheduleTournamentMatchesAsync(
+        Guid tournamentId,
+        DateTimeOffset firstMatchAt,
+        CancellationToken cancellationToken)
+    {
+        var rounds = await _tournaments.Rounds
+            .Where(round => round.TournamentId == tournamentId)
+            .OrderBy(round => round.RoundNumber)
+            .ToListAsync(cancellationToken);
+        var matches = await _tournaments.Matches
+            .Where(match => match.TournamentId == tournamentId)
+            .OrderBy(match => match.RoundNumber)
+            .ThenBy(match => match.MatchNumber)
+            .ToListAsync(cancellationToken);
+        var cursor = firstMatchAt;
+        var interval = TimeSpan.FromMinutes(Math.Max(1, _options.MatchIntervalMinutes));
+        foreach (var match in matches)
+        {
+            if (match.Status == TournamentMatchStatus.Bye)
+            {
+                match.ScheduledAtUtc = null;
+                continue;
+            }
+
+            match.ScheduledAtUtc = cursor;
+            cursor = cursor.Add(interval);
+        }
+
+        foreach (var round in rounds)
+        {
+            var firstScheduledMatch = matches.FirstOrDefault(match =>
+                match.RoundNumber == round.RoundNumber && match.ScheduledAtUtc.HasValue);
+            if (firstScheduledMatch?.ScheduledAtUtc is { } startsAt)
+                round.StartsAtUtc = startsAt;
+        }
+    }
+
+    private async Task<bool> EnsureRemainingMatchScheduleAsync(
+        Guid tournamentId,
+        IReadOnlyList<TournamentRound> rounds,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var matches = await _tournaments.Matches
+            .Where(match => match.TournamentId == tournamentId)
+            .OrderBy(match => match.RoundNumber)
+            .ThenBy(match => match.MatchNumber)
+            .ToListAsync(cancellationToken);
+        var unscheduled = matches.Where(match =>
+                (match.Status is TournamentMatchStatus.Pending or TournamentMatchStatus.Ready)
+                && !match.ScheduledAtUtc.HasValue)
+            .ToList();
+        if (unscheduled.Count == 0) return false;
+
+        var interval = TimeSpan.FromMinutes(Math.Max(1, _options.MatchIntervalMinutes));
+        var latestScheduledAt = matches
+            .Where(match => match.ScheduledAtUtc.HasValue)
+            .Select(match => match.ScheduledAtUtc!.Value)
+            .DefaultIfEmpty(now - interval)
+            .Max();
+        var cursor = latestScheduledAt.Add(interval);
+        if (cursor < now) cursor = now;
+        foreach (var match in unscheduled)
+        {
+            match.ScheduledAtUtc = cursor;
+            cursor = cursor.Add(interval);
+        }
+
+        foreach (var round in rounds.Where(round => round.Status != TournamentRoundStatus.Completed))
+        {
+            var firstScheduledAt = matches
+                .Where(match => match.RoundNumber == round.RoundNumber
+                                && match.Status is not TournamentMatchStatus.Completed
+                                and not TournamentMatchStatus.Bye
+                                && match.ScheduledAtUtc.HasValue)
+                .Select(match => match.ScheduledAtUtc!.Value)
+                .DefaultIfEmpty(round.StartsAtUtc)
+                .Min();
+            round.StartsAtUtc = firstScheduledAt;
+            round.UpdatedAtUtc = now;
+        }
+
+        return true;
     }
 
     private async Task AdvanceWinnerAsync(Guid tournamentId, TournamentMatch match, Guid winnerParticipantId, DateTimeOffset now, CancellationToken cancellationToken)
@@ -2363,12 +2851,25 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 .OrderBy(r => r.RoundNumber)
                 .Select(r => new { r.RoundNumber, r.StartsAtUtc })
                 .FirstOrDefaultAsync(cancellationToken);
+            var activePlaybackEndsAt = await _tournaments.Matches
+                .Where(match => match.TournamentId == tournament.Id
+                                && match.Status == TournamentMatchStatus.Resolving)
+                .Select(match => match.PlaybackEndsAtUtc)
+                .FirstOrDefaultAsync(cancellationToken);
+            var nextMatchStartsAt = await _tournaments.Matches
+                .Where(match => match.TournamentId == tournament.Id
+                                && match.Status != TournamentMatchStatus.Completed
+                                && match.Status != TournamentMatchStatus.Bye
+                                && match.ScheduledAtUtc.HasValue)
+                .OrderBy(match => match.ScheduledAtUtc)
+                .Select(match => match.ScheduledAtUtc)
+                .FirstOrDefaultAsync(cancellationToken);
             var nextActionAt = tournament.Status switch
             {
                 TournamentStatus.Scheduled => tournament.RegistrationStartsAtUtc,
                 TournamentStatus.RegistrationOpen => tournament.RegistrationEndsAtUtc,
                 TournamentStatus.RegistrationClosed or TournamentStatus.BracketGenerated => tournament.StartsAtUtc,
-                TournamentStatus.InProgress => currentRound?.StartsAtUtc,
+                TournamentStatus.InProgress => activePlaybackEndsAt ?? nextMatchStartsAt ?? currentRound?.StartsAtUtc,
                 _ => null
             };
 

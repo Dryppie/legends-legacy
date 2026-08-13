@@ -32,6 +32,18 @@ public interface ICombatEngineExecutor
         ]);
     }
 
+    Task<CombatExecutionWithCheckpoints> ExecuteTowerPlaybackAsync(
+        CombatEncounterRuntime runtime,
+        int checkpointIntervalTicks,
+        CancellationToken cancellationToken) =>
+        ExecuteCompactPlaybackAsync(runtime, checkpointIntervalTicks, cancellationToken);
+
+    Task<CombatExecutionWithCheckpoints> ExecuteCompactPlaybackAsync(
+        CombatEncounterRuntime runtime,
+        int checkpointIntervalTicks,
+        CancellationToken cancellationToken) =>
+        ExecuteWithCheckpointsAsync(runtime, checkpointIntervalTicks, cancellationToken);
+
     Task<CombatResult> ExecuteSimulationAsync(
         CombatEncounterRuntime runtime,
         CombatSimulationOptions options,
