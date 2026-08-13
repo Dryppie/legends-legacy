@@ -349,6 +349,46 @@
       "tier": 1
     },
     {
+      "id": "00000000-0000-0000-0000-000000000062",
+      "name": "Ni, the Ninefold",
+      "imagePath": "",
+      "archetype": "Balanced",
+      "damageProfile": "Hybrid",
+      "defenseProfile": "Balanced",
+      "baseLevel": 48,
+      "tier": 1
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000063",
+      "name": "Kodoku, the Poisoned Vessel",
+      "imagePath": "",
+      "archetype": "Balanced",
+      "damageProfile": "Magical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 46,
+      "tier": 1
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000064",
+      "name": "Eydis, the Endless Spring",
+      "imagePath": "",
+      "archetype": "Support",
+      "damageProfile": "Magical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 43,
+      "tier": 1
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000065",
+      "name": "The Mad King",
+      "imagePath": "",
+      "archetype": "Bruiser",
+      "damageProfile": "Physical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 50,
+      "tier": 1
+    },
+    {
       "id": "00000000-0000-0000-0000-000000000024",
       "name": "Venomous Snake",
       "imagePath": "venomous_snake",

@@ -418,6 +418,42 @@
         "ability.creature.orsenn.cremation",
         "ability.creature.orsenn.cinderbound"
       ]
+    },
+    {
+      "monsterId": "monster.ni,_the_ninefold",
+      "abilityIds": [
+        "ability.creature.ni.ninefold_strike",
+        "ability.creature.ni.ninth_seal",
+        "ability.creature.ni.one_among_nine",
+        "ability.creature.ni.ninefold"
+      ]
+    },
+    {
+      "monsterId": "monster.kodoku,_the_poisoned_vessel",
+      "abilityIds": [
+        "ability.creature.kodoku.insect_jar",
+        "ability.creature.kodoku.thousand_poisons",
+        "ability.creature.kodoku.withering_miasma",
+        "ability.creature.kodoku.survivors_struggle"
+      ]
+    },
+    {
+      "monsterId": "monster.eydis,_the_endless_spring",
+      "abilityIds": [
+        "ability.creature.eydis.springtide",
+        "ability.creature.eydis.ancient_heartwood",
+        "ability.creature.eydis.tranquil_waters",
+        "ability.creature.eydis.endless_spring"
+      ]
+    },
+    {
+      "monsterId": "monster.the_mad_king",
+      "abilityIds": [
+        "ability.creature.mad_king.bloodbath",
+        "ability.creature.mad_king.kings_cleaver",
+        "ability.creature.mad_king.unrestrained",
+        "ability.creature.mad_king.bloodlust"
+      ]
     }
   ]
 }

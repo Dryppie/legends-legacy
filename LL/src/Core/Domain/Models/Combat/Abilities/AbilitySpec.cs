@@ -75,7 +75,9 @@ public enum AbilityEffectOperation
     RemoveCondition = 26,
     SynchronizeAttributePerOwnedSummon = 27,
     ConsumeOwnedSummon = 28,
-    SynchronizeAttributePerStatusStack = 29
+    SynchronizeAttributePerStatusStack = 29,
+    SwapHealth = 30,
+    SynchronizeAttributePerMissingHealthStep = 31
 }
 
 public enum AbilityTargetSelector
@@ -99,7 +101,9 @@ public enum AbilityTargetSelector
     LowestHealthEnemy = 16,
     HighestHealthEnemy = 17,
     LowestCurrentHealthEnemy = 18,
-    HighestMaxHealthEnemy = 19
+    HighestMaxHealthEnemy = 19,
+    HighestCurrentHealthOwnedSummon = 20,
+    OwnedSummons = 21
 }
 
 public enum AbilityConditionType
@@ -251,6 +255,7 @@ public sealed class AbilityEffectSpec
     public float ConditionScalingCoefficient { get; set; }
     public string? ScalingStatusId { get; set; }
     public AbilityConditionSubject ScalingStatusSubject { get; set; } = AbilityConditionSubject.Source;
+    public AttributeType StatusScalingAttribute { get; set; } = AttributeType.Power;
     public float StatusScalingCoefficient { get; set; }
     public AttributeType? HealingScalingAttribute { get; set; }
     public float HealingScalingCoefficient { get; set; }
@@ -260,6 +265,11 @@ public sealed class AbilityEffectSpec
     public StandardConditionType? Condition { get; set; }
     public StandardConditionType? AlternativeCondition { get; set; }
     public string? SummonId { get; set; }
+    public int RepeatCount { get; set; } = 1;
+    public int HealthStepPercent { get; set; }
+    public string? RepeatPerOwnedSummonId { get; set; }
+    public string? ScalingOwnedSummonId { get; set; }
+    public float OwnedSummonScalingCoefficient { get; set; }
     public string? SummonGroupId { get; set; }
     public string? LinkedEffectId { get; set; }
     public double SummonPowerMultiplier { get; set; } = 1d;

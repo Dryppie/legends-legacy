@@ -1,5 +1,5 @@
 {
-  "releasedThroughFloor": 6,
+  "releasedThroughFloor": 10,
   "rewardCurve": {
     "baseReward": 100,
     "maximumFloor": 100,
@@ -168,7 +168,7 @@
       "requiredSlots": 5,
       "recommendedPowerRating": 166,
       "guardianScaling": {
-        "health": 57.5,
+        "health": 58.0,
         "offense": 60.0,
         "defense": 12.0,
         "resistance": 12.0,
@@ -186,21 +186,21 @@
     },
     {
       "floorNumber": 7,
-      "name": "The Mirror of Weakness",
+      "name": "The Endless Spring",
       "type": "Standard",
-      "guardianCreatureId": "00000000-0000-0000-0000-000000000017",
-      "guardianName": "Mirror Illusion Fox",
-      "guardianAbilityProfileId": "monster.illusion_fox",
-      "guardianTags": ["Arcane", "Illusion", "BuildCheck"],
+      "guardianCreatureId": "00000000-0000-0000-0000-000000000064",
+      "guardianName": "Eydis, the Endless Spring",
+      "guardianAbilityProfileId": "monster.eydis,_the_endless_spring",
+      "guardianTags": ["Nature", "Magical", "Healing", "Control", "Abundance"],
       "requiredSlots": 3,
       "recommendedPowerRating": 169,
       "guardianScaling": {
-        "health": 34.0,
-        "offense": 18.0,
-        "defense": 11.0,
-        "resistance": 11.0,
-        "penetration": 11.0,
-        "regeneration": 11.0
+        "health": 23.3,
+        "offense": 12.5,
+        "defense": 8.7,
+        "resistance": 8.7,
+        "penetration": 8.7,
+        "regeneration": 8.7
       },
       "balanceBenchmark": {
         "characterLevel": 43,
@@ -218,21 +218,21 @@
     },
     {
       "floorNumber": 8,
-      "name": "The Flamebound Crossing",
+      "name": "The Poisoned Vessel",
       "type": "Standard",
-      "guardianCreatureId": "00000000-0000-0000-0000-000000000005",
-      "guardianName": "Flamebound Gatekeeper",
-      "guardianAbilityProfileId": "monster.flame_imp",
-      "guardianTags": ["Elemental", "Fire", "DamageOverTime"],
+      "guardianCreatureId": "00000000-0000-0000-0000-000000000063",
+      "guardianName": "Kodoku, the Poisoned Vessel",
+      "guardianAbilityProfileId": "monster.kodoku,_the_poisoned_vessel",
+      "guardianTags": ["Poison", "Summon", "HealingReduction", "Attrition"],
       "requiredSlots": 10,
       "recommendedPowerRating": 174,
       "guardianScaling": {
-        "health": 90.0,
-        "offense": 80.0,
-        "defense": 16.0,
-        "resistance": 16.0,
-        "penetration": 16.0,
-        "regeneration": 16.0
+        "health": 60.0,
+        "offense": 54.0,
+        "defense": 15.0,
+        "resistance": 15.0,
+        "penetration": 15.0,
+        "regeneration": 15.0
       },
       "balanceBenchmark": {
         "characterLevel": 46,
@@ -250,21 +250,21 @@
     },
     {
       "floorNumber": 9,
-      "name": "The Thorned Colossus",
+      "name": "The Ninefold Court",
       "type": "Standard",
-      "guardianCreatureId": "00000000-0000-0000-0000-000000000040",
-      "guardianName": "Rotroot, the Thorned Colossus",
-      "guardianAbilityProfileId": "monster.rotroot_shambler",
-      "guardianTags": ["Nature", "Poison", "Giant", "Attrition"],
+      "guardianCreatureId": "00000000-0000-0000-0000-000000000062",
+      "guardianName": "Ni, the Ninefold",
+      "guardianAbilityProfileId": "monster.ni,_the_ninefold",
+      "guardianTags": ["Physical", "Magical", "Illusion", "Summon"],
       "requiredSlots": 10,
       "recommendedPowerRating": 175,
       "guardianScaling": {
-        "health": 83.0,
-        "offense": 90.0,
-        "defense": 18.0,
-        "resistance": 18.0,
-        "penetration": 18.0,
-        "regeneration": 18.0
+        "health": 70.0,
+        "offense": 58.2,
+        "defense": 15.0,
+        "resistance": 15.0,
+        "penetration": 15.0,
+        "regeneration": 15.0
       },
       "balanceBenchmark": {
         "characterLevel": 48,
@@ -277,21 +277,21 @@
     },
     {
       "floorNumber": 10,
-      "name": "The Crownless King's Throne",
+      "name": "The Mad King's Throne",
       "type": "Sovereign",
-      "guardianCreatureId": "00000000-0000-0000-0000-000000000046",
-      "guardianName": "The First Crownless King",
-      "guardianAbilityProfileId": "monster.undead",
-      "guardianTags": ["Undead", "Physical", "Arcane", "Sovereign"],
+      "guardianCreatureId": "00000000-0000-0000-0000-000000000065",
+      "guardianName": "The Mad King",
+      "guardianAbilityProfileId": "monster.the_mad_king",
+      "guardianTags": ["Physical", "Lifesteal", "Berserker", "Sovereign"],
       "requiredSlots": 15,
       "recommendedPowerRating": 179,
       "guardianScaling": {
-        "health": 300.0,
-        "offense": 92.0,
-        "defense": 26.0,
-        "resistance": 26.0,
-        "penetration": 26.0,
-        "regeneration": 26.0
+        "health": 57.0,
+        "offense": 35.0,
+        "defense": 15.0,
+        "resistance": 15.0,
+        "penetration": 15.0,
+        "regeneration": 15.0
       },
       "balanceBenchmark": {
         "characterLevel": 50,

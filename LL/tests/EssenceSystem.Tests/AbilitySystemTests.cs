@@ -2038,6 +2038,762 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Json_catalog_ni_authors_the_requested_floor_nine_kit()
+    {
+        var contentRoot = FindApiContentRoot();
+        var options = CreateJsonOptions();
+        var catalog = new JsonAbilityCatalogProvider(CreateConfig(), contentRoot, options).GetCatalog();
+        var profile = new JsonCreatureAbilityDefinitionProvider(CreateConfig(), contentRoot, options);
+
+        Assert.Equal(
+            [
+                "ability.creature.ni.ninefold_strike",
+                "ability.creature.ni.ninth_seal",
+                "ability.creature.ni.one_among_nine",
+                "ability.creature.ni.ninefold"
+            ],
+            profile.GetAbilityIds("monster.ni,_the_ninefold"));
+
+        var strike = catalog.AbilitiesById["ability.creature.ni.ninefold_strike"];
+        Assert.Equal(80, strike.CooldownTicks);
+        Assert.Equal(1f, strike.Effects[0].ScalingCoefficient);
+        Assert.Equal(0.2f, strike.Effects[1].ScalingCoefficient);
+        Assert.Equal("niCopy", strike.Effects[1].RepeatPerOwnedSummonId);
+
+        var seal = catalog.AbilitiesById["ability.creature.ni.ninth_seal"];
+        Assert.Equal(160, seal.CooldownTicks);
+        Assert.Equal(AbilityTargetSelector.AllEnemies, seal.Effects[0].Target);
+        Assert.Equal("niCopy", seal.Effects[0].ScalingOwnedSummonId);
+        Assert.Equal(0.2f, seal.Effects[0].OwnedSummonScalingCoefficient);
+
+        var swap = Assert.Single(catalog.AbilitiesById["ability.creature.ni.one_among_nine"].Effects);
+        Assert.Equal(AbilityEffectOperation.SwapHealth, swap.Operation);
+        Assert.Equal(AbilityTargetSelector.HighestCurrentHealthOwnedSummon, swap.Target);
+        Assert.Equal("niCopy", swap.SummonId);
+
+        var passive = catalog.AbilitiesById["ability.creature.ni.ninefold"];
+        Assert.Equal(9, passive.Effects[0].RepeatCount);
+        Assert.Equal(0.05f, passive.Effects[1].ScalingCoefficient);
+        var copy = catalog.SummonsById["niCopy"];
+        Assert.Equal(9, copy.MaxActive);
+        Assert.False(copy.CanBasicAttack);
+        Assert.Equal(
+            0.1f,
+            copy.Attributes.Single(attribute => attribute.Attribute == AttributeType.MaxHealth).ScalingCoefficient);
+    }
+
+    [Fact]
+    public void Ninefold_summons_nine_inert_copies_and_strike_repeats_for_each_survivor()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var selectedIds = new[]
+        {
+            "ability.creature.ni.ninefold_strike",
+            "ability.creature.ni.ninefold"
+        };
+        var abilities = AbilityCompiler.CompileAbilities(selectedIds.Select(id => catalog.AbilitiesById[id]));
+        var ni = CreateCombatant("ni", CombatTeam.Friendly, selectedIds.Select(id => abilities[id]), maxHealth: 1_000);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [], maxHealth: 10_000);
+        var engine = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            AbilityCompiler.CompileSummons(catalog.Summons),
+            AbilityCompiler.CompileAbilities(catalog.Abilities),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        var result = engine.Run([ni], [enemy]);
+
+        Assert.Equal(9, result.EventLog.Count(log =>
+            log.Source == "effect.creature.ni.ninefold.summon" && log.EventType == EventType.Summon));
+        Assert.Equal(9, result.EventLog.Count(log =>
+            log.Source == "effect.creature.ni.ninefold_strike.copy" && log.EventType == EventType.Damage));
+        Assert.DoesNotContain(result.EventLog, log =>
+            log.ActorId.Contains(":summon:niCopy:", StringComparison.Ordinal)
+            && log.EventType == EventType.AbilityUse);
+    }
+
+    [Fact]
+    public void Ninth_seal_scales_with_the_number_of_living_copies()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var seal = AbilityCompiler.CompileAbility(catalog.AbilitiesById["ability.creature.ni.ninth_seal"]);
+
+        int Run(int copyCount)
+        {
+            var ni = CreateCombatant("ni", CombatTeam.Friendly, [seal]);
+            var copies = Enumerable.Range(1, copyCount)
+                .Select(index => CreateOwnedNiCopy($"copy-{index}", ni, 20))
+                .ToArray();
+            var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [], maxHealth: 10_000);
+            var engine = new FastCombatEngine(
+                new Dictionary<string, CompiledStatus>(),
+                new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+            var result = engine.Run([ni, .. copies], [enemy]);
+            return Assert.Single(result.EventLog, log =>
+                log.Source == "effect.creature.ni.ninth_seal.damage" && log.EventType == EventType.Damage).Magnitude;
+        }
+
+        Assert.True(Run(3) > Run(1));
+    }
+
+    [Fact]
+    public void One_among_nine_swaps_with_the_healthiest_copy_only_when_it_is_healthier()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var swap = AbilityCompiler.CompileAbility(catalog.AbilitiesById["ability.creature.ni.one_among_nine"]);
+        var ni = CreateCombatant("ni", CombatTeam.Friendly, [swap], maxHealth: 100);
+        ni.SetHealth(20);
+        var lowerCopy = CreateOwnedNiCopy("lower-copy", ni, 60);
+        var higherCopy = CreateOwnedNiCopy("higher-copy", ni, 80);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [], maxHealth: 1_000);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        var result = engine.Run([ni, lowerCopy, higherCopy], [enemy]);
+
+        Assert.Equal(80, ni.Health);
+        Assert.Equal(20, higherCopy.Health);
+        Assert.Equal(60, lowerCopy.Health);
+        Assert.Contains(result.EventLog, log =>
+            log.Source == "effect.creature.ni.one_among_nine.swap" && log.TargetId == higherCopy.Id);
+    }
+
+    [Fact]
+    public void Ninefold_permanently_grants_power_for_each_copy_that_dies()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var passive = AbilityCompiler.CompileAbility(catalog.AbilitiesById["ability.creature.ni.ninefold"]);
+        var sweep = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.copy-sweep",
+            Kind = AbilitySpecKind.Active,
+            Name = "Copy Sweep",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.copy-sweep",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.AllEnemies,
+                    BaseValue = 110,
+                    DamageType = DamageType.None,
+                    CritEligibility = CritEligibility.Disallowed
+                }
+            ]
+        });
+        var ni = CreateCombatant("ni", CombatTeam.Friendly, [passive], maxHealth: 1_000);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [sweep], maxHealth: 10_000);
+        var engine = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            AbilityCompiler.CompileSummons(catalog.Summons),
+            AbilityCompiler.CompileAbilities(catalog.Abilities),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        var result = engine.Run([ni], [enemy]);
+
+        Assert.Equal(68, ni.GetAttribute(AttributeType.Power));
+        Assert.Equal(9, result.EventLog.Count(log =>
+            log.Source == "effect.creature.ni.ninefold.power" && log.EventType == EventType.Buff));
+    }
+
+    [Fact]
+    public void Json_catalog_kodoku_authors_the_requested_floor_eight_kit()
+    {
+        var contentRoot = FindApiContentRoot();
+        var options = CreateJsonOptions();
+        var catalog = new JsonAbilityCatalogProvider(CreateConfig(), contentRoot, options).GetCatalog();
+        var profile = new JsonCreatureAbilityDefinitionProvider(CreateConfig(), contentRoot, options);
+
+        Assert.Equal(
+            [
+                "ability.creature.kodoku.insect_jar",
+                "ability.creature.kodoku.thousand_poisons",
+                "ability.creature.kodoku.withering_miasma",
+                "ability.creature.kodoku.survivors_struggle"
+            ],
+            profile.GetAbilityIds("monster.kodoku,_the_poisoned_vessel"));
+
+        var insectJar = Assert.Single(catalog.AbilitiesById["ability.creature.kodoku.insect_jar"].Effects);
+        Assert.Equal(150, catalog.AbilitiesById["ability.creature.kodoku.insect_jar"].CooldownTicks);
+        Assert.Equal(3, insectJar.RepeatCount);
+        Assert.Equal("venomSpawn", insectJar.SummonId);
+        Assert.Equal(AttributeType.MaxHealth, insectJar.HealingScalingAttribute);
+        Assert.Equal(0.03f, insectJar.HealingScalingCoefficient);
+
+        var poison = Assert.Single(catalog.AbilitiesById["ability.creature.kodoku.thousand_poisons"].Effects);
+        Assert.Equal(AbilityTargetSelector.LowestCurrentHealthEnemy, poison.Target);
+        Assert.Equal(StandardConditionType.Poison, poison.Condition);
+        Assert.Equal(200, poison.BaseValue);
+
+        var miasma = catalog.AbilitiesById["ability.creature.kodoku.withering_miasma"];
+        Assert.Equal(150, miasma.CooldownTicks);
+        Assert.All(miasma.Effects, effect =>
+        {
+            Assert.Equal(AbilityTargetSelector.AllEnemies, effect.Target);
+            Assert.Equal(-80, effect.BaseValue);
+            Assert.Equal(150, effect.DurationTicks);
+        });
+
+        var struggle = catalog.AbilitiesById["ability.creature.kodoku.survivors_struggle"];
+        Assert.Equal(5, struggle.Effects[0].RepeatCount);
+        Assert.All(struggle.Effects.Skip(1), effect =>
+        {
+            Assert.Equal(AbilityTargetSelector.OwnedSummons, effect.Target);
+            Assert.Equal("venomSpawn", effect.SummonId);
+        });
+
+        var venomspawn = catalog.SummonsById["venomSpawn"];
+        Assert.Equal(5, venomspawn.MaxActive);
+        Assert.True(venomspawn.CanBasicAttack);
+        Assert.Equal(
+            0.08f,
+            venomspawn.Attributes.Single(attribute => attribute.Attribute == AttributeType.MaxHealth).ScalingCoefficient);
+        Assert.Equal(
+            0.15f,
+            venomspawn.Attributes.Single(attribute => attribute.Attribute == AttributeType.Power).ScalingCoefficient);
+    }
+
+    [Theory]
+    [InlineData(2, 3, 0)]
+    [InlineData(3, 2, 1)]
+    [InlineData(4, 1, 2)]
+    [InlineData(5, 0, 3)]
+    public void Insect_jar_summons_to_five_then_heals_once_per_excess(
+        int existingCount,
+        int expectedSummons,
+        int expectedOverflowHeals)
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var insectJar = AbilityCompiler.CompileAbility(catalog.AbilitiesById["ability.creature.kodoku.insect_jar"]);
+        var kodoku = CreateCombatant("kodoku", CombatTeam.Friendly, [insectJar], maxHealth: 1_000);
+        kodoku.SetHealth(500);
+        var existing = Enumerable.Range(1, existingCount)
+            .Select(index => CreateOwnedVenomspawn($"venomspawn-{index}", kodoku, 80))
+            .ToArray();
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [], maxHealth: 10_000);
+        var engine = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            AbilityCompiler.CompileSummons(catalog.Summons),
+            AbilityCompiler.CompileAbilities(catalog.Abilities),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        var result = engine.Run([kodoku, .. existing], [enemy]);
+
+        Assert.Equal(expectedSummons, result.EventLog.Count(log =>
+            log.Source == "effect.creature.kodoku.insect_jar.summon" && log.EventType == EventType.Summon));
+        Assert.Equal(expectedOverflowHeals, result.EventLog.Count(log =>
+            log.Source == "effect.creature.kodoku.insect_jar.summon" && log.EventType == EventType.Heal));
+        Assert.Equal(500 + expectedOverflowHeals * 30, kodoku.Health);
+    }
+
+    [Fact]
+    public void Thousand_poisons_targets_the_enemy_with_lowest_current_health()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var poison = AbilityCompiler.CompileAbility(catalog.AbilitiesById["ability.creature.kodoku.thousand_poisons"]);
+        var kodoku = CreateCombatant("kodoku", CombatTeam.Friendly, [poison]);
+        var lower = CreateCombatant("lower", CombatTeam.Hostile, [], maxHealth: 1_000);
+        lower.SetHealth(100);
+        var higher = CreateCombatant("higher", CombatTeam.Hostile, [], maxHealth: 200);
+        var engine = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        engine.Run([kodoku], [higher, lower]);
+
+        Assert.Equal(200, lower.GetConditionStacks(StandardConditionType.Poison));
+        Assert.Equal(0, higher.GetConditionStacks(StandardConditionType.Poison));
+    }
+
+    [Fact]
+    public void Withering_miasma_reduces_healing_and_regeneration_on_every_enemy()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var miasma = AbilityCompiler.CompileAbility(catalog.AbilitiesById["ability.creature.kodoku.withering_miasma"]);
+        var kodoku = CreateCombatant("kodoku", CombatTeam.Friendly, [miasma]);
+        var first = CreateCombatant("first", CombatTeam.Hostile, []);
+        var second = CreateCombatant("second", CombatTeam.Hostile, []);
+        var engine = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        engine.Run([kodoku], [first, second]);
+
+        Assert.All(new[] { first, second }, target =>
+        {
+            Assert.Equal(-80, target.HealingReceivedPercent);
+            Assert.Equal(-80, target.RegenerationRatePercent);
+        });
+    }
+
+    [Fact]
+    public void Venomspawn_deaths_permanently_stack_power_and_attack_speed_on_survivors()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var struggle = AbilityCompiler.CompileAbility(catalog.AbilitiesById["ability.creature.kodoku.survivors_struggle"]);
+        var sweep = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.venomspawn-sweep",
+            Kind = AbilitySpecKind.Active,
+            Name = "Venomspawn Sweep",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.venomspawn-sweep",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.AllEnemies,
+                    BaseValue = 20,
+                    DamageType = DamageType.None,
+                    CritEligibility = CritEligibility.Disallowed
+                }
+            ]
+        });
+        var kodoku = CreateCombatant("kodoku", CombatTeam.Friendly, [struggle], maxHealth: 1_000);
+        var firstDoomed = CreateOwnedVenomspawn("first-doomed", kodoku, 10);
+        var secondDoomed = CreateOwnedVenomspawn("second-doomed", kodoku, 10);
+        var survivors = Enumerable.Range(1, 3)
+            .Select(index => CreateOwnedVenomspawn($"survivor-{index}", kodoku, 80))
+            .ToArray();
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [sweep], maxHealth: 10_000);
+        var engine = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            AbilityCompiler.CompileSummons(catalog.Summons),
+            AbilityCompiler.CompileAbilities(catalog.Abilities),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        engine.Run([kodoku, firstDoomed, secondDoomed, .. survivors], [enemy]);
+
+        Assert.False(firstDoomed.IsAlive);
+        Assert.False(secondDoomed.IsAlive);
+        Assert.All(survivors, survivor =>
+        {
+            Assert.Equal(30, survivor.GetAttribute(AttributeType.Power));
+            Assert.Equal(50, survivor.GetAttribute(AttributeType.AttackSpeed));
+        });
+        Assert.Equal(50, kodoku.GetAttribute(AttributeType.Power));
+    }
+
+    [Fact]
+    public void Json_catalog_eydis_authors_the_requested_floor_seven_kit()
+    {
+        var contentRoot = FindApiContentRoot();
+        var options = CreateJsonOptions();
+        var catalog = new JsonAbilityCatalogProvider(CreateConfig(), contentRoot, options).GetCatalog();
+        var profile = new JsonCreatureAbilityDefinitionProvider(CreateConfig(), contentRoot, options);
+
+        Assert.Equal(
+            [
+                "ability.creature.eydis.springtide",
+                "ability.creature.eydis.ancient_heartwood",
+                "ability.creature.eydis.tranquil_waters",
+                "ability.creature.eydis.endless_spring"
+            ],
+            profile.GetAbilityIds("monster.eydis,_the_endless_spring"));
+
+        var springtide = Assert.Single(catalog.AbilitiesById["ability.creature.eydis.springtide"].Effects);
+        Assert.Equal(120, catalog.AbilitiesById["ability.creature.eydis.springtide"].CooldownTicks);
+        Assert.Equal(1f, springtide.ScalingCoefficient);
+        Assert.Equal("status.eydis.abundance", springtide.ScalingStatusId);
+        Assert.Equal(AttributeType.Power, springtide.StatusScalingAttribute);
+        Assert.Equal(0.2f, springtide.StatusScalingCoefficient);
+        Assert.Equal(AbilityTargetSelector.AllEnemies, springtide.Target);
+
+        var heartwood = catalog.AbilitiesById["ability.creature.eydis.ancient_heartwood"];
+        Assert.Equal(200, heartwood.CooldownTicks);
+        Assert.Equal([AttributeType.Armor, AttributeType.Resistance], heartwood.Effects.Select(x => x.Attribute));
+        Assert.All(heartwood.Effects, effect =>
+        {
+            Assert.Equal(0.5f, effect.ScalingCoefficient);
+            Assert.Equal(100, effect.DurationTicks);
+        });
+
+        var tranquil = catalog.AbilitiesById["ability.creature.eydis.tranquil_waters"];
+        Assert.Equal(150, tranquil.CooldownTicks);
+        Assert.Equal(
+            [StandardConditionType.Slow, StandardConditionType.Weaken],
+            tranquil.Effects.Select(x => x.Condition));
+        Assert.All(tranquil.Effects, effect => Assert.Equal(AbilityTargetSelector.AllEnemies, effect.Target));
+
+        var endless = catalog.AbilitiesById["ability.creature.eydis.endless_spring"];
+        var interval = Assert.Single(endless.Triggers);
+        Assert.Equal(100, interval.InitialDelayTicks);
+        Assert.Equal(100, interval.InternalCooldownTicks);
+        Assert.Equal(
+            [
+                "effect.creature.eydis.endless_spring.abundance",
+                "effect.creature.eydis.endless_spring.heal"
+            ],
+            interval.EffectIds);
+        var heal = endless.Effects[1];
+        Assert.Equal("status.eydis.abundance", heal.ScalingStatusId);
+        Assert.Equal(AttributeType.MaxHealth, heal.StatusScalingAttribute);
+        Assert.Equal(0.01f, heal.StatusScalingCoefficient);
+
+        var abundance = catalog.StatusesById["status.eydis.abundance"];
+        Assert.Equal(AbilityStatusStackingPolicy.Stack, abundance.StackingPolicy);
+        Assert.Equal(60, abundance.MaxStacks);
+        Assert.Equal(0, abundance.DurationTicks);
+    }
+
+    [Fact]
+    public void Springtide_gains_twenty_percent_power_scaling_per_abundance()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var springtide = AbilityCompiler.CompileAbility(catalog.AbilitiesById["ability.creature.eydis.springtide"]);
+
+        int DamageWithStacks(int stacks)
+        {
+            var eydis = CreateCombatant($"eydis-{stacks}", CombatTeam.Friendly, [springtide]);
+            var enemy = CreateCombatant($"enemy-{stacks}", CombatTeam.Hostile, [], maxHealth: 1_000);
+            if (stacks > 0)
+                eydis.Statuses.Add(new RuntimeStatus(statuses["status.eydis.abundance"], eydis, eydis, stacks));
+            var engine = new FastCombatEngine(
+                statuses,
+                new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+            var result = engine.Run([eydis], [enemy]);
+            return Assert.Single(result.EventLog, log =>
+                log.Source == "effect.creature.eydis.springtide.damage").Magnitude;
+        }
+
+        var baseDamage = DamageWithStacks(0);
+        var stackedDamage = DamageWithStacks(3);
+        Assert.True(stackedDamage > baseDamage);
+        Assert.InRange((double)stackedDamage / baseDamage, 1.55, 1.65);
+    }
+
+    [Fact]
+    public void Endless_spring_gains_abundance_before_healing_one_percent_max_health_per_stack()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var endless = AbilityCompiler.CompileAbility(catalog.AbilitiesById["ability.creature.eydis.endless_spring"]);
+        var eydis = CreateCombatant("eydis", CombatTeam.Friendly, [endless], maxHealth: 1_000);
+        eydis.SetHealth(500);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [], maxHealth: 100_000);
+        var engine = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 201, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        var result = engine.Run([eydis], [enemy]);
+
+        Assert.Equal(2, eydis.GetStatusStacks("status.eydis.abundance"));
+        Assert.Equal(530, eydis.Health);
+        Assert.Equal(
+            [10, 20],
+            result.EventLog
+                .Where(log => log.Source == "effect.creature.eydis.endless_spring.heal" && log.EventType == EventType.Heal)
+                .Select(log => log.Magnitude));
+    }
+
+    [Fact]
+    public void Ancient_heartwood_expires_and_tranquil_waters_debuffs_every_enemy()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var abilities = AbilityCompiler.CompileAbilities(
+            [
+                catalog.AbilitiesById["ability.creature.eydis.ancient_heartwood"],
+                catalog.AbilitiesById["ability.creature.eydis.tranquil_waters"]
+            ]);
+        var eydis = new RuntimeCombatant(
+            "eydis",
+            "Eydis",
+            CombatTeam.Friendly,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 100_000,
+                [AttributeType.Power] = 50,
+                [AttributeType.Armor] = 100,
+                [AttributeType.Resistance] = 80,
+                [AttributeType.AttackSpeed] = 0
+            },
+            abilities.Values,
+            ["Role.Test"]);
+        var first = CreateCombatant("first", CombatTeam.Hostile, [], maxHealth: 100_000);
+        var second = CreateCombatant("second", CombatTeam.Hostile, [], maxHealth: 100_000);
+        var engine = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 101, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        var result = engine.Run([eydis], [first, second]);
+
+        Assert.Equal(100, eydis.GetAttribute(AttributeType.Armor));
+        Assert.Equal(80, eydis.GetAttribute(AttributeType.Resistance));
+        Assert.Contains(result.EventLog, log =>
+            log.Source == "effect.creature.eydis.ancient_heartwood.defense"
+            && log.EventType == EventType.Buff
+            && log.Magnitude == 50);
+        var tranquil = abilities["ability.creature.eydis.tranquil_waters"];
+        var tranquilEydis = CreateCombatant("tranquil-eydis", CombatTeam.Friendly, [tranquil]);
+        var tranquilFirst = CreateCombatant("tranquil-first", CombatTeam.Hostile, []);
+        var tranquilSecond = CreateCombatant("tranquil-second", CombatTeam.Hostile, []);
+        var tranquilEngine = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        tranquilEngine.Run([tranquilEydis], [tranquilFirst, tranquilSecond]);
+
+        Assert.All(new[] { tranquilFirst, tranquilSecond }, enemy =>
+        {
+            Assert.Equal(1, enemy.GetConditionStacks(StandardConditionType.Slow));
+            Assert.Equal(1, enemy.GetConditionStacks(StandardConditionType.Weaken));
+        });
+    }
+
+    [Fact]
+    public void Json_catalog_mad_king_authors_the_requested_floor_ten_kit()
+    {
+        var contentRoot = FindApiContentRoot();
+        var options = CreateJsonOptions();
+        var catalog = new JsonAbilityCatalogProvider(CreateConfig(), contentRoot, options).GetCatalog();
+        var profile = new JsonCreatureAbilityDefinitionProvider(CreateConfig(), contentRoot, options);
+
+        Assert.Equal(
+            [
+                "ability.creature.mad_king.bloodbath",
+                "ability.creature.mad_king.kings_cleaver",
+                "ability.creature.mad_king.unrestrained",
+                "ability.creature.mad_king.bloodlust"
+            ],
+            profile.GetAbilityIds("monster.the_mad_king"));
+
+        var bloodbath = catalog.AbilitiesById["ability.creature.mad_king.bloodbath"];
+        var bloodbathDamage = Assert.Single(bloodbath.Effects);
+        Assert.Equal(150, bloodbath.CooldownTicks);
+        Assert.Equal(AbilityTargetSelector.AllEnemies, bloodbathDamage.Target);
+        Assert.Equal(0.4f, bloodbathDamage.ScalingCoefficient);
+        Assert.Equal(5, bloodbathDamage.RepeatCount);
+        Assert.Equal(20, bloodbathDamage.LifeStealPercentage);
+
+        var cleaver = catalog.AbilitiesById["ability.creature.mad_king.kings_cleaver"];
+        Assert.Equal(100, cleaver.CooldownTicks);
+        Assert.Equal(2, cleaver.Effects.Count);
+        Assert.All(cleaver.Effects, effect => Assert.Equal(3f, effect.ScalingCoefficient));
+        Assert.Equal(AbilityTargetSelector.HighestHealthEnemy, cleaver.Effects[0].Target);
+        Assert.Equal(AbilityTargetSelector.EventTarget, cleaver.Effects[1].Target);
+
+        var unrestrained = catalog.AbilitiesById["ability.creature.mad_king.unrestrained"];
+        Assert.Equal(180, unrestrained.CooldownTicks);
+        Assert.Equal(
+            [AbilityEffectOperation.ModifyDamageDealt, AbilityEffectOperation.ModifyDamageTaken],
+            unrestrained.Effects.Select(effect => effect.Operation));
+        Assert.All(unrestrained.Effects, effect =>
+        {
+            Assert.Equal(40, effect.BaseValue);
+            Assert.Equal(100, effect.DurationTicks);
+        });
+
+        var bloodlust = catalog.AbilitiesById["ability.creature.mad_king.bloodlust"];
+        var bloodlustEffect = Assert.Single(bloodlust.Effects);
+        Assert.Equal(AbilitySpecKind.Passive, bloodlust.Kind);
+        Assert.Equal(AbilityEffectOperation.SynchronizeAttributePerMissingHealthStep, bloodlustEffect.Operation);
+        Assert.Equal(AttributeType.LifeSteal, bloodlustEffect.Attribute);
+        Assert.Equal(5, bloodlustEffect.BaseValue);
+        Assert.Equal(10, bloodlustEffect.HealthStepPercent);
+    }
+
+    [Fact]
+    public void Bloodbath_hits_every_enemy_five_times_and_heals_twenty_percent_per_hit()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var bloodbath = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.mad_king.bloodbath"]);
+        var madKing = CreateCombatant("mad-king", CombatTeam.Friendly, [bloodbath]);
+        madKing.SetHealth(100);
+        var first = CreateCombatant("first", CombatTeam.Hostile, [], maxHealth: 1_000);
+        var second = CreateCombatant("second", CombatTeam.Hostile, [], maxHealth: 1_000);
+        var engine = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        var result = engine.Run([madKing], [first, second]);
+
+        var damage = result.EventLog
+            .Where(log => log.Source == "effect.creature.mad_king.bloodbath.damage"
+                          && log.EventType == EventType.Damage)
+            .ToArray();
+        Assert.Equal(10, damage.Length);
+        Assert.Equal(5, damage.Count(log => log.TargetId == first.Id));
+        Assert.Equal(5, damage.Count(log => log.TargetId == second.Id));
+        var expectedHealing = damage.Sum(log => (int)Math.Round(log.Magnitude * 0.2f));
+        var actualHealing = result.EventLog
+            .Where(log => log.Source == "effect.creature.mad_king.bloodbath.damage"
+                          && log.EventType == EventType.Heal)
+            .Sum(log => log.Magnitude);
+        Assert.Equal(expectedHealing, actualHealing);
+    }
+
+    [Theory]
+    [InlineData(800, 2)]
+    [InlineData(500, 1)]
+    public void Kings_cleaver_locks_the_highest_health_target_and_doubles_only_above_half(
+        int selectedHealth,
+        int expectedHits)
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var cleaver = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.mad_king.kings_cleaver"]);
+        var madKing = CreateCombatant("mad-king", CombatTeam.Friendly, [cleaver]);
+        var selected = CreateCombatant("selected", CombatTeam.Hostile, [], maxHealth: 1_000);
+        selected.SetHealth(selectedHealth);
+        var lower = CreateCombatant("lower", CombatTeam.Hostile, [], maxHealth: 1_000);
+        lower.SetHealth(selectedHealth - 100);
+        var engine = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        var result = engine.Run([madKing], [lower, selected]);
+
+        var damage = result.EventLog
+            .Where(log => log.Source.StartsWith("effect.creature.mad_king.kings_cleaver", StringComparison.Ordinal)
+                          && log.EventType == EventType.Damage)
+            .ToArray();
+        Assert.Equal(expectedHits, damage.Length);
+        Assert.All(damage, log => Assert.Equal(selected.Id, log.TargetId));
+    }
+
+    [Fact]
+    public void Unrestrained_increases_all_damage_dealt_and_taken_then_expires()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var unrestrained = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.mad_king.unrestrained"]);
+
+        RuntimeCombatant Run(int maxTicks)
+        {
+            var madKing = CreateCombatant($"mad-king-{maxTicks}", CombatTeam.Friendly, [unrestrained]);
+            var enemy = CreateCombatant($"enemy-{maxTicks}", CombatTeam.Hostile, [], maxHealth: 100_000);
+            var engine = new FastCombatEngine(
+                AbilityCompiler.CompileStatuses(catalog.Statuses),
+                new FastCombatEngineOptions(MaxTicks: maxTicks, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+            engine.Run([madKing], [enemy]);
+            return madKing;
+        }
+
+        var active = Run(1);
+        Assert.Equal(40, active.GetDamageDealtPercent(DamageType.Physical));
+        Assert.Equal(40, active.GetDamageDealtPercent(DamageType.Magical));
+        Assert.Equal(40, active.GetDamageTakenPercent(DamageType.Physical, active));
+        Assert.Equal(40, active.GetDamageTakenPercent(DamageType.Magical, active));
+        var expired = Run(101);
+        Assert.Equal(0, expired.GetDamageDealtPercent(DamageType.Physical));
+        Assert.Equal(0, expired.GetDamageDealtPercent(DamageType.Magical));
+        Assert.Equal(0, expired.GetDamageTakenPercent(DamageType.Physical, expired));
+        Assert.Equal(0, expired.GetDamageTakenPercent(DamageType.Magical, expired));
+    }
+
+    [Theory]
+    [InlineData(200, 0)]
+    [InlineData(181, 0)]
+    [InlineData(180, 5)]
+    [InlineData(100, 25)]
+    [InlineData(20, 45)]
+    public void Bloodlust_synchronizes_lifesteal_at_each_missing_health_step(
+        int health,
+        int expectedLifeSteal)
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var bloodlust = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.mad_king.bloodlust"]);
+        var madKing = CreateCombatant("mad-king", CombatTeam.Friendly, [bloodlust]);
+        madKing.SetHealth(health);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [], maxHealth: 100_000);
+        var engine = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        engine.Run([madKing], [enemy]);
+
+        Assert.Equal(expectedLifeSteal, madKing.GetAttribute(AttributeType.LifeSteal));
+    }
+
+    [Fact]
+    public void Bloodlust_removes_lifesteal_steps_after_healing()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var bloodlust = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.mad_king.bloodlust"]);
+        var heal = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.mad-king-heal",
+            Kind = AbilitySpecKind.Active,
+            Name = "Mad King Test Heal",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.mad-king-heal",
+                    Operation = AbilityEffectOperation.Heal,
+                    Target = AbilityTargetSelector.Self,
+                    BaseValue = 50,
+                    CritEligibility = CritEligibility.Disallowed
+                }
+            ]
+        });
+        var madKing = CreateCombatant("mad-king", CombatTeam.Friendly, [heal, bloodlust]);
+        madKing.SetHealth(100);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [], maxHealth: 100_000);
+        var engine = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        engine.Run([madKing], [enemy]);
+
+        Assert.Equal(150, madKing.Health);
+        Assert.Equal(10, madKing.GetAttribute(AttributeType.LifeSteal));
+    }
+
+    [Fact]
     public void Kharads_crushing_verdict_targets_highest_max_health()
     {
         var catalog = new JsonAbilityCatalogProvider(
@@ -2506,7 +3262,7 @@ public sealed class AbilitySystemTests
         Assert.All(allAbilityIds, profile =>
             Assert.Equal(profile.MonsterId == "monster.hobgoblin" ? 3 : 2, profile.AbilityIds.Count));
         Assert.Equal(105, allAbilityIds.SelectMany(x => x.AbilityIds).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(131, catalog.AbilitiesById.Count);
+        Assert.Equal(147, catalog.AbilitiesById.Count);
         Assert.Contains("ability.summon.shadow_image.shadow_strike", catalog.AbilitiesById.Keys);
         Assert.All(allAbilityIds.SelectMany(x => x.AbilityIds), abilityId =>
         {
@@ -4561,6 +5317,53 @@ public sealed class AbilitySystemTests
             summonOwner: owner);
         broodling.SetHealth(health);
         return broodling;
+    }
+
+    private static RuntimeCombatant CreateOwnedNiCopy(
+        string id,
+        RuntimeCombatant owner,
+        int health)
+    {
+        var copy = new RuntimeCombatant(
+            id,
+            id,
+            owner.Team,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 100,
+                [AttributeType.Power] = 0,
+                [AttributeType.AttackSpeed] = 0
+            },
+            [],
+            ["Summoned", "Summon.niCopy"],
+            isSummoned: true,
+            summonOwner: owner,
+            canBasicAttack: false);
+        copy.SetHealth(health);
+        return copy;
+    }
+
+    private static RuntimeCombatant CreateOwnedVenomspawn(
+        string id,
+        RuntimeCombatant owner,
+        int health)
+    {
+        var venomspawn = new RuntimeCombatant(
+            id,
+            id,
+            owner.Team,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 100,
+                [AttributeType.Power] = 20,
+                [AttributeType.AttackSpeed] = 0
+            },
+            [],
+            ["Summoned", "Summon.venomSpawn"],
+            isSummoned: true,
+            summonOwner: owner);
+        venomspawn.SetHealth(health);
+        return venomspawn;
     }
 
     private static int CountBasicAttacks(CombatResult result, string actorId) =>

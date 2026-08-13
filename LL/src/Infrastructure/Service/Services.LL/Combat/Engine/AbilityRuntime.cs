@@ -55,6 +55,7 @@ public sealed class CompiledEffect
     public float ConditionScalingCoefficient { get; init; }
     public string? ScalingStatusId { get; init; }
     public AbilityConditionSubject ScalingStatusSubject { get; init; }
+    public AttributeType StatusScalingAttribute { get; init; } = AttributeType.Power;
     public float StatusScalingCoefficient { get; init; }
     public AttributeType? HealingScalingAttribute { get; init; }
     public float HealingScalingCoefficient { get; init; }
@@ -64,6 +65,11 @@ public sealed class CompiledEffect
     public StandardConditionType? Condition { get; init; }
     public StandardConditionType? AlternativeCondition { get; init; }
     public string? SummonId { get; init; }
+    public int RepeatCount { get; init; } = 1;
+    public int HealthStepPercent { get; init; }
+    public string? RepeatPerOwnedSummonId { get; init; }
+    public string? ScalingOwnedSummonId { get; init; }
+    public float OwnedSummonScalingCoefficient { get; init; }
     public string? SummonGroupId { get; init; }
     public string? LinkedEffectId { get; init; }
     public double SummonPowerMultiplier { get; init; } = 1d;
@@ -331,13 +337,15 @@ public sealed class RuntimeEffect
         RuntimeCombatant target,
         string? statsSource = null,
         double durationMultiplier = 1d,
-        string? activationId = null)
+        string? activationId = null,
+        int? appliedModifierValue = null)
     {
         Definition = definition;
         Source = source;
         Target = target;
         StatsSource = string.IsNullOrWhiteSpace(statsSource) ? definition.StatsSource : statsSource;
         ActivationId = activationId;
+        AppliedModifierValue = appliedModifierValue;
         RemainingDurationTicks = definition.DurationTicks <= 0
             ? definition.DurationTicks
             : Math.Max(1, (int)Math.Ceiling(definition.DurationTicks * Math.Max(0, durationMultiplier)));
@@ -350,6 +358,7 @@ public sealed class RuntimeEffect
     public RuntimeCombatant Target { get; }
     public string StatsSource { get; }
     public string? ActivationId { get; }
+    public int? AppliedModifierValue { get; }
     public int RemainingDurationTicks { get; private set; }
     public int TicksUntilInterval { get; private set; }
     public int RemainingUses { get; private set; }

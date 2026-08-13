@@ -19,7 +19,12 @@ public sealed class RegionOneIdleAreaSeedTests
         "monster.velka,_the_bloodwing_huntress",
         "monster.morrowmaw,_broodkeeper",
         "monster.vaelor,_the_mirrorbound",
-        "monster.kharad,_the_first_warden"
+        "monster.kharad,_the_first_warden",
+        "monster.orsenn,_the_ashen_bellkeeper",
+        "monster.eydis,_the_endless_spring",
+        "monster.kodoku,_the_poisoned_vessel",
+        "monster.ni,_the_ninefold",
+        "monster.the_mad_king"
     };
     private static readonly HashSet<string> CreatureEssencesPendingAreaDropTuning = new(StringComparer.OrdinalIgnoreCase);
 
@@ -308,26 +313,8 @@ public sealed class RegionOneIdleAreaSeedTests
         return new LLDbContext(options);
     }
 
-    private static string FindApiDataRoot()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null)
-        {
-            foreach (var dataPath in new[]
-            {
-                Path.Combine(directory.FullName, "src", "API", "API.LL", "Data"),
-                Path.Combine(directory.FullName, "LL", "src", "API", "API.LL", "Data")
-            })
-            {
-                if (File.Exists(Path.Combine(dataPath, "essences", "essences.json")) && File.Exists(Path.Combine(dataPath, "items", "items.json")))
-                    return dataPath;
-            }
-
-            directory = directory.Parent;
-        }
-
-        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/essences/essences.json and items/items.json from test output directory.");
-    }
+    private static string FindApiDataRoot() =>
+        Path.Combine(TestContentPaths.FindApiRoot(), "Data");
 
     private sealed record CreatureEssenceLootTuning(double BaseDropChance);
 }

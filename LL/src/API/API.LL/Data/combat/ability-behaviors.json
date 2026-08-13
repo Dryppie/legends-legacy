@@ -1480,5 +1480,329 @@
         "minMagnitude": 204
       }
     ]
+  },
+  {
+    "id": "behavior.creature.ni.ninefold_strike.repeats_for_surviving_copies",
+    "abilityId": "ability.creature.ni.ninefold_strike",
+    "friendlyAbilityIds": [
+      "ability.creature.ni.ninefold_strike",
+      "ability.creature.ni.ninefold"
+    ],
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.ni.ninefold_strike.main",
+        "eventType": "Damage",
+        "minCount": 1
+      },
+      {
+        "source": "effect.creature.ni.ninefold_strike.copy",
+        "eventType": "Damage",
+        "minCount": 9
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.ni.ninth_seal.scales_with_surviving_copies",
+    "abilityId": "ability.creature.ni.ninth_seal",
+    "friendlyAbilityIds": [
+      "ability.creature.ni.ninth_seal",
+      "ability.creature.ni.ninefold"
+    ],
+    "hostileCount": 2,
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.ni.ninth_seal.damage",
+        "eventType": "Damage",
+        "minCount": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.ni.one_among_nine.has_ninefold_setup",
+    "abilityId": "ability.creature.ni.one_among_nine",
+    "friendlyAbilityIds": [
+      "ability.creature.ni.one_among_nine",
+      "ability.creature.ni.ninefold"
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.ni.ninefold.summon",
+        "eventType": "Summon",
+        "minCount": 9
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.ni.ninefold.summons_nine_inert_copies",
+    "abilityId": "ability.creature.ni.ninefold",
+    "friendlyAbilityIds": [
+      "ability.creature.ni.ninefold"
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.ni.ninefold.summon",
+        "eventType": "Summon",
+        "minCount": 9
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.kodoku.insect_jar.devours_excess_at_cap",
+    "abilityId": "ability.creature.kodoku.insect_jar",
+    "friendlyAbilityIds": [
+      "ability.creature.kodoku.insect_jar",
+      "ability.creature.kodoku.survivors_struggle"
+    ],
+    "friendlyHealth": 100,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.kodoku.insect_jar.summon",
+        "eventType": "Heal",
+        "minCount": 3
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.kodoku.thousand_poisons.targets_lowest_current_health",
+    "abilityId": "ability.creature.kodoku.thousand_poisons",
+    "friendlyAbilityIds": [
+      "ability.creature.kodoku.thousand_poisons"
+    ],
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "expectedConditions": [
+      {
+        "combatantId": "hostile-1",
+        "condition": "Poison",
+        "minStacks": 200
+      }
+    ],
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.kodoku.withering_miasma.withers_all_enemies",
+    "abilityId": "ability.creature.kodoku.withering_miasma",
+    "friendlyAbilityIds": [
+      "ability.creature.kodoku.withering_miasma"
+    ],
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.kodoku.withering_miasma.healing",
+        "eventType": "Debuff",
+        "minCount": 2
+      },
+      {
+        "source": "effect.creature.kodoku.withering_miasma.regeneration",
+        "eventType": "Debuff",
+        "minCount": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.kodoku.survivors_struggle.summons_five_venomspawn",
+    "abilityId": "ability.creature.kodoku.survivors_struggle",
+    "friendlyAbilityIds": [
+      "ability.creature.kodoku.survivors_struggle"
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.kodoku.survivors_struggle.summon",
+        "eventType": "Summon",
+        "minCount": 5
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.eydis.springtide.scales_with_abundance",
+    "abilityId": "ability.creature.eydis.springtide",
+    "friendlyAbilityIds": [
+      "ability.creature.eydis.springtide"
+    ],
+    "friendlyStats": {
+      "Power": 100
+    },
+    "hostileCount": 2,
+    "hostileHealth": 1000,
+    "maxTicks": 1,
+    "initialStatuses": [
+      {
+        "combatantId": "friendly",
+        "sourceCombatantId": "friendly",
+        "statusId": "status.eydis.abundance",
+        "stacks": 2
+      }
+    ],
+    "expectedLogs": [
+      {
+        "source": "effect.creature.eydis.springtide.damage",
+        "eventType": "Damage",
+        "minCount": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.eydis.ancient_heartwood.fortifies_eydis",
+    "abilityId": "ability.creature.eydis.ancient_heartwood",
+    "friendlyAbilityIds": [
+      "ability.creature.eydis.ancient_heartwood"
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.eydis.ancient_heartwood.defense",
+        "eventType": "Buff",
+        "minCount": 1
+      },
+      {
+        "source": "effect.creature.eydis.ancient_heartwood.resistance",
+        "eventType": "Buff",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.eydis.tranquil_waters.debuffs_all_enemies",
+    "abilityId": "ability.creature.eydis.tranquil_waters",
+    "friendlyAbilityIds": [
+      "ability.creature.eydis.tranquil_waters"
+    ],
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "expectedConditions": [
+      {
+        "combatantId": "hostile-1",
+        "condition": "Slow",
+        "minStacks": 1
+      },
+      {
+        "combatantId": "hostile-1",
+        "condition": "Weaken",
+        "minStacks": 1
+      },
+      {
+        "combatantId": "hostile-2",
+        "condition": "Slow",
+        "minStacks": 1
+      },
+      {
+        "combatantId": "hostile-2",
+        "condition": "Weaken",
+        "minStacks": 1
+      }
+    ],
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.eydis.endless_spring.stacks_then_heals",
+    "abilityId": "ability.creature.eydis.endless_spring",
+    "friendlyAbilityIds": [
+      "ability.creature.eydis.endless_spring"
+    ],
+    "friendlyHealth": 100,
+    "maxTicks": 101,
+    "expectedStatuses": [
+      {
+        "combatantId": "friendly",
+        "statusId": "status.eydis.abundance",
+        "minStacks": 1
+      }
+    ],
+    "expectedLogs": [
+      {
+        "source": "effect.creature.eydis.endless_spring.heal",
+        "eventType": "Heal",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.mad_king.bloodbath.strikes_every_enemy_five_times",
+    "abilityId": "ability.creature.mad_king.bloodbath",
+    "friendlyAbilityIds": [
+      "ability.creature.mad_king.bloodbath"
+    ],
+    "friendlyHealth": 100,
+    "hostileCount": 2,
+    "hostileHealth": 1000,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.mad_king.bloodbath.damage",
+        "eventType": "Damage",
+        "minCount": 10
+      },
+      {
+        "source": "effect.creature.mad_king.bloodbath.damage",
+        "eventType": "Heal",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.mad_king.kings_cleaver.doubles_above_half_health",
+    "abilityId": "ability.creature.mad_king.kings_cleaver",
+    "friendlyAbilityIds": [
+      "ability.creature.mad_king.kings_cleaver"
+    ],
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.mad_king.kings_cleaver.above_half_bonus",
+        "eventType": "Damage",
+        "minCount": 1
+      },
+      {
+        "source": "effect.creature.mad_king.kings_cleaver.base",
+        "eventType": "Damage",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.mad_king.unrestrained.increases_damage_dealt_and_taken",
+    "abilityId": "ability.creature.mad_king.unrestrained",
+    "friendlyAbilityIds": [
+      "ability.creature.mad_king.unrestrained"
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.mad_king.unrestrained.damage_dealt",
+        "eventType": "Buff",
+        "minCount": 1
+      },
+      {
+        "source": "effect.creature.mad_king.unrestrained.damage_taken",
+        "eventType": "Debuff",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.mad_king.bloodlust.grants_lifesteal_for_missing_health",
+    "abilityId": "ability.creature.mad_king.bloodlust",
+    "friendlyAbilityIds": [
+      "ability.creature.mad_king.bloodlust"
+    ],
+    "friendlyHealth": 100,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.mad_king.bloodlust.lifesteal",
+        "eventType": "Buff",
+        "minCount": 1
+      }
+    ]
   }
 ]

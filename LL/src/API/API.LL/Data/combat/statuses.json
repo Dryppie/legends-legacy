@@ -377,5 +377,20 @@
         "procCoefficient": 1
       }
     ]
+  },
+  {
+    "id": "status.eydis.abundance",
+    "name": "Abundance",
+    "description": "A permanent combat stack that strengthens Springtide and Endless Spring.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 60,
+    "durationTicks": 0,
+    "tags": [
+      "Status.Buff",
+      "Nature.Abundance",
+      "Pattern.StackingBuff"
+    ],
+    "triggers": [],
+    "effects": []
   }
 ]

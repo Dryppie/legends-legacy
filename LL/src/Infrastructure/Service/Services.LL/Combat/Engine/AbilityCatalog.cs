@@ -240,10 +240,41 @@ public static class AbilityCatalogValidator
             if (effect.DurationTicks < 0 || effect.IntervalTicks < 0 || effect.Uses < 0)
                 errors.Add($"{label}: duration, interval, and uses cannot be negative.");
 
+            if (effect.RepeatCount <= 0)
+                errors.Add($"{label}: repeatCount must be greater than 0.");
+
+            if (!float.IsFinite(effect.OwnedSummonScalingCoefficient)
+                || effect.OwnedSummonScalingCoefficient < 0)
+            {
+                errors.Add($"{label}: ownedSummonScalingCoefficient must be finite and non-negative.");
+            }
+
+            if (effect.OwnedSummonScalingCoefficient > 0
+                && string.IsNullOrWhiteSpace(effect.ScalingOwnedSummonId))
+            {
+                errors.Add($"{label}: ownedSummonScalingCoefficient requires scalingOwnedSummonId.");
+            }
+
+            if (!float.IsFinite(effect.HealingScalingCoefficient)
+                || !float.IsFinite(effect.MaximumHealingScalingCoefficient)
+                || effect.HealingScalingCoefficient < 0
+                || effect.MaximumHealingScalingCoefficient < 0)
+            {
+                errors.Add($"{label}: healing scaling coefficients must be finite and non-negative.");
+            }
+
+            if (effect.HealingScalingCoefficient > 0 && effect.HealingScalingAttribute is null)
+                errors.Add($"{label}: healingScalingCoefficient requires healingScalingAttribute.");
+
             if (effect.ScalingAttribute is { } scalingAttribute
                 && !AttributeCatalog.IsContentFacing(scalingAttribute))
             {
                 errors.Add($"{label}: scaling attribute '{scalingAttribute}' is runtime-only and cannot be authored.");
+            }
+
+            if (!AttributeCatalog.IsContentFacing(effect.StatusScalingAttribute))
+            {
+                errors.Add($"{label}: status scaling attribute '{effect.StatusScalingAttribute}' is runtime-only and cannot be authored.");
             }
 
             if (effect.Operation is AbilityEffectOperation.ModifyAttribute
@@ -251,6 +282,7 @@ public static class AbilityCatalogValidator
                     or AbilityEffectOperation.TransferAttributePercent
                     or AbilityEffectOperation.SynchronizeAttributePerOwnedSummon
                     or AbilityEffectOperation.SynchronizeAttributePerStatusStack
+                    or AbilityEffectOperation.SynchronizeAttributePerMissingHealthStep
                 && effect.Attribute is null)
             {
                 errors.Add($"{label}: {effect.Operation} requires attribute.");
@@ -275,6 +307,19 @@ public static class AbilityCatalogValidator
             if (effect.Operation == AbilityEffectOperation.Summon && string.IsNullOrWhiteSpace(effect.SummonId))
                 errors.Add($"{label}: Summon requires summonId.");
 
+            if (effect.Target == AbilityTargetSelector.OwnedSummons
+                && string.IsNullOrWhiteSpace(effect.SummonId))
+            {
+                errors.Add($"{label}: OwnedSummons requires summonId.");
+            }
+
+            if (effect.Operation == AbilityEffectOperation.SwapHealth
+                && (effect.Target != AbilityTargetSelector.HighestCurrentHealthOwnedSummon
+                    || string.IsNullOrWhiteSpace(effect.SummonId)))
+            {
+                errors.Add($"{label}: SwapHealth requires HighestCurrentHealthOwnedSummon and summonId.");
+            }
+
             if (effect.Operation == AbilityEffectOperation.Summon
                 && !string.IsNullOrWhiteSpace(effect.SummonGroupId)
                 && effect.DurationTicks <= 0)
@@ -295,6 +340,20 @@ public static class AbilityCatalogValidator
                 && Math.Abs(effect.ScalingCoefficient) <= float.Epsilon)
             {
                 errors.Add($"{label}: SynchronizeAttributePerStatusStack requires a non-zero baseValue or scalingCoefficient.");
+            }
+
+            if (effect.Operation == AbilityEffectOperation.SynchronizeAttributePerMissingHealthStep)
+            {
+                if (effect.HealthStepPercent is <= 0 or > 100)
+                {
+                    errors.Add(
+                        $"{label}: SynchronizeAttributePerMissingHealthStep requires healthStepPercent between 1 and 100.");
+                }
+                if (effect.BaseValue == 0)
+                {
+                    errors.Add(
+                        $"{label}: SynchronizeAttributePerMissingHealthStep requires a non-zero baseValue.");
+                }
             }
 
             if (effect.Operation == AbilityEffectOperation.ConsumeOwnedSummon)
@@ -511,14 +570,26 @@ public static class AbilityCatalogValidator
     {
         foreach (var effect in effects)
         {
-            if (effect.Operation is not (AbilityEffectOperation.Summon
+            var referencedSummonIds = new List<string>();
+            if (effect.Operation is AbilityEffectOperation.Summon
                     or AbilityEffectOperation.SynchronizeAttributePerOwnedSummon
-                    or AbilityEffectOperation.ConsumeOwnedSummon)
-                || string.IsNullOrWhiteSpace(effect.SummonId))
-                continue;
+                    or AbilityEffectOperation.ConsumeOwnedSummon
+                    or AbilityEffectOperation.SwapHealth
+                && !string.IsNullOrWhiteSpace(effect.SummonId))
+            {
+                referencedSummonIds.Add(effect.SummonId);
+            }
 
-            if (!knownSummonIds.Contains(effect.SummonId))
-                errors.Add($"{ownerId}/{effect.Id}: references unknown summon '{effect.SummonId}'.");
+            if (!string.IsNullOrWhiteSpace(effect.RepeatPerOwnedSummonId))
+                referencedSummonIds.Add(effect.RepeatPerOwnedSummonId);
+            if (!string.IsNullOrWhiteSpace(effect.ScalingOwnedSummonId))
+                referencedSummonIds.Add(effect.ScalingOwnedSummonId);
+
+            foreach (var summonId in referencedSummonIds.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                if (!knownSummonIds.Contains(summonId))
+                    errors.Add($"{ownerId}/{effect.Id}: references unknown summon '{summonId}'.");
+            }
         }
     }
 

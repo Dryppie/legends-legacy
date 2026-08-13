@@ -188,5 +188,87 @@
         "minimumValue": 0
       }
     ]
+  },
+  {
+    "id": "niCopy",
+    "name": "Ninefold Copy",
+    "description": "An inert copy of Ni that preserves a fragment of the original's Health and defenses.",
+    "imagePath": "",
+    "durationTicks": 0,
+    "maxActive": 9,
+    "canBasicAttack": false,
+    "tags": [
+      "Summon.NinefoldCopy",
+      "Illusion.Copy"
+    ],
+    "abilityIds": [],
+    "attributes": [
+      {
+        "attribute": "MaxHealth",
+        "baseValue": 0,
+        "minimumValue": 1,
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.1
+      },
+      {
+        "attribute": "Armor",
+        "baseValue": 0,
+        "minimumValue": 0,
+        "scalingAttribute": "Armor",
+        "scalingCoefficient": 1
+      },
+      {
+        "attribute": "Resistance",
+        "baseValue": 0,
+        "minimumValue": 0,
+        "scalingAttribute": "Resistance",
+        "scalingCoefficient": 1
+      },
+      {
+        "attribute": "Power",
+        "baseValue": 0,
+        "minimumValue": 0
+      },
+      {
+        "attribute": "AttackSpeed",
+        "baseValue": 0,
+        "minimumValue": 0
+      }
+    ]
+  },
+  {
+    "id": "venomSpawn",
+    "name": "Venomspawn",
+    "description": "A ravenous creature cultivated within Kodoku's poisoned vessel.",
+    "imagePath": "",
+    "durationTicks": 0,
+    "maxActive": 5,
+    "canBasicAttack": true,
+    "tags": [
+      "Summon.Venomspawn",
+      "Creature.Poison"
+    ],
+    "abilityIds": [],
+    "attributes": [
+      {
+        "attribute": "MaxHealth",
+        "baseValue": 0,
+        "minimumValue": 1,
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.08
+      },
+      {
+        "attribute": "Power",
+        "baseValue": 0,
+        "minimumValue": 1,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.15
+      },
+      {
+        "attribute": "AttackSpeed",
+        "baseValue": 0,
+        "minimumValue": 0
+      }
+    ]
   }
 ]

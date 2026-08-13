@@ -35,7 +35,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     private const int NominalSummonStrikeCooldownTicks = 24;
     private const int NominalSummonBasicAttackIntervalTicks = 20;
     private const int NominalSummonPowerBase = 20;
-    private const float NominalSummonPowerCoefficient = 0.30f;
+    // Calibrates the direct-control proxy against realized summon lifetime output across reference tiers.
+    private const float NominalSummonPowerCoefficient = 0.25f;
     private const float SummonPowerInheritanceCoefficient = 0.5f;
     private const int NominalSummonStrikeBase = 8;
     private const float NominalSummonStrikePowerCoefficient = 0.55f;

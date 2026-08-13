@@ -3928,5 +3928,493 @@
     "cooldownTicks": 0,
     "tags": ["Passive", "Cinder", "Magical"],
     "effects": []
+  },
+  {
+    "id": "ability.creature.ni.ninefold_strike",
+    "kind": "Active",
+    "name": "Ninefold Strike",
+    "description": "Strike the target for 100% Physical Damage, then strike once more for 20% Physical Damage for each surviving Ninefold Copy.",
+    "cooldownTicks": 80,
+    "tags": ["Physical", "Melee", "MultiHit", "NinefoldCopy"],
+    "effects": [
+      {
+        "id": "effect.creature.ni.ninefold_strike.main",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.ni.ninefold_strike.copy",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.2,
+        "repeatPerOwnedSummonId": "niCopy",
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.ni.ninth_seal",
+    "kind": "Active",
+    "name": "Ninth Seal",
+    "description": "Place one Seal for each surviving Ninefold Copy, then deal 20% Magical Damage per Seal to all enemies in one combined hit.",
+    "cooldownTicks": 160,
+    "tags": ["Magical", "Area", "NinefoldCopy", "Seal"],
+    "effects": [
+      {
+        "id": "effect.creature.ni.ninth_seal.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0,
+        "scalingOwnedSummonId": "niCopy",
+        "ownedSummonScalingCoefficient": 0.2,
+        "attackType": "None",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.ni.one_among_nine",
+    "kind": "Active",
+    "name": "One Among Nine",
+    "description": "Swap Health with the surviving Ninefold Copy that has the highest current Health, but only when that copy is healthier than Ni.",
+    "cooldownTicks": 200,
+    "tags": ["HealthSwap", "NinefoldCopy", "Defensive"],
+    "effects": [
+      {
+        "id": "effect.creature.ni.one_among_nine.swap",
+        "operation": "SwapHealth",
+        "target": "HighestCurrentHealthOwnedSummon",
+        "summonId": "niCopy",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.ni.ninefold",
+    "kind": "Passive",
+    "name": "Ninefold",
+    "description": "At combat start, summon 9 inert copies with 10% of Ni's Max Health and inherited Armor and Resistance. Whenever a copy dies, Ni permanently gains 5% of initial Power.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Summon", "NinefoldCopy", "Power"],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.creature.ni.ninefold.summon"
+        ]
+      },
+      {
+        "event": "OnSummonChanged",
+        "effectIds": [
+          "effect.creature.ni.ninefold.power"
+        ],
+        "conditions": [
+          {
+            "type": "HasTag",
+            "subject": "EventTarget",
+            "tag": "Summon.niCopy"
+          },
+          {
+            "type": "HealthBelowPercent",
+            "subject": "EventTarget",
+            "value": 1
+          }
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.ni.ninefold.summon",
+        "operation": "Summon",
+        "target": "Self",
+        "summonId": "niCopy",
+        "repeatCount": 9,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.ni.ninefold.power",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Power",
+        "scalingCoefficient": 0.05,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.kodoku.insect_jar",
+    "kind": "Active",
+    "name": "Insect Jar",
+    "description": "Summon three Venomspawn, up to five active. Each summon that would exceed the cap is devoured instead, healing Kodoku for 3% Max Health.",
+    "cooldownTicks": 150,
+    "tags": ["Summon", "Venomspawn", "Healing"],
+    "effects": [
+      {
+        "id": "effect.creature.kodoku.insect_jar.summon",
+        "operation": "Summon",
+        "target": "Self",
+        "summonId": "venomSpawn",
+        "repeatCount": 3,
+        "healingScalingAttribute": "MaxHealth",
+        "healingScalingCoefficient": 0.03,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.kodoku.thousand_poisons",
+    "kind": "Active",
+    "name": "Thousand Poisons",
+    "description": "Apply Poison(200) to the enemy with the lowest current Health.",
+    "cooldownTicks": 100,
+    "tags": ["Poison", "Debuff"],
+    "effects": [
+      {
+        "id": "effect.creature.kodoku.thousand_poisons.poison",
+        "operation": "ApplyCondition",
+        "target": "LowestCurrentHealthEnemy",
+        "baseValue": 200,
+        "condition": "Poison",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.kodoku.withering_miasma",
+    "kind": "Active",
+    "name": "Withering Miasma",
+    "description": "Reduce all enemies' healing received and Health Regeneration by 80% for 15 seconds.",
+    "cooldownTicks": 150,
+    "tags": ["Area", "Debuff", "HealingReduction", "RegenerationReduction"],
+    "effects": [
+      {
+        "id": "effect.creature.kodoku.withering_miasma.healing",
+        "operation": "ModifyHealingReceived",
+        "target": "AllEnemies",
+        "baseValue": -80,
+        "durationTicks": 150,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.kodoku.withering_miasma.regeneration",
+        "operation": "ModifyRegenerationRate",
+        "target": "AllEnemies",
+        "baseValue": -80,
+        "durationTicks": 150,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.kodoku.survivors_struggle",
+    "kind": "Passive",
+    "name": "Survivor's Struggle",
+    "description": "At combat start, summon five Venomspawn. Whenever one dies, every surviving Venomspawn permanently gains 25% Attack Speed and 25% of its initial Power.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Summon", "Venomspawn", "Power", "AttackSpeed"],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.creature.kodoku.survivors_struggle.summon"
+        ]
+      },
+      {
+        "event": "OnSummonChanged",
+        "effectIds": [
+          "effect.creature.kodoku.survivors_struggle.attack_speed",
+          "effect.creature.kodoku.survivors_struggle.power"
+        ],
+        "conditions": [
+          {
+            "type": "HasTag",
+            "subject": "EventTarget",
+            "tag": "Summon.venomSpawn"
+          },
+          {
+            "type": "HealthBelowPercent",
+            "subject": "EventTarget",
+            "value": 1
+          }
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.kodoku.survivors_struggle.summon",
+        "operation": "Summon",
+        "target": "Self",
+        "summonId": "venomSpawn",
+        "repeatCount": 5,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.kodoku.survivors_struggle.attack_speed",
+        "operation": "ModifyAttribute",
+        "target": "OwnedSummons",
+        "summonId": "venomSpawn",
+        "attribute": "AttackSpeed",
+        "baseValue": 25,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.kodoku.survivors_struggle.power",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "OwnedSummons",
+        "summonId": "venomSpawn",
+        "attribute": "Power",
+        "scalingCoefficient": 0.25,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.eydis.springtide",
+    "kind": "Active",
+    "name": "Springtide",
+    "description": "Deal 100% Magical Damage plus 20% per stack of Abundance to all enemies.",
+    "cooldownTicks": 120,
+    "tags": ["Magical", "Area", "Abundance"],
+    "effects": [
+      {
+        "id": "effect.creature.eydis.springtide.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.0,
+        "scalingStatusId": "status.eydis.abundance",
+        "statusScalingAttribute": "Power",
+        "statusScalingCoefficient": 0.2,
+        "attackType": "None",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.eydis.ancient_heartwood",
+    "kind": "Active",
+    "name": "Ancient Heartwood",
+    "description": "Increase Defense and Resistance by 50% for 10 seconds.",
+    "cooldownTicks": 200,
+    "tags": ["Defensive", "Transformation", "Nature"],
+    "effects": [
+      {
+        "id": "effect.creature.eydis.ancient_heartwood.defense",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "scalingAttribute": "Armor",
+        "scalingCoefficient": 0.5,
+        "attribute": "Armor",
+        "durationTicks": 100,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.eydis.ancient_heartwood.resistance",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "scalingAttribute": "Resistance",
+        "scalingCoefficient": 0.5,
+        "attribute": "Resistance",
+        "durationTicks": 100,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.eydis.tranquil_waters",
+    "kind": "Active",
+    "name": "Tranquil Waters",
+    "description": "Apply Slow and Weaken to all enemies.",
+    "cooldownTicks": 150,
+    "tags": ["Area", "Control", "Slow", "Weaken"],
+    "effects": [
+      {
+        "id": "effect.creature.eydis.tranquil_waters.slow",
+        "operation": "ApplyCondition",
+        "target": "AllEnemies",
+        "baseValue": 1,
+        "condition": "Slow",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.eydis.tranquil_waters.weaken",
+        "operation": "ApplyCondition",
+        "target": "AllEnemies",
+        "baseValue": 1,
+        "condition": "Weaken",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.eydis.endless_spring",
+    "kind": "Passive",
+    "name": "Endless Spring",
+    "description": "Every 10 seconds, gain 1 Abundance, then heal for 1% of Max Health per Abundance stack.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Healing", "Abundance", "Periodic"],
+    "triggers": [
+      {
+        "event": "OnInterval",
+        "internalCooldownTicks": 100,
+        "initialDelayTicks": 100,
+        "effectIds": [
+          "effect.creature.eydis.endless_spring.abundance",
+          "effect.creature.eydis.endless_spring.heal"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.eydis.endless_spring.abundance",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "baseValue": 1,
+        "statusId": "status.eydis.abundance",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.eydis.endless_spring.heal",
+        "operation": "Heal",
+        "target": "Self",
+        "scalingStatusId": "status.eydis.abundance",
+        "statusScalingAttribute": "MaxHealth",
+        "statusScalingCoefficient": 0.01,
+        "critEligibility": "Disallowed",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.mad_king.bloodbath",
+    "kind": "Active",
+    "name": "Bloodbath",
+    "description": "Swing wildly at all enemies 5 times, dealing 40% Physical Damage with each strike. Heal for 20% of the damage dealt.",
+    "cooldownTicks": 150,
+    "tags": ["Physical", "Melee", "Area", "Lifesteal", "MultiHit"],
+    "effects": [
+      {
+        "id": "effect.creature.mad_king.bloodbath.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.4,
+        "repeatCount": 5,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "lifeStealPercentage": 20,
+        "procCoefficient": 0.2
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.mad_king.kings_cleaver",
+    "kind": "Active",
+    "name": "King’s Cleaver",
+    "description": "Strike the enemy with the highest Health for 300% Physical Damage. If the target is above 50% Health, deal 600% Physical Damage instead.",
+    "cooldownTicks": 100,
+    "tags": ["Physical", "Melee", "Execute"],
+    "effects": [
+      {
+        "id": "effect.creature.mad_king.kings_cleaver.above_half_bonus",
+        "operation": "Damage",
+        "target": "HighestHealthEnemy",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 3.0,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 0.5,
+        "conditions": [
+          {
+            "type": "HealthAbovePercent",
+            "subject": "Target",
+            "value": 50
+          }
+        ]
+      },
+      {
+        "id": "effect.creature.mad_king.kings_cleaver.base",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 3.0,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 0.5
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.mad_king.unrestrained",
+    "kind": "Active",
+    "name": "Unrestrained",
+    "description": "Increase all damage dealt and received by 40% for 10 seconds.",
+    "cooldownTicks": 180,
+    "tags": ["Buff", "Berserk", "RiskReward"],
+    "effects": [
+      {
+        "id": "effect.creature.mad_king.unrestrained.damage_dealt",
+        "operation": "ModifyDamageDealt",
+        "target": "Self",
+        "baseValue": 40,
+        "damageType": "None",
+        "durationTicks": 100,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.mad_king.unrestrained.damage_taken",
+        "operation": "ModifyDamageTaken",
+        "target": "Self",
+        "baseValue": 40,
+        "damageType": "None",
+        "durationTicks": 100,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.mad_king.bloodlust",
+    "kind": "Passive",
+    "name": "Bloodlust",
+    "description": "For every 10% of maximum Health missing, gain 5% Lifesteal.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Lifesteal", "MissingHealth"],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": ["effect.creature.mad_king.bloodlust.lifesteal"]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": ["effect.creature.mad_king.bloodlust.lifesteal"],
+        "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          }
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.mad_king.bloodlust.lifesteal",
+        "operation": "SynchronizeAttributePerMissingHealthStep",
+        "target": "Self",
+        "attribute": "LifeSteal",
+        "baseValue": 5,
+        "healthStepPercent": 10,
+        "procCoefficient": 1
+      }
+    ]
   }
 ]

@@ -53,7 +53,7 @@ These decisions supersede conflicting details in the original proposal:
 | Hall of Fame UI           | **Shipped** | A full first-server-clear table is available.                                                                                                                                                                                                                                                                                                                            |
 | Server unlock effects     | **Partial** | Unlock keys are persisted, but most downstream game systems do not consume them yet.                                                                                                                                                                                                                                                                                     |
 | Rewards and prestige      | **Partial** | First-clear and Echo Tower Tokens are granted; titles, cosmetics, and other prestige rewards are not implemented.                                                                                                                                                                                                                                                       |
-| Guardian mechanics        | **Partial** | Floors 1–6 have fully authored active/passive kits. Floor 6 introduces Orsenn's source-bound Cinder amplification, six-stack combustion, Funeral Brand, and per-target Cremation scaling; Floors 7–10 still rely partly on existing creature mechanics, scaling, tags, and scouting descriptions. Monster artwork is intentionally excluded.                                      |
+| Guardian mechanics        | **Shipped** | Floors 1–10 have fully authored active/passive kits. Floor 10's Mad King combines repeated area strikes and damage-based healing, locked highest-Health targeting, a reversible timed damage tradeoff, and missing-Health-step Lifesteal. Monster artwork is intentionally excluded. |
 | Hall combat statistics    | **Partial** | Battle reports contain combat data, but the Hall table does not surface richer performance metrics.                                                                                                                                                                                                                                                                      |
 | Automated coverage        | **Partial** | Catalog, domain invariants, application approval, realtime delivery, Expedition rules, combat outcomes, progression, Echo, Hall projection, controller dispatch, and indexes have focused tests; PostgreSQL concurrency, HTTP integration, and frontend flows need broader coverage.                                                                                     |
 | Frontend automated tests  | **Partial** | The Angular API client has route/payload mapping tests and the complete Angular development build passes; component, browser, and full-suite execution coverage remain.                                                                                                                                                                                                  |
@@ -247,7 +247,15 @@ These omissions avoid new reward models until concrete rewards and existing inte
 
 ### Guardian mechanics
 
-Guardian identity and abilities are data-driven, and combat uses existing creature definitions with configurable strength. Floors 1–6 have authored kits. Floor 3's Morrowmaw owns and consumes Broodlings; Floor 5's Kharad manages paired pillars and synchronized Resonance; Floor 6's Orsenn applies source-bound Cinder, combusts targets at six stacks for target-Max-Health Magical Damage, and consumes each target's stacks with Cremation. The target-side scaling and source-specific damage-taken primitives are reusable by later authored content. Tags and scouting reveals communicate intended mechanics. Floors 7–10 do not yet have fully authored kits, and the combat layer does not interpret a Tower-specific phase/mechanic definition or floor-authored ability sequence.
+Guardian identity and abilities are data-driven, and combat uses existing creature definitions with configurable strength. Floors 1–10 have authored kits. Floor 3's Morrowmaw owns and consumes Broodlings; Floor 5's Kharad manages paired pillars and synchronized Resonance; Floor 6's Orsenn uses source-bound Cinder; Floor 7's Eydis gains permanent Abundance every ten seconds, scaling both Springtide and her periodic Max-Health healing; Floor 8's Kodoku maintains a capped Venomspawn brood; Floor 9's Ni summons nine inert copies and scales from their survival; and Floor 10's Mad King combines repeated area damage, damage-based healing, conditional highest-Health execution damage, a timed damage tradeoff, and missing-Health-step Lifesteal. Reusable effect repetition, status-stack and missing-Health-step attribute scaling, owned-summon scaling and targeting, capped-summon overflow healing, timed-modifier magnitude tracking, and Health-swap primitives support these kits and later content. Tags and scouting reveals communicate intended mechanics.
+
+Ni's source design omitted active cooldowns, copy durability, Ninth Seal hit semantics, and ended the passive mid-sentence. The authored defaults are 8/16/20-second cooldowns, copies with 10% of Ni's Max Health and inherited Armor/Resistance, and one combined `20% × surviving copies` Ninth Seal hit. No behavior was invented for the unfinished passive clause; it remains a content-design follow-up if the missing text is recovered.
+
+Eydis's source design omitted active cooldowns, whether percentage healing uses Max Health, and an Abundance cap. The authored defaults are 12/20/15-second active cooldowns, `1% Max Health × Abundance` periodic healing, and a 60-stack permanent combat cap (the maximum reachable within the 6,000-tick encounter limit). Her Floor 7 profile is calibrated at `23.3` Health, `12.5` Offense, and `8.7` on each defensive, penetration, and regeneration axis. Ni's relocated Floor 9 profile is calibrated at `70` Health, `58.2` Offense, and `15` on the remaining axes. Both fixed 256-attempt balance seeds pass the prepared mixed-roster 5–15% win-rate gate for both floors.
+
+The Mad King's Floor 10 profile is calibrated at `57` Health, `35` Offense, and `15` on each defensive, penetration, and regeneration axis. Both fixed 256-attempt balance seeds pass the prepared mixed-roster 5–15% win-rate gate. King's Cleaver selects and locks the highest-current-Health enemy once per cast; a target above 50% Health takes the base 300% strike plus a second 300% strike. Bloodlust recalculates on the Mad King's own Health changes, granting 5% Lifesteal per complete 10% of Max Health missing and removing steps again when he heals.
+
+Kodoku's source design omitted Venomspawn combat stats. The authored defaults give each Venomspawn 8% of Kodoku's Max Health and 15% of Kodoku's Power, with normal Physical basic attacks and no active ability. Kodoku's Floor 8 profile is calibrated at `60` Health, `54` Offense, and `15` on each defensive, penetration, and regeneration axis; both fixed 256-attempt balance seeds pass the prepared mixed-roster 5–15% win-rate gate.
 
 ### Hall of Fame depth
 
@@ -283,7 +291,7 @@ Focused tests currently cover:
 - combat failure reports and combat-exception persistence;
 - mixed Echo rosters rewarding only members who remain weekly-eligible;
 - supply, ward, and weak-point preparation values reaching the friendly and hostile combat runtimes;
-- authored Guardian catalog and runtime behavior through Floor 6, including source-bound Cinder amplification, combustion, shared-target Brand effects, and per-target Cremation scaling;
+- authored Guardian catalog and runtime behavior through Floor 10, including Eydis's Abundance loop, Kodoku's capped acting summons and survivor scaling, Ni's relocated nine-copy mechanics, and the Mad King's complete kit;
 - every controller endpoint dispatching the authenticated character and route/body payloads;
 - missing-character claim rejection and controller authorization metadata;
 - Angular API-client route and mutation payload mapping, including the absence of a minimum-power field.
@@ -438,6 +446,21 @@ The current status document itself should be updated whenever a Tower item moves
 | Tests              | `LL/tests/EssenceSystem.Tests/WorldTowerTests.cs`, `WorldTowerServiceTests.cs`, `WorldTowerControllerTests.cs`; Angular client `world-tower.service.spec.ts`                                                                                             |
 
 ## Change log
+
+### 2026-08-14
+
+- Released Floor 10 with the Mad King and a complete data-driven four-ability kit.
+- Added reversible missing-Health-step attribute synchronization for Bloodlust and fixed active-ability preflight to preserve conditional locked-target casts.
+- Calibrated Floor 10 against two deterministic 256-attempt mixed-roster seeds at its level-50 Tier 1 Legendary checkpoint.
+
+### 2026-08-13
+
+- Added Eydis, the Endless Spring as Floor 7, moved Ni to Floor 9, and released the Tower through Floor 9.
+- Added general status-stack attribute scaling and exact timed-modifier reversal to support Abundance healing and Ancient Heartwood.
+- Calibrated both reassigned encounters against two deterministic 256-attempt mixed-roster seeds.
+- Released Floor 8 with Kodoku, the Poisoned Vessel and a complete data-driven four-ability kit.
+- Added acting Venomspawn, capped-summon overflow healing, owned-summon survivor targeting, lowest-Health Poison, and simultaneous healing/Health-Regeneration suppression.
+- Calibrated Floor 8 against two deterministic 256-attempt mixed-roster seeds at its level-46 Tier 1 Unique checkpoint.
 
 ### 2026-08-12
 
