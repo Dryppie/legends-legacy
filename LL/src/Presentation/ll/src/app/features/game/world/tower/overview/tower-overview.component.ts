@@ -19,7 +19,7 @@ import { GameEventService } from '../../../../../core/services/real-time/game-ev
   selector: 'app-tower-overview',
   imports: [CommonModule, RouterLink, DefaultHeaderComponent],
   templateUrl: './tower-overview.component.html',
-  styleUrl: '../tower-page.scss',
+  styleUrls: ['../tower-page.scss', './tower-overview.component.scss'],
 })
 export class TowerOverviewComponent implements OnInit {
   private readonly tower = inject(WorldTowerService);

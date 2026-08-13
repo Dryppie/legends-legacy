@@ -1,0 +1,577 @@
+// Overview layout follows the floor-focused Tower workspace while retaining
+// the shared Legends Legacy palette and component tokens.
+.tower-overview-shell {
+  gap: var(--ll-space-3);
+  padding-bottom: var(--ll-space-5);
+}
+
+.tower-overview-shell > .campaign-stats {
+  margin-top: 0;
+}
+
+.tower-overview-board {
+  display: grid;
+  grid-template-columns: minmax(16rem, 18rem) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--ll-space-3);
+}
+
+.tower-overview-content {
+  display: grid;
+  min-width: 0;
+  gap: var(--ll-space-3);
+}
+
+.tower-floor-hero {
+  display: flex;
+  min-height: 8.5rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--ll-space-5);
+  padding: var(--ll-space-5);
+  overflow: hidden;
+  background: linear-gradient(
+      110deg,
+      var(--ll-color-surface-strong),
+      transparent 72%
+    ),
+    var(--ll-color-surface);
+}
+
+.tower-floor-title {
+  min-width: 0;
+}
+
+.tower-floor-title h1 {
+  color: var(--ll-color-text);
+  font-size: clamp(var(--ll-text-2xl), 3vw, 2.15rem);
+}
+
+.tower-floor-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(20rem, 1fr);
+  align-items: start;
+  gap: var(--ll-space-3);
+}
+
+.tower-floor-main,
+.tower-floor-sidebar {
+  display: grid;
+  min-width: 0;
+  gap: var(--ll-space-3);
+}
+
+.tower-expeditions-panel,
+.tower-intel-panel,
+.tower-preparation-panel,
+.tower-rewards-panel {
+  overflow: hidden;
+}
+
+.overview-panel-heading {
+  display: flex;
+  min-height: 4.2rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ll-space-3);
+  padding: var(--ll-space-3) var(--ll-space-4);
+  border-bottom: 1px solid var(--ll-color-border);
+}
+
+.overview-panel-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--ll-space-2);
+}
+
+.overview-panel-title h2 {
+  margin: 0 var(--ll-space-1) 0 0;
+  font-size: var(--ll-text-lg);
+}
+
+.badge.expedition-in-battle-badge {
+  border-color: rgba(255, 124, 101, 0.36);
+  color: var(--ll-color-danger);
+  background: var(--ll-color-danger-soft);
+}
+
+.status-orb {
+  width: 0.42rem;
+  height: 0.42rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--ll-color-success);
+  box-shadow: 0 0 0 0.3rem var(--ll-color-success-soft);
+}
+
+.status-orb.pulsing {
+  animation: tower-status-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes tower-status-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0.18rem var(--ll-color-success-soft);
+    opacity: 0.82;
+  }
+
+  50% {
+    box-shadow: 0 0 0 0.4rem var(--ll-color-success-soft);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-orb.pulsing {
+    animation: none;
+  }
+}
+
+.expedition-list {
+  display: grid;
+  gap: var(--ll-space-2);
+  padding: var(--ll-space-3) var(--ll-space-4) 0;
+}
+
+.expedition-card {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(9rem, 0.42fr) auto;
+  align-items: center;
+  gap: var(--ll-space-4);
+  padding: var(--ll-space-4);
+  overflow: hidden;
+  border: 1px solid var(--ll-color-border);
+  border-left: 3px solid var(--ll-color-success);
+  border-radius: var(--ll-radius-sm);
+  color: var(--ll-color-text);
+  background: var(--ll-color-surface-soft);
+  text-decoration: none;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease;
+}
+
+.expedition-card:hover {
+  border-color: var(--ll-color-border-strong);
+  border-left-color: var(--ll-color-primary);
+  background: var(--ll-color-surface-strong);
+}
+
+.expedition-card.roster-full {
+  border-color: rgba(225, 177, 88, 0.28);
+  border-left-color: var(--ll-color-primary);
+}
+
+.expedition-card.in-battle {
+  border-color: rgba(255, 124, 101, 0.34);
+  border-left-color: var(--ll-color-danger);
+}
+
+.expedition-identity {
+  min-width: 0;
+}
+
+.expedition-name-line {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--ll-space-2);
+}
+
+.expedition-name-line h3 {
+  margin: 0;
+  font-family: var(--ll-font-display);
+  font-size: var(--ll-text-md);
+}
+
+.expedition-status {
+  color: var(--ll-color-success);
+  font-size: 0.62rem;
+  font-weight: var(--ll-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.expedition-card.roster-full .expedition-status {
+  color: var(--ll-color-primary);
+}
+
+.expedition-card.in-battle .expedition-status,
+.expedition-card.in-battle .expedition-state-note {
+  color: var(--ll-color-danger);
+}
+
+.expedition-identity p,
+.expedition-note,
+.sidebar-subtitle,
+.sidebar-footnote {
+  color: var(--ll-color-text-subtle);
+  font-size: var(--ll-text-xs);
+  line-height: var(--ll-leading-normal);
+}
+
+.expedition-identity p {
+  margin: var(--ll-space-2) 0 0;
+}
+
+.expedition-identity small {
+  display: block;
+  margin-top: var(--ll-space-1);
+  color: var(--ll-color-primary);
+  font-size: var(--ll-text-xs);
+}
+
+.expedition-capacity {
+  min-width: 0;
+  text-align: right;
+}
+
+.expedition-capacity > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: var(--ll-space-1);
+}
+
+.expedition-capacity strong {
+  color: var(--ll-color-text);
+  font-family: var(--ll-font-display);
+  font-size: var(--ll-text-lg);
+}
+
+.expedition-capacity span,
+.expedition-capacity small {
+  color: var(--ll-color-text-muted);
+  font-size: var(--ll-text-xs);
+}
+
+.expedition-capacity .progress {
+  margin-top: var(--ll-space-1);
+}
+
+.expedition-slot-dots {
+  display: flex;
+  min-height: 0.75rem;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.3rem;
+}
+
+.expedition-slot-dots > span {
+  width: 0.68rem;
+  height: 0.68rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--ll-color-border-strong);
+  border-radius: 50%;
+  background: transparent;
+}
+
+.expedition-slot-dots > span.filled {
+  border-color: var(--ll-color-success);
+  background: var(--ll-color-success);
+  box-shadow: 0 0 0.35rem var(--ll-color-success-soft);
+}
+
+.expedition-card.roster-full .expedition-slot-dots > span.filled {
+  border-color: var(--ll-color-primary);
+  background: var(--ll-color-primary);
+  box-shadow: 0 0 0.35rem var(--ll-color-primary-soft);
+}
+
+.expedition-card.in-battle .expedition-slot-dots > span.filled {
+  border-color: var(--ll-color-danger);
+  background: var(--ll-color-danger);
+  box-shadow: 0 0 0.35rem var(--ll-color-danger-soft);
+}
+
+.expedition-card.roster-full .progress > span {
+  background: var(--ll-color-primary);
+}
+
+.expedition-card.in-battle .progress > span {
+  background: var(--ll-color-danger);
+}
+
+.expedition-capacity small {
+  display: block;
+  margin-top: var(--ll-space-1);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.expedition-apply {
+  min-width: 4.6rem;
+  color: var(--ll-color-primary);
+  text-align: center;
+}
+
+.expedition-apply.disabled {
+  color: var(--ll-color-text-subtle);
+  pointer-events: none;
+  opacity: 0.48;
+}
+
+.expedition-apply.spectate {
+  border-color: rgba(255, 124, 101, 0.44);
+  color: var(--ll-color-danger);
+}
+
+.expedition-empty {
+  margin: var(--ll-space-4);
+  padding: var(--ll-space-5);
+  border: 1px dashed var(--ll-color-border);
+  text-align: center;
+}
+
+.expedition-note {
+  margin: 0;
+  padding: var(--ll-space-3) var(--ll-space-4) var(--ll-space-4);
+}
+
+.tower-rewards-panel {
+  padding: var(--ll-space-4);
+}
+
+.tower-reward-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ll-space-3);
+  margin-top: var(--ll-space-3);
+}
+
+.tower-reward-card {
+  min-width: 0;
+  padding: var(--ll-space-4);
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-sm);
+  background: var(--ll-color-surface-soft);
+}
+
+.tower-reward-card span,
+.tower-reward-card small {
+  display: block;
+  color: var(--ll-color-text-muted);
+  font-size: var(--ll-text-xs);
+}
+
+.tower-reward-card strong {
+  display: block;
+  margin-top: var(--ll-space-2);
+  color: var(--ll-color-primary);
+  font-family: var(--ll-font-display);
+  font-size: var(--ll-text-lg);
+  font-weight: var(--ll-weight-medium);
+}
+
+.tower-reward-card small {
+  margin-top: var(--ll-space-2);
+}
+
+.tower-intel-panel,
+.tower-preparation-panel {
+  padding: var(--ll-space-4);
+}
+
+.sidebar-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ll-space-3);
+}
+
+.sidebar-panel-heading > span {
+  color: var(--ll-color-text-muted);
+  font-size: var(--ll-text-xs);
+  font-weight: var(--ll-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sidebar-panel-heading strong {
+  color: var(--ll-color-success);
+  font-size: var(--ll-text-xs);
+  font-weight: var(--ll-weight-medium);
+}
+
+.preparation-accordion-trigger {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.preparation-accordion-trigger:focus-visible {
+  border-radius: var(--ll-radius-sm);
+  outline: 1px solid var(--ll-color-primary);
+  outline-offset: var(--ll-space-1);
+}
+
+.preparation-accordion-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--ll-space-3);
+}
+
+.preparation-chevron {
+  width: 0.45rem;
+  height: 0.45rem;
+  flex: 0 0 auto;
+  border-right: 1px solid var(--ll-color-text-muted);
+  border-bottom: 1px solid var(--ll-color-text-muted);
+  transform: rotate(45deg);
+  transition: transform 140ms ease;
+}
+
+.preparation-accordion-trigger.expanded .preparation-chevron {
+  transform: rotate(225deg);
+}
+
+.scouting-progress {
+  margin-top: var(--ll-space-2);
+}
+
+.scouting-progress > span,
+.expedition-capacity .progress > span {
+  background: var(--ll-color-success);
+}
+
+.sidebar-subtitle {
+  margin: var(--ll-space-2) 0 0;
+}
+
+.guardian-tags {
+  margin-top: var(--ll-space-4);
+}
+
+.intel-section-heading {
+  margin-top: var(--ll-space-4);
+  padding-top: var(--ll-space-3);
+  border-top: 1px solid var(--ll-color-border);
+}
+
+.intel-reveal-list {
+  display: grid;
+  gap: var(--ll-space-2);
+  margin-top: var(--ll-space-3);
+}
+
+.intel-reveal-card {
+  padding: var(--ll-space-3);
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-sm);
+  background: var(--ll-color-surface-soft);
+}
+
+.intel-reveal-card > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ll-space-3);
+}
+
+.intel-reveal-card strong {
+  color: var(--ll-color-text);
+  font-family: var(--ll-font-display);
+  font-size: var(--ll-text-md);
+}
+
+.intel-reveal-card span {
+  color: var(--ll-color-text-muted);
+  font-size: var(--ll-text-xs);
+}
+
+.intel-reveal-card small {
+  display: block;
+  margin-top: var(--ll-space-1);
+  color: var(--ll-color-primary);
+  font-size: 0.65rem;
+  font-weight: var(--ll-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.intel-reveal-card p {
+  margin: var(--ll-space-2) 0 0;
+  color: var(--ll-color-text-muted);
+  font-size: var(--ll-text-xs);
+  line-height: var(--ll-leading-normal);
+}
+
+.intel-empty {
+  margin: var(--ll-space-3) 0 0;
+  padding: var(--ll-space-4);
+  border: 1px dashed var(--ll-color-border);
+}
+
+.intel-complete {
+  margin: var(--ll-space-3) 0 0;
+  color: var(--ll-color-success);
+  font-size: var(--ll-text-xs);
+}
+
+.intel-complete::before {
+  margin-right: var(--ll-space-2);
+  content: "•";
+}
+
+.scouting-action {
+  width: 100%;
+  margin-top: var(--ll-space-3);
+}
+
+.preparation-list {
+  display: grid;
+  gap: var(--ll-space-2);
+  margin-top: var(--ll-space-3);
+}
+
+.preparation-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--ll-space-3);
+  padding: var(--ll-space-3);
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-sm);
+  background: var(--ll-color-surface-soft);
+}
+
+.preparation-copy strong,
+.preparation-copy small {
+  display: block;
+}
+
+.preparation-copy strong {
+  color: var(--ll-color-text);
+  font-family: var(--ll-font-display);
+  font-size: var(--ll-text-sm);
+}
+
+.preparation-copy small {
+  margin-top: 0.15rem;
+  color: var(--ll-color-text-subtle);
+  font-size: var(--ll-text-xs);
+}
+
+.preparation-row > span {
+  color: var(--ll-color-primary);
+  font-size: var(--ll-text-xs);
+}
+
+.preparation-row .text-action {
+  min-height: 1.9rem;
+  margin-top: 0;
+}
+
+.sidebar-footnote {
+  margin: var(--ll-space-3) 0 0;
+}
