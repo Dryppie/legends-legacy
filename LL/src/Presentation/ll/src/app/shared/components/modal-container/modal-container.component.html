@@ -4,7 +4,12 @@
   (click)="onOverlayClick($event)"
 >
   <div
-    class="max-h-full w-full overflow-hidden sm:w-2/3 lg:w-2/5"
+    class="max-h-full w-full overflow-hidden"
+    [ngClass]="
+      inventoryEquipment
+        ? 'sm:w-[min(52rem,calc(100vw-2rem))]'
+        : 'sm:w-2/3 lg:w-2/5'
+    "
     role="dialog"
     aria-modal="true"
     (click)="$event.stopPropagation()"

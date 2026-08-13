@@ -1,39 +1,80 @@
-<div class="ll-modal-panel max-h-[90vh] max-w-full overflow-y-auto">
-  <div class="flex w-full items-center justify-center pb-2">
-    <h2 class="ll-heading text-xl">
-      {{ equipmentInstance.displayName || equipmentInstance.itemBase.name }}
-    </h2>
+<div
+  class="ll-modal-panel flex max-h-[calc(100dvh-2rem)] max-w-full flex-col overflow-hidden"
+>
+  <div class="mb-3 flex shrink-0 items-start justify-between gap-4">
+    <div>
+      <h2 class="ll-heading text-xl">Equip equipment</h2>
+      <p class="ll-copy mt-1">Review the change before equipping this item.</p>
+    </div>
+    <button
+      type="button"
+      class="ll-button flex h-8 w-8 shrink-0 items-center justify-center p-0 text-xl"
+      aria-label="Close equipment modal"
+      (click)="onClose()"
+    >
+      &times;
+    </button>
   </div>
 
-  <div class="border-t border-primary/20 pb-3"></div>
+  <div class="min-h-0 flex-1 overflow-y-auto border-t border-primary/20 pt-3">
+    <div *ngIf="requiresHandSelection" class="mb-3">
+      <div class="ll-item-meta mb-2 text-primary">Equip to</div>
+      <div class="ll-segmented grid grid-cols-2" aria-label="Choose hand">
+        <button
+          *ngFor="let option of equipSlotOptions"
+          type="button"
+          class="ll-segmented-button"
+          [ngClass]="{
+            'll-segmented-button-active': selectedSlotType === option,
+          }"
+          [attr.aria-pressed]="selectedSlotType === option"
+          (click)="selectSlot(option)"
+        >
+          {{ slotLabel(option) }}
+        </button>
+      </div>
+    </div>
 
-  <div class="flex flex-col gap-4">
-    <app-equipment-display [item]="equipmentInstance"> </app-equipment-display>
+    <app-equipment-display
+      [item]="equipmentInstance"
+      [comparisonItems]="equippedComparisons"
+      comparisonSubjectLabel="Equipping"
+      [fitComparisonToContainer]="true"
+    ></app-equipment-display>
 
     <app-inventory-transfer
       *ngIf="inventoryItem as item"
+      class="mt-4 block"
       [inventoryItem]="item"
       (transferred)="onClose()"
     ></app-inventory-transfer>
+  </div>
 
-    <div class="flex place-items-end justify-end gap-2">
-      <button
-        type="button"
-        class="ll-button"
-        data-tour="tutorial-equipment-close"
-        (click)="onClose()"
-      >
-        Close
-      </button>
+  <div
+    class="mt-4 flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-primary/20 pt-3"
+  >
+    <span *ngIf="requiresHandSelection" class="mr-auto text-xs text-secondary">
+      Equipping to {{ slotLabel(selectedSlotType) }}
+    </span>
+    <button
+      type="button"
+      class="ll-button"
+      data-tour="tutorial-equipment-close"
+      (click)="onClose()"
+    >
+      Cancel
+    </button>
 
-      <button
-        type="button"
-        class="ll-button"
-        data-tour="tutorial-equipment-equip"
-        (click)="onEquip()"
+    <button
+      type="button"
+      class="ll-button ll-button-primary"
+      data-tour="tutorial-equipment-equip"
+      [disabled]="equipmentState.loading()"
+      (click)="onEquip()"
+    >
+      Equip<span *ngIf="requiresHandSelection">
+        to {{ slotLabel(selectedSlotType) }}</span
       >
-        Equip
-      </button>
-    </div>
+    </button>
   </div>
 </div>

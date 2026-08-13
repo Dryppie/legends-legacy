@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ModalService } from '../../../core/services/client-side/modal/modal.service';
-import { NgIf } from '@angular/common';
+import { NgClass, NgIf } from '@angular/common';
 import { Essence } from '../../models/essence';
 import { EssenceModalComponent } from './essence-modals/essence-modal/essence-modal.component';
 import { CombatFiltersModalComponent } from './combat-modals/combat-filters-modal/combat-filters-modal.component';
@@ -13,16 +13,17 @@ import { InventoryItem } from '../../models/inventoryItem';
 import { InventoryItemModalComponent } from './item-modals/inventory-item-modal/inventory-item-modal.component';
 
 @Component({
-    selector: 'app-modal-container',
-    imports: [
-        NgIf,
-        EssenceModalComponent,
-        CombatFiltersModalComponent,
-        InventoryItemModalComponent,
-        InventoryEquipmentModalComponent,
-        OverviewEquipmentModalComponent,
-    ],
-    templateUrl: './modal-container.component.html'
+  selector: 'app-modal-container',
+  imports: [
+    NgIf,
+    NgClass,
+    EssenceModalComponent,
+    CombatFiltersModalComponent,
+    InventoryItemModalComponent,
+    InventoryEquipmentModalComponent,
+    OverviewEquipmentModalComponent,
+  ],
+  templateUrl: './modal-container.component.html',
 })
 export class ModalContainerComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];

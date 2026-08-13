@@ -65,6 +65,8 @@ interface CraftedItemPreviewState {
   itemPreview: CraftingItemPreview;
   masteryXpGained: number;
   craftedCount: number;
+  recipeId: string;
+  blueprintId: string | null;
 }
 
 type RecipeFilterMode =
@@ -131,6 +133,18 @@ export function getRollPercentage(
   return Math.min(
     100,
     Math.max(0, ((value - minimum) / (maximum - minimum)) * 100),
+  );
+}
+
+export function matchesCraftedSelection(
+  craftedRecipeId: string,
+  craftedBlueprintId: string | null,
+  selectedRecipeId: string | null,
+  selectedBlueprintId: string | null,
+): boolean {
+  return (
+    craftedRecipeId === selectedRecipeId &&
+    craftedBlueprintId === selectedBlueprintId
   );
 }
 
@@ -565,6 +579,23 @@ export class RegularCraftingComponent {
     });
     effect(
       () => {
+        const crafted = this.craftedItem();
+        if (!crafted) return;
+        if (
+          !matchesCraftedSelection(
+            crafted.recipeId,
+            crafted.blueprintId,
+            this.selectedRecipeId(),
+            this.selectedBlueprintId(),
+          )
+        ) {
+          this.craftedItem.set(null);
+        }
+      },
+      { allowSignalWrites: true },
+    );
+    effect(
+      () => {
         this.isOnboardingWeaponSelectionActive();
         this.selectFirstVisibleRecipeIfNeeded();
       },
@@ -675,6 +706,7 @@ export class RegularCraftingComponent {
   craft(): void {
     const recipe = this.selectedRecipe();
     const blueprint = this.selectedBlueprint();
+    const blueprintId = blueprint?.id ?? null;
     const itemPreview = this.selectedDesign()?.itemPreview;
     if (!recipe || !itemPreview || !this.canCraftSelected()) return;
 
@@ -704,12 +736,23 @@ export class RegularCraftingComponent {
           const equipment = newestItem?.itemInstance as
             | EquipmentInstance
             | undefined;
-          if (newestItem && equipment?.equipmentBase) {
+          if (
+            newestItem &&
+            equipment?.equipmentBase &&
+            matchesCraftedSelection(
+              recipe.id,
+              blueprintId,
+              this.selectedRecipeId(),
+              this.selectedBlueprintId(),
+            )
+          ) {
             this.craftedItem.set({
               equipment,
               itemPreview,
               masteryXpGained: result.masteryXpGained,
               craftedCount: result.createdItems.length,
+              recipeId: recipe.id,
+              blueprintId,
             });
             this.mobilePane.set('preview');
           }

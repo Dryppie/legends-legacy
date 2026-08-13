@@ -5,11 +5,44 @@ import { ItemType } from '../../models/enums/itemType';
 import { Rarity } from '../../models/enums/rarity';
 import { Equipment, EquipmentInstance } from '../../models/item';
 import {
+  findEquippedComparisonForSlot,
   findEquippedComparison,
   findEquippedComparisons,
+  getEquipSlotOptions,
 } from './equipment.utils';
 
 describe('equipment hover comparison', () => {
+  it('offers both hand slots for one-handed weapons', () => {
+    expect(getEquipSlotOptions(EquipmentType.OneHanded)).toEqual([
+      EquipmentSlotType.MainHand,
+      EquipmentSlotType.OffHand,
+    ]);
+    expect(getEquipSlotOptions(EquipmentType.TwoHanded)).toEqual([
+      EquipmentSlotType.MainHand,
+    ]);
+  });
+
+  it('compares a one-handed weapon with the selected hand only', () => {
+    const mainHand = equipmentInstance('main-hand', EquipmentType.OneHanded);
+    const offHand = equipmentInstance('off-hand', EquipmentType.OneHanded);
+    const candidate = equipmentInstance('candidate', EquipmentType.OneHanded);
+    const slots = [
+      equipmentSlot('main-slot', EquipmentSlotType.MainHand, mainHand),
+      equipmentSlot('off-slot', EquipmentSlotType.OffHand, offHand),
+    ];
+
+    expect(
+      findEquippedComparisonForSlot(
+        candidate,
+        EquipmentSlotType.OffHand,
+        slots,
+      ),
+    ).toEqual({
+      slotType: EquipmentSlotType.OffHand,
+      equipmentInstance: offHand,
+    });
+  });
+
   it('finds the equipped item in the hovered gear slot', () => {
     const equipped = equipmentInstance('equipped-chest', EquipmentType.Chest);
     const hovered = equipmentInstance('hovered-chest', EquipmentType.Chest);

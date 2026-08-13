@@ -66,6 +66,32 @@ export function getSlotTypeFromEquipmentType(
   }
 }
 
+export function getEquipSlotOptions(
+  equipmentType: EquipmentType,
+): EquipmentSlotType[] {
+  if (equipmentType === EquipmentType.OneHanded) {
+    return [EquipmentSlotType.MainHand, EquipmentSlotType.OffHand];
+  }
+
+  return [getSlotTypeFromEquipmentType(equipmentType)];
+}
+
+export function findEquippedComparisonForSlot(
+  item: Equipment | EquipmentInstance,
+  slotType: EquipmentSlotType,
+  slots: readonly EquipmentSlot[],
+): EquippedComparison | null {
+  const equipped = slots.find(
+    (slot) => slot.equipmentSlotType === slotType,
+  )?.equipmentInstance;
+
+  if (!equipped || (isEquipmentInstance(item) && equipped.id === item.id)) {
+    return null;
+  }
+
+  return { slotType, equipmentInstance: equipped };
+}
+
 export function findEquippedComparison(
   item: Equipment | EquipmentInstance,
   slots: readonly EquipmentSlot[],

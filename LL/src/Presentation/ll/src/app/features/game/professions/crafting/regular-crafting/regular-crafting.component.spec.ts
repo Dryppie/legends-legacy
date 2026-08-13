@@ -4,6 +4,7 @@ import { EquipmentType } from '../../../../../shared/models/enums/equipmentType'
 import {
   getRollPercentage,
   getRecipeEquipmentSlot,
+  matchesCraftedSelection,
   matchesRecipeSearch,
 } from './regular-crafting.component';
 
@@ -65,6 +66,31 @@ describe('regular crafting recipe filtering', () => {
 
   it('treats fixed rolls as complete', () => {
     expect(getRollPercentage(12, 12, 12)).toBe(100);
+  });
+
+  it('keeps a crafted result only for its exact recipe and Blueprint selection', () => {
+    expect(
+      matchesCraftedSelection('recipe-a', null, 'recipe-a', null),
+    ).toBeTrue();
+    expect(
+      matchesCraftedSelection(
+        'recipe-a',
+        'blueprint-a',
+        'recipe-a',
+        'blueprint-a',
+      ),
+    ).toBeTrue();
+    expect(
+      matchesCraftedSelection('recipe-a', null, 'recipe-b', null),
+    ).toBeFalse();
+    expect(
+      matchesCraftedSelection(
+        'recipe-a',
+        'blueprint-a',
+        'recipe-a',
+        'blueprint-b',
+      ),
+    ).toBeFalse();
   });
 });
 

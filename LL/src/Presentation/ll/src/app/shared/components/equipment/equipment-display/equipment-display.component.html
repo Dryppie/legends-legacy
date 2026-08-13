@@ -1,15 +1,22 @@
 <ng-container *ngIf="sideBySideComparisons.length; else standardEquipment">
   <div
     class="equipment-comparison-grid grid grid-cols-1 bg-texture"
-    [ngClass]="
-      sideBySideComparisons.length > 1
-        ? 'w-[min(50rem,calc(100vw-3rem))] sm:grid-cols-3'
-        : 'w-[min(34rem,calc(100vw-3rem))] sm:grid-cols-2'
-    "
+    [ngClass]="{
+      'w-full sm:w-[min(50rem,calc(100vw-4rem))] sm:grid-cols-3':
+        fitComparisonToContainer && sideBySideComparisons.length > 1,
+      'w-full sm:w-[min(34rem,calc(100vw-4rem))] sm:grid-cols-2':
+        fitComparisonToContainer && sideBySideComparisons.length === 1,
+      'w-[min(50rem,calc(100vw-3rem))] sm:grid-cols-3':
+        !fitComparisonToContainer && sideBySideComparisons.length > 1,
+      'w-[min(34rem,calc(100vw-3rem))] sm:grid-cols-2':
+        !fitComparisonToContainer && sideBySideComparisons.length === 1,
+    }"
   >
     <section class="equipment-comparison-card flex min-w-0 flex-col sm:pr-4">
       <div class="flex items-start justify-between gap-3">
-        <div class="ll-item-meta text-primary">Hovered</div>
+        <div class="ll-item-meta text-primary">
+          {{ comparisonSubjectLabel }}
+        </div>
         <span class="ll-state shrink-0">T{{ data.itemBudgetTier }}</span>
       </div>
       <h2
@@ -388,7 +395,9 @@
       <div
         *ngIf="data.itemBudget > 0"
         class="flex items-end justify-between gap-4"
-        [ngClass]="data.potential != null ? 'mt-3 border-t border-white/10 pt-3' : ''"
+        [ngClass]="
+          data.potential != null ? 'mt-3 border-t border-white/10 pt-3' : ''
+        "
       >
         <span class="ll-item-meta">Gear Value</span>
         <span class="font-medium tabular-nums text-primary">

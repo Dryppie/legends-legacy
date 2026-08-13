@@ -58,6 +58,8 @@ export class EquipmentDisplayComponent {
   @Input() useBaseName = false;
   @Input() comparisonItem: EquipmentInstance | null = null;
   @Input() comparisonItems: readonly EquippedComparison[] = [];
+  @Input() comparisonSubjectLabel = 'Hovered';
+  @Input() fitComparisonToContainer = false;
   @Input() compactCraftingDesign = false;
   @Input() showPossibleUpgradeAttributes = false;
   modifierType = ModifierType;
