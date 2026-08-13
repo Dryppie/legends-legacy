@@ -98,6 +98,14 @@ public sealed record PlayerTransferChatMessagePayload(
     string Body,
     DateTimeOffset SentAt);
 
+public sealed record GuildChatMessagePayload(
+    Guid GuildId,
+    Guid ActorCharacterId,
+    string ActorName,
+    string Body,
+    Guid MessageId,
+    DateTimeOffset SentAt);
+
 public sealed record GuildVaultChatMessagePayload(
     Guid GuildId,
     Guid ActorCharacterId,

@@ -6,6 +6,7 @@ public static class GameEventOutboxConsumerNames
     public const string EventQuests = "event-quests";
     public const string Achievements = "achievements";
     public const string TransferChat = "transfer-chat";
+    public const string GuildChat = "guild-chat";
     public const string GuildVaultChat = "guild-vault-chat";
     public const string RealtimeInventory = "realtime-inventory";
     public const string RealtimeWorldTower = "realtime-world-tower";

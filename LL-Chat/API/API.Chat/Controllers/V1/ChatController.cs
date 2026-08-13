@@ -38,7 +38,7 @@ public class ChatController : BaseController
         Guid ActorCharacterId,
         string ActorName,
         string Body,
-        JsonElement LinkedItem,
+        JsonElement? LinkedItem,
         Guid MessageId,
         DateTimeOffset SentAt);
 
@@ -79,7 +79,8 @@ public class ChatController : BaseController
         var authorizationFailure = AuthorizeSystemMessage();
         if (authorizationFailure is not null) return authorizationFailure;
         if (request.GuildId == Guid.Empty || request.ActorCharacterId == Guid.Empty ||
-            string.IsNullOrWhiteSpace(request.ActorName) || request.LinkedItem.ValueKind != JsonValueKind.Object)
+            string.IsNullOrWhiteSpace(request.ActorName) ||
+            request.LinkedItem is { ValueKind: not JsonValueKind.Object })
         {
             return BadRequest("Invalid guild chat message.");
         }
@@ -91,9 +92,10 @@ public class ChatController : BaseController
             request.ActorName,
             null,
             ChatChannelType.Guild,
-            LinkedItemJson: request.LinkedItem.GetRawText(),
+            LinkedItemJson: request.LinkedItem?.GetRawText(),
             MessageId: request.MessageId,
-            SentAt: request.SentAt));
+            SentAt: request.SentAt,
+            IsSystemGenerated: true));
         if (message is null) return BadRequest("Invalid guild chat message.");
 
         await _hub.Clients

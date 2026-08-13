@@ -196,6 +196,16 @@ export class GuildService {
     );
   }
 
+  setBuildingTarget(
+    buildingType: GuildBuildingType,
+  ): Observable<GuildBuildingOverview> {
+    return this.api.post('guild/setBuildingTarget', buildingType).pipe(
+      catchError(() => {
+        return throwError(() => new Error('Failed to set building target'));
+      }),
+    );
+  }
+
   applyToGuild(guildId: string) {
     return this.api.post('guild/applyToGuild', guildId).pipe(
       map((opponents) => {

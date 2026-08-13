@@ -85,6 +85,7 @@ public class GuildBuildingService : IGuildBuildingService
             characterId,
             $"{definition.Name} built to level 1.",
             now);
+        ClearCompletedTarget(guild, definition.Type, building.Level);
 
         return GuildOperationResult<GuildBuildingOverviewDto>.Success(BuildOverview(guild, characterId));
     }
@@ -125,6 +126,46 @@ public class GuildBuildingService : IGuildBuildingService
             characterId,
             $"{definition.Name} upgraded to level {nextLevel}.",
             now);
+        ClearCompletedTarget(guild, definition.Type, building.Level);
+
+        return GuildOperationResult<GuildBuildingOverviewDto>.Success(BuildOverview(guild, characterId));
+    }
+
+    public async Task<GuildOperationResult<GuildBuildingOverviewDto>> SetCurrentTargetAsync(
+        Guid characterId,
+        GuildBuildingType buildingType,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var guild = await LoadGuildAsync(characterId, cancellationToken);
+        if (guild is null)
+            return GuildOperationResult<GuildBuildingOverviewDto>.Fail("You are not in a guild.");
+
+        EnsureGuildHall(guild, now);
+
+        if (!CanManageBuildings(guild, characterId))
+            return GuildOperationResult<GuildBuildingOverviewDto>.Fail(
+                "Only guild leaders and officers can set the current building target.");
+
+        if (!_definitionMap.TryGetValue(buildingType, out var definition))
+            return GuildOperationResult<GuildBuildingOverviewDto>.Fail("Guild building was not found.");
+
+        var building = guild.Buildings.FirstOrDefault(x => x.Type == buildingType);
+        var currentLevel = building?.Level ?? 0;
+        if (currentLevel >= definition.MaxLevel)
+            return GuildOperationResult<GuildBuildingOverviewDto>.Fail(
+                "That building is already at max level.");
+
+        var targetLevel = currentLevel + 1;
+        guild.CurrentBuildingTargetType = buildingType;
+        guild.CurrentBuildingTargetLevel = targetLevel;
+
+        AddActivityLog(
+            guild,
+            GuildActivityLogType.BuildingTargetSet,
+            characterId,
+            $"{definition.Name} level {targetLevel} set as the current target.",
+            now);
 
         return GuildOperationResult<GuildBuildingOverviewDto>.Success(BuildOverview(guild, characterId));
     }
@@ -162,12 +203,40 @@ public class GuildBuildingService : IGuildBuildingService
             guildHallLevel,
             guild.Resources.FirstOrDefault(x => x.Resource == GuildResourceType.GuildSupplies)?.Amount ?? 0,
             canManage,
+            BuildCurrentTarget(guild),
             _definitions.Select(definition => ToBuildingDto(guild, definition, canManage)).ToList(),
             guild.ActivityLogs
                 .OrderByDescending(x => x.CreatedAt)
                 .Take(10)
                 .Select(x => new GuildActivityLogDto(x.Type, x.CharacterId, x.Message, x.CreatedAt))
                 .ToList());
+    }
+
+    private GuildBuildingTargetDto? BuildCurrentTarget(Guild guild)
+    {
+        if (guild.CurrentBuildingTargetType is not { } targetType ||
+            guild.CurrentBuildingTargetLevel is not { } targetLevel ||
+            !_definitionMap.TryGetValue(targetType, out var definition))
+        {
+            return null;
+        }
+
+        return new GuildBuildingTargetDto(targetType, definition.Name, targetLevel);
+    }
+
+    private static void ClearCompletedTarget(
+        Guild guild,
+        GuildBuildingType buildingType,
+        int completedLevel)
+    {
+        if (guild.CurrentBuildingTargetType != buildingType ||
+            guild.CurrentBuildingTargetLevel > completedLevel)
+        {
+            return;
+        }
+
+        guild.CurrentBuildingTargetType = null;
+        guild.CurrentBuildingTargetLevel = null;
     }
 
     private static GuildBuildingDto ToBuildingDto(Guild guild, GuildBuildingDefinition definition, bool canManage)

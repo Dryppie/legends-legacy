@@ -1,5 +1,6 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Inventories;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
@@ -27,6 +28,7 @@ public sealed class TransferInventoryItemCommandHandler
     private readonly IGameEventPublisher _legacyEvents;
     private readonly IGameRealtimeBroadcaster _gameRealtime;
     private readonly IGameEventOutbox _outbox;
+    private readonly ILootHistoryService _lootHistory;
     private readonly IMapper _mapper;
 
     public TransferInventoryItemCommandHandler(
@@ -35,6 +37,7 @@ public sealed class TransferInventoryItemCommandHandler
         IGameEventPublisher legacyEvents,
         IGameRealtimeBroadcaster gameRealtime,
         IGameEventOutbox outbox,
+        ILootHistoryService lootHistory,
         IMapper mapper)
     {
         _characters = characters;
@@ -42,6 +45,7 @@ public sealed class TransferInventoryItemCommandHandler
         _legacyEvents = legacyEvents;
         _gameRealtime = gameRealtime;
         _outbox = outbox;
+        _lootHistory = lootHistory;
         _mapper = mapper;
     }
 
@@ -94,13 +98,21 @@ public sealed class TransferInventoryItemCommandHandler
         var transferredItem = _mapper.Map<InventoryItemDto>(transfer.TransferredItem);
         var transferredItems = new[] { transferredItem };
         const string source = "player-transfer";
+        var tradeCounterparty = transfer.TransferRecord.SenderCharacterName;
+
+        await _lootHistory.RecordAsync(
+            recipientId.Value,
+            transferredItems,
+            source,
+            tradeCounterparty,
+            cancellationToken);
 
         await _legacyEvents.PublishAsync(
             new Audience.Character(recipientId.Value),
-            new LootReceivedMsg(recipientId.Value, transferredItems, source));
+            new LootReceivedMsg(recipientId.Value, transferredItems, source, tradeCounterparty));
         await _gameRealtime.PublishAsync(
             new Audience.Character(recipientId.Value),
-            new LootReceived(recipientId.Value, transferredItems, source, null),
+            new LootReceived(recipientId.Value, transferredItems, source, tradeCounterparty),
             nameof(TransferInventoryItemCommandHandler),
             cancellationToken);
 

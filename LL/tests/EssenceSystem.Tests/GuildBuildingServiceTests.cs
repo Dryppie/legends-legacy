@@ -102,6 +102,56 @@ public sealed class GuildBuildingServiceTests
             x.Type == GuildActivityLogType.BuildingUpgraded && x.Message == "Mission Board upgraded to level 2.");
     }
 
+    [Fact]
+    public async Task Leader_can_set_the_next_building_level_as_the_current_target()
+    {
+        await using var db = CreateDbContext();
+        var characterId = SeedGuild(db);
+        await db.SaveChangesAsync();
+        var service = new GuildBuildingService(db);
+        var now = new DateTimeOffset(2026, 8, 13, 12, 0, 0, TimeSpan.Zero);
+
+        var result = await service.SetCurrentTargetAsync(
+            characterId,
+            GuildBuildingType.MissionBoard,
+            now,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(GuildBuildingType.MissionBoard, result.Value!.CurrentTarget!.Type);
+        Assert.Equal(1, result.Value.CurrentTarget.TargetLevel);
+        var guild = await db.Guilds.SingleAsync();
+        Assert.Equal(GuildBuildingType.MissionBoard, guild.CurrentBuildingTargetType);
+        Assert.Equal(1, guild.CurrentBuildingTargetLevel);
+        Assert.Contains(result.Value.ActivityLogs, x =>
+            x.Type == GuildActivityLogType.BuildingTargetSet &&
+            x.Message == "Mission Board level 1 set as the current target.");
+    }
+
+    [Fact]
+    public async Task Member_cannot_set_the_current_building_target()
+    {
+        await using var db = CreateDbContext();
+        var characterId = SeedGuild(db);
+        await db.SaveChangesAsync();
+        var member = await db.Set<GuildMember>().SingleAsync();
+        member.Role = GuildRole.Member;
+        await db.SaveChangesAsync();
+        var service = new GuildBuildingService(db);
+
+        var result = await service.SetCurrentTargetAsync(
+            characterId,
+            GuildBuildingType.MissionBoard,
+            DateTimeOffset.UtcNow,
+            CancellationToken.None);
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(
+            "Only guild leaders and officers can set the current building target.",
+            result.Error);
+    }
+
     private static LLDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()

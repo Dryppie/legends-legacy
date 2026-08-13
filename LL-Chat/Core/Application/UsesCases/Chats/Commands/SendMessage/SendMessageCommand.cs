@@ -16,7 +16,8 @@ public record SendMessageCommand(
     string? TargetCharacterTitleDisplayName = null,
     string? LinkedItemJson = null,
     Guid? MessageId = null,
-    DateTimeOffset? SentAt = null) : IRequest<ChatMessageDto?>;
+    DateTimeOffset? SentAt = null,
+    bool IsSystemGenerated = false) : IRequest<ChatMessageDto?>;
 public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, ChatMessageDto?>
 {
     private readonly IChatService _chatService;
@@ -55,6 +56,7 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Cha
             SenderName = request.SenderName,
             SenderTitleDisplayName = NormalizeTitle(request.SenderTitleDisplayName),
             Body = request.Body,
+            IsSystemGenerated = request.IsSystemGenerated,
             LinkedItemJson = request.LinkedItemJson,
             ContextKey = request.Channel,
             SentAt = request.SentAt ?? DateTimeOffset.UtcNow,

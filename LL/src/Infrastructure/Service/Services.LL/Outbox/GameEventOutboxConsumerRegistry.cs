@@ -37,6 +37,7 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
             [GameEventTypes.TournamentBattleCompleted] = [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.EventQuests],
             [GameEventTypes.ProphecyCompleted] = [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.EventQuests],
             [GameEventTypes.PlayerTransferChatMessage] = [GameEventOutboxConsumerNames.TransferChat],
+            [GameEventTypes.GuildChatMessage] = [GameEventOutboxConsumerNames.GuildChat],
             [GameEventTypes.GuildVaultChatMessage] = [GameEventOutboxConsumerNames.GuildVaultChat],
             [GameEventTypes.InventoryItemsGranted] = [GameEventOutboxConsumerNames.RealtimeInventory],
             [GameEventTypes.WorldTowerRallyUpdated] = [GameEventOutboxConsumerNames.RealtimeWorldTower]

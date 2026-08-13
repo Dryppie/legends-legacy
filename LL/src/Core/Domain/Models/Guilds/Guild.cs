@@ -13,6 +13,8 @@ public class Guild
     public int MaxMembers { get; set; } = 10;
     public long GuildXp { get; set; }
     public int GuildLevel { get; set; } = 1;
+    public GuildBuildingType? CurrentBuildingTargetType { get; set; }
+    public int? CurrentBuildingTargetLevel { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public Guid OwnerId { get; set; }
     public Character Owner { get; set; } = null!;

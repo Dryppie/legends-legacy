@@ -329,46 +329,67 @@
                   {{ channelLabel(m) }}
                 </span>
 
-                <ng-container *ngIf="!m.linkedItem">
-                  <ng-container
-                    *ngIf="m.channelType === 'System'; else playerSender"
+                <ng-container *ngIf="m.isSystemGenerated; else regularSender">
+                  <app-character-tag
+                    [id]="m.senderId"
+                    [name]="m.senderName"
+                    [titleDisplayName]="m.senderTitleDisplayName"
+                  ></app-character-tag>
+                  <span
+                    class="min-w-0 break-words text-xs leading-5 text-[var(--ll-color-text)]"
                   >
-                    <span
-                      *ngIf="m.senderName !== channelLabel(m)"
-                      class="text-xs font-semibold text-[var(--ll-color-text-muted)]"
-                    >
-                      {{ m.senderName }}
-                    </span>
-                  </ng-container>
-
-                  <ng-template #playerSender>
                     <ng-container
-                      *ngIf="m.channelType === 'Whisper'; else normalSender"
+                      *ngTemplateOutlet="
+                        messageBody;
+                        context: { $implicit: m.body }
+                      "
+                    ></ng-container>
+                  </span>
+                </ng-container>
+
+                <ng-template #regularSender>
+                  <ng-container *ngIf="!m.linkedItem">
+                    <ng-container
+                      *ngIf="m.channelType === 'System'; else playerSender"
                     >
                       <span
-                        class="text-[10px] uppercase text-[var(--ll-color-text-subtle)]"
+                        *ngIf="m.senderName !== channelLabel(m)"
+                        class="text-xs font-semibold text-[var(--ll-color-text-muted)]"
                       >
-                        {{ m.senderId === characterId() ? "to" : "from" }}
+                        {{ m.senderName }}
                       </span>
-                      <app-character-tag
-                        [id]="whisperDisplayId(m)"
-                        [name]="whisperDisplayName(m)"
-                        [titleDisplayName]="whisperDisplayTitle(m)"
-                      ></app-character-tag>
                     </ng-container>
-                  </ng-template>
 
-                  <ng-template #normalSender>
-                    <app-character-tag
-                      [id]="m.senderId"
-                      [name]="m.senderName"
-                      [titleDisplayName]="m.senderTitleDisplayName"
-                    ></app-character-tag>
-                  </ng-template>
-                </ng-container>
+                    <ng-template #playerSender>
+                      <ng-container
+                        *ngIf="m.channelType === 'Whisper'; else normalSender"
+                      >
+                        <span
+                          class="text-[10px] uppercase text-[var(--ll-color-text-subtle)]"
+                        >
+                          {{ m.senderId === characterId() ? "to" : "from" }}
+                        </span>
+                        <app-character-tag
+                          [id]="whisperDisplayId(m)"
+                          [name]="whisperDisplayName(m)"
+                          [titleDisplayName]="whisperDisplayTitle(m)"
+                        ></app-character-tag>
+                      </ng-container>
+                    </ng-template>
+
+                    <ng-template #normalSender>
+                      <app-character-tag
+                        [id]="m.senderId"
+                        [name]="m.senderName"
+                        [titleDisplayName]="m.senderTitleDisplayName"
+                      ></app-character-tag>
+                    </ng-template>
+                  </ng-container>
+                </ng-template>
               </div>
 
               <div
+                *ngIf="!m.isSystemGenerated"
                 class="mt-0.5 flex flex-wrap items-baseline gap-x-1 break-words text-xs leading-5"
                 [ngClass]="{
                   'italic text-[var(--ll-color-text-muted)]':

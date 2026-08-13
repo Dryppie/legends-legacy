@@ -13,6 +13,7 @@ using Application.UseCases.Guilds.Commands.PurchaseGuildShopItem;
 using Application.UseCases.Guilds.Commands.RejectApplication;
 using Application.UseCases.Guilds.Commands.RejectInvite;
 using Application.UseCases.Guilds.Commands.SelectGuildMission;
+using Application.UseCases.Guilds.Commands.SetGuildBuildingTarget;
 using Application.UseCases.Guilds.Commands.UpgradeGuildBuilding;
 using Application.UseCases.Guilds.Commands.DonateGuildVaultItem;
 using Application.UseCases.Guilds.Commands.BorrowGuildVaultItem;
@@ -105,6 +106,11 @@ public class GuildController : BaseController
     [HttpPost("UpgradeBuilding")]
     public async Task<ActionResult<Response<GuildBuildingOverviewDto>>> UpgradeBuilding([FromBody] string id) =>
         await Mediator.Send(new UpgradeGuildBuildingCommand(CurrentCharacterGuid, Guid.Parse(id)));
+
+    [HttpPost("SetBuildingTarget")]
+    public async Task<ActionResult<Response<GuildBuildingOverviewDto>>> SetBuildingTarget(
+        [FromBody] GuildBuildingType buildingType) =>
+        await Mediator.Send(new SetGuildBuildingTargetCommand(CurrentCharacterGuid, buildingType));
 
     [HttpGet("GetMissions")]
     public async Task<GuildMissionOverviewDto?> GetMissions() =>

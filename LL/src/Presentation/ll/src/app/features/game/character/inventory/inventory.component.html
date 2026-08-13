@@ -99,6 +99,7 @@
           [value]="inventorySort"
           [options]="sortDropdownOptions"
           [selectedValue]="inventorySort"
+          [fitMenuToContent]="true"
           (selection)="setInventorySort($event)"
         ></app-dropdown>
       </div>
@@ -135,6 +136,7 @@
             [value]="inventorySort"
             [options]="sortDropdownOptions"
             [selectedValue]="inventorySort"
+            [fitMenuToContent]="true"
             (selection)="setInventorySort($event)"
           ></app-dropdown>
         </div>

@@ -185,10 +185,16 @@ public sealed record GuildActivityLogDto(
     string Message,
     DateTimeOffset CreatedAt);
 
+public sealed record GuildBuildingTargetDto(
+    GuildBuildingType Type,
+    string Name,
+    int TargetLevel);
+
 public sealed record GuildBuildingOverviewDto(
     Guid GuildId,
     int GuildHallLevel,
     long GuildSupplies,
     bool CanManageBuildings,
+    GuildBuildingTargetDto? CurrentTarget,
     IReadOnlyList<GuildBuildingDto> Buildings,
     IReadOnlyList<GuildActivityLogDto> ActivityLogs);

@@ -13,7 +13,8 @@ export type GuildBuildingType =
 
 export type GuildActivityLogType =
   | 'BuildingConstructed'
-  | 'BuildingUpgraded';
+  | 'BuildingUpgraded'
+  | 'BuildingTargetSet';
 
 export interface GuildBuildingDefinition {
   type: GuildBuildingType;
@@ -50,11 +51,18 @@ export interface GuildActivityLog {
   createdAt: string;
 }
 
+export interface GuildBuildingTarget {
+  type: GuildBuildingType;
+  name: string;
+  targetLevel: number;
+}
+
 export interface GuildBuildingOverview {
   guildId: string;
   guildHallLevel: number;
   guildSupplies: number;
   canManageBuildings: boolean;
+  currentTarget?: GuildBuildingTarget | null;
   buildings: GuildBuilding[];
   activityLogs: GuildActivityLog[];
 }

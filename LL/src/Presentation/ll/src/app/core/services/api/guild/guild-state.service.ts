@@ -464,6 +464,23 @@ export class GuildStateService {
       });
   }
 
+  setBuildingTarget(building: GuildBuilding): void {
+    this._loading.set(true);
+
+    this.service
+      .setBuildingTarget(building.definition.type)
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: (buildings) => {
+          if (buildings.guildId === this._guild()?.id) {
+            this._buildings.set(buildings);
+          }
+        },
+        error: (e) =>
+          this._error.set(e.message ?? 'Failed to set guild building target'),
+      });
+  }
+
   selectMission(optionId: string): void {
     this._loading.set(true);
 

@@ -12,6 +12,7 @@ public class ChatMessageDto
     public string SenderName { get; init; } = string.Empty;
     public string? SenderTitleDisplayName { get; init; }
     public string Body { get; init; } = string.Empty;
+    public bool IsSystemGenerated { get; init; }
     public JsonElement? LinkedItem { get; init; }
     public Guid? TargetCharacterId { get; init; }
     public string? TargetCharacterName { get; init; }
@@ -29,6 +30,7 @@ public class ChatMessageDto
             SenderName = message.SenderName,
             SenderTitleDisplayName = message.SenderTitleDisplayName,
             Body = message.Body,
+            IsSystemGenerated = message.IsSystemGenerated,
             LinkedItem = ParseLinkedItem(message.LinkedItemJson),
             TargetCharacterId = message.TargetCharacterId,
             TargetCharacterName = message.TargetCharacterName,

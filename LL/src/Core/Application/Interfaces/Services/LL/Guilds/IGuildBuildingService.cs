@@ -17,4 +17,10 @@ public interface IGuildBuildingService
         Guid buildingId,
         DateTimeOffset now,
         CancellationToken cancellationToken);
+
+    Task<GuildOperationResult<GuildBuildingOverviewDto>> SetCurrentTargetAsync(
+        Guid characterId,
+        GuildBuildingType buildingType,
+        DateTimeOffset now,
+        CancellationToken cancellationToken);
 }

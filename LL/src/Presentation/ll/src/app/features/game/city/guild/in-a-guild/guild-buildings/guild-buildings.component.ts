@@ -31,15 +31,13 @@ export class GuildBuildingsComponent {
 
   readonly visibleBuildings = computed(() =>
     (this.overview()?.buildings ?? []).filter(
-      (building) =>
-        !this.hiddenBuildingTypes.has(building.definition.type),
+      (building) => !this.hiddenBuildingTypes.has(building.definition.type),
     ),
   );
 
   readonly establishedBuildings = computed(() =>
     this.visibleBuildings().filter(
-      (building) =>
-        building.definition.isPermanent || building.level > 0,
+      (building) => building.definition.isPermanent || building.level > 0,
     ),
   );
 
@@ -116,6 +114,24 @@ export class GuildBuildingsComponent {
     return building.canConstruct || building.canUpgrade;
   });
 
+  readonly isSelectedCurrentTarget = computed(() => {
+    const building = this.selected();
+    const target = this.overview()?.currentTarget;
+    return !!building && target?.type === building.definition.type;
+  });
+
+  readonly canSetSelectedAsTarget = computed(() => {
+    const building = this.selected();
+    const overview = this.overview();
+    return !!(
+      building &&
+      overview?.canManageBuildings &&
+      building.level < building.definition.maxLevel &&
+      !this.isSelectedCurrentTarget() &&
+      !this.state.loading()
+    );
+  });
+
   constructor(private readonly state: GuildStateService) {
     this.overview = this.state.buildings;
 
@@ -153,6 +169,12 @@ export class GuildBuildingsComponent {
     }
   }
 
+  setSelectedAsTarget(): void {
+    const building = this.selected();
+    if (!building || !this.canSetSelectedAsTarget()) return;
+    this.state.setBuildingTarget(building);
+  }
+
   isSelected(building: GuildBuilding): boolean {
     return this.selected()?.definition.type === building.definition.type;
   }
@@ -167,6 +189,10 @@ export class GuildBuildingsComponent {
     const available = this.overview()?.guildSupplies ?? 0;
     if (required <= 0) return 100;
     return Math.min(100, (available / required) * 100);
+  }
+
+  isCurrentTarget(building: GuildBuilding): boolean {
+    return this.overview()?.currentTarget?.type === building.definition.type;
   }
 
   supplyShortfall(building: GuildBuilding): number {

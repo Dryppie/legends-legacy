@@ -20,6 +20,7 @@ public static class GameEventTypes
     public const string TournamentBattleCompleted = "colosseum.tournament_battle_completed";
     public const string ProphecyCompleted = "prophecy.completed";
     public const string PlayerTransferChatMessage = "player_transfer.chat_message";
+    public const string GuildChatMessage = "guild.chat_message";
     public const string GuildVaultChatMessage = "guild_vault.chat_message";
     public const string InventoryItemsGranted = "inventory.items_granted";
     public const string WorldTowerRallyUpdated = "world_tower.rally_updated";

@@ -55,6 +55,9 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
   /** Visual treatment: toolbar button by default, form field when used in panels/forms. */
   @Input() appearance: 'button' | 'field' = 'button';
 
+  /** Allow the menu to grow to fit its option labels while retaining the trigger width as a minimum. */
+  @Input() fitMenuToContent = false;
+
   /** Whether the parent considers this the active/main selection. */
   @Input() selected = false;
 

@@ -23,6 +23,7 @@ export interface ChatMessageDto {
   targetCharacterName?: string;
   targetCharacterTitleDisplayName?: string | null;
   body: string;
+  isSystemGenerated?: boolean;
   linkedItem?: EquipmentInstance | null;
   sentAt: Date | string;
 }

@@ -105,7 +105,7 @@ function getSidebarSections(): SidebarSection[] {
           id: 'legacy-ascension',
           route: ['world', 'tower'],
           icon: 'sidebar/world/legacy-ascension',
-          title: "Legacy's Ascension",
+          title: 'World Tower',
           description: 'Conquer the World Tower',
         },
         {

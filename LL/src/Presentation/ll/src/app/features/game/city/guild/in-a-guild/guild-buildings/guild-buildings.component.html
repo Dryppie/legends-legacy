@@ -14,6 +14,7 @@
         type="button"
         class="building-row has-level-track"
         [class.is-selected]="isSelected(building)"
+        [class.is-current-target]="isCurrentTarget(building)"
         (click)="select(building)"
       >
         <span class="building-row-copy">
@@ -29,16 +30,14 @@
       </button>
     </section>
 
-    <section
-      *ngIf="readyToBuildBuildings().length > 0"
-      class="building-group"
-    >
+    <section *ngIf="readyToBuildBuildings().length > 0" class="building-group">
       <h2 class="section-label">Ready to Build</h2>
       <button
         *ngFor="let building of readyToBuildBuildings()"
         type="button"
         class="building-row is-buildable"
         [class.is-selected]="isSelected(building)"
+        [class.is-current-target]="isCurrentTarget(building)"
         (click)="select(building)"
       >
         <span class="building-row-copy">
@@ -61,6 +60,7 @@
         type="button"
         class="building-row is-awaiting-resources"
         [class.is-selected]="isSelected(building)"
+        [class.is-current-target]="isCurrentTarget(building)"
         (click)="select(building)"
       >
         <span class="building-row-copy">
@@ -85,6 +85,7 @@
         type="button"
         class="building-row is-locked"
         [class.is-selected]="isSelected(building)"
+        [class.is-current-target]="isCurrentTarget(building)"
         (click)="select(building)"
       >
         <span class="building-row-copy">
@@ -111,6 +112,9 @@
           {{ building.definition.description }}
         </p>
         <p class="building-summary">{{ building.definition.unlockSummary }}</p>
+        <p *ngIf="isSelectedCurrentTarget()" class="current-target-summary">
+          Current target · Level {{ overview.currentTarget?.targetLevel }}
+        </p>
         <section
           *ngIf="building.definition.type === 'GuildHall'"
           class="member-capacity-summary"
@@ -164,6 +168,18 @@
             [fullWidth]="true"
             (pressed)="actOnSelected()"
             [text]="selectedActionText()"
+          ></app-regular-button>
+          <app-regular-button
+            *ngIf="overview.canManageBuildings"
+            class="target-action"
+            [disabled]="!canSetSelectedAsTarget()"
+            [fullWidth]="true"
+            (pressed)="setSelectedAsTarget()"
+            [text]="
+              isSelectedCurrentTarget()
+                ? 'Current Target'
+                : 'Set as Current Target'
+            "
           ></app-regular-button>
           <p
             *ngIf="building.lockedReason && selectedSupplyShortfall() === 0"

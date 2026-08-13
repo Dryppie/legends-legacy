@@ -11,6 +11,31 @@ import { LootHistoryEntry } from '../../../shared/models/loot-history';
 import { LootHistoryService } from '../../../core/services/api/loot-history/loot-history.service';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 
+export function lootHistoryLocationLabel(
+  entry: Pick<LootHistoryEntry, 'source' | 'location'>,
+): string {
+  switch (entry.source) {
+    case 'quest-reward':
+      return 'Quest Rewards';
+    case 'event-quest-reward':
+      return 'Server-wide Event Rewards';
+    case 'combat-reward':
+      return entry.location?.trim() || 'Combat';
+    case 'dungeon-reward':
+      return entry.location?.trim() || 'Dungeon';
+    case 'guild-shop':
+      return entry.location?.trim() || 'Guild Shop';
+    case 'champion-market':
+      return entry.location?.trim() || "Champion's Market";
+    case 'player-transfer':
+      return entry.location?.trim()
+        ? 'Trade - ' + entry.location.trim()
+        : 'Trade';
+    default:
+      return entry.location?.trim() || 'Loot Reward';
+  }
+}
+
 @Component({
   selector: 'app-loot-tracker',
   imports: [NgIf, NgFor, DatePipe, ItemComponent],
@@ -87,22 +112,7 @@ export class LootTrackerComponent {
   }
 
   locationLabel(entry: LootHistoryEntry): string {
-    switch (entry.source) {
-      case 'quest-reward':
-        return 'Quest Rewards';
-      case 'event-quest-reward':
-        return 'Server-wide Event Rewards';
-      case 'combat-reward':
-        return entry.location?.trim() || 'Combat';
-      case 'dungeon-reward':
-        return entry.location?.trim() || 'Dungeon';
-      case 'guild-shop':
-        return entry.location?.trim() || 'Guild Shop';
-      case 'champion-market':
-        return entry.location?.trim() || "Champion's Market";
-      default:
-        return entry.location?.trim() || 'Loot Reward';
-    }
+    return lootHistoryLocationLabel(entry);
   }
 
   private loadHistory(): void {

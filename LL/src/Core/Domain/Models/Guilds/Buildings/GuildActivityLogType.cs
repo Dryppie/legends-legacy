@@ -4,6 +4,7 @@ public enum GuildActivityLogType
 {
     BuildingConstructed,
     BuildingUpgraded,
+    BuildingTargetSet,
     MissionSelected,
     PersonalOrderRewardClaimed,
     WeeklyMissionRewardClaimed,
