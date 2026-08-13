@@ -17,7 +17,7 @@
         "id": "effect.shadow_image.shadow_strike.damage",
         "operation": "Damage",
         "target": "CurrentTarget",
-        "baseValue": 8,
+        "baseValue": 1,
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.2,
         "attackType": "None",

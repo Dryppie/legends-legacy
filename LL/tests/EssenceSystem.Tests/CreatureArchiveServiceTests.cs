@@ -84,6 +84,10 @@ public sealed class CreatureArchiveServiceTests
         Assert.Equal(0, creature.EssenceFocusTotalDurationSeconds);
         Assert.Equal(0, creature.CurrentEssenceFocusDurationSeconds);
         Assert.Contains("Species.Beast", creature.Tags);
+        Assert.Contains("Magical", creature.Tags);
+        Assert.Contains("Defensive", creature.Tags);
+        Assert.Contains("Mechanic.Execute", creature.Tags);
+        Assert.Contains("Magical", essence.Tags);
     }
 
     [Fact]
@@ -579,7 +583,13 @@ public sealed class CreatureArchiveServiceTests
                 Id = id,
                 SourceMonsterId = monsterId,
                 Name = name,
-                Tags = ["Species.Beast"]
+                Tags = ["Species.Beast"],
+                ActiveAbility = new AbilitySpec { Tags = ["Magical", "Ranged"] },
+                PassiveAbility = new AbilitySpec { Tags = ["Buff", "Defensive"] },
+                Evolution = new EssenceEvolutionDefinition
+                {
+                    AddsTags = ["Mechanic.Execute"]
+                }
             };
     }
 

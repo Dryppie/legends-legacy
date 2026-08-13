@@ -152,16 +152,28 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
                             definition.Id,
                             definition.DisplayName,
                             absorbedIds.Contains(definition.Id),
-                            definition.Tags,
+                            GetArchiveTags(definition),
                             definition))
                         .ToList(),
                     locationsByCreatureId.GetValueOrDefault(entry.CreatureDefinitionId, []),
-                    definitions.SelectMany(x => x.Tags).Distinct(StringComparer.OrdinalIgnoreCase).ToList());
+                    definitions
+                        .SelectMany(GetArchiveTags)
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .ToList());
             })
             .ToList();
 
         return new CreatureArchive(creatures, canChangeFocus, focusAvailableAt, lastFocusSetAt);
     }
+
+    private static IReadOnlyList<string> GetArchiveTags(EssenceDefinition definition) =>
+        definition.Tags
+            .Concat(definition.ActiveAbility.Tags)
+            .Concat(definition.PassiveAbility.Tags)
+            .Concat(definition.Evolution.AddsTags)
+            .Where(tag => !string.IsNullOrWhiteSpace(tag))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
     private async Task<IReadOnlyDictionary<string, IReadOnlyList<CreatureArchiveLocation>>> GetCreatureLocationsAsync(
         CancellationToken cancellationToken)

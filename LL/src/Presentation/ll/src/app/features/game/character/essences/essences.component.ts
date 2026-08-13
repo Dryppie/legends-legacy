@@ -59,6 +59,7 @@ import { PopoverComponent } from '../../../../shared/components/custom-component
 import { EssenceItemViewService } from '../../../../core/services/api/essences/essence-item-view.service';
 import { Essence } from '../../../../shared/models/essence';
 import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
+import { creatureArchiveSearchText } from './creature-archive-search';
 
 type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'ready';
 type ArchiveSort = 'name' | 'level' | 'tier';
@@ -247,20 +248,7 @@ export class EssencesComponent implements OnInit {
 
       if (!search) return true;
 
-      return [
-        creature.name,
-        creature.creatureId,
-        ...creature.essences.map((essence) => essence.name),
-        ...creature.locations.flatMap((location) => [
-          location.regionName,
-          location.sourceType,
-          location.sourceName,
-        ]),
-        ...creature.tags,
-      ]
-        .join(' ')
-        .toLowerCase()
-        .includes(search);
+      return creatureArchiveSearchText(creature).includes(search);
     });
   });
 
