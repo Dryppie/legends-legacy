@@ -25,6 +25,7 @@ using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
 using Domain.Models.WorldTower;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Services.LL.Combat.Engine;
@@ -63,6 +64,7 @@ public sealed class WorldTowerService : IWorldTowerService
     private readonly TimeProvider _timeProvider;
     private readonly WorldTowerOptions _options;
     private readonly JsonSerializerOptions _jsonOptions;
+    private readonly IMemoryCache _timelineCache;
     private readonly ILogger<WorldTowerService> _logger;
     private readonly int _echoModeUnlockFloor;
 
@@ -83,6 +85,7 @@ public sealed class WorldTowerService : IWorldTowerService
         IMapper mapper,
         IOptions<WorldTowerOptions> options,
         JsonSerializerOptions jsonOptions,
+        IMemoryCache timelineCache,
         TimeProvider timeProvider,
         ILogger<WorldTowerService> logger)
     {
@@ -102,6 +105,7 @@ public sealed class WorldTowerService : IWorldTowerService
         _mapper = mapper;
         _options = options.Value;
         _jsonOptions = jsonOptions;
+        _timelineCache = timelineCache;
         _timeProvider = timeProvider;
         _logger = logger;
         _echoModeUnlockFloor = _definitions.GetFloors()
@@ -348,6 +352,51 @@ public sealed class WorldTowerService : IWorldTowerService
                 attempt.CompletedAt ?? attempt.StartedAt,
                 attempt.AttemptNumberForFloor,
                 attempt.FightDurationSeconds ?? 0,
+                attempt.TowerRally.Participants
+                    .OrderBy(x => x.JoinedAt)
+                    .Select(x => new TowerHallOfFameParticipantDto(
+                        x.CharacterId,
+                        x.CharacterName,
+                        x.GuildName,
+                        x.PowerRating))
+                    .ToArray());
+        }).ToArray();
+    }
+
+    public async Task<IReadOnlyList<TowerPersonalExpeditionDto>> GetPersonalExpeditionsAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var releasedFloors = _definitions.GetFloors();
+        var releasedFloorNumbers = releasedFloors.Select(x => x.FloorNumber).ToArray();
+        var releasedFloorsByNumber = releasedFloors.ToDictionary(x => x.FloorNumber);
+        var attempts = await _db.TowerAttempts
+            .AsNoTracking()
+            .Include(x => x.TowerRally)
+                .ThenInclude(x => x.Participants)
+            .Where(x => x.ServerId == _options.ServerId
+                        && releasedFloorNumbers.Contains(x.FloorNumber)
+                        && x.TowerRally.Participants.Any(participant =>
+                            participant.CharacterId == characterId))
+            .OrderByDescending(x => x.CompletedAt ?? x.StartedAt)
+            .Take(100)
+            .ToListAsync(cancellationToken);
+
+        return attempts.Select(attempt =>
+        {
+            var floor = releasedFloorsByNumber[attempt.FloorNumber];
+            return new TowerPersonalExpeditionDto(
+                attempt.TowerRallyId,
+                attempt.Id,
+                attempt.FloorNumber,
+                floor.Name,
+                floor.GuardianName,
+                attempt.Mode,
+                attempt.Status,
+                attempt.AttemptNumberForFloor,
+                attempt.StartedAt,
+                attempt.CompletedAt,
+                attempt.FightDurationSeconds,
                 attempt.TowerRally.Participants
                     .OrderBy(x => x.JoinedAt)
                     .Select(x => new TowerHallOfFameParticipantDto(
@@ -888,8 +937,16 @@ public sealed class WorldTowerService : IWorldTowerService
         var definition = GetRequiredFloor(attempt.FloorNumber);
         try
         {
+            var simulationStartedAt = _timeProvider.GetTimestamp();
             var outcome = await ResolveCombatAsync(attempt.TowerRallyId, attempt.Id, definition, cancellationToken);
             await PreparePlaybackAsync(attempt.Id, leaseOwner, definition, outcome, cancellationToken);
+            _logger.LogInformation(
+                "World Tower attempt {AttemptId} simulated in {ElapsedMilliseconds} ms: {Ticks} ticks, {Events} events, {Frames} frames.",
+                attempt.Id,
+                _timeProvider.GetElapsedTime(simulationStartedAt).TotalMilliseconds,
+                outcome.CombatResult.Duration,
+                outcome.CombatResult.EventLog.Count,
+                outcome.Checkpoints.Count);
             return true;
         }
         catch (OperationCanceledException)
@@ -1356,7 +1413,8 @@ public sealed class WorldTowerService : IWorldTowerService
             SimulationCompletedAt = now,
             PlaybackStartedAt = now,
             PlaybackEndsAt = now.AddSeconds(
-                outcome.CombatResult.Duration / (double)FastCombatEngine.TicksPerSecond)
+                outcome.CombatResult.Duration / (double)FastCombatEngine.TicksPerSecond),
+            NextFrameDueAt = now
         };
 
         attempt.Status = TowerAttemptStatus.Playback;
@@ -1401,17 +1459,17 @@ public sealed class WorldTowerService : IWorldTowerService
 
         if (needsFinalization)
         {
-            var combatResult = JsonSerializer.Deserialize<CombatResult>(
-                playback.TowerAttempt.CombatResultJson!, _jsonOptions)
-                ?? throw new InvalidOperationException("The stored Tower combat result is invalid.");
             var report = JsonSerializer.Deserialize<TowerBattleReportDto>(
                 playback.TowerAttempt.BattleReportJson!, _jsonOptions)
                 ?? throw new InvalidOperationException("The stored Tower battle report is invalid.");
             var outcome = new TowerCombatOutcome(
-                combatResult,
+                new CombatResult
+                {
+                    Outcome = report.Succeeded ? BattleOutcome.Victory : BattleOutcome.Defeat
+                },
                 [],
                 report,
-                combatResult.Outcome == BattleOutcome.Victory,
+                report.Succeeded,
                 playback.TowerAttempt.FightDurationSeconds ?? 0,
                 playback.TowerAttempt.FailureReason);
             await ApplyOutcomeAsync(
@@ -1444,6 +1502,7 @@ public sealed class WorldTowerService : IWorldTowerService
             .SingleAsync(x => x.TowerAttemptId == attemptId, cancellationToken);
         cursor.DispatchLeaseOwner = null;
         cursor.DispatchLeaseUntil = null;
+        cursor.NextFrameDueAt = GetNextFrameDueAt(playback, frames, dueFrame);
         if (cursor.LastPublishedSequence >= dueFrame.Sequence)
         {
             await _db.SaveChangesAsync(cancellationToken);
@@ -1486,8 +1545,6 @@ public sealed class WorldTowerService : IWorldTowerService
         attempt.CompletedAt = now;
         attempt.FightDurationSeconds = outcome.FightDurationSeconds;
         attempt.FailureReason = outcome.FailureReason;
-        attempt.CombatResultJson = JsonSerializer.Serialize(outcome.CombatResult, _jsonOptions);
-        attempt.BattleReportJson = JsonSerializer.Serialize(outcome.Report, _jsonOptions);
         attempt.TowerRally.Status = TowerRallyStatus.Completed;
         attempt.TowerRally.CompletedAt = now;
 
@@ -1963,9 +2020,33 @@ public sealed class WorldTowerService : IWorldTowerService
     }
 
     private TowerCombatFrameDto[] DeserializeFrames(TowerCombatPlayback playback) =>
-        JsonSerializer.Deserialize<TowerCombatFrameDto[]>(playback.TimelineJson, _jsonOptions)
-        ?? throw new InvalidOperationException(
-            $"Tower playback for attempt '{playback.TowerAttemptId}' is invalid.");
+        _timelineCache.GetOrCreate(
+            $"world-tower:timeline:{playback.TowerAttemptId}:{playback.SchemaVersion}",
+            entry =>
+            {
+                entry.SetSlidingExpiration(TimeSpan.FromMinutes(5));
+                entry.SetAbsoluteExpiration(TimeSpan.FromMinutes(30));
+                return JsonSerializer.Deserialize<TowerCombatFrameDto[]>(playback.TimelineJson, _jsonOptions)
+                    ?? throw new InvalidOperationException(
+                        $"Tower playback for attempt '{playback.TowerAttemptId}' is invalid.");
+            })!;
+
+    private static DateTimeOffset GetNextFrameDueAt(
+        TowerCombatPlayback playback,
+        IReadOnlyList<TowerCombatFrameDto> frames,
+        TowerCombatFrameDto publishedFrame)
+    {
+        var nextIndex = publishedFrame.Sequence + 1;
+        var nextFrame = nextIndex >= 0
+                        && nextIndex < frames.Count
+                        && frames[nextIndex].Sequence == nextIndex
+            ? frames[nextIndex]
+            : frames.FirstOrDefault(frame => frame.Sequence > publishedFrame.Sequence);
+        return nextFrame is null
+            ? DateTimeOffset.MaxValue
+            : playback.PlaybackStartedAt.AddSeconds(
+                nextFrame.Tick / (double)playback.TicksPerSecond);
+    }
 
     private static TowerCombatFrameDto GetCurrentFrame(
         TowerCombatPlayback playback,
@@ -1978,9 +2059,17 @@ public sealed class WorldTowerService : IWorldTowerService
 
         var elapsedTicks = Math.Max(0, (int)Math.Floor(
             (now - playback.PlaybackStartedAt).TotalSeconds * playback.TicksPerSecond));
-        var dueIndex = 0;
-        for (var index = 1; index < frames.Count && frames[index].Tick <= elapsedTicks; index++)
-            dueIndex = index;
+        var low = 0;
+        var high = frames.Count - 1;
+        while (low < high)
+        {
+            var middle = low + (high - low + 1) / 2;
+            if (frames[middle].Tick <= elapsedTicks)
+                low = middle;
+            else
+                high = middle - 1;
+        }
+        var dueIndex = low;
         if (!revealFinal && frames[dueIndex].IsFinal)
             dueIndex = Math.Max(0, dueIndex - 1);
         return frames[dueIndex];
@@ -2071,7 +2160,8 @@ public sealed class WorldTowerService : IWorldTowerService
             rally.Participants.Count,
             rally.RequiredSlots,
             rally.Applications.Count(x => x.Status == TowerRallyApplicationStatus.Pending),
-            rally.CreatedAt);
+            rally.CreatedAt,
+            rally.StartedAt);
 
     private bool IsEchoUnlocked(IReadOnlyDictionary<int, TowerFloorProgress> progress) =>
         progress.GetValueOrDefault(_echoModeUnlockFloor)?.IsCleared == true;

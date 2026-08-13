@@ -181,6 +181,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
             FROM "TowerCombatPlaybacks" p
             INNER JOIN "TowerAttempts" a ON a."Id" = p."TowerAttemptId"
             WHERE p."PlaybackStartedAt" <= {0}
+              AND p."NextFrameDueAt" <= {0}
               AND (p."LastPublishedSequence" < p."FrameCount" - 1 OR a."Status" = {1})
               AND (p."DispatchLeaseUntil" IS NULL OR p."DispatchLeaseUntil" <= {0})
             ORDER BY p."PlaybackStartedAt"
@@ -201,6 +202,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
             },
             async () => await TowerCombatPlaybacks
                 .Where(x => x.PlaybackStartedAt <= now
+                            && x.NextFrameDueAt <= now
                             && (x.LastPublishedSequence < x.FrameCount - 1
                                 || x.TowerAttempt.Status == TowerAttemptStatus.Playback)
                             && (x.DispatchLeaseUntil == null || x.DispatchLeaseUntil <= now))
@@ -209,6 +211,25 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
                 .Take(limit)
                 .ToArrayAsync(ct),
             ct);
+
+    public async Task<bool> RenewWorldTowerSimulationLeaseAsync(
+        Guid attemptId,
+        string owner,
+        DateTimeOffset leaseUntil,
+        CancellationToken ct = default)
+    {
+        var attempt = await TowerAttempts.SingleOrDefaultAsync(
+            x => x.Id == attemptId
+                 && x.Status == TowerAttemptStatus.Started
+                 && x.SimulationLeaseOwner == owner,
+            ct);
+        if (attempt is null)
+            return false;
+
+        attempt.SimulationLeaseUntil = leaseUntil;
+        await SaveChangesAsync(ct);
+        return true;
+    }
 
     public async Task ReleaseWorldTowerPlaybackDispatchAsync(
         Guid attemptId,

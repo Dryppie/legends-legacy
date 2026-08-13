@@ -43,7 +43,7 @@ public sealed class WorldTowerCombatSimulationWorker(
             attemptIds = await leases.ClaimSimulationsAsync(
                 workerId,
                 timeProvider.GetUtcNow(),
-                4,
+                options.Value.SimulationClaimBatchSize,
                 cancellationToken);
         }
 
@@ -52,13 +52,68 @@ public sealed class WorldTowerCombatSimulationWorker(
             new ParallelOptions
             {
                 CancellationToken = cancellationToken,
-                MaxDegreeOfParallelism = 2
+                MaxDegreeOfParallelism = options.Value.SimulationMaxConcurrency
             },
             async (attemptId, token) =>
             {
                 await using var scope = scopeFactory.CreateAsyncScope();
                 var tower = scope.ServiceProvider.GetRequiredService<IWorldTowerService>();
-                await tower.SimulateQueuedAttemptAsync(attemptId, workerId, token);
+                using var leaseLost = new CancellationTokenSource();
+                using var simulationCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+                    token,
+                    leaseLost.Token);
+                using var heartbeatCancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
+                var heartbeat = RenewSimulationLeaseAsync(
+                    attemptId,
+                    leaseLost,
+                    heartbeatCancellation.Token);
+                try
+                {
+                    await tower.SimulateQueuedAttemptAsync(
+                        attemptId,
+                        workerId,
+                        simulationCancellation.Token);
+                }
+                catch (OperationCanceledException) when (leaseLost.IsCancellationRequested && !token.IsCancellationRequested)
+                {
+                    logger.LogWarning(
+                        "World Tower simulation {AttemptId} stopped after losing its work lease.",
+                        attemptId);
+                }
+                finally
+                {
+                    await heartbeatCancellation.CancelAsync();
+                    await heartbeat;
+                }
             });
+    }
+
+    private async Task RenewSimulationLeaseAsync(
+        Guid attemptId,
+        CancellationTokenSource leaseLost,
+        CancellationToken cancellationToken)
+    {
+        var interval = TimeSpan.FromSeconds(Math.Max(1, options.Value.WorkerLeaseSeconds / 3));
+        using var timer = new PeriodicTimer(interval, timeProvider);
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+            {
+                await using var scope = scopeFactory.CreateAsyncScope();
+                var leases = scope.ServiceProvider.GetRequiredService<IWorldTowerWorkLeaseService>();
+                if (await leases.RenewSimulationAsync(
+                        attemptId,
+                        workerId,
+                        timeProvider.GetUtcNow(),
+                        cancellationToken))
+                    continue;
+
+                await leaseLost.CancelAsync();
+                return;
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+        }
     }
 }

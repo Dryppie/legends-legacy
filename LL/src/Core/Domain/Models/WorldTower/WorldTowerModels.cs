@@ -195,6 +195,7 @@ public sealed class TowerCombatPlayback
     public DateTimeOffset SimulationCompletedAt { get; set; }
     public DateTimeOffset PlaybackStartedAt { get; set; }
     public DateTimeOffset PlaybackEndsAt { get; set; }
+    public DateTimeOffset NextFrameDueAt { get; set; }
     public int LastPublishedSequence { get; set; } = -1;
     public string? DispatchLeaseOwner { get; set; }
     public DateTimeOffset? DispatchLeaseUntil { get; set; }

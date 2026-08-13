@@ -24,6 +24,7 @@ using Domain.Models.WorldTower;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Persistence.LL;
 using Persistence.LL.Repositories.Snapshots;
@@ -748,6 +749,84 @@ public sealed class WorldTowerServiceTests
     }
 
     [Fact]
+    public async Task PersonalExpeditions_OnlyReturnsAttemptsForCurrentCharacter()
+    {
+        await using var db = CreateDbContext();
+        var current = SeedCharacter(db, "Journal Keeper", 20, Guid.NewGuid());
+        var other = SeedCharacter(db, "Other Climber", 20, Guid.NewGuid());
+        await db.SaveChangesAsync();
+        var service = CreateService(
+            db,
+            new FixedPowerRatingService((current.Id, 1_250), (other.Id, 1_100)));
+        var ownCreated = await service.CreateRallyAsync(
+            current.Id,
+            1,
+            TowerRallyMode.FirstClear,
+            CancellationToken.None);
+        var otherCreated = await service.CreateRallyAsync(
+            other.Id,
+            1,
+            TowerRallyMode.FirstClear,
+            CancellationToken.None);
+        var ownRally = await db.TowerRallies
+            .Include(x => x.Participants)
+            .SingleAsync(x => x.Id == ownCreated.Value!.Id);
+        var otherRally = await db.TowerRallies
+            .Include(x => x.Participants)
+            .SingleAsync(x => x.Id == otherCreated.Value!.Id);
+        var completedAt = new DateTimeOffset(2026, 8, 13, 12, 0, 0, TimeSpan.Zero);
+        var ownAttempt = new TowerAttempt
+        {
+            TowerRally = ownRally,
+            TowerRallyId = ownRally.Id,
+            ServerId = "test-server",
+            FloorNumber = 1,
+            Mode = TowerRallyMode.FirstClear,
+            Status = TowerAttemptStatus.Failed,
+            AttemptNumberForFloor = 4,
+            StartedAt = completedAt.AddSeconds(-37),
+            CompletedAt = completedAt,
+            FightDurationSeconds = 37,
+            FailureReason = "The Guardian endured."
+        };
+        var otherAttempt = new TowerAttempt
+        {
+            TowerRally = otherRally,
+            TowerRallyId = otherRally.Id,
+            ServerId = "test-server",
+            FloorNumber = 1,
+            Mode = TowerRallyMode.FirstClear,
+            Status = TowerAttemptStatus.Succeeded,
+            Succeeded = true,
+            AttemptNumberForFloor = 5,
+            StartedAt = completedAt.AddMinutes(1),
+            CompletedAt = completedAt.AddMinutes(2),
+            FightDurationSeconds = 60
+        };
+        ownRally.Status = TowerRallyStatus.Completed;
+        ownRally.Attempt = ownAttempt;
+        otherRally.Status = TowerRallyStatus.Completed;
+        otherRally.Attempt = otherAttempt;
+        db.TowerAttempts.AddRange(ownAttempt, otherAttempt);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        var history = await service.GetPersonalExpeditionsAsync(
+            current.Id,
+            CancellationToken.None);
+
+        var entry = Assert.Single(history);
+        Assert.Equal(ownRally.Id, entry.RallyId);
+        Assert.Equal(ownAttempt.Id, entry.AttemptId);
+        Assert.Equal("The Waking Step", entry.FloorName);
+        Assert.Equal("Lumo Sentinel", entry.GuardianName);
+        Assert.Equal(TowerAttemptStatus.Failed, entry.Status);
+        Assert.Equal(4, entry.AttemptNumber);
+        Assert.Equal(37, entry.FightDurationSeconds);
+        Assert.Equal(current.Id, Assert.Single(entry.Participants).CharacterId);
+    }
+
+    [Fact]
     public async Task Overview_IgnoresStaleFirstClearReferencesToUnreleasedFloors()
     {
         await using var db = CreateDbContext();
@@ -864,6 +943,97 @@ public sealed class WorldTowerServiceTests
         Assert.Equal(attempt.Id, Assert.Single(recoveredClaim));
         Assert.Equal("worker-two", attempt.SimulationLeaseOwner);
         Assert.Equal(2, attempt.SimulationAttempts);
+    }
+
+    [Fact]
+    public async Task SimulationLeaseRenewal_PreventsAnotherWorkerFromReclaimingActiveCombat()
+    {
+        await using var db = CreateDbContext();
+        var now = DateTimeOffset.UtcNow;
+        var rally = new TowerRally
+        {
+            ServerId = "test-server",
+            FloorNumber = 1,
+            Mode = TowerRallyMode.FirstClear,
+            Status = TowerRallyStatus.InProgress,
+            RequiredSlots = 4,
+            CreatedByCharacterId = Guid.NewGuid(),
+            CreatedAt = now
+        };
+        var attempt = new TowerAttempt
+        {
+            TowerRally = rally,
+            ServerId = "test-server",
+            FloorNumber = 1,
+            Mode = TowerRallyMode.FirstClear,
+            Status = TowerAttemptStatus.Started,
+            AttemptNumberForFloor = 1,
+            StartedAt = now
+        };
+        rally.Attempt = attempt;
+        db.TowerRallies.Add(rally);
+        await db.SaveChangesAsync();
+        await db.ClaimWorldTowerSimulationsAsync(
+            "worker-one", now, now.AddSeconds(30), 1);
+
+        var renewed = await db.RenewWorldTowerSimulationLeaseAsync(
+            attempt.Id,
+            "worker-one",
+            now.AddSeconds(50));
+        var competingClaim = await db.ClaimWorldTowerSimulationsAsync(
+            "worker-two", now.AddSeconds(31), now.AddSeconds(61), 1);
+
+        Assert.True(renewed);
+        Assert.Empty(competingClaim);
+        Assert.Equal(now.AddSeconds(50), attempt.SimulationLeaseUntil);
+    }
+
+    [Fact]
+    public async Task PlaybackClaims_OnlyReturnFramesWhoseNextDispatchIsDue()
+    {
+        await using var db = CreateDbContext();
+        var now = DateTimeOffset.UtcNow;
+        var rally = new TowerRally
+        {
+            ServerId = "test-server",
+            FloorNumber = 1,
+            Mode = TowerRallyMode.FirstClear,
+            Status = TowerRallyStatus.InProgress,
+            RequiredSlots = 4,
+            CreatedByCharacterId = Guid.NewGuid(),
+            CreatedAt = now
+        };
+        var attempt = new TowerAttempt
+        {
+            TowerRally = rally,
+            ServerId = "test-server",
+            FloorNumber = 1,
+            Mode = TowerRallyMode.FirstClear,
+            Status = TowerAttemptStatus.Playback,
+            AttemptNumberForFloor = 1,
+            StartedAt = now
+        };
+        rally.Attempt = attempt;
+        attempt.Playback = new TowerCombatPlayback
+        {
+            TowerAttempt = attempt,
+            PlaybackStartedAt = now,
+            PlaybackEndsAt = now.AddMinutes(1),
+            NextFrameDueAt = now.AddSeconds(10),
+            FrameCount = 2,
+            TimelineJson = "[]",
+            SimulationCompletedAt = now
+        };
+        db.TowerRallies.Add(rally);
+        await db.SaveChangesAsync();
+
+        var earlyClaim = await db.ClaimWorldTowerPlaybackDispatchesAsync(
+            "worker-one", now.AddSeconds(5), now.AddSeconds(35), 1);
+        var dueClaim = await db.ClaimWorldTowerPlaybackDispatchesAsync(
+            "worker-one", now.AddSeconds(10), now.AddSeconds(40), 1);
+
+        Assert.Empty(earlyClaim);
+        Assert.Equal(attempt.Id, Assert.Single(dueClaim));
     }
 
     [Fact]
@@ -1290,6 +1460,7 @@ public sealed class WorldTowerServiceTests
                 DevelopmentToolsEnabled = developmentToolsEnabled
             }),
             new JsonSerializerOptions(JsonSerializerDefaults.Web),
+            new MemoryCache(new MemoryCacheOptions()),
             TimeProvider.System,
             NullLogger<WorldTowerService>.Instance);
     }

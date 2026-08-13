@@ -196,6 +196,11 @@ public interface IDbContext
         DateTimeOffset leaseUntil,
         int limit,
         CancellationToken ct = default);
+    Task<bool> RenewWorldTowerSimulationLeaseAsync(
+        Guid attemptId,
+        string owner,
+        DateTimeOffset leaseUntil,
+        CancellationToken ct = default);
     Task ReleaseWorldTowerPlaybackDispatchAsync(
         Guid attemptId,
         string owner,

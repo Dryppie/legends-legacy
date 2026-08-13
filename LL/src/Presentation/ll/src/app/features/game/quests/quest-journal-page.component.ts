@@ -6,6 +6,7 @@ import { EventQuestStateService } from '../../../core/services/api/quest/event-q
 import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
 import { BaseItemComponent } from '../../../shared/components/base-item/base-item.component';
 import { CharacterTagComponent } from '../../../shared/components/character/character-tag/character-tag.component';
+import { DefaultHeaderComponent } from '../../../shared/components/default-header/default-header.component';
 import { Essence } from '../../../shared/models/essence';
 import { EssenceItem } from '../../../shared/models/item';
 import {
@@ -33,7 +34,14 @@ type QuestSortMode = 'Order' | 'Progress';
 @Component({
   selector: 'app-quest-journal-page',
   host: { class: 'block h-full min-h-0' },
-  imports: [NgClass, NgFor, NgIf, BaseItemComponent, CharacterTagComponent],
+  imports: [
+    NgClass,
+    NgFor,
+    NgIf,
+    BaseItemComponent,
+    CharacterTagComponent,
+    DefaultHeaderComponent,
+  ],
   templateUrl: './quest-journal-page.component.html',
 })
 export class QuestJournalPageComponent implements OnInit, OnDestroy {

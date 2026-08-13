@@ -14,6 +14,12 @@ public interface IWorldTowerWorkLeaseService
         int limit,
         CancellationToken cancellationToken);
 
+    Task<bool> RenewSimulationAsync(
+        Guid attemptId,
+        string owner,
+        DateTimeOffset now,
+        CancellationToken cancellationToken);
+
     Task ReleasePlaybackDispatchAsync(
         Guid attemptId,
         string owner,

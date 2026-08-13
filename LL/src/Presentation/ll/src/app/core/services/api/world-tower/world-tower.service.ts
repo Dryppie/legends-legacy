@@ -123,6 +123,7 @@ export interface TowerRallySummary {
   requiredSlots: number;
   pendingApplicationCount: number;
   createdAt: string;
+  startedAt: string | null;
 }
 
 export interface TowerRally {
@@ -275,6 +276,21 @@ export interface TowerHallOfFameParticipant {
   powerRating: number;
 }
 
+export interface TowerPersonalExpedition {
+  rallyId: string;
+  attemptId: string;
+  floorNumber: number;
+  floorName: string;
+  guardianName: string;
+  mode: TowerRallyMode;
+  status: TowerAttemptStatus;
+  attemptNumber: number;
+  startedAt: string;
+  completedAt: string | null;
+  fightDurationSeconds: number | null;
+  participants: TowerHallOfFameParticipant[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class WorldTowerService {
   private readonly api = inject(ApiService);
@@ -314,6 +330,10 @@ export class WorldTowerService {
 
   getHallOfFame(): Observable<TowerHallOfFameEntry[]> {
     return this.api.get('world-tower/hall-of-fame');
+  }
+
+  getPersonalExpeditions(): Observable<TowerPersonalExpedition[]> {
+    return this.api.get('world-tower/personal-expeditions');
   }
 
   createRally(

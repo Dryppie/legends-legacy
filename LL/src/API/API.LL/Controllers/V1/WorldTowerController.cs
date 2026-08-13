@@ -52,6 +52,10 @@ public sealed class WorldTowerController : BaseController
     public async Task<ActionResult<IReadOnlyList<TowerHallOfFameEntryDto>>> GetHallOfFame() =>
         Ok(await Mediator.Send(new GetTowerHallOfFameQuery()));
 
+    [HttpGet("personal-expeditions")]
+    public async Task<ActionResult<IReadOnlyList<TowerPersonalExpeditionDto>>> GetPersonalExpeditions() =>
+        Ok(await Mediator.Send(new GetPersonalTowerExpeditionsQuery(CurrentCharacterGuid)));
+
     [HttpPost("rallies")]
     public async Task<ActionResult<Response<TowerRallyDto>>> CreateRally(CreateRallyRequest request) =>
         await Mediator.Send(new CreateTowerRallyCommand(CurrentCharacterGuid, request.FloorNumber, request.Mode));

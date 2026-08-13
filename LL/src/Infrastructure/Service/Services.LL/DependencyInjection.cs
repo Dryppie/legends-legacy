@@ -311,9 +311,14 @@ public static class DependencyInjection
                     && options.PlaybackPollMilliseconds is >= 100 and <= 1000
                     && options.SimulationPollMilliseconds is >= 100 and <= 1000
                     && options.WorkerLeaseSeconds is >= 10 and <= 300
+                    && options.SimulationClaimBatchSize is >= 1 and <= 20
+                    && options.SimulationMaxConcurrency >= 1
+                    && options.SimulationMaxConcurrency <= options.SimulationClaimBatchSize
+                    && options.PlaybackClaimBatchSize is >= 1 and <= 200
                     && options.RecoveryFrameLimit is >= 1 and <= 300,
                 "World Tower settings are invalid.")
             .ValidateOnStart();
+        services.AddMemoryCache();
         services.AddSingleton<IWorldTowerDefinitionProvider>(sp =>
             new JsonWorldTowerDefinitionProvider(
                 Path.Combine(contentRootPath, config["Content:Root"] ?? "Data", "world-tower", "tower-floors.json"),

@@ -79,7 +79,8 @@ public sealed record TowerRallySummaryDto(
     int ParticipantCount,
     int RequiredSlots,
     int PendingApplicationCount,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    DateTimeOffset? StartedAt);
 
 public sealed record TowerRallyDto(
     Guid Id,
@@ -216,3 +217,17 @@ public sealed record TowerHallOfFameParticipantDto(
     string CharacterName,
     string? GuildName,
     int PowerRating);
+
+public sealed record TowerPersonalExpeditionDto(
+    Guid RallyId,
+    Guid AttemptId,
+    int FloorNumber,
+    string FloorName,
+    string GuardianName,
+    TowerRallyMode Mode,
+    TowerAttemptStatus Status,
+    int AttemptNumber,
+    DateTimeOffset StartedAt,
+    DateTimeOffset? CompletedAt,
+    int? FightDurationSeconds,
+    IReadOnlyList<TowerHallOfFameParticipantDto> Participants);

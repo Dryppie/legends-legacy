@@ -12,13 +12,24 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
         IEnumerable<CombatLogItem> log,
         IReadOnlyDictionary<string, string> teamsByEntityId)
     {
-        // 1) allocate work dictionaries
-        var entityMap = new ConcurrentDictionary<string, WorkEntity>();
+        var accumulator = new CombatStatsAccumulator();
+        accumulator.AddRange(log, teamsByEntityId);
+        return accumulator.Snapshot();
+    }
+}
 
+public sealed class CombatStatsAccumulator
+{
+    private readonly ConcurrentDictionary<string, WorkEntity> _entityMap = new();
+
+    public void AddRange(
+        IEnumerable<CombatLogItem> log,
+        IReadOnlyDictionary<string, string> teamsByEntityId)
+    {
         foreach (var item in log)
         {
             // ----- entity context ------------------------------------------------
-            var entity = entityMap.GetOrAdd(item.ActorId, static id => new WorkEntity(id));
+            var entity = _entityMap.GetOrAdd(item.ActorId, static id => new WorkEntity(id));
             var actorTeam = ResolveTeam(item.ActorId, teamsByEntityId);
             var targetTeam = ResolveTeam(item.TargetId, teamsByEntityId);
             var relationship = ResolveTargetRelationship(item.ActorId, actorTeam, item.TargetId, targetTeam);
@@ -119,7 +130,7 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
             // ----- target-side bookkeeping ---------------------------------------
             if (item.TargetId is { Length: > 0 })
             {
-                var target = entityMap.GetOrAdd(item.TargetId, static id => new WorkEntity(id));
+                var target = _entityMap.GetOrAdd(item.TargetId, static id => new WorkEntity(id));
                 target.SetTeam(targetTeam);
                 target.SetName(item.CombatEntity?.Name);
                 if (item.EventType == EventType.Damage
@@ -153,13 +164,13 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                     target.HealingReceived += item.Magnitude;
             }
         }
-
-        // 2) materialize immutable view models
-        return entityMap.Values
-                        .Select(e => e.ToImmutable())
-                        .ToList()
-                        .AsReadOnly();
     }
+
+    public IReadOnlyList<EntityStats> Snapshot() =>
+        _entityMap.Values
+            .Select(e => e.ToImmutable())
+            .ToList()
+            .AsReadOnly();
 
     private static string ResolveTeam(string entityId, IReadOnlyDictionary<string, string> teamsByEntityId) =>
         !string.IsNullOrWhiteSpace(entityId) && teamsByEntityId.TryGetValue(entityId, out var team) ? team : string.Empty;

@@ -1,63 +1,68 @@
 <main class="tower-page">
-  <div class="tower-shell" *ngIf="overview() as vm">
-    <section class="campaign-header">
-      <app-default-header
-        class="tower-default-header pr-4 sm:pr-6"
-        section="World Tower"
-        title="Legacy's Ascension"
-        icon="sidebar/world/legacy-ascension"
-        [showGuide]="false"
+  <div class="tower-shell tower-overview-shell" *ngIf="overview() as vm">
+    <app-default-header
+      class="tower-default-header pr-4 sm:pr-6"
+      section="World Tower"
+      title="Legacy's Ascension"
+      icon="sidebar/world/legacy-ascension"
+      [showGuide]="false"
+    >
+      <button
+        header-actions
+        type="button"
+        class="tower-button ll-button"
+        (click)="openShop()"
       >
-        <button
-          header-actions
-          type="button"
-          class="tower-button ll-button"
-          (click)="openShop()"
-        >
-          Shop · {{ vm.towerTokens | number }} Tokens
-        </button>
-        <a
-          header-actions
-          class="tower-button ll-button"
-          routerLink="/game/world/tower/hall-of-fame"
-        >
-          Hall of Fame
-        </a>
-      </app-default-header>
+        Shop · {{ vm.towerTokens | number }} Tokens
+      </button>
+      <a
+        header-actions
+        class="tower-button ll-button"
+        routerLink="/game/world/tower/hall-of-fame"
+      >
+        Hall of Fame
+      </a>
+      <a
+        header-actions
+        class="tower-button ll-button"
+        routerLink="/game/world/tower/personal-expeditions"
+      >
+        Personal Expeditions
+      </a>
+    </app-default-header>
 
-      <div class="campaign-stats ll-panel">
-        <article class="campaign-stat">
-          <span>Floors cleared</span>
-          <strong>{{ vm.highestClearedFloor }} / {{ vm.floors.length }}</strong>
-        </article>
-        <article class="campaign-stat">
-          <span>Current floor</span>
-          <strong>{{
+    <div class="campaign-stats ll-panel" aria-label="World Tower progress">
+      <article class="campaign-stat">
+        <span>Floors cleared</span>
+        <strong>{{ vm.highestClearedFloor }} / {{ vm.floors.length }}</strong>
+      </article>
+      <article class="campaign-stat">
+        <span>Current floor</span>
+        <strong>
+          {{
             floorLabel(vm.currentFloor?.floorNumber || vm.highestUnlockedFloor)
-          }}</strong>
-        </article>
-        <article class="campaign-stat">
-          <span>Echo Mode</span>
-          <strong [class.success-text]="vm.echoModeUnlocked">
-            {{ vm.echoModeUnlocked ? "Open" : "Sealed" }}
-          </strong>
-        </article>
-        <article class="campaign-stat campaign-release">
-          <span>Current release</span>
-          <strong>
-            Floors 01–{{
-              floorLabel(vm.floors[vm.floors.length - 1].floorNumber)
-            }}
-          </strong>
-          <small>More Guardians are coming</small>
-        </article>
-      </div>
-    </section>
+          }}
+        </strong>
+      </article>
+      <article class="campaign-stat">
+        <span>Echo Mode</span>
+        <strong [class.success-text]="vm.echoModeUnlocked">
+          {{ vm.echoModeUnlocked ? "Open" : "Sealed" }}
+        </strong>
+      </article>
+      <article class="campaign-stat campaign-release">
+        <span>Current release</span>
+        <strong>
+          Floors 01–{{
+            floorLabel(vm.floors[vm.floors.length - 1].floorNumber)
+          }}
+        </strong>
+        <small>More Guardians are coming</small>
+      </article>
+    </div>
 
-    <p class="error" *ngIf="error() as message">{{ message }}</p>
-
-    <section class="tower-board">
-      <aside class="ascent-panel ll-panel">
+    <section class="tower-overview-board">
+      <aside class="ascent-panel ll-panel" aria-label="Tower floors">
         <header class="panel-heading">
           <span>The ascent</span>
           <small>Floors 1–{{ vm.floors.length }}</small>
@@ -70,6 +75,9 @@
             [class.selected]="floor.floorNumber === selectedFloorNumber()"
             [class.cleared]="floor.state === 'Cleared'"
             [class.locked]="floor.state === 'Locked'"
+            [attr.aria-current]="
+              floor.floorNumber === selectedFloorNumber() ? 'page' : null
+            "
             [attr.aria-label]="
               'Floor ' +
               floor.floorNumber +
@@ -84,334 +92,463 @@
             <span class="floor-node" aria-hidden="true"><span></span></span>
             <span class="floor-identity">
               <strong>{{ floor.guardianName }}</strong>
-              <small
-                >{{ floorLabel(floor.floorNumber) }} · {{ floor.type }} ·
-                {{ floor.requiredSlots }} slots</small
-              >
+              <small>
+                {{ floorLabel(floor.floorNumber) }} · {{ floor.type }} ·
+                {{ floor.requiredSlots }} slots
+              </small>
             </span>
           </button>
         </div>
       </aside>
 
-      <section
-        class="floor-workspace ll-panel"
-        *ngIf="selectedFloor() as floor"
-      >
-        <header class="workspace-heading">
-          <div class="workspace-title">
-            <p class="eyebrow">
-              Floor {{ floorLabel(floor.floorNumber) }} · {{ floor.type }}
-            </p>
-            <h2>{{ floor.guardian.name }}</h2>
-            <div class="workspace-metrics" aria-label="Floor requirements">
-              <span
-                >Expedition size
-                <strong>{{ floor.requiredSlots }}</strong></span
-              >
-              <span
-                >Recommended
-                <strong>{{
-                  floor.recommendedPowerRating | number
-                }}</strong></span
-              >
-              <span
-                >Scouted <strong>{{ floor.scoutingProgress }}%</strong></span
-              >
-            </div>
-          </div>
-          <div class="workspace-badges">
-            <span class="badge ll-badge" [ngClass]="floor.state">{{
-              floorStateLabel(floor.state)
-            }}</span>
-            <span class="badge ll-badge ll-badge-muted"
-              >{{ floor.requiredSlots }} slots</span
-            >
-          </div>
-        </header>
+      <div class="tower-overview-content">
+        <p class="error" *ngIf="error() as message">{{ message }}</p>
 
-        <app-navigation-tabs
-          class="workspace-tabs"
-          [tabs]="workspaceTabs"
-          [activeKey]="activeTab()"
-          [stretch]="false"
-          appearance="compact"
-          ariaLabel="Floor details"
-          (tabSelected)="setTab($event)"
-        ></app-navigation-tabs>
-
-        <div
-          class="workspace-body scouting-workspace"
-          *ngIf="activeTab() === 'scouting'"
-        >
-          <div class="scouting-overview">
-            <section class="scouting-progress-panel">
-              <div class="progress-heading">
-                <span>Scouting progress</span>
-                <strong>{{ floor.scoutingProgress }} / 100</strong>
-              </div>
-              <div class="progress">
-                <span [style.width.%]="floor.scoutingProgress"></span>
-              </div>
-              <p class="workspace-note">
-                Failed attempts grant scouting progress for the first three
-                failures each week. Guardian abilities are revealed at 25%, 50%,
-                75%, and 100%; the passive is revealed last. You can scout any
-                released floor immediately, even before it is unlocked. Each
-                player has three scouting actions per week across the Tower.
+        <ng-container *ngIf="selectedFloor() as floor">
+          <section class="tower-floor-hero ll-panel">
+            <div class="tower-floor-title">
+              <p class="eyebrow">
+                Floor {{ floorLabel(floor.floorNumber) }} · {{ floor.type }}
               </p>
-            </section>
-
-            <aside class="guardian-intelligence">
-              <p class="eyebrow">Guardian intelligence</p>
-              <div class="tag-list">
-                <span
-                  class="badge ll-badge ll-badge-muted"
-                  *ngFor="let tag of floor.guardian.tags"
-                  >{{ tag }}</span
-                >
+              <h1>{{ floor.guardian.name }}</h1>
+              <div class="workspace-metrics" aria-label="Floor requirements">
+                <span>
+                  Expedition size <strong>{{ floor.requiredSlots }}</strong>
+                </span>
+                <span>
+                  Recommended
+                  <strong>{{ floor.recommendedPowerRating | number }}</strong>
+                </span>
+                <span>
+                  Scouted <strong>{{ floor.scoutingProgress }}%</strong>
+                </span>
               </div>
-            </aside>
-          </div>
-
-          <section class="revealed-abilities">
-            <div class="section-heading">
-              <p class="eyebrow">Revealed abilities</p>
-              <small>{{ floor.guardian.knownReveals.length }} of 4</small>
             </div>
-            <div
-              class="reveal-grid"
-              *ngIf="floor.guardian.knownReveals.length; else awaitingIntel"
-            >
-              <article
-                class="reveal-card"
-                *ngFor="let reveal of floor.guardian.knownReveals"
-              >
-                <div>
-                  <strong>{{ reveal.title }}</strong>
-                  <span>{{ reveal.threshold }}%</span>
-                </div>
-                <small>
-                  {{ reveal.kind }}
-                  <ng-container *ngIf="reveal.cooldownSeconds !== null">
-                    · {{ reveal.cooldownSeconds }}s cooldown
-                  </ng-container>
-                </small>
-                <p>{{ reveal.description }}</p>
-              </article>
+            <div class="workspace-badges">
+              <span class="badge ll-badge" [ngClass]="floor.state">
+                {{ floorStateLabel(floor.state) }}
+              </span>
             </div>
-            <ng-template #awaitingIntel>
-              <p class="empty-state">
-                The Guardian's abilities remain hidden. Reach 25% scouting to
-                reveal the first one.
-              </p>
-            </ng-template>
           </section>
 
-          <p
-            class="notice"
-            *ngIf="floor.state !== 'Cleared' && researchLimitReached(floor)"
-          >
-            Weekly scouting limit reached ({{
-              floor.weeklyResearchContribution
-            }}
-            / {{ floor.weeklyResearchCap }}). You can scout again next week.
-          </p>
+          <div class="tower-floor-layout">
+            <div class="tower-floor-main">
+              <section class="tower-expeditions-panel ll-panel">
+                <header class="overview-panel-heading">
+                  <div class="overview-panel-title">
+                    <span class="status-orb pulsing" aria-hidden="true"></span>
+                    <h2>Active Expeditions</h2>
+                    <span
+                      class="badge ll-badge Recruiting"
+                      *ngIf="recruitingRallyCount(floor) as recruitingCount"
+                    >
+                      {{ recruitingCount }} recruiting now
+                    </span>
+                    <span
+                      class="badge ll-badge expedition-in-battle-badge"
+                      *ngIf="inBattleRallyCount(floor) as battleCount"
+                    >
+                      {{ battleCount }} in battle
+                    </span>
+                  </div>
+                  <div class="actions">
+                    <a
+                      class="tower-button ll-button ll-button-primary"
+                      *ngIf="floor.currentCharacterRallyId as rallyId"
+                      [routerLink]="['/game/world/tower/expeditions', rallyId]"
+                    >
+                      View your Expedition
+                    </a>
+                    <button
+                      type="button"
+                      class="tower-button ll-button ll-button-primary"
+                      *ngIf="
+                        floor.canCreateRally && floor.canCreateFirstClearRally
+                      "
+                      [disabled]="!!action()"
+                      (click)="createRally('FirstClear')"
+                    >
+                      Create Expedition
+                    </button>
+                    <button
+                      type="button"
+                      class="tower-button ll-button ll-button-primary"
+                      *ngIf="floor.canCreateRally && floor.echoAvailable"
+                      [disabled]="!!action()"
+                      (click)="createRally('Echo')"
+                    >
+                      Create Echo Expedition
+                    </button>
+                  </div>
+                </header>
 
-          <footer class="workspace-footer" *ngIf="floor.state !== 'Cleared'">
-            <small
-              >Your scouting actions this week:
-              {{ floor.weeklyResearchContribution }} /
-              {{ floor.weeklyResearchCap }}</small
-            >
-            <button
-              type="button"
-              class="tower-button ll-button"
-              [disabled]="
-                !!action() ||
-                floor.scoutingProgress >= 100 ||
-                researchLimitReached(floor)
-              "
-              (click)="contribute('Research')"
-            >
-              {{ researchActionLabel(floor) }}
-            </button>
-          </footer>
-        </div>
-
-        <div class="workspace-body" *ngIf="activeTab() === 'preparation'">
-          <div class="progress-heading">
-            <span>Realm preparation</span>
-            <strong
-              >{{ floor.preparation.weeklyCharacterContribution }} /
-              {{ floor.preparation.weeklyCharacterCap }} this week</strong
-            >
-          </div>
-          <p class="workspace-note">
-            Preparation is shared by the realm and applied to every attempt on
-            this floor. Each player has three preparation actions per week
-            across the Tower. Every preparation bonus caps at
-            {{ floor.preparation.maximumEffectPercent }}%.
-          </p>
-          <div class="preparation-grid">
-            <article class="preparation-card">
-              <div>
-                <strong>Supply weapons</strong
-                ><span>+{{ floor.preparation.supplyWeaponsPercent }}%</span>
-              </div>
-              <p>Increase damage dealt to the Guardian.</p>
-              <button
-                type="button"
-                class="text-action ll-button"
-                [disabled]="
-                  preparationContributionDisabled(floor, 'SupplyWeapons')
-                "
-                (click)="contribute('SupplyWeapons')"
-              >
-                {{ preparationActionLabel(floor, "SupplyWeapons") }}
-              </button>
-            </article>
-            <article class="preparation-card">
-              <div>
-                <strong>Inscribe wards</strong
-                ><span>−{{ floor.preparation.inscribeWardsPercent }}%</span>
-              </div>
-              <p>Reduce the Guardian's damage against the roster.</p>
-              <button
-                type="button"
-                class="text-action ll-button"
-                [disabled]="
-                  preparationContributionDisabled(floor, 'InscribeWards')
-                "
-                (click)="contribute('InscribeWards')"
-              >
-                {{ preparationActionLabel(floor, "InscribeWards") }}
-              </button>
-            </article>
-            <article class="preparation-card">
-              <div>
-                <strong>Scout weak points</strong
-                ><span>+{{ floor.preparation.scoutWeakPointsPercent }}%</span>
-              </div>
-              <p>Improve armor and magic penetration.</p>
-              <button
-                type="button"
-                class="text-action ll-button"
-                [disabled]="
-                  preparationContributionDisabled(floor, 'ScoutWeakPoints')
-                "
-                (click)="contribute('ScoutWeakPoints')"
-              >
-                {{ preparationActionLabel(floor, "ScoutWeakPoints") }}
-              </button>
-            </article>
-          </div>
-        </div>
-
-        <div class="workspace-body" *ngIf="activeTab() === 'rally'">
-          <div class="rally-toolbar">
-            <div>
-              <span>Active Expeditions</span>
-              <p>
-                {{
-                  !floor.canCreateRally
-                    ? "You are already locked into an active Tower Expedition."
-                    : floor.activeRallies.length
-                      ? "Choose a roster or form your own."
-                      : "No roster is gathering for this floor."
-                }}
-              </p>
-              <p class="workspace-note">
-                Apply with your current build locked. The Expedition leader
-                accepts or declines each application.
-              </p>
-            </div>
-            <div class="actions">
-              <button
-                type="button"
-                class="tower-button ll-button ll-button-primary"
-                *ngIf="floor.canCreateRally && floor.canCreateFirstClearRally"
-                [disabled]="!!action()"
-                (click)="createRally('FirstClear')"
-              >
-                Create first-clear Expedition
-              </button>
-              <button
-                type="button"
-                class="tower-button ll-button ll-button-primary"
-                *ngIf="floor.canCreateRally && floor.echoAvailable"
-                [disabled]="!!action()"
-                (click)="createRally('Echo')"
-              >
-                Create Echo Expedition
-              </button>
-              <a
-                class="tower-button ll-button ll-button-primary"
-                *ngIf="floor.currentCharacterRallyId as rallyId"
-                [routerLink]="['/game/world/tower/expeditions', rallyId]"
-              >
-                View your Expedition
-              </a>
-            </div>
-          </div>
-          <div class="compact-rallies" *ngIf="floor.activeRallies.length">
-            <a
-              class="compact-rally"
-              *ngFor="let rally of floor.activeRallies"
-              [routerLink]="['/game/world/tower/expeditions', rally.id]"
-            >
-              <span
-                ><strong>{{ rally.mode }}</strong
-                ><small
-                  >Floor {{ floorLabel(rally.floorNumber)
-                  }}<ng-container
-                    *ngIf="rally.id === floor.currentCharacterRallyId"
-                  >
-                    | Your Expedition</ng-container
-                  ></small
+                <div
+                  class="expedition-list"
+                  *ngIf="floor.activeRallies.length; else noExpeditions"
                 >
-                <small>Leader: {{ rally.leaderCharacterName }}</small></span
-              >
-              <span>
-                {{ rally.participantCount }}/{{ rally.requiredSlots }}
-                <small *ngIf="rally.pendingApplicationCount">
-                  {{ rally.pendingApplicationCount }} pending
-                </small>
-              </span>
-              <span class="badge ll-badge" [ngClass]="rally.status">{{
-                rally.status
-              }}</span>
-            </a>
-          </div>
+                  <article
+                    class="expedition-card"
+                    *ngFor="let rally of floor.activeRallies"
+                    [class.roster-full]="rally.status === 'Ready'"
+                    [class.in-battle]="rally.status === 'InProgress'"
+                  >
+                    <div class="expedition-identity">
+                      <div class="expedition-name-line">
+                        <h3>
+                          {{
+                            rally.mode === "FirstClear" ? "First Clear" : "Echo"
+                          }}
+                        </h3>
+                        <span class="expedition-status">
+                          {{ rallyStatusLabel(rally) }}
+                        </span>
+                      </div>
+                      <p>
+                        Led by {{ rally.leaderCharacterName }} · Floor
+                        {{ floorLabel(rally.floorNumber) }} ·
+                        <ng-container *ngIf="rally.status === 'InProgress'">
+                          started
+                          {{
+                            rally.startedAt || rally.createdAt
+                              | date: "MMM d, HH:mm"
+                          }}
+                        </ng-container>
+                        <ng-container *ngIf="rally.status !== 'InProgress'">
+                          opened {{ rally.createdAt | date: "MMM d, HH:mm" }}
+                        </ng-container>
+                      </p>
+                      <small
+                        *ngIf="
+                          rally.status === 'Recruiting' &&
+                          rally.pendingApplicationCount
+                        "
+                      >
+                        {{ rally.pendingApplicationCount }}
+                        {{
+                          rally.pendingApplicationCount === 1
+                            ? "application"
+                            : "applications"
+                        }}
+                        pending
+                      </small>
+                      <small
+                        class="expedition-state-note"
+                        *ngIf="rally.status === 'Ready'"
+                      >
+                        Locked in · leader starts the attempt
+                      </small>
+                      <small
+                        class="expedition-state-note"
+                        *ngIf="rally.status === 'InProgress'"
+                      >
+                        Battle underway
+                      </small>
+                    </div>
+                    <div class="expedition-capacity">
+                      <ng-container
+                        *ngIf="
+                          rally.requiredSlots <= 10;
+                          else largeExpeditionCapacity
+                        "
+                      >
+                        <div
+                          class="expedition-slot-dots"
+                          role="img"
+                          [attr.aria-label]="
+                            rally.participantCount +
+                            ' of ' +
+                            rally.requiredSlots +
+                            ' slots filled'
+                          "
+                        >
+                          <span
+                            *ngFor="
+                              let slot of expeditionSlotDots
+                                | slice: 0 : rally.requiredSlots
+                            "
+                            [class.filled]="slot < rally.participantCount"
+                          ></span>
+                        </div>
+                        <small>
+                          <ng-container
+                            *ngIf="
+                              rally.status === 'Ready' ||
+                                rally.status === 'InProgress';
+                              else openSlotCount
+                            "
+                          >
+                            Full roster · {{ rally.requiredSlots }}
+                          </ng-container>
+                          <ng-template #openSlotCount>
+                            {{ rally.participantCount }} of
+                            {{ rally.requiredSlots }} slots
+                          </ng-template>
+                        </small>
+                      </ng-container>
+                      <ng-template #largeExpeditionCapacity>
+                        <div>
+                          <strong>{{ rally.participantCount }}</strong>
+                          <span>/ {{ rally.requiredSlots }}</span>
+                        </div>
+                        <div class="progress" aria-hidden="true">
+                          <span
+                            [style.width.%]="rallyOccupancyPercent(rally)"
+                          ></span>
+                        </div>
+                        <small>
+                          {{ rally.requiredSlots - rally.participantCount }}
+                          slots open
+                        </small>
+                      </ng-template>
+                    </div>
+                    <a
+                      *ngIf="
+                        rally.status === 'Recruiting' ||
+                        rally.id === floor.currentCharacterRallyId
+                      "
+                      class="tower-button ll-button expedition-apply"
+                      [class.spectate]="rally.status === 'InProgress'"
+                      [routerLink]="['/game/world/tower/expeditions', rally.id]"
+                    >
+                      {{
+                        rallyActionLabel(rally, floor.currentCharacterRallyId)
+                      }}
+                    </a>
+                    <span
+                      *ngIf="
+                        rally.status === 'Ready' &&
+                        rally.id !== floor.currentCharacterRallyId
+                      "
+                      class="tower-button ll-button expedition-apply disabled"
+                    >
+                      Full
+                    </span>
+                  </article>
+                </div>
+                <ng-template #noExpeditions>
+                  <p class="empty-state expedition-empty">
+                    No Expedition is recruiting on this floor yet.
+                  </p>
+                </ng-template>
 
-          <div class="rewards-section">
-            <p class="eyebrow">Rewards and unlocks</p>
-            <div class="prep-grid">
-              <div class="prep-item">
-                <span class="muted">First clear</span>
-                <h3>{{ floor.firstClearTowerTokens | number }} Tower Tokens</h3>
-              </div>
-              <div class="prep-item" *ngIf="floor.type !== 'Sovereign'">
-                <span class="muted">Weekly Echo reward</span>
-                <h3>{{ floor.echoTowerTokens | number }} Tower Tokens</h3>
-                <small *ngIf="floor.echoRewardClaimedThisWeek">
-                  Tower-wide reward claimed this week
-                </small>
-              </div>
-              <div class="prep-item" *ngFor="let unlock of floor.unlocks">
-                <span class="muted">Realm unlock</span>
-                <h3>{{ unlock.description }}</h3>
-              </div>
+                <p class="expedition-note">
+                  Applying locks your current build. The Expedition leader
+                  accepts or declines each application.
+                </p>
+              </section>
+
+              <section class="tower-rewards-panel ll-panel">
+                <p class="eyebrow">Rewards and unlocks</p>
+                <div class="tower-reward-grid">
+                  <article class="tower-reward-card">
+                    <span>First clear</span>
+                    <strong>
+                      {{ floor.firstClearTowerTokens | number }} Tower Tokens
+                    </strong>
+                  </article>
+                  <article
+                    class="tower-reward-card"
+                    *ngIf="floor.type !== 'Sovereign'"
+                  >
+                    <span>Weekly Echo reward</span>
+                    <strong
+                      >{{ floor.echoTowerTokens | number }} Tower Tokens</strong
+                    >
+                    <small *ngIf="floor.echoRewardClaimedThisWeek">
+                      Tower-wide reward claimed this week
+                    </small>
+                  </article>
+                  <article
+                    class="tower-reward-card"
+                    *ngFor="let unlock of floor.unlocks"
+                  >
+                    <span>Realm unlock</span>
+                    <strong>{{ unlock.description }}</strong>
+                  </article>
+                </div>
+              </section>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <section
-        class="floor-workspace loading-workspace ll-panel"
-        *ngIf="loadingFloor()"
-      >
-        <p>Reading the seal and Guardian records…</p>
-      </section>
+            <aside class="tower-floor-sidebar">
+              <section class="tower-preparation-panel ll-panel">
+                <button
+                  type="button"
+                  class="sidebar-panel-heading preparation-accordion-trigger"
+                  [class.expanded]="preparationExpanded()"
+                  [attr.aria-expanded]="preparationExpanded()"
+                  aria-controls="realm-preparation-content"
+                  (click)="togglePreparation()"
+                >
+                  <span>Realm preparation</span>
+                  <span class="preparation-accordion-meta">
+                    <strong>
+                      {{ floor.preparation.weeklyCharacterContribution }} /
+                      {{ floor.preparation.weeklyCharacterCap }} this week
+                    </strong>
+                    <span class="preparation-chevron" aria-hidden="true"></span>
+                  </span>
+                </button>
+                <div
+                  id="realm-preparation-content"
+                  class="preparation-accordion-content"
+                  *ngIf="preparationExpanded()"
+                >
+                  <div class="preparation-list">
+                    <article class="preparation-row">
+                      <div class="preparation-copy">
+                        <strong>Supply weapons</strong>
+                        <small>Increase damage dealt</small>
+                      </div>
+                      <span
+                        >+{{ floor.preparation.supplyWeaponsPercent }}%</span
+                      >
+                      <button
+                        type="button"
+                        class="text-action ll-button"
+                        [disabled]="
+                          preparationContributionDisabled(
+                            floor,
+                            'SupplyWeapons'
+                          )
+                        "
+                        (click)="contribute('SupplyWeapons')"
+                      >
+                        {{ preparationActionLabel(floor, "SupplyWeapons") }}
+                      </button>
+                    </article>
+                    <article class="preparation-row">
+                      <div class="preparation-copy">
+                        <strong>Inscribe wards</strong>
+                        <small>Reduce Guardian damage</small>
+                      </div>
+                      <span
+                        >−{{ floor.preparation.inscribeWardsPercent }}%</span
+                      >
+                      <button
+                        type="button"
+                        class="text-action ll-button"
+                        [disabled]="
+                          preparationContributionDisabled(
+                            floor,
+                            'InscribeWards'
+                          )
+                        "
+                        (click)="contribute('InscribeWards')"
+                      >
+                        {{ preparationActionLabel(floor, "InscribeWards") }}
+                      </button>
+                    </article>
+                    <article class="preparation-row">
+                      <div class="preparation-copy">
+                        <strong>Scout weak points</strong>
+                        <small>Improve penetration</small>
+                      </div>
+                      <span
+                        >+{{ floor.preparation.scoutWeakPointsPercent }}%</span
+                      >
+                      <button
+                        type="button"
+                        class="text-action ll-button"
+                        [disabled]="
+                          preparationContributionDisabled(
+                            floor,
+                            'ScoutWeakPoints'
+                          )
+                        "
+                        (click)="contribute('ScoutWeakPoints')"
+                      >
+                        {{ preparationActionLabel(floor, "ScoutWeakPoints") }}
+                      </button>
+                    </article>
+                  </div>
+                  <p class="sidebar-footnote">
+                    Shared by the realm · bonuses cap at
+                    {{ floor.preparation.maximumEffectPercent }}%
+                  </p>
+                </div>
+              </section>
+              <section class="tower-intel-panel ll-panel">
+                <header class="sidebar-panel-heading">
+                  <span>Scouting</span>
+                  <strong>{{ floor.scoutingProgress }} / 100</strong>
+                </header>
+                <div class="progress scouting-progress">
+                  <span [style.width.%]="floor.scoutingProgress"></span>
+                </div>
+                <p class="sidebar-subtitle">
+                  {{ floor.guardian.knownReveals.length }} / 4 abilities
+                  revealed · {{ floor.weeklyResearchContribution }} /
+                  {{ floor.weeklyResearchCap }} actions used
+                </p>
+
+                <div class="tag-list guardian-tags">
+                  <span
+                    class="badge ll-badge ll-badge-muted"
+                    *ngFor="let tag of floor.guardian.tags"
+                  >
+                    {{ tag }}
+                  </span>
+                </div>
+
+                <div class="section-heading intel-section-heading">
+                  <p class="eyebrow">Revealed abilities</p>
+                  <small>{{ floor.guardian.knownReveals.length }} of 4</small>
+                </div>
+                <div
+                  class="intel-reveal-list"
+                  *ngIf="floor.guardian.knownReveals.length; else awaitingIntel"
+                >
+                  <article
+                    class="intel-reveal-card"
+                    *ngFor="let reveal of floor.guardian.knownReveals"
+                  >
+                    <div>
+                      <strong>{{ reveal.title }}</strong>
+                      <span>{{ reveal.threshold }}%</span>
+                    </div>
+                    <small>
+                      {{ reveal.kind }}
+                      <ng-container *ngIf="reveal.cooldownSeconds !== null">
+                        · {{ reveal.cooldownSeconds }}s cooldown
+                      </ng-container>
+                    </small>
+                    <p>{{ reveal.description }}</p>
+                  </article>
+                </div>
+                <ng-template #awaitingIntel>
+                  <p class="empty-state intel-empty">
+                    Reach 25% scouting to reveal the Guardian's first ability.
+                  </p>
+                </ng-template>
+
+                <p class="intel-complete" *ngIf="floor.scoutingProgress >= 100">
+                  Fully scouted. Every ability and the passive are known.
+                </p>
+                <button
+                  type="button"
+                  class="tower-button ll-button scouting-action"
+                  *ngIf="floor.state !== 'Cleared'"
+                  [disabled]="
+                    !!action() ||
+                    floor.scoutingProgress >= 100 ||
+                    researchLimitReached(floor)
+                  "
+                  (click)="contribute('Research')"
+                >
+                  {{ researchActionLabel(floor) }}
+                </button>
+              </section>
+            </aside>
+          </div>
+        </ng-container>
+
+        <section
+          class="floor-workspace loading-workspace ll-panel"
+          *ngIf="loadingFloor()"
+        >
+          <p>Reading the seal and Guardian records…</p>
+        </section>
+      </div>
     </section>
 
     <div class="tower-shop-backdrop" *ngIf="shopOpen()" (click)="closeShop()">

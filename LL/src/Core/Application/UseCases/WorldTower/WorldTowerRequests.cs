@@ -17,6 +17,7 @@ public sealed record GetTowerAttemptCombatResultQuery(Guid CharacterId, Guid Att
 public sealed record GetTowerAttemptPlaybackQuery(Guid CharacterId, Guid AttemptId) : IQuery<TowerCombatPlaybackDto?>;
 public sealed record GetTowerAttemptPlaybackFramesQuery(Guid CharacterId, Guid AttemptId, int AfterSequence) : IQuery<TowerCombatFrameBatchDto?>;
 public sealed record GetTowerHallOfFameQuery : IQuery<IReadOnlyList<TowerHallOfFameEntryDto>>;
+public sealed record GetPersonalTowerExpeditionsQuery(Guid CharacterId) : IQuery<IReadOnlyList<TowerPersonalExpeditionDto>>;
 public sealed record CreateTowerRallyCommand(Guid CharacterId, int FloorNumber, TowerRallyMode Mode) : ICommand<Response<TowerRallyDto>>;
 public sealed record ApplyToTowerRallyCommand(Guid CharacterId, Guid RallyId) : ICommand<Response<TowerRallyDto>>;
 public sealed record AcceptTowerRallyApplicationCommand(Guid CharacterId, Guid RallyId, Guid ApplicationId) : ICommand<Response<TowerRallyDto>>;
@@ -91,6 +92,15 @@ public sealed class GetTowerHallOfFameQueryHandler(IWorldTowerService tower)
 {
     public Task<IReadOnlyList<TowerHallOfFameEntryDto>> Handle(GetTowerHallOfFameQuery request, CancellationToken cancellationToken) =>
         tower.GetHallOfFameAsync(cancellationToken);
+}
+
+public sealed class GetPersonalTowerExpeditionsQueryHandler(IWorldTowerService tower)
+    : IRequestHandler<GetPersonalTowerExpeditionsQuery, IReadOnlyList<TowerPersonalExpeditionDto>>
+{
+    public Task<IReadOnlyList<TowerPersonalExpeditionDto>> Handle(
+        GetPersonalTowerExpeditionsQuery request,
+        CancellationToken cancellationToken) =>
+        tower.GetPersonalExpeditionsAsync(request.CharacterId, cancellationToken);
 }
 
 public sealed class CreateTowerRallyCommandHandler(IWorldTowerService tower)

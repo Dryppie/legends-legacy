@@ -100,9 +100,17 @@ public sealed class FastCombatEngine
         Publish(new CombatEvent(AbilityTriggerEvent.OnCombatStart, null, null, null), combatants);
         var checkpointSequence = 0;
         var checkpointLogIndex = 0;
+        var checkpointStats = checkpointObserver is not null && checkpointIntervalTicks > 0
+            ? new CombatStatsAccumulator()
+            : null;
         if (checkpointObserver is not null && checkpointIntervalTicks > 0)
         {
-            checkpointObserver(CreateCheckpoint(combatants, checkpointSequence++, checkpointLogIndex, false));
+            checkpointObserver(CreateCheckpoint(
+                combatants,
+                checkpointStats!,
+                checkpointSequence++,
+                checkpointLogIndex,
+                false));
             checkpointLogIndex = _log.Count;
         }
 
@@ -147,6 +155,7 @@ public sealed class FastCombatEngine
                     || !HasLivingTeam(combatants, CombatTeam.Hostile);
                 checkpointObserver(CreateCheckpoint(
                     combatants,
+                    checkpointStats!,
                     checkpointSequence++,
                     checkpointLogIndex,
                     isFinalCheckpoint));
@@ -160,6 +169,7 @@ public sealed class FastCombatEngine
             {
                 checkpointObserver(CreateCheckpoint(
                     combatants,
+                    checkpointStats!,
                     checkpointSequence,
                     checkpointLogIndex,
                     true));
@@ -167,7 +177,7 @@ public sealed class FastCombatEngine
         }
 
         var entityStats = _captureEventLog
-            ? CreateDetailedStats(combatants)
+            ? CreateDetailedStats(combatants, checkpointStats)
             : CreateBalanceStats(combatants);
 
         return new CombatResult
@@ -181,6 +191,7 @@ public sealed class FastCombatEngine
 
     private CombatCheckpoint CreateCheckpoint(
         IReadOnlyList<RuntimeCombatant> combatants,
+        CombatStatsAccumulator stats,
         int sequence,
         int logIndex,
         bool isFinal)
@@ -190,9 +201,10 @@ public sealed class FastCombatEngine
             combatant => combatant.Id,
             combatant => combatant.Team.ToString(),
             StringComparer.OrdinalIgnoreCase);
+        stats.AddRange(intervalEvents, teams);
         var entityStats = AddFinalCombatantState(
             AddHealthRegenerationTelemetry(
-                new CombatStatsAggregator().Aggregate(_log, teams),
+                stats.Snapshot(),
                 combatants),
             combatants);
         return new CombatCheckpoint(
@@ -215,7 +227,9 @@ public sealed class FastCombatEngine
         Barrier = (int)combatant.Barrier
     };
 
-    private IReadOnlyList<EntityStats> CreateDetailedStats(IReadOnlyList<RuntimeCombatant> combatants)
+    private IReadOnlyList<EntityStats> CreateDetailedStats(
+        IReadOnlyList<RuntimeCombatant> combatants,
+        CombatStatsAccumulator? checkpointStats)
     {
         var teamsByEntityId = combatants.ToDictionary(
             combatant => combatant.Id,
@@ -223,7 +237,8 @@ public sealed class FastCombatEngine
             StringComparer.OrdinalIgnoreCase);
         return AddFinalCombatantState(
             AddHealthRegenerationTelemetry(
-                new CombatStatsAggregator().Aggregate(_log, teamsByEntityId),
+                checkpointStats?.Snapshot()
+                ?? new CombatStatsAggregator().Aggregate(_log, teamsByEntityId),
                 combatants),
             combatants);
     }

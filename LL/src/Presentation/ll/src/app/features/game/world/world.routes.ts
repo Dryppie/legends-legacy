@@ -6,6 +6,7 @@ import { GUIDE_PAGE_IDS } from '../../../shared/help/guide-catalog';
 import { TowerOverviewComponent } from './tower/overview/tower-overview.component';
 import { TowerRallyComponent } from './tower/rally/tower-rally.component';
 import { TowerHallOfFameComponent } from './tower/hall-of-fame/tower-hall-of-fame.component';
+import { TowerPersonalExpeditionsComponent } from './tower/personal-expeditions/tower-personal-expeditions.component';
 
 export const WORLD_ROUTES: Routes = [
   {
@@ -33,6 +34,10 @@ export const WORLD_ROUTES: Routes = [
       {
         path: 'tower/hall-of-fame',
         component: TowerHallOfFameComponent,
+      },
+      {
+        path: 'tower/personal-expeditions',
+        component: TowerPersonalExpeditionsComponent,
       },
       {
         path: '',

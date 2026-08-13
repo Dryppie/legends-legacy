@@ -101,7 +101,7 @@ public sealed class TowerCombatPlaybackConfiguration : IEntityTypeConfiguration<
         builder.Property(x => x.TimelineJson).HasColumnType("jsonb").IsRequired();
         builder.Property(x => x.DispatchLeaseOwner).HasMaxLength(128);
         builder.Property(x => x.RowVersion).IsConcurrencyToken();
-        builder.HasIndex(x => new { x.PlaybackEndsAt, x.LastPublishedSequence });
+        builder.HasIndex(x => new { x.NextFrameDueAt, x.LastPublishedSequence });
         builder.HasIndex(x => x.DispatchLeaseUntil);
     }
 }

@@ -529,6 +529,56 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
+    public void Combat_stats_accumulator_matches_single_pass_aggregation_across_chunks()
+    {
+        var log = new[]
+        {
+            new CombatLogItem
+            {
+                ActorId = "player",
+                TargetId = "enemy",
+                Source = "Strike",
+                EventType = EventType.Damage,
+                Magnitude = 30
+            },
+            new CombatLogItem
+            {
+                ActorId = "player",
+                TargetId = "player",
+                Source = "Recovery",
+                EventType = EventType.Heal,
+                Magnitude = 12
+            },
+            new CombatLogItem
+            {
+                ActorId = "enemy",
+                TargetId = "player",
+                Source = "Claw",
+                EventType = EventType.DamageCrit,
+                Magnitude = 18
+            }
+        };
+        var teams = new Dictionary<string, string>
+        {
+            ["player"] = "Friendly",
+            ["enemy"] = "Hostile"
+        };
+        var expected = new CombatStatsAggregator()
+            .Aggregate(log, teams)
+            .OrderBy(x => x.EntityId)
+            .ToArray();
+        var accumulator = new CombatStatsAccumulator();
+
+        accumulator.AddRange(log[..1], teams);
+        accumulator.AddRange(log[1..], teams);
+        var actual = accumulator.Snapshot().OrderBy(x => x.EntityId).ToArray();
+
+        Assert.Equal(expected.Length, actual.Length);
+        for (var index = 0; index < expected.Length; index++)
+            Assert.Equivalent(expected[index], actual[index], strict: true);
+    }
+
+    [Fact]
     public void Combat_stats_counts_ability_use_events()
     {
         var aggregator = new CombatStatsAggregator();

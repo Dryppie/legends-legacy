@@ -26,13 +26,6 @@
       icon="sidebar/world/world-map"
     >
       <a
-        header-actions
-        routerLink="/game/world/tower"
-        class="flex min-h-8 items-center rounded-full border border-[var(--ll-color-border-strong)] bg-[var(--ll-color-surface-raised)] px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:border-primary"
-      >
-        World Tower
-      </a>
-      <a
         *ngIf="activeBattle() as battle"
         header-actions
         routerLink="/game/combat"

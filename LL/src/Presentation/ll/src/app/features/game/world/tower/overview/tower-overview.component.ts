@@ -2,10 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import {
-  NavigationTab,
-  NavigationTabsComponent,
-} from '../../../../../shared/components/custom-components/tabs/navigation-tabs/navigation-tabs.component';
 import { DefaultHeaderComponent } from '../../../../../shared/components/default-header/default-header.component';
 import {
   TowerContributionKind,
@@ -14,20 +10,14 @@ import {
   TowerHallOfFameEntry,
   TowerOverview,
   TowerRallyMode,
+  TowerRallySummary,
   WorldTowerService,
 } from '../../../../../core/services/api/world-tower/world-tower.service';
 import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
 
-type TowerWorkspaceTab = 'scouting' | 'preparation' | 'rally';
-
 @Component({
   selector: 'app-tower-overview',
-  imports: [
-    CommonModule,
-    RouterLink,
-    NavigationTabsComponent,
-    DefaultHeaderComponent,
-  ],
+  imports: [CommonModule, RouterLink, DefaultHeaderComponent],
   templateUrl: './tower-overview.component.html',
   styleUrl: '../tower-page.scss',
 })
@@ -39,17 +29,13 @@ export class TowerOverviewComponent implements OnInit {
   readonly overview = signal<TowerOverview | null>(null);
   readonly selectedFloor = signal<TowerFloorDetail | null>(null);
   readonly selectedFloorNumber = signal<number | null>(null);
-  readonly activeTab = signal<TowerWorkspaceTab>('scouting');
   readonly loading = signal(true);
   readonly loadingFloor = signal(false);
   readonly action = signal<string | null>(null);
   readonly error = signal<string | null>(null);
   readonly shopOpen = signal(false);
-  readonly workspaceTabs: readonly NavigationTab[] = [
-    { key: 'scouting', label: 'Scouting' },
-    { key: 'preparation', label: 'Preparation' },
-    { key: 'rally', label: 'Expedition' },
-  ];
+  readonly preparationExpanded = signal(true);
+  readonly expeditionSlotDots = Array.from({ length: 10 }, (_, index) => index);
 
   constructor() {
     effect(
@@ -113,22 +99,26 @@ export class TowerOverviewComponent implements OnInit {
 
     this.selectedFloorNumber.set(floor.floorNumber);
     this.selectedFloor.set(null);
-    this.activeTab.set('scouting');
     this.loadingFloor.set(true);
     this.error.set(null);
     this.tower
       .getFloor(floor.floorNumber)
       .pipe(finalize(() => this.loadingFloor.set(false)))
       .subscribe({
-        next: (detail) => this.selectedFloor.set(detail),
+        next: (detail) => {
+          this.selectedFloor.set(detail);
+          this.preparationExpanded.set(
+            detail.preparation.weeklyCharacterContribution <
+              detail.preparation.weeklyCharacterCap &&
+              !this.isPreparationComplete(detail),
+          );
+        },
         error: (error) => this.error.set(this.errorMessage(error)),
       });
   }
 
-  setTab(tab: string): void {
-    if (tab === 'scouting' || tab === 'preparation' || tab === 'rally') {
-      this.activeTab.set(tab);
-    }
+  togglePreparation(): void {
+    this.preparationExpanded.update((expanded) => !expanded);
   }
 
   createRally(mode: TowerRallyMode): void {
@@ -182,6 +172,42 @@ export class TowerOverviewComponent implements OnInit {
     }
   }
 
+  recruitingRallyCount(floor: TowerFloorDetail): number {
+    return floor.activeRallies.filter((rally) => rally.status === 'Recruiting')
+      .length;
+  }
+
+  inBattleRallyCount(floor: TowerFloorDetail): number {
+    return floor.activeRallies.filter((rally) => rally.status === 'InProgress')
+      .length;
+  }
+
+  rallyStatusLabel(rally: TowerRallySummary): string {
+    switch (rally.status) {
+      case 'Ready':
+        return 'Roster Full';
+      case 'InProgress':
+        return 'In Battle';
+      default:
+        return rally.status;
+    }
+  }
+
+  rallyActionLabel(
+    rally: TowerRallySummary,
+    currentCharacterRallyId: string | null,
+  ): string {
+    if (rally.status === 'InProgress') return 'View';
+    if (rally.id === currentCharacterRallyId) return 'View';
+    if (rally.status === 'Ready') return 'Full';
+    return 'Apply';
+  }
+
+  rallyOccupancyPercent(rally: TowerRallySummary): number {
+    if (rally.requiredSlots <= 0) return 0;
+    return Math.min(100, (rally.participantCount / rally.requiredSlots) * 100);
+  }
+
   isPreparationMaxed(
     floor: TowerFloorDetail,
     kind: Exclude<TowerContributionKind, 'Research'>,
@@ -189,6 +215,14 @@ export class TowerOverviewComponent implements OnInit {
     return (
       this.preparationEffect(floor, kind) >=
       floor.preparation.maximumEffectPercent
+    );
+  }
+
+  isPreparationComplete(floor: TowerFloorDetail): boolean {
+    return (
+      this.isPreparationMaxed(floor, 'SupplyWeapons') &&
+      this.isPreparationMaxed(floor, 'InscribeWards') &&
+      this.isPreparationMaxed(floor, 'ScoutWeakPoints')
     );
   }
 

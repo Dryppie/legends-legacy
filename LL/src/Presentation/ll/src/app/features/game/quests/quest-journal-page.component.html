@@ -1,57 +1,34 @@
-<div class="h-full min-h-0 sm:pr-4">
-  <section class="flex h-full min-h-0 flex-col overflow-hidden">
-    <header
-      class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-light_gray/20 px-3 py-3 sm:px-4"
-    >
-      <div class="flex min-w-0 items-center gap-3">
-        <div
-          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/40 bg-black/20"
-        >
-          <img
-            src="icons/sidebar/world/quest-journal.svg"
-            class="h-6 w-6"
-            alt=""
-          />
-        </div>
-        <div class="min-w-0">
-          <div
-            class="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400"
-          >
-            Journal
-          </div>
-          <div class="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-            <h1
-              class="text-2xl font-[var(--ll-font-display)] font-semibold leading-none text-primary"
-            >
-              Quests
-            </h1>
-            <span class="text-xs text-zinc-400">
-              {{ trackedQuestCount() }} tracked · {{ trackedQuestCount() }} in
-              progress
-            </span>
-          </div>
-        </div>
-      </div>
+<div class="ll-page-stack">
+  <app-default-header
+    class="shrink-0 pr-4 sm:pr-6"
+    section="Journal"
+    title="Quests"
+    [text]="
+      trackedQuestCount() + ' tracked · ' + trackedQuestCount() + ' in progress'
+    "
+    icon="sidebar/world/quest-journal"
+    [showGuide]="false"
+  >
+    <div header-actions class="flex items-center gap-2">
+      <button
+        type="button"
+        class="ll-button px-3 py-2 text-[11px]"
+        [disabled]="questState.loading() || eventQuestState.loading()"
+        (click)="questState.load(); eventQuestState.load()"
+      >
+        {{ questState.loading() ? "Refreshing" : "Refresh" }}
+      </button>
+      <button
+        type="button"
+        class="ll-button px-3 py-2 text-[11px]"
+        (click)="toggleSort()"
+      >
+        Sort: {{ sortMode() }}
+      </button>
+    </div>
+  </app-default-header>
 
-      <div class="flex items-center gap-2">
-        <button
-          type="button"
-          class="ll-button px-3 py-2 text-[11px]"
-          [disabled]="questState.loading() || eventQuestState.loading()"
-          (click)="questState.load(); eventQuestState.load()"
-        >
-          {{ questState.loading() ? "Refreshing" : "Refresh" }}
-        </button>
-        <button
-          type="button"
-          class="ll-button px-3 py-2 text-[11px]"
-          (click)="toggleSort()"
-        >
-          Sort: {{ sortMode() }}
-        </button>
-      </div>
-    </header>
-
+  <section class="ll-panel flex min-h-0 flex-1 flex-col overflow-hidden">
     <p
       *ngIf="questState.error() as error"
       class="ll-state ll-state-danger m-3 shrink-0"

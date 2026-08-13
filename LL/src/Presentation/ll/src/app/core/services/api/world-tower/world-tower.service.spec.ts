@@ -25,6 +25,7 @@ describe('WorldTowerService', () => {
     service.getAttemptCombatResult('attempt-id').subscribe();
     service.getAttemptPlayback('attempt-id').subscribe();
     service.getHallOfFame().subscribe();
+    service.getPersonalExpeditions().subscribe();
 
     expect(api.get.calls.allArgs()).toEqual([
       ['world-tower'],
@@ -34,6 +35,7 @@ describe('WorldTowerService', () => {
       ['world-tower/attempts/attempt-id/combat-result'],
       ['world-tower/attempts/attempt-id/playback'],
       ['world-tower/hall-of-fame'],
+      ['world-tower/personal-expeditions'],
     ]);
   });
 

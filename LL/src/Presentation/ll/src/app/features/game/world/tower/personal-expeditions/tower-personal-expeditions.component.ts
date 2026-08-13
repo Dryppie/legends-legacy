@@ -3,19 +3,19 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import {
-  TowerHallOfFameEntry,
+  TowerPersonalExpedition,
   WorldTowerService,
 } from '../../../../../core/services/api/world-tower/world-tower.service';
 
 @Component({
-  selector: 'app-tower-hall-of-fame',
+  selector: 'app-tower-personal-expeditions',
   imports: [CommonModule, RouterLink],
-  templateUrl: './tower-hall-of-fame.component.html',
+  templateUrl: './tower-personal-expeditions.component.html',
   styleUrl: '../tower-page.scss',
 })
-export class TowerHallOfFameComponent implements OnInit {
+export class TowerPersonalExpeditionsComponent implements OnInit {
   private readonly tower = inject(WorldTowerService);
-  readonly records = signal<TowerHallOfFameEntry[]>([]);
+  readonly expeditions = signal<TowerPersonalExpedition[]>([]);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
@@ -27,30 +27,37 @@ export class TowerHallOfFameComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     this.tower
-      .getHallOfFame()
+      .getPersonalExpeditions()
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (records) => this.records.set(records),
+        next: (expeditions) => this.expeditions.set(expeditions),
         error: (error) =>
           this.error.set(
             (error as { errorMessage?: string })?.errorMessage ??
-              'Server history could not be read.',
+              'Your Expedition history could not be read.',
           ),
       });
   }
 
-  duration(seconds: number): string {
+  duration(seconds: number | null): string {
+    if (seconds === null) return '—';
     const total = Math.max(0, seconds);
     return `${Math.floor(total / 60)}:${(total % 60).toString().padStart(2, '0')}`;
   }
 
-  rosterSummary(record: TowerHallOfFameEntry): string {
-    return record.participants
-      .map((entry) => entry.characterName)
-      .join(', ');
+  rosterSummary(expedition: TowerPersonalExpedition): string {
+    const visible = expedition.participants
+      .slice(0, 4)
+      .map((entry) => entry.characterName);
+    const remaining = expedition.participants.length - visible.length;
+    return `${visible.join(', ')}${remaining > 0 ? `, +${remaining}` : ''}`;
   }
 
   floorLabel(floorNumber: number): string {
     return floorNumber.toString().padStart(2, '0');
+  }
+
+  modeLabel(expedition: TowerPersonalExpedition): string {
+    return expedition.mode === 'FirstClear' ? 'First clear' : 'Echo';
   }
 }

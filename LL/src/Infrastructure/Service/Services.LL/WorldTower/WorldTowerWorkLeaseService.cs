@@ -33,6 +33,17 @@ public sealed class WorldTowerWorkLeaseService(
             limit,
             cancellationToken);
 
+    public Task<bool> RenewSimulationAsync(
+        Guid attemptId,
+        string owner,
+        DateTimeOffset now,
+        CancellationToken cancellationToken) =>
+        db.RenewWorldTowerSimulationLeaseAsync(
+            attemptId,
+            owner,
+            now.Add(leaseDuration),
+            cancellationToken);
+
     public async Task ReleasePlaybackDispatchAsync(
         Guid attemptId,
         string owner,

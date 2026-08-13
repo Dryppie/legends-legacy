@@ -44,7 +44,7 @@ public sealed class WorldTowerCombatPlaybackWorker(
             attemptIds = await leases.ClaimPlaybackDispatchesAsync(
                 workerId,
                 now,
-                50,
+                options.Value.PlaybackClaimBatchSize,
                 cancellationToken);
         }
 

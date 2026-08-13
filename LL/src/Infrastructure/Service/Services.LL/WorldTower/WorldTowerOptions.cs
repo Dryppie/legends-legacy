@@ -15,6 +15,9 @@ public sealed class WorldTowerOptions
     public int PlaybackPollMilliseconds { get; set; } = 250;
     public int SimulationPollMilliseconds { get; set; } = 250;
     public int WorkerLeaseSeconds { get; set; } = 30;
+    public int SimulationClaimBatchSize { get; set; } = 2;
+    public int SimulationMaxConcurrency { get; set; } = 1;
+    public int PlaybackClaimBatchSize { get; set; } = 50;
     public int RecoveryFrameLimit { get; set; } = 60;
     public bool DevelopmentToolsEnabled { get; set; }
 }

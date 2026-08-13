@@ -1,0 +1,76 @@
+<main class="tower-page">
+  <div class="tower-shell">
+    <a class="back-link" routerLink="/game/world/tower">← Legacy's Ascension</a>
+
+    <section class="hall-panel section ll-panel">
+      <header class="panel-heading hall-heading">
+        <span>Personal Expeditions</span>
+        <small>Your latest 100 Tower attempts</small>
+      </header>
+
+      <p class="error" *ngIf="error() as message">{{ message }}</p>
+      <p
+        class="empty-state section"
+        *ngIf="!loading() && !expeditions().length"
+      >
+        You have not embarked on a Tower Expedition yet.
+      </p>
+
+      <div class="hall-table-wrap" *ngIf="expeditions().length">
+        <table class="hall-table personal-expeditions-table">
+          <thead>
+            <tr>
+              <th>Floor</th>
+              <th>Guardian</th>
+              <th>Mode</th>
+              <th>Attempt</th>
+              <th>Roster</th>
+              <th>Result</th>
+              <th>Duration</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let expedition of expeditions()">
+              <td>{{ floorLabel(expedition.floorNumber) }}</td>
+              <td>{{ expedition.guardianName }}</td>
+              <td>{{ modeLabel(expedition) }}</td>
+              <td>#{{ expedition.attemptNumber }}</td>
+              <td [title]="rosterSummary(expedition)">
+                {{ rosterSummary(expedition) }}
+              </td>
+              <td>
+                <span class="badge" [ngClass]="expedition.status">
+                  {{ expedition.status }}
+                </span>
+              </td>
+              <td>{{ duration(expedition.fightDurationSeconds) }}</td>
+              <td>
+                {{
+                  (expedition.completedAt || expedition.startedAt)
+                    | date: "MMM d, HH:mm"
+                }}
+              </td>
+              <td>
+                <a
+                  class="history-link"
+                  [routerLink]="[
+                    '/game/world/tower/expeditions',
+                    expedition.rallyId,
+                  ]"
+                >
+                  View
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="empty-state section" *ngIf="loading()">
+        Opening your Expedition journal…
+      </p>
+    </section>
+  </div>
+</main>
