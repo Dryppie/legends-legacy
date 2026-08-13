@@ -15,6 +15,8 @@ import {
 } from '../../../../../core/services/api/world-tower/world-tower.service';
 import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
 
+type TowerReadinessTab = 'scouting' | 'preparation';
+
 @Component({
   selector: 'app-tower-overview',
   imports: [CommonModule, RouterLink, DefaultHeaderComponent],
@@ -34,6 +36,8 @@ export class TowerOverviewComponent implements OnInit {
   readonly action = signal<string | null>(null);
   readonly error = signal<string | null>(null);
   readonly shopOpen = signal(false);
+  readonly mobileFloorDetailOpen = signal(false);
+  readonly mobileReadinessTab = signal<TowerReadinessTab>('scouting');
   readonly preparationExpanded = signal(true);
   readonly expeditionSlotDots = Array.from({ length: 10 }, (_, index) => index);
 
@@ -67,6 +71,11 @@ export class TowerOverviewComponent implements OnInit {
     this.shopOpen.set(false);
   }
 
+  selectMobileReadiness(tab: TowerReadinessTab): void {
+    this.mobileReadinessTab.set(tab);
+    if (tab === 'preparation') this.preparationExpanded.set(true);
+  }
+
   load(): void {
     this.loading.set(true);
     this.error.set(null);
@@ -82,7 +91,7 @@ export class TowerOverviewComponent implements OnInit {
               .reverse()
               .find((floor) => floor.state !== 'Locked') ??
             null;
-          if (selected) this.selectFloor(selected);
+          if (selected) this.selectFloor(selected, false);
         },
         error: (error) => this.error.set(this.errorMessage(error)),
       });
@@ -92,13 +101,18 @@ export class TowerOverviewComponent implements OnInit {
     return [...overview.floors].reverse();
   }
 
-  selectFloor(floor: TowerFloorSummary): void {
+  selectFloor(floor: TowerFloorSummary, openMobileDetail = true): void {
+    if (openMobileDetail) {
+      this.mobileFloorDetailOpen.set(true);
+    }
+
     if (this.selectedFloorNumber() === floor.floorNumber) {
       return;
     }
 
     this.selectedFloorNumber.set(floor.floorNumber);
     this.selectedFloor.set(null);
+    this.mobileReadinessTab.set('scouting');
     this.loadingFloor.set(true);
     this.error.set(null);
     this.tower
@@ -115,6 +129,10 @@ export class TowerOverviewComponent implements OnInit {
         },
         error: (error) => this.error.set(this.errorMessage(error)),
       });
+  }
+
+  showMobileFloorList(): void {
+    this.mobileFloorDetailOpen.set(false);
   }
 
   togglePreparation(): void {
@@ -206,6 +224,16 @@ export class TowerOverviewComponent implements OnInit {
   rallyOccupancyPercent(rally: TowerRallySummary): number {
     if (rally.requiredSlots <= 0) return 0;
     return Math.min(100, (rally.participantCount / rally.requiredSlots) * 100);
+  }
+
+  preparationProgressPercent(floor: TowerFloorDetail): number {
+    if (floor.preparation.weeklyCharacterCap <= 0) return 100;
+    return Math.min(
+      100,
+      (floor.preparation.weeklyCharacterContribution /
+        floor.preparation.weeklyCharacterCap) *
+        100,
+    );
   }
 
   isPreparationMaxed(

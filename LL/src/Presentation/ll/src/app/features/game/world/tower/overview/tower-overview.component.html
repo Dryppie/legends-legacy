@@ -1,5 +1,9 @@
 <main class="tower-page">
-  <div class="tower-shell tower-overview-shell" *ngIf="overview() as vm">
+  <div
+    class="tower-shell tower-overview-shell"
+    [class.mobile-floor-detail-open]="mobileFloorDetailOpen()"
+    *ngIf="overview() as vm"
+  >
     <app-default-header
       class="tower-default-header pr-4 sm:pr-6"
       section="World Tower"
@@ -10,21 +14,21 @@
       <button
         header-actions
         type="button"
-        class="tower-button ll-button"
+        class="tower-button ll-button desktop-header-action"
         (click)="openShop()"
       >
         Shop · {{ vm.towerTokens | number }} Tokens
       </button>
       <a
         header-actions
-        class="tower-button ll-button"
+        class="tower-button ll-button desktop-header-action"
         routerLink="/game/world/tower/hall-of-fame"
       >
         Hall of Fame
       </a>
       <a
         header-actions
-        class="tower-button ll-button"
+        class="tower-button ll-button desktop-header-action"
         routerLink="/game/world/tower/personal-expeditions"
       >
         Personal Expeditions
@@ -87,12 +91,19 @@
               floorStateLabel(floor.state)
             "
             [attr.title]="floorStateLabel(floor.state)"
+            [style.--mobile-floor-order]="floor.floorNumber"
             (click)="selectFloor(floor)"
           >
             <span class="floor-node" aria-hidden="true"><span></span></span>
             <span class="floor-identity">
-              <strong>{{ floor.guardianName }}</strong>
-              <small>
+              <strong class="desktop-floor-name">{{
+                floor.guardianName
+              }}</strong>
+              <strong class="mobile-floor-name">
+                {{ floorLabel(floor.floorNumber) }} ·
+                {{ floor.guardianName.split(",")[0] }}
+              </strong>
+              <small class="desktop-floor-meta">
                 {{ floorLabel(floor.floorNumber) }} · {{ floor.type }} ·
                 {{ floor.requiredSlots }} slots
               </small>
@@ -106,6 +117,13 @@
 
         <ng-container *ngIf="selectedFloor() as floor">
           <section class="tower-floor-hero ll-panel">
+            <button
+              type="button"
+              class="mobile-floor-back"
+              (click)="showMobileFloorList()"
+            >
+              <span aria-hidden="true">←</span> All floors
+            </button>
             <div class="tower-floor-title">
               <p class="eyebrow">
                 Floor {{ floorLabel(floor.floorNumber) }} · {{ floor.type }}
@@ -204,8 +222,7 @@
                         </span>
                       </div>
                       <p>
-                        Led by {{ rally.leaderCharacterName }} · Floor
-                        {{ floorLabel(rally.floorNumber) }} ·
+                        Led by {{ rally.leaderCharacterName }} ·
                         <ng-container *ngIf="rally.status === 'InProgress'">
                           started
                           {{
@@ -370,7 +387,50 @@
             </div>
 
             <aside class="tower-floor-sidebar">
-              <section class="tower-preparation-panel ll-panel">
+              <header class="mobile-readiness-heading">
+                <span>Floor readiness</span>
+                <span
+                  class="badge ll-badge"
+                  [class.Cleared]="floor.scoutingProgress >= 100"
+                >
+                  {{
+                    floor.scoutingProgress >= 100
+                      ? "Scouting complete"
+                      : "Scouting incomplete"
+                  }}
+                </span>
+              </header>
+              <nav class="mobile-readiness-tabs" aria-label="Floor readiness">
+                <button
+                  type="button"
+                  [class.active]="mobileReadinessTab() === 'scouting'"
+                  (click)="selectMobileReadiness('scouting')"
+                >
+                  <span>Scouting</span>
+                  <strong
+                    >{{ floor.scoutingProgress }}<small>/100</small></strong
+                  >
+                  <i><i [style.width.%]="floor.scoutingProgress"></i></i>
+                </button>
+                <button
+                  type="button"
+                  [class.active]="mobileReadinessTab() === 'preparation'"
+                  (click)="selectMobileReadiness('preparation')"
+                >
+                  <span>Preparation</span>
+                  <strong>
+                    {{ floor.preparation.weeklyCharacterContribution
+                    }}<small>/{{ floor.preparation.weeklyCharacterCap }}</small>
+                  </strong>
+                  <i
+                    ><i [style.width.%]="preparationProgressPercent(floor)"></i
+                  ></i>
+                </button>
+              </nav>
+              <section
+                class="tower-preparation-panel ll-panel"
+                [class.mobile-active]="mobileReadinessTab() === 'preparation'"
+              >
                 <button
                   type="button"
                   class="sidebar-panel-heading preparation-accordion-trigger"
@@ -467,7 +527,10 @@
                   </p>
                 </div>
               </section>
-              <section class="tower-intel-panel ll-panel">
+              <section
+                class="tower-intel-panel ll-panel"
+                [class.mobile-active]="mobileReadinessTab() === 'scouting'"
+              >
                 <header class="sidebar-panel-heading">
                   <span>Scouting</span>
                   <strong>{{ floor.scoutingProgress }} / 100</strong>

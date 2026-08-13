@@ -13,8 +13,7 @@
         "source": "effect.shadow_image.shadow_strike.damage",
         "eventType": "Damage",
         "targetId": "hostile-1",
-        "minCount": 1,
-        "minMagnitude": 18
+        "minCount": 1
       }
     ]
   },
