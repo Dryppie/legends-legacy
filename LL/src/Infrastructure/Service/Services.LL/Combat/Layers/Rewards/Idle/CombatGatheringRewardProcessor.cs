@@ -94,7 +94,7 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         foreach (var node in matchingNodes)
         {
             var nodeSuccessBonus = Math.Max(0d, tool.GetBonus(ToolBonusType.NodeSuccessChancePercent));
-            var chance = Math.Clamp(node.ProcChance + (nodeSuccessBonus / 100d), 0d, 1d);
+            var chance = Math.Clamp(node.ProcChance * (1d + nodeSuccessBonus / 100d), 0d, 1d);
             var appliedBonusEffects = BuildAppliedBonusEffects(tool, node, nodeSuccessBonus, gatheringYieldBps, gatheringExperienceGainBps, rareChanceRelativeBps);
 
             for (var i = 0; i < victories; i++)
