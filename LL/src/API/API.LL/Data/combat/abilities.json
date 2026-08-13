@@ -3835,5 +3835,98 @@
         "procCoefficient": 1
       }
     ]
+  },
+  {
+    "id": "ability.creature.orsenn.ashen_toll",
+    "kind": "Active",
+    "name": "Ashen Toll",
+    "description": "Ring the funeral bell, dealing 30% Magical Damage to all enemies and applying 1 Cinder.",
+    "cooldownTicks": 60,
+    "tags": ["Magical", "Area", "Cinder"],
+    "effects": [
+      {
+        "id": "effect.creature.orsenn.ashen_toll.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.3,
+        "attackType": "None",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.orsenn.ashen_toll.cinder",
+        "operation": "ApplyStatus",
+        "target": "AllEnemies",
+        "baseValue": 1,
+        "statusId": "status.orsenn.cinder",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.orsenn.funeral_brand",
+    "kind": "Active",
+    "name": "Funeral Brand",
+    "description": "Apply 2 Cinder to the enemy with the highest Health, then apply Doom(500).",
+    "cooldownTicks": 150,
+    "tags": ["Magical", "Cinder", "Doom", "Debuff"],
+    "effects": [
+      {
+        "id": "effect.creature.orsenn.funeral_brand.cinder",
+        "operation": "ApplyStatus",
+        "target": "HighestHealthEnemy",
+        "baseValue": 2,
+        "statusId": "status.orsenn.cinder",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.orsenn.funeral_brand.doom",
+        "operation": "ApplyCondition",
+        "target": "EventTarget",
+        "baseValue": 500,
+        "condition": "Doom",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.orsenn.cremation",
+    "kind": "Active",
+    "name": "Cremation",
+    "description": "Deal 45% Magical Damage to all enemies, increased by 25% for every Cinder on the target. Afterwards, remove all Cinder.",
+    "cooldownTicks": 450,
+    "tags": ["Magical", "Area", "Cinder"],
+    "effects": [
+      {
+        "id": "effect.creature.orsenn.cremation.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.45,
+        "scalingStatusId": "status.orsenn.cinder",
+        "scalingStatusSubject": "Target",
+        "statusScalingCoefficient": 0.1125,
+        "attackType": "None",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.orsenn.cremation.remove_cinder",
+        "operation": "RemoveStatus",
+        "target": "AllEnemies",
+        "statusId": "status.orsenn.cinder",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.orsenn.cinderbound",
+    "kind": "Passive",
+    "name": "Cinderbound",
+    "description": "Each Cinder increases damage received from Orsenn by 6%. At 6 stacks, the enemy combusts, taking Magical Damage equal to 15% of Max Health, and all Cinder is removed.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Cinder", "Magical"],
+    "effects": []
   }
 ]

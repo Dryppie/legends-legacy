@@ -1868,6 +1868,176 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Json_catalog_orsenn_authors_the_requested_floor_six_kit()
+    {
+        var contentRoot = FindApiContentRoot();
+        var options = CreateJsonOptions();
+        var catalog = new JsonAbilityCatalogProvider(CreateConfig(), contentRoot, options).GetCatalog();
+        var profile = new JsonCreatureAbilityDefinitionProvider(CreateConfig(), contentRoot, options);
+
+        Assert.Equal(
+            [
+                "ability.creature.orsenn.ashen_toll",
+                "ability.creature.orsenn.funeral_brand",
+                "ability.creature.orsenn.cremation",
+                "ability.creature.orsenn.cinderbound"
+            ],
+            profile.GetAbilityIds("monster.orsenn,_the_ashen_bellkeeper"));
+
+        var ashenToll = catalog.AbilitiesById["ability.creature.orsenn.ashen_toll"];
+        Assert.Equal(60, ashenToll.CooldownTicks);
+        Assert.Equal(AbilityTargetSelector.AllEnemies, ashenToll.Effects[0].Target);
+        Assert.Equal(0.3f, ashenToll.Effects[0].ScalingCoefficient);
+        Assert.Equal("status.orsenn.cinder", ashenToll.Effects[1].StatusId);
+
+        var funeralBrand = catalog.AbilitiesById["ability.creature.orsenn.funeral_brand"];
+        Assert.Equal(150, funeralBrand.CooldownTicks);
+        Assert.Equal(AbilityTargetSelector.HighestHealthEnemy, funeralBrand.Effects[0].Target);
+        Assert.Equal(2, funeralBrand.Effects[0].BaseValue);
+        Assert.Equal(StandardConditionType.Doom, funeralBrand.Effects[1].Condition);
+        Assert.Equal(500, funeralBrand.Effects[1].BaseValue);
+
+        var cremation = catalog.AbilitiesById["ability.creature.orsenn.cremation"];
+        Assert.Equal(450, cremation.CooldownTicks);
+        Assert.Equal(0.45f, cremation.Effects[0].ScalingCoefficient);
+        Assert.Equal("status.orsenn.cinder", cremation.Effects[0].ScalingStatusId);
+        Assert.Equal(AbilityConditionSubject.Target, cremation.Effects[0].ScalingStatusSubject);
+        Assert.Equal(0.1125f, cremation.Effects[0].StatusScalingCoefficient);
+        Assert.Equal(AbilityEffectOperation.RemoveStatus, cremation.Effects[1].Operation);
+
+        var cinder = catalog.StatusesById["status.orsenn.cinder"];
+        Assert.Equal(6, cinder.MaxStacks);
+        Assert.Equal(6, cinder.SourceDamageTakenPercentPerStack);
+        var combustion = cinder.Effects[0];
+        Assert.Equal(AttributeType.MaxHealth, combustion.ScalingAttribute);
+        Assert.Equal(AbilityConditionSubject.Target, combustion.ScalingAttributeSubject);
+        Assert.Equal(0.15f, combustion.ScalingCoefficient);
+    }
+
+    [Fact]
+    public void Orsenns_funeral_brand_marks_and_dooms_the_same_highest_health_enemy()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var funeralBrand = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.orsenn.funeral_brand"]);
+        var orsenn = CreateCombatant("orsenn", CombatTeam.Friendly, [funeralBrand]);
+        var lowerHealth = CreateCombatant("lower-health", CombatTeam.Hostile, [], maxHealth: 500);
+        var higherHealth = CreateCombatant("higher-health", CombatTeam.Hostile, [], maxHealth: 1_000);
+        var engine = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        engine.Run([orsenn], [lowerHealth, higherHealth]);
+
+        Assert.Equal(0, lowerHealth.GetStatusStacks("status.orsenn.cinder"));
+        Assert.Equal(0, lowerHealth.GetConditionStacks(StandardConditionType.Doom));
+        Assert.Equal(2, higherHealth.GetStatusStacks("status.orsenn.cinder"));
+        Assert.Equal(500, higherHealth.GetConditionStacks(StandardConditionType.Doom));
+    }
+
+    [Fact]
+    public void Cinder_amplifies_only_its_sources_damage()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var orsennAbility = AbilityCompiler.CompileAbility(
+            CreateFixedDamageAbility("ability.test.orsenn", "effect.test.orsenn", 100));
+        var allyAbility = AbilityCompiler.CompileAbility(
+            CreateFixedDamageAbility("ability.test.ally", "effect.test.ally", 100));
+        var orsenn = CreateCombatant("orsenn", CombatTeam.Friendly, [orsennAbility]);
+        var ally = CreateCombatant("ally", CombatTeam.Friendly, [allyAbility]);
+        var target = CreateCombatant("target", CombatTeam.Hostile, [], maxHealth: 1_000);
+        target.Statuses.Add(new RuntimeStatus(statuses["status.orsenn.cinder"], orsenn, target, 3));
+        var engine = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        var result = engine.Run([orsenn, ally], [target]);
+
+        Assert.Contains(result.EventLog, log =>
+            log.Source == "effect.test.orsenn" && log.EventType == EventType.Damage && log.Magnitude == 118);
+        Assert.Contains(result.EventLog, log =>
+            log.Source == "effect.test.ally" && log.EventType == EventType.Damage && log.Magnitude == 100);
+    }
+
+    [Fact]
+    public void Six_cinder_combusts_from_target_max_health_and_removes_all_stacks()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var applyCinder = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.apply-cinder",
+            Kind = AbilitySpecKind.Active,
+            Name = "Apply Cinder",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.apply-cinder",
+                    Operation = AbilityEffectOperation.ApplyStatus,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = 1,
+                    StatusId = "status.orsenn.cinder"
+                }
+            ]
+        });
+        var orsenn = CreateCombatant("orsenn", CombatTeam.Friendly, [applyCinder]);
+        var target = CreateCombatant("target", CombatTeam.Hostile, [], maxHealth: 1_000);
+        target.Statuses.Add(new RuntimeStatus(statuses["status.orsenn.cinder"], orsenn, target, 5));
+        var engine = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        var result = engine.Run([orsenn], [target]);
+
+        Assert.Equal(0, target.GetStatusStacks("status.orsenn.cinder"));
+        Assert.Contains(result.EventLog, log =>
+            log.Source == "effect.status.orsenn.cinder.combust"
+            && log.EventType == EventType.Damage
+            && log.Magnitude == 204);
+    }
+
+    [Fact]
+    public void Cremation_scales_per_targets_cinder_then_removes_it_from_every_enemy()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var cremation = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.orsenn.cremation"]);
+        var orsenn = CreateCombatant("orsenn", CombatTeam.Friendly, [cremation]);
+        var oneCinder = CreateCombatant("one-cinder", CombatTeam.Hostile, [], maxHealth: 1_000);
+        var threeCinder = CreateCombatant("three-cinder", CombatTeam.Hostile, [], maxHealth: 1_000);
+        oneCinder.Statuses.Add(new RuntimeStatus(statuses["status.orsenn.cinder"], orsenn, oneCinder, 1));
+        threeCinder.Statuses.Add(new RuntimeStatus(statuses["status.orsenn.cinder"], orsenn, threeCinder, 3));
+        var engine = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        var result = engine.Run([orsenn], [oneCinder, threeCinder]);
+
+        var oneCinderDamage = Assert.Single(result.EventLog, log =>
+            log.Source == "effect.creature.orsenn.cremation.damage" && log.TargetId == oneCinder.Id);
+        var threeCinderDamage = Assert.Single(result.EventLog, log =>
+            log.Source == "effect.creature.orsenn.cremation.damage" && log.TargetId == threeCinder.Id);
+        Assert.True(threeCinderDamage.Magnitude > oneCinderDamage.Magnitude);
+        Assert.Equal(0, oneCinder.GetStatusStacks("status.orsenn.cinder"));
+        Assert.Equal(0, threeCinder.GetStatusStacks("status.orsenn.cinder"));
+    }
+
+    [Fact]
     public void Kharads_crushing_verdict_targets_highest_max_health()
     {
         var catalog = new JsonAbilityCatalogProvider(
@@ -2336,7 +2506,7 @@ public sealed class AbilitySystemTests
         Assert.All(allAbilityIds, profile =>
             Assert.Equal(profile.MonsterId == "monster.hobgoblin" ? 3 : 2, profile.AbilityIds.Count));
         Assert.Equal(105, allAbilityIds.SelectMany(x => x.AbilityIds).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(127, catalog.AbilitiesById.Count);
+        Assert.Equal(131, catalog.AbilitiesById.Count);
         Assert.Contains("ability.summon.shadow_image.shadow_strike", catalog.AbilitiesById.Keys);
         Assert.All(allAbilityIds.SelectMany(x => x.AbilityIds), abilityId =>
         {
@@ -4546,6 +4716,27 @@ public sealed class AbilitySystemTests
                     ScalingCoefficient = 0.2f,
                     AttackType = AttackType.Melee,
                     DamageType = DamageType.Physical
+                }
+            ]
+        };
+
+    private static AbilitySpec CreateFixedDamageAbility(string abilityId, string effectId, int damage) =>
+        new()
+        {
+            Id = abilityId,
+            Kind = AbilitySpecKind.Active,
+            Name = abilityId,
+            Effects =
+            [
+                new()
+                {
+                    Id = effectId,
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = damage,
+                    AttackType = AttackType.None,
+                    DamageType = DamageType.None,
+                    CritEligibility = CritEligibility.Disallowed
                 }
             ]
         };

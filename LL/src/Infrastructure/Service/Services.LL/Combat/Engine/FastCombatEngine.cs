@@ -667,7 +667,7 @@ public sealed class FastCombatEngine
         bool countStatsActivation = false,
         EffectExecutionContext? executionContext = null)
     {
-        var value = CalculateValue(effect, source, combatEvent);
+        var value = CalculateValue(effect, source, target, combatEvent);
         if (effect.ScalingAttribute == AttributeType.Power
             && effect.Operation is AbilityEffectOperation.Damage or AbilityEffectOperation.Heal)
         {
@@ -2361,7 +2361,7 @@ public sealed class FastCombatEngine
                 {
                     if (IsTimedModifierOperation(effect.Definition.Operation))
                     {
-                        var value = CalculateValue(effect.Definition, effect.Source);
+                        var value = CalculateValue(effect.Definition, effect.Source, effect.Target);
                         switch (effect.Definition.Operation)
                         {
                             case AbilityEffectOperation.ModifyAttribute:
@@ -3094,6 +3094,7 @@ public sealed class FastCombatEngine
     private int CalculateValue(
         CompiledEffect effect,
         RuntimeCombatant source,
+        RuntimeCombatant target,
         CombatEvent? combatEvent = null)
     {
         var scalingCoefficient = effect.ScalingCoefficient;
@@ -3105,7 +3106,14 @@ public sealed class FastCombatEngine
 
         var value = effect.BaseValue
                     + (effect.ScalingAttribute is { } attribute
-                        ? GetEffectiveAttribute(source, attribute) * scalingCoefficient
+                        ? GetEffectiveAttribute(
+                              ResolveScalingSubject(
+                                  effect.ScalingAttributeSubject,
+                                  source,
+                                  target,
+                                  combatEvent),
+                              attribute)
+                          * scalingCoefficient
                         : 0)
                     + (combatEvent?.Magnitude ?? 0) * effect.EventMagnitudeCoefficient;
         if (effect.ScalingCondition is { } condition)
@@ -3116,7 +3124,12 @@ public sealed class FastCombatEngine
         }
         if (!string.IsNullOrWhiteSpace(effect.ScalingStatusId))
         {
-            value += source.GetStatusStacks(effect.ScalingStatusId)
+            value += ResolveScalingSubject(
+                         effect.ScalingStatusSubject,
+                         source,
+                         target,
+                         combatEvent)
+                     .GetStatusStacks(effect.ScalingStatusId)
                      * GetEffectivePower(source)
                      * effect.StatusScalingCoefficient;
         }
@@ -3125,6 +3138,19 @@ public sealed class FastCombatEngine
             AllowsNegativeValue(effect.Operation) ? int.MinValue : 0,
             (int)Math.Round(value));
     }
+
+    private static RuntimeCombatant ResolveScalingSubject(
+        AbilityConditionSubject subject,
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        CombatEvent? combatEvent) =>
+        subject switch
+        {
+            AbilityConditionSubject.Target => target,
+            AbilityConditionSubject.EventSource => combatEvent?.Source ?? source,
+            AbilityConditionSubject.EventTarget => combatEvent?.Target ?? target,
+            _ => source
+        };
 
     private static float GetEffectiveAttribute(RuntimeCombatant combatant, AttributeType attribute) =>
         attribute == AttributeType.Power

@@ -243,12 +243,14 @@ public sealed class AbilityEffectSpec
     public AbilityTargetSelector Target { get; set; } = AbilityTargetSelector.CurrentTarget;
     public int BaseValue { get; set; }
     public AttributeType? ScalingAttribute { get; set; }
+    public AbilityConditionSubject ScalingAttributeSubject { get; set; } = AbilityConditionSubject.Source;
     public float ScalingCoefficient { get; set; }
     public float MaximumScalingCoefficient { get; set; }
     public float EventMagnitudeCoefficient { get; set; }
     public StandardConditionType? ScalingCondition { get; set; }
     public float ConditionScalingCoefficient { get; set; }
     public string? ScalingStatusId { get; set; }
+    public AbilityConditionSubject ScalingStatusSubject { get; set; } = AbilityConditionSubject.Source;
     public float StatusScalingCoefficient { get; set; }
     public AttributeType? HealingScalingAttribute { get; set; }
     public float HealingScalingCoefficient { get; set; }
@@ -299,6 +301,7 @@ public sealed class StatusSpec
     public int MaxStacks { get; set; } = 1;
     public int DurationTicks { get; set; }
     public bool LockAtMaxStacks { get; set; }
+    public float SourceDamageTakenPercentPerStack { get; set; }
     public List<string> Tags { get; set; } = [];
     public List<AbilityTriggerSpec> Triggers { get; set; } = [];
     public List<AbilityEffectSpec> Effects { get; set; } = [];

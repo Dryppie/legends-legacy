@@ -339,6 +339,16 @@
       "tier": 1
     },
     {
+      "id": "00000000-0000-0000-0000-000000000061",
+      "name": "Orsenn, the Ashen Bellkeeper",
+      "imagePath": "",
+      "archetype": "DPS",
+      "damageProfile": "Magical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 41,
+      "tier": 1
+    },
+    {
       "id": "00000000-0000-0000-0000-000000000024",
       "name": "Venomous Snake",
       "imagePath": "venomous_snake",

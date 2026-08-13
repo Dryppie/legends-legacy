@@ -47,12 +47,14 @@ public sealed class CompiledEffect
     public AbilityTargetSelector Target { get; init; }
     public int BaseValue { get; init; }
     public AttributeType? ScalingAttribute { get; init; }
+    public AbilityConditionSubject ScalingAttributeSubject { get; init; }
     public float ScalingCoefficient { get; init; }
     public float MaximumScalingCoefficient { get; init; }
     public float EventMagnitudeCoefficient { get; init; }
     public StandardConditionType? ScalingCondition { get; init; }
     public float ConditionScalingCoefficient { get; init; }
     public string? ScalingStatusId { get; init; }
+    public AbilityConditionSubject ScalingStatusSubject { get; init; }
     public float StatusScalingCoefficient { get; init; }
     public AttributeType? HealingScalingAttribute { get; init; }
     public float HealingScalingCoefficient { get; init; }
@@ -105,6 +107,7 @@ public sealed class CompiledStatus
     public int MaxStacks { get; init; }
     public int DurationTicks { get; init; }
     public bool LockAtMaxStacks { get; init; }
+    public float SourceDamageTakenPercentPerStack { get; init; }
     public required IReadOnlyDictionary<AbilityTriggerEvent, IReadOnlyList<CompiledTrigger>> TriggersByEvent { get; init; }
 }
 
@@ -792,6 +795,9 @@ public sealed class RuntimeCombatant
         total += _damageTakenFromConditionPercent
             .Where(entry => source.HasCondition(entry.Key))
             .Sum(entry => entry.Value);
+        total += Statuses
+            .Where(status => ReferenceEquals(status.Source, source))
+            .Sum(status => status.Stacks * status.Definition.SourceDamageTakenPercentPerStack);
         return total;
     }
 

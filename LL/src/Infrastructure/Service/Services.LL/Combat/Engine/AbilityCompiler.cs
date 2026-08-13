@@ -45,6 +45,7 @@ public static class AbilityCompiler
             MaxStacks = spec.MaxStacks,
             DurationTicks = spec.DurationTicks,
             LockAtMaxStacks = spec.LockAtMaxStacks,
+            SourceDamageTakenPercentPerStack = spec.SourceDamageTakenPercentPerStack,
             TriggersByEvent = compiledTriggers
         };
     }
@@ -108,12 +109,14 @@ public static class AbilityCompiler
             Target = effect.Target,
             BaseValue = effect.BaseValue,
             ScalingAttribute = effect.ScalingAttribute,
+            ScalingAttributeSubject = effect.ScalingAttributeSubject,
             ScalingCoefficient = effect.ScalingCoefficient,
             MaximumScalingCoefficient = effect.MaximumScalingCoefficient,
             EventMagnitudeCoefficient = effect.EventMagnitudeCoefficient,
             ScalingCondition = effect.ScalingCondition,
             ConditionScalingCoefficient = effect.ConditionScalingCoefficient,
             ScalingStatusId = effect.ScalingStatusId,
+            ScalingStatusSubject = effect.ScalingStatusSubject,
             StatusScalingCoefficient = effect.StatusScalingCoefficient,
             HealingScalingAttribute = effect.HealingScalingAttribute,
             HealingScalingCoefficient = effect.HealingScalingCoefficient,

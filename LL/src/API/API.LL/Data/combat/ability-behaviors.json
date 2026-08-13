@@ -1375,5 +1375,110 @@
       }
     ],
     "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.orsenn.ashen_toll.hits_and_marks_all_enemies",
+    "abilityId": "ability.creature.orsenn.ashen_toll",
+    "friendlyAbilityIds": [
+      "ability.creature.orsenn.ashen_toll"
+    ],
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "expectedStatuses": [
+      {
+        "combatantId": "hostile-1",
+        "statusId": "status.orsenn.cinder",
+        "minStacks": 1
+      },
+      {
+        "combatantId": "hostile-2",
+        "statusId": "status.orsenn.cinder",
+        "minStacks": 1
+      }
+    ],
+    "expectedLogs": [
+      {
+        "source": "effect.creature.orsenn.ashen_toll.damage",
+        "eventType": "Damage",
+        "minCount": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.orsenn.funeral_brand.marks_highest_health_enemy",
+    "abilityId": "ability.creature.orsenn.funeral_brand",
+    "friendlyAbilityIds": [
+      "ability.creature.orsenn.funeral_brand"
+    ],
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "expectedStatuses": [
+      {
+        "combatantId": "hostile-1",
+        "statusId": "status.orsenn.cinder",
+        "minStacks": 2
+      }
+    ],
+    "expectedConditions": [
+      {
+        "combatantId": "hostile-1",
+        "condition": "Doom",
+        "minStacks": 500
+      }
+    ],
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.orsenn.cremation.scales_then_removes_cinder",
+    "abilityId": "ability.creature.orsenn.cremation",
+    "friendlyAbilityIds": [
+      "ability.creature.orsenn.cremation"
+    ],
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "initialStatuses": [
+      {
+        "combatantId": "hostile-1",
+        "sourceCombatantId": "friendly",
+        "statusId": "status.orsenn.cinder",
+        "stacks": 3
+      }
+    ],
+    "expectedLogs": [
+      {
+        "source": "effect.creature.orsenn.cremation.damage",
+        "eventType": "Damage",
+        "minCount": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.orsenn.cinderbound.combusts_at_six_stacks",
+    "abilityId": "ability.creature.orsenn.cinderbound",
+    "friendlyAbilityIds": [
+      "ability.creature.orsenn.ashen_toll",
+      "ability.creature.orsenn.cinderbound"
+    ],
+    "hostileStats": {
+      "MaxHealth": 1000
+    },
+    "maxTicks": 1,
+    "initialStatuses": [
+      {
+        "combatantId": "hostile-1",
+        "sourceCombatantId": "friendly",
+        "statusId": "status.orsenn.cinder",
+        "stacks": 5
+      }
+    ],
+    "expectedLogs": [
+      {
+        "source": "effect.status.orsenn.cinder.combust",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 204
+      }
+    ]
   }
 ]

@@ -1,5 +1,5 @@
 {
-  "releasedThroughFloor": 5,
+  "releasedThroughFloor": 6,
   "rewardCurve": {
     "baseReward": 100,
     "maximumFloor": 100,
@@ -159,16 +159,16 @@
     },
     {
       "floorNumber": 6,
-      "name": "The Hollow Archer's Walk",
+      "name": "The Ashen Belfry",
       "type": "Standard",
-      "guardianCreatureId": "00000000-0000-0000-0000-000000000003",
-      "guardianName": "Hollow Goblin Archer",
-      "guardianAbilityProfileId": "monster.goblin_archer",
-      "guardianTags": ["Goblinoid", "Ranged", "Precision"],
+      "guardianCreatureId": "00000000-0000-0000-0000-000000000061",
+      "guardianName": "Orsenn, the Ashen Bellkeeper",
+      "guardianAbilityProfileId": "monster.orsenn,_the_ashen_bellkeeper",
+      "guardianTags": ["Magical", "Cinder", "Doom"],
       "requiredSlots": 5,
       "recommendedPowerRating": 166,
       "guardianScaling": {
-        "health": 56.0,
+        "health": 57.5,
         "offense": 60.0,
         "defense": 12.0,
         "resistance": 12.0,

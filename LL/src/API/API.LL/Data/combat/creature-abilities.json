@@ -409,6 +409,15 @@
         "ability.creature.kharad.seal_of_ascension",
         "ability.creature.kharad.keystone_resonance"
       ]
+    },
+    {
+      "monsterId": "monster.orsenn,_the_ashen_bellkeeper",
+      "abilityIds": [
+        "ability.creature.orsenn.ashen_toll",
+        "ability.creature.orsenn.funeral_brand",
+        "ability.creature.orsenn.cremation",
+        "ability.creature.orsenn.cinderbound"
+      ]
     }
   ]
 }

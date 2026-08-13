@@ -144,6 +144,12 @@ public static class AbilityCatalogValidator
             if (status.DurationTicks < 0)
                 errors.Add($"{label}: duration cannot be negative.");
 
+            if (!float.IsFinite(status.SourceDamageTakenPercentPerStack)
+                || status.SourceDamageTakenPercentPerStack < 0)
+            {
+                errors.Add($"{label}: sourceDamageTakenPercentPerStack must be finite and non-negative.");
+            }
+
             ValidateEffects(label, status.Effects, statusIds: null, errors);
             ValidateTriggers(label, status.Triggers, status.Effects, errors);
         }

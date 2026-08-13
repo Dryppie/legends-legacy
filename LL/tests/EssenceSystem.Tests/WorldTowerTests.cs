@@ -22,7 +22,7 @@ public sealed class WorldTowerTests
     }
 
     [Fact]
-    public void CatalogReleasesFiveContiguousFloorsUsingExistingCreatures()
+    public void CatalogReleasesSixContiguousFloorsUsingExistingCreatures()
     {
         var apiRoot = Environment.GetEnvironmentVariable("LL_TEST_API_ROOT")
             ?? TestContentPaths.FindApiRoot();
@@ -58,9 +58,9 @@ public sealed class WorldTowerTests
             apiRoot,
             options).GetCatalog();
 
-        Assert.Equal(Enumerable.Range(1, 5), floors.Select(x => x.FloorNumber));
-        Assert.Equal([5, 5, 5, 5, 10], floors.Select(x => x.RequiredSlots));
-        Assert.Null(provider.GetFloor(6));
+        Assert.Equal(Enumerable.Range(1, 6), floors.Select(x => x.FloorNumber));
+        Assert.Equal([5, 5, 5, 5, 10, 5], floors.Select(x => x.RequiredSlots));
+        Assert.Null(provider.GetFloor(7));
         Assert.All(floors, floor => Assert.Contains(floor.GuardianCreatureId, creatureIds));
         Assert.All(floors, floor => Assert.False(string.IsNullOrWhiteSpace(floor.GuardianAbilityProfileId)));
         Assert.All(floors, floor =>
@@ -78,7 +78,7 @@ public sealed class WorldTowerTests
         });
         Assert.All(floors, floor => Assert.True(floor.GuardianScaling.Health > 0));
         Assert.All(floors, floor => Assert.True(floor.RecommendedPowerRating >= 0));
-        Assert.Equal([100, 104, 107, 109, 112], floors.Select(x => x.TowerTokens));
+        Assert.Equal([100, 104, 107, 109, 112, 114], floors.Select(x => x.TowerTokens));
         Assert.All(floors, floor => Assert.Equal(floor.TowerTokens * 4, floor.FirstClearTowerTokens));
         Assert.True(floors.Zip(floors.Skip(1), (current, next) => next.TowerTokens > current.TowerTokens).All(x => x));
         Assert.All(floors, floor => Assert.Equal(1, floor.BalanceBenchmark.EquipmentTier));
@@ -96,9 +96,11 @@ public sealed class WorldTowerTests
         Assert.Equal("Vaelor, the Mirrorbound", floors[3].GuardianName);
         Assert.Equal(Guid.Parse("00000000-0000-0000-0000-000000000060"), floors[4].GuardianCreatureId);
         Assert.Equal("Kharad, the First Warden", floors[4].GuardianName);
-        Assert.Equal(39, floors[^1].BalanceBenchmark.CharacterLevel);
+        Assert.Equal(Guid.Parse("00000000-0000-0000-0000-000000000061"), floors[5].GuardianCreatureId);
+        Assert.Equal("Orsenn, the Ashen Bellkeeper", floors[5].GuardianName);
+        Assert.Equal(41, floors[^1].BalanceBenchmark.CharacterLevel);
         Assert.Equal(Domain.Models.Items.Rarity.Epic, floors[^1].BalanceBenchmark.EquipmentRarity);
-        Assert.Equal(4, floors[^1].BalanceBenchmark.EssenceCount);
+        Assert.Equal(5, floors[^1].BalanceBenchmark.EssenceCount);
         Assert.Contains(
             floors.Single(x => x.FloorNumber == 1).Unlocks,
             unlock => unlock.Key == "tower_echo_mode_unlock"

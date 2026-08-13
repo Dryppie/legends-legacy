@@ -319,5 +319,63 @@
     ],
     "triggers": [],
     "effects": []
+  },
+  {
+    "id": "status.orsenn.cinder",
+    "name": "Cinder",
+    "description": "Increases damage received from Orsenn by 6% per stack. At 6 stacks, combusts for Magical Damage equal to 15% of Max Health and removes all Cinder.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 6,
+    "durationTicks": 0,
+    "sourceDamageTakenPercentPerStack": 6,
+    "tags": [
+      "Status.Debuff",
+      "Debuff.Cinder",
+      "Element.Fire",
+      "Pattern.StackingDebuff"
+    ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [
+          "effect.status.orsenn.cinder.combust",
+          "effect.status.orsenn.cinder.remove"
+        ],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "status.orsenn.cinder"
+          },
+          {
+            "type": "StatusStacksAtLeast",
+            "subject": "EventTarget",
+            "statusId": "status.orsenn.cinder",
+            "value": 6
+          }
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.status.orsenn.cinder.combust",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "scalingAttribute": "MaxHealth",
+        "scalingAttributeSubject": "Target",
+        "scalingCoefficient": 0.15,
+        "attackType": "None",
+        "damageType": "Magical",
+        "critEligibility": "Disallowed",
+        "tags": ["Damage.Secondary"],
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.status.orsenn.cinder.remove",
+        "operation": "RemoveStatus",
+        "target": "EventTarget",
+        "statusId": "status.orsenn.cinder",
+        "procCoefficient": 1
+      }
+    ]
   }
 ]

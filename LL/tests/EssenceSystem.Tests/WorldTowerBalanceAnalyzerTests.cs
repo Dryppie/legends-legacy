@@ -33,7 +33,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
             CancellationToken.None);
 
         Assert.True(first.UsesTierOneOnly);
-        Assert.Equal(5, first.Floors.Count);
+        Assert.Equal(6, first.Floors.Count);
         Assert.Equal(
             JsonSerializer.Serialize(first),
             JsonSerializer.Serialize(repeated));
@@ -50,9 +50,9 @@ public sealed class WorldTowerBalanceAnalyzerTests
         Assert.Equal(30, first.Floors[0].CharacterLevel);
         Assert.Equal("Rare", first.Floors[0].EquipmentRarity);
         Assert.Equal(4, first.Floors[0].EssenceCount);
-        Assert.Equal(39, first.Floors[^1].CharacterLevel);
+        Assert.Equal(41, first.Floors[^1].CharacterLevel);
         Assert.Equal("Epic", first.Floors[^1].EquipmentRarity);
-        Assert.Equal(4, first.Floors[^1].EssenceCount);
+        Assert.Equal(5, first.Floors[^1].EssenceCount);
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
             new WorldTowerBalanceRequest(null, 256, 130_363),
             CancellationToken.None);
 
-        Assert.Equal(5, report.Floors.Count);
+        Assert.Equal(6, report.Floors.Count);
         Assert.All(report.Floors, floor =>
         {
             Assert.Equal(1, floor.EquipmentTier);
@@ -155,7 +155,24 @@ public sealed class WorldTowerBalanceAnalyzerTests
     }
 
     [Fact]
-    public async Task Floor_ten_is_not_available_while_release_ends_at_floor_five()
+    [Trait("Category", "Balance")]
+    public async Task Floor_six_has_about_a_ten_percent_win_rate_at_its_epic_checkpoint()
+    {
+        var report = await CreateAnalyzer().AnalyzeAsync(
+            new WorldTowerBalanceRequest(6, 256, 130_363),
+            CancellationToken.None);
+
+        var floor = Assert.Single(report.Floors);
+        var mixed = floor.Rosters.Single(x => x.Roster == "Mixed");
+        Assert.Equal(41, floor.CharacterLevel);
+        Assert.Equal("Epic", floor.EquipmentRarity);
+        Assert.Equal(5, floor.EssenceCount);
+        Assert.InRange(mixed.WinRate, 5, 15);
+        Assert.InRange(mixed.AverageSurvivors, 0, floor.RequiredSlots * 0.2);
+    }
+
+    [Fact]
+    public async Task Floor_ten_is_not_available_while_release_ends_at_floor_six()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
             CreateAnalyzer().AnalyzeAsync(
@@ -166,6 +183,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
     [Theory]
     [InlineData(1, 30, "Rare", 4)]
     [InlineData(5, 39, "Epic", 4)]
+    [InlineData(6, 41, "Epic", 5)]
     public void Development_roster_builds_match_each_floor_benchmark(
         int floorNumber,
         int expectedLevel,
