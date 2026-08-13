@@ -36,6 +36,7 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                 case EventType.Damage:
                 case EventType.DamageOverTime:
                 case EventType.DamageCrit:
+                case EventType.ReflectedDamage:
                     if (relationship == DamageTargetRelationship.Opponent)
                         entity.DamageDone += item.Magnitude;
                     else if (relationship == DamageTargetRelationship.Self)
@@ -66,6 +67,7 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                 case EventType.Damage:
                 case EventType.DamageOverTime:
                 case EventType.DamageCrit:
+                case EventType.ReflectedDamage:
                     if (string.IsNullOrWhiteSpace(statsSource))
                         break;
 
@@ -120,7 +122,10 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                 var target = entityMap.GetOrAdd(item.TargetId, static id => new WorkEntity(id));
                 target.SetTeam(targetTeam);
                 target.SetName(item.CombatEntity?.Name);
-                if (item.EventType == EventType.Damage || item.EventType == EventType.DamageOverTime || item.EventType == EventType.DamageCrit)
+                if (item.EventType == EventType.Damage
+                    || item.EventType == EventType.DamageOverTime
+                    || item.EventType == EventType.DamageCrit
+                    || item.EventType == EventType.ReflectedDamage)
                 {
                     target.DamageBlocked += item.BarrierAbsorbed;
                     target.IncomingRawDamage += item.IncomingRawDamage;

@@ -162,7 +162,7 @@ export const COMBAT_KEYWORDS: readonly CombatKeywordDefinition[] = [
   {
     name: 'Thorns',
     description:
-      'Reflects the listed percentage of Health damage taken back to the attacker.',
+      'Reflects the listed percentage of direct damage received after mitigation back to the attacker.',
     valueMeaning: 'percent',
   },
   {

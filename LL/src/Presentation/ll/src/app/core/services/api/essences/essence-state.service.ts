@@ -6,6 +6,8 @@ import { EssencesService } from './essences.service';
 import { EssenceItemViewService } from './essence-item-view.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { CharacterStateService } from '../character/character-state.service';
+import { GameEventService } from '../../real-time/game-event.service';
+import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
 import { Essence } from '../../../../shared/models/essence';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
@@ -46,6 +48,7 @@ export class EssenceStateService {
   private readonly _loading = signal(false);
   private readonly _spendingDust = signal(false);
   private readonly _error = signal<string | null>(null);
+  private readonly eventDeduper = new GameEventDeduper();
   private resetVersion = 0;
   private dustMutationVersion = 0;
 
@@ -256,6 +259,7 @@ export class EssenceStateService {
     private readonly questState: QuestStateService,
     private readonly eventBus: EventBusService,
     private readonly characterState: CharacterStateService,
+    private readonly gameEvents: GameEventService,
   ) {
     setInterval(() => this._now.set(Date.now()), 60_000);
 
@@ -263,6 +267,24 @@ export class EssenceStateService {
       () => {
         if (this.eventBus.logout()) {
           untracked(() => this.reset());
+        }
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        const envelope = this.gameEvents.eventEnvelope.CharacterLevelUpMsg();
+        const levelUp = envelope?.payload;
+        const loadouts = this._loadouts();
+        if (
+          levelUp &&
+          loadouts &&
+          levelUp.characterId === this.characterState.currentCharacterId() &&
+          levelUp.unlockedEssenceSlots > loadouts.unlockedSlots &&
+          this.eventDeduper.shouldProcess('essence-slot-unlock', envelope)
+        ) {
+          untracked(() => this.refreshLoadouts(true));
         }
       },
       { allowSignalWrites: true },
@@ -846,7 +868,7 @@ export class EssenceStateService {
     });
   }
 
-  private refreshLoadouts(): void {
+  private refreshLoadouts(preserveDraft = false): void {
     this._loading.set(true);
     const requestVersion = this.resetVersion;
 
@@ -856,8 +878,21 @@ export class EssenceStateService {
       .subscribe({
         next: (loadouts) => {
           if (requestVersion !== this.resetVersion) return;
+          const shouldPreserveDraft =
+            preserveDraft &&
+            this.hasDraftChanges() &&
+            this.canPreserveLoadoutDraft(loadouts);
+          const draftSlots = shouldPreserveDraft ? this._draftSlots() : [];
           this._loadouts.set(loadouts);
-          this.ensureSelectedLoadout(loadouts);
+          if (shouldPreserveDraft) {
+            this._draftSlots.set(
+              Array.from(
+                { length: loadouts.unlockedSlots },
+                (_, index) => draftSlots[index] ?? null,
+              ),
+            );
+          }
+          this.ensureSelectedLoadout(loadouts, shouldPreserveDraft);
         },
         error: (error) => {
           if (requestVersion !== this.resetVersion) return;

@@ -4,4 +4,5 @@ public record CharacterLevelUpMsg(
     Guid CharacterId,
     int Level,
     long Experience,
-    long ExperienceUntilNextLevel) : GameEventMsg;
+    long ExperienceUntilNextLevel,
+    int UnlockedEssenceSlots) : GameEventMsg;

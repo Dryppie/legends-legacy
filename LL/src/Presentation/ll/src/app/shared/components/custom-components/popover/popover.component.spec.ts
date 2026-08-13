@@ -3,7 +3,10 @@ import { PopoverComponent } from './popover.component';
 describe('PopoverComponent pointer triggers', () => {
   function createComponent() {
     const component = new PopoverComponent(null!, null!, null!, null!, null!);
-    const handleCtrl = jasmine.createSpyObj('handleCtrl', ['requestToggle']);
+    const handleCtrl = jasmine.createSpyObj('handleCtrl', [
+      'requestToggle',
+      'requestClose',
+    ]);
     (component as any).handleCtrl = handleCtrl;
     return { component, handleCtrl };
   }
@@ -38,5 +41,13 @@ describe('PopoverComponent pointer triggers', () => {
 
     component.onOriginLeave({ pointerType: 'mouse' } as PointerEvent);
     expect(queueClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('provides an explicit close action for a touch-opened popover', () => {
+    const { component, handleCtrl } = createComponent();
+
+    component.close();
+
+    expect(handleCtrl.requestClose).toHaveBeenCalledOnceWith();
   });
 });

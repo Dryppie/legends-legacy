@@ -342,7 +342,7 @@ public sealed class StandardConditionSystemTests
     }
 
     [Fact]
-    public void Thorns_reflects_only_health_damage_remaining_after_barrier()
+    public void Thorns_reflects_received_damage_before_barrier_absorption()
     {
         var attacker = Combatant(
             "attacker",
@@ -365,11 +365,46 @@ public sealed class StandardConditionSystemTests
             basicAttackIntervalMultiplier: 1000);
         defender.GrantBarrier(defender, 40, 1);
 
-        Run([attacker], [defender], maxTicks: 1, basicAttackIntervalTicks: 1);
+        var result = Run([attacker], [defender], maxTicks: 1, basicAttackIntervalTicks: 1);
 
         var healthDamage = 1000 - defender.Health;
         Assert.InRange(healthDamage, 40, 80);
-        Assert.Equal((int)Math.Round(healthDamage * 0.20), 1000 - attacker.Health);
+        var incomingDamage = healthDamage + 40;
+        Assert.Equal((int)Math.Round(incomingDamage * 0.20), 1000 - attacker.Health);
+
+        var defenderStats = Assert.Single(result.EntityStats, x => x.EntityId == "defender");
+        var thornsStats = Assert.Single(defenderStats.Abilities, x => x.Name == "thorns");
+        Assert.Equal(1000 - attacker.Health, thornsStats.TotalDamage);
+    }
+
+    [Fact]
+    public void Thorns_reflects_when_barrier_absorbs_the_entire_hit()
+    {
+        var attacker = Combatant(
+            "attacker",
+            CombatTeam.Friendly,
+            [],
+            power: 0,
+            weaponDamage: 100);
+        var thorns = Passive(
+            "thorns",
+            ConditionEffect(
+                "thorns.20",
+                StandardConditionType.Thorns,
+                AbilityTargetSelector.Self,
+                20,
+                durationTicks: 80));
+        var defender = Combatant(
+            "defender",
+            CombatTeam.Hostile,
+            [thorns],
+            basicAttackIntervalMultiplier: 1000);
+        defender.GrantBarrier(defender, 1000, 1);
+
+        Run([attacker], [defender], maxTicks: 1, basicAttackIntervalTicks: 1);
+
+        Assert.Equal(1000, defender.Health);
+        Assert.InRange(1000 - attacker.Health, 16, 24);
     }
 
     [Fact]

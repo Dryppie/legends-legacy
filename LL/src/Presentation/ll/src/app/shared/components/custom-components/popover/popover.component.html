@@ -13,12 +13,21 @@
 
 <ng-template #content>
   <div
-    class="relative"
+    class="relative max-h-[calc(100dvh-1rem)] max-w-[calc(100vw-1rem)] overflow-y-auto overscroll-contain"
     [ngClass]="popoverClass"
     (mouseenter)="onPanelEnter()"
     (mouseleave)="onPanelLeave()"
     role="dialog"
   >
+    <button
+      *ngIf="openedByTouch"
+      type="button"
+      class="sticky top-0 z-20 float-right ml-2 flex h-8 w-8 items-center justify-center rounded border border-light_gray bg-black/90 text-lg leading-none text-primary shadow"
+      aria-label="Close item details"
+      (click)="close()"
+    >
+      &times;
+    </button>
     <ng-container *ngTemplateOutlet="template"></ng-container>
 
     <div

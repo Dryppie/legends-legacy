@@ -27,11 +27,27 @@
           <span class="truncate text-secondary">
             {{ comparison.attributeType | attributeTypeFormat }}
           </span>
-          <span class="font-semibold tabular-nums text-primary">
-            {{
-              comparison.hoveredAmount
-                | attributeValueFormat: comparison.attributeType
-            }}
+          <span
+            data-testid="hovered-attribute-value"
+            class="font-semibold tabular-nums"
+            [ngClass]="
+              hasAttribute(data, comparison.attributeType)
+                ? 'text-primary'
+                : 'text-secondary'
+            "
+          >
+            <ng-container
+              *ngIf="
+                hasAttribute(data, comparison.attributeType);
+                else noHoveredAttribute
+              "
+            >
+              {{
+                comparison.hoveredAmount
+                  | attributeValueFormat: comparison.attributeType
+              }}
+            </ng-container>
+            <ng-template #noHoveredAttribute>&mdash;</ng-template>
           </span>
         </div>
       </div>
@@ -76,11 +92,22 @@
           <span class="truncate text-secondary">
             {{ comparison.attributeType | attributeTypeFormat }}
           </span>
-          <span class="font-semibold tabular-nums text-white">
-            {{
-              equippedAmount(equipped, comparison.attributeType)
-                | attributeValueFormat: comparison.attributeType
-            }}
+          <span
+            data-testid="equipped-attribute-value"
+            class="font-semibold tabular-nums text-white"
+          >
+            <ng-container
+              *ngIf="
+                hasAttribute(equipped.data, comparison.attributeType);
+                else noEquippedAttribute
+              "
+            >
+              {{
+                equippedAmount(equipped, comparison.attributeType)
+                  | attributeValueFormat: comparison.attributeType
+              }}
+            </ng-container>
+            <ng-template #noEquippedAttribute>&mdash;</ng-template>
           </span>
           <span
             data-testid="comparison-difference"

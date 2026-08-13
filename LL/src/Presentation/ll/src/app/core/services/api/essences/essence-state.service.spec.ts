@@ -2,6 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Subject, of, throwError } from 'rxjs';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
+import { GameEventService } from '../../real-time/game-event.service';
 import { CharacterStateService } from '../character/character-state.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { QuestStateService } from '../quest/quest-state.service';
@@ -16,8 +17,10 @@ import {
 describe('EssenceStateService loadout drafts', () => {
   let service: EssenceStateService;
   let essences: jasmine.SpyObj<EssencesService>;
+  const levelUpEnvelope = signal<any>(null);
 
   beforeEach(() => {
+    levelUpEnvelope.set(null);
     essences = jasmine.createSpyObj<EssencesService>('EssencesService', [
       'getArchive',
       'getLoadouts',
@@ -60,8 +63,17 @@ describe('EssenceStateService loadout drafts', () => {
         { provide: QuestStateService, useValue: {} },
         { provide: EventBusService, useValue: { logout: signal(false) } },
         {
+          provide: GameEventService,
+          useValue: {
+            eventEnvelope: { CharacterLevelUpMsg: levelUpEnvelope },
+          },
+        },
+        {
           provide: CharacterStateService,
-          useValue: { markOverviewDirty: jasmine.createSpy() },
+          useValue: {
+            currentCharacterId: signal('character-1'),
+            markOverviewDirty: jasmine.createSpy(),
+          },
         },
       ],
     });
@@ -94,6 +106,40 @@ describe('EssenceStateService loadout drafts', () => {
 
     expect(service.draftSlots()).toEqual([null]);
     expect(service.hasDraftChanges()).toBeFalse();
+  });
+
+  it('live-refreshes loadouts when a level-up unlocks an Essence slot', () => {
+    essences.getLoadouts.and.returnValue(
+      of({
+        loadouts: [
+          {
+            id: 'loadout-1',
+            name: 'Default',
+            isActive: true,
+            slots: [],
+          },
+        ],
+        limit: 3,
+        unlockedSlots: 2,
+      }),
+    );
+
+    levelUpEnvelope.set({
+      updateId: 'level-up-10',
+      event: 'CharacterLevelUpMsg',
+      payload: {
+        characterId: 'character-1',
+        level: 10,
+        experience: 0,
+        experienceUntilNextLevel: 100,
+        unlockedEssenceSlots: 2,
+      },
+    });
+    TestBed.flushEffects();
+
+    expect(essences.getLoadouts).toHaveBeenCalledTimes(2);
+    expect(service.loadouts()?.unlockedSlots).toBe(2);
+    expect(service.draftSlots()).toEqual([null, null]);
   });
 
   it('persists an equipped Essence immediately without enabling name save', () => {

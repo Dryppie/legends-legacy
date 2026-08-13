@@ -19,6 +19,7 @@ import { EquipmentInstance } from '../../../../shared/models/item';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { EquipmentType } from '../../../../shared/models/enums/equipmentType';
 import { Rarity } from '../../../../shared/models/enums/rarity';
+import { ItemQuality } from '../../../../shared/models/enums/itemQuality';
 import { FormsModule } from '@angular/forms';
 import { ItemComponent } from '../../../../shared/components/item/item.component';
 import { HelpTooltipDirective } from '../../../../shared/help/help-tooltip.directive';
@@ -35,6 +36,13 @@ import {
   ONBOARDING_ONE_HANDED_WEAPON_ITEM_BASE_IDS,
 } from '../../../../shared/models/quest';
 type MobileInventoryView = 'Inventory' | 'Equipment';
+type InventorySort =
+  | 'Default'
+  | 'Name'
+  | 'Tier'
+  | 'Rarity'
+  | 'Quality'
+  | 'Gear Value';
 
 @Component({
   selector: 'app-inventory',
@@ -102,6 +110,15 @@ export class InventoryComponent implements OnInit {
 
   selectedItems: InventoryItem[] = [];
   scrapRarityThreshold: Rarity = Rarity.Common;
+  inventorySort: InventorySort = 'Default';
+  readonly sortDropdownOptions: DropdownOption<InventorySort>[] = [
+    { label: 'Default', value: 'Default' },
+    { label: 'Name A-Z', value: 'Name' },
+    { label: 'Tier: high to low', value: 'Tier' },
+    { label: 'Rarity: high to low', value: 'Rarity' },
+    { label: 'Quality: high to low', value: 'Quality' },
+    { label: 'Gear Value: high to low', value: 'Gear Value' },
+  ];
   rarities = Object.keys(Rarity);
   rarityDropdownOptions: DropdownOption<Rarity>[] = this.rarities.map(
     (rarity) => ({
@@ -117,6 +134,13 @@ export class InventoryComponent implements OnInit {
     [Rarity.Unique]: 4,
     [Rarity.Legendary]: 5,
     [Rarity.Legacy]: 6,
+  };
+  readonly QUALITY_ORDER: Record<ItemQuality, number> = {
+    [ItemQuality.Crude]: 0,
+    [ItemQuality.Standard]: 1,
+    [ItemQuality.Fine]: 2,
+    [ItemQuality.Exceptional]: 3,
+    [ItemQuality.Masterwork]: 4,
   };
 
   constructor(
@@ -180,6 +204,10 @@ export class InventoryComponent implements OnInit {
 
   setScrapRarityThreshold(selection: DropdownSelection<unknown>) {
     this.scrapRarityThreshold = selection.main as Rarity;
+  }
+
+  setInventorySort(selection: DropdownSelection<unknown>): void {
+    this.inventorySort = selection.main as InventorySort;
   }
 
   clearSelection() {
@@ -276,24 +304,32 @@ export class InventoryComponent implements OnInit {
   }
 
   get filteredItems(): InventoryItem[] {
+    let items: InventoryItem[];
     switch (this.isBrowseMode ? this.activeTab : 'Equipment') {
       case 'All':
-        return this.state.items();
+        items = this.state.items();
+        break;
 
       case 'Equipment':
-        return this.isBrowseMode
+        items = this.isBrowseMode
           ? this.state.equipment()
           : this.scrapableEquipment();
+        break;
 
       case 'Resources':
-        return this.sortResourcesForDisplay(this.state.materials());
+        items = this.sortResourcesForDisplay(this.state.materials());
+        break;
 
       case 'Essences':
-        return this.state.essences();
+        items = this.state.essences();
+        break;
 
       default:
-        return this.state.items();
+        items = this.state.items();
+        break;
     }
+
+    return this.sortInventoryItems(items);
   }
 
   get tabLabels(): string[] {
@@ -344,6 +380,52 @@ export class InventoryComponent implements OnInit {
         b.itemInstance.itemBase.name,
       );
     });
+  }
+
+  private sortInventoryItems(items: InventoryItem[]): InventoryItem[] {
+    if (this.inventorySort === 'Default') return [...items];
+
+    return [...items].sort((a, b) => {
+      const aEquipment = this.equipmentInstance(a);
+      const bEquipment = this.equipmentInstance(b);
+      let difference = 0;
+
+      switch (this.inventorySort) {
+        case 'Tier':
+          difference = (bEquipment?.tier ?? 0) - (aEquipment?.tier ?? 0);
+          break;
+        case 'Rarity':
+          difference =
+            this.RARITY_ORDER[
+              bEquipment?.rarity ?? b.itemInstance.itemBase.rarity
+            ] -
+            this.RARITY_ORDER[
+              aEquipment?.rarity ?? a.itemInstance.itemBase.rarity
+            ];
+          break;
+        case 'Quality':
+          difference =
+            (bEquipment ? this.QUALITY_ORDER[bEquipment.quality] : -1) -
+            (aEquipment ? this.QUALITY_ORDER[aEquipment.quality] : -1);
+          break;
+        case 'Gear Value':
+          difference =
+            (bEquipment?.itemBudget ?? 0) - (aEquipment?.itemBudget ?? 0);
+          break;
+      }
+
+      return (
+        difference ||
+        this.itemDisplayName(a).localeCompare(this.itemDisplayName(b))
+      );
+    });
+  }
+
+  private itemDisplayName(item: InventoryItem): string {
+    return (
+      this.equipmentInstance(item)?.displayName ??
+      item.itemInstance.itemBase.name
+    );
   }
 
   private isBlueprintResource(item: InventoryItem): boolean {

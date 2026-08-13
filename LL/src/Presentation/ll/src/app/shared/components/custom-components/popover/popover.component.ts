@@ -67,7 +67,7 @@ export class PopoverComponent implements AfterViewInit, OnDestroy {
   private hoverOpenTimer?: ReturnType<typeof setTimeout>;
   private hoverCloseTimer?: ReturnType<typeof setTimeout>;
   private lastOriginPointerType?: string;
-  private openedByTouch = false;
+  openedByTouch = false;
 
   // service handle
   private handleCtrl!: ReturnType<PopoverService['register']>;
@@ -177,6 +177,10 @@ export class PopoverComponent implements AfterViewInit, OnDestroy {
   onPanelLeave() {
     if (this.trigger !== 'hover') return;
     this.queueClose();
+  }
+
+  close(): void {
+    this.handleCtrl.requestClose();
   }
 
   // ========= Core overlay wiring =========

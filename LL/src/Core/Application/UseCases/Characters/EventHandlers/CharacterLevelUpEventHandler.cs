@@ -1,4 +1,5 @@
 using Application.Interfaces.Outbox;
+using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.WebSockets;
 using Application.UseCases.Characters.Events;
 using Application.UseCases.Outbox;
@@ -11,13 +12,16 @@ public class CharacterLevelUpEventHandler : INotificationHandler<CharacterLevelU
 {
     private readonly IGameEventPublisher _eventPublisher;
     private readonly IGameEventOutbox _outbox;
+    private readonly IEssenceSlotUnlockService _essenceSlotUnlocks;
 
     public CharacterLevelUpEventHandler(
         IGameEventPublisher eventPublisher,
-        IGameEventOutbox outbox)
+        IGameEventOutbox outbox,
+        IEssenceSlotUnlockService essenceSlotUnlocks)
     {
         _eventPublisher = eventPublisher;
         _outbox = outbox;
+        _essenceSlotUnlocks = essenceSlotUnlocks;
     }
 
     public async Task Handle(CharacterLevelUpEvent notification, CancellationToken cancellationToken)
@@ -39,6 +43,7 @@ public class CharacterLevelUpEventHandler : INotificationHandler<CharacterLevelU
                 notification.CharacterId,
                 notification.Level,
                 notification.Experience,
-                notification.ExperienceUntilNextLevel));
+                notification.ExperienceUntilNextLevel,
+                _essenceSlotUnlocks.GetUnlockedSlotCount(notification.Level)));
     }
 }

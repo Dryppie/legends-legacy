@@ -136,20 +136,20 @@ export class ChampionsMarketComponent {
 
   limitProgress(item: ChampionMarketItem): string {
     if (item.weeklyPurchaseLimit != null) {
-      return `${item.weeklyPurchaseLimit - item.remainingWeeklyPurchases} / ${item.weeklyPurchaseLimit}`;
+      return `${item.remainingWeeklyPurchases} / ${item.weeklyPurchaseLimit} left`;
     }
     if (item.lifetimePurchaseLimit != null) {
-      return `${item.lifetimePurchaseLimit - item.remainingLifetimePurchases} / ${item.lifetimePurchaseLimit}`;
+      return `${item.remainingLifetimePurchases} / ${item.lifetimePurchaseLimit} left`;
     }
     return 'None';
   }
 
   limitDescription(item: ChampionMarketItem): string {
     if (item.weeklyPurchaseLimit != null) {
-      return `${item.remainingWeeklyPurchases} of ${item.weeklyPurchaseLimit} this week`;
+      return `${item.remainingWeeklyPurchases} / ${item.weeklyPurchaseLimit} left this week`;
     }
     if (item.lifetimePurchaseLimit != null) {
-      return `${item.remainingLifetimePurchases} of ${item.lifetimePurchaseLimit} lifetime`;
+      return `${item.remainingLifetimePurchases} / ${item.lifetimePurchaseLimit} left lifetime`;
     }
     return 'No purchase limit';
   }

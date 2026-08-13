@@ -1512,7 +1512,7 @@
     "id": "ability.creature.hollow_stag.hollow_core",
     "kind": "Passive",
     "name": "Hollow Core",
-    "description": "For every 20% Health lost, gain 1% Damage Reduction for the rest of combat.",
+    "description": "For every 20% Health lost, gain 1% Damage Reduction for the rest of combat. Max 4%.",
     "cooldownTicks": 0,
     "tags": ["Buff", "Defensive"],
     "triggers": [

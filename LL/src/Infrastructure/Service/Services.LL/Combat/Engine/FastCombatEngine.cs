@@ -1063,7 +1063,7 @@ public sealed class FastCombatEngine
         var healthBefore = target.Health;
         target.AdjustHealth(-pendingHealthDamage);
         var healthDamage = Math.Max(0, (int)Math.Round(healthBefore - target.Health));
-        TrackBalanceDamage(source, target, healthDamage, delivery);
+        TrackBalanceDamage(source, target, healthDamage);
 
         Log(
             source,
@@ -1110,11 +1110,11 @@ public sealed class FastCombatEngine
             Publish(new CombatEvent(AbilityTriggerEvent.OnHealthChanged, target, source, null), combatants);
 
         if (delivery == DamageDelivery.Direct
-            && healthDamage > 0
+            && guardedDamage > 0
             && !ReferenceEquals(source, target)
             && source.IsAlive)
         {
-            ResolveThorns(target, source, healthDamage, combatants);
+            ResolveThorns(target, source, guardedDamage, combatants);
         }
 
         if (!target.IsAlive)
@@ -1164,36 +1164,39 @@ public sealed class FastCombatEngine
     private void ResolveThorns(
         RuntimeCombatant defender,
         RuntimeCombatant attacker,
-        int healthDamage,
+        int receivedDamage,
         IReadOnlyList<RuntimeCombatant> combatants)
     {
-        var reflectedPercent = defender.Conditions
+        var thorns = defender.Conditions
             .Where(x => x.Type == StandardConditionType.Thorns)
-            .Sum(x => (long)x.Value);
-        if (reflectedPercent <= 0)
-            return;
+            .Where(x => x.Value > 0)
+            .OrderBy(x => x.ApplicationOrder)
+            .ToList();
 
-        var reflectedDamage = Math.Max(
-            0,
-            (int)Math.Min(
-                int.MaxValue,
-                Math.Round(
-                    healthDamage * reflectedPercent / 100d,
-                    MidpointRounding.AwayFromZero)));
-        if (reflectedDamage <= 0)
-            return;
+        foreach (var condition in thorns)
+        {
+            var reflectedDamage = Math.Max(
+                0,
+                (int)Math.Min(
+                    int.MaxValue,
+                    Math.Round(
+                        receivedDamage * condition.Value / 100d,
+                        MidpointRounding.AwayFromZero)));
+            if (reflectedDamage <= 0)
+                continue;
 
-        ApplyDamage(
-            defender,
-            attacker,
-            reflectedDamage,
-            AttackType.None,
-            DamageType.None,
-            null,
-            combatants,
-            GetConditionId(StandardConditionType.Thorns),
-            "Thorns",
-            delivery: DamageDelivery.Reflected);
+            ApplyDamage(
+                condition.Source,
+                attacker,
+                reflectedDamage,
+                AttackType.None,
+                DamageType.None,
+                null,
+                combatants,
+                GetConditionId(StandardConditionType.Thorns),
+                condition.StatsSource,
+                delivery: DamageDelivery.Reflected);
+        }
     }
 
     private void GrantBarrier(
@@ -3193,11 +3196,9 @@ public sealed class FastCombatEngine
     private void TrackBalanceDamage(
         RuntimeCombatant source,
         RuntimeCombatant target,
-        int healthDamage,
-        DamageDelivery delivery)
+        int healthDamage)
     {
         if (_captureEventLog
-            || delivery == DamageDelivery.Reflected
             || healthDamage <= 0
             || source.Team == target.Team)
             return;

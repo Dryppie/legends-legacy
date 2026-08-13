@@ -240,6 +240,37 @@ describe('EquipmentDisplayComponent', () => {
     expect(text).toContain('Off Hand Shield');
     expect(differences).toEqual(['+5', '+10']);
   });
+
+  it('renders absent attributes as dashes instead of zero-value rolls', async () => {
+    await TestBed.configureTestingModule({
+      imports: [EquipmentDisplayComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(EquipmentDisplayComponent);
+
+    fixture.componentRef.setInput(
+      'item',
+      equipmentInstance('hovered', AttributeType.MaxHealth, 20),
+    );
+    fixture.componentRef.setInput('comparisonItems', [
+      {
+        slotType: EquipmentSlotType.Head,
+        equipmentInstance: equipmentInstance(
+          'equipped',
+          AttributeType.Armor,
+          10,
+        ),
+      },
+    ]);
+    fixture.detectChanges();
+
+    const values = (testId: string) =>
+      [
+        ...fixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`),
+      ].map((element: Element) => element.textContent?.trim());
+
+    expect(values('hovered-attribute-value')).toEqual(['20', '—']);
+    expect(values('equipped-attribute-value')).toEqual(['—', '10']);
+  });
 });
 
 function display(

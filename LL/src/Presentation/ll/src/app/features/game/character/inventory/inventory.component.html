@@ -91,6 +91,19 @@
       ></app-filter-tabs>
 
       <div
+        *ngIf="isBrowseMode"
+        class="ll-toolbar justify-end rounded-none border-x-0 border-t-0 px-4 py-2"
+      >
+        <app-dropdown
+          label="Sort"
+          [value]="inventorySort"
+          [options]="sortDropdownOptions"
+          [selectedValue]="inventorySort"
+          (selection)="setInventorySort($event)"
+        ></app-dropdown>
+      </div>
+
+      <div
         *ngIf="isScrapMode"
         class="ll-toolbar rounded-none border-x-0 border-t-0 px-4 py-3"
       >
@@ -116,6 +129,14 @@
               and below
             </button>
           </div>
+
+          <app-dropdown
+            label="Sort"
+            [value]="inventorySort"
+            [options]="sortDropdownOptions"
+            [selectedValue]="inventorySort"
+            (selection)="setInventorySort($event)"
+          ></app-dropdown>
         </div>
 
         <div class="flex items-center gap-2">
@@ -171,6 +192,15 @@
               [inventoryItem]="inventoryItem"
             ></app-inventory-item>
 
+            <span
+              *ngIf="
+                isScrapMode && equipmentInstance(inventoryItem) as equipment
+              "
+              class="ll-badge flex-none rounded text-primary sm:hidden"
+            >
+              {{ equipment.quality }}
+            </span>
+
             <ng-container *ngIf="activeTab === 'Equipment' || isScrapMode">
               <div
                 *ngIf="equipmentInstance(inventoryItem) as equipment"
@@ -185,10 +215,7 @@
                 >
                   {{ equipment.rarity }}
                 </span>
-                <span
-                  *ngIf="isBrowseMode && activeTab === 'Equipment'"
-                  class="ll-badge rounded text-primary"
-                >
+                <span class="ll-badge rounded text-primary">
                   {{ equipment.quality }}
                 </span>
                 <span

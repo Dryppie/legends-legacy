@@ -254,6 +254,12 @@ export class EquipmentDisplayComponent {
     );
   }
 
+  hasAttribute(item: EquipmentDisplay, attributeType: AttributeType): boolean {
+    return item.attributes.some(
+      (attribute) => attribute.attributeType === attributeType,
+    );
+  }
+
   rarityClass(rarity: Rarity): string {
     switch (rarity) {
       case Rarity.Common:
