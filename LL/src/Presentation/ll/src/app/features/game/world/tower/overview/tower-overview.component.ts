@@ -135,6 +135,18 @@ export class TowerOverviewComponent implements OnInit {
     this.mobileFloorDetailOpen.set(false);
   }
 
+  selectAdjacentFloor(overview: TowerOverview, direction: -1 | 1): void {
+    const floors = [...overview.floors].sort(
+      (left, right) => left.floorNumber - right.floorNumber,
+    );
+    const currentIndex = floors.findIndex(
+      (floor) => floor.floorNumber === this.selectedFloorNumber(),
+    );
+    const adjacentFloor = floors[currentIndex + direction];
+
+    if (adjacentFloor) this.selectFloor(adjacentFloor);
+  }
+
   togglePreparation(): void {
     this.preparationExpanded.update((expanded) => !expanded);
   }

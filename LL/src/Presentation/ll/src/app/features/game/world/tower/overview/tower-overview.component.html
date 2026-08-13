@@ -67,7 +67,23 @@
 
     <section class="tower-overview-board">
       <aside class="ascent-panel ll-panel" aria-label="Tower floors">
-        <header class="panel-heading">
+        <header class="mobile-ascent-summary">
+          <div>
+            <p>
+              World Tower · Floors 01–{{
+                floorLabel(vm.floors[vm.floors.length - 1].floorNumber)
+              }}
+            </p>
+            <h1>The Ascent</h1>
+          </div>
+          <div>
+            <strong>
+              {{ vm.highestClearedFloor }} / {{ vm.floors.length }}
+            </strong>
+            <small>Cleared</small>
+          </div>
+        </header>
+        <header class="panel-heading desktop-ascent-heading">
           <span>The ascent</span>
           <small>Floors 1–{{ vm.floors.length }}</small>
         </header>
@@ -94,22 +110,41 @@
             [style.--mobile-floor-order]="floor.floorNumber"
             (click)="selectFloor(floor)"
           >
-            <span class="floor-node" aria-hidden="true"><span></span></span>
+            <span class="floor-node desktop-floor-node" aria-hidden="true"
+              ><span></span
+            ></span>
+            <span class="mobile-floor-index" aria-hidden="true">
+              <strong>{{ floorLabel(floor.floorNumber) }}</strong>
+              <span></span>
+            </span>
             <span class="floor-identity">
               <strong class="desktop-floor-name">{{
                 floor.guardianName
               }}</strong>
               <strong class="mobile-floor-name">
-                {{ floorLabel(floor.floorNumber) }} ·
-                {{ floor.guardianName.split(",")[0] }}
+                {{ floor.guardianName }}
               </strong>
               <small class="desktop-floor-meta">
                 {{ floorLabel(floor.floorNumber) }} · {{ floor.type }} ·
                 {{ floor.requiredSlots }} slots
               </small>
+              <span
+                class="mobile-floor-state badge ll-badge"
+                [ngClass]="floor.state"
+              >
+                {{ floorStateLabel(floor.state) }}
+              </span>
             </span>
+            <span class="mobile-floor-chevron" aria-hidden="true">›</span>
           </button>
         </div>
+        <p class="mobile-ascent-note">
+          <ng-container *ngIf="vm.highestUnlockedFloor < vm.floors.length">
+            Floor {{ floorLabel(vm.highestUnlockedFloor + 1) }} unlocks when
+            Floor {{ floorLabel(vm.highestUnlockedFloor) }} is cleared.
+          </ng-container>
+          More Guardians are coming.
+        </p>
       </aside>
 
       <div class="tower-overview-content">
@@ -117,15 +152,36 @@
 
         <ng-container *ngIf="selectedFloor() as floor">
           <section class="tower-floor-hero ll-panel">
-            <button
-              type="button"
-              class="mobile-floor-back"
-              (click)="showMobileFloorList()"
-            >
-              <span aria-hidden="true">←</span> All floors
-            </button>
-            <div class="tower-floor-title">
+            <div class="mobile-floor-navigation">
+              <button
+                type="button"
+                class="mobile-floor-back"
+                (click)="showMobileFloorList()"
+              >
+                <span aria-hidden="true">←</span> All floors
+              </button>
               <p class="eyebrow">
+                Floor {{ floorLabel(floor.floorNumber) }} · {{ floor.type }}
+              </p>
+              <div class="mobile-floor-stepper">
+                <button
+                  type="button"
+                  aria-label="Previous floor"
+                  (click)="selectAdjacentFloor(vm, -1)"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next floor"
+                  (click)="selectAdjacentFloor(vm, 1)"
+                >
+                  ↑
+                </button>
+              </div>
+            </div>
+            <div class="tower-floor-title">
+              <p class="eyebrow desktop-floor-eyebrow">
                 Floor {{ floorLabel(floor.floorNumber) }} · {{ floor.type }}
               </p>
               <h1>{{ floor.guardian.name }}</h1>
@@ -155,7 +211,10 @@
                 <header class="overview-panel-heading">
                   <div class="overview-panel-title">
                     <span class="status-orb pulsing" aria-hidden="true"></span>
-                    <h2>Active Expeditions</h2>
+                    <h2>
+                      <span class="desktop-active-label">Active </span
+                      >Expeditions
+                    </h2>
                     <span
                       class="badge ll-badge Recruiting"
                       *ngIf="recruitingRallyCount(floor) as recruitingCount"
@@ -169,7 +228,7 @@
                       {{ battleCount }} in battle
                     </span>
                   </div>
-                  <div class="actions">
+                  <div class="actions desktop-expedition-actions">
                     <a
                       class="tower-button ll-button ll-button-primary"
                       *ngIf="floor.currentCharacterRallyId as rallyId"
@@ -347,6 +406,36 @@
                     No Expedition is recruiting on this floor yet.
                   </p>
                 </ng-template>
+
+                <div class="actions mobile-expedition-actions">
+                  <a
+                    class="tower-button ll-button ll-button-primary"
+                    *ngIf="floor.currentCharacterRallyId as rallyId"
+                    [routerLink]="['/game/world/tower/expeditions', rallyId]"
+                  >
+                    View your Expedition
+                  </a>
+                  <button
+                    type="button"
+                    class="tower-button ll-button ll-button-primary"
+                    *ngIf="
+                      floor.canCreateRally && floor.canCreateFirstClearRally
+                    "
+                    [disabled]="!!action()"
+                    (click)="createRally('FirstClear')"
+                  >
+                    Create Expedition
+                  </button>
+                  <button
+                    type="button"
+                    class="tower-button ll-button ll-button-primary"
+                    *ngIf="floor.canCreateRally && floor.echoAvailable"
+                    [disabled]="!!action()"
+                    (click)="createRally('Echo')"
+                  >
+                    Create Echo Expedition
+                  </button>
+                </div>
 
                 <p class="expedition-note">
                   Applying locks your current build. The Expedition leader
