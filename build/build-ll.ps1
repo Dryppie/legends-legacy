@@ -1,5 +1,7 @@
 param(
-    [switch]$SkipDockerBuild
+    [switch]$SkipDockerBuild,
+    [switch]$SkipPublish,
+    [switch]$NoBuild
 )
 
 $ErrorActionPreference = "Stop"
@@ -33,23 +35,34 @@ Write-Debug "DOCKER_REGISTRY: $DOCKER_REGISTRY"
 Write-Debug "IMAGE_TAG: $IMAGE_TAG"
 Write-Debug "BUILD_VERSION: $BUILD_VERSION"
 
-foreach ($publishPath in @($apiArtifactPath, $workerArtifactPath)) {
-    if (Test-Path -LiteralPath $publishPath) {
-        Remove-Item -LiteralPath $publishPath -Recurse -Force
+if (-not $SkipPublish) {
+    foreach ($publishPath in @($apiArtifactPath, $workerArtifactPath)) {
+        if (Test-Path -LiteralPath $publishPath) {
+            Remove-Item -LiteralPath $publishPath -Recurse -Force
+        }
+
+        New-Item -ItemType Directory -Path $publishPath -Force | Out-Null
     }
 
-    New-Item -ItemType Directory -Path $publishPath -Force | Out-Null
-}
+    Write-Debug "--- dotnet publish ---"
+    $commonPublishArguments = @(
+        "-c", "Release",
+        "/p:UseAppHost=false",
+        "--no-self-contained"
+    )
+    if ($NoBuild) {
+        $commonPublishArguments += @("--no-build", "--no-restore")
+    }
 
-Write-Debug "--- dotnet publish ---"
-dotnet publish "$root/LL/src/API/API.LL/API.LL.csproj" -c Release -o $apiArtifactPath /p:UseAppHost=false --no-self-contained
-if ($LASTEXITCODE -ne 0) {
-    throw "API publish failed with exit code $LASTEXITCODE."
-}
+    & dotnet publish "$root/LL/src/API/API.LL/API.LL.csproj" -o $apiArtifactPath @commonPublishArguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "API publish failed with exit code $LASTEXITCODE."
+    }
 
-dotnet publish "$root/LL/src/Worker/Worker.LL/Worker.LL.csproj" -c Release -o $workerArtifactPath /p:UseAppHost=false --no-self-contained
-if ($LASTEXITCODE -ne 0) {
-    throw "Worker publish failed with exit code $LASTEXITCODE."
+    & dotnet publish "$root/LL/src/Worker/Worker.LL/Worker.LL.csproj" -o $workerArtifactPath @commonPublishArguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "Worker publish failed with exit code $LASTEXITCODE."
+    }
 }
 
 if ($SkipDockerBuild) {
@@ -58,6 +71,12 @@ if ($SkipDockerBuild) {
 }
 
 Write-Debug "--- docker build ---"
+foreach ($publishPath in @($apiArtifactPath, $workerArtifactPath)) {
+    if (-not (Test-Path -LiteralPath $publishPath -PathType Container)) {
+        throw "Published artifact directory '$publishPath' was not found."
+    }
+}
+
 docker build --push -f "$buildpath/ll-backend.dockerfile" "$apiArtifactPath/." --tag "$($DOCKER_REGISTRY)ll-backend:$IMAGE_TAG"
 if ($LASTEXITCODE -ne 0) {
     throw "API image build failed with exit code $LASTEXITCODE."

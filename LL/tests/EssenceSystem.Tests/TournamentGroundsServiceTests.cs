@@ -154,10 +154,33 @@ public sealed class TournamentGroundsServiceTests
             team => Assert.Equal(3, team.MemberCount));
         Assert.True(await db.TournamentParticipants.AnyAsync(
             participant => participant.CharacterId == player.Id));
-        Assert.Equal(1, combatExecutor.ExecutionCount);
+        Assert.Equal(16, combatExecutor.ExecutionCount);
         Assert.Equal(
-            1,
+            16,
             await db.TournamentMatches.CountAsync(match => match.Status == TournamentMatchStatus.Resolving));
+
+        var scheduledMatches = await db.TournamentMatches
+            .Where(match => match.Status != TournamentMatchStatus.Bye)
+            .OrderBy(match => match.RoundNumber)
+            .ThenBy(match => match.MatchNumber)
+            .ToListAsync();
+        Assert.All(
+            scheduledMatches.Where(match => match.RoundNumber == 1),
+            match => Assert.Equal(Now, match.ScheduledAtUtc));
+        Assert.All(
+            scheduledMatches.Where(match => match.RoundNumber == 2),
+            match => Assert.Equal(Now.AddMinutes(10), match.ScheduledAtUtc));
+        Assert.All(
+            scheduledMatches.Where(match => match.RoundNumber == 3),
+            match => Assert.Equal(Now.AddMinutes(20), match.ScheduledAtUtc));
+        Assert.Equal(
+            [Now.AddMinutes(30), Now.AddMinutes(40)],
+            scheduledMatches
+                .Where(match => match.RoundNumber == 4)
+                .Select(match => match.ScheduledAtUtc));
+        Assert.Equal(
+            Now.AddMinutes(50),
+            Assert.Single(scheduledMatches, match => match.RoundNumber == 5).ScheduledAtUtc);
     }
 
     [Fact]

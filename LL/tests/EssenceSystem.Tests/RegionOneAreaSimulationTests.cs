@@ -22,6 +22,8 @@ using Xunit.Abstractions;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceFull")]
+[Trait("BalanceShard", "Misc")]
 public sealed class RegionOneAreaSimulationTests
 {
     private readonly ITestOutputHelper _output;

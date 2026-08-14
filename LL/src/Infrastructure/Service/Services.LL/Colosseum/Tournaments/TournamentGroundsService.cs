@@ -1637,17 +1637,26 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 changed = true;
             }
 
-            if (matches.Any(match => match.Status == TournamentMatchStatus.Resolving))
+            var nextDueAt = matches
+                .Where(match =>
+                    match.Status == TournamentMatchStatus.Ready
+                    && match.ScheduledAtUtc.HasValue
+                    && match.ScheduledAtUtc.Value <= now)
+                .Select(match => match.ScheduledAtUtc)
+                .Min();
+            if (!nextDueAt.HasValue)
                 return new TournamentProgressionResult(changed, false);
 
-            var dueMatch = matches.FirstOrDefault(match =>
-                match.Status == TournamentMatchStatus.Ready
-                && match.ScheduledAtUtc.HasValue
-                && match.ScheduledAtUtc.Value <= now);
-            if (dueMatch is null)
-                return new TournamentProgressionResult(changed, false);
+            var dueMatches = matches
+                .Where(match =>
+                    match.Status == TournamentMatchStatus.Ready
+                    && match.ScheduledAtUtc == nextDueAt)
+                .ToList();
+            foreach (var dueMatch in dueMatches)
+            {
+                await StartMatchPlaybackAsync(tournament, dueMatch, now, cancellationToken);
+            }
 
-            await StartMatchPlaybackAsync(tournament, dueMatch, now, cancellationToken);
             return new TournamentProgressionResult(true, true);
         }
 
@@ -2368,8 +2377,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             .OrderBy(match => match.RoundNumber)
             .ThenBy(match => match.MatchNumber)
             .ToListAsync(cancellationToken);
-        var cursor = firstMatchAt;
         var interval = TimeSpan.FromMinutes(Math.Max(1, _options.MatchIntervalMinutes));
+        var schedule = BuildTournamentMatchSchedule(rounds, matches, firstMatchAt, interval);
         foreach (var match in matches)
         {
             if (match.Status == TournamentMatchStatus.Bye)
@@ -2378,8 +2387,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 continue;
             }
 
-            match.ScheduledAtUtc = cursor;
-            cursor = cursor.Add(interval);
+            match.ScheduledAtUtc = schedule[match.Id];
         }
 
         foreach (var round in rounds)
@@ -2409,17 +2417,19 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         if (unscheduled.Count == 0) return false;
 
         var interval = TimeSpan.FromMinutes(Math.Max(1, _options.MatchIntervalMinutes));
-        var latestScheduledAt = matches
-            .Where(match => match.ScheduledAtUtc.HasValue)
-            .Select(match => match.ScheduledAtUtc!.Value)
-            .DefaultIfEmpty(now - interval)
-            .Max();
-        var cursor = latestScheduledAt.Add(interval);
-        if (cursor < now) cursor = now;
+        var firstMatchAt = rounds
+            .OrderBy(round => round.RoundNumber)
+            .Select(round => round.StartsAtUtc)
+            .FirstOrDefault();
+        if (firstMatchAt == default) firstMatchAt = now;
+        var schedule = BuildTournamentMatchSchedule(rounds, matches, firstMatchAt, interval);
+        var earliestMissingAt = unscheduled.Min(match => schedule[match.Id]);
+        var recoveryDelay = earliestMissingAt < now
+            ? now - earliestMissingAt
+            : TimeSpan.Zero;
         foreach (var match in unscheduled)
         {
-            match.ScheduledAtUtc = cursor;
-            cursor = cursor.Add(interval);
+            match.ScheduledAtUtc = schedule[match.Id].Add(recoveryDelay);
         }
 
         foreach (var round in rounds.Where(round => round.Status != TournamentRoundStatus.Completed))
@@ -2437,6 +2447,54 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         }
 
         return true;
+    }
+
+    private static IReadOnlyDictionary<Guid, DateTimeOffset> BuildTournamentMatchSchedule(
+        IReadOnlyList<TournamentRound> rounds,
+        IReadOnlyList<TournamentMatch> matches,
+        DateTimeOffset firstMatchAt,
+        TimeSpan interval)
+    {
+        var schedule = new Dictionary<Guid, DateTimeOffset>();
+        var cursor = firstMatchAt;
+        var finalRoundNumber = rounds.Count == 0
+            ? 0
+            : rounds.Max(round => round.RoundNumber);
+        var semiFinalRoundNumber = finalRoundNumber - 1;
+
+        foreach (var round in rounds.OrderBy(round => round.RoundNumber))
+        {
+            var roundMatches = matches
+                .Where(match =>
+                    match.RoundNumber == round.RoundNumber
+                    && match.Status != TournamentMatchStatus.Bye)
+                .OrderBy(match => match.MatchNumber)
+                .ToList();
+            if (roundMatches.Count == 0) continue;
+
+            if (round.RoundNumber == semiFinalRoundNumber)
+            {
+                foreach (var match in roundMatches)
+                {
+                    schedule[match.Id] = cursor;
+                    cursor = cursor.Add(interval);
+                }
+
+                continue;
+            }
+
+            foreach (var match in roundMatches)
+            {
+                schedule[match.Id] = cursor;
+            }
+
+            if (round.RoundNumber < finalRoundNumber)
+            {
+                cursor = cursor.Add(interval);
+            }
+        }
+
+        return schedule;
     }
 
     private async Task AdvanceWinnerAsync(Guid tournamentId, TournamentMatch match, Guid winnerParticipantId, DateTimeOffset now, CancellationToken cancellationToken)

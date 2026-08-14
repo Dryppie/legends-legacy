@@ -2,14 +2,26 @@ name: Backend gate
 
 on:
   workflow_call:
+    inputs:
+      run_full_balance:
+        description: "Run the exhaustive balance simulation shards."
+        required: false
+        default: true
+        type: boolean
   workflow_dispatch:
+    inputs:
+      run_full_balance:
+        description: "Run the exhaustive balance simulation shards."
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: read
 
 jobs:
-  backend:
-    name: Main backend build and tests
+  build:
+    name: Build and publish backend artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -20,14 +32,140 @@ jobs:
         with:
           dotnet-version: "10.x"
 
-      - name: Restore main solution
-        run: dotnet restore "LL/LegendsLegacy.sln"
+      - name: Restore and audit main solution
+        run: dotnet restore "LL/LegendsLegacy.sln" -p:WarningsAsErrors=NU1903%3BNU1904
 
       - name: Build main solution
         run: dotnet build "LL/LegendsLegacy.sln" --configuration Release --no-restore
 
-      - name: Run main test suite
-        run: dotnet test "LL/tests/EssenceSystem.Tests/EssenceSystem.Tests.csproj" --configuration Release --no-build --no-restore
+      - name: Publish API and worker from compiled outputs
+        shell: pwsh
+        run: ./build/build-ll.ps1 -SkipDockerBuild -NoBuild
 
-      - name: Reject high or critical .NET advisories
-        run: dotnet restore "LL/LegendsLegacy.sln" -p:WarningsAsErrors=NU1903%3BNU1904
+      - name: Upload compiled test artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ll-backend-tests
+          retention-days: 1
+          if-no-files-found: error
+          path: LL/tests/EssenceSystem.Tests/bin/Release/net10.0
+
+      - name: Upload published backend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ll-backend-publish
+          retention-days: 1
+          if-no-files-found: error
+          path: |
+            artifacts/api.ll
+            artifacts/worker.ll
+
+  fast-tests:
+    name: Tests / Fast correctness suite
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.x"
+
+      - name: Download compiled backend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ll-backend-tests
+          path: LL/tests/EssenceSystem.Tests/bin/Release/net10.0
+
+      - name: Run fast correctness suite
+        shell: pwsh
+        run: >-
+          dotnet vstest
+          "LL/tests/EssenceSystem.Tests/bin/Release/net10.0/EssenceSystem.Tests.dll"
+          --TestCaseFilter:"Category!=BalanceFull"
+          --Logger:"trx;LogFileName=fast.trx"
+          --ResultsDirectory:"TestResults/fast"
+
+      - name: Add test timings to job summary
+        if: always()
+        shell: pwsh
+        run: >-
+          ./build/report-test-timings.ps1
+          -ResultsDirectory "TestResults/fast"
+          -Title "Fast correctness suite timings"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-fast
+          retention-days: 7
+          if-no-files-found: warn
+          path: TestResults/fast
+
+  balance-tests:
+    name: Tests / ${{ matrix.name }}
+    if: inputs.run_full_balance
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: world-tower-low
+            name: World Tower floors 1-5
+            filter: BalanceShard=WorldTowerLow
+          - id: world-tower-high
+            name: World Tower floors 6-10
+            filter: BalanceShard=WorldTowerHigh
+          - id: dungeon
+            name: Dungeon balance
+            filter: BalanceShard=Dungeon
+          - id: attribute
+            name: Attribute balance
+            filter: BalanceShard=Attribute
+          - id: misc-balance
+            name: Region and equipment balance
+            filter: BalanceShard=Misc
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.x"
+
+      - name: Download compiled backend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ll-backend-tests
+          path: LL/tests/EssenceSystem.Tests/bin/Release/net10.0
+
+      - name: Run ${{ matrix.name }}
+        shell: pwsh
+        run: >-
+          dotnet vstest
+          "LL/tests/EssenceSystem.Tests/bin/Release/net10.0/EssenceSystem.Tests.dll"
+          --TestCaseFilter:"${{ matrix.filter }}"
+          --Logger:"trx;LogFileName=${{ matrix.id }}.trx"
+          --ResultsDirectory:"TestResults/${{ matrix.id }}"
+
+      - name: Add test timings to job summary
+        if: always()
+        shell: pwsh
+        run: >-
+          ./build/report-test-timings.ps1
+          -ResultsDirectory "TestResults/${{ matrix.id }}"
+          -Title "${{ matrix.name }} timings"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.id }}
+          retention-days: 7
+          if-no-files-found: warn
+          path: TestResults/${{ matrix.id }}

@@ -22,6 +22,8 @@ using Xunit.Abstractions;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceFull")]
+[Trait("BalanceShard", "Dungeon")]
 public sealed class TierOneDungeonBalanceTests
 {
     private readonly ITestOutputHelper _output;

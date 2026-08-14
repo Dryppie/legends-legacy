@@ -18,6 +18,8 @@ using Services.LL.Professions.Craftings;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceFull")]
+[Trait("BalanceShard", "Misc")]
 public sealed class CanonicalEquipmentBuildFactoryTests
 {
     private readonly CanonicalEquipmentBuildFactory _factory = CreateFactory();

@@ -20,94 +20,98 @@
       icon="sidebar/city/colosseum"
     ></app-default-header>
 
-    <section
-      class="ll-scrollbar-none flex w-full snap-x snap-mandatory flex-nowrap gap-1.5 overflow-x-auto overscroll-x-contain pb-1 text-white sm:grid sm:grid-cols-4 sm:gap-2 sm:overflow-visible sm:pb-0 xl:grid-cols-7"
-      aria-label="Colosseum status"
-    >
-      <div
-        class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
+    <ng-template #arenaStatus>
+      <section
+        class="ll-scrollbar-none flex w-full snap-x snap-mandatory flex-nowrap gap-1.5 overflow-x-auto overscroll-x-contain pb-1 text-white sm:grid sm:grid-cols-4 sm:gap-2 sm:overflow-visible sm:pb-0 xl:grid-cols-7"
+        aria-label="Colosseum status"
       >
-        <p class="ll-stat-label truncate">Tickets</p>
-        <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
-          {{
-            state.status()?.tickets ??
-              state.arenaTicketStatus()?.currentTickets ??
-              0
-          }}
-          /
-          {{
-            state.status()?.maxTickets ??
-              state.arenaTicketStatus()?.maxTickets ??
-              0
-          }}
-        </p>
-      </div>
-
-      <div
-        class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
-      >
-        <p class="ll-stat-label truncate">Tier</p>
-        <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
-          {{ state.status()?.rankProgress?.currentTierName ?? "-" }}
-        </p>
-      </div>
-
-      <div
-        class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
-      >
-        <p class="ll-stat-label truncate">Rating</p>
-        <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
-          {{ state.status()?.rating ?? myRanking?.level | numberFormat }}
-        </p>
-      </div>
-
-      <div
-        class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
-      >
-        <p class="ll-stat-label truncate">Glory</p>
-        <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
-          {{ state.status()?.glory ?? 0 | numberFormat }}
-        </p>
-      </div>
-
-      <div
-        class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
-      >
-        <p class="ll-stat-label truncate">Streak</p>
-        <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
-          {{ state.status()?.currentAttackWinStreak ?? 0 }}
-          <span class="text-sm text-secondary">
-            / {{ state.status()?.bestAttackWinStreak ?? 0 }}
-          </span>
-        </p>
-      </div>
-
-      <div
-        class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
-      >
-        <p class="ll-stat-label truncate">Daily Win</p>
-        <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
-          {{ state.status()?.dailyFirstWinAvailable ? "Available" : "Claimed" }}
-        </p>
-        <p
-          class="truncate text-[0.65rem] text-secondary sm:text-xs"
-          *ngIf="state.status()?.dailyFirstWinAvailable"
+        <div
+          class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
         >
-          +{{ state.status()?.dailyFirstWinBonusGlory ?? 20 }} Glory
-        </p>
-      </div>
+          <p class="ll-stat-label truncate">Tickets</p>
+          <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
+            {{
+              state.status()?.tickets ??
+                state.arenaTicketStatus()?.currentTickets ??
+                0
+            }}
+            /
+            {{
+              state.status()?.maxTickets ??
+                state.arenaTicketStatus()?.maxTickets ??
+                0
+            }}
+          </p>
+        </div>
 
-      <div
-        class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
-      >
-        <p class="ll-stat-label truncate">Record</p>
-        <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
-          {{ state.status()?.attackRecord?.wins ?? recentRecord.wins }}-{{
-            state.status()?.attackRecord?.losses ?? recentRecord.losses
-          }}-{{ state.status()?.attackRecord?.draws ?? recentRecord.draws }}
-        </p>
-      </div>
-    </section>
+        <div
+          class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
+        >
+          <p class="ll-stat-label truncate">Tier</p>
+          <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
+            {{ state.status()?.rankProgress?.currentTierName ?? "-" }}
+          </p>
+        </div>
+
+        <div
+          class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
+        >
+          <p class="ll-stat-label truncate">Rating</p>
+          <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
+            {{ state.status()?.rating ?? myRanking?.level | numberFormat }}
+          </p>
+        </div>
+
+        <div
+          class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
+        >
+          <p class="ll-stat-label truncate">Glory</p>
+          <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
+            {{ state.status()?.glory ?? 0 | numberFormat }}
+          </p>
+        </div>
+
+        <div
+          class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
+        >
+          <p class="ll-stat-label truncate">Streak</p>
+          <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
+            {{ state.status()?.currentAttackWinStreak ?? 0 }}
+            <span class="text-sm text-secondary">
+              / {{ state.status()?.bestAttackWinStreak ?? 0 }}
+            </span>
+          </p>
+        </div>
+
+        <div
+          class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
+        >
+          <p class="ll-stat-label truncate">Daily Win</p>
+          <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
+            {{
+              state.status()?.dailyFirstWinAvailable ? "Available" : "Claimed"
+            }}
+          </p>
+          <p
+            class="truncate text-[0.65rem] text-secondary sm:text-xs"
+            *ngIf="state.status()?.dailyFirstWinAvailable"
+          >
+            +{{ state.status()?.dailyFirstWinBonusGlory ?? 20 }} Glory
+          </p>
+        </div>
+
+        <div
+          class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
+        >
+          <p class="ll-stat-label truncate">Record</p>
+          <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
+            {{ state.status()?.attackRecord?.wins ?? recentRecord.wins }}-{{
+              state.status()?.attackRecord?.losses ?? recentRecord.losses
+            }}-{{ state.status()?.attackRecord?.draws ?? recentRecord.draws }}
+          </p>
+        </div>
+      </section>
+    </ng-template>
 
     <app-tabs
       class="flex min-h-0 w-full flex-1 flex-col gap-2 overflow-hidden"
@@ -118,6 +122,8 @@
         <div
           class="flex h-full min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain pb-24 pr-1 sm:pb-0"
         >
+          <ng-container *ngTemplateOutlet="arenaStatus"></ng-container>
+
           <section
             class="ll-stat-card flex flex-col gap-3 p-3 text-white sm:p-4 md:flex-row md:items-center md:justify-between"
           >

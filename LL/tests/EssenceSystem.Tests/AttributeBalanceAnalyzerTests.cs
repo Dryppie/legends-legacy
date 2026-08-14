@@ -12,6 +12,8 @@ using System.Text.Json.Serialization;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceFull")]
+[Trait("BalanceShard", "Attribute")]
 public sealed class AttributeBalanceAnalyzerTests
 {
     [Fact]

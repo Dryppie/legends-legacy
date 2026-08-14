@@ -1,4 +1,4 @@
-<section class="flex h-full w-full flex-col gap-3 overflow-auto text-white">
+<section class="tournament-shell ll-scrollbar text-white">
   <div
     *ngIf="error()"
     class="ll-panel border border-red-500/40 p-3 text-sm text-red-200"
@@ -7,618 +7,756 @@
   </div>
 
   <ng-container *ngIf="current() as tournament; else emptyState">
-    <section class="ll-stat-card flex flex-col gap-4 p-4">
-      <div
-        class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between"
-      >
-        <div class="min-w-0">
-          <p class="ll-stat-label">Tournament Grounds</p>
-          <h2 class="ll-heading mt-1 text-xl">{{ tournament.name }}</h2>
-          <p class="ll-copy mt-1">
-            {{ nextStateLabel(tournament) }}
-            <span *ngIf="tournament.status === 'RegistrationOpen'">
-              · {{ tournament.registrationEndsAtUtc | date: "short" }}
-            </span>
-            <span *ngIf="tournament.status === 'Scheduled'">
-              · {{ tournament.registrationStartsAtUtc | date: "short" }}
-            </span>
-            <span
-              *ngIf="
-                tournament.status === 'BracketGenerated' ||
-                tournament.status === 'RegistrationClosed'
-              "
-            >
-              · {{ tournament.startsAtUtc | date: "short" }}
-            </span>
-          </p>
-          <p
-            *ngIf="latestRealtimeUpdate() as update"
-            class="mt-1 text-xs text-secondary"
-          >
-            Latest: {{ enumLabel(update.event) }} · #{{
-              update.tournamentNumber
-            }}
-            {{ update.tournamentName }} ·
-            {{ update.registeredParticipantCount }} /
-            {{ update.maxParticipants }} teams
-            <span *ngIf="update.currentRoundNumber">
-              · Round {{ update.currentRoundNumber }}
-            </span>
-            <span *ngIf="update.nextActionAtUtc">
-              · Next {{ update.nextActionAtUtc | date: "short" }}
-            </span>
-          </p>
-        </div>
+    <div class="tournament-layout">
+      <div class="tournament-main-column">
+        <section class="tournament-hero ll-panel bg-texture bg-auto">
+          <div class="hero-main">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <p class="ll-stat-label">Weekly · 3v3 single elimination</p>
+                <span
+                  class="ll-badge py-1 text-[0.65rem]"
+                  [class.ll-badge-success]="
+                    tournament.status === 'RegistrationOpen' ||
+                    tournament.status === 'InProgress'
+                  "
+                  [class.ll-badge-danger]="tournament.status === 'Cancelled'"
+                  [class.ll-badge-accent]="
+                    tournament.status !== 'RegistrationOpen' &&
+                    tournament.status !== 'InProgress' &&
+                    tournament.status !== 'Cancelled'
+                  "
+                >
+                  {{ enumLabel(tournament.status) }}
+                </span>
+              </div>
+              <h2 class="ll-heading mt-2 text-2xl sm:text-3xl">
+                {{ tournament.name }}
+              </h2>
+              <p class="ll-copy mt-2 max-w-2xl">
+                {{ heroDescription(tournament) }}
+              </p>
+            </div>
 
-        <div class="flex shrink-0 flex-wrap gap-2">
-          <button
-            *ngIf="canStartDevelopmentTournament()"
-            type="button"
-            class="ll-button-secondary px-3 py-2 text-sm"
-            [disabled]="loading() || actionLoading()"
-            (click)="startDevelopmentTournament()"
+            <div class="hero-clock" *ngIf="nextActionAt() as actionAt">
+              <p class="ll-stat-label">{{ nextStateLabel(tournament) }}</p>
+              <p class="ll-heading mt-1 text-3xl tabular-nums sm:text-4xl">
+                {{ countdown() }}
+              </p>
+              <p class="mt-1 text-xs text-secondary">
+                {{ actionAt | date: "short" }}
+              </p>
+            </div>
+          </div>
+
+          <div class="hero-footer">
+            <dl class="hero-stats">
+              <div>
+                <dt class="ll-stat-label">Format</dt>
+                <dd class="ll-heading mt-1 text-sm">3v3 elimination</dd>
+              </div>
+              <div>
+                <dt class="ll-stat-label">Field</dt>
+                <dd class="ll-heading mt-1 text-sm">
+                  {{ tournament.registeredParticipantCount }} /
+                  {{ tournament.maxParticipants }}
+                </dd>
+              </div>
+              <div>
+                <dt class="ll-stat-label">Your entry</dt>
+                <dd class="ll-heading mt-1 text-sm">
+                  {{ tournament.isRegistered ? "Registered" : "Not entered" }}
+                </dd>
+              </div>
+              <div>
+                <dt class="ll-stat-label">Your seed</dt>
+                <dd class="ll-heading mt-1 text-sm">
+                  {{
+                    tournament.playerSeed
+                      ? "#" + tournament.playerSeed
+                      : "Pending"
+                  }}
+                </dd>
+              </div>
+            </dl>
+
+            <div *ngIf="unclaimedRewards().length > 0" class="hero-actions">
+              <button
+                type="button"
+                class="ll-button-primary px-4 py-2 text-sm"
+                [disabled]="actionLoading()"
+                (click)="claim(tournament)"
+              >
+                Claim rewards
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="bracket-card ll-panel bg-texture bg-auto">
+          <header class="section-heading">
+            <h3 class="ll-heading text-lg">Bracket</h3>
+            <p *ngIf="bracket()?.rounds?.length" class="ll-stat-label">
+              {{ teams().length }} teams · {{ totalBattleCount() }} battles
+            </p>
+          </header>
+
+          <ng-container
+            *ngIf="bracket()?.rounds?.length; else registrationField"
           >
-            {{
-              actionLoading() ? "Starting test..." : "Fill teams & start test"
-            }}
-          </button>
-          <button
-            type="button"
-            class="ll-button-secondary px-3 py-2 text-sm"
-            [disabled]="loading() || actionLoading()"
-            (click)="refresh()"
-          >
-            Refresh
-          </button>
-          <button
-            *ngIf="tournament.canRegister"
-            type="button"
-            class="ll-button-primary px-3 py-2 text-sm"
-            [disabled]="actionLoading()"
-            (click)="register(tournament)"
-          >
-            Register
-          </button>
+            <nav
+              class="bracket-round-navigation ll-scrollbar"
+              aria-label="Tournament rounds"
+            >
+              <button
+                *ngFor="let round of bracket()?.rounds"
+                type="button"
+                class="round-navigation-card"
+                [class.round-navigation-card-selected]="
+                  selectedRound().id === round.id
+                "
+                [class.round-navigation-card-live]="
+                  currentRound()?.id === round.id
+                "
+                [attr.aria-current]="
+                  selectedRound().id === round.id ? 'step' : null
+                "
+                (click)="selectedRoundNumber.set(round.roundNumber)"
+              >
+                <span class="flex items-center gap-2">
+                  <span class="round-dot"></span>
+                  <strong>{{ roundNavigationLabel(round) }}</strong>
+                </span>
+                <span class="mt-1 block text-[0.65rem] text-secondary">
+                  {{ round.matches.length }}
+                  {{ round.matches.length === 1 ? "battle" : "battles" }} ·
+                  {{ roundTimingLabel(round) }}
+                </span>
+              </button>
+            </nav>
+
+            <section
+              *ngIf="selectedRound() as round"
+              class="selected-round-panel"
+            >
+              <div class="bracket-match-grid">
+                <article
+                  *ngFor="let match of round.matches"
+                  class="match-card"
+                  [class.match-card-player]="isPlayerMatch(match)"
+                  [class.opacity-60]="
+                    match.status === 'Completed' &&
+                    isPlayerMatch(match) &&
+                    !isPlayerWinner(match)
+                  "
+                >
+                  <div class="match-team">
+                    <span class="team-seed">{{
+                      match.playerOne?.seed ?? "–"
+                    }}</span>
+                    <span
+                      class="truncate"
+                      [class.text-primary]="
+                        match.winnerTeamId === match.playerOne?.teamId
+                      "
+                    >
+                      {{ match.playerOne?.name ?? "Pending" }}
+                    </span>
+                    <span class="ml-auto text-secondary">
+                      {{
+                        match.status === "Completed"
+                          ? match.winnerTeamId === match.playerOne?.teamId
+                            ? "W"
+                            : "L"
+                          : "–"
+                      }}
+                    </span>
+                  </div>
+                  <div class="match-team">
+                    <span class="team-seed">{{
+                      match.playerTwo?.seed ?? "–"
+                    }}</span>
+                    <span
+                      class="truncate"
+                      [class.text-primary]="
+                        match.winnerTeamId === match.playerTwo?.teamId
+                      "
+                    >
+                      {{ match.playerTwo?.name ?? "Pending" }}
+                    </span>
+                    <span class="ml-auto text-secondary">
+                      {{
+                        match.status === "Completed"
+                          ? match.winnerTeamId === match.playerTwo?.teamId
+                            ? "W"
+                            : "L"
+                          : "–"
+                      }}
+                    </span>
+                  </div>
+
+                  <footer class="match-footer">
+                    <span *ngIf="isPlayerMatch(match)">
+                      Your match
+                      <span *ngIf="match.status === 'Completed'">
+                        · {{ isPlayerWinner(match) ? "Won" : "Lost" }}
+                      </span>
+                    </span>
+                    <span *ngIf="!isPlayerMatch(match)">{{
+                      outcomeLabel(match)
+                    }}</span>
+                    <a
+                      *ngIf="match.hasPlayback"
+                      class="ml-auto text-primary hover:underline"
+                      [routerLink]="[
+                        '/game',
+                        'city',
+                        'colosseum',
+                        'tournaments',
+                        tournament.id,
+                        'matches',
+                        match.id,
+                        'replay',
+                      ]"
+                    >
+                      {{ match.status === "Resolving" ? "Spectate" : "Replay" }}
+                    </a>
+                  </footer>
+                </article>
+              </div>
+            </section>
+          </ng-container>
+        </section>
+      </div>
+
+      <div class="tournament-side-column">
+        <aside class="entry-card ll-panel bg-texture bg-auto p-4">
+          <div class="flex items-start justify-between gap-3">
+            <p class="ll-stat-label">{{ entryCardEyebrow(tournament) }}</p>
+            <p class="text-xs text-secondary">
+              <span *ngIf="activePlayerMatch() as active">
+                {{ active.round.name }} · Match {{ active.match.matchNumber }}
+              </span>
+              <span *ngIf="!activePlayerMatch() && tournament.playerSeed">
+                Seed #{{ tournament.playerSeed }}
+              </span>
+            </p>
+          </div>
+          <h3 class="ll-heading mt-2 text-xl">
+            {{ entryCardTitle(tournament) }}
+          </h3>
+          <p class="ll-copy mt-2">{{ entryCardCopy(tournament) }}</p>
+
           <button
             *ngIf="
               tournament.isRegistered &&
               tournament.status === 'RegistrationOpen'
             "
             type="button"
-            class="ll-button-secondary px-3 py-2 text-sm"
+            class="ll-button mt-4 w-full px-3 py-2 text-sm"
             [disabled]="actionLoading()"
             (click)="withdraw(tournament)"
           >
-            Withdraw
+            Withdraw entry
+          </button>
+
+          <div *ngIf="activePlayerMatch() as active" class="entry-versus mt-4">
+            <div>
+              <p class="ll-heading text-sm">
+                {{ playerTeam()?.name ?? "Your team" }}
+              </p>
+              <p class="text-xs text-secondary">
+                {{
+                  playerTeam()?.seed
+                    ? "Seed #" + playerTeam()?.seed
+                    : "Your entry"
+                }}
+              </p>
+            </div>
+            <span class="ll-stat-label">vs</span>
+            <div class="text-right">
+              <p class="ll-heading text-sm">
+                {{ opponentFor(active.match)?.name ?? "Pending" }}
+              </p>
+              <p class="text-xs text-secondary">
+                {{
+                  opponentFor(active.match)?.seed
+                    ? "Seed #" + opponentFor(active.match)?.seed
+                    : "Awaiting seed"
+                }}
+              </p>
+            </div>
+          </div>
+
+          <button
+            *ngIf="activePlayerMatch()?.match?.hasPlayback"
+            type="button"
+            class="ll-button mt-4 w-full px-3 py-2 text-sm"
+            [routerLink]="[
+              '/game',
+              'city',
+              'colosseum',
+              'tournaments',
+              tournament.id,
+              'matches',
+              activePlayerMatch()?.match?.id,
+              'replay',
+            ]"
+          >
+            {{
+              activePlayerMatch()?.match?.status === "Resolving"
+                ? "Spectate match"
+                : "View match"
+            }}
+          </button>
+          <button
+            *ngIf="tournament.canRegister"
+            type="button"
+            class="ll-button-primary mt-4 w-full px-3 py-2 text-sm"
+            [disabled]="actionLoading()"
+            (click)="register(tournament)"
+          >
+            Enter the grounds
           </button>
           <button
             *ngIf="unclaimedRewards().length > 0"
             type="button"
-            class="ll-button-primary px-3 py-2 text-sm"
+            class="ll-button-primary mt-4 w-full px-3 py-2 text-sm"
             [disabled]="actionLoading()"
             (click)="claim(tournament)"
           >
-            Claim Rewards
+            Claim rewards
           </button>
-        </div>
-      </div>
+        </aside>
 
-      <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        <div class="ll-panel p-3">
-          <p class="ll-stat-label">Status</p>
-          <p class="ll-heading mt-1 text-base">
-            {{ enumLabel(tournament.status) }}
-          </p>
-        </div>
-        <div class="ll-panel p-3">
-          <p class="ll-stat-label">Teams</p>
-          <p class="ll-heading mt-1 text-base">
-            {{ tournament.registeredParticipantCount }} /
-            {{ tournament.maxParticipants }}
-          </p>
-          <p class="text-xs text-secondary">
-            Minimum {{ tournament.minParticipants }} teams
-          </p>
-        </div>
-        <div class="ll-panel p-3">
-          <p class="ll-stat-label">Registration</p>
-          <p class="ll-heading mt-1 text-base">
-            {{ tournament.registrationStartsAtUtc | date: "short" }}
-          </p>
-          <p class="text-xs text-secondary">
-            Closes {{ tournament.registrationEndsAtUtc | date: "short" }}
-          </p>
-        </div>
-        <div class="ll-panel p-3">
-          <p class="ll-stat-label">Your Entry</p>
-          <p class="ll-heading mt-1 text-base">
-            {{ playerStatusLabel(tournament) }}
-          </p>
-          <p class="text-xs text-secondary">
-            <span *ngIf="tournament.playerSeed"
-              >Seed #{{ tournament.playerSeed }}</span
-            >
-            <span
-              *ngIf="tournament.playerSeed && tournament.playerEntryArenaRating"
-            >
-              · {{ tournament.playerEntryArenaRating }} rating
-            </span>
-            <span *ngIf="!tournament.playerSeed">
-              {{
-                tournament.cannotRegisterReason ||
-                  "Current equipment and essences are saved when you register."
-              }}
-            </span>
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section
-      *ngIf="
-        tournament.isRegistered && tournament.status === 'RegistrationOpen'
-      "
-      class="ll-stat-card flex flex-col gap-3 p-4"
-    >
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h3 class="ll-heading text-lg">Teams</h3>
-          <p class="text-sm text-secondary">
-            Tournament Grounds battles resolve as teams of up to three.
-          </p>
-        </div>
-        <p class="text-xs uppercase tracking-wide text-secondary">
-          {{ teams().length }} teams forming
-        </p>
-      </div>
-
-      <div
-        *ngIf="playerPendingInvites().length > 0"
-        class="grid gap-2 md:grid-cols-2"
-      >
-        <div
-          *ngFor="let pending of playerPendingInvites()"
-          class="ll-panel p-3"
-        >
-          <p class="ll-heading text-base">{{ pending.team.name }}</p>
-          <p class="text-sm text-secondary">
-            Invite from {{ pending.team.ownerName }} ·
-            {{ pending.team.memberCount }}/3 members
-          </p>
-          <button
-            type="button"
-            class="ll-button-primary mt-3 px-3 py-2 text-sm"
-            [disabled]="actionLoading()"
-            (click)="acceptInvite(pending.invite)"
+        <aside class="right-rail">
+          <section
+            *ngIf="tournament.isRegistered"
+            class="ll-panel bg-texture bg-auto p-4"
           >
-            Accept Invite
-          </button>
-        </div>
-      </div>
-
-      <ng-container *ngIf="playerTeam() as team; else teamFinder">
-        <div class="ll-panel p-3">
-          <div class="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p class="ll-heading text-base">{{ team.name }}</p>
-              <p class="text-sm text-secondary">
-                Owner {{ team.ownerName }} · {{ team.memberCount }}/3 members
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="ll-stat-label">Your team</p>
+                <h3 class="ll-heading mt-1 text-lg">
+                  {{ playerTeam()?.name ?? "Form your team" }}
+                </h3>
+              </div>
+              <p class="text-xs text-secondary" *ngIf="playerTeam() as team">
+                {{ team.memberCount }} / 3
               </p>
             </div>
-            <div class="flex flex-wrap items-center justify-end gap-2">
-              <span
-                class="text-xs uppercase tracking-wide text-amber-200"
-                *ngIf="team.isPlayerOwner"
-              >
-                Owner
-              </span>
-              <button
-                type="button"
-                class="ll-button-secondary px-3 py-2 text-xs"
-                [disabled]="actionLoading()"
-                (click)="updateLoadout(tournament)"
-              >
-                {{
-                  actionLoading() ? "Updating..." : "Update Tournament Loadout"
-                }}
-              </button>
-            </div>
-          </div>
 
-          <p class="mt-2 text-xs text-secondary">
-            Copies your currently equipped gear and essences into this
-            tournament entry.
-          </p>
-
-          <div class="mt-3 grid gap-2 md:grid-cols-3">
             <div
-              *ngFor="let member of team.members"
-              class="rounded border border-white/10 p-2 text-sm"
+              *ngIf="playerPendingInvites().length > 0"
+              class="mt-3 space-y-2"
             >
-              <div class="flex items-center justify-between gap-2">
-                <span>{{ member.characterName }}</span>
+              <div
+                *ngFor="let pending of playerPendingInvites()"
+                class="ll-card p-3"
+              >
+                <p class="text-sm text-white">
+                  Invite from {{ pending.team.name }}
+                </p>
+                <p class="mt-1 text-xs text-secondary">
+                  {{ pending.team.memberCount }}/3 members · owner
+                  {{ pending.team.ownerName }}
+                </p>
                 <button
-                  *ngIf="
-                    team.isPlayerOwner &&
-                    member.participantId !== team.ownerParticipantId
-                  "
                   type="button"
-                  class="rounded border border-red-400/40 px-2 py-1 text-[11px] font-semibold uppercase text-red-200 hover:bg-red-500/10"
+                  class="ll-button-primary mt-2 w-full px-3 py-2 text-xs"
                   [disabled]="actionLoading()"
-                  (click)="kickMember(tournament, team, member)"
+                  (click)="acceptInvite(pending.invite)"
                 >
-                  Kick
-                </button>
-              </div>
-              <p class="text-xs text-secondary">
-                {{ member.entryArenaRating }} rating
-              </p>
-            </div>
-          </div>
-
-          <div
-            *ngIf="team.isPlayerOwner && team.applications.length > 0"
-            class="mt-3 border-t border-white/10 pt-3"
-          >
-            <p class="ll-stat-label">Applications</p>
-            <div class="mt-2 flex flex-col gap-2">
-              <div
-                *ngFor="let application of team.applications"
-                class="flex items-center justify-between gap-2 text-sm"
-              >
-                <span>{{ application.applicantName }}</span>
-                <button
-                  type="button"
-                  class="ll-button-secondary px-3 py-1 text-xs"
-                  [disabled]="actionLoading() || team.memberCount >= 3"
-                  (click)="acceptApplication(application.applicationId)"
-                >
-                  Accept
+                  Accept invite
                 </button>
               </div>
             </div>
-          </div>
 
-          <div
-            *ngIf="
-              team.isPlayerOwner &&
-              team.memberCount < 3 &&
-              unassignedParticipants().length > 0
-            "
-            class="mt-3 border-t border-white/10 pt-3"
-          >
-            <p class="ll-stat-label">Invite Registered Players</p>
-            <div class="mt-2 flex flex-wrap gap-2">
-              <button
-                *ngFor="let participant of unassignedParticipants()"
-                type="button"
-                class="ll-button-secondary px-3 py-1 text-xs"
-                [disabled]="actionLoading()"
-                (click)="inviteToTeam(tournament, team, participant)"
-              >
-                {{ participant.characterName }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </ng-container>
-    </section>
-
-    <section class="grid gap-3 xl:grid-cols-[1fr_320px]">
-      <div class="ll-stat-card p-4">
-        <div class="mb-3 flex items-center justify-between gap-3">
-          <h3 class="ll-heading text-lg">Bracket</h3>
-          <p class="text-xs text-secondary" *ngIf="bracket() as currentBracket">
-            {{ enumLabel(currentBracket.status) }}
-          </p>
-        </div>
-
-        <div
-          *ngIf="bracket()?.rounds?.length; else noBracket"
-          class="flex flex-col gap-3"
-        >
-          <section *ngFor="let round of bracket()?.rounds" class="ll-panel p-3">
-            <div
-              class="mb-2 flex flex-wrap items-baseline justify-between gap-2"
-            >
-              <h4 class="ll-heading text-base">{{ round.name }}</h4>
-              <p class="text-xs text-secondary">
-                {{ enumLabel(round.status) }} ·
-                {{ round.startsAtUtc | date: "short" }}
-              </p>
-            </div>
-            <div class="flex flex-col gap-2">
-              <div
-                *ngFor="let match of round.matches"
-                class="grid gap-2 border-t border-white/10 py-2 text-sm md:grid-cols-[1fr_auto_1fr]"
-              >
-                <span
-                  [class.text-amber-200]="
-                    match.winnerTeamId === match.playerOne?.teamId
-                  "
-                >
-                  {{ teamLabel(match.playerOne) }}
-                </span>
-                <span class="text-xs uppercase tracking-wide text-secondary">
-                  {{ outcomeLabel(match) }}
+            <ng-container *ngIf="playerTeam() as team; else teamFinder">
+              <div class="mt-3 flex flex-col gap-2">
+                <div *ngFor="let member of team.members" class="team-member">
+                  <div class="min-w-0 flex-1">
+                    <p class="truncate text-sm text-white">
+                      {{ member.characterName }}
+                    </p>
+                    <p class="truncate text-xs text-secondary">
+                      {{ member.entryArenaRating }} Arena Rating
+                      <span *ngIf="member.isTeamOwner"> · owner</span>
+                    </p>
+                  </div>
                   <span
-                    *ngIf="
-                      match.status !== 'Completed' &&
-                      match.status !== 'Bye' &&
-                      match.scheduledAtUtc
-                    "
+                    class="ll-badge ll-badge-success px-2 py-1 text-[0.6rem]"
                   >
-                    · {{ match.scheduledAtUtc | date: "shortTime" }}
+                    Ready
                   </span>
                   <button
-                    *ngIf="match.hasPlayback"
+                    *ngIf="
+                      team.isPlayerOwner &&
+                      member.participantId !== team.ownerParticipantId
+                    "
                     type="button"
-                    class="ml-2 rounded border border-primary/40 px-2 py-1 text-[11px] font-semibold uppercase text-primary hover:bg-primary/10"
+                    class="text-xs text-red-300 hover:text-red-200"
                     [disabled]="actionLoading()"
-                    [routerLink]="[
-                      '/game',
-                      'city',
-                      'colosseum',
-                      'tournaments',
-                      tournament.id,
-                      'matches',
-                      match.id,
-                      'replay',
-                    ]"
+                    (click)="kickMember(tournament, team, member)"
                   >
-                    {{ match.status === "Resolving" ? "Spectate" : "Replay" }}
+                    Kick
                   </button>
-                </span>
-                <span
-                  class="md:text-right"
-                  [class.text-amber-200]="
-                    match.winnerTeamId === match.playerTwo?.teamId
-                  "
+                </div>
+
+                <button
+                  *ngIf="team.memberCount < 3"
+                  type="button"
+                  class="team-member w-full border-dashed text-left transition-colors hover:border-primary disabled:cursor-default disabled:opacity-60"
+                  [attr.aria-expanded]="invitePickerOpen()"
+                  [disabled]="!team.isPlayerOwner || actionLoading()"
+                  (click)="invitePickerOpen.set(!invitePickerOpen())"
                 >
-                  {{ teamLabel(match.playerTwo) }}
-                </span>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-sm text-white">Open slot</p>
+                    <p class="text-xs text-secondary">
+                      {{
+                        team.isPlayerOwner
+                          ? "Choose a registered fighter to invite"
+                          : "Only the team owner can invite fighters"
+                      }}
+                    </p>
+                  </div>
+                </button>
               </div>
-            </div>
+
+              <div
+                *ngIf="invitePickerOpen() && team.isPlayerOwner"
+                class="invite-picker"
+              >
+                <div class="flex items-center justify-between gap-3">
+                  <p class="ll-stat-label">Invite a fighter</p>
+                  <button
+                    type="button"
+                    class="text-xs text-secondary hover:text-primary"
+                    (click)="invitePickerOpen.set(false)"
+                  >
+                    Close
+                  </button>
+                </div>
+                <p
+                  *ngIf="unassignedParticipants().length === 0"
+                  class="mt-2 text-xs text-secondary"
+                >
+                  No registered fighters are currently available to invite.
+                </p>
+                <button
+                  *ngFor="let participant of unassignedParticipants()"
+                  type="button"
+                  class="invite-option"
+                  [disabled]="actionLoading()"
+                  (click)="inviteToTeam(tournament, team, participant)"
+                >
+                  <span class="truncate">{{ participant.characterName }}</span>
+                  <span class="shrink-0 text-xs text-secondary">
+                    {{ participant.entryArenaRating }} Arena Rating
+                  </span>
+                </button>
+              </div>
+
+              <div
+                *ngIf="team.isPlayerOwner && team.applications.length > 0"
+                class="mt-4 border-t border-white/10 pt-3"
+              >
+                <p class="ll-stat-label">Applications</p>
+                <div
+                  *ngFor="let application of team.applications"
+                  class="mt-2 flex items-center justify-between gap-2 text-sm"
+                >
+                  <span class="truncate">{{ application.applicantName }}</span>
+                  <button
+                    type="button"
+                    class="ll-button px-2 py-1 text-xs"
+                    [disabled]="actionLoading() || team.memberCount >= 3"
+                    (click)="acceptApplication(application.applicationId)"
+                  >
+                    Accept
+                  </button>
+                </div>
+              </div>
+            </ng-container>
           </section>
-        </div>
+
+          <section class="ll-panel bg-texture bg-auto p-4">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="ll-heading text-lg">Rewards</h3>
+              <p class="ll-stat-label">
+                {{ unclaimedRewards().length > 0 ? "Claimable" : "Your run" }}
+              </p>
+            </div>
+
+            <div
+              *ngIf="
+                unclaimedRewards().length === 0 && claimedRewards().length === 0
+              "
+              class="ll-empty-state mt-3"
+            >
+              Rewards appear here as your run advances.
+            </div>
+
+            <div *ngFor="let reward of unclaimedRewards()" class="reward-row">
+              <div>
+                <p class="text-sm text-white">{{ rewardLabel(reward) }}</p>
+                <p class="text-xs text-secondary">Ready to claim</p>
+              </div>
+              <p class="text-right text-xs text-primary">
+                +{{ reward.arenaGlory }} Glory<br />
+                <span *ngIf="reward.cinders"
+                  >+{{ reward.cinders }} Cinders</span
+                >
+                <span *ngIf="reward.soulstones">
+                  +{{ reward.soulstones }} Soulstones
+                </span>
+              </p>
+            </div>
+
+            <div
+              *ngFor="let reward of claimedRewards()"
+              class="reward-row opacity-60"
+            >
+              <div>
+                <p class="text-sm text-white">{{ rewardLabel(reward) }}</p>
+                <p class="text-xs text-secondary">Claimed</p>
+              </div>
+              <p class="text-right text-xs text-primary">
+                +{{ reward.arenaGlory }} Glory
+              </p>
+            </div>
+
+            <button
+              *ngIf="unclaimedRewards().length > 0"
+              type="button"
+              class="ll-button-primary mt-4 w-full px-3 py-2 text-sm"
+              [disabled]="actionLoading()"
+              (click)="claim(tournament)"
+            >
+              Claim rewards
+            </button>
+          </section>
+        </aside>
       </div>
+    </div>
 
-      <aside class="ll-stat-card flex flex-col gap-3 p-4">
-        <h3 class="ll-heading text-lg">Rewards</h3>
-        <div
-          *ngIf="
-            unclaimedRewards().length === 0 && claimedRewards().length === 0
-          "
-          class="ll-empty-state"
-        >
-          No rewards yet.
+    <section class="archive-grid">
+      <article class="ll-panel bg-texture bg-auto p-4">
+        <h3 class="ll-heading text-lg">Your History</h3>
+        <div *ngIf="history().length === 0" class="ll-empty-state mt-3">
+          No completed entries yet.
         </div>
-        <div *ngFor="let reward of unclaimedRewards()" class="ll-panel p-3">
-          <p class="ll-heading text-base">{{ rewardLabel(reward) }}</p>
-          <p class="text-sm text-secondary">
-            {{ reward.arenaGlory }} Glory · {{ reward.cinders }} Cinders ·
-            {{ reward.soulstones }} Soulstones
-          </p>
-        </div>
-        <div
-          *ngFor="let reward of claimedRewards()"
-          class="ll-panel p-3 opacity-70"
-        >
-          <p class="ll-heading text-base">{{ rewardLabel(reward) }} claimed</p>
-          <p class="text-sm text-secondary">
-            {{ reward.arenaGlory }} Glory · {{ reward.cinders }} Cinders ·
-            {{ reward.soulstones }} Soulstones
-          </p>
-        </div>
-
-        <div
-          class="border-t border-white/10 pt-3"
-          *ngIf="upcoming().length > 0"
-        >
-          <h3 class="ll-heading text-lg">Upcoming</h3>
-          <div
-            *ngFor="let upcomingTournament of upcoming()"
-            class="ll-panel mt-2 p-3"
+        <div *ngFor="let item of history().slice(0, 3)" class="archive-row">
+          <div class="min-w-0">
+            <p class="truncate text-sm text-white">{{ item.tournamentName }}</p>
+            <p class="text-xs text-secondary">
+              {{ historyResultLabel(item) }} · {{ item.entryArenaRating }} Arena
+              Rating
+            </p>
+          </div>
+          <span class="text-xs text-primary"
+            >{{ item.replayCount }} replays</span
           >
-            <p class="ll-heading text-base">{{ upcomingTournament.name }}</p>
-            <p class="text-sm text-secondary">
-              {{ upcomingTournament.registrationStartsAtUtc | date: "short" }}
-            </p>
-          </div>
         </div>
+      </article>
 
-        <div class="border-t border-white/10 pt-3" *ngIf="recent().length > 0">
-          <h3 class="ll-heading text-lg">Recent Results</h3>
-          <div
-            *ngFor="let recentTournament of recent()"
-            class="ll-panel mt-2 p-3"
-          >
-            <p class="ll-heading text-base">{{ recentTournament.name }}</p>
-            <p class="text-sm text-secondary">
-              {{ tournamentResultLabel(recentTournament) }}
-              <span *ngIf="recentTournament.completedAtUtc">
-                · {{ recentTournament.completedAtUtc | date: "short" }}
-              </span>
-              <span *ngIf="recentTournament.cancelledAtUtc">
-                · {{ recentTournament.cancelledAtUtc | date: "short" }}
-              </span>
-            </p>
-          </div>
+      <article class="ll-panel bg-texture bg-auto p-4">
+        <h3 class="ll-heading text-lg">Record of Champions</h3>
+        <div *ngIf="hallOfFame().length === 0" class="ll-empty-state mt-3">
+          No champions crowned yet.
         </div>
-
-        <div class="border-t border-white/10 pt-3">
-          <h3 class="ll-heading text-lg">Your Tournament History</h3>
-          <div *ngIf="history().length === 0" class="ll-empty-state mt-2">
-            No completed entries yet.
-          </div>
-          <div *ngFor="let entry of history()" class="ll-panel mt-2 p-3">
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <p class="ll-heading text-base">
-                  #{{ entry.tournamentNumber }} {{ entry.tournamentName }}
-                </p>
-                <p class="text-sm text-secondary">
-                  {{ historyResultLabel(entry) }}
-                  <span *ngIf="entry.completedAtUtc">
-                    · {{ entry.completedAtUtc | date: "short" }}
-                  </span>
-                  <span *ngIf="entry.cancelledAtUtc">
-                    · {{ entry.cancelledAtUtc | date: "short" }}
-                  </span>
-                </p>
-              </div>
-              <span
-                class="shrink-0 text-xs uppercase tracking-wide text-secondary"
-              >
-                {{ entry.replayCount }} replays
-              </span>
-            </div>
-            <p class="mt-1 text-xs text-secondary">
-              <span *ngIf="entry.seed">Seed #{{ entry.seed }} · </span>
-              {{ entry.entryArenaRating }} rating · {{ entry.entryRankTier }}
-              <span *ngIf="entry.rewardStatus">
-                · Reward {{ entry.rewardStatus }}
-              </span>
+        <div
+          *ngFor="let champion of hallOfFame().slice(0, 3)"
+          class="archive-row"
+        >
+          <div class="min-w-0">
+            <p class="truncate text-sm text-white">
+              {{ champion.championName }}
             </p>
-          </div>
-        </div>
-
-        <div class="border-t border-white/10 pt-3">
-          <h3 class="ll-heading text-lg">Hall of Fame</h3>
-          <div *ngIf="hallOfFame().length === 0" class="ll-empty-state mt-2">
-            No champions crowned yet.
-          </div>
-          <div *ngFor="let champion of hallOfFame()" class="ll-panel mt-2 p-3">
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <p class="ll-heading text-base">{{ champion.championName }}</p>
-                <p class="text-sm text-secondary">
-                  #{{ champion.tournamentNumber }} {{ champion.tournamentName }}
-                </p>
-              </div>
-              <span
-                class="shrink-0 text-xs uppercase tracking-wide text-amber-200"
-              >
-                Champion
-              </span>
-            </div>
-            <p class="mt-1 text-xs text-secondary">
+            <p class="text-xs text-secondary">
               {{ championSeedLabel(champion) }} ·
-              {{ champion.championEntryArenaRating }} rating ·
-              {{ champion.participantCount }} entrants ·
-              {{ champion.completedAtUtc | date: "short" }}
+              {{ champion.championEntryArenaRating }} Arena Rating
             </p>
           </div>
+          <span class="text-xs text-primary">Champion</span>
         </div>
+      </article>
 
-        <div class="border-t border-white/10 pt-3">
-          <h3 class="ll-heading text-lg">Season Points</h3>
-          <div
-            *ngIf="seasonLeaderboard().length === 0"
-            class="ll-empty-state mt-2"
-          >
-            No season points yet.
-          </div>
-          <div
-            *ngFor="let entry of seasonLeaderboard()"
-            class="ll-panel mt-2 p-3"
-          >
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <p class="ll-heading text-base">
-                  #{{ entry.rank }}
-                  <app-character-tag
-                    [id]="entry.characterId"
-                    [name]="entry.characterName"
-                  ></app-character-tag>
-                </p>
-                <p class="text-sm text-secondary">
-                  {{ entry.points }} points ·
-                  {{ leaderboardPlacementLabel(entry) }}
-                </p>
-              </div>
-              <span
-                class="shrink-0 text-xs uppercase tracking-wide text-secondary"
-              >
-                {{ entry.seasonKey }}
-              </span>
-            </div>
-            <p class="mt-1 text-xs text-secondary">
-              {{ entry.tournamentsEntered }} entries ·
-              {{ entry.championships }} titles ·
-              {{ entry.finalistFinishes }} finalist runs
+      <article class="ll-panel bg-texture bg-auto p-4">
+        <h3 class="ll-heading text-lg">Season Standings</h3>
+        <div
+          *ngIf="seasonLeaderboard().length === 0"
+          class="ll-empty-state mt-3"
+        >
+          No season points yet.
+        </div>
+        <div
+          *ngFor="let entry of seasonLeaderboard().slice(0, 3)"
+          class="archive-row"
+        >
+          <div class="min-w-0">
+            <p class="truncate text-sm text-white">
+              #{{ entry.rank }}
+              <app-character-tag
+                [id]="entry.characterId"
+                [name]="entry.characterName"
+              ></app-character-tag>
+            </p>
+            <p class="text-xs text-secondary">
+              {{ leaderboardPlacementLabel(entry) }}
             </p>
           </div>
+          <span class="text-xs text-primary">{{ entry.points }} pts</span>
         </div>
-      </aside>
+      </article>
     </section>
+
+    <button
+      *ngIf="canStartDevelopmentTournament()"
+      type="button"
+      class="mx-auto block text-xs text-secondary hover:text-primary"
+      [disabled]="loading() || actionLoading()"
+      (click)="startDevelopmentTournament()"
+    >
+      {{ actionLoading() ? "Starting test..." : "Fill teams and start test" }}
+    </button>
   </ng-container>
 </section>
 
-<ng-template #teamFinder>
-  <div class="grid gap-3 lg:grid-cols-[280px_1fr]">
-    <div class="ll-panel p-3">
-      <p class="ll-heading text-base">Create Team</p>
-      <p class="text-sm text-secondary">
-        Start a team and invite registered players.
-      </p>
-      <input
-        #teamNameInput
-        type="text"
-        maxlength="80"
-        class="mt-3 w-full rounded border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-primary/60"
-        placeholder="Team name"
-      />
+<ng-template #registrationField>
+  <div class="registration-field">
+    <ng-container *ngFor="let team of teams(); let index = index">
       <button
         type="button"
-        class="ll-button-primary mt-3 w-full px-3 py-2 text-sm"
-        [disabled]="actionLoading()"
-        (click)="createTeam(current(), teamNameInput.value)"
+        class="seed-card text-left transition-colors hover:border-primary"
+        [class.seed-card-player]="team.isPlayerTeam"
+        [class.seed-card-selected]="selectedTeamId() === team.teamId"
+        [attr.aria-expanded]="selectedTeamId() === team.teamId"
+        (click)="toggleSelectedTeam(team)"
       >
-        Create Team
+        <span class="text-[0.65rem] text-secondary">
+          {{ seedNumber(team.seed, index + 1) }}
+        </span>
+        <span class="truncate text-sm" [class.text-primary]="team.isPlayerTeam">
+          {{ team.name }}
+        </span>
+        <span class="ml-auto text-[0.65rem] text-secondary">
+          {{ team.memberCount }}/3
+        </span>
       </button>
-    </div>
 
-    <div class="ll-panel p-3">
-      <p class="ll-heading text-base">Open Teams</p>
-      <div *ngIf="openTeams().length === 0" class="ll-empty-state mt-2">
-        No teams are looking for members yet.
-      </div>
-      <div class="mt-2 grid gap-2 md:grid-cols-2">
-        <div
-          *ngFor="let team of openTeams()"
-          class="rounded border border-white/10 p-3"
-        >
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <p class="ll-heading text-base">{{ team.name }}</p>
-              <p class="text-sm text-secondary">
-                Owner {{ team.ownerName }} · {{ team.memberCount }}/3 members
+      <section *ngIf="selectedTeamId() === team.teamId" class="seed-roster">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="ll-stat-label">
+              Seed {{ team.seed ? "#" + team.seed : "pending" }}
+            </p>
+            <h4 class="ll-heading mt-1 text-base">{{ team.name }}</h4>
+            <p class="mt-1 text-xs text-secondary">
+              Owner {{ team.ownerName }} · {{ team.memberCount }}/3 fighters
+            </p>
+          </div>
+          <button
+            type="button"
+            class="text-xs text-secondary hover:text-primary"
+            (click)="selectedTeamId.set(null)"
+          >
+            Close
+          </button>
+        </div>
+
+        <div class="seed-roster-members">
+          <div *ngFor="let member of team.members" class="seed-roster-member">
+            <div class="min-w-0">
+              <p class="truncate text-sm text-white">
+                {{ member.characterName }}
+              </p>
+              <p class="text-xs text-secondary">
+                {{ member.entryArenaRating }} Arena Rating ·
+                {{ member.entryRankTier }}
               </p>
             </div>
-            <button
-              type="button"
-              class="ll-button-secondary px-3 py-1 text-xs"
-              [disabled]="actionLoading()"
-              (click)="applyToTeam(current(), team)"
-            >
-              Apply
-            </button>
+            <span *ngIf="member.isTeamOwner" class="ll-stat-label">Owner</span>
           </div>
-          <p class="mt-2 text-xs text-secondary">
-            Missing {{ team.missingParticipantCount }} player{{
-              team.missingParticipantCount === 1 ? "" : "s"
-            }}
+          <div
+            *ngIf="team.memberCount < 3"
+            class="seed-roster-member border-dashed"
+          >
+            <p class="text-sm text-secondary">
+              {{ 3 - team.memberCount }} open
+              {{ 3 - team.memberCount === 1 ? "slot" : "slots" }}
+            </p>
+          </div>
+        </div>
+      </section>
+    </ng-container>
+
+    <article
+      *ngFor="let slot of registrationOpenSlots()"
+      class="seed-card border-dashed opacity-60"
+    >
+      <span class="text-[0.65rem] text-secondary">{{
+        seedNumber(null, slot)
+      }}</span>
+      <span class="text-sm text-secondary">Open</span>
+    </article>
+  </div>
+</ng-template>
+
+<ng-template #teamFinder>
+  <div class="mt-3">
+    <p class="text-sm text-secondary">
+      Create a team or join one that is still recruiting.
+    </p>
+    <input
+      #teamNameInput
+      type="text"
+      maxlength="80"
+      class="ll-input mt-3 w-full"
+      placeholder="Team name"
+    />
+    <button
+      type="button"
+      class="ll-button-primary mt-2 w-full px-3 py-2 text-sm"
+      [disabled]="actionLoading()"
+      (click)="createTeam(current(), teamNameInput.value)"
+    >
+      Create team
+    </button>
+
+    <div
+      *ngIf="openTeams().length > 0"
+      class="mt-4 border-t border-white/10 pt-3"
+    >
+      <p class="ll-stat-label">Open teams</p>
+      <div *ngFor="let team of openTeams().slice(0, 5)" class="archive-row">
+        <div class="min-w-0">
+          <p class="truncate text-sm text-white">{{ team.name }}</p>
+          <p class="text-xs text-secondary">
+            {{ team.memberCount }}/3 · owner {{ team.ownerName }}
           </p>
         </div>
+        <button
+          type="button"
+          class="ll-button px-2 py-1 text-xs"
+          [disabled]="actionLoading()"
+          (click)="applyToTeam(current(), team)"
+        >
+          Apply
+        </button>
       </div>
     </div>
   </div>
 </ng-template>
 
 <ng-template #emptyState>
-  <section class="ll-panel flex h-48 w-full items-center justify-center p-4">
-    <div class="ll-empty-state flex w-full flex-col items-center gap-3">
+  <section
+    class="ll-panel flex min-h-56 w-full items-center justify-center bg-texture p-6"
+  >
+    <div
+      class="ll-empty-state flex w-full flex-col items-center gap-3 text-center"
+    >
       <span>
         {{
           loading()
@@ -641,8 +779,4 @@
       </button>
     </div>
   </section>
-</ng-template>
-
-<ng-template #noBracket>
-  <div class="ll-empty-state">Bracket appears after registration closes.</div>
 </ng-template>

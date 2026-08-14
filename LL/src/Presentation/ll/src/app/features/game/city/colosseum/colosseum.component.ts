@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
-import { DatePipe, NgIf } from '@angular/common';
+import { DatePipe, NgIf, NgTemplateOutlet } from '@angular/common';
 import { CombatComponent } from '../../../../shared/components/combat/combat.component';
 import { BattleType } from '../../../../core/state/combat-state/combatState';
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
@@ -28,6 +28,7 @@ import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-
     TabComponent,
     CombatComponent,
     NgIf,
+    NgTemplateOutlet,
     DatePipe,
     ArenaBattleComponent,
     ChampionsMarketComponent,

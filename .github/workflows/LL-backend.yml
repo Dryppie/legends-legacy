@@ -9,6 +9,12 @@ on:
     paths:
       - "LL/**"
       - "!LL/src/Presentation/ll/**"
+      - ".github/actions/build-and-push-docker/**"
+      - ".github/workflows/LL-backend.yml"
+      - ".github/workflows/backend-gate.yml"
+      - ".github/workflows/backend-pr.yml"
+      - "build/build-ll.ps1"
+      - "build/report-test-timings.ps1"
 
 env:
   buildConfiguration: Release
@@ -22,7 +28,6 @@ jobs:
     uses: ./.github/workflows/backend-gate.yml
 
   setup:
-    needs: gate
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.set_version.outputs.version }}
@@ -84,22 +89,19 @@ jobs:
           echo "tagid=build-${{ github.run_id }}" >> $GITHUB_OUTPUT
           echo "tagcommit=commit-${{ github.sha }}" >> $GITHUB_OUTPUT
 
-  build:
-    needs: setup
-    uses: ./.github/workflows/backend-build.yml
-    with:
-      projects_filter: "LL/LegendsLegacy.sln"
-      project_name: "LL"
-      dotnet_version: "10.x"
-      version: ${{ needs.setup.outputs.version }}
-
   docker:
     needs:
       - setup
-      - build
+      - gate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download published backend artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ll-backend-publish
+          path: .
 
       - name: Docker Publish and Push
         uses: ./.github/actions/build-and-push-docker
@@ -107,6 +109,7 @@ jobs:
           tag: ${{ needs.setup.outputs.tag }}
           version: ${{ needs.setup.outputs.version }}
           buildScript: "build/build-ll.ps1"
+          usePrebuiltArtifacts: "true"
           token: ${{ secrets.GITHUB_TOKEN }}
 
   helm:

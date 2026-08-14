@@ -1,5 +1,12 @@
 import { DatePipe, NgFor, NgIf } from '@angular/common';
-import { Component, OnInit, computed, effect, signal } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  computed,
+  effect,
+  signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Observable, finalize } from 'rxjs';
 import { ColosseumService } from '../../../../../core/services/api/colosseum/colosseum.service';
@@ -16,6 +23,7 @@ import {
   TournamentMatch,
   TournamentParticipant,
   TournamentRewardGrant,
+  TournamentRound,
   TournamentSeasonLeaderboardEntry,
   TournamentSummary,
   TournamentTeam,
@@ -26,8 +34,9 @@ import {
   selector: 'app-tournament-grounds',
   imports: [DatePipe, NgFor, NgIf, RouterLink, CharacterTagComponent],
   templateUrl: './tournament-grounds.component.html',
+  styleUrl: './tournament-grounds.component.scss',
 })
-export class TournamentGroundsComponent implements OnInit {
+export class TournamentGroundsComponent implements OnInit, OnDestroy {
   readonly status = signal<TournamentGroundsStatus | null>(null);
   readonly details = signal<TournamentDetails | null>(null);
   readonly bracket = signal<TournamentBracket | null>(null);
@@ -39,6 +48,10 @@ export class TournamentGroundsComponent implements OnInit {
   readonly loading = signal(false);
   readonly actionLoading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly clock = signal(Date.now());
+  readonly invitePickerOpen = signal(false);
+  readonly selectedTeamId = signal<string | null>(null);
+  readonly selectedRoundNumber = signal<number | null>(null);
 
   readonly current = computed(() => this.status()?.currentTournament ?? null);
   readonly developmentToolsEnabled = computed(
@@ -50,9 +63,22 @@ export class TournamentGroundsComponent implements OnInit {
     const status = this.current()?.status;
     return !status || status === 'Scheduled' || status === 'RegistrationOpen';
   });
-  readonly upcoming = computed(() => this.status()?.upcomingTournaments ?? []);
-  readonly recent = computed(() => this.status()?.recentTournaments ?? []);
   readonly teams = computed(() => this.details()?.teams ?? []);
+  readonly registrationOpenSlots = computed(() => {
+    const tournament = this.current();
+    if (!tournament) return [];
+
+    const firstOpenSlot = this.teams().length + 1;
+    const openSlotCount = Math.max(
+      0,
+      tournament.maxParticipants - this.teams().length,
+    );
+
+    return Array.from(
+      { length: openSlotCount },
+      (_, index) => firstOpenSlot + index,
+    );
+  });
   readonly playerTeam = computed(
     () => this.teams().find((team) => team.isPlayerTeam) ?? null,
   );
@@ -82,7 +108,126 @@ export class TournamentGroundsComponent implements OnInit {
   readonly claimedRewards = computed(() =>
     this.rewards().filter((reward) => reward.status === 'Claimed'),
   );
+  readonly playerMatches = computed(() => {
+    const teamId = this.playerTeam()?.teamId;
+    if (!teamId) return [];
+
+    return (this.bracket()?.rounds ?? []).flatMap((round) =>
+      round.matches
+        .filter(
+          (match) =>
+            match.playerOne?.teamId === teamId ||
+            match.playerTwo?.teamId === teamId,
+        )
+        .map((match) => ({ round, match })),
+    );
+  });
+  readonly activePlayerMatch = computed(
+    () =>
+      this.playerMatches().find(
+        ({ match }) => match.status !== 'Completed' && match.status !== 'Bye',
+      ) ?? null,
+  );
+  readonly currentRound = computed(() => {
+    const rounds = this.bracket()?.rounds ?? [];
+    const resolvingRound = rounds.find(
+      (round) =>
+        round.status === 'InProgress' ||
+        round.status === 'Resolving' ||
+        round.matches.some((match) => match.status === 'Resolving'),
+    );
+    if (resolvingRound) return resolvingRound;
+
+    const dueRound = [...rounds]
+      .reverse()
+      .find(
+        (round) =>
+          round.status !== 'Completed' &&
+          Date.parse(round.startsAtUtc) <= this.clock(),
+      );
+    if (dueRound) return dueRound;
+
+    return (
+      rounds.find((round) => round.status !== 'Completed') ??
+      [...rounds].reverse().find((round) => round.status === 'Completed') ??
+      null
+    );
+  });
+  readonly selectedRound = computed(() => {
+    const rounds = this.bracket()?.rounds ?? [];
+    const roundNumber = this.selectedRoundNumber();
+    return (
+      rounds.find((round) => round.roundNumber === roundNumber) ??
+      this.currentRound() ??
+      rounds[0] ??
+      null
+    );
+  });
+  readonly totalBattleCount = computed(() =>
+    (this.bracket()?.rounds ?? []).reduce(
+      (total, round) => total + round.matches.length,
+      0,
+    ),
+  );
+  readonly playerRecord = computed(() => {
+    const teamId = this.playerTeam()?.teamId;
+    return this.playerMatches().reduce(
+      (record, { match }) => {
+        if (match.status !== 'Completed') return record;
+        if (match.winnerTeamId === teamId) record.wins += 1;
+        else record.losses += 1;
+        return record;
+      },
+      { wins: 0, losses: 0 },
+    );
+  });
+  readonly nextActionAt = computed(() => {
+    const tournament = this.current();
+    if (!tournament) return null;
+
+    switch (tournament.status) {
+      case 'Scheduled':
+        return tournament.registrationStartsAtUtc;
+      case 'RegistrationOpen':
+        return tournament.registrationEndsAtUtc;
+      case 'RegistrationClosed':
+      case 'BracketGenerated':
+        return tournament.startsAtUtc;
+      case 'InProgress':
+        return (
+          this.activePlayerMatch()?.match.playbackEndsAtUtc ??
+          this.activePlayerMatch()?.match.scheduledAtUtc ??
+          this.currentRound()?.startsAtUtc ??
+          null
+        );
+      default:
+        return null;
+    }
+  });
+  readonly countdown = computed(() => {
+    const target = this.nextActionAt();
+    if (!target) return null;
+
+    const remainingSeconds = Math.max(
+      0,
+      Math.floor((Date.parse(target) - this.clock()) / 1000),
+    );
+    const hours = Math.floor(remainingSeconds / 3600);
+    const minutes = Math.floor((remainingSeconds % 3600) / 60);
+    const seconds = remainingSeconds % 60;
+
+    return hours > 0
+      ? `${hours}:${minutes.toString().padStart(2, '0')}:${seconds
+          .toString()
+          .padStart(2, '0')}`
+      : `${minutes.toString().padStart(2, '0')}:${seconds
+          .toString()
+          .padStart(2, '0')}`;
+  });
   private lastRealtimeUpdateId: string | null = null;
+  private clockHandle: ReturnType<typeof setInterval> | null = null;
+  private serverClockOffsetMs = 0;
+  private lastAutoSelectedRoundNumber: number | null = null;
 
   constructor(
     private readonly colosseumService: ColosseumService,
@@ -120,7 +265,15 @@ export class TournamentGroundsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.clockHandle = setInterval(
+      () => this.clock.set(Date.now() + this.serverClockOffsetMs),
+      1000,
+    );
     this.refresh();
+  }
+
+  ngOnDestroy(): void {
+    if (this.clockHandle) clearInterval(this.clockHandle);
   }
 
   refresh(): void {
@@ -132,6 +285,11 @@ export class TournamentGroundsComponent implements OnInit {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (status) => {
+          const serverNow = Date.parse(status.nowUtc);
+          if (!Number.isNaN(serverNow)) {
+            this.serverClockOffsetMs = serverNow - Date.now();
+            this.clock.set(serverNow);
+          }
           this.status.set(status);
           const tournamentId = status.currentTournament?.id;
           if (tournamentId) {
@@ -175,14 +333,6 @@ export class TournamentGroundsComponent implements OnInit {
     );
   }
 
-  updateLoadout(tournament: TournamentSummary): void {
-    this.runAction(
-      this.colosseumService.updateTournamentLoadout(tournament.id),
-      'Tournament loadout updated',
-      () => this.loadDetails(tournament.id),
-    );
-  }
-
   createTeam(tournament: TournamentSummary | null, name: string): void {
     if (!tournament) return;
 
@@ -205,7 +355,10 @@ export class TournamentGroundsComponent implements OnInit {
         participant.participantId,
       ),
       'Invite sent',
-      () => this.refresh(),
+      () => {
+        this.invitePickerOpen.set(false);
+        this.refresh();
+      },
     );
   }
 
@@ -307,6 +460,151 @@ export class TournamentGroundsComponent implements OnInit {
     return winner ? `${winner.name} advanced` : this.enumLabel(match.outcome);
   }
 
+  opponentFor(
+    match: TournamentMatch | null | undefined,
+  ): TournamentTeam | null {
+    if (!match) return null;
+    const teamId = this.playerTeam()?.teamId;
+    if (!teamId) return null;
+    return match.playerOne?.teamId === teamId
+      ? (match.playerTwo ?? null)
+      : (match.playerOne ?? null);
+  }
+
+  isPlayerMatch(match: TournamentMatch): boolean {
+    const teamId = this.playerTeam()?.teamId;
+    return Boolean(
+      teamId &&
+        (match.playerOne?.teamId === teamId ||
+          match.playerTwo?.teamId === teamId),
+    );
+  }
+
+  isPlayerWinner(match: TournamentMatch): boolean {
+    return Boolean(
+      this.playerTeam()?.teamId &&
+        match.winnerTeamId === this.playerTeam()?.teamId,
+    );
+  }
+
+  seedNumber(seed: number | null | undefined, fallback: number): string {
+    return (seed ?? fallback).toString().padStart(2, '0');
+  }
+
+  toggleSelectedTeam(team: TournamentTeam): void {
+    this.selectedTeamId.update((teamId) =>
+      teamId === team.teamId ? null : team.teamId,
+    );
+  }
+
+  roundNavigationLabel(round: TournamentRound): string {
+    const teamCount = round.matches.length * 2;
+    if (teamCount === 2) return 'Final';
+    if (teamCount === 4) return 'SF';
+    if (teamCount === 8) return 'QF';
+    return `R${teamCount}`;
+  }
+
+  roundDisplayName(round: TournamentRound): string {
+    const teamCount = round.matches.length * 2;
+    if (teamCount === 2) return 'Final';
+    if (teamCount === 4) return 'Semi-finals';
+    if (teamCount === 8) return 'Quarter-finals';
+    return `Round of ${teamCount}`;
+  }
+
+  roundTimingLabel(round: TournamentRound): string {
+    if (round.status === 'Completed') return 'Complete';
+    if (this.currentRound()?.id === round.id) {
+      return round.status === 'Resolving' ||
+        round.matches.some((match) => match.status === 'Resolving')
+        ? 'Resolving now'
+        : 'Current round';
+    }
+
+    return new Date(round.startsAtUtc).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  navigateRound(offset: number): void {
+    const rounds = this.bracket()?.rounds ?? [];
+    const selected = this.selectedRound();
+    if (!selected) return;
+
+    const currentIndex = rounds.findIndex((round) => round.id === selected.id);
+    const nextRound = rounds[currentIndex + offset];
+    if (nextRound) this.selectedRoundNumber.set(nextRound.roundNumber);
+  }
+
+  canNavigateRound(offset: number): boolean {
+    const rounds = this.bracket()?.rounds ?? [];
+    const selected = this.selectedRound();
+    if (!selected) return false;
+    const currentIndex = rounds.findIndex((round) => round.id === selected.id);
+    return Boolean(rounds[currentIndex + offset]);
+  }
+
+  heroDescription(tournament: TournamentSummary): string {
+    if (tournament.status === 'RegistrationOpen') {
+      const remaining = Math.max(
+        0,
+        tournament.maxParticipants - tournament.registeredParticipantCount,
+      );
+      return `${remaining} places remain. Seeding locks when registration closes.`;
+    }
+    if (tournament.status === 'InProgress') {
+      const round = this.currentRound();
+      return round
+        ? `${this.roundDisplayName(round)} is underway. Matches resolve automatically on the tournament clock.`
+        : 'The tournament is underway. Matches resolve automatically.';
+    }
+    if (tournament.status === 'Completed') {
+      return tournament.playerFinalPlacement === 1
+        ? 'The grounds are claimed. Your rewards are ready below.'
+        : 'The tournament is complete. Review the bracket and your earned rewards.';
+    }
+    if (tournament.status === 'Cancelled') {
+      return tournament.cancellationReason ?? 'This tournament was cancelled.';
+    }
+    return 'Teams are seeded into a single-elimination bracket when registration closes.';
+  }
+
+  entryCardEyebrow(tournament: TournamentSummary): string {
+    if (tournament.status === 'Completed') return 'Your run';
+    if (this.activePlayerMatch()) return 'Next match';
+    return 'Your entry';
+  }
+
+  entryCardTitle(tournament: TournamentSummary): string {
+    const opponent = this.opponentFor(this.activePlayerMatch()?.match);
+    if (opponent) return `vs ${opponent.name}`;
+    if (tournament.playerFinalPlacement === 1) return 'Champion';
+    if (tournament.playerFinalPlacement) {
+      return `Placed #${tournament.playerFinalPlacement}`;
+    }
+    return this.playerStatusLabel(tournament);
+  }
+
+  entryCardCopy(tournament: TournamentSummary): string {
+    const active = this.activePlayerMatch();
+    if (active) {
+      return `${active.round.name}. The match resolves automatically at the scheduled time.`;
+    }
+    if (!tournament.isRegistered) {
+      return (
+        tournament.cannotRegisterReason ??
+        'Register to reserve your place in the next bracket.'
+      );
+    }
+    if (tournament.status === 'RegistrationOpen') {
+      return 'Your current equipment and essences are saved with this entry.';
+    }
+    const record = this.playerRecord();
+    return `Tournament record ${record.wins}-${record.losses}.`;
+  }
+
   playerStatusLabel(tournament: TournamentSummary): string {
     if (!tournament.playerStatus) return 'Not entered';
     if (tournament.playerStatus === 'Champion') return 'Champion';
@@ -315,19 +613,6 @@ export class TournamentGroundsComponent implements OnInit {
     }
 
     return this.enumLabel(tournament.playerStatus);
-  }
-
-  tournamentResultLabel(tournament: TournamentSummary): string {
-    if (tournament.status === 'Cancelled') {
-      return tournament.cancellationReason ?? 'Cancelled';
-    }
-
-    if (tournament.playerFinalPlacement === 1) return 'Champion';
-    if (tournament.playerFinalPlacement) {
-      return `Placed ${tournament.playerFinalPlacement}`;
-    }
-
-    return this.enumLabel(tournament.playerStatus ?? tournament.status);
   }
 
   rewardLabel(reward: TournamentRewardGrant): string {
@@ -386,10 +671,46 @@ export class TournamentGroundsComponent implements OnInit {
 
   private loadBracket(tournamentId: string): void {
     this.colosseumService.getTournamentBracket(tournamentId).subscribe({
-      next: (bracket) => this.bracket.set(bracket),
+      next: (bracket) => {
+        this.bracket.set(bracket);
+        const activeRoundNumber = this.preferredRoundNumber(bracket);
+        if (
+          this.selectedRoundNumber() === null ||
+          activeRoundNumber !== this.lastAutoSelectedRoundNumber
+        ) {
+          this.selectedRoundNumber.set(activeRoundNumber);
+        }
+        this.lastAutoSelectedRoundNumber = activeRoundNumber;
+      },
       error: (err) =>
         this.error.set(err.message ?? 'Failed to load tournament bracket'),
     });
+  }
+
+  private preferredRoundNumber(bracket: TournamentBracket): number | null {
+    const resolvingRound = bracket.rounds.find(
+      (round) =>
+        round.status === 'InProgress' ||
+        round.status === 'Resolving' ||
+        round.matches.some((match) => match.status === 'Resolving'),
+    );
+    if (resolvingRound) return resolvingRound.roundNumber;
+
+    const dueRound = [...bracket.rounds]
+      .reverse()
+      .find(
+        (round) =>
+          round.status !== 'Completed' &&
+          Date.parse(round.startsAtUtc) <= this.clock(),
+      );
+    if (dueRound) return dueRound.roundNumber;
+
+    return (
+      bracket.rounds.find((round) => round.status !== 'Completed')
+        ?.roundNumber ??
+      bracket.rounds[bracket.rounds.length - 1]?.roundNumber ??
+      null
+    );
   }
 
   private loadDetails(tournamentId: string): void {

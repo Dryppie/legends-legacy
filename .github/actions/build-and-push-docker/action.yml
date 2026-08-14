@@ -11,6 +11,10 @@ inputs:
   buildScript:
     description: "Path to the build script."
     required: true
+  usePrebuiltArtifacts:
+    description: "Use previously published artifacts instead of publishing again."
+    required: false
+    default: "false"
   token:
     description: "GitHub token for authentication"
     required: true
@@ -55,4 +59,9 @@ runs:
       run: |
         $DebugPreference = 'Continue'
         pwd
-        . "${{ inputs.buildScript }}"
+        if ("${{ inputs.usePrebuiltArtifacts }}" -eq "true") {
+          & "${{ inputs.buildScript }}" -SkipPublish
+        }
+        else {
+          & "${{ inputs.buildScript }}"
+        }

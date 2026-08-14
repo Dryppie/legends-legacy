@@ -7,14 +7,16 @@ Last updated: 2026-08-13
 ## Match cadence
 
 - Bracket generation assigns every non-bye match a fixed start slot.
-- Slots are separated by `MatchIntervalMinutes`, which defaults to 10 minutes.
-- If a worker starts a match late, that delay is cascaded to every remaining slot so catch-up processing never launches matches closer than ten minutes apart.
-- A progression execution may start at most one match.
+- Rounds begin at intervals controlled by `MatchIntervalMinutes`, which defaults to 10 minutes.
+- Every non-bye match in the Round of 32, Round of 16, and quarter-final begins together at its round boundary.
+- The two semifinal matches are staggered by one interval; the final begins one interval after the second semifinal.
+- If a worker starts a match batch late, that delay is cascaded to every remaining slot so the configured cadence is preserved.
+- A progression execution starts every match assigned to the next due slot.
 - A match remains `Resolving` until its authoritative playback end timestamp.
 - Winner/loser updates, bracket advancement, battle-completed events, placements, and rewards occur only after playback ends.
 - PostgreSQL advisory locks and persisted background-job execution guards continue to serialize tournament progression across workers.
 
-For a standard four-team bracket, the three battles start at tournament start, +10 minutes, and +20 minutes. Byes do not consume a battle slot.
+For a standard 32-team bracket, R32 starts at tournament start, R16 at +10 minutes, the quarter-final at +20, the semifinals at +30 and +40, and the final at +50. Byes do not consume a battle slot.
 
 ## Combat and playback
 

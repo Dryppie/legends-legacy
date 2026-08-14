@@ -19,9 +19,11 @@ using Services.LL.WorldTower;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceFull")]
 public sealed class WorldTowerBalanceAnalyzerTests
 {
     [Fact]
+    [Trait("BalanceShard", "WorldTowerLow")]
     public async Task Analyzer_uses_tier_one_floor_benchmarks_and_is_deterministic()
     {
         var analyzer = CreateAnalyzer();
@@ -55,26 +57,46 @@ public sealed class WorldTowerBalanceAnalyzerTests
         Assert.Equal(6, first.Floors[^1].EssenceCount);
     }
 
-    [Fact]
-    [Trait("Category", "Balance")]
-    public async Task Released_floor_balance_matrix_meets_prepared_targets()
-    {
-        var report = await CreateAnalyzer().AnalyzeAsync(
-            new WorldTowerBalanceRequest(null, 256, 130_363),
-            CancellationToken.None);
+    [Theory]
+    [Trait("BalanceShard", "WorldTowerLow")]
+    [InlineData(1, 30, "Rare", 4)]
+    [InlineData(2, 32, "Rare", 4)]
+    [InlineData(3, 34, "Rare", 4)]
+    [InlineData(4, 37, "Epic", 4)]
+    [InlineData(5, 39, "Epic", 4)]
+    public Task Released_lower_floor_balance_matrix_meets_prepared_targets(
+        int floorNumber,
+        int expectedLevel,
+        string expectedRarity,
+        int expectedEssenceCount) =>
+        AssertReleasedFloorAsync(
+            floorNumber,
+            expectedLevel,
+            expectedRarity,
+            expectedEssenceCount,
+            randomSeed: 130_363);
 
-        Assert.Equal(10, report.Floors.Count);
-        Assert.All(report.Floors, floor =>
-        {
-            Assert.Equal(1, floor.EquipmentTier);
-            Assert.All(floor.Rosters, roster => Assert.Equal(256, roster.Attempts));
-            var mixed = floor.Rosters.Single(roster => roster.Roster == "Mixed");
-            Assert.InRange(mixed.WinRate, 5, 15);
-            Assert.InRange(mixed.AverageSurvivors, 0, floor.RequiredSlots * 0.2);
-        });
-    }
+    [Theory]
+    [Trait("BalanceShard", "WorldTowerHigh")]
+    [InlineData(6, 41, "Epic", 5)]
+    [InlineData(7, 43, "Unique", 5)]
+    [InlineData(8, 46, "Unique", 5)]
+    [InlineData(9, 48, "Unique", 5)]
+    [InlineData(10, 50, "Legendary", 6)]
+    public Task Released_upper_floor_balance_matrix_meets_prepared_targets(
+        int floorNumber,
+        int expectedLevel,
+        string expectedRarity,
+        int expectedEssenceCount) =>
+        AssertReleasedFloorAsync(
+            floorNumber,
+            expectedLevel,
+            expectedRarity,
+            expectedEssenceCount,
+            randomSeed: 130_363);
 
     [Fact]
+    [Trait("BalanceShard", "WorldTowerLow")]
     public async Task Floor_one_rejects_the_pre_tower_checkpoint()
     {
         var analyzer = CreateAnalyzer();
@@ -93,6 +115,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
     }
 
     [Fact]
+    [Trait("BalanceShard", "WorldTowerLow")]
     public async Task Floor_one_rejects_an_otherwise_ready_uncommon_roster()
     {
         var report = await CreateAnalyzer().AnalyzeAsync(
@@ -110,6 +133,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
     }
 
     [Fact]
+    [Trait("BalanceShard", "WorldTowerLow")]
     public async Task Floor_one_rejects_full_common_gear_even_with_four_essences()
     {
         var report = await CreateAnalyzer().AnalyzeAsync(
@@ -126,130 +150,26 @@ public sealed class WorldTowerBalanceAnalyzerTests
             $"Full-Common {roster.Roster} roster still won {roster.WinRate:N2}% of attempts."));
     }
 
-    [Fact]
-    public async Task Floor_one_is_clearable_at_its_level_thirty_rare_checkpoint()
-    {
-        var report = await CreateAnalyzer().AnalyzeAsync(
-            new WorldTowerBalanceRequest(1, 256, 130_363),
-            CancellationToken.None);
-
-        var mixed = Assert.Single(report.Floors).Rosters.Single(x => x.Roster == "Mixed");
-        Assert.InRange(mixed.WinRate, 5, 15);
-        Assert.InRange(mixed.AverageSurvivors, 0, 1.0);
-    }
-
-    [Fact]
-    public async Task Floor_three_has_about_a_ten_percent_win_rate_at_its_rare_checkpoint()
-    {
-        var report = await CreateAnalyzer().AnalyzeAsync(
-            new WorldTowerBalanceRequest(3, 256, 130_363),
-            CancellationToken.None);
-
-        var floor = Assert.Single(report.Floors);
-        var mixed = floor.Rosters.Single(x => x.Roster == "Mixed");
-        Assert.Equal(34, floor.CharacterLevel);
-        Assert.Equal("Rare", floor.EquipmentRarity);
-        Assert.Equal(4, floor.EssenceCount);
-        Assert.InRange(mixed.WinRate, 5, 15);
-        Assert.InRange(mixed.AverageSurvivors, 0, floor.RequiredSlots * 0.2);
-    }
+    [Theory]
+    [Trait("BalanceShard", "WorldTowerHigh")]
+    [InlineData(7, 43, "Unique", 5)]
+    [InlineData(8, 46, "Unique", 5)]
+    [InlineData(9, 48, "Unique", 5)]
+    [InlineData(10, 50, "Legendary", 6)]
+    public Task Upper_floors_meet_prepared_targets_with_a_second_seed(
+        int floorNumber,
+        int expectedLevel,
+        string expectedRarity,
+        int expectedEssenceCount) =>
+        AssertReleasedFloorAsync(
+            floorNumber,
+            expectedLevel,
+            expectedRarity,
+            expectedEssenceCount,
+            randomSeed: 424_243);
 
     [Fact]
-    [Trait("Category", "Balance")]
-    public async Task Floor_six_has_about_a_ten_percent_win_rate_at_its_epic_checkpoint()
-    {
-        var report = await CreateAnalyzer().AnalyzeAsync(
-            new WorldTowerBalanceRequest(6, 256, 130_363),
-            CancellationToken.None);
-
-        var floor = Assert.Single(report.Floors);
-        var mixed = floor.Rosters.Single(x => x.Roster == "Mixed");
-        Assert.Equal(41, floor.CharacterLevel);
-        Assert.Equal("Epic", floor.EquipmentRarity);
-        Assert.Equal(5, floor.EssenceCount);
-        Assert.InRange(mixed.WinRate, 5, 15);
-        Assert.InRange(mixed.AverageSurvivors, 0, floor.RequiredSlots * 0.2);
-    }
-
-    [Theory]
-    [Trait("Category", "Balance")]
-    [InlineData(130_363)]
-    [InlineData(424_243)]
-    public async Task Floor_seven_has_about_a_ten_percent_win_rate_at_its_unique_checkpoint(int randomSeed)
-    {
-        var report = await CreateAnalyzer().AnalyzeAsync(
-            new WorldTowerBalanceRequest(7, 256, randomSeed),
-            CancellationToken.None);
-
-        var floor = Assert.Single(report.Floors);
-        var mixed = floor.Rosters.Single(x => x.Roster == "Mixed");
-        Assert.Equal(43, floor.CharacterLevel);
-        Assert.Equal("Unique", floor.EquipmentRarity);
-        Assert.Equal(5, floor.EssenceCount);
-        Assert.InRange(mixed.WinRate, 5, 15);
-        Assert.InRange(mixed.AverageSurvivors, 0, floor.RequiredSlots * 0.2);
-    }
-
-    [Theory]
-    [Trait("Category", "Balance")]
-    [InlineData(130_363)]
-    [InlineData(424_243)]
-    public async Task Floor_eight_has_about_a_ten_percent_win_rate_at_its_unique_checkpoint(int randomSeed)
-    {
-        var report = await CreateAnalyzer().AnalyzeAsync(
-            new WorldTowerBalanceRequest(8, 256, randomSeed),
-            CancellationToken.None);
-
-        var floor = Assert.Single(report.Floors);
-        var mixed = floor.Rosters.Single(x => x.Roster == "Mixed");
-        Assert.Equal(46, floor.CharacterLevel);
-        Assert.Equal("Unique", floor.EquipmentRarity);
-        Assert.Equal(5, floor.EssenceCount);
-        Assert.InRange(mixed.WinRate, 5, 15);
-        Assert.InRange(mixed.AverageSurvivors, 0, floor.RequiredSlots * 0.2);
-    }
-
-    [Theory]
-    [Trait("Category", "Balance")]
-    [InlineData(130_363)]
-    [InlineData(424_243)]
-    public async Task Floor_nine_has_about_a_ten_percent_win_rate_at_its_unique_checkpoint(int randomSeed)
-    {
-        var report = await CreateAnalyzer().AnalyzeAsync(
-            new WorldTowerBalanceRequest(9, 256, randomSeed),
-            CancellationToken.None);
-
-        var floor = Assert.Single(report.Floors);
-        var mixed = floor.Rosters.Single(x => x.Roster == "Mixed");
-        Assert.Equal(48, floor.CharacterLevel);
-        Assert.Equal("Unique", floor.EquipmentRarity);
-        Assert.Equal(5, floor.EssenceCount);
-        Assert.InRange(mixed.WinRate, 5, 15);
-        Assert.InRange(mixed.AverageSurvivors, 0, floor.RequiredSlots * 0.2);
-    }
-
-    [Theory]
-    [Trait("Category", "Balance")]
-    [InlineData(130_363)]
-    [InlineData(424_243)]
-    public async Task Floor_ten_has_about_a_ten_percent_win_rate_at_its_legendary_checkpoint(int randomSeed)
-    {
-        var report = await CreateAnalyzer().AnalyzeAsync(
-            new WorldTowerBalanceRequest(10, 256, randomSeed),
-            CancellationToken.None);
-
-        var floor = Assert.Single(report.Floors);
-        var mixed = floor.Rosters.Single(x => x.Roster == "Mixed");
-        Assert.Equal(50, floor.CharacterLevel);
-        Assert.Equal("Legendary", floor.EquipmentRarity);
-        Assert.Equal(6, floor.EssenceCount);
-        Assert.True(
-            mixed.WinRate is >= 5 and <= 15,
-            JsonSerializer.Serialize(mixed));
-        Assert.InRange(mixed.AverageSurvivors, 0, floor.RequiredSlots * 0.2);
-    }
-
-    [Fact]
+    [Trait("BalanceShard", "WorldTowerHigh")]
     public async Task Floor_eleven_is_not_available_while_release_ends_at_floor_ten()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
@@ -259,6 +179,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
     }
 
     [Theory]
+    [Trait("BalanceShard", "WorldTowerLow")]
     [InlineData(1, 30, "Rare", 4)]
     [InlineData(5, 39, "Epic", 4)]
     [InlineData(6, 41, "Epic", 5)]
@@ -289,6 +210,34 @@ public sealed class WorldTowerBalanceAnalyzerTests
             build.Snapshot.Equipment,
             equipment => Assert.Equal(expectedRarity, equipment.Rarity.ToString()));
         Assert.Equal(expectedEssenceCount, build.Snapshot.EquippedEssences.Count);
+    }
+
+    private static async Task AssertReleasedFloorAsync(
+        int floorNumber,
+        int expectedLevel,
+        string expectedRarity,
+        int expectedEssenceCount,
+        int randomSeed)
+    {
+        var report = await CreateAnalyzer().AnalyzeAsync(
+            new WorldTowerBalanceRequest(floorNumber, 256, randomSeed),
+            CancellationToken.None);
+
+        Assert.True(report.UsesTierOneOnly);
+        var floor = Assert.Single(report.Floors);
+        Assert.Equal(floorNumber, floor.FloorNumber);
+        Assert.Equal(expectedLevel, floor.CharacterLevel);
+        Assert.Equal(1, floor.EquipmentTier);
+        Assert.Equal(expectedRarity, floor.EquipmentRarity);
+        Assert.Equal(expectedEssenceCount, floor.EssenceCount);
+        Assert.Equal(4, floor.Rosters.Count);
+        Assert.All(floor.Rosters, roster => Assert.Equal(256, roster.Attempts));
+
+        var mixed = floor.Rosters.Single(roster => roster.Roster == "Mixed");
+        Assert.True(
+            mixed.WinRate is >= 5 and <= 15,
+            JsonSerializer.Serialize(mixed));
+        Assert.InRange(mixed.AverageSurvivors, 0, floor.RequiredSlots * 0.2);
     }
 
     private static WorldTowerBalanceAnalyzer CreateAnalyzer() => CreateFixture().Analyzer;

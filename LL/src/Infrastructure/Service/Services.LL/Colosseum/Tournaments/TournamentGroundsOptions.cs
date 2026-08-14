@@ -9,7 +9,7 @@ public sealed class TournamentGroundsOptions
     public bool UsePostgresAdvisoryLocks { get; set; } = true;
     public string DefaultDefinitionKey { get; set; } = "weekly-open-grounds";
     public string DefaultName { get; set; } = "Weekly Open Grounds";
-    public string DefaultDescription { get; set; } = "Weekly live single-elimination arena tournament with one spectatable match every ten minutes.";
+    public string DefaultDescription { get; set; } = "Weekly live single-elimination arena tournament with synchronized rounds every ten minutes and staggered semifinals.";
     public DayOfWeek DefaultRegistrationStartDayUtc { get; set; } = DayOfWeek.Monday;
     public int DefaultRegistrationStartHourUtc { get; set; } = 0;
     public DayOfWeek DefaultRegistrationEndDayUtc { get; set; } = DayOfWeek.Saturday;
