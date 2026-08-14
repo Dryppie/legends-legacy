@@ -3,6 +3,8 @@ namespace Services.LL.Colosseum.Tournaments;
 public sealed class TournamentGroundsOptions
 {
     public bool Enabled { get; set; } = true;
+    public bool DevelopmentToolsEnabled { get; set; }
+    public int DevelopmentProgressionIntervalSeconds { get; set; } = 2;
     public int ProgressionIntervalSeconds { get; set; } = 60;
     public bool UsePostgresAdvisoryLocks { get; set; } = true;
     public string DefaultDefinitionKey { get; set; } = "weekly-open-grounds";
@@ -15,6 +17,7 @@ public sealed class TournamentGroundsOptions
     public int DefaultStartDelayAfterRegistrationMinutes { get; set; } = 0;
     public int DefaultRoundIntervalMinutes { get; set; } = 10;
     public int MatchIntervalMinutes { get; set; } = 10;
+    public int PlaybackCompletionGraceSeconds { get; set; } = 1;
     public int CombatTicksPerFrame { get; set; } = 10;
     public int MaximumBundleUncompressedBytes { get; set; } = 16 * 1024 * 1024;
     public int MaximumBundleCompressedBytes { get; set; } = 4 * 1024 * 1024;

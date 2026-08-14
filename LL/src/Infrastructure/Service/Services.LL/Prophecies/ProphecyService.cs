@@ -423,12 +423,14 @@ public sealed class ProphecyService : IProphecyService
         }
 
         var reward = CreateCacheOpenReward(cache.Id);
-        await ApplyRewardAsync(characterId, reward, cancellationToken);
+        var rewards = await ApplyRewardAsync(characterId, reward, cancellationToken);
 
         return ProphecyOperationResult<ProphecyCacheOpenResult>.Success(
             new ProphecyCacheOpenResult(
                 cache.Id,
+                cache.Name,
                 reward,
+                rewards,
                 await GetCacheInventoryAsync(characterId, cancellationToken)));
     }
 
@@ -806,7 +808,10 @@ public sealed class ProphecyService : IProphecyService
         }
     }
 
-    private async Task ApplyRewardAsync(Guid characterId, ProphecyRewardSnapshot reward, CancellationToken cancellationToken)
+    private async Task<IReadOnlyList<InventoryItem>> ApplyRewardAsync(
+        Guid characterId,
+        ProphecyRewardSnapshot reward,
+        CancellationToken cancellationToken)
     {
         if (reward.Cinders <= 0 &&
             reward.Soulstones <= 0 &&
@@ -815,7 +820,7 @@ public sealed class ProphecyService : IProphecyService
             reward.FateEcho <= 0 &&
             !HasInventoryReward(reward))
         {
-            return;
+            return [];
         }
 
         if (HasCharacterReward(reward))
@@ -842,8 +847,12 @@ public sealed class ProphecyService : IProphecyService
 
         if (HasInventoryReward(reward))
         {
-            await _inventoryService.AddItemsToInventory(characterId, await CreateRewardInventoryItemsAsync(characterId, reward, cancellationToken), cancellationToken);
+            var rewards = await CreateRewardInventoryItemsAsync(characterId, reward, cancellationToken);
+            await _inventoryService.AddItemsToInventory(characterId, rewards, cancellationToken);
+            return rewards;
         }
+
+        return [];
     }
 
     private async Task<List<InventoryItem>> CreateRewardInventoryItemsAsync(

@@ -4,7 +4,25 @@ public sealed record TournamentGroundsStatus(
     DateTimeOffset NowUtc,
     TournamentSummary? CurrentTournament,
     IReadOnlyList<TournamentSummary> UpcomingTournaments,
-    IReadOnlyList<TournamentSummary> RecentTournaments);
+    IReadOnlyList<TournamentSummary> RecentTournaments,
+    bool DevelopmentToolsEnabled);
+
+public sealed record StartDevelopmentTournamentResult(
+    bool Started,
+    Guid? TournamentId,
+    int RegisteredParticipantCount,
+    int TeamCount,
+    string? ErrorMessage)
+{
+    public static StartDevelopmentTournamentResult Success(
+        Guid tournamentId,
+        int registeredParticipantCount,
+        int teamCount) =>
+        new(true, tournamentId, registeredParticipantCount, teamCount, null);
+
+    public static StartDevelopmentTournamentResult Failure(string errorMessage) =>
+        new(false, null, 0, 0, errorMessage);
+}
 
 public sealed record TournamentSummary(
     Guid Id,

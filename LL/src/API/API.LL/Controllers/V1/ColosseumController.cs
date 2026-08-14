@@ -5,6 +5,7 @@ using Application.UseCases.Colosseum.Commands.UpdateArenaDefenseSnapshot;
 using Application.UseCases.Colosseum.Dtos;
 using Application.UseCases.Colosseum.Tournaments;
 using Application.UseCases.Colosseum.Tournaments.Commands;
+using Application.UseCases.Colosseum.Tournaments.Commands.StartDevelopmentTournament;
 using Application.UseCases.Colosseum.Tournaments.Queries;
 using Application.UseCases.Colosseum.Queries.GetArenaOpponents;
 using Application.UseCases.Colosseum.Queries.GetArenaTickets;
@@ -69,6 +70,23 @@ public class ColosseumController : BaseController
     [HttpGet("tournaments/status")]
     public async Task<ActionResult<TournamentGroundsStatusDto>> GetTournamentGroundsStatus() =>
         await Mediator.Send(new GetTournamentGroundsStatusQuery(CurrentCharacterGuid));
+
+    [HttpPost("tournaments/development/start")]
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public async Task<ActionResult<Response<StartDevelopmentTournamentResponseDto>>> StartDevelopmentTournament(
+        [FromServices] IWebHostEnvironment environment)
+    {
+        if (!environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        var response = await Mediator.Send(
+            new StartDevelopmentTournamentCommand(CurrentCharacterGuid));
+        return response.IsSuccess
+            ? Ok(response)
+            : BadRequest(response);
+    }
 
     [HttpGet("tournaments/history")]
     public async Task<ActionResult<IReadOnlyList<TournamentHistoryEntryDto>>> GetTournamentHistory() =>
@@ -136,6 +154,16 @@ public class ColosseumController : BaseController
     [HttpPost("tournaments/{tournamentId:guid}/register")]
     public async Task<ActionResult<Response<RegisterTournamentResponseDto>>> RegisterTournament(Guid tournamentId) =>
         await Mediator.Send(new RegisterTournamentCommand(CurrentCharacterGuid, tournamentId));
+
+    [HttpPost("tournaments/{tournamentId:guid}/loadout")]
+    public async Task<ActionResult<Response<TournamentTeamActionResponseDto>>> UpdateTournamentLoadout(Guid tournamentId)
+    {
+        var response = await Mediator.Send(
+            new UpdateTournamentLoadoutCommand(CurrentCharacterGuid, tournamentId));
+        return response.IsSuccess
+            ? Ok(response)
+            : BadRequest(response);
+    }
 
     [HttpPost("tournaments/{tournamentId:guid}/withdraw")]
     public async Task<ActionResult<Response<WithdrawTournamentResponseDto>>> WithdrawTournament(Guid tournamentId) =>

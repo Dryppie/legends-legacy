@@ -41,6 +41,15 @@ export class TournamentGroundsComponent implements OnInit {
   readonly error = signal<string | null>(null);
 
   readonly current = computed(() => this.status()?.currentTournament ?? null);
+  readonly developmentToolsEnabled = computed(
+    () => this.status()?.developmentToolsEnabled ?? false,
+  );
+  readonly canStartDevelopmentTournament = computed(() => {
+    if (!this.developmentToolsEnabled()) return false;
+
+    const status = this.current()?.status;
+    return !status || status === 'Scheduled' || status === 'RegistrationOpen';
+  });
   readonly upcoming = computed(() => this.status()?.upcomingTournaments ?? []);
   readonly recent = computed(() => this.status()?.recentTournaments ?? []);
   readonly teams = computed(() => this.details()?.teams ?? []);
@@ -150,11 +159,27 @@ export class TournamentGroundsComponent implements OnInit {
     );
   }
 
+  startDevelopmentTournament(): void {
+    this.runAction(
+      this.colosseumService.startDevelopmentTournament(),
+      'Test tournament started',
+      () => this.refresh(),
+    );
+  }
+
   withdraw(tournament: TournamentSummary): void {
     this.runAction(
       this.colosseumService.withdrawTournament(tournament.id),
       'Registration withdrawn',
       () => this.refresh(),
+    );
+  }
+
+  updateLoadout(tournament: TournamentSummary): void {
+    this.runAction(
+      this.colosseumService.updateTournamentLoadout(tournament.id),
+      'Tournament loadout updated',
+      () => this.loadDetails(tournament.id),
     );
   }
 

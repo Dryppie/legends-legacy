@@ -156,9 +156,15 @@ public static class DependencyInjection
         services.AddScoped<IColosseumService, ColosseumService>();
         services.AddOptions<TournamentGroundsOptions>()
             .Bind(config.GetSection("Colosseum:TournamentGrounds"))
+            .PostConfigure(options =>
+                options.DevelopmentToolsEnabled =
+                    isDevelopment
+                    && config.GetValue<bool>("FeatureManagement:TournamentGroundsDevelopmentTools"))
             .Validate(options =>
                     options.ProgressionIntervalSeconds > 0
+                    && options.DevelopmentProgressionIntervalSeconds is >= 1 and <= 60
                     && options.MatchIntervalMinutes > 0
+                    && options.PlaybackCompletionGraceSeconds is >= 0 and <= 10
                     && options.CombatTicksPerFrame > 0
                     && options.MaximumBundleUncompressedBytes > 0
                     && options.MaximumBundleCompressedBytes > 0

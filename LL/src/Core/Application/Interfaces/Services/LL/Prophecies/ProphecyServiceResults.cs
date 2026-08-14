@@ -1,3 +1,4 @@
+using Domain.Models.Inventories;
 using Domain.Models.Prophecies;
 
 namespace Application.Interfaces.Services.LL.Prophecies;
@@ -50,7 +51,9 @@ public sealed record WeeklyRevelationClaimResult(
 
 public sealed record ProphecyCacheOpenResult(
     string CacheItemId,
+    string CacheTitle,
     ProphecyRewardSnapshot Reward,
+    IReadOnlyList<InventoryItem> Rewards,
     IReadOnlyList<ProphecyCacheInventory> Caches);
 
 public sealed record ProphecyProgressUpdate(

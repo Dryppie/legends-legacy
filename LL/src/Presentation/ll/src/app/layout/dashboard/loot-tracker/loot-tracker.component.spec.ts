@@ -18,4 +18,13 @@ describe('lootHistoryLocationLabel', () => {
       }),
     ).toBe('Trade');
   });
+
+  it('identifies the cache or loot-producing item that was opened', () => {
+    expect(
+      lootHistoryLocationLabel({
+        source: 'container-reward',
+        location: 'Catalyst Selection Cache',
+      }),
+    ).toBe('Opened: Catalyst Selection Cache');
+  });
 });

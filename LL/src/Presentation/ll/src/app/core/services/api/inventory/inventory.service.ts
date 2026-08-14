@@ -11,6 +11,7 @@ export interface ScrapEquipmentsResponse {
 
 export interface OpenSelectionCrateResponse {
   consumedItemInstanceId: string;
+  grantId: string;
   rewards: InventoryItem[];
 }
 

@@ -71,7 +71,7 @@ public sealed class SelectionCrateService : ISelectionCrateService
             .ToList();
         await _inventory.AddItemsToInventory(characterId, rewards, cancellationToken);
 
-        return new SelectionCrateOpenResult(true, null, rewards);
+        return new SelectionCrateOpenResult(true, null, rewards, definition.DisplayName);
     }
 
     private static SelectionCrateOpenResult Fail(string message) =>

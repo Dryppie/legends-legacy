@@ -172,6 +172,143 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         }
     }
 
+    public async Task<StartDevelopmentTournamentResult> StartDevelopmentTournamentAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        if (!_options.DevelopmentToolsEnabled)
+        {
+            return StartDevelopmentTournamentResult.Failure(
+                "Tournament Grounds development tools are disabled.");
+        }
+
+        if (!_options.Enabled)
+        {
+            return StartDevelopmentTournamentResult.Failure(
+                "Tournament Grounds are disabled.");
+        }
+
+        await EnsureUpcomingTournamentsAsync(cancellationToken);
+
+        var tournamentId = await _tournaments.Tournaments
+            .Where(t => t.Status != TournamentStatus.Completed && t.Status != TournamentStatus.Cancelled)
+            .OrderBy(t => t.RegistrationStartsAtUtc)
+            .Select(t => (Guid?)t.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (!tournamentId.HasValue)
+        {
+            return StartDevelopmentTournamentResult.Failure(
+                "No tournament was available to start.");
+        }
+
+        var tournament = await OpenDevelopmentRegistrationAsync(
+            tournamentId.Value,
+            cancellationToken);
+        if (tournament is null)
+        {
+            return StartDevelopmentTournamentResult.Failure(
+                "Only a scheduled or registering tournament can be started with development tools.");
+        }
+
+        var playerIsRegistered = await _tournaments.Participants.AnyAsync(
+            participant =>
+                participant.TournamentId == tournament.Id
+                && participant.CharacterId == characterId
+                && participant.Status != TournamentParticipantStatus.Withdrawn,
+            cancellationToken);
+        if (!playerIsRegistered)
+        {
+            var playerRegistration = await RegisterAsync(
+                characterId,
+                tournament.Id,
+                cancellationToken);
+            if (playerRegistration is null)
+            {
+                return StartDevelopmentTournamentResult.Failure(
+                    "Your character could not be registered. Ensure it has an Arena profile and meets the tournament requirements.");
+            }
+        }
+
+        var registeredCount = await _tournaments.Participants.CountAsync(
+            participant =>
+                participant.TournamentId == tournament.Id
+                && participant.Status != TournamentParticipantStatus.Withdrawn,
+            cancellationToken);
+        var desiredRegisteredCount = GetMaxRegisteredParticipants(tournament);
+
+        var registeredAccountIds = await _tournaments.Participants
+            .Where(participant =>
+                participant.TournamentId == tournament.Id
+                && participant.Status != TournamentParticipantStatus.Withdrawn)
+            .Select(participant => participant.AccountId)
+            .ToListAsync(cancellationToken);
+        var candidates = await _tournaments.Characters
+            .AsNoTracking()
+            .Where(candidate =>
+                candidate.User.IsGuest
+                && candidate.User.Username.StartsWith("SeedGuest")
+                && candidate.ArenaProfile != null
+                && !registeredAccountIds.Contains(candidate.UserId))
+            .OrderBy(candidate => candidate.Name)
+            .Select(candidate => candidate.Id)
+            .ToListAsync(cancellationToken);
+
+        foreach (var candidateId in candidates)
+        {
+            if (registeredCount >= desiredRegisteredCount)
+            {
+                break;
+            }
+
+            var registration = await RegisterAsync(
+                candidateId,
+                tournament.Id,
+                cancellationToken);
+            if (registration is not null)
+            {
+                registeredCount++;
+            }
+        }
+
+        if (registeredCount < desiredRegisteredCount)
+        {
+            return StartDevelopmentTournamentResult.Failure(
+                $"Only {registeredCount} of {desiredRegisteredCount} required development participants were available. Restart the API with local guest seeding enabled.");
+        }
+
+        var closedForStart = await CloseDevelopmentRegistrationAsync(
+            tournament.Id,
+            registeredCount,
+            cancellationToken);
+        if (!closedForStart)
+        {
+            return StartDevelopmentTournamentResult.Failure(
+                "The tournament changed state before it could be started.");
+        }
+
+        await AdvanceTournamentAsync(tournament.Id, cancellationToken);
+
+        var finalStatus = await _tournaments.Tournaments
+            .Where(item => item.Id == tournament.Id)
+            .Select(item => item.Status)
+            .SingleAsync(cancellationToken);
+        var teamCount = await _tournaments.Teams.CountAsync(
+            team => team.TournamentId == tournament.Id
+                    && team.Status != TournamentTeamStatus.Disbanded,
+            cancellationToken);
+
+        if (finalStatus is not TournamentStatus.InProgress and not TournamentStatus.Completed)
+        {
+            return StartDevelopmentTournamentResult.Failure(
+                $"The test tournament reached {finalStatus} instead of starting.");
+        }
+
+        return StartDevelopmentTournamentResult.Success(
+            tournament.Id,
+            registeredCount,
+            teamCount);
+    }
+
     public async Task<TournamentGroundsStatus> GetStatusAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var now = UtcNow();
@@ -202,7 +339,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             recentSummaries.Add(await MapSummaryAsync(tournament, characterId, now, cancellationToken));
         }
 
-        return new TournamentGroundsStatus(now, summaries.FirstOrDefault(), summaries.Skip(1).ToList(), recentSummaries);
+        return new TournamentGroundsStatus(
+            now,
+            summaries.FirstOrDefault(),
+            summaries.Skip(1).ToList(),
+            recentSummaries,
+            _options.DevelopmentToolsEnabled);
     }
 
     public async Task<TournamentDetails?> GetDetailsAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
@@ -600,7 +742,11 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         tournamentSnapshot.CharacterSnapshotId = snapshot.Id;
         tournamentSnapshot.CharacterSnapshot = snapshot;
         tournamentSnapshot.SnapshotVersion = "character-snapshot-v1";
-        tournamentSnapshot.SnapshotJson = BuildSnapshotJson(snapshot, character, tier.Id, now);
+        tournamentSnapshot.SnapshotJson = BuildSnapshotJson(
+            snapshot,
+            character.ArenaProfile.Rating,
+            tier.Id,
+            now);
         tournamentSnapshot.ArenaRatingAtSnapshot = character.ArenaProfile.Rating;
         tournamentSnapshot.RankTierAtSnapshot = tier.Id;
 
@@ -644,7 +790,82 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             tournamentSnapshot.Id,
             participant.EntryArenaRating,
             participant.EntryRankTier,
-            "Registered. Your current combat setup has been locked for this tournament.");
+            "Registered. Your current combat setup has been saved for this tournament. You can update it while registration is open after joining a team.");
+    }
+
+    public async Task<TournamentTeamActionResult?> UpdateLoadoutAsync(
+        Guid characterId,
+        Guid tournamentId,
+        CancellationToken cancellationToken)
+    {
+        if (!_options.Enabled) return null;
+
+        await using var transaction = await BeginOwnedTransactionIfNeededAsync(cancellationToken);
+        await _tournamentLockService.LockTournamentAsync(tournamentId, cancellationToken);
+
+        var now = UtcNow();
+        var tournament = await _tournaments.Tournaments.FirstOrDefaultAsync(
+            item => item.Id == tournamentId,
+            cancellationToken);
+        if (tournament is null) return null;
+        if (tournament.Status != TournamentStatus.RegistrationOpen
+            || now < tournament.RegistrationStartsAtUtc
+            || now >= tournament.RegistrationEndsAtUtc)
+        {
+            return new TournamentTeamActionResult(
+                false,
+                "Tournament loadouts can only be updated while registration is open.");
+        }
+
+        var participant = await _tournaments.Participants.FirstOrDefaultAsync(
+            item => item.TournamentId == tournamentId
+                    && item.CharacterId == characterId
+                    && item.Status != TournamentParticipantStatus.Withdrawn,
+            cancellationToken);
+        if (participant is null)
+        {
+            return new TournamentTeamActionResult(
+                false,
+                "Register for this tournament before updating your loadout.");
+        }
+
+        if (!participant.TeamId.HasValue)
+        {
+            return new TournamentTeamActionResult(
+                false,
+                "Join a tournament team before updating your loadout.");
+        }
+
+        var tournamentSnapshot = await _tournaments.CombatSnapshots.FirstOrDefaultAsync(
+            item => item.Id == participant.SnapshotId
+                    && item.TournamentId == tournamentId
+                    && item.CharacterId == characterId,
+            cancellationToken);
+        if (tournamentSnapshot is null) return null;
+
+        var snapshot = await _characterSnapshotService.CreateAsync(
+            characterId,
+            cancellationToken);
+        tournamentSnapshot.CharacterSnapshotId = snapshot.Id;
+        tournamentSnapshot.CharacterSnapshot = snapshot;
+        tournamentSnapshot.SnapshotVersion = "character-snapshot-v1";
+        tournamentSnapshot.SnapshotJson = BuildSnapshotJson(
+            snapshot,
+            tournamentSnapshot.ArenaRatingAtSnapshot,
+            tournamentSnapshot.RankTierAtSnapshot,
+            now);
+        tournamentSnapshot.CreatedAtUtc = now;
+        participant.UpdatedAtUtc = now;
+
+        await _tournaments.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        await PublishTournamentEventAsync(
+            tournament,
+            "TournamentLoadoutUpdated",
+            now,
+            cancellationToken);
+
+        return new TournamentTeamActionResult(true);
     }
 
     public async Task<WithdrawTournamentResult?> WithdrawAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
@@ -1071,6 +1292,66 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         return new ClaimTournamentRewardsResult(true, glory, cinders, soulstones);
     }
 
+    private async Task<TournamentInstance?> OpenDevelopmentRegistrationAsync(
+        Guid tournamentId,
+        CancellationToken cancellationToken)
+    {
+        await using var transaction = await BeginOwnedTransactionIfNeededAsync(cancellationToken);
+        await _tournamentLockService.LockTournamentAsync(tournamentId, cancellationToken);
+
+        var tournament = await _tournaments.Tournaments.FirstOrDefaultAsync(
+            item => item.Id == tournamentId,
+            cancellationToken);
+        if (tournament is null
+            || tournament.Status is not TournamentStatus.Scheduled and not TournamentStatus.RegistrationOpen)
+        {
+            return null;
+        }
+
+        var now = UtcNow();
+        tournament.Status = TournamentStatus.RegistrationOpen;
+        tournament.RegistrationStartsAtUtc = now.AddMinutes(-1);
+        tournament.RegistrationEndsAtUtc = now.AddHours(1);
+        tournament.StartsAtUtc = now.AddHours(1);
+        tournament.UpdatedAtUtc = now;
+
+        await _tournaments.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        await PublishTournamentEventAsync(
+            tournament,
+            "DevelopmentRegistrationOpened",
+            now,
+            cancellationToken);
+        return tournament;
+    }
+
+    private async Task<bool> CloseDevelopmentRegistrationAsync(
+        Guid tournamentId,
+        int registeredParticipantCount,
+        CancellationToken cancellationToken)
+    {
+        await using var transaction = await BeginOwnedTransactionIfNeededAsync(cancellationToken);
+        await _tournamentLockService.LockTournamentAsync(tournamentId, cancellationToken);
+
+        var tournament = await _tournaments.Tournaments.FirstOrDefaultAsync(
+            item => item.Id == tournamentId,
+            cancellationToken);
+        if (tournament is null || tournament.Status != TournamentStatus.RegistrationOpen)
+        {
+            return false;
+        }
+
+        var now = UtcNow();
+        tournament.RegisteredParticipantCount = registeredParticipantCount;
+        tournament.RegistrationEndsAtUtc = now;
+        tournament.StartsAtUtc = now;
+        tournament.UpdatedAtUtc = now;
+
+        await _tournaments.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return true;
+    }
+
     private async Task AdvanceTournamentAsync(Guid tournamentId, CancellationToken cancellationToken)
     {
         if (!_options.Enabled) return;
@@ -1302,6 +1583,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             rounds,
             now,
             cancellationToken);
+        var playbackFinalizationCutoff = now.AddSeconds(
+            -_options.PlaybackCompletionGraceSeconds);
 
         foreach (var round in rounds)
         {
@@ -1312,7 +1595,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
             foreach (var playingMatch in matches.Where(match =>
                          match.Status == TournamentMatchStatus.Resolving
-                         && match.PlaybackEndsAtUtc <= now))
+                         && match.PlaybackEndsAtUtc <= playbackFinalizationCutoff))
             {
                 await FinalizeMatchAsync(tournament, playingMatch, now, cancellationToken);
                 changed = true;
@@ -2769,7 +3052,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     private static string BuildSnapshotJson(
         CharacterSnapshot snapshot,
-        Character character,
+        int arenaRating,
         string rankTier,
         DateTimeOffset createdAtUtc)
     {
@@ -2778,7 +3061,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             snapshot.CharacterId,
             snapshot.Name,
             snapshot.Level,
-            character.ArenaProfile.Rating,
+            arenaRating,
             rankTier,
             createdAtUtc,
             snapshot.BaseAttributes

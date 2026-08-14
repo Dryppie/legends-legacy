@@ -8,10 +8,11 @@ public sealed record TournamentGroundsStatusDto(
     DateTimeOffset NowUtc,
     TournamentSummaryDto? CurrentTournament,
     IReadOnlyList<TournamentSummaryDto> UpcomingTournaments,
-    IReadOnlyList<TournamentSummaryDto> RecentTournaments) : IMapFrom<TournamentGroundsStatus>
+    IReadOnlyList<TournamentSummaryDto> RecentTournaments,
+    bool DevelopmentToolsEnabled) : IMapFrom<TournamentGroundsStatus>
 {
     public TournamentGroundsStatusDto()
-        : this(default, null, [], [])
+        : this(default, null, [], [], false)
     {
     }
 

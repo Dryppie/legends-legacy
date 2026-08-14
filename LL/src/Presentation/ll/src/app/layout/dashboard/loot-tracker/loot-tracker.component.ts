@@ -27,6 +27,10 @@ export function lootHistoryLocationLabel(
       return entry.location?.trim() || 'Guild Shop';
     case 'champion-market':
       return entry.location?.trim() || "Champion's Market";
+    case 'container-reward':
+      return entry.location?.trim()
+        ? 'Opened: ' + entry.location.trim()
+        : 'Opened Item';
     case 'player-transfer':
       return entry.location?.trim()
         ? 'Trade - ' + entry.location.trim()

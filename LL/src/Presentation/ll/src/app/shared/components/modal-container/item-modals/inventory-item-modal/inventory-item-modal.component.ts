@@ -96,7 +96,10 @@ export class InventoryItemModalComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.inventoryState.decrementItem(response.consumedItemInstanceId, 1);
-          this.inventoryState.addOrIncrementMany(response.rewards);
+          this.inventoryState.applyInventoryGrant(
+            response.grantId,
+            response.rewards,
+          );
           this.close.emit();
         },
         error: (err) => {

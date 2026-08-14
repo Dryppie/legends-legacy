@@ -20,6 +20,7 @@ import {
   ClaimTournamentRewardsResponse,
   CreateTournamentTeamResponse,
   RegisterTournamentResponse,
+  StartDevelopmentTournamentResponse,
   TournamentBracket,
   TournamentDetails,
   TournamentGroundsStatus,
@@ -145,6 +146,23 @@ export class ColosseumService {
     );
   }
 
+  startDevelopmentTournament(): Observable<StartDevelopmentTournamentResponse> {
+    return this.apiService
+      .post('colosseum/tournaments/development/start', {})
+      .pipe(
+        catchError((err) => {
+          return throwError(
+            () =>
+              new Error(
+                err.errorMessage ??
+                  err.message ??
+                  'Failed to start development tournament',
+              ),
+          );
+        }),
+      );
+  }
+
   getTournament(tournamentId: string): Observable<TournamentDetails> {
     return this.apiService.get(`colosseum/tournaments/${tournamentId}`).pipe(
       catchError(() => {
@@ -239,6 +257,21 @@ export class ColosseumService {
         catchError((err) => {
           return throwError(
             () => new Error(err.message ?? 'Failed to register for tournament'),
+          );
+        }),
+      );
+  }
+
+  updateTournamentLoadout(
+    tournamentId: string,
+  ): Observable<TournamentTeamActionResponse> {
+    return this.apiService
+      .post(`colosseum/tournaments/${tournamentId}/loadout`, {})
+      .pipe(
+        catchError((err) => {
+          return throwError(
+            () =>
+              new Error(err.message ?? 'Failed to update tournament loadout'),
           );
         }),
       );

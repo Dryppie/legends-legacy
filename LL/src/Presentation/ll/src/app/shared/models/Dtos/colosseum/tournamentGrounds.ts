@@ -9,6 +9,7 @@ export interface TournamentGroundsStatus {
   currentTournament: TournamentSummary | null;
   upcomingTournaments: TournamentSummary[];
   recentTournaments: TournamentSummary[];
+  developmentToolsEnabled: boolean;
 }
 
 export interface TournamentSummary {
@@ -265,6 +266,13 @@ export interface RegisterTournamentResponse {
   entryArenaRating: number;
   entryRankTier: string;
   message: string;
+}
+
+export interface StartDevelopmentTournamentResponse {
+  started: boolean;
+  tournamentId?: string | null;
+  registeredParticipantCount: number;
+  teamCount: number;
 }
 
 export interface WithdrawTournamentResponse {

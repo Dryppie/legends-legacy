@@ -109,7 +109,11 @@
       </div>
     </section>
 
-    <app-tabs class="flex min-h-0 w-full flex-1 flex-col gap-2 overflow-hidden">
+    <app-tabs
+      class="flex min-h-0 w-full flex-1 flex-col gap-2 overflow-hidden"
+      [selectedIndex]="selectedTabIndex()"
+      (selectedIndexChange)="selectTab($event)"
+    >
       <app-tab label="Arena">
         <div
           class="flex h-full min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain pb-24 pr-1 sm:pb-0"

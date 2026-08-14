@@ -5,7 +5,8 @@ namespace Application.Interfaces.Services.LL.Inventories;
 public sealed record SelectionCrateOpenResult(
     bool IsSuccess,
     string? ErrorMessage,
-    IReadOnlyList<InventoryItem> Rewards);
+    IReadOnlyList<InventoryItem> Rewards,
+    string? ContainerName = null);
 
 public interface ISelectionCrateService
 {

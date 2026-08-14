@@ -87,6 +87,11 @@ public sealed class TournamentGroundsProgressionJobTests
             return Task.CompletedTask;
         }
 
+        public Task<StartDevelopmentTournamentResult> StartDevelopmentTournamentAsync(
+            Guid characterId,
+            CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
         public Task<TournamentGroundsStatus> GetStatusAsync(Guid characterId, CancellationToken cancellationToken)
             => throw new NotSupportedException();
 
@@ -112,6 +117,9 @@ public sealed class TournamentGroundsProgressionJobTests
             => throw new NotSupportedException();
 
         public Task<RegisterTournamentResult?> RegisterAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
+            => throw new NotSupportedException();
+
+        public Task<TournamentTeamActionResult?> UpdateLoadoutAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
             => throw new NotSupportedException();
 
         public Task<WithdrawTournamentResult?> WithdrawAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)

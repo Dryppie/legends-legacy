@@ -1,4 +1,7 @@
-import { Component, effect, OnInit } from '@angular/core';
+import { Component, effect, inject, OnInit } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
+import { map } from 'rxjs';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
 import { DatePipe, NgIf } from '@angular/common';
@@ -19,25 +22,34 @@ import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/c
 import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-format.pipe';
 
 @Component({
-    selector: 'app-colosseum',
-    imports: [
-        DefaultHeaderComponent,
-        TabComponent,
-        CombatComponent,
-        NgIf,
-        DatePipe,
-        ArenaBattleComponent,
-        ChampionsMarketComponent,
-        RankingsGloryComponent,
-        RecordOfBattleComponent,
-        TournamentGroundsComponent,
-        TabsComponent,
-        NumberFormatPipe,
-    ],
-    templateUrl: './colosseum.component.html'
+  selector: 'app-colosseum',
+  imports: [
+    DefaultHeaderComponent,
+    TabComponent,
+    CombatComponent,
+    NgIf,
+    DatePipe,
+    ArenaBattleComponent,
+    ChampionsMarketComponent,
+    RankingsGloryComponent,
+    RecordOfBattleComponent,
+    TournamentGroundsComponent,
+    TabsComponent,
+    NumberFormatPipe,
+  ],
+  templateUrl: './colosseum.component.html',
 })
 export class ColosseumComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+
   battleType = BattleType.Colosseum;
+  readonly selectedTabIndex = toSignal(
+    this.route.queryParamMap.pipe(
+      map((params) => colosseumTabIndex(params.get('tab'))),
+    ),
+    { initialValue: 0 },
+  );
 
   constructor(
     public combatStateService: CombatStateService,
@@ -79,6 +91,16 @@ export class ColosseumComponent implements OnInit {
     this.state.updateDefenseSnapshot();
   }
 
+  selectTab(index: number): void {
+    const tab = COLOSSEUM_TABS[index] ?? COLOSSEUM_TABS[0];
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab: tab === 'arena' ? null : tab },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
   get myRanking(): LeaderboardEntry | undefined {
     const id = this.characterState.currentCharacterId();
     if (!id) return undefined;
@@ -114,4 +136,19 @@ export class ColosseumComponent implements OnInit {
   ): boolean {
     return match.characterAId === id || match.characterBId === id;
   }
+}
+
+const COLOSSEUM_TABS = [
+  'arena',
+  'tournaments',
+  'market',
+  'rankings',
+  'record',
+] as const;
+
+export function colosseumTabIndex(tab: string | null): number {
+  const index = COLOSSEUM_TABS.findIndex(
+    (candidate) => candidate === tab?.toLowerCase(),
+  );
+  return index >= 0 ? index : 0;
 }

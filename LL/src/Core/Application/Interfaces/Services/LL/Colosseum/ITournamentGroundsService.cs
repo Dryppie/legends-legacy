@@ -8,6 +8,7 @@ public interface ITournamentGroundsService
 {
     Task EnsureUpcomingTournamentsAsync(CancellationToken cancellationToken);
     Task AdvanceDueTournamentsAsync(CancellationToken cancellationToken);
+    Task<StartDevelopmentTournamentResult> StartDevelopmentTournamentAsync(Guid characterId, CancellationToken cancellationToken);
     Task<TournamentGroundsStatus> GetStatusAsync(Guid characterId, CancellationToken cancellationToken);
     Task<TournamentDetails?> GetDetailsAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken);
     Task<IReadOnlyList<TournamentHistoryEntry>> GetHistoryAsync(Guid characterId, CancellationToken cancellationToken);
@@ -21,6 +22,7 @@ public interface ITournamentGroundsService
         Task.FromResult<TournamentPlaybackBundleContentDto?>(null);
     Task<IReadOnlyList<TournamentRewardGrantEntry>> GetRewardsAsync(Guid characterId, Guid? tournamentId, CancellationToken cancellationToken);
     Task<RegisterTournamentResult?> RegisterAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken);
+    Task<TournamentTeamActionResult?> UpdateLoadoutAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken);
     Task<WithdrawTournamentResult?> WithdrawAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken);
     Task<CreateTournamentTeamResult?> CreateTeamAsync(Guid characterId, Guid tournamentId, string name, CancellationToken cancellationToken);
     Task<TournamentTeamActionResult?> InviteToTeamAsync(Guid characterId, Guid tournamentId, Guid teamId, Guid invitedParticipantId, CancellationToken cancellationToken);

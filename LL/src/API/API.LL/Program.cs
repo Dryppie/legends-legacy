@@ -79,6 +79,10 @@ builder.Services.AddHostedService<GameEventOutboxWorker>();
 builder.Services.AddHostedService<DungeonPowerCalibrationWorker>();
 builder.Services.AddHostedService<WorldTowerCombatSimulationWorker>();
 builder.Services.AddHostedService<WorldTowerCombatPlaybackWorker>();
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddHostedService<TournamentGroundsDevelopmentProgressionWorker>();
+}
 builder.Services.AddRealTime(); // RealTime services must be added after Application and Persistence, as they depend on them
 builder.Services.AddAdminDashboardServices(); // TODO: Application layer makes use of AdminDashboard services, so this is necessary at the moment.
                                               // At some point the application layer should perhaps be split up into two? One for LL, another for Dashboard

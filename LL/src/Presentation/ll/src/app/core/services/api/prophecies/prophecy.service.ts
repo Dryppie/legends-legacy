@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../api.service';
+import { InventoryItem } from '../../../../shared/models/inventoryItem';
 
 export interface PropheciesOverviewDto {
   serverTime: string;
@@ -108,7 +109,9 @@ export interface ClaimWeeklyRevelationMilestoneResponseDto {
 
 export interface OpenProphecyCacheResponseDto {
   cacheItemId: string;
+  cacheTitle: string;
   reward: ProphecyRewardSnapshotDto;
+  rewards: InventoryItem[];
   caches: ProphecyCacheInventoryDto[];
 }
 

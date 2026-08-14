@@ -20,6 +20,7 @@
         "Chat__SystemMessages__BaseUrl": "https://localhost:7095/chat",
         "Chat__SystemMessages__Secret": "local-development-system-chat-secret",
         "FeatureManagement__SeedLocalGuestAccounts": "true",
+        "FeatureManagement__TournamentGroundsDevelopmentTools": "true",
         "FeatureManagement__WorldTowerDevelopmentTools": "true"
       }
     },
@@ -34,6 +35,7 @@
         "Chat__SystemMessages__BaseUrl": "https://localhost:7095/chat",
         "Chat__SystemMessages__Secret": "local-development-system-chat-secret",
         "FeatureManagement__SeedLocalGuestAccounts": "true",
+        "FeatureManagement__TournamentGroundsDevelopmentTools": "true",
         "FeatureManagement__WorldTowerDevelopmentTools": "true"
       }
     },
@@ -46,6 +48,7 @@
         "Chat__SystemMessages__BaseUrl": "https://localhost:7095/chat",
         "Chat__SystemMessages__Secret": "local-development-system-chat-secret",
         "FeatureManagement__SeedLocalGuestAccounts": "true",
+        "FeatureManagement__TournamentGroundsDevelopmentTools": "true",
         "FeatureManagement__WorldTowerDevelopmentTools": "true"
       }
     }

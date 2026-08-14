@@ -4,6 +4,8 @@ using Application.Interfaces.Services.LL.Dungeons;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Prophecies.Dtos;
 using AutoMapper;
+using Domain.Models.Inventories;
+using Domain.Models.Items;
 using Domain.Models.Prophecies;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -101,6 +103,43 @@ public sealed class ProphecyDtoMappingTests
         Assert.Equal(result.SigilName, dto.SigilName);
         Assert.Equal(result.InventoryQuantity, dto.InventoryQuantity);
         Assert.Equal(result.SigilFragmentsRemaining, dto.SigilFragmentsRemaining);
+    }
+
+    [Fact]
+    public void OpenProphecyCacheResponseDto_maps_the_concrete_inventory_rewards()
+    {
+        var itemBase = new ItemBase
+        {
+            Id = "fury_heart",
+            Name = "Fury Heart",
+            ItemType = ItemType.Resource,
+            Stackable = true
+        };
+        var itemInstance = new ItemInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = itemBase.Id,
+            ItemBase = itemBase
+        };
+        var result = new ProphecyCacheOpenResult(
+            "item.prophecy_cache",
+            "Prophecy Cache",
+            new ProphecyRewardSnapshot(),
+            [new InventoryItem
+            {
+                InventoryId = Guid.NewGuid(),
+                ItemInstanceId = itemInstance.Id,
+                ItemInstance = itemInstance,
+                Quantity = 2
+            }],
+            []);
+
+        var dto = CreateMapper().Map<OpenProphecyCacheResponseDto>(result);
+
+        Assert.Equal("Prophecy Cache", dto.CacheTitle);
+        var reward = Assert.Single(dto.Rewards);
+        Assert.Equal("fury_heart", reward.ItemInstance.ItemBase.Id);
+        Assert.Equal(2, reward.Quantity);
     }
 
     private static PlayerProphecyInstance CreateInstance(string objectiveType) =>

@@ -16,6 +16,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Regions.Areas;
+using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -50,6 +51,8 @@ public sealed class TournamentGroundsServiceTests
     [InlineData(typeof(ApplyToTournamentTeamCommand))]
     [InlineData(typeof(AcceptTournamentTeamApplicationCommand))]
     [InlineData(typeof(KickTournamentTeamMemberCommand))]
+    [InlineData(typeof(UpdateTournamentLoadoutCommand))]
+    [InlineData(typeof(Application.UseCases.Colosseum.Tournaments.Commands.StartDevelopmentTournament.StartDevelopmentTournamentCommand))]
     public void Tournament_commands_opt_out_of_outer_transaction_pipeline(Type commandType)
     {
         Assert.True(
@@ -104,6 +107,75 @@ public sealed class TournamentGroundsServiceTests
         Assert.Empty(await db.ArenaTournaments.ToListAsync());
         Assert.Equal(0, lockService.ScheduleLockCalls);
         Assert.Equal(0, lockService.TournamentLockCalls);
+    }
+
+    [Fact]
+    public async Task StartDevelopmentTournamentAsync_creates_fills_and_starts_a_local_tournament()
+    {
+        await using var db = CreateDbContext();
+        var combatExecutor = new QueuedCombatEngineExecutor(BattleOutcome.Victory);
+        var options = new TournamentGroundsOptions
+        {
+            Enabled = true,
+            DevelopmentToolsEnabled = true,
+            UsePostgresAdvisoryLocks = false,
+            DefaultMinParticipants = 4,
+            DefaultMaxParticipants = 32
+        };
+        var service = CreateService(
+            db,
+            entityService: new DbEntityService(db),
+            combatSetupService: new SimpleCombatSetupService(),
+            combatEngineExecutor: combatExecutor,
+            combatEncounterResultFactory: new PassthroughCombatEncounterResultFactory(),
+            options: options);
+        var player = SeedCharacter(db, rating: 1500, accountId: Guid.NewGuid());
+        for (var i = 0; i < 95; i++)
+        {
+            SeedDevelopmentGuestCharacter(db, i, 1400 - i);
+        }
+        await db.SaveChangesAsync();
+
+        var result = await service.StartDevelopmentTournamentAsync(
+            player.Id,
+            CancellationToken.None);
+
+        Assert.True(result.Started, result.ErrorMessage);
+        Assert.Equal(96, result.RegisteredParticipantCount);
+        Assert.Equal(32, result.TeamCount);
+        var tournament = await db.ArenaTournaments.SingleAsync();
+        Assert.Equal(TournamentStatus.InProgress, tournament.Status);
+        Assert.Equal(96, await db.TournamentParticipants.CountAsync());
+        Assert.Equal(
+            32,
+            await db.TournamentTeams.CountAsync(team => team.Status == TournamentTeamStatus.Active));
+        Assert.All(
+            await db.TournamentTeams.Where(team => team.Status == TournamentTeamStatus.Active).ToListAsync(),
+            team => Assert.Equal(3, team.MemberCount));
+        Assert.True(await db.TournamentParticipants.AnyAsync(
+            participant => participant.CharacterId == player.Id));
+        Assert.Equal(1, combatExecutor.ExecutionCount);
+        Assert.Equal(
+            1,
+            await db.TournamentMatches.CountAsync(match => match.Status == TournamentMatchStatus.Resolving));
+    }
+
+    [Fact]
+    public async Task StartDevelopmentTournamentAsync_does_nothing_when_tools_are_disabled()
+    {
+        await using var db = CreateDbContext();
+        var service = CreateService(db);
+        var player = SeedCharacter(db, rating: 1500, accountId: Guid.NewGuid());
+        await db.SaveChangesAsync();
+
+        var result = await service.StartDevelopmentTournamentAsync(
+            player.Id,
+            CancellationToken.None);
+
+        Assert.False(result.Started);
+        Assert.Contains("disabled", result.ErrorMessage, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(await db.ArenaTournaments.ToListAsync());
+        Assert.Empty(await db.TournamentParticipants.ToListAsync());
     }
 
     [Fact]
@@ -364,6 +436,73 @@ public sealed class TournamentGroundsServiceTests
         Assert.Equal(TournamentParticipantStatus.Registered, participant.Status);
         Assert.Null(participant.TeamId);
         Assert.Equal(1625, participant.EntryArenaRating);
+    }
+
+    [Fact]
+    public async Task UpdateLoadoutAsync_refreshes_team_member_combat_snapshot_and_preserves_entry_rating()
+    {
+        await using var db = CreateDbContext();
+        var realtime = new CapturingGameRealtimeBroadcaster();
+        var service = CreateService(db, realtime);
+        var tournament = SeedTournament(db, TournamentStatus.RegistrationOpen);
+        var character = SeedCharacter(db, rating: 1500, accountId: Guid.NewGuid());
+        await db.SaveChangesAsync();
+
+        var registration = await service.RegisterAsync(
+            character.Id,
+            tournament.Id,
+            CancellationToken.None);
+        var team = await service.CreateTeamAsync(
+            character.Id,
+            tournament.Id,
+            "Snapshot Squad",
+            CancellationToken.None);
+        Assert.NotNull(registration);
+        Assert.NotNull(team);
+
+        var originalSnapshotId = (await db.TournamentCombatSnapshots.SingleAsync())
+            .CharacterSnapshotId;
+        character.Level = 27;
+        character.ArenaProfile.Rating = 1750;
+        await db.SaveChangesAsync();
+
+        var result = await service.UpdateLoadoutAsync(
+            character.Id,
+            tournament.Id,
+            CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.True(result.Succeeded, result.ErrorMessage);
+        var tournamentSnapshot = await db.TournamentCombatSnapshots.SingleAsync();
+        Assert.NotEqual(originalSnapshotId, tournamentSnapshot.CharacterSnapshotId);
+        Assert.Equal(1500, tournamentSnapshot.ArenaRatingAtSnapshot);
+        Assert.Equal(ArenaRank.GetTier(1500).Id, tournamentSnapshot.RankTierAtSnapshot);
+        Assert.Contains("\"level\":27", tournamentSnapshot.SnapshotJson);
+        var participant = await db.TournamentParticipants.SingleAsync();
+        Assert.Equal(1500, participant.EntryArenaRating);
+        Assert.Contains(realtime.Events, entry => entry.Event == "TournamentLoadoutUpdated");
+    }
+
+    [Fact]
+    public async Task UpdateLoadoutAsync_requires_registered_participant_to_be_on_team()
+    {
+        await using var db = CreateDbContext();
+        var service = CreateService(db);
+        var tournament = SeedTournament(db, TournamentStatus.RegistrationOpen);
+        var character = SeedCharacter(db, rating: 1500, accountId: Guid.NewGuid());
+        await db.SaveChangesAsync();
+        await service.RegisterAsync(character.Id, tournament.Id, CancellationToken.None);
+        var snapshotCount = await db.CharacterSnapshots.CountAsync();
+
+        var result = await service.UpdateLoadoutAsync(
+            character.Id,
+            tournament.Id,
+            CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.False(result.Succeeded);
+        Assert.Contains("team", result.ErrorMessage, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(snapshotCount, await db.CharacterSnapshots.CountAsync());
     }
 
     [Fact]
@@ -641,7 +780,12 @@ public sealed class TournamentGroundsServiceTests
         Assert.Equal(1, combatExecutor.ExecutionCount);
         Assert.Equal(TournamentMatchStatus.Resolving, liveMatch.Status);
 
-        clock.SetUtcNow(Now.AddMinutes(1));
+        clock.SetUtcNow(liveMatch.PlaybackEndsAtUtc!.Value);
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+        Assert.Equal(TournamentMatchStatus.Resolving, liveMatch.Status);
+        Assert.Empty(outbox.Events);
+
+        clock.SetUtcNow(liveMatch.PlaybackEndsAtUtc.Value.AddSeconds(1));
         await service.AdvanceDueTournamentsAsync(CancellationToken.None);
         Assert.Equal(1, await db.TournamentMatches.CountAsync(m => m.Status == TournamentMatchStatus.Completed));
         Assert.Equal(1, combatExecutor.ExecutionCount);
@@ -1103,6 +1247,33 @@ public sealed class TournamentGroundsServiceTests
         };
         character.ArenaProfile = arenaProfile;
 
+        db.Characters.Add(character);
+        db.CharacterArenaProfiles.Add(arenaProfile);
+        return character;
+    }
+
+    private static Character SeedDevelopmentGuestCharacter(LLDbContext db, int index, int rating)
+    {
+        var user = AppUser.Guest();
+        user.Username = $"SeedGuest_Tournament_{index:D2}";
+        var character = new Character
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            User = user,
+            Name = user.Username,
+            Level = 20
+        };
+        var arenaProfile = new CharacterArenaProfile
+        {
+            CharacterId = character.Id,
+            Character = character,
+            Rating = rating,
+            LifetimeHighestRating = rating
+        };
+        character.ArenaProfile = arenaProfile;
+
+        db.Users.Add(user);
         db.Characters.Add(character);
         db.CharacterArenaProfiles.Add(arenaProfile);
         return character;
