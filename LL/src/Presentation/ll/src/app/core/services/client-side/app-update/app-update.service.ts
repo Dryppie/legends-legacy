@@ -5,6 +5,35 @@ type VersionResponse = {
   version?: string;
 };
 
+const isoTimestampVersionPattern = /^\d{4}-\d{2}-\d{2}T/;
+
+export function isNewerAppVersion(
+  availableVersion: string,
+  currentVersion: string,
+): boolean {
+  const available = availableVersion.trim();
+  const current = currentVersion.trim();
+  if (!available || available === current) return false;
+
+  if (
+    isoTimestampVersionPattern.test(available) &&
+    isoTimestampVersionPattern.test(current)
+  ) {
+    const availableTimestamp = Date.parse(available);
+    const currentTimestamp = Date.parse(current);
+    if (
+      Number.isFinite(availableTimestamp) &&
+      Number.isFinite(currentTimestamp)
+    ) {
+      return availableTimestamp > currentTimestamp;
+    }
+  }
+
+  // Non-timestamp build identifiers cannot be ordered reliably. Preserve the
+  // existing behavior for hashes, semantic versions, and custom build labels.
+  return true;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -51,7 +80,7 @@ export class AppUpdateService {
       const result = (await response.json()) as VersionResponse;
       if (!result.version) return;
 
-      if (result.version !== this.currentVersion) {
+      if (isNewerAppVersion(result.version, this.currentVersion)) {
         this._updateAvailable.set(true);
       }
     } catch {
