@@ -4,6 +4,7 @@ import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
 import { CharacterActionType } from '../../models/enums/characterActionType';
 import { ProgressBarComponent } from '../progress-bar/progress-bar.component';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
+import { getEstimatedTemperingQueueDuration } from '../../utils/tempering/tempering-duration.utils';
 
 @Component({
   selector: 'app-current-action',
@@ -15,6 +16,7 @@ export class CurrentActionComponent {
   currentAction: CharacterActionDto | null = null;
   remainingTime: string = '00:00'; // Add a property to track the remaining time
   performingAction = '';
+  queueDuration = '';
   duration = 0;
   readonly totalDuration;
 
@@ -39,6 +41,7 @@ export class CurrentActionComponent {
 
   private setPerformingAction(): void {
     const action = this.currentAction;
+    this.queueDuration = '';
 
     if (!action) {
       this.performingAction = 'Idle';
@@ -59,6 +62,11 @@ export class CurrentActionComponent {
         break;
       case CharacterActionType.Crafting:
         this.performingAction = 'Tempering Items';
+        if (action.craftingActionDetails?.craftingQueueItems.length) {
+          this.queueDuration = getEstimatedTemperingQueueDuration(
+            action.craftingActionDetails.craftingQueueItems,
+          );
+        }
         break;
       case CharacterActionType.Idle:
         this.performingAction = 'Idle';

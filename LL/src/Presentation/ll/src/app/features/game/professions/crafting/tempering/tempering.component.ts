@@ -34,6 +34,7 @@ import {
 } from '../../../../../shared/models/Dtos/temperingSessionDto';
 import { formatAttributeType } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { formatAttributeValue } from '../../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
+import { getEstimatedTemperingQueueDuration } from '../../../../../shared/utils/tempering/tempering-duration.utils';
 
 @Component({
   selector: 'app-tempering',
@@ -51,7 +52,6 @@ export class TemperingComponent implements OnDestroy {
   @Input({ required: true }) inventory!: Signal<InventoryItem[]>;
 
   private readonly itemXpPerRarity = 10;
-  private readonly temperingActionDurationSeconds = 10;
 
   readonly craftingQueue: Signal<CraftingQueueItem[]>;
   readonly recentOutcomes: Signal<TemperingOutcomeEntry[]>;
@@ -207,24 +207,7 @@ export class TemperingComponent implements OnDestroy {
   }
 
   getEstimatedTime(queue: CraftingQueueItem[]): string {
-    const totalSeconds = queue.reduce((sum, item) => {
-      return (
-        sum +
-        Math.max(0, item.equipmentInstance.potential ?? 0) *
-          this.temperingActionDurationSeconds
-      );
-    }, 0);
-
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    const parts: string[] = [];
-    if (hours > 0) parts.push(`${hours}h`);
-    if (minutes > 0) parts.push(`${minutes}m`);
-    if (seconds > 0 || parts.length === 0) parts.push(`${seconds}s`);
-
-    return parts.join(' ');
+    return getEstimatedTemperingQueueDuration(queue);
   }
 
   itemXpPercent(equipment: EquipmentInstance): number {

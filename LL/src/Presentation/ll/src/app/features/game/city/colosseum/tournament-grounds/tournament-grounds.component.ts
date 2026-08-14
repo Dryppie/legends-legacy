@@ -333,6 +333,14 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     );
   }
 
+  updateLoadout(tournament: TournamentSummary): void {
+    this.runAction(
+      this.colosseumService.updateTournamentLoadout(tournament.id),
+      'Tournament loadout updated',
+      () => this.refresh(),
+    );
+  }
+
   createTeam(tournament: TournamentSummary | null, name: string): void {
     if (!tournament) return;
 

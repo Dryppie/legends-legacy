@@ -66,15 +66,33 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
     return this.round()?.matches.find((match) => match.id === matchId) ?? null;
   });
 
-  readonly overtimeClock = computed<string | null>(() => {
+  readonly overtimeState = computed<{
+    clock: string;
+    powerBonus: number;
+  } | null>(() => {
     const playback = this.playback();
     if (!playback) return null;
 
     const currentTick = this.currentPlaybackTick();
-    const overtimeEndsAtTick =
-      playback.overtimeStartsAtTick + playback.overtimeDurationTicks;
+    const overtimeStartsAtTick = playback.overtimeStartsAtTick;
+    const overtimeDurationTicks = playback.overtimeDurationTicks;
+    const ticksPerSecond = playback.ticksPerSecond;
+
     if (
-      currentTick < playback.overtimeStartsAtTick ||
+      !Number.isFinite(currentTick) ||
+      !Number.isFinite(overtimeStartsAtTick) ||
+      !Number.isFinite(overtimeDurationTicks) ||
+      !Number.isFinite(ticksPerSecond) ||
+      overtimeStartsAtTick < 0 ||
+      overtimeDurationTicks <= 0 ||
+      ticksPerSecond <= 0
+    ) {
+      return null;
+    }
+
+    const overtimeEndsAtTick = overtimeStartsAtTick + overtimeDurationTicks;
+    if (
+      currentTick < overtimeStartsAtTick ||
       currentTick >= overtimeEndsAtTick
     ) {
       return null;
@@ -83,27 +101,34 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
     const remainingSeconds = Math.max(
       0,
       Math.ceil(
-        (overtimeEndsAtTick - currentTick) /
-          Math.max(1, playback.ticksPerSecond),
+        (overtimeEndsAtTick - currentTick) / ticksPerSecond,
       ),
     );
     const minutes = Math.floor(remainingSeconds / 60);
     const seconds = remainingSeconds % 60;
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  });
+    const overtimePowerIncreaseIntervalTicks =
+      playback.overtimePowerIncreaseIntervalTicks;
+    const overtimePowerIncreasePercent =
+      playback.overtimePowerIncreasePercent;
 
-  readonly overtimePowerBonus = computed<number>(() => {
-    const playback = this.playback();
-    if (!playback || playback.overtimePowerIncreaseIntervalTicks <= 0) return 0;
+    let powerBonus = 0;
+    if (
+      Number.isFinite(overtimePowerIncreaseIntervalTicks) &&
+      overtimePowerIncreaseIntervalTicks > 0 &&
+      Number.isFinite(overtimePowerIncreasePercent) &&
+      overtimePowerIncreasePercent > 0
+    ) {
+      const overtimeTicks = Math.max(0, currentTick - overtimeStartsAtTick);
+      const stacks = Math.floor(
+        overtimeTicks / overtimePowerIncreaseIntervalTicks,
+      );
+      powerBonus = stacks * overtimePowerIncreasePercent;
+    }
 
-    const overtimeTicks = Math.max(
-      0,
-      this.currentPlaybackTick() - playback.overtimeStartsAtTick,
-    );
-    const stacks = Math.floor(
-      overtimeTicks / playback.overtimePowerIncreaseIntervalTicks,
-    );
-    return stacks * playback.overtimePowerIncreasePercent;
+    return {
+      clock: `${minutes}:${seconds.toString().padStart(2, '0')}`,
+      powerBonus: Number.isFinite(powerBonus) ? powerBonus : 0,
+    };
   });
 
   constructor(

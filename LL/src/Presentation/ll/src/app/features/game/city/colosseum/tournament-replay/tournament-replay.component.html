@@ -12,15 +12,18 @@
     ></app-combat>
 
     <div
-      *ngIf="overtimeClock() as clock"
-      class="ll-panel pointer-events-none absolute left-1/2 top-4 z-50 flex -translate-x-1/2 items-center gap-3 border-amber-300/60 bg-black/85 px-4 py-2 shadow-xl"
+      *ngIf="overtimeState() as overtime"
+      class="ll-panel ll-panel-strong pointer-events-none absolute left-1/2 top-4 z-50 flex -translate-x-1/2 items-center gap-3 bg-texture bg-auto px-4 py-2 shadow-xl"
     >
-      <span class="ll-stat-label text-amber-200">Overtime</span>
-      <span class="ll-heading text-lg tabular-nums text-amber-100">
-        {{ clock }}
+      <span class="ll-stat-label">Overtime</span>
+      <span class="ll-heading text-lg tabular-nums">
+        {{ overtime.clock }}
       </span>
-      <span class="ll-stat-label border-l border-amber-300/30 pl-3 text-amber-200">
-        Power +{{ overtimePowerBonus() }}%
+      <span class="ll-stat-label border-l border-white/10 pl-3">
+        Power
+        <span class="ml-1 font-semibold text-primary"
+          >+{{ overtime.powerBonus }}%</span
+        >
       </span>
     </div>
   </div>
@@ -47,7 +50,7 @@
                 : "Tournament Replay"
             }}
           </p>
-          <h1 class="ll-heading mt-1 text-xl">
+          <h1 class="ll-heading mt-1 text-xl text-white">
             {{ details()?.summary?.name ?? "Tournament Match" }}
           </h1>
           <p class="ll-copy mt-1">
@@ -67,7 +70,7 @@
         <div class="flex shrink-0 flex-wrap gap-2">
           <button
             type="button"
-            class="ll-button-primary px-3 py-2 text-sm"
+            class="ll-button px-3 py-2 text-sm"
             [disabled]="(!replay() && !playback()) || loading()"
             (click)="startReplay()"
           >
@@ -94,14 +97,14 @@
         *ngIf="match() as currentMatch"
         class="grid gap-3 md:grid-cols-[1fr_auto_1fr]"
       >
-        <div class="ll-panel p-3">
+        <div
+          class="ll-panel p-3"
+          [class.ll-panel-strong]="
+            currentMatch.winnerTeamId === currentMatch.playerOne?.teamId
+          "
+        >
           <p class="ll-stat-label">Player One</p>
-          <p
-            class="ll-heading mt-1 text-base"
-            [class.text-amber-200]="
-              currentMatch.winnerTeamId === currentMatch.playerOne?.teamId
-            "
-          >
+          <p class="ll-heading mt-1 text-base text-white">
             {{ teamLabel(currentMatch.playerOne) }}
           </p>
         </div>
@@ -110,19 +113,19 @@
           class="ll-panel flex min-w-28 flex-col items-center justify-center p-3 text-center"
         >
           <p class="ll-stat-label">Outcome</p>
-          <p class="ll-heading mt-1 text-base">
+          <p class="ll-heading mt-1 text-base text-white">
             {{ outcomeLabel(currentMatch) }}
           </p>
         </div>
 
-        <div class="ll-panel p-3 md:text-right">
+        <div
+          class="ll-panel p-3 md:text-right"
+          [class.ll-panel-strong]="
+            currentMatch.winnerTeamId === currentMatch.playerTwo?.teamId
+          "
+        >
           <p class="ll-stat-label">Player Two</p>
-          <p
-            class="ll-heading mt-1 text-base"
-            [class.text-amber-200]="
-              currentMatch.winnerTeamId === currentMatch.playerTwo?.teamId
-            "
-          >
+          <p class="ll-heading mt-1 text-base text-white">
             {{ teamLabel(currentMatch.playerTwo) }}
           </p>
         </div>
@@ -134,23 +137,25 @@
       >
         <div class="ll-panel p-3">
           <p class="ll-stat-label">Combat Result</p>
-          <p class="ll-heading mt-1 text-base">
+          <p class="ll-heading mt-1 text-base text-white">
             {{ enumLabel(loadedReplay.outcome) }}
           </p>
         </div>
         <div class="ll-panel p-3">
           <p class="ll-stat-label">Experience</p>
-          <p class="ll-heading mt-1 text-base">
+          <p class="ll-heading mt-1 text-base text-white">
             {{ loadedReplay.experienceGained }}
           </p>
         </div>
         <div class="ll-panel p-3">
           <p class="ll-stat-label">Duration</p>
-          <p class="ll-heading mt-1 text-base">{{ loadedReplay.duration }}</p>
+          <p class="ll-heading mt-1 text-base text-white">
+            {{ loadedReplay.duration }}
+          </p>
         </div>
         <div class="ll-panel p-3">
           <p class="ll-stat-label">Started</p>
-          <p class="ll-heading mt-1 text-base">
+          <p class="ll-heading mt-1 text-base text-white">
             {{ loadedReplay.startedAt | date: "short" }}
           </p>
         </div>
