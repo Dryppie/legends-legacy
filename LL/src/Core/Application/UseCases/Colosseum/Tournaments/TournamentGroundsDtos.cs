@@ -1,4 +1,5 @@
 using Application.Common.Mappings;
+using Application.UseCases.Inventories.Dtos;
 using AutoMapper;
 using Domain.Models.Colosseum.Tournaments;
 
@@ -368,12 +369,15 @@ public sealed record TournamentRewardGrantDto(
     int ArenaGlory,
     int Cinders,
     int Soulstones,
+    int CatalystSelectionCaches,
+    int BlueprintSelectionBoxes,
+    int SigilFragments,
     string Status,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset? ClaimedAtUtc) : IMapFrom<TournamentRewardGrantEntry>
 {
     public TournamentRewardGrantDto()
-        : this(Guid.Empty, Guid.Empty, string.Empty, string.Empty, null, 0, 0, 0, string.Empty, default, null)
+        : this(Guid.Empty, Guid.Empty, string.Empty, string.Empty, null, 0, 0, 0, 0, 0, 0, string.Empty, default, null)
     {
     }
 
@@ -387,10 +391,15 @@ public sealed record ClaimTournamentRewardsResponseDto(
     bool Claimed,
     int ArenaGlory,
     int Cinders,
-    int Soulstones) : IMapFrom<ClaimTournamentRewardsResult>
+    int Soulstones,
+    int SigilFragments,
+    int CatalystSelectionCaches,
+    int BlueprintSelectionBoxes,
+    Guid? InventoryGrantId,
+    IReadOnlyList<InventoryItemDto> InventoryRewards) : IMapFrom<ClaimTournamentRewardsResult>
 {
     public ClaimTournamentRewardsResponseDto()
-        : this(false, 0, 0, 0)
+        : this(false, 0, 0, 0, 0, 0, 0, null, [])
     {
     }
 

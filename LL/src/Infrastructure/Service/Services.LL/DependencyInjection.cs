@@ -163,13 +163,27 @@ public static class DependencyInjection
             .Validate(options =>
                     options.ProgressionIntervalSeconds > 0
                     && options.DevelopmentProgressionIntervalSeconds is >= 1 and <= 60
+                    && options.DefaultStartDelayAfterRegistrationMinutes is >= 0 and < 10_080
                     && options.MatchIntervalMinutes > 0
+                    && options.RegulationDurationMinutes > 0
+                    && options.OvertimeDurationMinutes > 0
+                    && options.RegulationDurationMinutes + options.OvertimeDurationMinutes
+                        <= options.MatchIntervalMinutes
+                    && options.OvertimePowerIncreaseIntervalSeconds > 0
+                    && options.OvertimePowerIncreasePercent is > 0 and <= 100
                     && options.PlaybackCompletionGraceSeconds is >= 0 and <= 10
                     && options.CombatTicksPerFrame > 0
                     && options.MaximumBundleUncompressedBytes > 0
                     && options.MaximumBundleCompressedBytes > 0
-                    && options.MaximumBundleCompressedBytes <= options.MaximumBundleUncompressedBytes,
-                "Tournament Grounds scheduling and playback settings are invalid.")
+                    && options.MaximumBundleCompressedBytes <= options.MaximumBundleUncompressedBytes
+                    && (options.Rewards.Count == 0 || options.Rewards.All(reward =>
+                        reward.ArenaGlory is >= 250 and <= 500
+                        && reward.Cinders >= 0
+                        && reward.Soulstones is >= 20 and <= 50
+                        && reward.CatalystSelectionCaches >= 0
+                        && reward.BlueprintSelectionBoxes >= 0
+                        && reward.SigilFragments >= 0)),
+                "Tournament Grounds scheduling, playback, and reward settings are invalid.")
             .ValidateOnStart();
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<ITournamentLockService, PostgresTournamentLockService>();

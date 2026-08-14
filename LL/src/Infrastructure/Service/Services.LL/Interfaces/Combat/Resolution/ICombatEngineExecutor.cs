@@ -44,6 +44,13 @@ public interface ICombatEngineExecutor
         CancellationToken cancellationToken) =>
         ExecuteWithCheckpointsAsync(runtime, checkpointIntervalTicks, cancellationToken);
 
+    Task<CombatExecutionWithCheckpoints> ExecuteTournamentPlaybackAsync(
+        CombatEncounterRuntime runtime,
+        int checkpointIntervalTicks,
+        TournamentCombatSimulationOptions options,
+        CancellationToken cancellationToken) =>
+        ExecuteCompactPlaybackAsync(runtime, checkpointIntervalTicks, cancellationToken);
+
     Task<CombatResult> ExecuteSimulationAsync(
         CombatEncounterRuntime runtime,
         CombatSimulationOptions options,
@@ -67,4 +74,13 @@ public sealed record CombatSimulationOptions(
     int MaxTicks = 1800,
     bool StartActiveAbilitiesOnCooldown = true,
     IReadOnlyList<AbilitySpec>? SupplementalAbilities = null,
-    int BasicAttackIntervalTicks = 30);
+    int BasicAttackIntervalTicks = 30,
+    int? OvertimeStartsAtTick = null,
+    int OvertimePowerIncreaseIntervalTicks = 0,
+    float OvertimePowerIncreasePercent = 0);
+
+public sealed record TournamentCombatSimulationOptions(
+    int RegulationTicks,
+    int OvertimeTicks,
+    int OvertimePowerIncreaseIntervalTicks,
+    float OvertimePowerIncreasePercent);

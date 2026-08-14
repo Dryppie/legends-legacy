@@ -457,6 +457,12 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
       match.winnerTeamId === match.playerOne?.teamId
         ? match.playerOne
         : match.playerTwo;
+    if (winner && match.outcome === 'DrawAdvancedByDamage') {
+      return `${winner.name} advanced on damage`;
+    }
+    if (winner && match.outcome === 'DrawAdvancedBySeed') {
+      return `${winner.name} advanced on seed tiebreak`;
+    }
     return winner ? `${winner.name} advanced` : this.enumLabel(match.outcome);
   }
 

@@ -2,7 +2,7 @@
 
 Status: **Implemented in the repository — migration and production rollout pending**
 
-Last updated: 2026-08-13
+Last updated: 2026-08-14
 
 ## Match cadence
 
@@ -13,6 +13,10 @@ Last updated: 2026-08-13
 - If a worker starts a match batch late, that delay is cascaded to every remaining slot so the configured cadence is preserved.
 - A progression execution starts every match assigned to the next due slot.
 - A match remains `Resolving` until its authoritative playback end timestamp.
+- Regulation lasts up to five minutes. If neither team has won, the battle enters a visible five-minute overtime phase.
+- During overtime, both teams gain another cumulative 10% effective Power every 10 seconds. The first increase occurs 10 seconds into overtime.
+- A battle can end early during either phase; ten minutes is the maximum duration.
+- If combat ends in a draw, the team with the greater total opponent damage advances. Equal damage falls back to the higher seed so the single-elimination bracket always progresses deterministically.
 - Winner/loser updates, bracket advancement, battle-completed events, placements, and rewards occur only after playback ends.
 - PostgreSQL advisory locks and persisted background-job execution guards continue to serialize tournament progression across workers.
 
@@ -32,6 +36,7 @@ For a standard 32-team bracket, R32 starts at tournament start, R16 at +10 minut
 - Any authenticated player can view a Tournament match; participation is not required.
 - `Resolving` matches expose a **Spectate** link in the bracket.
 - The browser aligns playback with `ServerNowUtc` and `PlaybackStartedAtUtc`, seeks directly to the current frame, and advances locally.
+- Playback metadata carries the authoritative overtime boundary, duration, and Power ramp; the combat view displays an `Overtime` countdown and current Power bonus.
 - Refreshing, navigating away and back, tab throttling, and realtime reconnection recover by reloading small metadata and reusing the immutable bundle.
 - Completed matches use the same artifact as a replay and start from tick zero.
 
@@ -43,6 +48,10 @@ For a standard 32-team bracket, R32 starts at tournament start, R16 at +10 minut
     "TournamentGrounds": {
       "ProgressionIntervalSeconds": 10,
       "MatchIntervalMinutes": 10,
+      "RegulationDurationMinutes": 5,
+      "OvertimeDurationMinutes": 5,
+      "OvertimePowerIncreaseIntervalSeconds": 10,
+      "OvertimePowerIncreasePercent": 10,
       "CombatTicksPerFrame": 10,
       "MaximumBundleUncompressedBytes": 16777216,
       "MaximumBundleCompressedBytes": 4194304

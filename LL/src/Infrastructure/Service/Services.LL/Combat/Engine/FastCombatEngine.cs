@@ -13,7 +13,10 @@ public sealed record FastCombatEngineOptions(
     int RandomSeed = 1337,
     bool StartActiveAbilitiesOnCooldown = false,
     float TauntThreatBonus = 100f,
-    bool CaptureEventLog = true);
+    bool CaptureEventLog = true,
+    int? OvertimeStartsAtTick = null,
+    int OvertimePowerIncreaseIntervalTicks = 0,
+    float OvertimePowerIncreasePercent = 0);
 
 public sealed class FastCombatEngine
 {
@@ -34,6 +37,9 @@ public sealed class FastCombatEngine
     private readonly bool _startActiveAbilitiesOnCooldown;
     private readonly float _tauntThreatBonus;
     private readonly bool _captureEventLog;
+    private readonly int _overtimeStartsAtTick;
+    private readonly int _overtimePowerIncreaseIntervalTicks;
+    private readonly float _overtimePowerIncreasePercent;
     private readonly Dictionary<RuntimeCombatant, float> _basicAttackProgress = [];
     private readonly Dictionary<RuntimeCombatant, float> _healthRegenerationProgress = [];
     private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationPotential = [];
@@ -82,6 +88,9 @@ public sealed class FastCombatEngine
         _startActiveAbilitiesOnCooldown = resolved.StartActiveAbilitiesOnCooldown;
         _tauntThreatBonus = Math.Max(0, resolved.TauntThreatBonus);
         _captureEventLog = resolved.CaptureEventLog;
+        _overtimeStartsAtTick = resolved.OvertimeStartsAtTick ?? int.MaxValue;
+        _overtimePowerIncreaseIntervalTicks = Math.Max(0, resolved.OvertimePowerIncreaseIntervalTicks);
+        _overtimePowerIncreasePercent = Math.Max(0, resolved.OvertimePowerIncreasePercent);
     }
 
     public CombatResult Run(
@@ -2150,7 +2159,7 @@ public sealed class FastCombatEngine
                 attribute.MinimumValue,
                 (int)Math.Round(
                     (attribute.BaseValue + (attribute.ScalingAttribute is { } scalingAttribute
-                        ? GetEffectiveAttribute(source, scalingAttribute) * attribute.ScalingCoefficient
+                        ? GetEffectiveAttributeWithoutOvertime(source, scalingAttribute) * attribute.ScalingCoefficient
                         : 0))
                     * GetSummonAttributeMultiplier(attribute.Attribute, effect))));
 
@@ -3347,12 +3356,29 @@ public sealed class FastCombatEngine
             _ => source
         };
 
-    private static float GetEffectiveAttribute(RuntimeCombatant combatant, AttributeType attribute) =>
+    private float GetEffectiveAttribute(RuntimeCombatant combatant, AttributeType attribute) =>
         attribute == AttributeType.Power
             ? GetEffectivePower(combatant)
             : combatant.GetAttribute(attribute);
 
-    private static float GetEffectivePower(RuntimeCombatant combatant)
+    private static float GetEffectiveAttributeWithoutOvertime(
+        RuntimeCombatant combatant,
+        AttributeType attribute) =>
+        attribute == AttributeType.Power
+            ? GetConditionAdjustedPower(combatant)
+            : combatant.GetAttribute(attribute);
+
+    private float GetEffectivePower(RuntimeCombatant combatant)
+    {
+        var overtimeStacks = _overtimePowerIncreaseIntervalTicks > 0
+            && _currentTick >= _overtimeStartsAtTick
+            ? (_currentTick - _overtimeStartsAtTick) / _overtimePowerIncreaseIntervalTicks
+            : 0;
+        var overtimeMultiplier = 1 + overtimeStacks * _overtimePowerIncreasePercent / 100f;
+        return Math.Max(0, GetConditionAdjustedPower(combatant) * overtimeMultiplier);
+    }
+
+    private static float GetConditionAdjustedPower(RuntimeCombatant combatant)
     {
         var modifier =
             (combatant.HasCondition(StandardConditionType.Empower) ? 0.20f : 0f)

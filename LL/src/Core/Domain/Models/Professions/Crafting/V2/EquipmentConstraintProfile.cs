@@ -96,14 +96,22 @@ public static class EquipmentConstraintProfile
             || tags.Contains("Support")
             || tags.Contains("Summon");
 
-        if (tags.Contains("Fury") || tags.Contains("Execution"))
+        if (tags.Contains("Fury"))
         {
             return EqualWeights(
                 AttributeType.Power,
                 AttributeType.CritChance,
                 AttributeType.CritDamage,
-                AttributeType.ArmorPenetration,
                 AttributeType.AttackSpeed);
+        }
+
+        if (tags.Contains("Execution"))
+        {
+            return EqualWeights(
+                AttributeType.Power,
+                AttributeType.ArmorPenetration,
+                AttributeType.CritDamage,
+                AttributeType.Cooldown);
         }
 
         if (tags.Contains("Aegis"))

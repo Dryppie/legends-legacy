@@ -77,14 +77,45 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         CombatEncounterRuntime runtime,
         int checkpointIntervalTicks,
         CancellationToken cancellationToken)
+        => await ExecuteCompactPlaybackCoreAsync(
+            runtime,
+            checkpointIntervalTicks,
+            6000,
+            cancellationToken);
+
+    public async Task<CombatExecutionWithCheckpoints> ExecuteTournamentPlaybackAsync(
+        CombatEncounterRuntime runtime,
+        int checkpointIntervalTicks,
+        TournamentCombatSimulationOptions options,
+        CancellationToken cancellationToken)
+        => await ExecuteCompactPlaybackCoreAsync(
+            runtime,
+            checkpointIntervalTicks,
+            checked(options.RegulationTicks + options.OvertimeTicks),
+            cancellationToken,
+            options.RegulationTicks,
+            options.OvertimePowerIncreaseIntervalTicks,
+            options.OvertimePowerIncreasePercent);
+
+    private async Task<CombatExecutionWithCheckpoints> ExecuteCompactPlaybackCoreAsync(
+        CombatEncounterRuntime runtime,
+        int checkpointIntervalTicks,
+        int maximumTicks,
+        CancellationToken cancellationToken,
+        int? overtimeStartsAtTick = null,
+        int overtimePowerIncreaseIntervalTicks = 0,
+        float overtimePowerIncreasePercent = 0)
     {
         var checkpoints = new List<CombatCheckpoint>();
         var execution = await ExecuteCoreAsync(
             runtime,
             new CombatSimulationOptions(
                 runtime.Plan.EncounterId.GetHashCode(),
-                6000,
-                StartActiveAbilitiesOnCooldown: true),
+                maximumTicks,
+                StartActiveAbilitiesOnCooldown: true,
+                OvertimeStartsAtTick: overtimeStartsAtTick,
+                OvertimePowerIncreaseIntervalTicks: overtimePowerIncreaseIntervalTicks,
+                OvertimePowerIncreasePercent: overtimePowerIncreasePercent),
             cancellationToken,
             checkpoint => checkpoints.Add(checkpoint),
             checkpointIntervalTicks,
@@ -168,7 +199,10 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 BasicAttackIntervalTicks: options.BasicAttackIntervalTicks,
                 RandomSeed: options.RandomSeed,
                 StartActiveAbilitiesOnCooldown: options.StartActiveAbilitiesOnCooldown,
-                CaptureEventLog: captureEventLog));
+                CaptureEventLog: captureEventLog,
+                OvertimeStartsAtTick: options.OvertimeStartsAtTick,
+                OvertimePowerIncreaseIntervalTicks: options.OvertimePowerIncreaseIntervalTicks,
+                OvertimePowerIncreasePercent: options.OvertimePowerIncreasePercent));
         var result = engine.Run(
             friendly,
             hostile,

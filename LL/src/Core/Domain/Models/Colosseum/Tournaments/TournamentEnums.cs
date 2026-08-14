@@ -67,7 +67,8 @@ public enum TournamentMatchOutcome
     PlayerTwoWin = 2,
     DrawAdvancedBySeed = 3,
     ByeAdvanced = 4,
-    Forfeit = 5
+    Forfeit = 5,
+    DrawAdvancedByDamage = 6
 }
 
 public enum TournamentRewardStatus

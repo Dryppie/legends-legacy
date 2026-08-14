@@ -4,11 +4,26 @@
     else replayShell
   "
 >
-  <app-combat
-    class="flex h-full w-full"
-    [battleType]="battleType"
-    (skipBattle)="skipBattle()"
-  ></app-combat>
+  <div class="relative flex h-full w-full">
+    <app-combat
+      class="flex h-full w-full"
+      [battleType]="battleType"
+      (skipBattle)="skipBattle()"
+    ></app-combat>
+
+    <div
+      *ngIf="overtimeClock() as clock"
+      class="ll-panel pointer-events-none absolute left-1/2 top-4 z-50 flex -translate-x-1/2 items-center gap-3 border-amber-300/60 bg-black/85 px-4 py-2 shadow-xl"
+    >
+      <span class="ll-stat-label text-amber-200">Overtime</span>
+      <span class="ll-heading text-lg tabular-nums text-amber-100">
+        {{ clock }}
+      </span>
+      <span class="ll-stat-label border-l border-amber-300/30 pl-3 text-amber-200">
+        Power +{{ overtimePowerBonus() }}%
+      </span>
+    </div>
+  </div>
 </ng-container>
 
 <ng-template #replayShell>

@@ -101,7 +101,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ll-backend-publish
-          path: .
+          path: artifacts
 
       - name: Docker Publish and Push
         uses: ./.github/actions/build-and-push-docker

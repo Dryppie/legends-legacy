@@ -170,7 +170,7 @@ Configuration section:
     "DefaultDescription": "A daily asynchronous single-elimination Colosseum bracket.",
     "DefaultDailyRegistrationStartHourUtc": 18,
     "DefaultDailyRegistrationEndHourUtc": 20,
-    "DefaultStartDelayAfterRegistrationMinutes": 5,
+    "DefaultStartDelayAfterRegistrationMinutes": 720,
     "DefaultRoundIntervalMinutes": 10,
     "DefaultMinParticipants": 4,
     "DefaultMaxParticipants": 32,
@@ -180,11 +180,11 @@ Configuration section:
     "AllowWithdrawDuringRegistration": true,
     "RequireValidArenaDefenseSnapshot": false,
     "Rewards": [
-      { "Key": "champion", "MaxPlacement": 1, "ArenaGlory": 120, "Cinders": 600, "Soulstones": 12 },
-      { "Key": "finalist", "MaxPlacement": 2, "ArenaGlory": 80, "Cinders": 400, "Soulstones": 8 },
-      { "Key": "semi-finalist", "MaxPlacement": 4, "ArenaGlory": 50, "Cinders": 250, "Soulstones": 5 },
-      { "Key": "quarter-finalist", "MaxPlacement": 8, "ArenaGlory": 35, "Cinders": 175, "Soulstones": 3 },
-      { "Key": "participant", "MaxPlacement": null, "ArenaGlory": 20, "Cinders": 100, "Soulstones": 2 }
+      { "Key": "champion", "MaxPlacement": 1, "ArenaGlory": 500, "Cinders": 0, "Soulstones": 50, "CatalystSelectionCaches": 1, "BlueprintSelectionBoxes": 1, "SigilFragments": 20 },
+      { "Key": "finalist", "MaxPlacement": 2, "ArenaGlory": 425, "Cinders": 0, "Soulstones": 40, "CatalystSelectionCaches": 1, "BlueprintSelectionBoxes": 1, "SigilFragments": 20 },
+      { "Key": "semi-finalist", "MaxPlacement": 4, "ArenaGlory": 350, "Cinders": 0, "Soulstones": 30, "CatalystSelectionCaches": 1, "BlueprintSelectionBoxes": 1, "SigilFragments": 0 },
+      { "Key": "quarter-finalist", "MaxPlacement": 8, "ArenaGlory": 300, "Cinders": 0, "Soulstones": 25, "CatalystSelectionCaches": 1, "BlueprintSelectionBoxes": 0, "SigilFragments": 0 },
+      { "Key": "participant", "MaxPlacement": null, "ArenaGlory": 250, "Cinders": 0, "Soulstones": 20, "CatalystSelectionCaches": 0, "BlueprintSelectionBoxes": 0, "SigilFragments": 0 }
     ]
   }
 }

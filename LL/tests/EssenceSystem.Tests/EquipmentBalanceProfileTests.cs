@@ -428,7 +428,7 @@ public sealed class EquipmentBalanceProfileTests
     }
 
     [Fact]
-    public void Overflow_preserves_blueprint_identity_across_compatible_slots()
+    public void Overflow_keeps_fury_and_execution_in_distinct_offensive_roles()
     {
         var recipe = new CraftingRecipeDefinition
         {
@@ -454,16 +454,35 @@ public sealed class EquipmentBalanceProfileTests
             Tags = ["Fury"]
         };
         var design = EquipmentCraftingDesignComposer.Compose(recipe, blueprint);
+        var executionBlueprint = new BlueprintDefinition
+        {
+            Id = "blueprint.test.execution",
+            Name = "Blueprint: Test Execution",
+            AnyRecipeTags = ["Accessory"],
+            BonusStatProfile = new Dictionary<AttributeType, double>
+            {
+                [AttributeType.ArmorPenetration] = 1d
+            },
+            Tags = ["Execution"]
+        };
+        var executionDesign = EquipmentCraftingDesignComposer.Compose(recipe, executionBlueprint);
 
         Assert.Equal(
             [
                 AttributeType.Power,
                 AttributeType.CritChance,
                 AttributeType.CritDamage,
-                AttributeType.ArmorPenetration,
                 AttributeType.AttackSpeed
             ],
             EquipmentConstraintProfile.GetOverflowWeights(design).Keys);
+        Assert.Equal(
+            [
+                AttributeType.Power,
+                AttributeType.ArmorPenetration,
+                AttributeType.CritDamage,
+                AttributeType.Cooldown
+            ],
+            EquipmentConstraintProfile.GetOverflowWeights(executionDesign).Keys);
     }
 
     [Theory]

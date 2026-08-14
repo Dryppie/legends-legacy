@@ -1,3 +1,4 @@
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.WebSockets;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Colosseum;
@@ -5,6 +6,7 @@ using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Entities;
 using Application.UseCases.Outbox;
 using Application.UseCases.Colosseum.Tournaments;
+using Application.UseCases.Inventories.SelectionCrates;
 using Domain.Models.Colosseum;
 using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Combat;
@@ -38,11 +40,11 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         TournamentMeter.CreateHistogram<long>("tournament_ground.playback.bundle.size", "By");
     private static readonly IReadOnlyList<TournamentRewardTierOptions> DefaultRewardTiers =
     [
-        new() { Key = "champion", MaxPlacement = 1, ArenaGlory = 120, Cinders = 600, Soulstones = 12 },
-        new() { Key = "finalist", MaxPlacement = 2, ArenaGlory = 80, Cinders = 400, Soulstones = 8 },
-        new() { Key = "semi-finalist", MaxPlacement = 4, ArenaGlory = 50, Cinders = 250, Soulstones = 5 },
-        new() { Key = "quarter-finalist", MaxPlacement = 8, ArenaGlory = 35, Cinders = 175, Soulstones = 3 },
-        new() { Key = "participant", MaxPlacement = null, ArenaGlory = 20, Cinders = 100, Soulstones = 2 }
+        new() { Key = "champion", MaxPlacement = 1, ArenaGlory = 500, Soulstones = 50, CatalystSelectionCaches = 1, BlueprintSelectionBoxes = 1, SigilFragments = 20 },
+        new() { Key = "finalist", MaxPlacement = 2, ArenaGlory = 425, Soulstones = 40, CatalystSelectionCaches = 1, BlueprintSelectionBoxes = 1, SigilFragments = 20 },
+        new() { Key = "semi-finalist", MaxPlacement = 4, ArenaGlory = 350, Soulstones = 30, CatalystSelectionCaches = 1, BlueprintSelectionBoxes = 1 },
+        new() { Key = "quarter-finalist", MaxPlacement = 8, ArenaGlory = 300, Soulstones = 25, CatalystSelectionCaches = 1 },
+        new() { Key = "participant", MaxPlacement = null, ArenaGlory = 250, Soulstones = 20 }
     ];
 
     private static readonly JsonSerializerOptions ReplayJsonOptions = new(JsonSerializerDefaults.Web)
@@ -56,6 +58,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     private readonly ICombatSetupService _combatSetupService;
     private readonly ICharacterSnapshotService _characterSnapshotService;
     private readonly IItemBaseRepository _itemBaseRepository;
+    private readonly IInventoryService _inventoryService;
+    private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly ICombatEngineExecutor _combatEngineExecutor;
     private readonly ICombatEncounterResultFactory _combatEncounterResultFactory;
     private readonly IGameRealtimeBroadcaster _gameRealtime;
@@ -71,6 +75,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         ICombatSetupService combatSetupService,
         ICharacterSnapshotService characterSnapshotService,
         IItemBaseRepository itemBaseRepository,
+        IInventoryService inventoryService,
+        IInventoryItemFactory inventoryItemFactory,
         ICombatEngineExecutor combatEngineExecutor,
         ICombatEncounterResultFactory combatEncounterResultFactory,
         IGameRealtimeBroadcaster gameRealtime,
@@ -85,6 +91,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         _combatSetupService = combatSetupService;
         _characterSnapshotService = characterSnapshotService;
         _itemBaseRepository = itemBaseRepository;
+        _inventoryService = inventoryService;
+        _inventoryItemFactory = inventoryItemFactory;
         _combatEngineExecutor = combatEngineExecutor;
         _combatEncounterResultFactory = combatEncounterResultFactory;
         _gameRealtime = gameRealtime;
@@ -104,6 +112,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         var now = UtcNow();
         var definition = await EnsureDefaultDefinitionAsync(now, cancellationToken);
+        await AlignUpcomingTournamentStartsAsync(definition, now, cancellationToken);
 
         var hasUpcoming = await _tournaments.Tournaments.AnyAsync(t =>
             t.DefinitionId == definition.Id &&
@@ -618,6 +627,10 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             playback.TicksPerSecond,
             playback.TicksPerFrame,
             playback.Duration,
+            GetCombatDurationTicks(_options.RegulationDurationMinutes, playback.TicksPerSecond),
+            GetCombatDurationTicks(_options.OvertimeDurationMinutes, playback.TicksPerSecond),
+            checked(_options.OvertimePowerIncreaseIntervalSeconds * playback.TicksPerSecond),
+            _options.OvertimePowerIncreasePercent,
             playback.FrameCount,
             playback.PlaybackStartedAtUtc.Value,
             playback.PlaybackEndsAtUtc.Value,
@@ -680,6 +693,9 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 r.ArenaGlory,
                 r.Cinders,
                 r.Soulstones,
+                r.CatalystSelectionCaches,
+                r.BlueprintSelectionBoxes,
+                r.SigilFragments,
                 r.Status.ToString(),
                 r.CreatedAtUtc,
                 r.ClaimedAtUtc))
@@ -1254,7 +1270,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             .FirstOrDefaultAsync(c => c.Id == characterId, cancellationToken);
         if (character?.ArenaProfile is null)
         {
-            return new ClaimTournamentRewardsResult(false, 0, 0, 0);
+            return EmptyClaimResult();
         }
 
         var query = _tournaments.RewardGrants
@@ -1267,17 +1283,34 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var rewards = await query.ToListAsync(cancellationToken);
         if (rewards.Count == 0)
         {
-            return new ClaimTournamentRewardsResult(false, 0, 0, 0);
+            return EmptyClaimResult();
         }
 
         var now = UtcNow();
         var glory = rewards.Sum(r => r.ArenaGlory);
         var cinders = rewards.Sum(r => r.Cinders);
         var soulstones = rewards.Sum(r => r.Soulstones);
+        var sigilFragments = rewards.Sum(r => r.SigilFragments);
+        var catalystSelectionCaches = rewards.Sum(r => r.CatalystSelectionCaches);
+        var blueprintSelectionBoxes = rewards.Sum(r => r.BlueprintSelectionBoxes);
 
         character.ArenaProfile.Glory += glory;
         character.Cinders += cinders;
         character.Soulstones += soulstones;
+        character.SigilFragments += sigilFragments;
+
+        var inventoryRewards = await CreateRewardInventoryItemsAsync(
+            characterId,
+            catalystSelectionCaches,
+            blueprintSelectionBoxes,
+            cancellationToken);
+        if (inventoryRewards.Count > 0)
+        {
+            await _inventoryService.AddItemsToInventory(
+                characterId,
+                inventoryRewards,
+                cancellationToken);
+        }
 
         foreach (var reward in rewards)
         {
@@ -1289,7 +1322,16 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         await transaction.CommitAsync(cancellationToken);
         await PublishTournamentEventAsync(rewards[0].TournamentId, "TournamentRewardsAvailable", now, cancellationToken);
 
-        return new ClaimTournamentRewardsResult(true, glory, cinders, soulstones);
+        return new ClaimTournamentRewardsResult(
+            true,
+            glory,
+            cinders,
+            soulstones,
+            sigilFragments,
+            catalystSelectionCaches,
+            blueprintSelectionBoxes,
+            inventoryRewards.Count > 0 ? Guid.NewGuid() : null,
+            inventoryRewards);
     }
 
     private async Task<TournamentInstance?> OpenDevelopmentRegistrationAsync(
@@ -1753,21 +1795,17 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             p1.Id,
             p2.Id,
             cancellationToken);
-        var p1Wins = combatResult.Outcome switch
-        {
-            BattleOutcome.Victory => true,
-            BattleOutcome.Defeat => false,
-            _ => (p1.Seed ?? int.MaxValue) <= (p2.Seed ?? int.MaxValue)
-        };
+        var (p1Wins, matchOutcome) = ResolveTournamentMatchOutcome(
+            combatResult,
+            p1.Seed,
+            p2.Seed);
 
         var winner = p1Wins ? p1 : p2;
         var loser = p1Wins ? p2 : p1;
 
         match.WinnerParticipantId = winner.Id;
         match.LoserParticipantId = loser.Id;
-        match.Outcome = combatResult.Outcome == BattleOutcome.Draw
-            ? TournamentMatchOutcome.DrawAdvancedBySeed
-            : p1Wins ? TournamentMatchOutcome.PlayerOneWin : TournamentMatchOutcome.PlayerTwoWin;
+        match.Outcome = matchOutcome;
         match.Status = TournamentMatchStatus.Completed;
         match.ResolvedAtUtc = now;
         match.UpdatedAtUtc = now;
@@ -1800,6 +1838,35 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         await AdvanceWinnerAsync(tournament.Id, match, winner.Id, now, cancellationToken);
         await PublishTournamentEventAsync(tournament, "TournamentMatchCompleted", now, cancellationToken);
     }
+
+    private static (bool PlayerOneWins, TournamentMatchOutcome MatchOutcome) ResolveTournamentMatchOutcome(
+        CombatResult combatResult,
+        int? playerOneSeed,
+        int? playerTwoSeed)
+    {
+        if (combatResult.Outcome == BattleOutcome.Victory)
+            return (true, TournamentMatchOutcome.PlayerOneWin);
+        if (combatResult.Outcome == BattleOutcome.Defeat)
+            return (false, TournamentMatchOutcome.PlayerTwoWin);
+
+        var playerOneDamage = SumTeamDamage(combatResult, "Friendly");
+        var playerTwoDamage = SumTeamDamage(combatResult, "Hostile");
+        if (playerOneDamage != playerTwoDamage)
+        {
+            return (
+                playerOneDamage > playerTwoDamage,
+                TournamentMatchOutcome.DrawAdvancedByDamage);
+        }
+
+        return (
+            (playerOneSeed ?? int.MaxValue) <= (playerTwoSeed ?? int.MaxValue),
+            TournamentMatchOutcome.DrawAdvancedBySeed);
+    }
+
+    private static int SumTeamDamage(CombatResult combatResult, string team) =>
+        combatResult.EntityStats
+            .Where(stats => string.Equals(stats.Team, team, StringComparison.OrdinalIgnoreCase))
+            .Sum(stats => stats.DamageDone);
 
     private readonly record struct TournamentProgressionResult(bool Changed, bool StopProgression);
 
@@ -2204,9 +2271,20 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         var engineStartedAt = _timeProvider.GetTimestamp();
         var allocatedBefore = GC.GetTotalAllocatedBytes(precise: false);
-        var execution = await _combatEngineExecutor.ExecuteCompactPlaybackAsync(
+        var execution = await _combatEngineExecutor.ExecuteTournamentPlaybackAsync(
             runtime,
             _options.CombatTicksPerFrame,
+            new TournamentCombatSimulationOptions(
+                GetCombatDurationTicks(
+                    _options.RegulationDurationMinutes,
+                    Services.LL.Combat.Engine.FastCombatEngine.TicksPerSecond),
+                GetCombatDurationTicks(
+                    _options.OvertimeDurationMinutes,
+                    Services.LL.Combat.Engine.FastCombatEngine.TicksPerSecond),
+                checked(
+                    _options.OvertimePowerIncreaseIntervalSeconds
+                    * Services.LL.Combat.Engine.FastCombatEngine.TicksPerSecond),
+                _options.OvertimePowerIncreasePercent),
             cancellationToken);
         var elapsedMilliseconds = _timeProvider.GetElapsedTime(engineStartedAt).TotalMilliseconds;
         var allocatedBytes = Math.Max(
@@ -2218,6 +2296,9 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         execution = execution with { Result = resolved };
         return (battleId, execution);
     }
+
+    private static int GetCombatDurationTicks(int minutes, int ticksPerSecond) =>
+        checked(minutes * 60 * ticksPerSecond);
 
     private static CombatExecutionWithCheckpoints CreateFallbackExecution(CombatResult result) =>
         new(result,
@@ -2346,6 +2427,9 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             ArenaGlory = tier.ArenaGlory,
             Cinders = tier.Cinders,
             Soulstones = tier.Soulstones,
+            CatalystSelectionCaches = tier.CatalystSelectionCaches,
+            BlueprintSelectionBoxes = tier.BlueprintSelectionBoxes,
+            SigilFragments = tier.SigilFragments,
             Status = TournamentRewardStatus.Unclaimed,
             CreatedAtUtc = now
         };
@@ -2362,6 +2446,49 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             await AdvanceWinnerAsync(tournamentId, bye, bye.WinnerParticipantId!.Value, now, cancellationToken);
         }
     }
+
+    private async Task<List<Domain.Models.Inventories.InventoryItem>> CreateRewardInventoryItemsAsync(
+        Guid characterId,
+        int catalystSelectionCaches,
+        int blueprintSelectionBoxes,
+        CancellationToken cancellationToken)
+    {
+        var quantities = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        if (catalystSelectionCaches > 0)
+        {
+            quantities[CatalystSelectionCrateCatalog.ItemBaseId] = catalystSelectionCaches;
+        }
+
+        if (blueprintSelectionBoxes > 0)
+        {
+            quantities[BlueprintSelectionBoxCatalog.ItemBaseId] = blueprintSelectionBoxes;
+        }
+
+        if (quantities.Count == 0)
+        {
+            return [];
+        }
+
+        var itemBases = await _itemBaseRepository.GetItemBasesByIdsAsync(
+            quantities.Keys.ToList(),
+            cancellationToken);
+        var missing = quantities.Keys.Where(itemId => !itemBases.ContainsKey(itemId)).ToList();
+        if (missing.Count > 0)
+        {
+            throw new InvalidOperationException(
+                $"Tournament reward item bases are missing: {string.Join(", ", missing)}.");
+        }
+
+        return quantities
+            .SelectMany(reward => _inventoryItemFactory.CreateForQuantity(
+                itemBases[reward.Key],
+                reward.Value,
+                characterId))
+            .ToList();
+    }
+
+    private static ClaimTournamentRewardsResult EmptyClaimResult() =>
+        new(false, 0, 0, 0, 0, 0, 0, null, []);
 
     private async Task ScheduleTournamentMatchesAsync(
         Guid tournamentId,
@@ -2971,7 +3098,17 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             ? "weekly-open-grounds"
             : _options.DefaultDefinitionKey.Trim();
         var definition = await _tournaments.Definitions.FirstOrDefaultAsync(d => d.Key == definitionKey, cancellationToken);
-        if (definition is not null) return definition;
+        if (definition is not null)
+        {
+            if (definition.StartDelayAfterRegistrationMinutes != _options.DefaultStartDelayAfterRegistrationMinutes)
+            {
+                definition.StartDelayAfterRegistrationMinutes = _options.DefaultStartDelayAfterRegistrationMinutes;
+                definition.UpdatedAtUtc = now;
+                await _tournaments.SaveChangesAsync(cancellationToken);
+            }
+
+            return definition;
+        }
 
         definition = new TournamentDefinition
         {
@@ -2997,6 +3134,48 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         await _tournaments.AddAsync(definition, cancellationToken);
         await _tournaments.SaveChangesAsync(cancellationToken);
         return definition;
+    }
+
+    private async Task AlignUpcomingTournamentStartsAsync(
+        TournamentDefinition definition,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var tournaments = await _tournaments.Tournaments
+            .Where(tournament => tournament.DefinitionId == definition.Id)
+            .Where(tournament => tournament.Status == TournamentStatus.Scheduled
+                                 || tournament.Status == TournamentStatus.RegistrationOpen
+                                 || tournament.Status == TournamentStatus.RegistrationClosed
+                                 || tournament.Status == TournamentStatus.BracketGenerated)
+            .ToListAsync(cancellationToken);
+        var changed = false;
+
+        foreach (var tournament in tournaments)
+        {
+            var configuredStart = tournament.RegistrationEndsAtUtc
+                .AddMinutes(definition.StartDelayAfterRegistrationMinutes);
+            if (tournament.StartsAtUtc == configuredStart)
+            {
+                continue;
+            }
+
+            tournament.StartsAtUtc = configuredStart;
+            tournament.UpdatedAtUtc = now;
+            changed = true;
+
+            if (tournament.Status == TournamentStatus.BracketGenerated)
+            {
+                await ScheduleTournamentMatchesAsync(
+                    tournament.Id,
+                    configuredStart,
+                    cancellationToken);
+            }
+        }
+
+        if (changed)
+        {
+            await _tournaments.SaveChangesAsync(cancellationToken);
+        }
     }
 
     private TournamentRegistrationWindow BuildNextRegistrationWindow(DateTimeOffset now)

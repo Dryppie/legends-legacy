@@ -194,6 +194,9 @@ public sealed record TournamentRewardGrantEntry(
     int ArenaGlory,
     int Cinders,
     int Soulstones,
+    int CatalystSelectionCaches,
+    int BlueprintSelectionBoxes,
+    int SigilFragments,
     string Status,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset? ClaimedAtUtc);
@@ -202,5 +205,10 @@ public sealed record ClaimTournamentRewardsResult(
     bool Claimed,
     int ArenaGlory,
     int Cinders,
-    int Soulstones);
+    int Soulstones,
+    int SigilFragments,
+    int CatalystSelectionCaches,
+    int BlueprintSelectionBoxes,
+    Guid? InventoryGrantId,
+    IReadOnlyList<Domain.Models.Inventories.InventoryItem> InventoryRewards);
 

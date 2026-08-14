@@ -23,6 +23,8 @@ export function lootHistoryLocationLabel(
       return entry.location?.trim() || 'Combat';
     case 'dungeon-reward':
       return entry.location?.trim() || 'Dungeon';
+    case 'tournament-reward':
+      return entry.location?.trim() || 'Tournament Grounds';
     case 'guild-shop':
       return entry.location?.trim() || 'Guild Shop';
     case 'champion-market':

@@ -1,11 +1,13 @@
 using Application.BackgroundJobs;
 using Application.Interfaces.Outbox;
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.WebSockets;
 using Application.MediatR.Attributes;
 using Application.UseCases.Colosseum.Tournaments.Commands;
 using Application.UseCases.Colosseum.Tournaments;
+using Application.UseCases.Inventories.SelectionCrates;
 using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
 using Domain.Models.Colosseum;
@@ -15,6 +17,9 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Inventories;
+using Domain.Models.MarketPlaces;
+using Domain.Models.Professions.Crafting;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +34,7 @@ using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
+using Services.LL.Inventories;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.IO.Compression;
@@ -72,11 +78,46 @@ public sealed class TournamentGroundsServiceTests
         Assert.Equal("Weekly Open Grounds", tournament.Name);
         Assert.Equal(new DateTimeOffset(2026, 6, 29, 0, 0, 0, TimeSpan.Zero), tournament.RegistrationStartsAtUtc);
         Assert.Equal(new DateTimeOffset(2026, 7, 4, 0, 0, 0, TimeSpan.Zero), tournament.RegistrationEndsAtUtc);
-        Assert.Equal(tournament.RegistrationEndsAtUtc, tournament.StartsAtUtc);
+        Assert.Equal(new DateTimeOffset(2026, 7, 4, 12, 0, 0, TimeSpan.Zero), tournament.StartsAtUtc);
 
         var definition = await db.TournamentDefinitions.SingleAsync();
         Assert.Equal("weekly-open-grounds", definition.Key);
         Assert.Equal(5 * 24 * 60, definition.RegistrationDurationMinutes);
+        Assert.Equal(12 * 60, definition.StartDelayAfterRegistrationMinutes);
+    }
+
+    [Fact]
+    public async Task EnsureUpcomingTournamentsAsync_moves_existing_upcoming_tournament_to_noon_without_changing_registration_close()
+    {
+        await using var db = CreateDbContext();
+        var originalService = CreateService(
+            db,
+            options: new TournamentGroundsOptions
+            {
+                Enabled = true,
+                UsePostgresAdvisoryLocks = false,
+                DefaultStartDelayAfterRegistrationMinutes = 0
+            });
+        await originalService.EnsureUpcomingTournamentsAsync(CancellationToken.None);
+        var tournament = await db.ArenaTournaments.SingleAsync();
+        var registrationEndsAt = tournament.RegistrationEndsAtUtc;
+        Assert.Equal(registrationEndsAt, tournament.StartsAtUtc);
+
+        var updatedService = CreateService(
+            db,
+            options: new TournamentGroundsOptions
+            {
+                Enabled = true,
+                UsePostgresAdvisoryLocks = false,
+                DefaultStartDelayAfterRegistrationMinutes = 12 * 60
+            });
+        await updatedService.EnsureUpcomingTournamentsAsync(CancellationToken.None);
+
+        Assert.Equal(registrationEndsAt, tournament.RegistrationEndsAtUtc);
+        Assert.Equal(registrationEndsAt.AddHours(12), tournament.StartsAtUtc);
+        Assert.Equal(
+            12 * 60,
+            (await db.TournamentDefinitions.SingleAsync()).StartDelayAfterRegistrationMinutes);
     }
 
     [Fact]
@@ -755,6 +796,76 @@ public sealed class TournamentGroundsServiceTests
     }
 
     [Fact]
+    public async Task ClaimRewardsAsync_grants_finalist_milestone_items_and_sigil_fragments()
+    {
+        await using var db = CreateDbContext();
+        var inventory = new RecordingInventoryService();
+        var itemBases = new FakeItemBaseRepository(
+        [
+            new ItemBase
+            {
+                Id = CatalystSelectionCrateCatalog.ItemBaseId,
+                Name = "Catalyst Selection Cache",
+                ItemType = ItemType.Resource,
+                Stackable = true
+            },
+            new ItemBase
+            {
+                Id = BlueprintSelectionBoxCatalog.ItemBaseId,
+                Name = "Blueprint Selection Box",
+                ItemType = ItemType.Resource,
+                Stackable = true
+            }
+        ]);
+        var service = CreateService(
+            db,
+            inventoryService: inventory,
+            itemBaseRepository: itemBases);
+        var tournament = SeedTournament(db, TournamentStatus.Completed);
+        var character = SeedCharacter(db, rating: 1500, accountId: Guid.NewGuid());
+
+        await db.TournamentRewardGrants.AddAsync(new TournamentRewardGrant
+        {
+            Id = Guid.NewGuid(),
+            TournamentId = tournament.Id,
+            Tournament = tournament,
+            CharacterId = character.Id,
+            RewardKey = "finalist",
+            Placement = 2,
+            ArenaGlory = 425,
+            Soulstones = 40,
+            CatalystSelectionCaches = 1,
+            BlueprintSelectionBoxes = 1,
+            SigilFragments = 20,
+            Status = TournamentRewardStatus.Unclaimed,
+            CreatedAtUtc = Now
+        });
+        await db.SaveChangesAsync();
+
+        var claim = await service.ClaimRewardsAsync(
+            character.Id,
+            tournament.Id,
+            CancellationToken.None);
+
+        Assert.True(claim.Claimed);
+        Assert.Equal(425, claim.ArenaGlory);
+        Assert.Equal(40, claim.Soulstones);
+        Assert.Equal(20, claim.SigilFragments);
+        Assert.Equal(1, claim.CatalystSelectionCaches);
+        Assert.Equal(1, claim.BlueprintSelectionBoxes);
+        Assert.NotNull(claim.InventoryGrantId);
+        Assert.Equal(20, character.SigilFragments);
+        Assert.Equal(2, claim.InventoryRewards.Count);
+        Assert.Equal(2, inventory.AddedRewards.Count);
+        Assert.Contains(
+            inventory.AddedRewards,
+            reward => reward.ItemInstance.ItemBaseId == CatalystSelectionCrateCatalog.ItemBaseId && reward.Quantity == 1);
+        Assert.Contains(
+            inventory.AddedRewards,
+            reward => reward.ItemInstance.ItemBaseId == BlueprintSelectionBoxCatalog.ItemBaseId && reward.Quantity == 1);
+    }
+
+    [Fact]
     public async Task AdvanceDueTournamentsAsync_resolves_combat_records_history_and_grants_rewards()
     {
         await using var db = CreateDbContext();
@@ -829,7 +940,20 @@ public sealed class TournamentGroundsServiceTests
         Assert.Equal(3, combatExecutor.ExecutionCount);
         Assert.Equal(3, await db.ColosseumMatches.CountAsync());
         Assert.Equal(3, await db.TournamentCombatReplays.CountAsync());
-        Assert.Equal(10, await db.TournamentRewardGrants.CountAsync());
+        var rewardGrants = await db.TournamentRewardGrants.ToListAsync();
+        Assert.Equal(10, rewardGrants.Count);
+        Assert.All(rewardGrants, reward =>
+        {
+            Assert.InRange(reward.ArenaGlory, 250, 500);
+            Assert.InRange(reward.Soulstones, 20, 50);
+            Assert.Equal(0, reward.Cinders);
+        });
+        Assert.All(rewardGrants.Where(reward => reward.Placement <= 8), reward =>
+            Assert.Equal(1, reward.CatalystSelectionCaches));
+        Assert.All(rewardGrants.Where(reward => reward.Placement <= 4), reward =>
+            Assert.Equal(1, reward.BlueprintSelectionBoxes));
+        Assert.All(rewardGrants.Where(reward => reward.Placement <= 2), reward =>
+            Assert.Equal(20, reward.SigilFragments));
         Assert.Contains(realtime.Events, e => e.Event == "TournamentCompleted");
         Assert.All(
             outbox.Events,
@@ -889,6 +1013,10 @@ public sealed class TournamentGroundsServiceTests
             CancellationToken.None);
         Assert.NotNull(manifest);
         Assert.Equal(TournamentCombatReplay.CompactBundleSchemaVersion, manifest.SchemaVersion);
+        Assert.Equal(3000, manifest.OvertimeStartsAtTick);
+        Assert.Equal(3000, manifest.OvertimeDurationTicks);
+        Assert.Equal(100, manifest.OvertimePowerIncreaseIntervalTicks);
+        Assert.Equal(10, manifest.OvertimePowerIncreasePercent);
         Assert.True(manifest.IsCompleted);
         var bundleContent = await service.GetMatchPlaybackBundleAsync(
             spectatorId,
@@ -929,6 +1057,53 @@ public sealed class TournamentGroundsServiceTests
         Assert.Equal(100, championEntry.Points);
         Assert.Equal(1, championEntry.Championships);
         Assert.Equal("2026-06", championEntry.SeasonKey);
+    }
+
+    [Theory]
+    [InlineData(120, 80, 1, TournamentMatchOutcome.DrawAdvancedByDamage)]
+    [InlineData(80, 120, 2, TournamentMatchOutcome.DrawAdvancedByDamage)]
+    [InlineData(100, 100, 1, TournamentMatchOutcome.DrawAdvancedBySeed)]
+    public async Task AdvanceDueTournamentsAsync_resolves_draws_by_total_team_damage(
+        int friendlyDamage,
+        int hostileDamage,
+        int expectedWinnerSeed,
+        TournamentMatchOutcome expectedOutcome)
+    {
+        await using var db = CreateDbContext();
+        var clock = new MutableTimeProvider(Now);
+        var service = CreateService(
+            db,
+            entityService: new DbEntityService(db),
+            combatSetupService: new SimpleCombatSetupService(),
+            combatEngineExecutor: new DrawDamageCombatEngineExecutor(friendlyDamage, hostileDamage),
+            combatEncounterResultFactory: new PassthroughCombatEncounterResultFactory(),
+            timeProvider: clock);
+        var tournament = SeedTournament(db, TournamentStatus.RegistrationClosed);
+        tournament.StartsAtUtc = Now.AddMinutes(-1);
+        tournament.RoundIntervalMinutes = 0;
+        tournament.MinParticipants = 2;
+        tournament.Definition.MinParticipants = 2;
+
+        for (var i = 0; i < 6; i++)
+        {
+            SeedParticipant(db, tournament, rating: 1800 - (i * 100), registeredOffsetMinutes: i);
+        }
+
+        tournament.RegisteredParticipantCount = 6;
+        await db.SaveChangesAsync();
+
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+
+        var match = await db.TournamentMatches.SingleAsync();
+        Assert.Equal(TournamentMatchStatus.Resolving, match.Status);
+
+        clock.SetUtcNow(match.PlaybackEndsAtUtc!.Value.AddSeconds(1));
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+
+        var winner = await db.TournamentTeams.SingleAsync(team => team.Id == match.WinnerParticipantId);
+        Assert.Equal(expectedWinnerSeed, winner.Seed);
+        Assert.Equal(expectedOutcome, match.Outcome);
+        Assert.Equal(TournamentStatus.Completed, tournament.Status);
     }
 
     [Fact]
@@ -1158,7 +1333,10 @@ public sealed class TournamentGroundsServiceTests
         ITournamentLockService? tournamentLockService = null,
         TimeProvider? timeProvider = null,
         TournamentGroundsOptions? options = null,
-        IGameEventOutbox? outbox = null)
+        IGameEventOutbox? outbox = null,
+        IInventoryService? inventoryService = null,
+        IItemBaseRepository? itemBaseRepository = null,
+        IInventoryItemFactory? inventoryItemFactory = null)
     {
         var tournaments = new TournamentGroundsRepository(db);
         var tournamentOptions = options ?? new TournamentGroundsOptions
@@ -1174,7 +1352,9 @@ public sealed class TournamentGroundsServiceTests
             entityService ?? new NoOpEntityService(),
             combatSetupService ?? new NoOpCombatSetupService(),
             characterSnapshotService ?? new DbCharacterSnapshotService(db),
-            new NoOpItemBaseRepository(),
+            itemBaseRepository ?? new NoOpItemBaseRepository(),
+            inventoryService ?? new RecordingInventoryService(),
+            inventoryItemFactory ?? new InventoryItemFactory(),
             combatEngineExecutor ?? new ThrowingCombatEngineExecutor(),
             combatEncounterResultFactory ?? new ThrowingCombatEncounterResultFactory(),
             realtime ?? new CapturingGameRealtimeBroadcaster(),
@@ -1595,6 +1775,50 @@ public sealed class TournamentGroundsServiceTests
             => Task.CompletedTask;
     }
 
+    private sealed class FakeItemBaseRepository(IEnumerable<ItemBase> itemBases) : IItemBaseRepository
+    {
+        private readonly IReadOnlyDictionary<string, ItemBase> _itemBases = itemBases.ToDictionary(item => item.Id);
+
+        public Task<IReadOnlyDictionary<string, ItemBase>> GetItemBasesByIdsAsync(
+            IReadOnlyCollection<string> itemIds,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyDictionary<string, ItemBase>>(
+                _itemBases
+                    .Where(pair => itemIds.Contains(pair.Key))
+                    .ToDictionary(pair => pair.Key, pair => pair.Value));
+
+        public Task<IReadOnlyDictionary<string, string>> GetEssenceItemBaseIdsByDefinitionIdAsync(CancellationToken cancellationToken)
+            => throw new NotSupportedException();
+
+        public Task<EquipmentBase?> GetCraftableEquipmentBaseAsync(string itemBaseId, CancellationToken cancellationToken)
+            => throw new NotSupportedException();
+
+        public Task AddMissingItemBasesAsync(IReadOnlyCollection<ItemBase> itemBases, CancellationToken cancellationToken)
+            => throw new NotSupportedException();
+    }
+
+    private sealed class RecordingInventoryService : IInventoryService
+    {
+        public List<InventoryItem> AddedRewards { get; } = [];
+
+        public Task AddItemsToInventory(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)
+        {
+            AddedRewards.AddRange(loot);
+            return Task.CompletedTask;
+        }
+
+        public Task<Inventory?> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<bool> TryRemoveCraftingMaterialsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<bool> TryConsumeInventoryItemAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<InventoryItem?> GetInventoryItemAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing marketplaceListing, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task AddItemToInventoryFromMarketPlace(Guid characterId, InventoryItem inventoryItem, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<InventoryItem?> ScrapEquipments(Guid characterId, List<Guid> parsedGuids, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<InventoryTransferResult> TransferItemAsync(Guid senderCharacterId, Guid recipientCharacterId, Guid itemInstanceId, int quantity, CancellationToken cancellationToken) => throw new NotSupportedException();
+    }
+
     private sealed class ThrowingCombatEngineExecutor : ICombatEngineExecutor
     {
         public Task<CombatResult> ExecuteAsync(CombatEncounterRuntime runtime, CancellationToken cancellationToken)
@@ -1645,6 +1869,57 @@ public sealed class TournamentGroundsServiceTests
                 EnemyTeam = runtime.HostileParticipants
                     .Select(p => new SimpleCombatEntity(p.Combatant.Id, p.Combatant.Name, p.Combatant.ImagePath, 1, 0))
                     .ToList()
+            });
+        }
+    }
+
+    private sealed class DrawDamageCombatEngineExecutor(
+        int friendlyDamage,
+        int hostileDamage) : ICombatEngineExecutor
+    {
+        public Task<CombatResult> ExecuteAsync(
+            CombatEncounterRuntime runtime,
+            CancellationToken cancellationToken)
+        {
+            var friendly = runtime.FriendlyParticipants
+                .Select(participant => new SimpleCombatEntity(
+                    participant.Combatant.Id,
+                    participant.Combatant.Name,
+                    participant.Combatant.ImagePath,
+                    1,
+                    0))
+                .ToList();
+            var hostile = runtime.HostileParticipants
+                .Select(participant => new SimpleCombatEntity(
+                    participant.Combatant.Id,
+                    participant.Combatant.Name,
+                    participant.Combatant.ImagePath,
+                    1,
+                    0))
+                .ToList();
+            var entityStats = runtime.FriendlyParticipants
+                .Select((participant, index) => new EntityStats(
+                    participant.Combatant.Id,
+                    participant.Combatant.Name,
+                    [],
+                    DamageDone: index == 0 ? friendlyDamage : 0,
+                    Team: "Friendly"))
+                .Concat(runtime.HostileParticipants.Select((participant, index) => new EntityStats(
+                    participant.Combatant.Id,
+                    participant.Combatant.Name,
+                    [],
+                    DamageDone: index == 0 ? hostileDamage : 0,
+                    Team: "Hostile")))
+                .ToList();
+
+            return Task.FromResult(new CombatResult
+            {
+                Outcome = BattleOutcome.Draw,
+                StartedAt = runtime.Plan.StartsAt,
+                Duration = 1,
+                PlayerTeam = friendly,
+                EnemyTeam = hostile,
+                EntityStats = entityStats
             });
         }
     }

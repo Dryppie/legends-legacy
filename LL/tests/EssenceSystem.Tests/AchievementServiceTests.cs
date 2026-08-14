@@ -35,6 +35,28 @@ public sealed class AchievementServiceTests
     }
 
     [Fact]
+    public void Champion_title_catalog_entry_references_tournament_winner_achievement()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        {
+            Converters = { new JsonStringEnumConverter() }
+        };
+        var dataPath = Path.Combine(AppContext.BaseDirectory, "Data");
+        var achievementKeys = Directory.EnumerateFiles(Path.Combine(dataPath, "achievements"), "*.json")
+            .SelectMany(path => JsonSerializer.Deserialize<List<AchievementCatalogEntry>>(File.ReadAllText(path), options) ?? [])
+            .Select(achievement => achievement.Key)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var titles = Directory.EnumerateFiles(Path.Combine(dataPath, "titles"), "*.json")
+            .SelectMany(path => JsonSerializer.Deserialize<List<TitleCatalogEntry>>(File.ReadAllText(path), options) ?? [])
+            .ToList();
+
+        var championTitle = Assert.Single(titles, title => title.Key == "title.champion_of_the_grounds");
+        Assert.Equal("Champion of the Grounds", championTitle.Name);
+        Assert.Equal("colosseum.tournament_winner", championTitle.SourceAchievementKey);
+        Assert.Contains(championTitle.SourceAchievementKey, achievementKeys);
+    }
+
+    [Fact]
     public async Task Progress_unlocks_achievement_once_and_awards_points_and_title_once()
     {
         await using var db = CreateDbContext();
@@ -58,6 +80,38 @@ public sealed class AchievementServiceTests
         Assert.Empty(third);
         Assert.Equal(10, (await service.GetOverviewAsync(accountId, characterId, CancellationToken.None)).TotalAchievementPoints);
         Assert.Single(db.PlayerTitleUnlocks);
+    }
+
+    [Fact]
+    public async Task Winning_tournament_unlocks_champion_of_the_grounds_title()
+    {
+        await using var db = CreateDbContext();
+        var accountId = Guid.NewGuid();
+        var characterId = Guid.NewGuid();
+        SeedCharacter(db, accountId, characterId);
+        SeedAchievement(
+            db,
+            "colosseum.tournament_winner",
+            AchievementRequirementType.ColosseumTournamentsWon,
+            1,
+            AchievementScope.Character,
+            AchievementCategory.Colosseum);
+        SeedTitle(
+            db,
+            "title.champion_of_the_grounds",
+            "colosseum.tournament_winner",
+            TitleScope.Character);
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        await service.RecordColosseumTournamentAsync(characterId, won: true, CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var title = Assert.Single(await db.PlayerTitleUnlocks.ToListAsync());
+        Assert.Equal(characterId, title.CharacterId);
+        Assert.Equal(
+            "title.champion_of_the_grounds",
+            (await db.TitleDefinitions.SingleAsync(definition => definition.Id == title.TitleDefinitionId)).Key);
     }
 
     [Fact]
@@ -640,4 +694,9 @@ public sealed class AchievementServiceTests
         TitleRarity Rarity,
         AchievementRequirementType RequirementType,
         int SortOrder);
+
+    private sealed record TitleCatalogEntry(
+        string Key,
+        string Name,
+        string SourceAchievementKey);
 }

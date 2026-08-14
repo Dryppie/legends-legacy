@@ -127,11 +127,14 @@ public sealed class CraftingCompositionContentTests
         Assert.Equal(
             new Dictionary<AttributeType, double>
             {
-                [AttributeType.Power] = 0.5d,
-                [AttributeType.CritDamage] = 0.2d,
-                [AttributeType.CritChance] = 0.3d
+                [AttributeType.Power] = 0.35d,
+                [AttributeType.ArmorPenetration] = 0.4d,
+                [AttributeType.CritDamage] = 0.25d
             },
             execution.BonusStatProfile);
+        Assert.Contains("Armor Penetration", execution.Description);
+        Assert.Contains("ArmorPenetration", execution.Tags);
+        Assert.DoesNotContain(AttributeType.CritChance, execution.BonusStatProfile.Keys);
         Assert.Equal(
             new Dictionary<AttributeType, double>
             {

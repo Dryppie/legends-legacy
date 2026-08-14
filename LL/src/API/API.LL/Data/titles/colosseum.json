@@ -58,5 +58,17 @@
     "isHiddenUntilUnlocked": false,
     "isActive": true,
     "sortOrder": 33
+  },
+  {
+    "key": "title.champion_of_the_grounds",
+    "name": "Champion of the Grounds",
+    "description": "Awarded for winning the Tournament Grounds.",
+    "category": "Colosseum",
+    "rarity": "Mythic",
+    "scope": "Character",
+    "sourceAchievementKey": "colosseum.tournament_winner",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 34
   }
 ]

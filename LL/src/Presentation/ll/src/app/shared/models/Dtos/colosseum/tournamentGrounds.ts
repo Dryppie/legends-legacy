@@ -3,6 +3,7 @@ import {
   EntityStats,
   SimpleCombatEntityDto,
 } from '../combatResultDto';
+import { InventoryItem } from '../../inventoryItem';
 
 export interface TournamentGroundsStatus {
   nowUtc: string;
@@ -178,6 +179,10 @@ export interface TournamentPlaybackManifest {
   ticksPerSecond: number;
   ticksPerFrame: number;
   totalTicks: number;
+  overtimeStartsAtTick: number;
+  overtimeDurationTicks: number;
+  overtimePowerIncreaseIntervalTicks: number;
+  overtimePowerIncreasePercent: number;
   frameCount: number;
   playbackStartedAtUtc: string;
   playbackEndsAtUtc: string;
@@ -297,6 +302,9 @@ export interface TournamentRewardGrant {
   arenaGlory: number;
   cinders: number;
   soulstones: number;
+  catalystSelectionCaches: number;
+  blueprintSelectionBoxes: number;
+  sigilFragments: number;
   status: string;
   createdAtUtc: string;
   claimedAtUtc?: string | null;
@@ -307,4 +315,9 @@ export interface ClaimTournamentRewardsResponse {
   arenaGlory: number;
   cinders: number;
   soulstones: number;
+  sigilFragments: number;
+  catalystSelectionCaches: number;
+  blueprintSelectionBoxes: number;
+  inventoryGrantId?: string | null;
+  inventoryRewards: InventoryItem[];
 }

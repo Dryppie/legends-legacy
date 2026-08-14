@@ -171,7 +171,7 @@
   {
     "id": "blueprint_execution",
     "name": "Blueprint: Execution",
-    "description": "Applies the Execution design to a compatible recipe.",
+    "description": "Focuses Power, Armor Penetration, and critical impact into an anti-armor finishing design.",
     "itemId": "blueprint_execution",
     "nameFormat": "{BaseName} of Execution",
     "requiredRecipeTags": [],
@@ -184,9 +184,9 @@
     "compatibleRecipeIds": [],
     "bonusStatBudgetMultiplier": 0.2,
     "bonusStatProfile": {
-      "Power": 0.5,
-      "CritDamage": 0.2,
-      "CritChance": 0.3
+      "Power": 0.35,
+      "ArmorPenetration": 0.4,
+      "CritDamage": 0.25
     },
     "temperingProfile": {
       "id": "blueprint_execution.tempering",
@@ -194,29 +194,29 @@
       "stats": [
         {
           "stat": "Power",
-          "weight": 50,
+          "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.55,
+          "maxBudgetShare": 0.45,
+          "minimumTier": 1
+        },
+        {
+          "stat": "ArmorPenetration",
+          "weight": 40,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.5,
           "minimumTier": 1
         },
         {
           "stat": "CritDamage",
-          "weight": 20,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritChance",
-          "weight": 30,
+          "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.35,
           "minimumTier": 1
         }
       ]
@@ -241,9 +241,10 @@
     "sourceId": "goblin_mines",
     "tags": [
       "Execution",
+      "Physical",
       "Crit",
-      "CritChance",
-      "Damage"
+      "ArmorPenetration",
+      "Finisher"
     ],
     "enabled": true
   },

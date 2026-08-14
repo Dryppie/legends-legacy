@@ -39,6 +39,7 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
   readonly bracket = signal<TournamentBracket | null>(null);
   readonly replay = signal<CombatResultDto | null>(null);
   readonly playback = signal<TournamentPlaybackManifest | null>(null);
+  readonly currentPlaybackTick = signal(0);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   private readonly destroyed = new Subject<void>();
@@ -63,6 +64,46 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
   readonly match = computed<TournamentMatch | null>(() => {
     const matchId = this.matchId();
     return this.round()?.matches.find((match) => match.id === matchId) ?? null;
+  });
+
+  readonly overtimeClock = computed<string | null>(() => {
+    const playback = this.playback();
+    if (!playback) return null;
+
+    const currentTick = this.currentPlaybackTick();
+    const overtimeEndsAtTick =
+      playback.overtimeStartsAtTick + playback.overtimeDurationTicks;
+    if (
+      currentTick < playback.overtimeStartsAtTick ||
+      currentTick >= overtimeEndsAtTick
+    ) {
+      return null;
+    }
+
+    const remainingSeconds = Math.max(
+      0,
+      Math.ceil(
+        (overtimeEndsAtTick - currentTick) /
+          Math.max(1, playback.ticksPerSecond),
+      ),
+    );
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  });
+
+  readonly overtimePowerBonus = computed<number>(() => {
+    const playback = this.playback();
+    if (!playback || playback.overtimePowerIncreaseIntervalTicks <= 0) return 0;
+
+    const overtimeTicks = Math.max(
+      0,
+      this.currentPlaybackTick() - playback.overtimeStartsAtTick,
+    );
+    const stacks = Math.floor(
+      overtimeTicks / playback.overtimePowerIncreaseIntervalTicks,
+    );
+    return stacks * playback.overtimePowerIncreasePercent;
   });
 
   constructor(
@@ -311,6 +352,7 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
             bundle.ticksPerSecond,
         ),
     );
+    this.currentPlaybackTick.set(tick);
     const frame = this.playbackService.frameAtTick(bundle, tick);
     if (frame.sequence !== this.lastSequence || reset) {
       this.lastSequence = frame.sequence;
