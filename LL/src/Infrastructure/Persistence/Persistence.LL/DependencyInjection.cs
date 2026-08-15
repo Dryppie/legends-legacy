@@ -9,6 +9,7 @@ using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Dungeons.Mastery;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Economy;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -43,6 +44,7 @@ using Persistence.LL.Repositories.Dungeons;
 using Persistence.LL.Repositories.Entities;
 using Persistence.LL.Repositories.Entities.Characters;
 using Persistence.LL.Repositories.Entities.Creatures;
+using Persistence.LL.Repositories.Economy;
 using Persistence.LL.Repositories.Equipments;
 using Persistence.LL.Repositories.Essences;
 using Persistence.LL.Repositories.Guilds;
@@ -105,6 +107,7 @@ public static class DependencyInjection
         services.AddScoped<IDungeonPowerRecommendationRepository, DungeonPowerRecommendationRepository>();
 
         services.AddScoped<IEntityRepository, EntityRepository>();
+        services.AddScoped<IEconomyLedgerRepository, EconomyLedgerRepository>();
         services.AddScoped<IEquipmentSlotRepository, EquipmentSlotRepository>();
         services.AddScoped<IEssenceRepository, EssenceRepository>();
 

@@ -666,7 +666,14 @@ public sealed class TournamentGroundsServiceTests
     {
         await using var db = CreateDbContext();
         var realtime = new CapturingGameRealtimeBroadcaster();
-        var service = CreateService(db, realtime);
+        var service = CreateService(
+            db,
+            realtime,
+            options: new TournamentGroundsOptions
+            {
+                DevelopmentToolsEnabled = true,
+                UsePostgresAdvisoryLocks = false
+            });
         var tournament = SeedTournament(db, TournamentStatus.RegistrationClosed);
         tournament.StartsAtUtc = Now.AddHours(1);
 
@@ -700,10 +707,58 @@ public sealed class TournamentGroundsServiceTests
     }
 
     [Fact]
-    public async Task AdvanceDueTournamentsAsync_merges_two_player_team_with_one_player_team()
+    public async Task AdvanceDueTournamentsAsync_does_not_create_teams_outside_development_but_merges_existing_teams()
     {
         await using var db = CreateDbContext();
         var service = CreateService(db);
+        var tournament = SeedTournament(db, TournamentStatus.RegistrationClosed);
+        tournament.StartsAtUtc = Now.AddHours(1);
+        tournament.MinParticipants = 2;
+        tournament.Definition.MinParticipants = 2;
+
+        var first = SeedParticipant(db, tournament, rating: 1800, registeredOffsetMinutes: 0);
+        var second = SeedParticipant(db, tournament, rating: 1700, registeredOffsetMinutes: 1);
+        var third = SeedParticipant(db, tournament, rating: 1600, registeredOffsetMinutes: 2);
+        var fourth = SeedParticipant(db, tournament, rating: 1500, registeredOffsetMinutes: 3);
+        var fifth = SeedParticipant(db, tournament, rating: 1400, registeredOffsetMinutes: 4);
+        var unassignedOne = SeedParticipant(db, tournament, rating: 1300, registeredOffsetMinutes: 5);
+        var unassignedTwo = SeedParticipant(db, tournament, rating: 1200, registeredOffsetMinutes: 6);
+        SeedTeam(db, tournament, "Player Pair One", first, second);
+        SeedTeam(db, tournament, "Player Pair Two", third, fourth);
+        SeedTeam(db, tournament, "Player Solo", fifth);
+        tournament.RegisteredParticipantCount = 7;
+        await db.SaveChangesAsync();
+
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+
+        Assert.Equal(TournamentStatus.BracketGenerated, tournament.Status);
+        var teams = await db.TournamentTeams.ToListAsync();
+        Assert.Equal(3, teams.Count);
+        var activeTeams = teams
+            .Where(team => team.Status == TournamentTeamStatus.Active)
+            .OrderBy(team => team.MemberCount)
+            .ToList();
+        Assert.Equal([2, 3], activeTeams.Select(team => team.MemberCount));
+        Assert.Single(teams, team => team.Status == TournamentTeamStatus.Disbanded);
+        Assert.Null(unassignedOne.TeamId);
+        Assert.Null(unassignedTwo.TeamId);
+        Assert.Equal(TournamentParticipantStatus.Registered, unassignedOne.Status);
+        Assert.Equal(TournamentParticipantStatus.Registered, unassignedTwo.Status);
+        Assert.Single(await db.TournamentRounds.ToListAsync());
+        Assert.Single(await db.TournamentMatches.ToListAsync());
+    }
+
+    [Fact]
+    public async Task AdvanceDueTournamentsAsync_merges_two_player_team_with_one_player_team()
+    {
+        await using var db = CreateDbContext();
+        var service = CreateService(
+            db,
+            options: new TournamentGroundsOptions
+            {
+                DevelopmentToolsEnabled = true,
+                UsePostgresAdvisoryLocks = false
+            });
         var tournament = SeedTournament(db, TournamentStatus.RegistrationClosed);
         tournament.MinParticipants = 1;
         tournament.Definition.MinParticipants = 1;
@@ -726,21 +781,29 @@ public sealed class TournamentGroundsServiceTests
     }
 
     [Fact]
-    public async Task AdvanceDueTournamentsAsync_does_not_split_three_two_player_teams()
+    public async Task AdvanceDueTournamentsAsync_does_not_merge_six_two_player_teams()
     {
         await using var db = CreateDbContext();
         var service = CreateService(db);
         var tournament = SeedTournament(db, TournamentStatus.RegistrationClosed);
-        tournament.MinParticipants = 3;
-        tournament.Definition.MinParticipants = 3;
+        tournament.StartsAtUtc = Now.AddHours(1);
+        tournament.MinParticipants = 6;
+        tournament.Definition.MinParticipants = 6;
 
-        var participants = Enumerable.Range(0, 6)
+        var participants = Enumerable.Range(0, 12)
             .Select(i => SeedParticipant(db, tournament, rating: 1800 - (i * 50), registeredOffsetMinutes: i))
             .ToArray();
-        SeedTeam(db, tournament, "First Pair", participants[0], participants[1]);
-        SeedTeam(db, tournament, "Second Pair", participants[2], participants[3]);
-        SeedTeam(db, tournament, "Third Pair", participants[4], participants[5]);
-        tournament.RegisteredParticipantCount = 6;
+        for (var teamIndex = 0; teamIndex < 6; teamIndex++)
+        {
+            SeedTeam(
+                db,
+                tournament,
+                $"Pair {teamIndex + 1}",
+                participants[teamIndex * 2],
+                participants[(teamIndex * 2) + 1]);
+        }
+
+        tournament.RegisteredParticipantCount = 12;
         await db.SaveChangesAsync();
 
         await service.AdvanceDueTournamentsAsync(CancellationToken.None);
@@ -750,8 +813,64 @@ public sealed class TournamentGroundsServiceTests
             .Where(t => t.Status == TournamentTeamStatus.Active)
             .OrderBy(t => t.Seed)
             .ToListAsync();
-        Assert.Equal([2, 2, 2], activeTeams.Select(t => t.MemberCount));
+        Assert.Equal(6, activeTeams.Count);
+        Assert.All(activeTeams, team => Assert.Equal(2, team.MemberCount));
         Assert.Empty(await db.TournamentTeams.Where(t => t.Status == TournamentTeamStatus.Disbanded).ToListAsync());
+    }
+
+    [Fact]
+    public async Task AdvanceDueTournamentsAsync_adds_three_solo_teams_to_three_of_six_two_player_teams()
+    {
+        await using var db = CreateDbContext();
+        var service = CreateService(db);
+        var tournament = SeedTournament(db, TournamentStatus.RegistrationClosed);
+        tournament.StartsAtUtc = Now.AddHours(1);
+        tournament.MinParticipants = 6;
+        tournament.Definition.MinParticipants = 6;
+
+        var participants = Enumerable.Range(0, 15)
+            .Select(i => SeedParticipant(db, tournament, rating: 2000 - (i * 50), registeredOffsetMinutes: i))
+            .ToArray();
+        var pairTeams = new List<TournamentTeam>();
+        for (var teamIndex = 0; teamIndex < 6; teamIndex++)
+        {
+            pairTeams.Add(SeedTeam(
+                db,
+                tournament,
+                $"Pair {teamIndex + 1}",
+                participants[teamIndex * 2],
+                participants[(teamIndex * 2) + 1]));
+        }
+
+        for (var soloIndex = 0; soloIndex < 3; soloIndex++)
+        {
+            SeedTeam(
+                db,
+                tournament,
+                $"Solo {soloIndex + 1}",
+                participants[12 + soloIndex]);
+        }
+
+        tournament.RegisteredParticipantCount = 15;
+        await db.SaveChangesAsync();
+
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+
+        Assert.Equal(TournamentStatus.BracketGenerated, tournament.Status);
+        var activeTeams = await db.TournamentTeams
+            .Where(team => team.Status == TournamentTeamStatus.Active)
+            .OrderBy(team => team.MemberCount)
+            .ToListAsync();
+        Assert.Equal(6, activeTeams.Count);
+        Assert.Equal([2, 2, 2, 3, 3, 3], activeTeams.Select(team => team.MemberCount));
+        Assert.Equal(3, await db.TournamentTeams.CountAsync(team => team.Status == TournamentTeamStatus.Disbanded));
+
+        for (var teamIndex = 0; teamIndex < pairTeams.Count; teamIndex++)
+        {
+            Assert.Equal(TournamentTeamStatus.Active, pairTeams[teamIndex].Status);
+            Assert.Equal(pairTeams[teamIndex].Id, participants[teamIndex * 2].TeamId);
+            Assert.Equal(pairTeams[teamIndex].Id, participants[(teamIndex * 2) + 1].TeamId);
+        }
     }
 
     [Fact]
@@ -884,6 +1003,11 @@ public sealed class TournamentGroundsServiceTests
             combatEngineExecutor: combatExecutor,
             combatEncounterResultFactory: new PassthroughCombatEncounterResultFactory(),
             timeProvider: clock,
+            options: new TournamentGroundsOptions
+            {
+                DevelopmentToolsEnabled = true,
+                UsePostgresAdvisoryLocks = false
+            },
             outbox: outbox);
         var tournament = SeedTournament(db, TournamentStatus.RegistrationClosed);
         tournament.StartsAtUtc = Now.AddMinutes(-1);
@@ -1077,7 +1201,12 @@ public sealed class TournamentGroundsServiceTests
             combatSetupService: new SimpleCombatSetupService(),
             combatEngineExecutor: new DrawDamageCombatEngineExecutor(friendlyDamage, hostileDamage),
             combatEncounterResultFactory: new PassthroughCombatEncounterResultFactory(),
-            timeProvider: clock);
+            timeProvider: clock,
+            options: new TournamentGroundsOptions
+            {
+                DevelopmentToolsEnabled = true,
+                UsePostgresAdvisoryLocks = false
+            });
         var tournament = SeedTournament(db, TournamentStatus.RegistrationClosed);
         tournament.StartsAtUtc = Now.AddMinutes(-1);
         tournament.RoundIntervalMinutes = 0;
@@ -1133,6 +1262,7 @@ public sealed class TournamentGroundsServiceTests
             var options = new TournamentGroundsOptions
             {
                 Enabled = true,
+                DevelopmentToolsEnabled = true,
                 AllowWithdrawDuringRegistration = true,
                 DefaultMinParticipants = 4,
                 DefaultMaxParticipants = 32,
@@ -1801,7 +1931,11 @@ public sealed class TournamentGroundsServiceTests
     {
         public List<InventoryItem> AddedRewards { get; } = [];
 
-        public Task AddItemsToInventory(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)
+        public Task AddItemsToInventory(
+            Guid characterId,
+            List<InventoryItem> loot,
+            string acquisitionSource,
+            CancellationToken cancellationToken)
         {
             AddedRewards.AddRange(loot);
             return Task.CompletedTask;

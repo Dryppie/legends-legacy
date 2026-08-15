@@ -472,7 +472,11 @@ public class ColosseumService : IColosseumService
 
         if (rewardInventoryItems.Count > 0)
         {
-            await _inventoryService.AddItemsToInventory(characterId, rewardInventoryItems, cancellationToken);
+            await _inventoryService.AddItemsToInventory(
+                characterId,
+                rewardInventoryItems,
+                ItemAcquisitionSources.ChampionMarket,
+                cancellationToken);
         }
 
         await _colosseumRepository.SaveChampionMarketPurchaseAsync(new ChampionMarketPurchase

@@ -7,6 +7,7 @@ using Domain.Models.Colosseum;
 using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Dungeons.Mastery;
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Economy;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -121,6 +122,7 @@ public interface IDbContext
     DbSet<InventoryItem> InventoryItems { get; }
     DbSet<LootHistoryEntry> LootHistoryEntries { get; }
     DbSet<PlayerTransferRecord> PlayerTransferHistory { get; }
+    DbSet<EconomyLedgerEntry> EconomyLedger { get; }
     DbSet<ItemBase> ItemBases { get; }
     DbSet<ItemInstance> ItemInstances { get; }
     DbSet<MarketPlaceListing> MarketPlaceListings { get; }

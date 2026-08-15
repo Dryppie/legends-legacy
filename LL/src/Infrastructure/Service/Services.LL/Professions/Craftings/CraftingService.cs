@@ -416,7 +416,11 @@ public class CraftingService : ICraftingService
             });
         }
 
-        await _inventoryService.AddItemsToInventory(characterId, created, cancellationToken);
+        await _inventoryService.AddItemsToInventory(
+            characterId,
+            created,
+            ItemAcquisitionSources.Crafting,
+            cancellationToken);
         var craftedEquipment = created.Select(x => (EquipmentInstance)x.ItemInstance).ToList();
         var craftedAt = DateTimeOffset.UtcNow;
         await _guildMissionService.RecordContributionAsync(

@@ -848,7 +848,11 @@ public sealed class ProphecyService : IProphecyService
         if (HasInventoryReward(reward))
         {
             var rewards = await CreateRewardInventoryItemsAsync(characterId, reward, cancellationToken);
-            await _inventoryService.AddItemsToInventory(characterId, rewards, cancellationToken);
+            await _inventoryService.AddItemsToInventory(
+                characterId,
+                rewards,
+                ItemAcquisitionSources.ProphecyReward,
+                cancellationToken);
             return rewards;
         }
 

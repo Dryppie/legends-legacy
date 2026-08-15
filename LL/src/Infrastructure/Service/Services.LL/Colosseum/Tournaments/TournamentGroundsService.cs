@@ -1309,6 +1309,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             await _inventoryService.AddItemsToInventory(
                 characterId,
                 inventoryRewards,
+                ItemAcquisitionSources.TournamentReward,
                 cancellationToken);
         }
 
@@ -2685,34 +2686,14 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     private async Task PrepareTeamsForBracketAsync(Guid tournamentId, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        var participants = await _tournaments.Participants
-            .Where(p => p.TournamentId == tournamentId && p.Status != TournamentParticipantStatus.Withdrawn)
-            .OrderByDescending(p => p.EntryArenaRating)
-            .ThenBy(p => p.RegisteredAtUtc)
-            .ToListAsync(cancellationToken);
-
-        foreach (var participant in participants.Where(p => !p.TeamId.HasValue))
+        if (_options.DevelopmentToolsEnabled)
         {
-            var team = new TournamentTeam
-            {
-                Id = Guid.NewGuid(),
-                TournamentId = tournamentId,
-                Name = NormalizeTeamName("", participant.CharacterId),
-                OwnerParticipantId = participant.Id,
-                Status = TournamentTeamStatus.Forming,
-                MemberCount = 1,
-                CreatedAtUtc = now,
-                UpdatedAtUtc = now
-            };
-
-            participant.TeamId = team.Id;
-            participant.Team = team;
-            participant.IsTeamOwner = true;
-            participant.UpdatedAtUtc = now;
-            await _tournaments.AddAsync(team, cancellationToken);
+            await CreateDevelopmentTeamsForUnassignedParticipantsAsync(
+                tournamentId,
+                now,
+                cancellationToken);
         }
 
-        await _tournaments.SaveChangesAsync(cancellationToken);
         await RecalculateTeamMemberCountsAsync(tournamentId, now, cancellationToken);
 
         while (true)
@@ -2754,6 +2735,41 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             await MergeTeamsAsync(target, source, now, cancellationToken);
             await _tournaments.SaveChangesAsync(cancellationToken);
         }
+    }
+
+    private async Task CreateDevelopmentTeamsForUnassignedParticipantsAsync(
+        Guid tournamentId,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var participants = await _tournaments.Participants
+            .Where(p => p.TournamentId == tournamentId && p.Status != TournamentParticipantStatus.Withdrawn)
+            .OrderByDescending(p => p.EntryArenaRating)
+            .ThenBy(p => p.RegisteredAtUtc)
+            .ToListAsync(cancellationToken);
+
+        foreach (var participant in participants.Where(p => !p.TeamId.HasValue))
+        {
+            var team = new TournamentTeam
+            {
+                Id = Guid.NewGuid(),
+                TournamentId = tournamentId,
+                Name = NormalizeTeamName("", participant.CharacterId),
+                OwnerParticipantId = participant.Id,
+                Status = TournamentTeamStatus.Forming,
+                MemberCount = 1,
+                CreatedAtUtc = now,
+                UpdatedAtUtc = now
+            };
+
+            participant.TeamId = team.Id;
+            participant.Team = team;
+            participant.IsTeamOwner = true;
+            participant.UpdatedAtUtc = now;
+            await _tournaments.AddAsync(team, cancellationToken);
+        }
+
+        await _tournaments.SaveChangesAsync(cancellationToken);
     }
 
     private async Task RecalculateTeamMemberCountsAsync(Guid tournamentId, DateTimeOffset now, CancellationToken cancellationToken)

@@ -75,7 +75,11 @@ public sealed class DungeonSigilAssemblyService(
             dungeon.SigilItemId,
             cancellationToken);
         var assembledSigil = inventoryItemFactory.Create(sigilItemBase, 1, characterId);
-        await inventory.AddItemsToInventory(characterId, [assembledSigil], cancellationToken);
+        await inventory.AddItemsToInventory(
+            characterId,
+            [assembledSigil],
+            ItemAcquisitionSources.DungeonSigilAssembly,
+            cancellationToken);
 
         return DungeonSigilAssemblyOperationResult.Success(new DungeonSigilAssemblyResult(
             dungeon.Id,

@@ -1,4 +1,5 @@
 using Application.Common.Interfaces;
+using Domain.Models.Economy;
 using Domain.Models.Items.Equipments;
 using Domain.Models.MarketPlaces;
 using Microsoft.EntityFrameworkCore;
@@ -203,8 +204,103 @@ public class MarketPlaceRepository : IMarketPlaceRepository
             .Take(Math.Clamp(take, 1, 200))
             .ToListAsync(cancellationToken);
 
-    public async Task AddOrderAsync(MarketPlaceOrder order, CancellationToken cancellationToken) =>
+    public async Task AddOrderAsync(MarketPlaceOrder order, CancellationToken cancellationToken)
+    {
+        var participants = await _dbContext.Characters
+            .AsNoTracking()
+            .Where(x => x.Id == order.SellerId || x.Id == order.BuyerId)
+            .Select(x => new { x.Id, x.UserId, x.Level })
+            .ToListAsync(cancellationToken);
+        var seller = participants.SingleOrDefault(x => x.Id == order.SellerId)
+            ?? throw new InvalidOperationException("Marketplace seller was not found while recording the trade.");
+        var buyer = participants.SingleOrDefault(x => x.Id == order.BuyerId)
+            ?? throw new InvalidOperationException("Marketplace buyer was not found while recording the trade.");
+
+        order.SellerAccountId = seller.UserId;
+        order.BuyerAccountId = buyer.UserId;
+
+        var accountCreatedUtc = await _dbContext.Users
+            .AsNoTracking()
+            .Where(x => x.Id == seller.UserId || x.Id == buyer.UserId)
+            .ToDictionaryAsync(x => x.Id, x => x.CreatedUtc, cancellationToken);
+        var itemBase = await _dbContext.ItemBases
+            .AsNoTracking()
+            .Where(x => x.Id == order.ItemBaseId)
+            .Select(x => new { x.Id, x.Name })
+            .SingleAsync(cancellationToken);
+
         await _dbContext.MarketPlaceOrders.AddAsync(order, cancellationToken);
+        await _dbContext.EconomyLedger.AddAsync(new EconomyLedgerEntry
+        {
+            EventType = EconomyEventType.MarketplaceTrade,
+            AssetType = EconomyAssetType.Item,
+            ReferenceId = order.Id,
+            SenderAccountId = seller.UserId,
+            SenderCharacterId = seller.Id,
+            SenderAccountCreatedUtc = accountCreatedUtc.TryGetValue(seller.UserId, out var sellerCreatedUtc)
+                ? sellerCreatedUtc
+                : null,
+            SenderCharacterLevel = seller.Level,
+            RecipientAccountId = buyer.UserId,
+            RecipientCharacterId = buyer.Id,
+            RecipientAccountCreatedUtc = accountCreatedUtc.TryGetValue(buyer.UserId, out var buyerCreatedUtc)
+                ? buyerCreatedUtc
+                : null,
+            RecipientCharacterLevel = buyer.Level,
+            AssetId = itemBase.Id,
+            AssetName = itemBase.Name,
+            SourceItemInstanceId = order.ItemInstanceId,
+            DestinationItemInstanceId = order.ItemInstanceId,
+            Quantity = order.Quantity,
+            UnitValue = order.UnitPrice,
+            TotalValue = order.TotalPrice,
+            Source = $"marketplace:{order.Source}",
+            OccurredAt = order.PurchasedAt
+        }, cancellationToken);
+
+        await _dbContext.EconomyLedger.AddAsync(new EconomyLedgerEntry
+        {
+            EventType = EconomyEventType.MarketplaceTrade,
+            AssetType = EconomyAssetType.Currency,
+            ReferenceId = order.Id,
+            SenderAccountId = buyer.UserId,
+            SenderCharacterId = buyer.Id,
+            SenderAccountCreatedUtc = buyerCreatedUtc,
+            SenderCharacterLevel = buyer.Level,
+            RecipientAccountId = seller.UserId,
+            RecipientCharacterId = seller.Id,
+            RecipientAccountCreatedUtc = sellerCreatedUtc,
+            RecipientCharacterLevel = seller.Level,
+            AssetId = "currency:cinders",
+            AssetName = "Cinders",
+            Quantity = order.TotalPrice,
+            UnitValue = 1,
+            TotalValue = order.TotalPrice,
+            Source = $"marketplace:{order.Source}:payment",
+            OccurredAt = order.PurchasedAt
+        }, cancellationToken);
+
+        if (order.SellerFee > 0)
+        {
+            await _dbContext.EconomyLedger.AddAsync(new EconomyLedgerEntry
+            {
+                EventType = EconomyEventType.MarketplaceFee,
+                AssetType = EconomyAssetType.Currency,
+                ReferenceId = order.Id,
+                SenderAccountId = seller.UserId,
+                SenderCharacterId = seller.Id,
+                SenderAccountCreatedUtc = sellerCreatedUtc,
+                SenderCharacterLevel = seller.Level,
+                AssetId = "currency:cinders",
+                AssetName = "Cinders",
+                Quantity = order.SellerFee,
+                UnitValue = 1,
+                TotalValue = order.SellerFee,
+                Source = "marketplace:fee",
+                OccurredAt = order.PurchasedAt
+            }, cancellationToken);
+        }
+    }
 
     public Task<bool> BuyoutMarketPlaceListingAsync(Guid characterId, Guid listingId, int quantity, CancellationToken cancellationToken)
     {

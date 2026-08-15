@@ -13,6 +13,8 @@ public class MarketPlaceOrder
     public Guid Id { get; set; }
     public Guid SellerId { get; set; }
     public Guid BuyerId { get; set; }
+    public Guid? SellerAccountId { get; set; }
+    public Guid? BuyerAccountId { get; set; }
     public string ItemBaseId { get; set; } = string.Empty;
     public ItemBase ItemBase { get; set; } = null!;
     public Guid? ItemInstanceId { get; set; }

@@ -10,6 +10,7 @@ using Domain.Models.Items;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Persistence.LL;
+using Persistence.LL.Repositories.Economy;
 using Services.LL.Guilds;
 
 namespace EssenceSystem.Tests;
@@ -88,7 +89,7 @@ public sealed class GuildShopServiceTests
         var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
         var characterId = SeedGuild(db, now);
         await db.SaveChangesAsync();
-        var service = new GuildShopService(db);
+        var service = CreateService(db);
 
         var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
         var blueprint = Assert.Single(overview!.Items, x => x.Key.StartsWith("rare.blueprint_"));
@@ -119,7 +120,7 @@ public sealed class GuildShopServiceTests
         var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
         var characterId = SeedGuild(db, now);
         await db.SaveChangesAsync();
-        var service = new GuildShopService(db);
+        var service = CreateService(db);
 
         var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
         var catalystCache = overview!.Items.First(x =>
@@ -152,7 +153,7 @@ public sealed class GuildShopServiceTests
         var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
         var characterId = SeedGuild(db, now);
         await db.SaveChangesAsync();
-        var service = new GuildShopService(db);
+        var service = CreateService(db);
 
         var rotations = new HashSet<string>();
         for (var week = 0; week < 8; week++)
@@ -178,7 +179,7 @@ public sealed class GuildShopServiceTests
         var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
         var characterId = SeedGuild(db, now, marketOfficeLevel: 5);
         await db.SaveChangesAsync();
-        var service = new GuildShopService(db);
+        var service = CreateService(db);
 
         var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
 
@@ -193,6 +194,9 @@ public sealed class GuildShopServiceTests
 
         return new LLDbContext(options);
     }
+
+    private static GuildShopService CreateService(LLDbContext db) =>
+        new(db, new EconomyLedgerRepository(db));
 
     private static ItemBase CreateResource(string id, string name) => new()
     {

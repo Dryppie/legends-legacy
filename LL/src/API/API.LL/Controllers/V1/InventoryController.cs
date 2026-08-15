@@ -3,6 +3,7 @@ using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.Inventories.Commands.OpenCatalystSelectionCrate;
 using Application.UseCases.Inventories.Commands.TransferInventoryItem;
 using Application.UseCases.Inventories.Queries.GetInventoryById;
+using API.LL.Common;
 using Common.Primitives;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +32,7 @@ public class InventoryController : BaseController
             request.OptionId));
 
     [HttpPost("items/{itemInstanceId:guid}/transfer")]
+    [Authorize(Policy = AuthorizationPolicies.RegisteredUser)]
     public async Task<ActionResult<Response<TransferInventoryItemResponseDto>>> Transfer(
         Guid itemInstanceId,
         [FromBody] TransferInventoryItemRequestDto request) =>

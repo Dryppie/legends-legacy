@@ -223,7 +223,11 @@ public sealed class SelectionCrateServiceTests
             return Task.FromResult(true);
         }
 
-        public Task AddItemsToInventory(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)
+        public Task AddItemsToInventory(
+            Guid characterId,
+            List<InventoryItem> loot,
+            string acquisitionSource,
+            CancellationToken cancellationToken)
         {
             AddedRewards.AddRange(loot);
             return Task.CompletedTask;

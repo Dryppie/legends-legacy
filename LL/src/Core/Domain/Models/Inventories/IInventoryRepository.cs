@@ -17,7 +17,11 @@ public interface IInventoryRepository
     /// <param name="characterId"></param>
     /// <param name="loot"></param>
     /// <returns></returns>
-    Task AddItemsToInventory(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken);
+    Task AddItemsToInventory(
+        Guid characterId,
+        List<InventoryItem> loot,
+        string acquisitionSource,
+        CancellationToken cancellationToken);
     /// <summary>
     /// Create Inventory for Character
     /// </summary>

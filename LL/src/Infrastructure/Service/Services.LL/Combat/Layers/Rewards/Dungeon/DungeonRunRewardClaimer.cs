@@ -82,6 +82,7 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
             await _inventoryService.AddItemsToInventory(
                 run.CharacterId,
                 inventoryItems.ToList(),
+                ItemAcquisitionSources.DungeonReward,
                 cancellationToken);
         }
 

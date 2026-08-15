@@ -9,6 +9,7 @@ using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Dungeons.Mastery;
 using Domain.Models.Dungeons.PowerRatings;
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Economy;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -72,7 +73,17 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         NormalizeIdentityFields();
+        EnforceAppendOnlyEconomyLedger();
         return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void EnforceAppendOnlyEconomyLedger()
+    {
+        if (ChangeTracker.Entries<EconomyLedgerEntry>()
+            .Any(x => x.State is EntityState.Modified or EntityState.Deleted))
+        {
+            throw new InvalidOperationException("Economy ledger entries are append-only and cannot be modified or deleted.");
+        }
     }
 
     private void NormalizeIdentityFields()
@@ -438,6 +449,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
     public DbSet<LootHistoryEntry> LootHistoryEntries => Set<LootHistoryEntry>();
     public DbSet<PlayerTransferRecord> PlayerTransferHistory => Set<PlayerTransferRecord>();
+    public DbSet<EconomyLedgerEntry> EconomyLedger => Set<EconomyLedgerEntry>();
 
     public DbSet<ItemBase> ItemBases => Set<ItemBase>();
     public DbSet<ItemInstance> ItemInstances => Set<ItemInstance>();

@@ -13,6 +13,8 @@ public sealed class MarketPlaceOrderConfiguration : IEntityTypeConfiguration<Mar
         builder.HasIndex(x => new { x.ItemBaseId, x.PurchasedAt });
         builder.HasIndex(x => new { x.BuyerId, x.PurchasedAt });
         builder.HasIndex(x => new { x.SellerId, x.PurchasedAt });
+        builder.HasIndex(x => new { x.BuyerAccountId, x.PurchasedAt });
+        builder.HasIndex(x => new { x.SellerAccountId, x.PurchasedAt });
 
         builder.HasOne(x => x.ItemBase)
             .WithMany()

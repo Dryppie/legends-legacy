@@ -875,7 +875,11 @@ public sealed class MarketPlaceServiceTests
         public int RemoveForListingCalls { get; private set; }
         public List<InventoryItem> MarketPurchases { get; } = [];
         public Task<Inventory?> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken) => Task.FromResult<Inventory?>(null);
-        public Task AddItemsToInventory(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task AddItemsToInventory(
+            Guid characterId,
+            List<InventoryItem> loot,
+            string acquisitionSource,
+            CancellationToken cancellationToken) => Task.CompletedTask;
         public Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken) => Task.CompletedTask;
         public Task<bool> TryRemoveCraftingMaterialsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken) => Task.FromResult(false);
         public Task<bool> TryConsumeInventoryItemAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken) => Task.FromResult(false);

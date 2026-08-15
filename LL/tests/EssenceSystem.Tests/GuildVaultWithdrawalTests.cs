@@ -1,4 +1,5 @@
 using Domain.Models.Entities.Characters;
+using Domain.Models.Economy;
 using Domain.Models.Guilds;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -6,6 +7,7 @@ using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Inventories;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
+using Persistence.LL.Repositories.Economy;
 using Services.LL.Guilds;
 
 public sealed class GuildVaultWithdrawalTests
@@ -15,7 +17,7 @@ public sealed class GuildVaultWithdrawalTests
     {
         await using var db = CreateDb();
         var seeded = await SeedVaultAsync(db, GuildRole.Leader, canWithdrawVault: false);
-        var service = new GuildVaultService(db);
+        var service = CreateService(db);
 
         var result = await service.WithdrawAsync(seeded.CharacterId, seeded.VaultItemId, CancellationToken.None);
         await db.SaveChangesAsync();
@@ -26,6 +28,10 @@ public sealed class GuildVaultWithdrawalTests
         Assert.False(await db.GuildVaultItems.AnyAsync(x => x.Id == seeded.VaultItemId));
         Assert.True(await db.InventoryItems.AnyAsync(x =>
             x.InventoryId == seeded.CharacterId && x.ItemInstanceId == seeded.EquipmentInstanceId));
+        var ledgerEntry = await db.EconomyLedger.SingleAsync();
+        Assert.Equal(EconomyEventType.GuildVaultWithdrawal, ledgerEntry.EventType);
+        Assert.Equal(seeded.CharacterId, ledgerEntry.RecipientCharacterId);
+        Assert.Equal(seeded.EquipmentInstanceId, ledgerEntry.DestinationItemInstanceId);
     }
 
     [Fact]
@@ -43,7 +49,7 @@ public sealed class GuildVaultWithdrawalTests
         });
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
-        var service = new GuildVaultService(db);
+        var service = CreateService(db);
 
         var result = await service.DonateAsync(
             seeded.CharacterId,
@@ -76,7 +82,7 @@ public sealed class GuildVaultWithdrawalTests
         });
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
-        var service = new GuildVaultService(db);
+        var service = CreateService(db);
 
         var result = await service.DonateAsync(
             seeded.CharacterId,
@@ -109,7 +115,7 @@ public sealed class GuildVaultWithdrawalTests
         });
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
-        var service = new GuildVaultService(db);
+        var service = CreateService(db);
 
         var result = await service.WithdrawAsync(
             seeded.CharacterId,
@@ -131,7 +137,7 @@ public sealed class GuildVaultWithdrawalTests
     {
         await using var db = CreateDb();
         var seeded = await SeedVaultAsync(db, GuildRole.Officer, canWithdrawVault: true);
-        var service = new GuildVaultService(db);
+        var service = CreateService(db);
 
         var result = await service.WithdrawAsync(seeded.CharacterId, seeded.VaultItemId, CancellationToken.None);
 
@@ -145,7 +151,7 @@ public sealed class GuildVaultWithdrawalTests
     {
         await using var db = CreateDb();
         var seeded = await SeedVaultAsync(db, role, canWithdrawVault: role == GuildRole.Member);
-        var service = new GuildVaultService(db);
+        var service = CreateService(db);
 
         var result = await service.WithdrawAsync(seeded.CharacterId, seeded.VaultItemId, CancellationToken.None);
 
@@ -158,7 +164,7 @@ public sealed class GuildVaultWithdrawalTests
     {
         await using var db = CreateDb();
         var seeded = await SeedVaultAsync(db, GuildRole.Leader, canWithdrawVault: true, borrowed: true);
-        var service = new GuildVaultService(db);
+        var service = CreateService(db);
 
         var result = await service.WithdrawAsync(seeded.CharacterId, seeded.VaultItemId, CancellationToken.None);
 
@@ -173,6 +179,9 @@ public sealed class GuildVaultWithdrawalTests
             .Options;
         return new LLDbContext(options);
     }
+
+    private static GuildVaultService CreateService(LLDbContext db) =>
+        new(db, new EconomyLedgerRepository(db));
 
     private static async Task<SeededVault> SeedVaultAsync(
         LLDbContext db,

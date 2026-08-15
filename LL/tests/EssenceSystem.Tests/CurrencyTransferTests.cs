@@ -1,4 +1,5 @@
 using Domain.Models.Entities.Characters;
+using Domain.Models.Economy;
 using Domain.Models.Transfers;
 using Application.Interfaces.Services.LL.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,11 @@ public sealed class CurrencyTransferTests
         Assert.Equal(sender.UserId, history.SenderAccountId);
         Assert.Equal(recipient.UserId, history.RecipientAccountId);
         Assert.Equal(250, history.Quantity);
+        var ledgerEntry = await db.EconomyLedger.SingleAsync();
+        Assert.Equal(EconomyEventType.DirectCurrencyTransfer, ledgerEntry.EventType);
+        Assert.Equal(sender.UserId, ledgerEntry.SenderAccountId);
+        Assert.Equal(recipient.UserId, ledgerEntry.RecipientAccountId);
+        Assert.Equal(250, ledgerEntry.TotalValue);
     }
 
     [Fact]

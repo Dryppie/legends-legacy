@@ -6,6 +6,23 @@ using System.Security.Claims;
 
 public sealed class MarketPlaceAuthorizationTests
 {
+    [Theory]
+    [InlineData(typeof(InventoryController), nameof(InventoryController.Transfer))]
+    [InlineData(typeof(CharacterController), nameof(CharacterController.Wire))]
+    public void Direct_player_transfer_endpoints_require_registered_user_policy(
+        Type controllerType,
+        string methodName)
+    {
+        var method = controllerType.GetMethod(methodName)
+            ?? throw new InvalidOperationException($"Controller method '{methodName}' was not found.");
+        var authorizeAttribute = method
+            .GetCustomAttributes(typeof(AuthorizeAttribute), inherit: true)
+            .Cast<AuthorizeAttribute>()
+            .Single(attribute => attribute.Policy is not null);
+
+        Assert.Equal(AuthorizationPolicies.RegisteredUser, authorizeAttribute.Policy);
+    }
+
     [Fact]
     public void Controller_RequiresRegisteredUserPolicy()
     {

@@ -1,4 +1,5 @@
 using Application.Common.Interfaces;
+using Domain.Models.Economy;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Transfers;
 using Microsoft.EntityFrameworkCore;
@@ -53,6 +54,36 @@ public sealed class CurrencyTransferRepository(IDbContext context) : ICurrencyTr
             Quantity = amount
         };
         context.PlayerTransferHistory.Add(transferRecord);
+
+        var accountCreatedUtc = await context.Users
+            .AsNoTracking()
+            .Where(x => x.Id == sender.UserId || x.Id == recipient.UserId)
+            .ToDictionaryAsync(x => x.Id, x => x.CreatedUtc, cancellationToken);
+        context.EconomyLedger.Add(new EconomyLedgerEntry
+        {
+            EventType = EconomyEventType.DirectCurrencyTransfer,
+            AssetType = EconomyAssetType.Currency,
+            ReferenceId = transferRecord.Id,
+            SenderAccountId = sender.UserId,
+            SenderCharacterId = sender.Id,
+            SenderAccountCreatedUtc = accountCreatedUtc.TryGetValue(sender.UserId, out var senderCreatedUtc)
+                ? senderCreatedUtc
+                : null,
+            SenderCharacterLevel = sender.Level,
+            RecipientAccountId = recipient.UserId,
+            RecipientCharacterId = recipient.Id,
+            RecipientAccountCreatedUtc = accountCreatedUtc.TryGetValue(recipient.UserId, out var recipientCreatedUtc)
+                ? recipientCreatedUtc
+                : null,
+            RecipientCharacterLevel = recipient.Level,
+            AssetId = "currency:cinders",
+            AssetName = "Cinders",
+            Quantity = amount,
+            UnitValue = 1,
+            TotalValue = amount,
+            Source = "player-wire",
+            OccurredAt = transferRecord.OccurredAt
+        });
 
         return CinderTransferResult.Success(sender, recipient, transferRecord);
     }

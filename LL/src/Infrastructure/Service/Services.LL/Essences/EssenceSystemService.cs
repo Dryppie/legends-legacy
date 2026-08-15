@@ -804,7 +804,11 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         if (!itemBases.TryGetValue(itemBaseId, out var itemBase))
             throw new InvalidOperationException($"Item '{itemBaseId}' does not exist.");
 
-        await _inventory.AddItemsToInventory(characterId, [_inventoryItemFactory.Create(itemBase, quantity, characterId)], cancellationToken);
+        await _inventory.AddItemsToInventory(
+            characterId,
+            [_inventoryItemFactory.Create(itemBase, quantity, characterId)],
+            ItemAcquisitionSources.EssenceSystem,
+            cancellationToken);
     }
 
     private async Task<bool> RemoveInventoryQuantityAsync(Guid characterId, string itemBaseId, int quantity, CancellationToken cancellationToken)

@@ -1,6 +1,7 @@
 using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL.Guilds;
 using Domain.Extensions.Guilds;
+using Domain.Models.Economy;
 using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
@@ -11,10 +12,14 @@ namespace Services.LL.Guilds;
 public class GuildVaultService : IGuildVaultService
 {
     private readonly IDbContext _context;
+    private readonly IEconomyLedgerRepository _economyLedger;
 
-    public GuildVaultService(IDbContext context)
+    public GuildVaultService(
+        IDbContext context,
+        IEconomyLedgerRepository economyLedger)
     {
         _context = context;
+        _economyLedger = economyLedger;
     }
 
     public async Task<GuildOperationResult<GuildVaultMutation>> DonateAsync(Guid characterId, Guid equipmentInstanceId, CancellationToken cancellationToken)
@@ -44,12 +49,22 @@ public class GuildVaultService : IGuildVaultService
             return GuildOperationResult<GuildVaultMutation>.Fail("That equipment already belongs to a guild vault.");
 
         _context.InventoryItems.Remove(inventoryItem);
-        _context.GuildVaultItems.Add(new GuildVaultItem
+        var vaultItem = new GuildVaultItem
         {
             GuildId = member.GuildId,
             EquipmentInstanceId = equipmentInstanceId,
             DonatedByCharacterId = characterId
-        });
+        };
+        _context.GuildVaultItems.Add(vaultItem);
+        await _economyLedger.RecordGuildVaultMovementAsync(
+            EconomyEventType.GuildVaultDonation,
+            vaultItem.Id,
+            member.GuildId,
+            member.Character,
+            equipment,
+            participantIsSender: true,
+            source: "guild-vault:donation",
+            cancellationToken: cancellationToken);
 
         return GuildOperationResult<GuildVaultMutation>.Success(new(
             member.GuildId,
@@ -66,6 +81,8 @@ public class GuildVaultService : IGuildVaultService
             return GuildOperationResult<bool>.Fail("Your guild role cannot borrow vault equipment.");
 
         var vaultItem = await _context.GuildVaultItems
+            .Include(x => x.EquipmentInstance)
+                .ThenInclude(x => x.ItemBase)
             .FirstOrDefaultAsync(x => x.Id == vaultItemId && x.GuildId == member.GuildId, cancellationToken);
         if (vaultItem is null) return GuildOperationResult<bool>.Fail("Vault equipment was not found.");
         if (vaultItem.BorrowedByCharacterId is not null)
@@ -82,6 +99,15 @@ public class GuildVaultService : IGuildVaultService
             ItemInstanceId = vaultItem.EquipmentInstanceId,
             Quantity = 1
         });
+        await _economyLedger.RecordGuildVaultMovementAsync(
+            EconomyEventType.GuildVaultBorrow,
+            vaultItem.Id,
+            member.GuildId,
+            member.Character,
+            vaultItem.EquipmentInstance,
+            participantIsSender: false,
+            source: "guild-vault:borrow",
+            cancellationToken: cancellationToken);
 
         return GuildOperationResult<bool>.Success(true);
     }
@@ -89,8 +115,14 @@ public class GuildVaultService : IGuildVaultService
     public async Task<GuildOperationResult<bool>> ReturnAsync(Guid characterId, Guid vaultItemId, CancellationToken cancellationToken)
     {
         var vaultItem = await _context.GuildVaultItems
+            .Include(x => x.EquipmentInstance)
+                .ThenInclude(x => x.ItemBase)
             .FirstOrDefaultAsync(x => x.Id == vaultItemId && x.BorrowedByCharacterId == characterId, cancellationToken);
         if (vaultItem is null) return GuildOperationResult<bool>.Fail("You are not borrowing that equipment.");
+
+        var character = await _context.Characters
+            .FirstOrDefaultAsync(x => x.Id == characterId, cancellationToken);
+        if (character is null) return GuildOperationResult<bool>.Fail("Your character could not be found.");
 
         var inventoryItem = await _context.InventoryItems
             .FirstOrDefaultAsync(
@@ -109,6 +141,15 @@ public class GuildVaultService : IGuildVaultService
 
         vaultItem.BorrowedByCharacterId = null;
         vaultItem.BorrowedAt = null;
+        await _economyLedger.RecordGuildVaultMovementAsync(
+            EconomyEventType.GuildVaultReturn,
+            vaultItem.Id,
+            vaultItem.GuildId,
+            character,
+            vaultItem.EquipmentInstance,
+            participantIsSender: true,
+            source: "guild-vault:return",
+            cancellationToken: cancellationToken);
         return GuildOperationResult<bool>.Success(true);
     }
 
@@ -176,6 +217,15 @@ public class GuildVaultService : IGuildVaultService
         }
 
         _context.GuildVaultItems.Remove(vaultItem);
+        await _economyLedger.RecordGuildVaultMovementAsync(
+            EconomyEventType.GuildVaultWithdrawal,
+            vaultItem.Id,
+            member.GuildId,
+            member.Character,
+            vaultItem.EquipmentInstance,
+            participantIsSender: false,
+            source: "guild-vault:withdrawal",
+            cancellationToken: cancellationToken);
 
         return GuildOperationResult<GuildVaultMutation>.Success(new(
             member.GuildId,
@@ -190,4 +240,5 @@ public class GuildVaultService : IGuildVaultService
             .Include(x => x.Guild)
                 .ThenInclude(x => x.RolePermissions)
             .FirstOrDefaultAsync(x => x.CharacterId == characterId, cancellationToken);
+
 }

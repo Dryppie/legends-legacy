@@ -1,4 +1,5 @@
 using Domain.Models.Inventories;
+using Domain.Models.Economy;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Items;
 using Domain.Models.Transfers;
@@ -42,6 +43,82 @@ public sealed class InventoryTransferTests
         Assert.Equal(senderItem.ItemInstanceId, history.SourceItemInstanceId);
         Assert.Equal(recipientItem.ItemInstanceId, history.DestinationItemInstanceId);
         Assert.Equal(4, history.Quantity);
+        var ledgerEntry = await db.EconomyLedger.SingleAsync();
+        Assert.Equal(EconomyEventType.DirectItemTransfer, ledgerEntry.EventType);
+        Assert.Equal(senderId, ledgerEntry.SenderCharacterId);
+        Assert.Equal(recipientId, ledgerEntry.RecipientCharacterId);
+        Assert.Equal(senderItem.ItemInstanceId, ledgerEntry.SourceItemInstanceId);
+        Assert.Equal(recipientItem.ItemInstanceId, ledgerEntry.DestinationItemInstanceId);
+    }
+
+    [Fact]
+    public async Task Inventory_grant_records_acquisition_metadata_and_ledger_entry()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        AddInventories(db, characterId);
+        await db.SaveChangesAsync();
+
+        var itemBase = new ItemBase
+        {
+            Id = "quest_token",
+            Name = "Quest Token",
+            Description = "Acquisition metadata test item.",
+            ItemType = ItemType.Resource,
+            Stackable = true
+        };
+        var itemInstance = new ItemInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = itemBase.Id,
+            ItemBase = itemBase
+        };
+        var item = new InventoryItem
+        {
+            InventoryId = characterId,
+            ItemInstanceId = itemInstance.Id,
+            ItemInstance = itemInstance,
+            Quantity = 3
+        };
+
+        var before = DateTimeOffset.UtcNow;
+        await new InventoryRepository(db).AddItemsToInventory(
+            characterId,
+            [item],
+            "quest-reward",
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.Equal("quest-reward", itemInstance.AcquisitionSource);
+        Assert.True(itemInstance.AcquiredAtUtc >= before);
+        var ledgerEntry = await db.EconomyLedger.SingleAsync();
+        Assert.Equal(EconomyEventType.ItemAcquisition, ledgerEntry.EventType);
+        Assert.Equal(characterId, ledgerEntry.RecipientCharacterId);
+        Assert.Equal(3, ledgerEntry.Quantity);
+        Assert.Equal("quest-reward", ledgerEntry.Source);
+    }
+
+    [Fact]
+    public async Task Economy_ledger_is_append_only()
+    {
+        await using var db = CreateDb();
+        var entry = new EconomyLedgerEntry
+        {
+            EventType = EconomyEventType.ItemAcquisition,
+            AssetType = EconomyAssetType.Item,
+            AssetId = "test-item",
+            AssetName = "Test Item",
+            Quantity = 1,
+            Source = "test"
+        };
+        db.EconomyLedger.Add(entry);
+        await db.SaveChangesAsync();
+
+        entry.Quantity = 2;
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => db.SaveChangesAsync());
+        Assert.Contains("append-only", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

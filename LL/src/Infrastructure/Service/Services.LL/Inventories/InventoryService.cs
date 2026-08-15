@@ -17,9 +17,13 @@ public class InventoryService : IInventoryService
     public async Task<Inventory?> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _inventoryRepository.GetInventoryByIdAsync(characterId, cancellationToken);
 
-    public async Task AddItemsToInventory(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)
+    public async Task AddItemsToInventory(
+        Guid characterId,
+        List<InventoryItem> loot,
+        string acquisitionSource,
+        CancellationToken cancellationToken)
     {
-        await _inventoryRepository.AddItemsToInventory(characterId, loot, cancellationToken);
+        await _inventoryRepository.AddItemsToInventory(characterId, loot, acquisitionSource, cancellationToken);
     }
 
     public async Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken)

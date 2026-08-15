@@ -69,7 +69,11 @@ public sealed class SelectionCrateService : ISelectionCrateService
         var rewards = _inventoryItemFactory
             .CreateForQuantity(rewardItemBase, option.Quantity, characterId)
             .ToList();
-        await _inventory.AddItemsToInventory(characterId, rewards, cancellationToken);
+        await _inventory.AddItemsToInventory(
+            characterId,
+            rewards,
+            ItemAcquisitionSources.SelectionContainer,
+            cancellationToken);
 
         return new SelectionCrateOpenResult(true, null, rewards, definition.DisplayName);
     }

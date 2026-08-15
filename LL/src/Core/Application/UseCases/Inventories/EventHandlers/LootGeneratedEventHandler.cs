@@ -4,6 +4,7 @@ using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.Inventories.Events;
 using Application.WebSockets.Contracts;
 using AutoMapper;
+using Domain.Models.Items;
 using MediatR;
 
 namespace Application.UseCases.Inventories.EventHandlers;
@@ -21,7 +22,11 @@ public sealed class LootGeneratedEventHandler : INotificationHandler<LootGenerat
 
     public async Task Handle(LootGeneratedEvent notification, CancellationToken ct)
     {
-        await _inventory.AddItemsToInventory(notification.CharacterId, notification.Loot, ct);
+        await _inventory.AddItemsToInventory(
+            notification.CharacterId,
+            notification.Loot,
+            ItemAcquisitionSources.LootGeneratedEvent,
+            ct);
 
         var msg = new LootReceivedMsg(notification.CharacterId, notification.Loot.Select(i => _mapper.Map<InventoryItemDto>(i)).ToList());
 

@@ -1,5 +1,6 @@
 using Application.Common.Interfaces;
 using Common.Exceptions;
+using Domain.Models.Economy;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -41,8 +42,37 @@ public class InventoryRepository : IInventoryRepository
         return inventory;
     }
 
-    public async Task AddItemsToInventory(Guid characterId, List<InventoryItem> items, CancellationToken cancellationToken)
+    public async Task AddItemsToInventory(
+        Guid characterId,
+        List<InventoryItem> items,
+        string acquisitionSource,
+        CancellationToken cancellationToken)
     {
+        var normalizedSource = string.IsNullOrWhiteSpace(acquisitionSource)
+            ? ItemAcquisitionSources.Unknown
+            : acquisitionSource.Trim();
+        var acquiredAt = DateTimeOffset.UtcNow;
+        foreach (var item in items)
+        {
+            item.ItemInstance.AcquiredAtUtc = acquiredAt;
+            item.ItemInstance.AcquisitionSource = normalizedSource;
+        }
+
+        var recipient = await _context.Characters
+            .AsNoTracking()
+            .Where(x => x.Id == characterId)
+            .Select(x => new { x.Id, x.UserId, x.Level })
+            .SingleOrDefaultAsync(cancellationToken);
+        DateTime? recipientAccountCreatedUtc = null;
+        if (recipient is not null)
+        {
+            recipientAccountCreatedUtc = await _context.Users
+                .AsNoTracking()
+                .Where(x => x.Id == recipient.UserId)
+                .Select(x => (DateTime?)x.CreatedUtc)
+                .SingleOrDefaultAsync(cancellationToken);
+        }
+
         // Separate stackable and non-stackable items
         var stackableGroups = items
             .Where(i => i.ItemInstance.ItemBase.Stackable)
@@ -75,6 +105,10 @@ public class InventoryRepository : IInventoryRepository
             if (existing != null)
             {
                 existing.Quantity += group.TotalQuantity;
+                AddAcquisitionLedgerEntry(
+                    group.RepresentativeItem,
+                    existing.ItemInstanceId,
+                    group.TotalQuantity);
             }
             else
             {
@@ -90,6 +124,10 @@ public class InventoryRepository : IInventoryRepository
                     await _context.ItemInstances.AddAsync(itemToAdd.ItemInstance, cancellationToken);
 
                 await _context.InventoryItems.AddAsync(itemToAdd, cancellationToken);
+                AddAcquisitionLedgerEntry(
+                    group.RepresentativeItem,
+                    itemToAdd.ItemInstanceId,
+                    group.TotalQuantity);
             }
         }
 
@@ -99,6 +137,30 @@ public class InventoryRepository : IInventoryRepository
             item.Quantity = 1;
             await _context.ItemInstances.AddAsync(item.ItemInstance, cancellationToken);
             await _context.InventoryItems.AddAsync(item, cancellationToken);
+            AddAcquisitionLedgerEntry(item, item.ItemInstanceId, 1);
+        }
+
+        void AddAcquisitionLedgerEntry(
+            InventoryItem sourceItem,
+            Guid destinationItemInstanceId,
+            int quantity)
+        {
+            _context.EconomyLedger.Add(new EconomyLedgerEntry
+            {
+                EventType = EconomyEventType.ItemAcquisition,
+                AssetType = EconomyAssetType.Item,
+                ReferenceId = destinationItemInstanceId,
+                RecipientAccountId = recipient?.UserId,
+                RecipientCharacterId = characterId,
+                RecipientAccountCreatedUtc = recipientAccountCreatedUtc,
+                RecipientCharacterLevel = recipient?.Level,
+                AssetId = sourceItem.ItemInstance.ItemBaseId,
+                AssetName = sourceItem.ItemInstance.ItemBase.Name,
+                DestinationItemInstanceId = destinationItemInstanceId,
+                Quantity = quantity,
+                Source = normalizedSource,
+                OccurredAt = acquiredAt
+            });
         }
     }
 
@@ -338,7 +400,10 @@ public class InventoryRepository : IInventoryRepository
             var itemInstance = new ItemInstance
             {
                 Id = Guid.NewGuid(),
-                ItemBase = itemBase
+                ItemBaseId = itemBase.Id,
+                ItemBase = itemBase,
+                AcquiredAtUtc = DateTimeOffset.UtcNow,
+                AcquisitionSource = ItemAcquisitionSources.EquipmentScrapping
             };
 
             temperedScrap = new InventoryItem
@@ -350,6 +415,37 @@ public class InventoryRepository : IInventoryRepository
 
             _context.InventoryItems.Add(temperedScrap);
         }
+
+        var recipient = await _context.Characters
+            .AsNoTracking()
+            .Where(x => x.Id == characterId)
+            .Select(x => new { x.Id, x.UserId, x.Level })
+            .SingleOrDefaultAsync(cancellationToken);
+        DateTime? recipientAccountCreatedUtc = null;
+        if (recipient is not null)
+        {
+            recipientAccountCreatedUtc = await _context.Users
+                .AsNoTracking()
+                .Where(x => x.Id == recipient.UserId)
+                .Select(x => (DateTime?)x.CreatedUtc)
+                .SingleOrDefaultAsync(cancellationToken);
+        }
+
+        _context.EconomyLedger.Add(new EconomyLedgerEntry
+        {
+            EventType = EconomyEventType.ItemAcquisition,
+            AssetType = EconomyAssetType.Item,
+            ReferenceId = temperedScrap.ItemInstanceId,
+            RecipientAccountId = recipient?.UserId,
+            RecipientCharacterId = characterId,
+            RecipientAccountCreatedUtc = recipientAccountCreatedUtc,
+            RecipientCharacterLevel = recipient?.Level,
+            AssetId = temperedScrap.ItemInstance.ItemBase.Id,
+            AssetName = temperedScrap.ItemInstance.ItemBase.Name,
+            DestinationItemInstanceId = temperedScrap.ItemInstanceId,
+            Quantity = temperedScrapGained,
+            Source = ItemAcquisitionSources.EquipmentScrapping
+        });
 
         return temperedScrap;
     }
@@ -473,6 +569,36 @@ public class InventoryRepository : IInventoryRepository
             Quantity = quantity
         };
         _context.PlayerTransferHistory.Add(transferRecord);
+
+        var accountCreatedUtc = await _context.Users
+            .AsNoTracking()
+            .Where(x => x.Id == sender.UserId || x.Id == recipient.UserId)
+            .ToDictionaryAsync(x => x.Id, x => x.CreatedUtc, cancellationToken);
+        _context.EconomyLedger.Add(new EconomyLedgerEntry
+        {
+            EventType = EconomyEventType.DirectItemTransfer,
+            AssetType = EconomyAssetType.Item,
+            ReferenceId = transferRecord.Id,
+            SenderAccountId = sender.UserId,
+            SenderCharacterId = sender.Id,
+            SenderAccountCreatedUtc = accountCreatedUtc.TryGetValue(sender.UserId, out var senderCreatedUtc)
+                ? senderCreatedUtc
+                : null,
+            SenderCharacterLevel = sender.Level,
+            RecipientAccountId = recipient.UserId,
+            RecipientCharacterId = recipient.Id,
+            RecipientAccountCreatedUtc = accountCreatedUtc.TryGetValue(recipient.UserId, out var recipientCreatedUtc)
+                ? recipientCreatedUtc
+                : null,
+            RecipientCharacterLevel = recipient.Level,
+            AssetId = itemBase.Id,
+            AssetName = itemBase.Name,
+            SourceItemInstanceId = itemInstanceId,
+            DestinationItemInstanceId = recipientItem.ItemInstanceId,
+            Quantity = quantity,
+            Source = "player-transfer",
+            OccurredAt = transferRecord.OccurredAt
+        });
 
         return InventoryTransferResult.Success(recipientItem, transferRecord);
     }

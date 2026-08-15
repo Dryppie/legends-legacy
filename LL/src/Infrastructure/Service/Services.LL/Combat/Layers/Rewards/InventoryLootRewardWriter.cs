@@ -46,6 +46,7 @@ public sealed class InventoryLootRewardWriter : ILootRewardWriter
         await _inventoryService.AddItemsToInventory(
             ownerCharacterId,
             items.ToList(),
+            source,
             cancellationToken);
 
         var mappedItems = items.Select(x => _mapper.Map<InventoryItemDto>(x)).ToList();
