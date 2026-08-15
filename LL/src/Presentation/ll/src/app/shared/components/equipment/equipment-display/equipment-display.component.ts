@@ -60,6 +60,8 @@ export class EquipmentDisplayComponent {
   @Input() comparisonItems: readonly EquippedComparison[] = [];
   @Input() comparisonSubjectLabel = 'Hovered';
   @Input() fitComparisonToContainer = false;
+  @Input() inlineComparison = false;
+  @Input() embedded = false;
   @Input() compactCraftingDesign = false;
   @Input() showPossibleUpgradeAttributes = false;
   modifierType = ModifierType;
@@ -272,6 +274,17 @@ export class EquipmentDisplayComponent {
   hasAttribute(item: EquipmentDisplay, attributeType: AttributeType): boolean {
     return item.attributes.some(
       (attribute) => attribute.attributeType === attributeType,
+    );
+  }
+
+  hasToolBonus(
+    item: EquipmentDisplay,
+    comparison: ToolBonusComparison,
+  ): boolean {
+    return item.toolBonuses.some(
+      (bonus) =>
+        bonus.bonusType === comparison.bonusType &&
+        bonus.scopeId === comparison.scopeId,
     );
   }
 

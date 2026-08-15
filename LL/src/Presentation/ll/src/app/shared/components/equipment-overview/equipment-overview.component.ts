@@ -1,5 +1,12 @@
-import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, computed, OnInit } from '@angular/core';
+import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
+import {
+  Component,
+  computed,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+} from '@angular/core';
 import {
   EquipmentSlot,
   EquipmentSlotType,
@@ -16,10 +23,14 @@ interface EquipmentSlotGuidance {
 
 @Component({
   selector: 'app-equipment-overview',
-  imports: [NgFor, NgIf, NgClass, ItemComponent],
+  imports: [NgFor, NgIf, NgClass, DecimalPipe, ItemComponent],
   templateUrl: './equipment-overview.component.html',
 })
 export class EquipmentOverviewComponent implements OnInit {
+  @Input() inlineSelection = false;
+  @Input() selectedSlotType: EquipmentSlotType | null = null;
+  @Output() readonly slotSelected = new EventEmitter<EquipmentSlot>();
+
   readonly slotGuidance: Record<EquipmentSlotType, EquipmentSlotGuidance> = {
     [EquipmentSlotType.Head]: {
       label: 'Head',
@@ -91,6 +102,11 @@ export class EquipmentOverviewComponent implements OnInit {
   }
 
   handleSlotClick(equipmentSlot: EquipmentSlot) {
+    if (this.inlineSelection) {
+      this.slotSelected.emit(equipmentSlot);
+      return;
+    }
+
     this.modalService.toggleOverviewEquipItemModal(
       equipmentSlot.equipmentSlotType,
     );

@@ -327,6 +327,46 @@ describe('EquipmentDisplayComponent', () => {
     expect(values('hovered-attribute-value')).toEqual(['20', '—']);
     expect(values('equipped-attribute-value')).toEqual(['—', '10']);
   });
+
+  it('renders a single selected item with inline stat differences', async () => {
+    await TestBed.configureTestingModule({
+      imports: [EquipmentDisplayComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(EquipmentDisplayComponent);
+    const selected = equipmentInstance('selected', AttributeType.MaxHealth, 20);
+    const equipped = equipmentInstance('equipped', AttributeType.Armor, 7);
+    selected.displayName = 'Selected Cowl';
+    equipped.displayName = 'Equipped Helm';
+
+    fixture.componentRef.setInput('item', selected);
+    fixture.componentRef.setInput('comparisonItem', equipped);
+    fixture.componentRef.setInput('inlineComparison', true);
+    fixture.componentRef.setInput('embedded', true);
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    const differences = [
+      ...fixture.nativeElement.querySelectorAll(
+        '[data-testid="inline-comparison-difference"]',
+      ),
+    ].map((element: Element) => element.textContent?.trim());
+
+    expect(text).not.toContain('Selected Cowl');
+    expect(text).not.toContain('Equipped Helm');
+    expect(text).not.toContain('Compared with equipped');
+    expect(text).toContain('Attributes');
+    expect(text).not.toContain('Rolled attributes');
+    expect(differences).toEqual(['+20', '-7']);
+    expect(
+      fixture.nativeElement.querySelector('.equipment-comparison-grid'),
+    ).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('.equipment-design-card'),
+    ).toHaveClass('equipment-design-card-embedded');
+    expect(
+      fixture.nativeElement.querySelector('.equipment-design-card'),
+    ).not.toHaveClass('bg-texture');
+  });
 });
 
 function display(

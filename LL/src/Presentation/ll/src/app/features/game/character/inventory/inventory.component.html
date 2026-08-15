@@ -1,13 +1,52 @@
-<div class="ll-page-stack">
+<div class="ll-page-stack inventory-page">
   <app-default-header
     class="pr-4 sm:pr-6"
     section="Character"
     title="Inventory"
-    [text]="inventoryCountLabel"
     icon="sidebar/character/inventory"
   >
-    <div header-actions class="flex items-center gap-2">
+    <div
+      *ngIf="isBrowseMode"
+      header-title-actions
+      class="ll-segmented inventory-collection-switch-header"
+      aria-label="Inventory collection"
+    >
       <button
+        type="button"
+        class="ll-segmented-button"
+        [ngClass]="{
+          'll-segmented-button-active': collectionView() === 'Equipment',
+        }"
+        (click)="selectCollectionView('Equipment')"
+      >
+        Equipment {{ equipmentCount }}
+      </button>
+      <button
+        type="button"
+        class="ll-segmented-button"
+        [ngClass]="{
+          'll-segmented-button-active': collectionView() === 'Stock',
+        }"
+        (click)="selectCollectionView('Stock')"
+      >
+        Stock {{ stockCount }}
+      </button>
+    </div>
+
+    <div header-actions class="flex items-center gap-2">
+      <label class="inventory-search inventory-search-header">
+        <span class="sr-only">Search inventory</span>
+        <span aria-hidden="true">⌕</span>
+        <input
+          type="search"
+          [(ngModel)]="inventorySearch"
+          [placeholder]="
+            collectionView() === 'Stock' ? 'Search stock' : 'Search inventory'
+          "
+        />
+      </label>
+      <button
+        *ngIf="collectionView() === 'Equipment'"
         type="button"
         class="ll-button flex h-8 w-8 items-center justify-center p-0 text-primary"
         appHelp="scrap_mode"
@@ -15,13 +54,15 @@
       >
         ?
       </button>
-      <div class="ll-segmented" aria-label="Inventory mode">
+      <div
+        *ngIf="collectionView() === 'Equipment'"
+        class="ll-segmented"
+        aria-label="Inventory mode"
+      >
         <button
           type="button"
           class="ll-segmented-button"
-          [ngClass]="{
-            'll-segmented-button-active': isBrowseMode,
-          }"
+          [ngClass]="{ 'll-segmented-button-active': isBrowseMode }"
           (click)="enterBrowseMode()"
         >
           Browse
@@ -29,9 +70,7 @@
         <button
           type="button"
           class="ll-segmented-button"
-          [ngClass]="{
-            'll-segmented-button-active': isScrapMode,
-          }"
+          [ngClass]="{ 'll-segmented-button-active': isScrapMode }"
           (click)="enterScrapMode()"
         >
           Scrap
@@ -40,47 +79,108 @@
     </div>
   </app-default-header>
 
-  <app-filter-tabs
-    *ngIf="isBrowseMode"
-    class="flex-none lg:hidden"
-    data-tour="mobile-inventory-view-tabs"
-    [tabs]="mobileViewTabs"
-    [activeTab]="mobileView()"
-    tourTabPrefix="mobile-inventory-view-tab"
-    (tabSelected)="selectMobileView($event)"
-  ></app-filter-tabs>
+  <div *ngIf="isBrowseMode" class="inventory-collection-switch-mobile px-2">
+    <div class="ll-segmented w-full" aria-label="Inventory collection">
+      <button
+        type="button"
+        class="ll-segmented-button flex-1"
+        [ngClass]="{
+          'll-segmented-button-active': collectionView() === 'Equipment',
+        }"
+        (click)="selectCollectionView('Equipment')"
+      >
+        Equipment {{ equipmentCount }}
+      </button>
+      <button
+        type="button"
+        class="ll-segmented-button flex-1"
+        [ngClass]="{
+          'll-segmented-button-active': collectionView() === 'Stock',
+        }"
+        (click)="selectCollectionView('Stock')"
+      >
+        Stock {{ stockCount }}
+      </button>
+    </div>
+  </div>
+
+  <label class="inventory-search inventory-search-mobile mx-2">
+    <span class="sr-only">Search inventory</span>
+    <span aria-hidden="true">⌕</span>
+    <input
+      type="search"
+      [(ngModel)]="inventorySearch"
+      [placeholder]="
+        collectionView() === 'Stock' ? 'Search stock' : 'Search inventory'
+      "
+    />
+  </label>
 
   <div
-    class="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-[minmax(0,1fr)_25rem]"
+    *ngIf="isScrapMode || collectionView() === 'Equipment'"
+    class="inventory-workspace"
   >
-    <div
-      class="ll-panel min-h-0 flex-col overflow-hidden"
-      [ngClass]="
-        !isBrowseMode || mobileView() === 'Inventory'
-          ? 'flex'
-          : 'hidden lg:flex'
-      "
+    <aside
+      *ngIf="isBrowseMode"
+      class="ll-panel inventory-equipment-rail inventory-mobile-hidden"
+      data-tour="equipped-overview"
     >
-      <div
-        *ngIf="isScrapMode"
-        class="flex flex-wrap items-center justify-between gap-3 border-b border-light_gray/70 px-4 py-3"
-      >
+      <header class="inventory-pane-heading">
         <div>
-          <h2 class="primary-gradient text-2xl">{{ activeListTitle }}</h2>
-          <p class="ll-copy">{{ activeListDescription }}</p>
+          <p class="ll-eyebrow">Loadout</p>
+          <h2 class="ll-heading text-lg">Equipped</h2>
         </div>
+        <span class="ll-item-chip">9 slots</span>
+      </header>
 
-        <div
-          *ngIf="isScrapMode"
-          class="ll-card ll-card-accent px-3 py-2 text-right"
-        >
-          <label class="ll-stat-label text-primary">Selected</label>
-          <p class="text-sm text-white">{{ selectedItemCountLabel }}</p>
-        </div>
+      <div class="ll-scrollbar min-h-0 flex-1 overflow-y-auto">
+        <app-equipment-overview
+          class="block w-full"
+          [inlineSelection]="true"
+          [selectedSlotType]="selectedEquipmentSlot()"
+          (slotSelected)="selectEquipmentSlot($event)"
+        ></app-equipment-overview>
       </div>
 
+      <p class="ll-copy inventory-pane-note">
+        Select a slot to review compatible equipment.
+      </p>
+    </aside>
+
+    <main class="ll-panel inventory-catalog flex">
+      <header class="inventory-catalog-heading">
+        <div class="min-w-0">
+          <p class="ll-eyebrow">Collection</p>
+          <div class="flex min-w-0 items-baseline gap-2">
+            <h2 class="ll-heading truncate text-xl">{{ activeListTitle }}</h2>
+            <span class="shrink-0 text-xs text-secondary">
+              {{ filteredItems.length }} shown
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            *ngIf="selectedEquipmentSlot()"
+            type="button"
+            class="ll-button"
+            (click)="clearEquipmentSlotFilter()"
+          >
+            Clear filter
+          </button>
+          <app-dropdown
+            label="Sort"
+            [value]="inventorySort"
+            [options]="sortDropdownOptions"
+            [selectedValue]="inventorySort"
+            [fitMenuToContent]="true"
+            (selection)="setInventorySort($event)"
+          ></app-dropdown>
+        </div>
+      </header>
+
       <app-filter-tabs
-        *ngIf="isBrowseMode"
+        *ngIf="isBrowseMode && tabLabels.length > 1"
         [tabs]="tabLabels"
         [activeTab]="activeTab"
         [scrollable]="true"
@@ -90,27 +190,10 @@
         data-tour="inventory-tabs"
       ></app-filter-tabs>
 
-      <div
-        *ngIf="isBrowseMode"
-        class="ll-toolbar justify-end rounded-none border-x-0 border-t-0 px-4 py-2"
-      >
-        <app-dropdown
-          label="Sort"
-          [value]="inventorySort"
-          [options]="sortDropdownOptions"
-          [selectedValue]="inventorySort"
-          [fitMenuToContent]="true"
-          (selection)="setInventorySort($event)"
-        ></app-dropdown>
-      </div>
-
-      <div
-        *ngIf="isScrapMode"
-        class="ll-toolbar rounded-none border-x-0 border-t-0 px-4 py-3"
-      >
+      <div *ngIf="isScrapMode" class="inventory-scrap-toolbar">
         <div class="flex flex-wrap items-center gap-2">
           <app-regular-button
-            text="Select all equipment"
+            text="Select all"
             (pressed)="selectAllEquipment()"
           ></app-regular-button>
 
@@ -130,28 +213,16 @@
               and below
             </button>
           </div>
-
-          <app-dropdown
-            label="Sort"
-            [value]="inventorySort"
-            [options]="sortDropdownOptions"
-            [selectedValue]="inventorySort"
-            [fitMenuToContent]="true"
-            (selection)="setInventorySort($event)"
-          ></app-dropdown>
         </div>
 
         <div class="flex items-center gap-2">
-          <button
-            type="button"
-            class="ll-button border-transparent px-2 py-1"
-            (click)="clearSelection()"
-          >
+          <span class="ll-item-chip">{{ selectedItemCountLabel }}</span>
+          <button type="button" class="ll-button" (click)="clearSelection()">
             Clear
           </button>
           <button
             type="button"
-            class="ll-button border-transparent px-2 py-1 text-danger hover:text-rose-300"
+            class="ll-button text-danger"
             (click)="cancelScrapMode()"
           >
             Cancel
@@ -159,7 +230,7 @@
         </div>
       </div>
 
-      <div class="min-h-0 flex-1 overflow-y-auto p-2">
+      <div class="ll-scrollbar min-h-0 flex-1 overflow-y-auto p-3">
         <div
           *ngIf="!filteredItems.length"
           class="ll-empty-state h-full min-h-60"
@@ -167,135 +238,208 @@
           <p class="italic">{{ emptyStateText }}</p>
         </div>
 
-        <ng-container *ngFor="let inventoryItem of filteredItems">
-          <div
-            class="group mb-1 flex w-full items-center gap-2 rounded border border-transparent transition-colors"
+        <div *ngIf="filteredItems.length" class="inventory-list-header">
+          <span>Item</span>
+          <span>Potential</span>
+          <span>Gear Power</span>
+        </div>
+
+        <div *ngIf="filteredItems.length" class="inventory-list">
+          <button
+            *ngFor="let inventoryItem of filteredItems"
+            type="button"
+            class="inventory-list-row"
             [ngClass]="{
-              'border-primary/70 bg-primary/10':
+              'inventory-list-row-active':
+                selectedItem()?.itemInstance?.id ===
+                  inventoryItem.itemInstance.id ||
                 selectedItemsContains(inventoryItem),
-              'hover:border-light_gray/70 hover:bg-black/30': isScrapMode,
             }"
-            data-tour="inventory-items"
+            [attr.aria-pressed]="
+              selectedItemsContains(inventoryItem) ? 'true' : null
+            "
+            [attr.data-tour]="
+              equipmentInstance(inventoryItem)
+                ? 'inventory-equipment-item'
+                : 'inventory-items'
+            "
+            [attr.data-item-base-id]="inventoryItem.itemInstance.itemBase.id"
+            [attr.data-tutorial-crafted-weapon]="
+              isOnboardingCraftedWeapon(inventoryItem) ? 'true' : null
+            "
+            [attr.data-tutorial-gathering-tool]="
+              isOnboardingGatheringTool(inventoryItem) ? 'true' : null
+            "
+            (click)="handleInventoryItemClick(inventoryItem)"
+            (dblclick)="openItemDetails(inventoryItem)"
           >
-            <app-inventory-item
-              class="min-w-0 flex-1"
-              [attr.data-tour]="
-                equipmentInstance(inventoryItem)
-                  ? 'inventory-equipment-item'
-                  : null
-              "
-              [attr.data-item-base-id]="inventoryItem.itemInstance.itemBase.id"
-              [attr.data-tutorial-crafted-weapon]="
-                isOnboardingCraftedWeapon(inventoryItem) ? 'true' : null
-              "
-              [attr.data-tutorial-gathering-tool]="
-                isOnboardingGatheringTool(inventoryItem) ? 'true' : null
-              "
-              [inventoryItem]="inventoryItem"
-            ></app-inventory-item>
-
             <span
-              *ngIf="
-                isScrapMode && equipmentInstance(inventoryItem) as equipment
-              "
-              class="ll-badge flex-none rounded text-primary sm:hidden"
+              *ngIf="equipmentInstance(inventoryItem) as equipment"
+              class="inventory-list-item min-w-0 text-left"
             >
-              {{ equipment.quality }}
-            </span>
-
-            <ng-container *ngIf="activeTab === 'Equipment' || isScrapMode">
-              <div
-                *ngIf="equipmentInstance(inventoryItem) as equipment"
-                class="hidden flex-none flex-wrap items-center justify-end gap-2 pr-2 text-xs sm:flex"
+              <strong
+                class="truncate text-sm font-medium"
+                [ngClass]="itemRarityClass(inventoryItem)"
               >
-                <span class="ll-badge rounded text-secondary">
-                  {{ equipment.equipmentBase.equipmentType | equipmentType }}
-                </span>
-                <span
-                  class="ll-badge rounded"
-                  [ngClass]="equipmentRarityClass(inventoryItem)"
-                >
-                  {{ equipment.rarity }}
-                </span>
-                <span class="ll-badge rounded text-primary">
-                  {{ equipment.quality }}
-                </span>
-                <span
-                  *ngIf="isBrowseMode && activeTab === 'Equipment'"
-                  class="ll-badge rounded tabular-nums text-secondary"
-                >
-                  Gear Value
-                  {{ equipment.itemBudget | number: "1.0-2" }}
-                </span>
-                <span
-                  class="ll-badge rounded"
-                  [ngClass]="{
-                    'border-primary/50 bg-primary/10 text-primary':
-                      equipment.potential !== 0,
-                    'border-red-400/40 bg-red-500/10 text-red-200':
-                      equipment.potential === 0,
-                  }"
-                >
-                  Potential {{ equipment.potential ?? 0 }}
-                </span>
-              </div>
-            </ng-container>
-
-            <ng-container *ngIf="isScrapMode">
-              <button
-                type="button"
-                (click)="toggleSelectItem(inventoryItem)"
-                class="mr-2 min-w-20 rounded border px-3 py-1 text-sm transition-colors"
-                [ngClass]="{
-                  'border-primary bg-primary text-black':
-                    selectedItemsContains(inventoryItem),
-                  'border-light_gray text-primary hover:bg-zinc-600/30':
-                    !selectedItemsContains(inventoryItem),
-                }"
-              >
+                {{ itemDisplayName(inventoryItem) }}
+              </strong>
+              <span class="truncate text-xs text-secondary">
+                {{ equipment.quality }}
+              </span>
+              <span *ngIf="isScrapMode" class="inventory-list-selection">
                 {{
                   selectedItemsContains(inventoryItem) ? "Selected" : "Select"
                 }}
-              </button>
-            </ng-container>
-          </div>
-        </ng-container>
-      </div>
-    </div>
+              </span>
+            </span>
 
-    <aside
-      *ngIf="isBrowseMode"
-      class="ll-panel min-h-0 overflow-y-auto p-4"
-      [ngClass]="mobileView() === 'Inventory' ? 'hidden lg:block' : 'block'"
-      data-tour="equipped-overview"
-    >
-      <div class="flex flex-col items-center space-y-2">
-        <h2 class="primary-gradient text-2xl">Equipped</h2>
-        <img src="core/Divider.svg" alt="" class="center w-60 object-contain" />
-        <app-equipment-overview class="w-full"></app-equipment-overview>
+            <span
+              *ngIf="equipmentInstance(inventoryItem) as equipment"
+              class="inventory-list-potential tabular-nums"
+            >
+              {{ equipment.potential ?? 0 }}
+            </span>
+
+            <span
+              *ngIf="equipmentInstance(inventoryItem) as equipment"
+              class="inventory-list-gear-power tabular-nums"
+            >
+              <span
+                *ngIf="gearPowerDifference(inventoryItem) as difference"
+                class="inventory-list-gear-difference"
+                [ngClass]="{
+                  'text-emerald-400': difference > 0,
+                  'text-rose-400': difference < 0,
+                }"
+              >
+                {{ difference > 0 ? "+" : ""
+                }}{{ difference | number: "1.0-2" }}
+              </span>
+              <strong>{{ equipment.itemBudget | number: "1.0-2" }}</strong>
+            </span>
+          </button>
+        </div>
       </div>
+    </main>
+
+    <aside *ngIf="isBrowseMode" class="ll-panel inventory-inspector">
+      <ng-container *ngIf="selectedItem() as item; else selectPrompt">
+        <header class="inventory-pane-heading">
+          <div class="min-w-0">
+            <p class="ll-eyebrow">{{ selectedItemContextLabel(item) }}</p>
+            <h2
+              class="mt-1 truncate text-lg font-semibold"
+              [ngClass]="itemRarityClass(item)"
+            >
+              {{ itemDisplayName(item) }}
+            </h2>
+            <p class="mt-1 text-xs text-secondary">
+              {{ itemTypeLabel(item) }} · {{ itemMetaLabel(item) }}
+            </p>
+          </div>
+        </header>
+
+        <div class="ll-scrollbar min-h-0 flex-1 overflow-y-auto p-3">
+          <app-equipment-display
+            *ngIf="equipmentInstance(item) as equipment; else genericItem"
+            [item]="equipment"
+            [comparisonItem]="comparisonEquipmentFor(item)"
+            comparisonSubjectLabel="Selected"
+            [fitComparisonToContainer]="true"
+            [inlineComparison]="true"
+            [embedded]="true"
+            [compactCraftingDesign]="true"
+          ></app-equipment-display>
+
+          <ng-template #genericItem>
+            <div class="ll-card p-3">
+              <app-item [item]="item.itemInstance"></app-item>
+              <p class="ll-copy mt-3">
+                {{
+                  item.itemInstance.itemBase.description ||
+                    "No description available."
+                }}
+              </p>
+              <div class="ll-item-stat-row mt-3">
+                <span>Held</span>
+                <strong class="tabular-nums text-primary">{{
+                  item.quantity
+                }}</strong>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+
+        <footer class="inventory-inspector-actions">
+          <ng-container *ngIf="isEquipmentItem(item); else openItemAction">
+            <div
+              *ngIf="!isSelectedEquippedItem(item); else currentlyEquipped"
+              class="grid w-full grid-cols-2 gap-2"
+            >
+              <button
+                *ngFor="let slotType of equipSlotOptions(item)"
+                type="button"
+                class="ll-button ll-button-primary"
+                [class.col-span-2]="equipSlotOptions(item).length === 1"
+                [disabled]="isEquipPending"
+                (click)="equipItem(item, slotType)"
+              >
+                {{ equipActionLabel(item, slotType) }}
+              </button>
+            </div>
+          </ng-container>
+
+          <ng-template #openItemAction>
+            <button
+              type="button"
+              class="ll-button ll-button-primary w-full"
+              (click)="openItemDetails(item)"
+            >
+              Open item
+            </button>
+          </ng-template>
+
+          <ng-template #currentlyEquipped>
+            <div class="ll-state w-full justify-center text-center">
+              Currently equipped
+            </div>
+          </ng-template>
+        </footer>
+      </ng-container>
+
+      <ng-template #selectPrompt>
+        <div class="ll-empty-state h-full px-6 text-center">
+          <div>
+            <p class="ll-eyebrow">Item details</p>
+            <h2 class="ll-heading mt-2 text-lg">Select an item</h2>
+            <p class="ll-copy mt-2">
+              Choose a tile to inspect its stats and available actions.
+            </p>
+          </div>
+        </div>
+      </ng-template>
     </aside>
 
-    <aside *ngIf="isScrapMode" class="ll-panel flex min-h-0 flex-col p-4">
-      <div class="border-b border-light_gray/70 pb-3">
-        <div class="flex items-center justify-between gap-3">
-          <h2 class="primary-gradient text-2xl">Scrap Bench</h2>
-          <span class="ll-badge ll-badge-accent">{{
-            selectedItemCountLabel
-          }}</span>
+    <aside *ngIf="isScrapMode" class="ll-panel inventory-scrap-bench">
+      <header class="inventory-pane-heading">
+        <div>
+          <p class="ll-eyebrow">Destructive action</p>
+          <h2 class="ll-heading text-lg">Scrap bench</h2>
         </div>
-        <p class="ll-copy mt-1">
-          Selected equipment will be permanently destroyed and converted into
-          tempered scrap.
-        </p>
-      </div>
+        <span class="ll-item-chip">{{ selectedItemCountLabel }}</span>
+      </header>
 
-      <div class="min-h-0 flex-1 overflow-y-auto py-3">
+      <p class="ll-copy px-4 pt-4">
+        Selected equipment will be permanently destroyed and converted into
+        tempered scrap.
+      </p>
+
+      <div class="ll-scrollbar min-h-0 flex-1 overflow-y-auto p-4">
         <div
           *ngIf="!selectedItems.length"
           class="ll-empty-state h-full min-h-52"
         >
-          <p class="italic">Select equipment from the list.</p>
+          <p class="italic">Select equipment from the grid.</p>
         </div>
 
         <ul *ngIf="selectedItems.length" class="space-y-2">
@@ -305,12 +449,7 @@
         </ul>
       </div>
 
-      <div class="space-y-3 border-t border-light_gray/70 pt-3">
-        <div class="flex items-center justify-between">
-          <label class="uppercase text-primary">Ready to scrap</label>
-          <p class="text-lg text-white">{{ selectedItems.length }}</p>
-        </div>
-
+      <footer class="inventory-inspector-actions">
         <app-regular-button
           fullWidth=""
           variant="danger"
@@ -318,7 +457,102 @@
           [disabled]="!selectedItems.length || state.loading()"
           (pressed)="scrapEquipment()"
         ></app-regular-button>
-      </div>
+      </footer>
     </aside>
+  </div>
+
+  <div
+    *ngIf="isBrowseMode && collectionView() === 'Stock'"
+    class="ll-panel stock-workspace"
+  >
+    <aside class="stock-category-rail">
+      <header class="inventory-pane-heading">
+        <div>
+          <p class="ll-eyebrow">Class</p>
+          <h2 class="ll-heading text-lg">Stock</h2>
+        </div>
+      </header>
+
+      <nav class="stock-category-list" aria-label="Stock categories">
+        <button
+          *ngFor="let category of stockCategories"
+          type="button"
+          class="stock-category-button"
+          [ngClass]="{
+            'stock-category-button-active': stockCategory() === category,
+          }"
+          (click)="selectStockCategory(category)"
+        >
+          <strong>{{ category }}</strong>
+          <span>
+            {{ stockCategoryCount(category) }}
+            {{ stockCategoryCount(category) === 1 ? "kind" : "kinds" }}
+          </span>
+        </button>
+      </nav>
+    </aside>
+
+    <main class="stock-list-pane">
+      <header class="inventory-catalog-heading">
+        <div class="min-w-0">
+          <p class="ll-eyebrow">Stock</p>
+          <div class="flex min-w-0 items-baseline gap-2">
+            <h2 class="ll-heading truncate text-xl">
+              {{ stockCategory() }}
+            </h2>
+            <span class="shrink-0 text-xs text-secondary">
+              {{ stockCategoryCountLabel }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <app-dropdown
+            label="Sort"
+            [value]="stockSort"
+            [options]="sortDropdownOptions"
+            [selectedValue]="stockSort"
+            [fitMenuToContent]="true"
+            (selection)="setStockSort($event)"
+          ></app-dropdown>
+        </div>
+      </header>
+
+      <div class="stock-table-header" aria-hidden="true">
+        <span>Item</span>
+        <span class="stock-quantity">Quantity</span>
+      </div>
+
+      <div class="ll-scrollbar min-h-0 flex-1 overflow-y-auto">
+        <div
+          *ngIf="!filteredStockItems.length"
+          class="ll-empty-state h-full min-h-60"
+        >
+          <p class="italic">No stock in this category.</p>
+        </div>
+
+        <div *ngIf="filteredStockItems.length" class="stock-table" role="table">
+          <div
+            *ngFor="let item of filteredStockItems"
+            class="stock-table-row"
+            role="row"
+          >
+            <span
+              class="truncate font-medium"
+              [ngClass]="itemRarityClass(item)"
+              role="cell"
+            >
+              {{ itemDisplayName(item) }}
+            </span>
+            <strong
+              class="stock-quantity tabular-nums text-primary"
+              role="cell"
+            >
+              {{ item.quantity | number: "1.0-0" }}
+            </strong>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
 </div>

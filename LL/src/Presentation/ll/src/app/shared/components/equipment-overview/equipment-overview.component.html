@@ -1,10 +1,22 @@
 <div
   class="ll-card flex w-full max-w-96 flex-col items-center justify-between overflow-hidden"
 >
-  <div
+  <button
     *ngFor="let slot of slots()"
+    type="button"
     (click)="handleSlotClick(slot)"
-    class="ll-item-row h-16 rounded-none border-x-0 border-t-0 px-4"
+    class="ll-item-row h-16 w-full cursor-pointer rounded-none border-x-0 border-t-0 px-4 text-left"
+    [ngClass]="{
+      'border-l-2 border-l-primary bg-primary/10':
+        selectedSlotType === slot.equipmentSlotType,
+    }"
+    [attr.aria-pressed]="
+      inlineSelection
+        ? selectedSlotType === slot.equipmentSlotType
+          ? 'true'
+          : 'false'
+        : null
+    "
   >
     <div class="flex min-w-12 items-center gap-2">
       <img
@@ -15,12 +27,22 @@
       />
     </div>
     <app-item
+      class="min-w-0 flex-1"
       [ngClass]="
         isGhost(slot) ? 'pointer-events-none opacity-40 grayscale' : ''
       "
       *ngIf="slot.equipmentInstance"
       [item]="slot.equipmentInstance"
     ></app-item>
+    <span
+      *ngIf="slot.equipmentInstance"
+      class="ml-auto shrink-0 tabular-nums text-primary"
+      [attr.aria-label]="
+        'Gear value ' + (slot.equipmentInstance.itemBudget | number: '1.0-0')
+      "
+    >
+      {{ slot.equipmentInstance.itemBudget | number: "1.0-0" }}
+    </span>
     <div
       *ngIf="!slot.equipmentInstance"
       class="flex min-w-0 flex-1 items-center justify-between gap-3"
@@ -35,5 +57,5 @@
       </div>
       <span class="ll-item-chip shrink-0">Empty</span>
     </div>
-  </div>
+  </button>
 </div>

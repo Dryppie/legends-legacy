@@ -1,0 +1,385 @@
+:host {
+  display: block;
+  min-height: 0;
+  height: 100%;
+}
+
+.inventory-page {
+  gap: var(--ll-space-3);
+  container-type: inline-size;
+}
+
+.inventory-workspace {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ll-space-3);
+  overflow: hidden;
+}
+
+.inventory-equipment-rail,
+.inventory-catalog,
+.inventory-inspector,
+.inventory-scrap-bench {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+.inventory-inspector {
+  display: none;
+}
+
+.inventory-mobile-hidden,
+.inventory-search-header,
+.inventory-collection-switch-header {
+  display: none;
+}
+
+.inventory-search-mobile,
+.inventory-collection-switch-mobile {
+  display: flex;
+}
+
+.inventory-pane-heading,
+.inventory-catalog-heading {
+  display: flex;
+  min-height: 4rem;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ll-space-3);
+  border-bottom: 1px solid var(--ll-color-border);
+  padding: var(--ll-space-3) var(--ll-space-4);
+}
+
+.inventory-pane-note {
+  flex: none;
+  border-top: 1px solid var(--ll-color-border);
+  padding: var(--ll-space-3) var(--ll-space-4);
+}
+
+.inventory-search {
+  height: 2.25rem;
+  min-width: 0;
+  align-items: center;
+  gap: var(--ll-space-2);
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-sm);
+  background: var(--ll-color-surface-strong);
+  padding: 0 var(--ll-space-3);
+  color: var(--ll-color-text-muted);
+}
+
+.inventory-search:focus-within {
+  border-color: var(--ll-color-border-strong);
+}
+
+.inventory-search input {
+  min-width: 0;
+  width: 13rem;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ll-color-text);
+  font-size: var(--ll-text-sm);
+}
+
+.inventory-search input::placeholder {
+  color: var(--ll-color-text-muted);
+}
+
+.inventory-scrap-toolbar {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ll-space-3);
+  border-bottom: 1px solid var(--ll-color-border);
+  padding: var(--ll-space-3) var(--ll-space-4);
+}
+
+.inventory-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.inventory-list-header,
+.inventory-list-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 3.75rem 6.5rem;
+}
+
+.inventory-list-header {
+  min-height: 2rem;
+  align-items: center;
+  gap: var(--ll-space-2);
+  border-bottom: 1px solid var(--ll-color-border);
+  padding: 0 var(--ll-space-3);
+  color: var(--ll-color-text-muted);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.inventory-list-header span:nth-child(2),
+.inventory-list-potential {
+  text-align: center;
+}
+
+.inventory-list-header span:last-child {
+  text-align: right;
+}
+
+.inventory-list-row {
+  width: 100%;
+  min-width: 0;
+  min-height: 3rem;
+  align-items: center;
+  gap: var(--ll-space-2);
+  border-bottom: 1px solid var(--ll-color-border);
+  border-left: 2px solid transparent;
+  padding: var(--ll-space-2) var(--ll-space-3);
+  color: var(--ll-color-text);
+  text-align: left;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.inventory-list-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+}
+
+.inventory-list-gear-power {
+  text-align: right;
+}
+
+.inventory-list-gear-power {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: var(--ll-space-2);
+}
+
+.inventory-list-gear-power strong {
+  color: var(--ll-color-text);
+  font-family: var(--ll-font-display);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.inventory-list-gear-difference {
+  font-size: var(--ll-text-xs);
+}
+
+.inventory-list-row:hover,
+.inventory-list-row:focus-visible {
+  border-left-color: var(--ll-color-border-strong);
+  background: var(--ll-color-surface-soft);
+}
+
+.inventory-list-row-active {
+  border-left-color: var(--ll-color-primary);
+  background: var(--ll-color-primary-soft);
+}
+
+.inventory-list-selection {
+  flex: none;
+  color: var(--ll-color-primary);
+  font-size: var(--ll-text-xs);
+  text-align: left;
+}
+
+.inventory-inspector-actions {
+  flex: none;
+  border-top: 1px solid var(--ll-color-border);
+  padding: var(--ll-space-3) var(--ll-space-4);
+}
+
+.stock-workspace {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.stock-category-rail,
+.stock-list-pane {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.stock-category-list {
+  display: grid;
+  flex: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-bottom: 1px solid var(--ll-color-border);
+}
+
+.stock-category-button {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--ll-space-1);
+  border-left: 2px solid transparent;
+  padding: var(--ll-space-3);
+  color: var(--ll-color-text-muted);
+  text-align: left;
+}
+
+.stock-category-button:hover,
+.stock-category-button-active {
+  background: var(--ll-color-surface-strong);
+  color: var(--ll-color-text);
+}
+
+.stock-category-button-active {
+  border-left-color: var(--ll-color-primary);
+}
+
+.stock-category-button strong {
+  overflow: hidden;
+  color: inherit;
+  font-size: var(--ll-text-xs);
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+}
+
+.stock-category-button span {
+  font-size: var(--ll-text-xs);
+}
+
+.stock-table-header,
+.stock-table-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(4rem, 8rem);
+  gap: var(--ll-space-4);
+  align-items: center;
+}
+
+.stock-table-header {
+  flex: none;
+  border-bottom: 1px solid var(--ll-color-border);
+  padding: var(--ll-space-2) var(--ll-space-4);
+  color: var(--ll-color-text-muted);
+  font-size: var(--ll-text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stock-table-row {
+  min-height: 2.85rem;
+  border-bottom: 1px solid var(--ll-color-border);
+  padding: var(--ll-space-2) var(--ll-space-4);
+}
+
+.stock-quantity {
+  justify-self: end;
+  text-align: right;
+}
+
+:host ::ng-deep app-equipment-overview > .ll-card {
+  max-width: none;
+  border: 0;
+  background: transparent;
+}
+
+:host ::ng-deep app-equipment-overview .ll-item-row[aria-pressed]:hover {
+  border-color: var(--ll-color-border);
+  background: transparent;
+}
+
+:host ::ng-deep app-equipment-overview .ll-item-row[aria-pressed="true"]:hover {
+  border-left-color: var(--ll-color-primary);
+  background: var(--ll-color-primary-soft);
+}
+
+@container (min-width: 48rem) {
+  .inventory-search-mobile,
+  .inventory-collection-switch-mobile {
+    display: none;
+  }
+
+  .inventory-mobile-hidden,
+  .inventory-search-header,
+  .inventory-collection-switch-header {
+    display: flex;
+  }
+
+  .inventory-workspace:has(.inventory-equipment-rail) {
+    grid-template-columns: 18rem minmax(0, 1fr);
+  }
+
+  .inventory-workspace:has(.inventory-scrap-bench) {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+  }
+
+  .inventory-scrap-bench {
+    display: flex;
+  }
+
+  .stock-workspace {
+    grid-template-columns: 14rem minmax(0, 1fr);
+  }
+
+  .stock-category-rail {
+    border-right: 1px solid var(--ll-color-border);
+  }
+
+  .stock-category-list {
+    display: block;
+    flex: 1;
+    border-bottom: 0;
+  }
+
+  .inventory-list-header,
+  .inventory-list-row {
+    grid-template-columns: minmax(0, 1fr) 4.25rem 7.75rem;
+  }
+
+  .inventory-list-item {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--ll-space-2);
+  }
+}
+
+@container (min-width: 68rem) {
+  .inventory-workspace:has(.inventory-equipment-rail) {
+    grid-template-columns: 18rem minmax(0, 1fr) 20rem;
+  }
+
+  .inventory-inspector {
+    display: flex;
+  }
+}
+
+@container (max-width: 47.999rem) {
+  .inventory-scrap-bench {
+    display: none;
+  }
+}
+
+@container (max-width: 39.999rem) {
+  .inventory-catalog-heading,
+  .inventory-pane-heading {
+    min-height: 3.5rem;
+    padding: var(--ll-space-2) var(--ll-space-3);
+  }
+
+  .inventory-scrap-toolbar {
+    padding: var(--ll-space-2) var(--ll-space-3);
+  }
+}

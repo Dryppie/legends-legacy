@@ -26,7 +26,7 @@ import {
   NgTemplateOutlet,
 } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { RegularButtonComponent } from '../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { StickyScrollDirective } from '../../../shared/directives/sticky-scroll/sticky-scroll.directive';
 import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
@@ -340,6 +340,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private readonly characterState: CharacterStateService,
     private readonly characterService: CharacterService,
     private readonly authService: AuthService,
+    private readonly router: Router,
   ) {
     this.guild = this.guildState.guild;
     this.characterId = this.characterState.currentCharacterId;
@@ -600,6 +601,13 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   isInlineSystemNotice(message: ChatMessageDto): boolean {
     return isInlineGuildSystemMessage(message);
+  }
+
+  navigateToMessageTarget(message: ChatMessageDto, event?: Event): void {
+    if (!message.targetUrl) return;
+
+    event?.preventDefault();
+    void this.router.navigateByUrl(message.targetUrl);
   }
 
   whisperDisplayId(message: ChatMessageDto): string {

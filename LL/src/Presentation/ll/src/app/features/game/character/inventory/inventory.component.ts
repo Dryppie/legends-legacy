@@ -7,11 +7,9 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { SidebarSection } from '../../../../shared/models/sidebar-item';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { EquipmentOverviewComponent } from '../../../../shared/components/equipment-overview/equipment-overview.component';
-import { InventoryItemComponent } from '../../../../shared/components/inventory-item/inventory-item.component';
 import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
 import { FilterTabsComponent } from '../../../../shared/components/custom-components/tabs/filter-tabs/filter-tabs.component';
 import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
@@ -23,7 +21,6 @@ import { ItemQuality } from '../../../../shared/models/enums/itemQuality';
 import { FormsModule } from '@angular/forms';
 import { ItemComponent } from '../../../../shared/components/item/item.component';
 import { HelpTooltipDirective } from '../../../../shared/help/help-tooltip.directive';
-import { EquipmentTypePipe } from '../../../../shared/pipes/equipment/equipment-type-format/equipment-type.pipe';
 import {
   DropdownComponent,
   DropdownOption,
@@ -35,14 +32,30 @@ import {
   ONBOARDING_GATHERING_TOOL_ITEM_BASE_IDS,
   ONBOARDING_ONE_HANDED_WEAPON_ITEM_BASE_IDS,
 } from '../../../../shared/models/quest';
-type MobileInventoryView = 'Inventory' | 'Equipment';
-type InventorySort =
-  | 'Default'
-  | 'Name'
-  | 'Tier'
-  | 'Rarity'
-  | 'Quality'
-  | 'Gear Value';
+import { EquipmentDisplayComponent } from '../../../../shared/components/equipment/equipment-display/equipment-display.component';
+import { ModalService } from '../../../../core/services/client-side/modal/modal.service';
+import { EquipmentStateService } from '../../../../core/services/api/equipment/equipment-state.service';
+import {
+  EquipmentSlot,
+  EquipmentSlotType,
+} from '../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
+import {
+  getAllowedEquipmentTypesForSlot,
+  getEquipSlotOptions,
+  getSlotTypeFromEquipmentType,
+} from '../../../../shared/utils/equipment/equipment.utils';
+import {
+  isMarketplaceBlueprintResource,
+  MARKETPLACE_CATALYST_ITEM_IDS,
+} from '../../../../shared/utils/market-place/market-place-category.utils';
+type InventoryCollectionView = 'Equipment' | 'Stock';
+type StockCategory =
+  | 'Resources'
+  | 'Essences'
+  | 'Blueprints'
+  | 'Entrance Keys'
+  | 'Catalysts';
+type InventorySort = 'Name' | 'Tier' | 'Rarity' | 'Quality' | 'Gear Power';
 
 @Component({
   selector: 'app-inventory',
@@ -52,50 +65,35 @@ type InventorySort =
     NgClass,
     DecimalPipe,
     FilterTabsComponent,
-    InventoryItemComponent,
     DefaultHeaderComponent,
     EquipmentOverviewComponent,
+    EquipmentDisplayComponent,
     RegularButtonComponent,
     FormsModule,
     ItemComponent,
     HelpTooltipDirective,
-    EquipmentTypePipe,
     DropdownComponent,
   ],
   templateUrl: './inventory.component.html',
+  styleUrl: './inventory.component.scss',
 })
 export class InventoryComponent implements OnInit {
-  readonly mobileView = signal<MobileInventoryView>('Inventory');
-  readonly mobileViewTabs: readonly MobileInventoryView[] = [
-    'Inventory',
-    'Equipment',
-  ];
-
-  tabs: SidebarSection[] = [
-    {
-      id: 'all',
-      label: 'All',
-      items: [],
-    },
-    {
-      id: 'equipment',
-      label: 'Equipment',
-      items: [],
-    },
-    {
-      id: 'resources',
-      label: 'Resources',
-      items: [],
-    },
-    {
-      id: 'essences',
-      label: 'Essences',
-      items: [],
-    },
+  readonly collectionView = signal<InventoryCollectionView>('Equipment');
+  readonly stockCategory = signal<StockCategory>('Resources');
+  readonly stockCategories: readonly StockCategory[] = [
+    'Resources',
+    'Essences',
+    'Blueprints',
+    'Entrance Keys',
+    'Catalysts',
   ];
   activeTab: string = '';
 
   inventoryMode: 'Scrap Mode' | 'Regular Mode' = 'Regular Mode';
+  inventorySearch = '';
+  readonly selectedItem = signal<InventoryItem | null>(null);
+  readonly selectedEquipmentSlot = signal<EquipmentSlotType | null>(null);
+  readonly selectedSlotEquipment = signal<EquipmentInstance | null>(null);
 
   scrapableEquipment = computed(() =>
     this.state
@@ -110,14 +108,14 @@ export class InventoryComponent implements OnInit {
 
   selectedItems: InventoryItem[] = [];
   scrapRarityThreshold: Rarity = Rarity.Common;
-  inventorySort: InventorySort = 'Default';
+  inventorySort: InventorySort = 'Gear Power';
+  stockSort: InventorySort = 'Name';
   readonly sortDropdownOptions: DropdownOption<InventorySort>[] = [
-    { label: 'Default', value: 'Default' },
     { label: 'Name A-Z', value: 'Name' },
     { label: 'Tier: high to low', value: 'Tier' },
     { label: 'Rarity: high to low', value: 'Rarity' },
     { label: 'Quality: high to low', value: 'Quality' },
-    { label: 'Gear Value: high to low', value: 'Gear Value' },
+    { label: 'Gear Power: high to low', value: 'Gear Power' },
   ];
   rarities = Object.keys(Rarity);
   rarityDropdownOptions: DropdownOption<Rarity>[] = this.rarities.map(
@@ -147,6 +145,8 @@ export class InventoryComponent implements OnInit {
     public state: InventoryStateService,
     private readonly questState: QuestStateService,
     private readonly questPresenter: QuestPresenterService,
+    private readonly modalService?: ModalService,
+    private readonly equipmentState?: EquipmentStateService,
   ) {
     effect(() => {
       const objectiveType = this.questState.pinnedObjective()?.type;
@@ -166,7 +166,7 @@ export class InventoryComponent implements OnInit {
   ngOnInit(): void {
     this.state.load();
 
-    this.setActiveTab(this.tabs[0]?.label || '');
+    this.setActiveTab('Equipment');
   }
 
   toggleSelectItem(selectedItem: InventoryItem) {
@@ -210,6 +210,10 @@ export class InventoryComponent implements OnInit {
     this.inventorySort = selection.main as InventorySort;
   }
 
+  setStockSort(selection: DropdownSelection<unknown>): void {
+    this.stockSort = selection.main as InventorySort;
+  }
+
   clearSelection() {
     this.selectedItems = [];
   }
@@ -234,6 +238,9 @@ export class InventoryComponent implements OnInit {
 
   enterScrapMode() {
     this.selectedItems = [];
+    this.clearEquipmentSlotFilter();
+    this.collectionView.set('Equipment');
+    this.setActiveTab('Equipment');
     this.inventoryMode = 'Scrap Mode';
   }
 
@@ -295,47 +302,92 @@ export class InventoryComponent implements OnInit {
 
   setActiveTab(tabLabel: string) {
     this.activeTab = tabLabel;
+    this.selectedItem.set(null);
   }
 
-  selectMobileView(view: string): void {
-    if (view === 'Inventory' || view === 'Equipment') {
-      this.mobileView.set(view);
+  selectCollectionView(view: InventoryCollectionView): void {
+    this.collectionView.set(view);
+    this.clearEquipmentSlotFilter();
+    this.setActiveTab(view === 'Equipment' ? 'Equipment' : 'All');
+  }
+
+  selectEquipmentSlot(slot: EquipmentSlot): void {
+    if (this.selectedEquipmentSlot() === slot.equipmentSlotType) {
+      this.clearEquipmentSlotFilter();
+      return;
     }
+
+    this.selectedEquipmentSlot.set(slot.equipmentSlotType);
+    this.selectedSlotEquipment.set(slot.equipmentInstance ?? null);
+    this.selectedItem.set(
+      slot.equipmentInstance
+        ? this.inventoryItemForEquipment(slot.equipmentInstance)
+        : null,
+    );
+  }
+
+  clearEquipmentSlotFilter(): void {
+    this.selectedEquipmentSlot.set(null);
+    this.selectedSlotEquipment.set(null);
+    this.selectedItem.set(null);
+  }
+
+  selectStockCategory(category: StockCategory): void {
+    this.stockCategory.set(category);
   }
 
   get filteredItems(): InventoryItem[] {
-    let items: InventoryItem[];
-    switch (this.isBrowseMode ? this.activeTab : 'Equipment') {
-      case 'All':
-        items = this.state.items();
-        break;
+    let items = this.isBrowseMode
+      ? this.state.equipment()
+      : this.scrapableEquipment();
 
-      case 'Equipment':
-        items = this.isBrowseMode
-          ? this.state.equipment()
-          : this.scrapableEquipment();
-        break;
-
-      case 'Resources':
-        items = this.sortResourcesForDisplay(this.state.materials());
-        break;
-
-      case 'Essences':
-        items = this.state.essences();
-        break;
-
-      default:
-        items = this.state.items();
-        break;
+    const selectedSlot = this.selectedEquipmentSlot();
+    if (this.isBrowseMode && selectedSlot) {
+      const allowedTypes = getAllowedEquipmentTypesForSlot(selectedSlot);
+      items = items.filter((item) => {
+        const equipment = this.equipmentInstance(item);
+        return (
+          !!equipment &&
+          allowedTypes.includes(equipment.equipmentBase.equipmentType)
+        );
+      });
     }
 
-    return this.sortInventoryItems(items);
+    const query = this.inventorySearch.trim().toLowerCase();
+    const filtered = query
+      ? items.filter((item) => {
+          const equipment = this.equipmentInstance(item);
+          return [
+            this.itemDisplayName(item),
+            item.itemInstance.itemBase.itemType,
+            item.itemInstance.itemBase.rarity,
+            equipment?.equipmentBase.equipmentType,
+            equipment?.rarity,
+            equipment?.quality,
+          ].some((value) => value?.toString().toLowerCase().includes(query));
+        })
+      : items;
+
+    return this.sortInventoryItems(filtered);
+  }
+
+  get filteredStockItems(): InventoryItem[] {
+    const query = this.inventorySearch.trim().toLowerCase();
+    const items = this.stockItemsForCategory(this.stockCategory()).filter(
+      (item) =>
+        !query ||
+        [
+          this.itemDisplayName(item),
+          item.itemInstance.itemBase.itemType,
+          item.itemInstance.itemBase.rarity,
+        ].some((value) => value?.toString().toLowerCase().includes(query)),
+    );
+
+    return this.sortInventoryItems(items, this.stockSort);
   }
 
   get tabLabels(): string[] {
-    return this.isBrowseMode
-      ? this.tabs.map((tab) => tab.label)
-      : ['Equipment'];
+    return [];
   }
 
   get isBrowseMode(): boolean {
@@ -355,8 +407,35 @@ export class InventoryComponent implements OnInit {
     return `${count} item${count === 1 ? '' : 's'}`;
   }
 
+  get equipmentCount(): number {
+    return this.state.equipment().length;
+  }
+
+  get stockCount(): number {
+    return this.state.items().filter((item) => !this.isEquipmentItem(item))
+      .length;
+  }
+
+  stockCategoryCount(category: StockCategory): number {
+    return this.stockItemsForCategory(category).length;
+  }
+
+  get stockCategoryCountLabel(): string {
+    const count = this.stockCategoryCount(this.stockCategory());
+    return `${count} kind${count === 1 ? '' : 's'}`;
+  }
+
   get activeListTitle(): string {
-    return 'Equipment';
+    const selectedSlot = this.selectedEquipmentSlot();
+    if (selectedSlot && this.isBrowseMode) {
+      return `${this.equipmentSlotLabel(selectedSlot)} equipment`;
+    }
+
+    if (this.isScrapMode || this.collectionView() === 'Equipment') {
+      return 'Equipment';
+    }
+
+    return this.activeTab === 'All' ? 'Stock' : this.activeTab;
   }
 
   get activeListDescription(): string {
@@ -369,28 +448,154 @@ export class InventoryComponent implements OnInit {
       : 'No items in this category.';
   }
 
-  private sortResourcesForDisplay(items: InventoryItem[]): InventoryItem[] {
-    return [...items].sort((a, b) => {
-      const blueprintRank =
-        Number(this.isBlueprintResource(b)) -
-        Number(this.isBlueprintResource(a));
-      if (blueprintRank !== 0) return blueprintRank;
-
-      return a.itemInstance.itemBase.name.localeCompare(
-        b.itemInstance.itemBase.name,
-      );
-    });
+  selectInventoryItem(item: InventoryItem): void {
+    this.selectedItem.set(item);
   }
 
-  private sortInventoryItems(items: InventoryItem[]): InventoryItem[] {
-    if (this.inventorySort === 'Default') return [...items];
+  equipmentSlotLabel(slot: EquipmentSlotType): string {
+    switch (slot) {
+      case EquipmentSlotType.MainHand:
+        return 'Main hand';
+      case EquipmentSlotType.OffHand:
+        return 'Off hand';
+      case EquipmentSlotType.Necklace:
+        return 'Necklace';
+      default:
+        return slot;
+    }
+  }
 
+  selectedItemContextLabel(item: InventoryItem): string {
+    return this.isSelectedEquippedItem(item)
+      ? 'Currently equipped'
+      : 'Selected item';
+  }
+
+  isSelectedEquippedItem(item: InventoryItem): boolean {
+    return (
+      this.selectedSlotEquipment()?.id === item.itemInstance.id ||
+      !!this.equipmentState
+        ?.equipmentSlots()
+        .some((slot) => slot.equipmentInstance?.id === item.itemInstance.id)
+    );
+  }
+
+  comparisonEquipmentFor(item: InventoryItem): EquipmentInstance | null {
+    const selectedSlot = this.selectedEquipmentSlot();
+    const equipped = selectedSlot
+      ? (this.equipmentState?.getSlot(selectedSlot)?.equipmentInstance ??
+        this.selectedSlotEquipment())
+      : this.selectedSlotEquipment();
+    return equipped && equipped.id !== item.itemInstance.id ? equipped : null;
+  }
+
+  gearPowerDifference(item: InventoryItem): number | null {
+    const equipment = this.equipmentInstance(item);
+    const equipped = this.comparisonEquipmentFor(item);
+    return equipment && equipped
+      ? equipment.itemBudget - equipped.itemBudget
+      : null;
+  }
+
+  handleInventoryItemClick(item: InventoryItem): void {
+    if (this.isScrapMode) {
+      this.toggleSelectItem(item);
+      return;
+    }
+
+    this.selectInventoryItem(item);
+  }
+
+  openItemDetails(item: InventoryItem): void {
+    if (this.isEquipmentItem(item)) {
+      this.modalService?.toggleInventoryEquipItemModal(
+        item.itemInstance as EquipmentInstance,
+      );
+      return;
+    }
+
+    this.modalService?.toggleInventoryItemModal(item);
+  }
+
+  equipSlotOptions(item: InventoryItem): EquipmentSlotType[] {
+    const equipment = this.equipmentInstance(item);
+    return equipment
+      ? getEquipSlotOptions(equipment.equipmentBase.equipmentType)
+      : [];
+  }
+
+  equipActionLabel(item: InventoryItem, slotType: EquipmentSlotType): string {
+    return this.equipmentInstance(item)?.equipmentBase.equipmentType ===
+      EquipmentType.OneHanded
+      ? `Equip ${this.equipmentSlotLabel(slotType).toLowerCase()}`
+      : 'Equip';
+  }
+
+  equipItem(item: InventoryItem, slotType?: EquipmentSlotType): void {
+    const equipment = this.equipmentInstance(item);
+    if (!equipment || !this.equipmentState) return;
+
+    this.equipmentState.equip(
+      equipment,
+      slotType ??
+        getSlotTypeFromEquipmentType(equipment.equipmentBase.equipmentType),
+    );
+  }
+
+  get isEquipPending(): boolean {
+    return this.equipmentState?.loading() ?? false;
+  }
+
+  itemTypeLabel(item: InventoryItem): string {
+    return (
+      this.equipmentInstance(item)?.equipmentBase.equipmentType ??
+      item.itemInstance.itemBase.itemType
+    );
+  }
+
+  itemMetaLabel(item: InventoryItem): string {
+    const equipment = this.equipmentInstance(item);
+    if (equipment) {
+      return `Tier ${equipment.tier} · ${equipment.quality}`;
+    }
+
+    return item.quantity === 1 ? '1 held' : `${item.quantity} held`;
+  }
+
+  itemRarityClass(item: InventoryItem): string {
+    const rarity =
+      this.equipmentInstance(item)?.rarity ?? item.itemInstance.itemBase.rarity;
+
+    switch (rarity) {
+      case Rarity.Common:
+        return 'll-rarity-common';
+      case Rarity.Uncommon:
+        return 'll-rarity-uncommon';
+      case Rarity.Rare:
+        return 'll-rarity-rare';
+      case Rarity.Epic:
+        return 'll-rarity-epic';
+      case Rarity.Unique:
+        return 'll-rarity-unique';
+      case Rarity.Legendary:
+        return 'll-rarity-legendary';
+      case Rarity.Legacy:
+        return 'll-rarity-legacy';
+      default:
+        return 'text-secondary';
+    }
+  }
+
+  private sortInventoryItems(
+    items: InventoryItem[],
+    sort: InventorySort = this.inventorySort,
+  ): InventoryItem[] {
     return [...items].sort((a, b) => {
       const aEquipment = this.equipmentInstance(a);
       const bEquipment = this.equipmentInstance(b);
       let difference = 0;
 
-      switch (this.inventorySort) {
+      switch (sort) {
         case 'Tier':
           difference = (bEquipment?.tier ?? 0) - (aEquipment?.tier ?? 0);
           break;
@@ -408,7 +613,7 @@ export class InventoryComponent implements OnInit {
             (bEquipment ? this.QUALITY_ORDER[bEquipment.quality] : -1) -
             (aEquipment ? this.QUALITY_ORDER[aEquipment.quality] : -1);
           break;
-        case 'Gear Value':
+        case 'Gear Power':
           difference =
             (bEquipment?.itemBudget ?? 0) - (aEquipment?.itemBudget ?? 0);
           break;
@@ -421,7 +626,7 @@ export class InventoryComponent implements OnInit {
     });
   }
 
-  private itemDisplayName(item: InventoryItem): string {
+  itemDisplayName(item: InventoryItem): string {
     return (
       this.equipmentInstance(item)?.displayName ??
       item.itemInstance.itemBase.name
@@ -429,11 +634,60 @@ export class InventoryComponent implements OnInit {
   }
 
   private isBlueprintResource(item: InventoryItem): boolean {
+    return isMarketplaceBlueprintResource(item.itemInstance.itemBase);
+  }
+
+  private isEntranceKeyResource(item: InventoryItem): boolean {
     const itemBase = item.itemInstance.itemBase;
     return (
       itemBase.itemType === ItemType.Resource &&
-      (itemBase.id.toLowerCase().startsWith('blueprint_') ||
-        itemBase.name.toLowerCase().startsWith('blueprint:'))
+      itemBase.id.toLowerCase().startsWith('sigil_')
     );
+  }
+
+  private isCatalystResource(item: InventoryItem): boolean {
+    const itemBase = item.itemInstance.itemBase;
+    return (
+      itemBase.itemType === ItemType.Resource &&
+      MARKETPLACE_CATALYST_ITEM_IDS.has(itemBase.id.toLowerCase())
+    );
+  }
+
+  private stockItemsForCategory(category: StockCategory): InventoryItem[] {
+    switch (category) {
+      case 'Resources':
+        return this.state
+          .materials()
+          .filter(
+            (item) =>
+              !this.isBlueprintResource(item) &&
+              !this.isEntranceKeyResource(item) &&
+              !this.isCatalystResource(item),
+          );
+      case 'Blueprints':
+        return this.state
+          .materials()
+          .filter((item) => this.isBlueprintResource(item));
+      case 'Essences':
+        return this.state.essences();
+      case 'Entrance Keys':
+        return this.state
+          .materials()
+          .filter((item) => this.isEntranceKeyResource(item));
+      case 'Catalysts':
+        return this.state
+          .materials()
+          .filter((item) => this.isCatalystResource(item));
+    }
+  }
+
+  private inventoryItemForEquipment(
+    equipment: EquipmentInstance,
+  ): InventoryItem {
+    return {
+      id: equipment.id,
+      itemInstance: equipment,
+      quantity: 1,
+    };
   }
 }
