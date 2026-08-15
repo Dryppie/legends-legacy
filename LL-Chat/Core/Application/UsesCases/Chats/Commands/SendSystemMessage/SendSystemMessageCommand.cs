@@ -12,7 +12,8 @@ public record SendSystemMessageCommand(
     Guid? TargetCharacterId,
     string? SenderName = null,
     Guid? MessageId = null,
-    DateTimeOffset? SentAt = null) : IRequest<ChatMessageDto?>;
+    DateTimeOffset? SentAt = null,
+    string? TargetUrl = null) : IRequest<ChatMessageDto?>;
 
 public class SendSystemMessageCommandHandler : IRequestHandler<SendSystemMessageCommand, ChatMessageDto?>
 {
@@ -31,6 +32,11 @@ public class SendSystemMessageCommandHandler : IRequestHandler<SendSystemMessage
         }
 
         if (!SendMessageValidator.IsValid(request.Body))
+        {
+            return null;
+        }
+
+        if (!IsValidTargetUrl(request.TargetUrl))
         {
             return null;
         }
@@ -55,6 +61,7 @@ public class SendSystemMessageCommandHandler : IRequestHandler<SendSystemMessage
                 : request.SenderName.Trim(),
             SenderTitleDisplayName = null,
             Body = request.Body.Trim(),
+            TargetUrl = string.IsNullOrWhiteSpace(request.TargetUrl) ? null : request.TargetUrl.Trim(),
             ContextKey = "system",
             SentAt = request.SentAt ?? DateTimeOffset.UtcNow,
             ChannelType = ChatChannelType.System,
@@ -66,5 +73,15 @@ public class SendSystemMessageCommandHandler : IRequestHandler<SendSystemMessage
         await _chatService.AddAsync(message, cancellationToken);
 
         return ChatMessageDto.FromDomain(message);
+    }
+
+    private static bool IsValidTargetUrl(string? targetUrl)
+    {
+        if (string.IsNullOrWhiteSpace(targetUrl)) return true;
+
+        var trimmed = targetUrl.Trim();
+        return trimmed.Length <= 512
+               && trimmed.StartsWith('/')
+               && !trimmed.StartsWith("//", StringComparison.Ordinal);
     }
 }

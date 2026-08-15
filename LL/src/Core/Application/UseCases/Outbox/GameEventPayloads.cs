@@ -86,6 +86,13 @@ public sealed record TournamentBattleCompletedPayload(
     Guid TournamentId,
     Guid MatchId);
 
+public sealed record TournamentChatAnnouncementPayload(
+    Guid TournamentId,
+    Guid MessageId,
+    string Body,
+    string TargetUrl,
+    DateTimeOffset SentAt);
+
 public sealed record ProphecyCompletedPayload(
     Guid CharacterId,
     Guid ProphecyId,

@@ -31,6 +31,7 @@ namespace Services.LL.Colosseum.Tournaments;
 
 public sealed class TournamentGroundsService : ITournamentGroundsService
 {
+    private const string TournamentGroundsTargetUrl = "/game/city/colosseum?tab=tournaments";
     private static readonly Meter TournamentMeter = new("LegendsLegacy.TournamentGrounds");
     private static readonly Histogram<double> CombatDurationMilliseconds =
         TournamentMeter.CreateHistogram<double>("tournament_ground.combat.engine.duration", "ms");
@@ -1460,6 +1461,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 case TournamentStatus.BracketGenerated when tournament.StartsAtUtc <= now:
                     tournament.Status = TournamentStatus.InProgress;
                     changed = Touch(tournament, now);
+                    await EnqueueTournamentChatAnnouncementAsync(
+                        tournament,
+                        "Tournament Grounds has started! Enter the Colosseum to follow the action.",
+                        "started",
+                        now,
+                        cancellationToken);
                     break;
                 case TournamentStatus.InProgress:
                     var progression = await ResolveDueRoundsAsync(tournament, now, cancellationToken);
@@ -1678,6 +1685,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 round.Status = TournamentRoundStatus.Resolving;
                 round.UpdatedAtUtc = now;
                 changed = true;
+                await EnqueueTournamentChatAnnouncementAsync(
+                    tournament,
+                    $"Tournament Grounds: {round.Name} has started!",
+                    $"round:{round.RoundNumber}",
+                    now,
+                    cancellationToken);
             }
 
             var nextDueAt = matches
@@ -1870,6 +1883,40 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             .Sum(stats => stats.DamageDone);
 
     private readonly record struct TournamentProgressionResult(bool Changed, bool StopProgression);
+
+    private Task EnqueueTournamentChatAnnouncementAsync(
+        TournamentInstance tournament,
+        string body,
+        string announcementKey,
+        DateTimeOffset sentAt,
+        CancellationToken cancellationToken)
+    {
+        if (_outbox is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        return _outbox.EnqueueAsync(
+            GameEventTypes.TournamentChatAnnouncement,
+            new TournamentChatAnnouncementPayload(
+                tournament.Id,
+                CreateTournamentAnnouncementMessageId(tournament.Id, announcementKey),
+                body,
+                TournamentGroundsTargetUrl,
+                sentAt),
+            characterId: null,
+            accountId: null,
+            cancellationToken: cancellationToken);
+    }
+
+    private static Guid CreateTournamentAnnouncementMessageId(
+        Guid tournamentId,
+        string announcementKey)
+    {
+        var hash = SHA256.HashData(
+            System.Text.Encoding.UTF8.GetBytes($"tournament-grounds:{tournamentId:N}:{announcementKey}"));
+        return new Guid(hash.AsSpan(0, 16));
+    }
 
     private async Task EnqueueTournamentBattleEventsAsync(
         Guid tournamentId,

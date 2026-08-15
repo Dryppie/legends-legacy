@@ -1033,6 +1033,20 @@ public sealed class TournamentGroundsServiceTests
         Assert.Null(liveMatch.BattleHistoryId);
         Assert.Empty(await db.ColosseumMatches.ToListAsync());
         Assert.Empty(await db.TournamentRewardGrants.ToListAsync());
+        Assert.Collection(
+            outbox.Events.Where(entry => entry.EventType == GameEventTypes.TournamentChatAnnouncement),
+            entry =>
+            {
+                var announcement = Assert.IsType<TournamentChatAnnouncementPayload>(entry.Payload);
+                Assert.Equal("Tournament Grounds has started! Enter the Colosseum to follow the action.", announcement.Body);
+                Assert.Equal("/game/city/colosseum?tab=tournaments", announcement.TargetUrl);
+            },
+            entry =>
+            {
+                var announcement = Assert.IsType<TournamentChatAnnouncementPayload>(entry.Payload);
+                Assert.Contains("has started!", announcement.Body);
+                Assert.Equal("/game/city/colosseum?tab=tournaments", announcement.TargetUrl);
+            });
 
         await service.AdvanceDueTournamentsAsync(CancellationToken.None);
         Assert.Equal(1, combatExecutor.ExecutionCount);
@@ -1041,7 +1055,9 @@ public sealed class TournamentGroundsServiceTests
         clock.SetUtcNow(liveMatch.PlaybackEndsAtUtc!.Value);
         await service.AdvanceDueTournamentsAsync(CancellationToken.None);
         Assert.Equal(TournamentMatchStatus.Resolving, liveMatch.Status);
-        Assert.Empty(outbox.Events);
+        Assert.DoesNotContain(
+            outbox.Events,
+            entry => entry.EventType == GameEventTypes.TournamentBattleCompleted);
 
         clock.SetUtcNow(liveMatch.PlaybackEndsAtUtc.Value.AddSeconds(1));
         await service.AdvanceDueTournamentsAsync(CancellationToken.None);
@@ -1079,12 +1095,18 @@ public sealed class TournamentGroundsServiceTests
         Assert.All(rewardGrants.Where(reward => reward.Placement <= 2), reward =>
             Assert.Equal(20, reward.SigilFragments));
         Assert.Contains(realtime.Events, e => e.Event == "TournamentCompleted");
+        var battleEvents = outbox.Events
+            .Where(entry => entry.EventType == GameEventTypes.TournamentBattleCompleted)
+            .ToList();
         Assert.All(
-            outbox.Events,
+            battleEvents,
             entry => Assert.Equal(GameEventTypes.TournamentBattleCompleted, entry.EventType));
         Assert.Equal(
             10,
-            outbox.Events.Select(entry => entry.CharacterId).Distinct().Count());
+            battleEvents.Select(entry => entry.CharacterId).Distinct().Count());
+        Assert.Equal(
+            3,
+            outbox.Events.Count(entry => entry.EventType == GameEventTypes.TournamentChatAnnouncement));
 
         var matches = await db.TournamentMatches.OrderBy(m => m.RoundNumber).ThenBy(m => m.MatchNumber).ToListAsync();
         Assert.All(matches, match =>
@@ -2080,7 +2102,7 @@ public sealed class TournamentGroundsServiceTests
 
     private sealed class RecordingGameEventOutbox : IGameEventOutbox
     {
-        public List<(string EventType, Guid? CharacterId)> Events { get; } = [];
+        public List<(string EventType, object Payload, Guid? CharacterId)> Events { get; } = [];
 
         public Task EnqueueAsync<TPayload>(
             string eventType,
@@ -2089,7 +2111,7 @@ public sealed class TournamentGroundsServiceTests
             Guid? accountId,
             CancellationToken cancellationToken)
         {
-            Events.Add((eventType, characterId));
+            Events.Add((eventType, payload!, characterId));
             return Task.CompletedTask;
         }
     }

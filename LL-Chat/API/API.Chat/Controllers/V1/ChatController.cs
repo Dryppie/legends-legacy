@@ -32,7 +32,9 @@ public class ChatController : BaseController
         Guid? TargetCharacterId,
         string? SenderName,
         Guid? MessageId,
-        DateTimeOffset? SentAt);
+        DateTimeOffset? SentAt,
+        string? TargetUrl = null,
+        bool Broadcast = false);
     public record SendGuildSystemMessageRequest(
         Guid GuildId,
         Guid ActorCharacterId,
@@ -66,9 +68,21 @@ public class ChatController : BaseController
             request.TargetCharacterId,
             request.SenderName,
             request.MessageId,
-            request.SentAt));
+            request.SentAt,
+            request.TargetUrl));
 
-        return message is null ? BadRequest("Invalid system chat message.") : Ok(message);
+        if (message is null) return BadRequest("Invalid system chat message.");
+
+        if (request.Broadcast && request.IsGlobal)
+        {
+            await _hub.Clients.All.Receive(message);
+        }
+        else if (request.Broadcast && request.TargetCharacterId.HasValue)
+        {
+            await _hub.Clients.User(request.TargetCharacterId.Value.ToString()).Receive(message);
+        }
+
+        return Ok(message);
     }
 
     [AllowAnonymous]
