@@ -151,6 +151,68 @@ public sealed class TournamentGroundsServiceTests
     }
 
     [Fact]
+    public async Task GetStatusAsync_includes_latest_completed_tournament_for_spectators()
+    {
+        await using var db = CreateDbContext();
+        var service = CreateService(db);
+        var completed = SeedTournament(db, TournamentStatus.Completed);
+        completed.CompletedAtUtc = Now.AddMinutes(-5);
+        var scheduled = SeedTournament(db, TournamentStatus.Scheduled);
+        scheduled.RegistrationStartsAtUtc = Now.AddHours(1);
+        await db.SaveChangesAsync();
+
+        var status = await service.GetStatusAsync(Guid.NewGuid(), CancellationToken.None);
+
+        Assert.Equal(scheduled.Id, status.CurrentTournament?.Id);
+        var recent = Assert.Single(status.RecentTournaments);
+        Assert.Equal(completed.Id, recent.Id);
+        Assert.False(recent.IsRegistered);
+    }
+
+    [Fact]
+    public void GetRewardTiers_returns_the_configured_placement_rewards()
+    {
+        using var db = CreateDbContext();
+        var service = CreateService(
+            db,
+            options: new TournamentGroundsOptions
+            {
+                Rewards =
+                [
+                    new TournamentRewardTierOptions
+                    {
+                        Key = "winner",
+                        MaxPlacement = 1,
+                        ArenaGlory = 900
+                    },
+                    new TournamentRewardTierOptions
+                    {
+                        Key = "participant",
+                        MaxPlacement = null,
+                        ArenaGlory = 100
+                    }
+                ]
+            });
+
+        var tiers = service.GetRewardTiers();
+
+        Assert.Collection(
+            tiers,
+            winner =>
+            {
+                Assert.Equal("winner", winner.Key);
+                Assert.Equal(1, winner.MaxPlacement);
+                Assert.Equal(900, winner.ArenaGlory);
+            },
+            participant =>
+            {
+                Assert.Equal("participant", participant.Key);
+                Assert.Null(participant.MaxPlacement);
+                Assert.Equal(100, participant.ArenaGlory);
+            });
+    }
+
+    [Fact]
     public async Task StartDevelopmentTournamentAsync_creates_fills_and_starts_a_local_tournament()
     {
         await using var db = CreateDbContext();
@@ -1067,13 +1129,41 @@ public sealed class TournamentGroundsServiceTests
         clock.SetUtcNow(Now.AddMinutes(10));
         await service.AdvanceDueTournamentsAsync(CancellationToken.None);
         Assert.Equal(2, combatExecutor.ExecutionCount);
-        clock.SetUtcNow(Now.AddMinutes(11));
+        var secondLiveMatch = Assert.Single(
+            await db.TournamentMatches
+                .Where(m => m.Status == TournamentMatchStatus.Resolving)
+                .ToListAsync());
+        clock.SetUtcNow(secondLiveMatch.PlaybackEndsAtUtc!.Value.AddSeconds(1));
         await service.AdvanceDueTournamentsAsync(CancellationToken.None);
 
-        clock.SetUtcNow(Now.AddMinutes(20));
+        var finalMatch = Assert.Single(
+            await db.TournamentMatches
+                .Where(m => m.RoundNumber == 2)
+                .ToListAsync());
+        var finalRound = Assert.Single(
+            await db.TournamentRounds
+                .Where(r => r.RoundNumber == 2)
+                .ToListAsync());
+        var expectedFinalStart = clock.GetUtcNow().AddSeconds(10);
+        Assert.Equal(expectedFinalStart, finalMatch.ScheduledAtUtc);
+        Assert.Equal(expectedFinalStart, finalRound.StartsAtUtc);
+        Assert.Contains(
+            outbox.Events,
+            entry => entry.EventType == GameEventTypes.TournamentGroundsUpdated
+                     && entry.Payload is TournamentGroundsUpdated update
+                     && update.Event == "TournamentStateChanged"
+                     && update.NextActionAtUtc == expectedFinalStart);
+
+        clock.SetUtcNow(expectedFinalStart);
         await service.AdvanceDueTournamentsAsync(CancellationToken.None);
         Assert.Equal(3, combatExecutor.ExecutionCount);
-        clock.SetUtcNow(Now.AddMinutes(21));
+        Assert.Contains(
+            outbox.Events,
+            entry => entry.EventType == GameEventTypes.TournamentGroundsUpdated
+                     && entry.Payload is TournamentGroundsUpdated update
+                     && update.Event == "TournamentStateChanged"
+                     && update.NextActionAtUtc == finalMatch.PlaybackEndsAtUtc);
+        clock.SetUtcNow(finalMatch.PlaybackEndsAtUtc!.Value.AddSeconds(1));
         await service.AdvanceDueTournamentsAsync(CancellationToken.None);
 
         Assert.Equal(TournamentStatus.Completed, tournament.Status);
@@ -1116,9 +1206,11 @@ public sealed class TournamentGroundsServiceTests
             Assert.Equal(match.Id, match.BattleHistoryId);
         });
         Assert.Equal(
-            [10d, 10d],
-            matches.Zip(matches.Skip(1), (left, right) =>
-                (right.ScheduledAtUtc!.Value - left.ScheduledAtUtc!.Value).TotalMinutes));
+            TimeSpan.FromMinutes(10),
+            matches[1].ScheduledAtUtc!.Value - matches[0].ScheduledAtUtc!.Value);
+        Assert.Equal(
+            matches[1].ResolvedAtUtc!.Value.AddSeconds(10),
+            matches[2].ScheduledAtUtc);
 
         var championTeam = await db.TournamentTeams.SingleAsync(t => t.Status == TournamentTeamStatus.Champion);
 

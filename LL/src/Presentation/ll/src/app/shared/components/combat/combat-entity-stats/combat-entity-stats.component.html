@@ -87,7 +87,7 @@
               participant.team === 'Friendly' ? 'text-primary' : 'text-danger'
             "
           >
-            {{ participant.team === "Friendly" ? "Ally" : "Enemy" }}
+            {{ teamDisplayName(participant.team) }}
           </span>
           <span
             *ngIf="selectedEntityId !== participant.id"
@@ -250,7 +250,7 @@
                 participant.team === 'Friendly' ? 'text-primary' : 'text-danger'
               "
             >
-              {{ participant.team === "Friendly" ? "Ally" : "Enemy" }}
+              {{ teamDisplayName(participant.team) }}
             </span>
 
             <span

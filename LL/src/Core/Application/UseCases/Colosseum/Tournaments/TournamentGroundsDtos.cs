@@ -387,6 +387,27 @@ public sealed record TournamentRewardGrantDto(
     }
 }
 
+public sealed record TournamentRewardTierDto(
+    string Key,
+    int? MaxPlacement,
+    int ArenaGlory,
+    int Cinders,
+    int Soulstones,
+    int CatalystSelectionCaches,
+    int BlueprintSelectionBoxes,
+    int SigilFragments) : IMapFrom<TournamentRewardTier>
+{
+    public TournamentRewardTierDto()
+        : this(string.Empty, null, 0, 0, 0, 0, 0, 0)
+    {
+    }
+
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<TournamentRewardTier, TournamentRewardTierDto>();
+    }
+}
+
 public sealed record ClaimTournamentRewardsResponseDto(
     bool Claimed,
     int ArenaGlory,

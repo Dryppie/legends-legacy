@@ -38,6 +38,8 @@ export class CombatEntityStatsComponent implements OnChanges {
   @Input() playerTeam: SimpleCombatEntityDto[] = [];
   @Input() enemyTeam: SimpleCombatEntityDto[] = [];
   @Input() entityStats!: EntityStats[];
+  @Input() playerTeamName: string | null = null;
+  @Input() enemyTeamName: string | null = null;
 
   selectedStats: EntityStats | null = null;
   selectedEntityId: string = '';
@@ -131,6 +133,12 @@ export class CombatEntityStatsComponent implements OnChanges {
 
   trackParticipant(_index: number, participant: StatsParticipant): string {
     return `${participant.team}:${participant.id}`;
+  }
+
+  teamDisplayName(team: CombatTeamName): string {
+    const teamName =
+      team === 'Friendly' ? this.playerTeamName : this.enemyTeamName;
+    return teamName?.trim() || (team === 'Friendly' ? 'Ally' : 'Enemy');
   }
 
   sortAbilities(column: AbilitySortColumn): void {

@@ -8,6 +8,8 @@
     <app-combat
       class="flex h-full w-full"
       [battleType]="battleType"
+      [playerTeamName]="match()?.playerOne?.name ?? null"
+      [enemyTeamName]="match()?.playerTwo?.name ?? null"
       (skipBattle)="skipBattle()"
     ></app-combat>
 
@@ -79,8 +81,7 @@
           <button
             type="button"
             class="ll-button-secondary px-3 py-2 text-sm"
-            [routerLink]="['/game', 'city', 'colosseum']"
-            [queryParams]="{ tab: 'tournaments' }"
+            (click)="returnToTournamentGrounds()"
           >
             Back
           </button>

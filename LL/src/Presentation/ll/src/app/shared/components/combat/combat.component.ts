@@ -73,6 +73,9 @@ export class CombatComponent implements OnInit, OnDestroy {
     return this.battleTypeSignal();
   }
 
+  @Input() playerTeamName: string | null = null;
+  @Input() enemyTeamName: string | null = null;
+
   @Output() skipBattle = new EventEmitter<void>();
 
   isStoppingCombat = false;

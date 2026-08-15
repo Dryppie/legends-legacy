@@ -192,6 +192,23 @@
   font-size: 0.75rem;
 }
 
+.match-team-button {
+  min-width: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.match-team-button:hover,
+.match-team-button:focus-visible {
+  color: var(--ll-color-primary);
+  text-decoration: underline;
+}
+
+.match-team-button:focus-visible {
+  outline: 1px solid var(--ll-color-primary);
+  outline-offset: 2px;
+}
+
 .team-seed {
   display: inline-flex;
   height: 1.35rem;
@@ -245,6 +262,26 @@
   border-top: 1px solid var(--ll-color-border);
   padding-top: 0.75rem;
   margin-top: 0.75rem;
+}
+
+.reward-tier-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-top: 0.75rem;
+  border-top: 1px solid var(--ll-color-border);
+  padding-top: 0.75rem;
+}
+
+.reward-tier-row {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-sm);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.625rem;
 }
 
 .archive-grid {

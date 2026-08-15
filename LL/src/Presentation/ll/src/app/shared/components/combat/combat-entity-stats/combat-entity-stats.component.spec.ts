@@ -70,6 +70,20 @@ describe('CombatEntityStatsComponent', () => {
       ),
     ).toBeFalse();
   });
+
+  it('uses supplied team names with arena-side fallbacks', () => {
+    component.playerTeamName = 'The Performers';
+    component.enemyTeamName = 'Exalt the Sun';
+
+    expect(component.teamDisplayName('Friendly')).toBe('The Performers');
+    expect(component.teamDisplayName('Hostile')).toBe('Exalt the Sun');
+
+    component.playerTeamName = ' ';
+    component.enemyTeamName = null;
+
+    expect(component.teamDisplayName('Friendly')).toBe('Ally');
+    expect(component.teamDisplayName('Hostile')).toBe('Enemy');
+  });
 });
 
 function refresh(component: CombatEntityStatsComponent): void {

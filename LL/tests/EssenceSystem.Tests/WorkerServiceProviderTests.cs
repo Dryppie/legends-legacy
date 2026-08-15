@@ -78,7 +78,7 @@ public sealed class WorkerServiceProviderTests
                     await scheduler.GetTriggersOfJob(jobKey),
                     candidate => candidate.Key.Equals(triggerKey));
                 var simpleTrigger = Assert.IsAssignableFrom<ISimpleTrigger>(trigger);
-                Assert.Equal(TimeSpan.FromSeconds(15), simpleTrigger.RepeatInterval);
+                Assert.Equal(TimeSpan.FromSeconds(10), simpleTrigger.RepeatInterval);
                 Assert.Equal(SimpleTriggerImpl.RepeatIndefinitely, simpleTrigger.RepeatCount);
             }
             finally
@@ -111,7 +111,7 @@ public sealed class WorkerServiceProviderTests
             ["BackgroundJobs:RunningExecutionTimeoutMinutes"] = "30",
             ["BackgroundJobs:SmokeJob:Enabled"] = "false",
             ["Colosseum:TournamentGrounds:Enabled"] = tournamentGroundsEnabled.ToString(),
-            ["Colosseum:TournamentGrounds:ProgressionIntervalSeconds"] = "15",
+            ["Colosseum:TournamentGrounds:ProgressionIntervalSeconds"] = "10",
             ["Colosseum:TournamentGrounds:DefaultRoundIntervalMinutes"] = "0",
             ["Content:Root"] = "Data",
             ["Jwt:SigningKey"] = "TestSigningKeyTestSigningKeyTestSigningKeyTestSigningKey",

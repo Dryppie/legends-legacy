@@ -27,6 +27,7 @@ import {
   TournamentHallOfFameEntry,
   TournamentHistoryEntry,
   TournamentRewardGrant,
+  TournamentRewardTier,
   TournamentSeasonLeaderboardEntry,
   TournamentPlaybackManifest,
   TournamentPlaybackBundle,
@@ -410,6 +411,16 @@ export class ColosseumService {
     return this.apiService.get(path).pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to get tournament rewards'));
+      }),
+    );
+  }
+
+  getTournamentRewardTiers(): Observable<TournamentRewardTier[]> {
+    return this.apiService.get('colosseum/tournaments/reward-tiers').pipe(
+      catchError(() => {
+        return throwError(
+          () => new Error('Failed to get tournament placement rewards'),
+        );
       }),
     );
   }

@@ -9,7 +9,7 @@ public sealed class TournamentGroundsOptions
     public bool UsePostgresAdvisoryLocks { get; set; } = true;
     public string DefaultDefinitionKey { get; set; } = "weekly-open-grounds";
     public string DefaultName { get; set; } = "Weekly Open Grounds";
-    public string DefaultDescription { get; set; } = "Weekly live single-elimination arena tournament with synchronized rounds every ten minutes and staggered semifinals. Registration closes Saturday at 00:00 UTC and battles begin at 12:00 UTC.";
+    public string DefaultDescription { get; set; } = "Weekly live single-elimination arena tournament with a short turnaround between rounds and staggered semifinals. Registration closes Saturday at 00:00 UTC and battles begin at 12:00 UTC.";
     public DayOfWeek DefaultRegistrationStartDayUtc { get; set; } = DayOfWeek.Monday;
     public int DefaultRegistrationStartHourUtc { get; set; } = 0;
     public DayOfWeek DefaultRegistrationEndDayUtc { get; set; } = DayOfWeek.Saturday;
@@ -17,6 +17,7 @@ public sealed class TournamentGroundsOptions
     public int DefaultStartDelayAfterRegistrationMinutes { get; set; } = 12 * 60;
     public int DefaultRoundIntervalMinutes { get; set; } = 10;
     public int MatchIntervalMinutes { get; set; } = 10;
+    public int RoundCompletionCooldownSeconds { get; set; } = 10;
     public int RegulationDurationMinutes { get; set; } = 5;
     public int OvertimeDurationMinutes { get; set; } = 5;
     public int OvertimePowerIncreaseIntervalSeconds { get; set; } = 10;

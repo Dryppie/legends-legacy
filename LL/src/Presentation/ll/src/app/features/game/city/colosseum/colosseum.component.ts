@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
-import { DatePipe, NgIf, NgTemplateOutlet } from '@angular/common';
+import { DatePipe, Location, NgIf, NgTemplateOutlet } from '@angular/common';
 import { CombatComponent } from '../../../../shared/components/combat/combat.component';
 import { BattleType } from '../../../../core/state/combat-state/combatState';
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
@@ -43,6 +43,7 @@ import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-
 export class ColosseumComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly location = inject(Location);
 
   battleType = BattleType.Colosseum;
   readonly selectedTabIndex = toSignal(
@@ -73,7 +74,12 @@ export class ColosseumComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.state.refresh();
+    const navigationState = this.location.getState() as {
+      preserveColosseum?: boolean;
+    };
+    if (navigationState.preserveColosseum !== true) {
+      this.state.refresh();
+    }
   }
 
   skipBattle() {

@@ -310,6 +310,17 @@ export interface TournamentRewardGrant {
   claimedAtUtc?: string | null;
 }
 
+export interface TournamentRewardTier {
+  key: string;
+  maxPlacement?: number | null;
+  arenaGlory: number;
+  cinders: number;
+  soulstones: number;
+  catalystSelectionCaches: number;
+  blueprintSelectionBoxes: number;
+  sigilFragments: number;
+}
+
 export interface ClaimTournamentRewardsResponse {
   claimed: boolean;
   arenaGlory: number;

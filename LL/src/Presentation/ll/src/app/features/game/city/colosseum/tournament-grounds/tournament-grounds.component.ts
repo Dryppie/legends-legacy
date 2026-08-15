@@ -1,10 +1,17 @@
-import { DatePipe, NgFor, NgIf } from '@angular/common';
+import {
+  DatePipe,
+  Location,
+  NgFor,
+  NgIf,
+  NgTemplateOutlet,
+} from '@angular/common';
 import {
   Component,
   OnDestroy,
   OnInit,
   computed,
   effect,
+  inject,
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -14,15 +21,15 @@ import { ToastService } from '../../../../../core/services/client-side/component
 import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
 import { TournamentGroundsUpdated } from '../../../../../core/services/real-time/colosseum/tournament-grounds-updated';
 import { CharacterTagComponent } from '../../../../../shared/components/character/character-tag/character-tag.component';
+import { TournamentGroundsViewStateService } from '../../../../../core/services/api/colosseum/tournament-grounds-view-state.service';
 import {
   TournamentBracket,
-  TournamentDetails,
-  TournamentGroundsStatus,
   TournamentHallOfFameEntry,
   TournamentHistoryEntry,
   TournamentMatch,
   TournamentParticipant,
   TournamentRewardGrant,
+  TournamentRewardTier,
   TournamentRound,
   TournamentSeasonLeaderboardEntry,
   TournamentSummary,
@@ -32,18 +39,27 @@ import {
 
 @Component({
   selector: 'app-tournament-grounds',
-  imports: [DatePipe, NgFor, NgIf, RouterLink, CharacterTagComponent],
+  imports: [
+    DatePipe,
+    NgFor,
+    NgIf,
+    NgTemplateOutlet,
+    RouterLink,
+    CharacterTagComponent,
+  ],
   templateUrl: './tournament-grounds.component.html',
   styleUrl: './tournament-grounds.component.scss',
 })
 export class TournamentGroundsComponent implements OnInit, OnDestroy {
-  readonly status = signal<TournamentGroundsStatus | null>(null);
-  readonly details = signal<TournamentDetails | null>(null);
-  readonly bracket = signal<TournamentBracket | null>(null);
-  readonly rewards = signal<TournamentRewardGrant[]>([]);
-  readonly history = signal<TournamentHistoryEntry[]>([]);
-  readonly hallOfFame = signal<TournamentHallOfFameEntry[]>([]);
-  readonly seasonLeaderboard = signal<TournamentSeasonLeaderboardEntry[]>([]);
+  private readonly viewState = inject(TournamentGroundsViewStateService);
+  private readonly location = inject(Location);
+  readonly status = this.viewState.status;
+  readonly details = this.viewState.details;
+  readonly bracket = this.viewState.bracket;
+  readonly rewards = this.viewState.rewards;
+  readonly history = this.viewState.history;
+  readonly hallOfFame = this.viewState.hallOfFame;
+  readonly seasonLeaderboard = this.viewState.seasonLeaderboard;
   readonly latestRealtimeUpdate = signal<TournamentGroundsUpdated | null>(null);
   readonly loading = signal(false);
   readonly actionLoading = signal(false);
@@ -51,9 +67,19 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
   readonly clock = signal(Date.now());
   readonly invitePickerOpen = signal(false);
   readonly selectedTeamId = signal<string | null>(null);
-  readonly selectedRoundNumber = signal<number | null>(null);
+  readonly rewardTiers = signal<TournamentRewardTier[]>([]);
+  readonly rewardTiersOpen = signal(false);
+  readonly selectedRoundNumber = this.viewState.selectedRoundNumber;
 
   readonly current = computed(() => this.status()?.currentTournament ?? null);
+  readonly displayedTournament = computed(
+    () => this.details()?.summary ?? this.current(),
+  );
+  readonly showingPreviousTournament = computed(() => {
+    const currentId = this.current()?.id;
+    const displayedId = this.displayedTournament()?.id;
+    return Boolean(currentId && displayedId && currentId !== displayedId);
+  });
   readonly developmentToolsEnabled = computed(
     () => this.status()?.developmentToolsEnabled ?? false,
   );
@@ -64,8 +90,28 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     return !status || status === 'Scheduled' || status === 'RegistrationOpen';
   });
   readonly teams = computed(() => this.details()?.teams ?? []);
+  readonly selectedTeam = computed(() => {
+    const selectedTeamId = this.selectedTeamId();
+    if (!selectedTeamId) return null;
+
+    const detailsTeam = this.teams().find(
+      (team) => team.teamId === selectedTeamId,
+    );
+    if (detailsTeam) return detailsTeam;
+
+    return (
+      (this.bracket()?.rounds ?? [])
+        .flatMap((round) =>
+          round.matches.flatMap((match) => [
+            match.playerOne,
+            match.playerTwo,
+          ]),
+        )
+        .find((team) => team?.teamId === selectedTeamId) ?? null
+    );
+  });
   readonly registrationOpenSlots = computed(() => {
-    const tournament = this.current();
+    const tournament = this.displayedTournament();
     if (!tournament) return [];
 
     const firstOpenSlot = this.teams().length + 1;
@@ -93,7 +139,7 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
       ) ?? [],
   );
   readonly playerPendingInvites = computed(() => {
-    const participantId = this.current()?.playerParticipantId;
+    const participantId = this.displayedTournament()?.playerParticipantId;
     if (!participantId) return [];
 
     return this.teams().flatMap((team) =>
@@ -181,6 +227,26 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
       { wins: 0, losses: 0 },
     );
   });
+  readonly currentRoundAction = computed(() => {
+    const round = this.currentRound();
+    if (!round) return null;
+
+    const resolvingEndsAt = round.matches
+      .filter(
+        (match) =>
+          match.status === 'Resolving' && Boolean(match.playbackEndsAtUtc),
+      )
+      .map((match) => match.playbackEndsAtUtc!)
+      .sort((left, right) => Date.parse(right) - Date.parse(left))[0];
+    if (resolvingEndsAt) {
+      return { at: resolvingEndsAt, kind: 'resolving' as const };
+    }
+
+    const nextBattleAt = this.nextScheduledMatchAt(round);
+    return nextBattleAt
+      ? { at: nextBattleAt, kind: 'scheduled' as const }
+      : null;
+  });
   readonly nextActionAt = computed(() => {
     const tournament = this.current();
     if (!tournament) return null;
@@ -195,9 +261,8 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
         return tournament.startsAtUtc;
       case 'InProgress':
         return (
-          this.activePlayerMatch()?.match.playbackEndsAtUtc ??
-          this.activePlayerMatch()?.match.scheduledAtUtc ??
-          this.currentRound()?.startsAtUtc ??
+          this.currentRoundAction()?.at ??
+          this.latestRealtimeUpdate()?.nextActionAtUtc ??
           null
         );
       default:
@@ -226,7 +291,6 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
   });
   private lastRealtimeUpdateId: string | null = null;
   private clockHandle: ReturnType<typeof setInterval> | null = null;
-  private serverClockOffsetMs = 0;
   private lastAutoSelectedRoundNumber: number | null = null;
 
   constructor(
@@ -234,6 +298,9 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     private readonly toastService: ToastService,
     private readonly eventService: GameEventService,
   ) {
+    this.lastRealtimeUpdateId =
+      this.eventService.eventEnvelope.TournamentGroundsUpdated()?.updateId ??
+      null;
     effect(
       () => {
         const envelope =
@@ -266,10 +333,15 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.clockHandle = setInterval(
-      () => this.clock.set(Date.now() + this.serverClockOffsetMs),
+      () =>
+        this.clock.set(Date.now() + this.viewState.serverClockOffsetMs),
       1000,
     );
-    this.refresh();
+    this.loadRewardTiers();
+
+    if (!this.shouldRestoreViewState()) {
+      this.refresh();
+    }
   }
 
   ngOnDestroy(): void {
@@ -287,11 +359,20 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
         next: (status) => {
           const serverNow = Date.parse(status.nowUtc);
           if (!Number.isNaN(serverNow)) {
-            this.serverClockOffsetMs = serverNow - Date.now();
+            this.viewState.serverClockOffsetMs = serverNow - Date.now();
             this.clock.set(serverNow);
           }
           this.status.set(status);
-          const tournamentId = status.currentTournament?.id;
+          this.viewState.markSnapshotLoaded();
+          const currentTournament = status.currentTournament;
+          const previousTournament = status.recentTournaments.find(
+            (tournament) => tournament.status === 'Completed',
+          );
+          const displayedTournament =
+            currentTournament?.status === 'Scheduled'
+              ? (previousTournament ?? currentTournament)
+              : (currentTournament ?? previousTournament);
+          const tournamentId = displayedTournament?.id;
           if (tournamentId) {
             this.loadDetails(tournamentId);
             this.loadBracket(tournamentId);
@@ -307,6 +388,16 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
         error: (err) =>
           this.error.set(err.message ?? 'Failed to load tournament grounds'),
       });
+  }
+
+  private shouldRestoreViewState(): boolean {
+    const navigationState = this.location.getState() as {
+      preserveTournamentGrounds?: boolean;
+    };
+    return (
+      navigationState.preserveTournamentGrounds === true &&
+      this.viewState.hasSnapshot
+    );
   }
 
   register(tournament: TournamentSummary): void {
@@ -426,6 +517,11 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     );
   }
 
+  claimDisplayedRewards(): void {
+    const tournament = this.displayedTournament();
+    if (tournament) this.claim(tournament);
+  }
+
   replay(tournament: TournamentSummary, match: TournamentMatch): void {
     if (!match.battleHistoryId) return;
 
@@ -460,6 +556,9 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
   ): string {
     if (match.status === 'Bye') return 'Advanced by bye';
     if (match.status === 'Resolving') return 'Live now';
+    if (match.status === 'Ready' && match.scheduledAtUtc) {
+      return `Starts ${this.shortTime(match.scheduledAtUtc)}`;
+    }
     if (match.status !== 'Completed') return this.enumLabel(match.status);
     const winner =
       match.winnerTeamId === match.playerOne?.teamId
@@ -530,13 +629,36 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
   roundTimingLabel(round: TournamentRound): string {
     if (round.status === 'Completed') return 'Complete';
     if (this.currentRound()?.id === round.id) {
-      return round.status === 'Resolving' ||
-        round.matches.some((match) => match.status === 'Resolving')
-        ? 'Resolving now'
+      if (round.matches.some((match) => match.status === 'Resolving')) {
+        return 'Resolving now';
+      }
+
+      const nextBattleAt = this.nextScheduledMatchAt(round);
+      return nextBattleAt
+        ? `Next battle ${this.shortTime(nextBattleAt)}`
         : 'Current round';
     }
 
-    return new Date(round.startsAtUtc).toLocaleTimeString([], {
+    return this.shortTime(round.startsAtUtc);
+  }
+
+  private nextScheduledMatchAt(round: TournamentRound): string | null {
+    return (
+      round.matches
+        .filter(
+          (match) =>
+            match.status !== 'Completed' &&
+            match.status !== 'Bye' &&
+            match.status !== 'Resolving' &&
+            Boolean(match.scheduledAtUtc),
+        )
+        .map((match) => match.scheduledAtUtc!)
+        .sort((left, right) => Date.parse(left) - Date.parse(right))[0] ?? null
+    );
+  }
+
+  private shortTime(value: string): string {
+    return new Date(value).toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
     });
@@ -635,6 +757,22 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     return 'Participation reward';
   }
 
+  rewardTierPlacementLabel(
+    tier: TournamentRewardTier,
+    index: number,
+  ): string {
+    const previousMax =
+      index > 0 ? (this.rewardTiers()[index - 1].maxPlacement ?? 0) : 0;
+    const minimum = previousMax + 1;
+    const placement =
+      tier.maxPlacement == null
+        ? `#${minimum}+`
+        : tier.maxPlacement === minimum
+          ? `#${minimum}`
+          : `#${minimum}–${tier.maxPlacement}`;
+    return `${placement} · ${this.enumLabel(tier.key)}`;
+  }
+
   historyResultLabel(entry: TournamentHistoryEntry): string {
     if (entry.status === 'Cancelled')
       return entry.cancellationReason ?? 'Cancelled';
@@ -663,7 +801,9 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
       case 'BracketGenerated':
         return 'Tournament starts';
       case 'InProgress':
-        return 'Rounds resolving';
+        return this.currentRoundAction()?.kind === 'scheduled'
+          ? 'Next battle starts'
+          : 'Battles resolving';
       case 'Completed':
         return 'Completed';
       case 'Cancelled':
@@ -740,6 +880,16 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
       next: (rewards) => this.rewards.set(rewards),
       error: (err) =>
         this.error.set(err.message ?? 'Failed to load tournament rewards'),
+    });
+  }
+
+  private loadRewardTiers(): void {
+    this.colosseumService.getTournamentRewardTiers().subscribe({
+      next: (tiers) => this.rewardTiers.set(tiers),
+      error: (err) =>
+        this.error.set(
+          err.message ?? 'Failed to load tournament placement rewards',
+        ),
     });
   }
 

@@ -201,6 +201,16 @@ public sealed record TournamentRewardGrantEntry(
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset? ClaimedAtUtc);
 
+public sealed record TournamentRewardTier(
+    string Key,
+    int? MaxPlacement,
+    int ArenaGlory,
+    int Cinders,
+    int Soulstones,
+    int CatalystSelectionCaches,
+    int BlueprintSelectionBoxes,
+    int SigilFragments);
+
 public sealed record ClaimTournamentRewardsResult(
     bool Claimed,
     int ArenaGlory,

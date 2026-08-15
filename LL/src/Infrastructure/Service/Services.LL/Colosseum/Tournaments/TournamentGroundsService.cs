@@ -336,9 +336,6 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         var recentTournaments = await _tournaments.Tournaments
             .Where(t => t.Status == TournamentStatus.Completed || t.Status == TournamentStatus.Cancelled)
-            .Where(t =>
-                _tournaments.Participants.Any(p => p.TournamentId == t.Id && p.CharacterId == characterId) ||
-                _tournaments.RewardGrants.Any(r => r.TournamentId == t.Id && r.CharacterId == characterId))
             .OrderByDescending(t => t.CompletedAtUtc ?? t.CancelledAtUtc ?? t.UpdatedAtUtc)
             .Take(5)
             .ToListAsync(cancellationToken);
@@ -702,6 +699,19 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 r.ClaimedAtUtc))
             .ToListAsync(cancellationToken);
     }
+
+    public IReadOnlyList<TournamentRewardTier> GetRewardTiers() =>
+        GetConfiguredRewardTiers()
+            .Select(tier => new TournamentRewardTier(
+                tier.Key,
+                tier.MaxPlacement,
+                tier.ArenaGlory,
+                tier.Cinders,
+                tier.Soulstones,
+                tier.CatalystSelectionCaches,
+                tier.BlueprintSelectionBoxes,
+                tier.SigilFragments))
+            .ToList();
 
     public async Task<RegisterTournamentResult?> RegisterAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
     {
@@ -1482,11 +1492,24 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             }
         }
 
+        if (changedAny && _outbox is not null)
+        {
+            await EnqueueTournamentEventAsync(
+                tournament,
+                "TournamentStateChanged",
+                now,
+                cancellationToken);
+        }
+
         await _tournaments.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        if (changedAny)
+        if (changedAny && _outbox is null)
         {
-            await PublishTournamentEventAsync(tournament, "TournamentStateChanged", now, cancellationToken);
+            await PublishTournamentEventAsync(
+                tournament,
+                "TournamentStateChanged",
+                now,
+                cancellationToken);
         }
     }
 
@@ -1658,6 +1681,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                     round.Status = TournamentRoundStatus.Completed;
                     round.ResolvedAtUtc = now;
                     round.UpdatedAtUtc = now;
+                    await ScheduleNextRoundAfterCooldownAsync(
+                        tournament.Id,
+                        round.RoundNumber,
+                        rounds,
+                        now,
+                        cancellationToken);
                     changed = true;
                     await PublishTournamentEventAsync(tournament, "TournamentRoundResolved", now, cancellationToken);
                 }
@@ -2460,7 +2489,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     private TournamentRewardGrant BuildReward(Guid tournamentId, Guid characterId, int placement, DateTimeOffset now)
     {
-        var tier = GetRewardTiers()
+        var tier = GetConfiguredRewardTiers()
             .Where(t => t.MaxPlacement is null || placement <= t.MaxPlacement.Value)
             .OrderBy(t => t.MaxPlacement ?? int.MaxValue)
             .First();
@@ -2622,6 +2651,47 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         }
 
         return true;
+    }
+
+    private async Task ScheduleNextRoundAfterCooldownAsync(
+        Guid tournamentId,
+        int completedRoundNumber,
+        IReadOnlyList<TournamentRound> rounds,
+        DateTimeOffset completedAt,
+        CancellationToken cancellationToken)
+    {
+        var nextRound = rounds.FirstOrDefault(round =>
+            round.RoundNumber == completedRoundNumber + 1);
+        if (nextRound is null || nextRound.Status == TournamentRoundStatus.Completed)
+            return;
+
+        var startsAt = completedAt.AddSeconds(
+            Math.Max(0, _options.RoundCompletionCooldownSeconds));
+        var nextMatches = await _tournaments.Matches
+            .Where(match =>
+                match.TournamentId == tournamentId
+                && match.RoundNumber == nextRound.RoundNumber
+                && (match.Status == TournamentMatchStatus.Pending
+                    || match.Status == TournamentMatchStatus.Ready))
+            .ToListAsync(cancellationToken);
+        var previousRoundStart = nextMatches
+            .Where(match => match.ScheduledAtUtc.HasValue)
+            .Select(match => match.ScheduledAtUtc!.Value)
+            .DefaultIfEmpty(startsAt)
+            .Min();
+
+        foreach (var match in nextMatches)
+        {
+            var withinRoundOffset = match.ScheduledAtUtc.HasValue
+                ? match.ScheduledAtUtc.Value - previousRoundStart
+                : TimeSpan.Zero;
+            match.ScheduledAtUtc = startsAt.Add(
+                withinRoundOffset < TimeSpan.Zero ? TimeSpan.Zero : withinRoundOffset);
+            match.UpdatedAtUtc = completedAt;
+        }
+
+        nextRound.StartsAtUtc = startsAt;
+        nextRound.UpdatedAtUtc = completedAt;
     }
 
     private static IReadOnlyDictionary<Guid, DateTimeOffset> BuildTournamentMatchSchedule(
@@ -3272,7 +3342,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         return _timeProvider.GetUtcNow();
     }
 
-    private IReadOnlyList<TournamentRewardTierOptions> GetRewardTiers()
+    private IReadOnlyList<TournamentRewardTierOptions> GetConfiguredRewardTiers()
     {
         var configured = _options.Rewards
             .Where(r => !string.IsNullOrWhiteSpace(r.Key))
@@ -3427,52 +3497,9 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     {
         try
         {
-            var hasBracket = await _tournaments.Rounds
-                .AnyAsync(r => r.TournamentId == tournament.Id, cancellationToken);
-            var currentRound = await _tournaments.Rounds
-                .Where(r => r.TournamentId == tournament.Id && r.Status != TournamentRoundStatus.Completed)
-                .OrderBy(r => r.RoundNumber)
-                .Select(r => new { r.RoundNumber, r.StartsAtUtc })
-                .FirstOrDefaultAsync(cancellationToken);
-            var activePlaybackEndsAt = await _tournaments.Matches
-                .Where(match => match.TournamentId == tournament.Id
-                                && match.Status == TournamentMatchStatus.Resolving)
-                .Select(match => match.PlaybackEndsAtUtc)
-                .FirstOrDefaultAsync(cancellationToken);
-            var nextMatchStartsAt = await _tournaments.Matches
-                .Where(match => match.TournamentId == tournament.Id
-                                && match.Status != TournamentMatchStatus.Completed
-                                && match.Status != TournamentMatchStatus.Bye
-                                && match.ScheduledAtUtc.HasValue)
-                .OrderBy(match => match.ScheduledAtUtc)
-                .Select(match => match.ScheduledAtUtc)
-                .FirstOrDefaultAsync(cancellationToken);
-            var nextActionAt = tournament.Status switch
-            {
-                TournamentStatus.Scheduled => tournament.RegistrationStartsAtUtc,
-                TournamentStatus.RegistrationOpen => tournament.RegistrationEndsAtUtc,
-                TournamentStatus.RegistrationClosed or TournamentStatus.BracketGenerated => tournament.StartsAtUtc,
-                TournamentStatus.InProgress => activePlaybackEndsAt ?? nextMatchStartsAt ?? currentRound?.StartsAtUtc,
-                _ => null
-            };
-
             await _gameRealtime.PublishAsync(
                 new Audience.World(),
-                new TournamentGroundsUpdated(
-                    tournament.Id,
-                    tournament.TournamentNumber,
-                    tournament.Name,
-                    eventName,
-                    tournament.Status.ToString(),
-                    await GetCurrentTeamCountAsync(tournament.Id, cancellationToken),
-                    tournament.MinParticipants,
-                    tournament.MaxParticipants,
-                    hasBracket,
-                    currentRound?.RoundNumber,
-                    nextActionAt,
-                    tournament.CompletedAtUtc,
-                    tournament.CancelledAtUtc,
-                    now),
+                await BuildTournamentUpdateAsync(tournament, eventName, now, cancellationToken),
                 nameof(TournamentGroundsService),
                 cancellationToken);
         }
@@ -3480,6 +3507,84 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         {
             // REST remains authoritative; realtime is only a convenience refresh signal.
         }
+    }
+
+    private async Task EnqueueTournamentEventAsync(
+        TournamentInstance tournament,
+        string eventName,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var payload = await BuildTournamentUpdateAsync(
+                tournament,
+                eventName,
+                now,
+                cancellationToken);
+            await _outbox!.EnqueueAsync(
+                GameEventTypes.TournamentGroundsUpdated,
+                payload,
+                characterId: null,
+                accountId: null,
+                cancellationToken);
+        }
+        catch
+        {
+            // REST remains authoritative; realtime is only a convenience refresh signal.
+        }
+    }
+
+    private async Task<TournamentGroundsUpdated> BuildTournamentUpdateAsync(
+        TournamentInstance tournament,
+        string eventName,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var hasBracket = await _tournaments.Rounds
+            .AnyAsync(r => r.TournamentId == tournament.Id, cancellationToken);
+        var currentRound = await _tournaments.Rounds
+            .Where(r => r.TournamentId == tournament.Id && r.Status != TournamentRoundStatus.Completed)
+            .OrderBy(r => r.RoundNumber)
+            .Select(r => new { r.RoundNumber, r.StartsAtUtc })
+            .FirstOrDefaultAsync(cancellationToken);
+        var activePlaybackEndsAt = await _tournaments.Matches
+            .Where(match => match.TournamentId == tournament.Id
+                            && match.Status == TournamentMatchStatus.Resolving)
+            .Select(match => match.PlaybackEndsAtUtc)
+            .FirstOrDefaultAsync(cancellationToken);
+        var nextMatchStartsAt = await _tournaments.Matches
+            .Where(match => match.TournamentId == tournament.Id
+                            && match.Status != TournamentMatchStatus.Completed
+                            && match.Status != TournamentMatchStatus.Bye
+                            && match.ScheduledAtUtc.HasValue)
+            .OrderBy(match => match.ScheduledAtUtc)
+            .Select(match => match.ScheduledAtUtc)
+            .FirstOrDefaultAsync(cancellationToken);
+        var nextActionAt = tournament.Status switch
+        {
+            TournamentStatus.Scheduled => tournament.RegistrationStartsAtUtc,
+            TournamentStatus.RegistrationOpen => tournament.RegistrationEndsAtUtc,
+            TournamentStatus.RegistrationClosed or TournamentStatus.BracketGenerated => tournament.StartsAtUtc,
+            TournamentStatus.InProgress => activePlaybackEndsAt ?? nextMatchStartsAt ?? currentRound?.StartsAtUtc,
+            _ => null
+        };
+
+        return new TournamentGroundsUpdated(
+            tournament.Id,
+            tournament.TournamentNumber,
+            tournament.Name,
+            eventName,
+            tournament.Status.ToString(),
+            await GetCurrentTeamCountAsync(tournament.Id, cancellationToken),
+            tournament.MinParticipants,
+            tournament.MaxParticipants,
+            hasBracket,
+            currentRound?.RoundNumber,
+            nextActionAt,
+            tournament.CompletedAtUtc,
+            tournament.CancelledAtUtc,
+            now);
     }
 
     private sealed record TournamentRegistrationWindow(

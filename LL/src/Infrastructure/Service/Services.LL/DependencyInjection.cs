@@ -165,6 +165,7 @@ public static class DependencyInjection
                     && options.DevelopmentProgressionIntervalSeconds is >= 1 and <= 60
                     && options.DefaultStartDelayAfterRegistrationMinutes is >= 0 and < 10_080
                     && options.MatchIntervalMinutes > 0
+                    && options.RoundCompletionCooldownSeconds is >= 0 and <= 300
                     && options.RegulationDurationMinutes > 0
                     && options.OvertimeDurationMinutes > 0
                     && options.RegulationDurationMinutes + options.OvertimeDurationMinutes
@@ -434,6 +435,7 @@ public static class DependencyInjection
         services.AddScoped<IGameEventOutboxConsumer, GuildChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, GuildVaultChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RealtimeInventoryGameEventOutboxConsumer>();
+        services.AddScoped<IGameEventOutboxConsumer, RealtimeTournamentGroundsGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RealtimeWorldTowerGameEventOutboxConsumer>();
         services.AddSingleton<IQuestDefinitionProvider>(sp =>
             new JsonQuestDefinitionProvider(

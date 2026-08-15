@@ -7,7 +7,7 @@ import {
   effect,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, finalize, takeUntil } from 'rxjs';
 import { ColosseumService } from '../../../../../core/services/api/colosseum/colosseum.service';
 import { BattleType } from '../../../../../core/state/combat-state/combatState';
@@ -25,10 +25,11 @@ import {
   TournamentPlaybackManifest,
 } from '../../../../../shared/models/Dtos/colosseum/tournamentGrounds';
 import { HelpLauncherComponent } from '../../../../../shared/help/help-launcher.component';
+import { TournamentGroundsViewStateService } from '../../../../../core/services/api/colosseum/tournament-grounds-view-state.service';
 
 @Component({
   selector: 'app-tournament-replay',
-  imports: [CombatComponent, DatePipe, NgIf, RouterLink, HelpLauncherComponent],
+  imports: [CombatComponent, DatePipe, NgIf, HelpLauncherComponent],
   templateUrl: './tournament-replay.component.html',
 })
 export class TournamentReplayComponent implements OnInit, OnDestroy {
@@ -133,10 +134,12 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
     private readonly colosseumService: ColosseumService,
     private readonly combatService: CombatService,
     private readonly playbackService: TournamentPlaybackService,
     private readonly eventService: GameEventService,
+    private readonly tournamentViewState: TournamentGroundsViewStateService,
     public readonly combatStateService: CombatStateService,
   ) {
     this.lastReconnectCount = this.eventService.reconnectCount();
@@ -206,6 +209,21 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
   skipBattle(): void {
     this.stopPlaybackTimer();
     this.colosseumService.skipColosseumMatch();
+    this.returnToTournamentGrounds(true);
+  }
+
+  returnToTournamentGrounds(replaceUrl = false): void {
+    const preserveState = this.tournamentViewState.hasSnapshot;
+    void this.router.navigate(['/game', 'city', 'colosseum'], {
+      queryParams: { tab: 'tournaments' },
+      replaceUrl,
+      state: preserveState
+        ? {
+            preserveColosseum: true,
+            preserveTournamentGrounds: true,
+          }
+        : undefined,
+    });
   }
 
   teamLabel(
@@ -249,7 +267,10 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
       .getTournament(tournamentId)
       .pipe(takeUntil(this.destroyed))
       .subscribe({
-        next: (details) => this.details.set(details),
+        next: (details) => {
+          this.details.set(details);
+          this.tournamentViewState.updateDetails(details);
+        },
         error: (err: Error) =>
           this.error.set(err.message ?? 'Failed to load tournament details'),
       });
@@ -258,7 +279,10 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
       .getTournamentBracket(tournamentId)
       .pipe(takeUntil(this.destroyed))
       .subscribe({
-        next: (bracket) => this.bracket.set(bracket),
+        next: (bracket) => {
+          this.bracket.set(bracket);
+          this.tournamentViewState.bracket.set(bracket);
+        },
         error: (err: Error) =>
           this.error.set(err.message ?? 'Failed to load tournament bracket'),
       });
@@ -268,10 +292,22 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
 
   private loadMetadata(tournamentId: string, matchId: string): void {
     this.colosseumService
+      .getTournament(tournamentId)
+      .pipe(takeUntil(this.destroyed))
+      .subscribe({
+        next: (details) => {
+          this.details.set(details);
+          this.tournamentViewState.updateDetails(details);
+        },
+      });
+    this.colosseumService
       .getTournamentBracket(tournamentId)
       .pipe(takeUntil(this.destroyed))
       .subscribe({
-        next: (bracket) => this.bracket.set(bracket),
+        next: (bracket) => {
+          this.bracket.set(bracket);
+          this.tournamentViewState.bracket.set(bracket);
+        },
       });
     this.colosseumService
       .getTournamentMatchPlayback(tournamentId, matchId)

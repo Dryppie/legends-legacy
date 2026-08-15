@@ -69,7 +69,7 @@ public static class BackgroundJobRegistrationExtensions
     {
         var enabled = configuration.GetValue<bool?>("Colosseum:TournamentGrounds:Enabled") ?? true;
         var intervalSeconds = Math.Max(
-            15,
+            1,
             configuration.GetValue<int?>("Colosseum:TournamentGrounds:ProgressionIntervalSeconds") ?? 60);
 
         q.AddJob<TournamentGroundsProgressionJob>(job => job

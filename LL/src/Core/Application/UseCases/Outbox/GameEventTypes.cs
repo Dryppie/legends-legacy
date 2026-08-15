@@ -18,6 +18,7 @@ public static class GameEventTypes
     public const string DungeonRunCompleted = "dungeon.run_completed";
     public const string ColosseumBattleCompleted = "colosseum.battle_completed";
     public const string TournamentBattleCompleted = "colosseum.tournament_battle_completed";
+    public const string TournamentGroundsUpdated = "colosseum.tournament_grounds_updated";
     public const string TournamentChatAnnouncement = "colosseum.tournament_chat_announcement";
     public const string ProphecyCompleted = "prophecy.completed";
     public const string PlayerTransferChatMessage = "player_transfer.chat_message";
