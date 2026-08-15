@@ -13,7 +13,10 @@ import { EquipmentOverviewComponent } from '../../../../shared/components/equipm
 import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
 import { FilterTabsComponent } from '../../../../shared/components/custom-components/tabs/filter-tabs/filter-tabs.component';
 import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
-import { EquipmentInstance } from '../../../../shared/models/item';
+import {
+  EquipmentInstance,
+  SelectionCrateOption,
+} from '../../../../shared/models/item';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { EquipmentType } from '../../../../shared/models/enums/equipmentType';
 import { Rarity } from '../../../../shared/models/enums/rarity';
@@ -51,6 +54,7 @@ import {
 import { InventoryTransferComponent } from '../../../../shared/components/inventory-transfer/inventory-transfer.component';
 import { BlueprintAttributeSummaryComponent } from '../../../../shared/components/blueprint-attribute-summary/blueprint-attribute-summary.component';
 import { CraftingService } from '../../../../core/services/api/crafting/crafting.service';
+import { InventoryService } from '../../../../core/services/api/inventory/inventory.service';
 type InventoryCollectionView = 'Equipment' | 'Stock';
 type StockCategory =
   | 'Resources'
@@ -97,6 +101,7 @@ export class InventoryComponent implements OnInit {
   inventoryMode: 'Scrap Mode' | 'Regular Mode' = 'Regular Mode';
   inventorySearch = '';
   readonly selectedItem = signal<InventoryItem | null>(null);
+  readonly mobileItemInspectorOpen = signal(false);
   readonly selectedBlueprintRecipeId = signal('');
   readonly blueprintRecipeOptions = signal<readonly DropdownOption<string>[]>(
     [],
@@ -105,6 +110,9 @@ export class InventoryComponent implements OnInit {
   readonly hasLoadedBlueprintRecipes = signal(false);
   readonly isLearningBlueprint = signal(false);
   readonly blueprintActionError = signal<string | null>(null);
+  readonly selectedContainerOptionId = signal('');
+  readonly isOpeningContainer = signal(false);
+  readonly containerActionError = signal<string | null>(null);
   readonly selectedEquipmentSlot = signal<EquipmentSlotType | null>(null);
   readonly selectedSlotEquipment = signal<EquipmentInstance | null>(null);
 
@@ -161,6 +169,7 @@ export class InventoryComponent implements OnInit {
     private readonly modalService?: ModalService,
     private readonly equipmentState?: EquipmentStateService,
     private readonly craftingService?: CraftingService,
+    private readonly inventoryService?: InventoryService,
   ) {
     effect(() => {
       const objectiveType = this.questState.pinnedObjective()?.type;
@@ -350,6 +359,7 @@ export class InventoryComponent implements OnInit {
   }
 
   selectEquipmentSlot(slot: EquipmentSlot): void {
+    this.mobileItemInspectorOpen.set(false);
     if (this.selectedEquipmentSlot() === slot.equipmentSlotType) {
       this.clearEquipmentSlotFilter();
       return;
@@ -493,8 +503,66 @@ export class InventoryComponent implements OnInit {
     this.selectedItem.set(item);
     if (changedItem) {
       this.resetBlueprintAction();
+      this.resetContainerAction(item);
       this.loadBlueprintRecipes(item);
     }
+  }
+
+  selectionContainerMetadata(item: InventoryItem) {
+    return item.itemInstance.itemBase.selectionCrate ?? null;
+  }
+
+  selectContainerOption(option: SelectionCrateOption): void {
+    this.selectedContainerOptionId.set(option.id);
+    this.containerActionError.set(null);
+  }
+
+  openSelectionContainer(item: InventoryItem): void {
+    const optionId = this.selectedContainerOptionId();
+    if (
+      !this.selectionContainerMetadata(item) ||
+      !optionId ||
+      !this.inventoryService ||
+      this.isOpeningContainer()
+    ) {
+      return;
+    }
+
+    this.isOpeningContainer.set(true);
+    this.containerActionError.set(null);
+    this.inventoryService
+      .openSelectionContainer(item.itemInstance.id, optionId)
+      .subscribe({
+        next: (response) => {
+          this.state.decrementItem(response.consumedItemInstanceId, 1);
+          this.state.applyInventoryGrant(response.grantId, response.rewards);
+          this.isOpeningContainer.set(false);
+
+          if (this.selectedItem()?.itemInstance.id !== item.itemInstance.id) {
+            return;
+          }
+
+          const remainingItem = this.state
+            .items()
+            .find(
+              (candidate) =>
+                candidate.itemInstance.id === response.consumedItemInstanceId,
+            );
+          if (remainingItem) {
+            this.selectedItem.set(remainingItem);
+          } else {
+            this.clearSelectedItem();
+          }
+        },
+        error: (error) => {
+          this.isOpeningContainer.set(false);
+          if (this.selectedItem()?.itemInstance.id === item.itemInstance.id) {
+            this.containerActionError.set(
+              error.message ?? 'Failed to open this container.',
+            );
+          }
+        },
+      });
   }
 
   selectBlueprintRecipe(selection: DropdownSelection<unknown>): void {
@@ -603,6 +671,16 @@ export class InventoryComponent implements OnInit {
     }
 
     this.selectInventoryItem(item);
+    this.mobileItemInspectorOpen.set(true);
+  }
+
+  handleStockItemClick(item: InventoryItem): void {
+    this.selectInventoryItem(item);
+    this.mobileItemInspectorOpen.set(true);
+  }
+
+  closeItemInspector(): void {
+    this.clearSelectedItem();
   }
 
   openItemDetails(item: InventoryItem): void {
@@ -734,7 +812,16 @@ export class InventoryComponent implements OnInit {
 
   private clearSelectedItem(): void {
     this.selectedItem.set(null);
+    this.mobileItemInspectorOpen.set(false);
     this.resetBlueprintAction();
+    this.resetContainerAction();
+  }
+
+  private resetContainerAction(item?: InventoryItem): void {
+    this.selectedContainerOptionId.set(
+      item?.itemInstance.itemBase.selectionCrate?.options[0]?.id ?? '',
+    );
+    this.containerActionError.set(null);
   }
 
   private resetBlueprintAction(): void {

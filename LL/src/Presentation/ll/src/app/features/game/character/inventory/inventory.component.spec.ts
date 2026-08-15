@@ -16,6 +16,7 @@ import { EquipmentStateService } from '../../../../core/services/api/equipment/e
 import { CraftingService } from '../../../../core/services/api/crafting/crafting.service';
 import { of } from 'rxjs';
 import { CraftingRecipe } from '../../../../shared/models/crafting-v2';
+import { InventoryService } from '../../../../core/services/api/inventory/inventory.service';
 
 describe('InventoryComponent quest presentation', () => {
   it('starts gathering-tool guidance when that objective becomes active', () => {
@@ -157,9 +158,47 @@ describe('InventoryComponent quest presentation', () => {
 
     expect(component.selectedEquipmentSlot()).toBe(EquipmentSlotType.Head);
     expect(component.selectedItem()?.itemInstance.id).toBe('equipped-head');
+    expect(component.mobileItemInspectorOpen()).toBeFalse();
     expect(component.filteredItems.map((item) => item.itemInstance.id)).toEqual(
       ['head-option'],
     );
+  });
+
+  it('opens mobile details for collection items but not equipped-slot filters', () => {
+    const equippedHead = inventoryEquipment(
+      'equipped-head',
+      EquipmentType.Head,
+    );
+    const headOption = inventoryEquipment('head-option', EquipmentType.Head);
+    const equipment = signal<InventoryItem[]>([headOption]);
+    const component = TestBed.runInInjectionContext(
+      () =>
+        new InventoryComponent(
+          { equipment: equipment.asReadonly() } as InventoryStateService,
+          {
+            pinnedObjective: signal<QuestObjectiveState | undefined>(
+              undefined,
+            ).asReadonly(),
+          } as QuestStateService,
+          jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
+            'presentCurrentObjective',
+          ]),
+        ),
+    );
+
+    component.handleInventoryItemClick(headOption);
+    expect(component.mobileItemInspectorOpen()).toBeTrue();
+
+    component.selectEquipmentSlot({
+      id: 'head-slot',
+      iconPath: 'empty_head',
+      equipmentSlotType: EquipmentSlotType.Head,
+      equipmentInstance: equippedHead.itemInstance as EquipmentInstance,
+    });
+
+    expect(component.selectedEquipmentSlot()).toBe(EquipmentSlotType.Head);
+    expect(component.selectedItem()?.itemInstance.id).toBe('equipped-head');
+    expect(component.mobileItemInspectorOpen()).toBeFalse();
   });
 
   it('calculates gear power changes against the selected equipped item', () => {
@@ -312,6 +351,85 @@ describe('InventoryComponent quest presentation', () => {
 
     component.selectStockCategory('Essences');
     expect(component.selectedItem()).toBeNull();
+  });
+
+  it('closes the item inspector without changing the active collection', () => {
+    const item = inventoryStock('ore-stock', 'Iron Ore');
+    const component = createStockComponent([item]);
+    component.selectCollectionView('Stock');
+    component.selectInventoryItem(item);
+
+    component.closeItemInspector();
+
+    expect(component.selectedItem()).toBeNull();
+    expect(component.collectionView()).toBe('Stock');
+  });
+
+  it('opens a selected cache with the chosen reward and updates inventory state', () => {
+    const cache = inventorySelectionContainer('catalyst-cache');
+    const reward = inventoryStock('flame-catalyst', 'Flame Evolution Catalyst');
+    const inventoryItems = signal<InventoryItem[]>([cache]);
+    const inventoryState = {
+      items: inventoryItems.asReadonly(),
+      materials: inventoryItems.asReadonly(),
+      essences: signal<InventoryItem[]>([]).asReadonly(),
+      decrementItem: jasmine
+        .createSpy('decrementItem')
+        .and.callFake(() => inventoryItems.set([])),
+      applyInventoryGrant: jasmine.createSpy('applyInventoryGrant'),
+    } as unknown as InventoryStateService;
+    const inventoryService = jasmine.createSpyObj<InventoryService>(
+      'InventoryService',
+      ['openSelectionContainer'],
+    );
+    inventoryService.openSelectionContainer.and.returnValue(
+      of({
+        consumedItemInstanceId: cache.itemInstance.id,
+        grantId: 'grant-1',
+        rewards: [reward],
+      }),
+    );
+    const component = TestBed.runInInjectionContext(
+      () =>
+        new InventoryComponent(
+          inventoryState,
+          {
+            pinnedObjective: signal<QuestObjectiveState | undefined>(
+              undefined,
+            ).asReadonly(),
+          } as QuestStateService,
+          jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
+            'presentCurrentObjective',
+          ]),
+          undefined,
+          undefined,
+          undefined,
+          inventoryService,
+        ),
+    );
+
+    component.selectInventoryItem(cache);
+    expect(component.selectedContainerOptionId()).toBe('flame');
+
+    component.selectContainerOption(
+      cache.itemInstance.itemBase.selectionCrate!.options[1],
+    );
+    component.openSelectionContainer(cache);
+
+    expect(inventoryService.openSelectionContainer).toHaveBeenCalledOnceWith(
+      'catalyst-cache',
+      'frost',
+    );
+    expect(inventoryState.decrementItem).toHaveBeenCalledOnceWith(
+      'catalyst-cache',
+      1,
+    );
+    expect(inventoryState.applyInventoryGrant).toHaveBeenCalledOnceWith(
+      'grant-1',
+      [reward],
+    );
+    expect(component.selectedItem()).toBeNull();
+    expect(component.isOpeningContainer()).toBeFalse();
   });
 
   it('requires an explicit compatible recipe selection before learning a blueprint', () => {
@@ -485,6 +603,18 @@ function inventoryBlueprint(id: string): InventoryItem {
     anyRecipeTags: [],
     compatibleRecipeCount: 1,
     compatibleRecipes: [{ id: 'recipe.sword', name: 'Sword' }],
+  };
+  return item;
+}
+
+function inventorySelectionContainer(id: string): InventoryItem {
+  const item = inventoryStock(id, 'Catalyst Selection Cache');
+  item.itemInstance.itemBase.selectionCrate = {
+    selectionLabel: 'Catalyst',
+    options: [
+      { id: 'flame', name: 'Flame Evolution Catalyst', quantity: 6 },
+      { id: 'frost', name: 'Frost Evolution Catalyst', quantity: 6 },
+    ],
   };
   return item;
 }

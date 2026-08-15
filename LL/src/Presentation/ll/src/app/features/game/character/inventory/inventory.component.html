@@ -104,7 +104,10 @@
     </div>
   </div>
 
-  <label class="inventory-search inventory-search-mobile mx-2">
+  <label
+    *ngIf="!mobileItemInspectorOpen()"
+    class="inventory-search inventory-search-mobile mx-2"
+  >
     <span class="sr-only">Search inventory</span>
     <span aria-hidden="true">⌕</span>
     <input
@@ -122,7 +125,7 @@
   >
     <aside
       *ngIf="isBrowseMode"
-      class="ll-panel inventory-equipment-rail inventory-mobile-hidden"
+      class="ll-panel inventory-equipment-rail"
       data-tour="equipped-overview"
     >
       <header class="inventory-pane-heading">
@@ -322,7 +325,11 @@
       </div>
     </main>
 
-    <aside *ngIf="isBrowseMode" class="ll-panel inventory-inspector">
+    <aside
+      *ngIf="isBrowseMode"
+      class="ll-panel inventory-inspector"
+      [class.inventory-inspector-open]="mobileItemInspectorOpen()"
+    >
       <ng-container *ngIf="selectedItem() as item; else selectPrompt">
         <header class="inventory-pane-heading">
           <div class="min-w-0">
@@ -337,6 +344,14 @@
               {{ itemTypeLabel(item) }} · {{ itemMetaLabel(item) }}
             </p>
           </div>
+          <button
+            type="button"
+            class="inventory-inspector-close ll-button"
+            aria-label="Close item details"
+            (click)="closeItemInspector()"
+          >
+            ×
+          </button>
         </header>
 
         <div class="ll-scrollbar min-h-0 flex-1 overflow-y-auto p-3">
@@ -486,7 +501,7 @@
     class="ll-panel stock-workspace"
   >
     <aside class="stock-category-rail">
-      <header class="inventory-pane-heading">
+      <header class="inventory-pane-heading stock-class-heading">
         <div>
           <p class="ll-eyebrow">Class</p>
           <h2 class="ll-heading text-lg">Stock</h2>
@@ -563,7 +578,7 @@
             [attr.aria-selected]="
               selectedItem()?.itemInstance?.id === item.itemInstance.id
             "
-            (click)="selectInventoryItem(item)"
+            (click)="handleStockItemClick(item)"
           >
             <span
               class="truncate font-medium"
@@ -583,7 +598,10 @@
       </div>
     </main>
 
-    <aside class="inventory-inspector stock-inspector">
+    <aside
+      class="inventory-inspector stock-inspector"
+      [class.inventory-inspector-open]="mobileItemInspectorOpen()"
+    >
       <ng-container *ngIf="selectedItem() as item; else selectStockPrompt">
         <header class="inventory-pane-heading">
           <div class="min-w-0">
@@ -598,6 +616,14 @@
               {{ itemTypeLabel(item) }} · {{ itemMetaLabel(item) }}
             </p>
           </div>
+          <button
+            type="button"
+            class="inventory-inspector-close ll-button"
+            aria-label="Close stock details"
+            (click)="closeItemInspector()"
+          >
+            ×
+          </button>
         </header>
 
         <div class="ll-scrollbar min-h-0 flex-1 overflow-y-auto p-3">
@@ -659,7 +685,46 @@
           </div>
 
           <div
+            *ngIf="selectionContainerMetadata(item) as container"
+            class="ll-card mt-3 p-3"
+          >
+            <p class="ll-eyebrow">Choose {{ container.selectionLabel }}</p>
+            <p class="ll-copy mt-2">
+              Select the reward you want before opening this container.
+            </p>
+
+            <div class="selection-container-options mt-3">
+              <button
+                *ngFor="let option of container.options"
+                type="button"
+                class="selection-container-option"
+                [class.selection-container-option-active]="
+                  selectedContainerOptionId() === option.id
+                "
+                [attr.aria-pressed]="selectedContainerOptionId() === option.id"
+                (click)="selectContainerOption(option)"
+              >
+                <span>{{ option.name }}</span>
+                <strong class="tabular-nums text-primary">
+                  ×{{ option.quantity | number: "1.0-0" }}
+                </strong>
+              </button>
+            </div>
+
+            <div class="ll-state mt-3">
+              Opening consumes one {{ itemDisplayName(item) }}.
+            </div>
+          </div>
+
+          <div
             *ngIf="blueprintActionError() as message"
+            class="ll-state ll-state-danger mt-3"
+          >
+            {{ message }}
+          </div>
+
+          <div
+            *ngIf="containerActionError() as message"
             class="ll-state ll-state-danger mt-3"
           >
             {{ message }}
@@ -667,6 +732,16 @@
         </div>
 
         <footer class="inventory-inspector-actions">
+          <button
+            *ngIf="selectionContainerMetadata(item)"
+            type="button"
+            class="ll-button ll-button-primary mb-2 w-full"
+            [disabled]="isOpeningContainer() || !selectedContainerOptionId()"
+            (click)="openSelectionContainer(item)"
+          >
+            {{ isOpeningContainer() ? "Opening..." : "Open" }}
+          </button>
+
           <button
             *ngIf="blueprintMetadata(item)"
             type="button"
