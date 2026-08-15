@@ -3,9 +3,12 @@ import { NgFor, NgIf } from '@angular/common';
 import {
   Component,
   EventEmitter,
+  HostBinding,
   Input,
+  OnChanges,
   OnDestroy,
   Output,
+  SimpleChanges,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -31,8 +34,9 @@ import { InventoryItem } from '../../models/inventoryItem';
   imports: [FormsModule, NgFor, NgIf, OverlayModule],
   templateUrl: './inventory-transfer.component.html',
 })
-export class InventoryTransferComponent implements OnDestroy {
+export class InventoryTransferComponent implements OnChanges, OnDestroy {
   @Input({ required: true }) inventoryItem!: InventoryItem;
+  @Input() compact = false;
   @Output() transferred = new EventEmitter<void>();
 
   readonly isFormOpen = signal(false);
@@ -47,23 +51,33 @@ export class InventoryTransferComponent implements OnDestroy {
   readonly recipientSuggestionPositions: ConnectedPosition[] = [
     {
       originX: 'start',
-      originY: 'bottom',
-      overlayX: 'start',
-      overlayY: 'top',
-      offsetY: 4,
-    },
-    {
-      originX: 'start',
       originY: 'top',
       overlayX: 'start',
       overlayY: 'bottom',
       offsetY: -4,
+    },
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 4,
     },
   ];
   recipientName = '';
   quantity = 1;
   private readonly recipientSearch = new Subject<string>();
   private readonly destroy = new Subject<void>();
+
+  @HostBinding('class.inventory-transfer-compact')
+  get compactClass(): boolean {
+    return this.compact;
+  }
+
+  @HostBinding('class.inventory-transfer-form-open')
+  get formOpenClass(): boolean {
+    return this.compact && this.isFormOpen();
+  }
 
   constructor(
     private readonly inventoryService: InventoryService,
@@ -97,6 +111,12 @@ export class InventoryTransferComponent implements OnDestroy {
         this.recipientSuggestions.set(suggestions);
         this.activeRecipientSuggestion.set(suggestions.length ? 0 : -1);
       });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['inventoryItem'] && !changes['inventoryItem'].firstChange) {
+      this.resetForm();
+    }
   }
 
   ngOnDestroy(): void {
@@ -136,9 +156,19 @@ export class InventoryTransferComponent implements OnDestroy {
 
   cancel(): void {
     if (this.isTransferring()) return;
+    this.resetForm();
+  }
+
+  private resetForm(): void {
     this.error.set(null);
+    this.recipientName = '';
+    this.hasSelectedRecipient.set(false);
+    this.recipientSuggestions.set([]);
+    this.recipientSearchCompleted.set(false);
+    this.isSearchingRecipients.set(false);
     this.closeRecipientSuggestions();
     this.isFormOpen.set(false);
+    this.recipientSearch.next('');
   }
 
   onRecipientNameChange(value: string): void {

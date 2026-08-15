@@ -794,6 +794,8 @@ public sealed class GameEventOutboxTests
         public Task RecordDungeonMasteryLevelReachedAsync(Guid characterId, int level, CancellationToken cancellationToken) => Task.CompletedTask;
         public Task RecordColosseumTournamentAsync(Guid characterId, bool won, CancellationToken cancellationToken) => Task.CompletedTask;
         public Task RecordChampionMarketPurchaseAsync(Guid characterId, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task<bool> UnlockTitleAsync(Guid accountId, Guid characterId, string titleKey, string? metadataJson, CancellationToken cancellationToken) =>
+            Task.FromResult(true);
 
         public Task<AchievementRecalculationResultDto?> RecalculateProgressAsync(Guid accountId, Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult<AchievementRecalculationResultDto?>(null);

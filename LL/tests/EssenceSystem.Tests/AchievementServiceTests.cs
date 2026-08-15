@@ -53,7 +53,7 @@ public sealed class AchievementServiceTests
         var championTitle = Assert.Single(titles, title => title.Key == "title.champion_of_the_grounds");
         Assert.Equal("Champion of the Grounds", championTitle.Name);
         Assert.Equal("colosseum.tournament_winner", championTitle.SourceAchievementKey);
-        Assert.Contains(championTitle.SourceAchievementKey, achievementKeys);
+        Assert.Contains(championTitle.SourceAchievementKey!, achievementKeys);
     }
 
     [Fact]
@@ -112,6 +112,52 @@ public sealed class AchievementServiceTests
         Assert.Equal(
             "title.champion_of_the_grounds",
             (await db.TitleDefinitions.SingleAsync(definition => definition.Id == title.TitleDefinitionId)).Key);
+    }
+
+    [Fact]
+    public async Task Purchased_title_can_be_unlocked_once_and_equipped()
+    {
+        await using var db = CreateDbContext();
+        var accountId = Guid.NewGuid();
+        var characterId = Guid.NewGuid();
+        SeedCharacter(db, accountId, characterId);
+        SeedTitle(
+            db,
+            "title.arena_duelist",
+            null,
+            TitleScope.Character,
+            name: "Arena Duelist");
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var unlocked = await service.UnlockTitleAsync(
+            accountId,
+            characterId,
+            "title.arena_duelist",
+            "{\"source\":\"champion-market\"}",
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.True(unlocked);
+        Assert.False(await service.UnlockTitleAsync(
+            accountId,
+            characterId,
+            "title.arena_duelist",
+            null,
+            CancellationToken.None));
+        var title = Assert.Single(await service.GetTitlesAsync(accountId, characterId, new(), CancellationToken.None));
+        Assert.True(title.IsUnlocked);
+        Assert.Equal("{\"source\":\"champion-market\"}", Assert.Single(db.PlayerTitleUnlocks).MetadataJson);
+
+        var equipped = await service.EquipTitleAsync(
+            accountId,
+            characterId,
+            "title.arena_duelist",
+            TitleDisplayPosition.Prefix,
+            CancellationToken.None);
+
+        Assert.NotNull(equipped);
+        Assert.Equal("Arena Duelist", equipped.Name);
     }
 
     [Fact]
@@ -657,15 +703,16 @@ public sealed class AchievementServiceTests
     private static void SeedTitle(
         LLDbContext db,
         string key,
-        string sourceAchievementKey,
+        string? sourceAchievementKey,
         TitleScope scope,
-        string description = "Duelist title")
+        string description = "Duelist title",
+        string name = "Duelist")
     {
         db.TitleDefinitions.Add(new TitleDefinition
         {
             Id = Guid.NewGuid(),
             Key = key,
-            Name = "Duelist",
+            Name = name,
             Description = description,
             Category = AchievementCategory.Colosseum,
             Rarity = TitleRarity.Common,
@@ -698,5 +745,5 @@ public sealed class AchievementServiceTests
     private sealed record TitleCatalogEntry(
         string Key,
         string Name,
-        string SourceAchievementKey);
+        string? SourceAchievementKey);
 }

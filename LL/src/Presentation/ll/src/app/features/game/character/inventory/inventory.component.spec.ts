@@ -13,6 +13,9 @@ import { InventoryComponent } from './inventory.component';
 import { EquipmentSlotType } from '../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
 import { EquipmentInstance } from '../../../../shared/models/item';
 import { EquipmentStateService } from '../../../../core/services/api/equipment/equipment-state.service';
+import { CraftingService } from '../../../../core/services/api/crafting/crafting.service';
+import { of } from 'rxjs';
+import { CraftingRecipe } from '../../../../shared/models/crafting-v2';
 
 describe('InventoryComponent quest presentation', () => {
   it('starts gathering-tool guidance when that objective becomes active', () => {
@@ -69,6 +72,30 @@ describe('InventoryComponent quest presentation', () => {
     expect(
       component.scrapableEquipment().map((item) => item.itemInstance.id),
     ).toEqual(['weapon']);
+  });
+
+  it('opens scrap mode with the inspected equipment preselected', () => {
+    const equipmentItem = inventoryEquipment(
+      'selected-weapon',
+      EquipmentType.OneHanded,
+    );
+    const equipment = signal<InventoryItem[]>([equipmentItem]);
+    const objective = signal<QuestObjectiveState | undefined>(undefined);
+    const component = TestBed.runInInjectionContext(
+      () =>
+        new InventoryComponent(
+          { equipment: equipment.asReadonly() } as InventoryStateService,
+          { pinnedObjective: objective.asReadonly() } as QuestStateService,
+          jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
+            'presentCurrentObjective',
+          ]),
+        ),
+    );
+
+    component.beginScrappingItem(equipmentItem);
+
+    expect(component.isScrapMode).toBeTrue();
+    expect(component.selectedItems).toEqual([equipmentItem]);
   });
 
   it('sorts scrap equipment by quality from highest to lowest', () => {
@@ -276,6 +303,93 @@ describe('InventoryComponent quest presentation', () => {
     ).toEqual(['flame-catalyst-stock', 'warden-sigil-stock']);
   });
 
+  it('selects stock for inspection and clears it when the category changes', () => {
+    const item = inventoryStock('ore-stock', 'Iron Ore');
+    const component = createStockComponent([item]);
+
+    component.selectInventoryItem(item);
+    expect(component.selectedItem()).toBe(item);
+
+    component.selectStockCategory('Essences');
+    expect(component.selectedItem()).toBeNull();
+  });
+
+  it('requires an explicit compatible recipe selection before learning a blueprint', () => {
+    const blueprint = inventoryBlueprint('endurance-blueprint');
+    const inventoryItems = signal<InventoryItem[]>([blueprint]);
+    const inventoryState = {
+      items: inventoryItems.asReadonly(),
+      materials: inventoryItems.asReadonly(),
+      essences: signal<InventoryItem[]>([]).asReadonly(),
+      decrementItem: jasmine.createSpy('decrementItem'),
+    } as unknown as InventoryStateService;
+    const craftingService = jasmine.createSpyObj<CraftingService>(
+      'CraftingService',
+      ['getRecipes', 'learnBlueprint'],
+    );
+    craftingService.getRecipes.and.returnValue(
+      of([
+        {
+          id: 'recipe.sword',
+          blueprints: [
+            {
+              id: 'blueprint.endurance',
+              isLearned: false,
+            },
+          ],
+        },
+      ] as unknown as CraftingRecipe[]),
+    );
+    craftingService.learnBlueprint.and.returnValue(
+      of({
+        blueprintId: 'blueprint.endurance',
+        blueprintName: 'Endurance',
+        recipeId: 'recipe.sword',
+        recipeName: 'Sword',
+      }),
+    );
+    const component = TestBed.runInInjectionContext(
+      () =>
+        new InventoryComponent(
+          inventoryState,
+          {
+            pinnedObjective: signal<QuestObjectiveState | undefined>(
+              undefined,
+            ).asReadonly(),
+          } as QuestStateService,
+          jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
+            'presentCurrentObjective',
+          ]),
+          undefined,
+          undefined,
+          craftingService,
+        ),
+    );
+
+    component.selectInventoryItem(blueprint);
+
+    expect(component.blueprintRecipeOptions()).toEqual([
+      { label: 'Sword', value: 'recipe.sword' },
+    ]);
+    expect(component.selectedBlueprintRecipeId()).toBe('');
+
+    component.learnSelectedBlueprint(blueprint);
+    expect(craftingService.learnBlueprint).not.toHaveBeenCalled();
+
+    component.selectBlueprintRecipe({ main: 'recipe.sword', sub: null });
+    component.learnSelectedBlueprint(blueprint);
+
+    expect(craftingService.learnBlueprint).toHaveBeenCalledOnceWith(
+      'endurance-blueprint',
+      'recipe.sword',
+    );
+    expect(inventoryState.decrementItem).toHaveBeenCalledOnceWith(
+      'endurance-blueprint',
+      1,
+    );
+    expect(component.selectedBlueprintRecipeId()).toBe('');
+  });
+
   it('equips regular equipment directly into its natural slot', () => {
     const item = inventoryEquipment('head-option', EquipmentType.Head);
     const equipmentState = equipmentStateStub();
@@ -358,6 +472,41 @@ function inventoryStock(
     },
     quantity: 1,
   } as InventoryItem;
+}
+
+function inventoryBlueprint(id: string): InventoryItem {
+  const item = inventoryStock(id, 'Blueprint: Endurance', 'blueprint-item');
+  item.itemInstance.itemBase.blueprint = {
+    blueprintId: 'blueprint.endurance',
+    name: 'Endurance',
+    description: 'A sturdy equipment design.',
+    bonusStatProfile: {},
+    requiredRecipeTags: [],
+    anyRecipeTags: [],
+    compatibleRecipeCount: 1,
+    compatibleRecipes: [{ id: 'recipe.sword', name: 'Sword' }],
+  };
+  return item;
+}
+
+function createStockComponent(items: InventoryItem[]): InventoryComponent {
+  return TestBed.runInInjectionContext(
+    () =>
+      new InventoryComponent(
+        {
+          materials: signal(items).asReadonly(),
+          essences: signal<InventoryItem[]>([]).asReadonly(),
+        } as InventoryStateService,
+        {
+          pinnedObjective: signal<QuestObjectiveState | undefined>(
+            undefined,
+          ).asReadonly(),
+        } as QuestStateService,
+        jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
+          'presentCurrentObjective',
+        ]),
+      ),
+  );
 }
 
 function inventoryEquipment(

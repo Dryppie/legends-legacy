@@ -15,6 +15,7 @@ using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 
 namespace Services.LL.Colosseum;
 public class ColosseumService : IColosseumService
@@ -460,6 +461,29 @@ public class ColosseumService : IColosseumService
 
             rewardInventoryItems.AddRange(
                 _inventoryItemFactory.CreateForQuantity(itemBase, rewardItemQuantity, characterId));
+        }
+
+        if (!string.IsNullOrWhiteSpace(item.RewardTitleKey))
+        {
+            if (_achievementService is null)
+            {
+                return null;
+            }
+
+            var titleUnlocked = await _achievementService.UnlockTitleAsync(
+                character.UserId,
+                characterId,
+                item.RewardTitleKey,
+                JsonSerializer.Serialize(new
+                {
+                    Source = ItemAcquisitionSources.ChampionMarket,
+                    MarketItemId = item.Id
+                }),
+                cancellationToken);
+            if (!titleUnlocked)
+            {
+                return null;
+            }
         }
 
         arena.Glory -= totalCost;

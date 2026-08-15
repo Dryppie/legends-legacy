@@ -6,6 +6,29 @@ import { InventoryService } from '../../../core/services/api/inventory/inventory
 import { InventoryTransferComponent } from './inventory-transfer.component';
 
 describe('InventoryTransferComponent', () => {
+  it('positions recipient suggestions above the text field by default', () => {
+    const component = new InventoryTransferComponent(
+      jasmine.createSpyObj<InventoryService>('InventoryService', [
+        'transferItem',
+      ]),
+      jasmine.createSpyObj<InventoryStateService>('InventoryStateService', [
+        'decrementItem',
+      ]),
+      jasmine.createSpyObj<CharacterService>('CharacterService', [
+        'suggestCharacterNames',
+      ]),
+    );
+
+    expect(component.recipientSuggestionPositions[0]).toEqual(
+      jasmine.objectContaining({
+        originY: 'top',
+        overlayY: 'bottom',
+        offsetY: -4,
+      }),
+    );
+    component.ngOnDestroy();
+  });
+
   it('loads recipient suggestions after typing two characters', fakeAsync(() => {
     const characterService = jasmine.createSpyObj<CharacterService>(
       'CharacterService',

@@ -203,6 +203,25 @@
   padding: var(--ll-space-3) var(--ll-space-4);
 }
 
+.inventory-secondary-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ll-space-2);
+  margin-top: var(--ll-space-2);
+  border-top: 1px solid var(--ll-color-border);
+  padding-top: var(--ll-space-2);
+}
+
+.inventory-secondary-actions app-inventory-transfer {
+  display: block;
+  min-width: 0;
+}
+
+.inventory-secondary-actions
+  app-inventory-transfer.inventory-transfer-form-open {
+  grid-column: 1 / -1;
+}
+
 .stock-workspace {
   display: grid;
   min-height: 0;
@@ -212,11 +231,17 @@
 }
 
 .stock-category-rail,
-.stock-list-pane {
+.stock-list-pane,
+.stock-inspector {
   display: flex;
   min-width: 0;
   min-height: 0;
   flex-direction: column;
+}
+
+.stock-inspector {
+  display: none;
+  border-left: 1px solid var(--ll-color-border);
 }
 
 .stock-category-list {
@@ -280,9 +305,27 @@
 }
 
 .stock-table-row {
+  width: 100%;
   min-height: 2.85rem;
+  border-left: 2px solid transparent;
   border-bottom: 1px solid var(--ll-color-border);
   padding: var(--ll-space-2) var(--ll-space-4);
+  color: var(--ll-color-text);
+  text-align: left;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.stock-table-row:hover,
+.stock-table-row:focus-visible {
+  border-left-color: var(--ll-color-border-strong);
+  background: var(--ll-color-surface-soft);
+}
+
+.stock-table-row-active {
+  border-left-color: var(--ll-color-primary);
+  background: var(--ll-color-primary-soft);
 }
 
 .stock-quantity {
@@ -363,6 +406,10 @@
 
   .inventory-inspector {
     display: flex;
+  }
+
+  .stock-workspace {
+    grid-template-columns: 14rem minmax(0, 1fr) 20rem;
   }
 }
 

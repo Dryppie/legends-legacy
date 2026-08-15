@@ -11,7 +11,8 @@
       "requiredRating": null,
       "requiredRankTier": null,
       "isEnabled": true,
-      "sortOrder": 10
+      "sortOrder": 10,
+      "rewardTitleKey": "title.arena_duelist"
     },
     {
       "id": "title.bloodied_challenger",
@@ -24,7 +25,8 @@
       "requiredRating": null,
       "requiredRankTier": "bronze",
       "isEnabled": true,
-      "sortOrder": 20
+      "sortOrder": 20,
+      "rewardTitleKey": "title.bloodied_challenger"
     },
     {
       "id": "cache.catalyst_selection",

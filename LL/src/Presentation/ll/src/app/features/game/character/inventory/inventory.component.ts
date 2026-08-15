@@ -48,6 +48,9 @@ import {
   isMarketplaceBlueprintResource,
   MARKETPLACE_CATALYST_ITEM_IDS,
 } from '../../../../shared/utils/market-place/market-place-category.utils';
+import { InventoryTransferComponent } from '../../../../shared/components/inventory-transfer/inventory-transfer.component';
+import { BlueprintAttributeSummaryComponent } from '../../../../shared/components/blueprint-attribute-summary/blueprint-attribute-summary.component';
+import { CraftingService } from '../../../../core/services/api/crafting/crafting.service';
 type InventoryCollectionView = 'Equipment' | 'Stock';
 type StockCategory =
   | 'Resources'
@@ -73,6 +76,8 @@ type InventorySort = 'Name' | 'Tier' | 'Rarity' | 'Quality' | 'Gear Power';
     ItemComponent,
     HelpTooltipDirective,
     DropdownComponent,
+    InventoryTransferComponent,
+    BlueprintAttributeSummaryComponent,
   ],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
@@ -92,6 +97,14 @@ export class InventoryComponent implements OnInit {
   inventoryMode: 'Scrap Mode' | 'Regular Mode' = 'Regular Mode';
   inventorySearch = '';
   readonly selectedItem = signal<InventoryItem | null>(null);
+  readonly selectedBlueprintRecipeId = signal('');
+  readonly blueprintRecipeOptions = signal<readonly DropdownOption<string>[]>(
+    [],
+  );
+  readonly isLoadingBlueprintRecipes = signal(false);
+  readonly hasLoadedBlueprintRecipes = signal(false);
+  readonly isLearningBlueprint = signal(false);
+  readonly blueprintActionError = signal<string | null>(null);
   readonly selectedEquipmentSlot = signal<EquipmentSlotType | null>(null);
   readonly selectedSlotEquipment = signal<EquipmentInstance | null>(null);
 
@@ -147,6 +160,7 @@ export class InventoryComponent implements OnInit {
     private readonly questPresenter: QuestPresenterService,
     private readonly modalService?: ModalService,
     private readonly equipmentState?: EquipmentStateService,
+    private readonly craftingService?: CraftingService,
   ) {
     effect(() => {
       const objectiveType = this.questState.pinnedObjective()?.type;
@@ -221,6 +235,30 @@ export class InventoryComponent implements OnInit {
   scrapEquipment() {
     this.state.scrapEquipment(this.selectedItems.map((i) => i.itemInstance.id));
     this.selectedItems = [];
+  }
+
+  canScrapItem(item: InventoryItem): boolean {
+    return this.scrapableEquipment().some(
+      (candidate) => candidate.itemInstance.id === item.itemInstance.id,
+    );
+  }
+
+  beginScrappingItem(item: InventoryItem): void {
+    if (!this.canScrapItem(item)) return;
+
+    this.enterScrapMode();
+    this.selectedItems = [item];
+  }
+
+  handleSelectedItemTransferred(item: InventoryItem): void {
+    const remainingItem = this.state
+      .items()
+      .find((candidate) => candidate.itemInstance.id === item.itemInstance.id);
+    if (remainingItem) {
+      this.selectedItem.set(remainingItem);
+    } else {
+      this.clearSelectedItem();
+    }
   }
 
   switchMode() {
@@ -302,7 +340,7 @@ export class InventoryComponent implements OnInit {
 
   setActiveTab(tabLabel: string) {
     this.activeTab = tabLabel;
-    this.selectedItem.set(null);
+    this.clearSelectedItem();
   }
 
   selectCollectionView(view: InventoryCollectionView): void {
@@ -329,11 +367,12 @@ export class InventoryComponent implements OnInit {
   clearEquipmentSlotFilter(): void {
     this.selectedEquipmentSlot.set(null);
     this.selectedSlotEquipment.set(null);
-    this.selectedItem.set(null);
+    this.clearSelectedItem();
   }
 
   selectStockCategory(category: StockCategory): void {
     this.stockCategory.set(category);
+    this.clearSelectedItem();
   }
 
   get filteredItems(): InventoryItem[] {
@@ -449,7 +488,67 @@ export class InventoryComponent implements OnInit {
   }
 
   selectInventoryItem(item: InventoryItem): void {
+    const changedItem =
+      this.selectedItem()?.itemInstance.id !== item.itemInstance.id;
     this.selectedItem.set(item);
+    if (changedItem) {
+      this.resetBlueprintAction();
+      this.loadBlueprintRecipes(item);
+    }
+  }
+
+  selectBlueprintRecipe(selection: DropdownSelection<unknown>): void {
+    this.selectedBlueprintRecipeId.set(selection.main as string);
+    this.blueprintActionError.set(null);
+  }
+
+  learnSelectedBlueprint(item: InventoryItem): void {
+    const recipeId = this.selectedBlueprintRecipeId();
+    const blueprint = this.blueprintMetadata(item);
+    if (
+      !blueprint ||
+      !recipeId ||
+      !this.craftingService ||
+      this.isLearningBlueprint()
+    ) {
+      return;
+    }
+
+    this.isLearningBlueprint.set(true);
+    this.blueprintActionError.set(null);
+    this.craftingService
+      .learnBlueprint(item.itemInstance.id, recipeId)
+      .subscribe({
+        next: () => {
+          this.state.decrementItem(item.itemInstance.id, 1);
+          const remainingItem = this.state
+            .items()
+            .find(
+              (candidate) => candidate.itemInstance.id === item.itemInstance.id,
+            );
+
+          this.blueprintRecipeOptions.update((options) =>
+            options.filter((option) => option.value !== recipeId),
+          );
+          this.selectedBlueprintRecipeId.set('');
+          this.isLearningBlueprint.set(false);
+          if (remainingItem) {
+            this.selectedItem.set(remainingItem);
+          } else {
+            this.clearSelectedItem();
+          }
+        },
+        error: (error) => {
+          this.blueprintActionError.set(
+            error.message ?? 'Failed to learn blueprint.',
+          );
+          this.isLearningBlueprint.set(false);
+        },
+      });
+  }
+
+  blueprintMetadata(item: InventoryItem) {
+    return item.itemInstance.itemBase.blueprint ?? null;
   }
 
   equipmentSlotLabel(slot: EquipmentSlotType): string {
@@ -631,6 +730,83 @@ export class InventoryComponent implements OnInit {
       this.equipmentInstance(item)?.displayName ??
       item.itemInstance.itemBase.name
     );
+  }
+
+  private clearSelectedItem(): void {
+    this.selectedItem.set(null);
+    this.resetBlueprintAction();
+  }
+
+  private resetBlueprintAction(): void {
+    this.selectedBlueprintRecipeId.set('');
+    this.blueprintRecipeOptions.set([]);
+    this.isLoadingBlueprintRecipes.set(false);
+    this.hasLoadedBlueprintRecipes.set(false);
+    this.isLearningBlueprint.set(false);
+    this.blueprintActionError.set(null);
+  }
+
+  private loadBlueprintRecipes(item: InventoryItem): void {
+    const blueprint = this.blueprintMetadata(item);
+    if (!blueprint) {
+      this.hasLoadedBlueprintRecipes.set(true);
+      return;
+    }
+
+    if (!this.craftingService) {
+      this.blueprintRecipeOptions.set(
+        blueprint.compatibleRecipes.map((recipe) => ({
+          label: recipe.name,
+          value: recipe.id,
+        })),
+      );
+      this.hasLoadedBlueprintRecipes.set(true);
+      return;
+    }
+
+    const itemInstanceId = item.itemInstance.id;
+    const compatibleRecipeIds = new Set(
+      blueprint.compatibleRecipes.map((recipe) => recipe.id),
+    );
+    this.isLoadingBlueprintRecipes.set(true);
+    this.craftingService.getRecipes().subscribe({
+      next: (recipes) => {
+        if (this.selectedItem()?.itemInstance.id !== itemInstanceId) return;
+
+        const availableRecipeIds = new Set(
+          recipes
+            .filter(
+              (recipe) =>
+                compatibleRecipeIds.has(recipe.id) &&
+                recipe.blueprints.some(
+                  (candidate) =>
+                    candidate.id === blueprint.blueprintId &&
+                    !candidate.isLearned,
+                ),
+            )
+            .map((recipe) => recipe.id),
+        );
+        this.blueprintRecipeOptions.set(
+          blueprint.compatibleRecipes
+            .filter((recipe) => availableRecipeIds.has(recipe.id))
+            .map((recipe) => ({
+              label: recipe.name,
+              value: recipe.id,
+            })),
+        );
+        this.isLoadingBlueprintRecipes.set(false);
+        this.hasLoadedBlueprintRecipes.set(true);
+      },
+      error: (error) => {
+        if (this.selectedItem()?.itemInstance.id !== itemInstanceId) return;
+
+        this.blueprintActionError.set(
+          error.message ?? 'Failed to load available recipes.',
+        );
+        this.isLoadingBlueprintRecipes.set(false);
+        this.hasLoadedBlueprintRecipes.set(true);
+      },
+    });
   }
 
   private isBlueprintResource(item: InventoryItem): boolean {

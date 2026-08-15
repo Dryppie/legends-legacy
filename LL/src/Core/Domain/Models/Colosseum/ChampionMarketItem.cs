@@ -19,4 +19,5 @@ public sealed record ChampionMarketItem(
     string? RewardItemName = null,
     int RewardItemQuantity = 0,
     bool RotatesWeekly = false,
-    string? RotationGroup = null);
+    string? RotationGroup = null,
+    string? RewardTitleKey = null);

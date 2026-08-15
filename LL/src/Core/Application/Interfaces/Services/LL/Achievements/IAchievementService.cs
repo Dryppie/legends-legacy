@@ -11,6 +11,12 @@ public interface IAchievementService
     Task<AchievementOverviewDto> GetOverviewAsync(Guid accountId, Guid characterId, CancellationToken cancellationToken);
     Task<IReadOnlyList<AchievementDto>> GetAchievementsAsync(Guid accountId, Guid characterId, AchievementFilters filters, CancellationToken cancellationToken);
     Task<IReadOnlyList<TitleDto>> GetTitlesAsync(Guid accountId, Guid characterId, TitleFilters filters, CancellationToken cancellationToken);
+    Task<bool> UnlockTitleAsync(
+        Guid accountId,
+        Guid characterId,
+        string titleKey,
+        string? metadataJson,
+        CancellationToken cancellationToken);
     Task<EquippedTitleDto?> EquipTitleAsync(
         Guid accountId,
         Guid characterId,

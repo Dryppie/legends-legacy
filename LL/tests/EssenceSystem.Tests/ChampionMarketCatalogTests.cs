@@ -70,6 +70,13 @@ public sealed class ChampionMarketCatalogTests
         Assert.All(
             CatalystSelectionCrateCatalog.Options,
             option => Assert.Contains(option.ItemId, itemBaseIds));
+        var titleKeys = Directory
+            .EnumerateFiles(Path.Combine(apiRoot, "Data", "titles"), "*.json")
+            .SelectMany(ReadTitleKeys)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        Assert.All(
+            items.Where(item => item.Category == "Title"),
+            item => Assert.Contains(item.RewardTitleKey!, titleKeys));
         Assert.Equal(11, CatalystSelectionCrateCatalog.Options.Count);
         Assert.All(CatalystSelectionCrateCatalog.Options, option => Assert.Equal(6, option.Quantity));
         var crateItem = itemDocument.RootElement
@@ -86,6 +93,15 @@ public sealed class ChampionMarketCatalogTests
             weeklyCaches
                 .Where(x => x.RewardItemId?.StartsWith("item.monster_core.") == true)
                 .Select(x => x.RewardItemId));
+
+        static IReadOnlyList<string> ReadTitleKeys(string path)
+        {
+            using var document = JsonDocument.Parse(File.ReadAllText(path));
+            return document.RootElement
+                .EnumerateArray()
+                .Select(title => title.GetProperty("key").GetString()!)
+                .ToList();
+        }
     }
 
     [Fact]

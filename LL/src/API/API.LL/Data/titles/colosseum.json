@@ -70,5 +70,29 @@
     "isHiddenUntilUnlocked": false,
     "isActive": true,
     "sortOrder": 34
+  },
+  {
+    "key": "title.arena_duelist",
+    "name": "Arena Duelist",
+    "description": "Purchased from the Champion's Market.",
+    "category": "Colosseum",
+    "rarity": "Renowned",
+    "scope": "Character",
+    "sourceAchievementKey": null,
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 35
+  },
+  {
+    "key": "title.bloodied_challenger",
+    "name": "Bloodied Challenger",
+    "description": "Purchased from the Champion's Market after reaching Bronze rank.",
+    "category": "Colosseum",
+    "rarity": "Mythic",
+    "scope": "Character",
+    "sourceAchievementKey": null,
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 36
   }
 ]

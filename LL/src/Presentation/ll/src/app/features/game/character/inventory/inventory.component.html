@@ -374,18 +374,38 @@
           <ng-container *ngIf="isEquipmentItem(item); else openItemAction">
             <div
               *ngIf="!isSelectedEquippedItem(item); else currentlyEquipped"
-              class="grid w-full grid-cols-2 gap-2"
+              class="w-full"
             >
-              <button
-                *ngFor="let slotType of equipSlotOptions(item)"
-                type="button"
-                class="ll-button ll-button-primary"
-                [class.col-span-2]="equipSlotOptions(item).length === 1"
-                [disabled]="isEquipPending"
-                (click)="equipItem(item, slotType)"
-              >
-                {{ equipActionLabel(item, slotType) }}
-              </button>
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  *ngFor="let slotType of equipSlotOptions(item)"
+                  type="button"
+                  class="ll-button ll-button-primary"
+                  [class.col-span-2]="equipSlotOptions(item).length === 1"
+                  [disabled]="isEquipPending"
+                  (click)="equipItem(item, slotType)"
+                >
+                  {{ equipActionLabel(item, slotType) }}
+                </button>
+              </div>
+
+              <div class="inventory-secondary-actions">
+                <button
+                  *ngIf="canScrapItem(item)"
+                  type="button"
+                  class="ll-button text-red-300 hover:text-red-200"
+                  [disabled]="state.loading()"
+                  (click)="beginScrappingItem(item)"
+                >
+                  Scrap
+                </button>
+
+                <app-inventory-transfer
+                  [compact]="true"
+                  [inventoryItem]="item"
+                  (transferred)="handleSelectedItemTransferred(item)"
+                ></app-inventory-transfer>
+              </div>
             </div>
           </ng-container>
 
@@ -532,10 +552,18 @@
         </div>
 
         <div *ngIf="filteredStockItems.length" class="stock-table" role="table">
-          <div
+          <button
             *ngFor="let item of filteredStockItems"
+            type="button"
             class="stock-table-row"
+            [class.stock-table-row-active]="
+              selectedItem()?.itemInstance?.id === item.itemInstance.id
+            "
             role="row"
+            [attr.aria-selected]="
+              selectedItem()?.itemInstance?.id === item.itemInstance.id
+            "
+            (click)="selectInventoryItem(item)"
           >
             <span
               class="truncate font-medium"
@@ -550,9 +578,128 @@
             >
               {{ item.quantity | number: "1.0-0" }}
             </strong>
-          </div>
+          </button>
         </div>
       </div>
     </main>
+
+    <aside class="inventory-inspector stock-inspector">
+      <ng-container *ngIf="selectedItem() as item; else selectStockPrompt">
+        <header class="inventory-pane-heading">
+          <div class="min-w-0">
+            <p class="ll-eyebrow">Selected stock</p>
+            <h2
+              class="mt-1 truncate text-lg font-semibold"
+              [ngClass]="itemRarityClass(item)"
+            >
+              {{ itemDisplayName(item) }}
+            </h2>
+            <p class="mt-1 text-xs text-secondary">
+              {{ itemTypeLabel(item) }} · {{ itemMetaLabel(item) }}
+            </p>
+          </div>
+        </header>
+
+        <div class="ll-scrollbar min-h-0 flex-1 overflow-y-auto p-3">
+          <div class="ll-card p-3">
+            <app-item [item]="item.itemInstance"></app-item>
+            <p class="ll-copy mt-3">
+              {{
+                item.itemInstance.itemBase.description ||
+                  "No description available."
+              }}
+            </p>
+            <div class="ll-item-stat-row mt-3">
+              <span>Held</span>
+              <strong class="tabular-nums text-primary">
+                {{ item.quantity | number: "1.0-0" }}
+              </strong>
+            </div>
+          </div>
+
+          <div
+            *ngIf="blueprintMetadata(item) as blueprint"
+            class="ll-card mt-3 p-3"
+          >
+            <p class="ll-eyebrow">Blueprint</p>
+            <h3 class="ll-heading mt-1 text-base">{{ blueprint.name }}</h3>
+            <p class="ll-copy mt-2">{{ blueprint.description }}</p>
+
+            <app-blueprint-attribute-summary
+              [blueprint]="blueprint"
+            ></app-blueprint-attribute-summary>
+
+            <div *ngIf="isLoadingBlueprintRecipes()" class="ll-state mt-3">
+              Loading available recipes...
+            </div>
+
+            <div *ngIf="blueprintRecipeOptions().length" class="mt-3">
+              <p class="ll-copy mb-1">Recipe to learn it on</p>
+              <app-dropdown
+                class="block w-full"
+                appearance="field"
+                label="Select a recipe"
+                [value]="selectedBlueprintRecipeId()"
+                [options]="blueprintRecipeOptions()"
+                [selectedValue]="selectedBlueprintRecipeId()"
+                (selection)="selectBlueprintRecipe($event)"
+              ></app-dropdown>
+            </div>
+
+            <div
+              *ngIf="
+                hasLoadedBlueprintRecipes() &&
+                !isLoadingBlueprintRecipes() &&
+                !blueprintRecipeOptions().length
+              "
+              class="ll-state mt-3"
+            >
+              This Blueprint is already learned on every compatible recipe.
+            </div>
+          </div>
+
+          <div
+            *ngIf="blueprintActionError() as message"
+            class="ll-state ll-state-danger mt-3"
+          >
+            {{ message }}
+          </div>
+        </div>
+
+        <footer class="inventory-inspector-actions">
+          <button
+            *ngIf="blueprintMetadata(item)"
+            type="button"
+            class="ll-button ll-button-primary mb-2 w-full"
+            [disabled]="
+              isLoadingBlueprintRecipes() ||
+              isLearningBlueprint() ||
+              !selectedBlueprintRecipeId()
+            "
+            (click)="learnSelectedBlueprint(item)"
+          >
+            {{ isLearningBlueprint() ? "Learning..." : "Learn" }}
+          </button>
+
+          <app-inventory-transfer
+            [compact]="true"
+            [inventoryItem]="item"
+            (transferred)="handleSelectedItemTransferred(item)"
+          ></app-inventory-transfer>
+        </footer>
+      </ng-container>
+
+      <ng-template #selectStockPrompt>
+        <div class="ll-empty-state h-full px-6 text-center">
+          <div>
+            <p class="ll-eyebrow">Stock details</p>
+            <h2 class="ll-heading mt-2 text-lg">Select an item</h2>
+            <p class="ll-copy mt-2">
+              Choose a row to preview it and see its available actions.
+            </p>
+          </div>
+        </div>
+      </ng-template>
+    </aside>
   </div>
 </div>

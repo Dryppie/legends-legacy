@@ -158,6 +158,52 @@ public sealed class AchievementService : IAchievementService
             .ToList();
     }
 
+    public async Task<bool> UnlockTitleAsync(
+        Guid accountId,
+        Guid characterId,
+        string titleKey,
+        string? metadataJson,
+        CancellationToken cancellationToken)
+    {
+        titleKey = titleKey.Trim();
+        var character = await _repository.GetCharacterAsync(accountId, characterId, cancellationToken);
+        var title = await _repository.GetActiveTitleByKeyAsync(titleKey, cancellationToken);
+        if (character is null || title is null)
+        {
+            return false;
+        }
+
+        var scopedCharacterId = title.Scope == TitleScope.Character ? (Guid?)characterId : null;
+        var exists = await _repository.HasTitleUnlockAsync(
+            accountId,
+            scopedCharacterId,
+            title.Id,
+            seasonId: null,
+            cancellationToken);
+        if (exists)
+        {
+            return false;
+        }
+
+        await _repository.AddTitleUnlockAsync(new PlayerTitleUnlock
+        {
+            Id = Guid.NewGuid(),
+            AccountId = accountId,
+            CharacterId = scopedCharacterId,
+            TitleDefinitionId = title.Id,
+            TitleDefinition = title,
+            UnlockedAt = DateTimeOffset.UtcNow,
+            MetadataJson = metadataJson
+        }, cancellationToken);
+
+        var achievementUnlocks = await SyncDependentAchievementProgressAsync(
+            accountId,
+            characterId,
+            cancellationToken);
+        await PublishUnlockAnnouncementsAsync(characterId, achievementUnlocks, cancellationToken);
+        return true;
+    }
+
     public async Task<EquippedTitleDto?> EquipTitleAsync(
         Guid accountId,
         Guid characterId,

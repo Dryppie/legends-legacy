@@ -136,7 +136,9 @@ internal static class AchievementTitleSeedData
             Category = seed.Category,
             Rarity = seed.Rarity,
             Scope = seed.Scope,
-            SourceAchievementKey = Required(seed.SourceAchievementKey, $"{key}.sourceAchievementKey"),
+            SourceAchievementKey = string.IsNullOrWhiteSpace(seed.SourceAchievementKey)
+                ? null
+                : seed.SourceAchievementKey.Trim(),
             IsHiddenUntilUnlocked = seed.IsHiddenUntilUnlocked,
             IsActive = seed.IsActive,
             SeasonNumber = seed.SeasonNumber,

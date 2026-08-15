@@ -105,6 +105,18 @@ public sealed class JsonChampionMarketCatalog : IChampionMarketCatalog
             throw new InvalidOperationException("Champion's Market inventory rewards require both an item id and a positive quantity: " + string.Join(", ", invalidItemRewards));
         }
 
+        var invalidTitleRewards = items
+            .Where(x =>
+                (x.Category.Equals("Title", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(x.RewardTitleKey)) ||
+                (!x.Category.Equals("Title", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(x.RewardTitleKey)))
+            .Select(x => x.Id)
+            .ToList();
+
+        if (invalidTitleRewards.Count > 0)
+        {
+            throw new InvalidOperationException("Champion's Market title rewards require the Title category and a title key: " + string.Join(", ", invalidTitleRewards));
+        }
+
         var invalidRotations = items
             .Where(x => x.RotatesWeekly && string.IsNullOrWhiteSpace(x.RotationGroup))
             .Select(x => x.Id)
