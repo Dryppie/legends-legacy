@@ -639,11 +639,23 @@ export class InventoryComponent implements OnInit {
   }
 
   isSelectedEquippedItem(item: InventoryItem): boolean {
+    return this.equippedSlotTypeFor(item) !== null;
+  }
+
+  equippedSlotTypeFor(item: InventoryItem): EquipmentSlotType | null {
+    const selectedSlot = this.selectedEquipmentSlot();
+    if (
+      selectedSlot &&
+      this.selectedSlotEquipment()?.id === item.itemInstance.id
+    ) {
+      return selectedSlot;
+    }
+
     return (
-      this.selectedSlotEquipment()?.id === item.itemInstance.id ||
-      !!this.equipmentState
+      this.equipmentState
         ?.equipmentSlots()
-        .some((slot) => slot.equipmentInstance?.id === item.itemInstance.id)
+        .find((slot) => slot.equipmentInstance?.id === item.itemInstance.id)
+        ?.equipmentSlotType ?? null
     );
   }
 
@@ -717,6 +729,14 @@ export class InventoryComponent implements OnInit {
       slotType ??
         getSlotTypeFromEquipmentType(equipment.equipmentBase.equipmentType),
     );
+  }
+
+  unequipItem(item: InventoryItem): void {
+    const slotType = this.equippedSlotTypeFor(item);
+    if (!slotType || !this.equipmentState || this.isEquipPending) return;
+
+    this.equipmentState.unequip(slotType);
+    this.clearEquipmentSlotFilter();
   }
 
   get isEquipPending(): boolean {

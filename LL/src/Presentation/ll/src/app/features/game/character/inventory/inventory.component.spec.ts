@@ -538,6 +538,27 @@ describe('InventoryComponent quest presentation', () => {
       EquipmentSlotType.OffHand,
     );
   });
+
+  it('unequips the item from its equipped slot', () => {
+    const item = inventoryEquipment('equipped-legs', EquipmentType.Legs);
+    const equipmentState = equipmentStateStub([
+      {
+        id: 'legs-slot',
+        iconPath: 'empty_legs',
+        equipmentSlotType: EquipmentSlotType.Legs,
+        equipmentInstance: item.itemInstance as EquipmentInstance,
+      },
+    ]);
+    const component = createComponentWithEquipmentState(equipmentState);
+
+    component.selectInventoryItem(item);
+    component.unequipItem(item);
+
+    expect(equipmentState.unequip).toHaveBeenCalledOnceWith(
+      EquipmentSlotType.Legs,
+    );
+    expect(component.selectedItem()).toBeNull();
+  });
 });
 
 function createComponentWithEquipmentState(
@@ -561,15 +582,22 @@ function createComponentWithEquipmentState(
   );
 }
 
-function equipmentStateStub(): EquipmentStateService & {
+function equipmentStateStub(
+  slots: Parameters<EquipmentStateService['setSlots']>[0] = [],
+): EquipmentStateService & {
   equip: jasmine.Spy;
+  unequip: jasmine.Spy;
 } {
   return {
-    equipmentSlots: signal([]).asReadonly(),
+    equipmentSlots: signal(slots).asReadonly(),
     loading: signal(false).asReadonly(),
     equip: jasmine.createSpy('equip'),
+    unequip: jasmine.createSpy('unequip'),
     getSlot: jasmine.createSpy('getSlot'),
-  } as unknown as EquipmentStateService & { equip: jasmine.Spy };
+  } as unknown as EquipmentStateService & {
+    equip: jasmine.Spy;
+    unequip: jasmine.Spy;
+  };
 }
 
 function inventoryStock(

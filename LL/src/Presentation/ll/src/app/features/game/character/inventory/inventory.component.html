@@ -435,9 +435,14 @@
           </ng-template>
 
           <ng-template #currentlyEquipped>
-            <div class="ll-state w-full justify-center text-center">
-              Currently equipped
-            </div>
+            <button
+              type="button"
+              class="ll-button w-full"
+              [disabled]="isEquipPending"
+              (click)="unequipItem(item)"
+            >
+              {{ isEquipPending ? "Unequipping..." : "Unequip" }}
+            </button>
           </ng-template>
         </footer>
       </ng-container>
