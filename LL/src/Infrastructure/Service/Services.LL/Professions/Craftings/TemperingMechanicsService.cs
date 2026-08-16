@@ -123,7 +123,9 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         var budgetByStat = currentByStat.ToDictionary(
             pair => pair.Key,
             pair => Math.Max(0d, pair.Value)
-                    * EquipmentStatBudgetCatalog.Get(pair.Key).CostPerPoint);
+                    * EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(
+                        pair.Key,
+                        equipment.Tier));
         var totalBudget = Math.Max(1d, budgetByStat.Values.Sum());
         var candidates = CreateCandidates(profile.Stats);
         if (candidates.Count == 0)
@@ -151,12 +153,17 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             return null;
 
         var selected = PickWeighted(candidates, candidate => candidate.EffectiveWeight, rng);
-        var selectedRule = EquipmentStatBudgetCatalog.Get(selected.Definition.Stat);
         var previous = currentByStat.GetValueOrDefault(selected.Definition.Stat);
         var rollBudget = TemperingConstants.GetDirectedImprovementBudget(equipment.Tier)
             * slotWeight
             * _options.GetQualityStatMultiplier(equipment.Quality);
-        var increase = (float)Math.Max(1d, Math.Round(rollBudget / selectedRule.CostPerPoint));
+        var materializedCost = EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(
+            selected.Definition.Stat,
+            equipment.Tier);
+        var rawIncrease = rollBudget / materializedCost;
+        float increase = EquipmentStatBudgetCatalog.IsDirectPercentage(selected.Definition.Stat)
+            ? (float)AttributeValueQuantizer.Quantize(selected.Definition.Stat, rawIncrease)
+            : (float)Math.Max(1d, Math.Round(rawIncrease, MidpointRounding.AwayFromZero));
         increase = Math.Min(
             increase,
             (float)EquipmentConstraintProfile.GetMaximumAdditionalPoints(
@@ -345,7 +352,9 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         var currentBudgetWeights = currentPoints.ToDictionary(
             pair => pair.Key,
             pair => pair.Value
-                    * EquipmentStatBudgetCatalog.Get(pair.Key).CostPerPoint);
+                    * EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(
+                        pair.Key,
+                        equipment.Tier));
         var currentBudget = currentBudgetWeights.Values.Sum();
         var allCurrentPoints = GetCurrentEquipmentPoints(equipment);
         var slotWeight = _options.GetSlotBudgetWeight(equipment.EquipmentBase.EquipmentType);

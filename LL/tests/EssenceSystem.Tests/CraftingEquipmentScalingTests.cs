@@ -10,6 +10,43 @@ namespace EssenceSystem.Tests;
 public sealed class CraftingEquipmentScalingTests
 {
     [Fact]
+    public void Hybrid_rolls_keep_direct_percentages_stable_while_tier_anchors_grow()
+    {
+        var service = new ItemStatRollService(Options.Create(new CraftingBalanceOptions()));
+        var equipment = new EquipmentBase
+        {
+            Id = "hybrid-sword",
+            Name = "Hybrid Sword",
+            EquipmentType = EquipmentType.OneHanded
+        };
+        var recipe = new CraftingRecipeDefinition
+        {
+            Id = "recipe.hybrid-sword",
+            Name = "Hybrid Sword",
+            OutputItemId = equipment.Id,
+            OutputItemType = equipment.EquipmentType,
+            InitialStatProfile = new Dictionary<AttributeType, double>
+            {
+                [AttributeType.Power] = 0.7d,
+                [AttributeType.CritChance] = 0.3d
+            }
+        };
+        var design = EquipmentCraftingDesignComposer.Compose(recipe, null);
+
+        var tierOne = service.RollBaseStats(
+            equipment, design, 1, ItemQuality.Standard, new FixedRandom(0.5d));
+        var tierTen = service.RollBaseStats(
+            equipment, design, 10, ItemQuality.Standard, new FixedRandom(0.5d));
+
+        Assert.True(
+            tierTen.Single(x => x.AttributeType == AttributeType.Power).Amount
+            > tierOne.Single(x => x.AttributeType == AttributeType.Power).Amount);
+        Assert.Equal(
+            tierOne.Single(x => x.AttributeType == AttributeType.CritChance).Amount,
+            tierTen.Single(x => x.AttributeType == AttributeType.CritChance).Amount);
+    }
+
+    [Fact]
     public void RollBaseStats_HigherTierBudgetCreatesStrongerEquipmentBase()
     {
         var service = new ItemStatRollService(Options.Create(new CraftingBalanceOptions()));

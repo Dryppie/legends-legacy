@@ -6,7 +6,7 @@ namespace Services.LL.Balance;
 
 public sealed class EquipmentCombatPacingAnalyzer : IEquipmentCombatPacingAnalyzer
 {
-    public const int ReferenceControlVersion = 1;
+    public const int ReferenceControlVersion = 4;
     public const string PercentileMethod = "nearest-rank-on-full-deterministic-sample";
 
     private static readonly int[] CheckpointTiers = [1, 5, 10, 20, 50, 100];

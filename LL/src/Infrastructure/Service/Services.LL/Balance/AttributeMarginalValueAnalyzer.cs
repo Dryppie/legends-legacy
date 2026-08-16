@@ -698,10 +698,12 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                     ? MediumCritContext
                     : null;
                 var baselineValue = baselineAttributes.GetValueOrDefault(attribute);
-                var desiredPointDelta = marginalBudget / rule.CostPerPoint;
+                var materializedCost = EquipmentStatBudgetCatalog
+                    .GetMaterializedCostPerPoint(attribute, tier);
+                var desiredPointDelta = marginalBudget / materializedCost;
                 var pointDelta = Math.Max(0d, Math.Min(desiredPointDelta, rule.PerItemHardCap - baselineValue));
                 var capLimited = pointDelta + 0.0001d < desiredPointDelta;
-                var budgetSpent = pointDelta * rule.CostPerPoint;
+                var budgetSpent = pointDelta * materializedCost;
                 var scenarios = new List<AttributeScenarioMeasurement>();
 
                 foreach (var scenario in RelevantScenarios[attribute])
@@ -1197,9 +1199,14 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         float amount,
         int tier)
     {
-        var effectiveAmount = EquipmentStatBudgetCatalog.IsRating(attribute)
-            ? EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(attribute, amount, tier)
-            : (float)(amount / EquipmentTierBudgetCurve.GetScale(tier));
+        var rule = EquipmentStatBudgetCatalog.Get(attribute, tier);
+        var effectiveAmount = rule.ScalingKind switch
+        {
+            EquipmentStatScalingKind.ProgressionNormalizedRating =>
+                EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(attribute, amount, tier),
+            EquipmentStatScalingKind.DirectPercentage => amount,
+            _ => (float)(amount / EquipmentTierBudgetCurve.GetScale(tier))
+        };
         attributes[attribute] =
             (attributes.TryGetValue(attribute, out var current) ? current : 0)
             + effectiveAmount;
@@ -2369,7 +2376,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                     0d,
                     attributes.GetValueOrDefault(attribute) - effectiveCap);
                 var equivalentWastedBudget =
-                    excessPoints * EquipmentStatBudgetCatalog.Get(attribute, tier).CostPerPoint;
+                    excessPoints * EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(attribute, tier);
                 return new CatalogCapResult(
                     attribute,
                     excessPoints,
@@ -2635,11 +2642,11 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         var aggregateRedistributedBudget = preRedistributionPoints
             .Select(entry =>
             {
-                var rule = EquipmentStatBudgetCatalog.Get(entry.Key, tier);
                 var removedPoints = Math.Max(
                     0d,
                     entry.Value - candidatePoints.GetValueOrDefault(entry.Key));
-                return removedPoints * rule.CostPerPoint;
+                return removedPoints
+                    * EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(entry.Key, tier);
             })
             .Sum();
 
@@ -2830,7 +2837,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             var directEquipmentExcessPoints = Math.Min(directEquipmentPoints, excessPoints);
             var equivalentWastedBudget =
                 directEquipmentExcessPoints
-                * EquipmentStatBudgetCatalog.Get(attribute, allocation.Tier).CostPerPoint;
+                * EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(attribute, allocation.Tier);
             var wastedTargetBudgetPercent = allocation.TargetBudget <= 0
                 ? 0
                 : equivalentWastedBudget / allocation.TargetBudget * 100d;
@@ -2857,12 +2864,13 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             .Union(allocation.Points.Keys)
             .Order()
             .ToList();
-        return attributes.Select(attribute =>
+        var recommendations = attributes.Select(attribute =>
         {
-            var rule = EquipmentStatBudgetCatalog.Get(attribute, allocation.Tier);
             var currentBudget =
                 allocation.PreRedistributionPoints.GetValueOrDefault(attribute)
-                * rule.CostPerPoint;
+                * EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(
+                    attribute,
+                    allocation.Tier);
             var candidateBudget =
                 allocation.Points.GetValueOrDefault(attribute)
                 * EquipmentConstraintProfile.GetCostPerPoint(
@@ -2881,6 +2889,20 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                     - allocation.PreRedistributionPoints.GetValueOrDefault(attribute)),
                 Round(candidateBudget - currentBudget));
         }).ToList();
+
+        // Each recommendation is rounded for artifact stability. Reconcile that
+        // reporting-only rounding on the final row so redistribution remains a
+        // zero-sum budget operation even at the Tier 100 numeric envelope.
+        if (recommendations.Count > 0)
+        {
+            var roundedResidual = recommendations.Sum(x => x.BudgetChange);
+            recommendations[^1] = recommendations[^1] with
+            {
+                BudgetChange = Round(recommendations[^1].BudgetChange - roundedResidual)
+            };
+        }
+
+        return recommendations;
     }
 
     private static double CalculateNominalSummonLifetimeDamage(double ownerPower)

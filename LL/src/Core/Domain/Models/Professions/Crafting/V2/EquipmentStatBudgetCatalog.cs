@@ -4,7 +4,8 @@ namespace Domain.Models.Professions.Crafting.V2;
 
 public static class EquipmentStatBudgetCatalog
 {
-    public const int BalanceVersion = 16;
+    public const int BalanceVersion = 17;
+    public const int PreviousBalanceVersion = 16;
     public const int LegacyBalanceVersion = 15;
     public const int MinimumTier = 1;
 
@@ -14,29 +15,24 @@ public static class EquipmentStatBudgetCatalog
     private static readonly IReadOnlyDictionary<AttributeType, EquipmentStatBudgetDefinition> Definitions =
         new Dictionary<AttributeType, EquipmentStatBudgetDefinition>
         {
-            [AttributeType.Power] = Flat(24d),
-            [AttributeType.MaxHealth] = Flat(0.2d),
-            [AttributeType.Armor] = Rating(0.68d, AttributeCombatRules.TypedMitigationCapPercent, 80d),
-            [AttributeType.Resistance] = Rating(0.68d, AttributeCombatRules.TypedMitigationCapPercent, 80d),
-            [AttributeType.CritChance] = Rating(4d, AttributeCombatRules.CritChanceCapPercent, 100d),
-            [AttributeType.CritDamage] = Rating(2d, 300f, 300d),
-            [AttributeType.ArmorPenetration] = Rating(3d, AttributeCombatRules.TypedPenetrationCapPercent, 60d),
-            [AttributeType.MagicPenetration] = Rating(3d, AttributeCombatRules.TypedPenetrationCapPercent, 60d),
-            [AttributeType.DodgeChance] = Rating(5d, AttributeCombatRules.DodgeChanceCapPercent, 50d),
-            [AttributeType.BlockChance] = Rating(5d, AttributeCombatRules.BlockChanceCapPercent, 50d),
-            [AttributeType.DamageReduction] = Rating(6d, AttributeCombatRules.DamageReductionCapPercent, 40d),
-            [AttributeType.HealingPowerPercent] = Rating(3d, 300f, 300d),
-            [AttributeType.HealthRegeneration] = Flat(1.5d),
-            [AttributeType.LifeSteal] = Rating(6d, 50f, 50d),
-            [AttributeType.Cooldown] = Rating(
-                6d,
-                AttributeCombatRules.CooldownReductionCapPercent,
-                AttributeCombatRules.CooldownRateConstant),
-            // Short authored status windows quantize to whole combat ticks. A lower half-cap
-            // keeps a 10% marginal equipment investment measurable without weakening the cap.
-            [AttributeType.StatusResistance] = Rating(2d, 80f, 20d),
-            [AttributeType.CrowdControlResistance] = Rating(2d, AttributeCombatRules.CrowdControlResistanceCapPercent, 20d),
-            [AttributeType.AttackSpeed] = Rating(2.8d, 300f, 300d)
+            [AttributeType.Power] = Flat(22.5d),
+            [AttributeType.MaxHealth] = Flat(0.185d),
+            [AttributeType.Armor] = Rating(0.9d, AttributeCombatRules.TypedMitigationCapPercent, 55d),
+            [AttributeType.Resistance] = Rating(0.75d, AttributeCombatRules.TypedMitigationCapPercent, 80d),
+            [AttributeType.CritChance] = Percentage(6d, AttributeCombatRules.CritChanceCapPercent),
+            [AttributeType.CritDamage] = Percentage(2.2d, AttributeCombatRules.CritDamageBonusCapPercent),
+            [AttributeType.ArmorPenetration] = Percentage(3.5d, AttributeCombatRules.TypedPenetrationCapPercent),
+            [AttributeType.MagicPenetration] = Percentage(4d, AttributeCombatRules.TypedPenetrationCapPercent),
+            [AttributeType.DodgeChance] = Percentage(30d, AttributeCombatRules.DodgeChanceCapPercent),
+            [AttributeType.BlockChance] = Percentage(5.7d, AttributeCombatRules.BlockChanceCapPercent),
+            [AttributeType.DamageReduction] = Percentage(6d, AttributeCombatRules.DamageReductionCapPercent),
+            [AttributeType.HealingPowerPercent] = Percentage(4.5d, AttributeCombatRules.HealingPowerCapPercent),
+            [AttributeType.HealthRegeneration] = Flat(3d),
+            [AttributeType.LifeSteal] = Percentage(8d, AttributeCombatRules.LifeStealCapPercent),
+            [AttributeType.Cooldown] = Percentage(7.5d, AttributeCombatRules.CooldownReductionCapPercent),
+            [AttributeType.StatusResistance] = Percentage(0.82d, AttributeCombatRules.StatusResistanceCapPercent),
+            [AttributeType.CrowdControlResistance] = Percentage(0.82d, AttributeCombatRules.CrowdControlResistanceCapPercent),
+            [AttributeType.AttackSpeed] = Percentage(1d, AttributeCombatRules.AttackSpeedCapPercent)
         };
 
     public static IReadOnlyCollection<AttributeType> Attributes => Definitions.Keys.ToArray();
@@ -48,13 +44,13 @@ public static class EquipmentStatBudgetCatalog
 
         return new EquipmentStatBudgetRule(
             definition.CostPerPoint,
-            float.MaxValue,
+            definition.PerItemHardCap,
             definition.ScalingKind,
             definition.EffectiveCap,
             definition.HalfCapNormalizedRating);
     }
 
-    /// <summary>Compatibility overload. Tier is intentionally ignored in v16.</summary>
+    /// <summary>The normalized v17 exchange rate is independent of tier.</summary>
     public static EquipmentStatBudgetRule Get(AttributeType stat, int tier)
     {
         if (tier < MinimumTier)
@@ -75,6 +71,31 @@ public static class EquipmentStatBudgetCatalog
         Definitions.TryGetValue(stat, out var definition)
         && definition.ScalingKind == EquipmentStatScalingKind.ProgressionNormalizedRating;
 
+    public static bool IsDirectPercentage(AttributeType stat) =>
+        Definitions.TryGetValue(stat, out var definition)
+        && definition.ScalingKind == EquipmentStatScalingKind.DirectPercentage;
+
+    public static bool IsTierAnchor(AttributeType stat) =>
+        Definitions.TryGetValue(stat, out var definition)
+        && definition.ScalingKind is EquipmentStatScalingKind.Flat
+            or EquipmentStatScalingKind.ProgressionNormalizedRating;
+
+    /// <summary>
+    /// Cost expressed in the tier-budget currency consumed by the allocator.
+    /// Direct percentages buy normalized value, while flats and opposed ratings
+    /// materialize with the tier scale.
+    /// </summary>
+    public static double GetMaterializedCostPerPoint(AttributeType stat, int tier)
+    {
+        if (tier < MinimumTier)
+            throw new ArgumentOutOfRangeException(nameof(tier), tier, "Equipment tier must be positive.");
+
+        var rule = Get(stat);
+        return rule.ScalingKind == EquipmentStatScalingKind.DirectPercentage
+            ? rule.CostPerPoint * EquipmentTierBudgetCurve.GetScale(tier)
+            : rule.CostPerPoint;
+    }
+
     public static float ConvertRatingToEffectiveValue(
         AttributeType stat,
         double rawRating,
@@ -82,15 +103,12 @@ public static class EquipmentStatBudgetCatalog
     {
         var rule = Get(stat);
         if (rule.ScalingKind != EquipmentStatScalingKind.ProgressionNormalizedRating)
-            return (float)Math.Max(0d, rawRating);
+            throw new InvalidOperationException($"Attribute '{stat}' is not an equipment rating in v17.");
 
         var normalizedRating = Math.Max(0d, rawRating)
             / EquipmentTierBudgetCurve.GetScale(Math.Max(MinimumTier, progressionTier));
         if (normalizedRating <= 0d)
             return 0f;
-        if (stat == AttributeType.Cooldown)
-            return AttributeCombatRules.CalculateCooldownReductionPercent(normalizedRating);
-
         var effective = rule.EffectiveCap
             * normalizedRating
             / (rule.HalfCapNormalizedRating + normalizedRating);
@@ -103,7 +121,7 @@ public static class EquipmentStatBudgetCatalog
     {
         var rule = Get(stat);
         if (rule.ScalingKind != EquipmentStatScalingKind.ProgressionNormalizedRating)
-            return Math.Max(0d, effectiveValue);
+            throw new InvalidOperationException($"Attribute '{stat}' is not an equipment rating in v17.");
 
         var effective = Math.Clamp(effectiveValue, 0d, rule.EffectiveCap);
         if (effective <= 0d)
@@ -122,31 +140,19 @@ public static class EquipmentStatBudgetCatalog
     {
         var rule = Get(stat);
         if (rule.ScalingKind != EquipmentStatScalingKind.ProgressionNormalizedRating)
-            return (float)Math.Max(0d, normalizedRating);
+            throw new InvalidOperationException($"Attribute '{stat}' is not an equipment rating in v17.");
         if (normalizedRating <= 0d)
             return 0f;
         if (!double.IsFinite(normalizedRating))
             return rule.EffectiveCap;
-        if (stat == AttributeType.Cooldown)
-            return AttributeCombatRules.CalculateCooldownReductionPercent(normalizedRating);
-
         var effective = rule.EffectiveCap
             * normalizedRating
             / (rule.HalfCapNormalizedRating + normalizedRating);
         return (float)Math.Clamp(effective, 0d, rule.EffectiveCap);
     }
 
-    public static float ConvertCooldownRatingToEffectiveReduction(
-        double rawRating,
-        int progressionTier)
-    {
-        var normalizedRating = Math.Max(0d, rawRating)
-            / EquipmentTierBudgetCurve.GetScale(Math.Max(MinimumTier, progressionTier));
-        return AttributeCombatRules.CalculateCooldownReductionPercent(normalizedRating);
-    }
-
     private static EquipmentStatBudgetDefinition Flat(double costPerPoint) =>
-        new(costPerPoint, EquipmentStatScalingKind.Flat, 0f, 0d);
+        new(costPerPoint, float.MaxValue, EquipmentStatScalingKind.Flat, 0f, 0d);
 
     private static EquipmentStatBudgetDefinition Rating(
         double costPerPoint,
@@ -154,19 +160,32 @@ public static class EquipmentStatBudgetCatalog
         double halfCapNormalizedRating) =>
         new(
             costPerPoint,
+            float.MaxValue,
             EquipmentStatScalingKind.ProgressionNormalizedRating,
             effectiveCap,
             halfCapNormalizedRating);
+
+    private static EquipmentStatBudgetDefinition Percentage(
+        double costPerPercentagePoint,
+        float perItemHardCap) =>
+        new(
+            costPerPercentagePoint,
+            perItemHardCap,
+            EquipmentStatScalingKind.DirectPercentage,
+            perItemHardCap,
+            0d);
 }
 
 public enum EquipmentStatScalingKind
 {
     Flat = 0,
-    ProgressionNormalizedRating = 1
+    ProgressionNormalizedRating = 1,
+    DirectPercentage = 2
 }
 
 public sealed record EquipmentStatBudgetDefinition(
     double CostPerPoint,
+    float PerItemHardCap,
     EquipmentStatScalingKind ScalingKind,
     float EffectiveCap,
     double HalfCapNormalizedRating);

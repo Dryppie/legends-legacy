@@ -43,6 +43,7 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public void Mapping(Profile profile)
     {
         profile.CreateMap<EquipmentInstance, EquipmentInstanceDto>()
+            .BeforeMap((source, _) => EquipmentStatModelMigrator.MigrateToCurrent(source))
             .ForMember(
                 destination => destination.ItemBudget,
                 options => options.MapFrom(source =>

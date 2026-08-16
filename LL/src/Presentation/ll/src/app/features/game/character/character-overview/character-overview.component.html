@@ -231,7 +231,6 @@
                     *ngIf="getEquipmentRating(attribute.attributeType) as rating"
                     class="block text-[0.65rem] text-secondary"
                   >
-                    {{ rating.attributeType | attributeTypeFormat: true }}:
                     {{
                       rating.value
                         | attributeValueFormat
@@ -239,7 +238,7 @@
                           : false
                           : true
                     }}
-                    from equipment
+                    {{ rating.attributeType | attributeTypeFormat: true }}
                   </span>
                 </span>
               </div>

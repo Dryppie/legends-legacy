@@ -24,7 +24,7 @@ public sealed class EventQuestSystemTests
     private static readonly DateTimeOffset Now = new(2026, 8, 10, 12, 0, 0, TimeSpan.Zero);
 
     [Fact]
-    public void Event_quest_catalog_loads_and_validates_the_enabled_example()
+    public void Event_quest_catalog_loads_and_validates_enabled_content()
     {
         var apiRoot = FindApiRoot();
         var provider = new JsonEventQuestDefinitionProvider(
@@ -32,7 +32,8 @@ public sealed class EventQuestSystemTests
             apiRoot,
             new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
-        var definition = Assert.Single(provider.GetAll());
+        Assert.Equal(2, provider.GetAll().Count);
+        var definition = provider.Get("event.lumo_defense.example");
         Assert.Equal("event.lumo_defense.example", definition.Id);
         Assert.True(definition.Enabled);
         Assert.Equal("CombatEncounterCompleted", Assert.Single(definition.Objectives).Type);
@@ -53,6 +54,57 @@ public sealed class EventQuestSystemTests
             milestone => Assert.Equal(
                 ["item.blueprint_selection_box"],
                 milestone.Rewards.Select(reward => reward.ItemBaseId)));
+
+        var tempering = provider.Get("event.tempered_together.2026_08");
+        Assert.Equal(new DateTimeOffset(2026, 8, 16, 0, 0, 0, TimeSpan.Zero), tempering.StartsAtUtc);
+        Assert.Equal(new DateTimeOffset(2026, 8, 19, 0, 0, 0, TimeSpan.Zero), tempering.EndsAtUtc);
+        Assert.Equal("TemperingActionCompleted", Assert.Single(tempering.Objectives).Type);
+        Assert.Equal(100_000, tempering.Objectives[0].RequiredAmount);
+        Assert.Equal(50, Assert.Single(tempering.Rewards).Quantity);
+        Assert.Equal("SigilFragments", tempering.Rewards[0].Type);
+        Assert.Equal([500L, 1500L, 3000L], tempering.PersonalMilestones.Select(x => x.RequiredContribution));
+        Assert.Equal(
+            [("ore", 200), ("wood", 200), ("advancement_stone", 200)],
+            tempering.PersonalMilestones[0].Rewards.Select(x => (x.ItemBaseId, x.Quantity)));
+        Assert.Equal(
+            "item.blueprint_selection_box",
+            Assert.Single(tempering.PersonalMilestones[1].Rewards).ItemBaseId);
+        Assert.Equal(
+            "item.catalyst_selection_crate",
+            Assert.Single(tempering.PersonalMilestones[2].Rewards).ItemBaseId);
+    }
+
+    [Fact]
+    public async Task Tempering_action_batch_advances_global_and_personal_progress_by_action_count()
+    {
+        await using var db = CreateDb();
+        var definition = CreateActiveDefinition(requiredAmount: 100_000);
+        definition.Objectives =
+        [
+            new QuestObjectiveDefinition
+            {
+                Key = "tempering-actions",
+                Description = "Complete tempering actions.",
+                Type = "TemperingActionCompleted",
+                RequiredAmount = 100_000
+            }
+        ];
+        var service = CreateService(db, definition, new RecordingPublisher());
+        var characterId = Guid.NewGuid();
+        CompleteTutorial(db, characterId);
+        await db.SaveChangesAsync();
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.EquipmentTempered([], [], [], [], [], actionCount: 500),
+            Guid.NewGuid(),
+            "EquipmentTempered",
+            CancellationToken.None);
+
+        var state = Assert.Single((await service.GetJournalAsync(characterId, CancellationToken.None)).Events);
+        Assert.Equal(500, Assert.Single(state.Objectives).CurrentAmount);
+        Assert.Equal(500, state.MyContribution);
+        Assert.True(state.PersonalMilestones[0].IsUnlocked);
     }
 
     [Fact]

@@ -150,8 +150,8 @@
             *ngFor="let mod of getAttributeModifiers(e) | attributeDisplay"
             [appAttributeTooltip]="mod"
           >
-            {{ mod.attributeType | attributeTypeFormat }}:
-            {{ mod.amount | attributeValueFormat: mod.attributeType : true }}
+            {{ mod.attributeType | attributeTypeFormat: true }}:
+            {{ mod.amount | attributeValueFormat: mod.attributeType : true : true }}
           </div>
         </div>
       </ng-container>

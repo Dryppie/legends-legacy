@@ -34,7 +34,7 @@ public sealed class PowerRatingCoreTests
             new Dictionary<AttributeType, double>(),
             1);
 
-        Assert.Equal(260, rating.Overall);
+        Assert.Equal(244, rating.Overall);
     }
 
     [Fact]
@@ -49,7 +49,7 @@ public sealed class PowerRatingCoreTests
             new Dictionary<AttributeType, double>(),
             1);
 
-        Assert.Equal(72, upgraded.Overall - baseline.Overall);
+        Assert.Equal(68, upgraded.Overall - baseline.Overall);
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public sealed class PowerRatingCoreTests
         var once = CombatRatingCalculator.Calculate([], [item]);
         var duplicatedSlotReference = CombatRatingCalculator.Calculate([], [item, item]);
 
-        Assert.Equal(7, once.Overall);
+        Assert.Equal(9, once.Overall);
         Assert.Equal(once.Overall, duplicatedSlotReference.Overall);
     }
 
@@ -137,9 +137,9 @@ public sealed class PowerRatingCoreTests
                     [new AbilityAttributeModifier(AttributeType.Power, 10)])
             ]);
 
-        Assert.Equal(240, CombatRatingCalculator.Calculate([], [baseModifierItem]).Overall);
-        Assert.Equal(240, CombatRatingCalculator.Calculate([], [generatedModifierItem]).Overall);
-        Assert.Equal(240, additionalModifierRating.Overall);
+        Assert.Equal(225, CombatRatingCalculator.Calculate([], [baseModifierItem]).Overall);
+        Assert.Equal(225, CombatRatingCalculator.Calculate([], [generatedModifierItem]).Overall);
+        Assert.Equal(225, additionalModifierRating.Overall);
     }
 
     [Fact]
@@ -159,7 +159,7 @@ public sealed class PowerRatingCoreTests
                     ])
             ]);
 
-        Assert.Equal(360, rating.Overall);
+        Assert.Equal(338, rating.Overall);
     }
 
     [Fact]
@@ -174,7 +174,7 @@ public sealed class PowerRatingCoreTests
             new Dictionary<AttributeType, double> { [AttributeType.Power] = 10 },
             10);
 
-        Assert.Equal(240, tierOne.Overall);
+        Assert.Equal(225, tierOne.Overall);
         Assert.Equal(tierOne.Overall, tierTen.Overall);
     }
 
@@ -191,8 +191,8 @@ public sealed class PowerRatingCoreTests
                     [new AbilityAttributeModifier(AttributeType.Armor, 10)])
             ]);
 
-        Assert.Equal(7, withTemporarySource.Overall - withoutTemporarySource.Overall);
-        Assert.Equal(7, withTemporarySource.PhysicalDurability);
+        Assert.Equal(9, withTemporarySource.Overall - withoutTemporarySource.Overall);
+        Assert.Equal(9, withTemporarySource.PhysicalDurability);
         Assert.Equal(0, withTemporarySource.MagicalDurability);
         Assert.Equal(0, withTemporarySource.ControlUtility);
     }
@@ -213,7 +213,7 @@ public sealed class PowerRatingCoreTests
                     [new AbilityAttributeModifier(AttributeType.DodgeChance, 10)])
             ]);
 
-        Assert.Equal(250, rating.Overall);
+        Assert.Equal(1_200, rating.Overall);
     }
 
     [Fact]

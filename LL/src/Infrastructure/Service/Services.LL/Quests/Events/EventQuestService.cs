@@ -533,6 +533,8 @@ public sealed class EventQuestService(
             "CompatibleEssenceLoadout" when trigger.Type == "EssenceLoadoutChanged" && trigger.HasCompatibleEssenceTrio => 1,
             "EquipmentCrafted" when trigger.Type == "EquipmentCrafted" => CountMatchingItems(trigger, filters),
             "EquipmentTempered" when trigger.Type == "EquipmentTempered" => CountMatchingItems(trigger, filters),
+            "TemperingActionCompleted" when trigger.Type == "EquipmentTempered" =>
+                Math.Max(0, trigger.ActionCount),
             "CharacterLevelReached" when trigger.Type == "CharacterLevelReached" &&
                 trigger.CharacterLevel >= objective.RequiredAmount => objective.RequiredAmount,
             "ColosseumBattleStarted" when trigger.Type == "ColosseumBattleStarted" => 1,

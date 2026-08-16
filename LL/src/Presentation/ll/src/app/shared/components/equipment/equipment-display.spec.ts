@@ -153,12 +153,11 @@ describe('EquipmentDisplayComponent', () => {
         isContentFacing: true,
         displayPrecision: 2,
         displaySuffix: '%',
-        equipmentDisplayName: 'Crowd Control Resistance Rating',
-        equipmentDescription:
-          'Higher rating improves this effect with diminishing returns.',
-        equipmentUnit: 'Rating',
+        equipmentDisplayName: 'Crowd Control Resistance',
+        equipmentDescription: 'Direct crowd-control resistance from this item.',
+        equipmentUnit: 'PercentagePoints',
         equipmentDisplayPrecision: 2,
-        equipmentDisplaySuffix: '',
+        equipmentDisplaySuffix: '%',
         relevantBenchmarkScenarios: ['CrowdControlResilience'],
       },
     ]);

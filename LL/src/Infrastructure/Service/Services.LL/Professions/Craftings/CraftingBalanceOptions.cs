@@ -10,20 +10,6 @@ public sealed class CraftingBalanceOptions
     public double CriticalChancePerRarityStep { get; set; } = 0.00001d;
     public double CriticalLevelingItemChance { get; set; } = 0.02d;
 
-    public Dictionary<EquipmentType, double> SlotBudgetWeights { get; set; } = new()
-    {
-        [EquipmentType.TwoHanded] = 2.00d,
-        [EquipmentType.OneHanded] = 1.00d,
-        [EquipmentType.OffHand] = 1.00d,
-        [EquipmentType.Chest] = 1.00d,
-        [EquipmentType.Head] = 1.00d,
-        [EquipmentType.Legs] = 1.00d,
-        [EquipmentType.Ring] = 1.00d,
-        [EquipmentType.Necklace] = 1.00d,
-        [EquipmentType.Relic] = 1.00d,
-        [EquipmentType.Tool] = 1.00d
-    };
-
     public Dictionary<ItemQuality, double> QualityStatMultipliers { get; set; } = new()
     {
         [ItemQuality.Crude] = 0.90d,
@@ -58,9 +44,7 @@ public sealed class CraftingBalanceOptions
     public double GetTierPowerBudget(int tier) => EquipmentTierBudgetCurve.GetBudget(tier);
 
     public double GetSlotBudgetWeight(EquipmentType equipmentType) =>
-        SlotBudgetWeights.TryGetValue(equipmentType, out var weight) && weight > 0
-            ? weight
-            : 1d;
+        equipmentType == EquipmentType.TwoHanded ? 2d : 1d;
 
     public double GetMaximumCombatLoadoutBudgetWeight()
     {

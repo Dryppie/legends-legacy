@@ -313,7 +313,7 @@ export class MarketPlaceBuyComponent implements OnInit {
         const mods = aggregateAttributes(eq.attributeModifiers)
           .map(
             (m) =>
-              `• ${formatAttributeType(m.attributeType)}: ${formatAttributeValue(m.amount, m.attributeType, true)}`,
+              `• ${formatAttributeType(m.attributeType, true)}: ${formatAttributeValue(m.amount, m.attributeType, true, true)}`,
           )
           .join('\n');
         return `Rarity: ${eq.rarity}\nType: ${new EquipmentTypePipe().transform(eq.equipmentBase.equipmentType)}\n${mods}`;

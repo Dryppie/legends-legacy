@@ -2,6 +2,7 @@ using System.Text.Json;
 using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting.V2;
+using Domain.Models.Attributes;
 using Microsoft.Extensions.Configuration;
 
 namespace Services.LL.Professions.Craftings;
@@ -94,6 +95,7 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         IReadOnlyList<BlueprintDefinition> blueprints,
         IReadOnlyDictionary<string, EquipmentBase> equipmentBases)
     {
+        ValidateEquipmentUnitContract();
         EnsureUnique(materials.Select(x => x.Id), "material");
         EnsureUnique(recipes.Select(x => x.Id), "equipment recipe");
         EnsureUnique(recipes.Select(x => x.OutputItemId), "recipe output item");
@@ -130,6 +132,7 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
                     $"Equipment recipe '{recipe.Id}' output type does not match item base '{recipe.OutputItemId}'.");
 
             ValidateProfile(recipe.Id, recipe.InitialStatProfile, recipe.TemperingProfile);
+            ValidateBaseRecipeStatContract(recipe);
             ValidateHandedness(recipe.Id, recipe.OutputItemType, recipe.Behavior);
         }
 
@@ -146,6 +149,173 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
 
             ValidateProfile(blueprint.Id, blueprint.BonusStatProfile, blueprint.TemperingProfile);
             ValidateRequirements(blueprint.Id, blueprint.AdditionalMaterialRequirements, materials);
+        }
+    }
+
+    private static void ValidateEquipmentUnitContract()
+    {
+        foreach (var definition in AttributeCatalog.All.Where(x => x.IsEquipmentEligible))
+        {
+            if (!EquipmentStatBudgetCatalog.IsKnown(definition.AttributeType))
+            {
+                throw new InvalidOperationException(
+                    $"Equipment attribute '{definition.AttributeType}' has no budget rule.");
+            }
+
+            var scalingKind = EquipmentStatBudgetCatalog.Get(definition.AttributeType).ScalingKind;
+            var expectedUnit = scalingKind switch
+            {
+                EquipmentStatScalingKind.ProgressionNormalizedRating => AttributeUnit.Rating,
+                EquipmentStatScalingKind.DirectPercentage => AttributeUnit.PercentagePoints,
+                _ => definition.AttributeType == AttributeType.HealthRegeneration
+                    ? AttributeUnit.HealthPerFiveSeconds
+                    : AttributeUnit.FlatPoints
+            };
+            if (definition.EquipmentUnit != expectedUnit)
+            {
+                throw new InvalidOperationException(
+                    $"Equipment attribute '{definition.AttributeType}' uses unit " +
+                    $"'{definition.EquipmentUnit}' but its scaling kind requires '{expectedUnit}'.");
+            }
+        }
+    }
+
+    private static void ValidateBaseRecipeStatContract(CraftingRecipeDefinition recipe)
+    {
+        const double tolerance = 0.000001d;
+        var totalWeight = recipe.InitialStatProfile.Values.Sum();
+        if (Math.Abs(totalWeight - 1d) > tolerance)
+        {
+            throw new InvalidOperationException(
+                $"Equipment recipe '{recipe.Id}' initial stat weights must sum to one.");
+        }
+
+        foreach (var attribute in recipe.InitialStatProfile.Keys)
+        {
+            if (!AttributeCatalog.IsEquipmentEligible(attribute)
+                || !EquipmentStatBudgetCatalog.IsKnown(attribute))
+            {
+                throw new InvalidOperationException(
+                    $"Equipment recipe '{recipe.Id}' uses unsupported attribute '{attribute}'.");
+            }
+        }
+
+        var anchorShare = recipe.InitialStatProfile
+            .Where(entry => EquipmentStatBudgetCatalog.IsTierAnchor(entry.Key))
+            .Sum(entry => entry.Value);
+        if (anchorShare < 0.25d - tolerance)
+        {
+            throw new InvalidOperationException(
+                $"Equipment recipe '{recipe.Id}' has only {anchorShare:P0} tier-anchor budget; at least 25% is required.");
+        }
+
+        ValidateAdjacentTierDominance(recipe);
+
+        var temperingByStat = recipe.TemperingProfile.Stats.ToDictionary(stat => stat.Stat);
+        if (!temperingByStat.Keys.ToHashSet().SetEquals(recipe.InitialStatProfile.Keys))
+        {
+            throw new InvalidOperationException(
+                $"Equipment recipe '{recipe.Id}' tempering attributes must exactly match its base profile.");
+        }
+
+        var temperingWeightTotal = temperingByStat.Values.Sum(stat => stat.Weight);
+        foreach (var (attribute, weight) in recipe.InitialStatProfile)
+        {
+            var tempering = temperingByStat[attribute];
+            var normalizedTemperingWeight = tempering.Weight / temperingWeightTotal;
+            if (Math.Abs(normalizedTemperingWeight - weight) > tolerance
+                || Math.Abs((tempering.MaxBudgetShare ?? 0d) - weight) > tolerance)
+            {
+                throw new InvalidOperationException(
+                    $"Equipment recipe '{recipe.Id}' tempering weight/cap for '{attribute}' " +
+                    "must match the approved base allocation.");
+            }
+        }
+
+        if (recipe.OutputItemType is EquipmentType.Head or EquipmentType.Chest or EquipmentType.Legs)
+            ValidateArmorProfile(recipe, anchorShare, tolerance);
+    }
+
+    private static void ValidateAdjacentTierDominance(CraftingRecipeDefinition recipe)
+    {
+        foreach (var (attribute, weight) in recipe.InitialStatProfile.Where(entry =>
+                     EquipmentStatBudgetCatalog.IsTierAnchor(entry.Key)))
+        {
+            var cost = EquipmentStatBudgetCatalog.Get(attribute).CostPerPoint;
+            for (var tier = EquipmentStatBudgetCatalog.MinimumTier;
+                 tier < EquipmentTierBudgetCurve.MaximumCalibrationTier;
+                 tier++)
+            {
+                var previousMaximum = AttributeValueQuantizer.Quantize(
+                    attribute,
+                    EquipmentTierBudgetCurve.GetBudget(tier) * weight * 1.05d / cost);
+                var nextMinimum = AttributeValueQuantizer.Quantize(
+                    attribute,
+                    EquipmentTierBudgetCurve.GetBudget(tier + 1) * weight * 0.95d / cost);
+                if (nextMinimum <= previousMaximum)
+                {
+                    throw new InvalidOperationException(
+                        $"Equipment recipe '{recipe.Id}' tier anchor '{attribute}' fails " +
+                        $"ordinary-roll dominance between tiers {tier} and {tier + 1}.");
+                }
+            }
+        }
+    }
+
+    private static void ValidateArmorProfile(
+        CraftingRecipeDefinition recipe,
+        double anchorShare,
+        double tolerance)
+    {
+        var expected = recipe.Behavior.Role.ToLowerInvariant() switch
+        {
+            "heavy" => new Dictionary<AttributeType, double>
+            {
+                [AttributeType.Armor] = 0.35d,
+                [AttributeType.MaxHealth] = 0.35d,
+                [AttributeType.Resistance] = 0.30d
+            },
+            "medium" => new Dictionary<AttributeType, double>
+            {
+                [AttributeType.Armor] = 0.25d,
+                [AttributeType.MaxHealth] = 0.25d,
+                [AttributeType.CritChance] = 0.25d,
+                [AttributeType.CritDamage] = 0.25d
+            },
+            "light" => new Dictionary<AttributeType, double>
+            {
+                [AttributeType.MaxHealth] = 0.25d,
+                [AttributeType.HealthRegeneration] = 0.25d,
+                [AttributeType.DodgeChance] = 0.25d,
+                [AttributeType.AttackSpeed] = 0.25d
+            },
+            "cloth" => new Dictionary<AttributeType, double>
+            {
+                [AttributeType.Resistance] = 0.25d,
+                [AttributeType.HealthRegeneration] = 0.25d,
+                [AttributeType.HealingPowerPercent] = 0.25d,
+                [AttributeType.Cooldown] = 0.25d
+            },
+            _ => throw new InvalidOperationException(
+                $"Armor recipe '{recipe.Id}' has unsupported family '{recipe.Behavior.Role}'.")
+        };
+
+        if (recipe.InitialStatProfile.Count != expected.Count
+            || expected.Any(entry =>
+                !recipe.InitialStatProfile.TryGetValue(entry.Key, out var actual)
+                || Math.Abs(actual - entry.Value) > tolerance))
+        {
+            throw new InvalidOperationException(
+                $"Armor recipe '{recipe.Id}' does not match the approved {recipe.Behavior.Role} profile.");
+        }
+
+        var expectedAnchorShare = recipe.Behavior.Role.Equals("Heavy", StringComparison.OrdinalIgnoreCase)
+            ? 1d
+            : 0.5d;
+        if (Math.Abs(anchorShare - expectedAnchorShare) > tolerance)
+        {
+            throw new InvalidOperationException(
+                $"Armor recipe '{recipe.Id}' has an invalid tier-anchor share.");
         }
     }
 

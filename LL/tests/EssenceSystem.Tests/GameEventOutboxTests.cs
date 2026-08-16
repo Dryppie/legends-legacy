@@ -182,11 +182,23 @@ public sealed class GameEventOutboxTests
                 GameEventTypes.ProphecyCompleted,
                 new ProphecyCompletedPayload(characterId, Guid.NewGuid(), "Daily")),
             CancellationToken.None);
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.EquipmentTempered,
+                new EquipmentTemperedPayload(
+                    characterId,
+                    new TemperingSummary { TotalActions = 37 },
+                    [])),
+            CancellationToken.None);
 
-        Assert.Equal(["CombatEncounterCompleted", "DailyProphecyCompleted"], progression.Triggers.Select(x => x.Type));
+        Assert.Equal(
+            ["CombatEncounterCompleted", "DailyProphecyCompleted", "EquipmentTempered"],
+            progression.Triggers.Select(x => x.Type));
         Assert.Equal(3, progression.Triggers[0].ActionCount);
         Assert.Equal("Mining", progression.Triggers[0].EquippedGatheringType);
         Assert.Equal(2, progression.Triggers[0].WinningEncounterCount);
+        Assert.Equal(37, progression.Triggers[2].ActionCount);
     }
 
     [Fact]
@@ -356,7 +368,10 @@ public sealed class GameEventOutboxTests
             CreateOutboxMessage(
                 characterId,
                 GameEventTypes.EquipmentTempered,
-                new EquipmentTemperedPayload(characterId, new TemperingSummary(), [temperedItem])),
+                new EquipmentTemperedPayload(
+                    characterId,
+                    new TemperingSummary { TotalActions = 37 },
+                    [temperedItem])),
             CancellationToken.None);
         await consumer.HandleAsync(
             CreateOutboxMessage(
@@ -389,6 +404,7 @@ public sealed class GameEventOutboxTests
             progression.Triggers.Select(trigger => trigger.Type));
         Assert.True(progression.Triggers[0].HasCompatibleEssenceTrio);
         Assert.Equal([0], progression.Triggers[2].CraftedItemPotentials);
+        Assert.Equal(37, progression.Triggers[2].ActionCount);
     }
 
     [Fact]

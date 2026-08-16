@@ -300,7 +300,7 @@ public sealed class AttributeBalanceAnalyzerTests
 
         Assert.Equal(expectedFrontier.Select(x => x.Budget), frontier.Select(x => x.Budget));
         Assert.Equal(
-            [10.1333d, 20.2667d, 30.4d, 50.6667d],
+            [5.0667d, 10.1333d, 15.2d, 25.3333d],
             frontier
                 .Select(x =>
                     Math.Round(
@@ -377,8 +377,8 @@ public sealed class AttributeBalanceAnalyzerTests
             else
                 Assert.True(loadout.UnspentBudget >= 0);
             Assert.True(loadout.RelevantScenarioUtilityIndex >= 0);
-            Assert.Equal(11, loadout.AggregateCaps.Count);
-            Assert.Equal(11, loadout.AggregateCapsBeforeRedistribution.Count);
+            Assert.Equal(15, loadout.AggregateCaps.Count);
+            Assert.Equal(15, loadout.AggregateCapsBeforeRedistribution.Count);
             Assert.NotEmpty(loadout.AllocationRecommendations);
             Assert.InRange(
                 Math.Abs(loadout.AllocationRecommendations.Sum(x =>
@@ -391,7 +391,9 @@ public sealed class AttributeBalanceAnalyzerTests
                 BudgetTolerance(loadout.TargetBudget));
             Assert.All(
                 loadout.AggregateCaps,
-                cap => Assert.InRange(cap.ExcessPoints, 0, 0.001d));
+                cap => Assert.True(
+                    cap.ExcessPoints <= 0.001d,
+                    $"{loadout.Id} T{loadout.Tier} exceeds the {cap.Attribute} cap by {cap.ExcessPoints}."));
             Assert.All(loadout.AggregateCaps, cap =>
             {
                 Assert.True(cap.EffectiveCharacterCap >= 0);
@@ -655,7 +657,7 @@ public sealed class AttributeBalanceAnalyzerTests
                     $"{loadout.Id}: target {loadout.TargetBudget}, spent {loadout.ProductionSpentBudget}, " +
                     $"waste {loadout.ProductionMaximumWastedBudgetPercent}%")));
         Assert.Equal(0, catalog.ReferenceLoadoutsWithUnspentBudget);
-        Assert.Equal(11, catalog.StatSummaries.Count);
+        Assert.Equal(15, catalog.StatSummaries.Count);
         Assert.All(
             catalog.StatSummaries,
             summary =>

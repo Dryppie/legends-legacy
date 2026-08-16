@@ -41,6 +41,13 @@ public sealed class AttributeCombatSystemTests
         Assert.Equal(AttributeUnit.HealthPerFiveSeconds, healthRegeneration.Unit);
         Assert.Equal(" HP/5s", healthRegeneration.DisplaySuffix);
 
+        var armor = AttributeCatalog.Get(AttributeType.Armor);
+        var resistance = AttributeCatalog.Get(AttributeType.Resistance);
+        Assert.Equal("Armor Rating", armor.EquipmentDisplayName);
+        Assert.Equal(AttributeUnit.Rating, armor.EquipmentUnit);
+        Assert.Equal("Resistance Rating", resistance.EquipmentDisplayName);
+        Assert.Equal(AttributeUnit.Rating, resistance.EquipmentUnit);
+
         Assert.Equal(
             EquipmentStatBudgetCatalog.Attributes.Order(),
             definitions
@@ -55,6 +62,7 @@ public sealed class AttributeCombatSystemTests
         var fixedCaps = new Dictionary<AttributeType, float>
         {
             [AttributeType.CritChance] = AttributeCombatRules.CritChanceCapPercent,
+            [AttributeType.CritDamage] = AttributeCombatRules.CritDamageBonusCapPercent,
             [AttributeType.DodgeChance] = AttributeCombatRules.DodgeChanceCapPercent,
             [AttributeType.BlockChance] = AttributeCombatRules.BlockChanceCapPercent,
             [AttributeType.DamageReduction] = AttributeCombatRules.DamageReductionCapPercent,
@@ -63,6 +71,9 @@ public sealed class AttributeCombatSystemTests
             [AttributeType.ArmorPenetration] = AttributeCombatRules.TypedPenetrationCapPercent,
             [AttributeType.MagicPenetration] = AttributeCombatRules.TypedPenetrationCapPercent,
             [AttributeType.Cooldown] = AttributeCombatRules.CooldownReductionCapPercent,
+            [AttributeType.HealingPowerPercent] = AttributeCombatRules.HealingPowerCapPercent,
+            [AttributeType.LifeSteal] = AttributeCombatRules.LifeStealCapPercent,
+            [AttributeType.StatusResistance] = AttributeCombatRules.StatusResistanceCapPercent,
             [AttributeType.CrowdControlResistance] =
                 AttributeCombatRules.CrowdControlResistanceCapPercent
         };
@@ -76,19 +87,6 @@ public sealed class AttributeCombatSystemTests
         }
 
         Assert.Equal(100f, AttributeCombatRules.CritChanceCapPercent);
-        Assert.Equal(AttributeCapKind.None, AttributeCatalog.Get(AttributeType.LifeSteal).CapKind);
-        Assert.Equal(
-            AttributeCapKind.None,
-            AttributeCatalog.Get(AttributeType.HealingPowerPercent).CapKind);
-        Assert.False(AttributeCatalog.TryGetEffectiveCharacterCap(
-            AttributeType.HealingPowerPercent,
-            1,
-            out _));
-        Assert.False(AttributeCatalog.TryGetEffectiveCharacterCap(
-            AttributeType.LifeSteal,
-            1,
-            out _));
-
         Assert.Equal(
             AttributeCapKind.ContextDependent,
             AttributeCatalog.Get(AttributeType.AttackSpeed).CapKind);
@@ -277,11 +275,11 @@ public sealed class AttributeCombatSystemTests
 
         RunSingleTick(penetratingSource, penetratedTarget);
 
-        Assert.Equal(942, penetratedTarget.Health);
+        Assert.Equal(944, penetratedTarget.Health);
 
         Assert.Equal(
             0.8f,
-            AttributeCombatRules.CalculateDefenseMitigation(defense: 100, penetration: 0));
+            AttributeCombatRules.CalculateDefenseMitigation(defense: 100, penetrationPercent: 0));
     }
 
     [Fact]
@@ -406,7 +404,7 @@ public sealed class AttributeCombatSystemTests
     }
 
     [Fact]
-    public void Character_life_steal_is_not_capped_at_one_hundred_percent()
+    public void Character_life_steal_is_capped_at_one_hundred_percent()
     {
         var ability = CreateDamageAbility(40, DamageType.Physical);
         var actor = CreateCombatant(
@@ -423,11 +421,11 @@ public sealed class AttributeCombatSystemTests
 
         RunSingleTick(actor, target, randomSeed: 1);
 
-        Assert.Equal(160, actor.Health);
+        Assert.Equal(140, actor.Health);
     }
 
     [Fact]
-    public void Cooldown_runtime_accepts_the_rate_curve_derived_reduction()
+    public void Cooldown_runtime_applies_the_direct_reduction_cap_and_tick_floor()
     {
         var definition = AbilityCompiler.CompileAbility(new AbilitySpec
         {
@@ -441,48 +439,38 @@ public sealed class AttributeCombatSystemTests
         var overcapped = new RuntimeAbility(definition);
 
         baseline.StartCooldown(0);
-        capped.StartCooldown(
-            AttributeCombatRules.CalculateCooldownReductionPercent(
-                AttributeCombatRules.CooldownRateConstant));
+        capped.StartCooldown(AttributeCombatRules.CooldownReductionCapPercent);
         overcapped.StartCooldown(400);
 
         Assert.Equal(100, baseline.RemainingCooldownTicks);
-        Assert.Equal(50, capped.RemainingCooldownTicks);
-        Assert.Equal(1, overcapped.RemainingCooldownTicks);
+        Assert.Equal(60, capped.RemainingCooldownTicks);
+        Assert.Equal(60, overcapped.RemainingCooldownTicks);
+        Assert.Equal(1, AttributeCombatRules.CalculateCooldownTicks(1, 40));
         Assert.Equal(
             AttributeCombatRules.CooldownReductionCapPercent,
             EquipmentStatBudgetCatalog.Get(AttributeType.Cooldown).EffectiveCap);
-        Assert.Equal(float.MaxValue,
+        Assert.Equal(AttributeCombatRules.CooldownReductionCapPercent,
             EquipmentStatBudgetCatalog.Get(AttributeType.Cooldown).PerItemHardCap);
     }
 
     [Theory]
-    [InlineData(0d, 1d, 0f, 100)]
-    [InlineData(40d, 1.25d, 20f, 80)]
-    [InlineData(160d, 2d, 50f, 50)]
-    [InlineData(480d, 4d, 75f, 25)]
-    public void Cooldown_rating_increases_action_rate_without_a_hard_rating_cap(
-        double normalizedRating,
-        double expectedRate,
-        float expectedReduction,
-        int expectedTicks)
-    {
-        Assert.Equal(
-            expectedRate,
-            AttributeCombatRules.CalculateCooldownRate(normalizedRating),
-            precision: 8);
-        var reduction = AttributeCombatRules.CalculateCooldownReductionPercent(normalizedRating);
-        Assert.Equal(expectedReduction, reduction, precision: 4);
+    [InlineData(0f, 100)]
+    [InlineData(20f, 80)]
+    [InlineData(40f, 60)]
+    [InlineData(75f, 60)]
+    public void Cooldown_reduction_is_a_direct_capped_percentage(
+        float reduction,
+        int expectedTicks) =>
         Assert.Equal(expectedTicks, AttributeCombatRules.CalculateCooldownTicks(100, reduction));
-    }
 
     [Theory]
-    [InlineData(0.75d, 200f)]
-    [InlineData(1d, 300f)]
-    [InlineData(1.25d, 400f)]
+    [InlineData(0.75d, 200f, 4f)]
+    [InlineData(1d, 300f, 4f)]
+    [InlineData(1.25d, 300f, 3.2f)]
     public void Useful_attack_speed_cap_depends_on_weapon_interval(
         double intervalMultiplier,
-        float expectedCap)
+        float expectedCap,
+        float expectedRate)
     {
         Assert.True(AttributeCombatRules.TryGetEffectiveCharacterCap(
             AttributeType.AttackSpeed,
@@ -490,7 +478,7 @@ public sealed class AttributeCombatSystemTests
             out var cap));
         Assert.Equal(expectedCap, cap);
         Assert.Equal(
-            AttributeCombatRules.MaximumBasicAttackRate,
+            expectedRate,
             AttributeCombatRules.CalculateBasicAttackRate(cap, intervalMultiplier));
         Assert.Equal(
             AttributeCombatRules.MaximumBasicAttackRate,
@@ -510,10 +498,10 @@ public sealed class AttributeCombatSystemTests
         var total = EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1);
         var breakdown = EquipmentBudgetEvaluator.EvaluateByAttribute(modifiers, tier: 1);
 
-        Assert.Equal(53.4d, total);
-        Assert.Equal(48d, breakdown[AttributeType.Power]);
-        Assert.Equal(2d, breakdown[AttributeType.MaxHealth]);
-        Assert.Equal(3.4d, breakdown[AttributeType.Armor]);
+        Assert.Equal(51.35d, total);
+        Assert.Equal(45d, breakdown[AttributeType.Power]);
+        Assert.Equal(1.85d, breakdown[AttributeType.MaxHealth]);
+        Assert.Equal(4.5d, breakdown[AttributeType.Armor]);
     }
 
     [Theory]
@@ -592,7 +580,7 @@ public sealed class AttributeCombatSystemTests
 
         engine.Run([source], [target]);
 
-        Assert.Equal(49, Assert.Single(target.Statuses).RemainingDurationTicks);
+        Assert.Equal(19, Assert.Single(target.Statuses).RemainingDurationTicks);
     }
 
     [Fact]

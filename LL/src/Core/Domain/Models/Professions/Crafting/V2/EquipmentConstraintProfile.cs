@@ -12,7 +12,7 @@ public static class EquipmentConstraintProfile
     public const double BlueprintBonusCapMultiplier = 1.25d;
     public const double RarityImprovementCapMultiplier = 1.25d;
     public static double GetCostPerPoint(AttributeType attribute, int tier) =>
-        EquipmentStatBudgetCatalog.Get(attribute).CostPerPoint;
+        EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(attribute, tier);
 
     public static IReadOnlyDictionary<AttributeType, float> CreateTierBaseline(int tier)
     {

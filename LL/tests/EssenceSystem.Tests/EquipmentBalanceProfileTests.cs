@@ -2,7 +2,9 @@ using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Professions.Crafting.V2;
+using Domain.Models.Snapshots;
 using Microsoft.Extensions.Options;
 using Services.LL.Combat.Engine;
 using Services.LL.Professions.Craftings;
@@ -11,6 +13,43 @@ namespace EssenceSystem.Tests;
 
 public sealed class EquipmentBalanceProfileTests
 {
+    [Fact]
+    public void V17_scaling_kinds_match_the_canonical_unit_contract()
+    {
+        Assert.Equal(17, EquipmentStatBudgetCatalog.BalanceVersion);
+        Assert.Equal(16, EquipmentStatBudgetCatalog.PreviousBalanceVersion);
+
+        var ratings = EquipmentStatBudgetCatalog.Attributes
+            .Where(EquipmentStatBudgetCatalog.IsRating)
+            .Order()
+            .ToArray();
+        Assert.Equal(new[] { AttributeType.Armor, AttributeType.Resistance }, ratings);
+
+        var anchors = EquipmentStatBudgetCatalog.Attributes
+            .Where(EquipmentStatBudgetCatalog.IsTierAnchor)
+            .Order()
+            .ToArray();
+        Assert.Equal(
+            new[]
+            {
+                AttributeType.Power,
+                AttributeType.MaxHealth,
+                AttributeType.Armor,
+                AttributeType.Resistance,
+                AttributeType.HealthRegeneration
+            }.Order(),
+            anchors);
+
+        Assert.All(
+            EquipmentStatBudgetCatalog.Attributes.Except(anchors),
+            attribute => Assert.True(EquipmentStatBudgetCatalog.IsDirectPercentage(attribute)));
+        Assert.Throws<InvalidOperationException>(() =>
+            EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(
+                AttributeType.CritChance,
+                10,
+                1));
+    }
+
     [Fact]
     public void Combat_pacing_contract_matches_the_approved_equal_tier_targets()
     {
@@ -67,20 +106,20 @@ public sealed class EquipmentBalanceProfileTests
     public void Typed_defense_uses_one_price_at_every_tier(int tier)
     {
         Assert.Equal(
-            0.68d,
+            0.9d,
             EquipmentStatBudgetCatalog.Get(AttributeType.Armor, tier).CostPerPoint,
             precision: 4);
         Assert.Equal(
-            0.68d,
+            0.75d,
             EquipmentStatBudgetCatalog.Get(AttributeType.Resistance, tier).CostPerPoint,
             precision: 4);
     }
 
     [Theory]
-    [InlineData(AttributeType.Power, 24d)]
-    [InlineData(AttributeType.CritDamage, 2d)]
-    [InlineData(AttributeType.StatusResistance, 2d)]
-    [InlineData(AttributeType.HealthRegeneration, 1.5d)]
+    [InlineData(AttributeType.Power, 22.5d)]
+    [InlineData(AttributeType.CritDamage, 2.2d)]
+    [InlineData(AttributeType.StatusResistance, 0.82d)]
+    [InlineData(AttributeType.HealthRegeneration, 3d)]
     public void Representative_attribute_prices_are_tier_independent(
         AttributeType attribute,
         double expectedCost)
@@ -94,28 +133,17 @@ public sealed class EquipmentBalanceProfileTests
     }
 
     [Fact]
-    public void Every_non_two_handed_slot_receives_equal_funding()
+    public void Every_equipment_item_uses_unit_budget_except_two_handed_items()
     {
         var options = new CraftingBalanceOptions();
-        var expectedWeight = options.GetSlotBudgetWeight(EquipmentType.OneHanded);
 
-        Assert.Equal(1d, expectedWeight);
         Assert.All(
             Enum.GetValues<EquipmentType>().Where(type => type != EquipmentType.TwoHanded),
             equipmentType => Assert.Equal(
-                expectedWeight,
+                1d,
                 options.GetSlotBudgetWeight(equipmentType),
                 precision: 4));
-    }
-
-    [Fact]
-    public void TwoHandedAndDualWieldReceiveEqualHandSlotFunding()
-    {
-        var options = new CraftingBalanceOptions();
-
-        Assert.True(
-            options.GetSlotBudgetWeight(EquipmentType.TwoHanded)
-            > options.GetSlotBudgetWeight(EquipmentType.OneHanded));
+        Assert.Equal(2d, options.GetSlotBudgetWeight(EquipmentType.TwoHanded), precision: 4);
         Assert.Equal(
             options.GetSlotBudgetWeight(EquipmentType.OneHanded) * 2d,
             options.GetSlotBudgetWeight(EquipmentType.TwoHanded),
@@ -142,10 +170,10 @@ public sealed class EquipmentBalanceProfileTests
             new InstanceAttributeModifier(AttributeType.Armor, 100)
         ];
 
-        Assert.Equal(68d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1));
-        Assert.Equal(68d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 5));
-        Assert.Equal(68d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 100));
-        Assert.Equal(16, EquipmentBudgetEvaluator.BalanceVersion);
+        Assert.Equal(90d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1));
+        Assert.Equal(90d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 5));
+        Assert.Equal(90d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 100));
+        Assert.Equal(17, EquipmentBudgetEvaluator.BalanceVersion);
     }
 
     [Fact]
@@ -259,8 +287,8 @@ public sealed class EquipmentBalanceProfileTests
             },
             roundToWholePoints: false);
 
-        Assert.Equal(44_650d / 24d, allocation.AddedPoints[AttributeType.Power], precision: 4);
-        Assert.Equal(2_350d / 0.2d, allocation.AddedPoints[AttributeType.MaxHealth], precision: 4);
+        Assert.Equal(44_650d / 22.5d, allocation.AddedPoints[AttributeType.Power], precision: 4);
+        Assert.Equal(2_350d / 0.185d, allocation.AddedPoints[AttributeType.MaxHealth], precision: 4);
         Assert.Equal(47_000d, allocation.SpentBudget, precision: 4);
         Assert.Equal(0d, allocation.UnspentBudget, precision: 4);
         Assert.Empty(allocation.CappedAttributes);
@@ -294,7 +322,7 @@ public sealed class EquipmentBalanceProfileTests
     }
 
     [Fact]
-    public void Rating_allocator_can_spend_budgets_beyond_the_effective_combat_cap()
+    public void Direct_percentage_allocator_respects_the_intrinsic_per_item_cap()
     {
         var allocation = EquipmentBudgetAllocator.Allocate(
             tier: 1,
@@ -305,14 +333,15 @@ public sealed class EquipmentBalanceProfileTests
             },
             roundToWholePoints: false);
 
-        Assert.Equal(1_000d / 6d, allocation.AddedPoints[AttributeType.DamageReduction], precision: 4);
-        Assert.Equal(1_000d, allocation.SpentBudget, precision: 4);
-        Assert.Equal(0d, allocation.UnspentBudget, precision: 4);
-        Assert.Empty(allocation.CappedAttributes);
+        Assert.Equal(AttributeCombatRules.DamageReductionCapPercent,
+            allocation.AddedPoints[AttributeType.DamageReduction], precision: 4);
+        Assert.Equal(240d, allocation.SpentBudget, precision: 4);
+        Assert.Equal(760d, allocation.UnspentBudget, precision: 4);
+        Assert.Contains(AttributeType.DamageReduction, allocation.CappedAttributes);
     }
 
     [Fact]
-    public void Crafted_item_preserves_authored_budget_shares_for_rating_stats()
+    public void Crafted_item_preserves_authored_budget_shares_for_direct_percentages()
     {
         var options = new CraftingBalanceOptions();
         var equipment = new EquipmentBase
@@ -329,7 +358,7 @@ public sealed class EquipmentBalanceProfileTests
             OutputItemType = equipment.EquipmentType,
             InitialStatProfile = new Dictionary<AttributeType, double>
             {
-                [AttributeType.DamageReduction] = 0.90d,
+                [AttributeType.CritDamage] = 0.90d,
                 [AttributeType.MaxHealth] = 0.05d,
                 [AttributeType.Armor] = 0.05d
             }
@@ -346,11 +375,11 @@ public sealed class EquipmentBalanceProfileTests
             * options.GetSlotBudgetWeight(equipment.EquipmentType);
         var evaluatedBudget = EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 10);
         var maximumRoundingError = modifiers.Sum(modifier =>
-            EquipmentStatBudgetCatalog.Get(modifier.AttributeType, 10).CostPerPoint / 2d);
+            EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(modifier.AttributeType, 10) / 2d);
 
-        var budgetByAttribute = EquipmentBudgetEvaluator.EvaluateByAttribute(modifiers);
+        var budgetByAttribute = EquipmentBudgetEvaluator.EvaluateByAttribute(modifiers, 10);
         Assert.InRange(
-            budgetByAttribute[AttributeType.DamageReduction] / evaluatedBudget,
+            budgetByAttribute[AttributeType.CritDamage] / evaluatedBudget,
             0.895d,
             0.905d);
         Assert.InRange(
@@ -422,7 +451,7 @@ public sealed class EquipmentBalanceProfileTests
 
         var allocation = EquipmentBudgetAllocator.AllocateConstrained(
             tier: 10,
-            budget: 100d,
+            budget: 2_000d,
             weights,
             constraints);
         var critContribution = allocation.AddedPoints.GetValueOrDefault(AttributeType.CritChance);
@@ -432,9 +461,9 @@ public sealed class EquipmentBalanceProfileTests
         Assert.Contains(AttributeType.CritChance, allocation.BindingCombatCaps);
         Assert.True(
             allocation.AddedPoints[AttributeType.Power]
-            > 100d * weights[AttributeType.Power]
+            > 2_000d * weights[AttributeType.Power]
             / EquipmentStatBudgetCatalog.Get(AttributeType.Power, 10).CostPerPoint);
-        Assert.Equal(16, EquipmentConstraintProfile.BalanceVersion);
+        Assert.Equal(17, EquipmentConstraintProfile.BalanceVersion);
         Assert.True(EquipmentConstraintProfile.ProductionActive);
     }
 
@@ -506,7 +535,7 @@ public sealed class EquipmentBalanceProfileTests
     public void Production_profile_uses_constant_health_regeneration_cost(int tier)
     {
         Assert.Equal(
-            1.5d,
+            3d,
             EquipmentConstraintProfile.GetCostPerPoint(
                 AttributeType.HealthRegeneration,
                 tier),
@@ -528,9 +557,7 @@ public sealed class EquipmentBalanceProfileTests
 
     [Theory]
     [InlineData(AttributeType.Armor)]
-    [InlineData(AttributeType.CritChance)]
-    [InlineData(AttributeType.Cooldown)]
-    [InlineData(AttributeType.AttackSpeed)]
+    [InlineData(AttributeType.Resistance)]
     public void Progression_normalized_ratings_have_stable_equal_tier_effects(AttributeType attribute)
     {
         var tierOne = EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(attribute, 40d, 1);
@@ -545,6 +572,29 @@ public sealed class EquipmentBalanceProfileTests
                     scaledRawRating,
                     tier),
                 precision: 4);
+        }
+    }
+
+    [Theory]
+    [InlineData(AttributeType.CritChance)]
+    [InlineData(AttributeType.Cooldown)]
+    [InlineData(AttributeType.AttackSpeed)]
+    public void Direct_percentage_allocations_are_stable_across_tiers(AttributeType attribute)
+    {
+        var tierOne = EquipmentBudgetAllocator.Allocate(
+            1,
+            EquipmentTierBudgetCurve.GetBudget(1),
+            new Dictionary<AttributeType, double> { [attribute] = 1d },
+            roundToWholePoints: false).AddedPoints[attribute];
+
+        foreach (var tier in new[] { 5, 10, 20, 50, 100 })
+        {
+            var points = EquipmentBudgetAllocator.Allocate(
+                tier,
+                EquipmentTierBudgetCurve.GetBudget(tier),
+                new Dictionary<AttributeType, double> { [attribute] = 1d },
+                roundToWholePoints: false).AddedPoints[attribute];
+            Assert.Equal(tierOne, points, precision: 4);
         }
     }
 
@@ -584,11 +634,95 @@ public sealed class EquipmentBalanceProfileTests
         Assert.Equal(EquipmentStatBudgetCatalog.BalanceVersion, equipment.StatModelVersion);
         Assert.Equal(5f, equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.Power).Amount);
         Assert.Equal(27.5f, equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.Armor).Amount);
-        Assert.Equal(138.7d, EquipmentBudgetEvaluator.Evaluate(equipment.InstanceModifiers), precision: 2);
+        Assert.Equal(137.25d, EquipmentBudgetEvaluator.Evaluate(equipment.InstanceModifiers), precision: 2);
 
         var converted = equipment.InstanceModifiers.Select(x => x.Amount).ToArray();
         Assert.False(EquipmentStatModelMigrator.MigrateToCurrent(equipment));
         Assert.Equal(converted, equipment.InstanceModifiers.Select(x => x.Amount));
+    }
+
+    [Fact]
+    public void V16_to_v17_conversion_preserves_effective_value_and_rating_points()
+    {
+        const int tier = 5;
+        var rawCriticalRating = 40d * EquipmentTierBudgetCurve.GetScale(tier);
+        var equipment = new EquipmentInstance
+        {
+            BaseRecipeId = "recipe.medium",
+            CraftedName = "Broken Medium Helm",
+            Tier = tier,
+            StatModelVersion = EquipmentStatBudgetCatalog.PreviousBalanceVersion,
+            InstanceModifiers =
+            [
+                new InstanceAttributeModifier(AttributeType.CritChance, (float)(rawCriticalRating / 2d)),
+                new InstanceAttributeModifier(AttributeType.CritChance, (float)(rawCriticalRating / 2d)),
+                new InstanceAttributeModifier(AttributeType.Armor, 123.45f),
+                new InstanceAttributeModifier(AttributeType.MaxHealth, 500f)
+            ]
+        };
+        var expectedCriticalChance = AttributeValueQuantizer.Quantize(
+            AttributeType.CritChance,
+            EquipmentStatModelMigrator.ConvertV16RatingToDirectPercentage(
+                AttributeType.CritChance,
+                rawCriticalRating,
+                tier));
+
+        Assert.True(EquipmentStatModelMigrator.MigrateToCurrent(equipment));
+        Assert.Equal(EquipmentStatBudgetCatalog.BalanceVersion, equipment.StatModelVersion);
+        Assert.Equal("Broken Medium Helm", equipment.CraftedName);
+        Assert.Equal(
+            expectedCriticalChance,
+            equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.CritChance).Amount,
+            precision: 2);
+        Assert.Equal(123.45f,
+            equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.Armor).Amount);
+        Assert.Equal(500f,
+            equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.MaxHealth).Amount);
+
+        var values = equipment.InstanceModifiers
+            .Select(modifier => (modifier.AttributeType, modifier.Amount))
+            .ToArray();
+        Assert.False(EquipmentStatModelMigrator.MigrateToCurrent(equipment));
+        Assert.Equal(values, equipment.InstanceModifiers.Select(modifier =>
+            (modifier.AttributeType, modifier.Amount)));
+    }
+
+    [Fact]
+    public void V16_snapshot_conversion_uses_the_same_idempotent_unit_migration()
+    {
+        const int tier = 5;
+        var rawRating = 40d * EquipmentTierBudgetCurve.GetScale(tier);
+        var source = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = "medium_helm",
+            BaseRecipeId = "recipe.medium",
+            Tier = tier,
+            StatModelVersion = EquipmentStatBudgetCatalog.BalanceVersion
+        };
+        var snapshot = EquipmentSnapshot.From(EquipmentSlotType.Head, source);
+        snapshot.StatModelVersion = EquipmentStatBudgetCatalog.PreviousBalanceVersion;
+        snapshot.InstanceModifiers =
+        [
+            EquipmentAttributeModifierSnapshot.From(
+                new InstanceAttributeModifier(AttributeType.CritChance, (float)rawRating)),
+            EquipmentAttributeModifierSnapshot.From(
+                new InstanceAttributeModifier(AttributeType.Armor, 123.45f))
+        ];
+
+        Assert.True(EquipmentStatModelMigrator.MigrateToCurrent(snapshot));
+        Assert.Equal(EquipmentStatBudgetCatalog.BalanceVersion, snapshot.StatModelVersion);
+        Assert.Equal(
+            EquipmentStatModelMigrator.ConvertV16RatingToDirectPercentage(
+                AttributeType.CritChance,
+                rawRating,
+                tier),
+            snapshot.InstanceModifiers.Single(x => x.AttributeType == AttributeType.CritChance).Amount,
+            precision: 2);
+        Assert.Equal(
+            123.45f,
+            snapshot.InstanceModifiers.Single(x => x.AttributeType == AttributeType.Armor).Amount);
+        Assert.False(EquipmentStatModelMigrator.MigrateToCurrent(snapshot));
     }
 
     private sealed class FixedRandom(double value) : Random

@@ -1518,9 +1518,10 @@ public sealed class FastCombatEngine
         string? statsSource,
         CompiledEffect? effect = null)
     {
-        var lifeStealPercentage = Math.Max(
+        var lifeStealPercentage = Math.Clamp(
             source.GetAttribute(AttributeType.LifeSteal) + effectPercentage,
-            0);
+            0,
+            AttributeCatalog.GetFixedCap(AttributeType.LifeSteal));
         if (lifeStealPercentage <= 0 || healthDamage <= 0)
             return;
 
@@ -1812,9 +1813,9 @@ public sealed class FastCombatEngine
                 resistance);
         }
 
-        return Math.Max(
-            1,
-            (int)Math.Ceiling(statusDefinition.DurationTicks / (1 + resistance / 100f)));
+        return AttributeCombatRules.CalculateStatusDurationTicks(
+            statusDefinition.DurationTicks,
+            resistance);
     }
 
     private static double CalculateStatusEffectDurationMultiplier(RuntimeStatus status) =>

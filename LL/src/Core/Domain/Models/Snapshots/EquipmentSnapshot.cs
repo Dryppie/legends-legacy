@@ -17,13 +17,13 @@ public sealed class EquipmentSnapshot
     public Rarity Rarity { get; init; }
     public ItemQuality Quality { get; init; }
     public int Tier { get; init; } = 1;
-    public int StatModelVersion { get; init; } = EquipmentStatBudgetCatalog.LegacyBalanceVersion;
+    public int StatModelVersion { get; set; } = EquipmentStatBudgetCatalog.LegacyBalanceVersion;
     public int? Potential { get; init; }
     public int ItemXp { get; init; }
     public bool IsMasterpiece { get; init; }
     public bool IsLevelingItem { get; init; }
 
-    public ICollection<EquipmentAttributeModifierSnapshot> InstanceModifiers { get; init; }
+    public ICollection<EquipmentAttributeModifierSnapshot> InstanceModifiers { get; set; }
         = new List<EquipmentAttributeModifierSnapshot>();
 
     // Required by EF Core
@@ -33,6 +33,7 @@ public sealed class EquipmentSnapshot
         EquipmentSlotType slot,
         EquipmentInstance inst)
     {
+        EquipmentStatModelMigrator.MigrateToCurrent(inst);
         return new EquipmentSnapshot
         {
             Slot = slot,

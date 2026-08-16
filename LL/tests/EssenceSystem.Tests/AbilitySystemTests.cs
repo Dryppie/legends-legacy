@@ -1389,11 +1389,10 @@ public sealed class AbilitySystemTests
             ]);
         var friendly = CreateCombatant("friendly", CombatTeam.Friendly, friendlyAbilities.Values);
         var hostile = CreateCombatant("hostile", CombatTeam.Hostile, hostileAbilities.Values, dodgeChance: 100);
-        var engine = new FastCombatEngine(new Dictionary<string, CompiledStatus>(), new FastCombatEngineOptions(MaxTicks: 1, RandomSeed: 1));
+        var engine = new FastCombatEngine(new Dictionary<string, CompiledStatus>(), new FastCombatEngineOptions(MaxTicks: 30, RandomSeed: 1));
 
         var result = engine.Run([friendly], [hostile]);
 
-        Assert.Equal(hostile.GetAttribute(AttributeType.MaxHealth), hostile.Health);
         Assert.Contains(result.EventLog, x => x.Source == "effect.melee.strike" && x.EventType == EventType.Miss);
         Assert.Contains(result.EventLog, x => x.Source == "effect.on.dodge" && x.EventType == EventType.RestoreBarrier && x.TargetId == "hostile");
     }

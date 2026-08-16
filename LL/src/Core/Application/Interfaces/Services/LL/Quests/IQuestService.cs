@@ -168,14 +168,16 @@ public sealed record QuestTrigger(
         IReadOnlyCollection<int> tiers,
         IReadOnlyCollection<string?> baseRecipeIds,
         IReadOnlyCollection<ItemQuality> qualities,
-        IReadOnlyCollection<int?> potentials) =>
+        IReadOnlyCollection<int?> potentials,
+        int actionCount = 1) =>
         new(
             "EquipmentTempered",
             CraftedItemBaseIds: itemBaseIds,
             CraftedItemTiers: tiers,
             CraftedBaseRecipeIds: baseRecipeIds,
             CraftedItemQualities: qualities,
-            CraftedItemPotentials: potentials);
+            CraftedItemPotentials: potentials,
+            ActionCount: actionCount);
 
     public static QuestTrigger EquipmentChanged() => new("EquipmentChanged");
 

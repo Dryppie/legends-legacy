@@ -98,7 +98,8 @@ public sealed class QuestGameEventOutboxConsumer(
             payload.CompletedItems.Select(x => x.Tier).ToList(),
             payload.CompletedItems.Select(x => x.BaseRecipeId).ToList(),
             payload.CompletedItems.Select(x => x.Quality).ToList(),
-            payload.CompletedItems.Select(x => x.Potential).ToList());
+            payload.CompletedItems.Select(x => x.Potential).ToList(),
+            payload.Summary.TotalActions);
 
     private static QuestTrigger CreateCombatTrigger(IdleCombatEncounterCompletedPayload payload) =>
         QuestTrigger.CombatCompleted(

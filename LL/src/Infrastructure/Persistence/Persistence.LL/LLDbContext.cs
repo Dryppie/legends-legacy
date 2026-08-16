@@ -39,6 +39,7 @@ using Domain.Models.Soulstones;
 using Domain.Models.Transfers;
 using Domain.Models.Users;
 using Domain.Models.WorldTower;
+using Domain.Models.Professions.Crafting.V2;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
@@ -72,9 +73,25 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        MigrateTrackedEquipment();
         NormalizeIdentityFields();
         EnforceAppendOnlyEconomyLedger();
         return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void MigrateTrackedEquipment()
+    {
+        foreach (var entry in ChangeTracker.Entries<EquipmentInstance>()
+                     .Where(entry => entry.State is EntityState.Added or EntityState.Modified))
+        {
+            EquipmentStatModelMigrator.MigrateToCurrent(entry.Entity);
+        }
+
+        foreach (var entry in ChangeTracker.Entries<EquipmentSnapshot>()
+                     .Where(entry => entry.State is EntityState.Added or EntityState.Modified))
+        {
+            EquipmentStatModelMigrator.MigrateToCurrent(entry.Entity);
+        }
     }
 
     private void EnforceAppendOnlyEconomyLedger()

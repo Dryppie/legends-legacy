@@ -145,8 +145,8 @@ attribute name, `%` suffix, cap, or display unit.
 
 Update `AttributeCatalog` so equipment metadata agrees with the contract:
 
-- Armor and Resistance use rating equipment units but display without the word
-  `Rating`;
+- Armor and Resistance use rating equipment units and display as `Armor Rating`
+  and `Resistance Rating` in equipment and crafting contexts;
 - direct percentages use their ordinary percentage names and `%` suffix;
 - descriptions state exactly what each percentage does;
 - Critical Damage distinguishes bonus percentage from the complete critical-hit
@@ -379,7 +379,7 @@ replace the canonical item lines.
 Update the shared attribute definition and formatting pipes so:
 
 - only Armor and Resistance take the equipment-rating path;
-- their visible item labels omit `Rating`;
+- their visible item labels are `Armor Rating` and `Resistance Rating`;
 - direct percentage recipe ranges and item values include `%`;
 - Critical Damage tooltips distinguish item bonus from total multiplier;
 - recipe, inventory, equipment, market, vault, chat, and tempering components use
@@ -491,7 +491,9 @@ rerun the analyzer.
 - only Armor and Resistance are formatted as rating units internally;
 - no visible `Critical Damage Rating`, `Cooldown Rating`, or equivalent obsolete
   label remains;
-- Armor and Resistance item labels omit the redundant word `Rating`;
+- Armor and Resistance item labels explicitly include `Rating`;
+- their character-sheet secondary lines use `<value> Armor Rating` and
+  `<value> Resistance Rating` without an additional `from equipment` phrase;
 - comparison projections cannot replace canonical item values.
 
 ### Balance tests

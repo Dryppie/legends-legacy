@@ -1,8 +1,13 @@
 # Open-Ended Equipment Attribute Scaling
 
-Status: approved for implementation  
-Target balance model: v16  
+Status: implemented foundation; hybrid-unit contract superseded by v17
+Target balance model: v17 (this document retains the v16 rating-model history)
 Scope: crafted equipment, tempering, combat attribute conversion, progression calibration, persistence migration, and automated verification
+
+The tier-budget curve and recipe-weight rules below remain active. The hybrid
+v17 unit contract in `hybrid-equipment-attribute-units-design.md` supersedes the
+v16 rule that every bounded effect is a rating: only Armor and Resistance remain
+ratings; all other percentage-like equipment attributes are direct percentages.
 
 ## Why this change exists
 
@@ -126,62 +131,33 @@ Not every rating should be applied through an identical final operation.
 
 #### Defense and penetration
 
-Penetration contests defense in rating space before mitigation is calculated:
+Armor and Resistance remain progression-normalized ratings. Penetration is a
+direct percentage of the target's remaining typed rating:
 
 ```text
-NetDefenseRating = max(0, DefenseRating - PenetrationRating)
-Mitigation       = DefenseCap * N / (DefenseHalfCap + N)
+RatingAfterTargetReduction = DefenseRating * (1 - TargetReduction / 100)
+RatingAfterPenetration     = max(0, RatingAfterTargetReduction * (1 - Penetration / 100))
+Mitigation                 = DefenseCap * N / (DefenseHalfCap + N)
 ```
 
 This prevents subtraction of unrelated percentages and keeps both defense and penetration useful beyond Tier 10.
 
 #### Cooldown reduction
 
-Cooldown is rate-based rather than directly subtracted:
+Cooldown Reduction is a direct percentage capped at 40%:
 
 ```text
-Cooldown = AuthoredCooldown / (1 + NormalizedCooldownRating / RateConstant)
+Cooldown = AuthoredCooldown * (1 - CooldownReduction / 100)
 ```
 
-The initial cooldown `RateConstant` is **160**. This is a conservative migration
-anchor because 40 normalized cooldown rating produces a 20% reduction, matching
-an important point on the existing curve. The constant remains a centralized
-balance input and can be adjusted only through the combat-pacing benchmarks.
-
-| Normalized cooldown rating | Final cooldown | Effective reduction |
-| -------------------------: | -------------: | ------------------: |
-|                          0 |           100% |                  0% |
-|                         40 |            80% |                 20% |
-|                         80 |          66.7% |               33.3% |
-|                        160 |            50% |                 50% |
-|                        320 |          33.3% |               66.7% |
-
-The percentage shown to players and diagnostics is derived from the same rate
-formula rather than stored as a separate balance value:
-
-```text
-EffectiveCooldownReductionPercent =
-    100 * NormalizedCooldownRating
-        / (RateConstant + NormalizedCooldownRating)
-```
-
-Equipment projection applies this dedicated rate conversion exactly once. The
-current combat runtime receives the derived effective-reduction percentage for
-compatibility with temporary modifiers, but that percentage must come directly
-from the rate formula and must never pass through the generic bounded-percentage
-curve first. Applying both conversions would create unintended double
-diminishing returns. Direct temporary percentage effects, if retained, remain
-separately identifiable and are composed after the equipment-derived cooldown
-rate.
-
-The engine rounds the calculated duration upward to a whole tick and retains a
-one-tick safety floor for malformed or extreme content:
+The engine clamps the complete character total once, rounds upward to a whole
+combat tick, and retains a one-tick floor:
 
 ```text
 FinalCooldownTicks = max(
     1,
     ceil(AuthoredCooldownTicks
-         / (1 + max(0, NormalizedCooldownRating) / 160)))
+         * (1 - clamp(CooldownReduction, 0, 40) / 100)))
 ```
 
 Unlike direct percentage subtraction, the rate formula cannot naturally reach
@@ -597,33 +573,30 @@ all required scenarios, every blocking gate passes, and the artifact has been
 reviewed. The artifact is evidence of the fixed-control measurement; it is not a
 place to override or waive failed outcomes silently.
 
-### Player-facing rating presentation
+### Player-facing hybrid-unit presentation
 
 The progression-normalized model is an internal balance system. Players are not
 expected to calculate normalization scales, half-cap ratings, or diminishing-
 return formulas. The presentation contract is:
 
-> Equipment shows the rating it grants; character and comparison views show what
-> the complete rating total currently does.
+> Equipment shows its intrinsic flat points, opposed ratings, or direct
+> percentages; character and comparison views show complete capped outcomes.
 
 #### Item and crafting displays
 
-V16 equipment and crafting previews show raw equipment values with rating names
-and no percent suffix, for example:
+V17 equipment and crafting previews show canonical intrinsic values, for example:
 
 ```text
-+50 Armor Rating
-+20 Critical Rating
-+15 Dodge Rating
++50 Armor
++10% Critical Chance
++8% Dodge Chance
 ```
 
-They must never show `+50% Armor` when 50 is a raw rating. This applies to every
-v16 progression-normalized equipment attribute, not only Armor and Resistance.
-Power, Maximum Health, and Health Regeneration retain their natural flat units.
+Armor and Resistance are the only rating inputs and omit the redundant word
+`Rating` on item lines. Every other percentage is stored and displayed directly.
 
-Legacy v15 equipment remains version-aware. Its stored direct percentage values
-continue to use their legacy presentation until the item is migrated; a global
-attribute suffix cannot correctly represent both item models.
+Legacy v15 equipment migrates through v16 before v17; native v16 percentage-like
+ratings are frozen at their effective value at the item's own tier.
 
 #### Character overview and comparisons
 
@@ -631,10 +604,10 @@ The character overview shows both the aggregated raw rating and its effective
 combat result:
 
 ```text
-Armor Rating: 150
+Armor: 150
 Physical Damage Reduction: 46.5%
 
-Resistance Rating: 105
+Resistance: 105
 Magical Damage Reduction: 38.5%
 ```
 
@@ -644,8 +617,9 @@ cannot truthfully advertise one standalone mitigation or critical-chance value.
 A comparison therefore uses an outcome presentation such as:
 
 ```text
-Armor Rating         110 -> 150
+Armor                110 -> 150
 Physical Mitigation  41.5% -> 46.5%  (+5.0 percentage points)
+Critical Chance       20% -> 28%     (+8 percentage points)
 ```
 
 When no character context exists, such as an unauthenticated catalog, the item
@@ -662,16 +636,15 @@ conversion.
 
 Player-facing names should describe both the input and result unambiguously:
 
-- `Armor Rating` produces `Physical Damage Reduction`;
-- `Resistance Rating` produces `Magical Damage Reduction`;
-- offensive and utility item inputs use names such as `Critical Rating`,
-  `Attack Speed Rating`, and `Cooldown Rating`;
+- `Armor` produces `Physical Damage Reduction`;
+- `Resistance` produces `Magical Damage Reduction`;
+- offensive and utility item inputs use direct names such as `Critical Chance`,
+  `Attack Speed`, and `Cooldown Reduction`;
 - the character overview uses result names such as `Critical Chance`, `Attack
   Rate`, and `Cooldown Reduction` where it displays converted values.
 
-The basic tooltip language is: "Higher rating improves this effect with
-diminishing returns." Terms such as `normalized rating`, `half-cap rating`, and
-`progression denominator` remain developer-facing.
+Only Armor and Resistance use the tooltip language "Combined rating determines
+effective reduction." Direct percentage tooltips state the exact operation.
 
 #### Progression transitions
 
@@ -720,16 +693,15 @@ The first implementation should tune global tier growth, attribute cost, rating 
 
 This follows the useful common theme in the linked balancing discussion: choose a control measurement and tune through repeated simulated outcomes instead of trying to derive every stat in isolation. Relevant contributions include [Josef Shindler's control-variable framing](https://www.quora.com/Are-there-methods-or-standard-formulas-for-balancing-stats-in-role-playing-games/answer/Josef-Shindler), [Gerson Da Silva's fixed control-number approach](https://www.quora.com/Are-there-methods-or-standard-formulas-for-balancing-stats-in-role-playing-games/answer/Gerson-Da-Silva), and [Bram Cohen's simulation-and-feedback recommendation](https://www.quora.com/Are-there-methods-or-standard-formulas-for-balancing-stats-in-role-playing-games/answer/Bram-Cohen).
 
-## Rollout order
+## V17 rollout order
 
-1. Add v16 budget, price, and rating definitions behind the balance-version boundary.
-2. Update allocation, evaluation, constraints, and tempering.
-3. Add progression-aware combat projection and specialized formulas.
-4. Add item-version migration and compatibility reads.
-5. Update canonical builds and open-ended progression helpers.
-6. Run invariant tests and combat simulations at all checkpoints.
-7. Review generated balance artifacts before activating v16 for newly crafted equipment.
-8. Generate the EF Core migration if persistence mapping requires it; do not apply it to shared environments.
+1. Add the hybrid unit catalog and v17 prices behind the balance-version boundary.
+2. Update allocation, evaluation, constraints, tempering, combat, and presentation.
+3. Add staged v15 -> v16 -> v17 migration for live items and snapshots.
+4. Update canonical builds and open-ended progression helpers.
+5. Run invariant tests and combat simulations at all checkpoints.
+6. Review the generated v17 activation artifact before enabling new crafting.
+7. Review the generated EF Core migration; do not apply it to shared environments.
 
 ## Production activation checklist
 
@@ -739,30 +711,28 @@ readable throughout a rolling deployment:
 
 1. Back up the production database and record row counts for equipment instances
    and equipment snapshots.
-2. Review and apply `20260815164513_AddEquipmentStatModelVersion`. The migration
-   classifies every existing equipment row as v15 and rewrites its existing
-   instance-name field to `Broken <existing name>` on the shared `ItemInstances`
-   row, so inventory, equipped, marketplace, guild, crafting, and reward
-   references all observe the same result. It does not rewrite legacy stat values.
-3. Deploy the API and worker services that understand both v15 and v16 before
-   enabling new v16 crafting. Deploy the client in the same release so ratings
-   are never mislabeled as direct percentages.
+2. Review the existing stat-version migrations and
+   `20260816022220_MigrateEquipmentStatsToV17`. The v17 migration chains v15 rows
+   through v16, freezes v16 percentage-like ratings at the owning item's tier,
+   and covers the shared `ItemInstances` table plus equipment snapshots.
+3. Deploy API, worker, and both clients together so v17 direct percentages are
+   never interpreted by a v16 client as ratings.
 4. Run the Admin Dashboard analyzer at `Activation` level against the exact
    release build. Confirm all required tiers and scenarios are present,
    `CanApprove` is true, and there are no blocking failures. Archive and review
-   the generated `equipment-combat-pacing-v16-activation.json` artifact.
+   the generated `equipment-combat-pacing-v17-activation.json` artifact.
 5. In staging, verify one legacy item in each important location (inventory,
-   equipped, marketplace, and guild vault), a newly crafted v16 item, tempering,
+   equipped, marketplace, and guild vault), a newly crafted v17 item, tempering,
    complete-character comparison, character rating display, and one combat of
    each damage type.
-6. Activate v16 crafting, then monitor crafting distributions, equip/comparison
+6. Activate v17 crafting, then monitor crafting distributions, equip/comparison
    errors, TTK/TTD telemetry, combat timeouts, and market behavior through at
    least one normal content cycle.
 
-Rollback disables new v16 creation and restores the previous service build; it
-must not run the migration `Down` step while v16 rows exist. The added version and
-prefix columns are backward-compatible data and should remain until a dedicated,
-data-aware rollback migration is prepared.
+Rollback disables new v17 creation, but a service-only rollback is unsafe after
+the migration because v17 reuses columns that held v16 ratings for direct
+percentages. Restore a reviewed database backup and the matching service/client
+release together; the migration intentionally has no automatic `Down` rewrite.
 
 ## Decisions intentionally centralized
 
@@ -771,9 +741,8 @@ The following values are calibration inputs, not recipe-tier data:
 - base item budget
 - per-tier growth factor
 - constant price per attribute
-- rating cap per attribute
-- half-cap normalized rating per attribute
-- attack-speed and cooldown rate constants
+- direct-percentage cap per attribute
+- Armor and Resistance rating caps and half-cap ratings
 - tempering budget fraction
 - canonical TTK and TTD target bands
 

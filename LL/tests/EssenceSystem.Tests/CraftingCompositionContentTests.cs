@@ -163,6 +163,66 @@ public sealed class CraftingCompositionContentTests
     }
 
     [Fact]
+    public void JewelryRecipesUseTheirApprovedSingleStatIdentityProfiles()
+    {
+        var expectedByRecipe = new Dictionary<string, AttributeType>
+        {
+            ["recipe.jewelry.ring.band"] = AttributeType.Power,
+            ["recipe.jewelry.necklace.amulet"] = AttributeType.MaxHealth,
+            ["recipe.jewelry.relic.vial"] = AttributeType.HealthRegeneration
+        };
+        var recipes = CreateProvider().GetRecipes();
+
+        foreach (var (recipeId, attribute) in expectedByRecipe)
+        {
+            var recipe = recipes.Single(candidate => candidate.Id == recipeId);
+            Assert.Equal(
+                new Dictionary<AttributeType, double> { [attribute] = 1d },
+                recipe.InitialStatProfile);
+            Assert.Collection(
+                recipe.TemperingProfile.Stats,
+                tempering =>
+                {
+                    Assert.Equal(attribute, tempering.Stat);
+                    Assert.Equal(100, tempering.Weight);
+                    Assert.Equal(1d, tempering.MaxBudgetShare);
+                    Assert.True(tempering.CanIntroduce);
+                    Assert.True(tempering.CanIncrease);
+                });
+        }
+    }
+
+    [Fact]
+    public void GrimoireUsesTheApprovedPowerAndCooldownIdentityProfile()
+    {
+        var recipe = CreateProvider()
+            .GetRecipes()
+            .Single(candidate => candidate.Id == "recipe.offhand.grimoire");
+
+        Assert.Equal(
+            new Dictionary<AttributeType, double>
+            {
+                [AttributeType.Power] = 0.7d,
+                [AttributeType.Cooldown] = 0.3d
+            },
+            recipe.InitialStatProfile);
+        Assert.Collection(
+            recipe.TemperingProfile.Stats,
+            power =>
+            {
+                Assert.Equal(AttributeType.Power, power.Stat);
+                Assert.Equal(70, power.Weight);
+                Assert.Equal(0.7d, power.MaxBudgetShare);
+            },
+            cooldown =>
+            {
+                Assert.Equal(AttributeType.Cooldown, cooldown.Stat);
+                Assert.Equal(30, cooldown.Weight);
+                Assert.Equal(0.3d, cooldown.MaxBudgetShare);
+            });
+    }
+
+    [Fact]
     public void EveryArmorSlotUsesTheApprovedFamilyIdentityProfile()
     {
         var expectedByFamily = new Dictionary<string, Dictionary<AttributeType, double>>

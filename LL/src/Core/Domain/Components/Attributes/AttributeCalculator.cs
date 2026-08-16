@@ -55,7 +55,7 @@ public static class AttributeCalculator
         var baseAttributes = entity.BaseAttributes.ToDictionary(a => a.AttributeType, a => a.Value);
         var equipmentModifiers = ProjectEquipmentModifiers(entity.Equipment, entity.Level);
 
-        foreach (var (attributeType, attributeValue) in CalculateProjectedAttributes(baseAttributes, equipmentModifiers))
+        foreach (var (attributeType, attributeValue) in CalculateUncappedProjectedAttributes(baseAttributes, equipmentModifiers))
             entity.BaseCombatAttributes[attributeType] = attributeValue;
 
         SyncBaseResources(entity.BaseCombatAttributes);
@@ -87,7 +87,9 @@ public static class AttributeCalculator
             .Where(tm => tm.AttributeType.Equals(attributeType))
             .ToList();
 
-        return CalculateModifiedValue(baseValue, validModifiers);
+        return ClampAttributeValue(
+            attributeType,
+            CalculateModifiedValue(baseValue, validModifiers));
     }
 
     public static float CalculateModifiedValue(float baseValue, IEnumerable<AttributeModifierBase> modifiers)
@@ -127,6 +129,7 @@ public static class AttributeCalculator
 
         foreach (var item in equipment.DistinctBy(item => item.Id))
         {
+            EquipmentStatModelMigrator.MigrateToCurrent(item);
             foreach (var modifier in item.AttributeModifiers)
             {
                 if (item.UsesProgressionNormalizedRatings
@@ -165,6 +168,7 @@ public static class AttributeCalculator
         var ratings = new Dictionary<AttributeType, double>();
         foreach (var item in equipment.DistinctBy(item => item.Id))
         {
+            EquipmentStatModelMigrator.MigrateToCurrent(item);
             if (!item.UsesProgressionNormalizedRatings)
                 continue;
 
@@ -199,8 +203,20 @@ public static class AttributeCalculator
         IReadOnlyDictionary<AttributeType, float> baseAttributes,
         IEnumerable<AttributeModifierBase> modifiers)
     {
+        var projected = CalculateUncappedProjectedAttributes(baseAttributes, modifiers);
+
+        foreach (var attribute in projected.Keys.ToArray())
+            projected[attribute] = ClampAttributeValue(attribute, projected[attribute]);
+
+        return projected;
+    }
+
+    private static Dictionary<AttributeType, float> CalculateUncappedProjectedAttributes(
+        IReadOnlyDictionary<AttributeType, float> baseAttributes,
+        IEnumerable<AttributeModifierBase> modifiers)
+    {
         var modifierList = modifiers.ToList();
-        var projected = baseAttributes.Keys
+        return baseAttributes.Keys
             .Concat(modifierList.Select(x => x.AttributeType))
             .Distinct()
             .ToDictionary(
@@ -209,7 +225,19 @@ public static class AttributeCalculator
                     baseAttributes.GetValueOrDefault(attributeType),
                     modifierList.Where(x => x.AttributeType == attributeType)));
 
-        return projected;
+    }
+
+    private static float ClampAttributeValue(AttributeType attribute, float value)
+    {
+        if (!AttributeCatalog.IsKnown(attribute))
+            return Math.Max(0f, value);
+
+        var definition = AttributeCatalog.Get(attribute);
+        return definition.MaximumValue is { } maximum
+               && definition.CapKind is AttributeCapKind.Fixed
+                   or AttributeCapKind.ContextDependent
+            ? Math.Clamp(value, definition.MinimumValue, maximum)
+            : Math.Max(definition.MinimumValue, value);
     }
 
     private static Dictionary<AttributeType, float> CalculateRuntimeAttributes(CombatEntity entity)

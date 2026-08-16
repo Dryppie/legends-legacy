@@ -13,6 +13,18 @@ describe('canonical attribute formatting', () => {
   beforeEach(() => {
     setAttributeDefinitions([
       definition({
+        attributeType: AttributeType.Armor,
+        displayName: 'Armor',
+        description: 'Reduces physical damage.',
+        unit: 'PercentagePoints',
+        equipmentDisplayName: 'Armor Rating',
+        equipmentDescription:
+          'Armor is combined and converted with diminishing returns.',
+        equipmentUnit: 'Rating',
+        equipmentDisplayPrecision: 2,
+        equipmentDisplaySuffix: '',
+      }),
+      definition({
         attributeType: AttributeType.CritChance,
         displayName: 'Critical Chance',
         description: 'Chance to critically strike.',
@@ -20,13 +32,24 @@ describe('canonical attribute formatting', () => {
         maximumValue: 75,
         capKind: 'Fixed',
         displaySuffix: '%',
+        equipmentDisplayName: 'Critical Chance',
+        equipmentDescription: 'Direct critical-strike chance from this item.',
+        equipmentUnit: 'PercentagePoints',
+        equipmentDisplayPrecision: 2,
+        equipmentDisplaySuffix: '%',
       }),
       definition({
         attributeType: AttributeType.StatusResistance,
         displayName: 'Status Resistance',
-        description: 'Status-duration resistance rating.',
-        unit: 'Rating',
-        displayPrecision: 0,
+        description: 'Reduces harmful status duration.',
+        unit: 'PercentagePoints',
+        displayPrecision: 2,
+        displaySuffix: '%',
+        equipmentDisplayName: 'Status Resistance',
+        equipmentDescription: 'Direct status resistance from this item.',
+        equipmentUnit: 'PercentagePoints',
+        equipmentDisplayPrecision: 2,
+        equipmentDisplaySuffix: '%',
       }),
       definition({
         attributeType: AttributeType.CrowdControlResistance,
@@ -63,37 +86,35 @@ describe('canonical attribute formatting', () => {
     );
   });
 
-  it('separates raw equipment ratings from effective character percentages', () => {
-    expect(formatAttributeType(AttributeType.CritChance, true)).toBe(
-      'Critical Chance Rating',
+  it('separates opposed ratings from effective character percentages', () => {
+    expect(formatAttributeType(AttributeType.Armor, true)).toBe(
+      'Armor Rating',
     );
     expect(
-      formatAttributeValue(12.345, AttributeType.CritChance, true, true),
+      formatAttributeValue(12.345, AttributeType.Armor, true, true),
     ).toBe('+12.35');
-    expect(formatAttributeTooltip(AttributeType.CritChance, true)).toBe(
-      'Higher rating improves this effect with diminishing returns.',
+    expect(formatAttributeTooltip(AttributeType.Armor, true)).toBe(
+      'Armor is combined and converted with diminishing returns.',
     );
-    expect(formatAttributeValue(12.345, AttributeType.CritChance, true)).toBe(
-      '+12.35%',
-    );
+    expect(formatAttributeValue(12.345, AttributeType.Armor, true)).toBe('+12.35%');
   });
 
-  it('rounds flat and rating attributes to integers', () => {
+  it('formats direct status resistance and rounds flat attributes', () => {
     expect(formatAttributeValue(25.49, AttributeType.StatusResistance)).toBe(
-      '25',
+      '25.49%',
     );
     expect(formatAttributeValue(25.5, AttributeType.StatusResistance)).toBe(
-      '26',
+      '25.5%',
     );
     expect(formatAttributeValue(4.5, AttributeType.HealthRegeneration)).toBe(
       '5 HP/5s',
     );
     expect(formatAttributeValue(9.933024, AttributeType.StatusResistance)).toBe(
-      '10',
+      '9.93%',
     );
     expect(
       formatAttributeValue(99.9, AttributeType.StatusResistance, true),
-    ).toBe('+100');
+    ).toBe('+99.9%');
   });
 
   it('formats crowd control resistance as percentage points', () => {

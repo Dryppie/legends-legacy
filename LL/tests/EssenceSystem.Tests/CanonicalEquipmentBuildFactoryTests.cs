@@ -183,7 +183,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             ],
             balanced.Equipment.Select(item => item.ItemBaseId));
         Assert.Equal(
-            ["essence.goblin", "essence.vampire_bat"],
+            ["essence.goblin", "essence.goblin_archer"],
             balanced.EquippedEssences.Select(essence => essence.EssenceDefinitionId));
     }
 
@@ -193,27 +193,27 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         "medium_mail",
         "greatsword",
         "essence.goblin",
-        "essence.vampire_bat",
+        "essence.goblin_archer",
         10)]
     [InlineData(
         CanonicalPartyProfile.Offense,
         "light_vest",
         "gauntlets",
-        "essence.goblin_archer",
-        "essence.glade_panther",
+        "essence.green_slime",
+        "essence.cinder_beetle",
         15)]
     [InlineData(
         CanonicalPartyProfile.Sustain,
         "cloth_robe",
         "staff",
-        "essence.enchanted_fairy",
-        "essence.pixie",
+        "essence.goblin",
+        "essence.goblin_shaman",
         15)]
     [InlineData(
         CanonicalPartyProfile.Defensive,
         "heavy_breastplate",
         "maul",
-        "essence.brown_slime",
+        "essence.red_slime",
         "essence.goblin_warrior",
         10)]
     [InlineData(
@@ -321,7 +321,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
     }
 
     [Fact]
-    public void Balanced_epic_basic_attack_pacing_is_stable_across_live_equipment_tiers()
+    public void Balanced_epic_hybrid_anchors_grow_without_accelerating_mirror_pacing()
     {
         var results = new[] { 1, 5, 10 }
             .Select(tier =>
@@ -358,7 +358,6 @@ public sealed class CanonicalEquipmentBuildFactoryTests
                 };
             })
             .ToList();
-        var tierOneDuration = results[0].MedianDuration;
         var summary = string.Join(
             ", ",
             results.Select(result =>
@@ -367,12 +366,16 @@ public sealed class CanonicalEquipmentBuildFactoryTests
                 $"CC{result.CritChance:0.##}/CD{result.CritDamage:0.##}/" +
                 $"AS{result.AttackSpeed:0.##}"));
 
-        Assert.All(
-            results,
-            result => Assert.True(
-                result.MedianDuration >= tierOneDuration * 0.8
-                && result.MedianDuration <= tierOneDuration * 1.25,
-                $"Balanced basic-attack pacing diverged by tier: {summary}."));
+        Assert.True(results.Select(result => result.Power).SequenceEqual(
+            results.Select(result => result.Power).Order()));
+        Assert.True(results.Select(result => result.MaxHealth).SequenceEqual(
+            results.Select(result => result.MaxHealth).Order()));
+        Assert.True(results.Select(result => result.MedianDuration).SequenceEqual(
+            results.Select(result => result.MedianDuration).Order()),
+            $"Balanced mirror pacing accelerated by tier: {summary}.");
+        Assert.Equal(results[1].CritChance, results[2].CritChance, precision: 3);
+        Assert.Equal(results[1].CritDamage, results[2].CritDamage, precision: 3);
+        Assert.Equal(results[1].AttackSpeed, results[2].AttackSpeed, precision: 3);
     }
 
     [Fact]
@@ -402,17 +405,14 @@ public sealed class CanonicalEquipmentBuildFactoryTests
                 };
             })
             .ToList();
-        var tierOneDuration = results[0].MedianDuration;
         var summary = string.Join(
             ", ",
             results.Select(result => $"T{result.Tier}: {result.MedianDuration} ticks"));
 
-        Assert.All(
-            results,
-            result => Assert.True(
-                result.MedianDuration >= tierOneDuration * 0.65
-                && result.MedianDuration <= tierOneDuration * 1.5,
-                $"Neutral essence battle pacing diverged by tier: {summary}."));
+        Assert.True(
+            results.Select(result => result.MedianDuration).SequenceEqual(
+                results.Select(result => result.MedianDuration).Order()),
+            $"Neutral essence battle pacing accelerated by tier: {summary}.");
     }
 
     [Fact]
@@ -429,11 +429,11 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             ratings.Select(entry => $"{entry.Key}={entry.Value / 10}"));
         var expectedDisplayedRatings = new Dictionary<CanonicalPartyProfile, int>
         {
-            [CanonicalPartyProfile.Balanced] = 133,
-            [CanonicalPartyProfile.Offense] = 142,
-            [CanonicalPartyProfile.Sustain] = 137,
-            [CanonicalPartyProfile.Defensive] = 132,
-            [CanonicalPartyProfile.Area] = 136
+            [CanonicalPartyProfile.Balanced] = 146,
+            [CanonicalPartyProfile.Offense] = 156,
+            [CanonicalPartyProfile.Sustain] = 151,
+            [CanonicalPartyProfile.Defensive] = 139,
+            [CanonicalPartyProfile.Area] = 150
         };
 
         Assert.Equal(
@@ -455,11 +455,11 @@ public sealed class CanonicalEquipmentBuildFactoryTests
                 profile => _factory.CreateBuild(profile, rung).Rating.Overall / 10);
         var expectedDisplayedRatings = new Dictionary<CanonicalPartyProfile, int>
         {
-            [CanonicalPartyProfile.Balanced] = 141,
-            [CanonicalPartyProfile.Offense] = 145,
-            [CanonicalPartyProfile.Sustain] = 138,
-            [CanonicalPartyProfile.Defensive] = 133,
-            [CanonicalPartyProfile.Area] = 141
+            [CanonicalPartyProfile.Balanced] = 158,
+            [CanonicalPartyProfile.Offense] = 165,
+            [CanonicalPartyProfile.Sustain] = 160,
+            [CanonicalPartyProfile.Defensive] = 147,
+            [CanonicalPartyProfile.Area] = 159
         };
 
         Assert.Equal(expectedDisplayedRatings, ratings);

@@ -18,6 +18,7 @@ public sealed class JsonEventQuestDefinitionProvider : IEventQuestDefinitionProv
         "CompatibleEssenceLoadout",
         "EquipmentCrafted",
         "EquipmentTempered",
+        "TemperingActionCompleted",
         "CharacterLevelReached",
         "ColosseumBattleStarted",
         "TournamentBattleCompleted",

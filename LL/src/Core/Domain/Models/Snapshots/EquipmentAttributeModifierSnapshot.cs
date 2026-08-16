@@ -7,9 +7,9 @@ public sealed class EquipmentAttributeModifierSnapshot
 {
     public Guid Id { get; init; }
     public Guid EquipmentSnapshotId { get; init; }
-    public AttributeType AttributeType { get; init; }
-    public float Amount { get; init; }
-    public ModifierType ModifierType { get; init; }
+    public AttributeType AttributeType { get; set; }
+    public float Amount { get; set; }
+    public ModifierType ModifierType { get; set; }
 
     private EquipmentAttributeModifierSnapshot() { }
 

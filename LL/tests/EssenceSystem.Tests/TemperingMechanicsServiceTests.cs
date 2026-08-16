@@ -203,6 +203,7 @@ public sealed class TemperingMechanicsServiceTests
             },
             BaseRecipeId = "recipe.armor.head.cloth_cowl",
             Tier = 1,
+            StatModelVersion = EquipmentStatBudgetCatalog.BalanceVersion,
             Potential = 10,
             ItemXp = 9,
             InstanceModifiers =

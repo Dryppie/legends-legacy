@@ -26,7 +26,7 @@ public sealed record CombatRatingModifierSource(
 /// </summary>
 public static class CombatRatingCalculator
 {
-    public const int DefinitionVersion = 15;
+    public const int DefinitionVersion = 16;
     public const int ReferenceWeightTier = EquipmentStatBudgetCatalog.MinimumTier;
 
     private static readonly IReadOnlySet<AttributeType> OffenseAttributes =

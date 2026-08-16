@@ -1332,8 +1332,7 @@
       "role": ""
     },
     "initialStatProfile": {
-      "Power": 0.6,
-      "MaxHealth": 0.4
+      "Power": 1.0
     },
     "temperingProfile": {
       "id": "recipe.jewelry.ring.band.tempering",
@@ -1341,20 +1340,11 @@
       "stats": [
         {
           "stat": "Power",
-          "weight": 60,
+          "weight": 100,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.6,
-          "minimumTier": 1
-        },
-        {
-          "stat": "MaxHealth",
-          "weight": 40,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
+          "maxBudgetShare": 1.0,
           "minimumTier": 1
         }
       ]
@@ -1417,8 +1407,7 @@
       "role": ""
     },
     "initialStatProfile": {
-      "MaxHealth": 0.6,
-      "HealthRegeneration": 0.4
+      "MaxHealth": 1.0
     },
     "temperingProfile": {
       "id": "recipe.jewelry.necklace.amulet.tempering",
@@ -1426,20 +1415,11 @@
       "stats": [
         {
           "stat": "MaxHealth",
-          "weight": 60,
+          "weight": 100,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.6,
-          "minimumTier": 1
-        },
-        {
-          "stat": "HealthRegeneration",
-          "weight": 40,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.25,
+          "maxBudgetShare": 1.0,
           "minimumTier": 1
         }
       ]
@@ -1498,29 +1478,19 @@
       "role": ""
     },
     "initialStatProfile": {
-      "Power": 0.6,
-      "HealthRegeneration": 0.4
+      "HealthRegeneration": 1.0
     },
     "temperingProfile": {
       "id": "recipe.jewelry.relic.vial.tempering",
       "name": "Relic Tempering",
       "stats": [
         {
-          "stat": "Power",
-          "weight": 60,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.6,
-          "minimumTier": 1
-        },
-        {
           "stat": "HealthRegeneration",
-          "weight": 40,
+          "weight": 100,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.35,
+          "maxBudgetShare": 1.0,
           "minimumTier": 1
         }
       ]
@@ -2898,10 +2868,8 @@
       "role": "Grimoire"
     },
     "initialStatProfile": {
-      "Power": 0.35,
-      "MagicPenetration": 0.25,
-      "CritChance": 0.2,
-      "Cooldown": 0.2
+      "Power": 0.7,
+      "Cooldown": 0.3
     },
     "temperingProfile": {
       "id": "recipe.offhand.grimoire.tempering",
@@ -2909,43 +2877,16 @@
       "stats": [
         {
           "stat": "Power",
-          "weight": 35,
+          "weight": 70,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
-          "stat": "MagicPenetration",
-          "weight": 25,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritChance",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.25,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritDamage",
-          "weight": 25,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.25,
+          "maxBudgetShare": 0.7,
           "minimumTier": 1
         },
         {
           "stat": "Cooldown",
-          "weight": 20,
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,

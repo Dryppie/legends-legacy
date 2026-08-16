@@ -1,0 +1,78 @@
+{
+  "id": "event.a_broken_curse.2026_08",
+  "version": 1,
+  "enabled": true,
+  "title": "A broken Curse",
+  "summary": "A strong curse broke out throughout the lands of the realm, breaking all equipment, angering Ars, the God of Crafting. Heed his call, craft new equipment, and temper it to strengthen yourself before what is to come.",
+  "startsAtUtc": "2026-08-16T00:00:00Z",
+  "endsAtUtc": "2026-08-19T00:00:00Z",
+  "claimEndsAtUtc": "2026-08-21T00:00:00Z",
+  "minimumContribution": 1,
+  "sortOrder": 90,
+  "objectives": [
+    {
+      "key": "tempering-actions",
+      "description": "Complete 100,000 tempering actions.",
+      "type": "TemperingActionCompleted",
+      "requiredAmount": 100000,
+      "filters": {}
+    }
+  ],
+  "rewards": [
+    {
+      "key": "sigil-fragments",
+      "type": "SigilFragments",
+      "quantity": 50
+    }
+  ],
+  "personalMilestones": [
+    {
+      "key": "stock-the-forge",
+      "requiredContribution": 500,
+      "rewards": [
+        {
+          "key": "ore",
+          "type": "Item",
+          "itemBaseId": "ore",
+          "quantity": 200
+        },
+        {
+          "key": "wood",
+          "type": "Item",
+          "itemBaseId": "wood",
+          "quantity": 200
+        },
+        {
+          "key": "hide",
+          "type": "Item",
+          "itemBaseId": "rawhide",
+          "quantity": 200
+        }
+      ]
+    },
+    {
+      "key": "master-the-pattern",
+      "requiredContribution": 1500,
+      "rewards": [
+        {
+          "key": "blueprint-selection-box",
+          "type": "Item",
+          "itemBaseId": "item.blueprint_selection_box",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "key": "perfect-the-craft",
+      "requiredContribution": 3000,
+      "rewards": [
+        {
+          "key": "catalyst-selection-cache",
+          "type": "Item",
+          "itemBaseId": "item.catalyst_selection_crate",
+          "quantity": 1
+        }
+      ]
+    }
+  ]
+}

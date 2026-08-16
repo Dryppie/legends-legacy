@@ -116,9 +116,9 @@ Armor and Resistance remain ratings because they oppose tier-scaled incoming
 pressure and must continue growing without printing impossible additive damage-
 reduction percentages on individual items.
 
-The item labels should simply be `Armor` and `Resistance`. Repeating the word
-`Rating` on every item line is unnecessary. Their tooltips explain that their
-combined rating determines the character's effective reduction.
+Equipment and crafting labels use `Armor Rating` and `Resistance Rating`. The
+explicit suffix distinguishes these raw, additive item values from the effective
+damage-reduction percentages shown on the character sheet.
 
 ### Direct percentage attributes
 
@@ -383,14 +383,16 @@ No armor recipe contains Power.
 
 ### Jewelry
 
-| Recipe | Attributes                              | Tier-anchor share | Required change |
-| ------ | --------------------------------------- | ----------------: | --------------- |
-| Ring   | Power 60%, Max Health 40%               |              100% | None            |
-| Amulet | Max Health 60%, Health Regeneration 40% |              100% | None            |
-| Relic  | Power 60%, Health Regeneration 40%      |              100% | None            |
+| Recipe | Attributes                | Tier-anchor share | Required change |
+| ------ | ------------------------- | ----------------: | --------------- |
+| Ring   | Power 100%                |              100% | None            |
+| Amulet | Max Health 100%           |              100% | None            |
+| Relic  | Health Regeneration 100%  |              100% | None            |
 
-Every Jewelry recipe already has two tier anchors and remains a guaranteed tier
-upgrade under the hybrid unit model.
+Each Jewelry recipe has one clear tier-scaled identity and remains a guaranteed
+tier upgrade under the hybrid unit model. Every equipment item uses a 1.00 stat
+budget except two-handed items, which use 2.00 so they retain the same total hand
+funding as two one-handed items.
 
 ### Weapons
 
@@ -414,7 +416,7 @@ retaining a stable, understandable secondary percentage.
 | ----------- | --------------------------------------------------- | ----------------: | --------------------------------------------- |
 | Towershield | Max Health 35%, Block 35%, Armor 30%                 |               65% | Convert Block to direct %                     |
 | Spiritward  | Max Health 35%, Block 35%, Resistance 30%            |               65% | Convert Block to direct %                     |
-| Grimoire    | Power, Magic Penetration, Critical Chance, Cooldown |               35% | Convert its three secondary stats to direct % |
+| Grimoire    | Power 70%, Cooldown Reduction 30%                   |               70% | Keep Cooldown Reduction as direct %           |
 
 The two defensive shields share the same Health and Block core, then specialize
 into physical or magical defense. Every Offhand satisfies the 25% anchor rule.
@@ -434,8 +436,8 @@ Critical Chance            +8–11%
 Heavy Legplates · T4
 
 Maximum Health          +420–510
-Armor                    +138–166
-Resistance                +82–99
+Armor Rating             +138–166
+Resistance Rating          +82–99
 ```
 
 ```text
@@ -458,6 +460,9 @@ Critical Chance               24.0%
 Critical Hit Damage          175.0%
 Cooldown Reduction            18.0%
 ```
+
+Physical and Magical Damage Reduction show their underlying values immediately
+below the percentage as `182.27 Armor Rating` and `115.13 Resistance Rating`.
 
 An optional personal comparison may show before and after totals, but it never
 replaces the values printed on the item.

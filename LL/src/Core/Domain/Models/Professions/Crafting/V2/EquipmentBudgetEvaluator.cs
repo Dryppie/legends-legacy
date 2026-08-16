@@ -22,7 +22,16 @@ public static class EquipmentBudgetEvaluator
         int tier)
     {
         ValidateTier(tier);
-        return Evaluate(modifiers);
+        return Math.Round(
+            modifiers
+                .Where(modifier => modifier.Amount > 0)
+                .Sum(modifier =>
+                    modifier.Amount
+                    * EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(
+                        modifier.AttributeType,
+                        tier)),
+            2,
+            MidpointRounding.AwayFromZero);
     }
 
     public static IReadOnlyDictionary<AttributeType, double> EvaluateByAttribute(
@@ -45,7 +54,19 @@ public static class EquipmentBudgetEvaluator
         int tier)
     {
         ValidateTier(tier);
-        return EvaluateByAttribute(modifiers);
+        return modifiers
+            .Where(modifier => modifier.Amount > 0)
+            .GroupBy(modifier => modifier.AttributeType)
+            .ToDictionary(
+                group => group.Key,
+                group => Math.Round(
+                    group.Sum(modifier =>
+                        modifier.Amount
+                        * EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(
+                            modifier.AttributeType,
+                            tier)),
+                    2,
+                    MidpointRounding.AwayFromZero));
     }
 
     private static void ValidateTier(int tier)
