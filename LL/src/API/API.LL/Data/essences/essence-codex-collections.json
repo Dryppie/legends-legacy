@@ -244,6 +244,44 @@
         "valuePerCollectionAscensionTier": 15,
         "description": "+0.75% Essence EXP gained."
       }
+    },
+    {
+      "id": "codex.collection.meran.warfang-warband",
+      "title": "Warfang Warband",
+      "description": "Unite the gnoll and kobold fighters that contest Meran's frontier.",
+      "category": "Regional Ecologies",
+      "essenceDefinitionIds": [
+        "essence.gnoll_pack_leader",
+        "essence.gnoll_raider",
+        "essence.gnoll_shaman",
+        "essence.kobold_skirmisher",
+        "essence.kobold_sorcerer"
+      ],
+      "bonus": {
+        "kind": "EssenceDropRateRelativeBps",
+        "value": 75,
+        "valuePerCollectionAscensionTier": 15,
+        "description": "+0.75% Essence drop rate."
+      }
+    },
+    {
+      "id": "codex.collection.meran.rotgrave-restless",
+      "title": "Rotgrave Restless",
+      "description": "Catalogue the ravenous dead and lingering spirits of the Rotgrave Fields.",
+      "category": "Creature Families",
+      "essenceDefinitionIds": [
+        "essence.feral_ghoul",
+        "essence.plague_ghoul",
+        "essence.ravenous_ghoul",
+        "essence.vampire_fledgeling",
+        "essence.wandering_ghost"
+      ],
+      "bonus": {
+        "kind": "EssenceExperienceGainBps",
+        "value": 75,
+        "valuePerCollectionAscensionTier": 15,
+        "description": "+0.75% Essence EXP gained."
+      }
     }
   ]
 }

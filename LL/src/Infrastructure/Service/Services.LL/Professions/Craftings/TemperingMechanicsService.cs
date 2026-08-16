@@ -209,7 +209,6 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
                     var currentBudget = budgetByStat.GetValueOrDefault(stat.Stat);
                     var currentShare = currentBudget / totalBudget;
                     var targetShare = stat.Weight / totalWeight;
-                    var cap = stat.MaxBudgetShare ?? 1d;
                     var maximumIncrease =
                         EquipmentConstraintProfile.GetMaximumAdditionalPoints(
                             stat.Stat,
@@ -229,8 +228,7 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
                         (exists && !stat.CanIncrease) ||
                         stat.MinimumTier > equipment.Tier ||
                         maximumIncrease <= 0.000001d ||
-                        quantizedMaximum <= quantizedCurrent ||
-                        currentShare >= cap)
+                        quantizedMaximum <= quantizedCurrent)
                     {
                         return null;
                     }
@@ -240,13 +238,15 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
                     var continuationMultiplier = exists ? 1.15d : 1d;
                     var categoryMultiplier =
                         stat.Category == TemperingStatCategory.Primary ? 1.25d : 1d;
-                    var capMultiplier = Math.Max(0.05d, 1d - (currentShare / cap));
+                    // MaxBudgetShare is no longer a ceiling: tempering lets an attribute
+                    // grow as far as the player takes it. Distribution is steered purely by
+                    // the authored weights, so a stat that is already ahead of its target
+                    // share simply loses its deficit bonus instead of being throttled out.
                     var effectiveWeight =
                         stat.Weight
                         * deficitMultiplier
                         * continuationMultiplier
-                        * categoryMultiplier
-                        * capMultiplier;
+                        * categoryMultiplier;
                     return new WeightedCandidate(stat, effectiveWeight);
                 })
                 .Where(candidate =>

@@ -140,6 +140,11 @@ public static class AbilityCompiler
             DurationTicks = effect.DurationTicks,
             IntervalTicks = effect.IntervalTicks,
             Uses = effect.Uses,
+            OncePerTarget = effect.OncePerTarget,
+            LivingNonSummonedAllyDamagePercent = effect.LivingNonSummonedAllyDamagePercent,
+            SubsequentTargetDamagePercent = effect.SubsequentTargetDamagePercent <= 0
+                ? 100
+                : effect.SubsequentTargetDamagePercent,
             ChancePercent = effect.ChancePercent,
             AttackType = effect.AttackType,
             DamageType = effect.DamageType,
@@ -147,6 +152,7 @@ public static class AbilityCompiler
             CritChanceBonus = effect.CritChanceBonus,
             ArmorPenetrationBonus = effect.ArmorPenetrationBonus,
             LifeStealPercentage = effect.LifeStealPercentage,
+            LifeStealTargetCondition = effect.LifeStealTargetCondition,
             ProcCoefficient = effect.ProcCoefficient <= 0 ? 1m : effect.ProcCoefficient,
             AbilityKind = abilityKind,
             AbilityTags = new HashSet<string>(abilityTags, StringComparer.OrdinalIgnoreCase),

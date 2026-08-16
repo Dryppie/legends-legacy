@@ -9,6 +9,11 @@ public sealed class TemperingStatWeightDefinition
     public TemperingStatCategory Category { get; init; } = TemperingStatCategory.Secondary;
     public bool CanIntroduce { get; init; } = true;
     public bool CanIncrease { get; init; } = true;
+    /// <summary>
+    /// Authored share of the item budget this stat is designed to hold. Tempering no
+    /// longer treats it as a ceiling - an attribute may grow past it - so this is kept
+    /// only as authoring intent and is still validated at content load time.
+    /// </summary>
     public double? MaxBudgetShare { get; init; }
     public int? MinimumTier { get; init; }
 }

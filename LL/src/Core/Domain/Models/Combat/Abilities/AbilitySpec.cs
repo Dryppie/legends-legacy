@@ -103,7 +103,10 @@ public enum AbilityTargetSelector
     LowestCurrentHealthEnemy = 18,
     HighestMaxHealthEnemy = 19,
     HighestCurrentHealthOwnedSummon = 20,
-    OwnedSummons = 21
+    OwnedSummons = 21,
+    RandomAlly = 22,
+    TwoRandomEnemies = 23,
+    ThreeRandomEnemies = 24
 }
 
 public enum AbilityConditionType
@@ -128,7 +131,9 @@ public enum AbilityConditionType
     NoEnemyHealthBelowPercent = 17,
     EventSourceIsEnemy = 18,
     EventMagnitudeAtLeast = 19,
-    EventMagnitudeAtMost = 20
+    EventMagnitudeAtMost = 20,
+    EventSourceIsAlly = 21,
+    EventIdIsNot = 22
 }
 
 public enum StandardConditionType
@@ -278,6 +283,9 @@ public sealed class AbilityEffectSpec
     public int DurationTicks { get; set; }
     public int IntervalTicks { get; set; }
     public int Uses { get; set; }
+    public bool OncePerTarget { get; set; }
+    public int LivingNonSummonedAllyDamagePercent { get; set; }
+    public int SubsequentTargetDamagePercent { get; set; } = 100;
     public int ChancePercent { get; set; } = 100;
     public AttackType AttackType { get; set; } = AttackType.None;
     public DamageType DamageType { get; set; } = DamageType.None;
@@ -285,6 +293,7 @@ public sealed class AbilityEffectSpec
     public float CritChanceBonus { get; set; }
     public float ArmorPenetrationBonus { get; set; }
     public float LifeStealPercentage { get; set; }
+    public StandardConditionType? LifeStealTargetCondition { get; set; }
     public decimal ProcCoefficient { get; set; } = 1m;
     public List<string> Tags { get; set; } = [];
     public List<AbilityConditionSpec> Conditions { get; set; } = [];

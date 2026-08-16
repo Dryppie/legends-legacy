@@ -268,5 +268,21 @@
         "minimumValue": 0
       }
     ]
+  },
+  {
+    "id": "totemicWard",
+    "name": "Totemic Ward",
+    "description": "A stationary ward that periodically protects its allies.",
+    "imagePath": "",
+    "durationTicks": 120,
+    "maxActive": 1,
+    "canBasicAttack": false,
+    "tags": ["Summon.TotemicWard", "Totem", "Support"],
+    "abilityIds": ["ability.summon.totemic_ward.warding_pulse"],
+    "attributes": [
+      {"attribute": "MaxHealth", "baseValue": 0, "minimumValue": 1, "scalingAttribute": "MaxHealth", "scalingCoefficient": 0.03},
+      {"attribute": "Power", "baseValue": 0, "minimumValue": 0, "scalingAttribute": "Power", "scalingCoefficient": 1},
+      {"attribute": "AttackSpeed", "baseValue": 0, "minimumValue": 0}
+    ]
   }
 ]

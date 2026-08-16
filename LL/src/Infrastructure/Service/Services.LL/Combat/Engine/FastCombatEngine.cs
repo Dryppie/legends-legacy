@@ -571,8 +571,8 @@ public sealed class FastCombatEngine
         RuntimeCombatant source,
         CombatEvent combatEvent,
         IReadOnlyList<RuntimeCombatant> combatants,
-        Func<CompiledEffect, bool> canUseEffect,
-        Action<CompiledEffect> markEffectUsed,
+        Func<CompiledEffect, RuntimeCombatant?, bool> canUseEffect,
+        Action<CompiledEffect, RuntimeCombatant> markEffectUsed,
         string? statsSourceOverride = null,
         bool countStatsActivation = false,
         double durationMultiplier = 1d)
@@ -581,7 +581,7 @@ public sealed class FastCombatEngine
         var executionContext = new EffectExecutionContext();
         foreach (var effect in trigger.Effects)
         {
-            if (!canUseEffect(effect))
+            if (!canUseEffect(effect, null))
                 continue;
 
             var repeatCount = effect.RepeatCount;
@@ -606,10 +606,11 @@ public sealed class FastCombatEngine
                 effect.SummonId).ToArray();
             for (var repetition = 0; repetition < repeatCount; repetition++)
             {
-                foreach (var target in targets)
+                for (var targetIndex = 0; targetIndex < targets.Length; targetIndex++)
                 {
-                    if (!canUseEffect(effect))
-                        break;
+                    var target = targets[targetIndex];
+                    if (!canUseEffect(effect, target))
+                        continue;
 
                     if (!target.IsAlive
                         || !ConditionsPass(effect.Conditions, source, combatEvent with { Target = target }, combatants))
@@ -622,7 +623,7 @@ public sealed class FastCombatEngine
                         continue;
 
                     var countThisActivation = countStatsActivation && !activationCounted;
-                    markEffectUsed(effect);
+                    markEffectUsed(effect, target);
                     ExecuteEffect(
                         effect,
                         source,
@@ -632,7 +633,8 @@ public sealed class FastCombatEngine
                         statsSourceOverride,
                         countThisActivation,
                         durationMultiplier,
-                        executionContext);
+                        executionContext,
+                        targetIndex);
                     if (countThisActivation)
                         activationCounted = true;
                 }
@@ -649,7 +651,8 @@ public sealed class FastCombatEngine
         string? statsSourceOverride = null,
         bool countStatsActivation = false,
         double durationMultiplier = 1d,
-        EffectExecutionContext? executionContext = null)
+        EffectExecutionContext? executionContext = null,
+        int targetIndex = 0)
     {
         var statsSource = statsSourceOverride ?? effect.StatsSource;
         if (effect.IntervalTicks > 0 && effect.DurationTicks > 0)
@@ -673,7 +676,7 @@ public sealed class FastCombatEngine
         }
 
         var appliedModifierValue = effect.DurationTicks > 0 && IsTimedModifierOperation(effect.Operation)
-            ? (int?)CalculateValue(effect, source, target, combatants, combatEvent)
+            ? (int?)CalculateValue(effect, source, target, combatants, combatEvent, targetIndex)
             : null;
 
         ApplyEffectOnce(
@@ -685,7 +688,8 @@ public sealed class FastCombatEngine
             statsSource,
             countStatsActivation,
             executionContext,
-            appliedModifierValue);
+            appliedModifierValue,
+            targetIndex);
 
         if (effect.DurationTicks > 0 && IsTimedModifierOperation(effect.Operation))
         {
@@ -708,9 +712,10 @@ public sealed class FastCombatEngine
         string? statsSourceOverride = null,
         bool countStatsActivation = false,
         EffectExecutionContext? executionContext = null,
-        int? precomputedValue = null)
+        int? precomputedValue = null,
+        int targetIndex = 0)
     {
-        var value = precomputedValue ?? CalculateValue(effect, source, target, combatants, combatEvent);
+        var value = precomputedValue ?? CalculateValue(effect, source, target, combatants, combatEvent, targetIndex);
         if (effect.ScalingAttribute == AttributeType.Power
             && effect.Operation is AbilityEffectOperation.Damage or AbilityEffectOperation.Heal)
         {
@@ -742,7 +747,7 @@ public sealed class FastCombatEngine
                     countStatsActivation,
                     delivery);
                 if (delivery == DamageDelivery.Direct)
-                    ApplyLifeSteal(effect, source, healthDamage, combatants, statsSource);
+                    ApplyLifeSteal(effect, source, target, healthDamage, combatants, statsSource);
                 break;
             case AbilityEffectOperation.Heal:
                 RestoreHealth(
@@ -1495,10 +1500,14 @@ public sealed class FastCombatEngine
     private void ApplyLifeSteal(
         CompiledEffect effect,
         RuntimeCombatant source,
+        RuntimeCombatant target,
         int healthDamage,
         IReadOnlyList<RuntimeCombatant> combatants,
         string? statsSource)
     {
+        if (effect.LifeStealTargetCondition is { } condition && !target.HasCondition(condition))
+            return;
+
         ApplyLifeSteal(
             source,
             healthDamage,
@@ -2349,7 +2358,7 @@ public sealed class FastCombatEngine
             statsSource,
             countStatsActivation,
             DamageDelivery.Direct);
-        ApplyLifeSteal(effect, source, healthDamage, combatants, statsSource);
+        ApplyLifeSteal(effect, source, target, healthDamage, combatants, statsSource);
 
         if (effect.HealingScalingAttribute is not { } healingAttribute
             || effect.HealingScalingCoefficient <= 0)
@@ -3009,9 +3018,27 @@ public sealed class FastCombatEngine
                 && x.IsSummoned
                 && ReferenceEquals(x.SummonOwner, source)
                 && x.Tags.Contains($"Summon.{summonId}")),
+            AbilityTargetSelector.RandomAlly => SelectRandom(
+                combatants.Where(x => x.Team == source.Team && x.IsAlive),
+                1),
+            AbilityTargetSelector.TwoRandomEnemies => SelectRandom(
+                combatants.Where(x => x.Team != source.Team && x.IsAlive),
+                2),
+            AbilityTargetSelector.ThreeRandomEnemies => SelectRandom(
+                combatants.Where(x => x.Team != source.Team && x.IsAlive),
+                3),
             _ => []
         };
     }
+
+    private IEnumerable<RuntimeCombatant> SelectRandom(
+        IEnumerable<RuntimeCombatant> candidates,
+        int count) =>
+        candidates
+            .Select(candidate => (candidate, order: _random.Next()))
+            .OrderBy(item => item.order)
+            .Take(count)
+            .Select(item => item.candidate);
 
     private static int CountLivingOwnedSummons(
         RuntimeCombatant source,
@@ -3222,6 +3249,11 @@ public sealed class FastCombatEngine
         if (condition.Type == AbilityConditionType.EventSourceIsEnemy)
             return combatEvent.Source is { } eventSource && eventSource.Team != source.Team;
 
+        if (condition.Type == AbilityConditionType.EventSourceIsAlly)
+            return combatEvent.Source is { } ally
+                   && ally.Team == source.Team
+                   && !ReferenceEquals(ally, source);
+
         if (condition.Type == AbilityConditionType.EventMagnitudeAtLeast)
             return combatEvent.Magnitude >= condition.Value;
 
@@ -3254,6 +3286,10 @@ public sealed class FastCombatEngine
                 combatEvent.AbilityId,
                 condition.StatusId,
                 StringComparison.OrdinalIgnoreCase),
+            AbilityConditionType.EventIdIsNot => !string.Equals(
+                combatEvent.AbilityId,
+                condition.StatusId,
+                StringComparison.OrdinalIgnoreCase),
             AbilityConditionType.EventSourceIsSelf => ReferenceEquals(combatEvent.Source, source),
             AbilityConditionType.HasTag => subject.Tags.Contains(condition.Tag!),
             AbilityConditionType.ChancePercent => _random.Next(1, 101) <= condition.Value,
@@ -3283,7 +3319,8 @@ public sealed class FastCombatEngine
         RuntimeCombatant source,
         RuntimeCombatant target,
         IReadOnlyList<RuntimeCombatant> combatants,
-        CombatEvent? combatEvent = null)
+        CombatEvent? combatEvent = null,
+        int targetIndex = 0)
     {
         var scalingCoefficient = effect.ScalingCoefficient;
         if (effect.MaximumScalingCoefficient > effect.ScalingCoefficient)
@@ -3333,6 +3370,19 @@ public sealed class FastCombatEngine
                      * GetEffectivePower(source)
                      * effect.OwnedSummonScalingCoefficient;
         }
+
+        if (effect.LivingNonSummonedAllyDamagePercent != 0)
+        {
+            var allyCount = combatants.Count(combatant =>
+                combatant.IsAlive
+                && !combatant.IsSummoned
+                && combatant.Team == source.Team
+                && !ReferenceEquals(combatant, source));
+            value *= 1 + allyCount * effect.LivingNonSummonedAllyDamagePercent / 100f;
+        }
+
+        if (targetIndex > 0 && effect.SubsequentTargetDamagePercent != 100)
+            value *= (float)Math.Pow(effect.SubsequentTargetDamagePercent / 100d, targetIndex);
 
         return Math.Max(
             AllowsNegativeValue(effect.Operation) ? int.MinValue : 0,

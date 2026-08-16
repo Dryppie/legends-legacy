@@ -240,6 +240,15 @@ public static class AbilityCatalogValidator
             if (effect.DurationTicks < 0 || effect.IntervalTicks < 0 || effect.Uses < 0)
                 errors.Add($"{label}: duration, interval, and uses cannot be negative.");
 
+            if (effect.LivingNonSummonedAllyDamagePercent < 0)
+                errors.Add($"{label}: livingNonSummonedAllyDamagePercent cannot be negative.");
+
+            if (effect.SubsequentTargetDamagePercent is <= 0 or > 100)
+                errors.Add($"{label}: subsequentTargetDamagePercent must be between 1 and 100.");
+
+            if (effect.LifeStealTargetCondition is not null && effect.LifeStealPercentage <= 0)
+                errors.Add($"{label}: lifeStealTargetCondition requires positive lifeStealPercentage.");
+
             if (effect.RepeatCount <= 0)
                 errors.Add($"{label}: repeatCount must be greater than 0.");
 

@@ -24,17 +24,7 @@ public sealed class RegionOneIdleAreaSeedTests
         "monster.eydis,_the_endless_spring",
         "monster.kodoku,_the_poisoned_vessel",
         "monster.ni,_the_ninefold",
-        "monster.the_mad_king",
-        "monster.gnoll_pack_leader",
-        "monster.gnoll_raider",
-        "monster.gnoll_shaman",
-        "monster.kobold_skirmisher",
-        "monster.kobold_sorcerer",
-        "monster.feral_ghoul",
-        "monster.plague_ghoul",
-        "monster.ravenous_ghoul",
-        "monster.vampire_fledgeling",
-        "monster.wandering_ghost"
+        "monster.the_mad_king"
     };
     private static readonly HashSet<string> CreatureEssencesPendingAreaDropTuning = new(StringComparer.OrdinalIgnoreCase);
 

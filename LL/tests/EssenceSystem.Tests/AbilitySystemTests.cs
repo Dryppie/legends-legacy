@@ -3250,18 +3250,20 @@ public sealed class AbilitySystemTests
             "glade_panther", "forest_spirit", "rotroot_shambler", "spider", "giant_spider",
             "venomous_spiderling", "blackjaw_spider", "flame_imp", "smolder_rat", "cinder_beetle",
             "red_slime", "giant_worm", "bog_mite", "green_slime", "large_rat", "viper",
-            "poisonous_rat", "rotfly_toad", "brown_slime", "cave_bat", "giant_bat", "undead"
+            "poisonous_rat", "rotfly_toad", "brown_slime", "cave_bat", "giant_bat", "undead",
+            "gnoll_pack_leader", "gnoll_raider", "gnoll_shaman", "kobold_skirmisher", "kobold_sorcerer",
+            "feral_ghoul", "plague_ghoul", "ravenous_ghoul", "vampire_fledgeling", "wandering_ghost"
         };
 
         var allAbilityIds = monsterIds
             .Select(id => (MonsterId: $"monster.{id}", AbilityIds: profiles.GetAbilityIds($"monster.{id}")))
             .ToArray();
 
-        Assert.Equal(52, allAbilityIds.Length);
+        Assert.Equal(62, allAbilityIds.Length);
         Assert.All(allAbilityIds, profile =>
             Assert.Equal(profile.MonsterId == "monster.hobgoblin" ? 3 : 2, profile.AbilityIds.Count));
-        Assert.Equal(105, allAbilityIds.SelectMany(x => x.AbilityIds).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(147, catalog.AbilitiesById.Count);
+        Assert.Equal(125, allAbilityIds.SelectMany(x => x.AbilityIds).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(168, catalog.AbilitiesById.Count);
         Assert.Contains("ability.summon.shadow_image.shadow_strike", catalog.AbilitiesById.Keys);
         Assert.All(allAbilityIds.SelectMany(x => x.AbilityIds), abilityId =>
         {
@@ -3295,10 +3297,10 @@ public sealed class AbilitySystemTests
             item.TryGetProperty("itemType", out var itemType)
             && itemType.GetString()?.Equals("Essence", StringComparison.OrdinalIgnoreCase) == true).ToList();
 
-        Assert.Equal(53, allDefinitions.Count);
-        Assert.Equal(52, allDefinitions.Select(x => x.SourceMonsterId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(52, allLootTables.Count);
-        Assert.Equal(53, essenceItems.Count);
+        Assert.Equal(63, allDefinitions.Count);
+        Assert.Equal(62, allDefinitions.Select(x => x.SourceMonsterId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(62, allLootTables.Count);
+        Assert.Equal(63, essenceItems.Count);
         Assert.All(allDefinitions, definition =>
         {
             Assert.StartsWith("monster.", definition.SourceMonsterId, StringComparison.Ordinal);
@@ -4045,8 +4047,8 @@ public sealed class AbilitySystemTests
 
         Assert.True(report.IsComplete, string.Join(Environment.NewLine, report.Gaps.Select(x => $"{x.EssenceId} {x.Slot}: {x.Reason}")));
         Assert.Equal(report.RequiredSlotCount, report.CoveredSlotCount);
-        Assert.Equal(106, report.RequiredSlotCount);
-        Assert.Equal(53, report.EssenceCount);
+        Assert.Equal(126, report.RequiredSlotCount);
+        Assert.Equal(63, report.EssenceCount);
         Assert.Equal(report.EssenceCount, report.RuntimeLoadoutChecks.Count);
         Assert.All(report.RuntimeLoadoutChecks, check =>
         {
@@ -5182,6 +5184,129 @@ public sealed class AbilitySystemTests
         Assert.Contains(report.Gaps, x => x.EssenceId == "essence.missing" && x.Slot == "Passive" && x.Reason.Contains("No Passive", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(report.Gaps, x => x.EssenceId == "essence.ambiguous" && x.Slot == "Active" && x.Reason.Contains("Multiple Active", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(report.UnownedAbilityIds, x => x == "ability.unowned");
+    }
+
+    [Fact]
+    public void Engine_applies_random_three_target_falloff_without_repeating_targets()
+    {
+        var ability = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.chain.test",
+            Kind = AbilitySpecKind.Active,
+            Name = "Chain Test",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.chain.test",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.ThreeRandomEnemies,
+                    BaseValue = 100,
+                    SubsequentTargetDamagePercent = 80,
+                    DamageType = DamageType.Magical
+                }
+            ]
+        });
+        var caster = CreateCombatant("caster", CombatTeam.Friendly, [ability]);
+        var enemies = Enumerable.Range(1, 4)
+            .Select(index => CreateCombatant($"enemy-{index}", CombatTeam.Hostile, [], maxHealth: 1_000))
+            .ToArray();
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 19));
+
+        var result = engine.Run([caster], enemies);
+        var hits = result.EventLog
+            .Where(log => log.Source == "effect.chain.test" && log.EventType == EventType.Damage)
+            .ToArray();
+
+        Assert.Equal([100, 80, 64], hits.Select(hit => hit.Magnitude));
+        Assert.Equal(3, hits.Select(hit => hit.TargetId).Distinct().Count());
+    }
+
+    [Fact]
+    public void Engine_scales_damage_per_living_non_summoned_ally_excluding_the_caster()
+    {
+        var ability = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.coordinated.test",
+            Kind = AbilitySpecKind.Active,
+            Name = "Coordinated Test",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.coordinated.test",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = 100,
+                    LivingNonSummonedAllyDamagePercent = 10
+                }
+            ]
+        });
+        var caster = CreateCombatant("caster", CombatTeam.Friendly, [ability]);
+        var allyOne = CreateCombatant("ally-1", CombatTeam.Friendly, []);
+        var allyTwo = CreateCombatant("ally-2", CombatTeam.Friendly, []);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [], maxHealth: 1_000);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000));
+
+        var result = engine.Run([caster, allyOne, allyTwo], [enemy]);
+
+        Assert.Contains(result.EventLog, log =>
+            log.Source == "effect.coordinated.test"
+            && log.EventType == EventType.Damage
+            && log.Magnitude == 120);
+    }
+
+    [Fact]
+    public void Runtime_ability_limits_an_effect_once_per_target()
+    {
+        var ability = new RuntimeAbility(AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.per-target.test",
+            Kind = AbilitySpecKind.Passive,
+            Name = "Per Target Test",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.per-target.test",
+                    Operation = AbilityEffectOperation.Damage,
+                    OncePerTarget = true
+                }
+            ]
+        }));
+        var effect = ability.Definition.TriggersByEvent[AbilityTriggerEvent.OnCombatStart].Single().Effects.Single();
+        var first = CreateCombatant("first", CombatTeam.Hostile, []);
+        var second = CreateCombatant("second", CombatTeam.Hostile, []);
+
+        Assert.True(ability.CanUseEffect(effect, first));
+        ability.MarkEffectUsed(effect, first);
+        Assert.False(ability.CanUseEffect(effect, first));
+        Assert.True(ability.CanUseEffect(effect, second));
+    }
+
+    [Fact]
+    public void Meran_essence_catalog_authors_requested_cost_and_totem_adjustments()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var raider = catalog.AbilitiesById["ability.creature.gnoll_raider.loot_and_slash"];
+        var skirmisher = catalog.AbilitiesById["ability.creature.kobold_skirmisher.coordinated_assault"];
+        var trapMastery = catalog.AbilitiesById["ability.creature.kobold_skirmisher.trap_mastery"];
+        var ward = catalog.SummonsById["totemicWard"];
+
+        Assert.Empty(raider.Costs);
+        Assert.Empty(skirmisher.Costs);
+        Assert.Empty(trapMastery.Triggers);
+        Assert.Empty(trapMastery.Effects);
+        Assert.Equal(
+            0.03f,
+            ward.Attributes.Single(attribute => attribute.Attribute == AttributeType.MaxHealth).ScalingCoefficient);
     }
 
     private static CombatResult RunBattle(

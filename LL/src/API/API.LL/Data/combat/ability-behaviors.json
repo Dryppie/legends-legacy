@@ -1804,5 +1804,26 @@
         "minCount": 1
       }
     ]
-  }
+  },
+  {"id": "behavior.creature.gnoll_pack_leader.rallying_cry.executes", "abilityId": "ability.creature.gnoll_pack_leader.rallying_cry", "friendlyAbilityIds": ["ability.creature.gnoll_pack_leader.rallying_cry"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.gnoll_pack_leader.savage_leader.executes", "abilityId": "ability.creature.gnoll_pack_leader.savage_leader", "friendlyAbilityIds": ["ability.creature.gnoll_pack_leader.savage_leader"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.gnoll_raider.loot_and_slash.executes", "abilityId": "ability.creature.gnoll_raider.loot_and_slash", "friendlyAbilityIds": ["ability.creature.gnoll_raider.loot_and_slash"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.gnoll_raider.shattering_strikes.executes", "abilityId": "ability.creature.gnoll_raider.shattering_strikes", "friendlyAbilityIds": ["ability.creature.gnoll_raider.shattering_strikes"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.summon.totemic_ward.warding_pulse.executes", "abilityId": "ability.summon.totemic_ward.warding_pulse", "friendlyAbilityIds": ["ability.summon.totemic_ward.warding_pulse"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.gnoll_shaman.totemic_ward.executes", "abilityId": "ability.creature.gnoll_shaman.totemic_ward", "friendlyAbilityIds": ["ability.creature.gnoll_shaman.totemic_ward"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.gnoll_shaman.hex_of_weakness.executes", "abilityId": "ability.creature.gnoll_shaman.hex_of_weakness", "friendlyAbilityIds": ["ability.creature.gnoll_shaman.hex_of_weakness"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.kobold_skirmisher.coordinated_assault.executes", "abilityId": "ability.creature.kobold_skirmisher.coordinated_assault", "friendlyAbilityIds": ["ability.creature.kobold_skirmisher.coordinated_assault"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.kobold_skirmisher.trap_mastery.catalog_only", "abilityId": "ability.creature.kobold_skirmisher.trap_mastery", "friendlyAbilityIds": ["ability.creature.kobold_skirmisher.trap_mastery"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.kobold_sorcerer.chain_lightning.executes", "abilityId": "ability.creature.kobold_sorcerer.chain_lightning", "friendlyAbilityIds": ["ability.creature.kobold_sorcerer.chain_lightning"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.kobold_sorcerer.focused_energy.executes", "abilityId": "ability.creature.kobold_sorcerer.focused_energy", "friendlyAbilityIds": ["ability.creature.kobold_sorcerer.focused_energy"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.feral_ghoul.feral_pounce.executes", "abilityId": "ability.creature.feral_ghoul.feral_pounce", "friendlyAbilityIds": ["ability.creature.feral_ghoul.feral_pounce"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.feral_ghoul.shredding_claws.executes", "abilityId": "ability.creature.feral_ghoul.shredding_claws", "friendlyAbilityIds": ["ability.creature.feral_ghoul.shredding_claws"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.plague_ghoul.plague_swipe.executes", "abilityId": "ability.creature.plague_ghoul.plague_swipe", "friendlyAbilityIds": ["ability.creature.plague_ghoul.plague_swipe"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.plague_ghoul.pestilent_touch.executes", "abilityId": "ability.creature.plague_ghoul.pestilent_touch", "friendlyAbilityIds": ["ability.creature.plague_ghoul.pestilent_touch"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.ravenous_ghoul.draining_claws.executes", "abilityId": "ability.creature.ravenous_ghoul.draining_claws", "friendlyAbilityIds": ["ability.creature.ravenous_ghoul.draining_claws"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.ravenous_ghoul.vile_feast.executes", "abilityId": "ability.creature.ravenous_ghoul.vile_feast", "friendlyAbilityIds": ["ability.creature.ravenous_ghoul.vile_feast"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.vampire_fledgeling.taste_of_blood.executes", "abilityId": "ability.creature.vampire_fledgeling.taste_of_blood", "friendlyAbilityIds": ["ability.creature.vampire_fledgeling.taste_of_blood"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.vampire_fledgeling.fresh_hunger.executes", "abilityId": "ability.creature.vampire_fledgeling.fresh_hunger", "friendlyAbilityIds": ["ability.creature.vampire_fledgeling.fresh_hunger"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.wandering_ghost.spectral_passage.executes", "abilityId": "ability.creature.wandering_ghost.spectral_passage", "friendlyAbilityIds": ["ability.creature.wandering_ghost.spectral_passage"], "maxTicks": 1, "expectedLogs": []},
+  {"id": "behavior.creature.wandering_ghost.restless_spirit.executes", "abilityId": "ability.creature.wandering_ghost.restless_spirit", "friendlyAbilityIds": ["ability.creature.wandering_ghost.restless_spirit"], "maxTicks": 1, "expectedLogs": []}
 ]

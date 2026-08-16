@@ -90,7 +90,8 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
 
         if (ability.Kind == AbilitySpecKind.Passive
             && ability.Triggers.Count == 0
-            && ability.Effects.Count == 0)
+            && ability.Effects.Count == 0
+            && !ability.Tags.Contains("NonCombat", StringComparer.OrdinalIgnoreCase))
         {
             errors.Add($"{essenceId}/{ability.Id}: passive ability requires a trigger or permanent effect.");
         }

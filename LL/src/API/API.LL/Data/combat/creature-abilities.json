@@ -375,6 +375,46 @@
       ]
     },
     {
+      "monsterId": "monster.gnoll_pack_leader",
+      "abilityIds": ["ability.creature.gnoll_pack_leader.rallying_cry", "ability.creature.gnoll_pack_leader.savage_leader"]
+    },
+    {
+      "monsterId": "monster.gnoll_raider",
+      "abilityIds": ["ability.creature.gnoll_raider.loot_and_slash", "ability.creature.gnoll_raider.shattering_strikes"]
+    },
+    {
+      "monsterId": "monster.gnoll_shaman",
+      "abilityIds": ["ability.creature.gnoll_shaman.totemic_ward", "ability.creature.gnoll_shaman.hex_of_weakness"]
+    },
+    {
+      "monsterId": "monster.kobold_skirmisher",
+      "abilityIds": ["ability.creature.kobold_skirmisher.coordinated_assault", "ability.creature.kobold_skirmisher.trap_mastery"]
+    },
+    {
+      "monsterId": "monster.kobold_sorcerer",
+      "abilityIds": ["ability.creature.kobold_sorcerer.chain_lightning", "ability.creature.kobold_sorcerer.focused_energy"]
+    },
+    {
+      "monsterId": "monster.feral_ghoul",
+      "abilityIds": ["ability.creature.feral_ghoul.feral_pounce", "ability.creature.feral_ghoul.shredding_claws"]
+    },
+    {
+      "monsterId": "monster.plague_ghoul",
+      "abilityIds": ["ability.creature.plague_ghoul.plague_swipe", "ability.creature.plague_ghoul.pestilent_touch"]
+    },
+    {
+      "monsterId": "monster.ravenous_ghoul",
+      "abilityIds": ["ability.creature.ravenous_ghoul.draining_claws", "ability.creature.ravenous_ghoul.vile_feast"]
+    },
+    {
+      "monsterId": "monster.vampire_fledgeling",
+      "abilityIds": ["ability.creature.vampire_fledgeling.taste_of_blood", "ability.creature.vampire_fledgeling.fresh_hunger"]
+    },
+    {
+      "monsterId": "monster.wandering_ghost",
+      "abilityIds": ["ability.creature.wandering_ghost.spectral_passage", "ability.creature.wandering_ghost.restless_spirit"]
+    },
+    {
       "monsterId": "monster.velka,_the_bloodwing_huntress",
       "abilityIds": [
         "ability.creature.velka.rending_dive",

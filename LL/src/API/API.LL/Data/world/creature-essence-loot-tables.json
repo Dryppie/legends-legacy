@@ -732,6 +732,46 @@
           }
         ]
       }
+    },
+    {
+      "id": "monster.gnoll_pack_leader",
+      "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.gnoll_pack_leader.savage_leader", "variants": [{"essenceDefinitionId": "essence.gnoll_pack_leader", "activeAbilityId": "ability.creature.gnoll_pack_leader.rallying_cry", "weight": 1}]}
+    },
+    {
+      "id": "monster.gnoll_raider",
+      "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.gnoll_raider.shattering_strikes", "variants": [{"essenceDefinitionId": "essence.gnoll_raider", "activeAbilityId": "ability.creature.gnoll_raider.loot_and_slash", "weight": 1}]}
+    },
+    {
+      "id": "monster.gnoll_shaman",
+      "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.gnoll_shaman.hex_of_weakness", "variants": [{"essenceDefinitionId": "essence.gnoll_shaman", "activeAbilityId": "ability.creature.gnoll_shaman.totemic_ward", "weight": 1}]}
+    },
+    {
+      "id": "monster.kobold_skirmisher",
+      "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.kobold_skirmisher.trap_mastery", "variants": [{"essenceDefinitionId": "essence.kobold_skirmisher", "activeAbilityId": "ability.creature.kobold_skirmisher.coordinated_assault", "weight": 1}]}
+    },
+    {
+      "id": "monster.kobold_sorcerer",
+      "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.kobold_sorcerer.focused_energy", "variants": [{"essenceDefinitionId": "essence.kobold_sorcerer", "activeAbilityId": "ability.creature.kobold_sorcerer.chain_lightning", "weight": 1}]}
+    },
+    {
+      "id": "monster.feral_ghoul",
+      "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.feral_ghoul.shredding_claws", "variants": [{"essenceDefinitionId": "essence.feral_ghoul", "activeAbilityId": "ability.creature.feral_ghoul.feral_pounce", "weight": 1}]}
+    },
+    {
+      "id": "monster.plague_ghoul",
+      "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.plague_ghoul.pestilent_touch", "variants": [{"essenceDefinitionId": "essence.plague_ghoul", "activeAbilityId": "ability.creature.plague_ghoul.plague_swipe", "weight": 1}]}
+    },
+    {
+      "id": "monster.ravenous_ghoul",
+      "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.ravenous_ghoul.vile_feast", "variants": [{"essenceDefinitionId": "essence.ravenous_ghoul", "activeAbilityId": "ability.creature.ravenous_ghoul.draining_claws", "weight": 1}]}
+    },
+    {
+      "id": "monster.vampire_fledgeling",
+      "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.vampire_fledgeling.fresh_hunger", "variants": [{"essenceDefinitionId": "essence.vampire_fledgeling", "activeAbilityId": "ability.creature.vampire_fledgeling.taste_of_blood", "weight": 1}]}
+    },
+    {
+      "id": "monster.wandering_ghost",
+      "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.wandering_ghost.restless_spirit", "variants": [{"essenceDefinitionId": "essence.wandering_ghost", "activeAbilityId": "ability.creature.wandering_ghost.spectral_passage", "weight": 1}]}
     }
   ]
 }

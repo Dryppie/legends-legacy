@@ -1167,6 +1167,106 @@
         "activeAbilityModifiers": [],
         "passiveAbilityModifiers": []
       }
+    },
+    {
+      "id": "essence.gnoll_pack_leader",
+      "sourceMonsterId": "monster.gnoll_pack_leader",
+      "name": "Gnoll Pack Leader Essence",
+      "description": "The combat essence of Gnoll Pack Leader, granting Rallying Cry and Savage Leader.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.gnoll_pack_leader.rallying_cry",
+      "passiveAbilityId": "ability.creature.gnoll_pack_leader.savage_leader",
+      "evolution": {"id": "evolution.gnoll_pack_leader", "name": "Awakened Gnoll Pack Leader", "description": "The awakened form of Gnoll Pack Leader Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.gnoll_raider",
+      "sourceMonsterId": "monster.gnoll_raider",
+      "name": "Gnoll Raider Essence",
+      "description": "The combat essence of Gnoll Raider, granting Loot and Slash and Shattering Strikes.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.gnoll_raider.loot_and_slash",
+      "passiveAbilityId": "ability.creature.gnoll_raider.shattering_strikes",
+      "evolution": {"id": "evolution.gnoll_raider", "name": "Awakened Gnoll Raider", "description": "The awakened form of Gnoll Raider Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.gnoll_shaman",
+      "sourceMonsterId": "monster.gnoll_shaman",
+      "name": "Gnoll Shaman Essence",
+      "description": "The combat essence of Gnoll Shaman, granting Totemic Ward and Hex of Weakness.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.gnoll_shaman.totemic_ward",
+      "passiveAbilityId": "ability.creature.gnoll_shaman.hex_of_weakness",
+      "evolution": {"id": "evolution.gnoll_shaman", "name": "Awakened Gnoll Shaman", "description": "The awakened form of Gnoll Shaman Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.kobold_skirmisher",
+      "sourceMonsterId": "monster.kobold_skirmisher",
+      "name": "Kobold Skirmisher Essence",
+      "description": "The combat essence of Kobold Skirmisher, granting Coordinated Assault.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.kobold_skirmisher.coordinated_assault",
+      "passiveAbilityId": "ability.creature.kobold_skirmisher.trap_mastery",
+      "evolution": {"id": "evolution.kobold_skirmisher", "name": "Awakened Kobold Skirmisher", "description": "The awakened form of Kobold Skirmisher Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.kobold_sorcerer",
+      "sourceMonsterId": "monster.kobold_sorcerer",
+      "name": "Kobold Sorcerer Essence",
+      "description": "The combat essence of Kobold Sorcerer, granting Chain Lightning and Focused Energy.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.kobold_sorcerer.chain_lightning",
+      "passiveAbilityId": "ability.creature.kobold_sorcerer.focused_energy",
+      "evolution": {"id": "evolution.kobold_sorcerer", "name": "Awakened Kobold Sorcerer", "description": "The awakened form of Kobold Sorcerer Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.feral_ghoul",
+      "sourceMonsterId": "monster.feral_ghoul",
+      "name": "Feral Ghoul Essence",
+      "description": "The combat essence of Feral Ghoul, granting Feral Pounce and Shredding Claws.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.feral_ghoul.feral_pounce",
+      "passiveAbilityId": "ability.creature.feral_ghoul.shredding_claws",
+      "evolution": {"id": "evolution.feral_ghoul", "name": "Awakened Feral Ghoul", "description": "The awakened form of Feral Ghoul Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.plague_ghoul",
+      "sourceMonsterId": "monster.plague_ghoul",
+      "name": "Plague Ghoul Essence",
+      "description": "The combat essence of Plague Ghoul, granting Plague Swipe and Pestilent Touch.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.plague_ghoul.plague_swipe",
+      "passiveAbilityId": "ability.creature.plague_ghoul.pestilent_touch",
+      "evolution": {"id": "evolution.plague_ghoul", "name": "Awakened Plague Ghoul", "description": "The awakened form of Plague Ghoul Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.ravenous_ghoul",
+      "sourceMonsterId": "monster.ravenous_ghoul",
+      "name": "Ravenous Ghoul Essence",
+      "description": "The combat essence of Ravenous Ghoul, granting Draining Claws and Vile Feast.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.ravenous_ghoul.draining_claws",
+      "passiveAbilityId": "ability.creature.ravenous_ghoul.vile_feast",
+      "evolution": {"id": "evolution.ravenous_ghoul", "name": "Awakened Ravenous Ghoul", "description": "The awakened form of Ravenous Ghoul Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.vampire_fledgeling",
+      "sourceMonsterId": "monster.vampire_fledgeling",
+      "name": "Vampire Fledgeling Essence",
+      "description": "The combat essence of Vampire Fledgeling, granting Taste of Blood and Fresh Hunger.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.vampire_fledgeling.taste_of_blood",
+      "passiveAbilityId": "ability.creature.vampire_fledgeling.fresh_hunger",
+      "evolution": {"id": "evolution.vampire_fledgeling", "name": "Awakened Vampire Fledgeling", "description": "The awakened form of Vampire Fledgeling Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.wandering_ghost",
+      "sourceMonsterId": "monster.wandering_ghost",
+      "name": "Wandering Ghost Essence",
+      "description": "The combat essence of Wandering Ghost, granting Spectral Passage and Restless Spirit.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.wandering_ghost.spectral_passage",
+      "passiveAbilityId": "ability.creature.wandering_ghost.restless_spirit",
+      "evolution": {"id": "evolution.wandering_ghost", "name": "Awakened Wandering Ghost", "description": "The awakened form of Wandering Ghost Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
     }
   ]
 }

@@ -65,18 +65,49 @@ public sealed class TemperingMechanicsServiceTests
     [Fact]
     public void RarityUpgradeUsesThematicOverflowWhenAuthoredStatsAreCapped()
     {
+        // Budget share is no longer a ceiling, so the only thing that can still exhaust an
+        // authored stat is its real per-item hard cap. Direct percentages have one; flats
+        // and ratings do not, which is why this saturates CritChance rather than Armor.
+        var options = new CraftingBalanceOptions();
         var equipment = CreateEquipment();
         equipment.Tier = 10;
         equipment.ItemXp = 9;
+        var saturatedCritChance = EquipmentStatBudgetCatalog
+            .Get(AttributeType.CritChance, equipment.Tier)
+            .PerItemHardCap
+            * (float)(EquipmentConstraintProfile.GetPerItemCapMultiplier(
+                    options.GetSlotBudgetWeight(equipment.EquipmentBase.EquipmentType))
+                * EquipmentConstraintProfile.RarityImprovementCapMultiplier);
         equipment.InstanceModifiers.Add(new InstanceAttributeModifier(
-            AttributeType.Armor,
-            719));
+            AttributeType.CritChance,
+            saturatedCritChance));
+        var profile = new TemperingProfileDefinition
+        {
+            Id = "profile.test",
+            Name = "Test",
+            Stats =
+            [
+                new TemperingStatWeightDefinition
+                {
+                    Stat = AttributeType.CritChance,
+                    Weight = 100,
+                    Category = TemperingStatCategory.Primary,
+                    CanIntroduce = true,
+                    CanIncrease = true,
+                    MaxBudgetShare = 1d
+                }
+            ]
+        };
 
-        var result = new TemperingMechanicsService()
-            .ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.01d));
+        var result = new TemperingMechanicsService(Options.Create(options))
+            .ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.01d));
 
         Assert.True(result.RarityUpgraded);
         Assert.Equal(AttributeType.Power, result.ImprovedStat);
+        Assert.Equal(
+            saturatedCritChance,
+            equipment.InstanceModifiers.Single(x =>
+                x.AttributeType == AttributeType.CritChance).Amount);
         var powerImprovement = equipment.InstanceModifiers.Single(x =>
             x.AttributeType == AttributeType.Power).Amount;
         Assert.Equal(
@@ -84,10 +115,46 @@ public sealed class TemperingMechanicsServiceTests
                 1d,
                 Math.Round(
                     TemperingConstants.GetDirectedImprovementBudget(equipment.Tier)
+                    * options.GetQualityStatMultiplier(equipment.Quality)
                     / EquipmentStatBudgetCatalog
                         .Get(AttributeType.Power, equipment.Tier)
                         .CostPerPoint)),
             powerImprovement);
+    }
+
+    [Fact]
+    public void RarityUpgradeKeepsImprovingAStatThatIsAlreadyPastItsAuthoredBudgetShare()
+    {
+        // The authored share used to exclude a stat outright once it was reached, which
+        // starved the primary stat on concentrated items. It is now a steering weight only.
+        var equipment = CreateEquipment();
+        equipment.ItemXp = 9;
+        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(AttributeType.Armor, 40));
+        var profile = new TemperingProfileDefinition
+        {
+            Id = "profile.test",
+            Name = "Test",
+            Stats =
+            [
+                new TemperingStatWeightDefinition
+                {
+                    Stat = AttributeType.Armor,
+                    Weight = 100,
+                    Category = TemperingStatCategory.Primary,
+                    CanIntroduce = true,
+                    CanIncrease = true,
+                    MaxBudgetShare = 0.25d
+                }
+            ]
+        };
+
+        var result = new TemperingMechanicsService()
+            .ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.01d));
+
+        Assert.True(result.RarityUpgraded);
+        Assert.Equal(AttributeType.Armor, result.ImprovedStat);
+        var modifier = Assert.Single(equipment.InstanceModifiers);
+        Assert.True(modifier.Amount > 40);
     }
 
     [Fact]
@@ -241,6 +308,58 @@ public sealed class TemperingMechanicsServiceTests
             EquipmentBudgetEvaluator.Evaluate(equipment.AttributeModifiers, equipment.Tier) > before,
             $"{result.ImprovedStat}: {result.PreviousStatValue} -> {result.NewStatValue}; " +
             string.Join(", ", equipment.InstanceModifiers.Select(x => $"{x.AttributeType}={x.Amount}")));
+    }
+
+    [Fact]
+    public void Rarity_upgrade_improves_the_sole_authored_stat_that_holds_the_whole_budget()
+    {
+        // Mirrors recipe.jewelry.ring.band: one authored tempering stat, maxBudgetShare 1.0.
+        // Power therefore always holds 100% of the item budget, which used to make it
+        // permanently ineligible and pushed every upgrade onto a thematic overflow stat.
+        var equipment = new EquipmentInstance
+        {
+            ItemBaseId = "band",
+            ItemBase = new EquipmentBase
+            {
+                Id = "band",
+                Name = "Ring",
+                EquipmentType = EquipmentType.Ring
+            },
+            Rarity = Rarity.Common,
+            Tier = 1,
+            Quality = ItemQuality.Exceptional,
+            Potential = 10,
+            ItemXp = 9,
+            StatModelVersion = EquipmentStatBudgetCatalog.BalanceVersion,
+            InstanceModifiers = [new InstanceAttributeModifier(AttributeType.Power, 4.95f)]
+        };
+        var profile = new TemperingProfileDefinition
+        {
+            Id = "recipe.jewelry.ring.band.tempering",
+            Name = "Ring Tempering",
+            Stats =
+            [
+                new TemperingStatWeightDefinition
+                {
+                    Stat = AttributeType.Power,
+                    Weight = 100,
+                    Category = TemperingStatCategory.Primary,
+                    CanIntroduce = true,
+                    CanIncrease = true,
+                    MaxBudgetShare = 1d,
+                    MinimumTier = 1
+                }
+            ]
+        };
+
+        var result = new TemperingMechanicsService()
+            .ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.01d));
+
+        Assert.True(result.RarityUpgraded);
+        Assert.Equal(AttributeType.Power, result.ImprovedStat);
+        var modifier = Assert.Single(equipment.InstanceModifiers);
+        Assert.Equal(AttributeType.Power, modifier.AttributeType);
+        Assert.Equal(5.95f, modifier.Amount);
     }
 
     private static EquipmentInstance CreateEquipment() => new()

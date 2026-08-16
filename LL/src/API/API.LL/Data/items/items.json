@@ -1946,5 +1946,35 @@
     "attributeModifiers": [],
     "toolBonuses": [],
     "gatheringType": null
+  },
+  {
+    "id": "item.essence.gnoll_pack_leader", "name": "Unbound Gnoll Pack Leader Essence", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Common", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "item.essence.gnoll_raider", "name": "Unbound Gnoll Raider Essence", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Common", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "item.essence.gnoll_shaman", "name": "Unbound Gnoll Shaman Essence", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Common", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "item.essence.kobold_skirmisher", "name": "Unbound Kobold Skirmisher Essence", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Common", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "item.essence.kobold_sorcerer", "name": "Unbound Kobold Sorcerer Essence", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Common", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "item.essence.feral_ghoul", "name": "Unbound Feral Ghoul Essence", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Common", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "item.essence.plague_ghoul", "name": "Unbound Plague Ghoul Essence", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Common", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "item.essence.ravenous_ghoul", "name": "Unbound Ravenous Ghoul Essence", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Common", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "item.essence.vampire_fledgeling", "name": "Unbound Vampire Fledgeling Essence", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Common", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "item.essence.wandering_ghost", "name": "Unbound Wandering Ghost Essence", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Common", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
   }
 ]

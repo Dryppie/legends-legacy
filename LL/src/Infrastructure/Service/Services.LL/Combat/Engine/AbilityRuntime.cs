@@ -78,6 +78,9 @@ public sealed class CompiledEffect
     public int DurationTicks { get; init; }
     public int IntervalTicks { get; init; }
     public int Uses { get; init; }
+    public bool OncePerTarget { get; init; }
+    public int LivingNonSummonedAllyDamagePercent { get; init; }
+    public int SubsequentTargetDamagePercent { get; init; } = 100;
     public int ChancePercent { get; init; }
     public AttackType AttackType { get; init; }
     public DamageType DamageType { get; init; }
@@ -85,6 +88,7 @@ public sealed class CompiledEffect
     public float CritChanceBonus { get; init; }
     public float ArmorPenetrationBonus { get; init; }
     public float LifeStealPercentage { get; init; }
+    public StandardConditionType? LifeStealTargetCondition { get; init; }
     public decimal ProcCoefficient { get; init; }
     public AbilitySpecKind AbilityKind { get; init; }
     public required IReadOnlySet<string> AbilityTags { get; init; }
@@ -145,6 +149,7 @@ public sealed class RuntimeAbility
     private readonly Dictionary<CompiledTrigger, int> _triggerOccurrences = [];
     private readonly HashSet<CompiledTrigger> _activeTriggers = [];
     private readonly Dictionary<string, int> _effectUses = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, HashSet<string>> _effectTargets = new(StringComparer.OrdinalIgnoreCase);
 
     public RuntimeAbility(CompiledAbility definition)
     {
@@ -211,15 +216,24 @@ public sealed class RuntimeAbility
 
     public void EndTriggerExecution(CompiledTrigger trigger) => _activeTriggers.Remove(trigger);
 
-    public bool CanUseEffect(CompiledEffect effect) =>
-        effect.Uses <= 0 || _effectUses.GetValueOrDefault(effect.Id) < effect.Uses;
+    public bool CanUseEffect(CompiledEffect effect, RuntimeCombatant? target = null) =>
+        (effect.Uses <= 0 || _effectUses.GetValueOrDefault(effect.Id) < effect.Uses)
+        && (!effect.OncePerTarget
+            || target is null
+            || !_effectTargets.TryGetValue(effect.Id, out var targets)
+            || !targets.Contains(target.Id));
 
-    public void MarkEffectUsed(CompiledEffect effect)
+    public void MarkEffectUsed(CompiledEffect effect, RuntimeCombatant target)
     {
-        if (effect.Uses <= 0)
-            return;
+        if (effect.Uses > 0)
+            _effectUses[effect.Id] = _effectUses.GetValueOrDefault(effect.Id) + 1;
 
-        _effectUses[effect.Id] = _effectUses.GetValueOrDefault(effect.Id) + 1;
+        if (effect.OncePerTarget)
+        {
+            if (!_effectTargets.TryGetValue(effect.Id, out var targets))
+                _effectTargets[effect.Id] = targets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            targets.Add(target.Id);
+        }
     }
 
 }
@@ -230,6 +244,7 @@ public sealed class RuntimeStatus
     private readonly Dictionary<CompiledTrigger, int> _triggerOccurrences = [];
     private readonly HashSet<CompiledTrigger> _activeTriggers = [];
     private readonly Dictionary<string, int> _effectUses = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, HashSet<string>> _effectTargets = new(StringComparer.OrdinalIgnoreCase);
     private readonly int _durationTicks;
 
     public RuntimeStatus(
@@ -317,15 +332,24 @@ public sealed class RuntimeStatus
 
     public void EndTriggerExecution(CompiledTrigger trigger) => _activeTriggers.Remove(trigger);
 
-    public bool CanUseEffect(CompiledEffect effect) =>
-        effect.Uses <= 0 || _effectUses.GetValueOrDefault(effect.Id) < effect.Uses;
+    public bool CanUseEffect(CompiledEffect effect, RuntimeCombatant? target = null) =>
+        (effect.Uses <= 0 || _effectUses.GetValueOrDefault(effect.Id) < effect.Uses)
+        && (!effect.OncePerTarget
+            || target is null
+            || !_effectTargets.TryGetValue(effect.Id, out var targets)
+            || !targets.Contains(target.Id));
 
-    public void MarkEffectUsed(CompiledEffect effect)
+    public void MarkEffectUsed(CompiledEffect effect, RuntimeCombatant target)
     {
-        if (effect.Uses <= 0)
-            return;
+        if (effect.Uses > 0)
+            _effectUses[effect.Id] = _effectUses.GetValueOrDefault(effect.Id) + 1;
 
-        _effectUses[effect.Id] = _effectUses.GetValueOrDefault(effect.Id) + 1;
+        if (effect.OncePerTarget)
+        {
+            if (!_effectTargets.TryGetValue(effect.Id, out var targets))
+                _effectTargets[effect.Id] = targets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            targets.Add(target.Id);
+        }
     }
 }
 

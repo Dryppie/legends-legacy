@@ -392,5 +392,27 @@
     ],
     "triggers": [],
     "effects": []
+  },
+  {
+    "id": "status.gnoll_raider.shattered_armor",
+    "name": "Shattered Armor",
+    "description": "Physical Armor is reduced by 5% of its initial value per stack for 20 seconds.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 20,
+    "durationTicks": 200,
+    "tags": ["Status.Debuff", "Damage.Physical", "Pattern.StackingDebuff"],
+    "triggers": [],
+    "effects": []
+  },
+  {
+    "id": "status.kobold_sorcerer.focused_energy",
+    "name": "Focused Energy",
+    "description": "Power is increased by 2% of its initial value per stack until hit.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 100,
+    "durationTicks": 0,
+    "tags": ["Status.Buff", "Pattern.StackingBuff"],
+    "triggers": [],
+    "effects": []
   }
 ]

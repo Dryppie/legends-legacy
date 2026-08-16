@@ -60,6 +60,19 @@ public sealed class EssenceDefinitionValidatorTests
     }
 
     [Fact]
+    public void Validate_allows_a_catalog_only_noncombat_passive()
+    {
+        var definition = ValidDefinition();
+        definition.PassiveAbility.Tags = ["NonCombat"];
+        definition.PassiveAbility.Triggers = [];
+        definition.PassiveAbility.Effects = [];
+
+        var errors = _validator.Validate([definition]);
+
+        Assert.DoesNotContain(errors, error => error.Contains("passive ability requires", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public void Validate_rejects_unknown_condition_tags()
     {
         var definition = ValidDefinition();
@@ -167,7 +180,7 @@ public sealed class EssenceDefinitionValidatorTests
             .Select(definition => definition.ActiveAbility.CooldownTicks)
             .ToArray();
 
-        Assert.Equal(53, cooldowns.Length);
+        Assert.Equal(63, cooldowns.Length);
         Assert.All(cooldowns, cooldown => Assert.InRange(cooldown, 75, 220));
         Assert.True(cooldowns.Distinct().Count() >= 10);
         Assert.Contains(cooldowns, cooldown => cooldown < 100);
@@ -208,7 +221,7 @@ public sealed class EssenceDefinitionValidatorTests
             .SelectMany(collection => collection.EssenceDefinitionIds)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        Assert.Equal(13, collections.Count);
+        Assert.Equal(15, collections.Count);
         Assert.All(collections, collection =>
         {
             Assert.InRange(collection.EssenceDefinitionIds.Count, 2, 6);
@@ -216,7 +229,7 @@ public sealed class EssenceDefinitionValidatorTests
         Assert.Equal(
             ["Creature Families", "Essence Affinities", "Regional Ecologies"],
             collections.Select(collection => collection.Category).Distinct().Order().ToArray());
-        Assert.Equal(53, regionOneEssences.Count);
+        Assert.Equal(63, regionOneEssences.Count);
         Assert.Equal(regionOneEssences.Order(StringComparer.OrdinalIgnoreCase), collectedEssences.Order(StringComparer.OrdinalIgnoreCase));
         var allowedBonusKinds = new HashSet<BonusKind>
         {
