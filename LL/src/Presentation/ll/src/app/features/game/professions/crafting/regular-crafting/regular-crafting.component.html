@@ -455,7 +455,18 @@
           <span class="ll-state shrink-0">T{{ crafted.equipment.tier }}</span>
         </div>
 
-        <section class="crafted-potential mt-6 border-t border-white/10 pt-4">
+        <section class="crafted-gear-power mt-6 border-t border-white/10 pt-4">
+          <div class="flex items-end justify-between gap-3">
+            <span class="ll-item-meta tracking-[0.18em]">Gear Power</span>
+            <span class="shrink-0 tabular-nums">
+              <strong class="font-serif text-xl font-medium text-primary">
+                {{ crafted.equipment.itemBudget | number: "1.0-2" }}
+              </strong>
+            </span>
+          </div>
+        </section>
+
+        <section class="crafted-potential mt-5 border-t border-white/10 pt-4">
           <div class="flex items-end justify-between gap-3">
             <span class="ll-item-meta tracking-[0.18em]">Potential</span>
             <span class="shrink-0 tabular-nums">

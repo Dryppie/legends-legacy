@@ -32,6 +32,9 @@ public static class SeedCreatures
     }
 
     public static async Task<bool> EnsureRemainingRegionOneIdleAreas(LLDbContext context)
+        => await EnsureAuthoredIdleRegions(context);
+
+    public static async Task<bool> EnsureAuthoredIdleRegions(LLDbContext context)
     {
         var content = await LoadContentAsync();
         var seedRegionNames = content.Regions
@@ -47,7 +50,7 @@ public static class SeedCreatures
 
         var changed = false;
         changed |= await UpsertCreaturesAsync(context, content.Creatures);
-        changed |= await UpsertRegionsAsync(context, content.Regions, createMissingRegions: false);
+        changed |= await UpsertRegionsAsync(context, content.Regions, createMissingRegions: true);
 
         return changed;
     }
@@ -134,6 +137,11 @@ public static class SeedCreatures
                 if (area.SpawnProbabilities.Count == 0)
                 {
                     throw new InvalidOperationException($"Area '{area.Id}' must define spawn probabilities.");
+                }
+
+                if (area.RequiredTowerFloor is < 1)
+                {
+                    throw new InvalidOperationException($"Area '{area.Id}' has an invalid required Tower floor.");
                 }
 
                 foreach (var creature in area.Creatures)
@@ -301,6 +309,7 @@ public static class SeedCreatures
             DifficultyTier = seed.DifficultyTier,
             RequiredActiveQuestId = seed.RequiredActiveQuestId,
             RequiredCompletedQuestId = seed.RequiredCompletedQuestId,
+            RequiredTowerFloor = seed.RequiredTowerFloor,
             HideWhenLocked = seed.HideWhenLocked,
             SpawnProbabilities = seed.SpawnProbabilities.ToList(),
             Creatures = seed.Creatures
@@ -324,6 +333,7 @@ public static class SeedCreatures
         changed |= SetIfChanged(area.DifficultyTier, seed.DifficultyTier, value => area.DifficultyTier = value);
         changed |= SetIfChanged(area.RequiredActiveQuestId, seed.RequiredActiveQuestId, value => area.RequiredActiveQuestId = value);
         changed |= SetIfChanged(area.RequiredCompletedQuestId, seed.RequiredCompletedQuestId, value => area.RequiredCompletedQuestId = value);
+        changed |= SetIfChanged(area.RequiredTowerFloor, seed.RequiredTowerFloor, value => area.RequiredTowerFloor = value);
         changed |= SetIfChanged(area.HideWhenLocked, seed.HideWhenLocked, value => area.HideWhenLocked = value);
 
         if (!FloatsEqual(area.SpawnProbabilities, seed.SpawnProbabilities))
@@ -508,6 +518,7 @@ public static class SeedCreatures
         public int DifficultyTier { get; set; }
         public string? RequiredActiveQuestId { get; set; }
         public string? RequiredCompletedQuestId { get; set; }
+        public int? RequiredTowerFloor { get; set; }
         public bool HideWhenLocked { get; set; }
         public List<float> SpawnProbabilities { get; set; } = [];
         public List<AreaCreatureSeed> Creatures { get; set; } = [];

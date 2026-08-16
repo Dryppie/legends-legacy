@@ -4,6 +4,8 @@ using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.WorldTower;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.WorldTower;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -203,9 +205,20 @@ public sealed class WorldTowerBalanceAnalyzerTests
         var factory = new WorldTowerDevelopmentRosterFactory(fixture.Builds);
         var characterId = Guid.NewGuid();
 
+        var benchmark = floor.BalanceBenchmark;
+        var rung = fixture.Builds.GetProgressionLadder().Single(candidate =>
+            candidate.Id.Equals(benchmark.BuildId, StringComparison.OrdinalIgnoreCase));
+        var unboosted = fixture.Builds.CreateBuildForArea(
+            CanonicalPartyProfile.Offense,
+            rung,
+            benchmark.CharacterLevel,
+            benchmark.EssenceCount);
+
         var build = factory.Create(characterId, "SeedGuest_Test", floor, rosterIndex: 0);
 
-        Assert.True(build.PowerRating > 0);
+        Assert.Equal(
+            CombatRatingDisplay.FromRaw(unboosted.Rating.Overall) * WorldTowerDevelopmentRosterFactory.PowerMultiplier,
+            build.PowerRating);
         Assert.Equal(characterId, build.Snapshot.CharacterId);
         Assert.Equal("SeedGuest_Test", build.Snapshot.Name);
         Assert.Equal(expectedLevel, build.Snapshot.Level);
@@ -214,6 +227,13 @@ public sealed class WorldTowerBalanceAnalyzerTests
             build.Snapshot.Equipment,
             equipment => Assert.Equal(expectedRarity, equipment.Rarity.ToString()));
         Assert.Equal(expectedEssenceCount, build.Snapshot.EquippedEssences.Count);
+        var powerBoost = Assert.Single(build.Snapshot.Equipment
+            .SelectMany(equipment => equipment.InstanceModifiers)
+            .Where(modifier =>
+                modifier.AttributeType == AttributeType.Power &&
+                modifier.ModifierType == ModifierType.Multiplicative &&
+                Math.Abs(modifier.Amount - 200f) < float.Epsilon));
+        Assert.Equal(200f, powerBoost.Amount);
     }
 
     private static async Task AssertReleasedFloorAsync(

@@ -109,6 +109,13 @@ export class InventoryService {
     );
   }
 
+  markItemSeen(itemInstanceId: string): Observable<unknown> {
+    return this.apiService.post(
+      `inventory/items/${itemInstanceId}/seen`,
+      {},
+    );
+  }
+
   transferItem(
     itemInstanceId: string,
     recipientName: string,

@@ -18,4 +18,24 @@ describe('RegionService', () => {
       GatheringType.Skinning,
     ]);
   });
+
+  it('exposes Meran and its Tower Floor 10 requirement', async () => {
+    const service = new RegionService({} as ApiService);
+
+    const region = await firstValueFrom(service.getRegionById('meran'));
+
+    expect(region.name).toBe('Meran');
+    expect(region.requiredTowerFloor).toBe(10);
+    expect(region.areas.map((area) => area.name)).toEqual([
+      'Warfang Frontier',
+      'Rotgrave Fields',
+    ]);
+    expect(region.areas[0].creatures).toEqual([
+      'Gnoll Pack Leader',
+      'Gnoll Raider',
+      'Gnoll Shaman',
+      'Kobold Skirmisher',
+      'Kobold Sorcerer',
+    ]);
+  });
 });

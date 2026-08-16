@@ -1,5 +1,6 @@
 ﻿using Application.UseCases.Inventories.Commands.ScrapEquipments;
 using Application.UseCases.Inventories.Dtos;
+using Application.UseCases.Inventories.Commands.MarkInventoryItemSeen;
 using Application.UseCases.Inventories.Commands.OpenCatalystSelectionCrate;
 using Application.UseCases.Inventories.Commands.TransferInventoryItem;
 using Application.UseCases.Inventories.Queries.GetInventoryById;
@@ -30,6 +31,13 @@ public class InventoryController : BaseController
             CurrentCharacterGuid,
             crateItemInstanceId,
             request.OptionId));
+
+    [HttpPost("items/{itemInstanceId:guid}/seen")]
+    public async Task<ActionResult<Response<MarkInventoryItemSeenResponseDto>>> MarkSeen(
+        Guid itemInstanceId) =>
+        await Mediator.Send(new MarkInventoryItemSeenCommand(
+            CurrentCharacterGuid,
+            itemInstanceId));
 
     [HttpPost("items/{itemInstanceId:guid}/transfer")]
     [Authorize(Policy = AuthorizationPolicies.RegisteredUser)]

@@ -340,7 +340,7 @@ export class EssencesComponent implements OnInit {
 
     effect(
       () => {
-        const objective = this.questState.pinnedObjective();
+        const objective = this.questState.pinnedOnboardingObjective();
         if (!objective) {
           this.lastPreparedQuestObjective = null;
           return;
@@ -441,7 +441,8 @@ export class EssencesComponent implements OnInit {
         this.essenceState.setActiveView(view as EssenceView);
         if (
           view === 'archive' &&
-          this.questState.pinnedObjective()?.type === 'EssenceEquipped'
+          this.questState.pinnedOnboardingObjective()?.type ===
+            'EssenceEquipped'
         ) {
           this.questPresenter.presentCurrentObjective();
         }
@@ -660,7 +661,7 @@ export class EssencesComponent implements OnInit {
     const starterEssenceDefinitionId =
       this.onboardingStarterEssenceDefinitionId();
     return (
-      this.questState.pinnedObjective()?.type === 'EssenceEquipped' &&
+      this.questState.pinnedOnboardingObjective()?.type === 'EssenceEquipped' &&
       essence.essenceDefinitionId === starterEssenceDefinitionId
     );
   }

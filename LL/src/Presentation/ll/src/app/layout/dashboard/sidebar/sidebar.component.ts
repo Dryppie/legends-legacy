@@ -148,7 +148,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   onNavigate(item: Tab): void {
     if (
       item.id === 'essences' &&
-      this.questState.pinnedObjective()?.type === 'EssenceEquipped'
+      this.questState.pinnedOnboardingObjective()?.type === 'EssenceEquipped'
     ) {
       this.essenceState.setActiveView('archive');
       this.questPresenter.presentCurrentObjective();
@@ -202,10 +202,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   isQuestDestination(item: Tab): boolean {
-    if (this.questState.pinnedQuest()?.category !== 'Tutorial') return false;
-
     const destinationRoute =
-      this.questState.pinnedObjective()?.presentation.destinationRoute;
+      this.questState.pinnedOnboardingObjective()?.presentation
+        .destinationRoute;
     if (!destinationRoute) return false;
     const destinationPath = this.routePath(destinationRoute);
     const itemRoute = `/${item.route.join('/')}`;

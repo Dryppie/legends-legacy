@@ -1,0 +1,17 @@
+<span
+  *ngIf="isOnline(); else offline"
+  class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-300"
+>
+  <span class="size-1.5 rounded-full bg-emerald-300"></span>
+  Online
+</span>
+
+<ng-template #offline>
+  <span
+    class="inline-flex items-center gap-1.5 text-xs text-secondary"
+    [title]="offlineTitle()"
+  >
+    <span *ngIf="compact()" class="size-1.5 rounded-full bg-zinc-600"></span>
+    {{ offlineLabel() }}
+  </span>
+</ng-template>

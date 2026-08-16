@@ -39,6 +39,12 @@ public interface IInventoryRepository
     Task<bool> TryRemoveCraftingMaterialsAsync(Guid characterId, Dictionary<string, int> requiredByItemId, CancellationToken cancellationToken);
     Task<bool> TryRemoveItemsByBaseIdAsync(Guid characterId, Dictionary<string, int> requiredByItemId, CancellationToken cancellationToken);
     Task<InventoryItem?> GetInventoryItemAsync(Guid characterId, Guid inventoryItemId, CancellationToken cancellationToken);
+    /// <summary>
+    /// Stamp an inventory row as inspected by its owner. Idempotent: a row that is already
+    /// stamped keeps its original timestamp.
+    /// </summary>
+    /// <returns>False when the character does not own the item.</returns>
+    Task<bool> MarkItemSeenAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken);
     Task<int> GetInventoryQuantityAsync(Guid characterId, string itemBaseId, CancellationToken cancellationToken);
     void RemoveInventoryItem(InventoryItem inventoryItem);
     Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing listing, CancellationToken cancellationToken);

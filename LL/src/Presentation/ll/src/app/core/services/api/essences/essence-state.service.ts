@@ -350,6 +350,26 @@ export class EssenceStateService {
     });
   }
 
+  /**
+   * Refetch the Soul Archive alone. Attunement (PlayerEssenceDto.attunedSlot) is what the
+   * Archive list renders, and it changes whenever the active loadout's slots change.
+   */
+  refreshArchive(): void {
+    const requestVersion = this.resetVersion;
+
+    this.essencesService.getArchive().subscribe({
+      next: (archive) => {
+        if (requestVersion !== this.resetVersion) return;
+        this._archive.set(archive);
+        this.ensureSelectedEssence(archive);
+      },
+      error: (error) => {
+        if (requestVersion !== this.resetVersion) return;
+        this._error.set(error?.message ?? 'Failed to load Soul Archive');
+      },
+    });
+  }
+
   refreshCreatureArchive(): void {
     const requestVersion = this.resetVersion;
 
@@ -655,6 +675,10 @@ export class EssenceStateService {
         this._savingLoadout.set(false);
         if (loadout.isActive) {
           this.characterState.markOverviewDirty();
+          // Re-saving the active loadout changes which essences are attuned. applySavedLoadout
+          // only patches _loadouts, so without this the Archive list keeps rendering the
+          // previous attunedSlot badges until a manual reload.
+          this.refreshArchive();
         }
         if (activateAfterSave) {
           this.questState.refreshAfterOutboxProgress();

@@ -165,6 +165,42 @@ describe('EssenceStateService loadout drafts', () => {
     expect(service.canSaveDraft()).toBeFalse();
   });
 
+  it('resyncs the Archive after re-saving the active loadout', () => {
+    essences.updateLoadout.and.returnValue(
+      of({
+        id: 'loadout-1',
+        name: 'Default',
+        isActive: true,
+        slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
+      }),
+    );
+    expect(essences.getArchive).toHaveBeenCalledTimes(1);
+
+    service.setDraftSlot(0, 'essence-1');
+    service.saveDraftSlots();
+
+    // attunedSlot lives on the archive snapshot, so it has to be refetched or the Archive list
+    // keeps rendering the previous slot badges.
+    expect(essences.getArchive).toHaveBeenCalledTimes(2);
+  });
+
+  it('leaves the Archive alone when the saved loadout is not active', () => {
+    essences.saveLoadout.and.returnValue(
+      of({
+        id: 'loadout-2',
+        name: 'New Loadout',
+        isActive: false,
+        slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
+      }),
+    );
+    service.newLoadout();
+    service.setDraftSlot(0, 'essence-1');
+
+    service.saveDraftSlots();
+
+    expect(essences.getArchive).toHaveBeenCalledTimes(1);
+  });
+
   it('creates a new loadout when its first Essence is equipped', () => {
     essences.saveLoadout.and.returnValue(
       of({

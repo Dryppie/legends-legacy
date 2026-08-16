@@ -195,7 +195,8 @@ export class RegularCraftingComponent {
   private readonly firstPartyTour = inject(FirstPartyTourService);
 
   readonly isOnboardingWeaponSelectionActive = computed(
-    () => this.questState.pinnedObjective()?.type === 'EquipmentCrafted',
+    () =>
+      this.questState.pinnedOnboardingObjective()?.type === 'EquipmentCrafted',
   );
 
   private readonly onboardingScopedRecipes = computed(() => {

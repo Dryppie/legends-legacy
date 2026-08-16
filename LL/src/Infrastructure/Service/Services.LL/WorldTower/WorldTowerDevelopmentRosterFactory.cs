@@ -1,4 +1,6 @@
 using Application.Interfaces.Services.LL.PowerRatings;
+using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Snapshots;
@@ -28,6 +30,8 @@ public sealed class WorldTowerDevelopmentRosterFactory(
     CanonicalEquipmentBuildFactory canonicalBuilds)
     : IWorldTowerDevelopmentRosterFactory
 {
+    public const int PowerMultiplier = 3;
+
     private static readonly CanonicalPartyProfile[] MixedRosterProfiles =
     [
         CanonicalPartyProfile.Offense,
@@ -54,6 +58,11 @@ public sealed class WorldTowerDevelopmentRosterFactory(
             rung,
             benchmark.CharacterLevel,
             benchmark.EssenceCount);
+        var powerCarrier = build.Equipment.First();
+        powerCarrier.InstanceModifiers.Add(new InstanceAttributeModifier(
+            AttributeType.Power,
+            (PowerMultiplier - 1) * 100f,
+            ModifierType.Multiplicative));
         var snapshotId = Guid.NewGuid();
         var snapshot = new CharacterSnapshot
         {
@@ -81,7 +90,7 @@ public sealed class WorldTowerDevelopmentRosterFactory(
         };
 
         return new WorldTowerDevelopmentBuild(
-            CombatRatingDisplay.FromRaw(build.Rating.Overall),
+            checked(CombatRatingDisplay.FromRaw(build.Rating.Overall) * PowerMultiplier),
             snapshot);
     }
 

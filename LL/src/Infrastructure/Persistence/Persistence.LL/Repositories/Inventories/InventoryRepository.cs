@@ -264,6 +264,20 @@ public class InventoryRepository : IInventoryRepository
             .Where(x => x.InventoryId == characterId && x.ItemInstanceId == inventoryItemId)
             .FirstOrDefaultAsync(cancellationToken);
 
+    public async Task<bool> MarkItemSeenAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken)
+    {
+        var inventoryItem = await _context.InventoryItems
+            .FirstOrDefaultAsync(
+                x => x.InventoryId == characterId && x.ItemInstanceId == itemInstanceId,
+                cancellationToken);
+
+        if (inventoryItem is null)
+            return false;
+
+        inventoryItem.SeenAtUtc ??= DateTimeOffset.UtcNow;
+        return true;
+    }
+
     public async Task<int> GetInventoryQuantityAsync(Guid characterId, string itemBaseId, CancellationToken cancellationToken) =>
         await _context.InventoryItems
             .Include(x => x.ItemInstance)

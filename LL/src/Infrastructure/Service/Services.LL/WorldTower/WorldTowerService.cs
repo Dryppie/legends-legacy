@@ -43,6 +43,7 @@ namespace Services.LL.WorldTower;
 public sealed class WorldTowerService : IWorldTowerService
 {
     private const string EchoModeUnlockKey = "tower_echo_mode_unlock";
+    private const string TowerExpeditionTargetUrlFormat = "/game/world/tower/expeditions/{0}";
     private static readonly TowerRallyStatus[] ActiveRallyStatuses =
     [
         TowerRallyStatus.Recruiting,
@@ -978,6 +979,11 @@ public sealed class WorldTowerService : IWorldTowerService
             rally.Attempt = attempt;
             _db.TowerAttempts.Add(attempt);
             await EnqueueRallyUpdateAsync(rally, "Started", attempt.StartedAt, cancellationToken);
+            await EnqueueTowerBattleChatAnnouncementAsync(
+                rally,
+                definition,
+                attempt.StartedAt,
+                cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
             return TowerOperationResult<TowerAttemptResultDto>.Success(new TowerAttemptResultDto(
@@ -2402,6 +2408,37 @@ public sealed class WorldTowerService : IWorldTowerService
                 item.Details)).ToArray(),
             checkpoint.IsFinal,
             outcome);
+
+    private Task EnqueueTowerBattleChatAnnouncementAsync(
+        TowerRally rally,
+        TowerFloorDefinition definition,
+        DateTimeOffset sentAt,
+        CancellationToken cancellationToken)
+    {
+        var body = $"The Expedition against {definition.GuardianName} - Floor {definition.FloorNumber} is starting!";
+
+        return _outbox.EnqueueAsync(
+            GameEventTypes.WorldTowerChatAnnouncement,
+            new WorldTowerChatAnnouncementPayload(
+                rally.Id,
+                CreateTowerAnnouncementMessageId(rally.Id, "battle-started"),
+                body,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    TowerExpeditionTargetUrlFormat,
+                    rally.Id),
+                sentAt),
+            characterId: null,
+            accountId: null,
+            cancellationToken: cancellationToken);
+    }
+
+    private static Guid CreateTowerAnnouncementMessageId(Guid rallyId, string announcementKey)
+    {
+        var hash = SHA256.HashData(
+            System.Text.Encoding.UTF8.GetBytes($"world-tower:{rallyId:N}:{announcementKey}"));
+        return new Guid(hash.AsSpan(0, 16));
+    }
 
     private async Task EnqueueRallyUpdateAsync(
         TowerRally rally,

@@ -172,7 +172,7 @@ export class InventoryComponent implements OnInit {
     private readonly inventoryService?: InventoryService,
   ) {
     effect(() => {
-      const objectiveType = this.questState.pinnedObjective()?.type;
+      const objectiveType = this.questState.pinnedOnboardingObjective()?.type;
       if (
         objectiveType === 'EquipmentEquipped' ||
         objectiveType === 'GatheringToolEquipped'
@@ -500,7 +500,14 @@ export class InventoryComponent implements OnInit {
   selectInventoryItem(item: InventoryItem): void {
     const changedItem =
       this.selectedItem()?.itemInstance.id !== item.itemInstance.id;
-    this.selectedItem.set(item);
+
+    // Inspecting an item is what clears its "new" marker. Scrap-mode clicks never reach here,
+    // so a bulk-scrap sweep leaves the badges alone.
+    const inspected = item.isNew
+      ? (this.state.markSeen(item.itemInstance.id) ?? item)
+      : item;
+
+    this.selectedItem.set(inspected);
     if (changedItem) {
       this.resetBlueprintAction();
       this.resetContainerAction(item);

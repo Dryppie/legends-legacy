@@ -6,10 +6,15 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Inventories;
 using Domain.Models.Quests;
 using Domain.Models.Regions.Areas;
+using Domain.Models.WorldTower;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using Persistence.LL;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Quests;
+using Services.LL.WorldTower;
 
 namespace EssenceSystem.Tests;
 
@@ -930,6 +935,52 @@ public sealed class QuestSystemTests
         Assert.True(lumo.IsVisible);
         Assert.Equal("quest_requirement", lumo.ReasonCode);
         Assert.Equal([QuestConstants.ToolsOfTheTrade], lumo.UnmetQuestIds);
+    }
+
+    [Fact]
+    public async Task Combat_area_access_requires_World_Tower_Floor_10_to_be_cleared()
+    {
+        var characterId = Guid.NewGuid();
+        var repository = new RecordingQuestRepository(level: 55);
+        var areas = new RecordingAreaService(
+        [
+            new Area
+            {
+                Id = "region_02_area_01",
+                LevelRequirement = 50,
+                RequiredTowerFloor = 10
+            }
+        ]);
+        await using var db = new LLDbContext(
+            new DbContextOptionsBuilder<LLDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options);
+        var service = new CombatAreaAccessService(
+            areas,
+            repository,
+            db,
+            Options.Create(new WorldTowerOptions { ServerId = "test-server" }));
+
+        var locked = await service.GetAccessAsync(characterId, "region_02_area_01", CancellationToken.None);
+
+        Assert.False(locked.CanAccess);
+        Assert.False(locked.IsRequiredTowerFloorCleared);
+        Assert.Equal("tower_floor_requirement", locked.ReasonCode);
+        Assert.Equal("Requires World Tower Floor 10 to be completed.", locked.PlayerMessage);
+
+        db.TowerFloorProgresses.Add(new TowerFloorProgress
+        {
+            ServerId = "test-server",
+            FloorNumber = 10,
+            IsCleared = true
+        });
+        await db.SaveChangesAsync();
+
+        var unlocked = await service.GetAccessAsync(characterId, "region_02_area_01", CancellationToken.None);
+
+        Assert.True(unlocked.CanAccess);
+        Assert.True(unlocked.IsRequiredTowerFloorCleared);
+        Assert.Null(unlocked.ReasonCode);
     }
 
     [Fact]

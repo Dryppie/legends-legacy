@@ -76,15 +76,36 @@ public sealed class RegionAreaBalancingTests
 
         var scaling = provider.GetScaling(new Area
         {
-            Id = "region_02_area_01",
-            DifficultyTier = 11
+            Id = "region_03_area_01",
+            DifficultyTier = 21
         });
 
         Assert.Null(scaling.RegionKey);
         Assert.Null(scaling.RegionStep);
-        Assert.Equal(11, scaling.GlobalStep);
-        Assert.Equal(10, scaling.ProgressionStep);
+        Assert.Equal(21, scaling.GlobalStep);
+        Assert.Equal(20, scaling.ProgressionStep);
         Assert.True(scaling.HealthMultiplier > 3);
+    }
+
+    [Fact]
+    public void Meran_continues_the_region_curve_at_global_step_eleven()
+    {
+        var provider = CreateProvider();
+        var region = provider.GetCatalog().Regions.Single(x => x.RegionKey == "meran");
+
+        Assert.Equal(["region_02_area_01", "region_02_area_02"], region.AreaIds);
+        Assert.Equal(11, region.StartingGlobalStep);
+        Assert.Equal(["t2-standard-common", "t2-standard-uncommon"], region.DefaultBuildIds);
+
+        var warfang = provider.GetScaling(new Area { Id = "region_02_area_01", DifficultyTier = 11 });
+        var rotgrave = provider.GetScaling(new Area { Id = "region_02_area_02", DifficultyTier = 12 });
+
+        Assert.Equal("meran-area-v1", warfang.ProfileId);
+        Assert.Equal(11, warfang.GlobalStep);
+        Assert.Equal(0, warfang.RegionStep);
+        Assert.Equal(200, warfang.RecommendedCombatRating);
+        Assert.Equal(246, rotgrave.RecommendedCombatRating);
+        Assert.True(rotgrave.HealthMultiplier > warfang.HealthMultiplier);
     }
 
     [Fact]

@@ -1039,6 +1039,37 @@ public sealed class WorldTowerServiceTests
     }
 
     [Fact]
+    public async Task StartRally_AnnouncesTheBattleInChat_WithALinkToTheExpedition()
+    {
+        await using var db = CreateDbContext();
+        var characters = Enumerable.Range(1, 4)
+            .Select(number => SeedCharacter(db, $"Ascendant {number}", 20, Guid.NewGuid()))
+            .ToArray();
+        await db.SaveChangesAsync();
+        var outbox = new TestGameEventOutbox();
+        var service = CreateService(
+            db,
+            new FixedPowerRatingService(characters.Select(x => (x.Id, 1_000)).ToArray()),
+            new FixedGuardianEntityService(),
+            new SimpleCombatSetupService(),
+            new QueuedCombatEngineExecutor(BattleOutcome.Victory),
+            new PassthroughCombatEncounterResultFactory(),
+            outbox);
+        var rallyId = await CreateReadyRallyAsync(db, service, characters, TowerRallyMode.FirstClear);
+
+        var result = await service.StartRallyAsync(characters[0].Id, rallyId, CancellationToken.None);
+
+        Assert.True(result.Succeeded, result.Error);
+        var announcement = Assert.Single(outbox.ChatAnnouncements);
+        Assert.Equal(rallyId, announcement.RallyId);
+        Assert.Equal($"/game/world/tower/expeditions/{rallyId}", announcement.TargetUrl);
+        Assert.Contains("is under attack!", announcement.Body, StringComparison.Ordinal);
+        Assert.Contains(
+            GameEventTypes.WorldTowerChatAnnouncement,
+            outbox.EventTypes);
+    }
+
+    [Fact]
     public async Task SuccessfulFirstClear_PersistsReportRewardsProgressionUnlockAndHallRecord()
     {
         await using var db = CreateDbContext();
@@ -1813,6 +1844,7 @@ public sealed class WorldTowerServiceTests
     {
         public List<string> EventTypes { get; } = [];
         public List<WorldTowerRallyUpdated> RallyEvents { get; } = [];
+        public List<WorldTowerChatAnnouncementPayload> ChatAnnouncements { get; } = [];
 
         public Task EnqueueAsync<TPayload>(
             string eventType,
@@ -1824,6 +1856,8 @@ public sealed class WorldTowerServiceTests
             EventTypes.Add(eventType);
             if (payload is WorldTowerRallyUpdated rallyEvent)
                 RallyEvents.Add(rallyEvent);
+            if (payload is WorldTowerChatAnnouncementPayload announcement)
+                ChatAnnouncements.Add(announcement);
             return Task.CompletedTask;
         }
     }

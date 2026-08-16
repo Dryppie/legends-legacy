@@ -411,6 +411,96 @@
       "name": "Wood Nymph",
       "imagePath": "wood_nymph",
       "archetype": "Support"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000066",
+      "name": "Gnoll Pack Leader",
+      "imagePath": "gnoll_pack_leader",
+      "archetype": "Bruiser",
+      "damageProfile": "Physical",
+      "baseLevel": 50,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000067",
+      "name": "Gnoll Raider",
+      "imagePath": "gnoll_raider",
+      "archetype": "DPS",
+      "damageProfile": "Physical",
+      "baseLevel": 50,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000068",
+      "name": "Gnoll Shaman",
+      "imagePath": "gnoll_shaman",
+      "archetype": "Support",
+      "damageProfile": "Magical",
+      "baseLevel": 50,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000069",
+      "name": "Kobold Skirmisher",
+      "imagePath": "kobold_skirmisher",
+      "archetype": "DPS",
+      "damageProfile": "Physical",
+      "baseLevel": 50,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000070",
+      "name": "Kobold Sorcerer",
+      "imagePath": "kobold_sorcerer",
+      "archetype": "DPS",
+      "damageProfile": "Magical",
+      "baseLevel": 50,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000071",
+      "name": "Feral Ghoul",
+      "imagePath": "feral_ghoul",
+      "archetype": "Bruiser",
+      "damageProfile": "Physical",
+      "baseLevel": 55,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000072",
+      "name": "Plague Ghoul",
+      "imagePath": "plague_ghoul",
+      "archetype": "Tank",
+      "damageProfile": "Hybrid",
+      "baseLevel": 55,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000073",
+      "name": "Ravenous Ghoul",
+      "imagePath": "ravenous_ghoul",
+      "archetype": "DPS",
+      "damageProfile": "Physical",
+      "baseLevel": 55,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000074",
+      "name": "Vampire Fledgeling",
+      "imagePath": "vampire_fledgeling",
+      "archetype": "Balanced",
+      "damageProfile": "Hybrid",
+      "baseLevel": 55,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000075",
+      "name": "Wandering Ghost",
+      "imagePath": "wandering_ghost",
+      "archetype": "Support",
+      "damageProfile": "Magical",
+      "baseLevel": 55,
+      "tier": 2
     }
   ]
 }

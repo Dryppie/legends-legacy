@@ -102,6 +102,11 @@ export class InventoryStateService {
         ) ?? [],
     );
 
+  /** How many items still carry the "new" marker. */
+  readonly newItemCount = computed(
+    () => this._items().filter((item) => item.isNew).length,
+  );
+
   /* Ready-made selectors for common queries */
   readonly equipment = this.byType(ItemType.Equipment);
   readonly materials = this.byType(ItemType.Resource);
@@ -312,6 +317,31 @@ export class InventoryStateService {
       .filter((i): i is InventoryItem => i !== null);
 
     this._items.set(updated);
+  }
+
+  /**
+   * Clear an item's "new" marker and return the updated row.
+   *
+   * Optimistic: the local signal updates immediately and the write is fire-and-forget, because
+   * `load()` short-circuits on a warm cache and a click that appears to do nothing is a worse
+   * failure than a badge that reappears after a hard reload.
+   */
+  markSeen(itemInstanceId: string): InventoryItem | undefined {
+    const items = this._items();
+    const index = items.findIndex(
+      (item) => item.itemInstance.id === itemInstanceId,
+    );
+    if (index === -1 || !items[index].isNew) return items[index];
+
+    const updated = [...items];
+    updated[index] = { ...updated[index], isNew: false };
+    this._items.set(updated);
+
+    this.inventoryService.markItemSeen(itemInstanceId).subscribe({
+      error: () => undefined,
+    });
+
+    return updated[index];
   }
 
   removeItem(itemInstanceId: string): void {

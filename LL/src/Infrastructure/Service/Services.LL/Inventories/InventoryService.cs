@@ -55,6 +55,9 @@ public class InventoryService : IInventoryService
     public async Task<InventoryItem?> GetInventoryItemAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken) =>
         await _inventoryRepository.GetInventoryItemAsync(characterId, itemInstanceId, cancellationToken);
 
+    public async Task<bool> MarkItemSeenAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken) =>
+        await _inventoryRepository.MarkItemSeenAsync(characterId, itemInstanceId, cancellationToken);
+
     public async Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing marketplaceListing, CancellationToken cancellationToken)
     {
         return await _inventoryRepository.TryRemoveItemsForMarketPlaceListingAsync(characterId, marketplaceListing, cancellationToken);

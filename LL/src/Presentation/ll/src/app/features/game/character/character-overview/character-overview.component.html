@@ -53,20 +53,11 @@
           <h2 class="ll-heading text-2xl text-white">
             {{ profileLabel() }}
           </h2>
-          <ng-container *ngIf="isViewingSearchResult()">
-            <span
-              *ngIf="characterOverview.isOnline; else lastSeen"
-              class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-300"
-            >
-              <span class="size-1.5 rounded-full bg-emerald-300"></span>
-              Online
-            </span>
-            <ng-template #lastSeen>
-              <span class="text-xs text-secondary">
-                {{ lastSeenLabel(characterOverview.lastSeenAt) }}
-              </span>
-            </ng-template>
-          </ng-container>
+          <app-presence-indicator
+            *ngIf="isViewingSearchResult()"
+            [isOnline]="characterOverview.isOnline"
+            [lastSeenAt]="characterOverview.lastSeenAt"
+          ></app-presence-indicator>
         </div>
         <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
           <span class="text-secondary">Guild</span>
@@ -228,7 +219,9 @@
                     }}
                   </span>
                   <span
-                    *ngIf="getEquipmentRating(attribute.attributeType) as rating"
+                    *ngIf="
+                      getEquipmentRating(attribute.attributeType) as rating
+                    "
                     class="block text-[0.65rem] text-secondary"
                   >
                     {{

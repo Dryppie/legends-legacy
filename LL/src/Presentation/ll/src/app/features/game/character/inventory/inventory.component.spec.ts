@@ -43,13 +43,50 @@ describe('InventoryComponent quest presentation', () => {
       () =>
         new InventoryComponent(
           {} as InventoryStateService,
-          { pinnedObjective: objective.asReadonly() } as QuestStateService,
+          {
+            pinnedOnboardingObjective: objective.asReadonly(),
+          } as QuestStateService,
           presenter,
         ),
     );
     TestBed.flushEffects();
 
     expect(presenter.presentCurrentObjective).toHaveBeenCalledOnceWith();
+  });
+
+  it('clears the new marker when an item is inspected but not when scrapped', () => {
+    const newItem = inventoryEquipment('weapon', EquipmentType.OneHanded);
+    newItem.isNew = true;
+    const equipment = signal<InventoryItem[]>([newItem]);
+    const objective = signal<QuestObjectiveState | undefined>(undefined);
+    const state = {
+      equipment: equipment.asReadonly(),
+      markSeen: jasmine
+        .createSpy('markSeen')
+        .and.returnValue({ ...newItem, isNew: false }),
+    } as unknown as InventoryStateService;
+
+    const component = TestBed.runInInjectionContext(
+      () =>
+        new InventoryComponent(
+          state,
+          {
+            pinnedOnboardingObjective: objective.asReadonly(),
+          } as QuestStateService,
+          jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
+            'presentCurrentObjective',
+          ]),
+        ),
+    );
+
+    component.enterScrapMode();
+    component.handleInventoryItemClick(newItem);
+    expect(state.markSeen).not.toHaveBeenCalled();
+
+    component.enterBrowseMode();
+    component.handleInventoryItemClick(newItem);
+    expect(state.markSeen).toHaveBeenCalledOnceWith('weapon');
+    expect(component.selectedItem()?.isNew).toBeFalse();
   });
 
   it('excludes tools from scrap mode', () => {
@@ -63,7 +100,9 @@ describe('InventoryComponent quest presentation', () => {
       () =>
         new InventoryComponent(
           { equipment: equipment.asReadonly() } as InventoryStateService,
-          { pinnedObjective: objective.asReadonly() } as QuestStateService,
+          {
+            pinnedOnboardingObjective: objective.asReadonly(),
+          } as QuestStateService,
           jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
             'presentCurrentObjective',
           ]),
@@ -86,7 +125,9 @@ describe('InventoryComponent quest presentation', () => {
       () =>
         new InventoryComponent(
           { equipment: equipment.asReadonly() } as InventoryStateService,
-          { pinnedObjective: objective.asReadonly() } as QuestStateService,
+          {
+            pinnedOnboardingObjective: objective.asReadonly(),
+          } as QuestStateService,
           jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
             'presentCurrentObjective',
           ]),
@@ -114,7 +155,9 @@ describe('InventoryComponent quest presentation', () => {
       () =>
         new InventoryComponent(
           { equipment: equipment.asReadonly() } as InventoryStateService,
-          { pinnedObjective: objective.asReadonly() } as QuestStateService,
+          {
+            pinnedOnboardingObjective: objective.asReadonly(),
+          } as QuestStateService,
           jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
             'presentCurrentObjective',
           ]),
@@ -142,7 +185,9 @@ describe('InventoryComponent quest presentation', () => {
       () =>
         new InventoryComponent(
           { equipment: equipment.asReadonly() } as InventoryStateService,
-          { pinnedObjective: objective.asReadonly() } as QuestStateService,
+          {
+            pinnedOnboardingObjective: objective.asReadonly(),
+          } as QuestStateService,
           jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
             'presentCurrentObjective',
           ]),
@@ -176,7 +221,7 @@ describe('InventoryComponent quest presentation', () => {
         new InventoryComponent(
           { equipment: equipment.asReadonly() } as InventoryStateService,
           {
-            pinnedObjective: signal<QuestObjectiveState | undefined>(
+            pinnedOnboardingObjective: signal<QuestObjectiveState | undefined>(
               undefined,
             ).asReadonly(),
           } as QuestStateService,
@@ -220,7 +265,9 @@ describe('InventoryComponent quest presentation', () => {
       () =>
         new InventoryComponent(
           { equipment: equipment.asReadonly() } as InventoryStateService,
-          { pinnedObjective: objective.asReadonly() } as QuestStateService,
+          {
+            pinnedOnboardingObjective: objective.asReadonly(),
+          } as QuestStateService,
           jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
             'presentCurrentObjective',
           ]),
@@ -258,7 +305,9 @@ describe('InventoryComponent quest presentation', () => {
       () =>
         new InventoryComponent(
           { equipment: equipment.asReadonly() } as InventoryStateService,
-          { pinnedObjective: objective.asReadonly() } as QuestStateService,
+          {
+            pinnedOnboardingObjective: objective.asReadonly(),
+          } as QuestStateService,
           jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
             'presentCurrentObjective',
           ]),
@@ -284,7 +333,9 @@ describe('InventoryComponent quest presentation', () => {
             materials: materials.asReadonly(),
             essences: signal<InventoryItem[]>([]).asReadonly(),
           } as InventoryStateService,
-          { pinnedObjective: objective.asReadonly() } as QuestStateService,
+          {
+            pinnedOnboardingObjective: objective.asReadonly(),
+          } as QuestStateService,
           jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
             'presentCurrentObjective',
           ]),
@@ -320,7 +371,9 @@ describe('InventoryComponent quest presentation', () => {
             materials: materials.asReadonly(),
             essences: signal<InventoryItem[]>([]).asReadonly(),
           } as InventoryStateService,
-          { pinnedObjective: objective.asReadonly() } as QuestStateService,
+          {
+            pinnedOnboardingObjective: objective.asReadonly(),
+          } as QuestStateService,
           jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
             'presentCurrentObjective',
           ]),
@@ -394,7 +447,7 @@ describe('InventoryComponent quest presentation', () => {
         new InventoryComponent(
           inventoryState,
           {
-            pinnedObjective: signal<QuestObjectiveState | undefined>(
+            pinnedOnboardingObjective: signal<QuestObjectiveState | undefined>(
               undefined,
             ).asReadonly(),
           } as QuestStateService,
@@ -471,7 +524,7 @@ describe('InventoryComponent quest presentation', () => {
         new InventoryComponent(
           inventoryState,
           {
-            pinnedObjective: signal<QuestObjectiveState | undefined>(
+            pinnedOnboardingObjective: signal<QuestObjectiveState | undefined>(
               undefined,
             ).asReadonly(),
           } as QuestStateService,
@@ -569,7 +622,7 @@ function createComponentWithEquipmentState(
       new InventoryComponent(
         {} as InventoryStateService,
         {
-          pinnedObjective: signal<QuestObjectiveState | undefined>(
+          pinnedOnboardingObjective: signal<QuestObjectiveState | undefined>(
             undefined,
           ).asReadonly(),
         } as QuestStateService,
@@ -656,7 +709,7 @@ function createStockComponent(items: InventoryItem[]): InventoryComponent {
           essences: signal<InventoryItem[]>([]).asReadonly(),
         } as InventoryStateService,
         {
-          pinnedObjective: signal<QuestObjectiveState | undefined>(
+          pinnedOnboardingObjective: signal<QuestObjectiveState | undefined>(
             undefined,
           ).asReadonly(),
         } as QuestStateService,

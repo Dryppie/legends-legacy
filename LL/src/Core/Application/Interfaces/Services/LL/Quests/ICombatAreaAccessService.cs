@@ -20,5 +20,7 @@ public sealed record CombatAreaAccessResult(
     int? CharacterLevel,
     IReadOnlyList<string> RequiredQuestIds,
     IReadOnlyList<string> UnmetQuestIds,
+    int? RequiredTowerFloor,
+    bool IsRequiredTowerFloorCleared,
     string? ReasonCode,
     string? PlayerMessage);

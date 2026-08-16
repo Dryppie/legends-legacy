@@ -17,6 +17,7 @@ import { AttributeTooltipDirective } from '../../../../shared/directives/attribu
 import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
 import { ProfessionType } from '../../../../shared/models/Dtos/characterProfession';
 import { EssencePreviewComponent } from '../../../../shared/components/essences/essence-preview/essence-preview.component';
+import { PresenceIndicatorComponent } from '../../../../shared/components/character/presence-indicator/presence-indicator.component';
 
 @Component({
   selector: 'app-character-overview',
@@ -31,6 +32,7 @@ import { EssencePreviewComponent } from '../../../../shared/components/essences/
     AttributeTooltipDirective,
     DecimalPipe,
     EssencePreviewComponent,
+    PresenceIndicatorComponent,
   ],
   templateUrl: './character-overview.component.html',
 })
@@ -285,27 +287,5 @@ export class CharacterOverviewComponent {
 
   get totalLoadoutSlots(): number {
     return this.character()?.activeEssenceLoadout?.slots.length ?? 0;
-  }
-
-  lastSeenLabel(lastSeenAt: string | null | undefined): string {
-    if (!lastSeenAt) return 'Last seen unknown';
-
-    const elapsedMilliseconds = Math.max(
-      0,
-      Date.now() - new Date(lastSeenAt).getTime(),
-    );
-    const elapsedMinutes = Math.floor(elapsedMilliseconds / 60_000);
-    if (elapsedMinutes < 1) return 'Last seen just now';
-    if (elapsedMinutes < 60) {
-      return `Last seen ${elapsedMinutes} ${elapsedMinutes === 1 ? 'minute' : 'minutes'} ago`;
-    }
-
-    const elapsedHours = Math.floor(elapsedMinutes / 60);
-    if (elapsedHours < 24) {
-      return `Last seen ${elapsedHours} ${elapsedHours === 1 ? 'hour' : 'hours'} ago`;
-    }
-
-    const elapsedDays = Math.floor(elapsedHours / 24);
-    return `Last seen ${elapsedDays} ${elapsedDays === 1 ? 'day' : 'days'} ago`;
   }
 }

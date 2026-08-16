@@ -172,6 +172,21 @@
   gap: 0.1rem;
 }
 
+.inventory-list-name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ll-space-2);
+  min-width: 0;
+  width: 100%;
+}
+
+.inventory-new-badge {
+  flex: none;
+  padding: 0 var(--ll-space-2);
+  font-size: 0.625rem;
+  letter-spacing: 0.04em;
+}
+
 .inventory-list-gear-power {
   text-align: right;
 }

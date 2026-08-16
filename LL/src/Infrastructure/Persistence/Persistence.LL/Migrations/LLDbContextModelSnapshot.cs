@@ -2489,9 +2489,15 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
+                    b.Property<DateTimeOffset?>("SeenAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("InventoryId", "ItemInstanceId");
 
                     b.HasIndex("ItemInstanceId");
+
+                    b.HasIndex("InventoryId", "SeenAtUtc")
+                        .HasFilter("\"SeenAtUtc\" IS NULL");
 
                     b.ToTable("InventoryItems");
                 });
@@ -3570,6 +3576,9 @@ namespace Persistence.LL.Migrations
                     b.Property<string>("RequiredCompletedQuestId")
                         .HasMaxLength(160)
                         .HasColumnType("character varying(160)");
+
+                    b.Property<int?>("RequiredTowerFloor")
+                        .HasColumnType("integer");
 
                     b.PrimitiveCollection<List<float>>("SpawnProbabilities")
                         .IsRequired()

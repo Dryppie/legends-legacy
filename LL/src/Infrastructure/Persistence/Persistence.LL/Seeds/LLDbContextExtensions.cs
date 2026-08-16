@@ -92,7 +92,7 @@ public static class LLDbContextExtensions
             await context.SaveChangesAsync();
         }
 
-        if (await SeedCreatures.EnsureRemainingRegionOneIdleAreas(context))
+        if (await SeedCreatures.EnsureAuthoredIdleRegions(context))
         {
             await context.SaveChangesAsync();
         }

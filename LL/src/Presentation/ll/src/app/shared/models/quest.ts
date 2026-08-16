@@ -90,10 +90,14 @@ export interface CombatAreaAccess {
   characterLevel?: number | null;
   requiredQuestIds: string[];
   unmetQuestIds: string[];
+  requiredTowerFloor?: number | null;
+  isRequiredTowerFloorCleared: boolean;
   reasonCode?: string | null;
   playerMessage?: string | null;
 }
 
+/** Category used by the new-player tutorial quest line. */
+export const ONBOARDING_QUEST_CATEGORY = 'Tutorial';
 export const TRAINING_DAY_QUEST_ID = 'quest.onboarding.training_day';
 export const SOUL_ARCHIVE_QUEST_ID = 'quest.onboarding.soul_archive';
 export const FIRST_WEAPON_QUEST_ID = 'quest.onboarding.first_weapon';

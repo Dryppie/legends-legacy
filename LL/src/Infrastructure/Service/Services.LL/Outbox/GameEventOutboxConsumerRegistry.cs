@@ -27,7 +27,12 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
             [GameEventTypes.CharacterCreated] =
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements, GameEventOutboxConsumerNames.EventQuests],
             [GameEventTypes.CharacterLevelReached] =
-                [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements, GameEventOutboxConsumerNames.EventQuests],
+            [
+                GameEventOutboxConsumerNames.Quests,
+                GameEventOutboxConsumerNames.Achievements,
+                GameEventOutboxConsumerNames.EventQuests,
+                GameEventOutboxConsumerNames.RealtimeCharacter
+            ],
             [GameEventTypes.DungeonRunStarted] =
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements, GameEventOutboxConsumerNames.EventQuests],
             [GameEventTypes.DungeonRunCompleted] =
@@ -42,7 +47,8 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
             [GameEventTypes.GuildVaultChatMessage] = [GameEventOutboxConsumerNames.GuildVaultChat],
             [GameEventTypes.InventoryItemsGranted] = [GameEventOutboxConsumerNames.RealtimeInventory],
             [GameEventTypes.TournamentGroundsUpdated] = [GameEventOutboxConsumerNames.RealtimeTournamentGrounds],
-            [GameEventTypes.WorldTowerRallyUpdated] = [GameEventOutboxConsumerNames.RealtimeWorldTower]
+            [GameEventTypes.WorldTowerRallyUpdated] = [GameEventOutboxConsumerNames.RealtimeWorldTower],
+            [GameEventTypes.WorldTowerChatAnnouncement] = [GameEventOutboxConsumerNames.WorldTowerChat]
         };
 
     public IReadOnlyList<string> GetConsumers(string eventType) =>

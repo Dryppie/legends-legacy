@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { GameEventService } from '../../real-time/game-event.service';
 import { InventoryDto } from '../../../../shared/models/Dtos/inventoryDto';
@@ -115,12 +115,83 @@ describe('InventoryStateService', () => {
       'reward',
     ]);
   });
+
+  it('clears the new marker optimistically and reports it to the server once', () => {
+    const inventoryApi = jasmine.createSpyObj<InventoryService>(
+      'InventoryService',
+      ['getInventory', 'markItemSeen'],
+    );
+    inventoryApi.getInventory.and.returnValue(
+      of({ inventoryItems: [item('crafted', true), item('old')] }),
+    );
+    inventoryApi.markItemSeen.and.returnValue(of({}));
+
+    const service = createService(inventoryApi);
+
+    expect(service.newItemCount()).toBe(1);
+
+    service.markSeen('crafted-instance');
+
+    expect(
+      service.items().find((entry) => entry.id === 'crafted')?.isNew,
+    ).toBeFalse();
+    expect(service.newItemCount()).toBe(0);
+    expect(inventoryApi.markItemSeen).toHaveBeenCalledOnceWith(
+      'crafted-instance',
+    );
+
+    // A second click must not produce a second write.
+    service.markSeen('crafted-instance');
+    expect(inventoryApi.markItemSeen).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves the marker cleared when the server write fails', () => {
+    const inventoryApi = jasmine.createSpyObj<InventoryService>(
+      'InventoryService',
+      ['getInventory', 'markItemSeen'],
+    );
+    inventoryApi.getInventory.and.returnValue(
+      of({ inventoryItems: [item('crafted', true)] }),
+    );
+    inventoryApi.markItemSeen.and.returnValue(
+      throwError(() => new Error('offline')),
+    );
+
+    const service = createService(inventoryApi);
+
+    expect(() => service.markSeen('crafted-instance')).not.toThrow();
+    expect(
+      service.items().find((entry) => entry.id === 'crafted')?.isNew,
+    ).toBeFalse();
+  });
 });
 
-function item(id: string): InventoryItem {
+function createService(
+  inventoryApi: jasmine.SpyObj<InventoryService>,
+): InventoryStateService {
+  TestBed.configureTestingModule({
+    providers: [
+      InventoryStateService,
+      { provide: InventoryService, useValue: inventoryApi },
+      {
+        provide: GameEventService,
+        useValue: {
+          eventEnvelope: { LootReceivedMsg: signal(null) },
+          reconnectCount: signal(0),
+        },
+      },
+      { provide: EventBusService, useValue: { logout: signal(false) } },
+    ],
+  });
+
+  return TestBed.inject(InventoryStateService);
+}
+
+function item(id: string, isNew = false): InventoryItem {
   return {
     id,
     quantity: 1,
+    isNew,
     itemInstance: {
       id: `${id}-instance`,
       itemBase: {

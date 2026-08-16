@@ -24,7 +24,17 @@ public sealed class RegionOneIdleAreaSeedTests
         "monster.eydis,_the_endless_spring",
         "monster.kodoku,_the_poisoned_vessel",
         "monster.ni,_the_ninefold",
-        "monster.the_mad_king"
+        "monster.the_mad_king",
+        "monster.gnoll_pack_leader",
+        "monster.gnoll_raider",
+        "monster.gnoll_shaman",
+        "monster.kobold_skirmisher",
+        "monster.kobold_sorcerer",
+        "monster.feral_ghoul",
+        "monster.plague_ghoul",
+        "monster.ravenous_ghoul",
+        "monster.vampire_fledgeling",
+        "monster.wandering_ghost"
     };
     private static readonly HashSet<string> CreatureEssencesPendingAreaDropTuning = new(StringComparer.OrdinalIgnoreCase);
 
@@ -79,6 +89,48 @@ public sealed class RegionOneIdleAreaSeedTests
 
         Assert.Equal([1, 5, 10, 15, 20, 25, 30, 35, 40, 45], progression.Select(area => area.LevelRequirement).ToArray());
         Assert.Equal(Enumerable.Range(1, 10), progression.Select(area => area.DifficultyTier));
+    }
+
+    [Fact]
+    public async Task SeedCreaturesData_creates_the_first_two_Meran_areas_and_their_monsters()
+    {
+        await using var db = CreateDb();
+
+        await SeedCreatures.SeedCreaturesData(db);
+        await db.SaveChangesAsync();
+
+        var creaturesById = await db.Creatures
+            .ToDictionaryAsync(creature => creature.Id, creature => creature.Name);
+        var meran = await db.Regions
+            .Include(region => region.Areas)
+            .ThenInclude(area => area.Creatures)
+            .SingleAsync(region => region.Name == "Meran");
+        var areas = meran.Areas.OrderBy(area => area.DifficultyTier).ToArray();
+
+        Assert.Equal(["Warfang Frontier", "Rotgrave Fields"], areas.Select(area => area.Name));
+        Assert.Equal([50, 55], areas.Select(area => area.LevelRequirement));
+        Assert.All(areas, area => Assert.Equal(10, area.RequiredTowerFloor));
+        Assert.Equal(
+            ["Gnoll Pack Leader", "Gnoll Raider", "Gnoll Shaman", "Kobold Skirmisher", "Kobold Sorcerer"],
+            areas[0].Creatures.Select(creature => creaturesById[creature.CreatureId]).OrderBy(name => name));
+        Assert.Equal(
+            ["Feral Ghoul", "Plague Ghoul", "Ravenous Ghoul", "Vampire Fledgeling", "Wandering Ghost"],
+            areas[1].Creatures.Select(creature => creaturesById[creature.CreatureId]).OrderBy(name => name));
+    }
+
+    [Fact]
+    public async Task EnsureRemainingRegionOneIdleAreas_adds_Meran_to_an_existing_world()
+    {
+        await using var db = CreateDb();
+        db.Regions.Add(new Region { Name = "Shenic" });
+        await db.SaveChangesAsync();
+
+        var changed = await SeedCreatures.EnsureRemainingRegionOneIdleAreas(db);
+        await db.SaveChangesAsync();
+
+        Assert.True(changed);
+        Assert.True(await db.Regions.AnyAsync(region => region.Name == "Meran"));
+        Assert.Equal(2, await db.Areas.CountAsync(area => area.Id.StartsWith("region_02_area_")));
     }
 
     [Fact]

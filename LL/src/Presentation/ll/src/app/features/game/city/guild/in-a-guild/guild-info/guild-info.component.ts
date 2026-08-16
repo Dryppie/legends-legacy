@@ -21,6 +21,7 @@ import { RegularButtonComponent } from '../../../../../../shared/components/cust
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
 import { CharacterTagComponent } from '../../../../../../shared/components/character/character-tag/character-tag.component';
 import { GuildRolePermission } from '../../../../../../shared/models/Dtos/guild/guildRolePermission';
+import { PresenceIndicatorComponent } from '../../../../../../shared/components/character/presence-indicator/presence-indicator.component';
 
 @Component({
   selector: 'app-guild-info',
@@ -31,6 +32,7 @@ import { GuildRolePermission } from '../../../../../../shared/models/Dtos/guild/
     FormsModule,
     RegularButtonComponent,
     CharacterTagComponent,
+    PresenceIndicatorComponent,
   ],
   templateUrl: './guild-info.component.html',
 })
@@ -197,6 +199,12 @@ export class GuildInfoComponent implements OnInit, OnChanges {
     return (
       !!this.permissionFor(current.role)?.canKick &&
       roleRank[member.role] > roleRank[current.role]
+    );
+  }
+
+  hasMemberActions(member: GuildMember): boolean {
+    return (
+      this.canPromote(member) || this.canDemote(member) || this.canKick(member)
     );
   }
 

@@ -29,7 +29,12 @@ import {
 } from '../../../../../core/services/api/market-place/market-place.service';
 import { MarketPlaceListing } from '../../../../../shared/models/Dtos/market-place/market-place-listing';
 import { MarketPlaceBuyOrder } from '../../../../../shared/models/Dtos/market-place/market-place-buy-order';
-import { EssenceItem, ItemBase } from '../../../../../shared/models/item';
+import {
+  EssenceItem,
+  ItemBase,
+  inferEssenceDefinitionId,
+} from '../../../../../shared/models/item';
+import { EssenceStateService } from '../../../../../core/services/api/essences/essence-state.service';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { ItemType } from '../../../../../shared/models/enums/itemType';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
@@ -67,7 +72,7 @@ interface CommodityBuyOrderRow {
   orders: MarketPlaceBuyOrder[];
 }
 
-type CommodityCatalogStatus = 'all' | 'active' | 'owned';
+type CommodityCatalogStatus = 'all' | 'active' | 'owned' | 'unabsorbed';
 type CommodityCatalogSort = 'activity' | 'name' | 'ask';
 type MobileOrderBook = 'sell' | 'buy';
 type MarketTicketSide = 'buy' | 'sell';
@@ -105,6 +110,11 @@ export class MarketPlaceCommodityComponent implements OnInit {
   @Input({ required: true })
   set category(value: MarketCategoryId) {
     this._category.set(value);
+    // "Not absorbed" only exists for Essences; leaving the category would strand the select on
+    // a value it no longer offers.
+    if (value !== 'essences' && this.catalogStatus() === 'unabsorbed') {
+      this.catalogStatus.set('all');
+    }
     this.resetMobileView();
   }
 
@@ -251,6 +261,26 @@ export class MarketPlaceCommodityComponent implements OnInit {
     );
   });
 
+  readonly isEssenceCatalogue = computed(() => this._category() === 'essences');
+
+  /** Essence definition ids already held in the Soul Archive. */
+  readonly absorbedEssenceDefinitionIds = computed(() =>
+    this.essenceState.absorbedEssenceDefinitionIds(),
+  );
+
+  isEssenceCommodity(base: ItemBase): boolean {
+    return base.itemType === ItemType.Essence;
+  }
+
+  /** True when this catalogue entry is an Essence already absorbed into the Soul Archive. */
+  isAbsorbedEssence(base: ItemBase): boolean {
+    if (!this.isEssenceCommodity(base)) return false;
+
+    return this.absorbedEssenceDefinitionIds().has(
+      inferEssenceDefinitionId(base as EssenceItem),
+    );
+  }
+
   readonly selectedEssenceDefinition = computed(() => {
     const base = this.selectedCommodity()?.base;
     if (base?.itemType !== ItemType.Essence) return null;
@@ -276,6 +306,10 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
       if (status === 'owned') {
         return commodity.ownedQuantity > 0;
+      }
+
+      if (status === 'unabsorbed') {
+        return !this.isAbsorbedEssence(commodity.base);
       }
 
       return true;
@@ -515,7 +549,21 @@ export class MarketPlaceCommodityComponent implements OnInit {
     private readonly marketplaceState: MarketplaceStateService,
     private readonly characterService: CharacterService,
     private readonly marketplaceService: MarketPlaceService,
+    private readonly essenceState: EssenceStateService,
   ) {
+    // The Soul Archive snapshot is normally only fetched by the Essences page, so pull it in the
+    // first time the Essence catalogue is shown. Both dependencies are stable while the request
+    // is in flight, so this runs once rather than per change detection.
+    effect(
+      () => {
+        if (!this.isEssenceCatalogue()) return;
+        if (this.essenceState.archive()) return;
+
+        untracked(() => this.essenceState.refreshArchive());
+      },
+      { allowSignalWrites: true },
+    );
+
     effect(
       () => {
         this._itemType();
@@ -669,7 +717,9 @@ export class MarketPlaceCommodityComponent implements OnInit {
   }
 
   adjustMobileQuantity(delta: number): void {
-    const quantity = Math.max(1, (this.quantityCtrl.value ?? 1) + delta);
+    // Treat a cleared input as 0 so the first tap on "+" lands on 1.
+    const current = this.quantityCtrl.value ?? 0;
+    const quantity = Math.max(1, current + delta);
     this.quantityCtrl.setValue(quantity);
   }
 
@@ -710,7 +760,12 @@ export class MarketPlaceCommodityComponent implements OnInit {
   }
 
   setCatalogStatus(value: string): void {
-    if (value === 'all' || value === 'active' || value === 'owned') {
+    if (
+      value === 'all' ||
+      value === 'active' ||
+      value === 'owned' ||
+      value === 'unabsorbed'
+    ) {
       this.catalogStatus.set(value);
     }
   }

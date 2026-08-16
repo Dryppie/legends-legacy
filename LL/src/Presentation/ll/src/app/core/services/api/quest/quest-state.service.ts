@@ -1,13 +1,23 @@
-import { computed, effect, Injectable, signal, untracked } from '@angular/core';
+import {
+  computed,
+  effect,
+  inject,
+  Injectable,
+  signal,
+  untracked,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import {
   CombatAreaAccess,
+  ONBOARDING_QUEST_CATEGORY,
   QuestJournal,
   QuestStatus,
 } from '../../../../shared/models/quest';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
+import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
 import { GameEventService } from '../../real-time/game-event.service';
+import { AuthService } from '../auth/auth.service';
 import { QuestService } from './quest.service';
 
 @Injectable({ providedIn: 'root' })
@@ -17,7 +27,10 @@ export class QuestStateService {
   private readonly _loaded = signal(false);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
+  private readonly auth = inject(AuthService);
+  private readonly eventDeduper = new GameEventDeduper();
   private lastLogoutCount = 0;
+  private lastReconnectCount = 0;
 
   readonly journal = this._journal.asReadonly();
   readonly areaAccess = this._areaAccess.asReadonly();
@@ -45,6 +58,21 @@ export class QuestStateService {
   readonly pinnedObjective = computed(() =>
     this.pinnedQuest()?.objectives.find((objective) => !objective.isCompleted),
   );
+  /** True only while a quest from the new-player tutorial line is pinned. */
+  readonly isOnboardingQuestPinned = computed(
+    () => this.pinnedQuest()?.category === ONBOARDING_QUEST_CATEGORY,
+  );
+  /**
+   * The pinned objective, but only while a tutorial quest is pinned.
+   *
+   * Onboarding-only UI (scoped recipe lists, forced views, highlights) must key
+   * off this rather than `pinnedObjective`, otherwise later quests that reuse
+   * the same objective type (e.g. the Tier 2 crafting side quests) re-trigger
+   * the tutorial presentation.
+   */
+  readonly pinnedOnboardingObjective = computed(() =>
+    this.isOnboardingQuestPinned() ? this.pinnedObjective() : undefined,
+  );
 
   constructor(
     private readonly api: QuestService,
@@ -58,6 +86,40 @@ export class QuestStateService {
         if (!event?.journal) return;
         untracked(() => {
           this.initializeAndRefreshAccessWhenNeeded(event.journal);
+        });
+      },
+      { allowSignalWrites: true },
+    );
+
+    // Area access and quest availability are both derived server-side from
+    // character level, and the level-up event carries neither. Without this the
+    // newly unlocked area stays locked until something else refetches.
+    effect(
+      () => {
+        const envelope = this.events.eventEnvelope.CharacterLevelUpMsg();
+        const levelUp = envelope?.payload;
+        if (!levelUp) return;
+        untracked(() => {
+          const characterId = this.auth.currentCharacter()?.id;
+          if (!characterId || levelUp.characterId !== characterId) return;
+          if (!this.eventDeduper.shouldProcess('level-up', envelope)) return;
+          this.resyncSilently();
+        });
+      },
+      { allowSignalWrites: true },
+    );
+
+    this.lastReconnectCount = this.events.reconnectCount();
+    effect(
+      () => {
+        const reconnectCount = this.events.reconnectCount();
+        if (reconnectCount === this.lastReconnectCount) return;
+        this.lastReconnectCount = reconnectCount;
+        // Events that landed while the socket was down are gone, so re-pull
+        // rather than trusting the state we were holding.
+        untracked(() => {
+          if (!this._loaded()) return;
+          this.resyncSilently();
         });
       },
       { allowSignalWrites: true },
@@ -198,6 +260,17 @@ export class QuestStateService {
     this._loaded.set(false);
     this._loading.set(false);
     this._error.set(null);
+  }
+
+  /** Re-pull journal and area access together, without touching loading/error UI. */
+  private resyncSilently(): void {
+    this.api.getJournal().subscribe({
+      next: (journal) => {
+        this.initialize(journal);
+        this.loadAreaAccess();
+      },
+      error: () => undefined,
+    });
   }
 
   private loadJournalSilently(): void {

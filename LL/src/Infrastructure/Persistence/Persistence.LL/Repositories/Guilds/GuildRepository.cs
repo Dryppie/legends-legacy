@@ -42,6 +42,7 @@ public class GuildRepository : IGuildRepository
             .Include(g => g.Owner)
             .Include(g => g.Members)
                 .ThenInclude(m => m.Character)
+                    .ThenInclude(c => c.CharacterAction)
             .Include(g => g.Invites)
                 .ThenInclude(i => i.Character)
             .Include(g => g.Resources)

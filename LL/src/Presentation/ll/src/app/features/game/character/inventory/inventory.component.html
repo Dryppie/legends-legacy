@@ -280,12 +280,19 @@
               *ngIf="equipmentInstance(inventoryItem) as equipment"
               class="inventory-list-item min-w-0 text-left"
             >
-              <strong
-                class="truncate text-sm font-medium"
-                [ngClass]="itemRarityClass(inventoryItem)"
-              >
-                {{ itemDisplayName(inventoryItem) }}
-              </strong>
+              <span class="inventory-list-name-row">
+                <strong
+                  class="min-w-0 truncate text-sm font-medium"
+                  [ngClass]="itemRarityClass(inventoryItem)"
+                >
+                  {{ itemDisplayName(inventoryItem) }}
+                </strong>
+                <span
+                  *ngIf="inventoryItem.isNew"
+                  class="ll-badge ll-badge-accent inventory-new-badge"
+                  >New</span
+                >
+              </span>
               <span class="truncate text-xs text-secondary">
                 {{ equipment.quality }}
               </span>

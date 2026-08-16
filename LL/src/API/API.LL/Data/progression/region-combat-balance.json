@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "profiles": [
     {
       "id": "legacy-area-v1",
@@ -72,6 +72,42 @@
       "critChanceCap": 0.45,
       "critDamageCap": 2.0,
       "maximumStepIncrease": 0.27
+    },
+    {
+      "id": "meran-area-v1",
+      "targetWinRateBasisPoints": 8500,
+      "healthCurve": {
+        "model": "Exponential",
+        "baseMultiplier": 8.395309,
+        "growthPerStep": 0.180298,
+        "exponent": 1.0
+      },
+      "offenseCurve": {
+        "model": "Exponential",
+        "baseMultiplier": 5.883016,
+        "growthPerStep": 0.122646,
+        "exponent": 1.0
+      },
+      "defenseCurve": {
+        "model": "Exponential",
+        "baseMultiplier": 3.803705,
+        "growthPerStep": 0.127070,
+        "exponent": 1.0
+      },
+      "resistanceCurve": {
+        "model": "Exponential",
+        "baseMultiplier": 3.803705,
+        "growthPerStep": 0.127070,
+        "exponent": 1.0
+      },
+      "attackSpeedGrowthPerStep": 0.048830,
+      "penetrationGrowthPerStep": 0.058596,
+      "softDefenseGrowthPerStep": 0.029298,
+      "critChancePerStep": 0.014649,
+      "critDamagePerStep": 0.019532,
+      "critChanceCap": 0.45,
+      "critDamageCap": 2.0,
+      "maximumStepIncrease": 0.27
     }
   ],
   "regions": [
@@ -104,6 +140,21 @@
         "t1-standard-epic",
         "t1-standard-unique",
         "t1-standard-legendary"
+      ]
+    },
+    {
+      "regionKey": "meran",
+      "profileId": "meran-area-v1",
+      "startingGlobalStep": 11,
+      "startingCombatRating": 200,
+      "endingCombatRating": 246,
+      "areaIds": [
+        "region_02_area_01",
+        "region_02_area_02"
+      ],
+      "defaultBuildIds": [
+        "t2-standard-common",
+        "t2-standard-uncommon"
       ]
     }
   ]

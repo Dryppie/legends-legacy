@@ -7,6 +7,7 @@ public class Area
     public int DifficultyTier { get; set; }
     public string? RequiredActiveQuestId { get; set; }
     public string? RequiredCompletedQuestId { get; set; }
+    public int? RequiredTowerFloor { get; set; }
     public bool HideWhenLocked { get; set; }
     public ICollection<AreaCreature> Creatures { get; set; } = [];
     /// <summary>

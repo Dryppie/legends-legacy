@@ -479,6 +479,79 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Meran",
+      "areas": [
+        {
+          "id": "region_02_area_01",
+          "name": "Warfang Frontier",
+          "levelRequirement": 50,
+          "difficultyTier": 11,
+          "requiredTowerFloor": 10,
+          "spawnProbabilities": [
+            0.03,
+            0.969,
+            0.001
+          ],
+          "creatures": [
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000066",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000067",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000068",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000069",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000070",
+              "weightedSpawnRate": 0.2
+            }
+          ]
+        },
+        {
+          "id": "region_02_area_02",
+          "name": "Rotgrave Fields",
+          "levelRequirement": 55,
+          "difficultyTier": 12,
+          "requiredTowerFloor": 10,
+          "spawnProbabilities": [
+            0.03,
+            0.969,
+            0.001
+          ],
+          "creatures": [
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000071",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000072",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000073",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000074",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000075",
+              "weightedSpawnRate": 0.2
+            }
+          ]
+        }
+      ]
     }
   ]
 }

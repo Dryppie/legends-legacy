@@ -2,6 +2,7 @@ import { GatheringType } from '../enums/gatheringType';
 
 export interface Region {
   name: string;
+  requiredTowerFloor?: number;
   areas: Area[];
   dungeons: Dungeon[];
   raids: Raid[];

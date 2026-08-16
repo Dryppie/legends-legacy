@@ -11,23 +11,23 @@ public sealed class CharacterProgressionSimulationSnapshotTests
 
         Assert.Equal(10_800, snapshot.Areas[0].ExperiencePerHourAtFullWinRate, 1);
         Assert.Equal(14_693.3, snapshot.Areas.Single(x => x.Id == "region_01_area_06").ExperiencePerHourAtFullWinRate, 1);
-        Assert.Equal(21_589.2, snapshot.Areas[^1].ExperiencePerHourAtFullWinRate, 1);
+        Assert.Equal(25_181.7, snapshot.Areas[^1].ExperiencePerHourAtFullWinRate, 1);
 
         var finalArea = snapshot.Areas[^1];
-        Assert.Equal(15_112.5, finalArea.ExperiencePerHourAt70PercentWinRate, 1);
-        Assert.Equal(18_350.9, finalArea.ExperiencePerHourAt85PercentWinRate, 1);
-        Assert.Equal(23_748.2, finalArea.ExperiencePerHourWithCommonBonus, 1);
-        Assert.Equal(440_420.7, snapshot.MaximumOfflineExperienceAt85PercentWinRate, 1);
+        Assert.Equal(17_627.2, finalArea.ExperiencePerHourAt70PercentWinRate, 1);
+        Assert.Equal(21_404.4, finalArea.ExperiencePerHourAt85PercentWinRate, 1);
+        Assert.Equal(27_699.9, finalArea.ExperiencePerHourWithCommonBonus, 1);
+        Assert.Equal(513_706.7, snapshot.MaximumOfflineExperienceAt85PercentWinRate, 1);
 
         Assert.Equal(2.38, snapshot.CumulativeHoursByMilestone[10], 2);
         Assert.Equal(17.80, snapshot.CumulativeHoursByMilestone[20], 2);
         Assert.Equal(54.67, snapshot.CumulativeHoursByMilestone[30], 2);
         Assert.Equal(117.02, snapshot.CumulativeHoursByMilestone[40], 2);
         Assert.Equal(158.12, snapshot.CumulativeHoursByMilestone[45], 2);
-        Assert.Equal(334.13, snapshot.CumulativeHoursByMilestone[60], 2);
-        Assert.Equal(625.47, snapshot.CumulativeHoursByMilestone[75], 2);
-        Assert.Equal(1_446.32, snapshot.CumulativeHoursByMilestone[100], 2);
-        Assert.InRange(snapshot.CumulativeHoursByMilestone[100] / 24d, 60d, 61d);
+        Assert.Equal(319.81, snapshot.CumulativeHoursByMilestone[60], 2);
+        Assert.Equal(569.59, snapshot.CumulativeHoursByMilestone[75], 2);
+        Assert.Equal(1_273.34, snapshot.CumulativeHoursByMilestone[100], 2);
+        Assert.InRange(snapshot.CumulativeHoursByMilestone[100] / 24d, 53d, 54d);
 
         Assert.Equal(4_500, snapshot.MinimumProphecyWeekBasisPoints);
         Assert.Equal(6_500, snapshot.MaximumProphecyWeekBasisPoints);

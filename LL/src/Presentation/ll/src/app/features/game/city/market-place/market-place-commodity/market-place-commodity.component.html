@@ -39,6 +39,9 @@
           <option value="all">All items</option>
           <option value="active">Active</option>
           <option value="owned">Owned</option>
+          <option *ngIf="isEssenceCatalogue()" value="unabsorbed">
+            Not absorbed
+          </option>
         </select>
       </label>
 
@@ -81,6 +84,12 @@
           </span>
           <span class="ll-helper block truncate">
             Owned {{ commodity.ownedQuantity | numberFormat }}
+            <span
+              *ngIf="isAbsorbedEssence(commodity.base)"
+              class="text-primary"
+            >
+              · Absorbed
+            </span>
           </span>
         </span>
 
@@ -235,6 +244,21 @@
                   {{ selected.buyOrderQuantity | numberFormat }}
                 </strong>
                 wanted
+              </span>
+              <span
+                *ngIf="isEssenceCommodity(selected.base)"
+                class="ll-card px-2.5 py-1 text-xs"
+                [ngClass]="
+                  isAbsorbedEssence(selected.base)
+                    ? 'text-primary'
+                    : 'text-zinc-400'
+                "
+              >
+                {{
+                  isAbsorbedEssence(selected.base)
+                    ? "In Soul Archive"
+                    : "Not absorbed"
+                }}
               </span>
             </div>
           </div>
@@ -570,22 +594,30 @@
             </label>
           </div>
 
-          <div class="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-2">
-            <div class="ll-segmented grid grid-cols-3 p-1">
+          <div class="grid grid-cols-[8.5rem_minmax(0,1fr)] gap-2">
+            <div
+              class="ll-segmented grid grid-cols-[2rem_minmax(0,1fr)_2rem] p-1"
+            >
               <button
                 type="button"
-                class="ll-segmented-button px-2"
+                class="ll-segmented-button px-0"
                 aria-label="Decrease quantity"
                 (click)="adjustMobileQuantity(-1)"
               >
                 −
               </button>
-              <span class="self-center text-center font-mono text-primary">
-                {{ quantityCtrl.value ?? 1 }}
-              </span>
+              <input
+                type="number"
+                min="1"
+                inputmode="numeric"
+                aria-label="Quantity"
+                [formControl]="quantityCtrl"
+                (focus)="$any($event.target).select()"
+                class="no-spinner w-full min-w-0 self-center border-0 bg-transparent p-0 text-center font-mono text-primary focus:outline-none"
+              />
               <button
                 type="button"
-                class="ll-segmented-button px-2 text-primary"
+                class="ll-segmented-button px-0 text-primary"
                 aria-label="Increase quantity"
                 (click)="adjustMobileQuantity(1)"
               >

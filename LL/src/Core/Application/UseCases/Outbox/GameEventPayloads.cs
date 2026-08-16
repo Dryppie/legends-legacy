@@ -60,9 +60,17 @@ public sealed record IdleCombatEncounterCompletedPayload(
 
 public sealed record CharacterCreatedPayload(Guid CharacterId);
 
+/// <summary>
+/// Carries everything the realtime level-up broadcast needs so it can be sent after the
+/// originating transaction commits. The trailing values are optional so outbox rows queued by
+/// an older build still deserialize.
+/// </summary>
 public sealed record CharacterLevelReachedPayload(
     Guid CharacterId,
-    int Level);
+    int Level,
+    long Experience = 0,
+    long ExperienceUntilNextLevel = 0,
+    int UnlockedEssenceSlots = 0);
 
 public sealed record DungeonRunStartedPayload(Guid CharacterId);
 
@@ -88,6 +96,13 @@ public sealed record TournamentBattleCompletedPayload(
 
 public sealed record TournamentChatAnnouncementPayload(
     Guid TournamentId,
+    Guid MessageId,
+    string Body,
+    string TargetUrl,
+    DateTimeOffset SentAt);
+
+public sealed record WorldTowerChatAnnouncementPayload(
+    Guid RallyId,
     Guid MessageId,
     string Body,
     string TargetUrl,

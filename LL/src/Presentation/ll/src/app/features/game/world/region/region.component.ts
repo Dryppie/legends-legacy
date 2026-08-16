@@ -86,6 +86,7 @@ export class RegionComponent implements OnInit, OnDestroy {
 
     this.route.paramMap.subscribe((params) => {
       this.regionId = params.get('id') ?? '';
+      this.questState.loadAreaAccess();
       this.getRegionDetails(this.regionId);
     });
 
@@ -187,5 +188,16 @@ export class RegionComponent implements OnInit, OnDestroy {
 
   closeTrainingSummary(): void {
     this.combatService.closeCurrentTrainingBattle();
+  }
+
+  isMeranUnlocked(): boolean {
+    return (
+      this.questState.accessFor('region_02_area_01')
+        ?.isRequiredTowerFloorCleared === true
+    );
+  }
+
+  isRegionTowerLocked(): boolean {
+    return !!this.region?.requiredTowerFloor && !this.isMeranUnlocked();
   }
 }

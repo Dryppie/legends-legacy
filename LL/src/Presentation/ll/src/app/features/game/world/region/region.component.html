@@ -71,42 +71,79 @@
       </a>
     </app-default-header>
 
-    <app-tabs *ngIf="region" class="flex w-full shrink-0 flex-col">
-      <app-tab label="Areas">
-        <div
-          *ngIf="region.areas.length > 0; else noAreas"
-          class="flex w-full flex-col gap-2 pt-4"
-          data-tour="areas-introduction"
+    <nav *ngIf="region" class="flex flex-wrap gap-2" aria-label="Regions">
+      <a
+        routerLink="/game/world/shenic"
+        class="ll-button-secondary px-3 py-2 text-sm"
+        [attr.aria-current]="regionId === 'shenic' ? 'page' : null"
+      >
+        Shenic
+      </a>
+      <a
+        *ngIf="isMeranUnlocked(); else lockedMeranLink"
+        routerLink="/game/world/meran"
+        class="ll-button-secondary px-3 py-2 text-sm"
+        [attr.aria-current]="regionId === 'meran' ? 'page' : null"
+      >
+        Meran
+      </a>
+      <ng-template #lockedMeranLink>
+        <span
+          class="ll-button-secondary cursor-not-allowed px-3 py-2 text-sm opacity-50"
+          title="Complete World Tower Floor 10 to unlock Meran"
+          aria-disabled="true"
         >
-          <div class="flex h-full w-full flex-wrap gap-4">
-            <div
-              *ngFor="let area of region.areas; index as i"
-              class="w-full sm:w-fit"
-            >
-              <app-combat-area-card
-                [area]="area"
-                [isLastInRow]="isLastInRow(i)"
-              ></app-combat-area-card>
+          Meran
+        </span>
+      </ng-template>
+    </nav>
+
+    <div
+      *ngIf="isRegionTowerLocked(); else unlockedRegion"
+      class="ll-empty-state"
+    >
+      Complete World Tower Floor {{ region.requiredTowerFloor }} to unlock
+      {{ region.name }}.
+    </div>
+
+    <ng-template #unlockedRegion>
+      <app-tabs *ngIf="region" class="flex w-full shrink-0 flex-col">
+        <app-tab label="Areas">
+          <div
+            *ngIf="region.areas.length > 0; else noAreas"
+            class="flex w-full flex-col gap-2 pt-4"
+            data-tour="areas-introduction"
+          >
+            <div class="flex h-full w-full flex-wrap gap-4">
+              <div
+                *ngFor="let area of region.areas; index as i"
+                class="w-full sm:w-fit"
+              >
+                <app-combat-area-card
+                  [area]="area"
+                  [isLastInRow]="isLastInRow(i)"
+                ></app-combat-area-card>
+              </div>
             </div>
           </div>
-        </div>
 
-        <ng-template #noAreas>
-          <div class="pt-4" data-tour="areas-introduction">
-            <div class="ll-empty-state">
-              No combat areas are available in this region yet.
+          <ng-template #noAreas>
+            <div class="pt-4" data-tour="areas-introduction">
+              <div class="ll-empty-state">
+                No combat areas are available in this region yet.
+              </div>
             </div>
-          </div>
-        </ng-template>
-      </app-tab>
+          </ng-template>
+        </app-tab>
 
-      <app-tab label="Dungeons">
-        <app-dungeons class="overflow-hidden pt-4"></app-dungeons>
-      </app-tab>
+        <app-tab label="Dungeons">
+          <app-dungeons class="overflow-hidden pt-4"></app-dungeons>
+        </app-tab>
 
-      <app-tab label="Raids">
-        <app-raids></app-raids>
-      </app-tab>
-    </app-tabs>
+        <app-tab label="Raids">
+          <app-raids></app-raids>
+        </app-tab>
+      </app-tabs>
+    </ng-template>
   </div>
 </ng-template>

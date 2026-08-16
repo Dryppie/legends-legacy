@@ -109,32 +109,54 @@
   </section>
   <div class="flex min-h-64 flex-1 flex-col overflow-hidden">
     <div
-      class="ll-table-header grid grid-cols-[minmax(0,1fr)_5rem_8rem_18rem] gap-2"
+      class="ll-table-header hidden gap-2 lg:grid lg:grid-cols-[minmax(0,1fr)_4rem_7rem_8.5rem_16rem]"
     >
       <div>Member</div>
       <div>Level</div>
       <div>Role</div>
+      <div>Status</div>
       <div class="justify-self-end">Action</div>
     </div>
     <div class="overflow-y-auto">
       <div
-        class="ll-table-row grid grid-cols-[minmax(0,1fr)_5rem_8rem_18rem] items-center gap-2"
+        class="ll-table-row flex flex-col gap-2 lg:grid lg:grid-cols-[minmax(0,1fr)_4rem_7rem_8.5rem_16rem] lg:items-center lg:gap-2"
         *ngFor="let member of guildMembers"
         [ngClass]="{
           'bg-zinc-300/10 text-primary':
             member.characterId === character.characterId,
         }"
       >
-        <app-character-tag
-          [id]="member.characterId"
-          [name]="member.name"
-        ></app-character-tag>
-        <div>{{ member.level }}</div>
-        <div>{{ member.role }}</div>
+        <div
+          class="flex min-w-0 items-center justify-between gap-2 lg:block lg:truncate"
+        >
+          <app-character-tag
+            class="min-w-0 truncate"
+            [id]="member.characterId"
+            [name]="member.name"
+          ></app-character-tag>
+          <span class="ll-badge shrink-0 rounded lg:hidden">
+            {{ member.role }}
+          </span>
+        </div>
+
+        <!-- One metadata line on narrow screens; separate grid cells from lg up. -->
+        <div class="flex min-w-0 items-center gap-3 lg:contents">
+          <div class="shrink-0">
+            <span class="text-zinc-500 lg:hidden">Lv </span>{{ member.level }}
+          </div>
+          <div class="hidden lg:block">{{ member.role }}</div>
+          <app-presence-indicator
+            class="min-w-0 truncate"
+            [isOnline]="member.isOnline"
+            [lastSeenAt]="member.lastSeenAt"
+            [compact]="true"
+          ></app-presence-indicator>
+        </div>
+
         <app-regular-button
           *ngIf="member.characterId === character.characterId"
           variant="danger"
-          class="col-start-4 justify-self-end"
+          class="self-end lg:col-start-5 lg:justify-self-end"
           (pressed)="
             openConfirmModal(member.role === leaderRole ? 'disband' : 'leave')
           "
@@ -143,7 +165,8 @@
         </app-regular-button>
         <div
           *ngIf="member.characterId !== character.characterId"
-          class="col-start-4 flex gap-1 justify-self-end"
+          class="justify-end gap-1 lg:col-start-5 lg:justify-self-end"
+          [ngClass]="hasMemberActions(member) ? 'flex' : 'hidden lg:flex'"
         >
           <app-regular-button
             *ngIf="canPromote(member)"
@@ -161,11 +184,7 @@
             (pressed)="kick(member)"
             >Kick</app-regular-button
           >
-          <span
-            *ngIf="
-              !canPromote(member) && !canDemote(member) && !canKick(member)
-            "
-            class="text-xs text-zinc-500"
+          <span *ngIf="!hasMemberActions(member)" class="text-xs text-zinc-500"
             >-</span
           >
         </div>

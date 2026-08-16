@@ -13,6 +13,8 @@ public sealed class CombatAreaAccessDto : IMapFrom<CombatAreaAccessResult>
     public int? CharacterLevel { get; set; }
     public IReadOnlyList<string> RequiredQuestIds { get; set; } = [];
     public IReadOnlyList<string> UnmetQuestIds { get; set; } = [];
+    public int? RequiredTowerFloor { get; set; }
+    public bool IsRequiredTowerFloorCleared { get; set; }
     public string? ReasonCode { get; set; }
     public string? PlayerMessage { get; set; }
 

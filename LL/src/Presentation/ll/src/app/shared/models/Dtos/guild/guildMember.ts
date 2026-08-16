@@ -6,4 +6,6 @@ export interface GuildMember {
   level: number;
   role: GuildRole;
   joinedAt: string; // ISO
+  isOnline: boolean;
+  lastSeenAt?: string | null;
 }
