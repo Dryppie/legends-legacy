@@ -16,7 +16,7 @@ namespace EssenceSystem.Tests;
 [Trait("BalanceShard", "Attribute")]
 public sealed class AttributeBalanceAnalyzerTests
 {
-    [Fact]
+    [BalanceFact]
     public void Analyzer_is_deterministic_and_covers_every_budgeted_attribute_at_reference_tiers()
     {
         var analyzer = CreateAnalyzer();
@@ -56,7 +56,7 @@ public sealed class AttributeBalanceAnalyzerTests
         });
     }
 
-    [Fact]
+    [BalanceFact]
     public void Analyzer_runs_real_recipe_and_blueprint_combat_peers_through_the_active_profile()
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
@@ -102,7 +102,7 @@ public sealed class AttributeBalanceAnalyzerTests
                         $"  second: {string.Join(", ", x.SecondAttributePoints.Select(p => $"{p.Key}={p.Value:0.##}"))}")));
     }
 
-    [Fact]
+    [BalanceFact]
     public void Analyzer_runs_the_approved_equal_budget_peer_matrix()
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
@@ -212,7 +212,7 @@ public sealed class AttributeBalanceAnalyzerTests
         });
     }
 
-    [Fact]
+    [BalanceFact]
     public void Analyzer_compares_health_regeneration_with_tank_and_recovery_peers()
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
@@ -282,7 +282,7 @@ public sealed class AttributeBalanceAnalyzerTests
             });
     }
 
-    [Fact]
+    [BalanceFact]
     public void Analyzer_tests_health_regeneration_across_a_long_sustain_investment_frontier()
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
@@ -325,7 +325,7 @@ public sealed class AttributeBalanceAnalyzerTests
         });
     }
 
-    [Fact]
+    [BalanceFact]
     public void Analyzer_reports_conditional_stats_in_their_relevant_scenarios()
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
@@ -346,7 +346,7 @@ public sealed class AttributeBalanceAnalyzerTests
         Assert.Contains(cooldown.Scenarios, x => x.Scenario == AttributeBalanceScenario.LongSustain);
     }
 
-    [Fact]
+    [BalanceFact]
     public void Analyzer_observes_status_stats_in_production_combat()
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
@@ -355,7 +355,7 @@ public sealed class AttributeBalanceAnalyzerTests
         AssertMeasuredGain(report, AttributeType.CrowdControlResistance);
     }
 
-    [Fact]
+    [BalanceFact]
     public void Analyzer_runs_every_canonical_loadout_through_the_full_scenario_matrix()
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
@@ -469,7 +469,7 @@ public sealed class AttributeBalanceAnalyzerTests
             x => x.Kind == AttributeBalanceFindingKind.AggregateCapWaste);
     }
 
-    [Fact]
+    [BalanceFact]
     public void Analyzer_compares_peer_balance_and_decomposes_different_roles_at_every_reference_tier()
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
@@ -517,7 +517,7 @@ public sealed class AttributeBalanceAnalyzerTests
                  && x.Message.Contains("cloth-support", StringComparison.Ordinal));
     }
 
-    [Fact]
+    [BalanceFact]
     public void Analyzer_runs_matched_summon_and_hand_calibrations_and_gates_the_next_balance_version()
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
@@ -635,7 +635,7 @@ public sealed class AttributeBalanceAnalyzerTests
         Assert.Equal(EquipmentStatBudgetCatalog.BalanceVersion, report.BalanceVersion);
     }
 
-    [Fact]
+    [BalanceFact]
     public void Analyzer_validates_real_recipe_and_blueprint_loadouts_in_production()
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
@@ -677,7 +677,7 @@ public sealed class AttributeBalanceAnalyzerTests
             });
     }
 
-    [Fact]
+    [BalanceFact]
     public void Analyzer_exercises_the_absolute_maximum_equipment_progression_envelope()
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);

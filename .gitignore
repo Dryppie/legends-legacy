@@ -243,3 +243,6 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# Local stamp recording the equipment balance version the balance suite last ran against.
+.artifacts/balance-suite.version

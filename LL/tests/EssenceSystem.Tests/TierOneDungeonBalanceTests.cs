@@ -38,7 +38,7 @@ public sealed class TierOneDungeonBalanceTests
     private static readonly int[] BalanceSeeds =
         Enumerable.Range(0, 24).Select(index => unchecked(90107 + index * 7919)).ToArray();
 
-    [Fact]
+    [BalanceFact]
     public async Task Canonical_equipment_pacing_smoke_runs_every_checkpoint_in_the_real_combat_engine()
     {
         var fixture = CreateFixture();
@@ -65,13 +65,13 @@ public sealed class TierOneDungeonBalanceTests
         Assert.True(report.Passed, string.Join(Environment.NewLine, report.Blockers));
     }
 
-    [Fact]
+    [BalanceFact]
     public async Task Canonical_equipment_pacing_development_gate_approves_every_checkpoint()
     {
         await AssertCanonicalPacingGateAsync(CombatPacingExecutionLevel.Development, 250);
     }
 
-    [Fact]
+    [BalanceFact]
     public async Task Canonical_equipment_pacing_development_role_gate_approves_tier_one()
     {
         var fixture = CreateFixture();
@@ -86,7 +86,7 @@ public sealed class TierOneDungeonBalanceTests
         Assert.True(report.Passed, string.Join(Environment.NewLine, report.Blockers));
     }
 
-    [Fact]
+    [BalanceFact]
     [Trait("BalanceLevel", "Activation")]
     public async Task Canonical_equipment_pacing_activation_gate_approves_every_checkpoint()
     {
@@ -115,7 +115,7 @@ public sealed class TierOneDungeonBalanceTests
         Assert.True(report.CanApproveBalanceVersion);
     }
 
-    [Theory]
+    [BalanceTheory]
     [InlineData("goblin_mines")]
     [InlineData("forgotten_catacombs")]
     public async Task Tier_one_dungeons_recommend_a_reliable_matching_tier_profile(string dungeonId)
@@ -160,7 +160,7 @@ public sealed class TierOneDungeonBalanceTests
             StringComparison.Ordinal);
     }
 
-    [Fact]
+    [BalanceFact]
     public void Epic_dungeon_milestone_ratings_follow_equipment_tiers_one_through_three()
     {
         var fixture = CreateFixture();
@@ -186,7 +186,7 @@ public sealed class TierOneDungeonBalanceTests
         }
     }
 
-    [Theory]
+    [BalanceTheory]
     [InlineData("goblin_mines", 1)]
     [InlineData("goblin_mines_ii", 2)]
     [InlineData("goblin_mines_iii", 3)]
@@ -245,7 +245,7 @@ public sealed class TierOneDungeonBalanceTests
             $"at {epicResult.CompletionRate:P0}.");
     }
 
-    [Theory]
+    [BalanceTheory]
     [InlineData(
         "goblin_mines_ii",
         Domain.Models.Dungeons.Definitions.DungeonTier.Heroic,

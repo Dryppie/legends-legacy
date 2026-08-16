@@ -26,6 +26,14 @@
 - Do not deploy services or apply changes to external environments.
 - EF Core migrations may be generated when requested, but must not be applied to shared or production databases.
 
+## Test execution
+
+- Run backend tests through `build/run-tests.ps1`. It always runs the fast correctness suite and decides on the exhaustive balance suite for you.
+- The balance suite is every test tagged `[Trait("Category", "BalanceFull")]`, declared with `[BalanceFact]` / `[BalanceTheory]`.
+- Locally the balance suite runs only when the equipment stat budget version, `EquipmentStatBudgetCatalog.BalanceVersion` (currently 17), differs from the version recorded in `.artifacts/balance-suite.version`. A successful balance run rewrites that stamp, so the suite stays quiet until the equipment version moves again.
+- Force it with `build/run-tests.ps1 -IncludeBalance` or `LL_RUN_BALANCE=1`; suppress it with `-SkipBalance` or `LL_RUN_BALANCE=0`.
+- In CI the balance suite runs only for pushes to `releases/**` and for manual dispatches. Pull requests and pushes to `main` run the fast suite only.
+
 ## Completion requirements
 
 Before finishing:

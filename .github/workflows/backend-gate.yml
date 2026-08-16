@@ -4,14 +4,14 @@ on:
   workflow_call:
     inputs:
       run_full_balance:
-        description: "Run the exhaustive balance simulation shards."
+        description: "Run the exhaustive balance simulation shards. Reserved for release branches."
         required: false
         default: true
         type: boolean
   workflow_dispatch:
     inputs:
       run_full_balance:
-        description: "Run the exhaustive balance simulation shards."
+        description: "Run the exhaustive balance simulation shards. Reserved for release branches."
         required: false
         default: true
         type: boolean
@@ -107,9 +107,15 @@ jobs:
 
   balance-tests:
     name: Tests / ${{ matrix.name }}
+    # Callers opt in: release branches and manual dispatches run these shards, pull
+    # requests and pushes to main do not. See .github/workflows/LL-backend.yml.
     if: inputs.run_full_balance
     needs: build
     runs-on: ubuntu-latest
+    env:
+      # BalanceSuiteGate defers to CI rather than the local equipment-version stamp.
+      # Set the override explicitly instead of relying on environment sniffing.
+      LL_RUN_BALANCE: "1"
     strategy:
       fail-fast: false
       matrix:

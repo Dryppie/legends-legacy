@@ -33,7 +33,7 @@ public sealed class RegionOneAreaSimulationTests
         _output = output;
     }
 
-    [Fact]
+    [BalanceFact]
     public async Task Region_one_area_simulation_uses_live_content_and_a_smooth_curve()
     {
         var fixture = CreateFixture();
@@ -72,7 +72,7 @@ public sealed class RegionOneAreaSimulationTests
         });
     }
 
-    [Fact]
+    [BalanceFact]
     public async Task Region_analyzer_runs_every_canonical_profile_and_flags_the_legacy_baseline()
     {
         var fixture = CreateFixture();
@@ -88,7 +88,7 @@ public sealed class RegionOneAreaSimulationTests
         Assert.Contains(report.Areas, area => area.Status == "Too easy");
     }
 
-    [Fact]
+    [BalanceFact]
     public async Task Region_endpoint_projections_cover_tier_one_through_tier_ten()
     {
         var fixture = CreateFixture();
@@ -119,7 +119,7 @@ public sealed class RegionOneAreaSimulationTests
                 pair.First.RecommendedEndpointCombatRating));
     }
 
-    [Fact]
+    [BalanceFact]
     public async Task Area_ten_is_doable_with_full_tier_one_legendary_builds()
     {
         var fixture = CreateFixture();
@@ -146,7 +146,7 @@ public sealed class RegionOneAreaSimulationTests
                 $"Tier-1 Legendary endpoint fell below viability: {summary}."));
     }
 
-    [Fact]
+    [BalanceFact]
     public async Task Area_one_is_just_doable_with_the_tutorial_mace_and_goblin_essence()
     {
         var fixture = CreateFixture();

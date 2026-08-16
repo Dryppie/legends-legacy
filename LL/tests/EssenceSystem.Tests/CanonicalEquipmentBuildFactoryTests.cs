@@ -24,7 +24,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
 {
     private readonly CanonicalEquipmentBuildFactory _factory = CreateFactory();
 
-    [Fact]
+    [BalanceFact]
     public void Balance_simulator_handles_the_default_large_random_pool_with_canonical_equipment()
     {
         var apiRoot = FindApiRoot();
@@ -82,7 +82,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         Assert.Equal(0, report.ParticipantAttributes[nameof(AttributeType.HealingPowerPercent)]);
     }
 
-    [Fact]
+    [BalanceFact]
     public void Ladder_is_deterministic_and_projects_authored_items_across_supported_equipment_tiers()
     {
         var first = _factory.GetProgressionLadder();
@@ -114,7 +114,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
                 tier.Select(rung => rung.Rarity)));
     }
 
-    [Fact]
+    [BalanceFact]
     public void Every_matrix_rung_uses_a_complete_authored_equipment_set()
     {
         foreach (var rung in _factory.GetProgressionLadder())
@@ -128,7 +128,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         }
     }
 
-    [Fact]
+    [BalanceFact]
     public void Canonical_build_uses_real_character_attributes()
     {
         var rung = _factory.GetProgressionLadder()
@@ -143,7 +143,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         Assert.Equal(expected, actual);
     }
 
-    [Fact]
+    [BalanceFact]
     public void Every_profile_uses_authored_items_and_two_region_one_essences()
     {
         var rung = _factory.GetProgressionLadder()
@@ -187,7 +187,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             balanced.EquippedEssences.Select(essence => essence.EssenceDefinitionId));
     }
 
-    [Theory]
+    [BalanceTheory]
     [InlineData(
         CanonicalPartyProfile.Balanced,
         "medium_mail",
@@ -243,7 +243,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             build.EquippedEssences.Select(essence => essence.EssenceDefinitionId));
     }
 
-    [Fact]
+    [BalanceFact]
     public void Combat_rating_uses_actual_loadout_attributes_and_rises_with_equipment_tier()
     {
         foreach (var profile in Enum.GetValues<CanonicalPartyProfile>())
@@ -279,7 +279,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         }
     }
 
-    [Fact]
+    [BalanceFact]
     public void Tier_ten_profile_combat_ratings_remain_comparable()
     {
         var rung = _factory.GetProgressionLadder()
@@ -320,7 +320,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             $"Tier-10 canonical Combat Ratings diverged too far: {summary}.");
     }
 
-    [Fact]
+    [BalanceFact]
     public void Balanced_epic_hybrid_anchors_grow_without_accelerating_mirror_pacing()
     {
         var results = new[] { 1, 5, 10 }
@@ -378,7 +378,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         Assert.Equal(results[1].AttackSpeed, results[2].AttackSpeed, precision: 3);
     }
 
-    [Fact]
+    [BalanceFact]
     public void Neutral_essence_battle_pacing_does_not_accelerate_across_equipment_tiers()
     {
         var simulator = CreateBalanceSimulator();
@@ -415,7 +415,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             $"Neutral essence battle pacing accelerated by tier: {summary}.");
     }
 
-    [Fact]
+    [BalanceFact]
     public void Tier_one_epic_profile_combat_ratings_remain_comparable()
     {
         var rung = _factory.GetProgressionLadder()
@@ -444,7 +444,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             $"Tier-1 epic canonical Combat Ratings diverged too far: {summary}.");
     }
 
-    [Fact]
+    [BalanceFact]
     public void Tier_one_legendary_profile_ratings_are_stable()
     {
         var rung = _factory.GetProgressionLadder()
@@ -465,7 +465,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         Assert.Equal(expectedDisplayedRatings, ratings);
     }
 
-    [Fact]
+    [BalanceFact]
     public void Tutorial_starter_build_uses_only_the_common_mace_and_goblin_essence()
     {
         var build = _factory.CreateTutorialStarterBuild();
@@ -488,7 +488,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         Assert.Equal(47, build.Rating.Overall / 10);
     }
 
-    [Theory]
+    [BalanceTheory]
     [InlineData(1, 2)]
     [InlineData(2, 4)]
     [InlineData(3, 6)]
@@ -516,7 +516,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         }
     }
 
-    [Fact]
+    [BalanceFact]
     public void Builds_are_deterministic()
     {
         var rung = _factory.GetProgressionLadder()[^1];

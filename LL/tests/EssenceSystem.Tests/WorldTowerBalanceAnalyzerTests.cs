@@ -22,7 +22,7 @@ namespace EssenceSystem.Tests;
 [Trait("Category", "BalanceFull")]
 public sealed class WorldTowerBalanceAnalyzerTests
 {
-    [Fact]
+    [BalanceFact]
     [Trait("BalanceShard", "WorldTowerLow")]
     public async Task Analyzer_uses_tier_one_floor_benchmarks_and_is_deterministic()
     {
@@ -57,7 +57,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
         Assert.Equal(6, first.Floors[^1].EssenceCount);
     }
 
-    [Theory]
+    [BalanceTheory]
     [Trait("BalanceShard", "WorldTowerLow")]
     [InlineData(1, 30, "Rare", 4)]
     [InlineData(2, 32, "Rare", 4)]
@@ -76,7 +76,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
             expectedEssenceCount,
             randomSeed: 130_363);
 
-    [Theory]
+    [BalanceTheory]
     [Trait("BalanceShard", "WorldTowerHigh")]
     [InlineData(6, 41, "Epic", 5)]
     [InlineData(7, 43, "Unique", 5)]
@@ -95,7 +95,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
             expectedEssenceCount,
             randomSeed: 130_363);
 
-    [Fact]
+    [BalanceFact]
     [Trait("BalanceShard", "WorldTowerLow")]
     public async Task Floor_one_rejects_the_pre_tower_checkpoint()
     {
@@ -114,7 +114,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
             $"Pre-Tower {roster.Roster} roster still won {roster.WinRate:N2}% of attempts."));
     }
 
-    [Fact]
+    [BalanceFact]
     [Trait("BalanceShard", "WorldTowerLow")]
     public async Task Floor_one_rejects_an_otherwise_ready_uncommon_roster()
     {
@@ -132,7 +132,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
             $"The level-30 Uncommon mixed roster still won {mixed.WinRate:N2}% of attempts.");
     }
 
-    [Fact]
+    [BalanceFact]
     [Trait("BalanceShard", "WorldTowerLow")]
     public async Task Floor_one_rejects_a_full_common_mixed_roster_even_with_four_essences()
     {
@@ -154,7 +154,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
             $"Full-Common {roster.Roster} roster still won {roster.WinRate:N2}% of attempts."));
     }
 
-    [Theory]
+    [BalanceTheory]
     [Trait("BalanceShard", "WorldTowerHigh")]
     [InlineData(7, 43, "Unique", 5)]
     [InlineData(8, 46, "Unique", 5)]
@@ -172,7 +172,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
             expectedEssenceCount,
             randomSeed: 424_243);
 
-    [Fact]
+    [BalanceFact]
     [Trait("BalanceShard", "WorldTowerHigh")]
     public async Task Floor_eleven_is_not_available_while_release_ends_at_floor_ten()
     {
@@ -182,7 +182,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
                 CancellationToken.None));
     }
 
-    [Theory]
+    [BalanceTheory]
     [Trait("BalanceShard", "WorldTowerLow")]
     [InlineData(1, 30, "Rare", 4)]
     [InlineData(5, 39, "Epic", 4)]
