@@ -1063,7 +1063,7 @@ public sealed class WorldTowerServiceTests
         var announcement = Assert.Single(outbox.ChatAnnouncements);
         Assert.Equal(rallyId, announcement.RallyId);
         Assert.Equal($"/game/world/tower/expeditions/{rallyId}", announcement.TargetUrl);
-        Assert.Contains("is under attack!", announcement.Body, StringComparison.Ordinal);
+        Assert.Contains("is starting!", announcement.Body, StringComparison.Ordinal);
         Assert.Contains(
             GameEventTypes.WorldTowerChatAnnouncement,
             outbox.EventTypes);

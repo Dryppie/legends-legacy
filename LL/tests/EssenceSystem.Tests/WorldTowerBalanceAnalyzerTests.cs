@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Services.LL.WorldTower;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
