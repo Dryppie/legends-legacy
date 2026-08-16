@@ -11,6 +11,7 @@ using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Guilds;
+using Domain.Models.Professions.Crafting.V2;
 
 namespace Application.UseCases.Characters.Dtos;
 public class CharacterOverviewDto : IMapFrom<Character>
@@ -26,6 +27,7 @@ public class CharacterOverviewDto : IMapFrom<Character>
     public OverallPowerRating? Power { get; set; }
     public List<EntityAttribute> BaseAttributes { get; set; } = [];
     public List<EntityAttribute> BaseCombatAttributes { get; set; } = [];
+    public List<EntityAttribute> EquipmentRatings { get; set; } = [];
     public EssenceLoadoutDto? ActiveEssenceLoadout { get; set; }
     public EquippedTitleDto? EquippedTitle { get; set; }
     public CharacterGuildDto? Guild { get; set; }
@@ -88,6 +90,18 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
                 AttributeType = kvp.Key,
                 Value = kvp.Value
             }).ToList(),
+            EquipmentRatings = AttributeCalculator
+                .CollectRawEquipmentRatings(source.EquipmentSlots
+                    .Where(slot => slot.EquipmentInstance is not null)
+                    .Select(slot => slot.EquipmentInstance!))
+                .OrderBy(entry => entry.Key)
+                .Select(entry => new EntityAttribute
+                {
+                    EntityId = source.Id,
+                    AttributeType = entry.Key,
+                    Value = (float)entry.Value
+                })
+                .ToList(),
             ActiveEssenceLoadout = MapActiveLoadout(source, context),
             EquippedTitle = MapEquippedTitle(source),
             LastSeenAt = source.CharacterAction?.UpdatedAt,

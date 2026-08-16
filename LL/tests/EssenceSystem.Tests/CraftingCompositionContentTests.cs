@@ -97,22 +97,129 @@ public sealed class CraftingCompositionContentTests
     }
 
     [Fact]
-    public void RepresentativeHandPeersRetainCalibratedCombatBehavior()
+    public void EveryWeaponUsesStandardBasicAttackTimingAndDamage()
     {
-        var recipes = CreateProvider().GetRecipes();
-        var dagger = recipes.Single(x => x.Id == "recipe.weapon.one_handed.dagger");
-        var greatsword = recipes.Single(x => x.Id == "recipe.weapon.two_handed.greatsword");
-        var gauntlets = recipes.Single(x => x.Id == "recipe.weapon.two_handed.gauntlets");
-        var maul = recipes.Single(x => x.Id == "recipe.weapon.two_handed.maul");
+        var weapons = CreateProvider()
+            .GetRecipes()
+            .Where(recipe => recipe.Tags.Contains("Weapon"))
+            .ToList();
 
-        Assert.Equal(0.75d, dagger.Behavior.BasicAttackIntervalMultiplier);
-        Assert.Equal(0.78d, dagger.Behavior.BasicAttackDamageMultiplier);
-        Assert.Equal(1d, greatsword.Behavior.BasicAttackIntervalMultiplier);
-        Assert.Equal(1.02d, greatsword.Behavior.BasicAttackDamageMultiplier);
-        Assert.Equal(0.75d, gauntlets.Behavior.BasicAttackIntervalMultiplier);
-        Assert.Equal(0.78d, gauntlets.Behavior.BasicAttackDamageMultiplier);
-        Assert.Equal(1.25d, maul.Behavior.BasicAttackIntervalMultiplier);
-        Assert.Equal(1.18d, maul.Behavior.BasicAttackDamageMultiplier);
+        Assert.NotEmpty(weapons);
+        Assert.All(weapons, weapon =>
+        {
+            Assert.Equal(1d, weapon.Behavior.BasicAttackIntervalMultiplier);
+            Assert.Equal(1d, weapon.Behavior.BasicAttackDamageMultiplier);
+        });
+    }
+
+    [Fact]
+    public void EveryWeaponUsesTheApprovedSeventyThirtyIdentityProfile()
+    {
+        var expectedSecondaryAttributes = new Dictionary<string, AttributeType>
+        {
+            ["recipe.weapon.one_handed.shortsword"] = AttributeType.CritChance,
+            ["recipe.weapon.one_handed.dagger"] = AttributeType.AttackSpeed,
+            ["recipe.weapon.one_handed.hand_axe"] = AttributeType.CritDamage,
+            ["recipe.weapon.one_handed.mace"] = AttributeType.ArmorPenetration,
+            ["recipe.weapon.one_handed.wand"] = AttributeType.MagicPenetration,
+            ["recipe.weapon.two_handed.greatsword"] = AttributeType.CritChance,
+            ["recipe.weapon.two_handed.battle_axe"] = AttributeType.CritDamage,
+            ["recipe.weapon.two_handed.maul"] = AttributeType.ArmorPenetration,
+            ["recipe.weapon.two_handed.spear"] = AttributeType.AttackSpeed,
+            ["recipe.weapon.two_handed.staff"] = AttributeType.MagicPenetration,
+            ["recipe.weapon.two_handed.longbow"] = AttributeType.CritChance,
+            ["recipe.weapon.two_handed.crossbow"] = AttributeType.ArmorPenetration,
+            ["recipe.weapon.two_handed.gauntlets"] = AttributeType.AttackSpeed
+        };
+        var weapons = CreateProvider()
+            .GetRecipes()
+            .Where(recipe => recipe.Tags.Contains("Weapon"))
+            .ToList();
+
+        Assert.Equal(expectedSecondaryAttributes.Count, weapons.Count);
+        Assert.Equal(5, expectedSecondaryAttributes.Values.Distinct().Count());
+        Assert.All(weapons, weapon =>
+        {
+            var secondaryAttribute = expectedSecondaryAttributes[weapon.Id];
+            Assert.Equal(2, weapon.InitialStatProfile.Count);
+            Assert.Equal(0.7d, weapon.InitialStatProfile[AttributeType.Power]);
+            Assert.Equal(0.3d, weapon.InitialStatProfile[secondaryAttribute]);
+
+            Assert.Collection(
+                weapon.TemperingProfile.Stats,
+                power =>
+                {
+                    Assert.Equal(AttributeType.Power, power.Stat);
+                    Assert.Equal(70, power.Weight);
+                    Assert.Equal(0.7d, power.MaxBudgetShare);
+                },
+                secondary =>
+                {
+                    Assert.Equal(secondaryAttribute, secondary.Stat);
+                    Assert.Equal(30, secondary.Weight);
+                    Assert.Equal(0.3d, secondary.MaxBudgetShare);
+                });
+        });
+    }
+
+    [Fact]
+    public void EveryArmorSlotUsesTheApprovedFamilyIdentityProfile()
+    {
+        var expectedByFamily = new Dictionary<string, Dictionary<AttributeType, double>>
+        {
+            ["HeavyArmor"] = new()
+            {
+                [AttributeType.Armor] = 0.35d,
+                [AttributeType.MaxHealth] = 0.35d,
+                [AttributeType.Resistance] = 0.30d
+            },
+            ["MediumArmor"] = new()
+            {
+                [AttributeType.Armor] = 0.25d,
+                [AttributeType.MaxHealth] = 0.25d,
+                [AttributeType.CritChance] = 0.25d,
+                [AttributeType.CritDamage] = 0.25d
+            },
+            ["LightArmor"] = new()
+            {
+                [AttributeType.MaxHealth] = 0.25d,
+                [AttributeType.HealthRegeneration] = 0.25d,
+                [AttributeType.DodgeChance] = 0.25d,
+                [AttributeType.AttackSpeed] = 0.25d
+            },
+            ["ClothArmor"] = new()
+            {
+                [AttributeType.Resistance] = 0.25d,
+                [AttributeType.HealthRegeneration] = 0.25d,
+                [AttributeType.HealingPowerPercent] = 0.25d,
+                [AttributeType.Cooldown] = 0.25d
+            }
+        };
+        var recipes = CreateProvider().GetRecipes();
+
+        foreach (var (familyTag, expectedProfile) in expectedByFamily)
+        {
+            var familyRecipes = recipes.Where(recipe => recipe.Tags.Contains(familyTag)).ToList();
+            Assert.Equal(3, familyRecipes.Count);
+
+            Assert.All(familyRecipes, recipe =>
+            {
+                Assert.Equal(expectedProfile, recipe.InitialStatProfile);
+                Assert.Equal(1d, recipe.InitialStatProfile.Values.Sum(), precision: 4);
+
+                var temperingByAttribute = recipe.TemperingProfile.Stats
+                    .ToDictionary(stat => stat.Stat);
+                Assert.Equal(expectedProfile.Keys.Order(), temperingByAttribute.Keys.Order());
+                foreach (var (attribute, budgetShare) in expectedProfile)
+                {
+                    var tempering = temperingByAttribute[attribute];
+                    Assert.Equal((int)(budgetShare * 100), tempering.Weight);
+                    Assert.Equal(budgetShare, tempering.MaxBudgetShare);
+                    Assert.True(tempering.CanIntroduce);
+                    Assert.True(tempering.CanIncrease);
+                }
+            });
+        }
     }
 
     [Fact]
@@ -168,11 +275,56 @@ public sealed class CraftingCompositionContentTests
     }
 
     [Fact]
-    public void Summon_crafting_profiles_use_the_stats_inherited_by_summons()
+    public void Defensive_offhand_shields_share_health_and_block_with_distinct_typed_defense()
+    {
+        var recipes = CreateProvider().GetRecipes();
+        var expectedDefenseByRecipe = new Dictionary<string, AttributeType>
+        {
+            ["recipe.offhand.towershield"] = AttributeType.Armor,
+            ["recipe.offhand.spiritward"] = AttributeType.Resistance
+        };
+
+        foreach (var (recipeId, defense) in expectedDefenseByRecipe)
+        {
+            var recipe = recipes.Single(x => x.Id == recipeId);
+            Assert.Contains("Shield", recipe.Tags);
+            Assert.Contains("Block", recipe.Tags);
+            Assert.Equal(
+                new Dictionary<AttributeType, double>
+                {
+                    [AttributeType.MaxHealth] = 0.35d,
+                    [AttributeType.BlockChance] = 0.35d,
+                    [defense] = 0.30d
+                },
+                recipe.InitialStatProfile);
+            Assert.Collection(
+                recipe.TemperingProfile.Stats,
+                maxHealth =>
+                {
+                    Assert.Equal(AttributeType.MaxHealth, maxHealth.Stat);
+                    Assert.Equal(35, maxHealth.Weight);
+                    Assert.Equal(0.35d, maxHealth.MaxBudgetShare);
+                },
+                block =>
+                {
+                    Assert.Equal(AttributeType.BlockChance, block.Stat);
+                    Assert.Equal(35, block.Weight);
+                    Assert.Equal(0.35d, block.MaxBudgetShare);
+                },
+                typedDefense =>
+                {
+                    Assert.Equal(defense, typedDefense.Stat);
+                    Assert.Equal(30, typedDefense.Weight);
+                    Assert.Equal(0.30d, typedDefense.MaxBudgetShare);
+                });
+        }
+    }
+
+    [Fact]
+    public void Primal_blueprint_uses_the_stats_inherited_by_summons()
     {
         var provider = CreateProvider();
         var primal = provider.GetBlueprint("blueprint_primal")!;
-        var spiritward = provider.GetRecipes().Single(x => x.Id == "recipe.offhand.spiritward");
 
         Assert.Equal(
             new Dictionary<AttributeType, double>
@@ -182,16 +334,7 @@ public sealed class CraftingCompositionContentTests
                 [AttributeType.CrowdControlResistance] = 0.2d
             },
             primal.BonusStatProfile);
-        Assert.Equal(
-            new Dictionary<AttributeType, double>
-            {
-                [AttributeType.Resistance] = 0.35d,
-                [AttributeType.HealthRegeneration] = 0.25d,
-                [AttributeType.MaxHealth] = 0.4d
-            },
-            spiritward.InitialStatProfile);
         Assert.Equal(1d, primal.BonusStatProfile.Values.Sum(), precision: 4);
-        Assert.Equal(1d, spiritward.InitialStatProfile.Values.Sum(), precision: 4);
     }
 
     [Fact]

@@ -77,7 +77,8 @@ public sealed record CombatSimulationOptions(
     int BasicAttackIntervalTicks = 30,
     int? OvertimeStartsAtTick = null,
     int OvertimePowerIncreaseIntervalTicks = 0,
-    float OvertimePowerIncreasePercent = 0);
+    float OvertimePowerIncreasePercent = 0,
+    bool CaptureEventLog = true);
 
 public sealed record TournamentCombatSimulationOptions(
     int RegulationTicks,

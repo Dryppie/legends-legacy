@@ -1,5 +1,13 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  inject,
+} from '@angular/core';
 import { Equipment, EquipmentInstance } from '../../../../models/item';
 import { EquipmentStateService } from '../../../../../core/services/api/equipment/equipment-state.service';
 import { EquipmentSlotType } from '../../../../models/Dtos/equipment-slots/equipmentSlot';
@@ -15,6 +23,13 @@ import { InventoryStateService } from '../../../../../core/services/api/inventor
 import { InventoryItem } from '../../../../models/inventoryItem';
 import { InventoryTransferComponent } from '../../../inventory-transfer/inventory-transfer.component';
 import { EquipmentType } from '../../../../models/enums/equipmentType';
+import {
+  EquipmentComparison,
+  EquipmentService,
+} from '../../../../../core/services/api/equipment/equipment.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AttributeTypeFormatPipe } from '../../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+import { AttributeValueFormatPipe } from '../../../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 
 @Component({
   selector: 'app-inventory-equipment-modal',
@@ -24,20 +39,26 @@ import { EquipmentType } from '../../../../models/enums/equipmentType';
     NgClass,
     NgFor,
     NgIf,
+    AttributeTypeFormatPipe,
+    AttributeValueFormatPipe,
   ],
   templateUrl: './inventory-equipment-modal.component.html',
 })
 export class InventoryEquipmentModalComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   @Input() equipmentInstance!: EquipmentInstance;
   @Input() slotType: EquipmentSlotType | null = null;
   equipment!: Equipment;
   selectedSlotType!: EquipmentSlotType;
   equippedComparisons: EquippedComparison[] = [];
+  characterComparison: EquipmentComparison | null = null;
+  comparisonLoading = false;
   @Output() close = new EventEmitter<void>();
 
   constructor(
     readonly equipmentState: EquipmentStateService,
     private inventoryState: InventoryStateService,
+    private equipmentApi: EquipmentService,
   ) {}
 
   get inventoryItem(): InventoryItem | undefined {
@@ -52,6 +73,7 @@ export class InventoryEquipmentModalComponent implements OnInit {
       this.slotType ??
       getSlotTypeFromEquipmentType(this.equipment.equipmentType);
     this.updateComparisons();
+    this.loadCharacterComparison();
   }
 
   get equipSlotOptions(): EquipmentSlotType[] {
@@ -83,6 +105,7 @@ export class InventoryEquipmentModalComponent implements OnInit {
   selectSlot(slotType: EquipmentSlotType): void {
     this.selectedSlotType = slotType;
     this.updateComparisons();
+    this.loadCharacterComparison();
   }
 
   slotLabel(slotType: EquipmentSlotType): string {
@@ -96,5 +119,22 @@ export class InventoryEquipmentModalComponent implements OnInit {
 
   onClose() {
     this.close.emit();
+  }
+
+  private loadCharacterComparison(): void {
+    this.comparisonLoading = true;
+    this.characterComparison = null;
+    this.equipmentApi
+      .compareEquipment(this.equipmentInstance.id, this.selectedSlotType)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (comparison) => {
+          this.characterComparison = comparison;
+          this.comparisonLoading = false;
+        },
+        error: () => {
+          this.comparisonLoading = false;
+        },
+      });
   }
 }

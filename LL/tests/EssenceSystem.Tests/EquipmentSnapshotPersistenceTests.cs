@@ -12,6 +12,27 @@ namespace EssenceSystem.Tests;
 public sealed class EquipmentSnapshotPersistenceTests
 {
     [Fact]
+    public void Display_name_prefers_the_persisted_instance_name_for_tools()
+    {
+        var equipment = new EquipmentInstance
+        {
+            CraftedName = "Broken Proven Pickaxe",
+            Rarity = Rarity.Rare,
+            ItemBase = new EquipmentBase
+            {
+                Name = "Pickaxe",
+                EquipmentType = EquipmentType.Tool
+            }
+        };
+
+        Assert.Equal("Broken Proven Pickaxe", equipment.DisplayName);
+
+        equipment.CraftedName = null;
+
+        Assert.Equal("Proven Pickaxe", equipment.DisplayName);
+    }
+
+    [Fact]
     public async Task Saving_equipment_snapshot_does_not_add_modifiers_to_live_equipment()
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()
@@ -24,6 +45,7 @@ public sealed class EquipmentSnapshotPersistenceTests
             ItemBaseId = "test.snapshot.helm",
             BaseRecipeId = "recipe.test.snapshot.helm",
             BlueprintId = "blueprint.test.snapshot.helm",
+            CraftedName = "Broken Snapshot Helm",
             ItemBase = new EquipmentBase
             {
                 Id = "test.snapshot.helm",
@@ -58,6 +80,7 @@ public sealed class EquipmentSnapshotPersistenceTests
         await using var readContext = new LLDbContext(options);
         var persistedEquipment = await readContext.ItemInstances
             .OfType<EquipmentInstance>()
+            .Include(x => x.ItemBase)
             .Include(x => x.InstanceModifiers)
             .SingleAsync(x => x.Id == equipmentId);
         var persistedSnapshot = await readContext.CharacterSnapshots
@@ -77,6 +100,7 @@ public sealed class EquipmentSnapshotPersistenceTests
         Assert.Equal(
             "blueprint.test.snapshot.helm",
             Assert.Single(persistedSnapshot.Equipment).BlueprintId);
+        Assert.Equal("Broken Snapshot Helm", persistedEquipment.DisplayName);
         Assert.Equal(AttributeType.MaxHealth, snapshotModifier.AttributeType);
         Assert.Equal(11, snapshotModifier.Amount);
     }

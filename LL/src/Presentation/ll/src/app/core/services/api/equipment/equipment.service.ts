@@ -7,10 +7,27 @@ import {
 } from '../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
 import { EquipmentInstance } from '../../../../shared/models/item';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
+import { HttpParams } from '@angular/common/http';
+import { AttributeType } from '../../../../shared/models/enums/attributeType';
 
 export interface EquipmentChangeResponse {
   equipmentSlots: EquipmentSlot[];
   inventoryItems: InventoryItem[];
+}
+
+export interface EquipmentComparisonValue {
+  attributeType: AttributeType;
+  before: number;
+  after: number;
+  difference: number;
+}
+
+export interface EquipmentComparison {
+  equipmentInstanceId: string;
+  characterLevel: number;
+  slotType: EquipmentSlotType;
+  ratings: EquipmentComparisonValue[];
+  effectiveAttributes: EquipmentComparisonValue[];
 }
 
 @Injectable({
@@ -21,6 +38,17 @@ export class EquipmentService {
 
   public getEquipment(): Observable<EquipmentSlot[]> {
     return this.apiService.get('equipment').pipe();
+  }
+
+  public compareEquipment(
+    equipmentInstanceId: string,
+    slotType: EquipmentSlotType,
+  ): Observable<EquipmentComparison> {
+    const params = new HttpParams().set('slotType', slotType);
+    return this.apiService.get(
+      `equipment/comparison/${equipmentInstanceId}`,
+      params,
+    );
   }
 
   public equipEquipment(

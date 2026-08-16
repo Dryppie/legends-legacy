@@ -20,7 +20,7 @@ public sealed record CanonicalEquipmentProgressionRung(
     int EquippedSlotCount,
     string Id)
 {
-    public bool UsesProjectedTierScaling => Tier > EquipmentStatBudgetCatalog.MaximumTier;
+    public bool UsesProjectedTierScaling => false;
 }
 
 public sealed record CanonicalEquipmentBuild(
@@ -44,8 +44,7 @@ public sealed class CanonicalEquipmentBuildFactory
     public const string TutorialStarterBuildId = "tutorial-starter";
     private const int PositiveTemperingAttemptsPerRarity = 10;
     private const int MaximumCanonicalEssenceCount = 6;
-    private const int MaximumCalibrationEquipmentTier = 20;
-    private const double ProjectedEquipmentPowerGrowthPerTier = 1.25d;
+    private const int MaximumCalibrationEquipmentTier = 100;
 
     // Stable slot order keeps every full-set matrix build deterministic.
     private static readonly EquipmentType[] CanonicalSlots =
@@ -97,38 +96,38 @@ public sealed class CanonicalEquipmentBuildFactory
             [CanonicalPartyProfile.Balanced] =
             [
                 "essence.goblin",
-                "essence.vampire_bat",
-                "essence.goblin_warrior",
-                "essence.enchanted_fairy",
                 "essence.goblin_archer",
-                "essence.pixie"
+                "essence.goblin_warrior",
+                "essence.glade_panther",
+                "essence.green_slime",
+                "essence.flame_imp"
             ],
             [CanonicalPartyProfile.Offense] =
             [
-                "essence.goblin_archer",
-                "essence.glade_panther",
-                "essence.goblin_warrior",
-                "essence.flame_imp",
-                "essence.hobgoblin",
-                "essence.vampire_bat"
+                "essence.green_slime",
+                "essence.cinder_beetle",
+                "essence.pixie",
+                "essence.giant_bat",
+                "essence.rotfly_toad",
+                "essence.poisonous_rat"
             ],
             [CanonicalPartyProfile.Sustain] =
             [
-                "essence.enchanted_fairy",
-                "essence.pixie",
-                "essence.treant_sapling",
+                "essence.goblin",
                 "essence.goblin_shaman",
                 "essence.brown_slime",
-                "essence.green_slime"
+                "essence.flame_imp",
+                "essence.vampire_bat",
+                "essence.goblin_warrior"
             ],
             [CanonicalPartyProfile.Defensive] =
             [
-                "essence.brown_slime",
+                "essence.red_slime",
                 "essence.goblin_warrior",
-                "essence.treant_sapling",
-                "essence.goblin_shaman",
-                "essence.blue_slime",
-                "essence.moss_lizard"
+                "essence.goblin",
+                "essence.flame_imp",
+                "essence.green_slime",
+                "essence.illusion_fox"
             ],
             [CanonicalPartyProfile.Area] =
             [
@@ -192,13 +191,19 @@ public sealed class CanonicalEquipmentBuildFactory
     public CanonicalEquipmentBuild CreateBuild(
         CanonicalPartyProfile profile,
         CanonicalEquipmentProgressionRung rung) =>
-        CreateBuild(profile, rung, essenceCount: 2);
+        CreateBuildCore(profile, rung, essenceCount: 2);
+
+    public CanonicalEquipmentBuild CreateBuild(
+        CanonicalPartyProfile profile,
+        CanonicalEquipmentProgressionRung rung,
+        int essenceCount) =>
+        CreateBuildCore(profile, rung, essenceCount);
 
     public CanonicalEquipmentBuild CreateBuildForDungeonTier(
         CanonicalPartyProfile profile,
         CanonicalEquipmentProgressionRung rung,
         int dungeonTier) =>
-        CreateBuild(profile, rung, GetEssenceCountForDungeonTier(dungeonTier));
+        CreateBuildCore(profile, rung, GetEssenceCountForDungeonTier(dungeonTier));
 
     public CanonicalEquipmentBuild CreateBuildForArea(
         CanonicalPartyProfile profile,
@@ -206,7 +211,7 @@ public sealed class CanonicalEquipmentBuildFactory
         int characterLevel,
         int essenceCount)
     {
-        var build = CreateBuild(profile, rung, essenceCount);
+        var build = CreateBuildCore(profile, rung, essenceCount);
         var resolvedLevel = Math.Max(1, characterLevel);
         build.Character.Level = resolvedLevel;
         build.Character.BaseAttributes = EntityBaseAttributeHelper
@@ -272,7 +277,7 @@ public sealed class CanonicalEquipmentBuildFactory
             "Canonical dungeon tiers must be between 1 and 3.")
     };
 
-    private CanonicalEquipmentBuild CreateBuild(
+    private CanonicalEquipmentBuild CreateBuildCore(
         CanonicalPartyProfile profile,
         CanonicalEquipmentProgressionRung rung,
         int essenceCount)
@@ -289,13 +294,17 @@ public sealed class CanonicalEquipmentBuildFactory
             Id = CreateDeterministicGuid($"canonical-character:{profile}"),
             Name = $"Canonical {profile} - {rung.Id}",
             Level = Math.Max(
-                Math.Max(rung.Tier, ProfileCharacterLevels[profile]),
+                Math.Max(
+                    EquipmentTierBudgetCurve.GetFirstCharacterLevelForTier(rung.Tier),
+                    ProfileCharacterLevels[profile]),
                 (essenceCount - 1) * 10),
             BaseAttributes = EntityBaseAttributeHelper
                 .CreateEntityAttributesForLevel(
                     CreateDeterministicGuid($"canonical-attributes:{profile}"),
                     Math.Max(
-                        Math.Max(rung.Tier, ProfileCharacterLevels[profile]),
+                        Math.Max(
+                            EquipmentTierBudgetCurve.GetFirstCharacterLevelForTier(rung.Tier),
+                            ProfileCharacterLevels[profile]),
                         (essenceCount - 1) * 10))
                 .OrderBy(attribute => attribute.AttributeType)
                 .ToList()
@@ -336,7 +345,8 @@ public sealed class CanonicalEquipmentBuildFactory
         return CombatRatingCalculator.Calculate(
             character.BaseAttributes,
             equipment,
-            essenceSources);
+            essenceSources,
+            character.Level);
     }
 
     private EquipmentInstance CreateEquipment(
@@ -350,7 +360,9 @@ public sealed class CanonicalEquipmentBuildFactory
             recipeId,
             rung,
             $"canonical-equipment:{profile}:{rung.Id}:{slotIndex}",
-            $"canonical-stat-roll:{profile}:{rung.Id}:{slotIndex}");
+            $"canonical-stat-roll:{profile}:t1-" +
+            $"{rung.Quality.ToString().ToLowerInvariant()}-" +
+            $"{rung.Rarity.ToString().ToLowerInvariant()}:{slotIndex}");
     }
 
     private EquipmentInstance CreateEquipmentFromRecipe(
@@ -398,6 +410,7 @@ public sealed class CanonicalEquipmentBuildFactory
             BaseRecipeId = recipe.Id,
             CraftedName = design.Name,
             Tier = rung.Tier,
+            StatModelVersion = EquipmentStatBudgetCatalog.BalanceVersion,
             Rarity = Rarity.Common,
             Quality = rung.Quality,
             Potential = startingPotential,
@@ -433,23 +446,7 @@ public sealed class CanonicalEquipmentBuildFactory
                 $"instead of {rung.Rarity}.");
         }
 
-        ApplyProjectedTierScaling(equipment);
         return equipment;
-    }
-
-    private static void ApplyProjectedTierScaling(EquipmentInstance equipment)
-    {
-        if (equipment.Tier <= EquipmentStatBudgetCatalog.MaximumTier)
-            return;
-
-        // Tier 10 is the end of the currently authored equipment budget table.
-        // Continue its late-game growth for calibration only so Mythic analysis
-        // can report the equipment tier its present enemy scaling would require.
-        var multiplier = Math.Pow(
-            ProjectedEquipmentPowerGrowthPerTier,
-            equipment.Tier - EquipmentStatBudgetCatalog.MaximumTier);
-        foreach (var modifier in equipment.InstanceModifiers)
-            modifier.Amount *= (float)multiplier;
     }
 
     private IReadOnlyList<PlayerEssence> CreateEssences(

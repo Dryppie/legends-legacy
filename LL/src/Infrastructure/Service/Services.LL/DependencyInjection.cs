@@ -273,6 +273,10 @@ public static class DependencyInjection
         services.AddScoped<IAbilityBalanceSimulator, AbilityBalanceSimulator>();
         services.AddScoped<IAbilityBalanceAuditService, AbilityBalanceAuditService>();
         services.AddScoped<IAttributeMarginalValueAnalyzer, AttributeMarginalValueAnalyzer>();
+        services.AddScoped<ICanonicalCombatPacingSampleSource, CanonicalCombatPacingSampleSource>();
+        services.AddSingleton<IEquipmentCombatPacingArtifactStore>(
+            new EquipmentCombatPacingArtifactStore(contentRootPath));
+        services.AddScoped<IEquipmentCombatPacingAnalyzer, EquipmentCombatPacingAnalyzer>();
         services.AddScoped<IAbilityCatalogBehaviorDiagnostics>(sp =>
             new AbilityCatalogBehaviorDiagnostics(
                 sp.GetRequiredService<IAbilityCatalogProvider>(),

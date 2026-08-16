@@ -12,7 +12,28 @@ namespace EssenceSystem.Tests;
 public sealed class EquipmentBalanceProfileTests
 {
     [Fact]
-    public void Profile_covers_every_attribute_with_positive_ordered_anchors()
+    public void Combat_pacing_contract_matches_the_approved_equal_tier_targets()
+    {
+        Assert.Equal(900, EquipmentCombatPacingTargets.OffensiveBenchmarkTicks);
+        Assert.Equal(1_200, EquipmentCombatPacingTargets.SustainBenchmarkTicks);
+        Assert.Equal(new CombatDurationBand(110, 90, 140),
+            EquipmentCombatPacingTargets.GetStandardEnemyTtk(EquipmentCombatRole.Offense));
+        Assert.Equal(new CombatDurationBand(140, 120, 160),
+            EquipmentCombatPacingTargets.GetStandardEnemyTtk(EquipmentCombatRole.Balanced));
+        Assert.Equal(new CombatDurationBand(390, 340, 450),
+            EquipmentCombatPacingTargets.GetRawTtd(EquipmentCombatRole.Sustain));
+        Assert.Equal(new CombatDurationBand(1_200, 900, 1_350),
+            EquipmentCombatPacingTargets.GetEffectiveTtd(EquipmentCombatRole.Defensive));
+        Assert.Equal(new CombatDurationBand(1_800, 1_500, 2_100),
+            EquipmentCombatPacingTargets.SoloBossTtk);
+        Assert.Equal(new CombatDurationBand(2_100, 1_800, 2_400),
+            EquipmentCombatPacingTargets.PartyBossTtk);
+        Assert.Equal(250, EquipmentCombatPacingTargets.DevelopmentSeedCount);
+        Assert.Equal(1_000, EquipmentCombatPacingTargets.ActivationSeedCount);
+    }
+
+    [Fact]
+    public void Profile_covers_every_attribute_with_one_positive_constant_price()
     {
         Assert.Equal(
             AttributeCatalog.All
@@ -24,81 +45,67 @@ public sealed class EquipmentBalanceProfileTests
         foreach (var attribute in EquipmentStatBudgetCatalog.Attributes)
         {
             var anchors = EquipmentStatBudgetCatalog.GetCostAnchors(attribute);
-            Assert.NotEmpty(anchors);
+            var anchor = Assert.Single(anchors);
             Assert.Equal(EquipmentStatBudgetCatalog.MinimumTier, anchors[0].Tier);
-            Assert.Equal(EquipmentStatBudgetCatalog.MaximumTier, anchors[^1].Tier);
-            Assert.All(anchors, anchor => Assert.True(anchor.CostPerPoint > 0));
-            Assert.Equal(anchors.Select(x => x.Tier).Distinct().Order(), anchors.Select(x => x.Tier));
+            Assert.True(anchor.CostPerPoint > 0);
+            Assert.All(
+                new[] { 1, 5, 10, 20, 50, 100 },
+                tier => Assert.Equal(
+                    anchor.CostPerPoint,
+                    EquipmentStatBudgetCatalog.Get(attribute, tier).CostPerPoint,
+                    precision: 8));
         }
     }
 
     [Theory]
-    [InlineData(1, 0.68d, 0.68d)]
-    [InlineData(3, 1.275d, 1.275d)]
-    [InlineData(5, 1.87d, 1.87d)]
-    [InlineData(8, 3.22d, 3.22d)]
-    [InlineData(10, 4.12d, 4.12d)]
-    public void Typed_defense_cost_interpolates_between_reviewed_tier_anchors(
-        int tier,
-        double expectedArmorCost,
-        double expectedResistanceCost)
+    [InlineData(1)]
+    [InlineData(5)]
+    [InlineData(10)]
+    [InlineData(20)]
+    [InlineData(50)]
+    [InlineData(100)]
+    public void Typed_defense_uses_one_price_at_every_tier(int tier)
     {
         Assert.Equal(
-            expectedArmorCost,
+            0.68d,
             EquipmentStatBudgetCatalog.Get(AttributeType.Armor, tier).CostPerPoint,
             precision: 4);
         Assert.Equal(
-            expectedResistanceCost,
+            0.68d,
             EquipmentStatBudgetCatalog.Get(AttributeType.Resistance, tier).CostPerPoint,
             precision: 4);
     }
 
     [Theory]
-    [InlineData(1, 2d)]
-    [InlineData(5, 2.25d)]
-    [InlineData(10, 2.5d)]
-    public void CritDamageCostRisesWithEndgameCritSynergy(
-        int tier,
+    [InlineData(AttributeType.Power, 24d)]
+    [InlineData(AttributeType.CritDamage, 2d)]
+    [InlineData(AttributeType.StatusResistance, 2d)]
+    [InlineData(AttributeType.HealthRegeneration, 1.5d)]
+    public void Representative_attribute_prices_are_tier_independent(
+        AttributeType attribute,
         double expectedCost)
     {
-        Assert.Equal(
-            expectedCost,
-            EquipmentStatBudgetCatalog
-                .Get(AttributeType.CritDamage, tier)
-                .CostPerPoint,
-            precision: 4);
+        Assert.All(
+            new[] { 1, 5, 10, 20, 50, 100 },
+            tier => Assert.Equal(
+                expectedCost,
+                EquipmentStatBudgetCatalog.Get(attribute, tier).CostPerPoint,
+                precision: 4));
     }
 
-    [Theory]
-    [InlineData(1, 24d)]
-    [InlineData(3, 18d)]
-    [InlineData(5, 12d)]
-    [InlineData(8, 15.6d)]
-    [InlineData(10, 18d)]
-    public void Power_cost_tracks_the_tier_stable_pacing_profile(
-        int tier,
-        double expectedCost)
+    [Fact]
+    public void Every_non_two_handed_slot_receives_equal_funding()
     {
-        Assert.Equal(
-            expectedCost,
-            EquipmentStatBudgetCatalog.Get(AttributeType.Power, tier).CostPerPoint,
-            precision: 4);
-    }
+        var options = new CraftingBalanceOptions();
+        var expectedWeight = options.GetSlotBudgetWeight(EquipmentType.OneHanded);
 
-    [Theory]
-    [InlineData(1, 2d)]
-    [InlineData(5, 2d)]
-    [InlineData(10, 2.2d)]
-    public void Status_resistance_cost_avoids_high_tier_cap_overflow(
-        int tier,
-        double expectedCost)
-    {
-        Assert.Equal(
-            expectedCost,
-            EquipmentStatBudgetCatalog
-                .Get(AttributeType.StatusResistance, tier)
-                .CostPerPoint,
-            precision: 4);
+        Assert.Equal(1d, expectedWeight);
+        Assert.All(
+            Enum.GetValues<EquipmentType>().Where(type => type != EquipmentType.TwoHanded),
+            equipmentType => Assert.Equal(
+                expectedWeight,
+                options.GetSlotBudgetWeight(equipmentType),
+                precision: 4));
     }
 
     [Fact]
@@ -106,6 +113,9 @@ public sealed class EquipmentBalanceProfileTests
     {
         var options = new CraftingBalanceOptions();
 
+        Assert.True(
+            options.GetSlotBudgetWeight(EquipmentType.TwoHanded)
+            > options.GetSlotBudgetWeight(EquipmentType.OneHanded));
         Assert.Equal(
             options.GetSlotBudgetWeight(EquipmentType.OneHanded) * 2d,
             options.GetSlotBudgetWeight(EquipmentType.TwoHanded),
@@ -113,18 +123,19 @@ public sealed class EquipmentBalanceProfileTests
     }
 
     [Fact]
-    public void Tier_is_clamped_to_the_supported_profile_range()
+    public void Tier_is_open_ended_and_non_positive_values_are_rejected()
     {
         Assert.Equal(
-            EquipmentStatBudgetCatalog.Get(AttributeType.Armor, 1),
-            EquipmentStatBudgetCatalog.Get(AttributeType.Armor, -100));
-        Assert.Equal(
-            EquipmentStatBudgetCatalog.Get(AttributeType.Armor, 10),
+            EquipmentStatBudgetCatalog.Get(AttributeType.Armor),
             EquipmentStatBudgetCatalog.Get(AttributeType.Armor, 100));
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            EquipmentStatBudgetCatalog.Get(AttributeType.Armor, 0));
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            EquipmentTierBudgetCurve.GetBudget(0));
     }
 
     [Fact]
-    public void Equipment_budget_evaluation_uses_the_items_tier()
+    public void Equipment_budget_evaluation_is_independent_of_item_tier()
     {
         AttributeModifierBase[] modifiers =
         [
@@ -132,9 +143,9 @@ public sealed class EquipmentBalanceProfileTests
         ];
 
         Assert.Equal(68d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1));
-        Assert.Equal(187d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 5));
-        Assert.Equal(412d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 10));
-        Assert.Equal(14, EquipmentBudgetEvaluator.BalanceVersion);
+        Assert.Equal(68d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 5));
+        Assert.Equal(68d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 100));
+        Assert.Equal(16, EquipmentBudgetEvaluator.BalanceVersion);
     }
 
     [Fact]
@@ -236,7 +247,7 @@ public sealed class EquipmentBalanceProfileTests
     }
 
     [Fact]
-    public void Allocator_redistributes_capped_budget_to_other_eligible_stats()
+    public void Allocator_preserves_recipe_shares_without_raw_point_caps()
     {
         var allocation = EquipmentBudgetAllocator.Allocate(
             tier: 1,
@@ -248,11 +259,11 @@ public sealed class EquipmentBalanceProfileTests
             },
             roundToWholePoints: false);
 
-        Assert.Equal(1_800d, allocation.AddedPoints[AttributeType.Power], precision: 4);
-        Assert.Equal(19_000d, allocation.AddedPoints[AttributeType.MaxHealth], precision: 4);
+        Assert.Equal(44_650d / 24d, allocation.AddedPoints[AttributeType.Power], precision: 4);
+        Assert.Equal(2_350d / 0.2d, allocation.AddedPoints[AttributeType.MaxHealth], precision: 4);
         Assert.Equal(47_000d, allocation.SpentBudget, precision: 4);
         Assert.Equal(0d, allocation.UnspentBudget, precision: 4);
-        Assert.Contains(AttributeType.Power, allocation.CappedAttributes);
+        Assert.Empty(allocation.CappedAttributes);
     }
 
     [Fact]
@@ -283,7 +294,7 @@ public sealed class EquipmentBalanceProfileTests
     }
 
     [Fact]
-    public void Allocator_reports_unspent_budget_only_when_every_eligible_stat_is_capped()
+    public void Rating_allocator_can_spend_budgets_beyond_the_effective_combat_cap()
     {
         var allocation = EquipmentBudgetAllocator.Allocate(
             tier: 1,
@@ -294,15 +305,14 @@ public sealed class EquipmentBalanceProfileTests
             },
             roundToWholePoints: false);
 
-        Assert.Equal(
-            AttributeCombatRules.DamageReductionCapPercent,
-            allocation.AddedPoints[AttributeType.DamageReduction]);
-        Assert.Equal(240d, allocation.SpentBudget, precision: 4);
-        Assert.Equal(760d, allocation.UnspentBudget, precision: 4);
+        Assert.Equal(1_000d / 6d, allocation.AddedPoints[AttributeType.DamageReduction], precision: 4);
+        Assert.Equal(1_000d, allocation.SpentBudget, precision: 4);
+        Assert.Equal(0d, allocation.UnspentBudget, precision: 4);
+        Assert.Empty(allocation.CappedAttributes);
     }
 
     [Fact]
-    public void Crafted_item_redistributes_a_capped_roll_instead_of_discarding_its_budget()
+    public void Crafted_item_preserves_authored_budget_shares_for_rating_stats()
     {
         var options = new CraftingBalanceOptions();
         var equipment = new EquipmentBase
@@ -338,10 +348,11 @@ public sealed class EquipmentBalanceProfileTests
         var maximumRoundingError = modifiers.Sum(modifier =>
             EquipmentStatBudgetCatalog.Get(modifier.AttributeType, 10).CostPerPoint / 2d);
 
-        Assert.True(
-            modifiers.Single(x => x.AttributeType == AttributeType.DamageReduction).Amount
-            < expectedBudget * recipe.InitialStatProfile[AttributeType.DamageReduction]
-            / EquipmentStatBudgetCatalog.Get(AttributeType.DamageReduction, 10).CostPerPoint);
+        var budgetByAttribute = EquipmentBudgetEvaluator.EvaluateByAttribute(modifiers);
+        Assert.InRange(
+            budgetByAttribute[AttributeType.DamageReduction] / evaluatedBudget,
+            0.895d,
+            0.905d);
         Assert.InRange(
             Math.Abs(evaluatedBudget - expectedBudget),
             0,
@@ -423,7 +434,7 @@ public sealed class EquipmentBalanceProfileTests
             allocation.AddedPoints[AttributeType.Power]
             > 100d * weights[AttributeType.Power]
             / EquipmentStatBudgetCatalog.Get(AttributeType.Power, 10).CostPerPoint);
-        Assert.Equal(14, EquipmentConstraintProfile.BalanceVersion);
+        Assert.Equal(16, EquipmentConstraintProfile.BalanceVersion);
         Assert.True(EquipmentConstraintProfile.ProductionActive);
     }
 
@@ -486,20 +497,98 @@ public sealed class EquipmentBalanceProfileTests
     }
 
     [Theory]
-    [InlineData(1, 1.50d)]
-    [InlineData(5, 1.50d)]
-    [InlineData(8, 1.86d)]
-    [InlineData(10, 2.10d)]
-    public void Production_profile_uses_tiered_health_regeneration_costs(
-        int tier,
-        double expectedCost)
+    [InlineData(1)]
+    [InlineData(5)]
+    [InlineData(10)]
+    [InlineData(20)]
+    [InlineData(50)]
+    [InlineData(100)]
+    public void Production_profile_uses_constant_health_regeneration_cost(int tier)
     {
         Assert.Equal(
-            expectedCost,
+            1.5d,
             EquipmentConstraintProfile.GetCostPerPoint(
                 AttributeType.HealthRegeneration,
                 tier),
             precision: 4);
+    }
+
+    [Fact]
+    public void Open_ended_budget_curve_is_monotonic_and_preserves_reference_endpoints()
+    {
+        Assert.Equal(100d, EquipmentTierBudgetCurve.GetBudget(1), precision: 8);
+        Assert.Equal(1_520d, EquipmentTierBudgetCurve.GetBudget(10), precision: 6);
+
+        var checkpoints = new[] { 1, 5, 10, 20, 50, 100 }
+            .Select(EquipmentTierBudgetCurve.GetBudget)
+            .ToArray();
+        Assert.All(checkpoints, value => Assert.True(double.IsFinite(value) && value > 0));
+        Assert.True(checkpoints.Zip(checkpoints.Skip(1)).All(pair => pair.First < pair.Second));
+    }
+
+    [Theory]
+    [InlineData(AttributeType.Armor)]
+    [InlineData(AttributeType.CritChance)]
+    [InlineData(AttributeType.Cooldown)]
+    [InlineData(AttributeType.AttackSpeed)]
+    public void Progression_normalized_ratings_have_stable_equal_tier_effects(AttributeType attribute)
+    {
+        var tierOne = EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(attribute, 40d, 1);
+
+        foreach (var tier in new[] { 5, 10, 20, 50, 100 })
+        {
+            var scaledRawRating = 40d * EquipmentTierBudgetCurve.GetScale(tier);
+            Assert.Equal(
+                tierOne,
+                EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(
+                    attribute,
+                    scaledRawRating,
+                    tier),
+                precision: 4);
+        }
+    }
+
+    [Fact]
+    public void Higher_tier_rating_gear_overperforms_in_lower_progression_context()
+    {
+        var tierTenRawRating = 40d * EquipmentTierBudgetCurve.GetScale(10);
+        var equalTier = EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(
+            AttributeType.Armor,
+            tierTenRawRating,
+            progressionTier: 10);
+        var overgeared = EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(
+            AttributeType.Armor,
+            tierTenRawRating,
+            progressionTier: 5);
+
+        Assert.True(overgeared > equalTier);
+        Assert.True(overgeared < AttributeCombatRules.TypedMitigationCapPercent);
+    }
+
+    [Fact]
+    public void Legacy_item_conversion_preserves_reconstructed_budget_and_is_idempotent()
+    {
+        var equipment = new EquipmentInstance
+        {
+            BaseRecipeId = "recipe.legacy",
+            Tier = 5,
+            StatModelVersion = EquipmentStatBudgetCatalog.LegacyBalanceVersion,
+            InstanceModifiers =
+            [
+                new InstanceAttributeModifier(AttributeType.Power, 10),
+                new InstanceAttributeModifier(AttributeType.Armor, 10)
+            ]
+        };
+
+        Assert.True(EquipmentStatModelMigrator.MigrateToCurrent(equipment));
+        Assert.Equal(EquipmentStatBudgetCatalog.BalanceVersion, equipment.StatModelVersion);
+        Assert.Equal(5f, equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.Power).Amount);
+        Assert.Equal(27.5f, equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.Armor).Amount);
+        Assert.Equal(138.7d, EquipmentBudgetEvaluator.Evaluate(equipment.InstanceModifiers), precision: 2);
+
+        var converted = equipment.InstanceModifiers.Select(x => x.Amount).ToArray();
+        Assert.False(EquipmentStatModelMigrator.MigrateToCurrent(equipment));
+        Assert.Equal(converted, equipment.InstanceModifiers.Select(x => x.Amount));
     }
 
     private sealed class FixedRandom(double value) : Random

@@ -3,6 +3,8 @@ using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
+using Domain.Models.Items.Equipments;
+using Domain.Models.Professions.Crafting.V2;
 
 namespace Domain.Components.Attributes;
 public static class AttributeCalculator
@@ -30,13 +32,12 @@ public static class AttributeCalculator
         entity.BaseCombatAttributes.Clear();
 
         var baseAttributes = entity.BaseAttributes.ToDictionary(a => a.AttributeType, a => a.Value);
-        var equipmentModifiers = entity.EquipmentSlots
+        var equipment = entity.EquipmentSlots
             .Where(es => es.EquipmentInstance != null)
             .Select(es => es.EquipmentInstance!)
             .DistinctBy(equipment => equipment.Id)
-            .SelectMany(equipment => equipment.AttributeModifiers)
-            .Cast<AttributeModifierBase>()
             .ToList();
+        var equipmentModifiers = ProjectEquipmentModifiers(equipment, entity.Level);
         var modifiers = equipmentModifiers.Concat(additionalModifiers ?? []).ToList();
 
         foreach (var (attributeType, attributeValue) in CalculateProjectedAttributes(baseAttributes, modifiers))
@@ -52,10 +53,7 @@ public static class AttributeCalculator
         entity.CombatAttributes.Clear();
         // Convert raw attributes to a dictionary for quick access
         var baseAttributes = entity.BaseAttributes.ToDictionary(a => a.AttributeType, a => a.Value);
-        var equipmentModifiers = entity.Equipment
-            .SelectMany(equipment => equipment.AttributeModifiers)
-            .Cast<AttributeModifierBase>()
-            .ToList();
+        var equipmentModifiers = ProjectEquipmentModifiers(entity.Equipment, entity.Level);
 
         foreach (var (attributeType, attributeValue) in CalculateProjectedAttributes(baseAttributes, equipmentModifiers))
             entity.BaseCombatAttributes[attributeType] = attributeValue;
@@ -114,10 +112,88 @@ public static class AttributeCalculator
                     break;
             }
         }
-        // Return the final rounded attribute value
-        float result = MathF.Round((baseValue + flatSum) * (1 + additiveSum) * multiplicativeProduct, MidpointRounding.ToZero);
+        // Preserve sub-point precision. Equipment ratings are intentionally
+        // converted after aggregation and percentage attributes use decimals.
+        float result = (baseValue + flatSum) * (1 + additiveSum) * multiplicativeProduct;
         return Math.Max(result, 0);
     }
+
+    public static IReadOnlyList<AttributeModifierBase> ProjectEquipmentModifiers(
+        IEnumerable<EquipmentInstance> equipment,
+        int characterLevel)
+    {
+        var directModifiers = new List<AttributeModifierBase>();
+        var rawRatings = new Dictionary<AttributeType, double>();
+
+        foreach (var item in equipment.DistinctBy(item => item.Id))
+        {
+            foreach (var modifier in item.AttributeModifiers)
+            {
+                if (item.UsesProgressionNormalizedRatings
+                    && modifier.ModifierType == ModifierType.Flat
+                    && EquipmentStatBudgetCatalog.IsRating(modifier.AttributeType))
+                {
+                    rawRatings[modifier.AttributeType] =
+                        rawRatings.GetValueOrDefault(modifier.AttributeType)
+                        + modifier.Amount;
+                    continue;
+                }
+
+                directModifiers.Add(modifier);
+            }
+        }
+
+        var progressionTier = EquipmentTierBudgetCurve
+            .GetExpectedTierForCharacterLevel(characterLevel);
+        foreach (var (attribute, rawRating) in rawRatings.OrderBy(entry => entry.Key))
+        {
+            directModifiers.Add(new InstanceAttributeModifier(
+                attribute,
+                EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(
+                    attribute,
+                    rawRating,
+                    progressionTier),
+                ModifierType.Flat));
+        }
+
+        return directModifiers;
+    }
+
+    public static IReadOnlyDictionary<AttributeType, double> CollectRawEquipmentRatings(
+        IEnumerable<EquipmentInstance> equipment)
+    {
+        var ratings = new Dictionary<AttributeType, double>();
+        foreach (var item in equipment.DistinctBy(item => item.Id))
+        {
+            if (!item.UsesProgressionNormalizedRatings)
+                continue;
+
+            foreach (var modifier in item.AttributeModifiers)
+            {
+                if (modifier.ModifierType != ModifierType.Flat
+                    || !EquipmentStatBudgetCatalog.IsRating(modifier.AttributeType))
+                {
+                    continue;
+                }
+
+                ratings[modifier.AttributeType] =
+                    ratings.GetValueOrDefault(modifier.AttributeType)
+                    + modifier.Amount;
+            }
+        }
+
+        return ratings;
+    }
+
+    public static Dictionary<AttributeType, float> CalculateProjectedEquipmentAttributes(
+        IReadOnlyDictionary<AttributeType, float> baseAttributes,
+        IEnumerable<EquipmentInstance> equipment,
+        int characterLevel,
+        IEnumerable<AttributeModifierBase>? additionalModifiers = null) =>
+        CalculateProjectedAttributes(
+            baseAttributes,
+            ProjectEquipmentModifiers(equipment, characterLevel)
+                .Concat(additionalModifiers ?? []));
 
     public static Dictionary<AttributeType, float> CalculateProjectedAttributes(
         IReadOnlyDictionary<AttributeType, float> baseAttributes,

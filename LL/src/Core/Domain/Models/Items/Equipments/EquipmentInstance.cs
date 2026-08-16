@@ -3,6 +3,7 @@ using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items.Equipments.Tools;
 using Domain.Models.Guilds;
+using Domain.Models.Professions.Crafting.V2;
 
 namespace Domain.Models.Items.Equipments;
 public class EquipmentInstance : ItemInstance
@@ -13,6 +14,7 @@ public class EquipmentInstance : ItemInstance
     public string? BlueprintId { get; set; }
     public string? CraftedName { get; set; }
     public int Tier { get; set; } = 1;
+    public int StatModelVersion { get; set; } = EquipmentStatBudgetCatalog.LegacyBalanceVersion;
     public int? Potential { get; set; } = null;
     public int? MaxPotential { get; set; } = null;
     public int TemperingProgress { get; set; } = 0;
@@ -24,12 +26,19 @@ public class EquipmentInstance : ItemInstance
     public EquipmentBase EquipmentBase => (EquipmentBase)ItemBase;
 
     [NotMapped]
-    public string DisplayName => EquipmentBase.EquipmentType == EquipmentType.Tool
-        ? ToolInstanceNaming.GetDisplayName(EquipmentBase.Name, Rarity)
-        : CraftedName ?? EquipmentBase.Name;
+    public string DisplayName => !string.IsNullOrWhiteSpace(CraftedName)
+        ? CraftedName.Trim()
+        : EquipmentBase.EquipmentType == EquipmentType.Tool
+            ? ToolInstanceNaming.GetDisplayName(EquipmentBase.Name, Rarity)
+            : EquipmentBase.Name;
 
     [NotMapped]
     public bool UsesRecipeStatBudget => !string.IsNullOrWhiteSpace(BaseRecipeId);
+
+    [NotMapped]
+    public bool UsesProgressionNormalizedRatings =>
+        UsesRecipeStatBudget
+        && StatModelVersion >= EquipmentStatBudgetCatalog.BalanceVersion;
 
     /// <summary>
     /// Authored item-base modifiers are retained for legacy and directly granted equipment.

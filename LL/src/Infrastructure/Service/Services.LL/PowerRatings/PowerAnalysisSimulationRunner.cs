@@ -470,7 +470,9 @@ public sealed class PowerAnalysisSimulationRunner
         IReadOnlyList<AbilitySpec>? supplementalAbilities,
         CancellationToken cancellationToken,
         int basicAttackIntervalTicks = 30,
-        Area? idleArea = null)
+        Area? idleArea = null,
+        bool startActiveAbilitiesOnCooldown = true,
+        bool captureEventLog = true)
     {
         var friendly = friendlyTemplates.Select(x => x.DeepCloneForEncounter()).ToList();
         var hostile = hostileTemplates.Select(x => x.DeepCloneForEncounter()).ToList();
@@ -498,9 +500,10 @@ public sealed class PowerAnalysisSimulationRunner
             new CombatSimulationOptions(
                 seed,
                 maxTicks,
-                StartActiveAbilitiesOnCooldown: true,
+                StartActiveAbilitiesOnCooldown: startActiveAbilitiesOnCooldown,
                 SupplementalAbilities: supplementalAbilities,
-                BasicAttackIntervalTicks: basicAttackIntervalTicks),
+                BasicAttackIntervalTicks: basicAttackIntervalTicks,
+                CaptureEventLog: captureEventLog),
             cancellationToken);
     }
 

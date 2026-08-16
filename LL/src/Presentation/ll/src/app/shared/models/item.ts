@@ -21,8 +21,9 @@ export interface EquipmentInstance extends ItemInstance {
   quality: ItemQuality;
   baseRecipeId?: string | null;
   blueprintId?: string | null;
-  craftingDesign?: EquipmentCraftingDesignMetadata | null;
+    craftingDesign?: EquipmentCraftingDesignMetadata | null;
   tier: number;
+  statModelVersion?: number;
   equipmentBase: Equipment;
   potential?: number;
   maxPotential?: number | null;
@@ -31,6 +32,7 @@ export interface EquipmentInstance extends ItemInstance {
   baseModifiers: AttributeModifier[];
   instanceModifiers: AttributeModifier[];
   attributeModifiers: AttributeModifier[];
+  effectiveAttributeModifiers?: AttributeModifier[];
   toolAffixes: ToolBonusModifier[];
   effectiveToolBonuses: ToolBonusModifier[];
   affinityTags: string[];

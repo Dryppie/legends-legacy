@@ -1,14 +1,15 @@
 namespace Services.LL.Regions;
 
 /// <summary>
-/// Defines the projected ten-region progression used by balance diagnostics.
+/// Defines open-ended formula progression used by balance diagnostics.
 /// Regions that eventually use a different level cadence must introduce a new
 /// policy version instead of silently changing existing calibration anchors.
 /// </summary>
 public static class CanonicalRegionProgressionPolicy
 {
-    public const int Version = 1;
-    public const int RegionCount = 10;
+    public const int Version = 2;
+    public const int AuthoredRegionCount = 10;
+    public const int RegionCount = AuthoredRegionCount;
     public const int AreasPerRegion = 10;
     public const int LevelsPerArea = 5;
 
@@ -21,12 +22,12 @@ public static class CanonicalRegionProgressionPolicy
 
     private static int ValidateRegionNumber(int regionNumber)
     {
-        if (regionNumber is < 1 or > RegionCount)
+        if (regionNumber < 1)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(regionNumber),
                 regionNumber,
-                $"Canonical regions must be between 1 and {RegionCount}.");
+                "Canonical region numbers must be positive.");
         }
 
         return regionNumber;

@@ -44,16 +44,21 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         "recipe.weapon.one_handed.dagger";
     private const string RepresentativeSlowWeaponRecipeId =
         "recipe.weapon.two_handed.maul";
-    private const int MaximumEquipmentTier = 10;
+    private const int MaximumEquipmentTier = 100;
     private const ItemQuality MaximumEquipmentQuality = ItemQuality.Masterwork;
     private const Rarity MaximumEquipmentRarity = Rarity.Legacy;
     private const double MaximumCraftingVarianceMultiplier = 1.05d;
 
-    private static readonly IReadOnlyList<int> ReferenceTiers = Array.AsReadOnly([1, 5, 10]);
+    private static readonly IReadOnlyList<int> ReferenceTiers =
+        Array.AsReadOnly([1, 5, 10, 20, 50, 100]);
     private static readonly IReadOnlyList<int> DeterministicSeeds =
         Array.AsReadOnly([101, 211, 307, 401, 503, 601, 701, 809]);
     private static readonly IReadOnlyList<int> CalibrationDurations =
-        Array.AsReadOnly([90, 180, 600]);
+        Array.AsReadOnly(
+        [
+            EquipmentCombatPacingTargets.OffensiveBenchmarkTicks,
+            EquipmentCombatPacingTargets.SustainBenchmarkTicks
+        ]);
     private static readonly IReadOnlyList<double> StandardEquipmentSlotWeights =
         Array.AsReadOnly([0.85d, 1.15d, 0.95d, 0.45d, 0.60d, 0.75d]);
     private static readonly EqualBudgetBenchmarkContext LowCritContext =
@@ -861,7 +866,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         }
 
         foreach (var (attribute, pointDelta) in pointDeltas.Where(x => x.Value > 0))
-            ApplyAttributeDelta(friendlyAttributes, attribute, (float)pointDelta);
+            ApplyAttributeDelta(friendlyAttributes, attribute, (float)pointDelta, tier);
 
         var friendlyAbilities = benchmarkContext?.FriendlyAbilityIds is { } abilityIds
             ? abilityIds.Select(id => AllAbilities[id]).ToArray()
@@ -1097,10 +1102,11 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
 
     private static Dictionary<AttributeType, float> CreateReferenceAttributes(int tier)
     {
+        _ = tier;
         var attributes = new Dictionary<AttributeType, float>
         {
-            [AttributeType.Power] = 8f * tier,
-            [AttributeType.MaxHealth] = 180 + tier * 112,
+            [AttributeType.Power] = 8,
+            [AttributeType.MaxHealth] = 292,
             [AttributeType.Armor] = 0,
             [AttributeType.Resistance] = 0,
             [AttributeType.CritChance] = 5,
@@ -1126,6 +1132,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         AttributeBalanceScenario scenario,
         double defenseMultiplier = 1d)
     {
+        _ = tier;
         var pressureScenario = scenario is
             AttributeBalanceScenario.PhysicalPressure or
             AttributeBalanceScenario.MagicalPressure or
@@ -1139,7 +1146,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         return new Dictionary<AttributeType, float>
         {
             [AttributeType.MaxHealth] = pressureScenario ? 1_000_000 : 2_000_000,
-            [AttributeType.Power] = 8 + tier * 6,
+            [AttributeType.Power] = 14,
             [AttributeType.Armor] = (float)(30d * Math.Max(0d, defenseMultiplier)),
             [AttributeType.Resistance] = (float)(30d * Math.Max(0d, defenseMultiplier)),
             [AttributeType.CritChance] = 0,
@@ -1152,6 +1159,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         int tier,
         AttributeBalanceScenario scenario)
     {
+        _ = tier;
         var pressureScenario = scenario is
             AttributeBalanceScenario.PhysicalPressure or
             AttributeBalanceScenario.MagicalPressure or
@@ -1162,18 +1170,19 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             AttributeBalanceScenario.UnmitigatedPressure or
             AttributeBalanceScenario.BurstPressure or
             AttributeBalanceScenario.LongSustain;
-        var previousBasicAttackDamage = scenario switch
+        var tierOneBasicAttackDamage = scenario switch
         {
             AttributeBalanceScenario.StatusResilience or
-            AttributeBalanceScenario.CrowdControlResilience => 4 + tier * 3,
-            AttributeBalanceScenario.MixedPressure => 4 + tier * 4,
+            AttributeBalanceScenario.CrowdControlResilience => 7d,
+            AttributeBalanceScenario.MixedPressure => 8d,
             AttributeBalanceScenario.UnmitigatedPressure or
-            AttributeBalanceScenario.BurstPressure => 3 + tier * 3,
-            AttributeBalanceScenario.LongSustain => 4 + tier * 4,
-            _ when pressureScenario => 10 + tier * 10,
-            _ => 4 + tier * 2
+            AttributeBalanceScenario.BurstPressure => 6d,
+            AttributeBalanceScenario.LongSustain => 8d,
+            _ when pressureScenario => 20d,
+            _ => 6d
         };
-        var power = 8 + tier * 6;
+        var previousBasicAttackDamage = tierOneBasicAttackDamage;
+        const double power = 14d;
         var previousRawDamage =
             Math.Max(1, previousBasicAttackDamage)
             + power * 0.1d;
@@ -1185,9 +1194,15 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     private static void ApplyAttributeDelta(
         IDictionary<AttributeType, float> attributes,
         AttributeType attribute,
-        float amount)
+        float amount,
+        int tier)
     {
-        attributes[attribute] = (attributes.TryGetValue(attribute, out var current) ? current : 0) + amount;
+        var effectiveAmount = EquipmentStatBudgetCatalog.IsRating(attribute)
+            ? EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(attribute, amount, tier)
+            : (float)(amount / EquipmentTierBudgetCurve.GetScale(tier));
+        attributes[attribute] =
+            (attributes.TryGetValue(attribute, out var current) ? current : 0)
+            + effectiveAmount;
     }
 
     private static int GetMaxTicks(AttributeBalanceScenario scenario) =>
@@ -1196,9 +1211,10 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             AttributeBalanceScenario.PhysicalOffense or
             AttributeBalanceScenario.MagicalOffense or
             AttributeBalanceScenario.PeriodicOffense or
-            AttributeBalanceScenario.SummonOffense => 180,
-            AttributeBalanceScenario.LongSustain => 600,
-            _ => 240
+            AttributeBalanceScenario.SummonOffense =>
+                EquipmentCombatPacingTargets.OffensiveBenchmarkTicks,
+            AttributeBalanceScenario.LongSustain => 1_200,
+            _ => 600
         };
 
     private static int GetBasicAttackInterval(AttributeBalanceScenario scenario) =>
@@ -1392,10 +1408,12 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                     cancellationToken);
                 var summonerEfficiency = CalculateDamagePerHundredBudget(
                     summonerOutput,
-                    summonerAllocation.SpentBudget);
+                    summonerAllocation.SpentBudget,
+                    tier);
                 var directEfficiency = CalculateDamagePerHundredBudget(
                     directCasterOutput,
-                    directCasterAllocation.SpentBudget);
+                    directCasterAllocation.SpentBudget,
+                    tier);
                 var referencePower = CreateReferenceAttributes(tier)
                     .GetValueOrDefault(AttributeType.Power);
                 var summonAbilityReferenceDamage =
@@ -1486,10 +1504,12 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                         cancellationToken);
                     var dualEfficiency = CalculateDamagePerHundredBudget(
                         dualOutput,
-                        dualAllocation.SpentBudget);
+                        dualAllocation.SpentBudget,
+                        tier);
                     var twoHandedEfficiency = CalculateDamagePerHundredBudget(
                         twoHandedOutput,
-                        twoHandedAllocation.SpentBudget);
+                        twoHandedAllocation.SpentBudget,
+                        tier);
 
                     comparisons.Add(new HandCalibrationComparison(
                         tier,
@@ -1555,10 +1575,12 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                     cancellationToken);
                 var firstUtility = CalculateUtilityPerHundredBudget(
                     AverageUtility(firstOutcomes).Total,
-                    first.SpentBudget);
+                    first.SpentBudget,
+                    tier);
                 var secondUtility = CalculateUtilityPerHundredBudget(
                     AverageUtility(secondOutcomes).Total,
-                    second.SpentBudget);
+                    second.SpentBudget,
+                    tier);
                 var difference = CalculateSymmetricDifference(firstUtility, secondUtility);
 
                 comparisons.Add(new CraftingCombatPeerComparison(
@@ -1637,10 +1659,12 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 cancellationToken);
             var firstUtility = CalculateUtilityPerHundredBudget(
                 AverageUtility(firstOutcomes).Total,
-                first.Combat.SpentBudget);
+                first.Combat.SpentBudget,
+                MaximumEquipmentTier);
             var secondUtility = CalculateUtilityPerHundredBudget(
                 AverageUtility(secondOutcomes).Total,
-                second.Combat.SpentBudget);
+                second.Combat.SpentBudget,
+                MaximumEquipmentTier);
             var difference = CalculateSymmetricDifference(firstUtility, secondUtility);
 
             comparisons.Add(new CraftingCombatPeerComparison(
@@ -1711,8 +1735,10 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             .ToList();
         var unspentBudgetByRecipe = allocations.Values
             .SelectMany(allocation => allocation.ItemDiagnostics)
-            .Where(item => item.GeneratedUnspentBudget > 0.01d
-                           || item.RarityUnspentBudget > 0.01d)
+            .Where(item => item.GeneratedUnspentBudget > BudgetTolerance(
+                               EquipmentTierBudgetCurve.GetBudget(MaximumEquipmentTier))
+                           || item.RarityUnspentBudget > BudgetTolerance(
+                               EquipmentTierBudgetCurve.GetBudget(MaximumEquipmentTier)))
             .GroupBy(item => new
             {
                 item.RecipeId,
@@ -1750,12 +1776,13 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             TemperingConstants.GetRarityUpgradeCount(MaximumEquipmentRarity),
             measurements.Count,
             measurements.Count(x => x.AttributesOverCap.Count > 0),
-            measurements.Count(x => x.UnspentBudget > 0.01d),
+            measurements.Count(x => x.UnspentBudget > BudgetTolerance(x.TargetBudget)),
             comparisons,
             capSaturationByAttribute,
             unspentBudgetByRecipe,
             measurements
-                .Where(x => x.AttributesOverCap.Count > 0 || x.UnspentBudget > 0.01d)
+                .Where(x => x.AttributesOverCap.Count > 0
+                            || x.UnspentBudget > BudgetTolerance(x.TargetBudget))
                 .OrderByDescending(x => x.MaximumWastedBudgetPercent)
                 .ThenByDescending(x => x.UnspentBudget)
                 .ThenBy(x => x.Id, StringComparer.Ordinal)
@@ -1890,7 +1917,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
 
         var attributes = CreateReferenceAttributes(MaximumEquipmentTier);
         foreach (var (attribute, pointDelta) in points)
-            ApplyAttributeDelta(attributes, attribute, (float)pointDelta);
+            ApplyAttributeDelta(attributes, attribute, (float)pointDelta, MaximumEquipmentTier);
 
         var combat = new CatalogCombatAllocation(
             CreateCatalogLoadoutId(template),
@@ -1988,7 +2015,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
 
         var attributes = CreateReferenceAttributes(tier);
         foreach (var (attribute, pointDelta) in points)
-            ApplyAttributeDelta(attributes, attribute, (float)pointDelta);
+            ApplyAttributeDelta(attributes, attribute, (float)pointDelta, tier);
 
         return new CatalogCombatAllocation(
             $"{template.ArmorFamily}|{template.HandConfiguration}|" +
@@ -2034,8 +2061,12 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
 
     private static double CalculateUtilityPerHundredBudget(
         double utility,
-        double spentBudget) =>
-        spentBudget <= 0 ? 0 : utility / spentBudget * 100d;
+        double spentBudget,
+        int tier)
+    {
+        var normalizedBudget = spentBudget / EquipmentTierBudgetCurve.GetScale(tier);
+        return normalizedBudget <= 0 ? 0 : utility / normalizedBudget * 100d;
+    }
 
     private CraftingCatalogConstraintReport AnalyzeCraftingCatalogConstraints(
         CancellationToken cancellationToken)
@@ -2086,7 +2117,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                     .Max())))
             .ToList();
         var worstCurrentLoadouts = measurements
-            .Where(x => x.CurrentAttributesOverCap.Count > 0 || x.CurrentUnspentBudget > 0.01d)
+            .Where(x => x.CurrentAttributesOverCap.Count > 0
+                        || x.CurrentUnspentBudget > BudgetTolerance(x.TargetBudget))
             .OrderByDescending(x => x.CurrentMaximumWastedBudgetPercent)
             .ThenBy(x => x.Id, StringComparer.Ordinal)
             .Take(20)
@@ -2116,8 +2148,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             measurements.Count,
             measurements.Count(x => x.CurrentAttributesOverCap.Count > 0),
             measurements.Count(x => x.ShadowAttributesOverCap.Count > 0),
-            measurements.Count(x => x.CurrentUnspentBudget > 0.01d),
-            measurements.Count(x => x.ShadowUnspentBudget > 0.01d),
+            measurements.Count(x => x.CurrentUnspentBudget > BudgetTolerance(x.TargetBudget)),
+            measurements.Count(x => x.ShadowUnspentBudget > BudgetTolerance(x.TargetBudget)),
             statSummaries,
             worstCurrentLoadouts);
     }
@@ -2319,7 +2351,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     {
         var attributes = CreateReferenceAttributes(tier);
         foreach (var (attribute, pointDelta) in points)
-            ApplyAttributeDelta(attributes, attribute, (float)pointDelta);
+            ApplyAttributeDelta(attributes, attribute, (float)pointDelta, tier);
 
         return EquipmentStatBudgetCatalog.Attributes
             .Order()
@@ -2408,10 +2440,14 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
 
     private static double CalculateDamagePerHundredBudget(
         EquipmentLoadoutOutput output,
-        double spentBudget) =>
-        spentBudget <= 0
+        double spentBudget,
+        int tier)
+    {
+        var normalizedBudget = spentBudget / EquipmentTierBudgetCurve.GetScale(tier);
+        return normalizedBudget <= 0
             ? 0
-            : (output.DirectDamage + output.SummonDamage) / spentBudget * 100d;
+            : (output.DirectDamage + output.SummonDamage) / normalizedBudget * 100d;
+    }
 
     private static double CalculateSymmetricDifference(double first, double second)
     {
@@ -2504,7 +2540,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         if (!maximumEquipmentProgressionAnalyzed)
         {
             blockers.Add(
-                "The tier-10 Masterwork/Legacy maximum-equipment analysis is incomplete or invalid.");
+                $"The tier-{MaximumEquipmentTier} Masterwork/Legacy maximum-equipment analysis is incomplete or invalid.");
         }
         var maximumEquipmentPeerFailures = maximumEquipmentProgression.CombatPeers
             .Where(x => x.IsReleaseGate && !x.Passed)
@@ -2512,21 +2548,21 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         if (maximumEquipmentProgression.LoadoutsOverCap > 0)
         {
             blockers.Add(
-                $"{maximumEquipmentProgression.LoadoutsOverCap} tier-10 Masterwork/Legacy " +
+                $"{maximumEquipmentProgression.LoadoutsOverCap} tier-{MaximumEquipmentTier} Masterwork/Legacy " +
                 "loadouts exceed an effective character cap.");
         }
 
         if (maximumEquipmentProgression.LoadoutsWithUnspentBudget > 0)
         {
             blockers.Add(
-                $"{maximumEquipmentProgression.LoadoutsWithUnspentBudget} tier-10 " +
+                $"{maximumEquipmentProgression.LoadoutsWithUnspentBudget} tier-{MaximumEquipmentTier} " +
                 "Masterwork/Legacy loadouts cannot spend their full progression budget.");
         }
 
         if (maximumEquipmentPeerFailures.Count > 0)
         {
             blockers.Add(
-                $"{maximumEquipmentPeerFailures.Count} tier-10 Masterwork/Legacy " +
+                $"{maximumEquipmentPeerFailures.Count} tier-{MaximumEquipmentTier} Masterwork/Legacy " +
                 "combat peer comparisons exceed their approved tolerances.");
         }
         var maximumEquipmentProgressionPassed =
@@ -2587,7 +2623,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         }
 
         foreach (var (attribute, pointDelta) in preRedistributionPoints)
-            ApplyAttributeDelta(preRedistributionAttributes, attribute, (float)pointDelta);
+            ApplyAttributeDelta(preRedistributionAttributes, attribute, (float)pointDelta, tier);
 
         var (candidatePoints, spentBudget) = AllocateAggregateCappedPoints(
             tier,
@@ -2595,7 +2631,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             profile);
         var attributes = CreateReferenceAttributes(tier);
         foreach (var (attribute, pointDelta) in candidatePoints)
-            ApplyAttributeDelta(attributes, attribute, (float)pointDelta);
+            ApplyAttributeDelta(attributes, attribute, (float)pointDelta, tier);
         var aggregateRedistributedBudget = preRedistributionPoints
             .Select(entry =>
             {
@@ -3246,7 +3282,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
 
         foreach (var loadout in loadouts.Where(x =>
                      x.AttributesOverSingleStatCap.Count > 0
-                     && x.UnspentBudget > 0.01d))
+                     && x.UnspentBudget > BudgetTolerance(x.TargetBudget)))
         {
             findings.Add(new AttributeBalanceFinding(
                 AttributeBalanceFindingKind.LoadoutCapPressure,
@@ -3378,6 +3414,9 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
 
     private static double Round(double value) =>
         Math.Round(value, 4, MidpointRounding.AwayFromZero);
+
+    private static double BudgetTolerance(double targetBudget) =>
+        Math.Max(0.01d, Math.Abs(targetBudget) * 1e-12d);
 
     private sealed record EqualBudgetPeerSpec(
         string Id,

@@ -29,6 +29,11 @@ export interface AttributeDefinition {
   displayPrecision: number;
   displaySuffix: string;
   relevantBenchmarkScenarios: string[];
+  equipmentDisplayName?: string;
+  equipmentDescription?: string;
+  equipmentUnit?: AttributeUnit;
+  equipmentDisplayPrecision?: number;
+  equipmentDisplaySuffix?: string;
 }
 
 let definitions = new Map<AttributeType, AttributeDefinition>();

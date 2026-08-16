@@ -13,6 +13,7 @@ using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetRegionOneConte
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunAbilityBalanceSimulation;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunDungeonSimulation;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunAreaSimulation;
+using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunEquipmentCombatPacing;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.WorldTower;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunWorldTowerBalance;
@@ -120,6 +121,13 @@ public class DiagnosticsController : BaseController
         [FromBody] WorldTowerBalanceRequest request)
     {
         return await Mediator.Send(new RunWorldTowerBalanceQuery(request));
+    }
+
+    [HttpPost("equipment-combat-pacing")]
+    public async Task<ActionResult<EquipmentCombatPacingReport>> AnalyzeEquipmentCombatPacing(
+        [FromBody] EquipmentCombatPacingRequest request)
+    {
+        return await Mediator.Send(new RunEquipmentCombatPacingQuery(request));
     }
 
 }

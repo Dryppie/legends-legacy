@@ -29,6 +29,9 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         if ((equipment.Potential ?? 0) < TemperingConstants.PotentialCost)
             throw new InvalidOperationException("Equipment does not have enough Potential.");
 
+        // Tempering is the explicit write boundary that upgrades legacy crafted
+        // items. Read-only combat continues to interpret v15 items unchanged.
+        EquipmentStatModelMigrator.MigrateToCurrent(equipment);
         QuantizeInstanceModifiers(equipment);
 
         var previousPotential = equipment.Potential ?? 0;
@@ -120,7 +123,7 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         var budgetByStat = currentByStat.ToDictionary(
             pair => pair.Key,
             pair => Math.Max(0d, pair.Value)
-                    * EquipmentStatBudgetCatalog.Get(pair.Key, equipment.Tier).CostPerPoint);
+                    * EquipmentStatBudgetCatalog.Get(pair.Key).CostPerPoint);
         var totalBudget = Math.Max(1d, budgetByStat.Values.Sum());
         var candidates = CreateCandidates(profile.Stats);
         if (candidates.Count == 0)
@@ -148,9 +151,11 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             return null;
 
         var selected = PickWeighted(candidates, candidate => candidate.EffectiveWeight, rng);
-        var selectedRule = EquipmentStatBudgetCatalog.Get(selected.Definition.Stat, equipment.Tier);
+        var selectedRule = EquipmentStatBudgetCatalog.Get(selected.Definition.Stat);
         var previous = currentByStat.GetValueOrDefault(selected.Definition.Stat);
-        var rollBudget = TemperingConstants.GetDirectedImprovementBudget(equipment.Tier);
+        var rollBudget = TemperingConstants.GetDirectedImprovementBudget(equipment.Tier)
+            * slotWeight
+            * _options.GetQualityStatMultiplier(equipment.Quality);
         var increase = (float)Math.Max(1d, Math.Round(rollBudget / selectedRule.CostPerPoint));
         increase = Math.Min(
             increase,
@@ -340,7 +345,7 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         var currentBudgetWeights = currentPoints.ToDictionary(
             pair => pair.Key,
             pair => pair.Value
-                    * EquipmentStatBudgetCatalog.Get(pair.Key, equipment.Tier).CostPerPoint);
+                    * EquipmentStatBudgetCatalog.Get(pair.Key).CostPerPoint);
         var currentBudget = currentBudgetWeights.Values.Sum();
         var allCurrentPoints = GetCurrentEquipmentPoints(equipment);
         var slotWeight = _options.GetSlotBudgetWeight(equipment.EquipmentBase.EquipmentType);

@@ -8,6 +8,7 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Tools;
 using Domain.Models.Professions.Crafting.V2;
+using Domain.Components.Attributes;
 
 namespace Application.UseCases.Equipments.Dtos;
 public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
@@ -20,6 +21,7 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public EquipmentCraftingDesignMetadataDto? CraftingDesign { get; set; }
     public string? CraftedName { get; set; }
     public int Tier { get; set; } = 1;
+    public int StatModelVersion { get; set; } = EquipmentStatBudgetCatalog.LegacyBalanceVersion;
     public int? Potential { get; set; } = null;
     public int? MaxPotential { get; set; } = null;
     public int TemperingProgress { get; set; } = 0;
@@ -28,6 +30,7 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public IReadOnlyCollection<ItemAttributeModifier> BaseModifiers { get; set; } = [];
     public List<InstanceAttributeModifier> InstanceModifiers { get; set; } = [];
     public List<AttributeModifierBase> AttributeModifiers { get; set; } = [];
+    public IReadOnlyList<AttributeModifierBase> EffectiveAttributeModifiers { get; set; } = [];
     public List<ToolBonusModifier> ToolAffixes { get; set; } = [];
     public IReadOnlyList<ToolBonusModifier> EffectiveToolBonuses { get; set; } = [];
     public List<string> AffinityTags { get; set; } = [];
@@ -49,6 +52,11 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
             .ForMember(
                 destination => destination.ItemBudgetTier,
                 options => options.MapFrom(source => source.Tier))
+            .ForMember(
+                destination => destination.EffectiveAttributeModifiers,
+                options => options.MapFrom(source => AttributeCalculator.ProjectEquipmentModifiers(
+                    new[] { source },
+                    EquipmentTierBudgetCurve.GetFirstCharacterLevelForTier(source.Tier))))
             .ForMember(
                 destination => destination.CraftingDesign,
                 options => options.MapFrom<EquipmentCraftingDesignMetadataResolver>())

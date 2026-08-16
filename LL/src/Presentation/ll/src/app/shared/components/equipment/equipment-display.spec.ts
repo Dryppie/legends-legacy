@@ -153,6 +153,12 @@ describe('EquipmentDisplayComponent', () => {
         isContentFacing: true,
         displayPrecision: 2,
         displaySuffix: '%',
+        equipmentDisplayName: 'Crowd Control Resistance Rating',
+        equipmentDescription:
+          'Higher rating improves this effect with diminishing returns.',
+        equipmentUnit: 'Rating',
+        equipmentDisplayPrecision: 2,
+        equipmentDisplaySuffix: '',
         relevantBenchmarkScenarios: ['CrowdControlResilience'],
       },
     ]);
@@ -384,6 +390,7 @@ function display(
     })),
     itemBudget: 0,
     itemBudgetTier: 1,
+    statModelVersion: 15,
     toolBonuses: [],
     toolAffixes: [],
     baseToolBonuses: [],

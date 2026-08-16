@@ -72,6 +72,7 @@ public static class EquipmentBudgetAllocator
         IReadOnlyDictionary<AttributeType, double>? currentPoints = null,
         bool roundToWholePoints = true)
     {
+        ValidateTier(tier);
         var targetBudget = Math.Max(0d, budget);
         var normalizedWeights = weights
             .Where(x => x.Value > 0 && EquipmentStatBudgetCatalog.IsKnown(x.Key))
@@ -85,7 +86,7 @@ public static class EquipmentBudgetAllocator
             attribute => attribute,
             attribute =>
             {
-                var rule = EquipmentStatBudgetCatalog.Get(attribute, tier);
+                var rule = EquipmentStatBudgetCatalog.Get(attribute);
                 var current = Math.Clamp(currentPoints?.GetValueOrDefault(attribute) ?? 0d, 0d, rule.PerItemHardCap);
                 return Math.Max(0d, rule.PerItemHardCap - current) * rule.CostPerPoint;
             });
@@ -133,7 +134,7 @@ public static class EquipmentBudgetAllocator
         var addedPoints = new Dictionary<AttributeType, double>();
         foreach (var attribute in normalizedWeights.Keys)
         {
-            var rule = EquipmentStatBudgetCatalog.Get(attribute, tier);
+            var rule = EquipmentStatBudgetCatalog.Get(attribute);
             var current = Math.Clamp(currentPoints?.GetValueOrDefault(attribute) ?? 0d, 0d, rule.PerItemHardCap);
             var points = allocatedBudget[attribute] / rule.CostPerPoint;
             if (roundToWholePoints && points > Epsilon)
@@ -144,7 +145,7 @@ public static class EquipmentBudgetAllocator
         }
 
         var spentBudget = addedPoints.Sum(x =>
-            x.Value * EquipmentStatBudgetCatalog.Get(x.Key, tier).CostPerPoint);
+            x.Value * EquipmentStatBudgetCatalog.Get(x.Key).CostPerPoint);
         return new EquipmentBudgetAllocation(
             targetBudget,
             spentBudget,
@@ -162,6 +163,7 @@ public static class EquipmentBudgetAllocator
         IReadOnlyDictionary<AttributeType, double>? currentPoints = null,
         double perItemCapMultiplier = 1d)
     {
+        ValidateTier(tier);
         var targetBudget = Math.Max(0d, budget);
         var normalizedWeights = NormalizeWeights(weights);
         if (targetBudget <= Epsilon || normalizedWeights.Count == 0)
@@ -206,7 +208,7 @@ public static class EquipmentBudgetAllocator
                     remainingBudget
                     * entry.Value
                     / totalWeight
-                    / EquipmentStatBudgetCatalog.Get(entry.Key, tier).CostPerPoint);
+                    / EquipmentStatBudgetCatalog.Get(entry.Key).CostPerPoint);
             var scale = 1d;
 
             foreach (var (attribute, proposedPointDelta) in proposedPoints)
@@ -255,7 +257,7 @@ public static class EquipmentBudgetAllocator
                 points[attribute] += pointIncrement;
                 spentThisIteration +=
                     pointIncrement
-                    * EquipmentStatBudgetCatalog.Get(attribute, tier).CostPerPoint;
+                    * EquipmentStatBudgetCatalog.Get(attribute).CostPerPoint;
             }
 
             remainingBudget = Math.Max(0d, remainingBudget - spentThisIteration);
@@ -312,7 +314,7 @@ public static class EquipmentBudgetAllocator
             .Where(x => x.Value > Epsilon)
             .ToDictionary(x => x.Key, x => x.Value);
         var spentBudget = addedPoints.Sum(x =>
-            x.Value * EquipmentStatBudgetCatalog.Get(x.Key, tier).CostPerPoint);
+            x.Value * EquipmentStatBudgetCatalog.Get(x.Key).CostPerPoint);
         return new EquipmentConstrainedBudgetAllocation(
             targetBudget,
             spentBudget,
@@ -326,7 +328,7 @@ public static class EquipmentBudgetAllocator
             + points.GetValueOrDefault(attribute);
 
         double GetPerItemCap(AttributeType attribute) =>
-            EquipmentStatBudgetCatalog.Get(attribute, tier).PerItemHardCap
+            EquipmentStatBudgetCatalog.Get(attribute).PerItemHardCap
             * Math.Max(1d, perItemCapMultiplier);
     }
 
@@ -336,6 +338,12 @@ public static class EquipmentBudgetAllocator
             .Where(x => x.Value > 0 && EquipmentStatBudgetCatalog.IsKnown(x.Key))
             .OrderBy(x => x.Key)
             .ToDictionary(x => x.Key, x => x.Value);
+
+    private static void ValidateTier(int tier)
+    {
+        if (tier < EquipmentStatBudgetCatalog.MinimumTier)
+            throw new ArgumentOutOfRangeException(nameof(tier), tier, "Equipment tier must be positive.");
+    }
 
     private static double GetDirectContribution(
         AttributeType source,

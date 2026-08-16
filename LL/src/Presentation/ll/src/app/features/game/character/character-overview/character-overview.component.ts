@@ -255,6 +255,14 @@ export class CharacterOverviewComponent {
     return attributes.map((type) => this.getAttribute(type));
   }
 
+  getEquipmentRating(type: AttributeType): AttributeDto | null {
+    return (
+      this.character()?.equipmentRatings?.find(
+        (rating) => rating.attributeType === type,
+      ) ?? null
+    );
+  }
+
   experiencePercent(
     experience: number,
     experienceUntilNextLevel: number,

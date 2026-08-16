@@ -11,19 +11,12 @@ public static class EquipmentConstraintProfile
     public const double MinimumSupportedBasicAttackIntervalMultiplier = 0.75d;
     public const double BlueprintBonusCapMultiplier = 1.25d;
     public const double RarityImprovementCapMultiplier = 1.25d;
-    private const float TierOneCraftedMitigationCapPercent = 35f;
-    private const float TierFiveCraftedMitigationCapPercent = 42f;
-    private const float TierTenCraftedMitigationCapPercent = 50f;
-
     public static double GetCostPerPoint(AttributeType attribute, int tier) =>
-        EquipmentStatBudgetCatalog.Get(attribute, tier).CostPerPoint;
+        EquipmentStatBudgetCatalog.Get(attribute).CostPerPoint;
 
     public static IReadOnlyDictionary<AttributeType, float> CreateTierBaseline(int tier)
     {
-        var normalizedTier = Math.Clamp(
-            tier,
-            EquipmentStatBudgetCatalog.MinimumTier,
-            EquipmentStatBudgetCatalog.MaximumTier);
+        var normalizedTier = Math.Max(EquipmentStatBudgetCatalog.MinimumTier, tier);
         var attributes = new Dictionary<AttributeType, float>
         {
             [AttributeType.Power] = 8f * normalizedTier,
@@ -43,48 +36,18 @@ public static class EquipmentConstraintProfile
         double expectedLoadoutBudgetWeight,
         double basicAttackIntervalMultiplier)
     {
-        var loadoutWeight = Math.Max(0.01d, expectedLoadoutBudgetWeight);
-        var capacityFraction = Math.Clamp(slotBudgetWeight / loadoutWeight, 0d, 1d);
-        var constraints = new List<EquipmentLinearBudgetConstraint>();
-
-        foreach (var attribute in EquipmentStatBudgetCatalog.Attributes.Order())
-        {
-            if (!AttributeCatalog.TryGetEffectiveCharacterCap(
-                    attribute,
-                    basicAttackIntervalMultiplier,
-                    out var effectiveCap))
-            {
-                continue;
-            }
-
-            if (attribute is AttributeType.Armor or AttributeType.Resistance)
-                effectiveCap = GetCraftedMitigationCapPercent(tier);
-
-            var baseline = baselineAttributes.GetValueOrDefault(attribute);
-            constraints.Add(new EquipmentLinearBudgetConstraint(
-                attribute,
-                Math.Max(0d, effectiveCap - baseline) * capacityFraction));
-        }
-
-        return constraints;
+        // V16 stores unbounded raw ratings. Effective combat caps are applied
+        // after loadout aggregation, so direct point constraints would make the
+        // same recipe spend a different budget share at different tiers.
+        return [];
     }
 
     public static float GetCraftedMitigationCapPercent(int tier)
     {
-        var normalizedTier = Math.Clamp(
-            tier,
-            EquipmentStatBudgetCatalog.MinimumTier,
-            EquipmentStatBudgetCatalog.MaximumTier);
-        if (normalizedTier <= 5)
-        {
-            return TierOneCraftedMitigationCapPercent
-                   + (TierFiveCraftedMitigationCapPercent - TierOneCraftedMitigationCapPercent)
-                   * (normalizedTier - 1) / 4f;
-        }
+        if (tier < EquipmentStatBudgetCatalog.MinimumTier)
+            throw new ArgumentOutOfRangeException(nameof(tier));
 
-        return TierFiveCraftedMitigationCapPercent
-               + (TierTenCraftedMitigationCapPercent - TierFiveCraftedMitigationCapPercent)
-               * (normalizedTier - 5) / 5f;
+        return AttributeCombatRules.TypedMitigationCapPercent;
     }
 
     public static IReadOnlyDictionary<AttributeType, double> GetOverflowWeights(
@@ -242,7 +205,7 @@ public static class EquipmentConstraintProfile
     {
         var maximum = Math.Max(
             0d,
-            EquipmentStatBudgetCatalog.Get(attribute, tier).PerItemHardCap
+            EquipmentStatBudgetCatalog.Get(attribute).PerItemHardCap
             * Math.Max(1d, perItemCapMultiplier)
             - currentPoints.GetValueOrDefault(attribute));
 

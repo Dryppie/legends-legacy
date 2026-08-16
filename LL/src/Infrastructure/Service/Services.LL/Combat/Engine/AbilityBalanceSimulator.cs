@@ -227,9 +227,9 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
         var candidatePoolSize = Math.Clamp(request.CandidatePoolSize <= 0 ? Math.Max(25, topResults) : request.CandidatePoolSize, 2, 1_000);
         var seed = request.RandomSeed == 0 ? 1337 : request.RandomSeed;
         var equipmentTier = Math.Clamp(
-            request.EquipmentTier <= 0 ? EquipmentStatBudgetCatalog.MaximumTier : request.EquipmentTier,
+            request.EquipmentTier <= 0 ? EquipmentTierBudgetCurve.ReferenceEndTier : request.EquipmentTier,
             EquipmentStatBudgetCatalog.MinimumTier,
-            EquipmentStatBudgetCatalog.MaximumTier);
+            EquipmentTierBudgetCurve.MaximumCalibrationTier);
         var equipmentRarity = Enum.TryParse<Rarity>(request.EquipmentRarity, true, out var parsedRarity)
             && parsedRarity <= Rarity.Legendary
             ? parsedRarity

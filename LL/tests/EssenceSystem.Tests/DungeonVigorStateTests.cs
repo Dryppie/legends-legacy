@@ -589,21 +589,7 @@ public sealed class DungeonVigorStateTests
     }
 
     private static string FindApiRoot()
-    {
-        var current = new DirectoryInfo(AppContext.BaseDirectory);
-        while (current is not null)
-        {
-            var candidate = Path.Combine(current.FullName, "src", "API", "API.LL");
-            if (File.Exists(Path.Combine(candidate, "Data", "dungeons", "dungeon-delves.json")))
-            {
-                return candidate;
-            }
-
-            current = current.Parent;
-        }
-
-        throw new DirectoryNotFoundException("Could not locate API.LL dungeon data.");
-    }
+        => TestContentPaths.FindApiRoot();
 
     private static DungeonDelveDefinition CreateSectionedDelve(
         int sectionCount,

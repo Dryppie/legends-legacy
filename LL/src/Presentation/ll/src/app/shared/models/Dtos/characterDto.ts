@@ -29,6 +29,7 @@ export interface CharacterOverviewDto {
   power?: OverallPowerRating | null;
   baseAttributes: AttributeDto[];
   baseCombatAttributes: AttributeDto[];
+  equipmentRatings?: AttributeDto[];
   activeEssenceLoadout?: EssenceLoadoutDto | null;
   equippedTitle?: EquippedTitleDto | null;
   guild?: CharacterGuildDto | null;

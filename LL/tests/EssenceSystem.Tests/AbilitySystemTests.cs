@@ -4533,10 +4533,8 @@ public sealed class AbilitySystemTests
             CreateConfig(),
             FindApiContentRoot(),
             CreateJsonOptions());
-        var allyCharacter = CreateSourceCharacter("Fox Ally");
         var foxCharacter = CreateSourceCharacter("Illusion Fox Holder");
         var hostileCharacter = CreateSourceCharacter("Hostile Attacker");
-        var allyCombatant = CreateCombatEntity("ally-slot", allyCharacter);
         var foxCombatant = CreateCombatEntity("fox-slot", foxCharacter, "essence.illusion_fox");
         var hostileCombatant = CreateCombatEntity("hostile-slot", hostileCharacter);
         var plan = new CombatEncounterPlan(
@@ -4546,16 +4544,12 @@ public sealed class AbilitySystemTests
             DateTimeOffset.UtcNow,
             [
                 new CombatParticipantSlot("fox-slot", foxCharacter.Id, CombatSide.Friendly),
-                new CombatParticipantSlot("ally-slot", allyCharacter.Id, CombatSide.Friendly),
                 new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
             ],
-            new IdleEncounterSourceContext(allyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)));
+            new IdleEncounterSourceContext(foxCharacter.Id, new Area(), TimeSpan.FromSeconds(1)));
         var runtime = new CombatEncounterRuntime(
             plan,
-            [
-                new CombatRuntimeParticipant(plan.FriendlyParticipants[0], foxCharacter, foxCombatant),
-                new CombatRuntimeParticipant(plan.FriendlyParticipants[1], allyCharacter, allyCombatant)
-            ],
+            [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), foxCharacter, foxCombatant)],
             [new CombatRuntimeParticipant(plan.HostileParticipants.Single(), hostileCharacter, hostileCombatant)]);
         var executor = new CombatEngineExecutor(provider);
 

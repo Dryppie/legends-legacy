@@ -115,24 +115,31 @@ public sealed class TemperingMechanicsServiceTests
     [Fact]
     public void CriticalQualityIncreaseRedistributesBudgetFromACappedStat()
     {
-        var equipment = CreateEquipment();
-        equipment.Tier = 10;
-        equipment.Quality = ItemQuality.Fine;
-        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(AttributeType.Power, 2_069));
-        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(AttributeType.MaxHealth, 100));
-        var service = new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions
+        var options = new CraftingBalanceOptions
         {
             CriticalChanceBase = 1d,
             CriticalChancePerRarityStep = 0d,
             CriticalLevelingItemChance = 0d
-        }));
+        };
+        var equipment = CreateEquipment();
+        equipment.Tier = 10;
+        equipment.Quality = ItemQuality.Fine;
+        var expectedPowerCap = EquipmentStatBudgetCatalog
+            .Get(AttributeType.Power, equipment.Tier)
+            .HardCap
+            * (float)EquipmentConstraintProfile.GetPerItemCapMultiplier(
+                options.GetSlotBudgetWeight(equipment.EquipmentBase.EquipmentType));
+        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(
+            AttributeType.Power,
+            expectedPowerCap - 1));
+        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(AttributeType.MaxHealth, 100));
+        var service = new TemperingMechanicsService(Options.Create(options));
 
         var result = service.ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.5d));
 
         Assert.True(result.QualityIncreased);
         Assert.Equal(
-            EquipmentStatBudgetCatalog.Get(AttributeType.Power, equipment.Tier).HardCap
-            * 1.15f,
+            expectedPowerCap,
             equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.Power).Amount);
         Assert.True(
             equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.MaxHealth).Amount > 100);

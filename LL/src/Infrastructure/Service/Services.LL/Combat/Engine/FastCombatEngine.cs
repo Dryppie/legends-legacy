@@ -48,6 +48,7 @@ public sealed class FastCombatEngine
     private readonly List<CombatLogItem> _log = [];
     private readonly Dictionary<string, int> _balanceDamageDone = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _balanceDamageTaken = new(StringComparer.OrdinalIgnoreCase);
+    private readonly CombatStatsAccumulator _balanceStats = new();
     private readonly Dictionary<string, RuntimeSummonGroup> _summonGroups = new(StringComparer.OrdinalIgnoreCase);
     private CombatStatsAccumulator? _checkpointStats;
     private int _currentTick;
@@ -263,15 +264,9 @@ public sealed class FastCombatEngine
     }
 
     private IReadOnlyList<EntityStats> CreateBalanceStats(IReadOnlyList<RuntimeCombatant> combatants) =>
-        combatants
-            .Select(combatant => new EntityStats(
-                combatant.Id,
-                combatant.Name,
-                [],
-                DamageDone: _balanceDamageDone.GetValueOrDefault(combatant.Id),
-                DamageTaken: _balanceDamageTaken.GetValueOrDefault(combatant.Id),
-                Team: combatant.Team.ToString()))
-            .ToList();
+        AddFinalCombatantState(
+            AddHealthRegenerationTelemetry(_balanceStats.Snapshot(), combatants),
+            combatants);
 
     private void PublishIntervalEvents(IReadOnlyList<RuntimeCombatant> combatants)
     {
@@ -3525,9 +3520,9 @@ public sealed class FastCombatEngine
         int damageAmplified,
         int finalHealthDamage)
     {
-        if (_checkpointStats is not null && !_captureEventLog)
+        if (!_captureEventLog)
         {
-            _checkpointStats.Add(
+            (_checkpointStats ?? _balanceStats).Add(
                 sourceName,
                 statsSource ?? string.Empty,
                 countsAsActivation,

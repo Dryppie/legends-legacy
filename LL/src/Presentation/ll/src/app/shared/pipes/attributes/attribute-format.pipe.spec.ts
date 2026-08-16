@@ -63,6 +63,21 @@ describe('canonical attribute formatting', () => {
     );
   });
 
+  it('separates raw equipment ratings from effective character percentages', () => {
+    expect(formatAttributeType(AttributeType.CritChance, true)).toBe(
+      'Critical Chance Rating',
+    );
+    expect(
+      formatAttributeValue(12.345, AttributeType.CritChance, true, true),
+    ).toBe('+12.35');
+    expect(formatAttributeTooltip(AttributeType.CritChance, true)).toBe(
+      'Higher rating improves this effect with diminishing returns.',
+    );
+    expect(formatAttributeValue(12.345, AttributeType.CritChance, true)).toBe(
+      '+12.35%',
+    );
+  });
+
   it('rounds flat and rating attributes to integers', () => {
     expect(formatAttributeValue(25.49, AttributeType.StatusResistance)).toBe(
       '25',
@@ -109,6 +124,12 @@ function definition(
     displayPrecision: 2,
     displaySuffix: '',
     relevantBenchmarkScenarios: ['PhysicalOffense'],
+    equipmentDisplayName: `${overrides.displayName} Rating`,
+    equipmentDescription:
+      'Higher rating improves this effect with diminishing returns.',
+    equipmentUnit: 'Rating',
+    equipmentDisplayPrecision: 2,
+    equipmentDisplaySuffix: '',
     ...overrides,
   };
 }

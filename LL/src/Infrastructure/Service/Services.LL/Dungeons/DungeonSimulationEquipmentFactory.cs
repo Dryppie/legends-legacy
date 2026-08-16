@@ -73,6 +73,7 @@ public sealed class DungeonSimulationEquipmentFactory
             BaseRecipeId = recipe.Id,
             CraftedName = design.Name,
             Tier = EquipmentStatBudgetCatalog.MinimumTier,
+            StatModelVersion = EquipmentStatBudgetCatalog.BalanceVersion,
             Rarity = Rarity.Common,
             Quality = ItemQuality.Standard,
             Potential = requiredPotential,

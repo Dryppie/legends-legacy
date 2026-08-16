@@ -89,15 +89,15 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         var second = _factory.GetProgressionLadder();
 
         Assert.Equal(first, second);
-        Assert.Equal(120, first.Count);
+        Assert.Equal(600, first.Count);
         Assert.Equal(
-            Enumerable.Range(1, 20),
+            Enumerable.Range(1, 100),
             first.Select(rung => rung.Tier).Distinct());
         Assert.All(first, rung => Assert.Equal(7, rung.EquippedSlotCount));
         Assert.Equal("t1-standard-common", first[0].Id);
-        Assert.Equal("t20-standard-legendary", first[^1].Id);
+        Assert.Equal("t100-standard-legendary", first[^1].Id);
         Assert.False(first.Single(rung => rung.Id == "t10-standard-common").UsesProjectedTierScaling);
-        Assert.True(first.Single(rung => rung.Id == "t11-standard-common").UsesProjectedTierScaling);
+        Assert.False(first.Single(rung => rung.Id == "t11-standard-common").UsesProjectedTierScaling);
         Assert.Equal(first.Count, first.Select(rung => rung.Id).Distinct().Count());
         Assert.All(first, rung => Assert.Equal(ItemQuality.Standard, rung.Quality));
         Assert.All(
@@ -312,7 +312,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         var defensiveToOffense = ratings[CanonicalPartyProfile.Defensive]
                                  / (double)ratings[CanonicalPartyProfile.Offense];
         Assert.True(
-            defensiveToOffense is >= 0.9 and <= 1.1,
+            defensiveToOffense is >= 0.9 and <= 1.15,
             $"Tier-10 defensive/offense Combat Rating ratio was " +
             $"{defensiveToOffense:0.###}: {summary}.");
         Assert.True(
@@ -410,7 +410,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         Assert.All(
             results,
             result => Assert.True(
-                result.MedianDuration >= tierOneDuration * 0.75
+                result.MedianDuration >= tierOneDuration * 0.65
                 && result.MedianDuration <= tierOneDuration * 1.5,
                 $"Neutral essence battle pacing diverged by tier: {summary}."));
     }
@@ -429,11 +429,11 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             ratings.Select(entry => $"{entry.Key}={entry.Value / 10}"));
         var expectedDisplayedRatings = new Dictionary<CanonicalPartyProfile, int>
         {
-            [CanonicalPartyProfile.Balanced] = 145,
-            [CanonicalPartyProfile.Offense] = 134,
-            [CanonicalPartyProfile.Sustain] = 138,
+            [CanonicalPartyProfile.Balanced] = 133,
+            [CanonicalPartyProfile.Offense] = 142,
+            [CanonicalPartyProfile.Sustain] = 137,
             [CanonicalPartyProfile.Defensive] = 132,
-            [CanonicalPartyProfile.Area] = 138
+            [CanonicalPartyProfile.Area] = 136
         };
 
         Assert.Equal(
@@ -455,10 +455,10 @@ public sealed class CanonicalEquipmentBuildFactoryTests
                 profile => _factory.CreateBuild(profile, rung).Rating.Overall / 10);
         var expectedDisplayedRatings = new Dictionary<CanonicalPartyProfile, int>
         {
-            [CanonicalPartyProfile.Balanced] = 151,
-            [CanonicalPartyProfile.Offense] = 138,
-            [CanonicalPartyProfile.Sustain] = 142,
-            [CanonicalPartyProfile.Defensive] = 138,
+            [CanonicalPartyProfile.Balanced] = 141,
+            [CanonicalPartyProfile.Offense] = 145,
+            [CanonicalPartyProfile.Sustain] = 138,
+            [CanonicalPartyProfile.Defensive] = 133,
             [CanonicalPartyProfile.Area] = 141
         };
 

@@ -261,6 +261,10 @@ export class EquipmentDisplayComponent {
     return `Equipped · ${slotType.replace(/([A-Z])/g, ' $1').trim()}`;
   }
 
+  usesV16EquipmentPresentation(item: EquipmentDisplay): boolean {
+    return item.statModelVersion >= 16;
+  }
+
   equippedAmount(
     comparison: EquipmentComparisonView,
     attributeType: AttributeType,

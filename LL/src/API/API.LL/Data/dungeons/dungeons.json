@@ -40,6 +40,7 @@
         {
           "id": "goblin_mines",
           "difficulty": 1,
+          "enemyStrengthMultiplier": 3.5,
           "minRooms": 10,
           "maxRooms": 12,
           "rewardTable": {
@@ -69,8 +70,8 @@
               },
               {
                 "itemId": "fury_heart",
-                "minAmount": 1,
-                "maxAmount": 1,
+                "minAmount": 2,
+                "maxAmount": 2,
                 "chance": 0.22
               },
               {
@@ -81,8 +82,8 @@
               },
               {
                 "itemId": "venom_gland",
-                "minAmount": 1,
-                "maxAmount": 1,
+                "minAmount": 2,
+                "maxAmount": 2,
                 "chance": 0.22
               }
             ]
@@ -98,8 +99,8 @@
                 {
                   "itemId": "ore",
                   "weight": 100,
-                  "minQuantity": 4,
-                  "maxQuantity": 12
+                  "minQuantity": 8,
+                  "maxQuantity": 24
                 }
               ]
             },
@@ -113,8 +114,8 @@
                 {
                   "itemId": "wood",
                   "weight": 95,
-                  "minQuantity": 4,
-                  "maxQuantity": 12
+                  "minQuantity": 8,
+                  "maxQuantity": 24
                 }
               ]
             },
@@ -128,8 +129,8 @@
                 {
                   "itemId": "rawhide",
                   "weight": 75,
-                  "minQuantity": 4,
-                  "maxQuantity": 8
+                  "minQuantity": 8,
+                  "maxQuantity": 16
                 }
               ]
             }
@@ -138,6 +139,7 @@
         {
           "id": "goblin_mines_ii",
           "difficulty": 2,
+          "enemyStrengthMultiplier": 5.88,
           "minRooms": 11,
           "maxRooms": 13,
           "rewardTable": {
@@ -167,8 +169,8 @@
               },
               {
                 "itemId": "executioners_mark",
-                "minAmount": 1,
-                "maxAmount": 1,
+                "minAmount": 2,
+                "maxAmount": 2,
                 "chance": 0.16
               },
               {
@@ -179,8 +181,8 @@
               },
               {
                 "itemId": "royal_chitin_plate",
-                "minAmount": 1,
-                "maxAmount": 1,
+                "minAmount": 2,
+                "maxAmount": 2,
                 "chance": 0.16
               }
             ]
@@ -196,8 +198,8 @@
                 {
                   "itemId": "ore",
                   "weight": 100,
-                  "minQuantity": 4,
-                  "maxQuantity": 16
+                  "minQuantity": 8,
+                  "maxQuantity": 32
                 }
               ]
             },
@@ -211,8 +213,8 @@
                 {
                   "itemId": "wood",
                   "weight": 90,
-                  "minQuantity": 4,
-                  "maxQuantity": 12
+                  "minQuantity": 8,
+                  "maxQuantity": 24
                 }
               ]
             },
@@ -226,8 +228,8 @@
                 {
                   "itemId": "rawhide",
                   "weight": 70,
-                  "minQuantity": 4,
-                  "maxQuantity": 8
+                  "minQuantity": 8,
+                  "maxQuantity": 16
                 }
               ]
             }
@@ -236,6 +238,7 @@
         {
           "id": "goblin_mines_iii",
           "difficulty": 3,
+          "enemyStrengthMultiplier": 8.0,
           "minRooms": 12,
           "maxRooms": 14,
           "rewardTable": {
@@ -260,8 +263,8 @@
               },
               {
                 "itemId": "arcane_focus",
-                "minAmount": 1,
-                "maxAmount": 1,
+                "minAmount": 2,
+                "maxAmount": 2,
                 "chance": 0.14
               }
             ]
@@ -277,8 +280,8 @@
                 {
                   "itemId": "ore",
                   "weight": 100,
-                  "minQuantity": 4,
-                  "maxQuantity": 16
+                  "minQuantity": 8,
+                  "maxQuantity": 32
                 }
               ]
             },
@@ -292,8 +295,8 @@
                 {
                   "itemId": "wood",
                   "weight": 90,
-                  "minQuantity": 4,
-                  "maxQuantity": 12
+                  "minQuantity": 8,
+                  "maxQuantity": 24
                 }
               ]
             },
@@ -307,8 +310,8 @@
                 {
                   "itemId": "rawhide",
                   "weight": 65,
-                  "minQuantity": 4,
-                  "maxQuantity": 8
+                  "minQuantity": 8,
+                  "maxQuantity": 16
                 }
               ]
             }
@@ -380,7 +383,7 @@
         {
           "id": "forgotten_catacombs",
           "difficulty": 1,
-          "enemyStrengthMultiplier": 3.48,
+          "enemyStrengthMultiplier": 3.9,
           "minRooms": 11,
           "maxRooms": 13,
           "rewardTable": {
@@ -410,8 +413,8 @@
               },
               {
                 "itemId": "aegis_runestone",
-                "minAmount": 1,
-                "maxAmount": 1,
+                "minAmount": 2,
+                "maxAmount": 2,
                 "chance": 0.22
               },
               {
@@ -422,8 +425,8 @@
               },
               {
                 "itemId": "warden_sigil",
-                "minAmount": 1,
-                "maxAmount": 1,
+                "minAmount": 2,
+                "maxAmount": 2,
                 "chance": 0.22
               }
             ]
@@ -439,8 +442,8 @@
                 {
                   "itemId": "ore",
                   "weight": 95,
-                  "minQuantity": 4,
-                  "maxQuantity": 12
+                  "minQuantity": 8,
+                  "maxQuantity": 24
                 }
               ]
             },
@@ -454,8 +457,8 @@
                 {
                   "itemId": "rawhide",
                   "weight": 90,
-                  "minQuantity": 4,
-                  "maxQuantity": 12
+                  "minQuantity": 8,
+                  "maxQuantity": 24
                 }
               ]
             }
@@ -464,7 +467,7 @@
         {
           "id": "forgotten_catacombs_ii",
           "difficulty": 2,
-          "enemyStrengthMultiplier": 6.05,
+          "enemyStrengthMultiplier": 6.4,
           "minRooms": 12,
           "maxRooms": 14,
           "rewardTable": {
@@ -494,8 +497,8 @@
               },
               {
                 "itemId": "spirit_prism",
-                "minAmount": 1,
-                "maxAmount": 1,
+                "minAmount": 2,
+                "maxAmount": 2,
                 "chance": 0.16
               },
               {
@@ -506,8 +509,8 @@
               },
               {
                 "itemId": "hive_ichor",
-                "minAmount": 1,
-                "maxAmount": 1,
+                "minAmount": 2,
+                "maxAmount": 2,
                 "chance": 0.16
               }
             ]
@@ -523,8 +526,8 @@
                 {
                   "itemId": "ore",
                   "weight": 95,
-                  "minQuantity": 4,
-                  "maxQuantity": 12
+                  "minQuantity": 8,
+                  "maxQuantity": 24
                 }
               ]
             },
@@ -538,8 +541,8 @@
                 {
                   "itemId": "rawhide",
                   "weight": 88,
-                  "minQuantity": 4,
-                  "maxQuantity": 12
+                  "minQuantity": 8,
+                  "maxQuantity": 24
                 }
               ]
             }
@@ -548,7 +551,7 @@
         {
           "id": "forgotten_catacombs_iii",
           "difficulty": 3,
-          "enemyStrengthMultiplier": 8.0,
+          "enemyStrengthMultiplier": 9.5,
           "minRooms": 13,
           "maxRooms": 15,
           "rewardTable": {
@@ -584,14 +587,14 @@
               },
               {
                 "itemId": "endurance_core",
-                "minAmount": 1,
-                "maxAmount": 1,
+                "minAmount": 2,
+                "maxAmount": 2,
                 "chance": 0.12
               },
               {
                 "itemId": "phoenix_ember",
-                "minAmount": 1,
-                "maxAmount": 1,
+                "minAmount": 2,
+                "maxAmount": 2,
                 "chance": 0.12
               }
             ]
@@ -607,8 +610,8 @@
                 {
                   "itemId": "ore",
                   "weight": 95,
-                  "minQuantity": 4,
-                  "maxQuantity": 12
+                  "minQuantity": 8,
+                  "maxQuantity": 24
                 }
               ]
             },
@@ -622,8 +625,8 @@
                 {
                   "itemId": "rawhide",
                   "weight": 85,
-                  "minQuantity": 4,
-                  "maxQuantity": 8
+                  "minQuantity": 8,
+                  "maxQuantity": 16
                 }
               ]
             }

@@ -26,7 +26,7 @@ public sealed record CombatRatingModifierSource(
 /// </summary>
 public static class CombatRatingCalculator
 {
-    public const int DefinitionVersion = 14;
+    public const int DefinitionVersion = 15;
     public const int ReferenceWeightTier = EquipmentStatBudgetCatalog.MinimumTier;
 
     private static readonly IReadOnlySet<AttributeType> OffenseAttributes =
@@ -89,11 +89,15 @@ public static class CombatRatingCalculator
     public static CombatRatingBreakdown Calculate(
         IEnumerable<Domain.Models.Attributes.EntityAttribute> baseAttributes,
         IEnumerable<EquipmentInstance> equipment,
-        IEnumerable<CombatRatingModifierSource>? additionalAttributeSources = null)
+        IEnumerable<CombatRatingModifierSource>? additionalAttributeSources = null,
+        int? characterLevel = null)
     {
-        var modifiers = equipment
-            .DistinctBy(item => item.Id)
-            .SelectMany(item => item.AttributeModifiers)
+        var equipmentList = equipment.DistinctBy(item => item.Id).ToList();
+        var resolvedCharacterLevel = characterLevel
+            ?? EquipmentTierBudgetCurve.GetFirstCharacterLevelForTier(
+                Math.Max(1, equipmentList.Select(item => item.Tier).DefaultIfEmpty(1).Max()));
+        var modifiers = AttributeCalculator
+            .ProjectEquipmentModifiers(equipmentList, resolvedCharacterLevel)
             .Concat((additionalAttributeSources ?? []).SelectMany(source => source.Modifiers));
         var projected = ProjectDirectAttributes(baseAttributes, modifiers);
 
@@ -105,9 +109,6 @@ public static class CombatRatingCalculator
         IReadOnlyDictionary<AttributeType, double> equipmentPoints,
         int equipmentTier)
     {
-        // Retain the tier parameter for callers that construct canonical rungs,
-        // but do not let source metadata change the value of identical final stats.
-        _ = equipmentTier;
         var projected = directBaseAttributes
             .Where(entry => EquipmentStatBudgetCatalog.IsKnown(entry.Key))
             .ToDictionary(
@@ -117,7 +118,13 @@ public static class CombatRatingCalculator
                      entry.Value > 0
                      && EquipmentStatBudgetCatalog.IsKnown(entry.Key)))
         {
-            projected[attribute] = projected.GetValueOrDefault(attribute) + points;
+            var value = EquipmentStatBudgetCatalog.IsRating(attribute)
+                ? EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(
+                    attribute,
+                    points,
+                    equipmentTier)
+                : points;
+            projected[attribute] = projected.GetValueOrDefault(attribute) + value;
         }
 
         return CreateBreakdown(ValueProjectedAttributes(projected));
@@ -166,7 +173,7 @@ public static class CombatRatingCalculator
 
                     return Math.Min(usefulPoints, cap)
                            * EquipmentStatBudgetCatalog
-                               .Get(entry.Key, ReferenceWeightTier)
+                               .Get(entry.Key)
                                .CostPerPoint;
                 });
     }

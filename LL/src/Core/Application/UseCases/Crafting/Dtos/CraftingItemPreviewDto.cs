@@ -1,6 +1,7 @@
 using Domain.Models.Attributes;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Professions.Crafting.V2;
 
 namespace Application.UseCases.Crafting.Dtos;
 
@@ -11,6 +12,7 @@ public sealed class CraftingItemPreviewDto
     public EquipmentType EquipmentType { get; init; }
     public Rarity Rarity { get; init; }
     public int Tier { get; init; }
+    public int StatModelVersion { get; init; } = EquipmentStatBudgetCatalog.BalanceVersion;
     public IReadOnlyList<CraftingAttributePreviewDto> Attributes { get; init; } = [];
     public IReadOnlyList<CraftingQualityChanceDto> QualityChances { get; init; } = [];
     public int MinimumStartingPotential { get; init; }

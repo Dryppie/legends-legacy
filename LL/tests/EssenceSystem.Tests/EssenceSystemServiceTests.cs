@@ -322,7 +322,7 @@ public sealed class EssenceSystemServiceTests
             new AbilityAttributeModifier(AttributeType.Power, 50, ModifierType.Multiplicative)
         ]);
 
-        Assert.Equal(206, result);
+        Assert.Equal(206.25f, result);
     }
 
     [Fact]

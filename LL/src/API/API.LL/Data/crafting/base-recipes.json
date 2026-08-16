@@ -63,9 +63,8 @@
     },
     "initialStatProfile": {
       "Armor": 0.35,
-      "MaxHealth": 0.3,
-      "BlockChance": 0.2,
-      "CrowdControlResistance": 0.15
+      "MaxHealth": 0.35,
+      "Resistance": 0.3
     },
     "temperingProfile": {
       "id": "recipe.armor.head.heavy_helm.tempering",
@@ -77,12 +76,12 @@
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
+          "maxBudgetShare": 0.35,
           "minimumTier": 1
         },
         {
           "stat": "MaxHealth",
-          "weight": 30,
+          "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -90,17 +89,8 @@
           "minimumTier": 1
         },
         {
-          "stat": "BlockChance",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CrowdControlResistance",
-          "weight": 15,
+          "stat": "Resistance",
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -169,31 +159,31 @@
       "role": "Medium"
     },
     "initialStatProfile": {
-      "MaxHealth": 0.3,
       "Armor": 0.25,
+      "MaxHealth": 0.25,
       "CritChance": 0.25,
-      "Resistance": 0.2
+      "CritDamage": 0.25
     },
     "temperingProfile": {
       "id": "recipe.armor.head.medium_helm.tempering",
       "name": "Medium Helm Tempering",
       "stats": [
         {
-          "stat": "MaxHealth",
-          "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
           "stat": "Armor",
           "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.35,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         },
         {
@@ -202,16 +192,16 @@
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         },
         {
-          "stat": "Resistance",
-          "weight": 20,
+          "stat": "CritDamage",
+          "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         }
       ]
@@ -278,31 +268,40 @@
       "role": "Light"
     },
     "initialStatProfile": {
-      "DodgeChance": 0.3,
-      "CritChance": 0.25,
-      "AttackSpeed": 0.25,
-      "StatusResistance": 0.2
+      "MaxHealth": 0.25,
+      "HealthRegeneration": 0.25,
+      "DodgeChance": 0.25,
+      "AttackSpeed": 0.25
     },
     "temperingProfile": {
       "id": "recipe.armor.head.light_hood.tempering",
       "name": "Light Hood Tempering",
       "stats": [
         {
-          "stat": "DodgeChance",
-          "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritChance",
+          "stat": "MaxHealth",
           "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.35,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "HealthRegeneration",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "DodgeChance",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         },
         {
@@ -311,16 +310,7 @@
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "StatusResistance",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         }
       ]
@@ -387,49 +377,49 @@
       "role": "Cloth"
     },
     "initialStatProfile": {
-      "HealingPowerPercent": 0.35,
       "Resistance": 0.25,
-      "Cooldown": 0.2,
-      "MaxHealth": 0.2
+      "HealthRegeneration": 0.25,
+      "HealingPowerPercent": 0.25,
+      "Cooldown": 0.25
     },
     "temperingProfile": {
       "id": "recipe.armor.head.cloth_cowl.tempering",
       "name": "Cloth Cowl Tempering",
       "stats": [
         {
-          "stat": "HealingPowerPercent",
-          "weight": 35,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
           "stat": "Resistance",
           "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.35,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "HealthRegeneration",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "HealingPowerPercent",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         },
         {
           "stat": "Cooldown",
-          "weight": 20,
+          "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "MaxHealth",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         }
       ]
@@ -499,9 +489,8 @@
     },
     "initialStatProfile": {
       "Armor": 0.35,
-      "MaxHealth": 0.3,
-      "BlockChance": 0.2,
-      "CrowdControlResistance": 0.15
+      "MaxHealth": 0.35,
+      "Resistance": 0.3
     },
     "temperingProfile": {
       "id": "recipe.armor.chest.heavy_breastplate.tempering",
@@ -513,12 +502,12 @@
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
+          "maxBudgetShare": 0.35,
           "minimumTier": 1
         },
         {
           "stat": "MaxHealth",
-          "weight": 30,
+          "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -526,17 +515,8 @@
           "minimumTier": 1
         },
         {
-          "stat": "BlockChance",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CrowdControlResistance",
-          "weight": 15,
+          "stat": "Resistance",
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -605,31 +585,31 @@
       "role": "Medium"
     },
     "initialStatProfile": {
-      "MaxHealth": 0.3,
       "Armor": 0.25,
+      "MaxHealth": 0.25,
       "CritChance": 0.25,
-      "Resistance": 0.2
+      "CritDamage": 0.25
     },
     "temperingProfile": {
       "id": "recipe.armor.chest.medium_mail.tempering",
       "name": "Medium Mail Tempering",
       "stats": [
         {
-          "stat": "MaxHealth",
-          "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
           "stat": "Armor",
           "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.35,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         },
         {
@@ -638,16 +618,16 @@
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         },
         {
-          "stat": "Resistance",
-          "weight": 20,
+          "stat": "CritDamage",
+          "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         }
       ]
@@ -714,31 +694,40 @@
       "role": "Light"
     },
     "initialStatProfile": {
-      "DodgeChance": 0.3,
-      "CritChance": 0.25,
-      "AttackSpeed": 0.25,
-      "StatusResistance": 0.2
+      "MaxHealth": 0.25,
+      "HealthRegeneration": 0.25,
+      "DodgeChance": 0.25,
+      "AttackSpeed": 0.25
     },
     "temperingProfile": {
       "id": "recipe.armor.chest.light_vest.tempering",
       "name": "Light Vest Tempering",
       "stats": [
         {
-          "stat": "DodgeChance",
-          "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritChance",
+          "stat": "MaxHealth",
           "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.35,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "HealthRegeneration",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "DodgeChance",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         },
         {
@@ -747,16 +736,7 @@
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "StatusResistance",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         }
       ]
@@ -823,49 +803,49 @@
       "role": "Cloth"
     },
     "initialStatProfile": {
-      "HealingPowerPercent": 0.35,
       "Resistance": 0.25,
-      "Cooldown": 0.2,
-      "MaxHealth": 0.2
+      "HealthRegeneration": 0.25,
+      "HealingPowerPercent": 0.25,
+      "Cooldown": 0.25
     },
     "temperingProfile": {
       "id": "recipe.armor.chest.cloth_robe.tempering",
       "name": "Cloth Robe Tempering",
       "stats": [
         {
-          "stat": "HealingPowerPercent",
-          "weight": 35,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
           "stat": "Resistance",
           "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.35,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "HealthRegeneration",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "HealingPowerPercent",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         },
         {
           "stat": "Cooldown",
-          "weight": 20,
+          "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "MaxHealth",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         }
       ]
@@ -935,9 +915,8 @@
     },
     "initialStatProfile": {
       "Armor": 0.35,
-      "MaxHealth": 0.3,
-      "BlockChance": 0.2,
-      "CrowdControlResistance": 0.15
+      "MaxHealth": 0.35,
+      "Resistance": 0.3
     },
     "temperingProfile": {
       "id": "recipe.armor.legs.heavy_legplates.tempering",
@@ -949,12 +928,12 @@
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
+          "maxBudgetShare": 0.35,
           "minimumTier": 1
         },
         {
           "stat": "MaxHealth",
-          "weight": 30,
+          "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -962,17 +941,8 @@
           "minimumTier": 1
         },
         {
-          "stat": "BlockChance",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CrowdControlResistance",
-          "weight": 15,
+          "stat": "Resistance",
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -1041,31 +1011,31 @@
       "role": "Medium"
     },
     "initialStatProfile": {
-      "MaxHealth": 0.3,
       "Armor": 0.25,
+      "MaxHealth": 0.25,
       "CritChance": 0.25,
-      "Resistance": 0.2
+      "CritDamage": 0.25
     },
     "temperingProfile": {
       "id": "recipe.armor.legs.medium_greaves.tempering",
       "name": "Medium Greaves Tempering",
       "stats": [
         {
-          "stat": "MaxHealth",
-          "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
           "stat": "Armor",
           "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.35,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         },
         {
@@ -1074,16 +1044,16 @@
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         },
         {
-          "stat": "Resistance",
-          "weight": 20,
+          "stat": "CritDamage",
+          "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         }
       ]
@@ -1150,31 +1120,40 @@
       "role": "Light"
     },
     "initialStatProfile": {
-      "DodgeChance": 0.3,
-      "CritChance": 0.25,
-      "AttackSpeed": 0.25,
-      "StatusResistance": 0.2
+      "MaxHealth": 0.25,
+      "HealthRegeneration": 0.25,
+      "DodgeChance": 0.25,
+      "AttackSpeed": 0.25
     },
     "temperingProfile": {
       "id": "recipe.armor.legs.light_legwraps.tempering",
       "name": "Light Legwraps Tempering",
       "stats": [
         {
-          "stat": "DodgeChance",
-          "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritChance",
+          "stat": "MaxHealth",
           "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.35,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "HealthRegeneration",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "DodgeChance",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         },
         {
@@ -1183,16 +1162,7 @@
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "StatusResistance",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         }
       ]
@@ -1259,49 +1229,49 @@
       "role": "Cloth"
     },
     "initialStatProfile": {
-      "HealingPowerPercent": 0.35,
       "Resistance": 0.25,
-      "Cooldown": 0.2,
-      "MaxHealth": 0.2
+      "HealthRegeneration": 0.25,
+      "HealingPowerPercent": 0.25,
+      "Cooldown": 0.25
     },
     "temperingProfile": {
       "id": "recipe.armor.legs.cloth_pants.tempering",
       "name": "Cloth Pants Tempering",
       "stats": [
         {
-          "stat": "HealingPowerPercent",
-          "weight": 35,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
           "stat": "Resistance",
           "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.35,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "HealthRegeneration",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "HealingPowerPercent",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         },
         {
           "stat": "Cooldown",
-          "weight": 20,
+          "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "MaxHealth",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         }
       ]
@@ -1362,10 +1332,8 @@
       "role": ""
     },
     "initialStatProfile": {
-      "Power": 0.3,
-      "CritChance": 0.25,
-      "CritDamage": 0.25,
-      "AttackSpeed": 0.2
+      "Power": 0.6,
+      "MaxHealth": 0.4
     },
     "temperingProfile": {
       "id": "recipe.jewelry.ring.band.tempering",
@@ -1373,38 +1341,20 @@
       "stats": [
         {
           "stat": "Power",
-          "weight": 30,
+          "weight": 60,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
+          "maxBudgetShare": 0.6,
           "minimumTier": 1
         },
         {
-          "stat": "CritChance",
-          "weight": 25,
+          "stat": "MaxHealth",
+          "weight": 40,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
           "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritDamage",
-          "weight": 25,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "AttackSpeed",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
           "minimumTier": 1
         }
       ]
@@ -1467,10 +1417,8 @@
       "role": ""
     },
     "initialStatProfile": {
-      "MaxHealth": 0.3,
-      "Resistance": 0.25,
-      "Armor": 0.25,
-      "HealthRegeneration": 0.2
+      "MaxHealth": 0.6,
+      "HealthRegeneration": 0.4
     },
     "temperingProfile": {
       "id": "recipe.jewelry.necklace.amulet.tempering",
@@ -1478,38 +1426,20 @@
       "stats": [
         {
           "stat": "MaxHealth",
-          "weight": 30,
+          "weight": 60,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
-          "stat": "Resistance",
-          "weight": 25,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "Armor",
-          "weight": 25,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.6,
           "minimumTier": 1
         },
         {
           "stat": "HealthRegeneration",
-          "weight": 20,
-          "category": "Secondary",
+          "weight": 40,
+          "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         }
       ]
@@ -1568,49 +1498,29 @@
       "role": ""
     },
     "initialStatProfile": {
-      "HealingPowerPercent": 0.3,
-      "HealthRegeneration": 0.25,
-      "StatusResistance": 0.25,
-      "MaxHealth": 0.2
+      "Power": 0.6,
+      "HealthRegeneration": 0.4
     },
     "temperingProfile": {
       "id": "recipe.jewelry.relic.vial.tempering",
       "name": "Relic Tempering",
       "stats": [
         {
-          "stat": "HealingPowerPercent",
-          "weight": 30,
+          "stat": "Power",
+          "weight": 60,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
+          "maxBudgetShare": 0.6,
           "minimumTier": 1
         },
         {
           "stat": "HealthRegeneration",
-          "weight": 25,
+          "weight": 40,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
           "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "StatusResistance",
-          "weight": 25,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "MaxHealth",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
           "minimumTier": 1
         }
       ]
@@ -1673,45 +1583,25 @@
       "role": ""
     },
     "initialStatProfile": {
-      "ArmorPenetration": 0.3,
-      "Power": 0.3,
-      "CritChance": 0.2,
-      "AttackSpeed": 0.2
+      "Power": 0.7,
+      "CritChance": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.one_handed.shortsword.tempering",
       "name": "Shortsword Tempering",
       "stats": [
         {
-          "stat": "ArmorPenetration",
-          "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
           "stat": "Power",
-          "weight": 30,
+          "weight": 70,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.35,
+          "maxBudgetShare": 0.7,
           "minimumTier": 1
         },
         {
           "stat": "CritChance",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "AttackSpeed",
-          "weight": 20,
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -1779,50 +1669,30 @@
       "handedness": "OneHanded",
       "attackCategory": "Physical",
       "rangeCategory": "Melee",
-      "basicAttackIntervalMultiplier": 0.75,
-      "basicAttackDamageMultiplier": 0.78,
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
       "role": ""
     },
     "initialStatProfile": {
-      "AttackSpeed": 0.3,
-      "CritChance": 0.25,
-      "CritDamage": 0.25,
-      "Power": 0.2
+      "Power": 0.7,
+      "AttackSpeed": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.one_handed.dagger.tempering",
       "name": "Dagger Tempering",
       "stats": [
         {
+          "stat": "Power",
+          "weight": 70,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.7,
+          "minimumTier": 1
+        },
+        {
           "stat": "AttackSpeed",
           "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritChance",
-          "weight": 25,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritDamage",
-          "weight": 25,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "Power",
-          "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -1891,10 +1761,8 @@
       "role": ""
     },
     "initialStatProfile": {
-      "Power": 0.35,
-      "CritDamage": 0.25,
-      "ArmorPenetration": 0.2,
-      "AttackSpeed": 0.2
+      "Power": 0.7,
+      "CritDamage": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.one_handed.hand_axe.tempering",
@@ -1902,34 +1770,16 @@
       "stats": [
         {
           "stat": "Power",
-          "weight": 35,
+          "weight": 70,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
+          "maxBudgetShare": 0.7,
           "minimumTier": 1
         },
         {
           "stat": "CritDamage",
-          "weight": 25,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "ArmorPenetration",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "AttackSpeed",
-          "weight": 20,
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -1993,14 +1843,13 @@
       "handedness": "OneHanded",
       "attackCategory": "Physical",
       "rangeCategory": "Melee",
-      "basicAttackIntervalMultiplier": 1.25,
-      "basicAttackDamageMultiplier": 1.22,
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
       "role": ""
     },
     "initialStatProfile": {
-      "Power": 0.35,
-      "ArmorPenetration": 0.35,
-      "CritChance": 0.3
+      "Power": 0.7,
+      "ArmorPenetration": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.one_handed.mace.tempering",
@@ -2008,24 +1857,15 @@
       "stats": [
         {
           "stat": "Power",
-          "weight": 35,
+          "weight": 70,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
+          "maxBudgetShare": 0.7,
           "minimumTier": 1
         },
         {
           "stat": "ArmorPenetration",
-          "weight": 35,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritChance",
           "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
@@ -2095,10 +1935,8 @@
       "role": ""
     },
     "initialStatProfile": {
-      "Power": 0.35,
-      "MagicPenetration": 0.25,
-      "CritChance": 0.2,
-      "AttackSpeed": 0.2
+      "Power": 0.7,
+      "MagicPenetration": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.one_handed.wand.tempering",
@@ -2106,34 +1944,16 @@
       "stats": [
         {
           "stat": "Power",
-          "weight": 35,
+          "weight": 70,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
+          "maxBudgetShare": 0.7,
           "minimumTier": 1
         },
         {
           "stat": "MagicPenetration",
-          "weight": 25,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritChance",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "AttackSpeed",
-          "weight": 20,
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -2196,14 +2016,12 @@
       "attackCategory": "Physical",
       "rangeCategory": "Melee",
       "basicAttackIntervalMultiplier": 1,
-      "basicAttackDamageMultiplier": 1.02,
+      "basicAttackDamageMultiplier": 1,
       "role": ""
     },
     "initialStatProfile": {
-      "Power": 0.3,
-      "ArmorPenetration": 0.3,
-      "CritChance": 0.2,
-      "AttackSpeed": 0.2
+      "Power": 0.7,
+      "CritChance": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.two_handed.greatsword.tempering",
@@ -2211,34 +2029,16 @@
       "stats": [
         {
           "stat": "Power",
-          "weight": 35,
+          "weight": 70,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
-          "stat": "ArmorPenetration",
-          "weight": 25,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
+          "maxBudgetShare": 0.7,
           "minimumTier": 1
         },
         {
           "stat": "CritChance",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritDamage",
-          "weight": 20,
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -2305,10 +2105,8 @@
       "role": ""
     },
     "initialStatProfile": {
-      "Power": 0.35,
-      "CritDamage": 0.25,
-      "ArmorPenetration": 0.2,
-      "AttackSpeed": 0.2
+      "Power": 0.7,
+      "CritDamage": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.two_handed.battle_axe.tempering",
@@ -2316,34 +2114,16 @@
       "stats": [
         {
           "stat": "Power",
-          "weight": 35,
+          "weight": 70,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
+          "maxBudgetShare": 0.7,
           "minimumTier": 1
         },
         {
           "stat": "CritDamage",
-          "weight": 25,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "ArmorPenetration",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "AttackSpeed",
-          "weight": 20,
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -2405,14 +2185,13 @@
       "handedness": "TwoHanded",
       "attackCategory": "Physical",
       "rangeCategory": "Melee",
-      "basicAttackIntervalMultiplier": 1.25,
-      "basicAttackDamageMultiplier": 1.18,
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
       "role": ""
     },
     "initialStatProfile": {
-      "Power": 0.35,
-      "ArmorPenetration": 0.35,
-      "CritChance": 0.3
+      "Power": 0.7,
+      "ArmorPenetration": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.two_handed.maul.tempering",
@@ -2420,24 +2199,15 @@
       "stats": [
         {
           "stat": "Power",
-          "weight": 30,
+          "weight": 70,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
+          "maxBudgetShare": 0.7,
           "minimumTier": 1
         },
         {
           "stat": "ArmorPenetration",
-          "weight": 35,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritChance",
           "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
@@ -2505,45 +2275,25 @@
       "role": ""
     },
     "initialStatProfile": {
-      "AttackSpeed": 0.3,
-      "ArmorPenetration": 0.25,
-      "Power": 0.25,
-      "CritChance": 0.2
+      "Power": 0.7,
+      "AttackSpeed": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.two_handed.spear.tempering",
       "name": "Spear Tempering",
       "stats": [
         {
+          "stat": "Power",
+          "weight": 70,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.7,
+          "minimumTier": 1
+        },
+        {
           "stat": "AttackSpeed",
           "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
-          "stat": "ArmorPenetration",
-          "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "Power",
-          "weight": 25,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritChance",
-          "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -2610,10 +2360,8 @@
       "role": ""
     },
     "initialStatProfile": {
-      "Power": 0.35,
-      "MagicPenetration": 0.25,
-      "Cooldown": 0.2,
-      "CritChance": 0.2
+      "Power": 0.7,
+      "MagicPenetration": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.two_handed.staff.tempering",
@@ -2621,34 +2369,16 @@
       "stats": [
         {
           "stat": "Power",
-          "weight": 35,
+          "weight": 70,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
+          "maxBudgetShare": 0.7,
           "minimumTier": 1
         },
         {
           "stat": "MagicPenetration",
-          "weight": 25,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "Cooldown",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritChance",
-          "weight": 20,
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -2715,45 +2445,25 @@
       "role": ""
     },
     "initialStatProfile": {
-      "AttackSpeed": 0.3,
-      "Power": 0.3,
-      "CritChance": 0.2,
-      "ArmorPenetration": 0.2
+      "Power": 0.7,
+      "CritChance": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.two_handed.longbow.tempering",
       "name": "Longbow Tempering",
       "stats": [
         {
-          "stat": "AttackSpeed",
-          "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
           "stat": "Power",
-          "weight": 30,
+          "weight": 70,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.35,
+          "maxBudgetShare": 0.7,
           "minimumTier": 1
         },
         {
           "stat": "CritChance",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "ArmorPenetration",
-          "weight": 20,
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -2815,15 +2525,13 @@
       "handedness": "TwoHanded",
       "attackCategory": "Physical",
       "rangeCategory": "Ranged",
-      "basicAttackIntervalMultiplier": 1.25,
-      "basicAttackDamageMultiplier": 1.22,
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
       "role": ""
     },
     "initialStatProfile": {
-      "Power": 0.35,
-      "ArmorPenetration": 0.3,
-      "CritDamage": 0.2,
-      "CritChance": 0.15
+      "Power": 0.7,
+      "ArmorPenetration": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.two_handed.crossbow.tempering",
@@ -2831,34 +2539,16 @@
       "stats": [
         {
           "stat": "Power",
-          "weight": 35,
+          "weight": 70,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
+          "maxBudgetShare": 0.7,
           "minimumTier": 1
         },
         {
           "stat": "ArmorPenetration",
           "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "AttackSpeed",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritChance",
-          "weight": 15,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -2920,50 +2610,30 @@
       "handedness": "TwoHanded",
       "attackCategory": "Physical",
       "rangeCategory": "Melee",
-      "basicAttackIntervalMultiplier": 0.75,
-      "basicAttackDamageMultiplier": 0.78,
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
       "role": ""
     },
     "initialStatProfile": {
-      "AttackSpeed": 0.35,
-      "CritDamage": 0.25,
-      "Power": 0.2,
-      "CritChance": 0.2
+      "Power": 0.7,
+      "AttackSpeed": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.two_handed.gauntlets.tempering",
       "name": "Gauntlets Tempering",
       "stats": [
         {
-          "stat": "AttackSpeed",
-          "weight": 35,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
-          "stat": "CritDamage",
-          "weight": 25,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
           "stat": "Power",
-          "weight": 20,
-          "category": "Secondary",
+          "weight": 70,
+          "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.7,
           "minimumTier": 1
         },
         {
-          "stat": "CritChance",
-          "weight": 20,
+          "stat": "AttackSpeed",
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -3030,27 +2700,17 @@
       "role": "Towershield"
     },
     "initialStatProfile": {
+      "MaxHealth": 0.35,
       "BlockChance": 0.35,
-      "Armor": 0.3,
-      "MaxHealth": 0.2,
-      "CrowdControlResistance": 0.15
+      "Armor": 0.3
     },
     "temperingProfile": {
       "id": "recipe.offhand.towershield.tempering",
       "name": "Towershield Tempering",
       "stats": [
         {
-          "stat": "BlockChance",
+          "stat": "MaxHealth",
           "weight": 35,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
-          "stat": "Armor",
-          "weight": 30,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -3058,17 +2718,17 @@
           "minimumTier": 1
         },
         {
-          "stat": "MaxHealth",
-          "weight": 20,
-          "category": "Secondary",
+          "stat": "BlockChance",
+          "weight": 35,
+          "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.35,
           "minimumTier": 1
         },
         {
-          "stat": "CrowdControlResistance",
-          "weight": 15,
+          "stat": "Armor",
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -3111,7 +2771,11 @@
     "specialResourceRequirements": [],
     "affinityTags": [
       "OffHand",
+      "Shield",
       "Ward",
+      "Block",
+      "Guard",
+      "Defensive",
       "MagicDefense",
       "Barrier",
       "Support",
@@ -3119,7 +2783,11 @@
     ],
     "tags": [
       "OffHand",
+      "Shield",
       "Ward",
+      "Block",
+      "Guard",
+      "Defensive",
       "MagicDefense",
       "Barrier",
       "Support",
@@ -3135,26 +2803,17 @@
       "role": "Spiritward"
     },
     "initialStatProfile": {
-      "Resistance": 0.35,
-      "HealthRegeneration": 0.25,
-      "MaxHealth": 0.4
+      "MaxHealth": 0.35,
+      "BlockChance": 0.35,
+      "Resistance": 0.3
     },
     "temperingProfile": {
       "id": "recipe.offhand.spiritward.tempering",
       "name": "Spiritward Tempering",
       "stats": [
         {
-          "stat": "Resistance",
+          "stat": "MaxHealth",
           "weight": 35,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
-          "stat": "HealthRegeneration",
-          "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -3162,12 +2821,21 @@
           "minimumTier": 1
         },
         {
-          "stat": "MaxHealth",
-          "weight": 40,
+          "stat": "BlockChance",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Resistance",
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.45,
+          "maxBudgetShare": 0.3,
           "minimumTier": 1
         }
       ]
@@ -3263,7 +2931,16 @@
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.25,
+          "minimumTier": 1
+        },
+        {
+          "stat": "CritDamage",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.25,
           "minimumTier": 1
         },
         {

@@ -201,7 +201,7 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
             EquipmentTier = Math.Clamp(
                 request.EquipmentTier,
                 EquipmentStatBudgetCatalog.MinimumTier,
-                EquipmentStatBudgetCatalog.MaximumTier),
+                EquipmentTierBudgetCurve.MaximumCalibrationTier),
             EquipmentRarity = rarity.ToString(),
             EquipmentProfile = profile.ToString()
         };

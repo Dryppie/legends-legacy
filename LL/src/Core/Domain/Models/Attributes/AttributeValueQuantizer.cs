@@ -13,12 +13,7 @@ public static class AttributeValueQuantizer
 
     public static double Quantize(AttributeType attributeType, double value)
     {
-        var precision = AttributeCatalog.Get(attributeType).Unit switch
-        {
-            AttributeUnit.PercentagePoints => 2,
-            AttributeUnit.MultiplierInput => 4,
-            _ => 0
-        };
+        var precision = AttributeCatalog.Get(attributeType).EquipmentDisplayPrecision;
         return Math.Round(value, precision, MidpointRounding.AwayFromZero);
     }
 }

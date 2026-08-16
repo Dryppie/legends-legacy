@@ -251,7 +251,7 @@ public sealed class CraftingRegionOneContentTests
     }
 
     [Fact]
-    public void CombatAreaGathering_YieldsAboutSixteenAverageEquipmentCraftsPerDay()
+    public void CombatAreaGathering_YieldsAboutThirtyTwoAverageEquipmentCraftsPerDay()
     {
         const double encountersPerDay = 24 * 60 * 60 / 10d;
         var recipes = ReadArray("crafting/base-recipes.json");
@@ -285,7 +285,50 @@ public sealed class CraftingRegionOneContentTests
             var procChance = node?["procChance"]?.GetValue<double>() ?? 0;
             var expectedCrafts = encountersPerDay * procChance * averageYield / averageTierOneRecipeCost;
 
-            Assert.InRange(expectedCrafts, 15.6, 16.4);
+            Assert.InRange(expectedCrafts, 31.2, 32.8);
+        });
+    }
+
+    [Fact]
+    public void DungeonCraftingResourceDropsUseDoubledAmounts()
+    {
+        var materials = ReadArray("crafting/materials.json");
+        var standardMaterialIds = materials
+            .Where(material => material?["isStandardTieredMaterial"]?.GetValue<bool>() == true)
+            .Select(material => material?["itemId"]?.GetValue<string>() ?? string.Empty)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var specialResourceIds = materials
+            .Where(material => material?["isSpecialResource"]?.GetValue<bool>() == true)
+            .Select(material => material?["itemId"]?.GetValue<string>() ?? string.Empty)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var dungeons = ReadDungeonDifficulties();
+
+        var gatheringDrops = dungeons
+            .SelectMany(dungeon => ChildArray(dungeon, "gatheringNodes"))
+            .SelectMany(node => ChildArray(node, "loot"))
+            .Where(drop => standardMaterialIds.Contains(
+                drop?["itemId"]?.GetValue<string>() ?? string.Empty))
+            .ToList();
+        Assert.Equal(15, gatheringDrops.Count);
+        Assert.All(gatheringDrops, drop =>
+        {
+            Assert.Equal(8, drop?["minQuantity"]?.GetValue<int>());
+            var maxQuantity = drop?["maxQuantity"]?.GetValue<int>() ?? 0;
+            Assert.Contains(
+                maxQuantity,
+                new[] { 16, 24, 32 });
+        });
+
+        var catalystDrops = dungeons
+            .SelectMany(dungeon => ChildArray(dungeon?["rewardTable"], "completionRewards"))
+            .Where(drop => specialResourceIds.Contains(
+                drop?["itemId"]?.GetValue<string>() ?? string.Empty))
+            .ToList();
+        Assert.Equal(11, catalystDrops.Count);
+        Assert.All(catalystDrops, drop =>
+        {
+            Assert.Equal(2, drop?["minAmount"]?.GetValue<int>());
+            Assert.Equal(2, drop?["maxAmount"]?.GetValue<int>());
         });
     }
 

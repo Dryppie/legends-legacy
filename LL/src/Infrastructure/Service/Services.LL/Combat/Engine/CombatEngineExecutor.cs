@@ -131,7 +131,11 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         CombatSimulationOptions options,
         CancellationToken cancellationToken)
     {
-        var execution = await ExecuteCoreAsync(runtime, options, cancellationToken);
+        var execution = await ExecuteCoreAsync(
+            runtime,
+            options,
+            cancellationToken,
+            captureEventLog: options.CaptureEventLog);
         PopulatePostCombatTeams(execution.Result, execution.Friendly, execution.Hostile);
         execution.Result.StartedAt = runtime.Plan.StartsAt;
         return execution.Result;

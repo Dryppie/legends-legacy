@@ -71,7 +71,8 @@ public sealed class PowerBuildSnapshotFactory
         var rating = CombatRatingCalculator.Calculate(
             character.BaseAttributes,
             equipment,
-            essenceAttributeSources);
+            essenceAttributeSources,
+            character.Level);
 
         var combatant = new CombatEntity(character)
         {

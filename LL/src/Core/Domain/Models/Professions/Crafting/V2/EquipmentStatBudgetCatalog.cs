@@ -4,115 +4,181 @@ namespace Domain.Models.Professions.Crafting.V2;
 
 public static class EquipmentStatBudgetCatalog
 {
-    public const int BalanceVersion = 14;
+    public const int BalanceVersion = 16;
+    public const int LegacyBalanceVersion = 15;
     public const int MinimumTier = 1;
-    public const int MaximumTier = 10;
+
+    // Source-compatible only. V16 never uses this value to clamp progression.
+    public const int MaximumTier = int.MaxValue;
 
     private static readonly IReadOnlyDictionary<AttributeType, EquipmentStatBudgetDefinition> Definitions =
         new Dictionary<AttributeType, EquipmentStatBudgetDefinition>
         {
-            [AttributeType.Power] =
-                Tiered(1_800, (1, 24d), (5, 12d), (10, 18d)),
-            [AttributeType.MaxHealth] = Fixed(0.2d, 25_000),
-            [AttributeType.Armor] = Tiered(
-                AttributeCombatRules.TypedMitigationCapPercent,
-                (1, 0.68d), (5, 1.87d), (10, 4.12d)),
-            [AttributeType.Resistance] = Tiered(
-                AttributeCombatRules.TypedMitigationCapPercent,
-                (1, 0.68d), (5, 1.87d), (10, 4.12d)),
-            [AttributeType.CritChance] = Fixed(4d, 75),
-            [AttributeType.CritDamage] =
-                Tiered(1_000, (1, 2d), (5, 2.25d), (10, 2.5d)),
-            [AttributeType.ArmorPenetration] = Fixed(
-                3d,
-                AttributeCombatRules.TypedPenetrationCapPercent),
-            [AttributeType.MagicPenetration] = Fixed(
-                3d,
-                AttributeCombatRules.TypedPenetrationCapPercent),
-            [AttributeType.DodgeChance] = Fixed(5d, 50),
-            [AttributeType.BlockChance] = Fixed(5d, 50),
-            [AttributeType.DamageReduction] =
-                Fixed(6d, AttributeCatalog.GetFixedCap(AttributeType.DamageReduction)),
-            [AttributeType.HealingPowerPercent] = Fixed(3d, 5_000),
-            [AttributeType.HealthRegeneration] =
-                Tiered(5_000, (1, 1.5d), (5, 1.5d), (10, 2.1d)),
-            [AttributeType.LifeSteal] = Fixed(6d, 50),
-            [AttributeType.Cooldown] =
-                Fixed(6d, AttributeCatalog.GetFixedCap(AttributeType.Cooldown)),
-            [AttributeType.StatusResistance] =
-                Tiered(5_000, (1, 2d), (5, 2d), (10, 2.2d)),
-            [AttributeType.CrowdControlResistance] =
-                Fixed(2d, AttributeCatalog.GetFixedCap(AttributeType.CrowdControlResistance)),
-            [AttributeType.AttackSpeed] = Fixed(2.8d, 200)
+            [AttributeType.Power] = Flat(24d),
+            [AttributeType.MaxHealth] = Flat(0.2d),
+            [AttributeType.Armor] = Rating(0.68d, AttributeCombatRules.TypedMitigationCapPercent, 80d),
+            [AttributeType.Resistance] = Rating(0.68d, AttributeCombatRules.TypedMitigationCapPercent, 80d),
+            [AttributeType.CritChance] = Rating(4d, AttributeCombatRules.CritChanceCapPercent, 100d),
+            [AttributeType.CritDamage] = Rating(2d, 300f, 300d),
+            [AttributeType.ArmorPenetration] = Rating(3d, AttributeCombatRules.TypedPenetrationCapPercent, 60d),
+            [AttributeType.MagicPenetration] = Rating(3d, AttributeCombatRules.TypedPenetrationCapPercent, 60d),
+            [AttributeType.DodgeChance] = Rating(5d, AttributeCombatRules.DodgeChanceCapPercent, 50d),
+            [AttributeType.BlockChance] = Rating(5d, AttributeCombatRules.BlockChanceCapPercent, 50d),
+            [AttributeType.DamageReduction] = Rating(6d, AttributeCombatRules.DamageReductionCapPercent, 40d),
+            [AttributeType.HealingPowerPercent] = Rating(3d, 300f, 300d),
+            [AttributeType.HealthRegeneration] = Flat(1.5d),
+            [AttributeType.LifeSteal] = Rating(6d, 50f, 50d),
+            [AttributeType.Cooldown] = Rating(
+                6d,
+                AttributeCombatRules.CooldownReductionCapPercent,
+                AttributeCombatRules.CooldownRateConstant),
+            // Short authored status windows quantize to whole combat ticks. A lower half-cap
+            // keeps a 10% marginal equipment investment measurable without weakening the cap.
+            [AttributeType.StatusResistance] = Rating(2d, 80f, 20d),
+            [AttributeType.CrowdControlResistance] = Rating(2d, AttributeCombatRules.CrowdControlResistanceCapPercent, 20d),
+            [AttributeType.AttackSpeed] = Rating(2.8d, 300f, 300d)
         };
+
     public static IReadOnlyCollection<AttributeType> Attributes => Definitions.Keys.ToArray();
 
-    public static EquipmentStatBudgetRule Get(AttributeType stat, int tier)
+    public static EquipmentStatBudgetRule Get(AttributeType stat)
     {
         if (!Definitions.TryGetValue(stat, out var definition))
             throw new InvalidOperationException($"No equipment budget rule exists for '{stat}'.");
 
         return new EquipmentStatBudgetRule(
-            InterpolateCost(definition.CostAnchors, NormalizeTier(tier)),
-            definition.PerItemHardCap);
+            definition.CostPerPoint,
+            float.MaxValue,
+            definition.ScalingKind,
+            definition.EffectiveCap,
+            definition.HalfCapNormalizedRating);
     }
 
-    public static IReadOnlyList<EquipmentStatCostAnchor> GetCostAnchors(AttributeType stat) =>
-        Definitions.TryGetValue(stat, out var definition)
-            ? definition.CostAnchors
-            : throw new InvalidOperationException($"No equipment budget rule exists for '{stat}'.");
+    /// <summary>Compatibility overload. Tier is intentionally ignored in v16.</summary>
+    public static EquipmentStatBudgetRule Get(AttributeType stat, int tier)
+    {
+        if (tier < MinimumTier)
+            throw new ArgumentOutOfRangeException(nameof(tier), tier, "Equipment tier must be positive.");
+
+        return Get(stat);
+    }
+
+    public static IReadOnlyList<EquipmentStatCostAnchor> GetCostAnchors(AttributeType stat)
+    {
+        var rule = Get(stat);
+        return [new EquipmentStatCostAnchor(MinimumTier, rule.CostPerPoint)];
+    }
 
     public static bool IsKnown(AttributeType stat) => Definitions.ContainsKey(stat);
 
-    private static int NormalizeTier(int tier) => Math.Clamp(tier, MinimumTier, MaximumTier);
+    public static bool IsRating(AttributeType stat) =>
+        Definitions.TryGetValue(stat, out var definition)
+        && definition.ScalingKind == EquipmentStatScalingKind.ProgressionNormalizedRating;
 
-    private static double InterpolateCost(
-        IReadOnlyList<EquipmentStatCostAnchor> anchors,
-        int tier)
+    public static float ConvertRatingToEffectiveValue(
+        AttributeType stat,
+        double rawRating,
+        int progressionTier)
     {
-        var upperIndex = 0;
-        while (upperIndex < anchors.Count && anchors[upperIndex].Tier < tier)
-            upperIndex++;
+        var rule = Get(stat);
+        if (rule.ScalingKind != EquipmentStatScalingKind.ProgressionNormalizedRating)
+            return (float)Math.Max(0d, rawRating);
 
-        if (upperIndex == 0)
-            return anchors[0].CostPerPoint;
-        if (upperIndex >= anchors.Count)
-            return anchors[^1].CostPerPoint;
+        var normalizedRating = Math.Max(0d, rawRating)
+            / EquipmentTierBudgetCurve.GetScale(Math.Max(MinimumTier, progressionTier));
+        if (normalizedRating <= 0d)
+            return 0f;
+        if (stat == AttributeType.Cooldown)
+            return AttributeCombatRules.CalculateCooldownReductionPercent(normalizedRating);
 
-        var lower = anchors[upperIndex - 1];
-        var upper = anchors[upperIndex];
-        if (lower.Tier == upper.Tier)
-            return upper.CostPerPoint;
-
-        var progress = (tier - lower.Tier) / (double)(upper.Tier - lower.Tier);
-        return Math.Round(
-            lower.CostPerPoint + ((upper.CostPerPoint - lower.CostPerPoint) * progress),
-            4,
-            MidpointRounding.AwayFromZero);
+        var effective = rule.EffectiveCap
+            * normalizedRating
+            / (rule.HalfCapNormalizedRating + normalizedRating);
+        return (float)Math.Clamp(effective, 0d, rule.EffectiveCap);
     }
 
-    private static EquipmentStatBudgetDefinition Fixed(double costPerPoint, float hardCap) =>
-        Tiered(hardCap, (MinimumTier, costPerPoint), (MaximumTier, costPerPoint));
+    public static double ConvertEffectiveValueToNormalizedRating(
+        AttributeType stat,
+        double effectiveValue)
+    {
+        var rule = Get(stat);
+        if (rule.ScalingKind != EquipmentStatScalingKind.ProgressionNormalizedRating)
+            return Math.Max(0d, effectiveValue);
 
-    private static EquipmentStatBudgetDefinition Tiered(
-        float hardCap,
-        params (int Tier, double CostPerPoint)[] anchors) =>
+        var effective = Math.Clamp(effectiveValue, 0d, rule.EffectiveCap);
+        if (effective <= 0d)
+            return 0d;
+        if (effective >= rule.EffectiveCap)
+            return double.MaxValue;
+
+        return rule.HalfCapNormalizedRating
+            * effective
+            / (rule.EffectiveCap - effective);
+    }
+
+    public static float ConvertNormalizedRatingToEffectiveValue(
+        AttributeType stat,
+        double normalizedRating)
+    {
+        var rule = Get(stat);
+        if (rule.ScalingKind != EquipmentStatScalingKind.ProgressionNormalizedRating)
+            return (float)Math.Max(0d, normalizedRating);
+        if (normalizedRating <= 0d)
+            return 0f;
+        if (!double.IsFinite(normalizedRating))
+            return rule.EffectiveCap;
+        if (stat == AttributeType.Cooldown)
+            return AttributeCombatRules.CalculateCooldownReductionPercent(normalizedRating);
+
+        var effective = rule.EffectiveCap
+            * normalizedRating
+            / (rule.HalfCapNormalizedRating + normalizedRating);
+        return (float)Math.Clamp(effective, 0d, rule.EffectiveCap);
+    }
+
+    public static float ConvertCooldownRatingToEffectiveReduction(
+        double rawRating,
+        int progressionTier)
+    {
+        var normalizedRating = Math.Max(0d, rawRating)
+            / EquipmentTierBudgetCurve.GetScale(Math.Max(MinimumTier, progressionTier));
+        return AttributeCombatRules.CalculateCooldownReductionPercent(normalizedRating);
+    }
+
+    private static EquipmentStatBudgetDefinition Flat(double costPerPoint) =>
+        new(costPerPoint, EquipmentStatScalingKind.Flat, 0f, 0d);
+
+    private static EquipmentStatBudgetDefinition Rating(
+        double costPerPoint,
+        float effectiveCap,
+        double halfCapNormalizedRating) =>
         new(
-            hardCap,
-            Array.AsReadOnly(
-                anchors
-                    .OrderBy(anchor => anchor.Tier)
-                    .Select(anchor => new EquipmentStatCostAnchor(anchor.Tier, anchor.CostPerPoint))
-                    .ToArray()));
+            costPerPoint,
+            EquipmentStatScalingKind.ProgressionNormalizedRating,
+            effectiveCap,
+            halfCapNormalizedRating);
+}
+
+public enum EquipmentStatScalingKind
+{
+    Flat = 0,
+    ProgressionNormalizedRating = 1
 }
 
 public sealed record EquipmentStatBudgetDefinition(
-    float PerItemHardCap,
-    IReadOnlyList<EquipmentStatCostAnchor> CostAnchors);
+    double CostPerPoint,
+    EquipmentStatScalingKind ScalingKind,
+    float EffectiveCap,
+    double HalfCapNormalizedRating);
 
 public sealed record EquipmentStatCostAnchor(int Tier, double CostPerPoint);
 
-public sealed record EquipmentStatBudgetRule(double CostPerPoint, float PerItemHardCap)
+public sealed record EquipmentStatBudgetRule(
+    double CostPerPoint,
+    float PerItemHardCap,
+    EquipmentStatScalingKind ScalingKind,
+    float EffectiveCap,
+    double HalfCapNormalizedRating)
 {
     public float HardCap => PerItemHardCap;
 }

@@ -5,12 +5,17 @@ export function formatAttributeValue(
   value: number | null | undefined,
   attribute?: string | null,
   signed = false,
+  equipmentRating = false,
 ): string {
   const amount = value ?? 0;
   const sign = signed && amount > 0 ? '+' : '';
   const definition = getAttributeDefinition(attribute);
-  const suffix = definition?.displaySuffix ?? '';
-  const precision = definition?.displayPrecision ?? 2;
+  const suffix = equipmentRating
+    ? (definition?.equipmentDisplaySuffix ?? '')
+    : (definition?.displaySuffix ?? '');
+  const precision = equipmentRating
+    ? (definition?.equipmentDisplayPrecision ?? 2)
+    : (definition?.displayPrecision ?? 2);
 
   return `${sign}${formatNumber(amount, precision)}${suffix}`;
 }
@@ -24,8 +29,9 @@ export class AttributeValueFormatPipe implements PipeTransform {
     value: number | null | undefined,
     attribute?: string | null,
     signed = false,
+    equipmentRating = false,
   ): string {
-    return formatAttributeValue(value, attribute, signed);
+    return formatAttributeValue(value, attribute, signed, equipmentRating);
   }
 }
 

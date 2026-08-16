@@ -220,11 +220,27 @@
                 <span class="text-zinc-300">
                   {{ attribute.attributeType | attributeTypeFormat }}
                 </span>
-                <span class="font-semibold text-primary">
-                  {{
-                    attribute.value
-                      | attributeValueFormat: attribute.attributeType
-                  }}
+                <span class="text-right">
+                  <span class="block font-semibold text-primary">
+                    {{
+                      attribute.value
+                        | attributeValueFormat: attribute.attributeType
+                    }}
+                  </span>
+                  <span
+                    *ngIf="getEquipmentRating(attribute.attributeType) as rating"
+                    class="block text-[0.65rem] text-secondary"
+                  >
+                    {{ rating.attributeType | attributeTypeFormat: true }}:
+                    {{
+                      rating.value
+                        | attributeValueFormat
+                          : rating.attributeType
+                          : false
+                          : true
+                    }}
+                    from equipment
+                  </span>
                 </span>
               </div>
             </div>

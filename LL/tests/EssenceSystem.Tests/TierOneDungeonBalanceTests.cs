@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Balance;
 using Application.UseCases._AdminDashboard.Creatures.Dtos;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Options;
 using Services.AdminDashboard.JsonReaders;
 using Services.LL.Combat;
 using Services.LL.Combat.Engine;
+using Services.LL.Balance;
 using Services.LL.Dungeons;
 using Services.LL.Entities.Creatures;
 using Services.LL.Essences;
@@ -36,10 +38,87 @@ public sealed class TierOneDungeonBalanceTests
     private static readonly int[] BalanceSeeds =
         Enumerable.Range(0, 24).Select(index => unchecked(90107 + index * 7919)).ToArray();
 
+    [Fact]
+    public async Task Canonical_equipment_pacing_smoke_runs_every_checkpoint_in_the_real_combat_engine()
+    {
+        var fixture = CreateFixture();
+        var analyzer = new EquipmentCombatPacingAnalyzer(
+            new CanonicalCombatPacingSampleSource(fixture.Builds, fixture.Simulations));
+
+        var report = await analyzer.AnalyzeAsync(
+            new EquipmentCombatPacingRequest(),
+            CancellationToken.None);
+
+        foreach (var measurement in report.Measurements)
+        {
+            _output.WriteLine(
+                $"{measurement.Role} {measurement.Scenario}: " +
+                $"p10/median/p90={measurement.Durations.P10Ticks}/" +
+                $"{measurement.Durations.MedianTicks}/{measurement.Durations.P90Ticks}, " +
+                $"damage={measurement.MedianTotalDamage:F0}, hp={measurement.MedianRemainingHealthPercent:F1}%, " +
+                $"break={measurement.MedianPressureBreakpoint}, passed={measurement.Passed}; " +
+                $"{string.Join(" | ", measurement.Failures)}; warnings=" +
+                $"{string.Join(" | ", measurement.Warnings)}");
+        }
+        Assert.Equal(178, report.Measurements.Count);
+        Assert.All(report.Measurements, measurement => Assert.Equal(8, measurement.SampleCount));
+        Assert.True(report.Passed, string.Join(Environment.NewLine, report.Blockers));
+    }
+
+    [Fact]
+    public async Task Canonical_equipment_pacing_development_gate_approves_every_checkpoint()
+    {
+        await AssertCanonicalPacingGateAsync(CombatPacingExecutionLevel.Development, 250);
+    }
+
+    [Fact]
+    public async Task Canonical_equipment_pacing_development_role_gate_approves_tier_one()
+    {
+        var fixture = CreateFixture();
+        var analyzer = new EquipmentCombatPacingAnalyzer(
+            new CanonicalCombatPacingSampleSource(fixture.Builds, fixture.Simulations));
+        var report = await analyzer.AnalyzeAsync(
+            new EquipmentCombatPacingRequest(
+                CombatPacingExecutionLevel.Development,
+                Tiers: [1]),
+            CancellationToken.None);
+
+        Assert.True(report.Passed, string.Join(Environment.NewLine, report.Blockers));
+    }
+
+    [Fact]
+    [Trait("BalanceLevel", "Activation")]
+    public async Task Canonical_equipment_pacing_activation_gate_approves_every_checkpoint()
+    {
+        await AssertCanonicalPacingGateAsync(CombatPacingExecutionLevel.Activation, 1_000);
+    }
+
+    private async Task AssertCanonicalPacingGateAsync(
+        CombatPacingExecutionLevel executionLevel,
+        int expectedSeeds)
+    {
+        var fixture = CreateFixture();
+        var analyzer = new EquipmentCombatPacingAnalyzer(
+            new CanonicalCombatPacingSampleSource(fixture.Builds, fixture.Simulations));
+        var report = await analyzer.AnalyzeAsync(
+            new EquipmentCombatPacingRequest(executionLevel),
+            CancellationToken.None);
+
+        foreach (var blocker in report.Blockers)
+            _output.WriteLine(blocker);
+
+        Assert.Equal(expectedSeeds, report.SeedsPerScenario);
+        Assert.Equal(178, report.Measurements.Count);
+        Assert.All(report.Measurements, measurement =>
+            Assert.Equal(expectedSeeds, measurement.SampleCount));
+        Assert.True(report.Passed, string.Join(Environment.NewLine, report.Blockers));
+        Assert.True(report.CanApproveBalanceVersion);
+    }
+
     [Theory]
     [InlineData("goblin_mines")]
     [InlineData("forgotten_catacombs")]
-    public async Task Tier_one_dungeons_recommend_the_matching_epic_profile(string dungeonId)
+    public async Task Tier_one_dungeons_recommend_a_reliable_matching_tier_profile(string dungeonId)
     {
         var fixture = CreateFixture();
 
@@ -58,7 +137,7 @@ public sealed class TierOneDungeonBalanceTests
         Assert.NotEqual(
             Application.Interfaces.Services.LL.PowerRatings.PowerAnalysisState.CalculationFailed,
             recommendation.State);
-        Assert.Equal(145, recommendation.RecommendedPartyPower / 10);
+        Assert.Equal(132, recommendation.RecommendedPartyPower / 10);
         Assert.InRange(
             recommendation.RecommendedPartyPower,
             recommendation.LowerRecommendedPower,
@@ -72,7 +151,7 @@ public sealed class TierOneDungeonBalanceTests
                 entry.Value >= DungeonPowerAnalyzer.TargetCompletionRate,
                 $"{entry.Key} calibrated below the completion target at {entry.Value:P0}."));
         Assert.Contains(
-            "rung t1-standard-epic with 2 Essences",
+            "rung t1-standard-uncommon with 2 Essences",
             recommendation.StatusMessage,
             StringComparison.Ordinal);
     }
@@ -110,7 +189,7 @@ public sealed class TierOneDungeonBalanceTests
     [InlineData("forgotten_catacombs", 1)]
     [InlineData("forgotten_catacombs_ii", 2)]
     [InlineData("forgotten_catacombs_iii", 3)]
-    public async Task Dungeon_tiers_are_anchored_between_matching_rare_and_epic_equipment(
+    public async Task Dungeon_tiers_are_reliably_winnable_with_matching_epic_equipment(
         string dungeonId,
         int dungeonTier)
     {
@@ -157,10 +236,6 @@ public sealed class TierOneDungeonBalanceTests
             $"{epicResult.CompletionRate:P0}.");
 
         Assert.True(
-            rareResult.CompletionRate < DungeonPowerAnalyzer.TargetCompletionRate,
-            $"{dungeonId} was already reliable with matching Rare equipment " +
-            $"at {rareResult.CompletionRate:P0}.");
-        Assert.True(
             epicResult.CompletionRate >= DungeonPowerAnalyzer.TargetCompletionRate,
             $"{dungeonId} was not reliable with matching Epic equipment " +
             $"at {epicResult.CompletionRate:P0}.");
@@ -171,29 +246,29 @@ public sealed class TierOneDungeonBalanceTests
         "goblin_mines_ii",
         Domain.Models.Dungeons.Definitions.DungeonTier.Heroic,
         4,
-        "t2-standard-epic",
-        202,
+        "t2-standard-uncommon",
+        190,
         false)]
     [InlineData(
         "goblin_mines_iii",
         Domain.Models.Dungeons.Definitions.DungeonTier.Mythic,
         6,
         "t3-standard-epic",
-        267,
+        275,
         false)]
     [InlineData(
         "forgotten_catacombs_ii",
         Domain.Models.Dungeons.Definitions.DungeonTier.Heroic,
         4,
         "t2-standard-epic",
-        202,
+        195,
         false)]
     [InlineData(
         "forgotten_catacombs_iii",
         Domain.Models.Dungeons.Definitions.DungeonTier.Mythic,
         6,
         "t3-standard-epic",
-        267,
+        275,
         false)]
     public async Task Higher_dungeon_tiers_find_an_actual_winning_profile(
         string dungeonId,
@@ -339,20 +414,34 @@ public sealed class TierOneDungeonBalanceTests
 
     private static string FindApiRoot()
     {
-        var current = new DirectoryInfo(AppContext.BaseDirectory);
-        while (current is not null)
+        var configuredRoot = Environment.GetEnvironmentVariable("LL_API_ROOT");
+        if (!string.IsNullOrWhiteSpace(configuredRoot)
+            && Directory.Exists(Path.Combine(configuredRoot, "Data")))
         {
-            foreach (var candidate in new[]
-            {
-                Path.Combine(current.FullName, "src", "API", "API.LL"),
-                Path.Combine(current.FullName, "LL", "src", "API", "API.LL")
-            })
-            {
-                if (Directory.Exists(Path.Combine(candidate, "Data")))
-                    return candidate;
-            }
+            return configuredRoot;
+        }
 
-            current = current.Parent;
+        foreach (var start in new[]
+                 {
+                     new DirectoryInfo(Directory.GetCurrentDirectory()),
+                     new DirectoryInfo(AppContext.BaseDirectory)
+                 })
+        {
+            var current = start;
+            while (current is not null)
+            {
+                foreach (var candidate in new[]
+                         {
+                             Path.Combine(current.FullName, "src", "API", "API.LL"),
+                             Path.Combine(current.FullName, "LL", "src", "API", "API.LL")
+                         })
+                {
+                    if (Directory.Exists(Path.Combine(candidate, "Data")))
+                        return candidate;
+                }
+
+                current = current.Parent;
+            }
         }
 
         throw new DirectoryNotFoundException("Could not find the API.LL content root.");

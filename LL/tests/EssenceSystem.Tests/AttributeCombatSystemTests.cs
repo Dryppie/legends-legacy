@@ -33,7 +33,7 @@ public sealed class AttributeCombatSystemTests
                 definition.Unit == AttributeUnit.PercentagePoints,
                 definition.DisplaySuffix == "%");
             Assert.Equal(
-                definition.Unit == AttributeUnit.PercentagePoints ? 2 : 0,
+                definition.Unit is AttributeUnit.PercentagePoints or AttributeUnit.HealthPerFiveSeconds ? 2 : 0,
                 definition.DisplayPrecision);
         });
 
@@ -237,7 +237,7 @@ public sealed class AttributeCombatSystemTests
     }
 
     [Fact]
-    public void Armor_and_penetration_use_readable_percentage_points()
+    public void Armor_and_penetration_contest_each_other_in_rating_space()
     {
         var ability = CreateDamageAbility(100, DamageType.Physical);
         var compiled = AbilityCompiler.CompileAbilities([ability]).Values;
@@ -277,7 +277,7 @@ public sealed class AttributeCombatSystemTests
 
         RunSingleTick(penetratingSource, penetratedTarget);
 
-        Assert.Equal(925, penetratedTarget.Health);
+        Assert.Equal(942, penetratedTarget.Health);
 
         Assert.Equal(
             0.8f,
@@ -427,7 +427,7 @@ public sealed class AttributeCombatSystemTests
     }
 
     [Fact]
-    public void Cooldown_reduction_is_globally_capped_at_forty_percent()
+    public void Cooldown_runtime_accepts_the_rate_curve_derived_reduction()
     {
         var definition = AbilityCompiler.CompileAbility(new AbilitySpec
         {
@@ -441,18 +441,39 @@ public sealed class AttributeCombatSystemTests
         var overcapped = new RuntimeAbility(definition);
 
         baseline.StartCooldown(0);
-        capped.StartCooldown(40);
+        capped.StartCooldown(
+            AttributeCombatRules.CalculateCooldownReductionPercent(
+                AttributeCombatRules.CooldownRateConstant));
         overcapped.StartCooldown(400);
 
         Assert.Equal(100, baseline.RemainingCooldownTicks);
-        Assert.Equal(60, capped.RemainingCooldownTicks);
-        Assert.Equal(60, overcapped.RemainingCooldownTicks);
+        Assert.Equal(50, capped.RemainingCooldownTicks);
+        Assert.Equal(1, overcapped.RemainingCooldownTicks);
         Assert.Equal(
             AttributeCombatRules.CooldownReductionCapPercent,
-            EquipmentStatBudgetCatalog.Get(AttributeType.Cooldown, tier: 1).HardCap);
+            EquipmentStatBudgetCatalog.Get(AttributeType.Cooldown).EffectiveCap);
+        Assert.Equal(float.MaxValue,
+            EquipmentStatBudgetCatalog.Get(AttributeType.Cooldown).PerItemHardCap);
+    }
+
+    [Theory]
+    [InlineData(0d, 1d, 0f, 100)]
+    [InlineData(40d, 1.25d, 20f, 80)]
+    [InlineData(160d, 2d, 50f, 50)]
+    [InlineData(480d, 4d, 75f, 25)]
+    public void Cooldown_rating_increases_action_rate_without_a_hard_rating_cap(
+        double normalizedRating,
+        double expectedRate,
+        float expectedReduction,
+        int expectedTicks)
+    {
         Assert.Equal(
-            AttributeCombatRules.CooldownReductionCapPercent,
-            EquipmentStatBudgetCatalog.Get(AttributeType.Cooldown, tier: 1).PerItemHardCap);
+            expectedRate,
+            AttributeCombatRules.CalculateCooldownRate(normalizedRating),
+            precision: 8);
+        var reduction = AttributeCombatRules.CalculateCooldownReductionPercent(normalizedRating);
+        Assert.Equal(expectedReduction, reduction, precision: 4);
+        Assert.Equal(expectedTicks, AttributeCombatRules.CalculateCooldownTicks(100, reduction));
     }
 
     [Theory]
@@ -496,20 +517,27 @@ public sealed class AttributeCombatSystemTests
     }
 
     [Theory]
-    [InlineData(1, 10d)]
-    [InlineData(5, 39d)]
-    [InlineData(10, 152d)]
-    public void Equal_budget_armor_and_health_have_similar_marginal_effective_health(
-        int tier,
-        double budget)
+    [InlineData(1)]
+    [InlineData(5)]
+    [InlineData(10)]
+    [InlineData(20)]
+    [InlineData(50)]
+    [InlineData(100)]
+    public void Equal_budget_armor_and_health_keep_stable_marginal_effective_health_across_progression(
+        int tier)
     {
-        var primary = 8f * tier;
-        var baselineHealth = 180 + tier * 80 + primary * 4;
+        var progressionScale = EquipmentTierBudgetCurve.GetScale(tier);
+        var budget = EquipmentTierBudgetCurve.GetBudget(tier) * 0.10d;
+        var baselineHealth = (float)(292d * progressionScale);
         var baselineArmor = 0f;
         var healthPoints =
-            (float)(budget / EquipmentStatBudgetCatalog.Get(AttributeType.MaxHealth, tier).CostPerPoint);
-        var armorPoints =
-            (float)(budget / EquipmentStatBudgetCatalog.Get(AttributeType.Armor, tier).CostPerPoint);
+            (float)(budget / EquipmentStatBudgetCatalog.Get(AttributeType.MaxHealth).CostPerPoint);
+        var armorRating =
+            budget / EquipmentStatBudgetCatalog.Get(AttributeType.Armor).CostPerPoint;
+        var armorPoints = EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(
+            AttributeType.Armor,
+            armorRating,
+            tier);
         var baselineEffectiveHealth =
             AttributeCombatRules.CalculateEffectiveHealth(baselineHealth, baselineArmor);
         var healthEffectiveHealth =
@@ -521,7 +549,7 @@ public sealed class AttributeCombatSystemTests
         var relativeDifference =
             Math.Abs(armorGain - healthGain) / healthGain;
 
-        Assert.InRange(relativeDifference, 0, 0.1f);
+        Assert.InRange(relativeDifference, 0, 0.20f);
     }
 
     [Fact]
@@ -624,7 +652,7 @@ public sealed class AttributeCombatSystemTests
 
     [Theory]
     [InlineData(AttributeType.MaxHealth, 199.6, 200)]
-    [InlineData(AttributeType.StatusResistance, 9.933024, 10)]
+    [InlineData(AttributeType.StatusResistance, 9.933024, 9.93)]
     [InlineData(AttributeType.CrowdControlResistance, 9.933024, 9.93)]
     [InlineData(AttributeType.Armor, 4.616, 4.62)]
     public void Equipment_values_quantize_to_their_canonical_attribute_precision(

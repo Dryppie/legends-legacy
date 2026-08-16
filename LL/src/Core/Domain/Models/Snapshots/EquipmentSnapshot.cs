@@ -2,6 +2,7 @@
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Professions.Crafting.V2;
 
 namespace Domain.Models.Snapshots;
 
@@ -14,6 +15,9 @@ public sealed class EquipmentSnapshot
     public string? BaseRecipeId { get; init; }
     public string? BlueprintId { get; init; }
     public Rarity Rarity { get; init; }
+    public ItemQuality Quality { get; init; }
+    public int Tier { get; init; } = 1;
+    public int StatModelVersion { get; init; } = EquipmentStatBudgetCatalog.LegacyBalanceVersion;
     public int? Potential { get; init; }
     public int ItemXp { get; init; }
     public bool IsMasterpiece { get; init; }
@@ -37,6 +41,9 @@ public sealed class EquipmentSnapshot
             BaseRecipeId = inst.BaseRecipeId,
             BlueprintId = inst.BlueprintId,
             Rarity = inst.Rarity,
+            Quality = inst.Quality,
+            Tier = inst.Tier,
+            StatModelVersion = inst.StatModelVersion,
             Potential = inst.Potential,
             ItemXp = inst.ItemXp,
             IsMasterpiece = inst.IsMasterpiece,

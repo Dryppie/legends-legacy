@@ -43,7 +43,10 @@
             class="grid min-h-6 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3"
           >
             <span class="truncate text-secondary">
-              {{ comparison.attributeType | attributeTypeFormat }}
+              {{
+                comparison.attributeType
+                  | attributeTypeFormat: usesV16EquipmentPresentation(data)
+              }}
             </span>
             <span
               data-testid="hovered-attribute-value"
@@ -63,7 +66,10 @@
                 <strong class="font-medium">
                   {{
                     comparison.hoveredAmount
-                      | attributeValueFormat: comparison.attributeType
+                      | attributeValueFormat
+                        : comparison.attributeType
+                        : false
+                        : usesV16EquipmentPresentation(data)
                   }}
                 </strong>
                 <span
@@ -75,10 +81,16 @@
                   /
                   {{
                     range.minimumAmount
-                      | attributeValueFormat: comparison.attributeType
+                      | attributeValueFormat
+                        : comparison.attributeType
+                        : false
+                        : usesV16EquipmentPresentation(data)
                   }}–{{
                     range.maximumAmount
-                      | attributeValueFormat: comparison.attributeType
+                      | attributeValueFormat
+                        : comparison.attributeType
+                        : false
+                        : usesV16EquipmentPresentation(data)
                   }}
                 </span>
               </ng-container>
@@ -154,7 +166,11 @@
             class="grid min-h-6 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3"
           >
             <span class="truncate text-secondary">
-              {{ comparison.attributeType | attributeTypeFormat }}
+              {{
+                comparison.attributeType
+                  | attributeTypeFormat
+                    : usesV16EquipmentPresentation(equipped.data)
+              }}
             </span>
             <span
               data-testid="equipped-attribute-value"
@@ -169,7 +185,10 @@
                 <strong class="font-medium">
                   {{
                     equippedAmount(equipped, comparison.attributeType)
-                      | attributeValueFormat: comparison.attributeType
+                      | attributeValueFormat
+                        : comparison.attributeType
+                        : false
+                        : usesV16EquipmentPresentation(equipped.data)
                   }}
                 </strong>
                 <span
@@ -184,10 +203,16 @@
                   /
                   {{
                     range.minimumAmount
-                      | attributeValueFormat: comparison.attributeType
+                      | attributeValueFormat
+                        : comparison.attributeType
+                        : false
+                        : usesV16EquipmentPresentation(equipped.data)
                   }}–{{
                     range.maximumAmount
-                      | attributeValueFormat: comparison.attributeType
+                      | attributeValueFormat
+                        : comparison.attributeType
+                        : false
+                        : usesV16EquipmentPresentation(equipped.data)
                   }}
                 </span>
               </ng-container>
@@ -207,7 +232,10 @@
               {{
                 comparison.hoveredAmount -
                   equippedAmount(equipped, comparison.attributeType)
-                  | attributeValueFormat: comparison.attributeType : true
+                  | attributeValueFormat
+                    : comparison.attributeType
+                    : true
+                    : usesV16EquipmentPresentation(data)
               }}
             </span>
           </div>
@@ -415,7 +443,10 @@
           >
             <div class="flex items-baseline justify-between gap-3 text-xs">
               <span class="truncate text-white">
-                {{ comparison.attributeType | attributeTypeFormat }}
+                {{
+                  comparison.attributeType
+                    | attributeTypeFormat: usesV16EquipmentPresentation(data)
+                }}
               </span>
               <span class="equipment-roll-value tabular-nums">
                 <strong class="font-medium text-primary">
@@ -427,7 +458,10 @@
                   >
                     {{
                       comparison.hoveredAmount
-                        | attributeValueFormat: comparison.attributeType : true
+                        | attributeValueFormat
+                          : comparison.attributeType
+                          : true
+                          : usesV16EquipmentPresentation(data)
                     }}
                   </ng-container>
                   <ng-template #noSelectedAttribute>&mdash;</ng-template>
@@ -441,10 +475,16 @@
                   /
                   {{
                     range.minimumAmount
-                      | attributeValueFormat: comparison.attributeType
+                      | attributeValueFormat
+                        : comparison.attributeType
+                        : false
+                        : usesV16EquipmentPresentation(data)
                   }}–{{
                     range.maximumAmount
-                      | attributeValueFormat: comparison.attributeType
+                      | attributeValueFormat
+                        : comparison.attributeType
+                        : false
+                        : usesV16EquipmentPresentation(data)
                   }}
                 </span>
                 <span
@@ -465,7 +505,10 @@
                   >
                     {{
                       comparison.hoveredAmount - comparison.equippedAmount
-                        | attributeValueFormat: comparison.attributeType : true
+                        | attributeValueFormat
+                          : comparison.attributeType
+                          : true
+                          : usesV16EquipmentPresentation(data)
                     }}
                   </ng-container>
                   <ng-template #unchangedAttribute>=</ng-template>
@@ -511,12 +554,19 @@
         >
           <div class="flex items-baseline justify-between gap-3 text-xs">
             <span class="truncate text-white">
-              {{ attr.attributeType | attributeTypeFormat }}
+              {{
+                attr.attributeType
+                  | attributeTypeFormat: usesV16EquipmentPresentation(data)
+              }}
             </span>
             <span class="equipment-roll-value tabular-nums">
               <strong class="font-medium text-primary">
                 {{
-                  attr.amount | attributeValueFormat: attr.attributeType : true
+                  attr.amount
+                    | attributeValueFormat
+                      : attr.attributeType
+                      : true
+                      : usesV16EquipmentPresentation(data)
                 }}<span *ngIf="shouldAppendModifierPercent(attr)">%</span>
               </strong>
               <span
@@ -526,9 +576,16 @@
                 /
                 {{
                   range.minimumAmount
-                    | attributeValueFormat: attr.attributeType
+                    | attributeValueFormat
+                      : attr.attributeType
+                      : false
+                      : usesV16EquipmentPresentation(data)
                 }}–{{
-                  range.maximumAmount | attributeValueFormat: attr.attributeType
+                  range.maximumAmount
+                    | attributeValueFormat
+                      : attr.attributeType
+                      : false
+                      : usesV16EquipmentPresentation(data)
                 }}
               </span>
             </span>
@@ -676,12 +733,18 @@
           class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-white/5 py-1 text-sm last:border-b-0"
         >
           <span class="text-secondary">
-            {{ comparison.attributeType | attributeTypeFormat }}
+            {{
+              comparison.attributeType
+                | attributeTypeFormat: usesV16EquipmentPresentation(data)
+            }}
           </span>
           <span class="tabular-nums text-white">
             {{
               comparison.equippedAmount
-                | attributeValueFormat: comparison.attributeType
+                | attributeValueFormat
+                  : comparison.attributeType
+                  : false
+                  : usesV16EquipmentPresentation(data)
             }}
           </span>
           <span
@@ -696,7 +759,10 @@
           >
             {{
               comparison.hoveredAmount - comparison.equippedAmount
-                | attributeValueFormat: comparison.attributeType : true
+                | attributeValueFormat
+                  : comparison.attributeType
+                  : true
+                  : usesV16EquipmentPresentation(data)
             }}
           </span>
         </div>

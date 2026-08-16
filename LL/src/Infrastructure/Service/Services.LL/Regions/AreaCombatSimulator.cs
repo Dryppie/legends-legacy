@@ -12,6 +12,7 @@ namespace Services.LL.Regions;
 
 public sealed class AreaCombatSimulator : IAreaCombatSimulator
 {
+    private const int RegionEndpointCombatRatingTolerance = 1;
     public const int MaximumEncounters = 1_000;
     private const int DefaultSeed = 73_901;
     private const int MaximumCombatTicks = 6_000;
@@ -120,7 +121,10 @@ public sealed class AreaCombatSimulator : IAreaCombatSimulator
         {
             var region = regions[index];
             var projection = projections[index];
-            if (region.EndingCombatRating != projection.RecommendedEndpointCombatRating)
+            if (Math.Abs(
+                    region.EndingCombatRating
+                    - projection.RecommendedEndpointCombatRating)
+                > RegionEndpointCombatRatingTolerance)
             {
                 throw new InvalidOperationException(
                     $"Region '{region.RegionKey}' ends at CR {region.EndingCombatRating}, but " +

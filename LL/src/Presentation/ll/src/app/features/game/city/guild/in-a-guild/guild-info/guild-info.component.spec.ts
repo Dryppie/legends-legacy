@@ -73,5 +73,7 @@ function createGuild(): Guild {
       },
     ],
     resources: [],
+    rolePermissions: [],
+    vaultItems: [],
   };
 }

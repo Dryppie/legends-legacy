@@ -264,6 +264,10 @@ export class RegularCraftingComponent {
       crafted.itemPreview.maximumStartingPotential,
     );
   });
+
+  usesV16ItemPresentation(statModelVersion?: number | null): boolean {
+    return (statModelVersion ?? 15) >= 16;
+  }
   readonly possibleTemperingAttributes = computed(() => {
     const design = this.selectedDesign();
     if (!design) return [];

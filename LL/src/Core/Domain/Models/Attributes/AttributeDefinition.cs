@@ -54,4 +54,9 @@ public sealed record AttributeDefinition(
     bool IsContentFacing,
     int DisplayPrecision,
     string DisplaySuffix,
-    IReadOnlyList<AttributeBenchmarkScenario> RelevantBenchmarkScenarios);
+    IReadOnlyList<AttributeBenchmarkScenario> RelevantBenchmarkScenarios,
+    string EquipmentDisplayName,
+    string EquipmentDescription,
+    AttributeUnit EquipmentUnit,
+    int EquipmentDisplayPrecision,
+    string EquipmentDisplaySuffix);

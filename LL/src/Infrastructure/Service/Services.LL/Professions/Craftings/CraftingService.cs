@@ -398,6 +398,7 @@ public class CraftingService : ICraftingService
                 BlueprintId = blueprint?.Id,
                 CraftedName = design.Name,
                 Tier = targetTier,
+                StatModelVersion = EquipmentStatBudgetCatalog.BalanceVersion,
                 Rarity = Rarity.Common,
                 Quality = quality,
                 Potential = potential,
@@ -716,6 +717,7 @@ public class CraftingService : ICraftingService
             EquipmentType = itemBase.EquipmentType,
             Rarity = itemBase.Rarity,
             Tier = tier,
+            StatModelVersion = EquipmentStatBudgetCatalog.BalanceVersion,
             Attributes = attributes,
             QualityChances = qualityChances
                 .Select(x => new CraftingQualityChanceDto

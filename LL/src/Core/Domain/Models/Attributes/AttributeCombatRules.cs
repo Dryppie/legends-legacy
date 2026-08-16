@@ -1,8 +1,11 @@
+using Domain.Models.Professions.Crafting.V2;
+
 namespace Domain.Models.Attributes;
 
 public static class AttributeCombatRules
 {
-    public const float CooldownReductionCapPercent = 40f;
+    public const float CooldownReductionCapPercent = 100f;
+    public const double CooldownRateConstant = 160d;
     public const float DamageReductionCapPercent = 40f;
     public const float DodgeChanceCapPercent = 50f;
     public const float BlockChanceCapPercent = 50f;
@@ -17,10 +20,17 @@ public static class AttributeCombatRules
 
     public static float CalculateDefenseMitigation(float defense, float penetration = 0)
     {
-        var effectiveDefensePercent = Math.Clamp(
-            defense - Math.Clamp(penetration, 0, TypedPenetrationCapPercent),
-            0,
-            TypedMitigationCapPercent);
+        var defenseRating = EquipmentStatBudgetCatalog.ConvertEffectiveValueToNormalizedRating(
+            AttributeType.Armor,
+            defense);
+        var penetrationRating = EquipmentStatBudgetCatalog.ConvertEffectiveValueToNormalizedRating(
+            AttributeType.ArmorPenetration,
+            penetration);
+        var netDefenseRating = defenseRating == double.MaxValue
+            ? double.MaxValue
+            : Math.Max(0d, defenseRating - penetrationRating);
+        var effectiveDefensePercent = EquipmentStatBudgetCatalog
+            .ConvertNormalizedRatingToEffectiveValue(AttributeType.Armor, netDefenseRating);
         return effectiveDefensePercent / 100f;
     }
 
@@ -37,12 +47,18 @@ public static class AttributeCombatRules
         if (authoredTicks <= 0)
             return 0;
 
-        var reductionPercent = Math.Clamp(
-            cooldownReductionPercent,
-            0,
-            AttributeCatalog.GetFixedCap(AttributeType.Cooldown));
+        var reductionPercent = Math.Clamp(cooldownReductionPercent, 0, 100);
         var reducedTicks = authoredTicks * (100d - reductionPercent) / 100d;
         return Math.Max(1, (int)Math.Ceiling(reducedTicks - 1e-9d));
+    }
+
+    public static double CalculateCooldownRate(double normalizedCooldownRating) =>
+        1d + Math.Max(0d, normalizedCooldownRating) / CooldownRateConstant;
+
+    public static float CalculateCooldownReductionPercent(double normalizedCooldownRating)
+    {
+        var rate = CalculateCooldownRate(normalizedCooldownRating);
+        return (float)(100d * (1d - 1d / rate));
     }
 
     public static int CalculateCrowdControlDurationTicks(

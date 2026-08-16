@@ -3745,10 +3745,19 @@ namespace Persistence.LL.Migrations
                     b.Property<int?>("Potential")
                         .HasColumnType("integer");
 
+                    b.Property<int>("Quality")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Rarity")
                         .HasColumnType("integer");
 
                     b.Property<int>("Slot")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StatModelVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Tier")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -4657,6 +4666,9 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("Rarity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StatModelVersion")
                         .HasColumnType("integer");
 
                     b.Property<int>("TemperingProgress")
