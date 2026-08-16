@@ -798,7 +798,7 @@
     "id": "ability.creature.blue_slime.sweet_water",
     "kind": "Active",
     "name": "Sweet Water",
-    "description": "Heal all allies for 40% Power over 6 seconds.",
+    "description": "Heal all allies for 70% Power every 2 seconds for 6 seconds.",
     "cooldownTicks": 140,
     "tags": ["Healing", "Area", "Periodic"],
     "effects": [
@@ -807,7 +807,7 @@
         "operation": "Heal",
         "target": "AllAllies",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 0.133333,
+        "scalingCoefficient": 0.233333,
         "durationTicks": 60,
         "intervalTicks": 20,
         "procCoefficient": 1
@@ -961,7 +961,7 @@
     "kind": "Active",
     "name": "Shadow Image",
     "description": "Summon a shadow illusion with 1 Max Health.",
-    "cooldownTicks": 180,
+    "cooldownTicks": 120,
     "tags": ["Summon"],
     "effects": [
       {
@@ -2947,9 +2947,7 @@
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [
-          "effect.creature.garran.the_first_gate.apply_seals"
-        ]
+        "effectIds": ["effect.creature.garran.the_first_gate.apply_seals"]
       },
       {
         "event": "OnHealthChanged",
@@ -3657,7 +3655,9 @@
     "triggers": [
       {
         "event": "OnSummonGroupResolved",
-        "effectIds": ["effect.creature.kharad.keystone_resonance.gain_from_pillars"],
+        "effectIds": [
+          "effect.creature.kharad.keystone_resonance.gain_from_pillars"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -3671,7 +3671,9 @@
       },
       {
         "event": "OnBarrierContributionBroken",
-        "effectIds": ["effect.creature.kharad.keystone_resonance.lose_from_seal"],
+        "effectIds": [
+          "effect.creature.kharad.keystone_resonance.lose_from_seal"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -3681,7 +3683,9 @@
       },
       {
         "event": "OnBarrierExpired",
-        "effectIds": ["effect.creature.kharad.keystone_resonance.gain_from_seal"],
+        "effectIds": [
+          "effect.creature.kharad.keystone_resonance.gain_from_seal"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -3691,7 +3695,9 @@
       },
       {
         "event": "OnSummonGroupResolved",
-        "effectIds": ["effect.creature.kharad.keystone_resonance.lose_from_pillars"],
+        "effectIds": [
+          "effect.creature.kharad.keystone_resonance.lose_from_pillars"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -4009,15 +4015,11 @@
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [
-          "effect.creature.ni.ninefold.summon"
-        ]
+        "effectIds": ["effect.creature.ni.ninefold.summon"]
       },
       {
         "event": "OnSummonChanged",
-        "effectIds": [
-          "effect.creature.ni.ninefold.power"
-        ],
+        "effectIds": ["effect.creature.ni.ninefold.power"],
         "conditions": [
           {
             "type": "HasTag",
@@ -4125,9 +4127,7 @@
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [
-          "effect.creature.kodoku.survivors_struggle.summon"
-        ]
+        "effectIds": ["effect.creature.kodoku.survivors_struggle.summon"]
       },
       {
         "event": "OnSummonChanged",
