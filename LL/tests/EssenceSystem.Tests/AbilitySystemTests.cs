@@ -4613,8 +4613,8 @@ public sealed class AbilitySystemTests
         Assert.NotNull(summonLog.CombatEntity);
         Assert.Equal("Creature Shadow Image", summonLog.CombatEntity!.Name);
         Assert.Equal("shadow_image", summonLog.CombatEntity.ImagePath);
-        Assert.Equal(20, summonLog.CombatEntity.MaxHealth);
-        Assert.Equal(20, summonLog.CombatEntity.Health);
+        Assert.Equal(1, summonLog.CombatEntity.MaxHealth);
+        Assert.Equal(1, summonLog.CombatEntity.Health);
         Assert.True(provider.GetCatalog().SummonsById.ContainsKey("creatureShadowImage"));
         Assert.Contains(result.EventLog, x =>
             x.ActorId == summonId
@@ -4641,7 +4641,7 @@ public sealed class AbilitySystemTests
             result.EntityStats,
             stats => stats.EntityId == summonId);
         Assert.Equal(0, summonStats.Health);
-        Assert.Equal(20, summonStats.MaxHealth);
+        Assert.Equal(1, summonStats.MaxHealth);
     }
 
     [Fact]
