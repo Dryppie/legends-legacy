@@ -1,4 +1,4 @@
-import { Component, Input, Signal } from '@angular/core';
+import { Component, Input, Signal, signal } from '@angular/core';
 import { TabComponent } from '../../../../../shared/components/custom-components/tabs/tab/tab.component';
 import { GuildInfoComponent } from './guild-info/guild-info.component';
 import { Guild } from '../../../../../shared/models/Dtos/guild/guild';
@@ -13,11 +13,18 @@ import { NgFor, NgIf } from '@angular/common';
 import { HumanizeEnumPipe } from '../../../../../shared/pipes/enums/humanize-enum.pipe';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 import { GuildVaultComponent } from './guild-vault/guild-vault.component';
+import { FormsModule } from '@angular/forms';
+import { CharacterService } from '../../../../../core/services/api/character/character.service';
+import { GuildRole } from '../../../../../shared/models/Dtos/guild/guildRole';
+import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 
 @Component({
   selector: 'app-in-a-guild',
   imports: [
     NgFor,
+    NgIf,
+    FormsModule,
+    RegularButtonComponent,
     TabComponent,
     GuildInfoComponent,
     TabsComponent,
@@ -36,8 +43,43 @@ export class InAGuildComponent {
   @Input() guild!: Guild;
   readonly claimableDailyOrderCount: Signal<number>;
 
-  constructor(private state: GuildStateService) {
+  readonly descriptionMaxLength = 500;
+  readonly editingDescription = signal(false);
+  descriptionDraft = '';
+
+  constructor(
+    private state: GuildStateService,
+    private characterService: CharacterService,
+  ) {
     this.claimableDailyOrderCount = this.state.claimableDailyOrderCount;
+  }
+
+  get canEditDescription(): boolean {
+    const characterId = this.characterService.currentCharacterId();
+    const role = this.guild?.members?.find(
+      (member) => member.characterId === characterId,
+    )?.role;
+
+    return role === GuildRole.Leader || role === GuildRole.Officer;
+  }
+
+  startEditingDescription(): void {
+    if (!this.canEditDescription) return;
+    this.descriptionDraft = this.guild.description ?? '';
+    this.editingDescription.set(true);
+  }
+
+  cancelEditingDescription(): void {
+    this.descriptionDraft = this.guild.description ?? '';
+    this.editingDescription.set(false);
+  }
+
+  saveDescription(): void {
+    if (!this.canEditDescription) return;
+    const description = this.descriptionDraft.trim();
+    if (description.length > this.descriptionMaxLength) return;
+    this.state.updateDescription(description);
+    this.editingDescription.set(false);
   }
 
   inviteCharacterByName($event: string) {

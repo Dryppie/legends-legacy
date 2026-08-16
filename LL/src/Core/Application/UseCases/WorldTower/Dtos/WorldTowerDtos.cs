@@ -1,4 +1,4 @@
-using Domain.Models.WorldTower;
+﻿using Domain.Models.WorldTower;
 using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
@@ -98,6 +98,8 @@ public sealed record TowerRallyDto(
     bool CanManageApplications,
     bool CanLeave,
     bool CanStart,
+    bool CanUpdateLoadout,
+    bool CanTransferLeadership,
     bool DevelopmentToolsEnabled,
     TowerAttemptSummaryDto? Attempt);
 

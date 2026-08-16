@@ -684,6 +684,14 @@ export class GuildStateService {
     });
   }
 
+  updateDescription(description: string): void {
+    this.service.updateDescription(description).subscribe({
+      next: () => this.refresh(),
+      error: (e) =>
+        this._error.set(e.message ?? 'Failed to update the guild description'),
+    });
+  }
+
   /* ─────────── optional optimistic helpers ─────────── */
   setGuild(guild: Guild | null) {
     if ((this._guild()?.id ?? null) !== (guild?.id ?? null)) {

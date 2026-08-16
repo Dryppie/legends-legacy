@@ -69,6 +69,19 @@
             }}
           </button>
           <button
+            class="secondary ll-button"
+            *ngIf="vm.canUpdateLoadout"
+            [disabled]="!!action()"
+            (click)="updateLoadout()"
+            title="Save your current equipment and essences as the build locked into this Expedition."
+          >
+            {{
+              action() === "update-loadout"
+                ? "Updating loadout..."
+                : "Update loadout"
+            }}
+          </button>
+          <button
             class="ll-button ll-button-primary"
             *ngIf="vm.canStart"
             [disabled]="!!action()"
@@ -150,7 +163,21 @@
                 ></span
               >
             </div>
-            <strong>{{ participant.powerRating | number }} power</strong>
+            <div class="actions">
+              <strong>{{ participant.powerRating | number }} power</strong>
+              <button
+                class="secondary ll-button"
+                *ngIf="vm.canTransferLeadership && !participant.isLeader"
+                [disabled]="!!action()"
+                (click)="transferLeadership(participant)"
+              >
+                {{
+                  action() === "transfer-leadership-" + participant.characterId
+                    ? "Transferring..."
+                    : "Make leader"
+                }}
+              </button>
+            </div>
           </div>
           <div class="roster-row" *ngFor="let slot of openSlots(vm)">
             <div class="identity">

@@ -17,6 +17,7 @@ import {
   TowerPlaybackBundle,
   TowerRally,
   TowerRallyApplication,
+  TowerRallyParticipant,
   WorldTowerService,
 } from '../../../../../core/services/api/world-tower/world-tower.service';
 import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
@@ -199,6 +200,20 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
         },
         error: (error) => this.error.set(this.errorMessage(error)),
       });
+  }
+
+  updateLoadout(): void {
+    this.runRallyAction(
+      'update-loadout',
+      this.tower.updateRallyLoadout(this.rallyId),
+    );
+  }
+
+  transferLeadership(participant: TowerRallyParticipant): void {
+    this.runRallyAction(
+      `transfer-leadership-${participant.characterId}`,
+      this.tower.transferRallyLeadership(this.rallyId, participant.characterId),
+    );
   }
 
   fillDevelopmentRoster(): void {

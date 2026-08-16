@@ -51,6 +51,12 @@
           >
             <div class="break-words">
               {{ guild.name }}
+              <p
+                *ngIf="guild.description"
+                class="mt-1 text-xs text-white/60"
+              >
+                {{ guild.description }}
+              </p>
             </div>
             <div class="break-words">
               {{ guild.ownerName }}

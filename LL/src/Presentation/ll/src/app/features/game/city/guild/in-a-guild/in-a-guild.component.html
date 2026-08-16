@@ -10,6 +10,51 @@
       <p class="ll-copy mt-1">
         {{ guild.tag ? "[" + guild.tag + "]" : "No guild tag" }}
       </p>
+      <p
+        *ngIf="!editingDescription(); else descriptionEditor"
+        class="ll-copy mt-2 flex max-w-prose flex-wrap items-baseline gap-2 whitespace-pre-line text-sm"
+      >
+        <span *ngIf="guild.description">{{ guild.description }}</span>
+        <span *ngIf="!guild.description" class="text-white/50">
+          No description yet.
+        </span>
+        <button
+          *ngIf="canEditDescription"
+          type="button"
+          class="shrink-0 text-xs text-primary hover:underline"
+          (click)="startEditingDescription()"
+        >
+          Edit
+        </button>
+      </p>
+
+      <ng-template #descriptionEditor>
+        <div class="mt-2 max-w-prose">
+          <textarea
+            rows="3"
+            class="ll-input w-full text-sm"
+            [(ngModel)]="descriptionDraft"
+            [maxlength]="descriptionMaxLength"
+            placeholder="What should recruits know about your guild?"
+          ></textarea>
+          <div class="mt-2 flex items-center justify-between gap-2">
+            <span class="text-xs text-white/60">
+              {{ descriptionDraft.length }} / {{ descriptionMaxLength }}
+            </span>
+            <div class="flex gap-2">
+              <app-regular-button (pressed)="cancelEditingDescription()">
+                Cancel
+              </app-regular-button>
+              <app-regular-button
+                variant="secondary"
+                (pressed)="saveDescription()"
+              >
+                Save
+              </app-regular-button>
+            </div>
+          </div>
+        </div>
+      </ng-template>
     </div>
 
     <div class="flex flex-wrap gap-2 text-sm">

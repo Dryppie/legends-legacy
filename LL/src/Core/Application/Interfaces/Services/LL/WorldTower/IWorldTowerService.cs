@@ -1,4 +1,4 @@
-using Application.UseCases.WorldTower.Dtos;
+﻿using Application.UseCases.WorldTower.Dtos;
 using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Domain.Models.WorldTower;
 
@@ -27,6 +27,8 @@ public interface IWorldTowerService
     Task<TowerOperationResult<TowerRallyDto>> AcceptRallyApplicationAsync(Guid characterId, Guid rallyId, Guid applicationId, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerRallyDto>> DeclineRallyApplicationAsync(Guid characterId, Guid rallyId, Guid applicationId, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerRallyDto>> LeaveRallyAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
+    Task<TowerOperationResult<TowerRallyDto>> UpdateRallyLoadoutAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
+    Task<TowerOperationResult<TowerRallyDto>> TransferRallyLeadershipAsync(Guid characterId, Guid rallyId, Guid targetCharacterId, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerRallyDto>> FillRallyWithDevelopmentCharactersAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerAttemptResultDto>> StartRallyAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
     Task<bool> SimulateQueuedAttemptAsync(Guid attemptId, string leaseOwner, CancellationToken cancellationToken);

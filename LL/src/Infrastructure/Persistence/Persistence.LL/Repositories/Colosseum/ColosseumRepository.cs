@@ -191,4 +191,36 @@ public class ColosseumRepository : IColosseumRepository
     {
         await _context.ChampionMarketPurchases.AddAsync(purchase, cancellationToken);
     }
+
+    public async Task<IReadOnlyList<ChampionMarketPurchase>> GetChampionMarketPurchasesByItemIdsAsync(
+        IReadOnlyCollection<string> itemIds,
+        CancellationToken cancellationToken)
+    {
+        if (itemIds.Count == 0)
+        {
+            return [];
+        }
+
+        var ids = itemIds.ToArray();
+        return await _context.ChampionMarketPurchases
+            .Where(x => ids.Contains(x.ItemId))
+            .OrderBy(x => x.PurchasedAt)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyDictionary<Guid, Guid>> GetAccountIdsForCharactersAsync(
+        IReadOnlyCollection<Guid> characterIds,
+        CancellationToken cancellationToken)
+    {
+        if (characterIds.Count == 0)
+        {
+            return new Dictionary<Guid, Guid>();
+        }
+
+        var ids = characterIds.ToArray();
+        return await _context.Characters
+            .Where(x => ids.Contains(x.Id))
+            .Select(x => new { x.Id, x.UserId })
+            .ToDictionaryAsync(x => x.Id, x => x.UserId, cancellationToken);
+    }
 }

@@ -1,4 +1,4 @@
-using Domain.Models.Guilds;
+﻿using Domain.Models.Guilds;
 using Services.LL.Guilds;
 
 public sealed class GuildServiceAuthorizationTests
@@ -150,6 +150,98 @@ public sealed class GuildServiceAuthorizationTests
         Assert.False(repository.InviteCalled);
     }
 
+    [Theory]
+    [InlineData(GuildRole.Leader)]
+    [InlineData(GuildRole.Officer)]
+    public async Task UpdateDescriptionAsync_TrimsAndForwardsDescription_ForLeadersAndOfficers(GuildRole role)
+    {
+        var guildId = Guid.NewGuid();
+        var characterId = Guid.NewGuid();
+        var repository = new FakeGuildRepository
+        {
+            Member = new GuildMember
+            {
+                GuildId = guildId,
+                Guild = new Guild { Id = guildId },
+                CharacterId = characterId,
+                Role = role
+            }
+        };
+
+        var result = await new GuildService(repository).UpdateDescriptionAsync(
+            characterId,
+            "  We raid on weekends.  ",
+            CancellationToken.None);
+
+        Assert.True(result);
+        Assert.True(repository.UpdateDescriptionCalled);
+        Assert.Equal("We raid on weekends.", repository.UpdatedDescription);
+    }
+
+    [Fact]
+    public async Task UpdateDescriptionAsync_ReturnsFalse_ForPlainMembers()
+    {
+        var guildId = Guid.NewGuid();
+        var characterId = Guid.NewGuid();
+        var repository = new FakeGuildRepository
+        {
+            Member = new GuildMember
+            {
+                GuildId = guildId,
+                Guild = new Guild { Id = guildId },
+                CharacterId = characterId,
+                Role = GuildRole.Member
+            }
+        };
+
+        var result = await new GuildService(repository).UpdateDescriptionAsync(
+            characterId,
+            "Let me in charge",
+            CancellationToken.None);
+
+        Assert.False(result);
+        Assert.False(repository.UpdateDescriptionCalled);
+    }
+
+    [Fact]
+    public async Task UpdateDescriptionAsync_ReturnsFalse_WhenCharacterHasNoGuild()
+    {
+        var repository = new FakeGuildRepository();
+
+        var result = await new GuildService(repository).UpdateDescriptionAsync(
+            Guid.NewGuid(),
+            "Hello",
+            CancellationToken.None);
+
+        Assert.False(result);
+        Assert.False(repository.UpdateDescriptionCalled);
+    }
+
+    [Fact]
+    public async Task UpdateDescriptionAsync_ReturnsFalse_WhenDescriptionExceedsMaximumLength()
+    {
+        var guildId = Guid.NewGuid();
+        var characterId = Guid.NewGuid();
+        var repository = new FakeGuildRepository
+        {
+            Member = new GuildMember
+            {
+                GuildId = guildId,
+                Guild = new Guild { Id = guildId },
+                CharacterId = characterId,
+                Role = GuildRole.Leader
+            }
+        };
+
+        var result = await new GuildService(repository).UpdateDescriptionAsync(
+            characterId,
+            new string('a', GuildService.MaximumGuildDescriptionLength + 1),
+            CancellationToken.None);
+
+        Assert.False(result);
+        Assert.False(repository.UpdateDescriptionCalled);
+    }
+
     private sealed class FakeGuildRepository : IGuildRepository
     {
         public GuildMember? Member { get; init; }
@@ -157,6 +249,8 @@ public sealed class GuildServiceAuthorizationTests
         public string? CreatedGuildName { get; private set; }
         public bool InviteCalled { get; private set; }
         public bool InviteByNameCalled { get; private set; }
+        public bool UpdateDescriptionCalled { get; private set; }
+        public string? UpdatedDescription { get; private set; }
 
         public Task<bool> CreateAsync(Guid characterId, string name, CancellationToken cancellationToken)
         {
@@ -218,5 +312,12 @@ public sealed class GuildServiceAuthorizationTests
 
         public Task<bool> UpdateRolePermissionsAsync(Guid guildId, GuildRolePermission permissions, CancellationToken cancellationToken) =>
             Task.FromResult(true);
+
+        public Task<bool> UpdateDescriptionAsync(Guid guildId, string description, CancellationToken cancellationToken)
+        {
+            UpdateDescriptionCalled = true;
+            UpdatedDescription = description;
+            return Task.FromResult(true);
+        }
     }
 }

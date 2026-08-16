@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Globalization;
 using System.IO.Compression;
 using Application.UseCases.WorldTower.Dtos;
@@ -299,6 +299,193 @@ public sealed class WorldTowerServiceTests
         Assert.True(leaderLeave.Succeeded, leaderLeave.Error);
         Assert.Equal(TowerRallyStatus.Cancelled, leaderLeave.Value?.Status);
         Assert.NotNull((await db.TowerRallies.SingleAsync(x => x.Id == rallyId)).CancelledAt);
+    }
+
+    [Fact]
+    public async Task UpdateRallyLoadout_ReplacesLockedSnapshotForParticipantAndApplicant()
+    {
+        await using var db = CreateDbContext();
+        var leader = SeedCharacter(db, "Leader", 20, Guid.NewGuid());
+        var applicant = SeedCharacter(db, "Applicant", 20, Guid.NewGuid());
+        await db.SaveChangesAsync();
+        var service = CreateService(
+            db,
+            new FixedPowerRatingService((leader.Id, 1_100), (applicant.Id, 900)));
+        var created = await service.CreateRallyAsync(
+            leader.Id,
+            1,
+            TowerRallyMode.FirstClear,
+            CancellationToken.None);
+        var rallyId = Assert.IsType<Guid>(created.Value?.Id);
+        db.ChangeTracker.Clear();
+        var leaderSnapshotId = (await db.TowerRallyParticipants
+            .AsNoTracking()
+            .SingleAsync(x => x.TowerRallyId == rallyId && x.CharacterId == leader.Id))
+            .CharacterSnapshotId;
+
+        var leaderUpdate = await service.UpdateRallyLoadoutAsync(
+            leader.Id,
+            rallyId,
+            CancellationToken.None);
+
+        Assert.True(leaderUpdate.Succeeded, leaderUpdate.Error);
+        Assert.True(leaderUpdate.Value!.CanUpdateLoadout);
+        db.ChangeTracker.Clear();
+        Assert.NotEqual(
+            leaderSnapshotId,
+            (await db.TowerRallyParticipants
+                .AsNoTracking()
+                .SingleAsync(x => x.TowerRallyId == rallyId && x.CharacterId == leader.Id))
+                .CharacterSnapshotId);
+
+        var application = await service.ApplyToRallyAsync(
+            applicant.Id,
+            rallyId,
+            CancellationToken.None);
+        Assert.True(application.Succeeded, application.Error);
+        db.ChangeTracker.Clear();
+        var applicationId = Assert.Single(application.Value!.Applications).Id;
+        var applicationSnapshotId = (await db.TowerRallyApplications
+            .AsNoTracking()
+            .SingleAsync(x => x.Id == applicationId))
+            .CharacterSnapshotId;
+
+        var applicantUpdate = await service.UpdateRallyLoadoutAsync(
+            applicant.Id,
+            rallyId,
+            CancellationToken.None);
+
+        Assert.True(applicantUpdate.Succeeded, applicantUpdate.Error);
+        db.ChangeTracker.Clear();
+        Assert.NotEqual(
+            applicationSnapshotId,
+            (await db.TowerRallyApplications
+                .AsNoTracking()
+                .SingleAsync(x => x.Id == applicationId))
+                .CharacterSnapshotId);
+    }
+
+    [Fact]
+    public async Task UpdateRallyLoadout_RejectsCharactersOutsideTheExpedition()
+    {
+        await using var db = CreateDbContext();
+        var leader = SeedCharacter(db, "Leader", 20, Guid.NewGuid());
+        var outsider = SeedCharacter(db, "Outsider", 20, Guid.NewGuid());
+        await db.SaveChangesAsync();
+        var service = CreateService(
+            db,
+            new FixedPowerRatingService((leader.Id, 1_100), (outsider.Id, 900)));
+        var created = await service.CreateRallyAsync(
+            leader.Id,
+            1,
+            TowerRallyMode.FirstClear,
+            CancellationToken.None);
+        var rallyId = Assert.IsType<Guid>(created.Value?.Id);
+        db.ChangeTracker.Clear();
+
+        var result = await service.UpdateRallyLoadoutAsync(
+            outsider.Id,
+            rallyId,
+            CancellationToken.None);
+
+        Assert.False(result.Succeeded);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public async Task TransferRallyLeadership_MovesLeadershipToAnotherParticipant()
+    {
+        await using var db = CreateDbContext();
+        var leader = SeedCharacter(db, "Leader", 20, Guid.NewGuid());
+        var member = SeedCharacter(db, "Member", 20, Guid.NewGuid());
+        await db.SaveChangesAsync();
+        var service = CreateService(
+            db,
+            new FixedPowerRatingService((leader.Id, 1_100), (member.Id, 900)));
+        var created = await service.CreateRallyAsync(
+            leader.Id,
+            1,
+            TowerRallyMode.FirstClear,
+            CancellationToken.None);
+        var rallyId = Assert.IsType<Guid>(created.Value?.Id);
+        db.ChangeTracker.Clear();
+        var application = await service.ApplyToRallyAsync(member.Id, rallyId, CancellationToken.None);
+        Assert.True(application.Succeeded, application.Error);
+        var applicationId = Assert.Single(application.Value!.Applications).Id;
+        db.ChangeTracker.Clear();
+        Assert.True((await service.AcceptRallyApplicationAsync(
+            leader.Id,
+            rallyId,
+            applicationId,
+            CancellationToken.None)).Succeeded);
+        db.ChangeTracker.Clear();
+
+        var transferred = await service.TransferRallyLeadershipAsync(
+            leader.Id,
+            rallyId,
+            member.Id,
+            CancellationToken.None);
+
+        Assert.True(transferred.Succeeded, transferred.Error);
+        Assert.False(transferred.Value!.CanManageApplications);
+        Assert.False(transferred.Value.CanTransferLeadership);
+        Assert.Equal(member.Id, transferred.Value.CreatedByCharacterId);
+        Assert.True(transferred.Value.Participants.Single(x => x.CharacterId == member.Id).IsLeader);
+        db.ChangeTracker.Clear();
+        Assert.Equal(
+            member.Id,
+            (await db.TowerRallies.AsNoTracking().SingleAsync(x => x.Id == rallyId)).CreatedByCharacterId);
+    }
+
+    [Fact]
+    public async Task TransferRallyLeadership_RejectsNonLeadersAndNonParticipants()
+    {
+        await using var db = CreateDbContext();
+        var leader = SeedCharacter(db, "Leader", 20, Guid.NewGuid());
+        var member = SeedCharacter(db, "Member", 20, Guid.NewGuid());
+        var outsider = SeedCharacter(db, "Outsider", 20, Guid.NewGuid());
+        await db.SaveChangesAsync();
+        var service = CreateService(
+            db,
+            new FixedPowerRatingService(
+                (leader.Id, 1_100),
+                (member.Id, 900),
+                (outsider.Id, 800)));
+        var created = await service.CreateRallyAsync(
+            leader.Id,
+            1,
+            TowerRallyMode.FirstClear,
+            CancellationToken.None);
+        var rallyId = Assert.IsType<Guid>(created.Value?.Id);
+        db.ChangeTracker.Clear();
+        var application = await service.ApplyToRallyAsync(member.Id, rallyId, CancellationToken.None);
+        var applicationId = Assert.Single(application.Value!.Applications).Id;
+        db.ChangeTracker.Clear();
+        Assert.True((await service.AcceptRallyApplicationAsync(
+            leader.Id,
+            rallyId,
+            applicationId,
+            CancellationToken.None)).Succeeded);
+        db.ChangeTracker.Clear();
+
+        var byMember = await service.TransferRallyLeadershipAsync(
+            member.Id,
+            rallyId,
+            member.Id,
+            CancellationToken.None);
+        db.ChangeTracker.Clear();
+        var toOutsider = await service.TransferRallyLeadershipAsync(
+            leader.Id,
+            rallyId,
+            outsider.Id,
+            CancellationToken.None);
+
+        Assert.False(byMember.Succeeded);
+        Assert.False(toOutsider.Succeeded);
+        db.ChangeTracker.Clear();
+        Assert.Equal(
+            leader.Id,
+            (await db.TowerRallies.AsNoTracking().SingleAsync(x => x.Id == rallyId)).CreatedByCharacterId);
     }
 
     [Fact]

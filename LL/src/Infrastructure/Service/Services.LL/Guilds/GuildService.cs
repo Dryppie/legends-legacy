@@ -7,6 +7,7 @@ namespace Services.LL.Guilds;
 public class GuildService : IGuildService
 {
     private const int MinimumGuildNameLength = 3;
+    public const int MaximumGuildDescriptionLength = 500;
     private readonly IGuildRepository _guildRepository;
     private readonly IAchievementService? _achievementService;
 
@@ -146,6 +147,18 @@ public class GuildService : IGuildService
         if (requester is null || requester.Role != GuildRole.Leader || permissions.Role == GuildRole.Leader) return false;
 
         return await _guildRepository.UpdateRolePermissionsAsync(requester.GuildId, permissions, cancellationToken);
+    }
+
+    public async Task<bool> UpdateDescriptionAsync(Guid characterId, string description, CancellationToken cancellationToken)
+    {
+        var requester = await _guildRepository.GetGuildMember(characterId, cancellationToken);
+        if (requester is null) return false;
+        if (requester.Role is not (GuildRole.Leader or GuildRole.Officer)) return false;
+
+        var normalized = (description ?? string.Empty).Trim();
+        if (normalized.Length > MaximumGuildDescriptionLength) return false;
+
+        return await _guildRepository.UpdateDescriptionAsync(requester.GuildId, normalized, cancellationToken);
     }
 
 }

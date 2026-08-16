@@ -22,6 +22,7 @@ import {
   DungeonMasteryBenefitLevel,
   DungeonPreviewData,
   DungeonPreviewReward,
+  DungeonRecord,
 } from '../../../models/Dtos/dungeons/dungeonPreviewData';
 import { DungeonDifficulty } from '../../../models/enums/dungeonDifficulty';
 import { Router } from '@angular/router';
@@ -93,6 +94,8 @@ export class DungeonCardComponent implements OnChanges {
 
   showPreview = signal(false);
   difficulty = signal<DungeonDifficulty>(DungeonDifficulty.Normal);
+  private difficultyChosenManually = false;
+  private appliedDefaultForDungeonId: string | null = null;
   selectedTab = signal<DungeonDetailTab>('rewards');
   readonly previewMasteryTooltipOpen = signal(false);
   readonly selectedMasteryTooltipOpen = signal(false);
@@ -138,11 +141,72 @@ export class DungeonCardComponent implements OnChanges {
       return;
     }
 
-    if (!this.isDifficultyUnlocked(this.difficulty())) {
-      this.difficulty.set(
-        this.previewData.unlockedDifficulties?.[0] ?? DungeonDifficulty.Normal,
-      );
+    const dungeonId = this.previewData.familyId ?? this.previewData.id;
+    if (dungeonId !== this.appliedDefaultForDungeonId) {
+      this.appliedDefaultForDungeonId = dungeonId;
+      this.difficultyChosenManually = false;
     }
+
+    if (!this.difficultyChosenManually) {
+      this.difficulty.set(this.defaultDifficulty());
+      return;
+    }
+
+    if (!this.isDifficultyUnlocked(this.difficulty())) {
+      this.difficulty.set(this.defaultDifficulty());
+    }
+  }
+
+  /**
+   * Preselects the difficulty of the most recent clear so returning players
+   * do not have to reselect it on every visit. Falls back to the lowest
+   * unlocked difficulty when the dungeon has never been completed.
+   */
+  private defaultDifficulty(): DungeonDifficulty {
+    const fallback =
+      this.previewData.unlockedDifficulties?.[0] ?? DungeonDifficulty.Normal;
+
+    let best: DungeonDifficulty | null = null;
+    let bestClearedAt = -Infinity;
+
+    for (const difficulty of this.difficulties) {
+      if (!this.isDifficultyUnlocked(difficulty)) continue;
+
+      const record = this.recordFor(difficulty);
+      if (!record?.hasCleared && !(record?.totalClears ?? 0)) continue;
+
+      const clearedAt = this.toTimestamp(
+        record?.lastClearedAt ?? record?.firstClearedAt,
+      );
+
+      // Iterated from lowest to highest difficulty, so an equal (or missing)
+      // timestamp resolves to the hardest difficulty that was cleared.
+      if (best === null || clearedAt >= bestClearedAt) {
+        best = difficulty;
+        bestClearedAt = clearedAt;
+      }
+    }
+
+    return best ?? fallback;
+  }
+
+  private recordFor(
+    difficulty: DungeonDifficulty,
+  ): DungeonRecord | null | undefined {
+    const variant = this.previewData.difficultyVariants?.[difficulty];
+    if (variant) return variant.record;
+
+    return this.previewData.difficulty === difficulty ||
+      (difficulty === DungeonDifficulty.Normal &&
+        !this.previewData.difficultyVariants)
+      ? this.previewData.record
+      : null;
+  }
+
+  private toTimestamp(value: string | null | undefined): number {
+    if (!value) return 0;
+    const parsed = new Date(value).getTime();
+    return Number.isNaN(parsed) ? 0 : parsed;
   }
 
   startDungeon() {
@@ -176,6 +240,7 @@ export class DungeonCardComponent implements OnChanges {
 
   selectDifficulty(difficulty: DungeonDifficulty) {
     if (this.isDifficultyUnlocked(difficulty)) {
+      this.difficultyChosenManually = true;
       this.difficulty.set(difficulty);
     }
   }

@@ -34,6 +34,12 @@ public sealed record ChampionMarketPurchaseResult(
     int RewardItemQuantity,
     IReadOnlyList<InventoryItem> InventoryItemsGranted);
 
+public sealed record ChampionMarketTitleGrant(
+    Guid CharacterId,
+    string ItemId,
+    string TitleKey,
+    DateTimeOffset PurchasedAt);
+
 public interface IColosseumService
 {
     Task<IReadOnlyList<ArenaOpponentPreview>> GetArenaOpponents(Guid characterId, CancellationToken cancellationToken);
@@ -64,4 +70,12 @@ public interface IColosseumService
     IReadOnlyList<ChampionMarketItem> GetChampionMarketItems();
     Task<ChampionMarketPurchaseResult?> PurchaseChampionMarketItemAsync(Guid characterId, string itemId, int quantity, CancellationToken cancellationToken);
     Task<int> CountChampionMarketPurchasesAsync(Guid characterId, string itemId, DateTimeOffset? since, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Grants Champion's Market title rewards for past purchases that never produced a title unlock.
+    /// Title rewards were charged but not granted before the reward pipeline existed, so this repairs
+    /// those purchases. Safe to run repeatedly: already-unlocked titles are skipped.
+    /// </summary>
+    Task<IReadOnlyList<ChampionMarketTitleGrant>> BackfillMissingChampionMarketTitleGrantsAsync(
+        CancellationToken cancellationToken);
 }

@@ -18,4 +18,5 @@ public interface IGuildRepository
     Task<bool> ChangeMemberRoleAsync(Guid guildId, Guid characterId, GuildRole role, CancellationToken cancellationToken);
     Task<bool> KickMemberAsync(Guid guildId, Guid characterId, CancellationToken cancellationToken);
     Task<bool> UpdateRolePermissionsAsync(Guid guildId, GuildRolePermission permissions, CancellationToken cancellationToken);
+    Task<bool> UpdateDescriptionAsync(Guid guildId, string description, CancellationToken cancellationToken);
 }

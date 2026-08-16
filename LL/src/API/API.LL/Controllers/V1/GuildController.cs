@@ -21,6 +21,7 @@ using Application.UseCases.Guilds.Commands.ReturnGuildVaultItem;
 using Application.UseCases.Guilds.Commands.WithdrawGuildVaultItem;
 using Application.UseCases.Guilds.Commands.ChangeGuildMemberRole;
 using Application.UseCases.Guilds.Commands.KickGuildMember;
+using Application.UseCases.Guilds.Commands.UpdateGuildDescription;
 using Application.UseCases.Guilds.Commands.UpdateGuildRolePermissions;
 using Application.UseCases.Guilds.Dtos.Requests;
 using Application.UseCases.Guilds.Dtos.Responses;
@@ -159,6 +160,10 @@ public class GuildController : BaseController
     [HttpPost("KickMember")]
     public async Task<ActionResult<Response<bool>>> KickMember([FromBody] Guid characterId) =>
         await Mediator.Send(new KickGuildMemberCommand(CurrentCharacterGuid, characterId));
+
+    [HttpPost("UpdateDescription")]
+    public async Task<ActionResult<Response<bool>>> UpdateDescription([FromBody] UpdateGuildDescriptionDto request) =>
+        await Mediator.Send(new UpdateGuildDescriptionCommand(CurrentCharacterGuid, request));
 
     [HttpPost("UpdateRolePermissions")]
     public async Task<ActionResult<Response<bool>>> UpdateRolePermissions([FromBody] UpdateGuildRolePermissionsDto request) =>

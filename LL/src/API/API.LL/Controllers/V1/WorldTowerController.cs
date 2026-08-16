@@ -1,4 +1,4 @@
-using Application.UseCases.WorldTower;
+﻿using Application.UseCases.WorldTower;
 using Application.UseCases.WorldTower.Dtos;
 using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Common.Primitives;
@@ -14,6 +14,7 @@ public sealed class WorldTowerController : BaseController
 {
     public sealed record CreateRallyRequest(int FloorNumber, TowerRallyMode Mode);
     public sealed record ContributionRequest(TowerContributionKind Kind, int Amount);
+    public sealed record TransferLeadershipRequest(Guid CharacterId);
 
     [HttpGet]
     public async Task<ActionResult<TowerOverviewDto>> GetOverview() =>
@@ -96,6 +97,19 @@ public sealed class WorldTowerController : BaseController
     [HttpPost("rallies/{rallyId:guid}/leave")]
     public async Task<ActionResult<Response<TowerRallyDto>>> LeaveRally(Guid rallyId) =>
         await Mediator.Send(new LeaveTowerRallyCommand(CurrentCharacterGuid, rallyId));
+
+    [HttpPost("rallies/{rallyId:guid}/loadout")]
+    public async Task<ActionResult<Response<TowerRallyDto>>> UpdateLoadout(Guid rallyId) =>
+        await Mediator.Send(new UpdateTowerRallyLoadoutCommand(CurrentCharacterGuid, rallyId));
+
+    [HttpPost("rallies/{rallyId:guid}/leader")]
+    public async Task<ActionResult<Response<TowerRallyDto>>> TransferLeadership(
+        Guid rallyId,
+        TransferLeadershipRequest request) =>
+        await Mediator.Send(new TransferTowerRallyLeadershipCommand(
+            CurrentCharacterGuid,
+            rallyId,
+            request.CharacterId));
 
     [HttpPost("rallies/{rallyId:guid}/development/fill-roster")]
     [ApiExplorerSettings(IgnoreApi = true)]

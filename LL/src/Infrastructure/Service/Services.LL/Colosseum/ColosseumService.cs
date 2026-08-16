@@ -1,4 +1,4 @@
-using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Entities;
@@ -537,6 +537,83 @@ public class ColosseumService : IColosseumService
     public async Task<int> CountChampionMarketPurchasesAsync(Guid characterId, string itemId, DateTimeOffset? since, CancellationToken cancellationToken)
     {
         return await _colosseumRepository.CountChampionMarketPurchasesAsync(characterId, itemId, since, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<ChampionMarketTitleGrant>> BackfillMissingChampionMarketTitleGrantsAsync(
+        CancellationToken cancellationToken)
+    {
+        if (_achievementService is null)
+        {
+            return [];
+        }
+
+        var titleItems = _championMarketCatalog
+            .GetAll()
+            .Where(x => !string.IsNullOrWhiteSpace(x.RewardTitleKey))
+            .ToDictionary(x => x.Id, x => x.RewardTitleKey!, StringComparer.OrdinalIgnoreCase);
+
+        if (titleItems.Count == 0)
+        {
+            return [];
+        }
+
+        var purchases = await _colosseumRepository.GetChampionMarketPurchasesByItemIdsAsync(
+            titleItems.Keys,
+            cancellationToken);
+
+        if (purchases.Count == 0)
+        {
+            return [];
+        }
+
+        var accountIds = await _colosseumRepository.GetAccountIdsForCharactersAsync(
+            purchases.Select(x => x.CharacterId).Distinct().ToArray(),
+            cancellationToken);
+
+        var granted = new List<ChampionMarketTitleGrant>();
+        var handled = new HashSet<(Guid CharacterId, string TitleKey)>();
+
+        foreach (var purchase in purchases)
+        {
+            if (!titleItems.TryGetValue(purchase.ItemId, out var titleKey))
+            {
+                continue;
+            }
+
+            if (!handled.Add((purchase.CharacterId, titleKey)))
+            {
+                continue;
+            }
+
+            if (!accountIds.TryGetValue(purchase.CharacterId, out var accountId))
+            {
+                continue;
+            }
+
+            var unlocked = await _achievementService.UnlockTitleAsync(
+                accountId,
+                purchase.CharacterId,
+                titleKey,
+                JsonSerializer.Serialize(new
+                {
+                    Source = ItemAcquisitionSources.ChampionMarket,
+                    MarketItemId = purchase.ItemId,
+                    Backfilled = true,
+                    OriginalPurchaseAt = purchase.PurchasedAt
+                }),
+                cancellationToken);
+
+            if (unlocked)
+            {
+                granted.Add(new ChampionMarketTitleGrant(
+                    purchase.CharacterId,
+                    purchase.ItemId,
+                    titleKey,
+                    purchase.PurchasedAt));
+            }
+        }
+
+        return granted;
     }
 
     private static bool MeetsMarketRequirement(Character character, ChampionMarketItem item)

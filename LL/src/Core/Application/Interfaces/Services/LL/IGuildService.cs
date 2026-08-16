@@ -38,4 +38,9 @@ public interface IGuildService
     Task<bool> ChangeMemberRoleAsync(Guid characterId, Guid targetCharacterId, GuildRole role, CancellationToken cancellationToken);
     Task<bool> KickMemberAsync(Guid characterId, Guid targetCharacterId, CancellationToken cancellationToken);
     Task<bool> UpdateRolePermissionsAsync(Guid characterId, GuildRolePermission permissions, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// The guild leader and officers may rewrite the guild description.
+    /// </summary>
+    Task<bool> UpdateDescriptionAsync(Guid characterId, string description, CancellationToken cancellationToken);
 }

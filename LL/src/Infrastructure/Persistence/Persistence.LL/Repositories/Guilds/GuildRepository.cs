@@ -303,6 +303,16 @@ public class GuildRepository : IGuildRepository
         return true;
     }
 
+    public async Task<bool> UpdateDescriptionAsync(Guid guildId, string description, CancellationToken cancellationToken)
+    {
+        var guild = await _context.Guilds
+            .FirstOrDefaultAsync(x => x.Id == guildId, cancellationToken);
+        if (guild is null) return false;
+
+        guild.Description = description;
+        return true;
+    }
+
     private async Task ReturnBorrowedItemsAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var borrowed = await _context.GuildVaultItems

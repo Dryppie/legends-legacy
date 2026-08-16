@@ -1,4 +1,4 @@
-using Application.Interfaces.Services.LL.WorldTower;
+﻿using Application.Interfaces.Services.LL.WorldTower;
 using Application.MediatR.Attributes;
 using Application.MediatR.Markers;
 using Application.UseCases.WorldTower.Dtos;
@@ -24,6 +24,8 @@ public sealed record ApplyToTowerRallyCommand(Guid CharacterId, Guid RallyId) : 
 public sealed record AcceptTowerRallyApplicationCommand(Guid CharacterId, Guid RallyId, Guid ApplicationId) : ICommand<Response<TowerRallyDto>>;
 public sealed record DeclineTowerRallyApplicationCommand(Guid CharacterId, Guid RallyId, Guid ApplicationId) : ICommand<Response<TowerRallyDto>>;
 public sealed record LeaveTowerRallyCommand(Guid CharacterId, Guid RallyId) : ICommand<Response<TowerRallyDto>>;
+public sealed record UpdateTowerRallyLoadoutCommand(Guid CharacterId, Guid RallyId) : ICommand<Response<TowerRallyDto>>;
+public sealed record TransferTowerRallyLeadershipCommand(Guid CharacterId, Guid RallyId, Guid TargetCharacterId) : ICommand<Response<TowerRallyDto>>;
 public sealed record FillTowerRallyWithDevelopmentCharactersCommand(Guid CharacterId, Guid RallyId) : ICommand<Response<TowerRallyDto>>;
 [NonTransactional]
 public sealed record StartTowerRallyCommand(Guid CharacterId, Guid RallyId) : ICommand<Response<TowerAttemptResultDto>>;
@@ -162,6 +164,30 @@ public sealed class LeaveTowerRallyCommandHandler(IWorldTowerService tower)
     public async Task<Response<TowerRallyDto>> Handle(LeaveTowerRallyCommand request, CancellationToken cancellationToken)
     {
         var result = await tower.LeaveRallyAsync(request.CharacterId, request.RallyId, cancellationToken);
+        return result.Succeeded ? Response<TowerRallyDto>.Success(result.Value!) : Response<TowerRallyDto>.Fail(result.Error!);
+    }
+}
+
+public sealed class UpdateTowerRallyLoadoutCommandHandler(IWorldTowerService tower)
+    : IRequestHandler<UpdateTowerRallyLoadoutCommand, Response<TowerRallyDto>>
+{
+    public async Task<Response<TowerRallyDto>> Handle(UpdateTowerRallyLoadoutCommand request, CancellationToken cancellationToken)
+    {
+        var result = await tower.UpdateRallyLoadoutAsync(request.CharacterId, request.RallyId, cancellationToken);
+        return result.Succeeded ? Response<TowerRallyDto>.Success(result.Value!) : Response<TowerRallyDto>.Fail(result.Error!);
+    }
+}
+
+public sealed class TransferTowerRallyLeadershipCommandHandler(IWorldTowerService tower)
+    : IRequestHandler<TransferTowerRallyLeadershipCommand, Response<TowerRallyDto>>
+{
+    public async Task<Response<TowerRallyDto>> Handle(TransferTowerRallyLeadershipCommand request, CancellationToken cancellationToken)
+    {
+        var result = await tower.TransferRallyLeadershipAsync(
+            request.CharacterId,
+            request.RallyId,
+            request.TargetCharacterId,
+            cancellationToken);
         return result.Succeeded ? Response<TowerRallyDto>.Success(result.Value!) : Response<TowerRallyDto>.Fail(result.Error!);
     }
 }

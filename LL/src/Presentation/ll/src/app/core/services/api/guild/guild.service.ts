@@ -170,6 +170,10 @@ export class GuildService {
     return this.api.post('guild/updateRolePermissions', permissions);
   }
 
+  updateDescription(description: string): Observable<void> {
+    return this.api.post('guild/updateDescription', { description });
+  }
+
   constructBuilding(
     buildingType: GuildBuildingType,
   ): Observable<GuildBuildingOverview> {

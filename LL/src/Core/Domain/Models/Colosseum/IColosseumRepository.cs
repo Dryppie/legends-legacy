@@ -20,4 +20,10 @@ public interface IColosseumRepository
     Task SaveArenaDefenseSnapshotAsync(ArenaDefenseSnapshot snapshot, CancellationToken cancellationToken);
     Task<int> CountChampionMarketPurchasesAsync(Guid characterId, string itemId, DateTimeOffset? since, CancellationToken cancellationToken);
     Task SaveChampionMarketPurchaseAsync(ChampionMarketPurchase purchase, CancellationToken cancellationToken);
+    Task<IReadOnlyList<ChampionMarketPurchase>> GetChampionMarketPurchasesByItemIdsAsync(
+        IReadOnlyCollection<string> itemIds,
+        CancellationToken cancellationToken);
+    Task<IReadOnlyDictionary<Guid, Guid>> GetAccountIdsForCharactersAsync(
+        IReadOnlyCollection<Guid> characterIds,
+        CancellationToken cancellationToken);
 }

@@ -1,4 +1,4 @@
-using API.LL;
+﻿using API.LL;
 using API.LL.Common;
 using API.LL.HostedServices;
 using Application;
@@ -79,6 +79,7 @@ builder.Services.AddHostedService<GameEventOutboxWorker>();
 builder.Services.AddHostedService<DungeonPowerCalibrationWorker>();
 builder.Services.AddHostedService<WorldTowerCombatSimulationWorker>();
 builder.Services.AddHostedService<WorldTowerCombatPlaybackWorker>();
+builder.Services.AddHostedService<ChampionMarketTitleBackfillWorker>();
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddHostedService<TournamentGroundsDevelopmentProgressionWorker>();

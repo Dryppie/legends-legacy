@@ -66,6 +66,105 @@ public sealed class EquipmentRollRangeServiceTests
         }
     }
 
+    [Fact]
+    public void Resolve_EnclosesRollsAfterRarityUpgrades()
+    {
+        var definitions = CreateProvider();
+        var balance = Options.Create(new CraftingBalanceOptions
+        {
+            CriticalChanceBase = 0d,
+            CriticalChancePerRarityStep = 0d
+        });
+        var statRolls = new ItemStatRollService(balance);
+        var tempering = new TemperingMechanicsService(balance);
+        var service = new EquipmentRollRangeService(definitions, statRolls, balance);
+        var recipes = definitions
+            .GetRecipes()
+            .Where(candidate => candidate.InitialStatProfile.Count > 0)
+            .ToList();
+        Assert.NotEmpty(recipes);
+        var observedGrowthBeyondTheCraftedRange = false;
+
+        foreach (var recipe in recipes)
+        {
+            var equipmentBase = definitions.GetEquipmentBases()[recipe.OutputItemId];
+            var design = EquipmentCraftingDesignComposer.Compose(recipe, null);
+            var equipment = CreateCraftedInstance(recipe, equipmentBase, design, statRolls);
+            var profile = design.TemperingProfile;
+            var craftedRange = service.Resolve(equipment);
+            Assert.NotNull(craftedRange);
+
+            while (equipment.Rarity < Rarity.Legendary)
+            {
+                // Nine XP means the next positive attempt tips the item over the rarity
+                // threshold, which is what writes a directed improvement into the instance.
+                equipment.ItemXp = 9;
+                var previousRarity = equipment.Rarity;
+                tempering.ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.0005d));
+                Assert.True(
+                    equipment.Rarity > previousRarity,
+                    $"{recipe.Id}: tempering did not advance rarity beyond {previousRarity}.");
+
+                var range = service.Resolve(equipment);
+                Assert.NotNull(range);
+                foreach (var modifier in equipment.InstanceModifiers)
+                {
+                    var attributeRange = range.Attributes.SingleOrDefault(candidate =>
+                        candidate.AttributeType == modifier.AttributeType);
+
+                    // Rarity overflow can introduce a stat the recipe never designs for.
+                    // Those have no advertised range, so the client renders none either.
+                    if (attributeRange is null) continue;
+
+                    Assert.True(
+                        modifier.Amount >= attributeRange.MinimumAmount
+                        && modifier.Amount <= attributeRange.MaximumAmount,
+                        $"{recipe.Id} at {equipment.Rarity}: {modifier.AttributeType} "
+                        + $"{modifier.Amount} is outside "
+                        + $"{attributeRange.MinimumAmount}-{attributeRange.MaximumAmount}.");
+
+                    var craftedMaximum = craftedRange.Attributes
+                        .Single(candidate => candidate.AttributeType == modifier.AttributeType)
+                        .MaximumAmount;
+                    observedGrowthBeyondTheCraftedRange |= modifier.Amount > craftedMaximum;
+                }
+            }
+        }
+
+        // Guards the regression itself: rarity upgrades really do push at least one
+        // attribute past the range the item was crafted against, so a range that ignores
+        // rarity would have failed the assertions above.
+        Assert.True(
+            observedGrowthBeyondTheCraftedRange,
+            "No rarity upgrade exceeded its crafted maximum; the test no longer covers the bug.");
+    }
+
+    private static EquipmentInstance CreateCraftedInstance(
+        CraftingRecipeDefinition recipe,
+        EquipmentBase equipmentBase,
+        EquipmentCraftingDesign design,
+        ItemStatRollService statRolls) => new()
+    {
+        ItemBase = equipmentBase,
+        ItemBaseId = equipmentBase.Id,
+        BaseRecipeId = recipe.Id,
+        Tier = 1,
+        Quality = ItemQuality.Standard,
+        Rarity = Rarity.Common,
+        Potential = 100,
+        MaxPotential = 100,
+        StatModelVersion = EquipmentStatBudgetCatalog.BalanceVersion,
+        InstanceModifiers =
+        [
+            .. statRolls.RollBaseStats(
+                equipmentBase,
+                design,
+                1,
+                ItemQuality.Standard,
+                new FixedRandom(0.5d))
+        ]
+    };
+
     private static JsonCraftingDefinitionProvider CreateProvider()
     {
         var configuration = new ConfigurationBuilder()

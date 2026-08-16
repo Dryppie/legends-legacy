@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Diagnostics.Metrics;
 using System.IO.Compression;
 using System.Security.Cryptography;
@@ -806,6 +806,103 @@ public sealed class WorldTowerService : IWorldTowerService
         await EnqueueRallyUpdateAsync(rally, eventName, now, cancellationToken);
         await _db.SaveChangesAsync(cancellationToken);
 
+        return TowerOperationResult<TowerRallyDto>.Success(ToRallyDto(rally, characterId, accountId));
+    }
+
+    public async Task<TowerOperationResult<TowerRallyDto>> UpdateRallyLoadoutAsync(
+        Guid characterId,
+        Guid rallyId,
+        CancellationToken cancellationToken)
+    {
+        await _db.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
+        var floorNumber = await GetRallyFloorNumberAsync(rallyId, cancellationToken);
+        if (!floorNumber.HasValue)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
+        await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber.Value, cancellationToken);
+
+        var rally = await GetMutableRallyWithApplicationsAsync(rallyId, cancellationToken);
+        if (rally is null)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
+        if (rally.Status is not (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready))
+            return TowerOperationResult<TowerRallyDto>.Fail("The locked build can only be updated before the Expedition starts.");
+
+        var participant = rally.Participants.SingleOrDefault(x => x.CharacterId == characterId);
+        var pendingApplication = rally.Applications.SingleOrDefault(x =>
+            x.CharacterId == characterId && x.Status == TowerRallyApplicationStatus.Pending);
+        if (participant is null && pendingApplication is null)
+            return TowerOperationResult<TowerRallyDto>.Fail("You are not part of this Expedition and have no pending application.");
+
+        var rating = await _powerRatings.GetCharacterRatingAsync(characterId, cancellationToken);
+        if (rating.State != PowerAnalysisState.Available)
+            return TowerOperationResult<TowerRallyDto>.Fail(
+                rating.StatusMessage ?? "Power Rating is unavailable for this character.");
+
+        var snapshot = await _snapshots.CreateAsync(characterId, cancellationToken);
+        var powerRating = CombatRatingDisplay.FromRaw(rating.Overall);
+        var now = DateTimeOffset.UtcNow;
+        Guid? accountId;
+        if (participant is not null)
+        {
+            participant.CharacterSnapshotId = snapshot.Id;
+            participant.CharacterSnapshot = snapshot;
+            participant.PowerRating = powerRating;
+            accountId = participant.AccountId;
+
+            var acceptedApplication = rally.Applications.SingleOrDefault(x =>
+                x.CharacterId == characterId && x.Status == TowerRallyApplicationStatus.Accepted);
+            if (acceptedApplication is not null)
+            {
+                acceptedApplication.CharacterSnapshotId = snapshot.Id;
+                acceptedApplication.CharacterSnapshot = snapshot;
+                acceptedApplication.PowerRating = powerRating;
+            }
+        }
+        else
+        {
+            pendingApplication!.CharacterSnapshotId = snapshot.Id;
+            pendingApplication.CharacterSnapshot = snapshot;
+            pendingApplication.PowerRating = powerRating;
+            pendingApplication.AppliedAt = now;
+            accountId = pendingApplication.AccountId;
+        }
+
+        await EnqueueRallyUpdateAsync(rally, "LoadoutUpdated", now, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        return TowerOperationResult<TowerRallyDto>.Success(ToRallyDto(rally, characterId, accountId));
+    }
+
+    public async Task<TowerOperationResult<TowerRallyDto>> TransferRallyLeadershipAsync(
+        Guid characterId,
+        Guid rallyId,
+        Guid targetCharacterId,
+        CancellationToken cancellationToken)
+    {
+        var floorNumber = await GetRallyFloorNumberAsync(rallyId, cancellationToken);
+        if (!floorNumber.HasValue)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
+        await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber.Value, cancellationToken);
+
+        var rally = await GetMutableRallyWithApplicationsAsync(rallyId, cancellationToken);
+        if (rally is null)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
+        if (rally.CreatedByCharacterId != characterId)
+            return TowerOperationResult<TowerRallyDto>.Fail("Only the Expedition leader can transfer leadership.");
+        if (rally.Status is not (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready))
+            return TowerOperationResult<TowerRallyDto>.Fail("Leadership cannot be transferred after the Expedition has started.");
+        if (targetCharacterId == characterId)
+            return TowerOperationResult<TowerRallyDto>.Fail("You already lead this Expedition.");
+
+        var target = rally.Participants.SingleOrDefault(x => x.CharacterId == targetCharacterId);
+        if (target is null)
+            return TowerOperationResult<TowerRallyDto>.Fail("The new leader must be a locked-in Expedition participant.");
+
+        var now = DateTimeOffset.UtcNow;
+        rally.CreatedByCharacterId = targetCharacterId;
+        await EnqueueRallyUpdateAsync(rally, "LeadershipTransferred", now, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        var accountId = await GetAccountIdAsync(characterId, cancellationToken);
         return TowerOperationResult<TowerRallyDto>.Success(ToRallyDto(rally, characterId, accountId));
     }
 
@@ -2151,6 +2248,11 @@ public sealed class WorldTowerService : IWorldTowerService
             (isParticipant || visibleApplications.Any(x => x.IsCurrentCharacter && x.Status == TowerRallyApplicationStatus.Pending))
                 && rally.Status is (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready),
             isLeader && rally.Status == TowerRallyStatus.Ready,
+            (isParticipant || visibleApplications.Any(x => x.IsCurrentCharacter && x.Status == TowerRallyApplicationStatus.Pending))
+                && rally.Status is (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready),
+            isLeader
+                && rally.Status is (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready)
+                && rally.Participants.Any(x => x.CharacterId != characterId),
             _options.DevelopmentToolsEnabled,
             rally.Attempt is null
                 ? null
