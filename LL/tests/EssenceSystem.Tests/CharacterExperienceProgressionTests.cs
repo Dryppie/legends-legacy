@@ -132,7 +132,7 @@ public sealed class CharacterExperienceProgressionTests
     }
 
     [Fact]
-    public void Each_level_up_spends_one_displayed_combat_rating_of_attribute_budget()
+    public void Each_level_up_uses_the_active_equipment_attribute_exchange_rates()
     {
         var internalBudget =
             EntityBaseAttributeHelper.PowerPerCharacterLevel
@@ -140,8 +140,8 @@ public sealed class CharacterExperienceProgressionTests
             + EntityBaseAttributeHelper.MaxHealthPerCharacterLevel
             * EquipmentStatBudgetCatalog.Get(AttributeType.MaxHealth, tier: 1).CostPerPoint;
 
-        Assert.Equal(10d, internalBudget, precision: 6);
-        Assert.Equal(1d, internalBudget / 10d, precision: 6);
+        Assert.Equal(9.325d, internalBudget, precision: 6);
+        Assert.Equal(0.9325d, internalBudget / 10d, precision: 6);
     }
 
     [Fact]

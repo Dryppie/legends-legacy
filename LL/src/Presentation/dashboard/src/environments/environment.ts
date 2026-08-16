@@ -1,7 +1,13 @@
-const env = (window as any).env;
+interface RuntimeEnvironment {
+  environment?: 'dev' | 'test' | 'prod';
+  apiBaseUrl?: string;
+  isLocal?: string;
+}
+
+const env = ((window as typeof window & { env?: RuntimeEnvironment }).env ?? {});
 export const environment = {
-  environment: env.environment as 'dev' | 'test' | 'prod',
-  apiBaseUrl: env.apiBaseUrl,
+  environment: env.environment ?? 'dev',
+  apiBaseUrl: env.apiBaseUrl ?? '',
   production: false,
   isLocal: env.isLocal === 'true',
   // apiUrl: 'https://localhost:7060/api/v1/',

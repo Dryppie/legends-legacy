@@ -14,11 +14,11 @@ public sealed class EquippedGatheringTool
 
     public double GetBonus(ToolBonusType type, string? scopeId = null)
     {
-        return Bonuses
+        return PercentageBonusMath.Combine(Bonuses
             .Where(bonus => bonus.BonusType == type)
             .Where(bonus => string.IsNullOrWhiteSpace(bonus.ScopeId) ||
                 string.Equals(bonus.ScopeId, scopeId, StringComparison.OrdinalIgnoreCase))
-            .Sum(bonus => bonus.Amount);
+            .Select(bonus => bonus.Amount));
     }
 
     public static EquippedGatheringTool From(EquipmentInstance equipmentInstance)

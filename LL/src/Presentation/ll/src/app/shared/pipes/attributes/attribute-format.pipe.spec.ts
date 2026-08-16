@@ -17,6 +17,7 @@ describe('canonical attribute formatting', () => {
         displayName: 'Armor',
         description: 'Reduces physical damage.',
         unit: 'PercentagePoints',
+        displaySuffix: '%',
         equipmentDisplayName: 'Armor Rating',
         equipmentDescription:
           'Armor is combined and converted with diminishing returns.',
@@ -96,7 +97,9 @@ describe('canonical attribute formatting', () => {
     expect(formatAttributeTooltip(AttributeType.Armor, true)).toBe(
       'Armor is combined and converted with diminishing returns.',
     );
-    expect(formatAttributeValue(12.345, AttributeType.Armor, true)).toBe('+12.35%');
+    expect(formatAttributeValue(12.345, AttributeType.Armor, true)).toBe(
+      '+12.35%',
+    );
   });
 
   it('formats direct status resistance and rounds flat attributes', () => {

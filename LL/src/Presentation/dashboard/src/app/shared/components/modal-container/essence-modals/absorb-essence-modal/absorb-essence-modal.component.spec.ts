@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AbsorbEssenceModalComponent } from './absorb-essence-modal.component';
+import { httpTestingProviders } from '../../../../testing/http-testing-providers';
 
 describe('AbsorbEssenceModalComponent', () => {
   let component: AbsorbEssenceModalComponent;
@@ -8,7 +9,8 @@ describe('AbsorbEssenceModalComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AbsorbEssenceModalComponent]
+      imports: [AbsorbEssenceModalComponent],
+      providers: httpTestingProviders,
     })
     .compileComponents();
 

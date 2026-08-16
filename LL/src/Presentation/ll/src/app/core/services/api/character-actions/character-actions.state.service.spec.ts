@@ -184,6 +184,7 @@ describe('CharacterActionsStateService', () => {
     };
 
     service.applyCurrentActionSnapshot(stoppingCombat);
+    TestBed.flushEffects();
     flushMicrotasks();
 
     expect(service.displayCurrentAction()).toBeTrue();
@@ -265,6 +266,7 @@ describe('CharacterActionsStateService', () => {
     service.initializeFromBootstrap(pendingAction);
     const applyUpdate = polling.start.calls.mostRecent().args[1];
     applyUpdate(pendingAction);
+    TestBed.flushEffects();
     flushMicrotasks();
 
     expect(service.resolvingOfflineProgress()).toBeTrue();
@@ -290,6 +292,7 @@ describe('CharacterActionsStateService', () => {
         },
       },
     });
+    TestBed.flushEffects();
     flushMicrotasks();
 
     expect(service.resolvingOfflineProgress()).toBeFalse();

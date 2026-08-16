@@ -74,7 +74,7 @@ describe('buildAttributeComparisons', () => {
 });
 
 describe('buildToolBonusComparisons', () => {
-  it('compares effective bonuses and aggregates matching affixes', () => {
+  it('compares effective bonuses and compounds matching affixes', () => {
     const hovered = display([]);
     const equipped = display([]);
     hovered.toolBonuses = [
@@ -83,14 +83,16 @@ describe('buildToolBonusComparisons', () => {
     ];
     equipped.toolBonuses = [toolBonus('equipped-affix', 8)];
 
-    expect(buildToolBonusComparisons(hovered, equipped)).toEqual([
-      {
+    const [comparison] = buildToolBonusComparisons(hovered, equipped);
+
+    expect(comparison).toEqual(
+      jasmine.objectContaining({
         bonusType: ToolBonusType.GatheringYieldPercent,
         scopeId: undefined,
         equippedAmount: 8,
-        hoveredAmount: 12,
-      },
-    ]);
+      }),
+    );
+    expect(comparison.hoveredAmount).toBeCloseTo(12.35, 10);
   });
 });
 

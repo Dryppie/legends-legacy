@@ -383,7 +383,7 @@
         {
           "id": "forgotten_catacombs",
           "difficulty": 1,
-          "enemyStrengthMultiplier": 3.9,
+          "enemyStrengthMultiplier": 3.7,
           "minRooms": 11,
           "maxRooms": 13,
           "rewardTable": {
@@ -467,7 +467,7 @@
         {
           "id": "forgotten_catacombs_ii",
           "difficulty": 2,
-          "enemyStrengthMultiplier": 6.4,
+          "enemyStrengthMultiplier": 6.0,
           "minRooms": 12,
           "maxRooms": 14,
           "rewardTable": {
@@ -551,7 +551,7 @@
         {
           "id": "forgotten_catacombs_iii",
           "difficulty": 3,
-          "enemyStrengthMultiplier": 9.5,
+          "enemyStrengthMultiplier": 8.3,
           "minRooms": 13,
           "maxRooms": 15,
           "rewardTable": {

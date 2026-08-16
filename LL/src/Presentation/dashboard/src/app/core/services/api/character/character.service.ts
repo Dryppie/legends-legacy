@@ -5,32 +5,32 @@ import {
   CharacterDto,
   CharacterOverviewDto,
 } from '../../../../shared/models/Dtos/characterDto';
-import { AuthService } from '../auth/auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CharacterService {
+  private currentCharacterSubject =
+    new BehaviorSubject<CharacterDto | null>(null);
   private characterOverviewSubject =
     new BehaviorSubject<CharacterOverviewDto | null>(null);
 
   public characterOverview$ = this.characterOverviewSubject.asObservable();
 
-  constructor(
-    private apiService: ApiService,
-    private authService: AuthService,
-  ) {}
+  constructor(private apiService: ApiService) {}
 
   updateCharacter(updatedCharacter: CharacterDto): void {
-    this.authService.updateCharacter(updatedCharacter);
+    this.currentCharacterSubject.next(updatedCharacter);
   }
 
   getCurrentCharacter(): Observable<CharacterDto | null> {
-    return this.authService.currentCharacter$;
+    return this.currentCharacterSubject.asObservable();
   }
 
-  fetchCharacterData() {
-    this.authService.getLoggedInCharacter();
+  fetchCharacterData(): void {
+    this.apiService.get('character').subscribe((response) => {
+      this.currentCharacterSubject.next(response?.data ?? response);
+    });
   }
 
   getLeaderboard() {

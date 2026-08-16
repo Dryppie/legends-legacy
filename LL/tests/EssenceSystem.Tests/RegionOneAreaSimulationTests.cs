@@ -101,16 +101,16 @@ public sealed class RegionOneAreaSimulationTests
         Assert.Equal(1, first.EquipmentTier);
         Assert.Equal(45, first.EndingCharacterLevel);
         Assert.Equal(5, first.EssenceCount);
-        Assert.Equal(168, first.RecommendedEndpointCombatRating);
-        Assert.Equal(176, first.MaximumEndpointCombatRating);
+        Assert.Equal(180, first.RecommendedEndpointCombatRating);
+        Assert.Equal(193, first.MaximumEndpointCombatRating);
 
         var second = options.RegionProjections[1];
         Assert.Equal(2, second.RegionNumber);
         Assert.Equal(2, second.EquipmentTier);
         Assert.Equal(95, second.EndingCharacterLevel);
         Assert.Equal(6, second.EssenceCount);
-        Assert.Equal(238, second.RecommendedEndpointCombatRating);
-        Assert.Equal(247, second.MaximumEndpointCombatRating);
+        Assert.Equal(246, second.RecommendedEndpointCombatRating);
+        Assert.Equal(262, second.MaximumEndpointCombatRating);
 
         Assert.All(
             options.RegionProjections.Zip(options.RegionProjections.Skip(1)),

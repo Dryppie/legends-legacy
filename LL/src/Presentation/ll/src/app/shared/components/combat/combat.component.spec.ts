@@ -115,7 +115,7 @@ describe('CombatComponent', () => {
     } as any);
 
     expect(fixture.componentInstance.gatheringToolWarning()).toContain(
-      'cannot gather here',
+      'cannot gather resources here',
     );
   });
 

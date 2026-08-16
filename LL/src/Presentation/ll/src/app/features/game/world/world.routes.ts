@@ -21,10 +21,12 @@ export const WORLD_ROUTES: Routes = [
       {
         path: 'tower',
         component: TowerOverviewComponent,
+        data: { guideDisabled: true },
       },
       {
         path: 'tower/expeditions/:rallyId',
         component: TowerRallyComponent,
+        data: { guideDisabled: true },
       },
       {
         path: 'tower/rallies/:rallyId',
@@ -34,10 +36,12 @@ export const WORLD_ROUTES: Routes = [
       {
         path: 'tower/hall-of-fame',
         component: TowerHallOfFameComponent,
+        data: { guideDisabled: true },
       },
       {
         path: 'tower/personal-expeditions',
         component: TowerPersonalExpeditionsComponent,
+        data: { guideDisabled: true },
       },
       {
         path: '',

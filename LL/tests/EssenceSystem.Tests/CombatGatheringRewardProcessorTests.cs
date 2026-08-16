@@ -19,6 +19,29 @@ namespace EssenceSystem.Tests;
 
 public sealed class CombatGatheringRewardProcessorTests
 {
+    [Fact]
+    public void Matching_tool_bonuses_compound_multiplicatively()
+    {
+        var tool = new EquippedGatheringTool
+        {
+            Bonuses =
+            [
+                new ToolBonusModifier
+                {
+                    BonusType = ToolBonusType.GatheringYieldPercent,
+                    Amount = 10d
+                },
+                new ToolBonusModifier
+                {
+                    BonusType = ToolBonusType.GatheringYieldPercent,
+                    Amount = 20d
+                }
+            ]
+        };
+
+        Assert.Equal(32d, tool.GetBonus(ToolBonusType.GatheringYieldPercent), 10);
+    }
+
     [Theory]
     [InlineData(0.45d, true)]
     [InlineData(0.55d, false)]
@@ -57,6 +80,87 @@ public sealed class CombatGatheringRewardProcessorTests
         Assert.Equal(expectedSuccess, reward.Success);
     }
 
+    [Fact]
+    public async Task General_and_scoped_yield_bonuses_compound_multiplicatively()
+    {
+        var processor = new CombatGatheringRewardProcessor(
+            new RecordingRewardRoller(quantity: 10),
+            new StaticItemBaseRepository(),
+            new InventoryItemFactory(),
+            new FixedRandomSource(0d),
+            new StaticProfessionService(),
+            new NoopLevelingService(),
+            new EmptyBonusService());
+        var facts = new CombatGatheringRewardFacts(
+            Guid.NewGuid(),
+            Victories: 1,
+            new EquippedGatheringTool
+            {
+                Name = "Test Pickaxe",
+                GatheringType = GatheringType.Mining,
+                Bonuses =
+                [
+                    new ToolBonusModifier
+                    {
+                        BonusType = ToolBonusType.GatheringYieldPercent,
+                        Amount = 20d
+                    },
+                    new ToolBonusModifier
+                    {
+                        BonusType = ToolBonusType.SpecificNodeYieldPercent,
+                        Amount = 30d,
+                        ScopeId = "ore"
+                    }
+                ]
+            },
+            [new CombatGatheringNode("ore", "Ore", GatheringType.Mining, null, 1f, "loot.test")]);
+
+        var reward = Assert.Single(await processor.ProcessAsync(facts, CancellationToken.None));
+
+        Assert.Equal(16, Assert.Single(reward.ItemsGained).Quantity);
+    }
+
+    [Fact]
+    public async Task Tool_and_soulstone_rare_bonuses_compound_multiplicatively()
+    {
+        var rewardRoller = new RecordingRewardRoller();
+        var processor = new CombatGatheringRewardProcessor(
+            rewardRoller,
+            new StaticItemBaseRepository(),
+            new InventoryItemFactory(),
+            new FixedRandomSource(0d),
+            new StaticProfessionService(),
+            new NoopLevelingService(),
+            new EmptyBonusService());
+        var facts = new CombatGatheringRewardFacts(
+            Guid.NewGuid(),
+            Victories: 1,
+            new EquippedGatheringTool
+            {
+                Name = "Test Pickaxe",
+                GatheringType = GatheringType.Mining,
+                Bonuses =
+                [
+                    new ToolBonusModifier
+                    {
+                        BonusType = ToolBonusType.RareMaterialChancePercent,
+                        Amount = 20d
+                    }
+                ]
+            },
+            [new CombatGatheringNode("ore", "Ore", GatheringType.Mining, null, 1f, "loot.test")]);
+        var bonusFactors = new Dictionary<BonusKind, double>
+        {
+            [BonusKind.GatheringRareDropChanceRelativeBps] = 3000d
+        };
+
+        await processor.ProcessAsync(facts, CancellationToken.None, bonusFactors);
+
+        var rareBonus = Assert.IsType<Dictionary<string, double>>(
+            rewardRoller.LastContext!.EntryWeightBonusPercentByTag)["rare"];
+        Assert.Equal(56d, rareBonus, 10);
+    }
+
     private sealed class StaticRewardRoller : IRewardRoller
     {
         private static readonly RewardRollResult Result = new(
@@ -68,6 +172,30 @@ public sealed class CombatGatheringRewardProcessorTests
 
         public RewardRollResult Roll(string rewardTableId, RewardRollContext context) => Result;
         public RewardRollResult Roll(RewardTableDefinition table, RewardRollContext context) => Result;
+    }
+
+    private sealed class RecordingRewardRoller(int quantity = 1) : IRewardRoller
+    {
+        public RewardRollContext? LastContext { get; private set; }
+
+        public RewardRollResult Roll(string rewardTableId, RewardRollContext context)
+        {
+            LastContext = context;
+            return CreateResult();
+        }
+
+        public RewardRollResult Roll(RewardTableDefinition table, RewardRollContext context)
+        {
+            LastContext = context;
+            return CreateResult();
+        }
+
+        private RewardRollResult CreateResult() => new(
+            [new ItemRewardResult("item.test", quantity, "test")],
+            0,
+            0,
+            0,
+            []);
     }
 
     private sealed class StaticItemBaseRepository : IItemBaseRepository

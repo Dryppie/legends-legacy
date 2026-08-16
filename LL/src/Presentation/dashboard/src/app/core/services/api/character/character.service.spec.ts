@@ -1,12 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
 import { CharacterService } from './character.service';
+import { httpTestingProviders } from '../../../../shared/testing/http-testing-providers';
 
 describe('CharacterService', () => {
   let service: CharacterService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({ providers: httpTestingProviders });
     service = TestBed.inject(CharacterService);
   });
 

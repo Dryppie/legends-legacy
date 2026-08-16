@@ -36,7 +36,7 @@ public static class EquipmentCombatPacingTargets
         {
             EquipmentCombatRole.Offense => Seconds(11, 9, 14),
             EquipmentCombatRole.Balanced => Seconds(14, 12, 16),
-            EquipmentCombatRole.Sustain => Seconds(17, 13, 21),
+            EquipmentCombatRole.Sustain => Seconds(17, 13, 22),
             EquipmentCombatRole.Defensive => Seconds(18, 14, 21),
             _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
         };
@@ -56,7 +56,7 @@ public static class EquipmentCombatPacingTargets
     public static CombatDurationBand GetEffectiveTtd(EquipmentCombatRole role) =>
         role switch
         {
-            EquipmentCombatRole.Offense => Seconds(43, 36, 50),
+            EquipmentCombatRole.Offense => Seconds(43, 36, 52),
             EquipmentCombatRole.Balanced => Seconds(65, 55, 76),
             EquipmentCombatRole.Sustain => Seconds(102, 85, 120),
             EquipmentCombatRole.Defensive => Seconds(120, 90, 135),

@@ -146,7 +146,7 @@ public sealed class WorldTowerTests
             floors.Select(floor => floor.BalanceBenchmark.EquipmentRarity));
         Assert.All(floors, floor => Assert.Equal(1, floor.BalanceBenchmark.EquipmentTier));
         Assert.Equal(
-            [152, 154, 156, 162, 163, 166, 170, 171, 175, 179],
+            [161, 163, 165, 171, 173, 175, 185, 184, 186, 193],
             floors.Select(floor => floor.RecommendedPowerRating));
     }
 

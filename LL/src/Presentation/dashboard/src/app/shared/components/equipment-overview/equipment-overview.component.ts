@@ -72,7 +72,7 @@ export class EquipmentOverviewComponent implements OnInit {
       {
         id: '',
         iconPath: 'empty_mainhand',
-        equipmentType: EquipmentType.MainHand,
+        equipmentType: EquipmentType.OneHanded,
       },
       {
         id: '',

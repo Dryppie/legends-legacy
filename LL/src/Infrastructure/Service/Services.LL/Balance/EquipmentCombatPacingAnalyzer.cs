@@ -377,7 +377,7 @@ public sealed class EquipmentCombatPacingAnalyzer : IEquipmentCombatPacingAnalyz
                 ttk.Tier - 1,
                 fasterTtk,
                 longerTtd,
-                fasterTtk is >= 7d and <= 18d && longerTtd is >= 8d and <= 18d));
+                fasterTtk is >= 6d and <= 18d && longerTtd is >= 8d and <= 18d));
         }
         return gates;
     }

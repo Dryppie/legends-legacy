@@ -753,7 +753,10 @@ export function getWireErrorMessage(error: unknown): string {
         : '';
   const normalizedMessage = technicalMessage.toLowerCase();
 
-  if (normalizedMessage.includes('not enough cinders')) {
+  if (
+    normalizedMessage.includes('not enough cinders') ||
+    normalizedMessage.includes('not have enough cinders')
+  ) {
     return 'You do not have enough Cinders for this wire.';
   }
   if (normalizedMessage.includes('yourself')) {

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CurrentActionComponent } from './current-action.component';
+import { httpTestingProviders } from '../../testing/http-testing-providers';
 
 describe('CurrentActionComponent', () => {
   let component: CurrentActionComponent;
@@ -8,7 +9,8 @@ describe('CurrentActionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CurrentActionComponent]
+      imports: [CurrentActionComponent],
+      providers: httpTestingProviders,
     })
     .compileComponents();
 

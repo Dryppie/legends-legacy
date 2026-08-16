@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { RemoveEssenceModalComponent } from './remove-essence-modal.component';
+import { httpTestingProviders } from '../../../../testing/http-testing-providers';
 
 describe('RemoveEssenceModalComponent', () => {
   let component: RemoveEssenceModalComponent;
@@ -8,7 +9,8 @@ describe('RemoveEssenceModalComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RemoveEssenceModalComponent]
+      imports: [RemoveEssenceModalComponent],
+      providers: httpTestingProviders,
     })
     .compileComponents();
 

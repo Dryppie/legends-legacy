@@ -37,7 +37,7 @@ public sealed class RegionAreaBalancingTests
         Assert.Equal(Enumerable.Range(0, 10), scalings.Select(x => x.RegionStep!.Value));
         Assert.Equal(Enumerable.Range(0, 10), scalings.Select(x => x.ProgressionStep));
         Assert.Equal(
-            [47, 54, 62, 72, 83, 96, 110, 127, 147, 169],
+            [47, 55, 63, 74, 85, 99, 115, 134, 155, 180],
             scalings.Select(x => x.RecommendedCombatRating));
         Assert.All(scalings.Zip(scalings.Skip(1)), pair =>
         {
@@ -60,7 +60,7 @@ public sealed class RegionAreaBalancingTests
         Assert.Equal(47, first.RecommendedCombatRating);
         Assert.Equal(1.6d * Math.Pow(1.180298, 9), last.HealthMultiplier, 6);
         Assert.Equal(1.85d * Math.Pow(1.122646, 9), last.OffenseMultiplier, 6);
-        Assert.Equal(169, last.RecommendedCombatRating);
+        Assert.Equal(180, last.RecommendedCombatRating);
 
         var fallback = provider.GetScaling(new Area { Id = "unmapped", DifficultyTier = 10 });
         Assert.Equal("legacy-area-v1", fallback.ProfileId);

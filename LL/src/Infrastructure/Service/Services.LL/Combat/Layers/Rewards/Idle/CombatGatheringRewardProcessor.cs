@@ -120,9 +120,9 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
                     0d,
                     100d) / 100d;
                 var numberOfRolls = 1 + (bonusRollChance > 0d && _randomSource.NextDouble() < bonusRollChance ? 1 : 0);
-                var rareMaterialChance =
-                    Math.Max(0d, tool.GetBonus(ToolBonusType.RareMaterialChancePercent)) +
-                    Math.Max(0d, rareChanceRelativeBps).ToPercent();
+                var rareMaterialChance = PercentageBonusMath.Combine(
+                    tool.GetBonus(ToolBonusType.RareMaterialChancePercent),
+                    Math.Max(0d, rareChanceRelativeBps).ToPercent());
                 var rewardRolls = RollGatheringRewards(
                     node,
                     rareMaterialChance,
@@ -237,9 +237,9 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         EquippedGatheringTool tool,
         CombatGatheringNode node)
     {
-        var yieldBonus =
-            Math.Max(0d, tool.GetBonus(ToolBonusType.GatheringYieldPercent)) +
-            Math.Max(0d, tool.GetBonus(ToolBonusType.SpecificNodeYieldPercent, node.Id));
+        var yieldBonus = PercentageBonusMath.Combine(
+            tool.GetBonus(ToolBonusType.GatheringYieldPercent),
+            tool.GetBonus(ToolBonusType.SpecificNodeYieldPercent, node.Id));
         var yieldMultiplier = 1d + yieldBonus / 100d;
         var doubleChance = Math.Clamp(
             Math.Max(0d, tool.GetBonus(ToolBonusType.DoubleGatherChancePercent)),

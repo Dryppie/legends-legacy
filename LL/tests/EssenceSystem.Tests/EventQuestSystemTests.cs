@@ -55,7 +55,7 @@ public sealed class EventQuestSystemTests
                 ["item.blueprint_selection_box"],
                 milestone.Rewards.Select(reward => reward.ItemBaseId)));
 
-        var tempering = provider.Get("event.tempered_together.2026_08");
+        var tempering = provider.Get("event.a_broken_curse.2026_08");
         Assert.Equal(new DateTimeOffset(2026, 8, 16, 0, 0, 0, TimeSpan.Zero), tempering.StartsAtUtc);
         Assert.Equal(new DateTimeOffset(2026, 8, 19, 0, 0, 0, TimeSpan.Zero), tempering.EndsAtUtc);
         Assert.Equal("TemperingActionCompleted", Assert.Single(tempering.Objectives).Type);
@@ -64,7 +64,7 @@ public sealed class EventQuestSystemTests
         Assert.Equal("SigilFragments", tempering.Rewards[0].Type);
         Assert.Equal([500L, 1500L, 3000L], tempering.PersonalMilestones.Select(x => x.RequiredContribution));
         Assert.Equal(
-            [("ore", 200), ("wood", 200), ("advancement_stone", 200)],
+            [("ore", 200), ("wood", 200), ("rawhide", 200)],
             tempering.PersonalMilestones[0].Rewards.Select(x => (x.ItemBaseId, x.Quantity)));
         Assert.Equal(
             "item.blueprint_selection_box",

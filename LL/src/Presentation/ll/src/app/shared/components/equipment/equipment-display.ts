@@ -201,11 +201,19 @@ function sumToolBonusesByKey(
     const existing = totals.get(key);
     totals.set(key, {
       ...bonus,
-      amount: (existing?.amount ?? 0) + bonus.amount,
+      amount: existing
+        ? combinePercentageBonuses(existing.amount, bonus.amount)
+        : Math.max(0, bonus.amount),
     });
   }
 
   return totals;
+}
+
+function combinePercentageBonuses(first: number, second: number): number {
+  return (
+    (1 + Math.max(0, first) / 100) * (1 + Math.max(0, second) / 100) * 100 - 100
+  );
 }
 
 function getToolDisplayName(baseName: string, rarity: Rarity): string {

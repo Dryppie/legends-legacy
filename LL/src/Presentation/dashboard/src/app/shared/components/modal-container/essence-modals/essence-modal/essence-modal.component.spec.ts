@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EssenceModalComponent } from './essence-modal.component';
+import { testEssence } from '../../../../testing/model-fixtures';
 
 describe('EssenceModalComponent', () => {
   let component: EssenceModalComponent;
@@ -14,6 +15,7 @@ describe('EssenceModalComponent', () => {
 
     fixture = TestBed.createComponent(EssenceModalComponent);
     component = fixture.componentInstance;
+    component.essence = testEssence;
     fixture.detectChanges();
   });
 
