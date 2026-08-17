@@ -76,6 +76,10 @@ export class ItemComponent {
     return this.item.itemBase.name;
   }
 
+  get isFavorite(): boolean {
+    return this.inventoryState.isFavorite(this.item.id);
+  }
+
   get isTool(): boolean {
     const base = this.item.itemBase as Equipment;
     const instance = this.item as EquipmentInstance;

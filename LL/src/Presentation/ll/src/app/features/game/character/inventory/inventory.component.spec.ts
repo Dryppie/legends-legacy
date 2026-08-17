@@ -17,6 +17,7 @@ import { CraftingService } from '../../../../core/services/api/crafting/crafting
 import { of } from 'rxjs';
 import { CraftingRecipe } from '../../../../shared/models/crafting-v2';
 import { InventoryService } from '../../../../core/services/api/inventory/inventory.service';
+import { GuildStateService } from '../../../../core/services/api/guild/guild-state.service';
 
 describe('InventoryComponent quest presentation', () => {
   it('starts gathering-tool guidance when that objective becomes active', () => {
@@ -138,6 +139,80 @@ describe('InventoryComponent quest presentation', () => {
 
     expect(component.isScrapMode).toBeTrue();
     expect(component.selectedItems).toEqual([equipmentItem]);
+  });
+
+  it('donates owned unequipped equipment to the current guild', () => {
+    const item = inventoryEquipment('guild-donation', EquipmentType.Chest);
+    const guildState = {
+      isInGuild: signal(true).asReadonly(),
+      donateVaultItem: jasmine
+        .createSpy('donateVaultItem')
+        .and.returnValue(of(undefined)),
+    } as unknown as GuildStateService;
+    const component = TestBed.runInInjectionContext(
+      () =>
+        new InventoryComponent(
+          {} as InventoryStateService,
+          {
+            pinnedOnboardingObjective: signal<QuestObjectiveState | undefined>(
+              undefined,
+            ).asReadonly(),
+          } as QuestStateService,
+          jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
+            'presentCurrentObjective',
+          ]),
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          guildState,
+        ),
+    );
+    component.selectInventoryItem(item);
+
+    expect(component.canDonateToGuild(item)).toBeTrue();
+
+    component.donateToGuild(item);
+
+    expect(guildState.donateVaultItem).toHaveBeenCalledOnceWith(
+      item.itemInstance.id,
+    );
+    expect(component.selectedItem()).toBeNull();
+    expect(component.donationPendingItemId()).toBeNull();
+  });
+
+  it('does not allow borrowed guild equipment to be donated', () => {
+    const item = inventoryEquipment('borrowed-item', EquipmentType.Chest);
+    (item.itemInstance as EquipmentInstance).isGuildBorrowed = true;
+    const guildState = {
+      isInGuild: signal(true).asReadonly(),
+      donateVaultItem: jasmine.createSpy('donateVaultItem'),
+    } as unknown as GuildStateService;
+    const component = TestBed.runInInjectionContext(
+      () =>
+        new InventoryComponent(
+          {} as InventoryStateService,
+          {
+            pinnedOnboardingObjective: signal<QuestObjectiveState | undefined>(
+              undefined,
+            ).asReadonly(),
+          } as QuestStateService,
+          jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
+            'presentCurrentObjective',
+          ]),
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          guildState,
+        ),
+    );
+
+    expect(component.canDonateToGuild(item)).toBeFalse();
+
+    component.donateToGuild(item);
+
+    expect(guildState.donateVaultItem).not.toHaveBeenCalled();
   });
 
   it('sorts scrap equipment by quality from highest to lowest', () => {

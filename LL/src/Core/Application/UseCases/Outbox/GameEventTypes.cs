@@ -25,6 +25,7 @@ public static class GameEventTypes
     public const string GuildChatMessage = "guild.chat_message";
     public const string GuildVaultChatMessage = "guild_vault.chat_message";
     public const string GuildMissionSelected = "guild.mission_selected";
+    public const string GuildMissionProgressed = "guild.mission_progressed";
     public const string InventoryItemsGranted = "inventory.items_granted";
     public const string WorldTowerRallyUpdated = "world_tower.rally_updated";
     public const string WorldTowerChatAnnouncement = "world_tower.chat_announcement";

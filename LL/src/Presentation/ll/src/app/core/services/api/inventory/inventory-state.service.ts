@@ -29,6 +29,14 @@ export class InventoryStateService {
   readonly loading = computed(() => this._loading());
   readonly isEmpty = computed(() => this._items().length === 0);
   readonly error = computed(() => this._error());
+  private readonly favoriteItemInstanceIds = computed(
+    () =>
+      new Set(
+        this._items()
+          .filter((item) => item.isFavorite)
+          .map((item) => item.itemInstance.id),
+      ),
+  );
   private readonly _lastLoot = signal<InventoryItem[] | null>(null);
   private readonly suppressedLootSignatures = new Set<string>();
   private readonly processedInventoryGrantIds = new Set<string>();
@@ -408,6 +416,10 @@ export class InventoryStateService {
           return throwError(() => error);
         }),
       );
+  }
+
+  isFavorite(itemInstanceId: string): boolean {
+    return this.favoriteItemInstanceIds().has(itemInstanceId);
   }
 
   removeItem(itemInstanceId: string): void {

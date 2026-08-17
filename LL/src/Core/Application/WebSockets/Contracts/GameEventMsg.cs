@@ -11,6 +11,7 @@ public record GuildInviteReceivedMsg(Guid GuildId, Guid CharacterId) : GameEvent
 public record GuildInviteRejectedMsg(Guid GuildId, Guid CharacterId) : GameEventMsg;
 public record GuildApplicationRejectedMsg(Guid GuildId, Guid CharacterId) : GameEventMsg;
 public record GuildBuildingsChangedMsg(Guid GuildId, string BuildingId) : GameEventMsg;
+public record GuildMissionsChangedMsg(Guid GuildId) : GameEventMsg;
 public record GuildStateChangedMsg(Guid GuildId) : GameEventMsg;
 public record GuildVaultChatMessageMsg(
     Guid GuildId,

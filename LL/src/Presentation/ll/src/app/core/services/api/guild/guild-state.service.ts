@@ -36,6 +36,7 @@ type GuildRealtimeEventName = Extract<
   | 'GuildInviteRejectedMsg'
   | 'GuildApplicationRejectedMsg'
   | 'GuildBuildingsChangedMsg'
+  | 'GuildMissionsChangedMsg'
   | 'GuildStateChangedMsg'
   | 'GuildMembershipChangedMsg'
   | 'GuildDisbandedMsg'
@@ -124,6 +125,9 @@ export class GuildStateService {
   private hasLoaded = false;
   private lastTokenGuildId: string | null | undefined = undefined;
   private refreshRequestId = 0;
+  private missionRequestId = 0;
+  private activeMissionViews = 0;
+  private missionsDirty = false;
 
   /* ─────────── public, read-only selectors ─────────── */
   readonly guild = computed(() => this._guild());
@@ -274,6 +278,13 @@ export class GuildStateService {
         refresh: true,
       },
       {
+        eventName: 'GuildMissionsChangedMsg',
+        key: 'guild-missions-changed',
+        scope: 'member',
+        matches: inCurrentGuild,
+        action: (_, context) => this.markMissionsChanged(context.guildId),
+      },
+      {
         eventName: 'GuildApplicationMsg',
         key: 'guild-application',
         scope: 'member',
@@ -410,7 +421,11 @@ export class GuildStateService {
       this._invites.set([]);
       this._allGuilds.set([]);
       this.loadGuildBuildings(guild.id);
-      this.loadGuildMissions(guild.id);
+      if (this.activeMissionViews > 0 || this._missions()?.guildId !== guild.id) {
+        this.loadGuildMissions(guild.id);
+      } else {
+        this.missionsDirty = true;
+      }
       this.loadGuildShop(guild.id);
       this.loadAllGuilds();
     } else {
@@ -575,6 +590,18 @@ export class GuildStateService {
       });
   }
 
+  activateMissionsView(): void {
+    this.activeMissionViews += 1;
+    const guildId = this._guild()?.id ?? null;
+    if (this.activeMissionViews === 1 && this.missionsDirty && guildId) {
+      this.loadGuildMissions(guildId);
+    }
+  }
+
+  deactivateMissionsView(): void {
+    this.activeMissionViews = Math.max(0, this.activeMissionViews - 1);
+  }
+
   purchaseShopItem(itemKey: string): void {
     this._loading.set(true);
 
@@ -631,15 +658,34 @@ export class GuildStateService {
   }
 
   private loadGuildMissions(expectedGuildId: string): void {
+    const requestId = ++this.missionRequestId;
     this.service.getMissions().subscribe({
       next: (missions) => {
-        if (this._guild()?.id !== expectedGuildId) return;
+        if (
+          requestId !== this.missionRequestId ||
+          this._guild()?.id !== expectedGuildId
+        ) {
+          return;
+        }
         this._missions.set(
           normalizeGuildMissionOverview(missions, expectedGuildId),
         );
+        this.missionsDirty = false;
       },
-      error: (e) => this._error.set(e.message ?? 'Failed to load missions'),
+      error: (e) => {
+        this.missionsDirty = true;
+        this._error.set(e.message ?? 'Failed to load missions');
+      },
     });
+  }
+
+  private markMissionsChanged(guildId: string | null): void {
+    if (!guildId) return;
+
+    this.missionsDirty = true;
+    if (this.activeMissionViews > 0) {
+      this.loadGuildMissions(guildId);
+    }
   }
 
   private loadGuildShop(expectedGuildId: string | null): void {
@@ -793,6 +839,8 @@ export class GuildStateService {
   }
 
   private clearGuildScopedState(): void {
+    this.missionRequestId += 1;
+    this.missionsDirty = false;
     this._buildings.set(null);
     this._missions.set(null);
     this._shop.set(null);

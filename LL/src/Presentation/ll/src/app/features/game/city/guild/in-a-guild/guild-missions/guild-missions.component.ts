@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
 import {
@@ -25,13 +25,21 @@ import { CharacterTagComponent } from '../../../../../../shared/components/chara
   templateUrl: './guild-missions.component.html',
   styleUrl: './guild-missions.component.scss',
 })
-export class GuildMissionsComponent {
+export class GuildMissionsComponent implements OnInit, OnDestroy {
   readonly missions;
   readonly loading;
 
   constructor(private readonly state: GuildStateService) {
     this.missions = this.state.missions;
     this.loading = this.state.loading;
+  }
+
+  ngOnInit(): void {
+    this.state.activateMissionsView();
+  }
+
+  ngOnDestroy(): void {
+    this.state.deactivateMissionsView();
   }
 
   selectMission(option: GuildMissionOption): void {

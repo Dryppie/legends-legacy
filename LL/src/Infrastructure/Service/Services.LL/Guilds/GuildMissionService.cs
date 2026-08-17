@@ -1,6 +1,8 @@
 using Application.Common.Interfaces;
+using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.Services.LL.Achievements;
+using Application.UseCases.Outbox;
 using Domain.Extensions.Guilds;
 using Domain.Models.Guilds;
 using Domain.Models.Guilds.Buildings;
@@ -19,19 +21,25 @@ public class GuildMissionService : IGuildMissionService
     private readonly IReadOnlyList<GuildMissionDefinition> _dailyDefinitions;
     private readonly IReadOnlyDictionary<Guid, GuildMissionDefinition> _allDefinitions;
     private readonly IAchievementService? _achievementService;
+    private readonly IGameEventOutbox? _outbox;
 
     public GuildMissionService(IDbContext context)
-        : this(context, new DefaultGuildContentProvider(), null)
+        : this(context, new DefaultGuildContentProvider(), null, null)
     {
     }
 
-    public GuildMissionService(IDbContext context, IGuildContentProvider content, IAchievementService? achievementService = null)
+    public GuildMissionService(
+        IDbContext context,
+        IGuildContentProvider content,
+        IAchievementService? achievementService = null,
+        IGameEventOutbox? outbox = null)
     {
         _context = context;
         _weeklyDefinitions = content.WeeklyMissions;
         _dailyDefinitions = content.DailyOrders;
         _allDefinitions = _weeklyDefinitions.Concat(_dailyDefinitions).ToDictionary(x => x.Id);
         _achievementService = achievementService;
+        _outbox = outbox;
     }
 
     public async Task<GuildMissionOverviewDto?> GetOverviewAsync(Guid characterId, DateTimeOffset now, CancellationToken cancellationToken)
@@ -254,6 +262,16 @@ public class GuildMissionService : IGuildMissionService
             {
                 await _achievementService.RecordGuildProgressAsync(participantId, 0, true, 0, cancellationToken);
             }
+        }
+
+        if (_outbox is not null)
+        {
+            await _outbox.EnqueueAsync(
+                GameEventTypes.GuildMissionProgressed,
+                new GuildMissionProgressedPayload(guild.Id),
+                contributionEvent.CharacterId,
+                contributionEvent.AccountId,
+                cancellationToken);
         }
 
         return new GuildContributionResult(true, false, weekly.Progress, completedOrders);

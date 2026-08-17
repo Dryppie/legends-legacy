@@ -146,6 +146,7 @@ public sealed record GuildVaultChatMessagePayload(
     DateTimeOffset SentAt);
 
 public sealed record GuildMissionSelectedPayload(Guid GuildId);
+public sealed record GuildMissionProgressedPayload(Guid GuildId);
 
 public sealed record RealtimeAudiencePayload(
     string Kind,

@@ -59,6 +59,12 @@
 
     <div class="flex flex-wrap gap-2 text-sm">
       <div class="ll-stat-card px-3 py-2">
+        <div class="ll-stat-label">Favor</div>
+        <div class="ll-heading mt-1 text-lg">
+          {{ guildFavor() | numberFormat }}
+        </div>
+      </div>
+      <div class="ll-stat-card px-3 py-2">
         <div class="ll-stat-label">Members</div>
         <div class="ll-heading mt-1 text-lg">
           {{ guild.members.length }} / {{ guild.maxMembers }}

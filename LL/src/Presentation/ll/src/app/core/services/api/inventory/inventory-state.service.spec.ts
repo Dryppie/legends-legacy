@@ -183,6 +183,7 @@ describe('InventoryStateService', () => {
     service.setFavorite('favorite-instance', true).subscribe();
 
     expect(service.items()[0].isFavorite).toBeTrue();
+    expect(service.isFavorite('favorite-instance')).toBeTrue();
     expect(inventoryApi.setItemFavorite).toHaveBeenCalledOnceWith(
       'favorite-instance',
       true,

@@ -8,12 +8,6 @@
       </div>
 
       <div class="stock-header-meta">
-        <div class="wallet-summary" aria-label="Guild Favor balance">
-          <span>
-            <small>Favor</small>
-            <strong>{{ shop.guildFavor | numberFormat }}</strong>
-          </span>
-        </div>
         <div class="reset-summary">
           <small>Resets in</small>
           <strong>{{ resetLabel(shop.nextWeeklyResetAt) }}</strong>
@@ -138,13 +132,5 @@
     <p class="purchase-guidance">
       {{ item.lockedReason ?? "Available for purchase." }}
     </p>
-
-    <section class="wallet-card">
-      <p class="section-label">Your Guild Favor</p>
-      <div>
-        <span>Favor</span>
-        <strong>{{ shop.guildFavor | numberFormat }}</strong>
-      </div>
-    </section>
   </aside>
 </div>
