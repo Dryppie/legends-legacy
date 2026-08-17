@@ -83,6 +83,7 @@ Only the `openid`, `profile`, and `email` scopes are required.
 Before starting outside Development, supply these settings through the deployment secret/configuration system:
 
 - `AllowedHosts` for the private dashboard hostname
+- `LiveOps:PublicBaseUrl` for the external HTTPS root URL used by redirects
 - `StaffIdentity:Authority`
 - `StaffIdentity:Audience` for bearer/API access
 - `StaffIdentity:ClientId` and `StaffIdentity:ClientSecret` for browser OIDC login
@@ -100,6 +101,7 @@ A production environment-variable configuration for the first login looks like:
 ```text
 ASPNETCORE_ENVIRONMENT=Production
 AllowedHosts=liveops.legends-legacy.com
+LiveOps__PublicBaseUrl=https://liveops.legends-legacy.com
 ConnectionStrings__LegendsLegacyDB=<secret connection string>
 StaffIdentity__Authority=https://accounts.google.com
 StaffIdentity__Audience=legends-legacy-liveops

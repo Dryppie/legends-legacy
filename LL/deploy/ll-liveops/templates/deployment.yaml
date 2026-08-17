@@ -35,6 +35,10 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            {{- if or .Values.publicBaseUrl .Values.probes.host }}
+            - name: LiveOps__PublicBaseUrl
+              value: {{ .Values.publicBaseUrl | default (printf "https://%s" .Values.probes.host) | quote }}
+            {{- end }}
             {{- range $name, $item := .Values.env }}
             - name: {{ $name }}
               {{- $item | toYaml | nindent 14 }}

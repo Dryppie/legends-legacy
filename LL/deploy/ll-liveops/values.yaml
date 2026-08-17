@@ -1,5 +1,6 @@
 replicaCount: 1
 revisionHistoryLimit: 2
+publicBaseUrl: ""
 
 image:
   repository: ghcr.io/dryppie/ll-liveops

@@ -325,7 +325,8 @@ The identity provider, not the dashboard, should enforce MFA and staff membershi
 
 ## Production configuration
 
-Expected secret-managed settings include:
+Expected runtime settings include the following. Credentials and shared secrets
+must be supplied through secret management:
 
 ```text
 StaffIdentity__Authority
@@ -337,6 +338,10 @@ LiveOps__PublicBaseUrl
 Chat__Moderation__BaseUrl
 Chat__Moderation__Secret
 ```
+
+`LiveOps__PublicBaseUrl` is the fixed external HTTPS root URL used for redirect
+generation behind the Cloudflare Tunnel and Traefik. The LiveOps Helm chart
+derives it from the configured probe hostname unless it is explicitly set.
 
 API.Chat must receive the matching:
 

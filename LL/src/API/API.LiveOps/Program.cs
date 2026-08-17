@@ -87,6 +87,7 @@ if (config.GetValue<bool>($"{LiveOpsReverseProxy.SectionName}:Enabled"))
 {
     app.UseForwardedHeaders();
 }
+app.UseLiveOpsPublicOrigin(config);
 
 if (app.Environment.IsDevelopment())
 {
@@ -184,6 +185,15 @@ static void ValidateProductionConfiguration(
     {
         throw new InvalidOperationException(
             "AllowedHosts must contain the private LiveOps hostname outside Development.");
+    }
+    if (!LiveOpsPublicOrigin.TryParse(
+            configuration[LiveOpsPublicOrigin.ConfigurationKey],
+            out var publicBaseUri) ||
+        publicBaseUri.Scheme != Uri.UriSchemeHttps ||
+        !allowedHosts.Contains(publicBaseUri.Host, StringComparer.OrdinalIgnoreCase))
+    {
+        throw new InvalidOperationException(
+            "LiveOps:PublicBaseUrl must be an HTTPS root URL whose host is present in AllowedHosts outside Development.");
     }
     if (string.IsNullOrWhiteSpace(configuration.GetConnectionString("LegendsLegacyDB")))
     {
