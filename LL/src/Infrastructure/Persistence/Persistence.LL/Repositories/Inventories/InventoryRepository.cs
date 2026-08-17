@@ -315,10 +315,21 @@ public class InventoryRepository : IInventoryRepository
                 x => x.InventoryId == characterId && x.ItemInstanceId == itemInstanceId,
                 cancellationToken);
 
-        if (inventoryItem is null)
+        if (inventoryItem is not null)
+        {
+            inventoryItem.IsFavorite = isFavorite;
+            return true;
+        }
+
+        var equippedItem = await _context.EquipmentSlots
+            .Where(x => x.EntityId == characterId && x.EquipmentInstanceId == itemInstanceId)
+            .Select(x => x.EquipmentInstance)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (equippedItem is null)
             return false;
 
-        inventoryItem.IsFavorite = isFavorite;
+        equippedItem.IsFavorite = isFavorite;
         return true;
     }
 

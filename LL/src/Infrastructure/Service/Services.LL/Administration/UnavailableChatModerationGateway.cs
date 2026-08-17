@@ -12,6 +12,16 @@ public sealed class UnavailableChatModerationGateway : IChatModerationGateway
     private const string Error =
         "Chat moderation is only available through the LiveOps API host.";
 
+    public Task<ChatModerationStateGatewayResult> GetStateAsync(
+        Guid characterId,
+        int historyLimit,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(new ChatModerationStateGatewayResult(
+            false,
+            null,
+            [],
+            Error));
+
     public Task<ChatModerationGatewayResult> MuteAsync(
         ChatMuteGatewayRequest request,
         CancellationToken cancellationToken) =>

@@ -53,7 +53,7 @@ public interface IInventoryRepository
     /// <returns>False when the character does not own the item.</returns>
     Task<bool> MarkItemSeenAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken);
     /// <summary>
-    /// Updates the owner's favorite preference for an inventory row.
+    /// Updates the owner's favorite preference for an inventory or equipped item.
     /// </summary>
     /// <returns>False when the character does not own the item.</returns>
     Task<bool> SetItemFavoriteAsync(Guid characterId, Guid itemInstanceId, bool isFavorite, CancellationToken cancellationToken);

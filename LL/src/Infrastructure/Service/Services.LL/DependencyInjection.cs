@@ -100,6 +100,33 @@ using System.Text.Json.Serialization;
 namespace Services.LL;
 public static class DependencyInjection
 {
+    public static IServiceCollection AddLiveOpsServices(
+        this IServiceCollection services,
+        IConfiguration config)
+    {
+        services.Configure<LiveOpsOptions>(
+            config.GetSection(LiveOpsOptions.SectionName));
+        services.AddSingleton(TimeProvider.System);
+        services.AddScoped<IAccountAccessPolicy, AccountAccessPolicy>();
+        services.AddScoped<ILiveOpsService, LiveOpsService>();
+        services.TryAddScoped<IChatModerationGateway, UnavailableChatModerationGateway>();
+        services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IInventoryItemFactory, InventoryItemFactory>();
+        services.AddSingleton<IGameEventOutboxConsumerRegistry, GameEventOutboxConsumerRegistry>();
+        services.AddScoped<IGameEventOutbox, GameEventOutbox>();
+        services.AddScoped<IGameRealtimeBroadcaster, OutboxGameRealtimeBroadcaster>();
+        services.AddScoped<IGameRealtimeImmediatePublisher, NoOpGameRealtimeImmediatePublisher>();
+        services.AddScoped<IStateSyncService, StateSyncService>();
+        services.TryAddSingleton(_ =>
+        {
+            var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+            options.Converters.Add(new JsonStringEnumConverter());
+            return options;
+        });
+
+        return services;
+    }
+
     public static IServiceCollection AddServices(
         this IServiceCollection services,
         IConfiguration config,

@@ -37,5 +37,11 @@ describe('RegionService', () => {
       'Kobold Skirmisher',
       'Kobold Sorcerer',
     ]);
+    expect(region.areas[0].gatheringTypes).toEqual([
+      GatheringType.Mining,
+      GatheringType.Woodcutting,
+      GatheringType.Skinning,
+    ]);
+    expect(region.areas[1].gatheringTypes).toEqual([GatheringType.Mining]);
   });
 });

@@ -94,6 +94,8 @@ public sealed class RegionOneIdleAreaSeedTests
         var meran = await db.Regions
             .Include(region => region.Areas)
             .ThenInclude(area => area.Creatures)
+            .Include(region => region.Areas)
+            .ThenInclude(area => area.GatheringNodes)
             .SingleAsync(region => region.Name == "Meran");
         var areas = meran.Areas.OrderBy(area => area.DifficultyTier).ToArray();
 
@@ -106,6 +108,17 @@ public sealed class RegionOneIdleAreaSeedTests
         Assert.Equal(
             ["Feral Ghoul", "Plague Ghoul", "Ravenous Ghoul", "Vampire Fledgeling", "Wandering Ghost"],
             areas[1].Creatures.Select(creature => creaturesById[creature.CreatureId]).OrderBy(name => name));
+        Assert.Equal(
+            [GatheringType.Mining, GatheringType.Woodcutting, GatheringType.Skinning],
+            areas[0].GatheringNodes.Select(node => node.Type).Order());
+        Assert.Equal(
+            [GatheringType.Mining],
+            areas[1].GatheringNodes.Select(node => node.Type));
+        Assert.All(areas.SelectMany(area => area.GatheringNodes), node =>
+        {
+            Assert.Equal(1, node.LevelRequirement);
+            Assert.False(string.IsNullOrWhiteSpace(node.RewardTableId));
+        });
     }
 
     [Fact]

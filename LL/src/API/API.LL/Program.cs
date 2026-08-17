@@ -3,7 +3,6 @@ using API.LL.Common;
 using API.LL.HostedServices;
 using Application;
 using Application.Interfaces.Services.LL;
-using Application.Interfaces.Services.LL.Administration;
 using Asp.Versioning;
 using Common;
 using Domain.Models.Users;
@@ -153,43 +152,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
                 return Task.CompletedTask;
             },
-            OnTokenValidated = async context =>
+            OnTokenValidated = context =>
             {
                 var isAllowAnonymous = context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() is not null;
                 if (isAllowAnonymous)
                 {
-                    return;
+                    return Task.CompletedTask;
                 }
 
-                var rawUserId = context.Principal?.FindFirstValue(ClaimTypes.UserData);
-                var hasUserId = Guid.TryParse(rawUserId, out var userId);
+                var hasUserId = Guid.TryParse(
+                    context.Principal?.FindFirstValue(ClaimTypes.UserData),
+                    out _);
                 var hasCharacterId = context.Principal?.FindFirstValue("CharacterId") is not null;
 
                 if (!hasUserId || !hasCharacterId)
                 {
                     context.Fail("The access token is missing required identity claims.");
-                    return;
                 }
 
-                var accountAccess = context.HttpContext.RequestServices
-                    .GetRequiredService<IAccountAccessPolicy>();
-                try
-                {
-                    if (await accountAccess.GetActiveBanAsync(
-                            userId,
-                            context.HttpContext.RequestAborted) is not null)
-                    {
-                        context.Fail("The account is suspended.");
-                    }
-                }
-                catch (OperationCanceledException)
-                    when (context.HttpContext.RequestAborted.IsCancellationRequested)
-                {
-                    // A browser refresh aborts outstanding authenticated requests.
-                    // Treat that as an unauthenticated abandoned request instead of
-                    // surfacing an expected cancellation through the debugger.
-                    context.NoResult();
-                }
+                return Task.CompletedTask;
             },
             OnAuthenticationFailed = context =>
             {

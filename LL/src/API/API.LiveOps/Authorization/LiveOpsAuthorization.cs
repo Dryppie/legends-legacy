@@ -28,7 +28,7 @@ public static class LiveOpsAuthorization
         }
     }
 
-    private static bool HasPermission(ClaimsPrincipal principal, string permission) =>
+    public static bool HasPermission(ClaimsPrincipal principal, string permission) =>
         principal.Claims
             .Where(claim => claim.Type is "permission" or "permissions" or "scope")
             .SelectMany(claim => ExpandClaimValue(claim.Value))
@@ -36,6 +36,14 @@ public static class LiveOpsAuthorization
                 value,
                 permission,
                 StringComparison.OrdinalIgnoreCase));
+
+    public static IReadOnlyList<string> GetPermissions(ClaimsPrincipal principal) =>
+        principal.Claims
+            .Where(claim => claim.Type is "permission" or "permissions" or "scope")
+            .SelectMany(claim => ExpandClaimValue(claim.Value))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
     private static IEnumerable<string> ExpandClaimValue(string value)
     {

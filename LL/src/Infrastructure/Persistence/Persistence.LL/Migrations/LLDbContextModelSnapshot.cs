@@ -4807,6 +4807,9 @@ namespace Persistence.LL.Migrations
                     b.Property<string>("CraftedName")
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsFavorite")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsLevelingItem")
                         .HasColumnType("boolean");
 

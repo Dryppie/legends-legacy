@@ -17,12 +17,14 @@ export interface ItemInstance {
 
 export interface EquipmentInstance extends ItemInstance {
   displayName: string;
+  isFavorite?: boolean;
   rarity: Rarity;
   quality: ItemQuality;
   baseRecipeId?: string | null;
   blueprintId?: string | null;
   craftingDesign?: EquipmentCraftingDesignMetadata | null;
   tier: number;
+  requiredLevel?: number;
   statModelVersion?: number;
   equipmentBase: Equipment;
   potential?: number;

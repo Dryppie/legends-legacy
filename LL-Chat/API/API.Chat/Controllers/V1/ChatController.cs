@@ -7,6 +7,7 @@ using API.Chat.Hubs;
 using API.Chat.Hubs.Interfaces;
 using Domain.Models.Chats;
 using Application.UsesCases.Chats.Queries.GetChatHistory;
+using Application.UsesCases.Chats.Queries.GetModerationState;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -156,6 +157,19 @@ public class ChatController : BaseController
         return result is null
             ? BadRequest("The chat mute could not be applied.")
             : Ok(result);
+    }
+
+    [AllowAnonymous]
+    [HttpGet("Moderation/{characterId:guid}")]
+    public async Task<ActionResult<ChatModerationStateDto>> GetModerationState(
+        Guid characterId,
+        [FromQuery] int take = 50)
+    {
+        var authorizationFailure = AuthorizeInternalModeration();
+        if (authorizationFailure is not null) return authorizationFailure;
+
+        return Ok(await Mediator.Send(
+            new GetModerationStateQuery(characterId, take)));
     }
 
     [AllowAnonymous]

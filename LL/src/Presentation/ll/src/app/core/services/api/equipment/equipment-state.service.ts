@@ -61,46 +61,53 @@ export class EquipmentStateService {
     const requestVersion = this.resetVersion;
     const requestEpoch = ++this.loadEpoch;
 
-    return this.equipmentService
-      .getEquipment()
-      .pipe(
-        tap({
-          next: (equipmentSlots) => {
-            if (
-              requestVersion !== this.resetVersion ||
-              requestEpoch !== this.loadEpoch
-            ) {
-              return;
-            }
-            this._equipmentSlots.set(equipmentSlots);
-          },
-          error: (err) => {
-            if (
-              requestVersion !== this.resetVersion ||
-              requestEpoch !== this.loadEpoch
-            ) {
-              return;
-            }
-            this._error.set(err.message ?? 'Unknown error');
-          },
-        }),
-        finalize(() => {
-          if (requestEpoch === this.loadEpoch) this._loading.set(false);
-        }),
-      );
+    return this.equipmentService.getEquipment().pipe(
+      tap({
+        next: (equipmentSlots) => {
+          if (
+            requestVersion !== this.resetVersion ||
+            requestEpoch !== this.loadEpoch
+          ) {
+            return;
+          }
+          this.applySlots(equipmentSlots);
+        },
+        error: (err) => {
+          if (
+            requestVersion !== this.resetVersion ||
+            requestEpoch !== this.loadEpoch
+          ) {
+            return;
+          }
+          this._error.set(err.message ?? 'Unknown error');
+        },
+      }),
+      finalize(() => {
+        if (requestEpoch === this.loadEpoch) this._loading.set(false);
+      }),
+    );
   }
 
   reset(): void {
     this.resetVersion += 1;
     this.loadEpoch += 1;
-    this._equipmentSlots.set([]);
+    this.applySlots([]);
     this._loading.set(false);
     this._error.set(null);
   }
 
   setSlots(slots: EquipmentSlot[]): void {
     this.loadEpoch += 1;
+    this.applySlots(slots);
+  }
+
+  private applySlots(slots: EquipmentSlot[]): void {
     this._equipmentSlots.set(slots);
+    this.inventoryState.setEquippedItems(
+      slots.flatMap((slot) =>
+        slot.equipmentInstance ? [slot.equipmentInstance] : [],
+      ),
+    );
   }
 
   getSlot(slotType: EquipmentSlotType): EquipmentSlot | undefined {

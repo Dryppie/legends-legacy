@@ -7,7 +7,7 @@
   "sortOrder": 230,
   "objectiveMode": "Sequential",
   "availability": {
-    "minimumLevel": 10,
+    "minimumLevel": 50,
     "completedQuestIds": ["quest.crafting.arms_of_choice"]
   },
   "objectives": [

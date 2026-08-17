@@ -5,9 +5,9 @@ export const MARKETPLACE_RESOURCE_FAMILY_ITEM_IDS: ReadonlyMap<
   string,
   readonly string[]
 > = new Map([
-  ['ore', ['ore']],
-  ['wood', ['wood']],
-  ['hide', ['rawhide']],
+  ['ore', ['ore', 'copper_ore']],
+  ['wood', ['wood', 'bloodwood']],
+  ['hide', ['rawhide', 'thick_hide']],
 ]);
 
 export const MARKETPLACE_CATALYST_ITEM_IDS: ReadonlySet<string> = new Set([

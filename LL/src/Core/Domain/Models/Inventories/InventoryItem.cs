@@ -21,7 +21,8 @@ public class InventoryItem
 
     /// <summary>
     /// Whether the owning character has marked this inventory row as a favorite.
-    /// Stored on the row so the preference is owner-specific when items change hands.
+    /// Stored on the row so the preference is owner-specific when items change hands, and
+    /// copied to equipment only while equipping removes this row.
     /// </summary>
     public bool IsFavorite { get; set; }
 

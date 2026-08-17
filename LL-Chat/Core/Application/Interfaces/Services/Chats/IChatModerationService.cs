@@ -8,6 +8,11 @@ public interface IChatModerationService
         Guid characterId,
         CancellationToken cancellationToken);
 
+    Task<IReadOnlyList<ChatModerationAction>> GetHistoryAsync(
+        Guid characterId,
+        int limit,
+        CancellationToken cancellationToken);
+
     Task<ChatModerationResult> MuteAsync(
         Guid operationId,
         Guid characterId,

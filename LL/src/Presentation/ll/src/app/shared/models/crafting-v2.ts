@@ -42,6 +42,7 @@ export interface CraftingItemPreview {
   equipmentType: EquipmentType;
   rarity: Rarity;
   tier: number;
+  requiredLevel?: number;
   statModelVersion: number;
   attributes: CraftingAttributePreview[];
   qualityChances: CraftingQualityChance[];

@@ -9,6 +9,21 @@ public interface ILiveOpsService
         int limit,
         CancellationToken cancellationToken);
 
+    Task<PlayerAdministrationSnapshot?> GetPlayerAsync(
+        Guid characterId,
+        CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<AdministrationItemCatalogEntry>> SearchItemsAsync(
+        string query,
+        int limit,
+        CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<AdministrationHistoryEntry>> GetHistoryAsync(
+        Guid accountId,
+        Guid characterId,
+        int limit,
+        CancellationToken cancellationToken);
+
     Task<AdministrationOperationResult<AccountBanOperation>> BanAccountAsync(
         Guid operationId,
         Guid accountId,

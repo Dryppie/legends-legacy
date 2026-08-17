@@ -22,6 +22,13 @@ public class EquipmentInstance : ItemInstance
     public int ItemXp { get; set; } = 0;
     public bool IsMasterpiece { get; set; } = false;
     public bool IsLevelingItem { get; set; } = false;
+
+    /// <summary>
+    /// Carries the owning character's favorite preference while this item is equipped.
+    /// The value is copied from the inventory row on equip and back to the new row on unequip.
+    /// </summary>
+    public bool IsFavorite { get; set; }
+
     [NotMapped]
     public EquipmentBase EquipmentBase => (EquipmentBase)ItemBase;
 

@@ -1,0 +1,131 @@
+name: Build LL LiveOps
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - "releases/**"
+    paths:
+      - "LL/src/API/API.LiveOps/**"
+      - "LL/src/Core/**"
+      - "LL/src/Infrastructure/Persistence/**"
+      - "LL/src/Infrastructure/Service/Services.LL/**"
+      - "LL/src/Presentation/liveops/**"
+      - "LL/deploy/ll-liveops/**"
+      - "LL/tests/EssenceSystem.Tests/**"
+      - "build/build-ll-liveops.ps1"
+      - "build/ll-liveops.dockerfile"
+      - ".github/actions/build-and-push-docker/**"
+      - ".github/actions/build-and-push-helm/**"
+      - ".github/workflows/LL-liveops.yml"
+      - ".github/workflows/backend-gate.yml"
+
+jobs:
+  gate:
+    uses: ./.github/workflows/backend-gate.yml
+    with:
+      run_full_balance: false
+
+  setup:
+    needs: gate
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set_version.outputs.version }}
+      tag: ${{ steps.set_tag.outputs.tag }}
+
+    steps:
+      - name: Checkout infrastructure versions
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/ll-infrastructure
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Increment component version
+        id: set_version
+        shell: bash
+        run: |
+          version_file="deploy/versions/ll-liveops.version"
+          if [[ -f "$version_file" ]]; then
+            version=$(cat "$version_file")
+          else
+            # Bootstrap the first component release before infrastructure has
+            # recorded a published version.
+            version="0.0.0"
+          fi
+          IFS='.' read -r major minor patch <<< "$version"
+          new_version="${major}.${minor}.$((patch + 1))"
+          echo "version=$new_version" >> "$GITHUB_OUTPUT"
+
+      - name: Select image tag
+        id: set_tag
+        shell: bash
+        run: |
+          version="${{ steps.set_version.outputs.version }}"
+          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
+            tag="main-${version}"
+          elif [[ "$GITHUB_REF" == refs/heads/releases/* ]]; then
+            tag="release-${version}"
+          else
+            tag="${version}"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+  docker:
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and publish LiveOps image
+        uses: ./.github/actions/build-and-push-docker
+        with:
+          tag: ${{ needs.setup.outputs.tag }}
+          version: ${{ needs.setup.outputs.version }}
+          buildScript: "build/build-ll-liveops.ps1"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  helm:
+    needs:
+      - setup
+      - docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish LiveOps Helm chart
+        uses: ./.github/actions/build-and-push-helm
+        with:
+          version: ${{ needs.setup.outputs.version }}
+          tag: ${{ needs.setup.outputs.tag }}
+          workingDirectory: "LL/deploy/ll-liveops"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          imageName: "ll-liveops"
+
+  bump_version:
+    needs:
+      - setup
+      - helm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout infrastructure repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/ll-infrastructure
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Record published LiveOps version
+        shell: bash
+        run: |
+          version_file="deploy/versions/ll-liveops.version"
+          if [[ ! -f "$version_file" ]]; then
+            echo "Infrastructure has not added ll-liveops.version yet; leaving the bootstrap release unrecorded."
+            exit 0
+          fi
+          echo "${{ needs.setup.outputs.version }}" > "$version_file"
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git add "$version_file"
+          git commit -m "Bump ll-liveops version to ${{ needs.setup.outputs.version }}"
+          git push

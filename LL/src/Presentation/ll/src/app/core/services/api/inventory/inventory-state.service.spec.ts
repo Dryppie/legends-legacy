@@ -218,6 +218,55 @@ describe('InventoryStateService', () => {
     expect(receivedError).toEqual(jasmine.any(Error));
     expect(service.items()[0].isFavorite).toBeFalsy();
   });
+
+  it('updates a favorite while the item is equipped', () => {
+    const favoriteRequest = new Subject<{
+      itemInstanceId: string;
+      isFavorite: boolean;
+    }>();
+    const inventoryApi = jasmine.createSpyObj<InventoryService>(
+      'InventoryService',
+      ['getInventory', 'setItemFavorite'],
+    );
+    inventoryApi.getInventory.and.returnValue(of({ inventoryItems: [] }));
+    inventoryApi.setItemFavorite.and.returnValue(favoriteRequest);
+    const service = createService(inventoryApi);
+    service.setEquippedItems([{ id: 'equipped-instance', isFavorite: false }]);
+
+    service.setFavorite('equipped-instance', true).subscribe();
+
+    expect(service.isFavorite('equipped-instance')).toBeTrue();
+    expect(inventoryApi.setItemFavorite).toHaveBeenCalledOnceWith(
+      'equipped-instance',
+      true,
+    );
+
+    favoriteRequest.next({
+      itemInstanceId: 'equipped-instance',
+      isFavorite: true,
+    });
+    favoriteRequest.complete();
+    expect(service.isFavorite('equipped-instance')).toBeTrue();
+  });
+
+  it('rolls back an equipped favorite when persistence fails', () => {
+    const inventoryApi = jasmine.createSpyObj<InventoryService>(
+      'InventoryService',
+      ['getInventory', 'setItemFavorite'],
+    );
+    inventoryApi.getInventory.and.returnValue(of({ inventoryItems: [] }));
+    inventoryApi.setItemFavorite.and.returnValue(
+      throwError(() => new Error('offline')),
+    );
+    const service = createService(inventoryApi);
+    service.setEquippedItems([{ id: 'equipped-instance', isFavorite: false }]);
+
+    service.setFavorite('equipped-instance', true).subscribe({
+      error: () => undefined,
+    });
+
+    expect(service.isFavorite('equipped-instance')).toBeFalse();
+  });
 });
 
 function createService(

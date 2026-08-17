@@ -742,6 +742,7 @@ public class CraftingService : ICraftingService
             EquipmentType = itemBase.EquipmentType,
             Rarity = itemBase.Rarity,
             Tier = tier,
+            RequiredLevel = EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(tier),
             StatModelVersion = EquipmentStatBudgetCatalog.BalanceVersion,
             Attributes = attributes,
             QualityChances = qualityChances

@@ -33,6 +33,9 @@
       <div class="ll-item-meta mt-1 truncate">
         {{ equipmentMeta(data) }}
       </div>
+      <div *ngIf="data.requiredLevel > 1" class="ll-item-meta mt-1 text-primary">
+        Requires level {{ data.requiredLevel }}
+      </div>
 
       <div class="mt-3 flex-1 text-sm">
         <div
@@ -155,6 +158,12 @@
       </h2>
       <div class="ll-item-meta mt-1 truncate">
         {{ equipmentMeta(equipped.data) }}
+      </div>
+      <div
+        *ngIf="equipped.data.requiredLevel > 1"
+        class="ll-item-meta mt-1 text-primary"
+      >
+        Requires level {{ equipped.data.requiredLevel }}
       </div>
 
       <div class="mt-3 flex-1 text-sm">
@@ -315,6 +324,9 @@
 
       <div class="ll-item-meta mt-1">
         {{ equipmentMeta(data) }}
+      </div>
+      <div *ngIf="data.requiredLevel > 1" class="ll-item-meta mt-1 text-primary">
+        Requires level {{ data.requiredLevel }}
       </div>
     </ng-container>
 

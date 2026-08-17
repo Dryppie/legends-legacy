@@ -30,6 +30,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AttributeTypeFormatPipe } from '../../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { AttributeValueFormatPipe } from '../../../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
+import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
 
 @Component({
   selector: 'app-inventory-equipment-modal',
@@ -59,7 +60,16 @@ export class InventoryEquipmentModalComponent implements OnInit {
     readonly equipmentState: EquipmentStateService,
     private inventoryState: InventoryStateService,
     private equipmentApi: EquipmentService,
+    private characterState: CharacterStateService,
   ) {}
+
+  get requiredLevel(): number {
+    return this.equipmentInstance.requiredLevel ?? 1;
+  }
+
+  get meetsLevelRequirement(): boolean {
+    return (this.characterState.currentCharacter()?.level ?? 0) >= this.requiredLevel;
+  }
 
   get inventoryItem(): InventoryItem | undefined {
     return this.inventoryState
@@ -113,6 +123,8 @@ export class InventoryEquipmentModalComponent implements OnInit {
   }
 
   onEquip(): void {
+    if (!this.meetsLevelRequirement) return;
+
     this.equipmentState.equip(this.equipmentInstance, this.selectedSlotType);
     this.onClose();
   }

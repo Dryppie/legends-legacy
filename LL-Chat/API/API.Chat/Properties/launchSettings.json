@@ -17,6 +17,7 @@
       "applicationUrl": "http://localhost:5179",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "InternalModeration__Secret": "local-development-liveops-chat-secret",
         "SystemMessages__Secret": "local-development-system-chat-secret"
       }
     },
@@ -28,6 +29,7 @@
       "applicationUrl": "https://localhost:7095;http://localhost:5179",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "InternalModeration__Secret": "local-development-liveops-chat-secret",
         "SystemMessages__Secret": "local-development-system-chat-secret"
       }
     },
@@ -37,6 +39,7 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "InternalModeration__Secret": "local-development-liveops-chat-secret",
         "SystemMessages__Secret": "local-development-system-chat-secret"
       }
     }

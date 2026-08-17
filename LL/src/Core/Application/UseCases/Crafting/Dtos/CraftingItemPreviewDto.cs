@@ -12,6 +12,7 @@ public sealed class CraftingItemPreviewDto
     public EquipmentType EquipmentType { get; init; }
     public Rarity Rarity { get; init; }
     public int Tier { get; init; }
+    public int RequiredLevel { get; init; } = 1;
     public int StatModelVersion { get; init; } = EquipmentStatBudgetCatalog.BalanceVersion;
     public IReadOnlyList<CraftingAttributePreviewDto> Attributes { get; init; } = [];
     public IReadOnlyList<CraftingQualityChanceDto> QualityChances { get; init; } = [];

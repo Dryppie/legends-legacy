@@ -763,9 +763,7 @@
                           | attributeValueFormat
                             : attribute.attributeType
                             : true
-                            : usesV16ItemPresentation(
-                                preview.statModelVersion
-                              )
+                            : usesV16ItemPresentation(preview.statModelVersion)
                       }}</ng-container
                     >
                   </span>
@@ -787,9 +785,16 @@
               </div>
 
               <div class="ll-item-stat-row">
-                <span>Required crafting level</span>
+                <span>Required level to craft</span>
                 <span class="text-primary">
-                  Level {{ recipe.minimumProfessionLevel }}
+                  Crafting level {{ recipe.minimumProfessionLevel }}
+                </span>
+              </div>
+
+              <div class="ll-item-stat-row">
+                <span>Required level to equip</span>
+                <span class="text-primary">
+                  Character level {{ preview.requiredLevel ?? 1 }}
                 </span>
               </div>
 

@@ -102,6 +102,22 @@ describe('MarketPlaceCommodityComponent absorbed Essences', () => {
     expect(component.catalogStatus()).toBe('all');
   });
 
+  it('shows tier two materials in their resource family', () => {
+    const component = createComponent([
+      resourceBase('ore', 'Ore'),
+      resourceBase('copper_ore', 'Copper Ore'),
+      resourceBase('bloodwood', 'Bloodwood'),
+      resourceBase('thick_hide', 'Thick Hide'),
+    ]);
+    component.itemType = ItemType.Resource;
+    component.category = 'resources';
+    component.subcategory = 'Ore';
+
+    expect(
+      component.commodities().map((commodity) => commodity.base.id),
+    ).toEqual(['ore', 'copper_ore']);
+  });
+
   it('loads the Soul Archive once when it has not been fetched yet', () => {
     archive.set(null);
     createComponent();
@@ -128,4 +144,14 @@ function essenceBase(definitionId: string): EssenceItem {
     essenceDefinitionId: definitionId,
     dismantleDustAmount: 1,
   } as unknown as EssenceItem;
+}
+
+function resourceBase(id: string, name: string): ItemBase {
+  return {
+    id,
+    name,
+    description: '',
+    itemType: ItemType.Resource,
+    stackable: true,
+  } as ItemBase;
 }

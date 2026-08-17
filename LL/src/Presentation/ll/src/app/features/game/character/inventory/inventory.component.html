@@ -494,7 +494,7 @@
                   type="button"
                   class="ll-button ll-button-primary"
                   [class.col-span-2]="equipSlotOptions(item).length === 1"
-                  [disabled]="isEquipPending"
+                  [disabled]="isEquipPending || !canEquipItem(item)"
                   (click)="equipItem(item, slotType)"
                 >
                   {{ equipActionLabel(item, slotType) }}
