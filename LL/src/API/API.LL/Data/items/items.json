@@ -1099,6 +1099,39 @@
     "gatheringType": null
   },
   {
+    "id": "copper_ore",
+    "name": "Copper Ore",
+    "description": "Dense copper-bearing stone gathered in the Meran region for Tier 2 crafting.",
+    "itemType": "Resource",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
+    "id": "bloodwood",
+    "name": "Bloodwood",
+    "description": "Hard, crimson timber gathered in the Meran region for Tier 2 crafting.",
+    "itemType": "Resource",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
+    "id": "thick_hide",
+    "name": "Thick Hide",
+    "description": "Tough frontier hide gathered in the Meran region for Tier 2 crafting.",
+    "itemType": "Resource",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
     "id": "item.blueprint_selection_box",
     "name": "Blueprint Selection Box",
     "description": "Open this box from your inventory to choose one Blueprint.",

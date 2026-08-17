@@ -764,6 +764,82 @@
           ]
         }
       ]
+    },
+    {
+      "id": "reward.gathering.warfang_frontier.copper_vein",
+      "displayName": "Warfang Frontier Copper Vein",
+      "rolls": [
+        {
+          "id": "mining_material",
+          "type": "Weighted",
+          "entries": [
+            {
+              "id": "copper_ore",
+              "type": "Item",
+              "itemId": "copper_ore",
+              "weight": 60,
+              "quantity": { "min": 12, "max": 32 }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.gathering.warfang_frontier.bloodwood_tree",
+      "displayName": "Warfang Frontier Bloodwood Tree",
+      "rolls": [
+        {
+          "id": "woodcutting_material",
+          "type": "Weighted",
+          "entries": [
+            {
+              "id": "bloodwood",
+              "type": "Item",
+              "itemId": "bloodwood",
+              "weight": 60,
+              "quantity": { "min": 12, "max": 32 }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.gathering.warfang_frontier.beast_remains",
+      "displayName": "Warfang Frontier Beast Remains",
+      "rolls": [
+        {
+          "id": "skinning_material",
+          "type": "Weighted",
+          "entries": [
+            {
+              "id": "thick_hide",
+              "type": "Item",
+              "itemId": "thick_hide",
+              "weight": 60,
+              "quantity": { "min": 12, "max": 32 }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.gathering.rotgrave_fields.copper_deposit",
+      "displayName": "Rotgrave Fields Copper Deposit",
+      "rolls": [
+        {
+          "id": "mining_material",
+          "type": "Weighted",
+          "entries": [
+            {
+              "id": "copper_ore",
+              "type": "Item",
+              "itemId": "copper_ore",
+              "weight": 60,
+              "quantity": { "min": 12, "max": 32 }
+            }
+          ]
+        }
+      ]
     }
   ]
 }

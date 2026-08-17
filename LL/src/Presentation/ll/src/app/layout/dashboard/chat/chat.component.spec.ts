@@ -1,4 +1,5 @@
 import {
+  ChatComponent,
   fallbackFromUnavailableGuildChannel,
   getChatSendErrorMessage,
   getWireErrorMessage,
@@ -12,6 +13,46 @@ import {
   ChatChannelType,
   ChatMessageDto,
 } from '../../../core/services/ll-chat/chat-service/chat.service';
+
+describe('ChatComponent message submission', () => {
+  it('ignores repeated sends while the current message is still in flight', async () => {
+    let completeSend!: () => void;
+    const pendingSend = new Promise<void>((resolve) => {
+      completeSend = resolve;
+    });
+    const sendPublic = jasmine
+      .createSpy('sendPublic')
+      .and.returnValue(pendingSend);
+    const component = Object.assign(Object.create(ChatComponent.prototype), {
+      userInfoLoaded: true,
+      userInfo: { isRegisteredUser: true },
+      draft: 'Hello world',
+      sendError: '',
+      isSending: false,
+      activeChannel: {
+        type: ChatChannelType.General,
+        contextKey: 'general',
+      },
+      chat: { sendPublic },
+    }) as ChatComponent;
+
+    const firstSend = component.send();
+    const repeatedSend = component.send();
+
+    expect(component.isSending).toBeTrue();
+    expect(sendPublic).toHaveBeenCalledOnceWith(
+      ChatChannelType.General,
+      'general',
+      'Hello world',
+    );
+
+    completeSend();
+    await Promise.all([firstSend, repeatedSend]);
+
+    expect(component.isSending).toBeFalse();
+    expect(component.draft).toBe('');
+  });
+});
 
 describe('fallbackFromUnavailableGuildChannel', () => {
   it('selects All when guild membership disappears from the Guild channel', () => {

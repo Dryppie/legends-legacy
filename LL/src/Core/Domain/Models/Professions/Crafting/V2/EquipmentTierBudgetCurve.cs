@@ -38,6 +38,16 @@ public static class EquipmentTierBudgetCurve
     public static int GetExpectedTierForCharacterLevel(int characterLevel) =>
         ((Math.Max(1, characterLevel) - 1) / CharacterLevelsPerEquipmentTier) + 1;
 
+    public static int GetRequiredCharacterLevelForTier(int tier)
+    {
+        if (tier < 1)
+            throw new ArgumentOutOfRangeException(nameof(tier), tier, "Equipment tier must be positive.");
+
+        return tier == 1
+            ? 1
+            : checked((tier - 1) * CharacterLevelsPerEquipmentTier);
+    }
+
     public static int GetFirstCharacterLevelForTier(int tier)
     {
         if (tier < 1)

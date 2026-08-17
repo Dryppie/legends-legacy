@@ -131,8 +131,8 @@
         <app-regular-button
           class="shrink-0"
           (pressed)="send()"
-          text="Send"
-          [disabled]="!canWriteChat || !draft.trim()"
+          [text]="isSending ? 'Sending...' : 'Send'"
+          [disabled]="!canWriteChat || !draft.trim() || isSending"
         />
       </div>
 
@@ -478,8 +478,8 @@
           <app-regular-button
             class="shrink-0"
             (pressed)="send()"
-            text="Send"
-            [disabled]="!canWriteChat || !draft.trim()"
+            [text]="isSending ? 'Sending...' : 'Send'"
+            [disabled]="!canWriteChat || !draft.trim() || isSending"
           />
         </div>
         <nav

@@ -5,6 +5,7 @@ using Domain.Models.Items.Equipments.Slots;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Repositories.Equipments;
+using Persistence.LL.Repositories.Inventories;
 
 namespace EssenceSystem.Tests;
 
@@ -134,6 +135,69 @@ public sealed class EquipmentHandRuleTests
         Assert.Contains(
             await db.InventoryItems.Where(item => item.InventoryId == characterId).ToListAsync(),
             item => item.ItemInstanceId == first.Id);
+    }
+
+    [Fact]
+    public async Task FavoritePreferenceSurvivesEquipAndUnequip()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var sword = Equipment("favorite-sword", EquipmentType.OneHanded);
+        var character = CharacterWithHands(characterId, null, null, [sword]);
+        character.Inventory!.InventoryItems.Single().IsFavorite = true;
+        db.Characters.Add(character);
+        await db.SaveChangesAsync();
+        var repository = new EquipmentSlotRepository(db);
+
+        Assert.True(await repository.EquipEquipmentAsync(
+            characterId,
+            sword.Id,
+            EquipmentSlotType.MainHand,
+            CancellationToken.None));
+        await db.SaveChangesAsync();
+
+        var equipped = (await repository.GetEquipmentSlotsByEntityIdAsync(characterId, CancellationToken.None))
+            .Single(slot => slot.EquipmentSlotType == EquipmentSlotType.MainHand)
+            .EquipmentInstance;
+        Assert.NotNull(equipped);
+        Assert.True(equipped.IsFavorite);
+
+        Assert.True(await repository.UnequipEquipmentAsync(
+            characterId,
+            EquipmentSlotType.MainHand,
+            CancellationToken.None));
+        await db.SaveChangesAsync();
+
+        var returned = await db.InventoryItems.SingleAsync(item =>
+            item.InventoryId == characterId && item.ItemInstanceId == sword.Id);
+        Assert.True(returned.IsFavorite);
+    }
+
+    [Fact]
+    public async Task EquippedFavoriteCanOnlyBeChangedByItsOwner()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var strangerId = Guid.NewGuid();
+        var sword = Equipment("equipped-favorite-sword", EquipmentType.OneHanded);
+        var character = CharacterWithHands(characterId, sword, null, []);
+        db.Characters.Add(character);
+        await db.SaveChangesAsync();
+        var inventoryRepository = new InventoryRepository(db);
+
+        Assert.True(await inventoryRepository.SetItemFavoriteAsync(
+            characterId,
+            sword.Id,
+            true,
+            CancellationToken.None));
+        Assert.False(await inventoryRepository.SetItemFavoriteAsync(
+            strangerId,
+            sword.Id,
+            false,
+            CancellationToken.None));
+        await db.SaveChangesAsync();
+
+        Assert.True(sword.IsFavorite);
     }
 
     private static LLDbContext CreateDb()

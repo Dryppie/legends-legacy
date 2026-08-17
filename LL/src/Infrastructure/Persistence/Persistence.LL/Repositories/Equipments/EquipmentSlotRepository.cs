@@ -3,6 +3,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Professions.Crafting.V2;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Equipments;
@@ -142,6 +143,13 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             return false;
         }
         var equipmentInstance = (EquipmentInstance)inventoryItem.ItemInstance;
+        var requiredLevel = EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(
+            equipmentInstance.Tier);
+        if (character.Level < requiredLevel)
+        {
+            return false;
+        }
+
         return await EquipEquipmentAsync(character, inventory, equipmentInstance, inventoryItem, slotType, cancellationToken);
     }
 
@@ -267,6 +275,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                 }
         }
 
+        equipmentInstance.IsFavorite = inventoryItem.IsFavorite;
         _context.InventoryItems.Remove(inventoryItem);
         inventory.InventoryItems.Remove(inventoryItem);
 
@@ -329,7 +338,8 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             InventoryId = inventory.CharacterId,
             ItemInstanceId = item.Id,
             ItemInstance = item,
-            Quantity = 1
+            Quantity = 1,
+            IsFavorite = item.IsFavorite
         });
     }
 }

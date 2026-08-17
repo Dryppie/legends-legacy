@@ -290,6 +290,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   messages: ChatMessageDto[] = [];
   draft = '';
   sendError = '';
+  isSending = false;
   userInfo: UserInfoDto | null = null;
   userInfoLoaded = false;
   chatAccessFailed = false;
@@ -675,6 +676,8 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   async send(): Promise<void> {
+    if (this.isSending) return;
+
     if (!this.canWriteChat) {
       this.sendError = this.isGuestAccount
         ? 'Register your account before writing in chat.'
@@ -688,6 +691,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (!body || !isMessageAllowed(body)) return;
 
     let { type, contextKey } = this.activeChannel;
+    this.isSending = true;
 
     try {
       const wire = parseWireCommand(body);
@@ -756,6 +760,8 @@ export class ChatComponent implements OnInit, OnDestroy {
         ? getWireErrorMessage(err)
         : getChatSendErrorMessage(err);
       console.warn('Unable to send chat message.', err);
+    } finally {
+      this.isSending = false;
     }
   }
 }

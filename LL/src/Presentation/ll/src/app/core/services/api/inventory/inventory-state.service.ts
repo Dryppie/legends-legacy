@@ -21,6 +21,9 @@ import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-c
 export class InventoryStateService {
   /* ---------- writable signals ---------- */
   private readonly _items = signal<InventoryItem[]>([]);
+  private readonly _equippedItemFavoriteState = signal<
+    ReadonlyMap<string, boolean>
+  >(new Map());
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
 
@@ -29,14 +32,20 @@ export class InventoryStateService {
   readonly loading = computed(() => this._loading());
   readonly isEmpty = computed(() => this._items().length === 0);
   readonly error = computed(() => this._error());
-  private readonly favoriteItemInstanceIds = computed(
-    () =>
-      new Set(
-        this._items()
-          .filter((item) => item.isFavorite)
-          .map((item) => item.itemInstance.id),
-      ),
-  );
+  private readonly favoriteItemInstanceIds = computed(() => {
+    const favorites = new Set(
+      this._items()
+        .filter((item) => item.isFavorite)
+        .map((item) => item.itemInstance.id),
+    );
+    for (const [
+      itemInstanceId,
+      isFavorite,
+    ] of this._equippedItemFavoriteState()) {
+      if (isFavorite) favorites.add(itemInstanceId);
+    }
+    return favorites;
+  });
   private readonly _lastLoot = signal<InventoryItem[] | null>(null);
   private readonly suppressedLootSignatures = new Set<string>();
   private readonly processedInventoryGrantIds = new Set<string>();
@@ -144,41 +153,40 @@ export class InventoryStateService {
     const requestVersion = this.resetVersion;
     const loadVersion = ++this.loadVersion;
 
-    return this.inventoryService
-      .getInventory()
-      .pipe(
-        tap({
-          next: (dto) => {
-            if (
-              requestVersion !== this.resetVersion ||
-              loadVersion !== this.loadVersion
-            ) {
-              return;
-            }
-            this._items.set(this.sortItems(dto.inventoryItems));
-          },
-          error: (err) => {
-            if (
-              requestVersion !== this.resetVersion ||
-              loadVersion !== this.loadVersion
-            ) {
-              return;
-            }
-            this._error.set(err.message ?? 'Unknown error');
-          },
-        }),
-        finalize(() => {
-          if (loadVersion === this.loadVersion) {
-            this._loading.set(false);
+    return this.inventoryService.getInventory().pipe(
+      tap({
+        next: (dto) => {
+          if (
+            requestVersion !== this.resetVersion ||
+            loadVersion !== this.loadVersion
+          ) {
+            return;
           }
-        }),
-      );
+          this._items.set(this.sortItems(dto.inventoryItems));
+        },
+        error: (err) => {
+          if (
+            requestVersion !== this.resetVersion ||
+            loadVersion !== this.loadVersion
+          ) {
+            return;
+          }
+          this._error.set(err.message ?? 'Unknown error');
+        },
+      }),
+      finalize(() => {
+        if (loadVersion === this.loadVersion) {
+          this._loading.set(false);
+        }
+      }),
+    );
   }
 
   reset(): void {
     this.resetVersion += 1;
     this.loadVersion += 1;
     this._items.set([]);
+    this._equippedItemFavoriteState.set(new Map());
     this._loading.set(false);
     this._error.set(null);
     this._lastLoot.set(null);
@@ -237,6 +245,14 @@ export class InventoryStateService {
     if (suppressNextLoot?.length) {
       this.suppressNextLoot(suppressNextLoot);
     }
+  }
+
+  setEquippedItems(
+    items: ReadonlyArray<{ id: string; isFavorite?: boolean }>,
+  ): void {
+    this._equippedItemFavoriteState.set(
+      new Map(items.map((item) => [item.id, !!item.isFavorite])),
+    );
   }
 
   applyInventoryItemState(
@@ -381,17 +397,26 @@ export class InventoryStateService {
     const index = items.findIndex(
       (item) => item.itemInstance.id === itemInstanceId,
     );
-    if (index === -1) {
+    const equippedFavorites = this._equippedItemFavoriteState();
+    const isEquipped = equippedFavorites.has(itemInstanceId);
+    if (index === -1 && !isEquipped) {
       return throwError(
-        () => new Error('The item is no longer in your inventory.'),
+        () => new Error('The item is no longer owned by this character.'),
       );
     }
 
-    const previous = items[index];
-    const optimistic = { ...previous, isFavorite };
-    const updated = [...items];
-    updated[index] = optimistic;
-    this._items.set(updated);
+    const previous = index === -1 ? undefined : items[index];
+    const previousEquippedFavorite = equippedFavorites.get(itemInstanceId);
+    if (previous) {
+      const optimistic = { ...previous, isFavorite };
+      const updated = [...items];
+      updated[index] = optimistic;
+      this._items.set(updated);
+    } else {
+      const updated = new Map(equippedFavorites);
+      updated.set(itemInstanceId, isFavorite);
+      this._equippedItemFavoriteState.set(updated);
+    }
 
     return this.inventoryService
       .setItemFavorite(itemInstanceId, isFavorite)
@@ -405,12 +430,20 @@ export class InventoryStateService {
             (item) => item.itemInstance.id === itemInstanceId,
           );
           if (
+            previous &&
             currentIndex !== -1 &&
             currentItems[currentIndex].isFavorite === isFavorite
           ) {
             const rolledBack = [...currentItems];
             rolledBack[currentIndex] = previous;
             this._items.set(rolledBack);
+          } else if (!previous) {
+            const currentEquippedFavorites = this._equippedItemFavoriteState();
+            if (currentEquippedFavorites.get(itemInstanceId) === isFavorite) {
+              const rolledBack = new Map(currentEquippedFavorites);
+              rolledBack.set(itemInstanceId, !!previousEquippedFavorite);
+              this._equippedItemFavoriteState.set(rolledBack);
+            }
           }
 
           return throwError(() => error);

@@ -17,6 +17,7 @@ export interface ItemInstance {
 
 export interface EquipmentInstance extends ItemInstance {
   displayName: string;
+  isFavorite?: boolean;
   rarity: Rarity;
   quality: ItemQuality;
   baseRecipeId?: string | null;

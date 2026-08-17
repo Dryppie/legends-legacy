@@ -192,6 +192,11 @@ export class RegionService {
             'Kobold Skirmisher',
             'Kobold Sorcerer',
           ],
+          gatheringTypes: [
+            GatheringType.Mining,
+            GatheringType.Woodcutting,
+            GatheringType.Skinning,
+          ],
         },
         {
           id: 'region_02_area_02',
@@ -204,6 +209,7 @@ export class RegionService {
             'Vampire Fledgeling',
             'Wandering Ghost',
           ],
+          gatheringTypes: [GatheringType.Mining],
         },
       ],
       dungeons: [],

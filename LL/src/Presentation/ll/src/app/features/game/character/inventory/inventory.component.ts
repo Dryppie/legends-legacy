@@ -623,7 +623,16 @@ export class InventoryComponent implements OnInit {
     const current = this.state
       .items()
       .find((item) => item.itemInstance.id === itemInstanceId);
-    if (current) this.selectedItem.set(current);
+    if (current) {
+      this.selectedItem.set(current);
+      return;
+    }
+
+    this.selectedItem.update((item) =>
+      item
+        ? { ...item, isFavorite: this.state.isFavorite(itemInstanceId) }
+        : item,
+    );
   }
 
   selectionContainerMetadata(item: InventoryItem) {
@@ -1100,6 +1109,7 @@ export class InventoryComponent implements OnInit {
       id: equipment.id,
       itemInstance: equipment,
       quantity: 1,
+      isFavorite: this.state.isFavorite(equipment.id),
     };
   }
 }

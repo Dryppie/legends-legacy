@@ -21,12 +21,14 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public EquipmentCraftingDesignMetadataDto? CraftingDesign { get; set; }
     public string? CraftedName { get; set; }
     public int Tier { get; set; } = 1;
+    public int RequiredLevel { get; set; } = 1;
     public int StatModelVersion { get; set; } = EquipmentStatBudgetCatalog.LegacyBalanceVersion;
     public int? Potential { get; set; } = null;
     public int? MaxPotential { get; set; } = null;
     public int TemperingProgress { get; set; } = 0;
     public EquipmentBase EquipmentBase { get; set; } = null!;
     public int ItemXp { get; set; } = 0;
+    public bool IsFavorite { get; set; }
     public IReadOnlyCollection<ItemAttributeModifier> BaseModifiers { get; set; } = [];
     public List<InstanceAttributeModifier> InstanceModifiers { get; set; } = [];
     public List<AttributeModifierBase> AttributeModifiers { get; set; } = [];
@@ -53,6 +55,10 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
             .ForMember(
                 destination => destination.ItemBudgetTier,
                 options => options.MapFrom(source => source.Tier))
+            .ForMember(
+                destination => destination.RequiredLevel,
+                options => options.MapFrom(source =>
+                    EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(source.Tier)))
             .ForMember(
                 destination => destination.EffectiveAttributeModifiers,
                 options => options.MapFrom(source => AttributeCalculator.ProjectEquipmentModifiers(

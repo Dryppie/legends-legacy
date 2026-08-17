@@ -515,6 +515,32 @@
               "creatureId": "00000000-0000-0000-0000-000000000070",
               "weightedSpawnRate": 0.2
             }
+          ],
+          "gatheringNodes": [
+            {
+              "id": "warfang_frontier_copper_vein",
+              "name": "Copper Vein",
+              "type": "Mining",
+              "levelRequirement": 1,
+              "procChance": 0.0037,
+              "rewardTableId": "reward.gathering.warfang_frontier.copper_vein"
+            },
+            {
+              "id": "warfang_frontier_bloodwood_tree",
+              "name": "Bloodwood Tree",
+              "type": "Woodcutting",
+              "levelRequirement": 1,
+              "procChance": 0.0037,
+              "rewardTableId": "reward.gathering.warfang_frontier.bloodwood_tree"
+            },
+            {
+              "id": "warfang_frontier_beast_remains",
+              "name": "Frontier Beast Remains",
+              "type": "Skinning",
+              "levelRequirement": 1,
+              "procChance": 0.0037,
+              "rewardTableId": "reward.gathering.warfang_frontier.beast_remains"
+            }
           ]
         },
         {
@@ -548,6 +574,16 @@
             {
               "creatureId": "00000000-0000-0000-0000-000000000075",
               "weightedSpawnRate": 0.2
+            }
+          ],
+          "gatheringNodes": [
+            {
+              "id": "rotgrave_fields_copper_deposit",
+              "name": "Copper Deposit",
+              "type": "Mining",
+              "levelRequirement": 1,
+              "procChance": 0.0037,
+              "rewardTableId": "reward.gathering.rotgrave_fields.copper_deposit"
             }
           ]
         }

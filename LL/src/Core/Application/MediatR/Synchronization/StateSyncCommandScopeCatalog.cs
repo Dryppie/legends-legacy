@@ -128,8 +128,10 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.Inventories.Commands.MarkInventoryItemSeen.MarkInventoryItemSeenCommand),
             typeof(global::Application.UseCases.Inventories.Commands.OpenCatalystSelectionCrate.OpenCatalystSelectionCrateCommand),
             typeof(global::Application.UseCases.Inventories.Commands.ScrapEquipments.ScrapEquipmentsCommand),
-            typeof(global::Application.UseCases.Inventories.Commands.SetInventoryItemFavorite.SetInventoryItemFavoriteCommand),
             typeof(global::Application.UseCases.Inventories.Commands.TransferInventoryItem.TransferInventoryItemCommand));
+
+        Register(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment], [],
+            typeof(global::Application.UseCases.Inventories.Commands.SetInventoryItemFavorite.SetInventoryItemFavoriteCommand));
 
         Register(profiles, [StateSyncScopes.Inventory], [StateSyncScopes.Marketplace],
             typeof(global::Application.UseCases.MarketPlaces.Commands.BuyCommodity.BuyCommodityCommand),
