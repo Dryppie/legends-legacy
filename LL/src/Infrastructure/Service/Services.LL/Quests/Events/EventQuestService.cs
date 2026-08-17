@@ -1,6 +1,10 @@
+﻿using System.Security.Cryptography;
+using System.Text;
+using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Quests;
 using Application.Interfaces.Services.LL.Quests.Events;
 using Application.Interfaces.WebSockets;
+using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
 using Domain.Models.Items;
 using Domain.Models.Quests;
@@ -18,8 +22,17 @@ public sealed class EventQuestService(
     IInventoryItemFactory inventoryItemFactory,
     ILootRewardWriter lootRewardWriter,
     TimeProvider timeProvider,
-    IGameEventPublisher eventPublisher) : IEventQuestService, IEventQuestProgressionService
+    IGameEventPublisher eventPublisher,
+    IGameEventOutbox outbox) : IEventQuestService, IEventQuestProgressionService
 {
+    private const string EventQuestTargetUrl = "/game/quests";
+
+    /// <summary>A status change worth announcing in world chat.</summary>
+    private readonly record struct EventQuestAnnouncement(
+        string EventQuestId,
+        int DefinitionVersion,
+        EventQuestStatus Status);
+
     public async Task<EventQuestJournal> GetJournalAsync(
         Guid characterId,
         CancellationToken cancellationToken)
@@ -30,9 +43,14 @@ public sealed class EventQuestService(
         }
 
         await EnsureInstancesAsync(cancellationToken);
+        var now = timeProvider.GetUtcNow();
         var instances = await repository.GetAllAsync(characterId, cancellationToken);
-        var changed = RefreshStatuses(instances, timeProvider.GetUtcNow());
-        if (changed) await repository.SaveChangesAsync(cancellationToken);
+        var announcements = new List<EventQuestAnnouncement>();
+        if (RefreshStatuses(instances, now, announcements))
+        {
+            await EnqueueAnnouncementsAsync(announcements, now, cancellationToken);
+            await repository.SaveChangesAsync(cancellationToken);
+        }
         return await MapJournalAsync(characterId, instances, cancellationToken);
     }
 
@@ -48,7 +66,8 @@ public sealed class EventQuestService(
         await EnsureInstancesAsync(cancellationToken);
         var now = timeProvider.GetUtcNow();
         var instances = await repository.GetAllAsync(characterId, cancellationToken);
-        var changed = RefreshStatuses(instances, now);
+        var announcements = new List<EventQuestAnnouncement>();
+        var changed = RefreshStatuses(instances, now, announcements);
         var globallyChangedEventIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var personallyChangedEventIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var enabledIds = definitions.GetAll()
@@ -122,10 +141,15 @@ public sealed class EventQuestService(
                 instance.CompletedAt ??= now;
                 instance.UpdatedAt = now;
                 globallyChangedEventIds.Add(instance.EventQuestId);
+                announcements.Add(new EventQuestAnnouncement(
+                    instance.EventQuestId,
+                    instance.DefinitionVersion,
+                    EventQuestStatus.Completed));
             }
         }
 
         if (!changed) return;
+        await EnqueueAnnouncementsAsync(announcements, now, cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
         foreach (var eventQuestId in globallyChangedEventIds)
         {
@@ -151,7 +175,8 @@ public sealed class EventQuestService(
         var now = timeProvider.GetUtcNow();
         var instance = await repository.GetAsync(eventQuestId, characterId, cancellationToken)
             ?? throw new InvalidOperationException("The event quest was not found.");
-        RefreshStatus(instance, now);
+        var announcements = new List<EventQuestAnnouncement>();
+        RefreshStatus(instance, now, announcements);
         var definition = definitions.Get(instance.EventQuestId, instance.DefinitionVersion);
         var contribution = instance.Contributions.SingleOrDefault()?.TotalAmount ?? 0;
 
@@ -182,6 +207,7 @@ public sealed class EventQuestService(
             "event-quest-reward",
             location: null,
             cancellationToken);
+        await EnqueueAnnouncementsAsync(announcements, now, cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
         return await GetJournalAsync(characterId, cancellationToken);
     }
@@ -317,6 +343,7 @@ public sealed class EventQuestService(
         var now = timeProvider.GetUtcNow();
         var existing = await repository.GetAllAsync(Guid.Empty, cancellationToken);
         var byId = existing.ToDictionary(x => x.EventQuestId, StringComparer.OrdinalIgnoreCase);
+        var announcements = new List<EventQuestAnnouncement>();
         var changed = false;
         foreach (var definition in definitions.GetAll().Where(x => x.Enabled))
         {
@@ -354,11 +381,22 @@ public sealed class EventQuestService(
                 continue;
             }
 
+            var status = now < definition.StartsAtUtc
+                ? EventQuestStatus.Upcoming
+                : EventQuestStatus.Active;
+            if (status == EventQuestStatus.Active)
+            {
+                announcements.Add(new EventQuestAnnouncement(
+                    definition.Id,
+                    definition.Version,
+                    EventQuestStatus.Active));
+            }
+
             repository.Add(new EventQuestInstance
             {
                 EventQuestId = definition.Id,
                 DefinitionVersion = definition.Version,
-                Status = now < definition.StartsAtUtc ? EventQuestStatus.Upcoming : EventQuestStatus.Active,
+                Status = status,
                 StartsAtUtc = definition.StartsAtUtc,
                 EndsAtUtc = definition.EndsAtUtc,
                 ClaimEndsAtUtc = definition.ClaimEndsAtUtc,
@@ -375,17 +413,25 @@ public sealed class EventQuestService(
             changed = true;
         }
 
-        if (changed) await repository.SaveChangesAsync(cancellationToken);
+        if (!changed) return;
+        await EnqueueAnnouncementsAsync(announcements, now, cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
     }
 
-    private static bool RefreshStatuses(IEnumerable<EventQuestInstance> instances, DateTimeOffset now)
+    private static bool RefreshStatuses(
+        IEnumerable<EventQuestInstance> instances,
+        DateTimeOffset now,
+        ICollection<EventQuestAnnouncement>? announcements = null)
     {
         var changed = false;
-        foreach (var instance in instances) changed |= RefreshStatus(instance, now);
+        foreach (var instance in instances) changed |= RefreshStatus(instance, now, announcements);
         return changed;
     }
 
-    private static bool RefreshStatus(EventQuestInstance instance, DateTimeOffset now)
+    private static bool RefreshStatus(
+        EventQuestInstance instance,
+        DateTimeOffset now,
+        ICollection<EventQuestAnnouncement>? announcements = null)
     {
         var status = instance.Objectives.Count > 0 && instance.Objectives.All(x => x.CompletedAt.HasValue)
             ? now > instance.ClaimEndsAtUtc ? EventQuestStatus.Expired : EventQuestStatus.Completed
@@ -393,10 +439,69 @@ public sealed class EventQuestService(
             : now <= instance.EndsAtUtc ? EventQuestStatus.Active
             : now > instance.ClaimEndsAtUtc ? EventQuestStatus.Expired : EventQuestStatus.Ended;
         if (instance.Status == status) return false;
+        var previous = instance.Status;
         instance.Status = status;
         instance.UpdatedAt = now;
         instance.RowVersion++;
+        if (IsAnnounceable(previous, status))
+        {
+            announcements?.Add(new EventQuestAnnouncement(
+                instance.EventQuestId,
+                instance.DefinitionVersion,
+                status));
+        }
         return true;
+    }
+
+    /// <summary>
+    /// World chat only cares about an event opening and an event being finished
+    /// by the server. Ended and Expired pass without an announcement.
+    /// </summary>
+    private static bool IsAnnounceable(EventQuestStatus previous, EventQuestStatus current) =>
+        (current == EventQuestStatus.Active && previous == EventQuestStatus.Upcoming) ||
+        (current == EventQuestStatus.Completed && previous != EventQuestStatus.Completed);
+
+    private async Task EnqueueAnnouncementsAsync(
+        IReadOnlyCollection<EventQuestAnnouncement> announcements,
+        DateTimeOffset sentAt,
+        CancellationToken cancellationToken)
+    {
+        foreach (var announcement in announcements.Distinct())
+        {
+            var definition = definitions.GetAll().FirstOrDefault(x =>
+                x.Enabled && x.Id.Equals(announcement.EventQuestId, StringComparison.OrdinalIgnoreCase));
+            if (definition is null) continue;
+
+            var started = announcement.Status == EventQuestStatus.Active;
+            var body = started
+                ? $"A server-wide event is underway - {definition.Title}. Lend a hand while it lasts!"
+                : $"The server has completed {definition.Title}. Well performed, claim your rewards!";
+
+            await outbox.EnqueueAsync(
+                GameEventTypes.EventQuestChatAnnouncement,
+                new EventQuestChatAnnouncementPayload(
+                    announcement.EventQuestId,
+                    CreateAnnouncementMessageId(
+                        announcement.EventQuestId,
+                        started ? "started" : "completed"),
+                    body,
+                    EventQuestTargetUrl,
+                    sentAt),
+                characterId: null,
+                accountId: null,
+                cancellationToken: cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Deterministic so a retried or duplicated announcement is deduplicated by
+    /// the chat service instead of posting the same line twice.
+    /// </summary>
+    private static Guid CreateAnnouncementMessageId(string eventQuestId, string announcementKey)
+    {
+        var hash = SHA256.HashData(
+            Encoding.UTF8.GetBytes($"event-quest:{eventQuestId.ToLowerInvariant()}:{announcementKey}"));
+        return new Guid(hash.AsSpan(0, 16));
     }
 
     private async Task<EventQuestJournal> MapJournalAsync(

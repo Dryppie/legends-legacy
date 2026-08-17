@@ -1,7 +1,9 @@
-using System.Text.Json;
+﻿using System.Text.Json;
+using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Quests;
 using Application.Interfaces.Services.LL.Quests.Events;
 using Application.Interfaces.WebSockets;
+using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -147,6 +149,64 @@ public sealed class EventQuestSystemTests
         Assert.Equal("RealmTester", Assert.Single(state.TopContributors).CharacterName);
         Assert.Single(await db.EventQuestEventLedgers.ToListAsync());
         Assert.Equal(2, publisher.Messages.OfType<EventQuestChangedMsg>().Count());
+    }
+
+    [Fact]
+    public async Task Starting_a_server_wide_event_announces_it_in_world_chat_once()
+    {
+        await using var db = CreateDb();
+        var definition = CreateActiveDefinition(requiredAmount: 5);
+        var outbox = new RecordingGameEventOutbox();
+        var service = CreateService(db, definition, new RecordingPublisher(), outbox: outbox);
+        var characterId = Guid.NewGuid();
+        CompleteTutorial(db, characterId);
+        await db.SaveChangesAsync();
+
+        await service.GetJournalAsync(characterId, CancellationToken.None);
+        await service.GetJournalAsync(characterId, CancellationToken.None);
+
+        var announcement = Assert.Single(outbox.ChatAnnouncements);
+        Assert.Equal(definition.Id, announcement.EventQuestId);
+        Assert.Contains(definition.Title, announcement.Body);
+        Assert.Contains("underway", announcement.Body, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("/game/quests", announcement.TargetUrl);
+        Assert.NotEqual(Guid.Empty, announcement.MessageId);
+    }
+
+    [Fact]
+    public async Task Completing_a_server_wide_event_announces_it_in_world_chat_once()
+    {
+        await using var db = CreateDb();
+        var definition = CreateActiveDefinition(requiredAmount: 1);
+        var outbox = new RecordingGameEventOutbox();
+        var service = CreateService(db, definition, new RecordingPublisher(), outbox: outbox);
+        var characterId = Guid.NewGuid();
+        db.Characters.Add(new Character
+        {
+            Id = characterId,
+            Name = "Finisher",
+            NormalizedName = "FINISHER"
+        });
+        CompleteTutorial(db, characterId);
+        await db.SaveChangesAsync();
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.CombatCompleted("region_01_area_01", true),
+            Guid.NewGuid(),
+            "IdleCombatEncounterCompleted",
+            CancellationToken.None);
+        await service.GetJournalAsync(characterId, CancellationToken.None);
+
+        var completion = Assert.Single(
+            outbox.ChatAnnouncements.Where(x =>
+                x.Body.Contains("completed", StringComparison.OrdinalIgnoreCase)));
+        Assert.Equal(definition.Id, completion.EventQuestId);
+        Assert.Contains(definition.Title, completion.Body);
+        Assert.Equal("/game/quests", completion.TargetUrl);
+        Assert.NotEqual(
+            completion.MessageId,
+            outbox.ChatAnnouncements.First().MessageId);
     }
 
     [Fact]
@@ -363,7 +423,8 @@ public sealed class EventQuestSystemTests
         LLDbContext db,
         EventQuestDefinition definition,
         RecordingPublisher publisher,
-        RecordingLootRewardWriter? lootRewardWriter = null) =>
+        RecordingLootRewardWriter? lootRewardWriter = null,
+        RecordingGameEventOutbox? outbox = null) =>
         new(
             new EventQuestRepository(db),
             new QuestRepository(db),
@@ -372,7 +433,25 @@ public sealed class EventQuestSystemTests
             new RecordingInventoryItemFactory(),
             lootRewardWriter ?? new RecordingLootRewardWriter(),
             new FixedTimeProvider(Now),
-            publisher);
+            publisher,
+            outbox ?? new RecordingGameEventOutbox());
+
+    private sealed class RecordingGameEventOutbox : IGameEventOutbox
+    {
+        public List<EventQuestChatAnnouncementPayload> ChatAnnouncements { get; } = [];
+
+        public Task EnqueueAsync<TPayload>(
+            string eventType,
+            TPayload payload,
+            Guid? characterId,
+            Guid? accountId,
+            CancellationToken cancellationToken)
+        {
+            if (payload is EventQuestChatAnnouncementPayload announcement)
+                ChatAnnouncements.Add(announcement);
+            return Task.CompletedTask;
+        }
+    }
 
     private static void CompleteTutorial(LLDbContext db, Guid characterId) =>
         db.CharacterQuestProgresses.Add(new CharacterQuestProgress

@@ -33,6 +33,7 @@ import { HelpLauncherComponent } from '../../help/help-launcher.component';
 import { GUIDE_PAGE_IDS } from '../../help/guide-catalog';
 import { CharacterActionType } from '../../models/enums/characterActionType';
 import { GameBootstrapStateService } from '../../../core/services/api/game-bootstrap/game-bootstrap-state.service';
+import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
 import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
 import { EquipmentSlotType } from '../../models/Dtos/equipment-slots/equipmentSlot';
 import { GatheringType } from '../../models/enums/gatheringType';
@@ -90,6 +91,7 @@ export class CombatComponent implements OnInit, OnDestroy {
   readonly hasActiveIdleCombat;
   readonly idleCombatError;
   readonly bootstrapLoaded;
+  readonly currentCharacterId;
   // Only set to true if a combat result has been received, or if start combat has been
   displayCombat = false;
   isLoading = false;
@@ -109,7 +111,9 @@ export class CombatComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly equipmentState: EquipmentStateService,
     bootstrapState: GameBootstrapStateService,
+    characterState: CharacterStateService,
   ) {
+    this.currentCharacterId = characterState.currentCharacterId;
     this.currentAction = this.characterActionService.currentAction;
     this.hasActiveIdleCombat = computed(() => {
       const action = this.currentAction();

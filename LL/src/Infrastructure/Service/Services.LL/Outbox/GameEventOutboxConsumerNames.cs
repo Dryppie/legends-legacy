@@ -1,4 +1,4 @@
-namespace Services.LL.Outbox;
+﻿namespace Services.LL.Outbox;
 
 public static class GameEventOutboxConsumerNames
 {
@@ -8,6 +8,7 @@ public static class GameEventOutboxConsumerNames
     public const string TransferChat = "transfer-chat";
     public const string TournamentChat = "tournament-chat";
     public const string WorldTowerChat = "world-tower-chat";
+    public const string EventQuestChat = "event-quest-chat";
     public const string GuildChat = "guild-chat";
     public const string GuildVaultChat = "guild-vault-chat";
     public const string RealtimeCharacter = "realtime-character";

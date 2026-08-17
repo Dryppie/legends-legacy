@@ -1,4 +1,4 @@
-using Domain.Models.CharacterActions.Sessions;
+﻿using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Items;
 using Application.UseCases.Equipments.Dtos;
@@ -103,6 +103,13 @@ public sealed record TournamentChatAnnouncementPayload(
 
 public sealed record WorldTowerChatAnnouncementPayload(
     Guid RallyId,
+    Guid MessageId,
+    string Body,
+    string TargetUrl,
+    DateTimeOffset SentAt);
+
+public sealed record EventQuestChatAnnouncementPayload(
+    string EventQuestId,
     Guid MessageId,
     string Body,
     string TargetUrl,

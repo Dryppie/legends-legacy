@@ -71,6 +71,10 @@ describe('TowerPlaybackService', () => {
             abilityIndex: 0,
             uses: 1,
             totalDamage: 20,
+            damageByType: [
+              { damageType: 'Physical', totalDamage: 12 },
+              { damageType: 'Burn', totalDamage: 8 },
+            ],
             totalHealing: 0,
             totalBarrier: 0,
           },
@@ -105,6 +109,10 @@ describe('TowerPlaybackService', () => {
     expect(frame.hostile[0].health).toBe(180);
     expect(frame.entityStats[0].damageDone).toBe(20);
     expect(frame.entityStats[0].abilities[0].uses).toBe(1);
+    expect(frame.entityStats[0].abilities[0].damageByType).toEqual([
+      { damageType: 'Physical', totalDamage: 12 },
+      { damageType: 'Burn', totalDamage: 8 },
+    ]);
     expect(frame.events).toEqual([]);
     expect(frame.outcome).toBe(BattleOutcome.Victory);
   });

@@ -54,7 +54,8 @@ public sealed record TowerPlaybackAbilityTotalsDto(
     int Uses,
     int TotalDamage,
     int TotalHealing,
-    int TotalBarrier);
+    int TotalBarrier,
+    IReadOnlyList<AbilityDamageTypeStats>? DamageByType = null);
 
 public sealed record TowerPlaybackBundleContentDto(
     byte[] Bytes,

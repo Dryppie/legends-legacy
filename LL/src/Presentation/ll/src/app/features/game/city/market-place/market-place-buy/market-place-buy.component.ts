@@ -66,6 +66,7 @@ import {
 import { AttributeDisplayPipe } from '../../../../../shared/pipes/attributes/attribute-display/attribute-display.pipe';
 import { aggregateAttributes } from '../../../../../shared/utils/attributes/attribute-order.utils';
 import { AttributeTooltipDirective } from '../../../../../shared/directives/attribute-tooltip/attribute-tooltip.directive';
+import { marketplaceCommoditySearchText } from '../market-place-commodity/market-place-commodity-search';
 
 @Component({
     selector: 'app-market-place-buy',
@@ -178,7 +179,11 @@ export class MarketPlaceBuyComponent implements OnInit {
     const q = this.searchTerm();
     if (q) {
       items = items.filter((l) =>
-        (l.itemInstance.displayName ?? l.itemInstance.itemBase.name)
+        [
+          l.itemInstance.displayName ?? '',
+          marketplaceCommoditySearchText(l.itemInstance.itemBase),
+        ]
+          .join(' ')
           .toLowerCase()
           .includes(q),
       );

@@ -12,6 +12,7 @@ Server-wide event quests are scheduled, content-driven quests where every charac
 - Definitions can contain cumulative personal contribution milestones with their own rewards.
 - Rewards are claimed by eligible players instead of being fanned out to every account at completion time.
 - Event progress changes are broadcast to the whole server through the existing game SignalR hub.
+- World chat announces an event when it opens and again when the server finishes it. The lines are generated from the event title, link to the quest journal, and use a deterministic message id so a retry cannot post the same announcement twice.
 - The quest journal shows active, upcoming, completed, and expired events in a focused Event tab, including the live top-three contributors, the current player's rank, shared progress, and personal milestones.
 
 ## Authoring an event

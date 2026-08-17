@@ -5289,21 +5289,93 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Gnoll_raider_pillages_only_the_first_enemy_to_fall_below_forty_percent_health()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var pillage = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.gnoll_raider.pillage_the_weak"]);
+        var selfDamage = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.pillage.self_damage",
+            Kind = AbilitySpecKind.Active,
+            Name = "Self Damage",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.pillage.self_damage",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.Self,
+                    BaseValue = 150
+                }
+            ]
+        });
+        var firstEnemy = CreateCombatant("enemy-1", CombatTeam.Friendly, [selfDamage]);
+        var secondEnemy = CreateCombatant("enemy-2", CombatTeam.Friendly, [selfDamage]);
+        var raider = CreateCombatant("raider", CombatTeam.Hostile, [pillage]);
+        var engine = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000));
+
+        var result = engine.Run([firstEnemy, secondEnemy], [raider]);
+
+        Assert.True(raider.HasCondition(StandardConditionType.Empower));
+        Assert.True(raider.HasCondition(StandardConditionType.Haste));
+        Assert.Single(result.EventLog, log =>
+            log.EventType == EventType.StatusEffect
+            && log.Details.Contains("applied Empower", StringComparison.Ordinal));
+        Assert.Single(result.EventLog, log =>
+            log.EventType == EventType.StatusEffect
+            && log.Details.Contains("applied Haste", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void Meran_essence_catalog_authors_requested_cost_and_totem_adjustments()
     {
         var catalog = new JsonAbilityCatalogProvider(
             CreateConfig(),
             FindApiContentRoot(),
             CreateJsonOptions()).GetCatalog();
+        var packLeader = catalog.AbilitiesById["ability.creature.gnoll_pack_leader.rallying_cry"];
         var raider = catalog.AbilitiesById["ability.creature.gnoll_raider.loot_and_slash"];
+        var pillage = catalog.AbilitiesById["ability.creature.gnoll_raider.pillage_the_weak"];
         var skirmisher = catalog.AbilitiesById["ability.creature.kobold_skirmisher.coordinated_assault"];
         var trapMastery = catalog.AbilitiesById["ability.creature.kobold_skirmisher.trap_mastery"];
+        var feralPounce = catalog.AbilitiesById["ability.creature.feral_ghoul.feral_pounce"];
+        var tasteOfBlood = catalog.AbilitiesById["ability.creature.vampire_fledgeling.taste_of_blood"];
+        var freshHunger = catalog.AbilitiesById["ability.creature.vampire_fledgeling.fresh_hunger"];
+        var spectralPassage = catalog.AbilitiesById["ability.creature.wandering_ghost.spectral_passage"];
         var ward = catalog.SummonsById["totemicWard"];
 
+        Assert.Equal(140, packLeader.CooldownTicks);
+        var rallyingCry = Assert.Single(packLeader.Effects);
+        Assert.Equal(AbilityEffectOperation.ApplyCondition, rallyingCry.Operation);
+        Assert.Equal(AbilityTargetSelector.RandomAlly, rallyingCry.Target);
+        Assert.Equal(StandardConditionType.Empower, rallyingCry.Condition);
         Assert.Empty(raider.Costs);
+        Assert.Equal(180, raider.CooldownTicks);
+        var raiderDamage = Assert.Single(raider.Effects);
+        Assert.Equal(AbilityTargetSelector.ThreeEnemies, raiderDamage.Target);
+        Assert.Equal(AttributeType.Power, raiderDamage.ScalingAttribute);
+        Assert.Equal(1.3f, raiderDamage.ScalingCoefficient);
+        Assert.Equal(
+            [StandardConditionType.Empower, StandardConditionType.Haste],
+            pillage.Effects.Select(effect => effect.Condition));
+        Assert.All(pillage.Effects, effect => Assert.Equal(1, effect.Uses));
         Assert.Empty(skirmisher.Costs);
+        var coordinatedDamage = Assert.Single(skirmisher.Effects);
+        Assert.Equal(1.8f, coordinatedDamage.ScalingCoefficient);
+        Assert.Equal(15, coordinatedDamage.LivingNonSummonedAllyDamagePercent);
         Assert.Empty(trapMastery.Triggers);
         Assert.Empty(trapMastery.Effects);
+        Assert.Equal(150, feralPounce.CooldownTicks);
+        Assert.Equal(1.5f, feralPounce.Effects.Single(effect => effect.Operation == AbilityEffectOperation.Damage).ScalingCoefficient);
+        Assert.Equal(1.75f, Assert.Single(tasteOfBlood.Effects).ScalingCoefficient);
+        Assert.Equal(0.35f, Assert.Single(freshHunger.Effects).EventMagnitudeCoefficient);
+        Assert.Equal(140, spectralPassage.CooldownTicks);
         Assert.Equal(
             0.03f,
             ward.Attributes.Single(attribute => attribute.Attribute == AttributeType.MaxHealth).ScalingCoefficient);

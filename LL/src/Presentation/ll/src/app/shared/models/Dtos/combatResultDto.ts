@@ -55,6 +55,7 @@ export interface EntityStats {
 export interface AbilityStats {
   name: string;
   totalDamage: number;
+  damageByType: AbilityDamageTypeStats[];
   totalHealing: number;
   uses: number;
   hits: number;
@@ -65,6 +66,20 @@ export interface AbilityStats {
   alliedDamage: number;
   totalBarrier: number;
 }
+
+export interface AbilityDamageTypeStats {
+  damageType: DamageType;
+  totalDamage: number;
+}
+
+export type DamageType =
+  | 'None'
+  | 'Physical'
+  | 'Magical'
+  | 'Bleed'
+  | 'Burn'
+  | 'Poison'
+  | 'Shadow';
 
 export interface SimpleCombatEntityDto {
   name: string;

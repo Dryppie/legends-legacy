@@ -17,6 +17,11 @@ import { GameBootstrapStateService } from '../../core/services/api/game-bootstra
 import { ChatLayoutPreferenceService } from '../../core/services/client-side/chat-layout/chat-layout-preference.service';
 import { GameHeaderComponent } from './game-header/game-header.component';
 
+/** How long offline progress must stay unresolved before the banner appears. */
+export const DASHBOARD_RESOLVING_BANNER_DELAY_MS = 400;
+/** Once shown, keep the banner up at least this long so it is readable. */
+export const DASHBOARD_RESOLVING_BANNER_MIN_VISIBLE_MS = 900;
+
 export interface FloatingDrawerPosition {
   left: number;
   verticalOffset: number;
@@ -113,6 +118,11 @@ export class DashboardComponent implements OnInit {
   private floatingDrawerDragStartX = 0;
   private floatingDrawerDragStartY = 0;
   private floatingDrawerDragStartPosition: FloatingDrawerPosition | null = null;
+  private resolvingBannerShowTimeout: ReturnType<typeof setTimeout> | null =
+    null;
+  private resolvingBannerHideTimeout: ReturnType<typeof setTimeout> | null =
+    null;
+  private resolvingBannerShownAt = 0;
 
   constructor(
     private readonly state: CharacterActionsStateService,
@@ -127,10 +137,50 @@ export class DashboardComponent implements OnInit {
     this.isChatOpenDesktop = this.chatLayoutPreference.dockedOpen();
 
     effect(() => {
-      this.isResolvingAction =
-        this.state.loadingActionRefresh() ||
-        this.state.resolvingOfflineProgress();
+      // Only genuine offline catch-up should raise this banner. A routine
+      // action refresh is a background request and must stay invisible.
+      this.setResolvingAction(this.state.resolvingOfflineProgress());
     });
+  }
+
+  /**
+   * Debounces the offline-progress banner so a fast resolution never flashes:
+   * it only appears once the state has held for a moment, and once visible it
+   * stays up long enough to be readable.
+   */
+  private setResolvingAction(isResolving: boolean): void {
+    if (isResolving) {
+      if (this.resolvingBannerHideTimeout) {
+        clearTimeout(this.resolvingBannerHideTimeout);
+        this.resolvingBannerHideTimeout = null;
+      }
+      if (this.isResolvingAction || this.resolvingBannerShowTimeout) return;
+
+      this.resolvingBannerShowTimeout = setTimeout(() => {
+        this.resolvingBannerShowTimeout = null;
+        this.isResolvingAction = true;
+        this.resolvingBannerShownAt = Date.now();
+      }, DASHBOARD_RESOLVING_BANNER_DELAY_MS);
+      return;
+    }
+
+    if (this.resolvingBannerShowTimeout) {
+      clearTimeout(this.resolvingBannerShowTimeout);
+      this.resolvingBannerShowTimeout = null;
+    }
+    if (!this.isResolvingAction || this.resolvingBannerHideTimeout) return;
+
+    const visibleFor = Date.now() - this.resolvingBannerShownAt;
+    const remaining = DASHBOARD_RESOLVING_BANNER_MIN_VISIBLE_MS - visibleFor;
+    if (remaining <= 0) {
+      this.isResolvingAction = false;
+      return;
+    }
+
+    this.resolvingBannerHideTimeout = setTimeout(() => {
+      this.resolvingBannerHideTimeout = null;
+      this.isResolvingAction = false;
+    }, remaining);
   }
 
   ngOnInit() {

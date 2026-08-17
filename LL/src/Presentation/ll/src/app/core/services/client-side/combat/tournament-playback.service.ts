@@ -103,6 +103,7 @@ export class TournamentPlaybackService {
             name: ability.name,
             uses: values?.uses ?? 0,
             totalDamage: values?.totalDamage ?? 0,
+            damageByType: [],
             totalHealing: values?.totalHealing ?? 0,
             totalBarrier: values?.totalBarrier ?? 0,
             hits: 0,

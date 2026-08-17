@@ -4421,16 +4421,15 @@
     "id": "ability.creature.gnoll_pack_leader.rallying_cry",
     "kind": "Active",
     "name": "Rallying Cry",
-    "description": "Increase a random ally's Power by 20% for 10 seconds.",
-    "cooldownTicks": 120,
+    "description": "Apply Empower to a random ally.",
+    "cooldownTicks": 140,
     "tags": ["Buff", "Power"],
     "effects": [{
-      "id": "effect.creature.gnoll_pack_leader.rallying_cry.power",
-      "operation": "ModifyAttributePercentOfInitial",
+      "id": "effect.creature.gnoll_pack_leader.rallying_cry.empower",
+      "operation": "ApplyCondition",
       "target": "RandomAlly",
-      "attribute": "Power",
-      "scalingCoefficient": 0.2,
-      "durationTicks": 100,
+      "condition": "Empower",
+      "baseValue": 1,
       "procCoefficient": 1
     }],
     "owningEssenceId": "essence.gnoll_pack_leader"
@@ -4461,14 +4460,15 @@
     "id": "ability.creature.gnoll_raider.loot_and_slash",
     "kind": "Active",
     "name": "Loot and Slash",
-    "description": "Deal 25 Physical Melee damage to two enemies.",
+    "description": "Deal 130% Physical Melee damage to three enemies.",
     "cooldownTicks": 180,
     "tags": ["Physical", "Melee", "Area"],
     "effects": [{
       "id": "effect.creature.gnoll_raider.loot_and_slash.damage",
       "operation": "Damage",
-      "target": "TwoEnemies",
-      "baseValue": 25,
+      "target": "ThreeEnemies",
+      "scalingAttribute": "Power",
+      "scalingCoefficient": 1.3,
       "attackType": "Melee",
       "damageType": "Physical",
       "procCoefficient": 1
@@ -4476,24 +4476,26 @@
     "owningEssenceId": "essence.gnoll_raider"
   },
   {
-    "id": "ability.creature.gnoll_raider.shattering_strikes",
+    "id": "ability.creature.gnoll_raider.pillage_the_weak",
     "kind": "Passive",
-    "name": "Shattering Strikes",
-    "description": "Each basic attack reduces the target's Physical Armor by 5% for 20 seconds, stacking up to 20 times.",
+    "name": "Pillage the Weak",
+    "description": "The first time any enemy falls below 40% Health, gain Empower and Haste.",
     "cooldownTicks": 0,
-    "tags": ["Passive", "Basic Attack", "Debuff"],
-    "triggers": [
-      {"event": "OnBasicAttack", "effectIds": ["effect.creature.gnoll_raider.shattering_strikes.apply"]},
-      {"event": "OnStatusApplied", "effectIds": ["effect.creature.gnoll_raider.shattering_strikes.armor"], "conditions": [{"type": "EventIdIs", "statusId": "status.gnoll_raider.shattered_armor"}]},
-      {"event": "OnStatusChanged", "effectIds": ["effect.creature.gnoll_raider.shattering_strikes.armor"], "conditions": [{"type": "EventIdIs", "statusId": "status.gnoll_raider.shattered_armor"}]},
-      {"event": "OnStatusRemoved", "effectIds": ["effect.creature.gnoll_raider.shattering_strikes.armor"], "conditions": [{"type": "EventIdIs", "statusId": "status.gnoll_raider.shattered_armor"}]},
-      {"event": "OnStatusExpired", "effectIds": ["effect.creature.gnoll_raider.shattering_strikes.armor"], "conditions": [{"type": "EventIdIs", "statusId": "status.gnoll_raider.shattered_armor"}]},
-      {"event": "OnStatusCleansed", "effectIds": ["effect.creature.gnoll_raider.shattering_strikes.armor"], "conditions": [{"type": "EventIdIs", "statusId": "status.gnoll_raider.shattered_armor"}]},
-      {"event": "OnStatusDispelled", "effectIds": ["effect.creature.gnoll_raider.shattering_strikes.armor"], "conditions": [{"type": "EventIdIs", "statusId": "status.gnoll_raider.shattered_armor"}]}
-    ],
+    "tags": ["Passive", "Buff", "Empower", "Haste", "HealthThreshold"],
+    "triggers": [{
+      "event": "OnHealthChanged",
+      "effectIds": [
+        "effect.creature.gnoll_raider.pillage_the_weak.empower",
+        "effect.creature.gnoll_raider.pillage_the_weak.haste"
+      ],
+      "conditions": [
+        {"type": "EventSourceIsEnemy"},
+        {"type": "AnyEnemyHealthBelowPercent", "value": 40}
+      ]
+    }],
     "effects": [
-      {"id": "effect.creature.gnoll_raider.shattering_strikes.apply", "operation": "ApplyStatus", "target": "EventTarget", "statusId": "status.gnoll_raider.shattered_armor", "baseValue": 1, "procCoefficient": 1},
-      {"id": "effect.creature.gnoll_raider.shattering_strikes.armor", "operation": "SynchronizeAttributePerStatusStack", "target": "EventTarget", "statusId": "status.gnoll_raider.shattered_armor", "attribute": "Armor", "scalingCoefficient": -0.05, "procCoefficient": 1}
+      {"id": "effect.creature.gnoll_raider.pillage_the_weak.empower", "operation": "ApplyCondition", "target": "Self", "condition": "Empower", "baseValue": 1, "uses": 1, "procCoefficient": 1},
+      {"id": "effect.creature.gnoll_raider.pillage_the_weak.haste", "operation": "ApplyCondition", "target": "Self", "condition": "Haste", "baseValue": 1, "uses": 1, "procCoefficient": 1}
     ],
     "owningEssenceId": "essence.gnoll_raider"
   },
@@ -4532,10 +4534,10 @@
     "id": "ability.creature.kobold_skirmisher.coordinated_assault",
     "kind": "Active",
     "name": "Coordinated Assault",
-    "description": "Deal 150% Physical Damage, increased by 10% for each living non-summoned ally.",
+    "description": "Deal 180% Physical Damage, increased by 15% for each living non-summoned ally.",
     "cooldownTicks": 130,
     "tags": ["Physical", "Melee"],
-    "effects": [{"id": "effect.creature.kobold_skirmisher.coordinated_assault.damage", "operation": "Damage", "target": "CurrentTarget", "scalingAttribute": "Power", "scalingCoefficient": 1.5, "livingNonSummonedAllyDamagePercent": 10, "attackType": "Melee", "damageType": "Physical", "procCoefficient": 1}],
+    "effects": [{"id": "effect.creature.kobold_skirmisher.coordinated_assault.damage", "operation": "Damage", "target": "CurrentTarget", "scalingAttribute": "Power", "scalingCoefficient": 1.8, "livingNonSummonedAllyDamagePercent": 15, "attackType": "Melee", "damageType": "Physical", "procCoefficient": 1}],
     "owningEssenceId": "essence.kobold_skirmisher"
   },
   {
@@ -4584,11 +4586,11 @@
     "id": "ability.creature.feral_ghoul.feral_pounce",
     "kind": "Active",
     "name": "Feral Pounce",
-    "description": "Deal 130% Physical Damage and apply Stun(3).",
-    "cooldownTicks": 160,
+    "description": "Deal 150% Physical Damage and apply Stun(3).",
+    "cooldownTicks": 150,
     "tags": ["Physical", "Melee", "Control"],
     "effects": [
-      {"id": "effect.creature.feral_ghoul.feral_pounce.damage", "operation": "Damage", "target": "CurrentTarget", "scalingAttribute": "Power", "scalingCoefficient": 1.3, "attackType": "Melee", "damageType": "Physical", "procCoefficient": 1},
+      {"id": "effect.creature.feral_ghoul.feral_pounce.damage", "operation": "Damage", "target": "CurrentTarget", "scalingAttribute": "Power", "scalingCoefficient": 1.5, "attackType": "Melee", "damageType": "Physical", "procCoefficient": 1},
       {"id": "effect.creature.feral_ghoul.feral_pounce.stun", "operation": "ApplyCondition", "target": "CurrentTarget", "condition": "Stun", "baseValue": 3, "procCoefficient": 1}
     ],
     "owningEssenceId": "essence.feral_ghoul"
@@ -4656,21 +4658,21 @@
     "id": "ability.creature.vampire_fledgeling.taste_of_blood",
     "kind": "Active",
     "name": "Taste of Blood",
-    "description": "Deal 150% Physical Damage. If the target is Bleeding, heal for 75% of damage dealt.",
+    "description": "Deal 175% Physical Damage. If the target is Bleeding, heal for 75% of damage dealt.",
     "cooldownTicks": 140,
     "tags": ["Physical", "Melee", "Lifesteal"],
-    "effects": [{"id": "effect.creature.vampire_fledgeling.taste_of_blood.damage", "operation": "Damage", "target": "CurrentTarget", "scalingAttribute": "Power", "scalingCoefficient": 1.5, "attackType": "Melee", "damageType": "Physical", "lifeStealPercentage": 75, "lifeStealTargetCondition": "Bleed", "procCoefficient": 1}],
+    "effects": [{"id": "effect.creature.vampire_fledgeling.taste_of_blood.damage", "operation": "Damage", "target": "CurrentTarget", "scalingAttribute": "Power", "scalingCoefficient": 1.75, "attackType": "Melee", "damageType": "Physical", "lifeStealPercentage": 75, "lifeStealTargetCondition": "Bleed", "procCoefficient": 1}],
     "owningEssenceId": "essence.vampire_fledgeling"
   },
   {
     "id": "ability.creature.vampire_fledgeling.fresh_hunger",
     "kind": "Passive",
     "name": "Fresh Hunger",
-    "description": "The first ability used against each enemy deals 25% additional damage.",
+    "description": "The first ability used against each enemy deals 35% additional damage.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Burst"],
     "triggers": [{"event": "OnHit", "effectIds": ["effect.creature.vampire_fledgeling.fresh_hunger.damage"], "conditions": [{"type": "EventIdIsNot", "statusId": "basic_attack"}]}],
-    "effects": [{"id": "effect.creature.vampire_fledgeling.fresh_hunger.damage", "operation": "Damage", "target": "EventTarget", "eventMagnitudeCoefficient": 0.25, "oncePerTarget": true, "attackType": "None", "damageType": "None", "critEligibility": "Disallowed", "tags": ["Damage.Secondary"], "procCoefficient": 1}],
+    "effects": [{"id": "effect.creature.vampire_fledgeling.fresh_hunger.damage", "operation": "Damage", "target": "EventTarget", "eventMagnitudeCoefficient": 0.35, "oncePerTarget": true, "attackType": "None", "damageType": "None", "critEligibility": "Disallowed", "tags": ["Damage.Secondary"], "procCoefficient": 1}],
     "owningEssenceId": "essence.vampire_fledgeling"
   },
   {
@@ -4678,7 +4680,7 @@
     "kind": "Active",
     "name": "Spectral Passage",
     "description": "Deal 150% Magical Damage and apply Chill(3).",
-    "cooldownTicks": 120,
+    "cooldownTicks": 140,
     "tags": ["Magical", "Melee", "Chill"],
     "effects": [
       {"id": "effect.creature.wandering_ghost.spectral_passage.damage", "operation": "Damage", "target": "CurrentTarget", "scalingAttribute": "Power", "scalingCoefficient": 1.5, "attackType": "Melee", "damageType": "Magical", "procCoefficient": 1},

@@ -380,7 +380,7 @@
     },
     {
       "monsterId": "monster.gnoll_raider",
-      "abilityIds": ["ability.creature.gnoll_raider.loot_and_slash", "ability.creature.gnoll_raider.shattering_strikes"]
+      "abilityIds": ["ability.creature.gnoll_raider.loot_and_slash", "ability.creature.gnoll_raider.pillage_the_weak"]
     },
     {
       "monsterId": "monster.gnoll_shaman",

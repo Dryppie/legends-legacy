@@ -274,20 +274,8 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
         var participantAttributes = AttributeCalculator.CalculateProjectedAttributes(
             baseAttributes,
             equipmentModifiers);
-        if (profile == CanonicalPartyProfile.Balanced)
-            ApplyNeutralBalanceAuditAttributes(participantAttributes);
 
         return participantAttributes;
-    }
-
-    private static void ApplyNeutralBalanceAuditAttributes(
-        IDictionary<AttributeType, float> attributes)
-    {
-        attributes[AttributeType.Armor] = 30f;
-        attributes[AttributeType.Resistance] = 30f;
-        attributes[AttributeType.ArmorPenetration] = 0f;
-        attributes[AttributeType.MagicPenetration] = 0f;
-        attributes[AttributeType.HealingPowerPercent] = 0f;
     }
 
     private static void ReportProgress(

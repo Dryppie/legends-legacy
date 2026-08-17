@@ -106,7 +106,8 @@ public enum AbilityTargetSelector
     OwnedSummons = 21,
     RandomAlly = 22,
     TwoRandomEnemies = 23,
-    ThreeRandomEnemies = 24
+    ThreeRandomEnemies = 24,
+    ThreeEnemies = 25
 }
 
 public enum AbilityConditionType

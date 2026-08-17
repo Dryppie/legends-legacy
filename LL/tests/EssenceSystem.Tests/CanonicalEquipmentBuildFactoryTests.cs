@@ -69,17 +69,22 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         Assert.Equal(
             JsonSerializer.Serialize(report.BattleSummaries),
             JsonSerializer.Serialize(repeated.BattleSummaries));
-        var physicalMitigation = AttributeCombatRules.CalculateDefenseMitigation(
-            report.ParticipantAttributes[nameof(AttributeType.Armor)],
-            report.ParticipantAttributes[nameof(AttributeType.ArmorPenetration)]);
-        var magicalMitigation = AttributeCombatRules.CalculateDefenseMitigation(
-            report.ParticipantAttributes[nameof(AttributeType.Resistance)],
-            report.ParticipantAttributes[nameof(AttributeType.MagicPenetration)]);
-        Assert.Equal(physicalMitigation, magicalMitigation, precision: 6);
-        Assert.Equal(0.3f, physicalMitigation, precision: 6);
-        Assert.Equal(0, report.ParticipantAttributes[nameof(AttributeType.ArmorPenetration)]);
-        Assert.Equal(0, report.ParticipantAttributes[nameof(AttributeType.MagicPenetration)]);
-        Assert.Equal(0, report.ParticipantAttributes[nameof(AttributeType.HealingPowerPercent)]);
+        var rung = _factory.GetProgressionLadder().Single(candidate =>
+            candidate.Tier == request.EquipmentTier
+            && candidate.Rarity == Rarity.Epic
+            && candidate.Quality == ItemQuality.Standard);
+        var build = _factory.CreateBuild(CanonicalPartyProfile.Balanced, rung);
+        var expectedAttributes = AttributeCalculator.CalculateProjectedAttributes(
+            build.Character.BaseAttributes.ToDictionary(
+                attribute => attribute.AttributeType,
+                attribute => attribute.Value),
+            build.Equipment
+                .SelectMany(equipment => equipment.AttributeModifiers)
+                .Cast<AttributeModifierBase>());
+
+        Assert.Equal(
+            expectedAttributes.ToDictionary(pair => pair.Key.ToString(), pair => pair.Value),
+            report.ParticipantAttributes);
     }
 
     [BalanceFact]

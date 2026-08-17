@@ -60,6 +60,7 @@ import { EssenceItemViewService } from '../../../../core/services/api/essences/e
 import { Essence } from '../../../../shared/models/essence';
 import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
 import { creatureArchiveSearchText } from './creature-archive-search';
+import { playerEssenceSearchText } from '../../../../shared/search/essence-search';
 
 type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'ready';
 type ArchiveSort = 'name' | 'level' | 'tier';
@@ -167,10 +168,38 @@ export class EssencesComponent implements OnInit {
       { label: 'Not found', value: 'not-found' },
     ];
 
+  /**
+   * Definitions keyed by Essence definition id so Archive search can also match
+   * on the Essence description and rarity, which the player-owned DTO omits.
+   */
+  readonly essenceDefinitionsById = computed(() => {
+    const definitions = new Map<string, EssenceDefinitionDto>();
+
+    for (const creature of this.essenceState.creatureArchive()?.creatures ??
+      []) {
+      for (const essence of creature.essences) {
+        if (essence.definition) {
+          definitions.set(essence.essenceDefinitionId, essence.definition);
+        }
+      }
+    }
+
+    for (const entry of this.essenceState.codex()?.entries ?? []) {
+      for (const member of entry.essences) {
+        if (member.essenceDefinitionId && member.definition) {
+          definitions.set(member.essenceDefinitionId, member.definition);
+        }
+      }
+    }
+
+    return definitions;
+  });
+
   readonly filteredArchiveEssences = computed(() => {
     const search = this.archiveSearch().trim().toLowerCase();
     const filter = this.archiveFilter();
     const sort = this.archiveSort();
+    const definitions = this.essenceDefinitionsById();
     const essences = [...(this.essenceState.archive()?.essences ?? [])];
 
     return essences
@@ -188,18 +217,10 @@ export class EssencesComponent implements OnInit {
 
         if (!search) return true;
 
-        const searchable = [
-          essence.name,
-          essence.activeAbility.name,
-          essence.passiveAbility.name,
-          ...(essence.tags ?? []),
-          ...(essence.activeAbility.tags ?? []),
-          ...(essence.passiveAbility.tags ?? []),
-        ]
-          .join(' ')
-          .toLowerCase();
-
-        return searchable.includes(search);
+        return playerEssenceSearchText(
+          essence,
+          definitions.get(essence.essenceDefinitionId),
+        ).includes(search);
       })
       .sort((a, b) => {
         switch (sort) {

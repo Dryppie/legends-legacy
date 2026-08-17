@@ -489,11 +489,33 @@
           class="hidden min-w-0 overflow-x-auto rounded border border-white/10 text-left text-sm lg:block"
           data-tour="current-combat-summary"
         >
-          <div class="min-w-[56rem]">
+          <div class="min-w-[60rem]">
             <div
-              class="grid grid-cols-[minmax(15rem,1fr)_9rem_14rem_7rem_7rem] gap-3 bg-white/[0.035] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
+              class="grid grid-cols-[minmax(15rem,1fr)_9rem_18rem_7rem_7rem] gap-3 bg-white/[0.035] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
             >
-              <div>Ability</div>
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+                <span>Ability</span>
+                <span
+                  class="flex flex-wrap items-center gap-x-3 gap-y-1 normal-case tracking-normal"
+                  aria-label="Damage type colors"
+                >
+                  <span
+                    class="text-[8px] uppercase tracking-[0.16em] text-light_gray"
+                    >Damage types</span
+                  >
+                  <span
+                    *ngFor="let damageType of damageTypeLegend"
+                    class="inline-flex items-center gap-1.5 text-[9px] font-normal text-secondary"
+                  >
+                    <span
+                      class="h-2 w-2 rounded-sm"
+                      [style.background-color]="damageTypeColor(damageType)"
+                      aria-hidden="true"
+                    ></span>
+                    {{ damageType }}
+                  </span>
+                </span>
+              </div>
               <button
                 type="button"
                 class="text-right transition-colors hover:text-white"
@@ -527,48 +549,97 @@
                 Barrier {{ sortIndicator("barrier") }}
               </button>
             </div>
-            <ng-container *ngFor="let ability of sortedAbilities">
+            <ng-container
+              *ngFor="let ability of sortedAbilities; trackBy: trackAbility"
+            >
               <div
                 *ngIf="ability.name"
-                class="grid grid-cols-[minmax(15rem,1fr)_9rem_14rem_7rem_7rem] gap-3 border-t border-white/[0.07] px-4 py-2 text-xs transition-colors hover:bg-white/[0.035]"
+                class="grid grid-cols-[minmax(15rem,1fr)_9rem_18rem_7rem_7rem] items-center gap-3 border-t border-white/[0.07] px-4 py-2 text-xs transition-colors hover:bg-white/[0.035]"
               >
                 <div class="font-medium text-white">{{ ability.name }}</div>
                 <div class="text-right text-secondary">
                   {{ ability.uses | number }}
                 </div>
-                <div
-                  class="grid grid-cols-[3.75rem_minmax(3rem,1fr)_3rem] items-center gap-2 text-right"
-                >
-                  <span class="text-[9px] font-normal text-light_gray">
-                    <ng-container
-                      *ngIf="
-                        ability.totalDamage > 0 ||
-                        ability.totalHealing > 0 ||
-                        ability.totalBarrier > 0
+                <div class="min-w-0 space-y-1 text-right">
+                  <div class="flex min-h-4 items-center justify-end gap-2">
+                    <span
+                      *ngFor="
+                        let entry of damageBreakdown(ability);
+                        trackBy: trackDamageType
+                      "
+                      class="inline-flex items-center gap-1 font-semibold tabular-nums"
+                      [style.color]="damageTypeColor(entry.damageType)"
+                      [attr.title]="
+                        damageTypeLabel(entry.damageType) +
+                        ': ' +
+                        entry.totalDamage +
+                        ' damage'
+                      "
+                      [attr.aria-label]="
+                        damageTypeLabel(entry.damageType) +
+                        ' ' +
+                        entry.totalDamage +
+                        ' damage'
                       "
                     >
-                      avg
-                      {{ averagePrimaryOutput(ability) | number: "1.1-1" }}
-                    </ng-container>
-                  </span>
-                  <span
-                    class="h-1 overflow-hidden rounded-full bg-white/[0.04]"
-                  >
+                      <span
+                        class="h-1.5 w-1.5 rounded-full"
+                        [style.background-color]="
+                          damageTypeColor(entry.damageType)
+                        "
+                        aria-hidden="true"
+                      ></span>
+                      {{ entry.totalDamage | number }}
+                    </span>
                     <span
-                      class="block h-full rounded-full"
-                      [ngClass]="abilityBarClass(ability)"
-                      [style.width.%]="abilityBarPercentage(ability)"
-                    ></span>
-                  </span>
-                  <span
-                    class="font-semibold"
-                    [ngClass]="
-                      ability.totalDamage > 0
-                        ? 'text-primary'
-                        : 'text-light_gray'
-                    "
-                    >{{ ability.totalDamage | number }}</span
+                      class="ml-1 w-10 font-semibold tabular-nums"
+                      [ngClass]="
+                        ability.totalDamage > 0
+                          ? 'text-primary'
+                          : 'text-light_gray'
+                      "
+                    >
+                      {{ ability.totalDamage | number }}
+                    </span>
+                  </div>
+                  <div
+                    class="grid grid-cols-[3.75rem_minmax(3rem,1fr)_2.5rem] items-center gap-2"
                   >
+                    <span class="text-[9px] font-normal text-light_gray">
+                      <ng-container
+                        *ngIf="
+                          ability.totalDamage > 0 ||
+                          ability.totalHealing > 0 ||
+                          ability.totalBarrier > 0
+                        "
+                      >
+                        avg
+                        {{ averagePrimaryOutput(ability) | number: "1.1-1" }}
+                      </ng-container>
+                    </span>
+                    <span
+                      class="flex h-1 overflow-hidden rounded-full bg-white/[0.04]"
+                    >
+                      <span
+                        *ngFor="
+                          let entry of damageBreakdown(ability);
+                          trackBy: trackDamageType
+                        "
+                        class="block h-full shrink-0 transition-[width] duration-1000 ease-linear"
+                        [style.background-color]="
+                          damageTypeColor(entry.damageType)
+                        "
+                        [style.width.%]="damageTypeBarPercentage(entry)"
+                      ></span>
+                      <span
+                        *ngIf="damageBreakdown(ability).length === 0"
+                        class="block h-full shrink-0 rounded-full transition-[width] duration-1000 ease-linear"
+                        [ngClass]="abilityBarClass(ability)"
+                        [style.width.%]="abilityBarPercentage(ability)"
+                      ></span>
+                    </span>
+                    <span aria-hidden="true"></span>
+                  </div>
                 </div>
                 <div
                   class="text-right font-semibold"
@@ -610,7 +681,7 @@
 
           <div class="space-y-2">
             <div
-              *ngFor="let ability of sortedAbilities"
+              *ngFor="let ability of sortedAbilities; trackBy: trackAbility"
               class="rounded-lg border border-white/10 bg-black/20 p-3"
             >
               <div class="flex min-w-0 items-center justify-between gap-3">
@@ -637,6 +708,48 @@
                 </span>
                 <span *ngIf="ability.totalBarrier > 0" class="ll-text-info">
                   · {{ ability.totalBarrier | number }} barrier
+                </span>
+              </div>
+
+              <div *ngIf="ability.totalDamage > 0" class="mt-2 space-y-1">
+                <div class="flex flex-wrap justify-end gap-x-2 gap-y-1">
+                  <span
+                    *ngFor="
+                      let entry of damageBreakdown(ability);
+                      trackBy: trackDamageType
+                    "
+                    class="inline-flex items-center gap-1 text-[10px] font-semibold tabular-nums"
+                    [style.color]="damageTypeColor(entry.damageType)"
+                    [attr.title]="damageTypeLabel(entry.damageType) + ' damage'"
+                  >
+                    <span
+                      class="h-1.5 w-1.5 rounded-full"
+                      [style.background-color]="
+                        damageTypeColor(entry.damageType)
+                      "
+                      aria-hidden="true"
+                    ></span>
+                    {{ entry.totalDamage | number }}
+                  </span>
+                </div>
+                <span
+                  class="flex h-1 overflow-hidden rounded-full bg-white/[0.04]"
+                  aria-hidden="true"
+                >
+                  <span
+                    *ngFor="
+                      let entry of damageBreakdown(ability);
+                      trackBy: trackDamageType
+                    "
+                    class="block h-full shrink-0 transition-[width] duration-1000 ease-linear"
+                    [style.background-color]="damageTypeColor(entry.damageType)"
+                    [style.width.%]="damageTypeBarPercentage(entry)"
+                  ></span>
+                  <span
+                    *ngIf="damageBreakdown(ability).length === 0"
+                    class="block h-full shrink-0 bg-primary/65 transition-[width] duration-1000 ease-linear"
+                    [style.width.%]="abilityBarPercentage(ability)"
+                  ></span>
                 </span>
               </div>
             </div>

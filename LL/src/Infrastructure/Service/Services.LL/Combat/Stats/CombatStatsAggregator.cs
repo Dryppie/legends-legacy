@@ -1,4 +1,5 @@
 using Domain.Models.Combat;
+using Domain.Models.Damages;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Combat.Stats;
@@ -48,7 +49,8 @@ public sealed class CombatStatsAccumulator
                 item.BlockPrevented,
                 item.DamageReductionPrevented,
                 item.DamageAmplified,
-                item.FinalHealthDamage);
+                item.FinalHealthDamage,
+                item.DamageType);
         }
     }
 
@@ -72,7 +74,8 @@ public sealed class CombatStatsAccumulator
         int blockPrevented = 0,
         int damageReductionPrevented = 0,
         int damageAmplified = 0,
-        int finalHealthDamage = 0)
+        int finalHealthDamage = 0,
+        DamageType damageType = DamageType.None)
     {
         // ----- entity context ------------------------------------------------
         var entity = GetOrAddEntity(actorId);
@@ -128,7 +131,10 @@ public sealed class CombatStatsAccumulator
 
                 var damageAbility = entity.GetOrAddAbility(statsSource);
                 if (relationship == DamageTargetRelationship.Opponent)
+                {
                     damageAbility.TotalDamage += magnitude;
+                    damageAbility.AddDamage(damageType, magnitude);
+                }
                 else if (relationship == DamageTargetRelationship.Self)
                     damageAbility.SelfDamage += magnitude;
                 else if (relationship == DamageTargetRelationship.Ally)
@@ -323,8 +329,32 @@ public sealed class WorkAbility
 {
     public string Name { get; }
     public int TotalDamage, TotalHealing, Uses, Hits, Crits, Summons, Stuns, SelfDamage, AlliedDamage, TotalBarrier;
+    private readonly Dictionary<DamageType, int> _damageByType = [];
 
     public WorkAbility(string name) => Name = name;
 
-    public AbilityStats ToImmutable() => new(Name, TotalDamage, TotalHealing, Uses, Hits, Crits, Summons, Stuns, SelfDamage, AlliedDamage, TotalBarrier);
+    public void AddDamage(DamageType damageType, int damage)
+    {
+        if (damage <= 0)
+            return;
+
+        _damageByType[damageType] = _damageByType.GetValueOrDefault(damageType) + damage;
+    }
+
+    public AbilityStats ToImmutable() => new(
+        Name,
+        TotalDamage,
+        TotalHealing,
+        Uses,
+        Hits,
+        Crits,
+        Summons,
+        Stuns,
+        SelfDamage,
+        AlliedDamage,
+        TotalBarrier,
+        _damageByType
+            .OrderBy(entry => entry.Key)
+            .Select(entry => new AbilityDamageTypeStats(entry.Key, entry.Value))
+            .ToList());
 }

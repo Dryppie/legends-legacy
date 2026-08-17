@@ -54,7 +54,13 @@ public sealed class RegionOneContentDiagnostics : IRegionOneContentDiagnostics
         var creatures = (await _creatures.GetCreaturesAsync(cancellationToken))
             .Select(creature => new CreatureDiagnosticData(creature.Id, creature.Name, creature.ImagePath))
             .ToList();
-        var creaturesByKey = creatures.ToDictionary(x => x.Key, StringComparer.OrdinalIgnoreCase);
+        var creaturesByKey = creatures
+            .Where(x => !string.IsNullOrWhiteSpace(x.Key))
+            .GroupBy(x => x.Key.Trim(), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                group => group.Key,
+                group => group.MinBy(x => x.Id)!,
+                StringComparer.OrdinalIgnoreCase);
         var areas = await _areas.GetAreasWithCreaturesAsync(cancellationToken);
         var staleAreaCount = await _areas.CountByIdAsync(RetiredGoblinMinesIdleAreaId, cancellationToken);
         var dungeons = _dungeonDefinitions.GetAll();

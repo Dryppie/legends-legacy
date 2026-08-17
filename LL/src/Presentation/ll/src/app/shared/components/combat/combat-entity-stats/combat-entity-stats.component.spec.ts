@@ -84,6 +84,42 @@ describe('CombatEntityStatsComponent', () => {
     expect(component.teamDisplayName('Friendly')).toBe('Ally');
     expect(component.teamDisplayName('Hostile')).toBe('Enemy');
   });
+
+  it('orders damage breakdowns consistently and scales segments to the largest ability', () => {
+    component.playerTeam = [entity('player', 'Player', 100, 100)];
+    component.entityStats = [stats('player', 'Player', 100, 'Friendly')];
+    component.entityStats[0].abilities = [
+      {
+        ...component.entityStats[0].abilities[0],
+        totalDamage: 100,
+        damageByType: [
+          { damageType: 'Burn', totalDamage: 30 },
+          { damageType: 'Physical', totalDamage: 70 },
+        ],
+      },
+    ];
+
+    refresh(component);
+
+    const ability = component.selectedStats!.abilities[0];
+    expect(
+      component.damageBreakdown(ability).map((entry) => entry.damageType),
+    ).toEqual(['Physical', 'Burn']);
+    expect(
+      component.damageTypeBarPercentage({
+        damageType: 'Physical',
+        totalDamage: 70,
+      }),
+    ).toBe(70);
+  });
+
+  it('tracks updated ability snapshots by name', () => {
+    const first = stats('player', 'Player', 10, 'Friendly').abilities[0];
+    const updated = { ...first, totalDamage: 20 };
+
+    expect(component.trackAbility(0, first)).toBe('Attack');
+    expect(component.trackAbility(0, updated)).toBe('Attack');
+  });
 });
 
 function refresh(component: CombatEntityStatsComponent): void {
@@ -137,6 +173,7 @@ function stats(
       {
         name: 'Attack',
         totalDamage: damageDone,
+        damageByType: [],
         totalHealing: 0,
         uses: 1,
         hits: 1,

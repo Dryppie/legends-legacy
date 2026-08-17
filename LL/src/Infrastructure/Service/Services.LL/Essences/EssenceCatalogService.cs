@@ -29,7 +29,21 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
     {
         var catalog = _catalogProvider.GetCatalog();
         var itemIdByEssenceId = await _itemBases.GetEssenceItemBaseIdsByDefinitionIdAsync(cancellationToken);
-        var areas = BuildRegionOneSources()
+        var shenicAreas = BuildAreas(BuildRegionOneSources(), itemIdByEssenceId, catalog);
+        var meranAreas = BuildAreas(BuildMeranSources(), itemIdByEssenceId, catalog);
+
+        return new EssenceCatalogReport(
+        [
+            new EssenceCatalogRegion("region_01", "Shenic", shenicAreas),
+            new EssenceCatalogRegion("region_02", "Meran", meranAreas)
+        ]);
+    }
+
+    private IReadOnlyList<EssenceCatalogArea> BuildAreas(
+        IReadOnlyList<EssenceCatalogSourceEntry> sources,
+        IReadOnlyDictionary<string, string> itemIdByEssenceId,
+        AbilityCatalog catalog) =>
+        sources
             .GroupBy(x => new { x.AreaId, x.AreaName, x.SourceType, x.Tier })
             .Select(group => new EssenceCatalogArea(
                 group.Key.AreaId,
@@ -44,12 +58,6 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
             .ThenBy(x => GetAreaSortOrder(x.Id))
             .ThenBy(x => x.Name)
             .ToList();
-
-        return new EssenceCatalogReport(
-        [
-            new EssenceCatalogRegion("region_01", "Shenic", areas)
-        ]);
-    }
 
     private EssenceCatalogMonster BuildMonster(
         EssenceCatalogSourceEntry entry,
@@ -166,6 +174,8 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
             "region_01_area_10" => 8,
             "region_01_area_11" => 9,
             "region_01_area_07" => 10,
+            "region_02_area_01" => 1,
+            "region_02_area_02" => 2,
             _ => int.MaxValue
         };
 
@@ -233,6 +243,20 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
         new("region_01_future_dungeon_great_tree", "The Great Tree", "Future Dungeon", "T2", "Wood Nymph", "wood_nymph"),
         new("region_01_future_dungeon_tangled_cave", "Tangled Cave", "Future Dungeon", "T2", "Giant Spider", "giant_spider"),
         new("region_01_future_dungeon_tangled_cave", "Tangled Cave", "Future Dungeon", "T2", "Venomous Spiderling", "venomous_spiderling")
+    ];
+
+    private static IReadOnlyList<EssenceCatalogSourceEntry> BuildMeranSources() =>
+    [
+        new("region_02_area_01", "Warfang Frontier", "Idle Area", "T2", "Gnoll Pack Leader", "gnoll_pack_leader"),
+        new("region_02_area_01", "Warfang Frontier", "Idle Area", "T2", "Gnoll Raider", "gnoll_raider"),
+        new("region_02_area_01", "Warfang Frontier", "Idle Area", "T2", "Gnoll Shaman", "gnoll_shaman"),
+        new("region_02_area_01", "Warfang Frontier", "Idle Area", "T2", "Kobold Skirmisher", "kobold_skirmisher"),
+        new("region_02_area_01", "Warfang Frontier", "Idle Area", "T2", "Kobold Sorcerer", "kobold_sorcerer"),
+        new("region_02_area_02", "Rotgrave Fields", "Idle Area", "T2", "Feral Ghoul", "feral_ghoul"),
+        new("region_02_area_02", "Rotgrave Fields", "Idle Area", "T2", "Plague Ghoul", "plague_ghoul"),
+        new("region_02_area_02", "Rotgrave Fields", "Idle Area", "T2", "Ravenous Ghoul", "ravenous_ghoul"),
+        new("region_02_area_02", "Rotgrave Fields", "Idle Area", "T2", "Vampire Fledgeling", "vampire_fledgeling"),
+        new("region_02_area_02", "Rotgrave Fields", "Idle Area", "T2", "Wandering Ghost", "wandering_ghost")
     ];
 
     private sealed record EssenceCatalogSourceEntry(

@@ -10,6 +10,7 @@ using Domain.Models.Bonuses;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
+using Domain.Models.Damages;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
@@ -635,6 +636,7 @@ public sealed class EssenceSystemServiceTests
                 Source = "effect.initial.damage",
                 StatsSource = "Sneak Attack",
                 EventType = EventType.Damage,
+                DamageType = DamageType.Physical,
                 Magnitude = 33
             },
             new CombatLogItem
@@ -644,6 +646,7 @@ public sealed class EssenceSystemServiceTests
                 Source = "effect.poison.dot",
                 StatsSource = "Sneak Attack",
                 EventType = EventType.DamageOverTime,
+                DamageType = DamageType.Poison,
                 Magnitude = 14
             }
         ]);
@@ -653,6 +656,18 @@ public sealed class EssenceSystemServiceTests
         Assert.Equal("Sneak Attack", ability.Name);
         Assert.Equal(1, ability.Uses);
         Assert.Equal(47, ability.TotalDamage);
+        Assert.Collection(
+            ability.DamageByType!,
+            physical =>
+            {
+                Assert.Equal(DamageType.Physical, physical.DamageType);
+                Assert.Equal(33, physical.TotalDamage);
+            },
+            poison =>
+            {
+                Assert.Equal(DamageType.Poison, poison.DamageType);
+                Assert.Equal(14, poison.TotalDamage);
+            });
         Assert.Equal(47, player.DamageDone);
 
         var enemy = stats.Single(x => x.EntityId == "enemy");

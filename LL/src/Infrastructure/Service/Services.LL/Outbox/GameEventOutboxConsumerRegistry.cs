@@ -1,4 +1,4 @@
-using Application.Interfaces.Outbox;
+﻿using Application.Interfaces.Outbox;
 using Application.UseCases.Outbox;
 
 namespace Services.LL.Outbox;
@@ -48,7 +48,8 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
             [GameEventTypes.InventoryItemsGranted] = [GameEventOutboxConsumerNames.RealtimeInventory],
             [GameEventTypes.TournamentGroundsUpdated] = [GameEventOutboxConsumerNames.RealtimeTournamentGrounds],
             [GameEventTypes.WorldTowerRallyUpdated] = [GameEventOutboxConsumerNames.RealtimeWorldTower],
-            [GameEventTypes.WorldTowerChatAnnouncement] = [GameEventOutboxConsumerNames.WorldTowerChat]
+            [GameEventTypes.WorldTowerChatAnnouncement] = [GameEventOutboxConsumerNames.WorldTowerChat],
+            [GameEventTypes.EventQuestChatAnnouncement] = [GameEventOutboxConsumerNames.EventQuestChat]
         };
 
     public IReadOnlyList<string> GetConsumers(string eventType) =>

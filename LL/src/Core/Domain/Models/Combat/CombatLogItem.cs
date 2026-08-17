@@ -8,6 +8,8 @@ public class CombatLogItem
     public string ActorId { get; set; } = string.Empty;
     public string TargetId { get; set; } = string.Empty;
     public EventType EventType { get; set; }
+    public Domain.Models.Damages.DamageType DamageType { get; set; }
+        = Domain.Models.Damages.DamageType.None;
     public int Magnitude { get; set; }
     public int BarrierAbsorbed { get; set; }
     public int IncomingRawDamage { get; set; }

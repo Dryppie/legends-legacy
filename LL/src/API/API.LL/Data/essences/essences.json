@@ -1182,10 +1182,10 @@
       "id": "essence.gnoll_raider",
       "sourceMonsterId": "monster.gnoll_raider",
       "name": "Gnoll Raider Essence",
-      "description": "The combat essence of Gnoll Raider, granting Loot and Slash and Shattering Strikes.",
+      "description": "The combat essence of Gnoll Raider, granting Loot and Slash and Pillage the Weak.",
       "rarity": "Common", "tags": [], "attributeBonuses": [],
       "activeAbilityId": "ability.creature.gnoll_raider.loot_and_slash",
-      "passiveAbilityId": "ability.creature.gnoll_raider.shattering_strikes",
+      "passiveAbilityId": "ability.creature.gnoll_raider.pillage_the_weak",
       "evolution": {"id": "evolution.gnoll_raider", "name": "Awakened Gnoll Raider", "description": "The awakened form of Gnoll Raider Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
     },
     {

@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Diagnostics.Metrics;
 using System.IO.Compression;
 using System.Security.Cryptography;
@@ -44,6 +44,7 @@ public sealed class WorldTowerService : IWorldTowerService
 {
     private const string EchoModeUnlockKey = "tower_echo_mode_unlock";
     private const string TowerExpeditionTargetUrlFormat = "/game/world/tower/expeditions/{0}";
+    private const string TowerHallOfFameTargetUrl = "/game/world/tower/hall-of-fame";
     private static readonly TowerRallyStatus[] ActiveRallyStatuses =
     [
         TowerRallyStatus.Recruiting,
@@ -1909,6 +1910,18 @@ public sealed class WorldTowerService : IWorldTowerService
                 progress.AddScoutingProgress(_options.FailedAttemptScoutingGain, now);
         }
 
+        // A floor is conquered exactly once per server. RecordFirstClear returns false when
+        // the floor was already cleared and the whole method holds the floor lock, so this
+        // cannot double-announce; Echo repeat-clears and defeats never set it at all.
+        if (createdHallRecord)
+        {
+            await EnqueueFloorConqueredChatAnnouncementAsync(
+                attempt.TowerRally,
+                definition,
+                now,
+                cancellationToken);
+        }
+
         await EnqueueRallyUpdateAsync(
             attempt.TowerRally,
             outcome.Succeeded ? "CompletedVictory" : "CompletedDefeat",
@@ -2399,7 +2412,8 @@ public sealed class WorldTowerService : IWorldTowerService
                         ability.Uses,
                         ability.TotalDamage,
                         ability.TotalHealing,
-                        ability.TotalBarrier)))
+                        ability.TotalBarrier,
+                        ability.DamageByType)))
                 .OrderBy(x => x.AbilityIndex)
                 .ToArray();
             return new TowerPlaybackBundleFrameDto(
@@ -2529,6 +2543,28 @@ public sealed class WorldTowerService : IWorldTowerService
                     CultureInfo.InvariantCulture,
                     TowerExpeditionTargetUrlFormat,
                     rally.Id),
+                sentAt),
+            characterId: null,
+            accountId: null,
+            cancellationToken: cancellationToken);
+    }
+
+    private Task EnqueueFloorConqueredChatAnnouncementAsync(
+        TowerRally rally,
+        TowerFloorDefinition definition,
+        DateTimeOffset sentAt,
+        CancellationToken cancellationToken)
+    {
+        var body = $"{definition.GuardianName} has fallen - Floor {definition.FloorNumber} "
+            + "of the World Tower has been conquered!";
+
+        return _outbox.EnqueueAsync(
+            GameEventTypes.WorldTowerChatAnnouncement,
+            new WorldTowerChatAnnouncementPayload(
+                rally.Id,
+                CreateTowerAnnouncementMessageId(rally.Id, "floor-conquered"),
+                body,
+                TowerHallOfFameTargetUrl,
                 sentAt),
             characterId: null,
             accountId: null,

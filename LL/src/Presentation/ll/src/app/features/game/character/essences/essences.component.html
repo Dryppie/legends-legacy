@@ -75,7 +75,7 @@
       <div class="mb-3 grid gap-2">
         <input
           class="ll-input w-full"
-          placeholder="Search essence, ability, or tag"
+          placeholder="Search name, description, ability, or tag"
           [ngModel]="archiveSearch()"
           (ngModelChange)="archiveSearch.set($event)"
         />
@@ -754,7 +754,7 @@
           <span class="ll-label">Search</span>
           <input
             class="ll-input"
-            placeholder="Creature, Essence, tag"
+            placeholder="Creature, Essence, description, or tag"
             [ngModel]="creatureSearch()"
             (ngModelChange)="creatureSearch.set($event)"
           />

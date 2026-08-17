@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Globalization;
 using System.IO.Compression;
 using Application.UseCases.WorldTower.Dtos;
@@ -1257,6 +1257,116 @@ public sealed class WorldTowerServiceTests
     }
 
     [Fact]
+    public async Task SuccessfulFirstClear_AnnouncesTheConqueredFloorToEveryone()
+    {
+        await using var db = CreateDbContext();
+        var characters = Enumerable.Range(1, 4)
+            .Select(number => SeedCharacter(db, $"Conqueror {number}", 20, Guid.NewGuid()))
+            .ToArray();
+        await db.SaveChangesAsync();
+        var outbox = new TestGameEventOutbox();
+        var service = CreateService(
+            db,
+            new FixedPowerRatingService(characters.Select(x => (x.Id, 1_000)).ToArray()),
+            new FixedGuardianEntityService(),
+            new SimpleCombatSetupService(),
+            new QueuedCombatEngineExecutor(BattleOutcome.Victory),
+            new PassthroughCombatEncounterResultFactory(),
+            outbox);
+        var rallyId = await CreateReadyRallyAsync(db, service, characters, TowerRallyMode.FirstClear);
+        var result = await service.StartRallyAsync(characters[0].Id, rallyId, CancellationToken.None);
+        Assert.True(result.Succeeded, result.Error);
+        Assert.NotNull(result.Value);
+        var playback = await SimulatePlaybackAsync(db, service, result.Value);
+
+        await FinalizePlaybackAsync(db, service, playback);
+        db.ChangeTracker.Clear();
+
+        Assert.True((await db.TowerFloorProgresses.SingleAsync(x => x.FloorNumber == 1)).IsCleared);
+        var conquest = Assert.Single(
+            outbox.ChatAnnouncements,
+            announcement => announcement.Body.Contains("conquered", StringComparison.Ordinal));
+        Assert.Equal(rallyId, conquest.RallyId);
+        Assert.Equal("/game/world/tower/hall-of-fame", conquest.TargetUrl);
+        Assert.Contains("Lumo Sentinel", conquest.Body, StringComparison.Ordinal);
+        Assert.Contains("Floor 1", conquest.Body, StringComparison.Ordinal);
+        // The rally-start and conquest messages share a rally, so their deterministic ids
+        // must still differ or LL-Chat would swallow the second one as a duplicate.
+        Assert.Equal(2, outbox.ChatAnnouncements.Count);
+        Assert.Equal(2, outbox.ChatAnnouncements.Select(x => x.MessageId).Distinct().Count());
+    }
+
+    [Fact]
+    public async Task EchoClear_DoesNotReannounceAnAlreadyConqueredFloor()
+    {
+        await using var db = CreateDbContext();
+        var characters = Enumerable.Range(1, 4)
+            .Select(number => SeedCharacter(db, $"Echo Conqueror {number}", 20, Guid.NewGuid()))
+            .ToArray();
+        await db.SaveChangesAsync();
+        var outbox = new TestGameEventOutbox();
+        var service = CreateService(
+            db,
+            new FixedPowerRatingService(characters.Select(x => (x.Id, 1_000)).ToArray()),
+            new FixedGuardianEntityService(),
+            new SimpleCombatSetupService(),
+            new QueuedCombatEngineExecutor(BattleOutcome.Victory),
+            new PassthroughCombatEncounterResultFactory(),
+            outbox);
+        await service.GetOverviewAsync(characters[0].Id, CancellationToken.None);
+        db.ChangeTracker.Clear();
+        var floorOne = await db.TowerFloorProgresses.SingleAsync(x => x.FloorNumber == 1);
+        floorOne.RecordFirstClear(Guid.NewGuid(), DateTimeOffset.UtcNow);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        var rallyId = await CreateReadyRallyAsync(db, service, characters, TowerRallyMode.Echo);
+        var result = await service.StartRallyAsync(characters[0].Id, rallyId, CancellationToken.None);
+        Assert.True(result.Succeeded, result.Error);
+        Assert.NotNull(result.Value);
+        var playback = await SimulatePlaybackAsync(db, service, result.Value);
+
+        await FinalizePlaybackAsync(db, service, playback);
+        db.ChangeTracker.Clear();
+
+        Assert.Equal(TowerAttemptStatus.Succeeded, (await db.TowerAttempts.SingleAsync()).Status);
+        Assert.DoesNotContain(
+            outbox.ChatAnnouncements,
+            announcement => announcement.Body.Contains("conquered", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task FailedFirstClear_DoesNotAnnounceAConquest()
+    {
+        await using var db = CreateDbContext();
+        var characters = Enumerable.Range(1, 4)
+            .Select(number => SeedCharacter(db, $"Challenger {number}", 20, Guid.NewGuid()))
+            .ToArray();
+        await db.SaveChangesAsync();
+        var outbox = new TestGameEventOutbox();
+        var service = CreateService(
+            db,
+            new FixedPowerRatingService(characters.Select(x => (x.Id, 1_000)).ToArray()),
+            new FixedGuardianEntityService(),
+            new SimpleCombatSetupService(),
+            new QueuedCombatEngineExecutor(BattleOutcome.Defeat),
+            new PassthroughCombatEncounterResultFactory(),
+            outbox);
+        var rallyId = await CreateReadyRallyAsync(db, service, characters, TowerRallyMode.FirstClear);
+        var result = await service.StartRallyAsync(characters[0].Id, rallyId, CancellationToken.None);
+        Assert.True(result.Succeeded, result.Error);
+        Assert.NotNull(result.Value);
+        var playback = await SimulatePlaybackAsync(db, service, result.Value);
+
+        await FinalizePlaybackAsync(db, service, playback);
+        db.ChangeTracker.Clear();
+
+        Assert.False((await db.TowerFloorProgresses.SingleAsync(x => x.FloorNumber == 1)).IsCleared);
+        Assert.DoesNotContain(
+            outbox.ChatAnnouncements,
+            announcement => announcement.Body.Contains("conquered", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task SuccessfulFirstClear_PersistsReportRewardsProgressionUnlockAndHallRecord()
     {
         await using var db = CreateDbContext();
@@ -1297,6 +1407,17 @@ public sealed class WorldTowerServiceTests
         Assert.NotEmpty(bundle.Frames);
         Assert.True(bundle.Frames[^1].IsFinal);
         Assert.All(bundle.Frames, frame => Assert.NotNull(frame.EntityStates));
+        var damagingAbilityTotals = bundle.Frames
+            .SelectMany(frame => frame.AbilityTotals)
+            .Where(ability => ability.TotalDamage > 0)
+            .ToArray();
+        Assert.All(damagingAbilityTotals, ability =>
+        {
+            Assert.NotNull(ability.DamageByType);
+            Assert.Equal(
+                ability.TotalDamage,
+                ability.DamageByType.Sum(entry => entry.TotalDamage));
+        });
         var spectatorId = Guid.NewGuid();
         Assert.NotNull(await service.GetAttemptPlaybackBundleAsync(
             spectatorId,

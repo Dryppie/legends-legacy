@@ -1,4 +1,4 @@
-using Application.Authorization.Interfaces;
+﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Guilds;
@@ -437,6 +437,7 @@ public static class DependencyInjection
         services.AddScoped<IGameEventOutboxConsumer, TransferChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, TournamentChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, WorldTowerChatGameEventOutboxConsumer>();
+        services.AddScoped<IGameEventOutboxConsumer, EventQuestChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, GuildChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, GuildVaultChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RealtimeCharacterGameEventOutboxConsumer>();

@@ -1,6 +1,8 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import {
+  AbilityDamageTypeStats,
   AbilityStats,
+  DamageType,
   EntityStats,
   SimpleCombatEntityDto,
 } from '../../../models/Dtos/combatResultDto';
@@ -10,6 +12,27 @@ import { RegularButtonComponent } from '../../custom-components/buttons/regular-
 type CombatTeamName = 'Friendly' | 'Hostile';
 type AbilitySortColumn = 'uses' | 'damage' | 'healing' | 'barrier';
 type SortDirection = 'asc' | 'desc';
+const DAMAGE_TYPE_ORDER: readonly DamageType[] = [
+  'Physical',
+  'Magical',
+  'Burn',
+  'Bleed',
+  'Poison',
+  'Shadow',
+  'None',
+];
+const DAMAGE_TYPE_ORDER_INDEX = new Map(
+  DAMAGE_TYPE_ORDER.map((damageType, index) => [damageType, index]),
+);
+const DAMAGE_TYPE_COLORS: Readonly<Record<DamageType, string>> = {
+  Physical: '#e6e2d9',
+  Magical: '#9d86ef',
+  Bleed: '#d94d5c',
+  Burn: '#ef8a3c',
+  Poison: '#82b94b',
+  Shadow: '#69b6dd',
+  None: '#8d8991',
+};
 type StatsParticipant = {
   id: string;
   name: string;
@@ -40,12 +63,21 @@ export class CombatEntityStatsComponent implements OnChanges {
   @Input() entityStats!: EntityStats[];
   @Input() playerTeamName: string | null = null;
   @Input() enemyTeamName: string | null = null;
+  /** Id of the logged-in character, used to pre-select their own unit. */
+  @Input() currentCharacterId: string | null = null;
 
   selectedStats: EntityStats | null = null;
   selectedEntityId: string = '';
   selectedEntityName: string = '';
   abilitySortColumn: AbilitySortColumn = 'damage';
   abilitySortDirection: SortDirection = 'desc';
+  readonly damageTypeLegend: readonly DamageType[] = [
+    'Physical',
+    'Magical',
+    'Burn',
+    'Bleed',
+    'Poison',
+  ];
 
   playerParticipants: StatsParticipant[] = [];
   enemyParticipants: StatsParticipant[] = [];
@@ -57,7 +89,8 @@ export class CombatEntityStatsComponent implements OnChanges {
     if (
       changes['entityStats'] ||
       changes['playerTeam'] ||
-      changes['enemyTeam']
+      changes['enemyTeam'] ||
+      changes['currentCharacterId']
     ) {
       this.rawStatsById.clear();
       for (const stats of this.entityStats ?? []) {
@@ -188,6 +221,45 @@ export class CombatEntityStatsComponent implements OnChanges {
     return 'bg-white/10';
   }
 
+  damageBreakdown(ability: AbilityStats): AbilityDamageTypeStats[] {
+    return [...(ability.damageByType ?? [])]
+      .filter((entry) => entry.totalDamage > 0)
+      .sort(
+        (left, right) =>
+          (DAMAGE_TYPE_ORDER_INDEX.get(left.damageType) ??
+            Number.MAX_SAFE_INTEGER) -
+          (DAMAGE_TYPE_ORDER_INDEX.get(right.damageType) ??
+            Number.MAX_SAFE_INTEGER),
+      );
+  }
+
+  damageTypeBarPercentage(entry: AbilityDamageTypeStats): number {
+    const maximum = Math.max(
+      0,
+      ...(this.selectedStats?.abilities ?? []).map(
+        (ability) => ability.totalDamage ?? 0,
+      ),
+    );
+    if (maximum <= 0) return 0;
+    return (entry.totalDamage / maximum) * 100;
+  }
+
+  damageTypeColor(damageType: DamageType): string {
+    return DAMAGE_TYPE_COLORS[damageType] ?? DAMAGE_TYPE_COLORS.None;
+  }
+
+  damageTypeLabel(damageType: DamageType): string {
+    return damageType === 'None' ? 'Untyped' : damageType;
+  }
+
+  trackDamageType(_index: number, entry: AbilityDamageTypeStats): DamageType {
+    return entry.damageType;
+  }
+
+  trackAbility(_index: number, ability: AbilityStats): string {
+    return ability.name;
+  }
+
   abilityCategory(ability: AbilityStats): string {
     if (ability.totalDamage > 0) return 'Attack';
     if (ability.totalHealing > 0) return 'Healing';
@@ -233,9 +305,10 @@ export class CombatEntityStatsComponent implements OnChanges {
       return;
     }
 
-    const firstParticipant = participants[0];
-    if (firstParticipant) {
-      this.selectEntity(firstParticipant.id);
+    const ownParticipant = this.findOwnParticipant(participants);
+    const fallbackParticipant = ownParticipant ?? participants[0];
+    if (fallbackParticipant) {
+      this.selectEntity(fallbackParticipant.id);
       return;
     }
 
@@ -403,6 +476,7 @@ export class CombatEntityStatsComponent implements OnChanges {
       const current = abilities.get(ability.name) ?? {
         name: ability.name,
         totalDamage: 0,
+        damageByType: [],
         totalHealing: 0,
         uses: 0,
         hits: 0,
@@ -416,6 +490,10 @@ export class CombatEntityStatsComponent implements OnChanges {
       abilities.set(ability.name, {
         name: ability.name,
         totalDamage: current.totalDamage + (ability.totalDamage ?? 0),
+        damageByType: this.mergeDamageByType(
+          current.damageByType,
+          ability.damageByType,
+        ),
         totalHealing: current.totalHealing + (ability.totalHealing ?? 0),
         uses: current.uses + (ability.uses ?? 0),
         hits: current.hits + (ability.hits ?? 0),
@@ -457,6 +535,21 @@ export class CombatEntityStatsComponent implements OnChanges {
       maxHealth: group.entity.maxHealth,
       barrier: group.entity.barrier,
     };
+  }
+
+  private findOwnParticipant(
+    participants: StatsParticipant[],
+  ): StatsParticipant | null {
+    const ownId = this.currentCharacterId;
+    if (!ownId) return null;
+    return (
+      participants.find(
+        (participant) =>
+          !participant.isSummonGroup &&
+          !participant.isSummonChild &&
+          participant.id === ownId,
+      ) ?? null
+    );
   }
 
   private summonIdentity(id: string): SummonIdentity | null {
@@ -537,6 +630,23 @@ export class CombatEntityStatsComponent implements OnChanges {
       default:
         return ability.totalDamage ?? 0;
     }
+  }
+
+  private mergeDamageByType(
+    left: readonly AbilityDamageTypeStats[] | null | undefined,
+    right: readonly AbilityDamageTypeStats[] | null | undefined,
+  ): AbilityDamageTypeStats[] {
+    const totals = new Map<DamageType, number>();
+    for (const entry of [...(left ?? []), ...(right ?? [])]) {
+      totals.set(
+        entry.damageType,
+        (totals.get(entry.damageType) ?? 0) + (entry.totalDamage ?? 0),
+      );
+    }
+    return [...totals].map(([damageType, totalDamage]) => ({
+      damageType,
+      totalDamage,
+    }));
   }
 
   private primaryOutputTotal(ability: AbilityStats): number {

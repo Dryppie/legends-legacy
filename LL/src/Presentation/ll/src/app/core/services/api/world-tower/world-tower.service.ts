@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
+  AbilityDamageTypeStats,
   BattleOutcome,
   CombatResultDto,
   EntityStats,
@@ -271,6 +272,7 @@ export interface TowerPlaybackAbilityTotals {
   totalDamage: number;
   totalHealing: number;
   totalBarrier: number;
+  damageByType?: AbilityDamageTypeStats[];
 }
 
 export interface TowerCombatFrame {

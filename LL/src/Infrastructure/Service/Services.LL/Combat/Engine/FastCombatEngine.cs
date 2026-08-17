@@ -1198,7 +1198,8 @@ public sealed class FastCombatEngine
             blockPrevented,
             damageReductionPrevented,
             damageAmplified,
-            pendingHealthDamage);
+            pendingHealthDamage,
+            damageType: damageType);
         if (delivery == DamageDelivery.Direct)
         {
             var directEvent = new CombatEvent(
@@ -2978,6 +2979,7 @@ public sealed class FastCombatEngine
             AbilityTargetSelector.AllAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive),
             AbilityTargetSelector.EveryoneButSelf => combatants.Where(x => x.Id != source.Id && x.IsAlive),
             AbilityTargetSelector.TwoEnemies => combatants.Where(x => x.Team != source.Team && x.IsAlive).Take(2),
+            AbilityTargetSelector.ThreeEnemies => combatants.Where(x => x.Team != source.Team && x.IsAlive).Take(3),
             AbilityTargetSelector.TwoAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive).Take(2),
             AbilityTargetSelector.HighestMaxHealthAlly => combatants
                 .Where(x => x.Team == source.Team && x.IsAlive)
@@ -3491,7 +3493,8 @@ public sealed class FastCombatEngine
         int blockPrevented = 0,
         int damageReductionPrevented = 0,
         int damageAmplified = 0,
-        int finalHealthDamage = 0)
+        int finalHealthDamage = 0,
+        DamageType damageType = DamageType.None)
         => LogCore(
             source,
             target,
@@ -3510,7 +3513,8 @@ public sealed class FastCombatEngine
             blockPrevented,
             damageReductionPrevented,
             damageAmplified,
-            finalHealthDamage);
+            finalHealthDamage,
+            damageType);
 
     private void Log(
         RuntimeCombatant source,
@@ -3530,7 +3534,8 @@ public sealed class FastCombatEngine
         int blockPrevented = 0,
         int damageReductionPrevented = 0,
         int damageAmplified = 0,
-        int finalHealthDamage = 0)
+        int finalHealthDamage = 0,
+        DamageType damageType = DamageType.None)
         => LogCore(
             source,
             target,
@@ -3549,7 +3554,8 @@ public sealed class FastCombatEngine
             blockPrevented,
             damageReductionPrevented,
             damageAmplified,
-            finalHealthDamage);
+            finalHealthDamage,
+            damageType);
 
     private void LogCore(
         RuntimeCombatant source,
@@ -3569,7 +3575,8 @@ public sealed class FastCombatEngine
         int blockPrevented,
         int damageReductionPrevented,
         int damageAmplified,
-        int finalHealthDamage)
+        int finalHealthDamage,
+        DamageType damageType)
     {
         if (!_captureEventLog)
         {
@@ -3593,7 +3600,8 @@ public sealed class FastCombatEngine
                 blockPrevented,
                 damageReductionPrevented,
                 damageAmplified,
-                finalHealthDamage);
+                finalHealthDamage,
+                damageType);
         }
 
         if (!_captureEventLog)
@@ -3608,6 +3616,7 @@ public sealed class FastCombatEngine
             TargetId = target?.Id!,
             Timestamp = _currentTick,
             EventType = eventType,
+            DamageType = damageType,
             Magnitude = magnitude,
             BarrierAbsorbed = barrierAbsorbed,
             IncomingRawDamage = incomingRawDamage,
