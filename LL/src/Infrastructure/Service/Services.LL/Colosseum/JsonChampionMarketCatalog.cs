@@ -136,6 +136,18 @@ public sealed class JsonChampionMarketCatalog : IChampionMarketCatalog
         {
             throw new InvalidOperationException("Champion's Market purchase limits must be greater than zero when set: " + string.Join(", ", invalidLimits));
         }
+
+        var invalidRankRequirements = items
+            .Where(item =>
+                !string.IsNullOrWhiteSpace(item.RequiredRankTier) &&
+                !ArenaRank.Tiers.Any(tier => tier.Id == item.RequiredRankTier))
+            .Select(item => item.Id)
+            .ToList();
+
+        if (invalidRankRequirements.Count > 0)
+        {
+            throw new InvalidOperationException("Champion's Market rank requirements must reference a valid arena rank: " + string.Join(", ", invalidRankRequirements));
+        }
     }
 
     private sealed class ChampionMarketDocument

@@ -10,8 +10,7 @@ export interface ChampionMarketItem {
   remainingLifetimePurchases: number;
   requiredRating?: number | null;
   requiredRankTier?: string | null;
-  canPurchase: boolean;
-  cannotPurchaseReason?: string | null;
+  requiredRankMinRating?: number | null;
   sortOrder: number;
   cindersGranted: number;
   soulstonesGranted: number;
@@ -21,10 +20,19 @@ export interface ChampionMarketItem {
   rewardItemQuantity: number;
 }
 
+export interface ChampionMarketItemView extends ChampionMarketItem {
+  canPurchase: boolean;
+  cannotPurchaseReason: string | null;
+}
+
 export interface ChampionMarket {
   items: ChampionMarketItem[];
   glory: number;
   weeklyResetAt: Date;
+}
+
+export interface ChampionMarketView extends Omit<ChampionMarket, 'items'> {
+  items: ChampionMarketItemView[];
 }
 
 export interface ChampionMarketPurchaseResponse {

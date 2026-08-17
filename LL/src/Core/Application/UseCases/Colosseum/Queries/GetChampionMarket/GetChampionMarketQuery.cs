@@ -34,7 +34,7 @@ public sealed class GetChampionMarketQueryHandler : IRequestHandler<GetChampionM
         {
             var weeklyPurchased = await _colosseumService.CountChampionMarketPurchasesAsync(request.CharacterId, item.Id, weekStart, cancellationToken);
             var lifetimePurchased = await _colosseumService.CountChampionMarketPurchasesAsync(request.CharacterId, item.Id, null, cancellationToken);
-            items.Add(MapItem(character, item, weeklyPurchased, lifetimePurchased));
+            items.Add(MapItem(item, weeklyPurchased, lifetimePurchased));
         }
 
         return _mapper.Map<ChampionMarketDto>(new ChampionMarketModel(
@@ -43,7 +43,7 @@ public sealed class GetChampionMarketQueryHandler : IRequestHandler<GetChampionM
             items));
     }
 
-    private static ChampionMarketItemModel MapItem(Domain.Models.Entities.Characters.Character character, ChampionMarketItem item, int weeklyPurchased, int lifetimePurchased)
+    private static ChampionMarketItemModel MapItem(ChampionMarketItem item, int weeklyPurchased, int lifetimePurchased)
     {
         var remainingWeekly = item.WeeklyPurchaseLimit.HasValue
             ? Math.Max(0, item.WeeklyPurchaseLimit.Value - weeklyPurchased)
@@ -51,7 +51,9 @@ public sealed class GetChampionMarketQueryHandler : IRequestHandler<GetChampionM
         var remainingLifetime = item.LifetimePurchaseLimit.HasValue
             ? Math.Max(0, item.LifetimePurchaseLimit.Value - lifetimePurchased)
             : int.MaxValue;
-        var reason = GetCannotPurchaseReason(character, item, remainingWeekly, remainingLifetime);
+        var requiredRankMinRating = string.IsNullOrWhiteSpace(item.RequiredRankTier)
+            ? null
+            : ArenaRank.Tiers.FirstOrDefault(tier => tier.Id == item.RequiredRankTier)?.MinRating;
 
         return new ChampionMarketItemModel(
             item.Id,
@@ -65,8 +67,7 @@ public sealed class GetChampionMarketQueryHandler : IRequestHandler<GetChampionM
             remainingLifetime,
             item.RequiredRating,
             item.RequiredRankTier,
-            reason is null,
-            reason,
+            requiredRankMinRating,
             item.SortOrder,
             item.CindersGranted,
             item.SoulstonesGranted,
@@ -74,26 +75,5 @@ public sealed class GetChampionMarketQueryHandler : IRequestHandler<GetChampionM
             item.RewardItemId,
             item.RewardItemName,
             item.RewardItemQuantity);
-    }
-
-    private static string? GetCannotPurchaseReason(Domain.Models.Entities.Characters.Character character, ChampionMarketItem item, int remainingWeekly, int remainingLifetime)
-    {
-        var arena = character.ArenaProfile;
-        if (remainingWeekly <= 0) return "Weekly limit reached";
-        if (remainingLifetime <= 0) return "Already purchased";
-        if (arena.Glory < item.GloryCost) return "Not enough Glory";
-        if (item.RequiredRating.HasValue && arena.Rating < item.RequiredRating.Value) return $"Requires {item.RequiredRating.Value} rating";
-
-        if (!string.IsNullOrWhiteSpace(item.RequiredRankTier))
-        {
-            var current = ArenaRank.GetTier(arena.Rating);
-            var required = ArenaRank.Tiers.FirstOrDefault(x => x.Id == item.RequiredRankTier);
-            if (required is not null && current.SortOrder < required.SortOrder)
-            {
-                return $"Requires {required.Name}";
-            }
-        }
-
-        return null;
     }
 }

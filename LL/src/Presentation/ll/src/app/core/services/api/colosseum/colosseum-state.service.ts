@@ -10,7 +10,10 @@ import { ColosseumStatus } from '../../../../shared/models/Dtos/colosseum/coloss
 import { StartArenaBattleResponse } from '../../../../shared/models/Dtos/colosseum/startArenaBattleResponse';
 import {
   ChampionMarket,
+  ChampionMarketItem,
+  ChampionMarketItemView,
   ChampionMarketPurchaseResponse,
+  ChampionMarketView,
 } from '../../../../shared/models/Dtos/colosseum/championMarket';
 import { GameEventService } from '../../real-time/game-event.service';
 import { CharacterStateService } from '../character/character-state.service';
@@ -42,7 +45,7 @@ export class ColosseumStateService {
   readonly opponents = computed(() => this._opponents());
   readonly arenaTicketStatus = computed(() => this._arenaTicketStatus());
   readonly status = computed(() => this._status());
-  readonly championMarket = computed(() => this._championMarket());
+  readonly championMarket = computed(() => this.deriveChampionMarket());
   readonly rankings = computed(() => this._rankings());
   readonly previousMatches = computed(() => this._previousMatches());
   readonly loading = computed(() => this._loading());
@@ -299,16 +302,26 @@ export class ColosseumStateService {
     event: ArenaBattleCompletedMsg,
     characterId: string,
   ): void {
+    const arenaRating =
+      event.characterId === characterId
+        ? event.characterRatingAfter
+        : event.enemyRatingAfter;
     const character = this.characterState.currentCharacter();
-    if (!character) return;
 
-    this.characterState.updateCharacter({
-      ...character,
-      arenaRating:
-        event.characterId === characterId
-          ? event.characterRatingAfter
-          : event.enemyRatingAfter,
-    });
+    if (character) {
+      this.characterState.updateCharacter({
+        ...character,
+        arenaRating,
+      });
+    }
+
+    const status = this._status();
+    if (status) {
+      this._status.set({
+        ...status,
+        rating: arenaRating,
+      });
+    }
   }
 
   private addNotification(): void {
@@ -426,21 +439,11 @@ export class ColosseumStateService {
           item.lifetimePurchaseLimit == null
             ? item.remainingLifetimePurchases
             : Math.max(0, item.remainingLifetimePurchases - response.quantity);
-        const cannotPurchaseReason =
-          remainingWeeklyPurchases <= 0
-            ? 'Weekly limit reached'
-            : remainingLifetimePurchases <= 0
-              ? 'Already purchased'
-              : response.gloryRemaining < item.gloryCost
-                ? 'Not enough Glory'
-                : null;
 
         return {
           ...item,
           remainingWeeklyPurchases,
           remainingLifetimePurchases,
-          canPurchase: cannotPurchaseReason === null,
-          cannotPurchaseReason,
         };
       }),
     });
@@ -514,5 +517,71 @@ export class ColosseumStateService {
         glory,
       });
     }
+  }
+
+  private deriveChampionMarket(): ChampionMarketView | null {
+    const market = this._championMarket();
+    if (!market) return null;
+
+    const status = this._status();
+    const rating =
+      status?.rating ??
+      this.characterState.currentCharacter()?.arenaRating ??
+      0;
+    const glory = status?.glory ?? market.glory;
+
+    return {
+      ...market,
+      glory,
+      items: market.items.map((item) =>
+        this.deriveChampionMarketItem(item, glory, rating),
+      ),
+    };
+  }
+
+  private deriveChampionMarketItem(
+    item: ChampionMarketItem,
+    glory: number,
+    rating: number,
+  ): ChampionMarketItemView {
+    const cannotPurchaseReason = this.getCannotPurchaseReason(
+      item,
+      glory,
+      rating,
+    );
+
+    return {
+      ...item,
+      canPurchase: cannotPurchaseReason === null,
+      cannotPurchaseReason,
+    };
+  }
+
+  private getCannotPurchaseReason(
+    item: ChampionMarketItem,
+    glory: number,
+    rating: number,
+  ): string | null {
+    if (item.remainingWeeklyPurchases <= 0) return 'Weekly limit reached';
+    if (item.remainingLifetimePurchases <= 0) return 'Already purchased';
+    if (glory < item.gloryCost) return 'Not enough Glory';
+    if (item.requiredRating != null && rating < item.requiredRating) {
+      return `Requires ${item.requiredRating} rating`;
+    }
+    if (
+      item.requiredRankTier &&
+      item.requiredRankMinRating != null &&
+      rating < item.requiredRankMinRating
+    ) {
+      return `Requires ${this.formatRankTier(item.requiredRankTier)}`;
+    }
+
+    return null;
+  }
+
+  private formatRankTier(value: string): string {
+    return value
+      .replace(/[_-]+/g, ' ')
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
   }
 }

@@ -1,7 +1,7 @@
 import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, computed, effect, signal } from '@angular/core';
 import { ColosseumStateService } from '../../../../../core/services/api/colosseum/colosseum-state.service';
-import { ChampionMarketItem } from '../../../../../shared/models/Dtos/colosseum/championMarket';
+import { ChampionMarketItemView } from '../../../../../shared/models/Dtos/colosseum/championMarket';
 import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 
@@ -24,7 +24,7 @@ interface ChampionMarketReward {
   styleUrl: './champions-market.component.scss',
 })
 export class ChampionsMarketComponent {
-  readonly selected = signal<ChampionMarketItem | null>(null);
+  readonly selected = signal<ChampionMarketItemView | null>(null);
 
   readonly categories = computed(() => [
     ...new Set(
@@ -64,15 +64,15 @@ export class ChampionsMarketComponent {
     });
   }
 
-  select(item: ChampionMarketItem): void {
+  select(item: ChampionMarketItemView): void {
     this.selected.set(item);
   }
 
-  isSelected(item: ChampionMarketItem): boolean {
+  isSelected(item: ChampionMarketItemView): boolean {
     return this.selected()?.id === item.id;
   }
 
-  purchase(item: ChampionMarketItem): void {
+  purchase(item: ChampionMarketItemView): void {
     if (!item.canPurchase || this.state.loading()) return;
     this.state.purchaseChampionMarketItem(item.id, 1);
   }
@@ -81,7 +81,7 @@ export class ChampionsMarketComponent {
     return category === 'Weekly Cache' ? 'll-badge-accent' : 'll-badge-muted';
   }
 
-  itemsForCategory(category: string): ChampionMarketItem[] {
+  itemsForCategory(category: string): ChampionMarketItemView[] {
     return (
       this.state
         .championMarket()
@@ -89,7 +89,7 @@ export class ChampionsMarketComponent {
     );
   }
 
-  rewards(item: ChampionMarketItem): ChampionMarketReward[] {
+  rewards(item: ChampionMarketItemView): ChampionMarketReward[] {
     const rewards: ChampionMarketReward[] = [];
     if (item.cindersGranted > 0) {
       rewards.push({
@@ -121,7 +121,7 @@ export class ChampionsMarketComponent {
       : [{ amount: 'Unlock', label: item.category }];
   }
 
-  requirementText(item: ChampionMarketItem): string {
+  requirementText(item: ChampionMarketItemView): string {
     const requirements: string[] = [];
     if (item.requiredRankTier) {
       requirements.push(`${this.titleCase(item.requiredRankTier)} rank`);
@@ -134,7 +134,7 @@ export class ChampionsMarketComponent {
       : 'No requirement';
   }
 
-  limitProgress(item: ChampionMarketItem): string {
+  limitProgress(item: ChampionMarketItemView): string {
     if (item.weeklyPurchaseLimit != null) {
       return `${item.remainingWeeklyPurchases} / ${item.weeklyPurchaseLimit} left`;
     }
@@ -144,7 +144,7 @@ export class ChampionsMarketComponent {
     return 'None';
   }
 
-  limitDescription(item: ChampionMarketItem): string {
+  limitDescription(item: ChampionMarketItemView): string {
     if (item.weeklyPurchaseLimit != null) {
       return `${item.remainingWeeklyPurchases} / ${item.weeklyPurchaseLimit} left this week`;
     }

@@ -45,6 +45,7 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
             [GameEventTypes.PlayerTransferChatMessage] = [GameEventOutboxConsumerNames.TransferChat],
             [GameEventTypes.GuildChatMessage] = [GameEventOutboxConsumerNames.GuildChat],
             [GameEventTypes.GuildVaultChatMessage] = [GameEventOutboxConsumerNames.GuildVaultChat],
+            [GameEventTypes.GuildMissionSelected] = [GameEventOutboxConsumerNames.RealtimeGuildMission],
             [GameEventTypes.InventoryItemsGranted] = [GameEventOutboxConsumerNames.RealtimeInventory],
             [GameEventTypes.TournamentGroundsUpdated] = [GameEventOutboxConsumerNames.RealtimeTournamentGrounds],
             [GameEventTypes.WorldTowerRallyUpdated] = [GameEventOutboxConsumerNames.RealtimeWorldTower],

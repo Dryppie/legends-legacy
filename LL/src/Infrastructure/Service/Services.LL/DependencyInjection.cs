@@ -441,6 +441,7 @@ public static class DependencyInjection
         services.AddScoped<IGameEventOutboxConsumer, GuildChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, GuildVaultChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RealtimeCharacterGameEventOutboxConsumer>();
+        services.AddScoped<IGameEventOutboxConsumer, RealtimeGuildMissionGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RealtimeInventoryGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RealtimeTournamentGroundsGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RealtimeWorldTowerGameEventOutboxConsumer>();

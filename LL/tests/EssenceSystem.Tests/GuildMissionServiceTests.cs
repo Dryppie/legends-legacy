@@ -5,6 +5,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Guilds;
 using Domain.Models.Guilds.Missions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Persistence.LL;
 using Services.LL.Guilds;
@@ -158,6 +159,44 @@ public sealed class GuildMissionServiceTests
         });
         Assert.Null(overview.ActiveMission);
         Assert.True(overview.CanSelectMission);
+    }
+
+    [Fact]
+    public async Task Repeated_contributions_before_save_do_not_duplicate_daily_orders()
+    {
+        await using var db = CreateDbContext();
+        var characterId = SeedGuild(db);
+        await db.SaveChangesAsync();
+        var service = new GuildMissionService(db);
+        var now = new DateTimeOffset(2026, 6, 23, 2, 0, 0, TimeSpan.Zero);
+
+        await service.RecordContributionAsync(
+            new GuildContributionEvent(
+                characterId,
+                GuildContributionSource.Tempering,
+                GuildContributionMetric.TemperingActionsCompleted,
+                8,
+                OccurredAt: now,
+                IdempotencyKey: "tempering:first"),
+            CancellationToken.None);
+        await service.RecordContributionAsync(
+            new GuildContributionEvent(
+                characterId,
+                GuildContributionSource.Crafting,
+                GuildContributionMetric.ItemsCrafted,
+                1,
+                OccurredAt: now,
+                IdempotencyKey: "crafting:second"),
+            CancellationToken.None);
+
+        Assert.Equal(3, db.PersonalGuildOrders.Local.Count);
+        Assert.Equal(
+            8,
+            db.PersonalGuildOrders.Local.Single(x =>
+                x.MissionDefinitionId == Guid.Parse("c4ec6549-2bdc-4c7d-8494-6a5d8fbe7df2")).CurrentAmount);
+
+        await db.SaveChangesAsync();
+        Assert.Equal(3, await db.PersonalGuildOrders.CountAsync());
     }
 
     [Fact]
@@ -338,6 +377,7 @@ public sealed class GuildMissionServiceTests
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
 
         return new LLDbContext(options);

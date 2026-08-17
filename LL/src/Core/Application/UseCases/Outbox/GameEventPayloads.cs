@@ -144,6 +144,8 @@ public sealed record GuildVaultChatMessagePayload(
     Guid MessageId,
     DateTimeOffset SentAt);
 
+public sealed record GuildMissionSelectedPayload(Guid GuildId);
+
 public sealed record InventoryItemsGrantedPayload(
     Guid GrantId,
     Guid CharacterId,

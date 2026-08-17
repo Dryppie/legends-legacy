@@ -8,6 +8,15 @@ public class PersonalGuildOrderConfiguration : IEntityTypeConfiguration<Personal
 {
     public void Configure(EntityTypeBuilder<PersonalGuildOrder> builder)
     {
-        builder.HasIndex(x => new { x.GuildId, x.CharacterId, x.PeriodType, x.PeriodKey });
+        builder
+            .HasIndex(x => new
+            {
+                x.GuildId,
+                x.CharacterId,
+                x.PeriodType,
+                x.PeriodKey,
+                x.MissionDefinitionId
+            })
+            .IsUnique();
     }
 }

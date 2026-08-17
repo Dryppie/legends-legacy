@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ColosseumStateService } from '../../../../../core/services/api/colosseum/colosseum-state.service';
-import { ChampionMarketItem } from '../../../../../shared/models/Dtos/colosseum/championMarket';
+import { ChampionMarketItemView } from '../../../../../shared/models/Dtos/colosseum/championMarket';
 import { ChampionsMarketComponent } from './champions-market.component';
 
 describe('ChampionsMarketComponent purchase limits', () => {
@@ -18,7 +18,7 @@ describe('ChampionsMarketComponent purchase limits', () => {
       remainingWeeklyPurchases: 0,
       lifetimePurchaseLimit: null,
       remainingLifetimePurchases: 0,
-    } as ChampionMarketItem;
+    } as ChampionMarketItemView;
 
     expect(component.limitProgress(item)).toBe('0 / 2 left');
     expect(component.limitDescription(item)).toBe('0 / 2 left this week');

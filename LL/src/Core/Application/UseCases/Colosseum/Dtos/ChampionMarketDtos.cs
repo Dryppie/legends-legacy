@@ -19,8 +19,7 @@ public sealed class ChampionMarketItemDto : IMapFrom<ChampionMarketItemModel>
     public int RemainingLifetimePurchases { get; set; }
     public int? RequiredRating { get; set; }
     public string? RequiredRankTier { get; set; }
-    public bool CanPurchase { get; set; }
-    public string? CannotPurchaseReason { get; set; }
+    public int? RequiredRankMinRating { get; set; }
     public int SortOrder { get; set; }
     public int CindersGranted { get; set; }
     public int SoulstonesGranted { get; set; }

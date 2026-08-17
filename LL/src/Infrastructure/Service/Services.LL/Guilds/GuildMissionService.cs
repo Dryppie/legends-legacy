@@ -36,16 +36,29 @@ public class GuildMissionService : IGuildMissionService
 
     public async Task<GuildMissionOverviewDto?> GetOverviewAsync(Guid characterId, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        var guild = await LoadGuildForCharacterAsync(characterId, cancellationToken);
-        if (guild is null) return null;
-
-        await EnsureCurrentStateAsync(guild, characterId, now, cancellationToken);
-        if (_context.HasChanges)
+        var strategy = _context.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
-            await _context.SaveChangesAsync(cancellationToken);
-        }
+            await using var transaction = await _context.BeginTransactionAsync(cancellationToken);
+            await _context.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
 
-        return await BuildOverviewAsync(guild.Id, characterId, now, cancellationToken);
+            var guild = await LoadGuildForCharacterAsync(characterId, cancellationToken);
+            if (guild is null)
+            {
+                await transaction.CommitAsync(cancellationToken);
+                return null;
+            }
+
+            await EnsureCurrentStateAsync(guild, characterId, now, cancellationToken);
+            if (_context.HasChanges)
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
+            var overview = await BuildOverviewAsync(guild.Id, characterId, now, cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return overview;
+        });
     }
 
     public async Task<GuildOperationResult<GuildMissionOverviewDto>> SelectMissionAsync(Guid characterId, Guid missionOptionId, DateTimeOffset now, CancellationToken cancellationToken)
@@ -316,12 +329,22 @@ public class GuildMissionService : IGuildMissionService
             SelectOption(guild, selectedOption, selectedOption.SelectedByCharacterId, selectedOption.SelectedAt ?? now);
         }
 
-        var currentOrders = await _context.PersonalGuildOrders
+        var persistedOrders = await _context.PersonalGuildOrders
             .Where(x => x.GuildId == guild.Id && x.CharacterId == characterId && x.PeriodType == GuildMissionPeriodType.Daily && x.PeriodKey == dailyKey)
             .ToListAsync(cancellationToken);
-        if (currentOrders.Count == 0)
+        var currentOrders = persistedOrders
+            .Concat(GetTrackedDailyOrders(guild.Id, characterId, dailyKey))
+            .DistinctBy(x => x.Id)
+            .ToList();
+        var existingDefinitionIds = currentOrders
+            .Select(x => x.MissionDefinitionId)
+            .ToHashSet();
+        var missingDefinitions = GetDailyOrderDefinitions(guild, dailyKey)
+            .Where(def => !existingDefinitionIds.Contains(def.Id))
+            .ToList();
+        if (missingDefinitions.Count > 0)
         {
-            var orders = GetDailyOrderDefinitions(guild, dailyKey).Select(def => new PersonalGuildOrder
+            var orders = missingDefinitions.Select(def => new PersonalGuildOrder
             {
                 GuildId = guild.Id,
                 CharacterId = characterId,
@@ -370,13 +393,18 @@ public class GuildMissionService : IGuildMissionService
     private async Task<int> ProgressPersonalOrdersAsync(Guid guildId, Guid characterId, GuildContributionMetric metric, long amount, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var dailyKey = GetDailyKey(now);
-        var orders = await _context.PersonalGuildOrders
+        var persistedOrders = await _context.PersonalGuildOrders
             .Where(x => x.GuildId == guildId
                 && x.CharacterId == characterId
                 && x.PeriodType == GuildMissionPeriodType.Daily
                 && x.PeriodKey == dailyKey
                 && x.Status == PersonalGuildOrderStatus.Active)
             .ToListAsync(cancellationToken);
+        var orders = persistedOrders
+            .Concat(GetTrackedDailyOrders(guildId, characterId, dailyKey)
+                .Where(x => x.Status == PersonalGuildOrderStatus.Active))
+            .DistinctBy(x => x.Id)
+            .ToList();
 
         var completed = 0;
         foreach (var order in orders)
@@ -397,6 +425,13 @@ public class GuildMissionService : IGuildMissionService
 
         return completed;
     }
+
+    private IEnumerable<PersonalGuildOrder> GetTrackedDailyOrders(Guid guildId, Guid characterId, string dailyKey) =>
+        _context.PersonalGuildOrders.Local.Where(x =>
+            x.GuildId == guildId
+            && x.CharacterId == characterId
+            && x.PeriodType == GuildMissionPeriodType.Daily
+            && x.PeriodKey == dailyKey);
 
     private async Task<(long Progress, bool Completed, IReadOnlyList<Guid> ParticipantIds)> ProgressWeeklyMissionAsync(Guild guild, Guid characterId, GuildContributionMetric metric, long amount, DateTimeOffset now, CancellationToken cancellationToken)
     {
