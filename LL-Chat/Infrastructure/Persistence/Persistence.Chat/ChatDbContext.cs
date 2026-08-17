@@ -11,6 +11,13 @@ public class ChatDbContext(DbContextOptions<ChatDbContext> options) : DbContext(
 {
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        if (ChangeTracker.Entries<ChatModerationAction>()
+            .Any(x => x.State is EntityState.Modified or EntityState.Deleted))
+        {
+            throw new InvalidOperationException(
+                "Chat moderation audit entries are append-only and cannot be modified or deleted.");
+        }
+
         return await base.SaveChangesAsync(cancellationToken);
     }
 
@@ -51,6 +58,8 @@ public class ChatDbContext(DbContextOptions<ChatDbContext> options) : DbContext(
     }
 
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
+    public DbSet<ChatRestriction> ChatRestrictions => Set<ChatRestriction>();
+    public DbSet<ChatModerationAction> ChatModerationActions => Set<ChatModerationAction>();
 }
 
 public class LLDbContextFactory : IDesignTimeDbContextFactory<ChatDbContext>

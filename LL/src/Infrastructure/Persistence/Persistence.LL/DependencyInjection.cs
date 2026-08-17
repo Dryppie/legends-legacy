@@ -2,6 +2,7 @@
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Domain.Models.Achievements;
+using Domain.Models.Administration;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.Colosseum;
@@ -37,6 +38,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence.LL.BackgroundJobs;
 using Persistence.LL.Repositories.Achievements;
+using Persistence.LL.Repositories.Administration;
 using Persistence.LL.Repositories.Attributes;
 using Persistence.LL.Repositories.CharacterActions;
 using Persistence.LL.Repositories.Colosseum;
@@ -87,6 +89,7 @@ public static class DependencyInjection
 
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
+        services.AddScoped<IAdministrationRepository, AdministrationRepository>();
         // Related to regions
         services.AddScoped<IAreaRepository, AreaRepository>();
 

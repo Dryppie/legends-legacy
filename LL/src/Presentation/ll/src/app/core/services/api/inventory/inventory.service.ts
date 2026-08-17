@@ -21,6 +21,11 @@ export interface TransferInventoryItemResponse {
   quantity: number;
 }
 
+export interface SetInventoryItemFavoriteResponse {
+  itemInstanceId: string;
+  isFavorite: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -110,10 +115,16 @@ export class InventoryService {
   }
 
   markItemSeen(itemInstanceId: string): Observable<unknown> {
-    return this.apiService.post(
-      `inventory/items/${itemInstanceId}/seen`,
-      {},
-    );
+    return this.apiService.post(`inventory/items/${itemInstanceId}/seen`, {});
+  }
+
+  setItemFavorite(
+    itemInstanceId: string,
+    isFavorite: boolean,
+  ): Observable<SetInventoryItemFavoriteResponse> {
+    return this.apiService.post(`inventory/items/${itemInstanceId}/favorite`, {
+      isFavorite,
+    });
   }
 
   transferItem(

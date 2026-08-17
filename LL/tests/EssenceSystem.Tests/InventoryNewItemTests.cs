@@ -125,6 +125,68 @@ public sealed class InventoryNewItemTests
         Assert.True(stored.IsNew);
     }
 
+    [Fact]
+    public async Task Favorite_preference_can_be_set_and_cleared_for_an_owned_item()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        AddInventory(db, characterId);
+        var item = BuildItem(characterId, "favorite_sword");
+        await db.SaveChangesAsync();
+
+        var repository = new InventoryRepository(db);
+        await repository.AddItemsToInventory(
+            characterId,
+            [item],
+            ItemAcquisitionSources.Crafting,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.True(await repository.SetItemFavoriteAsync(
+            characterId,
+            item.ItemInstanceId,
+            true,
+            CancellationToken.None));
+        await db.SaveChangesAsync();
+        Assert.True((await LoadAsync(db, characterId, item.ItemInstanceId)).IsFavorite);
+
+        Assert.True(await repository.SetItemFavoriteAsync(
+            characterId,
+            item.ItemInstanceId,
+            false,
+            CancellationToken.None));
+        await db.SaveChangesAsync();
+        Assert.False((await LoadAsync(db, characterId, item.ItemInstanceId)).IsFavorite);
+    }
+
+    [Fact]
+    public async Task Favorite_preference_cannot_be_changed_by_another_character()
+    {
+        await using var db = CreateDb();
+        var ownerId = Guid.NewGuid();
+        var strangerId = Guid.NewGuid();
+        AddInventory(db, ownerId, strangerId);
+        var item = BuildItem(ownerId, "favorite_sword");
+        await db.SaveChangesAsync();
+
+        var repository = new InventoryRepository(db);
+        await repository.AddItemsToInventory(
+            ownerId,
+            [item],
+            ItemAcquisitionSources.Crafting,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.False(await repository.SetItemFavoriteAsync(
+            strangerId,
+            item.ItemInstanceId,
+            true,
+            CancellationToken.None));
+        await db.SaveChangesAsync();
+
+        Assert.False((await LoadAsync(db, ownerId, item.ItemInstanceId)).IsFavorite);
+    }
+
     private static async Task<InventoryItem> LoadAsync(
         LLDbContext db,
         Guid characterId,

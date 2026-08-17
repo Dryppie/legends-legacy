@@ -7,7 +7,9 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
+        services.AddSingleton(TimeProvider.System);
         services.AddScoped<IChatService, ChatService>();
+        services.AddScoped<IChatModerationService, ChatModerationService>();
 
         return services;
     }

@@ -4,6 +4,7 @@ import {
   Input,
   OnChanges,
   Output,
+  SimpleChanges,
   signal,
 } from '@angular/core';
 import { RegularButtonComponent } from '../../custom-components/buttons/regular-button/regular-button.component';
@@ -54,19 +55,19 @@ interface MasteryBonusDisplay {
 type DungeonDetailTab = 'rewards' | 'gathering' | 'mastery';
 
 @Component({
-    selector: 'app-dungeon-card',
-    imports: [
-        NgIf,
-        NgFor,
-        NgClass,
-        NgTemplateOutlet,
-        DecimalPipe,
-        OverlayModule,
-        RegularButtonComponent,
-        ItemComponent,
-        BaseItemComponent,
-    ],
-    templateUrl: './dungeon-card.component.html'
+  selector: 'app-dungeon-card',
+  imports: [
+    NgIf,
+    NgFor,
+    NgClass,
+    NgTemplateOutlet,
+    DecimalPipe,
+    OverlayModule,
+    RegularButtonComponent,
+    ItemComponent,
+    BaseItemComponent,
+  ],
+  templateUrl: './dungeon-card.component.html',
 })
 export class DungeonCardComponent implements OnChanges {
   readonly displayCombatRating = toDisplayedCombatRating;
@@ -75,6 +76,7 @@ export class DungeonCardComponent implements OnChanges {
 
   @Input() height = 176;
   @Input() cornerSize = 32;
+  @Input() startExpanded = false;
 
   @Output() backEvent = new EventEmitter<void>();
   @Output() recordsRequested = new EventEmitter<DungeonPreviewData>();
@@ -136,9 +138,13 @@ export class DungeonCardComponent implements OnChanges {
     private readonly router: Router,
   ) {}
 
-  ngOnChanges(): void {
+  ngOnChanges(changes: SimpleChanges): void {
     if (!this.previewData) {
       return;
+    }
+
+    if (changes['startExpanded']) {
+      this.showPreview.set(this.startExpanded);
     }
 
     const dungeonId = this.previewData.familyId ?? this.previewData.id;

@@ -1,5 +1,7 @@
 using Application.UsesCases.Chats.Commands.SendSystemMessage;
 using Application.UsesCases.Chats.Commands.SendMessage;
+using Application.UsesCases.Chats.Commands.MuteCharacter;
+using Application.UsesCases.Chats.Commands.UnmuteCharacter;
 using Application.UsesCases.Chats.Dtos;
 using API.Chat.Hubs;
 using API.Chat.Hubs.Interfaces;
@@ -16,6 +18,7 @@ namespace API.Chat.Controllers.V1;
 public class ChatController : BaseController
 {
     private const string SystemMessageSecretHeader = "X-LL-System-Chat-Secret";
+    private const string ModerationSecretHeader = "X-LL-Chat-Moderation-Secret";
     private readonly IConfiguration _configuration;
     private readonly IHubContext<ChatHub, IChatClient> _hub;
 
@@ -43,6 +46,19 @@ public class ChatController : BaseController
         JsonElement? LinkedItem,
         Guid MessageId,
         DateTimeOffset SentAt);
+    public sealed record MuteCharacterRequest(
+        Guid OperationId,
+        Guid CharacterId,
+        string ActorSubject,
+        string ActorDisplayName,
+        string Reason,
+        DateTimeOffset? ExpiresAt);
+    public sealed record UnmuteCharacterRequest(
+        Guid OperationId,
+        Guid RestrictionId,
+        string ActorSubject,
+        string ActorDisplayName,
+        string Reason);
 
     [HttpGet("GetChatHistory")]
     public async Task<ActionResult<List<ChatMessageDto>>> GetChatHistory([FromQuery] GetChatRequest chatRequest)
@@ -122,6 +138,45 @@ public class ChatController : BaseController
         return Ok(message);
     }
 
+    [AllowAnonymous]
+    [HttpPost("Mute")]
+    public async Task<ActionResult<ChatModerationDto>> MuteCharacter(
+        [FromBody] MuteCharacterRequest request)
+    {
+        var authorizationFailure = AuthorizeInternalModeration();
+        if (authorizationFailure is not null) return authorizationFailure;
+
+        var result = await Mediator.Send(new MuteCharacterCommand(
+            request.OperationId,
+            request.CharacterId,
+            request.ActorSubject,
+            request.ActorDisplayName,
+            request.Reason,
+            request.ExpiresAt));
+        return result is null
+            ? BadRequest("The chat mute could not be applied.")
+            : Ok(result);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("Unmute")]
+    public async Task<ActionResult<ChatModerationDto>> UnmuteCharacter(
+        [FromBody] UnmuteCharacterRequest request)
+    {
+        var authorizationFailure = AuthorizeInternalModeration();
+        if (authorizationFailure is not null) return authorizationFailure;
+
+        var result = await Mediator.Send(new UnmuteCharacterCommand(
+            request.OperationId,
+            request.RestrictionId,
+            request.ActorSubject,
+            request.ActorDisplayName,
+            request.Reason));
+        return result is null
+            ? BadRequest("The chat mute could not be revoked.")
+            : Ok(result);
+    }
+
     private ActionResult? AuthorizeSystemMessage()
     {
         var secret = _configuration["SystemMessages:Secret"];
@@ -131,6 +186,25 @@ public class ChatController : BaseController
         }
 
         if (!Request.Headers.TryGetValue(SystemMessageSecretHeader, out var providedSecret) ||
+            !string.Equals(providedSecret.ToString(), secret, StringComparison.Ordinal))
+        {
+            return Unauthorized();
+        }
+
+        return null;
+    }
+
+    private ActionResult? AuthorizeInternalModeration()
+    {
+        var secret = _configuration["InternalModeration:Secret"];
+        if (string.IsNullOrWhiteSpace(secret))
+        {
+            return StatusCode(
+                StatusCodes.Status503ServiceUnavailable,
+                "Internal chat moderation is not configured.");
+        }
+
+        if (!Request.Headers.TryGetValue(ModerationSecretHeader, out var providedSecret) ||
             !string.Equals(providedSecret.ToString(), secret, StringComparison.Ordinal))
         {
             return Unauthorized();

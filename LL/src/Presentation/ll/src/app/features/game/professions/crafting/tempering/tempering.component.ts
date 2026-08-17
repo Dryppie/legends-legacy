@@ -1,4 +1,4 @@
-import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { DatePipe, DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
   Component,
   computed,
@@ -35,11 +35,24 @@ import {
 import { formatAttributeType } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { formatAttributeValue } from '../../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { getEstimatedTemperingQueueDuration } from '../../../../../shared/utils/tempering/tempering-duration.utils';
+import { ItemQuality } from '../../../../../shared/models/enums/itemQuality';
+
+type TemperingSort = 'Name' | 'Quality' | 'Potential' | 'Gear Power';
+type SortDirection = 'asc' | 'desc';
+
+const QUALITY_ORDER: Record<ItemQuality, number> = {
+  [ItemQuality.Crude]: 0,
+  [ItemQuality.Standard]: 1,
+  [ItemQuality.Fine]: 2,
+  [ItemQuality.Exceptional]: 3,
+  [ItemQuality.Masterwork]: 4,
+};
 
 @Component({
   selector: 'app-tempering',
   imports: [
     DatePipe,
+    DecimalPipe,
     NgFor,
     NgIf,
     NgClass,
@@ -59,6 +72,8 @@ export class TemperingComponent implements OnDestroy {
   readonly error = signal<string | null>(null);
   readonly removingQueueItemId = signal<string | null>(null);
   readonly movingQueueItemId = signal<string | null>(null);
+  readonly temperingSort = signal<TemperingSort>('Gear Power');
+  readonly sortDirection = signal<SortDirection>('desc');
   readonly activeQueueItem = computed<CraftingQueueItem | null>(
     () => this.craftingQueue()[0] ?? null,
   );
@@ -77,16 +92,22 @@ export class TemperingComponent implements OnDestroy {
     ),
   );
 
-  readonly filteredInventory = computed(() =>
-    this.equipmentInventory().filter((inventoryItem) => {
+  readonly filteredInventory = computed(() => {
+    const eligibleItems = this.equipmentInventory().filter((inventoryItem) => {
       const equipment = inventoryItem.itemInstance as EquipmentInstance;
       return (
         (equipment.potential ?? 0) > 0 &&
         equipment.rarity !== Rarity.Legacy &&
         !!equipment.baseRecipeId
       );
-    }),
-  );
+    });
+
+    return this.sortInventory(
+      eligibleItems,
+      this.temperingSort(),
+      this.sortDirection(),
+    );
+  });
 
   readonly unavailableEquipmentCount = computed(
     () => this.equipmentInventory().length - this.filteredInventory().length,
@@ -170,6 +191,32 @@ export class TemperingComponent implements OnDestroy {
 
   selectItem(e: ItemInstance): void {
     this.selectedItemId.set(e.id);
+  }
+
+  equipmentInstance(item: InventoryItem): EquipmentInstance {
+    return item.itemInstance as EquipmentInstance;
+  }
+
+  setTemperingSort(sort: TemperingSort): void {
+    if (this.temperingSort() === sort) {
+      this.sortDirection.update((direction) =>
+        direction === 'asc' ? 'desc' : 'asc',
+      );
+      return;
+    }
+
+    this.temperingSort.set(sort);
+    this.sortDirection.set(sort === 'Name' ? 'asc' : 'desc');
+  }
+
+  sortIndicator(sort: TemperingSort): string {
+    if (this.temperingSort() !== sort) return '';
+    return this.sortDirection() === 'asc' ? '↑' : '↓';
+  }
+
+  ariaSort(sort: TemperingSort): 'ascending' | 'descending' | 'none' {
+    if (this.temperingSort() !== sort) return 'none';
+    return this.sortDirection() === 'asc' ? 'ascending' : 'descending';
   }
 
   ngOnDestroy(): void {
@@ -377,5 +424,48 @@ export class TemperingComponent implements OnDestroy {
 
   queueIsBusy(): boolean {
     return !!this.movingQueueItemId() || !!this.removingQueueItemId();
+  }
+
+  private sortInventory(
+    items: InventoryItem[],
+    sort: TemperingSort,
+    direction: SortDirection,
+  ): InventoryItem[] {
+    return [...items].sort((left, right) => {
+      const leftEquipment = this.equipmentInstance(left);
+      const rightEquipment = this.equipmentInstance(right);
+      let difference = 0;
+
+      switch (sort) {
+        case 'Name':
+          difference = this.itemDisplayName(leftEquipment).localeCompare(
+            this.itemDisplayName(rightEquipment),
+          );
+          break;
+        case 'Quality':
+          difference =
+            QUALITY_ORDER[leftEquipment.quality] -
+            QUALITY_ORDER[rightEquipment.quality];
+          break;
+        case 'Potential':
+          difference =
+            (leftEquipment.potential ?? 0) - (rightEquipment.potential ?? 0);
+          break;
+        case 'Gear Power':
+          difference = leftEquipment.itemBudget - rightEquipment.itemBudget;
+          break;
+      }
+
+      return (
+        (direction === 'asc' ? difference : -difference) ||
+        this.itemDisplayName(leftEquipment).localeCompare(
+          this.itemDisplayName(rightEquipment),
+        )
+      );
+    });
+  }
+
+  private itemDisplayName(equipment: EquipmentInstance): string {
+    return equipment.displayName || equipment.itemBase.name;
   }
 }

@@ -20,7 +20,7 @@ public sealed class AbilitySpecConverter : ITypeConverter<AbilitySpec, EssenceAb
             source.Name,
             source.Description,
             source.CooldownTicks / 10d,
-            source.Effects.FirstOrDefault()?.Target.ToString() ?? AbilityTargetSelector.CurrentTarget.ToString(),
+            AbilityTargetMapping.GetDistinctTargets(source),
             source.Tags,
             source.Effects.Select(x => context.Mapper.Map<EssenceEffectDto>(x)).ToList());
 }

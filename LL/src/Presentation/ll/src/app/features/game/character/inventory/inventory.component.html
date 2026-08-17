@@ -162,24 +162,14 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <button
-            *ngIf="selectedEquipmentSlot()"
-            type="button"
-            class="ll-button"
-            (click)="clearEquipmentSlotFilter()"
-          >
-            Clear filter
-          </button>
-          <app-dropdown
-            label="Sort"
-            [value]="inventorySort"
-            [options]="sortDropdownOptions"
-            [selectedValue]="inventorySort"
-            [fitMenuToContent]="true"
-            (selection)="setInventorySort($event)"
-          ></app-dropdown>
-        </div>
+        <button
+          *ngIf="selectedEquipmentSlot()"
+          type="button"
+          class="ll-button"
+          (click)="clearEquipmentSlotFilter()"
+        >
+          Clear filter
+        </button>
       </header>
 
       <app-filter-tabs
@@ -241,10 +231,74 @@
           <p class="italic">{{ emptyStateText }}</p>
         </div>
 
-        <div *ngIf="filteredItems.length" class="inventory-list-header">
-          <span>Item</span>
-          <span>Potential</span>
-          <span>Gear Power</span>
+        <div
+          *ngIf="filteredItems.length"
+          class="inventory-list-header"
+          role="row"
+        >
+          <div role="columnheader" [attr.aria-sort]="inventoryAriaSort('Name')">
+            <button
+              type="button"
+              class="w-full text-left transition-colors hover:text-primary"
+              [ngClass]="{ 'text-primary': inventorySort === 'Name' }"
+              (click)="setInventorySort('Name')"
+            >
+              Item
+              <span aria-hidden="true">{{
+                inventorySortIndicator("Name")
+              }}</span>
+            </button>
+          </div>
+          <div
+            role="columnheader"
+            [attr.aria-sort]="inventoryAriaSort('Quality')"
+          >
+            <button
+              type="button"
+              class="w-full text-left transition-colors hover:text-primary"
+              [ngClass]="{ 'text-primary': inventorySort === 'Quality' }"
+              (click)="setInventorySort('Quality')"
+            >
+              Quality
+              <span aria-hidden="true">{{
+                inventorySortIndicator("Quality")
+              }}</span>
+            </button>
+          </div>
+          <div
+            class="text-center"
+            role="columnheader"
+            [attr.aria-sort]="inventoryAriaSort('Potential')"
+          >
+            <button
+              type="button"
+              class="w-full transition-colors hover:text-primary"
+              [ngClass]="{ 'text-primary': inventorySort === 'Potential' }"
+              (click)="setInventorySort('Potential')"
+            >
+              Potential
+              <span aria-hidden="true">{{
+                inventorySortIndicator("Potential")
+              }}</span>
+            </button>
+          </div>
+          <div
+            class="text-right"
+            role="columnheader"
+            [attr.aria-sort]="inventoryAriaSort('Gear Power')"
+          >
+            <button
+              type="button"
+              class="w-full text-right transition-colors hover:text-primary"
+              [ngClass]="{ 'text-primary': inventorySort === 'Gear Power' }"
+              (click)="setInventorySort('Gear Power')"
+            >
+              Gear Power
+              <span aria-hidden="true">{{
+                inventorySortIndicator("Gear Power")
+              }}</span>
+            </button>
+          </div>
         </div>
 
         <div *ngIf="filteredItems.length" class="inventory-list">
@@ -288,19 +342,30 @@
                   {{ itemDisplayName(inventoryItem) }}
                 </strong>
                 <span
+                  *ngIf="inventoryItem.isFavorite"
+                  class="inventory-favorite-marker"
+                  aria-label="Favorite"
+                  title="Favorite"
+                  >★</span
+                >
+                <span
                   *ngIf="inventoryItem.isNew"
                   class="ll-badge ll-badge-accent inventory-new-badge"
                   >New</span
                 >
-              </span>
-              <span class="truncate text-xs text-secondary">
-                {{ equipment.quality }}
               </span>
               <span *ngIf="isScrapMode" class="inventory-list-selection">
                 {{
                   selectedItemsContains(inventoryItem) ? "Selected" : "Select"
                 }}
               </span>
+            </span>
+
+            <span
+              *ngIf="equipmentInstance(inventoryItem) as equipment"
+              class="inventory-list-quality"
+            >
+              {{ equipment.quality }}
             </span>
 
             <span
@@ -393,6 +458,31 @@
         </div>
 
         <footer class="inventory-inspector-actions">
+          <button
+            type="button"
+            class="ll-button mb-2 w-full"
+            [class.ll-button-primary]="item.isFavorite"
+            [disabled]="favoritePendingItemId() !== null"
+            [attr.aria-pressed]="!!item.isFavorite"
+            (click)="toggleFavorite(item)"
+          >
+            <span aria-hidden="true">{{ item.isFavorite ? "★" : "☆" }}</span>
+            {{
+              favoritePendingItemId() === item.itemInstance.id
+                ? "Saving..."
+                : item.isFavorite
+                  ? "Remove favorite"
+                  : "Add favorite"
+            }}
+          </button>
+
+          <div
+            *ngIf="favoriteActionError() as message"
+            class="ll-state ll-state-danger mb-2"
+          >
+            {{ message }}
+          </div>
+
           <ng-container *ngIf="isEquipmentItem(item); else openItemAction">
             <div
               *ngIf="!isSelectedEquippedItem(item); else currentlyEquipped"
@@ -592,12 +682,20 @@
             "
             (click)="handleStockItemClick(item)"
           >
-            <span
-              class="truncate font-medium"
-              [ngClass]="itemRarityClass(item)"
-              role="cell"
-            >
-              {{ itemDisplayName(item) }}
+            <span class="stock-item-name" role="cell">
+              <span
+                class="truncate font-medium"
+                [ngClass]="itemRarityClass(item)"
+              >
+                {{ itemDisplayName(item) }}
+              </span>
+              <span
+                *ngIf="item.isFavorite"
+                class="inventory-favorite-marker"
+                aria-label="Favorite"
+                title="Favorite"
+                >★</span
+              >
             </span>
             <strong
               class="stock-quantity tabular-nums text-primary"
@@ -744,6 +842,31 @@
         </div>
 
         <footer class="inventory-inspector-actions">
+          <button
+            type="button"
+            class="ll-button mb-2 w-full"
+            [class.ll-button-primary]="item.isFavorite"
+            [disabled]="favoritePendingItemId() !== null"
+            [attr.aria-pressed]="!!item.isFavorite"
+            (click)="toggleFavorite(item)"
+          >
+            <span aria-hidden="true">{{ item.isFavorite ? "★" : "☆" }}</span>
+            {{
+              favoritePendingItemId() === item.itemInstance.id
+                ? "Saving..."
+                : item.isFavorite
+                  ? "Remove favorite"
+                  : "Add favorite"
+            }}
+          </button>
+
+          <div
+            *ngIf="favoriteActionError() as message"
+            class="ll-state ll-state-danger mb-2"
+          >
+            {{ message }}
+          </div>
+
           <button
             *ngIf="selectionContainerMetadata(item)"
             type="button"

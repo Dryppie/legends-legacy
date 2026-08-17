@@ -60,7 +60,8 @@ public sealed record TowerScoutingRevealDto(
     string Title,
     string Description,
     AbilitySpecKind Kind,
-    int? CooldownSeconds);
+    int? CooldownSeconds,
+    IReadOnlyList<string> Tags);
 
 public sealed record TowerPreparationSummaryDto(
     decimal SupplyWeaponsPercent,

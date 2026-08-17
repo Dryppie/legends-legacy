@@ -201,7 +201,7 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
             scaledAbility.Name,
             scaledAbility.Description,
             scaledAbility.CooldownTicks / 10d,
-            scaledAbility.Effects.FirstOrDefault()?.Target.ToString() ?? AbilityTargetSelector.CurrentTarget.ToString(),
+            AbilityTargetMapping.GetDistinctTargets(scaledAbility),
             scaledAbility.Tags,
             scaledAbility.Effects.Select(x => new EssenceEffectDto(
                 x.Id,

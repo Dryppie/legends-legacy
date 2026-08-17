@@ -3,9 +3,11 @@ import {
   Component,
   computed,
   effect,
-  HostListener,
+  ElementRef,
+  NgZone,
   OnDestroy,
   OnInit,
+  ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
@@ -15,9 +17,6 @@ import {
 } from '../../../../shared/models/Dtos/regionDto';
 import { RegionService } from '../../../../core/services/client-side/region/region.service';
 import { CombatAreaCardComponent } from '../../../../shared/components/combat/combat-area-card/combat-area-card.component';
-import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
-import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
-import { RaidsComponent } from './raids/raids.component';
 import { DungeonsComponent } from './dungeons/dungeons.component';
 import { CombatComponent } from '../../../../shared/components/combat/combat.component';
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
@@ -27,8 +26,17 @@ import { QuestStateService } from '../../../../core/services/api/quest/quest-sta
 import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../../../shared/models/enums/characterActionType';
 import { TRAINING_GROUNDS_AREA_ID } from '../../../../shared/models/quest';
-import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
+import { DungeonPreviewData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
+import { HelpLauncherComponent } from '../../../../shared/help/help-launcher.component';
+
+interface WorldMapDungeonEntry {
+  id: string;
+  title: string;
+  requiredLevel: number;
+  ownedSigilCount: number;
+  canEnter: boolean;
+}
 
 @Component({
   selector: 'app-region',
@@ -36,15 +44,13 @@ import { DungeonStateService } from '../../../../core/services/api/dungeon/dunge
     NgIf,
     NgFor,
     CombatAreaCardComponent,
-    TabsComponent,
-    TabComponent,
-    RaidsComponent,
     DungeonsComponent,
     CombatComponent,
     RouterLink,
-    DefaultHeaderComponent,
+    HelpLauncherComponent,
   ],
   templateUrl: './region.component.html',
+  styleUrl: './region.component.scss',
 })
 export class RegionComponent implements OnInit, OnDestroy {
   regionId!: string;
@@ -53,6 +59,9 @@ export class RegionComponent implements OnInit, OnDestroy {
   targetAreaId: string | null = null;
   readonly trainingBattleType = BattleType.Training;
   readonly activeBattle;
+  selectedDungeonId: string | null = null;
+  columnCount = 1;
+  private contentResizeObserver: ResizeObserver | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -61,6 +70,7 @@ export class RegionComponent implements OnInit, OnDestroy {
     private readonly combatService: CombatService,
     private readonly questState: QuestStateService,
     private readonly dungeonState: DungeonStateService,
+    private readonly ngZone: NgZone,
     characterActions: CharacterActionsStateService,
   ) {
     this.activeBattle = computed(() => {
@@ -70,6 +80,7 @@ export class RegionComponent implements OnInit, OnDestroy {
       }
 
       return {
+        areaId: action.combatActionDetails?.area?.id ?? null,
         areaName: action.combatActionDetails?.area?.name ?? 'Current encounter',
       };
     });
@@ -82,10 +93,9 @@ export class RegionComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.setColumnCount();
-
     this.route.paramMap.subscribe((params) => {
       this.regionId = params.get('id') ?? '';
+      this.selectedDungeonId = null;
       this.questState.loadAreaAccess();
       this.getRegionDetails(this.regionId);
     });
@@ -100,7 +110,23 @@ export class RegionComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.contentResizeObserver?.disconnect();
     this.closeTrainingSummary();
+  }
+
+  @ViewChild('worldMapContent')
+  set worldMapContent(content: ElementRef<HTMLElement> | undefined) {
+    this.contentResizeObserver?.disconnect();
+    this.contentResizeObserver = null;
+    if (!content) return;
+
+    const element = content.nativeElement;
+    this.contentResizeObserver = new ResizeObserver(([entry]) => {
+      this.ngZone.run(() => {
+        this.setColumnCount(element, entry.contentRect.width);
+      });
+    });
+    this.contentResizeObserver.observe(element);
   }
 
   getRegionDetails(id: string) {
@@ -110,22 +136,37 @@ export class RegionComponent implements OnInit, OnDestroy {
     });
   }
 
-  columnCount = 1;
-  @HostListener('window:resize')
-  onResize() {
-    this.setColumnCount();
-  }
+  private setColumnCount(content: HTMLElement, contentWidth: number): void {
+    if (window.matchMedia('(max-width: 42rem)').matches) {
+      this.columnCount = 1;
+      return;
+    }
 
-  private setColumnCount() {
-    const width = window.innerWidth;
+    const areaGrid = content.querySelector<HTMLElement>('.area-grid');
+    const firstCard = areaGrid?.querySelector<HTMLElement>(
+      'app-combat-area-card',
+    );
+    if (!areaGrid || !firstCard) return;
 
-    if (width >= 1280)
-      this.columnCount = 4; // xl
-    else if (width >= 1024)
-      this.columnCount = 3; // lg
-    else if (width >= 768)
-      this.columnCount = 2; // md
-    else this.columnCount = 0; // base
+    const rootFontSize = Number.parseFloat(
+      getComputedStyle(document.documentElement).fontSize,
+    );
+    const layoutGap = Number.parseFloat(getComputedStyle(content).columnGap);
+    const cardGap = Number.parseFloat(getComputedStyle(areaGrid).columnGap);
+    const cardWidth = firstCard.getBoundingClientRect().width;
+    const isStacked =
+      getComputedStyle(content).gridTemplateColumns.trim().split(/\s+/)
+        .length === 1;
+    const reservedRailWidth = isStacked ? 0 : 17 * rootFontSize + layoutGap;
+    const availableAreaWidth = Math.max(
+      cardWidth,
+      contentWidth - reservedRailWidth,
+    );
+    const nextColumnCount = Math.floor(
+      (availableAreaWidth + cardGap) / (cardWidth + cardGap),
+    );
+
+    this.columnCount = Math.max(1, Math.min(4, nextColumnCount));
   }
 
   isLastInRow(index: number): boolean {
@@ -199,5 +240,84 @@ export class RegionComponent implements OnInit, OnDestroy {
 
   isRegionTowerLocked(): boolean {
     return !!this.region?.requiredTowerFloor && !this.isMeranUnlocked();
+  }
+
+  regionLevelRange(): string {
+    if (!this.region?.areas.length) return '';
+
+    const levels = this.region.areas.map((area) => area.levelRequirement);
+    return `Lv. ${Math.min(...levels)}–${Math.max(...levels)}`;
+  }
+
+  unlockedAreaCount(): number {
+    return (
+      this.region?.areas.filter(
+        (area) => this.questState.accessFor(area.id)?.canAccess === true,
+      ).length ?? 0
+    );
+  }
+
+  regionNumber(): number | null {
+    switch (this.regionId.toLowerCase()) {
+      case 'shenic':
+        return 1;
+      case 'meran':
+        return 2;
+      default:
+        return null;
+    }
+  }
+
+  regionDungeons(): WorldMapDungeonEntry[] {
+    const regionNumber = this.regionNumber();
+    if (regionNumber === null) return [];
+
+    const families = new Map<string, DungeonPreviewData[]>();
+    for (const dungeon of this.dungeonState.dungeons()) {
+      if (dungeon.region !== regionNumber) continue;
+
+      const familyId = dungeon.familyId ?? dungeon.id;
+      families.set(familyId, [...(families.get(familyId) ?? []), dungeon]);
+    }
+
+    return Array.from(families.entries()).map(([id, variants]) => {
+      const ownedSigilCount = variants.reduce((highestCount, variant) => {
+        const sigilRequirement = variant.entryRequirements?.find(
+          (requirement) => requirement.itemId === variant.sigilItemId,
+        );
+
+        return Math.max(highestCount, sigilRequirement?.ownedAmount ?? 0);
+      }, 0);
+
+      return {
+        id,
+        title: variants[0]?.familyTitle ?? variants[0]?.title ?? id,
+        requiredLevel: Math.min(
+          ...variants.map((variant) => variant.requiredLevel ?? 1),
+        ),
+        ownedSigilCount,
+        canEnter: variants.some((variant) => variant.canEnter ?? true),
+      };
+    });
+  }
+
+  trackDungeon(_: number, dungeon: WorldMapDungeonEntry): string {
+    return dungeon.id;
+  }
+
+  selectDungeon(dungeonId: string): void {
+    this.selectedDungeonId = dungeonId;
+  }
+
+  showAreas(): void {
+    this.selectedDungeonId = null;
+  }
+
+  selectedDungeonTitle(): string {
+    return (
+      this.regionDungeons().find(
+        (dungeon) => dungeon.id === this.selectedDungeonId,
+      )?.title ?? 'Dungeon'
+    );
   }
 }

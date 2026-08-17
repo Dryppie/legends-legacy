@@ -1,5 +1,6 @@
 using Application.Common.Interfaces;
 using Domain.Models.Achievements;
+using Domain.Models.Administration;
 using Domain.Models.Attributes;
 using Domain.Models.BackgroundJobs;
 using Domain.Models.CharacterActions;
@@ -78,10 +79,20 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     {
         MigrateTrackedEquipment();
         NormalizeIdentityFields();
+        EnforceAppendOnlyAdminActions();
         EnforceAppendOnlyEconomyLedger();
         var affectedRows = await base.SaveChangesAsync(cancellationToken);
         _saveChangesVersion++;
         return affectedRows;
+    }
+
+    private void EnforceAppendOnlyAdminActions()
+    {
+        if (ChangeTracker.Entries<AdminAction>()
+            .Any(x => x.State is EntityState.Modified or EntityState.Deleted))
+        {
+            throw new InvalidOperationException("Administration audit entries are append-only and cannot be modified or deleted.");
+        }
     }
 
     private void MigrateTrackedEquipment()
@@ -405,6 +416,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         }
     }
 
+    public DbSet<AdminAction> AdminActions => Set<AdminAction>();
+    public DbSet<AccountRestriction> AccountRestrictions => Set<AccountRestriction>();
     public DbSet<AchievementDefinition> AchievementDefinitions => Set<AchievementDefinition>();
     public DbSet<AchievementEventLedger> AchievementEventLedgers => Set<AchievementEventLedger>();
     public DbSet<PlayerAchievementProgress> PlayerAchievementProgresses => Set<PlayerAchievementProgress>();

@@ -14,67 +14,72 @@
 </ng-container>
 
 <ng-template #regionView>
-  <div
-    class="flex h-full min-h-0 w-full flex-col gap-4 overflow-y-auto overflow-x-hidden"
-  >
-    <app-default-header
-      *ngIf="region"
-      class="pr-4 sm:pr-6"
-      section="Region"
-      [title]="region.name"
-      text="Areas, dungeons, and raids"
-      icon="sidebar/world/world-map"
-    >
-      <a
-        *ngIf="activeBattle() as battle"
-        header-actions
-        routerLink="/game/combat"
-        class="group flex min-h-8 min-w-0 max-w-32 items-center gap-2 rounded-full border border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] px-3 py-1.5 text-xs transition-colors hover:border-primary hover:bg-primary/15 sm:max-w-[24rem]"
-        [attr.aria-label]="'In battle: ' + battle.areaName"
-      >
-        <span
-          class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ll-color-success)]"
-          aria-hidden="true"
-        ></span>
+  <div *ngIf="region" class="world-map-page">
+    <header class="world-map-header">
+      <div class="world-map-identity">
+        <div class="world-map-eyebrow">World Map</div>
+        <div class="world-map-title-line">
+          <h1>{{ region.name }}</h1>
+          <span>{{ regionLevelRange() }}</span>
+        </div>
+      </div>
 
-        <span
-          class="hidden shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[var(--ll-color-text-muted)] sm:inline"
+      <div class="world-map-actions">
+        <a
+          *ngIf="activeBattle() as battle"
+          routerLink="/game/combat"
+          class="group flex min-h-8 min-w-0 max-w-32 items-center gap-2 rounded-full border border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] px-3 py-1.5 text-xs transition-colors hover:border-primary hover:bg-primary/15 sm:max-w-[24rem]"
+          [attr.aria-label]="'In battle: ' + battle.areaName"
         >
-          In battle
-        </span>
+          <span
+            class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ll-color-success)]"
+            aria-hidden="true"
+          ></span>
 
-        <span
-          class="hidden text-[var(--ll-color-text-subtle)] sm:inline"
-          aria-hidden="true"
-        >
-          ·
-        </span>
+          <span
+            class="hidden shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[var(--ll-color-text-muted)] sm:inline"
+          >
+            In battle
+          </span>
 
-        <strong class="min-w-0 truncate font-medium text-primary">
-          {{ battle.areaName }}
-        </strong>
+          <span
+            class="hidden text-[var(--ll-color-text-subtle)] sm:inline"
+            aria-hidden="true"
+          >
+            ·
+          </span>
 
-        <svg
-          class="h-3.5 w-3.5 shrink-0 text-primary/70 transition-transform group-hover:translate-x-0.5"
-          viewBox="0 0 16 16"
-          fill="none"
-          aria-hidden="true"
-        >
-          <path
-            d="m6 3 5 5-5 5"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </a>
-    </app-default-header>
+          <strong class="min-w-0 truncate font-medium text-primary">
+            {{ battle.areaName }}
+          </strong>
 
-    <nav *ngIf="region" class="flex flex-wrap gap-2" aria-label="Regions">
+          <svg
+            class="h-3.5 w-3.5 shrink-0 text-primary/70 transition-transform group-hover:translate-x-0.5"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="m6 3 5 5-5 5"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </a>
+
+        <app-help-launcher
+          presentation="inline"
+          [ariaLabel]="'Open ' + region.name + ' world map guide'"
+        ></app-help-launcher>
+      </div>
+    </header>
+
+    <nav class="region-tabs" aria-label="Regions">
       <a
         routerLink="/game/world/shenic"
-        class="ll-button-secondary px-3 py-2 text-sm"
+        [class.active]="regionId === 'shenic'"
         [attr.aria-current]="regionId === 'shenic' ? 'page' : null"
       >
         Shenic
@@ -82,14 +87,14 @@
       <a
         *ngIf="isMeranUnlocked(); else lockedMeranLink"
         routerLink="/game/world/meran"
-        class="ll-button-secondary px-3 py-2 text-sm"
+        [class.active]="regionId === 'meran'"
         [attr.aria-current]="regionId === 'meran' ? 'page' : null"
       >
         Meran
       </a>
       <ng-template #lockedMeranLink>
         <span
-          class="ll-button-secondary cursor-not-allowed px-3 py-2 text-sm opacity-50"
+          class="locked-region"
           title="Complete World Tower Floor 10 to unlock Meran"
           aria-disabled="true"
         >
@@ -98,52 +103,134 @@
       </ng-template>
     </nav>
 
-    <div
-      *ngIf="isRegionTowerLocked(); else unlockedRegion"
-      class="ll-empty-state"
-    >
+    <div *ngIf="isRegionTowerLocked(); else unlockedRegion" class="map-lock">
       Complete World Tower Floor {{ region.requiredTowerFloor }} to unlock
       {{ region.name }}.
     </div>
 
     <ng-template #unlockedRegion>
-      <app-tabs *ngIf="region" class="flex w-full shrink-0 flex-col">
-        <app-tab label="Areas">
-          <div
-            *ngIf="region.areas.length > 0; else noAreas"
-            class="flex w-full flex-col gap-2 pt-4"
-            data-tour="areas-introduction"
-          >
-            <div class="flex h-full w-full flex-wrap gap-4">
-              <div
-                *ngFor="let area of region.areas; index as i"
-                class="w-full sm:w-fit"
-              >
-                <app-combat-area-card
-                  [area]="area"
-                  [isLastInRow]="isLastInRow(i)"
-                ></app-combat-area-card>
+      <div
+        #worldMapContent
+        class="world-map-content"
+        [class.showing-dungeon]="selectedDungeonId"
+      >
+        <ng-container *ngIf="selectedDungeonId as dungeonId; else areasSection">
+          <section class="dungeon-preview-section">
+            <header class="dungeon-preview-toolbar">
+              <div>
+                <div class="world-map-eyebrow">Dungeon preview</div>
+                <h2>{{ selectedDungeonTitle() }}</h2>
               </div>
-            </div>
-          </div>
+              <button type="button" (click)="showAreas()">
+                <span aria-hidden="true">←</span>
+                Back to areas
+              </button>
+            </header>
 
-          <ng-template #noAreas>
-            <div class="pt-4" data-tour="areas-introduction">
-              <div class="ll-empty-state">
+            <app-dungeons
+              class="inline-dungeon-preview"
+              [region]="regionNumber()"
+              [selectedFamilyId]="dungeonId"
+              [expandSelected]="true"
+            ></app-dungeons>
+          </section>
+        </ng-container>
+
+        <ng-template #areasSection>
+          <section class="areas-section" aria-labelledby="areas-heading">
+            <header class="areas-toolbar">
+              <div class="areas-summary">
+                <h2 id="areas-heading">Areas</h2>
+                <span>{{ region.areas.length }}</span>
+                <span aria-hidden="true">·</span>
+                <span>{{ unlockedAreaCount() }} unlocked</span>
+              </div>
+
+              <ul class="gathering-legend" aria-label="Gathering node legend">
+                <li><span class="legend-node mining"></span>Mining</li>
+                <li>
+                  <span class="legend-node woodcutting"></span>Woodcutting
+                </li>
+                <li><span class="legend-node skinning"></span>Skinning</li>
+              </ul>
+            </header>
+
+            <div
+              *ngIf="region.areas.length > 0; else noAreas"
+              class="area-grid"
+              [style.--area-columns]="columnCount"
+              data-tour="areas-introduction"
+            >
+              <app-combat-area-card
+                *ngFor="let area of region.areas; index as i"
+                [area]="area"
+                [isLastInRow]="isLastInRow(i)"
+                [isActiveBattle]="activeBattle()?.areaId === area.id"
+              ></app-combat-area-card>
+            </div>
+
+            <ng-template #noAreas>
+              <div class="ll-empty-state" data-tour="areas-introduction">
                 No combat areas are available in this region yet.
               </div>
+            </ng-template>
+          </section>
+        </ng-template>
+
+        <aside class="world-map-rail" aria-label="Region activities">
+          <section class="activity-panel" data-tour="dungeons-introduction">
+            <header>
+              <h2>Dungeons</h2>
+              <span>{{ regionDungeons().length }}</span>
+            </header>
+
+            <div *ngIf="regionDungeons().length; else noDungeons">
+              <button
+                *ngFor="let dungeon of regionDungeons(); trackBy: trackDungeon"
+                type="button"
+                class="activity-row"
+                [class.locked]="!dungeon.canEnter"
+                [class.selected]="selectedDungeonId === dungeon.id"
+                (click)="selectDungeon(dungeon.id)"
+              >
+                <span class="activity-name">{{ dungeon.title }}</span>
+                <span class="activity-level"
+                  >Lv {{ dungeon.requiredLevel }}</span
+                >
+                <span class="activity-meta">
+                  {{ dungeon.ownedSigilCount }}
+                  {{ dungeon.ownedSigilCount === 1 ? "sigil" : "sigils" }}
+                </span>
+              </button>
             </div>
-          </ng-template>
-        </app-tab>
 
-        <app-tab label="Dungeons">
-          <app-dungeons class="overflow-hidden pt-4"></app-dungeons>
-        </app-tab>
+            <ng-template #noDungeons>
+              <p class="activity-empty">No dungeons are available here yet.</p>
+            </ng-template>
+          </section>
 
-        <app-tab label="Raids">
-          <app-raids></app-raids>
-        </app-tab>
-      </app-tabs>
+          <section class="activity-panel raids" data-tour="raids-introduction">
+            <header>
+              <h2>Raids</h2>
+              <span>{{ region.raids.length }}</span>
+            </header>
+
+            <div *ngIf="region.raids.length; else noRaids">
+              <div
+                *ngFor="let raid of region.raids"
+                class="activity-row static"
+              >
+                <span class="activity-name">{{ raid.name }}</span>
+                <span class="activity-meta">Raid activity</span>
+              </div>
+            </div>
+
+            <ng-template #noRaids>
+              <p class="activity-empty">No raids are available here yet.</p>
+            </ng-template>
+          </section>
+        </aside>
+      </div>
     </ng-template>
   </div>
 </ng-template>

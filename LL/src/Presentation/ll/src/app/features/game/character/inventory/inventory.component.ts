@@ -63,6 +63,8 @@ type StockCategory =
   | 'Entrance Keys'
   | 'Catalysts';
 type InventorySort = 'Name' | 'Tier' | 'Rarity' | 'Quality' | 'Gear Power';
+type EquipmentInventorySort = 'Name' | 'Quality' | 'Potential' | 'Gear Power';
+type SortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-inventory',
@@ -113,6 +115,8 @@ export class InventoryComponent implements OnInit {
   readonly selectedContainerOptionId = signal('');
   readonly isOpeningContainer = signal(false);
   readonly containerActionError = signal<string | null>(null);
+  readonly favoritePendingItemId = signal<string | null>(null);
+  readonly favoriteActionError = signal<string | null>(null);
   readonly selectedEquipmentSlot = signal<EquipmentSlotType | null>(null);
   readonly selectedSlotEquipment = signal<EquipmentInstance | null>(null);
 
@@ -129,7 +133,8 @@ export class InventoryComponent implements OnInit {
 
   selectedItems: InventoryItem[] = [];
   scrapRarityThreshold: Rarity = Rarity.Common;
-  inventorySort: InventorySort = 'Gear Power';
+  inventorySort: EquipmentInventorySort = 'Gear Power';
+  inventorySortDirection: SortDirection = 'desc';
   stockSort: InventorySort = 'Name';
   readonly sortDropdownOptions: DropdownOption<InventorySort>[] = [
     { label: 'Name A-Z', value: 'Name' },
@@ -229,8 +234,27 @@ export class InventoryComponent implements OnInit {
     this.scrapRarityThreshold = selection.main as Rarity;
   }
 
-  setInventorySort(selection: DropdownSelection<unknown>): void {
-    this.inventorySort = selection.main as InventorySort;
+  setInventorySort(sort: EquipmentInventorySort): void {
+    if (this.inventorySort === sort) {
+      this.inventorySortDirection =
+        this.inventorySortDirection === 'asc' ? 'desc' : 'asc';
+      return;
+    }
+
+    this.inventorySort = sort;
+    this.inventorySortDirection = sort === 'Name' ? 'asc' : 'desc';
+  }
+
+  inventorySortIndicator(sort: EquipmentInventorySort): string {
+    if (this.inventorySort !== sort) return '';
+    return this.inventorySortDirection === 'asc' ? '↑' : '↓';
+  }
+
+  inventoryAriaSort(
+    sort: EquipmentInventorySort,
+  ): 'ascending' | 'descending' | 'none' {
+    if (this.inventorySort !== sort) return 'none';
+    return this.inventorySortDirection === 'asc' ? 'ascending' : 'descending';
   }
 
   setStockSort(selection: DropdownSelection<unknown>): void {
@@ -417,7 +441,11 @@ export class InventoryComponent implements OnInit {
         })
       : items;
 
-    return this.sortInventoryItems(filtered);
+    return this.sortInventoryItems(
+      filtered,
+      this.inventorySort,
+      this.inventorySortDirection,
+    );
   }
 
   get filteredStockItems(): InventoryItem[] {
@@ -509,10 +537,45 @@ export class InventoryComponent implements OnInit {
 
     this.selectedItem.set(inspected);
     if (changedItem) {
+      this.favoriteActionError.set(null);
       this.resetBlueprintAction();
       this.resetContainerAction(item);
       this.loadBlueprintRecipes(item);
     }
+  }
+
+  toggleFavorite(item: InventoryItem): void {
+    if (this.favoritePendingItemId()) return;
+
+    const itemInstanceId = item.itemInstance.id;
+    this.favoritePendingItemId.set(itemInstanceId);
+    this.favoriteActionError.set(null);
+
+    const request = this.state.setFavorite(itemInstanceId, !item.isFavorite);
+    this.refreshSelectedInventoryItem(itemInstanceId);
+
+    request.subscribe({
+      next: () => {
+        this.refreshSelectedInventoryItem(itemInstanceId);
+        this.favoritePendingItemId.set(null);
+      },
+      error: (error) => {
+        this.refreshSelectedInventoryItem(itemInstanceId);
+        this.favoriteActionError.set(
+          error?.message ?? 'Failed to update this favorite.',
+        );
+        this.favoritePendingItemId.set(null);
+      },
+    });
+  }
+
+  private refreshSelectedInventoryItem(itemInstanceId: string): void {
+    if (this.selectedItem()?.itemInstance.id !== itemInstanceId) return;
+
+    const current = this.state
+      .items()
+      .find((item) => item.itemInstance.id === itemInstanceId);
+    if (current) this.selectedItem.set(current);
   }
 
   selectionContainerMetadata(item: InventoryItem) {
@@ -792,7 +855,8 @@ export class InventoryComponent implements OnInit {
 
   private sortInventoryItems(
     items: InventoryItem[],
-    sort: InventorySort = this.inventorySort,
+    sort: InventorySort | EquipmentInventorySort = this.inventorySort,
+    direction: SortDirection = sort === 'Name' ? 'asc' : 'desc',
   ): InventoryItem[] {
     return [...items].sort((a, b) => {
       const aEquipment = this.equipmentInstance(a);
@@ -800,31 +864,40 @@ export class InventoryComponent implements OnInit {
       let difference = 0;
 
       switch (sort) {
+        case 'Name':
+          difference = this.itemDisplayName(a).localeCompare(
+            this.itemDisplayName(b),
+          );
+          break;
         case 'Tier':
-          difference = (bEquipment?.tier ?? 0) - (aEquipment?.tier ?? 0);
+          difference = (aEquipment?.tier ?? 0) - (bEquipment?.tier ?? 0);
           break;
         case 'Rarity':
           difference =
             this.RARITY_ORDER[
-              bEquipment?.rarity ?? b.itemInstance.itemBase.rarity
+              aEquipment?.rarity ?? a.itemInstance.itemBase.rarity
             ] -
             this.RARITY_ORDER[
-              aEquipment?.rarity ?? a.itemInstance.itemBase.rarity
+              bEquipment?.rarity ?? b.itemInstance.itemBase.rarity
             ];
           break;
         case 'Quality':
           difference =
-            (bEquipment ? this.QUALITY_ORDER[bEquipment.quality] : -1) -
-            (aEquipment ? this.QUALITY_ORDER[aEquipment.quality] : -1);
+            (aEquipment ? this.QUALITY_ORDER[aEquipment.quality] : -1) -
+            (bEquipment ? this.QUALITY_ORDER[bEquipment.quality] : -1);
+          break;
+        case 'Potential':
+          difference =
+            (aEquipment?.potential ?? 0) - (bEquipment?.potential ?? 0);
           break;
         case 'Gear Power':
           difference =
-            (bEquipment?.itemBudget ?? 0) - (aEquipment?.itemBudget ?? 0);
+            (aEquipment?.itemBudget ?? 0) - (bEquipment?.itemBudget ?? 0);
           break;
       }
 
       return (
-        difference ||
+        (direction === 'asc' ? difference : -difference) ||
         this.itemDisplayName(a).localeCompare(this.itemDisplayName(b))
       );
     });

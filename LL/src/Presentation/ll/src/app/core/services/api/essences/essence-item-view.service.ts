@@ -6,7 +6,7 @@ import {
   Essence,
 } from '../../../../shared/models/essence';
 import { EffectTag } from '../../../../shared/models/enums/effectType';
-import { Targeting } from '../../../../shared/models/enums/targeting';
+import { isAbilityTargetSelector } from '../../../../shared/models/enums/targeting';
 import {
   EssenceItem,
   essenceItemToEssence,
@@ -44,7 +44,7 @@ export class EssenceItemViewService {
       attackTypes: this.filterEnumValues(tags, AttackType, 'Attack'),
       damageTypes: this.filterEnumValues(tags, DamageType, 'Damage'),
       effectTags: this.filterEnumValues(tags, EffectTag, 'Effect'),
-      targeting: ability.targeting ? [ability.targeting as Targeting] : [],
+      targets: (ability.targets ?? []).filter(isAbilityTargetSelector),
       cooldown: ability.cooldownSeconds * 10,
       effects: ability.effects ?? [],
     };

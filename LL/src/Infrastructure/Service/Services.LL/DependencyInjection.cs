@@ -2,6 +2,7 @@
 using Application.Interfaces.Outbox;
 using Application.Interfaces.WebSockets;
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Administration;
 using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.CharacterActions;
@@ -27,9 +28,11 @@ using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Services.LL._Simulator;
 using Services.LL.Attributes;
 using Services.LL.Achievements;
+using Services.LL.Administration;
 using Services.LL.Authorization;
 using Services.LL.Balance;
 using Services.LL.Bonuses;
@@ -127,6 +130,10 @@ public static class DependencyInjection
 
         services.AddScoped<IAttributeService, AttributeService>();
         services.AddScoped<IAchievementService, AchievementService>();
+        services.Configure<LiveOpsOptions>(config.GetSection(LiveOpsOptions.SectionName));
+        services.AddScoped<IAccountAccessPolicy, AccountAccessPolicy>();
+        services.AddScoped<ILiveOpsService, LiveOpsService>();
+        services.TryAddScoped<IChatModerationGateway, UnavailableChatModerationGateway>();
         services.Configure<AchievementSystemChatOptions>(config.GetSection("Chat:SystemMessages"));
         services.AddSingleton<HttpClient>();
         services.AddScoped<IAchievementSystemChatPublisher, AchievementSystemChatPublisher>();

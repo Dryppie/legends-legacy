@@ -4,6 +4,7 @@ import {
   COMBAT_KEYWORDS,
   CombatKeywordDefinition,
 } from './combat-keyword-glossary';
+import { ABILITY_TARGETS } from '../ability-target-glossary';
 
 type AttributeValueResolver = (attribute: string) => number;
 
@@ -13,12 +14,19 @@ export class EssenceDescriptionFormatter {
   private readonly keywordPattern: RegExp;
 
   constructor() {
-    const aliases = COMBAT_KEYWORDS.flatMap((entry) => [
-      entry.name,
-      ...(entry.aliases ?? []),
-    ]).sort((left, right) => right.length - left.length);
+    const definitions: readonly CombatKeywordDefinition[] = [
+      ...COMBAT_KEYWORDS,
+      ...ABILITY_TARGETS.map((target) => ({
+        name: target.label,
+        aliases: [...target.aliases],
+        description: target.description,
+      })),
+    ];
+    const aliases = definitions
+      .flatMap((entry) => [entry.name, ...(entry.aliases ?? [])])
+      .sort((left, right) => right.length - left.length);
 
-    for (const entry of COMBAT_KEYWORDS) {
+    for (const entry of definitions) {
       for (const alias of [entry.name, ...(entry.aliases ?? [])]) {
         this.keywordByAlias.set(alias.toLowerCase(), entry);
       }

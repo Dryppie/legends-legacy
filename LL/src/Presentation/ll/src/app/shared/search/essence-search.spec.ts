@@ -31,7 +31,7 @@ function createDefinition(): EssenceDefinitionDto {
       name: 'Thorned Rush',
       description: 'Charges forward, impaling the first enemy hit.',
       cooldownSeconds: 12,
-      targeting: 'Enemy',
+      targets: ['CurrentTarget', 'Self'],
       tags: ['Physical'],
       effects: [
         {
@@ -58,7 +58,7 @@ function createDefinition(): EssenceDefinitionDto {
       name: 'Bristling Hide',
       description: 'Reflects a portion of melee damage taken.',
       cooldownSeconds: 0,
-      targeting: 'Self',
+      targets: ['Self'],
       tags: ['Buff'],
       effects: [],
     },
@@ -93,6 +93,13 @@ describe('essenceDefinitionSearchText', () => {
     expect(searchable).toContain('reflects a portion of melee damage');
     expect(searchable).toContain('bleeding');
     expect(searchable).toContain('damageovertime');
+  });
+
+  it('matches raw target selectors and their readable labels', () => {
+    const searchable = essenceDefinitionSearchText(createDefinition());
+
+    expect(searchable).toContain('currenttarget');
+    expect(searchable).toContain('current target');
   });
 
   it('tolerates a missing definition', () => {

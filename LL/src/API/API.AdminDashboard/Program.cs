@@ -15,6 +15,12 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
+if (!builder.Environment.IsDevelopment())
+{
+    throw new InvalidOperationException(
+        "API.AdminDashboard is a development-only content workbench and cannot run outside the Development environment.");
+}
+
 var currentDirectory = Directory.GetCurrentDirectory(); // API.AdminDashboard
 var apiDirectory = Directory.GetParent(currentDirectory)!.FullName; // API folder
 

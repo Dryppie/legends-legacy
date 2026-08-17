@@ -2,6 +2,7 @@
 using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.Inventories.Commands.MarkInventoryItemSeen;
 using Application.UseCases.Inventories.Commands.OpenCatalystSelectionCrate;
+using Application.UseCases.Inventories.Commands.SetInventoryItemFavorite;
 using Application.UseCases.Inventories.Commands.TransferInventoryItem;
 using Application.UseCases.Inventories.Queries.GetInventoryById;
 using API.LL.Common;
@@ -38,6 +39,15 @@ public class InventoryController : BaseController
         await Mediator.Send(new MarkInventoryItemSeenCommand(
             CurrentCharacterGuid,
             itemInstanceId));
+
+    [HttpPost("items/{itemInstanceId:guid}/favorite")]
+    public async Task<ActionResult<Response<SetInventoryItemFavoriteResponseDto>>> SetFavorite(
+        Guid itemInstanceId,
+        [FromBody] SetInventoryItemFavoriteRequestDto request) =>
+        await Mediator.Send(new SetInventoryItemFavoriteCommand(
+            CurrentCharacterGuid,
+            itemInstanceId,
+            request.IsFavorite));
 
     [HttpPost("items/{itemInstanceId:guid}/transfer")]
     [Authorize(Policy = AuthorizationPolicies.RegisteredUser)]

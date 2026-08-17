@@ -1,7 +1,9 @@
 <div
-  class="grid h-full w-full grid-cols-1 gap-4 overflow-y-auto py-4 md:grid-cols-[minmax(0,1fr)_minmax(20rem,26rem)]"
+  class="grid h-full min-h-0 w-full grid-cols-1 gap-4 overflow-y-auto overscroll-contain py-4 md:grid-cols-[minmax(0,1fr)_minmax(20rem,26rem)] md:overflow-hidden"
 >
-  <div class="flex h-full w-full flex-col space-y-2 md:order-2">
+  <div
+    class="flex w-full flex-col space-y-2 md:order-2 md:h-full md:min-h-0 md:overflow-y-auto"
+  >
     <section class="ll-panel p-4">
       <h2 class="ll-heading text-xl">Tempering</h2>
       <ng-container
@@ -273,23 +275,114 @@
   </div>
 
   <div
-    class="flex max-h-full min-h-24 w-full flex-col space-y-2 overflow-y-auto md:order-1"
+    class="flex min-h-24 w-full flex-col space-y-2 md:order-1 md:max-h-full md:min-h-0 md:overflow-y-auto"
   >
     <ng-container
       *ngIf="filteredInventory().length; else noItemsToTemper"
       data-tour="first-tempering"
     >
-      <h2 class="ll-heading flex text-xl">Items To Temper</h2>
+      <h2 class="ll-heading text-xl">Items To Temper</h2>
+
       <div
-        *ngFor="let item of filteredInventory()"
-        class="ll-card cursor-pointer p-3 transition-colors hover:border-primary"
-        (click)="selectItem(item.itemInstance)"
-        [ngClass]="{
-          'll-card-accent':
-            selectedEquipmentInstance()?.id === item.itemInstance.id,
-        }"
+        class="overflow-hidden border-y border-light_gray/60"
+        role="table"
+        aria-label="Items to temper"
       >
-        <app-item [item]="item.itemInstance"></app-item>
+        <div
+          class="grid min-h-8 grid-cols-[minmax(0,1fr)_6.5rem_4.75rem_6.5rem] items-center gap-2 border-b border-light_gray/60 px-3 text-xs uppercase tracking-[0.12em] text-secondary"
+          role="row"
+        >
+          <div role="columnheader" [attr.aria-sort]="ariaSort('Name')">
+            <button
+              type="button"
+              class="w-full text-left transition-colors hover:text-primary"
+              [ngClass]="{ 'text-primary': temperingSort() === 'Name' }"
+              (click)="setTemperingSort('Name')"
+            >
+              Item <span aria-hidden="true">{{ sortIndicator("Name") }}</span>
+            </button>
+          </div>
+          <div role="columnheader" [attr.aria-sort]="ariaSort('Quality')">
+            <button
+              type="button"
+              class="w-full text-left transition-colors hover:text-primary"
+              [ngClass]="{ 'text-primary': temperingSort() === 'Quality' }"
+              (click)="setTemperingSort('Quality')"
+            >
+              Quality
+              <span aria-hidden="true">{{ sortIndicator("Quality") }}</span>
+            </button>
+          </div>
+          <div
+            class="text-center"
+            role="columnheader"
+            [attr.aria-sort]="ariaSort('Potential')"
+          >
+            <button
+              type="button"
+              class="w-full transition-colors hover:text-primary"
+              [ngClass]="{ 'text-primary': temperingSort() === 'Potential' }"
+              (click)="setTemperingSort('Potential')"
+            >
+              Potential
+              <span aria-hidden="true">{{ sortIndicator("Potential") }}</span>
+            </button>
+          </div>
+          <div
+            class="text-right"
+            role="columnheader"
+            [attr.aria-sort]="ariaSort('Gear Power')"
+          >
+            <button
+              type="button"
+              class="w-full text-right transition-colors hover:text-primary"
+              [ngClass]="{ 'text-primary': temperingSort() === 'Gear Power' }"
+              (click)="setTemperingSort('Gear Power')"
+            >
+              Gear Power
+              <span aria-hidden="true">{{ sortIndicator("Gear Power") }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div
+          *ngFor="let item of filteredInventory()"
+          class="grid min-h-12 cursor-pointer grid-cols-[minmax(0,1fr)_6.5rem_4.75rem_6.5rem] items-center gap-2 border-b border-l-2 border-light_gray/60 px-3 py-2 transition-colors last:border-b-0 hover:border-l-light_gray hover:bg-white/5"
+          role="row"
+          (click)="selectItem(item.itemInstance)"
+          [ngClass]="{
+            'border-l-primary bg-primary/10':
+              selectedEquipmentInstance()?.id === item.itemInstance.id,
+            'border-l-transparent':
+              selectedEquipmentInstance()?.id !== item.itemInstance.id,
+          }"
+        >
+          <ng-container *ngIf="equipmentInstance(item) as equipment">
+            <div
+              class="flex min-w-0 items-center gap-2 overflow-hidden"
+              role="cell"
+            >
+              <app-item class="min-w-0" [item]="equipment"></app-item>
+              <span
+                *ngIf="item.isNew"
+                class="ll-badge ll-badge-accent shrink-0 px-2 text-[0.625rem] tracking-[0.04em]"
+                >New</span
+              >
+            </div>
+
+            <span class="whitespace-nowrap text-sm text-secondary" role="cell">
+              {{ equipment.quality }}
+            </span>
+
+            <span class="text-center tabular-nums" role="cell">
+              {{ equipment.potential ?? 0 }}
+            </span>
+
+            <strong class="text-right tabular-nums" role="cell">
+              {{ equipment.itemBudget | number: "1.0-2" }}
+            </strong>
+          </ng-container>
+        </div>
       </div>
       <p
         *ngIf="unavailableEquipmentCount()"

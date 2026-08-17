@@ -2099,6 +2099,13 @@ public sealed class WorldTowerService : IWorldTowerService
                            && x.WeekKey == weekKey,
                 cancellationToken);
         var state = GetFloorState(floorProgress, rallies.Count > 0);
+        var knownGuardianReveals = GetGuardianAbilityReveals(definition)
+            .Where(x => x.Threshold <= floorProgress.ScoutingProgress)
+            .ToArray();
+        var knownGuardianTags = knownGuardianReveals
+            .SelectMany(x => x.Tags)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
 
         return new TowerFloorDetailDto(
             definition.FloorNumber,
@@ -2116,10 +2123,8 @@ public sealed class WorldTowerService : IWorldTowerService
             _options.ManualScoutingWeeklyCapPerCharacter,
             new TowerGuardianInfoDto(
                 definition.GuardianName,
-                definition.GuardianTags,
-                GetGuardianAbilityReveals(definition)
-                    .Where(x => x.Threshold <= floorProgress.ScoutingProgress)
-                    .ToArray()),
+                knownGuardianTags,
+                knownGuardianReveals),
             new TowerPreparationSummaryDto(
                 Effect(TowerContributionKind.SupplyWeapons),
                 Effect(TowerContributionKind.InscribeWards),
@@ -2165,7 +2170,8 @@ public sealed class WorldTowerService : IWorldTowerService
                 ability.Kind,
                 ability.Kind == AbilitySpecKind.Active
                     ? (int)Math.Ceiling(ability.CooldownTicks / (double)FastCombatEngine.TicksPerSecond)
-                    : null))
+                    : null,
+                ability.Tags))
             .ToArray();
     }
 

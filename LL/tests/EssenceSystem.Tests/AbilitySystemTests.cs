@@ -831,6 +831,91 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void All_allies_includes_the_caster_and_living_allied_summons_only()
+    {
+        var ability = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.all.allies",
+            Kind = AbilitySpecKind.Active,
+            Name = "All Allies",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.all.allies",
+                    Operation = AbilityEffectOperation.GrantBarrier,
+                    Target = AbilityTargetSelector.AllAllies,
+                    BaseValue = 5
+                }
+            ]
+        });
+        var caster = CreateCombatant("caster", CombatTeam.Friendly, [ability]);
+        var ally = CreateCombatant("ally", CombatTeam.Friendly, []);
+        var deadAlly = CreateCombatant("dead-ally", CombatTeam.Friendly, []);
+        deadAlly.SetHealth(0);
+        var alliedSummon = CreateOwnedBroodling("allied-summon", caster, 50);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, []);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000));
+
+        var result = engine.Run([caster, ally, deadAlly, alliedSummon], [enemy]);
+
+        Assert.Equal(
+            ["caster", "ally", "allied-summon"],
+            result.EventLog
+                .Where(log => log.Source == "effect.all.allies" && log.EventType == EventType.RestoreBarrier)
+                .Select(log => log.TargetId)
+                .ToArray());
+        Assert.Equal(0, deadAlly.Barrier);
+        Assert.Equal(0, enemy.Barrier);
+    }
+
+    [Fact]
+    public void Current_target_is_locked_for_every_effect_in_an_active_ability_use()
+    {
+        var ability = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.locked.target",
+            Kind = AbilitySpecKind.Active,
+            Name = "Locked Target",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.locked.target.one",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = 5
+                },
+                new()
+                {
+                    Id = "effect.locked.target.two",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = 5
+                }
+            ]
+        });
+        var caster = CreateCombatant("caster", CombatTeam.Friendly, [ability]);
+        var firstEnemy = CreateCombatant("enemy-1", CombatTeam.Hostile, [], maxHealth: 1_000);
+        var secondEnemy = CreateCombatant("enemy-2", CombatTeam.Hostile, [], maxHealth: 1_000);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 27));
+
+        var result = engine.Run([caster], [firstEnemy, secondEnemy]);
+        var targets = result.EventLog
+            .Where(log => log.Source.StartsWith("effect.locked.target", StringComparison.Ordinal)
+                && log.EventType == EventType.Damage)
+            .Select(log => log.TargetId)
+            .ToArray();
+
+        Assert.Equal(2, targets.Length);
+        Assert.Single(targets.Distinct());
+    }
+
+    [Fact]
     public void Engine_supports_restore_resource_lifesteal_and_real_catalog_events()
     {
         var abilities = AbilityCompiler.CompileAbilities(

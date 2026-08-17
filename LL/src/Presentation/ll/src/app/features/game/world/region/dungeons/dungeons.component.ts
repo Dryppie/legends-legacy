@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, input, signal } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { DungeonCardComponent } from '../../../../../shared/components/dungeons/dungeon-card/dungeon-card.component';
 import { DungeonPreviewData } from '../../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
@@ -26,10 +26,7 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
       have: 0,
       need: 1,
     },
-    unlockedDifficulties: [
-      DungeonDifficulty.Normal,
-      DungeonDifficulty.Heroic,
-    ],
+    unlockedDifficulties: [DungeonDifficulty.Normal, DungeonDifficulty.Heroic],
   },
   forgotten_catacombs: {
     number: '2',
@@ -62,11 +59,14 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
 };
 
 @Component({
-    selector: 'app-dungeons',
-    imports: [DungeonCardComponent, NgFor, NgIf, NgClass, CharacterTagComponent],
-    templateUrl: './dungeons.component.html'
+  selector: 'app-dungeons',
+  imports: [DungeonCardComponent, NgFor, NgIf, NgClass, CharacterTagComponent],
+  templateUrl: './dungeons.component.html',
 })
 export class DungeonsComponent implements OnInit {
+  readonly region = input<number | null>(null);
+  readonly selectedFamilyId = input<string | null>(null);
+  readonly expandSelected = input(false);
   selectedRecordsDungeon = signal<DungeonPreviewData | null>(null);
   recordsData = signal<DungeonRecordsData | null>(null);
   recordsLoading = signal(false);
@@ -95,9 +95,23 @@ export class DungeonsComponent implements OnInit {
     },
   ];
 
-  dungeons = computed(() =>
-    this.groupDifficultyVariants(this.dungeonState.dungeons()),
-  );
+  dungeons = computed(() => {
+    const groupedDungeons = this.groupDifficultyVariants(
+      this.dungeonState
+        .dungeons()
+        .filter(
+          (dungeon) =>
+            this.region() === null || dungeon.region === this.region(),
+        ),
+    );
+    const selectedFamilyId = this.selectedFamilyId();
+
+    return selectedFamilyId
+      ? groupedDungeons.filter(
+          (dungeon) => (dungeon.familyId ?? dungeon.id) === selectedFamilyId,
+        )
+      : groupedDungeons;
+  });
 
   constructor(
     private readonly dungeonState: DungeonStateService,
@@ -299,13 +313,12 @@ export class DungeonsComponent implements OnInit {
   private createVariantMap(
     variants: DungeonPreviewData[],
   ): Partial<Record<DungeonDifficulty, DungeonPreviewData>> {
-    return variants.reduce<Partial<Record<DungeonDifficulty, DungeonPreviewData>>>(
-      (map, dungeon) => {
-        map[this.getDifficulty(dungeon)] = dungeon;
-        return map;
-      },
-      {},
-    );
+    return variants.reduce<
+      Partial<Record<DungeonDifficulty, DungeonPreviewData>>
+    >((map, dungeon) => {
+      map[this.getDifficulty(dungeon)] = dungeon;
+      return map;
+    }, {});
   }
 
   private getUnlockedDifficulties(

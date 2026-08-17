@@ -26,6 +26,21 @@ public class InventoryService : IInventoryService
         await _inventoryRepository.AddItemsToInventory(characterId, loot, acquisitionSource, cancellationToken);
     }
 
+    public async Task AddItemsToInventory(
+        Guid characterId,
+        List<InventoryItem> loot,
+        string acquisitionSource,
+        Guid correlationId,
+        CancellationToken cancellationToken)
+    {
+        await _inventoryRepository.AddItemsToInventory(
+            characterId,
+            loot,
+            acquisitionSource,
+            correlationId,
+            cancellationToken);
+    }
+
     public async Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken)
     {
         await _inventoryRepository.CreateInventoryAsync(characterId, cancellationToken);
@@ -57,6 +72,13 @@ public class InventoryService : IInventoryService
 
     public async Task<bool> MarkItemSeenAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken) =>
         await _inventoryRepository.MarkItemSeenAsync(characterId, itemInstanceId, cancellationToken);
+
+    public async Task<bool> SetItemFavoriteAsync(
+        Guid characterId,
+        Guid itemInstanceId,
+        bool isFavorite,
+        CancellationToken cancellationToken) =>
+        await _inventoryRepository.SetItemFavoriteAsync(characterId, itemInstanceId, isFavorite, cancellationToken);
 
     public async Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing marketplaceListing, CancellationToken cancellationToken)
     {

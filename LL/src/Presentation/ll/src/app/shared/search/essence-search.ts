@@ -5,6 +5,8 @@ import {
   EssenceEvolutionDto,
   PlayerEssenceDto,
 } from '../models/essence-system';
+import { ABILITY_TARGET_BY_SELECTOR } from '../components/essences/ability-target-glossary';
+import { isAbilityTargetSelector } from '../models/enums/targeting';
 
 /**
  * Shared search-text builders for Essences.
@@ -40,7 +42,12 @@ export function essenceAbilitySearchTerms(
   return [
     ability.name,
     ability.description,
-    ability.targeting,
+    ...(ability.targets ?? []).flatMap((target) => [
+      target,
+      isAbilityTargetSelector(target)
+        ? ABILITY_TARGET_BY_SELECTOR.get(target)?.label
+        : undefined,
+    ]),
     ...(ability.tags ?? []),
     ...collectEffectTerms(ability.effects),
   ];
@@ -51,11 +58,7 @@ export function essenceEvolutionSearchTerms(
 ): Searchable[] {
   if (!evolution) return [];
 
-  return [
-    evolution.name,
-    evolution.description,
-    ...(evolution.addsTags ?? []),
-  ];
+  return [evolution.name, evolution.description, ...(evolution.addsTags ?? [])];
 }
 
 export function essenceDefinitionSearchTerms(
