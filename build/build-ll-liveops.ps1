@@ -14,7 +14,7 @@ $root = $root.Trim()
 $dashboardPath = Join-Path $root "LL/src/Presentation/liveops"
 $artifactPath = Join-Path $root "artifacts/api.liveops"
 $dockerfilePath = Join-Path $root "build/ll-liveops.dockerfile"
-$npmCache = Join-Path $env:TEMP "legends-legacy-liveops-npm-cache"
+$npmCache = Join-Path ([System.IO.Path]::GetTempPath()) "legends-legacy-liveops-npm-cache"
 $imageTag = if ([string]::IsNullOrWhiteSpace($env:IMAGE_TAG)) {
     "dev1"
 } else {
