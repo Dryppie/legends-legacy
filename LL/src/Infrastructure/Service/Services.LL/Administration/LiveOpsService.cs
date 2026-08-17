@@ -31,6 +31,31 @@ public sealed class LiveOpsService(
             timeProvider.GetUtcNow(),
             cancellationToken);
 
+    public Task<PlayerAdministrationSnapshot?> GetPlayerAsync(
+        Guid characterId,
+        CancellationToken cancellationToken) =>
+        administration.GetPlayerByCharacterIdAsync(
+            characterId,
+            timeProvider.GetUtcNow(),
+            cancellationToken);
+
+    public Task<IReadOnlyList<AdministrationItemCatalogEntry>> SearchItemsAsync(
+        string query,
+        int limit,
+        CancellationToken cancellationToken) =>
+        administration.SearchItemsAsync(query, limit, cancellationToken);
+
+    public Task<IReadOnlyList<AdministrationHistoryEntry>> GetHistoryAsync(
+        Guid accountId,
+        Guid characterId,
+        int limit,
+        CancellationToken cancellationToken) =>
+        administration.GetHistoryAsync(
+            accountId,
+            characterId,
+            limit,
+            cancellationToken);
+
     public async Task<AdministrationOperationResult<AccountBanOperation>> BanAccountAsync(
         Guid operationId,
         Guid accountId,

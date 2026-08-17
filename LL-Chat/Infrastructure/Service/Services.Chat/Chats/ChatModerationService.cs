@@ -15,6 +15,15 @@ public sealed class ChatModerationService(
             timeProvider.GetUtcNow(),
             cancellationToken);
 
+    public Task<IReadOnlyList<ChatModerationAction>> GetHistoryAsync(
+        Guid characterId,
+        int limit,
+        CancellationToken cancellationToken) =>
+        restrictions.GetActionsAsync(
+            characterId,
+            limit,
+            cancellationToken);
+
     public async Task<ChatModerationResult> MuteAsync(
         Guid operationId,
         Guid characterId,

@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
@@ -17,8 +18,21 @@
     <ProjectReference Include="..\..\Core\Common\Common.csproj" />
     <ProjectReference Include="..\..\Core\Domain\Domain.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Persistence\Persistence.LL\Persistence.LL.csproj" />
-    <ProjectReference Include="..\..\Infrastructure\RealTime\RealTime.LL\RealTime.LL.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Service\Services.LL\Services.LL.csproj" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <LiveOpsUiDist>$(MSBuildProjectDirectory)\..\..\Presentation\liveops\dist\liveops\browser</LiveOpsUiDist>
+  </PropertyGroup>
+
+  <Target Name="CopyLiveOpsUiForPublish" AfterTargets="ComputeFilesToPublish" Condition="Exists('$(LiveOpsUiDist)')">
+    <ItemGroup>
+      <LiveOpsUiFiles Include="$(LiveOpsUiDist)\**\*" />
+      <ResolvedFileToPublish Include="@(LiveOpsUiFiles)" Exclude="@(ResolvedFileToPublish)">
+        <RelativePath>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
 
 </Project>

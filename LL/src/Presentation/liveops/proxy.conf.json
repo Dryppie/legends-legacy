@@ -1,0 +1,17 @@
+{
+  "/api": {
+    "target": "http://localhost:7085",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/auth": {
+    "target": "http://localhost:7085",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/healthz": {
+    "target": "http://localhost:7085",
+    "secure": false,
+    "changeOrigin": true
+  }
+}
