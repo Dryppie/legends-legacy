@@ -75,12 +75,23 @@
       >
         <span class="min-w-0">
           <span
-            class="block truncate text-sm font-medium group-hover:text-primary"
-            [class.text-primary]="
-              commodity.base.id === selectedCommodity()?.base?.id
-            "
+            class="flex min-w-0 items-center gap-1 text-sm font-medium"
           >
-            {{ commodityDisplayName(commodity) }}
+            <span
+              class="truncate group-hover:text-primary"
+              [class.text-primary]="
+                commodity.base.id === selectedCommodity()?.base?.id
+              "
+            >
+              {{ commodityDisplayName(commodity) }}
+            </span>
+            <span
+              *ngIf="isFavoriteCommodity(commodity)"
+              class="shrink-0 leading-none text-primary"
+              aria-label="Favorite"
+              title="Favorite"
+              >★</span
+            >
           </span>
           <span class="ll-helper block truncate">
             Owned {{ commodity.ownedQuantity | numberFormat }}

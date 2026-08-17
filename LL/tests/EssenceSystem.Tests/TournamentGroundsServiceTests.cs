@@ -338,6 +338,32 @@ public sealed class TournamentGroundsServiceTests
     }
 
     [Fact]
+    public async Task RegisterAsync_uses_the_durable_tournament_event_when_outbox_is_available()
+    {
+        await using var db = CreateDbContext();
+        var realtime = new CapturingGameRealtimeBroadcaster();
+        var outbox = new RecordingGameEventOutbox();
+        var service = CreateService(db, realtime, outbox: outbox);
+        var tournament = SeedTournament(db, TournamentStatus.RegistrationOpen);
+        var character = SeedCharacter(db, rating: 1525, accountId: Guid.NewGuid());
+        await db.SaveChangesAsync();
+
+        var response = await service.RegisterAsync(
+            character.Id,
+            tournament.Id,
+            CancellationToken.None);
+
+        Assert.NotNull(response);
+        var queued = Assert.Single(
+            outbox.Events,
+            entry => entry.EventType == GameEventTypes.TournamentGroundsUpdated);
+        var update = Assert.IsType<TournamentGroundsUpdated>(queued.Payload);
+        Assert.Equal(tournament.Id, update.TournamentId);
+        Assert.Equal("TournamentRegistrationUpdated", update.Event);
+        Assert.Empty(realtime.Events);
+    }
+
+    [Fact]
     public async Task RegisterAsync_rejects_second_character_from_same_account()
     {
         await using var db = CreateDbContext();
@@ -1184,7 +1210,11 @@ public sealed class TournamentGroundsServiceTests
             Assert.Equal(1, reward.BlueprintSelectionBoxes));
         Assert.All(rewardGrants.Where(reward => reward.Placement <= 2), reward =>
             Assert.Equal(20, reward.SigilFragments));
-        Assert.Contains(realtime.Events, e => e.Event == "TournamentCompleted");
+        Assert.Contains(
+            outbox.Events,
+            entry => entry.EventType == GameEventTypes.TournamentGroundsUpdated
+                     && entry.Payload is TournamentGroundsUpdated update
+                     && update.Event == "TournamentCompleted");
         var battleEvents = outbox.Events
             .Where(entry => entry.EventType == GameEventTypes.TournamentBattleCompleted)
             .ToList();
@@ -1452,6 +1482,62 @@ public sealed class TournamentGroundsServiceTests
                 Assert.Equal(7, await db.BackgroundJobExecutions.CountAsync(e => e.JobName == BackgroundJobNames.TournamentGroundsRollover));
                 Assert.Contains(realtime.Events, e => e.Event == "TournamentCompleted");
             }
+        }
+        finally
+        {
+            await adminDb.Database.ExecuteSqlRawAsync(dropSchemaSql);
+        }
+    }
+
+    [Fact]
+    public async Task RegisterAsync_rolls_back_domain_change_when_outbox_enqueue_fails_in_postgres()
+    {
+        var connectionString = Environment.GetEnvironmentVariable("LL_TEST_TOURNAMENT_POSTGRES_CONNECTION");
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            return;
+        }
+
+        var schemaName = $"ll_tournament_atomicity_tests_{Guid.NewGuid():N}";
+        await using var adminDb = CreatePostgresDbContext(connectionString);
+        var createSchemaSql = $"CREATE SCHEMA \"{schemaName}\"";
+        var dropSchemaSql = $"DROP SCHEMA IF EXISTS \"{schemaName}\" CASCADE";
+        await adminDb.Database.ExecuteSqlRawAsync(createSchemaSql);
+
+        try
+        {
+            var isolatedConnectionString = WithSearchPath(connectionString, schemaName);
+            await using (var migrationDb = CreatePostgresDbContext(isolatedConnectionString, schemaName))
+            {
+                await migrationDb.Database.MigrateAsync();
+            }
+
+            Guid tournamentId;
+            Guid characterId;
+            await using (var seedDb = CreatePostgresDbContext(isolatedConnectionString, schemaName))
+            {
+                tournamentId = SeedTournament(seedDb, TournamentStatus.RegistrationOpen).Id;
+                characterId = SeedCharacter(seedDb, rating: 1500, accountId: Guid.NewGuid()).Id;
+                await seedDb.SaveChangesAsync();
+            }
+
+            await using (var mutationDb = CreatePostgresDbContext(isolatedConnectionString, schemaName))
+            {
+                var service = CreateService(mutationDb, outbox: new ThrowingGameEventOutbox());
+
+                await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                    service.RegisterAsync(characterId, tournamentId, CancellationToken.None));
+            }
+
+            await using var verifyDb = CreatePostgresDbContext(isolatedConnectionString, schemaName);
+            Assert.False(await verifyDb.TournamentParticipants.AnyAsync(
+                participant => participant.TournamentId == tournamentId && participant.CharacterId == characterId));
+            Assert.Equal(
+                0,
+                await verifyDb.ArenaTournaments
+                    .Where(tournament => tournament.Id == tournamentId)
+                    .Select(tournament => tournament.RegisteredParticipantCount)
+                    .SingleAsync());
         }
         finally
         {
@@ -2208,5 +2294,16 @@ public sealed class TournamentGroundsServiceTests
             Events.Add((eventType, payload!, characterId));
             return Task.CompletedTask;
         }
+    }
+
+    private sealed class ThrowingGameEventOutbox : IGameEventOutbox
+    {
+        public Task EnqueueAsync<TPayload>(
+            string eventType,
+            TPayload payload,
+            Guid? characterId,
+            Guid? accountId,
+            CancellationToken cancellationToken) =>
+            throw new InvalidOperationException("Simulated outbox failure.");
     }
 }

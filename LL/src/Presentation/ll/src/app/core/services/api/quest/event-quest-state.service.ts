@@ -1,9 +1,10 @@
 import { effect, Injectable, signal, untracked } from '@angular/core';
-import { finalize } from 'rxjs';
+import { finalize, Observable, tap } from 'rxjs';
 import { EventQuestJournal } from '../../../../shared/models/event-quest';
 import { GameEventService } from '../../real-time/game-event.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { EventQuestService } from './event-quest.service';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 
 @Injectable({ providedIn: 'root' })
 export class EventQuestStateService {
@@ -11,7 +12,8 @@ export class EventQuestStateService {
   private readonly _loaded = signal(false);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
-  private refreshTimer: number | null = null;
+  private loadEpoch = 0;
+  private refreshAfterCurrentRequest = false;
   private lastLogoutCount = 0;
 
   readonly journal = this._journal.asReadonly();
@@ -23,11 +25,18 @@ export class EventQuestStateService {
     private readonly api: EventQuestService,
     events: GameEventService,
     eventBus: EventBusService,
+    stateSync: StateSyncCoordinator,
   ) {
+    stateSync.register(
+      'event-quests',
+      'event-quests',
+      () => this.synchronize(),
+      () => this._loaded(),
+    );
     effect(
       () => {
         if (!events.event.EventQuestChangedMsg()) return;
-        untracked(() => this.scheduleRefresh());
+        untracked(() => this.load(true));
       },
       { allowSignalWrites: true },
     );
@@ -44,21 +53,62 @@ export class EventQuestStateService {
     );
   }
 
-  load(): void {
-    if (this._loading()) return;
+  load(force = false): void {
+    if (this._loading()) {
+      if (force) this.refreshAfterCurrentRequest = true;
+      return;
+    }
+    const requestEpoch = ++this.loadEpoch;
     this._loading.set(true);
+    this.refreshAfterCurrentRequest = false;
     this._error.set(null);
     this.api
       .getJournal()
-      .pipe(finalize(() => this._loading.set(false)))
+      .pipe(
+        finalize(() => {
+          if (requestEpoch !== this.loadEpoch) return;
+          this._loading.set(false);
+          if (this.refreshAfterCurrentRequest) {
+            this.refreshAfterCurrentRequest = false;
+            this.load(true);
+          }
+        }),
+      )
       .subscribe({
         next: (journal) => {
+          if (requestEpoch !== this.loadEpoch) return;
           this._journal.set(journal ?? { events: [] });
           this._loaded.set(true);
         },
-        error: (error) =>
-          this._error.set(error?.message ?? 'Failed to load event quests'),
+        error: (error) => {
+          if (requestEpoch === this.loadEpoch) {
+            this._error.set(error?.message ?? 'Failed to load event quests');
+          }
+        },
       });
+  }
+
+  private synchronize(): Observable<unknown> {
+    const requestEpoch = ++this.loadEpoch;
+    this._loading.set(true);
+    this._error.set(null);
+    return this.api.getJournal().pipe(
+      tap({
+        next: (journal) => {
+          if (requestEpoch !== this.loadEpoch) return;
+          this._journal.set(journal ?? { events: [] });
+          this._loaded.set(true);
+        },
+        error: (error) => {
+          if (requestEpoch === this.loadEpoch) {
+            this._error.set(error?.message ?? 'Failed to load event quests');
+          }
+        },
+      }),
+      finalize(() => {
+        if (requestEpoch === this.loadEpoch) this._loading.set(false);
+      }),
+    );
   }
 
   claim(eventQuestId: string): void {
@@ -90,28 +140,32 @@ export class EventQuestStateService {
     this._loading.set(true);
     this._error.set(null);
     request()
-      .pipe(finalize(() => this._loading.set(false)))
+      .pipe(
+        finalize(() => {
+          this._loading.set(false);
+          if (this.refreshAfterCurrentRequest) {
+            this.refreshAfterCurrentRequest = false;
+            this.load(true);
+          }
+        }),
+      )
       .subscribe({
-        next: (journal) => this._journal.set(journal),
+        next: (journal) => {
+          this.loadEpoch += 1;
+          this._journal.set(journal);
+        },
         error: (error) =>
           this._error.set(error?.message ?? errorMessage),
       });
   }
 
   private reset(): void {
-    if (this.refreshTimer !== null) window.clearTimeout(this.refreshTimer);
-    this.refreshTimer = null;
+    this.loadEpoch += 1;
+    this.refreshAfterCurrentRequest = false;
     this._journal.set({ events: [] });
     this._loaded.set(false);
     this._loading.set(false);
     this._error.set(null);
   }
 
-  private scheduleRefresh(): void {
-    if (this.refreshTimer !== null) window.clearTimeout(this.refreshTimer);
-    this.refreshTimer = window.setTimeout(() => {
-      this.refreshTimer = null;
-      this.load();
-    }, 750);
-  }
 }

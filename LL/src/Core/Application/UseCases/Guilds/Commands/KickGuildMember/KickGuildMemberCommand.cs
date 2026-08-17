@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Guilds;
 using Application.MediatR.Markers;
 using Application.Interfaces.WebSockets;
 using Application.Interfaces.Outbox;
@@ -16,11 +17,17 @@ public class KickGuildMemberCommandHandler : IRequestHandler<KickGuildMemberComm
     private readonly IGuildService _guild;
     private readonly IGameEventPublisher _events;
     private readonly IGameEventOutbox _outbox;
-    public KickGuildMemberCommandHandler(IGuildService guild, IGameEventPublisher events, IGameEventOutbox outbox)
+    private readonly IGuildSystemChatPublisher _guildChat;
+    public KickGuildMemberCommandHandler(
+        IGuildService guild,
+        IGameEventPublisher events,
+        IGameEventOutbox outbox,
+        IGuildSystemChatPublisher guildChat)
     {
         _guild = guild;
         _events = events;
         _outbox = outbox;
+        _guildChat = guildChat;
     }
 
     public async Task<Response<bool>> Handle(KickGuildMemberCommand request, CancellationToken cancellationToken)
@@ -29,6 +36,7 @@ public class KickGuildMemberCommandHandler : IRequestHandler<KickGuildMemberComm
         var kicked = await _guild.KickMemberAsync(request.CharacterId, request.TargetCharacterId, cancellationToken);
         if (!kicked || guild is null) return Response<bool>.Fail("You cannot kick that member.");
         await _outbox.EnqueueAsync(GameEventTypes.EquipmentChanged, new EquipmentChangedPayload(request.TargetCharacterId), request.TargetCharacterId, null, cancellationToken);
+        await _guildChat.PublishAsync(guild.Id, request.TargetCharacterId, GuildSystemChatEvent.Kicked, cancellationToken);
         await _events.PublishAsync(new Audience.Character(request.TargetCharacterId), new GuildMembershipChangedMsg(guild.Id, request.TargetCharacterId));
         await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChangedMsg(guild.Id));
         await _events.PublishAsync(new Audience.World(), new GuildDirectoryChangedMsg("membership"));

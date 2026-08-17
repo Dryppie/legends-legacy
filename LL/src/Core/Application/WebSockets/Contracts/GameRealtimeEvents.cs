@@ -1,4 +1,3 @@
-using Application.UseCases.CharacterActions.Dtos.Responses;
 using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.WorldTower.Dtos;
@@ -29,9 +28,16 @@ public sealed record CharacterSnapshot(
     CharacterDto Character,
     string Reason) : GameRealtimeEvent;
 
-public sealed record IdleCombatProcessed(
+public sealed record StateInvalidated(
+    Guid? CharacterId,
+    string Scope,
+    long Revision,
+    string Reason) : GameRealtimeEvent;
+
+public sealed record StateSyncCheckpoint(
     Guid CharacterId,
-    CharacterActionDto Action) : GameRealtimeEvent;
+    IReadOnlyDictionary<string, long> Revisions,
+    DateTimeOffset ServerTimeUtc);
 
 public sealed record TournamentGroundsUpdated(
     Guid TournamentId,

@@ -2,6 +2,7 @@
 using API.LL.Common;
 using API.LL.HostedServices;
 using Application;
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Administration;
 using Asp.Versioning;
 using Common;
@@ -21,6 +22,7 @@ using Services.LL.Validation;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -41,11 +43,26 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ConcurrencyExceptionHandler>();
 
-builder.Services.AddSignalR()
+var signalR = builder.Services.AddSignalR()
     .AddJsonProtocol(options =>
     {
         options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
+
+var signalRRedis = config.GetConnectionString("Redis");
+var useRedisSignalR = config.GetValue<bool>("SignalR:UseRedisBackplane");
+if (useRedisSignalR && string.IsNullOrWhiteSpace(signalRRedis))
+{
+    throw new InvalidOperationException(
+        "ConnectionStrings:Redis is required when SignalR:UseRedisBackplane is enabled.");
+}
+if (useRedisSignalR)
+{
+    signalR.AddStackExchangeRedis(signalRRedis!, options =>
+    {
+        options.Configuration.ChannelPrefix = RedisChannel.Literal("legends-legacy:game");
+    });
+}
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -69,7 +86,8 @@ builder.Services.AddCors(options =>
         builder => builder.WithOrigins("http://localhost:4200", "https://dev.legends-legacy.com")
                           .AllowCredentials()
                           .AllowAnyMethod()
-                          .AllowAnyHeader());
+                          .AllowAnyHeader()
+                          .WithExposedHeaders("X-LL-State-Revisions"));
 });
 
 builder.Services.AddPersistence(config);
@@ -155,11 +173,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
                 var accountAccess = context.HttpContext.RequestServices
                     .GetRequiredService<IAccountAccessPolicy>();
-                if (await accountAccess.GetActiveBanAsync(
-                        userId,
-                        context.HttpContext.RequestAborted) is not null)
+                try
                 {
-                    context.Fail("The account is suspended.");
+                    if (await accountAccess.GetActiveBanAsync(
+                            userId,
+                            context.HttpContext.RequestAborted) is not null)
+                    {
+                        context.Fail("The account is suspended.");
+                    }
+                }
+                catch (OperationCanceledException)
+                    when (context.HttpContext.RequestAborted.IsCancellationRequested)
+                {
+                    // A browser refresh aborts outstanding authenticated requests.
+                    // Treat that as an unauthenticated abandoned request instead of
+                    // surfacing an expected cancellation through the debugger.
+                    context.NoResult();
                 }
             },
             OnAuthenticationFailed = context =>
@@ -238,6 +267,33 @@ if (!app.Environment.IsDevelopment())       // prod only
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.Use(async (context, next) =>
+{
+    if (!context.Request.Path.StartsWithSegments("/api"))
+    {
+        await next();
+        return;
+    }
+
+    var stateSync = context.RequestServices.GetRequiredService<IStateSyncService>();
+    context.Response.OnStarting(() =>
+    {
+        var characterId = Guid.TryParse(
+            context.User.FindFirstValue("CharacterId"),
+            out var parsedCharacterId)
+            ? parsedCharacterId
+            : (Guid?)null;
+        var changedRevisions = stateSync.GetChangedRevisions(characterId);
+        if (changedRevisions.Count > 0)
+        {
+            context.Response.Headers["X-LL-State-Revisions"] =
+                System.Text.Json.JsonSerializer.Serialize(changedRevisions);
+        }
+        return Task.CompletedTask;
+    });
+    await next();
+});
 
 app.MapHub<GameHub>("/hub/game").RequireAuthorization();
 

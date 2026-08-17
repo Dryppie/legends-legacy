@@ -1,4 +1,12 @@
-import { catchError, finalize, map, Observable, throwError } from 'rxjs';
+import {
+  catchError,
+  finalize,
+  map,
+  Observable,
+  of,
+  tap,
+  throwError,
+} from 'rxjs';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { computed, effect, Injectable, signal, untracked } from '@angular/core';
 import { InventoryService } from './inventory.service';
@@ -7,6 +15,7 @@ import { GameEventService } from '../../real-time/game-event.service';
 import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
 import { isGameRealtimeEnabled } from '../../real-time/game-realtime/game-realtime-feature';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryStateService {
@@ -20,6 +29,14 @@ export class InventoryStateService {
   readonly loading = computed(() => this._loading());
   readonly isEmpty = computed(() => this._items().length === 0);
   readonly error = computed(() => this._error());
+  private readonly favoriteItemInstanceIds = computed(
+    () =>
+      new Set(
+        this._items()
+          .filter((item) => item.isFavorite)
+          .map((item) => item.itemInstance.id),
+      ),
+  );
   private readonly _lastLoot = signal<InventoryItem[] | null>(null);
   private readonly suppressedLootSignatures = new Set<string>();
   private readonly processedInventoryGrantIds = new Set<string>();
@@ -32,7 +49,11 @@ export class InventoryStateService {
     private inventoryService: InventoryService,
     private readonly eventService: GameEventService,
     private readonly eventBus: EventBusService,
+    private readonly stateSync: StateSyncCoordinator,
   ) {
+    this.stateSync.register('inventory', 'inventory', () =>
+      this.synchronize(true),
+    );
     this.load();
 
     effect(
@@ -113,41 +134,45 @@ export class InventoryStateService {
   readonly essences = this.byType(ItemType.Essence);
 
   load(force = false): void {
-    if (!force && this._items().length) return; // already cached
+    this.synchronize(force).subscribe({ error: () => undefined });
+  }
+
+  private synchronize(force = false): Observable<unknown> {
+    if (!force && this._items().length) return of(undefined); // already cached
     this._loading.set(true);
     this._error.set(null);
     const requestVersion = this.resetVersion;
     const loadVersion = ++this.loadVersion;
 
-    this.inventoryService
+    return this.inventoryService
       .getInventory()
       .pipe(
+        tap({
+          next: (dto) => {
+            if (
+              requestVersion !== this.resetVersion ||
+              loadVersion !== this.loadVersion
+            ) {
+              return;
+            }
+            this._items.set(this.sortItems(dto.inventoryItems));
+          },
+          error: (err) => {
+            if (
+              requestVersion !== this.resetVersion ||
+              loadVersion !== this.loadVersion
+            ) {
+              return;
+            }
+            this._error.set(err.message ?? 'Unknown error');
+          },
+        }),
         finalize(() => {
           if (loadVersion === this.loadVersion) {
             this._loading.set(false);
           }
         }),
-      )
-      .subscribe({
-        next: (dto) => {
-          if (
-            requestVersion !== this.resetVersion ||
-            loadVersion !== this.loadVersion
-          ) {
-            return;
-          }
-          this._items.set(this.sortItems(dto.inventoryItems));
-        },
-        error: (err) => {
-          if (
-            requestVersion !== this.resetVersion ||
-            loadVersion !== this.loadVersion
-          ) {
-            return;
-          }
-          this._error.set(err.message ?? 'Unknown error');
-        },
-      });
+      );
   }
 
   reset(): void {
@@ -391,6 +416,10 @@ export class InventoryStateService {
           return throwError(() => error);
         }),
       );
+  }
+
+  isFavorite(itemInstanceId: string): boolean {
+    return this.favoriteItemInstanceIds().has(itemInstanceId);
   }
 
   removeItem(itemInstanceId: string): void {

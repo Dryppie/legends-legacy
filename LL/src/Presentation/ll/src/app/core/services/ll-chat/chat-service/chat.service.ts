@@ -1,5 +1,5 @@
 import { effect, Injectable, NgZone, signal } from '@angular/core';
-import { firstValueFrom, ReplaySubject, Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import * as signalR from '@microsoft/signalr';
 import { HubConnection } from '@microsoft/signalr';
 import { environment } from '../../../../../environments/environment';
@@ -71,7 +71,6 @@ function chatMessageTimestamp(message: ChatMessageDto): number {
 })
 export class ChatService {
   private hub?: HubConnection;
-  private incoming$ = new Subject<ChatMessageDto>();
   private readonly whisperDraftRequests = new Subject<string>();
   private activeIdentity?: string;
   private activeGuildId: string | null = null;
@@ -81,6 +80,7 @@ export class ChatService {
   private lastConnectionWarningAt = 0;
   private readonly connectionWarningThrottleMs = 30_000;
   private readonly unavailableRetryDelayMs = 30_000;
+  private lastPersistentMessageAt?: string;
   private readonly systemSenderId = '00000000-0000-0000-0000-000000000000';
   // expose an observable stream of all messages
   private readonly messageList = signal<ChatMessageDto[]>([]);
@@ -98,10 +98,6 @@ export class ChatService {
     private gameEvents: GameEventService,
     private auth: AuthService,
   ) {
-    this.incoming$.subscribe((msg) => {
-      this.addMessage(msg);
-    });
-
     effect(
       () => {
         const envelope = this.gameEvents.eventEnvelope.AchievementUnlockedMsg();
@@ -182,6 +178,7 @@ export class ChatService {
           this.activeGuildId !== guildId ||
           this.activeAuthenticationContextVersion !==
             authenticationContextVersion;
+        const guildMembershipChanged = this.activeGuildId !== guildId;
 
         if (
           !connectionContextChanged &&
@@ -192,11 +189,18 @@ export class ChatService {
           return;
         }
 
-        if (this.isTemporarilyUnavailable()) return;
+        if (!connectionContextChanged && this.isTemporarilyUnavailable()) {
+          return;
+        }
+
+        if (connectionContextChanged) {
+          this.unavailableUntil = 0;
+        }
 
         const replaceExistingHub = !!this.hub && connectionContextChanged;
         const clearMessages =
-          this.activeIdentity !== undefined && this.activeIdentity !== id;
+          guildMembershipChanged ||
+          (this.activeIdentity !== undefined && this.activeIdentity !== id);
 
         this.activeIdentity = id;
         this.activeGuildId = guildId;
@@ -206,6 +210,7 @@ export class ChatService {
           guildId ?? undefined,
           replaceExistingHub,
           clearMessages,
+          guildMembershipChanged,
         ).catch((error) => {
           this.unavailableUntil = Date.now() + this.unavailableRetryDelayMs;
           this.handleConnectionError(error);
@@ -317,11 +322,18 @@ export class ChatService {
     );
   }
 
-  async loadHistory(guildId?: string, take = 50): Promise<void> {
+  async loadHistory(
+    guildId?: string,
+    take = 50,
+    after?: string,
+  ): Promise<void> {
     let params = new HttpParams().set('Take', take.toString());
 
     if (guildId != null) {
       params = params.set('GuildChannel', guildId);
+    }
+    if (after) {
+      params = params.set('After', after);
     }
 
     const history = await firstValueFrom<ChatMessageDto[]>(
@@ -331,6 +343,7 @@ export class ChatService {
     this.messageList.update((existing) =>
       mergeChatMessagesChronologically(existing, history),
     );
+    this.recordPersistentMessages(history);
   }
 
   /* -------------------- private helpers -------------------- */
@@ -345,11 +358,19 @@ export class ChatService {
     guildId: string | undefined,
     replaceExistingHub: boolean,
     clearMessages: boolean,
+    guildMembershipChanged: boolean,
   ): Promise<void> {
     if (replaceExistingHub) {
       await this.stopHubConnection(clearMessages);
     } else if (clearMessages) {
       this.messageList.set([]);
+    }
+
+    // The Chat API authorizes guild groups from the access-token GuildId claim.
+    // Guild state can update before its fire-and-forget token refresh completes,
+    // so wait for that shared refresh before opening the replacement connection.
+    if (guildMembershipChanged) {
+      await firstValueFrom(this.auth.refreshSession());
     }
 
     await this.connectAndLoad(guildId);
@@ -358,7 +379,7 @@ export class ChatService {
   private async buildHubConnection(): Promise<void> {
     await firstValueFrom(this.auth.ensureValidToken());
 
-    this.hub = new signalR.HubConnectionBuilder()
+    const hub = new signalR.HubConnectionBuilder()
       .withUrl(`${this.apiBase}/hub`, {
         accessTokenFactory: () => this.auth.getAccessToken(),
       })
@@ -368,27 +389,35 @@ export class ChatService {
       })
       .configureLogging(
         environment.isLocal
-          ? signalR.LogLevel.None
+          ? signalR.LogLevel.Warning
           : environment.production
             ? signalR.LogLevel.Warning
             : signalR.LogLevel.Information,
       )
       .build();
+    this.hub = hub;
 
     // server method name is Receive(msg)
-    this.hub.off('Receive');
+    hub.off('Receive');
 
-    this.hub.on('Receive', (msg: ChatMessageDto) => {
-      this.zone.run(() => this.addMessage(msg));
+    hub.on('Receive', (msg: ChatMessageDto) => {
+      this.zone.run(() => {
+        this.addMessage(msg);
+        this.recordPersistentMessages([msg]);
+      });
     });
 
-    this.hub.off('OnlineCountChanged');
-    this.hub.on('OnlineCountChanged', (count: number) => {
+    hub.off('OnlineCountChanged');
+    hub.on('OnlineCountChanged', (count: number) => {
       this.zone.run(() => this.setOnlinePlayerCount(count));
     });
 
+    hub.onreconnected(() => {
+      void this.recoverAfterReconnect(hub);
+    });
+
     try {
-      await this.hub.start();
+      await hub.start();
     } catch (error) {
       if (
         this.hub &&
@@ -402,7 +431,7 @@ export class ChatService {
     }
 
     try {
-      const onlineCount = await this.hub.invoke<number>('GetOnlineCount');
+      const onlineCount = await hub.invoke<number>('GetOnlineCount');
       this.zone.run(() => this.setOnlinePlayerCount(onlineCount));
     } catch {
       // Keep Chat usable during a rolling deployment with an older Chat API.
@@ -412,6 +441,23 @@ export class ChatService {
   private async ensureConnected(): Promise<void> {
     if (!this.hub || this.hub.state !== signalR.HubConnectionState.Connected) {
       await this.buildHubConnection();
+    }
+  }
+
+  private async recoverAfterReconnect(hub: HubConnection): Promise<void> {
+    if (this.hub !== hub) return;
+
+    try {
+      const guildId = this.activeGuildId ?? undefined;
+      if (guildId) {
+        await hub.invoke('JoinGuild', guildId);
+      }
+
+      await this.loadHistory(guildId, 200, this.lastPersistentMessageAt);
+      const onlineCount = await hub.invoke<number>('GetOnlineCount');
+      this.zone.run(() => this.setOnlinePlayerCount(onlineCount));
+    } catch (error) {
+      this.handleConnectionError(error);
     }
   }
 
@@ -427,8 +473,6 @@ export class ChatService {
     this.activeAuthenticationContextVersion = -1;
     this.connectAndLoadPromise = undefined;
 
-    this.incoming$.complete(); // ends the old stream
-    this.incoming$ = new ReplaySubject<ChatMessageDto>();
   }
 
   private async stopHubConnection(clearMessages: boolean): Promise<void> {
@@ -444,6 +488,7 @@ export class ChatService {
 
     if (clearMessages) {
       this.messageList.set([]);
+      this.lastPersistentMessageAt = undefined;
     }
 
     this._onlinePlayerCount.set(null);
@@ -456,7 +501,7 @@ export class ChatService {
     }
 
     this.lastConnectionWarningAt = now;
-    console.warn('Chat service unavailable; continuing without chat.');
+    console.warn('Chat service unavailable; continuing without chat.', error);
   }
 
   private isTemporarilyUnavailable(): boolean {
@@ -467,6 +512,22 @@ export class ChatService {
     return (
       this.auth.currentCharacter()?.equippedTitle?.displayName?.trim() || null
     );
+  }
+
+
+  private recordPersistentMessages(messages: readonly ChatMessageDto[]): void {
+    for (const message of messages) {
+      const sentAt =
+        message.sentAt instanceof Date
+          ? message.sentAt
+          : new Date(message.sentAt);
+      if (Number.isNaN(sentAt.getTime())) continue;
+
+      const iso = sentAt.toISOString();
+      if (!this.lastPersistentMessageAt || iso > this.lastPersistentMessageAt) {
+        this.lastPersistentMessageAt = iso;
+      }
+    }
   }
 
   private setOnlinePlayerCount(count: number): void {

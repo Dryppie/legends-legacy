@@ -63,7 +63,7 @@ describe('DungeonCardComponent difficulty preselection', () => {
     const component = createComponent();
     component.previewData = createPreview({});
 
-    component.ngOnChanges();
+    component.ngOnChanges({});
 
     expect(component.difficulty()).toBe(DungeonDifficulty.Normal);
   });
@@ -75,7 +75,7 @@ describe('DungeonCardComponent difficulty preselection', () => {
       [DungeonDifficulty.Heroic]: cleared('2026-08-05T10:00:00Z'),
     });
 
-    component.ngOnChanges();
+    component.ngOnChanges({});
 
     expect(component.difficulty()).toBe(DungeonDifficulty.Heroic);
   });
@@ -88,7 +88,7 @@ describe('DungeonCardComponent difficulty preselection', () => {
       [DungeonDifficulty.Mythic]: cleared(clearedAt),
     });
 
-    component.ngOnChanges();
+    component.ngOnChanges({});
 
     expect(component.difficulty()).toBe(DungeonDifficulty.Mythic);
   });
@@ -100,7 +100,7 @@ describe('DungeonCardComponent difficulty preselection', () => {
       [DungeonDifficulty.Normal, DungeonDifficulty.Heroic],
     );
 
-    component.ngOnChanges();
+    component.ngOnChanges({});
 
     expect(component.difficulty()).toBe(DungeonDifficulty.Normal);
   });
@@ -110,10 +110,10 @@ describe('DungeonCardComponent difficulty preselection', () => {
     component.previewData = createPreview({
       [DungeonDifficulty.Mythic]: cleared('2026-08-05T10:00:00Z'),
     });
-    component.ngOnChanges();
+    component.ngOnChanges({});
 
     component.selectDifficulty(DungeonDifficulty.Normal);
-    component.ngOnChanges();
+    component.ngOnChanges({});
 
     expect(component.difficulty()).toBe(DungeonDifficulty.Normal);
   });
@@ -123,7 +123,7 @@ describe('DungeonCardComponent difficulty preselection', () => {
     component.previewData = createPreview({
       [DungeonDifficulty.Heroic]: cleared('2026-08-05T10:00:00Z'),
     });
-    component.ngOnChanges();
+    component.ngOnChanges({});
     component.selectDifficulty(DungeonDifficulty.Normal);
 
     const other = createPreview({
@@ -131,7 +131,7 @@ describe('DungeonCardComponent difficulty preselection', () => {
     });
     other.familyId = 'hives_abyss';
     component.previewData = other;
-    component.ngOnChanges();
+    component.ngOnChanges({});
 
     expect(component.difficulty()).toBe(DungeonDifficulty.Mythic);
   });

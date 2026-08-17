@@ -1,6 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Guilds;
+using Application.UseCases.Outbox;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Guilds;
 using Domain.Models.Guilds.Missions;
@@ -337,6 +339,39 @@ public sealed class GuildMissionServiceTests
     }
 
     [Fact]
+    public async Task RecordContribution_queues_one_realtime_sync_for_new_progress()
+    {
+        await using var db = CreateDbContext();
+        var characterId = SeedGuild(db);
+        await db.SaveChangesAsync();
+        var outbox = new RecordingOutbox();
+        var service = new GuildMissionService(
+            db,
+            new DefaultGuildContentProvider(),
+            outbox: outbox);
+        var now = new DateTimeOffset(2026, 6, 23, 2, 0, 0, TimeSpan.Zero);
+
+        await service.GetOverviewAsync(characterId, now, CancellationToken.None);
+        var contribution = new GuildContributionEvent(
+            characterId,
+            GuildContributionSource.Combat,
+            GuildContributionMetric.CreaturesDefeated,
+            10,
+            OccurredAt: now,
+            IdempotencyKey: "combat:realtime:1");
+
+        await service.RecordContributionAsync(contribution, CancellationToken.None);
+        await service.RecordContributionAsync(contribution, CancellationToken.None);
+
+        var call = Assert.Single(outbox.Calls);
+        Assert.Equal(GameEventTypes.GuildMissionProgressed, call.EventType);
+        Assert.Equal(characterId, call.CharacterId);
+        Assert.Equal(
+            db.Guilds.Local.Single().Id,
+            Assert.IsType<GuildMissionProgressedPayload>(call.Payload).GuildId);
+    }
+
+    [Fact]
     public async Task ClaimPersonalOrderReward_awards_once()
     {
         await using var db = CreateDbContext();
@@ -412,6 +447,24 @@ public sealed class GuildMissionServiceTests
 
         return characterId;
     }
+
+    private sealed class RecordingOutbox : IGameEventOutbox
+    {
+        public List<OutboxCall> Calls { get; } = [];
+
+        public Task EnqueueAsync<TPayload>(
+            string eventType,
+            TPayload payload,
+            Guid? characterId,
+            Guid? accountId,
+            CancellationToken cancellationToken)
+        {
+            Calls.Add(new OutboxCall(eventType, payload!, characterId));
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed record OutboxCall(string EventType, object Payload, Guid? CharacterId);
 }
 
 internal static class GuildMissionTestExtensions

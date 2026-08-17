@@ -15,13 +15,14 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Observable, finalize } from 'rxjs';
+import { Observable, finalize, tap } from 'rxjs';
 import { ColosseumService } from '../../../../../core/services/api/colosseum/colosseum.service';
 import { ToastService } from '../../../../../core/services/client-side/components/toast/toast.service';
 import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
 import { TournamentGroundsUpdated } from '../../../../../core/services/real-time/colosseum/tournament-grounds-updated';
 import { CharacterTagComponent } from '../../../../../shared/components/character/character-tag/character-tag.component';
 import { TournamentGroundsViewStateService } from '../../../../../core/services/api/colosseum/tournament-grounds-view-state.service';
+import { StateSyncCoordinator } from '../../../../../core/services/real-time/game-realtime/state-sync-coordinator.service';
 import {
   TournamentBracket,
   TournamentHallOfFameEntry,
@@ -292,12 +293,19 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
   private lastRealtimeUpdateId: string | null = null;
   private clockHandle: ReturnType<typeof setInterval> | null = null;
   private lastAutoSelectedRoundNumber: number | null = null;
+  private unregisterStateSync: (() => void) | null = null;
 
   constructor(
     private readonly colosseumService: ColosseumService,
     private readonly toastService: ToastService,
     private readonly eventService: GameEventService,
+    stateSync: StateSyncCoordinator,
   ) {
+    this.unregisterStateSync = stateSync.register(
+      'tournament',
+      'tournament-grounds',
+      () => this.synchronize(),
+    );
     this.lastRealtimeUpdateId =
       this.eventService.eventEnvelope.TournamentGroundsUpdated()?.updateId ??
       null;
@@ -314,18 +322,6 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
 
         this.lastRealtimeUpdateId = envelope.updateId;
         this.latestRealtimeUpdate.set(envelope.payload);
-        const currentTournamentId = this.current()?.id;
-        if (
-          !currentTournamentId ||
-          envelope.payload.tournamentId === currentTournamentId
-        ) {
-          this.refresh();
-        } else if (
-          envelope.payload.event === 'TournamentCompleted' ||
-          envelope.payload.event === 'TournamentRewardsAvailable'
-        ) {
-          this.loadArchives();
-        }
       },
       { allowSignalWrites: true },
     );
@@ -346,48 +342,59 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.clockHandle) clearInterval(this.clockHandle);
+    this.unregisterStateSync?.();
   }
 
   refresh(): void {
+    this.synchronize().subscribe({ error: () => undefined });
+  }
+
+  private synchronize(): Observable<unknown> {
     this.loading.set(true);
     this.error.set(null);
 
-    this.colosseumService
+    return this.colosseumService
       .getTournamentGroundsStatus()
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: (status) => {
-          const serverNow = Date.parse(status.nowUtc);
-          if (!Number.isNaN(serverNow)) {
-            this.viewState.serverClockOffsetMs = serverNow - Date.now();
-            this.clock.set(serverNow);
-          }
-          this.status.set(status);
-          this.viewState.markSnapshotLoaded();
-          const currentTournament = status.currentTournament;
-          const previousTournament = status.recentTournaments.find(
-            (tournament) => tournament.status === 'Completed',
-          );
-          const displayedTournament =
-            currentTournament?.status === 'Scheduled'
-              ? (previousTournament ?? currentTournament)
-              : (currentTournament ?? previousTournament);
-          const tournamentId = displayedTournament?.id;
-          if (tournamentId) {
-            this.loadDetails(tournamentId);
-            this.loadBracket(tournamentId);
-            this.loadRewards(tournamentId);
-            this.loadArchives();
-          } else {
-            this.details.set(null);
-            this.bracket.set(null);
-            this.rewards.set([]);
-            this.loadArchives();
-          }
-        },
-        error: (err) =>
-          this.error.set(err.message ?? 'Failed to load tournament grounds'),
-      });
+      .pipe(
+        tap({
+          next: (status) => this.applyTournamentStatus(status),
+          error: (err) =>
+            this.error.set(err.message ?? 'Failed to load tournament grounds'),
+        }),
+        finalize(() => this.loading.set(false)),
+      );
+  }
+
+  private applyTournamentStatus(
+    status: NonNullable<ReturnType<typeof this.status>>,
+  ): void {
+    const serverNow = Date.parse(status.nowUtc);
+    if (!Number.isNaN(serverNow)) {
+      this.viewState.serverClockOffsetMs = serverNow - Date.now();
+      this.clock.set(serverNow);
+    }
+    this.status.set(status);
+    this.viewState.markSnapshotLoaded();
+    const currentTournament = status.currentTournament;
+    const previousTournament = status.recentTournaments.find(
+      (tournament) => tournament.status === 'Completed',
+    );
+    const displayedTournament =
+      currentTournament?.status === 'Scheduled'
+        ? (previousTournament ?? currentTournament)
+        : (currentTournament ?? previousTournament);
+    const tournamentId = displayedTournament?.id;
+    if (tournamentId) {
+      this.loadDetails(tournamentId);
+      this.loadBracket(tournamentId);
+      this.loadRewards(tournamentId);
+      this.loadArchives();
+    } else {
+      this.details.set(null);
+      this.bracket.set(null);
+      this.rewards.set([]);
+      this.loadArchives();
+    }
   }
 
   private shouldRestoreViewState(): boolean {

@@ -1,6 +1,7 @@
 using Application.BackgroundJobs;
 using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL;
+using Application.WebSockets.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Quartz;
@@ -44,6 +45,7 @@ public sealed class MarketplaceOrderExpirationJob : IJob
                 await using var scope = _scopeFactory.CreateAsyncScope();
                 var dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();
                 var marketplace = scope.ServiceProvider.GetRequiredService<IMarketPlaceService>();
+                var stateSync = scope.ServiceProvider.GetRequiredService<IStateSyncService>();
                 var strategy = dbContext.CreateExecutionStrategy();
                 await strategy.ExecuteAsync(async () =>
                 {
@@ -54,6 +56,29 @@ public sealed class MarketplaceOrderExpirationJob : IJob
                             _timeProvider.GetUtcNow(),
                             _options.ExpirationBatchSize,
                             cancellationToken);
+
+                        if (result.ExpiredListings > 0 || result.ExpiredBuyOrders > 0)
+                        {
+                            const string reason = "MarketplaceOrdersExpired";
+                            foreach (var characterId in result.AffectedCharacterIds.Order())
+                            {
+                                await stateSync.InvalidateCharacterScopeAsync(
+                                    characterId,
+                                    StateSyncScopes.Character,
+                                    reason,
+                                    cancellationToken);
+                                await stateSync.InvalidateCharacterScopeAsync(
+                                    characterId,
+                                    StateSyncScopes.Inventory,
+                                    reason,
+                                    cancellationToken);
+                            }
+
+                            await stateSync.InvalidateWorldScopeAsync(
+                                StateSyncScopes.Marketplace,
+                                reason,
+                                cancellationToken);
+                        }
 
                         await dbContext.SaveChangesAsync(cancellationToken);
                         await transaction.CommitAsync(cancellationToken);

@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
 using Application.WebSockets.Contracts;
@@ -11,13 +12,16 @@ public class ApproveApplicationCommandHandler : IRequestHandler<ApproveApplicati
 {
     private readonly IGuildService _guildService;
     private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGuildSystemChatPublisher _guildChat;
 
     public ApproveApplicationCommandHandler(
         IGuildService guildService,
-        IGameEventPublisher eventPublisher)
+        IGameEventPublisher eventPublisher,
+        IGuildSystemChatPublisher guildChat)
     {
         _guildService = guildService;
         _eventPublisher = eventPublisher;
+        _guildChat = guildChat;
     }
 
     public async Task<Response<bool>> Handle(ApproveApplicationCommand request, CancellationToken cancellationToken)
@@ -31,6 +35,12 @@ public class ApproveApplicationCommandHandler : IRequestHandler<ApproveApplicati
         var approved = await _guildService.ApproveApplicationAsync(request.CharacterId, applicationCharacterId, cancellationToken);
         if (!approved)
             return Response<bool>.Fail("Failed to approve application");
+
+        await _guildChat.PublishAsync(
+            guild.Id,
+            applicationCharacterId,
+            GuildSystemChatEvent.Joined,
+            cancellationToken);
 
         await _eventPublisher.PublishAsync(
             new Audience.Character(applicationCharacterId),

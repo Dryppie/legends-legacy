@@ -15,6 +15,7 @@ using Services.Chat;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -39,15 +40,38 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSignalR(o => { o.EnableDetailedErrors = true; })
+var signalR = builder.Services.AddSignalR(o => { o.EnableDetailedErrors = true; })
     .AddJsonProtocol(options =>
     {
         options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()); // optional, depends on your style
-    });//.AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis")!);
-// TODO: For production
-//builder.Services.AddSignalR().AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis")!);
+    });
+var signalRRedis = config.GetConnectionString("Redis");
+var useRedisSignalR = config.GetValue<bool>("SignalR:UseRedisBackplane");
+if (useRedisSignalR && string.IsNullOrWhiteSpace(signalRRedis))
+{
+    throw new InvalidOperationException(
+        "ConnectionStrings:Redis is required when SignalR:UseRedisBackplane is enabled.");
+}
+if (useRedisSignalR)
+{
+    builder.Services.Configure<RedisChatPresenceOptions>(
+        config.GetSection("ChatPresence"));
+    signalR.AddStackExchangeRedis(signalRRedis!, options =>
+    {
+        options.Configuration.ChannelPrefix = RedisChannel.Literal("legends-legacy:chat");
+    });
+    builder.Services.AddSingleton<IConnectionMultiplexer>(
+        _ => ConnectionMultiplexer.Connect(signalRRedis!));
+    builder.Services.AddSingleton<RedisChatPresenceTracker>();
+    builder.Services.AddSingleton<IChatPresenceTracker>(services =>
+        services.GetRequiredService<RedisChatPresenceTracker>());
+    builder.Services.AddHostedService<RedisChatPresenceLeaseWorker>();
+}
+else
+{
+    builder.Services.AddSingleton<IChatPresenceTracker, InMemoryChatPresenceTracker>();
+}
 builder.Services.AddSingleton<IUserIdProvider, CharacterIdProvider>();
-builder.Services.AddSingleton<IChatPresenceTracker, InMemoryChatPresenceTracker>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

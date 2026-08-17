@@ -33,6 +33,7 @@ using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
+using Domain.Models.Synchronization;
 using Domain.Models.Transfers;
 using Domain.Models.Users;
 using Domain.Models.WorldTower;
@@ -133,6 +134,7 @@ public interface IDbContext
     DbSet<MarketPlaceOrder> MarketPlaceOrders { get; }
     DbSet<GameEventOutboxMessage> GameEventOutboxMessages { get; }
     DbSet<GameEventOutboxDelivery> GameEventOutboxDeliveries { get; }
+    DbSet<StateSyncRevision> StateSyncRevisions { get; }
     //DbSet<Party> Parties { get; }
     //DbSet<PartyMember> PartyMembers { get; }
     DbSet<Profession> Professions { get; }
@@ -194,6 +196,7 @@ public interface IDbContext
     IExecutionStrategy CreateExecutionStrategy();
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default);
     Task AcquireCharacterCommandLockAsync(Guid characterId, CancellationToken ct = default);
+    Task AcquireStateSyncScopeLockAsync(string scopeKey, CancellationToken ct = default) => Task.CompletedTask;
     Task AcquireWorldTowerFloorLockAsync(string serverId, int floorNumber, CancellationToken ct = default);
     Task<IReadOnlyList<Guid>> ClaimWorldTowerSimulationsAsync(
         string owner,
@@ -218,4 +221,5 @@ public interface IDbContext
         CancellationToken ct = default);
     IDbContextTransaction? CurrentTransaction { get; }
     bool HasChanges { get; }
+    long SaveChangesVersion => 0;
 }

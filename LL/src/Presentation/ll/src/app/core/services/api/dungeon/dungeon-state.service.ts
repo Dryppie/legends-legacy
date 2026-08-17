@@ -19,16 +19,18 @@ import {
   Observable,
   Subscription,
   catchError,
+  forkJoin,
   of,
   switchMap,
   take,
+  tap,
   timer,
 } from 'rxjs';
 import { GameEventService } from '../../real-time/game-event.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { CharacterStateService } from '../character/character-state.service';
-import { isGameRealtimeEnabled } from '../../real-time/game-realtime/game-realtime-feature';
 import { ToastService } from '../../client-side/components/toast/toast.service';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 
 @Injectable({
   providedIn: 'root',
@@ -46,6 +48,8 @@ export class DungeonStateService {
   private readonly _sigilAssemblyEnabled = signal(false);
   private readonly _sigilAssemblyCost = signal(0);
   private recommendationPolling: Subscription | null = null;
+  private activeDungeonEpoch = 0;
+  private dungeonHubEpoch = 0;
 
   /* ─────────── public, read-only selectors ─────────── */
   readonly lastOutcome = computed(() => this._lastOutcome());
@@ -69,7 +73,11 @@ export class DungeonStateService {
     private readonly inventoryState: InventoryStateService,
     private readonly characterState: CharacterStateService,
     private readonly toast: ToastService,
+    private readonly stateSync: StateSyncCoordinator,
   ) {
+    this.stateSync.register('dungeons', 'dungeons', () =>
+      this.synchronize(),
+    );
     this.refresh();
 
     effect(
@@ -84,35 +92,88 @@ export class DungeonStateService {
   }
 
   refresh(): void {
+    const requestEpoch = ++this.activeDungeonEpoch;
     this._loading.set(true);
     this._error.set(null);
 
     this.service
       .getActiveDungeon()
-      .pipe(finalize(() => this._loading.set(false)))
+      .pipe(
+        finalize(() => {
+          if (requestEpoch === this.activeDungeonEpoch) {
+            this._loading.set(false);
+          }
+        }),
+      )
       .subscribe({
         next: (activeDungeon) => {
+          if (requestEpoch !== this.activeDungeonEpoch) return;
           this._activeDungeon.set(activeDungeon);
           this.loadAvailableDungeons();
         },
         error: (e) => {
+          if (requestEpoch !== this.activeDungeonEpoch) return;
           this._error.set(e.message ?? 'Failed to refresh dungeon data');
           this.loadAvailableDungeons();
         },
       });
   }
 
+  private synchronize(): Observable<unknown> {
+    const activeDungeonEpoch = ++this.activeDungeonEpoch;
+    const dungeonHubEpoch = ++this.dungeonHubEpoch;
+    this._loading.set(true);
+    this._error.set(null);
+
+    return forkJoin({
+      activeDungeon: this.service.getActiveDungeon(),
+      hub: this.service.getAvailableDungeons(),
+    }).pipe(
+      tap({
+        next: ({ activeDungeon, hub }) => {
+          if (activeDungeonEpoch === this.activeDungeonEpoch) {
+            this._activeDungeon.set(activeDungeon);
+          }
+          if (dungeonHubEpoch === this.dungeonHubEpoch) {
+            this._dungeons.set(hub.dungeons);
+            this._sigilFragments.set(hub.sigilFragments);
+            this._sigilAssemblyEnabled.set(hub.sigilAssemblyEnabled);
+            this._sigilAssemblyCost.set(hub.sigilAssemblyCost);
+            this.startRecommendationPolling();
+          }
+        },
+        error: (error) => {
+          if (activeDungeonEpoch === this.activeDungeonEpoch) {
+            this._error.set(
+              error?.message ?? 'Failed to synchronize dungeon data',
+            );
+          }
+        },
+      }),
+      finalize(() => {
+        if (activeDungeonEpoch === this.activeDungeonEpoch) {
+          this._loading.set(false);
+        }
+      }),
+    );
+  }
+
   loadAvailableDungeons(): void {
+    const requestEpoch = ++this.dungeonHubEpoch;
     this.service.getAvailableDungeons().subscribe({
       next: (hub) => {
+        if (requestEpoch !== this.dungeonHubEpoch) return;
         this._dungeons.set(hub.dungeons);
         this._sigilFragments.set(hub.sigilFragments);
         this._sigilAssemblyEnabled.set(hub.sigilAssemblyEnabled);
         this._sigilAssemblyCost.set(hub.sigilAssemblyCost);
         this.startRecommendationPolling();
       },
-      error: (e) =>
-        this._error.set(e.message ?? 'Failed to load available dungeons'),
+      error: (e) => {
+        if (requestEpoch === this.dungeonHubEpoch) {
+          this._error.set(e.message ?? 'Failed to load available dungeons');
+        }
+      },
     });
   }
 
@@ -245,7 +306,7 @@ export class DungeonStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (result) => {
-          this._activeDungeon.set(result.run);
+          this.setActiveDungeon(result.run);
           this._lastOutcome.set(result.outcome);
           this._combatSession.set(result.combatSession ?? null);
           this._message.set(result.message ?? null);
@@ -325,9 +386,7 @@ export class DungeonStateService {
   private applyClaimDungeonRewards(
     response: ClaimDungeonRewardsResponse,
   ): void {
-    this._activeDungeon.set(response.activeRun);
-    if (isGameRealtimeEnabled()) return;
-
+    this.setActiveDungeon(response.activeRun);
     this.inventoryState.setInventory(
       response.inventoryItems,
       response.claimedLoot,
@@ -338,11 +397,11 @@ export class DungeonStateService {
   private applyDismissFailedDungeonRun(
     response: DismissFailedDungeonRunResponse,
   ): void {
-    this._activeDungeon.set(response.activeRun);
+    this.setActiveDungeon(response.activeRun);
   }
 
   private applyStartDungeon(response: StartDungeonRunResponse): void {
-    this._activeDungeon.set(response.run);
+    this.setActiveDungeon(response.run);
 
     if (response.inventoryItems) {
       this.inventoryState.setInventory(response.inventoryItems);
@@ -350,10 +409,12 @@ export class DungeonStateService {
   }
 
   setActiveDungeon(run: DungeonRun | null): void {
+    this.activeDungeonEpoch += 1;
     this._activeDungeon.set(run);
   }
 
   setDungeons(dungeons: DungeonPreviewData[]): void {
+    this.dungeonHubEpoch += 1;
     this._dungeons.set(dungeons);
   }
 

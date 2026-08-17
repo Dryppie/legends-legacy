@@ -4,6 +4,7 @@ import { AuthService } from '../api/auth/auth.service';
 import { GameRealtimeConnection } from './game-realtime/game-realtime-connection.service';
 import { GameRealtimeEventRegistry } from './game-realtime/game-realtime-event-registry.service';
 import { isGameRealtimeEnabled } from './game-realtime/game-realtime-feature';
+import { StateSyncCoordinator } from './game-realtime/state-sync-coordinator.service';
 
 @Injectable({ providedIn: 'root' })
 export class RealTimeFacade {
@@ -14,6 +15,7 @@ export class RealTimeFacade {
     private socket: GameEventService,
     private gameRealtime: GameRealtimeConnection,
     private gameRealtimeRegistry: GameRealtimeEventRegistry,
+    private stateSync: StateSyncCoordinator,
   ) {
     effect(
       () => {
@@ -22,9 +24,12 @@ export class RealTimeFacade {
         if (this.auth.isAuthenticated()) {
           if (isGameRealtimeEnabled()) {
             this.gameRealtimeRegistry.initialize();
+            this.stateSync.initialize();
             this.gameRealtime
               .connect()
-              .then(() => {
+              .then(async () => {
+                await this.gameRealtime.subscribeToWorld();
+                await this.stateSync.reconcile();
                 if ((window as any).__gameSignalRDebug) {
                   (window as any).__gameSignalRDebug.isConnected = () =>
                     this.gameRealtime.isConnected();
@@ -42,6 +47,7 @@ export class RealTimeFacade {
             );
         } else {
           this.gameRealtimeRegistry.dispose();
+          this.stateSync.dispose();
           this.gameRealtime
             .disconnect()
             .catch((error) =>
@@ -56,6 +62,14 @@ export class RealTimeFacade {
       },
       { allowSignalWrites: true },
     );
+
+    effect(() => {
+      if (!this.initialized() || !this.auth.isAuthenticated()) return;
+      const reconnectCount = this.gameRealtime.reconnectCount();
+      if (reconnectCount > 0) {
+        void this.stateSync.reconcile();
+      }
+    });
   }
 
   initialize() {

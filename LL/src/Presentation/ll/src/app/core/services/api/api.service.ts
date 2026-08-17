@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   HttpClient,
+  HttpContext,
   HttpErrorResponse,
   HttpHeaders,
   HttpParams,
@@ -9,6 +10,11 @@ import { Observable, throwError } from 'rxjs';
 
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { FORCE_STATE_SYNC_RESPONSE_REFRESH } from '../../interceptors/state-sync-context';
+
+export interface ApiMutationOptions {
+  forceStateSyncRefresh?: boolean;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -77,11 +83,19 @@ export class ApiService {
       .pipe(catchError(this.formatErrors));
   }
 
-  post(path: string, body: Object = {}): Observable<any> {
+  post(
+    path: string,
+    body: Object = {},
+    options: ApiMutationOptions = {},
+  ): Observable<any> {
     return this.http
       .post(`${this.apiUrl}${path}`, JSON.stringify(body), {
         withCredentials: true,
         headers: this.getHeaders(path),
+        context: new HttpContext().set(
+          FORCE_STATE_SYNC_RESPONSE_REFRESH,
+          options.forceStateSyncRefresh ?? true,
+        ),
       })
       .pipe(catchError(this.formatErrors));
   }

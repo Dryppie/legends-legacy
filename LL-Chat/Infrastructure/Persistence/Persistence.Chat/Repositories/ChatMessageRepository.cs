@@ -23,38 +23,43 @@ public class ChatMessageRepository : IChatMessageRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-    public async Task<IReadOnlyList<ChatMessage>> LatestAsync(Guid userId, int take, string? guildChannel, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<ChatMessage>> LatestAsync(
+        Guid userId,
+        int take,
+        string? guildChannel,
+        DateTimeOffset? after,
+        CancellationToken cancellationToken)
     {
+        take = Math.Clamp(take, 1, 200);
         var publicChannels = new List<ChatChannelType> { ChatChannelType.General, ChatChannelType.Trade, ChatChannelType.Help };
-
-        var publicMessages = await _context.ChatMessages
+        var query = _context.ChatMessages
             .AsNoTracking()
-            .Where(m => publicChannels.Contains(m.ChannelType))
+            .Where(m =>
+                publicChannels.Contains(m.ChannelType) ||
+                (m.ChannelType == ChatChannelType.Guild && m.ContextKey == guildChannel) ||
+                (m.ChannelType == ChatChannelType.Whisper &&
+                    (m.SenderId == userId || m.TargetCharacterId == userId)) ||
+                (m.ChannelType == ChatChannelType.System &&
+                    (m.TargetCharacterId == null || m.TargetCharacterId == userId)));
+
+        if (after.HasValue)
+        {
+            return await query
+                // Include the cursor timestamp; clients merge by stable message ID,
+                // so equal-timestamp messages cannot be lost at the boundary.
+                .Where(m => m.SentAt >= after.Value)
+                .OrderBy(m => m.SentAt)
+                .ThenBy(m => m.Id)
+                .Take(take)
+                .ToListAsync(cancellationToken);
+        }
+
+        var latest = await query
             .OrderByDescending(m => m.SentAt)
+            .ThenByDescending(m => m.Id)
             .Take(take)
             .ToListAsync(cancellationToken);
-
-        var guildMessages = await _context.ChatMessages
-            .AsNoTracking()
-            .Where(m => m.ChannelType == ChatChannelType.Guild && m.ContextKey == guildChannel)
-            .OrderByDescending(m => m.SentAt)
-            .Take(take)
-            .ToListAsync(cancellationToken);
-
-        var whisperMessages = await _context.ChatMessages
-            .AsNoTracking()
-            .Where(m => m.ChannelType == ChatChannelType.Whisper && (m.SenderId == userId || m.TargetCharacterId == userId))
-            .OrderByDescending(m => m.SentAt)
-            .Take(take)
-            .ToListAsync(cancellationToken);
-
-        var systemMessages = await _context.ChatMessages
-            .AsNoTracking()
-            .Where(m => m.ChannelType == ChatChannelType.System && (m.TargetCharacterId == null || m.TargetCharacterId == userId))
-            .OrderByDescending(m => m.SentAt)
-            .Take(take)
-            .ToListAsync(cancellationToken);
-
-        return [.. publicMessages, .. guildMessages, .. whisperMessages, .. systemMessages];
+        latest.Reverse();
+        return latest;
     }
 }

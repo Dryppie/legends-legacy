@@ -345,15 +345,16 @@ public sealed class DungeonRunService : IDungeonRunService
         {
             _vigor.ApplyCombatToll(run, room, combatSession.CombatResult);
             CompleteRoom(run, room);
-            await RecordDungeonProgressContributionAsync(run, room, ct);
             if (run.State.Vigor <= 0)
             {
                 FailRun(run, room, "Attrition", "Vigor was spent at the end of the combat.");
+                await RecordDungeonProgressContributionAsync(run, room, ct);
                 outcome = DungeonActionOutcome.CombatDefeat;
             }
             else
             {
                 MoveToNextRoom(run);
+                await RecordDungeonProgressContributionAsync(run, room, ct);
                 await ApplyCompletionRewardsIfNeeded(run, ct);
                 outcome = run.Status == DungeonRunStatus.Completed
                     ? DungeonActionOutcome.RunCompleted

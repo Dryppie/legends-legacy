@@ -3,6 +3,7 @@ using Domain.Models.Combat;
 using Domain.Models.Items;
 using Application.UseCases.Equipments.Dtos;
 using Application.UseCases.Inventories.Dtos;
+using System.Text.Json;
 
 namespace Application.UseCases.Outbox;
 
@@ -145,6 +146,18 @@ public sealed record GuildVaultChatMessagePayload(
     DateTimeOffset SentAt);
 
 public sealed record GuildMissionSelectedPayload(Guid GuildId);
+public sealed record GuildMissionProgressedPayload(Guid GuildId);
+
+public sealed record RealtimeAudiencePayload(
+    string Kind,
+    Guid? TargetId,
+    IReadOnlyList<Guid>? CharacterIds);
+
+public sealed record RealtimeDeliveryRequestedPayload(
+    RealtimeAudiencePayload Audience,
+    string EventName,
+    JsonElement Payload,
+    string Sender);
 
 public sealed record InventoryItemsGrantedPayload(
     Guid GrantId,

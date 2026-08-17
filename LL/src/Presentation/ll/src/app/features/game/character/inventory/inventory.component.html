@@ -501,6 +501,27 @@
                 </button>
               </div>
 
+              <button
+                *ngIf="canDonateToGuild(item)"
+                type="button"
+                class="ll-button mt-2 w-full"
+                [disabled]="donationPendingItemId() !== null"
+                (click)="donateToGuild(item)"
+              >
+                {{
+                  donationPendingItemId() === item.itemInstance.id
+                    ? "Donating..."
+                    : "Donate to Guild"
+                }}
+              </button>
+
+              <div
+                *ngIf="donationActionError() as message"
+                class="ll-state ll-state-danger mt-2"
+              >
+                {{ message }}
+              </div>
+
               <div class="inventory-secondary-actions">
                 <button
                   *ngIf="canScrapItem(item)"

@@ -74,6 +74,10 @@ export class GameEventService {
     await this.connection.subscribeToGuild(guildId);
   }
 
+  async setGuildSubscription(guildId: string | null): Promise<void> {
+    await this.connection.setGuildSubscription(guildId);
+  }
+
   async subscribeToWorld(): Promise<void> {
     await this.connection.subscribeToWorld();
   }

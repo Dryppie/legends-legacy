@@ -7,7 +7,7 @@ import {
   untracked,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, forkJoin, Observable, tap } from 'rxjs';
 import {
   CombatAreaAccess,
   ONBOARDING_QUEST_CATEGORY,
@@ -19,6 +19,7 @@ import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer
 import { GameEventService } from '../../real-time/game-event.service';
 import { AuthService } from '../auth/auth.service';
 import { QuestService } from './quest.service';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 
 @Injectable({ providedIn: 'root' })
 export class QuestStateService {
@@ -29,6 +30,8 @@ export class QuestStateService {
   private readonly _error = signal<string | null>(null);
   private readonly auth = inject(AuthService);
   private readonly eventDeduper = new GameEventDeduper();
+  private journalRequestEpoch = 0;
+  private areaAccessRequestEpoch = 0;
   private lastLogoutCount = 0;
   private lastReconnectCount = 0;
 
@@ -79,7 +82,20 @@ export class QuestStateService {
     private readonly router: Router,
     private readonly events: GameEventService,
     private readonly eventBus: EventBusService,
+    private readonly stateSync: StateSyncCoordinator,
   ) {
+    this.stateSync.register(
+      'quests',
+      'quests',
+      () => this.synchronizeJournal(),
+      () => this._loaded(),
+    );
+    this.stateSync.register(
+      'area-access',
+      'area-access',
+      () => this.synchronizeAreaAccess(),
+      () => this._loaded(),
+    );
     effect(
       () => {
         const event = this.events.event.QuestJournalChangedMsg();
@@ -138,6 +154,7 @@ export class QuestStateService {
   }
 
   initialize(journal: QuestJournal): void {
+    this.journalRequestEpoch += 1;
     this._journal.set(journal ?? { quests: [] });
     this._loaded.set(true);
     this._loading.set(false);
@@ -146,6 +163,7 @@ export class QuestStateService {
 
   load(): void {
     if (this._loading()) return;
+    const requestEpoch = ++this.journalRequestEpoch;
     this._loading.set(true);
     this._error.set(null);
     this.api
@@ -153,6 +171,7 @@ export class QuestStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (journal) => {
+          if (requestEpoch !== this.journalRequestEpoch) return;
           this.initialize(journal);
           this.loadAreaAccess();
         },
@@ -161,9 +180,8 @@ export class QuestStateService {
       });
   }
 
-  refreshAfterOutboxProgress(delayMs = 750): void {
+  refreshAfterMutation(): void {
     this.loadJournalSilently();
-    window.setTimeout(() => this.loadJournalSilently(), delayMs);
   }
 
   selectChoice(
@@ -240,8 +258,13 @@ export class QuestStateService {
   }
 
   loadAreaAccess(): void {
+    const requestEpoch = ++this.areaAccessRequestEpoch;
     this.api.getAreaAccess().subscribe({
-      next: (access) => this._areaAccess.set(access),
+      next: (access) => {
+        if (requestEpoch === this.areaAccessRequestEpoch) {
+          this._areaAccess.set(access);
+        }
+      },
       error: () => undefined,
     });
   }
@@ -255,6 +278,8 @@ export class QuestStateService {
   }
 
   reset(): void {
+    this.journalRequestEpoch += 1;
+    this.areaAccessRequestEpoch += 1;
     this._journal.set({ quests: [] });
     this._areaAccess.set([]);
     this._loaded.set(false);
@@ -264,18 +289,67 @@ export class QuestStateService {
 
   /** Re-pull journal and area access together, without touching loading/error UI. */
   private resyncSilently(): void {
-    this.api.getJournal().subscribe({
-      next: (journal) => {
-        this.initialize(journal);
-        this.loadAreaAccess();
-      },
-      error: () => undefined,
-    });
+    this.synchronize().subscribe({ error: () => undefined });
+  }
+
+  private synchronize(): Observable<unknown> {
+    const requestEpoch = ++this.journalRequestEpoch;
+    const accessRequestEpoch = ++this.areaAccessRequestEpoch;
+    return forkJoin({
+      journal: this.api.getJournal(),
+      access: this.api.getAreaAccess(),
+    }).pipe(
+      tap({
+        next: ({ journal, access }) => {
+          if (requestEpoch === this.journalRequestEpoch) {
+            this.initialize(journal);
+          }
+          if (accessRequestEpoch === this.areaAccessRequestEpoch) {
+            this._areaAccess.set(access);
+          }
+        },
+        error: (error) =>
+          this._error.set(error?.message ?? 'Failed to synchronize quests'),
+      }),
+    );
+  }
+
+  private synchronizeJournal(): Observable<unknown> {
+    const requestEpoch = ++this.journalRequestEpoch;
+    return this.api.getJournal().pipe(
+      tap({
+        next: (journal) => {
+          if (requestEpoch === this.journalRequestEpoch) {
+            this.initialize(journal);
+          }
+        },
+        error: (error) =>
+          this._error.set(error?.message ?? 'Failed to synchronize quests'),
+      }),
+    );
+  }
+
+  private synchronizeAreaAccess(): Observable<unknown> {
+    const requestEpoch = ++this.areaAccessRequestEpoch;
+    return this.api.getAreaAccess().pipe(
+      tap({
+        next: (access) => {
+          if (requestEpoch === this.areaAccessRequestEpoch) {
+            this._areaAccess.set(access);
+          }
+        },
+      }),
+    );
   }
 
   private loadJournalSilently(): void {
+    const requestEpoch = ++this.journalRequestEpoch;
     this.api.getJournal().subscribe({
-      next: (journal) => this.initializeAndRefreshAccessWhenNeeded(journal),
+      next: (journal) => {
+        if (requestEpoch === this.journalRequestEpoch) {
+          this.initializeAndRefreshAccessWhenNeeded(journal);
+        }
+      },
       error: () => undefined,
     });
   }

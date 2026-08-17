@@ -8,7 +8,7 @@ using MediatR;
 using Application.UseCases.Users;
 
 namespace Application.UseCases.Users.Commands.RenameCharacter;
-public record RenameCharacterCommand(Guid UserId, string NewName) : ICommand<Response<Tokens>>;
+public record RenameCharacterCommand(Guid UserId, Guid CharacterId, string NewName) : ICommand<Response<Tokens>>;
 public class RenameCharacterCommandHandler : IRequestHandler<RenameCharacterCommand, Response<Tokens>>
 {
     private readonly ICharacterService _characterService;

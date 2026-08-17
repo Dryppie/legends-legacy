@@ -1,5 +1,5 @@
 import { signal, computed, effect, Injectable, untracked } from '@angular/core';
-import { finalize } from 'rxjs';
+import { finalize, Observable, of, tap } from 'rxjs';
 import {
   SoulstoneUpgradeBranch,
   SoulstoneUpgradeMutationResult,
@@ -7,6 +7,7 @@ import {
 } from '../../../../shared/models/soulstones/soulstone-upgrade-view';
 import { SoulstoneUpgradeService } from './soulstone-upgrade.service';
 import { CharacterStateService } from '../character/character-state.service';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 
 export interface SoulstoneBranchGroup {
   branch: SoulstoneUpgradeBranch;
@@ -25,6 +26,7 @@ export class SoulstoneUpgradeStateService {
   private readonly _error = signal<string | null>(null);
   private readonly _lastRefund = signal(0);
   private readonly _upgradeLoading = signal(new Map<string, boolean>());
+  private loadEpoch = 0;
 
   readonly upgrades = computed(() => this._upgrades());
   readonly loading = computed(() => this._loading());
@@ -41,7 +43,14 @@ export class SoulstoneUpgradeStateService {
   constructor(
     private readonly service: SoulstoneUpgradeService,
     private readonly characterState: CharacterStateService,
+    stateSync: StateSyncCoordinator,
   ) {
+    stateSync.register(
+      'soulstones',
+      'soulstone-upgrades',
+      () => this.synchronize(true),
+      () => !!this.characterState.currentCharacterId(),
+    );
     effect(
       () => {
         const characterId = this.characterState.currentCharacterId();
@@ -50,6 +59,7 @@ export class SoulstoneUpgradeStateService {
           this._upgradeLoading.set(new Map());
           this._lastRefund.set(0);
           this._error.set(null);
+          this.loadEpoch += 1;
 
           if (!characterId) {
             this._upgrades.set([]);
@@ -69,49 +79,75 @@ export class SoulstoneUpgradeStateService {
   }
 
   load(force = false): void {
+    this.synchronize(force).subscribe({ error: () => undefined });
+  }
+
+  private synchronize(force = false): Observable<unknown> {
     const characterId = this.characterState.currentCharacterId();
     if (!characterId) {
       this._upgrades.set([]);
       this._loadedCharacterId.set(null);
       this._loadingCharacterId.set(null);
-      return;
+      return of(undefined);
     }
 
-    if (!force && this._loadedCharacterId() === characterId && this._upgrades().length > 0) {
-      return;
+    if (
+      !force &&
+      this._loadedCharacterId() === characterId &&
+      this._upgrades().length > 0
+    ) {
+      return of(undefined);
     }
 
-    if (this._loading() && this._loadingCharacterId() === characterId) return;
+    if (
+      !force &&
+      this._loading() &&
+      this._loadingCharacterId() === characterId
+    ) {
+      return of(undefined);
+    }
 
+    const loadEpoch = ++this.loadEpoch;
     this._loading.set(true);
     this._loadingCharacterId.set(characterId);
     this._error.set(null);
     this._lastRefund.set(0);
 
-    this.service
-      .getSoulstoneUpgrades()
-      .pipe(
-        finalize(() => {
-          if (this._loadingCharacterId() === characterId) {
-            this._loading.set(false);
-            this._loadingCharacterId.set(null);
-          }
-        }),
-      )
-      .subscribe({
+    return this.service.getSoulstoneUpgrades().pipe(
+      tap({
         next: (list) => {
-          if (this.characterState.currentCharacterId() !== characterId) return;
+          if (
+            this.characterState.currentCharacterId() !== characterId ||
+            loadEpoch !== this.loadEpoch
+          )
+            return;
 
           this._upgrades.set(list);
           this._loadedCharacterId.set(characterId);
           this._error.set(null);
         },
         error: (err) => {
-          if (this.characterState.currentCharacterId() !== characterId) return;
+          if (
+            this.characterState.currentCharacterId() !== characterId ||
+            loadEpoch !== this.loadEpoch
+          )
+            return;
 
-          this._error.set(err.message ?? 'Failed to load Soulstone constellations.');
+          this._error.set(
+            err.message ?? 'Failed to load Soulstone constellations.',
+          );
         },
-      });
+      }),
+      finalize(() => {
+        if (
+          this._loadingCharacterId() === characterId &&
+          loadEpoch === this.loadEpoch
+        ) {
+          this._loading.set(false);
+          this._loadingCharacterId.set(null);
+        }
+      }),
+    );
   }
 
   upgrade(id: string): void {

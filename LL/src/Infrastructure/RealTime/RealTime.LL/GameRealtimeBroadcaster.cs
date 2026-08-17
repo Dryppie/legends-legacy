@@ -1,20 +1,19 @@
 using Application.Interfaces.WebSockets;
 using Application.WebSockets.Contracts;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace RealTime.LL;
 
-internal sealed class GameRealtimeBroadcaster : IGameRealtimeBroadcaster
+internal sealed class GameRealtimeImmediatePublisher : IGameRealtimeImmediatePublisher
 {
-    private readonly IHubContext<GameHub, IGameClient> _hub;
-    private readonly ILogger<GameRealtimeBroadcaster> _logger;
+    private readonly GameRealtimeEnvelopeSender _sender;
+    private readonly ILogger<GameRealtimeImmediatePublisher> _logger;
 
-    public GameRealtimeBroadcaster(
-        IHubContext<GameHub, IGameClient> hub,
-        ILogger<GameRealtimeBroadcaster> logger)
+    public GameRealtimeImmediatePublisher(
+        GameRealtimeEnvelopeSender sender,
+        ILogger<GameRealtimeImmediatePublisher> logger)
     {
-        _hub = hub;
+        _sender = sender;
         _logger = logger;
     }
 
@@ -39,18 +38,8 @@ internal sealed class GameRealtimeBroadcaster : IGameRealtimeBroadcaster
             sender,
             envelope.OccurredAt);
 
-        return Send(audience, envelope);
+        return _sender.SendAsync(audience, envelope);
     }
-
-    private Task Send(Audience audience, GameRealtimeEnvelope envelope) => audience switch
-    {
-        Audience.Character character => _hub.Clients.Group(GameHub.CharacterGroup(character.CharacterId)).ReceiveEvent(envelope),
-        Audience.Characters characters => _hub.Clients.Groups(
-            characters.CharacterIds.Distinct().Select(GameHub.CharacterGroup).ToArray()).ReceiveEvent(envelope),
-        Audience.Guild guild => _hub.Clients.Group(GameHub.GuildGroup(guild.GuildId)).ReceiveEvent(envelope),
-        Audience.World => _hub.Clients.All.ReceiveEvent(envelope),
-        _ => throw new ArgumentException($"Unsupported audience type: {audience.GetType().Name}", nameof(audience)),
-    };
 
     private static string DescribeAudience(Audience audience) => audience switch
     {

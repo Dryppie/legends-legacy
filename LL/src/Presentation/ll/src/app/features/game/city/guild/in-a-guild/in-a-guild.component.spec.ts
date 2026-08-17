@@ -12,6 +12,7 @@ describe('InAGuildComponent guild description', () => {
     updateDescription = jasmine.createSpy('updateDescription');
     const state = {
       claimableDailyOrderCount: signal(0),
+      shop: signal(null),
       updateDescription,
     } as unknown as GuildStateService;
     const characterService = {
@@ -39,6 +40,7 @@ describe('InAGuildComponent guild description', () => {
           level: 10,
           role,
           joinedAt: '2026-08-01T00:00:00Z',
+          isOnline: true,
         },
       ],
       invites: [],
@@ -91,5 +93,23 @@ describe('InAGuildComponent guild description', () => {
     expect(component.descriptionDraft).toBe('Old description');
     expect(component.editingDescription()).toBeFalse();
     expect(updateDescription).not.toHaveBeenCalled();
+  });
+
+  it('exposes guild Favor from the shop for the header', () => {
+    const shop = signal({ guildFavor: 900 });
+    const state = {
+      claimableDailyOrderCount: signal(0),
+      shop,
+      updateDescription: jasmine.createSpy('updateDescription'),
+    } as unknown as GuildStateService;
+    const characterService = {
+      currentCharacterId: signal('current-character'),
+    } as unknown as CharacterService;
+    const component = new InAGuildComponent(state, characterService);
+
+    expect(component.guildFavor()).toBe(900);
+
+    shop.set({ guildFavor: 800 });
+    expect(component.guildFavor()).toBe(800);
   });
 });

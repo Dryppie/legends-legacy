@@ -153,12 +153,11 @@ public sealed class QuestService(
             await repository.HasProcessedEventAsync(outboxMessageId.Value, cancellationToken))
         {
             var current = await GetJournalAsync(characterId, cancellationToken);
-            await PublishChangedAsync(characterId, current, cancellationToken);
-            return new QuestProgressionResult(current, [], []);
+            return new QuestProgressionResult(current, [], [], false);
         }
 
         var progresses = (await repository.GetProgressesAsync(characterId, cancellationToken)).ToList();
-        await EnsureAvailabilityAsync(characterId, progresses, cancellationToken);
+        var journalChanged = await EnsureAvailabilityAsync(characterId, progresses, cancellationToken);
         var completedQuestIds = new List<string>();
         var loot = new List<InventoryItem>();
         var now = timeProvider.GetUtcNow();
@@ -171,6 +170,8 @@ public sealed class QuestService(
             {
                 var amount = await EvaluateAsync(characterId, trigger, objective, cancellationToken);
                 if (amount <= 0) continue;
+
+                journalChanged = true;
 
                 objectiveProgress.CurrentAmount = Math.Min(
                     objectiveProgress.RequiredAmount,
@@ -197,8 +198,8 @@ public sealed class QuestService(
             }
         }
 
-        await EnsureAvailabilityAsync(characterId, progresses, cancellationToken);
-        EnsurePinnedQuest(progresses);
+        journalChanged |= await EnsureAvailabilityAsync(characterId, progresses, cancellationToken);
+        journalChanged |= EnsurePinnedQuest(progresses);
 
         if (outboxMessageId.HasValue)
         {
@@ -214,8 +215,11 @@ public sealed class QuestService(
 
         await repository.SaveChangesAsync(cancellationToken);
         var journal = await MapJournalAsync(progresses, cancellationToken);
-        await PublishChangedAsync(characterId, journal, cancellationToken);
-        return new QuestProgressionResult(journal, completedQuestIds, loot);
+        if (journalChanged)
+        {
+            await PublishChangedAsync(characterId, journal, cancellationToken);
+        }
+        return new QuestProgressionResult(journal, completedQuestIds, loot, journalChanged);
     }
 
     private async Task<bool> EnsureAvailabilityAsync(

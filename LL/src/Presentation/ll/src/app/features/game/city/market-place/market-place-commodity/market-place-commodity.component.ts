@@ -782,6 +782,14 @@ export class MarketPlaceCommodityComponent implements OnInit {
       : commodity.base.name;
   }
 
+  isFavoriteCommodity(commodity: Commodity): boolean {
+    return this.inventory().some(
+      (item) =>
+        item.itemInstance.itemBase.id === commodity.base.id &&
+        !!item.isFavorite,
+    );
+  }
+
   commodityDisplayPrice(commodity: Commodity): number | undefined {
     return commodity.bestSellPrice ?? commodity.bestBuyPrice ?? undefined;
   }

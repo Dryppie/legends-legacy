@@ -1,4 +1,4 @@
-import { Component, Input, Signal, signal } from '@angular/core';
+import { Component, computed, Input, Signal, signal } from '@angular/core';
 import { TabComponent } from '../../../../../shared/components/custom-components/tabs/tab/tab.component';
 import { GuildInfoComponent } from './guild-info/guild-info.component';
 import { Guild } from '../../../../../shared/models/Dtos/guild/guild';
@@ -42,6 +42,7 @@ import { RegularButtonComponent } from '../../../../../shared/components/custom-
 export class InAGuildComponent {
   @Input() guild!: Guild;
   readonly claimableDailyOrderCount: Signal<number>;
+  readonly guildFavor: Signal<number>;
 
   readonly descriptionMaxLength = 500;
   readonly editingDescription = signal(false);
@@ -52,6 +53,7 @@ export class InAGuildComponent {
     private characterService: CharacterService,
   ) {
     this.claimableDailyOrderCount = this.state.claimableDailyOrderCount;
+    this.guildFavor = computed(() => this.state.shop()?.guildFavor ?? 0);
   }
 
   get canEditDescription(): boolean {

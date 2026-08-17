@@ -63,7 +63,18 @@
       <!-- How *one* essence row looks -->
       <ng-template let-invItem>
         <div class="flex justify-between font-semibold text-white">
-          <div>{{ essenceState.asEssence(invItem).name }}</div>
+          <div class="flex min-w-0 items-center gap-1">
+            <span class="truncate">{{
+              essenceState.asEssence(invItem).name
+            }}</span>
+            <span
+              *ngIf="invItem.isFavorite"
+              class="shrink-0 leading-none text-primary"
+              aria-label="Favorite"
+              title="Favorite"
+              >★</span
+            >
+          </div>
           <div>x{{ invItem.quantity }}</div>
         </div>
       </ng-template>

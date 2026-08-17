@@ -77,21 +77,31 @@ public class CharacterActionService : ICharacterActionService
 
         if (characterAction.ActionDetails == null) return characterAction;
 
+        var actionChanged = false;
         switch (characterAction.CharacterActionType)
         {
             case CharacterActionType.Combat:
+                var previousCombatBoundary = characterAction.UpdatedAt;
                 characterAction.CombatSession = await HandleCombatActionAsync(characterAction, now, cancellationToken);
+                actionChanged = characterAction.UpdatedAt != previousCombatBoundary;
                 break;
 
             case CharacterActionType.Crafting:
                 characterAction.TemperingSession = await HandleProfessionActionAsync(characterAction, now, cancellationToken);
+                actionChanged = characterAction.TemperingSession is not null;
                 break;
 
             default:
                 return null;
         }
 
-        _characterActionRepository.UpdateCharacterAction(characterAction);
+        // Concurrent tabs can resolve the same action boundary. The later request
+        // still returns the current snapshot, but must not bump RowVersion or emit
+        // state-sync revisions when there was no encounter/crafting work to apply.
+        if (actionChanged)
+        {
+            _characterActionRepository.UpdateCharacterAction(characterAction);
+        }
 
         return characterAction;
     }

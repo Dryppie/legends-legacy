@@ -16,6 +16,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { AuthService } from './core/services/api/auth/auth.service';
 import { firstValueFrom } from 'rxjs';
 import { AuthInterceptor } from './core/interceptors/auth-interceptor';
+import { StateSyncInterceptor } from './core/interceptors/state-sync-interceptor';
 import { RealTimeFacade } from './core/services/real-time/real-time-facade';
 import { TimeSyncService } from './core/services/api/time-sync/time-sync.service';
 import { environment } from '../environments/environment';
@@ -46,6 +47,7 @@ export function initializeTimeSync(timeSyncService: TimeSyncService) {
 export const appConfig: ApplicationConfig = {
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: StateSyncInterceptor, multi: true },
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimations(),
     provideHttpClient(withInterceptorsFromDi()),

@@ -14,13 +14,16 @@ public class ConstructGuildBuildingCommandHandler : IRequestHandler<ConstructGui
 {
     private readonly IGuildBuildingService _guildBuildingService;
     private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGuildSystemChatPublisher _guildChat;
 
     public ConstructGuildBuildingCommandHandler(
         IGuildBuildingService guildBuildingService,
-        IGameEventPublisher eventPublisher)
+        IGameEventPublisher eventPublisher,
+        IGuildSystemChatPublisher guildChat)
     {
         _guildBuildingService = guildBuildingService;
         _eventPublisher = eventPublisher;
+        _guildChat = guildChat;
     }
 
     public async Task<Response<GuildBuildingOverviewDto>> Handle(ConstructGuildBuildingCommand request, CancellationToken cancellationToken)
@@ -33,6 +36,16 @@ public class ConstructGuildBuildingCommandHandler : IRequestHandler<ConstructGui
 
         if (!result.Succeeded || result.Value is null)
             return Response<GuildBuildingOverviewDto>.Fail(result.Error ?? "Failed to construct guild building.");
+
+        var building = result.Value.Buildings.Single(
+            candidate => candidate.Definition.Type == request.BuildingType);
+        await _guildChat.PublishBuildingAsync(
+            result.Value.GuildId,
+            request.CharacterId,
+            building.Definition.Name,
+            building.Level,
+            GuildBuildingChatEvent.Constructed,
+            cancellationToken);
 
         await _eventPublisher.PublishAsync(
             new Audience.Guild(result.Value.GuildId),

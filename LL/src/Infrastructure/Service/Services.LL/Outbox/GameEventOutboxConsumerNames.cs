@@ -16,4 +16,5 @@ public static class GameEventOutboxConsumerNames
     public const string RealtimeInventory = "realtime-inventory";
     public const string RealtimeTournamentGrounds = "realtime-tournament-grounds";
     public const string RealtimeWorldTower = "realtime-world-tower";
+    public const string RealtimeDelivery = "realtime-delivery";
 }

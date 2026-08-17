@@ -1,5 +1,5 @@
 import { computed, effect, Injectable, signal } from '@angular/core';
-import { finalize } from 'rxjs';
+import { finalize, forkJoin, Observable, tap } from 'rxjs';
 import { ColosseumService } from './colosseum.service';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { ArenaOpponentPreview } from '../../../../shared/models/Dtos/colosseum/arenaOpponentPreview';
@@ -26,6 +26,7 @@ import {
 import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
 import { ToastService } from '../../client-side/components/toast/toast.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 
 @Injectable({ providedIn: 'root' })
 export class ColosseumStateService {
@@ -41,6 +42,12 @@ export class ColosseumStateService {
   private hasLoaded = false;
   private notificationLoading = false;
   private readonly eventDeduper = new GameEventDeduper();
+  private statusRequestEpoch = 0;
+  private ticketRequestEpoch = 0;
+  private opponentsRequestEpoch = 0;
+  private rankingsRequestEpoch = 0;
+  private matchesRequestEpoch = 0;
+  private marketRequestEpoch = 0;
 
   readonly opponents = computed(() => this._opponents());
   readonly arenaTicketStatus = computed(() => this._arenaTicketStatus());
@@ -65,7 +72,14 @@ export class ColosseumStateService {
     private readonly notificationService: NotificationService,
     private readonly toastService: ToastService,
     private readonly inventoryState: InventoryStateService,
+    private readonly stateSync: StateSyncCoordinator,
   ) {
+    this.stateSync.register(
+      'colosseum',
+      'colosseum',
+      () => this.synchronize(),
+      () => this.hasLoaded,
+    );
     effect(
       () => {
         const reconnectCount = this.eventService.reconnectCount();
@@ -118,82 +132,182 @@ export class ColosseumStateService {
     this.loadChampionMarket();
   }
 
+  private synchronize(): Observable<unknown> {
+    this.hasLoaded = true;
+    this._loading.set(true);
+    this._error.set(null);
+    const epochs = {
+      status: ++this.statusRequestEpoch,
+      ticket: ++this.ticketRequestEpoch,
+      opponents: ++this.opponentsRequestEpoch,
+      rankings: ++this.rankingsRequestEpoch,
+      matches: ++this.matchesRequestEpoch,
+      market: ++this.marketRequestEpoch,
+    };
+
+    return forkJoin({
+      status: this.colosseumService.getStatus(),
+      ticket: this.colosseumService.getArenaTicketStatus(),
+      opponents: this.colosseumService.getArenaOpponents(),
+      rankings: this.colosseumService.getColosseumRankings(),
+      matches: this.colosseumService.getColosseumMatchResults(),
+      market: this.colosseumService.getChampionMarket(),
+    }).pipe(
+      tap({
+        next: ({ status, ticket, opponents, rankings, matches, market }) => {
+          if (epochs.status === this.statusRequestEpoch) {
+            this._status.set(status);
+            this.syncNotificationCount(status);
+          }
+          if (epochs.ticket === this.ticketRequestEpoch) {
+            this._arenaTicketStatus.set(ticket);
+          }
+          if (epochs.opponents === this.opponentsRequestEpoch) {
+            this._allOpponents.set(opponents);
+            this.pickRandomOpponents();
+          }
+          if (epochs.rankings === this.rankingsRequestEpoch) {
+            this._rankings.set([...rankings].sort((a, b) => a.rank - b.rank));
+          }
+          if (epochs.matches === this.matchesRequestEpoch) {
+            this._previousMatches.set(
+              [...matches].sort(
+                (a, b) =>
+                  new Date(b.playedAt).getTime() -
+                  new Date(a.playedAt).getTime(),
+              ),
+            );
+          }
+          if (epochs.market === this.marketRequestEpoch) {
+            this._championMarket.set(market);
+          }
+        },
+        error: (error) =>
+          this._error.set(error?.message ?? 'Failed to synchronize colosseum'),
+      }),
+      finalize(() => this._loading.set(false)),
+    );
+  }
+
   refreshNotificationCount(): void {
     if (this.notificationLoading) return;
 
+    const requestEpoch = ++this.statusRequestEpoch;
     this.notificationLoading = true;
     this.colosseumService
       .getStatus()
       .pipe(finalize(() => (this.notificationLoading = false)))
       .subscribe({
         next: (status) => {
+          if (requestEpoch !== this.statusRequestEpoch) return;
           this._status.set(status);
           this.syncNotificationCount(status);
         },
-        error: (err) =>
-          this._error.set(
-            err.message ?? 'Failed to load colosseum notifications',
-          ),
+        error: (err) => {
+          if (requestEpoch === this.statusRequestEpoch) {
+            this._error.set(
+              err.message ?? 'Failed to load colosseum notifications',
+            );
+          }
+        },
       });
   }
 
   loadStatus(): void {
+    const requestEpoch = ++this.statusRequestEpoch;
     this.colosseumService.getStatus().subscribe({
       next: (status) => {
+        if (requestEpoch !== this.statusRequestEpoch) return;
         this._status.set(status);
         this.syncNotificationCount(status);
       },
-      error: (err) =>
-        this._error.set(err.message ?? 'Failed to load colosseum status'),
+      error: (err) => {
+        if (requestEpoch === this.statusRequestEpoch) {
+          this._error.set(err.message ?? 'Failed to load colosseum status');
+        }
+      },
     });
   }
 
   loadArenaTicketStatus(): void {
+    const requestEpoch = ++this.ticketRequestEpoch;
     this.colosseumService.getArenaTicketStatus().subscribe({
-      next: (status) => this.applyTicketStatus(status),
-      error: (err) =>
-        this._error.set(err.message ?? 'Failed to load arena tickets'),
+      next: (status) => {
+        if (requestEpoch !== this.ticketRequestEpoch) return;
+        this._arenaTicketStatus.set(status);
+      },
+      error: (err) => {
+        if (requestEpoch === this.ticketRequestEpoch) {
+          this._error.set(err.message ?? 'Failed to load arena tickets');
+        }
+      },
     });
   }
 
   loadArenaOpponents(): void {
+    const requestEpoch = ++this.opponentsRequestEpoch;
     this.colosseumService.getArenaOpponents().subscribe({
       next: (data) => {
+        if (requestEpoch !== this.opponentsRequestEpoch) return;
         this._allOpponents.set(data);
         this.pickRandomOpponents();
       },
-      error: (err) =>
-        this._error.set(err.message ?? 'Failed to load arena opponents'),
+      error: (err) => {
+        if (requestEpoch === this.opponentsRequestEpoch) {
+          this._error.set(err.message ?? 'Failed to load arena opponents');
+        }
+      },
     });
   }
 
   loadColosseumRankings(): void {
+    const requestEpoch = ++this.rankingsRequestEpoch;
     this.colosseumService.getColosseumRankings().subscribe({
-      next: (data) => this._rankings.set(data.sort((a, b) => a.rank - b.rank)),
-      error: (err) =>
-        this._error.set(err.message ?? 'Failed to load arena rankings'),
+      next: (data) => {
+        if (requestEpoch !== this.rankingsRequestEpoch) return;
+        this._rankings.set([...data].sort((a, b) => a.rank - b.rank));
+      },
+      error: (err) => {
+        if (requestEpoch === this.rankingsRequestEpoch) {
+          this._error.set(err.message ?? 'Failed to load arena rankings');
+        }
+      },
     });
   }
 
   loadColosseumMatchResults(): void {
+    const requestEpoch = ++this.matchesRequestEpoch;
     this.colosseumService.getColosseumMatchResults().subscribe({
-      next: (data) =>
+      next: (data) => {
+        if (requestEpoch !== this.matchesRequestEpoch) return;
         this._previousMatches.set(
-          data.sort(
+          [...data].sort(
             (a, b) =>
               new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime(),
           ),
-        ),
-      error: (err) =>
-        this._error.set(err.message ?? 'Failed to load arena match results'),
+        );
+      },
+      error: (err) => {
+        if (requestEpoch === this.matchesRequestEpoch) {
+          this._error.set(err.message ?? 'Failed to load arena match results');
+        }
+      },
     });
   }
 
   loadChampionMarket(): void {
+    const requestEpoch = ++this.marketRequestEpoch;
     this.colosseumService.getChampionMarket().subscribe({
-      next: (market) => this._championMarket.set(market),
-      error: (err) =>
-        this._error.set(err.message ?? "Failed to load champion's market"),
+      next: (market) => {
+        if (requestEpoch === this.marketRequestEpoch) {
+          this._championMarket.set(market);
+        }
+      },
+      error: (err) => {
+        if (requestEpoch === this.marketRequestEpoch) {
+          this._error.set(err.message ?? "Failed to load champion's market");
+        }
+      },
     });
   }
 
@@ -288,6 +402,7 @@ export class ColosseumStateService {
   }
 
   private applyTicketStatus(status: ArenaTicketStatus): void {
+    this.ticketRequestEpoch += 1;
     this._arenaTicketStatus.set(status);
   }
 
@@ -317,6 +432,7 @@ export class ColosseumStateService {
 
     const status = this._status();
     if (status) {
+      this.statusRequestEpoch += 1;
       this._status.set({
         ...status,
         rating: arenaRating,
@@ -425,6 +541,7 @@ export class ColosseumStateService {
     const market = this._championMarket();
     if (!market) return;
 
+    this.marketRequestEpoch += 1;
     this._championMarket.set({
       ...market,
       glory: response.gloryRemaining,
@@ -459,6 +576,7 @@ export class ColosseumStateService {
 
     if (!status) return;
 
+    this.statusRequestEpoch += 1;
     this._status.set({
       ...status,
       rating: response.attackerRating.ratingAfter,
@@ -504,6 +622,7 @@ export class ColosseumStateService {
   private applyGloryBalance(glory: number): void {
     const status = this._status();
     if (status) {
+      this.statusRequestEpoch += 1;
       this._status.set({
         ...status,
         glory,
@@ -512,6 +631,7 @@ export class ColosseumStateService {
 
     const market = this._championMarket();
     if (market) {
+      this.marketRequestEpoch += 1;
       this._championMarket.set({
         ...market,
         glory,

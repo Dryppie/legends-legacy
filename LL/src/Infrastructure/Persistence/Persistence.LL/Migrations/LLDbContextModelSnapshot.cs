@@ -3954,6 +3954,24 @@ namespace Persistence.LL.Migrations
                     b.ToTable("CharacterSoulstoneUpgrades");
                 });
 
+            modelBuilder.Entity("Domain.Models.Synchronization.StateSyncRevision", b =>
+                {
+                    b.Property<string>("ScopeKey")
+                        .HasMaxLength(180)
+                        .HasColumnType("character varying(180)");
+
+                    b.Property<long>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("ScopeKey");
+
+                    b.ToTable("StateSyncRevisions", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Models.Transfers.PlayerTransferRecord", b =>
                 {
                     b.Property<Guid>("Id")

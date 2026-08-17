@@ -40,6 +40,31 @@ public sealed class ProphecyRepositoryTests
         Assert.Null(wrongCharacter);
     }
 
+    [Fact]
+    public async Task SyncDefinitionsAsync_is_idempotent_when_json_formatting_differs()
+    {
+        var databaseName = Guid.NewGuid().ToString();
+        var storedDefinition = CreateInstance("idempotent", ProphecyStatus.Offered).ProphecyDefinition!;
+        storedDefinition.ObjectiveParameterJson =
+            "{ \"requiredProfession\": \"Mining\", \"minimumEnemyCount\": 3 }";
+        var authoredDefinition = CreateInstance("idempotent", ProphecyStatus.Offered).ProphecyDefinition!;
+        authoredDefinition.ObjectiveParameterJson =
+            "{\"minimumEnemyCount\":3,\"requiredProfession\":\"Mining\"}";
+
+        await using (var seed = CreateDb(databaseName))
+        {
+            seed.ProphecyDefinitions.Add(storedDefinition);
+            await seed.SaveChangesAsync();
+        }
+
+        await using var db = CreateDb(databaseName);
+        var repository = new ProphecyRepository(db);
+
+        await repository.SyncDefinitionsAsync([authoredDefinition], CancellationToken.None);
+
+        Assert.False(db.HasChanges);
+    }
+
     private static PlayerProphecyInstance CreateInstance(
         string id,
         ProphecyStatus status,
@@ -79,10 +104,10 @@ public sealed class ProphecyRepositoryTests
         };
     }
 
-    private static LLDbContext CreateDb()
+    private static LLDbContext CreateDb(string? databaseName = null)
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .UseInMemoryDatabase(databaseName ?? Guid.NewGuid().ToString())
             .Options;
 
         return new LLDbContext(options);

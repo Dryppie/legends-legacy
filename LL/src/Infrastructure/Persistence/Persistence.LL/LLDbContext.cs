@@ -37,6 +37,7 @@ using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
+using Domain.Models.Synchronization;
 using Domain.Models.Transfers;
 using Domain.Models.Users;
 using Domain.Models.WorldTower;
@@ -53,6 +54,8 @@ using Microsoft.Extensions.Configuration;
 namespace Persistence.LL;
 public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(options), IDbContext
 {
+    private long _saveChangesVersion;
+
     public Task<TowerRally?> GetWorldTowerRallyWithSnapshotsAsync(
         Guid rallyId,
         string serverId,
@@ -78,7 +81,9 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         NormalizeIdentityFields();
         EnforceAppendOnlyAdminActions();
         EnforceAppendOnlyEconomyLedger();
-        return await base.SaveChangesAsync(cancellationToken);
+        var affectedRows = await base.SaveChangesAsync(cancellationToken);
+        _saveChangesVersion++;
+        return affectedRows;
     }
 
     private void EnforceAppendOnlyAdminActions()
@@ -164,6 +169,29 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         }
 
         var lockId = BitConverter.ToInt64(characterId.ToByteArray(), 0);
+        await ExecuteSqlRawAsync(
+            "SELECT pg_advisory_xact_lock({0})",
+            ct,
+            lockId);
+    }
+
+    public async Task AcquireStateSyncScopeLockAsync(
+        string scopeKey,
+        CancellationToken ct = default)
+    {
+        if (Database.ProviderName != "Npgsql.EntityFrameworkCore.PostgreSQL")
+        {
+            return;
+        }
+
+        if (Database.CurrentTransaction is null)
+        {
+            throw new InvalidOperationException(
+                "A state synchronization advisory lock requires an active transaction.");
+        }
+
+        var digest = SHA256.HashData(Encoding.UTF8.GetBytes(scopeKey));
+        var lockId = BitConverter.ToInt64(digest, 0);
         await ExecuteSqlRawAsync(
             "SELECT pg_advisory_xact_lock({0})",
             ct,
@@ -330,6 +358,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public bool HasChanges
         => ChangeTracker.HasChanges();
 
+    public long SaveChangesVersion => _saveChangesVersion;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -488,6 +518,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<MarketPlaceOrder> MarketPlaceOrders => Set<MarketPlaceOrder>();
     public DbSet<GameEventOutboxMessage> GameEventOutboxMessages => Set<GameEventOutboxMessage>();
     public DbSet<GameEventOutboxDelivery> GameEventOutboxDeliveries => Set<GameEventOutboxDelivery>();
+    public DbSet<StateSyncRevision> StateSyncRevisions => Set<StateSyncRevision>();
 
     //public DbSet<Party> Parties => Set<Party>();
 

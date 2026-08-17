@@ -1,5 +1,6 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Outbox;
+using Application.Interfaces.WebSockets;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Administration;
 using Application.Interfaces.Services.LL.Guilds;
@@ -90,6 +91,7 @@ using Services.LL.Rewards;
 using Services.LL.Snapshots;
 using Services.LL.Soulstones;
 using Services.LL.Spawnings;
+using Services.LL.Synchronization;
 using Services.LL.Users;
 using Services.LL.WorldTower;
 using System.Text.Json;
@@ -316,6 +318,7 @@ public static class DependencyInjection
         services.AddScoped<ICreatureArchiveService, CreatureArchiveService>();
 
         services.AddScoped<IGuildService, GuildService>();
+        services.AddScoped<IGuildSystemChatPublisher, GuildSystemChatPublisher>();
         services.AddScoped<IGuildVaultService, GuildVaultService>();
         services.AddSingleton<IGuildContentValidator, GuildContentValidator>();
         services.AddSingleton<IGuildContentProvider>(sp =>
@@ -437,6 +440,10 @@ public static class DependencyInjection
 
         services.AddScoped<ISimulatorService, SimulatorService>();
         services.AddScoped<IGameEventOutbox, GameEventOutbox>();
+        services.AddScoped<IGameEventPublisher, OutboxGameEventPublisher>();
+        services.AddScoped<IGameRealtimeBroadcaster, OutboxGameRealtimeBroadcaster>();
+        services.AddScoped<IGameRealtimeImmediatePublisher, NoOpGameRealtimeImmediatePublisher>();
+        services.AddScoped<IStateSyncService, StateSyncService>();
         services.AddSingleton<IGameEventOutboxConsumerRegistry, GameEventOutboxConsumerRegistry>();
         services.AddScoped<IGameEventOutboxConsumer, QuestGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, EventQuestGameEventOutboxConsumer>();

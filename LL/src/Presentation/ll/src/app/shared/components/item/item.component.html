@@ -1,7 +1,17 @@
 <app-popover [template]="hoverTpl" trigger="hover">
   <div class="flex min-w-0 flex-col">
-    <div class="ll-item-name flex min-w-0" [ngClass]="rarityClasses">
-      {{ displayName }}
+    <div
+      class="ll-item-name flex min-w-0 items-center gap-1"
+      [ngClass]="rarityClasses"
+    >
+      <span class="min-w-0 truncate">{{ displayName }}</span>
+      <span
+        *ngIf="isFavorite"
+        class="shrink-0 leading-none text-primary"
+        aria-label="Favorite"
+        title="Favorite"
+        >★</span
+      >
     </div>
     <span *ngIf="borrowedFromGuildName" class="text-[0.65rem] text-amber-300">
       Borrowed from {{ borrowedFromGuildName }}

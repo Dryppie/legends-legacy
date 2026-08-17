@@ -55,6 +55,8 @@ import { InventoryTransferComponent } from '../../../../shared/components/invent
 import { BlueprintAttributeSummaryComponent } from '../../../../shared/components/blueprint-attribute-summary/blueprint-attribute-summary.component';
 import { CraftingService } from '../../../../core/services/api/crafting/crafting.service';
 import { InventoryService } from '../../../../core/services/api/inventory/inventory.service';
+import { GuildStateService } from '../../../../core/services/api/guild/guild-state.service';
+import { finalize } from 'rxjs';
 type InventoryCollectionView = 'Equipment' | 'Stock';
 type StockCategory =
   | 'Resources'
@@ -117,6 +119,8 @@ export class InventoryComponent implements OnInit {
   readonly containerActionError = signal<string | null>(null);
   readonly favoritePendingItemId = signal<string | null>(null);
   readonly favoriteActionError = signal<string | null>(null);
+  readonly donationPendingItemId = signal<string | null>(null);
+  readonly donationActionError = signal<string | null>(null);
   readonly selectedEquipmentSlot = signal<EquipmentSlotType | null>(null);
   readonly selectedSlotEquipment = signal<EquipmentInstance | null>(null);
 
@@ -175,6 +179,7 @@ export class InventoryComponent implements OnInit {
     private readonly equipmentState?: EquipmentStateService,
     private readonly craftingService?: CraftingService,
     private readonly inventoryService?: InventoryService,
+    private readonly guildState?: GuildStateService,
   ) {
     effect(() => {
       const objectiveType = this.questState.pinnedOnboardingObjective()?.type;
@@ -281,6 +286,48 @@ export class InventoryComponent implements OnInit {
 
     this.enterScrapMode();
     this.selectedItems = [item];
+  }
+
+  canDonateToGuild(item: InventoryItem): boolean {
+    const equipment = this.equipmentInstance(item);
+    return (
+      !!this.guildState?.isInGuild() &&
+      !!equipment &&
+      !equipment.isGuildBorrowed &&
+      !this.isSelectedEquippedItem(item)
+    );
+  }
+
+  donateToGuild(item: InventoryItem): void {
+    if (
+      this.donationPendingItemId() !== null ||
+      !this.guildState ||
+      !this.canDonateToGuild(item)
+    ) {
+      return;
+    }
+
+    const itemInstanceId = item.itemInstance.id;
+    this.donationPendingItemId.set(itemInstanceId);
+    this.donationActionError.set(null);
+
+    this.guildState
+      .donateVaultItem(itemInstanceId)
+      .pipe(finalize(() => this.donationPendingItemId.set(null)))
+      .subscribe({
+        next: () => {
+          if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
+            this.clearSelectedItem();
+          }
+        },
+        error: (error) => {
+          if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
+            this.donationActionError.set(
+              error?.message ?? 'Failed to donate this item to the guild.',
+            );
+          }
+        },
+      });
   }
 
   handleSelectedItemTransferred(item: InventoryItem): void {
@@ -538,6 +585,7 @@ export class InventoryComponent implements OnInit {
     this.selectedItem.set(inspected);
     if (changedItem) {
       this.favoriteActionError.set(null);
+      this.donationActionError.set(null);
       this.resetBlueprintAction();
       this.resetContainerAction(item);
       this.loadBlueprintRecipes(item);
@@ -913,6 +961,7 @@ export class InventoryComponent implements OnInit {
   private clearSelectedItem(): void {
     this.selectedItem.set(null);
     this.mobileItemInspectorOpen.set(false);
+    this.donationActionError.set(null);
     this.resetBlueprintAction();
     this.resetContainerAction();
   }

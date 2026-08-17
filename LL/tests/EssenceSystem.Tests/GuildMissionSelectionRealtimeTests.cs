@@ -52,7 +52,7 @@ public sealed class GuildMissionSelectionRealtimeTests
 
         var audience = Assert.IsType<Audience.Guild>(publisher.Audience);
         Assert.Equal(guildId, audience.GuildId);
-        Assert.Equal(guildId, Assert.IsType<GuildStateChangedMsg>(publisher.Message).GuildId);
+        Assert.Equal(guildId, Assert.IsType<GuildMissionsChangedMsg>(publisher.Message).GuildId);
         Assert.Equal(GameEventOutboxConsumerNames.RealtimeGuildMission, consumer.Consumer);
         Assert.True(consumer.CanHandle(GameEventTypes.GuildMissionSelected));
     }
@@ -65,6 +65,31 @@ public sealed class GuildMissionSelectionRealtimeTests
         Assert.Equal(
             [GameEventOutboxConsumerNames.RealtimeGuildMission],
             registry.GetConsumers(GameEventTypes.GuildMissionSelected));
+    }
+
+    [Fact]
+    public async Task Committed_progress_event_notifies_the_whole_guild()
+    {
+        var guildId = Guid.NewGuid();
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var publisher = new RecordingPublisher();
+        var consumer = new RealtimeGuildMissionGameEventOutboxConsumer(publisher, options);
+
+        await consumer.HandleAsync(
+            new GameEventOutboxMessage
+            {
+                EventType = GameEventTypes.GuildMissionProgressed,
+                PayloadJson = JsonSerializer.Serialize(new GuildMissionProgressedPayload(guildId), options)
+            },
+            CancellationToken.None);
+
+        var audience = Assert.IsType<Audience.Guild>(publisher.Audience);
+        Assert.Equal(guildId, audience.GuildId);
+        Assert.Equal(guildId, Assert.IsType<GuildMissionsChangedMsg>(publisher.Message).GuildId);
+        Assert.True(consumer.CanHandle(GameEventTypes.GuildMissionProgressed));
+        Assert.Equal(
+            [GameEventOutboxConsumerNames.RealtimeGuildMission],
+            new GameEventOutboxConsumerRegistry().GetConsumers(GameEventTypes.GuildMissionProgressed));
     }
 
     private static GuildMissionOverviewDto CreateOverview(Guid guildId) =>
