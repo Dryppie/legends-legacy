@@ -195,6 +195,7 @@ public sealed class LiveOpsAdministrationTests
 
         var service = CreateService(db, new RecordingRefreshTokenRepository());
         var items = await service.SearchItemsAsync("support", 20, CancellationToken.None);
+        var players = await service.SearchPlayersAsync("player", 20, CancellationToken.None);
         var player = await service.GetPlayerAsync(characterId, CancellationToken.None);
         var history = await service.GetHistoryAsync(
             accountId,
@@ -204,6 +205,7 @@ public sealed class LiveOpsAdministrationTests
 
         var item = Assert.Single(items);
         Assert.Equal("support_token", item.Id);
+        Assert.Equal(characterId, Assert.Single(players).CharacterId);
         Assert.NotNull(player);
         Assert.Equal(characterId, player.CharacterId);
         Assert.Equal(actionId, Assert.Single(history).OperationId);

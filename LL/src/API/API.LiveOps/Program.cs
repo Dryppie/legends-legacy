@@ -7,6 +7,7 @@ using Common;
 using Microsoft.AspNetCore.Authorization;
 using Persistence.LL;
 using RealTime.LL;
+using Services.AdminDashboard;
 using Services.LL;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -66,6 +67,7 @@ builder.Services.AddServices(
     apiLLPath,
     builder.Environment.IsDevelopment());
 builder.Services.AddRealTime();
+builder.Services.AddAdminDashboardServices();
 builder.Services.AddCommonServices();
 
 builder.Services.Configure<ChatModerationOptions>(

@@ -1,5 +1,6 @@
 using Application.Common.Interfaces;
 using Domain.Models.Administration;
+using Domain.Models.Entities.Characters;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -36,8 +37,8 @@ public sealed class AdministrationRepository(IDbContext context) : IAdministrati
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        var player = await BasePlayers()
-            .Where(x => x.AccountId == accountId)
+        var player = await SelectPlayerRows(
+                BasePlayers().Where(x => x.UserId == accountId))
             .SingleOrDefaultAsync(cancellationToken);
         return player is null
             ? null
@@ -49,8 +50,8 @@ public sealed class AdministrationRepository(IDbContext context) : IAdministrati
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        var player = await BasePlayers()
-            .Where(x => x.CharacterId == characterId)
+        var player = await SelectPlayerRows(
+                BasePlayers().Where(x => x.Id == characterId))
             .SingleOrDefaultAsync(cancellationToken);
         return player is null
             ? null
@@ -69,7 +70,7 @@ public sealed class AdministrationRepository(IDbContext context) : IAdministrati
 
         if (Guid.TryParse(trimmed, out var id))
         {
-            players = players.Where(x => x.AccountId == id || x.CharacterId == id);
+            players = players.Where(x => x.UserId == id || x.Id == id);
         }
         else
         {
@@ -81,13 +82,14 @@ public sealed class AdministrationRepository(IDbContext context) : IAdministrati
 
             players = players.Where(x =>
                 x.NormalizedName.Contains(normalized) ||
-                (x.NormalizedEmail != null && x.NormalizedEmail.Contains(normalized)) ||
-                x.AccountLabel.ToUpper().Contains(normalized));
+                (x.User.NormalizedEmail != null && x.User.NormalizedEmail.Contains(normalized)) ||
+                x.User.Username.ToUpper().Contains(normalized));
         }
 
-        var matches = await players
-            .OrderBy(x => x.CharacterName)
-            .Take(resultLimit)
+        var matches = await SelectPlayerRows(
+                players
+                    .OrderBy(x => x.Name)
+                    .Take(resultLimit))
             .ToListAsync(cancellationToken);
         if (matches.Count == 0)
         {
@@ -176,19 +178,20 @@ public sealed class AdministrationRepository(IDbContext context) : IAdministrati
     public void AddRestriction(AccountRestriction restriction) =>
         context.AccountRestrictions.Add(restriction);
 
-    private IQueryable<PlayerRow> BasePlayers() =>
-        from user in context.Users.AsNoTracking()
-        join character in context.Characters.AsNoTracking() on user.Id equals character.UserId
-        select new PlayerRow(
-            user.Id,
+    private IQueryable<Character> BasePlayers() =>
+        context.Characters.AsNoTracking();
+
+    private static IQueryable<PlayerRow> SelectPlayerRows(IQueryable<Character> players) =>
+        players.Select(character => new PlayerRow(
+            character.UserId,
             character.Id,
-            user.Username,
-            user.Email,
-            user.NormalizedEmail,
+            character.User.Username,
+            character.User.Email,
+            character.User.NormalizedEmail,
             character.Name,
             character.NormalizedName,
             character.Level,
-            user.CreatedUtc);
+            character.User.CreatedUtc));
 
     private async Task<PlayerAdministrationSnapshot> AddActiveBanAsync(
         PlayerRow player,
