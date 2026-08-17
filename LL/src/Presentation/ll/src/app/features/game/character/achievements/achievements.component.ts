@@ -269,8 +269,6 @@ export class AchievementsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (equippedTitle) => {
           this.characterState.updateEquippedTitle(equippedTitle);
-          this.refreshTitles();
-          this.characterState.refresh();
         },
         error: (err) => this.error.set(err.message),
       });
@@ -315,7 +313,6 @@ export class AchievementsComponent implements OnInit, OnDestroy {
                 : title,
             ),
           );
-          this.characterState.refresh();
         },
         error: (err) => {
           this.titleDisplayPosition.set(previousPosition);
@@ -328,8 +325,6 @@ export class AchievementsComponent implements OnInit, OnDestroy {
     this.achievementsApi.unequipTitle().subscribe({
       next: () => {
         this.characterState.updateEquippedTitle(null);
-        this.refreshTitles();
-        this.characterState.refresh();
       },
       error: (err) => this.error.set(err.message),
     });
@@ -402,13 +397,6 @@ export class AchievementsComponent implements OnInit, OnDestroy {
     return achievement.completedAt
       ? new Date(achievement.completedAt).getTime()
       : 0;
-  }
-
-  private refreshTitles(): void {
-    this.achievementsApi.getTitles().subscribe({
-      next: (titles) => this.applyTitles(titles),
-      error: (err) => this.error.set(err.message),
-    });
   }
 
   private applyTitles(titles: TitleDto[]): void {

@@ -39,6 +39,8 @@ public sealed class StateSyncServiceTests
         Assert.Equal(1, checkpoint.Revisions[StateSyncScopes.Character]);
         Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.CharacterOverview]);
         Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Inventory]);
+        Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Soulstones]);
+        Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Prophecies]);
         Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Marketplace]);
         Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Guild]);
         Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Colosseum]);

@@ -50,6 +50,8 @@ export class StateSyncCoordinator {
   private readonly handledUpdateIds = new Set<string>();
   private readonly handledUpdateOrder: string[] = [];
   private reconcilePromise?: Promise<void>;
+  private reconcileRetryAttempt = 0;
+  private reconcileRetryTimeoutId?: number;
   private initialized = false;
   private lastFocusReconcileAt = 0;
   private readonly _status = signal<StateSyncRegistrationStatus[]>([]);
@@ -78,6 +80,11 @@ export class StateSyncCoordinator {
       window.clearTimeout(timeoutId);
     }
     this.pendingRefreshes.clear();
+    if (this.reconcileRetryTimeoutId !== undefined) {
+      window.clearTimeout(this.reconcileRetryTimeoutId);
+      this.reconcileRetryTimeoutId = undefined;
+    }
+    this.reconcileRetryAttempt = 0;
     for (const scopedRegistrations of this.registrations.values()) {
       for (const registration of scopedRegistrations.values()) {
         if (registration.retryTimeoutId !== undefined) {
@@ -105,19 +112,25 @@ export class StateSyncCoordinator {
       this.registrations.set(scope, scoped);
     }
 
-    scoped.set(key, {
+    const previous = scoped.get(key);
+    if (previous?.retryTimeoutId !== undefined) {
+      window.clearTimeout(previous.retryTimeoutId);
+    }
+
+    const registration: StateSyncRegistration = {
       key,
       refresh,
       shouldRefresh,
       lastRefreshRevision: this.revisions.get(scope) ?? 0,
       inFlight: false,
       retryAttempt: 0,
-    });
+    };
+    scoped.set(key, registration);
     this.publishStatus();
 
     return () => {
-      const registration = scoped?.get(key);
-      if (registration?.retryTimeoutId !== undefined) {
+      if (scoped?.get(key) !== registration) return;
+      if (registration.retryTimeoutId !== undefined) {
         window.clearTimeout(registration.retryTimeoutId);
       }
       scoped?.delete(key);
@@ -132,17 +145,39 @@ export class StateSyncCoordinator {
 
   reconcile(): Promise<void> {
     if (this.reconcilePromise) return this.reconcilePromise;
+    if (this.reconcileRetryTimeoutId !== undefined) {
+      window.clearTimeout(this.reconcileRetryTimeoutId);
+      this.reconcileRetryTimeoutId = undefined;
+    }
 
     const service = this.injector.get(StateSyncService);
     this.reconcilePromise = firstValueFrom(service.getCheckpoint())
-      .then((checkpoint) => this.acceptCheckpoint(checkpoint))
+      .then((checkpoint) => {
+        this.reconcileRetryAttempt = 0;
+        this.acceptCheckpoint(checkpoint);
+      })
       .catch((error) => {
         console.warn('State checkpoint reconciliation failed', error);
+        this.scheduleReconcileRetry();
       })
       .finally(() => {
         this.reconcilePromise = undefined;
       });
     return this.reconcilePromise;
+  }
+
+  private scheduleReconcileRetry(): void {
+    if (!this.initialized || this.reconcileRetryTimeoutId !== undefined) return;
+
+    this.reconcileRetryAttempt += 1;
+    const delay = Math.min(
+      30_000,
+      1_000 * 2 ** Math.min(this.reconcileRetryAttempt - 1, 5),
+    );
+    this.reconcileRetryTimeoutId = window.setTimeout(() => {
+      this.reconcileRetryTimeoutId = undefined;
+      void this.reconcile();
+    }, delay);
   }
 
   private acceptCheckpoint(checkpoint: StateSyncCheckpoint): void {

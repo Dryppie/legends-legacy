@@ -807,9 +807,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             await _tournaments.AddAsync(participant, cancellationToken);
         }
 
-        await _tournaments.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        await PublishTournamentEventAsync(tournament, "TournamentRegistrationUpdated", now, cancellationToken);
+        await SaveCommitAndPublishTournamentEventAsync(
+            transaction,
+            tournament,
+            "TournamentRegistrationUpdated",
+            now,
+            cancellationToken);
 
         return new RegisterTournamentResult(
             true,
@@ -884,9 +887,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         tournamentSnapshot.CreatedAtUtc = now;
         participant.UpdatedAtUtc = now;
 
-        await _tournaments.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        await PublishTournamentEventAsync(
+        await SaveCommitAndPublishTournamentEventAsync(
+            transaction,
             tournament,
             "TournamentLoadoutUpdated",
             now,
@@ -952,9 +954,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         participant.UpdatedAtUtc = now;
         tournament.RegisteredParticipantCount = Math.Max(0, tournament.RegisteredParticipantCount - 1);
         tournament.UpdatedAtUtc = now;
-        await _tournaments.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        await PublishTournamentEventAsync(tournament, "TournamentRegistrationUpdated", now, cancellationToken);
+        await SaveCommitAndPublishTournamentEventAsync(
+            transaction,
+            tournament,
+            "TournamentRegistrationUpdated",
+            now,
+            cancellationToken);
 
         return new WithdrawTournamentResult(true);
     }
@@ -1000,9 +1005,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         participant.UpdatedAtUtc = now;
 
         await _tournaments.AddAsync(team, cancellationToken);
-        await _tournaments.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        await PublishTournamentEventAsync(tournament, "TournamentTeamUpdated", now, cancellationToken);
+        await SaveCommitAndPublishTournamentEventAsync(
+            transaction,
+            tournament,
+            "TournamentTeamUpdated",
+            now,
+            cancellationToken);
 
         return new CreateTournamentTeamResult(true, team.Id);
     }
@@ -1049,9 +1057,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             UpdatedAtUtc = now
         }, cancellationToken);
 
-        await _tournaments.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        await PublishTournamentEventAsync(tournamentId, "TournamentTeamUpdated", now, cancellationToken);
+        await SaveCommitAndPublishTournamentEventAsync(
+            transaction,
+            tournamentId,
+            "TournamentTeamUpdated",
+            now,
+            cancellationToken);
         return new TournamentTeamActionResult(true);
     }
 
@@ -1081,9 +1092,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         if (invite.Team.Status != TournamentTeamStatus.Forming)
         {
             await CancelPendingRequestsForTeamAsync(invite.TournamentId, invite.TeamId, now, cancellationToken);
-            await _tournaments.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-            await PublishTournamentEventAsync(invite.TournamentId, "TournamentTeamUpdated", now, cancellationToken);
+            await SaveCommitAndPublishTournamentEventAsync(
+                transaction,
+                invite.TournamentId,
+                "TournamentTeamUpdated",
+                now,
+                cancellationToken);
             return new TournamentTeamActionResult(false, "This tournament team invite is no longer available.");
         }
 
@@ -1093,9 +1107,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         {
             invite.Team.UpdatedAtUtc = now;
             await CancelPendingRequestsForTeamAsync(invite.TournamentId, invite.TeamId, now, cancellationToken);
-            await _tournaments.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-            await PublishTournamentEventAsync(invite.TournamentId, "TournamentTeamUpdated", now, cancellationToken);
+            await SaveCommitAndPublishTournamentEventAsync(
+                transaction,
+                invite.TournamentId,
+                "TournamentTeamUpdated",
+                now,
+                cancellationToken);
             return new TournamentTeamActionResult(
                 false,
                 "That tournament team is already full. Ask the team owner for a new invite if a slot opens.");
@@ -1106,9 +1123,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         if (participant.TeamId.HasValue)
         {
             await CancelPendingRequestsForParticipantAsync(invite.TournamentId, participant.Id, now, cancellationToken);
-            await _tournaments.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-            await PublishTournamentEventAsync(invite.TournamentId, "TournamentTeamUpdated", now, cancellationToken);
+            await SaveCommitAndPublishTournamentEventAsync(
+                transaction,
+                invite.TournamentId,
+                "TournamentTeamUpdated",
+                now,
+                cancellationToken);
             return new TournamentTeamActionResult(false, "You already belong to a tournament team.");
         }
 
@@ -1125,9 +1145,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         invite.Status = TournamentTeamRequestStatus.Accepted;
         invite.UpdatedAtUtc = now;
 
-        await _tournaments.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        await PublishTournamentEventAsync(invite.TournamentId, "TournamentTeamUpdated", now, cancellationToken);
+        await SaveCommitAndPublishTournamentEventAsync(
+            transaction,
+            invite.TournamentId,
+            "TournamentTeamUpdated",
+            now,
+            cancellationToken);
         return new TournamentTeamActionResult(true);
     }
 
@@ -1137,6 +1160,9 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         Guid teamId,
         CancellationToken cancellationToken)
     {
+        await using var transaction = await BeginOwnedTransactionIfNeededAsync(cancellationToken);
+        await _tournamentLockService.LockTournamentAsync(tournamentId, cancellationToken);
+
         var now = UtcNow();
         if (!await CanMutateTeamsAsync(tournamentId, now, cancellationToken)) return null;
 
@@ -1163,8 +1189,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             CreatedAtUtc = now,
             UpdatedAtUtc = now
         }, cancellationToken);
-        await _tournaments.SaveChangesAsync(cancellationToken);
-        await PublishTournamentEventAsync(tournamentId, "TournamentTeamUpdated", now, cancellationToken);
+        await SaveCommitAndPublishTournamentEventAsync(
+            transaction,
+            tournamentId,
+            "TournamentTeamUpdated",
+            now,
+            cancellationToken);
         return new TournamentTeamActionResult(true);
     }
 
@@ -1199,9 +1229,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         if (application.Team.Status != TournamentTeamStatus.Forming)
         {
             await CancelPendingRequestsForTeamAsync(application.TournamentId, application.TeamId, now, cancellationToken);
-            await _tournaments.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-            await PublishTournamentEventAsync(application.TournamentId, "TournamentTeamUpdated", now, cancellationToken);
+            await SaveCommitAndPublishTournamentEventAsync(
+                transaction,
+                application.TournamentId,
+                "TournamentTeamUpdated",
+                now,
+                cancellationToken);
             return new TournamentTeamActionResult(false, "This tournament team application is no longer available.");
         }
 
@@ -1211,9 +1244,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         {
             application.Team.UpdatedAtUtc = now;
             await CancelPendingRequestsForTeamAsync(application.TournamentId, application.TeamId, now, cancellationToken);
-            await _tournaments.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-            await PublishTournamentEventAsync(application.TournamentId, "TournamentTeamUpdated", now, cancellationToken);
+            await SaveCommitAndPublishTournamentEventAsync(
+                transaction,
+                application.TournamentId,
+                "TournamentTeamUpdated",
+                now,
+                cancellationToken);
             return new TournamentTeamActionResult(false, "That tournament team is already full.");
         }
 
@@ -1234,9 +1270,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         application.Status = TournamentTeamRequestStatus.Accepted;
         application.UpdatedAtUtc = now;
 
-        await _tournaments.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        await PublishTournamentEventAsync(application.TournamentId, "TournamentTeamUpdated", now, cancellationToken);
+        await SaveCommitAndPublishTournamentEventAsync(
+            transaction,
+            application.TournamentId,
+            "TournamentTeamUpdated",
+            now,
+            cancellationToken);
         return new TournamentTeamActionResult(true);
     }
 
@@ -1266,9 +1305,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         team.MemberCount = Math.Max(0, team.MemberCount - 1);
         team.UpdatedAtUtc = now;
 
-        await _tournaments.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        await PublishTournamentEventAsync(tournamentId, "TournamentTeamUpdated", now, cancellationToken);
+        await SaveCommitAndPublishTournamentEventAsync(
+            transaction,
+            tournamentId,
+            "TournamentTeamUpdated",
+            now,
+            cancellationToken);
         return new TournamentTeamActionResult(true);
     }
 
@@ -1330,9 +1372,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             reward.ClaimedAtUtc = now;
         }
 
-        await _tournaments.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        await PublishTournamentEventAsync(rewards[0].TournamentId, "TournamentRewardsAvailable", now, cancellationToken);
+        await SaveCommitAndPublishTournamentEventAsync(
+            transaction,
+            rewards[0].TournamentId,
+            "TournamentRewardsAvailable",
+            now,
+            cancellationToken);
 
         return new ClaimTournamentRewardsResult(
             true,
@@ -1369,9 +1414,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         tournament.StartsAtUtc = now.AddHours(1);
         tournament.UpdatedAtUtc = now;
 
-        await _tournaments.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        await PublishTournamentEventAsync(
+        await SaveCommitAndPublishTournamentEventAsync(
+            transaction,
             tournament,
             "DevelopmentRegistrationOpened",
             now,
@@ -3479,6 +3523,77 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     private Task<ITournamentGroundsTransaction> BeginOwnedTransactionIfNeededAsync(CancellationToken cancellationToken)
         => _tournaments.BeginTransactionIfNeededAsync(cancellationToken);
 
+    private async Task SaveCommitAndPublishTournamentEventAsync(
+        ITournamentGroundsTransaction transaction,
+        Guid tournamentId,
+        string eventName,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        await _tournaments.SaveChangesAsync(cancellationToken);
+        var tournament = await _tournaments.Tournaments.FirstOrDefaultAsync(
+            item => item.Id == tournamentId,
+            cancellationToken);
+
+        if (tournament is null)
+        {
+            await transaction.CommitAsync(cancellationToken);
+            return;
+        }
+
+        await CommitAndPublishTournamentEventAsync(
+            transaction,
+            tournament,
+            eventName,
+            now,
+            cancellationToken);
+    }
+
+    private async Task SaveCommitAndPublishTournamentEventAsync(
+        ITournamentGroundsTransaction transaction,
+        TournamentInstance tournament,
+        string eventName,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        await _tournaments.SaveChangesAsync(cancellationToken);
+        await CommitAndPublishTournamentEventAsync(
+            transaction,
+            tournament,
+            eventName,
+            now,
+            cancellationToken);
+    }
+
+    private async Task CommitAndPublishTournamentEventAsync(
+        ITournamentGroundsTransaction transaction,
+        TournamentInstance tournament,
+        string eventName,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        if (_outbox is not null)
+        {
+            await EnqueueTournamentEventAsync(
+                tournament,
+                eventName,
+                now,
+                cancellationToken);
+            await _tournaments.SaveChangesAsync(cancellationToken);
+        }
+
+        await transaction.CommitAsync(cancellationToken);
+
+        if (_outbox is null)
+        {
+            await PublishTournamentEventAsync(
+                tournament,
+                eventName,
+                now,
+                cancellationToken);
+        }
+    }
+
     private async Task PublishTournamentEventAsync(
         Guid tournamentId,
         string eventName,
@@ -3498,11 +3613,28 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
+        if (_outbox is not null)
+        {
+            await EnqueueTournamentEventAsync(
+                tournament,
+                eventName,
+                now,
+                cancellationToken);
+            await _tournaments.SaveChangesAsync(cancellationToken);
+            return;
+        }
+
         try
         {
+            var update = await BuildTournamentUpdateAsync(
+                tournament,
+                eventName,
+                now,
+                cancellationToken);
+
             await _gameRealtime.PublishAsync(
                 new Audience.World(),
-                await BuildTournamentUpdateAsync(tournament, eventName, now, cancellationToken),
+                update,
                 nameof(TournamentGroundsService),
                 cancellationToken);
         }
@@ -3518,24 +3650,17 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var payload = await BuildTournamentUpdateAsync(
-                tournament,
-                eventName,
-                now,
-                cancellationToken);
-            await _outbox!.EnqueueAsync(
-                GameEventTypes.TournamentGroundsUpdated,
-                payload,
-                characterId: null,
-                accountId: null,
-                cancellationToken);
-        }
-        catch
-        {
-            // REST remains authoritative; realtime is only a convenience refresh signal.
-        }
+        var update = await BuildTournamentUpdateAsync(
+            tournament,
+            eventName,
+            now,
+            cancellationToken);
+        await _outbox!.EnqueueAsync(
+            GameEventTypes.TournamentGroundsUpdated,
+            update,
+            characterId: null,
+            accountId: null,
+            cancellationToken);
     }
 
     private async Task<TournamentGroundsUpdated> BuildTournamentUpdateAsync(

@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Application.MediatR.Attributes;
 using Application.MediatR.Markers;
+using Application.MediatR.Synchronization;
 using Application.Interfaces.Services.LL;
 using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
@@ -150,6 +151,7 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         CancellationToken cancellationToken)
     {
         var reason = typeof(TRequest).Name;
+        var scopeProfile = StateSyncCommandScopeCatalog.GetProfile(typeof(TRequest));
         var affectedCharacterIds = _db.GameEventOutboxMessages.Local
             .Where(message =>
                 message.CharacterId.HasValue &&
@@ -163,7 +165,7 @@ public sealed class TransactionBehavior<TRequest, TResponse>
 
         foreach (var affectedCharacterId in affectedCharacterIds.Order())
         {
-            foreach (var characterScope in GetCharacterScopes(affectedCharacterId).Distinct(StringComparer.Ordinal))
+            foreach (var characterScope in GetCharacterScopes(affectedCharacterId, scopeProfile).Distinct(StringComparer.Ordinal))
             {
                 await _stateSync.InvalidateCharacterScopeAsync(
                     affectedCharacterId,
@@ -173,7 +175,7 @@ public sealed class TransactionBehavior<TRequest, TResponse>
             }
         }
 
-        foreach (var worldScope in GetWorldScopes())
+        foreach (var worldScope in scopeProfile.WorldScopes)
         {
             await _stateSync.InvalidateWorldScopeAsync(
                 worldScope,
@@ -182,74 +184,28 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         }
     }
 
-    private IEnumerable<string> GetCharacterScopes(Guid characterId)
+    private IEnumerable<string> GetCharacterScopes(
+        Guid characterId,
+        StateSyncCommandScopeProfile profile)
     {
-        var requestNamespace = typeof(TRequest).Namespace ?? string.Empty;
-
         yield return StateSyncScopes.Character;
 
-        if (ShouldInvalidateCharacterOverview(requestNamespace))
+        if (profile.RefreshCharacterOverview || HasCharacterOverviewMutation())
         {
             yield return StateSyncScopes.CharacterOverview;
         }
 
-        if (requestNamespace.Contains(".Inventories.", StringComparison.Ordinal))
+        foreach (var scope in profile.CharacterScopes)
         {
-            yield return StateSyncScopes.Inventory;
+            yield return scope;
         }
-        if (requestNamespace.Contains(".Equipments.", StringComparison.Ordinal))
+
+        if (HasProphecyMutation(characterId))
         {
-            yield return StateSyncScopes.Equipment;
-            yield return StateSyncScopes.Inventory;
-            yield return StateSyncScopes.Quests;
+            yield return StateSyncScopes.Prophecies;
         }
-        if (requestNamespace.Contains(".Quests.Events.", StringComparison.Ordinal))
-        {
-            yield return StateSyncScopes.EventQuests;
-            yield return StateSyncScopes.Inventory;
-        }
-        else if (requestNamespace.Contains(".Quests.", StringComparison.Ordinal))
-        {
-            yield return StateSyncScopes.Quests;
-            yield return StateSyncScopes.AreaAccess;
-        }
-        if (requestNamespace.Contains(".Achievements.", StringComparison.Ordinal))
-        {
-            yield return StateSyncScopes.Achievements;
-        }
-        if (requestNamespace.Contains(".Dungeons.", StringComparison.Ordinal))
-        {
-            yield return StateSyncScopes.Dungeons;
-            yield return StateSyncScopes.Inventory;
-            yield return StateSyncScopes.Quests;
-        }
-        if (requestNamespace.Contains(".Essences.", StringComparison.Ordinal))
-        {
-            yield return StateSyncScopes.Essences;
-            yield return StateSyncScopes.Inventory;
-            yield return StateSyncScopes.Equipment;
-            yield return StateSyncScopes.Quests;
-        }
-        if (requestNamespace.Contains(".MarketPlaces.", StringComparison.Ordinal))
-        {
-            yield return StateSyncScopes.Inventory;
-        }
-        if (requestNamespace.Contains(".Guilds.", StringComparison.Ordinal))
-        {
-            yield return StateSyncScopes.Inventory;
-            yield return StateSyncScopes.Equipment;
-        }
-        if (requestNamespace.Contains(".Colosseum.", StringComparison.Ordinal))
-        {
-            yield return StateSyncScopes.Inventory;
-        }
-        if (requestNamespace.Contains(".Crafting.", StringComparison.Ordinal)
-            || requestNamespace.Contains(".Soulstones.", StringComparison.Ordinal))
-        {
-            yield return StateSyncScopes.Inventory;
-            yield return StateSyncScopes.Quests;
-        }
-        if (requestNamespace.Contains(".CharacterActions.", StringComparison.Ordinal))
+
+        if (profile.InventoryWhenChanged)
         {
             // Quest, event-quest, and achievement progress is applied later by
             // dedicated outbox consumers. Inventory only needs an invalidation
@@ -261,21 +217,14 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         }
     }
 
-    private bool ShouldInvalidateCharacterOverview(string requestNamespace)
-    {
-        if (!requestNamespace.Contains(".CharacterActions.", StringComparison.Ordinal))
-        {
-            return true;
-        }
-
+    private bool HasCharacterOverviewMutation() =>
         // Ordinary idle-combat resolutions only change fields already returned
         // by CharacterDto. A level-up or crafting progression changes the richer
         // overview and therefore still requires its own revision.
-        return _db.GameEventOutboxMessages.Local.Any(message =>
+        _db.GameEventOutboxMessages.Local.Any(message =>
             message.EventType is GameEventTypes.CharacterLevelReached
                 or GameEventTypes.EquipmentCrafted
                 or GameEventTypes.EquipmentTempered);
-    }
 
     private bool HasInventoryMutation(Guid characterId) =>
         _db.InventoryItems.Local.Any(item =>
@@ -287,6 +236,18 @@ public sealed class TransactionBehavior<TRequest, TResponse>
             message.CharacterId == characterId
             && (message.EventType == GameEventTypes.InventoryItemsGranted
                 || IsRealtimeEvent(message.PayloadJson, nameof(LootReceived))));
+
+    private bool HasProphecyMutation(Guid characterId) =>
+        _db.PlayerProphecyInstances.Local.Any(instance =>
+            instance.CharacterId == characterId
+            && _db.GetEntry(instance).State is EntityState.Added
+                or EntityState.Modified
+                or EntityState.Deleted)
+        || _db.WeeklyRevelationProgress.Local.Any(progress =>
+            progress.CharacterId == characterId
+            && _db.GetEntry(progress).State is EntityState.Added
+                or EntityState.Modified
+                or EntityState.Deleted);
 
     private static bool IsRealtimeEvent(string payloadJson, string eventName)
     {
@@ -301,27 +262,6 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         catch (JsonException)
         {
             return false;
-        }
-    }
-
-    private static IEnumerable<string> GetWorldScopes()
-    {
-        var requestNamespace = typeof(TRequest).Namespace;
-        if (requestNamespace?.Contains(".MarketPlaces.", StringComparison.Ordinal) == true)
-        {
-            yield return StateSyncScopes.Marketplace;
-        }
-        if (requestNamespace?.Contains(".Guilds.", StringComparison.Ordinal) == true)
-        {
-            yield return StateSyncScopes.Guild;
-        }
-        if (requestNamespace?.Contains(".Colosseum.", StringComparison.Ordinal) == true)
-        {
-            yield return StateSyncScopes.Colosseum;
-        }
-        if (requestNamespace?.Contains(".Colosseum.Tournaments.", StringComparison.Ordinal) == true)
-        {
-            yield return StateSyncScopes.Tournament;
         }
     }
 

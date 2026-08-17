@@ -49,6 +49,21 @@ var signalR = builder.Services.AddSignalR()
         options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
+var signalRRedis = config.GetConnectionString("Redis");
+var useRedisSignalR = config.GetValue<bool>("SignalR:UseRedisBackplane");
+if (useRedisSignalR && string.IsNullOrWhiteSpace(signalRRedis))
+{
+    throw new InvalidOperationException(
+        "ConnectionStrings:Redis is required when SignalR:UseRedisBackplane is enabled.");
+}
+if (useRedisSignalR)
+{
+    signalR.AddStackExchangeRedis(signalRRedis!, options =>
+    {
+        options.Configuration.ChannelPrefix = RedisChannel.Literal("legends-legacy:game");
+    });
+}
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -266,20 +281,6 @@ app.Use(async (context, next) =>
         }
         return Task.CompletedTask;
     });
-var signalRRedis = config.GetConnectionString("Redis");
-var useRedisSignalR = config.GetValue<bool>("SignalR:UseRedisBackplane");
-if (useRedisSignalR && string.IsNullOrWhiteSpace(signalRRedis))
-{
-    throw new InvalidOperationException(
-        "ConnectionStrings:Redis is required when SignalR:UseRedisBackplane is enabled.");
-}
-if (useRedisSignalR)
-{
-    signalR.AddStackExchangeRedis(signalRRedis!, options =>
-    {
-        options.Configuration.ChannelPrefix = RedisChannel.Literal("legends-legacy:game");
-    });
-}
     await next();
 });
 

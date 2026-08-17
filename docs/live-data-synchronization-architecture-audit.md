@@ -7,7 +7,7 @@ Date: 2026-08-17
 The in-repository implementation described by this audit is now complete for the supported game resources:
 
 - persistent state notifications are queued through the transactional outbox and retain stable delivery IDs;
-- character, inventory, equipment, quests, event quests, essences, dungeons, marketplace, guild, colosseum, tournament, and bootstrap checkpoints use independent monotonic revisions;
+- character, inventory, equipment, quests, event quests, achievements, essences, soulstones, dungeons, prophecies, marketplace, guild, colosseum, and tournament checkpoints use independent monotonic revisions;
 - successful mutation responses carry the affected revisions in `X-LL-State-Revisions`, and the Angular response interceptor forces post-response reconciliation to repair late stale responses;
 - registered Angular resources acknowledge a revision only after their HTTP refresh completes successfully, expose convergence status, coalesce concurrent invalidations, and retry failures with bounded exponential backoff;
 - reconnect, focus, and online recovery all use the same checkpoint protocol;
@@ -16,6 +16,16 @@ The in-repository implementation described by this audit is now complete for the
 - architecture and convergence tests guard durable publication, independent resource revisions, deduplication, retries, equal-revision recovery, and late mutation responses.
 
 The `AddStateSyncRevisions` migration is generated but is not applied by this change. Redis provisioning, connection-secret configuration, rollout, dashboards, and alerting remain deployment responsibilities outside this repository.
+
+`GameBootstrapStateService` remains an initial-hydration and reconnect composite rather than a revisioned resource. Its persistent subresources reconcile through their narrower scopes; current character-action recovery still uses the existing bootstrap/polling path. World Tower frames remain a deliberately separate sequenced stream. The compatibility `GameEventService` is also still present for transient UX/domain notifications, so the legacy live-event layer has not yet been fully removed.
+
+An independent follow-up review corrected the implementation defects it found: game SignalR Redis registration now occurs before the service provider is built; Prophecies and Soulstones participate in checkpoint reconciliation; failed checkpoints retry with bounded backoff; and title mutations declare their achievements dependency instead of relying on component cross-store refreshes.
+
+Tournament Grounds now saves its domain mutation and durable source outbox event inside the same service-owned database transaction. An outbox serialization/enqueue failure rolls back the mutation, while the no-outbox test fallback publishes only after commit. The frontend Tournament Grounds event handler retains transient event metadata but no longer performs a second refresh alongside revision reconciliation.
+
+Transactional command resource dependencies are defined by exact command types in `StateSyncCommandScopeCatalog`; runtime namespace-string inference has been removed. An architecture test enumerates specialized transactional commands and fails when a new command has not been added to that contract. Background/outbox flows continue to declare their scopes through their consumer contracts.
+
+Redis chat presence now uses renewable per-connection leases and an expiry-indexed online-user set. A terminated process stops renewing its local connections, so stale presence ages out naturally. `ChatPresence:KeyPrefix`, `ChatPresence:LeaseDuration`, and `ChatPresence:LeaseRenewalInterval` can be configured when the Redis backplane is enabled. The SignalR Redis package is pinned to 10.0.10, which resolves MessagePack 2.5.302 and removes the previously reported NuGet vulnerability advisories.
 
 ## 1. Executive Summary
 
@@ -765,9 +775,9 @@ That architecture makes the normal developer workflow systemic:
 4. enqueue one invalidation;
 5. let the synchronization coordinator handle every consumer.
 
-### Audit execution notes
+### Original pre-migration audit execution notes
 
-- **Changed application files during the audit:** None. This report was added afterward as documentation.
+- **Changed application files during the original audit:** None. The implementation and independent follow-up described at the top of this document happened afterward.
 - **Backend verification:** build/run-tests.ps1 -SkipBalance passed all 1,085 fast tests. The balance suite was intentionally skipped.
 - **Frontend verification:** Focused specs could not start because this worktree had no installed Angular CLI/node modules; ng was not found.
 - **Existing useful tests:** Inventory stale-request/grant-dedupe tests, character-action revision tests, chat merge tests, outbox consumer tests, and World Tower tests.

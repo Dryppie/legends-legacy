@@ -151,6 +151,20 @@ interface ChatRoom {
   requiresGuild?: boolean;
 }
 
+export interface ActiveChatChannel {
+  type: ChatChannelType;
+  contextKey: string;
+}
+
+export function fallbackFromUnavailableGuildChannel(
+  activeChannel: ActiveChatChannel,
+  hasGuild: boolean,
+): ActiveChatChannel {
+  return !hasGuild && activeChannel.type === ChatChannelType.Guild
+    ? { type: ChatChannelType.General, contextKey: 'all' }
+    : activeChannel;
+}
+
 export function isWorldSystemMessage(message: ChatMessageDto): boolean {
   return (
     message.channelType === ChatChannelType.System &&
@@ -227,10 +241,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   @ViewChild('channelScroller')
   channelScroller?: ElementRef<HTMLElement>;
   ChatChannelType = ChatChannelType;
-  public activeChannel: {
-    type: ChatChannelType;
-    contextKey: string;
-  } = { type: ChatChannelType.General, contextKey: 'all' };
+  public activeChannel: ActiveChatChannel = {
+    type: ChatChannelType.General,
+    contextKey: 'all',
+  };
 
   readonly guild;
   readonly characterId;
@@ -347,6 +361,12 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.characterName = computed(
       () => this.characterState.currentCharacter()?.name ?? null,
     );
+    effect(() => {
+      this.activeChannel = fallbackFromUnavailableGuildChannel(
+        this.activeChannel,
+        !!this.guild(),
+      );
+    });
     effect(() => {
       const userInfo = this.authService.userInfo();
       if (!userInfo) return;

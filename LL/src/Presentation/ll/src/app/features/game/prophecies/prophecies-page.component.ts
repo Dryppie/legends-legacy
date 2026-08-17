@@ -21,6 +21,8 @@ import {
   WeeklyRevelationMilestoneDto,
 } from '../../../core/services/api/prophecies/prophecy.service';
 import { ProphecyNotificationService } from '../../../core/services/api/prophecies/prophecy-notification.service';
+import { StateSyncCoordinator } from '../../../core/services/real-time/game-realtime/state-sync-coordinator.service';
+import { finalize, Observable, tap } from 'rxjs';
 
 interface RewardDisplayItem {
   key: string;
@@ -84,6 +86,8 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   private readonly eventDeduper = new GameEventDeduper();
   private readonly initialProgressEventId: string | null;
   private clockIntervalId: ReturnType<typeof setInterval> | null = null;
+  private readonly unregisterStateSync: () => void;
+  private requestEpoch = 0;
   hoveredRewardOverflowId: string | null = null;
   hoveredWeeklyMilestoneFavor: number | null = null;
 
@@ -116,7 +120,13 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     private readonly prophecyNotificationService: ProphecyNotificationService,
     private readonly authService: AuthService,
     private readonly eventService: GameEventService,
+    stateSync: StateSyncCoordinator,
   ) {
+    this.unregisterStateSync = stateSync.register(
+      'prophecies',
+      'prophecies-page',
+      () => this.synchronize(),
+    );
     this.initialProgressEventId = getGameEventId(
       this.eventService.eventEnvelope.ProphecyProgressedMsg(),
     );
@@ -150,6 +160,7 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.unregisterStateSync();
     if (this.clockIntervalId) {
       clearInterval(this.clockIntervalId);
       this.clockIntervalId = null;
@@ -157,20 +168,32 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   }
 
   refresh(): void {
+    this.synchronize().subscribe({ error: () => undefined });
+  }
+
+  private synchronize(): Observable<PropheciesOverviewDto> {
+    const requestEpoch = ++this.requestEpoch;
     this.loading.set(true);
     this.error.set(null);
 
-    this.prophecyService.getOverview().subscribe({
-      next: (overview) => {
-        this.overview.set(overview);
-        this.syncNotificationCount();
-        this.loading.set(false);
-      },
-      error: (error) => {
-        this.error.set(error?.message ?? 'Failed to load prophecies.');
-        this.loading.set(false);
-      },
-    });
+    return this.prophecyService.getOverview().pipe(
+      tap({
+        next: (overview) => {
+          if (requestEpoch !== this.requestEpoch) return;
+          this.overview.set(overview);
+          this.syncNotificationCount();
+        },
+        error: (error) => {
+          if (requestEpoch !== this.requestEpoch) return;
+          this.error.set(error?.message ?? 'Failed to load prophecies.');
+        },
+      }),
+      finalize(() => {
+        if (requestEpoch === this.requestEpoch) {
+          this.loading.set(false);
+        }
+      }),
+    );
   }
 
   accept(prophecy: ProphecyInstanceDto): void {

@@ -18,7 +18,6 @@ import { QuestStateService } from '../quest/quest-state.service';
 import { GameEventService } from '../../real-time/game-event.service';
 import { setAttributeDefinitions } from '../../../../shared/models/attribute-definition';
 import { TimeSyncService } from '../time-sync/time-sync.service';
-import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 
 @Injectable({ providedIn: 'root' })
 export class GameBootstrapStateService {
@@ -42,14 +41,7 @@ export class GameBootstrapStateService {
     private readonly characterActionsState: CharacterActionsStateService,
     private readonly gameEvents: GameEventService,
     private readonly timeSync: TimeSyncService,
-    private readonly stateSync: StateSyncCoordinator,
   ) {
-    this.stateSync.register(
-      'bootstrap',
-      'game-bootstrap',
-      () => this.reload(),
-      () => this._loaded(),
-    );
     effect(
       () => {
         if (!this.auth.isAuthenticated()) {

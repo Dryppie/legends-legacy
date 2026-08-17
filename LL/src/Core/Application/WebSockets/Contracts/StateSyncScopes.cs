@@ -11,8 +11,9 @@ public static class StateSyncScopes
     public const string EventQuests = "event-quests";
     public const string Achievements = "achievements";
     public const string Essences = "essences";
+    public const string Soulstones = "soulstones";
     public const string Dungeons = "dungeons";
-    public const string Bootstrap = "bootstrap";
+    public const string Prophecies = "prophecies";
     public const string Marketplace = "marketplace";
     public const string Guild = "guild";
     public const string Colosseum = "colosseum";
@@ -29,8 +30,9 @@ public static class StateSyncScopes
         EventQuests,
         Achievements,
         Essences,
+        Soulstones,
         Dungeons,
-        Bootstrap
+        Prophecies
     ];
 
     public static readonly IReadOnlyList<string> WorldResources =

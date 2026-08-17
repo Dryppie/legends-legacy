@@ -1,6 +1,6 @@
 import { Injector } from '@angular/core';
 import { fakeAsync, tick } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { defer, of, throwError } from 'rxjs';
 import { StateSyncService } from '../../api/state-sync/state-sync.service';
 import { StateSyncCoordinator } from './state-sync-coordinator.service';
 
@@ -160,5 +160,72 @@ describe('StateSyncCoordinator', () => {
 
     expect(refresh).toHaveBeenCalledTimes(2);
     expect(coordinator.status()[0].appliedRevision).toBe(5);
+  }));
+
+  it('retries checkpoint reconciliation after a transient failure', fakeAsync(() => {
+    let attempts = 0;
+    const api = {
+      getCheckpoint: () =>
+        defer(() => {
+          attempts += 1;
+          return attempts === 1
+            ? throwError(() => new Error('offline'))
+            : of({
+                characterId: 'character',
+                revisions: { character: 2 },
+                serverTimeUtc: '',
+              });
+        }),
+    } as unknown as StateSyncService;
+    const injector = { get: () => api } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    const refresh = jasmine
+      .createSpy('refresh')
+      .and.returnValue(Promise.resolve());
+    coordinator.register('character', 'character', refresh);
+    coordinator.initialize();
+
+    void coordinator.reconcile();
+    tick();
+    expect(attempts).toBe(1);
+
+    tick(1_000);
+    tick(51);
+    tick();
+
+    expect(attempts).toBe(2);
+    expect(refresh).toHaveBeenCalledTimes(1);
+    coordinator.dispose();
+  }));
+
+  it('keeps a replacement registration when the old owner unregisters late', fakeAsync(() => {
+    const api = {
+      getCheckpoint: () =>
+        of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),
+    } as unknown as StateSyncService;
+    const injector = { get: () => api } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    const oldRefresh = jasmine.createSpy('oldRefresh');
+    const newRefresh = jasmine
+      .createSpy('newRefresh')
+      .and.returnValue(Promise.resolve());
+
+    const unregisterOld = coordinator.register(
+      'inventory',
+      'inventory-page',
+      oldRefresh,
+    );
+    coordinator.register('inventory', 'inventory-page', newRefresh);
+    unregisterOld();
+    coordinator.acceptInvalidation({
+      scope: 'inventory',
+      revision: 1,
+      reason: 'test',
+    });
+    tick(51);
+    tick();
+
+    expect(oldRefresh).not.toHaveBeenCalled();
+    expect(newRefresh).toHaveBeenCalledTimes(1);
   }));
 });

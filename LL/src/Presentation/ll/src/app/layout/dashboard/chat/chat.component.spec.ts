@@ -1,4 +1,5 @@
 import {
+  fallbackFromUnavailableGuildChannel,
   getChatSendErrorMessage,
   getWireErrorMessage,
   isInlineGuildSystemMessage,
@@ -11,6 +12,28 @@ import {
   ChatChannelType,
   ChatMessageDto,
 } from '../../../core/services/ll-chat/chat-service/chat.service';
+
+describe('fallbackFromUnavailableGuildChannel', () => {
+  it('selects All when guild membership disappears from the Guild channel', () => {
+    expect(
+      fallbackFromUnavailableGuildChannel(
+        { type: ChatChannelType.Guild, contextKey: 'guild' },
+        false,
+      ),
+    ).toEqual({ type: ChatChannelType.General, contextKey: 'all' });
+  });
+
+  it('keeps other channel selections unchanged without a guild', () => {
+    const activeChannel = {
+      type: ChatChannelType.Trade,
+      contextKey: 'trade',
+    };
+
+    expect(
+      fallbackFromUnavailableGuildChannel(activeChannel, false),
+    ).toBe(activeChannel);
+  });
+});
 
 describe('isInlineGuildSystemMessage', () => {
   it('recognizes explicitly flagged guild notices', () => {

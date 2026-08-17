@@ -178,6 +178,7 @@ export class ChatService {
           this.activeGuildId !== guildId ||
           this.activeAuthenticationContextVersion !==
             authenticationContextVersion;
+        const guildMembershipChanged = this.activeGuildId !== guildId;
 
         if (
           !connectionContextChanged &&
@@ -188,11 +189,18 @@ export class ChatService {
           return;
         }
 
-        if (this.isTemporarilyUnavailable()) return;
+        if (!connectionContextChanged && this.isTemporarilyUnavailable()) {
+          return;
+        }
+
+        if (connectionContextChanged) {
+          this.unavailableUntil = 0;
+        }
 
         const replaceExistingHub = !!this.hub && connectionContextChanged;
         const clearMessages =
-          this.activeIdentity !== undefined && this.activeIdentity !== id;
+          guildMembershipChanged ||
+          (this.activeIdentity !== undefined && this.activeIdentity !== id);
 
         this.activeIdentity = id;
         this.activeGuildId = guildId;
@@ -202,6 +210,7 @@ export class ChatService {
           guildId ?? undefined,
           replaceExistingHub,
           clearMessages,
+          guildMembershipChanged,
         ).catch((error) => {
           this.unavailableUntil = Date.now() + this.unavailableRetryDelayMs;
           this.handleConnectionError(error);
@@ -349,11 +358,19 @@ export class ChatService {
     guildId: string | undefined,
     replaceExistingHub: boolean,
     clearMessages: boolean,
+    guildMembershipChanged: boolean,
   ): Promise<void> {
     if (replaceExistingHub) {
       await this.stopHubConnection(clearMessages);
     } else if (clearMessages) {
       this.messageList.set([]);
+    }
+
+    // The Chat API authorizes guild groups from the access-token GuildId claim.
+    // Guild state can update before its fire-and-forget token refresh completes,
+    // so wait for that shared refresh before opening the replacement connection.
+    if (guildMembershipChanged) {
+      await firstValueFrom(this.auth.refreshSession());
     }
 
     await this.connectAndLoad(guildId);

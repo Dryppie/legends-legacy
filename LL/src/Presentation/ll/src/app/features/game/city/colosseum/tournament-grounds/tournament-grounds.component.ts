@@ -322,18 +322,6 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
 
         this.lastRealtimeUpdateId = envelope.updateId;
         this.latestRealtimeUpdate.set(envelope.payload);
-        const currentTournamentId = this.current()?.id;
-        if (
-          !currentTournamentId ||
-          envelope.payload.tournamentId === currentTournamentId
-        ) {
-          this.refresh();
-        } else if (
-          envelope.payload.event === 'TournamentCompleted' ||
-          envelope.payload.event === 'TournamentRewardsAvailable'
-        ) {
-          this.loadArchives();
-        }
       },
       { allowSignalWrites: true },
     );

@@ -54,13 +54,18 @@ if (useRedisSignalR && string.IsNullOrWhiteSpace(signalRRedis))
 }
 if (useRedisSignalR)
 {
+    builder.Services.Configure<RedisChatPresenceOptions>(
+        config.GetSection("ChatPresence"));
     signalR.AddStackExchangeRedis(signalRRedis!, options =>
     {
         options.Configuration.ChannelPrefix = RedisChannel.Literal("legends-legacy:chat");
     });
     builder.Services.AddSingleton<IConnectionMultiplexer>(
         _ => ConnectionMultiplexer.Connect(signalRRedis!));
-    builder.Services.AddSingleton<IChatPresenceTracker, RedisChatPresenceTracker>();
+    builder.Services.AddSingleton<RedisChatPresenceTracker>();
+    builder.Services.AddSingleton<IChatPresenceTracker>(services =>
+        services.GetRequiredService<RedisChatPresenceTracker>());
+    builder.Services.AddHostedService<RedisChatPresenceLeaseWorker>();
 }
 else
 {
