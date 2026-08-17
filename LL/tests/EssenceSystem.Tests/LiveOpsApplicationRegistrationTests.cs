@@ -1,6 +1,9 @@
 using API.LiveOps.Hosting;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.WebSockets;
+using Application.UseCases.Administration.Dtos;
+using AutoMapper;
+using Domain.Models.Administration;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,5 +50,36 @@ public sealed class LiveOpsApplicationRegistrationTests
             descriptor.ServiceType == typeof(IGameRealtimeBroadcaster));
         Assert.Contains(services, descriptor =>
             descriptor.ServiceType == typeof(IGameRealtimeImmediatePublisher));
+    }
+
+    [Fact]
+    public void LiveOps_registers_administration_collection_mappings()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddLiveOpsApplication();
+
+        using var provider = services.BuildServiceProvider();
+        var mapper = provider.GetRequiredService<IMapper>();
+        IReadOnlyList<PlayerAdministrationSnapshot> players =
+        [
+            new(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                "local-account",
+                "operator@example.test",
+                "Admin",
+                42,
+                new DateTime(2026, 8, 17, 0, 0, 0, DateTimeKind.Utc),
+                null,
+                null,
+                null)
+        ];
+
+        var result = mapper.Map<IReadOnlyList<PlayerAdministrationDto>>(players);
+
+        var player = Assert.Single(result);
+        Assert.Equal(players[0].AccountId, player.AccountId);
+        Assert.Equal("Admin", player.CharacterName);
     }
 }

@@ -1,6 +1,7 @@
 using Application.Common.Mappings;
 using Application.MediatR.Behaviors;
 using Application.UseCases.Administration;
+using Application.UseCases.Administration.Mappings;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -23,7 +24,10 @@ public static class LiveOpsApplication
         });
 
         services.AddAutoMapper(configuration =>
-            configuration.AddProfile<MappingProfile>());
+        {
+            configuration.AddProfile<MappingProfile>();
+            configuration.AddProfile<AdministrationMappingProfile>();
+        });
 
         var applicationAssembly = typeof(AdministrationPermissions).Assembly;
         var handlerRegistrations = applicationAssembly.DefinedTypes
