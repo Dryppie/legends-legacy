@@ -173,11 +173,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
                 var accountAccess = context.HttpContext.RequestServices
                     .GetRequiredService<IAccountAccessPolicy>();
-                if (await accountAccess.GetActiveBanAsync(
-                        userId,
-                        context.HttpContext.RequestAborted) is not null)
+                try
                 {
-                    context.Fail("The account is suspended.");
+                    if (await accountAccess.GetActiveBanAsync(
+                            userId,
+                            context.HttpContext.RequestAborted) is not null)
+                    {
+                        context.Fail("The account is suspended.");
+                    }
+                }
+                catch (OperationCanceledException)
+                    when (context.HttpContext.RequestAborted.IsCancellationRequested)
+                {
+                    // A browser refresh aborts outstanding authenticated requests.
+                    // Treat that as an unauthenticated abandoned request instead of
+                    // surfacing an expected cancellation through the debugger.
+                    context.NoResult();
                 }
             },
             OnAuthenticationFailed = context =>
