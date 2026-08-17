@@ -84,7 +84,7 @@ export class MarketplaceStateService {
     this.stateSync.register(
       'marketplace',
       'marketplace',
-      () => this.refresh(),
+      () => this.synchronize(),
       () => this.hasLoaded,
     );
     this.myCharacterId = computed(() => this.characterService.currentCharacterId());
@@ -189,51 +189,55 @@ export class MarketplaceStateService {
   }
 
   refresh(): void {
+    this.synchronize().subscribe({ error: () => undefined });
+  }
+
+  private synchronize(): Observable<unknown> {
     this.hasLoaded = true;
     this._loading.set(true);
     this._error.set(null);
     const refreshVersion = ++this.refreshVersion;
 
-    forkJoin({
+    return forkJoin({
       listings: this.marketplaceService.getListings(),
       catalog: this.marketplaceService.getCatalog(),
       history: this.marketplaceService.getHistory(),
       buyOrders: this.marketplaceService.getBuyOrders(),
     })
       .pipe(
+        tap({
+          next: ({ listings, catalog, history, buyOrders }) => {
+            if (refreshVersion !== this.refreshVersion) return;
+
+            this._listings.set(
+              listings.slice().sort((a, b) =>
+                a.itemInstance.itemBase.itemType.localeCompare(
+                  b.itemInstance.itemBase.itemType,
+                ),
+              ),
+            );
+            this._catalog.set(catalog);
+            this._history.set(history);
+            this._buyOrders.set(
+              buyOrders
+                .slice()
+                .sort((a, b) =>
+                  a.itemBase.itemType.localeCompare(b.itemBase.itemType),
+                ),
+            );
+          },
+          error: (err) => {
+            if (refreshVersion === this.refreshVersion) {
+              this._error.set(err.message ?? 'Unknown error');
+            }
+          },
+        }),
         finalize(() => {
           if (refreshVersion === this.refreshVersion) {
             this._loading.set(false);
           }
         }),
-      )
-      .subscribe({
-        next: ({ listings, catalog, history, buyOrders }) => {
-          if (refreshVersion !== this.refreshVersion) return;
-
-          this._listings.set(
-            listings.slice().sort((a, b) =>
-              a.itemInstance.itemBase.itemType.localeCompare(
-                b.itemInstance.itemBase.itemType,
-              ),
-            ),
-          );
-          this._catalog.set(catalog);
-          this._history.set(history);
-          this._buyOrders.set(
-            buyOrders
-              .slice()
-              .sort((a, b) =>
-                a.itemBase.itemType.localeCompare(b.itemBase.itemType),
-              ),
-          );
-        },
-        error: (err) => {
-          if (refreshVersion === this.refreshVersion) {
-            this._error.set(err.message ?? 'Unknown error');
-          }
-        },
-      });
+      );
   }
 
   buyoutListing(

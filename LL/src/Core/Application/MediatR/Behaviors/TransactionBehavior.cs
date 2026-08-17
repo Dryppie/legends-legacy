@@ -2,11 +2,14 @@
 using Application.MediatR.Attributes;
 using Application.MediatR.Markers;
 using Application.Interfaces.Services.LL;
+using Application.UseCases.Outbox;
+using Application.WebSockets.Contracts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Text.Json;
 
 namespace Application.MediatR.Behaviors;
 public sealed class TransactionBehavior<TRequest, TResponse>
@@ -160,10 +163,14 @@ public sealed class TransactionBehavior<TRequest, TResponse>
 
         foreach (var affectedCharacterId in affectedCharacterIds.Order())
         {
-            await _stateSync.InvalidateCharacterAsync(
-                affectedCharacterId,
-                reason,
-                cancellationToken);
+            foreach (var characterScope in GetCharacterScopes(affectedCharacterId).Distinct(StringComparer.Ordinal))
+            {
+                await _stateSync.InvalidateCharacterScopeAsync(
+                    affectedCharacterId,
+                    characterScope,
+                    reason,
+                    cancellationToken);
+            }
         }
 
         foreach (var worldScope in GetWorldScopes())
@@ -175,24 +182,146 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         }
     }
 
+    private IEnumerable<string> GetCharacterScopes(Guid characterId)
+    {
+        var requestNamespace = typeof(TRequest).Namespace ?? string.Empty;
+
+        yield return StateSyncScopes.Character;
+
+        if (ShouldInvalidateCharacterOverview(requestNamespace))
+        {
+            yield return StateSyncScopes.CharacterOverview;
+        }
+
+        if (requestNamespace.Contains(".Inventories.", StringComparison.Ordinal))
+        {
+            yield return StateSyncScopes.Inventory;
+        }
+        if (requestNamespace.Contains(".Equipments.", StringComparison.Ordinal))
+        {
+            yield return StateSyncScopes.Equipment;
+            yield return StateSyncScopes.Inventory;
+            yield return StateSyncScopes.Quests;
+        }
+        if (requestNamespace.Contains(".Quests.Events.", StringComparison.Ordinal))
+        {
+            yield return StateSyncScopes.EventQuests;
+            yield return StateSyncScopes.Inventory;
+        }
+        else if (requestNamespace.Contains(".Quests.", StringComparison.Ordinal))
+        {
+            yield return StateSyncScopes.Quests;
+            yield return StateSyncScopes.AreaAccess;
+        }
+        if (requestNamespace.Contains(".Achievements.", StringComparison.Ordinal))
+        {
+            yield return StateSyncScopes.Achievements;
+        }
+        if (requestNamespace.Contains(".Dungeons.", StringComparison.Ordinal))
+        {
+            yield return StateSyncScopes.Dungeons;
+            yield return StateSyncScopes.Inventory;
+            yield return StateSyncScopes.Quests;
+        }
+        if (requestNamespace.Contains(".Essences.", StringComparison.Ordinal))
+        {
+            yield return StateSyncScopes.Essences;
+            yield return StateSyncScopes.Inventory;
+            yield return StateSyncScopes.Equipment;
+            yield return StateSyncScopes.Quests;
+        }
+        if (requestNamespace.Contains(".MarketPlaces.", StringComparison.Ordinal))
+        {
+            yield return StateSyncScopes.Inventory;
+        }
+        if (requestNamespace.Contains(".Guilds.", StringComparison.Ordinal))
+        {
+            yield return StateSyncScopes.Inventory;
+            yield return StateSyncScopes.Equipment;
+        }
+        if (requestNamespace.Contains(".Colosseum.", StringComparison.Ordinal))
+        {
+            yield return StateSyncScopes.Inventory;
+        }
+        if (requestNamespace.Contains(".Crafting.", StringComparison.Ordinal)
+            || requestNamespace.Contains(".Soulstones.", StringComparison.Ordinal))
+        {
+            yield return StateSyncScopes.Inventory;
+            yield return StateSyncScopes.Quests;
+        }
+        if (requestNamespace.Contains(".CharacterActions.", StringComparison.Ordinal))
+        {
+            // Quest, event-quest, and achievement progress is applied later by
+            // dedicated outbox consumers. Inventory only needs an invalidation
+            // when this resolution actually changed an inventory row.
+            if (HasInventoryMutation(characterId))
+            {
+                yield return StateSyncScopes.Inventory;
+            }
+        }
+    }
+
+    private bool ShouldInvalidateCharacterOverview(string requestNamespace)
+    {
+        if (!requestNamespace.Contains(".CharacterActions.", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        // Ordinary idle-combat resolutions only change fields already returned
+        // by CharacterDto. A level-up or crafting progression changes the richer
+        // overview and therefore still requires its own revision.
+        return _db.GameEventOutboxMessages.Local.Any(message =>
+            message.EventType is GameEventTypes.CharacterLevelReached
+                or GameEventTypes.EquipmentCrafted
+                or GameEventTypes.EquipmentTempered);
+    }
+
+    private bool HasInventoryMutation(Guid characterId) =>
+        _db.InventoryItems.Local.Any(item =>
+            item.InventoryId == characterId
+            && _db.GetEntry(item).State is EntityState.Added
+                or EntityState.Modified
+                or EntityState.Deleted)
+        || _db.GameEventOutboxMessages.Local.Any(message =>
+            message.CharacterId == characterId
+            && (message.EventType == GameEventTypes.InventoryItemsGranted
+                || IsRealtimeEvent(message.PayloadJson, nameof(LootReceived))));
+
+    private static bool IsRealtimeEvent(string payloadJson, string eventName)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(payloadJson);
+            var root = document.RootElement;
+            return (root.TryGetProperty("eventName", out var value)
+                    || root.TryGetProperty("EventName", out value))
+                && string.Equals(value.GetString(), eventName, StringComparison.Ordinal);
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
     private static IEnumerable<string> GetWorldScopes()
     {
         var requestNamespace = typeof(TRequest).Namespace;
         if (requestNamespace?.Contains(".MarketPlaces.", StringComparison.Ordinal) == true)
         {
-            yield return "marketplace";
+            yield return StateSyncScopes.Marketplace;
         }
         if (requestNamespace?.Contains(".Guilds.", StringComparison.Ordinal) == true)
         {
-            yield return "guild";
+            yield return StateSyncScopes.Guild;
         }
         if (requestNamespace?.Contains(".Colosseum.", StringComparison.Ordinal) == true)
         {
-            yield return "colosseum";
+            yield return StateSyncScopes.Colosseum;
         }
         if (requestNamespace?.Contains(".Colosseum.Tournaments.", StringComparison.Ordinal) == true)
         {
-            yield return "tournament";
+            yield return StateSyncScopes.Tournament;
         }
     }
 

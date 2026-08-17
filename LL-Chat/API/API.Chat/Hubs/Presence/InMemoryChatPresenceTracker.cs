@@ -8,18 +8,12 @@ public sealed class InMemoryChatPresenceTracker : IChatPresenceTracker
     private readonly Dictionary<string, HashSet<string>> _connectionsByUser =
         new(StringComparer.OrdinalIgnoreCase);
 
-    public int OnlineUserCount
+    public Task<int> GetOnlineUserCountAsync()
     {
-        get
-        {
-            lock (_gate)
-            {
-                return _connectionsByUser.Count;
-            }
-        }
+        lock (_gate) return Task.FromResult(_connectionsByUser.Count);
     }
 
-    public int Connect(string userId, string connectionId)
+    public Task<int> ConnectAsync(string userId, string connectionId)
     {
         lock (_gate)
         {
@@ -30,17 +24,17 @@ public sealed class InMemoryChatPresenceTracker : IChatPresenceTracker
             }
 
             connections.Add(connectionId);
-            return _connectionsByUser.Count;
+            return Task.FromResult(_connectionsByUser.Count);
         }
     }
 
-    public int Disconnect(string userId, string connectionId)
+    public Task<int> DisconnectAsync(string userId, string connectionId)
     {
         lock (_gate)
         {
             if (!_connectionsByUser.TryGetValue(userId, out var connections))
             {
-                return _connectionsByUser.Count;
+                return Task.FromResult(_connectionsByUser.Count);
             }
 
             connections.Remove(connectionId);
@@ -49,7 +43,7 @@ public sealed class InMemoryChatPresenceTracker : IChatPresenceTracker
                 _connectionsByUser.Remove(userId);
             }
 
-            return _connectionsByUser.Count;
+            return Task.FromResult(_connectionsByUser.Count);
         }
     }
 }

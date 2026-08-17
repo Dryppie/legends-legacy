@@ -1,6 +1,7 @@
 using Application.BackgroundJobs;
 using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL;
+using Application.WebSockets.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Quartz;
@@ -61,14 +62,20 @@ public sealed class MarketplaceOrderExpirationJob : IJob
                             const string reason = "MarketplaceOrdersExpired";
                             foreach (var characterId in result.AffectedCharacterIds.Order())
                             {
-                                await stateSync.InvalidateCharacterAsync(
+                                await stateSync.InvalidateCharacterScopeAsync(
                                     characterId,
+                                    StateSyncScopes.Character,
+                                    reason,
+                                    cancellationToken);
+                                await stateSync.InvalidateCharacterScopeAsync(
+                                    characterId,
+                                    StateSyncScopes.Inventory,
                                     reason,
                                     cancellationToken);
                             }
 
                             await stateSync.InvalidateWorldScopeAsync(
-                                "marketplace",
+                                StateSyncScopes.Marketplace,
                                 reason,
                                 cancellationToken);
                         }

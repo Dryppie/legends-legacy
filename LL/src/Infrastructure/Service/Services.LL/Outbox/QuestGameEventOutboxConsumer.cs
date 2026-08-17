@@ -2,15 +2,21 @@ using System.Text.Json;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Quests;
 using Application.UseCases.Outbox;
+using Application.WebSockets.Contracts;
 using Domain.Models.Outbox;
 
 namespace Services.LL.Outbox;
 
 public sealed class QuestGameEventOutboxConsumer(
     IQuestProgressionService progression,
-    JsonSerializerOptions jsonOptions) : IGameEventOutboxConsumer
+    JsonSerializerOptions jsonOptions) :
+    IGameEventOutboxConsumer,
+    IReportsGameEventOutboxStateSyncScopes
 {
+    private IReadOnlyList<string> _changedCharacterScopes = [];
+
     public string Consumer => GameEventOutboxConsumerNames.Quests;
+    public IReadOnlyList<string> ChangedCharacterScopes => _changedCharacterScopes;
 
     public bool CanHandle(string eventType) =>
         eventType is GameEventTypes.EquipmentChanged
@@ -30,11 +36,14 @@ public sealed class QuestGameEventOutboxConsumer(
             or GameEventTypes.DungeonRunCompleted
             or GameEventTypes.ProphecyCompleted;
 
-    public Task HandleAsync(GameEventOutboxMessage message, CancellationToken cancellationToken)
+    public async Task HandleAsync(
+        GameEventOutboxMessage message,
+        CancellationToken cancellationToken)
     {
+        _changedCharacterScopes = [];
         if (!message.CharacterId.HasValue)
         {
-            return Task.CompletedTask;
+            return;
         }
 
         var trigger = message.EventType switch
@@ -68,14 +77,33 @@ public sealed class QuestGameEventOutboxConsumer(
             _ => null
         };
 
-        return trigger is null
-            ? Task.CompletedTask
-            : progression.ProcessAsync(
-                message.CharacterId.Value,
-                trigger,
-                message.Id,
-                message.EventType,
-                cancellationToken);
+        if (trigger is null)
+        {
+            return;
+        }
+
+        var result = await progression.ProcessAsync(
+            message.CharacterId.Value,
+            trigger,
+            message.Id,
+            message.EventType,
+            cancellationToken);
+
+        var scopes = new List<string>();
+        if (result.JournalChanged)
+        {
+            scopes.Add(StateSyncScopes.Quests);
+        }
+        if (result.CompletedQuestIds.Count > 0)
+        {
+            scopes.Add(StateSyncScopes.AreaAccess);
+        }
+        if (result.Loot.Count > 0)
+        {
+            scopes.Add(StateSyncScopes.Inventory);
+        }
+
+        _changedCharacterScopes = scopes;
     }
 
     private static QuestTrigger CreateEquipmentCraftedTrigger(EquipmentCraftedPayload payload) =>

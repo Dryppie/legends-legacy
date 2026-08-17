@@ -8,6 +8,8 @@ using Application.Interfaces.Services.LL.Quests.Events;
 using Application.UseCases.Achievements.Dtos;
 using Application.UseCases.Outbox;
 using Application.UseCases.Prophecies.Events;
+using Application.WebSockets.Contracts;
+using API.LL.HostedServices;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Achievements;
@@ -129,6 +131,21 @@ public sealed class GameEventOutboxTests
         Assert.Equal(
             [GameEventOutboxConsumerNames.RealtimeWorldTower],
             registry.GetConsumers(GameEventTypes.WorldTowerRallyUpdated));
+    }
+
+    [Fact]
+    public void Outbox_state_sync_scopes_are_owned_by_the_delivery_consumer()
+    {
+        Assert.Equal(
+            [StateSyncScopes.Quests],
+            GameEventOutboxWorker.GetCharacterScopes(GameEventOutboxConsumerNames.Quests));
+        Assert.Equal(
+            [StateSyncScopes.EventQuests],
+            GameEventOutboxWorker.GetCharacterScopes(GameEventOutboxConsumerNames.EventQuests));
+        Assert.Equal(
+            [StateSyncScopes.Achievements],
+            GameEventOutboxWorker.GetCharacterScopes(GameEventOutboxConsumerNames.Achievements));
+        Assert.Empty(GameEventOutboxWorker.GetCharacterScopes(GameEventOutboxConsumerNames.RealtimeInventory));
     }
 
     [Fact]
@@ -310,6 +327,66 @@ public sealed class GameEventOutboxTests
         var focusedDrop = progression.Triggers[1];
         Assert.Equal("monster.goblin", focusedDrop.CreatureDefinitionId);
         Assert.Equal("essence.goblin", focusedDrop.EssenceDefinitionId);
+    }
+
+    [Fact]
+    public async Task Quest_consumer_reports_only_scopes_changed_by_progression()
+    {
+        var characterId = Guid.NewGuid();
+        var progression = new RecordingQuestProgressionService
+        {
+            Result = new QuestProgressionResult(
+                new QuestJournal([], null),
+                ["quest.completed"],
+                [],
+                true)
+        };
+        var consumer = new QuestGameEventOutboxConsumer(progression, CreateJsonOptions());
+
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.IdleCombatEncounterCompleted,
+                new IdleCombatEncounterCompletedPayload(
+                    characterId,
+                    "region_01_area_01",
+                    true,
+                    1,
+                    [],
+                    0,
+                    100,
+                    1,
+                    null,
+                    1)),
+            CancellationToken.None);
+
+        Assert.Equal(
+            [StateSyncScopes.Quests, StateSyncScopes.AreaAccess],
+            consumer.ChangedCharacterScopes);
+
+        progression.Result = progression.Result with
+        {
+            CompletedQuestIds = [],
+            JournalChanged = false
+        };
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.IdleCombatEncounterCompleted,
+                new IdleCombatEncounterCompletedPayload(
+                    characterId,
+                    "region_01_area_01",
+                    true,
+                    1,
+                    [],
+                    0,
+                    100,
+                    1,
+                    null,
+                    1)),
+            CancellationToken.None);
+
+        Assert.Empty(consumer.ChangedCharacterScopes);
     }
 
     [Fact]
@@ -574,6 +651,10 @@ public sealed class GameEventOutboxTests
     private sealed class RecordingQuestProgressionService : IQuestProgressionService
     {
         public List<QuestTrigger> Triggers { get; } = [];
+        public QuestProgressionResult Result { get; set; } = new(
+            new QuestJournal([], null),
+            [],
+            []);
 
         public Task<QuestProgressionResult> ProcessAsync(
             Guid characterId,
@@ -583,10 +664,7 @@ public sealed class GameEventOutboxTests
             CancellationToken cancellationToken)
         {
             Triggers.Add(trigger);
-            return Task.FromResult(new QuestProgressionResult(
-                new QuestJournal([], null),
-                [],
-                []));
+            return Task.FromResult(Result);
         }
     }
 

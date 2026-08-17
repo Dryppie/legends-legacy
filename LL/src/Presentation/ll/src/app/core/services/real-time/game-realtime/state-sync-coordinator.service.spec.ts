@@ -1,6 +1,6 @@
 import { Injector } from '@angular/core';
 import { fakeAsync, tick } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { StateSyncService } from '../../api/state-sync/state-sync.service';
 import { StateSyncCoordinator } from './state-sync-coordinator.service';
 
@@ -14,7 +14,9 @@ describe('StateSyncCoordinator', () => {
       get: () => api,
     } as unknown as Injector;
     const coordinator = new StateSyncCoordinator(injector);
-    const refresh = jasmine.createSpy('refresh');
+    const refresh = jasmine
+      .createSpy('refresh')
+      .and.returnValue(Promise.resolve());
     coordinator.register('character', 'inventory', refresh);
 
     coordinator.acceptInvalidation(
@@ -30,6 +32,7 @@ describe('StateSyncCoordinator', () => {
       'update-2',
     );
     tick(51);
+    tick();
 
     expect(refresh).toHaveBeenCalledTimes(1);
   }));
@@ -47,12 +50,115 @@ describe('StateSyncCoordinator', () => {
       get: () => api,
     } as unknown as Injector;
     const coordinator = new StateSyncCoordinator(injector);
-    const refresh = jasmine.createSpy('refresh');
+    const refresh = jasmine
+      .createSpy('refresh')
+      .and.returnValue(Promise.resolve());
     coordinator.register('character', 'quests', refresh);
 
     void coordinator.reconcile();
     tick(51);
+    tick();
 
     expect(refresh).toHaveBeenCalledTimes(1);
+  }));
+
+  it('acknowledges only successful refreshes and retries a failed revision', fakeAsync(() => {
+    const api = {
+      getCheckpoint: () =>
+        of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),
+    } as unknown as StateSyncService;
+    const injector = { get: () => api } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    let attempt = 0;
+    const refresh = jasmine.createSpy('refresh').and.callFake(() =>
+      attempt++ === 0
+        ? throwError(() => new Error('offline'))
+        : of(undefined),
+    );
+    coordinator.register('inventory', 'inventory', refresh);
+
+    coordinator.acceptInvalidation({
+      scope: 'inventory',
+      revision: 8,
+      reason: 'test',
+    });
+    tick(51);
+    tick();
+
+    expect(coordinator.status()[0]).toEqual(
+      jasmine.objectContaining({
+        appliedRevision: 0,
+        stale: true,
+        retryAttempt: 1,
+      }),
+    );
+
+    tick(1_000);
+    tick();
+
+    expect(refresh).toHaveBeenCalledTimes(2);
+    expect(coordinator.status()[0]).toEqual(
+      jasmine.objectContaining({
+        appliedRevision: 8,
+        stale: false,
+        retryAttempt: 0,
+      }),
+    );
+  }));
+
+  it('retries an unacknowledged registration when an equal checkpoint arrives', fakeAsync(() => {
+    const api = {
+      getCheckpoint: () =>
+        of({
+          characterId: 'character',
+          revisions: { inventory: 3 },
+          serverTimeUtc: '',
+        }),
+    } as unknown as StateSyncService;
+    const injector = { get: () => api } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    let active = false;
+    const refresh = jasmine
+      .createSpy('refresh')
+      .and.returnValue(Promise.resolve());
+    coordinator.register('inventory', 'inventory', refresh, () => active);
+
+    void coordinator.reconcile();
+    tick(51);
+    expect(refresh).not.toHaveBeenCalled();
+
+    active = true;
+    void coordinator.reconcile();
+    tick(51);
+    tick();
+
+    expect(refresh).toHaveBeenCalledTimes(1);
+  }));
+
+  it('forces reconciliation after a mutation response even when its revision is older', fakeAsync(() => {
+    const api = {
+      getCheckpoint: () =>
+        of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),
+    } as unknown as StateSyncService;
+    const injector = { get: () => api } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    const refresh = jasmine
+      .createSpy('refresh')
+      .and.returnValue(Promise.resolve());
+    coordinator.register('inventory', 'inventory', refresh);
+
+    coordinator.acceptInvalidation({
+      scope: 'inventory',
+      revision: 5,
+      reason: 'newer-event',
+    });
+    tick(51);
+    tick();
+    coordinator.acceptMutationResponse({ inventory: 4 });
+    tick(51);
+    tick();
+
+    expect(refresh).toHaveBeenCalledTimes(2);
+    expect(coordinator.status()[0].appliedRevision).toBe(5);
   }));
 });

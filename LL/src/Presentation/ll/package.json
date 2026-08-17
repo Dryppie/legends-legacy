@@ -10,7 +10,8 @@
     "build": "npm run generate:version && npm run validate:guides && ng build",
     "build:development": "npm run validate:guides && ng build --configuration development",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadless"
   },
   "private": true,
   "dependencies": {

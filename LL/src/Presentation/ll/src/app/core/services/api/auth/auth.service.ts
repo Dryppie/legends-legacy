@@ -108,7 +108,11 @@ export class AuthService {
   }
 
   refreshCurrentCharacter(): void {
-    this.fetchCharacter().subscribe();
+    this.refreshCurrentCharacterRequest().subscribe({ error: () => undefined });
+  }
+
+  refreshCurrentCharacterRequest(): Observable<CharacterDto> {
+    return this.fetchCharacter();
   }
 
   refreshSessionState(): void {

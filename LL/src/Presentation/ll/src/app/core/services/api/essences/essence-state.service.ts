@@ -269,9 +269,9 @@ export class EssenceStateService {
     private readonly stateSync: StateSyncCoordinator,
   ) {
     this.stateSync.register(
-      'character',
       'essences',
-      () => this.refresh(true),
+      'essences',
+      () => this.synchronize(true),
       () => this._archive() !== null || this._loadouts() !== null,
     );
     setInterval(() => this._now.set(Date.now()), 60_000);
@@ -331,6 +331,10 @@ export class EssenceStateService {
   }
 
   refresh(preserveLoadoutDraft = false): void {
+    this.synchronize(preserveLoadoutDraft).subscribe({ error: () => undefined });
+  }
+
+  private synchronize(preserveLoadoutDraft = false): Observable<unknown> {
     this._loading.set(true);
     this._error.set(null);
     const requestVersion = this.resetVersion;
@@ -340,48 +344,55 @@ export class EssenceStateService {
     const creatureArchiveEpoch = ++this.creatureArchiveRequestEpoch;
     const codexEpoch = ++this.codexRequestEpoch;
 
-    forkJoin({
+    return forkJoin({
       archive: this.essencesService.getArchive(),
       loadouts: this.essencesService.getLoadouts(),
       creatureArchive: this.essencesService.getCreatureArchive(),
       codex: this.essencesService.getCodex(),
-    }).subscribe({
-      next: ({ archive, loadouts, creatureArchive, codex }) => {
+    }).pipe(
+      tap({
+        next: ({ archive, loadouts, creatureArchive, codex }) => {
+          if (
+            requestVersion !== this.resetVersion ||
+            refreshEpoch !== this.fullRefreshEpoch
+          ) {
+            return;
+          }
+          const shouldPreserveLoadoutDraft =
+            preserveLoadoutDraft &&
+            this.hasDraftChanges() &&
+            this.canPreserveLoadoutDraft(loadouts);
+          if (archiveEpoch === this.archiveRequestEpoch) {
+            this._archive.set(archive);
+            this.ensureSelectedEssence(archive);
+          }
+          if (loadoutEpoch === this.loadoutRequestEpoch) {
+            this._loadouts.set(loadouts);
+            this.ensureSelectedLoadout(loadouts, shouldPreserveLoadoutDraft);
+          }
+          if (creatureArchiveEpoch === this.creatureArchiveRequestEpoch) {
+            this._creatureArchive.set(creatureArchive);
+          }
+          if (codexEpoch === this.codexRequestEpoch) this._codex.set(codex);
+        },
+        error: (error) => {
+          if (
+            requestVersion === this.resetVersion &&
+            refreshEpoch === this.fullRefreshEpoch
+          ) {
+            this._error.set(error?.message ?? 'Failed to load essences');
+          }
+        },
+      }),
+      finalize(() => {
         if (
-          requestVersion !== this.resetVersion ||
-          refreshEpoch !== this.fullRefreshEpoch
+          requestVersion === this.resetVersion &&
+          refreshEpoch === this.fullRefreshEpoch
         ) {
-          return;
+          this._loading.set(false);
         }
-        const shouldPreserveLoadoutDraft =
-          preserveLoadoutDraft &&
-          this.hasDraftChanges() &&
-          this.canPreserveLoadoutDraft(loadouts);
-        if (archiveEpoch === this.archiveRequestEpoch) {
-          this._archive.set(archive);
-          this.ensureSelectedEssence(archive);
-        }
-        if (loadoutEpoch === this.loadoutRequestEpoch) {
-          this._loadouts.set(loadouts);
-          this.ensureSelectedLoadout(loadouts, shouldPreserveLoadoutDraft);
-        }
-        if (creatureArchiveEpoch === this.creatureArchiveRequestEpoch) {
-          this._creatureArchive.set(creatureArchive);
-        }
-        if (codexEpoch === this.codexRequestEpoch) this._codex.set(codex);
-        this._loading.set(false);
-      },
-      error: (error) => {
-        if (
-          requestVersion !== this.resetVersion ||
-          refreshEpoch !== this.fullRefreshEpoch
-        ) {
-          return;
-        }
-        this._error.set(error?.message ?? 'Failed to load essences');
-        this._loading.set(false);
-      },
-    });
+      }),
+    );
   }
 
   /**

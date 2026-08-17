@@ -2,6 +2,8 @@ using Application.Interfaces.Outbox;
 using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL;
 using Application.UseCases.Outbox;
+using Application.WebSockets.Contracts;
+using Services.LL.Outbox;
 using System.Diagnostics.Metrics;
 using System.Diagnostics;
 
@@ -141,16 +143,23 @@ public sealed class GameEventOutboxWorker(
                     {
                         if (delivery.Message.CharacterId.HasValue)
                         {
-                            await stateSync.InvalidateCharacterAsync(
-                                delivery.Message.CharacterId.Value,
-                                $"Outbox:{delivery.Message.EventType}",
-                                cancellationToken);
+                            var characterScopes = consumer is IReportsGameEventOutboxStateSyncScopes reporter
+                                ? reporter.ChangedCharacterScopes
+                                : GetCharacterScopes(delivery.Consumer);
+                            foreach (var characterScope in characterScopes)
+                            {
+                                await stateSync.InvalidateCharacterScopeAsync(
+                                    delivery.Message.CharacterId.Value,
+                                    characterScope,
+                                    $"Outbox:{delivery.Message.EventType}",
+                                    cancellationToken);
+                            }
                         }
 
                         if (delivery.Message.EventType == GameEventTypes.TournamentGroundsUpdated)
                         {
                             await stateSync.InvalidateWorldScopeAsync(
-                                "tournament",
+                                StateSyncScopes.Tournament,
                                 $"Outbox:{delivery.Message.EventType}",
                                 cancellationToken);
                         }
@@ -210,6 +219,18 @@ public sealed class GameEventOutboxWorker(
             }
         }
     }
+
+    public static IReadOnlyList<string> GetCharacterScopes(string consumer) =>
+        consumer switch
+        {
+            GameEventOutboxConsumerNames.Quests =>
+                [StateSyncScopes.Quests],
+            GameEventOutboxConsumerNames.EventQuests =>
+                [StateSyncScopes.EventQuests],
+            GameEventOutboxConsumerNames.Achievements =>
+                [StateSyncScopes.Achievements],
+            _ => []
+        };
 
     private DateTimeOffset GetNextAvailableAt(int attempts)
     {

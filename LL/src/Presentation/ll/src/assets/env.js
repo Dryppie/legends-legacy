@@ -5,7 +5,7 @@
   // Environment variables
   window.env.environment = "dev";
   window.env.apiBaseUrl = "http://localhost:7050";
-  window.env.chatApiRoot = "https://localhost:7095/chat";
+  window.env.chatApiRoot = "http://localhost:5179/chat";
   window.env.isLocal = "true";
   window.env.googleClientId =
     "431775673466-3ut1k7ilm8g6bu66njohs5tc7aiochti.apps.googleusercontent.com";

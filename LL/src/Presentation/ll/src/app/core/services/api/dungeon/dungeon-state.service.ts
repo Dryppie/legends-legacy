@@ -19,9 +19,11 @@ import {
   Observable,
   Subscription,
   catchError,
+  forkJoin,
   of,
   switchMap,
   take,
+  tap,
   timer,
 } from 'rxjs';
 import { GameEventService } from '../../real-time/game-event.service';
@@ -73,7 +75,9 @@ export class DungeonStateService {
     private readonly toast: ToastService,
     private readonly stateSync: StateSyncCoordinator,
   ) {
-    this.stateSync.register('character', 'dungeons', () => this.refresh());
+    this.stateSync.register('dungeons', 'dungeons', () =>
+      this.synchronize(),
+    );
     this.refresh();
 
     effect(
@@ -113,6 +117,45 @@ export class DungeonStateService {
           this.loadAvailableDungeons();
         },
       });
+  }
+
+  private synchronize(): Observable<unknown> {
+    const activeDungeonEpoch = ++this.activeDungeonEpoch;
+    const dungeonHubEpoch = ++this.dungeonHubEpoch;
+    this._loading.set(true);
+    this._error.set(null);
+
+    return forkJoin({
+      activeDungeon: this.service.getActiveDungeon(),
+      hub: this.service.getAvailableDungeons(),
+    }).pipe(
+      tap({
+        next: ({ activeDungeon, hub }) => {
+          if (activeDungeonEpoch === this.activeDungeonEpoch) {
+            this._activeDungeon.set(activeDungeon);
+          }
+          if (dungeonHubEpoch === this.dungeonHubEpoch) {
+            this._dungeons.set(hub.dungeons);
+            this._sigilFragments.set(hub.sigilFragments);
+            this._sigilAssemblyEnabled.set(hub.sigilAssemblyEnabled);
+            this._sigilAssemblyCost.set(hub.sigilAssemblyCost);
+            this.startRecommendationPolling();
+          }
+        },
+        error: (error) => {
+          if (activeDungeonEpoch === this.activeDungeonEpoch) {
+            this._error.set(
+              error?.message ?? 'Failed to synchronize dungeon data',
+            );
+          }
+        },
+      }),
+      finalize(() => {
+        if (activeDungeonEpoch === this.activeDungeonEpoch) {
+          this._loading.set(false);
+        }
+      }),
+    );
   }
 
   loadAvailableDungeons(): void {

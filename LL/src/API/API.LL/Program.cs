@@ -2,6 +2,7 @@
 using API.LL.Common;
 using API.LL.HostedServices;
 using Application;
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Administration;
 using Asp.Versioning;
 using Common;
@@ -21,6 +22,7 @@ using Services.LL.Validation;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -41,7 +43,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ConcurrencyExceptionHandler>();
 
-builder.Services.AddSignalR()
+var signalR = builder.Services.AddSignalR()
     .AddJsonProtocol(options =>
     {
         options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -69,7 +71,8 @@ builder.Services.AddCors(options =>
         builder => builder.WithOrigins("http://localhost:4200", "https://dev.legends-legacy.com")
                           .AllowCredentials()
                           .AllowAnyMethod()
-                          .AllowAnyHeader());
+                          .AllowAnyHeader()
+                          .WithExposedHeaders("X-LL-State-Revisions"));
 });
 
 builder.Services.AddPersistence(config);
@@ -238,6 +241,47 @@ if (!app.Environment.IsDevelopment())       // prod only
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.Use(async (context, next) =>
+{
+    if (!context.Request.Path.StartsWithSegments("/api"))
+    {
+        await next();
+        return;
+    }
+
+    var stateSync = context.RequestServices.GetRequiredService<IStateSyncService>();
+    context.Response.OnStarting(() =>
+    {
+        var characterId = Guid.TryParse(
+            context.User.FindFirstValue("CharacterId"),
+            out var parsedCharacterId)
+            ? parsedCharacterId
+            : (Guid?)null;
+        var changedRevisions = stateSync.GetChangedRevisions(characterId);
+        if (changedRevisions.Count > 0)
+        {
+            context.Response.Headers["X-LL-State-Revisions"] =
+                System.Text.Json.JsonSerializer.Serialize(changedRevisions);
+        }
+        return Task.CompletedTask;
+    });
+var signalRRedis = config.GetConnectionString("Redis");
+var useRedisSignalR = config.GetValue<bool>("SignalR:UseRedisBackplane");
+if (useRedisSignalR && string.IsNullOrWhiteSpace(signalRRedis))
+{
+    throw new InvalidOperationException(
+        "ConnectionStrings:Redis is required when SignalR:UseRedisBackplane is enabled.");
+}
+if (useRedisSignalR)
+{
+    signalR.AddStackExchangeRedis(signalRRedis!, options =>
+    {
+        options.Configuration.ChannelPrefix = RedisChannel.Literal("legends-legacy:game");
+    });
+}
+    await next();
+});
 
 app.MapHub<GameHub>("/hub/game").RequireAuthorization();
 

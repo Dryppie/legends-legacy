@@ -17,7 +17,8 @@ export const ABILITY_TARGETS: readonly AbilityTargetDefinition[] = [
   {
     selector: 'CurrentTarget',
     label: 'Current target',
-    description: 'A enemy selected using threat.',
+    description:
+      'An enemy selected using threat. Taunts can lock this enemy as the current target.',
     aliases: ['current target'],
   },
   {

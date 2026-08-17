@@ -1,5 +1,5 @@
 import { computed, effect, Injectable, signal } from '@angular/core';
-import { finalize } from 'rxjs';
+import { finalize, forkJoin, Observable, tap } from 'rxjs';
 import { ColosseumService } from './colosseum.service';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { ArenaOpponentPreview } from '../../../../shared/models/Dtos/colosseum/arenaOpponentPreview';
@@ -77,7 +77,7 @@ export class ColosseumStateService {
     this.stateSync.register(
       'colosseum',
       'colosseum',
-      () => this.refresh(),
+      () => this.synchronize(),
       () => this.hasLoaded,
     );
     effect(
@@ -130,6 +130,63 @@ export class ColosseumStateService {
     this.loadColosseumRankings();
     this.loadColosseumMatchResults();
     this.loadChampionMarket();
+  }
+
+  private synchronize(): Observable<unknown> {
+    this.hasLoaded = true;
+    this._loading.set(true);
+    this._error.set(null);
+    const epochs = {
+      status: ++this.statusRequestEpoch,
+      ticket: ++this.ticketRequestEpoch,
+      opponents: ++this.opponentsRequestEpoch,
+      rankings: ++this.rankingsRequestEpoch,
+      matches: ++this.matchesRequestEpoch,
+      market: ++this.marketRequestEpoch,
+    };
+
+    return forkJoin({
+      status: this.colosseumService.getStatus(),
+      ticket: this.colosseumService.getArenaTicketStatus(),
+      opponents: this.colosseumService.getArenaOpponents(),
+      rankings: this.colosseumService.getColosseumRankings(),
+      matches: this.colosseumService.getColosseumMatchResults(),
+      market: this.colosseumService.getChampionMarket(),
+    }).pipe(
+      tap({
+        next: ({ status, ticket, opponents, rankings, matches, market }) => {
+          if (epochs.status === this.statusRequestEpoch) {
+            this._status.set(status);
+            this.syncNotificationCount(status);
+          }
+          if (epochs.ticket === this.ticketRequestEpoch) {
+            this._arenaTicketStatus.set(ticket);
+          }
+          if (epochs.opponents === this.opponentsRequestEpoch) {
+            this._allOpponents.set(opponents);
+            this.pickRandomOpponents();
+          }
+          if (epochs.rankings === this.rankingsRequestEpoch) {
+            this._rankings.set([...rankings].sort((a, b) => a.rank - b.rank));
+          }
+          if (epochs.matches === this.matchesRequestEpoch) {
+            this._previousMatches.set(
+              [...matches].sort(
+                (a, b) =>
+                  new Date(b.playedAt).getTime() -
+                  new Date(a.playedAt).getTime(),
+              ),
+            );
+          }
+          if (epochs.market === this.marketRequestEpoch) {
+            this._championMarket.set(market);
+          }
+        },
+        error: (error) =>
+          this._error.set(error?.message ?? 'Failed to synchronize colosseum'),
+      }),
+      finalize(() => this._loading.set(false)),
+    );
   }
 
   refreshNotificationCount(): void {

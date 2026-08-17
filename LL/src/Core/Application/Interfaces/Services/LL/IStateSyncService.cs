@@ -4,8 +4,16 @@ namespace Application.Interfaces.Services.LL;
 
 public interface IStateSyncService
 {
+    IReadOnlyDictionary<string, long> GetChangedRevisions(Guid? characterId);
+
     Task InvalidateCharacterAsync(
         Guid characterId,
+        string reason,
+        CancellationToken cancellationToken = default);
+
+    Task InvalidateCharacterScopeAsync(
+        Guid characterId,
+        string scope,
         string reason,
         CancellationToken cancellationToken = default);
 

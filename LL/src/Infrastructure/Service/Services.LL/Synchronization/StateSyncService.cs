@@ -4,6 +4,7 @@ using Application.Interfaces.WebSockets;
 using Application.WebSockets.Contracts;
 using Domain.Models.Synchronization;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.Metrics;
 
 namespace Services.LL.Synchronization;
 
@@ -12,25 +13,48 @@ public sealed class StateSyncService(
     IGameRealtimeBroadcaster realtimeBroadcaster,
     TimeProvider timeProvider) : IStateSyncService
 {
-    public const string CharacterScope = "character";
-    public const string MarketplaceScope = "marketplace";
-    public const string GuildScope = "guild";
-    public const string ColosseumScope = "colosseum";
-    public const string TournamentScope = "tournament";
-
+    private static readonly Meter Meter = new("LegendsLegacy.StateSync");
+    private static readonly Counter<long> InvalidationCounter =
+        Meter.CreateCounter<long>("state_sync.invalidations");
+    private static readonly Counter<long> CheckpointCounter =
+        Meter.CreateCounter<long>("state_sync.checkpoints");
     private readonly HashSet<(Guid TransactionId, string ScopeKey)> _invalidatedScopes = [];
+    private readonly Dictionary<(Guid? CharacterId, string Scope), long> _changedRevisions = [];
+
+    public IReadOnlyDictionary<string, long> GetChangedRevisions(Guid? characterId) =>
+        _changedRevisions
+            .Where(entry =>
+                entry.Key.CharacterId is null || entry.Key.CharacterId == characterId)
+            .ToDictionary(
+                entry => entry.Key.Scope,
+                entry => entry.Value,
+                StringComparer.Ordinal);
 
     public Task InvalidateCharacterAsync(
         Guid characterId,
         string reason,
         CancellationToken cancellationToken = default) =>
-        InvalidateAsync(
-            $"{CharacterScope}:{characterId:N}",
-            CharacterScope,
+        InvalidateCharacterScopeAsync(
+            characterId,
+            StateSyncScopes.Character,
+            reason,
+            cancellationToken);
+
+    public Task InvalidateCharacterScopeAsync(
+        Guid characterId,
+        string scope,
+        string reason,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(scope);
+        return InvalidateAsync(
+            GetCharacterScopeKey(characterId, scope),
+            scope,
             characterId,
             new Audience.Character(characterId),
             reason,
             cancellationToken);
+    }
 
     public Task InvalidateWorldScopeAsync(
         string scope,
@@ -51,32 +75,36 @@ public sealed class StateSyncService(
         Guid characterId,
         CancellationToken cancellationToken = default)
     {
-        var characterKey = $"{CharacterScope}:{characterId:N}";
-        string[] worldScopes =
-        [
-            MarketplaceScope,
-            GuildScope,
-            ColosseumScope,
-            TournamentScope
-        ];
-        var worldKeys = worldScopes.Select(scope => $"world:{scope}").ToArray();
-        var checkpointKeys = worldKeys.Append(characterKey).ToArray();
+        var characterKeys = StateSyncScopes.CharacterResources
+            .ToDictionary(scope => scope, scope => GetCharacterScopeKey(characterId, scope));
+        var worldKeys = StateSyncScopes.WorldResources
+            .ToDictionary(scope => scope, scope => $"world:{scope}");
+        var checkpointKeys = characterKeys.Values.Concat(worldKeys.Values).ToArray();
         var revisions = await context.StateSyncRevisions
             .AsNoTracking()
             .Where(x => checkpointKeys.Contains(x.ScopeKey))
             .ToDictionaryAsync(x => x.ScopeKey, x => x.Revision, cancellationToken);
 
-        var checkpointRevisions = worldScopes.ToDictionary(
+        var checkpointRevisions = StateSyncScopes.WorldResources.ToDictionary(
             scope => scope,
-            scope => revisions.GetValueOrDefault($"world:{scope}"),
+            scope => revisions.GetValueOrDefault(worldKeys[scope]),
             StringComparer.Ordinal);
-        checkpointRevisions[CharacterScope] = revisions.GetValueOrDefault(characterKey);
+        foreach (var (scope, scopeKey) in characterKeys)
+        {
+            checkpointRevisions[scope] = revisions.GetValueOrDefault(scopeKey);
+        }
 
+        CheckpointCounter.Add(1);
         return new StateSyncCheckpoint(
             characterId,
             checkpointRevisions,
             timeProvider.GetUtcNow());
     }
+
+    private static string GetCharacterScopeKey(Guid characterId, string scope) =>
+        scope == StateSyncScopes.Character
+            ? $"character:{characterId:N}"
+            : $"character:{characterId:N}:{scope}";
 
     private async Task InvalidateAsync(
         string scopeKey,
@@ -114,6 +142,14 @@ public sealed class StateSyncService(
             revision.Revision++;
             revision.UpdatedAt = timeProvider.GetUtcNow();
         }
+
+        _changedRevisions[(characterId, publicScope)] = revision.Revision;
+        InvalidationCounter.Add(
+            1,
+            new KeyValuePair<string, object?>("scope", publicScope),
+            new KeyValuePair<string, object?>(
+                "audience",
+                characterId.HasValue ? "character" : "world"));
 
         await realtimeBroadcaster.PublishAsync(
             audience,

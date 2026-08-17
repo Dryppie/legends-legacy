@@ -45,11 +45,9 @@ export class GameBootstrapStateService {
     private readonly stateSync: StateSyncCoordinator,
   ) {
     this.stateSync.register(
-      'character',
+      'bootstrap',
       'game-bootstrap',
-      () => {
-        this.reload().subscribe({ error: () => undefined });
-      },
+      () => this.reload(),
       () => this._loaded(),
     );
     effect(

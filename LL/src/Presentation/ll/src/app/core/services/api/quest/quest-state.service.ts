@@ -7,7 +7,7 @@ import {
   untracked,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, forkJoin, Observable, tap } from 'rxjs';
 import {
   CombatAreaAccess,
   ONBOARDING_QUEST_CATEGORY,
@@ -85,9 +85,15 @@ export class QuestStateService {
     private readonly stateSync: StateSyncCoordinator,
   ) {
     this.stateSync.register(
-      'character',
       'quests',
-      () => this.resyncSilently(),
+      'quests',
+      () => this.synchronizeJournal(),
+      () => this._loaded(),
+    );
+    this.stateSync.register(
+      'area-access',
+      'area-access',
+      () => this.synchronizeAreaAccess(),
       () => this._loaded(),
     );
     effect(
@@ -283,15 +289,57 @@ export class QuestStateService {
 
   /** Re-pull journal and area access together, without touching loading/error UI. */
   private resyncSilently(): void {
+    this.synchronize().subscribe({ error: () => undefined });
+  }
+
+  private synchronize(): Observable<unknown> {
     const requestEpoch = ++this.journalRequestEpoch;
-    this.api.getJournal().subscribe({
-      next: (journal) => {
-        if (requestEpoch !== this.journalRequestEpoch) return;
-        this.initialize(journal);
-        this.loadAreaAccess();
-      },
-      error: () => undefined,
-    });
+    const accessRequestEpoch = ++this.areaAccessRequestEpoch;
+    return forkJoin({
+      journal: this.api.getJournal(),
+      access: this.api.getAreaAccess(),
+    }).pipe(
+      tap({
+        next: ({ journal, access }) => {
+          if (requestEpoch === this.journalRequestEpoch) {
+            this.initialize(journal);
+          }
+          if (accessRequestEpoch === this.areaAccessRequestEpoch) {
+            this._areaAccess.set(access);
+          }
+        },
+        error: (error) =>
+          this._error.set(error?.message ?? 'Failed to synchronize quests'),
+      }),
+    );
+  }
+
+  private synchronizeJournal(): Observable<unknown> {
+    const requestEpoch = ++this.journalRequestEpoch;
+    return this.api.getJournal().pipe(
+      tap({
+        next: (journal) => {
+          if (requestEpoch === this.journalRequestEpoch) {
+            this.initialize(journal);
+          }
+        },
+        error: (error) =>
+          this._error.set(error?.message ?? 'Failed to synchronize quests'),
+      }),
+    );
+  }
+
+  private synchronizeAreaAccess(): Observable<unknown> {
+    const requestEpoch = ++this.areaAccessRequestEpoch;
+    return this.api.getAreaAccess().pipe(
+      tap({
+        next: (access) => {
+          if (requestEpoch === this.areaAccessRequestEpoch) {
+            this._areaAccess.set(access);
+          }
+        },
+      }),
+    );
   }
 
   private loadJournalSilently(): void {

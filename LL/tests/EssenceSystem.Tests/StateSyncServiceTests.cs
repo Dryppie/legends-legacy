@@ -32,15 +32,17 @@ public sealed class StateSyncServiceTests
 
         var notification = Assert.IsType<StateInvalidated>(Assert.Single(realtime.Messages).Message);
         Assert.Equal(characterId, notification.CharacterId);
-        Assert.Equal(StateSyncService.CharacterScope, notification.Scope);
+        Assert.Equal(StateSyncScopes.Character, notification.Scope);
         Assert.Equal(1, notification.Revision);
 
         var checkpoint = await service.GetCheckpointAsync(characterId, CancellationToken.None);
-        Assert.Equal(1, checkpoint.Revisions[StateSyncService.CharacterScope]);
-        Assert.Equal(0, checkpoint.Revisions[StateSyncService.MarketplaceScope]);
-        Assert.Equal(0, checkpoint.Revisions[StateSyncService.GuildScope]);
-        Assert.Equal(0, checkpoint.Revisions[StateSyncService.ColosseumScope]);
-        Assert.Equal(0, checkpoint.Revisions[StateSyncService.TournamentScope]);
+        Assert.Equal(1, checkpoint.Revisions[StateSyncScopes.Character]);
+        Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.CharacterOverview]);
+        Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Inventory]);
+        Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Marketplace]);
+        Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Guild]);
+        Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Colosseum]);
+        Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Tournament]);
     }
 
     [Fact]
@@ -51,18 +53,87 @@ public sealed class StateSyncServiceTests
         var service = new StateSyncService(db, realtime, new FixedTimeProvider(Now));
 
         await service.InvalidateWorldScopeAsync(
-            StateSyncService.GuildScope,
+            StateSyncScopes.Guild,
             "guild-change",
             CancellationToken.None);
         await db.SaveChangesAsync(CancellationToken.None);
 
         var checkpoint = await service.GetCheckpointAsync(Guid.NewGuid(), CancellationToken.None);
-        Assert.Equal(1, checkpoint.Revisions[StateSyncService.GuildScope]);
+        Assert.Equal(1, checkpoint.Revisions[StateSyncScopes.Guild]);
         var publication = Assert.Single(realtime.Messages);
         Assert.IsType<Audience.World>(publication.Audience);
         var notification = Assert.IsType<StateInvalidated>(publication.Message);
-        Assert.Equal(StateSyncService.GuildScope, notification.Scope);
+        Assert.Equal(StateSyncScopes.Guild, notification.Scope);
         Assert.Null(notification.CharacterId);
+    }
+
+    [Fact]
+    public async Task Character_resource_revisions_advance_independently()
+    {
+        await using var db = CreateDb();
+        var realtime = new RecordingRealtimeBroadcaster();
+        var service = new StateSyncService(db, realtime, new FixedTimeProvider(Now));
+        var characterId = Guid.NewGuid();
+
+        await service.InvalidateCharacterScopeAsync(
+            characterId,
+            StateSyncScopes.Inventory,
+            "inventory-change",
+            CancellationToken.None);
+        await service.InvalidateCharacterScopeAsync(
+            characterId,
+            StateSyncScopes.Equipment,
+            "equipment-change",
+            CancellationToken.None);
+        await db.SaveChangesAsync(CancellationToken.None);
+
+        var checkpoint = await service.GetCheckpointAsync(characterId, CancellationToken.None);
+        Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Character]);
+        Assert.Equal(1, checkpoint.Revisions[StateSyncScopes.Inventory]);
+        Assert.Equal(1, checkpoint.Revisions[StateSyncScopes.Equipment]);
+        Assert.Equal(2, service.GetChangedRevisions(characterId).Count);
+        Assert.Collection(
+            realtime.Messages,
+            first => Assert.Equal(
+                StateSyncScopes.Inventory,
+                Assert.IsType<StateInvalidated>(first.Message).Scope),
+            second => Assert.Equal(
+                StateSyncScopes.Equipment,
+                Assert.IsType<StateInvalidated>(second.Message).Scope));
+    }
+
+    [Fact]
+    public async Task Response_revisions_include_only_the_request_character_and_world_scopes()
+    {
+        await using var db = CreateDb();
+        var service = new StateSyncService(
+            db,
+            new RecordingRealtimeBroadcaster(),
+            new FixedTimeProvider(Now));
+        var requestCharacterId = Guid.NewGuid();
+        var otherCharacterId = Guid.NewGuid();
+
+        await service.InvalidateCharacterScopeAsync(
+            requestCharacterId,
+            StateSyncScopes.Inventory,
+            "request-character",
+            CancellationToken.None);
+        await service.InvalidateCharacterScopeAsync(
+            otherCharacterId,
+            StateSyncScopes.Equipment,
+            "other-character",
+            CancellationToken.None);
+        await service.InvalidateWorldScopeAsync(
+            StateSyncScopes.Marketplace,
+            "world",
+            CancellationToken.None);
+
+        var revisions = service.GetChangedRevisions(requestCharacterId);
+
+        Assert.Equal(2, revisions.Count);
+        Assert.Contains(StateSyncScopes.Inventory, revisions.Keys);
+        Assert.Contains(StateSyncScopes.Marketplace, revisions.Keys);
+        Assert.DoesNotContain(StateSyncScopes.Equipment, revisions.Keys);
     }
 
     [Fact]

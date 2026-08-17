@@ -1,5 +1,5 @@
 import { effect, Injectable, signal, untracked } from '@angular/core';
-import { finalize } from 'rxjs';
+import { finalize, Observable, tap } from 'rxjs';
 import { EventQuestJournal } from '../../../../shared/models/event-quest';
 import { GameEventService } from '../../real-time/game-event.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
@@ -28,9 +28,9 @@ export class EventQuestStateService {
     stateSync: StateSyncCoordinator,
   ) {
     stateSync.register(
-      'character',
       'event-quests',
-      () => this.load(true),
+      'event-quests',
+      () => this.synchronize(),
       () => this._loaded(),
     );
     effect(
@@ -86,6 +86,29 @@ export class EventQuestStateService {
           }
         },
       });
+  }
+
+  private synchronize(): Observable<unknown> {
+    const requestEpoch = ++this.loadEpoch;
+    this._loading.set(true);
+    this._error.set(null);
+    return this.api.getJournal().pipe(
+      tap({
+        next: (journal) => {
+          if (requestEpoch !== this.loadEpoch) return;
+          this._journal.set(journal ?? { events: [] });
+          this._loaded.set(true);
+        },
+        error: (error) => {
+          if (requestEpoch === this.loadEpoch) {
+            this._error.set(error?.message ?? 'Failed to load event quests');
+          }
+        },
+      }),
+      finalize(() => {
+        if (requestEpoch === this.loadEpoch) this._loading.set(false);
+      }),
+    );
   }
 
   claim(eventQuestId: string): void {

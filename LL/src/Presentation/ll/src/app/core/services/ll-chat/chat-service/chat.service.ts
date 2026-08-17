@@ -372,7 +372,7 @@ export class ChatService {
       })
       .configureLogging(
         environment.isLocal
-          ? signalR.LogLevel.None
+          ? signalR.LogLevel.Warning
           : environment.production
             ? signalR.LogLevel.Warning
             : signalR.LogLevel.Information,
@@ -484,7 +484,7 @@ export class ChatService {
     }
 
     this.lastConnectionWarningAt = now;
-    console.warn('Chat service unavailable; continuing without chat.');
+    console.warn('Chat service unavailable; continuing without chat.', error);
   }
 
   private isTemporarilyUnavailable(): boolean {

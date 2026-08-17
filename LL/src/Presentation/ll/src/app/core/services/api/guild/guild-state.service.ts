@@ -163,7 +163,7 @@ export class GuildStateService {
     this.stateSync.register(
       'guild',
       'guild',
-      () => this.refresh(),
+      () => this.synchronize(),
       () => this.hasLoaded,
     );
     this.refresh(); // initial fetch
@@ -368,51 +368,57 @@ export class GuildStateService {
 
   /** Call once at login or when character changes */
   refresh(): void {
+    this.synchronize().subscribe({ error: () => undefined });
+  }
+
+  private synchronize(): Observable<unknown> {
     this.hasLoaded = true;
     this._loading.set(true);
     const requestId = ++this.refreshRequestId;
 
-    this.service
+    return this.service
       .getMyGuild()
       .pipe(
+        tap({
+          next: (responseGuild) => {
+            if (requestId !== this.refreshRequestId) return;
+            this.applyGuildSnapshot(responseGuild);
+          },
+          error: (err) => this._error.set(err.message ?? 'Unknown error'),
+        }),
         finalize(() => {
           if (requestId === this.refreshRequestId) this._loading.set(false);
         }),
-      )
-      .subscribe({
-        next: (responseGuild) => {
-          if (requestId !== this.refreshRequestId) return;
+      );
+  }
 
-          const guild = normalizeGuild(responseGuild);
+  private applyGuildSnapshot(responseGuild: Guild | null): void {
+    const guild = normalizeGuild(responseGuild);
 
-          const nextGuildId = guild?.id ?? null;
-          const previousGuildId = this._guild()?.id ?? null;
-          if (previousGuildId !== nextGuildId) {
-            this.clearGuildScopedState();
-          }
-          this.refreshAuthSessionIfGuildChanged(nextGuildId);
+    const nextGuildId = guild?.id ?? null;
+    const previousGuildId = this._guild()?.id ?? null;
+    if (previousGuildId !== nextGuildId) {
+      this.clearGuildScopedState();
+    }
+    this.refreshAuthSessionIfGuildChanged(nextGuildId);
 
-          if (guild) {
-            this._guild.set(guild);
-            this.initializeGuildNotificationCount(
-              guild.invites.filter((invite: GuildInvite) => !invite.isInvite)
-                .length,
-            );
-            this._invites.set([]);
-            this._allGuilds.set([]);
-            this.loadGuildBuildings(guild.id);
-            this.loadGuildMissions(guild.id);
-            this.loadGuildShop(guild.id);
-            this.loadAllGuilds();
-          } else {
-            this._guild.set(null);
-            this.clearGuildScopedState();
-            this.loadAllGuilds();
-            this.loadMyInvites();
-          }
-        },
-        error: (err) => this._error.set(err.message ?? 'Unknown error'),
-      });
+    if (guild) {
+      this._guild.set(guild);
+      this.initializeGuildNotificationCount(
+        guild.invites.filter((invite: GuildInvite) => !invite.isInvite).length,
+      );
+      this._invites.set([]);
+      this._allGuilds.set([]);
+      this.loadGuildBuildings(guild.id);
+      this.loadGuildMissions(guild.id);
+      this.loadGuildShop(guild.id);
+      this.loadAllGuilds();
+    } else {
+      this._guild.set(null);
+      this.clearGuildScopedState();
+      this.loadAllGuilds();
+      this.loadMyInvites();
+    }
   }
 
   refreshNotificationCount(): void {

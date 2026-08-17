@@ -1,9 +1,10 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, computed, OnInit, signal } from '@angular/core';
+import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs';
+import { finalize, forkJoin, tap } from 'rxjs';
 import { AchievementService } from '../../../../core/services/api/achievements/achievement.service';
 import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
+import { StateSyncCoordinator } from '../../../../core/services/real-time/game-realtime/state-sync-coordinator.service';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import {
@@ -38,7 +39,7 @@ type CollectionView = 'Achievements' | 'Titles';
   ],
   templateUrl: './achievements.component.html',
 })
-export class AchievementsComponent implements OnInit {
+export class AchievementsComponent implements OnInit, OnDestroy {
   readonly collectionViews: CollectionView[] = ['Achievements', 'Titles'];
   readonly categories: AchievementTab[] = [
     'All',
@@ -69,6 +70,7 @@ export class AchievementsComponent implements OnInit {
   readonly titleState = signal<TitleStateFilter>('All');
   readonly titleDisplayPosition = signal<TitleDisplayPosition>('Prefix');
   readonly titlePositionUpdating = signal(false);
+  private readonly unregisterStateSync: () => void;
 
   readonly achievementStates: AchievementStateFilter[] = [
     'All',
@@ -200,30 +202,45 @@ export class AchievementsComponent implements OnInit {
   constructor(
     private readonly achievementsApi: AchievementService,
     private readonly characterState: CharacterStateService,
-  ) {}
+    stateSync: StateSyncCoordinator,
+  ) {
+    this.unregisterStateSync = stateSync.register(
+      'achievements',
+      'achievement-page',
+      () => this.synchronize(),
+    );
+  }
 
   ngOnInit(): void {
     this.load();
   }
 
+  ngOnDestroy(): void {
+    this.unregisterStateSync();
+  }
+
   load(): void {
+    this.synchronize().subscribe({
+      error: (err) => this.error.set(err.message),
+    });
+  }
+
+  private synchronize() {
     this.loading.set(true);
     this.error.set('');
 
-    this.achievementsApi.getOverview().subscribe({
-      next: (overview) => this.overview.set(overview),
-      error: (err) => this.error.set(err.message),
-    });
-
-    this.achievementsApi
-      .getAchievements()
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: (achievements) => this.achievements.set(achievements),
-        error: (err) => this.error.set(err.message),
-      });
-
-    this.refreshTitles();
+    return forkJoin({
+      overview: this.achievementsApi.getOverview(),
+      achievements: this.achievementsApi.getAchievements(),
+      titles: this.achievementsApi.getTitles(),
+    }).pipe(
+      tap(({ overview, achievements, titles }) => {
+        this.overview.set(overview);
+        this.achievements.set(achievements);
+        this.applyTitles(titles);
+      }),
+      finalize(() => this.loading.set(false)),
+    );
   }
 
   setCategory(category: AchievementTab): void {
@@ -389,14 +406,16 @@ export class AchievementsComponent implements OnInit {
 
   private refreshTitles(): void {
     this.achievementsApi.getTitles().subscribe({
-      next: (titles) => {
-        this.titles.set(titles);
-        const equippedTitle = titles.find((title) => title.isEquipped);
-        if (equippedTitle) {
-          this.titleDisplayPosition.set(equippedTitle.displayPosition);
-        }
-      },
+      next: (titles) => this.applyTitles(titles),
       error: (err) => this.error.set(err.message),
     });
+  }
+
+  private applyTitles(titles: TitleDto[]): void {
+    this.titles.set(titles);
+    const equippedTitle = titles.find((title) => title.isEquipped);
+    if (equippedTitle) {
+      this.titleDisplayPosition.set(equippedTitle.displayPosition);
+    }
   }
 }

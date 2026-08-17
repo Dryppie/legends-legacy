@@ -130,7 +130,7 @@ public sealed class ChatHub : Hub<IChatClient>
     public Task LeavePublic(string room)
         => Groups.RemoveFromGroupAsync(Context.ConnectionId, PublicPrefix + room);
 
-    public int GetOnlineCount() => _presence.OnlineUserCount;
+    public Task<int> GetOnlineCount() => _presence.GetOnlineUserCountAsync();
 
     /// <summary>Server-side code (e.g. after auth) calls this to enrol a connection in its guilds.</summary>
     public Task JoinGuild(string guildId)
@@ -161,7 +161,7 @@ public sealed class ChatHub : Hub<IChatClient>
         await Groups.AddToGroupAsync(Context.ConnectionId, PublicPrefix);
         await base.OnConnectedAsync();
 
-        var onlineCount = _presence.Connect(userId, Context.ConnectionId);
+        var onlineCount = await _presence.ConnectAsync(userId, Context.ConnectionId);
         await Clients.All.OnlineCountChanged(onlineCount);
     }
 
@@ -169,8 +169,8 @@ public sealed class ChatHub : Hub<IChatClient>
     {
         var userId = Context.UserIdentifier;
         var onlineCount = string.IsNullOrWhiteSpace(userId)
-            ? _presence.OnlineUserCount
-            : _presence.Disconnect(userId, Context.ConnectionId);
+            ? await _presence.GetOnlineUserCountAsync()
+            : await _presence.DisconnectAsync(userId, Context.ConnectionId);
 
         await base.OnDisconnectedAsync(exception);
         await Clients.All.OnlineCountChanged(onlineCount);

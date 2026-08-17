@@ -15,7 +15,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Observable, finalize } from 'rxjs';
+import { Observable, finalize, tap } from 'rxjs';
 import { ColosseumService } from '../../../../../core/services/api/colosseum/colosseum.service';
 import { ToastService } from '../../../../../core/services/client-side/components/toast/toast.service';
 import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
@@ -304,7 +304,7 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     this.unregisterStateSync = stateSync.register(
       'tournament',
       'tournament-grounds',
-      () => this.refresh(),
+      () => this.synchronize(),
     );
     this.lastRealtimeUpdateId =
       this.eventService.eventEnvelope.TournamentGroundsUpdated()?.updateId ??
@@ -358,45 +358,55 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
   }
 
   refresh(): void {
+    this.synchronize().subscribe({ error: () => undefined });
+  }
+
+  private synchronize(): Observable<unknown> {
     this.loading.set(true);
     this.error.set(null);
 
-    this.colosseumService
+    return this.colosseumService
       .getTournamentGroundsStatus()
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: (status) => {
-          const serverNow = Date.parse(status.nowUtc);
-          if (!Number.isNaN(serverNow)) {
-            this.viewState.serverClockOffsetMs = serverNow - Date.now();
-            this.clock.set(serverNow);
-          }
-          this.status.set(status);
-          this.viewState.markSnapshotLoaded();
-          const currentTournament = status.currentTournament;
-          const previousTournament = status.recentTournaments.find(
-            (tournament) => tournament.status === 'Completed',
-          );
-          const displayedTournament =
-            currentTournament?.status === 'Scheduled'
-              ? (previousTournament ?? currentTournament)
-              : (currentTournament ?? previousTournament);
-          const tournamentId = displayedTournament?.id;
-          if (tournamentId) {
-            this.loadDetails(tournamentId);
-            this.loadBracket(tournamentId);
-            this.loadRewards(tournamentId);
-            this.loadArchives();
-          } else {
-            this.details.set(null);
-            this.bracket.set(null);
-            this.rewards.set([]);
-            this.loadArchives();
-          }
-        },
-        error: (err) =>
-          this.error.set(err.message ?? 'Failed to load tournament grounds'),
-      });
+      .pipe(
+        tap({
+          next: (status) => this.applyTournamentStatus(status),
+          error: (err) =>
+            this.error.set(err.message ?? 'Failed to load tournament grounds'),
+        }),
+        finalize(() => this.loading.set(false)),
+      );
+  }
+
+  private applyTournamentStatus(
+    status: NonNullable<ReturnType<typeof this.status>>,
+  ): void {
+    const serverNow = Date.parse(status.nowUtc);
+    if (!Number.isNaN(serverNow)) {
+      this.viewState.serverClockOffsetMs = serverNow - Date.now();
+      this.clock.set(serverNow);
+    }
+    this.status.set(status);
+    this.viewState.markSnapshotLoaded();
+    const currentTournament = status.currentTournament;
+    const previousTournament = status.recentTournaments.find(
+      (tournament) => tournament.status === 'Completed',
+    );
+    const displayedTournament =
+      currentTournament?.status === 'Scheduled'
+        ? (previousTournament ?? currentTournament)
+        : (currentTournament ?? previousTournament);
+    const tournamentId = displayedTournament?.id;
+    if (tournamentId) {
+      this.loadDetails(tournamentId);
+      this.loadBracket(tournamentId);
+      this.loadRewards(tournamentId);
+      this.loadArchives();
+    } else {
+      this.details.set(null);
+      this.bracket.set(null);
+      this.rewards.set([]);
+      this.loadArchives();
+    }
   }
 
   private shouldRestoreViewState(): boolean {

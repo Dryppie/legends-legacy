@@ -1,5 +1,6 @@
 import { Injectable, signal, computed, effect, untracked } from '@angular/core';
-import { finalize } from 'rxjs';
+import { Router } from '@angular/router';
+import { finalize, Observable, of, tap } from 'rxjs';
 import {
   CharacterOverviewDto,
   CharacterDto,
@@ -21,6 +22,7 @@ export class CharacterStateService {
   private dirtyVersion = 0;
   private activeRefreshDirtyVersion: number | null = null;
   private refreshAfterCurrentRequest = false;
+  private overviewRequestEpoch = 0;
 
   /* ─────────── public, read-only selectors ─────────── */
   /** Current character comes straight from AuthService, no copy needed */
@@ -40,11 +42,18 @@ export class CharacterStateService {
     private readonly auth: AuthService,
     private readonly eventService: GameEventService,
     private readonly stateSync: StateSyncCoordinator,
+    private readonly router: Router,
   ) {
     this.stateSync.register(
       'character',
+      'character-summary',
+      () => this.synchronizeCharacterSummary(),
+      () => !!this.currentCharacterId(),
+    );
+    this.stateSync.register(
       'character-overview',
-      () => this.refreshCurrentCharacter(),
+      'character-overview',
+      () => this.handleOverviewInvalidation(),
       () => !!this.currentCharacterId(),
     );
     /* load (or clear) overview whenever the selected character changes */
@@ -58,7 +67,9 @@ export class CharacterStateService {
           return;
         }
         this.markOverviewDirty();
-        this.refresh(); // writes _loading, _overview
+        if (this.isOverviewRouteActive()) {
+          this.refresh(); // writes _loading, _overview
+        }
       },
       { allowSignalWrites: true },
     );
@@ -98,7 +109,8 @@ export class CharacterStateService {
             experience: levelUp.experience,
             experienceUntilNextLevel: levelUp.experienceUntilNextLevel,
           });
-          this.refresh();
+          this.markOverviewDirty();
+          if (this.isOverviewRouteActive()) this.refreshIfDirty();
         }
       },
       { allowSignalWrites: true },
@@ -109,7 +121,8 @@ export class CharacterStateService {
         const reconnectCount = this.eventService.reconnectCount();
         if (reconnectCount > 0) {
           this.auth.refreshCurrentCharacter();
-          this.refresh();
+          this.markOverviewDirty();
+          if (this.isOverviewRouteActive()) this.refreshIfDirty();
         }
       },
       { allowSignalWrites: true },
@@ -129,12 +142,14 @@ export class CharacterStateService {
     this._loading.set(true);
     this.refreshAfterCurrentRequest = false;
     const requestDirtyVersion = this.dirtyVersion;
+    const requestEpoch = ++this.overviewRequestEpoch;
     this.activeRefreshDirtyVersion = requestDirtyVersion;
 
     this.service
       .getCharacterOverview()
       .pipe(
         finalize(() => {
+          if (requestEpoch !== this.overviewRequestEpoch) return;
           this._loading.set(false);
           this.activeRefreshDirtyVersion = null;
           if (this.refreshAfterCurrentRequest) {
@@ -145,6 +160,7 @@ export class CharacterStateService {
       )
       .subscribe({
         next: (ov) => {
+          if (requestEpoch !== this.overviewRequestEpoch) return;
           this._overview.set(ov);
           this._error.set(null);
           if (requestDirtyVersion === this.dirtyVersion) {
@@ -152,6 +168,7 @@ export class CharacterStateService {
           }
         },
         error: (e) => {
+          if (requestEpoch !== this.overviewRequestEpoch) return;
           this._overviewDirty.set(true);
           this._error.set(e.message ?? 'Failed to load character');
         },
@@ -181,6 +198,70 @@ export class CharacterStateService {
   refreshCurrentCharacter(): void {
     this.auth.refreshCurrentCharacter();
     this.refresh();
+  }
+
+  private synchronizeCharacterSummary(): Observable<unknown> {
+    return this.auth.refreshCurrentCharacterRequest().pipe(
+      tap((character) => this.patchOverviewFromSummary(character)),
+    );
+  }
+
+  private handleOverviewInvalidation(): Observable<unknown> {
+    this.markOverviewDirty();
+    return this.isOverviewRouteActive()
+      ? this.synchronizeOverview()
+      : of(undefined);
+  }
+
+  private synchronizeOverview(): Observable<unknown> {
+    const requestDirtyVersion = this.dirtyVersion;
+    const requestEpoch = ++this.overviewRequestEpoch;
+    this._loading.set(true);
+    this._error.set(null);
+
+    return this.service.getCharacterOverview().pipe(
+      tap({
+        next: (overview) => {
+          if (requestEpoch !== this.overviewRequestEpoch) return;
+          this._overview.set(overview);
+          if (requestDirtyVersion === this.dirtyVersion) {
+            this._overviewDirty.set(false);
+          }
+        },
+        error: (error) => {
+          if (requestEpoch !== this.overviewRequestEpoch) return;
+          this._overviewDirty.set(true);
+          this._error.set(error?.message ?? 'Failed to load character');
+        },
+      }),
+      finalize(() => {
+        if (requestEpoch === this.overviewRequestEpoch) {
+          this._loading.set(false);
+        }
+      }),
+    );
+  }
+
+  private patchOverviewFromSummary(character: CharacterDto): void {
+    const overview = this._overview();
+    if (!overview || overview.id !== character.id) return;
+
+    this._overview.set({
+      ...overview,
+      name: character.name,
+      level: character.level,
+      experience: character.experience,
+      experienceUntilNextLevel: character.experienceUntilNextLevel,
+      equippedTitle: character.equippedTitle,
+      isOnline: true,
+      lastSeenAt: new Date().toISOString(),
+    });
+  }
+
+  private isOverviewRouteActive(): boolean {
+    return this.router.url
+      .split(/[?#]/, 1)[0]
+      .endsWith('/character/character-overview');
   }
 
   /** Optimistic cache update (optional helper) */

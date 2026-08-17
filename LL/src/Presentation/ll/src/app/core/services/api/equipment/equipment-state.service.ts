@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, effect, untracked } from '@angular/core';
-import { finalize } from 'rxjs';
+import { finalize, Observable, of, tap } from 'rxjs';
 import {
   EquipmentSlot,
   EquipmentSlotType,
@@ -35,7 +35,9 @@ export class EquipmentStateService {
     private readonly questState: QuestStateService,
     private readonly stateSync: StateSyncCoordinator,
   ) {
-    this.stateSync.register('character', 'equipment', () => this.load(true));
+    this.stateSync.register('equipment', 'equipment', () =>
+      this.synchronize(true),
+    );
     this.load();
 
     effect(
@@ -49,39 +51,43 @@ export class EquipmentStateService {
   }
 
   load(force = false): void {
-    if (!force && this._equipmentSlots().length) return;
+    this.synchronize(force).subscribe({ error: () => undefined });
+  }
+
+  private synchronize(force = false): Observable<unknown> {
+    if (!force && this._equipmentSlots().length) return of(undefined);
     this._loading.set(true);
     this._error.set(null);
     const requestVersion = this.resetVersion;
     const requestEpoch = ++this.loadEpoch;
 
-    this.equipmentService
+    return this.equipmentService
       .getEquipment()
       .pipe(
+        tap({
+          next: (equipmentSlots) => {
+            if (
+              requestVersion !== this.resetVersion ||
+              requestEpoch !== this.loadEpoch
+            ) {
+              return;
+            }
+            this._equipmentSlots.set(equipmentSlots);
+          },
+          error: (err) => {
+            if (
+              requestVersion !== this.resetVersion ||
+              requestEpoch !== this.loadEpoch
+            ) {
+              return;
+            }
+            this._error.set(err.message ?? 'Unknown error');
+          },
+        }),
         finalize(() => {
           if (requestEpoch === this.loadEpoch) this._loading.set(false);
         }),
-      )
-      .subscribe({
-        next: (equipmentSlots) => {
-          if (
-            requestVersion !== this.resetVersion ||
-            requestEpoch !== this.loadEpoch
-          ) {
-            return;
-          }
-          this._equipmentSlots.set(equipmentSlots);
-        },
-        error: (err) => {
-          if (
-            requestVersion !== this.resetVersion ||
-            requestEpoch !== this.loadEpoch
-          ) {
-            return;
-          }
-          this._error.set(err.message ?? 'Unknown error');
-        },
-      });
+      );
   }
 
   reset(): void {

@@ -2,6 +2,21 @@
 
 Date: 2026-08-17
 
+## Implementation Status
+
+The in-repository implementation described by this audit is now complete for the supported game resources:
+
+- persistent state notifications are queued through the transactional outbox and retain stable delivery IDs;
+- character, inventory, equipment, quests, event quests, essences, dungeons, marketplace, guild, colosseum, tournament, and bootstrap checkpoints use independent monotonic revisions;
+- successful mutation responses carry the affected revisions in `X-LL-State-Revisions`, and the Angular response interceptor forces post-response reconciliation to repair late stale responses;
+- registered Angular resources acknowledge a revision only after their HTTP refresh completes successfully, expose convergence status, coalesce concurrent invalidations, and retry failures with bounded exponential backoff;
+- reconnect, focus, and online recovery all use the same checkpoint protocol;
+- marketplace expiration, guild membership changes, chat history recovery, and other background/outbox mutations participate in reconciliation;
+- game and chat SignalR use a Redis backplane when `SignalR:UseRedisBackplane=true` and `ConnectionStrings:Redis` are configured, with Redis-backed shared chat presence in that mode;
+- architecture and convergence tests guard durable publication, independent resource revisions, deduplication, retries, equal-revision recovery, and late mutation responses.
+
+The `AddStateSyncRevisions` migration is generated but is not applied by this change. Redis provisioning, connection-secret configuration, rollout, dashboards, and alerting remain deployment responsibilities outside this repository.
+
 ## 1. Executive Summary
 
 The current synchronization architecture is reliable on the happy path but unreliable under disconnection, concurrent requests, background processing, retries, or multiple server instances.
@@ -334,6 +349,7 @@ Introduce resource keys and monotonic revisions, for example:
 - equipment:{characterId}
 - quest-journal:{characterId}
 - event-quests:{characterId}
+- achievements:{characterId}
 - guild:{guildId}
 - market:listings
 - market:buy-orders

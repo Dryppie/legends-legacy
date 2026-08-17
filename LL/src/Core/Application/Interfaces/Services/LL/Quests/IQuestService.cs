@@ -98,7 +98,8 @@ public sealed record QuestPresentation(
 public sealed record QuestProgressionResult(
     QuestJournal Journal,
     IReadOnlyList<string> CompletedQuestIds,
-    IReadOnlyList<InventoryItem> Loot);
+    IReadOnlyList<InventoryItem> Loot,
+    bool JournalChanged = true);
 
 public sealed record QuestTrigger(
     string Type,
