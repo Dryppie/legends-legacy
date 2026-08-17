@@ -12,6 +12,10 @@ public interface IChatRestrictionRepository
         Guid characterId,
         DateTimeOffset now,
         CancellationToken cancellationToken);
+    Task<IReadOnlyList<ChatModerationAction>> GetActionsAsync(
+        Guid characterId,
+        int limit,
+        CancellationToken cancellationToken);
     void AddRestriction(ChatRestriction restriction);
     void AddAction(ChatModerationAction action);
     Task SaveChangesAsync(CancellationToken cancellationToken);

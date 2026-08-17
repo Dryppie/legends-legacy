@@ -1,0 +1,317 @@
+<div class="page-shell">
+  @if (loadingSession) {
+    <main class="center-state" aria-live="polite">
+      <div class="sigil">LL</div>
+      <p>Securing the operator session…</p>
+    </main>
+  } @else if (authenticationRequired) {
+    <main class="login-panel">
+      <div class="login-mark">LL</div>
+      <p class="eyebrow">Private control plane</p>
+      <h1>Legends Legacy<br /><span>Live Operations</span></h1>
+      <p class="login-copy">
+        Player moderation and support compensation. Every action is permission checked,
+        idempotent, and recorded in the audit trail.
+      </p>
+      <button class="primary large" type="button" (click)="login()">
+        Sign in as operator
+      </button>
+      <p class="security-note">Staff identity and MFA are required outside local development.</p>
+    </main>
+  } @else if (session) {
+    @if (session.environment.toLowerCase() === 'production') {
+      <div class="environment-warning">Production environment — actions affect live players</div>
+    } @else if (session.isDevelopmentOperator) {
+      <div class="environment-warning development">Local development operator</div>
+    }
+
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">LL</div>
+        <div>
+          <span>Legends Legacy</span>
+          <strong>Live Operations</strong>
+        </div>
+      </div>
+      <div class="operator">
+        <div>
+          <span>{{ session.environment }}</span>
+          <strong>{{ session.displayName }}</strong>
+        </div>
+        <button class="quiet" type="button" (click)="logout()">Sign out</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="finder">
+        <div class="section-heading">
+          <p class="eyebrow">Player finder</p>
+          <h2>Choose an exact target</h2>
+          <p>Name, account, email, or ID</p>
+        </div>
+
+        <form class="search" (ngSubmit)="searchPlayers()">
+          <label for="player-search">Search players</label>
+          <div class="search-row">
+            <input
+              id="player-search"
+              name="player-search"
+              [(ngModel)]="searchQuery"
+              autocomplete="off"
+              placeholder="e.g. ArdentFox"
+            />
+            <button class="primary" type="submit" [disabled]="loadingSearch">
+              {{ loadingSearch ? 'Searching' : 'Search' }}
+            </button>
+          </div>
+        </form>
+
+        <div class="result-list" aria-live="polite">
+          @for (player of searchResults; track player.characterId) {
+            <button
+              type="button"
+              class="player-result"
+              [class.selected]="selectedPlayer?.player?.characterId === player.characterId"
+              (click)="selectPlayer(player)"
+            >
+              <span class="avatar">{{ player.characterName.slice(0, 2).toUpperCase() }}</span>
+              <span class="player-result-copy">
+                <strong>{{ player.characterName }}</strong>
+                <span>Level {{ player.characterLevel }} · {{ player.accountLabel }}</span>
+              </span>
+              @if (player.activeBanId) {
+                <span class="status-pill danger">Banned</span>
+              } @else {
+                <span class="status-dot" aria-label="No active account ban"></span>
+              }
+            </button>
+          }
+        </div>
+
+        <div class="finder-foot">
+          <span class="lock-icon">◇</span>
+          <p>Actions require a reason and are written to an append-only audit trail.</p>
+        </div>
+      </aside>
+
+      <section class="player-workspace">
+        @if (loadingPlayer) {
+          <div class="empty-workspace"><p>Loading player record…</p></div>
+        } @else if (!selectedPlayer) {
+          <div class="empty-workspace">
+            <div class="empty-rings"><span>⌖</span></div>
+            <p class="eyebrow">No target selected</p>
+            <h2>Search for a player to begin</h2>
+            <p>Player IDs stay behind the interface. Select one result to review every action before it is submitted.</p>
+          </div>
+        } @else {
+          <div class="player-header">
+            <div>
+              <div class="player-title-row">
+                <h1>{{ selectedPlayer.player.characterName }}</h1>
+                <span class="level-badge">LV {{ selectedPlayer.player.characterLevel }}</span>
+              </div>
+              <p>{{ selectedPlayer.player.accountLabel }} · {{ selectedPlayer.player.email || 'No email' }}</p>
+            </div>
+            <div class="identity-grid">
+              <div><span>Account created</span><strong>{{ selectedPlayer.player.createdUtc | date: 'mediumDate' }}</strong></div>
+              <div><span>Account</span><strong title="{{ selectedPlayer.player.accountId }}">{{ selectedPlayer.player.accountId.slice(0, 8) }}…</strong></div>
+              <div><span>Character</span><strong title="{{ selectedPlayer.player.characterId }}">{{ selectedPlayer.player.characterId.slice(0, 8) }}…</strong></div>
+            </div>
+          </div>
+
+          <div class="status-strip">
+            <div class="status-card" [class.alert]="selectedPlayer.player.activeBanId">
+              <span>Account access</span>
+              <strong>{{ selectedPlayer.player.activeBanId ? 'Banned' : 'Active' }}</strong>
+              <small>{{ selectedPlayer.player.activeBanReason || 'No active restriction' }}</small>
+            </div>
+            <div class="status-card" [class.alert]="selectedPlayer.activeMute">
+              <span>Chat access</span>
+              <strong>{{ selectedPlayer.activeMute ? 'Muted' : 'Active' }}</strong>
+              <small>{{ selectedPlayer.activeMute?.reason || selectedPlayer.chatStatusMessage || 'No active restriction' }}</small>
+            </div>
+            <div class="status-card">
+              <span>Recorded actions</span>
+              <strong>{{ timeline.length }}</strong>
+              <small>Game and Chat audit entries</small>
+            </div>
+          </div>
+
+          <nav class="section-tabs" aria-label="Player operations">
+            <button type="button" [class.active]="activeSection === 'account'" (click)="setSection('account')">Account</button>
+            <button type="button" [class.active]="activeSection === 'chat'" (click)="setSection('chat')">Chat</button>
+            <button type="button" [class.active]="activeSection === 'grant'" (click)="setSection('grant')">Compensation</button>
+            <button type="button" [class.active]="activeSection === 'audit'" (click)="setSection('audit')">Audit</button>
+          </nav>
+
+          @if (message) {
+            <div class="message" [class]="'message ' + messageTone" role="status">{{ message }}</div>
+          }
+
+          <div class="operation-panel">
+            @if (activeSection === 'account') {
+              @if (!hasPermission(permissions.account)) {
+                <div class="permission-note">Your staff role can view this player but cannot moderate accounts.</div>
+              } @else if (selectedPlayer.player.activeBanId) {
+                <div class="operation-copy">
+                  <p class="eyebrow danger-text">Active restriction</p>
+                  <h2>Revoke account ban</h2>
+                  <p>{{ selectedPlayer.player.activeBanReason }}</p>
+                  @if (selectedPlayer.player.activeBanExpiresAt) {
+                    <p class="expiry">Expires {{ selectedPlayer.player.activeBanExpiresAt | date: 'medium' }}</p>
+                  } @else {
+                    <p class="expiry">Permanent until revoked</p>
+                  }
+                </div>
+                <div class="form-grid compact">
+                  <label class="wide">Revocation reason
+                    <textarea [(ngModel)]="unbanReason" placeholder="Appeal outcome or support reference"></textarea>
+                  </label>
+                  <button class="primary" type="button" [disabled]="!!busyAction" (click)="revokeBan()">Revoke ban</button>
+                </div>
+              } @else {
+                <div class="operation-copy">
+                  <p class="eyebrow">Account moderation</p>
+                  <h2>Apply account ban</h2>
+                  <p>Existing refresh tokens are revoked and authenticated Game requests are rejected.</p>
+                </div>
+                <div class="form-grid">
+                  <label>Duration
+                    <select [(ngModel)]="banDuration">
+                      <option value="1h">1 hour</option>
+                      <option value="24h">24 hours</option>
+                      <option value="7d">7 days</option>
+                      <option value="permanent">Permanent</option>
+                    </select>
+                  </label>
+                  <label class="wide">Reason or support reference
+                    <textarea [(ngModel)]="banReason" placeholder="Required and visible in the audit trail"></textarea>
+                  </label>
+                  <label class="wide">Internal notes
+                    <textarea [(ngModel)]="banNotes" placeholder="Optional investigation context"></textarea>
+                  </label>
+                  <button class="danger-button" type="button" [disabled]="!!busyAction" (click)="applyBan()">Review and ban account</button>
+                </div>
+              }
+            }
+
+            @if (activeSection === 'chat') {
+              @if (!selectedPlayer.chatAvailable) {
+                <div class="permission-note danger-note">{{ selectedPlayer.chatStatusMessage }}</div>
+              } @else if (!hasPermission(permissions.chat)) {
+                <div class="permission-note">Your staff role can view Chat status but cannot change it.</div>
+              } @else if (selectedPlayer.activeMute) {
+                <div class="operation-copy">
+                  <p class="eyebrow danger-text">Active chat restriction</p>
+                  <h2>Unmute chat</h2>
+                  <p>{{ selectedPlayer.activeMute.reason }}</p>
+                  <p class="expiry">{{ selectedPlayer.activeMute.expiresAt ? ('Expires ' + (selectedPlayer.activeMute.expiresAt | date: 'medium')) : 'Permanent until revoked' }}</p>
+                </div>
+                <div class="form-grid compact">
+                  <label class="wide">Revocation reason
+                    <textarea [(ngModel)]="unmuteReason" placeholder="Appeal outcome or support reference"></textarea>
+                  </label>
+                  <button class="primary" type="button" [disabled]="!!busyAction" (click)="revokeMute()">Remove mute</button>
+                </div>
+              } @else {
+                <div class="operation-copy">
+                  <p class="eyebrow">Chat moderation</p>
+                  <h2>Mute player chat</h2>
+                  <p>The player can continue reading Chat but cannot send player-authored messages.</p>
+                </div>
+                <div class="form-grid">
+                  <label>Duration
+                    <select [(ngModel)]="muteDuration">
+                      <option value="1h">1 hour</option>
+                      <option value="24h">24 hours</option>
+                      <option value="7d">7 days</option>
+                      <option value="permanent">Permanent</option>
+                    </select>
+                  </label>
+                  <label class="wide">Moderation reason
+                    <textarea [(ngModel)]="muteReason" placeholder="Required reason or case reference"></textarea>
+                  </label>
+                  <button class="danger-button" type="button" [disabled]="!!busyAction" (click)="applyMute()">Review and mute chat</button>
+                </div>
+              }
+            }
+
+            @if (activeSection === 'grant') {
+              @if (!hasPermission(permissions.economy)) {
+                <div class="permission-note">Your staff role cannot grant compensation items.</div>
+              } @else {
+                <div class="operation-copy">
+                  <p class="eyebrow">Support compensation</p>
+                  <h2>Grant catalog items</h2>
+                  <p>Uses the game inventory service, economy ledger, and realtime outbox. Direct database edits are never used.</p>
+                </div>
+                <div class="form-grid">
+                  <label class="wide">Find item
+                    <span class="inline-search">
+                      <input [(ngModel)]="itemQuery" placeholder="Item name or server ID" />
+                      <button class="secondary" type="button" [disabled]="loadingItems" (click)="searchItems()">Find</button>
+                    </span>
+                  </label>
+                  @if (itemResults.length) {
+                    <div class="item-results wide">
+                      @for (item of itemResults; track item.id) {
+                        <button type="button" (click)="chooseItem(item)">
+                          <span class="item-rarity">{{ item.rarity }}</span>
+                          <strong>{{ item.name }}</strong>
+                          <small>{{ item.id }} · {{ item.itemType }} · {{ item.stackable ? 'Stackable' : 'Individual instances' }}</small>
+                        </button>
+                      }
+                    </div>
+                  }
+                  @if (selectedItem) {
+                    <div class="selected-item wide">
+                      <div><span>{{ selectedItem.rarity }}</span><strong>{{ selectedItem.name }}</strong><small>{{ selectedItem.id }}</small></div>
+                      <p>{{ selectedItem.description }}</p>
+                    </div>
+                  }
+                  <label>Quantity
+                    <input type="number" min="1" step="1" [(ngModel)]="grantQuantity" />
+                  </label>
+                  <label class="wide">Reason or support reference
+                    <textarea [(ngModel)]="grantReason" placeholder="Required compensation justification"></textarea>
+                  </label>
+                  <label class="wide">Internal notes
+                    <textarea [(ngModel)]="grantNotes" placeholder="Optional bug or incident context"></textarea>
+                  </label>
+                  <button class="primary" type="button" [disabled]="!!busyAction || !selectedItem" (click)="grantItems()">Preview and grant items</button>
+                </div>
+              }
+            }
+
+            @if (activeSection === 'audit') {
+              <div class="operation-copy">
+                <p class="eyebrow">Append-only history</p>
+                <h2>Operator activity</h2>
+                <p>Game and Chat records are combined by occurrence time. Entries cannot be edited here.</p>
+              </div>
+              <div class="timeline">
+                @for (entry of timeline; track entry.operationId) {
+                  <article>
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-card">
+                      <div class="timeline-head">
+                        <span class="source-pill">{{ entry.source }}</span>
+                        <time>{{ entry.occurredAt | date: 'medium' }}</time>
+                      </div>
+                      <h3>{{ entry.actionType }}</h3>
+                      <p>{{ entry.reason }}</p>
+                      <footer>{{ entry.actorDisplayName }} · <code title="{{ entry.operationId }}">{{ entry.operationId.slice(0, 8) }}…</code></footer>
+                    </div>
+                  </article>
+                } @empty {
+                  <div class="permission-note">No administration actions have been recorded for this player.</div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </section>
+    </main>
+  }
+</div>

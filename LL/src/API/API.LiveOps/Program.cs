@@ -1,13 +1,10 @@
-using System.Security.Claims;
 using System.Text.Json.Serialization;
 using API.LiveOps.Authorization;
 using API.LiveOps.Chat;
 using Application;
 using Application.Interfaces.Services.LL.Administration;
 using Common;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.IdentityModel.Tokens;
 using Persistence.LL;
 using RealTime.LL;
 using Services.LL;
@@ -39,12 +36,27 @@ ValidateProductionConfiguration(
     config);
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddControllers().AddJsonOptions(options =>
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+builder.Services.AddScoped<CookieAntiforgeryFilter>();
+builder.Services.AddControllers(options =>
+    options.Filters.AddService<CookieAntiforgeryFilter>())
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
 builder.Services.AddSignalR();
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-XSRF-TOKEN";
+    options.Cookie.Name = builder.Environment.IsDevelopment()
+        ? "LL-LiveOps-XSRF"
+        : "__Host-LL-LiveOps-XSRF";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+        ? CookieSecurePolicy.SameAsRequest
+        : CookieSecurePolicy.Always;
+});
 
 builder.Services.AddPersistence(config);
 builder.Services.AddRepositories();
@@ -71,24 +83,9 @@ if (allowedOrigins.Length > 0)
             .AllowAnyMethod()));
 }
 
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Authority = staffAuthority;
-        options.Audience = staffAudience;
-        options.RequireHttpsMetadata = true;
-        options.MapInboundClaims = false;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            NameClaimType = "name",
-            RoleClaimType = "roles",
-            ClockSkew = TimeSpan.FromSeconds(30)
-        };
-    });
+builder.Services.AddLiveOpsAuthentication(
+    config,
+    builder.Environment);
 builder.Services.AddAuthorization(options =>
 {
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
@@ -109,6 +106,20 @@ else
     app.UseHttpsRedirection();
 }
 
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Content-Security-Policy"] =
+        "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; " +
+        "form-action 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; " +
+        "script-src 'self'; connect-src 'self'";
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["Referrer-Policy"] = "no-referrer";
+    await next();
+});
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 if (allowedOrigins.Length > 0)
 {
     app.UseCors("LiveOpsOrigins");
@@ -119,6 +130,7 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/healthz/ready").AllowAnonymous();
 app.MapHealthChecks("/healthz/live").AllowAnonymous();
+app.MapFallbackToFile("index.html").AllowAnonymous();
 
 app.Run();
 
@@ -133,6 +145,12 @@ static void ValidateProductionConfiguration(
         return;
     }
 
+    if (configuration.GetValue<bool>("LiveOps:DevelopmentOperator:Enabled"))
+    {
+        throw new InvalidOperationException(
+            "The LiveOps development operator must be disabled outside Development.");
+    }
+
     if (!Uri.TryCreate(staffAuthority, UriKind.Absolute, out var authorityUri) ||
         authorityUri.Scheme != Uri.UriSchemeHttps ||
         authorityUri.Host.EndsWith(".invalid", StringComparison.OrdinalIgnoreCase))
@@ -144,6 +162,12 @@ static void ValidateProductionConfiguration(
     {
         throw new InvalidOperationException(
             "StaffIdentity:Audience is required outside Development.");
+    }
+    if (string.IsNullOrWhiteSpace(configuration["StaffIdentity:ClientId"]) ||
+        string.IsNullOrWhiteSpace(configuration["StaffIdentity:ClientSecret"]))
+    {
+        throw new InvalidOperationException(
+            "StaffIdentity client ID and client secret are required outside Development.");
     }
 
     var chatBaseUrl = configuration["Chat:Moderation:BaseUrl"];

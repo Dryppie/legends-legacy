@@ -21,6 +21,15 @@ public interface IAdministrationRepository
         int limit,
         DateTimeOffset now,
         CancellationToken cancellationToken);
+    Task<IReadOnlyList<AdministrationItemCatalogEntry>> SearchItemsAsync(
+        string query,
+        int limit,
+        CancellationToken cancellationToken);
+    Task<IReadOnlyList<AdministrationHistoryEntry>> GetHistoryAsync(
+        Guid accountId,
+        Guid characterId,
+        int limit,
+        CancellationToken cancellationToken);
     void AddAction(AdminAction action);
     void AddRestriction(AccountRestriction restriction);
 }

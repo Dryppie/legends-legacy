@@ -60,6 +60,11 @@ public sealed class ChatModerationServiceTests
         Assert.Null(await service.GetActiveMuteAsync(characterId, CancellationToken.None));
         Assert.Single(await db.ChatRestrictions.ToListAsync());
         Assert.Equal(2, await db.ChatModerationActions.CountAsync());
+
+        var history = await service.GetHistoryAsync(characterId, 20, CancellationToken.None);
+        Assert.Equal(2, history.Count);
+        Assert.Equal("Unmuted", history[0].ActionType.ToString());
+        Assert.Equal("Muted", history[1].ActionType.ToString());
     }
 
     [Fact]

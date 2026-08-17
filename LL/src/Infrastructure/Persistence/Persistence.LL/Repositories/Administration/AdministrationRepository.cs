@@ -114,6 +114,63 @@ public sealed class AdministrationRepository(IDbContext context) : IAdministrati
             .ToList();
     }
 
+    public async Task<IReadOnlyList<AdministrationItemCatalogEntry>> SearchItemsAsync(
+        string query,
+        int limit,
+        CancellationToken cancellationToken)
+    {
+        var trimmed = query.Trim();
+        if (trimmed.Length < 2)
+        {
+            return [];
+        }
+
+        var resultLimit = Math.Clamp(limit, 1, 50);
+        var normalized = trimmed.ToUpper();
+        return await context.ItemBases
+            .AsNoTracking()
+            .Where(x => x.Id.ToUpper().Contains(normalized) ||
+                        x.Name.ToUpper().Contains(normalized))
+            .OrderBy(x => x.Name)
+            .ThenBy(x => x.Id)
+            .Take(resultLimit)
+            .Select(x => new AdministrationItemCatalogEntry(
+                x.Id,
+                x.Name,
+                x.Description,
+                x.ItemType,
+                x.Rarity,
+                x.Stackable,
+                x.IsBound))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<AdministrationHistoryEntry>> GetHistoryAsync(
+        Guid accountId,
+        Guid characterId,
+        int limit,
+        CancellationToken cancellationToken) =>
+        await context.AdminActions
+            .AsNoTracking()
+            .Where(x => x.TargetAccountId == accountId ||
+                        x.TargetCharacterId == characterId)
+            .OrderByDescending(x => x.OccurredAt)
+            .Take(Math.Clamp(limit, 1, 100))
+            .Select(x => new AdministrationHistoryEntry(
+                x.Id,
+                x.ActionType,
+                x.Permission,
+                x.ActorSubject,
+                x.ActorDisplayName,
+                x.TargetAccountId,
+                x.TargetCharacterId,
+                x.TargetResourceId,
+                x.Reason,
+                x.InternalNotes,
+                x.DetailsJson,
+                x.OccurredAt))
+            .ToListAsync(cancellationToken);
+
     public void AddAction(AdminAction action) => context.AdminActions.Add(action);
 
     public void AddRestriction(AccountRestriction restriction) =>

@@ -156,6 +156,59 @@ public sealed class LiveOpsAdministrationTests
         Assert.Contains("append-only", error.Message, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public async Task Operator_read_model_searches_catalog_and_returns_player_history()
+    {
+        await using var db = CreateDb();
+        var (accountId, characterId) = AddPlayer(db);
+        db.ItemBases.AddRange(
+            new ItemBase
+            {
+                Id = "support_token",
+                Name = "Support Token",
+                Description = "A support compensation token.",
+                ItemType = ItemType.Resource,
+                Stackable = true
+            },
+            new ItemBase
+            {
+                Id = "iron_sword",
+                Name = "Iron Sword",
+                Description = "Not a token.",
+                ItemType = ItemType.Equipment,
+                Stackable = false
+            });
+        var actionId = Guid.NewGuid();
+        db.AdminActions.Add(new AdminAction
+        {
+            Id = actionId,
+            ActionType = AdminActionType.CompensationItemsGranted,
+            Permission = "economy.compensate",
+            ActorSubject = "staff|support-1",
+            ActorDisplayName = "Support One",
+            TargetAccountId = accountId,
+            TargetCharacterId = characterId,
+            Reason = "Support case LL-901",
+            OccurredAt = Now
+        });
+        await db.SaveChangesAsync();
+
+        var service = CreateService(db, new RecordingRefreshTokenRepository());
+        var items = await service.SearchItemsAsync("support", 20, CancellationToken.None);
+        var player = await service.GetPlayerAsync(characterId, CancellationToken.None);
+        var history = await service.GetHistoryAsync(
+            accountId,
+            characterId,
+            20,
+            CancellationToken.None);
+
+        var item = Assert.Single(items);
+        Assert.Equal("support_token", item.Id);
+        Assert.NotNull(player);
+        Assert.Equal(characterId, player.CharacterId);
+        Assert.Equal(actionId, Assert.Single(history).OperationId);
+    }
+
     private static (Guid AccountId, Guid CharacterId) AddPlayer(LLDbContext db)
     {
         var user = AppUser.Register(

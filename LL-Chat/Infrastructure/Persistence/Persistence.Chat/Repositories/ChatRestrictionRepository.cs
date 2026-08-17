@@ -32,6 +32,17 @@ public sealed class ChatRestrictionRepository(IDbContext context)
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<ChatModerationAction>> GetActionsAsync(
+        Guid characterId,
+        int limit,
+        CancellationToken cancellationToken) =>
+        await context.ChatModerationActions
+            .AsNoTracking()
+            .Where(x => x.TargetCharacterId == characterId)
+            .OrderByDescending(x => x.OccurredAt)
+            .Take(Math.Clamp(limit, 1, 100))
+            .ToListAsync(cancellationToken);
+
     public void AddRestriction(ChatRestriction restriction) =>
         context.ChatRestrictions.Add(restriction);
 

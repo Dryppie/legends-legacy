@@ -10,5 +10,7 @@ public sealed class AdministrationMappingProfile : Profile
     {
         CreateMap<PlayerAdministrationSnapshot, PlayerAdministrationDto>();
         CreateMap<AccountRestriction, AccountRestrictionDto>();
+        CreateMap<AdministrationItemCatalogEntry, AdministrationItemDto>();
+        CreateMap<AdministrationHistoryEntry, AdministrationHistoryDto>();
     }
 }
