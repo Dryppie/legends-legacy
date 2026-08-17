@@ -8,6 +8,7 @@ import { AuthService } from '../auth/auth.service';
 import { CharacterService } from './character.service';
 import { GameEventService } from '../../real-time/game-event.service';
 import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 
 @Injectable({ providedIn: 'root' })
 export class CharacterStateService {
@@ -38,7 +39,14 @@ export class CharacterStateService {
     private readonly service: CharacterService,
     private readonly auth: AuthService,
     private readonly eventService: GameEventService,
+    private readonly stateSync: StateSyncCoordinator,
   ) {
+    this.stateSync.register(
+      'character',
+      'character-overview',
+      () => this.refreshCurrentCharacter(),
+      () => !!this.currentCharacterId(),
+    );
     /* load (or clear) overview whenever the selected character changes */
     effect(
       () => {

@@ -1,5 +1,5 @@
-import { Injectable, signal, computed, effect } from '@angular/core';
-import { finalize } from 'rxjs';
+import { Injectable, signal, computed, effect, Injector } from '@angular/core';
+import { finalize, Observable, tap } from 'rxjs';
 import { Guild, GuildSimple } from '../../../../shared/models/Dtos/guild/guild';
 import { GuildInvite } from '../../../../shared/models/Dtos/guild/guildInvite';
 import { InviteToGuild } from '../../../../shared/models/requestDtos/guilds/inviteToGuild';
@@ -26,6 +26,8 @@ import {
 import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
 import { GameEventName } from '../../real-time/game-event/game-event.map';
 import { InventoryStateService } from '../inventory/inventory-state.service';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
+import { EquipmentStateService } from '../equipment/equipment-state.service';
 
 type GuildRealtimeEventName = Extract<
   GameEventName,
@@ -155,17 +157,24 @@ export class GuildStateService {
     private readonly auth: AuthService,
     private readonly notificationService: NotificationService,
     private readonly inventoryState: InventoryStateService,
+    private readonly injector: Injector,
+    private readonly stateSync: StateSyncCoordinator,
   ) {
+    this.stateSync.register(
+      'guild',
+      'guild',
+      () => this.refresh(),
+      () => this.hasLoaded,
+    );
     this.refresh(); // initial fetch
 
     effect(() => {
-      const guildId = this._guild()?.id;
-      if (!guildId) return;
+      const guildId = this._guild()?.id ?? null;
 
       void this.eventService
-        .subscribeToGuild(guildId)
+        .setGuildSubscription(guildId)
         .catch((error) =>
-          console.warn('Failed to subscribe to guild realtime', error),
+          console.warn('Failed to update guild realtime subscription', error),
         );
     });
 
@@ -185,6 +194,36 @@ export class GuildStateService {
       },
       { allowSignalWrites: true },
     );
+  }
+
+  donateVaultItem(equipmentInstanceId: string): Observable<void> {
+    return this.service
+      .donateVaultItem(equipmentInstanceId)
+      .pipe(tap(() => this.refreshVaultDependencies()));
+  }
+
+  borrowVaultItem(vaultItemId: string): Observable<void> {
+    return this.service
+      .borrowVaultItem(vaultItemId)
+      .pipe(tap(() => this.refreshVaultDependencies()));
+  }
+
+  returnVaultItem(vaultItemId: string): Observable<void> {
+    return this.service
+      .returnVaultItem(vaultItemId)
+      .pipe(tap(() => this.refreshVaultDependencies()));
+  }
+
+  withdrawVaultItem(vaultItemId: string): Observable<void> {
+    return this.service
+      .withdrawVaultItem(vaultItemId)
+      .pipe(tap(() => this.refreshVaultDependencies()));
+  }
+
+  private refreshVaultDependencies(): void {
+    this.refresh();
+    this.inventoryState.load(true);
+    this.injector.get(EquipmentStateService).load(true);
   }
 
   private createGuildRealtimeHandlers(): GuildRealtimeHandler[] {

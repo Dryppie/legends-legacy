@@ -1,4 +1,3 @@
-import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 
@@ -7,7 +6,7 @@ export const gameRealtimeEventNames = {
   lootReceived: 'LootReceived',
   inventorySnapshot: 'InventorySnapshot',
   characterSnapshot: 'CharacterSnapshot',
-  idleCombatProcessed: 'IdleCombatProcessed',
+  stateInvalidated: 'StateInvalidated',
 } as const;
 
 export type GameRealtimeEventName =
@@ -46,9 +45,19 @@ export interface CharacterSnapshot {
   reason: string;
 }
 
-export interface IdleCombatProcessed {
+export type StateSyncScope = 'character' | 'marketplace' | string;
+
+export interface StateInvalidated {
+  characterId?: string | null;
+  scope: StateSyncScope;
+  revision: number;
+  reason: string;
+}
+
+export interface StateSyncCheckpoint {
   characterId: string;
-  action: CharacterActionDto;
+  revisions: Record<string, number>;
+  serverTimeUtc: string;
 }
 
 export type GameRealtimePayload =
@@ -56,4 +65,4 @@ export type GameRealtimePayload =
   | LootReceived
   | InventorySnapshot
   | CharacterSnapshot
-  | IdleCombatProcessed;
+  | StateInvalidated;

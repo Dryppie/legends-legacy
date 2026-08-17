@@ -9,11 +9,13 @@ import {
   GameRealtimeEnvelope,
   InventorySnapshot,
   LootReceived,
+  StateInvalidated,
   gameRealtimeEventNames,
 } from './game-realtime-contracts';
 import { GameRealtimeConnection } from './game-realtime-connection.service';
 import { isGameRealtimeEnabled } from './game-realtime-feature';
 import { GameRealtimeStore } from './game-realtime-store.service';
+import { StateSyncCoordinator } from './state-sync-coordinator.service';
 
 type Handler = (envelope: GameRealtimeEnvelope) => void;
 
@@ -88,6 +90,15 @@ export class GameRealtimeEventRegistry {
       this.injector
         .get(CharacterStateService)
         .updateCharacter(payload.character);
+    });
+
+    this.addHandler(gameRealtimeEventNames.stateInvalidated, (envelope) => {
+      this.injector
+        .get(StateSyncCoordinator)
+        .acceptInvalidation(
+          envelope.payload as StateInvalidated,
+          envelope.updateId,
+        );
     });
   }
 

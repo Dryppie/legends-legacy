@@ -25,7 +25,7 @@ public class ChatController : BaseController
         _hub = hub;
     }
 
-    public record GetChatRequest(string? GuildChannel, int Take = 50);
+    public record GetChatRequest(string? GuildChannel, int Take = 50, DateTimeOffset? After = null);
     public record SendSystemMessageRequest(
         string Body,
         bool IsGlobal,
@@ -52,7 +52,11 @@ public class ChatController : BaseController
             return Forbid();
         }
 
-        return await Mediator.Send(new GetChatHistoryQuery(CurrentCharacterGuid, chatRequest.GuildChannel, chatRequest.Take));
+        return await Mediator.Send(new GetChatHistoryQuery(
+            CurrentCharacterGuid,
+            chatRequest.GuildChannel,
+            chatRequest.Take,
+            chatRequest.After));
     }
 
     [AllowAnonymous]

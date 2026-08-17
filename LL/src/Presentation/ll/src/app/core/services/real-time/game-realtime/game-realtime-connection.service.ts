@@ -120,6 +120,26 @@ export class GameRealtimeConnection {
     this.activeGuildSubscriptions.add(guildId);
   }
 
+  async setGuildSubscription(guildId: string | null): Promise<void> {
+    const obsoleteGuildIds = [...this.guildSubscriptions].filter(
+      (existingGuildId) => existingGuildId !== guildId,
+    );
+
+    for (const obsoleteGuildId of obsoleteGuildIds) {
+      this.guildSubscriptions.delete(obsoleteGuildId);
+      if (
+        this.activeGuildSubscriptions.delete(obsoleteGuildId) &&
+        this.hub?.state === HubConnectionState.Connected
+      ) {
+        await this.hub.invoke('UnsubscribeFromGuild', obsoleteGuildId);
+      }
+    }
+
+    if (guildId) {
+      await this.subscribeToGuild(guildId);
+    }
+  }
+
   private registerHubHandlers(): void {
     if (!this.hub || this.handlersRegistered) return;
     this.handlersRegistered = true;

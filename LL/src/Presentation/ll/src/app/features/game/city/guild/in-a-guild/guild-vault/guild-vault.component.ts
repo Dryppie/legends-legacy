@@ -3,8 +3,6 @@ import { Component, computed, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { CharacterService } from '../../../../../../core/services/api/character/character.service';
-import { EquipmentStateService } from '../../../../../../core/services/api/equipment/equipment-state.service';
-import { GuildService } from '../../../../../../core/services/api/guild/guild.service';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
 import { InventoryStateService } from '../../../../../../core/services/api/inventory/inventory-state.service';
 import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
@@ -81,10 +79,8 @@ export class GuildVaultComponent {
 
   constructor(
     private readonly characterService: CharacterService,
-    private readonly guildService: GuildService,
     private readonly guildState: GuildStateService,
     private readonly inventoryState: InventoryStateService,
-    private readonly equipmentState: EquipmentStateService,
   ) {
     this.inventoryState.load();
   }
@@ -215,28 +211,28 @@ export class GuildVaultComponent {
   donate(equipmentInstanceId: string): void {
     if (this.busy) return;
     this.busy = true;
-    this.guildService
+    this.guildState
       .donateVaultItem(equipmentInstanceId)
       .pipe(finalize(() => (this.busy = false)))
-      .subscribe({ next: () => this.refreshAll() });
+      .subscribe();
   }
 
   borrow(vaultItemId: string): void {
     if (this.busy) return;
     this.busy = true;
-    this.guildService
+    this.guildState
       .borrowVaultItem(vaultItemId)
       .pipe(finalize(() => (this.busy = false)))
-      .subscribe({ next: () => this.refreshAll() });
+      .subscribe();
   }
 
   returnItem(vaultItemId: string): void {
     if (this.busy) return;
     this.busy = true;
-    this.guildService
+    this.guildState
       .returnVaultItem(vaultItemId)
       .pipe(finalize(() => (this.busy = false)))
-      .subscribe({ next: () => this.refreshAll() });
+      .subscribe();
   }
 
   requestWithdraw(vaultItemId: string): void {
@@ -251,13 +247,12 @@ export class GuildVaultComponent {
   withdraw(vaultItemId: string): void {
     if (this.busy || this.pendingWithdrawId !== vaultItemId) return;
     this.busy = true;
-    this.guildService
+    this.guildState
       .withdrawVaultItem(vaultItemId)
       .pipe(finalize(() => (this.busy = false)))
       .subscribe({
         next: () => {
           this.pendingWithdrawId = null;
-          this.refreshAll();
         },
       });
   }
@@ -271,9 +266,4 @@ export class GuildVaultComponent {
     );
   }
 
-  private refreshAll(): void {
-    this.guildState.refresh();
-    this.inventoryState.load(true);
-    this.equipmentState.load(true);
-  }
 }

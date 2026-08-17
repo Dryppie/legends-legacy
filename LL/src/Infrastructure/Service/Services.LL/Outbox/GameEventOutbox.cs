@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Diagnostics;
 using Application.Common.Interfaces;
 using Application.Interfaces.Outbox;
 using Domain.Models.Outbox;
@@ -27,7 +28,8 @@ public sealed class GameEventOutbox(
             EventType = eventType,
             PayloadJson = JsonSerializer.Serialize(payload, jsonOptions),
             CreatedAt = now,
-            AvailableAt = now
+            AvailableAt = now,
+            CorrelationId = Activity.Current?.TraceId.ToString()
         };
 
         context.GameEventOutboxMessages.Add(message);

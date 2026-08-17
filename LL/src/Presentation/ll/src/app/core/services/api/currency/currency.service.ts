@@ -10,14 +10,18 @@ export class CurrencyService {
   gainSoulstones(soulstones: number) {
     const character = this.characterState.currentCharacter();
     if (!character) return;
-    character.soulstones += soulstones;
-    this.characterState.updateCharacter(character);
+    this.characterState.updateCharacter({
+      ...character,
+      soulstones: character.soulstones + soulstones,
+    });
   }
 
   gainCinders(cinders: number) {
     const character = this.characterState.currentCharacter();
     if (!character) return;
-    character.cinders += cinders;
-    this.characterState.updateCharacter(character);
+    this.characterState.updateCharacter({
+      ...character,
+      cinders: character.cinders + cinders,
+    });
   }
 }

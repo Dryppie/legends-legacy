@@ -929,6 +929,7 @@ public class MarketPlaceService : IMarketPlaceService
         var expiredListings = 0;
         var expiredBuyOrders = 0;
         long refundedCinders = 0;
+        var affectedCharacterIds = new HashSet<Guid>();
 
         var listingIds = await _marketPlaceRepository.GetExpiredListingIdsAsync(now, take, cancellationToken);
         foreach (var listingId in listingIds)
@@ -946,6 +947,7 @@ public class MarketPlaceService : IMarketPlaceService
             }, cancellationToken);
 
             _marketPlaceRepository.RemoveListingAsync(listing);
+            affectedCharacterIds.Add(listing.SellerId);
             expiredListings++;
         }
 
@@ -965,10 +967,15 @@ public class MarketPlaceService : IMarketPlaceService
             buyer.Cinders = checked(buyer.Cinders + refund);
             refundedCinders = checked(refundedCinders + refund);
             _marketPlaceRepository.RemoveBuyOrder(buyOrder);
+            affectedCharacterIds.Add(buyOrder.BuyerId);
             expiredBuyOrders++;
         }
 
-        return new ExpireMarketPlaceOrdersResult(expiredListings, expiredBuyOrders, refundedCinders);
+        return new ExpireMarketPlaceOrdersResult(
+            expiredListings,
+            expiredBuyOrders,
+            refundedCinders,
+            affectedCharacterIds);
     }
 
     public async Task<List<ItemBase>> GetTradableItemBasesAsync(CancellationToken cancellationToken)

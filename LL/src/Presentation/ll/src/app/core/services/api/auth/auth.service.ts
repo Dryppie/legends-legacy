@@ -37,6 +37,8 @@ interface AuthTokens {
 })
 export class AuthService {
   private refreshSub?: Subscription;
+  private characterRequestEpoch = 0;
+  private userInfoRequestEpoch = 0;
   /** UNIX seconds when the current access token expires */
   private _accessExpiresAt = 0;
   private _accessToken = '';
@@ -87,6 +89,8 @@ export class AuthService {
   }
 
   private markUnauthenticated() {
+    this.characterRequestEpoch += 1;
+    this.userInfoRequestEpoch += 1;
     this._currentCharacter.set(null);
     this._userInfo.set(null);
     this._isAuthenticated.set(false);
@@ -94,6 +98,7 @@ export class AuthService {
   }
 
   updateCharacter(updatedCharacter: CharacterDto): void {
+    this.characterRequestEpoch += 1;
     const current = this._currentCharacter();
     if (current && this.isSameCharacter(current, updatedCharacter)) {
       return;
@@ -262,11 +267,13 @@ export class AuthService {
   }
 
   private fetchCharacter(): Observable<CharacterDto> {
+    const requestEpoch = ++this.characterRequestEpoch;
     return this.api
       .get('character')
       .pipe(
         map((response) => this.unwrapResponse<CharacterDto>(response)),
         tap((character) => {
+          if (requestEpoch !== this.characterRequestEpoch) return;
           const current = this._currentCharacter();
           if (!current || !this.isSameCharacter(current, character)) {
             this._currentCharacter.set(character);
@@ -295,15 +302,22 @@ export class AuthService {
   }
 
   private applyAuthenticatedTokens(accessToken: string, accessExpiresAt: number) {
+    this.characterRequestEpoch += 1;
+    this.userInfoRequestEpoch += 1;
     this.setAccessToken(accessToken, accessExpiresAt);
     this.markAuthenticated();
     this._authenticationContextVersion.update((version) => version + 1);
   }
 
   getUserInfo(): Observable<UserInfoDto> {
+    const requestEpoch = ++this.userInfoRequestEpoch;
     return this.api.get('auth/getUserInfo').pipe(
       map((response) => this.unwrapResponse<UserInfoDto>(response)),
-      tap((userInfo) => this._userInfo.set(userInfo)),
+      tap((userInfo) => {
+        if (requestEpoch === this.userInfoRequestEpoch) {
+          this._userInfo.set(userInfo);
+        }
+      }),
       catchError((e) => {
         return throwError(() => new Error(this.readErrorMessage(e) || 'Failed to load user info'));
       }),
@@ -402,6 +416,9 @@ export class AuthService {
       a.experienceUntilNextLevel === b.experienceUntilNextLevel &&
       a.cinders === b.cinders &&
       a.soulstones === b.soulstones &&
+      a.fateEcho === b.fateEcho &&
+      a.sigilFragments === b.sigilFragments &&
+      a.guildFavor === b.guildFavor &&
       a.arenaRating === b.arenaRating &&
       this.isSameEquippedTitle(a.equippedTitle, b.equippedTitle)
     );

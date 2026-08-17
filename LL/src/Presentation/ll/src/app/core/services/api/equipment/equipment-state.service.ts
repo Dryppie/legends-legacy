@@ -10,6 +10,7 @@ import { InventoryStateService } from '../inventory/inventory-state.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { CharacterStateService } from '../character/character-state.service';
 import { QuestStateService } from '../quest/quest-state.service';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 
 @Injectable({ providedIn: 'root' })
 export class EquipmentStateService {
@@ -17,6 +18,7 @@ export class EquipmentStateService {
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
   private resetVersion = 0;
+  private loadEpoch = 0;
 
   readonly equipmentSlots = computed(() => this._equipmentSlots());
   readonly loading = computed(() => this._loading());
@@ -31,7 +33,9 @@ export class EquipmentStateService {
     private readonly eventBus: EventBusService,
     private readonly characterState: CharacterStateService,
     private readonly questState: QuestStateService,
+    private readonly stateSync: StateSyncCoordinator,
   ) {
+    this.stateSync.register('character', 'equipment', () => this.load(true));
     this.load();
 
     effect(
@@ -49,17 +53,32 @@ export class EquipmentStateService {
     this._loading.set(true);
     this._error.set(null);
     const requestVersion = this.resetVersion;
+    const requestEpoch = ++this.loadEpoch;
 
     this.equipmentService
       .getEquipment()
-      .pipe(finalize(() => this._loading.set(false)))
+      .pipe(
+        finalize(() => {
+          if (requestEpoch === this.loadEpoch) this._loading.set(false);
+        }),
+      )
       .subscribe({
         next: (equipmentSlots) => {
-          if (requestVersion !== this.resetVersion) return;
+          if (
+            requestVersion !== this.resetVersion ||
+            requestEpoch !== this.loadEpoch
+          ) {
+            return;
+          }
           this._equipmentSlots.set(equipmentSlots);
         },
         error: (err) => {
-          if (requestVersion !== this.resetVersion) return;
+          if (
+            requestVersion !== this.resetVersion ||
+            requestEpoch !== this.loadEpoch
+          ) {
+            return;
+          }
           this._error.set(err.message ?? 'Unknown error');
         },
       });
@@ -67,12 +86,14 @@ export class EquipmentStateService {
 
   reset(): void {
     this.resetVersion += 1;
+    this.loadEpoch += 1;
     this._equipmentSlots.set([]);
     this._loading.set(false);
     this._error.set(null);
   }
 
   setSlots(slots: EquipmentSlot[]): void {
+    this.loadEpoch += 1;
     this._equipmentSlots.set(slots);
   }
 
@@ -113,9 +134,9 @@ export class EquipmentStateService {
   }
 
   private applyEquipmentChange(response: EquipmentChangeResponse): void {
-    this._equipmentSlots.set(response.equipmentSlots);
+    this.setSlots(response.equipmentSlots);
     this.inventoryState.setInventory(response.inventoryItems);
     this.characterState.markOverviewDirty();
-    this.questState.refreshAfterOutboxProgress();
+    this.questState.refreshAfterMutation();
   }
 }

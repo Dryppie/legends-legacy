@@ -50,7 +50,8 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
             [GameEventTypes.TournamentGroundsUpdated] = [GameEventOutboxConsumerNames.RealtimeTournamentGrounds],
             [GameEventTypes.WorldTowerRallyUpdated] = [GameEventOutboxConsumerNames.RealtimeWorldTower],
             [GameEventTypes.WorldTowerChatAnnouncement] = [GameEventOutboxConsumerNames.WorldTowerChat],
-            [GameEventTypes.EventQuestChatAnnouncement] = [GameEventOutboxConsumerNames.EventQuestChat]
+            [GameEventTypes.EventQuestChatAnnouncement] = [GameEventOutboxConsumerNames.EventQuestChat],
+            [GameEventTypes.RealtimeDeliveryRequested] = [GameEventOutboxConsumerNames.RealtimeDelivery]
         };
 
     public IReadOnlyList<string> GetConsumers(string eventType) =>

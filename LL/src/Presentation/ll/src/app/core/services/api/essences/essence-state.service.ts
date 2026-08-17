@@ -8,6 +8,7 @@ import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { CharacterStateService } from '../character/character-state.service';
 import { GameEventService } from '../../real-time/game-event.service';
 import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 import { Essence } from '../../../../shared/models/essence';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
@@ -51,6 +52,11 @@ export class EssenceStateService {
   private readonly eventDeduper = new GameEventDeduper();
   private resetVersion = 0;
   private dustMutationVersion = 0;
+  private fullRefreshEpoch = 0;
+  private archiveRequestEpoch = 0;
+  private loadoutRequestEpoch = 0;
+  private creatureArchiveRequestEpoch = 0;
+  private codexRequestEpoch = 0;
 
   readonly activeView = computed(() => this._activeView());
   readonly currentTime = computed(() => this._now());
@@ -260,7 +266,14 @@ export class EssenceStateService {
     private readonly eventBus: EventBusService,
     private readonly characterState: CharacterStateService,
     private readonly gameEvents: GameEventService,
+    private readonly stateSync: StateSyncCoordinator,
   ) {
+    this.stateSync.register(
+      'character',
+      'essences',
+      () => this.refresh(true),
+      () => this._archive() !== null || this._loadouts() !== null,
+    );
     setInterval(() => this._now.set(Date.now()), 60_000);
 
     effect(
@@ -321,6 +334,11 @@ export class EssenceStateService {
     this._loading.set(true);
     this._error.set(null);
     const requestVersion = this.resetVersion;
+    const refreshEpoch = ++this.fullRefreshEpoch;
+    const archiveEpoch = ++this.archiveRequestEpoch;
+    const loadoutEpoch = ++this.loadoutRequestEpoch;
+    const creatureArchiveEpoch = ++this.creatureArchiveRequestEpoch;
+    const codexEpoch = ++this.codexRequestEpoch;
 
     forkJoin({
       archive: this.essencesService.getArchive(),
@@ -329,21 +347,37 @@ export class EssenceStateService {
       codex: this.essencesService.getCodex(),
     }).subscribe({
       next: ({ archive, loadouts, creatureArchive, codex }) => {
-        if (requestVersion !== this.resetVersion) return;
+        if (
+          requestVersion !== this.resetVersion ||
+          refreshEpoch !== this.fullRefreshEpoch
+        ) {
+          return;
+        }
         const shouldPreserveLoadoutDraft =
           preserveLoadoutDraft &&
           this.hasDraftChanges() &&
           this.canPreserveLoadoutDraft(loadouts);
-        this._archive.set(archive);
-        this._loadouts.set(loadouts);
-        this._creatureArchive.set(creatureArchive);
-        this._codex.set(codex);
-        this.ensureSelectedEssence(archive);
-        this.ensureSelectedLoadout(loadouts, shouldPreserveLoadoutDraft);
+        if (archiveEpoch === this.archiveRequestEpoch) {
+          this._archive.set(archive);
+          this.ensureSelectedEssence(archive);
+        }
+        if (loadoutEpoch === this.loadoutRequestEpoch) {
+          this._loadouts.set(loadouts);
+          this.ensureSelectedLoadout(loadouts, shouldPreserveLoadoutDraft);
+        }
+        if (creatureArchiveEpoch === this.creatureArchiveRequestEpoch) {
+          this._creatureArchive.set(creatureArchive);
+        }
+        if (codexEpoch === this.codexRequestEpoch) this._codex.set(codex);
         this._loading.set(false);
       },
       error: (error) => {
-        if (requestVersion !== this.resetVersion) return;
+        if (
+          requestVersion !== this.resetVersion ||
+          refreshEpoch !== this.fullRefreshEpoch
+        ) {
+          return;
+        }
         this._error.set(error?.message ?? 'Failed to load essences');
         this._loading.set(false);
       },
@@ -356,15 +390,26 @@ export class EssenceStateService {
    */
   refreshArchive(): void {
     const requestVersion = this.resetVersion;
+    const requestEpoch = ++this.archiveRequestEpoch;
 
     this.essencesService.getArchive().subscribe({
       next: (archive) => {
-        if (requestVersion !== this.resetVersion) return;
+        if (
+          requestVersion !== this.resetVersion ||
+          requestEpoch !== this.archiveRequestEpoch
+        ) {
+          return;
+        }
         this._archive.set(archive);
         this.ensureSelectedEssence(archive);
       },
       error: (error) => {
-        if (requestVersion !== this.resetVersion) return;
+        if (
+          requestVersion !== this.resetVersion ||
+          requestEpoch !== this.archiveRequestEpoch
+        ) {
+          return;
+        }
         this._error.set(error?.message ?? 'Failed to load Soul Archive');
       },
     });
@@ -372,14 +417,25 @@ export class EssenceStateService {
 
   refreshCreatureArchive(): void {
     const requestVersion = this.resetVersion;
+    const requestEpoch = ++this.creatureArchiveRequestEpoch;
 
     this.essencesService.getCreatureArchive().subscribe({
       next: (creatureArchive) => {
-        if (requestVersion !== this.resetVersion) return;
+        if (
+          requestVersion !== this.resetVersion ||
+          requestEpoch !== this.creatureArchiveRequestEpoch
+        ) {
+          return;
+        }
         this._creatureArchive.set(creatureArchive);
       },
       error: (error) => {
-        if (requestVersion !== this.resetVersion) return;
+        if (
+          requestVersion !== this.resetVersion ||
+          requestEpoch !== this.creatureArchiveRequestEpoch
+        ) {
+          return;
+        }
         this._error.set(error?.message ?? 'Failed to load Creature Archive');
       },
     });
@@ -388,6 +444,11 @@ export class EssenceStateService {
   reset(): void {
     this.resetVersion += 1;
     this.dustMutationVersion += 1;
+    this.fullRefreshEpoch += 1;
+    this.archiveRequestEpoch += 1;
+    this.loadoutRequestEpoch += 1;
+    this.creatureArchiveRequestEpoch += 1;
+    this.codexRequestEpoch += 1;
     this._activeView.set('archive');
     this._archive.set(null);
     this._loadouts.set(null);
@@ -481,10 +542,18 @@ export class EssenceStateService {
   }
 
   favorite(essence: PlayerEssenceDto): void {
-    essence.isFavorite = !essence.isFavorite;
+    const isFavorite = !essence.isFavorite;
+    const mutationEpoch = ++this.archiveRequestEpoch;
+    this.updateFavorite(essence.id, isFavorite);
     this.essencesService
-      .setFavorite(essence.id, essence.isFavorite)
-      .subscribe();
+      .setFavorite(essence.id, isFavorite)
+      .subscribe({
+        error: (error) => {
+          if (mutationEpoch !== this.archiveRequestEpoch) return;
+          this.updateFavorite(essence.id, !isFavorite);
+          this._error.set(error?.message ?? 'Failed to update favorite');
+        },
+      });
   }
 
   setEssenceFocus(creatureId: string | null): void {
@@ -494,7 +563,10 @@ export class EssenceStateService {
     }
 
     this.essencesService.setEssenceFocus(creatureId).subscribe({
-      next: (archive) => this._creatureArchive.set(archive),
+      next: (archive) => {
+        this.creatureArchiveRequestEpoch += 1;
+        this._creatureArchive.set(archive);
+      },
       error: (error) =>
         this._error.set(error?.message ?? 'Failed to update Essence Focus'),
     });
@@ -517,7 +589,7 @@ export class EssenceStateService {
 
         this.applyEssenceMutation(response);
         this.refreshLoadouts();
-        this.questState.refreshAfterOutboxProgress();
+        this.questState.refreshAfterMutation();
         this._selectedInventoryItemId.set(
           this.getFirstAbsorbableInventoryEssenceId(),
         );
@@ -660,7 +732,7 @@ export class EssenceStateService {
               this._savingLoadout.set(false);
               this.characterState.markOverviewDirty();
               this.refresh();
-              this.questState.refreshAfterOutboxProgress();
+              this.questState.refreshAfterMutation();
             },
             error: (error) => {
               this._savingLoadout.set(false);
@@ -681,7 +753,7 @@ export class EssenceStateService {
           this.refreshArchive();
         }
         if (activateAfterSave) {
-          this.questState.refreshAfterOutboxProgress();
+          this.questState.refreshAfterMutation();
         }
       },
       error: (error) => {
@@ -717,6 +789,7 @@ export class EssenceStateService {
   }
 
   private applySavedLoadout(loadout: EssenceLoadoutDto): void {
+    this.loadoutRequestEpoch += 1;
     const loadouts = this._loadouts();
     if (loadouts) {
       const existingIndex = loadouts.loadouts.findIndex(
@@ -740,7 +813,7 @@ export class EssenceStateService {
     this.essencesService.activateLoadout(id).subscribe(() => {
       this.characterState.markOverviewDirty();
       this.refresh();
-      this.questState.refreshAfterOutboxProgress();
+      this.questState.refreshAfterMutation();
     });
   }
 
@@ -792,6 +865,7 @@ export class EssenceStateService {
   }
 
   private applyEssenceMutation(response: EssenceMutationResponseDto): void {
+    this.archiveRequestEpoch += 1;
     this._archive.set(response.archive);
     this.inventoryState.setInventory(response.inventoryItems);
     this.characterState.markOverviewDirty();
@@ -799,11 +873,25 @@ export class EssenceStateService {
     this.refreshCompanionArchives();
   }
 
+  private updateFavorite(essenceId: string, isFavorite: boolean): void {
+    this._archive.update((archive) =>
+      archive
+        ? {
+            ...archive,
+            essences: archive.essences.map((entry) =>
+              entry.id === essenceId ? { ...entry, isFavorite } : entry,
+            ),
+          }
+        : archive,
+    );
+  }
+
   private reconcileArchiveAfterDustRejection(
     message: string,
     resetVersion: number,
   ): void {
     const reconciliationVersion = ++this.dustMutationVersion;
+    const requestEpoch = ++this.archiveRequestEpoch;
 
     this.essencesService
       .getArchive()
@@ -811,7 +899,8 @@ export class EssenceStateService {
         finalize(() => {
           if (
             resetVersion === this.resetVersion &&
-            reconciliationVersion === this.dustMutationVersion
+            reconciliationVersion === this.dustMutationVersion &&
+            requestEpoch === this.archiveRequestEpoch
           ) {
             this._spendingDust.set(false);
           }
@@ -821,7 +910,8 @@ export class EssenceStateService {
         next: (archive) => {
           if (
             resetVersion !== this.resetVersion ||
-            reconciliationVersion !== this.dustMutationVersion
+            reconciliationVersion !== this.dustMutationVersion ||
+            requestEpoch !== this.archiveRequestEpoch
           ) {
             return;
           }
@@ -833,7 +923,8 @@ export class EssenceStateService {
         error: () => {
           if (
             resetVersion === this.resetVersion &&
-            reconciliationVersion === this.dustMutationVersion
+            reconciliationVersion === this.dustMutationVersion &&
+            requestEpoch === this.archiveRequestEpoch
           ) {
             this._error.set(message);
           }
@@ -875,6 +966,8 @@ export class EssenceStateService {
 
   private refreshCompanionArchives(): void {
     const requestVersion = this.resetVersion;
+    const creatureArchiveEpoch = ++this.creatureArchiveRequestEpoch;
+    const codexEpoch = ++this.codexRequestEpoch;
 
     forkJoin({
       creatureArchive: this.essencesService.getCreatureArchive(),
@@ -882,11 +975,19 @@ export class EssenceStateService {
     }).subscribe({
       next: ({ creatureArchive, codex }) => {
         if (requestVersion !== this.resetVersion) return;
-        this._creatureArchive.set(creatureArchive);
-        this._codex.set(codex);
+        if (creatureArchiveEpoch === this.creatureArchiveRequestEpoch) {
+          this._creatureArchive.set(creatureArchive);
+        }
+        if (codexEpoch === this.codexRequestEpoch) this._codex.set(codex);
       },
       error: (error) => {
-        if (requestVersion !== this.resetVersion) return;
+        if (
+          requestVersion !== this.resetVersion ||
+          (creatureArchiveEpoch !== this.creatureArchiveRequestEpoch &&
+            codexEpoch !== this.codexRequestEpoch)
+        ) {
+          return;
+        }
         this._error.set(error?.message ?? 'Failed to refresh Essence records');
       },
     });
@@ -895,13 +996,25 @@ export class EssenceStateService {
   private refreshLoadouts(preserveDraft = false): void {
     this._loading.set(true);
     const requestVersion = this.resetVersion;
+    const requestEpoch = ++this.loadoutRequestEpoch;
 
     this.essencesService
       .getLoadouts()
-      .pipe(finalize(() => this._loading.set(false)))
+      .pipe(
+        finalize(() => {
+          if (requestEpoch === this.loadoutRequestEpoch) {
+            this._loading.set(false);
+          }
+        }),
+      )
       .subscribe({
         next: (loadouts) => {
-          if (requestVersion !== this.resetVersion) return;
+          if (
+            requestVersion !== this.resetVersion ||
+            requestEpoch !== this.loadoutRequestEpoch
+          ) {
+            return;
+          }
           const shouldPreserveDraft =
             preserveDraft &&
             this.hasDraftChanges() &&
@@ -919,7 +1032,12 @@ export class EssenceStateService {
           this.ensureSelectedLoadout(loadouts, shouldPreserveDraft);
         },
         error: (error) => {
-          if (requestVersion !== this.resetVersion) return;
+          if (
+            requestVersion !== this.resetVersion ||
+            requestEpoch !== this.loadoutRequestEpoch
+          ) {
+            return;
+          }
           this._error.set(error?.message ?? 'Failed to load Essence loadouts');
         },
       });

@@ -62,7 +62,8 @@ public sealed record SellCommodityResult(
 public sealed record ExpireMarketPlaceOrdersResult(
     int ExpiredListings,
     int ExpiredBuyOrders,
-    long RefundedCinders);
+    long RefundedCinders,
+    IReadOnlyCollection<Guid> AffectedCharacterIds);
 
 public interface IMarketPlaceService
 {

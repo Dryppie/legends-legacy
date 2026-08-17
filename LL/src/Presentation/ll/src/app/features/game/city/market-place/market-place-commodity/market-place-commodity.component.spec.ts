@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { NEVER } from 'rxjs';
 import { CharacterService } from '../../../../../core/services/api/character/character.service';
 import { EssenceStateService } from '../../../../../core/services/api/essences/essence-state.service';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
@@ -34,8 +35,12 @@ describe('MarketPlaceCommodityComponent absorbed Essences', () => {
             buyOrders: signal([]),
             load: jasmine.createSpy('load'),
           } as unknown as MarketplaceStateService,
-          {} as CharacterService,
-          {} as MarketPlaceService,
+          {
+            currentCharacterId: signal('current-character'),
+          } as unknown as CharacterService,
+          {
+            getSummary: jasmine.createSpy('getSummary').and.returnValue(NEVER),
+          } as unknown as MarketPlaceService,
           {
             archive,
             absorbedEssenceDefinitionIds: signal(new Set(absorbedIds)),

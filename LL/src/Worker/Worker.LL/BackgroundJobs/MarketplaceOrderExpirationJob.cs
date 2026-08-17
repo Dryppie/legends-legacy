@@ -44,6 +44,7 @@ public sealed class MarketplaceOrderExpirationJob : IJob
                 await using var scope = _scopeFactory.CreateAsyncScope();
                 var dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();
                 var marketplace = scope.ServiceProvider.GetRequiredService<IMarketPlaceService>();
+                var stateSync = scope.ServiceProvider.GetRequiredService<IStateSyncService>();
                 var strategy = dbContext.CreateExecutionStrategy();
                 await strategy.ExecuteAsync(async () =>
                 {
@@ -54,6 +55,23 @@ public sealed class MarketplaceOrderExpirationJob : IJob
                             _timeProvider.GetUtcNow(),
                             _options.ExpirationBatchSize,
                             cancellationToken);
+
+                        if (result.ExpiredListings > 0 || result.ExpiredBuyOrders > 0)
+                        {
+                            const string reason = "MarketplaceOrdersExpired";
+                            foreach (var characterId in result.AffectedCharacterIds.Order())
+                            {
+                                await stateSync.InvalidateCharacterAsync(
+                                    characterId,
+                                    reason,
+                                    cancellationToken);
+                            }
+
+                            await stateSync.InvalidateWorldScopeAsync(
+                                "marketplace",
+                                reason,
+                                cancellationToken);
+                        }
 
                         await dbContext.SaveChangesAsync(cancellationToken);
                         await transaction.CommitAsync(cancellationToken);

@@ -8,6 +8,8 @@ namespace RealTime.LL;
 [Authorize]
 public sealed class GameHub : Hub<IGameClient>
 {
+    public const string WorldGroup = "world";
+
     private readonly IGuildService _guildService;
 
     public GameHub(IGuildService guildService)
@@ -24,7 +26,7 @@ public sealed class GameHub : Hub<IGameClient>
     public Task SubscribeToWorld()
     {
         _ = Context.RequireCharacterId();
-        return Groups.AddToGroupAsync(Context.ConnectionId, "world");
+        return Groups.AddToGroupAsync(Context.ConnectionId, WorldGroup);
     }
 
     public async Task SubscribeToGuild(Guid guildId)
@@ -38,6 +40,12 @@ public sealed class GameHub : Hub<IGameClient>
         }
 
         await Groups.AddToGroupAsync(Context.ConnectionId, GuildGroup(guildId));
+    }
+
+    public Task UnsubscribeFromGuild(Guid guildId)
+    {
+        _ = Context.RequireCharacterId();
+        return Groups.RemoveFromGroupAsync(Context.ConnectionId, GuildGroup(guildId));
     }
 
     public override Task OnDisconnectedAsync(Exception? exception)

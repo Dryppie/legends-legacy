@@ -144,7 +144,7 @@ public class AuthController : BaseController
     [HttpPost("Rename")]
     public async Task<ActionResult<Response<bool>>> Rename([FromBody] string newName)
     {
-        var result = await Mediator.Send(new RenameCharacterCommand(CurrentUserId, newName));
+        var result = await Mediator.Send(new RenameCharacterCommand(CurrentUserId, CurrentCharacterGuid, newName));
         if (result.Data is null) return BadRequest(result);
 
         SetAuthCookies(result.Data);

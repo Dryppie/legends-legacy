@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { GameBootstrapStateService } from '../../../core/services/api/game-bootstrap/game-bootstrap-state.service';
 import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
+import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
 import { FirstPartyTourService } from '../../../core/services/client-side/first-party-tour/first-party-tour.service';
 import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
@@ -69,6 +70,10 @@ describe('CombatComponent', () => {
         {
           provide: EquipmentStateService,
           useValue: { getSlot: jasmine.createSpy('getSlot') },
+        },
+        {
+          provide: CharacterStateService,
+          useValue: { currentCharacterId: signal('current-character') },
         },
         {
           provide: GameService,

@@ -12,7 +12,6 @@ using Quartz.Impl.Triggers;
 using Services.AdminDashboard;
 using Services.LL;
 using Worker.LL.BackgroundJobs;
-using Worker.LL.Realtime;
 
 namespace EssenceSystem.Tests;
 
@@ -122,8 +121,6 @@ public sealed class WorkerServiceProviderTests
         builder.Services.AddRepositories();
         builder.Services.AddApplication();
         builder.Services.AddCommonServices();
-        builder.Services.AddScoped<IGameEventPublisher, NoOpGameEventPublisher>();
-        builder.Services.AddScoped<IGameRealtimeBroadcaster, NoOpGameRealtimeBroadcaster>();
         builder.Services.AddServices(builder.Configuration, builder.Environment.ContentRootPath);
         builder.Services.AddAdminDashboardServices();
         builder.Services.AddBackgroundJobInfrastructure(builder.Configuration, builder.Environment);

@@ -19,6 +19,7 @@ import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer
 import { GameEventService } from '../../real-time/game-event.service';
 import { AuthService } from '../auth/auth.service';
 import { QuestService } from './quest.service';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 
 @Injectable({ providedIn: 'root' })
 export class QuestStateService {
@@ -29,6 +30,8 @@ export class QuestStateService {
   private readonly _error = signal<string | null>(null);
   private readonly auth = inject(AuthService);
   private readonly eventDeduper = new GameEventDeduper();
+  private journalRequestEpoch = 0;
+  private areaAccessRequestEpoch = 0;
   private lastLogoutCount = 0;
   private lastReconnectCount = 0;
 
@@ -79,7 +82,14 @@ export class QuestStateService {
     private readonly router: Router,
     private readonly events: GameEventService,
     private readonly eventBus: EventBusService,
+    private readonly stateSync: StateSyncCoordinator,
   ) {
+    this.stateSync.register(
+      'character',
+      'quests',
+      () => this.resyncSilently(),
+      () => this._loaded(),
+    );
     effect(
       () => {
         const event = this.events.event.QuestJournalChangedMsg();
@@ -138,6 +148,7 @@ export class QuestStateService {
   }
 
   initialize(journal: QuestJournal): void {
+    this.journalRequestEpoch += 1;
     this._journal.set(journal ?? { quests: [] });
     this._loaded.set(true);
     this._loading.set(false);
@@ -146,6 +157,7 @@ export class QuestStateService {
 
   load(): void {
     if (this._loading()) return;
+    const requestEpoch = ++this.journalRequestEpoch;
     this._loading.set(true);
     this._error.set(null);
     this.api
@@ -153,6 +165,7 @@ export class QuestStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (journal) => {
+          if (requestEpoch !== this.journalRequestEpoch) return;
           this.initialize(journal);
           this.loadAreaAccess();
         },
@@ -161,9 +174,8 @@ export class QuestStateService {
       });
   }
 
-  refreshAfterOutboxProgress(delayMs = 750): void {
+  refreshAfterMutation(): void {
     this.loadJournalSilently();
-    window.setTimeout(() => this.loadJournalSilently(), delayMs);
   }
 
   selectChoice(
@@ -240,8 +252,13 @@ export class QuestStateService {
   }
 
   loadAreaAccess(): void {
+    const requestEpoch = ++this.areaAccessRequestEpoch;
     this.api.getAreaAccess().subscribe({
-      next: (access) => this._areaAccess.set(access),
+      next: (access) => {
+        if (requestEpoch === this.areaAccessRequestEpoch) {
+          this._areaAccess.set(access);
+        }
+      },
       error: () => undefined,
     });
   }
@@ -255,6 +272,8 @@ export class QuestStateService {
   }
 
   reset(): void {
+    this.journalRequestEpoch += 1;
+    this.areaAccessRequestEpoch += 1;
     this._journal.set({ quests: [] });
     this._areaAccess.set([]);
     this._loaded.set(false);
@@ -264,8 +283,10 @@ export class QuestStateService {
 
   /** Re-pull journal and area access together, without touching loading/error UI. */
   private resyncSilently(): void {
+    const requestEpoch = ++this.journalRequestEpoch;
     this.api.getJournal().subscribe({
       next: (journal) => {
+        if (requestEpoch !== this.journalRequestEpoch) return;
         this.initialize(journal);
         this.loadAreaAccess();
       },
@@ -274,8 +295,13 @@ export class QuestStateService {
   }
 
   private loadJournalSilently(): void {
+    const requestEpoch = ++this.journalRequestEpoch;
     this.api.getJournal().subscribe({
-      next: (journal) => this.initializeAndRefreshAccessWhenNeeded(journal),
+      next: (journal) => {
+        if (requestEpoch === this.journalRequestEpoch) {
+          this.initializeAndRefreshAccessWhenNeeded(journal);
+        }
+      },
       error: () => undefined,
     });
   }

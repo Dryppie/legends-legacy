@@ -61,6 +61,7 @@ function createGuild(): Guild {
         level: 10,
         role: GuildRole.Leader,
         joinedAt: '2026-08-01T00:00:00Z',
+        isOnline: true,
       },
     ],
     invites: [

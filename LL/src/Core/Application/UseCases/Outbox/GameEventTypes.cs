@@ -29,4 +29,5 @@ public static class GameEventTypes
     public const string WorldTowerRallyUpdated = "world_tower.rally_updated";
     public const string WorldTowerChatAnnouncement = "world_tower.chat_announcement";
     public const string EventQuestChatAnnouncement = "event_quest.chat_announcement";
+    public const string RealtimeDeliveryRequested = "realtime.delivery_requested";
 }

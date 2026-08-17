@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Application.MediatR.Attributes;
 using Application.MediatR.Markers;
+using Application.Interfaces.Services.LL;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -15,12 +16,15 @@ public sealed class TransactionBehavior<TRequest, TResponse>
     private static readonly ConcurrentDictionary<Guid, SemaphoreSlim> CharacterCommandLocks = new();
 
     private readonly IDbContext _db;
+    private readonly IStateSyncService _stateSync;
     private readonly ILogger<TransactionBehavior<TRequest, TResponse>> _logger;
 
     public TransactionBehavior(IDbContext db,
+        IStateSyncService stateSync,
         ILogger<TransactionBehavior<TRequest, TResponse>> logger)
     {
         _db = db;
+        _stateSync = stateSync;
         _logger = logger;
     }
 
@@ -42,7 +46,7 @@ public sealed class TransactionBehavior<TRequest, TResponse>
                 await _db.AcquireCharacterCommandLockAsync(characterId.Value, ct);
             }
 
-            return await HandleTransactionalCommand(next, ct, null);
+            return await HandleTransactionalCommand(next, ct, characterId);
         }
 
         if (characterId.HasValue)
@@ -71,9 +75,16 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         Guid? characterId)
     {
 
+        var saveChangesVersion = _db.SaveChangesVersion;
+
         if (_db.CurrentTransaction is not null)
         {
             var resp = await next();
+            if (IsSuccessfulResponse(resp)
+                && (_db.HasChanges || _db.SaveChangesVersion > saveChangesVersion))
+            {
+                await InvalidateChangedScopesAsync(characterId, ct);
+            }
             if (_db.HasChanges)
             {
                 try
@@ -109,6 +120,12 @@ public sealed class TransactionBehavior<TRequest, TResponse>
 
                 var response = await next();
 
+                if (IsSuccessfulResponse(response)
+                    && (_db.HasChanges || _db.SaveChangesVersion > saveChangesVersion))
+                {
+                    await InvalidateChangedScopesAsync(characterId, ct);
+                }
+
                 if (_db.HasChanges)
                     await _db.SaveChangesAsync(ct);
 
@@ -125,11 +142,80 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         });
     }
 
+    private async Task InvalidateChangedScopesAsync(
+        Guid? primaryCharacterId,
+        CancellationToken cancellationToken)
+    {
+        var reason = typeof(TRequest).Name;
+        var affectedCharacterIds = _db.GameEventOutboxMessages.Local
+            .Where(message =>
+                message.CharacterId.HasValue &&
+                _db.GetEntry(message).State == EntityState.Added)
+            .Select(message => message.CharacterId!.Value)
+            .ToHashSet();
+        if (primaryCharacterId.HasValue)
+        {
+            affectedCharacterIds.Add(primaryCharacterId.Value);
+        }
+
+        foreach (var affectedCharacterId in affectedCharacterIds.Order())
+        {
+            await _stateSync.InvalidateCharacterAsync(
+                affectedCharacterId,
+                reason,
+                cancellationToken);
+        }
+
+        foreach (var worldScope in GetWorldScopes())
+        {
+            await _stateSync.InvalidateWorldScopeAsync(
+                worldScope,
+                reason,
+                cancellationToken);
+        }
+    }
+
+    private static IEnumerable<string> GetWorldScopes()
+    {
+        var requestNamespace = typeof(TRequest).Namespace;
+        if (requestNamespace?.Contains(".MarketPlaces.", StringComparison.Ordinal) == true)
+        {
+            yield return "marketplace";
+        }
+        if (requestNamespace?.Contains(".Guilds.", StringComparison.Ordinal) == true)
+        {
+            yield return "guild";
+        }
+        if (requestNamespace?.Contains(".Colosseum.", StringComparison.Ordinal) == true)
+        {
+            yield return "colosseum";
+        }
+        if (requestNamespace?.Contains(".Colosseum.Tournaments.", StringComparison.Ordinal) == true)
+        {
+            yield return "tournament";
+        }
+    }
+
+    private static bool IsSuccessfulResponse(TResponse response)
+    {
+        if (response is null)
+        {
+            return true;
+        }
+
+        var property = response.GetType().GetProperty(
+            "IsSuccess",
+            BindingFlags.Public | BindingFlags.Instance);
+        return property?.PropertyType != typeof(bool)
+            || property.GetValue(response) is not false;
+    }
+
     private static Guid? TryGetCharacterId(TRequest request)
     {
         var requestType = request.GetType();
         var property = requestType.GetProperty("CharacterId", BindingFlags.Public | BindingFlags.Instance)
-            ?? requestType.GetProperty("CurrentCharacterId", BindingFlags.Public | BindingFlags.Instance);
+            ?? requestType.GetProperty("CurrentCharacterId", BindingFlags.Public | BindingFlags.Instance)
+            ?? requestType.GetProperty("EntityId", BindingFlags.Public | BindingFlags.Instance);
 
         if (property?.PropertyType != typeof(Guid))
         {

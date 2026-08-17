@@ -22,6 +22,7 @@ import { GameEventService } from '../../../../../core/services/real-time/game-ev
 import { TournamentGroundsUpdated } from '../../../../../core/services/real-time/colosseum/tournament-grounds-updated';
 import { CharacterTagComponent } from '../../../../../shared/components/character/character-tag/character-tag.component';
 import { TournamentGroundsViewStateService } from '../../../../../core/services/api/colosseum/tournament-grounds-view-state.service';
+import { StateSyncCoordinator } from '../../../../../core/services/real-time/game-realtime/state-sync-coordinator.service';
 import {
   TournamentBracket,
   TournamentHallOfFameEntry,
@@ -292,12 +293,19 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
   private lastRealtimeUpdateId: string | null = null;
   private clockHandle: ReturnType<typeof setInterval> | null = null;
   private lastAutoSelectedRoundNumber: number | null = null;
+  private unregisterStateSync: (() => void) | null = null;
 
   constructor(
     private readonly colosseumService: ColosseumService,
     private readonly toastService: ToastService,
     private readonly eventService: GameEventService,
+    stateSync: StateSyncCoordinator,
   ) {
+    this.unregisterStateSync = stateSync.register(
+      'tournament',
+      'tournament-grounds',
+      () => this.refresh(),
+    );
     this.lastRealtimeUpdateId =
       this.eventService.eventEnvelope.TournamentGroundsUpdated()?.updateId ??
       null;
@@ -346,6 +354,7 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.clockHandle) clearInterval(this.clockHandle);
+    this.unregisterStateSync?.();
   }
 
   refresh(): void {

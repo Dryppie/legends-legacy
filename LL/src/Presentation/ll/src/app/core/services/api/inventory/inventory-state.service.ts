@@ -7,6 +7,7 @@ import { GameEventService } from '../../real-time/game-event.service';
 import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
 import { isGameRealtimeEnabled } from '../../real-time/game-realtime/game-realtime-feature';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryStateService {
@@ -32,7 +33,9 @@ export class InventoryStateService {
     private inventoryService: InventoryService,
     private readonly eventService: GameEventService,
     private readonly eventBus: EventBusService,
+    private readonly stateSync: StateSyncCoordinator,
   ) {
+    this.stateSync.register('character', 'inventory', () => this.load(true));
     this.load();
 
     effect(

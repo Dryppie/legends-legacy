@@ -25,7 +25,7 @@ import { MarketPlaceBuyOrder } from '../../../../shared/models/Dtos/market-place
 import { CreateMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/create-market-place-listing-request';
 import { CreateMarketPlaceBuyOrderRequest } from '../../../../shared/models/requestDtos/market-place/create-market-place-buy-order-request';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
-import { Observable } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { BuyoutMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/buyout-market.place-listing-request';
 import { FulfillMarketPlaceBuyOrderRequest } from '../../../../shared/models/requestDtos/market-place/fulfill-market-place-buy-order-request';
 import { CharacterService } from '../character/character.service';
@@ -41,6 +41,7 @@ import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer
 import { ItemBase } from '../../../../shared/models/item';
 import { MarketPlaceOrder } from '../../../../shared/models/Dtos/market-place/market-place-order';
 import { ToastService } from '../../client-side/components/toast/toast.service';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 
 @Injectable({ providedIn: 'root' })
 export class MarketplaceStateService {
@@ -54,6 +55,7 @@ export class MarketplaceStateService {
   private readonly myCharacterId!: Signal<string | null>;
   private readonly eventDeduper = new GameEventDeduper();
   private hasLoaded = false;
+  private refreshVersion = 0;
 
   readonly listings = computed(() => this._listings());
   readonly buyOrders = computed(() => this._buyOrders());
@@ -77,7 +79,14 @@ export class MarketplaceStateService {
     private inventoryState: InventoryStateService,
     private eventService: GameEventService,
     private toast: ToastService,
+    private readonly stateSync: StateSyncCoordinator,
   ) {
+    this.stateSync.register(
+      'marketplace',
+      'marketplace',
+      () => this.refresh(),
+      () => this.hasLoaded,
+    );
     this.myCharacterId = computed(() => this.characterService.currentCharacterId());
 
     effect(
@@ -182,45 +191,49 @@ export class MarketplaceStateService {
   refresh(): void {
     this.hasLoaded = true;
     this._loading.set(true);
+    this._error.set(null);
+    const refreshVersion = ++this.refreshVersion;
 
-    this.marketplaceService
-      .getListings()
-      .pipe(finalize(() => this._loading.set(false)))
+    forkJoin({
+      listings: this.marketplaceService.getListings(),
+      catalog: this.marketplaceService.getCatalog(),
+      history: this.marketplaceService.getHistory(),
+      buyOrders: this.marketplaceService.getBuyOrders(),
+    })
+      .pipe(
+        finalize(() => {
+          if (refreshVersion === this.refreshVersion) {
+            this._loading.set(false);
+          }
+        }),
+      )
       .subscribe({
-        next: (marketplaceListings) => {
-          const sorted = marketplaceListings
-            .slice()
-            .sort((a, b) =>
+        next: ({ listings, catalog, history, buyOrders }) => {
+          if (refreshVersion !== this.refreshVersion) return;
+
+          this._listings.set(
+            listings.slice().sort((a, b) =>
               a.itemInstance.itemBase.itemType.localeCompare(
                 b.itemInstance.itemBase.itemType,
               ),
-            );
-
-          this._listings.set(sorted);
+            ),
+          );
+          this._catalog.set(catalog);
+          this._history.set(history);
+          this._buyOrders.set(
+            buyOrders
+              .slice()
+              .sort((a, b) =>
+                a.itemBase.itemType.localeCompare(b.itemBase.itemType),
+              ),
+          );
         },
-        error: (err) => this._error.set(err.message ?? 'Unknown error'),
+        error: (err) => {
+          if (refreshVersion === this.refreshVersion) {
+            this._error.set(err.message ?? 'Unknown error');
+          }
+        },
       });
-
-    this.marketplaceService.getCatalog().subscribe({
-      next: (items) => this._catalog.set(items),
-      error: (err) => this._error.set(err.message ?? 'Unknown error'),
-    });
-
-    this.marketplaceService.getHistory().subscribe({
-      next: (orders) => this._history.set(orders),
-      error: (err) => this._error.set(err.message ?? 'Unknown error'),
-    });
-
-    this.marketplaceService.getBuyOrders().subscribe({
-      next: (buyOrders) => {
-        const sorted = buyOrders
-          .slice()
-          .sort((a, b) => a.itemBase.itemType.localeCompare(b.itemBase.itemType));
-
-        this._buyOrders.set(sorted);
-      },
-      error: (err) => this._error.set(err.message ?? 'Unknown error'),
-    });
   }
 
   buyoutListing(

@@ -781,6 +781,7 @@ public sealed class MarketPlaceServiceTests
         Assert.Equal(1, result.ExpiredListings);
         Assert.Equal(1, result.ExpiredBuyOrders);
         Assert.Equal(60, result.RefundedCinders);
+        Assert.Equal(new[] { sellerId, buyerId }.Order(), result.AffectedCharacterIds.Order());
         Assert.Equal(65, buyer.Cinders);
         Assert.Empty(market.Listings);
         Assert.Empty(market.BuyOrders);
