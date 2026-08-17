@@ -23,6 +23,8 @@ public static class LiveOpsAuthentication
         var audience = configuration["StaffIdentity:Audience"] ?? string.Empty;
         var clientId = configuration["StaffIdentity:ClientId"] ?? "liveops-dashboard";
         var clientSecret = configuration["StaffIdentity:ClientSecret"] ?? string.Empty;
+        var ownerSubject = configuration["StaffIdentity:OwnerSubject"];
+        var bootstrapOwnerEmail = configuration["StaffIdentity:BootstrapOwnerEmail"];
 
         return services
             .AddAuthentication(options =>
@@ -117,6 +119,25 @@ public static class LiveOpsAuthentication
                 options.ClaimActions.MapUniqueJsonKey("permission", "permission");
                 options.ClaimActions.MapUniqueJsonKey("permissions", "permissions");
                 options.ClaimActions.MapUniqueJsonKey("preferred_username", "preferred_username");
+                options.ClaimActions.MapUniqueJsonKey("email_verified", "email_verified");
+                options.Events = new OpenIdConnectEvents
+                {
+                    OnTicketReceived = context =>
+                    {
+                        if (context.Principal is not null &&
+                            LiveOpsOwnerIdentity.TryGrantOwnerPermission(
+                                context.Principal,
+                                ownerSubject,
+                                bootstrapOwnerEmail))
+                        {
+                            return Task.CompletedTask;
+                        }
+
+                        context.Response.Redirect("/?authentication=denied");
+                        context.HandleResponse();
+                        return Task.CompletedTask;
+                    }
+                };
             })
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
             {

@@ -125,6 +125,7 @@ button { border: 0; border-radius: 3px; }
 .login-panel h1 { margin: 12px 0 18px; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(31px, 5vw, 48px); line-height: 1.15; }
 .login-panel h1 span { color: #c6a45e; }
 .login-copy { max-width: 500px; margin: 0 0 28px; color: #9298a0; line-height: 1.7; }
+.login-error { max-width: 500px; margin: -8px 0 22px; padding: 11px 14px; border: 1px solid #713c37; background: #241414; color: #e0a099; font-size: 12px; }
 .primary.large { min-height: 48px; padding: 0 28px; }
 .security-note { color: #616a75; font-size: 10px; }
 .center-state { color: #9ca3aa; }

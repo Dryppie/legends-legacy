@@ -25,6 +25,7 @@
     <ProjectReference Include="..\..\src\Infrastructure\Persistence\Persistence.LL\Persistence.LL.csproj" />
     <ProjectReference Include="..\..\src\Infrastructure\Service\Services.LL\Services.LL.csproj" />
     <ProjectReference Include="..\..\src\API\API.LL\API.LL.csproj" />
+    <ProjectReference Include="..\..\src\API\API.LiveOps\API.LiveOps.csproj" />
     <ProjectReference Include="..\..\src\Worker\Worker.LL\Worker.LL.csproj" />
   </ItemGroup>
 

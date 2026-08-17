@@ -33,6 +33,7 @@ export class AppComponent implements OnInit {
 
   session: OperatorSession | null = null;
   authenticationRequired = false;
+  authenticationDenied = false;
   loadingSession = true;
   searchQuery = '';
   searchResults: PlayerSummary[] = [];
@@ -65,6 +66,8 @@ export class AppComponent implements OnInit {
   constructor(private readonly api: LiveOpsApiService) {}
 
   async ngOnInit(): Promise<void> {
+    this.authenticationDenied = new URLSearchParams(window.location.search)
+      .get('authentication') === 'denied';
     try {
       this.session = await this.api.session();
       await this.api.initializeAntiforgery();

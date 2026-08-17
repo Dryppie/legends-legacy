@@ -13,6 +13,11 @@
         Player moderation and support compensation. Every action is permission checked,
         idempotent, and recorded in the audit trail.
       </p>
+      @if (authenticationDenied) {
+        <p class="login-error" role="alert">
+          This Google account is not the configured LiveOps owner.
+        </p>
+      }
       <button class="primary large" type="button" (click)="login()">
         Sign in as operator
       </button>

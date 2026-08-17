@@ -20,11 +20,14 @@ Operators must not need to handle bearer tokens, operation GUIDs, restriction GU
 The local MVP described in work packages 1–4 is implemented:
 
 - `API.LiveOps` supports browser OIDC/cookie sessions, a loopback-only Development operator, antiforgery validation, permission policies, and production configuration checks.
+- Google OIDC can be restricted to a single owner: a verified email bootstraps the first login, then the immutable Google subject becomes the permanent allowlist key.
 - Player details combine Game restrictions/history with Chat mute state/history without allowing a Chat outage to hide Game administration.
 - The new Angular dashboard supports player and item search, ban/unban, mute/unmute, compensation grants, confirmation safeguards, idempotent retries, and a combined audit timeline.
 - Angular release output is copied into `API.LiveOps` during `dotnet publish`, and the exact local startup procedure is in the dashboard README.
+- `API.LiveOps` owns its runtime configuration, includes trusted forwarded-header handling and dependency-aware readiness checks, and has a dedicated artifact/image build script.
+- The application repository publishes a hardened `ll-liveops` Helm component, and the infrastructure repository contains a disabled-by-default aggregate deployment with owner-secret, private hostname, proxy, Chat, maintenance, reset-safety, rollout, and rollback wiring.
 
-Production rollout remains intentionally external to this repository: staff identity-provider registration and MFA policy, private ingress/VPN and DNS, deployment secrets, monitoring, backups, and staging sign-off must be completed through the infrastructure/deployment systems.
+Production activation remains intentionally external to this repository: the Google client, Cloudflare hostname/access policy, SealedSecret values, migrations, monitoring, backups, and staging sign-off must be completed before the infrastructure `liveOps.enabled` gate is switched on.
 
 ## Decision: create a new dashboard
 
