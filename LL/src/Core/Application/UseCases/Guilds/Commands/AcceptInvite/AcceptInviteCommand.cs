@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
 using Application.WebSockets.Contracts;
@@ -11,13 +12,16 @@ public class AcceptInviteCommandHandler : IRequestHandler<AcceptInviteCommand, R
 {
     private readonly IGuildService _guildService;
     private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGuildSystemChatPublisher _guildChat;
 
     public AcceptInviteCommandHandler(
         IGuildService guildService,
-        IGameEventPublisher eventPublisher)
+        IGameEventPublisher eventPublisher,
+        IGuildSystemChatPublisher guildChat)
     {
         _guildService = guildService;
         _eventPublisher = eventPublisher;
+        _guildChat = guildChat;
     }
 
     public async Task<Response<bool>> Handle(AcceptInviteCommand request, CancellationToken cancellationToken)
@@ -27,6 +31,12 @@ public class AcceptInviteCommandHandler : IRequestHandler<AcceptInviteCommand, R
         var accepted = await _guildService.AcceptInviteAsync(request.CharacterId, guildId, cancellationToken);
         if (!accepted)
             return Response<bool>.Fail("Failed to accept invite.");
+
+        await _guildChat.PublishAsync(
+            guildId,
+            request.CharacterId,
+            GuildSystemChatEvent.Joined,
+            cancellationToken);
 
         await _eventPublisher.PublishAsync(
             new Audience.Character(request.CharacterId),

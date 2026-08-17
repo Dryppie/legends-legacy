@@ -13,13 +13,16 @@ public class UpgradeGuildBuildingCommandHandler : IRequestHandler<UpgradeGuildBu
 {
     private readonly IGuildBuildingService _guildBuildingService;
     private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGuildSystemChatPublisher _guildChat;
 
     public UpgradeGuildBuildingCommandHandler(
         IGuildBuildingService guildBuildingService,
-        IGameEventPublisher eventPublisher)
+        IGameEventPublisher eventPublisher,
+        IGuildSystemChatPublisher guildChat)
     {
         _guildBuildingService = guildBuildingService;
         _eventPublisher = eventPublisher;
+        _guildChat = guildChat;
     }
 
     public async Task<Response<GuildBuildingOverviewDto>> Handle(UpgradeGuildBuildingCommand request, CancellationToken cancellationToken)
@@ -32,6 +35,16 @@ public class UpgradeGuildBuildingCommandHandler : IRequestHandler<UpgradeGuildBu
 
         if (!result.Succeeded || result.Value is null)
             return Response<GuildBuildingOverviewDto>.Fail(result.Error ?? "Failed to upgrade guild building.");
+
+        var building = result.Value.Buildings.Single(
+            candidate => candidate.Id == request.BuildingId);
+        await _guildChat.PublishBuildingAsync(
+            result.Value.GuildId,
+            request.CharacterId,
+            building.Definition.Name,
+            building.Level,
+            GuildBuildingChatEvent.Upgraded,
+            cancellationToken);
 
         await _eventPublisher.PublishAsync(
             new Audience.Guild(result.Value.GuildId),

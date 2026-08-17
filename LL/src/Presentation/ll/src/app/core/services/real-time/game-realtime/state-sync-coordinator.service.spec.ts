@@ -162,6 +162,37 @@ describe('StateSyncCoordinator', () => {
     expect(coordinator.status()[0].appliedRevision).toBe(5);
   }));
 
+  it('does not repeat an applied realtime revision for a non-forcing mutation response', fakeAsync(() => {
+    const api = {
+      getCheckpoint: () =>
+        of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),
+    } as unknown as StateSyncService;
+    const injector = { get: () => api } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    const refresh = jasmine
+      .createSpy('refresh')
+      .and.returnValue(Promise.resolve());
+    coordinator.register('character', 'character', refresh);
+
+    coordinator.acceptInvalidation({
+      scope: 'character',
+      revision: 5,
+      reason: 'realtime',
+    });
+    tick(51);
+    tick();
+
+    coordinator.acceptMutationResponse({ character: 5 }, false);
+    tick(51);
+    tick();
+    expect(refresh).toHaveBeenCalledTimes(1);
+
+    coordinator.acceptMutationResponse({ character: 6 }, false);
+    tick(51);
+    tick();
+    expect(refresh).toHaveBeenCalledTimes(2);
+  }));
+
   it('retries checkpoint reconciliation after a transient failure', fakeAsync(() => {
     let attempts = 0;
     const api = {

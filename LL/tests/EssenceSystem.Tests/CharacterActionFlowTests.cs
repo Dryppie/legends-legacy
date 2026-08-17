@@ -54,7 +54,7 @@ public sealed class CharacterActionFlowTests
         {
             Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails()),
         };
-        var combat = new CombatServiceStub();
+        var combat = new CombatServiceStub { AdvanceBoundary = true };
         var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
 
         var result = await service.GetCharacterActionAsync(
@@ -64,6 +64,25 @@ public sealed class CharacterActionFlowTests
         Assert.Same(combat.Session, result!.CombatSession);
         Assert.Equal(1, combat.CallCount);
         Assert.Equal(1, repository.UpdateCount);
+    }
+
+    [Fact]
+    public async Task Resolve_does_not_update_an_action_when_no_combat_boundary_was_due()
+    {
+        var repository = new CharacterActionRepositoryStub
+        {
+            Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails()),
+        };
+        var combat = new CombatServiceStub();
+        var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
+
+        var result = await service.GetCharacterActionAsync(
+            repository.Current.CharacterId,
+            CancellationToken.None);
+
+        Assert.Same(combat.Session, result!.CombatSession);
+        Assert.Equal(1, combat.CallCount);
+        Assert.Equal(0, repository.UpdateCount);
     }
 
     [Fact]
@@ -138,6 +157,7 @@ public sealed class CharacterActionFlowTests
     private sealed class CombatServiceStub : ICombatService
     {
         public CombatSession Session { get; } = new();
+        public bool AdvanceBoundary { get; init; }
         public int CallCount { get; private set; }
         public DateTimeOffset LastNow { get; private set; }
 
@@ -145,6 +165,10 @@ public sealed class CharacterActionFlowTests
         {
             CallCount++;
             LastNow = now;
+            if (AdvanceBoundary)
+            {
+                characterAction.UpdatedAt = characterAction.UpdatedAt.AddSeconds(10);
+            }
             return Task.FromResult(Session);
         }
     }

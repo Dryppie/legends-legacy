@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
 using Application.UseCases.Guilds.Dtos.Requests;
@@ -12,13 +13,16 @@ public class InviteCommandHandler : IRequestHandler<InviteCommand, Response<bool
 {
     private readonly IGuildService _guildService;
     private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGuildSystemChatPublisher _guildChat;
 
     public InviteCommandHandler(
         IGuildService guildService,
-        IGameEventPublisher eventPublisher)
+        IGameEventPublisher eventPublisher,
+        IGuildSystemChatPublisher guildChat)
     {
         _guildService = guildService;
         _eventPublisher = eventPublisher;
+        _guildChat = guildChat;
     }
 
     public async Task<Response<bool>> Handle(InviteCommand request, CancellationToken cancellationToken)
@@ -30,6 +34,12 @@ public class InviteCommandHandler : IRequestHandler<InviteCommand, Response<bool
         var invited = await _guildService.InviteAsync(request.CurrentCharacterId, guildId, invitedCharacterId, cancellationToken);
         if (!invited)
             return Response<bool>.Fail("Failed to invite character.");
+
+        await _guildChat.PublishAsync(
+            guildId,
+            invitedCharacterId,
+            GuildSystemChatEvent.Invited,
+            cancellationToken);
 
         await _eventPublisher.PublishAsync(
             new Audience.Character(invitedCharacterId),

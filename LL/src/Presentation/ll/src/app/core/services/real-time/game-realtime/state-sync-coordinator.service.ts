@@ -213,9 +213,16 @@ export class StateSyncCoordinator {
     this.pendingRefreshes.set(scope, timeoutId);
   }
 
-  acceptMutationResponse(revisions: Record<string, number>): void {
+  acceptMutationResponse(
+    revisions: Record<string, number>,
+    forceRefresh = true,
+  ): void {
     for (const [scope, revision] of Object.entries(revisions)) {
       if (!Number.isSafeInteger(revision) || revision < 1) continue;
+      if (!forceRefresh) {
+        this.acceptRevision(scope, revision);
+        continue;
+      }
 
       const current = this.revisions.get(scope) ?? 0;
       const targetRevision = Math.max(current, revision);

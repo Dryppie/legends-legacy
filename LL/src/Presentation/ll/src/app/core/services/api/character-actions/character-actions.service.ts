@@ -19,7 +19,7 @@ export class CharacterActionsService {
 
   resolveCurrentAction(): Observable<CharacterActionDto | null> {
     return this.api
-      .post('CharacterActions/Resolve', {})
+      .post('CharacterActions/Resolve', {}, { forceStateSyncRefresh: false })
       .pipe(
         map((response) =>
           this.unwrapNullableResponse<CharacterActionDto>(response),

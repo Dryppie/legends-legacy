@@ -1,6 +1,7 @@
 using Application.Common.Interfaces;
 using Domain.Models.Prophecies;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Nodes;
 
 namespace Persistence.LL.Repositories.Prophecies;
 
@@ -197,7 +198,9 @@ public sealed class ProphecyRepository : IProphecyRepository
         target.Category = source.Category;
         target.Difficulty = source.Difficulty;
         target.ObjectiveType = source.ObjectiveType;
-        target.ObjectiveParameterJson = source.ObjectiveParameterJson;
+        target.ObjectiveParameterJson = PreserveEquivalentJson(
+            source.ObjectiveParameterJson,
+            target.ObjectiveParameterJson);
         target.RewardProfileId = source.RewardProfileId;
         target.Weight = source.Weight;
         target.IsEnabled = source.IsEnabled;
@@ -207,5 +210,17 @@ public sealed class ProphecyRepository : IProphecyRepository
         target.ExcludedTags = source.ExcludedTags.ToList();
         target.MinPlayerLevel = source.MinPlayerLevel;
         target.MaxPlayerLevel = source.MaxPlayerLevel;
+    }
+
+    private static string PreserveEquivalentJson(string source, string target)
+    {
+        if (string.Equals(source, target, StringComparison.Ordinal))
+        {
+            return target;
+        }
+
+        return JsonNode.DeepEquals(JsonNode.Parse(source), JsonNode.Parse(target))
+            ? target
+            : source;
     }
 }
