@@ -9,7 +9,8 @@ public sealed record IdleCombatOrchestrationRequest(
     : CombatOrchestrationRequest(CombatMode.Idle)
 {
     public Guid CharacterId => CharacterAction.CharacterId;
-    public DateTimeOffset NextEncounterAt => CharacterAction.UpdatedAt;
+    public DateTimeOffset NextEncounterAt => CharacterAction.NextResolutionAtUtc
+        ?? throw new InvalidOperationException("Active idle combat requires a next-resolution boundary.");
 
     public CombatActionDetails ActionDetails =>
         CharacterAction.ActionDetails as CombatActionDetails

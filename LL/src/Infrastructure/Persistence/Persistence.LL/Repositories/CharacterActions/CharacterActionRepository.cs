@@ -3,6 +3,7 @@ using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
+using Domain.Models.Professions.Crafting.V2;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.CharacterActions;
@@ -15,7 +16,7 @@ public class CharacterActionRepository : ICharacterActionRepository
         _context = context;
     }
 
-    public async Task<CharacterAction?> StartCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
+    public async Task<CharacterAction?> StartCharacterActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var existingAction = await _context.CharacterActions
             .Include(a => a.ActionDetails)  // Ensure ActionDetails is loaded
@@ -28,13 +29,15 @@ public class CharacterActionRepository : ICharacterActionRepository
             return characterAction;
         }
 
-        // If combat or any other action ends in the future, it is not possible to start a new action until that time has passed
-        if (existingAction.UpdatedAt > DateTimeOffset.UtcNow)
+        if (existingAction.BlockedUntilUtc > now)
         {
             return null;
         }
 
-        existingAction.UpdatedAt = characterAction.UpdatedAt;
+        existingAction.NextResolutionAtUtc = characterAction.NextResolutionAtUtc;
+        existingAction.UpdatedAt = now;
+        existingAction.BlockedUntilUtc = null;
+        existingAction.ScheduleGeneration = checked(existingAction.ScheduleGeneration + 1);
         existingAction.IsDeleted = false;
         existingAction.RowVersion++;
 
@@ -50,19 +53,30 @@ public class CharacterActionRepository : ICharacterActionRepository
         return existingAction;
     }
 
-    public async Task<bool> DeleteCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
+    public async Task<bool> DeleteCharacterActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
+        var wasCombat = characterAction.ActionDetails is CombatActionDetails;
         if (characterAction.ActionDetails != null)
             _context.ActionDetails.Remove(characterAction.ActionDetails);  // Explicitly remove the related entity
 
         characterAction.IsDeleted = true;
         characterAction.ActionDetails = null;
+        characterAction.BlockedUntilUtc = wasCombat && characterAction.NextResolutionAtUtc > now
+            ? characterAction.NextResolutionAtUtc
+            : null;
+        characterAction.NextResolutionAtUtc = null;
+        characterAction.UpdatedAt = now;
         characterAction.RowVersion++;
         _context.CharacterActions.Update(characterAction);
         return true;
     }
 
-    public async Task<CharacterAction?> GetCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
+    public Task<CharacterAction?> GetActionScheduleAsync(Guid characterId, CancellationToken cancellationToken) =>
+        _context.CharacterActions
+            .Include(ca => ca.ActionDetails)
+            .FirstOrDefaultAsync(ca => ca.CharacterId == characterId, cancellationToken);
+
+    public async Task<CharacterAction?> GetCombatActionForResolutionAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var characterAction = await _context.CharacterActions
             .Include(ca => ca.ActionDetails)
@@ -71,6 +85,13 @@ public class CharacterActionRepository : ICharacterActionRepository
             .Include(ca => ca.ActionDetails)
                 .ThenInclude(ad => (ad as CombatActionDetails).Area)
                     .ThenInclude(a => a.GatheringNodes)
+            .FirstOrDefaultAsync(ca => ca.CharacterId.Equals(characterId), cancellationToken);
+        return characterAction;
+    }
+
+    public async Task<CharacterAction?> GetCraftingActionForResolutionAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _context.CharacterActions
             .Include(ca => ca.ActionDetails)
                 .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
                     .ThenInclude(ci => ci.EquipmentInstance)
@@ -89,8 +110,7 @@ public class CharacterActionRepository : ICharacterActionRepository
                     .ThenInclude(ci => ci.EquipmentInstance)
                         .ThenInclude(ei => ei.ItemBase)
                             .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
-            .FirstOrDefaultAsync(ca => ca.CharacterId.Equals(characterId), cancellationToken);
-        return characterAction;
+            .FirstOrDefaultAsync(ca => ca.CharacterId == characterId, cancellationToken);
     }
 
     public void UpdateCharacterAction(CharacterAction characterAction)
@@ -121,18 +141,17 @@ public class CharacterActionRepository : ICharacterActionRepository
         return craftingAction;
     }
 
-    // This differs from the StartCharacterActionAsync method in that it doesn't update UpdatedAt
-    public async Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem craftingQueueItem, CancellationToken cancellationToken)
+    // Adding to an active queue preserves its next due boundary; starting/restarting
+    // a queue establishes a new generation and first-attempt boundary.
+    public async Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem craftingQueueItem, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        var now = DateTimeOffset.UtcNow;
-
         var existingAction = await _context.CharacterActions
             .Include(a => a.ActionDetails)  // Ensure ActionDetails is loaded
                 .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
                     .ThenInclude(ci => ci.EquipmentInstance)
             .FirstOrDefaultAsync(a => a.CharacterId == characterId, cancellationToken);
 
-        if (existingAction?.UpdatedAt > now)
+        if (existingAction?.BlockedUntilUtc > now)
             return false;
 
         var inventoryItem = await _context.InventoryItems
@@ -163,6 +182,8 @@ public class CharacterActionRepository : ICharacterActionRepository
             {
                 CharacterId = characterId,
                 UpdatedAt = now,
+                NextResolutionAtUtc = now.AddSeconds(TemperingConstants.ActionDurationSeconds),
+                ScheduleGeneration = 1,
                 IsDeleted = false, // Ensure it's not marked as deleted on creation
                 ActionDetails = new CraftingActionDetails
                 {
@@ -180,6 +201,9 @@ public class CharacterActionRepository : ICharacterActionRepository
         {
             // If existing action had no details, add new details
             existingAction.UpdatedAt = now;
+            existingAction.NextResolutionAtUtc = now.AddSeconds(TemperingConstants.ActionDurationSeconds);
+            existingAction.BlockedUntilUtc = null;
+            existingAction.ScheduleGeneration = checked(existingAction.ScheduleGeneration + 1);
             existingAction.ActionDetails = new CraftingActionDetails
             {
                 CraftingQueueItems = [craftingQueueItem]
@@ -188,7 +212,13 @@ public class CharacterActionRepository : ICharacterActionRepository
         }
         else
         {
-            if (craftingDetails.CraftingQueueItems.Count == 0) existingAction.UpdatedAt = now;
+            if (craftingDetails.CraftingQueueItems.Count == 0)
+            {
+                existingAction.NextResolutionAtUtc = now.AddSeconds(TemperingConstants.ActionDurationSeconds);
+                existingAction.ScheduleGeneration = checked(existingAction.ScheduleGeneration + 1);
+            }
+            existingAction.UpdatedAt = now;
+            existingAction.BlockedUntilUtc = null;
 
             craftingQueueItem.Position = craftingDetails.CraftingQueueItems.Count == 0
                 ? 0

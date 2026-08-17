@@ -8,14 +8,16 @@ public interface ICharacterActionRepository
     /// </summary>
     /// <param name="characterId"></param>
     /// <returns></returns>
-    public Task<CharacterAction?> StartCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken);
+    public Task<CharacterAction?> StartCharacterActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get a character's current action
     /// </summary>
     /// <param name="characterId"></param>
     /// <returns></returns>
-    public Task<CharacterAction?> GetCharacterActionAsync(Guid characterId, CancellationToken cancellationToken);
+    public Task<CharacterAction?> GetActionScheduleAsync(Guid characterId, CancellationToken cancellationToken);
+    public Task<CharacterAction?> GetCombatActionForResolutionAsync(Guid characterId, CancellationToken cancellationToken);
+    public Task<CharacterAction?> GetCraftingActionForResolutionAsync(Guid characterId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Update a character's current action
@@ -29,7 +31,7 @@ public interface ICharacterActionRepository
     /// </summary>
     /// <param name="characterId"></param>
     /// <returns></returns>
-    public Task<bool> DeleteCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken);
+    public Task<bool> DeleteCharacterActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get a character's crafting action
@@ -38,6 +40,6 @@ public interface ICharacterActionRepository
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem characterAction, CancellationToken cancellationToken);
+    Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem characterAction, DateTimeOffset now, CancellationToken cancellationToken);
     Task<CharacterAction?> GetCharacterActionForDeletionAsync(Guid characterId, CancellationToken cancellationToken);
 }

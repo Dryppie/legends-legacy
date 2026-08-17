@@ -1,5 +1,6 @@
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Tools;
+using Services.LL.Interfaces.Combat.Reward;
 
 namespace Services.LL.Inventories;
 
@@ -14,7 +15,7 @@ internal static class ToolAffixGenerator
         new("Opportunist's", ToolBonusType.BonusRollChancePercent, 1, 3),
     ];
 
-    public static List<ToolBonusModifier> RollAffixes(Rarity rarity)
+    public static List<ToolBonusModifier> RollAffixes(Rarity rarity, IResolutionRandomSource? random = null)
     {
         var affixCount = GetAffixCount(rarity);
         if (affixCount <= 0)
@@ -23,14 +24,14 @@ internal static class ToolAffixGenerator
         }
 
         return Definitions
-            .OrderBy(_ => Random.Shared.Next())
+            .OrderBy(_ => random?.NextInt(int.MaxValue) ?? Random.Shared.Next())
             .Take(affixCount)
             .Select(definition => new ToolBonusModifier
             {
-                Id = Guid.NewGuid(),
+                Id = random?.NextGuid() ?? Guid.NewGuid(),
                 Name = definition.Name,
                 BonusType = definition.BonusType,
-                Amount = RollAmount(definition, rarity)
+                Amount = RollAmount(definition, rarity, random)
             })
             .ToList();
     }
@@ -50,7 +51,10 @@ internal static class ToolAffixGenerator
         };
     }
 
-    private static double RollAmount(ToolAffixDefinition definition, Rarity rarity)
+    private static double RollAmount(
+        ToolAffixDefinition definition,
+        Rarity rarity,
+        IResolutionRandomSource? random)
     {
         var rarityMultiplier = rarity switch
         {
@@ -64,7 +68,7 @@ internal static class ToolAffixGenerator
             _ => 1.0
         };
 
-        var amount = Random.Shared.NextDouble() *
+        var amount = (random?.NextDouble() ?? Random.Shared.NextDouble()) *
             (definition.MaxAmount - definition.MinAmount) +
             definition.MinAmount;
 

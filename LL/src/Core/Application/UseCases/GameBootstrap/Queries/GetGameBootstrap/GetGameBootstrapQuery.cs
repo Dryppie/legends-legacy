@@ -18,13 +18,16 @@ public sealed class GetGameBootstrapQueryHandler
 {
     private readonly IMapper _mapper;
     private readonly ISender _sender;
+    private readonly TimeProvider _timeProvider;
 
     public GetGameBootstrapQueryHandler(
         IMapper mapper,
-        ISender sender)
+        ISender sender,
+        TimeProvider? timeProvider = null)
     {
         _mapper = mapper;
         _sender = sender;
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     public async Task<Response<GameBootstrapDto>> Handle(
@@ -61,7 +64,7 @@ public sealed class GetGameBootstrapQueryHandler
             Character = characterResponse.Data,
             QuestJournal = questJournal,
             CurrentAction = currentActionResponse.Data,
-            ServerTimeUtc = DateTimeOffset.UtcNow,
+            ServerTimeUtc = _timeProvider.GetUtcNow(),
             AttributeDefinitions = AttributeCatalog.All,
         };
 

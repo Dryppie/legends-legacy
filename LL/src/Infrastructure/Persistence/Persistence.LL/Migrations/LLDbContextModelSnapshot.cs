@@ -546,12 +546,23 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("CharacterId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset?>("BlockedUntilUtc")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("NextResolutionAtUtc")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<long>("RowVersion")
                         .IsConcurrencyToken()
                         .HasColumnType("bigint");
+
+                    b.Property<long>("ScheduleGeneration")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(1L);
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");

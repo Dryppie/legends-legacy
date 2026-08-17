@@ -7,20 +7,22 @@ using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Professions.Crafting;
 using Services.LL.CharacterActions;
+using Microsoft.Extensions.Options;
 
 namespace EssenceSystem.Tests;
 
 public sealed class CharacterActionFlowTests
 {
+    private static readonly DateTimeOffset Now = DateTimeOffset.Parse("2026-08-17T12:00:00Z");
     [Fact]
     public async Task Start_combat_returns_a_hydrated_first_encounter()
     {
         var repository = new CharacterActionRepositoryStub();
         var combat = new CombatServiceStub();
         var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
-        var action = new CharacterAction(Guid.NewGuid(), new CombatActionDetails());
+        var action = new CharacterAction(Guid.NewGuid(), new CombatActionDetails(), Now);
 
-        var result = await service.StartCharacterActionAsync(action, CancellationToken.None);
+        var result = await service.StartCharacterActionAsync(action, Now, CancellationToken.None);
 
         Assert.Same(action, result);
         Assert.Same(combat.Session, result!.CombatSession);
@@ -33,7 +35,7 @@ public sealed class CharacterActionFlowTests
     {
         var repository = new CharacterActionRepositoryStub
         {
-            Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails()),
+            Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails(), Now),
         };
         var combat = new CombatServiceStub();
         var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
@@ -52,7 +54,7 @@ public sealed class CharacterActionFlowTests
     {
         var repository = new CharacterActionRepositoryStub
         {
-            Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails()),
+            Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails(), Now),
         };
         var combat = new CombatServiceStub { AdvanceBoundary = true };
         var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
@@ -71,7 +73,7 @@ public sealed class CharacterActionFlowTests
     {
         var repository = new CharacterActionRepositoryStub
         {
-            Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails()),
+            Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails(), Now),
         };
         var combat = new CombatServiceStub();
         var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
@@ -90,20 +92,23 @@ public sealed class CharacterActionFlowTests
     {
         var repository = new CharacterActionRepositoryStub
         {
-            Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails())
+            Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails(), Now)
             {
-                UpdatedAt = DateTimeOffset.UtcNow.AddHours(-48)
+                NextResolutionAtUtc = Now.AddHours(-48)
             },
         };
         var combat = new CombatServiceStub();
-        var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
-        var earliestExpectedNow = DateTimeOffset.UtcNow.AddMinutes(-1);
+        var service = new CharacterActionService(
+            repository,
+            combat,
+            new CraftingServiceStub(),
+            new FixedTimeProvider(Now));
 
         await service.GetCharacterActionAsync(
             repository.Current.CharacterId,
             CancellationToken.None);
 
-        Assert.True(combat.LastNow >= earliestExpectedNow);
+        Assert.Equal(Now, combat.LastNow);
     }
 
     [Fact]
@@ -111,7 +116,7 @@ public sealed class CharacterActionFlowTests
     {
         var repository = new CharacterActionRepositoryStub
         {
-            Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails()),
+            Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails(), Now),
         };
         var service = new CharacterActionService(
             repository,
@@ -126,30 +131,64 @@ public sealed class CharacterActionFlowTests
         Assert.Equal(1, repository.DeleteCount);
     }
 
+    [Fact]
+    public async Task Tempering_catch_up_is_bounded_and_continues_from_the_persisted_boundary()
+    {
+        var firstDue = Now.AddMinutes(-5);
+        var repository = new CharacterActionRepositoryStub
+        {
+            Current = new CharacterAction(Guid.NewGuid(), new CraftingActionDetails(), Now)
+            {
+                NextResolutionAtUtc = firstDue
+            }
+        };
+        var crafting = new CraftingServiceStub { AdvanceSchedule = true };
+        var service = new CharacterActionService(
+            repository,
+            new CombatServiceStub(),
+            crafting,
+            new FixedTimeProvider(Now),
+            Options.Create(new TemperingProgressionOptions
+            {
+                MaximumAttemptsPerResolution = 3
+            }));
+
+        var result = await service.GetCharacterActionAsync(repository.Current.CharacterId, CancellationToken.None);
+
+        Assert.Equal(3, crafting.LastActionsToPerform);
+        Assert.Equal(3, result!.ProcessedCount);
+        Assert.True(result.HasMoreDueWork);
+        Assert.Equal(firstDue.AddSeconds(30), result.NextResolutionAtUtc);
+    }
+
     private sealed class CharacterActionRepositoryStub : ICharacterActionRepository
     {
         public CharacterAction Current { get; set; } = null!;
         public int UpdateCount { get; private set; }
         public int DeleteCount { get; private set; }
 
-        public Task<CharacterAction?> StartCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
+        public Task<CharacterAction?> StartCharacterActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
         {
             Current = characterAction;
             return Task.FromResult<CharacterAction?>(characterAction);
         }
 
-        public Task<CharacterAction?> GetCharacterActionAsync(Guid characterId, CancellationToken cancellationToken) =>
+        public Task<CharacterAction?> GetActionScheduleAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult<CharacterAction?>(Current);
+        public Task<CharacterAction?> GetCombatActionForResolutionAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult<CharacterAction?>(Current);
+        public Task<CharacterAction?> GetCraftingActionForResolutionAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult<CharacterAction?>(Current);
 
         public void UpdateCharacterAction(CharacterAction characterAction) => UpdateCount++;
-        public Task<bool> DeleteCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
+        public Task<bool> DeleteCharacterActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
         {
             DeleteCount++;
             characterAction.IsDeleted = true;
             return Task.FromResult(true);
         }
         public Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem characterAction, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem characterAction, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<CharacterAction?> GetCharacterActionForDeletionAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult<CharacterAction?>(Current);
     }
@@ -167,7 +206,7 @@ public sealed class CharacterActionFlowTests
             LastNow = now;
             if (AdvanceBoundary)
             {
-                characterAction.UpdatedAt = characterAction.UpdatedAt.AddSeconds(10);
+                characterAction.NextResolutionAtUtc = characterAction.NextResolutionAtUtc?.AddSeconds(10);
             }
             return Task.FromResult(Session);
         }
@@ -175,11 +214,28 @@ public sealed class CharacterActionFlowTests
 
     private sealed class CraftingServiceStub : ICraftingService
     {
-        public Task<TemperingSession> PerformIdleCrafting(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public bool AdvanceSchedule { get; init; }
+        public int LastActionsToPerform { get; private set; }
+
+        public Task<TemperingSession> PerformIdleCrafting(CharacterAction characterAction, int actionsToPerform, DateTimeOffset now, CancellationToken cancellationToken)
+        {
+            LastActionsToPerform = actionsToPerform;
+            if (AdvanceSchedule)
+                characterAction.NextResolutionAtUtc = characterAction.NextResolutionAtUtc?.AddSeconds(actionsToPerform * 10);
+            return Task.FromResult(new TemperingSession
+            {
+                TemperingSummary = new TemperingSummary { TotalActions = actionsToPerform }
+            });
+        }
         public Task<bool> RemoveCraftingQueueItemsAsync(Guid characterId, List<Guid> queueItemIds, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<bool> MoveCraftingQueueItemAsync(Guid characterId, Guid queueItemId, CraftingQueueMoveDirection direction, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Response<IReadOnlyList<CraftingRecipeDto>>> GetCraftingRecipesAsync(Guid characterId, int targetTier, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Response<LearnBlueprintResult>> LearnBlueprintAsync(Guid characterId, Guid blueprintItemInstanceId, string recipeId, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Response<CraftItemsResult>> CraftItemsAsync(Guid characterId, string recipeId, string? blueprintId, int targetTier, int quantity, CancellationToken cancellationToken) => throw new NotSupportedException();
+    }
+
+    private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => now;
     }
 }

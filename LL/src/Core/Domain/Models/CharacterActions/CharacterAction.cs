@@ -16,7 +16,17 @@ public class CharacterAction
     };
 
     public ActionDetails? ActionDetails { get; set; }
+    /// <summary>
+    /// Earliest UTC boundary at which this action has work eligible for resolution.
+    /// Null means that the retained action row has no active schedule.
+    /// </summary>
+    public DateTimeOffset? NextResolutionAtUtc { get; set; }
+    /// <summary>
+    /// Audit timestamp for the last persisted mutation. It is not a gameplay schedule.
+    /// </summary>
     public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? BlockedUntilUtc { get; set; }
+    public long ScheduleGeneration { get; set; } = 1;
     public bool IsDeleted { get; set; }
     public uint RowVersion { get; set; }
 
@@ -24,12 +34,19 @@ public class CharacterAction
     public CombatSession? CombatSession { get; set; }
     [NotMapped]
     public TemperingSession? TemperingSession { get; set; }
+    [NotMapped]
+    public int ProcessedCount { get; set; }
+    [NotMapped]
+    public bool HasMoreDueWork { get; set; }
+    [NotMapped]
+    public int? ResolutionIntervalMs { get; set; }
 
-    public CharacterAction(Guid characterId, ActionDetails actionDetails)
+    public CharacterAction(Guid characterId, ActionDetails actionDetails, DateTimeOffset now)
     {
         CharacterId = characterId;
         ActionDetails = actionDetails;
-        UpdatedAt = DateTimeOffset.UtcNow;
+        NextResolutionAtUtc = now;
+        UpdatedAt = now;
     }
 
     public CharacterAction()

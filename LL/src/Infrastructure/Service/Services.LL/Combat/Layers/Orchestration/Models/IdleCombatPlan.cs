@@ -8,6 +8,7 @@ public sealed record IdleCombatPlan(
     DateTimeOffset RequestedTo,
     DateTimeOffset ExecutableUntil,
     TimeSpan EncounterCadence,
+    long ScheduleGeneration,
     IReadOnlyList<Guid> PlayerEntityIds,
     Area Area,
     int PlannedEncounterCount);

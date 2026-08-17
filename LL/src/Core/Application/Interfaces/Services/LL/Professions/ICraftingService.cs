@@ -8,7 +8,7 @@ namespace Application.Interfaces.Services.LL.Professions;
 
 public interface ICraftingService
 {
-    Task<TemperingSession> PerformIdleCrafting(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken);
+    Task<TemperingSession> PerformIdleCrafting(CharacterAction characterAction, int actionsToPerform, DateTimeOffset now, CancellationToken cancellationToken);
     Task<bool> RemoveCraftingQueueItemsAsync(Guid characterId, List<Guid> queueItemIds, CancellationToken cancellationToken);
     Task<bool> MoveCraftingQueueItemAsync(
         Guid characterId,

@@ -23,6 +23,7 @@ public sealed class CharacterActionConcurrencyTests
             {
                 CharacterId = characterId,
                 UpdatedAt = DateTimeOffset.Parse("2026-07-24T10:00:00Z"),
+                NextResolutionAtUtc = DateTimeOffset.Parse("2026-07-24T10:00:00Z"),
                 ActionDetails = new CombatActionDetails(
                     [characterId],
                     new Area { Id = "test-area" })
@@ -35,11 +36,11 @@ public sealed class CharacterActionConcurrencyTests
         var firstAction = await first.CharacterActions.SingleAsync(x => x.CharacterId == characterId);
         var secondAction = await second.CharacterActions.SingleAsync(x => x.CharacterId == characterId);
 
-        firstAction.UpdatedAt = firstAction.UpdatedAt.AddSeconds(10);
+        firstAction.NextResolutionAtUtc = firstAction.NextResolutionAtUtc?.AddSeconds(10);
         firstAction.RowVersion++;
         await first.SaveChangesAsync();
 
-        secondAction.UpdatedAt = secondAction.UpdatedAt.AddSeconds(10);
+        secondAction.NextResolutionAtUtc = secondAction.NextResolutionAtUtc?.AddSeconds(10);
         secondAction.RowVersion++;
 
         await Assert.ThrowsAsync<DbUpdateConcurrencyException>(() => second.SaveChangesAsync());

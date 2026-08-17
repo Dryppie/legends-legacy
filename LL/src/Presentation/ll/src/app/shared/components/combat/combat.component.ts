@@ -196,7 +196,12 @@ export class CombatComponent implements OnInit, OnDestroy {
       const type = this.battleTypeSignal();
       const time = this.combatStateService.getNextCombat(type)();
       if (time) this.nextCombatIn = time;
-      else this.nextCombatIn = this.currentAction()?.updatedAt ?? new Date();
+      else
+        this.nextCombatIn =
+          this.currentAction()?.nextResolutionAtUtc ??
+          this.currentAction()?.nextResolutionAt ??
+          this.currentAction()?.updatedAt ??
+          new Date();
     });
 
     /** Handle combat result */

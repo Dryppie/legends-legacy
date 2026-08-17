@@ -2,6 +2,8 @@ using Microsoft.Extensions.Options;
 using Services.LL.CharacterActions;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Interfaces.Combat.Orchestration;
+using Common.Randomness;
+using System.Globalization;
 
 namespace Services.LL.Combat.Layers.Orchestration.Idle;
 
@@ -48,6 +50,7 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
                 RequestedTo: to,
                 ExecutableUntil: from,
                 EncounterCadence: _encounterCadence,
+                ScheduleGeneration: request.CharacterAction.ScheduleGeneration,
                 PlayerEntityIds: [.. action.CharacterTeam],
                 Area: action.Area,
                 PlannedEncounterCount: 0);
@@ -67,6 +70,7 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
             RequestedTo: to,
             ExecutableUntil: executableUntil,
             EncounterCadence: _encounterCadence,
+            ScheduleGeneration: request.CharacterAction.ScheduleGeneration,
             PlayerEntityIds: [.. action.CharacterTeam],
             Area: action.Area,
             PlannedEncounterCount: plannedEncounterCount);
@@ -77,29 +81,43 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
         int sequence,
         DateTimeOffset startsAt)
     {
-        var monsterCount = _spawningService.HowManyMonstersToSpawn(plan.Area.SpawnProbabilities);
+        var generation = plan.ScheduleGeneration.ToString(CultureInfo.InvariantCulture);
+        var boundary = startsAt.UtcTicks.ToString(CultureInfo.InvariantCulture);
+        var identity = new[]
+        {
+            "idle-combat-v1",
+            plan.CharacterId.ToString("N"),
+            generation,
+            boundary,
+            sequence.ToString(CultureInfo.InvariantCulture)
+        };
+        var randomSeed = StableRandom.Seed(identity);
+        var random = new Random(randomSeed);
+        var encounterId = StableRandom.Guid(identity);
+        var monsterCount = _spawningService.HowManyMonstersToSpawn(plan.Area.SpawnProbabilities, random);
         var selectedCreatures = _spawningService.WhatAreaCreaturesToSpawn(
-            plan.Area.Creatures.ToList(),
-            monsterCount);
+            plan.Area.Creatures.OrderBy(x => x.CreatureId).ToList(),
+            monsterCount,
+            random);
 
         var participants = new List<CombatParticipantSlot>();
 
         participants.AddRange(
-            plan.PlayerEntityIds.Select(id =>
+            plan.PlayerEntityIds.Order().Select((id, index) =>
                 new CombatParticipantSlot(
-                    SlotId: Guid.NewGuid().ToString(),
+                    SlotId: StableRandom.Guid([.. identity, "friendly", index.ToString(CultureInfo.InvariantCulture), id.ToString("N")]).ToString("N"),
                     SourceEntityId: id,
                     Side: CombatSide.Friendly)));
 
         participants.AddRange(
-            selectedCreatures.Select(creature =>
+            selectedCreatures.Select((creature, index) =>
                 new CombatParticipantSlot(
-                    SlotId: Guid.NewGuid().ToString(),
+                    SlotId: StableRandom.Guid([.. identity, "hostile", index.ToString(CultureInfo.InvariantCulture), creature.CreatureId.ToString("N")]).ToString("N"),
                     SourceEntityId: creature.CreatureId,
                     Side: CombatSide.Hostile)));
 
         return new CombatEncounterPlan(
-            EncounterId: Guid.NewGuid(),
+            EncounterId: encounterId,
             Mode: CombatMode.Idle,
             Sequence: sequence,
             StartsAt: startsAt,
@@ -107,6 +125,9 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
             SourceContext: new IdleEncounterSourceContext(
                 CharacterId: plan.CharacterId,
                 Area: plan.Area,
-                EncounterCadence: plan.EncounterCadence));
+                EncounterCadence: plan.EncounterCadence))
+        {
+            RandomSeed = randomSeed
+        };
     }
 }

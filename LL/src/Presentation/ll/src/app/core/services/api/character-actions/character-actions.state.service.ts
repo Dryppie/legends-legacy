@@ -113,7 +113,9 @@ export class CharacterActionsStateService {
             this._loadingCombat.set(false);
             this.combatHandler.handle(action);
             const hasPendingResolution =
-              action.hasPendingCombatResolution ?? false;
+              action.hasMoreDueWork ??
+              action.hasPendingCombatResolution ??
+              false;
             this._idleCombatPhase.set(
               hasPendingResolution ? 'resolving' : 'active',
             );
@@ -387,7 +389,7 @@ export class CharacterActionsStateService {
 
   private applyActionUpdate(action: CharacterActionDto | null): void {
     if (
-      action?.hasPendingCombatResolution &&
+      (action?.hasMoreDueWork ?? action?.hasPendingCombatResolution) &&
       this._idleCombatError() === null
     ) {
       this._resolvingOfflineProgress.set(true);
@@ -421,10 +423,14 @@ export class CharacterActionsStateService {
     }
 
     const currentBoundary = new Date(
-      current.nextResolutionAt ?? current.updatedAt,
+      current.nextResolutionAtUtc ??
+        current.nextResolutionAt ??
+        current.updatedAt,
     ).getTime();
     const candidateBoundary = new Date(
-      candidate.nextResolutionAt ?? candidate.updatedAt,
+      candidate.nextResolutionAtUtc ??
+        candidate.nextResolutionAt ??
+        candidate.updatedAt,
     ).getTime();
 
     if (candidateBoundary < currentBoundary) return true;
@@ -514,7 +520,7 @@ export class CharacterActionsStateService {
       this._currentAction()?.characterActionType === CharacterActionType.Combat
     ) {
       this._idleCombatPhase.set('resolving');
-      if (this._currentAction()?.hasPendingCombatResolution) {
+      if (this._currentAction()?.hasMoreDueWork) {
         this._resolvingOfflineProgress.set(true);
       }
     }
@@ -527,7 +533,7 @@ export class CharacterActionsStateService {
           !action.isDeleted
         ) {
           this._idleCombatPhase.set(
-            action.hasPendingCombatResolution ? 'resolving' : 'active',
+            action.hasMoreDueWork ? 'resolving' : 'active',
           );
         }
       }),
@@ -633,6 +639,8 @@ export class CharacterActionsStateService {
   }
 
   private actionDeadline(action: CharacterActionDto): number {
-    return new Date(action.nextResolutionAt ?? action.updatedAt).getTime();
+    return new Date(
+      action.nextResolutionAtUtc ?? action.nextResolutionAt ?? action.updatedAt,
+    ).getTime();
   }
 }

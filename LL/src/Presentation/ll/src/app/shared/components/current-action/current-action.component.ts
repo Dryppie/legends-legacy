@@ -49,7 +49,7 @@ export class CurrentActionComponent {
     }
 
     const deadline = new Date(
-      action.nextResolutionAt ?? action.updatedAt,
+      action.nextResolutionAtUtc ?? action.nextResolutionAt ?? action.updatedAt,
     ).getTime();
     if (action.isDeleted && deadline > Date.now()) {
       this.performingAction = 'Combat ending - recovery';

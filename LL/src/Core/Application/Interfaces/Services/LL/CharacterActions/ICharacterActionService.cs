@@ -9,7 +9,10 @@ public interface ICharacterActionService
     /// </summary>
     /// <param name="characterId"></param>
     /// <returns></returns>
-    public Task<CharacterAction?> StartCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken);
+    public Task<CharacterAction?> StartCharacterActionAsync(
+        CharacterAction characterAction,
+        DateTimeOffset now,
+        CancellationToken cancellationToken);
 
     /// <summary>
     /// Get a character's current action

@@ -15,17 +15,20 @@ public class StartCombatActionCommandHandler : IRequestHandler<StartCombatAction
     private readonly IActionDetailsService _actionDetailsService;
     private readonly ICombatAreaAccessService _combatAreaAccessService;
     private readonly IMapper _mapper;
+    private readonly TimeProvider _timeProvider;
 
     public StartCombatActionCommandHandler(
         ICharacterActionService characterActionService,
         IActionDetailsService actionDetailsService,
         ICombatAreaAccessService combatAreaAccessService,
-        IMapper mapper)
+        IMapper mapper,
+        TimeProvider? timeProvider = null)
     {
         _characterActionService = characterActionService;
         _actionDetailsService = actionDetailsService;
         _combatAreaAccessService = combatAreaAccessService;
         _mapper = mapper;
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     public async Task<Response<CharacterActionDto>> Handle(StartCombatActionCommand request, CancellationToken cancellationToken)
@@ -44,9 +47,10 @@ public class StartCombatActionCommandHandler : IRequestHandler<StartCombatAction
         if (combatActionDetails == null)
             return Response<CharacterActionDto>.Fail("Unable to start combat.");
 
-        var characterAction = new CharacterAction(request.CharacterId, combatActionDetails);
+        var now = _timeProvider.GetUtcNow();
+        var characterAction = new CharacterAction(request.CharacterId, combatActionDetails, now);
 
-        var startedAction = await _characterActionService.StartCharacterActionAsync(characterAction, cancellationToken);
+        var startedAction = await _characterActionService.StartCharacterActionAsync(characterAction, now, cancellationToken);
         return startedAction is not null
             ? Response<CharacterActionDto>.Success(_mapper.Map<CharacterActionDto>(startedAction))
             : Response<CharacterActionDto>.Fail("Unable to start combat");

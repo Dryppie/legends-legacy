@@ -8,7 +8,6 @@ import {
   Observable,
   of,
 } from 'rxjs';
-import { environment } from '../../../../../../environments/environment';
 import { CharacterActionDto } from '../../../../../shared/models/Dtos/characterActionDto';
 import { CharacterActionType } from '../../../../../shared/models/enums/characterActionType';
 import { Injectable } from '@angular/core';
@@ -22,7 +21,7 @@ export class CharacterActionsPollingService {
   private readonly maxImmediateBackoffMs = 30_000;
   private readonly recentPollDecisions: Array<{
     actionType: CharacterActionType;
-    updatedAt: string;
+    nextResolutionAtUtc: string;
     rawDelayMs: number;
     scheduledDelayMs: number;
     timestamp: number;
@@ -55,18 +54,16 @@ export class CharacterActionsPollingService {
             return EMPTY;
           }
 
-          const updatedAt = new Date(action.updatedAt).getTime();
+          const deadline = this.actionDeadline(action);
           const now = this.timeSync.now();
+          if (deadline === null) return EMPTY;
 
-          const rawDelay =
-            action.characterActionType === CharacterActionType.Combat
-              ? updatedAt - now
-              : environment.baseDuration * 1000 - (now - updatedAt);
-          const nextDelay = action.hasPendingCombatResolution
+          const rawDelay = deadline - now;
+          const nextDelay = action.hasMoreDueWork
             ? this.catchUpPollDelayMs
             : this.clampPollDelay(action, rawDelay);
 
-          if (action.hasPendingCombatResolution) {
+          if (action.hasMoreDueWork) {
             this.consecutiveImmediatePolls = 0;
             this.recordPollDecision(action, rawDelay, nextDelay);
           }
@@ -108,7 +105,7 @@ export class CharacterActionsPollingService {
             rawDelayMs,
             scheduledDelayMs,
             actionType: action.characterActionType,
-            updatedAt: action.updatedAt,
+            nextResolutionAtUtc: action.nextResolutionAtUtc,
           },
         );
       }
@@ -126,7 +123,7 @@ export class CharacterActionsPollingService {
             rawDelayMs,
             scheduledDelayMs,
             actionType: action.characterActionType,
-            updatedAt: action.updatedAt,
+            nextResolutionAtUtc: action.nextResolutionAtUtc,
           },
         );
       }
@@ -143,7 +140,7 @@ export class CharacterActionsPollingService {
   ): void {
     this.recentPollDecisions.push({
       actionType: action.characterActionType,
-      updatedAt: String(action.updatedAt),
+      nextResolutionAtUtc: String(action.nextResolutionAtUtc),
       rawDelayMs: Math.round(rawDelayMs),
       scheduledDelayMs: Math.round(scheduledDelayMs),
       timestamp: Date.now(),
@@ -163,5 +160,12 @@ export class CharacterActionsPollingService {
       printRecentDecisions: () => console.table(this.recentPollDecisions),
       isRunning: () => !!this.sub,
     };
+  }
+
+  private actionDeadline(action: CharacterActionDto): number | null {
+    const value = action.nextResolutionAtUtc ?? action.nextResolutionAt;
+    if (!value) return null;
+    const deadline = new Date(value).getTime();
+    return Number.isFinite(deadline) ? deadline : null;
   }
 }

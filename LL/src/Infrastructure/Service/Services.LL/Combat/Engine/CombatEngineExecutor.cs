@@ -10,6 +10,7 @@ using Domain.Models.Damages;
 using Domain.Models.Professions.Crafting.V2;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces.Combat.Resolution;
+using Common.Randomness;
 
 namespace Services.LL.Combat.Engine;
 
@@ -36,7 +37,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         var execution = await ExecuteCoreAsync(
             runtime,
             new CombatSimulationOptions(
-                runtime.Plan.EncounterId.GetHashCode(),
+                ResolveRandomSeed(runtime),
                 6000,
                 StartActiveAbilitiesOnCooldown: true),
             cancellationToken);
@@ -55,7 +56,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         var execution = await ExecuteCoreAsync(
             runtime,
             new CombatSimulationOptions(
-                runtime.Plan.EncounterId.GetHashCode(),
+                ResolveRandomSeed(runtime),
                 6000,
                 StartActiveAbilitiesOnCooldown: true),
             cancellationToken,
@@ -110,7 +111,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         var execution = await ExecuteCoreAsync(
             runtime,
             new CombatSimulationOptions(
-                runtime.Plan.EncounterId.GetHashCode(),
+                ResolveRandomSeed(runtime),
                 maximumTicks,
                 StartActiveAbilitiesOnCooldown: true,
                 OvertimeStartsAtTick: overtimeStartsAtTick,
@@ -140,6 +141,11 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         execution.Result.StartedAt = runtime.Plan.StartsAt;
         return execution.Result;
     }
+
+    private static int ResolveRandomSeed(CombatEncounterRuntime runtime) =>
+        runtime.Plan.RandomSeed ?? StableRandom.Seed(
+            "combat-encounter-v1",
+            runtime.Plan.EncounterId.ToString("N"));
 
     private static void PopulatePostCombatTeams(
         CombatResult result,

@@ -4,11 +4,19 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Tools;
 using Domain.Models.Items.EssenceItems;
 using Services.LL.Interfaces;
+using Services.LL.Interfaces.Combat.Reward;
 
 namespace Services.LL.Inventories;
 
 public sealed class InventoryItemFactory : IInventoryItemFactory
 {
+    private readonly IResolutionRandomSource? _resolutionRandom;
+
+    public InventoryItemFactory(IResolutionRandomSource? resolutionRandom = null)
+    {
+        _resolutionRandom = resolutionRandom;
+    }
+
     public InventoryItem Create(ItemBase itemBase, int quantity, Guid? inventoryId = null)
     {
         var itemInstance = CreateItemInstance(itemBase);
@@ -45,31 +53,31 @@ public sealed class InventoryItemFactory : IInventoryItemFactory
             .ToList();
     }
 
-    private static ItemInstance CreateItemInstance(ItemBase itemBase)
+    private ItemInstance CreateItemInstance(ItemBase itemBase)
     {
         return itemBase.ItemType switch
         {
             ItemType.Equipment => CreateEquipmentInstance((EquipmentBase)itemBase),
             ItemType.Essence => new EssenceItemInstance
             {
-                Id = Guid.NewGuid(),
+                Id = NewGuid(),
                 ItemBaseId = itemBase.Id,
                 ItemBase = itemBase
             },
             _ => new ItemInstance
             {
-                Id = Guid.NewGuid(),
+                Id = NewGuid(),
                 ItemBaseId = itemBase.Id,
                 ItemBase = itemBase
             }
         };
     }
 
-    private static EquipmentInstance CreateEquipmentInstance(EquipmentBase itemBase)
+    private EquipmentInstance CreateEquipmentInstance(EquipmentBase itemBase)
     {
         var instance = new EquipmentInstance
         {
-            Id = Guid.NewGuid(),
+            Id = NewGuid(),
             ItemBaseId = itemBase.Id,
             ItemBase = itemBase,
             Rarity = itemBase.Rarity
@@ -78,7 +86,7 @@ public sealed class InventoryItemFactory : IInventoryItemFactory
         if (itemBase.EquipmentType == EquipmentType.Tool)
         {
             instance.Potential = null;
-            instance.ToolAffixes = ToolAffixGenerator.RollAffixes(instance.Rarity);
+            instance.ToolAffixes = ToolAffixGenerator.RollAffixes(instance.Rarity, _resolutionRandom);
 
             foreach (var affix in instance.ToolAffixes)
             {
@@ -88,4 +96,6 @@ public sealed class InventoryItemFactory : IInventoryItemFactory
 
         return instance;
     }
+
+    private Guid NewGuid() => _resolutionRandom?.NextGuid() ?? Guid.NewGuid();
 }

@@ -16,7 +16,8 @@ export class CombatActionHandler {
 
   handle(action: CharacterActionDto): void {
     if (!action.combatSession) return;
-    const hasPendingResolution = action.hasPendingCombatResolution ?? false;
+    const hasPendingResolution =
+      action.hasMoreDueWork ?? action.hasPendingCombatResolution ?? false;
     const completedSession = this.summary.loadCombatSince(
       action.combatSession,
       hasPendingResolution,

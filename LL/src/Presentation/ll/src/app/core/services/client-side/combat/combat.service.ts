@@ -135,7 +135,9 @@ export class CombatService {
     this.combatStateService.commitEncounter(
       BattleType.IdleCombat,
       combatResult,
-      characterAction.nextResolutionAt ?? characterAction.updatedAt,
+      characterAction.nextResolutionAtUtc ??
+        characterAction.nextResolutionAt ??
+        characterAction.updatedAt,
     );
   }
 

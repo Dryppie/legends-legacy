@@ -8,7 +8,6 @@ using Application.WebSockets.Contracts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.Json;
 
@@ -17,8 +16,6 @@ public sealed class TransactionBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    private static readonly ConcurrentDictionary<Guid, SemaphoreSlim> CharacterCommandLocks = new();
-
     private readonly IDbContext _db;
     private readonly IStateSyncService _stateSync;
     private readonly ILogger<TransactionBehavior<TRequest, TResponse>> _logger;
@@ -55,19 +52,8 @@ public sealed class TransactionBehavior<TRequest, TResponse>
 
         if (characterId.HasValue)
         {
-            var commandLock = CharacterCommandLocks.GetOrAdd(
-                characterId.Value,
-                _ => new SemaphoreSlim(1, 1));
-
-            await commandLock.WaitAsync(ct);
-            try
-            {
-                return await HandleTransactionalCommand(next, ct, characterId);
-            }
-            finally
-            {
-                commandLock.Release();
-            }
+            using var commandLock = await CharacterCommandLockRegistry.Instance.AcquireAsync(characterId.Value, ct);
+            return await HandleTransactionalCommand(next, ct, characterId);
         }
 
         return await HandleTransactionalCommand(next, ct, null);

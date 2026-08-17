@@ -25,9 +25,9 @@ public class SpawningService : ISpawningService
     /// </summary>
     /// <param name="counterProbabilities">List of probabilities corresponding to 0..N monsters.</param>
     /// <returns>The chosen number of monsters to spawn.</returns>
-    public int HowManyMonstersToSpawn(List<float> counterProbabilities)
+    public int HowManyMonstersToSpawn(List<float> counterProbabilities, Random? random = null)
     {
-        return WeightedSpawnSelector.SelectCreatureCount(counterProbabilities, _random);
+        return WeightedSpawnSelector.SelectCreatureCount(counterProbabilities, random ?? _random);
     }
 
     /// <summary>
@@ -36,9 +36,9 @@ public class SpawningService : ISpawningService
     /// <param name="creatures">A list of AreaCreature, each with a spawn rate.</param>
     /// <param name="count">How many creatures to spawn.</param>
     /// <returns>A list of the chosen creatures.</returns>
-    public List<AreaCreature> WhatAreaCreaturesToSpawn(List<AreaCreature> creatures, int count)
+    public List<AreaCreature> WhatAreaCreaturesToSpawn(List<AreaCreature> creatures, int count, Random? random = null)
     {
-        return WeightedSpawnSelector.SelectCreatures(creatures, count, _random).ToList();
+        return WeightedSpawnSelector.SelectCreatures(creatures, count, random ?? _random).ToList();
     }
 
     /// <summary>

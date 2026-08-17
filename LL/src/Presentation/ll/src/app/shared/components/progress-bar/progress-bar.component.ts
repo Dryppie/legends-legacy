@@ -10,8 +10,6 @@ import {
 } from '@angular/core';
 import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
-import { environment } from '../../../../environments/environment';
-import { CharacterActionType } from '../../models/enums/characterActionType';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { TimeSyncService } from '../../../core/services/api/time-sync/time-sync.service';
 
@@ -28,7 +26,6 @@ export class ProgressBarComponent implements OnDestroy {
 
   private animationFrameId: number = 0;
   private actionSubscription: Subscription | null = null;
-  private readonly craftingActionDurationSeconds = 10;
 
   constructor(
     private readonly state: CharacterActionsStateService,
@@ -53,30 +50,22 @@ export class ProgressBarComponent implements OnDestroy {
   private startProgressBar(action: CharacterActionDto): void {
     this.cancelAnimation();
     const progressBarElement = this.progressBar.nativeElement;
-    let duration = environment.baseDuration;
-    let startTime: number;
-    const now = this.timeSync.now();
-
-    if (
-      action.characterActionType === CharacterActionType.Combat ||
-      action.isDeleted
-    ) {
-      // The server deadline is canonical. Deriving the start from it means a late
-      // response advances the same bar instead of restarting it from zero.
-      const deadline = new Date(
-        action.nextResolutionAt ?? action.updatedAt,
-      ).getTime();
-      startTime = deadline - duration * 1000;
-    } else if (action.characterActionType === CharacterActionType.Crafting) {
-      // Crafting: updatedAt is in the past, meaning the current tempering tick started before now.
-      const actionUpdatedAt = new Date(action.updatedAt).getTime();
-      startTime = actionUpdatedAt; // The action started in the past
-      duration = this.craftingActionDurationSeconds;
-    } else {
-      const actionUpdatedAt = new Date(action.updatedAt).getTime();
-      startTime = actionUpdatedAt;
-      duration = environment.baseDuration;
+    const durationMs = action.resolutionIntervalMs;
+    const deadlineValue = action.nextResolutionAtUtc ?? action.nextResolutionAt;
+    if (action.isDeleted || !durationMs || durationMs <= 0 || !deadlineValue) {
+      this.stopProgressBar();
+      return;
     }
+
+    const deadline = new Date(deadlineValue).getTime();
+    if (!Number.isFinite(deadline)) {
+      this.stopProgressBar();
+      return;
+    }
+
+    const duration = durationMs / 1000;
+    const startTime = deadline - durationMs;
+    const now = this.timeSync.now();
 
     // Calculate initial progress
     const elapsedTime = (now - startTime) / 1000;

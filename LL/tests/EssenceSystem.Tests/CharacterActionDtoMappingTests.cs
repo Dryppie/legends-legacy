@@ -14,28 +14,39 @@ public sealed class CharacterActionDtoMappingTests
         NullLoggerFactory.Instance).CreateMapper();
 
     [Fact]
-    public void Due_combat_action_reports_pending_resolution()
+    public void Explicit_due_state_maps_to_new_and_compatibility_contracts()
     {
         var action = new CharacterAction
         {
             CharacterId = Guid.NewGuid(),
             ActionDetails = new CombatActionDetails(),
-            UpdatedAt = DateTimeOffset.UtcNow.AddMinutes(-1)
+            UpdatedAt = DateTimeOffset.Parse("2026-08-17T12:00:00Z"),
+            NextResolutionAtUtc = DateTimeOffset.Parse("2026-08-17T12:00:10Z"),
+            HasMoreDueWork = true,
+            ProcessedCount = 100,
+            ResolutionIntervalMs = 10_000
         };
 
         var dto = _mapper.Map<CharacterActionDto>(action);
 
         Assert.True(dto.HasPendingCombatResolution);
+        Assert.True(dto.HasMoreDueWork);
+        Assert.Equal(action.NextResolutionAtUtc, dto.NextResolutionAtUtc);
+        Assert.Equal(action.NextResolutionAtUtc, dto.NextResolutionAt);
+        Assert.Equal(100, dto.ProcessedCount);
+        Assert.Equal(10_000, dto.ResolutionIntervalMs);
     }
 
     [Fact]
-    public void Future_combat_action_does_not_report_pending_resolution()
+    public void Explicit_not_due_state_does_not_report_pending_resolution()
     {
         var action = new CharacterAction
         {
             CharacterId = Guid.NewGuid(),
             ActionDetails = new CombatActionDetails(),
-            UpdatedAt = DateTimeOffset.UtcNow.AddMinutes(1)
+            UpdatedAt = DateTimeOffset.Parse("2026-08-17T12:00:00Z"),
+            NextResolutionAtUtc = DateTimeOffset.Parse("2026-08-17T12:00:10Z"),
+            HasMoreDueWork = false
         };
 
         var dto = _mapper.Map<CharacterActionDto>(action);

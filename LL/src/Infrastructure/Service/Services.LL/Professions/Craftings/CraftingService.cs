@@ -24,6 +24,9 @@ using Domain.Models.Professions.Crafting.V2;
 using MediatR;
 using Services.LL.Extensions;
 using Services.LL.Interfaces;
+using Services.LL.Interfaces.Combat.Reward;
+using Common.Randomness;
+using System.Globalization;
 
 namespace Services.LL.Professions.Craftings;
 
@@ -47,6 +50,7 @@ public class CraftingService : ICraftingService
     private readonly IGameEventOutbox _outbox;
     private readonly IGuildMissionService _guildMissionService;
     private readonly IMapper _mapper;
+    private readonly IResolutionRandomSource? _resolutionRandom;
 
     public CraftingService(
         ICraftingRepository cr,
@@ -66,7 +70,8 @@ public class CraftingService : ICraftingService
         ICraftingItemCatalogService itemCatalogService,
         IGameEventOutbox outbox,
         IGuildMissionService guildMissionService,
-        IMapper mapper)
+        IMapper mapper,
+        IResolutionRandomSource? resolutionRandom = null)
     {
         _craftingRepository = cr;
         _inventoryService = invS;
@@ -86,19 +91,27 @@ public class CraftingService : ICraftingService
         _outbox = outbox;
         _guildMissionService = guildMissionService;
         _mapper = mapper;
+        _resolutionRandom = resolutionRandom;
     }
 
-    public async Task<TemperingSession> PerformIdleCrafting(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken)
+    public async Task<TemperingSession> PerformIdleCrafting(
+        CharacterAction characterAction,
+        int actionsToPerform,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
     {
-        var now = DateTimeOffset.UtcNow;
-
         var actionDetails = (characterAction.ActionDetails as CraftingActionDetails)!;
-        var sessionStartedAt = characterAction.UpdatedAt;
+        var sessionStartedAt = characterAction.NextResolutionAtUtc
+            ?? throw new InvalidOperationException("Active tempering requires a next-resolution boundary.");
 
         var temperingSummary = new TemperingSummary();
         var outcomes = new List<TemperingOutcomeEntry>();
         var completedItems = new List<EquipmentInstance>();
-        var rng = Random.Shared;
+        using var randomScope = _resolutionRandom?.UseSeed(StableRandom.Seed(
+            "tempering-batch-v1",
+            characterAction.CharacterId.ToString("N"),
+            characterAction.ScheduleGeneration.ToString(CultureInfo.InvariantCulture),
+            sessionStartedAt.UtcTicks.ToString(CultureInfo.InvariantCulture)));
 
         var factors = await _bonusService.GetAggregatedAsync(characterAction.CharacterId, now, cancellationToken);
 
@@ -108,6 +121,17 @@ public class CraftingService : ICraftingService
         while (actionsToPerform > 0 && actionDetails.CraftingQueueItems.Count > 0)
         {
             var current = actionDetails.CraftingQueueItems.First();
+            var attemptBoundary = characterAction.NextResolutionAtUtc
+                ?? throw new InvalidOperationException("Active tempering requires a next-resolution boundary.");
+            var identity = new[]
+            {
+                "tempering-attempt-v1",
+                characterAction.CharacterId.ToString("N"),
+                characterAction.ScheduleGeneration.ToString(CultureInfo.InvariantCulture),
+                attemptBoundary.UtcTicks.ToString(CultureInfo.InvariantCulture),
+                current.Id.ToString("N")
+            };
+            var rng = new Random(StableRandom.Seed(identity));
             var result = _temperingService.HandleTempering(
                 current,
                 temperingSummary,
@@ -120,16 +144,16 @@ public class CraftingService : ICraftingService
                 continue;
             }
 
-            characterAction.UpdatedAt += TimeSpan.FromSeconds(TemperingConstants.ActionDurationSeconds);
+            characterAction.NextResolutionAtUtc = attemptBoundary.AddSeconds(TemperingConstants.ActionDurationSeconds);
             actionsToPerform--;
             temperingSummary.TotalActions++;
             outcomes.Add(new TemperingOutcomeEntry
             {
-                Id = Guid.NewGuid(),
+                Id = StableRandom.Guid(identity),
                 QueueItemId = current.Id,
                 EquipmentInstanceId = result.Equipment.Id,
                 EquipmentName = result.Equipment.DisplayName,
-                OccurredAt = characterAction.UpdatedAt,
+                OccurredAt = attemptBoundary,
                 Outcome = result.Outcome,
                 PotentialSpent = result.PotentialSpent,
                 PreviousPotential = result.PreviousPotential,
@@ -158,6 +182,7 @@ public class CraftingService : ICraftingService
         if (actionDetails.CraftingQueueItems.Count == 0)
         {
             characterAction.IsDeleted = true;
+            characterAction.NextResolutionAtUtc = null;
         }
 
         temperingSummary.TotalSoulstones = await ProcessSoulstoneDrops(

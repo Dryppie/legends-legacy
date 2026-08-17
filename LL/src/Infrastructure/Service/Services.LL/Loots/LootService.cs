@@ -6,6 +6,7 @@ using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Rewards;
 using Services.LL.Interfaces;
+using Services.LL.Interfaces.Combat.Reward;
 
 namespace Services.LL.Loots;
 public class LootService : ILootService
@@ -14,15 +15,18 @@ public class LootService : ILootService
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IRewardRoller _rewardRoller;
     private readonly IItemBaseRepository _itemBases;
+    private readonly IRandomSource? _random;
 
     public LootService(
         IInventoryItemFactory inventoryItemFactory,
         IRewardRoller rewardRoller,
-        IItemBaseRepository itemBases)
+        IItemBaseRepository itemBases,
+        IRandomSource? random = null)
     {
         _inventoryItemFactory = inventoryItemFactory;
         _rewardRoller = rewardRoller;
         _itemBases = itemBases;
+        _random = random;
     }
 
     public int GenerateSoulstoneLoot(int seconds)
@@ -36,9 +40,8 @@ public class LootService : ILootService
         return Math.Max(0, earned);
     }
 
-    private static int SamplePoisson(double lambda)
+    private int SamplePoisson(double lambda)
     {
-        var rng = Random.Shared;
         int k = 0;
         double p = 1.0;
         double L = Math.Exp(-lambda);
@@ -46,7 +49,7 @@ public class LootService : ILootService
         while (p > L)
         {
             k++;
-            p *= rng.NextDouble();
+            p *= _random?.NextDouble() ?? Random.Shared.NextDouble();
         }
 
         return k - 1;

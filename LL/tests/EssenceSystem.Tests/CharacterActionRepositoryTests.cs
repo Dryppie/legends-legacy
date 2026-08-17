@@ -19,11 +19,13 @@ public sealed class CharacterActionRepositoryTests
         await db.SaveChangesAsync();
 
         var repository = new CharacterActionRepository(db);
+        var now = DateTimeOffset.Parse("2026-08-17T12:00:00Z");
         var action = new CharacterAction(
             characterId,
-            new CombatActionDetails([characterId], area));
+            new CombatActionDetails([characterId], area),
+            now);
 
-        var startedAction = await repository.StartCharacterActionAsync(action, CancellationToken.None);
+        var startedAction = await repository.StartCharacterActionAsync(action, now, CancellationToken.None);
         Assert.NotNull(startedAction);
         Assert.Equal(EntityState.Added, db.Entry(startedAction).State);
 
@@ -50,18 +52,21 @@ public sealed class CharacterActionRepositoryTests
         await db.SaveChangesAsync();
 
         var repository = new CharacterActionRepository(db);
+        var now = DateTimeOffset.Parse("2026-08-17T12:00:00Z");
         var firstAction = new CharacterAction(
             characterId,
-            new CombatActionDetails([characterId], firstArea));
+            new CombatActionDetails([characterId], firstArea),
+            now);
 
-        var startedFirst = await repository.StartCharacterActionAsync(firstAction, CancellationToken.None);
+        var startedFirst = await repository.StartCharacterActionAsync(firstAction, now, CancellationToken.None);
         await db.SaveChangesAsync();
 
         var secondAction = new CharacterAction(
             characterId,
-            new CombatActionDetails([characterId], secondArea));
+            new CombatActionDetails([characterId], secondArea),
+            now);
 
-        var startedSecond = await repository.StartCharacterActionAsync(secondAction, CancellationToken.None);
+        var startedSecond = await repository.StartCharacterActionAsync(secondAction, now, CancellationToken.None);
         await db.SaveChangesAsync();
 
         var currentAction = await db.CharacterActions

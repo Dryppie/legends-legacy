@@ -156,6 +156,12 @@ public static class DependencyInjection
                            options.ReferenceWinRateBasisPoints is > 0 and <= 10_000,
                 "Idle combat progression settings are invalid.")
             .ValidateOnStart();
+        services.AddOptions<TemperingProgressionOptions>()
+            .Configure(options => config.GetSection(TemperingProgressionOptions.SectionName).Bind(options))
+            .Validate(
+                options => options.MaximumAttemptsPerResolution > 0,
+                "Tempering progression settings are invalid.")
+            .ValidateOnStart();
 
         services.AddSingleton<IChampionMarketCatalog>(sp =>
             new JsonChampionMarketCatalog(
@@ -294,7 +300,10 @@ public static class DependencyInjection
                 sp.GetRequiredService<JsonSerializerOptions>(),
                 sp.GetRequiredService<IEssenceDefinitionRepository>()));
         services.AddScoped<IAbilityCatalogCoverageAnalyzer, AbilityCatalogCoverageAnalyzer>();
-        services.AddScoped<IRandomProvider, SystemRandomProvider>();
+        services.AddScoped<ResolutionRandomSource>();
+        services.AddScoped<IResolutionRandomSource>(sp => sp.GetRequiredService<ResolutionRandomSource>());
+        services.AddScoped<IRandomSource>(sp => sp.GetRequiredService<ResolutionRandomSource>());
+        services.AddScoped<IRandomProvider>(sp => sp.GetRequiredService<ResolutionRandomSource>());
         services.AddScoped<IEssenceService, EssenceSystemService>();
         services.AddScoped<IEssenceBonusProvider, EssenceSystemService>();
         services.AddScoped<IEssenceAbilityProvider, EssenceSystemService>();
@@ -528,7 +537,6 @@ public static class DependencyInjection
         services.AddScoped<IIdleCombatRewardFactBuilder, IdleCombatRewardFactBuilder>();
         services.AddScoped<IIdleCombatSessionFactory, IdleCombatSessionFactory>();
         services.AddScoped<ILootRewardWriter, InventoryLootRewardWriter>();
-        services.AddScoped<IRandomSource, SharedRandomSource>();
         services.AddScoped<ISoulstoneRewardCalculator, PoissonSoulstoneRewardCalculator>();
 
         // Options

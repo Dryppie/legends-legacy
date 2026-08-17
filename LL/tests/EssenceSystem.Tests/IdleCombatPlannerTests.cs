@@ -112,6 +112,8 @@ public sealed class IdleCombatPlannerTests
         {
             CharacterId = characterId,
             UpdatedAt = nextEncounterAt,
+            NextResolutionAtUtc = nextEncounterAt,
+            ScheduleGeneration = 7,
             ActionDetails = new CombatActionDetails(
                 [characterId],
                 new Area
@@ -132,9 +134,9 @@ public sealed class IdleCombatPlannerTests
 
     private sealed class FakeSpawningService : ISpawningService
     {
-        public int HowManyMonstersToSpawn(List<float> counterProbabilities) => 1;
+        public int HowManyMonstersToSpawn(List<float> counterProbabilities, Random? random = null) => 1;
 
-        public List<AreaCreature> WhatAreaCreaturesToSpawn(List<AreaCreature> creatures, int count) =>
+        public List<AreaCreature> WhatAreaCreaturesToSpawn(List<AreaCreature> creatures, int count, Random? random = null) =>
             creatures.Take(count).ToList();
     }
 }

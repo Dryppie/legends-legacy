@@ -22,6 +22,8 @@ public class CharacterActionConfiguration : IEntityTypeConfiguration<CharacterAc
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(e => e.CharacterId).IsRequired();
+        builder.Property(e => e.NextResolutionAtUtc);
+        builder.Property(e => e.ScheduleGeneration).HasDefaultValue(1L);
         builder.Property(e => e.RowVersion).IsConcurrencyToken();
     }
 }

@@ -10,31 +10,32 @@ public class CharacterActionDto : IMapFrom<CharacterAction>
 {
     public CharacterActionType CharacterActionType { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? NextResolutionAtUtc { get; set; }
+    public long ScheduleGeneration { get; set; }
+    public int ProcessedCount { get; set; }
+    public bool HasMoreDueWork { get; set; }
+    public int? ResolutionIntervalMs { get; set; }
     public bool IsDeleted { get; set; }
     public CombatSessionDto? CombatSession { get; set; }
     public TemperingSessionDto? TemperingSession { get; set; }
     public CombatActionDetails? CombatActionDetails { get; set; }
     public CraftingActionDetailsDto? CraftingActionDetails { get; set; }
 
-    // Revision is derived from persisted encounter boundaries, so it remains stable
-    // across repeated reads and requires no additional database state.
     public string Revision => string.Join(':',
-        CombatSession?.CombatResult?.StartedAt.UtcDateTime.Ticks ?? UpdatedAt.UtcDateTime.Ticks,
+        ScheduleGeneration,
+        CombatSession?.CombatResult?.StartedAt.UtcDateTime.Ticks ?? NextResolutionAtUtc?.UtcDateTime.Ticks ?? UpdatedAt.UtcDateTime.Ticks,
+        NextResolutionAtUtc?.UtcDateTime.Ticks ?? 0,
         UpdatedAt.UtcDateTime.Ticks,
         IsDeleted);
 
-    public DateTimeOffset NextResolutionAt => UpdatedAt;
-    public bool HasPendingCombatResolution { get; set; }
+    // Temporary compatibility aliases for clients deployed before the explicit contract.
+    public DateTimeOffset? NextResolutionAt => NextResolutionAtUtc;
+    public bool HasPendingCombatResolution =>
+        CharacterActionType == CharacterActionType.Combat && HasMoreDueWork;
 
     public void Mapping(Profile profile)
     {
         profile.CreateMap<CharacterAction, CharacterActionDto>()
-            .ForMember(
-                dest => dest.HasPendingCombatResolution,
-                opt => opt.MapFrom(source =>
-                    source.CharacterActionType == CharacterActionType.Combat &&
-                    !source.IsDeleted &&
-                    source.UpdatedAt <= DateTimeOffset.UtcNow))
             .ForMember(dest => dest.CombatActionDetails, opt => opt.MapFrom<CombatActionDetailsResolver>())
             .ForMember(dest => dest.CraftingActionDetails, opt => opt.MapFrom<CraftingActionDetailsResolver>());
     }
