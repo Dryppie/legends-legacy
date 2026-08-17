@@ -180,13 +180,15 @@ public static class DependencyInjection
                 options => options.EncounterCadenceSeconds > 0 &&
                            options.MaximumOfflineHours > 0 &&
                            options.MaximumEncountersPerResolution > 0 &&
+                           options.MaximumBatchesPerResolution > 0 &&
                            options.ReferenceWinRateBasisPoints is > 0 and <= 10_000,
                 "Idle combat progression settings are invalid.")
             .ValidateOnStart();
         services.AddOptions<TemperingProgressionOptions>()
             .Configure(options => config.GetSection(TemperingProgressionOptions.SectionName).Bind(options))
             .Validate(
-                options => options.MaximumAttemptsPerResolution > 0,
+                options => options.MaximumAttemptsPerResolution > 0 &&
+                           options.MaximumBatchesPerResolution > 0,
                 "Tempering progression settings are invalid.")
             .ValidateOnStart();
 

@@ -150,7 +150,8 @@ public sealed class CharacterActionFlowTests
             new FixedTimeProvider(Now),
             Options.Create(new TemperingProgressionOptions
             {
-                MaximumAttemptsPerResolution = 3
+                MaximumAttemptsPerResolution = 3,
+                MaximumBatchesPerResolution = 1
             }));
 
         var result = await service.GetCharacterActionAsync(repository.Current.CharacterId, CancellationToken.None);
@@ -159,6 +160,44 @@ public sealed class CharacterActionFlowTests
         Assert.Equal(3, result!.ProcessedCount);
         Assert.True(result.HasMoreDueWork);
         Assert.Equal(firstDue.AddSeconds(30), result.NextResolutionAtUtc);
+    }
+
+    [Fact]
+    public async Task Tempering_24_hour_progress_is_aggregated_server_side()
+    {
+        var firstDue = Now.AddHours(-24);
+        var repository = new CharacterActionRepositoryStub
+        {
+            Current = new CharacterAction(Guid.NewGuid(), new CraftingActionDetails(), Now)
+            {
+                NextResolutionAtUtc = firstDue
+            }
+        };
+        var crafting = new CraftingServiceStub { AdvanceSchedule = true };
+        var service = new CharacterActionService(
+            repository,
+            new CombatServiceStub(),
+            crafting,
+            new FixedTimeProvider(Now),
+            Options.Create(new TemperingProgressionOptions
+            {
+                MaximumAttemptsPerResolution = 100,
+                MaximumBatchesPerResolution = 100
+            }));
+
+        var result = await service.GetCharacterActionAsync(
+            repository.Current.CharacterId,
+            CancellationToken.None);
+
+        Assert.Equal(87, crafting.CallCount);
+        Assert.Equal(8_641, crafting.TotalActionsRequested);
+        Assert.Equal(8_641, result!.ProcessedCount);
+        Assert.False(result.HasMoreDueWork);
+        Assert.Equal(Now.AddSeconds(10), result.NextResolutionAtUtc);
+        Assert.Equal(8_641, result.TemperingSession!.TemperingSummary.TotalActions);
+        Assert.Equal(8_641, result.TemperingSession.TemperingSummary.CraftingExperience);
+        Assert.Equal(5, result.TemperingSession.Outcomes.Count);
+        Assert.Equal(Now, result.TemperingSession.Outcomes[0].OccurredAt);
     }
 
     private sealed class CharacterActionRepositoryStub : ICharacterActionRepository
@@ -216,15 +255,32 @@ public sealed class CharacterActionFlowTests
     {
         public bool AdvanceSchedule { get; init; }
         public int LastActionsToPerform { get; private set; }
+        public int CallCount { get; private set; }
+        public int TotalActionsRequested { get; private set; }
 
         public Task<TemperingSession> PerformIdleCrafting(CharacterAction characterAction, int actionsToPerform, DateTimeOffset now, CancellationToken cancellationToken)
         {
+            CallCount++;
             LastActionsToPerform = actionsToPerform;
+            TotalActionsRequested = checked(TotalActionsRequested + actionsToPerform);
+            var from = characterAction.NextResolutionAtUtc!.Value;
             if (AdvanceSchedule)
                 characterAction.NextResolutionAtUtc = characterAction.NextResolutionAtUtc?.AddSeconds(actionsToPerform * 10);
             return Task.FromResult(new TemperingSession
             {
-                TemperingSummary = new TemperingSummary { TotalActions = actionsToPerform }
+                From = from,
+                To = now,
+                TemperingSummary = new TemperingSummary
+                {
+                    TotalActions = actionsToPerform,
+                    CraftingExperience = actionsToPerform
+                },
+                Outcomes = [.. Enumerable.Range(0, actionsToPerform).Select(index =>
+                    new TemperingOutcomeEntry
+                    {
+                        Id = Guid.NewGuid(),
+                        OccurredAt = from.AddSeconds(index * 10)
+                    })]
             });
         }
         public Task<bool> RemoveCraftingQueueItemsAsync(Guid characterId, List<Guid> queueItemIds, CancellationToken cancellationToken) => throw new NotSupportedException();

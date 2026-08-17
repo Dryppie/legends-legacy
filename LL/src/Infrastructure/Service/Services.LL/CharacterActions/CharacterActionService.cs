@@ -156,29 +156,53 @@ public class CharacterActionService : ICharacterActionService
                 .ThenBy(queueItem => queueItem.Id)];
 
         var interval = TimeSpan.FromSeconds(TemperingConstants.ActionDurationSeconds);
-        var plan = ActionScheduleCalculator.Calculate(
-            characterAction.NextResolutionAtUtc,
-            now,
-            interval,
-            _temperingOptions.MaximumAttemptsPerResolution);
-
         characterAction.ResolutionIntervalMs = checked((int)interval.TotalMilliseconds);
-        if (plan.ProcessCount == 0)
+        var accumulator = new TemperingSessionAccumulator();
+        var processedCount = 0;
+        var processedAnyBatch = false;
+
+        for (var batch = 0; batch < _temperingOptions.MaximumBatchesPerResolution; batch++)
         {
-            characterAction.ProcessedCount = 0;
-            characterAction.HasMoreDueWork = false;
-            return null;
+            var plan = ActionScheduleCalculator.Calculate(
+                characterAction.NextResolutionAtUtc,
+                now,
+                interval,
+                _temperingOptions.MaximumAttemptsPerResolution);
+            if (plan.ProcessCount == 0)
+                break;
+
+            var previousBoundary = characterAction.NextResolutionAtUtc
+                ?? throw new InvalidOperationException(
+                    "Active tempering requires a next-resolution boundary.");
+            var session = await _craftingService.PerformIdleCrafting(
+                characterAction,
+                plan.ProcessCount,
+                now,
+                cancellationToken);
+
+            accumulator.Add(session);
+            processedAnyBatch = true;
+            processedCount = checked(
+                processedCount + session.TemperingSummary.TotalActions);
+
+            if (characterAction.IsDeleted || characterAction.NextResolutionAtUtc is null)
+                break;
+
+            if (characterAction.NextResolutionAtUtc <= previousBoundary)
+            {
+                throw new InvalidOperationException(
+                    "Tempering resolution did not advance its persisted boundary.");
+            }
+
+            if (characterAction.NextResolutionAtUtc > now)
+                break;
         }
 
-        var session = await _craftingService.PerformIdleCrafting(
-            characterAction,
-            plan.ProcessCount,
-            now,
-            cancellationToken);
-        characterAction.ProcessedCount = session.TemperingSummary.TotalActions;
+        characterAction.ProcessedCount = processedCount;
         characterAction.HasMoreDueWork = !characterAction.IsDeleted &&
+            characterAction.NextResolutionAtUtc is not null &&
             characterAction.NextResolutionAtUtc <= now;
-        return session;
+        return processedAnyBatch ? accumulator.Build() : null;
     }
 
     public async Task<bool> UpdateCraftingCharacterActionAsync(Guid characterId, CraftingQueueItem characterAction, CancellationToken cancellationToken)
