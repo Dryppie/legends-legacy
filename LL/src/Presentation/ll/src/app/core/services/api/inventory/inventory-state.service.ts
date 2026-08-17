@@ -1,4 +1,4 @@
-import { finalize } from 'rxjs';
+import { catchError, finalize, map, Observable, throwError } from 'rxjs';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { computed, effect, Injectable, signal, untracked } from '@angular/core';
 import { InventoryService } from './inventory.service';
@@ -342,6 +342,55 @@ export class InventoryStateService {
     });
 
     return updated[index];
+  }
+
+  /**
+   * Update the favorite marker immediately, then persist it. A failed request rolls back
+   * only if no newer favorite change has replaced the optimistic value.
+   */
+  setFavorite(
+    itemInstanceId: string,
+    isFavorite: boolean,
+  ): Observable<InventoryItem | undefined> {
+    const items = this._items();
+    const index = items.findIndex(
+      (item) => item.itemInstance.id === itemInstanceId,
+    );
+    if (index === -1) {
+      return throwError(
+        () => new Error('The item is no longer in your inventory.'),
+      );
+    }
+
+    const previous = items[index];
+    const optimistic = { ...previous, isFavorite };
+    const updated = [...items];
+    updated[index] = optimistic;
+    this._items.set(updated);
+
+    return this.inventoryService
+      .setItemFavorite(itemInstanceId, isFavorite)
+      .pipe(
+        map(() =>
+          this._items().find((item) => item.itemInstance.id === itemInstanceId),
+        ),
+        catchError((error) => {
+          const currentItems = this._items();
+          const currentIndex = currentItems.findIndex(
+            (item) => item.itemInstance.id === itemInstanceId,
+          );
+          if (
+            currentIndex !== -1 &&
+            currentItems[currentIndex].isFavorite === isFavorite
+          ) {
+            const rolledBack = [...currentItems];
+            rolledBack[currentIndex] = previous;
+            this._items.set(rolledBack);
+          }
+
+          return throwError(() => error);
+        }),
+      );
   }
 
   removeItem(itemInstanceId: string): void {

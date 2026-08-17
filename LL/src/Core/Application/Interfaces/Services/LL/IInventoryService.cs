@@ -23,6 +23,13 @@ public interface IInventoryService
         List<InventoryItem> loot,
         string acquisitionSource,
         CancellationToken cancellationToken);
+    Task AddItemsToInventory(
+        Guid characterId,
+        List<InventoryItem> loot,
+        string acquisitionSource,
+        Guid correlationId,
+        CancellationToken cancellationToken) =>
+        AddItemsToInventory(characterId, loot, acquisitionSource, cancellationToken);
     /// <summary>
     /// Create Inventory for Character
     /// </summary>
@@ -38,6 +45,11 @@ public interface IInventoryService
     /// </summary>
     /// <returns>False when the character does not own the item.</returns>
     Task<bool> MarkItemSeenAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken);
+    /// <summary>
+    /// Updates the owner's favorite preference for an inventory row.
+    /// </summary>
+    /// <returns>False when the character does not own the item.</returns>
+    Task<bool> SetItemFavoriteAsync(Guid characterId, Guid itemInstanceId, bool isFavorite, CancellationToken cancellationToken);
     Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing marketplaceListing, CancellationToken cancellationToken);
     Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken);
     Task AddItemToInventoryFromMarketPlace(Guid characterId, InventoryItem inventoryItem, CancellationToken cancellationToken);

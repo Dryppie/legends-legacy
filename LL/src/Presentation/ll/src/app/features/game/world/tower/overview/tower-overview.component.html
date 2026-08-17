@@ -634,7 +634,10 @@
                   {{ floor.weeklyResearchCap }} actions used
                 </p>
 
-                <div class="tag-list guardian-tags">
+                <div
+                  class="tag-list guardian-tags"
+                  *ngIf="floor.guardian.tags.length"
+                >
                   <span
                     class="badge ll-badge ll-badge-muted"
                     *ngFor="let tag of floor.guardian.tags"
@@ -655,7 +658,7 @@
                     class="intel-reveal-card"
                     *ngFor="let reveal of floor.guardian.knownReveals"
                   >
-                    <div>
+                    <div class="intel-reveal-heading">
                       <strong>{{ reveal.title }}</strong>
                       <span>{{ reveal.threshold }}%</span>
                     </div>

@@ -18,4 +18,5 @@ public static class ItemAcquisitionSources
     public const string EventQuestReward = "event-quest-reward";
     public const string EquipmentScrapping = "equipment-scrapping";
     public const string LootGeneratedEvent = "loot-generated-event";
+    public const string AdminCompensation = "admin-compensation";
 }

@@ -1,0 +1,433 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+  color: var(--ll-color-text);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.world-map-page {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  padding-right: var(--ll-space-4);
+}
+
+.world-map-header {
+  display: flex;
+  min-height: 4.5rem;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ll-space-4);
+  border-bottom: 1px solid var(--ll-color-border);
+}
+
+.world-map-identity {
+  min-width: 0;
+}
+
+.world-map-eyebrow,
+.areas-summary h2,
+.gathering-legend,
+.activity-panel > header h2 {
+  color: var(--ll-color-text-muted);
+  font-size: 0.62rem;
+  font-weight: var(--ll-weight-semibold);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.world-map-title-line {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: var(--ll-space-3);
+  margin-top: 0.15rem;
+}
+
+.world-map-title-line h1,
+.dungeon-preview-toolbar h2 {
+  margin: 0;
+  color: var(--ll-color-primary);
+  font-family: var(--ll-font-display);
+  font-size: clamp(1.5rem, 2.3vw, 2rem);
+  font-weight: var(--ll-weight-medium);
+  line-height: var(--ll-leading-tight);
+}
+
+.world-map-title-line span {
+  overflow: hidden;
+  color: var(--ll-color-text-muted);
+  font-size: var(--ll-text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.world-map-actions,
+.areas-toolbar,
+.areas-summary,
+.gathering-legend,
+.gathering-legend li,
+.activity-panel > header,
+.dungeon-preview-toolbar {
+  display: flex;
+  align-items: center;
+}
+
+.world-map-actions {
+  flex: none;
+  gap: var(--ll-space-2);
+}
+
+.region-tabs {
+  display: flex;
+  min-height: 3rem;
+  flex: none;
+  align-items: stretch;
+  gap: var(--ll-space-1);
+  border-bottom: 1px solid var(--ll-color-border);
+}
+
+.region-tabs a,
+.region-tabs span {
+  display: grid;
+  min-width: 5.2rem;
+  place-items: center;
+  border-bottom: 2px solid transparent;
+  color: var(--ll-color-text-muted);
+  font-family: var(--ll-font-display);
+  font-size: var(--ll-text-sm);
+  text-decoration: none;
+  transition:
+    color 150ms ease,
+    background 150ms ease;
+}
+
+.region-tabs a:hover {
+  color: var(--ll-color-primary);
+  background: var(--ll-color-surface-soft);
+}
+
+.region-tabs a.active {
+  border-bottom-color: var(--ll-color-primary);
+  color: var(--ll-color-primary);
+}
+
+.region-tabs .locked-region {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.world-map-content {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: max-content minmax(17rem, 1fr);
+  gap: clamp(var(--ll-space-4), 2vw, var(--ll-space-6));
+  overflow-y: auto;
+  padding: var(--ll-space-5) 0 var(--ll-space-5);
+}
+
+.world-map-content.showing-dungeon {
+  grid-template-columns: minmax(0, 3fr) minmax(17rem, 1fr);
+}
+
+.areas-section,
+.dungeon-preview-section,
+.world-map-rail {
+  min-width: 0;
+}
+
+.dungeon-preview-toolbar {
+  min-height: 2.75rem;
+  justify-content: space-between;
+  gap: var(--ll-space-4);
+  margin-bottom: var(--ll-space-2);
+}
+
+.dungeon-preview-toolbar h2 {
+  margin-top: 0.15rem;
+}
+
+.dungeon-preview-toolbar button {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ll-space-2);
+  padding: var(--ll-space-2) var(--ll-space-3);
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-sm);
+  color: var(--ll-color-text-muted);
+  background: var(--ll-color-surface);
+  font: inherit;
+  font-size: var(--ll-text-xs);
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    color 150ms ease,
+    background 150ms ease;
+}
+
+.dungeon-preview-toolbar button:hover {
+  border-color: var(--ll-color-border-strong);
+  color: var(--ll-color-primary);
+  background: var(--ll-color-primary-soft);
+}
+
+.inline-dungeon-preview {
+  display: block;
+  min-width: 0;
+}
+
+.areas-toolbar {
+  min-height: 1.5rem;
+  justify-content: space-between;
+  gap: var(--ll-space-4);
+  margin-bottom: var(--ll-space-3);
+}
+
+.areas-summary {
+  gap: var(--ll-space-2);
+}
+
+.areas-summary h2 {
+  margin: 0;
+}
+
+.areas-summary span {
+  color: var(--ll-color-text-subtle);
+  font-size: 0.65rem;
+}
+
+.gathering-legend {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--ll-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gathering-legend li {
+  gap: var(--ll-space-2);
+  font-size: 0.55rem;
+}
+
+.legend-node {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 0.1rem;
+  transform: rotate(45deg);
+}
+
+.legend-node.mining {
+  background: #9bbde1;
+}
+
+.legend-node.woodcutting {
+  background: #50b790;
+}
+
+.legend-node.skinning {
+  background: #d9913e;
+}
+
+.area-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--area-columns, 1), 15rem);
+  gap: var(--ll-space-4);
+}
+
+.area-grid app-combat-area-card {
+  width: 15rem;
+}
+
+.world-map-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ll-space-4);
+}
+
+.activity-panel {
+  overflow: hidden;
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-md);
+  background: var(--ll-color-surface);
+  box-shadow: var(--ll-shadow-sm);
+}
+
+.activity-panel.raids {
+  border-color: rgba(255, 154, 162, 0.22);
+}
+
+.activity-panel > header {
+  min-height: 2.6rem;
+  justify-content: space-between;
+  padding: 0 var(--ll-space-4);
+  border-bottom: 1px solid var(--ll-color-border);
+  background: var(--ll-color-surface-strong);
+}
+
+.activity-panel > header h2 {
+  margin: 0;
+}
+
+.activity-panel.raids > header h2 {
+  color: var(--ll-color-danger);
+}
+
+.activity-panel > header span {
+  color: var(--ll-color-text-subtle);
+  font-size: 0.65rem;
+}
+
+.activity-row {
+  display: grid;
+  width: 100%;
+  min-height: 4.15rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: center;
+  gap: 0.25rem var(--ll-space-3);
+  padding: var(--ll-space-3) var(--ll-space-4);
+  border: 0;
+  border-bottom: 1px solid var(--ll-color-border);
+  color: var(--ll-color-text);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.activity-row:last-child {
+  border-bottom: 0;
+}
+
+.activity-row:hover:not(.static) {
+  background: var(--ll-color-primary-soft);
+}
+
+.activity-row.selected {
+  background: var(--ll-color-primary-soft);
+  box-shadow: inset 2px 0 0 var(--ll-color-primary);
+}
+
+.activity-row.selected .activity-name {
+  color: var(--ll-color-primary);
+}
+
+.activity-row:focus-visible {
+  outline: 1px solid var(--ll-color-primary);
+  outline-offset: -2px;
+}
+
+.activity-row.locked {
+  opacity: 0.42;
+}
+
+.activity-row.static {
+  cursor: default;
+}
+
+.activity-name {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--ll-font-display);
+  font-size: var(--ll-text-md);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-level {
+  align-self: center;
+  color: var(--ll-color-text-muted);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.activity-meta {
+  grid-column: 1 / -1;
+  color: var(--ll-color-text-subtle);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.activity-empty {
+  margin: 0;
+  padding: var(--ll-space-4);
+  color: var(--ll-color-text-subtle);
+  font-size: var(--ll-text-xs);
+  line-height: var(--ll-leading-normal);
+}
+
+.map-lock {
+  margin-top: var(--ll-space-5);
+  padding: var(--ll-space-5);
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-md);
+  color: var(--ll-color-text-muted);
+  text-align: center;
+}
+
+@media (max-width: 72rem) {
+  .world-map-content,
+  .world-map-content.showing-dungeon {
+    grid-template-columns: 1fr;
+  }
+
+  .world-map-rail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 42rem) {
+  .world-map-page {
+    padding-right: var(--ll-space-2);
+  }
+
+  .world-map-header {
+    align-items: flex-start;
+    padding: var(--ll-space-3) 0;
+  }
+
+  .world-map-title-line {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .areas-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .area-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .area-grid app-combat-area-card {
+    width: 100%;
+  }
+
+  .gathering-legend {
+    justify-content: flex-start;
+  }
+
+  .world-map-rail {
+    grid-template-columns: 1fr;
+  }
+
+  .dungeon-preview-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

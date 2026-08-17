@@ -2,6 +2,7 @@
 using API.Chat.Hubs.Presence;
 using API.Chat.Utility;
 using Application.UsesCases.Chats.Commands.SendMessage;
+using Application.Interfaces.Services.Chats;
 using Domain.Models.Chats;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -19,15 +20,18 @@ public sealed class ChatHub : Hub<IChatClient>
     private readonly IMediator _mediator;
     private readonly IDistributedCache _cache;
     private readonly IChatPresenceTracker _presence;
+    private readonly IChatModerationService _moderation;
 
     public ChatHub(
         IMediator mediator,
         IDistributedCache cache,
-        IChatPresenceTracker presence)
+        IChatPresenceTracker presence,
+        IChatModerationService moderation)
     {
         _mediator = mediator;
         _cache = cache;
         _presence = presence;
+        _moderation = moderation;
     }
 
     public async Task Send(
@@ -49,6 +53,22 @@ public sealed class ChatHub : Hub<IChatClient>
         if (!CanWriteChat())
         {
             throw new HubException("Register your account before writing in chat.");
+        }
+
+        if (!Guid.TryParse(senderId, out var senderCharacterId))
+        {
+            throw new HubException("Chat connection has an invalid character identity.");
+        }
+
+        var activeMute = await _moderation.GetActiveMuteAsync(
+            senderCharacterId,
+            Context.ConnectionAborted);
+        if (activeMute is not null)
+        {
+            var message = activeMute.ExpiresAt.HasValue
+                ? $"Chat is muted until {activeMute.ExpiresAt.Value:O}."
+                : "Chat is muted for this character.";
+            throw new HubException(message);
         }
 
         if (!await RateLimiter.EnsureAllowedAsync(_cache, senderId))

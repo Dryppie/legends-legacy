@@ -1,12 +1,33 @@
-<section
-  *ngIf="displayTags.length > 0"
+<div
+  *ngIf="displayTargets.length > 0 || displayTags.length > 0"
   class="ability-tags"
-  aria-label="Ability tags"
 >
-  <span class="ability-tags-heading">Tags</span>
-  <ul class="ability-tag-list">
-    <li *ngFor="let tag of displayTags; trackBy: trackTag" class="ability-tag">
-      {{ tag }}
-    </li>
-  </ul>
-</section>
+  <section *ngIf="displayTargets.length > 0" aria-label="Ability targets">
+    <span class="ability-tags-heading">Targets</span>
+    <ul class="ability-tag-list mt-1" abilityTooltipContainer>
+      <li
+        *ngFor="let target of displayTargets; trackBy: trackTarget"
+        class="ability-tag ability-target-tag keyword"
+        tabindex="0"
+        data-tooltip-kind="keyword"
+        [attr.data-title]="target.label"
+        [attr.data-description]="target.description"
+        [attr.aria-label]="target.label + ': ' + target.description"
+      >
+        {{ target.label }}
+      </li>
+    </ul>
+  </section>
+
+  <section *ngIf="displayTags.length > 0" aria-label="Ability tags">
+    <span class="ability-tags-heading">Tags</span>
+    <ul class="ability-tag-list mt-1">
+      <li
+        *ngFor="let tag of displayTags; trackBy: trackTag"
+        class="ability-tag"
+      >
+        {{ tag }}
+      </li>
+    </ul>
+  </section>
+</div>

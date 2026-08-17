@@ -123,6 +123,7 @@
       <div *ngFor="let dungeon of dungeons()">
         <app-dungeon-card
           [previewData]="dungeon"
+          [startExpanded]="expandSelected()"
           (recordsRequested)="openRecords($event)"
         />
       </div>

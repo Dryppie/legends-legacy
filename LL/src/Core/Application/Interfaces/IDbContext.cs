@@ -1,4 +1,5 @@
 using Domain.Models.Attributes;
+using Domain.Models.Administration;
 using Domain.Models.Achievements;
 using Domain.Models.BackgroundJobs;
 using Domain.Models.CharacterActions;
@@ -42,6 +43,8 @@ using Microsoft.EntityFrameworkCore.Storage;
 namespace Application.Common.Interfaces;
 public interface IDbContext
 {
+    DbSet<AdminAction> AdminActions { get; }
+    DbSet<AccountRestriction> AccountRestrictions { get; }
     DbSet<AchievementDefinition> AchievementDefinitions { get; }
     DbSet<AchievementEventLedger> AchievementEventLedgers { get; }
     DbSet<PlayerAchievementProgress> PlayerAchievementProgresses { get; }

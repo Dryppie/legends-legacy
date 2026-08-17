@@ -103,6 +103,7 @@ export interface TowerScoutingReveal {
   description: string;
   kind: 'Active' | 'Passive';
   cooldownSeconds: number | null;
+  tags: string[];
 }
 
 export interface TowerPreparationSummary {

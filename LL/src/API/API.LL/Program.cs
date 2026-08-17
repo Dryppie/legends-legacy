@@ -2,6 +2,7 @@
 using API.LL.Common;
 using API.LL.HostedServices;
 using Application;
+using Application.Interfaces.Services.LL.Administration;
 using Asp.Versioning;
 using Common;
 using Domain.Models.Users;
@@ -134,23 +135,32 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
                 return Task.CompletedTask;
             },
-            OnTokenValidated = context =>
+            OnTokenValidated = async context =>
             {
                 var isAllowAnonymous = context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() is not null;
                 if (isAllowAnonymous)
                 {
-                    return Task.CompletedTask;
+                    return;
                 }
 
-                var hasUserId = context.Principal?.FindFirstValue(ClaimTypes.UserData) is not null;
+                var rawUserId = context.Principal?.FindFirstValue(ClaimTypes.UserData);
+                var hasUserId = Guid.TryParse(rawUserId, out var userId);
                 var hasCharacterId = context.Principal?.FindFirstValue("CharacterId") is not null;
 
                 if (!hasUserId || !hasCharacterId)
                 {
                     context.Fail("The access token is missing required identity claims.");
+                    return;
                 }
 
-                return Task.CompletedTask;
+                var accountAccess = context.HttpContext.RequestServices
+                    .GetRequiredService<IAccountAccessPolicy>();
+                if (await accountAccess.GetActiveBanAsync(
+                        userId,
+                        context.HttpContext.RequestAborted) is not null)
+                {
+                    context.Fail("The account is suspended.");
+                }
             },
             OnAuthenticationFailed = context =>
             {

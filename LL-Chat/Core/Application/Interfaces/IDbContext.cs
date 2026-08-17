@@ -6,6 +6,8 @@ namespace Application.Interfaces;
 public interface IDbContext
 {
     DbSet<ChatMessage> ChatMessages { get; }
+    DbSet<ChatRestriction> ChatRestrictions { get; }
+    DbSet<ChatModerationAction> ChatModerationActions { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 

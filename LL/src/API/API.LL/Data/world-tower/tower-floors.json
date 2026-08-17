@@ -14,7 +14,6 @@
       "guardianCreatureId": "00000000-0000-0000-0000-000000000056",
       "guardianName": "Garran, the Gatekeeper",
       "guardianAbilityProfileId": "monster.garran,_the_gatekeeper",
-      "guardianTags": ["Physical", "Magical"],
       "requiredSlots": 5,
       "recommendedPowerRating": 161,
       "guardianScaling": {
@@ -46,7 +45,6 @@
       "guardianCreatureId": "00000000-0000-0000-0000-000000000057",
       "guardianName": "Velka, the Bloodwing Huntress",
       "guardianAbilityProfileId": "monster.velka,_the_bloodwing_huntress",
-      "guardianTags": ["Physical", "Bleed", "Haste"],
       "requiredSlots": 5,
       "recommendedPowerRating": 163,
       "guardianScaling": {
@@ -73,7 +71,6 @@
       "guardianCreatureId": "00000000-0000-0000-0000-000000000059",
       "guardianName": "Morrowmaw, Broodkeeper",
       "guardianAbilityProfileId": "monster.morrowmaw,_broodkeeper",
-      "guardianTags": ["Magical", "Summoner"],
       "requiredSlots": 5,
       "recommendedPowerRating": 165,
       "guardianScaling": {
@@ -100,7 +97,6 @@
       "guardianCreatureId": "00000000-0000-0000-0000-000000000058",
       "guardianName": "Vaelor, the Mirrorbound",
       "guardianAbilityProfileId": "monster.vaelor,_the_mirrorbound",
-      "guardianTags": ["Physical", "Magical", "Reflection"],
       "requiredSlots": 5,
       "recommendedPowerRating": 171,
       "guardianScaling": {
@@ -132,7 +128,6 @@
       "guardianCreatureId": "00000000-0000-0000-0000-000000000060",
       "guardianName": "Kharad, the First Warden",
       "guardianAbilityProfileId": "monster.kharad,_the_first_warden",
-      "guardianTags": ["Physical", "Magical", "Barrier", "Summoner"],
       "requiredSlots": 10,
       "recommendedPowerRating": 173,
       "guardianScaling": {
@@ -164,7 +159,6 @@
       "guardianCreatureId": "00000000-0000-0000-0000-000000000061",
       "guardianName": "Orsenn, the Ashen Bellkeeper",
       "guardianAbilityProfileId": "monster.orsenn,_the_ashen_bellkeeper",
-      "guardianTags": ["Magical", "Cinder", "Doom"],
       "requiredSlots": 5,
       "recommendedPowerRating": 175,
       "guardianScaling": {
@@ -191,7 +185,6 @@
       "guardianCreatureId": "00000000-0000-0000-0000-000000000064",
       "guardianName": "Eydis, the Endless Spring",
       "guardianAbilityProfileId": "monster.eydis,_the_endless_spring",
-      "guardianTags": ["Nature", "Magical", "Healing", "Control", "Abundance"],
       "requiredSlots": 3,
       "recommendedPowerRating": 185,
       "guardianScaling": {
@@ -223,7 +216,6 @@
       "guardianCreatureId": "00000000-0000-0000-0000-000000000063",
       "guardianName": "Kodoku, the Poisoned Vessel",
       "guardianAbilityProfileId": "monster.kodoku,_the_poisoned_vessel",
-      "guardianTags": ["Poison", "Summon", "HealingReduction", "Attrition"],
       "requiredSlots": 10,
       "recommendedPowerRating": 184,
       "guardianScaling": {
@@ -255,7 +247,6 @@
       "guardianCreatureId": "00000000-0000-0000-0000-000000000062",
       "guardianName": "Ni, the Ninefold",
       "guardianAbilityProfileId": "monster.ni,_the_ninefold",
-      "guardianTags": ["Physical", "Magical", "Illusion", "Summon"],
       "requiredSlots": 10,
       "recommendedPowerRating": 186,
       "guardianScaling": {
@@ -282,7 +273,6 @@
       "guardianCreatureId": "00000000-0000-0000-0000-000000000065",
       "guardianName": "The Mad King",
       "guardianAbilityProfileId": "monster.the_mad_king",
-      "guardianTags": ["Physical", "Lifesteal", "Berserker", "Sovereign"],
       "requiredSlots": 15,
       "recommendedPowerRating": 193,
       "guardianScaling": {

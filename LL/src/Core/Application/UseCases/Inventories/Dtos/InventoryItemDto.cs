@@ -8,6 +8,7 @@ public class InventoryItemDto : IMapFrom<InventoryItem>
     public Guid ItemInstanceId { get; set; }
     public ItemInstanceDto ItemInstance { get; set; } = null!;
     public int Quantity { get; set; }
+    public bool IsFavorite { get; set; }
 
     /// <summary>
     /// Projected from <see cref="InventoryItem.IsNew"/>: a crafted item the owner has not

@@ -1,5 +1,6 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Administration;
 using Application.MediatR.Markers;
 using Application.UseCases.Users.Events;
 using Common.Authorization.Security;
@@ -15,13 +16,20 @@ public class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginCommand, Res
     private readonly IJwtGenerator _jwt;
     private readonly ICharacterService _characterService;
     private readonly IMediator _publisher;
+    private readonly IAccountAccessPolicy _accountAccess;
 
-    public GoogleLoginCommandHandler(IGoogleAuthService google, IJwtGenerator jwt, ICharacterService characterService, IMediator publisher)
+    public GoogleLoginCommandHandler(
+        IGoogleAuthService google,
+        IJwtGenerator jwt,
+        ICharacterService characterService,
+        IMediator publisher,
+        IAccountAccessPolicy accountAccess)
     {
         _google = google;
         _jwt = jwt;
         _characterService = characterService;
         _publisher = publisher;
+        _accountAccess = accountAccess;
     }
 
     public async Task<Response<Tokens>> Handle(GoogleLoginCommand req, CancellationToken cancellationToken)
@@ -30,6 +38,8 @@ public class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginCommand, Res
         if (googleLoginResult == null) return Response<Tokens>.Fail("Gmail validation failed.");
 
         var (user, isNew, characterName) = googleLoginResult;
+        if (await _accountAccess.GetActiveBanAsync(user.Id, cancellationToken) is not null)
+            return Response<Tokens>.Fail("This account is suspended.");
         // if brand‑new, create a character
         if (isNew)
             await _publisher.Publish(new UserCreatedEvent(user.Id, characterName ?? user.Username), cancellationToken);

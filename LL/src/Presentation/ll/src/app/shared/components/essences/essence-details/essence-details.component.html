@@ -31,7 +31,10 @@
       Cooldown:
       {{ essence.active.cooldown | ticksToSeconds }} seconds
     </p>
-    <app-ability-tags [tags]="essence.active.tags"></app-ability-tags>
+    <app-ability-tags
+      [targets]="essence.active.targets"
+      [tags]="essence.active.tags"
+    ></app-ability-tags>
   </div>
 
   <div class="border-t border-primary/20 pt-2">
@@ -50,6 +53,9 @@
       [description]="essence.passive.description"
       [effects]="essence.passive.effects"
     ></app-essence-description>
-    <app-ability-tags [tags]="essence.passive.tags"></app-ability-tags>
+    <app-ability-tags
+      [targets]="essence.passive.targets"
+      [tags]="essence.passive.tags"
+    ></app-ability-tags>
   </div>
 </div>

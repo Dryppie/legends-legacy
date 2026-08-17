@@ -27,6 +27,7 @@ public sealed class RefreshTokenReuseTests
             hasher: null!,
             characterService: null!,
             guildService: null!,
+            accountAccess: null!,
             Options.Create(new JwtOptions
             {
                 SigningKey = "TestSigningKeyTestSigningKeyTestSigningKeyTestSigningKey",

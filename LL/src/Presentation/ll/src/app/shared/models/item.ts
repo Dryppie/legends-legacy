@@ -21,7 +21,7 @@ export interface EquipmentInstance extends ItemInstance {
   quality: ItemQuality;
   baseRecipeId?: string | null;
   blueprintId?: string | null;
-    craftingDesign?: EquipmentCraftingDesignMetadata | null;
+  craftingDesign?: EquipmentCraftingDesignMetadata | null;
   tier: number;
   statModelVersion?: number;
   equipmentBase: Equipment;
@@ -163,7 +163,7 @@ export function essenceItemToEssence(item: EssenceItem): Essence {
       attackTypes: [],
       damageTypes: [],
       effectTags: [],
-      targeting: [],
+      targets: [],
       cooldown: 0,
       effects: [],
     },
@@ -174,7 +174,7 @@ export function essenceItemToEssence(item: EssenceItem): Essence {
       attackTypes: [],
       damageTypes: [],
       effectTags: [],
-      targeting: [],
+      targets: [],
       cooldown: 0,
       effects: [],
     },

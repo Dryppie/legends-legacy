@@ -1,6 +1,7 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Administration;
 using Common.Authorization.Security;
 using Common.Exceptions;
 using Common.Options;
@@ -21,6 +22,7 @@ public class JwtGenerator : IJwtGenerator
     private readonly ITokenHasher _hasher;
     private readonly ICharacterService _characterService;
     private readonly IGuildService _guildService;
+    private readonly IAccountAccessPolicy _accountAccess;
 
     private readonly JwtSecurityTokenHandler _handler = new();
     private readonly SymmetricSecurityKey _signingKey;
@@ -36,6 +38,7 @@ public class JwtGenerator : IJwtGenerator
         ITokenHasher hasher,
         ICharacterService characterService,
         IGuildService guildService,
+        IAccountAccessPolicy accountAccess,
         IOptions<JwtOptions> jwtOpt)
     {
         _repo = repo;
@@ -43,6 +46,7 @@ public class JwtGenerator : IJwtGenerator
         _hasher = hasher;
         _characterService = characterService;
         _guildService = guildService;
+        _accountAccess = accountAccess;
 
         var opt = jwtOpt.Value;
 
@@ -134,6 +138,11 @@ public class JwtGenerator : IJwtGenerator
 
         var user = await _userRepo.FindByIdAsync(userId, cancellationToken);
         if (user == null) return null;
+        if (await _accountAccess.GetActiveBanAsync(userId, cancellationToken) is not null)
+        {
+            await _repo.RevokeActiveTokensForUserAsync(userId, cancellationToken);
+            return null;
+        }
 
         var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
         if (character == null) return null;

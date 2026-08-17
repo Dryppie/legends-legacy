@@ -165,7 +165,7 @@ describe('InventoryComponent quest presentation', () => {
     );
     component.enterScrapMode();
 
-    component.setInventorySort({ main: 'Quality', sub: null });
+    component.setInventorySort('Quality');
 
     expect(component.filteredItems.map((item) => item.itemInstance.id)).toEqual(
       ['masterwork', 'fine', 'standard'],
@@ -315,8 +315,16 @@ describe('InventoryComponent quest presentation', () => {
     );
 
     expect(component.inventorySort).toBe('Gear Power');
+    expect(component.inventorySortDirection).toBe('desc');
     expect(component.filteredItems.map((item) => item.itemInstance.id)).toEqual(
       ['high-power', 'low-power'],
+    );
+
+    component.setInventorySort('Gear Power');
+
+    expect(component.inventorySortDirection).toBe('asc');
+    expect(component.filteredItems.map((item) => item.itemInstance.id)).toEqual(
+      ['low-power', 'high-power'],
     );
   });
 

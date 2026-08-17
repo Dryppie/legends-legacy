@@ -893,9 +893,16 @@
                             >
                               {{ essence.active.name }}
                             </div>
-                            <p class="mt-1 text-[11px] leading-4 text-zinc-300">
-                              {{ essence.active.description }}
-                            </p>
+                            <app-essence-description
+                              class="mt-1 block text-[11px] leading-4 text-zinc-300"
+                              [abilityName]="essence.active.name"
+                              [description]="essence.active.description"
+                              [effects]="essence.active.effects"
+                            ></app-essence-description>
+                            <app-ability-tags
+                              [targets]="essence.active.targets"
+                              [tags]="essence.active.tags"
+                            ></app-ability-tags>
                           </div>
                           <div
                             class="rounded border border-light_gray/15 bg-white/[0.025] p-2.5"
@@ -908,9 +915,16 @@
                             >
                               {{ essence.passive.name }}
                             </div>
-                            <p class="mt-1 text-[11px] leading-4 text-zinc-300">
-                              {{ essence.passive.description }}
-                            </p>
+                            <app-essence-description
+                              class="mt-1 block text-[11px] leading-4 text-zinc-300"
+                              [abilityName]="essence.passive.name"
+                              [description]="essence.passive.description"
+                              [effects]="essence.passive.effects"
+                            ></app-essence-description>
+                            <app-ability-tags
+                              [targets]="essence.passive.targets"
+                              [tags]="essence.passive.tags"
+                            ></app-ability-tags>
                           </div>
                         </div>
                       </ng-container>

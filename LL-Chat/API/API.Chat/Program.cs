@@ -24,6 +24,13 @@ config
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 
+if (!builder.Environment.IsDevelopment() &&
+    string.IsNullOrWhiteSpace(config["InternalModeration:Secret"]))
+{
+    throw new InvalidOperationException(
+        "InternalModeration:Secret is required outside Development.");
+}
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddControllers().AddJsonOptions(options =>

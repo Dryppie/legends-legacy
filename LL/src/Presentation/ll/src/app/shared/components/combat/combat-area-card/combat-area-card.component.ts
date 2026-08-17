@@ -28,6 +28,7 @@ export class CombatAreaCardComponent implements OnInit {
 
   @Input() area!: Area;
   @Input() isLastInRow = false;
+  @Input() isActiveBattle = false;
 
   readonly isStartingIdleCombat;
   isLocked = true;

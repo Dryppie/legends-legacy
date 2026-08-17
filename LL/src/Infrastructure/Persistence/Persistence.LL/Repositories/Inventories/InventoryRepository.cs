@@ -42,10 +42,36 @@ public class InventoryRepository : IInventoryRepository
         return inventory;
     }
 
-    public async Task AddItemsToInventory(
+    public Task AddItemsToInventory(
         Guid characterId,
         List<InventoryItem> items,
         string acquisitionSource,
+        CancellationToken cancellationToken) =>
+        AddItemsToInventoryCore(
+            characterId,
+            items,
+            acquisitionSource,
+            null,
+            cancellationToken);
+
+    public Task AddItemsToInventory(
+        Guid characterId,
+        List<InventoryItem> items,
+        string acquisitionSource,
+        Guid correlationId,
+        CancellationToken cancellationToken) =>
+        AddItemsToInventoryCore(
+            characterId,
+            items,
+            acquisitionSource,
+            correlationId,
+            cancellationToken);
+
+    private async Task AddItemsToInventoryCore(
+        Guid characterId,
+        List<InventoryItem> items,
+        string acquisitionSource,
+        Guid? correlationId,
         CancellationToken cancellationToken)
     {
         var normalizedSource = string.IsNullOrWhiteSpace(acquisitionSource)
@@ -149,7 +175,7 @@ public class InventoryRepository : IInventoryRepository
             {
                 EventType = EconomyEventType.ItemAcquisition,
                 AssetType = EconomyAssetType.Item,
-                ReferenceId = destinationItemInstanceId,
+                ReferenceId = correlationId ?? destinationItemInstanceId,
                 RecipientAccountId = recipient?.UserId,
                 RecipientCharacterId = characterId,
                 RecipientAccountCreatedUtc = recipientAccountCreatedUtc,
@@ -275,6 +301,24 @@ public class InventoryRepository : IInventoryRepository
             return false;
 
         inventoryItem.SeenAtUtc ??= DateTimeOffset.UtcNow;
+        return true;
+    }
+
+    public async Task<bool> SetItemFavoriteAsync(
+        Guid characterId,
+        Guid itemInstanceId,
+        bool isFavorite,
+        CancellationToken cancellationToken)
+    {
+        var inventoryItem = await _context.InventoryItems
+            .FirstOrDefaultAsync(
+                x => x.InventoryId == characterId && x.ItemInstanceId == itemInstanceId,
+                cancellationToken);
+
+        if (inventoryItem is null)
+            return false;
+
+        inventoryItem.IsFavorite = isFavorite;
         return true;
     }
 

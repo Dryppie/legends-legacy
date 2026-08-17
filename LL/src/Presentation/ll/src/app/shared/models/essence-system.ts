@@ -28,7 +28,7 @@ export interface EssenceAbilityDto {
   name: string;
   description: string;
   cooldownSeconds: number;
-  targeting: string;
+  targets: string[];
   tags: string[];
   effects: EssenceEffectDto[];
 }

@@ -73,12 +73,25 @@ public sealed class WorldTowerServiceTests
         Assert.Equal(
             [.. new[] { 25, 50, 75, 100 }.Take(expectedCount)],
             floor.Guardian.KnownReveals.Select(reveal => reveal.Threshold));
+        string[] expectedTags = expectedCount switch
+        {
+            0 => [],
+            1 => ["Physical", "Melee"],
+            2 => ["Physical", "Melee", "Magical", "Area"],
+            3 => ["Physical", "Melee", "Magical", "Area", "Debuff"],
+            _ => ["Physical", "Melee", "Magical", "Area", "Debuff", "Defensive"]
+        };
+        Assert.Equal(expectedTags, floor.Guardian.Tags);
         if (expectedCount > 0)
         {
+            Assert.Equal(
+                ["Physical", "Melee"],
+                floor.Guardian.KnownReveals[0].Tags);
             Assert.All(floor.Guardian.KnownReveals.Take(Math.Min(3, expectedCount)), reveal =>
             {
                 Assert.Equal(AbilitySpecKind.Active, reveal.Kind);
                 Assert.NotNull(reveal.CooldownSeconds);
+                Assert.NotEmpty(reveal.Tags);
             });
         }
         if (expectedCount == 4)
@@ -2075,10 +2088,10 @@ public sealed class WorldTowerServiceTests
     {
         private static readonly AbilityCatalog Catalog = new(
             [
-                CreateAbility("ability.test.guardian.first", "First Strike", AbilitySpecKind.Active, 50),
-                CreateAbility("ability.test.guardian.second", "Second Strike", AbilitySpecKind.Active, 100),
-                CreateAbility("ability.test.guardian.third", "Third Strike", AbilitySpecKind.Active, 150),
-                CreateAbility("ability.test.guardian.passive", "Final Secret", AbilitySpecKind.Passive, 0)
+                CreateAbility("ability.test.guardian.first", "First Strike", AbilitySpecKind.Active, 50, "Physical", "Melee"),
+                CreateAbility("ability.test.guardian.second", "Second Strike", AbilitySpecKind.Active, 100, "Magical", "Area"),
+                CreateAbility("ability.test.guardian.third", "Third Strike", AbilitySpecKind.Active, 150, "Debuff"),
+                CreateAbility("ability.test.guardian.passive", "Final Secret", AbilitySpecKind.Passive, 0, "Defensive")
             ],
             [],
             [],
@@ -2090,14 +2103,16 @@ public sealed class WorldTowerServiceTests
             string id,
             string name,
             AbilitySpecKind kind,
-            int cooldownTicks) =>
+            int cooldownTicks,
+            params string[] tags) =>
             new()
             {
                 Id = id,
                 Name = name,
                 Description = $"{name} description.",
                 Kind = kind,
-                CooldownTicks = cooldownTicks
+                CooldownTicks = cooldownTicks,
+                Tags = [.. tags]
             };
     }
 

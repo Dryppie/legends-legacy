@@ -7,6 +7,8 @@ import { EssenceItemViewService } from '../../../core/services/api/essences/esse
 import { BaseItemComponent } from '../../../shared/components/base-item/base-item.component';
 import { CharacterTagComponent } from '../../../shared/components/character/character-tag/character-tag.component';
 import { DefaultHeaderComponent } from '../../../shared/components/default-header/default-header.component';
+import { AbilityTagsComponent } from '../../../shared/components/essences/ability-tags/ability-tags.component';
+import { EssenceDescriptionComponent } from '../../../shared/components/essences/essence-description/essence-description.component';
 import { Essence } from '../../../shared/models/essence';
 import { EssenceItem } from '../../../shared/models/item';
 import {
@@ -41,6 +43,8 @@ type QuestSortMode = 'Order' | 'Progress';
     BaseItemComponent,
     CharacterTagComponent,
     DefaultHeaderComponent,
+    AbilityTagsComponent,
+    EssenceDescriptionComponent,
   ],
   templateUrl: './quest-journal-page.component.html',
 })

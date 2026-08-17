@@ -275,6 +275,7 @@
               Cooldown: {{ essence.activeAbility.cooldownSeconds }}s
             </p>
             <app-ability-tags
+              [targets]="essence.activeAbility.targets"
               [tags]="essence.activeAbility.tags"
             ></app-ability-tags>
           </article>
@@ -292,6 +293,7 @@
               [effects]="essence.passiveAbility.effects"
             ></app-essence-description>
             <app-ability-tags
+              [targets]="essence.passiveAbility.targets"
               [tags]="essence.passiveAbility.tags"
             ></app-ability-tags>
           </article>

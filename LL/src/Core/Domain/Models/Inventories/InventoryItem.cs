@@ -20,6 +20,12 @@ public class InventoryItem
     public DateTimeOffset? SeenAtUtc { get; set; }
 
     /// <summary>
+    /// Whether the owning character has marked this inventory row as a favorite.
+    /// Stored on the row so the preference is owner-specific when items change hands.
+    /// </summary>
+    public bool IsFavorite { get; set; }
+
+    /// <summary>
     /// True while this is a crafted item the owner has not inspected yet.
     /// Widening the feature to other acquisition sources is a change to this predicate alone.
     /// </summary>

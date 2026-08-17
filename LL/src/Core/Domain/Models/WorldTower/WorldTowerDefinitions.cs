@@ -10,7 +10,6 @@ public sealed class TowerFloorDefinition
     public Guid GuardianCreatureId { get; init; }
     public string GuardianName { get; init; } = string.Empty;
     public string GuardianAbilityProfileId { get; init; } = string.Empty;
-    public IReadOnlyList<string> GuardianTags { get; init; } = [];
     public int RequiredSlots { get; init; }
     public int RecommendedPowerRating { get; init; }
     public TowerGuardianScalingDefinition GuardianScaling { get; init; } = new();
