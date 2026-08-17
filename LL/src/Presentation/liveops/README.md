@@ -8,12 +8,29 @@ Prerequisites:
 
 - .NET SDK matching the repository target framework
 - Node.js and npm
-- the normal local database/configuration required by `API.LL`
+- the normal local PostgreSQL databases used by `API.LL` and `API.Chat`
 
-From the repository root, start the private API:
+The Development configuration uses the repository's existing local Game database
+(`legends_legacy` on `localhost:5432`) and a development-only Chat moderation secret.
+Start the local services with their `http` launch profiles so LiveOps can use the
+preconfigured addresses.
+
+From the repository root, start Game so its migrations and local data are ready:
 
 ```powershell
-dotnet run --project LL/src/API/API.LiveOps/API.LiveOps.csproj --urls http://localhost:7085
+dotnet run --project LL/src/API/API.LL/API.LL.csproj --launch-profile http
+```
+
+Start Chat in another terminal:
+
+```powershell
+dotnet run --project LL-Chat/API/API.Chat/API.Chat.csproj --launch-profile http
+```
+
+Then start the private API:
+
+```powershell
+dotnet run --project LL/src/API/API.LiveOps/API.LiveOps.csproj --launch-profile http
 ```
 
 In another terminal, install and start the dashboard:
@@ -27,7 +44,17 @@ npm start
 
 Open `http://localhost:4400`. Select **Sign in as operator**. In Development, the loopback-only development operator is enabled by `API.LiveOps/appsettings.Development.json`; it cannot pass the production startup checks.
 
-Chat status and mute actions require the Chat service plus matching `Chat:Moderation:Secret` configuration. Player account and item operations remain available when Chat is offline, while the dashboard shows Chat as unavailable.
+Chat status and mute actions require the Chat service. The checked-in Development
+settings give Chat's `InternalModeration:Secret` launch-profile variable and LiveOps'
+`Chat:Moderation:Secret` the same development-only value. Player account and item
+operations remain available when Chat is offline, while the dashboard shows Chat
+as unavailable.
+
+If player search reports that the connection string is not initialized, restart
+`API.LiveOps` with `ASPNETCORE_ENVIRONMENT=Development` (the `http` launch profile
+sets this automatically). If your local PostgreSQL credentials differ from the
+repository defaults, override `ConnectionStrings__LegendsLegacyDB` with a user
+secret or environment variable rather than editing committed production settings.
 
 ## Production build
 

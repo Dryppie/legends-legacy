@@ -274,11 +274,17 @@ This mode is for local data only. It must never be accepted as a way to access a
 Use local user secrets or environment variables; do not commit secrets.
 
 ```powershell
-$env:InternalModeration__Secret = "local-liveops-chat-secret"
-$env:Chat__Moderation__BaseUrl = "https://localhost:7095/"
-$env:Chat__Moderation__Secret = "local-liveops-chat-secret"
+$env:InternalModeration__Secret = "local-development-liveops-chat-secret"
+$env:Chat__Moderation__BaseUrl = "http://localhost:5179/chat/"
+$env:Chat__Moderation__Secret = "local-development-liveops-chat-secret"
 $env:LiveOps__DevelopmentOperator__Enabled = "true"
 ```
+
+These values are already present in the checked-in Development configuration and
+are shown here only as examples for explicit overrides. Both services must receive
+the exact same moderation secret. The local Game database connection is also
+preconfigured to match `API.LL`; override `ConnectionStrings__LegendsLegacyDB`
+when using different local PostgreSQL credentials.
 
 ### Processes
 
