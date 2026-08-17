@@ -57,6 +57,7 @@ import { CraftingService } from '../../../../core/services/api/crafting/crafting
 import { InventoryService } from '../../../../core/services/api/inventory/inventory.service';
 import { GuildStateService } from '../../../../core/services/api/guild/guild-state.service';
 import { finalize } from 'rxjs';
+import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
 type InventoryCollectionView = 'Equipment' | 'Stock';
 type StockCategory =
   | 'Resources'
@@ -180,6 +181,7 @@ export class InventoryComponent implements OnInit {
     private readonly craftingService?: CraftingService,
     private readonly inventoryService?: InventoryService,
     private readonly guildState?: GuildStateService,
+    private readonly characterState?: CharacterStateService,
   ) {
     effect(() => {
       const objectiveType = this.questState.pinnedOnboardingObjective()?.type;
@@ -849,7 +851,7 @@ export class InventoryComponent implements OnInit {
 
   equipItem(item: InventoryItem, slotType?: EquipmentSlotType): void {
     const equipment = this.equipmentInstance(item);
-    if (!equipment || !this.equipmentState) return;
+    if (!equipment || !this.equipmentState || !this.canEquipItem(item)) return;
 
     this.equipmentState.equip(
       equipment,
@@ -868,6 +870,15 @@ export class InventoryComponent implements OnInit {
 
   get isEquipPending(): boolean {
     return this.equipmentState?.loading() ?? false;
+  }
+
+  canEquipItem(item: InventoryItem): boolean {
+    const equipment = this.equipmentInstance(item);
+    if (!equipment) return false;
+
+    const characterLevel =
+      this.characterState?.currentCharacter()?.level ?? Number.MAX_SAFE_INTEGER;
+    return characterLevel >= (equipment.requiredLevel ?? 1);
   }
 
   itemTypeLabel(item: InventoryItem): string {

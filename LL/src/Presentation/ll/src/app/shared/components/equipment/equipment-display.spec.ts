@@ -135,6 +135,14 @@ describe('mapInstanceToDisplay', () => {
     expect(displayItem.maximumPotential).toBe(380);
     expect(displayItem.attributeRollRanges).toEqual(item.rollRange.attributes);
   });
+
+  it('maps the character level required to equip the item', () => {
+    const item = equipmentInstance('tier-two-item', AttributeType.Armor, 100);
+    item.tier = 2;
+    item.requiredLevel = 50;
+
+    expect(mapInstanceToDisplay(item).requiredLevel).toBe(50);
+  });
 });
 
 describe('EquipmentDisplayComponent', () => {
@@ -391,6 +399,7 @@ function display(
     })),
     itemBudget: 0,
     itemBudgetTier: 1,
+    requiredLevel: 1,
     statModelVersion: 15,
     toolBonuses: [],
     toolAffixes: [],

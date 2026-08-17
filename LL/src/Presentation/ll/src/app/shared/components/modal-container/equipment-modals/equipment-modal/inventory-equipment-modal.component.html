@@ -123,6 +123,12 @@
   <div
     class="mt-4 flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-primary/20 pt-3"
   >
+    <span
+      *ngIf="!meetsLevelRequirement"
+      class="ll-state ll-state-danger mr-auto"
+    >
+      Requires character level {{ requiredLevel }}
+    </span>
     <span *ngIf="requiresHandSelection" class="mr-auto text-xs text-secondary">
       Equipping to {{ slotLabel(selectedSlotType) }}
     </span>
@@ -139,7 +145,7 @@
       type="button"
       class="ll-button ll-button-primary"
       data-tour="tutorial-equipment-equip"
-      [disabled]="equipmentState.loading()"
+      [disabled]="equipmentState.loading() || !meetsLevelRequirement"
       (click)="onEquip()"
     >
       Equip<span *ngIf="requiresHandSelection">

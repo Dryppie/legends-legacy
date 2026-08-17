@@ -5,7 +5,7 @@ namespace EssenceSystem.Tests;
 public sealed class CraftingRegionOneContentTests
 {
     [Fact]
-    public void GatheringCatalog_UsesOnlyOreWoodAndHideAsStandardMaterials()
+    public void GatheringCatalog_ProvidesMetalWoodAndHideForTiersOneAndTwo()
     {
         var materials = ReadArray("crafting/materials.json");
         var standardMaterials = materials
@@ -13,14 +13,15 @@ public sealed class CraftingRegionOneContentTests
             .ToList();
 
         Assert.Equal(
-            ["ore", "rawhide", "wood"],
+            ["bloodwood", "copper_ore", "ore", "rawhide", "thick_hide", "wood"],
             standardMaterials
                 .Select(material => material?["itemId"]?.GetValue<string>() ?? string.Empty)
                 .Order(StringComparer.OrdinalIgnoreCase));
         Assert.Equal(
-            ["Hide", "Metal", "Wood"],
+            ["Hide:1", "Hide:2", "Metal:1", "Metal:2", "Wood:1", "Wood:2"],
             standardMaterials
-                .Select(material => material?["family"]?.GetValue<string>() ?? string.Empty)
+                .Select(material =>
+                    $"{material?["family"]?.GetValue<string>()}:{material?["tier"]?.GetValue<int>()}")
                 .Order(StringComparer.OrdinalIgnoreCase));
 
         var allowedFamilies = new HashSet<string>(["Metal", "Wood", "Hide"], StringComparer.OrdinalIgnoreCase);
@@ -81,7 +82,7 @@ public sealed class CraftingRegionOneContentTests
     }
 
     [Fact]
-    public void RegionOneDungeons_SourceEveryStandardCraftingMaterial()
+    public void RegionOneDungeons_SourceEveryTierOneStandardCraftingMaterial()
     {
         var materials = ReadArray("crafting/materials.json");
         var dungeons = ReadDungeonDifficulties();
@@ -94,7 +95,9 @@ public sealed class CraftingRegionOneContentTests
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var missing = materials
-            .Where(material => material?["isStandardTieredMaterial"]?.GetValue<bool>() == true)
+            .Where(material =>
+                material?["isStandardTieredMaterial"]?.GetValue<bool>() == true &&
+                material?["tier"]?.GetValue<int>() == 1)
             .Select(material => material?["itemId"]?.GetValue<string>() ?? string.Empty)
             .Where(itemId => !gatheredItemIds.Contains(itemId))
             .ToList();
@@ -214,38 +217,40 @@ public sealed class CraftingRegionOneContentTests
             .ToList();
         var materials = ReadArray("crafting/materials.json")
             .Where(material => material?["isStandardTieredMaterial"]?.GetValue<bool>() == true)
+            .ToList();
+        var rewardTables = ChildArray(ReadDocument("rewards/reward-tables.json"), "rewardTables")
             .ToDictionary(
-                material => material?["family"]?.GetValue<string>() ?? string.Empty,
-                material => string.Join(" ", ChildArray(material, "sources").Select(source => source?.GetValue<string>())),
+                table => table?["id"]?.GetValue<string>() ?? string.Empty,
+                table => ChildArray(table, "rolls")
+                    .SelectMany(roll => ChildArray(roll, "entries"))
+                    .Select(entry => entry?["itemId"]?.GetValue<string>() ?? string.Empty)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase),
                 StringComparer.OrdinalIgnoreCase);
-        var familyByGatheringType = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["Mining"] = "Metal",
-            ["Woodcutting"] = "Wood",
-            ["Skinning"] = "Hide"
-        };
 
-        Assert.All(materials.Values, source =>
-            Assert.DoesNotContain("Cinder Bazaar", source, StringComparison.OrdinalIgnoreCase));
-
-        foreach (var (gatheringType, family) in familyByGatheringType)
+        foreach (var material in materials)
         {
+            var itemId = material?["itemId"]?.GetValue<string>() ?? string.Empty;
+            var source = string.Join(
+                " ",
+                ChildArray(material, "sources").Select(value => value?.GetValue<string>()));
             var expectedAreaNames = areas
                 .Where(area => ChildArray(area, "gatheringNodes").Any(node =>
-                    string.Equals(
-                        node?["type"]?.GetValue<string>(),
-                        gatheringType,
-                        StringComparison.OrdinalIgnoreCase)))
+                {
+                    var rewardTableId = node?["rewardTableId"]?.GetValue<string>() ?? string.Empty;
+                    return rewardTables.TryGetValue(rewardTableId, out var rewardItemIds) &&
+                           rewardItemIds.Contains(itemId);
+                }))
                 .Select(area => area?["name"]?.GetValue<string>() ?? string.Empty)
                 .Order(StringComparer.OrdinalIgnoreCase)
                 .ToArray();
             var listedAreaNames = areas
                 .Select(area => area?["name"]?.GetValue<string>() ?? string.Empty)
-                .Where(areaName => materials[family].Contains(areaName, StringComparison.OrdinalIgnoreCase))
+                .Where(areaName => source.Contains(areaName, StringComparison.OrdinalIgnoreCase))
                 .Order(StringComparer.OrdinalIgnoreCase)
                 .ToArray();
 
-            Assert.InRange(expectedAreaNames.Length, 4, 5);
+            Assert.DoesNotContain("Cinder Bazaar", source, StringComparison.OrdinalIgnoreCase);
+            Assert.NotEmpty(expectedAreaNames);
             Assert.Equal(expectedAreaNames, listedAreaNames);
         }
     }
@@ -255,9 +260,19 @@ public sealed class CraftingRegionOneContentTests
     {
         const double encountersPerDay = 24 * 60 * 60 / 10d;
         var recipes = ReadArray("crafting/base-recipes.json");
-        var averageTierOneRecipeCost = recipes.Average(recipe =>
-            ChildArray(recipe, "materialRequirements")
-                .Sum(requirement => requirement?["baseAmount"]?.GetValue<int>() ?? 0));
+        var averageRecipeCostByTier = new[] { 1, 2 }.ToDictionary(
+            tier => tier,
+            tier => recipes.Average(recipe =>
+                ChildArray(recipe, "materialRequirements")
+                    .Sum(requirement =>
+                        (requirement?["baseAmount"]?.GetValue<int>() ?? 0) +
+                        ((requirement?["amountPerTier"]?.GetValue<int>() ?? 0) * (tier - 1)))));
+        var materialTierByItemId = ReadArray("crafting/materials.json")
+            .Where(material => material?["isStandardTieredMaterial"]?.GetValue<bool>() == true)
+            .ToDictionary(
+                material => material?["itemId"]?.GetValue<string>() ?? string.Empty,
+                material => material?["tier"]?.GetValue<int>() ?? 1,
+                StringComparer.OrdinalIgnoreCase);
         var rewardTables = ChildArray(ReadDocument("rewards/reward-tables.json"), "rewardTables")
             .ToDictionary(
                 table => table?["id"]?.GetValue<string>() ?? string.Empty,
@@ -282,11 +297,24 @@ public sealed class CraftingRegionOneContentTests
                      (quantity?["max"]?.GetValue<int>() ?? 0)) / 2d)
                 .ToArray();
             var averageYield = Assert.Single(quantities);
+            var rewardItemId = Assert.Single(
+                ChildArray(rewardTable, "rolls")
+                    .SelectMany(roll => ChildArray(roll, "entries"))
+                    .Select(entry => entry?["itemId"]?.GetValue<string>() ?? string.Empty));
+            Assert.True(materialTierByItemId.TryGetValue(rewardItemId, out var materialTier));
             var procChance = node?["procChance"]?.GetValue<double>() ?? 0;
-            var expectedCrafts = encountersPerDay * procChance * averageYield / averageTierOneRecipeCost;
+            var expectedCrafts = encountersPerDay * procChance * averageYield / averageRecipeCostByTier[materialTier];
 
             Assert.InRange(expectedCrafts, 31.2, 32.8);
         });
+    }
+
+    [Fact]
+    public void TierTwoCraftingQuest_IsAvailableAtLevelFifty()
+    {
+        var quest = ReadDocument("quests/side-quests/made-by-your-own-hand.v1.json");
+
+        Assert.Equal(50, quest["availability"]?["minimumLevel"]?.GetValue<int>());
     }
 
     [Fact]

@@ -24,6 +24,7 @@ export interface EquipmentInstance extends ItemInstance {
   blueprintId?: string | null;
   craftingDesign?: EquipmentCraftingDesignMetadata | null;
   tier: number;
+  requiredLevel?: number;
   statModelVersion?: number;
   equipmentBase: Equipment;
   potential?: number;

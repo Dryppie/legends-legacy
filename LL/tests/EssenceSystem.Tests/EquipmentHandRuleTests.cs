@@ -2,6 +2,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Professions.Crafting.V2;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Repositories.Equipments;
@@ -88,6 +89,8 @@ public sealed class EquipmentHandRuleTests
             sword,
             shield,
             [greatsword]);
+        sword.IsFavorite = true;
+        character.Inventory!.InventoryItems.Single().IsFavorite = true;
         db.Characters.Add(character);
         await db.SaveChangesAsync();
         var repository = new EquipmentSlotRepository(db);
@@ -102,13 +105,13 @@ public sealed class EquipmentHandRuleTests
         var slots = await repository.GetEquipmentSlotsByEntityIdAsync(characterId, CancellationToken.None);
         Assert.Equal(greatsword.Id, slots.Single(slot => slot.EquipmentSlotType == EquipmentSlotType.MainHand).EquipmentInstanceId);
         Assert.Equal(greatsword.Id, slots.Single(slot => slot.EquipmentSlotType == EquipmentSlotType.OffHand).EquipmentInstanceId);
-        var inventoryIds = await db.InventoryItems
+        Assert.True(slots.Single(slot => slot.EquipmentSlotType == EquipmentSlotType.MainHand).EquipmentInstance!.IsFavorite);
+        var inventoryItems = await db.InventoryItems
             .Where(item => item.InventoryId == characterId)
-            .Select(item => item.ItemInstanceId)
             .ToListAsync();
-        Assert.Contains(sword.Id, inventoryIds);
-        Assert.Contains(shield.Id, inventoryIds);
-        Assert.DoesNotContain(greatsword.Id, inventoryIds);
+        Assert.Contains(inventoryItems, item => item.ItemInstanceId == sword.Id && item.IsFavorite);
+        Assert.Contains(inventoryItems, item => item.ItemInstanceId == shield.Id);
+        Assert.DoesNotContain(inventoryItems, item => item.ItemInstanceId == greatsword.Id);
     }
 
     [Fact]
@@ -198,6 +201,36 @@ public sealed class EquipmentHandRuleTests
         await db.SaveChangesAsync();
 
         Assert.True(sword.IsFavorite);
+    }
+
+    [Fact]
+    public async Task TierTwoEquipmentRequiresCharacterLevelFifty()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var tierTwoSword = Equipment("tier-two-sword", EquipmentType.OneHanded);
+        tierTwoSword.Tier = 2;
+        var character = CharacterWithHands(characterId, null, null, [tierTwoSword]);
+        character.Level = 49;
+        db.Characters.Add(character);
+        await db.SaveChangesAsync();
+        var repository = new EquipmentSlotRepository(db);
+
+        Assert.Equal(50, EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(2));
+        Assert.False(await repository.EquipEquipmentAsync(
+            characterId,
+            tierTwoSword.Id,
+            EquipmentSlotType.MainHand,
+            CancellationToken.None));
+
+        character.Level = 50;
+        await db.SaveChangesAsync();
+
+        Assert.True(await repository.EquipEquipmentAsync(
+            characterId,
+            tierTwoSword.Id,
+            EquipmentSlotType.MainHand,
+            CancellationToken.None));
     }
 
     private static LLDbContext CreateDb()

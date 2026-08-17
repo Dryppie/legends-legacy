@@ -22,6 +22,17 @@ public sealed class CraftingCompositionContentTests
         Assert.Equal(31, provider.GetRecipes().Count);
         Assert.Equal(11, provider.GetBlueprints().Count);
         Assert.Equal(31, provider.GetRecipes().Select(recipe => recipe.OutputItemId).Distinct().Count());
+        Assert.All(provider.GetRecipes(), recipe =>
+        {
+            Assert.Equal(2, recipe.TierRange.Max);
+            Assert.Equal(1, recipe.MinimumProfessionLevel);
+        });
+        Assert.Equal("copper_ore", Assert.IsType<MaterialDefinition>(
+            provider.GetStandardMaterial(MaterialFamily.Metal, 2)).ItemId);
+        Assert.Equal("bloodwood", Assert.IsType<MaterialDefinition>(
+            provider.GetStandardMaterial(MaterialFamily.Wood, 2)).ItemId);
+        Assert.Equal("thick_hide", Assert.IsType<MaterialDefinition>(
+            provider.GetStandardMaterial(MaterialFamily.Hide, 2)).ItemId);
     }
 
     [Fact]
