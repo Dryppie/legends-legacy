@@ -495,7 +495,7 @@ public class CraftingService : ICraftingService
         CancellationToken cancellationToken)
     {
         temperingSummary.TotalItemsCrafted++;
-        actionDetails.CraftingQueueItems.Remove(current);
+        _craftingRepository.RemoveCompletedCraftingQueueItem(actionDetails, current);
         completedItems.Add(current.EquipmentInstance);
         await _inventoryService.AddItemInstanceBackToInventory(characterId, current.EquipmentInstance, cancellationToken);
     }

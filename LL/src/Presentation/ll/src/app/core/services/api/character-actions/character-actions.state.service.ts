@@ -8,7 +8,7 @@ import { CharacterActionType } from '../../../../shared/models/enums/characterAc
 import { CombatActionHandler } from './handlers/combat-action-handler';
 import { CraftingActionHandler } from './handlers/crafting-action-handler';
 import { CharacterActionsPollingService } from './helpers/characterActionsPollingService';
-import { catchError, finalize, Observable, of, tap } from 'rxjs';
+import { catchError, finalize, Observable, of, tap, throwError } from 'rxjs';
 import { CharacterActionsService } from './character-actions.service';
 import { CharacterActionTypePersistenceService } from './helpers/character-action-type-persistence.service';
 import { GameService } from '../../client-side/game/game.service';
@@ -243,7 +243,7 @@ export class CharacterActionsStateService {
             catchError((err) => {
               console.error('[Polling] Failed to fetch current action', err);
               this.setIdleCombatError(err);
-              return of(this._currentAction());
+              return throwError(() => err);
             }),
           ),
         ),

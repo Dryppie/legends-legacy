@@ -149,6 +149,34 @@ public sealed class CraftingQueueReorderingTests
     }
 
     [Fact]
+    public async Task Removing_a_completed_tempering_item_deletes_the_queue_row()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var queueItem = QueueItemWithEquipment(characterId, 0, "completed-test-sword");
+        queueItem.PausedForCharacterId = null;
+        var details = new CraftingActionDetails
+        {
+            CraftingQueueItems = [queueItem]
+        };
+        db.CharacterActions.Add(new CharacterAction
+        {
+            CharacterId = characterId,
+            UpdatedAt = DateTimeOffset.UtcNow,
+            ActionDetails = details
+        });
+        await db.SaveChangesAsync();
+
+        var repository = new CraftingRepository(db);
+        repository.RemoveCompletedCraftingQueueItem(details, queueItem);
+
+        Assert.Equal(EntityState.Deleted, db.Entry(queueItem).State);
+        Assert.Empty(details.CraftingQueueItems);
+        await db.SaveChangesAsync();
+        Assert.Empty(await db.CraftingQueueItems.ToListAsync());
+    }
+
+    [Fact]
     public async Task Removing_the_final_tempering_item_clears_the_schedule_immediately()
     {
         await using var db = CreateDb();

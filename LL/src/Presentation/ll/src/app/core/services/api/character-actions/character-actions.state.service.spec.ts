@@ -130,6 +130,33 @@ describe('CharacterActionsStateService', () => {
     expect(service.idleCombatError()).toBeNull();
   });
 
+  it('lets polling stop after a resolve error instead of re-emitting the overdue action', () => {
+    spyOn(console, 'error');
+    const overdueTempering: CharacterActionDto = {
+      ...combatAction(),
+      characterActionType: CharacterActionType.Crafting,
+      nextResolutionAtUtc: new Date(Date.now() - 1_000),
+      nextResolutionAt: new Date(Date.now() - 1_000),
+      revision: 'overdue-tempering-revision',
+    };
+    const resolveError = new Error('save failed');
+    actions.resolveCurrentAction.and.returnValue(
+      throwError(() => resolveError),
+    );
+    service.initializeFromBootstrap(overdueTempering);
+    const fetch = polling.start.calls.mostRecent().args[0];
+    let observedError: unknown;
+    let emittedAction = false;
+
+    fetch().subscribe({
+      next: () => (emittedAction = true),
+      error: (error) => (observedError = error),
+    });
+
+    expect(observedError).toBe(resolveError);
+    expect(emittedAction).toBeFalse();
+  });
+
   it('waits for the confirmed start response before opening combat', () => {
     const startResult = new Subject<CharacterActionDto>();
     actions.startCombat.and.returnValue(startResult.asObservable());

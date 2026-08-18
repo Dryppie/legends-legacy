@@ -16,6 +16,14 @@ public class CraftingRepository : ICraftingRepository
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
+    public void RemoveCompletedCraftingQueueItem(
+        CraftingActionDetails actionDetails,
+        CraftingQueueItem queueItem)
+    {
+        _dbContext.CraftingQueueItems.Remove(queueItem);
+        actionDetails.CraftingQueueItems.Remove(queueItem);
+    }
+
     public async Task<EquipmentInstance?> RemoveCraftingQueueItemAndReturnItemAsync(Guid characterId, Guid queueItemId, CancellationToken cancellationToken)
     {
         var characterAction = await _dbContext.CharacterActions

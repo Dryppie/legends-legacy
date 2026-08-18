@@ -1,8 +1,13 @@
 ﻿using Domain.Models.Items.Equipments;
 
+using Domain.Models.CharacterActions.CharacterActionDetails;
+
 namespace Domain.Models.Professions.Crafting;
 public interface ICraftingRepository
 {
+    void RemoveCompletedCraftingQueueItem(
+        CraftingActionDetails actionDetails,
+        CraftingQueueItem queueItem);
     Task<EquipmentInstance?> RemoveCraftingQueueItemAndReturnItemAsync(Guid characterId, Guid queueItemId, CancellationToken cancellationToken);
     Task<bool> MoveCraftingQueueItemAsync(
         Guid characterId,
