@@ -10,23 +10,23 @@ The objective is to reduce catch-up latency and allocation pressure without chan
 
 The following measurement was captured on 2026-08-18 from the local API's current Debug build. The prepared admin account resolved a complete 24-hour backlog.
 
-| Measurement | Result |
-| --- | ---: |
-| Total resolve duration | 20.16 seconds |
-| Encounters | 8,640 |
-| Internal batches | 9 |
-| Overall throughput | 429 encounters/second |
-| Simulation duration | 19.02 seconds (94.35%) |
-| Template preparation | 269.86 ms (1.34%) |
-| Progression application | 339.83 ms (1.69%) |
-| Final settlement | 321.50 ms (1.59%) |
-| Reward calculation | 172.28 ms (0.85%) |
-| Simulation allocation | 21.04 GiB |
-| Runtime allocation during request | 21.31 GiB |
-| Average CPU use | 1.35 logical cores |
-| GC pause time | 548.1 ms |
-| GC collections | 930 Gen 0, 9 Gen 1, 2 Gen 2 |
-| Working set | 279.8-359.8 MiB |
+| Measurement                       |                      Result |
+| --------------------------------- | --------------------------: |
+| Total resolve duration            |               20.16 seconds |
+| Encounters                        |                       8,640 |
+| Internal batches                  |                           9 |
+| Overall throughput                |       429 encounters/second |
+| Simulation duration               |      19.02 seconds (94.35%) |
+| Template preparation              |           269.86 ms (1.34%) |
+| Progression application           |           339.83 ms (1.69%) |
+| Final settlement                  |           321.50 ms (1.59%) |
+| Reward calculation                |           172.28 ms (0.85%) |
+| Simulation allocation             |                   21.04 GiB |
+| Runtime allocation during request |                   21.31 GiB |
+| Average CPU use                   |          1.35 logical cores |
+| GC pause time                     |                    548.1 ms |
+| GC collections                    | 930 Gen 0, 9 Gen 1, 2 Gen 2 |
+| Working set                       |             279.8-359.8 MiB |
 
 The raw counter capture is stored locally at `TestResults/idle-combat-24h.json`.
 
@@ -94,18 +94,18 @@ A verbose GC/allocation and sampled-CPU trace was captured while the admin chara
 
 The leading sampled allocation types were:
 
-| Type | Sampled allocation |
-| --- | ---: |
-| `Func<RuntimeCondition, bool>` | 4,019.10 MiB |
-| `List<CompiledTrigger>` | 1,788.70 MiB |
-| `FastCombatEngine` condition/summon closure | 1,186.18 MiB |
-| `ListWhereIterator<RuntimeCondition>` | 1,027.18 MiB |
-| `ListWhereIterator<RuntimeCombatant>` | 963.94 MiB |
-| `List<RuntimeStatus>` | 799.75 MiB |
-| `ListWhereIterator<RuntimeAbility>` | 797.32 MiB |
-| `CombatEvent` | 544.08 MiB |
-| `List<RuntimeBarrierContribution>` | 399.82 MiB |
-| `List<RuntimeCondition>` | 388.54 MiB |
+| Type                                        | Sampled allocation |
+| ------------------------------------------- | -----------------: |
+| `Func<RuntimeCondition, bool>`              |       4,019.10 MiB |
+| `List<CompiledTrigger>`                     |       1,788.70 MiB |
+| `FastCombatEngine` condition/summon closure |       1,186.18 MiB |
+| `ListWhereIterator<RuntimeCondition>`       |       1,027.18 MiB |
+| `ListWhereIterator<RuntimeCombatant>`       |         963.94 MiB |
+| `List<RuntimeStatus>`                       |         799.75 MiB |
+| `ListWhereIterator<RuntimeAbility>`         |         797.32 MiB |
+| `CombatEvent`                               |         544.08 MiB |
+| `List<RuntimeBarrierContribution>`          |         399.82 MiB |
+| `List<RuntimeCondition>`                    |         388.54 MiB |
 
 Generated closure types were mapped back to `ConditionsPass`, `EffectCanResolve`, `HasReachedSummonCap`, and `Publish`. The largest `RuntimeCondition` predicate and iterator allocations came from `RuntimeCombatant.GetConditionStacks`. Target selection, active-ability filtering, status/condition aggregation, and trigger publication also created high-frequency LINQ iterators and delegates.
 
@@ -131,18 +131,18 @@ The implementation preserves event-start combatant boundaries, deterministic can
 
 The prepared admin fixture was reset to the same 24-hour boundary and resolved with the optimized Debug build under the same counter collector. The API reported 8,641 processed actions; the idle-combat instrument recorded the comparable 8,640 combat encounters in 9 internal batches.
 
-| Measurement | Baseline | Optimized | Change |
-| --- | ---: | ---: | ---: |
-| Total resolve duration | 20.16 s | 14.10 s | **-30.1%** |
-| Simulation duration | 19.02 s | 13.14 s | **-30.9%** |
-| Simulation allocation | 21.04 GiB | 10.48 GiB | **-50.2%** |
-| Runtime allocation during request | 21.31 GiB | 10.08 GiB | **-52.7%** |
-| CPU time | 27.19 core-s | 17.05 core-s | **-37.3%** |
-| GC pause time | 548.1 ms | 343.4 ms | **-37.3%** |
-| Gen 0 collections | 930 | 582 | **-37.4%** |
-| Working-set range | 279.8-359.8 MiB | 242.8-297.8 MiB | lower |
-| Resolve time per encounter | 2.333 ms | 1.632 ms | **-30.1%** |
-| Simulation allocation per encounter | 2.493 MiB | 1.242 MiB | **-50.2%** |
+| Measurement                         |        Baseline |       Optimized |     Change |
+| ----------------------------------- | --------------: | --------------: | ---------: |
+| Total resolve duration              |         20.16 s |         14.10 s | **-30.1%** |
+| Simulation duration                 |         19.02 s |         13.14 s | **-30.9%** |
+| Simulation allocation               |       21.04 GiB |       10.48 GiB | **-50.2%** |
+| Runtime allocation during request   |       21.31 GiB |       10.08 GiB | **-52.7%** |
+| CPU time                            |    27.19 core-s |    17.05 core-s | **-37.3%** |
+| GC pause time                       |        548.1 ms |        343.4 ms | **-37.3%** |
+| Gen 0 collections                   |             930 |             582 | **-37.4%** |
+| Working-set range                   | 279.8-359.8 MiB | 242.8-297.8 MiB |      lower |
+| Resolve time per encounter          |        2.333 ms |        1.632 ms | **-30.1%** |
+| Simulation allocation per encounter |       2.493 MiB |       1.242 MiB | **-50.2%** |
 
 The direct HTTP stopwatch measured 14.17 seconds, consistent with the instrumented 14.10-second server duration. Encounter normalization removes the one-action difference in the API result count.
 
@@ -154,17 +154,17 @@ The optimized raw counter capture is stored locally at `TestResults/idle-combat-
 
 The admin fixture was reset again and captured in a finalized combined sampled-CPU and verbose-allocation trace. Profiling overhead increased the direct request measurement to 17.44 seconds, so that duration is not used as a performance comparison. The trace is used only to rank the remaining hot allocations and their call stacks.
 
-| Remaining allocation type | Sampled allocation | Dominant source |
-| --- | ---: | --- |
-| `List<CompiledTrigger>` | 2,031.95 MiB | `RuntimeAbility.Tick` cooldown-key snapshots |
-| `List<RuntimeStatus>` | 921.29 MiB | status tick and event-publication snapshots |
-| boxed `RuntimeCombatant` enumerators | 731.41 MiB | tick-phase `IReadOnlyList` traversal |
-| `ListWhereIterator<RuntimeCombatant>` | 653.26 MiB | regeneration and summon filtering |
-| `List<RuntimeBarrierContribution>` | 457.63 MiB | barrier tick snapshots |
-| `List<RuntimeCondition>` | 449.32 MiB | condition tick snapshots |
-| `List<RuntimeEffect>` | 434.47 MiB | active-effect tick snapshots |
-| `RuntimeCondition[]` | 340.34 MiB | materializing condition snapshots |
-| summon predicate/iterator objects | 554.38 MiB | expired summon-group filtering |
+| Remaining allocation type             | Sampled allocation | Dominant source                              |
+| ------------------------------------- | -----------------: | -------------------------------------------- |
+| `List<CompiledTrigger>`               |       2,031.95 MiB | `RuntimeAbility.Tick` cooldown-key snapshots |
+| `List<RuntimeStatus>`                 |         921.29 MiB | status tick and event-publication snapshots  |
+| boxed `RuntimeCombatant` enumerators  |         731.41 MiB | tick-phase `IReadOnlyList` traversal         |
+| `ListWhereIterator<RuntimeCombatant>` |         653.26 MiB | regeneration and summon filtering            |
+| `List<RuntimeBarrierContribution>`    |         457.63 MiB | barrier tick snapshots                       |
+| `List<RuntimeCondition>`              |         449.32 MiB | condition tick snapshots                     |
+| `List<RuntimeEffect>`                 |         434.47 MiB | active-effect tick snapshots                 |
+| `RuntimeCondition[]`                  |         340.34 MiB | materializing condition snapshots            |
+| summon predicate/iterator objects     |         554.38 MiB | expired summon-group filtering               |
 
 The resulting implementation:
 
@@ -181,18 +181,18 @@ The finalized trace is stored locally at `TestResults/idle-combat-24h-profile-af
 
 The same 24-hour admin fixture was resolved with lightweight counters after the reusable-buffer changes. The API reported 8,641 processed actions; the comparable combat instrumentation recorded 8,640 encounters in 9 batches.
 
-| Measurement | Original baseline | First optimization | Reusable buffers | Change from first | Change from baseline |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Total resolve duration | 20.16 s | 14.10 s | 11.06 s | **-21.6%** | **-45.2%** |
-| Simulation duration | 19.02 s | 13.14 s | 10.14 s | **-22.8%** | **-46.7%** |
-| Simulation allocation | 21.04 GiB | 10.48 GiB | 3.06 GiB | **-70.8%** | **-85.5%** |
-| Runtime allocation | 21.31 GiB | 10.08 GiB | 3.20 GiB | **-68.3%** | **-85.0%** |
-| CPU time | 27.19 core-s | 17.05 core-s | 12.55 core-s | **-26.4%** | **-53.9%** |
-| GC pause time | 548.1 ms | 343.4 ms | 253.7 ms | **-26.1%** | **-53.7%** |
-| Gen 0 collections | 930 | 582 | 311 | **-46.6%** | **-66.6%** |
-| Working-set range | 279.8-359.8 MiB | 242.8-297.8 MiB | 255.3-306.4 MiB | slightly higher | lower peak |
-| Resolve time per encounter | 2.333 ms | 1.632 ms | 1.280 ms | **-21.6%** | **-45.1%** |
-| Simulation allocation per encounter | 2.493 MiB | 1.242 MiB | 0.363 MiB | **-70.8%** | **-85.4%** |
+| Measurement                         | Original baseline | First optimization | Reusable buffers | Change from first | Change from baseline |
+| ----------------------------------- | ----------------: | -----------------: | ---------------: | ----------------: | -------------------: |
+| Total resolve duration              |           20.16 s |            14.10 s |          11.06 s |        **-21.6%** |           **-45.2%** |
+| Simulation duration                 |           19.02 s |            13.14 s |          10.14 s |        **-22.8%** |           **-46.7%** |
+| Simulation allocation               |         21.04 GiB |          10.48 GiB |         3.06 GiB |        **-70.8%** |           **-85.5%** |
+| Runtime allocation                  |         21.31 GiB |          10.08 GiB |         3.20 GiB |        **-68.3%** |           **-85.0%** |
+| CPU time                            |      27.19 core-s |       17.05 core-s |     12.55 core-s |        **-26.4%** |           **-53.9%** |
+| GC pause time                       |          548.1 ms |           343.4 ms |         253.7 ms |        **-26.1%** |           **-53.7%** |
+| Gen 0 collections                   |               930 |                582 |              311 |        **-46.6%** |           **-66.6%** |
+| Working-set range                   |   279.8-359.8 MiB |    242.8-297.8 MiB |  255.3-306.4 MiB |   slightly higher |           lower peak |
+| Resolve time per encounter          |          2.333 ms |           1.632 ms |         1.280 ms |        **-21.6%** |           **-45.1%** |
+| Simulation allocation per encounter |         2.493 MiB |          1.242 MiB |        0.363 MiB |        **-70.8%** |           **-85.4%** |
 
 The direct HTTP stopwatch measured 11.15 seconds, consistent with the 11.06-second instrumented server duration. The patch passes its retention gate and exceeds the plan's final allocation and GC-pause reduction thresholds. It narrowly misses the provisional 50% wall-time reduction gate and remains above the provisional 10-second product target on the local Debug fixture.
 
@@ -202,17 +202,17 @@ Simulation still accounts for approximately 91.7% of the request. The next evide
 
 The admin fixture was reset and captured in a second finalized combined sampled-CPU and verbose-allocation trace after the reusable-buffer changes. The direct request took 13.90 seconds under profiling overhead; as with the prior traces, that duration is not used for the before/after wall-time comparison.
 
-| Remaining allocation type | Sampled allocation | Dominant source |
-| --- | ---: | --- |
-| `CombatEvent` | 601.51 MiB | record construction and `with` cloning throughout event publication and damage resolution |
-| `System.String` | 138.71 MiB | condition identifiers and other combat strings |
-| `System.Int32[]` | 118.45 MiB | runtime collection growth and framework internals |
-| `CompiledEffect` | 104.42 MiB | repeated ability compilation during encounter setup |
-| boxed `CombatTeam` | 100.22 MiB | team `ToString` calls in statistics logging |
-| `EquipmentStatBudgetRule` | 92.98 MiB | recreating immutable rules on every catalog lookup |
-| ordered barrier iterators | 81.32 MiB | sorting barrier contributions before consumption |
-| `RuntimeBarrierConsumption` | 32.43 MiB | result objects created even when no barrier exists |
-| `List<RuntimeBarrierConsumptionEntry>` | 30.60 MiB | contribution lists created even when no barrier exists |
+| Remaining allocation type              | Sampled allocation | Dominant source                                                                           |
+| -------------------------------------- | -----------------: | ----------------------------------------------------------------------------------------- |
+| `CombatEvent`                          |         601.51 MiB | record construction and `with` cloning throughout event publication and damage resolution |
+| `System.String`                        |         138.71 MiB | condition identifiers and other combat strings                                            |
+| `System.Int32[]`                       |         118.45 MiB | runtime collection growth and framework internals                                         |
+| `CompiledEffect`                       |         104.42 MiB | repeated ability compilation during encounter setup                                       |
+| boxed `CombatTeam`                     |         100.22 MiB | team `ToString` calls in statistics logging                                               |
+| `EquipmentStatBudgetRule`              |          92.98 MiB | recreating immutable rules on every catalog lookup                                        |
+| ordered barrier iterators              |          81.32 MiB | sorting barrier contributions before consumption                                          |
+| `RuntimeBarrierConsumption`            |          32.43 MiB | result objects created even when no barrier exists                                        |
+| `List<RuntimeBarrierConsumptionEntry>` |          30.60 MiB | contribution lists created even when no barrier exists                                    |
 
 The resulting experiment and retained implementation changes:
 
@@ -228,18 +228,18 @@ The finalized trace is stored locally at `TestResults/idle-combat-24h-profile-af
 
 The same capped 24-hour fixture was resolved with lightweight counters after the event-and-catalog allocation changes. The API reported 8,641 processed actions; the idle-combat instrumentation recorded the comparable 8,640 encounters in 9 batches.
 
-| Measurement | Reusable buffers | Event and catalog | Change from reusable buffers | Change from baseline |
-| --- | ---: | ---: | ---: | ---: |
-| Total resolve duration | 11.06 s | 11.73 s | **+6.1%** | **-41.8%** |
-| Simulation duration | 10.14 s | 10.78 s | **+6.3%** | **-43.3%** |
-| Simulation allocation | 3.06 GiB | 2.04 GiB | **-33.3%** | **-90.3%** |
-| Runtime allocation | 3.20 GiB | 2.08 GiB | **-35.1%** | **-90.3%** |
-| CPU time | 12.55 core-s | 12.33 core-s | **-1.7%** | **-54.7%** |
-| GC pause time | 253.7 ms | 197.0 ms | **-22.3%** | **-64.1%** |
-| Gen 0 collections | 311 | 202 | **-35.0%** | **-78.3%** |
-| Working-set range | 255.3-306.4 MiB | 266.4-311.6 MiB | slightly higher | lower peak |
-| Resolve time per encounter | 1.280 ms | 1.357 ms | **+6.0%** | **-41.8%** |
-| Simulation allocation per encounter | 0.363 MiB | 0.242 MiB | **-33.3%** | **-90.3%** |
+| Measurement                         | Reusable buffers | Event and catalog | Change from reusable buffers | Change from baseline |
+| ----------------------------------- | ---------------: | ----------------: | ---------------------------: | -------------------: |
+| Total resolve duration              |          11.06 s |           11.73 s |                    **+6.1%** |           **-41.8%** |
+| Simulation duration                 |          10.14 s |           10.78 s |                    **+6.3%** |           **-43.3%** |
+| Simulation allocation               |         3.06 GiB |          2.04 GiB |                   **-33.3%** |           **-90.3%** |
+| Runtime allocation                  |         3.20 GiB |          2.08 GiB |                   **-35.1%** |           **-90.3%** |
+| CPU time                            |     12.55 core-s |      12.33 core-s |                    **-1.7%** |           **-54.7%** |
+| GC pause time                       |         253.7 ms |          197.0 ms |                   **-22.3%** |           **-64.1%** |
+| Gen 0 collections                   |              311 |               202 |                   **-35.0%** |           **-78.3%** |
+| Working-set range                   |  255.3-306.4 MiB |   266.4-311.6 MiB |              slightly higher |           lower peak |
+| Resolve time per encounter          |         1.280 ms |          1.357 ms |                    **+6.0%** |           **-41.8%** |
+| Simulation allocation per encounter |        0.363 MiB |         0.242 MiB |                   **-33.3%** |           **-90.3%** |
 
 The direct HTTP stopwatch measured 11.81 seconds, consistent with the 11.73-second instrumented duration. The allocation, CPU, collection, and pause metrics support retaining the batch for server throughput, but the single-run wall-time result regressed by 6.1% and remains above the provisional 10-second target. Because CPU time decreased slightly while wall time increased, this result does not prove that the value-record representation added compute cost; scheduling and run-to-run variability remain plausible. Repeat the unprofiled measurement once before declaring the latency gate passed or failed, then capture a clean CPU-only trace if simulation remains dominant.
 
@@ -257,16 +257,16 @@ The complete value-event experiment has been reverted and `CombatEvent` is again
 
 The same 24-hour fixture was resolved after restoring the reference-record event while retaining only the independent immutable-rule, cached-string, reusable-barrier, and shared-empty-result changes. The API reported 8,641 processed actions and the combat instrumentation recorded the comparable 8,640 encounters in 9 batches.
 
-| Measurement | Reusable buffers | Retained subset | Change |
-| --- | ---: | ---: | ---: |
-| Total resolve duration | 11.06 s | 10.90 s | **-1.4%** |
-| Simulation duration | 10.14 s | 9.28 s | **-8.5%** |
-| Simulation allocation | 3.06 GiB | 2.41 GiB | **-21.2%** |
-| Runtime allocation | 3.20 GiB | 2.59 GiB | **-19.0%** |
-| CPU time | 12.55 core-s | 11.48 core-s | **-8.5%** |
-| GC pause time | 253.7 ms | 257.7 ms | +1.6% |
-| Gen 0 collections | 311 | 269 | **-13.5%** |
-| Working-set range | 255.3-306.4 MiB | 268.0-312.6 MiB | slightly higher |
+| Measurement            | Reusable buffers | Retained subset |          Change |
+| ---------------------- | ---------------: | --------------: | --------------: |
+| Total resolve duration |          11.06 s |         10.90 s |       **-1.4%** |
+| Simulation duration    |          10.14 s |          9.28 s |       **-8.5%** |
+| Simulation allocation  |         3.06 GiB |        2.41 GiB |      **-21.2%** |
+| Runtime allocation     |         3.20 GiB |        2.59 GiB |      **-19.0%** |
+| CPU time               |     12.55 core-s |    11.48 core-s |       **-8.5%** |
+| GC pause time          |         253.7 ms |        257.7 ms |           +1.6% |
+| Gen 0 collections      |              311 |             269 |      **-13.5%** |
+| Working-set range      |  255.3-306.4 MiB | 268.0-312.6 MiB | slightly higher |
 
 The direct HTTP stopwatch measured 10.97 seconds. The subset passes its retention gate: it improves duration, CPU, and allocation while avoiding the value-event regression. Compared with the original baseline, resolve duration is approximately 46.0% lower, simulation allocation 88.6% lower, runtime allocation 87.9% lower, CPU time 57.8% lower, GC pause 53.0% lower, and Gen 0 collections 71.1% lower. The remaining request is still slightly above the provisional 10-second target, so the next measured optimization targets repeated immutable ability-catalog compilation. The raw capture is stored locally at `TestResults/idle-combat-24h-after-retained-catalog-barrier.json`.
 
@@ -276,17 +276,17 @@ The production JSON catalog now lazily compiles its immutable abilities, statuse
 
 The same 24-hour fixture again resolved 8,640 comparable encounters in 9 batches:
 
-| Measurement | Retained subset | Compiled-catalog reuse | Change |
-| --- | ---: | ---: | ---: |
-| Total resolve duration | 10.896 s | 10.944 s | +0.4% |
-| Direct HTTP duration | 10.966 s | 11.015 s | +0.4% |
-| Simulation duration | 9.276 s | 9.981 s | +7.6% |
-| Simulation allocation | 2.4092 GiB | 1.6495 GiB | **-31.5%** |
-| Runtime allocation | 2.5894 GiB | 1.6546 GiB | **-36.1%** |
-| CPU time | 11.4844 core-s | 11.0312 core-s | **-3.9%** |
-| GC pause time | 257.7 ms | 156.5 ms | **-39.3%** |
-| Gen 0 collections | 269 | 156 | **-42.0%** |
-| Working-set range | 268.0-312.6 MiB | 264.6-316.4 MiB | comparable |
+| Measurement            | Retained subset | Compiled-catalog reuse |     Change |
+| ---------------------- | --------------: | ---------------------: | ---------: |
+| Total resolve duration |        10.896 s |               10.944 s |      +0.4% |
+| Direct HTTP duration   |        10.966 s |               11.015 s |      +0.4% |
+| Simulation duration    |         9.276 s |                9.981 s |      +7.6% |
+| Simulation allocation  |      2.4092 GiB |             1.6495 GiB | **-31.5%** |
+| Runtime allocation     |      2.5894 GiB |             1.6546 GiB | **-36.1%** |
+| CPU time               |  11.4844 core-s |         11.0312 core-s |  **-3.9%** |
+| GC pause time          |        257.7 ms |               156.5 ms | **-39.3%** |
+| Gen 0 collections      |             269 |                    156 | **-42.0%** |
+| Working-set range      | 268.0-312.6 MiB |        264.6-316.4 MiB | comparable |
 
 The total request change is only 48 ms and is within normal run-to-run noise, while allocation, collection frequency, pause time, and CPU all improve materially. The cache therefore passes the server-throughput retention gate even though it does not improve this single request's measured wall time. The apparent redistribution between instrumented simulation and uninstrumented resolve overhead does not change the end-to-end result; a clean CPU-only trace is the appropriate next step before another compute-path change. The raw capture is stored locally at `TestResults/idle-combat-24h-after-compiled-catalog.json`.
 
@@ -294,11 +294,11 @@ The total request change is only 48 ms and is within normal run-to-run noise, wh
 
 A sampled-thread-time trace was captured from the compiled-catalog build while the same fixture resolved 8,641 actions. The profiled HTTP request took 11.29 seconds. Isolating stack intervals containing `FastCombatEngine.Run` produced 9.85 seconds of engine samples.
 
-| Engine sample attribution | Self time | Share |
-| --- | ---: | ---: |
-| Runtime GC polling/safepoints | 4,968 ms | 50.4% |
-| `Guid.NewGuid()` | 2,860 ms | 29.0% |
-| All other individual methods | each below 151 ms | each below 1.6% |
+| Engine sample attribution     |         Self time |           Share |
+| ----------------------------- | ----------------: | --------------: |
+| Runtime GC polling/safepoints |          4,968 ms |           50.4% |
+| `Guid.NewGuid()`              |          2,860 ms |           29.0% |
+| All other individual methods  | each below 151 ms | each below 1.6% |
 
 The GUID work was entirely attributable to `EffectExecutionContext` creation and summon identity. These identifiers are private to one engine execution: activation IDs correlate barriers with linked effects, summon-group IDs correlate members created by one activation, and summon actor IDs distinguish runtime combatants. None requires process-wide or cryptographic uniqueness.
 
@@ -310,17 +310,17 @@ The raw trace is stored locally at `TestResults/idle-combat-24h-cpu-after-compil
 
 The same 24-hour fixture resolved 8,640 comparable encounters in 9 batches after replacing transient GUIDs and making execution-context state lazy:
 
-| Measurement | Compiled-catalog reuse | Deterministic identities | Change |
-| --- | ---: | ---: | ---: |
-| Total resolve duration | 10.944 s | 9.856 s | **-9.9%** |
-| Direct HTTP duration | 11.015 s | 9.931 s | **-9.8%** |
-| Simulation duration | 9.981 s | 8.311 s | **-16.7%** |
-| Simulation allocation | 1.6495 GiB | 1.4385 GiB | **-12.8%** |
-| Request-window runtime allocation | 1.6546 GiB | 1.6759 GiB | +1.3% |
-| CPU time | 11.0312 core-s | 10.8906 core-s | **-1.3%** |
-| GC pause time | 156.5 ms | 160.0 ms | +2.2% |
-| Gen 0 collections | 156 | 125 | **-19.9%** |
-| Working-set range | 264.6-316.4 MiB | 262.2-315.2 MiB | slightly lower |
+| Measurement                       | Compiled-catalog reuse | Deterministic identities |         Change |
+| --------------------------------- | ---------------------: | -----------------------: | -------------: |
+| Total resolve duration            |               10.944 s |                  9.856 s |      **-9.9%** |
+| Direct HTTP duration              |               11.015 s |                  9.931 s |      **-9.8%** |
+| Simulation duration               |                9.981 s |                  8.311 s |     **-16.7%** |
+| Simulation allocation             |             1.6495 GiB |               1.4385 GiB |     **-12.8%** |
+| Request-window runtime allocation |             1.6546 GiB |               1.6759 GiB |          +1.3% |
+| CPU time                          |         11.0312 core-s |           10.8906 core-s |      **-1.3%** |
+| GC pause time                     |               156.5 ms |                 160.0 ms |          +2.2% |
+| Gen 0 collections                 |                    156 |                      125 |     **-19.9%** |
+| Working-set range                 |        264.6-316.4 MiB |          262.2-315.2 MiB | slightly lower |
 
 The change passes its retention gate and brings this local Debug fixture below the provisional 10-second target for the first time. The instrumented simulation allocation fell materially, while the one-second process-wide request window recorded a small allocation and pause-time increase. Background workers and sampling-boundary alignment can affect those process-wide values, so one repeat run is appropriate before treating the 10-second result as stable. The raw capture is stored locally at `TestResults/idle-combat-24h-after-deterministic-identities.json`.
 
@@ -335,6 +335,42 @@ The first three-run fixed-fixture Debug baseline recorded server resolve duratio
 The harness now produces a deterministic correctness fingerprint from the normalized API result and normalized persisted gameplay state. Repeated runs must match automatically, and subsequent optimization runs can pass the known-good hash through `-ExpectedFingerprint` to reject consistently wrong results. This supplies the fixed-seed before/after semantic gate required before the next combat-runtime change.
 
 The first fingerprinted three-run validation produced the same hash on every restore: `a6c348f6d81ebb54092d776d88bf0e34ac9d3b13ce2712fc35ce04aff0ec918f`. Its Debug medians were 12.672 seconds server-side, 12.767 seconds over HTTP, 11.541 seconds in simulation, 1.543 GiB of simulation allocation, 15.375 core-seconds, and 183.7 ms of GC pause. This run is slower than the earlier 10.496-second fixed baseline even though the fingerprint work occurs after the timed request and simulation allocation is unchanged. Treat it as evidence of current machine/load variance, not as a new performance baseline. The report is stored under `TestResults/idle-combat-benchmark/20260818-104616/`.
+
+### Fixed-fixture CPU and allocation profiles (2026-08-18)
+
+Separate CPU and verbose-allocation traces were captured through the guarded harness. Both restored the exact snapshot, processed 8,641 actions, and matched the accepted correctness fingerprint. The profiled HTTP durations were 13.776 seconds for CPU and 14.072 seconds for allocation; those values include profiling overhead and are not latency baselines.
+
+The sampled CPU trace contains 12.025 seconds beneath `FastCombatEngine.Run`. Runtime GC polling accounts for 7.573 seconds, or 63.0%, confirming that allocation and collection still dominate the sampled engine time. The most prominent inclusive managed paths below the engine root are:
+
+| Managed path                | Inclusive sample | Engine share |
+| --------------------------- | ---------------: | -----------: |
+| `TickBasicAttack`           |          4.491 s |        37.4% |
+| `ApplyDamage`               |          3.921 s |        32.6% |
+| `ConsumeBarrierWithSources` |          3.287 s |        27.3% |
+| `UseReadyActiveAbilities`   |          2.876 s |        23.9% |
+| `TickConditions`            |          1.879 s |        15.6% |
+| `RemoveCondition`           |          1.532 s |        12.7% |
+| `CanResolveActiveAbility`   |          1.394 s |        11.6% |
+| `Publish`                   |          1.379 s |        11.5% |
+| `ExecuteTrigger`            |          1.271 s |        10.6% |
+
+Verbose allocation sampling recorded 1.660 GiB. The leading types and iterator families are:
+
+| Allocation type/family                                      | Sampled allocation | Share |
+| ----------------------------------------------------------- | -----------------: | ----: |
+| `CombatEvent`                                               |         572.95 MiB | 33.7% |
+| `Int32[]`                                                   |          60.58 MiB |  3.6% |
+| attribute-dictionary entry arrays                           |          47.17 MiB |  2.8% |
+| compiled-trigger/effect `SelectMany` and selector iterators |          66.58 MiB |  3.9% |
+| trigger/effect enumerators                                  |          55.49 MiB |  3.3% |
+| trigger execution display classes and effect delegates      |          99.30 MiB |  5.8% |
+| `String`                                                    |          25.56 MiB |  1.5% |
+| `EffectExecutionContext`                                    |          17.38 MiB |  1.0% |
+| barrier consumption entries, arrays, lists, and results     |          44.62 MiB |  2.6% |
+
+The earlier value-type `CombatEvent` experiment already failed its CPU/latency retention gate, so it should not be repeated without a fundamentally different design. Barrier consumption is prominent in sampled inclusive stacks, but its direct allocation footprint is comparatively small and sampled GC safe-point bias can attribute unrelated collection time to the current safe point. The next narrow prototype should therefore remove the remaining per-activation trigger/effect LINQ iterators, boxed enumerators, display classes, and instance delegates while preserving effect order, target order, cooldown behavior, and random-number consumption. Together those measured families represent approximately 221 MiB, or 13.0% of sampled allocation.
+
+The CPU trace and report are stored under `TestResults/idle-combat-benchmark/20260818-105837/`; the allocation trace and report are under `TestResults/idle-combat-benchmark/20260818-105952/`.
 
 ## Phase 2: stop retaining full within-batch result graphs
 
@@ -476,15 +512,15 @@ Bounded parallel simulation is appropriate only after:
 
 Final thresholds should be set from the Phase 0 Release baseline. Recommended initial gates are:
 
-| Metric | Required result |
-| --- | --- |
-| Deterministic outputs | Exact match |
-| 24-hour wall time | At least 50% below Release baseline |
-| Allocation per encounter | At least 70% below Release baseline |
-| GC pause time | At least 50% below Release baseline |
-| Database command count | No regression |
-| Final response size | No regression |
-| Sustained working set | No growth across repeated runs |
+| Metric                         | Required result                     |
+| ------------------------------ | ----------------------------------- |
+| Deterministic outputs          | Exact match                         |
+| 24-hour wall time              | At least 50% below Release baseline |
+| Allocation per encounter       | At least 70% below Release baseline |
+| GC pause time                  | At least 50% below Release baseline |
+| Database command count         | No regression                       |
+| Final response size            | No regression                       |
+| Sustained working set          | No growth across repeated runs      |
 | Concurrent catch-up throughput | No regression at the same CPU limit |
 
 An absolute latency target should be chosen after the Release baseline is known. A reasonable first product target is a 24-hour p95 below 10 seconds on production-equivalent hardware, followed by a lower target if profiling shows it is attainable without semantic changes.

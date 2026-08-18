@@ -55,6 +55,26 @@ The default run performs three complete restore/start/resolve cycles and reports
 
 Use `-Configuration Release` when a Release comparison is wanted. Never compare a Debug sample with a Release sample.
 
+## Capture diagnostic profiles
+
+The same guarded workflow can capture one CPU or verbose allocation trace instead of runtime counters. Always use one restored run and the accepted correctness fingerprint:
+
+```powershell
+./build/measure-idle-combat.ps1 `
+    -Runs 1 `
+    -Diagnostics Cpu `
+    -ExpectedFingerprint 'a6c348f6d81ebb54092d776d88bf0e34ac9d3b13ce2712fc35ce04aff0ec918f'
+
+./build/measure-idle-combat.ps1 `
+    -Runs 1 `
+    -Diagnostics Allocation `
+    -ExpectedFingerprint 'a6c348f6d81ebb54092d776d88bf0e34ac9d3b13ce2712fc35ce04aff0ec918f'
+```
+
+CPU mode uses the `dotnet-sampled-thread-time` and `dotnet-common` profiles. Allocation mode combines sampled thread time with `gc-verbose` and uses a larger trace buffer. Both modes still restore the snapshot, fix time, issue the real authenticated request, record normalized state, and enforce the expected fingerprint.
+
+Profiling adds overhead. Use these traces to rank call stacks and allocation types, not as latency baselines. Use the default `Counters` mode for before/after duration and allocation measurements.
+
 ## Results
 
 Each invocation creates a timestamped directory under:
@@ -64,6 +84,7 @@ Each invocation creates a timestamped directory under:
 It contains:
 
 - One raw counter JSON file per run.
+- Or one `.nettrace` file per run when `-Diagnostics Cpu` or `Allocation` is selected.
 - Normalized response and persisted gameplay-state JSON for every run.
 - `summary.json` with every run and the median.
 
