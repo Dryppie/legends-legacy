@@ -27,7 +27,7 @@ export interface RemoveCraftingQueueItemResponse {
   currentAction: CharacterActionDto | null;
 }
 
-export type CraftingQueueMoveDirection = 'Up' | 'Down';
+export type CraftingQueueMoveDirection = 'Up' | 'Down' | 'Top';
 
 export interface MoveCraftingQueueItemResponse {
   currentAction: CharacterActionDto;

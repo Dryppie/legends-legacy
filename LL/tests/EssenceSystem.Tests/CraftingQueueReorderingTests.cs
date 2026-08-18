@@ -76,6 +76,44 @@ public sealed class CraftingQueueReorderingTests
     }
 
     [Fact]
+    public async Task MoveCraftingQueueItemAsync_moves_an_item_directly_to_the_top()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var first = QueueItem(0);
+        var second = QueueItem(1);
+        var third = QueueItem(2);
+        var fourth = QueueItem(3);
+        db.CharacterActions.Add(new CharacterAction
+        {
+            CharacterId = characterId,
+            UpdatedAt = DateTimeOffset.UtcNow,
+            ActionDetails = new CraftingActionDetails
+            {
+                CraftingQueueItems = [first, second, third, fourth]
+            }
+        });
+        await db.SaveChangesAsync();
+
+        var repository = new CraftingRepository(db);
+        var moved = await repository.MoveCraftingQueueItemAsync(
+            characterId,
+            fourth.Id,
+            CraftingQueueMoveDirection.Top,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        Assert.True(moved);
+        Assert.Equal(
+            [fourth.Id, first.Id, second.Id, third.Id],
+            await db.CraftingQueueItems
+                .OrderBy(item => item.Position)
+                .Select(item => item.Id)
+                .ToArrayAsync());
+    }
+
+    [Fact]
     public async Task MoveCraftingQueueItemAsync_reorders_a_paused_tempering_queue()
     {
         await using var db = CreateDb();

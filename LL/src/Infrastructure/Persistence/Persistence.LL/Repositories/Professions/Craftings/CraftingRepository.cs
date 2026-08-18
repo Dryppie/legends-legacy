@@ -81,15 +81,37 @@ public class CraftingRepository : ICraftingRepository
             .ThenBy(item => item.Id)
             .ToList();
         var currentIndex = orderedQueue.FindIndex(item => item.Id == queueItemId);
-        var targetIndex = currentIndex + (int)direction;
-
-        if (currentIndex < 0 || targetIndex < 0 || targetIndex >= orderedQueue.Count)
+        if (currentIndex < 0)
         {
             return false;
         }
 
-        (orderedQueue[currentIndex], orderedQueue[targetIndex]) =
-            (orderedQueue[targetIndex], orderedQueue[currentIndex]);
+        var targetIndex = direction switch
+        {
+            CraftingQueueMoveDirection.Up => currentIndex - 1,
+            CraftingQueueMoveDirection.Down => currentIndex + 1,
+            CraftingQueueMoveDirection.Top => 0,
+            _ => -1
+        };
+
+        if (targetIndex < 0 ||
+            targetIndex >= orderedQueue.Count ||
+            targetIndex == currentIndex)
+        {
+            return false;
+        }
+
+        if (direction == CraftingQueueMoveDirection.Top)
+        {
+            var queueItem = orderedQueue[currentIndex];
+            orderedQueue.RemoveAt(currentIndex);
+            orderedQueue.Insert(0, queueItem);
+        }
+        else
+        {
+            (orderedQueue[currentIndex], orderedQueue[targetIndex]) =
+                (orderedQueue[targetIndex], orderedQueue[currentIndex]);
+        }
 
         for (var index = 0; index < orderedQueue.Count; index++)
         {
