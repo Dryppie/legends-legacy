@@ -627,6 +627,128 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Blood_feeders_checks_the_enemy_hit_instead_of_its_self_heal_target()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var bloodFeeders = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.bog_mite.blood_feeders"]);
+        var strike = AbilityCompiler.CompileAbility(
+            CreateFixedDamageAbility("ability.test.bog-mite-strike", "effect.test.bog-mite-strike", 100));
+
+        CombatResult Run(bool poisonFriendly, bool poisonHostile)
+        {
+            var friendly = CreateCombatant("friendly", CombatTeam.Friendly, [bloodFeeders, strike]);
+            var hostile = CreateCombatant("hostile", CombatTeam.Hostile, [], maxHealth: 1_000);
+            friendly.SetHealth(100);
+            if (poisonFriendly)
+                AddStandardCondition(friendly, hostile, StandardConditionType.Poison);
+            if (poisonHostile)
+                AddStandardCondition(hostile, friendly, StandardConditionType.Poison);
+
+            var engine = new FastCombatEngine(
+                new Dictionary<string, CompiledStatus>(),
+                new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+            return engine.Run([friendly], [hostile]);
+        }
+
+        var poisonedEnemy = Run(poisonFriendly: false, poisonHostile: true);
+        var poisonedSelf = Run(poisonFriendly: true, poisonHostile: false);
+
+        Assert.Contains(poisonedEnemy.EventLog, item =>
+            item.Source == "effect.creature.bog_mite.blood_feeders.heal"
+            && item.EventType == EventType.Heal
+            && item.Magnitude == 5);
+        Assert.Equal(
+            5,
+            poisonedEnemy.EntityStats
+                .Single(item => item.EntityId == "friendly")
+                .Abilities.Single(item => item.Name == "Blood Feeders")
+                .TotalHealing);
+        Assert.DoesNotContain(poisonedSelf.EventLog, item =>
+            item.Source == "effect.creature.bog_mite.blood_feeders.heal");
+    }
+
+    [Fact]
+    public void Rotfly_host_checks_the_enemy_killed_instead_of_its_self_heal_target()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var rotflyHost = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.rotfly_toad.rotfly_host"]);
+        var strike = AbilityCompiler.CompileAbility(
+            CreateFixedDamageAbility("ability.test.rotfly-strike", "effect.test.rotfly-strike", 100));
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, [rotflyHost, strike]);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, [], maxHealth: 50);
+        friendly.SetHealth(100);
+        AddStandardCondition(hostile, friendly, StandardConditionType.Decay);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        var result = engine.Run([friendly], [hostile]);
+
+        Assert.Contains(result.EventLog, item =>
+            item.Source == "effect.creature.rotfly_toad.rotfly_host.heal"
+            && item.EventType == EventType.Heal
+            && item.Magnitude == 16);
+    }
+
+    [Fact]
+    public void Effect_condition_target_still_resolves_to_the_effect_recipient()
+    {
+        var conditionalBarrier = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.effect-target-condition",
+            Kind = AbilitySpecKind.Passive,
+            Name = "Effect Target Condition",
+            Triggers =
+            [
+                new()
+                {
+                    Event = AbilityTriggerEvent.OnHit,
+                    EffectIds = ["effect.test.effect-target-condition"]
+                }
+            ],
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.effect-target-condition",
+                    Operation = AbilityEffectOperation.GrantBarrier,
+                    Target = AbilityTargetSelector.Self,
+                    BaseValue = 7,
+                    Conditions =
+                    [
+                        new()
+                        {
+                            Type = AbilityConditionType.HasCondition,
+                            Subject = AbilityConditionSubject.Target,
+                            Condition = StandardConditionType.Recovery
+                        }
+                    ]
+                }
+            ]
+        });
+        var strike = AbilityCompiler.CompileAbility(
+            CreateFixedDamageAbility("ability.test.effect-target-strike", "effect.test.effect-target-strike", 10));
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, [conditionalBarrier, strike]);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        AddStandardCondition(friendly, friendly, StandardConditionType.Recovery);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        engine.Run([friendly], [hostile]);
+
+        Assert.Equal(7, friendly.Barrier);
+    }
+
+    [Fact]
     public void Engine_weights_taunting_targets_for_basic_attacks()
     {
         var front = CreateCombatant("front", CombatTeam.Friendly, [], maxHealth: 2_000);
@@ -5590,6 +5712,21 @@ public sealed class AbilitySystemTests
             },
             abilities,
             ["Role.Test"]);
+
+    private static void AddStandardCondition(
+        RuntimeCombatant owner,
+        RuntimeCombatant source,
+        StandardConditionType condition) =>
+        owner.Conditions.Add(
+            new RuntimeCondition(
+                condition,
+                source,
+                owner,
+                1,
+                100,
+                source.GetAttribute(AttributeType.Power),
+                owner.Conditions.Count + 1,
+                $"condition.{condition.ToString().ToLowerInvariant()}"));
 
     private static RuntimeCombatant CreateOwnedBroodling(
         string id,

@@ -38,7 +38,7 @@ public sealed class LiveOpsApplicationRegistrationTests
                     typeof(IRequestHandler<,>)))
             .ToList();
 
-        Assert.Equal(10, handlers.Count);
+        Assert.Equal(15, handlers.Count);
         Assert.All(handlers, descriptor => Assert.StartsWith(
             "Application.UseCases.Administration",
             descriptor.ImplementationType?.Namespace,

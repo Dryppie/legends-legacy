@@ -39,6 +39,29 @@ $env:LL_BENCH_DB_PASSWORD = '<local postgres password>'
 $env:LL_BENCH_ADMIN_PASSWORD = '<local seeded admin password>'
 ```
 
+### Fresh Codex task or shell
+
+Temporary `$env:` values do not carry into a new Codex task or a separately started shell. Do not paste either password into a chat or put it directly in a recorded command. From the repository root, use secure prompts and run the benchmark in that same PowerShell session:
+
+```powershell
+$benchmarkDbSecret = Read-Host 'Local PostgreSQL password' -AsSecureString
+$benchmarkAdminSecret = Read-Host 'Seeded benchmark admin password' -AsSecureString
+$env:LL_BENCH_DB_PASSWORD = [System.Net.NetworkCredential]::new('', $benchmarkDbSecret).Password
+$env:LL_BENCH_ADMIN_PASSWORD = [System.Net.NetworkCredential]::new('', $benchmarkAdminSecret).Password
+
+try {
+    ./build/measure-idle-combat.ps1 `
+        -Runs 3 `
+        -ExpectedFingerprint 'a6c348f6d81ebb54092d776d88bf0e34ac9d3b13ce2712fc35ce04aff0ec918f'
+}
+finally {
+    Remove-Item Env:LL_BENCH_DB_PASSWORD -ErrorAction SilentlyContinue
+    Remove-Item Env:LL_BENCH_ADMIN_PASSWORD -ErrorAction SilentlyContinue
+}
+```
+
+When it completes, the new task can inspect the newest `TestResults/idle-combat-benchmark/*/summary.json`; it does not need either credential to read or compare the results.
+
 ## Run the benchmark
 
 From the repository root:

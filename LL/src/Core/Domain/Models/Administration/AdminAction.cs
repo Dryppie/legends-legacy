@@ -5,7 +5,9 @@ public enum AdminActionType
     AccountBanned,
     AccountBanRevoked,
     CompensationItemsGranted,
-    AuditExported
+    AuditExported,
+    AccountRiskStatusChanged,
+    AccountRiskNoteAdded
 }
 
 public enum AdministrationRiskLevel

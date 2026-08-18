@@ -110,6 +110,41 @@ describe('LiveOpsApiService', () => {
     await promise;
   });
 
+  it('sends account-risk investigation filters and pagination', async () => {
+    const promise = service.accountRisks({
+      minimumSeverity: 'High',
+      signalType: 'FeederNetwork',
+      status: 'Unreviewed',
+      sort: 'connected',
+    }, 2, 50);
+    const request = http.expectOne((candidate) =>
+      candidate.url === '/api/liveops/account-risk' &&
+      candidate.params.get('minimumSeverity') === 'High' &&
+      candidate.params.get('signalType') === 'FeederNetwork' &&
+      candidate.params.get('status') === 'Unreviewed' &&
+      candidate.params.get('sort') === 'connected' &&
+      candidate.params.get('page') === '2' &&
+      candidate.params.get('pageSize') === '50');
+    expect(request.request.method).toBe('GET');
+    request.flush({ isSuccess: true, data: null, errorMessage: '' });
+    await promise;
+  });
+
+  it('uses antiforgery for investigation workflow mutations', async () => {
+    const tokenPromise = service.initializeAntiforgery();
+    http.expectOne('/auth/antiforgery').flush({ requestToken: 'xsrf-token' });
+    await tokenPromise;
+
+    const promise = service.updateAccountRiskStatus('account-1', {
+      operationId: 'operation-1', status: 'Investigating', reason: 'CASE-42',
+    });
+    const request = http.expectOne('/api/liveops/account-risk/account-1/status');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.headers.get('X-XSRF-TOKEN')).toBe('xsrf-token');
+    request.flush({ isSuccess: true, data: null, errorMessage: '' });
+    await promise;
+  });
+
   it('exports an authorized bounded audit query with antiforgery', async () => {
     const tokenPromise = service.initializeAntiforgery();
     http.expectOne('/auth/antiforgery').flush({ requestToken: 'xsrf-token' });

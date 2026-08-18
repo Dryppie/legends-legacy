@@ -106,9 +106,17 @@ public static class DependencyInjection
     {
         services.Configure<LiveOpsOptions>(
             config.GetSection(LiveOpsOptions.SectionName));
+        services.AddOptions<AccountRiskOptions>()
+            .Bind(config.GetSection(AccountRiskOptions.SectionName))
+            .Validate(x => x.LookbackDays > 0 && x.CandidateLimit > 0 && x.MaximumTransfersPerEvaluation > 0,
+                "LiveOps account-risk limits must be positive.")
+            .Validate(x => x.ModerateScore >= 0 && x.ModerateScore < x.HighScore && x.HighScore < x.CriticalScore && x.CriticalScore <= 100,
+                "LiveOps account-risk severity thresholds must be ordered within 0-100.")
+            .ValidateOnStart();
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<IAccountAccessPolicy, AccountAccessPolicy>();
         services.AddScoped<ILiveOpsService, LiveOpsService>();
+        services.AddScoped<ILiveOpsAccountRiskService, LiveOpsAccountRiskService>();
         services.TryAddScoped<IChatModerationGateway, UnavailableChatModerationGateway>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IInventoryItemFactory, InventoryItemFactory>();
@@ -168,6 +176,14 @@ public static class DependencyInjection
         services.Configure<LiveOpsOptions>(config.GetSection(LiveOpsOptions.SectionName));
         services.AddScoped<IAccountAccessPolicy, AccountAccessPolicy>();
         services.AddScoped<ILiveOpsService, LiveOpsService>();
+        services.AddOptions<AccountRiskOptions>()
+            .Bind(config.GetSection(AccountRiskOptions.SectionName))
+            .Validate(x => x.LookbackDays > 0 && x.CandidateLimit > 0 && x.MaximumTransfersPerEvaluation > 0,
+                "LiveOps account-risk limits must be positive.")
+            .Validate(x => x.ModerateScore >= 0 && x.ModerateScore < x.HighScore && x.HighScore < x.CriticalScore && x.CriticalScore <= 100,
+                "LiveOps account-risk severity thresholds must be ordered within 0-100.")
+            .ValidateOnStart();
+        services.AddScoped<ILiveOpsAccountRiskService, LiveOpsAccountRiskService>();
         services.TryAddScoped<IChatModerationGateway, UnavailableChatModerationGateway>();
         services.Configure<AchievementSystemChatOptions>(config.GetSection("Chat:SystemMessages"));
         services.AddSingleton<HttpClient>();

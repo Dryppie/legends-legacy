@@ -46,6 +46,10 @@ public interface IDbContext
 {
     DbSet<AdminAction> AdminActions { get; }
     DbSet<AccountRestriction> AccountRestrictions { get; }
+    DbSet<AccountRiskSnapshot> AccountRiskSnapshots { get; }
+    DbSet<AccountRiskHistory> AccountRiskHistory { get; }
+    DbSet<AccountRiskInvestigation> AccountRiskInvestigations { get; }
+    DbSet<AccountRiskNote> AccountRiskNotes { get; }
     DbSet<AchievementDefinition> AchievementDefinitions { get; }
     DbSet<AchievementEventLedger> AchievementEventLedgers { get; }
     DbSet<PlayerAchievementProgress> PlayerAchievementProgresses { get; }

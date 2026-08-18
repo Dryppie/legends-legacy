@@ -416,15 +416,15 @@ A fresh sampled-thread-time trace was captured from the retained targeting imple
 
 Runtime GC polling accounts for 5.895 seconds, or 54.0% of those samples. The leading inclusive managed paths were:
 
-| Managed path                                  | Inclusive samples | Engine share |
-| --------------------------------------------- | ----------------: | -----------: |
-| `TickBasicAttack`                             |           3.914 s |        35.9% |
-| `ApplyDamage`                                 |           3.806 s |        34.9% |
-| `RuntimeCombatant.ConsumeBarrierWithSources`  |           3.096 s |        28.4% |
-| `Publish`                                     |           2.946 s |        27.0% |
-| `ExecuteTrigger`                              |           2.565 s |        23.5% |
-| `UseReadyActiveAbilities`                     |           2.495 s |        22.9% |
-| `TickConditions`                              |           1.626 s |        14.9% |
+| Managed path                                 | Inclusive samples | Engine share |
+| -------------------------------------------- | ----------------: | -----------: |
+| `TickBasicAttack`                            |           3.914 s |        35.9% |
+| `ApplyDamage`                                |           3.806 s |        34.9% |
+| `RuntimeCombatant.ConsumeBarrierWithSources` |           3.096 s |        28.4% |
+| `Publish`                                    |           2.946 s |        27.0% |
+| `ExecuteTrigger`                             |           2.565 s |        23.5% |
+| `UseReadyActiveAbilities`                    |           2.495 s |        22.9% |
+| `TickConditions`                             |           1.626 s |        14.9% |
 
 The barrier path was almost entirely attributed through `List.AddRange`, `Array.Copy`, and `List.Remove`, while its direct allocation footprint in the allocation trace was small. To test whether the stack represented useful work or a GC safe point, a bounded prototype replaced copy-sort-remove with a direct stable minimum-order scan and `RemoveAt`. A new characterization test covers out-of-order contributions and stable equal-order ties.
 
@@ -440,6 +440,44 @@ The prototype matched the correctness fingerprint in all three runs but failed t
 | GC pause                  |              152.5 ms |         156.8 ms |            -2.8% |
 
 The direct scan was reverted. The result confirms that the large inclusive barrier stack was predominantly GC safe-point attribution and that its scan-based replacement had worse algorithmic behavior. The ordering characterization test remains to protect future changes. The CPU trace is under `TestResults/idle-combat-benchmark/20260818-114036/`, the rejected prototype under `TestResults/idle-combat-benchmark/20260818-114429/`, and the reverted control under `TestResults/idle-combat-benchmark/20260818-114731/`.
+
+### Reusable combat-event frame prototype (2026-08-18)
+
+The next bounded prototype replaced per-publication `CombatEvent` record allocation and record cloning with a reusable, reference-type LIFO frame stack. The stack supported nested synchronous event publication and target-specific condition evaluation without allowing a mutable frame to escape its publishing scope. All three benchmark runs matched the accepted deterministic fingerprint.
+
+The allocation result was substantial, but the execution-time trade-off failed the retention gate when compared with the accepted control immediately preceding the prototype:
+
+| Median measurement        | Event-frame prototype | Accepted control | Prototype change |
+| ------------------------- | --------------------: | ---------------: | ---------------: |
+| Server resolve            |              14.416 s |         12.272 s |           +17.5% |
+| Simulation                |              13.215 s |         10.508 s |           +25.8% |
+| Simulation allocation     |             0.696 GiB |        1.160 GiB |           -40.0% |
+| Request-window allocation |             0.813 GiB |        1.369 GiB |           -40.6% |
+| CPU                       |              17.000 s |         15.875 s |            +7.1% |
+| GC pause                  |               96.6 ms |         156.8 ms |           -38.4% |
+| Gen 0 collections         |                    13 |               81 |           -84.0% |
+
+The prototype was reverted because the project prioritizes catch-up latency and CPU over allocation reduction by itself. The rejected report is under `TestResults/idle-combat-benchmark/20260818-120724/`; the accepted control remains `TestResults/idle-combat-benchmark/20260818-114731/`. A future event-dispatch redesign should avoid another unconditional event-representation swap and first determine whether event publication can be eliminated entirely when no listener exists.
+
+The bounded follow-up design is documented in `LL/docs/idle-combat-listener-aware-dispatch-plan.md`. It keeps the accepted reference event for observed events and first measures whether listener-free events can be skipped before allocating or scanning combatants.
+
+### Listener-aware event dispatch (2026-08-18)
+
+The bounded listener-aware prototype added an engine-local monotonic `ulong` presence index for ability and status trigger events. Initial combatants and statuses register before combat start; dynamically applied statuses and newly created summons register before participating in subsequent publication. Hot basic-attack, direct-damage, heal, dodge, death, and health-change call sites now construct the existing immutable `CombatEvent` only when the index indicates a possible listener. The existing `Publish` implementation and all observed-event semantics remain unchanged.
+
+The three-run prototype and a same-session three-run reverted control all matched the accepted deterministic fingerprint. The reverted control was built in a disposable copy to preserve unrelated uncommitted engine work in the main checkout. Results were also compared with the accepted control immediately preceding this line of event-dispatch work:
+
+| Median measurement        | Listener prototype | Prior accepted control | Change vs prior | Reverted control | Change vs reverted |
+| ------------------------- | -----------------: | ---------------------: | --------------: | ---------------: | -----------------: |
+| Server resolve            |           11.280 s |               12.272 s |           -8.1% |         13.824 s |             -18.4% |
+| Simulation                |            9.485 s |               10.508 s |           -9.7% |         12.734 s |             -25.5% |
+| Simulation allocation     |          0.768 GiB |              1.160 GiB |          -33.8% |        1.179 GiB |             -34.9% |
+| Request-window allocation |          0.946 GiB |              1.369 GiB |          -30.9% |        1.297 GiB |             -27.1% |
+| CPU                       |           14.078 s |               15.875 s |          -11.3% |         16.125 s |             -12.7% |
+| GC pause                  |            92.7 ms |               156.8 ms |          -40.9% |         131.8 ms |             -29.7% |
+| Gen 0 collections         |                 25 |                     81 |          -69.1% |               70 |             -64.3% |
+
+The prototype passes the retention gate: correctness is unchanged, CPU and simulation duration improve by more than 5% against both controls, and simulation allocation falls by more than 10%. It is retained. The prototype report is under `TestResults/idle-combat-benchmark/20260818-125533/`; the same-session reverted control is under `TestResults/idle-combat-benchmark/20260818-130422-control/`; and the prior accepted control remains `TestResults/idle-combat-benchmark/20260818-114731/`.
 
 No remaining narrow managed method has enough trustworthy self time to justify another speculative micro-optimization. Further material improvement now requires either a compact runtime-state/event-dispatch redesign with a dedicated benchmark branch, or operational admission control to protect the API while exact replay remains CPU-heavy.
 

@@ -84,6 +84,7 @@ builder.Services.AddScoped<LiveOpsOperationalStatusService>();
 builder.Services.AddScoped<ILiveOpsRecentActivityReader, LiveOpsRecentActivityReader>();
 builder.Services.AddScoped<LiveOpsActionPreviewService>();
 builder.Services.AddScoped<LiveOpsPlayerSupportSnapshotService>();
+builder.Services.AddHostedService<AccountRiskEvaluationWorker>();
 
 var allowedOrigins = config.GetSection("LiveOps:AllowedOrigins").Get<string[]>() ?? [];
 if (allowedOrigins.Length > 0)

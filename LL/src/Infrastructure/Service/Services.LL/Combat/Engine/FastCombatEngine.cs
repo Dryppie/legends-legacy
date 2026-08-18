@@ -64,6 +64,7 @@ public sealed class FastCombatEngine
     private long _applicationOrder;
     private long _activationSequence;
     private long _summonSequence;
+    private ulong _listenerMask;
     private int _eventDepth;
 
     private enum DamageDelivery
@@ -116,6 +117,7 @@ public sealed class FastCombatEngine
         for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
         {
             var combatant = combatants[combatantIndex];
+            RegisterListeners(combatant);
             _basicAttackProgress[combatant] = 0;
             _healthRegenerationProgress[combatant] = 0;
             InitializeActiveAbilityCooldowns(combatant);
@@ -361,7 +363,7 @@ public sealed class FastCombatEngine
                 actor.BasicAttackDamageMultiplier));
         var damage = Math.Max(1, ApplyCombatMagnitudeVariance(baseDamage));
         Log(actor, null, "Basic Attack", EventType.AbilityUse, 0, $"{actor.Name} used Basic Attack");
-        Publish(new CombatEvent(AbilityTriggerEvent.OnBasicAttack, actor, target, "basic_attack"), combatants);
+        PublishIfObserved(AbilityTriggerEvent.OnBasicAttack, actor, target, "basic_attack", combatants);
         var basicAttackModifiers = actor.ConsumeNextBasicAttackModifiers();
         damage = Math.Max(0, (int)Math.Round(damage * (1 + basicAttackModifiers.DamagePercent / 100f)));
         var healthDamage = ApplyDamage(
@@ -453,8 +455,9 @@ public sealed class FastCombatEngine
                             && ConditionsPass(
                                 effect.Conditions,
                                 actor,
-                                combatEvent with { Target = target },
-                                combatants))
+                                combatEvent,
+                                combatants,
+                                effectTarget: target))
                         {
                             return true;
                         }
@@ -526,9 +529,79 @@ public sealed class FastCombatEngine
         }
 
         if (healthChanged)
-            Publish(new CombatEvent(AbilityTriggerEvent.OnHealthChanged, actor, actor, null), combatants);
+            PublishIfObserved(AbilityTriggerEvent.OnHealthChanged, actor, actor, null, combatants);
 
         return additionalCooldownTicks;
+    }
+
+    private void RegisterListeners(RuntimeCombatant combatant)
+    {
+        foreach (var eventType in combatant.AbilityTriggersByEvent.Keys)
+            RegisterListener(eventType);
+
+        for (var statusIndex = 0; statusIndex < combatant.Statuses.Count; statusIndex++)
+            RegisterListeners(combatant.Statuses[statusIndex]);
+    }
+
+    private void RegisterListeners(RuntimeStatus status)
+    {
+        foreach (var eventType in status.Definition.TriggersByEvent.Keys)
+            RegisterListener(eventType);
+    }
+
+    private void RegisterListener(AbilityTriggerEvent eventType) =>
+        _listenerMask |= GetListenerBit(eventType);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool HasPotentialListener(AbilityTriggerEvent eventType) =>
+        (_listenerMask & GetListenerBit(eventType)) != 0;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static ulong GetListenerBit(AbilityTriggerEvent eventType)
+    {
+        var bit = (int)eventType;
+        if ((uint)bit >= 64)
+        {
+            throw new InvalidOperationException(
+                $"Ability trigger event '{eventType}' does not fit in the 64-bit listener index.");
+        }
+
+        return 1UL << bit;
+    }
+
+    private void PublishIfObserved(
+        AbilityTriggerEvent eventType,
+        RuntimeCombatant? source,
+        RuntimeCombatant? target,
+        string? abilityId,
+        IReadOnlyList<RuntimeCombatant> combatants,
+        int magnitude = 0,
+        RuntimeCombatant? instigator = null,
+        long? barrierApplicationOrder = null,
+        ConditionRemovalReason? removalReason = null,
+        DamageType damageType = DamageType.None,
+        AttackType attackType = AttackType.None,
+        bool wasCritical = false,
+        bool wasDirectHit = false)
+    {
+        if (!HasPotentialListener(eventType))
+            return;
+
+        Publish(
+            new CombatEvent(
+                eventType,
+                source,
+                target,
+                abilityId,
+                magnitude,
+                instigator,
+                barrierApplicationOrder,
+                removalReason,
+                damageType,
+                attackType,
+                wasCritical,
+                wasDirectHit),
+            combatants);
     }
 
     private void Publish(CombatEvent combatEvent, IReadOnlyList<RuntimeCombatant> combatants)
@@ -719,7 +792,12 @@ public sealed class FastCombatEngine
                             continue;
 
                         if (!target.IsAlive
-                            || !ConditionsPass(effect.Conditions, source, combatEvent with { Target = target }, combatants))
+                            || !ConditionsPass(
+                                effect.Conditions,
+                                source,
+                                combatEvent,
+                                combatants,
+                                effectTarget: target))
                             continue;
 
                         if (effect.Operation != AbilityEffectOperation.ApplyRandomCondition
@@ -814,9 +892,7 @@ public sealed class FastCombatEngine
                     executionContext?.ActivationId));
             if (effect.Operation == AbilityEffectOperation.Heal)
             {
-                Publish(
-                    new CombatEvent(AbilityTriggerEvent.OnHeal, source, target, effect.Id),
-                    combatants);
+                PublishIfObserved(AbilityTriggerEvent.OnHeal, source, target, effect.Id, combatants);
             }
 
             return;
@@ -1198,7 +1274,7 @@ public sealed class FastCombatEngine
                     countStatsActivation,
                     incomingRawDamage: damage,
                     avoidedDamage: damage);
-                Publish(new CombatEvent(AbilityTriggerEvent.OnDodge, target, source, null), combatants);
+                PublishIfObserved(AbilityTriggerEvent.OnDodge, target, source, null, combatants);
                 return 0;
             }
         }
@@ -1349,23 +1425,54 @@ public sealed class FastCombatEngine
             damageType: damageType);
         if (delivery == DamageDelivery.Direct)
         {
-            var directEvent = new CombatEvent(
+            var abilityId = sourceName.Equals("Basic Attack", StringComparison.Ordinal)
+                ? "basic_attack"
+                : effect?.Id;
+            PublishIfObserved(
                 AbilityTriggerEvent.OnHit,
                 source,
                 target,
-                sourceName.Equals("Basic Attack", StringComparison.Ordinal) ? "basic_attack" : effect?.Id,
+                abilityId,
+                combatants,
                 healthDamage,
-                DamageType: damageType,
-                AttackType: attackType,
-                WasCritical: isCritical,
-                WasDirectHit: true);
-            Publish(directEvent, combatants);
-            PublishAttackTypeEvents(source, target, attackType, combatants, directEvent);
-            Publish(directEvent with { Event = AbilityTriggerEvent.OnDamaged, Source = target, Target = source }, combatants);
-            Publish(directEvent with { Event = AbilityTriggerEvent.OnAttacked, Source = target, Target = source }, combatants);
+                damageType: damageType,
+                attackType: attackType,
+                wasCritical: isCritical,
+                wasDirectHit: true);
+            PublishAttackTypeEvents(
+                source,
+                target,
+                abilityId,
+                healthDamage,
+                damageType,
+                attackType,
+                isCritical,
+                combatants);
+            PublishIfObserved(
+                AbilityTriggerEvent.OnDamaged,
+                target,
+                source,
+                abilityId,
+                combatants,
+                healthDamage,
+                damageType: damageType,
+                attackType: attackType,
+                wasCritical: isCritical,
+                wasDirectHit: true);
+            PublishIfObserved(
+                AbilityTriggerEvent.OnAttacked,
+                target,
+                source,
+                abilityId,
+                combatants,
+                healthDamage,
+                damageType: damageType,
+                attackType: attackType,
+                wasCritical: isCritical,
+                wasDirectHit: true);
         }
         if (healthDamage > 0)
-            Publish(new CombatEvent(AbilityTriggerEvent.OnHealthChanged, target, source, null), combatants);
+            PublishIfObserved(AbilityTriggerEvent.OnHealthChanged, target, source, null, combatants);
 
         if (delivery == DamageDelivery.Direct
             && guardedDamage > 0
@@ -1378,18 +1485,28 @@ public sealed class FastCombatEngine
         if (!target.IsAlive)
         {
             Log(source, target, sourceName, EventType.Death, 0, $"{target.Name} was killed by {source.Name}.", statsSource);
-            var deathEvent = new CombatEvent(
+            PublishIfObserved(
                 AbilityTriggerEvent.OnKill,
                 source,
                 target,
                 null,
+                combatants,
                 healthDamage,
-                DamageType: damageType,
-                AttackType: attackType,
-                WasCritical: isCritical,
-                WasDirectHit: delivery == DamageDelivery.Direct);
-            Publish(deathEvent, combatants);
-            Publish(deathEvent with { Event = AbilityTriggerEvent.OnDeath, Source = target, Target = source }, combatants);
+                damageType: damageType,
+                attackType: attackType,
+                wasCritical: isCritical,
+                wasDirectHit: delivery == DamageDelivery.Direct);
+            PublishIfObserved(
+                AbilityTriggerEvent.OnDeath,
+                target,
+                source,
+                null,
+                combatants,
+                healthDamage,
+                damageType: damageType,
+                attackType: attackType,
+                wasCritical: isCritical,
+                wasDirectHit: delivery == DamageDelivery.Direct);
             NotifySummonChanged(target, combatants);
             ExpireOwnedSummons(target, combatants, "owner death");
         }
@@ -1585,19 +1702,62 @@ public sealed class FastCombatEngine
     private void PublishAttackTypeEvents(
         RuntimeCombatant source,
         RuntimeCombatant target,
+        string? abilityId,
+        int magnitude,
+        DamageType damageType,
         AttackType attackType,
-        IReadOnlyList<RuntimeCombatant> combatants,
-        CombatEvent combatEvent)
+        bool wasCritical,
+        IReadOnlyList<RuntimeCombatant> combatants)
     {
         switch (attackType)
         {
             case AttackType.Melee:
-                Publish(combatEvent with { Event = AbilityTriggerEvent.OnMeleeAttack }, combatants);
-                Publish(combatEvent with { Event = AbilityTriggerEvent.OnMeleeAttacked, Source = target, Target = source }, combatants);
+                PublishIfObserved(
+                    AbilityTriggerEvent.OnMeleeAttack,
+                    source,
+                    target,
+                    abilityId,
+                    combatants,
+                    magnitude,
+                    damageType: damageType,
+                    attackType: attackType,
+                    wasCritical: wasCritical,
+                    wasDirectHit: true);
+                PublishIfObserved(
+                    AbilityTriggerEvent.OnMeleeAttacked,
+                    target,
+                    source,
+                    abilityId,
+                    combatants,
+                    magnitude,
+                    damageType: damageType,
+                    attackType: attackType,
+                    wasCritical: wasCritical,
+                    wasDirectHit: true);
                 break;
             case AttackType.Ranged:
-                Publish(combatEvent with { Event = AbilityTriggerEvent.OnRangedAttack }, combatants);
-                Publish(combatEvent with { Event = AbilityTriggerEvent.OnRangedAttacked, Source = target, Target = source }, combatants);
+                PublishIfObserved(
+                    AbilityTriggerEvent.OnRangedAttack,
+                    source,
+                    target,
+                    abilityId,
+                    combatants,
+                    magnitude,
+                    damageType: damageType,
+                    attackType: attackType,
+                    wasCritical: wasCritical,
+                    wasDirectHit: true);
+                PublishIfObserved(
+                    AbilityTriggerEvent.OnRangedAttacked,
+                    target,
+                    source,
+                    abilityId,
+                    combatants,
+                    magnitude,
+                    damageType: damageType,
+                    attackType: attackType,
+                    wasCritical: wasCritical,
+                    wasDirectHit: true);
                 break;
         }
     }
@@ -1643,12 +1803,12 @@ public sealed class FastCombatEngine
             return;
 
         if (effect is null || !IsPeriodicEffect(effect))
-            Publish(new CombatEvent(AbilityTriggerEvent.OnHeal, source, target, null), combatants);
-        Publish(new CombatEvent(AbilityTriggerEvent.OnHealed, target, source, null), combatants);
-        Publish(new CombatEvent(AbilityTriggerEvent.OnHealthChanged, target, source, null), combatants);
+            PublishIfObserved(AbilityTriggerEvent.OnHeal, source, target, null, combatants);
+        PublishIfObserved(AbilityTriggerEvent.OnHealed, target, source, null, combatants);
+        PublishIfObserved(AbilityTriggerEvent.OnHealthChanged, target, source, null, combatants);
 
         if (isLifeSteal)
-            Publish(new CombatEvent(AbilityTriggerEvent.OnLifestealHeal, source, target, null), combatants);
+            PublishIfObserved(AbilityTriggerEvent.OnLifestealHeal, source, target, null, combatants);
     }
 
     private void ApplyLifeSteal(
@@ -1744,14 +1904,15 @@ public sealed class FastCombatEngine
 
         if (existing is null || statusDefinition.StackingPolicy == AbilityStatusStackingPolicy.Replace)
         {
-            target.Statuses.Add(
-                new RuntimeStatus(
-                    statusDefinition,
-                    source,
-                    target,
-                    stacks,
-                    statsSource,
-                    CalculateStatusDuration(statusDefinition, target)));
+            var status = new RuntimeStatus(
+                statusDefinition,
+                source,
+                target,
+                stacks,
+                statsSource,
+                CalculateStatusDuration(statusDefinition, target));
+            RegisterListeners(status);
+            target.Statuses.Add(status);
         }
 
         Log(source, target, statusId, EventType.StatusEffect, stacks, $"{source.Name} applied {statusId} to {target.Name}.", statsSource, countStatsActivation);
@@ -2047,6 +2208,7 @@ public sealed class FastCombatEngine
             summonDefinition,
             _abilitiesById,
             groupInstanceId);
+        RegisterListeners(summon);
         mutableCombatants.Add(summon);
         _basicAttackProgress[summon] = GetBasicAttackChargeThreshold();
         _healthRegenerationProgress[summon] = 0;
@@ -2262,8 +2424,8 @@ public sealed class FastCombatEngine
             $"{source.Name} swapped Health with {target.Name}.",
             statsSource,
             countStatsActivation);
-        Publish(new CombatEvent(AbilityTriggerEvent.OnHealthChanged, source, target, effectId), combatants);
-        Publish(new CombatEvent(AbilityTriggerEvent.OnHealthChanged, target, source, effectId), combatants);
+        PublishIfObserved(AbilityTriggerEvent.OnHealthChanged, source, target, effectId, combatants);
+        PublishIfObserved(AbilityTriggerEvent.OnHealthChanged, target, source, effectId, combatants);
     }
 
     private int GetBasicAttackChargeThreshold() => Math.Max(1, _basicAttackIntervalTicks);
@@ -2839,9 +3001,9 @@ public sealed class FastCombatEngine
                 EventType.HealthRegeneration,
                 restored,
                 $"{combatant.Name} regenerated {restored} health.");
-            Publish(new CombatEvent(AbilityTriggerEvent.OnHeal, combatant, combatant, null), combatants);
-            Publish(new CombatEvent(AbilityTriggerEvent.OnHealed, combatant, combatant, null), combatants);
-            Publish(new CombatEvent(AbilityTriggerEvent.OnHealthChanged, combatant, combatant, null), combatants);
+            PublishIfObserved(AbilityTriggerEvent.OnHeal, combatant, combatant, null, combatants);
+            PublishIfObserved(AbilityTriggerEvent.OnHealed, combatant, combatant, null, combatants);
+            PublishIfObserved(AbilityTriggerEvent.OnHealthChanged, combatant, combatant, null, combatants);
         }
     }
 
@@ -3694,11 +3856,12 @@ public sealed class FastCombatEngine
         IReadOnlyList<CompiledCondition> conditions,
         RuntimeCombatant source,
         CombatEvent combatEvent,
-        IReadOnlyList<RuntimeCombatant> combatants)
+        IReadOnlyList<RuntimeCombatant> combatants,
+        RuntimeCombatant? effectTarget = null)
     {
         for (var index = 0; index < conditions.Count; index++)
         {
-            if (!ConditionPass(conditions[index], source, combatEvent, combatants))
+            if (!ConditionPass(conditions[index], source, combatEvent, combatants, effectTarget))
                 return false;
         }
 
@@ -3709,7 +3872,8 @@ public sealed class FastCombatEngine
         CompiledCondition condition,
         RuntimeCombatant source,
         CombatEvent combatEvent,
-        IReadOnlyList<RuntimeCombatant> combatants)
+        IReadOnlyList<RuntimeCombatant> combatants,
+        RuntimeCombatant? effectTarget)
     {
         if (condition.Type == AbilityConditionType.AnyEnemyHealthBelowPercent)
         {
@@ -3757,7 +3921,7 @@ public sealed class FastCombatEngine
         if (condition.Type == AbilityConditionType.EventMagnitudeAtMost)
             return combatEvent.Magnitude <= condition.Value;
 
-        var subject = ResolveSubject(condition.Subject, source, combatEvent);
+        var subject = ResolveSubject(condition.Subject, source, combatEvent, effectTarget);
         if (subject is null)
             return false;
 
@@ -3801,11 +3965,12 @@ public sealed class FastCombatEngine
     private static RuntimeCombatant? ResolveSubject(
         AbilityConditionSubject subject,
         RuntimeCombatant source,
-        CombatEvent combatEvent) =>
+        CombatEvent combatEvent,
+        RuntimeCombatant? effectTarget) =>
         subject switch
         {
             AbilityConditionSubject.Source => source,
-            AbilityConditionSubject.Target => combatEvent.Target,
+            AbilityConditionSubject.Target => effectTarget ?? combatEvent.Target,
             AbilityConditionSubject.EventSource => combatEvent.Source,
             AbilityConditionSubject.EventTarget => combatEvent.Target,
             _ => null

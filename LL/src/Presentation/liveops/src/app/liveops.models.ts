@@ -337,3 +337,115 @@ export interface OperationalStatus {
   recentActions: AdministrationAuditEntry[];
   warnings: string[];
 }
+
+export type AccountRiskSeverity = 'Low' | 'Moderate' | 'High' | 'Critical';
+export type AccountRiskSignalType = 'IncomingConcentration' | 'OneSidedRelationship' | 'FeederNetwork' | 'YoungAccountOutflow' | 'CircularTransfer';
+export type AccountInvestigationStatus = 'Unreviewed' | 'Investigating' | 'Watchlisted' | 'Cleared' | 'ConfirmedAbuse' | 'Actioned';
+
+export interface AccountRiskSummary {
+  accountId: string;
+  characterId: string;
+  accountLabel: string;
+  characterName: string;
+  characterLevel: number;
+  accountCreatedUtc: string;
+  lastSessionUtc: string | null;
+  score: number;
+  severity: AccountRiskSeverity;
+  primarySignalType: AccountRiskSignalType | null;
+  primaryReason: string;
+  connectedAccountCount: number;
+  incomingCinders: number;
+  outgoingCinders: number;
+  transferCount: number;
+  firstFlaggedAt: string | null;
+  lastTriggeredAt: string | null;
+  evaluatedAt: string;
+  investigationStatus: AccountInvestigationStatus;
+}
+
+export interface AccountRiskPage {
+  entries: AccountRiskSummary[];
+  total: number;
+  counts: Partial<Record<AccountRiskSeverity, number>>;
+  lastEvaluatedAt: string | null;
+  page: number;
+  pageSize: number;
+}
+
+export interface AccountRiskSignal {
+  type: AccountRiskSignalType;
+  category: string;
+  contribution: number;
+  title: string;
+  explanation: string;
+  evidence: Record<string, number>;
+}
+
+export interface AccountRiskRelationship {
+  accountId: string;
+  characterId: string;
+  characterName: string;
+  relationship: string;
+  sentToSubject: number;
+  receivedFromSubject: number;
+  transactionCount: number;
+  youngAccount: boolean;
+  riskScore: number | null;
+  riskSeverity: AccountRiskSeverity | null;
+}
+
+export interface AccountRiskTransfer {
+  transferId: string;
+  direction: 'Incoming' | 'Outgoing';
+  kind: 'Cinders' | 'InventoryItem';
+  counterpartyAccountId: string;
+  counterpartyCharacterId: string;
+  counterpartyCharacterName: string;
+  assetId: string;
+  assetName: string;
+  quantity: number;
+  occurredAt: string;
+}
+
+export interface AccountRiskHistoryPoint {
+  id: string;
+  score: number;
+  severity: AccountRiskSeverity;
+  evaluatedAt: string;
+}
+
+export interface AccountRiskNote {
+  id: string;
+  actorSubject: string;
+  actorDisplayName: string;
+  body: string;
+  createdAt: string;
+}
+
+export interface AccountRiskDetails {
+  account: AccountRiskSummary;
+  signals: AccountRiskSignal[];
+  relationships: AccountRiskRelationship[];
+  transfers: AccountRiskTransfer[];
+  history: AccountRiskHistoryPoint[];
+  notes: AccountRiskNote[];
+}
+
+export interface AccountRiskFilters {
+  search?: string;
+  minimumSeverity?: string;
+  signalType?: string;
+  status?: string;
+  minimumScore?: string;
+  maximumAccountAgeDays?: string;
+  lastTriggeredAfter?: string;
+  sort?: string;
+}
+
+export interface AccountRiskOperation {
+  operationId: string;
+  wasAlreadyProcessed: boolean;
+  status: AccountInvestigationStatus | null;
+  note: AccountRiskNote | null;
+}

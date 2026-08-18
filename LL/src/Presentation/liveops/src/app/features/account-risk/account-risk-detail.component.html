@@ -1,0 +1,95 @@
+<main class="risk-detail-workspace">
+  <button class="risk-back" type="button" (click)="back()">← Account risk queue</button>
+  @if (message) { <div class="message" [class]="'message ' + messageTone" role="status">{{ message }}</div> }
+  @if (loading) {
+    <div class="risk-detail-loading">Loading investigation evidence…</div>
+  } @else if (details; as view) {
+    <header class="risk-detail-header">
+      <div>
+        <p class="eyebrow">Account investigation · automated signals are not a finding of guilt</p>
+        <div class="risk-detail-title"><h1>{{ view.account.characterName }}</h1><span>Lv {{ view.account.characterLevel }}</span><span class="investigation-pill">{{ view.account.investigationStatus }}</span></div>
+        <p>{{ view.account.accountLabel }} · <code>{{ view.account.accountId }}</code></p>
+      </div>
+      <div class="risk-verdict" [class]="view.account.severity.toLowerCase()">
+        <span>{{ view.account.severity }} priority</span><strong>{{ view.account.score }}</strong><small>/ 100 risk score</small>
+      </div>
+    </header>
+
+    <section class="risk-context-strip">
+      <div><span>Account created</span><strong>{{ view.account.accountCreatedUtc | date: 'mediumDate' }}</strong></div>
+      <div><span>Last session issued</span><strong>{{ view.account.lastSessionUtc ? (view.account.lastSessionUtc | date: 'medium') : 'Unavailable' }}</strong></div>
+      <div><span>Incoming cinders</span><strong>{{ view.account.incomingCinders | number }}</strong></div>
+      <div><span>Outgoing cinders</span><strong>{{ view.account.outgoingCinders | number }}</strong></div>
+      <div><span>Counterparties</span><strong>{{ view.account.connectedAccountCount }}</strong></div>
+      <div><span>Direct transfers</span><strong>{{ view.account.transferCount }}</strong></div>
+    </section>
+
+    <section class="risk-panel why-flagged">
+      <header><div><p class="eyebrow">Evidence and interpretation</p><h2>Why this account was flagged</h2></div><small>Contributions are capped within correlated categories.</small></header>
+      <div class="risk-signal-list">
+        @for (signal of view.signals; track signal.type) {
+          <article><div class="risk-contribution">+{{ signal.contribution }}</div><div><span>{{ signal.category }} · {{ signal.type }}</span><h3>{{ signal.title }}</h3><p>{{ signal.explanation }}</p><details><summary>Raw measured facts</summary><dl>@for (fact of signal.evidence | keyvalue; track fact.key) { <div><dt>{{ fact.key }}</dt><dd>{{ fact.value | number: '1.0-2' }}</dd></div> }</dl></details></div></article>
+        } @empty { <div class="risk-empty">No material signals are present in the current evaluation window.</div> }
+      </div>
+    </section>
+
+    <div class="risk-detail-grid">
+      <section class="risk-panel risk-connections">
+        <header><div><p class="eyebrow">Direct relationships</p><h2>Connected accounts</h2></div><span>{{ view.relationships.length }} shown</span></header>
+        <div class="risk-connection-table">
+          <div class="risk-connection-head"><span>Account</span><span>Relationship</span><span>To subject</span><span>From subject</span><span>Risk</span></div>
+          @for (relation of view.relationships; track relation.accountId) {
+            <button type="button" (click)="openAccount(relation.accountId)">
+              <span><strong>{{ relation.characterName }}</strong><small>{{ relation.youngAccount ? 'Young account · ' : '' }}{{ relation.transactionCount }} transfers</small></span>
+              <span>{{ relation.relationship }}</span><span>{{ relation.sentToSubject | number }}</span><span>{{ relation.receivedFromSubject | number }}</span>
+              <span><span class="risk-severity" [class]="'risk-severity ' + (relation.riskSeverity || 'Low').toLowerCase()">{{ relation.riskScore ?? '—' }}</span></span>
+            </button>
+          } @empty { <div class="risk-empty">No connected direct-transfer accounts.</div> }
+        </div>
+      </section>
+
+      <section class="risk-panel risk-history-panel">
+        <header><div><p class="eyebrow">Sparse snapshots</p><h2>Risk history</h2></div><span>Stored on meaningful change</span></header>
+        <div class="risk-history-list">
+          @for (point of view.history; track point.id) {
+            <div><time>{{ point.evaluatedAt | date: 'short' }}</time><span class="risk-history-bar"><i [style.width.%]="point.score"></i></span><strong>{{ point.score }}</strong><small>{{ point.severity }}</small></div>
+          } @empty { <div class="risk-empty">No historical changes recorded.</div> }
+        </div>
+      </section>
+    </div>
+
+    <section class="risk-panel risk-transfers">
+      <header><div><p class="eyebrow">Underlying records</p><h2>Transaction timeline</h2></div><small>Items are shown as quantities and are not converted into cinders.</small></header>
+      <div class="risk-transfer-filters">
+        <label>Direction<select [(ngModel)]="direction"><option value="">Both</option><option value="Incoming">Incoming</option><option value="Outgoing">Outgoing</option></select></label>
+        <label>Asset kind<select [(ngModel)]="kind"><option value="">All</option><option value="Cinders">Cinders</option><option value="InventoryItem">Inventory item</option></select></label>
+        <label>Counterparty<input [(ngModel)]="counterparty" placeholder="Name or account UUID" /></label>
+        <span>{{ filteredTransfers.length }} / {{ view.transfers.length }} records</span>
+      </div>
+      <div class="risk-transfer-list">
+        @for (transfer of filteredTransfers; track transfer.transferId) {
+          <article>
+            <time>{{ transfer.occurredAt | date: 'medium' }}</time>
+            <span class="transfer-direction" [class.incoming]="transfer.direction === 'Incoming'">{{ transfer.direction === 'Incoming' ? '→' : '←' }} {{ transfer.direction }}</span>
+            <button type="button" (click)="openPlayer(transfer.counterpartyCharacterId)"><strong>{{ transfer.counterpartyCharacterName }}</strong><small>{{ transfer.counterpartyAccountId }}</small></button>
+            <span><strong>{{ transfer.quantity | number }} {{ transfer.assetName }}</strong><small>{{ transfer.kind }} · {{ transfer.assetId }}</small></span>
+          </article>
+        } @empty { <div class="risk-empty">No transfers match the current filters.</div> }
+      </div>
+    </section>
+
+    <section class="risk-panel investigation-workflow">
+      <header><div><p class="eyebrow">Human review · separately audited</p><h2>Investigation</h2></div><span class="investigation-pill">{{ view.account.investigationStatus }}</span></header>
+      @if (canModerate) {
+        <div class="investigation-actions">
+          <form (ngSubmit)="updateStatus()"><label>Review status<select name="review-status" [(ngModel)]="selectedStatus"><option value="Unreviewed">Unreviewed</option><option value="Investigating">Investigating</option><option value="Watchlisted">Watchlisted</option><option value="Cleared">Cleared</option><option value="ConfirmedAbuse">Confirmed abuse</option><option value="Actioned">Actioned</option></select></label><label>Reason<input name="status-reason" [(ngModel)]="statusReason" maxlength="500" placeholder="Case/reference and rationale" /></label><button class="primary" type="submit" [disabled]="saving">Update status</button></form>
+          <form (ngSubmit)="addNote()"><label>Append-only investigation note<textarea name="risk-note" [(ngModel)]="note" maxlength="4000" placeholder="Record what was reviewed and why…"></textarea></label><button class="secondary" type="submit" [disabled]="saving">Add note</button></form>
+        </div>
+      } @else { <div class="permission-note">You have read access. Account-moderation permission is required to change review state or add notes.</div> }
+      <div class="investigation-notes">
+        @for (entry of view.notes; track entry.id) { <article><header><strong>{{ entry.actorDisplayName }}</strong><time>{{ entry.createdAt | date: 'medium' }}</time></header><p>{{ entry.body }}</p><small>{{ entry.actorSubject }}</small></article> }
+        @empty { <div class="risk-empty">No investigation notes yet.</div> }
+      </div>
+    </section>
+  }
+</main>

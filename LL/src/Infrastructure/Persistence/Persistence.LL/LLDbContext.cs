@@ -81,6 +81,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         NormalizeIdentityFields();
         EnforceAppendOnlyAdminActions();
         EnforceAppendOnlyEconomyLedger();
+        EnforceAppendOnlyRiskEvidence();
         var affectedRows = await base.SaveChangesAsync(cancellationToken);
         _saveChangesVersion++;
         return affectedRows;
@@ -116,6 +117,17 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
             .Any(x => x.State is EntityState.Modified or EntityState.Deleted))
         {
             throw new InvalidOperationException("Economy ledger entries are append-only and cannot be modified or deleted.");
+        }
+    }
+
+    private void EnforceAppendOnlyRiskEvidence()
+    {
+        if (ChangeTracker.Entries<AccountRiskHistory>()
+                .Any(x => x.State is EntityState.Modified or EntityState.Deleted) ||
+            ChangeTracker.Entries<AccountRiskNote>()
+                .Any(x => x.State is EntityState.Modified or EntityState.Deleted))
+        {
+            throw new InvalidOperationException("Account-risk history and investigation notes are append-only.");
         }
     }
 
@@ -419,6 +431,10 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<AdminAction> AdminActions => Set<AdminAction>();
     public DbSet<AdminActionPreview> AdminActionPreviews => Set<AdminActionPreview>();
     public DbSet<AccountRestriction> AccountRestrictions => Set<AccountRestriction>();
+    public DbSet<AccountRiskSnapshot> AccountRiskSnapshots => Set<AccountRiskSnapshot>();
+    public DbSet<AccountRiskHistory> AccountRiskHistory => Set<AccountRiskHistory>();
+    public DbSet<AccountRiskInvestigation> AccountRiskInvestigations => Set<AccountRiskInvestigation>();
+    public DbSet<AccountRiskNote> AccountRiskNotes => Set<AccountRiskNote>();
     public DbSet<AchievementDefinition> AchievementDefinitions => Set<AchievementDefinition>();
     public DbSet<AchievementEventLedger> AchievementEventLedgers => Set<AchievementEventLedger>();
     public DbSet<PlayerAchievementProgress> PlayerAchievementProgresses => Set<PlayerAchievementProgress>();

@@ -25,6 +25,18 @@ export const routes: Routes = [
       .then((component) => component.PlayerWorkspaceComponent),
     title: 'LiveOps player',
   },
+  {
+    path: 'account-risk',
+    loadComponent: () => import('./features/account-risk/account-risk.component')
+      .then((component) => component.AccountRiskComponent),
+    title: 'LiveOps account risk',
+  },
+  {
+    path: 'account-risk/:accountId',
+    loadComponent: () => import('./features/account-risk/account-risk-detail.component')
+      .then((component) => component.AccountRiskDetailComponent),
+    title: 'LiveOps account investigation',
+  },
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   { path: '**', redirectTo: 'dashboard' },
 ];

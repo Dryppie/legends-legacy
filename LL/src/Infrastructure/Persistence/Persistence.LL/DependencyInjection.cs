@@ -90,6 +90,7 @@ public static class DependencyInjection
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IAdministrationRepository, AdministrationRepository>();
+        services.AddScoped<IAccountRiskRepository, AccountRiskRepository>();
         // Related to regions
         services.AddScoped<IAreaRepository, AreaRepository>();
 

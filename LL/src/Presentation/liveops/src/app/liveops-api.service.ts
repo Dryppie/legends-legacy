@@ -4,6 +4,10 @@ import { firstValueFrom } from 'rxjs';
 import {
   ApiResponse,
   ActionPreview,
+  AccountRiskDetails,
+  AccountRiskFilters,
+  AccountRiskOperation,
+  AccountRiskPage,
   AdministrationAuditFilters,
   AdministrationAuditPage,
   ItemCatalogEntry,
@@ -76,6 +80,27 @@ export class LiveOpsApiService {
     return firstValueFrom(
       this.http.get<ApiResponse<OperationalStatus>>('/api/liveops/status'),
     );
+  }
+
+  accountRisks(filters: AccountRiskFilters, page = 1, pageSize = 50): Promise<ApiResponse<AccountRiskPage>> {
+    let params = new HttpParams().set('page', page).set('pageSize', pageSize);
+    for (const [name, value] of Object.entries(filters)) {
+      if (value?.trim()) params = params.set(name, value.trim());
+    }
+    return firstValueFrom(this.http.get<ApiResponse<AccountRiskPage>>('/api/liveops/account-risk', { params }));
+  }
+
+  accountRiskDetails(accountId: string, transferLimit = 200): Promise<ApiResponse<AccountRiskDetails>> {
+    const params = new HttpParams().set('transferLimit', transferLimit);
+    return firstValueFrom(this.http.get<ApiResponse<AccountRiskDetails>>(`/api/liveops/account-risk/${accountId}`, { params }));
+  }
+
+  updateAccountRiskStatus(accountId: string, body: object): Promise<ApiResponse<AccountRiskOperation>> {
+    return this.post(`/api/liveops/account-risk/${accountId}/status`, body);
+  }
+
+  addAccountRiskNote(accountId: string, body: object): Promise<ApiResponse<AccountRiskOperation>> {
+    return this.post(`/api/liveops/account-risk/${accountId}/notes`, body);
   }
 
   audit(

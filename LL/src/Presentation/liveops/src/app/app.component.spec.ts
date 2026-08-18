@@ -28,7 +28,7 @@ describe('LiveOps routed frontend', () => {
     expect(api.session).toHaveBeenCalledOnceWith();
     expect(api.initializeAntiforgery).toHaveBeenCalledOnceWith();
     expect(fixture.nativeElement.textContent).toContain('Test Operator');
-    expect(fixture.nativeElement.querySelectorAll('.primary-nav a').length).toBe(3);
+    expect(fixture.nativeElement.querySelectorAll('.primary-nav a').length).toBe(4);
   });
 
   it('loads operational status inside the dashboard route component', async () => {

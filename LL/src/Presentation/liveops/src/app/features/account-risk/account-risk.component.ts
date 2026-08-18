@@ -1,0 +1,94 @@
+import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { LiveOpsApiService } from '../../liveops-api.service';
+import { AccountRiskFilters, AccountRiskPage, AccountRiskSeverity } from '../../liveops.models';
+
+@Component({
+  selector: 'app-account-risk',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './account-risk.component.html',
+})
+export class AccountRiskComponent implements OnInit {
+  data: AccountRiskPage | null = null;
+  search = '';
+  minimumSeverity = 'Moderate';
+  signalType = '';
+  status = '';
+  minimumScore = '';
+  maximumAccountAgeDays = '';
+  sort = 'risk';
+  page = 1;
+  loading = false;
+  message = '';
+
+  constructor(private readonly api: LiveOpsApiService, private readonly router: Router) {}
+
+  ngOnInit(): void { void this.load(); }
+
+  async applyFilters(): Promise<void> {
+    this.page = 1;
+    await this.load();
+  }
+
+  async quickFilter(filter: 'critical' | 'high' | 'feeders' | 'new' | 'all'): Promise<void> {
+    this.signalType = '';
+    this.maximumAccountAgeDays = '';
+    this.minimumSeverity = filter === 'critical' ? 'Critical' : filter === 'high' ? 'High' : filter === 'all' ? 'Low' : 'Moderate';
+    if (filter === 'feeders') this.signalType = 'FeederNetwork';
+    if (filter === 'new') this.maximumAccountAgeDays = '14';
+    await this.applyFilters();
+  }
+
+  async changePage(delta: number): Promise<void> {
+    const next = this.page + delta;
+    if (next < 1 || (delta > 0 && this.data && next > Math.ceil(this.data.total / this.data.pageSize))) return;
+    this.page = next;
+    await this.load();
+  }
+
+  open(accountId: string): void { void this.router.navigate(['/account-risk', accountId]); }
+
+  count(severity: AccountRiskSeverity): number { return this.data?.counts[severity] ?? 0; }
+
+  ageDays(createdUtc: string): number {
+    return Math.max(0, Math.floor((Date.now() - new Date(createdUtc).getTime()) / 86_400_000));
+  }
+
+  private async load(): Promise<void> {
+    this.loading = true;
+    this.message = '';
+    try {
+      const response = await this.api.accountRisks(this.filters(), this.page);
+      if (!response.isSuccess || !response.data) {
+        this.message = response.errorMessage || 'Account-risk summaries could not be loaded.';
+        return;
+      }
+      this.data = response.data;
+    } catch (error) {
+      this.message = this.errorMessage(error);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  private filters(): AccountRiskFilters {
+    return {
+      search: this.search,
+      minimumSeverity: this.minimumSeverity,
+      signalType: this.signalType,
+      status: this.status,
+      minimumScore: this.minimumScore,
+      maximumAccountAgeDays: this.maximumAccountAgeDays,
+      sort: this.sort,
+    };
+  }
+
+  private errorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) return error.error?.errorMessage ?? error.message;
+    return error instanceof Error ? error.message : 'An unexpected error occurred.';
+  }
+}

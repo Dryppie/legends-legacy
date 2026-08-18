@@ -1,0 +1,64 @@
+<main class="risk-workspace">
+  <section class="risk-heading">
+    <div>
+      <p class="eyebrow">Investigation priority · not proof of abuse</p>
+      <h1>Account risk</h1>
+      <p>Explainable cinder-flow signals derived from historical direct transfers. Review the evidence before taking any moderation action.</p>
+    </div>
+    @if (data?.lastEvaluatedAt) { <div class="risk-freshness">Evaluated {{ data!.lastEvaluatedAt | date: 'medium' }}</div> }
+  </section>
+
+  <section class="risk-counts" aria-label="Risk counts">
+    <button type="button" class="critical" (click)="quickFilter('critical')"><span>Critical</span><strong>{{ count('Critical') }}</strong></button>
+    <button type="button" class="high" (click)="quickFilter('high')"><span>High</span><strong>{{ count('High') }}</strong></button>
+    <button type="button" class="moderate" (click)="quickFilter('all')"><span>Moderate</span><strong>{{ count('Moderate') }}</strong></button>
+    <div><span>Showing</span><strong>{{ data?.total ?? 0 }}</strong></div>
+  </section>
+
+  <div class="risk-quick-filters">
+    <span>Quick views</span>
+    <button type="button" (click)="quickFilter('critical')">Critical</button>
+    <button type="button" (click)="quickFilter('high')">High risk</button>
+    <button type="button" (click)="quickFilter('feeders')">Possible alt feeders</button>
+    <button type="button" (click)="quickFilter('new')">Young accounts</button>
+    <button type="button" (click)="quickFilter('all')">Include low</button>
+  </div>
+
+  <form class="risk-filters" (ngSubmit)="applyFilters()">
+    <label class="risk-search">Player or account<input name="risk-search" [(ngModel)]="search" placeholder="Name or UUID" /></label>
+    <label>Minimum risk<select name="risk-severity" [(ngModel)]="minimumSeverity"><option value="Low">All</option><option value="Moderate">Moderate</option><option value="High">High</option><option value="Critical">Critical</option></select></label>
+    <label>Primary signal<select name="risk-signal" [(ngModel)]="signalType"><option value="">All signals</option><option value="FeederNetwork">Feeder network</option><option value="IncomingConcentration">Incoming concentration</option><option value="OneSidedRelationship">One-sided relationship</option><option value="YoungAccountOutflow">Young account outflow</option><option value="CircularTransfer">Circular transfer</option></select></label>
+    <label>Review state<select name="risk-status" [(ngModel)]="status"><option value="">All states</option><option value="Unreviewed">Unreviewed</option><option value="Investigating">Investigating</option><option value="Watchlisted">Watchlisted</option><option value="Cleared">Cleared</option><option value="ConfirmedAbuse">Confirmed abuse</option><option value="Actioned">Actioned</option></select></label>
+    <label>Min score<input name="risk-score" type="number" min="0" max="100" [(ngModel)]="minimumScore" placeholder="0–100" /></label>
+    <label>Max age (days)<input name="risk-age" type="number" min="0" [(ngModel)]="maximumAccountAgeDays" placeholder="Any" /></label>
+    <label>Sort<select name="risk-sort" [(ngModel)]="sort"><option value="risk">Highest risk</option><option value="recent">Most recent trigger</option><option value="volume">Largest transfer volume</option><option value="connected">Most connected</option><option value="newest">Newest flag</option></select></label>
+    <button class="primary" type="submit" [disabled]="loading">{{ loading ? 'Loading' : 'Apply' }}</button>
+  </form>
+
+  @if (message) { <div class="message error" role="alert">{{ message }}</div> }
+
+  <section class="risk-table-wrap" [attr.aria-busy]="loading">
+    <div class="risk-table-head"><span>{{ data?.total ?? 0 }} matching accounts</span><span>Automated risk and moderator state are intentionally separate</span></div>
+    <div class="risk-table-scroll">
+      <table class="risk-table">
+        <thead><tr><th>Player</th><th>Risk</th><th>Primary evidence</th><th>Connections</th><th>Direct cinder flow</th><th>Context</th><th>Review</th></tr></thead>
+        <tbody>
+          @for (entry of data?.entries ?? []; track entry.accountId) {
+            <tr tabindex="0" (click)="open(entry.accountId)" (keydown.enter)="open(entry.accountId)">
+              <td><strong>{{ entry.characterName }}</strong><small>{{ entry.accountLabel }} · Lv {{ entry.characterLevel }}</small><code>{{ entry.accountId }}</code></td>
+              <td><span class="risk-severity" [class]="'risk-severity ' + entry.severity.toLowerCase()">{{ entry.severity }}</span><strong class="risk-score">{{ entry.score }}</strong><small>/ 100</small></td>
+              <td><strong>{{ entry.primarySignalType || 'No material signal' }}</strong><small>{{ entry.primaryReason }}</small></td>
+              <td><strong>{{ entry.connectedAccountCount }}</strong><small>{{ entry.transferCount }} transfers</small></td>
+              <td><strong>↓ {{ entry.incomingCinders | number }} / ↑ {{ entry.outgoingCinders | number }}</strong><small>cinders in configured lookback</small></td>
+              <td><strong>{{ ageDays(entry.accountCreatedUtc) }}d old</strong><small>Last session {{ entry.lastSessionUtc ? (entry.lastSessionUtc | date: 'short') : 'unknown' }}</small></td>
+              <td><span class="investigation-pill">{{ entry.investigationStatus }}</span></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="risk-empty">{{ loading ? 'Loading risk summaries…' : 'No accounts matched these investigation filters.' }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="risk-pagination"><button class="secondary" type="button" [disabled]="loading || page <= 1" (click)="changePage(-1)">Previous</button><span>Page {{ page }}</span><button class="secondary" type="button" [disabled]="loading || !data || page * data.pageSize >= data.total" (click)="changePage(1)">Next</button></div>
+  </section>
+</main>
