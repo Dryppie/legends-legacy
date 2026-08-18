@@ -243,6 +243,53 @@ public sealed class EventQuestSystemTests
     }
 
     [Fact]
+    public async Task Tracked_contributions_for_other_characters_do_not_break_progression()
+    {
+        await using var db = CreateDb();
+        var definition = CreateActiveDefinition(requiredAmount: 100);
+        var service = CreateService(db, definition, new RecordingPublisher());
+        var firstCharacterId = Guid.NewGuid();
+        var secondCharacterId = Guid.NewGuid();
+        CompleteTutorial(db, firstCharacterId);
+        CompleteTutorial(db, secondCharacterId);
+        await db.SaveChangesAsync();
+
+        await service.ProcessAsync(
+            firstCharacterId,
+            QuestTrigger.CombatCompleted("region_01_area_01", true),
+            Guid.NewGuid(),
+            "IdleCombatEncounterCompleted",
+            CancellationToken.None);
+        db.ChangeTracker.Clear();
+        await service.ProcessAsync(
+            secondCharacterId,
+            QuestTrigger.CombatCompleted("region_01_area_01", true),
+            Guid.NewGuid(),
+            "IdleCombatEncounterCompleted",
+            CancellationToken.None);
+        db.ChangeTracker.Clear();
+
+        await service.ProcessAsync(
+            firstCharacterId,
+            QuestTrigger.CombatCompleted("region_01_area_01", true),
+            Guid.NewGuid(),
+            "IdleCombatEncounterCompleted",
+            CancellationToken.None);
+        await service.ProcessAsync(
+            secondCharacterId,
+            QuestTrigger.CombatCompleted("region_01_area_01", true),
+            Guid.NewGuid(),
+            "IdleCombatEncounterCompleted",
+            CancellationToken.None);
+
+        var contributions = await db.EventQuestCharacterContributions
+            .OrderBy(x => x.CharacterId)
+            .ToListAsync();
+        Assert.Equal(2, contributions.Count);
+        Assert.All(contributions, contribution => Assert.Equal(2, contribution.TotalAmount));
+    }
+
+    [Fact]
     public async Task Event_completes_when_the_shared_target_is_reached()
     {
         await using var db = CreateDb();

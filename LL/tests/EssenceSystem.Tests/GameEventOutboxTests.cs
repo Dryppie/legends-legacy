@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Application.Common.Interfaces;
 using Application.Interfaces.Outbox;
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Quests;
@@ -24,7 +25,11 @@ using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions.Areas;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 using Persistence.LL;
+using Persistence.LL.Repositories.Outbox;
 using Services.LL.Combat.Layers.Orchestration.Idle;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Rewards.Idle;
@@ -146,6 +151,70 @@ public sealed class GameEventOutboxTests
             [StateSyncScopes.Achievements],
             GameEventOutboxWorker.GetCharacterScopes(GameEventOutboxConsumerNames.Achievements));
         Assert.Empty(GameEventOutboxWorker.GetCharacterScopes(GameEventOutboxConsumerNames.RealtimeInventory));
+    }
+
+    [Fact]
+    public async Task Worker_processes_each_delivery_in_a_fresh_scope()
+    {
+        var services = new ServiceCollection();
+        var databaseName = Guid.NewGuid().ToString();
+        var recorder = new ScopedContextRecorder();
+        var timeProvider = new FixedTimeProvider(Now);
+        services.AddDbContext<LLDbContext>(options => options
+            .UseInMemoryDatabase(databaseName)
+            .ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
+        services.AddScoped<IDbContext>(provider => provider.GetRequiredService<LLDbContext>());
+        services.AddScoped<IGameEventOutboxRepository, GameEventOutboxRepository>();
+        services.AddScoped<IGameEventOutboxConsumer, ScopedContextRecordingConsumer>();
+        services.AddScoped<IStateSyncService, StubStateSyncService>();
+        services.AddSingleton(recorder);
+        services.AddSingleton<TimeProvider>(timeProvider);
+        await using var provider = services.BuildServiceProvider();
+
+        using (var seedScope = provider.CreateScope())
+        {
+            var db = seedScope.ServiceProvider.GetRequiredService<LLDbContext>();
+            for (var index = 0; index < 2; index++)
+            {
+                var message = new GameEventOutboxMessage
+                {
+                    Id = Guid.NewGuid(),
+                    EventType = GameEventTypes.CharacterCreated,
+                    PayloadJson = "{}",
+                    CreatedAt = Now,
+                    AvailableAt = Now
+                };
+                db.GameEventOutboxMessages.Add(message);
+                db.GameEventOutboxDeliveries.Add(new GameEventOutboxDelivery
+                {
+                    Id = Guid.NewGuid(),
+                    MessageId = message.Id,
+                    Message = message,
+                    Consumer = ScopedContextRecordingConsumer.ConsumerName,
+                    Status = GameEventOutboxDeliveryStatus.Pending,
+                    CreatedAt = Now,
+                    AvailableAt = Now
+                });
+            }
+            await db.SaveChangesAsync();
+        }
+
+        var worker = new GameEventOutboxWorker(
+            provider.GetRequiredService<IServiceScopeFactory>(),
+            NullLogger<GameEventOutboxWorker>.Instance,
+            timeProvider);
+        await worker.StartAsync(CancellationToken.None);
+        try
+        {
+            await recorder.TwoDeliveriesProcessed.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        }
+        finally
+        {
+            await worker.StopAsync(CancellationToken.None);
+        }
+
+        Assert.Equal(2, recorder.ContextIds.Count);
+        Assert.Equal(2, recorder.ContextIds.Distinct().Count());
     }
 
     [Fact]
@@ -735,6 +804,73 @@ public sealed class GameEventOutboxTests
     private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
     {
         public override DateTimeOffset GetUtcNow() => now;
+    }
+
+    private sealed class ScopedContextRecorder
+    {
+        private readonly object _gate = new();
+
+        public List<Guid> ContextIds { get; } = [];
+        public TaskCompletionSource TwoDeliveriesProcessed { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public void Record(Guid contextId)
+        {
+            lock (_gate)
+            {
+                ContextIds.Add(contextId);
+                if (ContextIds.Count == 2)
+                {
+                    TwoDeliveriesProcessed.TrySetResult();
+                }
+            }
+        }
+    }
+
+    private sealed class ScopedContextRecordingConsumer(
+        LLDbContext db,
+        ScopedContextRecorder recorder) : IGameEventOutboxConsumer
+    {
+        public const string ConsumerName = "scope-recorder";
+        public string Consumer => ConsumerName;
+
+        public bool CanHandle(string eventType) => true;
+
+        public Task HandleAsync(GameEventOutboxMessage message, CancellationToken cancellationToken)
+        {
+            recorder.Record(db.ContextId.InstanceId);
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class StubStateSyncService : IStateSyncService
+    {
+        public IReadOnlyDictionary<string, long> GetChangedRevisions(Guid? characterId) =>
+            new Dictionary<string, long>();
+
+        public Task InvalidateCharacterAsync(
+            Guid characterId,
+            string reason,
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task InvalidateCharacterScopeAsync(
+            Guid characterId,
+            string scope,
+            string reason,
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task InvalidateWorldScopeAsync(
+            string scope,
+            string reason,
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task<StateSyncCheckpoint> GetCheckpointAsync(
+            Guid characterId,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(new StateSyncCheckpoint(
+                characterId,
+                new Dictionary<string, long>(),
+                Now));
     }
 
     private sealed class RecordingQuestProgressionService : IQuestProgressionService

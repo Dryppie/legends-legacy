@@ -81,7 +81,7 @@ public sealed class EventQuestService(
                      now <= x.EndsAtUtc))
         {
             var definition = definitions.Get(instance.EventQuestId, instance.DefinitionVersion);
-            var contribution = instance.Contributions.SingleOrDefault();
+            var contribution = instance.Contributions.SingleOrDefault(x => x.CharacterId == characterId);
             foreach (var objectiveDefinition in definition.Objectives)
             {
                 var objective = instance.Objectives.Single(x => x.ObjectiveKey == objectiveDefinition.Key);
@@ -178,7 +178,8 @@ public sealed class EventQuestService(
         var announcements = new List<EventQuestAnnouncement>();
         RefreshStatus(instance, now, announcements);
         var definition = definitions.Get(instance.EventQuestId, instance.DefinitionVersion);
-        var contribution = instance.Contributions.SingleOrDefault()?.TotalAmount ?? 0;
+        var contribution = instance.Contributions
+            .SingleOrDefault(x => x.CharacterId == characterId)?.TotalAmount ?? 0;
 
         if (instance.Status != EventQuestStatus.Completed || now > instance.ClaimEndsAtUtc)
             throw new InvalidOperationException("This event's rewards are not claimable.");
@@ -253,7 +254,8 @@ public sealed class EventQuestService(
             throw new InvalidOperationException("This event's personal milestone rewards are not claimable.");
         }
 
-        var contribution = instance.Contributions.SingleOrDefault()?.TotalAmount ?? 0;
+        var contribution = instance.Contributions
+            .SingleOrDefault(x => x.CharacterId == characterId)?.TotalAmount ?? 0;
         var claimedKeys = instance.MilestoneClaims
             .Select(x => x.MilestoneKey)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);

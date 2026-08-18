@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL;
 using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
+using Domain.Models.Outbox;
 using Services.LL.Outbox;
 using System.Diagnostics.Metrics;
 using System.Diagnostics;
@@ -73,18 +74,15 @@ public sealed class GameEventOutboxWorker(
 
     private async Task ProcessPendingDeliveriesAsync(CancellationToken cancellationToken)
     {
-        using var scope = scopeFactory.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<IGameEventOutboxRepository>();
-        var consumers = scope.ServiceProvider
-            .GetRequiredService<IEnumerable<IGameEventOutboxConsumer>>()
-            .ToDictionary(x => x.Consumer, StringComparer.OrdinalIgnoreCase);
-        var dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();
-        var stateSync = scope.ServiceProvider.GetRequiredService<IStateSyncService>();
-
-        var deliveries = await repository.ClaimPendingDeliveriesAsync(
-            BatchSize,
-            ProcessingTimeout,
-            cancellationToken);
+        IReadOnlyList<GameEventOutboxDelivery> deliveries;
+        using (var claimScope = scopeFactory.CreateScope())
+        {
+            var repository = claimScope.ServiceProvider.GetRequiredService<IGameEventOutboxRepository>();
+            deliveries = await repository.ClaimPendingDeliveriesAsync(
+                BatchSize,
+                ProcessingTimeout,
+                cancellationToken);
+        }
 
         if (deliveries.Count > 0)
         {
@@ -99,125 +97,142 @@ public sealed class GameEventOutboxWorker(
 
         foreach (var delivery in deliveries)
         {
-            using var activity = ActivitySource.StartActivity("outbox.deliver");
-            activity?.SetTag("outbox.delivery.id", delivery.Id);
-            activity?.SetTag("outbox.message.id", delivery.MessageId);
-            activity?.SetTag("outbox.event_type", delivery.Message.EventType);
-            activity?.SetTag("outbox.consumer", delivery.Consumer);
-            using var logScope = logger.BeginScope(new Dictionary<string, object?>
-            {
-                ["OutboxDeliveryId"] = delivery.Id,
-                ["OutboxMessageId"] = delivery.MessageId,
-                ["OutboxEventType"] = delivery.Message.EventType,
-                ["OutboxConsumer"] = delivery.Consumer,
-                ["OriginTraceId"] = delivery.Message.CorrelationId
-            });
+            await ProcessDeliveryAsync(delivery, cancellationToken);
+        }
+    }
 
-            if (!consumers.TryGetValue(delivery.Consumer, out var consumer) ||
-                !consumer.CanHandle(delivery.Message.EventType))
-            {
-                await repository.MarkFailedAsync(
-                    delivery.Id,
-                    delivery.Attempts,
-                    $"No outbox consumer '{delivery.Consumer}' can handle event '{delivery.Message.EventType}'.",
-                    cancellationToken);
-                FailedCounter.Add(1, new KeyValuePair<string, object?>("consumer", delivery.Consumer));
-                logger.LogCritical(
-                    "Game event outbox delivery {DeliveryId} entered the dead-letter state because consumer {Consumer} was unavailable.",
-                    delivery.Id,
-                    delivery.Consumer);
-                continue;
-            }
+    private async Task ProcessDeliveryAsync(
+        GameEventOutboxDelivery delivery,
+        CancellationToken cancellationToken)
+    {
+        // A delivery is its own unit of work. Sharing a scope would also share EF tracking
+        // and rolled-back entity state between otherwise independent consumers.
+        using var scope = scopeFactory.CreateScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IGameEventOutboxRepository>();
+        var consumers = scope.ServiceProvider
+            .GetRequiredService<IEnumerable<IGameEventOutboxConsumer>>()
+            .ToDictionary(x => x.Consumer, StringComparer.OrdinalIgnoreCase);
+        var dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();
+        var stateSync = scope.ServiceProvider.GetRequiredService<IStateSyncService>();
 
+        using var activity = ActivitySource.StartActivity("outbox.deliver");
+        activity?.SetTag("outbox.delivery.id", delivery.Id);
+        activity?.SetTag("outbox.message.id", delivery.MessageId);
+        activity?.SetTag("outbox.event_type", delivery.Message.EventType);
+        activity?.SetTag("outbox.consumer", delivery.Consumer);
+        using var logScope = logger.BeginScope(new Dictionary<string, object?>
+        {
+            ["OutboxDeliveryId"] = delivery.Id,
+            ["OutboxMessageId"] = delivery.MessageId,
+            ["OutboxEventType"] = delivery.Message.EventType,
+            ["OutboxConsumer"] = delivery.Consumer,
+            ["OriginTraceId"] = delivery.Message.CorrelationId
+        });
+
+        if (!consumers.TryGetValue(delivery.Consumer, out var consumer) ||
+            !consumer.CanHandle(delivery.Message.EventType))
+        {
+            await repository.MarkFailedAsync(
+                delivery.Id,
+                delivery.Attempts,
+                $"No outbox consumer '{delivery.Consumer}' can handle event '{delivery.Message.EventType}'.",
+                cancellationToken);
+            FailedCounter.Add(1, new KeyValuePair<string, object?>("consumer", delivery.Consumer));
+            logger.LogCritical(
+                "Game event outbox delivery {DeliveryId} entered the dead-letter state because consumer {Consumer} was unavailable.",
+                delivery.Id,
+                delivery.Consumer);
+            return;
+        }
+
+        try
+        {
+            await using var transaction = await dbContext.BeginTransactionAsync(cancellationToken);
             try
             {
-                await using var transaction = await dbContext.BeginTransactionAsync(cancellationToken);
-                try
+                var saveChangesVersion = dbContext.SaveChangesVersion;
+                await consumer.HandleAsync(delivery.Message, cancellationToken);
+
+                var consumerChangedState =
+                    dbContext.HasChanges || dbContext.SaveChangesVersion > saveChangesVersion;
+                if (delivery.Message.EventType != GameEventTypes.RealtimeDeliveryRequested
+                    && consumerChangedState)
                 {
-                    var saveChangesVersion = dbContext.SaveChangesVersion;
-                    await consumer.HandleAsync(delivery.Message, cancellationToken);
-
-                    var consumerChangedState =
-                        dbContext.HasChanges || dbContext.SaveChangesVersion > saveChangesVersion;
-                    if (delivery.Message.EventType != GameEventTypes.RealtimeDeliveryRequested
-                        && consumerChangedState)
+                    if (delivery.Message.CharacterId.HasValue)
                     {
-                        if (delivery.Message.CharacterId.HasValue)
+                        var characterScopes = consumer is IReportsGameEventOutboxStateSyncScopes reporter
+                            ? reporter.ChangedCharacterScopes
+                            : GetCharacterScopes(delivery.Consumer);
+                        foreach (var characterScope in characterScopes)
                         {
-                            var characterScopes = consumer is IReportsGameEventOutboxStateSyncScopes reporter
-                                ? reporter.ChangedCharacterScopes
-                                : GetCharacterScopes(delivery.Consumer);
-                            foreach (var characterScope in characterScopes)
-                            {
-                                await stateSync.InvalidateCharacterScopeAsync(
-                                    delivery.Message.CharacterId.Value,
-                                    characterScope,
-                                    $"Outbox:{delivery.Message.EventType}",
-                                    cancellationToken);
-                            }
-                        }
-
-                        if (delivery.Message.EventType == GameEventTypes.TournamentGroundsUpdated)
-                        {
-                            await stateSync.InvalidateWorldScopeAsync(
-                                StateSyncScopes.Tournament,
+                            await stateSync.InvalidateCharacterScopeAsync(
+                                delivery.Message.CharacterId.Value,
+                                characterScope,
                                 $"Outbox:{delivery.Message.EventType}",
                                 cancellationToken);
                         }
                     }
 
-                    await repository.MarkProcessedAsync(delivery.Id, cancellationToken);
-                    await transaction.CommitAsync(cancellationToken);
+                    if (delivery.Message.EventType == GameEventTypes.TournamentGroundsUpdated)
+                    {
+                        await stateSync.InvalidateWorldScopeAsync(
+                            StateSyncScopes.Tournament,
+                            $"Outbox:{delivery.Message.EventType}",
+                            cancellationToken);
+                    }
                 }
-                catch
-                {
-                    await transaction.RollbackAsync(CancellationToken.None);
-                    throw;
-                }
-                ProcessedCounter.Add(1, new KeyValuePair<string, object?>("consumer", delivery.Consumer));
-                DeliveryLag.Record(
-                    (timeProvider.GetUtcNow() - delivery.CreatedAt).TotalMilliseconds,
-                    new KeyValuePair<string, object?>("consumer", delivery.Consumer));
+
+                await repository.MarkProcessedAsync(delivery.Id, cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
             }
-            catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+            catch
             {
-                logger.LogError(
-                    ex,
-                    "Outbox delivery {DeliveryId} for event {EventType} and consumer {Consumer} failed.",
-                    delivery.Id,
-                    delivery.Message.EventType,
-                    delivery.Consumer);
+                await transaction.RollbackAsync(CancellationToken.None);
+                throw;
+            }
+            ProcessedCounter.Add(1, new KeyValuePair<string, object?>("consumer", delivery.Consumer));
+            DeliveryLag.Record(
+                (timeProvider.GetUtcNow() - delivery.CreatedAt).TotalMilliseconds,
+                new KeyValuePair<string, object?>("consumer", delivery.Consumer));
+        }
+        catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            logger.LogError(
+                ex,
+                "Outbox delivery {DeliveryId} for event {EventType} and consumer {Consumer} failed.",
+                delivery.Id,
+                delivery.Message.EventType,
+                delivery.Consumer);
 
-                var error = ex.ToString();
-                if (error.Length > 4000)
-                {
-                    error = error[..4000];
-                }
+            var error = ex.ToString();
+            if (error.Length > 4000)
+            {
+                error = error[..4000];
+            }
 
-                if (delivery.Attempts >= MaxAttempts)
-                {
-                    await repository.MarkFailedAsync(
-                        delivery.Id,
-                        delivery.Attempts,
-                        error,
-                        cancellationToken);
-                    FailedCounter.Add(1, new KeyValuePair<string, object?>("consumer", delivery.Consumer));
-                    logger.LogCritical(
-                        ex,
-                        "Game event outbox delivery {DeliveryId} entered the dead-letter state after {Attempts} attempts.",
-                        delivery.Id,
-                        delivery.Attempts);
-                    continue;
-                }
-
-                await repository.MarkRetryAsync(
+            if (delivery.Attempts >= MaxAttempts)
+            {
+                await repository.MarkFailedAsync(
                     delivery.Id,
                     delivery.Attempts,
                     error,
-                    GetNextAvailableAt(delivery.Attempts),
                     cancellationToken);
-                RetryCounter.Add(1, new KeyValuePair<string, object?>("consumer", delivery.Consumer));
+                FailedCounter.Add(1, new KeyValuePair<string, object?>("consumer", delivery.Consumer));
+                logger.LogCritical(
+                    ex,
+                    "Game event outbox delivery {DeliveryId} entered the dead-letter state after {Attempts} attempts.",
+                    delivery.Id,
+                    delivery.Attempts);
+                return;
             }
+
+            await repository.MarkRetryAsync(
+                delivery.Id,
+                delivery.Attempts,
+                error,
+                GetNextAvailableAt(delivery.Attempts),
+                cancellationToken);
+            RetryCounter.Add(1, new KeyValuePair<string, object?>("consumer", delivery.Consumer));
         }
     }
 
