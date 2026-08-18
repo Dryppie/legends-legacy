@@ -297,6 +297,31 @@ public sealed class StandardConditionSystemTests
     }
 
     [Fact]
+    public void Barrier_consumption_preserves_application_order_and_stable_ties()
+    {
+        var last = Combatant("last", CombatTeam.Friendly, []);
+        var first = Combatant("first", CombatTeam.Friendly, []);
+        var second = Combatant("second", CombatTeam.Friendly, []);
+        var target = Combatant("target", CombatTeam.Friendly, [], maxHealth: 100);
+
+        target.GrantBarrier(last, 10, 10);
+        target.GrantBarrier(first, 10, 5);
+        target.GrantBarrier(second, 10, 5);
+
+        var consumption = target.ConsumeBarrierWithSources(25);
+
+        Assert.Equal(25, consumption.Total);
+        Assert.Collection(
+            consumption.Contributions,
+            item => Assert.Same(first, item.Source),
+            item => Assert.Same(second, item.Source),
+            item => Assert.Same(last, item.Source));
+        Assert.Single(target.BarrierContributions);
+        Assert.Same(last, target.BarrierContributions[0].Source);
+        Assert.Equal(5, target.BarrierContributions[0].Remaining);
+    }
+
+    [Fact]
     public void Barrier_absorption_events_preserve_each_contribution_source()
     {
         var first = Combatant("first.source", CombatTeam.Friendly, []);

@@ -435,23 +435,34 @@ public sealed class FastCombatEngine
             for (var effectIndex = 0; effectIndex < trigger.Effects.Count; effectIndex++)
             {
                 var effect = trigger.Effects[effectIndex];
-                foreach (var target in SelectTargets(
-                             actor,
-                             effect.Target,
-                             combatEvent,
-                             combatants,
-                             effect.SummonId))
+                var targetBuffer = ArrayPool<RuntimeCombatant>.Shared.Rent(Math.Max(1, combatants.Count));
+                try
                 {
-                    if (target.IsAlive
-                        && EffectCanResolve(effect, actor, combatants)
-                        && ConditionsPass(
-                            effect.Conditions,
-                            actor,
-                            combatEvent with { Target = target },
-                            combatants))
+                    var targetCount = FillTargets(
+                        targetBuffer,
+                        actor,
+                        effect.Target,
+                        combatEvent,
+                        combatants,
+                        effect.SummonId);
+                    for (var targetIndex = 0; targetIndex < targetCount; targetIndex++)
                     {
-                        return true;
+                        var target = targetBuffer[targetIndex];
+                        if (target.IsAlive
+                            && EffectCanResolve(effect, actor, combatants)
+                            && ConditionsPass(
+                                effect.Conditions,
+                                actor,
+                                combatEvent with { Target = target },
+                                combatants))
+                        {
+                            return true;
+                        }
                     }
+                }
+                finally
+                {
+                    ArrayPool<RuntimeCombatant>.Shared.Return(targetBuffer, clearArray: true);
                 }
             }
         }
@@ -570,8 +581,7 @@ public sealed class FastCombatEngine
                                     combatant,
                                     combatEvent,
                                     combatants,
-                                    ability.CanUseEffect,
-                                    ability.MarkEffectUsed,
+                                    new EffectUsageTracker(ability),
                                     countStatsActivation: ability.Definition.Kind == AbilitySpecKind.Passive);
                             }
                             finally
@@ -640,8 +650,7 @@ public sealed class FastCombatEngine
                             status.Source,
                             combatEvent,
                             combatants,
-                            status.CanUseEffect,
-                            status.MarkEffectUsed,
+                            new EffectUsageTracker(status),
                             status.StatsSource,
                             countStatsActivation: false,
                             durationMultiplier: CalculateStatusEffectDurationMultiplier(status));
@@ -664,17 +673,17 @@ public sealed class FastCombatEngine
         RuntimeCombatant source,
         CombatEvent combatEvent,
         IReadOnlyList<RuntimeCombatant> combatants,
-        Func<CompiledEffect, RuntimeCombatant?, bool> canUseEffect,
-        Action<CompiledEffect, RuntimeCombatant> markEffectUsed,
+        EffectUsageTracker effectUsage,
         string? statsSourceOverride = null,
         bool countStatsActivation = false,
         double durationMultiplier = 1d)
     {
         var activationCounted = false;
         var executionContext = CreateEffectExecutionContext();
-        foreach (var effect in trigger.Effects)
+        for (var effectIndex = 0; effectIndex < trigger.Effects.Count; effectIndex++)
         {
-            if (!canUseEffect(effect, null))
+            var effect = trigger.Effects[effectIndex];
+            if (!effectUsage.CanUseEffect(effect, null))
                 continue;
 
             var repeatCount = effect.RepeatCount;
@@ -691,47 +700,89 @@ public sealed class FastCombatEngine
 
             // Effects such as Summon can append combatants while resolving this target set.
             // Snapshot it so every repetition keeps the cast's originally selected targets.
-            var targets = SelectTargets(
-                source,
-                effect.Target,
-                combatEvent,
-                combatants,
-                effect.SummonId).ToArray();
-            for (var repetition = 0; repetition < repeatCount; repetition++)
+            var targets = ArrayPool<RuntimeCombatant>.Shared.Rent(Math.Max(1, combatants.Count));
+            try
             {
-                for (var targetIndex = 0; targetIndex < targets.Length; targetIndex++)
+                var targetCount = FillTargets(
+                    targets,
+                    source,
+                    effect.Target,
+                    combatEvent,
+                    combatants,
+                    effect.SummonId);
+                for (var repetition = 0; repetition < repeatCount; repetition++)
                 {
-                    var target = targets[targetIndex];
-                    if (!canUseEffect(effect, target))
-                        continue;
+                    for (var targetIndex = 0; targetIndex < targetCount; targetIndex++)
+                    {
+                        var target = targets[targetIndex];
+                        if (!effectUsage.CanUseEffect(effect, target))
+                            continue;
 
-                    if (!target.IsAlive
-                        || !ConditionsPass(effect.Conditions, source, combatEvent with { Target = target }, combatants))
-                        continue;
+                        if (!target.IsAlive
+                            || !ConditionsPass(effect.Conditions, source, combatEvent with { Target = target }, combatants))
+                            continue;
 
-                    if (effect.Operation != AbilityEffectOperation.ApplyRandomCondition
-                        && !IsPeriodicEffect(effect)
-                        && effect.ChancePercent < 100
-                        && _random.Next(1, 101) > effect.ChancePercent)
-                        continue;
+                        if (effect.Operation != AbilityEffectOperation.ApplyRandomCondition
+                            && !IsPeriodicEffect(effect)
+                            && effect.ChancePercent < 100
+                            && _random.Next(1, 101) > effect.ChancePercent)
+                            continue;
 
-                    var countThisActivation = countStatsActivation && !activationCounted;
-                    markEffectUsed(effect, target);
-                    ExecuteEffect(
-                        effect,
-                        source,
-                        target,
-                        combatants,
-                        combatEvent,
-                        statsSourceOverride,
-                        countThisActivation,
-                        durationMultiplier,
-                        executionContext,
-                        targetIndex);
-                    if (countThisActivation)
-                        activationCounted = true;
+                        var countThisActivation = countStatsActivation && !activationCounted;
+                        effectUsage.MarkEffectUsed(effect, target);
+                        ExecuteEffect(
+                            effect,
+                            source,
+                            target,
+                            combatants,
+                            combatEvent,
+                            statsSourceOverride,
+                            countThisActivation,
+                            durationMultiplier,
+                            executionContext,
+                            targetIndex);
+                        if (countThisActivation)
+                            activationCounted = true;
+                    }
                 }
             }
+            finally
+            {
+                ArrayPool<RuntimeCombatant>.Shared.Return(targets, clearArray: true);
+            }
+        }
+    }
+
+    private readonly struct EffectUsageTracker
+    {
+        private readonly RuntimeAbility? _ability;
+        private readonly RuntimeStatus? _status;
+
+        public EffectUsageTracker(RuntimeAbility ability)
+        {
+            _ability = ability;
+            _status = null;
+        }
+
+        public EffectUsageTracker(RuntimeStatus status)
+        {
+            _ability = null;
+            _status = status;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool CanUseEffect(CompiledEffect effect, RuntimeCombatant? target) =>
+            _ability is not null
+                ? _ability.CanUseEffect(effect, target)
+                : _status!.CanUseEffect(effect, target);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void MarkEffectUsed(CompiledEffect effect, RuntimeCombatant target)
+        {
+            if (_ability is not null)
+                _ability.MarkEffectUsed(effect, target);
+            else
+                _status!.MarkEffectUsed(effect, target);
         }
     }
 
@@ -3150,92 +3201,225 @@ public sealed class FastCombatEngine
             _ => true
         };
 
-    private IEnumerable<RuntimeCombatant> SelectTargets(
+    private int FillTargets(
+        RuntimeCombatant[] targets,
         RuntimeCombatant source,
         AbilityTargetSelector targetSelector,
         CombatEvent combatEvent,
         IReadOnlyList<RuntimeCombatant> combatants,
         string? summonId = null)
     {
-        return targetSelector switch
+        RuntimeCombatant? target;
+        switch (targetSelector)
         {
-            AbilityTargetSelector.Self => [source],
-            AbilityTargetSelector.Source => [source],
-            AbilityTargetSelector.EventSource => combatEvent.Source is null ? [] : [combatEvent.Source],
-            AbilityTargetSelector.EventTarget => combatEvent.Target is null ? [] : [combatEvent.Target],
-            AbilityTargetSelector.CurrentTarget => SelectLockedEnemy(source, combatEvent) is { } lockedTarget
-                ? [lockedTarget]
-                : SelectFirstEnemy(source, combatants) is { } target ? [target] : [],
-            AbilityTargetSelector.RandomEnemy => SelectLockedEnemy(source, combatEvent) is { } lockedTarget
-                ? [lockedTarget]
-                : SelectRandomEnemy(source, combatants) is { } target ? [target] : [],
-            AbilityTargetSelector.LowestHealthAlly => combatants.Where(x => x.Team == source.Team && x.IsAlive).OrderBy(x => x.Health).Take(1),
-            AbilityTargetSelector.AllEnemies => combatants.Where(x => x.Team != source.Team && x.IsAlive),
-            AbilityTargetSelector.AllAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive),
-            AbilityTargetSelector.EveryoneButSelf => combatants.Where(x => x.Id != source.Id && x.IsAlive),
-            AbilityTargetSelector.TwoEnemies => combatants.Where(x => x.Team != source.Team && x.IsAlive).Take(2),
-            AbilityTargetSelector.ThreeEnemies => combatants.Where(x => x.Team != source.Team && x.IsAlive).Take(3),
-            AbilityTargetSelector.TwoAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive).Take(2),
-            AbilityTargetSelector.HighestMaxHealthAlly => combatants
-                .Where(x => x.Team == source.Team && x.IsAlive)
-                .OrderByDescending(x => x.GetAttribute(AttributeType.MaxHealth))
-                .Take(1),
-            AbilityTargetSelector.SummonedAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive && x.IsSummoned),
-            AbilityTargetSelector.NonSummonedAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive && !x.IsSummoned),
-            AbilityTargetSelector.SummonedEnemies => combatants.Where(x => x.Team != source.Team && x.IsAlive && x.IsSummoned),
-            AbilityTargetSelector.LowestHealthEnemy => SelectLockedEnemy(source, combatEvent) is { } lockedTarget
-                ? [lockedTarget]
-                : combatants
-                    .Where(x => x.Team != source.Team && x.IsAlive)
-                    .OrderBy(x => x.Health / Math.Max(1, x.GetAttribute(AttributeType.MaxHealth)))
-                    .Take(1),
-            AbilityTargetSelector.HighestHealthEnemy => combatants
-                .Where(x => x.Team != source.Team && x.IsAlive)
-                .OrderByDescending(x => x.Health)
-                .Take(1),
-            AbilityTargetSelector.LowestCurrentHealthEnemy => combatants
-                .Where(x => x.Team != source.Team && x.IsAlive)
-                .OrderBy(x => x.Health)
-                .Take(1),
-            AbilityTargetSelector.HighestMaxHealthEnemy => combatants
-                .Where(x => x.Team != source.Team && x.IsAlive)
-                .OrderByDescending(x => x.GetAttribute(AttributeType.MaxHealth))
-                .Take(1),
-            AbilityTargetSelector.HighestCurrentHealthOwnedSummon => combatants
-                .Where(x => x.IsAlive
-                    && x.IsSummoned
-                    && ReferenceEquals(x.SummonOwner, source)
-                    && x.Health > source.Health
-                    && (string.IsNullOrWhiteSpace(summonId)
-                        || x.Tags.Contains($"Summon.{summonId}")))
-                .OrderByDescending(x => x.Health)
-                .Take(1),
-            AbilityTargetSelector.OwnedSummons => combatants.Where(x =>
-                x.IsAlive
-                && x.IsSummoned
-                && ReferenceEquals(x.SummonOwner, source)
-                && x.Tags.Contains($"Summon.{summonId}")),
-            AbilityTargetSelector.RandomAlly => SelectRandom(
-                combatants.Where(x => x.Team == source.Team && x.IsAlive),
-                1),
-            AbilityTargetSelector.TwoRandomEnemies => SelectRandom(
-                combatants.Where(x => x.Team != source.Team && x.IsAlive),
-                2),
-            AbilityTargetSelector.ThreeRandomEnemies => SelectRandom(
-                combatants.Where(x => x.Team != source.Team && x.IsAlive),
-                3),
-            _ => []
-        };
+            case AbilityTargetSelector.Self:
+            case AbilityTargetSelector.Source:
+                targets[0] = source;
+                return 1;
+            case AbilityTargetSelector.EventSource:
+                return AddSingleTarget(targets, combatEvent.Source);
+            case AbilityTargetSelector.EventTarget:
+                return AddSingleTarget(targets, combatEvent.Target);
+            case AbilityTargetSelector.CurrentTarget:
+                target = SelectLockedEnemy(source, combatEvent) ?? SelectFirstEnemy(source, combatants);
+                return AddSingleTarget(targets, target);
+            case AbilityTargetSelector.RandomEnemy:
+                target = SelectLockedEnemy(source, combatEvent) ?? SelectRandomEnemy(source, combatants);
+                return AddSingleTarget(targets, target);
+            case AbilityTargetSelector.LowestHealthAlly:
+            case AbilityTargetSelector.HighestMaxHealthAlly:
+            case AbilityTargetSelector.LowestHealthEnemy:
+            case AbilityTargetSelector.HighestHealthEnemy:
+            case AbilityTargetSelector.LowestCurrentHealthEnemy:
+            case AbilityTargetSelector.HighestMaxHealthEnemy:
+            case AbilityTargetSelector.HighestCurrentHealthOwnedSummon:
+                if (targetSelector == AbilityTargetSelector.LowestHealthEnemy
+                    && SelectLockedEnemy(source, combatEvent) is { } lockedTarget)
+                {
+                    targets[0] = lockedTarget;
+                    return 1;
+                }
+
+                return AddSingleTarget(
+                    targets,
+                    SelectExtremumTarget(source, targetSelector, combatants, summonId));
+            case AbilityTargetSelector.RandomAlly:
+                return FillRandomTargets(targets, source, combatants, allies: true, count: 1);
+            case AbilityTargetSelector.TwoRandomEnemies:
+                return FillRandomTargets(targets, source, combatants, allies: false, count: 2);
+            case AbilityTargetSelector.ThreeRandomEnemies:
+                return FillRandomTargets(targets, source, combatants, allies: false, count: 3);
+            case AbilityTargetSelector.AllEnemies:
+            case AbilityTargetSelector.AllAllies:
+            case AbilityTargetSelector.EveryoneButSelf:
+            case AbilityTargetSelector.TwoEnemies:
+            case AbilityTargetSelector.ThreeEnemies:
+            case AbilityTargetSelector.TwoAllies:
+            case AbilityTargetSelector.SummonedAllies:
+            case AbilityTargetSelector.NonSummonedAllies:
+            case AbilityTargetSelector.SummonedEnemies:
+            case AbilityTargetSelector.OwnedSummons:
+                return FillFilteredTargets(targets, source, targetSelector, combatants, summonId);
+            default:
+                return 0;
+        }
     }
 
-    private IEnumerable<RuntimeCombatant> SelectRandom(
-        IEnumerable<RuntimeCombatant> candidates,
-        int count) =>
-        candidates
-            .Select(candidate => (candidate, order: _random.Next()))
-            .OrderBy(item => item.order)
-            .Take(count)
-            .Select(item => item.candidate);
+    private static int AddSingleTarget(RuntimeCombatant[] targets, RuntimeCombatant? target)
+    {
+        if (target is null)
+            return 0;
+
+        targets[0] = target;
+        return 1;
+    }
+
+    private static int FillFilteredTargets(
+        RuntimeCombatant[] targets,
+        RuntimeCombatant source,
+        AbilityTargetSelector targetSelector,
+        IReadOnlyList<RuntimeCombatant> combatants,
+        string? summonId)
+    {
+        var targetCount = 0;
+        var maximumTargets = targetSelector switch
+        {
+            AbilityTargetSelector.TwoEnemies or AbilityTargetSelector.TwoAllies => 2,
+            AbilityTargetSelector.ThreeEnemies => 3,
+            _ => int.MaxValue
+        };
+        var summonTag = targetSelector == AbilityTargetSelector.OwnedSummons
+            ? $"Summon.{summonId}"
+            : null;
+
+        for (var index = 0; index < combatants.Count && targetCount < maximumTargets; index++)
+        {
+            var candidate = combatants[index];
+            if (!candidate.IsAlive)
+                continue;
+
+            var matches = targetSelector switch
+            {
+                AbilityTargetSelector.AllEnemies
+                    or AbilityTargetSelector.TwoEnemies
+                    or AbilityTargetSelector.ThreeEnemies => candidate.Team != source.Team,
+                AbilityTargetSelector.AllAllies
+                    or AbilityTargetSelector.TwoAllies => candidate.Team == source.Team,
+                AbilityTargetSelector.EveryoneButSelf => candidate.Id != source.Id,
+                AbilityTargetSelector.SummonedAllies => candidate.Team == source.Team && candidate.IsSummoned,
+                AbilityTargetSelector.NonSummonedAllies => candidate.Team == source.Team && !candidate.IsSummoned,
+                AbilityTargetSelector.SummonedEnemies => candidate.Team != source.Team && candidate.IsSummoned,
+                AbilityTargetSelector.OwnedSummons => candidate.IsSummoned
+                    && ReferenceEquals(candidate.SummonOwner, source)
+                    && candidate.Tags.Contains(summonTag!),
+                _ => false
+            };
+
+            if (matches)
+                targets[targetCount++] = candidate;
+        }
+
+        return targetCount;
+    }
+
+    private int FillRandomTargets(
+        RuntimeCombatant[] targets,
+        RuntimeCombatant source,
+        IReadOnlyList<RuntimeCombatant> combatants,
+        bool allies,
+        int count)
+    {
+        Span<int> selectedOrders = stackalloc int[3];
+        var selectedCount = 0;
+        for (var index = 0; index < combatants.Count; index++)
+        {
+            var candidate = combatants[index];
+            if (!candidate.IsAlive || (candidate.Team == source.Team) != allies)
+                continue;
+
+            var order = _random.Next();
+            var insertionIndex = selectedCount;
+            while (insertionIndex > 0 && order < selectedOrders[insertionIndex - 1])
+                insertionIndex--;
+
+            if (insertionIndex >= count)
+                continue;
+
+            var newCount = Math.Min(count, selectedCount + 1);
+            for (var shiftIndex = newCount - 1; shiftIndex > insertionIndex; shiftIndex--)
+            {
+                targets[shiftIndex] = targets[shiftIndex - 1];
+                selectedOrders[shiftIndex] = selectedOrders[shiftIndex - 1];
+            }
+
+            targets[insertionIndex] = candidate;
+            selectedOrders[insertionIndex] = order;
+            selectedCount = newCount;
+        }
+
+        return selectedCount;
+    }
+
+    private static RuntimeCombatant? SelectExtremumTarget(
+        RuntimeCombatant source,
+        AbilityTargetSelector targetSelector,
+        IReadOnlyList<RuntimeCombatant> combatants,
+        string? summonId)
+    {
+        RuntimeCombatant? selected = null;
+        var selectedValue = 0f;
+        var summonTag = targetSelector == AbilityTargetSelector.HighestCurrentHealthOwnedSummon
+                        && !string.IsNullOrWhiteSpace(summonId)
+            ? $"Summon.{summonId}"
+            : null;
+
+        for (var index = 0; index < combatants.Count; index++)
+        {
+            var candidate = combatants[index];
+            if (!candidate.IsAlive)
+                continue;
+
+            var isCandidate = targetSelector switch
+            {
+                AbilityTargetSelector.LowestHealthAlly
+                    or AbilityTargetSelector.HighestMaxHealthAlly => candidate.Team == source.Team,
+                AbilityTargetSelector.LowestHealthEnemy
+                    or AbilityTargetSelector.HighestHealthEnemy
+                    or AbilityTargetSelector.LowestCurrentHealthEnemy
+                    or AbilityTargetSelector.HighestMaxHealthEnemy => candidate.Team != source.Team,
+                AbilityTargetSelector.HighestCurrentHealthOwnedSummon => candidate.IsSummoned
+                    && ReferenceEquals(candidate.SummonOwner, source)
+                    && candidate.Health > source.Health
+                    && (summonTag is null || candidate.Tags.Contains(summonTag)),
+                _ => false
+            };
+            if (!isCandidate)
+                continue;
+
+            var value = targetSelector switch
+            {
+                AbilityTargetSelector.HighestMaxHealthAlly
+                    or AbilityTargetSelector.HighestMaxHealthEnemy => candidate.GetAttribute(AttributeType.MaxHealth),
+                AbilityTargetSelector.LowestHealthEnemy =>
+                    candidate.Health / Math.Max(1, candidate.GetAttribute(AttributeType.MaxHealth)),
+                _ => candidate.Health
+            };
+            var selectCandidate = selected is null || targetSelector switch
+            {
+                AbilityTargetSelector.LowestHealthAlly
+                    or AbilityTargetSelector.LowestHealthEnemy
+                    or AbilityTargetSelector.LowestCurrentHealthEnemy => value < selectedValue,
+                _ => value > selectedValue
+            };
+            if (!selectCandidate)
+                continue;
+
+            selected = candidate;
+            selectedValue = value;
+        }
+
+        return selected;
+    }
 
     private static int CountLivingOwnedSummons(
         RuntimeCombatant source,
@@ -3267,36 +3451,37 @@ public sealed class FastCombatEngine
         if (!ability.Definition.TriggersByEvent.TryGetValue(AbilityTriggerEvent.OnAbilityUsed, out var triggers))
             return null;
 
-        var selector = triggers
-            .SelectMany(trigger => trigger.Effects)
-            .Select(effect => effect.Target)
-            .FirstOrDefault(target => target is AbilityTargetSelector.CurrentTarget
-                or AbilityTargetSelector.RandomEnemy
-                or AbilityTargetSelector.LowestHealthEnemy
-                or AbilityTargetSelector.HighestHealthEnemy
-                or AbilityTargetSelector.LowestCurrentHealthEnemy
-                or AbilityTargetSelector.HighestMaxHealthEnemy);
+        AbilityTargetSelector? selector = null;
+        for (var triggerIndex = 0; triggerIndex < triggers.Count && selector is null; triggerIndex++)
+        {
+            var effects = triggers[triggerIndex].Effects;
+            for (var effectIndex = 0; effectIndex < effects.Count; effectIndex++)
+            {
+                var candidate = effects[effectIndex].Target;
+                if (candidate is not (AbilityTargetSelector.CurrentTarget
+                    or AbilityTargetSelector.RandomEnemy
+                    or AbilityTargetSelector.LowestHealthEnemy
+                    or AbilityTargetSelector.HighestHealthEnemy
+                    or AbilityTargetSelector.LowestCurrentHealthEnemy
+                    or AbilityTargetSelector.HighestMaxHealthEnemy))
+                {
+                    continue;
+                }
+
+                selector = candidate;
+                break;
+            }
+        }
 
         return selector switch
         {
             AbilityTargetSelector.CurrentTarget => SelectFirstEnemy(source, combatants),
             AbilityTargetSelector.RandomEnemy => SelectRandomEnemy(source, combatants),
-            AbilityTargetSelector.LowestHealthEnemy => combatants
-                .Where(x => x.Team != source.Team && x.IsAlive)
-                .OrderBy(x => x.Health / Math.Max(1, x.GetAttribute(AttributeType.MaxHealth)))
-                .FirstOrDefault(),
-            AbilityTargetSelector.HighestHealthEnemy => combatants
-                .Where(x => x.Team != source.Team && x.IsAlive)
-                .OrderByDescending(x => x.Health)
-                .FirstOrDefault(),
-            AbilityTargetSelector.LowestCurrentHealthEnemy => combatants
-                .Where(x => x.Team != source.Team && x.IsAlive)
-                .OrderBy(x => x.Health)
-                .FirstOrDefault(),
-            AbilityTargetSelector.HighestMaxHealthEnemy => combatants
-                .Where(x => x.Team != source.Team && x.IsAlive)
-                .OrderByDescending(x => x.GetAttribute(AttributeType.MaxHealth))
-                .FirstOrDefault(),
+            AbilityTargetSelector.LowestHealthEnemy
+                or AbilityTargetSelector.HighestHealthEnemy
+                or AbilityTargetSelector.LowestCurrentHealthEnemy
+                or AbilityTargetSelector.HighestMaxHealthEnemy =>
+                SelectExtremumTarget(source, selector.Value, combatants, summonId: null),
             _ => null
         };
     }

@@ -20,6 +20,65 @@ import { InventoryService } from '../../../../core/services/api/inventory/invent
 import { GuildStateService } from '../../../../core/services/api/guild/guild-state.service';
 
 describe('InventoryComponent quest presentation', () => {
+  it('reuses the cached inventory snapshot when the page opens', () => {
+    const state = jasmine.createSpyObj<InventoryStateService>(
+      'InventoryStateService',
+      ['load'],
+      {
+        items: signal<InventoryItem[]>([]).asReadonly(),
+        equipment: signal<InventoryItem[]>([]).asReadonly(),
+      },
+    );
+    const component = TestBed.runInInjectionContext(
+      () =>
+        new InventoryComponent(
+          state,
+          {
+            pinnedOnboardingObjective: signal<QuestObjectiveState | undefined>(
+              undefined,
+            ).asReadonly(),
+          } as QuestStateService,
+          jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
+            'presentCurrentObjective',
+          ]),
+        ),
+    );
+
+    component.ngOnInit();
+
+    expect(state.load).toHaveBeenCalledOnceWith();
+  });
+
+  it('keeps the inspected stock row synchronized with refreshed inventory', () => {
+    const stale = inventoryStock('thick-hide', 'Thick Hide');
+    stale.quantity = 83;
+    const inventoryItems = signal<InventoryItem[]>([stale]);
+    const component = TestBed.runInInjectionContext(
+      () =>
+        new InventoryComponent(
+          {
+            items: inventoryItems.asReadonly(),
+            materials: inventoryItems.asReadonly(),
+            essences: signal<InventoryItem[]>([]).asReadonly(),
+          } as InventoryStateService,
+          {
+            pinnedOnboardingObjective: signal<QuestObjectiveState | undefined>(
+              undefined,
+            ).asReadonly(),
+          } as QuestStateService,
+          jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
+            'presentCurrentObjective',
+          ]),
+        ),
+    );
+    component.selectInventoryItem(stale);
+
+    inventoryItems.set([{ ...stale, quantity: 56 }]);
+    TestBed.flushEffects();
+
+    expect(component.selectedItem()?.quantity).toBe(56);
+  });
+
   it('starts gathering-tool guidance when that objective becomes active', () => {
     const objective = signal<QuestObjectiveState | undefined>({
       key: 'equip_gathering_tool',

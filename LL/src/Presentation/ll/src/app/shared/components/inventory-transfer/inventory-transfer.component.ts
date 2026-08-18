@@ -114,8 +114,18 @@ export class InventoryTransferComponent implements OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['inventoryItem'] && !changes['inventoryItem'].firstChange) {
+    const itemChange = changes['inventoryItem'];
+    if (!itemChange || itemChange.firstChange) return;
+
+    const previous = itemChange.previousValue as InventoryItem | undefined;
+    const current = itemChange.currentValue as InventoryItem | undefined;
+    if (previous?.itemInstance.id !== current?.itemInstance.id) {
       this.resetForm();
+      return;
+    }
+
+    if (current && this.quantity > current.quantity) {
+      this.quantity = Math.max(1, current.quantity);
     }
   }
 
@@ -126,6 +136,10 @@ export class InventoryTransferComponent implements OnChanges, OnDestroy {
 
   get isStackable(): boolean {
     return this.inventoryItem.itemInstance.itemBase.stackable;
+  }
+
+  get inventoryRefreshing(): boolean {
+    return this.inventoryState.loading();
   }
 
   get transferRestriction(): string | null {
@@ -246,6 +260,8 @@ export class InventoryTransferComponent implements OnChanges, OnDestroy {
   }
 
   transfer(): void {
+    if (this.inventoryRefreshing) return;
+
     const recipientName = this.recipientName.trim();
     const quantity = Math.floor(Number(this.quantity));
     if (!recipientName || !this.hasSelectedRecipient()) {
@@ -278,6 +294,7 @@ export class InventoryTransferComponent implements OnChanges, OnDestroy {
           this.error.set(
             err.errorMessage ?? err.message ?? 'Failed to transfer the item.',
           );
+          this.inventoryState.load(true);
         },
       });
   }

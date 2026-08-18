@@ -129,8 +129,7 @@ export class InventoryComponent implements OnInit {
     this.state
       .equipment()
       .filter(
-        (item) =>
-          !(item.itemInstance as EquipmentInstance).isGuildBorrowed,
+        (item) => !(item.itemInstance as EquipmentInstance).isGuildBorrowed,
       ),
   );
 
@@ -192,6 +191,26 @@ export class InventoryComponent implements OnInit {
         if (objectiveType === 'GatheringToolEquipped') {
           untracked(() => this.questPresenter.presentCurrentObjective());
         }
+      }
+    });
+
+    effect(() => {
+      const selected = this.selectedItem();
+      if (
+        !selected ||
+        this.isSelectedEquippedItem(selected) ||
+        typeof this.state.items !== 'function'
+      ) {
+        return;
+      }
+
+      const current = this.state
+        .items()
+        .find((item) => item.itemInstance.id === selected.itemInstance.id);
+      if (!current) {
+        this.clearSelectedItem();
+      } else if (current !== selected) {
+        this.selectedItem.set(current);
       }
     });
   }

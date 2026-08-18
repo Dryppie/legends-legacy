@@ -24,6 +24,10 @@
   </div>
 
   <div *ngIf="isFormOpen()" class="mt-3 space-y-3">
+    <div *ngIf="inventoryRefreshing" class="ll-state">
+      Checking current inventory...
+    </div>
+
     <div class="ll-field block">
       <label for="transfer-recipient-name">Player name</label>
       <div class="relative mt-1">
@@ -47,7 +51,7 @@
               : null
           "
           [ngModel]="recipientName"
-          [disabled]="isTransferring()"
+          [disabled]="isTransferring() || inventoryRefreshing"
           (ngModelChange)="onRecipientNameChange($event)"
           (focus)="openRecipientSuggestions()"
           (blur)="closeRecipientSuggestions()"
@@ -111,7 +115,13 @@
     </div>
 
     <label *ngIf="isStackable" class="ll-field block">
-      <span>Quantity (maximum {{ inventoryItem.quantity }})</span>
+      <span>
+        Quantity ({{
+          inventoryRefreshing
+            ? "checking current stock..."
+            : "maximum " + inventoryItem.quantity
+        }})
+      </span>
       <input
         type="number"
         class="ll-input no-spinner mt-1 w-full"
@@ -120,7 +130,7 @@
         [max]="inventoryItem.quantity"
         step="1"
         [(ngModel)]="quantity"
-        [disabled]="isTransferring()"
+        [disabled]="isTransferring() || inventoryRefreshing"
       />
     </label>
 
@@ -140,7 +150,12 @@
       <button
         type="button"
         class="ll-button"
-        [disabled]="isTransferring() || !hasSelectedRecipient() || quantity < 1"
+        [disabled]="
+          isTransferring() ||
+          inventoryRefreshing ||
+          !hasSelectedRecipient() ||
+          quantity < 1
+        "
         (click)="transfer()"
       >
         {{ isTransferring() ? "Sending..." : "Send" }}
