@@ -30,6 +30,17 @@ public sealed class IdleCombatRewardApplier : IIdleCombatRewardApplier
         IdleCombatCalculatedOutcome outcome,
         CancellationToken cancellationToken)
     {
+        await ApplyProgressionAsync(facts, outcome, cancellationToken);
+        await ApplySettlementAsync(
+            [CreateSettlementBatch(facts, outcome)],
+            cancellationToken);
+    }
+
+    public async Task ApplyProgressionAsync(
+        IdleCombatRewardFacts facts,
+        IdleCombatCalculatedOutcome outcome,
+        CancellationToken cancellationToken)
+    {
         if (outcome.TotalExperience > 0)
         {
             await _experienceWriter.AddSplitExperienceAsync(
@@ -38,25 +49,9 @@ public sealed class IdleCombatRewardApplier : IIdleCombatRewardApplier
                 cancellationToken);
         }
 
-        if (outcome.TotalLoot.Count > 0)
-        {
-            await _lootWriter.AddLootAsync(
-                facts.CharacterId,
-                outcome.TotalLoot,
-                "combat-reward",
-                facts.Area.Name,
-                cancellationToken);
-        }
-
-        if (outcome.TotalCinders > 0 || outcome.TotalSoulstones > 0)
-        {
-            await _currencyWriter.AddAsync(
-                facts.CharacterId,
-                outcome.TotalCinders,
-                outcome.TotalSoulstones,
-                cancellationToken);
-        }
-
+        // Guild missions are evaluated at the original checkpoint timestamp. Keep
+        // this operation at every semantic batch so a catch-up crossing a mission
+        // period boundary produces exactly the same contribution as before.
         var creaturesDefeated = facts.Encounters
             .Where(x => x.IsVictory)
             .Sum(x => x.HostileCreatures.Count);
@@ -73,4 +68,67 @@ public sealed class IdleCombatRewardApplier : IIdleCombatRewardApplier
                 cancellationToken);
         }
     }
+
+    public async Task ApplySettlementAsync(
+        IReadOnlyList<IdleCombatSettlementBatch> batches,
+        CancellationToken cancellationToken)
+    {
+        if (batches.Count == 0)
+        {
+            return;
+        }
+
+        var characterId = batches[0].CharacterId;
+        if (batches.Any(batch => batch.CharacterId != characterId))
+        {
+            throw new InvalidOperationException(
+                "Idle combat settlement batches must target one character.");
+        }
+
+        var totalLoot = batches
+            .SelectMany(batch => batch.Loot)
+            .ToArray();
+
+        if (totalLoot.Length > 0)
+        {
+            await _lootWriter.AddLootAsync(
+                characterId,
+                totalLoot,
+                "combat-reward",
+                batches[^1].AreaName,
+                cancellationToken);
+        }
+
+        var totalCinders = checked(batches.Sum(batch => batch.Cinders));
+        var totalSoulstones = checked(batches.Sum(batch => batch.Soulstones));
+        if (totalCinders > 0 || totalSoulstones > 0)
+        {
+            await _currencyWriter.AddAsync(
+                characterId,
+                totalCinders,
+                totalSoulstones,
+                cancellationToken);
+        }
+    }
+
+    private static IdleCombatSettlementBatch CreateSettlementBatch(
+        IdleCombatRewardFacts facts,
+        IdleCombatCalculatedOutcome outcome) =>
+        new(
+            facts.CharacterId,
+            facts.From,
+            facts.ProcessedUntil,
+            facts.Area.Id,
+            facts.Area.Name,
+            facts.EquippedTool?.GatheringType.ToString(),
+            outcome.TotalLoot,
+            outcome.TotalCinders,
+            outcome.TotalSoulstones,
+            [],
+            [],
+            0,
+            null,
+            facts.Encounters.Count,
+            facts.Encounters.Count(x => x.IsVictory),
+            []);
 }

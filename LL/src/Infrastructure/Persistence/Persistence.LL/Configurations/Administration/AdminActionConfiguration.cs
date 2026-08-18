@@ -20,7 +20,12 @@ public sealed class AdminActionConfiguration : IEntityTypeConfiguration<AdminAct
         builder.Property(x => x.Reason).HasMaxLength(1_000).IsRequired();
         builder.Property(x => x.InternalNotes).HasMaxLength(4_000);
         builder.Property(x => x.DetailsJson).HasColumnType("jsonb").IsRequired();
+        builder.Property(x => x.RiskLevel)
+            .HasConversion<string>()
+            .HasMaxLength(32)
+            .IsRequired();
         builder.HasIndex(x => x.OccurredAt);
+        builder.HasIndex(x => new { x.RiskLevel, x.OccurredAt });
         builder.HasIndex(x => new { x.TargetAccountId, x.OccurredAt });
         builder.HasIndex(x => new { x.TargetCharacterId, x.OccurredAt });
         builder.HasIndex(x => x.TargetResourceId);

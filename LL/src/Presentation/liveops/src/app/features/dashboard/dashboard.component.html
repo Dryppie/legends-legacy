@@ -1,0 +1,93 @@
+<main class="status-workspace">
+  <section class="status-heading">
+    <div>
+      <p class="eyebrow">Operational readiness</p>
+      <h1>LiveOps status</h1>
+      <p>Dependency health, delayed work, recent privileged activity, and deployed release identity.</p>
+    </div>
+    <button class="secondary" type="button" [disabled]="statusLoading" (click)="loadOperationalStatus()">
+      {{ statusLoading ? 'Refreshing' : 'Refresh status' }}
+    </button>
+  </section>
+
+  @if (statusError) { <div class="message error" role="alert">{{ statusError }}</div> }
+  @if (statusLoading && !operationalStatus) {
+    <div class="status-loading">Checking operational readiness…</div>
+  } @else if (operationalStatus; as status) {
+    <section class="readiness-banner" [class]="'readiness-banner ' + statusClass(status.overallStatus)">
+      <div class="readiness-mark"></div>
+      <div>
+        <span>Current readiness</span><strong>{{ status.overallStatus }}</strong>
+        <small>Updated {{ status.serverTimeUtc | date: 'medium' }} · refreshes every 30 seconds</small>
+      </div>
+      <div class="readiness-context">
+        <span>Environment</span><strong>{{ status.environment }}</strong>
+        <span>Browser clock</span>
+        <strong [class.clock-warning]="absoluteSkewSeconds() > 30">{{ absoluteSkewSeconds() }}s {{ statusClockSkewSeconds >= 0 ? 'ahead' : 'behind' }}</strong>
+      </div>
+    </section>
+
+    @if (status.warnings.length || absoluteSkewSeconds() > 30) {
+      <section class="status-warnings" aria-label="Operational warnings">
+        @if (absoluteSkewSeconds() > 30) { <p>Your browser clock differs from the server by more than 30 seconds.</p> }
+        @for (warning of status.warnings; track warning) { <p>{{ warning }}</p> }
+      </section>
+    }
+
+    <section class="status-section">
+      <div class="status-section-heading"><div><p class="eyebrow">Dependencies</p><h2>Safe operation availability</h2></div></div>
+      <div class="dependency-grid">
+        @for (dependency of status.dependencies; track dependency.key) {
+          <article class="dependency-card" [class]="'dependency-card ' + statusClass(dependency.status)">
+            <div class="dependency-title"><span class="health-indicator"></span><div><strong>{{ dependency.name }}</strong><small>{{ dependency.status }}</small></div></div>
+            <p>{{ dependency.message }}</p>
+            <div class="capability-list"><span>{{ dependency.status === 'Healthy' ? 'Available' : 'Affected tools' }}</span><p>{{ dependency.affectedCapabilities.join(' · ') }}</p></div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="status-section">
+      <div class="status-section-heading"><div><p class="eyebrow">Signals</p><h2>Operational workload</h2></div></div>
+      <div class="signal-grid">
+        <article class="signal-card" [class.alert]="status.outbox.status !== 'Healthy'">
+          <span>Realtime outbox</span><strong>{{ status.outbox.isAvailable ? status.outbox.pendingDeliveries : '—' }}</strong>
+          <small>pending · {{ status.outbox.failedDeliveries }} failed</small>
+          @if (status.outbox.oldestPendingAtUtc) { <time>Oldest {{ status.outbox.oldestPendingAtUtc | date: 'medium' }}</time> }
+        </article>
+        <article class="signal-card">
+          <span>Bans expiring in 7 days</span><strong>{{ status.restrictions.isAvailable ? status.restrictions.expiringWithinSevenDays : '—' }}</strong>
+          <small>active Game account restrictions</small>
+          @if (status.restrictions.nextExpiryAtUtc) { <time>Next {{ status.restrictions.nextExpiryAtUtc | date: 'medium' }}</time> }
+        </article>
+        <button class="signal-card action-signal" type="button" (click)="openRiskAudit('Permanent')"><span>Permanent actions · 24h</span><strong>{{ status.permanentActionsLast24Hours }}</strong><small>Open filtered audit →</small></button>
+        <button class="signal-card action-signal" type="button" (click)="openRiskAudit('HighValue')"><span>High-value grants · 24h</span><strong>{{ status.highValueActionsLast24Hours }}</strong><small>Open filtered audit →</small></button>
+      </div>
+    </section>
+
+    <div class="status-lower-grid">
+      <section class="status-section recent-status-actions">
+        <div class="status-section-heading"><div><p class="eyebrow">Audit</p><h2>Recent privileged activity</h2></div><button class="text-link" type="button" (click)="openAudit()">Open explorer</button></div>
+        <div class="recent-action-list">
+          @for (entry of status.recentActions; track entry.operationId) {
+            <article>
+              <span class="source-pill" [class.chat]="entry.source === 'Chat'">{{ entry.source }}</span>
+              <div><strong>{{ entry.actionType }}</strong><p>{{ entry.reason }}</p><small>{{ entry.actorDisplayName }} · {{ entry.occurredAt | date: 'medium' }}</small></div>
+              @if (entry.targetCharacterId) { <button class="text-link" type="button" (click)="openPlayer(entry.targetCharacterId!)">Player</button> }
+            </article>
+          } @empty { <div class="status-empty">No recent privileged activity was returned.</div> }
+        </div>
+      </section>
+      <section class="status-section release-status">
+        <div class="status-section-heading"><div><p class="eyebrow">Release</p><h2>Deployed identity</h2></div></div>
+        <dl>
+          <div><dt>LiveOps API</dt><dd>{{ status.build.releaseVersion }}</dd></div><div><dt>LiveOps UI</dt><dd>{{ status.build.frontendVersion }}</dd></div>
+          <div><dt>Game</dt><dd>{{ status.build.gameVersion }}</dd></div><div><dt>Chat</dt><dd>{{ status.build.chatVersion }}</dd></div>
+          <div><dt>Commit</dt><dd><code>{{ status.build.commitSha || 'not reported' }}</code></dd></div>
+          <div><dt>Deployed</dt><dd>{{ status.build.deployedAtUtc ? (status.build.deployedAtUtc | date: 'medium') : 'not reported' }}</dd></div>
+          <div><dt>LiveOps started</dt><dd>{{ status.build.processStartedAtUtc | date: 'medium' }}</dd></div>
+        </dl>
+      </section>
+    </div>
+  }
+</main>

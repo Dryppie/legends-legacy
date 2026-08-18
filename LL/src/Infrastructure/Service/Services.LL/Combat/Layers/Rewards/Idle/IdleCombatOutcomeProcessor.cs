@@ -10,6 +10,7 @@ using Domain.Models.Entities.Creatures;
 using Services.LL.Combat.Layers.Orchestration.Idle;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Rewards.Models;
+using Services.LL.Combat;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Interfaces.Combat.Reward.Idle;
 
@@ -24,6 +25,7 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
     private readonly IPublisher _publisher;
     private readonly IGameEventOutbox _outbox;
     private readonly ICreatureArchiveService _creatureArchiveService;
+    private readonly List<IdleCombatSettlementBatch> _pendingSettlement = [];
 
     public IdleCombatOutcomeProcessor(
         IIdleCombatRewardFactBuilder factBuilder,
@@ -52,70 +54,96 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
         var context = CreateContext(request);
 
         var facts = await _factBuilder.BuildAsync(context, cancellationToken);
+        var calculationStartedAt = IdleCombatTelemetry.Start();
         var calculatedOutcome = await _calculator.CalculateAsync(facts, cancellationToken);
-        await _applier.ApplyAsync(facts, calculatedOutcome, cancellationToken);
-        await RecordCreatureArchiveProgressAsync(facts, cancellationToken);
-        await PublishProphecyProgressAsync(facts, calculatedOutcome, cancellationToken);
-        await EnqueueOutboxProgressAsync(facts, cancellationToken);
+        IdleCombatTelemetry.RecordRewardCalculation(calculationStartedAt);
+
+        var progressionStartedAt = IdleCombatTelemetry.Start();
+        await _applier.ApplyProgressionAsync(facts, calculatedOutcome, cancellationToken);
+        IdleCombatTelemetry.RecordProgressionApply(progressionStartedAt);
+
+        _pendingSettlement.Add(CreateSettlementBatch(facts, calculatedOutcome));
+        if (context.OrchestrationRequest.CaptureFinalEncounterLog)
+        {
+            var settlementStartedAt = IdleCombatTelemetry.Start();
+            await FlushSettlementAsync(cancellationToken);
+            IdleCombatTelemetry.RecordSettlement(settlementStartedAt);
+        }
 
         return _sessionFactory.Create(facts, calculatedOutcome);
     }
 
-    private async Task RecordCreatureArchiveProgressAsync(
-        IdleCombatRewardFacts facts,
-        CancellationToken cancellationToken)
+    private async Task FlushSettlementAsync(CancellationToken cancellationToken)
     {
-        var defeatedCreatures = facts.Encounters
-            .Where(x => x.IsVictory)
-            .SelectMany(x => x.HostileCreatures)
-            .ToList();
-
-        if (defeatedCreatures.Count == 0)
+        if (_pendingSettlement.Count == 0)
         {
             return;
         }
 
-        await _creatureArchiveService.RecordDefeatedCreaturesAsync(
-            facts.CharacterId,
-            defeatedCreatures,
-            facts.ProcessedUntil,
+        var batches = _pendingSettlement.ToArray();
+        await _applier.ApplySettlementAsync(batches, cancellationToken);
+        await RecordCreatureArchiveProgressAsync(batches, cancellationToken);
+        await PublishProphecyProgressAsync(batches, cancellationToken);
+        await EnqueueOutboxProgressAsync(batches, cancellationToken);
+        _pendingSettlement.Clear();
+    }
+
+    private async Task RecordCreatureArchiveProgressAsync(
+        IReadOnlyList<IdleCombatSettlementBatch> batches,
+        CancellationToken cancellationToken)
+    {
+        var defeatBatches = batches
+            .Select(batch => new CreatureDefeatBatch(
+                batch.DefeatedCreatures,
+                batch.ProcessedUntil))
+            .Where(batch => batch.Creatures.Count > 0)
+            .ToList();
+
+        if (defeatBatches.Count == 0)
+        {
+            return;
+        }
+
+        await _creatureArchiveService.RecordDefeatedCreatureBatchesAsync(
+            batches[0].CharacterId,
+            defeatBatches,
             cancellationToken);
     }
 
-    private Task EnqueueOutboxProgressAsync(IdleCombatRewardFacts facts, CancellationToken cancellationToken)
+    private Task EnqueueOutboxProgressAsync(
+        IReadOnlyList<IdleCombatSettlementBatch> batches,
+        CancellationToken cancellationToken)
     {
-        if (facts.Encounters.Count == 0)
+        var actionCount = checked(batches.Sum(batch => batch.ActionCount));
+        if (actionCount == 0)
         {
             return Task.CompletedTask;
         }
 
-        var defeatedCreatures = facts.Encounters
-            .Where(x => x.IsVictory)
-            .SelectMany(x => x.HostileCreatures)
-            .ToList();
-
-        var lowestWinningHealthPercent = facts.Encounters
-            .Where(x => x.IsVictory)
-            .Select(GetLowestWinningHealthPercent)
-            .Where(x => x.HasValue)
-            .Select(x => x!.Value)
+        var defeatedCreatureFamilyKeys = batches
+            .SelectMany(batch => batch.DefeatedCreatureFamilyKeys)
+            .ToArray();
+        var lowestWinningHealthPercent = batches
+            .Where(batch => batch.LowestWinningHealthPercent.HasValue)
+            .Select(batch => batch.LowestWinningHealthPercent!.Value)
             .DefaultIfEmpty()
             .Min();
+        var winningEncounterCount = checked(batches.Sum(batch => batch.WinningEncounterCount));
 
         return _outbox.EnqueueAsync(
             GameEventTypes.IdleCombatEncounterCompleted,
             new IdleCombatEncounterCompletedPayload(
-                facts.CharacterId,
-                facts.Area.Id,
-                facts.Encounters.Any(x => x.Outcome == BattleOutcome.Victory),
-                defeatedCreatures.Count,
-                [.. defeatedCreatures.Select(GetCreatureFamilyKey)],
-                facts.Encounters.Count(x => x.Outcome == BattleOutcome.Defeat),
+                batches[0].CharacterId,
+                batches[0].AreaId,
+                winningEncounterCount > 0,
+                batches.Sum(batch => batch.DefeatedCreatures.Count),
+                defeatedCreatureFamilyKeys,
+                batches.Sum(batch => batch.PlayerDefeats),
                 lowestWinningHealthPercent == 0 ? null : lowestWinningHealthPercent,
-                facts.Encounters.Count,
-                facts.EquippedTool?.GatheringType.ToString(),
-                facts.Encounters.Count(x => x.Outcome == BattleOutcome.Victory)),
-            facts.CharacterId,
+                actionCount,
+                batches[^1].EquippedGatheringType,
+                winningEncounterCount),
+            batches[0].CharacterId,
             null,
             cancellationToken);
     }
@@ -132,12 +160,64 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
     }
 
     private async Task PublishProphecyProgressAsync(
-        IdleCombatRewardFacts facts,
-        IdleCombatCalculatedOutcome outcome,
+        IReadOnlyList<IdleCombatSettlementBatch> batches,
         CancellationToken cancellationToken)
     {
         var progressEvents = new List<ProphecyProgressEvent>();
 
+        foreach (var batch in batches)
+        {
+            progressEvents.AddRange(batch.ProphecyProgressEvents);
+        }
+
+        if (progressEvents.Count > 0)
+        {
+            await _publisher.Publish(new ProphecyProgressBatchNotification(progressEvents), cancellationToken);
+        }
+    }
+
+    private static IdleCombatSettlementBatch CreateSettlementBatch(
+        IdleCombatRewardFacts facts,
+        IdleCombatCalculatedOutcome outcome)
+    {
+        var defeatedCreatures = facts.Encounters
+            .Where(x => x.IsVictory)
+            .SelectMany(x => x.HostileCreatures)
+            .ToArray();
+        var lowestWinningHealthPercent = facts.Encounters
+            .Where(x => x.IsVictory)
+            .Select(GetLowestWinningHealthPercent)
+            .Where(x => x.HasValue)
+            .Select(x => x!.Value)
+            .DefaultIfEmpty()
+            .Min();
+        var prophecyProgressEvents = new List<ProphecyProgressEvent>();
+        AddCombatProphecyProgress(prophecyProgressEvents, facts);
+        AddRewardProphecyProgress(prophecyProgressEvents, facts, outcome);
+
+        return new IdleCombatSettlementBatch(
+            facts.CharacterId,
+            facts.From,
+            facts.ProcessedUntil,
+            facts.Area.Id,
+            facts.Area.Name,
+            facts.EquippedTool?.GatheringType.ToString(),
+            outcome.TotalLoot,
+            outcome.TotalCinders,
+            outcome.TotalSoulstones,
+            defeatedCreatures,
+            [.. defeatedCreatures.Select(GetCreatureFamilyKey)],
+            facts.Encounters.Count(x => x.Outcome == BattleOutcome.Defeat),
+            lowestWinningHealthPercent == 0 ? null : lowestWinningHealthPercent,
+            facts.Encounters.Count,
+            facts.Encounters.Count(x => x.Outcome == BattleOutcome.Victory),
+            prophecyProgressEvents);
+    }
+
+    private static void AddCombatProphecyProgress(
+        ICollection<ProphecyProgressEvent> progressEvents,
+        IdleCombatRewardFacts facts)
+    {
         foreach (var encounter in facts.Encounters)
         {
             if (encounter.IsVictory)
@@ -157,6 +237,7 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
                     EnemyCount: encounter.HostileCreatures.Count));
             }
 
+            var defeatedCreatureIds = new List<string>();
             for (var index = 0; index < encounter.HostileCreatures.Count; index++)
             {
                 var wasDefeated = encounter.IsVictory ||
@@ -168,14 +249,28 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
                     continue;
                 }
 
+                defeatedCreatureIds.Add(encounter.HostileCreatures[index].Id.ToString());
+            }
+
+            foreach (var creatureGroup in defeatedCreatureIds.GroupBy(
+                id => id,
+                StringComparer.OrdinalIgnoreCase))
+            {
                 progressEvents.Add(new ProphecyProgressEvent(
                     facts.CharacterId,
                     encounter.StartedAt,
                     ProphecyProgressKind.CreatureDefeated,
-                    CreatureDefinitionId: encounter.HostileCreatures[index].Id.ToString()));
+                    Amount: creatureGroup.Count(),
+                    CreatureDefinitionId: creatureGroup.Key));
             }
         }
+    }
 
+    private static void AddRewardProphecyProgress(
+        ICollection<ProphecyProgressEvent> progressEvents,
+        IdleCombatRewardFacts facts,
+        IdleCombatCalculatedOutcome outcome)
+    {
         foreach (var gathered in outcome.GatheringRewards.Where(x => x.Success))
         {
             var amount = gathered.ItemsGained.Sum(x => x.Quantity);
@@ -200,11 +295,6 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
                 outcome.ProcessedUntil,
                 ProphecyProgressKind.TreasureProgress,
                 treasureProgress));
-        }
-
-        if (progressEvents.Count > 0)
-        {
-            await _publisher.Publish(new ProphecyProgressBatchNotification(progressEvents), cancellationToken);
         }
     }
 

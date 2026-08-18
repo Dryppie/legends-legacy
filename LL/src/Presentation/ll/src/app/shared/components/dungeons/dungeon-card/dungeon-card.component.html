@@ -33,7 +33,7 @@
             "
             class="font-serif text-2xl font-semibold text-primary"
           >
-            {{ displayCombatRating(recommended) | number: '1.0-0' }}
+            {{ displayCombatRating(recommended) | number: "1.0-0" }}
           </span>
           <ng-template #previewRecommendationPending>
             <span class="text-xs text-zinc-400">
@@ -489,12 +489,14 @@
             <div>
               <div class="ll-stat-label">Your Combat Rating</div>
               <ng-container
-                *ngIf="selectedPartyPower() !== null; else partyPowerUnavailable"
+                *ngIf="
+                  selectedPartyPower() !== null;
+                  else partyPowerUnavailable
+                "
               >
                 <div class="mt-1 font-serif text-xl tabular-nums text-primary">
                   {{
-                    displayCombatRating(selectedPartyPower()!)
-                      | number: '1.0-0'
+                    displayCombatRating(selectedPartyPower()!) | number: "1.0-0"
                   }}
                 </div>
               </ng-container>
@@ -512,9 +514,7 @@
                 "
               >
                 <div class="mt-1 font-serif text-xl tabular-nums text-white">
-                  {{
-                    displayCombatRating(recommended) | number: '1.0-0'
-                  }}
+                  {{ displayCombatRating(recommended) | number: "1.0-0" }}
                 </div>
               </ng-container>
               <ng-template #recommendationPending>
@@ -599,23 +599,35 @@
         </section>
 
         <div class="mt-4">
-          <app-regular-button
-            [text]="
-              selectedCanEnter()
-                ? 'Enter ' + difficultyLabel(difficulty())
-                : 'Cannot Enter'
-            "
-            [disabled]="!selectedCanEnter()"
-            (pressed)="startDungeon()"
-            fullWidth
-          ></app-regular-button>
-
-          <div
-            *ngIf="!selectedCanEnter()"
-            class="ll-state ll-state-danger mt-3 text-xs leading-5"
+          <ng-container
+            *ngIf="isActiveDungeonPreview(); else dungeonEntryAction"
           >
-            {{ selectedBlockingMessage() }}
-          </div>
+            <app-regular-button
+              text="Ongoing Dungeon Run - Continue"
+              (pressed)="continueDungeon()"
+              fullWidth
+            ></app-regular-button>
+          </ng-container>
+
+          <ng-template #dungeonEntryAction>
+            <app-regular-button
+              [text]="
+                selectedCanEnter()
+                  ? 'Enter ' + difficultyLabel(difficulty())
+                  : 'Cannot Enter'
+              "
+              [disabled]="!selectedCanEnter()"
+              (pressed)="startDungeon()"
+              fullWidth
+            ></app-regular-button>
+
+            <div
+              *ngIf="!selectedCanEnter()"
+              class="ll-state ll-state-danger mt-3 text-xs leading-5"
+            >
+              {{ selectedBlockingMessage() }}
+            </div>
+          </ng-template>
         </div>
       </aside>
     </div>

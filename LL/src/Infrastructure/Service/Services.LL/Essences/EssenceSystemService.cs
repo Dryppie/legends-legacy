@@ -666,8 +666,64 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         IReadOnlyDictionary<BonusKind, double>? bonusFactors = null,
         EssenceDropRollModifiers? modifiers = null)
     {
+        var groups = await RollEssenceDropGroupsAsync(
+            characterId,
+            [defeatedCreatures],
+            eligible,
+            cancellationToken,
+            bonusFactors,
+            modifiers);
+        return groups.Count == 0 ? [] : groups[0];
+    }
+
+    public async Task<IReadOnlyList<IReadOnlyList<InventoryItem>>> RollEssenceDropGroupsAsync(
+        Guid characterId,
+        IReadOnlyList<IReadOnlyList<Creature>> defeatedCreatureGroups,
+        bool eligible,
+        CancellationToken cancellationToken,
+        IReadOnlyDictionary<BonusKind, double>? bonusFactors = null,
+        EssenceDropRollModifiers? modifiers = null)
+    {
+        if (defeatedCreatureGroups.Count == 0)
+        {
+            return [];
+        }
+
+        if (!eligible)
+        {
+            return defeatedCreatureGroups
+                .Select(_ => (IReadOnlyList<InventoryItem>)Array.Empty<InventoryItem>())
+                .ToArray();
+        }
+
+        var factors = bonusFactors ?? await GetBonusFactorsAsync(
+            characterId,
+            DateTimeOffset.UtcNow,
+            cancellationToken);
+        var rollModifiers = modifiers ?? new EssenceDropRollModifiers();
+        var groups = new List<IReadOnlyList<InventoryItem>>(defeatedCreatureGroups.Count);
+        foreach (var defeatedCreatures in defeatedCreatureGroups)
+        {
+            groups.Add(await RollEssenceDropGroupCoreAsync(
+                characterId,
+                defeatedCreatures,
+                factors,
+                rollModifiers,
+                cancellationToken));
+        }
+
+        return groups;
+    }
+
+    private async Task<IReadOnlyList<InventoryItem>> RollEssenceDropGroupCoreAsync(
+        Guid characterId,
+        IReadOnlyList<Creature> defeatedCreatures,
+        IReadOnlyDictionary<BonusKind, double> factors,
+        EssenceDropRollModifiers rollModifiers,
+        CancellationToken cancellationToken)
+    {
         var drops = new List<InventoryItem>();
-        if (!eligible || defeatedCreatures.Count == 0) return drops;
+        if (defeatedCreatures.Count == 0) return drops;
 
         var monsterIds = defeatedCreatures
             .Select(CreatureEssenceSource.GetMonsterDefinitionId)
@@ -676,8 +732,6 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
         if (monsterIds.Count == 0) return drops;
 
-        var factors = bonusFactors ?? await GetBonusFactorsAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
-        var rollModifiers = modifiers ?? new EssenceDropRollModifiers();
         foreach (var monsterId in monsterIds)
         {
             var roll = await RollMonsterEssenceDropAsync(

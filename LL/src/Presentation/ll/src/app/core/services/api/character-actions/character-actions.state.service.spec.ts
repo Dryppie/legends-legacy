@@ -14,7 +14,10 @@ import { GameService } from '../../client-side/game/game.service';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { CharacterActionsService } from './character-actions.service';
-import { CharacterActionsStateService } from './character-actions.state.service';
+import {
+  CharacterActionsStateService,
+  isOfflineCombatCatchUpRequest,
+} from './character-actions.state.service';
 import { CombatActionHandler } from './handlers/combat-action-handler';
 import { CraftingActionHandler } from './handlers/crafting-action-handler';
 import { CharacterActionTypePersistenceService } from './helpers/character-action-type-persistence.service';
@@ -298,6 +301,65 @@ describe('CharacterActionsStateService', () => {
     expect(service.resolvingOfflineProgress()).toBeFalse();
     expect(service.idleCombatPhase()).toBe('active');
   }));
+
+  it('shows offline catch-up while an overdue resolve request is in flight', () => {
+    const now = Date.now();
+    const overdueAction: CharacterActionDto = {
+      ...combatAction(),
+      nextResolutionAtUtc: new Date(now - 24 * 60 * 60 * 1_000),
+      resolutionIntervalMs: 10_000,
+      revision: 'overdue-combat-revision',
+    };
+    const resolveResult = new Subject<CharacterActionDto | null>();
+    actions.resolveCurrentAction.and.returnValue(resolveResult.asObservable());
+    service.applyCurrentActionSnapshot(overdueAction);
+
+    service.refreshCurrentAction();
+
+    expect(service.resolvingOfflineProgress()).toBeTrue();
+
+    resolveResult.next({
+      ...overdueAction,
+      nextResolutionAtUtc: new Date(now + 10_000),
+      hasMoreDueWork: false,
+      revision: 'caught-up-combat-revision',
+    });
+    resolveResult.complete();
+
+    expect(service.resolvingOfflineProgress()).toBeFalse();
+  });
+});
+
+describe('isOfflineCombatCatchUpRequest', () => {
+  it('detects a combat backlog before the server response is available', () => {
+    const now = Date.parse('2026-08-18T12:00:00Z');
+
+    expect(
+      isOfflineCombatCatchUpRequest(
+        {
+          ...combatAction(),
+          nextResolutionAtUtc: new Date('2026-08-18T11:59:40Z'),
+          resolutionIntervalMs: 10_000,
+        },
+        now,
+      ),
+    ).toBeTrue();
+  });
+
+  it('does not classify a routine single-encounter poll as offline catch-up', () => {
+    const now = Date.parse('2026-08-18T12:00:00Z');
+
+    expect(
+      isOfflineCombatCatchUpRequest(
+        {
+          ...combatAction(),
+          nextResolutionAtUtc: new Date('2026-08-18T12:00:00Z'),
+          resolutionIntervalMs: 10_000,
+        },
+        now,
+      ),
+    ).toBeFalse();
+  });
 });
 
 function combatAction(): CharacterActionDto {

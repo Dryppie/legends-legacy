@@ -251,6 +251,7 @@ function createRun(roomType: RoomType): DungeonRun {
   return {
     id: 'run',
     characterId: 'character',
+    dungeonDefinitionId: 'goblin_mines_Normal',
     dungeonDefinitionName: 'Goblin Mines I',
     seed: 1,
     status: DungeonRunStatus.Active,

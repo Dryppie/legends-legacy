@@ -100,6 +100,89 @@ public sealed class ChatModerationGateway(
         }
     }
 
+    public async Task<ChatModerationAuditGatewayResult> GetAuditAsync(
+        ChatModerationAuditGatewayQuery query,
+        CancellationToken cancellationToken)
+    {
+        var parameters = new List<string>();
+        AddParameter(parameters, "from", query.From?.ToString("O"));
+        AddParameter(parameters, "to", query.To?.ToString("O"));
+        AddParameter(parameters, "actionType", query.ActionType);
+        AddParameter(parameters, "actor", query.Actor);
+        AddParameter(parameters, "reference", query.Reference);
+        AddParameter(parameters, "operationId", query.OperationId?.ToString());
+        foreach (var characterId in query.CharacterIds)
+        {
+            AddParameter(parameters, "characterId", characterId.ToString());
+        }
+        AddParameter(parameters, "restrictionId", query.RestrictionId?.ToString());
+        AddParameter(parameters, "beforeOccurredAt", query.BeforeOccurredAt?.ToString("O"));
+        AddParameter(parameters, "beforeOperationId", query.BeforeOperationId?.ToString());
+        AddParameter(parameters, "take", Math.Clamp(query.Limit, 1, 101).ToString());
+
+        var relativePath = "api/v1/chat/ModerationAudit?" + string.Join('&', parameters);
+        if (!TryCreateConfiguredRequest(
+                HttpMethod.Get,
+                relativePath,
+                out var request,
+                out var configurationError))
+        {
+            return new ChatModerationAuditGatewayResult(false, [], configurationError);
+        }
+
+        using (request)
+        using (var timeoutCts = CreateTimeoutToken(cancellationToken))
+        {
+            try
+            {
+                using var response = await httpClient.SendAsync(request, timeoutCts.Token);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ChatModerationAuditGatewayResult(
+                        false,
+                        [],
+                        $"Chat moderation audit returned status {(int)response.StatusCode}.");
+                }
+
+                var body = await response.Content.ReadFromJsonAsync<
+                    IReadOnlyList<ChatModerationHistoryResponse>>(
+                    cancellationToken: timeoutCts.Token);
+                return body is null
+                    ? new ChatModerationAuditGatewayResult(
+                        false,
+                        [],
+                        "Chat moderation returned an invalid audit response.")
+                    : new ChatModerationAuditGatewayResult(
+                        true,
+                        body.Select(x => new ChatModerationHistoryGatewayEntry(
+                                x.OperationId,
+                                x.ActionType,
+                                x.CharacterId,
+                                x.RestrictionId,
+                                x.ActorSubject,
+                                x.ActorDisplayName,
+                                x.Reason,
+                                x.OccurredAt))
+                            .ToList(),
+                        string.Empty);
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                return new ChatModerationAuditGatewayResult(
+                    false,
+                    [],
+                    "Chat moderation audit timed out.");
+            }
+            catch (HttpRequestException)
+            {
+                return new ChatModerationAuditGatewayResult(
+                    false,
+                    [],
+                    "Chat moderation audit is temporarily unavailable.");
+            }
+        }
+    }
+
     public Task<ChatModerationGatewayResult> MuteAsync(
         ChatMuteGatewayRequest request,
         CancellationToken cancellationToken) =>
@@ -222,6 +305,16 @@ public sealed class ChatModerationGateway(
     {
         var baseUrl = _options.BaseUrl.TrimEnd('/') + "/";
         return new Uri(new Uri(baseUrl), relativePath);
+    }
+
+    private static void AddParameter(
+        ICollection<string> parameters,
+        string name,
+        string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return;
+
+        parameters.Add($"{Uri.EscapeDataString(name)}={Uri.EscapeDataString(value)}");
     }
 
     private sealed record ChatModerationResponse(

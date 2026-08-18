@@ -170,8 +170,98 @@ public sealed class AdministrationRepository(IDbContext context) : IAdministrati
                 x.Reason,
                 x.InternalNotes,
                 x.DetailsJson,
+                x.RiskLevel,
                 x.OccurredAt))
             .ToListAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<AdministrationHistoryEntry>> GetAuditAsync(
+        AdministrationAuditQuery query,
+        CancellationToken cancellationToken)
+    {
+        var actions = context.AdminActions.AsNoTracking().AsQueryable();
+
+        if (query.From.HasValue)
+        {
+            actions = actions.Where(x => x.OccurredAt >= query.From.Value);
+        }
+        if (query.To.HasValue)
+        {
+            actions = actions.Where(x => x.OccurredAt <= query.To.Value);
+        }
+        if (query.ActionType.HasValue)
+        {
+            actions = actions.Where(x => x.ActionType == query.ActionType.Value);
+        }
+        if (!string.IsNullOrWhiteSpace(query.Actor))
+        {
+            var actor = query.Actor.Trim().ToUpper();
+            actions = actions.Where(x =>
+                x.ActorSubject.ToUpper().Contains(actor) ||
+                x.ActorDisplayName.ToUpper().Contains(actor));
+        }
+        if (!string.IsNullOrWhiteSpace(query.Permission))
+        {
+            var permission = query.Permission.Trim().ToUpper();
+            actions = actions.Where(x => x.Permission.ToUpper() == permission);
+        }
+        if (!string.IsNullOrWhiteSpace(query.Reference))
+        {
+            var reference = query.Reference.Trim().ToUpper();
+            actions = query.IncludeInternalNotesInReference
+                ? actions.Where(x =>
+                    x.Reason.ToUpper().Contains(reference) ||
+                    (x.InternalNotes != null && x.InternalNotes.ToUpper().Contains(reference)))
+                : actions.Where(x => x.Reason.ToUpper().Contains(reference));
+        }
+        if (query.RiskLevel.HasValue)
+        {
+            actions = actions.Where(x => x.RiskLevel == query.RiskLevel.Value);
+        }
+        if (query.OperationId.HasValue)
+        {
+            actions = actions.Where(x => x.Id == query.OperationId.Value);
+        }
+
+        var accountIds = query.TargetAccountIds.ToArray();
+        var characterIds = query.TargetCharacterIds.ToArray();
+        if (accountIds.Length > 0 || characterIds.Length > 0 || query.TargetResourceId.HasValue)
+        {
+            actions = actions.Where(x =>
+                (x.TargetAccountId.HasValue && accountIds.Contains(x.TargetAccountId.Value)) ||
+                (x.TargetCharacterId.HasValue && characterIds.Contains(x.TargetCharacterId.Value)) ||
+                (query.TargetResourceId.HasValue &&
+                 x.TargetResourceId == query.TargetResourceId.Value));
+        }
+
+        if (query.BeforeOccurredAt.HasValue && query.BeforeOperationId.HasValue)
+        {
+            var beforeAt = query.BeforeOccurredAt.Value;
+            var beforeId = query.BeforeOperationId.Value;
+            actions = actions.Where(x =>
+                x.OccurredAt < beforeAt ||
+                (x.OccurredAt == beforeAt && x.Id.CompareTo(beforeId) < 0));
+        }
+
+        return await actions
+            .OrderByDescending(x => x.OccurredAt)
+            .ThenByDescending(x => x.Id)
+            .Take(Math.Clamp(query.Limit, 1, 101))
+            .Select(x => new AdministrationHistoryEntry(
+                x.Id,
+                x.ActionType,
+                x.Permission,
+                x.ActorSubject,
+                x.ActorDisplayName,
+                x.TargetAccountId,
+                x.TargetCharacterId,
+                x.TargetResourceId,
+                x.Reason,
+                x.InternalNotes,
+                x.DetailsJson,
+                x.RiskLevel,
+                x.OccurredAt))
+            .ToListAsync(cancellationToken);
+    }
 
     public void AddAction(AdminAction action) => context.AdminActions.Add(action);
 

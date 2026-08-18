@@ -22,6 +22,14 @@ public sealed class UnavailableChatModerationGateway : IChatModerationGateway
             [],
             Error));
 
+    public Task<ChatModerationAuditGatewayResult> GetAuditAsync(
+        ChatModerationAuditGatewayQuery query,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(new ChatModerationAuditGatewayResult(
+            false,
+            [],
+            Error));
+
     public Task<ChatModerationGatewayResult> MuteAsync(
         ChatMuteGatewayRequest request,
         CancellationToken cancellationToken) =>

@@ -48,6 +48,33 @@ public sealed class CreatureArchiveServiceTests
     }
 
     [Fact]
+    public async Task RecordDefeatedCreatureBatches_preserves_first_and_last_checkpoint_timestamps()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var firstDefeatedAt = new DateTimeOffset(2026, 7, 9, 10, 0, 0, TimeSpan.Zero);
+        var lastDefeatedAt = firstDefeatedAt.AddHours(3);
+        var service = CreateService(db);
+
+        await service.RecordDefeatedCreatureBatchesAsync(
+            characterId,
+            [
+                new CreatureDefeatBatch(
+                    [new Creature { Name = "Cave Bat" }, new Creature { Name = "Cave Bat" }],
+                    firstDefeatedAt),
+                new CreatureDefeatBatch(
+                    [new Creature { Name = "Cave Bat" }],
+                    lastDefeatedAt)
+            ],
+            CancellationToken.None);
+
+        var entry = Assert.Single(await db.Set<CharacterCreatureArchiveEntry>().ToListAsync());
+        Assert.Equal(3, entry.KillCount);
+        Assert.Equal(firstDefeatedAt, entry.FirstDefeatedAtUtc);
+        Assert.Equal(lastDefeatedAt, entry.LastDefeatedAtUtc);
+    }
+
+    [Fact]
     public async Task GetCreatureArchive_links_essence_definition_and_absorbed_state()
     {
         await using var db = CreateDb();

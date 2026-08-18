@@ -3,9 +3,14 @@ using API.LiveOps.Authorization;
 using API.LiveOps.Chat;
 using API.LiveOps.Health;
 using API.LiveOps.Hosting;
+using API.LiveOps.Previews;
+using API.LiveOps.Support;
 using Application.Interfaces.Services.LL.Administration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Security.Claims;
+using System.Threading.RateLimiting;
 using Persistence.LL;
 using Services.LL;
 
@@ -28,6 +33,23 @@ builder.Services.AddControllers(options =>
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("audit-exports", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.User.FindFirstValue("sub")
+                ?? context.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? context.Connection.RemoteIpAddress?.ToString()
+                ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 3,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+});
 builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "X-XSRF-TOKEN";
@@ -58,6 +80,10 @@ builder.Services.AddHealthChecks()
         "chat_moderation",
         failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded,
         tags: ["ready"]);
+builder.Services.AddScoped<LiveOpsOperationalStatusService>();
+builder.Services.AddScoped<ILiveOpsRecentActivityReader, LiveOpsRecentActivityReader>();
+builder.Services.AddScoped<LiveOpsActionPreviewService>();
+builder.Services.AddScoped<LiveOpsPlayerSupportSnapshotService>();
 
 var allowedOrigins = config.GetSection("LiveOps:AllowedOrigins").Get<string[]>() ?? [];
 if (allowedOrigins.Length > 0)
@@ -120,6 +146,7 @@ if (allowedOrigins.Length > 0)
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.MapControllers();
 app.MapHealthChecks("/healthz/ready", new HealthCheckOptions
 {

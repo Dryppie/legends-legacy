@@ -8,7 +8,10 @@ using Services.LL.Interfaces.Combat.Orchestration;
 using Services.LL.Interfaces.Combat.Reward;
 using Common.Randomness;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Globalization;
+using Services.LL.Combat;
 
 namespace Services.LL.CharacterActions;
 
@@ -18,24 +21,29 @@ public class CombatService : ICombatService
     private readonly ICombatOutcomeCoordinator _outcomeCoordinator;
     private readonly IResolutionRandomSource? _resolutionRandom;
     private readonly IdleCombatProgressionOptions _options;
+    private readonly ILogger<CombatService>? _logger;
 
     public CombatService(
         ICombatOrchestrationCoordinator orchestrationCoordinator,
         ICombatOutcomeCoordinator outcomeCoordinator,
         IResolutionRandomSource? resolutionRandom = null,
-        IOptions<IdleCombatProgressionOptions>? options = null)
+        IOptions<IdleCombatProgressionOptions>? options = null,
+        ILogger<CombatService>? logger = null)
     {
         _orchestrationCoordinator = orchestrationCoordinator;
         _outcomeCoordinator = outcomeCoordinator;
         _resolutionRandom = resolutionRandom;
         _options = options?.Value ?? new IdleCombatProgressionOptions();
+        _logger = logger;
     }
 
     public async Task<CombatSession> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
+        var resolveStartedAt = IdleCombatTelemetry.Start();
         var accumulator = new CombatSessionAccumulator();
         IdleCombatOrchestrationDetails? lastDetails = null;
         var processedCount = 0;
+        var processedBatches = 0;
 
         // MaximumEncountersPerResolution remains the memory/CPU size of one
         // orchestration batch. Continuation happens here, inside the same command
@@ -84,6 +92,7 @@ public class CombatService : ICombatService
                 new CombatOutcomeRequest(orchestrationRequest, orchestrationResult),
                 cancellationToken);
             accumulator.Add(session);
+            processedBatches++;
 
             if (orchestrationResult.EncounterCount == 0 || details.ProcessedUntil > now)
                 break;
@@ -95,6 +104,17 @@ public class CombatService : ICombatService
             (int)(lastDetails?.EncounterCadence.TotalMilliseconds
                 ?? TimeSpan.FromSeconds(_options.EncounterCadenceSeconds).TotalMilliseconds));
 
+        var elapsed = Stopwatch.GetElapsedTime(resolveStartedAt);
+        IdleCombatTelemetry.RecordResolve(resolveStartedAt, processedCount, processedBatches);
+        if (processedCount > 0)
+        {
+            _logger?.LogInformation(
+                "Idle combat catch-up resolved {EncounterCount} encounters in {BatchCount} batches over {ElapsedMilliseconds} ms ({EncountersPerSecond} encounters/sec).",
+                processedCount,
+                processedBatches,
+                elapsed.TotalMilliseconds,
+                elapsed.TotalSeconds <= 0 ? processedCount : processedCount / elapsed.TotalSeconds);
+        }
         return accumulator.Build();
     }
 

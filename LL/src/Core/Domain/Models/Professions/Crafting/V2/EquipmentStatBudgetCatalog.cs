@@ -35,19 +35,24 @@ public static class EquipmentStatBudgetCatalog
             [AttributeType.AttackSpeed] = Percentage(1d, AttributeCombatRules.AttackSpeedCapPercent)
         };
 
+    private static readonly IReadOnlyDictionary<AttributeType, EquipmentStatBudgetRule> Rules =
+        Definitions.ToDictionary(
+            pair => pair.Key,
+            pair => new EquipmentStatBudgetRule(
+                pair.Value.CostPerPoint,
+                pair.Value.PerItemHardCap,
+                pair.Value.ScalingKind,
+                pair.Value.EffectiveCap,
+                pair.Value.HalfCapNormalizedRating));
+
     public static IReadOnlyCollection<AttributeType> Attributes => Definitions.Keys.ToArray();
 
     public static EquipmentStatBudgetRule Get(AttributeType stat)
     {
-        if (!Definitions.TryGetValue(stat, out var definition))
+        if (!Rules.TryGetValue(stat, out var rule))
             throw new InvalidOperationException($"No equipment budget rule exists for '{stat}'.");
 
-        return new EquipmentStatBudgetRule(
-            definition.CostPerPoint,
-            definition.PerItemHardCap,
-            definition.ScalingKind,
-            definition.EffectiveCap,
-            definition.HalfCapNormalizedRating);
+        return rule;
     }
 
     /// <summary>The normalized v17 exchange rate is independent of tier.</summary>

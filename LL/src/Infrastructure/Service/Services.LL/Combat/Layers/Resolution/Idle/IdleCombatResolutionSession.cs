@@ -44,7 +44,15 @@ public sealed class IdleCombatResolutionSession : ICombatResolutionSession
             encounterPlan.CaptureEventLog,
             cancellationToken);
 
-        return _resultFactory.Create(runtime, combatResult);
+        var result = _resultFactory.Create(runtime, combatResult);
+        if (!encounterPlan.CaptureEventLog)
+        {
+            // Reward and progression logic needs outcome and post-combat health,
+            // but not per-ability statistics for historical encounters.
+            result.CombatResult.EntityStats.Clear();
+        }
+
+        return result;
     }
 
     private CombatRuntimeParticipant CreateFriendlyRuntimeParticipant(

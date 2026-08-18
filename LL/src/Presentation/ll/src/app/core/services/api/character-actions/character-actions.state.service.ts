@@ -26,6 +26,43 @@ export type IdleCombatPhase =
   | 'stopping'
   | 'error';
 
+const DEFAULT_IDLE_COMBAT_RESOLUTION_INTERVAL_MS = 10_000;
+
+export function isOfflineCombatCatchUpRequest(
+  action: CharacterActionDto | null,
+  now: number,
+): boolean {
+  if (
+    !action ||
+    action.isDeleted ||
+    action.characterActionType !== CharacterActionType.Combat
+  ) {
+    return false;
+  }
+
+  if (action.hasMoreDueWork || action.hasPendingCombatResolution) {
+    return true;
+  }
+
+  const boundaryValue =
+    action.nextResolutionAtUtc ?? action.nextResolutionAt ?? null;
+  if (!boundaryValue) return false;
+
+  const boundary = new Date(boundaryValue).getTime();
+  if (!Number.isFinite(boundary)) return false;
+
+  const configuredInterval = action.resolutionIntervalMs;
+  const interval =
+    typeof configuredInterval === 'number' && configuredInterval > 0
+      ? configuredInterval
+      : DEFAULT_IDLE_COMBAT_RESOLUTION_INTERVAL_MS;
+
+  // One overdue interval means at least two encounters are waiting. The
+  // dashboard separately debounces this state, so routine fast polls remain
+  // invisible even when they happen exactly on an encounter boundary.
+  return boundary <= now - interval;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CharacterActionsStateService {
   private readonly _showAction = signal(false);
@@ -50,6 +87,7 @@ export class CharacterActionsStateService {
   private activeActionRefreshes = 0;
   private actionRefreshLoadingTimeout: ReturnType<typeof setTimeout> | null =
     null;
+  private activeOfflineCatchUpRequests = 0;
 
   private readonly _startTime = signal<number | null>(null);
   private readonly _tickingDuration = signal<number>(0);
@@ -320,6 +358,7 @@ export class CharacterActionsStateService {
       this.actionRefreshLoadingTimeout = null;
     }
     this._loadingActionRefresh.set(false);
+    this.activeOfflineCatchUpRequests = 0;
     this._resolvingOfflineProgress.set(false);
     this._loadingCombat.set(false);
     this._idleCombatPhase.set('idle');
@@ -516,11 +555,18 @@ export class CharacterActionsStateService {
   }
 
   private resolveCurrentActionRequest(): Observable<CharacterActionDto | null> {
+    const actionAtRequestStart = this._currentAction();
+    const isOfflineCatchUp = isOfflineCombatCatchUpRequest(
+      actionAtRequestStart,
+      Date.now(),
+    );
+
     if (
-      this._currentAction()?.characterActionType === CharacterActionType.Combat
+      actionAtRequestStart?.characterActionType === CharacterActionType.Combat
     ) {
       this._idleCombatPhase.set('resolving');
-      if (this._currentAction()?.hasMoreDueWork) {
+      if (isOfflineCatchUp) {
+        this.activeOfflineCatchUpRequests += 1;
         this._resolvingOfflineProgress.set(true);
       }
     }
@@ -535,6 +581,23 @@ export class CharacterActionsStateService {
           this._idleCombatPhase.set(
             action.hasMoreDueWork ? 'resolving' : 'active',
           );
+        }
+      }),
+      finalize(() => {
+        if (isOfflineCatchUp) {
+          this.activeOfflineCatchUpRequests = Math.max(
+            0,
+            this.activeOfflineCatchUpRequests - 1,
+          );
+        }
+
+        const currentAction = this._currentAction();
+        const serverReportsMoreWork =
+          currentAction?.hasMoreDueWork ??
+          currentAction?.hasPendingCombatResolution ??
+          false;
+        if (this.activeOfflineCatchUpRequests === 0 && !serverReportsMoreWork) {
+          this._resolvingOfflineProgress.set(false);
         }
       }),
     );

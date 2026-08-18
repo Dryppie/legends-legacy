@@ -23,4 +23,22 @@ public sealed record AdministrationHistoryEntry(
     string Reason,
     string? InternalNotes,
     string DetailsJson,
+    AdministrationRiskLevel RiskLevel,
     DateTimeOffset OccurredAt);
+
+public sealed record AdministrationAuditQuery(
+    DateTimeOffset? From,
+    DateTimeOffset? To,
+    AdminActionType? ActionType,
+    string? Actor,
+    string? Permission,
+    string? Reference,
+    bool IncludeInternalNotesInReference,
+    AdministrationRiskLevel? RiskLevel,
+    Guid? OperationId,
+    IReadOnlyCollection<Guid> TargetAccountIds,
+    IReadOnlyCollection<Guid> TargetCharacterIds,
+    Guid? TargetResourceId,
+    DateTimeOffset? BeforeOccurredAt,
+    Guid? BeforeOperationId,
+    int Limit);

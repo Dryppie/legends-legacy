@@ -1,0 +1,65 @@
+<main class="audit-workspace">
+  <section class="audit-heading">
+    <div><p class="eyebrow">Append-only activity</p><h1>Global audit explorer</h1><p>Search Game and Chat actions across every player. Results are ordered newest first.</p></div>
+    <div class="audit-security">Read-only · permission filtered</div>
+  </section>
+
+  <div class="audit-toolbar">
+    <span>Quick views</span>
+    <button type="button" (click)="applyQuickFilter('permanent')">Permanent bans</button>
+    <button type="button" (click)="applyQuickFilter('large-grants')">Large grants</button>
+    <button type="button" (click)="applyQuickFilter('exports')">Audit exports</button>
+    @if (hasPermission(permissions.superadmin)) {
+      <button class="audit-export" type="button" [disabled]="exporting" (click)="exportAudit()">{{ exporting ? 'Preparing export' : 'Export filtered CSV' }}</button>
+    }
+  </div>
+
+  <form class="audit-filters" (ngSubmit)="searchAudit()">
+    <label>Source<select name="audit-source" [(ngModel)]="source"><option value="All">All systems</option><option value="Game">Game</option><option value="Chat">Chat</option></select></label>
+    <label>Action<select name="audit-action" [(ngModel)]="actionType"><option value="">All actions</option><option value="AccountBanned">Account banned</option><option value="AccountBanRevoked">Account ban revoked</option><option value="CompensationItemsGranted">Items granted</option><option value="AuditExported">Audit exported</option><option value="Muted">Chat muted</option><option value="Unmuted">Chat unmuted</option></select></label>
+    <label>Actor<input name="audit-actor" [(ngModel)]="actor" placeholder="Email, subject, or name" /></label>
+    <label>Permission<select name="audit-permission" [(ngModel)]="permission"><option value="">All permissions</option><option [value]="permissions.account">Account moderation</option><option [value]="permissions.chat">Chat moderation</option><option [value]="permissions.economy">Economy compensation</option><option [value]="permissions.superadmin">Superadmin</option></select></label>
+    <label>Target<input name="audit-target" [(ngModel)]="target" placeholder="Player name, email, or ID" /></label>
+    <label>Case or reference<input name="audit-reference" [(ngModel)]="reference" placeholder="e.g. LL-1042" /></label>
+    <label>Risk<select name="audit-risk" [(ngModel)]="riskLevel"><option value="">All risk levels</option><option value="Normal">Normal</option><option value="Permanent">Permanent</option><option value="HighValue">High value</option></select></label>
+    <label>From<input name="audit-from" type="datetime-local" [(ngModel)]="from" /></label>
+    <label>To<input name="audit-to" type="datetime-local" [(ngModel)]="to" /></label>
+    <label class="audit-operation-filter">Operation ID<input name="audit-operation" [(ngModel)]="operationId" placeholder="Exact operation UUID" /></label>
+    <button class="primary" type="submit" [disabled]="loading">{{ loading ? 'Loading' : 'Search audit' }}</button>
+  </form>
+
+  @if (message) { <div class="message" [class]="'message ' + messageTone" role="status">{{ message }}</div> }
+  @if (unavailableSources.length) { <div class="permission-note danger-note">{{ unavailableSources.join(', ') }} audit is temporarily unavailable. Showing the sources that responded.</div> }
+
+  <section class="audit-results" aria-live="polite" [attr.aria-busy]="loading">
+    <div class="audit-results-head"><span>{{ entries.length }} actions on this page</span><span>Newest first</span></div>
+    @if (loading && !loaded) {
+      <div class="audit-empty">Loading operator activity…</div>
+    } @else {
+      @for (entry of entries; track entry.operationId) {
+        <article class="audit-entry">
+          <button class="audit-summary" type="button" (click)="toggle(entry.operationId)" [attr.aria-expanded]="expandedOperations.has(entry.operationId)">
+            <span class="audit-classification"><span class="source-pill" [class.chat]="entry.source === 'Chat'">{{ entry.source }}</span>@if (entry.riskLevel !== 'Normal') { <span class="risk-pill" [class.permanent]="entry.riskLevel === 'Permanent'">{{ entry.riskLevel === 'HighValue' ? 'High value' : 'Permanent' }}</span> }</span>
+            <span class="audit-action"><strong>{{ entry.actionType }}</strong><small>{{ entry.reason }}</small></span>
+            <span class="audit-actor"><strong>{{ entry.actorDisplayName }}</strong><small>{{ entry.actorSubject }}</small></span>
+            <time>{{ entry.occurredAt | date: 'medium' }}</time><span class="outcome-pill">{{ entry.outcome }}</span><span class="audit-expand">{{ expandedOperations.has(entry.operationId) ? '−' : '+' }}</span>
+          </button>
+          @if (expandedOperations.has(entry.operationId)) {
+            <div class="audit-detail">
+              <dl>
+                <div><dt>Operation</dt><dd><code>{{ entry.operationId }}</code></dd></div><div><dt>Permission</dt><dd><code>{{ entry.permission }}</code></dd></div>
+                <div><dt>Outcome</dt><dd>{{ entry.outcome }}</dd></div><div><dt>Risk</dt><dd>{{ entry.riskLevel }}</dd></div>
+                @if (entry.targetAccountId) { <div><dt>Account</dt><dd><code>{{ entry.targetAccountId }}</code></dd></div> }
+                @if (entry.targetCharacterId) { <div><dt>Character</dt><dd><button class="text-link" type="button" (click)="openPlayer(entry.targetCharacterId!)">{{ entry.targetCharacterId }}</button></dd></div> }
+                @if (entry.targetResourceId) { <div><dt>Resource</dt><dd><code>{{ entry.targetResourceId }}</code></dd></div> }
+              </dl>
+              @if (entry.internalNotes) { <div class="internal-notes"><strong>Internal notes</strong><p>{{ entry.internalNotes }}</p></div> }
+              @if (entry.detailsJson && entry.detailsJson !== '{}') { <div class="audit-json"><strong>Recorded details</strong><pre>{{ details(entry) }}</pre></div> }
+            </div>
+          }
+        </article>
+      } @empty { <div class="audit-empty">No administration actions matched these filters.</div> }
+    }
+    <div class="audit-pagination"><button class="secondary" type="button" [disabled]="loading || previousCursors.length === 0" (click)="previousPage()">Previous</button><button class="secondary" type="button" [disabled]="loading || !nextCursor" (click)="nextPage()">Next</button></div>
+  </section>
+</main>

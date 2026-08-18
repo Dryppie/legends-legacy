@@ -17,3 +17,16 @@ public sealed class ChatModerationAction
     public string Reason { get; set; } = string.Empty;
     public DateTimeOffset OccurredAt { get; set; }
 }
+
+public sealed record ChatModerationAuditQuery(
+    DateTimeOffset? From,
+    DateTimeOffset? To,
+    ChatModerationActionType? ActionType,
+    string? Actor,
+    string? Reference,
+    Guid? OperationId,
+    IReadOnlyCollection<Guid> CharacterIds,
+    Guid? RestrictionId,
+    DateTimeOffset? BeforeOccurredAt,
+    Guid? BeforeOperationId,
+    int Limit);

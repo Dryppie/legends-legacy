@@ -8,12 +8,25 @@ import {
 import { DungeonDifficulty } from '../../../models/enums/dungeonDifficulty';
 import { DungeonCardComponent } from './dungeon-card.component';
 
-describe('DungeonCardComponent difficulty preselection', () => {
+describe('DungeonCardComponent', () => {
   function createComponent(): DungeonCardComponent {
     return new DungeonCardComponent(
       {} as DungeonStateService,
       {} as CharacterStateService,
       {} as Router,
+    );
+  }
+
+  function createComponentWithActiveDungeon(
+    dungeonDefinitionId: string,
+    navigate = jasmine.createSpy('navigate'),
+  ): DungeonCardComponent {
+    return new DungeonCardComponent(
+      {
+        activeDungeon: () => ({ dungeonDefinitionId }),
+      } as unknown as DungeonStateService,
+      {} as CharacterStateService,
+      { navigate } as unknown as Router,
     );
   }
 
@@ -134,5 +147,25 @@ describe('DungeonCardComponent difficulty preselection', () => {
     component.ngOnChanges({});
 
     expect(component.difficulty()).toBe(DungeonDifficulty.Mythic);
+  });
+
+  it('recognizes an active run from any difficulty in the preview family', () => {
+    const component = createComponentWithActiveDungeon('goblin_mines_Heroic');
+    component.previewData = createPreview({});
+
+    expect(component.isActiveDungeonPreview()).toBeTrue();
+  });
+
+  it('continues the active dungeon from its preview', () => {
+    const navigate = jasmine.createSpy('navigate');
+    const component = createComponentWithActiveDungeon(
+      'goblin_mines_Normal',
+      navigate,
+    );
+    component.previewData = createPreview({});
+
+    component.continueDungeon();
+
+    expect(navigate).toHaveBeenCalledOnceWith(['/game/world/dungeon']);
   });
 });

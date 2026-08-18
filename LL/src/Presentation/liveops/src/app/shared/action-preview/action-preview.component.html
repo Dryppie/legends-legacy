@@ -1,0 +1,24 @@
+<div class="preview-backdrop" (click)="cancel.emit()">
+  <section class="action-preview" role="dialog" aria-modal="true" aria-labelledby="action-preview-title" (click)="$event.stopPropagation()">
+    <header class="preview-header">
+      <div><p class="eyebrow">Server-verified action</p><h2 id="action-preview-title">{{ preview.title }}</h2></div>
+      <span class="preview-risk" [class.permanent]="preview.riskLevel === 'Permanent'" [class.high-value]="preview.riskLevel === 'HighValue'">{{ preview.riskLevel }} risk</span>
+    </header>
+    <div class="preview-target"><span>Exact target</span><strong>{{ preview.targetName }}</strong><code>{{ preview.targetId }}</code></div>
+    <dl class="preview-fields">@for (field of preview.fields; track field.label) { <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div> }</dl>
+    @if (preview.warnings.length) { <div class="preview-warnings">@for (warning of preview.warnings; track warning) { <p>{{ warning }}</p> }</div> }
+    <div class="preview-metadata">
+      <span>Environment <strong>{{ session.environment }}</strong></span><span>Operator <strong>{{ session.displayName }}</strong></span>
+      <span>Operation <code>{{ preview.operationId }}</code></span><span>Preview expires <time>{{ preview.expiresAt | date: 'mediumTime' }}</time></span>
+    </div>
+    @if (preview.confirmationText) {
+      <label class="preview-confirmation">Type <strong>{{ preview.confirmationText }}</strong> to confirm
+        <input [ngModel]="confirmation" (ngModelChange)="confirmationChange.emit($event)" [disabled]="submitting" autocomplete="off" spellcheck="false" />
+      </label>
+    }
+    <footer class="preview-actions">
+      <button class="secondary" type="button" [disabled]="submitting" (click)="cancel.emit()">Cancel</button>
+      <button class="danger-button" type="button" [disabled]="!canSubmit" (click)="confirm.emit()">{{ submitting ? 'Submitting…' : 'Confirm action' }}</button>
+    </footer>
+  </section>
+</div>

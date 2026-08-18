@@ -13,6 +13,10 @@ public interface IChatModerationService
         int limit,
         CancellationToken cancellationToken);
 
+    Task<IReadOnlyList<ChatModerationAction>> GetAuditAsync(
+        ChatModerationAuditQuery query,
+        CancellationToken cancellationToken);
+
     Task<ChatModerationResult> MuteAsync(
         Guid operationId,
         Guid characterId,

@@ -599,6 +599,95 @@ public sealed class GameEventOutboxTests
         Assert.Empty(publisher.Notifications.OfType<ProphecyProgressNotification>());
     }
 
+    [Fact]
+    public async Task Idle_combat_side_effects_are_flushed_once_on_the_final_internal_batch()
+    {
+        var characterId = Guid.NewGuid();
+        var from = Now.AddMinutes(-2);
+        var area = new Area { Id = "training-grounds", Name = "Training Grounds" };
+        var creature = new Creature { Id = Guid.NewGuid(), Name = "Goblin Scout" };
+        var facts = new IdleCombatRewardFacts(
+            characterId,
+            from,
+            Now,
+            Now,
+            TimeSpan.FromMinutes(1),
+            area,
+            [],
+            null,
+            [CreateEncounter(1, BattleOutcome.Victory, [creature], [new SimpleCombatEntity { MaxHealth = 100, Health = 50 }])]);
+        var outcome = new IdleCombatCalculatedOutcome(
+            characterId,
+            from,
+            Now,
+            0,
+            0,
+            0,
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []);
+        var outbox = new RecordingGameEventOutbox();
+        var publisher = new RecordingPublisher();
+        var archive = new RecordingCreatureArchiveService();
+        var applier = new StubIdleCombatRewardApplier();
+        var processor = new IdleCombatOutcomeProcessor(
+            new StubIdleCombatRewardFactBuilder(facts),
+            new StubIdleCombatRewardCalculator(outcome),
+            applier,
+            new StubIdleCombatSessionFactory(),
+            outbox,
+            publisher,
+            archive);
+        var action = new CharacterAction
+        {
+            CharacterId = characterId,
+            UpdatedAt = from,
+            ActionDetails = new CombatActionDetails([], area)
+        };
+        var orchestrationResult = new CombatOrchestrationResult(
+            Guid.NewGuid(),
+            CombatMode.Idle,
+            [],
+            new IdleCombatOrchestrationDetails(
+                from,
+                Now,
+                Now,
+                PlannedEncounterCount: 1,
+                EncounterCadence: TimeSpan.FromSeconds(10)));
+
+        await processor.ApplyAsync(
+            new CombatOutcomeRequest(
+                new IdleCombatOrchestrationRequest(action, Now, CaptureFinalEncounterLog: false),
+                orchestrationResult),
+            CancellationToken.None);
+
+        Assert.Empty(outbox.Messages);
+        Assert.Empty(publisher.Notifications);
+        Assert.Empty(archive.RecordedCreatures);
+        Assert.Equal(1, applier.ProgressionCallCount);
+        Assert.Equal(0, applier.SettlementCallCount);
+
+        await processor.ApplyAsync(
+            new CombatOutcomeRequest(
+                new IdleCombatOrchestrationRequest(action, Now, CaptureFinalEncounterLog: true),
+                orchestrationResult),
+            CancellationToken.None);
+
+        var payload = Assert.IsType<IdleCombatEncounterCompletedPayload>(
+            Assert.Single(outbox.Messages).Payload);
+        Assert.Equal(2, payload.ActionCount);
+        Assert.Equal(2, payload.MonstersDefeated);
+        Assert.Equal(2, archive.RecordedCreatures.Count);
+        Assert.Single(publisher.Notifications.OfType<ProphecyProgressBatchNotification>());
+        Assert.Equal(2, applier.ProgressionCallCount);
+        Assert.Equal(1, applier.SettlementCallCount);
+        Assert.Equal(2, applier.SettledBatchCount);
+    }
+
     private static LLDbContext CreateDb()
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()
@@ -724,11 +813,33 @@ public sealed class GameEventOutboxTests
 
     private sealed class StubIdleCombatRewardApplier : IIdleCombatRewardApplier
     {
+        public int ProgressionCallCount { get; private set; }
+        public int SettlementCallCount { get; private set; }
+        public int SettledBatchCount { get; private set; }
+
         public Task ApplyAsync(
             IdleCombatRewardFacts facts,
             IdleCombatCalculatedOutcome outcome,
             CancellationToken cancellationToken) =>
             Task.CompletedTask;
+
+        public Task ApplyProgressionAsync(
+            IdleCombatRewardFacts facts,
+            IdleCombatCalculatedOutcome outcome,
+            CancellationToken cancellationToken)
+        {
+            ProgressionCallCount++;
+            return Task.CompletedTask;
+        }
+
+        public Task ApplySettlementAsync(
+            IReadOnlyList<IdleCombatSettlementBatch> batches,
+            CancellationToken cancellationToken)
+        {
+            SettlementCallCount++;
+            SettledBatchCount += batches.Count;
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class StubIdleCombatSessionFactory : IIdleCombatSessionFactory

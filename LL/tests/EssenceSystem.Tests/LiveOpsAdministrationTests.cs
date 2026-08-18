@@ -1,3 +1,4 @@
+using Application.UseCases.Administration;
 using Domain.Models.Administration;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
@@ -42,6 +43,7 @@ public sealed class LiveOpsAdministrationTests
 
         Assert.True(first.IsSuccess);
         Assert.False(first.Value!.WasAlreadyProcessed);
+        Assert.Equal(AdministrationRiskLevel.Normal, first.Value.Action.RiskLevel);
         Assert.Equal(characterId, first.Value.Action.TargetCharacterId);
         Assert.Equal(1, refreshTokens.RevokeCalls);
         Assert.Single(await db.AdminActions.ToListAsync());
@@ -103,6 +105,7 @@ public sealed class LiveOpsAdministrationTests
 
         Assert.True(first.IsSuccess);
         Assert.False(first.Value!.WasAlreadyProcessed);
+        Assert.Equal(AdministrationRiskLevel.Normal, first.Value.Action.RiskLevel);
         Assert.Single(first.Value.GrantedItems);
         var inventoryItem = await db.InventoryItems
             .Include(x => x.ItemInstance)
@@ -209,6 +212,154 @@ public sealed class LiveOpsAdministrationTests
         Assert.NotNull(player);
         Assert.Equal(characterId, player.CharacterId);
         Assert.Equal(actionId, Assert.Single(history).OperationId);
+    }
+
+    [Fact]
+    public async Task Global_audit_filters_and_pages_by_occurrence_and_operation()
+    {
+        await using var db = CreateDb();
+        var (accountId, characterId) = AddPlayer(db);
+        var newestId = Guid.Parse("ffffffff-ffff-ffff-ffff-ffffffffffff");
+        var olderId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        db.AdminActions.AddRange(
+            new AdminAction
+            {
+                Id = newestId,
+                ActionType = AdminActionType.AccountBanned,
+                Permission = "liveops.accounts.moderate",
+                ActorSubject = "owner@example.test",
+                ActorDisplayName = "Owner",
+                TargetAccountId = accountId,
+                TargetCharacterId = characterId,
+                Reason = "Newest",
+                InternalNotes = "Escalated under CASE-777",
+                RiskLevel = AdministrationRiskLevel.Permanent,
+                OccurredAt = Now
+            },
+            new AdminAction
+            {
+                Id = olderId,
+                ActionType = AdminActionType.AccountBanned,
+                Permission = "liveops.accounts.moderate",
+                ActorSubject = "owner@example.test",
+                ActorDisplayName = "Owner",
+                TargetAccountId = accountId,
+                TargetCharacterId = characterId,
+                Reason = "Older",
+                OccurredAt = Now.AddMinutes(-1)
+            },
+            new AdminAction
+            {
+                Id = Guid.NewGuid(),
+                ActionType = AdminActionType.CompensationItemsGranted,
+                Permission = "liveops.economy.compensate",
+                ActorSubject = "someone-else@example.test",
+                ActorDisplayName = "Someone Else",
+                TargetCharacterId = Guid.NewGuid(),
+                Reason = "Unrelated",
+                OccurredAt = Now.AddMinutes(-2)
+            });
+        await db.SaveChangesAsync();
+
+        var service = CreateService(db, new RecordingRefreshTokenRepository());
+        var first = await service.GetAuditAsync(
+            new AdministrationAuditQuery(
+                null,
+                null,
+                AdminActionType.AccountBanned,
+                "owner@",
+                null,
+                null,
+                false,
+                null,
+                null,
+                [accountId],
+                [characterId],
+                null,
+                null,
+                null,
+                1),
+            CancellationToken.None);
+        var firstEntry = Assert.Single(first);
+        Assert.Equal(newestId, firstEntry.OperationId);
+
+        var second = await service.GetAuditAsync(
+            new AdministrationAuditQuery(
+                null,
+                null,
+                AdminActionType.AccountBanned,
+                "owner@",
+                null,
+                null,
+                false,
+                null,
+                null,
+                [accountId],
+                [characterId],
+                null,
+                firstEntry.OccurredAt,
+                firstEntry.OperationId,
+                1),
+            CancellationToken.None);
+        Assert.Equal(olderId, Assert.Single(second).OperationId);
+
+        var riskMatch = await service.GetAuditAsync(
+            new AdministrationAuditQuery(
+                null,
+                null,
+                AdminActionType.AccountBanned,
+                null,
+                "LIVEOPS.ACCOUNTS.MODERATE",
+                "CASE-777",
+                true,
+                AdministrationRiskLevel.Permanent,
+                null,
+                [],
+                [],
+                null,
+                null,
+                null,
+                20),
+            CancellationToken.None);
+        Assert.Equal(newestId, Assert.Single(riskMatch).OperationId);
+    }
+
+    [Fact]
+    public async Task Audit_export_is_append_only_and_idempotent_for_the_same_payload()
+    {
+        await using var db = CreateDb();
+        var service = CreateService(db, new RecordingRefreshTokenRepository());
+        var operationId = Guid.NewGuid();
+        var actor = new AdministrationActor("owner@example.test", "Owner");
+        const string details = "{\"rowCount\":2,\"sha256\":\"ABC\"}";
+
+        var first = await service.RecordAuditExportAsync(
+            operationId,
+            actor,
+            2,
+            details,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+        var replay = await service.RecordAuditExportAsync(
+            operationId,
+            actor,
+            2,
+            details,
+            CancellationToken.None);
+        var conflict = await service.RecordAuditExportAsync(
+            operationId,
+            actor,
+            2,
+            "{\"rowCount\":2,\"sha256\":\"DIFFERENT\"}",
+            CancellationToken.None);
+
+        Assert.True(first.IsSuccess);
+        Assert.True(replay.IsSuccess);
+        Assert.False(conflict.IsSuccess);
+        Assert.Equal(AdminActionType.AuditExported, first.Value!.ActionType);
+        Assert.Equal(AdministrationPermissions.SuperAdmin, first.Value.Permission);
+        Assert.Equal("idempotency-conflict", conflict.ErrorCode);
+        Assert.Single(await db.AdminActions.ToListAsync());
     }
 
     private static (Guid AccountId, Guid CharacterId) AddPlayer(LLDbContext db)

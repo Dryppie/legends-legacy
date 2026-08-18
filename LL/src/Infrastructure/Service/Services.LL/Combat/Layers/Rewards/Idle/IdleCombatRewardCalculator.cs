@@ -3,6 +3,7 @@ using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Regions;
 using Domain.Models.Bonuses;
 using Domain.Models.Entities;
+using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Services.LL.Combat.Layers.Rewards.Models;
@@ -65,6 +66,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         var orderedEncounters = facts.Encounters.OrderBy(x => x.Sequence).ToArray();
         var victoriousEncounters = orderedEncounters.Where(x => x.IsVictory).ToArray();
         var combatLootByEncounterId = new Dictionary<Guid, IReadOnlyList<InventoryItem>>();
+        var essenceDropsByEncounterId = new Dictionary<Guid, IReadOnlyList<InventoryItem>>();
 
         if (victoriousEncounters.Length > 0)
         {
@@ -81,9 +83,19 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                 [],
                 cancellationToken);
 
+            var essenceDropGroups = await _essenceResonanceService.RollEssenceDropGroupsAsync(
+                facts.CharacterId,
+                victoriousEncounters
+                    .Select(encounter => (IReadOnlyList<Creature>)encounter.HostileCreatures)
+                    .ToArray(),
+                eligible: true,
+                cancellationToken,
+                factors);
+
             for (var index = 0; index < victoriousEncounters.Length; index++)
             {
                 combatLootByEncounterId[victoriousEncounters[index].EncounterId] = lootGroups[index];
+                essenceDropsByEncounterId[victoriousEncounters[index].EncounterId] = essenceDropGroups[index];
             }
         }
 
@@ -106,12 +118,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                 loot = combatLootByEncounterId[encounter.EncounterId];
                 ClassifyCombatLoot(loot, powerRewards, craftingRewards, essenceRewards);
 
-                var essenceDrops = await _essenceResonanceService.RollEssenceDropsAsync(
-                    facts.CharacterId,
-                    encounter.HostileCreatures,
-                    eligible: true,
-                    cancellationToken,
-                    factors);
+                var essenceDrops = essenceDropsByEncounterId[encounter.EncounterId];
 
                 if (essenceDrops.Count > 0)
                 {

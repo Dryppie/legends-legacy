@@ -9,6 +9,7 @@ using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
 using Services.LL.Interfaces.Combat.Resolution.Idle;
+using Services.LL.Combat;
 
 namespace Services.LL.Combat.Layers.Resolution.Idle;
 
@@ -18,6 +19,7 @@ public sealed class IdleCombatResolutionSessionFactory : IIdleCombatResolutionSe
     private readonly ICombatSetupService _combatSetupService;
     private readonly ICombatEngineExecutor _engineExecutor;
     private readonly ICombatEncounterResultFactory _resultFactory;
+    private HostileTemplateCache? _hostileCache;
 
     public IdleCombatResolutionSessionFactory(
         IEntityService entityService,
@@ -35,27 +37,91 @@ public sealed class IdleCombatResolutionSessionFactory : IIdleCombatResolutionSe
         IdleCombatPlan plan,
         CancellationToken cancellationToken)
     {
+        var startedAt = IdleCombatTelemetry.Start();
         var playerIds = plan.PlayerEntityIds
             .Distinct()
+            .Order()
             .ToArray();
 
         var hostileIds = plan.Area.Creatures
             .Select(x => x.CreatureId)
             .Distinct()
+            .Order()
             .ToArray();
 
-        var allSourceIds = playerIds
-            .Concat(hostileIds)
-            .Distinct()
-            .ToArray();
+        var reuseHostiles = CanReuseHostiles(plan.Area.Id, hostileIds);
+        IReadOnlyDictionary<Guid, Entity> hostileSources;
+        IReadOnlyDictionary<Guid, CombatEntity> hostileTemplates;
+        Dictionary<Guid, Entity> sourceEntitiesById;
+        Dictionary<Guid, CombatEntity> friendlyTemplates;
 
-        var entities = await _entityService.GetEntitiesByIdsForCombatAsync(
-            [.. allSourceIds],
-            cancellationToken);
+        if (reuseHostiles)
+        {
+            var playerEntities = await _entityService.GetEntitiesByIdsForCombatAsync(
+                [.. playerIds],
+                cancellationToken);
+            sourceEntitiesById = playerEntities.ToDictionary(x => x.Id);
+            EnsureAllLoaded(playerIds, sourceEntitiesById);
 
-        var sourceEntitiesById = entities.ToDictionary(x => x.Id);
+            hostileSources = _hostileCache!.SourceEntitiesById;
+            hostileTemplates = _hostileCache.TemplatesBySourceEntityId;
+            foreach (var (id, source) in hostileSources)
+            {
+                sourceEntitiesById[id] = source;
+            }
 
-        var missingIds = allSourceIds
+            friendlyTemplates = BuildFriendlyTemplates(playerIds, sourceEntitiesById);
+            await _combatSetupService.PrepareEntitiesForCombat([.. friendlyTemplates.Values]);
+        }
+        else
+        {
+            var allSourceIds = playerIds
+                .Concat(hostileIds)
+                .Distinct()
+                .ToArray();
+            var entities = await _entityService.GetEntitiesByIdsForCombatAsync(
+                [.. allSourceIds],
+                cancellationToken);
+            sourceEntitiesById = entities.ToDictionary(x => x.Id);
+            EnsureAllLoaded(allSourceIds, sourceEntitiesById);
+
+            friendlyTemplates = BuildFriendlyTemplates(playerIds, sourceEntitiesById);
+            var builtHostileTemplates = BuildHostileTemplates(hostileIds, sourceEntitiesById, plan.Area);
+            await _combatSetupService.PrepareEntitiesForCombat(
+                [.. friendlyTemplates.Values, .. builtHostileTemplates.Values]);
+
+            hostileSources = hostileIds.ToDictionary(id => id, id => sourceEntitiesById[id]);
+            hostileTemplates = builtHostileTemplates;
+            _hostileCache = new HostileTemplateCache(
+                plan.Area.Id,
+                hostileIds,
+                hostileSources,
+                hostileTemplates);
+        }
+
+        var catalog = new IdleCombatTemplateCatalog(
+            sourceEntitiesById,
+            friendlyTemplates,
+            hostileTemplates);
+
+        IdleCombatTelemetry.RecordTemplatePreparation(startedAt, reuseHostiles);
+
+        return new IdleCombatResolutionSession(
+            _engineExecutor,
+            _resultFactory)
+        { Catalog = catalog };
+    }
+
+    private bool CanReuseHostiles(string areaId, IReadOnlyList<Guid> hostileIds) =>
+        _hostileCache is not null &&
+        string.Equals(_hostileCache.AreaId, areaId, StringComparison.Ordinal) &&
+        _hostileCache.HostileIds.SequenceEqual(hostileIds);
+
+    private static void EnsureAllLoaded(
+        IReadOnlyCollection<Guid> expectedIds,
+        IReadOnlyDictionary<Guid, Entity> sourceEntitiesById)
+    {
+        var missingIds = expectedIds
             .Where(id => !sourceEntitiesById.ContainsKey(id))
             .ToArray();
 
@@ -64,22 +130,6 @@ public sealed class IdleCombatResolutionSessionFactory : IIdleCombatResolutionSe
             throw new InvalidOperationException(
                 $"Failed to preload idle combat source entities. Missing: {string.Join(", ", missingIds)}");
         }
-
-        var friendlyTemplates = BuildFriendlyTemplates(playerIds, sourceEntitiesById);
-        var hostileTemplates = BuildHostileTemplates(hostileIds, sourceEntitiesById, plan.Area);
-
-        await _combatSetupService.PrepareEntitiesForCombat(
-            [.. friendlyTemplates.Values, .. hostileTemplates.Values]);
-
-        var catalog = new IdleCombatTemplateCatalog(
-            sourceEntitiesById,
-            friendlyTemplates,
-            hostileTemplates);
-
-        return new IdleCombatResolutionSession(
-            _engineExecutor,
-            _resultFactory)
-        { Catalog = catalog };
     }
 
     private Dictionary<Guid, CombatEntity> BuildFriendlyTemplates(
@@ -130,4 +180,10 @@ public sealed class IdleCombatResolutionSessionFactory : IIdleCombatResolutionSe
 
         return templates;
     }
+
+    private sealed record HostileTemplateCache(
+        string AreaId,
+        IReadOnlyList<Guid> HostileIds,
+        IReadOnlyDictionary<Guid, Entity> SourceEntitiesById,
+        IReadOnlyDictionary<Guid, CombatEntity> TemplatesBySourceEntityId);
 }

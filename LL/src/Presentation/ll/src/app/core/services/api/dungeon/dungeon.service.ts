@@ -51,6 +51,7 @@ export interface RoomInstance {
 export interface DungeonRun {
   id: string;
   characterId: string;
+  dungeonDefinitionId: string;
   dungeonDefinitionName: string;
   seed: number;
   status: DungeonRunStatus;

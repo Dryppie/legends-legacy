@@ -8,6 +8,7 @@ using API.Chat.Hubs.Interfaces;
 using Domain.Models.Chats;
 using Application.UsesCases.Chats.Queries.GetChatHistory;
 using Application.UsesCases.Chats.Queries.GetModerationState;
+using Application.UsesCases.Chats.Queries.GetModerationAudit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -170,6 +171,39 @@ public class ChatController : BaseController
 
         return Ok(await Mediator.Send(
             new GetModerationStateQuery(characterId, take)));
+    }
+
+    [AllowAnonymous]
+    [HttpGet("ModerationAudit")]
+    public async Task<ActionResult<IReadOnlyList<ChatModerationHistoryEntryDto>>> GetModerationAudit(
+        [FromQuery] DateTimeOffset? from,
+        [FromQuery] DateTimeOffset? to,
+        [FromQuery] string? actionType,
+        [FromQuery] string? actor,
+        [FromQuery] string? reference,
+        [FromQuery] Guid? operationId,
+        [FromQuery] Guid[]? characterId,
+        [FromQuery] Guid? restrictionId,
+        [FromQuery] DateTimeOffset? beforeOccurredAt,
+        [FromQuery] Guid? beforeOperationId,
+        [FromQuery] int take = 51)
+    {
+        var authorizationFailure = AuthorizeInternalModeration();
+        if (authorizationFailure is not null) return authorizationFailure;
+        if (from > to) return BadRequest("The audit start date must not be after the end date.");
+
+        return Ok(await Mediator.Send(new GetModerationAuditQuery(
+            from,
+            to,
+            actionType,
+            actor,
+            reference,
+            operationId,
+            characterId ?? [],
+            restrictionId,
+            beforeOccurredAt,
+            beforeOperationId,
+            Math.Clamp(take, 1, 101))));
     }
 
     [AllowAnonymous]

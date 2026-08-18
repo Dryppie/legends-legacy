@@ -56,6 +56,19 @@ public sealed class LiveOpsService(
             limit,
             cancellationToken);
 
+    public Task<PlayerAdministrationSnapshot?> GetPlayerByAccountIdAsync(
+        Guid accountId,
+        CancellationToken cancellationToken) =>
+        administration.GetPlayerByAccountIdAsync(
+            accountId,
+            timeProvider.GetUtcNow(),
+            cancellationToken);
+
+    public Task<IReadOnlyList<AdministrationHistoryEntry>> GetAuditAsync(
+        AdministrationAuditQuery query,
+        CancellationToken cancellationToken) =>
+        administration.GetAuditAsync(query, cancellationToken);
+
     public async Task<AdministrationOperationResult<AccountBanOperation>> BanAccountAsync(
         Guid operationId,
         Guid accountId,
@@ -148,6 +161,9 @@ public sealed class LiveOpsService(
             reason,
             internalNotes,
             JsonSerializer.Serialize(new { expiresAt }),
+            expiresAt.HasValue
+                ? AdministrationRiskLevel.Normal
+                : AdministrationRiskLevel.Permanent,
             now);
 
         administration.AddRestriction(restriction);
@@ -223,6 +239,7 @@ public sealed class LiveOpsService(
             reason,
             null,
             "{}",
+            AdministrationRiskLevel.Normal,
             now);
         administration.AddAction(action);
 
@@ -338,6 +355,9 @@ public sealed class LiveOpsService(
             reason,
             internalNotes,
             detailsJson,
+            quantity >= Math.Max(1, _options.LargeGrantAuditThreshold)
+                ? AdministrationRiskLevel.HighValue
+                : AdministrationRiskLevel.Normal,
             now);
         administration.AddAction(action);
 
@@ -350,6 +370,55 @@ public sealed class LiveOpsService(
                 quantity,
                 grantedItems,
                 false));
+    }
+
+    public async Task<AdministrationOperationResult<AdminAction>> RecordAuditExportAsync(
+        Guid operationId,
+        AdministrationActor actor,
+        int rowCount,
+        string detailsJson,
+        CancellationToken cancellationToken)
+    {
+        var validation = ValidateOperation(operationId, actor, "Audit CSV export");
+        if (validation is not null)
+        {
+            return AdministrationOperationResult<AdminAction>.Fail(
+                validation.Value.Code,
+                validation.Value.Message);
+        }
+        if (rowCount < 0 || rowCount > 5_000)
+        {
+            return AdministrationOperationResult<AdminAction>.Fail(
+                "invalid-export-size",
+                "Audit exports are limited to 5,000 rows.");
+        }
+
+        var existingAction = await administration.GetActionAsync(
+            operationId,
+            cancellationToken);
+        if (existingAction is not null)
+        {
+            return existingAction.ActionType == AdminActionType.AuditExported &&
+                string.Equals(existingAction.DetailsJson, detailsJson, StringComparison.Ordinal)
+                ? AdministrationOperationResult<AdminAction>.Success(existingAction)
+                : IdempotencyConflict<AdminAction>();
+        }
+
+        var action = CreateAction(
+            operationId,
+            AdminActionType.AuditExported,
+            AdministrationPermissions.SuperAdmin,
+            actor,
+            null,
+            null,
+            null,
+            $"Exported {rowCount:N0} authorized audit rows.",
+            null,
+            detailsJson,
+            AdministrationRiskLevel.Normal,
+            timeProvider.GetUtcNow());
+        administration.AddAction(action);
+        return AdministrationOperationResult<AdminAction>.Success(action);
     }
 
     private static (string Code, string Message)? ValidateOperation(
@@ -393,6 +462,7 @@ public sealed class LiveOpsService(
         string reason,
         string? internalNotes,
         string detailsJson,
+        AdministrationRiskLevel riskLevel,
         DateTimeOffset occurredAt) =>
         new()
         {
@@ -409,6 +479,7 @@ public sealed class LiveOpsService(
             Reason = NormalizeReason(reason),
             InternalNotes = NormalizeOptional(internalNotes),
             DetailsJson = detailsJson,
+            RiskLevel = riskLevel,
             OccurredAt = occurredAt
         };
 

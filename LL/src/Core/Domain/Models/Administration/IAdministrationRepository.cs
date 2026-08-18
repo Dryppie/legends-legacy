@@ -30,6 +30,9 @@ public interface IAdministrationRepository
         Guid characterId,
         int limit,
         CancellationToken cancellationToken);
+    Task<IReadOnlyList<AdministrationHistoryEntry>> GetAuditAsync(
+        AdministrationAuditQuery query,
+        CancellationToken cancellationToken);
     void AddAction(AdminAction action);
     void AddRestriction(AccountRestriction restriction);
 }

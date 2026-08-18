@@ -417,6 +417,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     }
 
     public DbSet<AdminAction> AdminActions => Set<AdminAction>();
+    public DbSet<AdminActionPreview> AdminActionPreviews => Set<AdminActionPreview>();
     public DbSet<AccountRestriction> AccountRestrictions => Set<AccountRestriction>();
     public DbSet<AchievementDefinition> AchievementDefinitions => Set<AchievementDefinition>();
     public DbSet<AchievementEventLedger> AchievementEventLedgers => Set<AchievementEventLedger>();

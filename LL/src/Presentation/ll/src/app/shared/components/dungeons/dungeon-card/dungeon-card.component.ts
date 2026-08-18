@@ -231,6 +231,28 @@ export class DungeonCardComponent implements OnChanges {
     );
   }
 
+  isActiveDungeonPreview(): boolean {
+    const activeDungeon = this.dungeonState.activeDungeon();
+    if (!activeDungeon) return false;
+
+    const previewDefinitionIds = [
+      this.previewData.id,
+      ...Object.values(this.previewData.difficultyVariants ?? {})
+        .map((variant) => variant?.id)
+        .filter((id): id is string => !!id),
+    ];
+    const activeDefinitionId = activeDungeon.dungeonDefinitionId.toLowerCase();
+
+    return previewDefinitionIds.some(
+      (id) => id.toLowerCase() === activeDefinitionId,
+    );
+  }
+
+  continueDungeon(): void {
+    if (!this.isActiveDungeonPreview()) return;
+    void this.router.navigate(['/game/world/dungeon']);
+  }
+
   togglePreview() {
     this.previewMasteryTooltipOpen.set(false);
     this.selectedMasteryTooltipOpen.set(false);

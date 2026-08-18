@@ -3,6 +3,8 @@ using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Damages;
 using Services.LL.Combat.Stats;
+using System.Buffers;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace Services.LL.Combat.Engine;
@@ -50,9 +52,18 @@ public sealed class FastCombatEngine
     private readonly Dictionary<string, int> _balanceDamageTaken = new(StringComparer.OrdinalIgnoreCase);
     private readonly CombatStatsAccumulator _balanceStats = new();
     private readonly Dictionary<string, RuntimeSummonGroup> _summonGroups = new(StringComparer.OrdinalIgnoreCase);
+    private readonly List<RuntimeEffect> _effectTickBuffer = [];
+    private readonly List<RuntimeStatus> _statusTickBuffer = [];
+    private readonly List<RuntimeCondition> _conditionTickBuffer = [];
+    private readonly List<RuntimeBarrierContribution> _barrierTickBuffer = [];
+    private readonly List<RuntimeSummonGroup> _summonGroupTickBuffer = [];
+    private readonly List<RuntimeCombatant> _summonTickBuffer = [];
+    private readonly List<RuntimeCondition> _thornsBuffer = [];
     private CombatStatsAccumulator? _checkpointStats;
     private int _currentTick;
     private long _applicationOrder;
+    private long _activationSequence;
+    private long _summonSequence;
     private int _eventDepth;
 
     private enum DamageDelivery
@@ -102,8 +113,9 @@ public sealed class FastCombatEngine
         int checkpointIntervalTicks = 0)
     {
         var combatants = friendly.Concat(hostile).ToList();
-        foreach (var combatant in combatants)
+        for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
         {
+            var combatant = combatants[combatantIndex];
             _basicAttackProgress[combatant] = 0;
             _healthRegenerationProgress[combatant] = 0;
             InitializeActiveAbilityCooldowns(combatant);
@@ -157,8 +169,8 @@ public sealed class FastCombatEngine
             TickHealthRegeneration(combatants);
             TickBarrierContributions(combatants);
 
-            foreach (var combatant in combatants)
-                combatant.Tick();
+            for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
+                combatants[combatantIndex].Tick();
 
             TickSummons(combatants);
             _currentTick++;
@@ -278,8 +290,18 @@ public sealed class FastCombatEngine
                 continue;
             var hasAbilityListener =
                 combatant.AbilityTriggersByEvent.ContainsKey(AbilityTriggerEvent.OnInterval);
-            var hasStatusListener = combatant.Statuses.Any(
-                status => status.Definition.TriggersByEvent.ContainsKey(AbilityTriggerEvent.OnInterval));
+            var hasStatusListener = false;
+            for (var statusIndex = 0; statusIndex < combatant.Statuses.Count; statusIndex++)
+            {
+                if (!combatant.Statuses[statusIndex].Definition.TriggersByEvent.ContainsKey(
+                        AbilityTriggerEvent.OnInterval))
+                {
+                    continue;
+                }
+
+                hasStatusListener = true;
+                break;
+            }
             if (!hasAbilityListener && !hasStatusListener)
                 continue;
 
@@ -295,8 +317,12 @@ public sealed class FastCombatEngine
 
     private void UseReadyActiveAbilities(RuntimeCombatant actor, IReadOnlyList<RuntimeCombatant> combatants)
     {
-        foreach (var ability in actor.Abilities.Where(x => x.Definition.Kind == AbilitySpecKind.Active && x.IsReady))
+        for (var abilityIndex = 0; abilityIndex < actor.Abilities.Count; abilityIndex++)
         {
+            var ability = actor.Abilities[abilityIndex];
+            if (ability.Definition.Kind != AbilitySpecKind.Active || !ability.IsReady)
+                continue;
+
             if (!HasLivingOpponent(actor, combatants)
                 || !CanResolveActiveAbility(ability, actor, combatants)
                 || !CanPayAbilityCosts(actor, ability.Definition))
@@ -351,10 +377,18 @@ public sealed class FastCombatEngine
         ApplyLifeSteal(actor, healthDamage, 0, combatants, "Basic Attack", "Basic Attack");
     }
 
-    private static bool IsActionBlocked(RuntimeCombatant combatant) =>
-        combatant.Statuses.Any(status => status.Stacks > 0 && status.Definition.Tags.Contains("Control.Stun"))
-        || combatant.HasCondition(StandardConditionType.Stun)
-        || combatant.HasCondition(StandardConditionType.Freeze);
+    private static bool IsActionBlocked(RuntimeCombatant combatant)
+    {
+        for (var index = 0; index < combatant.Statuses.Count; index++)
+        {
+            var status = combatant.Statuses[index];
+            if (status.Stacks > 0 && status.Definition.Tags.Contains("Control.Stun"))
+                return true;
+        }
+
+        return combatant.HasCondition(StandardConditionType.Stun)
+               || combatant.HasCondition(StandardConditionType.Freeze);
+    }
 
     private static bool HasLivingOpponent(RuntimeCombatant actor, IReadOnlyList<RuntimeCombatant> combatants)
     {
@@ -392,13 +426,37 @@ public sealed class FastCombatEngine
             actor,
             primaryTarget,
             ability.Definition.Id);
-        return triggers
-            .Where(trigger => ConditionsPass(trigger.Conditions, actor, combatEvent, combatants))
-            .SelectMany(trigger => trigger.Effects)
-            .Any(effect => SelectTargets(actor, effect.Target, combatEvent, combatants, effect.SummonId)
-                .Any(target => target.IsAlive
-                    && EffectCanResolve(effect, actor, combatants)
-                    && ConditionsPass(effect.Conditions, actor, combatEvent with { Target = target }, combatants)));
+        for (var triggerIndex = 0; triggerIndex < triggers.Count; triggerIndex++)
+        {
+            var trigger = triggers[triggerIndex];
+            if (!ConditionsPass(trigger.Conditions, actor, combatEvent, combatants))
+                continue;
+
+            for (var effectIndex = 0; effectIndex < trigger.Effects.Count; effectIndex++)
+            {
+                var effect = trigger.Effects[effectIndex];
+                foreach (var target in SelectTargets(
+                             actor,
+                             effect.Target,
+                             combatEvent,
+                             combatants,
+                             effect.SummonId))
+                {
+                    if (target.IsAlive
+                        && EffectCanResolve(effect, actor, combatants)
+                        && ConditionsPass(
+                            effect.Conditions,
+                            actor,
+                            combatEvent with { Target = target },
+                            combatants))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private static bool CanPayAbilityCosts(RuntimeCombatant actor, CompiledAbility ability)
@@ -470,16 +528,22 @@ public sealed class FastCombatEngine
         _eventDepth++;
         try
         {
-            foreach (var combatant in combatants
-                         .Where(x => x.IsAlive
-                                     || (combatEvent.Event == AbilityTriggerEvent.OnDeath
-                                         && ReferenceEquals(x, combatEvent.Source)))
-                         .ToList())
+            var combatantCount = combatants.Count;
+            for (var combatantIndex = 0; combatantIndex < combatantCount; combatantIndex++)
             {
+                var combatant = combatants[combatantIndex];
+                if (!combatant.IsAlive
+                    && (combatEvent.Event != AbilityTriggerEvent.OnDeath
+                        || !ReferenceEquals(combatant, combatEvent.Source)))
+                {
+                    continue;
+                }
+
                 if (combatant.AbilityTriggersByEvent.TryGetValue(combatEvent.Event, out var abilities))
                 {
-                    foreach (var ability in abilities.ToList())
+                    for (var abilityIndex = 0; abilityIndex < abilities.Count; abilityIndex++)
                     {
+                        var ability = abilities[abilityIndex];
                         if (ability.Definition.Kind == AbilitySpecKind.Active
                             && !string.Equals(combatEvent.AbilityId, ability.Definition.Id, StringComparison.OrdinalIgnoreCase))
                         {
@@ -489,8 +553,10 @@ public sealed class FastCombatEngine
                         if (!IsSourceScopedTriggerRelevant(combatant, combatEvent))
                             continue;
 
-                        foreach (var trigger in ability.Definition.TriggersByEvent[combatEvent.Event])
+                        var triggers = ability.Definition.TriggersByEvent[combatEvent.Event];
+                        for (var triggerIndex = 0; triggerIndex < triggers.Count; triggerIndex++)
                         {
+                            var trigger = triggers[triggerIndex];
                             if (!ability.CanUseTrigger(trigger, _currentTick)
                                 || !ConditionsPass(trigger.Conditions, combatant, combatEvent, combatants))
                                 continue;
@@ -516,53 +582,80 @@ public sealed class FastCombatEngine
                     }
                 }
 
-                foreach (var status in combatant.Statuses.ToList())
+                PublishStatusTriggers(combatEvent, combatants, combatant);
+            }
+        }
+        finally
+        {
+            _eventDepth--;
+        }
+    }
+
+    private void PublishStatusTriggers(
+        CombatEvent combatEvent,
+        IReadOnlyList<RuntimeCombatant> combatants,
+        RuntimeCombatant combatant)
+    {
+        var statusCount = combatant.Statuses.Count;
+        if (statusCount == 0)
+            return;
+
+        var statusSnapshot = ArrayPool<RuntimeStatus>.Shared.Rent(statusCount);
+        for (var statusIndex = 0; statusIndex < statusCount; statusIndex++)
+            statusSnapshot[statusIndex] = combatant.Statuses[statusIndex];
+
+        try
+        {
+            for (var statusIndex = 0; statusIndex < statusCount; statusIndex++)
+            {
+                var status = statusSnapshot[statusIndex];
+                if (!status.Definition.TriggersByEvent.TryGetValue(combatEvent.Event, out var triggers))
+                    continue;
+
+                if (!IsSourceScopedTriggerRelevant(status.Owner, combatEvent))
+                    continue;
+
+                for (var triggerIndex = 0; triggerIndex < triggers.Count; triggerIndex++)
                 {
-                    if (!status.Definition.TriggersByEvent.TryGetValue(combatEvent.Event, out var triggers))
-                        continue;
-
-                    if (!IsSourceScopedTriggerRelevant(status.Owner, combatEvent))
-                        continue;
-
-                    foreach (var trigger in triggers)
+                    var trigger = triggers[triggerIndex];
+                    if (IsStatusLifecycleEvent(combatEvent.Event)
+                        && (!string.Equals(combatEvent.AbilityId, status.Definition.Id, StringComparison.OrdinalIgnoreCase)
+                            || !ReferenceEquals(combatEvent.Target, status.Owner)))
                     {
-                        if (IsStatusLifecycleEvent(combatEvent.Event)
-                            && (!string.Equals(combatEvent.AbilityId, status.Definition.Id, StringComparison.OrdinalIgnoreCase)
-                                || !ReferenceEquals(combatEvent.Target, status.Owner)))
-                        {
-                            continue;
-                        }
+                        continue;
+                    }
 
-                        if (!status.CanUseTrigger(trigger, _currentTick)
-                            || !ConditionsPass(trigger.Conditions, status.Source, combatEvent, combatants))
-                            continue;
+                    if (!status.CanUseTrigger(trigger, _currentTick)
+                        || !ConditionsPass(trigger.Conditions, status.Source, combatEvent, combatants))
+                    {
+                        continue;
+                    }
 
-                        status.StartTriggerCooldown(trigger);
-                        status.BeginTriggerExecution(trigger);
-                        try
-                        {
-                            ExecuteTrigger(
-                                trigger,
-                                status.Source,
-                                combatEvent,
-                                combatants,
-                                status.CanUseEffect,
-                                status.MarkEffectUsed,
-                                status.StatsSource,
-                                countStatsActivation: false,
-                                durationMultiplier: CalculateStatusEffectDurationMultiplier(status));
-                        }
-                        finally
-                        {
-                            status.EndTriggerExecution(trigger);
-                        }
+                    status.StartTriggerCooldown(trigger);
+                    status.BeginTriggerExecution(trigger);
+                    try
+                    {
+                        ExecuteTrigger(
+                            trigger,
+                            status.Source,
+                            combatEvent,
+                            combatants,
+                            status.CanUseEffect,
+                            status.MarkEffectUsed,
+                            status.StatsSource,
+                            countStatsActivation: false,
+                            durationMultiplier: CalculateStatusEffectDurationMultiplier(status));
+                    }
+                    finally
+                    {
+                        status.EndTriggerExecution(trigger);
                     }
                 }
             }
         }
         finally
         {
-            _eventDepth--;
+            ArrayPool<RuntimeStatus>.Shared.Return(statusSnapshot, clearArray: true);
         }
     }
 
@@ -578,7 +671,7 @@ public sealed class FastCombatEngine
         double durationMultiplier = 1d)
     {
         var activationCounted = false;
-        var executionContext = new EffectExecutionContext();
+        var executionContext = CreateEffectExecutionContext();
         foreach (var effect in trigger.Effects)
         {
             if (!canUseEffect(effect, null))
@@ -641,6 +734,9 @@ public sealed class FastCombatEngine
             }
         }
     }
+
+    private EffectExecutionContext CreateEffectExecutionContext() =>
+        new(++_activationSequence);
 
     private void ExecuteEffect(
         CompiledEffect effect,
@@ -871,7 +967,7 @@ public sealed class FastCombatEngine
                     combatants,
                     statsSource,
                     countStatsActivation,
-                    executionContext ?? new EffectExecutionContext());
+                    executionContext ?? CreateEffectExecutionContext());
                 break;
             case AbilityEffectOperation.RemoveCondition:
                 RemoveConditionInstances(
@@ -956,7 +1052,7 @@ public sealed class FastCombatEngine
                     combatants,
                     statsSource,
                     countStatsActivation,
-                    executionContext ?? new EffectExecutionContext());
+                    executionContext ?? CreateEffectExecutionContext());
                 break;
             case AbilityEffectOperation.SelfDestruct:
                 target.SetHealth(0);
@@ -1278,14 +1374,20 @@ public sealed class FastCombatEngine
         int receivedDamage,
         IReadOnlyList<RuntimeCombatant> combatants)
     {
-        var thorns = defender.Conditions
-            .Where(x => x.Type == StandardConditionType.Thorns)
-            .Where(x => x.Value > 0)
-            .OrderBy(x => x.ApplicationOrder)
-            .ToList();
-
-        foreach (var condition in thorns)
+        _thornsBuffer.Clear();
+        for (var index = 0; index < defender.Conditions.Count; index++)
         {
+            var condition = defender.Conditions[index];
+            if (condition.Type == StandardConditionType.Thorns && condition.Value > 0)
+                _thornsBuffer.Add(condition);
+        }
+
+        _thornsBuffer.Sort(static (left, right) =>
+            left.ApplicationOrder.CompareTo(right.ApplicationOrder));
+
+        for (var index = 0; index < _thornsBuffer.Count; index++)
+        {
+            var condition = _thornsBuffer[index];
             var reflectedDamage = Math.Max(
                 0,
                 (int)Math.Min(
@@ -1799,9 +1901,33 @@ public sealed class FastCombatEngine
         !IsHarmfulCondition(type);
 
     private static string GetConditionId(StandardConditionType type) =>
-        type == StandardConditionType.Vulnerable
-            ? "condition.vulnerability"
-            : $"condition.{type.ToString().ToLowerInvariant()}";
+        type switch
+        {
+            StandardConditionType.Haste => "condition.haste",
+            StandardConditionType.Slow => "condition.slow",
+            StandardConditionType.Empower => "condition.empower",
+            StandardConditionType.Weaken => "condition.weaken",
+            StandardConditionType.Vulnerable => "condition.vulnerability",
+            StandardConditionType.Wound => "condition.wound",
+            StandardConditionType.Recovery => "condition.recovery",
+            StandardConditionType.Decay => "condition.decay",
+            StandardConditionType.Renewal => "condition.renewal",
+            StandardConditionType.Guard => "condition.guard",
+            StandardConditionType.Ward => "condition.ward",
+            StandardConditionType.Unstoppable => "condition.unstoppable",
+            StandardConditionType.Poison => "condition.poison",
+            StandardConditionType.Burn => "condition.burn",
+            StandardConditionType.Bleed => "condition.bleed",
+            StandardConditionType.Stun => "condition.stun",
+            StandardConditionType.Taunt => "condition.taunt",
+            StandardConditionType.Stealth => "condition.stealth",
+            StandardConditionType.Chill => "condition.chill",
+            StandardConditionType.Freeze => "condition.freeze",
+            StandardConditionType.Corrosion => "condition.corrosion",
+            StandardConditionType.Doom => "condition.doom",
+            StandardConditionType.Thorns => "condition.thorns",
+            _ => $"condition.{type.ToString().ToLowerInvariant()}"
+        };
 
     private static int CalculateStatusDuration(
         CompiledStatus statusDefinition,
@@ -2118,7 +2244,7 @@ public sealed class FastCombatEngine
             ability.StartInitialCooldown(combatant.GetAttribute(AttributeType.Cooldown));
     }
 
-    private static RuntimeCombatant CreateSummonedCombatant(
+    private RuntimeCombatant CreateSummonedCombatant(
         RuntimeCombatant source,
         CompiledEffect effect,
         CompiledSummon summonDefinition,
@@ -2139,7 +2265,9 @@ public sealed class FastCombatEngine
         };
 
         return new RuntimeCombatant(
-            id: $"{source.Id}:summon:{summonId}:{Guid.NewGuid():N}",
+            id: string.Create(
+                CultureInfo.InvariantCulture,
+                $"{source.Id}:summon:{summonId}:{++_summonSequence}"),
             name: summonDefinition.Name,
             team: source.Team,
             attributes: attributes,
@@ -2401,10 +2529,17 @@ public sealed class FastCombatEngine
         RuntimeCombatant eventSource,
         IReadOnlyList<RuntimeCombatant> combatants)
     {
-        var condition = target.Conditions
-            .Where(x => x.Type == type && x.Value > 0)
-            .OrderBy(x => x.ApplicationOrder)
-            .FirstOrDefault();
+        RuntimeCondition? condition = null;
+        for (var index = 0; index < target.Conditions.Count; index++)
+        {
+            var candidate = target.Conditions[index];
+            if (candidate.Type != type || candidate.Value <= 0)
+                continue;
+
+            if (condition is null || candidate.ApplicationOrder < condition.ApplicationOrder)
+                condition = candidate;
+        }
+
         if (condition is null)
             return false;
 
@@ -2509,10 +2644,16 @@ public sealed class FastCombatEngine
 
     private void TickEffects(IReadOnlyList<RuntimeCombatant> combatants)
     {
-        foreach (var combatant in combatants)
+        for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
         {
-            foreach (var effect in combatant.ActiveEffects.ToList())
+            var combatant = combatants[combatantIndex];
+            _effectTickBuffer.Clear();
+            for (var effectIndex = 0; effectIndex < combatant.ActiveEffects.Count; effectIndex++)
+                _effectTickBuffer.Add(combatant.ActiveEffects[effectIndex]);
+
+            for (var effectIndex = 0; effectIndex < _effectTickBuffer.Count; effectIndex++)
             {
+                var effect = _effectTickBuffer[effectIndex];
                 if (effect.Tick() && (effect.Definition.ChancePercent >= 100 || _random.Next(1, 101) <= effect.Definition.ChancePercent))
                     ApplyEffectOnce(
                         effect.Definition,
@@ -2565,10 +2706,16 @@ public sealed class FastCombatEngine
 
     private void TickStatuses(IReadOnlyList<RuntimeCombatant> combatants)
     {
-        foreach (var combatant in combatants)
+        for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
         {
-            foreach (var status in combatant.Statuses.ToList())
+            var combatant = combatants[combatantIndex];
+            _statusTickBuffer.Clear();
+            for (var statusIndex = 0; statusIndex < combatant.Statuses.Count; statusIndex++)
+                _statusTickBuffer.Add(combatant.Statuses[statusIndex]);
+
+            for (var statusIndex = 0; statusIndex < _statusTickBuffer.Count; statusIndex++)
             {
+                var status = _statusTickBuffer[statusIndex];
                 if (!status.IsExpired)
                     continue;
 
@@ -2584,8 +2731,12 @@ public sealed class FastCombatEngine
 
     private void TickHealthRegeneration(IReadOnlyList<RuntimeCombatant> combatants)
     {
-        foreach (var combatant in combatants.Where(x => x.IsAlive))
+        for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
         {
+            var combatant = combatants[combatantIndex];
+            if (!combatant.IsAlive)
+                continue;
+
             var rate = Math.Max(
                 0,
                 1 + combatant.RegenerationRatePercent / 100f);
@@ -2671,10 +2822,16 @@ public sealed class FastCombatEngine
 
     private void TickConditions(IReadOnlyList<RuntimeCombatant> combatants)
     {
-        foreach (var combatant in combatants)
+        for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
         {
-            foreach (var condition in combatant.Conditions.ToList())
+            var combatant = combatants[combatantIndex];
+            _conditionTickBuffer.Clear();
+            for (var conditionIndex = 0; conditionIndex < combatant.Conditions.Count; conditionIndex++)
+                _conditionTickBuffer.Add(combatant.Conditions[conditionIndex]);
+
+            for (var conditionIndex = 0; conditionIndex < _conditionTickBuffer.Count; conditionIndex++)
             {
+                var condition = _conditionTickBuffer[conditionIndex];
                 var intervalDue = condition.Tick();
                 if (intervalDue && combatant.IsAlive)
                     ResolvePeriodicCondition(condition, combatants);
@@ -2818,10 +2975,22 @@ public sealed class FastCombatEngine
 
     private void TickBarrierContributions(IReadOnlyList<RuntimeCombatant> combatants)
     {
-        foreach (var target in combatants)
+        for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
         {
-            foreach (var contribution in target.BarrierContributions.ToList())
+            var target = combatants[combatantIndex];
+            _barrierTickBuffer.Clear();
+            for (var contributionIndex = 0;
+                 contributionIndex < target.BarrierContributions.Count;
+                 contributionIndex++)
             {
+                _barrierTickBuffer.Add(target.BarrierContributions[contributionIndex]);
+            }
+
+            for (var contributionIndex = 0;
+                 contributionIndex < _barrierTickBuffer.Count;
+                 contributionIndex++)
+            {
+                var contribution = _barrierTickBuffer[contributionIndex];
                 if (!contribution.TickDuration())
                     continue;
 
@@ -2859,8 +3028,9 @@ public sealed class FastCombatEngine
         if (string.IsNullOrWhiteSpace(activationId) || string.IsNullOrWhiteSpace(linkedEffectId))
             return;
 
-        foreach (var combatant in combatants)
+        for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
         {
+            var combatant = combatants[combatantIndex];
             combatant.ActiveEffects.RemoveAll(effect =>
                 effect.ActivationId == activationId
                 && effect.Definition.Id.Equals(linkedEffectId, StringComparison.OrdinalIgnoreCase));
@@ -2869,14 +3039,30 @@ public sealed class FastCombatEngine
 
     private void TickSummons(IReadOnlyList<RuntimeCombatant> combatants)
     {
-        foreach (var group in _summonGroups.Values
-                     .Where(group => group.ExpiresAtTick <= _currentTick)
-                     .ToList())
+        _summonGroupTickBuffer.Clear();
+        foreach (var group in _summonGroups.Values)
         {
+            if (group.ExpiresAtTick <= _currentTick)
+                _summonGroupTickBuffer.Add(group);
+        }
+
+        for (var groupIndex = 0; groupIndex < _summonGroupTickBuffer.Count; groupIndex++)
+        {
+            var group = _summonGroupTickBuffer[groupIndex];
             _summonGroups.Remove(group.InstanceId);
-            var survivingCount = group.Members.Count(member => member.IsAlive);
-            foreach (var member in group.Members.Where(member => member.IsAlive))
+            var survivingCount = 0;
+            for (var memberIndex = 0; memberIndex < group.Members.Count; memberIndex++)
             {
+                if (group.Members[memberIndex].IsAlive)
+                    survivingCount++;
+            }
+
+            for (var memberIndex = 0; memberIndex < group.Members.Count; memberIndex++)
+            {
+                var member = group.Members[memberIndex];
+                if (!member.IsAlive)
+                    continue;
+
                 member.SetHealth(0);
                 LogSummonExpired(member, "expired");
                 NotifySummonChanged(member, combatants);
@@ -2895,12 +3081,21 @@ public sealed class FastCombatEngine
             }
         }
 
-        foreach (var summon in combatants
-                     .Where(x => x.IsSummoned
-                         && x.IsAlive
-                         && string.IsNullOrWhiteSpace(x.SummonGroupInstanceId))
-                     .ToList())
+        _summonTickBuffer.Clear();
+        for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
         {
+            var combatant = combatants[combatantIndex];
+            if (combatant.IsSummoned
+                && combatant.IsAlive
+                && string.IsNullOrWhiteSpace(combatant.SummonGroupInstanceId))
+            {
+                _summonTickBuffer.Add(combatant);
+            }
+        }
+
+        for (var summonIndex = 0; summonIndex < _summonTickBuffer.Count; summonIndex++)
+        {
+            var summon = _summonTickBuffer[summonIndex];
             if (!summon.TickSummonDuration())
                 continue;
 
@@ -3045,12 +3240,24 @@ public sealed class FastCombatEngine
     private static int CountLivingOwnedSummons(
         RuntimeCombatant source,
         string summonId,
-        IReadOnlyList<RuntimeCombatant> combatants) =>
-        combatants.Count(combatant =>
-            combatant.IsAlive
-            && combatant.IsSummoned
-            && ReferenceEquals(combatant.SummonOwner, source)
-            && combatant.Tags.Contains($"Summon.{summonId}"));
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        var count = 0;
+        var summonTag = $"Summon.{summonId}";
+        for (var index = 0; index < combatants.Count; index++)
+        {
+            var combatant = combatants[index];
+            if (combatant.IsAlive
+                && combatant.IsSummoned
+                && ReferenceEquals(combatant.SummonOwner, source)
+                && combatant.Tags.Contains(summonTag))
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
 
     private RuntimeCombatant? SelectActiveAbilityPrimaryTarget(
         RuntimeAbility ability,
@@ -3108,12 +3315,23 @@ public sealed class FastCombatEngine
     {
         if (effect.Operation == AbilityEffectOperation.ConsumeOwnedSummon)
         {
-            return !string.IsNullOrWhiteSpace(effect.SummonId)
-                   && combatants.Any(combatant =>
-                       combatant.IsAlive
-                       && combatant.IsSummoned
-                       && ReferenceEquals(combatant.SummonOwner, source)
-                       && combatant.Tags.Contains($"Summon.{effect.SummonId}"));
+            if (string.IsNullOrWhiteSpace(effect.SummonId))
+                return false;
+
+            var summonTag = $"Summon.{effect.SummonId}";
+            for (var index = 0; index < combatants.Count; index++)
+            {
+                var combatant = combatants[index];
+                if (combatant.IsAlive
+                    && combatant.IsSummoned
+                    && ReferenceEquals(combatant.SummonOwner, source)
+                    && combatant.Tags.Contains(summonTag))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         if (effect.Operation != AbilityEffectOperation.Summon || string.IsNullOrWhiteSpace(effect.SummonId))
@@ -3133,12 +3351,31 @@ public sealed class FastCombatEngine
     private static bool HasReachedSummonCap(
         RuntimeCombatant source,
         CompiledSummon summonDefinition,
-        IReadOnlyList<RuntimeCombatant> combatants) =>
-        summonDefinition.MaxActive > 0
-        && combatants.Count(x => x.IsAlive
-            && x.IsSummoned
-            && ReferenceEquals(x.SummonOwner, source)
-            && x.Tags.Contains($"Summon.{summonDefinition.Id}")) >= summonDefinition.MaxActive;
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        if (summonDefinition.MaxActive <= 0)
+            return false;
+
+        var count = 0;
+        var summonTag = $"Summon.{summonDefinition.Id}";
+        for (var index = 0; index < combatants.Count; index++)
+        {
+            var combatant = combatants[index];
+            if (!combatant.IsAlive
+                || !combatant.IsSummoned
+                || !ReferenceEquals(combatant.SummonOwner, source)
+                || !combatant.Tags.Contains(summonTag))
+            {
+                continue;
+            }
+
+            count++;
+            if (count >= summonDefinition.MaxActive)
+                return true;
+        }
+
+        return false;
+    }
 
     private void ExpireOwnedSummons(
         RuntimeCombatant owner,
@@ -3174,14 +3411,63 @@ public sealed class FastCombatEngine
 
     private RuntimeCombatant? SelectFirstEnemy(RuntimeCombatant source, IReadOnlyList<RuntimeCombatant> combatants)
     {
-        var enemies = combatants.Where(x => x.Team != source.Team && x.IsAlive).ToList();
-        return SelectThreatWeightedEnemy(enemies);
+        RuntimeCombatant? firstEnemy = null;
+        RuntimeCombatant? lastEnemy = null;
+        var totalThreat = 0d;
+        for (var index = 0; index < combatants.Count; index++)
+        {
+            var combatant = combatants[index];
+            if (combatant.Team == source.Team || !combatant.IsAlive)
+                continue;
+
+            firstEnemy ??= combatant;
+            lastEnemy = combatant;
+            totalThreat += GetEffectiveThreat(combatant);
+        }
+
+        if (firstEnemy is null || totalThreat <= 0)
+            return firstEnemy;
+
+        var roll = _random.NextDouble() * totalThreat;
+        for (var index = 0; index < combatants.Count; index++)
+        {
+            var combatant = combatants[index];
+            if (combatant.Team == source.Team || !combatant.IsAlive)
+                continue;
+
+            roll -= GetEffectiveThreat(combatant);
+            if (roll < 0)
+                return combatant;
+        }
+
+        return lastEnemy;
     }
 
     private RuntimeCombatant? SelectRandomEnemy(RuntimeCombatant source, IReadOnlyList<RuntimeCombatant> combatants)
     {
-        var enemies = combatants.Where(x => x.Team != source.Team && x.IsAlive).ToList();
-        return enemies.Count == 0 ? null : enemies[_random.Next(enemies.Count)];
+        var enemyCount = 0;
+        for (var index = 0; index < combatants.Count; index++)
+        {
+            var combatant = combatants[index];
+            if (combatant.Team != source.Team && combatant.IsAlive)
+                enemyCount++;
+        }
+
+        if (enemyCount == 0)
+            return null;
+
+        var selectedIndex = _random.Next(enemyCount);
+        for (var index = 0; index < combatants.Count; index++)
+        {
+            var combatant = combatants[index];
+            if (combatant.Team == source.Team || !combatant.IsAlive)
+                continue;
+
+            if (selectedIndex-- == 0)
+                return combatant;
+        }
+
+        return null;
     }
 
     private RuntimeCombatant? SelectThreatWeightedEnemy(IReadOnlyList<RuntimeCombatant> enemies)
@@ -3220,11 +3506,19 @@ public sealed class FastCombatEngine
     }
 
     private bool ConditionsPass(
-        IEnumerable<CompiledCondition> conditions,
+        IReadOnlyList<CompiledCondition> conditions,
         RuntimeCombatant source,
         CombatEvent combatEvent,
-        IReadOnlyList<RuntimeCombatant> combatants) =>
-        conditions.All(condition => ConditionPass(condition, source, combatEvent, combatants));
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        for (var index = 0; index < conditions.Count; index++)
+        {
+            if (!ConditionPass(conditions[index], source, combatEvent, combatants))
+                return false;
+        }
+
+        return true;
+    }
 
     private bool ConditionPass(
         CompiledCondition condition,
@@ -3234,18 +3528,34 @@ public sealed class FastCombatEngine
     {
         if (condition.Type == AbilityConditionType.AnyEnemyHealthBelowPercent)
         {
-            return combatants.Any(combatant =>
-                combatant.Team != source.Team
-                && combatant.IsAlive
-                && IsHealthBelowPercent(combatant, condition.Value));
+            for (var index = 0; index < combatants.Count; index++)
+            {
+                var combatant = combatants[index];
+                if (combatant.Team != source.Team
+                    && combatant.IsAlive
+                    && IsHealthBelowPercent(combatant, condition.Value))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         if (condition.Type == AbilityConditionType.NoEnemyHealthBelowPercent)
         {
-            return combatants.All(combatant =>
-                combatant.Team == source.Team
-                || !combatant.IsAlive
-                || !IsHealthBelowPercent(combatant, condition.Value));
+            for (var index = 0; index < combatants.Count; index++)
+            {
+                var combatant = combatants[index];
+                if (combatant.Team != source.Team
+                    && combatant.IsAlive
+                    && IsHealthBelowPercent(combatant, condition.Value))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         if (condition.Type == AbilityConditionType.EventSourceIsEnemy)
@@ -3585,9 +3895,9 @@ public sealed class FastCombatEngine
                 statsSource ?? string.Empty,
                 countsAsActivation,
                 source.Id,
-                source.Team.ToString(),
+                GetTeamName(source.Team),
                 target?.Id ?? string.Empty,
-                target?.Team.ToString() ?? string.Empty,
+                target is null ? string.Empty : GetTeamName(target.Team),
                 target?.Name,
                 eventType,
                 magnitude,
@@ -3642,6 +3952,14 @@ public sealed class FastCombatEngine
                 }
         });
     }
+
+    private static string GetTeamName(CombatTeam team) =>
+        team switch
+        {
+            CombatTeam.Friendly => nameof(CombatTeam.Friendly),
+            CombatTeam.Hostile => nameof(CombatTeam.Hostile),
+            _ => team.ToString()
+        };
 
     [InterpolatedStringHandler]
     private ref struct CombatLogDetailsHandler
@@ -3714,25 +4032,35 @@ public sealed class FastCombatEngine
 
     private sealed class EffectExecutionContext
     {
-        private readonly Dictionary<string, int> _generatedHealingByEffect =
-            new(StringComparer.OrdinalIgnoreCase);
-        private readonly Dictionary<string, string> _summonGroupInstances =
-            new(StringComparer.OrdinalIgnoreCase);
+        private readonly long _activationSequence;
+        private Dictionary<string, int>? _generatedHealingByEffect;
+        private Dictionary<string, string>? _summonGroupInstances;
+        private string? _activationId;
 
-        public string ActivationId { get; } = Guid.NewGuid().ToString("N");
+        public EffectExecutionContext(long activationSequence)
+        {
+            _activationSequence = activationSequence;
+        }
+
+        public string ActivationId =>
+            _activationId ??= _activationSequence.ToString(CultureInfo.InvariantCulture);
 
         public int GetGeneratedHealing(string effectId) =>
-            _generatedHealingByEffect.GetValueOrDefault(effectId);
+            _generatedHealingByEffect?.GetValueOrDefault(effectId) ?? 0;
 
-        public void AddGeneratedHealing(string effectId, int amount) =>
+        public void AddGeneratedHealing(string effectId, int amount)
+        {
+            _generatedHealingByEffect ??= new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             _generatedHealingByEffect[effectId] = GetGeneratedHealing(effectId) + Math.Max(0, amount);
+        }
 
         public string GetSummonGroupInstanceId(string groupId)
         {
+            _summonGroupInstances ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             if (_summonGroupInstances.TryGetValue(groupId, out var existing))
                 return existing;
 
-            var created = $"{groupId}:{Guid.NewGuid():N}";
+            var created = $"{groupId}:{ActivationId}";
             _summonGroupInstances[groupId] = created;
             return created;
         }

@@ -24,6 +24,11 @@ public sealed class ChatModerationService(
             limit,
             cancellationToken);
 
+    public Task<IReadOnlyList<ChatModerationAction>> GetAuditAsync(
+        ChatModerationAuditQuery query,
+        CancellationToken cancellationToken) =>
+        restrictions.GetAuditAsync(query, cancellationToken);
+
     public async Task<ChatModerationResult> MuteAsync(
         Guid operationId,
         Guid characterId,

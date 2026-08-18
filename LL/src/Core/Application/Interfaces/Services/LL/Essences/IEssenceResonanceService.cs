@@ -24,6 +24,29 @@ public interface IEssenceResonanceService
         CancellationToken cancellationToken,
         IReadOnlyDictionary<BonusKind, double>? bonusFactors = null,
         EssenceDropRollModifiers? modifiers = null);
+
+    async Task<IReadOnlyList<IReadOnlyList<InventoryItem>>> RollEssenceDropGroupsAsync(
+        Guid characterId,
+        IReadOnlyList<IReadOnlyList<Creature>> defeatedCreatureGroups,
+        bool eligible,
+        CancellationToken cancellationToken,
+        IReadOnlyDictionary<BonusKind, double>? bonusFactors = null,
+        EssenceDropRollModifiers? modifiers = null)
+    {
+        var groups = new List<IReadOnlyList<InventoryItem>>(defeatedCreatureGroups.Count);
+        foreach (var defeatedCreatures in defeatedCreatureGroups)
+        {
+            groups.Add(await RollEssenceDropsAsync(
+                characterId,
+                defeatedCreatures,
+                eligible,
+                cancellationToken,
+                bonusFactors,
+                modifiers));
+        }
+
+        return groups;
+    }
 }
 
 public sealed record EssenceDropRollResult(bool Dropped, string? EssenceDefinitionId, double EffectiveDropChance, double ResonanceValue);

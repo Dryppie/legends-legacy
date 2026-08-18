@@ -1,6 +1,7 @@
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Interfaces.Combat.Orchestration;
 using Services.LL.Interfaces.Combat.Resolution.Idle;
+using Services.LL.Combat;
 
 namespace Services.LL.Combat.Layers.Orchestration.Idle;
 
@@ -49,6 +50,9 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
             plan,
             cancellationToken);
 
+        var simulationStartedAt = IdleCombatTelemetry.Start();
+        var allocatedBefore = GC.GetTotalAllocatedBytes(precise: false);
+
         for (var sequence = 1; sequence <= plan.PlannedEncounterCount; sequence++)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -60,6 +64,8 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
 
             cursor = cursor.Add(plan.EncounterCadence);
         }
+
+        IdleCombatTelemetry.RecordSimulation(simulationStartedAt, allocatedBefore);
 
         return new CombatOrchestrationResult(
             SessionId: Guid.NewGuid(),

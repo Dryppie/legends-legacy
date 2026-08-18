@@ -1562,6 +1562,26 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Json_catalog_reuses_compiled_immutable_definitions()
+    {
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+
+        var first = provider.GetCompiledCatalog();
+        var second = provider.GetCompiledCatalog();
+
+        Assert.Same(first, second);
+        Assert.Same(
+            first.AbilitiesById["ability.creature.large_rat.big"],
+            second.AbilitiesById["ability.creature.large_rat.big"]);
+        Assert.Equal(provider.GetCatalog().Abilities.Count, first.AbilitiesById.Count);
+        Assert.Equal(provider.GetCatalog().Statuses.Count, first.StatusesById.Count);
+        Assert.Equal(provider.GetCatalog().Summons.Count, first.SummonsById.Count);
+    }
+
+    [Fact]
     public void Json_catalog_garran_authors_the_requested_floor_one_kit()
     {
         var contentRoot = FindApiContentRoot();

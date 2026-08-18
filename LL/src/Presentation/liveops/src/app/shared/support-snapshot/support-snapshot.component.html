@@ -1,0 +1,77 @@
+<div class="support-heading">
+  <div><p class="eyebrow">Read-only decision context</p><h2>Player support snapshot</h2><p>Each section identifies its source and freshness. Unavailable sections do not block the rest of the snapshot.</p></div>
+  <button class="secondary" type="button" [disabled]="loading" (click)="refresh.emit()">{{ loading ? 'Refreshing…' : 'Refresh snapshot' }}</button>
+</div>
+
+@if (loading && !snapshot) {
+  <div class="support-loading">Loading bounded support data…</div>
+} @else if (error && !snapshot) {
+  <div class="permission-note danger-note">{{ error }}</div>
+} @else if (snapshot; as support) {
+  <div class="support-identifiers">
+    <div><span>Account ID</span><code>{{ support.accountId }}</code><button class="text-link" type="button" (click)="copy(support.accountId, 'Account ID')">Copy</button></div>
+    <div><span>Character ID</span><code>{{ support.characterId }}</code><button class="text-link" type="button" (click)="copy(support.characterId, 'Character ID')">Copy</button></div>
+  </div>
+
+  <div class="support-grid">
+    <article class="support-card support-wide" [class.unavailable]="!support.account.isAvailable">
+      <header><div><span>Account and restrictions</span><small>{{ support.account.source }} · {{ support.account.fetchedAtUtc | date: 'mediumTime' }}</small></div><strong>{{ support.account.isAvailable ? 'Available' : 'Unavailable' }}</strong></header>
+      @if (support.account.data; as account) {
+        <div class="support-metrics three"><div><span>Created</span><strong>{{ account.accountCreatedUtc | date: 'medium' }}</strong></div><div><span>Last session issued</span><strong>{{ account.lastSessionIssuedUtc ? (account.lastSessionIssuedUtc | date: 'medium') : 'None recorded' }}</strong></div><div><span>Active sessions</span><strong>{{ account.activeSessionCount }}</strong></div></div>
+        <p class="support-note">{{ account.loginActivityMessage }}</p>
+        <div class="support-list restriction-list">
+          @for (restriction of account.restrictions; track restriction.id) {
+            <div><span class="support-state" [class.alert]="restriction.status === 'Active'">{{ restriction.status }}</span><div><strong>{{ restriction.type }} · {{ restriction.reason }}</strong><small>Applied {{ restriction.createdAt | date: 'medium' }} by {{ restriction.createdBySubject }}</small>@if (restriction.revokedAt) { <small>Revoked {{ restriction.revokedAt | date: 'medium' }} · {{ restriction.revocationReason }}</small> }</div><code>{{ restriction.id }}</code></div>
+          } @empty { <p class="support-empty">No account restrictions have been recorded.</p> }
+        </div>
+      } @else { <p class="support-unavailable">{{ support.account.message }}</p> }
+    </article>
+
+    <article class="support-card" [class.unavailable]="!support.activity.isAvailable">
+      <header><div><span>Current activity</span><small>{{ support.activity.source }} · {{ support.activity.fetchedAtUtc | date: 'mediumTime' }}</small></div><strong>{{ support.activity.isAvailable ? 'Available' : 'Unavailable' }}</strong></header>
+      @if (support.activity.data; as activity) {
+        <div class="activity-focus"><span>Current action</span><strong>{{ activity.currentAction }}</strong><small>{{ activity.actionDetailType || 'No active action details' }}</small></div>
+        <dl class="support-definition"><div><dt>Last mutation</dt><dd>{{ activity.lastActionMutationAtUtc ? (activity.lastActionMutationAtUtc | date: 'medium') : 'Not recorded' }}</dd></div><div><dt>Next resolution</dt><dd>{{ activity.nextResolutionAtUtc ? (activity.nextResolutionAtUtc | date: 'medium') : 'Not scheduled' }}</dd></div><div><dt>Blocked until</dt><dd>{{ activity.blockedUntilUtc ? (activity.blockedUntilUtc | date: 'medium') : 'Not blocked' }}</dd></div><div><dt>Generation</dt><dd>{{ activity.scheduleGeneration ?? '—' }}</dd></div></dl>
+        <p class="support-note">{{ activity.activityMessage }}</p>
+      } @else { <p class="support-unavailable">{{ support.activity.message }}</p> }
+    </article>
+
+    <article class="support-card" [class.unavailable]="!support.guild.isAvailable">
+      <header><div><span>Guild membership</span><small>{{ support.guild.source }} · {{ support.guild.fetchedAtUtc | date: 'mediumTime' }}</small></div><strong>{{ support.guild.isAvailable ? 'Available' : 'Unavailable' }}</strong></header>
+      @if (support.guild.data; as guild) {
+        @if (guild.isMember) { <div class="activity-focus"><span>{{ guild.guildTag }}</span><strong>{{ guild.guildName }}</strong><small>{{ guild.role }} · Level {{ guild.guildLevel }} · {{ guild.memberCount }} members</small></div><code class="full-code">{{ guild.guildId }}</code> }
+        @else { <p class="support-empty">This character is not a guild member.</p> }
+      } @else { <p class="support-unavailable">{{ support.guild.message }}</p> }
+    </article>
+
+    <article class="support-card support-wide" [class.unavailable]="!support.economy.isAvailable">
+      <header><div><span>Economy and inventory</span><small>{{ support.economy.source }} · {{ support.economy.fetchedAtUtc | date: 'mediumTime' }}</small></div><strong>{{ support.economy.isAvailable ? 'Available' : 'Unavailable' }}</strong></header>
+      @if (support.economy.data; as economy) {
+        <div class="balance-grid"><div><span>Cinders</span><strong>{{ economy.cinders | number }}</strong></div><div><span>Soulstones</span><strong>{{ economy.soulstones | number }}</strong></div><div><span>Fate Echo</span><strong>{{ economy.fateEcho | number }}</strong></div><div><span>Sigil fragments</span><strong>{{ economy.sigilFragments | number }}</strong></div><div><span>Guild favor</span><strong>{{ economy.guildFavor | number }}</strong></div><div><span>Tower tokens</span><strong>{{ economy.towerTokens | number }}</strong></div></div>
+        <div class="support-metrics three inventory-metrics"><div><span>Inventory rows</span><strong>{{ economy.inventoryRowCount }}</strong></div><div><span>Total quantity</span><strong>{{ economy.inventoryQuantity | number }}</strong></div><div><span>Unseen rows</span><strong>{{ economy.unseenInventoryRows }}</strong></div></div>
+        <div class="support-split-list">
+          <section><h3>Recent acquisitions</h3><div class="support-list">@for (item of economy.recentAcquisitions; track item.itemInstanceId) { <div><div><strong>{{ item.quantity }} × {{ item.itemName }}</strong><small>{{ item.itemBaseId }} · {{ item.acquisitionSource }}</small></div><time>{{ item.acquiredAtUtc | date: 'short' }}</time></div> } @empty { <p class="support-empty">No retained inventory acquisitions.</p> }</div></section>
+          <section><h3>Recent compensation</h3><div class="support-list">@for (grant of economy.recentCompensationGrants; track grant.operationId) { <div><span class="support-state">{{ grant.riskLevel }}</span><div><strong>{{ grant.quantity }} × {{ grant.itemName }}</strong><small>{{ grant.reason }}</small></div><time>{{ grant.occurredAtUtc | date: 'short' }}</time></div> } @empty { <p class="support-empty">No compensation grants recorded.</p> }</div></section>
+        </div>
+      } @else { <p class="support-unavailable">{{ support.economy.message }}</p> }
+    </article>
+
+    <article class="support-card" [class.unavailable]="!support.marketplace.isAvailable">
+      <header><div><span>Marketplace</span><small>{{ support.marketplace.source }} · {{ support.marketplace.fetchedAtUtc | date: 'mediumTime' }}</small></div><strong>{{ support.marketplace.isAvailable ? 'Available' : 'Unavailable' }}</strong></header>
+      @if (support.marketplace.data; as market) {
+        <div class="support-metrics"><div><span>Active listings</span><strong>{{ market.activeListingCount }}</strong></div><div><span>Buy orders</span><strong>{{ market.activeBuyOrderCount }}</strong></div></div>
+        <div class="support-list">@for (trade of market.recentTrades; track trade.orderId) { <div><span class="support-state">{{ trade.direction }}</span><div><strong>{{ trade.quantity }} × {{ trade.itemName }}</strong><small>{{ trade.totalPrice | number }} Cinders</small></div><time>{{ trade.purchasedAtUtc | date: 'short' }}</time></div> } @empty { <p class="support-empty">No marketplace trades recorded.</p> }</div>
+      } @else { <p class="support-unavailable">{{ support.marketplace.message }}</p> }
+    </article>
+
+    <article class="support-card" [class.unavailable]="!support.synchronization.isAvailable">
+      <header><div><span>Realtime synchronization</span><small>{{ support.synchronization.source }} · {{ support.synchronization.fetchedAtUtc | date: 'mediumTime' }}</small></div><strong>{{ support.synchronization.isAvailable ? 'Available' : 'Unavailable' }}</strong></header>
+      @if (support.synchronization.data; as sync) {
+        <div class="support-metrics"><div><span>Pending deliveries</span><strong>{{ sync.pendingDeliveries }}</strong></div><div><span>Failed deliveries</span><strong [class.danger-text]="sync.failedDeliveries > 0">{{ sync.failedDeliveries }}</strong></div></div>
+        <dl class="support-definition"><div><dt>Oldest pending</dt><dd>{{ sync.oldestPendingAtUtc ? (sync.oldestPendingAtUtc | date: 'medium') : 'None' }}</dd></div><div><dt>Last event</dt><dd>{{ sync.lastOutboxEventAtUtc ? (sync.lastOutboxEventAtUtc | date: 'medium') : 'None' }}</dd></div></dl>
+        <div class="revision-list">@for (revision of sync.revisions; track revision.scope) { <div><code>{{ revision.scope }}</code><strong>r{{ revision.revision }}</strong><time>{{ revision.updatedAtUtc | date: 'shortTime' }}</time></div> } @empty { <p class="support-empty">No state revisions recorded.</p> }</div>
+        <p class="support-note">{{ sync.pendingRewardMessage }}</p>
+      } @else { <p class="support-unavailable">{{ support.synchronization.message }}</p> }
+    </article>
+  </div>
+}

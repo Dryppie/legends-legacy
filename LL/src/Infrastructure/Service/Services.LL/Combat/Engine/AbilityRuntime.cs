@@ -10,6 +10,11 @@ public enum CombatTeam
     Hostile = 1
 }
 
+public sealed record CompiledAbilityCatalog(
+    IReadOnlyDictionary<string, CompiledAbility> AbilitiesById,
+    IReadOnlyDictionary<string, CompiledStatus> StatusesById,
+    IReadOnlyDictionary<string, CompiledSummon> SummonsById);
+
 public sealed class CompiledAbility
 {
     public required string Id { get; init; }
@@ -146,6 +151,7 @@ public sealed class CompiledSummonAttribute
 public sealed class RuntimeAbility
 {
     private readonly Dictionary<CompiledTrigger, int> _triggerCooldowns = [];
+    private readonly List<CompiledTrigger> _triggerCooldownTickBuffer = [];
     private readonly Dictionary<CompiledTrigger, int> _triggerOccurrences = [];
     private readonly HashSet<CompiledTrigger> _activeTriggers = [];
     private readonly Dictionary<string, int> _effectUses = new(StringComparer.OrdinalIgnoreCase);
@@ -184,8 +190,13 @@ public sealed class RuntimeAbility
         if (RemainingCooldownTicks > 0)
             RemainingCooldownTicks--;
 
-        foreach (var trigger in _triggerCooldowns.Keys.ToList())
+        _triggerCooldownTickBuffer.Clear();
+        foreach (var trigger in _triggerCooldowns.Keys)
+            _triggerCooldownTickBuffer.Add(trigger);
+
+        for (var index = 0; index < _triggerCooldownTickBuffer.Count; index++)
         {
+            var trigger = _triggerCooldownTickBuffer[index];
             if (_triggerCooldowns[trigger] <= 1)
                 _triggerCooldowns.Remove(trigger);
             else
@@ -241,6 +252,7 @@ public sealed class RuntimeAbility
 public sealed class RuntimeStatus
 {
     private readonly Dictionary<CompiledTrigger, int> _triggerCooldowns = [];
+    private readonly List<CompiledTrigger> _triggerCooldownTickBuffer = [];
     private readonly Dictionary<CompiledTrigger, int> _triggerOccurrences = [];
     private readonly HashSet<CompiledTrigger> _activeTriggers = [];
     private readonly Dictionary<string, int> _effectUses = new(StringComparer.OrdinalIgnoreCase);
@@ -300,8 +312,13 @@ public sealed class RuntimeStatus
         if (RemainingDurationTicks > 0)
             RemainingDurationTicks--;
 
-        foreach (var trigger in _triggerCooldowns.Keys.ToList())
+        _triggerCooldownTickBuffer.Clear();
+        foreach (var trigger in _triggerCooldowns.Keys)
+            _triggerCooldownTickBuffer.Add(trigger);
+
+        for (var index = 0; index < _triggerCooldownTickBuffer.Count; index++)
         {
+            var trigger = _triggerCooldownTickBuffer[index];
             if (_triggerCooldowns[trigger] <= 1)
                 _triggerCooldowns.Remove(trigger);
             else
@@ -544,6 +561,9 @@ public sealed class RuntimeCombatant
 {
     public const float BaseThreat = 100f;
 
+    private static readonly RuntimeBarrierConsumption EmptyBarrierConsumption =
+        new(0, Array.Empty<RuntimeBarrierConsumptionEntry>());
+
     private float _threat;
     private float _regenerationRatePercent;
     private int _regenerationIntervalModifierTicks;
@@ -553,6 +573,7 @@ public sealed class RuntimeCombatant
     private readonly Dictionary<StandardConditionType, float> _damageTakenFromConditionPercent = [];
     private readonly Dictionary<string, (AttributeType Attribute, float Amount)> _synchronizedAttributeContributions =
         new(StringComparer.OrdinalIgnoreCase);
+    private readonly List<RuntimeBarrierContribution> _barrierOrderingBuffer = [];
     private float _nextBasicAttackDamagePercent;
     private float _nextBasicAttackArmorPenetration;
 
@@ -612,7 +633,17 @@ public sealed class RuntimeCombatant
     public List<RuntimeBarrierContribution> BarrierContributions { get; } = [];
     public Dictionary<AbilityTriggerEvent, List<RuntimeAbility>> AbilityTriggersByEvent { get; private set; } = [];
     public float Health { get; private set; }
-    public float Barrier => BarrierContributions.Sum(x => x.Remaining);
+    public float Barrier
+    {
+        get
+        {
+            var total = 0f;
+            for (var index = 0; index < BarrierContributions.Count; index++)
+                total += BarrierContributions[index].Remaining;
+
+            return total;
+        }
+    }
     public float Threat => Math.Max(0, _threat);
     public float RegenerationRatePercent => _regenerationRatePercent;
     public int RegenerationIntervalModifierTicks => _regenerationIntervalModifierTicks;
@@ -703,10 +734,14 @@ public sealed class RuntimeCombatant
     private void TrimBarrierToCap()
     {
         var excess = Math.Max(0, Barrier - GetAttribute(AttributeType.MaxHealth) * 2.5f);
-        foreach (var contribution in BarrierContributions
-                     .OrderByDescending(x => x.ApplicationOrder)
-                     .ToList())
+        _barrierOrderingBuffer.Clear();
+        _barrierOrderingBuffer.AddRange(BarrierContributions);
+        _barrierOrderingBuffer.Sort(static (left, right) =>
+            right.ApplicationOrder.CompareTo(left.ApplicationOrder));
+
+        for (var index = 0; index < _barrierOrderingBuffer.Count; index++)
         {
+            var contribution = _barrierOrderingBuffer[index];
             if (excess <= 0)
                 break;
 
@@ -753,12 +788,19 @@ public sealed class RuntimeCombatant
     public RuntimeBarrierConsumption ConsumeBarrierWithSources(float amount)
     {
         var remaining = Math.Max(0, amount);
+        if (remaining <= 0 || BarrierContributions.Count == 0)
+            return EmptyBarrierConsumption;
+
         var consumed = 0f;
         var consumedContributions = new List<RuntimeBarrierConsumptionEntry>();
-        foreach (var contribution in BarrierContributions
-                     .OrderBy(x => x.ApplicationOrder)
-                     .ToList())
+        _barrierOrderingBuffer.Clear();
+        _barrierOrderingBuffer.AddRange(BarrierContributions);
+        _barrierOrderingBuffer.Sort(static (left, right) =>
+            left.ApplicationOrder.CompareTo(right.ApplicationOrder));
+
+        for (var index = 0; index < _barrierOrderingBuffer.Count; index++)
         {
+            var contribution = _barrierOrderingBuffer[index];
             if (remaining <= 0)
                 break;
 
@@ -825,12 +867,20 @@ public sealed class RuntimeCombatant
     {
         var total = _damageTakenPercent.GetValueOrDefault(DamageType.None)
                     + _damageTakenPercent.GetValueOrDefault(damageType);
-        total += _damageTakenFromConditionPercent
-            .Where(entry => source.HasCondition(entry.Key))
-            .Sum(entry => entry.Value);
-        total += Statuses
-            .Where(status => ReferenceEquals(status.Source, source))
-            .Sum(status => status.Stacks * status.Definition.SourceDamageTakenPercentPerStack);
+
+        foreach (var entry in _damageTakenFromConditionPercent)
+        {
+            if (source.HasCondition(entry.Key))
+                total += entry.Value;
+        }
+
+        for (var index = 0; index < Statuses.Count; index++)
+        {
+            var status = Statuses[index];
+            if (ReferenceEquals(status.Source, source))
+                total += status.Stacks * status.Definition.SourceDamageTakenPercentPerStack;
+        }
+
         return total;
     }
 
@@ -863,20 +913,62 @@ public sealed class RuntimeCombatant
             status.Tick();
     }
 
-    public int GetStatusStacks(string statusId) =>
-        Statuses.Where(x => x.Definition.Id.Equals(statusId, StringComparison.OrdinalIgnoreCase)).Sum(x => x.Stacks);
+    public int GetStatusStacks(string statusId)
+    {
+        var stacks = 0;
+        for (var index = 0; index < Statuses.Count; index++)
+        {
+            var status = Statuses[index];
+            if (status.Definition.Id.Equals(statusId, StringComparison.OrdinalIgnoreCase))
+                stacks += status.Stacks;
+        }
 
-    public bool HasCondition(StandardConditionType type) =>
-        Conditions.Any(x => x.Type == type && x.Value > 0);
+        return stacks;
+    }
 
-    public int GetConditionStacks(StandardConditionType type) =>
-        Conditions.Where(x => x.Type == type).Sum(x => x.Value);
+    public bool HasCondition(StandardConditionType type)
+    {
+        for (var index = 0; index < Conditions.Count; index++)
+        {
+            var condition = Conditions[index];
+            if (condition.Type == type && condition.Value > 0)
+                return true;
+        }
+
+        return false;
+    }
+
+    public int GetConditionStacks(StandardConditionType type)
+    {
+        var stacks = 0;
+        for (var index = 0; index < Conditions.Count; index++)
+        {
+            var condition = Conditions[index];
+            if (condition.Type == type)
+                stacks += condition.Value;
+        }
+
+        return stacks;
+    }
 
     public void RebuildTriggerIndex()
     {
-        AbilityTriggersByEvent = Abilities
-            .SelectMany(ability => ability.Definition.TriggersByEvent.Keys.Select(triggerEvent => (triggerEvent, ability)))
-            .GroupBy(x => x.triggerEvent)
-            .ToDictionary(x => x.Key, x => x.Select(item => item.ability).ToList());
+        var index = new Dictionary<AbilityTriggerEvent, List<RuntimeAbility>>();
+        for (var abilityIndex = 0; abilityIndex < Abilities.Count; abilityIndex++)
+        {
+            var ability = Abilities[abilityIndex];
+            foreach (var triggerEvent in ability.Definition.TriggersByEvent.Keys)
+            {
+                if (!index.TryGetValue(triggerEvent, out var listeners))
+                {
+                    listeners = [];
+                    index.Add(triggerEvent, listeners);
+                }
+
+                listeners.Add(ability);
+            }
+        }
+
+        AbilityTriggersByEvent = index;
     }
 }

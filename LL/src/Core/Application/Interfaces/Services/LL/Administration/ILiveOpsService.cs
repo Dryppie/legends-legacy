@@ -13,6 +13,10 @@ public interface ILiveOpsService
         Guid characterId,
         CancellationToken cancellationToken);
 
+    Task<PlayerAdministrationSnapshot?> GetPlayerByAccountIdAsync(
+        Guid accountId,
+        CancellationToken cancellationToken);
+
     Task<IReadOnlyList<AdministrationItemCatalogEntry>> SearchItemsAsync(
         string query,
         int limit,
@@ -22,6 +26,17 @@ public interface ILiveOpsService
         Guid accountId,
         Guid characterId,
         int limit,
+        CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<AdministrationHistoryEntry>> GetAuditAsync(
+        AdministrationAuditQuery query,
+        CancellationToken cancellationToken);
+
+    Task<AdministrationOperationResult<AdminAction>> RecordAuditExportAsync(
+        Guid operationId,
+        AdministrationActor actor,
+        int rowCount,
+        string detailsJson,
         CancellationToken cancellationToken);
 
     Task<AdministrationOperationResult<AccountBanOperation>> BanAccountAsync(

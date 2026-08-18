@@ -1,0 +1,387 @@
+using System.Text.Json;
+using Domain.Models.Administration;
+using Domain.Models.Outbox;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Persistence.LL;
+using Services.LL.Administration;
+
+namespace API.LiveOps.Support;
+
+public sealed class LiveOpsPlayerSupportSnapshotService(
+    IDbContextFactory<LLDbContext> contextFactory,
+    IOptions<LiveOpsOptions> options,
+    TimeProvider timeProvider,
+    ILogger<LiveOpsPlayerSupportSnapshotService> logger)
+{
+    private const string Source = "Game database";
+    private readonly int _sectionTimeoutSeconds = Math.Clamp(
+        options.Value.SupportSnapshotSectionTimeoutSeconds,
+        1,
+        15);
+
+    public async Task<PlayerSupportSnapshotDto?> GetAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        await using var lookup = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var target = await lookup.Characters.AsNoTracking()
+            .Where(x => x.Id == characterId)
+            .Select(x => new TargetRow(x.UserId, x.Id))
+            .SingleOrDefaultAsync(cancellationToken);
+        if (target is null) return null;
+
+        var account = CaptureAsync(
+            "account",
+            token => LoadAccountAsync(target, token),
+            cancellationToken);
+        var activity = CaptureAsync(
+            "activity",
+            token => LoadActivityAsync(target, token),
+            cancellationToken);
+        var economy = CaptureAsync(
+            "economy",
+            token => LoadEconomyAsync(target, token),
+            cancellationToken);
+        var guild = CaptureAsync(
+            "guild",
+            token => LoadGuildAsync(target, token),
+            cancellationToken);
+        var marketplace = CaptureAsync(
+            "marketplace",
+            token => LoadMarketplaceAsync(target, token),
+            cancellationToken);
+        var synchronization = CaptureAsync(
+            "synchronization",
+            token => LoadSynchronizationAsync(target, token),
+            cancellationToken);
+
+        await Task.WhenAll(account, activity, economy, guild, marketplace, synchronization);
+        return new PlayerSupportSnapshotDto(
+            target.AccountId,
+            target.CharacterId,
+            timeProvider.GetUtcNow(),
+            await account,
+            await activity,
+            await economy,
+            await guild,
+            await marketplace,
+            await synchronization);
+    }
+
+    private async Task<AccountSupportSnapshotDto> LoadAccountAsync(
+        TargetRow target,
+        CancellationToken cancellationToken)
+    {
+        await using var database = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var created = await database.Users.AsNoTracking()
+            .Where(x => x.Id == target.AccountId)
+            .Select(x => x.CreatedUtc)
+            .SingleAsync(cancellationToken);
+        var lastSession = await database.RefreshTokens.AsNoTracking()
+            .Where(x => x.UserId == target.AccountId)
+            .Select(x => (DateTime?)x.CreatedUtc)
+            .MaxAsync(cancellationToken);
+        var now = timeProvider.GetUtcNow();
+        var nowUtc = now.UtcDateTime;
+        var activeSessions = await database.RefreshTokens.AsNoTracking()
+            .CountAsync(x =>
+                x.UserId == target.AccountId &&
+                x.RevokedUtc == null &&
+                x.ExpiresUtc > nowUtc,
+                cancellationToken);
+        var restrictions = await database.AccountRestrictions.AsNoTracking()
+            .Where(x => x.AccountId == target.AccountId)
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(50)
+            .ToListAsync(cancellationToken);
+
+        return new AccountSupportSnapshotDto(
+            created,
+            lastSession,
+            activeSessions,
+            "The game currently stores session issuance, not a dedicated login-event history.",
+            restrictions.Select(x => new AccountRestrictionHistoryDto(
+                x.Id,
+                x.RestrictionType.ToString(),
+                x.RevokedAt.HasValue ? "Revoked" :
+                    x.ExpiresAt.HasValue && x.ExpiresAt.Value <= now ? "Expired" : "Active",
+                x.Reason,
+                x.CreatedBySubject,
+                x.CreatedAt,
+                x.ExpiresAt,
+                x.RevokedBySubject,
+                x.RevokedAt,
+                x.RevocationReason)).ToList());
+    }
+
+    private async Task<ActivitySupportSnapshotDto> LoadActivityAsync(
+        TargetRow target,
+        CancellationToken cancellationToken)
+    {
+        await using var database = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var action = await database.CharacterActions.AsNoTracking()
+            .Include(x => x.ActionDetails)
+            .SingleOrDefaultAsync(x => x.CharacterId == target.CharacterId, cancellationToken);
+        if (action is null || action.IsDeleted)
+        {
+            return new ActivitySupportSnapshotDto(
+                "Idle", null, action?.UpdatedAt, null, null,
+                action?.ScheduleGeneration,
+                "No active background action is retained for this character.");
+        }
+
+        return new ActivitySupportSnapshotDto(
+            action.CharacterActionType.ToString(),
+            action.ActionDetails?.GetType().Name,
+            action.UpdatedAt,
+            action.NextResolutionAtUtc,
+            action.BlockedUntilUtc,
+            action.ScheduleGeneration,
+            "UpdatedAt is the last persisted action mutation, not a login timestamp.");
+    }
+
+    private async Task<EconomySupportSnapshotDto> LoadEconomyAsync(
+        TargetRow target,
+        CancellationToken cancellationToken)
+    {
+        await using var database = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var balances = await database.Characters.AsNoTracking()
+            .Where(x => x.Id == target.CharacterId)
+            .Select(x => new BalanceRow(
+                x.Cinders,
+                x.Soulstones,
+                x.FateEcho,
+                x.SigilFragments,
+                x.GuildFavor,
+                x.TowerTokens))
+            .SingleAsync(cancellationToken);
+        var inventory = await database.InventoryItems.AsNoTracking()
+            .Where(x => x.InventoryId == target.CharacterId)
+            .GroupBy(_ => 1)
+            .Select(group => new InventoryTotals(
+                group.Count(),
+                group.Sum(x => (long)x.Quantity),
+                group.Count(x => x.SeenAtUtc == null)))
+            .SingleOrDefaultAsync(cancellationToken)
+            ?? new InventoryTotals(0, 0, 0);
+        var acquisitions = await database.InventoryItems.AsNoTracking()
+            .Where(x => x.InventoryId == target.CharacterId)
+            .OrderByDescending(x => x.ItemInstance.AcquiredAtUtc)
+            .Take(10)
+            .Select(x => new RecentInventoryAcquisitionDto(
+                x.ItemInstanceId,
+                x.ItemInstance.ItemBaseId,
+                x.ItemInstance.ItemBase.Name,
+                x.Quantity,
+                x.ItemInstance.AcquisitionSource,
+                x.ItemInstance.AcquiredAtUtc))
+            .ToListAsync(cancellationToken);
+        var grantRows = await database.AdminActions.AsNoTracking()
+            .Where(x =>
+                x.TargetCharacterId == target.CharacterId &&
+                x.ActionType == AdminActionType.CompensationItemsGranted)
+            .OrderByDescending(x => x.OccurredAt)
+            .Take(10)
+            .Select(x => new GrantRow(
+                x.Id,
+                x.DetailsJson,
+                x.Reason,
+                x.RiskLevel,
+                x.OccurredAt))
+            .ToListAsync(cancellationToken);
+        var grants = await HydrateGrantsAsync(database, grantRows, cancellationToken);
+
+        return new EconomySupportSnapshotDto(
+            balances.Cinders,
+            balances.Soulstones,
+            balances.FateEcho,
+            balances.SigilFragments,
+            balances.GuildFavor,
+            balances.TowerTokens,
+            inventory.RowCount,
+            inventory.Quantity,
+            inventory.UnseenRows,
+            acquisitions,
+            grants);
+    }
+
+    private static async Task<IReadOnlyList<RecentCompensationGrantDto>> HydrateGrantsAsync(
+        LLDbContext database,
+        IReadOnlyList<GrantRow> rows,
+        CancellationToken cancellationToken)
+    {
+        var parsed = rows.Select(row => (Row: row, Details: TryReadGrant(row.DetailsJson))).ToList();
+        var itemIds = parsed
+            .Where(x => x.Details is not null)
+            .Select(x => x.Details!.ItemBaseId)
+            .Distinct()
+            .ToArray();
+        var names = await database.ItemBases.AsNoTracking()
+            .Where(x => itemIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, x => x.Name, cancellationToken);
+        return parsed.Select(x => new RecentCompensationGrantDto(
+            x.Row.OperationId,
+            x.Details?.ItemBaseId ?? "unknown",
+            x.Details is not null
+                ? names.GetValueOrDefault(x.Details.ItemBaseId, x.Details.ItemBaseId)
+                : "Unknown item",
+            x.Details?.Quantity ?? 0,
+            x.Row.Reason,
+            x.Row.RiskLevel.ToString(),
+            x.Row.OccurredAt)).ToList();
+    }
+
+    private async Task<GuildSupportSnapshotDto> LoadGuildAsync(
+        TargetRow target,
+        CancellationToken cancellationToken)
+    {
+        await using var database = await contextFactory.CreateDbContextAsync(cancellationToken);
+        return await database.GuildMembers.AsNoTracking()
+            .Where(x => x.CharacterId == target.CharacterId)
+            .Select(x => new GuildSupportSnapshotDto(
+                true,
+                x.GuildId,
+                x.Guild.Name,
+                x.Guild.Tag,
+                x.Role.ToString(),
+                x.JoinedAt,
+                x.Guild.GuildLevel,
+                x.Guild.Members.Count))
+            .SingleOrDefaultAsync(cancellationToken)
+            ?? new GuildSupportSnapshotDto(false, null, null, null, null, null, null, null);
+    }
+
+    private async Task<MarketplaceSupportSnapshotDto> LoadMarketplaceAsync(
+        TargetRow target,
+        CancellationToken cancellationToken)
+    {
+        await using var database = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var now = timeProvider.GetUtcNow();
+        var listingCount = await database.MarketPlaceListings.AsNoTracking()
+            .CountAsync(x => x.SellerId == target.CharacterId && x.ExpiresAt > now, cancellationToken);
+        var buyOrderCount = await database.MarketPlaceBuyOrders.AsNoTracking()
+            .CountAsync(x => x.BuyerId == target.CharacterId && x.ExpiresAt > now, cancellationToken);
+        var trades = await database.MarketPlaceOrders.AsNoTracking()
+            .Where(x => x.SellerId == target.CharacterId || x.BuyerId == target.CharacterId)
+            .OrderByDescending(x => x.PurchasedAt)
+            .Take(10)
+            .Select(x => new RecentMarketplaceTradeDto(
+                x.Id,
+                x.BuyerId == target.CharacterId ? "Purchased" : "Sold",
+                x.ItemBaseId,
+                x.ItemBase.Name,
+                x.Quantity,
+                x.TotalPrice,
+                x.PurchasedAt))
+            .ToListAsync(cancellationToken);
+        return new MarketplaceSupportSnapshotDto(listingCount, buyOrderCount, trades);
+    }
+
+    private async Task<SynchronizationSupportSnapshotDto> LoadSynchronizationAsync(
+        TargetRow target,
+        CancellationToken cancellationToken)
+    {
+        await using var database = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var prefix = $"character:{target.CharacterId:N}";
+        var revisions = await database.StateSyncRevisions.AsNoTracking()
+            .Where(x => x.ScopeKey.StartsWith(prefix))
+            .OrderByDescending(x => x.UpdatedAt)
+            .Take(20)
+            .Select(x => new StateRevisionDto(
+                x.ScopeKey == prefix ? "all" : x.ScopeKey.Substring(prefix.Length + 1),
+                x.Revision,
+                x.UpdatedAt))
+            .ToListAsync(cancellationToken);
+        var deliveries = database.GameEventOutboxDeliveries.AsNoTracking()
+            .Where(x =>
+                x.Message.CharacterId == target.CharacterId ||
+                x.Message.AccountId == target.AccountId);
+        var pending = await deliveries.CountAsync(
+            x => x.Status == GameEventOutboxDeliveryStatus.Pending,
+            cancellationToken);
+        var failed = await deliveries.CountAsync(
+            x => x.Status == GameEventOutboxDeliveryStatus.Failed,
+            cancellationToken);
+        var oldestPending = await deliveries
+            .Where(x => x.Status == GameEventOutboxDeliveryStatus.Pending)
+            .Select(x => (DateTimeOffset?)x.CreatedAt)
+            .MinAsync(cancellationToken);
+        var lastEvent = await database.GameEventOutboxMessages.AsNoTracking()
+            .Where(x => x.CharacterId == target.CharacterId || x.AccountId == target.AccountId)
+            .Select(x => (DateTimeOffset?)x.CreatedAt)
+            .MaxAsync(cancellationToken);
+        return new SynchronizationSupportSnapshotDto(
+            pending,
+            failed,
+            oldestPending,
+            lastEvent,
+            revisions,
+            "No bounded pending-reward registry currently exists; no status is inferred from unrelated records.");
+    }
+
+    private async Task<PlayerSupportSection<T>> CaptureAsync<T>(
+        string section,
+        Func<CancellationToken, Task<T>> load,
+        CancellationToken requestCancellationToken)
+    {
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken);
+        timeout.CancelAfter(TimeSpan.FromSeconds(_sectionTimeoutSeconds));
+        try
+        {
+            var data = await load(timeout.Token);
+            return new PlayerSupportSection<T>(
+                true,
+                Source,
+                timeProvider.GetUtcNow(),
+                null,
+                data);
+        }
+        catch (OperationCanceledException) when (requestCancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (OperationCanceledException)
+        {
+            logger.LogWarning("LiveOps player support section {Section} timed out.", section);
+            return Unavailable<T>("This section timed out. Retry the snapshot.");
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "LiveOps player support section {Section} is unavailable.", section);
+            return Unavailable<T>("This section is temporarily unavailable.");
+        }
+    }
+
+    private PlayerSupportSection<T> Unavailable<T>(string message) =>
+        new(false, Source, timeProvider.GetUtcNow(), message, default);
+
+    private static GrantDetails? TryReadGrant(string json)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<GrantDetails>(json);
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
+
+    private sealed record TargetRow(Guid AccountId, Guid CharacterId);
+    private sealed record BalanceRow(
+        long Cinders,
+        long Soulstones,
+        long FateEcho,
+        long SigilFragments,
+        long GuildFavor,
+        long TowerTokens);
+    private sealed record InventoryTotals(int RowCount, long Quantity, int UnseenRows);
+    private sealed record GrantRow(
+        Guid OperationId,
+        string DetailsJson,
+        string Reason,
+        AdministrationRiskLevel RiskLevel,
+        DateTimeOffset OccurredAt);
+    private sealed record GrantDetails(string ItemBaseId, int Quantity);
+}

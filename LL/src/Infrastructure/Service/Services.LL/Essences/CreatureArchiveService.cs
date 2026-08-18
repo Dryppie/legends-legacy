@@ -43,17 +43,27 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
         Guid characterId,
         IReadOnlyCollection<Creature> creatures,
         DateTimeOffset defeatedAtUtc,
+        CancellationToken cancellationToken) =>
+        await RecordDefeatedCreatureBatchesAsync(
+            characterId,
+            [new CreatureDefeatBatch(creatures, defeatedAtUtc)],
+            cancellationToken);
+
+    public async Task RecordDefeatedCreatureBatchesAsync(
+        Guid characterId,
+        IReadOnlyList<CreatureDefeatBatch> batches,
         CancellationToken cancellationToken)
     {
-        if (creatures.Count == 0)
+        if (batches.Count == 0)
         {
             return;
         }
 
-        var defeated = creatures
-            .Select(creature => new DefeatedCreature(
+        var defeated = batches
+            .SelectMany(batch => batch.Creatures.Select(creature => new TimedDefeatedCreature(
                 CreatureEssenceSource.GetMonsterDefinitionId(creature),
-                creature.Name.Trim()))
+                creature.Name.Trim(),
+                batch.DefeatedAtUtc)))
             .Where(creature => !string.IsNullOrWhiteSpace(creature.CreatureId))
             .GroupBy(creature => creature.CreatureId, StringComparer.OrdinalIgnoreCase)
             .Select(group => new
@@ -62,7 +72,9 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
                 Name = group
                     .Select(x => x.Name)
                     .FirstOrDefault(name => !string.IsNullOrWhiteSpace(name)) ?? string.Empty,
-                Count = group.Count()
+                Count = group.Count(),
+                FirstDefeatedAtUtc = group.Min(x => x.DefeatedAtUtc),
+                LastDefeatedAtUtc = group.Max(x => x.DefeatedAtUtc)
             })
             .ToList();
 
@@ -92,8 +104,8 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
                         ? FormatCreatureName(creature.CreatureId)
                         : creature.Name,
                     KillCount = creature.Count,
-                    FirstDefeatedAtUtc = defeatedAtUtc,
-                    LastDefeatedAtUtc = defeatedAtUtc
+                    FirstDefeatedAtUtc = creature.FirstDefeatedAtUtc,
+                    LastDefeatedAtUtc = creature.LastDefeatedAtUtc
                 });
                 continue;
             }
@@ -104,7 +116,7 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
                 entry.CreatureName = creature.Name;
             }
 
-            entry.LastDefeatedAtUtc = defeatedAtUtc;
+            entry.LastDefeatedAtUtc = creature.LastDefeatedAtUtc;
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
@@ -165,6 +177,11 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
 
         return new CreatureArchive(creatures, canChangeFocus, focusAvailableAt, lastFocusSetAt);
     }
+
+    private sealed record TimedDefeatedCreature(
+        string CreatureId,
+        string Name,
+        DateTimeOffset DefeatedAtUtc);
 
     private static IReadOnlyList<string> GetArchiveTags(EssenceDefinition definition) =>
         definition.Tags
@@ -409,5 +426,4 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
         return Math.Max(0, Convert.ToInt64(Math.Floor((now - focusSetAt).TotalSeconds)));
     }
 
-    private sealed record DefeatedCreature(string CreatureId, string Name);
 }

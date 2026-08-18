@@ -8,4 +8,15 @@ public interface IIdleCombatRewardApplier
         IdleCombatRewardFacts facts,
         IdleCombatCalculatedOutcome outcome,
         CancellationToken cancellationToken);
+
+    Task ApplyProgressionAsync(
+        IdleCombatRewardFacts facts,
+        IdleCombatCalculatedOutcome outcome,
+        CancellationToken cancellationToken) =>
+        ApplyAsync(facts, outcome, cancellationToken);
+
+    Task ApplySettlementAsync(
+        IReadOnlyList<IdleCombatSettlementBatch> batches,
+        CancellationToken cancellationToken) =>
+        Task.CompletedTask;
 }

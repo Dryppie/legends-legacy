@@ -4,7 +4,15 @@ public enum AdminActionType
 {
     AccountBanned,
     AccountBanRevoked,
-    CompensationItemsGranted
+    CompensationItemsGranted,
+    AuditExported
+}
+
+public enum AdministrationRiskLevel
+{
+    Normal,
+    Permanent,
+    HighValue
 }
 
 /// <summary>
@@ -24,5 +32,6 @@ public sealed class AdminAction
     public string Reason { get; set; } = string.Empty;
     public string? InternalNotes { get; set; }
     public string DetailsJson { get; set; } = "{}";
+    public AdministrationRiskLevel RiskLevel { get; set; }
     public DateTimeOffset OccurredAt { get; set; }
 }

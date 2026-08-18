@@ -19,6 +19,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
     private readonly IAbilityCatalogProvider _catalogProvider;
     private readonly IEssenceDefinitionRepository? _essenceDefinitions;
     private readonly ICraftingDefinitionProvider? _craftingDefinitions;
+    private readonly Dictionary<EssenceAbilityCacheKey, CompiledAbility> _compiledEssenceAbilities = [];
 
     public CombatEngineExecutor(
         IAbilityCatalogProvider catalogProvider,
@@ -184,6 +185,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         cancellationToken.ThrowIfCancellationRequested();
 
         var catalog = _catalogProvider.GetCatalog();
+        var precompiledCatalog = (_catalogProvider as ICompiledAbilityCatalogProvider)?.GetCompiledCatalog();
         var supplementalAbilities = (options.SupplementalAbilities ?? [])
             .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
         var abilityIds = runtime.FriendlyParticipants
@@ -197,15 +199,25 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 
         var abilitySpecs = SelectAbilitySpecsAndSummons(catalog, supplementalAbilities, abilityIds).ToList();
         var summonIds = SelectSummonIds(abilitySpecs).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var compiledAbilities = AbilityCompiler.CompileAbilities(abilitySpecs);
-        var compiledStatuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
-        var compiledSummons = AbilityCompiler.CompileSummons(
-            summonIds.Select(summonId => catalog.SummonsById[summonId]));
+        var compiledAbilities = CompileSelectedAbilities(catalog, precompiledCatalog, abilitySpecs);
+        var compiledStatuses = precompiledCatalog?.StatusesById
+            ?? AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var compiledSummons = CompileSelectedSummons(catalog, precompiledCatalog, summonIds);
         var friendly = runtime.FriendlyParticipants
-            .Select(participant => CreateRuntimeCombatant(participant.Combatant, CombatTeam.Friendly, catalog, compiledAbilities))
+            .Select(participant => CreateRuntimeCombatant(
+                participant.Combatant,
+                CombatTeam.Friendly,
+                catalog,
+                compiledAbilities,
+                precompiledCatalog is not null))
             .ToList();
         var hostile = runtime.HostileParticipants
-            .Select(participant => CreateRuntimeCombatant(participant.Combatant, CombatTeam.Hostile, catalog, compiledAbilities))
+            .Select(participant => CreateRuntimeCombatant(
+                participant.Combatant,
+                CombatTeam.Hostile,
+                catalog,
+                compiledAbilities,
+                precompiledCatalog is not null))
             .ToList();
         var engine = new FastCombatEngine(
             compiledStatuses,
@@ -248,9 +260,15 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         CombatEntity combatant,
         CombatTeam team,
         AbilityCatalog catalog,
-        IReadOnlyDictionary<string, CompiledAbility> compiledAbilities)
+        IReadOnlyDictionary<string, CompiledAbility> compiledAbilities,
+        bool cacheStableEssenceAbilities)
     {
-        var abilities = CreateCombatantAbilities(combatant, catalog, compiledAbilities).ToList();
+        var abilities = CreateCombatantAbilities(
+                combatant,
+                catalog,
+                compiledAbilities,
+                cacheStableEssenceAbilities)
+            .ToList();
         var behavior = ResolveBasicAttackBehavior(combatant);
 
         return new RuntimeCombatant(
@@ -301,7 +319,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
     private IEnumerable<CompiledAbility> CreateCombatantAbilities(
         CombatEntity combatant,
         AbilityCatalog catalog,
-        IReadOnlyDictionary<string, CompiledAbility> compiledAbilities)
+        IReadOnlyDictionary<string, CompiledAbility> compiledAbilities,
+        bool cacheStableEssenceAbilities)
     {
         var selected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -316,12 +335,34 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                     continue;
 
                 var baseSpec = catalog.AbilitiesById[abilityId];
-                var modifiedSpec = ApplyEvolutionModifiers(baseSpec, essence, catalog);
-                modifiedSpec = EssenceAbilityProgressionScaler.Apply(modifiedSpec, essence.AscensionTier);
-                modifiedSpec = ApplyTemporaryAbilityModifiers(modifiedSpec, combatant, catalog);
-                yield return ReferenceEquals(baseSpec, modifiedSpec)
+                if (cacheStableEssenceAbilities && combatant.TemporaryAbilityModifiers.Count == 0)
+                {
+                    var cacheKey = new EssenceAbilityCacheKey(
+                        catalog,
+                        abilityId,
+                        essence.EssenceDefinitionId,
+                        essence.IsEvolved,
+                        essence.AscensionTier);
+                    if (!_compiledEssenceAbilities.TryGetValue(cacheKey, out var compiledAbility))
+                    {
+                        var modifiedSpec = ApplyEvolutionModifiers(baseSpec, essence, catalog);
+                        modifiedSpec = EssenceAbilityProgressionScaler.Apply(modifiedSpec, essence.AscensionTier);
+                        compiledAbility = ReferenceEquals(baseSpec, modifiedSpec)
+                            ? compiledAbilities[abilityId]
+                            : AbilityCompiler.CompileAbility(modifiedSpec);
+                        _compiledEssenceAbilities.Add(cacheKey, compiledAbility);
+                    }
+
+                    yield return compiledAbility;
+                    continue;
+                }
+
+                var uncachedSpec = ApplyEvolutionModifiers(baseSpec, essence, catalog);
+                uncachedSpec = EssenceAbilityProgressionScaler.Apply(uncachedSpec, essence.AscensionTier);
+                uncachedSpec = ApplyTemporaryAbilityModifiers(uncachedSpec, combatant, catalog);
+                yield return ReferenceEquals(baseSpec, uncachedSpec)
                     ? compiledAbilities[abilityId]
-                    : AbilityCompiler.CompileAbility(modifiedSpec);
+                    : AbilityCompiler.CompileAbility(uncachedSpec);
             }
         }
 
@@ -386,6 +427,48 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                     queue.Enqueue(summonAbilityId);
             }
         }
+    }
+
+    private static IReadOnlyDictionary<string, CompiledAbility> CompileSelectedAbilities(
+        AbilityCatalog catalog,
+        CompiledAbilityCatalog? precompiledCatalog,
+        IReadOnlyList<AbilitySpec> abilitySpecs)
+    {
+        if (precompiledCatalog is null)
+            return AbilityCompiler.CompileAbilities(abilitySpecs);
+
+        var compiled = new Dictionary<string, CompiledAbility>(abilitySpecs.Count, StringComparer.OrdinalIgnoreCase);
+        foreach (var spec in abilitySpecs)
+        {
+            if (catalog.AbilitiesById.TryGetValue(spec.Id, out var catalogSpec)
+                && ReferenceEquals(spec, catalogSpec))
+            {
+                compiled.Add(spec.Id, precompiledCatalog.AbilitiesById[spec.Id]);
+            }
+            else
+            {
+                compiled.Add(spec.Id, AbilityCompiler.CompileAbility(spec));
+            }
+        }
+
+        return compiled;
+    }
+
+    private static IReadOnlyDictionary<string, CompiledSummon> CompileSelectedSummons(
+        AbilityCatalog catalog,
+        CompiledAbilityCatalog? precompiledCatalog,
+        IReadOnlySet<string> summonIds)
+    {
+        if (precompiledCatalog is null)
+        {
+            return AbilityCompiler.CompileSummons(
+                summonIds.Select(summonId => catalog.SummonsById[summonId]));
+        }
+
+        var compiled = new Dictionary<string, CompiledSummon>(summonIds.Count, StringComparer.OrdinalIgnoreCase);
+        foreach (var summonId in summonIds)
+            compiled.Add(summonId, precompiledCatalog.SummonsById[summonId]);
+        return compiled;
     }
 
     private AbilitySpec ApplyEvolutionModifiers(
@@ -810,6 +893,13 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         CombatResult Result,
         IReadOnlyList<RuntimeCombatant> Friendly,
         IReadOnlyList<RuntimeCombatant> Hostile);
+
+    private readonly record struct EssenceAbilityCacheKey(
+        AbilityCatalog Catalog,
+        string AbilityId,
+        string EssenceDefinitionId,
+        bool IsEvolved,
+        int AscensionTier);
 
     private sealed record BasicAttackBehavior(
         double IntervalMultiplier,

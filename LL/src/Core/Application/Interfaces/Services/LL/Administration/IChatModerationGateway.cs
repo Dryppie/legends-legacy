@@ -48,11 +48,33 @@ public sealed record ChatModerationStateGatewayResult(
     IReadOnlyList<ChatModerationHistoryGatewayEntry> History,
     string ErrorMessage);
 
+public sealed record ChatModerationAuditGatewayQuery(
+    DateTimeOffset? From,
+    DateTimeOffset? To,
+    string? ActionType,
+    string? Actor,
+    string? Reference,
+    Guid? OperationId,
+    IReadOnlyCollection<Guid> CharacterIds,
+    Guid? RestrictionId,
+    DateTimeOffset? BeforeOccurredAt,
+    Guid? BeforeOperationId,
+    int Limit);
+
+public sealed record ChatModerationAuditGatewayResult(
+    bool IsSuccess,
+    IReadOnlyList<ChatModerationHistoryGatewayEntry> Entries,
+    string ErrorMessage);
+
 public interface IChatModerationGateway
 {
     Task<ChatModerationStateGatewayResult> GetStateAsync(
         Guid characterId,
         int historyLimit,
+        CancellationToken cancellationToken);
+
+    Task<ChatModerationAuditGatewayResult> GetAuditAsync(
+        ChatModerationAuditGatewayQuery query,
         CancellationToken cancellationToken);
 
     Task<ChatModerationGatewayResult> MuteAsync(

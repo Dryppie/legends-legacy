@@ -3,9 +3,14 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import {
   ApiResponse,
+  ActionPreview,
+  AdministrationAuditFilters,
+  AdministrationAuditPage,
   ItemCatalogEntry,
+  OperationalStatus,
   OperatorSession,
   PlayerDetails,
+  PlayerSupportSnapshot,
   PlayerSummary,
 } from './liveops.models';
 
@@ -43,6 +48,72 @@ export class LiveOpsApiService {
     );
   }
 
+  playerSupportSnapshot(characterId: string): Promise<ApiResponse<PlayerSupportSnapshot>> {
+    return firstValueFrom(
+      this.http.get<ApiResponse<PlayerSupportSnapshot>>(
+        `/api/liveops/players/${characterId}/support-snapshot`,
+      ),
+    );
+  }
+
+  operationalStatus(): Promise<ApiResponse<OperationalStatus>> {
+    return firstValueFrom(
+      this.http.get<ApiResponse<OperationalStatus>>('/api/liveops/status'),
+    );
+  }
+
+  audit(
+    filters: AdministrationAuditFilters,
+    cursor: string | null = null,
+    take = 25,
+  ): Promise<ApiResponse<AdministrationAuditPage>> {
+    let params = new HttpParams().set('take', take);
+    for (const [name, value] of Object.entries(filters)) {
+      if (value?.trim()) params = params.set(name, value.trim());
+    }
+    if (cursor) params = params.set('cursor', cursor);
+
+    return firstValueFrom(
+      this.http.get<ApiResponse<AdministrationAuditPage>>(
+        '/api/liveops/audit',
+        { params },
+      ),
+    );
+  }
+
+  async exportAudit(
+    filters: AdministrationAuditFilters,
+    from: string,
+    to: string,
+    operationId: string,
+  ): Promise<{ blob: Blob; fileName: string }> {
+    const response = await firstValueFrom(this.http.post(
+      '/api/liveops/audit/exports',
+      {
+        operationId,
+        from,
+        to,
+        source: filters.source || null,
+        actionType: filters.actionType || null,
+        actor: filters.actor || null,
+        permission: filters.permission || null,
+        reference: filters.reference || null,
+        riskLevel: filters.riskLevel || null,
+        target: filters.target || null,
+        targetOperationId: filters.operationId || null,
+      },
+      {
+        headers: this.mutationHeaders(),
+        observe: 'response',
+        responseType: 'blob',
+      },
+    ));
+    const disposition = response.headers.get('Content-Disposition') ?? '';
+    const fileName = /filename="?([^";]+)"?/i.exec(disposition)?.[1]
+      ?? 'liveops-audit.csv';
+    return { blob: response.body ?? new Blob(), fileName };
+  }
+
   searchItems(query: string): Promise<ApiResponse<ItemCatalogEntry[]>> {
     const params = new HttpParams().set('query', query).set('limit', 20);
     return firstValueFrom(
@@ -56,9 +127,20 @@ export class LiveOpsApiService {
     return this.post(`/api/liveops/accounts/${accountId}/bans`, body);
   }
 
+  previewBan(accountId: string, body: object): Promise<ApiResponse<ActionPreview>> {
+    return this.post(`/api/liveops/accounts/${accountId}/bans/preview`, body);
+  }
+
   unban(restrictionId: string, body: object): Promise<ApiResponse<unknown>> {
     return this.post(
       `/api/liveops/accounts/bans/${restrictionId}/revoke`,
+      body,
+    );
+  }
+
+  previewUnban(restrictionId: string, body: object): Promise<ApiResponse<ActionPreview>> {
+    return this.post(
+      `/api/liveops/accounts/bans/${restrictionId}/revoke/preview`,
       body,
     );
   }
@@ -70,6 +152,13 @@ export class LiveOpsApiService {
     );
   }
 
+  previewMute(characterId: string, body: object): Promise<ApiResponse<ActionPreview>> {
+    return this.post(
+      `/api/liveops/chat/characters/${characterId}/mutes/preview`,
+      body,
+    );
+  }
+
   unmute(restrictionId: string, body: object): Promise<ApiResponse<unknown>> {
     return this.post(
       `/api/liveops/chat/mutes/${restrictionId}/revoke`,
@@ -77,9 +166,23 @@ export class LiveOpsApiService {
     );
   }
 
+  previewUnmute(restrictionId: string, body: object): Promise<ApiResponse<ActionPreview>> {
+    return this.post(
+      `/api/liveops/chat/mutes/${restrictionId}/revoke/preview`,
+      body,
+    );
+  }
+
   grantItems(characterId: string, body: object): Promise<ApiResponse<unknown>> {
     return this.post(
       `/api/liveops/characters/${characterId}/item-grants`,
+      body,
+    );
+  }
+
+  previewGrantItems(characterId: string, body: object): Promise<ApiResponse<ActionPreview>> {
+    return this.post(
+      `/api/liveops/characters/${characterId}/item-grants/preview`,
       body,
     );
   }
