@@ -259,7 +259,10 @@ describe('InventoryComponent quest presentation', () => {
     const component = TestBed.runInInjectionContext(
       () =>
         new InventoryComponent(
-          { equipment: equipment.asReadonly() } as InventoryStateService,
+          {
+            equipment: equipment.asReadonly(),
+            isFavorite: () => false,
+          } as unknown as InventoryStateService,
           {
             pinnedOnboardingObjective: objective.asReadonly(),
           } as QuestStateService,
@@ -294,7 +297,10 @@ describe('InventoryComponent quest presentation', () => {
     const component = TestBed.runInInjectionContext(
       () =>
         new InventoryComponent(
-          { equipment: equipment.asReadonly() } as InventoryStateService,
+          {
+            equipment: equipment.asReadonly(),
+            isFavorite: () => false,
+          } as unknown as InventoryStateService,
           {
             pinnedOnboardingObjective: signal<QuestObjectiveState | undefined>(
               undefined,
@@ -339,7 +345,10 @@ describe('InventoryComponent quest presentation', () => {
     const component = TestBed.runInInjectionContext(
       () =>
         new InventoryComponent(
-          { equipment: equipment.asReadonly() } as InventoryStateService,
+          {
+            equipment: equipment.asReadonly(),
+            isFavorite: () => false,
+          } as unknown as InventoryStateService,
           {
             pinnedOnboardingObjective: objective.asReadonly(),
           } as QuestStateService,

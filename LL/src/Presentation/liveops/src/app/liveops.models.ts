@@ -184,6 +184,30 @@ export interface MarketplaceSupportSnapshot {
   recentTrades: RecentMarketplaceTrade[];
 }
 
+export interface PlayerTransferHistory {
+  transferId: string;
+  direction: 'Incoming' | 'Outgoing' | 'BetweenOwnCharacters';
+  kind: 'Cinders' | 'InventoryItem';
+  senderAccountId: string;
+  senderCharacterId: string;
+  senderCharacterName: string;
+  recipientAccountId: string;
+  recipientCharacterId: string;
+  recipientCharacterName: string;
+  assetId: string;
+  assetName: string;
+  sourceItemInstanceId: string | null;
+  destinationItemInstanceId: string | null;
+  quantity: number;
+  occurredAtUtc: string;
+}
+
+export interface TransferHistorySupportSnapshot {
+  historyLimit: number;
+  entries: PlayerTransferHistory[];
+  nextCursor: string | null;
+}
+
 export interface StateRevision {
   scope: string;
   revision: number;
@@ -208,6 +232,7 @@ export interface PlayerSupportSnapshot {
   economy: SupportSection<EconomySupportSnapshot>;
   guild: SupportSection<GuildSupportSnapshot>;
   marketplace: SupportSection<MarketplaceSupportSnapshot>;
+  transfers: SupportSection<TransferHistorySupportSnapshot>;
   synchronization: SupportSection<SynchronizationSupportSnapshot>;
 }
 

@@ -17,6 +17,7 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
     private readonly IRandomSource _randomSource;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IBonusService _bonusService;
+    private readonly TimeProvider _timeProvider;
 
     private const int IdleActionsPerDay = 24 * 60 * 60 / 10;
     private const double TargetSigilDropsPerDay = 2d;
@@ -26,13 +27,15 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
         IItemBaseRepository itemBases,
         IRandomSource randomSource,
         IInventoryItemFactory inventoryItemFactory,
-        IBonusService bonusService)
+        IBonusService bonusService,
+        TimeProvider? timeProvider = null)
     {
         _dungeons = dungeons;
         _itemBases = itemBases;
         _randomSource = randomSource;
         _inventoryItemFactory = inventoryItemFactory;
         _bonusService = bonusService;
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     public async Task<IReadOnlyList<InventoryItem>> RollAsync(
@@ -53,7 +56,10 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
             return [];
         }
 
-        var factors = bonusFactors ?? await _bonusService.GetAggregatedAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
+        var factors = bonusFactors ?? await _bonusService.GetAggregatedAsync(
+            characterId,
+            _timeProvider.GetUtcNow(),
+            cancellationToken);
         var sigilDropRateBps = factors.Get(BonusKind.DungeonSigilDropRateRelativeBps);
         var dropCount = SamplePoisson(
             (eligibleVictories * SigilDropChancePerIdleAction).ApplyPositiveBps(sigilDropRateBps));

@@ -221,6 +221,16 @@
             Cancel
           </button>
         </div>
+
+        <div class="inventory-scrap-submit-mobile">
+          <app-regular-button
+            fullWidth=""
+            variant="danger"
+            text="Scrap selected"
+            [disabled]="!selectedItems.length || state.loading()"
+            (pressed)="scrapEquipment()"
+          ></app-regular-button>
+        </div>
       </div>
 
       <div class="ll-scrollbar min-h-0 flex-1 overflow-y-auto p-3">

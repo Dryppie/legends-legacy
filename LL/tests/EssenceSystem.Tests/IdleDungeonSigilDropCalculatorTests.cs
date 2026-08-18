@@ -16,6 +16,36 @@ namespace EssenceSystem.Tests;
 public sealed class IdleDungeonSigilDropCalculatorTests
 {
     [Fact]
+    public async Task RollAsync_uses_the_injected_clock_for_bonus_lookup()
+    {
+        var fixedNow = DateTimeOffset.Parse("2026-08-18T12:00:00Z");
+        var bonusService = new CapturingBonusService();
+        var calculator = new IdleDungeonSigilDropCalculator(
+            new StaticDungeonDefinitions(
+            [
+                new DungeonDefinition
+                {
+                    Id = "test_dungeon",
+                    Region = 1,
+                    SigilItemId = "item.sigil.test"
+                }
+            ]),
+            new StaticItemBaseRepository([]),
+            new QueueRandomSource(0.5),
+            new InventoryItemFactory(),
+            bonusService,
+            new API.LL.Benchmarking.FixedTimeProvider(fixedNow));
+
+        await calculator.RollAsync(
+            Guid.NewGuid(),
+            new Area { Id = "region_01_area_01" },
+            eligibleVictories: 1,
+            CancellationToken.None);
+
+        Assert.Equal(fixedNow, bonusService.RequestedAt);
+    }
+
+    [Fact]
     public async Task RollAsync_applies_sigil_trace_bonus_as_relative_drop_rate()
     {
         var characterId = Guid.NewGuid();
@@ -146,5 +176,20 @@ public sealed class IdleDungeonSigilDropCalculatorTests
             DateTimeOffset now,
             CancellationToken ct = default) =>
             ValueTask.FromResult(bonuses);
+    }
+
+    private sealed class CapturingBonusService : IBonusService
+    {
+        public DateTimeOffset? RequestedAt { get; private set; }
+
+        public ValueTask<IReadOnlyDictionary<BonusKind, double>> GetAggregatedAsync(
+            Guid characterId,
+            DateTimeOffset now,
+            CancellationToken ct = default)
+        {
+            RequestedAt = now;
+            return ValueTask.FromResult<IReadOnlyDictionary<BonusKind, double>>(
+                new Dictionary<BonusKind, double>());
+        }
     }
 }

@@ -1,6 +1,9 @@
+using System.Globalization;
+using System.Text;
 using System.Text.Json;
 using Domain.Models.Administration;
 using Domain.Models.Outbox;
+using Domain.Models.Transfers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Persistence.LL;
@@ -51,12 +54,16 @@ public sealed class LiveOpsPlayerSupportSnapshotService(
             "marketplace",
             token => LoadMarketplaceAsync(target, token),
             cancellationToken);
+        var transfers = CaptureAsync(
+            "transfers",
+            token => LoadTransfersAsync(target, null, 25, token),
+            cancellationToken);
         var synchronization = CaptureAsync(
             "synchronization",
             token => LoadSynchronizationAsync(target, token),
             cancellationToken);
 
-        await Task.WhenAll(account, activity, economy, guild, marketplace, synchronization);
+        await Task.WhenAll(account, activity, economy, guild, marketplace, transfers, synchronization);
         return new PlayerSupportSnapshotDto(
             target.AccountId,
             target.CharacterId,
@@ -66,7 +73,32 @@ public sealed class LiveOpsPlayerSupportSnapshotService(
             await economy,
             await guild,
             await marketplace,
+            await transfers,
             await synchronization);
+    }
+
+    public async Task<TransferHistoryLookupResult> GetTransferHistoryAsync(
+        Guid characterId,
+        string? cursorValue,
+        int take,
+        CancellationToken cancellationToken)
+    {
+        if (!TransferCursor.TryDecode(cursorValue, out var cursor))
+            return new TransferHistoryLookupResult(false, false, null);
+
+        await using var lookup = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var target = await lookup.Characters.AsNoTracking()
+            .Where(x => x.Id == characterId)
+            .Select(x => new TargetRow(x.UserId, x.Id))
+            .SingleOrDefaultAsync(cancellationToken);
+        if (target is null)
+            return new TransferHistoryLookupResult(false, true, null);
+
+        var section = await CaptureAsync(
+            "transfers",
+            token => LoadTransfersAsync(target, cursor, Math.Clamp(take, 1, 50), token),
+            cancellationToken);
+        return new TransferHistoryLookupResult(true, true, section);
     }
 
     private async Task<AccountSupportSnapshotDto> LoadAccountAsync(
@@ -320,6 +352,77 @@ public sealed class LiveOpsPlayerSupportSnapshotService(
             "No bounded pending-reward registry currently exists; no status is inferred from unrelated records.");
     }
 
+    private async Task<TransferHistorySupportSnapshotDto> LoadTransfersAsync(
+        TargetRow target,
+        TransferCursor? cursor,
+        int historyLimit,
+        CancellationToken cancellationToken)
+    {
+        await using var database = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var query = database.PlayerTransferHistory.AsNoTracking()
+            .Where(x =>
+                x.SenderAccountId == target.AccountId ||
+                x.RecipientAccountId == target.AccountId);
+        if (cursor is not null)
+        {
+            query = query.Where(x =>
+                x.OccurredAt < cursor.OccurredAt ||
+                (x.OccurredAt == cursor.OccurredAt && x.Id.CompareTo(cursor.TransferId) < 0));
+        }
+        var rows = await query
+            .OrderByDescending(x => x.OccurredAt)
+            .ThenByDescending(x => x.Id)
+            .Take(historyLimit + 1)
+            .Select(x => new TransferRow(
+                x.Id,
+                x.Kind,
+                x.SenderAccountId,
+                x.SenderCharacterId,
+                x.SenderCharacterName,
+                x.RecipientAccountId,
+                x.RecipientCharacterId,
+                x.RecipientCharacterName,
+                x.AssetId,
+                x.AssetName,
+                x.SourceItemInstanceId,
+                x.DestinationItemInstanceId,
+                x.Quantity,
+                x.OccurredAt))
+            .ToListAsync(cancellationToken);
+
+        var hasMore = rows.Count > historyLimit;
+        var page = rows.Take(historyLimit).ToList();
+        var nextCursor = hasMore && page.Count > 0
+            ? TransferCursor.Encode(page[^1].OccurredAtUtc, page[^1].TransferId)
+            : null;
+        return new TransferHistorySupportSnapshotDto(
+            historyLimit,
+            page.Select(x => new PlayerTransferHistoryDto(
+                x.TransferId,
+                Direction(x, target.AccountId),
+                x.Kind.ToString(),
+                x.SenderAccountId,
+                x.SenderCharacterId,
+                x.SenderCharacterName,
+                x.RecipientAccountId,
+                x.RecipientCharacterId,
+                x.RecipientCharacterName,
+                x.AssetId,
+                x.AssetName,
+                x.SourceItemInstanceId,
+                x.DestinationItemInstanceId,
+                x.Quantity,
+                x.OccurredAtUtc)).ToList(),
+            nextCursor);
+    }
+
+    private static string Direction(TransferRow transfer, Guid accountId)
+    {
+        if (transfer.SenderAccountId == accountId && transfer.RecipientAccountId == accountId)
+            return "BetweenOwnCharacters";
+        return transfer.SenderAccountId == accountId ? "Outgoing" : "Incoming";
+    }
+
     private async Task<PlayerSupportSection<T>> CaptureAsync<T>(
         string section,
         Func<CancellationToken, Task<T>> load,
@@ -384,4 +487,64 @@ public sealed class LiveOpsPlayerSupportSnapshotService(
         AdministrationRiskLevel RiskLevel,
         DateTimeOffset OccurredAt);
     private sealed record GrantDetails(string ItemBaseId, int Quantity);
+    private sealed record TransferRow(
+        Guid TransferId,
+        PlayerTransferKind Kind,
+        Guid SenderAccountId,
+        Guid SenderCharacterId,
+        string SenderCharacterName,
+        Guid RecipientAccountId,
+        Guid RecipientCharacterId,
+        string RecipientCharacterName,
+        string AssetId,
+        string AssetName,
+        Guid? SourceItemInstanceId,
+        Guid? DestinationItemInstanceId,
+        long Quantity,
+        DateTimeOffset OccurredAtUtc);
+
+    private sealed record TransferCursor(DateTimeOffset OccurredAt, Guid TransferId)
+    {
+        public static string Encode(DateTimeOffset occurredAt, Guid transferId)
+        {
+            var value = string.Create(
+                CultureInfo.InvariantCulture,
+                $"{occurredAt.UtcTicks}:{transferId:N}");
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(value))
+                .TrimEnd('=')
+                .Replace('+', '-')
+                .Replace('/', '_');
+        }
+
+        public static bool TryDecode(string? value, out TransferCursor? cursor)
+        {
+            cursor = null;
+            if (string.IsNullOrWhiteSpace(value)) return true;
+            try
+            {
+                var normalized = value.Replace('-', '+').Replace('_', '/');
+                normalized = normalized.PadRight(
+                    normalized.Length + ((4 - normalized.Length % 4) % 4),
+                    '=');
+                var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(normalized));
+                var separator = decoded.IndexOf(':');
+                if (separator <= 0 ||
+                    !long.TryParse(decoded[..separator], NumberStyles.None, CultureInfo.InvariantCulture, out var ticks) ||
+                    !Guid.TryParseExact(decoded[(separator + 1)..], "N", out var transferId))
+                {
+                    return false;
+                }
+                cursor = new TransferCursor(new DateTimeOffset(ticks, TimeSpan.Zero), transferId);
+                return true;
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return false;
+            }
+        }
+    }
 }

@@ -12,7 +12,10 @@ export class SupportSnapshotComponent {
   @Input() snapshot: PlayerSupportSnapshot | null = null;
   @Input() loading = false;
   @Input() error = '';
+  @Input() transferLoading = false;
+  @Input() transferError = '';
   @Output() refresh = new EventEmitter<void>();
+  @Output() loadMoreTransfers = new EventEmitter<void>();
   @Output() copyIdentifier = new EventEmitter<{ value: string; label: string }>();
 
   copy(value: string, label: string): void {

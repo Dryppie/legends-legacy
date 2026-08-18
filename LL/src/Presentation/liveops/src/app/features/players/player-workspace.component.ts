@@ -35,6 +35,8 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
   supportSnapshot: PlayerSupportSnapshot | null = null;
   supportSnapshotLoading = false;
   supportSnapshotError = '';
+  transferHistoryLoading = false;
+  transferHistoryError = '';
   activeSection: WorkspaceSection = 'support';
   loadingSearch = false;
   loadingPlayer = false;
@@ -117,6 +119,7 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     if (!requestedId) return;
     this.supportSnapshotLoading = true;
     this.supportSnapshotError = '';
+    this.transferHistoryError = '';
     try {
       const response = await this.api.playerSupportSnapshot(requestedId);
       if (this.selectedPlayer?.player.characterId !== requestedId) return;
@@ -131,6 +134,47 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
       }
     } finally {
       if (this.selectedPlayer?.player.characterId === requestedId) this.supportSnapshotLoading = false;
+    }
+  }
+
+  async loadMoreTransfers(): Promise<void> {
+    const characterId = this.selectedPlayer?.player.characterId;
+    const current = this.supportSnapshot?.transfers.data;
+    const cursor = current?.nextCursor;
+    if (!characterId || !current || !cursor || this.transferHistoryLoading) return;
+
+    this.transferHistoryLoading = true;
+    this.transferHistoryError = '';
+    try {
+      const response = await this.api.playerTransferHistory(characterId, cursor, current.historyLimit);
+      if (this.selectedPlayer?.player.characterId !== characterId ||
+          !this.supportSnapshot ||
+          this.supportSnapshot.transfers.data !== current) return;
+      const section = response.data;
+      if (!response.isSuccess || !section?.isAvailable || !section.data) {
+        this.transferHistoryError = response.errorMessage || section?.message || 'More transfer history could not be loaded.';
+        return;
+      }
+      const seen = new Set(current.entries.map((entry) => entry.transferId));
+      const additions = section.data.entries.filter((entry) => !seen.has(entry.transferId));
+      this.supportSnapshot = {
+        ...this.supportSnapshot,
+        transfers: {
+          ...section,
+          data: {
+            ...section.data,
+            entries: [...current.entries, ...additions],
+          },
+        },
+      };
+    } catch (error) {
+      if (this.selectedPlayer?.player.characterId === characterId) {
+        this.transferHistoryError = this.errorMessage(error);
+      }
+    } finally {
+      if (this.selectedPlayer?.player.characterId === characterId) {
+        this.transferHistoryLoading = false;
+      }
     }
   }
 
@@ -254,6 +298,8 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     this.selectedPlayer = null;
     this.supportSnapshot = null;
     this.supportSnapshotError = '';
+    this.transferHistoryError = '';
+    this.transferHistoryLoading = false;
     this.activeSection = 'support';
     this.message = '';
     try {
@@ -272,6 +318,8 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     this.selectedPlayer = null;
     this.supportSnapshot = null;
     this.supportSnapshotError = '';
+    this.transferHistoryError = '';
+    this.transferHistoryLoading = false;
     this.loadingPlayer = false;
     this.activeSection = 'support';
   }

@@ -53,7 +53,10 @@
             [snapshot]="supportSnapshot"
             [loading]="supportSnapshotLoading"
             [error]="supportSnapshotError"
+            [transferLoading]="transferHistoryLoading"
+            [transferError]="transferHistoryError"
             (refresh)="loadSupportSnapshot()"
+            (loadMoreTransfers)="loadMoreTransfers()"
             (copyIdentifier)="copyIdentifier($event.value, $event.label)" />
         }
 

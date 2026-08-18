@@ -3,6 +3,7 @@ using Domain.Models.Administration;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Outbox;
 using Domain.Models.Synchronization;
+using Domain.Models.Transfers;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -34,8 +35,52 @@ public sealed class LiveOpsPlayerSupportSnapshotTests
         Assert.Equal("Active", Assert.Single(result.Account.Data.Restrictions).Status);
         Assert.Equal(1250, result.Economy.Data!.Cinders);
         Assert.False(result.Guild.Data!.IsMember);
+        Assert.Equal(25, result.Transfers.Data!.HistoryLimit);
+        Assert.Null(result.Transfers.Data.NextCursor);
+        Assert.Equal(
+            ["BetweenOwnCharacters", "Incoming", "Outgoing"],
+            result.Transfers.Data.Entries.Select(x => x.Direction));
+        Assert.Equal("Cinders", result.Transfers.Data.Entries[2].AssetName);
         Assert.Equal(1, result.Synchronization.Data!.PendingDeliveries);
         Assert.Equal(7, Assert.Single(result.Synchronization.Data.Revisions).Revision);
+    }
+
+    [Fact]
+    public async Task Transfer_history_uses_a_stable_cursor_to_fetch_more()
+    {
+        var seeded = await SeedAsync();
+        var service = CreateService(new TestContextFactory(seeded.Options));
+
+        var first = await service.GetTransferHistoryAsync(
+            seeded.CharacterId,
+            null,
+            2,
+            CancellationToken.None);
+
+        Assert.True(first.PlayerFound);
+        Assert.True(first.CursorValid);
+        Assert.True(first.Section!.IsAvailable);
+        Assert.Equal(2, first.Section.Data!.Entries.Count);
+        Assert.NotNull(first.Section.Data.NextCursor);
+
+        var second = await service.GetTransferHistoryAsync(
+            seeded.CharacterId,
+            first.Section.Data.NextCursor,
+            2,
+            CancellationToken.None);
+
+        Assert.True(second.PlayerFound);
+        Assert.True(second.CursorValid);
+        Assert.Equal("Outgoing", Assert.Single(second.Section!.Data!.Entries).Direction);
+        Assert.Null(second.Section.Data.NextCursor);
+
+        var invalid = await service.GetTransferHistoryAsync(
+            seeded.CharacterId,
+            "not-a-valid-cursor",
+            2,
+            CancellationToken.None);
+        Assert.False(invalid.CursorValid);
+        Assert.Null(invalid.Section);
     }
 
     [Fact]
@@ -48,7 +93,7 @@ public sealed class LiveOpsPlayerSupportSnapshotTests
 
         Assert.NotNull(result);
         Assert.Equal(1, Sections(result).Count(section => !section.IsAvailable));
-        Assert.Equal(5, Sections(result).Count(section => section.IsAvailable));
+        Assert.Equal(6, Sections(result).Count(section => section.IsAvailable));
     }
 
     [Fact]
@@ -69,6 +114,7 @@ public sealed class LiveOpsPlayerSupportSnapshotTests
         new SectionState(snapshot.Economy.IsAvailable),
         new SectionState(snapshot.Guild.IsAvailable),
         new SectionState(snapshot.Marketplace.IsAvailable),
+        new SectionState(snapshot.Transfers.IsAvailable),
         new SectionState(snapshot.Synchronization.IsAvailable)
     ];
 
@@ -117,6 +163,52 @@ public sealed class LiveOpsPlayerSupportSnapshotTests
             CreatedAt = Now.AddHours(-1),
             ExpiresAt = Now.AddDays(1)
         });
+        var otherAccountId = Guid.NewGuid();
+        var otherCharacterId = Guid.NewGuid();
+        var ownAlternateCharacterId = Guid.NewGuid();
+        database.PlayerTransferHistory.AddRange(
+            new PlayerTransferRecord
+            {
+                Kind = PlayerTransferKind.Cinders,
+                SenderAccountId = user.Id,
+                SenderCharacterId = character.Id,
+                SenderCharacterName = character.Name,
+                RecipientAccountId = otherAccountId,
+                RecipientCharacterId = otherCharacterId,
+                RecipientCharacterName = "EmberKnight",
+                AssetId = "currency:cinders",
+                AssetName = "Cinders",
+                Quantity = 500,
+                OccurredAt = Now.AddMinutes(-3)
+            },
+            new PlayerTransferRecord
+            {
+                Kind = PlayerTransferKind.InventoryItem,
+                SenderAccountId = otherAccountId,
+                SenderCharacterId = otherCharacterId,
+                SenderCharacterName = "EmberKnight",
+                RecipientAccountId = user.Id,
+                RecipientCharacterId = character.Id,
+                RecipientCharacterName = character.Name,
+                AssetId = "item:potion",
+                AssetName = "Potion",
+                Quantity = 2,
+                OccurredAt = Now.AddMinutes(-2)
+            },
+            new PlayerTransferRecord
+            {
+                Kind = PlayerTransferKind.InventoryItem,
+                SenderAccountId = user.Id,
+                SenderCharacterId = ownAlternateCharacterId,
+                SenderCharacterName = "ArdentAlt",
+                RecipientAccountId = user.Id,
+                RecipientCharacterId = character.Id,
+                RecipientCharacterName = character.Name,
+                AssetId = "item:ore",
+                AssetName = "Iron Ore",
+                Quantity = 4,
+                OccurredAt = Now.AddMinutes(-1)
+            });
         database.StateSyncRevisions.Add(new StateSyncRevision
         {
             ScopeKey = $"character:{character.Id:N}:inventory",

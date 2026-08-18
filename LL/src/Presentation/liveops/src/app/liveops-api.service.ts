@@ -12,6 +12,8 @@ import {
   PlayerDetails,
   PlayerSupportSnapshot,
   PlayerSummary,
+  SupportSection,
+  TransferHistorySupportSnapshot,
 } from './liveops.models';
 
 @Injectable({ providedIn: 'root' })
@@ -52,6 +54,20 @@ export class LiveOpsApiService {
     return firstValueFrom(
       this.http.get<ApiResponse<PlayerSupportSnapshot>>(
         `/api/liveops/players/${characterId}/support-snapshot`,
+      ),
+    );
+  }
+
+  playerTransferHistory(
+    characterId: string,
+    cursor: string,
+    take = 25,
+  ): Promise<ApiResponse<SupportSection<TransferHistorySupportSnapshot>>> {
+    const params = new HttpParams().set('cursor', cursor).set('take', take);
+    return firstValueFrom(
+      this.http.get<ApiResponse<SupportSection<TransferHistorySupportSnapshot>>>(
+        `/api/liveops/players/${characterId}/transfers`,
+        { params },
       ),
     );
   }

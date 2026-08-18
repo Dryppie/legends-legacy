@@ -1,5 +1,6 @@
 ﻿using API.LL;
 using API.LL.Common;
+using API.LL.Benchmarking;
 using API.LL.HostedServices;
 using Application;
 using Application.Interfaces.Services.LL;
@@ -25,6 +26,24 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
+var idleCombatBenchmark = config
+    .GetSection(IdleCombatBenchmarkOptions.SectionName)
+    .Get<IdleCombatBenchmarkOptions>() ?? new IdleCombatBenchmarkOptions();
+
+if (idleCombatBenchmark.Enabled)
+{
+    if (!builder.Environment.IsDevelopment())
+    {
+        throw new InvalidOperationException(
+            "Idle-combat benchmark mode can only run in the Development environment.");
+    }
+
+    if (idleCombatBenchmark.FixedUtcNow is null)
+    {
+        throw new InvalidOperationException(
+            "Idle-combat benchmark mode requires Benchmarking:IdleCombat:FixedUtcNow.");
+    }
+}
 
 config
     .SetBasePath(Directory.GetCurrentDirectory())
@@ -93,14 +112,22 @@ builder.Services.AddPersistence(config);
 builder.Services.AddRepositories();
 builder.Services.AddApplication();
 builder.Services.AddServices(config, builder.Environment.ContentRootPath, builder.Environment.IsDevelopment());
-builder.Services.AddHostedService<GameEventOutboxWorker>();
-builder.Services.AddHostedService<DungeonPowerCalibrationWorker>();
-builder.Services.AddHostedService<WorldTowerCombatSimulationWorker>();
-builder.Services.AddHostedService<WorldTowerCombatPlaybackWorker>();
-builder.Services.AddHostedService<ChampionMarketTitleBackfillWorker>();
-if (builder.Environment.IsDevelopment())
+if (idleCombatBenchmark.Enabled)
 {
-    builder.Services.AddHostedService<TournamentGroundsDevelopmentProgressionWorker>();
+    builder.Services.AddSingleton<TimeProvider>(
+        new FixedTimeProvider(idleCombatBenchmark.FixedUtcNow!.Value));
+}
+else
+{
+    builder.Services.AddHostedService<GameEventOutboxWorker>();
+    builder.Services.AddHostedService<DungeonPowerCalibrationWorker>();
+    builder.Services.AddHostedService<WorldTowerCombatSimulationWorker>();
+    builder.Services.AddHostedService<WorldTowerCombatPlaybackWorker>();
+    builder.Services.AddHostedService<ChampionMarketTitleBackfillWorker>();
+    if (builder.Environment.IsDevelopment())
+    {
+        builder.Services.AddHostedService<TournamentGroundsDevelopmentProgressionWorker>();
+    }
 }
 builder.Services.AddRealTime(); // RealTime services must be added after Application and Persistence, as they depend on them
 builder.Services.AddAdminDashboardServices(); // TODO: Application layer makes use of AdminDashboard services, so this is necessary at the moment.

@@ -1,7 +1,9 @@
 using API.LiveOps.Hosting;
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.WebSockets;
 using Application.UseCases.Administration.Dtos;
+using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Equipments.Dtos;
 using Application.UseCases.Essences.Dtos;
 using Application.UseCases.Inventories.Dtos;
@@ -57,6 +59,24 @@ public sealed class LiveOpsApplicationRegistrationTests
             descriptor.ServiceType == typeof(IGameRealtimeBroadcaster));
         Assert.Contains(services, descriptor =>
             descriptor.ServiceType == typeof(IGameRealtimeImmediatePublisher));
+    }
+
+    [Fact]
+    public void LiveOps_registers_application_mapping_dependencies()
+    {
+        var services = new ServiceCollection();
+        var configuration = new ConfigurationBuilder().Build();
+        services.AddLogging();
+        services.AddLiveOpsApplication();
+        services.AddLiveOpsServices(configuration);
+
+        using var provider = services.BuildServiceProvider();
+
+        Assert.NotNull(provider.GetRequiredService<IEssenceDefinitionRepository>());
+        Assert.NotNull(provider.GetRequiredService<IEssenceProgressionService>());
+        Assert.NotNull(provider.GetRequiredService<EssenceLoadoutConverter>());
+        Assert.NotNull(provider.GetRequiredService<PlayerEssenceArchiveEntryConverter>());
+        Assert.NotNull(provider.GetRequiredService<CharacterOverviewConverter>());
     }
 
     [Fact]

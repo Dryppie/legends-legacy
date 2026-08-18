@@ -134,6 +134,11 @@ button { border: 0; border-radius: 3px; }
 .restriction-list > div > code { max-width: 120px; overflow: hidden; color: #806e4d; font-size: 8px; text-overflow: ellipsis; }
 .support-state { flex: 0 0 auto; padding: 3px 6px; border: 1px solid #4d5d48; color: #8caf86; font-size: 7px; font-weight: 800; text-transform: uppercase; }
 .support-state.alert { border-color: #74403b; color: #da7770; }
+.support-state.incoming { border-color: #365d50; color: #83bda2; }
+.support-state.own-transfer { border-color: #4f506b; color: #a6a8d1; }
+.transfer-list > div > div { flex: 1; }
+.transfer-list code { max-width: 100%; overflow: hidden; color: #806e4d; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.transfer-pagination { display: flex; justify-content: center; padding-top: 14px; border-top: 1px solid #293039; }
 .support-empty, .support-unavailable { margin: 14px 0 0; color: #737d87; font-size: 10px; }
 .support-unavailable { color: #ca7770; }
 .activity-focus { display: grid; gap: 5px; padding: 16px 0 12px; }

@@ -99,6 +99,17 @@ describe('LiveOpsApiService', () => {
     await promise;
   });
 
+  it('loads the next bounded page of player transfer history', async () => {
+    const promise = service.playerTransferHistory('character-1', 'next-page', 25);
+    const request = http.expectOne((candidate) =>
+      candidate.url === '/api/liveops/players/character-1/transfers' &&
+      candidate.params.get('cursor') === 'next-page' &&
+      candidate.params.get('take') === '25');
+    expect(request.request.method).toBe('GET');
+    request.flush({ isSuccess: true, data: null, errorMessage: '' });
+    await promise;
+  });
+
   it('exports an authorized bounded audit query with antiforgery', async () => {
     const tokenPromise = service.initializeAntiforgery();
     http.expectOne('/auth/antiforgery').flush({ requestToken: 'xsrf-token' });

@@ -112,6 +112,9 @@ The read-only player support snapshot is now implemented:
 - balances, inventory totals, recent retained acquisitions, and compensation grants;
 - guild membership, marketplace exposure and trades, state revisions, and per-player
   outbox delivery health;
+- an initial 25 account-level Cinder wires and direct inventory transfers with a
+  stable cursor-based "Load 25 more" action, including alternate-character activity,
+  direction, exact participants, asset identity, and item-instance lineage;
 - full account and character identifiers with copy controls;
 - API, resilience, missing-player, client, and frontend partial-state coverage.
 
@@ -121,6 +124,11 @@ snapshot states those limitations instead of inferring misleading values. It als
 omits refresh-token values, event payloads, delivery errors, and restriction internal
 notes. Section timeouts default to three seconds and can be changed with the
 non-secret `LiveOps__SupportSnapshotSectionTimeoutSeconds` setting.
+
+Transfer history is read from the existing append-only `PlayerTransferHistory`
+records rather than inferred from current balances. Consequently, it is authoritative
+for retained transfers but does not reconstruct activity from before transfer-history
+persistence was introduced.
 
 Frontend route and feature separation is now implemented:
 

@@ -21,6 +21,19 @@
     <ProjectReference Include="..\..\Infrastructure\Service\Services.LL\Services.LL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\API.LL\Data\essences\essences.json">
+      <Link>Data\essences\essences.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\API.LL\Data\combat\abilities.json">
+      <Link>Data\combat\abilities.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
   <PropertyGroup>
     <LiveOpsUiDist>$(MSBuildProjectDirectory)\..\..\Presentation\liveops\dist\liveops\browser</LiveOpsUiDist>
   </PropertyGroup>

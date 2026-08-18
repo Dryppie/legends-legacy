@@ -246,3 +246,6 @@ paket-files/
 
 # Local stamp recording the equipment balance version the balance suite last ran against.
 .artifacts/balance-suite.version
+
+# Local database fixture used by the guarded idle-combat benchmark harness.
+/LL/legends_legacy_idle_benchmark.sql

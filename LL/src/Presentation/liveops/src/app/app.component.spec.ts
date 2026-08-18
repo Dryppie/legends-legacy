@@ -87,6 +87,29 @@ describe('LiveOps routed frontend', () => {
     const api = {
       playerDetails: jasmine.createSpy().and.resolveTo({ isSuccess: true, data: playerDetails(characterId), errorMessage: '' }),
       playerSupportSnapshot: jasmine.createSpy().and.resolveTo({ isSuccess: true, data: supportSnapshot(characterId), errorMessage: '' }),
+      playerTransferHistory: jasmine.createSpy().and.resolveTo({
+        isSuccess: true,
+        data: {
+          isAvailable: true,
+          source: 'Game database',
+          fetchedAtUtc: '2026-08-18T10:05:00Z',
+          message: null,
+          data: {
+            historyLimit: 25,
+            nextCursor: null,
+            entries: [{
+              transferId: '66666666-6666-6666-6666-666666666666', direction: 'Incoming', kind: 'InventoryItem',
+              senderAccountId: '44444444-4444-4444-4444-444444444444', senderCharacterId: '55555555-5555-5555-5555-555555555555',
+              senderCharacterName: 'EmberKnight', recipientAccountId: '11111111-1111-1111-1111-111111111111',
+              recipientCharacterId: characterId, recipientCharacterName: 'ArdentFox', assetId: 'item:potion',
+              assetName: 'Potion', sourceItemInstanceId: '77777777-7777-7777-7777-777777777777',
+              destinationItemInstanceId: '88888888-8888-8888-8888-888888888888', quantity: 2,
+              occurredAtUtc: '2026-08-17T10:00:00Z',
+            }],
+          },
+        },
+        errorMessage: '',
+      }),
     };
     await TestBed.configureTestingModule({
       imports: [PlayerWorkspaceComponent],
@@ -107,7 +130,17 @@ describe('LiveOps routed frontend', () => {
     expect(api.playerSupportSnapshot).toHaveBeenCalledWith(characterId);
     expect(fixture.nativeElement.textContent).toContain('Player support snapshot');
     expect(fixture.nativeElement.textContent).toContain('Activity timed out for this player.');
+    expect(fixture.nativeElement.textContent).toContain('Transfer and wire history');
+    expect(fixture.nativeElement.textContent).toContain('500 × Cinders');
+    expect(fixture.nativeElement.textContent).toContain('ArdentFox → EmberKnight');
     expect(fixture.nativeElement.textContent).toContain(characterId);
+
+    const loadMore = fixture.nativeElement.querySelector('.transfer-pagination button') as HTMLButtonElement;
+    loadMore.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(api.playerTransferHistory).toHaveBeenCalledWith(characterId, 'next-transfer-page', 25);
+    expect(fixture.nativeElement.textContent).toContain('2 × Potion');
   });
 
   it('keeps typed confirmation inside the extracted action preview', async () => {
@@ -163,6 +196,18 @@ function supportSnapshot(characterId: string) {
     economy: available({ cinders: 25, soulstones: 5, fateEcho: 0, sigilFragments: 0, guildFavor: 0, towerTokens: 0, inventoryRowCount: 0, inventoryQuantity: 0, unseenInventoryRows: 0, recentAcquisitions: [], recentCompensationGrants: [] }),
     guild: available({ isMember: false, guildId: null, guildName: null, guildTag: null, role: null, joinedAtUtc: null, guildLevel: null, memberCount: null }),
     marketplace: available({ activeListingCount: 0, activeBuyOrderCount: 0, recentTrades: [] }),
+    transfers: available({
+      historyLimit: 25,
+      nextCursor: 'next-transfer-page',
+      entries: [{
+        transferId: '33333333-3333-3333-3333-333333333333', direction: 'Outgoing', kind: 'Cinders',
+        senderAccountId: '11111111-1111-1111-1111-111111111111', senderCharacterId: characterId,
+        senderCharacterName: 'ArdentFox', recipientAccountId: '44444444-4444-4444-4444-444444444444',
+        recipientCharacterId: '55555555-5555-5555-5555-555555555555', recipientCharacterName: 'EmberKnight',
+        assetId: 'currency:cinders', assetName: 'Cinders', sourceItemInstanceId: null,
+        destinationItemInstanceId: null, quantity: 500, occurredAtUtc: fetchedAtUtc,
+      }],
+    }),
     synchronization: available({ pendingDeliveries: 0, failedDeliveries: 0, oldestPendingAtUtc: null, lastOutboxEventAtUtc: null, revisions: [], pendingRewardMessage: 'No pending-reward registry exists.' }),
   };
 }

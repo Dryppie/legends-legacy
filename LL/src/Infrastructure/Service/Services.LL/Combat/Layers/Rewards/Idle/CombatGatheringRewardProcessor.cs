@@ -26,6 +26,7 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
     private readonly IProfessionService _professionService;
     private readonly ILevelingService _levelingService;
     private readonly IBonusService _bonusService;
+    private readonly TimeProvider _timeProvider;
 
     public CombatGatheringRewardProcessor(
         IRewardRoller rewardRoller,
@@ -34,7 +35,8 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         IRandomSource randomSource,
         IProfessionService professionService,
         ILevelingService levelingService,
-        IBonusService bonusService)
+        IBonusService bonusService,
+        TimeProvider? timeProvider = null)
     {
         _rewardRoller = rewardRoller;
         _itemBases = itemBases;
@@ -43,6 +45,7 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         _professionService = professionService;
         _levelingService = levelingService;
         _bonusService = bonusService;
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     public async Task<IReadOnlyList<GatheringRewardResult>> ProcessAsync(
@@ -72,7 +75,10 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
             facts.CharacterId,
             professionType,
             cancellationToken);
-        var factors = bonusFactors ?? await _bonusService.GetAggregatedAsync(facts.CharacterId, DateTimeOffset.UtcNow, cancellationToken);
+        var factors = bonusFactors ?? await _bonusService.GetAggregatedAsync(
+            facts.CharacterId,
+            _timeProvider.GetUtcNow(),
+            cancellationToken);
         var gatheringYieldBps = factors.Get(BonusKind.GatheringYieldBps);
         var gatheringExperienceGainBps = factors.Get(BonusKind.GatheringExperienceGainBps);
         var rareChanceRelativeBps = factors.Get(BonusKind.GatheringRareDropChanceRelativeBps);

@@ -56,6 +56,39 @@
       } @else { <p class="support-unavailable">{{ support.economy.message }}</p> }
     </article>
 
+    <article class="support-card support-wide" [class.unavailable]="!support.transfers.isAvailable">
+      <header><div><span>Transfer and wire history</span><small>{{ support.transfers.source }} · {{ support.transfers.fetchedAtUtc | date: 'mediumTime' }}</small></div><strong>{{ support.transfers.isAvailable ? 'Available' : 'Unavailable' }}</strong></header>
+      @if (support.transfers.data; as transfers) {
+        <p class="support-note">{{ transfers.entries.length }} account-level Cinder wires and direct inventory transfers loaded in pages of {{ transfers.historyLimit }}, including alternate characters.</p>
+        <div class="support-list transfer-list">
+          @for (transfer of transfers.entries; track transfer.transferId) {
+            <div>
+              <span class="support-state" [class.incoming]="transfer.direction === 'Incoming'" [class.own-transfer]="transfer.direction === 'BetweenOwnCharacters'">
+                {{ transfer.direction === 'BetweenOwnCharacters' ? 'Own account' : transfer.direction }}
+              </span>
+              <div>
+                <strong>{{ transfer.quantity | number }} × {{ transfer.assetName }}</strong>
+                <small>{{ transfer.senderCharacterName }} → {{ transfer.recipientCharacterName }}</small>
+                <code title="Sender {{ transfer.senderCharacterId }} · Recipient {{ transfer.recipientCharacterId }}">{{ transfer.senderCharacterId }} → {{ transfer.recipientCharacterId }}</code>
+                @if (transfer.sourceItemInstanceId || transfer.destinationItemInstanceId) {
+                  <small title="Source {{ transfer.sourceItemInstanceId || 'none' }} · Destination {{ transfer.destinationItemInstanceId || 'none' }}">Item lineage: {{ transfer.sourceItemInstanceId || 'none' }} → {{ transfer.destinationItemInstanceId || 'none' }}</small>
+                }
+              </div>
+              <time>{{ transfer.occurredAtUtc | date: 'short' }}</time>
+            </div>
+          } @empty { <p class="support-empty">No retained player transfers or Cinder wires.</p> }
+        </div>
+        @if (transferError) { <p class="support-unavailable" role="alert">{{ transferError }}</p> }
+        @if (transfers.nextCursor) {
+          <div class="transfer-pagination">
+            <button class="secondary" type="button" [disabled]="transferLoading" (click)="loadMoreTransfers.emit()">{{ transferLoading ? 'Loading more…' : 'Load ' + transfers.historyLimit + ' more' }}</button>
+          </div>
+        } @else if (transfers.entries.length) {
+          <p class="support-note">All retained transfers have been loaded.</p>
+        }
+      } @else { <p class="support-unavailable">{{ support.transfers.message }}</p> }
+    </article>
+
     <article class="support-card" [class.unavailable]="!support.marketplace.isAvailable">
       <header><div><span>Marketplace</span><small>{{ support.marketplace.source }} · {{ support.marketplace.fetchedAtUtc | date: 'mediumTime' }}</small></div><strong>{{ support.marketplace.isAvailable ? 'Available' : 'Unavailable' }}</strong></header>
       @if (support.marketplace.data; as market) {

@@ -117,6 +117,14 @@ public static class DependencyInjection
         services.AddScoped<IGameRealtimeBroadcaster, OutboxGameRealtimeBroadcaster>();
         services.AddScoped<IGameRealtimeImmediatePublisher, NoOpGameRealtimeImmediatePublisher>();
         services.AddScoped<IStateSyncService, StateSyncService>();
+        services.TryAddSingleton<IEssenceDefinitionValidator, EssenceDefinitionValidator>();
+        services.TryAddSingleton<IEssenceDefinitionRepository>(sp =>
+            new JsonEssenceDefinitionRepository(
+                config,
+                AppContext.BaseDirectory,
+                sp.GetRequiredService<JsonSerializerOptions>(),
+                sp.GetRequiredService<IEssenceDefinitionValidator>()));
+        services.TryAddScoped<IEssenceProgressionService, EssenceProgressionService>();
         services.TryAddSingleton(_ =>
         {
             var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);

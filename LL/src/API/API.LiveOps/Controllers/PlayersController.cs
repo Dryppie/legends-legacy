@@ -48,4 +48,31 @@ public sealed class PlayersController(
         }
         return Ok(Response<PlayerSupportSnapshotDto>.Success(snapshot));
     }
+
+    [HttpGet("{characterId:guid}/transfers")]
+    [Authorize(Policy = AdministrationPermissions.Read)]
+    public async Task<ActionResult<Response<PlayerSupportSection<TransferHistorySupportSnapshotDto>>>> GetTransfers(
+        Guid characterId,
+        [FromQuery] string? cursor,
+        [FromQuery] int take = 25,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await supportSnapshot.GetTransferHistoryAsync(
+            characterId,
+            cursor,
+            take,
+            cancellationToken);
+        if (!result.CursorValid)
+        {
+            return BadRequest(Response<PlayerSupportSection<TransferHistorySupportSnapshotDto>>.Fail(
+                "The transfer-history cursor is invalid or expired."));
+        }
+        if (!result.PlayerFound || result.Section is null)
+        {
+            return NotFound(Response<PlayerSupportSection<TransferHistorySupportSnapshotDto>>.Fail(
+                "The target player was not found."));
+        }
+        return Ok(Response<PlayerSupportSection<TransferHistorySupportSnapshotDto>>.Success(
+            result.Section));
+    }
 }

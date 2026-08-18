@@ -16,6 +16,7 @@ public sealed record PlayerSupportSnapshotDto(
     PlayerSupportSection<EconomySupportSnapshotDto> Economy,
     PlayerSupportSection<GuildSupportSnapshotDto> Guild,
     PlayerSupportSection<MarketplaceSupportSnapshotDto> Marketplace,
+    PlayerSupportSection<TransferHistorySupportSnapshotDto> Transfers,
     PlayerSupportSection<SynchronizationSupportSnapshotDto> Synchronization);
 
 public sealed record AccountSupportSnapshotDto(
@@ -99,6 +100,33 @@ public sealed record RecentMarketplaceTradeDto(
     int Quantity,
     long TotalPrice,
     DateTimeOffset PurchasedAtUtc);
+
+public sealed record TransferHistorySupportSnapshotDto(
+    int HistoryLimit,
+    IReadOnlyList<PlayerTransferHistoryDto> Entries,
+    string? NextCursor);
+
+public sealed record TransferHistoryLookupResult(
+    bool PlayerFound,
+    bool CursorValid,
+    PlayerSupportSection<TransferHistorySupportSnapshotDto>? Section);
+
+public sealed record PlayerTransferHistoryDto(
+    Guid TransferId,
+    string Direction,
+    string Kind,
+    Guid SenderAccountId,
+    Guid SenderCharacterId,
+    string SenderCharacterName,
+    Guid RecipientAccountId,
+    Guid RecipientCharacterId,
+    string RecipientCharacterName,
+    string AssetId,
+    string AssetName,
+    Guid? SourceItemInstanceId,
+    Guid? DestinationItemInstanceId,
+    long Quantity,
+    DateTimeOffset OccurredAtUtc);
 
 public sealed record SynchronizationSupportSnapshotDto(
     int PendingDeliveries,

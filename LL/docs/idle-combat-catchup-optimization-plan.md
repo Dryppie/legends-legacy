@@ -324,6 +324,18 @@ The same 24-hour fixture resolved 8,640 comparable encounters in 9 batches after
 
 The change passes its retention gate and brings this local Debug fixture below the provisional 10-second target for the first time. The instrumented simulation allocation fell materially, while the one-second process-wide request window recorded a small allocation and pause-time increase. Background workers and sampling-boundary alignment can affect those process-wide values, so one repeat run is appropriate before treating the 10-second result as stable. The raw capture is stored locally at `TestResults/idle-combat-24h-after-deterministic-identities.json`.
 
+The confirmation run completed in 11.296 seconds server-side and 11.380 seconds over HTTP. Simulation took 10.348 seconds and allocated 1.5548 GiB; the request window recorded 12.9688 core-seconds, 178.0 ms of GC pause, and 130 Gen 0 collections. The two deterministic-identity samples therefore average 10.576 seconds server-side and 10.656 seconds over HTTP. Allocation and Gen 0 frequency improve in both samples compared with compiled-catalog reuse, so the implementation remains worthwhile, but the provisional sub-10-second latency target is not yet demonstrated reliably.
+
+The reset procedure changes `NextResolutionAtUtc`, and that timestamp is part of every encounter's stable random identity. Each reset therefore produces a different set of encounter seeds. The request also commits rewards and progression, so repeated runs are not a true fixed-state benchmark unless the whole relevant character state is restored. Future latency gates should use a repeatable database snapshot and an exact scheduler boundary rather than only setting the boundary relative to `NOW()`. The confirmation capture is stored locally at `TestResults/idle-combat-24h-after-deterministic-identities-repeat.json`.
+
+That reproducible harness is now implemented in `build/measure-idle-combat.ps1` and documented in `LL/docs/idle-combat-benchmark.md`. It restores the supplied custom PostgreSQL archive into a guarded local-only benchmark database, fixes the API clock and scheduler boundary, disables unrelated hosted workers, performs the authenticated resolve, and records per-run plus median metrics. This fixed fixture replaces the earlier moving-`NOW()` procedure for subsequent retention gates.
+
+The first three-run fixed-fixture Debug baseline recorded server resolve durations of 11.936, 10.496, and 10.320 seconds, with a median of 10.496 seconds. Median HTTP duration was 10.580 seconds, simulation duration 9.428 seconds, simulation allocation 1.5425 GiB, request-window allocation 1.5821 GiB, CPU 13.25 core-seconds, GC pause 159.0 ms, and 132 Gen 0 collections. The raw captures and summary are stored under `TestResults/idle-combat-benchmark/20260818-102953/`. Subsequent changes should be compared against this fixed-fixture median, not the earlier moving-boundary samples.
+
+The harness now produces a deterministic correctness fingerprint from the normalized API result and normalized persisted gameplay state. Repeated runs must match automatically, and subsequent optimization runs can pass the known-good hash through `-ExpectedFingerprint` to reject consistently wrong results. This supplies the fixed-seed before/after semantic gate required before the next combat-runtime change.
+
+The first fingerprinted three-run validation produced the same hash on every restore: `a6c348f6d81ebb54092d776d88bf0e34ac9d3b13ce2712fc35ce04aff0ec918f`. Its Debug medians were 12.672 seconds server-side, 12.767 seconds over HTTP, 11.541 seconds in simulation, 1.543 GiB of simulation allocation, 15.375 core-seconds, and 183.7 ms of GC pause. This run is slower than the earlier 10.496-second fixed baseline even though the fingerprint work occurs after the timed request and simulation allocation is unchanged. Treat it as evidence of current machine/load variance, not as a new performance baseline. The report is stored under `TestResults/idle-combat-benchmark/20260818-104616/`.
+
 ## Phase 2: stop retaining full within-batch result graphs
 
 Status: deferred until the hot-loop optimization has been remeasured. The allocation profile did not identify encounter-record retention as a leading source of total allocation.
@@ -509,7 +521,7 @@ An absolute latency target should be chosen after the Release baseline is known.
 - [x] Measure the retained catalog, string, and barrier subset.
 - [x] Cache immutable catalog compilation and stable player essence variants.
 - [x] Capture a clean CPU-only trace if simulation remains the dominant phase.
-- [ ] Add fixed-seed, before/after golden result coverage.
+- [x] Add fixed-seed, before/after golden result coverage through the benchmark correctness fingerprint.
 - [ ] Prototype compact within-batch encounter facts.
 - [ ] Benchmark the prototype and keep it only if it materially reduces allocation.
 - [ ] Redesign deep cloning only if profiling identifies it as a major remaining source.
