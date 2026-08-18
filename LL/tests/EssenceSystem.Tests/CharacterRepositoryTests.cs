@@ -47,7 +47,7 @@ public sealed class CharacterRepositoryTests
         var repository = new CharacterRepository(db);
 
         var character = await repository.GetCharacterOverviewByCharacterNameAsync(
-            "VisibleActivity",
+            "visibleactivity",
             CancellationToken.None);
 
         Assert.NotNull(character?.CharacterAction);

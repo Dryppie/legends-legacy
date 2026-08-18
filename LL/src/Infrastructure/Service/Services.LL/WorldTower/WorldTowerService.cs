@@ -193,6 +193,7 @@ public sealed class WorldTowerService : IWorldTowerService
             .FirstOrDefaultAsync(cancellationToken);
         var rallies = await ActiveRalliesQuery()
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(x => x.Participants)
             .Include(x => x.Applications)
             .Where(x => x.FloorNumber == floorNumber)

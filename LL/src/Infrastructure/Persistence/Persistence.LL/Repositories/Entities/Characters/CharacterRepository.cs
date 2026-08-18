@@ -80,12 +80,18 @@ public class CharacterRepository : ICharacterRepository
             .Include(c => c.EquippedTitleDefinition)
             .FirstOrDefaultAsync(c => c.Id.Equals(characterId), cancellationToken);
 
-    public async Task<Character?> GetCharacterOverviewByCharacterNameAsync(string characterName, CancellationToken cancellationToken) =>
-        await _context.Characters
+    public async Task<Character?> GetCharacterOverviewByCharacterNameAsync(
+        string characterName,
+        CancellationToken cancellationToken)
+    {
+        var normalizedName = IdentityNormalizer.NormalizeRequired(characterName);
+        return await _context.Characters
             .AsNoTracking()
+            .AsSplitQuery()
             .EntireCharacter()
             .Include(c => c.EquippedTitleDefinition)
-            .FirstOrDefaultAsync(c => c.Name.ToLower() == characterName.ToLower(), cancellationToken);
+            .FirstOrDefaultAsync(c => c.NormalizedName == normalizedName, cancellationToken);
+    }
 
     public async Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
