@@ -28,5 +28,8 @@ public sealed record AccountRiskPageDto(
     int Total,
     IReadOnlyDictionary<AccountRiskSeverity, int> Counts,
     DateTimeOffset? LastEvaluatedAt,
+    DateTimeOffset? FirstEvidenceAt,
+    long DirectTransferCount,
+    int EvaluatedAccountCount,
     int Page,
     int PageSize);

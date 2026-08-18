@@ -8,11 +8,22 @@
     @if (data?.lastEvaluatedAt) { <div class="risk-freshness">Evaluated {{ data!.lastEvaluatedAt | date: 'medium' }}</div> }
   </section>
 
+  <section class="risk-coverage" [class.warning]="!data?.directTransferCount">
+    @if (data?.firstEvidenceAt) {
+      <strong>Evidence coverage</strong>
+      <span>{{ data!.directTransferCount | number }} retained direct-cinder transfers, earliest {{ data!.firstEvidenceAt | date: 'medium' }}.</span>
+      <small>Transfers made before retained transfer tracking began cannot be reconstructed by this detector.</small>
+    } @else if (data) {
+      <strong>No retained cinder-transfer evidence</strong>
+      <span>The evaluator has no direct player-wire records to analyze.</span>
+    }
+  </section>
+
   <section class="risk-counts" aria-label="Risk counts">
     <button type="button" class="critical" (click)="quickFilter('critical')"><span>Critical</span><strong>{{ count('Critical') }}</strong></button>
     <button type="button" class="high" (click)="quickFilter('high')"><span>High</span><strong>{{ count('High') }}</strong></button>
-    <button type="button" class="moderate" (click)="quickFilter('all')"><span>Moderate</span><strong>{{ count('Moderate') }}</strong></button>
-    <div><span>Showing</span><strong>{{ data?.total ?? 0 }}</strong></div>
+    <button type="button" class="moderate" (click)="quickFilter('moderate')"><span>Moderate</span><strong>{{ count('Moderate') }}</strong></button>
+    <button type="button" (click)="quickFilter('all')"><span>Low / evaluated</span><strong>{{ count('Low') }} / {{ data?.evaluatedAccountCount ?? 0 }}</strong></button>
   </section>
 
   <div class="risk-quick-filters">
@@ -54,7 +65,7 @@
               <td><span class="investigation-pill">{{ entry.investigationStatus }}</span></td>
             </tr>
           } @empty {
-            <tr><td colspan="7" class="risk-empty">{{ loading ? 'Loading risk summaries…' : 'No accounts matched these investigation filters.' }}</td></tr>
+            <tr><td colspan="7" class="risk-empty">{{ emptyMessage }}</td></tr>
           }
         </tbody>
       </table>

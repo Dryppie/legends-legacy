@@ -45,6 +45,23 @@ public sealed class AccountRiskEvaluatorTests
     }
 
     [Fact]
+    public void SingleYoungAccountFunnelFlagsBothSenderAndRecipientForInvestigation()
+    {
+        var main = Account("SingleFunnelMain", 500, 80);
+        var feeder = Account("SingleFunnelAlt", 5, 45);
+        var transfer = HistoricalTransfer(feeder, main, 25_000, Now.AddDays(-2), senderLevel: 40);
+        var dataset = Dataset([main, feeder], [transfer]);
+
+        var mainResult = _evaluator.Evaluate(main.AccountId, dataset, Now);
+        var feederResult = _evaluator.Evaluate(feeder.AccountId, dataset, Now);
+
+        Assert.Contains(mainResult.Signals, x => x.Type == AccountRiskSignalType.FeederNetwork);
+        Assert.Contains(feederResult.Signals, x => x.Type == AccountRiskSignalType.YoungAccountOutflow);
+        Assert.Equal(AccountRiskSeverity.Moderate, mainResult.Severity);
+        Assert.Equal(AccountRiskSeverity.Moderate, feederResult.Severity);
+    }
+
+    [Fact]
     public void MultipleYoungAccountsCreateFeederNetworkSignal()
     {
         var main = Account("Main", 500, 80);
@@ -56,6 +73,27 @@ public sealed class AccountRiskEvaluatorTests
         var signal = Assert.Single(result.Signals, x => x.Type == AccountRiskSignalType.FeederNetwork);
         Assert.True(signal.Contribution >= AccountRiskPolicy.Default.ModerateScore);
         Assert.Equal(4m, signal.Evidence["feederCount"]);
+    }
+
+    [Fact]
+    public void TwoFeedersThatWereYoungWhenTransfersBeganFlagTheRecipient()
+    {
+        var main = Account("HistoricalMain", 500, 80);
+        var feederA = Account("HistoricalFeederA", 30, 42);
+        var feederB = Account("HistoricalFeederB", 32, 45);
+        var occurredAt = Now.AddDays(-20);
+        var transfers = new[]
+        {
+            HistoricalTransfer(feederA, main, 9_500, occurredAt, senderLevel: 8),
+            HistoricalTransfer(feederB, main, 8_700, occurredAt.AddHours(1), senderLevel: 55),
+        };
+
+        var result = _evaluator.Evaluate(main.AccountId, Dataset([main, feederA, feederB], transfers), Now);
+
+        var signal = Assert.Single(result.Signals, x => x.Type == AccountRiskSignalType.FeederNetwork);
+        Assert.Equal(2m, signal.Evidence["feederCount"]);
+        Assert.Equal(1m, signal.Evidence["lowLevelFeederCount"]);
+        Assert.Equal(AccountRiskSeverity.Moderate, result.Severity);
     }
 
     [Fact]
@@ -126,6 +164,23 @@ public sealed class AccountRiskEvaluatorTests
 
     private static AccountRiskTransferFact Transfer(AccountRiskAccountFact sender, AccountRiskAccountFact recipient, long amount, int hour) =>
         new(StableGuid($"transfer:{sender.AccountLabel}:{recipient.AccountLabel}:{hour}"), sender.AccountId, recipient.AccountId, amount, Now.AddHours(-100 + hour));
+
+    private static AccountRiskTransferFact HistoricalTransfer(
+        AccountRiskAccountFact sender,
+        AccountRiskAccountFact recipient,
+        long amount,
+        DateTimeOffset occurredAt,
+        int senderLevel) =>
+        new(
+            StableGuid($"historical:{sender.AccountLabel}:{recipient.AccountLabel}:{occurredAt:O}"),
+            sender.AccountId,
+            recipient.AccountId,
+            amount,
+            occurredAt,
+            sender.AccountCreatedUtc,
+            senderLevel,
+            recipient.AccountCreatedUtc,
+            recipient.CharacterLevel);
 
     private static AccountRiskAnalysisDataset Dataset(
         IReadOnlyCollection<AccountRiskAccountFact> accounts,

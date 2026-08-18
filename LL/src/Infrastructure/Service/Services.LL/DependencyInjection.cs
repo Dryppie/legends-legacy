@@ -108,7 +108,7 @@ public static class DependencyInjection
             config.GetSection(LiveOpsOptions.SectionName));
         services.AddOptions<AccountRiskOptions>()
             .Bind(config.GetSection(AccountRiskOptions.SectionName))
-            .Validate(x => x.LookbackDays > 0 && x.CandidateLimit > 0 && x.MaximumTransfersPerEvaluation > 0,
+            .Validate(x => x.EvaluationVersion > 0 && x.LookbackDays > 0 && x.CandidateLimit > 0 && x.MaximumTransfersPerEvaluation > 0 && x.MinimumCounterpartyCount > 0,
                 "LiveOps account-risk limits must be positive.")
             .Validate(x => x.ModerateScore >= 0 && x.ModerateScore < x.HighScore && x.HighScore < x.CriticalScore && x.CriticalScore <= 100,
                 "LiveOps account-risk severity thresholds must be ordered within 0-100.")
@@ -178,7 +178,7 @@ public static class DependencyInjection
         services.AddScoped<ILiveOpsService, LiveOpsService>();
         services.AddOptions<AccountRiskOptions>()
             .Bind(config.GetSection(AccountRiskOptions.SectionName))
-            .Validate(x => x.LookbackDays > 0 && x.CandidateLimit > 0 && x.MaximumTransfersPerEvaluation > 0,
+            .Validate(x => x.EvaluationVersion > 0 && x.LookbackDays > 0 && x.CandidateLimit > 0 && x.MaximumTransfersPerEvaluation > 0 && x.MinimumCounterpartyCount > 0,
                 "LiveOps account-risk limits must be positive.")
             .Validate(x => x.ModerateScore >= 0 && x.ModerateScore < x.HighScore && x.HighScore < x.CriticalScore && x.CriticalScore <= 100,
                 "LiveOps account-risk severity thresholds must be ordered within 0-100.")

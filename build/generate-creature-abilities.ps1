@@ -626,8 +626,8 @@ Add-Creature 'Rotfly Toad' 'rotfly_toad' @(
         (New-Effect 'effect.creature.rotfly_toad.putrid_belch.decay' ApplyCondition CurrentTarget 14 -Condition Decay)
     )),
     (New-Ability 'Rotfly Toad' 'rotfly_toad' 'rotfly_host' Passive 'Rotfly Host' 'When an enemy with Decay dies, heal 8% Max Health.' @(
-        (New-Effect 'effect.creature.rotfly_toad.rotfly_host.heal' Heal Self 0 MaxHealth 0.08 -Conditions @((New-Condition HasCondition EventTarget 0 Decay)))
-    ) @((New-Trigger OnKill @('effect.creature.rotfly_toad.rotfly_host.heal'))))
+        (New-Effect 'effect.creature.rotfly_toad.rotfly_host.heal' Heal Self 0 MaxHealth 0.08)
+    ) @((New-Trigger OnEnemyDeath @('effect.creature.rotfly_toad.rotfly_host.heal') -Conditions @((New-Condition HasCondition EventSource 0 Decay)))))
 )
 
 Add-Creature 'Brown Slime' 'brown_slime' @(

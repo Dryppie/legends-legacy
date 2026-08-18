@@ -41,7 +41,8 @@ public enum AbilityTriggerEvent
     OnBarrierContributionBroken = 27,
     OnBarrierExpired = 28,
     OnSummonGroupResolved = 29,
-    OnStatusChanged = 30
+    OnStatusChanged = 30,
+    OnEnemyDeath = 31
 }
 
 public enum AbilityEffectOperation

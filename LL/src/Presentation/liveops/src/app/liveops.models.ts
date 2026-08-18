@@ -369,6 +369,9 @@ export interface AccountRiskPage {
   total: number;
   counts: Partial<Record<AccountRiskSeverity, number>>;
   lastEvaluatedAt: string | null;
+  firstEvidenceAt: string | null;
+  directTransferCount: number;
+  evaluatedAccountCount: number;
   page: number;
   pageSize: number;
 }

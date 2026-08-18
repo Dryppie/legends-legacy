@@ -53,6 +53,7 @@ public sealed class AccountRiskSnapshot
     public DateTimeOffset? FirstFlaggedAt { get; set; }
     public DateTimeOffset? LastTriggeredAt { get; set; }
     public DateTimeOffset EvaluatedAt { get; set; }
+    public int EvaluationVersion { get; set; } = 1;
     public string SignalsJson { get; set; } = "[]";
     public string RelationshipsJson { get; set; } = "[]";
 }
@@ -65,6 +66,7 @@ public sealed class AccountRiskHistory
     public AccountRiskSeverity Severity { get; set; }
     public string SignalsJson { get; set; } = "[]";
     public DateTimeOffset EvaluatedAt { get; set; }
+    public int EvaluationVersion { get; set; } = 1;
 }
 
 public sealed class AccountRiskInvestigation
@@ -136,7 +138,11 @@ public sealed record AccountRiskTransferFact(
     Guid SenderAccountId,
     Guid RecipientAccountId,
     long Amount,
-    DateTimeOffset OccurredAt);
+    DateTimeOffset OccurredAt,
+    DateTime? SenderAccountCreatedUtc = null,
+    int? SenderCharacterLevel = null,
+    DateTime? RecipientAccountCreatedUtc = null,
+    int? RecipientCharacterLevel = null);
 
 public sealed class AccountRiskAnalysisDataset
 {
@@ -186,7 +192,7 @@ public sealed record AccountRiskPolicy(
         HighScore: 50,
         CriticalScore: 75,
         MinimumTransferCount: 3,
-        MinimumCounterpartyCount: 3,
+        MinimumCounterpartyCount: 1,
         ConcentrationThreshold: 0.70m,
         RelationshipImbalanceThreshold: 0.85m,
         YoungAccountDays: 14,
@@ -219,13 +225,13 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
 
         EvaluateIncomingConcentration(accountId, incoming, incomingTotal, signals);
         EvaluateOneSidedRelationships(accountId, direct, signals);
-        EvaluateFeederNetwork(accountId, dataset, incoming, now, signals);
-        EvaluateYoungAccountOutflow(account, outgoing, incomingTotal + outgoingTotal, now, signals);
+        EvaluateFeederNetwork(accountId, dataset, incoming, signals);
+        EvaluateYoungAccountOutflow(account, outgoing, incomingTotal + outgoingTotal, signals);
         EvaluateCircularTransfers(accountId, dataset, signals);
 
         ApplyCategoryCaps(signals);
         var score = Math.Clamp(signals.Sum(x => x.Contribution), 0, 100);
-        var relationships = BuildRelationships(accountId, dataset, direct, now);
+        var relationships = BuildRelationships(accountId, dataset, direct);
         return new AccountRiskEvaluation(
             account.AccountId,
             account.CharacterId,
@@ -292,7 +298,7 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         signals.Add(new AccountRiskSignal(
             AccountRiskSignalType.OneSidedRelationship,
             "Resource flow",
-            Scale(strongest.Imbalance, policy.RelationshipImbalanceThreshold, 1m, 8, 18),
+            Scale(strongest.Imbalance, policy.RelationshipImbalanceThreshold, 1m, 8, 25),
             "Highly one-sided transfer relationship",
             $"The strongest repeated relationship was {strongest.Imbalance:P0} one-sided across {strongest.Count} direct transfers.",
             Evidence(("sent", strongest.Sent), ("received", strongest.Received), ("imbalance", strongest.Imbalance))));
@@ -302,7 +308,6 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         Guid accountId,
         AccountRiskAnalysisDataset dataset,
         IReadOnlyList<AccountRiskTransferFact> incoming,
-        DateTimeOffset now,
         ICollection<AccountRiskSignal> signals)
     {
         var feeders = incoming.GroupBy(x => x.SenderAccountId)
@@ -311,12 +316,18 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
                 var allSenderOutgoing = dataset.GetOutgoing(group.Key).Sum(x => x.Amount);
                 var toSubject = group.Sum(x => x.Amount);
                 var share = allSenderOutgoing == 0 ? 0 : (decimal)toSubject / allSenderOutgoing;
-                var isYoung = dataset.Accounts.TryGetValue(group.Key, out var sender) &&
-                    (now.UtcDateTime - sender.AccountCreatedUtc).TotalDays <= policy.YoungAccountDays &&
-                    sender.CharacterLevel <= policy.YoungAccountMaximumLevel;
-                return new { AccountId = group.Key, Share = share, IsYoung = isYoung, Value = toSubject };
+                dataset.Accounts.TryGetValue(group.Key, out var sender);
+                var firstTransfer = group.OrderBy(x => x.OccurredAt).First();
+                var createdUtc = firstTransfer.SenderAccountCreatedUtc ?? sender?.AccountCreatedUtc;
+                var level = firstTransfer.SenderCharacterLevel ?? sender?.CharacterLevel;
+                var ageAtTransfer = createdUtc.HasValue
+                    ? (firstTransfer.OccurredAt.UtcDateTime - createdUtc.Value).TotalDays
+                    : double.MaxValue;
+                var wasYoung = ageAtTransfer <= policy.YoungAccountDays;
+                var wasLowLevel = level.HasValue && level.Value <= policy.YoungAccountMaximumLevel;
+                return new { AccountId = group.Key, Share = share, WasYoung = wasYoung, WasLowLevel = wasLowLevel, Value = toSubject, AgeAtTransfer = ageAtTransfer };
             })
-            .Where(x => x.IsYoung && x.Share >= policy.FeederTargetShareThreshold)
+            .Where(x => x.WasYoung && x.Share >= policy.FeederTargetShareThreshold)
             .ToList();
         if (feeders.Count < policy.MinimumCounterpartyCount) return;
 
@@ -326,20 +337,22 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
             "Resource flow",
             contribution,
             "Possible feeder-account network",
-            $"{feeders.Count} young, low-level accounts sent at least {policy.FeederTargetShareThreshold:P0} of their observable direct outflow to this account.",
-            Evidence(("feederCount", feeders.Count), ("cindersReceived", feeders.Sum(x => x.Value)))));
+            $"{feeders.Count} accounts were at most {policy.YoungAccountDays} days old when transfers began and sent at least {policy.FeederTargetShareThreshold:P0} of their observable direct outflow to this account; {feeders.Count(x => x.WasLowLevel)} were level {policy.YoungAccountMaximumLevel} or below in the retained event data.",
+            Evidence(("feederCount", feeders.Count), ("lowLevelFeederCount", feeders.Count(x => x.WasLowLevel)), ("cindersReceived", feeders.Sum(x => x.Value)), ("maximumAgeAtFirstTransferDays", (decimal)feeders.Max(x => x.AgeAtTransfer)))));
     }
 
     private void EvaluateYoungAccountOutflow(
         AccountRiskAccountFact account,
         IReadOnlyList<AccountRiskTransferFact> outgoing,
         long totalFlow,
-        DateTimeOffset now,
         ICollection<AccountRiskSignal> signals)
     {
-        if (outgoing.Count < policy.MinimumTransferCount || totalFlow <= 0) return;
-        var ageDays = (now.UtcDateTime - account.AccountCreatedUtc).TotalDays;
-        if (ageDays > policy.YoungAccountDays || account.CharacterLevel > policy.YoungAccountMaximumLevel) return;
+        if (outgoing.Count == 0 || totalFlow <= 0) return;
+        var firstTransfer = outgoing.OrderBy(x => x.OccurredAt).First();
+        var createdUtc = firstTransfer.SenderAccountCreatedUtc ?? account.AccountCreatedUtc;
+        var level = firstTransfer.SenderCharacterLevel ?? account.CharacterLevel;
+        var ageDays = (firstTransfer.OccurredAt.UtcDateTime - createdUtc).TotalDays;
+        if (ageDays > policy.YoungAccountDays) return;
         var outgoingTotal = outgoing.Sum(x => x.Amount);
         var share = (decimal)outgoingTotal / totalFlow;
         if (share < policy.FeederTargetShareThreshold) return;
@@ -347,10 +360,10 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         signals.Add(new AccountRiskSignal(
             AccountRiskSignalType.YoungAccountOutflow,
             "Account context",
-            Scale(share, policy.FeederTargetShareThreshold, 1m, 10, 22),
+            25,
             "Young account dominated by outgoing transfers",
-            $"A {Math.Max(0, (int)ageDays)}-day-old level {account.CharacterLevel} account sent {share:P0} of its observed direct-transfer volume outward.",
-            Evidence(("accountAgeDays", (decimal)ageDays), ("characterLevel", account.CharacterLevel), ("outgoingShare", share), ("outgoingCinders", outgoingTotal))));
+            $"This account was {Math.Max(0, (int)ageDays)} days old and level {level} when the observed outgoing pattern began; {share:P0} of its direct-transfer volume went outward.",
+            Evidence(("accountAgeAtFirstTransferDays", (decimal)ageDays), ("characterLevelAtFirstTransfer", (decimal)level), ("outgoingShare", share), ("outgoingCinders", outgoingTotal))));
     }
 
     private void EvaluateCircularTransfers(
@@ -390,16 +403,20 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
     private IReadOnlyList<AccountRiskRelationship> BuildRelationships(
         Guid accountId,
         AccountRiskAnalysisDataset dataset,
-        IReadOnlyList<AccountRiskTransferFact> direct,
-        DateTimeOffset now) =>
+        IReadOnlyList<AccountRiskTransferFact> direct) =>
         direct.GroupBy(x => x.SenderAccountId == accountId ? x.RecipientAccountId : x.SenderAccountId)
             .Select(group =>
             {
                 var sent = group.Where(x => x.RecipientAccountId == accountId).Sum(x => x.Amount);
                 var received = group.Where(x => x.SenderAccountId == accountId).Sum(x => x.Amount);
                 dataset.Accounts.TryGetValue(group.Key, out var counterparty);
-                var young = counterparty is not null &&
-                    (now.UtcDateTime - counterparty.AccountCreatedUtc).TotalDays <= policy.YoungAccountDays;
+                var firstTransfer = group.OrderBy(x => x.OccurredAt).First();
+                var counterpartyCreatedUtc = firstTransfer.SenderAccountId == group.Key
+                    ? firstTransfer.SenderAccountCreatedUtc
+                    : firstTransfer.RecipientAccountCreatedUtc;
+                counterpartyCreatedUtc ??= counterparty?.AccountCreatedUtc;
+                var young = counterpartyCreatedUtc.HasValue &&
+                    (firstTransfer.OccurredAt.UtcDateTime - counterpartyCreatedUtc.Value).TotalDays <= policy.YoungAccountDays;
                 var total = sent + received;
                 var imbalance = total == 0 ? 0 : (decimal)Math.Abs(sent - received) / total;
                 var relationship = sent > received && young && imbalance >= policy.RelationshipImbalanceThreshold

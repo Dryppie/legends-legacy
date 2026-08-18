@@ -1507,6 +1507,17 @@ public sealed class FastCombatEngine
                 attackType: attackType,
                 wasCritical: isCritical,
                 wasDirectHit: delivery == DamageDelivery.Direct);
+            PublishIfObserved(
+                AbilityTriggerEvent.OnEnemyDeath,
+                target,
+                source,
+                null,
+                combatants,
+                healthDamage,
+                damageType: damageType,
+                attackType: attackType,
+                wasCritical: isCritical,
+                wasDirectHit: delivery == DamageDelivery.Direct);
             NotifySummonChanged(target, combatants);
             ExpireOwnedSummons(target, combatants, "owner death");
         }
@@ -3360,6 +3371,9 @@ public sealed class FastCombatEngine
                 or AbilityTriggerEvent.OnBarrierExpired =>
                 ReferenceEquals(combatEvent.Source, listener)
                 || ReferenceEquals(combatEvent.Target, listener),
+            AbilityTriggerEvent.OnEnemyDeath =>
+                combatEvent.Source is { } deadCombatant
+                && deadCombatant.Team != listener.Team,
             _ => true
         };
 

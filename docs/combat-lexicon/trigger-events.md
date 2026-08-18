@@ -19,6 +19,7 @@
 | `trigger.on-dodge`                | `OnDodge`         | Implemented             | A dodge exits damage processing.                       |
 | `trigger.on-kill`                 | `OnKill`          | Implemented             | Before the victim's death event.                       |
 | `trigger.on-death`                | `OnDeath`         | Implemented             | After kill event; owner summons then expire.           |
+| `trigger.on-enemy-death`          | `OnEnemyDeath`    | Implemented             | After the victim's death event, for each living opponent. |
 | `trigger.on-condition-applied`    | `OnStatusApplied` | Implemented             | After status mutation/application effects.             |
 | `trigger.on-condition-expired`    | `OnStatusExpired` | Implemented             | After natural duration expiry only.                    |
 | `trigger.on-condition-removed`    | `OnStatusRemoved` | Implemented             | After explicit removal, replacement, or charge consumption. |
@@ -31,7 +32,7 @@
 | `trigger.on-barrier-broken`       | `OnBarrierBroken` | Implemented             | Once when a positive Barrier total reaches zero.       |
 | `trigger.on-combat-end`           | None              | Proposed                | Accepted tag only.                                     |
 
-Direct damage publishes `OnHit` after damage/Barrier mutation even when Barrier absorbs all damage. Periodic, stored, reflected, and self-damage do not publish direct-hit events. A dodge returns early and publishes only `OnDodge`. Death publishes `OnKill` before `OnDeath`.
+Direct damage publishes `OnHit` after damage/Barrier mutation even when Barrier absorbs all damage. Periodic, stored, reflected, and self-damage do not publish direct-hit events. A dodge returns early and publishes only `OnDodge`. Death publishes `OnKill`, then `OnDeath`, then `OnEnemyDeath`; the enemy-death event exposes the dead enemy as `EventSource` and the killer as `EventTarget`.
 
 ## Interval cadence
 

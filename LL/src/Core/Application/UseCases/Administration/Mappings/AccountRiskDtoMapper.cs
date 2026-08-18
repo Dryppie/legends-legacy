@@ -37,6 +37,17 @@ public static class AccountRiskDtoMapper
         details.History.Select(x => new AccountRiskHistoryPointDto(x.Id, x.Score, x.Severity, x.EvaluatedAt)).ToList(),
         details.Notes.Select(ToDto).ToList());
 
+    public static AccountRiskPageDto ToDto(AccountRiskPage page, int pageNumber, int pageSize) => new(
+        page.Entries.Select(ToDto).ToList(),
+        page.Total,
+        page.Counts,
+        page.LastEvaluatedAt,
+        page.FirstEvidenceAt,
+        page.DirectTransferCount,
+        page.EvaluatedAccountCount,
+        pageNumber,
+        pageSize);
+
     public static AccountRiskNoteDto ToDto(AccountRiskNote note) =>
         new(note.Id, note.ActorSubject, note.ActorDisplayName, note.Body, note.CreatedAt);
 }

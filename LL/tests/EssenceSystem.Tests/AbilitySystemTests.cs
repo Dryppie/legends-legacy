@@ -672,7 +672,7 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
-    public void Rotfly_host_checks_the_enemy_killed_instead_of_its_self_heal_target()
+    public void Rotfly_host_heals_when_an_ally_kills_a_decayed_enemy()
     {
         var catalog = new JsonAbilityCatalogProvider(
             CreateConfig(),
@@ -682,20 +682,71 @@ public sealed class AbilitySystemTests
             catalog.AbilitiesById["ability.creature.rotfly_toad.rotfly_host"]);
         var strike = AbilityCompiler.CompileAbility(
             CreateFixedDamageAbility("ability.test.rotfly-strike", "effect.test.rotfly-strike", 100));
-        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, [rotflyHost, strike]);
+        var rotflyOwner = CreateCombatant("rotfly-owner", CombatTeam.Friendly, [rotflyHost]);
+        var ally = CreateCombatant("ally", CombatTeam.Friendly, [strike]);
         var hostile = CreateCombatant("hostile", CombatTeam.Hostile, [], maxHealth: 50);
-        friendly.SetHealth(100);
-        AddStandardCondition(hostile, friendly, StandardConditionType.Decay);
+        rotflyOwner.SetHealth(100);
+        AddStandardCondition(hostile, rotflyOwner, StandardConditionType.Decay);
         var engine = new FastCombatEngine(
             new Dictionary<string, CompiledStatus>(),
             new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
 
-        var result = engine.Run([friendly], [hostile]);
+        var result = engine.Run([rotflyOwner, ally], [hostile]);
 
         Assert.Contains(result.EventLog, item =>
-            item.Source == "effect.creature.rotfly_toad.rotfly_host.heal"
+            item.ActorId == rotflyOwner.Id
+            && item.Source == "effect.creature.rotfly_toad.rotfly_host.heal"
             && item.EventType == EventType.Heal
             && item.Magnitude == 16);
+        Assert.Equal(116, rotflyOwner.Health);
+        Assert.Contains(AbilityTriggerEvent.OnEnemyDeath, rotflyHost.TriggersByEvent.Keys);
+    }
+
+    [Fact]
+    public void On_enemy_death_notifies_living_opponents_but_not_the_victims_allies()
+    {
+        var listener = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.enemy-death-listener",
+            Kind = AbilitySpecKind.Passive,
+            Name = "Enemy Death Listener",
+            Triggers =
+            [
+                new()
+                {
+                    Event = AbilityTriggerEvent.OnEnemyDeath,
+                    EffectIds = ["effect.test.enemy-death-listener"]
+                }
+            ],
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.enemy-death-listener",
+                    Operation = AbilityEffectOperation.GrantBarrier,
+                    Target = AbilityTargetSelector.Self,
+                    BaseValue = 7
+                }
+            ]
+        });
+        var executeSpec = CreateFixedDamageAbility(
+            "ability.test.enemy-death-execute",
+            "effect.test.enemy-death-execute",
+            100);
+        executeSpec.Effects.Single().Target = AbilityTargetSelector.LowestCurrentHealthEnemy;
+        var execute = AbilityCompiler.CompileAbility(executeSpec);
+        var friendlyObserver = CreateCombatant("friendly-observer", CombatTeam.Friendly, [listener]);
+        var attacker = CreateCombatant("attacker", CombatTeam.Friendly, [execute]);
+        var victim = CreateCombatant("victim", CombatTeam.Hostile, [], maxHealth: 5);
+        var hostileObserver = CreateCombatant("hostile-observer", CombatTeam.Hostile, [listener]);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        engine.Run([friendlyObserver, attacker], [victim, hostileObserver]);
+
+        Assert.Equal(7, friendlyObserver.Barrier);
+        Assert.Equal(0, hostileObserver.Barrier);
     }
 
     [Fact]

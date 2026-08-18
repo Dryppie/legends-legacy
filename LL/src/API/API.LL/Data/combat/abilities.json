@@ -2640,8 +2640,15 @@
     "tags": ["Healing"],
     "triggers": [
       {
-        "event": "OnKill",
-        "effectIds": ["effect.creature.rotfly_toad.rotfly_host.heal"]
+        "event": "OnEnemyDeath",
+        "effectIds": ["effect.creature.rotfly_toad.rotfly_host.heal"],
+        "conditions": [
+          {
+            "type": "HasCondition",
+            "subject": "EventSource",
+            "condition": "Decay"
+          }
+        ]
       }
     ],
     "effects": [
@@ -2651,13 +2658,6 @@
         "target": "Self",
         "scalingAttribute": "MaxHealth",
         "scalingCoefficient": 0.08,
-        "conditions": [
-          {
-            "type": "HasCondition",
-            "subject": "EventTarget",
-            "condition": "Decay"
-          }
-        ],
         "procCoefficient": 1
       }
     ],

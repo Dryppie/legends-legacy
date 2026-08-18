@@ -16,7 +16,10 @@ public sealed record AccountRiskPage(
     IReadOnlyList<AccountRiskSnapshotView> Entries,
     int Total,
     IReadOnlyDictionary<AccountRiskSeverity, int> Counts,
-    DateTimeOffset? LastEvaluatedAt);
+    DateTimeOffset? LastEvaluatedAt,
+    DateTimeOffset? FirstEvidenceAt,
+    long DirectTransferCount,
+    int EvaluatedAccountCount);
 
 public sealed record AccountRiskSnapshotView(
     AccountRiskSnapshot Snapshot,
@@ -46,10 +49,10 @@ public sealed record AccountRiskDetails(
 public interface IAccountRiskRepository
 {
     Task AcquireEvaluationLockAsync(CancellationToken cancellationToken);
-    Task<DateTimeOffset?> GetLastEvaluatedAtAsync(CancellationToken cancellationToken);
+    Task<bool> HasFreshEvaluationAsync(int evaluationVersion, DateTimeOffset evaluatedAfter, CancellationToken cancellationToken);
     Task<IReadOnlyList<Guid>> GetCandidateAccountIdsAsync(DateTimeOffset since, int limit, CancellationToken cancellationToken);
     Task<AccountRiskAnalysisDataset> GetAnalysisDatasetAsync(IReadOnlyCollection<Guid> accountIds, DateTimeOffset since, int maximumTransfers, CancellationToken cancellationToken);
-    Task UpsertEvaluationsAsync(IReadOnlyCollection<AccountRiskEvaluation> evaluations, DateTimeOffset evaluatedAt, int historyMinimumScoreChange, CancellationToken cancellationToken);
+    Task UpsertEvaluationsAsync(IReadOnlyCollection<AccountRiskEvaluation> evaluations, DateTimeOffset evaluatedAt, int evaluationVersion, int historyMinimumScoreChange, CancellationToken cancellationToken);
     Task<AccountRiskPage> SearchAsync(AccountRiskSearch search, CancellationToken cancellationToken);
     Task<AccountRiskDetails?> GetDetailsAsync(Guid accountId, int transferLimit, CancellationToken cancellationToken);
     Task<AccountRiskInvestigation?> GetInvestigationAsync(Guid accountId, CancellationToken cancellationToken);

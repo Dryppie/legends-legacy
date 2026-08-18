@@ -34,7 +34,7 @@ export class AccountRiskComponent implements OnInit {
     await this.load();
   }
 
-  async quickFilter(filter: 'critical' | 'high' | 'feeders' | 'new' | 'all'): Promise<void> {
+  async quickFilter(filter: 'critical' | 'high' | 'moderate' | 'feeders' | 'new' | 'all'): Promise<void> {
     this.signalType = '';
     this.maximumAccountAgeDays = '';
     this.minimumSeverity = filter === 'critical' ? 'Critical' : filter === 'high' ? 'High' : filter === 'all' ? 'Low' : 'Moderate';
@@ -53,6 +53,15 @@ export class AccountRiskComponent implements OnInit {
   open(accountId: string): void { void this.router.navigate(['/account-risk', accountId]); }
 
   count(severity: AccountRiskSeverity): number { return this.data?.counts[severity] ?? 0; }
+
+  get emptyMessage(): string {
+    if (this.loading) return 'Loading risk summaries…';
+    if (!this.data?.directTransferCount) return 'No retained direct-cinder transfers are available to evaluate.';
+    if (this.minimumSeverity !== 'Low' && this.data.evaluatedAccountCount > 0) {
+      return `${this.data.evaluatedAccountCount} accounts were evaluated, but none reached the selected severity. Use “Include low” to inspect the observed relationships.`;
+    }
+    return 'No accounts matched these investigation filters.';
+  }
 
   ageDays(createdUtc: string): number {
     return Math.max(0, Math.floor((Date.now() - new Date(createdUtc).getTime()) / 86_400_000));

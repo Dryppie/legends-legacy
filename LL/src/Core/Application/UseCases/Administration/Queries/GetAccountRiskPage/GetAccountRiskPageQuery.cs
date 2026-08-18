@@ -38,11 +38,8 @@ public sealed class GetAccountRiskPageQueryHandler(ILiveOpsAccountRiskService se
             request.Sort ?? "risk",
             Math.Max(1, request.Page),
             Math.Clamp(request.PageSize, 1, 100)), cancellationToken);
-        return Response<AccountRiskPageDto>.Success(new AccountRiskPageDto(
-            page.Entries.Select(AccountRiskDtoMapper.ToDto).ToList(),
-            page.Total,
-            page.Counts,
-            page.LastEvaluatedAt,
+        return Response<AccountRiskPageDto>.Success(AccountRiskDtoMapper.ToDto(
+            page,
             Math.Max(1, request.Page),
             Math.Clamp(request.PageSize, 1, 100)));
     }

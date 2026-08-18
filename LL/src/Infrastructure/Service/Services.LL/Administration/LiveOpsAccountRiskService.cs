@@ -19,9 +19,11 @@ public sealed class LiveOpsAccountRiskService(
         if (!_options.Enabled) return 0;
         await riskRepository.AcquireEvaluationLockAsync(cancellationToken);
         var now = timeProvider.GetUtcNow();
-        var lastEvaluation = await riskRepository.GetLastEvaluatedAtAsync(cancellationToken);
         var freshnessWindow = TimeSpan.FromMinutes(Math.Max(1, _options.EvaluationIntervalMinutes) * 0.8);
-        if (lastEvaluation >= now - freshnessWindow) return 0;
+        if (await riskRepository.HasFreshEvaluationAsync(
+                _options.EvaluationVersion,
+                now - freshnessWindow,
+                cancellationToken)) return 0;
         var since = now.AddDays(-_options.LookbackDays);
         var candidates = await riskRepository.GetCandidateAccountIdsAsync(
             since,
@@ -42,6 +44,7 @@ public sealed class LiveOpsAccountRiskService(
         await riskRepository.UpsertEvaluationsAsync(
             evaluations,
             now,
+            _options.EvaluationVersion,
             _options.HistoryMinimumScoreChange,
             cancellationToken);
         return evaluations.Count;

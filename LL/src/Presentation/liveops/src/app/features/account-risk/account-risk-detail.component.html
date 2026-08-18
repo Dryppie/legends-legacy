@@ -40,7 +40,7 @@
           <div class="risk-connection-head"><span>Account</span><span>Relationship</span><span>To subject</span><span>From subject</span><span>Risk</span></div>
           @for (relation of view.relationships; track relation.accountId) {
             <button type="button" (click)="openAccount(relation.accountId)">
-              <span><strong>{{ relation.characterName }}</strong><small>{{ relation.youngAccount ? 'Young account · ' : '' }}{{ relation.transactionCount }} transfers</small></span>
+              <span><strong>{{ relation.characterName }}</strong><small>{{ relation.youngAccount ? 'Young when transfers began · ' : '' }}{{ relation.transactionCount }} transfers</small></span>
               <span>{{ relation.relationship }}</span><span>{{ relation.sentToSubject | number }}</span><span>{{ relation.receivedFromSubject | number }}</span>
               <span><span class="risk-severity" [class]="'risk-severity ' + (relation.riskSeverity || 'Low').toLowerCase()">{{ relation.riskScore ?? '—' }}</span></span>
             </button>
