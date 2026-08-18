@@ -1,8 +1,8 @@
 <div
-  class="grid h-full min-h-0 w-full grid-cols-1 gap-4 overflow-y-auto overscroll-contain py-4 md:grid-cols-[minmax(0,1fr)_minmax(20rem,26rem)] md:overflow-hidden"
+  class="flex h-full min-h-0 w-full flex-col gap-4 overflow-y-auto overscroll-contain py-4 md:grid md:grid-cols-[minmax(0,1fr)_minmax(20rem,26rem)] md:grid-rows-[minmax(0,1fr)] md:overflow-hidden"
 >
   <div
-    class="flex w-full flex-col space-y-2 md:order-2 md:h-full md:min-h-0 md:overflow-y-auto"
+    class="order-2 flex w-full shrink-0 flex-col space-y-2 md:h-full md:min-h-0 md:overflow-y-auto"
   >
     <section class="ll-panel p-4">
       <h2 class="ll-heading text-xl">Tempering</h2>
@@ -275,7 +275,7 @@
   </div>
 
   <div
-    class="flex min-h-24 w-full flex-col space-y-2 md:order-1 md:max-h-full md:min-h-0 md:overflow-y-auto"
+    class="order-1 flex min-h-24 w-full shrink-0 flex-col space-y-2 md:h-full md:min-h-0 md:overflow-y-auto"
   >
     <ng-container
       *ngIf="filteredInventory().length; else noItemsToTemper"
@@ -284,12 +284,12 @@
       <h2 class="ll-heading text-xl">Items To Temper</h2>
 
       <div
-        class="overflow-hidden border-y border-light_gray/60"
+        class="shrink-0 overflow-hidden border-y border-light_gray/60"
         role="table"
         aria-label="Items to temper"
       >
         <div
-          class="grid min-h-8 grid-cols-[minmax(0,1fr)_6.5rem_4.75rem_6.5rem] items-center gap-2 border-b border-light_gray/60 px-3 text-xs uppercase tracking-[0.12em] text-secondary"
+          class="grid min-h-8 grid-cols-[minmax(0,1fr)_4.75rem] items-center gap-2 border-b border-light_gray/60 px-3 text-xs uppercase tracking-[0.12em] text-secondary lg:grid-cols-[minmax(0,1fr)_6.5rem_4.75rem_6.5rem]"
           role="row"
         >
           <div role="columnheader" [attr.aria-sort]="ariaSort('Name')">
@@ -302,7 +302,11 @@
               Item <span aria-hidden="true">{{ sortIndicator("Name") }}</span>
             </button>
           </div>
-          <div role="columnheader" [attr.aria-sort]="ariaSort('Quality')">
+          <div
+            class="hidden lg:block"
+            role="columnheader"
+            [attr.aria-sort]="ariaSort('Quality')"
+          >
             <button
               type="button"
               class="w-full text-left transition-colors hover:text-primary"
@@ -329,7 +333,7 @@
             </button>
           </div>
           <div
-            class="text-right"
+            class="hidden text-right lg:block"
             role="columnheader"
             [attr.aria-sort]="ariaSort('Gear Power')"
           >
@@ -347,7 +351,7 @@
 
         <div
           *ngFor="let item of filteredInventory()"
-          class="grid min-h-12 cursor-pointer grid-cols-[minmax(0,1fr)_6.5rem_4.75rem_6.5rem] items-center gap-2 border-b border-l-2 border-light_gray/60 px-3 py-2 transition-colors last:border-b-0 hover:border-l-light_gray hover:bg-white/5"
+          class="grid min-h-12 cursor-pointer grid-cols-[minmax(0,1fr)_4.75rem] items-center gap-2 border-b border-l-2 border-light_gray/60 px-3 py-2 transition-colors last:border-b-0 hover:border-l-light_gray hover:bg-white/5 lg:grid-cols-[minmax(0,1fr)_6.5rem_4.75rem_6.5rem]"
           role="row"
           (click)="selectItem(item.itemInstance)"
           [ngClass]="{
@@ -370,7 +374,10 @@
               >
             </div>
 
-            <span class="whitespace-nowrap text-sm text-secondary" role="cell">
+            <span
+              class="hidden whitespace-nowrap text-sm text-secondary lg:block"
+              role="cell"
+            >
               {{ equipment.quality }}
             </span>
 
@@ -378,7 +385,7 @@
               {{ equipment.potential ?? 0 }}
             </span>
 
-            <strong class="text-right tabular-nums" role="cell">
+            <strong class="hidden text-right tabular-nums lg:block" role="cell">
               {{ equipment.itemBudget | number: "1.0-2" }}
             </strong>
           </ng-container>

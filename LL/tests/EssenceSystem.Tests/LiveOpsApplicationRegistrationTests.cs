@@ -2,8 +2,15 @@ using API.LiveOps.Hosting;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.WebSockets;
 using Application.UseCases.Administration.Dtos;
+using Application.UseCases.Equipments.Dtos;
+using Application.UseCases.Essences.Dtos;
+using Application.UseCases.Inventories.Dtos;
 using AutoMapper;
 using Domain.Models.Administration;
+using Domain.Models.Inventories;
+using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
+using Domain.Models.Items.EssenceItems;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -81,5 +88,80 @@ public sealed class LiveOpsApplicationRegistrationTests
         var player = Assert.Single(result);
         Assert.Equal(players[0].AccountId, player.AccountId);
         Assert.Equal("Admin", player.CharacterName);
+    }
+
+    [Fact]
+    public void LiveOps_registers_compensation_inventory_item_mappings()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddLiveOpsApplication();
+
+        using var provider = services.BuildServiceProvider();
+        var mapper = provider.GetRequiredService<IMapper>();
+        var resourceInstanceId = Guid.NewGuid();
+        var equipmentInstanceId = Guid.NewGuid();
+        var essenceInstanceId = Guid.NewGuid();
+        var itemBase = new ItemBase
+        {
+            Id = "iron_ore",
+            Name = "Iron Ore",
+            ItemType = ItemType.Resource
+        };
+        var inventoryItems = new List<InventoryItem>
+        {
+            new()
+            {
+                ItemInstanceId = resourceInstanceId,
+                ItemInstance = new ItemInstance
+                {
+                    Id = resourceInstanceId,
+                    ItemBaseId = itemBase.Id,
+                    ItemBase = itemBase
+                },
+                Quantity = 10
+            },
+            new()
+            {
+                ItemInstanceId = equipmentInstanceId,
+                ItemInstance = new EquipmentInstance
+                {
+                    Id = equipmentInstanceId,
+                    ItemBaseId = "iron_sword",
+                    ItemBase = new EquipmentBase
+                    {
+                        Id = "iron_sword",
+                        Name = "Iron Sword",
+                        EquipmentType = EquipmentType.OneHanded
+                    }
+                },
+                Quantity = 1
+            },
+            new()
+            {
+                ItemInstanceId = essenceInstanceId,
+                ItemInstance = new EssenceItemInstance
+                {
+                    Id = essenceInstanceId,
+                    ItemBaseId = "item.ember_essence",
+                    ItemBase = new EssenceItemBase
+                    {
+                        Id = "item.ember_essence",
+                        Name = "Ember Essence",
+                        EssenceDefinitionId = "ember_essence"
+                    }
+                },
+                Quantity = 1
+            }
+        };
+
+        var result = mapper.Map<IReadOnlyList<InventoryItemDto>>(inventoryItems);
+
+        Assert.Equal(3, result.Count);
+        Assert.Equal(resourceInstanceId, result[0].ItemInstanceId);
+        Assert.Equal("iron_ore", result[0].ItemInstance.ItemBase.Id);
+        Assert.Equal(10, result[0].Quantity);
+        Assert.IsType<EquipmentInstanceDto>(result[1].ItemInstance);
+        Assert.IsType<EssenceItemInstanceDto>(result[2].ItemInstance);
     }
 }

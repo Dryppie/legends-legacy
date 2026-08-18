@@ -21,7 +21,11 @@ public class EssenceItemBaseDto : ItemBaseDto, IMapFrom<EssenceItemBase>
 
 public sealed class EssenceItemBaseConverter : ITypeConverter<EssenceItemBase, EssenceItemBaseDto>
 {
-    private readonly IEssenceDefinitionRepository _definitions;
+    private readonly IEssenceDefinitionRepository? _definitions;
+
+    public EssenceItemBaseConverter()
+    {
+    }
 
     public EssenceItemBaseConverter(IEssenceDefinitionRepository definitions)
     {
@@ -33,7 +37,7 @@ public sealed class EssenceItemBaseConverter : ITypeConverter<EssenceItemBase, E
         var essenceDefinitionId = string.IsNullOrWhiteSpace(source.EssenceDefinitionId)
             ? InferDefinitionIdFromItemBaseId(source.Id)
             : source.EssenceDefinitionId;
-        var essence = string.IsNullOrWhiteSpace(essenceDefinitionId)
+        var essence = _definitions is null || string.IsNullOrWhiteSpace(essenceDefinitionId)
             ? null
             : _definitions.GetById(essenceDefinitionId);
 

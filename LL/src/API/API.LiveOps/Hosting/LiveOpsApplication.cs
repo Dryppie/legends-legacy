@@ -1,7 +1,6 @@
 using Application.Common.Mappings;
 using Application.MediatR.Behaviors;
 using Application.UseCases.Administration;
-using Application.UseCases.Administration.Mappings;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -23,11 +22,11 @@ public static class LiveOpsApplication
             configuration.AddOpenBehavior(typeof(TransactionBehavior<,>));
         });
 
-        services.AddAutoMapper(configuration =>
-        {
-            configuration.AddProfile<MappingProfile>();
-            configuration.AddProfile<AdministrationMappingProfile>();
-        });
+        // Supplying the Application assembly registers not only its profiles, but also
+        // the value resolvers and converters used by nested inventory-item mappings.
+        services.AddAutoMapper(
+            configuration => { },
+            typeof(MappingProfile).Assembly);
 
         var applicationAssembly = typeof(AdministrationPermissions).Assembly;
         var handlerRegistrations = applicationAssembly.DefinedTypes
