@@ -61,6 +61,7 @@ export class CombatComponent implements OnInit, OnDestroy {
   private flavorIntervalId: ReturnType<typeof setInterval> | null = null;
   private flavorVisibilityTimeoutId: ReturnType<typeof setTimeout> | null =
     null;
+  private combatExitTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private isDestroyed = false;
   private idleCombatRecoveryAttempted = false;
   private readonly battleTypeSignal = signal<BattleType>(BattleType.IdleCombat);
@@ -221,8 +222,10 @@ export class CombatComponent implements OnInit, OnDestroy {
 
       this.outcome = outcome;
 
-      if (outcome && this.isStoppingCombat) {
-        setTimeout(() => {
+      if (outcome && this.isStoppingCombat && !this.combatExitTimeoutId) {
+        this.combatExitTimeoutId = setTimeout(() => {
+          this.combatExitTimeoutId = null;
+          if (this.isDestroyed) return;
           this.stopCombat();
         }, 3000);
       }
@@ -292,6 +295,10 @@ export class CombatComponent implements OnInit, OnDestroy {
     if (this.flavorIntervalId) clearInterval(this.flavorIntervalId);
     if (this.flavorVisibilityTimeoutId) {
       clearTimeout(this.flavorVisibilityTimeoutId);
+    }
+    if (this.combatExitTimeoutId) {
+      clearTimeout(this.combatExitTimeoutId);
+      this.combatExitTimeoutId = null;
     }
   }
 
@@ -372,7 +379,6 @@ export class CombatComponent implements OnInit, OnDestroy {
   stopCombat() {
     this.subscriptions.unsubscribe();
     this.gameService.endCombat();
-    this.characterActionService.clear();
     if (this.battleType === BattleType.IdleCombat) {
       this.router.navigate(['/game/world']);
     }

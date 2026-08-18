@@ -176,11 +176,11 @@ describe('CharacterActionsStateService', () => {
     expect(combat.clearAllCombat).not.toHaveBeenCalled();
   }));
 
-  it('keeps a stopped combat visible and blocks new actions until its deadline', fakeAsync(() => {
+  it('keeps stopped combat visible but allows Tempering to queue during its lock', fakeAsync(() => {
     const deadline = new Date(Date.now() + 10_000);
     const stoppingCombat: CharacterActionDto = {
       ...combatAction(),
-      updatedAt: deadline,
+      blockedUntilUtc: deadline,
       nextResolutionAt: deadline,
       revision: 'stopping-combat-revision',
       isDeleted: true,
@@ -193,7 +193,7 @@ describe('CharacterActionsStateService', () => {
     expect(service.displayCurrentAction()).toBeTrue();
     expect(service.isActionCooldown()).toBeTrue();
     expect(service.canStartAction(CharacterActionType.Combat)).toBeFalse();
-    expect(service.canStartAction(CharacterActionType.Crafting)).toBeFalse();
+    expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
 
     tick(10_001);
 
@@ -201,6 +201,29 @@ describe('CharacterActionsStateService', () => {
     expect(service.isActionCooldown()).toBeFalse();
     expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
   }));
+
+  it('waits for Combat quit to finish before sending queued Tempering', () => {
+    const stopResult = new Subject<void>();
+    const payload = {
+      queueId: '8f6cb596-94df-4a84-b6f2-4b4d6384e065',
+      itemInstanceId: '6c79774b-d048-4698-9c04-c77e481c7aa2',
+    };
+    actions.stop.and.returnValue(stopResult.asObservable());
+    actions.startCrafting.and.returnValue(of(true));
+    service.applyCurrentActionSnapshot(combatAction());
+
+    service.stopAction();
+    service.startAction(CharacterActionType.Crafting, payload);
+
+    expect(actions.startCrafting).not.toHaveBeenCalled();
+    expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
+
+    stopResult.next();
+    stopResult.complete();
+
+    expect(actions.startCrafting).toHaveBeenCalledOnceWith(payload);
+    expect(polling.start).toHaveBeenCalled();
+  });
 
   it('allows more Tempering items during Tempering but blocks Combat', () => {
     service.applyCurrentActionSnapshot({
@@ -221,6 +244,58 @@ describe('CharacterActionsStateService', () => {
 
     expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
     expect(service.canStartAction(CharacterActionType.Combat)).toBeFalse();
+  });
+
+  it('allows a new action immediately after Tempering is stopped', () => {
+    actions.stop.and.returnValue(of(undefined));
+    service.applyCurrentActionSnapshot({
+      ...combatAction(),
+      characterActionType: CharacterActionType.Crafting,
+      nextResolutionAtUtc: new Date(Date.now() + 10_000),
+      nextResolutionAt: new Date(Date.now() + 10_000),
+      revision: 'active-crafting-revision',
+      isDeleted: false,
+    });
+
+    service.stopAction();
+
+    expect(service.isActionCooldown()).toBeFalse();
+    expect(service.canStartAction(CharacterActionType.Combat)).toBeTrue();
+    expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
+  });
+
+  it('allows an immediate action after stopping Combat once its initial lock expired', () => {
+    actions.stop.and.returnValue(of(undefined));
+    service.applyCurrentActionSnapshot({
+      ...combatAction(),
+      blockedUntilUtc: new Date(Date.now() - 1_000),
+      nextResolutionAtUtc: new Date(Date.now() + 9_000),
+      nextResolutionAt: new Date(Date.now() + 9_000),
+      revision: 'unlocked-combat-revision',
+    });
+
+    service.stopAction();
+
+    expect(service.isActionCooldown()).toBeFalse();
+    expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
+  });
+
+  it('preserves the original Combat lock when queued Tempering is stopped', () => {
+    actions.stop.and.returnValue(of(undefined));
+    service.applyCurrentActionSnapshot({
+      ...combatAction(),
+      characterActionType: CharacterActionType.Crafting,
+      blockedUntilUtc: new Date(Date.now() + 5_000),
+      nextResolutionAtUtc: new Date(Date.now() + 15_000),
+      nextResolutionAt: new Date(Date.now() + 15_000),
+      revision: 'combat-queued-crafting-revision',
+    });
+
+    service.stopAction();
+
+    expect(service.isActionCooldown()).toBeTrue();
+    expect(service.canStartAction(CharacterActionType.Combat)).toBeFalse();
+    expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
   });
 
   it('does not treat later action changes as another logout', fakeAsync(() => {

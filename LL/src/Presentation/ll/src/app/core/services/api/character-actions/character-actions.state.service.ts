@@ -88,6 +88,11 @@ export class CharacterActionsStateService {
   private actionRefreshLoadingTimeout: ReturnType<typeof setTimeout> | null =
     null;
   private activeOfflineCatchUpRequests = 0;
+  private stopActionInFlight = false;
+  private pendingStartAfterStop: {
+    type: CharacterActionType;
+    payload: StartCombatActionRequest | StartCraftingActionRequest;
+  } | null = null;
 
   private readonly _startTime = signal<number | null>(null);
   private readonly _tickingDuration = signal<number>(0);
@@ -122,7 +127,7 @@ export class CharacterActionsStateService {
     const action = this._currentAction();
     if (!action?.isDeleted) return false;
 
-    return this.actionDeadline(action) > Date.now();
+    return this.switchUnlockDeadline(action) > Date.now();
   });
 
   constructor(
@@ -225,6 +230,15 @@ export class CharacterActionsStateService {
     type: CharacterActionType,
     payload: StartCombatActionRequest | StartCraftingActionRequest,
   ): void {
+    // Quitting and starting another action are separate HTTP requests. Preserve
+    // the player's click immediately, but serialize the requests so a late
+    // combat-delete cannot remove the newly created tempering queue.
+    if (this.stopActionInFlight && type === CharacterActionType.Crafting) {
+      this.pendingStartAfterStop = { type, payload };
+      this.persistence.set(type);
+      return;
+    }
+
     this.persistence.set(type);
     let call$: Observable<boolean | CharacterActionDto>;
 
@@ -278,16 +292,22 @@ export class CharacterActionsStateService {
   }
 
   stopAction(): void {
+    if (this.stopActionInFlight) return;
+
     const wasCraftingAction = this.isCraftingAction();
     if (this.isCombatAction()) this._idleCombatPhase.set('stopping');
     this._resolvingOfflineProgress.set(false);
+    this.stopActionInFlight = true;
     this.handleDeletionOfCurrentAction();
+    // Tear down the old action synchronously. The retained deleted snapshot
+    // still carries the original combat lock, so Tempering remains clickable.
+    // Doing this in the response callback could clear a successor action.
+    this.clear();
 
     this.actionsService
       .stop()
       .pipe(
         tap(() => {
-          this.clear();
           if (wasCraftingAction) {
             this.inventoryState.load(true);
           }
@@ -295,6 +315,14 @@ export class CharacterActionsStateService {
         catchError((err) => {
           console.error('Failed to stop action', err);
           return of(null);
+        }),
+        finalize(() => {
+          this.stopActionInFlight = false;
+          const pendingStart = this.pendingStartAfterStop;
+          this.pendingStartAfterStop = null;
+          if (pendingStart) {
+            this.startAction(pendingStart.type, pendingStart.payload);
+          }
         }),
       )
       .subscribe();
@@ -304,9 +332,18 @@ export class CharacterActionsStateService {
     const currentAction = this._currentAction();
     if (!currentAction) return;
 
+    const waitsForSwitchUnlock =
+      this.switchUnlockDeadline(currentAction) > Date.now();
     const updated = {
       ...currentAction,
       isDeleted: true,
+      updatedAt: waitsForSwitchUnlock ? currentAction.updatedAt : new Date(),
+      nextResolutionAtUtc: waitsForSwitchUnlock
+        ? currentAction.nextResolutionAtUtc
+        : null,
+      nextResolutionAt: waitsForSwitchUnlock
+        ? currentAction.nextResolutionAt
+        : null,
       craftingActionDetails: undefined,
       combatActionDetails: undefined,
     };
@@ -321,7 +358,9 @@ export class CharacterActionsStateService {
   canStartAction(type: CharacterActionType): boolean {
     const action = this._currentAction();
     if (!action) return true;
-    if (this.isActionCooldown()) return false;
+    if (this.isActionCooldown()) {
+      return type === CharacterActionType.Crafting;
+    }
     if (
       action.isDeleted ||
       action.characterActionType === CharacterActionType.Idle
@@ -352,6 +391,7 @@ export class CharacterActionsStateService {
 
   reset(): void {
     this.resetVersion += 1;
+    this.pendingStartAfterStop = null;
     this.clear();
     this.activeActionRefreshes = 0;
     if (this.actionRefreshLoadingTimeout) {
@@ -379,7 +419,7 @@ export class CharacterActionsStateService {
       return;
     }
 
-    const deadline = this.actionDeadline(action);
+    const deadline = this.switchUnlockDeadline(action);
     const now = Date.now();
 
     if (deadline < now) {
@@ -702,9 +742,8 @@ export class CharacterActionsStateService {
     return !action.combatSession?.combatResult;
   }
 
-  private actionDeadline(action: CharacterActionDto): number {
-    return new Date(
-      action.nextResolutionAtUtc ?? action.nextResolutionAt ?? action.updatedAt,
-    ).getTime();
+  private switchUnlockDeadline(action: CharacterActionDto): number {
+    const deadline = action.blockedUntilUtc ?? action.updatedAt;
+    return new Date(deadline).getTime();
   }
 }

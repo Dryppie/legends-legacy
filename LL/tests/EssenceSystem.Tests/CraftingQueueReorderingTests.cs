@@ -1,5 +1,6 @@
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
@@ -73,6 +74,115 @@ public sealed class CraftingQueueReorderingTests
         Assert.False(moved);
     }
 
+    [Fact]
+    public async Task Removing_the_final_tempering_item_clears_the_schedule_immediately()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var equipmentId = Guid.NewGuid();
+        var now = DateTimeOffset.Parse("2026-08-18T12:00:00Z");
+        var equipmentBase = new EquipmentBase
+        {
+            Id = "test-sword",
+            Name = "Test Sword",
+            EquipmentType = EquipmentType.OneHanded
+        };
+        var equipment = new EquipmentInstance
+        {
+            Id = equipmentId,
+            ItemBaseId = equipmentBase.Id,
+            ItemBase = equipmentBase
+        };
+        var queueItem = new CraftingQueueItem
+        {
+            Id = Guid.NewGuid(),
+            EquipmentInstanceId = equipmentId,
+            EquipmentInstance = equipment
+        };
+        db.CharacterActions.Add(new CharacterAction
+        {
+            CharacterId = characterId,
+            UpdatedAt = now.AddSeconds(-1),
+            NextResolutionAtUtc = now.AddSeconds(9),
+            ActionDetails = new CraftingActionDetails
+            {
+                CraftingQueueItems = [queueItem]
+            }
+        });
+        await db.SaveChangesAsync();
+
+        var repository = new CraftingRepository(db, new FixedTimeProvider(now));
+        var removed = await repository.RemoveCraftingQueueItemAndReturnItemAsync(
+            characterId,
+            queueItem.Id,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var action = await db.CharacterActions.SingleAsync(
+            candidate => candidate.CharacterId == characterId);
+        Assert.Same(equipment, removed);
+        Assert.True(action.IsDeleted);
+        Assert.Null(action.ActionDetails);
+        Assert.Null(action.NextResolutionAtUtc);
+        Assert.Null(action.BlockedUntilUtc);
+        Assert.Equal(now, action.UpdatedAt);
+        Assert.Equal((uint)1, action.RowVersion);
+    }
+
+    [Fact]
+    public async Task Removing_queued_tempering_preserves_an_unexpired_combat_switch_lock()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var equipmentId = Guid.NewGuid();
+        var now = DateTimeOffset.Parse("2026-08-18T12:00:00Z");
+        var switchUnlock = now.AddSeconds(5);
+        var equipmentBase = new EquipmentBase
+        {
+            Id = "test-sword",
+            Name = "Test Sword",
+            EquipmentType = EquipmentType.OneHanded
+        };
+        var equipment = new EquipmentInstance
+        {
+            Id = equipmentId,
+            ItemBaseId = equipmentBase.Id,
+            ItemBase = equipmentBase
+        };
+        var queueItem = new CraftingQueueItem
+        {
+            Id = Guid.NewGuid(),
+            EquipmentInstanceId = equipmentId,
+            EquipmentInstance = equipment
+        };
+        db.CharacterActions.Add(new CharacterAction
+        {
+            CharacterId = characterId,
+            UpdatedAt = now.AddSeconds(-5),
+            NextResolutionAtUtc = now.AddSeconds(15),
+            BlockedUntilUtc = switchUnlock,
+            ActionDetails = new CraftingActionDetails
+            {
+                CraftingQueueItems = [queueItem]
+            }
+        });
+        await db.SaveChangesAsync();
+
+        var repository = new CraftingRepository(db, new FixedTimeProvider(now));
+        var removed = await repository.RemoveCraftingQueueItemAndReturnItemAsync(
+            characterId,
+            queueItem.Id,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var action = await db.CharacterActions.SingleAsync(
+            candidate => candidate.CharacterId == characterId);
+        Assert.Same(equipment, removed);
+        Assert.True(action.IsDeleted);
+        Assert.Null(action.NextResolutionAtUtc);
+        Assert.Equal(switchUnlock, action.BlockedUntilUtc);
+    }
+
     private static CraftingQueueItem QueueItem(int position) => new()
     {
         Id = Guid.NewGuid(),
@@ -88,5 +198,10 @@ public sealed class CraftingQueueReorderingTests
             .Options;
 
         return new LLDbContext(options);
+    }
+
+    private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => now;
     }
 }

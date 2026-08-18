@@ -25,6 +25,10 @@ public class CharacterAction
     /// Audit timestamp for the last persisted mutation. It is not a gameplay schedule.
     /// </summary>
     public DateTimeOffset UpdatedAt { get; set; }
+    /// <summary>
+    /// Earliest UTC timestamp at which combat may be replaced by another action.
+    /// This is a fixed lock from combat start, not the rolling resolution boundary.
+    /// </summary>
     public DateTimeOffset? BlockedUntilUtc { get; set; }
     public long ScheduleGeneration { get; set; } = 1;
     public bool IsDeleted { get; set; }

@@ -1,10 +1,8 @@
 <div
-  class="flex h-full min-h-0 w-full flex-col gap-4 overflow-y-auto overscroll-contain py-4 md:grid md:grid-cols-[minmax(0,1fr)_minmax(20rem,26rem)] md:grid-rows-[minmax(0,1fr)] md:overflow-hidden"
+  class="flex h-full min-h-0 w-full flex-col gap-4 overflow-y-auto overscroll-contain py-4 md:grid md:grid-cols-[minmax(0,1fr)_minmax(20rem,26rem)]"
 >
-  <div
-    class="order-2 flex w-full shrink-0 flex-col space-y-2 md:h-full md:min-h-0 md:overflow-y-auto"
-  >
-    <section class="ll-panel p-4">
+  <div class="order-2 flex w-full shrink-0 flex-col space-y-2">
+    <section class="ll-panel shrink-0 p-4">
       <h2 class="ll-heading text-xl">Tempering</h2>
       <ng-container
         *ngIf="selectedEquipmentInstance() as equipment; else noItem"
@@ -113,7 +111,7 @@
     </section>
 
     <section
-      class="ll-panel max-h-72 min-h-24 overflow-y-auto p-4 sm:max-h-full"
+      class="ll-panel max-h-72 min-h-24 overflow-y-auto p-4 sm:max-h-full md:max-h-none"
     >
       <h2 class="ll-heading text-xl">Tempering Queue</h2>
       <ng-container *ngIf="activeQueueItem() as workingItem; else emptyQueue">
@@ -275,7 +273,7 @@
   </div>
 
   <div
-    class="order-1 flex min-h-24 w-full shrink-0 flex-col space-y-2 md:h-full md:min-h-0 md:overflow-y-auto"
+    class="order-1 flex min-h-24 w-full shrink-0 flex-col space-y-2 md:min-h-0 md:overflow-hidden md:[contain:size]"
   >
     <ng-container
       *ngIf="filteredInventory().length; else noItemsToTemper"
@@ -290,12 +288,12 @@
       </div>
 
       <div
-        class="shrink-0 overflow-hidden border-y border-light_gray/60"
+        class="shrink-0 overflow-hidden border-y border-light_gray/60 md:min-h-0 md:flex-1 md:overflow-y-auto md:overscroll-contain"
         role="table"
         aria-label="Items to temper"
       >
         <div
-          class="grid min-h-8 grid-cols-[minmax(0,1fr)_4.75rem] items-center gap-2 border-b border-light_gray/60 px-3 text-xs uppercase tracking-[0.12em] text-secondary lg:grid-cols-[minmax(0,1fr)_6.5rem_4.75rem_6.5rem]"
+          class="grid min-h-8 grid-cols-[minmax(0,1fr)_4.75rem] items-center gap-2 border-b border-light_gray/60 px-3 text-xs uppercase tracking-[0.12em] text-secondary md:sticky md:top-0 md:z-10 md:bg-[#111114] lg:grid-cols-[minmax(0,1fr)_6.5rem_4.75rem_6.5rem]"
           role="row"
         >
           <div role="columnheader" [attr.aria-sort]="ariaSort('Name')">

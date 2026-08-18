@@ -31,6 +31,9 @@ public sealed class CharacterActionRepositoryTests
 
         var startedAction = await repository.StartCharacterActionAsync(action, now, CancellationToken.None);
         Assert.NotNull(startedAction);
+        Assert.Equal(
+            now.AddSeconds(CharacterActionTimingConstants.CombatSwitchLockSeconds),
+            startedAction.BlockedUntilUtc);
         Assert.Equal(EntityState.Added, db.Entry(startedAction).State);
 
         // CharacterActionService performs this update after resolving the first
@@ -65,12 +68,13 @@ public sealed class CharacterActionRepositoryTests
         var startedFirst = await repository.StartCharacterActionAsync(firstAction, now, CancellationToken.None);
         await db.SaveChangesAsync();
 
+        var secondStart = now.AddSeconds(CharacterActionTimingConstants.CombatSwitchLockSeconds);
         var secondAction = new CharacterAction(
             characterId,
             new CombatActionDetails([characterId], secondArea),
-            now);
+            secondStart);
 
-        var startedSecond = await repository.StartCharacterActionAsync(secondAction, now, CancellationToken.None);
+        var startedSecond = await repository.StartCharacterActionAsync(secondAction, secondStart, CancellationToken.None);
         await db.SaveChangesAsync();
 
         var currentAction = await db.CharacterActions
@@ -87,42 +91,119 @@ public sealed class CharacterActionRepositoryTests
     }
 
     [Fact]
-    public async Task UpdateCraftingActionAsync_replaces_combat_after_its_next_boundary()
+    public async Task Stopped_combat_blocks_replacement_until_its_ten_second_boundary()
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
-        var itemId = Guid.NewGuid();
         var area = new Area { Id = "first-area", Name = "First Area" };
-        var equipmentBase = new EquipmentBase
+        var now = DateTimeOffset.Parse("2026-08-18T12:00:00Z");
+        var switchUnlock = now.AddSeconds(CharacterActionTimingConstants.CombatSwitchLockSeconds);
+        var action = new CharacterAction(
+            characterId,
+            new CombatActionDetails([characterId], area),
+            now)
         {
-            Id = "test-sword",
-            Name = "Test Sword",
-            EquipmentType = EquipmentType.OneHanded
-        };
-        var equipment = new EquipmentInstance
-        {
-            Id = itemId,
-            ItemBaseId = equipmentBase.Id,
-            ItemBase = equipmentBase,
-            BaseRecipeId = "recipe.test-sword",
-            Potential = 10
+            NextResolutionAtUtc = now.AddSeconds(30)
         };
         db.Areas.Add(area);
-        db.InventoryItems.Add(new InventoryItem
-        {
-            InventoryId = characterId,
-            ItemInstanceId = itemId,
-            ItemInstance = equipment
-        });
+        var repository = new CharacterActionRepository(db);
+        action = (await repository.StartCharacterActionAsync(
+            action,
+            now,
+            CancellationToken.None))!;
+        await db.SaveChangesAsync();
+        await repository.DeleteCharacterActionAsync(
+            action,
+            now.AddSeconds(5),
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var blocked = await repository.StartCharacterActionAsync(
+            new CharacterAction(
+                characterId,
+                new CombatActionDetails([characterId], area),
+                now.AddSeconds(5)),
+            now.AddSeconds(5),
+            CancellationToken.None);
+        var accepted = await repository.StartCharacterActionAsync(
+            new CharacterAction(
+                characterId,
+                new CombatActionDetails([characterId], area),
+                switchUnlock),
+            switchUnlock,
+            CancellationToken.None);
+
+        Assert.Null(blocked);
+        Assert.NotNull(accepted);
+    }
+
+    [Fact]
+    public async Task Stopped_combat_accepts_tempering_during_the_lock_and_delays_its_first_attempt()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var area = new Area { Id = "first-area", Name = "First Area" };
+        var equipment = AddTemperableEquipment(db, characterId);
+        var now = DateTimeOffset.Parse("2026-08-18T12:00:00Z");
+        var switchUnlock = now.AddSeconds(CharacterActionTimingConstants.CombatSwitchLockSeconds);
+        db.Areas.Add(area);
+
+        var repository = new CharacterActionRepository(db);
+        var combat = (await repository.StartCharacterActionAsync(
+            new CharacterAction(
+                characterId,
+                new CombatActionDetails([characterId], area),
+                now),
+            now,
+            CancellationToken.None))!;
+        combat.NextResolutionAtUtc = now.AddSeconds(30);
+        await db.SaveChangesAsync();
+
+        var stoppedAt = now.AddSeconds(1);
+        await repository.DeleteCharacterActionAsync(combat, stoppedAt, CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var queued = await repository.UpdateCraftingActionAsync(
+            characterId,
+            new CraftingQueueItem
+            {
+                Id = Guid.NewGuid(),
+                EquipmentInstanceId = equipment.Id
+            },
+            stoppedAt,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var action = await db.CharacterActions
+            .Include(candidate => candidate.ActionDetails)
+            .SingleAsync(candidate => candidate.CharacterId == characterId);
+        Assert.True(queued);
+        Assert.False(action.IsDeleted);
+        Assert.IsType<CraftingActionDetails>(action.ActionDetails);
+        Assert.Equal(switchUnlock, action.BlockedUntilUtc);
+        Assert.Equal(
+            switchUnlock.AddSeconds(TemperingConstants.ActionDurationSeconds),
+            action.NextResolutionAtUtc);
+    }
+
+    [Fact]
+    public async Task UpdateCraftingActionAsync_replaces_combat_after_its_fixed_switch_lock()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var area = new Area { Id = "first-area", Name = "First Area" };
+        var equipment = AddTemperableEquipment(db, characterId);
+        db.Areas.Add(area);
 
         var now = DateTimeOffset.Parse("2026-08-17T12:00:00Z");
-        var combatBoundary = now.AddSeconds(7);
+        var switchUnlock = now.AddSeconds(7);
         db.CharacterActions.Add(new CharacterAction(
             characterId,
             new CombatActionDetails([characterId], area),
             now)
         {
-            NextResolutionAtUtc = combatBoundary
+            NextResolutionAtUtc = now.AddSeconds(30),
+            BlockedUntilUtc = switchUnlock
         });
         await db.SaveChangesAsync();
 
@@ -130,7 +211,7 @@ public sealed class CharacterActionRepositoryTests
         var queueItem = new CraftingQueueItem
         {
             Id = Guid.NewGuid(),
-            EquipmentInstanceId = itemId
+            EquipmentInstanceId = equipment.Id
         };
 
         var updated = await repository.UpdateCraftingActionAsync(
@@ -148,12 +229,116 @@ public sealed class CharacterActionRepositoryTests
         var craftingDetails = Assert.IsType<CraftingActionDetails>(action.ActionDetails);
         Assert.True(updated);
         Assert.Equal(
-            combatBoundary.AddSeconds(TemperingConstants.ActionDurationSeconds),
+            switchUnlock.AddSeconds(TemperingConstants.ActionDurationSeconds),
             action.NextResolutionAtUtc);
+        Assert.Equal(switchUnlock, action.BlockedUntilUtc);
         Assert.Equal(2, action.ScheduleGeneration);
         Assert.Equal(queueItem.Id, Assert.Single(craftingDetails.CraftingQueueItems).Id);
         Assert.Empty(db.InventoryItems);
         Assert.Single(db.ActionDetails);
+    }
+
+    [Fact]
+    public async Task Stopped_combat_can_start_tempering_immediately_after_the_initial_lock()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var area = new Area { Id = "first-area", Name = "First Area" };
+        var equipment = AddTemperableEquipment(db, characterId);
+        var now = DateTimeOffset.Parse("2026-08-18T12:00:00Z");
+        db.Areas.Add(area);
+
+        var repository = new CharacterActionRepository(db);
+        var combat = (await repository.StartCharacterActionAsync(
+            new CharacterAction(
+                characterId,
+                new CombatActionDetails([characterId], area),
+                now),
+            now,
+            CancellationToken.None))!;
+        combat.NextResolutionAtUtc = now.AddSeconds(30);
+        await db.SaveChangesAsync();
+
+        var switchTime = now.AddSeconds(15);
+        await repository.DeleteCharacterActionAsync(
+            combat,
+            switchTime,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var updated = await repository.UpdateCraftingActionAsync(
+            characterId,
+            new CraftingQueueItem
+            {
+                Id = Guid.NewGuid(),
+                EquipmentInstanceId = equipment.Id
+            },
+            switchTime,
+            CancellationToken.None);
+
+        Assert.True(updated);
+        var action = await db.CharacterActions.SingleAsync();
+        Assert.Equal(
+            switchTime.AddSeconds(TemperingConstants.ActionDurationSeconds),
+            action.NextResolutionAtUtc);
+        Assert.Null(action.BlockedUntilUtc);
+    }
+
+    [Fact]
+    public async Task UpdateCraftingActionAsync_waits_one_full_interval_for_the_first_attempt()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var equipment = AddTemperableEquipment(db, characterId);
+        await db.SaveChangesAsync();
+
+        var now = DateTimeOffset.Parse("2026-08-18T12:00:00Z");
+        var repository = new CharacterActionRepository(db);
+
+        var updated = await repository.UpdateCraftingActionAsync(
+            characterId,
+            new CraftingQueueItem
+            {
+                Id = Guid.NewGuid(),
+                EquipmentInstanceId = equipment.Id
+            },
+            now,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var action = await db.CharacterActions.SingleAsync(
+            candidate => candidate.CharacterId == characterId);
+        Assert.True(updated);
+        Assert.Equal(
+            now.AddSeconds(TemperingConstants.ActionDurationSeconds),
+            action.NextResolutionAtUtc);
+    }
+
+    private static EquipmentInstance AddTemperableEquipment(
+        LLDbContext db,
+        Guid characterId)
+    {
+        var equipmentBase = new EquipmentBase
+        {
+            Id = "test-sword",
+            Name = "Test Sword",
+            EquipmentType = EquipmentType.OneHanded
+        };
+        var equipment = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = equipmentBase.Id,
+            ItemBase = equipmentBase,
+            BaseRecipeId = "recipe.test-sword",
+            Potential = 10
+        };
+        db.InventoryItems.Add(new InventoryItem
+        {
+            InventoryId = characterId,
+            ItemInstanceId = equipment.Id,
+            ItemInstance = equipment
+        });
+        return equipment;
     }
 
     private static LLDbContext CreateDb()

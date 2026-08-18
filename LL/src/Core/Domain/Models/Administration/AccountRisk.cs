@@ -16,7 +16,9 @@ public enum AccountRiskSignalType
     OneSidedRelationship,
     OneSidedItemTransfer,
     IncomingItemFunnel,
+    ItemQuantityConsolidation,
     YoungItemSourceNetwork,
+    YoungItemCoordinationNetwork,
     FeederNetwork,
     YoungAccountOutflow,
     CircularTransfer
@@ -164,7 +166,11 @@ public sealed record AccountRiskTransferFact(
     DateTime? RecipientAccountCreatedUtc = null,
     int? RecipientCharacterLevel = null,
     AccountRiskTransferKind Kind = AccountRiskTransferKind.Cinders,
-    string AssetId = "currency:cinders");
+    string AssetId = "currency:cinders",
+    long Quantity = 0)
+{
+    public long EffectiveQuantity => Quantity > 0 ? Quantity : Amount;
+}
 
 public enum AccountRiskTransferKind
 {
@@ -217,8 +223,18 @@ public sealed record AccountRiskPolicy(
     int MinimumItemFunnelCounterpartyCount,
     int ItemFunnelFullScaleTransferCount,
     decimal ItemFunnelIncomingShareThreshold,
+    int MinimumConsolidatedItemAssetCount,
+    long MinimumConsolidatedItemQuantity,
+    int MinimumConsolidatedItemTransferCount,
+    decimal ConsolidatedItemIncomingShareThreshold,
     int MinimumYoungItemSourceTransferCount,
     int MinimumYoungItemSourceCounterpartyCount,
+    int MinimumYoungItemCoordinationTransferCount,
+    int MinimumYoungItemCoordinationCounterpartyCount,
+    int MinimumMixedDirectionItemTransferCount,
+    int ItemTransferSessionWindowMinutes,
+    int MinimumItemCoordinationSessionCount,
+    decimal ItemCoordinationDominantSessionShareThreshold,
     long MinimumFeederCinders,
     long MinimumYoungAccountOutflowCinders,
     long MinimumCircularTransferCinders,
@@ -244,8 +260,18 @@ public sealed record AccountRiskPolicy(
         MinimumItemFunnelCounterpartyCount: 2,
         ItemFunnelFullScaleTransferCount: 150,
         ItemFunnelIncomingShareThreshold: 0.85m,
+        MinimumConsolidatedItemAssetCount: 2,
+        MinimumConsolidatedItemQuantity: 50,
+        MinimumConsolidatedItemTransferCount: 10,
+        ConsolidatedItemIncomingShareThreshold: 0.80m,
         MinimumYoungItemSourceTransferCount: 20,
         MinimumYoungItemSourceCounterpartyCount: 2,
+        MinimumYoungItemCoordinationTransferCount: 50,
+        MinimumYoungItemCoordinationCounterpartyCount: 4,
+        MinimumMixedDirectionItemTransferCount: 10,
+        ItemTransferSessionWindowMinutes: 5,
+        MinimumItemCoordinationSessionCount: 20,
+        ItemCoordinationDominantSessionShareThreshold: 0.70m,
         MinimumFeederCinders: 20_000,
         MinimumYoungAccountOutflowCinders: 10_000,
         MinimumCircularTransferCinders: 10_000,
@@ -286,8 +312,10 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         EvaluateIncomingConcentration(accountId, cinderIncoming, incomingTotal, signals);
         EvaluateOneSidedRelationships(accountId, cinderDirect, signals);
         EvaluateIncomingItemFunnel(accountId, itemDirect, signals);
+        EvaluateItemQuantityConsolidation(accountId, itemDirect, signals);
         EvaluateOneSidedItemTransfers(accountId, itemDirect, signals);
         EvaluateYoungItemSourceNetwork(accountId, dataset, itemDirect, signals);
+        EvaluateYoungItemCoordinationNetwork(accountId, dataset, itemDirect, signals);
         EvaluateFeederNetwork(accountId, dataset, cinderIncoming, signals);
         EvaluateYoungAccountOutflow(account, cinderOutgoing, incomingTotal + outgoingTotal, signals);
         EvaluateCircularTransfers(accountId, dataset, signals);
@@ -451,6 +479,75 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
             "item-flow"));
     }
 
+    private void EvaluateItemQuantityConsolidation(
+        Guid accountId,
+        IReadOnlyList<AccountRiskTransferFact> directItems,
+        ICollection<AccountRiskSignal> signals)
+    {
+        var imbalancedAssets = directItems
+            .GroupBy(x => x.AssetId, StringComparer.Ordinal)
+            .Select(group =>
+            {
+                var incomingQuantity = group
+                    .Where(x => x.RecipientAccountId == accountId)
+                    .Sum(x => x.EffectiveQuantity);
+                var outgoingQuantity = group
+                    .Where(x => x.SenderAccountId == accountId)
+                    .Sum(x => x.EffectiveQuantity);
+                var totalQuantity = incomingQuantity + outgoingQuantity;
+                var incomingShare = totalQuantity == 0 ? 0 : (decimal)incomingQuantity / totalQuantity;
+                return new ItemQuantityFlow(
+                    group.Key,
+                    incomingQuantity,
+                    outgoingQuantity,
+                    incomingShare,
+                    group.ToList());
+            })
+            .Where(x => x.IncomingQuantity >= policy.MinimumConsolidatedItemQuantity &&
+                        x.IncomingShare >= policy.ConsolidatedItemIncomingShareThreshold)
+            .OrderByDescending(x => x.IncomingQuantity - x.OutgoingQuantity)
+            .ToList();
+        var supportingTransfers = imbalancedAssets.SelectMany(x => x.Transfers).ToList();
+        if (imbalancedAssets.Count < policy.MinimumConsolidatedItemAssetCount ||
+            supportingTransfers.Count < policy.MinimumConsolidatedItemTransferCount) return;
+
+        var averageIncomingShare = imbalancedAssets.Average(x => x.IncomingShare);
+        var contribution = Math.Min(
+            30,
+            17 +
+            Scale(
+                imbalancedAssets.Count,
+                policy.MinimumConsolidatedItemAssetCount,
+                Math.Max(policy.MinimumConsolidatedItemAssetCount + 1, 5),
+                0,
+                7) +
+            Scale(
+                supportingTransfers.Count,
+                policy.MinimumConsolidatedItemTransferCount,
+                Math.Max(policy.MinimumConsolidatedItemTransferCount + 1, 50),
+                0,
+                4) +
+            Scale(averageIncomingShare, policy.ConsolidatedItemIncomingShareThreshold, 1m, 0, 4));
+        var strongest = imbalancedAssets[0];
+        var examples = string.Join(
+            ", ",
+            imbalancedAssets.Take(3).Select(x => $"{x.AssetId}: {x.IncomingQuantity:N0} in / {x.OutgoingQuantity:N0} out"));
+        signals.Add(Signal(
+            AccountRiskSignalType.ItemQuantityConsolidation,
+            "Resource flow",
+            contribution,
+            "Same-asset item quantity consolidation",
+            $"Incoming quantities materially exceeded outgoing quantities for {imbalancedAssets.Count} item types ({examples}). Only matching asset IDs offset one another; unrelated outbound items do not.",
+            Evidence(
+                ("qualifyingAssetCount", imbalancedAssets.Count),
+                ("supportingItemTransfers", supportingTransfers.Count),
+                ("averageIncomingQuantityShare", averageIncomingShare),
+                ("strongestAssetIncomingQuantity", strongest.IncomingQuantity),
+                ("strongestAssetOutgoingQuantity", strongest.OutgoingQuantity)),
+            supportingTransfers,
+            "item-flow"));
+    }
+
     private void EvaluateYoungItemSourceNetwork(
         Guid accountId,
         AccountRiskAnalysisDataset dataset,
@@ -491,7 +588,75 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
                 ("accountIncomingItemShare", incomingShare),
                 ("maximumAgeAtFirstTransferDays", (decimal)sources.Max(x => x.AgeAtFirstTransferDays))),
             sources.SelectMany(x => x.Transfers),
-            "item-source-context"));
+            "young-item-network"));
+    }
+
+    private void EvaluateYoungItemCoordinationNetwork(
+        Guid accountId,
+        AccountRiskAnalysisDataset dataset,
+        IReadOnlyList<AccountRiskTransferFact> directItems,
+        ICollection<AccountRiskSignal> signals)
+    {
+        var counterparties = YoungItemCounterparties(accountId, dataset, directItems);
+        if (counterparties.Count < policy.MinimumYoungItemCoordinationCounterpartyCount) return;
+        var counterpartyIds = counterparties.Select(x => x.AccountId).ToHashSet();
+        var networkTransfers = directItems
+            .Where(x => counterpartyIds.Contains(x.SenderAccountId == accountId
+                ? x.RecipientAccountId
+                : x.SenderAccountId))
+            .ToList();
+        var incomingCount = networkTransfers.Count(x => x.RecipientAccountId == accountId);
+        var outgoingCount = networkTransfers.Count(x => x.SenderAccountId == accountId);
+        if (networkTransfers.Count < policy.MinimumYoungItemCoordinationTransferCount ||
+            incomingCount < policy.MinimumMixedDirectionItemTransferCount ||
+            outgoingCount < policy.MinimumMixedDirectionItemTransferCount) return;
+
+        var sessions = SummarizeItemTransferSessions(accountId, networkTransfers);
+        if (sessions.Total < policy.MinimumItemCoordinationSessionCount ||
+            sessions.Incoming == 0 ||
+            sessions.Outgoing == 0) return;
+        var dominantSessionShare = (decimal)Math.Max(sessions.Incoming, sessions.Outgoing) / sessions.Total;
+        if (dominantSessionShare < policy.ItemCoordinationDominantSessionShareThreshold) return;
+
+        var contribution = Math.Min(
+            25,
+            12 +
+            Scale(
+                counterparties.Count,
+                policy.MinimumYoungItemCoordinationCounterpartyCount,
+                Math.Max(policy.MinimumYoungItemCoordinationCounterpartyCount + 1, 8),
+                0,
+                5) +
+            Scale(
+                sessions.Total,
+                policy.MinimumItemCoordinationSessionCount,
+                Math.Max(policy.MinimumItemCoordinationSessionCount + 1, policy.MinimumItemCoordinationSessionCount * 3),
+                0,
+                5) +
+            Scale(
+                networkTransfers.Count,
+                policy.MinimumYoungItemCoordinationTransferCount,
+                Math.Max(policy.MinimumYoungItemCoordinationTransferCount + 1, policy.ItemFunnelFullScaleTransferCount),
+                0,
+                3) +
+            Scale(dominantSessionShare, policy.ItemCoordinationDominantSessionShareThreshold, 1m, 0, 3));
+        signals.Add(Signal(
+            AccountRiskSignalType.YoungItemCoordinationNetwork,
+            "Account context",
+            contribution,
+            "Mixed-role young-account item network",
+            $"This account exchanged {networkTransfers.Count} item-transfer events with {counterparties.Count} young accounts in {sessions.Total} transfer session(s). Both directions were active, but {dominantSessionShare:P0} of sessions moved in the dominant direction.",
+            Evidence(
+                ("youngCounterpartyCount", counterparties.Count),
+                ("networkItemTransfers", networkTransfers.Count),
+                ("incomingItemTransfers", incomingCount),
+                ("outgoingItemTransfers", outgoingCount),
+                ("transferSessionCount", sessions.Total),
+                ("incomingSessionCount", sessions.Incoming),
+                ("outgoingSessionCount", sessions.Outgoing),
+                ("dominantSessionShare", dominantSessionShare)),
+            networkTransfers,
+            "young-item-network"));
     }
 
     private void EvaluateFeederNetwork(
@@ -616,6 +781,24 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         var qualifiedYoungItemSourceIds = itemSourceNetworkQualified
             ? youngItemSources.Select(x => x.AccountId).ToHashSet()
             : [];
+        var youngItemCounterparties = YoungItemCounterparties(accountId, dataset, directItems);
+        var youngCounterpartyIds = youngItemCounterparties.Select(x => x.AccountId).ToHashSet();
+        var coordinationTransfers = directItems.Where(x => youngCounterpartyIds.Contains(
+            x.SenderAccountId == accountId ? x.RecipientAccountId : x.SenderAccountId)).ToList();
+        var coordinationIncomingCount = coordinationTransfers.Count(x => x.RecipientAccountId == accountId);
+        var coordinationOutgoingCount = coordinationTransfers.Count(x => x.SenderAccountId == accountId);
+        var coordinationSessions = SummarizeItemTransferSessions(accountId, coordinationTransfers);
+        var coordinationDominantShare = coordinationSessions.Total == 0
+            ? 0
+            : (decimal)Math.Max(coordinationSessions.Incoming, coordinationSessions.Outgoing) / coordinationSessions.Total;
+        var itemCoordinationNetworkQualified =
+            youngItemCounterparties.Count >= policy.MinimumYoungItemCoordinationCounterpartyCount &&
+            coordinationTransfers.Count >= policy.MinimumYoungItemCoordinationTransferCount &&
+            coordinationIncomingCount >= policy.MinimumMixedDirectionItemTransferCount &&
+            coordinationOutgoingCount >= policy.MinimumMixedDirectionItemTransferCount &&
+            coordinationSessions.Total >= policy.MinimumItemCoordinationSessionCount &&
+            coordinationDominantShare >= policy.ItemCoordinationDominantSessionShareThreshold;
+        var coordinatedYoungItemIds = itemCoordinationNetworkQualified ? youngCounterpartyIds : [];
 
         return direct.GroupBy(x => x.SenderAccountId == accountId ? x.RecipientAccountId : x.SenderAccountId)
             .Select(group =>
@@ -645,6 +828,12 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
                 var relationship = qualifiedYoungItemSourceIds.Contains(group.Key) &&
                                    itemFlowIsStronger && flowsToSubject && isOneSided
                     ? "Young item-source network"
+                    : coordinatedYoungItemIds.Contains(group.Key) && itemTransfersToSubject > itemTransfersFromSubject
+                        ? "Young coordinated item source"
+                        : coordinatedYoungItemIds.Contains(group.Key) && itemTransfersFromSubject > itemTransfersToSubject
+                            ? "Young coordinated item recipient"
+                            : coordinatedYoungItemIds.Contains(group.Key) && itemTotal > 0
+                                ? "Young coordinated item exchange"
                     : flowsToSubject && young && itemFlowIsStronger && isOneSided
                         ? "Young one-sided item source"
                         : flowsToSubject && young && isOneSided
@@ -692,13 +881,75 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
                     : double.MaxValue;
                 return new YoungItemSource(
                     group.Key,
-                    ageDays <= policy.YoungAccountDays,
+                    ageDays is >= 0 && ageDays <= policy.YoungAccountDays,
                     level.HasValue && level.Value <= policy.YoungAccountMaximumLevel,
                     ageDays,
                     transfers);
             })
             .Where(x => x.WasYoung)
             .ToList();
+
+    private IReadOnlyList<YoungItemCounterparty> YoungItemCounterparties(
+        Guid accountId,
+        AccountRiskAnalysisDataset dataset,
+        IReadOnlyList<AccountRiskTransferFact> directItems) =>
+        directItems
+            .GroupBy(x => x.SenderAccountId == accountId ? x.RecipientAccountId : x.SenderAccountId)
+            .Select(group =>
+            {
+                dataset.Accounts.TryGetValue(group.Key, out var counterparty);
+                var transfers = group.OrderBy(x => x.OccurredAt).ToList();
+                var firstTransfer = transfers[0];
+                var counterpartyIsSender = firstTransfer.SenderAccountId == group.Key;
+                var createdUtc = counterpartyIsSender
+                    ? firstTransfer.SenderAccountCreatedUtc
+                    : firstTransfer.RecipientAccountCreatedUtc;
+                createdUtc ??= counterparty?.AccountCreatedUtc;
+                var level = counterpartyIsSender
+                    ? firstTransfer.SenderCharacterLevel
+                    : firstTransfer.RecipientCharacterLevel;
+                level ??= counterparty?.CharacterLevel;
+                var ageDays = createdUtc.HasValue
+                    ? (firstTransfer.OccurredAt.UtcDateTime - createdUtc.Value).TotalDays
+                    : double.MaxValue;
+                return new YoungItemCounterparty(
+                    group.Key,
+                    ageDays is >= 0 && ageDays <= policy.YoungAccountDays,
+                    level.HasValue && level.Value <= policy.YoungAccountMaximumLevel,
+                    ageDays,
+                    transfers);
+            })
+            .Where(x => x.WasYoung)
+            .ToList();
+
+    private ItemTransferSessionSummary SummarizeItemTransferSessions(
+        Guid accountId,
+        IReadOnlyList<AccountRiskTransferFact> transfers)
+    {
+        var incoming = 0;
+        var outgoing = 0;
+        var sessionWindow = TimeSpan.FromMinutes(policy.ItemTransferSessionWindowMinutes);
+        foreach (var group in transfers.GroupBy(x => new
+                 {
+                     CounterpartyId = x.SenderAccountId == accountId ? x.RecipientAccountId : x.SenderAccountId,
+                     Incoming = x.RecipientAccountId == accountId
+                 }))
+        {
+            DateTimeOffset? previous = null;
+            foreach (var transfer in group.OrderBy(x => x.OccurredAt))
+            {
+                if (previous is null || transfer.OccurredAt - previous.Value > sessionWindow)
+                {
+                    if (group.Key.Incoming) incoming++;
+                    else outgoing++;
+                }
+
+                previous = transfer.OccurredAt;
+            }
+        }
+
+        return new ItemTransferSessionSummary(incoming + outgoing, incoming, outgoing);
+    }
 
     private int PairwiseItemContribution(int transferCount, decimal imbalance) => Math.Min(
         15,
@@ -849,5 +1100,21 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         bool WasLowLevel,
         double AgeAtFirstTransferDays,
         IReadOnlyList<AccountRiskTransferFact> Transfers);
+
+    private sealed record YoungItemCounterparty(
+        Guid AccountId,
+        bool WasYoung,
+        bool WasLowLevel,
+        double AgeAtFirstTransferDays,
+        IReadOnlyList<AccountRiskTransferFact> Transfers);
+
+    private sealed record ItemQuantityFlow(
+        string AssetId,
+        long IncomingQuantity,
+        long OutgoingQuantity,
+        decimal IncomingShare,
+        IReadOnlyList<AccountRiskTransferFact> Transfers);
+
+    private sealed record ItemTransferSessionSummary(int Total, int Incoming, int Outgoing);
 
 }

@@ -1,5 +1,10 @@
 import { signal } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  fakeAsync,
+  TestBed,
+  tick,
+} from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { GameBootstrapStateService } from '../../../core/services/api/game-bootstrap/game-bootstrap-state.service';
@@ -20,6 +25,7 @@ describe('CombatComponent', () => {
   let router: { url: string; navigate: jasmine.Spy };
   let tour: { start: jasmine.Spy; stop: jasmine.Spy };
   let refreshCurrentAction: jasmine.Spy;
+  let combatOutcome: ReturnType<typeof signal<BattleOutcome | null>>;
 
   beforeEach(async () => {
     currentAction = signal<Record<string, unknown> | null>({
@@ -27,6 +33,7 @@ describe('CombatComponent', () => {
       isDeleted: false,
     });
     bootstrapLoaded = signal(true);
+    combatOutcome = signal<BattleOutcome | null>(null);
     refreshCurrentAction = jasmine.createSpy('refreshCurrentAction');
     router = {
       url: '/game/combat',
@@ -55,7 +62,7 @@ describe('CombatComponent', () => {
       getEnemyCharacters: () => signal([]),
       getEntityStats: () => signal([]),
       getNextCombat: () => signal(new Date()),
-      getCombatOutcome: () => signal(null),
+      getCombatOutcome: () => combatOutcome,
     };
 
     await TestBed.configureTestingModule({
@@ -225,4 +232,28 @@ describe('CombatComponent', () => {
 
     expect(emitSpy).not.toHaveBeenCalled();
   });
+
+  it('does not clear a successor action when delayed Combat cleanup runs', () => {
+    const characterActions = TestBed.inject(
+      CharacterActionsStateService,
+    ) as any;
+
+    fixture.componentInstance.battleType = BattleType.IdleCombat;
+    fixture.componentInstance.stopCombat();
+
+    expect(characterActions.clear).not.toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledOnceWith(['/game/world']);
+  });
+
+  it('cancels delayed Combat exit after the player navigates away', fakeAsync(() => {
+    fixture.detectChanges();
+    fixture.componentInstance.initiateStoppingCombat();
+    combatOutcome.set(BattleOutcome.Victory);
+    tick();
+
+    fixture.destroy();
+    tick(3_001);
+
+    expect(router.navigate).not.toHaveBeenCalled();
+  }));
 });

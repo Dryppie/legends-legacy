@@ -34,12 +34,13 @@ export class AccountRiskComponent implements OnInit {
     await this.load();
   }
 
-  async quickFilter(filter: 'critical' | 'high' | 'moderate' | 'feeders' | 'item-sources' | 'new' | 'all'): Promise<void> {
+  async quickFilter(filter: 'critical' | 'high' | 'moderate' | 'feeders' | 'item-sources' | 'item-coordination' | 'new' | 'all'): Promise<void> {
     this.signalType = '';
     this.maximumAccountAgeDays = '';
     this.minimumSeverity = filter === 'critical' ? 'Critical' : filter === 'high' ? 'High' : filter === 'all' ? 'Low' : 'Moderate';
     if (filter === 'feeders') this.signalType = 'FeederNetwork';
     if (filter === 'item-sources') this.signalType = 'YoungItemSourceNetwork';
+    if (filter === 'item-coordination') this.signalType = 'YoungItemCoordinationNetwork';
     if (filter === 'new') this.maximumAccountAgeDays = '14';
     await this.applyFilters();
   }

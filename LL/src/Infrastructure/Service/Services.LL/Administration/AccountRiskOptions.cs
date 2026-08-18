@@ -7,7 +7,7 @@ public sealed class AccountRiskOptions
     public const string SectionName = "LiveOps:AccountRisk";
 
     public bool Enabled { get; set; } = true;
-    public int EvaluationVersion { get; set; } = 7;
+    public int EvaluationVersion { get; set; } = 8;
     public int EvaluationIntervalMinutes { get; set; } = 30;
     public int LookbackDays { get; set; } = 90;
     public int CandidateLimit { get; set; } = 2_000;
@@ -24,8 +24,18 @@ public sealed class AccountRiskOptions
     public int MinimumItemFunnelCounterpartyCount { get; set; } = 2;
     public int ItemFunnelFullScaleTransferCount { get; set; } = 150;
     public decimal ItemFunnelIncomingShareThreshold { get; set; } = 0.85m;
+    public int MinimumConsolidatedItemAssetCount { get; set; } = 2;
+    public long MinimumConsolidatedItemQuantity { get; set; } = 50;
+    public int MinimumConsolidatedItemTransferCount { get; set; } = 10;
+    public decimal ConsolidatedItemIncomingShareThreshold { get; set; } = 0.80m;
     public int MinimumYoungItemSourceTransferCount { get; set; } = 20;
     public int MinimumYoungItemSourceCounterpartyCount { get; set; } = 2;
+    public int MinimumYoungItemCoordinationTransferCount { get; set; } = 50;
+    public int MinimumYoungItemCoordinationCounterpartyCount { get; set; } = 4;
+    public int MinimumMixedDirectionItemTransferCount { get; set; } = 10;
+    public int ItemTransferSessionWindowMinutes { get; set; } = 5;
+    public int MinimumItemCoordinationSessionCount { get; set; } = 20;
+    public decimal ItemCoordinationDominantSessionShareThreshold { get; set; } = 0.70m;
     public long MinimumFeederCinders { get; set; } = 20_000;
     public long MinimumYoungAccountOutflowCinders { get; set; } = 10_000;
     public long MinimumCircularTransferCinders { get; set; } = 10_000;
@@ -51,8 +61,18 @@ public sealed class AccountRiskOptions
         MinimumItemFunnelCounterpartyCount,
         ItemFunnelFullScaleTransferCount,
         ItemFunnelIncomingShareThreshold,
+        MinimumConsolidatedItemAssetCount,
+        MinimumConsolidatedItemQuantity,
+        MinimumConsolidatedItemTransferCount,
+        ConsolidatedItemIncomingShareThreshold,
         MinimumYoungItemSourceTransferCount,
         MinimumYoungItemSourceCounterpartyCount,
+        MinimumYoungItemCoordinationTransferCount,
+        MinimumYoungItemCoordinationCounterpartyCount,
+        MinimumMixedDirectionItemTransferCount,
+        ItemTransferSessionWindowMinutes,
+        MinimumItemCoordinationSessionCount,
+        ItemCoordinationDominantSessionShareThreshold,
         MinimumFeederCinders,
         MinimumYoungAccountOutflowCinders,
         MinimumCircularTransferCinders,

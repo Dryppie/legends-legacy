@@ -114,14 +114,24 @@ public static class DependencyInjection
                            x.MinimumItemTransferCount > 0 && x.MinimumItemFunnelTransferCount > 0 &&
                            x.MinimumItemFunnelCounterpartyCount > 0 &&
                            x.ItemFunnelFullScaleTransferCount >= x.MinimumItemFunnelTransferCount &&
+                           x.MinimumConsolidatedItemAssetCount > 0 && x.MinimumConsolidatedItemQuantity > 0 &&
+                           x.MinimumConsolidatedItemTransferCount > 0 &&
                            x.MinimumYoungItemSourceTransferCount > 0 &&
-                           x.MinimumYoungItemSourceCounterpartyCount > 0 && x.MinimumFeederCinders > 0 &&
+                           x.MinimumYoungItemSourceCounterpartyCount > 0 &&
+                           x.MinimumYoungItemCoordinationTransferCount > 0 &&
+                           x.MinimumYoungItemCoordinationCounterpartyCount > 0 &&
+                           x.MinimumMixedDirectionItemTransferCount > 0 &&
+                           x.ItemTransferSessionWindowMinutes > 0 && x.MinimumItemCoordinationSessionCount > 0 &&
+                           x.MinimumFeederCinders > 0 &&
                            x.MinimumYoungAccountOutflowCinders > 0 && x.MinimumCircularTransferCinders > 0,
                 "LiveOps account-risk limits must be positive.")
             .Validate(x => x.ModerateScore >= 0 && x.ModerateScore < x.HighScore && x.HighScore < x.CriticalScore && x.CriticalScore <= 100,
                 "LiveOps account-risk severity thresholds must be ordered within 0-100.")
             .Validate(x => x.ItemFunnelIncomingShareThreshold is > 0 and <= 1,
                 "The incoming-item funnel share threshold must be within (0, 1].")
+            .Validate(x => x.ConsolidatedItemIncomingShareThreshold is > 0.5m and <= 1 &&
+                           x.ItemCoordinationDominantSessionShareThreshold is > 0.5m and <= 1,
+                "Item consolidation and coordination share thresholds must be within (0.5, 1].")
             .ValidateOnStart();
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<IAccountAccessPolicy, AccountAccessPolicy>();
@@ -194,14 +204,24 @@ public static class DependencyInjection
                            x.MinimumItemTransferCount > 0 && x.MinimumItemFunnelTransferCount > 0 &&
                            x.MinimumItemFunnelCounterpartyCount > 0 &&
                            x.ItemFunnelFullScaleTransferCount >= x.MinimumItemFunnelTransferCount &&
+                           x.MinimumConsolidatedItemAssetCount > 0 && x.MinimumConsolidatedItemQuantity > 0 &&
+                           x.MinimumConsolidatedItemTransferCount > 0 &&
                            x.MinimumYoungItemSourceTransferCount > 0 &&
-                           x.MinimumYoungItemSourceCounterpartyCount > 0 && x.MinimumFeederCinders > 0 &&
+                           x.MinimumYoungItemSourceCounterpartyCount > 0 &&
+                           x.MinimumYoungItemCoordinationTransferCount > 0 &&
+                           x.MinimumYoungItemCoordinationCounterpartyCount > 0 &&
+                           x.MinimumMixedDirectionItemTransferCount > 0 &&
+                           x.ItemTransferSessionWindowMinutes > 0 && x.MinimumItemCoordinationSessionCount > 0 &&
+                           x.MinimumFeederCinders > 0 &&
                            x.MinimumYoungAccountOutflowCinders > 0 && x.MinimumCircularTransferCinders > 0,
                 "LiveOps account-risk limits must be positive.")
             .Validate(x => x.ModerateScore >= 0 && x.ModerateScore < x.HighScore && x.HighScore < x.CriticalScore && x.CriticalScore <= 100,
                 "LiveOps account-risk severity thresholds must be ordered within 0-100.")
             .Validate(x => x.ItemFunnelIncomingShareThreshold is > 0 and <= 1,
                 "The incoming-item funnel share threshold must be within (0, 1].")
+            .Validate(x => x.ConsolidatedItemIncomingShareThreshold is > 0.5m and <= 1 &&
+                           x.ItemCoordinationDominantSessionShareThreshold is > 0.5m and <= 1,
+                "Item consolidation and coordination share thresholds must be within (0.5, 1].")
             .ValidateOnStart();
         services.AddScoped<ILiveOpsAccountRiskService, LiveOpsAccountRiskService>();
         services.TryAddScoped<IChatModerationGateway, UnavailableChatModerationGateway>();

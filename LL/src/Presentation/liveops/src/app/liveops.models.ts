@@ -339,7 +339,7 @@ export interface OperationalStatus {
 }
 
 export type AccountRiskSeverity = 'Low' | 'Moderate' | 'High' | 'Critical';
-export type AccountRiskSignalType = 'IncomingConcentration' | 'OneSidedRelationship' | 'OneSidedItemTransfer' | 'IncomingItemFunnel' | 'YoungItemSourceNetwork' | 'FeederNetwork' | 'YoungAccountOutflow' | 'CircularTransfer';
+export type AccountRiskSignalType = 'IncomingConcentration' | 'OneSidedRelationship' | 'OneSidedItemTransfer' | 'IncomingItemFunnel' | 'ItemQuantityConsolidation' | 'YoungItemSourceNetwork' | 'YoungItemCoordinationNetwork' | 'FeederNetwork' | 'YoungAccountOutflow' | 'CircularTransfer';
 export type AccountInvestigationStatus = 'Unreviewed' | 'Investigating' | 'Watchlisted' | 'Cleared' | 'ConfirmedAbuse' | 'Actioned';
 
 export interface AccountRiskSummary {

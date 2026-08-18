@@ -188,6 +188,123 @@ public sealed class AccountRiskEvaluatorTests
     }
 
     [Fact]
+    public void QuantityAndSessionScoringDetectsTheReportedMixedRoleCoverTrafficPattern()
+    {
+        var subject = Account("ReportedMixedRoleMule", 8, 51);
+        var counterparties = new[]
+        {
+            (Account("BiggieSmalls", 7, 12), Incoming: 63, Outgoing: 19),
+            (Account("Niko", 7, 10), Incoming: 13, Outgoing: 6),
+            (Account("Shakob", 7, 14), Incoming: 2, Outgoing: 16),
+            (Account("Slaasmand", 7, 8), Incoming: 10, Outgoing: 0),
+            (Account("Dryp", 7, 9), Incoming: 5, Outgoing: 2),
+            (Account("neskidug", 7, 7), Incoming: 3, Outgoing: 2),
+            (Account("FieryElephantWalker_8482", 7, 11), Incoming: 3, Outgoing: 0),
+            (Account("smol", 7, 6), Incoming: 1, Outgoing: 0),
+        };
+        var incomingStacks = new Queue<(string AssetId, long Quantity)>(
+        [
+            ("wood", 800), ("wood", 700), ("wood", 42), ("wood", 26), ("wood", 7),
+            ("ore", 100), ("ore", 120), ("ore", 8), ("ore", 30), ("ore", 11),
+            ("ore", 77), ("ore", 50), ("ore", 3), ("ore", 3),
+            ("rawhide", 350), ("rawhide", 65), ("rawhide", 15), ("rawhide", 14),
+            ("soul_dust", 50), ("soul_dust", 50),
+        ]);
+        var transfers = new List<AccountRiskTransferFact>();
+        var remainingIncoming = counterparties.Select(x => x.Incoming).ToArray();
+        var sequence = 0;
+        while (remainingIncoming.Any(x => x > 0))
+        {
+            for (var counterpartyIndex = 0; counterpartyIndex < counterparties.Length; counterpartyIndex++)
+            {
+                if (remainingIncoming[counterpartyIndex] == 0) continue;
+                var item = incomingStacks.TryDequeue(out var stack)
+                    ? stack
+                    : (AssetId: $"item:incoming-cover:{sequence}", Quantity: 1L);
+                transfers.Add(TimedItemTransfer(
+                    counterparties[counterpartyIndex].Item1,
+                    subject,
+                    item.AssetId,
+                    item.Quantity,
+                    sequence,
+                    Now.AddMinutes(-3_000 + sequence * 10)));
+                remainingIncoming[counterpartyIndex]--;
+                sequence++;
+            }
+        }
+
+        var outgoingStacks = new Queue<(string AssetId, long Quantity)>(
+        [("wood", 150), ("ore", 13), ("rawhide", 100)]);
+        for (var counterpartyIndex = 0; counterpartyIndex < counterparties.Length; counterpartyIndex++)
+        {
+            for (var index = 0; index < counterparties[counterpartyIndex].Outgoing; index++)
+            {
+                var item = outgoingStacks.TryDequeue(out var stack)
+                    ? stack
+                    : (AssetId: $"item:outgoing-cover:{sequence}", Quantity: 1L);
+                transfers.Add(TimedItemTransfer(
+                    subject,
+                    counterparties[counterpartyIndex].Item1,
+                    item.AssetId,
+                    item.Quantity,
+                    sequence,
+                    Now.AddMinutes(-1_000 + counterpartyIndex * 30).AddSeconds(index * 10)));
+                sequence++;
+            }
+        }
+
+        var result = _evaluator.Evaluate(
+            subject.AccountId,
+            Dataset([subject, .. counterparties.Select(x => x.Item1)], transfers),
+            Now);
+
+        Assert.Equal(145, transfers.Count);
+        Assert.DoesNotContain(result.Signals, x => x.Type == AccountRiskSignalType.IncomingItemFunnel);
+        Assert.DoesNotContain(result.Signals, x => x.Type == AccountRiskSignalType.YoungItemSourceNetwork);
+        var consolidation = Assert.Single(result.Signals, x => x.Type == AccountRiskSignalType.ItemQuantityConsolidation);
+        var coordination = Assert.Single(result.Signals, x => x.Type == AccountRiskSignalType.YoungItemCoordinationNetwork);
+        var pairwise = Assert.Single(result.Signals, x => x.Type == AccountRiskSignalType.OneSidedItemTransfer);
+        Assert.Equal(25, consolidation.Contribution);
+        Assert.Equal(25, coordination.Contribution);
+        Assert.Equal(0, pairwise.Contribution);
+        Assert.Equal(4m, consolidation.Evidence["qualifyingAssetCount"]);
+        Assert.Equal(100m, coordination.Evidence["incomingItemTransfers"]);
+        Assert.Equal(45m, coordination.Evidence["outgoingItemTransfers"]);
+        Assert.True(coordination.Evidence["transferSessionCount"] < coordination.Evidence["networkItemTransfers"]);
+        Assert.Equal(50, result.Score);
+        Assert.Equal(AccountRiskSeverity.High, result.Severity);
+        Assert.Contains(result.Relationships, x => x.Relationship == "Young coordinated item recipient");
+        Assert.Contains(result.Relationships, x => x.Relationship == "Young coordinated item source");
+    }
+
+    [Fact]
+    public void BalancedSameAssetTradingDoesNotCreateConsolidationOrCoordinationSignals()
+    {
+        var subject = Account("BalancedTrader", 100, 50);
+        var counterparties = Enumerable.Range(1, 4).Select(x => Account($"BalancedPartner{x}", 7, 15)).ToList();
+        var transfers = new List<AccountRiskTransferFact>();
+        var sequence = 0;
+        foreach (var counterparty in counterparties)
+        {
+            for (var index = 0; index < 10; index++)
+            {
+                transfers.Add(TimedItemTransfer(counterparty, subject, "wood", 100, sequence, Now.AddMinutes(-2_000 + sequence * 10)));
+                sequence++;
+                transfers.Add(TimedItemTransfer(subject, counterparty, "wood", 100, sequence, Now.AddMinutes(-2_000 + sequence * 10)));
+                sequence++;
+            }
+        }
+
+        var result = _evaluator.Evaluate(
+            subject.AccountId,
+            Dataset([subject, .. counterparties], transfers),
+            Now);
+
+        Assert.DoesNotContain(result.Signals, x => x.Type == AccountRiskSignalType.ItemQuantityConsolidation);
+        Assert.DoesNotContain(result.Signals, x => x.Type == AccountRiskSignalType.YoungItemCoordinationNetwork);
+    }
+
+    [Fact]
     public void MultipleYoungAccountsCreateFeederNetworkSignal()
     {
         var main = Account("Main", 500, 80);
@@ -384,6 +501,27 @@ public sealed class AccountRiskEvaluatorTests
             recipient.CharacterLevel,
             AccountRiskTransferKind.Item,
             assetId);
+
+    private static AccountRiskTransferFact TimedItemTransfer(
+        AccountRiskAccountFact sender,
+        AccountRiskAccountFact recipient,
+        string assetId,
+        long quantity,
+        int sequence,
+        DateTimeOffset occurredAt) =>
+        new(
+            StableGuid($"timed-item-transfer:{sender.AccountLabel}:{recipient.AccountLabel}:{assetId}:{sequence}"),
+            sender.AccountId,
+            recipient.AccountId,
+            quantity,
+            occurredAt,
+            sender.AccountCreatedUtc,
+            sender.CharacterLevel,
+            recipient.AccountCreatedUtc,
+            recipient.CharacterLevel,
+            AccountRiskTransferKind.Item,
+            assetId,
+            quantity);
 
     private static AccountRiskTransferFact HistoricalTransfer(
         AccountRiskAccountFact sender,

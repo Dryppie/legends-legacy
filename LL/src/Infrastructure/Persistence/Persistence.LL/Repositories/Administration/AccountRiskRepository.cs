@@ -124,7 +124,8 @@ public sealed class AccountRiskRepository(
                 x.RecipientAccountCreatedUtc,
                 x.RecipientCharacterLevel,
                 x.EventType == EconomyEventType.DirectItemTransfer ? AccountRiskTransferKind.Item : AccountRiskTransferKind.Cinders,
-                x.AssetId))
+                x.AssetId,
+                x.Quantity))
             .ToListAsync(cancellationToken);
         var firstHopTruncated = firstHopRows.Count > take;
         var firstHop = firstHopRows.Take(take).ToList();
@@ -150,7 +151,8 @@ public sealed class AccountRiskRepository(
                     x.RecipientAccountCreatedUtc,
                     x.RecipientCharacterLevel,
                     x.EventType == EconomyEventType.DirectItemTransfer ? AccountRiskTransferKind.Item : AccountRiskTransferKind.Cinders,
-                    x.AssetId))
+                    x.AssetId,
+                    x.Quantity))
                 .ToListAsync(cancellationToken);
         var secondHopTruncated = secondHopRows.Count > take;
         var secondHop = secondHopRows.Take(take).ToList();

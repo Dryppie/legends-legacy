@@ -25,6 +25,7 @@ public class CharacterActionRepository : ICharacterActionRepository
         if (existingAction == null)
         {
             characterAction.IsDeleted = false; // Ensure it's not marked as deleted on creation
+            characterAction.BlockedUntilUtc = GetSwitchLock(characterAction.ActionDetails, now);
             await _context.CharacterActions.AddAsync(characterAction, cancellationToken);
             return characterAction;
         }
@@ -36,7 +37,7 @@ public class CharacterActionRepository : ICharacterActionRepository
 
         existingAction.NextResolutionAtUtc = characterAction.NextResolutionAtUtc;
         existingAction.UpdatedAt = now;
-        existingAction.BlockedUntilUtc = null;
+        existingAction.BlockedUntilUtc = GetSwitchLock(characterAction.ActionDetails, now);
         existingAction.ScheduleGeneration = checked(existingAction.ScheduleGeneration + 1);
         existingAction.IsDeleted = false;
         existingAction.RowVersion++;
@@ -61,8 +62,8 @@ public class CharacterActionRepository : ICharacterActionRepository
 
         characterAction.IsDeleted = true;
         characterAction.ActionDetails = null;
-        characterAction.BlockedUntilUtc = wasCombat && characterAction.NextResolutionAtUtc > now
-            ? characterAction.NextResolutionAtUtc
+        characterAction.BlockedUntilUtc = wasCombat && characterAction.BlockedUntilUtc > now
+            ? characterAction.BlockedUntilUtc
             : null;
         characterAction.NextResolutionAtUtc = null;
         characterAction.UpdatedAt = now;
@@ -143,8 +144,9 @@ public class CharacterActionRepository : ICharacterActionRepository
 
     // Adding to an active queue preserves its next due boundary; starting/restarting
     // a queue establishes a new generation and first-attempt boundary. Replacing
-    // combat waits for its already-earned action boundary before beginning the
-    // tempering cadence, matching the cooldown enforced by an explicit combat stop.
+    // combat may be replaced or followed by queued tempering immediately, while the
+    // tempering cadence still begins at the fixed switch lock. It does not wait for
+    // a rolling combat resolution boundary.
     public async Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem craftingQueueItem, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var existingAction = await _context.CharacterActions
@@ -153,8 +155,9 @@ public class CharacterActionRepository : ICharacterActionRepository
                     .ThenInclude(ci => ci.EquipmentInstance)
             .FirstOrDefaultAsync(a => a.CharacterId == characterId, cancellationToken);
 
-        if (existingAction?.BlockedUntilUtc > now)
-            return false;
+        var pendingSwitchLock = existingAction?.BlockedUntilUtc is { } blockedUntil && blockedUntil > now
+            ? blockedUntil
+            : (DateTimeOffset?)null;
 
         var inventoryItem = await _context.InventoryItems
             .Include(ii => ii.ItemInstance)
@@ -201,11 +204,7 @@ public class CharacterActionRepository : ICharacterActionRepository
 
         if (existingAction.ActionDetails is not CraftingActionDetails craftingDetails)
         {
-            var temperingStartsAt = existingAction.ActionDetails is CombatActionDetails &&
-                existingAction.NextResolutionAtUtc is { } combatBoundary &&
-                combatBoundary > now
-                    ? combatBoundary
-                    : now;
+            var temperingStartsAt = pendingSwitchLock ?? now;
 
             if (existingAction.ActionDetails != null)
             {
@@ -217,7 +216,7 @@ public class CharacterActionRepository : ICharacterActionRepository
             // becomes eligible to be replaced.
             existingAction.UpdatedAt = now;
             existingAction.NextResolutionAtUtc = temperingStartsAt.AddSeconds(TemperingConstants.ActionDurationSeconds);
-            existingAction.BlockedUntilUtc = null;
+            existingAction.BlockedUntilUtc = pendingSwitchLock;
             existingAction.ScheduleGeneration = checked(existingAction.ScheduleGeneration + 1);
             existingAction.ActionDetails = new CraftingActionDetails
             {
@@ -234,7 +233,9 @@ public class CharacterActionRepository : ICharacterActionRepository
                 existingAction.ScheduleGeneration = checked(existingAction.ScheduleGeneration + 1);
             }
             existingAction.UpdatedAt = now;
-            existingAction.BlockedUntilUtc = null;
+            existingAction.BlockedUntilUtc = existingAction.BlockedUntilUtc > now
+                ? existingAction.BlockedUntilUtc
+                : null;
 
             craftingQueueItem.Position = craftingDetails.CraftingQueueItems.Count == 0
                 ? 0
@@ -245,6 +246,13 @@ public class CharacterActionRepository : ICharacterActionRepository
 
         return true;
     }
+
+    private static DateTimeOffset? GetSwitchLock(
+        ActionDetails? actionDetails,
+        DateTimeOffset now) =>
+        actionDetails is CombatActionDetails
+            ? now.AddSeconds(CharacterActionTimingConstants.CombatSwitchLockSeconds)
+            : null;
 
     public async Task<CharacterAction?> GetCharacterActionForDeletionAsync(Guid characterId, CancellationToken cancellationToken)
     {

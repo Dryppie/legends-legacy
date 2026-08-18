@@ -11,6 +11,7 @@ public class CharacterActionDto : IMapFrom<CharacterAction>
     public CharacterActionType CharacterActionType { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
     public DateTimeOffset? NextResolutionAtUtc { get; set; }
+    public DateTimeOffset? BlockedUntilUtc { get; set; }
     public long ScheduleGeneration { get; set; }
     public int ProcessedCount { get; set; }
     public bool HasMoreDueWork { get; set; }
@@ -25,6 +26,7 @@ public class CharacterActionDto : IMapFrom<CharacterAction>
         ScheduleGeneration,
         CombatSession?.CombatResult?.StartedAt.UtcDateTime.Ticks ?? NextResolutionAtUtc?.UtcDateTime.Ticks ?? UpdatedAt.UtcDateTime.Ticks,
         NextResolutionAtUtc?.UtcDateTime.Ticks ?? 0,
+        BlockedUntilUtc?.UtcDateTime.Ticks ?? 0,
         UpdatedAt.UtcDateTime.Ticks,
         IsDeleted);
 

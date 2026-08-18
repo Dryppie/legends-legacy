@@ -8,9 +8,12 @@ namespace Persistence.LL.Repositories.Professions.Craftings;
 public class CraftingRepository : ICraftingRepository
 {
     private readonly IDbContext _dbContext;
-    public CraftingRepository(IDbContext dbContext)
+    private readonly TimeProvider _timeProvider;
+
+    public CraftingRepository(IDbContext dbContext, TimeProvider? timeProvider = null)
     {
         _dbContext = dbContext;
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     public async Task<EquipmentInstance?> RemoveCraftingQueueItemAndReturnItemAsync(Guid characterId, Guid queueItemId, CancellationToken cancellationToken)
@@ -19,20 +22,28 @@ public class CraftingRepository : ICraftingRepository
             .Include(ca => ca.ActionDetails)
                 .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
                     .ThenInclude(cq => cq.EquipmentInstance)
-            .FirstOrDefaultAsync(ca => ca.CharacterId == characterId && ca.ActionDetails is CraftingActionDetails, cancellationToken);
-        if (characterAction == null || characterAction.ActionDetails == null) return null;
+            .FirstOrDefaultAsync(ca => ca.CharacterId == characterId, cancellationToken);
+        if (characterAction?.ActionDetails is not CraftingActionDetails craftingDetails) return null;
 
-        var queueItem = (characterAction.ActionDetails as CraftingActionDetails).CraftingQueueItems
+        var queueItem = craftingDetails.CraftingQueueItems
             .FirstOrDefault(cq => cq.Id == queueItemId);
         if (queueItem == null) return null;
 
-        (characterAction.ActionDetails as CraftingActionDetails).CraftingQueueItems.Remove(queueItem);
-        if ((characterAction.ActionDetails as CraftingActionDetails).CraftingQueueItems.Count == 0)
+        craftingDetails.CraftingQueueItems.Remove(queueItem);
+        if (craftingDetails.CraftingQueueItems.Count == 0)
         {
+            var now = _timeProvider.GetUtcNow();
+            _dbContext.ActionDetails.Remove(craftingDetails);
             characterAction.IsDeleted = true;
             characterAction.ActionDetails = null;
+            characterAction.NextResolutionAtUtc = null;
+            characterAction.BlockedUntilUtc = characterAction.BlockedUntilUtc > now
+                ? characterAction.BlockedUntilUtc
+                : null;
+            characterAction.UpdatedAt = now;
+            characterAction.RowVersion++;
         }
-        return queueItem?.EquipmentInstance;
+        return queueItem.EquipmentInstance;
     }
 
     public async Task<bool> MoveCraftingQueueItemAsync(
