@@ -33,8 +33,9 @@ public sealed class AccountRiskRepository(
         CancellationToken cancellationToken)
     {
         var transfers = context.EconomyLedger.AsNoTracking()
-            .Where(x => x.EventType == EconomyEventType.DirectCurrencyTransfer &&
-                        x.AssetId == "currency:cinders" &&
+            .Where(x => ((x.EventType == EconomyEventType.DirectCurrencyTransfer &&
+                          x.AssetId == "currency:cinders") ||
+                         x.EventType == EconomyEventType.DirectItemTransfer) &&
                         x.SenderAccountId.HasValue &&
                         x.RecipientAccountId.HasValue &&
                         x.SenderAccountId != x.RecipientAccountId &&
@@ -90,8 +91,9 @@ public sealed class AccountRiskRepository(
         var candidates = accountIds.Distinct().ToArray();
         var take = Math.Clamp(maximumTransfers, 100, 250_000);
         var baseQuery = context.EconomyLedger.AsNoTracking()
-            .Where(x => x.EventType == EconomyEventType.DirectCurrencyTransfer &&
-                        x.AssetId == "currency:cinders" &&
+            .Where(x => ((x.EventType == EconomyEventType.DirectCurrencyTransfer &&
+                          x.AssetId == "currency:cinders") ||
+                         x.EventType == EconomyEventType.DirectItemTransfer) &&
                         x.SenderAccountId.HasValue &&
                         x.RecipientAccountId.HasValue &&
                         x.SenderAccountId != x.RecipientAccountId &&
@@ -112,7 +114,9 @@ public sealed class AccountRiskRepository(
                 x.SenderAccountCreatedUtc,
                 x.SenderCharacterLevel,
                 x.RecipientAccountCreatedUtc,
-                x.RecipientCharacterLevel))
+                x.RecipientCharacterLevel,
+                x.EventType == EconomyEventType.DirectItemTransfer ? AccountRiskTransferKind.Item : AccountRiskTransferKind.Cinders,
+                x.AssetId))
             .ToListAsync(cancellationToken);
 
         var relatedIds = firstHop
@@ -134,7 +138,9 @@ public sealed class AccountRiskRepository(
                     x.SenderAccountCreatedUtc,
                     x.SenderCharacterLevel,
                     x.RecipientAccountCreatedUtc,
-                    x.RecipientCharacterLevel))
+                    x.RecipientCharacterLevel,
+                    x.EventType == EconomyEventType.DirectItemTransfer ? AccountRiskTransferKind.Item : AccountRiskTransferKind.Cinders,
+                    x.AssetId))
                 .ToListAsync(cancellationToken);
 
         var transfers = firstHop.Concat(secondHop)
@@ -308,12 +314,18 @@ public sealed class AccountRiskRepository(
         var lastEvaluated = await context.AccountRiskSnapshots.AsNoTracking()
             .MaxAsync(x => (DateTimeOffset?)x.EvaluatedAt, cancellationToken);
         var directEvidence = context.EconomyLedger.AsNoTracking()
-            .Where(x => x.EventType == EconomyEventType.DirectCurrencyTransfer &&
-                        x.AssetId == "currency:cinders" &&
+            .Where(x => ((x.EventType == EconomyEventType.DirectCurrencyTransfer &&
+                          x.AssetId == "currency:cinders") ||
+                         x.EventType == EconomyEventType.DirectItemTransfer) &&
                         x.SenderAccountId.HasValue &&
                         x.RecipientAccountId.HasValue);
         var firstEvidence = await directEvidence.MinAsync(x => (DateTimeOffset?)x.OccurredAt, cancellationToken);
-        var directTransferCount = await directEvidence.LongCountAsync(cancellationToken);
+        var directTransferCount = await directEvidence.LongCountAsync(
+            x => x.EventType == EconomyEventType.DirectCurrencyTransfer,
+            cancellationToken);
+        var directItemTransferCount = await directEvidence.LongCountAsync(
+            x => x.EventType == EconomyEventType.DirectItemTransfer,
+            cancellationToken);
         return new AccountRiskPage(
             entries.Select(x => new AccountRiskSnapshotView(x.Snapshot, x.Status)).ToList(),
             total,
@@ -321,6 +333,7 @@ public sealed class AccountRiskRepository(
             lastEvaluated,
             firstEvidence,
             directTransferCount,
+            directItemTransferCount,
             counts.Values.Sum());
     }
 

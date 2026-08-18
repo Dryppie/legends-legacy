@@ -20,7 +20,9 @@ public sealed record AccountRiskRelationshipDto(
     int TransactionCount,
     bool YoungAccount,
     int? RiskScore,
-    AccountRiskSeverity? RiskSeverity);
+    AccountRiskSeverity? RiskSeverity,
+    int ItemTransfersToSubject,
+    int ItemTransfersFromSubject);
 
 public sealed record AccountRiskTransferDto(
     Guid TransferId,

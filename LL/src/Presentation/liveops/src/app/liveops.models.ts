@@ -339,7 +339,7 @@ export interface OperationalStatus {
 }
 
 export type AccountRiskSeverity = 'Low' | 'Moderate' | 'High' | 'Critical';
-export type AccountRiskSignalType = 'IncomingConcentration' | 'OneSidedRelationship' | 'FeederNetwork' | 'YoungAccountOutflow' | 'CircularTransfer';
+export type AccountRiskSignalType = 'IncomingConcentration' | 'OneSidedRelationship' | 'OneSidedItemTransfer' | 'FeederNetwork' | 'YoungAccountOutflow' | 'CircularTransfer';
 export type AccountInvestigationStatus = 'Unreviewed' | 'Investigating' | 'Watchlisted' | 'Cleared' | 'ConfirmedAbuse' | 'Actioned';
 
 export interface AccountRiskSummary {
@@ -371,6 +371,7 @@ export interface AccountRiskPage {
   lastEvaluatedAt: string | null;
   firstEvidenceAt: string | null;
   directTransferCount: number;
+  directItemTransferCount: number;
   evaluatedAccountCount: number;
   page: number;
   pageSize: number;
@@ -396,6 +397,8 @@ export interface AccountRiskRelationship {
   youngAccount: boolean;
   riskScore: number | null;
   riskSeverity: AccountRiskSeverity | null;
+  itemTransfersToSubject: number;
+  itemTransfersFromSubject: number;
 }
 
 export interface AccountRiskTransfer {

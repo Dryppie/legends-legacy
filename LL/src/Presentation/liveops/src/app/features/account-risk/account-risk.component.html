@@ -3,19 +3,19 @@
     <div>
       <p class="eyebrow">Investigation priority · not proof of abuse</p>
       <h1>Account risk</h1>
-      <p>Explainable cinder-flow signals derived from historical direct transfers. Review the evidence before taking any moderation action.</p>
+      <p>Explainable cinder and item-flow signals derived from historical direct transfers. Review the evidence before taking any moderation action.</p>
     </div>
     @if (data?.lastEvaluatedAt) { <div class="risk-freshness">Evaluated {{ data!.lastEvaluatedAt | date: 'medium' }}</div> }
   </section>
 
-  <section class="risk-coverage" [class.warning]="!data?.directTransferCount">
+  <section class="risk-coverage" [class.warning]="data && !data.directTransferCount && !data.directItemTransferCount">
     @if (data?.firstEvidenceAt) {
       <strong>Evidence coverage</strong>
-      <span>{{ data!.directTransferCount | number }} retained direct-cinder transfers, earliest {{ data!.firstEvidenceAt | date: 'medium' }}.</span>
+      <span>{{ data!.directTransferCount | number }} retained direct-cinder transfers and {{ data!.directItemTransferCount | number }} direct-item transfers, earliest {{ data!.firstEvidenceAt | date: 'medium' }}.</span>
       <small>Transfers made before retained transfer tracking began cannot be reconstructed by this detector.</small>
     } @else if (data) {
-      <strong>No retained cinder-transfer evidence</strong>
-      <span>The evaluator has no direct player-wire records to analyze.</span>
+      <strong>No retained direct-transfer evidence</strong>
+      <span>The evaluator has no direct cinder or item-transfer records to analyze.</span>
     }
   </section>
 
@@ -38,7 +38,7 @@
   <form class="risk-filters" (ngSubmit)="applyFilters()">
     <label class="risk-search">Player or account<input name="risk-search" [(ngModel)]="search" placeholder="Name or UUID" /></label>
     <label>Minimum risk<select name="risk-severity" [(ngModel)]="minimumSeverity"><option value="Low">All</option><option value="Moderate">Moderate</option><option value="High">High</option><option value="Critical">Critical</option></select></label>
-    <label>Primary signal<select name="risk-signal" [(ngModel)]="signalType"><option value="">All signals</option><option value="FeederNetwork">Feeder network</option><option value="IncomingConcentration">Incoming concentration</option><option value="OneSidedRelationship">One-sided relationship</option><option value="YoungAccountOutflow">Young account outflow</option><option value="CircularTransfer">Circular transfer</option></select></label>
+    <label>Primary signal<select name="risk-signal" [(ngModel)]="signalType"><option value="">All signals</option><option value="FeederNetwork">Feeder network</option><option value="IncomingConcentration">Incoming concentration</option><option value="OneSidedRelationship">One-sided cinders</option><option value="OneSidedItemTransfer">One-sided items</option><option value="YoungAccountOutflow">Young account outflow</option><option value="CircularTransfer">Circular transfer</option></select></label>
     <label>Review state<select name="risk-status" [(ngModel)]="status"><option value="">All states</option><option value="Unreviewed">Unreviewed</option><option value="Investigating">Investigating</option><option value="Watchlisted">Watchlisted</option><option value="Cleared">Cleared</option><option value="ConfirmedAbuse">Confirmed abuse</option><option value="Actioned">Actioned</option></select></label>
     <label>Min score<input name="risk-score" type="number" min="0" max="100" [(ngModel)]="minimumScore" placeholder="0–100" /></label>
     <label>Max age (days)<input name="risk-age" type="number" min="0" [(ngModel)]="maximumAccountAgeDays" placeholder="Any" /></label>

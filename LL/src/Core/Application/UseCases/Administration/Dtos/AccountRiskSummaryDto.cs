@@ -30,6 +30,7 @@ public sealed record AccountRiskPageDto(
     DateTimeOffset? LastEvaluatedAt,
     DateTimeOffset? FirstEvidenceAt,
     long DirectTransferCount,
+    long DirectItemTransferCount,
     int EvaluatedAccountCount,
     int Page,
     int PageSize);

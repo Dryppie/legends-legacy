@@ -56,7 +56,9 @@ export class AccountRiskComponent implements OnInit {
 
   get emptyMessage(): string {
     if (this.loading) return 'Loading risk summaries…';
-    if (!this.data?.directTransferCount) return 'No retained direct-cinder transfers are available to evaluate.';
+    if (!this.data || (!this.data.directTransferCount && !this.data.directItemTransferCount)) {
+      return 'No retained direct cinder or item transfers are available to evaluate.';
+    }
     if (this.minimumSeverity !== 'Low' && this.data.evaluatedAccountCount > 0) {
       return `${this.data.evaluatedAccountCount} accounts were evaluated, but none reached the selected severity. Use “Include low” to inspect the observed relationships.`;
     }

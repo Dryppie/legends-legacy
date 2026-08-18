@@ -19,6 +19,7 @@ public sealed record AccountRiskPage(
     DateTimeOffset? LastEvaluatedAt,
     DateTimeOffset? FirstEvidenceAt,
     long DirectTransferCount,
+    long DirectItemTransferCount,
     int EvaluatedAccountCount);
 
 public sealed record AccountRiskSnapshotView(

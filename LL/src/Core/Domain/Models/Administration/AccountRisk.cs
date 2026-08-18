@@ -14,6 +14,7 @@ public enum AccountRiskSignalType
 {
     IncomingConcentration,
     OneSidedRelationship,
+    OneSidedItemTransfer,
     FeederNetwork,
     YoungAccountOutflow,
     CircularTransfer
@@ -105,7 +106,9 @@ public sealed record AccountRiskRelationship(
     int TransactionCount,
     bool YoungAccount,
     int? RiskScore = null,
-    AccountRiskSeverity? RiskSeverity = null);
+    AccountRiskSeverity? RiskSeverity = null,
+    int ItemTransfersToSubject = 0,
+    int ItemTransfersFromSubject = 0);
 
 public sealed record AccountRiskEvaluation(
     Guid AccountId,
@@ -142,7 +145,15 @@ public sealed record AccountRiskTransferFact(
     DateTime? SenderAccountCreatedUtc = null,
     int? SenderCharacterLevel = null,
     DateTime? RecipientAccountCreatedUtc = null,
-    int? RecipientCharacterLevel = null);
+    int? RecipientCharacterLevel = null,
+    AccountRiskTransferKind Kind = AccountRiskTransferKind.Cinders,
+    string AssetId = "currency:cinders");
+
+public enum AccountRiskTransferKind
+{
+    Cinders,
+    Item
+}
 
 public sealed class AccountRiskAnalysisDataset
 {
@@ -191,7 +202,7 @@ public sealed record AccountRiskPolicy(
         ModerateScore: 25,
         HighScore: 50,
         CriticalScore: 75,
-        MinimumTransferCount: 3,
+        MinimumTransferCount: 1,
         MinimumCounterpartyCount: 1,
         ConcentrationThreshold: 0.70m,
         RelationshipImbalanceThreshold: 0.85m,
@@ -219,14 +230,19 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         var incoming = dataset.GetIncoming(accountId);
         var outgoing = dataset.GetOutgoing(accountId);
         var direct = incoming.Concat(outgoing).ToList();
-        var incomingTotal = incoming.Sum(x => x.Amount);
-        var outgoingTotal = outgoing.Sum(x => x.Amount);
+        var cinderIncoming = incoming.Where(x => x.Kind == AccountRiskTransferKind.Cinders).ToList();
+        var cinderOutgoing = outgoing.Where(x => x.Kind == AccountRiskTransferKind.Cinders).ToList();
+        var cinderDirect = cinderIncoming.Concat(cinderOutgoing).ToList();
+        var itemDirect = direct.Where(x => x.Kind == AccountRiskTransferKind.Item).ToList();
+        var incomingTotal = cinderIncoming.Sum(x => x.Amount);
+        var outgoingTotal = cinderOutgoing.Sum(x => x.Amount);
         var signals = new List<AccountRiskSignal>();
 
-        EvaluateIncomingConcentration(accountId, incoming, incomingTotal, signals);
-        EvaluateOneSidedRelationships(accountId, direct, signals);
-        EvaluateFeederNetwork(accountId, dataset, incoming, signals);
-        EvaluateYoungAccountOutflow(account, outgoing, incomingTotal + outgoingTotal, signals);
+        EvaluateIncomingConcentration(accountId, cinderIncoming, incomingTotal, signals);
+        EvaluateOneSidedRelationships(accountId, cinderDirect, signals);
+        EvaluateOneSidedItemTransfers(accountId, itemDirect, signals);
+        EvaluateFeederNetwork(accountId, dataset, cinderIncoming, signals);
+        EvaluateYoungAccountOutflow(account, cinderOutgoing, incomingTotal + outgoingTotal, signals);
         EvaluateCircularTransfers(accountId, dataset, signals);
 
         ApplyCategoryCaps(signals);
@@ -304,6 +320,37 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
             Evidence(("sent", strongest.Sent), ("received", strongest.Received), ("imbalance", strongest.Imbalance))));
     }
 
+    private void EvaluateOneSidedItemTransfers(
+        Guid accountId,
+        IReadOnlyList<AccountRiskTransferFact> directItems,
+        ICollection<AccountRiskSignal> signals)
+    {
+        var strongest = directItems
+            .GroupBy(x => x.SenderAccountId == accountId ? x.RecipientAccountId : x.SenderAccountId)
+            .Select(group =>
+            {
+                var sent = group.Count(x => x.SenderAccountId == accountId);
+                var received = group.Count(x => x.RecipientAccountId == accountId);
+                var total = sent + received;
+                var imbalance = total == 0 ? 0 : (decimal)Math.Abs(sent - received) / total;
+                return new { Sent = sent, Received = received, Total = total, Imbalance = imbalance, AssetCount = group.Select(x => x.AssetId).Distinct(StringComparer.Ordinal).Count() };
+            })
+            .Where(x => x.Total >= policy.MinimumTransferCount && x.Imbalance >= policy.RelationshipImbalanceThreshold)
+            .OrderByDescending(x => x.Imbalance)
+            .ThenByDescending(x => x.Total)
+            .FirstOrDefault();
+        if (strongest is null) return;
+
+        var direction = strongest.Sent > strongest.Received ? "sent" : "received";
+        signals.Add(new AccountRiskSignal(
+            AccountRiskSignalType.OneSidedItemTransfer,
+            "Resource flow",
+            Scale(strongest.Imbalance, policy.RelationshipImbalanceThreshold, 1m, 8, 25),
+            "One-sided direct item transfers",
+            $"This account only {direction} items in its strongest direct item relationship: {strongest.Total} transfer event(s) involving {strongest.AssetCount} item type(s). Item values are not converted into cinders.",
+            Evidence(("sentItemTransfers", strongest.Sent), ("receivedItemTransfers", strongest.Received), ("imbalance", strongest.Imbalance), ("distinctItemTypes", strongest.AssetCount))));
+    }
+
     private void EvaluateFeederNetwork(
         Guid accountId,
         AccountRiskAnalysisDataset dataset,
@@ -313,7 +360,9 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         var feeders = incoming.GroupBy(x => x.SenderAccountId)
             .Select(group =>
             {
-                var allSenderOutgoing = dataset.GetOutgoing(group.Key).Sum(x => x.Amount);
+                var allSenderOutgoing = dataset.GetOutgoing(group.Key)
+                    .Where(x => x.Kind == AccountRiskTransferKind.Cinders)
+                    .Sum(x => x.Amount);
                 var toSubject = group.Sum(x => x.Amount);
                 var share = allSenderOutgoing == 0 ? 0 : (decimal)toSubject / allSenderOutgoing;
                 dataset.Accounts.TryGetValue(group.Key, out var sender);
@@ -371,12 +420,14 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         AccountRiskAnalysisDataset dataset,
         ICollection<AccountRiskSignal> signals)
     {
-        var outbound = dataset.GetOutgoing(accountId);
-        var inboundBySender = dataset.GetIncoming(accountId).ToLookup(x => x.SenderAccountId);
+        var outbound = dataset.GetOutgoing(accountId).Where(x => x.Kind == AccountRiskTransferKind.Cinders);
+        var inboundBySender = dataset.GetIncoming(accountId)
+            .Where(x => x.Kind == AccountRiskTransferKind.Cinders)
+            .ToLookup(x => x.SenderAccountId);
         var cycles = new HashSet<string>(StringComparer.Ordinal);
         foreach (var first in outbound)
         {
-            foreach (var second in dataset.GetOutgoing(first.RecipientAccountId).Where(x => x.RecipientAccountId != accountId))
+            foreach (var second in dataset.GetOutgoing(first.RecipientAccountId).Where(x => x.Kind == AccountRiskTransferKind.Cinders && x.RecipientAccountId != accountId))
             {
                 foreach (var third in inboundBySender[second.RecipientAccountId])
                 {
@@ -407,8 +458,10 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         direct.GroupBy(x => x.SenderAccountId == accountId ? x.RecipientAccountId : x.SenderAccountId)
             .Select(group =>
             {
-                var sent = group.Where(x => x.RecipientAccountId == accountId).Sum(x => x.Amount);
-                var received = group.Where(x => x.SenderAccountId == accountId).Sum(x => x.Amount);
+                var sent = group.Where(x => x.Kind == AccountRiskTransferKind.Cinders && x.RecipientAccountId == accountId).Sum(x => x.Amount);
+                var received = group.Where(x => x.Kind == AccountRiskTransferKind.Cinders && x.SenderAccountId == accountId).Sum(x => x.Amount);
+                var itemTransfersToSubject = group.Count(x => x.Kind == AccountRiskTransferKind.Item && x.RecipientAccountId == accountId);
+                var itemTransfersFromSubject = group.Count(x => x.Kind == AccountRiskTransferKind.Item && x.SenderAccountId == accountId);
                 dataset.Accounts.TryGetValue(group.Key, out var counterparty);
                 var firstTransfer = group.OrderBy(x => x.OccurredAt).First();
                 var counterpartyCreatedUtc = firstTransfer.SenderAccountId == group.Key
@@ -418,8 +471,15 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
                 var young = counterpartyCreatedUtc.HasValue &&
                     (firstTransfer.OccurredAt.UtcDateTime - counterpartyCreatedUtc.Value).TotalDays <= policy.YoungAccountDays;
                 var total = sent + received;
-                var imbalance = total == 0 ? 0 : (decimal)Math.Abs(sent - received) / total;
-                var relationship = sent > received && young && imbalance >= policy.RelationshipImbalanceThreshold
+                var itemTotal = itemTransfersToSubject + itemTransfersFromSubject;
+                var cinderImbalance = total == 0 ? 0 : (decimal)Math.Abs(sent - received) / total;
+                var itemImbalance = itemTotal == 0 ? 0 : (decimal)Math.Abs(itemTransfersToSubject - itemTransfersFromSubject) / itemTotal;
+                var itemFlowIsStronger = itemImbalance > cinderImbalance;
+                var imbalance = Math.Max(cinderImbalance, itemImbalance);
+                var flowsToSubject = itemFlowIsStronger
+                    ? itemTransfersToSubject > itemTransfersFromSubject
+                    : sent > received;
+                var relationship = flowsToSubject && young && imbalance >= policy.RelationshipImbalanceThreshold
                     ? "Possible feeder"
                     : imbalance >= policy.RelationshipImbalanceThreshold ? "One-sided transfer" : "Mutual transfer";
                 return new AccountRiskRelationship(
@@ -430,9 +490,11 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
                     sent,
                     received,
                     group.Count(),
-                    young);
+                    young,
+                    ItemTransfersToSubject: itemTransfersToSubject,
+                    ItemTransfersFromSubject: itemTransfersFromSubject);
             })
-            .OrderByDescending(x => x.SentToSubject + x.ReceivedFromSubject)
+            .OrderByDescending(x => x.SentToSubject + x.ReceivedFromSubject + x.ItemTransfersToSubject + x.ItemTransfersFromSubject)
             .Take(50)
             .ToList();
 

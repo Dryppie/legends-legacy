@@ -57,8 +57,64 @@ public sealed class AccountRiskEvaluatorTests
 
         Assert.Contains(mainResult.Signals, x => x.Type == AccountRiskSignalType.FeederNetwork);
         Assert.Contains(feederResult.Signals, x => x.Type == AccountRiskSignalType.YoungAccountOutflow);
-        Assert.Equal(AccountRiskSeverity.Moderate, mainResult.Severity);
-        Assert.Equal(AccountRiskSeverity.Moderate, feederResult.Severity);
+        Assert.Equal(AccountRiskSeverity.High, mainResult.Severity);
+        Assert.Equal(AccountRiskSeverity.High, feederResult.Severity);
+    }
+
+    [Fact]
+    public void SingleEstablishedOneWayTransferIsEnoughForModerateInvestigationPriority()
+    {
+        var sender = Account("EstablishedSender", 500, 80);
+        var recipient = Account("EstablishedRecipient", 700, 90);
+        var dataset = Dataset([sender, recipient], [Transfer(sender, recipient, 5_000, 1)]);
+
+        var senderResult = _evaluator.Evaluate(sender.AccountId, dataset, Now);
+        var recipientResult = _evaluator.Evaluate(recipient.AccountId, dataset, Now);
+
+        Assert.Contains(senderResult.Signals, x => x.Type == AccountRiskSignalType.OneSidedRelationship);
+        Assert.Contains(recipientResult.Signals, x => x.Type == AccountRiskSignalType.OneSidedRelationship);
+        Assert.Equal(AccountRiskSeverity.Moderate, senderResult.Severity);
+        Assert.Equal(AccountRiskSeverity.Moderate, recipientResult.Severity);
+    }
+
+    [Fact]
+    public void SingleOneWayItemTransferFlagsBothAccountsWithoutInventingACinderValue()
+    {
+        var sender = Account("ItemSender", 500, 80);
+        var recipient = Account("ItemRecipient", 700, 90);
+        var dataset = Dataset([sender, recipient], [ItemTransfer(sender, recipient, "item:legendary-sword", 1)]);
+
+        var senderResult = _evaluator.Evaluate(sender.AccountId, dataset, Now);
+        var recipientResult = _evaluator.Evaluate(recipient.AccountId, dataset, Now);
+
+        Assert.Contains(senderResult.Signals, x => x.Type == AccountRiskSignalType.OneSidedItemTransfer);
+        Assert.Contains(recipientResult.Signals, x => x.Type == AccountRiskSignalType.OneSidedItemTransfer);
+        Assert.Equal(AccountRiskSeverity.Moderate, senderResult.Severity);
+        Assert.Equal(AccountRiskSeverity.Moderate, recipientResult.Severity);
+        Assert.Equal(0, senderResult.IncomingCinders);
+        Assert.Equal(0, senderResult.OutgoingCinders);
+        Assert.Equal(0, recipientResult.IncomingCinders);
+        Assert.Equal(0, recipientResult.OutgoingCinders);
+    }
+
+    [Fact]
+    public void ReciprocalItemSwapRemainsLowRisk()
+    {
+        var a = Account("ItemTraderA", 500, 80);
+        var b = Account("ItemTraderB", 700, 90);
+        var transfers = new[]
+        {
+            ItemTransfer(a, b, "item:sword", 1),
+            ItemTransfer(b, a, "item:shield", 2),
+        };
+
+        var aResult = _evaluator.Evaluate(a.AccountId, Dataset([a, b], transfers), Now);
+        var bResult = _evaluator.Evaluate(b.AccountId, Dataset([a, b], transfers), Now);
+
+        Assert.Equal(AccountRiskSeverity.Low, aResult.Severity);
+        Assert.Equal(AccountRiskSeverity.Low, bResult.Severity);
+        Assert.DoesNotContain(aResult.Signals, x => x.Type == AccountRiskSignalType.OneSidedItemTransfer);
+        Assert.DoesNotContain(bResult.Signals, x => x.Type == AccountRiskSignalType.OneSidedItemTransfer);
     }
 
     [Fact]
@@ -93,7 +149,7 @@ public sealed class AccountRiskEvaluatorTests
         var signal = Assert.Single(result.Signals, x => x.Type == AccountRiskSignalType.FeederNetwork);
         Assert.Equal(2m, signal.Evidence["feederCount"]);
         Assert.Equal(1m, signal.Evidence["lowLevelFeederCount"]);
-        Assert.Equal(AccountRiskSeverity.Moderate, result.Severity);
+        Assert.Equal(AccountRiskSeverity.High, result.Severity);
     }
 
     [Fact]
@@ -164,6 +220,20 @@ public sealed class AccountRiskEvaluatorTests
 
     private static AccountRiskTransferFact Transfer(AccountRiskAccountFact sender, AccountRiskAccountFact recipient, long amount, int hour) =>
         new(StableGuid($"transfer:{sender.AccountLabel}:{recipient.AccountLabel}:{hour}"), sender.AccountId, recipient.AccountId, amount, Now.AddHours(-100 + hour));
+
+    private static AccountRiskTransferFact ItemTransfer(AccountRiskAccountFact sender, AccountRiskAccountFact recipient, string assetId, int hour) =>
+        new(
+            StableGuid($"item-transfer:{sender.AccountLabel}:{recipient.AccountLabel}:{assetId}:{hour}"),
+            sender.AccountId,
+            recipient.AccountId,
+            1,
+            Now.AddHours(-100 + hour),
+            sender.AccountCreatedUtc,
+            sender.CharacterLevel,
+            recipient.AccountCreatedUtc,
+            recipient.CharacterLevel,
+            AccountRiskTransferKind.Item,
+            assetId);
 
     private static AccountRiskTransferFact HistoricalTransfer(
         AccountRiskAccountFact sender,

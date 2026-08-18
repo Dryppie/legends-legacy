@@ -41,7 +41,9 @@
           @for (relation of view.relationships; track relation.accountId) {
             <button type="button" (click)="openAccount(relation.accountId)">
               <span><strong>{{ relation.characterName }}</strong><small>{{ relation.youngAccount ? 'Young when transfers began · ' : '' }}{{ relation.transactionCount }} transfers</small></span>
-              <span>{{ relation.relationship }}</span><span>{{ relation.sentToSubject | number }}</span><span>{{ relation.receivedFromSubject | number }}</span>
+              <span>{{ relation.relationship }}</span>
+              <span><strong>{{ relation.sentToSubject | number }} cinders</strong><small>{{ relation.itemTransfersToSubject }} item transfer(s)</small></span>
+              <span><strong>{{ relation.receivedFromSubject | number }} cinders</strong><small>{{ relation.itemTransfersFromSubject }} item transfer(s)</small></span>
               <span><span class="risk-severity" [class]="'risk-severity ' + (relation.riskSeverity || 'Low').toLowerCase()">{{ relation.riskScore ?? '—' }}</span></span>
             </button>
           } @empty { <div class="risk-empty">No connected direct-transfer accounts.</div> }
