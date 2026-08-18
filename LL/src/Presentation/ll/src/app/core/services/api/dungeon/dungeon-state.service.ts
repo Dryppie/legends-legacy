@@ -75,8 +75,9 @@ export class DungeonStateService {
     private readonly toast: ToastService,
     private readonly stateSync: StateSyncCoordinator,
   ) {
-    this.stateSync.register('dungeons', 'dungeons', () =>
-      this.synchronize(),
+    this.stateSync.register('dungeons', 'dungeons', () => this.synchronize());
+    this.stateSync.register('inventory', 'dungeons-inventory', () =>
+      this.synchronizeAvailableDungeons(),
     );
     this.refresh();
 
@@ -159,22 +160,30 @@ export class DungeonStateService {
   }
 
   loadAvailableDungeons(): void {
-    const requestEpoch = ++this.dungeonHubEpoch;
-    this.service.getAvailableDungeons().subscribe({
-      next: (hub) => {
-        if (requestEpoch !== this.dungeonHubEpoch) return;
-        this._dungeons.set(hub.dungeons);
-        this._sigilFragments.set(hub.sigilFragments);
-        this._sigilAssemblyEnabled.set(hub.sigilAssemblyEnabled);
-        this._sigilAssemblyCost.set(hub.sigilAssemblyCost);
-        this.startRecommendationPolling();
-      },
-      error: (e) => {
-        if (requestEpoch === this.dungeonHubEpoch) {
-          this._error.set(e.message ?? 'Failed to load available dungeons');
-        }
-      },
+    this.synchronizeAvailableDungeons().subscribe({
+      error: () => undefined,
     });
+  }
+
+  private synchronizeAvailableDungeons(): Observable<unknown> {
+    const requestEpoch = ++this.dungeonHubEpoch;
+    return this.service.getAvailableDungeons().pipe(
+      tap({
+        next: (hub) => {
+          if (requestEpoch !== this.dungeonHubEpoch) return;
+          this._dungeons.set(hub.dungeons);
+          this._sigilFragments.set(hub.sigilFragments);
+          this._sigilAssemblyEnabled.set(hub.sigilAssemblyEnabled);
+          this._sigilAssemblyCost.set(hub.sigilAssemblyCost);
+          this.startRecommendationPolling();
+        },
+        error: (e) => {
+          if (requestEpoch === this.dungeonHubEpoch) {
+            this._error.set(e.message ?? 'Failed to load available dungeons');
+          }
+        },
+      }),
+    );
   }
 
   private startRecommendationPolling(): void {
@@ -182,9 +191,7 @@ export class DungeonStateService {
     this.recommendationPolling = null;
 
     if (
-      !this._dungeons().some(
-        (dungeon) => dungeon.recommendedPartyPower == null,
-      )
+      !this._dungeons().some((dungeon) => dungeon.recommendedPartyPower == null)
     ) {
       return;
     }
@@ -192,16 +199,14 @@ export class DungeonStateService {
     this.recommendationPolling = timer(1_000, 5_000)
       .pipe(
         switchMap(() =>
-          this.service
-            .getPowerRecommendations()
-            .pipe(
-              catchError(() =>
-                of({
-                  calibrationComplete: false,
-                  recommendations: {},
-                } as DungeonPowerRecommendationsResponse),
-              ),
+          this.service.getPowerRecommendations().pipe(
+            catchError(() =>
+              of({
+                calibrationComplete: false,
+                recommendations: {},
+              } as DungeonPowerRecommendationsResponse),
             ),
+          ),
         ),
         take(120),
       )
@@ -224,7 +229,8 @@ export class DungeonStateService {
           }),
         );
 
-        if (response.calibrationComplete ||
+        if (
+          response.calibrationComplete ||
           !this._dungeons().some(
             (dungeon) => dungeon.recommendedPartyPower == null,
           )
