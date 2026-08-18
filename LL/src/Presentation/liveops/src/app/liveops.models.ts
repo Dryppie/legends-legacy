@@ -361,6 +361,10 @@ export interface AccountRiskSummary {
   firstFlaggedAt: string | null;
   lastTriggeredAt: string | null;
   evaluatedAt: string;
+  evaluationVersion: number;
+  analysisWindowStart: string;
+  evidenceComplete: boolean;
+  analyzedTransferCount: number;
   investigationStatus: AccountInvestigationStatus;
 }
 
@@ -373,6 +377,12 @@ export interface AccountRiskPage {
   directTransferCount: number;
   directItemTransferCount: number;
   evaluatedAccountCount: number;
+  eligibleAccountCount: number;
+  upToDateAccountCount: number;
+  pendingEvaluationCount: number;
+  incompleteEvaluationCount: number;
+  evaluationVersion: number;
+  lookbackDays: number;
   page: number;
   pageSize: number;
 }
@@ -384,6 +394,11 @@ export interface AccountRiskSignal {
   title: string;
   explanation: string;
   evidence: Record<string, number>;
+  supportingTransferIds: string[];
+  firstObservedAt: string | null;
+  lastObservedAt: string | null;
+  supportingTransferCount: number;
+  supportingEvidenceComplete: boolean;
 }
 
 export interface AccountRiskRelationship {
@@ -419,6 +434,10 @@ export interface AccountRiskHistoryPoint {
   score: number;
   severity: AccountRiskSeverity;
   evaluatedAt: string;
+  evaluationVersion: number;
+  analysisWindowStart: string;
+  evidenceComplete: boolean;
+  analyzedTransferCount: number;
 }
 
 export interface AccountRiskNote {

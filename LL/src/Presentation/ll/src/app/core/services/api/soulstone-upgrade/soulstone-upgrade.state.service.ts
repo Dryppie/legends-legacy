@@ -28,14 +28,16 @@ export class SoulstoneUpgradeStateService {
   private readonly _upgradeLoading = signal(new Map<string, boolean>());
   private loadEpoch = 0;
 
-  readonly upgrades = computed(() => this._upgrades());
+  readonly upgrades = computed(() => this.deriveUpgrades());
   readonly loading = computed(() => this._loading());
   readonly error = computed(() => this._error());
   readonly lastRefund = computed(() => this._lastRefund());
   readonly resetRefund = computed(() =>
-    this._upgrades().reduce((total, upgrade) => total + upgrade.refundValue, 0),
+    this.upgrades().reduce((total, upgrade) => total + upgrade.refundValue, 0),
   );
-  readonly branchGroups = computed(() => this.buildBranchGroups(this._upgrades()));
+  readonly branchGroups = computed(() =>
+    this.buildBranchGroups(this.upgrades()),
+  );
 
   isUpgradeLoading = (id: string) =>
     computed(() => this._upgradeLoading().get(id) === true);
@@ -151,7 +153,7 @@ export class SoulstoneUpgradeStateService {
   }
 
   upgrade(id: string): void {
-    const upgrade = this._upgrades().find((candidate) => candidate.id === id);
+    const upgrade = this.upgrades().find((candidate) => candidate.id === id);
     const characterId = this.characterState.currentCharacterId();
     if (!upgrade || !characterId || !upgrade.canPurchase) return;
 
@@ -233,16 +235,40 @@ export class SoulstoneUpgradeStateService {
     });
   }
 
-  private buildBranchGroups(upgrades: SoulstoneUpgradeView[]): SoulstoneBranchGroup[] {
+  private buildBranchGroups(
+    upgrades: SoulstoneUpgradeView[],
+  ): SoulstoneBranchGroup[] {
     return branchOrder
       .map((branch) => ({
         branch,
         title: branchTitles[branch],
         upgrades: upgrades
           .filter((upgrade) => upgrade.branch === branch)
-          .sort((a, b) => a.sortOrder - b.sortOrder || a.displayName.localeCompare(b.displayName)),
+          .sort(
+            (a, b) =>
+              a.sortOrder - b.sortOrder ||
+              a.displayName.localeCompare(b.displayName),
+          ),
       }))
       .filter((group) => group.upgrades.length > 0);
+  }
+
+  private deriveUpgrades(): SoulstoneUpgradeView[] {
+    const soulstones = this.characterState.currentCharacter()?.soulstones ?? 0;
+
+    return this._upgrades().map((upgrade) => {
+      const affordabilityCanChange =
+        upgrade.canPurchase ||
+        upgrade.disabledReason === 'Not enough Soulstones.';
+      if (!affordabilityCanChange || upgrade.nextCost == null) return upgrade;
+
+      const canPurchase = upgrade.nextCost <= soulstones;
+      return {
+        ...upgrade,
+        canPurchase,
+        disabledReason: canPurchase ? null : 'Not enough Soulstones.',
+      };
+    });
   }
 }
 

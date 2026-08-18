@@ -29,7 +29,7 @@ export const routes: Routes = [
     path: 'account-risk',
     loadComponent: () => import('./features/account-risk/account-risk.component')
       .then((component) => component.AccountRiskComponent),
-    title: 'LiveOps account risk',
+    title: 'LiveOps direct-transfer review',
   },
   {
     path: 'account-risk/:accountId',

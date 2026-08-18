@@ -8,7 +8,12 @@ public sealed record AccountRiskSignalDto(
     int Contribution,
     string Title,
     string Explanation,
-    IReadOnlyDictionary<string, decimal> Evidence);
+    IReadOnlyDictionary<string, decimal> Evidence,
+    IReadOnlyList<Guid> SupportingTransferIds,
+    DateTimeOffset? FirstObservedAt,
+    DateTimeOffset? LastObservedAt,
+    int SupportingTransferCount,
+    bool SupportingEvidenceComplete);
 
 public sealed record AccountRiskRelationshipDto(
     Guid AccountId,
@@ -40,7 +45,11 @@ public sealed record AccountRiskHistoryPointDto(
     Guid Id,
     int Score,
     AccountRiskSeverity Severity,
-    DateTimeOffset EvaluatedAt);
+    DateTimeOffset EvaluatedAt,
+    int EvaluationVersion,
+    DateTimeOffset AnalysisWindowStart,
+    bool EvidenceComplete,
+    int AnalyzedTransferCount);
 
 public sealed record AccountRiskNoteDto(
     Guid Id,

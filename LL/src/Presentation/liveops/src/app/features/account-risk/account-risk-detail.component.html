@@ -1,19 +1,23 @@
 <main class="risk-detail-workspace">
-  <button class="risk-back" type="button" (click)="back()">← Account risk queue</button>
+  <button class="risk-back" type="button" (click)="back()">← Direct-transfer review queue</button>
   @if (message) { <div class="message" [class]="'message ' + messageTone" role="status">{{ message }}</div> }
   @if (loading) {
     <div class="risk-detail-loading">Loading investigation evidence…</div>
   } @else if (details; as view) {
     <header class="risk-detail-header">
       <div>
-        <p class="eyebrow">Account investigation · automated signals are not a finding of guilt</p>
+        <p class="eyebrow">Direct-transfer investigation · automated signals are not a finding of guilt</p>
         <div class="risk-detail-title"><h1>{{ view.account.characterName }}</h1><span>Lv {{ view.account.characterLevel }}</span><span class="investigation-pill">{{ view.account.investigationStatus }}</span></div>
         <p>{{ view.account.accountLabel }} · <code>{{ view.account.accountId }}</code></p>
       </div>
       <div class="risk-verdict" [class]="view.account.severity.toLowerCase()">
-        <span>{{ view.account.severity }} priority</span><strong>{{ view.account.score }}</strong><small>/ 100 risk score</small>
+        <span>{{ view.account.severity }} priority</span><strong>{{ view.account.score }}</strong><small>/ 100 review score</small>
       </div>
     </header>
+
+    @if (!view.account.evidenceComplete) {
+      <div class="message error" role="alert">This evaluation hit an evidence safety cap. Its score can understate or mischaracterize the account; review the underlying records before using it.</div>
+    }
 
     <section class="risk-context-strip">
       <div><span>Account created</span><strong>{{ view.account.accountCreatedUtc | date: 'mediumDate' }}</strong></div>
@@ -25,10 +29,10 @@
     </section>
 
     <section class="risk-panel why-flagged">
-      <header><div><p class="eyebrow">Evidence and interpretation</p><h2>Why this account was flagged</h2></div><small>Contributions are capped within correlated categories.</small></header>
+      <header><div><p class="eyebrow">Evidence and interpretation</p><h2>Why this account was flagged</h2></div><small>Overlapping transfer evidence contributes only once. Window starts {{ view.account.analysisWindowStart | date: 'medium' }}.</small></header>
       <div class="risk-signal-list">
         @for (signal of view.signals; track signal.type) {
-          <article><div class="risk-contribution">+{{ signal.contribution }}</div><div><span>{{ signal.category }} · {{ signal.type }}</span><h3>{{ signal.title }}</h3><p>{{ signal.explanation }}</p><details><summary>Raw measured facts</summary><dl>@for (fact of signal.evidence | keyvalue; track fact.key) { <div><dt>{{ fact.key }}</dt><dd>{{ fact.value | number: '1.0-2' }}</dd></div> }</dl></details></div></article>
+          <article><div class="risk-contribution">{{ signal.contribution ? '+' + signal.contribution : 'context' }}</div><div><span>{{ signal.category }} · {{ signal.type }} · {{ signal.supportingTransferCount }} supporting transfer(s){{ signal.supportingEvidenceComplete ? '' : ' · first 500 IDs retained' }}</span><h3>{{ signal.title }}</h3><p>{{ signal.explanation }}</p><details><summary>Raw measured facts</summary><dl>@for (fact of signal.evidence | keyvalue; track fact.key) { <div><dt>{{ fact.key }}</dt><dd>{{ fact.value | number: '1.0-2' }}</dd></div> }</dl></details></div></article>
         } @empty { <div class="risk-empty">No material signals are present in the current evaluation window.</div> }
       </div>
     </section>
@@ -54,7 +58,7 @@
         <header><div><p class="eyebrow">Sparse snapshots</p><h2>Risk history</h2></div><span>Stored on meaningful change</span></header>
         <div class="risk-history-list">
           @for (point of view.history; track point.id) {
-            <div><time>{{ point.evaluatedAt | date: 'short' }}</time><span class="risk-history-bar"><i [style.width.%]="point.score"></i></span><strong>{{ point.score }}</strong><small>{{ point.severity }}</small></div>
+            <div><time>{{ point.evaluatedAt | date: 'short' }}</time><span class="risk-history-bar"><i [style.width.%]="point.score"></i></span><strong>{{ point.score }}</strong><small>{{ point.severity }} · v{{ point.evaluationVersion }}{{ point.evidenceComplete ? '' : ' · incomplete' }}</small></div>
           } @empty { <div class="risk-empty">No historical changes recorded.</div> }
         </div>
       </section>

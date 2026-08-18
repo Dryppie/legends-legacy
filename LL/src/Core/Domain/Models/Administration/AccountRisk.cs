@@ -55,6 +55,9 @@ public sealed class AccountRiskSnapshot
     public DateTimeOffset? LastTriggeredAt { get; set; }
     public DateTimeOffset EvaluatedAt { get; set; }
     public int EvaluationVersion { get; set; } = 1;
+    public DateTimeOffset AnalysisWindowStart { get; set; }
+    public bool EvidenceComplete { get; set; } = true;
+    public int AnalyzedTransferCount { get; set; }
     public string SignalsJson { get; set; } = "[]";
     public string RelationshipsJson { get; set; } = "[]";
 }
@@ -68,6 +71,9 @@ public sealed class AccountRiskHistory
     public string SignalsJson { get; set; } = "[]";
     public DateTimeOffset EvaluatedAt { get; set; }
     public int EvaluationVersion { get; set; } = 1;
+    public DateTimeOffset AnalysisWindowStart { get; set; }
+    public bool EvidenceComplete { get; set; } = true;
+    public int AnalyzedTransferCount { get; set; }
 }
 
 public sealed class AccountRiskInvestigation
@@ -94,7 +100,12 @@ public sealed record AccountRiskSignal(
     int Contribution,
     string Title,
     string Explanation,
-    IReadOnlyDictionary<string, decimal> Evidence);
+    IReadOnlyDictionary<string, decimal> Evidence,
+    IReadOnlyList<Guid>? SupportingTransferIds = null,
+    DateTimeOffset? FirstObservedAt = null,
+    DateTimeOffset? LastObservedAt = null,
+    int SupportingTransferCount = 0,
+    bool SupportingEvidenceComplete = true);
 
 public sealed record AccountRiskRelationship(
     Guid AccountId,
@@ -125,7 +136,10 @@ public sealed record AccountRiskEvaluation(
     long IncomingCinders,
     long OutgoingCinders,
     int TransferCount,
-    DateTimeOffset? LastTriggeredAt);
+    DateTimeOffset? LastTriggeredAt,
+    DateTimeOffset AnalysisWindowStart,
+    bool EvidenceComplete,
+    int AnalyzedTransferCount);
 
 public sealed record AccountRiskAccountFact(
     Guid AccountId,
@@ -162,10 +176,14 @@ public sealed class AccountRiskAnalysisDataset
 
     public AccountRiskAnalysisDataset(
         IReadOnlyDictionary<Guid, AccountRiskAccountFact> accounts,
-        IReadOnlyList<AccountRiskTransferFact> transfers)
+        IReadOnlyList<AccountRiskTransferFact> transfers,
+        DateTimeOffset? analysisWindowStart = null,
+        bool evidenceComplete = true)
     {
         Accounts = accounts;
         Transfers = transfers;
+        AnalysisWindowStart = analysisWindowStart ?? DateTimeOffset.MinValue;
+        EvidenceComplete = evidenceComplete;
         _outgoing = transfers.GroupBy(x => x.SenderAccountId)
             .ToDictionary(x => x.Key, x => (IReadOnlyList<AccountRiskTransferFact>)x.ToList());
         _incoming = transfers.GroupBy(x => x.RecipientAccountId)
@@ -174,6 +192,8 @@ public sealed class AccountRiskAnalysisDataset
 
     public IReadOnlyDictionary<Guid, AccountRiskAccountFact> Accounts { get; }
     public IReadOnlyList<AccountRiskTransferFact> Transfers { get; }
+    public DateTimeOffset AnalysisWindowStart { get; }
+    public bool EvidenceComplete { get; }
 
     public IReadOnlyList<AccountRiskTransferFact> GetOutgoing(Guid accountId) =>
         _outgoing.GetValueOrDefault(accountId) ?? [];
@@ -188,6 +208,11 @@ public sealed record AccountRiskPolicy(
     int CriticalScore,
     int MinimumTransferCount,
     int MinimumCounterpartyCount,
+    long MinimumRelationshipCinders,
+    int MinimumItemTransferCount,
+    long MinimumFeederCinders,
+    long MinimumYoungAccountOutflowCinders,
+    long MinimumCircularTransferCinders,
     decimal ConcentrationThreshold,
     decimal RelationshipImbalanceThreshold,
     int YoungAccountDays,
@@ -202,8 +227,13 @@ public sealed record AccountRiskPolicy(
         ModerateScore: 25,
         HighScore: 50,
         CriticalScore: 75,
-        MinimumTransferCount: 1,
-        MinimumCounterpartyCount: 1,
+        MinimumTransferCount: 2,
+        MinimumCounterpartyCount: 2,
+        MinimumRelationshipCinders: 10_000,
+        MinimumItemTransferCount: 2,
+        MinimumFeederCinders: 20_000,
+        MinimumYoungAccountOutflowCinders: 10_000,
+        MinimumCircularTransferCinders: 10_000,
         ConcentrationThreshold: 0.70m,
         RelationshipImbalanceThreshold: 0.85m,
         YoungAccountDays: 14,
@@ -245,6 +275,8 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         EvaluateYoungAccountOutflow(account, cinderOutgoing, incomingTotal + outgoingTotal, signals);
         EvaluateCircularTransfers(accountId, dataset, signals);
 
+        ApplyCorrelationControls(signals);
+        TrimSupportingEvidence(signals);
         ApplyCategoryCaps(signals);
         var score = Math.Clamp(signals.Sum(x => x.Contribution), 0, 100);
         var relationships = BuildRelationships(accountId, dataset, direct);
@@ -263,7 +295,10 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
             incomingTotal,
             outgoingTotal,
             direct.Count,
-            signals.Count == 0 ? null : direct.Max(x => (DateTimeOffset?)x.OccurredAt));
+            signals.Select(x => x.LastObservedAt).Where(x => x.HasValue).Max(),
+            dataset.AnalysisWindowStart,
+            dataset.EvidenceComplete,
+            dataset.Transfers.Count);
     }
 
     private void EvaluateIncomingConcentration(
@@ -272,7 +307,7 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         long incomingTotal,
         ICollection<AccountRiskSignal> signals)
     {
-        if (incoming.Count < policy.MinimumTransferCount || incomingTotal <= 0) return;
+        if (incoming.Count < policy.MinimumTransferCount || incomingTotal < policy.MinimumRelationshipCinders) return;
         var groups = incoming.GroupBy(x => x.SenderAccountId)
             .Select(x => new { AccountId = x.Key, Value = x.Sum(y => y.Amount) })
             .OrderByDescending(x => x.Value)
@@ -281,14 +316,15 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         var topShare = (decimal)groups[0].Value / incomingTotal;
         if (topShare < policy.ConcentrationThreshold) return;
 
-        var contribution = Scale(topShare, policy.ConcentrationThreshold, 1m, 8, 20);
-        signals.Add(new AccountRiskSignal(
+        var contribution = Scale(topShare, policy.ConcentrationThreshold, 1m, 6, 15);
+        signals.Add(Signal(
             AccountRiskSignalType.IncomingConcentration,
             "Resource flow",
             contribution,
             "Concentrated incoming cinders",
             $"{topShare:P0} of direct incoming cinders came from one account across {incoming.Count} transfers.",
-            Evidence(("incomingCinders", incomingTotal), ("largestSenderShare", topShare), ("senderCount", groups.Count))));
+            Evidence(("incomingCinders", incomingTotal), ("largestSenderShare", topShare), ("senderCount", groups.Count)),
+            incoming));
     }
 
     private void EvaluateOneSidedRelationships(
@@ -303,21 +339,25 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
                 var sent = group.Where(x => x.SenderAccountId == accountId).Sum(x => x.Amount);
                 var received = group.Where(x => x.RecipientAccountId == accountId).Sum(x => x.Amount);
                 var total = sent + received;
-                return new { AccountId = group.Key, Sent = sent, Received = received, Total = total, Imbalance = total == 0 ? 0 : (decimal)Math.Abs(sent - received) / total, Count = group.Count() };
+                return new { AccountId = group.Key, Sent = sent, Received = received, Total = total, Imbalance = total == 0 ? 0 : (decimal)Math.Abs(sent - received) / total, Count = group.Count(), Transfers = group.ToList() };
             })
-            .Where(x => x.Count >= policy.MinimumTransferCount && x.Imbalance >= policy.RelationshipImbalanceThreshold)
+            .Where(x => x.Count >= policy.MinimumTransferCount &&
+                        x.Total >= policy.MinimumRelationshipCinders &&
+                        x.Imbalance >= policy.RelationshipImbalanceThreshold)
             .OrderByDescending(x => x.Imbalance)
             .ThenByDescending(x => x.Total)
             .FirstOrDefault();
         if (strongest is null) return;
 
-        signals.Add(new AccountRiskSignal(
+        var direction = strongest.Sent > strongest.Received ? "outgoing" : "incoming";
+        signals.Add(Signal(
             AccountRiskSignalType.OneSidedRelationship,
             "Resource flow",
-            Scale(strongest.Imbalance, policy.RelationshipImbalanceThreshold, 1m, 8, 25),
+            Scale(strongest.Imbalance, policy.RelationshipImbalanceThreshold, 1m, 6, 15),
             "Highly one-sided transfer relationship",
-            $"The strongest repeated relationship was {strongest.Imbalance:P0} one-sided across {strongest.Count} direct transfers.",
-            Evidence(("sent", strongest.Sent), ("received", strongest.Received), ("imbalance", strongest.Imbalance))));
+            $"The strongest repeated relationship was {strongest.Imbalance:P0} one-sided and primarily {direction} across {strongest.Count} direct transfers.",
+            Evidence(("sent", strongest.Sent), ("received", strongest.Received), ("imbalance", strongest.Imbalance)),
+            strongest.Transfers));
     }
 
     private void EvaluateOneSidedItemTransfers(
@@ -333,22 +373,23 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
                 var received = group.Count(x => x.RecipientAccountId == accountId);
                 var total = sent + received;
                 var imbalance = total == 0 ? 0 : (decimal)Math.Abs(sent - received) / total;
-                return new { Sent = sent, Received = received, Total = total, Imbalance = imbalance, AssetCount = group.Select(x => x.AssetId).Distinct(StringComparer.Ordinal).Count() };
+                return new { Sent = sent, Received = received, Total = total, Imbalance = imbalance, AssetCount = group.Select(x => x.AssetId).Distinct(StringComparer.Ordinal).Count(), Transfers = group.ToList() };
             })
-            .Where(x => x.Total >= policy.MinimumTransferCount && x.Imbalance >= policy.RelationshipImbalanceThreshold)
+            .Where(x => x.Total >= policy.MinimumItemTransferCount && x.Imbalance >= policy.RelationshipImbalanceThreshold)
             .OrderByDescending(x => x.Imbalance)
             .ThenByDescending(x => x.Total)
             .FirstOrDefault();
         if (strongest is null) return;
 
         var direction = strongest.Sent > strongest.Received ? "sent" : "received";
-        signals.Add(new AccountRiskSignal(
+        signals.Add(Signal(
             AccountRiskSignalType.OneSidedItemTransfer,
             "Resource flow",
-            Scale(strongest.Imbalance, policy.RelationshipImbalanceThreshold, 1m, 8, 25),
+            Scale(strongest.Imbalance, policy.RelationshipImbalanceThreshold, 1m, 6, 15),
             "One-sided direct item transfers",
             $"This account only {direction} items in its strongest direct item relationship: {strongest.Total} transfer event(s) involving {strongest.AssetCount} item type(s). Item values are not converted into cinders.",
-            Evidence(("sentItemTransfers", strongest.Sent), ("receivedItemTransfers", strongest.Received), ("imbalance", strongest.Imbalance), ("distinctItemTypes", strongest.AssetCount))));
+            Evidence(("sentItemTransfers", strongest.Sent), ("receivedItemTransfers", strongest.Received), ("imbalance", strongest.Imbalance), ("distinctItemTypes", strongest.AssetCount)),
+            strongest.Transfers));
     }
 
     private void EvaluateFeederNetwork(
@@ -374,20 +415,21 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
                     : double.MaxValue;
                 var wasYoung = ageAtTransfer <= policy.YoungAccountDays;
                 var wasLowLevel = level.HasValue && level.Value <= policy.YoungAccountMaximumLevel;
-                return new { AccountId = group.Key, Share = share, WasYoung = wasYoung, WasLowLevel = wasLowLevel, Value = toSubject, AgeAtTransfer = ageAtTransfer };
+                return new { AccountId = group.Key, Share = share, WasYoung = wasYoung, WasLowLevel = wasLowLevel, Value = toSubject, AgeAtTransfer = ageAtTransfer, Transfers = group.ToList() };
             })
             .Where(x => x.WasYoung && x.Share >= policy.FeederTargetShareThreshold)
             .ToList();
-        if (feeders.Count < policy.MinimumCounterpartyCount) return;
+        if (feeders.Count < policy.MinimumCounterpartyCount || feeders.Sum(x => x.Value) < policy.MinimumFeederCinders) return;
 
         var contribution = Math.Min(32, 25 + (feeders.Count - policy.MinimumCounterpartyCount) * 3);
-        signals.Add(new AccountRiskSignal(
+        signals.Add(Signal(
             AccountRiskSignalType.FeederNetwork,
             "Resource flow",
             contribution,
             "Possible feeder-account network",
             $"{feeders.Count} accounts were at most {policy.YoungAccountDays} days old when transfers began and sent at least {policy.FeederTargetShareThreshold:P0} of their observable direct outflow to this account; {feeders.Count(x => x.WasLowLevel)} were level {policy.YoungAccountMaximumLevel} or below in the retained event data.",
-            Evidence(("feederCount", feeders.Count), ("lowLevelFeederCount", feeders.Count(x => x.WasLowLevel)), ("cindersReceived", feeders.Sum(x => x.Value)), ("maximumAgeAtFirstTransferDays", (decimal)feeders.Max(x => x.AgeAtTransfer)))));
+            Evidence(("feederCount", feeders.Count), ("lowLevelFeederCount", feeders.Count(x => x.WasLowLevel)), ("cindersReceived", feeders.Sum(x => x.Value)), ("maximumAgeAtFirstTransferDays", (decimal)feeders.Max(x => x.AgeAtTransfer))),
+            feeders.SelectMany(x => x.Transfers)));
     }
 
     private void EvaluateYoungAccountOutflow(
@@ -396,23 +438,25 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         long totalFlow,
         ICollection<AccountRiskSignal> signals)
     {
-        if (outgoing.Count == 0 || totalFlow <= 0) return;
+        if (outgoing.Count < policy.MinimumTransferCount || totalFlow <= 0) return;
         var firstTransfer = outgoing.OrderBy(x => x.OccurredAt).First();
         var createdUtc = firstTransfer.SenderAccountCreatedUtc ?? account.AccountCreatedUtc;
         var level = firstTransfer.SenderCharacterLevel ?? account.CharacterLevel;
         var ageDays = (firstTransfer.OccurredAt.UtcDateTime - createdUtc).TotalDays;
         if (ageDays > policy.YoungAccountDays) return;
         var outgoingTotal = outgoing.Sum(x => x.Amount);
+        if (outgoingTotal < policy.MinimumYoungAccountOutflowCinders) return;
         var share = (decimal)outgoingTotal / totalFlow;
         if (share < policy.FeederTargetShareThreshold) return;
 
-        signals.Add(new AccountRiskSignal(
+        signals.Add(Signal(
             AccountRiskSignalType.YoungAccountOutflow,
             "Account context",
             25,
             "Young account dominated by outgoing transfers",
             $"This account was {Math.Max(0, (int)ageDays)} days old and level {level} when the observed outgoing pattern began; {share:P0} of its direct-transfer volume went outward.",
-            Evidence(("accountAgeAtFirstTransferDays", (decimal)ageDays), ("characterLevelAtFirstTransfer", (decimal)level), ("outgoingShare", share), ("outgoingCinders", outgoingTotal))));
+            Evidence(("accountAgeAtFirstTransferDays", (decimal)ageDays), ("characterLevelAtFirstTransfer", (decimal)level), ("outgoingShare", share), ("outgoingCinders", outgoingTotal)),
+            outgoing));
     }
 
     private void EvaluateCircularTransfers(
@@ -424,7 +468,7 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         var inboundBySender = dataset.GetIncoming(accountId)
             .Where(x => x.Kind == AccountRiskTransferKind.Cinders)
             .ToLookup(x => x.SenderAccountId);
-        var cycles = new HashSet<string>(StringComparer.Ordinal);
+        var cycles = new Dictionary<string, IReadOnlyList<AccountRiskTransferFact>>(StringComparer.Ordinal);
         foreach (var first in outbound)
         {
             foreach (var second in dataset.GetOutgoing(first.RecipientAccountId).Where(x => x.Kind == AccountRiskTransferKind.Cinders && x.RecipientAccountId != accountId))
@@ -435,20 +479,22 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
                     var times = new[] { first.OccurredAt, second.OccurredAt, third.OccurredAt };
                     if ((times.Max() - times.Min()).TotalHours > policy.CircularWindowHours) continue;
                     var values = new[] { first.Amount, second.Amount, third.Amount };
+                    if (values.Min() < policy.MinimumCircularTransferCinders) continue;
                     if ((decimal)values.Min() / values.Max() < policy.CircularValueSimilarity) continue;
-                    cycles.Add($"{first.RecipientAccountId:N}:{second.RecipientAccountId:N}");
+                    cycles.TryAdd($"{first.RecipientAccountId:N}:{second.RecipientAccountId:N}", [first, second, third]);
                 }
             }
         }
         if (cycles.Count == 0) return;
 
-        signals.Add(new AccountRiskSignal(
+        signals.Add(Signal(
             AccountRiskSignalType.CircularTransfer,
             "Transfer chains",
-            Math.Min(20, 10 + (cycles.Count - 1) * 3),
+            Math.Min(30, 20 + (cycles.Count - 1) * 5),
             "Circular cinder movement",
             $"Found {cycles.Count} three-account transfer cycle(s) with similar values inside {policy.CircularWindowHours} hours.",
-            Evidence(("cycleCount", cycles.Count), ("windowHours", policy.CircularWindowHours), ("minimumValueSimilarity", policy.CircularValueSimilarity))));
+            Evidence(("cycleCount", cycles.Count), ("windowHours", policy.CircularWindowHours), ("minimumValueSimilarity", policy.CircularValueSimilarity)),
+            cycles.Values.SelectMany(x => x)));
     }
 
     private IReadOnlyList<AccountRiskRelationship> BuildRelationships(
@@ -504,6 +550,58 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         CapCategory(signals, "Account context", policy.CoordinationCategoryCap);
     }
 
+    private static void ApplyCorrelationControls(List<AccountRiskSignal> signals)
+    {
+        var visited = new HashSet<int>();
+        for (var start = 0; start < signals.Count; start++)
+        {
+            if (!visited.Add(start)) continue;
+            var component = new List<int> { start };
+            var componentEvidence = new HashSet<Guid>(signals[start].SupportingTransferIds ?? []);
+            if (componentEvidence.Count == 0) continue;
+
+            var changed = true;
+            while (changed)
+            {
+                changed = false;
+                for (var candidate = 0; candidate < signals.Count; candidate++)
+                {
+                    if (visited.Contains(candidate)) continue;
+                    var candidateEvidence = signals[candidate].SupportingTransferIds ?? [];
+                    if (!candidateEvidence.Any(componentEvidence.Contains)) continue;
+                    visited.Add(candidate);
+                    component.Add(candidate);
+                    componentEvidence.UnionWith(candidateEvidence);
+                    changed = true;
+                }
+            }
+
+            var winner = component
+                .OrderByDescending(index => signals[index].Contribution)
+                .ThenBy(index => index)
+                .First();
+            foreach (var index in component.Where(index => index != winner))
+            {
+                signals[index] = signals[index] with { Contribution = 0 };
+            }
+        }
+    }
+
+    private static void TrimSupportingEvidence(List<AccountRiskSignal> signals)
+    {
+        const int retainedEvidenceLimit = 500;
+        for (var index = 0; index < signals.Count; index++)
+        {
+            var supportingIds = signals[index].SupportingTransferIds ?? [];
+            signals[index] = signals[index] with
+            {
+                SupportingTransferIds = supportingIds.Take(retainedEvidenceLimit).ToList(),
+                SupportingTransferCount = supportingIds.Count,
+                SupportingEvidenceComplete = supportingIds.Count <= retainedEvidenceLimit
+            };
+        }
+    }
+
     private static void CapCategory(List<AccountRiskSignal> signals, string category, int cap)
     {
         var categorySignals = signals.Where(x => x.Category == category).ToList();
@@ -513,7 +611,12 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         foreach (var signal in categorySignals)
         {
             var index = signals.IndexOf(signal);
-            signals[index] = signal with { Contribution = Math.Max(1, (int)Math.Floor(signal.Contribution * factor)) };
+            signals[index] = signal with
+            {
+                Contribution = signal.Contribution == 0
+                    ? 0
+                    : Math.Max(1, (int)Math.Floor(signal.Contribution * factor))
+            };
         }
 
         var excess = signals.Where(x => x.Category == category).Sum(x => x.Contribution) - cap;
@@ -545,5 +648,33 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
 
     private static IReadOnlyDictionary<string, decimal> Evidence(params (string Key, decimal Value)[] values) =>
         values.ToDictionary(x => x.Key, x => x.Value, StringComparer.Ordinal);
+
+    private static AccountRiskSignal Signal(
+        AccountRiskSignalType type,
+        string category,
+        int contribution,
+        string title,
+        string explanation,
+        IReadOnlyDictionary<string, decimal> evidence,
+        IEnumerable<AccountRiskTransferFact> supportingTransfers)
+    {
+        var transfers = supportingTransfers
+            .GroupBy(x => x.Id)
+            .Select(x => x.First())
+            .OrderBy(x => x.OccurredAt)
+            .ToList();
+        return new AccountRiskSignal(
+            type,
+            category,
+            contribution,
+            title,
+            explanation,
+            evidence,
+            transfers.Select(x => x.Id).ToList(),
+            transfers.Count == 0 ? null : transfers[0].OccurredAt,
+            transfers.Count == 0 ? null : transfers[^1].OccurredAt,
+            transfers.Count,
+            true);
+    }
 
 }

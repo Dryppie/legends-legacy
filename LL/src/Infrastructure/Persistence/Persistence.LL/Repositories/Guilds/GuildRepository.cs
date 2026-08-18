@@ -120,6 +120,13 @@ public class GuildRepository : IGuildRepository
 
     public async Task<bool> InviteAsync(Guid currentCharacterId, Guid guildId, Guid invitedCharacterId, CancellationToken cancellationToken)
     {
+        if (await _context.GuildMembers.AnyAsync(
+                member => member.CharacterId == invitedCharacterId,
+                cancellationToken))
+        {
+            return false;
+        }
+
         var guild = await _context.Guilds
             .Include(g => g.Members)
             .Include(g => g.Invites)
@@ -151,6 +158,12 @@ public class GuildRepository : IGuildRepository
             .FirstOrDefaultAsync(c => c.Name.ToLower() == invitedCharacterName.ToLower(), cancellationToken);
 
         if (invitedCharacter == null) return false;
+        if (await _context.GuildMembers.AnyAsync(
+                member => member.CharacterId == invitedCharacter.Id,
+                cancellationToken))
+        {
+            return false;
+        }
 
         guild.Invites.Add(new GuildInvite
         {

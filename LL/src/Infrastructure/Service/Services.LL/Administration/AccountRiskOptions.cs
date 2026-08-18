@@ -7,7 +7,7 @@ public sealed class AccountRiskOptions
     public const string SectionName = "LiveOps:AccountRisk";
 
     public bool Enabled { get; set; } = true;
-    public int EvaluationVersion { get; set; } = 5;
+    public int EvaluationVersion { get; set; } = 6;
     public int EvaluationIntervalMinutes { get; set; } = 30;
     public int LookbackDays { get; set; } = 90;
     public int CandidateLimit { get; set; } = 2_000;
@@ -16,8 +16,13 @@ public sealed class AccountRiskOptions
     public int ModerateScore { get; set; } = 25;
     public int HighScore { get; set; } = 50;
     public int CriticalScore { get; set; } = 75;
-    public int MinimumTransferCount { get; set; } = 1;
-    public int MinimumCounterpartyCount { get; set; } = 1;
+    public int MinimumTransferCount { get; set; } = 2;
+    public int MinimumCounterpartyCount { get; set; } = 2;
+    public long MinimumRelationshipCinders { get; set; } = 10_000;
+    public int MinimumItemTransferCount { get; set; } = 2;
+    public long MinimumFeederCinders { get; set; } = 20_000;
+    public long MinimumYoungAccountOutflowCinders { get; set; } = 10_000;
+    public long MinimumCircularTransferCinders { get; set; } = 10_000;
     public decimal ConcentrationThreshold { get; set; } = 0.70m;
     public decimal RelationshipImbalanceThreshold { get; set; } = 0.85m;
     public int YoungAccountDays { get; set; } = 14;
@@ -34,6 +39,11 @@ public sealed class AccountRiskOptions
         CriticalScore,
         MinimumTransferCount,
         MinimumCounterpartyCount,
+        MinimumRelationshipCinders,
+        MinimumItemTransferCount,
+        MinimumFeederCinders,
+        MinimumYoungAccountOutflowCinders,
+        MinimumCircularTransferCinders,
         ConcentrationThreshold,
         RelationshipImbalanceThreshold,
         YoungAccountDays,

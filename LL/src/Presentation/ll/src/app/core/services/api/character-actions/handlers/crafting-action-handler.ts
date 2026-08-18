@@ -5,7 +5,6 @@ import { CharacterActionType } from '../../../../../shared/models/enums/characte
 import { LevelingService } from '../../../client-side/leveling/leveling.service';
 import { SessionSummaryService } from '../../../client-side/session-summary/session-summary.service';
 import { CraftingService } from '../../crafting/crafting.service';
-import { CurrencyService } from '../../currency/currency.service';
 
 @Injectable({ providedIn: 'root' })
 export class CraftingActionHandler {
@@ -13,7 +12,6 @@ export class CraftingActionHandler {
     private readonly craftingService: CraftingService,
     private readonly sessionSummaryService: SessionSummaryService,
     private readonly levelingService: LevelingService,
-    private readonly currencyService: CurrencyService,
   ) {}
 
   handle(action: CharacterActionDto): void {
@@ -36,6 +34,8 @@ export class CraftingActionHandler {
       );
     }
 
-    this.currencyService.gainSoulstones(summary.totalSoulstones);
+    // Crafting Soulstones are applied from the authoritative SoulstoneDropMsg.
+    // Adding the session total here as well makes the displayed balance depend
+    // on whether the action response or the real-time event arrives first.
   }
 }

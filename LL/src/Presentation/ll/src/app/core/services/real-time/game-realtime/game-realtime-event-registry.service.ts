@@ -73,9 +73,11 @@ export class GameRealtimeEventRegistry {
           payload.location,
           payload.grantId,
         );
-      this.injector
-        .get(InventoryStateService)
-        .applyInventoryGrant(payload.grantId, payload.items ?? []);
+
+      // Inventory is refreshed from the matching StateInvalidated revision.
+      // Applying this delta as well races the authoritative snapshot: when the
+      // snapshot already includes the grant, adding the delta doubles the local
+      // quantity even though the database and loot history are correct.
     });
 
     this.addHandler(gameRealtimeEventNames.inventorySnapshot, (envelope) => {

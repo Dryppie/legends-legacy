@@ -27,14 +27,18 @@ public static class AccountRiskDtoMapper
         snapshot.FirstFlaggedAt,
         snapshot.LastTriggeredAt,
         snapshot.EvaluatedAt,
+        snapshot.EvaluationVersion,
+        snapshot.AnalysisWindowStart,
+        snapshot.EvidenceComplete,
+        snapshot.AnalyzedTransferCount,
         status);
 
     public static AccountRiskDetailsDto ToDto(AccountRiskDetails details) => new(
         ToDto(details.Snapshot, details.InvestigationStatus),
-        details.Signals.Select(x => new AccountRiskSignalDto(x.Type, x.Category, x.Contribution, x.Title, x.Explanation, x.Evidence)).ToList(),
+        details.Signals.Select(x => new AccountRiskSignalDto(x.Type, x.Category, x.Contribution, x.Title, x.Explanation, x.Evidence, x.SupportingTransferIds ?? [], x.FirstObservedAt, x.LastObservedAt, x.SupportingTransferCount, x.SupportingEvidenceComplete)).ToList(),
         details.Relationships.Select(x => new AccountRiskRelationshipDto(x.AccountId, x.CharacterId, x.CharacterName, x.Relationship, x.SentToSubject, x.ReceivedFromSubject, x.TransactionCount, x.YoungAccount, x.RiskScore, x.RiskSeverity, x.ItemTransfersToSubject, x.ItemTransfersFromSubject)).ToList(),
         details.Transfers.Select(x => new AccountRiskTransferDto(x.TransferId, x.Direction, x.Kind, x.CounterpartyAccountId, x.CounterpartyCharacterId, x.CounterpartyCharacterName, x.AssetId, x.AssetName, x.Quantity, x.OccurredAt)).ToList(),
-        details.History.Select(x => new AccountRiskHistoryPointDto(x.Id, x.Score, x.Severity, x.EvaluatedAt)).ToList(),
+        details.History.Select(x => new AccountRiskHistoryPointDto(x.Id, x.Score, x.Severity, x.EvaluatedAt, x.EvaluationVersion, x.AnalysisWindowStart, x.EvidenceComplete, x.AnalyzedTransferCount)).ToList(),
         details.Notes.Select(ToDto).ToList());
 
     public static AccountRiskPageDto ToDto(AccountRiskPage page, int pageNumber, int pageSize) => new(
@@ -46,6 +50,12 @@ public static class AccountRiskDtoMapper
         page.DirectTransferCount,
         page.DirectItemTransferCount,
         page.EvaluatedAccountCount,
+        page.EligibleAccountCount,
+        page.UpToDateAccountCount,
+        page.PendingEvaluationCount,
+        page.IncompleteEvaluationCount,
+        page.EvaluationVersion,
+        page.LookbackDays,
         pageNumber,
         pageSize);
 

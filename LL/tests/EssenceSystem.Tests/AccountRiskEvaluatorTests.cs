@@ -34,7 +34,7 @@ public sealed class AccountRiskEvaluatorTests
         {
             Transfer(feeder, main, 3_000, 1),
             Transfer(feeder, main, 3_000, 2),
-            Transfer(feeder, main, 3_500, 3),
+            Transfer(feeder, main, 4_000, 3),
         };
 
         var result = _evaluator.Evaluate(feeder.AccountId, Dataset([main, feeder], transfers), Now);
@@ -45,7 +45,7 @@ public sealed class AccountRiskEvaluatorTests
     }
 
     [Fact]
-    public void SingleYoungAccountFunnelFlagsBothSenderAndRecipientForInvestigation()
+    public void SingleYoungAccountTransferDoesNotCreateAnInvestigationPriority()
     {
         var main = Account("SingleFunnelMain", 500, 80);
         var feeder = Account("SingleFunnelAlt", 5, 45);
@@ -55,14 +55,14 @@ public sealed class AccountRiskEvaluatorTests
         var mainResult = _evaluator.Evaluate(main.AccountId, dataset, Now);
         var feederResult = _evaluator.Evaluate(feeder.AccountId, dataset, Now);
 
-        Assert.Contains(mainResult.Signals, x => x.Type == AccountRiskSignalType.FeederNetwork);
-        Assert.Contains(feederResult.Signals, x => x.Type == AccountRiskSignalType.YoungAccountOutflow);
-        Assert.Equal(AccountRiskSeverity.High, mainResult.Severity);
-        Assert.Equal(AccountRiskSeverity.High, feederResult.Severity);
+        Assert.Empty(mainResult.Signals);
+        Assert.Empty(feederResult.Signals);
+        Assert.Equal(AccountRiskSeverity.Low, mainResult.Severity);
+        Assert.Equal(AccountRiskSeverity.Low, feederResult.Severity);
     }
 
     [Fact]
-    public void SingleEstablishedOneWayTransferIsEnoughForModerateInvestigationPriority()
+    public void SingleEstablishedOneWayTransferDoesNotCreateAnInvestigationPriority()
     {
         var sender = Account("EstablishedSender", 500, 80);
         var recipient = Account("EstablishedRecipient", 700, 90);
@@ -71,14 +71,14 @@ public sealed class AccountRiskEvaluatorTests
         var senderResult = _evaluator.Evaluate(sender.AccountId, dataset, Now);
         var recipientResult = _evaluator.Evaluate(recipient.AccountId, dataset, Now);
 
-        Assert.Contains(senderResult.Signals, x => x.Type == AccountRiskSignalType.OneSidedRelationship);
-        Assert.Contains(recipientResult.Signals, x => x.Type == AccountRiskSignalType.OneSidedRelationship);
-        Assert.Equal(AccountRiskSeverity.Moderate, senderResult.Severity);
-        Assert.Equal(AccountRiskSeverity.Moderate, recipientResult.Severity);
+        Assert.Empty(senderResult.Signals);
+        Assert.Empty(recipientResult.Signals);
+        Assert.Equal(AccountRiskSeverity.Low, senderResult.Severity);
+        Assert.Equal(AccountRiskSeverity.Low, recipientResult.Severity);
     }
 
     [Fact]
-    public void SingleOneWayItemTransferFlagsBothAccountsWithoutInventingACinderValue()
+    public void SingleOneWayItemTransferDoesNotCreateAnInvestigationPriority()
     {
         var sender = Account("ItemSender", 500, 80);
         var recipient = Account("ItemRecipient", 700, 90);
@@ -87,10 +87,10 @@ public sealed class AccountRiskEvaluatorTests
         var senderResult = _evaluator.Evaluate(sender.AccountId, dataset, Now);
         var recipientResult = _evaluator.Evaluate(recipient.AccountId, dataset, Now);
 
-        Assert.Contains(senderResult.Signals, x => x.Type == AccountRiskSignalType.OneSidedItemTransfer);
-        Assert.Contains(recipientResult.Signals, x => x.Type == AccountRiskSignalType.OneSidedItemTransfer);
-        Assert.Equal(AccountRiskSeverity.Moderate, senderResult.Severity);
-        Assert.Equal(AccountRiskSeverity.Moderate, recipientResult.Severity);
+        Assert.Empty(senderResult.Signals);
+        Assert.Empty(recipientResult.Signals);
+        Assert.Equal(AccountRiskSeverity.Low, senderResult.Severity);
+        Assert.Equal(AccountRiskSeverity.Low, recipientResult.Severity);
         Assert.Equal(0, senderResult.IncomingCinders);
         Assert.Equal(0, senderResult.OutgoingCinders);
         Assert.Equal(0, recipientResult.IncomingCinders);
@@ -140,8 +140,8 @@ public sealed class AccountRiskEvaluatorTests
         var occurredAt = Now.AddDays(-20);
         var transfers = new[]
         {
-            HistoricalTransfer(feederA, main, 9_500, occurredAt, senderLevel: 8),
-            HistoricalTransfer(feederB, main, 8_700, occurredAt.AddHours(1), senderLevel: 55),
+            HistoricalTransfer(feederA, main, 10_500, occurredAt, senderLevel: 8),
+            HistoricalTransfer(feederB, main, 10_500, occurredAt.AddHours(1), senderLevel: 55),
         };
 
         var result = _evaluator.Evaluate(main.AccountId, Dataset([main, feederA, feederB], transfers), Now);
@@ -149,7 +149,9 @@ public sealed class AccountRiskEvaluatorTests
         var signal = Assert.Single(result.Signals, x => x.Type == AccountRiskSignalType.FeederNetwork);
         Assert.Equal(2m, signal.Evidence["feederCount"]);
         Assert.Equal(1m, signal.Evidence["lowLevelFeederCount"]);
-        Assert.Equal(AccountRiskSeverity.High, result.Severity);
+        Assert.Equal(AccountRiskSeverity.Moderate, result.Severity);
+        Assert.Equal(25, result.Score);
+        Assert.All(result.Signals.Where(x => x.Type != AccountRiskSignalType.FeederNetwork), x => Assert.Equal(0, x.Contribution));
     }
 
     [Fact]
@@ -177,9 +179,9 @@ public sealed class AccountRiskEvaluatorTests
         var c = Account("C", 190, 61);
         var transfers = new[]
         {
-            Transfer(a, b, 10_000, 1),
-            Transfer(b, c, 9_500, 2),
-            Transfer(c, a, 9_000, 3),
+            Transfer(a, b, 12_000, 1),
+            Transfer(b, c, 11_500, 2),
+            Transfer(c, a, 11_000, 3),
         };
 
         var result = _evaluator.Evaluate(a.AccountId, Dataset([a, b, c], transfers), Now);
@@ -203,6 +205,66 @@ public sealed class AccountRiskEvaluatorTests
         Assert.Contains(youngResult.Signals, x => x.Type == AccountRiskSignalType.YoungAccountOutflow);
         Assert.DoesNotContain(establishedResult.Signals, x => x.Type == AccountRiskSignalType.YoungAccountOutflow);
         Assert.True(youngResult.Score > establishedResult.Score);
+    }
+
+    [Fact]
+    public void OverlappingSignalsAreVisibleButTheTransfersContributeOnlyOnce()
+    {
+        var recipient = Account("CorrelationRecipient", 700, 90);
+        var young = Account("CorrelationYoung", 2, 8);
+        var transfers = new[]
+        {
+            Transfer(young, recipient, 6_000, 1),
+            Transfer(young, recipient, 6_000, 2),
+        };
+
+        var result = _evaluator.Evaluate(young.AccountId, Dataset([recipient, young], transfers), Now);
+
+        var youngSignal = Assert.Single(result.Signals, x => x.Type == AccountRiskSignalType.YoungAccountOutflow);
+        var relationshipSignal = Assert.Single(result.Signals, x => x.Type == AccountRiskSignalType.OneSidedRelationship);
+        Assert.Equal(25, youngSignal.Contribution);
+        Assert.Equal(0, relationshipSignal.Contribution);
+        Assert.Equal(25, result.Score);
+        Assert.Equal(transfers.Select(x => x.Id).Order(), youngSignal.SupportingTransferIds!.Order());
+        Assert.Equal(transfers.Min(x => x.OccurredAt), youngSignal.FirstObservedAt);
+        Assert.Equal(transfers.Max(x => x.OccurredAt), result.LastTriggeredAt);
+    }
+
+    [Fact]
+    public void EvaluationCarriesEvidenceCompletenessMetadata()
+    {
+        var a = Account("IncompleteA", 300, 70);
+        var b = Account("IncompleteB", 300, 70);
+        var transfers = new[] { Transfer(a, b, 20_000, 1), Transfer(a, b, 20_000, 2) };
+        var windowStart = Now.AddDays(-90);
+        var dataset = new AccountRiskAnalysisDataset(
+            new[] { a, b }.ToDictionary(x => x.AccountId),
+            transfers,
+            windowStart,
+            evidenceComplete: false);
+
+        var result = _evaluator.Evaluate(a.AccountId, dataset, Now);
+
+        Assert.False(result.EvidenceComplete);
+        Assert.Equal(windowStart, result.AnalysisWindowStart);
+        Assert.Equal(2, result.AnalyzedTransferCount);
+    }
+
+    [Fact]
+    public void StoredSignalEvidenceIsBoundedWithoutHidingTheSupportingCount()
+    {
+        var sender = Account("EvidenceBoundSender", 500, 80);
+        var recipient = Account("EvidenceBoundRecipient", 500, 80);
+        var transfers = Enumerable.Range(1, 501)
+            .Select(index => Transfer(sender, recipient, 100, index))
+            .ToList();
+
+        var result = _evaluator.Evaluate(sender.AccountId, Dataset([sender, recipient], transfers), Now);
+
+        var signal = Assert.Single(result.Signals, x => x.Type == AccountRiskSignalType.OneSidedRelationship);
+        Assert.Equal(501, signal.SupportingTransferCount);
+        Assert.Equal(500, signal.SupportingTransferIds!.Count);
+        Assert.False(signal.SupportingEvidenceComplete);
     }
 
     private static AccountRiskAccountFact Account(string name, int ageDays, int level)

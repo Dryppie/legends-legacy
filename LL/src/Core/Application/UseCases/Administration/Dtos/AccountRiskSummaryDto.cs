@@ -21,6 +21,10 @@ public sealed record AccountRiskSummaryDto(
     DateTimeOffset? FirstFlaggedAt,
     DateTimeOffset? LastTriggeredAt,
     DateTimeOffset EvaluatedAt,
+    int EvaluationVersion,
+    DateTimeOffset AnalysisWindowStart,
+    bool EvidenceComplete,
+    int AnalyzedTransferCount,
     AccountInvestigationStatus InvestigationStatus);
 
 public sealed record AccountRiskPageDto(
@@ -32,5 +36,11 @@ public sealed record AccountRiskPageDto(
     long DirectTransferCount,
     long DirectItemTransferCount,
     int EvaluatedAccountCount,
+    int EligibleAccountCount,
+    int UpToDateAccountCount,
+    int PendingEvaluationCount,
+    int IncompleteEvaluationCount,
+    int EvaluationVersion,
+    int LookbackDays,
     int Page,
     int PageSize);

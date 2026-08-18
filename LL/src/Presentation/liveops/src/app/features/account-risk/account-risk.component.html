@@ -2,13 +2,13 @@
   <section class="risk-heading">
     <div>
       <p class="eyebrow">Investigation priority · not proof of abuse</p>
-      <h1>Account risk</h1>
+      <h1>Direct-transfer review</h1>
       <p>Explainable cinder and item-flow signals derived from historical direct transfers. Review the evidence before taking any moderation action.</p>
     </div>
     @if (data?.lastEvaluatedAt) { <div class="risk-freshness">Evaluated {{ data!.lastEvaluatedAt | date: 'medium' }}</div> }
   </section>
 
-  <section class="risk-coverage" [class.warning]="data && !data.directTransferCount && !data.directItemTransferCount">
+  <section class="risk-coverage" [class.warning]="data && (!data.directTransferCount && !data.directItemTransferCount || data.pendingEvaluationCount > 0 || data.incompleteEvaluationCount > 0)">
     @if (data?.firstEvidenceAt) {
       <strong>Evidence coverage</strong>
       <span>{{ data!.directTransferCount | number }} retained direct-cinder transfers and {{ data!.directItemTransferCount | number }} direct-item transfers, earliest {{ data!.firstEvidenceAt | date: 'medium' }}.</span>
@@ -16,6 +16,11 @@
     } @else if (data) {
       <strong>No retained direct-transfer evidence</strong>
       <span>The evaluator has no direct cinder or item-transfer records to analyze.</span>
+    }
+    @if (data) {
+      <strong>Evaluation coverage</strong>
+      <span>{{ data.upToDateAccountCount | number }} of {{ data.eligibleAccountCount | number }} eligible accounts are current for v{{ data.evaluationVersion }} ({{ data.lookbackDays }}-day window); {{ data.pendingEvaluationCount | number }} remain pending.</span>
+      @if (data.incompleteEvaluationCount) { <small>{{ data.incompleteEvaluationCount | number }} current snapshot(s) hit an evidence safety cap and must not be treated as complete.</small> }
     }
   </section>
 
@@ -29,7 +34,7 @@
   <div class="risk-quick-filters">
     <span>Quick views</span>
     <button type="button" (click)="quickFilter('critical')">Critical</button>
-    <button type="button" (click)="quickFilter('high')">High risk</button>
+    <button type="button" (click)="quickFilter('high')">High priority</button>
     <button type="button" (click)="quickFilter('feeders')">Possible alt feeders</button>
     <button type="button" (click)="quickFilter('new')">Young accounts</button>
     <button type="button" (click)="quickFilter('all')">Include low</button>
@@ -37,7 +42,7 @@
 
   <form class="risk-filters" (ngSubmit)="applyFilters()">
     <label class="risk-search">Player or account<input name="risk-search" [(ngModel)]="search" placeholder="Name or UUID" /></label>
-    <label>Minimum risk<select name="risk-severity" [(ngModel)]="minimumSeverity"><option value="Low">All</option><option value="Moderate">Moderate</option><option value="High">High</option><option value="Critical">Critical</option></select></label>
+    <label>Minimum priority<select name="risk-severity" [(ngModel)]="minimumSeverity"><option value="Low">All</option><option value="Moderate">Moderate</option><option value="High">High</option><option value="Critical">Critical</option></select></label>
     <label>Primary signal<select name="risk-signal" [(ngModel)]="signalType"><option value="">All signals</option><option value="FeederNetwork">Feeder network</option><option value="IncomingConcentration">Incoming concentration</option><option value="OneSidedRelationship">One-sided cinders</option><option value="OneSidedItemTransfer">One-sided items</option><option value="YoungAccountOutflow">Young account outflow</option><option value="CircularTransfer">Circular transfer</option></select></label>
     <label>Review state<select name="risk-status" [(ngModel)]="status"><option value="">All states</option><option value="Unreviewed">Unreviewed</option><option value="Investigating">Investigating</option><option value="Watchlisted">Watchlisted</option><option value="Cleared">Cleared</option><option value="ConfirmedAbuse">Confirmed abuse</option><option value="Actioned">Actioned</option></select></label>
     <label>Min score<input name="risk-score" type="number" min="0" max="100" [(ngModel)]="minimumScore" placeholder="0–100" /></label>
@@ -49,10 +54,10 @@
   @if (message) { <div class="message error" role="alert">{{ message }}</div> }
 
   <section class="risk-table-wrap" [attr.aria-busy]="loading">
-    <div class="risk-table-head"><span>{{ data?.total ?? 0 }} matching accounts</span><span>Automated risk and moderator state are intentionally separate</span></div>
+    <div class="risk-table-head"><span>{{ data?.total ?? 0 }} matching accounts</span><span>Automated direct-transfer priority and moderator state are intentionally separate</span></div>
     <div class="risk-table-scroll">
       <table class="risk-table">
-        <thead><tr><th>Player</th><th>Risk</th><th>Primary evidence</th><th>Connections</th><th>Direct cinder flow</th><th>Context</th><th>Review</th></tr></thead>
+        <thead><tr><th>Player</th><th>Priority</th><th>Primary evidence</th><th>Connections</th><th>Direct cinder flow</th><th>Context</th><th>Review</th></tr></thead>
         <tbody>
           @for (entry of data?.entries ?? []; track entry.accountId) {
             <tr tabindex="0" (click)="open(entry.accountId)" (keydown.enter)="open(entry.accountId)">

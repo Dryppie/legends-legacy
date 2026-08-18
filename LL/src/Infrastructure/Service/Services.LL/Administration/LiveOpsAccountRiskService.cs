@@ -27,6 +27,7 @@ public sealed class LiveOpsAccountRiskService(
         var since = now.AddDays(-_options.LookbackDays);
         var candidates = await riskRepository.GetCandidateAccountIdsAsync(
             since,
+            _options.EvaluationVersion,
             _options.CandidateLimit,
             cancellationToken);
         if (candidates.Count == 0) return 0;
@@ -51,7 +52,12 @@ public sealed class LiveOpsAccountRiskService(
     }
 
     public Task<AccountRiskPage> SearchAsync(AccountRiskSearch search, CancellationToken cancellationToken) =>
-        riskRepository.SearchAsync(search, cancellationToken);
+        riskRepository.SearchAsync(
+            search,
+            timeProvider.GetUtcNow().AddDays(-_options.LookbackDays),
+            _options.EvaluationVersion,
+            _options.LookbackDays,
+            cancellationToken);
 
     public Task<AccountRiskDetails?> GetDetailsAsync(Guid accountId, int transferLimit, CancellationToken cancellationToken) =>
         riskRepository.GetDetailsAsync(accountId, transferLimit, cancellationToken);

@@ -29,6 +29,7 @@ public sealed class AccountRiskRepository(
 
     public async Task<IReadOnlyList<Guid>> GetCandidateAccountIdsAsync(
         DateTimeOffset since,
+        int evaluationVersion,
         int limit,
         CancellationToken cancellationToken)
     {
@@ -41,38 +42,44 @@ public sealed class AccountRiskRepository(
                         x.SenderAccountId != x.RecipientAccountId &&
                         x.OccurredAt >= since);
         var take = Math.Clamp(limit, 1, 5_000);
-        var senders = await transfers
-            .GroupBy(x => x.SenderAccountId!.Value)
-            .Select(x => new { AccountId = x.Key, LastActivity = x.Max(y => y.OccurredAt) })
-            .OrderByDescending(x => x.LastActivity)
-            .Take(take)
-            .ToListAsync(cancellationToken);
-        var recipients = await transfers
-            .GroupBy(x => x.RecipientAccountId!.Value)
-            .Select(x => new { AccountId = x.Key, LastActivity = x.Max(y => y.OccurredAt) })
-            .OrderByDescending(x => x.LastActivity)
-            .Take(take)
-            .ToListAsync(cancellationToken);
-
-        var active = senders.Concat(recipients)
-            .GroupBy(x => x.AccountId)
-            .Select(x => new { AccountId = x.Key, LastActivity = x.Max(y => y.LastActivity) })
-            .OrderByDescending(x => x.LastActivity)
-            .ThenBy(x => x.AccountId)
-            .Take(take)
-            .Select(x => x.AccountId)
-            .ToList();
+        var maintenanceTake = Math.Max(1, take / 10);
         var expired = await context.AccountRiskSnapshots.AsNoTracking()
             .Where(x => x.Severity != AccountRiskSeverity.Low &&
                         (!x.LastTriggeredAt.HasValue || x.LastTriggeredAt < since))
             .OrderBy(x => x.EvaluatedAt)
-            .Take(Math.Max(1, take / 10))
+            .Take(maintenanceTake)
             .Select(x => x.AccountId)
             .ToListAsync(cancellationToken);
+        var activeTake = take - expired.Count;
+        if (activeTake <= 0) return expired;
+
+        var senders = transfers
+            .GroupBy(x => x.SenderAccountId!.Value)
+            .Select(x => new { AccountId = x.Key, LastActivity = x.Max(y => y.OccurredAt) });
+        var recipients = transfers
+            .GroupBy(x => x.RecipientAccountId!.Value)
+            .Select(x => new { AccountId = x.Key, LastActivity = x.Max(y => y.OccurredAt) });
+        var accountActivity = senders.Concat(recipients)
+            .GroupBy(x => x.AccountId)
+            .Select(x => new { AccountId = x.Key, LastActivity = x.Max(y => y.LastActivity) });
+        var activeQuery = from activity in accountActivity
+                          join snapshot in context.AccountRiskSnapshots.AsNoTracking()
+                              on activity.AccountId equals snapshot.AccountId into snapshotRows
+                          from snapshot in snapshotRows.DefaultIfEmpty()
+                          where !expired.Contains(activity.AccountId)
+                          let needsEvaluation = snapshot == null ||
+                              snapshot.EvaluationVersion != evaluationVersion ||
+                              activity.LastActivity > snapshot.EvaluatedAt
+                          orderby needsEvaluation descending,
+                              snapshot == null ? DateTimeOffset.MinValue : snapshot.EvaluatedAt,
+                              activity.LastActivity descending,
+                              activity.AccountId
+                          select activity.AccountId;
+        var active = await activeQuery.Take(activeTake).ToListAsync(cancellationToken);
 
         // The maintenance slice clears flags after their last evidence ages out of
         // the lookback without making the foreground queue execute analytics.
-        return active.Concat(expired).Distinct().ToList();
+        return expired.Concat(active).Distinct().Take(take).ToList();
     }
 
     public async Task<AccountRiskAnalysisDataset> GetAnalysisDatasetAsync(
@@ -85,7 +92,8 @@ public sealed class AccountRiskRepository(
         {
             return new AccountRiskAnalysisDataset(
                 new Dictionary<Guid, AccountRiskAccountFact>(),
-                []);
+                [],
+                since);
         }
 
         var candidates = accountIds.Distinct().ToArray();
@@ -100,11 +108,11 @@ public sealed class AccountRiskRepository(
                         x.Quantity > 0 &&
                         x.OccurredAt >= since);
 
-        var firstHop = await baseQuery
+        var firstHopRows = await baseQuery
             .Where(x => candidates.Contains(x.SenderAccountId!.Value) ||
                         candidates.Contains(x.RecipientAccountId!.Value))
             .OrderByDescending(x => x.OccurredAt)
-            .Take(take)
+            .Take(take + 1)
             .Select(x => new AccountRiskTransferFact(
                 x.Id,
                 x.SenderAccountId!.Value,
@@ -118,17 +126,19 @@ public sealed class AccountRiskRepository(
                 x.EventType == EconomyEventType.DirectItemTransfer ? AccountRiskTransferKind.Item : AccountRiskTransferKind.Cinders,
                 x.AssetId))
             .ToListAsync(cancellationToken);
+        var firstHopTruncated = firstHopRows.Count > take;
+        var firstHop = firstHopRows.Take(take).ToList();
 
         var relatedIds = firstHop
             .SelectMany(x => new[] { x.SenderAccountId, x.RecipientAccountId })
             .Distinct()
             .ToArray();
-        var secondHop = relatedIds.Length == 0
+        var secondHopRows = relatedIds.Length == 0
             ? []
             : await baseQuery
                 .Where(x => relatedIds.Contains(x.SenderAccountId!.Value))
                 .OrderByDescending(x => x.OccurredAt)
-                .Take(take)
+                .Take(take + 1)
                 .Select(x => new AccountRiskTransferFact(
                     x.Id,
                     x.SenderAccountId!.Value,
@@ -142,6 +152,8 @@ public sealed class AccountRiskRepository(
                     x.EventType == EconomyEventType.DirectItemTransfer ? AccountRiskTransferKind.Item : AccountRiskTransferKind.Cinders,
                     x.AssetId))
                 .ToListAsync(cancellationToken);
+        var secondHopTruncated = secondHopRows.Count > take;
+        var secondHop = secondHopRows.Take(take).ToList();
 
         var transfers = firstHop.Concat(secondHop)
             .GroupBy(x => x.Id)
@@ -184,7 +196,11 @@ public sealed class AccountRiskRepository(
                 lastSessions.GetValueOrDefault(user.Id));
         }
 
-        return new AccountRiskAnalysisDataset(facts, transfers);
+        return new AccountRiskAnalysisDataset(
+            facts,
+            transfers,
+            since,
+            !firstHopTruncated && !secondHopTruncated);
     }
 
     public async Task UpsertEvaluationsAsync(
@@ -233,6 +249,9 @@ public sealed class AccountRiskRepository(
             snapshot.LastTriggeredAt = evaluation.LastTriggeredAt;
             snapshot.EvaluatedAt = evaluatedAt;
             snapshot.EvaluationVersion = evaluationVersion;
+            snapshot.AnalysisWindowStart = evaluation.AnalysisWindowStart;
+            snapshot.EvidenceComplete = evaluation.EvidenceComplete;
+            snapshot.AnalyzedTransferCount = evaluation.AnalyzedTransferCount;
             snapshot.SignalsJson = signalsJson;
             snapshot.RelationshipsJson = relationshipsJson;
 
@@ -247,7 +266,10 @@ public sealed class AccountRiskRepository(
                     Severity = evaluation.Severity,
                     SignalsJson = signalsJson,
                     EvaluatedAt = evaluatedAt,
-                    EvaluationVersion = evaluationVersion
+                    EvaluationVersion = evaluationVersion,
+                    AnalysisWindowStart = evaluation.AnalysisWindowStart,
+                    EvidenceComplete = evaluation.EvidenceComplete,
+                    AnalyzedTransferCount = evaluation.AnalyzedTransferCount
                 });
             }
         }
@@ -255,9 +277,13 @@ public sealed class AccountRiskRepository(
 
     public async Task<AccountRiskPage> SearchAsync(
         AccountRiskSearch search,
+        DateTimeOffset since,
+        int evaluationVersion,
+        int lookbackDays,
         CancellationToken cancellationToken)
     {
-        var snapshots = context.AccountRiskSnapshots.AsNoTracking().AsQueryable();
+        var snapshots = context.AccountRiskSnapshots.AsNoTracking()
+            .Where(x => x.EvaluationVersion == evaluationVersion);
         if (search.MinimumSeverity.HasValue)
         {
             var allowedSeverities = Enum.GetValues<AccountRiskSeverity>()
@@ -308,6 +334,7 @@ public sealed class AccountRiskRepository(
             .Take(Math.Clamp(search.PageSize, 1, 100))
             .ToListAsync(cancellationToken);
         var counts = await context.AccountRiskSnapshots.AsNoTracking()
+            .Where(x => x.EvaluationVersion == evaluationVersion)
             .GroupBy(x => x.Severity)
             .Select(x => new { Severity = x.Key, Count = x.Count() })
             .ToDictionaryAsync(x => x.Severity, x => x.Count, cancellationToken);
@@ -326,6 +353,23 @@ public sealed class AccountRiskRepository(
         var directItemTransferCount = await directEvidence.LongCountAsync(
             x => x.EventType == EconomyEventType.DirectItemTransfer,
             cancellationToken);
+        var evaluationEvidence = directEvidence.Where(x =>
+            x.SenderAccountId != x.RecipientAccountId &&
+            x.Quantity > 0 &&
+            x.OccurredAt >= since);
+        var eligibleAccounts = evaluationEvidence
+            .Select(x => x.SenderAccountId!.Value)
+            .Union(evaluationEvidence.Select(x => x.RecipientAccountId!.Value));
+        var eligibleAccountCount = await eligibleAccounts.CountAsync(cancellationToken);
+        var upToDateAccountCount = await context.AccountRiskSnapshots.AsNoTracking()
+            .Where(snapshot => snapshot.EvaluationVersion == evaluationVersion &&
+                eligibleAccounts.Contains(snapshot.AccountId) &&
+                !evaluationEvidence.Any(evidence =>
+                    (evidence.SenderAccountId == snapshot.AccountId || evidence.RecipientAccountId == snapshot.AccountId) &&
+                    evidence.OccurredAt > snapshot.EvaluatedAt))
+            .CountAsync(cancellationToken);
+        var incompleteEvaluationCount = await context.AccountRiskSnapshots.AsNoTracking()
+            .CountAsync(x => x.EvaluationVersion == evaluationVersion && !x.EvidenceComplete, cancellationToken);
         return new AccountRiskPage(
             entries.Select(x => new AccountRiskSnapshotView(x.Snapshot, x.Status)).ToList(),
             total,
@@ -334,7 +378,13 @@ public sealed class AccountRiskRepository(
             firstEvidence,
             directTransferCount,
             directItemTransferCount,
-            counts.Values.Sum());
+            counts.Values.Sum(),
+            eligibleAccountCount,
+            upToDateAccountCount,
+            Math.Max(0, eligibleAccountCount - upToDateAccountCount),
+            incompleteEvaluationCount,
+            evaluationVersion,
+            lookbackDays);
     }
 
     public async Task<AccountRiskDetails?> GetDetailsAsync(

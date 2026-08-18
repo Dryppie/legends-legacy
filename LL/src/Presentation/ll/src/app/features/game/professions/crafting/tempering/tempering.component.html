@@ -281,7 +281,13 @@
       *ngIf="filteredInventory().length; else noItemsToTemper"
       data-tour="first-tempering"
     >
-      <h2 class="ll-heading text-xl">Items To Temper</h2>
+      <div class="flex items-center justify-between gap-3">
+        <h2 class="ll-heading text-xl">Items To Temper</h2>
+        <span class="ll-badge shrink-0 rounded text-xs text-secondary">
+          {{ filteredInventory().length }}
+          {{ filteredInventory().length === 1 ? "item" : "items" }} shown
+        </span>
+      </div>
 
       <div
         class="shrink-0 overflow-hidden border-y border-light_gray/60"
