@@ -48,9 +48,14 @@ public class CombatService : ICombatService
             var previousBoundary = characterAction.NextResolutionAtUtc
                 ?? throw new InvalidOperationException(
                     "Active idle combat requires a next-resolution boundary.");
+            var captureFinalEncounterLog = IsFinalResponseBatch(
+                previousBoundary,
+                now,
+                batch);
             var orchestrationRequest = new IdleCombatOrchestrationRequest(
                 characterAction,
-                now);
+                now,
+                captureFinalEncounterLog);
 
             using var randomScope = _resolutionRandom?.UseSeed(StableRandom.Seed(
                 "idle-combat-batch-v1",
@@ -91,5 +96,38 @@ public class CombatService : ICombatService
                 ?? TimeSpan.FromSeconds(_options.EncounterCadenceSeconds).TotalMilliseconds));
 
         return accumulator.Build();
+    }
+
+    private bool IsFinalResponseBatch(
+        DateTimeOffset nextEncounterAt,
+        DateTimeOffset now,
+        int batchIndex)
+    {
+        if (batchIndex == _options.MaximumBatchesPerResolution - 1)
+        {
+            return true;
+        }
+
+        var cadence = TimeSpan.FromSeconds(_options.EncounterCadenceSeconds);
+        if (nextEncounterAt > now + cadence)
+        {
+            nextEncounterAt = now;
+        }
+
+        var oldestRetainedBoundary = now - TimeSpan.FromHours(
+            _options.MaximumOfflineHours);
+        if (nextEncounterAt < oldestRetainedBoundary)
+        {
+            nextEncounterAt = oldestRetainedBoundary;
+        }
+
+        if (nextEncounterAt > now)
+        {
+            return true;
+        }
+
+        var dueEncounterCount = checked(
+            1 + (int)((now - nextEncounterAt).Ticks / cadence.Ticks));
+        return dueEncounterCount <= _options.MaximumEncountersPerResolution;
     }
 }

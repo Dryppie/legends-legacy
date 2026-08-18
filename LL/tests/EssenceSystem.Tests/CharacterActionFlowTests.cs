@@ -7,6 +7,7 @@ using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Professions.Crafting;
 using Services.LL.CharacterActions;
+using Services.LL.Combat.Layers.Orchestration.Models;
 using Microsoft.Extensions.Options;
 
 namespace EssenceSystem.Tests;
@@ -38,13 +39,22 @@ public sealed class CharacterActionFlowTests
             Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails(), Now),
         };
         var combat = new CombatServiceStub();
-        var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
+        var service = new CharacterActionService(
+            repository,
+            combat,
+            new CraftingServiceStub(),
+            new FixedTimeProvider(Now),
+            idleCombatOptions: Options.Create(new IdleCombatProgressionOptions
+            {
+                EncounterCadenceSeconds = 12
+            }));
 
         var result = await service.PeekCharacterActionAsync(
             repository.Current.CharacterId,
             CancellationToken.None);
 
         Assert.Same(repository.Current, result);
+        Assert.Equal(12_000, result!.ResolutionIntervalMs);
         Assert.Equal(0, combat.CallCount);
         Assert.Equal(0, repository.UpdateCount);
     }

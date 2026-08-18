@@ -39,7 +39,10 @@ public sealed class IdleCombatResolutionSession : ICombatResolutionSession
             friendlyParticipants,
             hostileParticipants);
 
-        var combatResult = await _engineExecutor.ExecuteAsync(runtime, cancellationToken);
+        var combatResult = await _engineExecutor.ExecuteAsync(
+            runtime,
+            encounterPlan.CaptureEventLog,
+            cancellationToken);
 
         return _resultFactory.Create(runtime, combatResult);
     }

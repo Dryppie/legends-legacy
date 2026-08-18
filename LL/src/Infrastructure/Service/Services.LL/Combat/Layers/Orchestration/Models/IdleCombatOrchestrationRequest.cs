@@ -5,7 +5,8 @@ namespace Services.LL.Combat.Layers.Orchestration.Models;
 
 public sealed record IdleCombatOrchestrationRequest(
     CharacterAction CharacterAction,
-    DateTimeOffset Now)
+    DateTimeOffset Now,
+    bool CaptureFinalEncounterLog = true)
     : CombatOrchestrationRequest(CombatMode.Idle)
 {
     public Guid CharacterId => CharacterAction.CharacterId;

@@ -94,6 +94,42 @@ public sealed class IdleCombatPlannerTests
         Assert.Equal(firstEncounterAt.AddSeconds(1_000), plan.ExecutableUntil);
     }
 
+    [Fact]
+    public void CreateEncounterPlan_captures_playback_only_for_the_requested_final_encounter()
+    {
+        var firstEncounterAt = DateTimeOffset.Parse("2026-06-23T12:00:00Z");
+        var now = firstEncounterAt.AddSeconds(25);
+        var planner = CreatePlanner();
+        var plan = planner.CreatePlan(new IdleCombatOrchestrationRequest(
+            CreateCombatAction(firstEncounterAt),
+            now,
+            CaptureFinalEncounterLog: true));
+
+        var first = planner.CreateEncounterPlan(plan, 1, firstEncounterAt);
+        var second = planner.CreateEncounterPlan(plan, 2, firstEncounterAt.AddSeconds(10));
+        var final = planner.CreateEncounterPlan(plan, 3, firstEncounterAt.AddSeconds(20));
+
+        Assert.False(first.CaptureEventLog);
+        Assert.False(second.CaptureEventLog);
+        Assert.True(final.CaptureEventLog);
+    }
+
+    [Fact]
+    public void CreateEncounterPlan_skips_playback_for_an_internal_nonfinal_batch()
+    {
+        var firstEncounterAt = DateTimeOffset.Parse("2026-06-23T12:00:00Z");
+        var now = firstEncounterAt.AddSeconds(25);
+        var planner = CreatePlanner();
+        var plan = planner.CreatePlan(new IdleCombatOrchestrationRequest(
+            CreateCombatAction(firstEncounterAt),
+            now,
+            CaptureFinalEncounterLog: false));
+
+        var final = planner.CreateEncounterPlan(plan, 3, firstEncounterAt.AddSeconds(20));
+
+        Assert.False(final.CaptureEventLog);
+    }
+
     private static IdleCombatPlanner CreatePlanner() =>
         new(
             new FakeSpawningService(),

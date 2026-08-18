@@ -9,6 +9,7 @@ public sealed record CombatEncounterPlan(
     CombatEncounterSourceContext SourceContext)
 {
     public int? RandomSeed { get; init; }
+    public bool CaptureEventLog { get; init; } = true;
 
     public IReadOnlyList<CombatParticipantSlot> FriendlyParticipants =>
         [.. Participants.Where(x => x.Side == CombatSide.Friendly)];

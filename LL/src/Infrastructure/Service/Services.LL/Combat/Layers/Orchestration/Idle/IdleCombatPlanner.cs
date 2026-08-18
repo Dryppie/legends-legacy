@@ -53,7 +53,10 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
                 ScheduleGeneration: request.CharacterAction.ScheduleGeneration,
                 PlayerEntityIds: [.. action.CharacterTeam],
                 Area: action.Area,
-                PlannedEncounterCount: 0);
+                PlannedEncounterCount: 0)
+            {
+                CaptureFinalEncounterLog = request.CaptureFinalEncounterLog
+            };
         }
 
         var elapsed = to - from;
@@ -73,7 +76,10 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
             ScheduleGeneration: request.CharacterAction.ScheduleGeneration,
             PlayerEntityIds: [.. action.CharacterTeam],
             Area: action.Area,
-            PlannedEncounterCount: plannedEncounterCount);
+            PlannedEncounterCount: plannedEncounterCount)
+        {
+            CaptureFinalEncounterLog = request.CaptureFinalEncounterLog
+        };
     }
 
     public CombatEncounterPlan CreateEncounterPlan(
@@ -127,7 +133,9 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
                 Area: plan.Area,
                 EncounterCadence: plan.EncounterCadence))
         {
-            RandomSeed = randomSeed
+            RandomSeed = randomSeed,
+            CaptureEventLog = plan.CaptureFinalEncounterLog &&
+                sequence == plan.PlannedEncounterCount
         };
     }
 }

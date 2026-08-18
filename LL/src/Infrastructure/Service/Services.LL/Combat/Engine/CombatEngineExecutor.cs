@@ -30,8 +30,14 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         _craftingDefinitions = craftingDefinitions;
     }
 
+    public Task<CombatResult> ExecuteAsync(
+        CombatEncounterRuntime runtime,
+        CancellationToken cancellationToken) =>
+        ExecuteAsync(runtime, captureEventLog: true, cancellationToken);
+
     public async Task<CombatResult> ExecuteAsync(
         CombatEncounterRuntime runtime,
+        bool captureEventLog,
         CancellationToken cancellationToken)
     {
         var execution = await ExecuteCoreAsync(
@@ -40,7 +46,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 ResolveRandomSeed(runtime),
                 6000,
                 StartActiveAbilitiesOnCooldown: true),
-            cancellationToken);
+            cancellationToken,
+            captureEventLog: captureEventLog);
         SyncCombatEntityState(runtime.FriendlyParticipants, execution.Friendly);
         SyncCombatEntityState(runtime.HostileParticipants, execution.Hostile);
         execution.Result.StartedAt = runtime.Plan.StartsAt;

@@ -34,6 +34,7 @@ public sealed class CombatServiceBatchingTests
             CancellationToken.None);
 
         Assert.Equal(3, coordinator.CallCount);
+        Assert.Equal([false, false, true], coordinator.CaptureLogRequests);
         Assert.Equal(3, outcome.CallCount);
         Assert.Equal(250, action.ProcessedCount);
         Assert.False(action.HasMoreDueWork);
@@ -63,6 +64,7 @@ public sealed class CombatServiceBatchingTests
             CancellationToken.None);
 
         Assert.Equal(2, coordinator.CallCount);
+        Assert.Equal([false, true], coordinator.CaptureLogRequests);
         Assert.Equal(200, action.ProcessedCount);
         Assert.True(action.HasMoreDueWork);
         Assert.Equal(200, session.CombatSummary.TotalBattles);
@@ -84,6 +86,8 @@ public sealed class CombatServiceBatchingTests
             CancellationToken.None);
 
         Assert.Equal(87, coordinator.CallCount);
+        Assert.Equal(1, coordinator.CaptureLogRequests.Count(x => x));
+        Assert.True(coordinator.CaptureLogRequests[^1]);
         Assert.Equal(8_641, action.ProcessedCount);
         Assert.False(action.HasMoreDueWork);
         Assert.Equal(8_641, session.CombatSummary.TotalBattles);
@@ -116,6 +120,7 @@ public sealed class CombatServiceBatchingTests
         private readonly TimeSpan _cadence = TimeSpan.FromSeconds(cadenceSeconds);
 
         public int CallCount { get; private set; }
+        public List<bool> CaptureLogRequests { get; } = [];
 
         public Task<CombatOrchestrationResult> OrchestrateAsync(
             CombatOrchestrationRequest request,
@@ -123,6 +128,7 @@ public sealed class CombatServiceBatchingTests
         {
             CallCount++;
             var idle = Assert.IsType<IdleCombatOrchestrationRequest>(request);
+            CaptureLogRequests.Add(idle.CaptureFinalEncounterLog);
             var boundary = idle.NextEncounterAt;
             var due = idle.Now < boundary
                 ? 0

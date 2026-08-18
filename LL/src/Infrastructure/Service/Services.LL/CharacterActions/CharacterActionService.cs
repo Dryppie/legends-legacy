@@ -5,6 +5,7 @@ using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Crafting.V2;
+using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -17,6 +18,7 @@ public class CharacterActionService : ICharacterActionService
     private readonly ICraftingService _craftingService;
     private readonly TimeProvider _timeProvider;
     private readonly TemperingProgressionOptions _temperingOptions;
+    private readonly IdleCombatProgressionOptions _idleCombatOptions;
     private readonly ILogger<CharacterActionService>? _logger;
 
     public CharacterActionService(
@@ -25,6 +27,7 @@ public class CharacterActionService : ICharacterActionService
         ICraftingService craftingService,
         TimeProvider? timeProvider = null,
         IOptions<TemperingProgressionOptions>? temperingOptions = null,
+        IOptions<IdleCombatProgressionOptions>? idleCombatOptions = null,
         ILogger<CharacterActionService>? logger = null)
     {
         _characterActionRepository = characterActionRepository;
@@ -32,6 +35,7 @@ public class CharacterActionService : ICharacterActionService
         _craftingService = craftingService;
         _timeProvider = timeProvider ?? TimeProvider.System;
         _temperingOptions = temperingOptions?.Value ?? new TemperingProgressionOptions();
+        _idleCombatOptions = idleCombatOptions?.Value ?? new IdleCombatProgressionOptions();
         _logger = logger;
     }
 
@@ -221,16 +225,23 @@ public class CharacterActionService : ICharacterActionService
         return schedule;
     }
 
-    private static void PopulateScheduleMetadata(CharacterAction? action, DateTimeOffset now)
+    private void PopulateScheduleMetadata(CharacterAction? action, DateTimeOffset now)
     {
         if (action is null) return;
 
         action.HasMoreDueWork = !action.IsDeleted &&
             action.NextResolutionAtUtc is not null &&
             action.NextResolutionAtUtc <= now;
-        if (action.CharacterActionType == CharacterActionType.Crafting)
+        switch (action.CharacterActionType)
         {
-            action.ResolutionIntervalMs = TemperingConstants.ActionDurationSeconds * 1_000;
+            case CharacterActionType.Combat:
+                action.ResolutionIntervalMs = checked(
+                    _idleCombatOptions.EncounterCadenceSeconds * 1_000);
+                break;
+            case CharacterActionType.Crafting:
+                action.ResolutionIntervalMs = checked(
+                    TemperingConstants.ActionDurationSeconds * 1_000);
+                break;
         }
     }
 }

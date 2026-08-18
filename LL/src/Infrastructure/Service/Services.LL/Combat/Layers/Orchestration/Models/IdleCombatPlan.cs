@@ -11,4 +11,7 @@ public sealed record IdleCombatPlan(
     long ScheduleGeneration,
     IReadOnlyList<Guid> PlayerEntityIds,
     Area Area,
-    int PlannedEncounterCount);
+    int PlannedEncounterCount)
+{
+    public bool CaptureFinalEncounterLog { get; init; } = true;
+}

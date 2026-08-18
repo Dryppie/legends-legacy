@@ -10,6 +10,20 @@ public interface ICombatEngineExecutor
         CombatEncounterRuntime runtime,
         CancellationToken cancellationToken);
 
+    async Task<CombatResult> ExecuteAsync(
+        CombatEncounterRuntime runtime,
+        bool captureEventLog,
+        CancellationToken cancellationToken)
+    {
+        var result = await ExecuteAsync(runtime, cancellationToken);
+        if (!captureEventLog)
+        {
+            result.EventLog.Clear();
+        }
+
+        return result;
+    }
+
     async Task<CombatExecutionWithCheckpoints> ExecuteWithCheckpointsAsync(
         CombatEncounterRuntime runtime,
         int checkpointIntervalTicks,
