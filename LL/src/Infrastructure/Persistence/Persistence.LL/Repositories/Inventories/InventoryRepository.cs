@@ -530,6 +530,7 @@ public class InventoryRepository : IInventoryRepository
             return InventoryTransferResult.Fail(InventoryTransferFailure.InvalidQuantity);
 
         var senderItem = await _context.InventoryItems
+            .AsSplitQuery()
             .Include(x => x.ItemInstance)
                 .ThenInclude(x => x.ItemBase)
                     .ThenInclude(x => (x as EquipmentBase).AttributeModifiers)
