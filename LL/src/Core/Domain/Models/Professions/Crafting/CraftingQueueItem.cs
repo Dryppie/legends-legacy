@@ -9,5 +9,6 @@ public class CraftingQueueItem
     public Guid EquipmentInstanceId { get; set; }
     public EquipmentInstance EquipmentInstance { get; set; } = null!;
     public CraftType CraftType { get; set; }
-    public Guid CraftingActionDetailsId { get; set; }
+    public Guid? CraftingActionDetailsId { get; set; }
+    public Guid? PausedForCharacterId { get; set; }
 }

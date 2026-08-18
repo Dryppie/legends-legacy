@@ -4,6 +4,7 @@ using Application.UseCases.Crafting.Commands.LearnBlueprint;
 using Application.UseCases.Crafting.Dtos;
 using Application.UseCases.Crafting.Queries.GetCraftingRecipes;
 using Application.UseCases.Crafting.Queries.GetRecipeMasteries;
+using Application.UseCases.Professions.Commands.CancelTemperingQueue;
 using Application.UseCases.Professions.Commands.RemoveCraftingQueueItem;
 using Application.UseCases.Professions.Commands.MoveCraftingQueueItem;
 using Application.UseCases.Professions.Dtos;
@@ -41,6 +42,10 @@ public class CraftingController : BaseController
     [HttpPost("RemoveCraftingQueueItem")]
     public async Task<ActionResult<Response<RemoveCraftingQueueItemResponseDto>>> RemoveCraftingQueueItem([FromBody] string queueItemId) =>
         await Mediator.Send(new RemoveCraftingQueueItemCommand(CurrentCharacterGuid, queueItemId));
+
+    [HttpPost("queue/cancel")]
+    public async Task<ActionResult<Response<RemoveCraftingQueueItemResponseDto>>> CancelTemperingQueue() =>
+        await Mediator.Send(new CancelTemperingQueueCommand(CurrentCharacterGuid));
 
     [HttpPost("queue/move")]
     public async Task<ActionResult<Response<MoveCraftingQueueItemResponseDto>>> MoveCraftingQueueItem(

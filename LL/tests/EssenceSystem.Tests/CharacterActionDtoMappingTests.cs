@@ -3,6 +3,8 @@ using Application.UseCases.CharacterActions.Dtos.Responses;
 using AutoMapper;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.Items.Equipments;
+using Domain.Models.Professions.Crafting;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EssenceSystem.Tests;
@@ -52,5 +54,47 @@ public sealed class CharacterActionDtoMappingTests
         var dto = _mapper.Map<CharacterActionDto>(action);
 
         Assert.False(dto.HasPendingCombatResolution);
+    }
+
+    [Fact]
+    public void Combat_action_maps_its_paused_tempering_queue_in_position_order()
+    {
+        var first = QueueItem(position: 0, "First");
+        var second = QueueItem(position: 1, "Second");
+        var action = new CharacterAction
+        {
+            CharacterId = Guid.NewGuid(),
+            ActionDetails = new CombatActionDetails(),
+            UpdatedAt = DateTimeOffset.Parse("2026-08-18T12:00:00Z"),
+            PausedTemperingQueueItems = [second, first]
+        };
+
+        var dto = _mapper.Map<CharacterActionDto>(action);
+
+        Assert.Equal([first.Id, second.Id], dto.TemperingQueueItems.Select(item => item.Id));
+        Assert.Null(dto.CraftingActionDetails);
+    }
+
+    private static CraftingQueueItem QueueItem(int position, string name)
+    {
+        var equipmentBase = new EquipmentBase
+        {
+            Id = $"test-{position}",
+            Name = name,
+            EquipmentType = EquipmentType.OneHanded
+        };
+        var equipment = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = equipmentBase.Id,
+            ItemBase = equipmentBase
+        };
+        return new CraftingQueueItem
+        {
+            Id = Guid.NewGuid(),
+            Position = position,
+            EquipmentInstanceId = equipment.Id,
+            EquipmentInstance = equipment
+        };
     }
 }

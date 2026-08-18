@@ -2,6 +2,7 @@
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Professions.Crafting;
 
 namespace Domain.Models.CharacterActions;
 public class CharacterAction
@@ -44,6 +45,8 @@ public class CharacterAction
     public bool HasMoreDueWork { get; set; }
     [NotMapped]
     public int? ResolutionIntervalMs { get; set; }
+    [NotMapped]
+    public ICollection<CraftingQueueItem> PausedTemperingQueueItems { get; set; } = [];
 
     public CharacterAction(Guid characterId, ActionDetails actionDetails, DateTimeOffset now)
     {

@@ -2,6 +2,7 @@ using Application.UseCases.CharacterActions.Commands.DeleteCharacterAction;
 using Application.UseCases.CharacterActions.Commands.StartCombatAction;
 using Application.UseCases.CharacterActions.Commands.StartCraftingAction;
 using Application.UseCases.CharacterActions.Commands.ResolveCharacterAction;
+using Application.UseCases.CharacterActions.Commands.ResumeTempering;
 using Application.UseCases.CharacterActions.Dtos.Responses;
 using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Common.Primitives;
@@ -30,6 +31,10 @@ public class CharacterActionsController : BaseController
     [HttpPost("StartCrafting")]
     public async Task<ActionResult<Response<bool>>> StartCrafting([FromBody] StartCraftingActionRequest request) =>
         await Mediator.Send(new StartCraftingActionCommand(CurrentCharacterGuid, request.QueueId, request.ItemInstanceId));
+
+    [HttpPost("ResumeTempering")]
+    public async Task<ActionResult<Response<CharacterActionDto>>> ResumeTempering() =>
+        await Mediator.Send(new ResumeTemperingCommand(CurrentCharacterGuid));
 
     [HttpDelete]
     public async Task<ActionResult<Response<bool>>> Delete() =>

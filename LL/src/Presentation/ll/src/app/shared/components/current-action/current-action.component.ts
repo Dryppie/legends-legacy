@@ -25,8 +25,10 @@ export class CurrentActionComponent {
 
     effect(() => {
       const action = this.state.currentAction();
+      const waitingForCombat =
+        this.state.isTemperingPendingCombatUnlock();
       this.currentAction = action;
-      this.setPerformingAction();
+      this.setPerformingAction(waitingForCombat);
     });
   }
 
@@ -39,7 +41,7 @@ export class CurrentActionComponent {
     this.state.stopAction();
   }
 
-  private setPerformingAction(): void {
+  private setPerformingAction(waitingForCombat = false): void {
     const action = this.currentAction;
     this.queueDuration = '';
 
@@ -53,6 +55,11 @@ export class CurrentActionComponent {
     ).getTime();
     if (action.isDeleted && deadline > Date.now()) {
       this.performingAction = 'Combat ending - recovery';
+      return;
+    }
+
+    if (waitingForCombat) {
+      this.performingAction = 'Combat ending - Tempering queued';
       return;
     }
 

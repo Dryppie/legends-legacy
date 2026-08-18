@@ -13,7 +13,6 @@ import { CharacterActionsService } from './character-actions.service';
 import { CharacterActionTypePersistenceService } from './helpers/character-action-type-persistence.service';
 import { GameService } from '../../client-side/game/game.service';
 import { CombatService } from '../../client-side/combat/combat.service';
-import { InventoryStateService } from '../inventory/inventory-state.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -76,6 +75,8 @@ export class CharacterActionsStateService {
 
   private readonly _loadingActionRefresh = signal(false);
   readonly loadingActionRefresh = computed(() => this._loadingActionRefresh());
+  private readonly _resumingTempering = signal(false);
+  readonly resumingTempering = computed(() => this._resumingTempering());
   private readonly _resolvingOfflineProgress = signal(false);
   readonly resolvingOfflineProgress = computed(() =>
     this._resolvingOfflineProgress(),
@@ -88,7 +89,8 @@ export class CharacterActionsStateService {
   private actionRefreshLoadingTimeout: ReturnType<typeof setTimeout> | null =
     null;
   private activeOfflineCatchUpRequests = 0;
-  private stopActionInFlight = false;
+  private readonly _stoppingAction = signal(false);
+  readonly stoppingAction = computed(() => this._stoppingAction());
   private pendingStartAfterStop: {
     type: CharacterActionType;
     payload: StartCombatActionRequest | StartCraftingActionRequest;
@@ -116,6 +118,36 @@ export class CharacterActionsStateService {
       CharacterActionType.Crafting,
   );
 
+  readonly isTemperingPendingCombatUnlock = computed(() => {
+    // Re-evaluate time-based phase changes even when the persisted action
+    // snapshot itself has not changed.
+    this._tickingDuration();
+    const action = this._currentAction();
+    if (
+      !action ||
+      action.isDeleted ||
+      action.characterActionType !== CharacterActionType.Crafting ||
+      !action.blockedUntilUtc
+    ) {
+      return false;
+    }
+
+    return new Date(action.blockedUntilUtc).getTime() > Date.now();
+  });
+
+  readonly temperingCombatUnlockSeconds = computed(() => {
+    this._tickingDuration();
+    const action = this._currentAction();
+    if (!action?.blockedUntilUtc) return 0;
+
+    return Math.max(
+      0,
+      Math.ceil(
+        (new Date(action.blockedUntilUtc).getTime() - Date.now()) / 1_000,
+      ),
+    );
+  });
+
   readonly isActiveAction = computed(
     () =>
       !!this._currentAction() &&
@@ -138,7 +170,6 @@ export class CharacterActionsStateService {
     private readonly craftingHandler: CraftingActionHandler,
     private readonly gameService: GameService,
     private readonly combatService: CombatService,
-    private readonly inventoryState: InventoryStateService,
     private readonly eventBus: EventBusService,
     private readonly router: Router,
   ) {
@@ -148,6 +179,7 @@ export class CharacterActionsStateService {
       queueMicrotask(() => this.updateDisplay(action));
 
       if (!action) return;
+      queueMicrotask(() => this.craftingHandler.handle(action));
 
       switch (action.characterActionType) {
         case CharacterActionType.Combat:
@@ -167,9 +199,6 @@ export class CharacterActionsStateService {
             }
             this.gameService.resumeCombat();
           });
-          break;
-        case CharacterActionType.Crafting:
-          queueMicrotask(() => this.craftingHandler.handle(action));
           break;
       }
     });
@@ -233,7 +262,7 @@ export class CharacterActionsStateService {
     // Quitting and starting another action are separate HTTP requests. Preserve
     // the player's click immediately, but serialize the requests so a late
     // combat-delete cannot remove the newly created tempering queue.
-    if (this.stopActionInFlight && type === CharacterActionType.Crafting) {
+    if (this._stoppingAction() && type === CharacterActionType.Crafting) {
       this.pendingStartAfterStop = { type, payload };
       this.persistence.set(type);
       return;
@@ -277,6 +306,7 @@ export class CharacterActionsStateService {
               this.acceptStartedCombat(result as CharacterActionDto);
               return;
             }
+            this.combatService.clearAllCombat();
             this.startPolling();
           }
         }),
@@ -292,12 +322,11 @@ export class CharacterActionsStateService {
   }
 
   stopAction(): void {
-    if (this.stopActionInFlight) return;
+    if (this._stoppingAction()) return;
 
-    const wasCraftingAction = this.isCraftingAction();
     if (this.isCombatAction()) this._idleCombatPhase.set('stopping');
     this._resolvingOfflineProgress.set(false);
-    this.stopActionInFlight = true;
+    this._stoppingAction.set(true);
     this.handleDeletionOfCurrentAction();
     // Tear down the old action synchronously. The retained deleted snapshot
     // still carries the original combat lock, so Tempering remains clickable.
@@ -307,17 +336,12 @@ export class CharacterActionsStateService {
     this.actionsService
       .stop()
       .pipe(
-        tap(() => {
-          if (wasCraftingAction) {
-            this.inventoryState.load(true);
-          }
-        }),
         catchError((err) => {
           console.error('Failed to stop action', err);
           return of(null);
         }),
         finalize(() => {
-          this.stopActionInFlight = false;
+          this._stoppingAction.set(false);
           const pendingStart = this.pendingStartAfterStop;
           this.pendingStartAfterStop = null;
           if (pendingStart) {
@@ -368,6 +392,16 @@ export class CharacterActionsStateService {
       return true;
     }
 
+    if (
+      action.characterActionType === CharacterActionType.Crafting &&
+      type === CharacterActionType.Combat
+    ) {
+      return !(
+        action.blockedUntilUtc &&
+        new Date(action.blockedUntilUtc).getTime() > Date.now()
+      );
+    }
+
     return (
       type === CharacterActionType.Crafting &&
       (action.characterActionType === CharacterActionType.Crafting ||
@@ -399,6 +433,7 @@ export class CharacterActionsStateService {
       this.actionRefreshLoadingTimeout = null;
     }
     this._loadingActionRefresh.set(false);
+    this._resumingTempering.set(false);
     this.activeOfflineCatchUpRequests = 0;
     this._resolvingOfflineProgress.set(false);
     this._loadingCombat.set(false);
@@ -406,6 +441,7 @@ export class CharacterActionsStateService {
     this._idleCombatError.set(null);
     this._showAction.set(false);
     this._currentAction.set(null);
+    this.craftingHandler.clear();
   }
 
   updateDisplay(action: CharacterActionDto | null): void {
@@ -461,6 +497,33 @@ export class CharacterActionsStateService {
       if (requestVersion !== this.resetVersion) return;
       this.applyActionUpdate(action);
     });
+  }
+
+  resumeTempering(): void {
+    if (this._resumingTempering()) return;
+
+    this._resumingTempering.set(true);
+    this.persistence.set(CharacterActionType.Crafting);
+    this.actionsService
+      .resumeTempering()
+      .pipe(
+        tap((action) => {
+          this._currentAction.set(action);
+          this.startPolling(action);
+        }),
+        catchError((err) => {
+          console.error('Failed to resume Tempering', err);
+          const currentAction = this._currentAction();
+          if (currentAction) {
+            this.persistence.set(currentAction.characterActionType);
+          } else {
+            this.persistence.clear();
+          }
+          return of(null);
+        }),
+        finalize(() => this._resumingTempering.set(false)),
+      )
+      .subscribe();
   }
 
   applyCurrentActionSnapshot(action: CharacterActionDto): void {
@@ -529,7 +592,8 @@ export class CharacterActionsStateService {
     if (!action) return null;
 
     const craftingQueueOrder =
-      action.craftingActionDetails?.craftingQueueItems
+      (action.temperingQueueItems ??
+        action.craftingActionDetails?.craftingQueueItems)
         ?.map((item) => item.id)
         .join(',') ?? '';
 

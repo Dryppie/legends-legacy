@@ -32,6 +32,78 @@ public sealed class CharacterActionFlowTests
     }
 
     [Fact]
+    public async Task Start_combat_pauses_tempering_and_preserves_its_queue()
+    {
+        var characterId = Guid.NewGuid();
+        var firstQueueItemId = Guid.NewGuid();
+        var secondQueueItemId = Guid.NewGuid();
+        var repository = new CharacterActionRepositoryStub
+        {
+            Current = new CharacterAction(
+                characterId,
+                new CraftingActionDetails
+                {
+                    CraftingQueueItems =
+                    [
+                        new CraftingQueueItem { Id = firstQueueItemId },
+                        new CraftingQueueItem { Id = secondQueueItemId }
+                    ]
+                },
+                Now)
+        };
+        var crafting = new CraftingServiceStub();
+        var combat = new CombatServiceStub();
+        var service = new CharacterActionService(repository, combat, crafting);
+        var requestedCombat = new CharacterAction(
+            characterId,
+            new CombatActionDetails(),
+            Now);
+
+        var result = await service.StartCharacterActionAsync(
+            requestedCombat,
+            Now,
+            CancellationToken.None);
+
+        Assert.Same(requestedCombat, result);
+        Assert.Equal(
+            [firstQueueItemId, secondQueueItemId],
+            result!.PausedTemperingQueueItems.Select(item => item.Id));
+        Assert.Equal(1, repository.StartCount);
+        Assert.Equal(1, combat.CallCount);
+    }
+
+    [Fact]
+    public async Task Start_combat_does_not_bypass_a_lock_inherited_by_tempering()
+    {
+        var characterId = Guid.NewGuid();
+        var repository = new CharacterActionRepositoryStub
+        {
+            Current = new CharacterAction(
+                characterId,
+                new CraftingActionDetails
+                {
+                    CraftingQueueItems = [new CraftingQueueItem { Id = Guid.NewGuid() }]
+                },
+                Now)
+            {
+                BlockedUntilUtc = Now.AddSeconds(5)
+            }
+        };
+        var crafting = new CraftingServiceStub();
+        var combat = new CombatServiceStub();
+        var service = new CharacterActionService(repository, combat, crafting);
+
+        var result = await service.StartCharacterActionAsync(
+            new CharacterAction(characterId, new CombatActionDetails(), Now),
+            Now,
+            CancellationToken.None);
+
+        Assert.Null(result);
+        Assert.Equal(0, repository.StartCount);
+        Assert.Equal(0, combat.CallCount);
+    }
+
+    [Fact]
     public async Task Peek_is_read_only_and_does_not_resolve_elapsed_combat()
     {
         var repository = new CharacterActionRepositoryStub
@@ -173,6 +245,34 @@ public sealed class CharacterActionFlowTests
     }
 
     [Fact]
+    public async Task Queued_tempering_does_not_resolve_before_combat_unlock_and_its_first_interval()
+    {
+        var repository = new CharacterActionRepositoryStub
+        {
+            Current = new CharacterAction(Guid.NewGuid(), new CraftingActionDetails(), Now)
+            {
+                BlockedUntilUtc = Now.AddSeconds(5),
+                NextResolutionAtUtc = Now.AddSeconds(15)
+            }
+        };
+        var crafting = new CraftingServiceStub();
+        var service = new CharacterActionService(
+            repository,
+            new CombatServiceStub(),
+            crafting,
+            new FixedTimeProvider(Now));
+
+        var result = await service.GetCharacterActionAsync(
+            repository.Current.CharacterId,
+            CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Equal(0, crafting.CallCount);
+        Assert.Equal(0, result.ProcessedCount);
+        Assert.Equal(Now.AddSeconds(15), result.NextResolutionAtUtc);
+    }
+
+    [Fact]
     public async Task Tempering_24_hour_progress_is_aggregated_server_side()
     {
         var firstDue = Now.AddHours(-24);
@@ -215,9 +315,20 @@ public sealed class CharacterActionFlowTests
         public CharacterAction Current { get; set; } = null!;
         public int UpdateCount { get; private set; }
         public int DeleteCount { get; private set; }
+        public int StartCount { get; private set; }
 
         public Task<CharacterAction?> StartCharacterActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
         {
+            if (Current?.BlockedUntilUtc > now)
+                return Task.FromResult<CharacterAction?>(null);
+
+            StartCount++;
+            if (characterAction.ActionDetails is CombatActionDetails &&
+                Current?.ActionDetails is CraftingActionDetails craftingDetails)
+            {
+                characterAction.PausedTemperingQueueItems =
+                    [.. craftingDetails.CraftingQueueItems];
+            }
             Current = characterAction;
             return Task.FromResult<CharacterAction?>(characterAction);
         }
@@ -238,6 +349,10 @@ public sealed class CharacterActionFlowTests
         }
         public Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem characterAction, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<CharacterAction?> ResumeTemperingAsync(Guid characterId, DateTimeOffset now, CancellationToken cancellationToken) =>
+            Task.FromResult<CharacterAction?>(Current.ActionDetails is CraftingActionDetails ? Current : null);
+        public Task<IReadOnlyList<CraftingQueueItem>> GetPausedTemperingQueueAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<CraftingQueueItem>>(Current.PausedTemperingQueueItems.ToList());
         public Task<CharacterAction?> GetCharacterActionForDeletionAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult<CharacterAction?>(Current);
     }
@@ -293,7 +408,10 @@ public sealed class CharacterActionFlowTests
                     })]
             });
         }
-        public Task<bool> RemoveCraftingQueueItemsAsync(Guid characterId, List<Guid> queueItemIds, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<bool> RemoveCraftingQueueItemsAsync(Guid characterId, List<Guid> queueItemIds, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(false);
+        }
         public Task<bool> MoveCraftingQueueItemAsync(Guid characterId, Guid queueItemId, CraftingQueueMoveDirection direction, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Response<IReadOnlyList<CraftingRecipeDto>>> GetCraftingRecipesAsync(Guid characterId, int targetTier, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Response<LearnBlueprintResult>> LearnBlueprintAsync(Guid characterId, Guid blueprintItemInstanceId, string recipeId, CancellationToken cancellationToken) => throw new NotSupportedException();

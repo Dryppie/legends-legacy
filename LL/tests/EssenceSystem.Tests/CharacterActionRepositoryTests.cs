@@ -314,16 +314,123 @@ public sealed class CharacterActionRepositoryTests
             action.NextResolutionAtUtc);
     }
 
+    [Fact]
+    public async Task Starting_combat_pauses_and_resuming_restores_the_ordered_tempering_queue()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var area = new Area { Id = "first-area", Name = "First Area" };
+        var firstEquipment = AddTemperableEquipment(db, characterId);
+        var secondEquipment = AddTemperableEquipment(db, characterId);
+        db.Areas.Add(area);
+        await db.SaveChangesAsync();
+
+        var repository = new CharacterActionRepository(db);
+        var now = DateTimeOffset.Parse("2026-08-18T12:00:00Z");
+        await repository.UpdateCraftingActionAsync(
+            characterId,
+            new CraftingQueueItem { Id = Guid.NewGuid(), EquipmentInstanceId = firstEquipment.Id },
+            now,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+        await repository.UpdateCraftingActionAsync(
+            characterId,
+            new CraftingQueueItem { Id = Guid.NewGuid(), EquipmentInstanceId = secondEquipment.Id },
+            now,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var combatStartedAt = now.AddSeconds(1);
+        var combat = await repository.StartCharacterActionAsync(
+            new CharacterAction(
+                characterId,
+                new CombatActionDetails([characterId], area),
+                combatStartedAt),
+            combatStartedAt,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.NotNull(combat);
+        Assert.IsType<CombatActionDetails>(combat.ActionDetails);
+        var paused = await repository.GetPausedTemperingQueueAsync(
+            characterId,
+            CancellationToken.None);
+        Assert.Equal([firstEquipment.Id, secondEquipment.Id], paused.Select(item => item.EquipmentInstanceId));
+        Assert.All(paused, item =>
+        {
+            Assert.Null(item.CraftingActionDetailsId);
+            Assert.Equal(characterId, item.PausedForCharacterId);
+        });
+
+        var resumedAt = combatStartedAt.AddSeconds(2);
+        var resumed = await repository.ResumeTemperingAsync(
+            characterId,
+            resumedAt,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var resumedDetails = Assert.IsType<CraftingActionDetails>(resumed!.ActionDetails);
+        Assert.Equal([firstEquipment.Id, secondEquipment.Id],
+            resumedDetails.CraftingQueueItems
+                .OrderBy(item => item.Position)
+                .Select(item => item.EquipmentInstanceId));
+        Assert.All(resumedDetails.CraftingQueueItems, item =>
+        {
+            Assert.NotNull(item.CraftingActionDetailsId);
+            Assert.Null(item.PausedForCharacterId);
+        });
+        Assert.Equal(
+            combat!.BlockedUntilUtc!.Value.AddSeconds(TemperingConstants.ActionDurationSeconds),
+            resumed.NextResolutionAtUtc);
+    }
+
+    [Fact]
+    public async Task Stopping_tempering_pauses_the_queue_instead_of_returning_it_to_inventory()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var equipment = AddTemperableEquipment(db, characterId);
+        await db.SaveChangesAsync();
+
+        var repository = new CharacterActionRepository(db);
+        var now = DateTimeOffset.Parse("2026-08-18T12:00:00Z");
+        await repository.UpdateCraftingActionAsync(
+            characterId,
+            new CraftingQueueItem { Id = Guid.NewGuid(), EquipmentInstanceId = equipment.Id },
+            now,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var action = await repository.GetCharacterActionForDeletionAsync(
+            characterId,
+            CancellationToken.None);
+        await repository.DeleteCharacterActionAsync(
+            action!,
+            now.AddSeconds(1),
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.True(action!.IsDeleted);
+        Assert.Null(action.ActionDetails);
+        Assert.Empty(db.InventoryItems);
+        var paused = await repository.GetPausedTemperingQueueAsync(
+            characterId,
+            CancellationToken.None);
+        Assert.Equal(equipment.Id, Assert.Single(paused).EquipmentInstanceId);
+    }
+
     private static EquipmentInstance AddTemperableEquipment(
         LLDbContext db,
         Guid characterId)
     {
-        var equipmentBase = new EquipmentBase
-        {
-            Id = "test-sword",
-            Name = "Test Sword",
-            EquipmentType = EquipmentType.OneHanded
-        };
+        var equipmentBase = db.Set<EquipmentBase>().Local
+            .FirstOrDefault(item => item.Id == "test-sword")
+            ?? new EquipmentBase
+            {
+                Id = "test-sword",
+                Name = "Test Sword",
+                EquipmentType = EquipmentType.OneHanded
+            };
         var equipment = new EquipmentInstance
         {
             Id = Guid.NewGuid(),

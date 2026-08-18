@@ -19,7 +19,8 @@ public class CharacterActionRepository : ICharacterActionRepository
     public async Task<CharacterAction?> StartCharacterActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var existingAction = await _context.CharacterActions
-            .Include(a => a.ActionDetails)  // Ensure ActionDetails is loaded
+            .Include(a => a.ActionDetails)
+                .ThenInclude(details => (details as CraftingActionDetails).CraftingQueueItems)
             .FirstOrDefaultAsync(a => a.CharacterId == characterAction.CharacterId, cancellationToken);
 
         if (existingAction == null)
@@ -42,6 +43,19 @@ public class CharacterActionRepository : ICharacterActionRepository
         existingAction.IsDeleted = false;
         existingAction.RowVersion++;
 
+        if (characterAction.ActionDetails is CombatActionDetails &&
+            existingAction.ActionDetails is CraftingActionDetails craftingDetails)
+        {
+            foreach (var queueItem in craftingDetails.CraftingQueueItems)
+            {
+                queueItem.CraftingActionDetailsId = null;
+                queueItem.PausedForCharacterId = characterAction.CharacterId;
+            }
+
+            existingAction.PausedTemperingQueueItems =
+                [.. craftingDetails.CraftingQueueItems.OrderBy(item => item.Position)];
+        }
+
         if (existingAction.ActionDetails != null)
         {
             _context.ActionDetails.Remove(existingAction.ActionDetails);
@@ -57,6 +71,18 @@ public class CharacterActionRepository : ICharacterActionRepository
     public async Task<bool> DeleteCharacterActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var wasCombat = characterAction.ActionDetails is CombatActionDetails;
+        if (characterAction.ActionDetails is CraftingActionDetails craftingDetails)
+        {
+            foreach (var queueItem in craftingDetails.CraftingQueueItems)
+            {
+                queueItem.CraftingActionDetailsId = null;
+                queueItem.PausedForCharacterId = characterAction.CharacterId;
+            }
+
+            characterAction.PausedTemperingQueueItems =
+                [.. craftingDetails.CraftingQueueItems.OrderBy(item => item.Position)];
+        }
+
         if (characterAction.ActionDetails != null)
             _context.ActionDetails.Remove(characterAction.ActionDetails);  // Explicitly remove the related entity
 
@@ -155,6 +181,8 @@ public class CharacterActionRepository : ICharacterActionRepository
                     .ThenInclude(ci => ci.EquipmentInstance)
             .FirstOrDefaultAsync(a => a.CharacterId == characterId, cancellationToken);
 
+        var pausedQueue = (await GetPausedTemperingQueueAsync(characterId, cancellationToken)).ToList();
+
         var pendingSwitchLock = existingAction?.BlockedUntilUtc is { } blockedUntil && blockedUntil > now
             ? blockedUntil
             : (DateTimeOffset?)null;
@@ -190,11 +218,9 @@ public class CharacterActionRepository : ICharacterActionRepository
                 NextResolutionAtUtc = now.AddSeconds(TemperingConstants.ActionDurationSeconds),
                 ScheduleGeneration = 1,
                 IsDeleted = false, // Ensure it's not marked as deleted on creation
-                ActionDetails = new CraftingActionDetails
-                {
-                    CraftingQueueItems = [craftingQueueItem]
-                },
+                ActionDetails = new CraftingActionDetails { Id = Guid.NewGuid() },
             };
+            AttachQueue(action.ActionDetails as CraftingActionDetails, pausedQueue, craftingQueueItem);
             await _context.CharacterActions.AddAsync(action, cancellationToken);
             return true;
         }
@@ -218,12 +244,14 @@ public class CharacterActionRepository : ICharacterActionRepository
             existingAction.NextResolutionAtUtc = temperingStartsAt.AddSeconds(TemperingConstants.ActionDurationSeconds);
             existingAction.BlockedUntilUtc = pendingSwitchLock;
             existingAction.ScheduleGeneration = checked(existingAction.ScheduleGeneration + 1);
-            existingAction.ActionDetails = new CraftingActionDetails
+            var resumedDetails = new CraftingActionDetails
             {
-                CharacterActionId = characterId,
-                CraftingQueueItems = [craftingQueueItem]
+                Id = Guid.NewGuid(),
+                CharacterActionId = characterId
             };
-            _context.ActionDetails.Add(existingAction.ActionDetails);
+            _context.ActionDetails.Add(resumedDetails);
+            AttachQueue(resumedDetails, pausedQueue, craftingQueueItem);
+            existingAction.ActionDetails = resumedDetails;
         }
         else
         {
@@ -245,6 +273,102 @@ public class CharacterActionRepository : ICharacterActionRepository
         }
 
         return true;
+    }
+
+    public async Task<CharacterAction?> ResumeTemperingAsync(
+        Guid characterId,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var existingAction = await _context.CharacterActions
+            .Include(action => action.ActionDetails)
+            .FirstOrDefaultAsync(action => action.CharacterId == characterId, cancellationToken);
+        if (existingAction?.ActionDetails is CraftingActionDetails)
+            return await GetCraftingActionForResolutionAsync(characterId, cancellationToken);
+
+        var pausedQueue = (await GetPausedTemperingQueueAsync(characterId, cancellationToken)).ToList();
+        if (pausedQueue.Count == 0)
+            return null;
+
+        var pendingSwitchLock = existingAction?.BlockedUntilUtc is { } blockedUntil && blockedUntil > now
+            ? blockedUntil
+            : (DateTimeOffset?)null;
+        var temperingStartsAt = pendingSwitchLock ?? now;
+
+        if (existingAction == null)
+        {
+            existingAction = new CharacterAction
+            {
+                CharacterId = characterId,
+                ScheduleGeneration = 1
+            };
+            await _context.CharacterActions.AddAsync(existingAction, cancellationToken);
+        }
+        else
+        {
+            if (existingAction.ActionDetails != null)
+                _context.ActionDetails.Remove(existingAction.ActionDetails);
+            existingAction.ScheduleGeneration = checked(existingAction.ScheduleGeneration + 1);
+            existingAction.RowVersion++;
+        }
+
+        var craftingDetails = new CraftingActionDetails
+        {
+            Id = Guid.NewGuid(),
+            CharacterActionId = characterId
+        };
+        _context.ActionDetails.Add(craftingDetails);
+        AttachQueue(craftingDetails, pausedQueue);
+
+        existingAction.ActionDetails = craftingDetails;
+        existingAction.IsDeleted = false;
+        existingAction.UpdatedAt = now;
+        existingAction.BlockedUntilUtc = pendingSwitchLock;
+        existingAction.NextResolutionAtUtc = temperingStartsAt.AddSeconds(TemperingConstants.ActionDurationSeconds);
+        existingAction.PausedTemperingQueueItems = [];
+        return existingAction;
+    }
+
+    public async Task<IReadOnlyList<CraftingQueueItem>> GetPausedTemperingQueueAsync(
+        Guid characterId,
+        CancellationToken cancellationToken) =>
+        await _context.CraftingQueueItems
+            .Where(item => item.PausedForCharacterId == characterId)
+            .Include(item => item.EquipmentInstance)
+                .ThenInclude(equipment => equipment.InstanceModifiers)
+            .Include(item => item.EquipmentInstance)
+                .ThenInclude(equipment => equipment.ToolAffixes)
+            .Include(item => item.EquipmentInstance)
+                .ThenInclude(equipment => equipment.ItemBase)
+                    .ThenInclude(itemBase => (itemBase as EquipmentBase).AttributeModifiers)
+            .Include(item => item.EquipmentInstance)
+                .ThenInclude(equipment => equipment.ItemBase)
+                    .ThenInclude(itemBase => (itemBase as EquipmentBase).ToolBonuses)
+            .OrderBy(item => item.Position)
+            .ThenBy(item => item.AddedAt)
+            .ThenBy(item => item.Id)
+            .ToListAsync(cancellationToken);
+
+    private void AttachQueue(
+        CraftingActionDetails? craftingDetails,
+        IReadOnlyList<CraftingQueueItem> pausedQueue,
+        CraftingQueueItem? appendedItem = null)
+    {
+        if (craftingDetails == null)
+            throw new InvalidOperationException("Crafting details are required to attach a tempering queue.");
+
+        var queue = appendedItem == null
+            ? pausedQueue.ToList()
+            : [.. pausedQueue, appendedItem];
+
+        for (var position = 0; position < queue.Count; position++)
+        {
+            var queueItem = queue[position];
+            queueItem.Position = position;
+            queueItem.CraftingActionDetailsId = craftingDetails.Id;
+            queueItem.PausedForCharacterId = null;
+            craftingDetails.CraftingQueueItems.Add(queueItem);
+        }
     }
 
     private static DateTimeOffset? GetSwitchLock(

@@ -37,6 +37,12 @@ export class CharacterActionsService {
     return this.api.post('CharacterActions/StartCrafting', data);
   }
 
+  resumeTempering(): Observable<CharacterActionDto> {
+    return this.api
+      .post('CharacterActions/ResumeTempering', {})
+      .pipe(map((response) => this.unwrapResponse<CharacterActionDto>(response)));
+  }
+
   stop(): Observable<void> {
     return this.api.delete('CharacterActions');
   }

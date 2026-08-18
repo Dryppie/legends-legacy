@@ -124,6 +124,28 @@ export class CraftingService {
     );
   }
 
+  cancelTemperingQueue(): Observable<RemoveCraftingQueueItemResponse> {
+    return this.api.post('Crafting/queue/cancel', {}).pipe(
+      map((response) => {
+        const result =
+          this.unwrapResponse<RemoveCraftingQueueItemResponse>(response);
+        this.toast.showToast(
+          'Cancelled the Tempering queue',
+          'success',
+          true,
+          'tr',
+        );
+        return result;
+      }),
+      catchError((error) =>
+        throwError(
+          () =>
+            new Error(error?.message ?? 'Failed to cancel the Tempering queue'),
+        ),
+      ),
+    );
+  }
+
   moveQueueItem(
     queueItemId: string,
     direction: CraftingQueueMoveDirection,

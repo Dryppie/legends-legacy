@@ -22,6 +22,7 @@ export interface CharacterActionDto {
   temperingSession?: TemperingSessionDto;
   combatSession?: CombatSessionDto;
   craftingActionDetails?: CraftingActionDetails;
+  temperingQueueItems?: CraftingQueueItem[];
   combatActionDetails?: CombatActionDetails;
 }
 

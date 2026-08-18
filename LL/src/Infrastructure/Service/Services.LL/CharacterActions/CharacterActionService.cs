@@ -57,6 +57,8 @@ public class CharacterActionService : ICharacterActionService
             _characterActionRepository.UpdateCharacterAction(startedAction);
         }
 
+        await PopulatePausedTemperingQueueAsync(startedAction, cancellationToken);
+
         return startedAction;
     }
 
@@ -73,16 +75,6 @@ public class CharacterActionService : ICharacterActionService
         var now = _timeProvider.GetUtcNow();
         var characterAction = await _characterActionRepository.GetCharacterActionForDeletionAsync(characterId, cancellationToken);
         if (characterAction == null) return false;
-
-        if (characterAction.ActionDetails is CraftingActionDetails craftingActionDetails)
-        {
-            var removed = await _craftingService.RemoveCraftingQueueItemsAsync(
-                characterId,
-                [.. craftingActionDetails.CraftingQueueItems.Select(cqi => cqi.Id)],
-                cancellationToken);
-
-            if (removed) return true;
-        }
 
         return await _characterActionRepository.DeleteCharacterActionAsync(characterAction, now, cancellationToken);
     }
@@ -215,14 +207,41 @@ public class CharacterActionService : ICharacterActionService
         return await _characterActionRepository.UpdateCraftingActionAsync(characterId, characterAction, now, cancellationToken);
     }
 
+    public async Task<CharacterAction?> ResumeTemperingAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var now = _timeProvider.GetUtcNow();
+        var action = await _characterActionRepository.ResumeTemperingAsync(
+            characterId,
+            now,
+            cancellationToken);
+        PopulateScheduleMetadata(action, now);
+        return action;
+    }
+
     private async Task<CharacterAction?> LoadTypedActionAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var schedule = await _characterActionRepository.GetActionScheduleAsync(characterId, cancellationToken);
+        CharacterAction? action = schedule;
         if (schedule?.ActionDetails is CombatActionDetails)
-            return await _characterActionRepository.GetCombatActionForResolutionAsync(characterId, cancellationToken);
-        if (schedule?.ActionDetails is CraftingActionDetails)
-            return await _characterActionRepository.GetCraftingActionForResolutionAsync(characterId, cancellationToken);
-        return schedule;
+            action = await _characterActionRepository.GetCombatActionForResolutionAsync(characterId, cancellationToken);
+        else if (schedule?.ActionDetails is CraftingActionDetails)
+            action = await _characterActionRepository.GetCraftingActionForResolutionAsync(characterId, cancellationToken);
+
+        await PopulatePausedTemperingQueueAsync(action, cancellationToken);
+        return action;
+    }
+
+    private async Task PopulatePausedTemperingQueueAsync(
+        CharacterAction? action,
+        CancellationToken cancellationToken)
+    {
+        if (action == null || action.ActionDetails is CraftingActionDetails)
+            return;
+
+        action.PausedTemperingQueueItems = [.. await _characterActionRepository
+            .GetPausedTemperingQueueAsync(action.CharacterId, cancellationToken)];
     }
 
     private void PopulateScheduleMetadata(CharacterAction? action, DateTimeOffset now)

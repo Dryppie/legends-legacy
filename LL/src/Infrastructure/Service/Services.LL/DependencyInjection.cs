@@ -122,6 +122,10 @@ public static class DependencyInjection
                            x.MinimumYoungItemCoordinationCounterpartyCount > 0 &&
                            x.MinimumMixedDirectionItemTransferCount > 0 &&
                            x.ItemTransferSessionWindowMinutes > 0 && x.MinimumItemCoordinationSessionCount > 0 &&
+                           x.MinimumEphemeralItemOutflowTransferCount > 0 &&
+                           x.MinimumEphemeralItemDistinctAssetCount > 0 &&
+                           x.EphemeralAccountMaximumSessionSpanHours > 0 &&
+                           x.EphemeralAccountMinimumDormantDays > 0 &&
                            x.MinimumFeederCinders > 0 &&
                            x.MinimumYoungAccountOutflowCinders > 0 && x.MinimumCircularTransferCinders > 0,
                 "LiveOps account-risk limits must be positive.")
@@ -130,8 +134,9 @@ public static class DependencyInjection
             .Validate(x => x.ItemFunnelIncomingShareThreshold is > 0 and <= 1,
                 "The incoming-item funnel share threshold must be within (0, 1].")
             .Validate(x => x.ConsolidatedItemIncomingShareThreshold is > 0.5m and <= 1 &&
-                           x.ItemCoordinationDominantSessionShareThreshold is > 0.5m and <= 1,
-                "Item consolidation and coordination share thresholds must be within (0.5, 1].")
+                           x.ItemCoordinationDominantSessionShareThreshold is > 0.5m and <= 1 &&
+                           x.EphemeralItemTargetShareThreshold is > 0.5m and <= 1,
+                "Item consolidation, coordination, and ephemeral-outflow share thresholds must be within (0.5, 1].")
             .ValidateOnStart();
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<IAccountAccessPolicy, AccountAccessPolicy>();
@@ -212,6 +217,10 @@ public static class DependencyInjection
                            x.MinimumYoungItemCoordinationCounterpartyCount > 0 &&
                            x.MinimumMixedDirectionItemTransferCount > 0 &&
                            x.ItemTransferSessionWindowMinutes > 0 && x.MinimumItemCoordinationSessionCount > 0 &&
+                           x.MinimumEphemeralItemOutflowTransferCount > 0 &&
+                           x.MinimumEphemeralItemDistinctAssetCount > 0 &&
+                           x.EphemeralAccountMaximumSessionSpanHours > 0 &&
+                           x.EphemeralAccountMinimumDormantDays > 0 &&
                            x.MinimumFeederCinders > 0 &&
                            x.MinimumYoungAccountOutflowCinders > 0 && x.MinimumCircularTransferCinders > 0,
                 "LiveOps account-risk limits must be positive.")
@@ -220,8 +229,9 @@ public static class DependencyInjection
             .Validate(x => x.ItemFunnelIncomingShareThreshold is > 0 and <= 1,
                 "The incoming-item funnel share threshold must be within (0, 1].")
             .Validate(x => x.ConsolidatedItemIncomingShareThreshold is > 0.5m and <= 1 &&
-                           x.ItemCoordinationDominantSessionShareThreshold is > 0.5m and <= 1,
-                "Item consolidation and coordination share thresholds must be within (0.5, 1].")
+                           x.ItemCoordinationDominantSessionShareThreshold is > 0.5m and <= 1 &&
+                           x.EphemeralItemTargetShareThreshold is > 0.5m and <= 1,
+                "Item consolidation, coordination, and ephemeral-outflow share thresholds must be within (0.5, 1].")
             .ValidateOnStart();
         services.AddScoped<ILiveOpsAccountRiskService, LiveOpsAccountRiskService>();
         services.TryAddScoped<IChatModerationGateway, UnavailableChatModerationGateway>();

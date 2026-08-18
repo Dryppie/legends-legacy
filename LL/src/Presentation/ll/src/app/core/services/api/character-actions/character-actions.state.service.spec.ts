@@ -29,12 +29,20 @@ describe('CharacterActionsStateService', () => {
   let polling: jasmine.SpyObj<CharacterActionsPollingService>;
   let router: jasmine.SpyObj<Router>;
   let combat: jasmine.SpyObj<CombatService>;
+  let craftingHandler: jasmine.SpyObj<CraftingActionHandler>;
+  let inventory: jasmine.SpyObj<InventoryStateService>;
   let logoutCount: ReturnType<typeof signal<number>>;
 
   beforeEach(() => {
     actions = jasmine.createSpyObj<CharacterActionsService>(
       'CharacterActionsService',
-      ['startCombat', 'startCrafting', 'resolveCurrentAction', 'stop'],
+      [
+        'startCombat',
+        'startCrafting',
+        'resumeTempering',
+        'resolveCurrentAction',
+        'stop',
+      ],
     );
     polling = jasmine.createSpyObj<CharacterActionsPollingService>(
       'CharacterActionsPollingService',
@@ -48,6 +56,14 @@ describe('CharacterActionsStateService', () => {
       'clearAllCombat',
       'stop',
     ]);
+    craftingHandler = jasmine.createSpyObj<CraftingActionHandler>(
+      'CraftingActionHandler',
+      ['handle', 'clear'],
+    );
+    inventory = jasmine.createSpyObj<InventoryStateService>(
+      'InventoryStateService',
+      ['load'],
+    );
     logoutCount = signal(0);
 
     TestBed.configureTestingModule({
@@ -65,7 +81,7 @@ describe('CharacterActionsStateService', () => {
         },
         {
           provide: CraftingActionHandler,
-          useValue: jasmine.createSpyObj('CraftingActionHandler', ['handle']),
+          useValue: craftingHandler,
         },
         {
           provide: GameService,
@@ -80,7 +96,7 @@ describe('CharacterActionsStateService', () => {
         },
         {
           provide: InventoryStateService,
-          useValue: jasmine.createSpyObj('InventoryStateService', ['load']),
+          useValue: inventory,
         },
         { provide: EventBusService, useValue: { logout: logoutCount } },
         { provide: Router, useValue: router },
@@ -225,7 +241,20 @@ describe('CharacterActionsStateService', () => {
     expect(polling.start).toHaveBeenCalled();
   });
 
-  it('allows more Tempering items during Tempering but blocks Combat', () => {
+  it('clears the previous idle-combat encounter after Tempering starts', () => {
+    const payload = {
+      queueId: '8f6cb596-94df-4a84-b6f2-4b4d6384e065',
+      itemInstanceId: '6c79774b-d048-4698-9c04-c77e481c7aa2',
+    };
+    actions.startCrafting.and.returnValue(of(true));
+
+    service.startAction(CharacterActionType.Crafting, payload);
+
+    expect(combat.clearAllCombat).toHaveBeenCalledTimes(1);
+    expect(polling.start).toHaveBeenCalled();
+  });
+
+  it('allows Combat to replace active Tempering immediately', () => {
     service.applyCurrentActionSnapshot({
       ...combatAction(),
       characterActionType: CharacterActionType.Crafting,
@@ -236,8 +265,87 @@ describe('CharacterActionsStateService', () => {
     });
 
     expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
+    expect(service.canStartAction(CharacterActionType.Combat)).toBeTrue();
+  });
+
+  it('keeps the server-provided paused Tempering queue when Combat starts', fakeAsync(() => {
+    service.applyCurrentActionSnapshot({
+      ...combatAction(),
+      characterActionType: CharacterActionType.Crafting,
+      updatedAt: new Date(Date.now() - 1_000),
+      revision: 'active-crafting-revision',
+      isDeleted: false,
+    });
+    const pausedQueue = [{ id: 'paused-item' }] as never[];
+    const startedCombat = {
+      ...combatAction(),
+      temperingQueueItems: pausedQueue,
+    };
+    actions.startCombat.and.returnValue(of(startedCombat));
+
+    service.startAction(CharacterActionType.Combat, { areaId: 'lumo-ruins' });
+    flushMicrotasks();
+
+    expect(service.currentAction()).toBe(startedCombat);
+    expect(craftingHandler.handle).toHaveBeenCalledWith(startedCombat);
+    expect(craftingHandler.clear).not.toHaveBeenCalled();
+    expect(inventory.load).not.toHaveBeenCalled();
+  }));
+
+  it('resumes a paused Tempering queue', () => {
+    const resumedAction = {
+      ...combatAction(),
+      characterActionType: CharacterActionType.Crafting,
+      temperingQueueItems: [{ id: 'paused-item' }] as never[],
+      revision: 'resumed-tempering-revision',
+    };
+    actions.resumeTempering.and.returnValue(of(resumedAction));
+
+    service.resumeTempering();
+
+    expect(actions.resumeTempering).toHaveBeenCalled();
+    expect(service.currentAction()).toBe(resumedAction);
+    expect(polling.start).toHaveBeenCalled();
+  });
+
+  it('blocks Combat while Tempering still carries an inherited Combat lock', () => {
+    service.applyCurrentActionSnapshot({
+      ...combatAction(),
+      characterActionType: CharacterActionType.Crafting,
+      blockedUntilUtc: new Date(Date.now() + 5_000),
+      revision: 'combat-queued-crafting-revision',
+      isDeleted: false,
+    });
+
+    expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
     expect(service.canStartAction(CharacterActionType.Combat)).toBeFalse();
   });
+
+  it('keeps queued Tempering pending until the inherited Combat lock expires', fakeAsync(() => {
+    const pendingTempering: CharacterActionDto = {
+      ...combatAction(),
+      characterActionType: CharacterActionType.Crafting,
+      blockedUntilUtc: new Date(Date.now() + 5_000),
+      nextResolutionAtUtc: new Date(Date.now() + 15_000),
+      nextResolutionAt: new Date(Date.now() + 15_000),
+      revision: 'pending-tempering-revision',
+      isDeleted: false,
+    };
+
+    service.initializeFromBootstrap(pendingTempering);
+    const applyAction = polling.start.calls.mostRecent().args[1];
+    applyAction(pendingTempering);
+    TestBed.flushEffects();
+    flushMicrotasks();
+
+    expect(service.isTemperingPendingCombatUnlock()).toBeTrue();
+    expect(service.temperingCombatUnlockSeconds()).toBeGreaterThan(0);
+
+    tick(5_001);
+
+    expect(service.isTemperingPendingCombatUnlock()).toBeFalse();
+    expect(service.temperingCombatUnlockSeconds()).toBe(0);
+  }));
 
   it('allows Tempering to replace active Combat but blocks another Combat start', () => {
     service.applyCurrentActionSnapshot(combatAction());

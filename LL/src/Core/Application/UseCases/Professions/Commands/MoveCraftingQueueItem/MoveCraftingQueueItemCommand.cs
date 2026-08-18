@@ -57,7 +57,9 @@ public sealed class MoveCraftingQueueItemCommandHandler
         var action = await _characterActionService.PeekCharacterActionAsync(
             request.CharacterId,
             cancellationToken);
-        if (action?.ActionDetails is not Domain.Models.CharacterActions.CharacterActionDetails.CraftingActionDetails)
+        if (action == null ||
+            (action.ActionDetails is not Domain.Models.CharacterActions.CharacterActionDetails.CraftingActionDetails &&
+             action.PausedTemperingQueueItems.Count == 0))
         {
             return Response<MoveCraftingQueueItemResponseDto>.Fail(
                 "Failed to load the updated crafting queue.");

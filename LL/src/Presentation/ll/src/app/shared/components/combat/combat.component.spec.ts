@@ -25,6 +25,7 @@ describe('CombatComponent', () => {
   let router: { url: string; navigate: jasmine.Spy };
   let tour: { start: jasmine.Spy; stop: jasmine.Spy };
   let refreshCurrentAction: jasmine.Spy;
+  let combatResult: ReturnType<typeof signal<any>>;
   let combatOutcome: ReturnType<typeof signal<BattleOutcome | null>>;
 
   beforeEach(async () => {
@@ -33,6 +34,7 @@ describe('CombatComponent', () => {
       isDeleted: false,
     });
     bootstrapLoaded = signal(true);
+    combatResult = signal(null);
     combatOutcome = signal<BattleOutcome | null>(null);
     refreshCurrentAction = jasmine.createSpy('refreshCurrentAction');
     router = {
@@ -56,7 +58,7 @@ describe('CombatComponent', () => {
       retryIdleCombatResolution: jasmine.createSpy('retryIdleCombatResolution'),
     };
     const combatState = {
-      getCombatResult: () => signal(null),
+      getCombatResult: () => combatResult,
       getIsCombatActive: () => signal(false),
       getPlayerCharacters: () => signal([]),
       getEnemyCharacters: () => signal([]),
@@ -243,6 +245,29 @@ describe('CombatComponent', () => {
 
     expect(characterActions.clear).not.toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledOnceWith(['/game/world']);
+  });
+
+  it('hides a cached idle-combat summary after the action switches to Tempering', async () => {
+    combatResult.set({
+      playerTeam: [{ id: 'player' }],
+      enemyTeam: [{ id: 'enemy' }],
+      entityStats: [],
+      duration: 10,
+    });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.displayCombat).toBeTrue();
+
+    currentAction.set({
+      characterActionType: CharacterActionType.Crafting,
+      isDeleted: false,
+    });
+    fixture.detectChanges();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.displayCombat).toBeFalse();
+    expect(fixture.nativeElement.textContent).toContain('No Active Combat');
+    expect(refreshCurrentAction).not.toHaveBeenCalled();
   });
 
   it('cancels delayed Combat exit after the player navigates away', fakeAsync(() => {

@@ -305,6 +305,91 @@ public sealed class AccountRiskEvaluatorTests
     }
 
     [Fact]
+    public void ShortLivedDormantAccountWithConcentratedItemOutflowIsHighPriority()
+    {
+        var createdAt = Now.AddDays(-7);
+        var subject = new AccountRiskAccountFact(
+            StableGuid("account:ReportedEphemeralFeeder"),
+            StableGuid("character:ReportedEphemeralFeeder"),
+            "ReportedEphemeralFeeder",
+            "test2",
+            7,
+            createdAt.UtcDateTime,
+            createdAt.AddHours(18));
+        var recipient = Account("ReportedRecipient", 500, 80);
+        var sourceA = Account("ReportedSourceA", 7, 8);
+        var sourceB = Account("ReportedSourceB", 7, 9);
+        var transfers = new List<AccountRiskTransferFact>();
+        for (var index = 0; index < 3; index++)
+        {
+            transfers.Add(TimedItemTransfer(
+                sourceA,
+                subject,
+                $"item:input-a:{index}",
+                10,
+                index,
+                createdAt.AddHours(6).AddMinutes(index)));
+            transfers.Add(TimedItemTransfer(
+                sourceB,
+                subject,
+                $"item:input-b:{index}",
+                10,
+                index,
+                createdAt.AddHours(12).AddMinutes(index)));
+        }
+        for (var index = 0; index < 12; index++)
+        {
+            transfers.Add(TimedItemTransfer(
+                subject,
+                recipient,
+                $"item:outgoing:{Math.Min(index, 10)}",
+                1,
+                index,
+                createdAt.AddHours(18).AddMinutes(index)));
+        }
+
+        var result = _evaluator.Evaluate(
+            subject.AccountId,
+            Dataset([subject, recipient, sourceA, sourceB], transfers),
+            Now);
+
+        var lifecycle = Assert.Single(
+            result.Signals,
+            x => x.Type == AccountRiskSignalType.EphemeralItemOutflow);
+        Assert.Equal(12m, lifecycle.Evidence["outgoingItemTransfers"]);
+        Assert.Equal(11m, lifecycle.Evidence["distinctItemTypes"]);
+        Assert.Equal(1m, lifecycle.Evidence["dominantRecipientShare"]);
+        Assert.True(lifecycle.Evidence["dormantDaysAfterLastObservedActivity"] >= 6m);
+        Assert.Equal(AccountRiskSeverity.High, result.Severity);
+        Assert.Equal(52, result.Score);
+    }
+
+    [Fact]
+    public void ActiveYoungAccountDoesNotProduceEphemeralItemOutflowSignal()
+    {
+        var subject = Account("ActiveYoungSender", 7, 7) with { LastSessionUtc = Now.AddHours(-1) };
+        var recipient = Account("ActiveYoungRecipient", 500, 80);
+        var transfers = Enumerable.Range(0, 12)
+            .Select(index => TimedItemTransfer(
+                subject,
+                recipient,
+                $"item:gift:{index}",
+                1,
+                index,
+                Now.AddDays(-6).AddMinutes(index)))
+            .ToList();
+
+        var result = _evaluator.Evaluate(
+            subject.AccountId,
+            Dataset([subject, recipient], transfers),
+            Now);
+
+        Assert.DoesNotContain(
+            result.Signals,
+            x => x.Type == AccountRiskSignalType.EphemeralItemOutflow);
+    }
+
+    [Fact]
     public void MultipleYoungAccountsCreateFeederNetworkSignal()
     {
         var main = Account("Main", 500, 80);

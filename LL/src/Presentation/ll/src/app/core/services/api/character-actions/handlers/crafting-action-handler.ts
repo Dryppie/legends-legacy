@@ -15,10 +15,9 @@ export class CraftingActionHandler {
   ) {}
 
   handle(action: CharacterActionDto): void {
-    if (action.characterActionType !== CharacterActionType.Crafting) return;
+    this.craftingService.setQueue(action.temperingQueueItems ?? []);
 
-    const queue = action.craftingActionDetails?.craftingQueueItems ?? [];
-    this.craftingService.setQueue(queue);
+    if (action.characterActionType !== CharacterActionType.Crafting) return;
 
     const tempering = action.temperingSession;
     if (!tempering) return;
@@ -37,5 +36,9 @@ export class CraftingActionHandler {
     // Crafting Soulstones are applied from the authoritative SoulstoneDropMsg.
     // Adding the session total here as well makes the displayed balance depend
     // on whether the action response or the real-time event arrives first.
+  }
+
+  clear(): void {
+    this.craftingService.setQueue([]);
   }
 }

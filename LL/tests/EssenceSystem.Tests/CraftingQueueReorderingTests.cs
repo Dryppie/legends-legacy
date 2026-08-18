@@ -2,6 +2,7 @@ using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
+using Domain.Models.Regions.Areas;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Repositories.Professions.Craftings;
@@ -72,6 +73,41 @@ public sealed class CraftingQueueReorderingTests
             CancellationToken.None);
 
         Assert.False(moved);
+    }
+
+    [Fact]
+    public async Task MoveCraftingQueueItemAsync_reorders_a_paused_tempering_queue()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var first = QueueItem(0);
+        var second = QueueItem(1);
+        first.PausedForCharacterId = characterId;
+        second.PausedForCharacterId = characterId;
+        db.CharacterActions.Add(new CharacterAction
+        {
+            CharacterId = characterId,
+            UpdatedAt = DateTimeOffset.UtcNow,
+            IsDeleted = true
+        });
+        db.CraftingQueueItems.AddRange(first, second);
+        await db.SaveChangesAsync();
+
+        var repository = new CraftingRepository(db);
+        var moved = await repository.MoveCraftingQueueItemAsync(
+            characterId,
+            second.Id,
+            CraftingQueueMoveDirection.Up,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.True(moved);
+        Assert.Equal(
+            [second.Id, first.Id],
+            await db.CraftingQueueItems
+                .OrderBy(item => item.Position)
+                .Select(item => item.Id)
+                .ToArrayAsync());
     }
 
     [Fact]
@@ -183,6 +219,50 @@ public sealed class CraftingQueueReorderingTests
         Assert.Equal(switchUnlock, action.BlockedUntilUtc);
     }
 
+    [Fact]
+    public async Task Removing_every_paused_tempering_item_clears_the_queue_and_preserves_combat()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var first = QueueItemWithEquipment(characterId, 0, "first-test-sword");
+        var second = QueueItemWithEquipment(characterId, 1, "second-test-sword");
+        var area = new Area { Id = "test-area", Name = "Test Area" };
+        db.Areas.Add(area);
+        db.CharacterActions.Add(new CharacterAction
+        {
+            CharacterId = characterId,
+            UpdatedAt = DateTimeOffset.UtcNow,
+            ActionDetails = new CombatActionDetails([characterId], area)
+        });
+        db.CraftingQueueItems.AddRange(first, second);
+        await db.SaveChangesAsync();
+
+        var repository = new CraftingRepository(db);
+        var returnedItems = new[]
+        {
+            await repository.RemoveCraftingQueueItemAndReturnItemAsync(
+                characterId,
+                first.Id,
+                CancellationToken.None),
+            await repository.RemoveCraftingQueueItemAndReturnItemAsync(
+                characterId,
+                second.Id,
+                CancellationToken.None)
+        };
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        Assert.Equal(
+            [first.EquipmentInstanceId, second.EquipmentInstanceId],
+            returnedItems.Select(item => item!.Id));
+        Assert.Empty(await db.CraftingQueueItems.ToListAsync());
+        var action = await db.CharacterActions
+            .Include(candidate => candidate.ActionDetails)
+            .SingleAsync(candidate => candidate.CharacterId == characterId);
+        Assert.IsType<CombatActionDetails>(action.ActionDetails);
+        Assert.False(action.IsDeleted);
+    }
+
     private static CraftingQueueItem QueueItem(int position) => new()
     {
         Id = Guid.NewGuid(),
@@ -190,6 +270,35 @@ public sealed class CraftingQueueReorderingTests
         AddedAt = DateTimeOffset.UtcNow.AddSeconds(position),
         Position = position
     };
+
+    private static CraftingQueueItem QueueItemWithEquipment(
+        Guid characterId,
+        int position,
+        string itemBaseId)
+    {
+        var equipmentBase = new EquipmentBase
+        {
+            Id = itemBaseId,
+            Name = "Test Sword",
+            EquipmentType = EquipmentType.OneHanded
+        };
+        var equipment = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = equipmentBase.Id,
+            ItemBase = equipmentBase
+        };
+
+        return new CraftingQueueItem
+        {
+            Id = Guid.NewGuid(),
+            EquipmentInstanceId = equipment.Id,
+            EquipmentInstance = equipment,
+            AddedAt = DateTimeOffset.UtcNow.AddSeconds(position),
+            Position = position,
+            PausedForCharacterId = characterId
+        };
+    }
 
     private static LLDbContext CreateDb()
     {

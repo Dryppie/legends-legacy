@@ -9,6 +9,8 @@ public class CraftingActionDetailsConfiguration : IEntityTypeConfiguration<Craft
     {
         builder.HasMany(c => c.CraftingQueueItems)
             .WithOne()
-            .HasForeignKey(cqi => cqi.CraftingActionDetailsId);
+            .HasForeignKey(cqi => cqi.CraftingActionDetailsId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

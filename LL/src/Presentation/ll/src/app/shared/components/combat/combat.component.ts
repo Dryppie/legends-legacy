@@ -140,10 +140,11 @@ export class CombatComponent implements OnInit, OnDestroy {
     });
 
     effect(() => {
+      const currentAction = this.currentAction();
       const shouldRecoverCombat =
         this.battleTypeSignal() === BattleType.IdleCombat &&
         this.bootstrapLoaded() &&
-        !this.hasActiveIdleCombat() &&
+        currentAction === null &&
         !isStartingCombatSig() &&
         !isRefreshingActionSig() &&
         !this.idleCombatRecoveryAttempted;
@@ -154,7 +155,7 @@ export class CombatComponent implements OnInit, OnDestroy {
         if (
           this.isDestroyed ||
           this.battleTypeSignal() !== BattleType.IdleCombat ||
-          this.hasActiveIdleCombat() ||
+          this.currentAction() !== null ||
           isStartingCombatSig() ||
           isRefreshingActionSig() ||
           this.idleCombatRecoveryAttempted
@@ -171,7 +172,8 @@ export class CombatComponent implements OnInit, OnDestroy {
       const type = this.battleTypeSignal();
       this.displayCombat =
         type === BattleType.IdleCombat
-          ? !!this.combatStateService.getCombatResult(type)()?.playerTeam.length
+          ? this.hasActiveIdleCombat() &&
+            !!this.combatStateService.getCombatResult(type)()?.playerTeam.length
           : this.combatStateService.getIsCombatActive(type)();
     });
 

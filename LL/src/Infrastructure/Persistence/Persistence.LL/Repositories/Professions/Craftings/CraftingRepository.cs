@@ -23,14 +23,20 @@ public class CraftingRepository : ICraftingRepository
                 .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
                     .ThenInclude(cq => cq.EquipmentInstance)
             .FirstOrDefaultAsync(ca => ca.CharacterId == characterId, cancellationToken);
-        if (characterAction?.ActionDetails is not CraftingActionDetails craftingDetails) return null;
-
-        var queueItem = craftingDetails.CraftingQueueItems
-            .FirstOrDefault(cq => cq.Id == queueItemId);
+        var craftingDetails = characterAction?.ActionDetails as CraftingActionDetails;
+        var queueItem = craftingDetails?.CraftingQueueItems
+            .FirstOrDefault(cq => cq.Id == queueItemId)
+            ?? await _dbContext.CraftingQueueItems
+                .Include(item => item.EquipmentInstance)
+                .FirstOrDefaultAsync(
+                    item => item.Id == queueItemId &&
+                        item.PausedForCharacterId == characterId,
+                    cancellationToken);
         if (queueItem == null) return null;
 
-        craftingDetails.CraftingQueueItems.Remove(queueItem);
-        if (craftingDetails.CraftingQueueItems.Count == 0)
+        _dbContext.CraftingQueueItems.Remove(queueItem);
+        craftingDetails?.CraftingQueueItems.Remove(queueItem);
+        if (craftingDetails?.CraftingQueueItems.Count == 0 && characterAction != null)
         {
             var now = _timeProvider.GetUtcNow();
             _dbContext.ActionDetails.Remove(craftingDetails);
@@ -41,6 +47,11 @@ public class CraftingRepository : ICraftingRepository
                 ? characterAction.BlockedUntilUtc
                 : null;
             characterAction.UpdatedAt = now;
+            characterAction.RowVersion++;
+        }
+        else if (characterAction != null)
+        {
+            characterAction.UpdatedAt = _timeProvider.GetUtcNow();
             characterAction.RowVersion++;
         }
         return queueItem.EquipmentInstance;
@@ -59,12 +70,12 @@ public class CraftingRepository : ICraftingRepository
                 action => action.CharacterId == characterId,
                 cancellationToken);
 
-        if (characterAction?.ActionDetails is not CraftingActionDetails craftingDetails)
-        {
-            return false;
-        }
-
-        var orderedQueue = craftingDetails.CraftingQueueItems
+        var queue = characterAction?.ActionDetails is CraftingActionDetails craftingDetails
+            ? craftingDetails.CraftingQueueItems
+            : await _dbContext.CraftingQueueItems
+                .Where(item => item.PausedForCharacterId == characterId)
+                .ToListAsync(cancellationToken);
+        var orderedQueue = queue
             .OrderBy(item => item.Position)
             .ThenBy(item => item.AddedAt)
             .ThenBy(item => item.Id)
@@ -85,7 +96,11 @@ public class CraftingRepository : ICraftingRepository
             orderedQueue[index].Position = index;
         }
 
-        characterAction.RowVersion++;
+        if (characterAction != null)
+        {
+            characterAction.UpdatedAt = _timeProvider.GetUtcNow();
+            characterAction.RowVersion++;
+        }
         return true;
     }
 

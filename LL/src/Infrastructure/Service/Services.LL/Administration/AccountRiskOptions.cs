@@ -7,7 +7,7 @@ public sealed class AccountRiskOptions
     public const string SectionName = "LiveOps:AccountRisk";
 
     public bool Enabled { get; set; } = true;
-    public int EvaluationVersion { get; set; } = 8;
+    public int EvaluationVersion { get; set; } = 9;
     public int EvaluationIntervalMinutes { get; set; } = 30;
     public int LookbackDays { get; set; } = 90;
     public int CandidateLimit { get; set; } = 2_000;
@@ -36,6 +36,11 @@ public sealed class AccountRiskOptions
     public int ItemTransferSessionWindowMinutes { get; set; } = 5;
     public int MinimumItemCoordinationSessionCount { get; set; } = 20;
     public decimal ItemCoordinationDominantSessionShareThreshold { get; set; } = 0.70m;
+    public int MinimumEphemeralItemOutflowTransferCount { get; set; } = 5;
+    public int MinimumEphemeralItemDistinctAssetCount { get; set; } = 3;
+    public int EphemeralAccountMaximumSessionSpanHours { get; set; } = 24;
+    public int EphemeralAccountMinimumDormantDays { get; set; } = 3;
+    public decimal EphemeralItemTargetShareThreshold { get; set; } = 0.80m;
     public long MinimumFeederCinders { get; set; } = 20_000;
     public long MinimumYoungAccountOutflowCinders { get; set; } = 10_000;
     public long MinimumCircularTransferCinders { get; set; } = 10_000;
@@ -73,6 +78,11 @@ public sealed class AccountRiskOptions
         ItemTransferSessionWindowMinutes,
         MinimumItemCoordinationSessionCount,
         ItemCoordinationDominantSessionShareThreshold,
+        MinimumEphemeralItemOutflowTransferCount,
+        MinimumEphemeralItemDistinctAssetCount,
+        EphemeralAccountMaximumSessionSpanHours,
+        EphemeralAccountMinimumDormantDays,
+        EphemeralItemTargetShareThreshold,
         MinimumFeederCinders,
         MinimumYoungAccountOutflowCinders,
         MinimumCircularTransferCinders,

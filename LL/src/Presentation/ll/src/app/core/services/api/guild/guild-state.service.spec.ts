@@ -1,5 +1,10 @@
+import { Injector, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { NEVER, Subject } from 'rxjs';
+import { Guild } from '../../../../shared/models/Dtos/guild/guild';
 import { GuildMissionOverview } from '../../../../shared/models/Dtos/guild/guildMission';
 import {
+  GuildStateService,
   normalizeGuild,
   normalizeGuildMissionOverview,
 } from './guild-state.service';
@@ -42,6 +47,128 @@ describe('normalizeGuildMissionOverview', () => {
     expect(normalized?.personalOrders[0].definition.name).toBe('Scout');
   });
 });
+
+describe('GuildStateService description updates', () => {
+  function createState(...updateRequests: Subject<void>[]): GuildStateService {
+    TestBed.configureTestingModule({});
+    let updateRequestIndex = 0;
+
+    const eventEnvelope = {
+      GuildDirectoryChangedMsg: signal(null),
+      GuildInviteReceivedMsg: signal(null),
+      GuildInviteRejectedMsg: signal(null),
+      GuildApplicationRejectedMsg: signal(null),
+      GuildMembershipChangedMsg: signal(null),
+      GuildBuildingsChangedMsg: signal(null),
+      GuildMissionsChangedMsg: signal(null),
+      GuildApplicationMsg: signal(null),
+      GuildStateChangedMsg: signal(null),
+      GuildDisbandedMsg: signal(null),
+    };
+    const guildService = {
+      getMyGuild: jasmine.createSpy().and.returnValue(NEVER),
+      updateDescription: jasmine
+        .createSpy()
+        .and.callFake(() =>
+          updateRequests[updateRequestIndex++].asObservable(),
+        ),
+    };
+    const eventService = {
+      eventEnvelope,
+      reconnectCount: signal(0),
+      setGuildSubscription: jasmine
+        .createSpy()
+        .and.returnValue(Promise.resolve()),
+    };
+    const auth = {
+      isAuthenticated: jasmine.createSpy().and.returnValue(false),
+    };
+    const notifications = {
+      count: jasmine.createSpy().and.returnValue(0),
+    };
+    const stateSync = {
+      register: jasmine.createSpy(),
+    };
+    const injector = TestBed.inject(Injector);
+
+    return TestBed.runInInjectionContext(
+      () =>
+        new GuildStateService(
+          guildService as never,
+          eventService as never,
+          auth as never,
+          notifications as never,
+          {} as never,
+          injector,
+          stateSync as never,
+        ),
+    );
+  }
+
+  it('shows a new description before the request completes', () => {
+    const request = new Subject<void>();
+    const state = createState(request);
+    state.setGuild(createGuild('Old description'));
+
+    state.updateDescription('New description');
+
+    expect(state.guild()?.description).toBe('New description');
+  });
+
+  it('keeps the optimistic description after a successful request', () => {
+    const request = new Subject<void>();
+    const state = createState(request);
+    state.setGuild(createGuild('Old description'));
+
+    state.updateDescription('New description');
+    request.next();
+
+    expect(state.guild()?.description).toBe('New description');
+  });
+
+  it('restores the previous description when the request fails', () => {
+    const request = new Subject<void>();
+    const state = createState(request);
+    state.setGuild(createGuild('Old description'));
+
+    state.updateDescription('New description');
+    request.error(new Error('Save failed'));
+
+    expect(state.guild()?.description).toBe('Old description');
+    expect(state.error()).toBe('Save failed');
+  });
+
+  it('does not let an older failure undo a newer description', () => {
+    const firstRequest = new Subject<void>();
+    const secondRequest = new Subject<void>();
+    const state = createState(firstRequest, secondRequest);
+    state.setGuild(createGuild('Old description'));
+
+    state.updateDescription('First description');
+    state.updateDescription('Second description');
+    firstRequest.error(new Error('First save failed'));
+
+    expect(state.guild()?.description).toBe('Second description');
+    expect(state.error()).toBeNull();
+  });
+});
+
+function createGuild(description: string): Guild {
+  return {
+    id: 'guild-id',
+    name: 'Guild',
+    tag: 'TAG',
+    description,
+    guildXp: 0,
+    guildLevel: 1,
+    members: [],
+    maxMembers: 10,
+    invites: [],
+    resources: [],
+    rolePermissions: [],
+    vaultItems: [],
+  };
+}
 
 function createOverview(guildId: string): GuildMissionOverview {
   return {

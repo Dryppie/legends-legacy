@@ -68,10 +68,35 @@ export class TemperingComponent implements OnDestroy {
 
   readonly craftingQueue: Signal<CraftingQueueItem[]>;
   readonly recentOutcomes: Signal<TemperingOutcomeEntry[]>;
+  readonly waitingForCombatUnlock = computed(() =>
+    this.characterActionsState.isTemperingPendingCombatUnlock(),
+  );
+  readonly combatUnlockSeconds = computed(() =>
+    this.characterActionsState.temperingCombatUnlockSeconds(),
+  );
+  readonly temperingPaused = computed(
+    () =>
+      this.craftingQueue().length > 0 &&
+      (!this.characterActionsState.isCraftingAction() ||
+        !!this.characterActionsState.currentAction()?.isDeleted),
+  );
+  readonly canResumeTempering = computed(
+    () =>
+      this.temperingPaused() &&
+      !this.characterActionsState.resumingTempering() &&
+      this.characterActionsState.canStartAction(CharacterActionType.Crafting),
+  );
+  readonly resumingTempering = computed(() =>
+    this.characterActionsState.resumingTempering(),
+  );
+  readonly pausingTempering = computed(() =>
+    this.characterActionsState.stoppingAction(),
+  );
   readonly outcomesOpen = signal(false);
   readonly error = signal<string | null>(null);
   readonly removingQueueItemId = signal<string | null>(null);
   readonly movingQueueItemId = signal<string | null>(null);
+  readonly cancellingQueue = signal(false);
   readonly temperingSort = signal<TemperingSort>('Gear Power');
   readonly sortDirection = signal<SortDirection>('desc');
   readonly activeQueueItem = computed<CraftingQueueItem | null>(
@@ -249,6 +274,43 @@ export class TemperingComponent implements OnDestroy {
     this.selectedItemId.set(equipment.id);
   }
 
+  resumeTempering(): void {
+    if (!this.canResumeTempering()) return;
+    this.characterActionsState.resumeTempering();
+  }
+
+  pauseTempering(): void {
+    if (
+      this.temperingPaused() ||
+      this.queueIsBusy() ||
+      this.pausingTempering()
+    )
+      return;
+    this.characterActionsState.stopAction();
+  }
+
+  cancelEntireQueue(): void {
+    if (this.craftingQueue().length === 0 || this.queueIsBusy()) return;
+
+    const wasActiveTempering = this.characterActionsState.isCraftingAction();
+    this.cancellingQueue.set(true);
+    this.error.set(null);
+    this.craftingService.cancelTemperingQueue().subscribe({
+      next: (response) => {
+        this.inventoryState.setInventory(response.inventoryItems);
+        this.craftingService.setQueue([]);
+        this.cancellingQueue.set(false);
+        if (wasActiveTempering) {
+          this.characterActionsState.reset();
+        }
+      },
+      error: (err) => {
+        this.error.set(err.message ?? 'Failed to cancel the Tempering queue.');
+        this.cancellingQueue.set(false);
+      },
+    });
+  }
+
   selectQueuedItem(queueItem: CraftingQueueItem): void {
     this.selectedItemId.set(queueItem.equipmentInstance.id);
   }
@@ -295,6 +357,7 @@ export class TemperingComponent implements OnDestroy {
     this.craftingService.removeItemFromQueue(queueItem).subscribe({
       next: (response) => {
         const nextQueue =
+          response.currentAction?.temperingQueueItems ??
           response.currentAction?.craftingActionDetails?.craftingQueueItems ??
           [];
         this.inventoryState.setInventory(response.inventoryItems);
@@ -407,6 +470,7 @@ export class TemperingComponent implements OnDestroy {
     this.craftingService.moveQueueItem(queueItem.id, direction).subscribe({
       next: (response) => {
         const queue =
+          response.currentAction.temperingQueueItems ??
           response.currentAction.craftingActionDetails?.craftingQueueItems ??
           [];
         this.craftingService.setQueue(queue);
@@ -423,7 +487,11 @@ export class TemperingComponent implements OnDestroy {
   }
 
   queueIsBusy(): boolean {
-    return !!this.movingQueueItemId() || !!this.removingQueueItemId();
+    return (
+      !!this.movingQueueItemId() ||
+      !!this.removingQueueItemId() ||
+      this.cancellingQueue()
+    );
   }
 
   private sortInventory(

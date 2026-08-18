@@ -67,6 +67,13 @@ interface GuildRealtimeHandler {
   refresh?: boolean;
 }
 
+interface PendingGuildDescription {
+  id: number;
+  guildId: string;
+  description: string;
+  previousDescription: string;
+}
+
 export function normalizeGuildMissionOverview(
   missions: GuildMissionOverview | null,
   guildId: string | null,
@@ -126,6 +133,8 @@ export class GuildStateService {
   private lastTokenGuildId: string | null | undefined = undefined;
   private refreshRequestId = 0;
   private missionRequestId = 0;
+  private descriptionMutationId = 0;
+  private pendingDescription: PendingGuildDescription | null = null;
   private activeMissionViews = 0;
   private missionsDirty = false;
 
@@ -404,7 +413,11 @@ export class GuildStateService {
   }
 
   private applyGuildSnapshot(responseGuild: Guild | null): void {
-    const guild = normalizeGuild(responseGuild);
+    let guild = normalizeGuild(responseGuild);
+
+    if (guild && this.pendingDescription?.guildId === guild.id) {
+      guild = { ...guild, description: this.pendingDescription.description };
+    }
 
     const nextGuildId = guild?.id ?? null;
     const previousGuildId = this._guild()?.id ?? null;
@@ -776,10 +789,40 @@ export class GuildStateService {
   }
 
   updateDescription(description: string): void {
+    const guild = this._guild();
+    const mutationId = ++this.descriptionMutationId;
+
+    if (guild) {
+      this.pendingDescription = {
+        id: mutationId,
+        guildId: guild.id,
+        description,
+        previousDescription: guild.description ?? '',
+      };
+      this._guild.set({ ...guild, description });
+    }
+
     this.service.updateDescription(description).subscribe({
-      next: () => this.refresh(),
-      error: (e) =>
-        this._error.set(e.message ?? 'Failed to update the guild description'),
+      next: () => {
+        if (mutationId !== this.descriptionMutationId) return;
+        this.pendingDescription = null;
+        this.refresh();
+      },
+      error: (e) => {
+        if (mutationId !== this.descriptionMutationId) return;
+        const pending = this.pendingDescription;
+        if (pending?.id === mutationId) {
+          const currentGuild = this._guild();
+          if (currentGuild?.id === pending.guildId) {
+            this._guild.set({
+              ...currentGuild,
+              description: pending.previousDescription,
+            });
+          }
+          this.pendingDescription = null;
+        }
+        this._error.set(e.message ?? 'Failed to update the guild description');
+      },
     });
   }
 
@@ -840,6 +883,8 @@ export class GuildStateService {
 
   private clearGuildScopedState(): void {
     this.missionRequestId += 1;
+    this.descriptionMutationId += 1;
+    this.pendingDescription = null;
     this.missionsDirty = false;
     this._buildings.set(null);
     this._missions.set(null);

@@ -113,13 +113,69 @@
     <section
       class="ll-panel max-h-72 min-h-24 overflow-y-auto p-4 sm:max-h-full md:max-h-none"
     >
-      <h2 class="ll-heading text-xl">Tempering Queue</h2>
+      <div class="flex items-center justify-between gap-3">
+        <h2 class="ll-heading text-xl">Tempering Queue</h2>
+        <div *ngIf="craftingQueue().length" class="flex flex-wrap gap-2">
+          <button
+            type="button"
+            class="ll-button px-3 py-1.5 text-sm text-rose-400"
+            [disabled]="queueIsBusy()"
+            (click)="cancelEntireQueue()"
+          >
+            {{ cancellingQueue() ? "Cancelling…" : "Cancel Entire Queue" }}
+          </button>
+          <button
+            type="button"
+            class="ll-button px-3 py-1.5 text-sm"
+            [disabled]="
+              queueIsBusy() ||
+              pausingTempering() ||
+              (temperingPaused() && !canResumeTempering())
+            "
+            (click)="temperingPaused() ? resumeTempering() : pauseTempering()"
+          >
+            {{
+              pausingTempering()
+                ? "Pausing…"
+                : temperingPaused()
+                ? resumingTempering()
+                  ? "Continuing…"
+                  : "Continue Queue"
+                : "Pause Queue"
+            }}
+          </button>
+        </div>
+      </div>
       <ng-container *ngIf="activeQueueItem() as workingItem; else emptyQueue">
         <div class="flex items-center justify-between gap-3">
-          <div class="ll-eyebrow text-primary">Working On</div>
+          <div class="ll-eyebrow text-primary">
+            {{
+              temperingPaused()
+                ? "Paused"
+                : waitingForCombatUnlock()
+                  ? "Waiting for Combat"
+                  : "Working On"
+            }}
+          </div>
           <span class="ll-badge ll-badge-accent rounded">
             {{ getEstimatedTime([workingItem]) }}~
           </span>
+        </div>
+
+        <div
+          *ngIf="temperingPaused()"
+          class="ll-state mt-2 text-sm text-secondary"
+        >
+          Your queue is preserved while you do other actions. Continue it when
+          you are ready to resume Tempering.
+        </div>
+
+        <div
+          *ngIf="waitingForCombatUnlock()"
+          class="ll-state mt-2 text-sm text-secondary"
+        >
+          Combat is finishing its initial action. Tempering starts in
+          {{ combatUnlockSeconds() }}s, then its first result takes 10 seconds.
         </div>
 
         <div
@@ -142,7 +198,15 @@
                   Potential</span
                 >
               </div>
-              <div class="mt-1 text-sm text-white">Tempering progress</div>
+              <div class="mt-1 text-sm text-white">
+                {{
+                  temperingPaused()
+                    ? "Tempering paused"
+                    : waitingForCombatUnlock()
+                      ? "Queued for Tempering"
+                      : "Tempering progress"
+                }}
+              </div>
               <div class="mt-1 flex items-center gap-2">
                 <div class="ll-progress-track h-1.5 w-28">
                   <div

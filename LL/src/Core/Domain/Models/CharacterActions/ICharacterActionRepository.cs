@@ -41,5 +41,7 @@ public interface ICharacterActionRepository
     /// <returns></returns>
     Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken);
     Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem characterAction, DateTimeOffset now, CancellationToken cancellationToken);
+    Task<CharacterAction?> ResumeTemperingAsync(Guid characterId, DateTimeOffset now, CancellationToken cancellationToken);
+    Task<IReadOnlyList<CraftingQueueItem>> GetPausedTemperingQueueAsync(Guid characterId, CancellationToken cancellationToken);
     Task<CharacterAction?> GetCharacterActionForDeletionAsync(Guid characterId, CancellationToken cancellationToken);
 }

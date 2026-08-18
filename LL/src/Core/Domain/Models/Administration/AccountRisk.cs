@@ -21,6 +21,7 @@ public enum AccountRiskSignalType
     YoungItemCoordinationNetwork,
     FeederNetwork,
     YoungAccountOutflow,
+    EphemeralItemOutflow,
     CircularTransfer
 }
 
@@ -235,6 +236,11 @@ public sealed record AccountRiskPolicy(
     int ItemTransferSessionWindowMinutes,
     int MinimumItemCoordinationSessionCount,
     decimal ItemCoordinationDominantSessionShareThreshold,
+    int MinimumEphemeralItemOutflowTransferCount,
+    int MinimumEphemeralItemDistinctAssetCount,
+    int EphemeralAccountMaximumSessionSpanHours,
+    int EphemeralAccountMinimumDormantDays,
+    decimal EphemeralItemTargetShareThreshold,
     long MinimumFeederCinders,
     long MinimumYoungAccountOutflowCinders,
     long MinimumCircularTransferCinders,
@@ -272,6 +278,11 @@ public sealed record AccountRiskPolicy(
         ItemTransferSessionWindowMinutes: 5,
         MinimumItemCoordinationSessionCount: 20,
         ItemCoordinationDominantSessionShareThreshold: 0.70m,
+        MinimumEphemeralItemOutflowTransferCount: 5,
+        MinimumEphemeralItemDistinctAssetCount: 3,
+        EphemeralAccountMaximumSessionSpanHours: 24,
+        EphemeralAccountMinimumDormantDays: 3,
+        EphemeralItemTargetShareThreshold: 0.80m,
         MinimumFeederCinders: 20_000,
         MinimumYoungAccountOutflowCinders: 10_000,
         MinimumCircularTransferCinders: 10_000,
@@ -316,6 +327,7 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
         EvaluateOneSidedItemTransfers(accountId, itemDirect, signals);
         EvaluateYoungItemSourceNetwork(accountId, dataset, itemDirect, signals);
         EvaluateYoungItemCoordinationNetwork(accountId, dataset, itemDirect, signals);
+        EvaluateEphemeralItemOutflow(account, itemDirect, now, signals);
         EvaluateFeederNetwork(accountId, dataset, cinderIncoming, signals);
         EvaluateYoungAccountOutflow(account, cinderOutgoing, incomingTotal + outgoingTotal, signals);
         EvaluateCircularTransfers(accountId, dataset, signals);
@@ -697,6 +709,89 @@ public sealed class AccountRiskEvaluator(AccountRiskPolicy policy)
             $"{feeders.Count} accounts were at most {policy.YoungAccountDays} days old when transfers began and sent at least {policy.FeederTargetShareThreshold:P0} of their observable direct outflow to this account; {feeders.Count(x => x.WasLowLevel)} were level {policy.YoungAccountMaximumLevel} or below in the retained event data.",
             Evidence(("feederCount", feeders.Count), ("lowLevelFeederCount", feeders.Count(x => x.WasLowLevel)), ("cindersReceived", feeders.Sum(x => x.Value)), ("maximumAgeAtFirstTransferDays", (decimal)feeders.Max(x => x.AgeAtTransfer))),
             feeders.SelectMany(x => x.Transfers)));
+    }
+
+    private void EvaluateEphemeralItemOutflow(
+        AccountRiskAccountFact account,
+        IReadOnlyList<AccountRiskTransferFact> directItems,
+        DateTimeOffset now,
+        ICollection<AccountRiskSignal> signals)
+    {
+        var outgoing = directItems
+            .Where(x => x.SenderAccountId == account.AccountId)
+            .OrderBy(x => x.OccurredAt)
+            .ToList();
+        if (outgoing.Count < policy.MinimumEphemeralItemOutflowTransferCount ||
+            account.LastSessionUtc is not { } lastSession) return;
+
+        var firstTransfer = outgoing[0];
+        var createdUtc = firstTransfer.SenderAccountCreatedUtc ?? account.AccountCreatedUtc;
+        var level = firstTransfer.SenderCharacterLevel ?? account.CharacterLevel;
+        var ageAtFirstTransferDays = (firstTransfer.OccurredAt.UtcDateTime - createdUtc).TotalDays;
+        if (ageAtFirstTransferDays is < 0 || ageAtFirstTransferDays > policy.YoungAccountDays ||
+            level > policy.YoungAccountMaximumLevel) return;
+
+        var sessionSpanHours = (lastSession.UtcDateTime - createdUtc).TotalHours;
+        if (sessionSpanHours is < 0 || sessionSpanHours > policy.EphemeralAccountMaximumSessionSpanHours) return;
+
+        var lastDirectTransfer = directItems.Max(x => x.OccurredAt);
+        var lastObservedActivity = lastSession > lastDirectTransfer ? lastSession : lastDirectTransfer;
+        var dormantDays = (now - lastObservedActivity).TotalDays;
+        if (dormantDays < policy.EphemeralAccountMinimumDormantDays) return;
+
+        var distinctAssetCount = outgoing.Select(x => x.AssetId).Distinct(StringComparer.Ordinal).Count();
+        if (distinctAssetCount < policy.MinimumEphemeralItemDistinctAssetCount) return;
+
+        var dominantRecipient = outgoing
+            .GroupBy(x => x.RecipientAccountId)
+            .Select(group => new { AccountId = group.Key, Count = group.Count() })
+            .OrderByDescending(x => x.Count)
+            .ThenBy(x => x.AccountId)
+            .First();
+        var dominantRecipientShare = (decimal)dominantRecipient.Count / outgoing.Count;
+        if (dominantRecipientShare < policy.EphemeralItemTargetShareThreshold) return;
+
+        var contribution = Math.Min(
+            40,
+            30 +
+            Scale(
+                outgoing.Count,
+                policy.MinimumEphemeralItemOutflowTransferCount,
+                Math.Max(policy.MinimumEphemeralItemOutflowTransferCount + 1, 20),
+                0,
+                5) +
+            Scale(
+                distinctAssetCount,
+                policy.MinimumEphemeralItemDistinctAssetCount,
+                Math.Max(policy.MinimumEphemeralItemDistinctAssetCount + 1, 10),
+                0,
+                4) +
+            Scale(dominantRecipientShare, policy.EphemeralItemTargetShareThreshold, 1m, 0, 3) +
+            Scale(
+                (decimal)dormantDays,
+                policy.EphemeralAccountMinimumDormantDays,
+                Math.Max(policy.EphemeralAccountMinimumDormantDays + 1, 14),
+                0,
+                3));
+        var incoming = directItems.Count(x => x.RecipientAccountId == account.AccountId);
+        signals.Add(Signal(
+            AccountRiskSignalType.EphemeralItemOutflow,
+            "Account lifecycle",
+            contribution,
+            "Short-lived account item outflow",
+            $"This level {level} account began sending items {Math.Max(0, ageAtFirstTransferDays):0.#} day(s) after registration, issued its newest session within {Math.Max(0, sessionSpanHours):0.#} hour(s) of registration, and then sent {outgoing.Count} item-transfer events involving {distinctAssetCount} item types. {dominantRecipientShare:P0} went to one account, and no newer session issuance or direct transfer was observed for {dormantDays:0.#} day(s).",
+            Evidence(
+                ("accountAgeAtFirstOutgoingDays", (decimal)ageAtFirstTransferDays),
+                ("characterLevelAtFirstTransfer", level),
+                ("sessionIssuanceSpanHours", (decimal)sessionSpanHours),
+                ("dormantDaysAfterLastObservedActivity", (decimal)dormantDays),
+                ("outgoingItemTransfers", outgoing.Count),
+                ("incomingItemTransfers", incoming),
+                ("distinctItemTypes", distinctAssetCount),
+                ("dominantRecipientTransfers", dominantRecipient.Count),
+                ("dominantRecipientShare", dominantRecipientShare)),
+            outgoing,
+            "ephemeral-item-account"));
     }
 
     private void EvaluateYoungAccountOutflow(

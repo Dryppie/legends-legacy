@@ -9,6 +9,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
+import { CharacterActionType } from '../../models/enums/characterActionType';
 import { Subscription } from 'rxjs';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { TimeSyncService } from '../../../core/services/api/time-sync/time-sync.service';
@@ -51,33 +52,40 @@ export class ProgressBarComponent implements OnDestroy {
     this.cancelAnimation();
     const progressBarElement = this.progressBar.nativeElement;
     const durationMs = action.resolutionIntervalMs;
-    const deadlineValue = action.nextResolutionAtUtc ?? action.nextResolutionAt;
-    if (action.isDeleted || !durationMs || durationMs <= 0 || !deadlineValue) {
+    const resolutionDeadlineValue =
+      action.nextResolutionAtUtc ?? action.nextResolutionAt;
+    if (
+      action.isDeleted ||
+      !durationMs ||
+      durationMs <= 0 ||
+      !resolutionDeadlineValue
+    ) {
       this.stopProgressBar();
       return;
     }
 
-    const deadline = new Date(deadlineValue).getTime();
-    if (!Number.isFinite(deadline)) {
+    const resolutionDeadline = new Date(resolutionDeadlineValue).getTime();
+    const combatUnlockDeadline =
+      action.characterActionType === CharacterActionType.Crafting &&
+      action.blockedUntilUtc
+        ? new Date(action.blockedUntilUtc).getTime()
+        : null;
+    if (!Number.isFinite(resolutionDeadline)) {
       this.stopProgressBar();
       return;
     }
 
     const duration = durationMs / 1000;
-    const startTime = deadline - durationMs;
-    const now = this.timeSync.now();
-
-    // Calculate initial progress
-    const elapsedTime = (now - startTime) / 1000;
-    const initialProgress = Math.max(
-      0,
-      Math.min((elapsedTime / duration) * 100, 100),
-    );
-
-    this.setProgress(progressBarElement, initialProgress);
 
     const updateProgress = () => {
-      const elapsed = (this.timeSync.now() - startTime) / 1000;
+      const now = this.timeSync.now();
+      const isWaitingForCombat =
+        combatUnlockDeadline !== null && combatUnlockDeadline > now;
+      const deadline = isWaitingForCombat
+        ? combatUnlockDeadline
+        : resolutionDeadline;
+      const startTime = deadline - durationMs;
+      const elapsed = (now - startTime) / 1000;
       const progress = Math.max(0, Math.min((elapsed / duration) * 100, 100));
 
       this.setProgress(progressBarElement, progress);
@@ -85,12 +93,12 @@ export class ProgressBarComponent implements OnDestroy {
       const remainingSeconds = Math.max(duration - Math.floor(elapsed), 0);
       this.remainingTimeChange.emit(this.formatTime(remainingSeconds));
 
-      if (progress < 100) {
+      if (isWaitingForCombat || progress < 100) {
         this.animationFrameId = requestAnimationFrame(updateProgress);
       }
     };
 
-    this.animationFrameId = requestAnimationFrame(updateProgress);
+    updateProgress();
   }
 
   private formatTime(seconds: number): string {
