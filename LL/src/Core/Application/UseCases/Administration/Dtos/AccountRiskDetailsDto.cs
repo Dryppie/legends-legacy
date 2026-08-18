@@ -13,7 +13,8 @@ public sealed record AccountRiskSignalDto(
     DateTimeOffset? FirstObservedAt,
     DateTimeOffset? LastObservedAt,
     int SupportingTransferCount,
-    bool SupportingEvidenceComplete);
+    bool SupportingEvidenceComplete,
+    string CorrelationFamily);
 
 public sealed record AccountRiskRelationshipDto(
     Guid AccountId,
@@ -63,5 +64,6 @@ public sealed record AccountRiskDetailsDto(
     IReadOnlyList<AccountRiskSignalDto> Signals,
     IReadOnlyList<AccountRiskRelationshipDto> Relationships,
     IReadOnlyList<AccountRiskTransferDto> Transfers,
+    int TotalRetainedTransferCount,
     IReadOnlyList<AccountRiskHistoryPointDto> History,
     IReadOnlyList<AccountRiskNoteDto> Notes);

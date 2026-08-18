@@ -118,6 +118,76 @@ public sealed class AccountRiskEvaluatorTests
     }
 
     [Fact]
+    public void AccountWideItemFunnelPrioritizesTheReported193Of200Pattern()
+    {
+        var subject = Account("ReportedItemFunnel", 8, 51);
+        var sources = Enumerable.Range(1, 19)
+            .Select(index => Account($"ReportedSource{index}", 7, 5 + index % 10))
+            .ToList();
+        var transfers = new List<AccountRiskTransferFact>();
+        for (var index = 0; index < 193; index++)
+        {
+            transfers.Add(SequencedItemTransfer(
+                sources[index % sources.Count],
+                subject,
+                $"item:resource:{index % 8}",
+                index));
+        }
+        for (var index = 0; index < 7; index++)
+        {
+            transfers.Add(SequencedItemTransfer(
+                subject,
+                sources[index],
+                $"item:return:{index}",
+                193 + index));
+        }
+
+        var result = _evaluator.Evaluate(subject.AccountId, Dataset([subject, .. sources], transfers), Now);
+
+        var funnel = Assert.Single(result.Signals, x => x.Type == AccountRiskSignalType.IncomingItemFunnel);
+        var sourceNetwork = Assert.Single(result.Signals, x => x.Type == AccountRiskSignalType.YoungItemSourceNetwork);
+        var pairwise = Assert.Single(result.Signals, x => x.Type == AccountRiskSignalType.OneSidedItemTransfer);
+        Assert.Equal(30, funnel.Contribution);
+        Assert.Equal(25, sourceNetwork.Contribution);
+        Assert.Equal(0, pairwise.Contribution);
+        Assert.Equal(193m, funnel.Evidence["incomingItemTransfers"]);
+        Assert.Equal(19m, funnel.Evidence["sourceAccountCount"]);
+        Assert.Equal(55, result.Score);
+        Assert.Equal(AccountRiskSeverity.High, result.Severity);
+        Assert.True(result.Relationships.Count(x => x.Relationship == "Young item-source network") >= 10);
+    }
+
+    [Fact]
+    public void PairwiseItemEvidenceRanksMaterialRelationshipAheadOfPerfectSmallRelationship()
+    {
+        var subject = Account("PairwiseSubject", 500, 80);
+        var materialSource = Account("MaterialSource", 500, 80);
+        var perfectSmallSource = Account("PerfectSmallSource", 500, 80);
+        var transfers = new List<AccountRiskTransferFact>();
+        for (var index = 0; index < 61; index++)
+        {
+            transfers.Add(SequencedItemTransfer(materialSource, subject, "item:wood", index));
+        }
+        transfers.Add(SequencedItemTransfer(subject, materialSource, "item:return", 61));
+        for (var index = 0; index < 16; index++)
+        {
+            transfers.Add(SequencedItemTransfer(perfectSmallSource, subject, "item:dust", 70 + index));
+        }
+
+        var result = _evaluator.Evaluate(
+            subject.AccountId,
+            Dataset([subject, materialSource, perfectSmallSource], transfers),
+            Now);
+
+        var pairwise = Assert.Single(result.Signals, x => x.Type == AccountRiskSignalType.OneSidedItemTransfer);
+        Assert.Equal(62, pairwise.SupportingTransferCount);
+        Assert.Equal(61m, pairwise.Evidence["receivedItemTransfers"]);
+        Assert.Equal(1m, pairwise.Evidence["sentItemTransfers"]);
+        Assert.Equal(0, pairwise.Contribution);
+        Assert.Contains(result.Signals, x => x.Type == AccountRiskSignalType.IncomingItemFunnel && x.Contribution > 0);
+    }
+
+    [Fact]
     public void MultipleYoungAccountsCreateFeederNetworkSignal()
     {
         var main = Account("Main", 500, 80);
@@ -290,6 +360,24 @@ public sealed class AccountRiskEvaluatorTests
             recipient.AccountId,
             1,
             Now.AddHours(-100 + hour),
+            sender.AccountCreatedUtc,
+            sender.CharacterLevel,
+            recipient.AccountCreatedUtc,
+            recipient.CharacterLevel,
+            AccountRiskTransferKind.Item,
+            assetId);
+
+    private static AccountRiskTransferFact SequencedItemTransfer(
+        AccountRiskAccountFact sender,
+        AccountRiskAccountFact recipient,
+        string assetId,
+        int sequence) =>
+        new(
+            StableGuid($"sequenced-item-transfer:{sender.AccountLabel}:{recipient.AccountLabel}:{assetId}:{sequence}"),
+            sender.AccountId,
+            recipient.AccountId,
+            1,
+            Now.AddMinutes(-1_000 + sequence),
             sender.AccountCreatedUtc,
             sender.CharacterLevel,
             recipient.AccountCreatedUtc,

@@ -331,7 +331,8 @@ export class CharacterActionsStateService {
 
     return (
       type === CharacterActionType.Crafting &&
-      action.characterActionType === CharacterActionType.Crafting
+      (action.characterActionType === CharacterActionType.Crafting ||
+        action.characterActionType === CharacterActionType.Combat)
     );
   }
 

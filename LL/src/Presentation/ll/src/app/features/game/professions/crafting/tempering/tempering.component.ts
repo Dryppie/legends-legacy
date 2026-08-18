@@ -154,7 +154,7 @@ export class TemperingComponent implements OnDestroy {
     if (this.characterActionsState.isActionCooldown())
       return 'Combat is stopping. Tempering will be available when the current action timer finishes.';
     if (this.actionUnavailable())
-      return 'Tempering cannot be started while combat is in progress.';
+      return 'Tempering is temporarily unavailable while combat is starting.';
     if ((equipment.potential ?? 0) < 1)
       return 'This item has no remaining Potential.';
     if (equipment.rarity === Rarity.Legacy)

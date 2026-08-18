@@ -111,11 +111,17 @@ public static class DependencyInjection
             .Validate(x => x.EvaluationVersion > 0 && x.LookbackDays > 0 && x.CandidateLimit > 0 &&
                            x.MaximumTransfersPerEvaluation > 0 && x.MinimumTransferCount > 0 &&
                            x.MinimumCounterpartyCount > 0 && x.MinimumRelationshipCinders > 0 &&
-                           x.MinimumItemTransferCount > 0 && x.MinimumFeederCinders > 0 &&
+                           x.MinimumItemTransferCount > 0 && x.MinimumItemFunnelTransferCount > 0 &&
+                           x.MinimumItemFunnelCounterpartyCount > 0 &&
+                           x.ItemFunnelFullScaleTransferCount >= x.MinimumItemFunnelTransferCount &&
+                           x.MinimumYoungItemSourceTransferCount > 0 &&
+                           x.MinimumYoungItemSourceCounterpartyCount > 0 && x.MinimumFeederCinders > 0 &&
                            x.MinimumYoungAccountOutflowCinders > 0 && x.MinimumCircularTransferCinders > 0,
                 "LiveOps account-risk limits must be positive.")
             .Validate(x => x.ModerateScore >= 0 && x.ModerateScore < x.HighScore && x.HighScore < x.CriticalScore && x.CriticalScore <= 100,
                 "LiveOps account-risk severity thresholds must be ordered within 0-100.")
+            .Validate(x => x.ItemFunnelIncomingShareThreshold is > 0 and <= 1,
+                "The incoming-item funnel share threshold must be within (0, 1].")
             .ValidateOnStart();
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<IAccountAccessPolicy, AccountAccessPolicy>();
@@ -185,11 +191,17 @@ public static class DependencyInjection
             .Validate(x => x.EvaluationVersion > 0 && x.LookbackDays > 0 && x.CandidateLimit > 0 &&
                            x.MaximumTransfersPerEvaluation > 0 && x.MinimumTransferCount > 0 &&
                            x.MinimumCounterpartyCount > 0 && x.MinimumRelationshipCinders > 0 &&
-                           x.MinimumItemTransferCount > 0 && x.MinimumFeederCinders > 0 &&
+                           x.MinimumItemTransferCount > 0 && x.MinimumItemFunnelTransferCount > 0 &&
+                           x.MinimumItemFunnelCounterpartyCount > 0 &&
+                           x.ItemFunnelFullScaleTransferCount >= x.MinimumItemFunnelTransferCount &&
+                           x.MinimumYoungItemSourceTransferCount > 0 &&
+                           x.MinimumYoungItemSourceCounterpartyCount > 0 && x.MinimumFeederCinders > 0 &&
                            x.MinimumYoungAccountOutflowCinders > 0 && x.MinimumCircularTransferCinders > 0,
                 "LiveOps account-risk limits must be positive.")
             .Validate(x => x.ModerateScore >= 0 && x.ModerateScore < x.HighScore && x.HighScore < x.CriticalScore && x.CriticalScore <= 100,
                 "LiveOps account-risk severity thresholds must be ordered within 0-100.")
+            .Validate(x => x.ItemFunnelIncomingShareThreshold is > 0 and <= 1,
+                "The incoming-item funnel share threshold must be within (0, 1].")
             .ValidateOnStart();
         services.AddScoped<ILiveOpsAccountRiskService, LiveOpsAccountRiskService>();
         services.TryAddScoped<IChatModerationGateway, UnavailableChatModerationGateway>();

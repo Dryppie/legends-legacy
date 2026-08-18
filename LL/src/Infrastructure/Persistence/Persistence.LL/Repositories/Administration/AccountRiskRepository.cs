@@ -411,8 +411,10 @@ public sealed class AccountRiskRepository(
                 : x)
             .ToList();
 
-        var transfers = await context.PlayerTransferHistory.AsNoTracking()
-            .Where(x => x.SenderAccountId == accountId || x.RecipientAccountId == accountId)
+        var transferQuery = context.PlayerTransferHistory.AsNoTracking()
+            .Where(x => x.SenderAccountId == accountId || x.RecipientAccountId == accountId);
+        var totalRetainedTransferCount = await transferQuery.CountAsync(cancellationToken);
+        var transfers = await transferQuery
             .OrderByDescending(x => x.OccurredAt)
             .Take(Math.Clamp(transferLimit, 1, 500))
             .Select(x => new AccountRiskTransferEvidence(
@@ -437,7 +439,7 @@ public sealed class AccountRiskRepository(
             .OrderByDescending(x => x.CreatedAt)
             .Take(100)
             .ToListAsync(cancellationToken);
-        return new AccountRiskDetails(snapshot, status, signals, relationships, transfers, history, notes);
+        return new AccountRiskDetails(snapshot, status, signals, relationships, transfers, totalRetainedTransferCount, history, notes);
     }
 
     public Task<AccountRiskInvestigation?> GetInvestigationAsync(Guid accountId, CancellationToken cancellationToken) =>

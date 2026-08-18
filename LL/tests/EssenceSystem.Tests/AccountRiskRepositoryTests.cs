@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Domain.Models.Administration;
 using Domain.Models.Economy;
+using Domain.Models.Transfers;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Repositories.Administration;
@@ -67,6 +68,26 @@ public sealed class AccountRiskRepositoryTests
         Assert.Equal(2, page.Entries.Count);
     }
 
+    [Fact]
+    public async Task DetailsReportsTheRetainedTransferTotalWhenTheTimelineIsLimited()
+    {
+        await using var context = CreateContext();
+        var accountId = Guid.NewGuid();
+        var counterpartyId = Guid.NewGuid();
+        context.AccountRiskSnapshots.Add(Snapshot(accountId, evaluationVersion: 7, evaluatedAt: Now));
+        context.PlayerTransferHistory.AddRange(
+            PlayerTransfer(counterpartyId, accountId, Now.AddMinutes(-3)),
+            PlayerTransfer(counterpartyId, accountId, Now.AddMinutes(-2)),
+            PlayerTransfer(counterpartyId, accountId, Now.AddMinutes(-1)));
+        await context.SaveChangesAsync();
+
+        var details = await Repository(context).GetDetailsAsync(accountId, transferLimit: 2, CancellationToken.None);
+
+        Assert.NotNull(details);
+        Assert.Equal(3, details.TotalRetainedTransferCount);
+        Assert.Equal(2, details.Transfers.Count);
+    }
+
     private static LLDbContext CreateContext() => new(
         new DbContextOptionsBuilder<LLDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -87,6 +108,21 @@ public sealed class AccountRiskRepositoryTests
         TotalValue = 10_000,
         OccurredAt = occurredAt,
         Source = "test"
+    };
+
+    private static PlayerTransferRecord PlayerTransfer(Guid sender, Guid recipient, DateTimeOffset occurredAt) => new()
+    {
+        Kind = PlayerTransferKind.InventoryItem,
+        SenderAccountId = sender,
+        SenderCharacterId = Guid.NewGuid(),
+        SenderCharacterName = "Source",
+        RecipientAccountId = recipient,
+        RecipientCharacterId = Guid.NewGuid(),
+        RecipientCharacterName = "Subject",
+        AssetId = "item:wood",
+        AssetName = "Wood",
+        Quantity = 1,
+        OccurredAt = occurredAt
     };
 
     private static AccountRiskSnapshot Snapshot(Guid accountId, int evaluationVersion, DateTimeOffset evaluatedAt) => new()

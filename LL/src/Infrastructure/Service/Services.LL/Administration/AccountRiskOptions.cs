@@ -7,7 +7,7 @@ public sealed class AccountRiskOptions
     public const string SectionName = "LiveOps:AccountRisk";
 
     public bool Enabled { get; set; } = true;
-    public int EvaluationVersion { get; set; } = 6;
+    public int EvaluationVersion { get; set; } = 7;
     public int EvaluationIntervalMinutes { get; set; } = 30;
     public int LookbackDays { get; set; } = 90;
     public int CandidateLimit { get; set; } = 2_000;
@@ -20,6 +20,12 @@ public sealed class AccountRiskOptions
     public int MinimumCounterpartyCount { get; set; } = 2;
     public long MinimumRelationshipCinders { get; set; } = 10_000;
     public int MinimumItemTransferCount { get; set; } = 2;
+    public int MinimumItemFunnelTransferCount { get; set; } = 20;
+    public int MinimumItemFunnelCounterpartyCount { get; set; } = 2;
+    public int ItemFunnelFullScaleTransferCount { get; set; } = 150;
+    public decimal ItemFunnelIncomingShareThreshold { get; set; } = 0.85m;
+    public int MinimumYoungItemSourceTransferCount { get; set; } = 20;
+    public int MinimumYoungItemSourceCounterpartyCount { get; set; } = 2;
     public long MinimumFeederCinders { get; set; } = 20_000;
     public long MinimumYoungAccountOutflowCinders { get; set; } = 10_000;
     public long MinimumCircularTransferCinders { get; set; } = 10_000;
@@ -41,6 +47,12 @@ public sealed class AccountRiskOptions
         MinimumCounterpartyCount,
         MinimumRelationshipCinders,
         MinimumItemTransferCount,
+        MinimumItemFunnelTransferCount,
+        MinimumItemFunnelCounterpartyCount,
+        ItemFunnelFullScaleTransferCount,
+        ItemFunnelIncomingShareThreshold,
+        MinimumYoungItemSourceTransferCount,
+        MinimumYoungItemSourceCounterpartyCount,
         MinimumFeederCinders,
         MinimumYoungAccountOutflowCinders,
         MinimumCircularTransferCinders,

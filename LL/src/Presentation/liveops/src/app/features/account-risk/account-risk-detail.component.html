@@ -29,7 +29,7 @@
     </section>
 
     <section class="risk-panel why-flagged">
-      <header><div><p class="eyebrow">Evidence and interpretation</p><h2>Why this account was flagged</h2></div><small>Overlapping transfer evidence contributes only once. Window starts {{ view.account.analysisWindowStart | date: 'medium' }}.</small></header>
+      <header><div><p class="eyebrow">Evidence and interpretation</p><h2>Why this account was flagged</h2></div><small>Overlapping evidence contributes once within each scoring family. Window starts {{ view.account.analysisWindowStart | date: 'medium' }}.</small></header>
       <div class="risk-signal-list">
         @for (signal of view.signals; track signal.type) {
           <article><div class="risk-contribution">{{ signal.contribution ? '+' + signal.contribution : 'context' }}</div><div><span>{{ signal.category }} · {{ signal.type }} · {{ signal.supportingTransferCount }} supporting transfer(s){{ signal.supportingEvidenceComplete ? '' : ' · first 500 IDs retained' }}</span><h3>{{ signal.title }}</h3><p>{{ signal.explanation }}</p><details><summary>Raw measured facts</summary><dl>@for (fact of signal.evidence | keyvalue; track fact.key) { <div><dt>{{ fact.key }}</dt><dd>{{ fact.value | number: '1.0-2' }}</dd></div> }</dl></details></div></article>
@@ -70,7 +70,7 @@
         <label>Direction<select [(ngModel)]="direction"><option value="">Both</option><option value="Incoming">Incoming</option><option value="Outgoing">Outgoing</option></select></label>
         <label>Asset kind<select [(ngModel)]="kind"><option value="">All</option><option value="Cinders">Cinders</option><option value="InventoryItem">Inventory item</option></select></label>
         <label>Counterparty<input [(ngModel)]="counterparty" placeholder="Name or account UUID" /></label>
-        <span>{{ filteredTransfers.length }} / {{ view.transfers.length }} records</span>
+        <span>{{ filteredTransfers.length }} matching within newest {{ view.transfers.length }} of {{ view.totalRetainedTransferCount }} retained records</span>
       </div>
       <div class="risk-transfer-list">
         @for (transfer of filteredTransfers; track transfer.transferId) {

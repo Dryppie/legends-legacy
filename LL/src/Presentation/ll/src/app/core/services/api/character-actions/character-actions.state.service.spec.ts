@@ -216,6 +216,13 @@ describe('CharacterActionsStateService', () => {
     expect(service.canStartAction(CharacterActionType.Combat)).toBeFalse();
   });
 
+  it('allows Tempering to replace active Combat but blocks another Combat start', () => {
+    service.applyCurrentActionSnapshot(combatAction());
+
+    expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
+    expect(service.canStartAction(CharacterActionType.Combat)).toBeFalse();
+  });
+
   it('does not treat later action changes as another logout', fakeAsync(() => {
     logoutCount.set(1);
     TestBed.flushEffects();

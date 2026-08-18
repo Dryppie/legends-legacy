@@ -142,7 +142,9 @@ public class CharacterActionRepository : ICharacterActionRepository
     }
 
     // Adding to an active queue preserves its next due boundary; starting/restarting
-    // a queue establishes a new generation and first-attempt boundary.
+    // a queue establishes a new generation and first-attempt boundary. Replacing
+    // combat waits for its already-earned action boundary before beginning the
+    // tempering cadence, matching the cooldown enforced by an explicit combat stop.
     public async Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem craftingQueueItem, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var existingAction = await _context.CharacterActions
@@ -199,13 +201,27 @@ public class CharacterActionRepository : ICharacterActionRepository
 
         if (existingAction.ActionDetails is not CraftingActionDetails craftingDetails)
         {
-            // If existing action had no details, add new details
+            var temperingStartsAt = existingAction.ActionDetails is CombatActionDetails &&
+                existingAction.NextResolutionAtUtc is { } combatBoundary &&
+                combatBoundary > now
+                    ? combatBoundary
+                    : now;
+
+            if (existingAction.ActionDetails != null)
+            {
+                _context.ActionDetails.Remove(existingAction.ActionDetails);
+            }
+
+            // Make the queued replacement visible immediately, but do not grant its
+            // first tempering result until one full tempering interval after combat
+            // becomes eligible to be replaced.
             existingAction.UpdatedAt = now;
-            existingAction.NextResolutionAtUtc = now.AddSeconds(TemperingConstants.ActionDurationSeconds);
+            existingAction.NextResolutionAtUtc = temperingStartsAt.AddSeconds(TemperingConstants.ActionDurationSeconds);
             existingAction.BlockedUntilUtc = null;
             existingAction.ScheduleGeneration = checked(existingAction.ScheduleGeneration + 1);
             existingAction.ActionDetails = new CraftingActionDetails
             {
+                CharacterActionId = characterId,
                 CraftingQueueItems = [craftingQueueItem]
             };
             _context.ActionDetails.Add(existingAction.ActionDetails);

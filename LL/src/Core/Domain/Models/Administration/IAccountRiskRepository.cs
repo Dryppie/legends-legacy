@@ -50,6 +50,7 @@ public sealed record AccountRiskDetails(
     IReadOnlyList<AccountRiskSignal> Signals,
     IReadOnlyList<AccountRiskRelationship> Relationships,
     IReadOnlyList<AccountRiskTransferEvidence> Transfers,
+    int TotalRetainedTransferCount,
     IReadOnlyList<AccountRiskHistory> History,
     IReadOnlyList<AccountRiskNote> Notes);
 
