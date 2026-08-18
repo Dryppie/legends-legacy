@@ -6,7 +6,8 @@ public sealed record StateSyncCommandScopeProfile(
     IReadOnlyList<string> CharacterScopes,
     IReadOnlyList<string> WorldScopes,
     bool RefreshCharacterOverview = true,
-    bool InventoryWhenChanged = false);
+    bool InventoryWhenChanged = false,
+    bool RefreshCharacterSummaryWhenChanged = false);
 
 /// <summary>
 /// Compile-time command-to-resource contract used by the transaction pipeline.
@@ -59,6 +60,7 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.Titles.Commands.UnequipTitle.UnequipTitleCommand));
 
         Register(profiles, [], [], refreshCharacterOverview: false, inventoryWhenChanged: true,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.CharacterActions.Commands.DeleteCharacterAction.DeleteCharacterActionCommand),
             typeof(global::Application.UseCases.CharacterActions.Commands.ResolveCharacterAction.ResolveCharacterActionCommand),
             typeof(global::Application.UseCases.CharacterActions.Commands.ResumeTempering.ResumeTemperingCommand),
@@ -179,7 +181,7 @@ public static class StateSyncCommandScopeCatalog
         IReadOnlyList<string> characterScopes,
         IReadOnlyList<string> worldScopes,
         params Type[] commandTypes) =>
-        Register(profiles, characterScopes, worldScopes, true, false, commandTypes);
+        Register(profiles, characterScopes, worldScopes, true, false, false, commandTypes);
 
     private static void Register(
         IDictionary<Type, StateSyncCommandScopeProfile> profiles,
@@ -187,13 +189,15 @@ public static class StateSyncCommandScopeCatalog
         IReadOnlyList<string> worldScopes,
         bool refreshCharacterOverview,
         bool inventoryWhenChanged,
+        bool refreshCharacterSummaryWhenChanged,
         params Type[] commandTypes)
     {
         var profile = new StateSyncCommandScopeProfile(
             characterScopes,
             worldScopes,
             refreshCharacterOverview,
-            inventoryWhenChanged);
+            inventoryWhenChanged,
+            refreshCharacterSummaryWhenChanged);
         foreach (var commandType in commandTypes)
         {
             profiles.Add(commandType, profile);

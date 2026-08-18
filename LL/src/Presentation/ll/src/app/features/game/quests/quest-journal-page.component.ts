@@ -134,6 +134,7 @@ export class QuestJournalPageComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.eventQuestState.activateView();
     this.questState.load();
     this.eventQuestState.load();
     this.countdownTimer = window.setInterval(
@@ -143,6 +144,7 @@ export class QuestJournalPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.eventQuestState.deactivateView();
     if (this.countdownTimer !== null) {
       window.clearInterval(this.countdownTimer);
     }

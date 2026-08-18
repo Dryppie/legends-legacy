@@ -31,7 +31,7 @@ internal sealed class GameRealtimeImmediatePublisher : IGameRealtimeImmediatePub
             Payload = message
         };
 
-        _logger.LogInformation(
+        _logger.LogDebug(
             "Game realtime send {Event} target={Target} sender={Sender} sentAt={SentAt:o}",
             envelope.Event,
             DescribeAudience(audience),

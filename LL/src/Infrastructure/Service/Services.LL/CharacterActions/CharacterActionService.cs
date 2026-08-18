@@ -124,7 +124,7 @@ public class CharacterActionService : ICharacterActionService
         PopulateScheduleMetadata(characterAction, now);
         if (characterAction.ProcessedCount > 0)
         {
-            _logger?.LogInformation(
+            _logger?.LogDebug(
                 "Resolved {ActionKind} action for {CharacterId}: processed {ProcessedCount}, hasMore={HasMoreDueWork}, previousBoundary={PreviousBoundary}, nextBoundary={NextBoundary}, generation={ScheduleGeneration}",
                 characterAction.CharacterActionType,
                 characterAction.CharacterId,

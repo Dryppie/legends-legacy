@@ -108,7 +108,7 @@ public class CombatService : ICombatService
         IdleCombatTelemetry.RecordResolve(resolveStartedAt, processedCount, processedBatches);
         if (processedCount > 0)
         {
-            _logger?.LogInformation(
+            _logger?.LogDebug(
                 "Idle combat catch-up resolved {EncounterCount} encounters in {BatchCount} batches over {ElapsedMilliseconds} ms ({EncountersPerSecond} encounters/sec).",
                 processedCount,
                 processedBatches,

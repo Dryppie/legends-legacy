@@ -1,4 +1,5 @@
 using API.Chat;
+using API.Chat.Common;
 using API.Chat.Hubs;
 using API.Chat.Hubs.Presence;
 using API.Chat.Hubs.Providers;
@@ -23,6 +24,7 @@ var config = builder.Configuration;
 config
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 
 if (!builder.Environment.IsDevelopment() &&
@@ -38,9 +40,20 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = context =>
+    {
+        context.ProblemDetails.Extensions["requestId"] =
+            RequestLoggingMiddleware.GetRequestId(context.HttpContext);
+    };
+});
 
 builder.Services.AddDistributedMemoryCache();
-var signalR = builder.Services.AddSignalR(o => { o.EnableDetailedErrors = true; })
+var signalR = builder.Services.AddSignalR(o =>
+    {
+        o.EnableDetailedErrors = builder.Environment.IsDevelopment();
+    })
     .AddJsonProtocol(options =>
     {
         options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()); // optional, depends on your style
@@ -97,7 +110,8 @@ builder.Services.AddCors(options =>
         builder => builder.WithOrigins("http://localhost:4200", "https://dev.legends-legacy.com")
                           .AllowCredentials()
                           .AllowAnyMethod()
-                          .AllowAnyHeader());
+                          .AllowAnyHeader()
+                          .WithExposedHeaders(RequestLoggingMiddleware.RequestIdHeaderName));
 });
 
 // Dependency Injections
@@ -182,6 +196,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UsePathBase("/chat");
+app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -214,6 +230,7 @@ if (config.GetValue<bool>("FeatureManagement:DisableAllRequests"))
 }
 
 app.UseAuthentication();
+app.UseMiddleware<AuthenticatedIdentityLoggingMiddleware>();
 app.UseAuthorization();
 
 app.MapHub<ChatHub>("/hub");

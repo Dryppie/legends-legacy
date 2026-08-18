@@ -14,6 +14,7 @@ public sealed class ConcurrencyExceptionHandlerTests
         var handler = new ConcurrencyExceptionHandler(
             NullLogger<ConcurrencyExceptionHandler>.Instance);
         var context = new DefaultHttpContext();
+        context.TraceIdentifier = "request-409";
         context.Request.Path = "/api/v1/CharacterActions/Resolve";
         context.Response.Body = new MemoryStream();
 
@@ -30,5 +31,8 @@ public sealed class ConcurrencyExceptionHandlerTests
         Assert.Equal(
             "This action was already updated by another request. Refresh and try again.",
             body.RootElement.GetProperty("detail").GetString());
+        Assert.Equal(
+            "request-409",
+            body.RootElement.GetProperty("requestId").GetString());
     }
 }

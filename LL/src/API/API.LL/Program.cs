@@ -58,7 +58,14 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
-builder.Services.AddProblemDetails();
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = context =>
+    {
+        context.ProblemDetails.Extensions["requestId"] =
+            RequestLoggingMiddleware.GetRequestId(context.HttpContext);
+    };
+});
 builder.Services.AddExceptionHandler<ConcurrencyExceptionHandler>();
 
 var signalR = builder.Services.AddSignalR()
@@ -105,7 +112,7 @@ builder.Services.AddCors(options =>
                           .AllowCredentials()
                           .AllowAnyMethod()
                           .AllowAnyHeader()
-                          .WithExposedHeaders("X-LL-State-Revisions"));
+                          .WithExposedHeaders("X-LL-State-Revisions", RequestLoggingMiddleware.RequestIdHeaderName));
 });
 
 builder.Services.AddPersistence(config);
@@ -237,6 +244,7 @@ using (var scope = app.Services.CreateScope())
 await app.Services.ValidateCreatureBuildProfilesAsync();
 
 // Configure the HTTP request pipeline.
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
@@ -274,6 +282,7 @@ if (!app.Environment.IsDevelopment())       // prod only
 }
 
 app.UseAuthentication();
+app.UseMiddleware<AuthenticatedIdentityLoggingMiddleware>();
 app.UseAuthorization();
 
 app.Use(async (context, next) =>

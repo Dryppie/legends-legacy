@@ -7,8 +7,5 @@ namespace Domain.Components.Leveling.LevelActions;
 /// </summary>
 public class IncreaseEssenceSlotAction : ILevelAction
 {
-    public async Task Execute(Guid characterId)
-    {
-        Console.WriteLine($"[Action] Increased {characterId}'s essence slots by 1. ");
-    }
+    public Task Execute(Guid characterId) => Task.CompletedTask;
 }

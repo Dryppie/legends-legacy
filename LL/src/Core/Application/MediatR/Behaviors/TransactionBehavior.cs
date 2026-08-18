@@ -34,6 +34,11 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         RequestHandlerDelegate<TResponse> next,
         CancellationToken ct)
     {
+        using var operationScope = _logger.BeginScope(new Dictionary<string, object>
+        {
+            ["Operation"] = typeof(TRequest).Name
+        });
+
         var isCommand = request is ICommandBase;
         var isOptOut = request.GetType().IsDefined(typeof(NonTransactionalAttribute), inherit: true);
         if (!isCommand || isOptOut)
@@ -85,7 +90,7 @@ public sealed class TransactionBehavior<TRequest, TResponse>
                 {
                     foreach (var e in ex.Entries)
                     {
-                        _logger.LogError("Concurrency on {Entity} with key {KeyValues}",
+                        _logger.LogDebug("Concurrency on {Entity} with key {KeyValues}",
                             e.Metadata.Name,
                             string.Join(",", e.Properties.Where(p => p.Metadata.IsPrimaryKey())
                                                          .Select(p => p.CurrentValue)));
@@ -122,11 +127,10 @@ public sealed class TransactionBehavior<TRequest, TResponse>
                 await tx.CommitAsync(ct);
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 try { await tx.RollbackAsync(ct); }
                 catch (Exception rbEx) { _logger.LogError(rbEx, "Rollback failed."); }
-                _logger.LogError(ex, "Command {Command} failed; tx rolled back.", typeof(TRequest).Name);
                 throw;
             }
         });
@@ -174,7 +178,10 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         Guid characterId,
         StateSyncCommandScopeProfile profile)
     {
-        yield return StateSyncScopes.Character;
+        if (!profile.RefreshCharacterSummaryWhenChanged || HasCharacterSummaryMutation(characterId))
+        {
+            yield return StateSyncScopes.Character;
+        }
 
         if (profile.RefreshCharacterOverview || HasCharacterOverviewMutation())
         {
@@ -211,6 +218,13 @@ public sealed class TransactionBehavior<TRequest, TResponse>
             message.EventType is GameEventTypes.CharacterLevelReached
                 or GameEventTypes.EquipmentCrafted
                 or GameEventTypes.EquipmentTempered);
+
+    private bool HasCharacterSummaryMutation(Guid characterId) =>
+        _db.Characters.Local.Any(character =>
+            character.Id == characterId
+            && _db.GetEntry(character).State is EntityState.Added
+                or EntityState.Modified
+                or EntityState.Deleted);
 
     private bool HasInventoryMutation(Guid characterId) =>
         _db.InventoryItems.Local.Any(item =>

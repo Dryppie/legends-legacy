@@ -15,6 +15,9 @@ export class EventQuestStateService {
   private loadEpoch = 0;
   private refreshAfterCurrentRequest = false;
   private lastLogoutCount = 0;
+  private activeViews = 0;
+  private dirty = false;
+  private changeVersion = 0;
 
   readonly journal = this._journal.asReadonly();
   readonly loaded = this._loaded.asReadonly();
@@ -31,12 +34,16 @@ export class EventQuestStateService {
       'event-quests',
       'event-quests',
       () => this.synchronize(),
-      () => this._loaded(),
+      () => this._loaded() && this.activeViews > 0,
     );
     effect(
       () => {
         if (!events.event.EventQuestChangedMsg()) return;
-        untracked(() => this.load(true));
+        untracked(() => {
+          this.changeVersion += 1;
+          this.dirty = true;
+          if (this.activeViews > 0) this.load(true);
+        });
       },
       { allowSignalWrites: true },
     );
@@ -59,6 +66,7 @@ export class EventQuestStateService {
       return;
     }
     const requestEpoch = ++this.loadEpoch;
+    const requestChangeVersion = this.changeVersion;
     this._loading.set(true);
     this.refreshAfterCurrentRequest = false;
     this._error.set(null);
@@ -79,6 +87,7 @@ export class EventQuestStateService {
           if (requestEpoch !== this.loadEpoch) return;
           this._journal.set(journal ?? { events: [] });
           this._loaded.set(true);
+          if (requestChangeVersion === this.changeVersion) this.dirty = false;
         },
         error: (error) => {
           if (requestEpoch === this.loadEpoch) {
@@ -90,6 +99,7 @@ export class EventQuestStateService {
 
   private synchronize(): Observable<unknown> {
     const requestEpoch = ++this.loadEpoch;
+    const requestChangeVersion = this.changeVersion;
     this._loading.set(true);
     this._error.set(null);
     return this.api.getJournal().pipe(
@@ -98,6 +108,7 @@ export class EventQuestStateService {
           if (requestEpoch !== this.loadEpoch) return;
           this._journal.set(journal ?? { events: [] });
           this._loaded.set(true);
+          if (requestChangeVersion === this.changeVersion) this.dirty = false;
         },
         error: (error) => {
           if (requestEpoch === this.loadEpoch) {
@@ -116,6 +127,15 @@ export class EventQuestStateService {
       () => this.api.claim(eventQuestId),
       'Failed to claim event rewards',
     );
+  }
+
+  activateView(): void {
+    this.activeViews += 1;
+    if (this.activeViews === 1 && this.dirty) this.load(true);
+  }
+
+  deactivateView(): void {
+    this.activeViews = Math.max(0, this.activeViews - 1);
   }
 
   claimMilestone(eventQuestId: string, milestoneKey: string): void {
@@ -162,6 +182,9 @@ export class EventQuestStateService {
   private reset(): void {
     this.loadEpoch += 1;
     this.refreshAfterCurrentRequest = false;
+    this.activeViews = 0;
+    this.changeVersion += 1;
+    this.dirty = false;
     this._journal.set({ events: [] });
     this._loaded.set(false);
     this._loading.set(false);

@@ -104,12 +104,13 @@ public sealed class GameEventOutboxWorker(
             activity?.SetTag("outbox.message.id", delivery.MessageId);
             activity?.SetTag("outbox.event_type", delivery.Message.EventType);
             activity?.SetTag("outbox.consumer", delivery.Consumer);
-            using var logScope = logger.BeginScope(new Dictionary<string, object>
+            using var logScope = logger.BeginScope(new Dictionary<string, object?>
             {
                 ["OutboxDeliveryId"] = delivery.Id,
                 ["OutboxMessageId"] = delivery.MessageId,
                 ["OutboxEventType"] = delivery.Message.EventType,
-                ["OutboxConsumer"] = delivery.Consumer
+                ["OutboxConsumer"] = delivery.Consumer,
+                ["OriginTraceId"] = delivery.Message.CorrelationId
             });
 
             if (!consumers.TryGetValue(delivery.Consumer, out var consumer) ||

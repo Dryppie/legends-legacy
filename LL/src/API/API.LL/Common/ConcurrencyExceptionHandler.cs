@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -29,10 +30,12 @@ public sealed class ConcurrencyExceptionHandler(
             return false;
         }
 
+        var route = (httpContext.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText
+            ?? "(unmatched)";
         logger.LogWarning(
             exception,
-            "A concurrent update prevented duplicate command processing for {Path}.",
-            httpContext.Request.Path);
+            "A concurrent update prevented duplicate command processing for {HttpRoute}.",
+            route);
 
         httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
         await httpContext.Response.WriteAsJsonAsync(
@@ -42,7 +45,11 @@ public sealed class ConcurrencyExceptionHandler(
                 Title = "Game state changed",
                 Detail = duplicateDungeonStart
                     ? "A dungeon run is already active for this character. Refresh to continue it."
-                    : "This action was already updated by another request. Refresh and try again."
+                    : "This action was already updated by another request. Refresh and try again.",
+                Extensions =
+                {
+                    ["requestId"] = RequestLoggingMiddleware.GetRequestId(httpContext)
+                }
             },
             cancellationToken);
 

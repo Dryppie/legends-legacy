@@ -31,6 +31,14 @@ builder.Services.AddControllers(options =>
     options.Filters.AddService<CookieAntiforgeryFilter>())
     .AddJsonOptions(options =>
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = context =>
+    {
+        context.ProblemDetails.Extensions["requestId"] =
+            RequestLoggingMiddleware.GetRequestId(context.HttpContext);
+    };
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddRateLimiter(options =>
@@ -94,7 +102,8 @@ if (allowedOrigins.Length > 0)
         policy => policy
             .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
-            .AllowAnyMethod()));
+            .AllowAnyMethod()
+            .WithExposedHeaders(RequestLoggingMiddleware.RequestIdHeaderName)));
 }
 
 builder.Services.AddLiveOpsAuthentication(
@@ -115,6 +124,8 @@ if (config.GetValue<bool>($"{LiveOpsReverseProxy.SectionName}:Enabled"))
     app.UseForwardedHeaders();
 }
 app.UseLiveOpsPublicOrigin(config);
+app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {

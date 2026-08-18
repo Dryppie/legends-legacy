@@ -41,7 +41,7 @@ internal sealed class RealtimeDeliveryGameEventOutboxConsumer(
             Payload = delivery.Payload
         };
 
-        logger.LogInformation(
+        logger.LogDebug(
             "Durable game realtime send {Event} updateId={UpdateId} target={Target} sender={Sender} createdAt={CreatedAt:o}",
             envelope.Event,
             envelope.UpdateId,

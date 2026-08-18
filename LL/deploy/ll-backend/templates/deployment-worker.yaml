@@ -20,7 +20,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "ll-backend.selectorLabels" . | nindent 8 }}
+        {{- include "ll-backend.labels" . | nindent 8 }}
         app.kubernetes.io/component: worker
     spec:
       terminationGracePeriodSeconds: {{ .Values.worker.terminationGracePeriodSeconds }}
