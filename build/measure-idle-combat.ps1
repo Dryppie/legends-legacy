@@ -8,6 +8,9 @@ param(
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Debug',
 
+    [ValidateSet('Counters', 'Cpu', 'Allocation')]
+    [string]$Diagnostics = 'Counters',
+
     [string]$SnapshotPath = (Join-Path $PSScriptRoot '..\LL\legends_legacy_idle_benchmark.sql'),
 
     [string]$DatabaseName = 'legends_legacy_idle_benchmark',
@@ -82,6 +85,29 @@ function Get-DotnetCountersPath {
 
     if ([string]::IsNullOrWhiteSpace($tool)) {
         throw 'dotnet-counters is not available in the local NuGet package cache.'
+    }
+
+    return $tool
+}
+
+function Get-DotnetTracePath {
+    $userProfile = if (![string]::IsNullOrWhiteSpace($env:USERPROFILE)) {
+        $env:USERPROFILE
+    }
+    else {
+        [Environment]::GetFolderPath('UserProfile')
+    }
+    $packages = Join-Path $userProfile '.nuget\packages\dotnet-trace'
+    $tool = Get-ChildItem -LiteralPath $packages -Directory -ErrorAction SilentlyContinue |
+        Sort-Object Name -Descending |
+        ForEach-Object {
+            Join-Path $_.FullName 'tools\net8.0\any\dotnet-trace.dll'
+        } |
+        Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
+        Select-Object -First 1
+
+    if ([string]::IsNullOrWhiteSpace($tool)) {
+        throw 'dotnet-trace is not available in the local NuGet package cache.'
     }
 
     return $tool
@@ -253,6 +279,65 @@ function Stop-CounterCollector([Diagnostics.Process]$Process) {
 
     if ($Process.ExitCode -ne 0) {
         throw "dotnet-counters failed with exit code $($Process.ExitCode): $($Process.StandardError.ReadToEnd())"
+    }
+}
+
+function Start-TraceCollector(
+    [string]$DotnetTrace,
+    [int]$ProcessId,
+    [string]$OutputPath,
+    [ValidateSet('Cpu', 'Allocation')]
+    [string]$Mode) {
+    $profile = if ($Mode -eq 'Cpu') {
+        'dotnet-sampled-thread-time,dotnet-common'
+    }
+    else {
+        'dotnet-sampled-thread-time,gc-verbose'
+    }
+    $bufferSize = if ($Mode -eq 'Allocation') { '1024' } else { '256' }
+
+    $startInfo = [Diagnostics.ProcessStartInfo]::new()
+    $startInfo.FileName = 'dotnet'
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    $startInfo.ArgumentList.Add($DotnetTrace)
+    $startInfo.ArgumentList.Add('collect')
+    $startInfo.ArgumentList.Add('--process-id')
+    $startInfo.ArgumentList.Add($ProcessId.ToString([Globalization.CultureInfo]::InvariantCulture))
+    $startInfo.ArgumentList.Add('--profile')
+    $startInfo.ArgumentList.Add($profile)
+    $startInfo.ArgumentList.Add('--buffersize')
+    $startInfo.ArgumentList.Add($bufferSize)
+    $startInfo.ArgumentList.Add('--output')
+    $startInfo.ArgumentList.Add($OutputPath)
+    $startInfo.ArgumentList.Add('--duration')
+    $startInfo.ArgumentList.Add('00:00:00:30')
+
+    $process = [Diagnostics.Process]::new()
+    $process.StartInfo = $startInfo
+    if (!$process.Start()) {
+        throw "Failed to start dotnet-trace for $Mode profiling."
+    }
+
+    Start-Sleep -Seconds 2
+    if ($process.HasExited) {
+        $errorOutput = $process.StandardError.ReadToEnd()
+        throw "dotnet-trace exited during startup: $errorOutput"
+    }
+
+    return $process
+}
+
+function Stop-TraceCollector([Diagnostics.Process]$Process) {
+    if (!$Process.HasExited -and !$Process.WaitForExit(45000)) {
+        $Process.Kill($true)
+        throw 'dotnet-trace exceeded its configured collection duration.'
+    }
+
+    if ($Process.ExitCode -ne 0) {
+        throw "dotnet-trace failed with exit code $($Process.ExitCode): $($Process.StandardError.ReadToEnd())"
     }
 }
 
@@ -532,7 +617,8 @@ $psql = Get-PostgresTool 'psql'
 $dropDb = Get-PostgresTool 'dropdb'
 $createDb = Get-PostgresTool 'createdb'
 $pgRestore = Get-PostgresTool 'pg_restore'
-$dotnetCounters = Get-DotnetCountersPath
+$dotnetCounters = if ($Diagnostics -eq 'Counters') { Get-DotnetCountersPath } else { $null }
+$dotnetTrace = if ($Diagnostics -eq 'Counters') { $null } else { Get-DotnetTracePath }
 $connectionString = @(
     "Host=$(Quote-ConnectionStringValue $DatabaseHost)"
     "Port=$DatabasePort"
@@ -589,8 +675,25 @@ try {
                 throw "Unexpected benchmark boundary. Expected $FixedBoundary; got $actualBoundary."
             }
 
-            $counterPath = Join-Path $runRoot ("run-{0:D2}.counters.json" -f $run)
-            $collector = Start-CounterCollector -DotnetCounters $dotnetCounters -ProcessId $api.Id -OutputPath $counterPath
+            $diagnosticPath = if ($Diagnostics -eq 'Counters') {
+                Join-Path $runRoot ("run-{0:D2}.counters.json" -f $run)
+            }
+            else {
+                Join-Path $runRoot ("run-{0:D2}.{1}.nettrace" -f $run, $Diagnostics.ToLowerInvariant())
+            }
+            $collector = if ($Diagnostics -eq 'Counters') {
+                Start-CounterCollector `
+                    -DotnetCounters $dotnetCounters `
+                    -ProcessId $api.Id `
+                    -OutputPath $diagnosticPath
+            }
+            else {
+                Start-TraceCollector `
+                    -DotnetTrace $dotnetTrace `
+                    -ProcessId $api.Id `
+                    -OutputPath $diagnosticPath `
+                    -Mode $Diagnostics
+            }
             $stopwatch = [Diagnostics.Stopwatch]::StartNew()
             $result = Invoke-RestMethod `
                 -Method Post `
@@ -598,7 +701,12 @@ try {
                 -Headers $headers `
                 -TimeoutSec 120
             $stopwatch.Stop()
-            Stop-CounterCollector $collector
+            if ($Diagnostics -eq 'Counters') {
+                Stop-CounterCollector $collector
+            }
+            else {
+                Stop-TraceCollector $collector
+            }
             $collector = $null
 
             if ($result.processedCount -ne 8641 -or $result.hasMoreDueWork) {
@@ -642,24 +750,54 @@ Compare the normalized artifacts in $runRoot.
 "@
             }
 
-            $summary = Get-CounterSummary -Path $counterPath -HttpDurationMs $stopwatch.Elapsed.TotalMilliseconds
+            $summary = if ($Diagnostics -eq 'Counters') {
+                Get-CounterSummary -Path $diagnosticPath -HttpDurationMs $stopwatch.Elapsed.TotalMilliseconds
+            }
+            else {
+                [ordered]@{
+                    HttpDurationMs = [Math]::Round($stopwatch.Elapsed.TotalMilliseconds, 3)
+                    Diagnostics = $Diagnostics
+                    TracePath = $diagnosticPath
+                    ProcessedCount = [int]$result.processedCount
+                }
+            }
             $summary['Run'] = $run
             $summary['ResponseFingerprint'] = $responseFingerprint.Hash
             $summary['DatabaseFingerprint'] = $databaseFingerprint.Hash
             $summary['CorrectnessFingerprint'] = $combinedFingerprint.Hash
             $summaries.Add([pscustomobject]$summary)
-            Write-Host (
-                'Run {0}: HTTP {1:N0} ms, server {2:N0} ms, simulation {3:N0} ms, allocation {4:N3} GiB, fingerprint {5}' -f
-                $run,
-                $summary.HttpDurationMs,
-                $summary.ResolveDurationMs,
-                $summary.SimulationDurationMs,
-                ($summary.SimulationAllocatedBytes / 1GB),
-                $combinedFingerprint.Hash.Substring(0, 12))
+            if ($Diagnostics -eq 'Counters') {
+                Write-Host (
+                    'Run {0}: HTTP {1:N0} ms, server {2:N0} ms, simulation {3:N0} ms, allocation {4:N3} GiB, fingerprint {5}' -f
+                    $run,
+                    $summary.HttpDurationMs,
+                    $summary.ResolveDurationMs,
+                    $summary.SimulationDurationMs,
+                    ($summary.SimulationAllocatedBytes / 1GB),
+                    $combinedFingerprint.Hash.Substring(0, 12))
+            }
+            else {
+                Write-Host (
+                    'Run {0}: {1} trace, HTTP {2:N0} ms, fingerprint {3}' -f
+                    $run,
+                    $Diagnostics,
+                    $summary.HttpDurationMs,
+                    $combinedFingerprint.Hash.Substring(0, 12))
+            }
         }
         finally {
             if ($null -ne $collector -and !$collector.HasExited) {
-                try { Stop-CounterCollector $collector } catch { Write-Warning $_ }
+                try {
+                    if ($Diagnostics -eq 'Counters') {
+                        Stop-CounterCollector $collector
+                    }
+                    else {
+                        Stop-TraceCollector $collector
+                    }
+                }
+                catch {
+                    Write-Warning $_
+                }
             }
             if ($null -ne $api -and !$api.HasExited) {
                 $api.Kill($true)
@@ -672,18 +810,25 @@ finally {
     $env:PGPASSWORD = $previousPgPassword
 }
 
-$median = [ordered]@{
-    HttpDurationMs = [Math]::Round((Get-Median @($summaries.HttpDurationMs)), 3)
-    ResolveDurationMs = [Math]::Round((Get-Median @($summaries.ResolveDurationMs)), 3)
-    SimulationDurationMs = [Math]::Round((Get-Median @($summaries.SimulationDurationMs)), 3)
-    SimulationAllocatedBytes = [long](Get-Median @($summaries.SimulationAllocatedBytes))
-    RuntimeAllocatedBytes = [long](Get-Median @($summaries.RuntimeAllocatedBytes))
-    CpuSeconds = [Math]::Round((Get-Median @($summaries.CpuSeconds)), 6)
-    GcPauseMilliseconds = [Math]::Round((Get-Median @($summaries.GcPauseMilliseconds)), 3)
-    Gen0Collections = [Math]::Round((Get-Median @($summaries.Gen0Collections)), 1)
-    Gen1Collections = [Math]::Round((Get-Median @($summaries.Gen1Collections)), 1)
-    Gen2Collections = [Math]::Round((Get-Median @($summaries.Gen2Collections)), 1)
-    WorkingSetMaximumBytes = [long](Get-Median @($summaries.WorkingSetMaximumBytes))
+$median = if ($Diagnostics -eq 'Counters') {
+    [ordered]@{
+        HttpDurationMs = [Math]::Round((Get-Median @($summaries.HttpDurationMs)), 3)
+        ResolveDurationMs = [Math]::Round((Get-Median @($summaries.ResolveDurationMs)), 3)
+        SimulationDurationMs = [Math]::Round((Get-Median @($summaries.SimulationDurationMs)), 3)
+        SimulationAllocatedBytes = [long](Get-Median @($summaries.SimulationAllocatedBytes))
+        RuntimeAllocatedBytes = [long](Get-Median @($summaries.RuntimeAllocatedBytes))
+        CpuSeconds = [Math]::Round((Get-Median @($summaries.CpuSeconds)), 6)
+        GcPauseMilliseconds = [Math]::Round((Get-Median @($summaries.GcPauseMilliseconds)), 3)
+        Gen0Collections = [Math]::Round((Get-Median @($summaries.Gen0Collections)), 1)
+        Gen1Collections = [Math]::Round((Get-Median @($summaries.Gen1Collections)), 1)
+        Gen2Collections = [Math]::Round((Get-Median @($summaries.Gen2Collections)), 1)
+        WorkingSetMaximumBytes = [long](Get-Median @($summaries.WorkingSetMaximumBytes))
+    }
+}
+else {
+    [ordered]@{
+        HttpDurationMs = [Math]::Round((Get-Median @($summaries.HttpDurationMs)), 3)
+    }
 }
 $report = [ordered]@{
     CreatedAtUtc = [DateTimeOffset]::UtcNow
@@ -692,6 +837,7 @@ $report = [ordered]@{
     FixedUtcNow = $FixedUtcNow
     FixedBoundary = $FixedBoundary
     Configuration = $Configuration
+    Diagnostics = $Diagnostics
     CorrectnessFingerprint = $referenceFingerprint
     Runs = $summaries
     Median = $median
@@ -700,5 +846,10 @@ $reportPath = Join-Path $runRoot 'summary.json'
 $report | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $reportPath -Encoding utf8
 
 Write-Host ''
-Write-Host "Benchmark complete. Median server resolve: $($median.ResolveDurationMs) ms"
+if ($Diagnostics -eq 'Counters') {
+    Write-Host "Benchmark complete. Median server resolve: $($median.ResolveDurationMs) ms"
+}
+else {
+    Write-Host "$Diagnostics profile complete. HTTP duration: $($median.HttpDurationMs) ms"
+}
 Write-Host "Report: $reportPath"

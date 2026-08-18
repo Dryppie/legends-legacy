@@ -430,9 +430,7 @@ public class InventoryRepository : IInventoryRepository
             x => x.BorrowedByCharacterId == characterId && parsedGuids.Contains(x.EquipmentInstanceId),
             cancellationToken))
             return null;
-        if (equipmentInventoryItems.Any(i =>
-            i.ItemInstance is not EquipmentInstance equipmentInstance ||
-            equipmentInstance.EquipmentBase.EquipmentType == EquipmentType.Tool))
+        if (equipmentInventoryItems.Any(i => i.ItemInstance is not EquipmentInstance))
         {
             return null;
         }

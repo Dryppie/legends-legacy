@@ -31,7 +31,7 @@ public sealed class InventoryRepositoryScrappingTests
     }
 
     [Fact]
-    public async Task Tools_cannot_be_scrapped()
+    public async Task Tools_can_be_scrapped()
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
@@ -44,9 +44,11 @@ public sealed class InventoryRepositoryScrappingTests
             characterId,
             [tool.ItemInstanceId],
             CancellationToken.None);
+        await db.SaveChangesAsync();
 
-        Assert.Null(result);
-        Assert.Contains(db.InventoryItems, x => x.ItemInstanceId == tool.ItemInstanceId);
+        Assert.NotNull(result);
+        Assert.Equal(1, result.Quantity);
+        Assert.DoesNotContain(db.InventoryItems, x => x.ItemInstanceId == tool.ItemInstanceId);
     }
 
     private static void AddTemperedScrapBase(LLDbContext db) =>

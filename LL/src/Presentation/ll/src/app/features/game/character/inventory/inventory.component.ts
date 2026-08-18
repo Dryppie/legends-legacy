@@ -130,9 +130,7 @@ export class InventoryComponent implements OnInit {
       .equipment()
       .filter(
         (item) =>
-          !(item.itemInstance as EquipmentInstance).isGuildBorrowed &&
-          (item.itemInstance as EquipmentInstance).equipmentBase
-            .equipmentType !== EquipmentType.Tool,
+          !(item.itemInstance as EquipmentInstance).isGuildBorrowed,
       ),
   );
 
@@ -565,7 +563,7 @@ export class InventoryComponent implements OnInit {
   }
 
   get activeListDescription(): string {
-    return 'Any unequipped non-tool equipment can be turned into tempered scrap.';
+    return 'Any unequipped equipment can be turned into tempered scrap.';
   }
 
   get emptyStateText(): string {

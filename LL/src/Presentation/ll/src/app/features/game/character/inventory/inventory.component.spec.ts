@@ -90,7 +90,7 @@ describe('InventoryComponent quest presentation', () => {
     expect(component.selectedItem()?.isNew).toBeFalse();
   });
 
-  it('excludes tools from scrap mode', () => {
+  it('includes tools in scrap mode', () => {
     const equipment = signal<InventoryItem[]>([
       inventoryEquipment('weapon', EquipmentType.OneHanded),
       inventoryEquipment('tool', EquipmentType.Tool),
@@ -112,7 +112,7 @@ describe('InventoryComponent quest presentation', () => {
 
     expect(
       component.scrapableEquipment().map((item) => item.itemInstance.id),
-    ).toEqual(['weapon']);
+    ).toEqual(['weapon', 'tool']);
   });
 
   it('opens scrap mode with the inspected equipment preselected', () => {
