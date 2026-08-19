@@ -9,6 +9,7 @@ using Domain.Models.Regions.Areas;
 using Services.LL.Combat.Layers.Rewards.Idle;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
+using Services.LL.Interfaces.Combat.Reward.Idle;
 using Services.LL.Inventories;
 
 namespace EssenceSystem.Tests;
@@ -30,6 +31,7 @@ public sealed class IdleDungeonSigilDropCalculatorTests
                     SigilItemId = "item.sigil.test"
                 }
             ]),
+            new StaticIdleDungeonSigilDropPool(),
             new StaticItemBaseRepository([]),
             new QueueRandomSource(0.5),
             new InventoryItemFactory(),
@@ -61,7 +63,7 @@ public sealed class IdleDungeonSigilDropCalculatorTests
     }
 
     [Fact]
-    public async Task RollAsync_only_uses_sigils_from_the_areas_region()
+    public async Task RollAsync_only_uses_sigils_from_the_areas_region_when_no_additions_are_configured()
     {
         var regionOneSigil = new ItemBase
         {
@@ -83,6 +85,7 @@ public sealed class IdleDungeonSigilDropCalculatorTests
                 new DungeonDefinition { Id = "region_one_dungeon", Region = 1, SigilItemId = regionOneSigil.Id },
                 new DungeonDefinition { Id = "region_two_dungeon", Region = 2, SigilItemId = regionTwoSigil.Id }
             ]),
+            new StaticIdleDungeonSigilDropPool(),
             new StaticItemBaseRepository([regionOneSigil, regionTwoSigil]),
             new QueueRandomSource(Enumerable.Repeat(0.5, 200).ToArray()),
             new InventoryItemFactory(),
@@ -98,6 +101,42 @@ public sealed class IdleDungeonSigilDropCalculatorTests
         Assert.All(drops, drop => Assert.Equal(regionTwoSigil.Id, drop.ItemInstance.ItemBaseId));
     }
 
+    [Theory]
+    [InlineData("region_02_area_01", 0.0, "sigil_tangled_cave")]
+    [InlineData("region_02_area_01", 0.999, "sigil_great_tree")]
+    [InlineData("region_02_area_02", 0.0, "sigil_tangled_cave")]
+    [InlineData("region_02_area_02", 0.999, "sigil_great_tree")]
+    public async Task RollAsync_can_drop_future_Shenic_dungeon_sigils_in_each_Meran_area(
+        string areaId,
+        double selectionRoll,
+        string expectedSigilId)
+    {
+        var tangledCaveSigil = CreateSigil("sigil_tangled_cave", "Silkbound Sigil");
+        var greatTreeSigil = CreateSigil("sigil_great_tree", "Heartwood Sigil");
+        var additionalDrops = new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["region_02_area_01"] = [tangledCaveSigil.Id, greatTreeSigil.Id],
+            ["region_02_area_02"] = [tangledCaveSigil.Id, greatTreeSigil.Id]
+        };
+        var calculator = new IdleDungeonSigilDropCalculator(
+            new StaticDungeonDefinitions([]),
+            new StaticIdleDungeonSigilDropPool(additionalDrops),
+            new StaticItemBaseRepository([tangledCaveSigil, greatTreeSigil]),
+            new QueueRandomSource(0.5, 0.1, selectionRoll),
+            new InventoryItemFactory(),
+            new StaticBonusService(new Dictionary<BonusKind, double>()));
+
+        var drops = await calculator.RollAsync(
+            Guid.NewGuid(),
+            new Area { Id = areaId },
+            eligibleVictories: 8640,
+            CancellationToken.None);
+
+        var drop = Assert.Single(drops);
+        Assert.Equal(expectedSigilId, drop.ItemInstance.ItemBaseId);
+        Assert.Equal(1, drop.Quantity);
+    }
+
     private static IdleDungeonSigilDropCalculator CreateCalculator(double sigilTraceBonusBps)
     {
         return new IdleDungeonSigilDropCalculator(
@@ -110,6 +149,7 @@ public sealed class IdleDungeonSigilDropCalculatorTests
                     SigilItemId = "item.sigil.test"
                 }
             ]),
+            new StaticIdleDungeonSigilDropPool(),
             new StaticItemBaseRepository(
             [
                 new ItemBase
@@ -128,12 +168,27 @@ public sealed class IdleDungeonSigilDropCalculatorTests
             }));
     }
 
+    private static ItemBase CreateSigil(string id, string name) => new()
+    {
+        Id = id,
+        Name = name,
+        ItemType = ItemType.Resource,
+        Stackable = true
+    };
+
     private sealed class StaticDungeonDefinitions(IReadOnlyList<DungeonDefinition> definitions) : IDungeonDefinitions
     {
         public DungeonDefinition GetByKey(string key) =>
             definitions.First(x => x.Id.Equals(key, StringComparison.OrdinalIgnoreCase));
 
         public IReadOnlyList<DungeonDefinition> GetAll() => definitions;
+    }
+
+    private sealed class StaticIdleDungeonSigilDropPool(
+        IReadOnlyDictionary<string, IReadOnlyList<string>>? additionalDrops = null) : IIdleDungeonSigilDropPool
+    {
+        public IReadOnlyList<string> GetAdditionalSigilIds(string areaId) =>
+            additionalDrops?.GetValueOrDefault(areaId) ?? [];
     }
 
     private sealed class StaticItemBaseRepository(IReadOnlyList<ItemBase> itemBases) : IItemBaseRepository

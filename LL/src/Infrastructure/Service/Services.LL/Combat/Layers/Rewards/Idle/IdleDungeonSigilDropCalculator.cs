@@ -13,6 +13,7 @@ namespace Services.LL.Combat.Layers.Rewards.Idle;
 public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalculator
 {
     private readonly IDungeonDefinitions _dungeons;
+    private readonly IIdleDungeonSigilDropPool _dropPool;
     private readonly IItemBaseRepository _itemBases;
     private readonly IRandomSource _randomSource;
     private readonly IInventoryItemFactory _inventoryItemFactory;
@@ -24,6 +25,7 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
     private const double SigilDropChancePerIdleAction = TargetSigilDropsPerDay / IdleActionsPerDay;
     public IdleDungeonSigilDropCalculator(
         IDungeonDefinitions dungeons,
+        IIdleDungeonSigilDropPool dropPool,
         IItemBaseRepository itemBases,
         IRandomSource randomSource,
         IInventoryItemFactory inventoryItemFactory,
@@ -31,6 +33,7 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
         TimeProvider? timeProvider = null)
     {
         _dungeons = dungeons;
+        _dropPool = dropPool;
         _itemBases = itemBases;
         _randomSource = randomSource;
         _inventoryItemFactory = inventoryItemFactory;
@@ -96,6 +99,7 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
         return _dungeons.GetAll()
             .Where(dungeon => dungeon.Region == region)
             .Select(dungeon => dungeon.SigilItemId)
+            .Concat(_dropPool.GetAdditionalSigilIds(area.Id))
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();

@@ -340,6 +340,11 @@ public static class DependencyInjection
                 config,
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddSingleton<IIdleDungeonSigilDropPool>(sp =>
+            new JsonIdleDungeonSigilDropPool(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IDungeonSigilAssemblyService, DungeonSigilAssemblyService>();
         services.AddScoped<IDungeonPreviewRewardService, DungeonPreviewRewardService>();
         services.AddScoped<IDungeonMasteryService, DungeonMasteryService>();

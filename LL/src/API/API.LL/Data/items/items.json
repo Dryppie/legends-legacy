@@ -55,6 +55,28 @@
     "gatheringType": null
   },
   {
+    "id": "sigil_tangled_cave",
+    "name": "Silkbound Sigil",
+    "description": "A sigil used to open a run into Tangled Cave. It can drop from idle combat in Warfang Frontier and Rotgrave Fields.",
+    "itemType": "Resource",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
+    "id": "sigil_great_tree",
+    "name": "Heartwood Sigil",
+    "description": "A sigil used to open a run into The Great Tree. It can drop from idle combat in Warfang Frontier and Rotgrave Fields.",
+    "itemType": "Resource",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
     "id": "item.monster_core.lesser",
     "name": "Lesser Monster Core",
     "description": "A lesser core taken from monsters and used to ascend Essences into Ascension Tier 1.",

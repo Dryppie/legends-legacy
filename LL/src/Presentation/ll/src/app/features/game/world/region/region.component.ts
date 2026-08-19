@@ -38,6 +38,19 @@ interface WorldMapDungeonEntry {
   canEnter: boolean;
 }
 
+const PRE_IMPLEMENTATION_SIGIL_DROPS_BY_AREA: Readonly<
+  Record<string, readonly AreaDrop[]>
+> = {
+  region_02_area_01: [
+    { itemId: 'sigil_tangled_cave', name: 'Silkbound Sigil' },
+    { itemId: 'sigil_great_tree', name: 'Heartwood Sigil' },
+  ],
+  region_02_area_02: [
+    { itemId: 'sigil_tangled_cave', name: 'Silkbound Sigil' },
+    { itemId: 'sigil_great_tree', name: 'Heartwood Sigil' },
+  ],
+};
+
 @Component({
   selector: 'app-region',
   imports: [
@@ -201,7 +214,12 @@ export class RegionComponent implements OnInit, OnDestroy {
       return [];
     }
 
-    const drops = new Map<string, AreaDrop>();
+    const drops = new Map<string, AreaDrop>(
+      (PRE_IMPLEMENTATION_SIGIL_DROPS_BY_AREA[area.id] ?? []).map((drop) => [
+        drop.itemId,
+        drop,
+      ]),
+    );
     for (const dungeon of this.dungeonState.dungeons()) {
       if (
         dungeon.region !== region ||
