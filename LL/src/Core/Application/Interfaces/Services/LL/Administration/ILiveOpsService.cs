@@ -55,6 +55,22 @@ public interface ILiveOpsService
         string reason,
         CancellationToken cancellationToken);
 
+    Task<AdministrationOperationResult<MultiplayerRestrictionOperation>> RestrictMultiplayerAsync(
+        Guid operationId,
+        Guid accountId,
+        AdministrationActor actor,
+        string reason,
+        string? internalNotes,
+        DateTimeOffset? expiresAt,
+        CancellationToken cancellationToken);
+
+    Task<AdministrationOperationResult<MultiplayerRestrictionOperation>> RevokeMultiplayerRestrictionAsync(
+        Guid operationId,
+        Guid restrictionId,
+        AdministrationActor actor,
+        string reason,
+        CancellationToken cancellationToken);
+
     Task<AdministrationOperationResult<ItemGrantOperation>> GrantCompensationItemsAsync(
         Guid operationId,
         Guid characterId,

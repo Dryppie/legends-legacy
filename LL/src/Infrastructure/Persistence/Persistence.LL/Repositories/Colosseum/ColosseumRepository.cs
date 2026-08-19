@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Domain.Models.Colosseum;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Administration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Colosseum;
@@ -30,9 +31,15 @@ public class ColosseumRepository : IColosseumRepository
 
     public async Task<(List<Character> Opponents, int MyRating)> GetArenaOpponentsWithRating(Guid characterId, CancellationToken cancellationToken)
     {
+        var now = DateTimeOffset.UtcNow;
         var characters = await _context.Characters
             .Include(c => c.ArenaProfile)
-            .Where(c => c.Id == characterId || c.Id != characterId)
+            .Where(c => !_context.AccountRestrictions.Any(restriction =>
+                restriction.AccountId == c.UserId &&
+                restriction.RevokedAt == null &&
+                (restriction.ExpiresAt == null || restriction.ExpiresAt > now) &&
+                (restriction.RestrictionType == AccountRestrictionType.Ban ||
+                 restriction.RestrictionType == AccountRestrictionType.MultiplayerRestriction)))
             .Select(c => new { c.Id, c.Name, c.ArenaProfile.Rating, Character = c })
             .ToListAsync(cancellationToken);
 
@@ -101,8 +108,15 @@ public class ColosseumRepository : IColosseumRepository
 
     public async Task<List<Character>> GetRankings(Guid characterId, CancellationToken cancellationToken)
     {
+        var now = DateTimeOffset.UtcNow;
         var characters = await _context.Characters
             .Include(c => c.ArenaProfile)
+            .Where(c => !_context.AccountRestrictions.Any(restriction =>
+                restriction.AccountId == c.UserId &&
+                restriction.RevokedAt == null &&
+                (restriction.ExpiresAt == null || restriction.ExpiresAt > now) &&
+                (restriction.RestrictionType == AccountRestrictionType.Ban ||
+                 restriction.RestrictionType == AccountRestrictionType.MultiplayerRestriction)))
             .OrderByDescending(c => c.ArenaProfile.Rating)
             .ToListAsync(cancellationToken);
 

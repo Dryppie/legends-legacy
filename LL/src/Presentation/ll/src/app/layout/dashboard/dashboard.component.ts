@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { RouterOutlet } from '@angular/router';
-import { NgClass, NgIf } from '@angular/common';
+import { DatePipe, NgClass, NgIf } from '@angular/common';
 import { ChatComponent } from './chat/chat.component';
 import { LootTrackerComponent } from './loot-tracker/loot-tracker.component';
 import { CharacterActionsStateService } from '../../core/services/api/character-actions/character-actions.state.service';
@@ -74,6 +74,7 @@ export function shouldUseFloatingChatDrawer(
     SidebarComponent,
     NgIf,
     NgClass,
+    DatePipe,
     ChatComponent,
     LootTrackerComponent,
     GameHeaderComponent,
@@ -107,6 +108,7 @@ export class DashboardComponent implements OnInit {
   readonly bootstrapLoaded: Signal<boolean>;
   readonly bootstrapLoading: Signal<boolean>;
   readonly bootstrapError: Signal<string | null>;
+  readonly accountAccess;
   readonly idleCombatError: Signal<string | null>;
   readonly chatLayout;
   private sidebarSwipeTouchIdentifier: number | null = null;
@@ -132,6 +134,7 @@ export class DashboardComponent implements OnInit {
     this.bootstrapLoaded = this.bootstrapState.loaded;
     this.bootstrapLoading = this.bootstrapState.loading;
     this.bootstrapError = this.bootstrapState.error;
+    this.accountAccess = this.bootstrapState.accountAccess;
     this.idleCombatError = this.state.idleCombatError;
     this.chatLayout = this.chatLayoutPreference.layout;
     this.isChatOpenDesktop = this.chatLayoutPreference.dockedOpen();

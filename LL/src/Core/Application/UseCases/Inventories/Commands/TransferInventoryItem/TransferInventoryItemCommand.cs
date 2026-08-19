@@ -162,6 +162,8 @@ public sealed class TransferInventoryItemCommandHandler
         InventoryTransferFailure.SenderNotFound => "Your character could not be found.",
         InventoryTransferFailure.RecipientNotFound => "The receiving player could not be found.",
         InventoryTransferFailure.RecipientInventoryNotFound => "The receiving player's inventory could not be found.",
+        InventoryTransferFailure.AccountRestricted => "One of the accounts is restricted from player transfers.",
+        InventoryTransferFailure.GuestAccount => "Guest accounts cannot send or receive items.",
         _ => "The item could not be transferred."
     };
 }

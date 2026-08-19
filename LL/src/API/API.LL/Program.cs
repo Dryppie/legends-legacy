@@ -7,8 +7,10 @@ using Application.Interfaces.Services.LL;
 using Asp.Versioning;
 using Common;
 using Domain.Models.Users;
+using Domain.Models.Administration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +20,7 @@ using Persistence.LL.Seeds;
 using RealTime.LL;
 using Services.AdminDashboard;
 using Services.LL;
+using Services.LL.Administration;
 using Services.LL.Validation;
 using System.Security.Claims;
 using System.Text;
@@ -92,7 +95,10 @@ if (useRedisSignalR)
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecks()
+    .AddCheck<AccountRestrictionSnapshotHealthCheck>(
+        "account_restriction_snapshot",
+        tags: ["ready"]);
 
 builder.Services.AddApiVersioning(options =>
 {
@@ -119,6 +125,10 @@ builder.Services.AddPersistence(config);
 builder.Services.AddRepositories();
 builder.Services.AddApplication();
 builder.Services.AddServices(config, builder.Environment.ContentRootPath, builder.Environment.IsDevelopment());
+builder.Services.AddSingleton<IAuthorizationHandler, ActiveAccountAuthorizationHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, MultiplayerAllowedAuthorizationHandler>();
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AccountRestrictionAuthorizationResultHandler>();
+builder.Services.AddHostedService<AccountRestrictionRefreshWorker>();
 if (idleCombatBenchmark.Enabled)
 {
     builder.Services.AddSingleton<TimeProvider>(
@@ -239,6 +249,10 @@ using (var scope = app.Services.CreateScope())
         await context.Database.MigrateAsync();
     var seedLocalGuestAccounts = config.GetValue<bool>("FeatureManagement:SeedLocalGuestAccounts");
     await context.SeedData(hasher, seedLocalGuestAccounts);
+    await scope.ServiceProvider.GetRequiredService<AccountRestrictionIndex>()
+        .RefreshAsync(
+            scope.ServiceProvider.GetRequiredService<IAdministrationRepository>(),
+            CancellationToken.None);
 }
 
 await app.Services.ValidateCreatureBuildProfilesAsync();

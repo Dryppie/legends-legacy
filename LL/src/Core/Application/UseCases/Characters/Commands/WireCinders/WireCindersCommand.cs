@@ -121,6 +121,8 @@ public sealed class WireCindersCommandHandler(
         CinderTransferFailure.SenderNotFound => "Your character could not be found.",
         CinderTransferFailure.InsufficientCinders => "You do not have enough Cinders for this wire.",
         CinderTransferFailure.RecipientBalanceOverflow => "The receiving player cannot hold that many Cinders.",
+        CinderTransferFailure.AccountRestricted => "One of the accounts is restricted from player transfers.",
+        CinderTransferFailure.GuestAccount => "Guest accounts cannot send or receive Cinders.",
         _ => "The Cinders could not be wired."
     };
 }

@@ -10,4 +10,7 @@ public sealed record PlayerAdministrationDto(
     DateTime CreatedUtc,
     Guid? ActiveBanId,
     string? ActiveBanReason,
-    DateTimeOffset? ActiveBanExpiresAt);
+    DateTimeOffset? ActiveBanExpiresAt,
+    Guid? ActiveMultiplayerRestrictionId,
+    string? ActiveMultiplayerRestrictionReason,
+    DateTimeOffset? ActiveMultiplayerRestrictionExpiresAt);

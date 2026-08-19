@@ -4,6 +4,8 @@ public static class AdminActionPreviewKinds
 {
     public const string AccountBan = "AccountBan";
     public const string AccountBanRevoke = "AccountBanRevoke";
+    public const string MultiplayerRestriction = "MultiplayerRestriction";
+    public const string MultiplayerRestrictionRevoke = "MultiplayerRestrictionRevoke";
     public const string ChatMute = "ChatMute";
     public const string ChatUnmute = "ChatUnmute";
     public const string CompensationGrant = "CompensationGrant";

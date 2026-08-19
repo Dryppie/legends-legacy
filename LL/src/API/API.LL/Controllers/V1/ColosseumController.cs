@@ -14,11 +14,14 @@ using Application.UseCases.Colosseum.Queries.GetColosseumStatus;
 using Application.UseCases.Colosseum.Queries.GetColosseumMatchResults;
 using Application.UseCases.Colosseum.Queries.GetRankings;
 using Application.UseCases.Leaderboards.Dtos;
+using API.LL.Common;
 using Common.Primitives;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.LL.Controllers.V1;
 
+[Authorize(Policy = AuthorizationPolicies.MultiplayerAllowed)]
 public class ColosseumController : BaseController
 {
     public sealed record CreateTournamentTeamRequest(string Name);

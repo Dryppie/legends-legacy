@@ -2,6 +2,7 @@ using Application.Common.Interfaces;
 using Domain.Models.Economy;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Transfers;
+using Domain.Models.Administration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Entities.Characters;
@@ -32,6 +33,28 @@ public sealed class CurrencyTransferRepository(IDbContext context) : ICurrencyTr
         var recipient = characters.FirstOrDefault(x => x.Id == recipientCharacterId);
         if (recipient is null)
             return CinderTransferResult.Fail(CinderTransferFailure.RecipientNotFound);
+
+        var now = DateTimeOffset.UtcNow;
+        var participantAccounts = await context.Users
+            .AsNoTracking()
+            .Where(x => x.Id == sender.UserId || x.Id == recipient.UserId)
+            .Select(x => new
+            {
+                x.Id,
+                x.IsGuest,
+                x.CreatedUtc,
+                IsRestricted = context.AccountRestrictions.Any(restriction =>
+                    restriction.AccountId == x.Id &&
+                    restriction.RevokedAt == null &&
+                    (restriction.ExpiresAt == null || restriction.ExpiresAt > now) &&
+                    (restriction.RestrictionType == AccountRestrictionType.Ban ||
+                     restriction.RestrictionType == AccountRestrictionType.MultiplayerRestriction))
+            })
+            .ToListAsync(cancellationToken);
+        if (participantAccounts.Any(x => x.IsGuest))
+            return CinderTransferResult.Fail(CinderTransferFailure.GuestAccount);
+        if (participantAccounts.Any(x => x.IsRestricted))
+            return CinderTransferResult.Fail(CinderTransferFailure.AccountRestricted);
         if (sender.Cinders < amount)
             return CinderTransferResult.Fail(CinderTransferFailure.InsufficientCinders);
         if (recipient.Cinders > long.MaxValue - amount)
@@ -55,10 +78,7 @@ public sealed class CurrencyTransferRepository(IDbContext context) : ICurrencyTr
         };
         context.PlayerTransferHistory.Add(transferRecord);
 
-        var accountCreatedUtc = await context.Users
-            .AsNoTracking()
-            .Where(x => x.Id == sender.UserId || x.Id == recipient.UserId)
-            .ToDictionaryAsync(x => x.Id, x => x.CreatedUtc, cancellationToken);
+        var accountCreatedUtc = participantAccounts.ToDictionary(x => x.Id, x => x.CreatedUtc);
         context.EconomyLedger.Add(new EconomyLedgerEntry
         {
             EventType = EconomyEventType.DirectCurrencyTransfer,

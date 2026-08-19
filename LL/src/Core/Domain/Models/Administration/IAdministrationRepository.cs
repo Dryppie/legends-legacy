@@ -8,6 +8,14 @@ public interface IAdministrationRepository
         Guid accountId,
         DateTimeOffset now,
         CancellationToken cancellationToken);
+    Task<AccountRestriction?> GetActiveRestrictionAsync(
+        Guid accountId,
+        AccountRestrictionType restrictionType,
+        DateTimeOffset now,
+        CancellationToken cancellationToken);
+    Task<IReadOnlyList<AccountRestriction>> GetActiveRestrictionsAsync(
+        DateTimeOffset now,
+        CancellationToken cancellationToken);
     Task<PlayerAdministrationSnapshot?> GetPlayerByAccountIdAsync(
         Guid accountId,
         DateTimeOffset now,

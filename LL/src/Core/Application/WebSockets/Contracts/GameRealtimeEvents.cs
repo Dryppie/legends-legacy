@@ -34,6 +34,11 @@ public sealed record StateInvalidated(
     long Revision,
     string Reason) : GameRealtimeEvent;
 
+public sealed record AccountAccessChanged(
+    Guid AccountId,
+    string Reason,
+    DateTimeOffset OccurredAtUtc) : GameRealtimeEvent;
+
 public sealed record StateSyncCheckpoint(
     Guid CharacterId,
     IReadOnlyDictionary<string, long> Revisions,

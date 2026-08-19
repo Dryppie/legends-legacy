@@ -6,6 +6,10 @@ public interface IMarketPlaceRepository
     Task<bool> HasActiveListingForItemAsync(Guid characterId, string itemBaseId, DateTimeOffset now, CancellationToken cancellationToken);
     Task<bool> HasActiveBuyOrderForItemAsync(Guid characterId, string itemBaseId, DateTimeOffset now, CancellationToken cancellationToken);
     Task LockCharactersAsync(IReadOnlyCollection<Guid> characterIds, CancellationToken cancellationToken);
+    Task<bool> IsCharacterMultiplayerEligibleAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<(IReadOnlyList<Guid> ListingIds, IReadOnlyList<Guid> BuyOrderIds)> GetActiveOrderIdsAsync(
+        Guid characterId,
+        CancellationToken cancellationToken);
     Task<List<MarketPlaceListing>> GetMarketPlaceListingsAsync(CancellationToken cancellationToken);
     Task<List<MarketPlaceListing>> GetCommodityListingsAsync(string itemBaseId, long maximumUnitPrice, CancellationToken cancellationToken);
     Task<List<MarketPlaceBuyOrder>> GetMarketPlaceBuyOrdersAsync(CancellationToken cancellationToken);

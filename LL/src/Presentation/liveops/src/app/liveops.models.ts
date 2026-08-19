@@ -23,6 +23,9 @@ export interface PlayerSummary {
   activeBanId: string | null;
   activeBanReason: string | null;
   activeBanExpiresAt: string | null;
+  activeMultiplayerRestrictionId: string | null;
+  activeMultiplayerRestrictionReason: string | null;
+  activeMultiplayerRestrictionExpiresAt: string | null;
 }
 
 export interface ChatRestriction {

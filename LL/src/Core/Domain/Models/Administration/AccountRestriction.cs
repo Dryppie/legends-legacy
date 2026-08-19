@@ -2,7 +2,41 @@ namespace Domain.Models.Administration;
 
 public enum AccountRestrictionType
 {
-    Ban
+    Ban,
+    MultiplayerRestriction
+}
+
+public sealed record AccountAccessSnapshot(
+    bool CanAuthenticate,
+    bool CanParticipate,
+    bool IsPubliclyEligible,
+    AccountRestriction? EffectiveRestriction)
+{
+    public static AccountAccessSnapshot Unrestricted { get; } =
+        new(true, true, true, null);
+
+    public static AccountAccessSnapshot From(
+        IReadOnlyCollection<AccountRestriction> restrictions,
+        DateTimeOffset now)
+    {
+        var active = restrictions
+            .Where(x => x.IsActive(now))
+            .OrderByDescending(x => x.RestrictionType == AccountRestrictionType.Ban)
+            .ThenByDescending(x => x.CreatedAt)
+            .ToList();
+        var effective = active.FirstOrDefault();
+        if (effective is null)
+        {
+            return Unrestricted;
+        }
+
+        return effective.RestrictionType switch
+        {
+            AccountRestrictionType.Ban => new(false, false, false, effective),
+            AccountRestrictionType.MultiplayerRestriction => new(true, false, false, effective),
+            _ => Unrestricted
+        };
+    }
 }
 
 public sealed class AccountRestriction

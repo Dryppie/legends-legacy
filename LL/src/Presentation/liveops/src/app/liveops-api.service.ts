@@ -186,6 +186,28 @@ export class LiveOpsApiService {
     );
   }
 
+  restrictMultiplayer(accountId: string, body: object): Promise<ApiResponse<unknown>> {
+    return this.post(`/api/liveops/accounts/${accountId}/multiplayer-restrictions`, body);
+  }
+
+  previewMultiplayerRestriction(accountId: string, body: object): Promise<ApiResponse<ActionPreview>> {
+    return this.post(`/api/liveops/accounts/${accountId}/multiplayer-restrictions/preview`, body);
+  }
+
+  revokeMultiplayerRestriction(restrictionId: string, body: object): Promise<ApiResponse<unknown>> {
+    return this.post(
+      `/api/liveops/accounts/multiplayer-restrictions/${restrictionId}/revoke`,
+      body,
+    );
+  }
+
+  previewRevokeMultiplayerRestriction(restrictionId: string, body: object): Promise<ApiResponse<ActionPreview>> {
+    return this.post(
+      `/api/liveops/accounts/multiplayer-restrictions/${restrictionId}/revoke/preview`,
+      body,
+    );
+  }
+
   mute(characterId: string, body: object): Promise<ApiResponse<unknown>> {
     return this.post(
       `/api/liveops/chat/characters/${characterId}/mutes`,

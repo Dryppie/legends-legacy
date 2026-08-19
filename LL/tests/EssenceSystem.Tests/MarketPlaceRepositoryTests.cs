@@ -129,10 +129,21 @@ public sealed class MarketPlaceRepositoryTests
                 new InstanceAttributeModifier(AttributeType.MaxHealth, 70)
             ]
         };
+        var sellerUser = AppUser.Register(
+            "MarketSeller",
+            "market-seller@example.com",
+            "hash");
+        var seller = new Character
+        {
+            Id = Guid.NewGuid(),
+            UserId = sellerUser.Id,
+            User = sellerUser,
+            Name = "Seller"
+        };
         var listing = new MarketPlaceListing
         {
             Id = Guid.NewGuid(),
-            SellerId = Guid.NewGuid(),
+            SellerId = seller.Id,
             SellerName = "Seller",
             ItemInstanceId = equipment.Id,
             ItemInstance = equipment,
@@ -142,6 +153,8 @@ public sealed class MarketPlaceRepositoryTests
             ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)
         };
 
+        db.Users.Add(sellerUser);
+        db.Characters.Add(seller);
         db.MarketPlaceListings.Add(listing);
         await db.SaveChangesAsync();
         return listing.Id;

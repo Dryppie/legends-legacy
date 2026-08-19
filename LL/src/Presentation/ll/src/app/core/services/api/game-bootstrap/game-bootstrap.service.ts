@@ -13,6 +13,14 @@ export interface GameBootstrapDto {
   currentAction: CharacterActionDto | null;
   serverTimeUtc: string;
   attributeDefinitions: AttributeDefinition[];
+  accountAccess: AccountAccessDto;
+}
+
+export interface AccountAccessDto {
+  canParticipate: boolean;
+  isPubliclyEligible: boolean;
+  restrictionCode: string | null;
+  expiresAt: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

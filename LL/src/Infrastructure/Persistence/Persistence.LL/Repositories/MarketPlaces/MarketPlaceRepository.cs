@@ -2,6 +2,7 @@ using Application.Common.Interfaces;
 using Domain.Models.Economy;
 using Domain.Models.Items.Equipments;
 using Domain.Models.MarketPlaces;
+using Domain.Models.Administration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.MarketPlaces;
@@ -19,6 +20,37 @@ public class MarketPlaceRepository : IMarketPlaceRepository
 
     public Task<int> GetBuyOrderCountAsync(Guid characterId, CancellationToken cancellationToken) =>
         _dbContext.MarketPlaceBuyOrders.CountAsync(x => x.BuyerId == characterId, cancellationToken);
+
+    public Task<bool> IsCharacterMultiplayerEligibleAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var now = DateTimeOffset.UtcNow;
+        return _dbContext.Characters
+            .Where(character => character.Id == characterId)
+            .AnyAsync(character => !_dbContext.AccountRestrictions.Any(restriction =>
+                restriction.AccountId == character.UserId &&
+                restriction.RevokedAt == null &&
+                (restriction.ExpiresAt == null || restriction.ExpiresAt > now) &&
+                (restriction.RestrictionType == AccountRestrictionType.Ban ||
+                 restriction.RestrictionType == AccountRestrictionType.MultiplayerRestriction)),
+                cancellationToken);
+    }
+
+    public async Task<(IReadOnlyList<Guid> ListingIds, IReadOnlyList<Guid> BuyOrderIds)> GetActiveOrderIdsAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var listingIds = await _dbContext.MarketPlaceListings
+            .Where(x => x.SellerId == characterId)
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+        var buyOrderIds = await _dbContext.MarketPlaceBuyOrders
+            .Where(x => x.BuyerId == characterId)
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+        return (listingIds, buyOrderIds);
+    }
 
     public Task<bool> HasActiveListingForItemAsync(
         Guid characterId,
@@ -66,7 +98,7 @@ public class MarketPlaceRepository : IMarketPlaceRepository
     }
     public async Task<List<MarketPlaceListing>> GetMarketPlaceListingsAsync(CancellationToken cancellationToken)
     {
-        var marketPlaceListings = await _dbContext.MarketPlaceListings
+        var marketPlaceListings = await EligibleListings()
             .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => (ii as EquipmentInstance).ToolAffixes)
             .Include(mpl => mpl.ItemInstance)
@@ -87,7 +119,7 @@ public class MarketPlaceRepository : IMarketPlaceRepository
         string itemBaseId,
         long maximumUnitPrice,
         CancellationToken cancellationToken) =>
-        await _dbContext.MarketPlaceListings
+        await EligibleListings()
             .Include(x => x.ItemInstance)
                 .ThenInclude(x => x.ItemBase)
             .Where(x =>
@@ -100,7 +132,7 @@ public class MarketPlaceRepository : IMarketPlaceRepository
 
     public async Task<List<MarketPlaceBuyOrder>> GetMarketPlaceBuyOrdersAsync(CancellationToken cancellationToken)
     {
-        return await _dbContext.MarketPlaceBuyOrders
+        return await EligibleBuyOrders()
             .Include(order => order.ItemBase)
             .Where(x => x.ExpiresAt > DateTimeOffset.UtcNow)
             .ToListAsync(cancellationToken);
@@ -110,7 +142,7 @@ public class MarketPlaceRepository : IMarketPlaceRepository
         string itemBaseId,
         long minimumUnitPrice,
         CancellationToken cancellationToken) =>
-        await _dbContext.MarketPlaceBuyOrders
+        await EligibleBuyOrders()
             .Include(x => x.ItemBase)
             .Where(x => x.ItemBaseId == itemBaseId && x.ExpiresAt > DateTimeOffset.UtcNow && x.UnitPrice >= minimumUnitPrice)
             .OrderByDescending(x => x.UnitPrice)
@@ -122,10 +154,10 @@ public class MarketPlaceRepository : IMarketPlaceRepository
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        var activeListings = _dbContext.MarketPlaceListings
+        var activeListings = EligibleListings()
             .AsNoTracking()
             .Where(x => x.ItemInstance.ItemBaseId == itemBaseId && x.ExpiresAt > now);
-        var activeBuyOrders = _dbContext.MarketPlaceBuyOrders
+        var activeBuyOrders = EligibleBuyOrders()
             .AsNoTracking()
             .Where(x => x.ItemBaseId == itemBaseId && x.ExpiresAt > now);
 
@@ -393,5 +425,33 @@ public class MarketPlaceRepository : IMarketPlaceRepository
         };
 
         await _dbContext.ExecuteSqlRawAsync(sql, cancellationToken, id);
+    }
+
+    private IQueryable<MarketPlaceListing> EligibleListings()
+    {
+        var now = DateTimeOffset.UtcNow;
+        return _dbContext.MarketPlaceListings.Where(listing =>
+            _dbContext.Characters.Any(character =>
+                character.Id == listing.SellerId &&
+                !_dbContext.AccountRestrictions.Any(restriction =>
+                    restriction.AccountId == character.UserId &&
+                    restriction.RevokedAt == null &&
+                    (restriction.ExpiresAt == null || restriction.ExpiresAt > now) &&
+                    (restriction.RestrictionType == AccountRestrictionType.Ban ||
+                     restriction.RestrictionType == AccountRestrictionType.MultiplayerRestriction))));
+    }
+
+    private IQueryable<MarketPlaceBuyOrder> EligibleBuyOrders()
+    {
+        var now = DateTimeOffset.UtcNow;
+        return _dbContext.MarketPlaceBuyOrders.Where(order =>
+            _dbContext.Characters.Any(character =>
+                character.Id == order.BuyerId &&
+                !_dbContext.AccountRestrictions.Any(restriction =>
+                    restriction.AccountId == character.UserId &&
+                    restriction.RevokedAt == null &&
+                    (restriction.ExpiresAt == null || restriction.ExpiresAt > now) &&
+                    (restriction.RestrictionType == AccountRestrictionType.Ban ||
+                     restriction.RestrictionType == AccountRestrictionType.MultiplayerRestriction))));
     }
 }

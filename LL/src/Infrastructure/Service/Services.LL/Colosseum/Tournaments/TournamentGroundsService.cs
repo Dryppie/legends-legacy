@@ -14,6 +14,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Snapshots;
+using Domain.Models.Administration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Services.LL.Combat.Layers.Orchestration.Models;
@@ -417,7 +418,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         if (championTeams.Count == 0) return [];
 
         var ownerIds = championTeams.Select(t => t.OwnerParticipantId).ToList();
-        var owners = await _tournaments.Participants
+        var owners = await EligibleParticipants(UtcNow())
             .Where(p => ownerIds.Contains(p.Id))
             .ToDictionaryAsync(p => p.Id, cancellationToken);
         var characterIds = owners.Values.Select(p => p.CharacterId).ToList();
@@ -459,7 +460,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var seasonEnd = seasonStart.AddMonths(1);
         var seasonKey = seasonStart.ToString("yyyy-MM");
 
-        var placements = await _tournaments.Participants
+        var placements = await EligibleParticipants(now)
             .Include(p => p.Tournament)
             .Where(p => p.Tournament.Status == TournamentStatus.Completed)
             .Where(p => p.Tournament.CompletedAtUtc >= seasonStart && p.Tournament.CompletedAtUtc < seasonEnd)
@@ -1564,6 +1565,17 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             return;
         }
 
+        var ineligibleParticipants = await _tournaments.Participants
+            .Where(p => p.TournamentId == tournament.Id &&
+                        p.Status != TournamentParticipantStatus.Withdrawn &&
+                        !EligibleParticipants(now).Any(eligible => eligible.Id == p.Id))
+            .ToListAsync(cancellationToken);
+        foreach (var participant in ineligibleParticipants)
+        {
+            participant.Status = TournamentParticipantStatus.Withdrawn;
+            participant.UpdatedAtUtc = now;
+        }
+
         await PrepareTeamsForBracketAsync(tournament.Id, now, cancellationToken);
 
         var teams = await _tournaments.Teams
@@ -2507,7 +2519,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         tournament.CompletedAtUtc = now;
         tournament.UpdatedAtUtc = now;
 
-        var participants = await _tournaments.Participants
+        var participants = await EligibleParticipants(now)
             .Where(p => p.TournamentId == tournament.Id && p.Status != TournamentParticipantStatus.Withdrawn)
             .ToListAsync(cancellationToken);
 
@@ -3388,6 +3400,15 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     {
         return _timeProvider.GetUtcNow();
     }
+
+    private IQueryable<TournamentParticipant> EligibleParticipants(DateTimeOffset now) =>
+        _tournaments.Participants.Where(participant =>
+            !_tournaments.AccountRestrictions.Any(restriction =>
+                restriction.AccountId == participant.AccountId &&
+                restriction.RevokedAt == null &&
+                (restriction.ExpiresAt == null || restriction.ExpiresAt > now) &&
+                (restriction.RestrictionType == AccountRestrictionType.Ban ||
+                 restriction.RestrictionType == AccountRestrictionType.MultiplayerRestriction)));
 
     private IReadOnlyList<TournamentRewardTierOptions> GetConfiguredRewardTiers()
     {

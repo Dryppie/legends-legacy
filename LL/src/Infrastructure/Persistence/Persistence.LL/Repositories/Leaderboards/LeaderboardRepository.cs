@@ -173,7 +173,7 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
         string boardKey,
         CancellationToken cancellationToken)
     {
-        var query = _context.Characters.AsNoTracking();
+        var query = EligibleCharacters();
 
         if (boardKey == LeaderboardBoardKey.CombatLevel)
         {
@@ -199,8 +199,7 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
         ProfessionType profession,
         CancellationToken cancellationToken)
     {
-        return await _context.Characters
-            .AsNoTracking()
+        return await EligibleCharacters()
             .SelectMany(
                 character => character.Professions
                     .Where(characterProfession => characterProfession.ProfessionType == profession),
@@ -215,8 +214,7 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
     private async Task<List<LeaderboardScore>> GetSoulArchiveScoresAsync(
         CancellationToken cancellationToken)
     {
-        return await _context.Characters
-            .AsNoTracking()
+        return await EligibleCharacters()
             .Select(character => new LeaderboardScore(
                 character.Id,
                 character.Name,
@@ -229,8 +227,7 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
     private async Task<List<LeaderboardScore>> GetAchievementRenownScoresAsync(
         CancellationToken cancellationToken)
     {
-        return await _context.Characters
-            .AsNoTracking()
+        return await EligibleCharacters()
             .Select(character => new LeaderboardScore(
                 character.Id,
                 character.Name,
@@ -254,8 +251,7 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
     private async Task<List<LeaderboardScore>> GetDungeonMasteryScoresAsync(
         CancellationToken cancellationToken)
     {
-        return await _context.Characters
-            .AsNoTracking()
+        return await EligibleCharacters()
             .Where(character => _context.CharacterDungeonMasteries.Any(
                 mastery => mastery.CharacterId == character.Id))
             .Select(character => new LeaderboardScore(
@@ -273,8 +269,7 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
     private async Task<List<LeaderboardScore>> GetMostDungeonClearsScoresAsync(
         CancellationToken cancellationToken)
     {
-        return await _context.Characters
-            .AsNoTracking()
+        return await EligibleCharacters()
             .Where(character => _context.DungeonCompletionRecords.Any(
                 completion => completion.CharacterId == character.Id))
             .Select(character => new LeaderboardScore(
@@ -302,7 +297,7 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
                     period.WeeklyMissionContribution > 0 ||
                     period.OrdersCompleted > 0))
             .Join(
-                _context.Characters.AsNoTracking(),
+                EligibleCharacters(),
                 period => period.CharacterId,
                 character => character.Id,
                 (period, character) => new LeaderboardScore(
@@ -319,7 +314,7 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
         return await _context.CharacterArenaProfiles
             .AsNoTracking()
             .Join(
-                _context.Characters.AsNoTracking(),
+                EligibleCharacters(),
                 profile => profile.CharacterId,
                 character => character.Id,
                 (profile, character) => new LeaderboardScore(
@@ -349,7 +344,13 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
                 participant.Tournament.Status == TournamentStatus.Completed &&
                 participant.Tournament.CompletedAtUtc >= seasonStart &&
                 participant.Tournament.CompletedAtUtc < seasonEnd &&
-                participant.FinalPlacement.HasValue)
+                participant.FinalPlacement.HasValue &&
+                !_context.AccountRestrictions.Any(restriction =>
+                    restriction.AccountId == participant.AccountId &&
+                    restriction.RevokedAt == null &&
+                    (restriction.ExpiresAt == null || restriction.ExpiresAt > now) &&
+                    (restriction.RestrictionType == Domain.Models.Administration.AccountRestrictionType.Ban ||
+                     restriction.RestrictionType == Domain.Models.Administration.AccountRestrictionType.MultiplayerRestriction)))
             .Select(participant => new
             {
                 participant.CharacterId,
@@ -367,8 +368,7 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
             .Select(placement => placement.CharacterId)
             .Distinct()
             .ToList();
-        var characterNames = await _context.Characters
-            .AsNoTracking()
+        var characterNames = await EligibleCharacters()
             .Where(character => characterIds.Contains(character.Id))
             .Select(character => new { character.Id, character.Name })
             .ToDictionaryAsync(
@@ -416,6 +416,19 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
             .Where(member => member.CharacterId == characterId)
             .Select(member => (Guid?)member.GuildId)
             .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    private IQueryable<Domain.Models.Entities.Characters.Character> EligibleCharacters()
+    {
+        var now = DateTimeOffset.UtcNow;
+        return _context.Characters
+            .AsNoTracking()
+            .Where(character => !_context.AccountRestrictions.Any(restriction =>
+                restriction.AccountId == character.UserId &&
+                restriction.RevokedAt == null &&
+                (restriction.ExpiresAt == null || restriction.ExpiresAt > now) &&
+                (restriction.RestrictionType == Domain.Models.Administration.AccountRestrictionType.Ban ||
+                 restriction.RestrictionType == Domain.Models.Administration.AccountRestrictionType.MultiplayerRestriction)));
     }
 
     private static string GetGuildWeekKey(DateTimeOffset now)

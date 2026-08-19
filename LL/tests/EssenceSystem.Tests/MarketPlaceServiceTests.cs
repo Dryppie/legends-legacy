@@ -14,6 +14,33 @@ namespace EssenceSystem.Tests;
 public sealed class MarketPlaceServiceTests
 {
     [Fact]
+    public async Task CreateListing_RejectsMultiplayerRestrictedSellerBeforeEscrow()
+    {
+        var characterId = Guid.NewGuid();
+        var equipmentBase = new EquipmentBase { Id = "sword", Name = "Sword" };
+        var inventory = new FakeInventoryService(CreateInventoryItem(equipmentBase, 1));
+        var market = new FakeMarketRepository { IsMultiplayerEligible = false };
+        var service = CreateService(
+            market,
+            inventory,
+            [equipmentBase],
+            new Character { Id = characterId });
+
+        var result = await service.CreateMarketPlaceListingAsync(
+            characterId,
+            new MarketPlaceListing
+            {
+                ItemInstanceId = inventory.Item!.ItemInstanceId,
+                Quantity = 1,
+                UnitPrice = 100
+            },
+            CancellationToken.None);
+
+        Assert.Null(result);
+        Assert.Equal(0, inventory.RemoveForListingCalls);
+    }
+
+    [Fact]
     public async Task CreateListing_ForUniqueEquipment_ReturnsNoRemainingInventoryItem()
     {
         var characterId = Guid.NewGuid();
@@ -823,12 +850,19 @@ public sealed class MarketPlaceServiceTests
 
     private sealed class FakeMarketRepository : IMarketPlaceRepository
     {
+        public bool IsMultiplayerEligible { get; set; } = true;
         public int ListingCount { get; set; }
         public int BuyOrderCount { get; set; }
         public List<MarketPlaceListing> Listings { get; } = [];
         public List<MarketPlaceBuyOrder> BuyOrders { get; } = [];
         public List<MarketPlaceOrder> Orders { get; } = [];
 
+        public Task<bool> IsCharacterMultiplayerEligibleAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult(IsMultiplayerEligible);
+        public Task<(IReadOnlyList<Guid> ListingIds, IReadOnlyList<Guid> BuyOrderIds)> GetActiveOrderIdsAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult((
+                (IReadOnlyList<Guid>)Listings.Where(x => x.SellerId == characterId).Select(x => x.Id).ToList(),
+                (IReadOnlyList<Guid>)BuyOrders.Where(x => x.BuyerId == characterId).Select(x => x.Id).ToList()));
         public Task<int> GetListingCountAsync(Guid characterId, CancellationToken cancellationToken) => Task.FromResult(ListingCount);
         public Task<int> GetBuyOrderCountAsync(Guid characterId, CancellationToken cancellationToken) => Task.FromResult(BuyOrderCount);
         public Task<bool> HasActiveListingForItemAsync(Guid characterId, string itemBaseId, DateTimeOffset now, CancellationToken cancellationToken) =>

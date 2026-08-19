@@ -27,6 +27,7 @@ using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
 using Domain.Models.WorldTower;
+using Domain.Models.Administration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -410,6 +411,17 @@ public sealed class WorldTowerService : IWorldTowerService
                         && releasedFloorNumbers.Contains(x.FloorNumber))
             .OrderByDescending(x => x.CompletedAt)
             .ToListAsync(cancellationToken);
+        var hallAccountIds = attempts
+            .SelectMany(x => x.TowerRally.Participants)
+            .Select(x => x.AccountId)
+            .Distinct()
+            .ToArray();
+        var restrictedAccountIds = await ActiveSharedRestrictions()
+            .Where(x => hallAccountIds.Contains(x.AccountId))
+            .Select(x => x.AccountId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+        var restrictedAccounts = restrictedAccountIds.ToHashSet();
 
         return attempts
             .Where(attempt => firstClearFloorByAttemptId[attempt.Id] == attempt.FloorNumber)
@@ -425,6 +437,7 @@ public sealed class WorldTowerService : IWorldTowerService
                 attempt.AttemptNumberForFloor,
                 attempt.FightDurationSeconds ?? 0,
                 attempt.TowerRally.Participants
+                    .Where(x => !restrictedAccounts.Contains(x.AccountId))
                     .OrderBy(x => x.JoinedAt)
                     .Select(x => new TowerHallOfFameParticipantDto(
                         x.CharacterId,
@@ -1039,6 +1052,14 @@ public sealed class WorldTowerService : IWorldTowerService
                 return TowerOperationResult<TowerAttemptResultDto>.Fail("Only the Expedition leader can start the attempt.");
             if (rally.Status != TowerRallyStatus.Ready || rally.Participants.Count != rally.RequiredSlots)
                 return TowerOperationResult<TowerAttemptResultDto>.Fail("The Expedition must fill every slot before it can start.");
+            var participantAccountIds = rally.Participants
+                .Select(x => x.AccountId)
+                .Distinct()
+                .ToArray();
+            if (await ActiveSharedRestrictions()
+                    .AnyAsync(x => participantAccountIds.Contains(x.AccountId), cancellationToken))
+                return TowerOperationResult<TowerAttemptResultDto>.Fail(
+                    "An Expedition participant is no longer eligible for multiplayer activity.");
             if (rally.Attempt is not null)
                 return TowerOperationResult<TowerAttemptResultDto>.Fail("This Expedition already has an attempt.");
 
@@ -1942,10 +1963,22 @@ public sealed class WorldTowerService : IWorldTowerService
             return;
         var ids = characterIds.Distinct().ToArray();
         var characters = await _db.Characters
-            .Where(x => ids.Contains(x.Id))
+            .Where(x => ids.Contains(x.Id) &&
+                        !ActiveSharedRestrictions().Any(restriction =>
+                            restriction.AccountId == x.UserId))
             .ToListAsync(cancellationToken);
         foreach (var character in characters)
             character.TowerTokens = checked(character.TowerTokens + amount);
+    }
+
+    private IQueryable<AccountRestriction> ActiveSharedRestrictions()
+    {
+        var now = _timeProvider.GetUtcNow();
+        return _db.AccountRestrictions.Where(restriction =>
+            restriction.RevokedAt == null &&
+            (restriction.ExpiresAt == null || restriction.ExpiresAt > now) &&
+            (restriction.RestrictionType == AccountRestrictionType.Ban ||
+             restriction.RestrictionType == AccountRestrictionType.MultiplayerRestriction));
     }
 
     private async Task MarkAttemptErroredAsync(

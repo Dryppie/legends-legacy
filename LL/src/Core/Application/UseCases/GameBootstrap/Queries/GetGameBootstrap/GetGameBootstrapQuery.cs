@@ -1,4 +1,5 @@
 using Application.MediatR.Markers;
+using Application.Interfaces.Services.LL.Administration;
 using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Application.UseCases.Characters.Queries.GetCharacter;
 using Application.UseCases.GameBootstrap.Dtos;
@@ -19,14 +20,17 @@ public sealed class GetGameBootstrapQueryHandler
     private readonly IMapper _mapper;
     private readonly ISender _sender;
     private readonly TimeProvider _timeProvider;
+    private readonly IAccountRestrictionIndex _accountRestrictions;
 
     public GetGameBootstrapQueryHandler(
         IMapper mapper,
         ISender sender,
+        IAccountRestrictionIndex accountRestrictions,
         TimeProvider? timeProvider = null)
     {
         _mapper = mapper;
         _sender = sender;
+        _accountRestrictions = accountRestrictions;
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
@@ -66,6 +70,8 @@ public sealed class GetGameBootstrapQueryHandler
             CurrentAction = currentActionResponse.Data,
             ServerTimeUtc = _timeProvider.GetUtcNow(),
             AttributeDefinitions = AttributeCatalog.All,
+            AccountAccess = AccountAccessDto.From(
+                _accountRestrictions.Get(request.UserId)),
         };
 
         return Response<GameBootstrapDto>.Success(

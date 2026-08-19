@@ -10,7 +10,9 @@ public enum CinderTransferFailure
     SameRecipient,
     SenderNotFound,
     InsufficientCinders,
-    RecipientBalanceOverflow
+    RecipientBalanceOverflow,
+    AccountRestricted,
+    GuestAccount
 }
 
 public sealed record CinderTransferResult(

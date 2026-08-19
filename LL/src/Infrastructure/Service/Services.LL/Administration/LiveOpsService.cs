@@ -1,7 +1,10 @@
 using System.Text.Json;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Administration;
+using Application.Interfaces.Outbox;
+using Application.UseCases.Outbox;
 using Application.UseCases.Administration;
+using Application.WebSockets.Contracts;
 using Domain.Models.Administration;
 using Domain.Models.Items;
 using Domain.Models.Users;
@@ -16,6 +19,7 @@ public sealed class LiveOpsService(
     IItemBaseRepository itemBases,
     IInventoryService inventory,
     IInventoryItemFactory itemFactory,
+    IGameEventOutbox gameEvents,
     IOptions<LiveOpsOptions> options,
     TimeProvider timeProvider) : ILiveOpsService
 {
@@ -247,6 +251,211 @@ public sealed class LiveOpsService(
             new AccountBanOperation(action, restriction, false));
     }
 
+    public async Task<AdministrationOperationResult<MultiplayerRestrictionOperation>> RestrictMultiplayerAsync(
+        Guid operationId,
+        Guid accountId,
+        AdministrationActor actor,
+        string reason,
+        string? internalNotes,
+        DateTimeOffset? expiresAt,
+        CancellationToken cancellationToken)
+    {
+        var validation = ValidateOperation(operationId, actor, reason);
+        if (validation is not null)
+        {
+            return AdministrationOperationResult<MultiplayerRestrictionOperation>.Fail(
+                validation.Value.Code,
+                validation.Value.Message);
+        }
+        if (!string.IsNullOrWhiteSpace(internalNotes) && internalNotes.Trim().Length > 4_000)
+        {
+            return AdministrationOperationResult<MultiplayerRestrictionOperation>.Fail(
+                "invalid-notes",
+                "Internal notes cannot exceed 4,000 characters.");
+        }
+
+        var existingAction = await administration.GetActionAsync(operationId, cancellationToken);
+        if (existingAction is not null)
+        {
+            if (existingAction.ActionType != AdminActionType.MultiplayerRestricted ||
+                existingAction.TargetAccountId != accountId ||
+                existingAction.TargetResourceId is not Guid existingRestrictionId)
+            {
+                return IdempotencyConflict<MultiplayerRestrictionOperation>();
+            }
+
+            var existingRestriction = await administration.GetRestrictionAsync(
+                existingRestrictionId,
+                cancellationToken);
+            return existingRestriction is null
+                ? AdministrationOperationResult<MultiplayerRestrictionOperation>.Fail(
+                    "audit-corrupt",
+                    "The original restriction audit record no longer resolves to its restriction.")
+                : AdministrationOperationResult<MultiplayerRestrictionOperation>.Success(
+                    new MultiplayerRestrictionOperation(existingAction, existingRestriction, true));
+        }
+
+        var now = timeProvider.GetUtcNow();
+        if (expiresAt.HasValue && expiresAt.Value <= now)
+        {
+            return AdministrationOperationResult<MultiplayerRestrictionOperation>.Fail(
+                "invalid-expiry",
+                "A temporary multiplayer restriction must expire in the future.");
+        }
+
+        var player = await administration.GetPlayerByAccountIdAsync(
+            accountId,
+            now,
+            cancellationToken);
+        if (player is null)
+        {
+            return AdministrationOperationResult<MultiplayerRestrictionOperation>.Fail(
+                "account-not-found",
+                "The target account was not found.");
+        }
+        if (player.ActiveMultiplayerRestrictionId.HasValue)
+        {
+            return AdministrationOperationResult<MultiplayerRestrictionOperation>.Fail(
+                "already-restricted",
+                "The target account already has an active multiplayer restriction.");
+        }
+
+        var restriction = new AccountRestriction
+        {
+            Id = Guid.NewGuid(),
+            AccountId = accountId,
+            RestrictionType = AccountRestrictionType.MultiplayerRestriction,
+            Reason = NormalizeReason(reason),
+            InternalNotes = NormalizeOptional(internalNotes),
+            CreatedBySubject = actor.Subject.Trim(),
+            CreatedAt = now,
+            ExpiresAt = expiresAt
+        };
+        var action = CreateAction(
+            operationId,
+            AdminActionType.MultiplayerRestricted,
+            AdministrationPermissions.AccountModeration,
+            actor,
+            accountId,
+            player.CharacterId,
+            restriction.Id,
+            reason,
+            internalNotes,
+            JsonSerializer.Serialize(new { expiresAt }),
+            expiresAt.HasValue
+                ? AdministrationRiskLevel.Normal
+                : AdministrationRiskLevel.Permanent,
+            now);
+
+        administration.AddRestriction(restriction);
+        administration.AddAction(action);
+        await gameEvents.EnqueueAsync(
+            GameEventTypes.AccountMultiplayerRestricted,
+            new AccountMultiplayerRestrictedPayload(
+                restriction.Id,
+                accountId,
+                player.CharacterId,
+                now),
+            player.CharacterId,
+            accountId,
+            cancellationToken);
+        await EnqueueAccountAccessChangedAsync(
+            accountId,
+            player.CharacterId,
+            "MultiplayerRestricted",
+            now,
+            cancellationToken);
+        return AdministrationOperationResult<MultiplayerRestrictionOperation>.Success(
+            new MultiplayerRestrictionOperation(action, restriction, false));
+    }
+
+    public async Task<AdministrationOperationResult<MultiplayerRestrictionOperation>> RevokeMultiplayerRestrictionAsync(
+        Guid operationId,
+        Guid restrictionId,
+        AdministrationActor actor,
+        string reason,
+        CancellationToken cancellationToken)
+    {
+        var validation = ValidateOperation(operationId, actor, reason);
+        if (validation is not null)
+        {
+            return AdministrationOperationResult<MultiplayerRestrictionOperation>.Fail(
+                validation.Value.Code,
+                validation.Value.Message);
+        }
+
+        var existingAction = await administration.GetActionAsync(operationId, cancellationToken);
+        if (existingAction is not null)
+        {
+            if (existingAction.ActionType != AdminActionType.MultiplayerRestrictionRevoked ||
+                existingAction.TargetResourceId != restrictionId)
+            {
+                return IdempotencyConflict<MultiplayerRestrictionOperation>();
+            }
+
+            var replayRestriction = await administration.GetRestrictionAsync(
+                restrictionId,
+                cancellationToken);
+            return replayRestriction is null
+                ? AdministrationOperationResult<MultiplayerRestrictionOperation>.Fail(
+                    "restriction-not-found",
+                    "The target multiplayer restriction was not found.")
+                : AdministrationOperationResult<MultiplayerRestrictionOperation>.Success(
+                    new MultiplayerRestrictionOperation(existingAction, replayRestriction, true));
+        }
+
+        var restriction = await administration.GetRestrictionAsync(
+            restrictionId,
+            cancellationToken);
+        if (restriction is null ||
+            restriction.RestrictionType != AccountRestrictionType.MultiplayerRestriction)
+        {
+            return AdministrationOperationResult<MultiplayerRestrictionOperation>.Fail(
+                "restriction-not-found",
+                "The target multiplayer restriction was not found.");
+        }
+
+        var now = timeProvider.GetUtcNow();
+        if (!restriction.IsActive(now))
+        {
+            return AdministrationOperationResult<MultiplayerRestrictionOperation>.Fail(
+                "restriction-inactive",
+                "The target multiplayer restriction is no longer active.");
+        }
+
+        restriction.Revoke(actor.Subject, reason, now);
+        var player = await administration.GetPlayerByAccountIdAsync(
+            restriction.AccountId,
+            now,
+            cancellationToken);
+        var action = CreateAction(
+            operationId,
+            AdminActionType.MultiplayerRestrictionRevoked,
+            AdministrationPermissions.AccountModeration,
+            actor,
+            restriction.AccountId,
+            null,
+            restriction.Id,
+            reason,
+            null,
+            "{}",
+            AdministrationRiskLevel.Normal,
+            now);
+        administration.AddAction(action);
+        if (player is not null)
+        {
+            await EnqueueAccountAccessChangedAsync(
+                restriction.AccountId,
+                player.CharacterId,
+                "MultiplayerRestrictionRevoked",
+                now,
+                cancellationToken);
+        }
+
+        return AdministrationOperationResult<MultiplayerRestrictionOperation>.Success(
+            new MultiplayerRestrictionOperation(action, restriction, false));
+    }
+
     public async Task<AdministrationOperationResult<ItemGrantOperation>> GrantCompensationItemsAsync(
         Guid operationId,
         Guid characterId,
@@ -419,6 +628,26 @@ public sealed class LiveOpsService(
             timeProvider.GetUtcNow());
         administration.AddAction(action);
         return AdministrationOperationResult<AdminAction>.Success(action);
+    }
+
+    private Task EnqueueAccountAccessChangedAsync(
+        Guid accountId,
+        Guid characterId,
+        string reason,
+        DateTimeOffset occurredAt,
+        CancellationToken cancellationToken)
+    {
+        var change = new AccountAccessChanged(accountId, reason, occurredAt);
+        return gameEvents.EnqueueAsync(
+            GameEventTypes.RealtimeDeliveryRequested,
+            new RealtimeDeliveryRequestedPayload(
+                new RealtimeAudiencePayload("Character", characterId, null),
+                nameof(AccountAccessChanged),
+                JsonSerializer.SerializeToElement(change),
+                "LiveOps"),
+            characterId,
+            accountId,
+            cancellationToken);
     }
 
     private static (string Code, string Message)? ValidateOperation(

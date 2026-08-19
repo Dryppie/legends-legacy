@@ -14,7 +14,9 @@ public enum InventoryTransferFailure
     BorrowedGuildItem,
     SenderNotFound,
     RecipientNotFound,
-    RecipientInventoryNotFound
+    RecipientInventoryNotFound,
+    AccountRestricted,
+    GuestAccount
 }
 
 public sealed record InventoryTransferResult(

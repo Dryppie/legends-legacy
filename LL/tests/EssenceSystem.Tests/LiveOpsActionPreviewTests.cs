@@ -134,7 +134,8 @@ public sealed class LiveOpsActionPreviewTests
         var factory = new TestContextFactory(options);
         var player = new PlayerAdministrationSnapshot(
             Guid.NewGuid(), Guid.NewGuid(), "account@example.com", "account@example.com",
-            "ArdentFox", 42, Now.UtcDateTime.AddYears(-1), null, null, null);
+            "ArdentFox", 42, Now.UtcDateTime.AddYears(-1), null, null, null,
+            null, null, null);
         var liveOps = new TestLiveOpsService { Player = player };
         var time = new MutableTimeProvider { Now = Now };
         var service = new LiveOpsActionPreviewService(
@@ -187,6 +188,8 @@ public sealed class LiveOpsActionPreviewTests
         public Task<AdministrationOperationResult<AdminAction>> RecordAuditExportAsync(Guid operationId, AdministrationActor actor, int rowCount, string detailsJson, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<AdministrationOperationResult<AccountBanOperation>> BanAccountAsync(Guid operationId, Guid accountId, AdministrationActor actor, string reason, string? internalNotes, DateTimeOffset? expiresAt, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<AdministrationOperationResult<AccountBanOperation>> RevokeAccountBanAsync(Guid operationId, Guid restrictionId, AdministrationActor actor, string reason, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<AdministrationOperationResult<MultiplayerRestrictionOperation>> RestrictMultiplayerAsync(Guid operationId, Guid accountId, AdministrationActor actor, string reason, string? internalNotes, DateTimeOffset? expiresAt, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<AdministrationOperationResult<MultiplayerRestrictionOperation>> RevokeMultiplayerRestrictionAsync(Guid operationId, Guid restrictionId, AdministrationActor actor, string reason, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<AdministrationOperationResult<ItemGrantOperation>> GrantCompensationItemsAsync(Guid operationId, Guid characterId, AdministrationActor actor, string itemBaseId, int quantity, string reason, string? internalNotes, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 

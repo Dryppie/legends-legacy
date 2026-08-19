@@ -32,6 +32,7 @@ using Application.UseCases.Guilds.Queries.GetGuildBuildings;
 using Application.UseCases.Guilds.Queries.GetMyGuild;
 using Application.UseCases.Guilds.Queries.GetMyInvites;
 using Application.Interfaces.Services.LL.Guilds;
+using API.LL.Common;
 using Common.Primitives;
 using Domain.Models.Guilds;
 using Domain.Models.Guilds.Buildings;
@@ -40,7 +41,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.LL.Controllers.V1;
 
-[Authorize]
+[Authorize(Policy = AuthorizationPolicies.MultiplayerAllowed)]
 public class GuildController : BaseController
 {
     [HttpGet("GetMyGuild")]

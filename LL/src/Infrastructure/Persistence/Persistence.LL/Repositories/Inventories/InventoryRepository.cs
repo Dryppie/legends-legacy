@@ -6,6 +6,7 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Transfers;
 using Domain.Models.MarketPlaces;
+using Domain.Models.Administration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Inventories;
@@ -568,6 +569,28 @@ public class InventoryRepository : IInventoryRepository
         if (recipient is null)
             return InventoryTransferResult.Fail(InventoryTransferFailure.RecipientNotFound);
 
+        var now = DateTimeOffset.UtcNow;
+        var participantAccounts = await _context.Users
+            .AsNoTracking()
+            .Where(x => x.Id == sender.UserId || x.Id == recipient.UserId)
+            .Select(x => new
+            {
+                x.Id,
+                x.IsGuest,
+                x.CreatedUtc,
+                IsRestricted = _context.AccountRestrictions.Any(restriction =>
+                    restriction.AccountId == x.Id &&
+                    restriction.RevokedAt == null &&
+                    (restriction.ExpiresAt == null || restriction.ExpiresAt > now) &&
+                    (restriction.RestrictionType == AccountRestrictionType.Ban ||
+                     restriction.RestrictionType == AccountRestrictionType.MultiplayerRestriction))
+            })
+            .ToListAsync(cancellationToken);
+        if (participantAccounts.Any(x => x.IsGuest))
+            return InventoryTransferResult.Fail(InventoryTransferFailure.GuestAccount);
+        if (participantAccounts.Any(x => x.IsRestricted))
+            return InventoryTransferResult.Fail(InventoryTransferFailure.AccountRestricted);
+
         var itemBase = senderItem.ItemInstance.ItemBase;
         InventoryItem recipientItem;
 
@@ -638,10 +661,7 @@ public class InventoryRepository : IInventoryRepository
         };
         _context.PlayerTransferHistory.Add(transferRecord);
 
-        var accountCreatedUtc = await _context.Users
-            .AsNoTracking()
-            .Where(x => x.Id == sender.UserId || x.Id == recipient.UserId)
-            .ToDictionaryAsync(x => x.Id, x => x.CreatedUtc, cancellationToken);
+        var accountCreatedUtc = participantAccounts.ToDictionary(x => x.Id, x => x.CreatedUtc);
         _context.EconomyLedger.Add(new EconomyLedgerEntry
         {
             EventType = EconomyEventType.DirectItemTransfer,

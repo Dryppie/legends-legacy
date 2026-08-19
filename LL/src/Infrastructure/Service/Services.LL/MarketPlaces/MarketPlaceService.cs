@@ -65,6 +65,9 @@ public class MarketPlaceService : IMarketPlaceService
         MarketPlaceListing marketPlaceListing,
         CancellationToken cancellationToken)
     {
+        if (!await _marketPlaceRepository.IsCharacterMultiplayerEligibleAsync(
+                characterId,
+                cancellationToken)) return null;
         if (!IsValidQuantityAndPrice(marketPlaceListing.Quantity, marketPlaceListing.UnitPrice)) return null;
 
         var inventoryItem = await _inventoryService.GetInventoryItemAsync(characterId, marketPlaceListing.ItemInstanceId, cancellationToken);
@@ -269,6 +272,9 @@ public class MarketPlaceService : IMarketPlaceService
 
     public async Task<CreateMarketPlaceBuyOrderResult?> CreateMarketPlaceBuyOrderAsync(Guid characterId, MarketPlaceBuyOrder buyOrder, CancellationToken cancellationToken)
     {
+        if (!await _marketPlaceRepository.IsCharacterMultiplayerEligibleAsync(
+                characterId,
+                cancellationToken)) return null;
         if (!IsValidQuantityAndPrice(buyOrder.Quantity, buyOrder.UnitPrice))
             return null;
 
@@ -452,8 +458,15 @@ public class MarketPlaceService : IMarketPlaceService
 
     public async Task<BuyoutMarketPlaceListingResult?> BuyoutMarketPlaceListingAsync(Guid characterId, Guid listingId, int quantity, CancellationToken cancellationToken)
     {
+        if (!await _marketPlaceRepository.IsCharacterMultiplayerEligibleAsync(
+                characterId,
+                cancellationToken)) return null;
         var now = _timeProvider.GetUtcNow();
         var listing = await _marketPlaceRepository.GetListingAsync(listingId, cancellationToken);
+        if (listing is not null &&
+            !await _marketPlaceRepository.IsCharacterMultiplayerEligibleAsync(
+                listing.SellerId,
+                cancellationToken)) return null;
         if (listing == null || listing.ExpiresAt <= now || listing.Quantity < quantity || listing.SellerId.Equals(characterId) ||
             !IsValidQuantityAndPrice(quantity, listing.UnitPrice) ||
             listing.ItemInstance.ItemBase.IsBound ||
@@ -523,6 +536,9 @@ public class MarketPlaceService : IMarketPlaceService
         long maximumUnitPrice,
         CancellationToken cancellationToken)
     {
+        if (!await _marketPlaceRepository.IsCharacterMultiplayerEligibleAsync(
+                characterId,
+                cancellationToken)) return null;
         if (string.IsNullOrWhiteSpace(itemBaseId) || !IsValidQuantityAndPrice(quantity, maximumUnitPrice))
             return null;
 
@@ -645,8 +661,15 @@ public class MarketPlaceService : IMarketPlaceService
 
     public async Task<FulfillMarketPlaceBuyOrderResult?> FulfillMarketPlaceBuyOrderAsync(Guid characterId, Guid buyOrderId, Guid itemInstanceId, int quantity, CancellationToken cancellationToken)
     {
+        if (!await _marketPlaceRepository.IsCharacterMultiplayerEligibleAsync(
+                characterId,
+                cancellationToken)) return null;
         var now = _timeProvider.GetUtcNow();
         var buyOrder = await _marketPlaceRepository.GetBuyOrderAsync(buyOrderId, cancellationToken);
+        if (buyOrder is not null &&
+            !await _marketPlaceRepository.IsCharacterMultiplayerEligibleAsync(
+                buyOrder.BuyerId,
+                cancellationToken)) return null;
         if (buyOrder == null || buyOrder.ExpiresAt <= now || buyOrder.Quantity < quantity || buyOrder.BuyerId.Equals(characterId) ||
             !IsValidQuantityAndPrice(quantity, buyOrder.UnitPrice) ||
             !TryCalculateTotal(buyOrder.UnitPrice, quantity, out var totalPrice)) return null;
@@ -730,6 +753,9 @@ public class MarketPlaceService : IMarketPlaceService
         long minimumUnitPrice,
         CancellationToken cancellationToken)
     {
+        if (!await _marketPlaceRepository.IsCharacterMultiplayerEligibleAsync(
+                characterId,
+                cancellationToken)) return null;
         if (!IsValidQuantityAndPrice(quantity, minimumUnitPrice)) return null;
 
         var inventoryItem = await _inventoryService.GetInventoryItemAsync(characterId, itemInstanceId, cancellationToken);

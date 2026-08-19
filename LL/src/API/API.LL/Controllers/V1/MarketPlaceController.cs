@@ -21,7 +21,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.LL.Controllers.V1;
 
-[Authorize(Policy = AuthorizationPolicies.RegisteredUser)]
+[Authorize(Policy = AuthorizationPolicies.MultiplayerAllowed)]
 public class MarketPlaceController : BaseController
 {
     [HttpGet("Catalog")]

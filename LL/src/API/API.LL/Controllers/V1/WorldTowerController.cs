@@ -1,6 +1,7 @@
 ﻿using Application.UseCases.WorldTower;
 using Application.UseCases.WorldTower.Dtos;
 using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
+using API.LL.Common;
 using Common.Primitives;
 using Domain.Models.WorldTower;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.LL.Controllers.V1;
 
-[Authorize]
+[Authorize(Policy = AuthorizationPolicies.MultiplayerAllowed)]
 [Route("~/api/v{version:apiVersion}/world-tower")]
 public sealed class WorldTowerController : BaseController
 {

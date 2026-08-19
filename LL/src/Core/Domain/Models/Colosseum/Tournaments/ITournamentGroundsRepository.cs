@@ -1,4 +1,5 @@
 using Domain.Models.Entities.Characters;
+using Domain.Models.Administration;
 
 namespace Domain.Models.Colosseum.Tournaments;
 
@@ -18,6 +19,7 @@ public interface ITournamentGroundsRepository
     IQueryable<TournamentRewardGrant> RewardGrants { get; }
     IQueryable<Character> Characters { get; }
     IQueryable<ColosseumMatchResult> ColosseumMatches { get; }
+    IQueryable<AccountRestriction> AccountRestrictions { get; }
 
     Task AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken)
         where TEntity : class;

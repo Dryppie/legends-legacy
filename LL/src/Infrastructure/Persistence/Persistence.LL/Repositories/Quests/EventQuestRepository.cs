@@ -1,5 +1,6 @@
 using Application.Common.Interfaces;
 using Domain.Models.Quests.Events;
+using Domain.Models.Administration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Quests;
@@ -33,9 +34,18 @@ public sealed class EventQuestRepository(IDbContext context) : IEventQuestReposi
         int topCount,
         CancellationToken cancellationToken)
     {
+        var now = DateTimeOffset.UtcNow;
         var contributions = context.EventQuestCharacterContributions
             .AsNoTracking()
-            .Where(x => x.EventQuestId == eventQuestId);
+            .Where(x => x.EventQuestId == eventQuestId &&
+                context.Characters.Any(character =>
+                    character.Id == x.CharacterId &&
+                    !context.AccountRestrictions.Any(restriction =>
+                        restriction.AccountId == character.UserId &&
+                        restriction.RevokedAt == null &&
+                        (restriction.ExpiresAt == null || restriction.ExpiresAt > now) &&
+                        (restriction.RestrictionType == AccountRestrictionType.Ban ||
+                         restriction.RestrictionType == AccountRestrictionType.MultiplayerRestriction))));
         var contributorCount = await contributions.CountAsync(cancellationToken);
         var characterContribution = await contributions
             .Where(x => x.CharacterId == characterId)

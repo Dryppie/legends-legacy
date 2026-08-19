@@ -7,7 +7,9 @@ public enum AdminActionType
     CompensationItemsGranted,
     AuditExported,
     AccountRiskStatusChanged,
-    AccountRiskNoteAdded
+    AccountRiskNoteAdded,
+    MultiplayerRestricted,
+    MultiplayerRestrictionRevoked
 }
 
 public enum AdministrationRiskLevel

@@ -139,6 +139,9 @@ public static class DependencyInjection
                 "Item consolidation, coordination, and ephemeral-outflow share thresholds must be within (0.5, 1].")
             .ValidateOnStart();
         services.AddSingleton(TimeProvider.System);
+        services.TryAddSingleton<AccountRestrictionIndex>();
+        services.TryAddSingleton<IAccountRestrictionIndex>(sp =>
+            sp.GetRequiredService<AccountRestrictionIndex>());
         services.AddScoped<IAccountAccessPolicy, AccountAccessPolicy>();
         services.AddScoped<ILiveOpsService, LiveOpsService>();
         services.AddScoped<ILiveOpsAccountRiskService, LiveOpsAccountRiskService>();
@@ -199,6 +202,9 @@ public static class DependencyInjection
         services.AddScoped<IAttributeService, AttributeService>();
         services.AddScoped<IAchievementService, AchievementService>();
         services.Configure<LiveOpsOptions>(config.GetSection(LiveOpsOptions.SectionName));
+        services.TryAddSingleton<AccountRestrictionIndex>();
+        services.TryAddSingleton<IAccountRestrictionIndex>(sp =>
+            sp.GetRequiredService<AccountRestrictionIndex>());
         services.AddScoped<IAccountAccessPolicy, AccountAccessPolicy>();
         services.AddScoped<ILiveOpsService, LiveOpsService>();
         services.AddOptions<AccountRiskOptions>()
@@ -564,6 +570,7 @@ public static class DependencyInjection
         services.AddSingleton<IGameEventOutboxConsumerRegistry, GameEventOutboxConsumerRegistry>();
         services.AddScoped<IGameEventOutboxConsumer, QuestGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, EventQuestGameEventOutboxConsumer>();
+        services.AddScoped<IGameEventOutboxConsumer, AccountRestrictionCleanupOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, AchievementGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, TransferChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, TournamentChatGameEventOutboxConsumer>();

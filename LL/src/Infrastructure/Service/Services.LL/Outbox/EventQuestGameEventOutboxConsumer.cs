@@ -2,14 +2,18 @@ using System.Text.Json;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Quests;
 using Application.Interfaces.Services.LL.Quests.Events;
+using Application.Interfaces.Services.LL.Administration;
 using Application.UseCases.Outbox;
 using Domain.Models.Outbox;
+using Application.Interfaces.Services.LL.Entities;
 
 namespace Services.LL.Outbox;
 
 public sealed class EventQuestGameEventOutboxConsumer(
     IEventQuestProgressionService progression,
-    JsonSerializerOptions jsonOptions) : IGameEventOutboxConsumer
+    IAccountRestrictionIndex restrictions,
+    JsonSerializerOptions jsonOptions,
+    ICharacterService? characters = null) : IGameEventOutboxConsumer
 {
     public string Consumer => GameEventOutboxConsumerNames.EventQuests;
 
@@ -30,9 +34,28 @@ public sealed class EventQuestGameEventOutboxConsumer(
             or GameEventTypes.DungeonRunCompleted
             or GameEventTypes.ProphecyCompleted;
 
-    public Task HandleAsync(GameEventOutboxMessage message, CancellationToken cancellationToken)
+    public async Task HandleAsync(GameEventOutboxMessage message, CancellationToken cancellationToken)
     {
-        if (!message.CharacterId.HasValue) return Task.CompletedTask;
+        if (!message.CharacterId.HasValue)
+        {
+            throw new InvalidOperationException(
+                $"Event-quest outbox message '{message.Id}' has no character identity.");
+        }
+        var accountId = message.AccountId;
+        if (!accountId.HasValue)
+        {
+            var character = characters is null
+                ? null
+                : await characters.GetBaseCharacterByIdAsync(
+                    message.CharacterId.Value,
+                    cancellationToken);
+            accountId = character?.UserId ?? throw new InvalidOperationException(
+                $"Event-quest outbox message '{message.Id}' has no resolvable account identity.");
+        }
+        if (!restrictions.Get(accountId.Value).CanParticipate)
+        {
+            return;
+        }
         var trigger = message.EventType switch
         {
             GameEventTypes.EssenceAbsorbed => QuestTrigger.EssenceAbsorbed(
@@ -56,14 +79,15 @@ public sealed class EventQuestGameEventOutboxConsumer(
                 "Daily", StringComparison.OrdinalIgnoreCase) => QuestTrigger.DailyProphecyCompleted(),
             _ => null
         };
-        return trigger is null
-            ? Task.CompletedTask
-            : progression.ProcessAsync(
+        if (trigger is not null)
+        {
+            await progression.ProcessAsync(
                 message.CharacterId.Value,
                 trigger,
                 message.Id,
                 message.EventType,
                 cancellationToken);
+        }
     }
 
     private static QuestTrigger CreateEquipmentCraftedTrigger(EquipmentCraftedPayload payload) =>

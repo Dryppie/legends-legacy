@@ -35,6 +35,7 @@ using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Rewards.Idle;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Interfaces.Combat.Reward.Idle;
+using Services.LL.Administration;
 using Services.LL.Outbox;
 
 namespace EssenceSystem.Tests;
@@ -255,7 +256,10 @@ public sealed class GameEventOutboxTests
     {
         var characterId = Guid.NewGuid();
         var progression = new RecordingEventQuestProgressionService();
-        var consumer = new EventQuestGameEventOutboxConsumer(progression, CreateJsonOptions());
+        var consumer = new EventQuestGameEventOutboxConsumer(
+            progression,
+            new AccountRestrictionIndex(TimeProvider.System),
+            CreateJsonOptions());
 
         await consumer.HandleAsync(
             CreateOutboxMessage(
@@ -314,6 +318,7 @@ public sealed class GameEventOutboxTests
         {
             Id = Guid.NewGuid(),
             CharacterId = characterId,
+            AccountId = Guid.NewGuid(),
             EventType = GameEventTypes.CharacterCreated,
             PayloadJson = JsonSerializer.Serialize(
                 new CharacterCreatedPayload(characterId),
@@ -777,6 +782,7 @@ public sealed class GameEventOutboxTests
         {
             Id = Guid.NewGuid(),
             CharacterId = characterId,
+            AccountId = Guid.NewGuid(),
             EventType = eventType,
             PayloadJson = JsonSerializer.Serialize(payload, CreateJsonOptions()),
             CreatedAt = Now,

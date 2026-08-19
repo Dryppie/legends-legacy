@@ -1,6 +1,7 @@
 using Domain.Models.Colosseum;
 using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Administration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -22,6 +23,7 @@ public sealed class TournamentGroundsRepository(LLDbContext context) : ITourname
     public IQueryable<TournamentRewardGrant> RewardGrants => context.TournamentRewardGrants;
     public IQueryable<Character> Characters => context.Characters;
     public IQueryable<ColosseumMatchResult> ColosseumMatches => context.ColosseumMatches;
+    public IQueryable<AccountRestriction> AccountRestrictions => context.AccountRestrictions;
 
     public async Task AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken)
         where TEntity : class

@@ -1,4 +1,6 @@
 using Application.UseCases.Administration;
+using Application.Interfaces.Outbox;
+using Application.UseCases.Outbox;
 using Domain.Models.Administration;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
@@ -215,6 +217,73 @@ public sealed class LiveOpsAdministrationTests
     }
 
     [Fact]
+    public async Task Multiplayer_restriction_is_audited_enforced_reversible_and_idempotent()
+    {
+        await using var db = CreateDb();
+        var (accountId, characterId) = AddPlayer(db);
+        await db.SaveChangesAsync();
+
+        var refreshTokens = new RecordingRefreshTokenRepository();
+        var outbox = new RecordingGameEventOutbox();
+        var service = CreateService(db, refreshTokens, outbox);
+        var operationId = Guid.NewGuid();
+        var actor = new AdministrationActor("staff|moderator-2", "Moderator Two");
+
+        var first = await service.RestrictMultiplayerAsync(
+            operationId,
+            accountId,
+            actor,
+            "Investigation LL-777",
+            "Credible ongoing economy abuse.",
+            Now.AddHours(24),
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.True(first.IsSuccess);
+        Assert.False(first.Value!.WasAlreadyProcessed);
+        Assert.Equal(AccountRestrictionType.MultiplayerRestriction, first.Value.Restriction.RestrictionType);
+        Assert.Equal(0, refreshTokens.RevokeCalls);
+        var eventCall = Assert.Single(
+            outbox.Calls,
+            call => call.EventType == GameEventTypes.AccountMultiplayerRestricted);
+        Assert.Equal(GameEventTypes.AccountMultiplayerRestricted, eventCall.EventType);
+        Assert.Equal(characterId, eventCall.CharacterId);
+        Assert.Equal(accountId, eventCall.AccountId);
+
+        var access = await new AccountAccessPolicy(
+                new AdministrationRepository(db),
+                new FixedTimeProvider(Now))
+            .GetAccessAsync(accountId, CancellationToken.None);
+        Assert.True(access.CanAuthenticate);
+        Assert.False(access.CanParticipate);
+        Assert.False(access.IsPubliclyEligible);
+
+        var replay = await service.RestrictMultiplayerAsync(
+            operationId,
+            accountId,
+            actor,
+            "Investigation LL-777",
+            "Credible ongoing economy abuse.",
+            Now.AddHours(24),
+            CancellationToken.None);
+        Assert.True(replay.IsSuccess);
+        Assert.True(replay.Value!.WasAlreadyProcessed);
+        Assert.Equal(2, outbox.Calls.Count);
+
+        var revoke = await service.RevokeMultiplayerRestrictionAsync(
+            Guid.NewGuid(),
+            first.Value.Restriction.Id,
+            actor,
+            "Investigation completed and economy reconciled.",
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.True(revoke.IsSuccess);
+        Assert.False(revoke.Value!.Restriction.IsActive(Now));
+        Assert.Equal(2, await db.AdminActions.CountAsync());
+    }
+
+    [Fact]
     public async Task Global_audit_filters_and_pages_by_occurrence_and_operation()
     {
         await using var db = CreateDb();
@@ -382,13 +451,15 @@ public sealed class LiveOpsAdministrationTests
 
     private static LiveOpsService CreateService(
         LLDbContext db,
-        IRefreshTokenRepository refreshTokens) =>
+        IRefreshTokenRepository refreshTokens,
+        IGameEventOutbox? outbox = null) =>
         new(
             new AdministrationRepository(db),
             refreshTokens,
             new ItemBaseRepository(db),
             new InventoryService(new InventoryRepository(db)),
             new InventoryItemFactory(),
+            outbox ?? new NoopGameEventOutbox(),
             Options.Create(new LiveOpsOptions { MaximumGrantQuantity = 100_000 }),
             new FixedTimeProvider(Now));
 
@@ -403,6 +474,32 @@ public sealed class LiveOpsAdministrationTests
     private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
     {
         public override DateTimeOffset GetUtcNow() => now;
+    }
+
+    private sealed class NoopGameEventOutbox : IGameEventOutbox
+    {
+        public Task EnqueueAsync<TPayload>(
+            string eventType,
+            TPayload payload,
+            Guid? characterId,
+            Guid? accountId,
+            CancellationToken cancellationToken) => Task.CompletedTask;
+    }
+
+    private sealed class RecordingGameEventOutbox : IGameEventOutbox
+    {
+        public List<(string EventType, Guid? CharacterId, Guid? AccountId)> Calls { get; } = [];
+
+        public Task EnqueueAsync<TPayload>(
+            string eventType,
+            TPayload payload,
+            Guid? characterId,
+            Guid? accountId,
+            CancellationToken cancellationToken)
+        {
+            Calls.Add((eventType, characterId, accountId));
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class RecordingRefreshTokenRepository : IRefreshTokenRepository

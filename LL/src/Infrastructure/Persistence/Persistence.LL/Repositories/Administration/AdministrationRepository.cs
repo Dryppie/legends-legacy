@@ -23,14 +23,36 @@ public sealed class AdministrationRepository(IDbContext context) : IAdministrati
         Guid accountId,
         DateTimeOffset now,
         CancellationToken cancellationToken) =>
+        GetActiveRestrictionAsync(
+            accountId,
+            AccountRestrictionType.Ban,
+            now,
+            cancellationToken);
+
+    public Task<AccountRestriction?> GetActiveRestrictionAsync(
+        Guid accountId,
+        AccountRestrictionType restrictionType,
+        DateTimeOffset now,
+        CancellationToken cancellationToken) =>
         context.AccountRestrictions
             .AsNoTracking()
             .Where(x => x.AccountId == accountId &&
-                        x.RestrictionType == AccountRestrictionType.Ban &&
+                        x.RestrictionType == restrictionType &&
                         x.RevokedAt == null &&
                         (x.ExpiresAt == null || x.ExpiresAt > now))
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<AccountRestriction>> GetActiveRestrictionsAsync(
+        DateTimeOffset now,
+        CancellationToken cancellationToken) =>
+        await context.AccountRestrictions
+            .AsNoTracking()
+            .Where(x => x.RevokedAt == null &&
+                        (x.ExpiresAt == null || x.ExpiresAt > now))
+            .OrderBy(x => x.AccountId)
+            .ThenByDescending(x => x.CreatedAt)
+            .ToListAsync(cancellationToken);
 
     public async Task<PlayerAdministrationSnapshot?> GetPlayerByAccountIdAsync(
         Guid accountId,
@@ -42,7 +64,7 @@ public sealed class AdministrationRepository(IDbContext context) : IAdministrati
             .SingleOrDefaultAsync(cancellationToken);
         return player is null
             ? null
-            : await AddActiveBanAsync(player, now, cancellationToken);
+            : await AddActiveRestrictionsAsync(player, now, cancellationToken);
     }
 
     public async Task<PlayerAdministrationSnapshot?> GetPlayerByCharacterIdAsync(
@@ -55,7 +77,7 @@ public sealed class AdministrationRepository(IDbContext context) : IAdministrati
             .SingleOrDefaultAsync(cancellationToken);
         return player is null
             ? null
-            : await AddActiveBanAsync(player, now, cancellationToken);
+            : await AddActiveRestrictionsAsync(player, now, cancellationToken);
     }
 
     public async Task<IReadOnlyList<PlayerAdministrationSnapshot>> SearchPlayersAsync(
@@ -97,22 +119,21 @@ public sealed class AdministrationRepository(IDbContext context) : IAdministrati
         }
 
         var accountIds = matches.Select(x => x.AccountId).ToArray();
-        var activeBans = await context.AccountRestrictions
+        var activeRestrictions = await context.AccountRestrictions
             .AsNoTracking()
             .Where(x => accountIds.Contains(x.AccountId) &&
-                        x.RestrictionType == AccountRestrictionType.Ban &&
                         x.RevokedAt == null &&
                         (x.ExpiresAt == null || x.ExpiresAt > now))
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(cancellationToken);
-        var bansByAccount = activeBans
+        var restrictionsByAccount = activeRestrictions
             .GroupBy(x => x.AccountId)
-            .ToDictionary(x => x.Key, x => x.First());
+            .ToDictionary(x => x.Key, x => x.ToList());
 
         return matches
             .Select(player => ToSnapshot(
                 player,
-                bansByAccount.GetValueOrDefault(player.AccountId)))
+                restrictionsByAccount.GetValueOrDefault(player.AccountId) ?? []))
             .ToList();
     }
 
@@ -283,19 +304,30 @@ public sealed class AdministrationRepository(IDbContext context) : IAdministrati
             character.Level,
             character.User.CreatedUtc));
 
-    private async Task<PlayerAdministrationSnapshot> AddActiveBanAsync(
+    private async Task<PlayerAdministrationSnapshot> AddActiveRestrictionsAsync(
         PlayerRow player,
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        var ban = await GetActiveAccountBanAsync(player.AccountId, now, cancellationToken);
-        return ToSnapshot(player, ban);
+        var restrictions = await context.AccountRestrictions
+            .AsNoTracking()
+            .Where(x => x.AccountId == player.AccountId &&
+                        x.RevokedAt == null &&
+                        (x.ExpiresAt == null || x.ExpiresAt > now))
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync(cancellationToken);
+        return ToSnapshot(player, restrictions);
     }
 
     private static PlayerAdministrationSnapshot ToSnapshot(
         PlayerRow player,
-        AccountRestriction? ban) =>
-        new(
+        IReadOnlyCollection<AccountRestriction> restrictions)
+    {
+        var ban = restrictions.FirstOrDefault(x =>
+            x.RestrictionType == AccountRestrictionType.Ban);
+        var multiplayerRestriction = restrictions.FirstOrDefault(x =>
+            x.RestrictionType == AccountRestrictionType.MultiplayerRestriction);
+        return new(
             player.AccountId,
             player.CharacterId,
             player.AccountLabel,
@@ -305,7 +337,11 @@ public sealed class AdministrationRepository(IDbContext context) : IAdministrati
             player.CreatedUtc,
             ban?.Id,
             ban?.Reason,
-            ban?.ExpiresAt);
+            ban?.ExpiresAt,
+            multiplayerRestriction?.Id,
+            multiplayerRestriction?.Reason,
+            multiplayerRestriction?.ExpiresAt);
+    }
 
     private sealed record PlayerRow(
         Guid AccountId,

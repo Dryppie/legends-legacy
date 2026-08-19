@@ -4,6 +4,7 @@ using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Quests.Dtos;
 using AutoMapper;
 using Domain.Models.Attributes;
+using Domain.Models.Administration;
 
 namespace Application.UseCases.GameBootstrap.Dtos;
 
@@ -14,6 +15,7 @@ public sealed class GameBootstrapDto : IMapFrom<GameBootstrapSnapshot>
     public CharacterActionDto? CurrentAction { get; init; }
     public DateTimeOffset ServerTimeUtc { get; init; }
     public IReadOnlyCollection<AttributeDefinition> AttributeDefinitions { get; init; } = [];
+    public required AccountAccessDto AccountAccess { get; init; }
 
     public void Mapping(Profile profile)
     {
@@ -28,4 +30,21 @@ public sealed class GameBootstrapSnapshot
     public CharacterActionDto? CurrentAction { get; init; }
     public DateTimeOffset ServerTimeUtc { get; init; }
     public IReadOnlyCollection<AttributeDefinition> AttributeDefinitions { get; init; } = [];
+    public required AccountAccessDto AccountAccess { get; init; }
+}
+
+public sealed record AccountAccessDto(
+    bool CanParticipate,
+    bool IsPubliclyEligible,
+    string? RestrictionCode,
+    DateTimeOffset? ExpiresAt)
+{
+    public static AccountAccessDto From(AccountAccessSnapshot access) => new(
+        access.CanParticipate,
+        access.IsPubliclyEligible,
+        access.EffectiveRestriction?.RestrictionType ==
+            AccountRestrictionType.MultiplayerRestriction
+            ? "multiplayer_restricted"
+            : null,
+        access.EffectiveRestriction?.ExpiresAt);
 }

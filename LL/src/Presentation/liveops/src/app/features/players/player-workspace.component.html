@@ -10,7 +10,7 @@
         <button type="button" class="player-result" [class.selected]="selectedPlayer?.player?.characterId === player.characterId" (click)="selectPlayer(player)">
           <span class="avatar">{{ player.characterName.slice(0, 2).toUpperCase() }}</span>
           <span class="player-result-copy"><strong>{{ player.characterName }}</strong><span>Level {{ player.characterLevel }} · {{ player.accountLabel }}</span></span>
-          @if (player.activeBanId) { <span class="status-pill danger">Banned</span> } @else { <span class="status-dot" aria-label="No active account ban"></span> }
+          @if (player.activeBanId) { <span class="status-pill danger">Banned</span> } @else if (player.activeMultiplayerRestrictionId) { <span class="status-pill danger">Solo only</span> } @else { <span class="status-dot" aria-label="No active account restriction"></span> }
         </button>
       }
     </div>
@@ -33,7 +33,7 @@
       </div>
 
       <div class="status-strip">
-        <div class="status-card" [class.alert]="selectedPlayer.player.activeBanId"><span>Account access</span><strong>{{ selectedPlayer.player.activeBanId ? 'Banned' : 'Active' }}</strong><small>{{ selectedPlayer.player.activeBanReason || 'No active restriction' }}</small></div>
+        <div class="status-card" [class.alert]="selectedPlayer.player.activeBanId || selectedPlayer.player.activeMultiplayerRestrictionId"><span>Account access</span><strong>{{ selectedPlayer.player.activeBanId ? 'Banned' : selectedPlayer.player.activeMultiplayerRestrictionId ? 'Solo only' : 'Active' }}</strong><small>{{ selectedPlayer.player.activeBanReason || selectedPlayer.player.activeMultiplayerRestrictionReason || 'No active restriction' }}</small></div>
         <div class="status-card" [class.alert]="selectedPlayer.activeMute"><span>Chat access</span><strong>{{ selectedPlayer.activeMute ? 'Muted' : 'Active' }}</strong><small>{{ selectedPlayer.activeMute?.reason || selectedPlayer.chatStatusMessage || 'No active restriction' }}</small></div>
         <div class="status-card"><span>Recorded actions</span><strong>{{ timeline.length }}</strong><small>Game and Chat audit entries</small></div>
       </div>
@@ -63,17 +63,32 @@
         @if (activeSection === 'account') {
           @if (!hasPermission(permissions.account)) {
             <div class="permission-note">Your staff role can view this player but cannot moderate accounts.</div>
-          } @else if (selectedPlayer.player.activeBanId) {
-            <div class="operation-copy"><p class="eyebrow danger-text">Active restriction</p><h2>Revoke account ban</h2><p>{{ selectedPlayer.player.activeBanReason }}</p>@if (selectedPlayer.player.activeBanExpiresAt) { <p class="expiry">Expires {{ selectedPlayer.player.activeBanExpiresAt | date: 'medium' }}</p> } @else { <p class="expiry">Permanent until revoked</p> }</div>
-            <div class="form-grid compact"><label class="wide">Revocation reason<textarea [(ngModel)]="unbanReason" placeholder="Appeal outcome or support reference"></textarea></label><button class="primary" type="button" [disabled]="!!busyAction" (click)="revokeBan()">Revoke ban</button></div>
           } @else {
-            <div class="operation-copy"><p class="eyebrow">Account moderation</p><h2>Apply account ban</h2><p>Existing refresh tokens are revoked and authenticated Game requests are rejected.</p></div>
-            <div class="form-grid">
-              <label>Duration<select [(ngModel)]="banDuration"><option value="1h">1 hour</option><option value="24h">24 hours</option><option value="7d">7 days</option><option value="permanent">Permanent</option></select></label>
-              <label class="wide">Reason or support reference<textarea [(ngModel)]="banReason" placeholder="Required and visible in the audit trail"></textarea></label>
-              <label class="wide">Internal notes<textarea [(ngModel)]="banNotes" placeholder="Optional investigation context"></textarea></label>
-              <button class="danger-button" type="button" [disabled]="!!busyAction" (click)="applyBan()">Review and ban account</button>
-            </div>
+            @if (selectedPlayer.player.activeBanId) {
+              <div class="operation-copy"><p class="eyebrow danger-text">Active restriction</p><h2>Revoke account ban</h2><p>{{ selectedPlayer.player.activeBanReason }}</p>@if (selectedPlayer.player.activeBanExpiresAt) { <p class="expiry">Expires {{ selectedPlayer.player.activeBanExpiresAt | date: 'medium' }}</p> } @else { <p class="expiry">Permanent until revoked</p> }</div>
+              <div class="form-grid compact"><label class="wide">Revocation reason<textarea [(ngModel)]="unbanReason" placeholder="Appeal outcome or support reference"></textarea></label><button class="primary" type="button" [disabled]="!!busyAction" (click)="revokeBan()">Revoke ban</button></div>
+            } @else {
+              <div class="operation-copy"><p class="eyebrow">Account moderation</p><h2>Apply account ban</h2><p>Existing refresh tokens are revoked and authenticated Game requests are rejected.</p></div>
+              <div class="form-grid">
+                <label>Duration<select [(ngModel)]="banDuration"><option value="1h">1 hour</option><option value="24h">24 hours</option><option value="7d">7 days</option><option value="permanent">Permanent</option></select></label>
+                <label class="wide">Reason or support reference<textarea [(ngModel)]="banReason" placeholder="Required and visible in the audit trail"></textarea></label>
+                <label class="wide">Internal notes<textarea [(ngModel)]="banNotes" placeholder="Optional investigation context"></textarea></label>
+                <button class="danger-button" type="button" [disabled]="!!busyAction" (click)="applyBan()">Review and ban account</button>
+              </div>
+            }
+
+            @if (selectedPlayer.player.activeMultiplayerRestrictionId) {
+              <div class="operation-copy"><p class="eyebrow danger-text">Active multiplayer restriction</p><h2>Restore shared-game access</h2><p>{{ selectedPlayer.player.activeMultiplayerRestrictionReason }}</p>@if (selectedPlayer.player.activeMultiplayerRestrictionExpiresAt) { <p class="expiry">Expires {{ selectedPlayer.player.activeMultiplayerRestrictionExpiresAt | date: 'medium' }}</p> } @else { <p class="expiry">Permanent until revoked</p> }</div>
+              <div class="form-grid compact"><label class="wide">Revocation reason<textarea [(ngModel)]="multiplayerRestrictionRevokeReason" placeholder="Review outcome, remediation, or support reference"></textarea></label><button class="primary" type="button" [disabled]="!!busyAction" (click)="revokeMultiplayerRestriction()">Restore multiplayer access</button></div>
+            } @else {
+              <div class="operation-copy"><p class="eyebrow">Scoped gameplay sanction</p><h2>Restrict multiplayer access</h2><p>The player keeps solo access but is blocked from markets, transfers, competitive play, guild participation, public rankings, and server events.</p></div>
+              <div class="form-grid">
+                <label>Duration<select [(ngModel)]="multiplayerRestrictionDuration"><option value="1h">1 hour</option><option value="24h">24 hours</option><option value="7d">7 days</option><option value="permanent">Permanent</option></select></label>
+                <label class="wide">Player-facing reason or support reference<textarea [(ngModel)]="multiplayerRestrictionReason" placeholder="Required and visible in the audit trail"></textarea></label>
+                <label class="wide">Internal evidence or case notes<textarea [(ngModel)]="multiplayerRestrictionNotes" placeholder="Optional investigation context"></textarea></label>
+                <button class="danger-button" type="button" [disabled]="!!busyAction" (click)="applyMultiplayerRestriction()">Review and restrict multiplayer</button>
+              </div>
+            }
           }
         }
 

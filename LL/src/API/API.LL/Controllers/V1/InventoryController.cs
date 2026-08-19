@@ -50,7 +50,7 @@ public class InventoryController : BaseController
             request.IsFavorite));
 
     [HttpPost("items/{itemInstanceId:guid}/transfer")]
-    [Authorize(Policy = AuthorizationPolicies.RegisteredUser)]
+    [Authorize(Policy = AuthorizationPolicies.MultiplayerAllowed)]
     public async Task<ActionResult<Response<TransferInventoryItemResponseDto>>> Transfer(
         Guid itemInstanceId,
         [FromBody] TransferInventoryItemRequestDto request) =>

@@ -54,7 +54,7 @@ public class CharacterController : BaseController
         Ok(await Mediator.Send(new SearchCharacterNamesQuery(CurrentCharacterGuid, query)));
 
     [HttpPost("Wire")]
-    [Authorize(Policy = AuthorizationPolicies.RegisteredUser)]
+    [Authorize(Policy = AuthorizationPolicies.MultiplayerAllowed)]
     public async Task<ActionResult<Response<WireCindersResponseDto>>> Wire(
         [FromBody] WireCurrencyRequestDto request) =>
         await Mediator.Send(new WireCindersCommand(

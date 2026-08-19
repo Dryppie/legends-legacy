@@ -48,6 +48,10 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
   banNotes = '';
   banDuration: DurationOption = '24h';
   unbanReason = '';
+  multiplayerRestrictionReason = '';
+  multiplayerRestrictionNotes = '';
+  multiplayerRestrictionDuration: DurationOption = '24h';
+  multiplayerRestrictionRevokeReason = '';
   muteReason = '';
   muteDuration: DurationOption = '1h';
   unmuteReason = '';
@@ -202,6 +206,32 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
       'unban',
       (operationId) => this.api.previewUnban(restrictionId, { operationId, ...body }),
       (previewToken, operationId) => this.api.unban(restrictionId, { previewToken, operationId, ...body }),
+    );
+  }
+
+  async applyMultiplayerRestriction(): Promise<void> {
+    const player = this.selectedPlayer?.player;
+    if (!player || !this.requireReason(this.multiplayerRestrictionReason)) return;
+    const body = {
+      reason: this.multiplayerRestrictionReason.trim(),
+      internalNotes: this.cleanOptional(this.multiplayerRestrictionNotes),
+      expiresAt: this.expiresAt(this.multiplayerRestrictionDuration),
+    };
+    await this.openActionPreview(
+      'multiplayer-restriction',
+      (operationId) => this.api.previewMultiplayerRestriction(player.accountId, { operationId, ...body }),
+      (previewToken, operationId) => this.api.restrictMultiplayer(player.accountId, { previewToken, operationId, ...body }),
+    );
+  }
+
+  async revokeMultiplayerRestriction(): Promise<void> {
+    const restrictionId = this.selectedPlayer?.player.activeMultiplayerRestrictionId;
+    if (!restrictionId || !this.requireReason(this.multiplayerRestrictionRevokeReason)) return;
+    const body = { reason: this.multiplayerRestrictionRevokeReason.trim() };
+    await this.openActionPreview(
+      'multiplayer-restriction-revoke',
+      (operationId) => this.api.previewRevokeMultiplayerRestriction(restrictionId, { operationId, ...body }),
+      (previewToken, operationId) => this.api.revokeMultiplayerRestriction(restrictionId, { previewToken, operationId, ...body }),
     );
   }
 

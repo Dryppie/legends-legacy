@@ -33,6 +33,10 @@ export class GameBootstrapStateService {
   readonly loaded = computed(() => this._loaded());
   readonly error = computed(() => this._error());
   readonly serverTimeUtc = computed(() => this._serverTimeUtc());
+  readonly accountAccess = computed(() => this._bootstrap()?.accountAccess ?? null);
+  readonly canParticipate = computed(
+    () => this.accountAccess()?.canParticipate ?? true,
+  );
 
   constructor(
     private readonly bootstrapService: GameBootstrapService,
@@ -50,7 +54,8 @@ export class GameBootstrapStateService {
         }
 
         const reconnectCount = this.gameEvents.reconnectCount();
-        if (reconnectCount <= 0 || !this._loaded()) {
+        const accessChanged = this.gameEvents.event.AccountAccessChanged();
+        if (!this._loaded() || (reconnectCount <= 0 && !accessChanged)) {
           return;
         }
 

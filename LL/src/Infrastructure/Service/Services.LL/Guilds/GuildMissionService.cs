@@ -2,6 +2,7 @@ using Application.Common.Interfaces;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.Services.LL.Achievements;
+using Application.Interfaces.Services.LL.Administration;
 using Application.UseCases.Outbox;
 using Domain.Extensions.Guilds;
 using Domain.Models.Guilds;
@@ -22,9 +23,10 @@ public class GuildMissionService : IGuildMissionService
     private readonly IReadOnlyDictionary<Guid, GuildMissionDefinition> _allDefinitions;
     private readonly IAchievementService? _achievementService;
     private readonly IGameEventOutbox? _outbox;
+    private readonly IAccountRestrictionIndex? _accountRestrictions;
 
     public GuildMissionService(IDbContext context)
-        : this(context, new DefaultGuildContentProvider(), null, null)
+        : this(context, new DefaultGuildContentProvider(), null, null, null)
     {
     }
 
@@ -32,7 +34,8 @@ public class GuildMissionService : IGuildMissionService
         IDbContext context,
         IGuildContentProvider content,
         IAchievementService? achievementService = null,
-        IGameEventOutbox? outbox = null)
+        IGameEventOutbox? outbox = null,
+        IAccountRestrictionIndex? accountRestrictions = null)
     {
         _context = context;
         _weeklyDefinitions = content.WeeklyMissions;
@@ -40,6 +43,7 @@ public class GuildMissionService : IGuildMissionService
         _allDefinitions = _weeklyDefinitions.Concat(_dailyDefinitions).ToDictionary(x => x.Id);
         _achievementService = achievementService;
         _outbox = outbox;
+        _accountRestrictions = accountRestrictions;
     }
 
     public async Task<GuildMissionOverviewDto?> GetOverviewAsync(Guid characterId, DateTimeOffset now, CancellationToken cancellationToken)
@@ -199,6 +203,21 @@ public class GuildMissionService : IGuildMissionService
 
     public async Task<GuildContributionResult> RecordContributionAsync(GuildContributionEvent contributionEvent, CancellationToken cancellationToken)
     {
+        var accountId = contributionEvent.AccountId;
+        if (!accountId.HasValue && _accountRestrictions is not null)
+        {
+            accountId = await _context.Characters
+                .Where(x => x.Id == contributionEvent.CharacterId)
+                .Select(x => (Guid?)x.UserId)
+                .SingleOrDefaultAsync(cancellationToken);
+        }
+        if (_accountRestrictions is not null &&
+            (!accountId.HasValue ||
+             !_accountRestrictions.Get(accountId.Value).CanParticipate))
+        {
+            return new GuildContributionResult(false, false, 0, 0);
+        }
+
         if (contributionEvent.Amount <= 0)
         {
             return new GuildContributionResult(false, false, 0, 0);
@@ -270,7 +289,7 @@ public class GuildMissionService : IGuildMissionService
                 GameEventTypes.GuildMissionProgressed,
                 new GuildMissionProgressedPayload(guild.Id),
                 contributionEvent.CharacterId,
-                contributionEvent.AccountId,
+                accountId,
                 cancellationToken);
         }
 

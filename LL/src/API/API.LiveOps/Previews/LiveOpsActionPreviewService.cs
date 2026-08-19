@@ -92,7 +92,9 @@ public sealed class LiveOpsActionPreviewService(
         var restriction = await database.AccountRestrictions.AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == restrictionId, cancellationToken);
         var now = timeProvider.GetUtcNow();
-        if (restriction is null || !restriction.IsActive(now))
+        if (restriction is null ||
+            restriction.RestrictionType != AccountRestrictionType.Ban ||
+            !restriction.IsActive(now))
         {
             return Response<ActionPreviewDto>.Fail("The account ban is no longer active.");
         }
@@ -125,6 +127,122 @@ public sealed class LiveOpsActionPreviewService(
                 new("Revocation reason", reason.Trim())
             ],
             ["Account access will be restored immediately."],
+            cancellationToken);
+    }
+
+    public async Task<Response<ActionPreviewDto>> CreateMultiplayerRestrictionAsync(
+        Guid operationId,
+        Guid accountId,
+        AdministrationActor actor,
+        string reason,
+        string? internalNotes,
+        DateTimeOffset? expiresAt,
+        CancellationToken cancellationToken)
+    {
+        var validation = ValidateCommon(operationId, reason, internalNotes);
+        if (validation is not null) return Response<ActionPreviewDto>.Fail(validation);
+        var now = timeProvider.GetUtcNow();
+        if (expiresAt.HasValue && expiresAt.Value <= now)
+        {
+            return Response<ActionPreviewDto>.Fail(
+                "A temporary multiplayer restriction must expire in the future.");
+        }
+
+        var player = await liveOps.GetPlayerByAccountIdAsync(accountId, cancellationToken);
+        if (player is null) return Response<ActionPreviewDto>.Fail("The target account was not found.");
+        if (player.ActiveMultiplayerRestrictionId.HasValue)
+        {
+            return Response<ActionPreviewDto>.Fail(
+                "The target account already has an active multiplayer restriction.");
+        }
+
+        var requestHash = RequestHash(AdminActionPreviewKinds.MultiplayerRestriction, new
+        {
+            AccountId = accountId,
+            Reason = reason.Trim(),
+            InternalNotes = Normalize(internalNotes),
+            ExpiresAt = expiresAt?.ToUniversalTime()
+        });
+        var stateHash = StateHash(new
+        {
+            player.AccountId,
+            player.CharacterId,
+            player.ActiveMultiplayerRestrictionId
+        });
+        return await PersistAsync(
+            operationId,
+            AdminActionPreviewKinds.MultiplayerRestriction,
+            actor,
+            accountId,
+            requestHash,
+            stateHash,
+            new PreviewContext(player.CharacterId, null),
+            "Restrict multiplayer access",
+            player.CharacterName,
+            expiresAt.HasValue ? "Normal" : "Permanent",
+            expiresAt.HasValue ? null : player.CharacterName,
+            [
+                new("Account", player.AccountLabel),
+                new("Character", player.CharacterName),
+                new("Current multiplayer restriction", "None"),
+                new("Expiry", expiresAt?.ToUniversalTime().ToString("O") ?? "Permanent"),
+                new("Reason", reason.Trim()),
+                new("Internal notes", Normalize(internalNotes) ?? "None")
+            ],
+            expiresAt.HasValue
+                ? ["Trading, transfers, competition, guild mutations, rankings, and server-event participation will be blocked."]
+                : ["This restriction is permanent until explicitly revoked.", "Trading, transfers, competition, guild mutations, rankings, and server-event participation will be blocked."],
+            cancellationToken);
+    }
+
+    public async Task<Response<ActionPreviewDto>> CreateMultiplayerRestrictionRevokeAsync(
+        Guid operationId,
+        Guid restrictionId,
+        AdministrationActor actor,
+        string reason,
+        CancellationToken cancellationToken)
+    {
+        var validation = ValidateCommon(operationId, reason, null);
+        if (validation is not null) return Response<ActionPreviewDto>.Fail(validation);
+        await using var database = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var restriction = await database.AccountRestrictions.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == restrictionId, cancellationToken);
+        var now = timeProvider.GetUtcNow();
+        if (restriction is null ||
+            restriction.RestrictionType != AccountRestrictionType.MultiplayerRestriction ||
+            !restriction.IsActive(now))
+        {
+            return Response<ActionPreviewDto>.Fail(
+                "The multiplayer restriction is no longer active.");
+        }
+        var player = await liveOps.GetPlayerByAccountIdAsync(
+            restriction.AccountId,
+            cancellationToken);
+        if (player is null) return Response<ActionPreviewDto>.Fail("The target account was not found.");
+
+        return await PersistAsync(
+            operationId,
+            AdminActionPreviewKinds.MultiplayerRestrictionRevoke,
+            actor,
+            restrictionId,
+            RequestHash(AdminActionPreviewKinds.MultiplayerRestrictionRevoke, new
+            {
+                RestrictionId = restrictionId,
+                Reason = reason.Trim()
+            }),
+            RestrictionStateHash(restriction),
+            new PreviewContext(player.CharacterId, null),
+            "Revoke multiplayer restriction",
+            player.CharacterName,
+            "Normal",
+            null,
+            [
+                new("Character", player.CharacterName),
+                new("Current restriction", restriction.Reason),
+                new("Current expiry", restriction.ExpiresAt?.ToUniversalTime().ToString("O") ?? "Permanent"),
+                new("Revocation reason", reason.Trim())
+            ],
+            ["Shared-system access will be restored after restriction snapshots refresh. Review restricted-period progression before release."],
             cancellationToken);
     }
 
@@ -311,6 +429,26 @@ public sealed class LiveOpsActionPreviewService(
                 RestrictionId = restrictionId, Reason = NormalizeRequired(reason)
             }), cancellationToken);
 
+    public Task<PreviewSubmissionResult> BeginMultiplayerRestrictionAsync(
+        Guid token, Guid operationId, Guid accountId, AdministrationActor actor,
+        string reason, string? internalNotes, DateTimeOffset? expiresAt,
+        CancellationToken cancellationToken) => BeginAsync(
+            token, operationId, AdminActionPreviewKinds.MultiplayerRestriction, accountId, actor,
+            RequestHash(AdminActionPreviewKinds.MultiplayerRestriction, new
+            {
+                AccountId = accountId, Reason = NormalizeRequired(reason), InternalNotes = Normalize(internalNotes),
+                ExpiresAt = expiresAt?.ToUniversalTime()
+            }), cancellationToken);
+
+    public Task<PreviewSubmissionResult> BeginMultiplayerRestrictionRevokeAsync(
+        Guid token, Guid operationId, Guid restrictionId, AdministrationActor actor,
+        string reason, CancellationToken cancellationToken) => BeginAsync(
+            token, operationId, AdminActionPreviewKinds.MultiplayerRestrictionRevoke, restrictionId, actor,
+            RequestHash(AdminActionPreviewKinds.MultiplayerRestrictionRevoke, new
+            {
+                RestrictionId = restrictionId, Reason = NormalizeRequired(reason)
+            }), cancellationToken);
+
     public Task<PreviewSubmissionResult> BeginChatMuteAsync(
         Guid token, Guid operationId, Guid characterId, AdministrationActor actor,
         string reason, DateTimeOffset? expiresAt, CancellationToken cancellationToken) => BeginAsync(
@@ -438,6 +576,29 @@ public sealed class LiveOpsActionPreviewService(
                     .FirstOrDefaultAsync(x => x.Id == preview.TargetId, cancellationToken);
                 return restriction is null
                     ? StateResult.Fail("The account ban is no longer available.")
+                    : StateResult.Success(RestrictionStateHash(restriction));
+            }
+            case AdminActionPreviewKinds.MultiplayerRestriction:
+            {
+                var player = await liveOps.GetPlayerByAccountIdAsync(
+                    preview.TargetId,
+                    cancellationToken);
+                return player is null
+                    ? StateResult.Fail("The target account is no longer available.")
+                    : StateResult.Success(StateHash(new
+                    {
+                        player.AccountId,
+                        player.CharacterId,
+                        player.ActiveMultiplayerRestrictionId
+                    }));
+            }
+            case AdminActionPreviewKinds.MultiplayerRestrictionRevoke:
+            {
+                await using var database = await contextFactory.CreateDbContextAsync(cancellationToken);
+                var restriction = await database.AccountRestrictions.AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == preview.TargetId, cancellationToken);
+                return restriction is null
+                    ? StateResult.Fail("The multiplayer restriction is no longer available.")
                     : StateResult.Success(RestrictionStateHash(restriction));
             }
             case AdminActionPreviewKinds.ChatMute:

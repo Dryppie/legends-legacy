@@ -6,6 +6,8 @@ using Domain.Models.Transfers;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Repositories.Inventories;
+using Domain.Models.Administration;
+using Domain.Models.Users;
 
 namespace EssenceSystem.Tests;
 
@@ -174,6 +176,105 @@ public sealed class InventoryTransferTests
     }
 
     [Fact]
+    public async Task Transfer_to_multiplayer_restricted_recipient_is_rejected_without_mutating_inventory()
+    {
+        await using var db = CreateDb();
+        var senderId = Guid.NewGuid();
+        var recipientId = Guid.NewGuid();
+        AddInventories(db, senderId, recipientId);
+        var recipientAccountId = db.Characters.Local
+            .Single(x => x.Id == recipientId)
+            .UserId;
+        var item = AddItem(db, senderId, "iron_ore", quantity: 5, stackable: true);
+        db.AccountRestrictions.Add(new AccountRestriction
+        {
+            AccountId = recipientAccountId,
+            RestrictionType = AccountRestrictionType.MultiplayerRestriction,
+            Reason = "Test restriction",
+            CreatedBySubject = "staff|moderator",
+            CreatedAt = DateTimeOffset.UtcNow
+        });
+        await db.SaveChangesAsync();
+
+        var result = await new InventoryRepository(db).TransferItemAsync(
+            senderId,
+            recipientId,
+            item.ItemInstanceId,
+            2,
+            CancellationToken.None);
+
+        Assert.Equal(InventoryTransferFailure.AccountRestricted, result.Failure);
+        Assert.Equal(5, item.Quantity);
+        Assert.False(await db.InventoryItems.AnyAsync(x => x.InventoryId == recipientId));
+        Assert.Empty(db.PlayerTransferHistory);
+    }
+
+    [Fact]
+    public async Task Transfer_from_multiplayer_restricted_sender_is_rejected_without_mutating_inventory()
+    {
+        await using var db = CreateDb();
+        var senderId = Guid.NewGuid();
+        var recipientId = Guid.NewGuid();
+        AddInventories(db, senderId, recipientId);
+        var senderAccountId = db.Characters.Local
+            .Single(x => x.Id == senderId)
+            .UserId;
+        var item = AddItem(db, senderId, "iron_ore", quantity: 5, stackable: true);
+        db.AccountRestrictions.Add(new AccountRestriction
+        {
+            AccountId = senderAccountId,
+            RestrictionType = AccountRestrictionType.MultiplayerRestriction,
+            Reason = "Test restriction",
+            CreatedBySubject = "staff|moderator",
+            CreatedAt = DateTimeOffset.UtcNow
+        });
+        await db.SaveChangesAsync();
+
+        var result = await new InventoryRepository(db).TransferItemAsync(
+            senderId,
+            recipientId,
+            item.ItemInstanceId,
+            2,
+            CancellationToken.None);
+
+        Assert.Equal(InventoryTransferFailure.AccountRestricted, result.Failure);
+        Assert.Equal(5, item.Quantity);
+        Assert.False(await db.InventoryItems.AnyAsync(x => x.InventoryId == recipientId));
+        Assert.Empty(db.PlayerTransferHistory);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Transfer_rejects_a_guest_participant_without_mutating_inventory(bool senderIsGuest)
+    {
+        await using var db = CreateDb();
+        var senderId = Guid.NewGuid();
+        var recipientId = Guid.NewGuid();
+        AddInventories(db, senderId, recipientId);
+        var participants = db.Characters.Local
+            .Where(x => x.Id == senderId || x.Id == recipientId)
+            .ToDictionary(x => x.Id);
+        var guestAccountId = participants[senderIsGuest ? senderId : recipientId].UserId;
+        db.Users.Local.Single(x => x.Id == guestAccountId).IsGuest = true;
+        var item = AddItem(db, senderId, "iron_ore", quantity: 5, stackable: true);
+        await db.SaveChangesAsync();
+
+        var result = await new InventoryRepository(db).TransferItemAsync(
+            senderId,
+            recipientId,
+            item.ItemInstanceId,
+            2,
+            CancellationToken.None);
+
+        Assert.Equal(InventoryTransferFailure.GuestAccount, result.Failure);
+        Assert.Equal(5, item.Quantity);
+        Assert.False(await db.InventoryItems.AnyAsync(x => x.InventoryId == recipientId));
+        Assert.Empty(db.PlayerTransferHistory);
+        Assert.Empty(db.EconomyLedger);
+    }
+
+    [Fact]
     public async Task Transfer_larger_than_owned_quantity_is_rejected()
     {
         await using var db = CreateDb();
@@ -198,12 +299,21 @@ public sealed class InventoryTransferTests
 
     private static void AddInventories(LLDbContext db, params Guid[] characterIds)
     {
-        db.Characters.AddRange(characterIds.Select((id, index) => new Character
+        foreach (var (id, index) in characterIds.Select((id, index) => (id, index)))
         {
-            Id = id,
-            UserId = Guid.NewGuid(),
-            Name = $"TransferTester{index}-{id:N}"[..26]
-        }));
+            var user = new AppUser
+            {
+                Username = $"TransferTester{index}-{id:N}"[..26],
+                IsGuest = false
+            };
+            db.Users.Add(user);
+            db.Characters.Add(new Character
+            {
+                Id = id,
+                UserId = user.Id,
+                Name = $"TransferTester{index}-{id:N}"[..26]
+            });
+        }
         db.Inventories.AddRange(characterIds.Select(id => new Inventory { CharacterId = id }));
     }
 

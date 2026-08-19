@@ -68,6 +68,7 @@ export const gameEventNames = [
   'PlayerTransferMsg',
   'WorldTowerRallyUpdated',
   'WorldTowerCombatFrameUpdated',
+  'AccountAccessChanged',
 ] as const;
 
 export type GameEventSignalMap = {
@@ -109,6 +110,11 @@ export interface GameEventMap {
   PlayerTransferMsg: PlayerTransferMsg;
   WorldTowerRallyUpdated: WorldTowerRallyUpdated;
   WorldTowerCombatFrameUpdated: WorldTowerCombatFrameUpdated;
+  AccountAccessChanged: {
+    accountId: string;
+    reason: string;
+    occurredAtUtc: string;
+  };
   //   SaleCompleted: SaleCompletedMsg;
   //   RiftOpened:    RiftOpenedMsg;
   // 💡 when you add a new C# record and regenerate the client

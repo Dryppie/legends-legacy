@@ -38,7 +38,7 @@ public sealed class LiveOpsApplicationRegistrationTests
                     typeof(IRequestHandler<,>)))
             .ToList();
 
-        Assert.Equal(15, handlers.Count);
+        Assert.Equal(17, handlers.Count);
         Assert.All(handlers, descriptor => Assert.StartsWith(
             "Application.UseCases.Administration",
             descriptor.ImplementationType?.Namespace,
@@ -98,6 +98,9 @@ public sealed class LiveOpsApplicationRegistrationTests
                 "Admin",
                 42,
                 new DateTime(2026, 8, 17, 0, 0, 0, DateTimeKind.Utc),
+                null,
+                null,
+                null,
                 null,
                 null,
                 null)
