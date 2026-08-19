@@ -5,6 +5,10 @@ public sealed record DungeonAccessResult(
     IReadOnlyList<string> MissingRequirements,
     IReadOnlyList<DungeonEntryRequirementResult> EntryRequirements);
 
+public sealed record DungeonPreviewAccess(
+    DungeonAccessResult Entry,
+    DungeonAccessResult? SigilAssembly);
+
 public sealed record DungeonEntryRequirementResult(
     string ItemId,
     string Name,

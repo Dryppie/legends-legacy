@@ -153,6 +153,60 @@ describe('GuildStateService description updates', () => {
   });
 });
 
+describe('GuildStateService refreshes', () => {
+  it('shares overlapping guild refreshes', () => {
+    TestBed.configureTestingModule({});
+    const guildRequest = new Subject<Guild | null>();
+    const guildService = {
+      getMyGuild: jasmine
+        .createSpy()
+        .and.returnValue(guildRequest.asObservable()),
+    };
+    const eventService = {
+      eventEnvelope: {
+        GuildDirectoryChangedMsg: signal(null),
+        GuildInviteReceivedMsg: signal(null),
+        GuildInviteRejectedMsg: signal(null),
+        GuildApplicationRejectedMsg: signal(null),
+        GuildMembershipChangedMsg: signal(null),
+        GuildBuildingsChangedMsg: signal(null),
+        GuildMissionsChangedMsg: signal(null),
+        GuildApplicationMsg: signal(null),
+        GuildStateChangedMsg: signal(null),
+        GuildDisbandedMsg: signal(null),
+      },
+      reconnectCount: signal(0),
+      setGuildSubscription: jasmine
+        .createSpy()
+        .and.returnValue(Promise.resolve()),
+    };
+    const stateSync = { register: jasmine.createSpy() };
+    const injector = TestBed.inject(Injector);
+    const state = TestBed.runInInjectionContext(
+      () =>
+        new GuildStateService(
+          guildService as never,
+          eventService as never,
+          { isAuthenticated: () => false } as never,
+          { count: () => 0 } as never,
+          {} as never,
+          injector,
+          stateSync as never,
+        ),
+    );
+
+    state.refresh();
+    state.refresh();
+
+    expect(guildService.getMyGuild).toHaveBeenCalledTimes(1);
+
+    guildRequest.complete();
+    state.refresh();
+
+    expect(guildService.getMyGuild).toHaveBeenCalledTimes(2);
+  });
+});
+
 function createGuild(description: string): Guild {
   return {
     id: 'guild-id',

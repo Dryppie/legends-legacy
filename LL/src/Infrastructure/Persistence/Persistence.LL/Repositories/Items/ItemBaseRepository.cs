@@ -20,6 +20,7 @@ public class ItemBaseRepository : IItemBaseRepository
             .AsNoTracking()
             .Include(x => (x as EquipmentBase)!.AttributeModifiers)
             .Include(x => (x as EquipmentBase)!.ToolBonuses)
+            .AsSplitQuery()
             .Where(x => !x.IsBound)
             .OrderBy(x => x.ItemType)
             .ThenBy(x => x.Name)
@@ -37,6 +38,7 @@ public class ItemBaseRepository : IItemBaseRepository
         return await _context.ItemBases
             .Include(x => (x as EquipmentBase)!.AttributeModifiers)
             .Include(x => (x as EquipmentBase)!.ToolBonuses)
+            .AsSplitQuery()
             .Where(x => itemIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, cancellationToken);
     }

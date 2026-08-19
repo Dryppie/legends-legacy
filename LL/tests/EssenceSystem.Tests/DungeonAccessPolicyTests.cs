@@ -48,6 +48,53 @@ public sealed class DungeonAccessPolicyTests
         Assert.Single(assembly.EntryRequirements);
     }
 
+    [Fact]
+    public async Task Preview_access_preserves_entry_and_progression_requirements()
+    {
+        await using var db = CreateDb();
+        db.ItemBases.Add(new ItemBase
+        {
+            Id = "sigil_test",
+            Name = "Test Sigil",
+            ItemType = ItemType.Resource,
+            Stackable = true
+        });
+        await db.SaveChangesAsync();
+
+        var policy = new DungeonAccessPolicy(
+            new DungeonRunRepository(db),
+            new InventoryRepository(db),
+            new ItemBaseRepository(db));
+        var dungeons = new[]
+        {
+            new DungeonDefinition
+            {
+                Id = "test_dungeon.grade_1",
+                SigilItemId = "sigil_test",
+                EntryCosts = [new DungeonEntryCost { ItemId = "sigil_test", Amount = 1 }]
+            },
+            new DungeonDefinition
+            {
+                Id = "test_dungeon.grade_2",
+                SigilItemId = "sigil_test",
+                RequiredPreviousDungeonId = "test_dungeon.grade_1",
+                EntryCosts = [new DungeonEntryCost { ItemId = "sigil_test", Amount = 1 }]
+            }
+        };
+
+        var preview = await policy.EvaluateForPreviewAsync(
+            Guid.NewGuid(),
+            dungeons,
+            CancellationToken.None);
+
+        Assert.False(preview["test_dungeon.grade_1"].Entry.CanEnter);
+        Assert.True(preview["test_dungeon.grade_1"].SigilAssembly!.CanEnter);
+        Assert.False(preview["test_dungeon.grade_2"].SigilAssembly!.CanEnter);
+        Assert.Equal(
+            "Complete the previous difficulty first.",
+            Assert.Single(preview["test_dungeon.grade_2"].SigilAssembly!.MissingRequirements));
+    }
+
     private static LLDbContext CreateDb()
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()

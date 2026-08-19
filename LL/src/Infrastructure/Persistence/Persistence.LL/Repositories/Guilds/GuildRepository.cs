@@ -66,6 +66,8 @@ public class GuildRepository : IGuildRepository
                 .ThenInclude(x => x.EquipmentInstance)
                     .ThenInclude(x => x.ItemBase)
                         .ThenInclude(x => (x as Domain.Models.Items.Equipments.EquipmentBase).ToolBonuses)
+            .AsSplitQuery()
+            .AsNoTracking()
             .SingleOrDefaultAsync(g => g.Members.Select(gm => gm.CharacterId).Contains(characterId), cancellationToken);
 
     public async Task<List<Guild>> GetAllGuildsAsync(CancellationToken cancellationToken) =>

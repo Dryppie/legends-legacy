@@ -13,4 +13,9 @@ public interface IDungeonAccessPolicy
         Guid characterId,
         DungeonDefinition dungeon,
         CancellationToken cancellationToken);
+
+    Task<IReadOnlyDictionary<string, DungeonPreviewAccess>> EvaluateForPreviewAsync(
+        Guid characterId,
+        IReadOnlyCollection<DungeonDefinition> dungeons,
+        CancellationToken cancellationToken);
 }

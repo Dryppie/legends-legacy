@@ -74,6 +74,10 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             request.CharacterId,
             dungeons.Select(x => x.Id).ToArray(),
             cancellationToken);
+        var accessByDungeon = await _dungeonAccess.EvaluateForPreviewAsync(
+            request.CharacterId,
+            dungeons,
+            cancellationToken);
         var sigilSettings = _sigilAssemblySettings.GetSettings();
 
         foreach (var dungeon in dungeons)
@@ -81,16 +85,9 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             _powerRecommendations.TryGet(dungeon.Id, out var powerRecommendation);
             records.TryGetValue(dungeon.Id, out var record);
             masteryByDungeon.TryGetValue(dungeon.Id, out var mastery);
-            var access = await _dungeonAccess.EvaluateAsync(
-                request.CharacterId,
-                dungeon,
-                cancellationToken);
-            var sigilAssemblyAccess = string.IsNullOrWhiteSpace(dungeon.SigilItemId)
-                ? null
-                : await _dungeonAccess.EvaluateForSigilAssemblyAsync(
-                    request.CharacterId,
-                    dungeon,
-                    cancellationToken);
+            var accessSnapshot = accessByDungeon[dungeon.Id];
+            var access = accessSnapshot.Entry;
+            var sigilAssemblyAccess = accessSnapshot.SigilAssembly;
             var sigilRequirement = access.EntryRequirements.FirstOrDefault(x =>
                 x.ItemId.Equals(dungeon.SigilItemId, StringComparison.OrdinalIgnoreCase));
 

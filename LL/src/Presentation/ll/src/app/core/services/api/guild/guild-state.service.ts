@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, effect, Injector } from '@angular/core';
-import { finalize, Observable, tap } from 'rxjs';
+import { finalize, Observable, shareReplay, tap } from 'rxjs';
 import { Guild, GuildSimple } from '../../../../shared/models/Dtos/guild/guild';
 import { GuildInvite } from '../../../../shared/models/Dtos/guild/guildInvite';
 import { InviteToGuild } from '../../../../shared/models/requestDtos/guilds/inviteToGuild';
@@ -132,6 +132,7 @@ export class GuildStateService {
   private hasLoaded = false;
   private lastTokenGuildId: string | null | undefined = undefined;
   private refreshRequestId = 0;
+  private guildSync$: Observable<unknown> | null = null;
   private missionRequestId = 0;
   private descriptionMutationId = 0;
   private pendingDescription: PendingGuildDescription | null = null;
@@ -392,11 +393,13 @@ export class GuildStateService {
   }
 
   private synchronize(): Observable<unknown> {
+    if (this.guildSync$) return this.guildSync$;
+
     this.hasLoaded = true;
     this._loading.set(true);
     const requestId = ++this.refreshRequestId;
 
-    return this.service
+    const request$ = this.service
       .getMyGuild()
       .pipe(
         tap({
@@ -407,9 +410,14 @@ export class GuildStateService {
           error: (err) => this._error.set(err.message ?? 'Unknown error'),
         }),
         finalize(() => {
+          if (this.guildSync$ === request$) this.guildSync$ = null;
           if (requestId === this.refreshRequestId) this._loading.set(false);
         }),
+        shareReplay({ bufferSize: 1, refCount: false }),
       );
+
+    this.guildSync$ = request$;
+    return request$;
   }
 
   private applyGuildSnapshot(responseGuild: Guild | null): void {
