@@ -1,0 +1,21 @@
+.tempering-inventory {
+  container-type: inline-size;
+}
+
+.tempering-inventory-grid {
+  grid-template-columns: minmax(0, 1fr) 4.75rem;
+}
+
+.tempering-wide-column {
+  display: none;
+}
+
+@container (min-width: 40rem) {
+  .tempering-inventory-grid {
+    grid-template-columns: minmax(0, 1fr) 6.5rem 4.75rem 6.5rem;
+  }
+
+  .tempering-wide-column {
+    display: block;
+  }
+}

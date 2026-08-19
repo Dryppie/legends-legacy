@@ -60,6 +60,7 @@ const QUALITY_ORDER: Record<ItemQuality, number> = {
     EquipmentDisplayComponent,
   ],
   templateUrl: './tempering.component.html',
+  styleUrl: './tempering.component.css',
 })
 export class TemperingComponent implements OnDestroy {
   @Input({ required: true }) inventory!: Signal<InventoryItem[]>;

@@ -356,15 +356,15 @@
   </div>
 
   <div
-    class="order-1 flex min-h-24 w-full shrink-0 flex-col space-y-2 md:min-h-0 md:overflow-hidden md:[contain:size]"
+    class="tempering-inventory order-1 flex min-h-24 w-full shrink-0 flex-col space-y-2 md:min-h-0 md:overflow-hidden md:[contain:size]"
   >
     <ng-container
       *ngIf="filteredInventory().length; else noItemsToTemper"
       data-tour="first-tempering"
     >
-      <div class="flex items-center justify-between gap-3">
-        <h2 class="ll-heading text-xl">Items To Temper</h2>
-        <span class="ll-badge shrink-0 rounded text-xs text-secondary">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 class="ll-heading whitespace-nowrap text-xl">Items To Temper</h2>
+        <span class="ll-badge ml-auto shrink-0 rounded text-xs text-secondary">
           {{ filteredInventory().length }}
           {{ filteredInventory().length === 1 ? "item" : "items" }} shown
         </span>
@@ -376,7 +376,7 @@
         aria-label="Items to temper"
       >
         <div
-          class="grid min-h-8 grid-cols-[minmax(0,1fr)_4.75rem] items-center gap-2 border-b border-light_gray/60 px-3 text-xs uppercase tracking-[0.12em] text-secondary md:sticky md:top-0 md:z-10 md:bg-[#111114] lg:grid-cols-[minmax(0,1fr)_6.5rem_4.75rem_6.5rem]"
+          class="tempering-inventory-grid grid min-h-8 items-center gap-2 border-b border-light_gray/60 px-3 text-xs uppercase tracking-[0.12em] text-secondary md:sticky md:top-0 md:z-10 md:bg-[#111114]"
           role="row"
         >
           <div role="columnheader" [attr.aria-sort]="ariaSort('Name')">
@@ -390,7 +390,7 @@
             </button>
           </div>
           <div
-            class="hidden lg:block"
+            class="tempering-wide-column"
             role="columnheader"
             [attr.aria-sort]="ariaSort('Quality')"
           >
@@ -420,7 +420,7 @@
             </button>
           </div>
           <div
-            class="hidden text-right lg:block"
+            class="tempering-wide-column text-right"
             role="columnheader"
             [attr.aria-sort]="ariaSort('Gear Power')"
           >
@@ -438,7 +438,7 @@
 
         <div
           *ngFor="let item of filteredInventory()"
-          class="grid min-h-12 cursor-pointer grid-cols-[minmax(0,1fr)_4.75rem] items-center gap-2 border-b border-l-2 border-light_gray/60 px-3 py-2 transition-colors last:border-b-0 hover:border-l-light_gray hover:bg-white/5 lg:grid-cols-[minmax(0,1fr)_6.5rem_4.75rem_6.5rem]"
+          class="tempering-inventory-grid grid min-h-12 cursor-pointer items-center gap-2 border-b border-l-2 border-light_gray/60 px-3 py-2 transition-colors last:border-b-0 hover:border-l-light_gray hover:bg-white/5"
           role="row"
           (click)="selectItem(item.itemInstance)"
           [ngClass]="{
@@ -462,7 +462,7 @@
             </div>
 
             <span
-              class="hidden whitespace-nowrap text-sm text-secondary lg:block"
+              class="tempering-wide-column whitespace-nowrap text-sm text-secondary"
               role="cell"
             >
               {{ equipment.quality }}
@@ -472,7 +472,10 @@
               {{ equipment.potential ?? 0 }}
             </span>
 
-            <strong class="hidden text-right tabular-nums lg:block" role="cell">
+            <strong
+              class="tempering-wide-column text-right tabular-nums"
+              role="cell"
+            >
               {{ equipment.itemBudget | number: "1.0-2" }}
             </strong>
           </ng-container>
