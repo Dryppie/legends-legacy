@@ -358,7 +358,7 @@
       "id": "essence.transparent_slime",
       "sourceMonsterId": "monster.transparent_slime",
       "name": "Transparent Slime Essence",
-      "description": "The combat essence of Transparent Slime, granting Transparent Engulf and Reconstitute.",
+      "description": "The combat essence of Transparent Slime, granting Gelatinous Defiance and Reconstitute.",
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [],

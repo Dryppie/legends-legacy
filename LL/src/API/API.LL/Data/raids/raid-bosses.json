@@ -15,8 +15,8 @@
           "laneSlots": 3,
           "minimumRoster": 3,
           "signupWindowHours": 24,
-          "recommendedWingPower": { "vanguard": 210, "flank": 150, "ward": 160 },
-          "tickBudget": { "vanguard": 6000, "flank": 3000, "ward": 4000 },
+          "recommendedWingPower": { "rearguard": 150, "vanguard": 210, "mainGuard": 160 },
+          "tickBudget": { "rearguard": 3000, "vanguard": 4000, "mainGuard": 600, "finalAssault": 6000 },
           "boss": {
             "creatureId": "00000000-0000-0000-0000-000000000082",
             "scaling": { "health": 42.0, "offense": 26.0, "defense": 8.0, "resistance": 8.0, "penetration": 5.0, "regeneration": 3.0 },
@@ -27,23 +27,30 @@
                 "scaling": { "health": 48.0, "offense": 30.0, "defense": 9.0, "resistance": 8.0, "penetration": 6.0, "regeneration": 3.0 }
               }
             ],
-            "maxReinforceOffensePercent": 40,
-            "maxWardBreakPercent": 50,
+            "maxGuardianBreakPercent": 50,
+            "maxSignaturePowerReductionPercent": 30,
+            "maxSignatureCooldownDelayPercent": 25,
             "overtimeStartsAtTick": 4500,
             "overtimePowerIncreasePercent": 6
           },
-          "flank": {
+          "rearguard": {
+            "waveCount": 10,
             "adds": [
               { "creatureId": "00000000-0000-0000-0000-000000000079", "count": 2, "scaling": { "health": 5.0, "offense": 12.0 } },
               { "creatureId": "00000000-0000-0000-0000-000000000080", "count": 1, "scaling": { "health": 6.0, "offense": 14.0 } }
             ]
           },
-          "ward": {
-            "objectiveCreatureId": "00000000-0000-0000-0000-000000000081",
-            "objectiveScaling": { "health": 18.0, "defense": 22.0, "resistance": 18.0, "offense": 6.0 },
-            "guards": [
+          "vanguard": {
+            "guardianCreatureId": "00000000-0000-0000-0000-000000000081",
+            "guardianScaling": { "health": 18.0, "defense": 22.0, "resistance": 18.0, "offense": 6.0 },
+            "escorts": [
               { "creatureId": "00000000-0000-0000-0000-000000000079", "count": 1, "scaling": { "health": 4.0, "offense": 10.0 } }
             ]
+          },
+          "mainGuard": {
+            "projectionCreatureId": "00000000-0000-0000-0000-000000000082",
+            "projectionScaling": { "health": 200.0, "offense": 8.0, "defense": 8.0, "resistance": 8.0, "penetration": 5.0 },
+            "survivalThresholdsPercent": [33, 67, 100]
           },
           "rewards": {
             "slainTrophies": 100,
@@ -61,8 +68,8 @@
           "laneSlots": 4,
           "minimumRoster": 6,
           "signupWindowHours": 24,
-          "recommendedWingPower": { "vanguard": 390, "flank": 300, "ward": 320 },
-          "tickBudget": { "vanguard": 6000, "flank": 3400, "ward": 4400 },
+          "recommendedWingPower": { "rearguard": 300, "vanguard": 390, "mainGuard": 320 },
+          "tickBudget": { "rearguard": 3400, "vanguard": 4400, "mainGuard": 600, "finalAssault": 6000 },
           "boss": {
             "creatureId": "00000000-0000-0000-0000-000000000082",
             "scaling": { "health": 68.0, "offense": 39.0, "defense": 11.0, "resistance": 11.0, "penetration": 7.0, "regeneration": 4.0 },
@@ -73,24 +80,31 @@
                 "scaling": { "health": 76.0, "offense": 44.0, "defense": 12.0, "resistance": 11.0, "penetration": 8.0, "regeneration": 4.0 }
               }
             ],
-            "maxReinforceOffensePercent": 45,
-            "maxWardBreakPercent": 55,
+            "maxGuardianBreakPercent": 55,
+            "maxSignaturePowerReductionPercent": 30,
+            "maxSignatureCooldownDelayPercent": 25,
             "overtimeStartsAtTick": 4400,
             "overtimePowerIncreasePercent": 7
           },
-          "flank": {
+          "rearguard": {
+            "waveCount": 10,
             "adds": [
               { "creatureId": "00000000-0000-0000-0000-000000000079", "count": 3, "scaling": { "health": 8.0, "offense": 18.0 } },
               { "creatureId": "00000000-0000-0000-0000-000000000080", "count": 2, "scaling": { "health": 9.0, "offense": 20.0 } }
             ]
           },
-          "ward": {
-            "objectiveCreatureId": "00000000-0000-0000-0000-000000000081",
-            "objectiveScaling": { "health": 28.0, "defense": 28.0, "resistance": 24.0, "offense": 8.0 },
-            "guards": [
+          "vanguard": {
+            "guardianCreatureId": "00000000-0000-0000-0000-000000000081",
+            "guardianScaling": { "health": 28.0, "defense": 28.0, "resistance": 24.0, "offense": 8.0 },
+            "escorts": [
               { "creatureId": "00000000-0000-0000-0000-000000000079", "count": 2, "scaling": { "health": 7.0, "offense": 15.0 } },
               { "creatureId": "00000000-0000-0000-0000-000000000080", "count": 1, "scaling": { "health": 7.0, "offense": 15.0 } }
             ]
+          },
+          "mainGuard": {
+            "projectionCreatureId": "00000000-0000-0000-0000-000000000082",
+            "projectionScaling": { "health": 250.0, "offense": 12.0, "defense": 11.0, "resistance": 11.0, "penetration": 7.0 },
+            "survivalThresholdsPercent": [33, 67, 100]
           },
           "rewards": {
             "slainTrophies": 180,
@@ -108,8 +122,8 @@
           "laneSlots": 5,
           "minimumRoster": 9,
           "signupWindowHours": 24,
-          "recommendedWingPower": { "vanguard": 620, "flank": 480, "ward": 510 },
-          "tickBudget": { "vanguard": 6000, "flank": 3800, "ward": 4800 },
+          "recommendedWingPower": { "rearguard": 480, "vanguard": 620, "mainGuard": 510 },
+          "tickBudget": { "rearguard": 3800, "vanguard": 4800, "mainGuard": 600, "finalAssault": 6000 },
           "boss": {
             "creatureId": "00000000-0000-0000-0000-000000000082",
             "scaling": { "health": 105.0, "offense": 56.0, "defense": 15.0, "resistance": 15.0, "penetration": 9.0, "regeneration": 5.0 },
@@ -120,24 +134,31 @@
                 "scaling": { "health": 118.0, "offense": 63.0, "defense": 17.0, "resistance": 15.0, "penetration": 10.0, "regeneration": 5.0 }
               }
             ],
-            "maxReinforceOffensePercent": 50,
-            "maxWardBreakPercent": 60,
+            "maxGuardianBreakPercent": 60,
+            "maxSignaturePowerReductionPercent": 30,
+            "maxSignatureCooldownDelayPercent": 25,
             "overtimeStartsAtTick": 4200,
             "overtimePowerIncreasePercent": 8
           },
-          "flank": {
+          "rearguard": {
+            "waveCount": 10,
             "adds": [
               { "creatureId": "00000000-0000-0000-0000-000000000079", "count": 4, "scaling": { "health": 12.0, "offense": 25.0 } },
               { "creatureId": "00000000-0000-0000-0000-000000000080", "count": 2, "scaling": { "health": 13.0, "offense": 27.0 } }
             ]
           },
-          "ward": {
-            "objectiveCreatureId": "00000000-0000-0000-0000-000000000081",
-            "objectiveScaling": { "health": 40.0, "defense": 36.0, "resistance": 32.0, "offense": 10.0 },
-            "guards": [
+          "vanguard": {
+            "guardianCreatureId": "00000000-0000-0000-0000-000000000081",
+            "guardianScaling": { "health": 40.0, "defense": 36.0, "resistance": 32.0, "offense": 10.0 },
+            "escorts": [
               { "creatureId": "00000000-0000-0000-0000-000000000079", "count": 3, "scaling": { "health": 10.0, "offense": 21.0 } },
               { "creatureId": "00000000-0000-0000-0000-000000000080", "count": 1, "scaling": { "health": 10.0, "offense": 22.0 } }
             ]
+          },
+          "mainGuard": {
+            "projectionCreatureId": "00000000-0000-0000-0000-000000000082",
+            "projectionScaling": { "health": 300.0, "offense": 18.0, "defense": 15.0, "resistance": 15.0, "penetration": 9.0 },
+            "survivalThresholdsPercent": [33, 67, 100]
           },
           "rewards": {
             "slainTrophies": 300,
@@ -167,27 +188,34 @@
           "laneSlots": 4,
           "minimumRoster": 6,
           "signupWindowHours": 24,
-          "recommendedWingPower": { "vanguard": 440, "flank": 350, "ward": 370 },
-          "tickBudget": { "vanguard": 6000, "flank": 3600, "ward": 4500 },
+          "recommendedWingPower": { "rearguard": 350, "vanguard": 440, "mainGuard": 370 },
+          "tickBudget": { "rearguard": 3600, "vanguard": 4500, "mainGuard": 600, "finalAssault": 6000 },
           "boss": {
             "creatureId": "00000000-0000-0000-0000-000000000086",
             "scaling": { "health": 74.0, "offense": 42.0, "defense": 14.0, "resistance": 12.0, "penetration": 7.0, "regeneration": 6.0 },
-            "maxReinforceOffensePercent": 45,
-            "maxWardBreakPercent": 55,
+            "maxGuardianBreakPercent": 55,
+            "maxSignaturePowerReductionPercent": 30,
+            "maxSignatureCooldownDelayPercent": 25,
             "overtimeStartsAtTick": 4400,
             "overtimePowerIncreasePercent": 7
           },
-          "flank": {
+          "rearguard": {
+            "waveCount": 10,
             "adds": [
               { "creatureId": "00000000-0000-0000-0000-000000000071", "count": 4, "scaling": { "health": 8.0, "offense": 18.0 } }
             ]
           },
-          "ward": {
-            "objectiveCreatureId": "00000000-0000-0000-0000-000000000085",
-            "objectiveScaling": { "health": 25.0, "defense": 26.0, "resistance": 26.0, "offense": 11.0 },
-            "guards": [
+          "vanguard": {
+            "guardianCreatureId": "00000000-0000-0000-0000-000000000085",
+            "guardianScaling": { "health": 25.0, "defense": 26.0, "resistance": 26.0, "offense": 11.0 },
+            "escorts": [
               { "creatureId": "00000000-0000-0000-0000-000000000084", "count": 1, "spawnChancePercent": 22, "scaling": { "health": 18.0, "offense": 22.0, "resistance": 20.0 } }
             ]
+          },
+          "mainGuard": {
+            "projectionCreatureId": "00000000-0000-0000-0000-000000000086",
+            "projectionScaling": { "health": 260.0, "offense": 13.0, "defense": 14.0, "resistance": 12.0, "penetration": 7.0 },
+            "survivalThresholdsPercent": [33, 67, 100]
           },
           "rewards": {
             "slainTrophies": 210,
@@ -205,27 +233,34 @@
           "laneSlots": 5,
           "minimumRoster": 9,
           "signupWindowHours": 24,
-          "recommendedWingPower": { "vanguard": 690, "flank": 540, "ward": 570 },
-          "tickBudget": { "vanguard": 6000, "flank": 4000, "ward": 5000 },
+          "recommendedWingPower": { "rearguard": 540, "vanguard": 690, "mainGuard": 570 },
+          "tickBudget": { "rearguard": 4000, "vanguard": 5000, "mainGuard": 600, "finalAssault": 6000 },
           "boss": {
             "creatureId": "00000000-0000-0000-0000-000000000086",
             "scaling": { "health": 116.0, "offense": 61.0, "defense": 19.0, "resistance": 17.0, "penetration": 10.0, "regeneration": 8.0 },
-            "maxReinforceOffensePercent": 52,
-            "maxWardBreakPercent": 62,
+            "maxGuardianBreakPercent": 62,
+            "maxSignaturePowerReductionPercent": 30,
+            "maxSignatureCooldownDelayPercent": 25,
             "overtimeStartsAtTick": 4100,
             "overtimePowerIncreasePercent": 9
           },
-          "flank": {
+          "rearguard": {
+            "waveCount": 10,
             "adds": [
               { "creatureId": "00000000-0000-0000-0000-000000000071", "count": 6, "scaling": { "health": 12.0, "offense": 25.0 } }
             ]
           },
-          "ward": {
-            "objectiveCreatureId": "00000000-0000-0000-0000-000000000085",
-            "objectiveScaling": { "health": 39.0, "defense": 35.0, "resistance": 35.0, "offense": 14.0 },
-            "guards": [
+          "vanguard": {
+            "guardianCreatureId": "00000000-0000-0000-0000-000000000085",
+            "guardianScaling": { "health": 39.0, "defense": 35.0, "resistance": 35.0, "offense": 14.0 },
+            "escorts": [
               { "creatureId": "00000000-0000-0000-0000-000000000084", "count": 1, "spawnChancePercent": 22, "scaling": { "health": 28.0, "offense": 31.0, "resistance": 28.0 } }
             ]
+          },
+          "mainGuard": {
+            "projectionCreatureId": "00000000-0000-0000-0000-000000000086",
+            "projectionScaling": { "health": 320.0, "offense": 19.0, "defense": 19.0, "resistance": 17.0, "penetration": 10.0 },
+            "survivalThresholdsPercent": [33, 67, 100]
           },
           "rewards": {
             "slainTrophies": 340,

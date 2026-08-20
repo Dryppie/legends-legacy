@@ -1,6 +1,4 @@
 using Application.Interfaces.Services.LL.PowerRatings;
-using Domain.Models.Attributes;
-using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Snapshots;
@@ -30,16 +28,7 @@ public sealed class WorldTowerDevelopmentRosterFactory(
     CanonicalEquipmentBuildFactory canonicalBuilds)
     : IWorldTowerDevelopmentRosterFactory
 {
-    public const int PowerMultiplier = 3;
-
-    private static readonly CanonicalPartyProfile[] MixedRosterProfiles =
-    [
-        CanonicalPartyProfile.Offense,
-        CanonicalPartyProfile.Balanced,
-        CanonicalPartyProfile.Sustain,
-        CanonicalPartyProfile.Defensive,
-        CanonicalPartyProfile.Area
-    ];
+    public const int PowerMultiplier = 1;
 
     public WorldTowerDevelopmentBuild Create(
         Guid characterId,
@@ -51,18 +40,14 @@ public sealed class WorldTowerDevelopmentRosterFactory(
         var benchmark = floor.BalanceBenchmark;
         var rung = canonicalBuilds.GetProgressionLadder().Single(candidate =>
             candidate.Id.Equals(benchmark.BuildId, StringComparison.OrdinalIgnoreCase));
-        var profile = MixedRosterProfiles[
-            Math.Abs(rosterIndex % MixedRosterProfiles.Length)];
+        var roster = CanonicalCooperativeRosterCatalog.CreateParty(floor.RequiredSlots);
+        var normalizedIndex = ((rosterIndex % roster.Count) + roster.Count) % roster.Count;
+        var role = roster[normalizedIndex].Role;
         var build = canonicalBuilds.CreateBuildForArea(
-            profile,
+            role,
             rung,
             benchmark.CharacterLevel,
             benchmark.EssenceCount);
-        var powerCarrier = build.Equipment.First();
-        powerCarrier.InstanceModifiers.Add(new InstanceAttributeModifier(
-            AttributeType.Power,
-            (PowerMultiplier - 1) * 100f,
-            ModifierType.Multiplicative));
         var snapshotId = Guid.NewGuid();
         var snapshot = new CharacterSnapshot
         {
@@ -90,7 +75,7 @@ public sealed class WorldTowerDevelopmentRosterFactory(
         };
 
         return new WorldTowerDevelopmentBuild(
-            checked(CombatRatingDisplay.FromRaw(build.Rating.Overall) * PowerMultiplier),
+            CombatRatingDisplay.FromRaw(build.Rating.Overall),
             snapshot);
     }
 

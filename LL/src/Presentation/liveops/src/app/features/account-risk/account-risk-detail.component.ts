@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { LiveOpsApiService } from '../../liveops-api.service';
 import { AccountInvestigationStatus, AccountRiskDetails, AccountRiskTransfer } from '../../liveops.models';
 import { OperatorContextService } from '../../operator-context.service';
+import { AccountRiskListStateService } from './account-risk-list-state.service';
 
 @Component({
   selector: 'app-account-risk-detail',
@@ -30,6 +31,7 @@ export class AccountRiskDetailComponent implements OnInit {
     private readonly api: LiveOpsApiService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
+    private readonly listState: AccountRiskListStateService,
     readonly operator: OperatorContextService,
   ) {}
 
@@ -58,6 +60,7 @@ export class AccountRiskDetailComponent implements OnInit {
       const response = await this.api.updateAccountRiskStatus(this.details.account.accountId, { operationId: crypto.randomUUID(), status: this.selectedStatus, reason: this.statusReason.trim() });
       if (!response.isSuccess) { this.showError(response.errorMessage); return; }
       this.details.account.investigationStatus = this.selectedStatus;
+      this.listState.updateInvestigationStatus(this.details.account.accountId, this.selectedStatus);
       this.statusReason = '';
       this.showSuccess('Investigation status updated and recorded in the global audit.');
     } catch (error) { this.showError(this.errorMessage(error)); }

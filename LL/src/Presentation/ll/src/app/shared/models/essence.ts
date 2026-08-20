@@ -22,6 +22,8 @@ export interface Ability {
   cooldown: number;
   threatValue: number;
   threatMultiplier: number;
+  estimatedThreatPerSecond?: number;
+  hasMaintainedThreat?: boolean;
   effects: EssenceEffectDto[];
 }
 

@@ -6,7 +6,7 @@ namespace Services.LL.Balance;
 
 public sealed class EquipmentCombatPacingAnalyzer : IEquipmentCombatPacingAnalyzer
 {
-    public const int ReferenceControlVersion = 4;
+    public const int ReferenceControlVersion = 6;
     public const string PercentileMethod = "nearest-rank-on-full-deterministic-sample";
 
     private static readonly int[] CheckpointTiers = [1, 5, 10, 20, 50, 100];
@@ -72,7 +72,8 @@ public sealed class EquipmentCombatPacingAnalyzer : IEquipmentCombatPacingAnalyz
                      {
                          CombatPacingScenario.EliteEnemyTtk,
                          CombatPacingScenario.SoloBossTtk,
-                         CombatPacingScenario.PartyBossTtk
+                         CombatPacingScenario.PartyBoss5Ttk,
+                         CombatPacingScenario.PartyBoss10Ttk
                      })
             {
                 measurements.Add(await MeasureAsync(
@@ -89,6 +90,7 @@ public sealed class EquipmentCombatPacingAnalyzer : IEquipmentCombatPacingAnalyz
             measurements,
             request.ExecutionLevel);
         measurements = offensiveConsistency.Measurements;
+        measurements = ApplyCooperativePartySizeConsistency(measurements);
         var stability = BuildTierStability(measurements, tiers);
         var overgear = BuildOvergear(measurements);
         var blockers = measurements
@@ -209,6 +211,59 @@ public sealed class EquipmentCombatPacingAnalyzer : IEquipmentCombatPacingAnalyz
             }
         }
 
+        var cooperativeTelemetry = MedianCooperativeTelemetry(samples);
+        if (scenario is CombatPacingScenario.PartyBoss5Ttk or
+            CombatPacingScenario.PartyBoss10Ttk)
+        {
+            if (cooperativeTelemetry is null)
+            {
+                resolutionPassed = false;
+                failures.Add("cooperative role telemetry was not produced.");
+            }
+            else
+            {
+                if (cooperativeTelemetry.GuardianAttentionSharePercent is < 60d or > 90d)
+                {
+                    resolutionPassed = false;
+                    failures.Add(
+                        $"Guardian attention was {cooperativeTelemetry.GuardianAttentionSharePercent:F2}% " +
+                        "instead of 60-90%.");
+                }
+                if (cooperativeTelemetry.RestorerAttentionSharePercent > 25d)
+                {
+                    resolutionPassed = false;
+                    failures.Add(
+                        $"Restorer attention was {cooperativeTelemetry.RestorerAttentionSharePercent:F2}% " +
+                        "(maximum 25%).");
+                }
+                if (cooperativeTelemetry.GuardianThreatGenerated <=
+                    cooperativeTelemetry.RestorerThreatGenerated)
+                {
+                    resolutionPassed = false;
+                    failures.Add("Guardians did not generate more total threat than Restorers.");
+                }
+                if (cooperativeTelemetry.GuardianIncomingRawDamage <= 0)
+                {
+                    resolutionPassed = false;
+                    failures.Add("Guardians received no boss pressure.");
+                }
+                if (cooperativeTelemetry.RestorerHealingDone <= 0)
+                {
+                    resolutionPassed = false;
+                    failures.Add("Restorers produced no effective healing.");
+                }
+
+                var minimumSurvivors = (int)Math.Ceiling(cooperativeTelemetry.PartySize * 0.8d);
+                if (cooperativeTelemetry.Survivors < minimumSurvivors)
+                {
+                    resolutionPassed = false;
+                    failures.Add(
+                        $"median survivors were {cooperativeTelemetry.Survivors} of " +
+                        $"{cooperativeTelemetry.PartySize} (minimum {minimumSurvivors}).");
+                }
+            }
+        }
+
         return new CombatPacingMeasurement(
             role,
             tier,
@@ -233,7 +288,8 @@ public sealed class EquipmentCombatPacingAnalyzer : IEquipmentCombatPacingAnalyz
             resolutionPassed,
             immortalityPassed,
             failures,
-            MedianTelemetry(samples))
+            MedianTelemetry(samples),
+            cooperativeTelemetry)
         {
             Warnings = warnings
         };
@@ -270,6 +326,30 @@ public sealed class EquipmentCombatPacingAnalyzer : IEquipmentCombatPacingAnalyz
             Median(values.Select(value => value.FinalHealthDamage)));
     }
 
+    private static CooperativeCombatPacingTelemetry? MedianCooperativeTelemetry(
+        IReadOnlyList<CombatPacingSample> samples)
+    {
+        var values = samples
+            .Select(sample => sample.CooperativeTelemetry)
+            .Where(telemetry => telemetry is not null)
+            .Cast<CooperativeCombatPacingTelemetry>()
+            .ToArray();
+        if (values.Length == 0)
+            return null;
+
+        return new CooperativeCombatPacingTelemetry(
+            (int)Math.Round(Median(values.Select(value => (double)value.PartySize))),
+            Median(values.Select(value => value.GuardianAttentionSharePercent)),
+            Median(values.Select(value => value.RestorerAttentionSharePercent)),
+            Median(values.Select(value => value.NonGuardianAttentionSharePercent)),
+            Median(values.Select(value => value.GuardianThreatGenerated)),
+            Median(values.Select(value => value.RestorerThreatGenerated)),
+            Median(values.Select(value => value.GuardianIncomingRawDamage)),
+            Median(values.Select(value => value.RestorerHealingDone)),
+            Median(values.Select(value => value.DamageRedirectedToGuardians)),
+            (int)Math.Round(Median(values.Select(value => (double)value.Survivors))));
+    }
+
     private static (List<CombatPacingMeasurement> Measurements, IReadOnlyList<string> Failures)
         ApplyOffensiveWindowConsistency(
             List<CombatPacingMeasurement> measurements,
@@ -304,6 +384,35 @@ public sealed class EquipmentCombatPacingAnalyzer : IEquipmentCombatPacingAnalyz
         }
 
         return (measurements, failures);
+    }
+
+    private static List<CombatPacingMeasurement> ApplyCooperativePartySizeConsistency(
+        List<CombatPacingMeasurement> measurements)
+    {
+        const double tolerancePercent = 10d;
+        foreach (var partyFive in measurements.Where(measurement =>
+                     measurement.Scenario == CombatPacingScenario.PartyBoss5Ttk).ToArray())
+        {
+            var partyTen = measurements.Single(measurement =>
+                measurement.Tier == partyFive.Tier &&
+                measurement.Scenario == CombatPacingScenario.PartyBoss10Ttk);
+            var difference = RelativeDifferencePercent(
+                partyFive.Durations.MedianTicks,
+                partyTen.Durations.MedianTicks);
+            if (difference <= tolerancePercent)
+                continue;
+
+            var failure = $"five-/ten-player clear times differ by {difference:F2}% " +
+                $"after proportional boss scaling (limit {tolerancePercent:F2}%).";
+            var index = measurements.IndexOf(partyTen);
+            measurements[index] = partyTen with
+            {
+                ResolutionPassed = false,
+                Failures = [.. partyTen.Failures, failure]
+            };
+        }
+
+        return measurements;
     }
 
     private static IReadOnlyList<CombatPacingTierStabilityGate> BuildTierStability(
@@ -419,7 +528,9 @@ public sealed class EquipmentCombatPacingAnalyzer : IEquipmentCombatPacingAnalyz
                 (EquipmentCombatPacingTargets.EliteEnemyTtk, "elite TTK"),
             CombatPacingScenario.SoloBossTtk =>
                 (EquipmentCombatPacingTargets.SoloBossTtk, "solo-boss TTK"),
-            CombatPacingScenario.PartyBossTtk =>
+            CombatPacingScenario.PartyBossTtk or
+                CombatPacingScenario.PartyBoss5Ttk or
+                CombatPacingScenario.PartyBoss10Ttk =>
                 (EquipmentCombatPacingTargets.PartyBossTtk, "party-boss TTK"),
             CombatPacingScenario.RawTtd =>
                 (EquipmentCombatPacingTargets.GetRawTtd(equipmentRole), "raw TTD"),

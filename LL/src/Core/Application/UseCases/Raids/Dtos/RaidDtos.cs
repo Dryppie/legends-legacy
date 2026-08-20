@@ -14,7 +14,7 @@ public sealed record RaidBossSummaryDto(
     bool IsUnlocked,
     string? LockReason,
     int OpenRaidCount,
-    bool RewardReducedThisWeek,
+    bool HasWeeklyRewardThisWeek,
     Guid? ActiveRaidId,
     IReadOnlyList<RaidBossTierSummaryDto> Tiers,
     bool DevelopmentToolsEnabled);
@@ -27,15 +27,15 @@ public sealed record RaidBossTierSummaryDto(
     RaidRecommendedWingPowerDto RecommendedWingPower);
 
 public sealed record RaidRecommendedWingPowerDto(
+    int Rearguard,
     int Vanguard,
-    int Flank,
-    int Ward,
+    int MainGuard,
+    int RearguardLower,
+    int RearguardUpper,
     int VanguardLower,
     int VanguardUpper,
-    int FlankLower,
-    int FlankUpper,
-    int WardLower,
-    int WardUpper,
+    int MainGuardLower,
+    int MainGuardUpper,
     PowerRatingConfidence Confidence,
     bool IsCalibrated);
 
@@ -50,9 +50,9 @@ public sealed record RaidRunSummaryDto(
     DateTimeOffset SignupClosesAt,
     int SignupCount,
     int MaximumRoster,
+    int RearguardCount,
     int VanguardCount,
-    int FlankCount,
-    int WardCount,
+    int MainGuardCount,
     bool CanJoin);
 
 public sealed record RaidHistoryEntryDto(
@@ -63,7 +63,7 @@ public sealed record RaidHistoryEntryDto(
     RaidOutcome Outcome,
     DateTimeOffset ResolvedAt,
     int Trophies,
-    bool WasReduced,
+    RaidRewardKind RewardKind,
     DateTimeOffset? ClaimedAt,
     bool CanClaim);
 
@@ -86,11 +86,13 @@ public sealed record RaidRunDto(
     int LaneSlots,
     int MinimumRoster,
     IReadOnlyList<RaidSignupDto> Signups,
+    IReadOnlyList<RaidJoinRequestDto> JoinRequests,
     IReadOnlyList<RaidLaneResultDto> LaneResults,
     IReadOnlyList<RaidParticipantResultDto> ParticipantResults,
     RaidOutcome? Outcome,
     decimal? ReinforcementPenalty,
-    decimal? WardBreak,
+    decimal? GuardianBreak,
+    decimal? SignatureDisruption,
     decimal? BossHealthRemainingPercent,
     bool CanJoin,
     bool CanLeave,
@@ -98,7 +100,7 @@ public sealed record RaidRunDto(
     bool CanCommence,
     bool CanRefreshSnapshot,
     bool CanClaim,
-    bool RewardWasReduced,
+    RaidRewardKind? RewardKind,
     bool CanPreviewBattlePlan,
     bool CanCancel,
     bool CanTransferLeadership,
@@ -113,6 +115,14 @@ public sealed record RaidSignupDto(
     DateTimeOffset SignedUpAt,
     DateTimeOffset? SnapshotRefreshedAt,
     bool IsLeader,
+    bool IsCurrentCharacter);
+
+public sealed record RaidJoinRequestDto(
+    Guid CharacterId,
+    string CharacterName,
+    int PowerRating,
+    DateTimeOffset RequestedAt,
+    DateTimeOffset? SnapshotRefreshedAt,
     bool IsCurrentCharacter);
 
 public sealed record RaidLaneResultDto(
@@ -203,7 +213,8 @@ public sealed record RaidPlaybackEntityTotalsDto(
     int HealingReceived,
     int HealthRegenerated,
     int BarrierGenerated,
-    int DamageBlocked);
+    int DamageBlocked,
+    int ThreatGenerated = 0);
 
 public sealed record RaidPlaybackAbilityTotalsDto(
     int AbilityIndex,
@@ -211,14 +222,14 @@ public sealed record RaidPlaybackAbilityTotalsDto(
     int TotalDamage,
     int TotalHealing,
     int TotalBarrier,
-    IReadOnlyList<AbilityDamageTypeStats>? DamageByType = null);
+    IReadOnlyList<AbilityDamageTypeStats>? DamageByType = null,
+    int TotalThreat = 0);
 
 public sealed record RaidParticipantResultDto(
     Guid CharacterId,
     RaidLane Lane,
     long DamageDone,
     decimal ContributionScore,
-    decimal PayoutMultiplier,
     int ContributionRank);
 
 public sealed record RaidRewardDto(
@@ -226,10 +237,10 @@ public sealed record RaidRewardDto(
     int Trophies,
     long TrophyBalance,
     IReadOnlyList<RaidRewardItemDto> Items,
-    bool WasReduced,
+    RaidRewardKind RewardKind,
     DateTimeOffset ClaimedAt);
 
-public sealed record RaidRewardItemDto(string ItemId, int Quantity);
+public sealed record RaidRewardItemDto(string ItemId, string ItemName, int Quantity);
 
 public sealed record RaidTrophyVendorDto(
     string RaidBossId,

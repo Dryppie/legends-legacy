@@ -74,6 +74,7 @@ export class CombatEntityStatsComponent implements OnChanges {
   @Input() playerTeamName: string | null = null;
   @Input() enemyTeamName: string | null = null;
   @Input() combatDurationTicks = 0;
+  @Input() useParentScroll = false;
   /** Id of the logged-in character, used to pre-select their own unit. */
   @Input() currentCharacterId: string | null = null;
 
@@ -97,6 +98,7 @@ export class CombatEntityStatsComponent implements OnChanges {
   private readonly rawStatsById = new Map<string, EntityStats>();
   private readonly aggregateStats = new Map<string, EntityStats>();
   private readonly expandedSummonGroups = new Set<string>();
+  private readonly collapsedParticipantGroups = new Set<string>();
 
   ngOnChanges(changes: SimpleChanges): void {
     if (
@@ -118,6 +120,7 @@ export class CombatEntityStatsComponent implements OnChanges {
       );
       this.participantGroups = this.buildParticipantGroups();
       this.pruneExpandedSummonGroups();
+      this.pruneCollapsedParticipantGroups();
       this.refreshSelection();
     }
   }
@@ -131,6 +134,7 @@ export class CombatEntityStatsComponent implements OnChanges {
   visibleParticipantsForGroup(
     group: StatsParticipantGroup,
   ): StatsParticipant[] {
+    if (this.isParticipantGroupCollapsed(group)) return [];
     return group.participants.flatMap((participant) =>
       participant.isSummonGroup && this.expandedSummonGroups.has(participant.id)
         ? [participant, ...(participant.members ?? [])]
@@ -140,6 +144,19 @@ export class CombatEntityStatsComponent implements OnChanges {
 
   trackParticipantGroup(_index: number, group: StatsParticipantGroup): string {
     return group.key;
+  }
+
+  toggleParticipantGroup(group: StatsParticipantGroup): void {
+    if (this.collapsedParticipantGroups.has(group.key)) {
+      this.collapsedParticipantGroups.delete(group.key);
+    } else {
+      this.collapsedParticipantGroups.add(group.key);
+    }
+    this.refreshSelection();
+  }
+
+  isParticipantGroupCollapsed(group: StatsParticipantGroup): boolean {
+    return this.collapsedParticipantGroups.has(group.key);
   }
 
   participantSideLabel(participant: StatsParticipant): string {
@@ -727,6 +744,17 @@ export class CombatEntityStatsComponent implements OnChanges {
     for (const groupId of this.expandedSummonGroups) {
       if (!currentGroupIds.has(groupId)) {
         this.expandedSummonGroups.delete(groupId);
+      }
+    }
+  }
+
+  private pruneCollapsedParticipantGroups(): void {
+    const currentGroupKeys = new Set(
+      this.participantGroups.map((group) => group.key),
+    );
+    for (const groupKey of this.collapsedParticipantGroups) {
+      if (!currentGroupKeys.has(groupKey)) {
+        this.collapsedParticipantGroups.delete(groupKey);
       }
     }
   }

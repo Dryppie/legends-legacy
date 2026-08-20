@@ -36,6 +36,7 @@ import {
   RaidService,
 } from '../../../../core/services/api/raid/raid.service';
 import { StateSyncCoordinator } from '../../../../core/services/real-time/game-realtime/state-sync-coordinator.service';
+import { environment } from '../../../../../environments/environment';
 
 interface WorldMapDungeonEntry {
   id: string;
@@ -74,6 +75,7 @@ const PRE_IMPLEMENTATION_SIGIL_DROPS_BY_AREA: Readonly<
   styleUrl: './region.component.scss',
 })
 export class RegionComponent implements OnInit, OnDestroy {
+  readonly raidsEnabled = environment.features.raids;
   regionId!: string;
   region!: Region; // You can define a more specific type based on your item data structure
   private sourceRegion: Region | null = null;
@@ -103,7 +105,7 @@ export class RegionComponent implements OnInit, OnDestroy {
       'raids',
       'world-map-raids',
       async () => this.loadRaidBosses(),
-      () => this.regionNumber() !== null,
+      () => this.raidsEnabled && this.regionNumber() !== null,
     );
 
     this.activeBattle = computed(() => {
@@ -352,6 +354,8 @@ export class RegionComponent implements OnInit, OnDestroy {
   }
 
   regionRaidBosses(): RaidBossSummary[] {
+    if (!this.raidsEnabled) return [];
+
     const region = this.regionNumber();
     return region === null
       ? []
@@ -363,11 +367,15 @@ export class RegionComponent implements OnInit, OnDestroy {
   }
 
   selectRaidBoss(raidBossId: string): void {
+    if (!this.raidsEnabled) return;
+
     this.selectedRaidBossId = raidBossId;
     this.selectedDungeonId = null;
   }
 
   selectedRaidBoss(): RaidBossSummary | null {
+    if (!this.raidsEnabled) return null;
+
     return (
       this.regionRaidBosses().find(
         (boss) => boss.id === this.selectedRaidBossId,
@@ -376,6 +384,11 @@ export class RegionComponent implements OnInit, OnDestroy {
   }
 
   private loadRaidBosses(): void {
+    if (!this.raidsEnabled) {
+      this.raidBosses.set([]);
+      return;
+    }
+
     const region = this.regionNumber();
     if (region === null) {
       this.raidBosses.set([]);

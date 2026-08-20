@@ -140,6 +140,55 @@ public sealed class CanonicalEquipmentBuildFactory
             ]
         };
 
+    private static readonly IReadOnlyDictionary<CanonicalCooperativeRole, string[]> RoleEssenceIds =
+        new Dictionary<CanonicalCooperativeRole, string[]>
+        {
+            [CanonicalCooperativeRole.Guardian] =
+            [
+                "essence.transparent_slime",
+                "essence.brown_slime",
+                "essence.wood_nymph",
+                "essence.hobgoblin",
+                "essence.cinder_beetle",
+                "essence.red_slime"
+            ],
+            [CanonicalCooperativeRole.Restorer] =
+            [
+                "essence.blue_slime",
+                "essence.forest_spirit",
+                "essence.goblin_shaman",
+                "essence.lumo_wisp",
+                "essence.treant_sapling",
+                "essence.wood_nymph"
+            ],
+            [CanonicalCooperativeRole.Striker] =
+            [
+                .. ProfileEssenceIds[CanonicalPartyProfile.Offense]
+            ],
+            [CanonicalCooperativeRole.Controller] =
+            [
+                "essence.enchanted_fairy",
+                "essence.frost_imp",
+                "essence.goblin",
+                "essence.giant_bat",
+                "essence.hollow_stag",
+                "essence.rainbow_slime"
+            ],
+            [CanonicalCooperativeRole.AreaSpecialist] =
+            [
+                .. ProfileEssenceIds[CanonicalPartyProfile.Area]
+            ],
+            [CanonicalCooperativeRole.DefensiveHybrid] =
+            [
+                "essence.brown_slime",
+                "essence.red_slime",
+                "essence.vampire_bat",
+                "essence.blood_zombie",
+                "essence.lumo_sentinel",
+                "essence.cinder_beetle"
+            ]
+        };
+
     private static readonly IReadOnlyDictionary<CanonicalPartyProfile, int> ProfileCharacterLevels =
         new Dictionary<CanonicalPartyProfile, int>
         {
@@ -199,6 +248,12 @@ public sealed class CanonicalEquipmentBuildFactory
         int essenceCount) =>
         CreateBuildCore(profile, rung, essenceCount);
 
+    public CanonicalEquipmentBuild CreateBuild(
+        CanonicalCooperativeRole role,
+        CanonicalEquipmentProgressionRung rung,
+        int essenceCount) =>
+        CreateRoleBuildCore(role, rung, essenceCount);
+
     public CanonicalEquipmentBuild CreateBuildForDungeonTier(
         CanonicalPartyProfile profile,
         CanonicalEquipmentProgressionRung rung,
@@ -212,6 +267,28 @@ public sealed class CanonicalEquipmentBuildFactory
         int essenceCount)
     {
         var build = CreateBuildCore(profile, rung, essenceCount);
+        var resolvedLevel = Math.Max(1, characterLevel);
+        build.Character.Level = resolvedLevel;
+        build.Character.BaseAttributes = EntityBaseAttributeHelper
+            .CreateEntityAttributesForLevel(build.Character.Id, resolvedLevel)
+            .OrderBy(attribute => attribute.AttributeType)
+            .ToList();
+        return build with
+        {
+            Rating = CalculateRating(
+                build.Character,
+                build.Equipment,
+                build.EquippedEssences)
+        };
+    }
+
+    public CanonicalEquipmentBuild CreateBuildForArea(
+        CanonicalCooperativeRole role,
+        CanonicalEquipmentProgressionRung rung,
+        int characterLevel,
+        int essenceCount)
+    {
+        var build = CreateRoleBuildCore(role, rung, essenceCount);
         var resolvedLevel = Math.Max(1, characterLevel);
         build.Character.Level = resolvedLevel;
         build.Character.BaseAttributes = EntityBaseAttributeHelper
@@ -326,6 +403,22 @@ public sealed class CanonicalEquipmentBuildFactory
             equipment
                 .FirstOrDefault(item => item.EquipmentBase.EquipmentType == EquipmentType.TwoHanded)
                 ?.BaseRecipeId);
+    }
+
+    private CanonicalEquipmentBuild CreateRoleBuildCore(
+        CanonicalCooperativeRole role,
+        CanonicalEquipmentProgressionRung rung,
+        int essenceCount)
+    {
+        var profile = CanonicalCooperativeRosterCatalog.EquipmentProfileFor(role);
+        var build = CreateBuildCore(profile, rung, essenceCount);
+        build.Character.Name = $"Canonical {role} - {rung.Id}";
+        var essences = CreateEssences(role, build.Character.Id, essenceCount);
+        return build with
+        {
+            EquippedEssences = essences,
+            Rating = CalculateRating(build.Character, build.Equipment, essences)
+        };
     }
 
     private CombatRatingBreakdown CalculateRating(
@@ -453,11 +546,24 @@ public sealed class CanonicalEquipmentBuildFactory
         CanonicalPartyProfile profile,
         Guid characterId,
         int essenceCount) =>
-        ProfileEssenceIds[profile]
+        CreateEssences(ProfileEssenceIds[profile], profile.ToString(), characterId, essenceCount);
+
+    private IReadOnlyList<PlayerEssence> CreateEssences(
+        CanonicalCooperativeRole role,
+        Guid characterId,
+        int essenceCount) =>
+        CreateEssences(RoleEssenceIds[role], role.ToString(), characterId, essenceCount);
+
+    private static IReadOnlyList<PlayerEssence> CreateEssences(
+        IReadOnlyList<string> definitionIds,
+        string identity,
+        Guid characterId,
+        int essenceCount) =>
+        definitionIds
             .Take(essenceCount)
             .Select((definitionId, index) => new PlayerEssence
             {
-                Id = CreateDeterministicGuid($"canonical-essence:{profile}:{index}:{definitionId}"),
+                Id = CreateDeterministicGuid($"canonical-essence:{identity}:{index}:{definitionId}"),
                 CharacterId = characterId,
                 EssenceDefinitionId = definitionId,
                 Level = 1,
@@ -550,6 +656,25 @@ public sealed class CanonicalEquipmentBuildFactory
                 {
                     throw new InvalidOperationException(
                         $"Canonical {profile} Essence '{essenceId}' was not found.");
+                }
+            }
+        }
+
+        foreach (var (role, essenceIds) in RoleEssenceIds)
+        {
+            if (essenceIds.Length != MaximumCanonicalEssenceCount)
+            {
+                throw new InvalidOperationException(
+                    $"Canonical {role} must define exactly {MaximumCanonicalEssenceCount} Essences.");
+            }
+            if (essenceIds.Distinct(StringComparer.OrdinalIgnoreCase).Count() != essenceIds.Length)
+                throw new InvalidOperationException($"Canonical {role} contains duplicate Essences.");
+            foreach (var essenceId in essenceIds)
+            {
+                if (_essenceDefinitions.GetById(essenceId) is null)
+                {
+                    throw new InvalidOperationException(
+                        $"Canonical {role} Essence '{essenceId}' was not found.");
                 }
             }
         }

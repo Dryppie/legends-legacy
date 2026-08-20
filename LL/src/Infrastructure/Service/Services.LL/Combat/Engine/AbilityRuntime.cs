@@ -89,6 +89,9 @@ public sealed class CompiledEffect
     public int IntervalTicks { get; init; }
     public int Uses { get; init; }
     public bool OncePerTarget { get; init; }
+    public bool MaintainWhileConditionsMet { get; init; }
+    public AbilityThreatFunctionBand? MaintainedThreatBand { get; init; }
+    public float MaintainedThreatPerSecond { get; init; }
     public int LivingNonSummonedAllyDamagePercent { get; init; }
     public int SubsequentTargetDamagePercent { get; init; } = 100;
     public int ChancePercent { get; init; }
@@ -573,6 +576,13 @@ public sealed class RuntimeBarrierContribution
     }
 }
 
+public sealed record RuntimeMaintainedModifier(
+    CompiledEffect Definition,
+    RuntimeCombatant Source,
+    RuntimeCombatant Target,
+    string StatsSource,
+    int AppliedModifierValue);
+
 public sealed class RuntimeCover
 {
     public RuntimeCover(
@@ -710,6 +720,7 @@ public sealed class RuntimeCombatant
     public List<RuntimeStatus> Statuses { get; } = [];
     public List<RuntimeCondition> Conditions { get; } = [];
     public List<RuntimeEffect> ActiveEffects { get; } = [];
+    public List<RuntimeMaintainedModifier> MaintainedModifiers { get; } = [];
     public List<RuntimeBarrierContribution> BarrierContributions { get; } = [];
     public List<RuntimeCover> Covers { get; } = [];
     public Dictionary<AbilityTriggerEvent, List<RuntimeAbility>> AbilityTriggersByEvent { get; private set; } = [];

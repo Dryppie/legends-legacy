@@ -25,13 +25,15 @@ public interface IRaidService
     Task<RaidOperationResult<RaidRunDto>> CreateAsync(Guid characterId, string raidBossId, int tier, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> CreateDevelopmentAsync(Guid characterId, string raidBossId, int tier, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> JoinAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken);
+    Task<RaidOperationResult<RaidRunDto>> ApproveSignupAsync(Guid characterId, Guid raidRunId, Guid targetCharacterId, CancellationToken cancellationToken);
+    Task<RaidOperationResult<RaidRunDto>> RemoveSignupAsync(Guid characterId, Guid raidRunId, Guid targetCharacterId, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> LeaveAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> CancelAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> TransferLeadershipAsync(Guid characterId, Guid raidRunId, Guid targetCharacterId, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> RefreshSnapshotAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> AssignAsync(Guid characterId, Guid raidRunId, Guid targetCharacterId, RaidLane lane, int slotIndex, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> UpdatePartiesAsync(Guid characterId, Guid raidRunId, IReadOnlyList<RaidPartyAssignment> assignments, CancellationToken cancellationToken);
-    Task<RaidOperationResult<RaidRunDto>> FillWithDevelopmentCharactersAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken);
+    Task<RaidOperationResult<RaidRunDto>> FillWithDevelopmentCharactersAsync(Guid characterId, Guid raidRunId, double powerMultiplier, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidBattlePlanPreviewDto>> PreviewBattlePlanAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> CommenceAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken);
     Task<RaidPlaybackDto?> GetPlaybackAsync(Guid characterId, Guid raidRunId, RaidLane lane, CancellationToken cancellationToken);

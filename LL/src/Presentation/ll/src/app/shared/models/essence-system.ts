@@ -31,6 +31,7 @@ export interface EssenceAbilityDto {
   threatValue?: number;
   threatMultiplier?: number;
   estimatedThreatPerSecond?: number;
+  hasMaintainedThreat?: boolean;
   targets: string[];
   tags: string[];
   effects: EssenceEffectDto[];

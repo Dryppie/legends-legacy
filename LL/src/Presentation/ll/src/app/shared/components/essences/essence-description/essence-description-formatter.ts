@@ -128,6 +128,7 @@ export class EssenceDescriptionFormatter {
           .split('-')
           .map((value) => Number(value.trim()));
         const authoredMinimumCoefficient = percentages[0] / 100;
+        const hasAuthoredCoefficientRange = percentages.length > 1;
         const authoredMaximumCoefficient =
           (percentages[1] ?? percentages[0]) / 100;
         const minimumCoefficient = scaling.coefficient;
@@ -136,7 +137,9 @@ export class EssenceDescriptionFormatter {
           : 1;
         const maximumCoefficient =
           scaling.maximumCoefficient ??
-          authoredMaximumCoefficient * ascensionMultiplier;
+          (hasAuthoredCoefficientRange
+            ? authoredMaximumCoefficient * ascensionMultiplier
+            : minimumCoefficient);
         const attributeValue = resolveAttributeValue(scaling.attribute);
         const base = effect.currentValue ?? effect.baseValue ?? 0;
         const rawMinimum = base + attributeValue * minimumCoefficient;
@@ -418,9 +421,10 @@ export class EssenceDescriptionFormatter {
 
   private formatCoefficientRange(minimum: number, maximum: number): string {
     const minimumDisplay = this.formatPercent(minimum);
-    if (Math.abs(maximum - minimum) < Number.EPSILON) return minimumDisplay;
+    const maximumDisplay = this.formatPercent(maximum);
+    if (maximumDisplay === minimumDisplay) return minimumDisplay;
 
-    return `${minimumDisplay}-${this.formatPercent(maximum)}`;
+    return `${minimumDisplay}-${maximumDisplay}`;
   }
 
   private escapeRegExp(value: string): string {

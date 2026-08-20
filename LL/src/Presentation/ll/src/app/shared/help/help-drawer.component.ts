@@ -13,6 +13,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map, shareReplay } from 'rxjs/operators';
 import { Guide } from './help.models';
 import { A11yModule } from '@angular/cdk/a11y';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-help-drawer',
@@ -95,7 +96,7 @@ export class HelpDrawerComponent implements OnInit {
     this.guide$ = this.help
       .load<Guide>(`assets/help/guides/${this.pageId}.json`)
       .pipe(
-        map((g) => g || { title: 'Guide', sections: [] }),
+        map((g) => this.availableGuide(g)),
         catchError(() =>
           of({
             title: 'Guide unavailable',
@@ -110,6 +111,21 @@ export class HelpDrawerComponent implements OnInit {
         ),
         shareReplay({ bufferSize: 1, refCount: false }),
       );
+  }
+
+  private availableGuide(guide: Guide | null): Guide {
+    const available = guide || {
+      title: 'Guide',
+      lastReviewed: '',
+      sections: [],
+    };
+
+    return {
+      ...available,
+      sections: available.sections.filter(
+        (section) => section.feature !== 'raids' || environment.features.raids,
+      ),
+    };
   }
 
   @HostListener('document:keydown.escape') close() {

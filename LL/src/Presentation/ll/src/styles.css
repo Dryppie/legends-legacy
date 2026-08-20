@@ -15,15 +15,6 @@
   :focus-visible {
     box-shadow: none;
   }
-
-  :where(
-      a,
-      button,
-      [role="button"],
-      [tabindex]:not([tabindex="-1"])
-    ):focus-visible {
-    filter: brightness(1.16) saturate(1.04);
-  }
 }
 
 @layer utilities {

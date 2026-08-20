@@ -77,6 +77,8 @@ export class ChatService {
   private activeIdentity?: string;
   private activeGuildId: string | null = null;
   private activeRaidId: string | null = null;
+  private loadedRaidHistoryId: string | null = null;
+  private raidHistoryRecoveryPromise?: Promise<void>;
   private raidLoadedForIdentity?: string;
   private activeAuthenticationContextVersion = -1;
   private connectAndLoadPromise?: Promise<void>;
@@ -168,7 +170,7 @@ export class ChatService {
       () => {
         const id = this.auth.identity(); // ← depends on username + login
         const guildId = this.guildState.guild()?.id ?? null;
-        const raidId = this.raidService.activeRaidId();
+        const raidId = this.raidService.activeRaidChatId();
         const authenticationContextVersion =
           this.auth.authenticationContextVersion();
 
@@ -214,10 +216,15 @@ export class ChatService {
           this.unavailableUntil = 0;
         }
 
-        const replaceExistingHub = !!this.hub && connectionContextChanged;
+        const hubAuthenticationContextChanged =
+          this.activeIdentity !== id ||
+          guildMembershipChanged ||
+          this.activeAuthenticationContextVersion !==
+            authenticationContextVersion;
+        const replaceExistingHub =
+          !!this.hub && hubAuthenticationContextChanged;
         const clearMessages =
           guildMembershipChanged ||
-          raidMembershipChanged ||
           (this.activeIdentity !== undefined && this.activeIdentity !== id);
 
         this.activeIdentity = id;
@@ -230,6 +237,7 @@ export class ChatService {
           replaceExistingHub,
           clearMessages,
           guildMembershipChanged,
+          raidMembershipChanged,
           raidId ?? undefined,
         ).catch((error) => {
           this.unavailableUntil = Date.now() + this.unavailableRetryDelayMs;
@@ -249,13 +257,12 @@ export class ChatService {
 
   /** Connect + load history in one call. */
   async connectAndLoad(guildId?: string, take = 50): Promise<void> {
+    const raidId = this.activeRaidId ?? undefined;
     await this.joinChannel();
-    await this.loadHistory(
-      guildId,
-      take,
-      undefined,
-      this.activeRaidId ?? undefined,
-    );
+    await this.loadHistory(guildId, take, undefined, raidId);
+    if (raidId && this.activeRaidId === raidId) {
+      this.loadedRaidHistoryId = raidId;
+    }
     if (guildId) await this.joinGuildChannel(guildId);
   }
 
@@ -402,8 +409,18 @@ export class ChatService {
     replaceExistingHub: boolean,
     clearMessages: boolean,
     guildMembershipChanged: boolean,
+    raidMembershipChanged: boolean,
     raidId?: string,
   ): Promise<void> {
+    if (raidMembershipChanged) {
+      this.loadedRaidHistoryId = null;
+      this.messageList.update((messages) =>
+        messages.filter(
+          (message) => message.channelType !== ChatChannelType.Raid,
+        ),
+      );
+    }
+
     if (replaceExistingHub) {
       await this.stopHubConnection(clearMessages);
     } else if (clearMessages) {
@@ -449,6 +466,7 @@ export class ChatService {
       this.zone.run(() => {
         this.addMessage(msg);
         this.recordPersistentMessages([msg]);
+        this.recoverActiveRaidHistory(msg);
       });
     });
 
@@ -505,11 +523,43 @@ export class ChatService {
         this.lastPersistentMessageAt,
         raidId,
       );
+      if (raidId && this.activeRaidId === raidId) {
+        this.loadedRaidHistoryId = raidId;
+      }
       const onlineCount = await hub.invoke<number>('GetOnlineCount');
       this.zone.run(() => this.setOnlinePlayerCount(onlineCount));
     } catch (error) {
       this.handleConnectionError(error);
     }
+  }
+
+  private recoverActiveRaidHistory(message: ChatMessageDto): void {
+    const raidId = this.activeRaidId;
+    if (
+      message.channelType !== ChatChannelType.Raid ||
+      !raidId ||
+      message.contextKey.toLowerCase() !== raidId.toLowerCase() ||
+      this.loadedRaidHistoryId === raidId ||
+      this.raidHistoryRecoveryPromise
+    ) {
+      return;
+    }
+
+    const guildId = this.activeGuildId ?? undefined;
+    const recovery = this.loadHistory(guildId, 50, undefined, raidId)
+      .then(() => {
+        if (this.activeRaidId === raidId) {
+          this.loadedRaidHistoryId = raidId;
+        }
+      })
+      .catch((error) => this.handleConnectionError(error));
+
+    this.raidHistoryRecoveryPromise = recovery;
+    void recovery.finally(() => {
+      if (this.raidHistoryRecoveryPromise === recovery) {
+        this.raidHistoryRecoveryPromise = undefined;
+      }
+    });
   }
 
   // async reconnect(take = 50): Promise<void> {
@@ -522,6 +572,8 @@ export class ChatService {
     this.activeIdentity = undefined;
     this.activeGuildId = null;
     this.activeRaidId = null;
+    this.loadedRaidHistoryId = null;
+    this.raidHistoryRecoveryPromise = undefined;
     this.activeAuthenticationContextVersion = -1;
     this.connectAndLoadPromise = undefined;
   }

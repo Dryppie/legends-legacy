@@ -13,12 +13,14 @@ namespace API.LL.Controllers.V1;
 [Route("~/api/v{version:apiVersion}/raids")]
 public sealed class RaidController : BaseController
 {
-    public sealed record CreateRaidRequest(string RaidBossId, int Tier);
-    public sealed record CreateDevelopmentRaidRequest(int Tier);
+    public sealed record CreateRaidRequest(string RaidBossId, int PlusLevel);
+    public sealed record CreateDevelopmentRaidRequest(int PlusLevel);
     public sealed record AssignRaidWingRequest(Guid CharacterId, RaidLane Lane, int SlotIndex);
     public sealed record RaidPartyAssignmentRequest(Guid CharacterId, RaidLane? Lane, int? WingSlotIndex);
     public sealed record UpdateRaidPartiesRequest(IReadOnlyList<RaidPartyAssignmentRequest> Assignments);
     public sealed record TransferRaidLeadershipRequest(Guid CharacterId);
+    public sealed record RaidSignupDecisionRequest(Guid CharacterId);
+    public sealed record FillDevelopmentRosterRequest(double PowerMultiplier = 1d);
     public sealed record PurchaseTrophyVendorItemRequest(string ItemId, int Quantity = 1);
 
     [HttpGet("bosses")]
@@ -45,7 +47,7 @@ public sealed class RaidController : BaseController
 
     [HttpPost("create")]
     public async Task<ActionResult<Response<RaidRunDto>>> Create(CreateRaidRequest request) =>
-        await Mediator.Send(new CreateRaidCommand(CurrentCharacterGuid, request.RaidBossId, request.Tier));
+        await Mediator.Send(new CreateRaidCommand(CurrentCharacterGuid, request.RaidBossId, request.PlusLevel));
 
     [HttpPost("bosses/{raidBossId}/development/create")]
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -60,12 +62,30 @@ public sealed class RaidController : BaseController
         return await Mediator.Send(new CreateDevelopmentRaidCommand(
             CurrentCharacterGuid,
             raidBossId,
-            request.Tier));
+            request.PlusLevel));
     }
 
     [HttpPost("{raidRunId:guid}/join")]
     public async Task<ActionResult<Response<RaidRunDto>>> Join(Guid raidRunId) =>
         await Mediator.Send(new JoinRaidCommand(CurrentCharacterGuid, raidRunId));
+
+    [HttpPost("{raidRunId:guid}/signups/approve")]
+    public async Task<ActionResult<Response<RaidRunDto>>> ApproveSignup(
+        Guid raidRunId,
+        RaidSignupDecisionRequest request) =>
+        await Mediator.Send(new ApproveRaidSignupCommand(
+            CurrentCharacterGuid,
+            raidRunId,
+            request.CharacterId));
+
+    [HttpPost("{raidRunId:guid}/signups/remove")]
+    public async Task<ActionResult<Response<RaidRunDto>>> RemoveSignup(
+        Guid raidRunId,
+        RaidSignupDecisionRequest request) =>
+        await Mediator.Send(new RemoveRaidSignupCommand(
+            CurrentCharacterGuid,
+            raidRunId,
+            request.CharacterId));
 
     [HttpPost("{raidRunId:guid}/leave")]
     public async Task<ActionResult<Response<RaidRunDto>>> Leave(Guid raidRunId) =>
@@ -115,6 +135,7 @@ public sealed class RaidController : BaseController
     [ApiExplorerSettings(IgnoreApi = true)]
     public async Task<ActionResult<Response<RaidRunDto>>> FillDevelopmentRoster(
         Guid raidRunId,
+        FillDevelopmentRosterRequest request,
         [FromServices] IWebHostEnvironment environment)
     {
         if (!environment.IsDevelopment())
@@ -123,7 +144,8 @@ public sealed class RaidController : BaseController
         return await Mediator.Send(
             new FillRaidWithDevelopmentCharactersCommand(
                 CurrentCharacterGuid,
-                raidRunId));
+                raidRunId,
+                request.PowerMultiplier));
     }
 
     [HttpPost("{raidRunId:guid}/battle-plan")]

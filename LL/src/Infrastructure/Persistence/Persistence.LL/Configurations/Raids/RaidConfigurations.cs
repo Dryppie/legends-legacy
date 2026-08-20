@@ -14,7 +14,8 @@ public sealed class RaidRunConfiguration : IEntityTypeConfiguration<RaidRun>
         builder.Property(x => x.DefinitionSnapshotJson).HasColumnType("jsonb").IsRequired();
         builder.Property(x => x.SimulationLeaseOwner).HasMaxLength(128);
         builder.Property(x => x.ReinforcementPenalty).HasPrecision(8, 6);
-        builder.Property(x => x.WardBreak).HasPrecision(8, 6);
+        builder.Property(x => x.GuardianBreak).HasPrecision(8, 6);
+        builder.Property(x => x.SignatureDisruption).HasPrecision(8, 6);
         builder.Property(x => x.BossHealthRemainingPercent).HasPrecision(8, 4);
         builder.Property(x => x.RowVersion).IsConcurrencyToken();
         builder.HasIndex(x => new { x.RaidBossId, x.Status, x.SignupClosesAt });
@@ -90,7 +91,6 @@ public sealed class RaidParticipantResultConfiguration : IEntityTypeConfiguratio
     {
         builder.HasKey(x => new { x.RaidRunId, x.CharacterId });
         builder.Property(x => x.ContributionScore).HasPrecision(12, 8);
-        builder.Property(x => x.PayoutMultiplier).HasPrecision(8, 6);
     }
 }
 
@@ -102,9 +102,7 @@ public sealed class RaidRewardClaimConfiguration : IEntityTypeConfiguration<Raid
         builder.Property(x => x.RaidBossId).HasMaxLength(128).IsRequired();
         builder.Property(x => x.PendingItemsJson).HasColumnType("jsonb").IsRequired();
         builder.HasIndex(x => new { x.RaidRunId, x.CharacterId }).IsUnique();
-        builder.HasIndex(x => new { x.RaidBossId, x.CharacterId, x.WeekKey })
-            .IsUnique()
-            .HasFilter("\"WasReduced\" = false");
+        builder.HasIndex(x => new { x.RaidBossId, x.CharacterId, x.WeekKey });
     }
 }
 

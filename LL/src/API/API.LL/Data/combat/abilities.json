@@ -56,16 +56,12 @@
     "tags": ["Buff", "Defensive"],
     "triggers": [
       {
-        "event": "OnInterval",
-        "effectIds": ["effect.creature.vampire_bat.erratic_flight.dodge"],
-        "internalCooldownTicks": 1,
-        "conditions": [
-          {
-            "type": "HealthBelowPercent",
-            "subject": "Source",
-            "value": 20
-          }
-        ]
+        "event": "OnCombatStart",
+        "effectIds": ["effect.creature.vampire_bat.erratic_flight.dodge"]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": ["effect.creature.vampire_bat.erratic_flight.dodge"]
       }
     ],
     "effects": [
@@ -75,7 +71,14 @@
         "target": "Self",
         "baseValue": 5,
         "attribute": "DodgeChance",
-        "durationTicks": 1,
+        "maintainWhileConditionsMet": true,
+        "conditions": [
+          {
+            "type": "HealthBelowPercent",
+            "subject": "Source",
+            "value": 20
+          }
+        ],
         "procCoefficient": 1
       }
     ],
@@ -272,16 +275,12 @@
     "tags": ["Buff", "Defensive"],
     "triggers": [
       {
-        "event": "OnInterval",
-        "effectIds": ["effect.creature.blood_zombie.clotted_flesh.defense"],
-        "internalCooldownTicks": 1,
-        "conditions": [
-          {
-            "type": "HealthAbovePercent",
-            "subject": "Source",
-            "value": 50
-          }
-        ]
+        "event": "OnCombatStart",
+        "effectIds": ["effect.creature.blood_zombie.clotted_flesh.defense"]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": ["effect.creature.blood_zombie.clotted_flesh.defense"]
       }
     ],
     "effects": [
@@ -290,8 +289,15 @@
         "operation": "ModifyDamageTaken",
         "target": "Self",
         "baseValue": -10,
-        "durationTicks": 1,
         "damageType": "Physical",
+        "maintainWhileConditionsMet": true,
+        "conditions": [
+          {
+            "type": "HealthAbovePercent",
+            "subject": "Source",
+            "value": 50
+          }
+        ],
         "procCoefficient": 1
       }
     ],
@@ -365,12 +371,18 @@
     "tags": ["Buff", "Defensive"],
     "triggers": [
       {
-        "event": "OnInterval",
+        "event": "OnCombatStart",
         "effectIds": [
           "effect.creature.lumo_sentinel.cracked_core.high",
           "effect.creature.lumo_sentinel.cracked_core.low"
-        ],
-        "internalCooldownTicks": 1
+        ]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": [
+          "effect.creature.lumo_sentinel.cracked_core.high",
+          "effect.creature.lumo_sentinel.cracked_core.low"
+        ]
       }
     ],
     "effects": [
@@ -381,7 +393,7 @@
         "scalingAttribute": "Resistance",
         "scalingCoefficient": 0.3,
         "attribute": "Resistance",
-        "durationTicks": 1,
+        "maintainWhileConditionsMet": true,
         "conditions": [
           {
             "type": "HealthAbovePercent",
@@ -398,7 +410,7 @@
         "scalingAttribute": "Resistance",
         "scalingCoefficient": -0.15,
         "attribute": "Resistance",
-        "durationTicks": 1,
+        "maintainWhileConditionsMet": true,
         "conditions": [
           {
             "type": "HealthBelowPercent",
@@ -603,6 +615,7 @@
         "target": "AllAllies",
         "baseValue": 20,
         "condition": "Recovery",
+        "uses": 1,
         "procCoefficient": 1
       }
     ],
@@ -829,10 +842,11 @@
   {
     "id": "ability.creature.transparent_slime.transparent_engulf",
     "kind": "Active",
-    "name": "Transparent Engulf",
-    "description": "Gain Guard(4), Taunt enemies for 4 seconds, Mark a random enemy for 11 seconds, and Cover allies for 25% damage for 15 seconds.",
+    "name": "Gelatinous Defiance",
+    "description": "Generate 100 threat and gain Guard(4).",
     "cooldownTicks": 120,
-    "tags": ["Buff", "Control", "Defensive"],
+    "threatValue": 100,
+    "tags": ["Buff", "Defensive"],
     "effects": [
       {
         "id": "effect.creature.transparent_slime.transparent_engulf.guard",
@@ -840,30 +854,6 @@
         "target": "Self",
         "baseValue": 4,
         "condition": "Guard",
-        "procCoefficient": 1
-      },
-      {
-        "id": "effect.creature.transparent_slime.transparent_engulf.taunt_self",
-        "operation": "ApplyCondition",
-        "target": "Self",
-        "baseValue": 4,
-        "condition": "Taunt",
-        "procCoefficient": 1
-      },
-      {
-        "id": "effect.creature.transparent_slime.transparent_engulf.mark",
-        "operation": "ApplyCondition",
-        "target": "RandomEnemy",
-        "baseValue": 11,
-        "condition": "Mark",
-        "procCoefficient": 1
-      },
-      {
-        "id": "effect.creature.transparent_slime.transparent_engulf.cover",
-        "operation": "GrantCover",
-        "target": "AllAllies",
-        "baseValue": 25,
-        "durationTicks": 150,
         "procCoefficient": 1
       }
     ],
@@ -1794,6 +1784,7 @@
         "target": "AllEnemies",
         "baseValue": 30,
         "condition": "Poison",
+        "uses": 1,
         "procCoefficient": 1
       },
       {
@@ -1802,6 +1793,7 @@
         "target": "AllEnemies",
         "baseValue": 20,
         "condition": "Decay",
+        "uses": 1,
         "procCoefficient": 1
       }
     ],

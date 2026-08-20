@@ -18,7 +18,7 @@
       "recommendedPowerRating": 161,
       "guardianScaling": {
         "health": 36.0,
-        "offense": 39.0,
+        "offense": 44.0,
         "defense": 5.0,
         "resistance": 5.0,
         "penetration": 5.0,
@@ -49,7 +49,7 @@
       "recommendedPowerRating": 163,
       "guardianScaling": {
         "health": 42.0,
-        "offense": 50.0,
+        "offense": 52.0,
         "defense": 6.0,
         "resistance": 6.0,
         "penetration": 6.0,
@@ -75,7 +75,7 @@
       "recommendedPowerRating": 165,
       "guardianScaling": {
         "health": 25.7,
-        "offense": 104.0,
+        "offense": 140.0,
         "defense": 8.0,
         "resistance": 8.0,
         "penetration": 8.0,
@@ -101,7 +101,7 @@
       "recommendedPowerRating": 171,
       "guardianScaling": {
         "health": 34.0,
-        "offense": 55.0,
+        "offense": 60.0,
         "defense": 11.0,
         "resistance": 11.0,
         "penetration": 11.0,
@@ -132,7 +132,7 @@
       "recommendedPowerRating": 173,
       "guardianScaling": {
         "health": 46.5,
-        "offense": 99.0,
+        "offense": 135.0,
         "defense": 15.0,
         "resistance": 15.0,
         "penetration": 15.0,
@@ -163,7 +163,7 @@
       "recommendedPowerRating": 175,
       "guardianScaling": {
         "health": 58.0,
-        "offense": 41.3,
+        "offense": 50.0,
         "defense": 12.0,
         "resistance": 12.0,
         "penetration": 12.0,
@@ -188,12 +188,12 @@
       "requiredSlots": 3,
       "recommendedPowerRating": 185,
       "guardianScaling": {
-        "health": 21.1,
+        "health": 8.0,
         "offense": 35.0,
         "defense": 8.7,
         "resistance": 8.7,
         "penetration": 8.7,
-        "regeneration": 2.5
+        "regeneration": 0.001
       },
       "balanceBenchmark": {
         "characterLevel": 43,
@@ -217,10 +217,10 @@
       "guardianName": "Kodoku, the Poisoned Vessel",
       "guardianAbilityProfileId": "monster.kodoku,_the_poisoned_vessel",
       "requiredSlots": 10,
-      "recommendedPowerRating": 184,
+      "recommendedPowerRating": 188,
       "guardianScaling": {
-        "health": 63.0,
-        "offense": 71.65,
+        "health": 75.0,
+        "offense": 65.0,
         "defense": 15.2,
         "resistance": 15.2,
         "penetration": 15.0,
@@ -248,10 +248,10 @@
       "guardianName": "Ni, the Ninefold",
       "guardianAbilityProfileId": "monster.ni,_the_ninefold",
       "requiredSlots": 10,
-      "recommendedPowerRating": 186,
+      "recommendedPowerRating": 189,
       "guardianScaling": {
         "health": 76.0,
-        "offense": 81.0,
+        "offense": 100.0,
         "defense": 15.0,
         "resistance": 15.0,
         "penetration": 15.0,
@@ -274,10 +274,10 @@
       "guardianName": "The Mad King",
       "guardianAbilityProfileId": "monster.the_mad_king",
       "requiredSlots": 15,
-      "recommendedPowerRating": 193,
+      "recommendedPowerRating": 196,
       "guardianScaling": {
-        "health": 57.0,
-        "offense": 37.5,
+        "health": 150.0,
+        "offense": 55.0,
         "defense": 15.0,
         "resistance": 15.0,
         "penetration": 15.0,

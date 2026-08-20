@@ -48,6 +48,8 @@ export class EssenceItemViewService {
       cooldown: ability.cooldownSeconds * 10,
       threatValue: ability.threatValue ?? 0,
       threatMultiplier: ability.threatMultiplier ?? 1,
+      estimatedThreatPerSecond: ability.estimatedThreatPerSecond ?? 0,
+      hasMaintainedThreat: ability.hasMaintainedThreat ?? false,
       effects: ability.effects ?? [],
     };
   }

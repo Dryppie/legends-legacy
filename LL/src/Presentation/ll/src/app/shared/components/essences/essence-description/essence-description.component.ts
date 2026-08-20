@@ -46,6 +46,8 @@ export class EssenceDescriptionComponent implements OnChanges {
   @Input() cooldownSeconds = 0;
   @Input() threatValue = 0;
   @Input() threatMultiplier = 1;
+  @Input() estimatedThreatPerSecond = 0;
+  @Input() hasMaintainedThreat = false;
   safeDescription!: SafeHtml;
 
   private readonly formatter = new EssenceDescriptionFormatter();
@@ -68,12 +70,19 @@ export class EssenceDescriptionComponent implements OnChanges {
     return resolveEffectiveThreatValue(this.threatValue, this.threatMultiplier);
   }
 
+  get displayedThreat(): number {
+    return this.hasMaintainedThreat
+      ? this.estimatedThreatPerSecond
+      : this.effectiveThreat;
+  }
+
   get threatCadenceLabel(): string {
+    if (this.hasMaintainedThreat) return 's while active';
     return this.kind === 'Active' ? 'use' : 'trigger';
   }
 
   get hasThreatMultiplier(): boolean {
-    return this.threatMultiplier !== 1;
+    return !this.hasMaintainedThreat && this.threatMultiplier !== 1;
   }
 
   private refreshDescription(): void {

@@ -4,15 +4,15 @@
   "sections": [
     {
       "heading": "Rallying a raid",
-      "body": "Raid bosses are permanent regional encounters. Create a public raid for free, or join an existing muster. A character can participate in only one active raid at a time, and each account can occupy only one place in a raid."
+      "body": "Raid bosses are permanent regional encounters. Create a public raid for free, or request to join an existing muster. The raid leader must approve requests and can remove accepted raiders while mustering remains open. A character can participate in only one active raid at a time, and each account can occupy only one place in a raid."
     },
     {
-      "heading": "The three wings",
-      "body": "The raid leader assigns every participant to Vanguard, Flank, or Ward before commencing. Flank reduces the reinforcements that reach the boss. Ward tears down the boss's protection. Vanguard confronts the boss under the conditions created by the other two wings."
+      "heading": "The three parties",
+      "body": "The raid leader assigns every participant to Rearguard, Vanguard, or Main Guard before commencing. Rearguard fights up to 10 continuous enemy waves so fewer adds reach the boss; Health, barriers, resources, statuses, and cooldowns do not reset between waves. Vanguard focuses a durable guardian to reduce the boss's defenses. Main Guard survives an escalating projection for up to 60 seconds, reaching thresholds that weaken the boss's signature power and ability cadence."
     },
     {
       "heading": "Resolution and rewards",
-      "body": "After commencement the three battles resolve in the background from the saved character snapshots. Return to the raid page to see the outcome and claim trophies and materials. Your first reward from a particular raid boss each week is the full payout; later completions pay a reduced amount."
+      "body": "After the three preparation battles, every party regroups fully restored for a combined Final Assault against the boss. All four battles resolve in the background from saved character snapshots. Return to the raid page to watch them, review the visible consequences, and claim trophies and materials. Every approved participant receives the same outcome reward. Slaying Regular unlocks +1, and each slain +level unlocks the next. Your first result against a boss establishes the weekly reward; a higher +level or better outcome grants the missing upgrade difference, while results that do not improve it still pay a 25% repeat reward."
     }
   ]
 }

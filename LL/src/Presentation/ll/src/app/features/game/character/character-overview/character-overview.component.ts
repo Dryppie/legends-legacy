@@ -53,6 +53,7 @@ export function estimateEssenceThreatPerSecond(
     PresenceIndicatorComponent,
   ],
   templateUrl: './character-overview.component.html',
+  styleUrl: './character-overview.component.scss',
 })
 export class CharacterOverviewComponent {
   readonly AttributeType = AttributeType;

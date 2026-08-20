@@ -120,6 +120,21 @@ describe('CombatEntityStatsComponent', () => {
         )!,
       ),
     ).toBe('P1 · Minion');
+
+    const partyOne = component.participantGroups[0];
+    expect(component.isParticipantGroupCollapsed(partyOne)).toBeFalse();
+    expect(component.visibleParticipantsForGroup(partyOne)).toHaveSize(3);
+
+    component.toggleParticipantGroup(partyOne);
+
+    expect(component.isParticipantGroupCollapsed(partyOne)).toBeTrue();
+    expect(component.visibleParticipantsForGroup(partyOne)).toEqual([]);
+    expect(component.selectedEntityId).toBe('party-two-player');
+
+    component.toggleParticipantGroup(partyOne);
+
+    expect(component.isParticipantGroupCollapsed(partyOne)).toBeFalse();
+    expect(component.visibleParticipantsForGroup(partyOne)).toHaveSize(3);
   });
 
   it('orders damage breakdowns consistently and scales segments to the largest ability', () => {

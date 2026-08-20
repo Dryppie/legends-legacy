@@ -10,9 +10,27 @@ import {
   SimpleCombatEntityDto,
 } from '../../../../shared/models/Dtos/combatResultDto';
 
+export interface RaidCombatFrame extends TowerCombatFrame {
+  waveNumber: number | null;
+}
+
+export interface RaidPlaybackPosition {
+  combatTick: number;
+  isWaveTransitionHold: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class RaidPlaybackService {
-  frameAtTick(bundle: RaidPlaybackBundle, tick: number): TowerCombatFrame {
+  private readonly transitionTicksByBundle = new WeakMap<
+    RaidPlaybackBundle,
+    readonly number[]
+  >();
+
+  frameAtTick(
+    bundle: RaidPlaybackBundle,
+    tick: number,
+    showDefeatedPreviousWave = false,
+  ): RaidCombatFrame {
     if (!bundle.frames.length) {
       throw new Error('Raid playback bundle contains no frames.');
     }
@@ -24,13 +42,101 @@ export class RaidPlaybackService {
       if (bundle.frames[middle].tick <= tick) low = middle;
       else high = middle - 1;
     }
-    return this.toCombatFrame(bundle, bundle.frames[low]);
+    return this.toCombatFrame(
+      bundle,
+      bundle.frames[low],
+      showDefeatedPreviousWave,
+    );
+  }
+
+  playbackDurationMilliseconds(
+    bundle: RaidPlaybackBundle,
+    waveTransitionHoldMilliseconds: number,
+  ): number {
+    const combatDuration =
+      (bundle.totalTicks / Math.max(1, bundle.ticksPerSecond)) * 1000;
+    return (
+      combatDuration +
+      this.rearguardWaveTransitionTicks(bundle).length *
+        Math.max(0, waveTransitionHoldMilliseconds)
+    );
+  }
+
+  combatTickAtPlaybackElapsed(
+    bundle: RaidPlaybackBundle,
+    playbackElapsedMilliseconds: number,
+    waveTransitionHoldMilliseconds: number,
+  ): number {
+    return this.playbackPositionAtElapsed(
+      bundle,
+      playbackElapsedMilliseconds,
+      waveTransitionHoldMilliseconds,
+    ).combatTick;
+  }
+
+  playbackPositionAtElapsed(
+    bundle: RaidPlaybackBundle,
+    playbackElapsedMilliseconds: number,
+    waveTransitionHoldMilliseconds: number,
+  ): RaidPlaybackPosition {
+    const ticksPerSecond = Math.max(1, bundle.ticksPerSecond);
+    const holdMilliseconds = Math.max(0, waveTransitionHoldMilliseconds);
+    let remainingPlaybackMilliseconds = Math.max(
+      0,
+      playbackElapsedMilliseconds,
+    );
+    let previousCombatMilliseconds = 0;
+
+    for (const transitionTick of this.rearguardWaveTransitionTicks(bundle)) {
+      const transitionCombatMilliseconds =
+        (transitionTick / ticksPerSecond) * 1000;
+      const combatSegmentMilliseconds = Math.max(
+        0,
+        transitionCombatMilliseconds - previousCombatMilliseconds,
+      );
+      if (remainingPlaybackMilliseconds < combatSegmentMilliseconds) {
+        return {
+          combatTick: Math.min(
+            bundle.totalTicks,
+            Math.floor(
+              ((previousCombatMilliseconds + remainingPlaybackMilliseconds) /
+                1000) *
+                ticksPerSecond,
+            ),
+          ),
+          isWaveTransitionHold: false,
+        };
+      }
+
+      remainingPlaybackMilliseconds -= combatSegmentMilliseconds;
+      if (remainingPlaybackMilliseconds < holdMilliseconds)
+        return {
+          combatTick: transitionTick,
+          isWaveTransitionHold: true,
+        };
+
+      remainingPlaybackMilliseconds -= holdMilliseconds;
+      previousCombatMilliseconds = transitionCombatMilliseconds;
+    }
+
+    return {
+      combatTick: Math.min(
+        bundle.totalTicks,
+        Math.floor(
+          ((previousCombatMilliseconds + remainingPlaybackMilliseconds) /
+            1000) *
+            ticksPerSecond,
+        ),
+      ),
+      isWaveTransitionHold: false,
+    };
   }
 
   private toCombatFrame(
     bundle: RaidPlaybackBundle,
     frame: RaidPlaybackFrame,
-  ): TowerCombatFrame {
+    showDefeatedPreviousWave: boolean,
+  ): RaidCombatFrame {
     const stateByEntity = new Map(
       frame.entityStates.map((state) => [state.entityIndex, state]),
     );
@@ -40,9 +146,23 @@ export class RaidPlaybackService {
     const abilityTotals = new Map(
       frame.abilityTotals.map((totals) => [totals.abilityIndex, totals]),
     );
-    const activeEntities = bundle.entities.filter((entity) =>
+    const spawnedEntities = bundle.entities.filter((entity) =>
       stateByEntity.has(entity.index),
     );
+    const currentWaveNumber = this.currentRearguardWave(spawnedEntities);
+    const waveNumber =
+      showDefeatedPreviousWave && currentWaveNumber !== null
+        ? (this.previousRearguardWave(spawnedEntities, currentWaveNumber) ??
+          currentWaveNumber)
+        : currentWaveNumber;
+    const activeEntities =
+      waveNumber === null
+        ? spawnedEntities
+        : spawnedEntities.filter((entity) => {
+            if (entity.isFriendly) return true;
+            const entityWave = this.rearguardWaveNumber(entity.id);
+            return entityWave === null || entityWave === waveNumber;
+          });
     const entities = activeEntities.map((entity): SimpleCombatEntityDto => {
       const state = stateByEntity.get(entity.index)!;
       return {
@@ -70,6 +190,7 @@ export class RaidPlaybackService {
             damageByType: values?.damageByType ?? [],
             totalHealing: values?.totalHealing ?? 0,
             totalBarrier: values?.totalBarrier ?? 0,
+            totalThreat: values?.totalThreat ?? 0,
             hits: 0,
             crits: 0,
             summons: 0,
@@ -90,6 +211,7 @@ export class RaidPlaybackService {
         healthRegenerated: totals?.healthRegenerated ?? 0,
         barrierGenerated: totals?.barrierGenerated ?? 0,
         damageBlocked: totals?.damageBlocked ?? 0,
+        threatGenerated: totals?.threatGenerated ?? 0,
         healthRegenerationPotential: 0,
         healthRegenerationOverhealed: 0,
         healthRegenerationPulses: 0,
@@ -112,6 +234,64 @@ export class RaidPlaybackService {
       events: [],
       isFinal: frame.isFinal,
       outcome: frame.outcome,
+      waveNumber,
     };
+  }
+
+  private currentRearguardWave(
+    entities: RaidPlaybackBundle['entities'],
+  ): number | null {
+    const waves = entities
+      .filter((entity) => !entity.isFriendly)
+      .map((entity) => this.rearguardWaveNumber(entity.id))
+      .filter((wave): wave is number => wave !== null);
+    return waves.length ? Math.max(...waves) : null;
+  }
+
+  private previousRearguardWave(
+    entities: RaidPlaybackBundle['entities'],
+    currentWave: number,
+  ): number | null {
+    const previousWaves = entities
+      .filter((entity) => !entity.isFriendly)
+      .map((entity) => this.rearguardWaveNumber(entity.id))
+      .filter((wave): wave is number => wave !== null && wave < currentWave);
+    return previousWaves.length ? Math.max(...previousWaves) : null;
+  }
+
+  private rearguardWaveTransitionTicks(
+    bundle: RaidPlaybackBundle,
+  ): readonly number[] {
+    const cached = this.transitionTicksByBundle.get(bundle);
+    if (cached) return cached;
+
+    const entityByIndex = new Map(
+      bundle.entities.map((entity) => [entity.index, entity]),
+    );
+    const transitionTicks: number[] = [];
+    let currentWave: number | null = null;
+    for (const frame of bundle.frames) {
+      const frameWave = this.currentRearguardWave(
+        frame.entityStates
+          .map((state) => entityByIndex.get(state.entityIndex))
+          .filter((entity): entity is RaidPlaybackBundle['entities'][number] =>
+            Boolean(entity),
+          ),
+      );
+      if (frameWave === null) continue;
+      if (currentWave !== null && frameWave > currentWave)
+        transitionTicks.push(frame.tick);
+      currentWave = Math.max(currentWave ?? frameWave, frameWave);
+    }
+
+    this.transitionTicksByBundle.set(bundle, transitionTicks);
+    return transitionTicks;
+  }
+
+  private rearguardWaveNumber(entityId: string): number | null {
+    const match = /^rearguard-wave-(\d+)-/i.exec(entityId);
+    if (!match) return null;
+    const wave = Number.parseInt(match[1], 10);
+    return Number.isSafeInteger(wave) && wave > 0 ? wave : null;
   }
 }

@@ -8,11 +8,13 @@ public sealed class CombatEncounterRuntime
     public CombatEncounterRuntime(
         CombatEncounterPlan plan,
         IReadOnlyList<CombatRuntimeParticipant> friendlyParticipants,
-        IReadOnlyList<CombatRuntimeParticipant> hostileParticipants)
+        IReadOnlyList<CombatRuntimeParticipant> hostileParticipants,
+        IReadOnlyList<IReadOnlyList<CombatRuntimeParticipant>>? hostileReinforcementWaves = null)
     {
         Plan = plan;
         FriendlyParticipants = friendlyParticipants;
         HostileParticipants = hostileParticipants;
+        HostileReinforcementWaves = hostileReinforcementWaves ?? [];
     }
 
     public CombatEncounterPlan Plan { get; }
@@ -21,6 +23,11 @@ public sealed class CombatEncounterRuntime
 
     public IReadOnlyList<CombatRuntimeParticipant> HostileParticipants { get; }
 
+    public IReadOnlyList<IReadOnlyList<CombatRuntimeParticipant>> HostileReinforcementWaves { get; }
+
+    public IReadOnlyList<CombatRuntimeParticipant> AllHostileParticipants =>
+        [.. HostileParticipants, .. HostileReinforcementWaves.SelectMany(x => x)];
+
     public IReadOnlyList<CombatEntity> AllCombatants =>
-        [.. FriendlyParticipants.Select(x => x.Combatant), .. HostileParticipants.Select(x => x.Combatant)];
+        [.. FriendlyParticipants.Select(x => x.Combatant), .. AllHostileParticipants.Select(x => x.Combatant)];
 }

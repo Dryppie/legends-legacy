@@ -9,6 +9,7 @@ using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 using Domain.Models.Items;
 using Domain.Models.Professions.Crafting.V2;
+using Domain.Models.Raids;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Services.LL.Essences;
@@ -23,6 +24,72 @@ namespace EssenceSystem.Tests;
 public sealed class CanonicalEquipmentBuildFactoryTests
 {
     private readonly CanonicalEquipmentBuildFactory _factory = CreateFactory();
+
+    [BalanceFact]
+    public void Cooperative_rosters_support_partial_and_complete_five_character_cells()
+    {
+        var three = CanonicalCooperativeRosterCatalog.CreateParty(3);
+        var five = CanonicalCooperativeRosterCatalog.CreateParty(5);
+        var ten = CanonicalCooperativeRosterCatalog.CreateParty(10);
+        var fifteen = CanonicalCooperativeRosterCatalog.CreateParty(15);
+
+        Assert.Equal(
+            [CanonicalCooperativeRole.Guardian, CanonicalCooperativeRole.Restorer, CanonicalCooperativeRole.Striker],
+            three.Select(slot => slot.Role));
+        Assert.Equal(5, five.Count);
+        Assert.Equal(10, ten.Count);
+        Assert.Equal(15, fifteen.Count);
+        Assert.Equal(1, five.Count(slot => slot.Role == CanonicalCooperativeRole.Guardian));
+        Assert.Equal(1, five.Count(slot => slot.Role == CanonicalCooperativeRole.Restorer));
+        Assert.Equal(2, ten.Count(slot => slot.Role == CanonicalCooperativeRole.Guardian));
+        Assert.Equal(2, ten.Count(slot => slot.Role == CanonicalCooperativeRole.Restorer));
+        Assert.Equal(3, fifteen.Count(slot => slot.Role == CanonicalCooperativeRole.Guardian));
+        Assert.Equal(3, fifteen.Count(slot => slot.Role == CanonicalCooperativeRole.Restorer));
+        Assert.Equal([1, 2], ten.Select(slot => slot.PartyNumber).Distinct().Order());
+        Assert.Equal([1, 2, 3], fifteen.Select(slot => slot.PartyNumber).Distinct().Order());
+    }
+
+    [BalanceFact]
+    public void Cooperative_guardian_and_restorer_use_authored_role_defining_essences()
+    {
+        var rung = _factory.GetProgressionLadder()
+            .Single(candidate => candidate.Id == "t1-standard-common");
+        var guardian = _factory.CreateBuild(CanonicalCooperativeRole.Guardian, rung, essenceCount: 6);
+        var restorer = _factory.CreateBuild(CanonicalCooperativeRole.Restorer, rung, essenceCount: 6);
+
+        Assert.Equal(CanonicalPartyProfile.Defensive, guardian.Profile);
+        Assert.Equal(
+            ["essence.transparent_slime", "essence.brown_slime"],
+            guardian.EquippedEssences.Take(2).Select(essence => essence.EssenceDefinitionId));
+        Assert.Equal(CanonicalPartyProfile.Sustain, restorer.Profile);
+        Assert.Equal(
+            ["essence.blue_slime", "essence.forest_spirit"],
+            restorer.EquippedEssences.Take(2).Select(essence => essence.EssenceDefinitionId));
+    }
+
+    [BalanceFact]
+    public void Every_raid_party_gets_a_guardian_and_restorer_before_objective_specialists()
+    {
+        foreach (var lane in RaidParties.All)
+        {
+            Assert.Equal(
+                CanonicalCooperativeRole.Guardian,
+                CanonicalCooperativeRosterCatalog.ResolveRaidRole(lane, 0, laneSlots: 5));
+            Assert.Equal(
+                CanonicalCooperativeRole.Restorer,
+                CanonicalCooperativeRosterCatalog.ResolveRaidRole(lane, 1, laneSlots: 5));
+        }
+
+        Assert.Equal(
+            CanonicalCooperativeRole.AreaSpecialist,
+            CanonicalCooperativeRosterCatalog.ResolveRaidRole(RaidLane.Rearguard, 2, 5));
+        Assert.Equal(
+            CanonicalCooperativeRole.Striker,
+            CanonicalCooperativeRosterCatalog.ResolveRaidRole(RaidLane.Vanguard, 2, 5));
+        Assert.Equal(
+            CanonicalCooperativeRole.DefensiveHybrid,
+            CanonicalCooperativeRosterCatalog.ResolveRaidRole(RaidLane.MainGuard, 2, 5));
+    }
 
     [BalanceFact]
     public void Balance_simulator_handles_the_default_large_random_pool_with_canonical_equipment()

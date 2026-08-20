@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LiveOpsApiService } from '../../liveops-api.service';
 import { AccountRiskFilters, AccountRiskPage, AccountRiskSeverity } from '../../liveops.models';
+import { AccountRiskListStateService } from './account-risk-list-state.service';
 
 @Component({
   selector: 'app-account-risk',
@@ -15,9 +16,9 @@ import { AccountRiskFilters, AccountRiskPage, AccountRiskSeverity } from '../../
 export class AccountRiskComponent implements OnInit {
   data: AccountRiskPage | null = null;
   search = '';
-  minimumSeverity = 'Moderate';
+  minimumSeverity = 'Low';
   signalType = '';
-  status = '';
+  status = 'Unreviewed';
   minimumScore = '';
   maximumAccountAgeDays = '';
   sort = 'risk';
@@ -25,9 +26,29 @@ export class AccountRiskComponent implements OnInit {
   loading = false;
   message = '';
 
-  constructor(private readonly api: LiveOpsApiService, private readonly router: Router) {}
+  constructor(
+    private readonly api: LiveOpsApiService,
+    private readonly router: Router,
+    private readonly listState: AccountRiskListStateService,
+  ) {}
 
-  ngOnInit(): void { void this.load(); }
+  ngOnInit(): void {
+    const restored = this.listState.restore();
+    if (!restored) {
+      void this.load();
+      return;
+    }
+
+    this.data = restored.data;
+    this.search = restored.search;
+    this.minimumSeverity = restored.minimumSeverity;
+    this.signalType = restored.signalType;
+    this.status = restored.status;
+    this.minimumScore = restored.minimumScore;
+    this.maximumAccountAgeDays = restored.maximumAccountAgeDays;
+    this.sort = restored.sort;
+    this.page = restored.page;
+  }
 
   async applyFilters(): Promise<void> {
     this.page = 1;
@@ -52,7 +73,22 @@ export class AccountRiskComponent implements OnInit {
     await this.load();
   }
 
-  open(accountId: string): void { void this.router.navigate(['/account-risk', accountId]); }
+  open(accountId: string): void {
+    if (this.data) {
+      this.listState.save({
+        data: this.data,
+        search: this.search,
+        minimumSeverity: this.minimumSeverity,
+        signalType: this.signalType,
+        status: this.status,
+        minimumScore: this.minimumScore,
+        maximumAccountAgeDays: this.maximumAccountAgeDays,
+        sort: this.sort,
+        page: this.page,
+      });
+    }
+    void this.router.navigate(['/account-risk', accountId]);
+  }
 
   count(severity: AccountRiskSeverity): number { return this.data?.counts[severity] ?? 0; }
 

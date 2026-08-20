@@ -231,7 +231,11 @@
             </ng-template>
           </section>
 
-          <section class="activity-panel raids" data-tour="raids-introduction">
+          <section
+            *ngIf="raidsEnabled"
+            class="activity-panel raids"
+            data-tour="raids-introduction"
+          >
             <header>
               <h2>Raids</h2>
               <span>{{ regionRaidBosses().length }}</span>

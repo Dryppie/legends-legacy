@@ -28,6 +28,7 @@ describe('CombatComponent', () => {
   let refreshCurrentAction: jasmine.Spy;
   let combatResult: ReturnType<typeof signal<any>>;
   let combatOutcome: ReturnType<typeof signal<BattleOutcome | null>>;
+  let combatActive: ReturnType<typeof signal<boolean>>;
 
   beforeEach(async () => {
     currentAction = signal<Record<string, unknown> | null>({
@@ -37,6 +38,7 @@ describe('CombatComponent', () => {
     bootstrapLoaded = signal(true);
     combatResult = signal(null);
     combatOutcome = signal<BattleOutcome | null>(null);
+    combatActive = signal(false);
     refreshCurrentAction = jasmine.createSpy('refreshCurrentAction');
     router = {
       url: '/game/combat',
@@ -60,7 +62,7 @@ describe('CombatComponent', () => {
     };
     const combatState = {
       getCombatResult: () => combatResult,
-      getIsCombatActive: () => signal(false),
+      getIsCombatActive: () => combatActive,
       getPlayerCharacters: () => signal([]),
       getEnemyCharacters: () => signal([]),
       getEntityStats: () => signal([]),
@@ -241,6 +243,41 @@ describe('CombatComponent', () => {
     component.onEscapeKey();
 
     expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  it('keeps a disabled combat summary open and shows its override label', () => {
+    const component = fixture.componentInstance;
+    const emitSpy = spyOn(component.skipBattle, 'emit');
+    component.battleType = BattleType.Raid;
+    combatActive.set(true);
+    combatOutcome.set(BattleOutcome.Victory);
+    component.combatActionDisabled = true;
+    component.combatActionButtonTextOverride = 'Waiting for parties';
+
+    component.onStopOrSkip();
+    component.onEscapeKey();
+    fixture.detectChanges();
+
+    const actionButton = fixture.nativeElement.querySelector(
+      'app-mini-button button',
+    ) as HTMLButtonElement;
+
+    expect(component.combatActionButtonText()).toBe('Waiting for parties');
+    expect(component.combatActionButtonMobileText()).toBe(
+      'Waiting for parties',
+    );
+    expect(actionButton.disabled).toBeTrue();
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  it('removes nested vertical scrolling when the parent owns scrolling', () => {
+    const component = fixture.componentInstance;
+    component.useParentScroll = true;
+    combatActive.set(true);
+
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.overflow-y-auto')).toBeNull();
   });
 
   it('uses the active area parent region in the idle combat title', () => {

@@ -128,6 +128,12 @@ public static class AbilityCatalogValidator
             if (!float.IsFinite(ability.ThreatMultiplier) || ability.ThreatMultiplier < 0)
                 errors.Add($"{label}: threatMultiplier must be finite and non-negative.");
 
+            if (ability.Kind != AbilitySpecKind.Passive
+                && ability.Effects.Any(effect => effect.MaintainWhileConditionsMet))
+            {
+                errors.Add($"{label}: maintained conditional modifiers require a Passive ability.");
+            }
+
             ValidateCosts(label, ability.Costs, errors);
             ValidateEffects(label, ability.Effects, statusIds: null, errors);
             ValidateTriggers(label, ability.Triggers, ability.Effects, errors);
@@ -152,6 +158,9 @@ public static class AbilityCatalogValidator
             {
                 errors.Add($"{label}: sourceDamageTakenPercentPerStack must be finite and non-negative.");
             }
+
+            if (status.Effects.Any(effect => effect.MaintainWhileConditionsMet))
+                errors.Add($"{label}: status effects cannot maintain conditional modifiers.");
 
             ValidateEffects(label, status.Effects, statusIds: null, errors);
             ValidateTriggers(label, status.Triggers, status.Effects, errors);
@@ -246,6 +255,20 @@ public static class AbilityCatalogValidator
 
             if (effect.DurationTicks < 0 || effect.IntervalTicks < 0 || effect.Uses < 0)
                 errors.Add($"{label}: duration, interval, and uses cannot be negative.");
+
+            if (effect.MaintainWhileConditionsMet)
+            {
+                if (!IsMaintainableModifierOperation(effect.Operation))
+                    errors.Add($"{label}: {effect.Operation} cannot be maintained while conditions are met.");
+                if (effect.Target is not (AbilityTargetSelector.Self or AbilityTargetSelector.Source))
+                    errors.Add($"{label}: maintained conditional modifiers must target Self or Source.");
+                if (effect.Conditions.Count == 0)
+                    errors.Add($"{label}: maintained conditional modifiers require at least one condition.");
+                if (effect.DurationTicks != 0 || effect.IntervalTicks != 0 || effect.Uses != 0)
+                    errors.Add($"{label}: maintained conditional modifiers cannot use durationTicks, intervalTicks, or uses.");
+                if (effect.OncePerTarget || effect.ChancePercent != 100)
+                    errors.Add($"{label}: maintained conditional modifiers cannot use oncePerTarget or chance.");
+            }
 
             if (effect.Operation is (AbilityEffectOperation.Damage
                     or AbilityEffectOperation.Heal
@@ -470,6 +493,15 @@ public static class AbilityCatalogValidator
             ValidateConditions(label, effect.Conditions, errors);
         }
     }
+
+    private static bool IsMaintainableModifierOperation(AbilityEffectOperation operation) =>
+        operation is AbilityEffectOperation.ModifyAttribute
+            or AbilityEffectOperation.ModifyRegenerationRate
+            or AbilityEffectOperation.ModifyRegenerationInterval
+            or AbilityEffectOperation.ModifyHealingReceived
+            or AbilityEffectOperation.ModifyDamageDealt
+            or AbilityEffectOperation.ModifyDamageTaken
+            or AbilityEffectOperation.ModifyDamageTakenFromCondition;
 
     private static void ValidateCosts(
         string ownerId,

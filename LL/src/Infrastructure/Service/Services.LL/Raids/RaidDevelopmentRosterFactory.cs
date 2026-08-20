@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.PowerRatings;
+using Application.Interfaces.Services.LL.Raids;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items.Equipments;
@@ -22,7 +23,8 @@ public interface IRaidDevelopmentRosterFactory
         RaidBossDefinition boss,
         RaidBossTierDefinition tier,
         RaidLane lane,
-        int slotIndex);
+        int slotIndex,
+        double powerMultiplier);
 }
 
 /// <summary>
@@ -30,10 +32,18 @@ public interface IRaidDevelopmentRosterFactory
 /// The seeded guest's real level, equipment, inventory, and Essences are never changed.
 /// </summary>
 public sealed class RaidDevelopmentRosterFactory(
-    CanonicalEquipmentBuildFactory canonicalBuilds)
+    CanonicalEquipmentBuildFactory canonicalBuilds,
+    IRaidPowerRecommendationStore powerRecommendations)
     : IRaidDevelopmentRosterFactory
 {
-    public const int PowerMultiplier = 3;
+    public const double DefaultPowerMultiplier = 1d;
+    public const double MinimumPowerMultiplier = 0.5d;
+    public const double MaximumPowerMultiplier = 2d;
+
+    public static bool IsSupportedPowerMultiplier(double powerMultiplier) =>
+        double.IsFinite(powerMultiplier)
+        && powerMultiplier >= MinimumPowerMultiplier
+        && powerMultiplier <= MaximumPowerMultiplier;
 
     public RaidDevelopmentBuild Create(
         Guid characterId,
@@ -41,33 +51,47 @@ public sealed class RaidDevelopmentRosterFactory(
         RaidBossDefinition boss,
         RaidBossTierDefinition tier,
         RaidLane lane,
-        int slotIndex)
+        int slotIndex,
+        double powerMultiplier)
     {
         ArgumentNullException.ThrowIfNull(boss);
         ArgumentNullException.ThrowIfNull(tier);
-
-        var rung = canonicalBuilds.GetProgressionLadder()
-            .Where(candidate => candidate.Tier == tier.Tier)
-            .OrderByDescending(candidate => candidate.Index)
-            .First();
-        var profile = lane switch
+        if (!IsSupportedPowerMultiplier(powerMultiplier))
         {
-            RaidLane.Flank => CanonicalPartyProfile.Area,
-            RaidLane.Ward => CanonicalPartyProfile.Sustain,
-            _ => slotIndex % 2 == 0
-                ? CanonicalPartyProfile.Offense
-                : CanonicalPartyProfile.Defensive
-        };
+            throw new ArgumentOutOfRangeException(
+                nameof(powerMultiplier),
+                powerMultiplier,
+                $"Development roster power must be between {MinimumPowerMultiplier:0.##}x and {MaximumPowerMultiplier:0.##}x.");
+        }
+
+        var ladder = canonicalBuilds.GetProgressionLadder();
+        var rung = powerRecommendations.TryGet(boss.Id, 0, out var recommendation)
+            ? ladder.SingleOrDefault(candidate => candidate.Id.Equals(
+                recommendation.CanonicalRungId,
+                StringComparison.OrdinalIgnoreCase))
+            : null;
+        rung ??= ladder
+            .Where(candidate => candidate.Tier == Math.Clamp(tier.Tier + 1, 1, 100))
+            .OrderByDescending(candidate => candidate.Index)
+            .FirstOrDefault();
+        rung ??= ladder[^1];
+        var role = CanonicalCooperativeRosterCatalog.ResolveRaidRole(
+            lane,
+            slotIndex,
+            tier.LaneSlots);
         var build = canonicalBuilds.CreateBuildForArea(
-            profile,
+            role,
             rung,
             boss.LevelRequirement,
-            CanonicalEquipmentBuildFactory.GetEssenceCountForDungeonTier(tier.Tier));
-        var powerCarrier = build.Equipment.First();
-        powerCarrier.InstanceModifiers.Add(new InstanceAttributeModifier(
-            AttributeType.Power,
-            (PowerMultiplier - 1) * 100f,
-            ModifierType.Multiplicative));
+            CanonicalEquipmentBuildFactory.GetEssenceCountForDungeonTier(Math.Clamp(tier.Tier + 1, 1, 3)));
+        if (Math.Abs(powerMultiplier - DefaultPowerMultiplier) > double.Epsilon)
+        {
+            var powerCarrier = build.Equipment.First();
+            powerCarrier.InstanceModifiers.Add(new InstanceAttributeModifier(
+                AttributeType.Power,
+                (float)((powerMultiplier - 1d) * 100d),
+                ModifierType.Multiplicative));
+        }
 
         var snapshotId = Guid.NewGuid();
         var snapshot = new CharacterSnapshot
@@ -96,7 +120,9 @@ public sealed class RaidDevelopmentRosterFactory(
         };
 
         return new RaidDevelopmentBuild(
-            checked(CombatRatingDisplay.FromRaw(build.Rating.Overall) * PowerMultiplier),
+            checked((int)Math.Round(
+                CombatRatingDisplay.FromRaw(build.Rating.Overall) * powerMultiplier,
+                MidpointRounding.AwayFromZero)),
             snapshot);
     }
 

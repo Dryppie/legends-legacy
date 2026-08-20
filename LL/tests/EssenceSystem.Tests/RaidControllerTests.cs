@@ -65,6 +65,44 @@ public sealed class RaidControllerTests
     }
 
     [Fact]
+    public async Task ApproveSignupEndpointDispatchesLeaderAndApplicant()
+    {
+        var leaderId = Guid.NewGuid();
+        var applicantId = Guid.NewGuid();
+        var raidRunId = Guid.NewGuid();
+        var sender = new RecordingSender();
+        var controller = CreateController(sender, leaderId);
+
+        await controller.ApproveSignup(
+            raidRunId,
+            new RaidController.RaidSignupDecisionRequest(applicantId));
+
+        var command = Assert.IsType<ApproveRaidSignupCommand>(Assert.Single(sender.Requests));
+        Assert.Equal(
+            (leaderId, raidRunId, applicantId),
+            (command.CharacterId, command.RaidRunId, command.TargetCharacterId));
+    }
+
+    [Fact]
+    public async Task RemoveSignupEndpointDispatchesLeaderAndTarget()
+    {
+        var leaderId = Guid.NewGuid();
+        var targetId = Guid.NewGuid();
+        var raidRunId = Guid.NewGuid();
+        var sender = new RecordingSender();
+        var controller = CreateController(sender, leaderId);
+
+        await controller.RemoveSignup(
+            raidRunId,
+            new RaidController.RaidSignupDecisionRequest(targetId));
+
+        var command = Assert.IsType<RemoveRaidSignupCommand>(Assert.Single(sender.Requests));
+        Assert.Equal(
+            (leaderId, raidRunId, targetId),
+            (command.CharacterId, command.RaidRunId, command.TargetCharacterId));
+    }
+
+    [Fact]
     public async Task DevelopmentCreateEndpointDispatchesAuthenticatedCharacterInDevelopment()
     {
         var characterId = Guid.NewGuid();
@@ -80,7 +118,7 @@ public sealed class RaidControllerTests
             Assert.Single(sender.Requests));
         Assert.Equal(
             (characterId, "raid-boss.hives-abyss", 2),
-            (command.CharacterId, command.RaidBossId, command.Tier));
+            (command.CharacterId, command.RaidBossId, command.PlusLevel));
     }
 
     [Fact]
@@ -93,11 +131,12 @@ public sealed class RaidControllerTests
 
         await controller.FillDevelopmentRoster(
             raidRunId,
+            new RaidController.FillDevelopmentRosterRequest(0.75d),
             new TestWebHostEnvironment("Development"));
 
         var command = Assert.IsType<FillRaidWithDevelopmentCharactersCommand>(
             Assert.Single(sender.Requests));
-        Assert.Equal((characterId, raidRunId), (command.CharacterId, command.RaidRunId));
+        Assert.Equal((characterId, raidRunId, 0.75d), (command.CharacterId, command.RaidRunId, command.PowerMultiplier));
     }
 
     [Fact]
@@ -108,6 +147,7 @@ public sealed class RaidControllerTests
 
         var result = await controller.FillDevelopmentRoster(
             Guid.NewGuid(),
+            new RaidController.FillDevelopmentRosterRequest(),
             new TestWebHostEnvironment("Production"));
 
         Assert.IsType<NotFoundResult>(result.Result);

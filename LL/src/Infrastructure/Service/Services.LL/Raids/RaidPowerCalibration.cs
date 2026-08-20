@@ -90,9 +90,9 @@ public sealed class RaidPowerAnalyzer(
             var interval = DungeonReadinessService.WilsonInterval(successes, samples.Count);
             var evaluation = new Evaluation(
                 rung,
+                roster.RearguardPower,
                 roster.VanguardPower,
-                roster.FlankPower,
-                roster.WardPower,
+                roster.MainGuardPower,
                 successes,
                 samples.Count,
                 interval.Lower,
@@ -142,9 +142,9 @@ public sealed class RaidPowerAnalyzer(
         return new RaidPowerRecommendation(
             raidBossId,
             tier,
+            Wing(selected.RearguardPower, lower.RearguardPower, upper.RearguardPower),
             Wing(selected.VanguardPower, lower.VanguardPower, upper.VanguardPower),
-            Wing(selected.FlankPower, lower.FlankPower, upper.FlankPower),
-            Wing(selected.WardPower, lower.WardPower, upper.WardPower),
+            Wing(selected.MainGuardPower, lower.MainGuardPower, upper.MainGuardPower),
             selected.ClearProbability,
             selected.LowerBound,
             selected.UpperBound,
@@ -154,9 +154,14 @@ public sealed class RaidPowerAnalyzer(
             timeProvider.GetUtcNow());
     }
 
-    private RaidBossTierDefinition GetTier(string raidBossId, int tier) =>
-        definitions.Get(raidBossId)?.Tiers.SingleOrDefault(x => x.Tier == tier)
-        ?? throw new InvalidOperationException($"Raid boss '{raidBossId}' tier {tier} was not found.");
+    private RaidBossTierDefinition GetTier(string raidBossId, int tier)
+    {
+        if (tier != 0)
+            throw new InvalidOperationException("Only Regular raid difficulty is calibrated.");
+        var boss = definitions.Get(raidBossId)
+            ?? throw new InvalidOperationException($"Raid boss '{raidBossId}' was not found.");
+        return RaidPlusDifficulty.Create(boss, 0);
+    }
 
     private Roster CreateRoster(
         RaidBossDefinition boss,
@@ -181,22 +186,20 @@ public sealed class RaidPowerAnalyzer(
         };
         var powers = new Dictionary<RaidLane, List<int>>
         {
+            [RaidLane.Rearguard] = [],
             [RaidLane.Vanguard] = [],
-            [RaidLane.Flank] = [],
-            [RaidLane.Ward] = []
+            [RaidLane.MainGuard] = []
         };
-        foreach (var lane in Enum.GetValues<RaidLane>())
+        foreach (var lane in RaidParties.All)
         {
             for (var slot = 0; slot < tier.LaneSlots; slot++)
             {
-                var profile = lane switch
-                {
-                    RaidLane.Flank => CanonicalPartyProfile.Area,
-                    RaidLane.Ward => CanonicalPartyProfile.Sustain,
-                    _ => slot % 2 == 0 ? CanonicalPartyProfile.Offense : CanonicalPartyProfile.Defensive
-                };
+                var role = CanonicalCooperativeRosterCatalog.ResolveRaidRole(
+                    lane,
+                    slot,
+                    tier.LaneSlots);
                 var build = canonicalBuilds.CreateBuildForArea(
-                    profile,
+                    role,
                     rung,
                     boss.LevelRequirement,
                     CanonicalEquipmentBuildFactory.GetEssenceCountForDungeonTier(tier.Tier));
@@ -228,9 +231,9 @@ public sealed class RaidPowerAnalyzer(
 
         return new Roster(
             run,
+            Average(powers[RaidLane.Rearguard]),
             Average(powers[RaidLane.Vanguard]),
-            Average(powers[RaidLane.Flank]),
-            Average(powers[RaidLane.Ward]));
+            Average(powers[RaidLane.MainGuard]));
     }
 
     private static CharacterSnapshot CreateSnapshot(
@@ -282,13 +285,13 @@ public sealed class RaidPowerAnalyzer(
     private static RaidWingPowerRecommendation Wing(int value, int lower, int upper) =>
         new(value, Math.Min(value, lower), Math.Max(value, upper));
 
-    private sealed record Roster(RaidRun Run, int VanguardPower, int FlankPower, int WardPower);
+    private sealed record Roster(RaidRun Run, int RearguardPower, int VanguardPower, int MainGuardPower);
 
     private sealed record Evaluation(
         CanonicalEquipmentProgressionRung Rung,
+        int RearguardPower,
         int VanguardPower,
-        int FlankPower,
-        int WardPower,
+        int MainGuardPower,
         int Successes,
         int SampleCount,
         decimal LowerBound,

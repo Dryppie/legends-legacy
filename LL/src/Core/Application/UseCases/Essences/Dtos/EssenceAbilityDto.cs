@@ -9,6 +9,7 @@ public sealed record EssenceAbilityDto(
     int ThreatValue,
     float ThreatMultiplier,
     double EstimatedThreatPerSecond,
+    bool HasMaintainedThreat,
     IReadOnlyList<string> Targets,
     IReadOnlyList<string> Tags,
     IReadOnlyList<EssenceEffectDto> Effects);

@@ -105,7 +105,8 @@ public sealed class RaidPlaybackBundleBuilder(
                     entity.HealingReceived,
                     entity.HealthRegenerated,
                     entity.BarrierGenerated,
-                    entity.DamageBlocked))
+                    entity.DamageBlocked,
+                    entity.ThreatGenerated))
                 .OrderBy(x => x.EntityIndex)
                 .ToArray();
             var abilityTotals = checkpoint.EntityStats
@@ -117,7 +118,8 @@ public sealed class RaidPlaybackBundleBuilder(
                         ability.TotalDamage,
                         ability.TotalHealing,
                         ability.TotalBarrier,
-                        ability.DamageByType)))
+                        ability.DamageByType,
+                        ability.TotalThreat)))
                 .OrderBy(x => x.AbilityIndex)
                 .ToArray();
             return new RaidPlaybackFrameDto(

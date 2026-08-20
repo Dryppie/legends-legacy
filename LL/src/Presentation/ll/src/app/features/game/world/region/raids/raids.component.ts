@@ -28,7 +28,7 @@ export class RaidsComponent implements OnChanges {
   readonly loading = signal(false);
   readonly action = signal<string | null>(null);
   readonly error = signal<string | null>(null);
-  readonly selectedTier = signal<number>(1);
+  readonly selectedTier = signal<number>(0);
   readonly vendor = signal<RaidTrophyVendor | null>(null);
   readonly history = signal<RaidHistoryEntry[]>([]);
   readonly historyLoading = signal(false);
@@ -51,7 +51,7 @@ export class RaidsComponent implements OnChanges {
   }
 
   ngOnChanges(): void {
-    this.selectedTier.set(this.raidBoss?.tiers[0]?.tier ?? 1);
+    this.selectedTier.set(this.raidBoss?.tiers[0]?.tier ?? 0);
     this.load();
     this.loadHistory();
     this.loadVendor();
@@ -133,6 +133,24 @@ export class RaidsComponent implements OnChanges {
 
   selectTier(tier: number): void {
     if (!this.action()) this.selectedTier.set(tier);
+  }
+
+  changeDifficulty(direction: -1 | 1): void {
+    if (this.action()) return;
+    const tiers = this.raidBoss.tiers;
+    const index = tiers.findIndex((tier) => tier.tier === this.selectedTier());
+    const next = tiers[index + direction];
+    if (next) this.selectedTier.set(next.tier);
+  }
+
+  canChangeDifficulty(direction: -1 | 1): boolean {
+    const tiers = this.raidBoss.tiers;
+    const index = tiers.findIndex((tier) => tier.tier === this.selectedTier());
+    return index >= 0 && !!tiers[index + direction];
+  }
+
+  difficultyLabel(plusLevel: number): string {
+    return plusLevel === 0 ? 'Regular' : `+${plusLevel}`;
   }
 
   currentTier() {

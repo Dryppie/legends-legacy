@@ -16,25 +16,33 @@ namespace Services.LL.WorldTower;
 
 public sealed class WorldTowerBalanceAnalyzer : IWorldTowerBalanceAnalyzer
 {
+    public const int BalanceVersion = 2;
     public const int MaximumAttemptsPerRoster = 1_000;
+    public const double PreparedMinimumWinRate = 70d;
+    public const double PreparedMaximumWinRate = 100d;
+
     private const int DefaultSeed = 130_363;
     private const int MaximumCombatTicks = 6_000;
+    private const int MinimumPreparedVictoryTicks = 600;
+    private const int MaximumPreparedVictoryTicks = 3_000;
+    private const double MinimumGuardianAttentionMultiplier = 1.1d;
+    private const double MaximumGuardianAttentionPercent = 95d;
+    private const double MaximumRestorerAttentionAboveNeutralPercent = 5d;
+    private const double MinimumVictorySurvivorFraction = 0.8d;
+    private const double RequiredAblationWinRateReduction = 15d;
+    private const double RequiredAblationSurvivorReductionFraction = 0.1d;
+    private const double RequiredAblationDurationIncreasePercent = 15d;
+    private const double RequiredRestorerAttentionIncreaseWithoutGuardianPercent = 10d;
+    private const double RequiredGuardianRedirectToIncomingDamageFraction = 0.1d;
+    private const double RequiredRestorerHealingToGuardianDamageFraction = 0.1d;
+    private const double MinimumDamageLightDurationIncreasePercent = 15d;
 
-    private static readonly IReadOnlyDictionary<string, int[]> RosterWeights =
-        new Dictionary<string, int[]>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["Mixed"] = [2, 1, 1, 1],
-            ["DamageHeavy"] = [3, 1, 0, 1],
-            ["SustainHeavy"] = [1, 1, 3, 1],
-            ["DefensiveHeavy"] = [1, 1, 1, 3]
-        };
-
-    private static readonly CanonicalPartyProfile[] WeightedProfiles =
+    private static readonly WorldTowerBalanceRosterKind[] RosterKinds =
     [
-        CanonicalPartyProfile.Offense,
-        CanonicalPartyProfile.Balanced,
-        CanonicalPartyProfile.Sustain,
-        CanonicalPartyProfile.Defensive
+        WorldTowerBalanceRosterKind.Cooperative,
+        WorldTowerBalanceRosterKind.NoGuardian,
+        WorldTowerBalanceRosterKind.NoRestorer,
+        WorldTowerBalanceRosterKind.DamageLight
     ];
 
     private readonly IWorldTowerDefinitionProvider _definitions;
@@ -84,11 +92,17 @@ public sealed class WorldTowerBalanceAnalyzer : IWorldTowerBalanceAnalyzer
                 cancellationToken));
         }
 
+        var blockers = results
+            .SelectMany(floor => floor.Failures.Select(failure =>
+                $"Floor {floor.FloorNumber} {floor.FloorName}: {failure}"))
+            .ToArray();
         return new WorldTowerBalanceReport(
             attempts,
             baseSeed,
-            results.All(x => x.EquipmentTier == 1),
-            results);
+            results.All(result => result.EquipmentTier == 1),
+            results,
+            blockers.Length == 0,
+            blockers);
     }
 
     private async Task<WorldTowerFloorBalanceResult> AnalyzeFloorAsync(
@@ -103,23 +117,24 @@ public sealed class WorldTowerBalanceAnalyzer : IWorldTowerBalanceAnalyzer
 
         var rung = _builds.GetProgressionLadder().Single(candidate =>
             candidate.Id.Equals(benchmark.BuildId, StringComparison.OrdinalIgnoreCase));
-        var rosters = new List<WorldTowerRosterBalanceResult>();
-        var canonicalRatings = new List<int>();
-        foreach (var (rosterName, weights) in RosterWeights)
+        var cooperativeSlots = CanonicalCooperativeRosterCatalog.CreateParty(definition.RequiredSlots);
+        var canonicalRatings = new List<int>(definition.RequiredSlots);
+        var rosters = new List<WorldTowerRosterBalanceResult>(RosterKinds.Length);
+
+        foreach (var rosterKind in RosterKinds)
         {
-            var profiles = CreateProfiles(definition.RequiredSlots, weights);
-            var friendly = new List<CombatEntity>(profiles.Count);
-            foreach (var profile in profiles)
+            var slots = CreateVariant(cooperativeSlots, rosterKind);
+            var friendly = new List<CombatEntity>(slots.Count);
+            foreach (var slot in slots)
             {
                 var build = _builds.CreateBuildForArea(
-                    profile,
+                    slot.Role,
                     rung,
                     benchmark.CharacterLevel,
                     benchmark.EssenceCount);
-                canonicalRatings.Add(CombatRatingDisplay.FromRaw(build.Rating.Overall));
-                var combatant = await _simulations.CreateCanonicalCombatantAsync(
-                    build,
-                    cancellationToken);
+                if (rosterKind == WorldTowerBalanceRosterKind.Cooperative)
+                    canonicalRatings.Add(CombatRatingDisplay.FromRaw(build.Rating.Overall));
+                var combatant = await _simulations.CreateCanonicalCombatantAsync(build, cancellationToken);
                 ApplyPreparation(combatant);
                 friendly.Add(combatant);
             }
@@ -136,14 +151,13 @@ public sealed class WorldTowerBalanceAnalyzer : IWorldTowerBalanceAnalyzer
                     MaximumCombatTicks,
                     supplementalAbilities: null,
                     cancellationToken,
-                    friendlyPartyNumbers: Enumerable.Range(0, friendly.Count)
-                        .Select(index => (int?)(index / WorldTowerPartyRules.MaximumPartySize + 1))
-                        .ToArray()));
+                    friendlyPartyNumbers: slots.Select(slot => (int?)slot.PartyNumber).ToArray()));
             }
 
-            rosters.Add(CreateRosterResult(rosterName, profiles, outcomes));
+            rosters.Add(CreateRosterResult(rosterKind, slots, outcomes));
         }
 
+        var failures = EvaluateFloor(definition, rosters);
         return new WorldTowerFloorBalanceResult(
             definition.FloorNumber,
             definition.Name,
@@ -157,7 +171,184 @@ public sealed class WorldTowerBalanceAnalyzer : IWorldTowerBalanceAnalyzer
                 : (int)Math.Round(canonicalRatings.Average()),
             (int)Math.Round(canonicalRatings.Average()),
             definition.GuardianScaling,
-            rosters);
+            rosters,
+            failures.Count == 0,
+            failures);
+    }
+
+    private static IReadOnlyList<CanonicalCooperativeRosterSlot> CreateVariant(
+        IReadOnlyList<CanonicalCooperativeRosterSlot> cooperative,
+        WorldTowerBalanceRosterKind kind) =>
+        cooperative.Select(slot => slot with
+        {
+            Role = kind switch
+            {
+                WorldTowerBalanceRosterKind.NoGuardian
+                    when slot.Role == CanonicalCooperativeRole.Guardian =>
+                    CanonicalCooperativeRole.DefensiveHybrid,
+                WorldTowerBalanceRosterKind.NoRestorer
+                    when slot.Role == CanonicalCooperativeRole.Restorer =>
+                    CanonicalCooperativeRole.DefensiveHybrid,
+                WorldTowerBalanceRosterKind.DamageLight
+                    when slot.Role is CanonicalCooperativeRole.Striker or CanonicalCooperativeRole.Controller =>
+                    CanonicalCooperativeRole.DefensiveHybrid,
+                _ => slot.Role
+            }
+        }).ToArray();
+
+    private static IReadOnlyList<string> EvaluateFloor(
+        TowerFloorDefinition definition,
+        IReadOnlyList<WorldTowerRosterBalanceResult> rosters)
+    {
+        var failures = new List<string>();
+        var cooperative = rosters.Single(result => result.Kind == WorldTowerBalanceRosterKind.Cooperative);
+        if (cooperative.WinRate is < PreparedMinimumWinRate or > PreparedMaximumWinRate)
+        {
+            failures.Add(
+                $"cooperative win rate was {cooperative.WinRate:F2}% instead of " +
+                $"{PreparedMinimumWinRate:F0}-{PreparedMaximumWinRate:F0}%.");
+        }
+        if (cooperative.MedianVictoryTicks is < MinimumPreparedVictoryTicks or > MaximumPreparedVictoryTicks)
+        {
+            failures.Add(
+                $"cooperative median victory was {cooperative.MedianVictoryTicks:F0} ticks instead of " +
+                $"{MinimumPreparedVictoryTicks}-{MaximumPreparedVictoryTicks} ticks.");
+        }
+        var minimumVictorySurvivors = Math.Ceiling(definition.RequiredSlots * MinimumVictorySurvivorFraction);
+        if (cooperative.AverageVictorySurvivors < minimumVictorySurvivors)
+        {
+            failures.Add(
+                $"cooperative victories averaged {cooperative.AverageVictorySurvivors:F2} survivors " +
+                $"(minimum {minimumVictorySurvivors:F0}).");
+        }
+
+        var telemetry = cooperative.Cooperation;
+        var neutralGuardianAttention = telemetry.Parties.Count * 100d / definition.RequiredSlots;
+        var minimumGuardianAttention = neutralGuardianAttention * MinimumGuardianAttentionMultiplier;
+        var neutralRestorerAttention = telemetry.Parties.Count * 100d / definition.RequiredSlots;
+        var maximumRestorerAttention = neutralRestorerAttention + MaximumRestorerAttentionAboveNeutralPercent;
+        if (telemetry.GuardianAttentionSharePercent < minimumGuardianAttention ||
+            telemetry.GuardianAttentionSharePercent > MaximumGuardianAttentionPercent)
+        {
+            failures.Add(
+                $"Guardians received {telemetry.GuardianAttentionSharePercent:F2}% attention instead of " +
+                $"{minimumGuardianAttention:F2}-{MaximumGuardianAttentionPercent:F0}% " +
+                $"(neutral share {neutralGuardianAttention:F2}%).");
+        }
+        if (telemetry.RestorerAttentionSharePercent > maximumRestorerAttention)
+        {
+            failures.Add(
+                $"Restorers received {telemetry.RestorerAttentionSharePercent:F2}% attention " +
+                $"(maximum {maximumRestorerAttention:F2}%; neutral share {neutralRestorerAttention:F2}%).");
+        }
+        if (telemetry.GuardianThreatGenerated <= telemetry.RestorerThreatGenerated)
+            failures.Add("Guardians did not generate more threat than Restorers.");
+        if (telemetry.GuardianIncomingRawDamage <= 0)
+            failures.Add("Guardians received no Guardian pressure.");
+        if (telemetry.RestorerHealingDone <= 0)
+            failures.Add("Restorers produced no effective healing.");
+
+        foreach (var party in telemetry.Parties)
+        {
+            var partyNeutralAttention = 100d / party.PartySize;
+            var partyMinimumGuardianAttention = partyNeutralAttention;
+            var partyMaximumRestorerAttention =
+                partyNeutralAttention + MaximumRestorerAttentionAboveNeutralPercent;
+            if (party.GuardianAttentionSharePercent < partyMinimumGuardianAttention ||
+                party.GuardianAttentionSharePercent > MaximumGuardianAttentionPercent)
+            {
+                failures.Add(
+                    $"party {party.PartyNumber} Guardian attention was " +
+                    $"{party.GuardianAttentionSharePercent:F2}% (minimum " +
+                    $"{partyMinimumGuardianAttention:F2}%; neutral share {partyNeutralAttention:F2}%).");
+            }
+            if (party.RestorerAttentionSharePercent > partyMaximumRestorerAttention)
+            {
+                failures.Add(
+                    $"party {party.PartyNumber} Restorer attention was " +
+                    $"{party.RestorerAttentionSharePercent:F2}% (maximum " +
+                    $"{partyMaximumRestorerAttention:F2}%; neutral share {partyNeutralAttention:F2}%).");
+            }
+            if (party.GuardianThreatGenerated <= party.RestorerThreatGenerated)
+                failures.Add($"party {party.PartyNumber} Guardian lost the threat race to its Restorer.");
+            if (party.RestorerHealingDone <= 0)
+                failures.Add($"party {party.PartyNumber} Restorer produced no effective healing.");
+        }
+
+        RequireRoleRegression(
+            definition,
+            cooperative,
+            rosters.Single(result => result.Kind == WorldTowerBalanceRosterKind.NoGuardian),
+            "removing Guardians",
+            failures);
+        RequireRoleRegression(
+            definition,
+            cooperative,
+            rosters.Single(result => result.Kind == WorldTowerBalanceRosterKind.NoRestorer),
+            "removing Restorers",
+            failures);
+
+        var damageLight = rosters.Single(result => result.Kind == WorldTowerBalanceRosterKind.DamageLight);
+        var winRateRegressed = damageLight.WinRate <= cooperative.WinRate - RequiredAblationWinRateReduction;
+        var durationRegressed = cooperative.MedianVictoryTicks > 0 && damageLight.MedianVictoryTicks > 0 &&
+            (damageLight.MedianVictoryTicks - cooperative.MedianVictoryTicks) /
+            cooperative.MedianVictoryTicks * 100d >= MinimumDamageLightDurationIncreasePercent;
+        if (!winRateRegressed && !durationRegressed)
+        {
+            failures.Add(
+                $"removing dedicated damage roles did not reduce wins by " +
+                $"{RequiredAblationWinRateReduction:F0} points or increase median clear time by " +
+                $"{MinimumDamageLightDurationIncreasePercent:F0}%.");
+        }
+
+        return failures;
+    }
+
+    private static void RequireRoleRegression(
+        TowerFloorDefinition definition,
+        WorldTowerRosterBalanceResult cooperative,
+        WorldTowerRosterBalanceResult ablation,
+        string label,
+        ICollection<string> failures)
+    {
+        var winRateRegressed =
+            ablation.WinRate <= cooperative.WinRate - RequiredAblationWinRateReduction;
+        var survivorReduction = cooperative.AverageSurvivors - ablation.AverageSurvivors;
+        var survivorRegressed =
+            survivorReduction >= definition.RequiredSlots * RequiredAblationSurvivorReductionFraction;
+        var durationRegressed = cooperative.MedianVictoryTicks > 0 &&
+            ablation.MedianVictoryTicks >= cooperative.MedianVictoryTicks *
+            (1d + RequiredAblationDurationIncreasePercent / 100d);
+        var guardianProtectionRegressed =
+            ablation.Kind == WorldTowerBalanceRosterKind.NoGuardian &&
+            ablation.Cooperation.RestorerAttentionSharePercent >=
+            cooperative.Cooperation.RestorerAttentionSharePercent +
+            RequiredRestorerAttentionIncreaseWithoutGuardianPercent;
+        var guardianContributionWasMaterial =
+            ablation.Kind == WorldTowerBalanceRosterKind.NoGuardian &&
+            cooperative.Cooperation.GuardianIncomingRawDamage > 0 &&
+            cooperative.Cooperation.DamageRedirectedToGuardians >=
+            cooperative.Cooperation.GuardianIncomingRawDamage *
+            RequiredGuardianRedirectToIncomingDamageFraction;
+        var restorerContributionWasMaterial =
+            ablation.Kind == WorldTowerBalanceRosterKind.NoRestorer &&
+            cooperative.Cooperation.GuardianIncomingRawDamage > 0 &&
+            cooperative.Cooperation.RestorerHealingDone >=
+            cooperative.Cooperation.GuardianIncomingRawDamage *
+            RequiredRestorerHealingToGuardianDamageFraction;
+        if (!winRateRegressed && !survivorRegressed && !durationRegressed &&
+            !guardianProtectionRegressed && !guardianContributionWasMaterial &&
+            !restorerContributionWasMaterial)
+        {
+            failures.Add(
+                $"{label} only changed win rate from {cooperative.WinRate:F2}% to " +
+                $"{ablation.WinRate:F2}% and survivors from {cooperative.AverageSurvivors:F2} to " +
+                $"{ablation.AverageSurvivors:F2} (required {RequiredAblationWinRateReduction:F0}-point " +
+                $"win, {RequiredAblationSurvivorReductionFraction:P0} party-survival reduction, " +
+                $"{RequiredAblationDurationIncreasePercent:F0}% longer clear, displaced Restorer pressure, " +
+                $"{RequiredGuardianRedirectToIncomingDamageFraction:P0} redirected Guardian pressure, " +
+                $"or healing worth {RequiredRestorerHealingToGuardianDamageFraction:P0} of Guardian pressure).");
+        }
     }
 
     private static TowerBalanceBenchmarkDefinition ResolveBenchmark(
@@ -220,31 +411,17 @@ public sealed class WorldTowerBalanceAnalyzer : IWorldTowerBalanceAnalyzer
             (float)amount,
             ModifierType.Multiplicative));
 
-    private static IReadOnlyList<CanonicalPartyProfile> CreateProfiles(
-        int slots,
-        IReadOnlyList<int> weights)
-    {
-        var expanded = WeightedProfiles
-            .SelectMany((profile, index) => Enumerable.Repeat(profile, weights[index]))
-            .ToArray();
-        return Enumerable.Range(0, slots)
-            .Select(index => expanded[index % expanded.Length])
-            .ToArray();
-    }
-
     private static WorldTowerRosterBalanceResult CreateRosterResult(
-        string rosterName,
-        IReadOnlyList<CanonicalPartyProfile> profiles,
+        WorldTowerBalanceRosterKind kind,
+        IReadOnlyList<CanonicalCooperativeRosterSlot> slots,
         IReadOnlyList<CombatResult> outcomes)
     {
-        var victories = outcomes.Count(x => x.Outcome == BattleOutcome.Victory);
-        var defeats = outcomes.Count(x => x.Outcome == BattleOutcome.Defeat);
+        var victories = outcomes.Count(result => result.Outcome == BattleOutcome.Victory);
+        var defeats = outcomes.Count(result => result.Outcome == BattleOutcome.Defeat);
         var draws = outcomes.Count - victories - defeats;
         var interval = WilsonInterval(victories, outcomes.Count);
-        var victoryTicks = outcomes
-            .Where(x => x.Outcome == BattleOutcome.Victory)
-            .Select(x => x.Duration)
-            .ToArray();
+        var victoryResults = outcomes.Where(result => result.Outcome == BattleOutcome.Victory).ToArray();
+        var victoryTicks = victoryResults.Select(result => result.Duration).ToArray();
         var guardianHealth = outcomes.Select(result =>
         {
             var guardian = result.EnemyTeam.Single();
@@ -254,7 +431,8 @@ public sealed class WorldTowerBalanceAnalyzer : IWorldTowerBalanceAnalyzer
         });
 
         return new WorldTowerRosterBalanceResult(
-            rosterName,
+            kind.ToString(),
+            kind,
             outcomes.Count,
             victories,
             defeats,
@@ -264,10 +442,106 @@ public sealed class WorldTowerBalanceAnalyzer : IWorldTowerBalanceAnalyzer
             Math.Round(interval.Upper * 100d, 2),
             Percentile(victoryTicks, 0.50),
             Percentile(victoryTicks, 0.95),
-            Math.Round(outcomes.Average(x => x.PlayerTeam.Count(player => player.Health > 0)), 2),
+            Math.Round(outcomes.Average(CountSurvivors), 2),
+            victoryResults.Length == 0 ? 0 : Math.Round(victoryResults.Average(CountSurvivors), 2),
             Math.Round(guardianHealth.Average(), 2),
-            profiles.Select(x => x.ToString()).ToArray());
+            slots.Select(slot => slot.Role.ToString()).ToArray(),
+            CreateCooperationTelemetry(slots, outcomes));
     }
+
+    private static WorldTowerCooperationTelemetry CreateCooperationTelemetry(
+        IReadOnlyList<CanonicalCooperativeRosterSlot> slots,
+        IReadOnlyList<CombatResult> outcomes)
+    {
+        var attempts = outcomes.Select(result => CreateAttemptTelemetry(slots, result)).ToArray();
+        var parties = slots
+            .GroupBy(slot => slot.PartyNumber)
+            .OrderBy(group => group.Key)
+            .Select(group =>
+            {
+                var values = attempts.Select(attempt => attempt.Parties.Single(party =>
+                    party.PartyNumber == group.Key)).ToArray();
+                return new WorldTowerPartyCooperationTelemetry(
+                    group.Key,
+                    group.Count(),
+                    Average(values, value => value.GuardianAttentionSharePercent),
+                    Average(values, value => value.RestorerAttentionSharePercent),
+                    Average(values, value => value.GuardianThreatGenerated),
+                    Average(values, value => value.RestorerThreatGenerated),
+                    Average(values, value => value.GuardianIncomingRawDamage),
+                    Average(values, value => value.RestorerHealingDone),
+                    Average(values, value => value.Survivors));
+            })
+            .ToArray();
+
+        return new WorldTowerCooperationTelemetry(
+            Average(attempts, attempt => attempt.GuardianAttentionSharePercent),
+            Average(attempts, attempt => attempt.RestorerAttentionSharePercent),
+            Average(attempts, attempt => attempt.GuardianThreatGenerated),
+            Average(attempts, attempt => attempt.RestorerThreatGenerated),
+            Average(attempts, attempt => attempt.GuardianIncomingRawDamage),
+            Average(attempts, attempt => attempt.RestorerHealingDone),
+            Average(attempts, attempt => attempt.DamageRedirectedToGuardians),
+            Average(attempts, attempt => attempt.Survivors),
+            parties);
+    }
+
+    private static AttemptTelemetry CreateAttemptTelemetry(
+        IReadOnlyList<CanonicalCooperativeRosterSlot> slots,
+        CombatResult result)
+    {
+        var rolesById = slots.ToDictionary(
+            slot => $"power-friendly-{slot.SlotIndex + 1}",
+            slot => slot,
+            StringComparer.OrdinalIgnoreCase);
+        var stats = result.EntityStats
+            .Where(stat => rolesById.ContainsKey(stat.EntityId))
+            .ToArray();
+        var parties = slots
+            .GroupBy(slot => slot.PartyNumber)
+            .OrderBy(group => group.Key)
+            .Select(group =>
+            {
+                var ids = group.Select(slot => $"power-friendly-{slot.SlotIndex + 1}")
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var partyStats = stats.Where(stat => ids.Contains(stat.EntityId)).ToArray();
+                var targetedAttacks = partyStats.Sum(stat => stat.TargetedAttacks);
+                var guardian = partyStats.Where(stat =>
+                    rolesById[stat.EntityId].Role == CanonicalCooperativeRole.Guardian).ToArray();
+                var restorer = partyStats.Where(stat =>
+                    rolesById[stat.EntityId].Role == CanonicalCooperativeRole.Restorer).ToArray();
+                return new PartyAttemptTelemetry(
+                    group.Key,
+                    targetedAttacks <= 0 ? 0 : guardian.Sum(stat => stat.TargetedAttacks) * 100d / targetedAttacks,
+                    targetedAttacks <= 0 ? 0 : restorer.Sum(stat => stat.TargetedAttacks) * 100d / targetedAttacks,
+                    guardian.Sum(stat => (double)stat.ThreatGenerated),
+                    restorer.Sum(stat => (double)stat.ThreatGenerated),
+                    guardian.Sum(stat => (double)stat.IncomingRawDamage),
+                    restorer.Sum(stat => (double)stat.HealingDone),
+                    result.PlayerTeam.Count(combatant => ids.Contains(combatant.Id) && combatant.Health > 0));
+            })
+            .ToArray();
+        var guardianStats = stats.Where(stat =>
+            rolesById[stat.EntityId].Role == CanonicalCooperativeRole.Guardian).ToArray();
+        var restorerStats = stats.Where(stat =>
+            rolesById[stat.EntityId].Role == CanonicalCooperativeRole.Restorer).ToArray();
+        return new AttemptTelemetry(
+            guardianStats.Sum(stat => stat.AttentionSharePercent),
+            restorerStats.Sum(stat => stat.AttentionSharePercent),
+            guardianStats.Sum(stat => (double)stat.ThreatGenerated),
+            restorerStats.Sum(stat => (double)stat.ThreatGenerated),
+            guardianStats.Sum(stat => (double)stat.IncomingRawDamage),
+            restorerStats.Sum(stat => (double)stat.HealingDone),
+            guardianStats.Sum(stat => (double)stat.DamageRedirectedTo),
+            CountSurvivors(result),
+            parties);
+    }
+
+    private static int CountSurvivors(CombatResult result) =>
+        result.PlayerTeam.Count(combatant => combatant.Health > 0);
+
+    private static double Average<T>(IReadOnlyList<T> values, Func<T, double> selector) =>
+        values.Count == 0 ? 0 : Math.Round(values.Average(selector), 2);
 
     private static (double Lower, double Upper) WilsonInterval(int successes, int attempts)
     {
@@ -293,4 +567,25 @@ public sealed class WorldTowerBalanceAnalyzer : IWorldTowerBalanceAnalyzer
             ? ordered[lower]
             : Math.Round(ordered[lower] + (ordered[upper] - ordered[lower]) * (position - lower), 2);
     }
+
+    private sealed record AttemptTelemetry(
+        double GuardianAttentionSharePercent,
+        double RestorerAttentionSharePercent,
+        double GuardianThreatGenerated,
+        double RestorerThreatGenerated,
+        double GuardianIncomingRawDamage,
+        double RestorerHealingDone,
+        double DamageRedirectedToGuardians,
+        int Survivors,
+        IReadOnlyList<PartyAttemptTelemetry> Parties);
+
+    private sealed record PartyAttemptTelemetry(
+        int PartyNumber,
+        double GuardianAttentionSharePercent,
+        double RestorerAttentionSharePercent,
+        double GuardianThreatGenerated,
+        double RestorerThreatGenerated,
+        double GuardianIncomingRawDamage,
+        double RestorerHealingDone,
+        int Survivors);
 }

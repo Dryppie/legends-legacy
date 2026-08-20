@@ -26,29 +26,26 @@ public sealed class RaidPowerCalibrationWorker(
                 StringComparer.OrdinalIgnoreCase);
             foreach (var boss in definitions.GetAll().OrderBy(x => x.Region).ThenBy(x => x.Id))
             {
-                foreach (var tier in boss.Tiers.OrderBy(x => x.Tier))
+                const int regularPlusLevel = 0;
+                stoppingToken.ThrowIfCancellationRequested();
+                var key = RaidPowerRecommendationStore.Key(boss.Id, regularPlusLevel);
+                var identity = analyzer.GetIdentity(boss.Id, regularPlusLevel);
+                if (persisted.TryGetValue(key, out var saved) && saved.Identity == identity)
                 {
-                    stoppingToken.ThrowIfCancellationRequested();
-                    var key = RaidPowerRecommendationStore.Key(boss.Id, tier.Tier);
-                    var identity = analyzer.GetIdentity(boss.Id, tier.Tier);
-                    if (persisted.TryGetValue(key, out var saved) && saved.Identity == identity)
-                    {
-                        staged[key] = saved.Recommendation;
-                        continue;
-                    }
-                    if (!options.Value.Enabled)
-                        continue;
-
-                    logger.LogInformation(
-                        "Calibrating recommended raid wing power for {RaidBossId} tier {Tier}.",
-                        boss.Id,
-                        tier.Tier);
-                    var recommendation = await analyzer.AnalyzeAsync(boss.Id, tier.Tier, stoppingToken);
-                    staged[key] = recommendation;
-                    await repository.UpsertAsync(
-                        new PersistedRaidPowerRecommendation(identity, recommendation, DateTimeOffset.UtcNow),
-                        stoppingToken);
+                    staged[key] = saved.Recommendation;
+                    continue;
                 }
+                if (!options.Value.Enabled)
+                    continue;
+
+                logger.LogInformation(
+                    "Calibrating recommended raid wing power for {RaidBossId} Regular.",
+                    boss.Id);
+                var recommendation = await analyzer.AnalyzeAsync(boss.Id, regularPlusLevel, stoppingToken);
+                staged[key] = recommendation;
+                await repository.UpsertAsync(
+                    new PersistedRaidPowerRecommendation(identity, recommendation, DateTimeOffset.UtcNow),
+                    stoppingToken);
             }
             store.Publish(staged);
         }

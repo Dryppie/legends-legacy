@@ -11,7 +11,7 @@
       "rewardQuantity": 1,
       "weeklyPurchaseLimit": 1,
       "lifetimePurchaseLimit": null,
-      "requiredTier": 1,
+      "requiredTier": 0,
       "isEnabled": true,
       "sortOrder": 10
     },
@@ -26,7 +26,7 @@
       "rewardQuantity": 2,
       "weeklyPurchaseLimit": 6,
       "lifetimePurchaseLimit": null,
-      "requiredTier": 1,
+      "requiredTier": 0,
       "isEnabled": true,
       "sortOrder": 20
     },
@@ -41,7 +41,7 @@
       "rewardQuantity": 1,
       "weeklyPurchaseLimit": 1,
       "lifetimePurchaseLimit": null,
-      "requiredTier": 2,
+      "requiredTier": 0,
       "isEnabled": true,
       "sortOrder": 10
     },
@@ -56,7 +56,7 @@
       "rewardQuantity": 2,
       "weeklyPurchaseLimit": 6,
       "lifetimePurchaseLimit": null,
-      "requiredTier": 2,
+      "requiredTier": 0,
       "isEnabled": true,
       "sortOrder": 20
     }

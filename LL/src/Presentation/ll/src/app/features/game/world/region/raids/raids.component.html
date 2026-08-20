@@ -6,14 +6,13 @@
       <div class="encounter-column">
         <section class="encounter-overview">
           <p class="raid-introduction">
-            Three parties muster for one coordinated assault. Each party holds a
-            distinct wing of the raid, and every wing contributes to the final
-            outcome.
+            Three parties perform specialized preparation tasks, then regroup
+            fully restored to fight {{ raidBoss.name }} together.
           </p>
 
           <header class="lane-summary">
-            <span>Wings · 3 parties</span>
-            <span>Boss wing follows the support wings</span>
+            <span>Preparation · 3 parties</span>
+            <span>All parties regroup for the boss</span>
           </header>
 
           <div class="encounter-list">
@@ -23,13 +22,18 @@
                 <span>Party</span>
               </div>
               <div class="encounter-copy">
-                <span class="eyebrow">Flank</span>
-                <h3>Adds wing</h3>
-                <p>Contain the supporting enemies before they overwhelm the raid.</p>
+                <span class="eyebrow">Rearguard · AoE</span>
+                <h3>Control the reinforcements</h3>
+                <p>
+                  Clear 10 continuous waves without recovery between them so
+                  fewer adds survive into the Final Assault.
+                </p>
               </div>
               <div class="recommended-power">
                 <span>Recommended power</span>
-                <strong>{{ tier.recommendedWingPower.flank | number }}</strong>
+                <strong>{{
+                  tier.recommendedWingPower.rearguard | number
+                }}</strong>
               </div>
             </article>
 
@@ -39,13 +43,18 @@
                 <span>Party</span>
               </div>
               <div class="encounter-copy">
-                <span class="eyebrow">Ward</span>
-                <h3>Objective wing</h3>
-                <p>Break the ward to weaken the boss wing for the final assault.</p>
+                <span class="eyebrow">Vanguard · Single target</span>
+                <h3>Destroy the guardian</h3>
+                <p>
+                  Break its defenses to reduce the boss's barrier and
+                  mitigation.
+                </p>
               </div>
               <div class="recommended-power">
                 <span>Recommended power</span>
-                <strong>{{ tier.recommendedWingPower.ward | number }}</strong>
+                <strong>{{
+                  tier.recommendedWingPower.vanguard | number
+                }}</strong>
               </div>
             </article>
 
@@ -55,38 +64,66 @@
                 <span>Party</span>
               </div>
               <div class="encounter-copy">
-                <span class="eyebrow">Vanguard · Raid boss</span>
-                <h3>{{ raidBoss.name }}</h3>
-                <p>Lead the final assault after the support parties have done their work.</p>
+                <span class="eyebrow">Main Guard · Endurance</span>
+                <h3>Withstand the projection</h3>
+                <p>
+                  Survive escalating boss attacks to weaken its signature
+                  mechanic.
+                </p>
               </div>
               <div class="recommended-power">
                 <span>Recommended power</span>
-                <strong>{{ tier.recommendedWingPower.vanguard | number }}</strong>
+                <strong>{{
+                  tier.recommendedWingPower.mainGuard | number
+                }}</strong>
               </div>
             </article>
           </div>
 
           <footer class="raid-facts">
-            <div><span>Raid size</span><strong>{{ tier.laneSlots * 3 }}</strong></div>
-            <div><span>Formation</span><strong>3 × {{ tier.laneSlots }}</strong></div>
-            <div><span>Muster window</span><strong>{{ tier.signupWindowHours }}h</strong></div>
-            <div><span>Open musters</span><strong>{{ raidBoss.openRaidCount }}</strong></div>
+            <div>
+              <span>Raid size</span><strong>{{ tier.laneSlots * 3 }}</strong>
+            </div>
+            <div>
+              <span>Formation</span><strong>3 × {{ tier.laneSlots }}</strong>
+            </div>
+            <div>
+              <span>Raid window</span
+              ><strong>{{ tier.signupWindowHours }}h</strong>
+            </div>
+            <div>
+              <span>Open Raids</span
+              ><strong>{{ raidBoss.openRaidCount }}</strong>
+            </div>
           </footer>
         </section>
 
         <section *ngIf="vendor() as shop" class="trophy-vendor panel-card">
           <header>
-            <div><span class="eyebrow">Raid boss site</span><h3>Trophy Exchange</h3></div>
+            <div>
+              <span class="eyebrow">Raid boss site</span>
+              <h3>Trophy Exchange</h3>
+            </div>
             <strong>{{ shop.trophyBalance | number }} Trophies</strong>
           </header>
           <article *ngFor="let item of shop.items" class="vendor-item">
             <div>
               <strong>{{ item.name }}</strong>
               <p>{{ item.description }}</p>
-              <small *ngIf="!item.isUnlocked">Slay Tier {{ item.requiredTier }} to unlock</small>
-              <small *ngIf="item.weeklyPurchaseLimit">Weekly {{ item.weeklyPurchased }}/{{ item.weeklyPurchaseLimit }}</small>
+              <small *ngIf="!item.isUnlocked"
+                >Slay {{ difficultyLabel(item.requiredTier) }} to unlock</small
+              >
+              <small *ngIf="item.weeklyPurchaseLimit"
+                >Weekly {{ item.weeklyPurchased }}/{{
+                  item.weeklyPurchaseLimit
+                }}</small
+              >
             </div>
-            <button type="button" (click)="purchase(item.id)" [disabled]="!item.canPurchase || !!action()">
+            <button
+              type="button"
+              (click)="purchase(item.id)"
+              [disabled]="!item.canPurchase || !!action()"
+            >
               {{ item.trophyCost }} Trophies
             </button>
           </article>
@@ -97,18 +134,32 @@
         <section class="muster-card panel-card">
           <header class="muster-heading">
             <span class="eyebrow">Muster setup</span>
-            <h3>Tier {{ selectedTier() }}</h3>
+            <h3>{{ difficultyLabel(selectedTier()) }}</h3>
           </header>
 
-          <div *ngIf="raidBoss.tiers.length > 1" class="tier-tabs" aria-label="Raid tier">
+          <div
+            *ngIf="raidBoss.tiers.length > 1"
+            class="difficulty-stepper"
+            aria-label="Raid difficulty"
+          >
             <button
-              *ngFor="let raidTier of raidBoss.tiers"
               type="button"
               class="secondary"
-              [class.active]="selectedTier() === raidTier.tier"
-              (click)="selectTier(raidTier.tier)"
+              aria-label="Previous raid difficulty"
+              (click)="changeDifficulty(-1)"
+              [disabled]="!canChangeDifficulty(-1) || !!action()"
             >
-              Tier {{ raidTier.tier }}
+              −
+            </button>
+            <strong>{{ difficultyLabel(selectedTier()) }}</strong>
+            <button
+              type="button"
+              class="secondary"
+              aria-label="Next raid difficulty"
+              (click)="changeDifficulty(1)"
+              [disabled]="!canChangeDifficulty(1) || !!action()"
+            >
+              +
             </button>
           </div>
 
@@ -124,25 +175,34 @@
               type="button"
               class="full-width"
               (click)="create()"
-              [disabled]="!raidBoss.isUnlocked || !!raidBoss.activeRaidId || !!action()"
+              [disabled]="
+                !raidBoss.isUnlocked || !!raidBoss.activeRaidId || !!action()
+              "
             >
-              {{ action() === 'create' ? 'Creating raid...' : 'Create raid' }}
+              {{ action() === "create" ? "Creating raid..." : "Create raid" }}
             </button>
             <button
               *ngIf="raidBoss.developmentToolsEnabled"
               type="button"
               class="secondary full-width"
               (click)="createDevelopment()"
-              [disabled]="!raidBoss.isUnlocked || !!raidBoss.activeRaidId || !!action()"
+              [disabled]="
+                !raidBoss.isUnlocked || !!raidBoss.activeRaidId || !!action()
+              "
             >
-              {{ action() === 'development-create' ? 'Creating test raid...' : 'Create test raid · free' }}
+              {{
+                action() === "development-create"
+                  ? "Creating test raid..."
+                  : "Create test raid · free"
+              }}
             </button>
           </div>
         </section>
 
-        <p *ngIf="raidBoss.rewardReducedThisWeek" class="notice panel-card">
-          <span class="eyebrow">Weekly reward spent</span>
-          You already earned the full weekly reward. Further clears pay 25%.
+        <p *ngIf="raidBoss.hasWeeklyRewardThisWeek" class="notice panel-card">
+          <span class="eyebrow">Weekly reward active</span>
+          Further clears pay 25%, while a higher +level or better outcome grants
+          the upgrade difference.
         </p>
 
         <section class="recruiting-card panel-card">
@@ -151,9 +211,18 @@
             <strong>{{ openRaids().length }} recruiting</strong>
           </header>
 
-          <p *ngIf="loading()" class="loading-state">Loading recruiting raids…</p>
-          <div *ngIf="!loading() && openRaids().length === 0" class="ll-empty-state">
-            No raids are recruiting. Create one to begin mustering{{ raidBoss.developmentToolsEnabled ? ', or create a local test raid above' : '' }}.
+          <p *ngIf="loading()" class="loading-state">
+            Loading recruiting raids…
+          </p>
+          <div
+            *ngIf="!loading() && openRaids().length === 0"
+            class="ll-empty-state"
+          >
+            No raids are recruiting. Create one to begin mustering{{
+              raidBoss.developmentToolsEnabled
+                ? ", or create a local test raid above"
+                : ""
+            }}.
           </div>
 
           <article *ngFor="let run of openRaids()" class="open-raid">
@@ -162,13 +231,24 @@
                 <strong>{{ run.leaderCharacterName }}</strong>
                 <span>{{ closesIn(run.signupClosesAt) }}</span>
               </div>
-              <span>Tier {{ run.tier }} · {{ run.signupCount }}/{{ run.maximumRoster }} mustered</span>
+              <span
+                >{{ difficultyLabel(run.tier) }} · {{ run.signupCount }}/{{
+                  run.maximumRoster
+                }}
+                mustered</span
+              >
               <small>
-                Vanguard {{ run.vanguardCount }} · Flank {{ run.flankCount }} · Ward {{ run.wardCount }}
+                Rearguard {{ run.rearguardCount }} · Vanguard
+                {{ run.vanguardCount }} · Main Guard {{ run.mainGuardCount }}
               </small>
             </div>
-            <button type="button" class="secondary" (click)="join(run)" [disabled]="!run.canJoin || !!action()">
-              {{ run.canJoin ? 'Join raid' : 'Unavailable' }}
+            <button
+              type="button"
+              class="secondary"
+              (click)="join(run)"
+              [disabled]="!run.canJoin || !!action()"
+            >
+              {{ run.canJoin ? "Request to join" : "Unavailable" }}
             </button>
           </article>
         </section>
@@ -176,25 +256,55 @@
         <details class="raid-history panel-card">
           <summary>
             <span class="eyebrow">Raid history</span>
-            <strong *ngIf="unclaimedRewardCount() as count">{{ count }} unclaimed</strong>
-            <span *ngIf="!unclaimedRewardCount()">{{ history().length }} recent</span>
+            <strong *ngIf="unclaimedRewardCount() as count"
+              >{{ count }} unclaimed</strong
+            >
+            <span *ngIf="!unclaimedRewardCount()"
+              >{{ history().length }} recent</span
+            >
           </summary>
 
           <div class="history-content">
-            <p *ngIf="historyLoading()" class="loading-state">Loading raid history…</p>
-            <div *ngIf="!historyLoading() && history().length === 0" class="ll-empty-state">
+            <p *ngIf="historyLoading()" class="loading-state">
+              Loading raid history…
+            </p>
+            <div
+              *ngIf="!historyLoading() && history().length === 0"
+              class="ll-empty-state"
+            >
               Your completed raids will appear here.
             </div>
-            <article *ngFor="let entry of history()" class="history-entry" [class.reward-ready]="entry.canClaim">
+            <article
+              *ngFor="let entry of history()"
+              class="history-entry"
+              [class.reward-ready]="entry.canClaim"
+            >
               <div>
-                <strong>{{ entry.raidBossName }} · Tier {{ entry.tier }}</strong>
-                <span>{{ entry.outcome }} · {{ entry.resolvedAt | date:'mediumDate' }}</span>
-                <small>{{ entry.trophies | number }} Trophies{{ entry.wasReduced ? ' · repeat-clear reward' : '' }}</small>
-                <small *ngIf="entry.canClaim" class="claim-status">Reward ready to collect</small>
-                <small *ngIf="!entry.canClaim">Claimed {{ entry.claimedAt | date:'mediumDate' }}</small>
+                <strong
+                  >{{ entry.raidBossName }} · {{ difficultyLabel(entry.tier) }}</strong
+                >
+                <span
+                  >{{ entry.outcome }} ·
+                  {{ entry.resolvedAt | date: "mediumDate" }}</span
+                >
+                <small
+                  >{{ entry.trophies | number }} Trophies{{
+                    entry.rewardKind === "Repeat"
+                      ? " · repeat reward"
+                      : entry.rewardKind === "WeeklyUpgrade"
+                        ? " · weekly upgrade"
+                        : ""
+                  }}</small
+                >
+                <small *ngIf="entry.canClaim" class="claim-status"
+                  >Reward ready to collect</small
+                >
+                <small *ngIf="!entry.canClaim"
+                  >Claimed {{ entry.claimedAt | date: "mediumDate" }}</small
+                >
               </div>
               <a [routerLink]="['/game/world/raid', entry.raidRunId]">
-                {{ entry.canClaim ? 'Claim reward' : 'View result' }}
+                {{ entry.canClaim ? "Claim reward" : "View result" }}
               </a>
             </article>
           </div>

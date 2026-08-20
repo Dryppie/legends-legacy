@@ -53,6 +53,8 @@ public sealed class RaidService(
     private const int BattlePlanHourlyLimit = 30;
     private const string RealmFirstRaidTitleKey = "title.realm_first_raider";
     private static readonly TimeSpan PlaybackTransitionDelay = TimeSpan.FromMilliseconds(1500);
+    // Keep aligned with RaidPageComponent.rearguardWaveTransitionHoldMilliseconds.
+    private static readonly TimeSpan RearguardWaveTransitionHold = TimeSpan.FromMilliseconds(1000);
     private static readonly RaidRunStatus[] ActiveStatuses =
         [RaidRunStatus.Mustering, RaidRunStatus.Resolving, RaidRunStatus.Playback];
 
@@ -74,11 +76,27 @@ public sealed class RaidService(
             .FirstOrDefaultAsync(cancellationToken);
         var now = timeProvider.GetUtcNow();
         var weekKey = GetWeekKey(now);
-        var reducedBossIds = await db.RaidRewardClaims.AsNoTracking()
+        var rewardedBossIds = await db.RaidRewardClaims.AsNoTracking()
             .Where(x => x.CharacterId == characterId && x.WeekKey == weekKey)
             .Select(x => x.RaidBossId)
             .Distinct()
             .ToArrayAsync(cancellationToken);
+        var highestSlainPlusByBoss = await db.RaidParticipantResults.AsNoTracking()
+            .Where(x => x.CharacterId == characterId
+                        && x.RaidRun.Outcome == RaidOutcome.Slain
+                        && (x.RaidRun.Status == RaidRunStatus.Resolved
+                            || x.RaidRun.Status == RaidRunStatus.Settled))
+            .GroupBy(x => x.RaidRun.RaidBossId)
+            .Select(group => new
+            {
+                RaidBossId = group.Key,
+                HighestPlus = group.Max(x => x.RaidRun.Tier)
+            })
+            .ToDictionaryAsync(
+                x => x.RaidBossId,
+                x => x.HighestPlus,
+                StringComparer.OrdinalIgnoreCase,
+                cancellationToken);
         var openCounts = await db.RaidRuns.AsNoTracking()
             .Where(x => x.Status == RaidRunStatus.Mustering && x.SignupClosesAt > now)
             .GroupBy(x => x.RaidBossId)
@@ -104,49 +122,60 @@ public sealed class RaidService(
                 unlocked,
                 unlockError,
                 openCounts.GetValueOrDefault(boss.Id),
-                reducedBossIds.Contains(boss.Id, StringComparer.OrdinalIgnoreCase),
+                rewardedBossIds.Contains(boss.Id, StringComparer.OrdinalIgnoreCase),
                 activeRaidId,
-                boss.Tiers.Select(tier => new RaidBossTierSummaryDto(
-                    tier.Tier,
-                    tier.LaneSlots,
-                    tier.MinimumRoster,
-                    tier.SignupWindowHours,
-                    ToPowerDto(boss.Id, tier))).ToArray(),
+                Enumerable.Range(0, highestSlainPlusByBoss.GetValueOrDefault(boss.Id, -1) + 2)
+                    .Select(plusLevel => RaidPlusDifficulty.Create(boss, plusLevel))
+                    .Select(difficulty => new RaidBossTierSummaryDto(
+                        difficulty.Tier,
+                        difficulty.LaneSlots,
+                        difficulty.MinimumRoster,
+                        difficulty.SignupWindowHours,
+                        ToPowerDto(boss.Id, difficulty))).ToArray(),
                 options.Value.DevelopmentToolsEnabled);
         }).ToArray();
     }
 
     private RaidRecommendedWingPowerDto ToPowerDto(string raidBossId, RaidBossTierDefinition tier)
     {
-        if (raidPowerRecommendations.TryGet(raidBossId, tier.Tier, out var recommendation))
+        if (raidPowerRecommendations.TryGet(raidBossId, 0, out var recommendation))
         {
+            var multiplier = Math.Pow(RaidPlusDifficulty.RecommendedPowerGrowth, tier.Tier);
             return new RaidRecommendedWingPowerDto(
-                recommendation.Vanguard.RecommendedPower,
-                recommendation.Flank.RecommendedPower,
-                recommendation.Ward.RecommendedPower,
-                recommendation.Vanguard.LowerRecommendedPower,
-                recommendation.Vanguard.UpperRecommendedPower,
-                recommendation.Flank.LowerRecommendedPower,
-                recommendation.Flank.UpperRecommendedPower,
-                recommendation.Ward.LowerRecommendedPower,
-                recommendation.Ward.UpperRecommendedPower,
+                ScaleRecommendedPower(recommendation.Rearguard.RecommendedPower, multiplier),
+                ScaleRecommendedPower(recommendation.Vanguard.RecommendedPower, multiplier),
+                ScaleRecommendedPower(recommendation.MainGuard.RecommendedPower, multiplier),
+                ScaleRecommendedPower(recommendation.Rearguard.LowerRecommendedPower, multiplier),
+                ScaleRecommendedPower(recommendation.Rearguard.UpperRecommendedPower, multiplier),
+                ScaleRecommendedPower(recommendation.Vanguard.LowerRecommendedPower, multiplier),
+                ScaleRecommendedPower(recommendation.Vanguard.UpperRecommendedPower, multiplier),
+                ScaleRecommendedPower(recommendation.MainGuard.LowerRecommendedPower, multiplier),
+                ScaleRecommendedPower(recommendation.MainGuard.UpperRecommendedPower, multiplier),
                 recommendation.Confidence,
-                true);
+                tier.Tier == 0);
         }
 
         var authored = tier.RecommendedWingPower;
         return new RaidRecommendedWingPowerDto(
+            authored.Rearguard,
             authored.Vanguard,
-            authored.Flank,
-            authored.Ward,
+            authored.MainGuard,
+            authored.Rearguard,
+            authored.Rearguard,
             authored.Vanguard,
             authored.Vanguard,
-            authored.Flank,
-            authored.Flank,
-            authored.Ward,
-            authored.Ward,
+            authored.MainGuard,
+            authored.MainGuard,
             PowerRatingConfidence.Low,
             false);
+    }
+
+    private static int ScaleRecommendedPower(int value, double multiplier)
+    {
+        var scaled = value * multiplier;
+        if (!double.IsFinite(scaled) || scaled > int.MaxValue)
+            throw new ArgumentOutOfRangeException(nameof(multiplier), "Raid +level exceeds numeric limits.");
+        return Math.Max(1, (int)Math.Round(scaled, MidpointRounding.AwayFromZero));
     }
 
     public async Task<IReadOnlyList<RaidRunSummaryDto>> GetOpenRaidsAsync(
@@ -165,6 +194,8 @@ public sealed class RaidService(
             return [];
         var unlockError = await GetBossUnlockErrorAsync(characterId, character.Level, boss, cancellationToken);
         var hasActive = await HasActiveRaidAsync(characterId, null, cancellationToken);
+        var highestSlainPlus = await GetHighestSlainPlusAsync(characterId, boss.Id, cancellationToken);
+        var highestAvailablePlus = highestSlainPlus + 1;
         var now = timeProvider.GetUtcNow();
         var runs = await db.RaidRuns.AsNoTracking()
             .Include(x => x.Signups)
@@ -177,8 +208,9 @@ public sealed class RaidService(
             boss,
             !hasActive
             && unlockError is null
+            && run.Tier <= highestAvailablePlus
             && !run.Signups.Any(x => x.AccountId == character.UserId)
-            && run.Signups.Count < ResolvePinnedTier(run).LaneSlots * 3)).ToArray();
+            && ApprovedSignups(run).Count < ResolvePinnedTier(run).LaneSlots * 3)).ToArray();
     }
 
     public async Task<IReadOnlyList<RaidHistoryEntryDto>> GetHistoryAsync(
@@ -210,7 +242,7 @@ public sealed class RaidService(
                 x.RaidRun.Outcome,
                 x.RaidRun.ResolvedAt,
                 x.Trophies,
-                x.WasReduced,
+                x.Kind,
                 x.ClaimedAt,
                 x.CreatedAt
             })
@@ -224,7 +256,7 @@ public sealed class RaidService(
             x.Outcome!.Value,
             x.ResolvedAt ?? x.CreatedAt,
             x.Trophies,
-            x.WasReduced,
+            x.Kind,
             x.ClaimedAt,
             !x.ClaimedAt.HasValue)).ToArray();
     }
@@ -289,28 +321,25 @@ public sealed class RaidService(
         CancellationToken cancellationToken)
     {
         var boss = definitions.Get(raidBossId);
-        var tier = boss?.Tiers.SingleOrDefault(x => x.Tier == tierNumber);
-        if (boss is null || tier is null)
-            return RaidOperationResult<RaidRunDto>.Fail("Raid boss or tier was not found.");
+        if (boss is null || tierNumber < 0)
+            return RaidOperationResult<RaidRunDto>.Fail("Raid boss or difficulty was not found.");
+        RaidBossTierDefinition tier;
+        try
+        {
+            tier = RaidPlusDifficulty.Create(boss, tierNumber);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            return RaidOperationResult<RaidRunDto>.Fail("Raid difficulty exceeds numeric limits.");
+        }
         await db.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
         var eligibility = await GetEligibilityAsync(characterId, boss, null, cancellationToken);
         if (eligibility.Error is not null)
             return RaidOperationResult<RaidRunDto>.Fail(eligibility.Error);
-        var previousTier = boss.Tiers.Where(x => x.Tier < tier.Tier)
-            .OrderByDescending(x => x.Tier)
-            .FirstOrDefault();
         if (requirePriorTierSlay
-            && previousTier is not null
-            && !await db.RaidParticipantResults.AsNoTracking().AnyAsync(
-                x => x.CharacterId == characterId
-                     && x.RaidRun.RaidBossId == boss.Id
-                     && x.RaidRun.Tier == previousTier.Tier
-                     && x.RaidRun.Outcome == RaidOutcome.Slain
-                     && (x.RaidRun.Status == RaidRunStatus.Resolved
-                         || x.RaidRun.Status == RaidRunStatus.Settled),
-                cancellationToken))
+            && tier.Tier > await GetHighestSlainPlusAsync(characterId, boss.Id, cancellationToken) + 1)
             return RaidOperationResult<RaidRunDto>.Fail(
-                $"Slay Tier {previousTier.Tier} of this raid boss before leading Tier {tier.Tier}.");
+                $"Slay {RaidPlusDifficulty.Label(tier.Tier - 1)} of this raid boss before leading {RaidPlusDifficulty.Label(tier.Tier)}.");
         if (await db.RaidRuns.AnyAsync(x => x.LeaderCharacterId == characterId && ActiveStatuses.Contains(x.Status), cancellationToken))
             return RaidOperationResult<RaidRunDto>.Fail("This character already leads an active raid.");
         if (await db.RaidRuns.CountAsync(x => x.RaidBossId == boss.Id && x.Status == RaidRunStatus.Mustering, cancellationToken) >= MaximumOpenRaidsPerBoss)
@@ -359,23 +388,100 @@ public sealed class RaidService(
         var eligibility = await GetEligibilityAsync(characterId, boss, run.Id, cancellationToken);
         if (eligibility.Error is not null)
             return RaidOperationResult<RaidRunDto>.Fail(eligibility.Error);
+        if (run.Tier > await GetHighestSlainPlusAsync(characterId, boss.Id, cancellationToken) + 1)
+            return RaidOperationResult<RaidRunDto>.Fail(
+                $"Slay {RaidPlusDifficulty.Label(run.Tier - 1)} of this raid boss before joining {RaidPlusDifficulty.Label(run.Tier)}.");
         var tier = ResolvePinnedTier(run);
-        if (run.Signups.Count >= tier.LaneSlots * 3)
+        if (ApprovedSignups(run).Count >= tier.LaneSlots * 3)
             return RaidOperationResult<RaidRunDto>.Fail("This raid roster is full.");
         if (run.Signups.Any(x => x.AccountId == eligibility.AccountId))
-            return RaidOperationResult<RaidRunDto>.Fail("This account already occupies a slot in this raid.");
+            return RaidOperationResult<RaidRunDto>.Fail("This account already has a signup or pending request in this raid.");
 
         var snapshot = await snapshots.CreateAsync(characterId, cancellationToken);
         var signup = CreateSignup(run, snapshot, eligibility, timeProvider.GetUtcNow());
+        signup.Status = RaidSignupStatus.Pending;
         run.Signups.Add(signup);
         db.RaidSignups.Add(signup);
         run.RowVersion++;
         await QueueRaidChatSnapshotAsync(
             run,
             cancellationToken,
-            $"{eligibility.CharacterName} joined the raid.",
-            $"joined:{characterId:N}");
-        await QueueRaidUpdateAsync(run, "ParticipantJoined", cancellationToken);
+            $"{eligibility.CharacterName} requested to join the raid.",
+            $"join-requested:{characterId:N}");
+        await QueueRaidUpdateAsync(run, "SignupRequested", cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
+        return RaidOperationResult<RaidRunDto>.Success(await ToDtoAsync(run, characterId, cancellationToken));
+    }
+
+    public async Task<RaidOperationResult<RaidRunDto>> ApproveSignupAsync(
+        Guid characterId,
+        Guid raidRunId,
+        Guid targetCharacterId,
+        CancellationToken cancellationToken)
+    {
+        await db.AcquireRaidRunLockAsync(raidRunId, cancellationToken);
+        var run = await LoadRunAsync(raidRunId, includeSnapshots: false, cancellationToken);
+        if (run is null)
+            return RaidOperationResult<RaidRunDto>.Fail("Raid was not found.");
+        if (run.LeaderCharacterId != characterId)
+            return RaidOperationResult<RaidRunDto>.Fail("Only the raid leader can approve join requests.");
+        if (run.Status != RaidRunStatus.Mustering || run.SignupClosesAt <= timeProvider.GetUtcNow())
+            return RaidOperationResult<RaidRunDto>.Fail("Join requests can only be approved during an open muster.");
+
+        var signup = run.Signups.SingleOrDefault(x => x.CharacterId == targetCharacterId);
+        if (signup is null || signup.Status != RaidSignupStatus.Pending)
+            return RaidOperationResult<RaidRunDto>.Fail("That pending join request was not found.");
+        var tier = ResolvePinnedTier(run);
+        if (ApprovedSignups(run).Count >= tier.LaneSlots * 3)
+            return RaidOperationResult<RaidRunDto>.Fail("This raid roster is full.");
+
+        signup.Status = RaidSignupStatus.Approved;
+        run.RowVersion++;
+        await QueueRaidChatSnapshotAsync(
+            run,
+            cancellationToken,
+            $"{signup.CharacterName} was approved to join the raid.",
+            $"signup-approved:{targetCharacterId:N}");
+        await QueueRaidUpdateAsync(run, "SignupApproved", cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
+        return RaidOperationResult<RaidRunDto>.Success(await ToDtoAsync(run, characterId, cancellationToken));
+    }
+
+    public async Task<RaidOperationResult<RaidRunDto>> RemoveSignupAsync(
+        Guid characterId,
+        Guid raidRunId,
+        Guid targetCharacterId,
+        CancellationToken cancellationToken)
+    {
+        await db.AcquireRaidRunLockAsync(raidRunId, cancellationToken);
+        var run = await LoadRunAsync(raidRunId, includeSnapshots: false, cancellationToken);
+        if (run is null)
+            return RaidOperationResult<RaidRunDto>.Fail("Raid was not found.");
+        if (run.LeaderCharacterId != characterId)
+            return RaidOperationResult<RaidRunDto>.Fail("Only the raid leader can remove raid signups.");
+        if (run.Status != RaidRunStatus.Mustering || run.SignupClosesAt <= timeProvider.GetUtcNow())
+            return RaidOperationResult<RaidRunDto>.Fail("Raid signups can only be removed during an open muster.");
+        if (targetCharacterId == run.LeaderCharacterId)
+            return RaidOperationResult<RaidRunDto>.Fail("Transfer leadership before removing the raid leader.");
+
+        var signup = run.Signups.SingleOrDefault(x => x.CharacterId == targetCharacterId);
+        if (signup is null)
+            return RaidOperationResult<RaidRunDto>.Fail("That raid signup was not found.");
+        var wasPending = signup.Status == RaidSignupStatus.Pending;
+        run.Signups.Remove(signup);
+        db.RaidSignups.Remove(signup);
+        run.RowVersion++;
+        await QueueRaidChatSnapshotAsync(
+            run,
+            cancellationToken,
+            wasPending
+                ? $"{signup.CharacterName}'s join request was declined."
+                : $"{signup.CharacterName} was removed from the raid.",
+            $"signup-removed:{targetCharacterId:N}");
+        await QueueRaidUpdateAsync(
+            run,
+            wasPending ? "SignupDeclined" : "ParticipantRemoved",
+            cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         return RaidOperationResult<RaidRunDto>.Success(await ToDtoAsync(run, characterId, cancellationToken));
     }
@@ -477,7 +583,7 @@ public sealed class RaidService(
             return RaidOperationResult<RaidRunDto>.Fail("Leadership can only be transferred during an open muster.");
         if (targetCharacterId == characterId)
             return RaidOperationResult<RaidRunDto>.Fail("That character is already the raid leader.");
-        if (run.Signups.All(x => x.CharacterId != targetCharacterId))
+        if (run.Signups.All(x => x.CharacterId != targetCharacterId || x.Status != RaidSignupStatus.Approved))
             return RaidOperationResult<RaidRunDto>.Fail("The new leader must be signed up for this raid.");
 
         run.LeaderCharacterId = targetCharacterId;
@@ -526,21 +632,22 @@ public sealed class RaidService(
         if (run is null)
             return RaidOperationResult<RaidRunDto>.Fail("Raid was not found.");
         if (run.LeaderCharacterId != characterId)
-            return RaidOperationResult<RaidRunDto>.Fail("Only the raid leader can assign wings.");
+            return RaidOperationResult<RaidRunDto>.Fail("Only the raid leader can assign parties.");
         if (run.Status != RaidRunStatus.Mustering)
-            return RaidOperationResult<RaidRunDto>.Fail("Wing assignments are locked after commencement.");
+            return RaidOperationResult<RaidRunDto>.Fail("Party assignments are locked after commencement.");
         if (run.SignupClosesAt <= timeProvider.GetUtcNow())
-            return RaidOperationResult<RaidRunDto>.Fail("Wing assignments are locked after the muster closes.");
-        if (!Enum.IsDefined(lane))
-            return RaidOperationResult<RaidRunDto>.Fail("That raid wing is not valid.");
+            return RaidOperationResult<RaidRunDto>.Fail("Party assignments are locked after the muster closes.");
+        if (!RaidParties.IsAssignable(lane))
+            return RaidOperationResult<RaidRunDto>.Fail("That raid party is not valid.");
         var tier = ResolvePinnedTier(run);
         if (slotIndex < 0 || slotIndex >= tier.LaneSlots)
-            return RaidOperationResult<RaidRunDto>.Fail("Wing slot is outside the tier limit.");
-        var signup = run.Signups.SingleOrDefault(x => x.CharacterId == targetCharacterId);
+            return RaidOperationResult<RaidRunDto>.Fail("Party slot is outside the tier limit.");
+        var signup = run.Signups.SingleOrDefault(x =>
+            x.CharacterId == targetCharacterId && x.Status == RaidSignupStatus.Approved);
         if (signup is null)
             return RaidOperationResult<RaidRunDto>.Fail("That character is not signed up for this raid.");
         if (run.Signups.Any(x => x.Id != signup.Id && x.Lane == lane && x.WingSlotIndex == slotIndex))
-            return RaidOperationResult<RaidRunDto>.Fail("That wing slot is already occupied.");
+            return RaidOperationResult<RaidRunDto>.Fail("That party slot is already occupied.");
         signup.Lane = lane;
         signup.WingSlotIndex = slotIndex;
         run.RowVersion++;
@@ -570,10 +677,11 @@ public sealed class RaidService(
                 return RaidOperationResult<RaidRunDto>.Fail("Party assignments are locked after commencement.");
             if (run.SignupClosesAt <= timeProvider.GetUtcNow())
                 return RaidOperationResult<RaidRunDto>.Fail("Party assignments are locked after the muster closes.");
-            if (assignments.Count != run.Signups.Count)
+            var approvedSignups = ApprovedSignups(run);
+            if (assignments.Count != approvedSignups.Count)
                 return RaidOperationResult<RaidRunDto>.Fail("The party layout must include every raid participant.");
 
-            var participantIds = run.Signups.Select(signup => signup.CharacterId).ToHashSet();
+            var participantIds = approvedSignups.Select(signup => signup.CharacterId).ToHashSet();
             var assignmentIds = assignments.Select(assignment => assignment.CharacterId).ToArray();
             if (assignmentIds.Distinct().Count() != assignmentIds.Length
                 || assignmentIds.Any(characterIdToAssign => !participantIds.Contains(characterIdToAssign)))
@@ -588,7 +696,7 @@ public sealed class RaidService(
                 return RaidOperationResult<RaidRunDto>.Fail(
                     "A participant must have both a party and slot, or neither while benched.");
             }
-            if (assignments.Any(assignment => assignment.Lane.HasValue && !Enum.IsDefined(assignment.Lane.Value)))
+            if (assignments.Any(assignment => assignment.Lane.HasValue && !RaidParties.IsAssignable(assignment.Lane.Value)))
                 return RaidOperationResult<RaidRunDto>.Fail("The party layout contains an invalid raid party.");
             if (assignments.Any(assignment => assignment.WingSlotIndex is < 0
                     || assignment.WingSlotIndex >= tier.LaneSlots))
@@ -605,7 +713,7 @@ public sealed class RaidService(
                 return RaidOperationResult<RaidRunDto>.Fail("Each raid party slot can hold only one participant.");
 
             // Clearing first allows two occupied slots to be swapped while preserving the database uniqueness invariant.
-            foreach (var signup in run.Signups)
+            foreach (var signup in approvedSignups)
             {
                 signup.Lane = null;
                 signup.WingSlotIndex = null;
@@ -613,7 +721,7 @@ public sealed class RaidService(
             await db.SaveChangesAsync(cancellationToken);
 
             var assignmentByCharacter = assignments.ToDictionary(assignment => assignment.CharacterId);
-            foreach (var signup in run.Signups)
+            foreach (var signup in approvedSignups)
             {
                 var assignment = assignmentByCharacter[signup.CharacterId];
                 signup.Lane = assignment.Lane;
@@ -639,10 +747,16 @@ public sealed class RaidService(
     public async Task<RaidOperationResult<RaidRunDto>> FillWithDevelopmentCharactersAsync(
         Guid characterId,
         Guid raidRunId,
+        double powerMultiplier,
         CancellationToken cancellationToken)
     {
         if (!options.Value.DevelopmentToolsEnabled)
             return RaidOperationResult<RaidRunDto>.Fail("Raid development tools are disabled.");
+        if (!RaidDevelopmentRosterFactory.IsSupportedPowerMultiplier(powerMultiplier))
+        {
+            return RaidOperationResult<RaidRunDto>.Fail(
+                $"Test roster power must be between {RaidDevelopmentRosterFactory.MinimumPowerMultiplier:0.##}x and {RaidDevelopmentRosterFactory.MaximumPowerMultiplier:0.##}x.");
+        }
 
         await db.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
         await db.AcquireRaidRunLockAsync(raidRunId, cancellationToken);
@@ -658,7 +772,8 @@ public sealed class RaidService(
         if (boss is null)
             return RaidOperationResult<RaidRunDto>.Fail("Raid boss content is unavailable.");
         var tier = ResolvePinnedTier(run);
-        var openSlots = tier.LaneSlots * 3 - run.Signups.Count;
+        var approvedSignups = ApprovedSignups(run);
+        var openSlots = tier.LaneSlots * 3 - approvedSignups.Count;
         if (openSlots <= 0)
             return RaidOperationResult<RaidRunDto>.Fail("This raid roster is already full.");
 
@@ -688,23 +803,25 @@ public sealed class RaidService(
                 $"Only {candidates.Length} seeded development character(s) were available for {openSlots} open slot(s). Restart the API with local guest seeding enabled.");
         }
 
-        var developmentPositions = Enum.GetValues<RaidLane>()
+        var developmentPositions = RaidParties.All
             .SelectMany(lane => Enumerable.Range(0, tier.LaneSlots)
                 .Select(slotIndex => (Lane: lane, SlotIndex: slotIndex)))
             .ToArray();
 
         var now = timeProvider.GetUtcNow();
+        var multiplierLabel = powerMultiplier.ToString("0.##", CultureInfo.InvariantCulture);
         for (var index = 0; index < candidates.Length; index++)
         {
             var candidate = candidates[index];
-            var position = developmentPositions[(run.Signups.Count + index) % developmentPositions.Length];
+            var position = developmentPositions[(approvedSignups.Count + index) % developmentPositions.Length];
             var build = developmentRosters.Create(
                 candidate.Id,
                 candidate.Name,
                 boss,
                 tier,
                 position.Lane,
-                position.SlotIndex);
+                position.SlotIndex,
+                powerMultiplier);
             var signup = new RaidSignup
             {
                 RaidRun = run,
@@ -714,7 +831,7 @@ public sealed class RaidService(
                 CharacterName = candidate.Name,
                 CharacterSnapshotId = build.Snapshot.Id,
                 CharacterSnapshot = build.Snapshot,
-                LoadoutHash = $"development:{tier.Tier}:{position.Lane}:{position.SlotIndex}",
+                LoadoutHash = $"development:{tier.Tier}:{position.Lane}:{position.SlotIndex}:{multiplierLabel}x",
                 PowerRating = build.PowerRating,
                 Lane = null,
                 WingSlotIndex = null,
@@ -826,6 +943,7 @@ public sealed class RaidService(
             var validation = ValidateCommencement(run, ResolvePinnedTier(run));
             if (validation is not null)
                 return RaidOperationResult<RaidRunDto>.Fail(validation);
+            RemovePendingSignups(run);
             run.Status = RaidRunStatus.Resolving;
             run.CommencedAt = timeProvider.GetUtcNow();
             run.RowVersion++;
@@ -883,8 +1001,11 @@ public sealed class RaidService(
             raidRunId,
             claim.Trophies,
             character.RaidTrophies,
-            pending.Select(x => new RaidRewardItemDto(x.ItemId, x.Quantity)).ToArray(),
-            claim.WasReduced,
+            pending.Select(x => new RaidRewardItemDto(
+                x.ItemId,
+                bases[x.ItemId].Name,
+                x.Quantity)).ToArray(),
+            claim.Kind,
             claim.ClaimedAt.Value));
     }
 
@@ -982,7 +1103,7 @@ public sealed class RaidService(
             .MaxAsync(cancellationToken) ?? 0;
         if (highestSlainTier < item.RequiredTier)
             return RaidOperationResult<RaidTrophyPurchaseDto>.Fail(
-                $"Slay Tier {item.RequiredTier} of this raid boss to unlock this item.");
+                $"Slay {RaidPlusDifficulty.Label(item.RequiredTier)} of this raid boss to unlock this item.");
 
         var weekKey = GetWeekKey(timeProvider.GetUtcNow());
         var lifetimePurchased = await db.RaidTrophyPurchases.AsNoTracking()
@@ -1091,6 +1212,7 @@ public sealed class RaidService(
         }
         else
         {
+            RemovePendingSignups(run);
             run.Status = RaidRunStatus.Resolving;
             run.CommencedAt = timeProvider.GetUtcNow();
         }
@@ -1151,11 +1273,14 @@ public sealed class RaidService(
                 return;
             var playbackStartedAt = timeProvider.GetUtcNow();
             run.ReinforcementPenalty = resolution.ReinforcementPenalty;
-            run.WardBreak = resolution.WardBreak;
+            run.GuardianBreak = resolution.GuardianBreak;
+            run.SignatureDisruption = resolution.SignatureDisruption;
             run.BossHealthRemainingPercent = resolution.BossHealthRemainingPercent;
             run.Outcome = resolution.Outcome;
             run.PlaybackStartedAt = playbackStartedAt;
-            run.PlaybackEndsAt = playbackStartedAt.Add(GetPlaybackDuration(playbacks));
+            run.PlaybackEndsAt = playbackStartedAt.Add(GetPlaybackDuration(
+                playbacks,
+                CountRearguardWaveTransitions(resolution.PlaybackCaptures)));
             run.Status = RaidRunStatus.Playback;
             run.SimulationLeaseOwner = null;
             run.SimulationLeaseUntil = null;
@@ -1218,7 +1343,7 @@ public sealed class RaidService(
         {
             if (isFirstSlain)
             {
-                foreach (var signup in run.Signups)
+                foreach (var signup in ApprovedSignups(run))
                 {
                     await achievements.UnlockTitleAsync(
                         signup.AccountId,
@@ -1242,12 +1367,65 @@ public sealed class RaidService(
         await transaction.CommitAsync(cancellationToken);
     }
 
-    private static TimeSpan GetPlaybackDuration(IReadOnlyCollection<RaidPlayback> playbacks)
+    private static TimeSpan GetPlaybackDuration(
+        IReadOnlyCollection<RaidPlayback> playbacks,
+        int rearguardWaveTransitions)
     {
-        var combatSeconds = playbacks.Sum(playback =>
-            playback.TotalTicks / (double)Math.Max(1, playback.TicksPerSecond));
-        return TimeSpan.FromSeconds(combatSeconds)
-            .Add(TimeSpan.FromTicks(PlaybackTransitionDelay.Ticks * playbacks.Count));
+        var preparationPlaybacks = playbacks
+            .Where(playback => playback.Lane != RaidLane.FinalAssault)
+            .ToArray();
+        var preparationSeconds = preparationPlaybacks
+            .Select(playback =>
+                playback.TotalTicks / (double)Math.Max(1, playback.TicksPerSecond)
+                + (playback.Lane == RaidLane.Rearguard
+                    ? RearguardWaveTransitionHold.TotalSeconds * Math.Max(0, rearguardWaveTransitions)
+                    : 0))
+            .DefaultIfEmpty(0)
+            .Max();
+        var finalAssaultSeconds = playbacks
+            .Where(playback => playback.Lane == RaidLane.FinalAssault)
+            .Sum(playback =>
+                playback.TotalTicks / (double)Math.Max(1, playback.TicksPerSecond));
+        var hasFinalAssault = playbacks.Any(playback =>
+            playback.Lane == RaidLane.FinalAssault);
+        var phaseCount = (preparationPlaybacks.Length > 0 ? 1 : 0)
+                         + (hasFinalAssault ? 1 : 0);
+
+        return TimeSpan.FromSeconds(preparationSeconds + finalAssaultSeconds)
+            .Add(TimeSpan.FromTicks(PlaybackTransitionDelay.Ticks * phaseCount));
+    }
+
+    private static int CountRearguardWaveTransitions(
+        IReadOnlyList<RaidLanePlaybackCapture> captures)
+    {
+        var waves = captures
+            .Where(capture => capture.Lane == RaidLane.Rearguard)
+            .SelectMany(capture => capture.Checkpoints)
+            .SelectMany(checkpoint => checkpoint.Hostile)
+            .Select(entity => TryGetRearguardWaveNumber(entity.Id))
+            .Where(wave => wave.HasValue)
+            .Select(wave => wave!.Value)
+            .Distinct()
+            .Count();
+        return Math.Max(0, waves - 1);
+    }
+
+    private static int? TryGetRearguardWaveNumber(string entityId)
+    {
+        const string prefix = "rearguard-wave-";
+        if (!entityId.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            return null;
+        var suffix = entityId[prefix.Length..];
+        var separator = suffix.IndexOf('-');
+        return separator > 0
+               && int.TryParse(
+                   suffix[..separator],
+                   NumberStyles.None,
+                   CultureInfo.InvariantCulture,
+                   out var wave)
+               && wave > 0
+            ? wave
+            : null;
     }
 
     private async Task CreateRewardsAsync(
@@ -1256,45 +1434,48 @@ public sealed class RaidService(
         RaidCombatResolution resolution,
         CancellationToken cancellationToken)
     {
-        var baseTrophies = resolution.Outcome switch
-        {
-            RaidOutcome.Slain => tier.Rewards.SlainTrophies,
-            RaidOutcome.Broken => tier.Rewards.BrokenTrophies,
-            RaidOutcome.Wounded => tier.Rewards.WoundedTrophies,
-            _ => tier.Rewards.RepelledTrophies
-        };
-        var outcomeMultiplier = resolution.Outcome switch
-        {
-            RaidOutcome.Slain => 1m,
-            RaidOutcome.Broken => 0.65m,
-            RaidOutcome.Wounded => 0.40m,
-            _ => 0.20m
-        };
-        var characterIds = resolution.ParticipantResults.Select(x => x.CharacterId).ToArray();
-        var rewardWeekKey = GetWeekKey(timeProvider.GetUtcNow());
-        var previouslyRewarded = await db.RaidRewardClaims.AsNoTracking()
-            .Where(x => x.RaidBossId == run.RaidBossId && x.WeekKey == rewardWeekKey && characterIds.Contains(x.CharacterId))
+        var fullPackage = RaidRewardCalculator.FullPackage(tier.Rewards, resolution.Outcome);
+        var characterIds = resolution.ParticipantResults
             .Select(x => x.CharacterId)
             .Distinct()
+            .Order()
+            .ToArray();
+        foreach (var characterId in characterIds)
+            await db.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
+
+        var rewardWeekKey = GetWeekKey(timeProvider.GetUtcNow());
+        var previousEntitlementRows = await db.RaidRewardClaims.AsNoTracking()
+            .Where(x => x.RaidBossId == run.RaidBossId
+                        && x.WeekKey == rewardWeekKey
+                        && x.Kind != RaidRewardKind.Repeat
+                        && characterIds.Contains(x.CharacterId))
+            .Select(x => new { x.CharacterId, x.Trophies, x.PendingItemsJson })
             .ToArrayAsync(cancellationToken);
+        var previousEntitlements = previousEntitlementRows
+            .GroupBy(x => x.CharacterId)
+            .ToDictionary(
+                group => group.Key,
+                group => (IReadOnlyCollection<RaidRewardPackage>)group.Select(row => new RaidRewardPackage(
+                    row.Trophies,
+                    JsonSerializer.Deserialize<IReadOnlyList<RaidPendingItem>>(
+                        row.PendingItemsJson,
+                        jsonOptions) ?? [])).ToArray());
+
         foreach (var participant in resolution.ParticipantResults)
         {
-            var reduced = previouslyRewarded.Contains(participant.CharacterId);
-            var weeklyMultiplier = reduced ? 0.25m : 1m;
-            var trophies = Math.Max(1, (int)Math.Round(baseTrophies * participant.PayoutMultiplier * weeklyMultiplier, MidpointRounding.AwayFromZero));
-            var pendingItems = tier.Rewards.GuaranteedItems.Select(item => new RaidPendingItem(
-                item.ItemId,
-                Math.Max(1, (int)Math.Round(item.Quantity * outcomeMultiplier * participant.PayoutMultiplier * weeklyMultiplier, MidpointRounding.AwayFromZero)))).ToArray();
+            var grant = RaidRewardCalculator.CalculateGrant(
+                fullPackage,
+                previousEntitlements.GetValueOrDefault(participant.CharacterId) ?? []);
             db.RaidRewardClaims.Add(new RaidRewardClaim
             {
                 RaidRunId = run.Id,
                 RaidBossId = run.RaidBossId,
                 CharacterId = participant.CharacterId,
                 WeekKey = rewardWeekKey,
-                Trophies = trophies,
-                PendingItemsJson = JsonSerializer.Serialize(pendingItems, jsonOptions),
+                Trophies = grant.Package.Trophies,
+                PendingItemsJson = JsonSerializer.Serialize(grant.Package.Items, jsonOptions),
                 CreatedAt = timeProvider.GetUtcNow(),
-                WasReduced = reduced
+                Kind = grant.Kind
             });
         }
     }
@@ -1350,6 +1531,19 @@ public sealed class RaidService(
                  && ActiveStatuses.Contains(x.RaidRun.Status),
             cancellationToken);
 
+    private async Task<int> GetHighestSlainPlusAsync(
+        Guid characterId,
+        string raidBossId,
+        CancellationToken cancellationToken) =>
+        await db.RaidParticipantResults.AsNoTracking()
+            .Where(x => x.CharacterId == characterId
+                        && x.RaidRun.RaidBossId == raidBossId
+                        && x.RaidRun.Outcome == RaidOutcome.Slain
+                        && (x.RaidRun.Status == RaidRunStatus.Resolved
+                            || x.RaidRun.Status == RaidRunStatus.Settled))
+            .Select(x => (int?)x.RaidRun.Tier)
+            .MaxAsync(cancellationToken) ?? -1;
+
     private async Task<string?> GetBossUnlockErrorAsync(
         Guid characterId,
         int characterLevel,
@@ -1394,17 +1588,34 @@ public sealed class RaidService(
         SignedUpAt = now
     };
 
+    private static IReadOnlyList<RaidSignup> ApprovedSignups(RaidRun run) =>
+        run.Signups.Where(x => x.Status == RaidSignupStatus.Approved).ToArray();
+
     private static string? ValidateCommencement(RaidRun run, RaidBossTierDefinition tier)
     {
+        var approvedSignups = ApprovedSignups(run);
         if (run.Status != RaidRunStatus.Mustering)
             return "This raid cannot be commenced in its current state.";
-        if (run.Signups.Count < tier.MinimumRoster)
+        if (approvedSignups.Count < tier.MinimumRoster)
             return $"At least {tier.MinimumRoster} characters are required to commence.";
-        if (run.Signups.Any(x => !x.Lane.HasValue || !x.WingSlotIndex.HasValue))
-            return "Every signup must be assigned to a wing before commencement.";
-        if (Enum.GetValues<RaidLane>().Any(lane => run.Signups.All(x => x.Lane != lane)))
-            return "Vanguard, Flank, and Ward must each have at least one character.";
+        if (approvedSignups.Any(x => !x.Lane.HasValue || !x.WingSlotIndex.HasValue))
+            return "Every signup must be assigned to a party before commencement.";
+        if (RaidParties.All.Any(lane => approvedSignups.All(x => x.Lane != lane)))
+            return "Rearguard, Vanguard, and Main Guard must each have at least one character.";
         return null;
+    }
+
+    private void RemovePendingSignups(RaidRun run)
+    {
+        var pending = run.Signups
+            .Where(x => x.Status == RaidSignupStatus.Pending)
+            .ToArray();
+        if (pending.Length == 0)
+            return;
+
+        foreach (var signup in pending)
+            run.Signups.Remove(signup);
+        db.RaidSignups.RemoveRange(pending);
     }
 
     private async Task<RaidRun?> LoadRunAsync(Guid raidRunId, bool includeSnapshots, CancellationToken cancellationToken)
@@ -1428,17 +1639,25 @@ public sealed class RaidService(
     {
         var boss = definitions.Get(run.RaidBossId);
         var tier = ResolvePinnedTier(run);
+        var now = timeProvider.GetUtcNow();
         var currentAccountId = await db.Characters.AsNoTracking()
             .Where(x => x.Id == characterId)
             .Select(x => (Guid?)x.UserId)
             .SingleOrDefaultAsync(cancellationToken);
         var currentSignup = run.Signups.SingleOrDefault(x => x.CharacterId == characterId);
+        var approvedSignups = ApprovedSignups(run);
+        var pendingSignups = run.Signups
+            .Where(x => x.Status == RaidSignupStatus.Pending
+                        && (run.LeaderCharacterId == characterId || x.CharacterId == characterId))
+            .OrderBy(x => x.SignedUpAt)
+            .ToArray();
         var currentReward = run.RewardClaims.SingleOrDefault(x => x.CharacterId == characterId);
         var canJoin = run.Status == RaidRunStatus.Mustering
+                      && run.SignupClosesAt > now
                       && currentSignup is null
                       && currentAccountId.HasValue
                       && run.Signups.All(x => x.AccountId != currentAccountId.Value)
-                      && run.Signups.Count < tier.LaneSlots * 3
+                      && approvedSignups.Count < tier.LaneSlots * 3
                       && !await HasActiveRaidAsync(characterId, run.Id, cancellationToken);
         return new RaidRunDto(
             run.Id,
@@ -1454,11 +1673,14 @@ public sealed class RaidService(
             run.CommencedAt,
             run.PlaybackStartedAt,
             run.PlaybackEndsAt,
-            timeProvider.GetUtcNow(),
+            now,
             run.ResolvedAt,
             tier.LaneSlots,
             tier.MinimumRoster,
-            run.Signups.OrderBy(x => x.Lane).ThenBy(x => x.WingSlotIndex).ThenBy(x => x.SignedUpAt).Select(x => new RaidSignupDto(
+            approvedSignups.OrderBy(x => x.Lane.HasValue ? RaidParties.EncounterOrder(x.Lane.Value) : int.MaxValue)
+                .ThenBy(x => x.WingSlotIndex)
+                .ThenBy(x => x.SignedUpAt)
+                .Select(x => new RaidSignupDto(
                 x.CharacterId,
                 x.CharacterName,
                 x.PowerRating,
@@ -1468,7 +1690,14 @@ public sealed class RaidService(
                 x.SnapshotRefreshedAt,
                 x.CharacterId == run.LeaderCharacterId,
                 x.CharacterId == characterId)).ToArray(),
-            run.LaneResults.OrderBy(x => x.Lane).Select(x => new RaidLaneResultDto(
+            pendingSignups.Select(x => new RaidJoinRequestDto(
+                x.CharacterId,
+                x.CharacterName,
+                x.PowerRating,
+                x.SignedUpAt,
+                x.SnapshotRefreshedAt,
+                x.CharacterId == characterId)).ToArray(),
+            run.LaneResults.OrderBy(x => RaidParties.EncounterOrder(x.Lane)).Select(x => new RaidLaneResultDto(
                 x.Lane,
                 x.DurationTicks,
                 x.BattleOutcome,
@@ -1481,40 +1710,81 @@ public sealed class RaidService(
                 x.Lane,
                 x.DamageDone,
                 x.ContributionScore,
-                x.PayoutMultiplier,
                 x.ContributionRank)).ToArray(),
             run.Outcome,
             run.ReinforcementPenalty,
-            run.WardBreak,
+            run.GuardianBreak,
+            run.SignatureDisruption,
             run.BossHealthRemainingPercent,
             canJoin,
             currentSignup is not null
             && run.Status == RaidRunStatus.Mustering
             && (run.LeaderCharacterId != characterId || run.Signups.Count == 1),
-            run.LeaderCharacterId == characterId && run.Status == RaidRunStatus.Mustering,
+            run.LeaderCharacterId == characterId
+            && run.Status == RaidRunStatus.Mustering
+            && run.SignupClosesAt > now,
             run.LeaderCharacterId == characterId && ValidateCommencement(run, tier) is null,
             currentSignup is not null && run.Status == RaidRunStatus.Mustering,
             currentReward is { ClaimedAt: null }
             && (run.Status == RaidRunStatus.Resolved || run.Status == RaidRunStatus.Settled),
-            currentReward?.WasReduced == true,
+            currentReward?.Kind,
             run.LeaderCharacterId == characterId
             && run.Status == RaidRunStatus.Mustering
             && ValidateBattlePlan(run) is null,
             run.LeaderCharacterId == characterId && run.Status == RaidRunStatus.Mustering,
             run.LeaderCharacterId == characterId
             && run.Status == RaidRunStatus.Mustering
-            && run.Signups.Count > 1,
+            && approvedSignups.Count > 1,
             options.Value.DevelopmentToolsEnabled);
     }
 
-    private RaidBossTierDefinition ResolvePinnedTier(RaidRun run) =>
-        JsonSerializer.Deserialize<RaidBossTierDefinition>(run.DefinitionSnapshotJson, jsonOptions)
-        ?? throw new InvalidOperationException($"Raid '{run.Id}' has an invalid pinned definition.");
+    private RaidBossTierDefinition ResolvePinnedTier(RaidRun run)
+    {
+        RaidBossTierDefinition? pinned = null;
+        try
+        {
+            pinned = JsonSerializer.Deserialize<RaidBossTierDefinition>(run.DefinitionSnapshotJson, jsonOptions);
+        }
+        catch (JsonException)
+        {
+            // The common failure below includes the raid id and remains stable for workers and API callers.
+        }
+
+        var isLegacyLaneSnapshot = IsLegacyLaneSnapshot(run.DefinitionSnapshotJson);
+        if (pinned is not null && !isLegacyLaneSnapshot)
+            return pinned;
+
+        if (isLegacyLaneSnapshot)
+        {
+            var boss = definitions.Get(run.RaidBossId);
+            if (boss is not null)
+                return RaidPlusDifficulty.Create(boss, run.Tier);
+        }
+
+        throw new InvalidOperationException($"Raid '{run.Id}' has an invalid pinned definition.");
+    }
+
+    private static bool IsLegacyLaneSnapshot(string snapshotJson)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(snapshotJson);
+            var properties = document.RootElement.EnumerateObject()
+                .Select(x => x.Name)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            return properties.Contains("flank") && properties.Contains("ward");
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
 
     private RaidRunSummaryDto ToSummary(RaidRun run, RaidBossDefinition boss, bool canJoin)
     {
         var tier = ResolvePinnedTier(run);
-        var leader = run.Signups.SingleOrDefault(x => x.CharacterId == run.LeaderCharacterId);
+        var approvedSignups = ApprovedSignups(run);
+        var leader = approvedSignups.SingleOrDefault(x => x.CharacterId == run.LeaderCharacterId);
         return new RaidRunSummaryDto(
             run.Id,
             run.RaidBossId,
@@ -1524,11 +1794,11 @@ public sealed class RaidService(
             leader?.CharacterName ?? "Unknown",
             run.Status,
             run.SignupClosesAt,
-            run.Signups.Count,
+            approvedSignups.Count,
             tier.LaneSlots * 3,
-            run.Signups.Count(x => x.Lane == RaidLane.Vanguard),
-            run.Signups.Count(x => x.Lane == RaidLane.Flank),
-            run.Signups.Count(x => x.Lane == RaidLane.Ward),
+            approvedSignups.Count(x => x.Lane == RaidLane.Rearguard),
+            approvedSignups.Count(x => x.Lane == RaidLane.Vanguard),
+            approvedSignups.Count(x => x.Lane == RaidLane.MainGuard),
             canJoin);
     }
 
@@ -1539,6 +1809,7 @@ public sealed class RaidService(
         await db.RaidSignups.AsNoTracking().AnyAsync(
             x => x.RaidRunId == raidRunId
                  && x.CharacterId == characterId
+                 && x.Status == RaidSignupStatus.Approved
                  && (x.RaidRun.Status == RaidRunStatus.Playback
                      || x.RaidRun.Status == RaidRunStatus.Resolved
                      || x.RaidRun.Status == RaidRunStatus.Settled),
@@ -1572,12 +1843,13 @@ public sealed class RaidService(
 
     private static string? ValidateBattlePlan(RaidRun run)
     {
-        if (run.Signups.Count == 0)
+        var approvedSignups = ApprovedSignups(run);
+        if (approvedSignups.Count == 0)
             return "At least one character must be signed up before previewing the Battle Plan.";
-        if (run.Signups.Any(x => !x.Lane.HasValue || !x.WingSlotIndex.HasValue))
+        if (approvedSignups.Any(x => !x.Lane.HasValue || !x.WingSlotIndex.HasValue))
             return "Assign every signed-up character before previewing the Battle Plan.";
-        if (Enum.GetValues<RaidLane>().Any(lane => run.Signups.All(x => x.Lane != lane)))
-            return "Vanguard, Flank, and Ward must each have at least one character for a Battle Plan preview.";
+        if (RaidParties.All.Any(lane => approvedSignups.All(x => x.Lane != lane)))
+            return "Rearguard, Vanguard, and Main Guard must each have at least one character for a Battle Plan preview.";
         return null;
     }
 
@@ -1589,10 +1861,10 @@ public sealed class RaidService(
         if (samples.Count == 0)
             throw new InvalidOperationException("A Battle Plan preview requires at least one sample.");
 
-        var lanes = Enum.GetValues<RaidLane>().Select(lane =>
+        var lanes = RaidParties.All.Append(RaidLane.FinalAssault).Select(lane =>
         {
             var results = samples.Select(x => x.LaneResults.Single(result => result.Lane == lane)).ToArray();
-            var successes = lane == RaidLane.Vanguard
+            var successes = lane == RaidLane.FinalAssault
                 ? samples.Count(x => x.Outcome == RaidOutcome.Slain)
                 : results.Count(x => x.BattleOutcome == Domain.Models.Combat.BattleOutcome.Victory);
             var probability = successes / (decimal)samples.Count;
@@ -1649,7 +1921,7 @@ public sealed class RaidService(
         CancellationToken cancellationToken)
     {
         var bossName = definitions.Get(run.RaidBossId)?.Name ?? run.RaidBossId;
-        var leaderName = run.Signups.SingleOrDefault(x => x.CharacterId == run.LeaderCharacterId)?.CharacterName
+        var leaderName = ApprovedSignups(run).SingleOrDefault(x => x.CharacterId == run.LeaderCharacterId)?.CharacterName
             ?? "A raid leader";
         var body = isFirstSlain
             ? $"Realm first! {leaderName}'s raid has slain {bossName}."
@@ -1700,7 +1972,7 @@ public sealed class RaidService(
                 run.RowVersion,
                 isOpen,
                 isOpen
-                    ? run.Signups.Select(x => x.CharacterId).Distinct().ToArray()
+                    ? ApprovedSignups(run).Select(x => x.CharacterId).Distinct().ToArray()
                     : [],
                 now,
                 message),
@@ -1720,7 +1992,7 @@ public sealed class RaidService(
                 run.RaidBossId,
                 eventName,
                 run.Status.ToString(),
-                run.Signups.Count,
+                ApprovedSignups(run).Count,
                 timeProvider.GetUtcNow()),
             characterId: null,
             accountId: null,

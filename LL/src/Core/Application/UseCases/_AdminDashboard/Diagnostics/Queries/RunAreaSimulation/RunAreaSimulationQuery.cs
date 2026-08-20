@@ -1,3 +1,4 @@
+using Application.Interfaces.Services.LL.Balance;
 using Application.Interfaces.Services.LL.Regions;
 using MediatR;
 
@@ -57,4 +58,46 @@ public sealed class AnalyzeRegionAreaBalanceQueryHandler
         AnalyzeRegionAreaBalanceQuery request,
         CancellationToken cancellationToken) =>
         _analyzer.AnalyzeAsync(request.Request, cancellationToken);
+}
+
+public sealed record AnalyzeAreaCalibrationQuery(AreaCalibrationRequest Request)
+    : IRequest<AreaCalibrationReport>;
+
+public sealed class AnalyzeAreaCalibrationQueryHandler
+    : IRequestHandler<AnalyzeAreaCalibrationQuery, AreaCalibrationReport>
+{
+    private readonly ICombatCalibrationService _calibration;
+
+    public AnalyzeAreaCalibrationQueryHandler(ICombatCalibrationService calibration)
+    {
+        _calibration = calibration;
+    }
+
+    public Task<AreaCalibrationReport> Handle(
+        AnalyzeAreaCalibrationQuery request,
+        CancellationToken cancellationToken) =>
+        _calibration.AnalyzeAreaAsync(request.Request, cancellationToken);
+}
+
+public sealed record GetProgressionCurveQuery(
+    string RegionKey,
+    CalibrationArchetype Archetype) : IRequest<ProgressionCurveReport>;
+
+public sealed class GetProgressionCurveQueryHandler
+    : IRequestHandler<GetProgressionCurveQuery, ProgressionCurveReport>
+{
+    private readonly ICombatCalibrationService _calibration;
+
+    public GetProgressionCurveQueryHandler(ICombatCalibrationService calibration)
+    {
+        _calibration = calibration;
+    }
+
+    public Task<ProgressionCurveReport> Handle(
+        GetProgressionCurveQuery request,
+        CancellationToken cancellationToken) =>
+        _calibration.CreateProgressionReportAsync(
+            request.RegionKey,
+            request.Archetype,
+            cancellationToken);
 }

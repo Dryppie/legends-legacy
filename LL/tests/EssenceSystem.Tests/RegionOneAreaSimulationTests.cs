@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Application.Interfaces.Services.LL.Balance;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Regions;
 using Application.UseCases._AdminDashboard.Creatures.Dtos;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.Options;
 using Services.AdminDashboard.JsonReaders;
 using Services.LL.Combat;
 using Services.LL.Combat.Engine;
+using Services.LL.Balance;
 using Services.LL.Entities.Creatures;
 using Services.LL.Essences;
 using Services.LL.JsonDefinitions;
@@ -164,6 +166,115 @@ public sealed class RegionOneAreaSimulationTests
         Assert.Equal(CanonicalEquipmentBuildFactory.TutorialStarterBuildId, report.BuildId);
     }
 
+    [BalanceFact]
+    public async Task Calibration_checkpoints_and_strength_bands_follow_real_progression()
+    {
+        var fixture = CreateFixture();
+        var early = await fixture.Calibration.GetCheckpointAsync(
+            "region_01_area_02",
+            CancellationToken.None);
+        var late = await fixture.Calibration.GetCheckpointAsync(
+            "region_01_area_07",
+            CancellationToken.None);
+        var earlyPlayer = await fixture.Calibration.CreatePlayerAsync(
+            early,
+            CalibrationStrengthBand.Expected,
+            CalibrationArchetype.Balanced,
+            CancellationToken.None);
+        var latePlayer = await fixture.Calibration.CreatePlayerAsync(
+            late,
+            CalibrationStrengthBand.Expected,
+            CalibrationArchetype.Balanced,
+            CancellationToken.None);
+
+        Assert.Equal(early, await fixture.Calibration.GetCheckpointAsync(
+            "region_01_area_02",
+            CancellationToken.None));
+        Assert.True(latePlayer.CombatRating > earlyPlayer.CombatRating);
+        Assert.True(latePlayer.MaxHealth > earlyPlayer.MaxHealth);
+
+        var middle = await fixture.Calibration.GetCheckpointAsync(
+            "region_01_area_06",
+            CancellationToken.None);
+        var bands = new List<CalibrationPlayerProfile>();
+        foreach (var strength in Enum.GetValues<CalibrationStrengthBand>())
+        {
+            bands.Add(await fixture.Calibration.CreatePlayerAsync(
+                middle,
+                strength,
+                CalibrationArchetype.Balanced,
+                CancellationToken.None));
+        }
+
+        Assert.All(bands.Zip(bands.Skip(1)), pair =>
+            Assert.True(pair.Second.CombatRating >= pair.First.CombatRating));
+    }
+
+    [BalanceFact]
+    public async Task Calibration_simulation_and_progression_reports_are_seeded_and_human_readable()
+    {
+        var fixture = CreateFixture();
+        var request = new AreaCalibrationRequest(
+            "region_01_area_06",
+            3,
+            73_901,
+            [CalibrationStrengthBand.Expected],
+            [CalibrationArchetype.Balanced]);
+
+        var first = await fixture.Calibration.AnalyzeAreaAsync(request, CancellationToken.None);
+        var second = await fixture.Calibration.AnalyzeAreaAsync(request, CancellationToken.None);
+        var progression = await fixture.Calibration.CreateProgressionReportAsync(
+            "shenic",
+            CalibrationArchetype.Balanced,
+            CancellationToken.None);
+
+        Assert.Equal(
+            first.Encounters.Select(result => result.Metrics),
+            second.Encounters.Select(result => result.Metrics));
+        Assert.Equal(5, first.Encounters.Count);
+        Assert.Contains("Median TTK", first.TextReport);
+        Assert.Equal(10, progression.Checkpoints.Count);
+        Assert.All(progression.Checkpoints.Zip(progression.Checkpoints.Skip(1)), pair =>
+        {
+            Assert.True(pair.Second.ExpectedPlayer.CombatRating >= pair.First.ExpectedPlayer.CombatRating);
+            Assert.True(pair.Second.EnemyHealthMultiplier > pair.First.EnemyHealthMultiplier);
+        });
+        Assert.Contains("Player CR", progression.TextReport);
+
+        _output.WriteLine(first.TextReport);
+        _output.WriteLine(progression.TextReport);
+    }
+
+    [BalanceFact]
+    public async Task Calibration_samples_early_middle_and_late_region_one_content()
+    {
+        var fixture = CreateFixture();
+        var reports = new List<AreaCalibrationReport>();
+        foreach (var areaId in new[]
+                 {
+                     "region_01_area_01",
+                     "region_01_area_06",
+                     "region_01_area_07"
+                 })
+        {
+            var report = await fixture.Calibration.AnalyzeAreaAsync(
+                new AreaCalibrationRequest(
+                    areaId,
+                    12,
+                    91_007,
+                    [CalibrationStrengthBand.Expected],
+                    [CalibrationArchetype.Balanced]),
+                CancellationToken.None);
+            reports.Add(report);
+            _output.WriteLine(report.TextReport);
+        }
+
+        Assert.Equal([1, 5, 10], reports.Select(report => report.Checkpoint.AreaNumber));
+        Assert.All(reports, report => Assert.Equal(5, report.Encounters.Count));
+        Assert.All(reports.SelectMany(report => report.Encounters), encounter =>
+            Assert.True(encounter.Metrics.Samples >= 12));
+    }
+
     private static AreaFixture CreateFixture()
     {
         var apiRoot = FindApiRoot();
@@ -230,8 +341,9 @@ public sealed class RegionOneAreaSimulationTests
             null!,
             builds);
         var areas = ReadAreas(apiRoot);
+        var areaRepository = new InMemoryAreaRepository(areas);
         var simulator = new AreaCombatSimulator(
-            new InMemoryAreaRepository(areas),
+            areaRepository,
             entityLookup,
             combatSetup,
             simulations,
@@ -239,8 +351,20 @@ public sealed class RegionOneAreaSimulationTests
             new EssenceSlotUnlockService(),
             new JsonAreaExperienceBalanceProvider(configuration, apiRoot, options),
             scaling);
+        var calibration = new CombatCalibrationService(
+            simulator,
+            areaRepository,
+            entityLookup,
+            scaling,
+            builds,
+            new EssenceSlotUnlockService(),
+            simulations,
+            new CombatDifficultyEvaluator());
 
-        return new AreaFixture(simulator, new RegionAreaBalanceAnalyzer(simulator, scaling));
+        return new AreaFixture(
+            simulator,
+            new RegionAreaBalanceAnalyzer(simulator, scaling),
+            calibration);
     }
 
     private static IReadOnlyList<Area> ReadAreas(string apiRoot)
@@ -305,7 +429,8 @@ public sealed class RegionOneAreaSimulationTests
 
     private sealed record AreaFixture(
         AreaCombatSimulator Simulator,
-        RegionAreaBalanceAnalyzer Analyzer);
+        RegionAreaBalanceAnalyzer Analyzer,
+        CombatCalibrationService Calibration);
 
     private sealed class InMemoryAreaRepository(IReadOnlyList<Area> areas) : IAreaRepository
     {

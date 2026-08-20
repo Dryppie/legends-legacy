@@ -116,6 +116,145 @@ public sealed class ThreatAndTankingSystemTests
     }
 
     [Fact]
+    public void Maintained_conditional_modifier_uses_sustained_threat_instead_of_trigger_threat()
+    {
+        var ability = MaintainedPhysicalDefenseAbility();
+
+        Assert.Equal(0, AbilityThreatRules.GetThreatValue(ability));
+        Assert.Equal(5d, AbilityThreatRules.GetEstimatedThreatPerSecond(ability), precision: 5);
+        Assert.True(AbilityThreatRules.HasMaintainedThreat(ability));
+
+        var compiledEffect = AbilityCompiler.CompileAbility(ability)
+            .TriggersByEvent[AbilityTriggerEvent.OnCombatStart]
+            .Single()
+            .Effects
+            .Single();
+        Assert.Equal(AbilityThreatFunctionBand.ProtectiveSelf, compiledEffect.MaintainedThreatBand);
+        Assert.Equal(5f, compiledEffect.MaintainedThreatPerSecond);
+    }
+
+    [Fact]
+    public void Maintained_conditional_modifier_applies_once_and_generates_exact_sustained_threat()
+    {
+        var definition = AbilityCompiler.CompileAbility(MaintainedPhysicalDefenseAbility());
+        var friendly = Combatant("friendly", CombatTeam.Friendly, [definition], canBasicAttack: false);
+        var hostile = Combatant("hostile", CombatTeam.Hostile, [], canBasicAttack: false);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(
+                MaxTicks: 20,
+                BasicAttackIntervalTicks: 1_000,
+                ThreatHalfLifeSeconds: 0));
+
+        var result = engine.Run([friendly], [hostile]);
+
+        Assert.Equal(-10f, friendly.GetDamageTakenPercent(DamageType.Physical, hostile));
+        var stats = result.EntityStats.Single(item => item.EntityId == friendly.Id);
+        var abilityStats = Assert.Single(stats.Abilities, item => item.Name == definition.Name);
+        Assert.Equal(1, abilityStats.Uses);
+        Assert.Equal(10, abilityStats.TotalThreat);
+    }
+
+    [Fact]
+    public void Maintained_conditional_modifier_is_removed_when_health_crosses_its_threshold()
+    {
+        var defense = AbilityCompiler.CompileAbility(MaintainedPhysicalDefenseAbility());
+        var attack = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "threshold.attack",
+            Name = "Threshold Attack",
+            Kind = AbilitySpecKind.Active,
+            CooldownTicks = 100,
+            ThreatValue = 0,
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "threshold.attack.damage",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.RandomEnemy,
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 1f,
+                    AttackType = AttackType.Melee,
+                    DamageType = DamageType.Physical
+                }
+            ]
+        });
+        var friendly = Combatant("friendly", CombatTeam.Friendly, [defense], canBasicAttack: false);
+        var hostile = Combatant("hostile", CombatTeam.Hostile, [attack], canBasicAttack: false, power: 700_000);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        var result = engine.Run([friendly], [hostile]);
+
+        Assert.True(friendly.IsAlive);
+        Assert.True(friendly.Health < 500_000);
+        Assert.Equal(0f, friendly.GetDamageTakenPercent(DamageType.Physical, hostile));
+        var stats = result.EntityStats.Single(item => item.EntityId == friendly.Id);
+        Assert.Equal(1, Assert.Single(stats.Abilities, item => item.Name == defense.Name).Uses);
+    }
+
+    [Fact]
+    public void One_shot_passive_threat_uses_its_activation_delay_instead_of_its_lockout()
+    {
+        var oneShot = new AbilitySpec
+        {
+            Kind = AbilitySpecKind.Passive,
+            Triggers =
+            [
+                new AbilityTriggerSpec
+                {
+                    Event = AbilityTriggerEvent.OnInterval,
+                    InternalCooldownTicks = 100_000,
+                    InitialDelayTicks = 150,
+                    EffectIds = ["recovery"]
+                }
+            ],
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "recovery",
+                    Operation = AbilityEffectOperation.ApplyCondition,
+                    Target = AbilityTargetSelector.AllAllies,
+                    Condition = StandardConditionType.Recovery,
+                    Uses = 1
+                }
+            ]
+        };
+        var repeating = new AbilitySpec
+        {
+            Kind = AbilitySpecKind.Passive,
+            Triggers =
+            [
+                new AbilityTriggerSpec
+                {
+                    Event = AbilityTriggerEvent.OnInterval,
+                    InternalCooldownTicks = 40,
+                    InitialDelayTicks = 40,
+                    EffectIds = ["barrier"]
+                }
+            ],
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "barrier",
+                    Operation = AbilityEffectOperation.GrantBarrier,
+                    Target = AbilityTargetSelector.AllAllies,
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 0.2f
+                }
+            ]
+        };
+
+        Assert.Equal(75, AbilityThreatRules.GetThreatValue(oneShot));
+        Assert.Equal(150, AbilityThreatRules.GetTriggerPeriodTicks(oneShot, Assert.Single(oneShot.Triggers)));
+        Assert.Equal(20, AbilityThreatRules.GetThreatValue(repeating));
+    }
+
+    [Fact]
     public void Threat_derivation_and_summon_defaults_accept_runtime_tuning()
     {
         var tuning = new AbilityThreatTuning(
@@ -514,4 +653,45 @@ public sealed class ThreatAndTankingSystemTests
             canBasicAttack: canBasicAttack,
             basicAttackType: AttackType.Melee,
             basicAttackDamageType: DamageType.Physical);
+
+    private static AbilitySpec MaintainedPhysicalDefenseAbility() => new()
+    {
+        Id = "conditional-defense",
+        Name = "Conditional Defense",
+        Kind = AbilitySpecKind.Passive,
+        Triggers =
+        [
+            new AbilityTriggerSpec
+            {
+                Event = AbilityTriggerEvent.OnCombatStart,
+                EffectIds = ["conditional-defense.effect"]
+            },
+            new AbilityTriggerSpec
+            {
+                Event = AbilityTriggerEvent.OnHealthChanged,
+                EffectIds = ["conditional-defense.effect"]
+            }
+        ],
+        Effects =
+        [
+            new AbilityEffectSpec
+            {
+                Id = "conditional-defense.effect",
+                Operation = AbilityEffectOperation.ModifyDamageTaken,
+                Target = AbilityTargetSelector.Self,
+                BaseValue = -10,
+                DamageType = DamageType.Physical,
+                MaintainWhileConditionsMet = true,
+                Conditions =
+                [
+                    new AbilityConditionSpec
+                    {
+                        Type = AbilityConditionType.HealthAbovePercent,
+                        Subject = AbilityConditionSubject.Source,
+                        Value = 50
+                    }
+                ]
+            }
+        ]
+    };
 }

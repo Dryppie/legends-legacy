@@ -9,6 +9,20 @@ public static class AbilityCompiler
     public static CompiledAbility CompileAbility(AbilitySpec spec, AbilityThreatTuning? threatTuning)
     {
         var effectsById = spec.Effects.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+        var maintainedThreatMultiplier = spec.ThreatValue is null
+                                         && !spec.Tags.Contains("NonCombat", StringComparer.OrdinalIgnoreCase)
+            ? Math.Max(0, spec.ThreatMultiplier)
+            : 0;
+        var compiledEffectsById = effectsById.ToDictionary(
+            pair => pair.Key,
+            pair => CompileEffect(
+                pair.Value,
+                spec.Name,
+                spec.Kind,
+                spec.Tags,
+                threatTuning,
+                maintainedThreatMultiplier),
+            StringComparer.OrdinalIgnoreCase);
         var triggers = spec.Triggers.Count == 0
             ? [new AbilityTriggerSpec { Event = spec.Kind == AbilitySpecKind.Active ? AbilityTriggerEvent.OnAbilityUsed : AbilityTriggerEvent.OnCombatStart }]
             : spec.Triggers;
@@ -16,11 +30,8 @@ public static class AbilityCompiler
         var compiledTriggers = triggers
             .Select(trigger => CompileTrigger(
                 trigger,
-                effectsById.Values,
-                effectsById,
-                spec.Name,
-                spec.Kind,
-                spec.Tags,
+                compiledEffectsById.Values,
+                compiledEffectsById,
                 spec.Kind == AbilitySpecKind.Passive
                     ? AbilityThreatRules.GetThreatValue(spec, trigger, threatTuning)
                     : 0))
@@ -44,14 +55,21 @@ public static class AbilityCompiler
     public static CompiledStatus CompileStatus(StatusSpec spec)
     {
         var effectsById = spec.Effects.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
-        var compiledTriggers = spec.Triggers
-            .Select(trigger => CompileTrigger(
-                trigger,
-                spec.Effects,
-                effectsById,
+        var compiledEffectsById = effectsById.ToDictionary(
+            pair => pair.Key,
+            pair => CompileEffect(
+                pair.Value,
                 spec.Name,
                 AbilitySpecKind.Passive,
                 spec.Tags,
+                threatTuning: null,
+                maintainedThreatMultiplier: 0),
+            StringComparer.OrdinalIgnoreCase);
+        var compiledTriggers = spec.Triggers
+            .Select(trigger => CompileTrigger(
+                trigger,
+                compiledEffectsById.Values,
+                compiledEffectsById,
                 threatValue: 0))
             .GroupBy(x => x.Event)
             .ToDictionary(x => x.Key, x => (IReadOnlyList<CompiledTrigger>)x.ToList());
@@ -107,11 +125,8 @@ public static class AbilityCompiler
 
     private static CompiledTrigger CompileTrigger(
         AbilityTriggerSpec trigger,
-        IEnumerable<AbilityEffectSpec> defaultEffects,
-        IReadOnlyDictionary<string, AbilityEffectSpec> effectsById,
-        string statsSource,
-        AbilitySpecKind abilityKind,
-        IReadOnlyList<string> abilityTags,
+        IEnumerable<CompiledEffect> defaultEffects,
+        IReadOnlyDictionary<string, CompiledEffect> effectsById,
         int threatValue)
     {
         var selectedEffects = trigger.EffectIds.Count == 0
@@ -131,7 +146,7 @@ public static class AbilityCompiler
             InitialDelayTicks = trigger.InitialDelayTicks,
             EveryNthOccurrence = Math.Max(1, trigger.EveryNthOccurrence),
             Conditions = [.. trigger.Conditions.Select(CompileCondition)],
-            Effects = [.. selectedEffects.Select(effect => CompileEffect(effect, statsSource, abilityKind, abilityTags))]
+            Effects = [.. selectedEffects]
         };
     }
 
@@ -149,7 +164,9 @@ public static class AbilityCompiler
         AbilityEffectSpec effect,
         string statsSource,
         AbilitySpecKind abilityKind,
-        IReadOnlyList<string> abilityTags) =>
+        IReadOnlyList<string> abilityTags,
+        AbilityThreatTuning? threatTuning,
+        float maintainedThreatMultiplier) =>
         new()
         {
             Id = effect.Id,
@@ -190,6 +207,14 @@ public static class AbilityCompiler
             IntervalTicks = effect.IntervalTicks,
             Uses = effect.Uses,
             OncePerTarget = effect.OncePerTarget,
+            MaintainWhileConditionsMet = effect.MaintainWhileConditionsMet,
+            MaintainedThreatBand = effect.MaintainWhileConditionsMet
+                ? AbilityThreatRules.GetFunctionBand(effect, triggerEvent: null)
+                : null,
+            MaintainedThreatPerSecond = GetMaintainedThreatPerSecond(
+                effect,
+                threatTuning,
+                maintainedThreatMultiplier),
             LivingNonSummonedAllyDamagePercent = effect.LivingNonSummonedAllyDamagePercent,
             SubsequentTargetDamagePercent = effect.SubsequentTargetDamagePercent <= 0
                 ? 100
@@ -208,6 +233,23 @@ public static class AbilityCompiler
             Tags = new HashSet<string>(effect.Tags, StringComparer.OrdinalIgnoreCase),
             Conditions = [.. effect.Conditions.Select(CompileCondition)]
         };
+
+    private static float GetMaintainedThreatPerSecond(
+        AbilityEffectSpec effect,
+        AbilityThreatTuning? threatTuning,
+        float maintainedThreatMultiplier)
+    {
+        if (!effect.MaintainWhileConditionsMet
+            || maintainedThreatMultiplier <= 0
+            || AbilityThreatRules.GetFunctionBand(effect, triggerEvent: null) is not { } band)
+        {
+            return 0;
+        }
+
+        return AbilityThreatRules.GetThreatPerSecond(
+            band,
+            threatTuning ?? AbilityThreatTuning.Default) * maintainedThreatMultiplier;
+    }
 
     private static CompiledCost CompileCost(AbilityCostSpec cost) =>
         new()

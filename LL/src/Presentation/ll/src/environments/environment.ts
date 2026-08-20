@@ -25,6 +25,9 @@ export const environment = {
   apiBaseUrl: env.apiBaseUrl,
   chatApiRoot: env.chatApiRoot,
   production: false,
+  features: {
+    raids: env.environment !== 'prod',
+  },
   googleClientId: env.googleClientId,
   isLocal: env.isLocal === 'true',
   maintenance: {

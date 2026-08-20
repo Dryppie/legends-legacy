@@ -21,7 +21,7 @@ public sealed class AccountRiskController : LiveOpsControllerBase
     [Authorize(Policy = AdministrationPermissions.Read)]
     public async Task<ActionResult<Response<AccountRiskPageDto>>> Search(
         [FromQuery] string? search = null,
-        [FromQuery] AccountRiskSeverity? minimumSeverity = AccountRiskSeverity.Moderate,
+        [FromQuery] AccountRiskSeverity? minimumSeverity = AccountRiskSeverity.Low,
         [FromQuery] AccountRiskSignalType? signalType = null,
         [FromQuery] AccountInvestigationStatus? status = null,
         [FromQuery] int? minimumScore = null,

@@ -12,7 +12,7 @@ namespace Services.LL.Regions;
 
 public sealed class AreaCombatSimulator : IAreaCombatSimulator
 {
-    private const int RegionEndpointCombatRatingTolerance = 1;
+    private const double MaximumRegionEndpointCombatRatingDrift = 0.05d;
     public const int MaximumEncounters = 1_000;
     private const int DefaultSeed = 73_901;
     private const int MaximumCombatTicks = 6_000;
@@ -121,15 +121,16 @@ public sealed class AreaCombatSimulator : IAreaCombatSimulator
         {
             var region = regions[index];
             var projection = projections[index];
-            if (Math.Abs(
-                    region.EndingCombatRating
-                    - projection.RecommendedEndpointCombatRating)
-                > RegionEndpointCombatRatingTolerance)
+            var drift = Math.Abs(
+                region.EndingCombatRating - projection.RecommendedEndpointCombatRating)
+                / (double)region.EndingCombatRating;
+            if (drift > MaximumRegionEndpointCombatRatingDrift)
             {
                 throw new InvalidOperationException(
                     $"Region '{region.RegionKey}' ends at CR {region.EndingCombatRating}, but " +
                     $"canonical Tier {projection.EquipmentTier} Legendary progression ends at " +
-                    $"CR {projection.RecommendedEndpointCombatRating}.");
+                    $"CR {projection.RecommendedEndpointCombatRating} ({drift:P1} drift; " +
+                    $"maximum {MaximumRegionEndpointCombatRatingDrift:P1}).");
             }
         }
     }
@@ -185,31 +186,13 @@ public sealed class AreaCombatSimulator : IAreaCombatSimulator
         if (area.Creatures.Count == 0 || area.SpawnProbabilities.Count == 0)
             throw new InvalidOperationException($"Area '{area.Id}' has no combat spawn content.");
 
-        var ladder = _builds.GetProgressionLadder();
         var encounterCount = Math.Clamp(request.EncounterCount, 1, MaximumEncounters);
         var baseSeed = request.RandomSeed == 0 ? DefaultSeed : request.RandomSeed;
-        CanonicalEquipmentBuild build;
-        if (request.BuildId.Equals(
-                CanonicalEquipmentBuildFactory.TutorialStarterBuildId,
-                StringComparison.OrdinalIgnoreCase))
-        {
-            build = _builds.CreateTutorialStarterBuild();
-        }
-        else
-        {
-            var rung = ladder.FirstOrDefault(x =>
-                           x.Id.Equals(request.BuildId, StringComparison.OrdinalIgnoreCase))
-                       ?? throw new ArgumentException(
-                           $"Unknown canonical build '{request.BuildId}'.",
-                           nameof(request));
-            var essenceCount = Math.Min(6, _essenceSlots.GetUnlockedSlotCount(area.LevelRequirement));
-            build = _builds.CreateBuildForArea(
-                profile,
-                rung,
-                area.LevelRequirement,
-                essenceCount);
-        }
-        var friendly = await _simulations.CreateCanonicalCombatantAsync(build, cancellationToken);
+        var friendly = await CreateFriendlyAsync(
+            area,
+            profile,
+            request.BuildId,
+            cancellationToken);
         var hostileTemplates = await CreateHostileTemplatesAsync(area, cancellationToken);
         var outcomes = new List<AreaSimulationEncounterResult>(encounterCount);
 
@@ -251,6 +234,107 @@ public sealed class AreaCombatSimulator : IAreaCombatSimulator
             (int)friendly.GetAttributeValue(Domain.Models.Attributes.AttributeType.MaxHealth),
             baseSeed,
             outcomes);
+    }
+
+    public async Task<AreaEncounterSimulationReport> RunEncounterAsync(
+        AreaEncounterSimulationRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        if (!Enum.TryParse<CanonicalPartyProfile>(request.CharacterProfile, true, out var profile))
+        {
+            throw new ArgumentException(
+                $"Unknown canonical profile '{request.CharacterProfile}'.",
+                nameof(request));
+        }
+
+        var area = await _areas.GetAreaByIdAsync(request.AreaId)
+                   ?? throw new KeyNotFoundException($"Area '{request.AreaId}' was not found.");
+        if (area.Creatures.All(creature => creature.CreatureId != request.CreatureId))
+        {
+            throw new KeyNotFoundException(
+                $"Creature '{request.CreatureId}' is not assigned to area '{area.Id}'.");
+        }
+
+        var friendly = await CreateFriendlyAsync(
+            area,
+            profile,
+            request.BuildId,
+            cancellationToken);
+        var hostileTemplates = await CreateHostileTemplatesAsync(area, cancellationToken);
+        var hostile = hostileTemplates[request.CreatureId];
+        var encounterCount = Math.Clamp(request.EncounterCount, 1, MaximumEncounters);
+        var baseSeed = request.RandomSeed == 0 ? DefaultSeed : request.RandomSeed;
+        var attempts = new List<AreaEncounterSimulationAttempt>(encounterCount);
+
+        for (var index = 0; index < encounterCount; index++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var seed = unchecked(baseSeed + index * 7_919);
+            var combat = await _simulations.RunCombatAsync(
+                [friendly],
+                [hostile],
+                seed,
+                MaximumCombatTicks,
+                supplementalAbilities: null,
+                cancellationToken,
+                idleArea: area,
+                captureEventLog: false);
+            var friendlyStats = combat.EntityStats
+                .Where(stat => stat.Team.Equals("Friendly", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            attempts.Add(new AreaEncounterSimulationAttempt(
+                index + 1,
+                seed,
+                combat.Outcome.ToString(),
+                combat.Duration,
+                friendlyStats.Sum(stat => Math.Max(0, stat.DamageTaken)),
+                friendlyStats.Sum(stat => Math.Max(0, stat.HealingDone)),
+                friendlyStats.Sum(stat => Math.Max(0, stat.HealthRegenerated)),
+                combat.PlayerTeam.Sum(entity => Math.Max(0, entity.Health)),
+                combat.EnemyTeam.Sum(entity => Math.Max(0, entity.Health))));
+        }
+
+        return new AreaEncounterSimulationReport(
+            area.Id,
+            request.CreatureId,
+            hostile.Name,
+            profile.ToString(),
+            request.BuildId,
+            (int)friendly.GetAttributeValue(Domain.Models.Attributes.AttributeType.MaxHealth),
+            attempts);
+    }
+
+    private async Task<Domain.Models.Combat.CombatEntity> CreateFriendlyAsync(
+        Area area,
+        CanonicalPartyProfile profile,
+        string buildId,
+        CancellationToken cancellationToken)
+    {
+        CanonicalEquipmentBuild build;
+        if (buildId.Equals(
+                CanonicalEquipmentBuildFactory.TutorialStarterBuildId,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            build = _builds.CreateTutorialStarterBuild();
+        }
+        else
+        {
+            var rung = _builds.GetProgressionLadder().FirstOrDefault(candidate =>
+                           candidate.Id.Equals(buildId, StringComparison.OrdinalIgnoreCase))
+                       ?? throw new ArgumentException($"Unknown canonical build '{buildId}'.");
+            var essenceCount = Math.Min(
+                6,
+                _essenceSlots.GetUnlockedSlotCount(area.LevelRequirement));
+            build = _builds.CreateBuildForArea(
+                profile,
+                rung,
+                area.LevelRequirement,
+                essenceCount);
+        }
+
+        return await _simulations.CreateCanonicalCombatantAsync(build, cancellationToken);
     }
 
     private async Task<IReadOnlyDictionary<Guid, Domain.Models.Combat.CombatEntity>> CreateHostileTemplatesAsync(

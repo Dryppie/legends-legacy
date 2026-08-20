@@ -30,6 +30,8 @@
       [cooldownSeconds]="essence.active.cooldown / 10"
       [threatValue]="essence.active.threatValue"
       [threatMultiplier]="essence.active.threatMultiplier"
+      [estimatedThreatPerSecond]="essence.active.estimatedThreatPerSecond ?? 0"
+      [hasMaintainedThreat]="essence.active.hasMaintainedThreat ?? false"
     ></app-essence-description>
     <app-ability-tags
       [targets]="essence.active.targets"
@@ -55,6 +57,8 @@
       kind="Passive"
       [threatValue]="essence.passive.threatValue"
       [threatMultiplier]="essence.passive.threatMultiplier"
+      [estimatedThreatPerSecond]="essence.passive.estimatedThreatPerSecond ?? 0"
+      [hasMaintainedThreat]="essence.passive.hasMaintainedThreat ?? false"
     ></app-essence-description>
     <app-ability-tags
       [targets]="essence.passive.targets"

@@ -186,6 +186,8 @@ public static class DependencyInjection
         services.AddScoped<IRegionOneContentDiagnostics, RegionOneContentDiagnostics>();
         services.AddScoped<IAreaCombatSimulator, AreaCombatSimulator>();
         services.AddScoped<IRegionAreaBalanceAnalyzer, RegionAreaBalanceAnalyzer>();
+        services.AddSingleton<ICombatDifficultyEvaluator, CombatDifficultyEvaluator>();
+        services.AddScoped<ICombatCalibrationService, CombatCalibrationService>();
         services.AddSingleton<IAreaExperienceBalanceProvider>(sp =>
             new JsonAreaExperienceBalanceProvider(
                 config,

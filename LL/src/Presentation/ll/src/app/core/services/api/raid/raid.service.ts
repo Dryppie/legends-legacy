@@ -15,18 +15,19 @@ export type RaidRunStatus =
   | 'Cancelled'
   | 'Expired';
 export type RaidOutcome = 'Repelled' | 'Wounded' | 'Broken' | 'Slain';
-export type RaidLane = 'Vanguard' | 'Flank' | 'Ward';
+export type RaidRewardKind = 'WeeklyBase' | 'WeeklyUpgrade' | 'Repeat';
+export type RaidLane = 'Rearguard' | 'Vanguard' | 'MainGuard' | 'FinalAssault';
 
 export interface RaidRecommendedWingPower {
+  rearguard: number;
   vanguard: number;
-  flank: number;
-  ward: number;
+  mainGuard: number;
+  rearguardLower: number;
+  rearguardUpper: number;
   vanguardLower: number;
   vanguardUpper: number;
-  flankLower: number;
-  flankUpper: number;
-  wardLower: number;
-  wardUpper: number;
+  mainGuardLower: number;
+  mainGuardUpper: number;
   confidence: 'Low' | 'Medium' | 'High';
   isCalibrated: boolean;
 }
@@ -49,7 +50,7 @@ export interface RaidBossSummary {
   isUnlocked: boolean;
   lockReason: string | null;
   openRaidCount: number;
-  rewardReducedThisWeek: boolean;
+  hasWeeklyRewardThisWeek: boolean;
   activeRaidId: string | null;
   tiers: RaidBossTierSummary[];
   developmentToolsEnabled: boolean;
@@ -66,9 +67,9 @@ export interface RaidRunSummary {
   signupClosesAt: string;
   signupCount: number;
   maximumRoster: number;
+  rearguardCount: number;
   vanguardCount: number;
-  flankCount: number;
-  wardCount: number;
+  mainGuardCount: number;
   canJoin: boolean;
 }
 
@@ -80,7 +81,7 @@ export interface RaidHistoryEntry {
   outcome: RaidOutcome;
   resolvedAt: string;
   trophies: number;
-  wasReduced: boolean;
+  rewardKind: RaidRewardKind;
   claimedAt: string | null;
   canClaim: boolean;
 }
@@ -94,6 +95,15 @@ export interface RaidSignup {
   signedUpAt: string;
   snapshotRefreshedAt: string | null;
   isLeader: boolean;
+  isCurrentCharacter: boolean;
+}
+
+export interface RaidJoinRequest {
+  characterId: string;
+  characterName: string;
+  powerRating: number;
+  requestedAt: string;
+  snapshotRefreshedAt: string | null;
   isCurrentCharacter: boolean;
 }
 
@@ -167,6 +177,7 @@ export interface RaidPlaybackFrame {
     healthRegenerated: number;
     barrierGenerated: number;
     damageBlocked: number;
+    threatGenerated?: number;
   }[];
   abilityTotals: RaidPlaybackAbilityTotals[];
   isFinal: boolean;
@@ -196,6 +207,7 @@ export interface RaidPlaybackAbilityTotals {
   totalHealing: number;
   totalBarrier: number;
   damageByType?: AbilityDamageTypeStats[];
+  totalThreat?: number;
 }
 
 export interface RaidParticipantResult {
@@ -203,7 +215,6 @@ export interface RaidParticipantResult {
   lane: RaidLane;
   damageDone: number;
   contributionScore: number;
-  payoutMultiplier: number;
   contributionRank: number;
 }
 
@@ -226,11 +237,13 @@ export interface RaidRun {
   laneSlots: number;
   minimumRoster: number;
   signups: RaidSignup[];
+  joinRequests: RaidJoinRequest[];
   laneResults: RaidLaneResult[];
   participantResults: RaidParticipantResult[];
   outcome: RaidOutcome | null;
   reinforcementPenalty: number | null;
-  wardBreak: number | null;
+  guardianBreak: number | null;
+  signatureDisruption: number | null;
   bossHealthRemainingPercent: number | null;
   canJoin: boolean;
   canLeave: boolean;
@@ -238,7 +251,7 @@ export interface RaidRun {
   canCommence: boolean;
   canRefreshSnapshot: boolean;
   canClaim: boolean;
-  rewardWasReduced: boolean;
+  rewardKind: RaidRewardKind | null;
   canPreviewBattlePlan: boolean;
   canCancel: boolean;
   canTransferLeadership: boolean;
@@ -249,8 +262,8 @@ export interface RaidReward {
   raidRunId: string;
   trophies: number;
   trophyBalance: number;
-  items: { itemId: string; quantity: number }[];
-  wasReduced: boolean;
+  items: { itemId: string; itemName: string; quantity: number }[];
+  rewardKind: RaidRewardKind;
   claimedAt: string;
 }
 
@@ -291,7 +304,9 @@ export interface RaidTrophyPurchase {
 export class RaidService {
   private readonly api = inject(ApiService);
   private readonly _activeRaidId = signal<string | null>(null);
+  private readonly _activeRaidChatId = signal<string | null>(null);
   readonly activeRaidId = this._activeRaidId.asReadonly();
+  readonly activeRaidChatId = this._activeRaidChatId.asReadonly();
 
   getRaidBosses(region?: number): Observable<RaidBossSummary[]> {
     return this.api.get(`raids/bosses${region ? `?region=${region}` : ''}`);
@@ -318,22 +333,22 @@ export class RaidService {
     return this.api.get('raids/active').pipe(
       tap((raid) => {
         if (raid) this.trackRaid(raid as RaidRun);
-        else this._activeRaidId.set(null);
+        else this.clearActiveRaid();
       }),
     );
   }
 
-  create(raidBossId: string, tier: number): Observable<RaidRun> {
+  create(raidBossId: string, plusLevel: number): Observable<RaidRun> {
     return this.api
-      .post('raids/create', { raidBossId, tier })
+      .post('raids/create', { raidBossId, plusLevel })
       .pipe(tap((raid) => this.trackRaid(raid as RaidRun)));
   }
 
-  createDevelopment(raidBossId: string, tier: number): Observable<RaidRun> {
+  createDevelopment(raidBossId: string, plusLevel: number): Observable<RaidRun> {
     return this.api
       .post(
         `raids/bosses/${encodeURIComponent(raidBossId)}/development/create`,
-        { tier },
+        { plusLevel },
       )
       .pipe(tap((raid) => this.trackRaid(raid as RaidRun)));
   }
@@ -342,6 +357,18 @@ export class RaidService {
     return this.api
       .post(`raids/${raidRunId}/join`)
       .pipe(tap((raid) => this.trackRaid(raid as RaidRun)));
+  }
+
+  approveSignup(raidRunId: string, characterId: string): Observable<RaidRun> {
+    return this.api.post(`raids/${raidRunId}/signups/approve`, {
+      characterId,
+    });
+  }
+
+  removeSignup(raidRunId: string, characterId: string): Observable<RaidRun> {
+    return this.api.post(`raids/${raidRunId}/signups/remove`, {
+      characterId,
+    });
   }
 
   leave(raidRunId: string): Observable<RaidRun> {
@@ -393,8 +420,13 @@ export class RaidService {
     return this.api.put(`raids/${raidRunId}/parties`, { assignments });
   }
 
-  fillDevelopmentRoster(raidRunId: string): Observable<RaidRun> {
-    return this.api.post(`raids/${raidRunId}/development/fill-roster`);
+  fillDevelopmentRoster(
+    raidRunId: string,
+    powerMultiplier: number,
+  ): Observable<RaidRun> {
+    return this.api.post(`raids/${raidRunId}/development/fill-roster`, {
+      powerMultiplier,
+    });
   }
 
   commence(raidRunId: string): Observable<RaidRun> {
@@ -443,6 +475,9 @@ export class RaidService {
     if (!raidRunId || this._activeRaidId() === raidRunId) {
       this._activeRaidId.set(null);
     }
+    if (!raidRunId || this._activeRaidChatId() === raidRunId) {
+      this._activeRaidChatId.set(null);
+    }
   }
 
   private trackRaid(raid: RaidRun | null | undefined): void {
@@ -452,11 +487,22 @@ export class RaidService {
       raid.status === 'Mustering' ||
       raid.status === 'Resolving' ||
       raid.status === 'Playback';
-    const isMember = raid.signups?.some((signup) => signup.isCurrentCharacter);
-    if (isActive && isMember) {
+    const isApprovedMember = raid.signups?.some(
+      (signup) => signup.isCurrentCharacter,
+    );
+    const hasPendingRequest = raid.joinRequests?.some(
+      (request) => request.isCurrentCharacter,
+    );
+    if (isActive && (isApprovedMember || hasPendingRequest)) {
       this._activeRaidId.set(raid.id);
     } else if (this._activeRaidId() === raid.id) {
       this._activeRaidId.set(null);
+    }
+
+    if (isActive && isApprovedMember) {
+      this._activeRaidChatId.set(raid.id);
+    } else if (this._activeRaidChatId() === raid.id) {
+      this._activeRaidChatId.set(null);
     }
   }
 }

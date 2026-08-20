@@ -24,7 +24,9 @@ public sealed record WorldTowerBalanceReport(
     int AttemptsPerRoster,
     int RandomSeed,
     bool UsesTierOneOnly,
-    IReadOnlyList<WorldTowerFloorBalanceResult> Floors);
+    IReadOnlyList<WorldTowerFloorBalanceResult> Floors,
+    bool Passed,
+    IReadOnlyList<string> Blockers);
 
 public sealed record WorldTowerFloorBalanceResult(
     int FloorNumber,
@@ -37,10 +39,21 @@ public sealed record WorldTowerFloorBalanceResult(
     int RecommendedPowerRating,
     int CanonicalAveragePowerRating,
     TowerGuardianScalingDefinition GuardianScaling,
-    IReadOnlyList<WorldTowerRosterBalanceResult> Rosters);
+    IReadOnlyList<WorldTowerRosterBalanceResult> Rosters,
+    bool Passed,
+    IReadOnlyList<string> Failures);
+
+public enum WorldTowerBalanceRosterKind
+{
+    Cooperative,
+    NoGuardian,
+    NoRestorer,
+    DamageLight
+}
 
 public sealed record WorldTowerRosterBalanceResult(
     string Roster,
+    WorldTowerBalanceRosterKind Kind,
     int Attempts,
     int Victories,
     int Defeats,
@@ -51,5 +64,29 @@ public sealed record WorldTowerRosterBalanceResult(
     double MedianVictoryTicks,
     double P95VictoryTicks,
     double AverageSurvivors,
+    double AverageVictorySurvivors,
     double AverageGuardianHealthRemainingPercent,
-    IReadOnlyList<string> Profiles);
+    IReadOnlyList<string> Profiles,
+    WorldTowerCooperationTelemetry Cooperation);
+
+public sealed record WorldTowerCooperationTelemetry(
+    double GuardianAttentionSharePercent,
+    double RestorerAttentionSharePercent,
+    double GuardianThreatGenerated,
+    double RestorerThreatGenerated,
+    double GuardianIncomingRawDamage,
+    double RestorerHealingDone,
+    double DamageRedirectedToGuardians,
+    double AverageSurvivors,
+    IReadOnlyList<WorldTowerPartyCooperationTelemetry> Parties);
+
+public sealed record WorldTowerPartyCooperationTelemetry(
+    int PartyNumber,
+    int PartySize,
+    double GuardianAttentionSharePercent,
+    double RestorerAttentionSharePercent,
+    double GuardianThreatGenerated,
+    double RestorerThreatGenerated,
+    double GuardianIncomingRawDamage,
+    double RestorerHealingDone,
+    double AverageSurvivors);

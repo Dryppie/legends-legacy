@@ -904,6 +904,12 @@
                               [threatMultiplier]="
                                 essence.active.threatMultiplier
                               "
+                              [estimatedThreatPerSecond]="
+                                essence.active.estimatedThreatPerSecond ?? 0
+                              "
+                              [hasMaintainedThreat]="
+                                essence.active.hasMaintainedThreat ?? false
+                              "
                             ></app-essence-description>
                             <app-ability-tags
                               [targets]="essence.active.targets"
@@ -930,6 +936,12 @@
                               [threatValue]="essence.passive.threatValue"
                               [threatMultiplier]="
                                 essence.passive.threatMultiplier
+                              "
+                              [estimatedThreatPerSecond]="
+                                essence.passive.estimatedThreatPerSecond ?? 0
+                              "
+                              [hasMaintainedThreat]="
+                                essence.passive.hasMaintainedThreat ?? false
                               "
                             ></app-essence-description>
                             <app-ability-tags

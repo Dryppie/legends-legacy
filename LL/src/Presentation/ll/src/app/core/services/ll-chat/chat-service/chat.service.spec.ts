@@ -83,6 +83,7 @@ describe('ChatService guild connection synchronization', () => {
           provide: RaidService,
           useValue: {
             activeRaidId: signal(null),
+            activeRaidChatId: signal(null),
             getActiveRaid: () => of(null),
             clearActiveRaid: () => undefined,
           },
@@ -110,6 +111,7 @@ describe('ChatService guild connection synchronization', () => {
       true,
       true,
       true,
+      false,
     );
     await Promise.resolve();
 
@@ -126,9 +128,61 @@ describe('ChatService guild connection synchronization', () => {
   it('does not refresh authentication for an unchanged guild context', async () => {
     spyOn(service, 'connectAndLoad').and.resolveTo();
 
-    await (service as any).connectForContext('guild-1', false, false, false);
+    await (service as any).connectForContext(
+      'guild-1',
+      false,
+      false,
+      false,
+      false,
+    );
 
     expect(auth.refreshSession).not.toHaveBeenCalled();
+  });
+
+  it('keeps non-raid messages visible while raid membership synchronizes', async () => {
+    const generalMessage = messageAt('general', '2026-08-11T10:00:00Z');
+    const previousRaidMessage = {
+      ...messageAt('old-raid', '2026-08-11T10:01:00Z'),
+      channelType: ChatChannelType.Raid,
+      contextKey: 'raid-1',
+    };
+    (service as any).messageList.set([generalMessage, previousRaidMessage]);
+    spyOn(service, 'connectAndLoad').and.rejectWith(
+      new Error('Raid membership has not reached chat yet.'),
+    );
+
+    await expectAsync(
+      (service as any).connectForContext(
+        undefined,
+        false,
+        false,
+        false,
+        true,
+        'raid-2',
+      ),
+    ).toBeRejected();
+
+    expect((service as any).messageList()).toEqual([generalMessage]);
+  });
+
+  it('reloads raid history when the membership lifecycle message arrives', async () => {
+    (service as any).activeRaidId = 'raid-1';
+    const loadHistory = spyOn(service, 'loadHistory').and.resolveTo();
+
+    (service as any).recoverActiveRaidHistory({
+      ...messageAt('raid-opened', '2026-08-11T10:00:00Z'),
+      channelType: ChatChannelType.Raid,
+      contextKey: 'raid-1',
+    });
+    await (service as any).raidHistoryRecoveryPromise;
+
+    expect(loadHistory).toHaveBeenCalledOnceWith(
+      undefined,
+      50,
+      undefined,
+      'raid-1',
+    );
+    expect((service as any).loadedRaidHistoryId).toBe('raid-1');
   });
 });
 

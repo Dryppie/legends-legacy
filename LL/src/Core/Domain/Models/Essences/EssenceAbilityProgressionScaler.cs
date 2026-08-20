@@ -227,6 +227,7 @@ public static class EssenceAbilityProgressionScaler
             DurationTicks = effect.DurationTicks,
             IntervalTicks = effect.IntervalTicks,
             Uses = effect.Uses,
+            MaintainWhileConditionsMet = effect.MaintainWhileConditionsMet,
             ChancePercent = effect.ChancePercent,
             AttackType = effect.AttackType,
             DamageType = effect.DamageType,

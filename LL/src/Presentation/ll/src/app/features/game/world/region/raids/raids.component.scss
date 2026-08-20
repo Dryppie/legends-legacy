@@ -207,10 +207,18 @@
   font-size: var(--ll-text-xl);
 }
 
-.tier-tabs {
+.difficulty-stepper {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
+  grid-template-columns: 2.75rem minmax(6rem, 1fr) 2.75rem;
+  align-items: center;
   gap: var(--ll-space-2);
+}
+
+.difficulty-stepper strong {
+  color: var(--ll-color-primary);
+  font-family: var(--ll-font-display);
+  font-size: var(--ll-text-lg);
+  text-align: center;
 }
 
 .entry-cost {

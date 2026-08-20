@@ -188,6 +188,8 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
             slot.PlayerEssenceId,
             slot.PlayerEssence?.EssenceDefinitionId,
             definition?.Name,
-            definition is null ? null : context.Mapper.Map<EssenceDefinitionDto>(definition));
+            definition is null || slot.PlayerEssence is null
+                ? null
+                : PlayerEssenceDefinitionDtoMapper.Map(definition, slot.PlayerEssence, context.Mapper));
     }
 }

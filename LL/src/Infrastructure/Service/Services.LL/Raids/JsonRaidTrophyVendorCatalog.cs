@@ -49,7 +49,7 @@ public sealed class JsonRaidTrophyVendorCatalog : IRaidTrophyVendorCatalog
                 || string.IsNullOrWhiteSpace(item.RewardItemId)
                 || item.TrophyCost <= 0
                 || item.RewardQuantity <= 0
-                || item.RequiredTier <= 0
+                || item.RequiredTier < 0
                 || item.WeeklyPurchaseLimit is <= 0
                 || item.LifetimePurchaseLimit is <= 0)
                 throw new InvalidOperationException($"Raid Trophy vendor item '{item.Id}' is invalid.");

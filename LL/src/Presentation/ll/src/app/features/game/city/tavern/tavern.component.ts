@@ -12,6 +12,7 @@ import {
 } from '../../../../shared/models/Dtos/leaderboard/leaderboard';
 import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-format.pipe';
 import { CharacterTagComponent } from '../../../../shared/components/character/character-tag/character-tag.component';
+import { environment } from '../../../../../environments/environment';
 
 type LeaderboardCategory = 'Overall' | 'PvE' | 'PvP' | 'Professions' | 'Guilds';
 
@@ -63,17 +64,25 @@ export class TavernComponent implements OnInit {
       label: 'Most Dungeon Clears',
       category: 'PvE',
     },
-    { key: 'raid-boss-kills', label: 'Raid Boss Kills', category: 'PvE' },
-    {
-      key: 'fastest-raid-slain.raid-boss.hives-abyss',
-      label: "Fastest Hive's Abyss",
-      category: 'PvE',
-    },
-    {
-      key: 'fastest-raid-slain.raid-boss.sanguine-horror',
-      label: 'Fastest Sanguine Horror',
-      category: 'PvE',
-    },
+    ...(environment.features.raids
+      ? [
+          {
+            key: 'raid-boss-kills',
+            label: 'Raid Boss Kills',
+            category: 'PvE' as const,
+          },
+          {
+            key: 'fastest-raid-slain.raid-boss.hives-abyss',
+            label: "Fastest Hive's Abyss",
+            category: 'PvE' as const,
+          },
+          {
+            key: 'fastest-raid-slain.raid-boss.sanguine-horror',
+            label: 'Fastest Sanguine Horror',
+            category: 'PvE' as const,
+          },
+        ]
+      : []),
     { key: 'arena-rating', label: 'Arena Rating', category: 'PvP' },
     { key: 'tournament-points', label: 'Tournament Points', category: 'PvP' },
     { key: 'profession-crafting', label: 'Crafting', category: 'Professions' },

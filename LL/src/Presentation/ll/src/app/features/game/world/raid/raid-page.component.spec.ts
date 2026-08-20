@@ -64,7 +64,7 @@ describe('RaidPageComponent playback', () => {
 
   afterEach(() => component.ngOnDestroy());
 
-  it('resumes Flank, Ward, then Vanguard when refreshed during playback', fakeAsync(() => {
+  it('resumes three preparations and the Final Assault during playback', fakeAsync(() => {
     const monotonicOrigin = Date.now();
     spyOn(performance, 'now').and.callFake(() => Date.now() - monotonicOrigin);
     const playback = raid('Playback');
@@ -74,18 +74,30 @@ describe('RaidPageComponent playback', () => {
     );
     flushMicrotasks();
 
-    expect(requestedLanes()).toEqual(['Flank']);
+    expect(requestedLanes()).toEqual(['Rearguard', 'Vanguard', 'MainGuard']);
+    expect(component.showingAllPreparations()).toBeTrue();
+    expect(component.preparationViews().map((view) => view.lane)).toEqual([
+      'Rearguard',
+      'Vanguard',
+      'MainGuard',
+    ]);
+    expect(combat.applyRaidCombatFrame).not.toHaveBeenCalled();
+
     tick(1500);
-    expect(requestedLanes()).toEqual(['Flank', 'Ward']);
-    tick(1500);
-    expect(requestedLanes()).toEqual(['Flank', 'Ward', 'Vanguard']);
+    expect(requestedLanes()).toEqual([
+      'Rearguard',
+      'Vanguard',
+      'MainGuard',
+      'FinalAssault',
+    ]);
+    expect(component.playbackLane()).toBe('FinalAssault');
     tick(1500);
 
-    expect(combat.applyRaidCombatFrame).toHaveBeenCalledTimes(3);
+    expect(combat.applyRaidCombatFrame).toHaveBeenCalledTimes(1);
     expect(component.playbackLane()).toBeNull();
   }));
 
-  it('skips a lane whose shared playback window already ended before refresh', fakeAsync(() => {
+  it('opens the Final Assault when the shared preparation window ended before refresh', fakeAsync(() => {
     const playback = raid('Playback');
     playback.playbackStartedAt = new Date(
       Date.parse(playback.serverNow) - 1600,
@@ -96,19 +108,69 @@ describe('RaidPageComponent playback', () => {
     );
     flushMicrotasks();
 
-    expect(requestedLanes()).toEqual(['Flank', 'Ward']);
-    expect(component.playbackLane()).toBe('Ward');
+    expect(requestedLanes()).toEqual([
+      'Rearguard',
+      'Vanguard',
+      'MainGuard',
+      'FinalAssault',
+    ]);
+    expect(component.playbackLane()).toBe('FinalAssault');
   }));
 
+  it('switches between one and all preparations without hiding summaries or stopping playback', fakeAsync(() => {
+    component.raid.set(raid('Settled'));
+
+    component.replayRaid();
+
+    expect(component.showingAllPreparations()).toBeTrue();
+    component.focusPreparation('Vanguard');
+    expect(component.showingAllPreparations()).toBeFalse();
+    expect(component.playbackLane()).toBe('Vanguard');
+    expect(component.preparationViews()).toHaveSize(3);
+    expect(combat.applyRaidCombatFrame).toHaveBeenCalledTimes(1);
+
+    component.showAllPreparations();
+    expect(component.showingAllPreparations()).toBeTrue();
+    expect(component.playbackLane()).toBeNull();
+    expect(component.watchingPlayback()).toBeTrue();
+    expect(combat.closeCurrentRaidBattle).toHaveBeenCalled();
+
+    component.showOnePreparation();
+    expect(component.showingAllPreparations()).toBeFalse();
+    expect(component.playbackLane()).toBe('Vanguard');
+    expect(component.preparationViews()).toHaveSize(3);
+    expect(combat.applyRaidCombatFrame).toHaveBeenCalledTimes(2);
+  }));
+
+  it('locks a completed preparation summary while another party is fighting', () => {
+    component.raid.set(raid('Settled'));
+    component.replayRaid();
+    component.focusPreparation('MainGuard');
+
+    component.preparationViews.update((views) =>
+      views.map((view) =>
+        view.lane === 'Vanguard' ? { ...view, completed: false } : view,
+      ),
+    );
+
+    expect(component.preparationSummaryLocked()).toBeTrue();
+
+    component.preparationViews.update((views) =>
+      views.map((view) => ({ ...view, completed: true })),
+    );
+
+    expect(component.preparationSummaryLocked()).toBeFalse();
+  });
+
   it('collapses and expands individual raid wings', () => {
-    expect(component.isLaneCollapsed('Flank')).toBeFalse();
+    expect(component.isLaneCollapsed('Rearguard')).toBeFalse();
 
-    component.toggleLane('Flank');
-    expect(component.isLaneCollapsed('Flank')).toBeTrue();
-    expect(component.isLaneCollapsed('Ward')).toBeFalse();
+    component.toggleLane('Rearguard');
+    expect(component.isLaneCollapsed('Rearguard')).toBeTrue();
+    expect(component.isLaneCollapsed('MainGuard')).toBeFalse();
 
-    component.toggleLane('Flank');
-    expect(component.isLaneCollapsed('Flank')).toBeFalse();
+    component.toggleLane('Rearguard');
+    expect(component.isLaneCollapsed('Rearguard')).toBeFalse();
   });
 
   it('maps raid states to the shared Tower status badges', () => {
@@ -118,6 +180,13 @@ describe('RaidPageComponent playback', () => {
     expect(component.raidStatusBadge('Playback')).toBe('InProgress');
     expect(component.raidStatusBadge('Settled')).toBe('Succeeded');
     expect(component.raidStatusBadge('Cancelled')).toBe('Cancelled');
+  });
+
+  it('shows the active Rearguard wave in the enemy heading', () => {
+    component.playbackLane.set('Rearguard');
+    component.rearguardWaveNumber.set(7);
+
+    expect(component.raidEnemyName()).toBe('Reinforcements · Wave 7');
   });
 
   it('reloads when the current raid receives a committed realtime update', fakeAsync(() => {
@@ -160,11 +229,13 @@ function raid(status: RaidRun['status']): RaidRun {
     laneSlots: 3,
     minimumRoster: 3,
     signups: [],
+    joinRequests: [],
     laneResults: [],
     participantResults: [],
     outcome: status === 'Settled' ? 'Slain' : null,
     reinforcementPenalty: 0,
-    wardBreak: 1,
+    guardianBreak: 1,
+    signatureDisruption: 1,
     bossHealthRemainingPercent: 0,
     canJoin: false,
     canLeave: false,
@@ -172,7 +243,7 @@ function raid(status: RaidRun['status']): RaidRun {
     canCommence: false,
     canRefreshSnapshot: false,
     canClaim: status === 'Settled',
-    rewardWasReduced: false,
+    rewardKind: null,
     canPreviewBattlePlan: false,
     canCancel: false,
     canTransferLeadership: false,

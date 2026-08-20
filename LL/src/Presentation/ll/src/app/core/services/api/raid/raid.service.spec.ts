@@ -36,10 +36,11 @@ describe('RaidService', () => {
   });
 
   it('maps the local roster shortcut to the development endpoint', () => {
-    service.fillDevelopmentRoster('raid-id').subscribe();
+    service.fillDevelopmentRoster('raid-id', 0.75).subscribe();
 
     expect(api.post).toHaveBeenCalledOnceWith(
       'raids/raid-id/development/fill-roster',
+      { powerMultiplier: 0.75 },
     );
   });
 
@@ -48,8 +49,24 @@ describe('RaidService', () => {
 
     expect(api.post).toHaveBeenCalledOnceWith(
       'raids/bosses/raid-boss.hives-abyss/development/create',
-      { tier: 2 },
+      { plusLevel: 2 },
     );
+  });
+
+  it('maps signup approval to the leader decision endpoint', () => {
+    service.approveSignup('raid-id', 'member-id').subscribe();
+
+    expect(api.post).toHaveBeenCalledOnceWith('raids/raid-id/signups/approve', {
+      characterId: 'member-id',
+    });
+  });
+
+  it('maps signup removal to the leader decision endpoint', () => {
+    service.removeSignup('raid-id', 'member-id').subscribe();
+
+    expect(api.post).toHaveBeenCalledOnceWith('raids/raid-id/signups/remove', {
+      characterId: 'member-id',
+    });
   });
 
   it('loads personal raid history for a boss', () => {
@@ -72,13 +89,32 @@ describe('RaidService', () => {
         id: 'raid-id',
         status: 'Mustering',
         signups: [{ isCurrentCharacter: true }],
+        joinRequests: [],
       }),
     );
 
     service.join('raid-id').subscribe();
     expect(service.activeRaidId()).toBe('raid-id');
+    expect(service.activeRaidChatId()).toBe('raid-id');
 
     service.leave('raid-id').subscribe();
     expect(service.activeRaidId()).toBeNull();
+    expect(service.activeRaidChatId()).toBeNull();
+  });
+
+  it('tracks the raid while the current character is awaiting approval', () => {
+    api.post.and.returnValue(
+      of({
+        id: 'raid-id',
+        status: 'Mustering',
+        signups: [],
+        joinRequests: [{ isCurrentCharacter: true }],
+      }),
+    );
+
+    service.join('raid-id').subscribe();
+
+    expect(service.activeRaidId()).toBe('raid-id');
+    expect(service.activeRaidChatId()).toBeNull();
   });
 });

@@ -274,6 +274,12 @@
               [cooldownSeconds]="essence.activeAbility.cooldownSeconds"
               [threatValue]="essence.activeAbility.threatValue ?? 0"
               [threatMultiplier]="essence.activeAbility.threatMultiplier ?? 1"
+              [estimatedThreatPerSecond]="
+                essence.activeAbility.estimatedThreatPerSecond ?? 0
+              "
+              [hasMaintainedThreat]="
+                essence.activeAbility.hasMaintainedThreat ?? false
+              "
             ></app-essence-description>
             <app-ability-tags
               [targets]="essence.activeAbility.targets"
@@ -295,6 +301,12 @@
               kind="Passive"
               [threatValue]="essence.passiveAbility.threatValue ?? 0"
               [threatMultiplier]="essence.passiveAbility.threatMultiplier ?? 1"
+              [estimatedThreatPerSecond]="
+                essence.passiveAbility.estimatedThreatPerSecond ?? 0
+              "
+              [hasMaintainedThreat]="
+                essence.passiveAbility.hasMaintainedThreat ?? false
+              "
             ></app-essence-description>
             <app-ability-tags
               [targets]="essence.passiveAbility.targets"

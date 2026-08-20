@@ -5,6 +5,7 @@ using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.Essences.Definitions;
 using Domain.Models.Raids;
 using Domain.Models.Regions.Areas;
 using Services.LL.Combat.Layers.Orchestration.Models;
@@ -30,7 +31,8 @@ public interface IRaidCombatResolver
 
 public sealed record RaidCombatResolution(
     decimal ReinforcementPenalty,
-    decimal WardBreak,
+    decimal GuardianBreak,
+    decimal SignatureDisruption,
     decimal BossHealthRemainingPercent,
     RaidOutcome Outcome,
     IReadOnlyList<RaidLaneResult> LaneResults,
@@ -91,70 +93,103 @@ public sealed class RaidCombatResolver(
         bool capturePlayback,
         CancellationToken cancellationToken)
     {
-        var flank = await ResolveFlankAsync(run, tier, seed(RaidLane.Flank), capturePlayback, cancellationToken);
-        var ward = await ResolveWardAsync(run, tier, seed(RaidLane.Ward), capturePlayback, cancellationToken);
-        var vanguard = await ResolveVanguardAsync(run, tier, flank, ward.WardBreak, seed(RaidLane.Vanguard), capturePlayback, cancellationToken);
+        var rearguard = await ResolveRearguardAsync(
+            run, tier, seed(RaidLane.Rearguard), capturePlayback, cancellationToken);
+        var vanguard = await ResolveVanguardAsync(
+            run, tier, seed(RaidLane.Vanguard), capturePlayback, cancellationToken);
+        var mainGuard = await ResolveMainGuardAsync(
+            run, tier, seed(RaidLane.MainGuard), capturePlayback, cancellationToken);
+        var finalAssault = await ResolveFinalAssaultAsync(
+            run,
+            tier,
+            rearguard,
+            vanguard.GuardianBreak,
+            mainGuard.SignatureDisruption,
+            seed(RaidLane.FinalAssault),
+            capturePlayback,
+            cancellationToken);
         var participantResults = CalculateParticipantResults(run, new Dictionary<RaidLane, CombatResult>
         {
-            [RaidLane.Flank] = flank.Result,
-            [RaidLane.Ward] = ward.Result,
-            [RaidLane.Vanguard] = vanguard.Result
-        });
+            [RaidLane.Rearguard] = rearguard.Result,
+            [RaidLane.Vanguard] = vanguard.Result,
+            [RaidLane.MainGuard] = mainGuard.Result
+        }, finalAssault.Result);
 
         return new RaidCombatResolution(
-            flank.ReinforcementPenalty,
-            ward.WardBreak,
-            vanguard.BossHealthRemainingPercent,
-            vanguard.Outcome,
-            [flank.LaneResult, ward.LaneResult, vanguard.LaneResult],
+            rearguard.ReinforcementPenalty,
+            vanguard.GuardianBreak,
+            mainGuard.SignatureDisruption,
+            finalAssault.BossHealthRemainingPercent,
+            finalAssault.Outcome,
+            [rearguard.LaneResult, vanguard.LaneResult, mainGuard.LaneResult, finalAssault.LaneResult],
             participantResults,
             capturePlayback
-                ? [flank.Playback, ward.Playback, vanguard.Playback]
+                ? [rearguard.Playback, vanguard.Playback, mainGuard.Playback, finalAssault.Playback]
                 : []);
     }
 
-    private async Task<FlankResolution> ResolveFlankAsync(
+    private async Task<RearguardResolution> ResolveRearguardAsync(
         RaidRun run,
         RaidBossTierDefinition tier,
         int seed,
         bool capturePlayback,
         CancellationToken cancellationToken)
     {
-        var friendly = await CreateFriendlyAsync(run, RaidLane.Flank, cancellationToken);
-        var hostile = await CreateCreatureGroupAsync(
-            tier.Flank.Adds,
-            "flank-add",
-            seed,
-            cancellationToken);
+        var friendly = await CreateFriendlyAsync(run, RaidLane.Rearguard, cancellationToken);
+        var waves = new List<IReadOnlyList<CombatRuntimeParticipant>>(tier.Rearguard.WaveCount);
+        for (var waveNumber = 1; waveNumber <= tier.Rearguard.WaveCount; waveNumber++)
+        {
+            waves.Add(await CreateCreatureGroupAsync(
+                tier.Rearguard.Adds,
+                $"rearguard-wave-{waveNumber}",
+                seed,
+                cancellationToken));
+        }
+
+        var hostile = waves[0];
+        var reinforcementWaves = waves.Skip(1).ToArray();
         var execution = await ExecuteAsync(
             run.Id,
-            RaidLane.Flank,
+            RaidLane.Rearguard,
             friendly,
             hostile,
             seed,
-            tier.TickBudget.Flank,
+            tier.TickBudget.Rearguard,
             capturePlayback,
-            cancellationToken);
+            cancellationToken,
+            reinforcementWaves);
         var result = execution.Result;
-        var totalMax = Math.Max(1L, result.EnemyTeam.Sum(x => (long)x.MaxHealth));
-        var remaining = result.EnemyTeam.Sum(x => Math.Max(0L, x.Health));
+        var allHostile = waves.SelectMany(x => x).ToArray();
+        var spawnedState = result.EnemyTeam.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+        var totalMax = Math.Max(1L, allHostile.Sum(x => (long)x.Combatant.GetAttributeValue(AttributeType.MaxHealth)));
+        var remaining = allHostile.Sum(x => spawnedState.TryGetValue(x.Slot.SlotId, out var state)
+            ? Math.Max(0L, state.Health)
+            : (long)x.Combatant.GetAttributeValue(AttributeType.MaxHealth));
         var penalty = Math.Clamp((decimal)remaining / totalMax, 0m, 1m);
-        var survivors = result.EnemyTeam
+        var survivors = allHostile
+            .Select(participant =>
+            {
+                var maxHealth = Math.Max(1, (int)participant.Combatant.GetAttributeValue(AttributeType.MaxHealth));
+                var health = spawnedState.TryGetValue(participant.Slot.SlotId, out var state)
+                    ? state.Health
+                    : maxHealth;
+                return (Participant: participant, Health: health, MaxHealth: maxHealth);
+            })
             .Where(x => x.Health > 0)
             .Select(x => new SurvivingAdd(
-                hostile.Single(h => h.Slot.SlotId == x.Id).Slot.SourceEntityId,
-                tier.Flank.Adds.First(a => a.CreatureId == hostile.Single(h => h.Slot.SlotId == x.Id).Slot.SourceEntityId).Scaling,
-                (decimal)x.Health / Math.Max(1, x.MaxHealth)))
+                x.Participant.Slot.SourceEntityId,
+                tier.Rearguard.Adds.First(a => a.CreatureId == x.Participant.Slot.SourceEntityId).Scaling,
+                (decimal)x.Health / x.MaxHealth))
             .ToArray();
         var totalDamage = SumFriendlyDamage(result, friendly);
-        return new FlankResolution(
+        return new RearguardResolution(
             result,
             penalty,
             survivors,
             new RaidLaneResult
             {
                 RaidRunId = run.Id,
-                Lane = RaidLane.Flank,
+                Lane = RaidLane.Rearguard,
                 Seed = seed,
                 DurationTicks = result.Duration,
                 BattleOutcome = result.Outcome,
@@ -163,60 +198,62 @@ public sealed class RaidCombatResolver(
                 SurvivingHostileHealthFraction = penalty,
                 DerivedModifier = penalty
             },
-            new RaidLanePlaybackCapture(RaidLane.Flank, result, execution.Checkpoints));
+            new RaidLanePlaybackCapture(RaidLane.Rearguard, result, execution.Checkpoints));
     }
 
-    private async Task<WardResolution> ResolveWardAsync(
+    private async Task<VanguardResolution> ResolveVanguardAsync(
         RaidRun run,
         RaidBossTierDefinition tier,
         int seed,
         bool capturePlayback,
         CancellationToken cancellationToken)
     {
-        var friendly = await CreateFriendlyAsync(run, RaidLane.Ward, cancellationToken);
+        var friendly = await CreateFriendlyAsync(run, RaidLane.Vanguard, cancellationToken);
         var objectiveEntry = new RaidCreatureGroupEntry
         {
-            CreatureId = tier.Ward.ObjectiveCreatureId,
+            CreatureId = tier.Vanguard.GuardianCreatureId,
             Count = 1,
-            Scaling = tier.Ward.ObjectiveScaling
+            Scaling = tier.Vanguard.GuardianScaling
         };
         var hostile = (await CreateCreatureGroupAsync(
-            [objectiveEntry, .. tier.Ward.Guards],
-            "ward",
+            [objectiveEntry, .. tier.Vanguard.Escorts],
+            "vanguard",
             seed,
             cancellationToken)).ToList();
-        hostile[0].Combatant.Id = "ward-objective";
+        hostile[0].Combatant.Id = "raid-guardian";
         hostile[0] = new CombatRuntimeParticipant(
-            hostile[0].Slot with { SlotId = "ward-objective" },
+            hostile[0].Slot with { SlotId = "raid-guardian" },
             hostile[0].SourceEntity,
             hostile[0].Combatant);
         var execution = await ExecuteAsync(
             run.Id,
-            RaidLane.Ward,
+            RaidLane.Vanguard,
             friendly,
             hostile,
             seed,
-            tier.TickBudget.Ward,
+            tier.TickBudget.Vanguard,
             capturePlayback,
             cancellationToken);
         var result = execution.Result;
-        var objective = result.EnemyTeam.Single(x => x.Id == "ward-objective");
-        var objectiveStats = result.EntityStats.FirstOrDefault(x => x.EntityId == "ward-objective");
+        var objective = result.EnemyTeam.Single(x => x.Id == "raid-guardian");
+        var objectiveStats = result.EntityStats.FirstOrDefault(x => x.EntityId == "raid-guardian");
         var healthRemoved = Math.Max(0, objective.MaxHealth - objective.Health);
         var barrierAbsorbed = Math.Max(0, objectiveStats?.DamageBlocked ?? 0);
-        var wardBreak = Math.Clamp(
+        var guardianBreak = Math.Clamp(
             (decimal)(healthRemoved + barrierAbsorbed) / Math.Max(1, objective.MaxHealth),
             0m,
             1m);
+        if (guardianBreak >= 1m)
+            result.Outcome = BattleOutcome.Victory;
         var hostileMax = Math.Max(1L, result.EnemyTeam.Sum(x => (long)x.MaxHealth));
         var hostileRemaining = result.EnemyTeam.Sum(x => Math.Max(0L, x.Health));
-        return new WardResolution(
+        return new VanguardResolution(
             result,
-            wardBreak,
+            guardianBreak,
             new RaidLaneResult
             {
                 RaidRunId = run.Id,
-                Lane = RaidLane.Ward,
+                Lane = RaidLane.Vanguard,
                 Seed = seed,
                 DurationTicks = result.Duration,
                 BattleOutcome = result.Outcome,
@@ -224,23 +261,88 @@ public sealed class RaidCombatResolver(
                 ObjectiveDamage = healthRemoved,
                 ObjectiveBarrierAbsorbed = barrierAbsorbed,
                 SurvivingHostileHealthFraction = Math.Clamp((decimal)hostileRemaining / hostileMax, 0m, 1m),
-                DerivedModifier = wardBreak
+                DerivedModifier = guardianBreak
             },
-            new RaidLanePlaybackCapture(RaidLane.Ward, result, execution.Checkpoints));
+            new RaidLanePlaybackCapture(RaidLane.Vanguard, result, execution.Checkpoints));
     }
 
-    private async Task<VanguardResolution> ResolveVanguardAsync(
+    private async Task<MainGuardResolution> ResolveMainGuardAsync(
         RaidRun run,
         RaidBossTierDefinition tier,
-        FlankResolution flank,
-        decimal wardBreak,
         int seed,
         bool capturePlayback,
         CancellationToken cancellationToken)
     {
-        var friendly = await CreateFriendlyAsync(run, RaidLane.Vanguard, cancellationToken);
+        var friendly = await CreateFriendlyAsync(run, RaidLane.MainGuard, cancellationToken);
+        var projectionEntry = new RaidCreatureGroupEntry
+        {
+            CreatureId = tier.MainGuard.ProjectionCreatureId,
+            Count = 1,
+            Scaling = tier.MainGuard.ProjectionScaling
+        };
+        var hostile = (await CreateCreatureGroupAsync(
+            [projectionEntry],
+            "main-guard-projection",
+            seed,
+            cancellationToken)).ToList();
+        hostile[0].Combatant.Id = "boss-projection";
+        hostile[0] = new CombatRuntimeParticipant(
+            hostile[0].Slot with { SlotId = "boss-projection" },
+            hostile[0].SourceEntity,
+            hostile[0].Combatant);
+        var execution = await ExecuteAsync(
+            run.Id,
+            RaidLane.MainGuard,
+            friendly,
+            hostile,
+            seed,
+            tier.TickBudget.MainGuard,
+            capturePlayback,
+            cancellationToken);
+        var result = execution.Result;
+        var survivedPercent = result.Outcome == BattleOutcome.Victory
+            ? 100m
+            : Math.Clamp(100m * result.Duration / Math.Max(1, tier.TickBudget.MainGuard), 0m, 100m);
+        var thresholdsReached = tier.MainGuard.SurvivalThresholdsPercent.Count(
+            threshold => survivedPercent >= threshold);
+        var disruption = tier.MainGuard.SurvivalThresholdsPercent.Count == 0
+            ? survivedPercent / 100m
+            : thresholdsReached / (decimal)tier.MainGuard.SurvivalThresholdsPercent.Count;
+        if (disruption >= 1m)
+            result.Outcome = BattleOutcome.Victory;
+        var hostileMax = Math.Max(1L, result.EnemyTeam.Sum(x => (long)x.MaxHealth));
+        var hostileRemaining = result.EnemyTeam.Sum(x => Math.Max(0L, x.Health));
+        return new MainGuardResolution(
+            result,
+            disruption,
+            new RaidLaneResult
+            {
+                RaidRunId = run.Id,
+                Lane = RaidLane.MainGuard,
+                Seed = seed,
+                DurationTicks = result.Duration,
+                BattleOutcome = result.Outcome,
+                TotalFriendlyDamage = SumFriendlyDamage(result, friendly),
+                ObjectiveDamage = result.Duration,
+                SurvivingHostileHealthFraction = Math.Clamp((decimal)hostileRemaining / hostileMax, 0m, 1m),
+                DerivedModifier = disruption
+            },
+            new RaidLanePlaybackCapture(RaidLane.MainGuard, result, execution.Checkpoints));
+    }
+
+    private async Task<FinalAssaultResolution> ResolveFinalAssaultAsync(
+        RaidRun run,
+        RaidBossTierDefinition tier,
+        RearguardResolution rearguard,
+        decimal guardianBreak,
+        decimal signatureDisruption,
+        int seed,
+        bool capturePlayback,
+        CancellationToken cancellationToken)
+    {
+        var friendly = await CreateAllFriendlyAsync(run, cancellationToken);
         var bossEntry = SelectBoss(tier.Boss, seed);
-        var survivorEntries = flank.Survivors.Select(x => new RaidCreatureGroupEntry
+        var survivorEntries = rearguard.Survivors.Select(x => new RaidCreatureGroupEntry
         {
             CreatureId = x.CreatureId,
             Count = 1,
@@ -248,7 +350,7 @@ public sealed class RaidCombatResolver(
         }).ToArray();
         var hostile = (await CreateCreatureGroupAsync(
             [bossEntry, .. survivorEntries],
-            "vanguard",
+            "final-assault",
             seed,
             cancellationToken)).ToList();
         hostile[0].Combatant.Id = "raid-boss";
@@ -256,30 +358,38 @@ public sealed class RaidCombatResolver(
             hostile[0].Slot with { SlotId = "raid-boss" },
             hostile[0].SourceEntity,
             hostile[0].Combatant);
-        RaidCombatScaling.AddPercent(
-            hostile[0].Combatant,
-            AttributeType.Power,
-            flank.ReinforcementPenalty * tier.Boss.MaxReinforceOffensePercent);
-        var defenceReduction = -(wardBreak * tier.Boss.MaxWardBreakPercent);
+        var defenceReduction = -(guardianBreak * tier.Boss.MaxGuardianBreakPercent);
         RaidCombatScaling.AddPercent(hostile[0].Combatant, AttributeType.Armor, defenceReduction);
         RaidCombatScaling.AddPercent(hostile[0].Combatant, AttributeType.Resistance, defenceReduction);
         RaidCombatScaling.AddPercent(hostile[0].Combatant, AttributeType.DamageReduction, defenceReduction);
+        RaidCombatScaling.AddPercent(
+            hostile[0].Combatant,
+            AttributeType.Power,
+            -(signatureDisruption * tier.Boss.MaxSignaturePowerReductionPercent));
+        var cooldownDelay = (double)(signatureDisruption * tier.Boss.MaxSignatureCooldownDelayPercent / 100m);
+        hostile[0].Combatant.TemporaryAbilityModifiers.AddRange(
+            hostile[0].Combatant.NativeAbilityIds.Select(abilityId => new EssenceAbilityModifierDefinition
+            {
+                Target = abilityId,
+                Operation = "DelayCooldowns",
+                Value = cooldownDelay
+            }));
         await combatSetup.PrepareEntitiesForCombat(hostile.Select(x => x.Combatant).ToList());
         for (var i = 1; i < hostile.Count; i++)
         {
-            var remainingFraction = flank.Survivors[i - 1].HealthFraction;
+            var remainingFraction = rearguard.Survivors[i - 1].HealthFraction;
             hostile[i].Combatant.SetCurrentHealth(
                 hostile[i].Combatant.GetAttributeValue(AttributeType.MaxHealth) * (float)remainingFraction);
         }
         await PrepareFriendlyAsync(friendly);
         var execution = await ExecutePreparedAsync(
             run.Id,
-            RaidLane.Vanguard,
+            RaidLane.FinalAssault,
             friendly,
             hostile,
             new CombatSimulationOptions(
                 seed,
-                tier.TickBudget.Vanguard,
+                tier.TickBudget.FinalAssault,
                 OvertimeStartsAtTick: tier.Boss.OvertimeStartsAtTick,
                 OvertimePowerIncreaseIntervalTicks: 300,
                 OvertimePowerIncreasePercent: tier.Boss.OvertimePowerIncreasePercent,
@@ -298,14 +408,14 @@ public sealed class RaidCombatResolver(
                     : RaidOutcome.Repelled;
         var hostileMax = Math.Max(1L, result.EnemyTeam.Sum(x => (long)x.MaxHealth));
         var hostileRemaining = result.EnemyTeam.Sum(x => Math.Max(0L, x.Health));
-        return new VanguardResolution(
+        return new FinalAssaultResolution(
             result,
             remainingPercent,
             outcome,
             new RaidLaneResult
             {
                 RaidRunId = run.Id,
-                Lane = RaidLane.Vanguard,
+                Lane = RaidLane.FinalAssault,
                 Seed = seed,
                 DurationTicks = result.Duration,
                 BattleOutcome = result.Outcome,
@@ -314,7 +424,7 @@ public sealed class RaidCombatResolver(
                 SurvivingHostileHealthFraction = Math.Clamp((decimal)hostileRemaining / hostileMax, 0m, 1m),
                 DerivedModifier = remainingPercent / 100m
             },
-            new RaidLanePlaybackCapture(RaidLane.Vanguard, result, execution.Checkpoints));
+            new RaidLanePlaybackCapture(RaidLane.FinalAssault, result, execution.Checkpoints));
     }
 
     private async Task<IReadOnlyList<CombatRuntimeParticipant>> CreateFriendlyAsync(
@@ -322,7 +432,8 @@ public sealed class RaidCombatResolver(
         RaidLane lane,
         CancellationToken cancellationToken)
     {
-        var requests = run.Signups.Where(x => x.Lane == lane)
+        var requests = run.Signups.Where(x =>
+                x.Status == RaidSignupStatus.Approved && x.Lane == lane)
             .OrderBy(x => x.WingSlotIndex)
             .Select(x => new SnapshotCombatantRequest(
                 x.CharacterSnapshot,
@@ -330,7 +441,28 @@ public sealed class RaidCombatResolver(
                     x.CharacterId.ToString("N"),
                     x.CharacterId,
                     CombatSide.Friendly,
-                    (int)lane + 1)))
+                    RaidParties.FormationNumber(lane))))
+            .ToArray();
+        return await snapshotCombatants.BuildAsync(requests, cancellationToken);
+    }
+
+    private async Task<IReadOnlyList<CombatRuntimeParticipant>> CreateAllFriendlyAsync(
+        RaidRun run,
+        CancellationToken cancellationToken)
+    {
+        var requests = run.Signups
+            .Where(x => x.Status == RaidSignupStatus.Approved
+                        && x.Lane.HasValue
+                        && RaidParties.IsAssignable(x.Lane.Value))
+            .OrderBy(x => RaidParties.FormationNumber(x.Lane!.Value))
+            .ThenBy(x => x.WingSlotIndex)
+            .Select(x => new SnapshotCombatantRequest(
+                x.CharacterSnapshot,
+                new CombatParticipantSlot(
+                    x.CharacterId.ToString("N"),
+                    x.CharacterId,
+                    CombatSide.Friendly,
+                    RaidParties.FormationNumber(x.Lane!.Value))))
             .ToArray();
         return await snapshotCombatants.BuildAsync(requests, cancellationToken);
     }
@@ -373,7 +505,7 @@ public sealed class RaidCombatResolver(
 
     private static RaidCreatureGroupEntry SelectBoss(RaidBossCombatDefinition boss, int seed)
     {
-        var roll = RollPercent(seed, "vanguard:boss-variant");
+        var roll = RollPercent(seed, "final-assault:boss-variant");
         var cumulativeChance = 0m;
         foreach (var variant in boss.Variants)
         {
@@ -415,10 +547,14 @@ public sealed class RaidCombatResolver(
         int seed,
         int maxTicks,
         bool capturePlayback,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        IReadOnlyList<IReadOnlyList<CombatRuntimeParticipant>>? hostileReinforcementWaves = null)
     {
         await PrepareFriendlyAsync(friendly);
-        await combatSetup.PrepareEntitiesForCombat(hostile.Select(x => x.Combatant).ToList());
+        var allHostile = hostile
+            .Concat((hostileReinforcementWaves ?? []).SelectMany(x => x))
+            .ToList();
+        await combatSetup.PrepareEntitiesForCombat(allHostile.Select(x => x.Combatant).ToList());
         return await ExecutePreparedAsync(
             raidRunId,
             lane,
@@ -426,7 +562,8 @@ public sealed class RaidCombatResolver(
             hostile,
             new CombatSimulationOptions(seed, maxTicks, CaptureEventLog: false),
             capturePlayback,
-            cancellationToken);
+            cancellationToken,
+            hostileReinforcementWaves);
     }
 
     private Task PrepareFriendlyAsync(IReadOnlyList<CombatRuntimeParticipant> friendly) =>
@@ -439,20 +576,22 @@ public sealed class RaidCombatResolver(
         IReadOnlyList<CombatRuntimeParticipant> hostile,
         CombatSimulationOptions options,
         bool capturePlayback,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        IReadOnlyList<IReadOnlyList<CombatRuntimeParticipant>>? hostileReinforcementWaves = null)
     {
+        var allHostile = hostile.Concat((hostileReinforcementWaves ?? []).SelectMany(x => x));
         var plan = new CombatEncounterPlan(
             StableRandom.Guid("raid-encounter-v1", raidRunId.ToString("N"), lane.ToString()),
             CombatMode.Raid,
             (int)lane,
             timeProvider.GetUtcNow(),
-            [.. friendly.Select(x => x.Slot), .. hostile.Select(x => x.Slot)],
+            [.. friendly.Select(x => x.Slot), .. allHostile.Select(x => x.Slot)],
             new RaidEncounterSourceContext(raidRunId, (int)lane, lane.ToString().ToLowerInvariant()))
         {
             RandomSeed = options.RandomSeed,
             CaptureEventLog = false
         };
-        var runtime = new CombatEncounterRuntime(plan, friendly, hostile);
+        var runtime = new CombatEncounterRuntime(plan, friendly, hostile, hostileReinforcementWaves);
         if (capturePlayback)
         {
             var execution = await combatEngine.ExecuteRaidPlaybackAsync(
@@ -481,36 +620,35 @@ public sealed class RaidCombatResolver(
 
     private static IReadOnlyList<RaidParticipantResult> CalculateParticipantResults(
         RaidRun run,
-        IReadOnlyDictionary<RaidLane, CombatResult> laneResults)
+        IReadOnlyDictionary<RaidLane, CombatResult> preparationResults,
+        CombatResult finalAssaultResult)
     {
         var damageByCharacter = new Dictionary<Guid, long>();
-        foreach (var signup in run.Signups.Where(x => x.Lane.HasValue))
+        foreach (var signup in run.Signups.Where(x =>
+                     x.Status == RaidSignupStatus.Approved && x.Lane.HasValue))
         {
-            var result = laneResults[signup.Lane!.Value];
-            damageByCharacter[signup.CharacterId] = DamageFor(result, signup.CharacterId.ToString("N"));
+            var participantId = signup.CharacterId.ToString("N");
+            damageByCharacter[signup.CharacterId] =
+                DamageFor(preparationResults[signup.Lane!.Value], participantId)
+                + DamageFor(finalAssaultResult, participantId);
         }
 
         var scores = new Dictionary<Guid, decimal>();
-        foreach (var laneGroup in run.Signups.Where(x => x.Lane.HasValue).GroupBy(x => x.Lane!.Value))
+        var approvedSignups = run.Signups
+            .Where(x => x.Status == RaidSignupStatus.Approved && x.Lane.HasValue)
+            .ToArray();
+        foreach (var laneGroup in approvedSignups.GroupBy(x => x.Lane!.Value))
         {
             var wingDamage = Math.Max(1L, laneGroup.Sum(x => damageByCharacter.GetValueOrDefault(x.CharacterId)));
-            var wingSizeFactor = (decimal)laneGroup.Count() / Math.Max(1, run.Signups.Count);
+            var wingSizeFactor = (decimal)laneGroup.Count() / Math.Max(1, approvedSignups.Length);
             foreach (var signup in laneGroup)
                 scores[signup.CharacterId] = (decimal)damageByCharacter.GetValueOrDefault(signup.CharacterId) / wingDamage / 3m * wingSizeFactor;
         }
-        var orderedScores = scores.Values.Order().ToArray();
-        var median = orderedScores.Length == 0
-            ? 1m
-            : orderedScores.Length % 2 == 1
-                ? orderedScores[orderedScores.Length / 2]
-                : (orderedScores[orderedScores.Length / 2 - 1] + orderedScores[orderedScores.Length / 2]) / 2m;
-        median = Math.Max(0.000001m, median);
         var ranked = scores.OrderByDescending(x => x.Value).Select((x, index) => (x.Key, Rank: index + 1)).ToDictionary(x => x.Key, x => x.Rank);
 
-        return run.Signups.Where(x => x.Lane.HasValue).Select(signup =>
+        return approvedSignups.Select(signup =>
         {
             var score = scores.GetValueOrDefault(signup.CharacterId);
-            var payout = 0.70m + 0.30m * Math.Min(1.5m, score / median) / 1.5m;
             return new RaidParticipantResult
             {
                 RaidRunId = run.Id,
@@ -518,7 +656,6 @@ public sealed class RaidCombatResolver(
                 Lane = signup.Lane!.Value,
                 DamageDone = damageByCharacter.GetValueOrDefault(signup.CharacterId),
                 ContributionScore = score,
-                PayoutMultiplier = Math.Clamp(payout, 0.70m, 1m),
                 ContributionRank = ranked[signup.CharacterId]
             };
         }).ToArray();
@@ -536,7 +673,8 @@ public sealed class RaidCombatResolver(
 
     private sealed record SurvivingAdd(Guid CreatureId, RaidAttributeScalingDefinition Scaling, decimal HealthFraction);
     private sealed record RaidLaneCombatExecution(CombatResult Result, IReadOnlyList<CombatCheckpoint> Checkpoints);
-    private sealed record FlankResolution(CombatResult Result, decimal ReinforcementPenalty, IReadOnlyList<SurvivingAdd> Survivors, RaidLaneResult LaneResult, RaidLanePlaybackCapture Playback);
-    private sealed record WardResolution(CombatResult Result, decimal WardBreak, RaidLaneResult LaneResult, RaidLanePlaybackCapture Playback);
-    private sealed record VanguardResolution(CombatResult Result, decimal BossHealthRemainingPercent, RaidOutcome Outcome, RaidLaneResult LaneResult, RaidLanePlaybackCapture Playback);
+    private sealed record RearguardResolution(CombatResult Result, decimal ReinforcementPenalty, IReadOnlyList<SurvivingAdd> Survivors, RaidLaneResult LaneResult, RaidLanePlaybackCapture Playback);
+    private sealed record VanguardResolution(CombatResult Result, decimal GuardianBreak, RaidLaneResult LaneResult, RaidLanePlaybackCapture Playback);
+    private sealed record MainGuardResolution(CombatResult Result, decimal SignatureDisruption, RaidLaneResult LaneResult, RaidLanePlaybackCapture Playback);
+    private sealed record FinalAssaultResolution(CombatResult Result, decimal BossHealthRemainingPercent, RaidOutcome Outcome, RaidLaneResult LaneResult, RaidLanePlaybackCapture Playback);
 }

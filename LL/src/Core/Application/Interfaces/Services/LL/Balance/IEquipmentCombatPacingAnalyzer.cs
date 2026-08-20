@@ -21,6 +21,8 @@ public enum CombatPacingScenario
     EliteEnemyTtk,
     SoloBossTtk,
     PartyBossTtk,
+    PartyBoss5Ttk,
+    PartyBoss10Ttk,
     RawTtd,
     EffectiveTtd,
     OffensiveWindow90,
@@ -53,7 +55,20 @@ public sealed record CombatPacingSample(
     double LateWindowHealthTrendPercentPerSecond = 0,
     double? PressureBreakpoint = null,
     int? ReferenceDurationTicks = null,
-    CombatPacingTelemetry? Telemetry = null);
+    CombatPacingTelemetry? Telemetry = null,
+    CooperativeCombatPacingTelemetry? CooperativeTelemetry = null);
+
+public sealed record CooperativeCombatPacingTelemetry(
+    int PartySize,
+    double GuardianAttentionSharePercent,
+    double RestorerAttentionSharePercent,
+    double NonGuardianAttentionSharePercent,
+    double GuardianThreatGenerated,
+    double RestorerThreatGenerated,
+    double GuardianIncomingRawDamage,
+    double RestorerHealingDone,
+    double DamageRedirectedToGuardians,
+    int Survivors);
 
 public sealed record CombatPacingTelemetry(
     double BasicAttacks,
@@ -109,7 +124,8 @@ public sealed record CombatPacingMeasurement(
     bool ResolutionPassed,
     bool ImmortalityPassed,
     IReadOnlyList<string> Failures,
-    CombatPacingTelemetry? MedianTelemetry = null)
+    CombatPacingTelemetry? MedianTelemetry = null,
+    CooperativeCombatPacingTelemetry? MedianCooperativeTelemetry = null)
 {
     public IReadOnlyList<string> Warnings { get; init; } = [];
 

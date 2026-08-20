@@ -39,6 +39,8 @@ public sealed class EssenceLoadoutConverter : ITypeConverter<EssenceLoadout, Ess
             slot.PlayerEssenceId,
             slot.PlayerEssence?.EssenceDefinitionId,
             definition?.DisplayName,
-            definition is null ? null : context.Mapper.Map<EssenceDefinitionDto>(definition));
+            definition is null || slot.PlayerEssence is null
+                ? null
+                : PlayerEssenceDefinitionDtoMapper.Map(definition, slot.PlayerEssence, context.Mapper));
     }
 }

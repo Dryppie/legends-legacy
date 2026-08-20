@@ -1,6 +1,7 @@
 export interface GuideSection {
   heading: string;
   body: string;
+  feature?: 'raids';
 }
 
 export interface Guide {

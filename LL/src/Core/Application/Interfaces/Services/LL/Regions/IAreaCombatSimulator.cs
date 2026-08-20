@@ -6,6 +6,9 @@ public interface IAreaCombatSimulator
     Task<AreaSimulationReport> RunAsync(
         AreaSimulationRequest request,
         CancellationToken cancellationToken);
+    Task<AreaEncounterSimulationReport> RunEncounterAsync(
+        AreaEncounterSimulationRequest request,
+        CancellationToken cancellationToken);
 }
 
 public sealed record AreaSimulationOptions(
@@ -95,3 +98,31 @@ public sealed record AreaSimulationEncounterResult(
     int DamageTaken,
     int RemainingHealth,
     IReadOnlyList<string> Enemies);
+
+public sealed record AreaEncounterSimulationRequest(
+    string AreaId,
+    Guid CreatureId,
+    int EncounterCount,
+    int RandomSeed,
+    string CharacterProfile,
+    string BuildId);
+
+public sealed record AreaEncounterSimulationReport(
+    string AreaId,
+    Guid CreatureId,
+    string CreatureName,
+    string CharacterProfile,
+    string BuildId,
+    int PlayerMaxHealth,
+    IReadOnlyList<AreaEncounterSimulationAttempt> Attempts);
+
+public sealed record AreaEncounterSimulationAttempt(
+    int EncounterNumber,
+    int Seed,
+    string Outcome,
+    int CombatTicks,
+    int DamageTaken,
+    int HealingDone,
+    int HealthRegenerated,
+    int RemainingHealth,
+    int EnemyRemainingHealth);

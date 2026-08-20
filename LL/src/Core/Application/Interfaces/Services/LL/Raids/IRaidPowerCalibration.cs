@@ -10,9 +10,9 @@ public sealed record RaidWingPowerRecommendation(
 public sealed record RaidPowerRecommendation(
     string RaidBossId,
     int Tier,
+    RaidWingPowerRecommendation Rearguard,
     RaidWingPowerRecommendation Vanguard,
-    RaidWingPowerRecommendation Flank,
-    RaidWingPowerRecommendation Ward,
+    RaidWingPowerRecommendation MainGuard,
     decimal ClearProbability,
     decimal ClearProbabilityLowerBound,
     decimal ClearProbabilityUpperBound,

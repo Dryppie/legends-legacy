@@ -22,11 +22,56 @@ public enum RaidOutcome
     Slain = 3
 }
 
+public enum RaidRewardKind
+{
+    WeeklyBase = 0,
+    WeeklyUpgrade = 1,
+    Repeat = 2
+}
+
+public enum RaidSignupStatus
+{
+    // Approved remains zero so signups created before approval was introduced
+    // continue to be treated as raid participants.
+    Approved = 0,
+    Pending = 1
+}
+
 public enum RaidLane
 {
-    Vanguard = 0,
-    Flank = 1,
-    Ward = 2
+    // Explicit values preserve assignments created before the party redesign:
+    // old Vanguard -> Main Guard, old Flank -> Rearguard, old Ward -> Vanguard.
+    MainGuard = 0,
+    Rearguard = 1,
+    Vanguard = 2,
+
+    // Resolution/playback phase only. Characters can never be assigned here.
+    FinalAssault = 3
+}
+
+public static class RaidParties
+{
+    public static readonly IReadOnlyList<RaidLane> All =
+        [RaidLane.Rearguard, RaidLane.Vanguard, RaidLane.MainGuard];
+
+    public static bool IsAssignable(RaidLane lane) => All.Contains(lane);
+
+    public static int FormationNumber(RaidLane lane) => lane switch
+    {
+        RaidLane.Rearguard => 1,
+        RaidLane.Vanguard => 2,
+        RaidLane.MainGuard => 3,
+        _ => throw new ArgumentOutOfRangeException(nameof(lane), lane, "Only raid parties have formations.")
+    };
+
+    public static int EncounterOrder(RaidLane lane) => lane switch
+    {
+        RaidLane.Rearguard => 1,
+        RaidLane.Vanguard => 2,
+        RaidLane.MainGuard => 3,
+        RaidLane.FinalAssault => 4,
+        _ => throw new ArgumentOutOfRangeException(nameof(lane), lane, "Unknown raid encounter.")
+    };
 }
 
 public sealed class RaidRun
@@ -48,7 +93,8 @@ public sealed class RaidRun
     public DateTimeOffset? CancelledAt { get; set; }
     public int WeekKey { get; set; }
     public decimal? ReinforcementPenalty { get; set; }
-    public decimal? WardBreak { get; set; }
+    public decimal? GuardianBreak { get; set; }
+    public decimal? SignatureDisruption { get; set; }
     public decimal? BossHealthRemainingPercent { get; set; }
     public RaidOutcome? Outcome { get; set; }
     public string? SimulationLeaseOwner { get; set; }
@@ -74,6 +120,7 @@ public sealed class RaidSignup
     public CharacterSnapshot CharacterSnapshot { get; set; } = null!;
     public string LoadoutHash { get; set; } = string.Empty;
     public int PowerRating { get; set; }
+    public RaidSignupStatus Status { get; set; } = RaidSignupStatus.Approved;
     public RaidLane? Lane { get; set; }
     public int? WingSlotIndex { get; set; }
     public DateTimeOffset SignedUpAt { get; set; }
@@ -105,7 +152,7 @@ public sealed class RaidLaneResult
 
 public sealed class RaidPlayback
 {
-    public const int CompactBundleSchemaVersion = 2;
+    public const int CompactBundleSchemaVersion = 3;
 
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid RaidRunId { get; set; }
@@ -140,7 +187,6 @@ public sealed class RaidParticipantResult
     public long DamageDone { get; set; }
     public int? DeathTick { get; set; }
     public decimal ContributionScore { get; set; }
-    public decimal PayoutMultiplier { get; set; }
     public int ContributionRank { get; set; }
 }
 
@@ -156,7 +202,7 @@ public sealed class RaidRewardClaim
     public string PendingItemsJson { get; set; } = "[]";
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? ClaimedAt { get; set; }
-    public bool WasReduced { get; set; }
+    public RaidRewardKind Kind { get; set; }
 }
 
 public sealed record RaidPendingItem(string ItemId, int Quantity);

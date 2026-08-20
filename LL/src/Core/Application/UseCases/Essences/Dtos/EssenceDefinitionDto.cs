@@ -46,7 +46,7 @@ public sealed record EssenceDefinitionDto(
     }
 
     private static EssenceAbilityDto EmptyAbility() =>
-        new(string.Empty, string.Empty, string.Empty, string.Empty, 0, 0, 1f, 0, [], [], []);
+        new(string.Empty, string.Empty, string.Empty, string.Empty, 0, 0, 1f, 0, false, [], [], []);
 
     private static IReadOnlyDictionary<string, IReadOnlyList<string>> GroupTags(IEnumerable<string> tags) =>
         tags.GroupBy(EssenceTagCatalog.GetCategory).ToDictionary(x => x.Key, x => (IReadOnlyList<string>)x.Order().ToList());

@@ -30,7 +30,7 @@
 
 - Run backend tests through `build/run-tests.ps1`. It always runs the fast correctness suite and decides on the exhaustive balance suite for you.
 - The balance suite is every test tagged `[Trait("Category", "BalanceFull")]`, declared with `[BalanceFact]` / `[BalanceTheory]`.
-- Locally the balance suite runs only when the equipment stat budget version, `EquipmentStatBudgetCatalog.BalanceVersion` (currently 17), differs from the version recorded in `.artifacts/balance-suite.version`. A successful balance run rewrites that stamp, so the suite stays quiet until the equipment version moves again.
+- Locally the balance suite runs only when its composite identity differs from `.artifacts/balance-suite.version`. The identity covers versioned equipment, combat, pacing, raid, cooperative-roster, and Tower rules plus hashes of ability, raid-boss, and Tower-floor data. A successful balance run rewrites that stamp, so the suite stays quiet until a relevant input moves again.
 - Force it with `build/run-tests.ps1 -IncludeBalance` or `LL_RUN_BALANCE=1`; suppress it with `-SkipBalance` or `LL_RUN_BALANCE=0`.
 - In CI the balance suite runs only for pushes to `releases/**` and for manual dispatches. Pull requests and pushes to `main` run the fast suite only.
 

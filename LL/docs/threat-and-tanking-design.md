@@ -648,8 +648,8 @@ Split the one overloaded condition into two, because the existing content clearl
 
 - **`Taunt`** — applied to **self**, beneficial: hard forced-target magnet (§4.3).
 - **`Mark`** (new) — applied to an **enemy**, harmful: raises that enemy's threat so your allies focus
-  it. This is what `transparent_engulf` and `impish_flame` actually mean today; migrate both to
-  `Mark` and their behaviour is preserved rather than reinterpreted.
+  it. This is what `impish_flame` actually means today; migrate it to `Mark` and its behaviour is
+  preserved rather than reinterpreted.
 
 Also fix the classification: `Mark` belongs in `IsHarmfulCondition` (so Ward blocks it and Dispel
 logic is coherent), whereas `Taunt`-on-self is beneficial and should arguably be **Dispel-exempt**

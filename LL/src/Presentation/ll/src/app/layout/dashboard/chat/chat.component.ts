@@ -37,6 +37,7 @@ import { AuthService } from '../../../core/services/api/auth/auth.service';
 import { UserInfoDto } from '../../../shared/models/Dtos/userInfoDto';
 import { CharacterService } from '../../../core/services/api/character/character.service';
 import { ItemComponent } from '../../../shared/components/item/item.component';
+import { environment } from '../../../../environments/environment';
 
 export interface WireCommand {
   recipientName: string;
@@ -304,7 +305,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       (r) => !r.requiresGuild || !!this.guild(),
     );
     const raidId = this.raidId();
-    if (raidId) {
+    if (environment.features.raids && raidId) {
       rooms.splice(3, 0, {
         label: 'Raid',
         contextKey: raidId,
@@ -390,7 +391,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private readonly router: Router,
   ) {
     this.guild = this.guildState.guild;
-    this.raidId = this.raidService.activeRaidId;
+    this.raidId = this.raidService.activeRaidChatId;
     this.characterId = this.characterState.currentCharacterId;
     this.characterName = computed(
       () => this.characterState.currentCharacter()?.name ?? null,
@@ -402,7 +403,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       );
       this.activeChannel = fallbackFromUnavailableRaidChannel(
         this.activeChannel,
-        this.raidId(),
+        environment.features.raids ? this.raidId() : null,
       );
     });
     effect(() => {

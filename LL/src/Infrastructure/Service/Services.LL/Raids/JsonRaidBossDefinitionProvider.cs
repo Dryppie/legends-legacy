@@ -50,15 +50,38 @@ public sealed class JsonRaidBossDefinitionProvider : IRaidBossDefinitionProvider
             {
                 if (tier.Tier <= 0 || tier.LaneSlots is <= 0 or > 5 || tier.MinimumRoster <= 0 || tier.MinimumRoster > tier.LaneSlots * 3)
                     throw new InvalidOperationException($"Raid boss '{boss.Id}' tier {tier.Tier} has invalid roster settings.");
-                if (tier.SignupWindowHours <= 0 || tier.TickBudget.Vanguard <= 0 || tier.TickBudget.Flank <= 0 || tier.TickBudget.Ward <= 0)
+                if (tier.SignupWindowHours <= 0
+                    || tier.TickBudget.Rearguard <= 0
+                    || tier.TickBudget.Vanguard <= 0
+                    || tier.TickBudget.MainGuard <= 0
+                    || tier.TickBudget.FinalAssault <= 0)
                     throw new InvalidOperationException($"Raid boss '{boss.Id}' tier {tier.Tier} has invalid timing settings.");
-                if (tier.Boss.CreatureId == Guid.Empty || tier.Ward.ObjectiveCreatureId == Guid.Empty || tier.Flank.Adds.Count == 0)
-                    throw new InvalidOperationException($"Raid boss '{boss.Id}' tier {tier.Tier} must author a boss, Flank adds, and a Ward objective.");
-                if (tier.Flank.Adds.Concat(tier.Ward.Guards).Any(x =>
+                if (tier.Boss.CreatureId == Guid.Empty
+                    || tier.Vanguard.GuardianCreatureId == Guid.Empty
+                    || tier.MainGuard.ProjectionCreatureId == Guid.Empty
+                    || tier.Rearguard.Adds.Count == 0)
+                {
+                    throw new InvalidOperationException(
+                        $"Raid boss '{boss.Id}' tier {tier.Tier} must author a final boss, Rearguard adds, a Vanguard guardian, and a Main Guard projection.");
+                }
+                if (tier.Rearguard.WaveCount is <= 0 or > RaidRearguardDefinition.MaximumWaveCount)
+                {
+                    throw new InvalidOperationException(
+                        $"Raid boss '{boss.Id}' tier {tier.Tier} must author between 1 and {RaidRearguardDefinition.MaximumWaveCount} Rearguard waves.");
+                }
+                if (tier.Rearguard.Adds.Concat(tier.Vanguard.Escorts).Any(x =>
                         x.CreatureId == Guid.Empty ||
                         x.Count <= 0 ||
                         x.SpawnChancePercent is <= 0 or > 100))
                     throw new InvalidOperationException($"Raid boss '{boss.Id}' tier {tier.Tier} contains an invalid creature group.");
+                if (tier.MainGuard.SurvivalThresholdsPercent.Count == 0
+                    || tier.MainGuard.SurvivalThresholdsPercent.Any(x => x is <= 0 or > 100)
+                    || !tier.MainGuard.SurvivalThresholdsPercent.SequenceEqual(
+                        tier.MainGuard.SurvivalThresholdsPercent.Order()))
+                {
+                    throw new InvalidOperationException(
+                        $"Raid boss '{boss.Id}' tier {tier.Tier} has invalid Main Guard survival thresholds.");
+                }
                 if (tier.Boss.Variants.Any(x => x.CreatureId == Guid.Empty || x.SpawnChancePercent is <= 0 or > 100) ||
                     tier.Boss.Variants.Sum(x => x.SpawnChancePercent) > 100)
                     throw new InvalidOperationException($"Raid boss '{boss.Id}' tier {tier.Tier} contains invalid boss variants.");

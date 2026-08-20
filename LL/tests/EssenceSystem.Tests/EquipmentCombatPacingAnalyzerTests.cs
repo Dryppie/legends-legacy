@@ -85,7 +85,9 @@ public sealed class EquipmentCombatPacingAnalyzerTests
                 },
                 CombatPacingScenario.EliteEnemyTtk => 520,
                 CombatPacingScenario.SoloBossTtk => 1_800,
-                CombatPacingScenario.PartyBossTtk => 2_100,
+                CombatPacingScenario.PartyBossTtk or
+                    CombatPacingScenario.PartyBoss5Ttk or
+                    CombatPacingScenario.PartyBoss10Ttk => 2_100,
                 CombatPacingScenario.RawTtd => role switch
                 {
                     CanonicalCombatRole.Offense => 360,
@@ -124,6 +126,12 @@ public sealed class EquipmentCombatPacingAnalyzerTests
                 CombatPacingScenario.OvergearRawTtd
                 ? 100
                 : null;
+            var cooperativeTelemetry = scenario switch
+            {
+                CombatPacingScenario.PartyBoss5Ttk => CooperativeTelemetry(5),
+                CombatPacingScenario.PartyBoss10Ttk => CooperativeTelemetry(10),
+                _ => null
+            };
             return Task.FromResult(new CombatPacingSample(
                 seed,
                 duration,
@@ -136,8 +144,21 @@ public sealed class EquipmentCombatPacingAnalyzerTests
                 ReferenceDurationTicks: referenceDuration,
                 Telemetry: new CombatPacingTelemetry(
                     12, 4, totalDamage, 100, 10, 20, 30, 25,
-                    800, 40, 1, 200, 120, 80, 15, 10, 400)));
+                    800, 40, 1, 200, 120, 80, 15, 10, 400),
+                CooperativeTelemetry: cooperativeTelemetry));
         }
+
+        private static CooperativeCombatPacingTelemetry CooperativeTelemetry(int partySize) => new(
+            partySize,
+            GuardianAttentionSharePercent: 80,
+            RestorerAttentionSharePercent: 5,
+            NonGuardianAttentionSharePercent: 20,
+            GuardianThreatGenerated: 1_000,
+            RestorerThreatGenerated: 250,
+            GuardianIncomingRawDamage: 5_000,
+            RestorerHealingDone: 3_000,
+            DamageRedirectedToGuardians: 500,
+            Survivors: partySize);
     }
 
     private sealed class FailingSampleSource : PassingSampleSource

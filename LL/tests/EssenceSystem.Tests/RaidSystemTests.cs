@@ -1,9 +1,11 @@
+using System.IO.Compression;
 using System.Text.Json;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Raids;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Outbox;
 using Application.UseCases.Outbox;
+using Application.UseCases.Raids.Dtos;
 using RaidUpdated = Application.WebSockets.Contracts.RaidUpdated;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
@@ -27,6 +29,185 @@ namespace EssenceSystem.Tests;
 
 public sealed class RaidSystemTests
 {
+    [Theory]
+    [InlineData(0.49d, false)]
+    [InlineData(0.5d, true)]
+    [InlineData(1d, true)]
+    [InlineData(2d, true)]
+    [InlineData(2.01d, false)]
+    public void Development_roster_power_multiplier_is_bounded(
+        double multiplier,
+        bool expected) =>
+        Assert.Equal(
+            expected,
+            RaidDevelopmentRosterFactory.IsSupportedPowerMultiplier(multiplier));
+
+    [Fact]
+    public void Raid_playback_bundle_preserves_entity_and_ability_threat()
+    {
+        var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var combatant = new SimpleCombatEntity(
+            "friendly-1",
+            "Friendly One",
+            string.Empty,
+            maxHealth: 100,
+            barrier: 0);
+        var stats = new EntityStats(
+            combatant.Id,
+            combatant.Name,
+            [new AbilityStats("Basic Attack", Uses: 2, TotalThreat: 34)],
+            ThreatGenerated: 34);
+        var result = new CombatResult
+        {
+            Duration = 10,
+            Outcome = BattleOutcome.Victory,
+            PlayerTeam = [combatant],
+            EntityStats = [stats]
+        };
+        var capture = new RaidLanePlaybackCapture(
+            RaidLane.Rearguard,
+            result,
+            [new CombatCheckpoint(
+                Sequence: 1,
+                Tick: 10,
+                Friendly: [combatant],
+                Hostile: [],
+                EntityStats: [stats],
+                Events: [],
+                IsFinal: true)]);
+
+        var playback = new RaidPlaybackBundleBuilder(jsonOptions, TimeProvider.System)
+            .Build(Guid.NewGuid(), capture);
+        using var compressed = new MemoryStream(playback.Artifact.BundleBytes);
+        using var decompressed = new BrotliStream(compressed, CompressionMode.Decompress);
+        var bundle = JsonSerializer.Deserialize<RaidPlaybackBundleDto>(
+            decompressed,
+            jsonOptions);
+
+        Assert.NotNull(bundle);
+        Assert.Equal(RaidPlayback.CompactBundleSchemaVersion, bundle.SchemaVersion);
+        var frame = Assert.Single(bundle.Frames);
+        Assert.Equal(34, Assert.Single(frame.EntityTotals).ThreatGenerated);
+        Assert.Equal(34, Assert.Single(frame.AbilityTotals).TotalThreat);
+    }
+
+    [Fact]
+    public void Raid_assignments_have_three_parties_and_exclude_the_final_assault()
+    {
+        Assert.Equal(
+            [RaidLane.Rearguard, RaidLane.Vanguard, RaidLane.MainGuard],
+            RaidParties.All);
+        Assert.All(RaidParties.All, party => Assert.True(RaidParties.IsAssignable(party)));
+        Assert.False(RaidParties.IsAssignable(RaidLane.FinalAssault));
+        Assert.Equal(1, RaidParties.FormationNumber(RaidLane.Rearguard));
+        Assert.Equal(2, RaidParties.FormationNumber(RaidLane.Vanguard));
+        Assert.Equal(3, RaidParties.FormationNumber(RaidLane.MainGuard));
+        Assert.Equal(1, RaidParties.EncounterOrder(RaidLane.Rearguard));
+        Assert.Equal(2, RaidParties.EncounterOrder(RaidLane.Vanguard));
+        Assert.Equal(3, RaidParties.EncounterOrder(RaidLane.MainGuard));
+        Assert.Equal(4, RaidParties.EncounterOrder(RaidLane.FinalAssault));
+    }
+
+    [Fact]
+    public void Raid_plus_difficulty_scales_from_regular_without_changing_roster_or_timers()
+    {
+        var regular = new RaidBossTierDefinition
+        {
+            Tier = 7,
+            LaneSlots = 3,
+            MinimumRoster = 6,
+            SignupWindowHours = 24,
+            RecommendedWingPower = new RaidRecommendedWingPowerDefinition
+            {
+                Rearguard = 100,
+                Vanguard = 200,
+                MainGuard = 300
+            },
+            TickBudget = new RaidTickBudgetDefinition
+            {
+                Rearguard = 1000,
+                Vanguard = 2000,
+                MainGuard = 3000,
+                FinalAssault = 4000
+            },
+            Boss = new RaidBossCombatDefinition
+            {
+                Scaling = new RaidAttributeScalingDefinition
+                {
+                    Health = 100,
+                    Offense = 100,
+                    Defense = 100,
+                    Resistance = 100,
+                    Penetration = 100,
+                    Regeneration = 100
+                },
+                OvertimeStartsAtTick = 2000,
+                OvertimePowerIncreasePercent = 6
+            },
+            Rearguard = new RaidRearguardDefinition
+            {
+                Adds =
+                [
+                    new RaidCreatureGroupEntry
+                    {
+                        Count = 2,
+                        Scaling = new RaidAttributeScalingDefinition()
+                    }
+                ]
+            },
+            Vanguard = new RaidVanguardDefinition
+            {
+                GuardianScaling = new RaidAttributeScalingDefinition(),
+                Escorts =
+                [
+                    new RaidCreatureGroupEntry
+                    {
+                        Count = 1,
+                        Scaling = new RaidAttributeScalingDefinition()
+                    }
+                ]
+            },
+            MainGuard = new RaidMainGuardDefinition
+            {
+                ProjectionScaling = new RaidAttributeScalingDefinition(),
+                SurvivalThresholdsPercent = [33m, 67m, 100m]
+            },
+            Rewards = new RaidRewardDefinition
+            {
+                SlainTrophies = 100,
+                BrokenTrophies = 80,
+                WoundedTrophies = 60,
+                RepelledTrophies = 40,
+                GuaranteedItems = [new RaidPendingItem("raid-material", 20)]
+            }
+        };
+        var boss = new RaidBossDefinition { Id = "raid-boss.plus-test", Tiers = [regular] };
+
+        var plusThree = RaidPlusDifficulty.Create(boss, 3);
+
+        Assert.Equal(3, plusThree.Tier);
+        Assert.Equal((3, 6, 24), (plusThree.LaneSlots, plusThree.MinimumRoster, plusThree.SignupWindowHours));
+        Assert.Equal((1000, 2000, 3000, 4000), (
+            plusThree.TickBudget.Rearguard,
+            plusThree.TickBudget.Vanguard,
+            plusThree.TickBudget.MainGuard,
+            plusThree.TickBudget.FinalAssault));
+        Assert.Equal(128, plusThree.RecommendedWingPower.Rearguard);
+        Assert.Equal(133.1f, plusThree.Boss.Scaling.Health, 1);
+        Assert.Equal(124.2f, plusThree.Boss.Scaling.Offense, 1);
+        Assert.Equal(113.5f, plusThree.Boss.Scaling.Defense, 1);
+        Assert.Equal(109f, plusThree.Boss.Scaling.Penetration, 1);
+        Assert.Equal(115f, plusThree.Boss.Scaling.Regeneration, 1);
+        Assert.Equal(124, plusThree.Rewards.SlainTrophies);
+        Assert.Equal(23, Assert.Single(plusThree.Rewards.GuaranteedItems).Quantity);
+        Assert.Equal(3, Assert.Single(plusThree.Rearguard.Adds).Count);
+        Assert.Equal(1850, plusThree.Boss.OvertimeStartsAtTick);
+        Assert.Equal(7, plusThree.Boss.OvertimePowerIncreasePercent);
+        Assert.Equal([35m, 69m, 100m], plusThree.MainGuard.SurvivalThresholdsPercent);
+        Assert.Equal("Regular", RaidPlusDifficulty.Label(0));
+        Assert.Equal("+12", RaidPlusDifficulty.Label(12));
+    }
+
     [Fact]
     public void Raid_boss_and_vendor_content_is_complete_and_references_existing_content()
     {
@@ -56,7 +237,7 @@ public sealed class RaidSystemTests
         Assert.Equal([2, 3], sanguine.Tiers.Select(x => x.Tier));
         Assert.All(sanguine.Tiers, tier =>
         {
-            var bloodthorn = Assert.Single(tier.Ward.Guards);
+            var bloodthorn = Assert.Single(tier.Vanguard.Escorts);
             Assert.Equal(Guid.Parse("00000000-0000-0000-0000-000000000084"), bloodthorn.CreatureId);
             Assert.Equal(22m, bloodthorn.SpawnChancePercent);
         });
@@ -82,11 +263,22 @@ public sealed class RaidSystemTests
                 "Corpse Golem"
             });
         var tiers = bosses.SelectMany(x => x.Tiers).ToArray();
-        var referencedCreatures = tiers.SelectMany(tier => tier.Flank.Adds
-            .Concat(tier.Ward.Guards)
+        Assert.All(tiers, tier =>
+        {
+            Assert.Equal(10, tier.Rearguard.WaveCount);
+            Assert.Equal(600, tier.TickBudget.MainGuard);
+            Assert.Equal([33m, 67m, 100m], tier.MainGuard.SurvivalThresholdsPercent);
+            Assert.True(tier.TickBudget.FinalAssault > 0);
+            Assert.True(tier.Boss.MaxGuardianBreakPercent > 0);
+            Assert.True(tier.Boss.MaxSignaturePowerReductionPercent > 0);
+            Assert.True(tier.Boss.MaxSignatureCooldownDelayPercent > 0);
+        });
+        var referencedCreatures = tiers.SelectMany(tier => tier.Rearguard.Adds
+            .Concat(tier.Vanguard.Escorts)
             .Select(x => x.CreatureId)
             .Append(tier.Boss.CreatureId)
-            .Append(tier.Ward.ObjectiveCreatureId)
+            .Append(tier.Vanguard.GuardianCreatureId)
+            .Append(tier.MainGuard.ProjectionCreatureId)
             .Concat(tier.Boss.Variants.Select(x => x.CreatureId)));
         Assert.All(referencedCreatures, id => Assert.Contains(id, creatureIds));
 
@@ -159,7 +351,7 @@ public sealed class RaidSystemTests
     }
 
     [Fact]
-    public void Raid_persistence_model_enforces_roster_and_full_weekly_reward_invariants()
+    public void Raid_persistence_model_enforces_roster_and_weekly_reward_invariants()
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -189,10 +381,14 @@ public sealed class RaidSystemTests
 
         var claim = db.Model.FindEntityType(typeof(RaidRewardClaim));
         Assert.NotNull(claim);
-        var fullRewardIndex = Assert.Single(claim.GetIndexes(), index =>
+        var weeklyRewardIndex = Assert.Single(claim.GetIndexes(), index =>
             PropertyNames(index).SequenceEqual(["RaidBossId", "CharacterId", "WeekKey"]));
-        Assert.True(fullRewardIndex.IsUnique);
-        Assert.Equal("\"WasReduced\" = false", fullRewardIndex.GetFilter());
+        Assert.False(weeklyRewardIndex.IsUnique);
+        Assert.NotNull(claim.FindProperty(nameof(RaidRewardClaim.Kind)));
+
+        var participantResult = db.Model.FindEntityType(typeof(RaidParticipantResult));
+        Assert.NotNull(participantResult);
+        Assert.Null(participantResult.FindProperty("PayoutMultiplier"));
 
         var playback = db.Model.FindEntityType(typeof(RaidPlayback));
         Assert.NotNull(playback);
@@ -207,6 +403,93 @@ public sealed class RaidSystemTests
         var recommendation = db.Model.FindEntityType(typeof(RaidPowerRecommendationCacheEntry));
         Assert.NotNull(recommendation);
         Assert.Equal(["RaidBossId", "Tier"], recommendation.FindPrimaryKey()!.Properties.Select(x => x.Name));
+    }
+
+    [Fact]
+    public void Weekly_reward_upgrades_pay_only_the_unearned_outcome_difference()
+    {
+        var rewards = new RaidRewardDefinition
+        {
+            SlainTrophies = 100,
+            BrokenTrophies = 65,
+            WoundedTrophies = 40,
+            RepelledTrophies = 20,
+            GuaranteedItems =
+            [
+                new RaidPendingItem("soul_dust", 25),
+                new RaidPendingItem("monster_core", 2)
+            ]
+        };
+        var wounded = RaidRewardCalculator.CalculateGrant(
+            RaidRewardCalculator.FullPackage(rewards, RaidOutcome.Wounded),
+            []);
+        var slain = RaidRewardCalculator.CalculateGrant(
+            RaidRewardCalculator.FullPackage(rewards, RaidOutcome.Slain),
+            [wounded.Package]);
+
+        Assert.Equal(RaidRewardKind.WeeklyBase, wounded.Kind);
+        Assert.Equal(40, wounded.Package.Trophies);
+        Assert.Equal(RaidRewardKind.WeeklyUpgrade, slain.Kind);
+        Assert.Equal(60, slain.Package.Trophies);
+        Assert.Equal(15, slain.Package.Items.Single(x => x.ItemId == "soul_dust").Quantity);
+        Assert.Equal(1, slain.Package.Items.Single(x => x.ItemId == "monster_core").Quantity);
+        Assert.Equal(100, wounded.Package.Trophies + slain.Package.Trophies);
+    }
+
+    [Fact]
+    public void Weekly_reward_can_upgrade_by_tier_and_repeat_clears_keep_quarter_rewards()
+    {
+        var tierOne = new RaidRewardDefinition
+        {
+            SlainTrophies = 100,
+            GuaranteedItems = [new RaidPendingItem("soul_dust", 25)]
+        };
+        var tierTwo = new RaidRewardDefinition
+        {
+            SlainTrophies = 180,
+            GuaranteedItems =
+            [
+                new RaidPendingItem("soul_dust", 45),
+                new RaidPendingItem("greater_core", 2)
+            ]
+        };
+        var first = RaidRewardCalculator.CalculateGrant(
+            RaidRewardCalculator.FullPackage(tierOne, RaidOutcome.Slain),
+            []);
+        var upgrade = RaidRewardCalculator.CalculateGrant(
+            RaidRewardCalculator.FullPackage(tierTwo, RaidOutcome.Slain),
+            [first.Package]);
+        var repeat = RaidRewardCalculator.CalculateGrant(
+            RaidRewardCalculator.FullPackage(tierTwo, RaidOutcome.Slain),
+            [first.Package, upgrade.Package]);
+
+        Assert.Equal(RaidRewardKind.WeeklyUpgrade, upgrade.Kind);
+        Assert.Equal(80, upgrade.Package.Trophies);
+        Assert.Equal(20, upgrade.Package.Items.Single(x => x.ItemId == "soul_dust").Quantity);
+        Assert.Equal(2, upgrade.Package.Items.Single(x => x.ItemId == "greater_core").Quantity);
+        Assert.Equal(RaidRewardKind.Repeat, repeat.Kind);
+        Assert.Equal(45, repeat.Package.Trophies);
+        Assert.Equal(11, repeat.Package.Items.Single(x => x.ItemId == "soul_dust").Quantity);
+        Assert.Equal(1, repeat.Package.Items.Single(x => x.ItemId == "greater_core").Quantity);
+    }
+
+    [Fact]
+    public void Equal_outcome_rewards_do_not_accept_or_apply_contribution_scaling()
+    {
+        var rewards = new RaidRewardDefinition
+        {
+            BrokenTrophies = 65,
+            GuaranteedItems = [new RaidPendingItem("soul_dust", 25)]
+        };
+        var package = RaidRewardCalculator.FullPackage(rewards, RaidOutcome.Broken);
+        var firstParticipant = RaidRewardCalculator.CalculateGrant(package, []);
+        var secondParticipant = RaidRewardCalculator.CalculateGrant(package, []);
+
+        Assert.Equal(firstParticipant.Kind, secondParticipant.Kind);
+        Assert.Equal(firstParticipant.Package.Trophies, secondParticipant.Package.Trophies);
+        Assert.Equal(
+            firstParticipant.Package.Items.Select(x => (x.ItemId, x.Quantity)),
+            secondParticipant.Package.Items.Select(x => (x.ItemId, x.Quantity)));
     }
 
     [Fact]
@@ -232,7 +515,7 @@ public sealed class RaidSystemTests
 
         var tier = new RaidBossTierDefinition
         {
-            Tier = 1,
+            Tier = 0,
             LaneSlots = 3,
             MinimumRoster = 3
         };
@@ -259,9 +542,9 @@ public sealed class RaidSystemTests
         };
         var originalPositions = new[]
         {
+            (RaidLane.Rearguard, 0),
             (RaidLane.Vanguard, 0),
-            (RaidLane.Flank, 0),
-            (RaidLane.Ward, 0)
+            (RaidLane.MainGuard, 0)
         };
         for (var index = 0; index < characters.Length; index++)
         {
@@ -291,7 +574,7 @@ public sealed class RaidSystemTests
             characters[0].Id,
             run.Id,
             [
-                new RaidPartyAssignment(characters[0].Id, RaidLane.Ward, 1),
+                new RaidPartyAssignment(characters[0].Id, RaidLane.MainGuard, 1),
                 new RaidPartyAssignment(characters[1].Id, RaidLane.Vanguard, 0),
                 new RaidPartyAssignment(characters[2].Id, null, null)
             ],
@@ -299,7 +582,7 @@ public sealed class RaidSystemTests
 
         Assert.True(result.Succeeded, result.Error);
         var signups = result.Value!.Signups.ToDictionary(signup => signup.CharacterId);
-        Assert.Equal((RaidLane.Ward, 1), (signups[characters[0].Id].Lane, signups[characters[0].Id].WingSlotIndex));
+        Assert.Equal((RaidLane.MainGuard, 1), (signups[characters[0].Id].Lane, signups[characters[0].Id].WingSlotIndex));
         Assert.Equal((RaidLane.Vanguard, 0), (signups[characters[1].Id].Lane, signups[characters[1].Id].WingSlotIndex));
         Assert.Equal((null, null), (signups[characters[2].Id].Lane, signups[characters[2].Id].WingSlotIndex));
         Assert.False(result.Value.CanCommence);
@@ -390,14 +673,16 @@ public sealed class RaidSystemTests
         db.RaidRuns.Add(run);
         await db.SaveChangesAsync();
 
+        var developmentRosters = new FixedRaidDevelopmentRosterFactory();
         var service = CreateRaidService(
             db,
             boss,
-            new FixedRaidDevelopmentRosterFactory(),
+            developmentRosters,
             developmentToolsEnabled: true);
         var result = await service.FillWithDevelopmentCharactersAsync(
             leader.Id,
             run.Id,
+            0.75d,
             CancellationToken.None);
 
         Assert.True(result.Succeeded, result.Error);
@@ -414,6 +699,8 @@ public sealed class RaidSystemTests
         Assert.All(
             result.Value.Signups.Where(signup => !signup.IsLeader),
             signup => Assert.StartsWith("SeedGuest_Raid_", signup.CharacterName));
+        Assert.Equal(8, developmentRosters.PowerMultipliers.Count);
+        Assert.All(developmentRosters.PowerMultipliers, multiplier => Assert.Equal(0.75d, multiplier));
     }
 
     [Fact]
@@ -484,7 +771,7 @@ public sealed class RaidSystemTests
     }
 
     [Fact]
-    public async Task Raid_channel_announces_members_joining_and_leaving()
+    public async Task Raid_leader_approves_join_request_and_can_remove_accepted_member()
     {
         await using var db = CreateDbContext();
         var leaderUser = AppUser.Guest();
@@ -523,7 +810,7 @@ public sealed class RaidSystemTests
             [
                 new RaidBossTierDefinition
                 {
-                    Tier = 1,
+                    Tier = 0,
                     LaneSlots = 3,
                     MinimumRoster = 3
                 }
@@ -542,7 +829,7 @@ public sealed class RaidSystemTests
         var created = await service.CreateDevelopmentAsync(
             leader.Id,
             boss.Id,
-            1,
+            0,
             CancellationToken.None);
         Assert.True(created.Succeeded, created.Error);
         db.ChangeTracker.Clear();
@@ -551,23 +838,45 @@ public sealed class RaidSystemTests
             created.Value!.Id,
             CancellationToken.None);
         Assert.True(joined.Succeeded, joined.Error);
-        db.ChangeTracker.Clear();
-        var left = await service.LeaveAsync(
+        Assert.DoesNotContain(joined.Value!.Signups, signup => signup.CharacterId == member.Id);
+        Assert.Equal(member.Id, Assert.Single(joined.Value.JoinRequests).CharacterId);
+        var selfApproval = await service.ApproveSignupAsync(
             member.Id,
             created.Value.Id,
+            member.Id,
             CancellationToken.None);
-        Assert.True(left.Succeeded, left.Error);
+        Assert.False(selfApproval.Succeeded);
+        Assert.Equal("Only the raid leader can approve join requests.", selfApproval.Error);
+        db.ChangeTracker.Clear();
+        var approved = await service.ApproveSignupAsync(
+            leader.Id,
+            created.Value.Id,
+            member.Id,
+            CancellationToken.None);
+        Assert.True(approved.Succeeded, approved.Error);
+        Assert.Empty(approved.Value!.JoinRequests);
+        Assert.Contains(approved.Value.Signups, signup => signup.CharacterId == member.Id);
+        db.ChangeTracker.Clear();
+        var removed = await service.RemoveSignupAsync(
+            leader.Id,
+            created.Value.Id,
+            member.Id,
+            CancellationToken.None);
+        Assert.True(removed.Succeeded, removed.Error);
+        Assert.DoesNotContain(removed.Value!.Signups, signup => signup.CharacterId == member.Id);
 
         var snapshots = outbox.Payloads
             .OfType<RaidChatChannelSnapshotPayload>()
             .ToArray();
-        Assert.Equal(3, snapshots.Length);
-        Assert.Equal("Raid Member joined the raid.", snapshots[1].LifecycleMessage?.Body);
-        Assert.Contains(member.Id, snapshots[1].MemberCharacterIds);
-        Assert.Equal("Raid Member left the raid.", snapshots[2].LifecycleMessage?.Body);
-        Assert.DoesNotContain(member.Id, snapshots[2].MemberCharacterIds);
+        Assert.Equal(4, snapshots.Length);
+        Assert.Equal("Raid Member requested to join the raid.", snapshots[1].LifecycleMessage?.Body);
+        Assert.DoesNotContain(member.Id, snapshots[1].MemberCharacterIds);
+        Assert.Equal("Raid Member was approved to join the raid.", snapshots[2].LifecycleMessage?.Body);
+        Assert.Contains(member.Id, snapshots[2].MemberCharacterIds);
+        Assert.Equal("Raid Member was removed from the raid.", snapshots[3].LifecycleMessage?.Body);
+        Assert.DoesNotContain(member.Id, snapshots[3].MemberCharacterIds);
         Assert.Equal(
-            ["Created", "ParticipantJoined", "ParticipantLeft"],
+            ["Created", "SignupRequested", "SignupApproved", "ParticipantRemoved"],
             outbox.Payloads.OfType<RaidUpdated>().Select(update => update.Event));
     }
 
@@ -594,8 +903,8 @@ public sealed class RaidSystemTests
                 {
                     CharacterId = participantId,
                     AccountId = Guid.NewGuid(),
-                    CharacterName = "Flank Participant",
-                    Lane = RaidLane.Flank,
+                    CharacterName = "Rearguard Participant",
+                    Lane = RaidLane.Rearguard,
                     WingSlotIndex = 0,
                     SignedUpAt = DateTimeOffset.UtcNow
                 }
@@ -637,8 +946,29 @@ public sealed class RaidSystemTests
         Assert.Null(await service.GetPlaybackAsync(
             Guid.NewGuid(),
             run.Id,
-            RaidLane.Flank,
+            RaidLane.Rearguard,
             CancellationToken.None));
+    }
+
+    [Fact]
+    public void Playback_duration_runs_preparation_battles_concurrently()
+    {
+        RaidPlayback[] playbacks =
+        [
+            new() { Lane = RaidLane.Rearguard, TotalTicks = 100, TicksPerSecond = 10 },
+            new() { Lane = RaidLane.Vanguard, TotalTicks = 200, TicksPerSecond = 10 },
+            new() { Lane = RaidLane.MainGuard, TotalTicks = 150, TicksPerSecond = 10 },
+            new() { Lane = RaidLane.FinalAssault, TotalTicks = 50, TicksPerSecond = 10 }
+        ];
+        var method = typeof(RaidService).GetMethod(
+            "GetPlaybackDuration",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+
+        var duration = Assert.IsType<TimeSpan>(method!.Invoke(null, [playbacks, 2]));
+
+        // Vanguard is the longest preparation at 20s. It overlaps Rearguard (12s including holds)
+        // and Main Guard (15s), then Final Assault takes 5s with one 1.5s transition per phase.
+        Assert.Equal(TimeSpan.FromSeconds(28), duration);
     }
 
     [Fact]
@@ -979,14 +1309,19 @@ public sealed class RaidSystemTests
 
     private sealed class FixedRaidDevelopmentRosterFactory : IRaidDevelopmentRosterFactory
     {
+        public List<double> PowerMultipliers { get; } = [];
+
         public RaidDevelopmentBuild Create(
             Guid characterId,
             string characterName,
             RaidBossDefinition boss,
             RaidBossTierDefinition tier,
             RaidLane lane,
-            int slotIndex) =>
-            new(
+            int slotIndex,
+            double powerMultiplier)
+        {
+            PowerMultipliers.Add(powerMultiplier);
+            return new(
                 9_000,
                 new CharacterSnapshot
                 {
@@ -995,6 +1330,7 @@ public sealed class RaidSystemTests
                     Name = characterName,
                     Level = boss.LevelRequirement
                 });
+        }
     }
 
     private static string[] PropertyNames(Microsoft.EntityFrameworkCore.Metadata.IReadOnlyIndex index) =>

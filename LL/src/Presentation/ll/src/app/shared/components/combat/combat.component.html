@@ -1,4 +1,10 @@
-<div class="flex h-full w-full flex-col overflow-hidden">
+<div
+  class="flex w-full flex-col"
+  [ngClass]="{
+    'h-full overflow-hidden': !useParentScroll,
+    'h-auto overflow-visible': useParentScroll,
+  }"
+>
   <div
     *ngIf="battleType === 'IdleCombat' && idleCombatError() as resolutionError"
     class="ll-panel mx-2 mt-2 flex shrink-0 items-center justify-between gap-4 border border-danger/50 px-4 py-3 sm:mx-4"
@@ -88,10 +94,19 @@
 
   <div
     *ngIf="displayCombat"
-    class="flex h-full min-h-0 w-full flex-col overflow-y-auto overscroll-contain lg:overflow-hidden"
+    class="flex min-h-0 w-full flex-col"
+    [ngClass]="{
+      'h-full overflow-y-auto overscroll-contain lg:overflow-hidden':
+        !useParentScroll,
+      'h-auto overflow-visible': useParentScroll,
+    }"
   >
     <section
-      class="ll-panel flex min-h-full w-full flex-col overflow-hidden px-4 py-4 sm:px-6 lg:h-full lg:min-h-0"
+      class="ll-panel flex w-full flex-col px-4 py-4 sm:px-6"
+      [ngClass]="{
+        'min-h-full overflow-hidden lg:h-full lg:min-h-0': !useParentScroll,
+        'min-h-0 overflow-visible': useParentScroll,
+      }"
     >
       <header
         class="flex shrink-0 flex-col gap-4 border-b border-primary/40 pb-3 sm:flex-row sm:items-center sm:justify-between"
@@ -116,12 +131,15 @@
           </span>
         </div>
 
-        <div class="flex shrink-0 items-center gap-2 self-end sm:self-auto">
+        <div
+          class="flex shrink-0 flex-wrap items-center justify-end gap-2 self-end sm:self-auto"
+        >
+          <ng-content select="[combat-header-actions]"></ng-content>
           <app-mini-button
             class="block"
             [text]="combatActionButtonText()"
             [mobileText]="combatActionButtonMobileText()"
-            [disabled]="isStoppingCombat"
+            [disabled]="isStoppingCombat || combatActionDisabled"
             [width]="battleType === 'IdleCombat' ? '72px' : '156px'"
             (click)="onStopOrSkip()"
           ></app-mini-button>
@@ -143,7 +161,8 @@
       </div>
 
       <app-combat-entity-stats
-        class="flex min-h-0 w-full flex-1"
+        class="flex min-h-0 w-full"
+        [class.flex-1]="!useParentScroll"
         [playerTeam]="playerCharacters"
         [enemyTeam]="enemyCharacters"
         [entityStats]="entityStats"
@@ -151,6 +170,7 @@
         [enemyTeamName]="enemyTeamName"
         [currentCharacterId]="currentCharacterId()"
         [combatDurationTicks]="combatDurationTicks"
+        [useParentScroll]="useParentScroll"
       ></app-combat-entity-stats>
     </section>
   </div>

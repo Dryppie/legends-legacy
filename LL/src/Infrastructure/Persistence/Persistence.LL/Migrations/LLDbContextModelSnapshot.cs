@@ -4035,10 +4035,6 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("Lane")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("PayoutMultiplier")
-                        .HasPrecision(8, 6)
-                        .HasColumnType("numeric(8,6)");
-
                     b.HasKey("RaidRunId", "CharacterId");
 
                     b.ToTable("RaidParticipantResults");
@@ -4170,6 +4166,9 @@ namespace Persistence.LL.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("Kind")
+                        .HasColumnType("integer");
+
                     b.Property<string>("PendingItemsJson")
                         .IsRequired()
                         .HasColumnType("jsonb");
@@ -4185,9 +4184,6 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("Trophies")
                         .HasColumnType("integer");
 
-                    b.Property<bool>("WasReduced")
-                        .HasColumnType("boolean");
-
                     b.Property<int>("WeekKey")
                         .HasColumnType("integer");
 
@@ -4196,9 +4192,7 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("RaidRunId", "CharacterId")
                         .IsUnique();
 
-                    b.HasIndex("RaidBossId", "CharacterId", "WeekKey")
-                        .IsUnique()
-                        .HasFilter("\"WasReduced\" = false");
+                    b.HasIndex("RaidBossId", "CharacterId", "WeekKey");
 
                     b.ToTable("RaidRewardClaims");
                 });
@@ -4231,6 +4225,10 @@ namespace Persistence.LL.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb");
 
+                    b.Property<decimal?>("GuardianBreak")
+                        .HasPrecision(8, 6)
+                        .HasColumnType("numeric(8,6)");
+
                     b.Property<Guid>("LeaderCharacterId")
                         .HasColumnType("uuid");
 
@@ -4262,6 +4260,10 @@ namespace Persistence.LL.Migrations
                     b.Property<DateTimeOffset?>("SettledAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<decimal?>("SignatureDisruption")
+                        .HasPrecision(8, 6)
+                        .HasColumnType("numeric(8,6)");
+
                     b.Property<DateTimeOffset>("SignupClosesAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -4280,10 +4282,6 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int>("Tier")
                         .HasColumnType("integer");
-
-                    b.Property<decimal?>("WardBreak")
-                        .HasPrecision(8, 6)
-                        .HasColumnType("numeric(8,6)");
 
                     b.Property<int>("WeekKey")
                         .HasColumnType("integer");
@@ -4340,6 +4338,9 @@ namespace Persistence.LL.Migrations
 
                     b.Property<DateTimeOffset?>("SnapshotRefreshedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<int?>("WingSlotIndex")
                         .HasColumnType("integer");

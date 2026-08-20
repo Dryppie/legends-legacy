@@ -116,6 +116,21 @@ public class DiagnosticsController : BaseController
         return await Mediator.Send(new AnalyzeRegionAreaBalanceQuery(request));
     }
 
+    [HttpPost("combat-calibration/area")]
+    public async Task<ActionResult<AreaCalibrationReport>> AnalyzeAreaCalibration(
+        [FromBody] AreaCalibrationRequest request)
+    {
+        return await Mediator.Send(new AnalyzeAreaCalibrationQuery(request));
+    }
+
+    [HttpGet("combat-calibration/progression")]
+    public async Task<ActionResult<ProgressionCurveReport>> GetCombatProgressionCurve(
+        [FromQuery] string regionKey,
+        [FromQuery] CalibrationArchetype archetype = CalibrationArchetype.Balanced)
+    {
+        return await Mediator.Send(new GetProgressionCurveQuery(regionKey, archetype));
+    }
+
     [HttpPost("world-tower-balance")]
     public async Task<ActionResult<WorldTowerBalanceReport>> AnalyzeWorldTowerBalance(
         [FromBody] WorldTowerBalanceRequest request)

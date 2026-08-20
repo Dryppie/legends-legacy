@@ -131,8 +131,8 @@ Calibrated so that a fully-committed tank lands near **30–35 TPS** and a pure 
 | **Threat-negative**         | `Stealth` on Self; explicit authored negatives                                                                                                                                                                                                                                                                                    | **authored, negative** |
 
 **Summing rule.** An ability's threat is the sum over its **distinct bands**, not over its effects —
-otherwise a three-effect ability in one band triples its threat for free. `transparent_engulf` hits
-_Protective—self_ (Guard) and _Protective—ally_ (Cover) → `(5.0 + 5.0) × 12s = 120`.
+otherwise a three-effect ability in one band triples its threat for free. `bramble_shield` hits
+_Protective—ally_ (Cover and Barrier) and _Retaliation_ (Thorns) → `(5.0 + 3.5) × 16s = 136`.
 
 **Magnitude sensitivity.** Within a band, scale modestly by magnitude so a big shield out-threatens a
 token one — but keep the exponent well under 1 so magnitude cannot dominate the band:
@@ -243,7 +243,7 @@ set before the bands existed:
 | Ability                                | Authored | Band-derived | Bands hit                                                                        |
 | -------------------------------------- | -------- | ------------ | -------------------------------------------------------------------------------- |
 | `hobgoblin.threatening_presence`       | 600      | ~100         | Protective—self (`ModifyDamageTakenFromCondition −10`), `OnCombatStart` one-shot |
-| `transparent_slime.transparent_engulf` | 400      | ~120         | Protective—self (Guard) + Protective—ally (Cover), 120t                          |
+| `transparent_slime.transparent_engulf` | 100      | ~60          | Protective—self (Guard), 120t                                                     |
 | `wood_nymph.bramble_shield`            | 150      | ~80          | Protective—ally (Cover + barrier) + Retaliation (Thorns), 160t                   |
 | `moss_lizard.moss_camouflage`          | −250     | authored     | Threat-negative — keep as authored                                               |
 
@@ -372,7 +372,7 @@ Using `BandTps` from §3.2, `TicksPerSecond = 10`, magnitude modifier omitted fo
 | Ability                                                                    | cd      | Bands                   | Derived threat        | TPS  |
 | -------------------------------------------------------------------------- | ------- | ----------------------- | --------------------- | ---- |
 | `brown_slime.absorb_impact` (Guard 5)                                      | 120     | Protective—self         | `5.0 × 12` = **60**   | 5.0  |
-| `transparent_slime.transparent_engulf` (Guard + Cover AoE; Taunt/Mark → 0) | 120     | Prot—self + Prot—ally   | `10.0 × 12` = **120** | 10.0 |
+| `transparent_slime.transparent_engulf` (Guard 4; authored threat overrides) | 120     | Prot—self               | `5.0 × 12` = **60** (authored: **100**) | 8.3  |
 | `wood_nymph.bramble_shield` (ally Cover + barrier + Thorns)                | 160     | Prot—ally + Retaliation | `8.5 × 16` = **136**  | 8.5  |
 | `lumo_wisp.soothing_glow` (heal lowest ally)                               | 80      | Support—ally            | `3.5 × 8` = **28**    | 3.5  |
 | `blue_slime.sweet_water` (AoE heal)                                        | 140     | Support—ally            | `3.5 × 14` = **49**   | 3.5  |

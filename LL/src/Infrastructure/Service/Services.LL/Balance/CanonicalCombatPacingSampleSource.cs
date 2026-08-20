@@ -25,7 +25,8 @@ public sealed class CanonicalCombatPacingSampleSource : ICanonicalCombatPacingSa
     private const int StandardHealth = 520;
     private const int EliteHealth = 2_040;
     private const int SoloBossHealth = 7_100;
-    private const int PartyBossHealth = 27_400;
+    private const int PartyBoss5Health = 26_000;
+    private const int PartyBoss10Health = 52_000;
     private const int TargetDummyHealth = 1_000_000_000;
     private const float MixedPressurePower = 160f;
 
@@ -136,23 +137,36 @@ public sealed class CanonicalCombatPacingSampleSource : ICanonicalCombatPacingSa
         int seed,
         CancellationToken cancellationToken)
     {
-        var friendly = scenario == CombatPacingScenario.PartyBossTtk
-            ? await CreatePartyAsync(buildTier, encounterTier, cancellationToken)
-            :
-            [
-                await CreatePlayerAsync(
-                    role,
-                    buildTier,
-                    encounterTier,
-                    rawDurability: scenario == CombatPacingScenario.RawTtd,
-                    cancellationToken)
-            ];
+        CanonicalPartySetup? cooperativeParty = null;
+        if (scenario is CombatPacingScenario.PartyBossTtk or
+            CombatPacingScenario.PartyBoss5Ttk or
+            CombatPacingScenario.PartyBoss10Ttk)
+        {
+            var partySize = scenario == CombatPacingScenario.PartyBoss10Ttk ? 10 : 5;
+            cooperativeParty = await CreatePartyAsync(
+                partySize,
+                buildTier,
+                encounterTier,
+                cancellationToken);
+        }
+
+        var friendly = cooperativeParty?.Combatants ??
+        [
+            await CreatePlayerAsync(
+                role,
+                buildTier,
+                encounterTier,
+                rawDurability: scenario == CombatPacingScenario.RawTtd,
+                cancellationToken)
+        ];
         var targetHealth = scenario switch
         {
             CombatPacingScenario.StandardEnemyTtk => StandardHealth,
             CombatPacingScenario.EliteEnemyTtk => EliteHealth,
             CombatPacingScenario.SoloBossTtk => SoloBossHealth,
-            CombatPacingScenario.PartyBossTtk => PartyBossHealth,
+            CombatPacingScenario.PartyBossTtk or CombatPacingScenario.PartyBoss5Ttk =>
+                PartyBoss5Health,
+            CombatPacingScenario.PartyBoss10Ttk => PartyBoss10Health,
             CombatPacingScenario.OffensiveWindow90 or CombatPacingScenario.OffensiveWindow120 =>
                 TargetDummyHealth,
             CombatPacingScenario.RawTtd or CombatPacingScenario.EffectiveTtd =>
@@ -162,13 +176,17 @@ public sealed class CanonicalCombatPacingSampleSource : ICanonicalCombatPacingSa
         var isDurability = scenario is CombatPacingScenario.RawTtd or CombatPacingScenario.EffectiveTtd;
         var hostile = isDurability
             ? CreatePressureSources(1d)
-            : new[] { CreateTarget(targetHealth) };
+            : cooperativeParty is null
+                ? new[] { CreateTarget(targetHealth) }
+                : new[] { CreatePartyBoss(targetHealth) };
         var maxTicks = scenario switch
         {
             CombatPacingScenario.StandardEnemyTtk => 600,
             CombatPacingScenario.EliteEnemyTtk => 900,
             CombatPacingScenario.SoloBossTtk => 2_400,
-            CombatPacingScenario.PartyBossTtk => 2_700,
+            CombatPacingScenario.PartyBossTtk or
+                CombatPacingScenario.PartyBoss5Ttk or
+                CombatPacingScenario.PartyBoss10Ttk => 2_700,
             CombatPacingScenario.RawTtd => 1_200,
             CombatPacingScenario.EffectiveTtd => 1_800,
             CombatPacingScenario.OffensiveWindow90 => 900,
@@ -184,7 +202,10 @@ public sealed class CanonicalCombatPacingSampleSource : ICanonicalCombatPacingSa
             cancellationToken,
             basicAttackIntervalTicks: 30,
             startActiveAbilitiesOnCooldown: false,
-            captureEventLog: false);
+            captureEventLog: false,
+            friendlyPartyNumbers: cooperativeParty?.Slots
+                .Select(slot => (int?)slot.PartyNumber)
+                .ToArray());
 
         CombatResult? openingDiagnostic = null;
         if (scenario == CombatPacingScenario.StandardEnemyTtk)
@@ -218,21 +239,27 @@ public sealed class CanonicalCombatPacingSampleSource : ICanonicalCombatPacingSa
             targetHealth,
             scenario,
             pressureBreakpoint,
-            openingDiagnostic);
+            openingDiagnostic,
+            cooperativeParty?.Slots);
     }
 
-    private async Task<List<CombatEntity>> CreatePartyAsync(
+    private async Task<CanonicalPartySetup> CreatePartyAsync(
+        int partySize,
         int buildTier,
         int encounterTier,
         CancellationToken cancellationToken)
     {
-        var party = new List<CombatEntity>(4);
-        foreach (var role in Enum.GetValues<CanonicalCombatRole>())
+        var slots = CanonicalCooperativeRosterCatalog.CreateParty(partySize);
+        var party = new List<CombatEntity>(partySize);
+        foreach (var slot in slots)
         {
             party.Add(await CreatePlayerAsync(
-                role, buildTier, encounterTier, rawDurability: false, cancellationToken));
+                slot.Role,
+                buildTier,
+                encounterTier,
+                cancellationToken));
         }
-        return party;
+        return new CanonicalPartySetup(party, slots);
     }
 
     private async Task<CombatEntity> CreatePlayerAsync(
@@ -251,6 +278,22 @@ public sealed class CanonicalCombatPacingSampleSource : ICanonicalCombatPacingSa
         NormalizeFlatProgression(combatant, encounterTier);
         if (rawDurability)
             DisableRecoveryAndDefensiveActives(combatant);
+        return combatant;
+    }
+
+    private async Task<CombatEntity> CreatePlayerAsync(
+        CanonicalCooperativeRole role,
+        int buildTier,
+        int encounterTier,
+        CancellationToken cancellationToken)
+    {
+        var rung = _builds.GetProgressionLadder().Single(candidate =>
+            candidate.Tier == buildTier &&
+            candidate.Quality == Domain.Models.Items.ItemQuality.Standard &&
+            candidate.Rarity == Domain.Models.Items.Rarity.Common);
+        var build = _builds.CreateBuild(role, rung, FullCanonicalEssenceCount);
+        var combatant = await _simulations.CreateCanonicalCombatantAsync(build, cancellationToken);
+        NormalizeFlatProgression(combatant, encounterTier);
         return combatant;
     }
 
@@ -349,6 +392,19 @@ public sealed class CanonicalCombatPacingSampleSource : ICanonicalCombatPacingSa
             resistance: 20,
             attackSpeed: -75);
 
+    private static CombatEntity CreatePartyBoss(int maxHealth)
+    {
+        var boss = CreateCombatant(
+            "Canonical cooperative reference boss",
+            maxHealth,
+            power: 135,
+            armor: 20,
+            resistance: 20,
+            attackSpeed: -20);
+        boss.NativeAbilityIds.Add(MixedPressureAbilityId);
+        return boss;
+    }
+
     private static CombatEntity CreateCombatant(
         string name,
         float maxHealth,
@@ -391,7 +447,8 @@ public sealed class CanonicalCombatPacingSampleSource : ICanonicalCombatPacingSa
         int initialTargetHealth,
         CombatPacingScenario scenario,
         double? pressureBreakpoint,
-        CombatResult? openingDiagnostic)
+        CombatResult? openingDiagnostic,
+        IReadOnlyList<CanonicalCooperativeRosterSlot>? cooperativeSlots)
     {
         var fixedWindow = scenario is CombatPacingScenario.OffensiveWindow90 or
             CombatPacingScenario.OffensiveWindow120;
@@ -444,6 +501,35 @@ public sealed class CanonicalCombatPacingSampleSource : ICanonicalCombatPacingSa
             DamageReductionPrevented: friendlyStats.Sum(stat => (double)stat.DamageReductionPrevented),
             FinalHealthDamage: friendlyStats.Sum(stat => (double)stat.FinalHealthDamage));
 
+        CooperativeCombatPacingTelemetry? cooperativeTelemetry = null;
+        if (cooperativeSlots is not null)
+        {
+            var rolesByEntityId = cooperativeSlots.ToDictionary(
+                slot => $"power-friendly-{slot.SlotIndex + 1}",
+                slot => slot.Role,
+                StringComparer.OrdinalIgnoreCase);
+            var guardianStats = friendlyStats.Where(stat =>
+                rolesByEntityId.TryGetValue(stat.EntityId, out var mappedRole) &&
+                mappedRole == CanonicalCooperativeRole.Guardian).ToArray();
+            var restorerStats = friendlyStats.Where(stat =>
+                rolesByEntityId.TryGetValue(stat.EntityId, out var mappedRole) &&
+                mappedRole == CanonicalCooperativeRole.Restorer).ToArray();
+            cooperativeTelemetry = new CooperativeCombatPacingTelemetry(
+                cooperativeSlots.Count,
+                guardianStats.Sum(stat => stat.AttentionSharePercent),
+                restorerStats.Sum(stat => stat.AttentionSharePercent),
+                friendlyStats
+                    .Where(stat => rolesByEntityId.TryGetValue(stat.EntityId, out var mappedRole) &&
+                        mappedRole != CanonicalCooperativeRole.Guardian)
+                    .Sum(stat => stat.AttentionSharePercent),
+                guardianStats.Sum(stat => (double)stat.ThreatGenerated),
+                restorerStats.Sum(stat => (double)stat.ThreatGenerated),
+                guardianStats.Sum(stat => (double)stat.IncomingRawDamage),
+                restorerStats.Sum(stat => (double)stat.HealingDone),
+                guardianStats.Sum(stat => (double)stat.DamageRedirectedTo),
+                result.PlayerTeam.Count(entity => entity.Health > 0));
+        }
+
         return new CombatPacingSample(
             seed,
             result.Duration,
@@ -453,7 +539,8 @@ public sealed class CanonicalCombatPacingSampleSource : ICanonicalCombatPacingSa
             openingBurst / (double)initialTargetHealth * 100d,
             totalMaxHealth <= 0 ? 0 : remainingHealth / (double)totalMaxHealth * 100d,
             PressureBreakpoint: pressureBreakpoint,
-            Telemetry: telemetry);
+            Telemetry: telemetry,
+            CooperativeTelemetry: cooperativeTelemetry);
     }
 
     private static CanonicalPartyProfile ToProfile(CanonicalCombatRole role) => role switch
@@ -464,4 +551,8 @@ public sealed class CanonicalCombatPacingSampleSource : ICanonicalCombatPacingSa
         CanonicalCombatRole.Defensive => CanonicalPartyProfile.Defensive,
         _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
     };
+
+    private sealed record CanonicalPartySetup(
+        IReadOnlyList<CombatEntity> Combatants,
+        IReadOnlyList<CanonicalCooperativeRosterSlot> Slots);
 }

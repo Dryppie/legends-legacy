@@ -5,7 +5,7 @@
 ></p>
 
 <dl
-  *ngIf="kind === 'Active' || effectiveThreat !== 0"
+  *ngIf="kind === 'Active' || displayedThreat !== 0"
   class="mt-2 divide-y divide-white/10 overflow-hidden border-t border-white/10 text-xs"
   aria-label="Ability combat details"
 >
@@ -20,7 +20,7 @@
   </div>
 
   <div
-    *ngIf="effectiveThreat !== 0"
+    *ngIf="displayedThreat !== 0"
     class="flex items-center justify-between gap-2 px-1 py-1.5 text-zinc-400"
   >
     <dt>Threat</dt>
@@ -28,7 +28,7 @@
       <span *ngIf="hasThreatMultiplier" class="mr-1 text-zinc-500">
         {{ threatValue | number }} × {{ threatMultiplier | number: "1.0-2" }} ≈
       </span>
-      <strong class="text-white">{{ effectiveThreat | number }}</strong>
+      <strong class="text-white">{{ displayedThreat | number: "1.0-1" }}</strong>
       <span class="ml-1">/ {{ threatCadenceLabel }}</span>
     </dd>
   </div>

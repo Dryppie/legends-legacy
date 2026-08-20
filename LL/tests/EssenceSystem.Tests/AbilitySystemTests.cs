@@ -169,6 +169,55 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Engine_spawns_ten_continuous_hostile_waves_without_resetting_friendly_cooldowns()
+    {
+        var ability = CreateDamageAbility("ability.wave.strike", "Family.Test");
+        ability.CooldownTicks = 3;
+        var compiled = AbilityCompiler.CompileAbility(ability);
+        var friendly = CreateCombatant(
+            "friendly",
+            CombatTeam.Friendly,
+            [compiled],
+            maxHealth: 10_000,
+            canBasicAttack: false);
+        var firstWave = CreateCombatant("wave-1", CombatTeam.Hostile, [], maxHealth: 1);
+        var reinforcementWaves = Enumerable.Range(2, 9)
+            .Select(wave => (IReadOnlyList<RuntimeCombatant>)[
+                CreateCombatant($"wave-{wave}", CombatTeam.Hostile, [], maxHealth: 1)
+            ])
+            .ToArray();
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 30, BasicAttackIntervalTicks: 1));
+        var checkpoints = new List<CombatCheckpoint>();
+
+        var result = engine.Run(
+            [friendly],
+            [firstWave],
+            checkpointObserver: checkpoints.Add,
+            checkpointIntervalTicks: 10,
+            hostileReinforcementWaves: reinforcementWaves);
+
+        Assert.Equal(BattleOutcome.Victory, result.Outcome);
+        Assert.Equal(28, result.Duration);
+        Assert.True(friendly.Health < 9_900, $"Expected damage to accumulate across waves, but Health was {friendly.Health}.");
+        Assert.Equal(
+            Enumerable.Range(0, 10).Select(index => index * 3),
+            result.EventLog
+                .Where(x => x.Source == ability.Name && x.EventType == EventType.AbilityUse)
+                .Select(x => x.Timestamp));
+        Assert.All(
+            Enumerable.Range(1, 10),
+            wave => Assert.Contains(result.EntityStats, x => x.EntityId == $"wave-{wave}"));
+        Assert.All(
+            Enumerable.Range(2, 9),
+            wave => Assert.Contains(
+                checkpoints,
+                checkpoint => checkpoint.Hostile.Any(entity =>
+                    entity.Id == $"wave-{wave}" && entity.Health == entity.MaxHealth)));
+    }
+
+    [Fact]
     public void Engine_attack_speed_increases_basic_attack_cadence()
     {
         var hasted = CreateCombatant("hasted", CombatTeam.Friendly, []);
@@ -4817,7 +4866,7 @@ public sealed class AbilitySystemTests
             Kind = AbilitySpecKind.Active,
             Name = "Temporary Modifier Strike",
             OwningEssenceId = "essence.test.temporary_modifier",
-            CooldownTicks = 700,
+            CooldownTicks = 20,
             Triggers =
             [
                 new()
@@ -4855,6 +4904,12 @@ public sealed class AbilitySystemTests
             Operation = "AddMultiplier",
             Value = 0.5
         });
+        friendlyCombatant.TemporaryAbilityModifiers.Add(new EssenceAbilityModifierDefinition
+        {
+            Target = ability.Id,
+            Operation = "DelayCooldowns",
+            Value = 0.25
+        });
         var hostileCombatant = CreateCombatEntity("hostile-slot", hostileCharacter);
         IncreaseMaxHealth(friendlyCombatant, 2_000);
         IncreaseMaxHealth(hostileCombatant, 2_000);
@@ -4878,6 +4933,13 @@ public sealed class AbilitySystemTests
 
         Assert.Contains(DamageMagnitudes(result, "effect.damage.main"), magnitude => magnitude is >= 12 and <= 18);
         Assert.Contains(result.EventLog, x => x.Source == "Temporary Modifier Strike" && x.EventType == EventType.AbilityUse);
+        var abilityUses = result.EventLog
+            .Where(x => x.Source == "Temporary Modifier Strike" && x.EventType == EventType.AbilityUse)
+            .Select(x => x.Timestamp)
+            .Take(2)
+            .ToArray();
+        Assert.Equal(2, abilityUses.Length);
+        Assert.Equal(25, abilityUses[1] - abilityUses[0]);
     }
 
     [Fact]
@@ -5849,7 +5911,8 @@ public sealed class AbilitySystemTests
         IEnumerable<CompiledAbility> abilities,
         int maxHealth = 200,
         int dodgeChance = 0,
-        int? partyNumber = null) =>
+        int? partyNumber = null,
+        bool canBasicAttack = true) =>
         new(
             id,
             id,
@@ -5864,6 +5927,7 @@ public sealed class AbilitySystemTests
             },
             abilities,
             ["Role.Test"],
+            canBasicAttack: canBasicAttack,
             partyNumber: partyNumber);
 
     private static void AddStandardCondition(

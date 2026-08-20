@@ -1,9 +1,24 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Subject, finalize, interval, startWith, takeUntil } from 'rxjs';
+import {
+  Subject,
+  finalize,
+  forkJoin,
+  interval,
+  startWith,
+  takeUntil,
+} from 'rxjs';
 import {
   RaidLane,
+  RaidJoinRequest,
   RaidBattlePlanPreview,
   RaidPlaybackBundle,
   RaidReward,
@@ -16,8 +31,26 @@ import { CombatComponent } from '../../../../shared/components/combat/combat.com
 import { CombatService } from '../../../../core/services/client-side/combat/combat.service';
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
 import { BattleType } from '../../../../core/state/combat-state/combatState';
-import { RaidPlaybackService } from '../../../../core/services/client-side/combat/raid-playback.service';
+import {
+  RaidCombatFrame,
+  RaidPlaybackService,
+} from '../../../../core/services/client-side/combat/raid-playback.service';
 import { CharacterTagComponent } from '../../../../shared/components/character/character-tag/character-tag.component';
+
+interface RaidPreparationPlaybackView {
+  lane: RaidLane;
+  frame: RaidCombatFrame;
+  progressPercent: number;
+  elapsedSeconds: number;
+  durationSeconds: number;
+  friendlyAlive: number;
+  friendlyTotal: number;
+  hostileHealth: number;
+  hostileMaxHealth: number;
+  status: string;
+  completed: boolean;
+  isWaveTransitionHold: boolean;
+}
 
 @Component({
   selector: 'app-raid-page',
@@ -40,23 +73,38 @@ export class RaidPageComponent implements OnInit, OnDestroy {
   readonly error = signal<string | null>(null);
   readonly reward = signal<RaidReward | null>(null);
   readonly battlePlan = signal<RaidBattlePlanPreview | null>(null);
+  readonly developmentRosterPowerMultiplier = signal(1);
+  readonly developmentRosterPowerMultipliers = [0.5, 0.75, 1, 1.25, 1.5, 2];
   readonly battleType = BattleType.Raid;
   readonly watchingPlayback = signal(false);
   readonly playbackLane = signal<RaidLane | null>(null);
+  readonly showingAllPreparations = signal(false);
+  readonly preparationViews = signal<RaidPreparationPlaybackView[]>([]);
+  readonly rearguardWaveNumber = signal(1);
   readonly playbackStageIndex = signal(-1);
   readonly selectedSignupId = signal<string | null>(null);
   readonly collapsedLanes = signal<Set<RaidLane>>(new Set());
-  readonly lanes: RaidLane[] = ['Vanguard', 'Flank', 'Ward'];
-  readonly raidPlaybackOrder: RaidLane[] = ['Flank', 'Ward', 'Vanguard'];
+  readonly lanes: RaidLane[] = ['Rearguard', 'Vanguard', 'MainGuard'];
+  readonly raidPlaybackOrder: RaidLane[] = [
+    'Rearguard',
+    'Vanguard',
+    'MainGuard',
+    'FinalAssault',
+  ];
   private raidRunId = '';
   private lastRealtimeUpdateId: string | null = null;
   private lastReconnectCount = this.events.reconnectCount();
   private playbackTimer: ReturnType<typeof setInterval> | null = null;
   private playbackAdvanceTimer: ReturnType<typeof setTimeout> | null = null;
   private activePlaybackBundle: RaidPlaybackBundle | null = null;
+  private readonly preparationBundles = new Map<RaidLane, RaidPlaybackBundle>();
   private activePlaybackLanes: RaidLane[] = [];
+  private focusPreparationOnLoad: RaidLane | null = null;
+  private lastFocusedPreparationLane: RaidLane | null = null;
+  private preparationPhaseDurationMilliseconds = 0;
   private playbackStartedAt = 0;
   private lastPlaybackFrameSequence = -1;
+  private lastPlaybackWasWaveTransitionHold = false;
   private autoPlaybackRequested = false;
   private autoPlaybackStarted = false;
   private playbackGeneration = 0;
@@ -65,6 +113,9 @@ export class RaidPageComponent implements OnInit, OnDestroy {
   private playbackMonotonicClockAtSync = 0;
   private playbackStageOffsetMilliseconds = 0;
   private readonly playbackTransitionMilliseconds = 1500;
+  // Keep aligned with RaidService.RearguardWaveTransitionHold.
+  private readonly rearguardWaveTransitionHoldMilliseconds = 1000;
+  private readonly playbackStageDurations = new Map<RaidLane, number>();
 
   constructor() {
     effect(() => {
@@ -130,6 +181,32 @@ export class RaidPageComponent implements OnInit, OnDestroy {
     this.runAction('join', this.raids.join(this.raidRunId));
   }
 
+  approveRequest(request: RaidJoinRequest): void {
+    if (this.action()) return;
+    this.runAction(
+      `approve-${request.characterId}`,
+      this.raids.approveSignup(this.raidRunId, request.characterId),
+    );
+  }
+
+  removeSignup(
+    signup: Pick<RaidSignup, 'characterId' | 'characterName'> | RaidJoinRequest,
+    pending = false,
+  ): void {
+    const action = pending ? 'Decline' : 'Remove';
+    if (
+      this.action() ||
+      !window.confirm(
+        `${action} ${signup.characterName}${pending ? "'s request" : ' from this raid'}?`,
+      )
+    )
+      return;
+    this.runAction(
+      `remove-${signup.characterId}`,
+      this.raids.removeSignup(this.raidRunId, signup.characterId),
+    );
+  }
+
   leave(): void {
     if (this.action()) return;
     this.action.set('leave');
@@ -192,7 +269,10 @@ export class RaidPageComponent implements OnInit, OnDestroy {
   fillDevelopmentRoster(): void {
     this.runAction(
       'development-fill',
-      this.raids.fillDevelopmentRoster(this.raidRunId),
+      this.raids.fillDevelopmentRoster(
+        this.raidRunId,
+        this.developmentRosterPowerMultiplier(),
+      ),
     );
   }
 
@@ -230,21 +310,32 @@ export class RaidPageComponent implements OnInit, OnDestroy {
     this.startRaidPlayback(this.raidPlaybackOrder);
   }
 
+  raidDifficultyLabel(plusLevel: number): string {
+    return plusLevel === 0 ? 'Regular' : `+${plusLevel}`;
+  }
+
   raidBattleTitle(): string {
     const lane = this.playbackLane();
     const raid = this.raid();
     if (!lane || !raid) return 'Raid Battle';
     const stage = this.playbackStageIndex() + 1;
-    return `${raid.raidBossName} · ${lane} · Battle ${stage}/${this.activePlaybackLanes.length}`;
+    const totalStages = this.activePlaybackLanes.some(
+      (activeLane) => activeLane !== 'FinalAssault',
+    )
+      ? 2
+      : 1;
+    return `${raid.raidBossName} · ${this.raidEncounterName(lane)} · Battle ${stage}/${totalStages}`;
   }
 
   raidEnemyName(): string {
     switch (this.playbackLane()) {
-      case 'Flank':
-        return 'Reinforcements';
-      case 'Ward':
-        return 'Ward Defenders';
+      case 'Rearguard':
+        return `Reinforcements · Wave ${this.rearguardWaveNumber()}`;
       case 'Vanguard':
+        return 'Guardian';
+      case 'MainGuard':
+        return 'Boss Projection';
+      case 'FinalAssault':
         return this.raid()?.raidBossName ?? 'Raid Boss';
       default:
         return 'Hostiles';
@@ -252,20 +343,138 @@ export class RaidPageComponent implements OnInit, OnDestroy {
   }
 
   raidWingName(): string {
-    return `${this.playbackLane() ?? 'Raid'} Wing`;
+    const lane = this.playbackLane();
+    return lane === 'FinalAssault'
+      ? 'Combined Raid'
+      : `${this.raidEncounterName(lane)} Party`;
+  }
+
+  raidEncounterName(lane: RaidLane | null): string {
+    switch (lane) {
+      case 'MainGuard':
+        return 'Main Guard';
+      case 'FinalAssault':
+        return 'Final Assault';
+      case 'Rearguard':
+        return 'Rearguard';
+      case 'Vanguard':
+        return 'Vanguard';
+      default:
+        return 'Raid';
+    }
+  }
+
+  preparationObjective(lane: RaidLane): string {
+    switch (lane) {
+      case 'Rearguard':
+        return 'Defeat ten reinforcement waves';
+      case 'Vanguard':
+        return 'Break the raid guardian';
+      case 'MainGuard':
+        return 'Disrupt the boss projection';
+      default:
+        return 'Prepare for the Final Assault';
+    }
+  }
+
+  preparationHostileName(view: RaidPreparationPlaybackView): string {
+    if (view.lane === 'Rearguard' && view.frame.waveNumber !== null)
+      return `Reinforcements · Wave ${view.frame.waveNumber}`;
+    return (
+      view.frame.hostile.map((entity) => entity.name).join(', ') || 'Objective'
+    );
+  }
+
+  preparationEntityDamage(
+    view: RaidPreparationPlaybackView,
+    entityId: string,
+  ): number {
+    return (
+      view.frame.entityStats.find((stats) => stats.entityId === entityId)
+        ?.damageDone ?? 0
+    );
+  }
+
+  preparationSummaryLocked(): boolean {
+    const lane = this.playbackLane();
+    if (!lane || lane === 'FinalAssault') return false;
+
+    const views = this.preparationViews();
+    return (
+      views.find((view) => view.lane === lane)?.completed === true &&
+      views.some((view) => !view.completed)
+    );
+  }
+
+  healthPercent(health: number, maxHealth: number): number {
+    return Math.max(0, Math.min(100, (health / Math.max(1, maxHealth)) * 100));
+  }
+
+  trackPreparationLane(
+    _index: number,
+    view: RaidPreparationPlaybackView,
+  ): RaidLane {
+    return view.lane;
+  }
+
+  trackCombatEntity(_index: number, entity: { id: string }): string {
+    return entity.id;
   }
 
   closeRaidPlayback(): void {
     this.playbackGeneration++;
     this.stopPlaybackTimers();
     this.activePlaybackBundle = null;
+    this.preparationBundles.clear();
     this.activePlaybackLanes = [];
+    this.focusPreparationOnLoad = null;
+    this.lastFocusedPreparationLane = null;
+    this.preparationPhaseDurationMilliseconds = 0;
     this.playbackLane.set(null);
+    this.showingAllPreparations.set(false);
+    this.preparationViews.set([]);
+    this.rearguardWaveNumber.set(1);
     this.playbackStageIndex.set(-1);
     this.watchingPlayback.set(false);
     this.scheduledPlaybackStartedAt = null;
     this.playbackStageOffsetMilliseconds = 0;
+    this.lastPlaybackWasWaveTransitionHold = false;
+    this.playbackStageDurations.clear();
     this.combat.closeCurrentRaidBattle();
+  }
+
+  focusPreparation(lane: RaidLane): void {
+    if (!this.showingAllPreparations() && this.playbackLane() === lane) return;
+    const view = this.preparationViews().find((item) => item.lane === lane);
+    const bundle = this.preparationBundles.get(lane);
+    if (!view || !bundle) return;
+
+    this.showingAllPreparations.set(false);
+    this.playbackLane.set(lane);
+    this.lastFocusedPreparationLane = lane;
+    this.activePlaybackBundle = bundle;
+    this.lastPlaybackFrameSequence = view.frame.sequence;
+    this.lastPlaybackWasWaveTransitionHold = view.isWaveTransitionHold;
+    if (view.frame.waveNumber !== null)
+      this.rearguardWaveNumber.set(view.frame.waveNumber);
+    this.combat.applyRaidCombatFrame(view.frame, true);
+  }
+
+  showAllPreparations(): void {
+    if (!this.preparationViews().length || this.showingAllPreparations())
+      return;
+    this.showingAllPreparations.set(true);
+    this.playbackLane.set(null);
+    this.activePlaybackBundle = null;
+    this.lastPlaybackFrameSequence = -1;
+    this.combat.closeCurrentRaidBattle();
+  }
+
+  showOnePreparation(): void {
+    if (!this.showingAllPreparations()) return;
+    const lane =
+      this.lastFocusedPreparationLane ?? this.preparationViews()[0]?.lane;
+    if (lane) this.focusPreparation(lane);
   }
 
   claim(): void {
@@ -297,6 +506,10 @@ export class RaidPageComponent implements OnInit, OnDestroy {
 
   benched(): RaidSignup[] {
     return this.raid()?.signups.filter((signup) => !signup.lane) ?? [];
+  }
+
+  hasPendingJoinRequest(raid: RaidRun): boolean {
+    return raid.joinRequests.some((request) => request.isCurrentCharacter);
   }
 
   wingSlots(raid: RaidRun): number[] {
@@ -610,68 +823,85 @@ export class RaidPageComponent implements OnInit, OnDestroy {
     if (this.action() || !lanes.length) return;
     this.closeRaidPlayback();
     this.setPlaybackSchedule(schedule);
-    this.activePlaybackLanes = [...lanes];
+    const preparationLane = lanes.find((lane) => lane !== 'FinalAssault');
+    const includesPreparations = preparationLane !== undefined;
+    this.activePlaybackLanes = includesPreparations
+      ? [
+          ...this.lanes,
+          ...(lanes.includes('FinalAssault')
+            ? (['FinalAssault'] as const)
+            : []),
+        ]
+      : ['FinalAssault'];
+    this.focusPreparationOnLoad =
+      lanes.length === 1 && preparationLane ? preparationLane : null;
     this.watchingPlayback.set(true);
-    this.loadPlaybackStage(0);
+    if (includesPreparations) this.loadPreparationPhase();
+    else this.loadFinalAssault(0);
   }
 
-  private loadPlaybackStage(index: number): void {
-    const lane = this.activePlaybackLanes[index];
-    if (!lane) {
-      const completedScheduledPlayback =
-        this.scheduledPlaybackStartedAt !== null;
-      this.closeRaidPlayback();
-      if (completedScheduledPlayback) this.load(false);
-      return;
-    }
-
+  private loadPreparationPhase(): void {
     this.stopPlaybackTimers();
-    this.playbackStageIndex.set(index);
-    this.playbackLane.set(lane);
-    this.action.set(`playback-${lane}`);
+    this.playbackStageIndex.set(0);
+    this.playbackLane.set(null);
+    this.showingAllPreparations.set(true);
+    this.action.set('playback-preparations');
     this.error.set(null);
     const generation = this.playbackGeneration;
-    this.raids
-      .getPlaybackBundle(this.raidRunId, lane)
+    forkJoin(
+      this.lanes.map((lane) =>
+        this.raids.getPlaybackBundle(this.raidRunId, lane),
+      ),
+    )
       .pipe(takeUntil(this.destroyed))
       .subscribe({
-        next: (bundle) => {
+        next: (bundles) => {
           if (generation !== this.playbackGeneration) return;
           this.action.set(null);
-          this.activePlaybackBundle = bundle;
-          this.playbackStageOffsetMilliseconds = this.activePlaybackLanes
-            .slice(0, index)
-            .reduce(
-              (total, previousLane) =>
-                total +
-                this.playbackDurationMilliseconds(previousLane, bundle) +
-                this.playbackTransitionMilliseconds,
-              0,
+          this.lanes.forEach((lane, index) => {
+            const bundle = bundles[index];
+            this.preparationBundles.set(lane, bundle);
+            this.playbackStageDurations.set(
+              lane,
+              this.playbackDurationMilliseconds(lane, bundle),
             );
-          const stageElapsedMilliseconds = Math.max(
-            0,
-            (this.scheduledPlaybackElapsedMilliseconds() ??
-              this.playbackStageOffsetMilliseconds) -
-              this.playbackStageOffsetMilliseconds,
+          });
+          this.preparationPhaseDurationMilliseconds = Math.max(
+            ...this.lanes.map(
+              (lane) => this.playbackStageDurations.get(lane) ?? 0,
+            ),
           );
-          const stageDurationMilliseconds =
-            (bundle.totalTicks / bundle.ticksPerSecond) * 1000;
+          const stageElapsedMilliseconds =
+            this.scheduledPlaybackElapsedMilliseconds() ?? 0;
           if (
             stageElapsedMilliseconds >=
-            stageDurationMilliseconds + this.playbackTransitionMilliseconds
+            this.preparationPhaseDurationMilliseconds +
+              this.playbackTransitionMilliseconds
           ) {
-            queueMicrotask(() => this.loadPlaybackStage(index + 1));
+            queueMicrotask(() => this.advanceAfterPreparations());
             return;
           }
 
           this.playbackStartedAt =
             performance.now() -
-            Math.min(stageElapsedMilliseconds, stageDurationMilliseconds);
+            Math.min(
+              stageElapsedMilliseconds,
+              this.preparationPhaseDurationMilliseconds,
+            );
           this.lastPlaybackFrameSequence = -1;
-          this.renderPlaybackFrame(true);
-          if (stageElapsedMilliseconds < stageDurationMilliseconds) {
+          this.lastPlaybackWasWaveTransitionHold = false;
+          this.renderPreparationFrames(true);
+          if (
+            this.focusPreparationOnLoad &&
+            stageElapsedMilliseconds < this.preparationPhaseDurationMilliseconds
+          ) {
+            this.focusPreparation(this.focusPreparationOnLoad);
+          }
+          if (
+            stageElapsedMilliseconds < this.preparationPhaseDurationMilliseconds
+          ) {
             this.playbackTimer = setInterval(
-              () => this.renderPlaybackFrame(false),
+              () => this.renderPreparationFrames(false),
               250,
             );
           }
@@ -685,7 +915,167 @@ export class RaidPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  private renderPlaybackFrame(reset: boolean): void {
+  private renderPreparationFrames(reset: boolean): void {
+    const elapsedMilliseconds = Math.max(
+      0,
+      performance.now() - this.playbackStartedAt,
+    );
+    const views = this.lanes.flatMap((lane) => {
+      const bundle = this.preparationBundles.get(lane);
+      if (!bundle) return [];
+      const durationMilliseconds = this.playbackStageDurations.get(lane) ?? 0;
+      const laneElapsedMilliseconds = Math.min(
+        elapsedMilliseconds,
+        durationMilliseconds,
+      );
+      const playbackPosition =
+        lane === 'Rearguard'
+          ? this.playbackPlayer.playbackPositionAtElapsed(
+              bundle,
+              laneElapsedMilliseconds,
+              this.rearguardWaveTransitionHoldMilliseconds,
+            )
+          : {
+              combatTick: Math.min(
+                bundle.totalTicks,
+                Math.floor(
+                  (laneElapsedMilliseconds / 1000) * bundle.ticksPerSecond,
+                ),
+              ),
+              isWaveTransitionHold: false,
+            };
+      const frame = this.playbackPlayer.frameAtTick(
+        bundle,
+        playbackPosition.combatTick,
+        playbackPosition.isWaveTransitionHold,
+      );
+      const completed = elapsedMilliseconds >= durationMilliseconds;
+      return [
+        this.toPreparationView(
+          lane,
+          frame,
+          laneElapsedMilliseconds,
+          durationMilliseconds,
+          completed,
+          playbackPosition.isWaveTransitionHold,
+        ),
+      ];
+    });
+    this.preparationViews.set(views);
+
+    const focusedLane = this.playbackLane();
+    if (focusedLane && !this.showingAllPreparations()) {
+      const focused = views.find((view) => view.lane === focusedLane);
+      if (
+        focused &&
+        (reset ||
+          focused.frame.sequence !== this.lastPlaybackFrameSequence ||
+          focused.isWaveTransitionHold !==
+            this.lastPlaybackWasWaveTransitionHold)
+      ) {
+        this.lastPlaybackFrameSequence = focused.frame.sequence;
+        this.lastPlaybackWasWaveTransitionHold = focused.isWaveTransitionHold;
+        if (focused.frame.waveNumber !== null)
+          this.rearguardWaveNumber.set(focused.frame.waveNumber);
+        this.combat.applyRaidCombatFrame(focused.frame, reset);
+      }
+    }
+
+    if (
+      elapsedMilliseconds < this.preparationPhaseDurationMilliseconds ||
+      this.playbackAdvanceTimer !== null
+    )
+      return;
+
+    if (this.playbackTimer !== null) clearInterval(this.playbackTimer);
+    this.playbackTimer = null;
+    const scheduledElapsed = this.scheduledPlaybackElapsedMilliseconds();
+    const transitionDelay =
+      scheduledElapsed === null
+        ? this.playbackTransitionMilliseconds
+        : Math.max(
+            0,
+            this.preparationPhaseDurationMilliseconds +
+              this.playbackTransitionMilliseconds -
+              scheduledElapsed,
+          );
+    this.playbackAdvanceTimer = setTimeout(() => {
+      this.playbackAdvanceTimer = null;
+      this.advanceAfterPreparations();
+    }, transitionDelay);
+  }
+
+  private advanceAfterPreparations(): void {
+    if (this.activePlaybackLanes.includes('FinalAssault')) {
+      this.loadFinalAssault(
+        this.preparationPhaseDurationMilliseconds +
+          this.playbackTransitionMilliseconds,
+      );
+      return;
+    }
+    this.finishRaidPlayback();
+  }
+
+  private loadFinalAssault(stageOffsetMilliseconds: number): void {
+    this.stopPlaybackTimers();
+    this.showingAllPreparations.set(false);
+    this.preparationViews.set([]);
+    this.combat.closeCurrentRaidBattle();
+    this.playbackStageIndex.set(
+      this.activePlaybackLanes.some((lane) => lane !== 'FinalAssault') ? 1 : 0,
+    );
+    this.playbackLane.set('FinalAssault');
+    this.action.set('playback-FinalAssault');
+    this.error.set(null);
+    const generation = this.playbackGeneration;
+    this.raids
+      .getPlaybackBundle(this.raidRunId, 'FinalAssault')
+      .pipe(takeUntil(this.destroyed))
+      .subscribe({
+        next: (bundle) => {
+          if (generation !== this.playbackGeneration) return;
+          this.action.set(null);
+          this.activePlaybackBundle = bundle;
+          const durationMilliseconds = this.playbackDurationMilliseconds(
+            'FinalAssault',
+            bundle,
+          );
+          this.playbackStageDurations.set('FinalAssault', durationMilliseconds);
+          this.playbackStageOffsetMilliseconds = stageOffsetMilliseconds;
+          const elapsedMilliseconds = Math.max(
+            0,
+            (this.scheduledPlaybackElapsedMilliseconds() ??
+              stageOffsetMilliseconds) - stageOffsetMilliseconds,
+          );
+          if (
+            elapsedMilliseconds >=
+            durationMilliseconds + this.playbackTransitionMilliseconds
+          ) {
+            queueMicrotask(() => this.finishRaidPlayback());
+            return;
+          }
+          this.playbackStartedAt =
+            performance.now() -
+            Math.min(elapsedMilliseconds, durationMilliseconds);
+          this.lastPlaybackFrameSequence = -1;
+          this.renderFinalAssaultFrame(true);
+          if (elapsedMilliseconds < durationMilliseconds) {
+            this.playbackTimer = setInterval(
+              () => this.renderFinalAssaultFrame(false),
+              250,
+            );
+          }
+        },
+        error: (error) => {
+          if (generation !== this.playbackGeneration) return;
+          this.action.set(null);
+          this.error.set(this.errorMessage(error));
+          this.closeRaidPlayback();
+        },
+      });
+  }
+
+  private renderFinalAssaultFrame(reset: boolean): void {
     const bundle = this.activePlaybackBundle;
     if (!bundle) return;
     const elapsedMilliseconds = Math.max(
@@ -706,6 +1096,9 @@ export class RaidPageComponent implements OnInit, OnDestroy {
 
     if (this.playbackTimer !== null) clearInterval(this.playbackTimer);
     this.playbackTimer = null;
+    const durationMilliseconds =
+      this.playbackStageDurations.get('FinalAssault') ??
+      (bundle.totalTicks / bundle.ticksPerSecond) * 1000;
     const scheduledElapsed = this.scheduledPlaybackElapsedMilliseconds();
     const transitionDelay =
       scheduledElapsed === null
@@ -713,14 +1106,81 @@ export class RaidPageComponent implements OnInit, OnDestroy {
         : Math.max(
             0,
             this.playbackStageOffsetMilliseconds +
-              (bundle.totalTicks / bundle.ticksPerSecond) * 1000 +
+              durationMilliseconds +
               this.playbackTransitionMilliseconds -
               scheduledElapsed,
           );
     this.playbackAdvanceTimer = setTimeout(() => {
       this.playbackAdvanceTimer = null;
-      this.loadPlaybackStage(this.playbackStageIndex() + 1);
+      this.finishRaidPlayback();
     }, transitionDelay);
+  }
+
+  private finishRaidPlayback(): void {
+    const completedScheduledPlayback = this.scheduledPlaybackStartedAt !== null;
+    this.closeRaidPlayback();
+    if (completedScheduledPlayback) this.load(false);
+  }
+
+  private toPreparationView(
+    lane: RaidLane,
+    frame: RaidCombatFrame,
+    elapsedMilliseconds: number,
+    durationMilliseconds: number,
+    completed: boolean,
+    isWaveTransitionHold: boolean,
+  ): RaidPreparationPlaybackView {
+    const friendlyAlive = frame.friendly.filter(
+      (entity) => entity.health > 0,
+    ).length;
+    const hostileHealth = frame.hostile.reduce(
+      (total, entity) => total + Math.max(0, entity.health),
+      0,
+    );
+    const hostileMaxHealth = frame.hostile.reduce(
+      (total, entity) => total + Math.max(0, entity.maxHealth),
+      0,
+    );
+    const encounterProgress =
+      hostileMaxHealth > 0
+        ? Math.max(
+            0,
+            Math.min(100, 100 - (hostileHealth / hostileMaxHealth) * 100),
+          )
+        : 100;
+    const progressPercent =
+      lane === 'Rearguard' && frame.waveNumber !== null
+        ? Math.min(
+            100,
+            ((frame.waveNumber - 1) / 10) * 100 + encounterProgress / 10,
+          )
+        : hostileMaxHealth > 0
+          ? encounterProgress
+          : Math.min(
+              100,
+              (elapsedMilliseconds / Math.max(1, durationMilliseconds)) * 100,
+            );
+    const status = completed
+      ? frame.outcome === 'Victory'
+        ? 'Objective complete'
+        : 'Party defeated'
+      : lane === 'Rearguard' && frame.waveNumber !== null
+        ? `Wave ${frame.waveNumber} of 10`
+        : 'Engaged';
+    return {
+      lane,
+      frame,
+      progressPercent,
+      elapsedSeconds: elapsedMilliseconds / 1000,
+      durationSeconds: durationMilliseconds / 1000,
+      friendlyAlive,
+      friendlyTotal: frame.friendly.length,
+      hostileHealth,
+      hostileMaxHealth,
+      status,
+      completed,
+      isWaveTransitionHold,
+    };
   }
 
   private setPlaybackSchedule(schedule?: RaidRun): void {
@@ -757,7 +1217,14 @@ export class RaidPageComponent implements OnInit, OnDestroy {
     const durationTicks =
       this.raid()?.laneResults.find((result) => result.lane === lane)
         ?.durationTicks ?? 0;
-    return (durationTicks / bundle.ticksPerSecond) * 1000;
+    const combatDurationMilliseconds =
+      (durationTicks / bundle.ticksPerSecond) * 1000;
+    return lane === 'Rearguard'
+      ? this.playbackPlayer.playbackDurationMilliseconds(
+          bundle,
+          this.rearguardWaveTransitionHoldMilliseconds,
+        )
+      : combatDurationMilliseconds;
   }
 
   private stopPlaybackTimers(): void {

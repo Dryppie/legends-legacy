@@ -5,8 +5,6 @@ using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Services.LL.WorldTower;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
-using Domain.Models.Attributes;
-using Domain.Models.Attributes.Modifiers;
 using Domain.Models.WorldTower;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -119,7 +117,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
 
     [BalanceFact]
     [Trait("BalanceShard", "WorldTowerLow")]
-    public async Task Floor_one_rejects_an_otherwise_ready_uncommon_roster()
+    public async Task Floor_one_allows_cooperation_to_compensate_one_rarity_step()
     {
         var report = await CreateAnalyzer().AnalyzeAsync(
             new WorldTowerBalanceRequest(
@@ -129,15 +127,16 @@ public sealed class WorldTowerBalanceAnalyzerTests
                 new WorldTowerBalanceLoadout(30, "Uncommon", 4)),
             CancellationToken.None);
 
-        var mixed = Assert.Single(report.Floors).Rosters.Single(x => x.Roster == "Mixed");
+        var cooperative = Assert.Single(report.Floors).Rosters.Single(x =>
+            x.Kind == WorldTowerBalanceRosterKind.Cooperative);
         Assert.True(
-            mixed.WinRate < 50,
-            $"The level-30 Uncommon mixed roster still won {mixed.WinRate:N2}% of attempts.");
+            cooperative.WinRate >= WorldTowerBalanceAnalyzer.PreparedMinimumWinRate,
+            $"The level-30 Uncommon cooperative roster won only {cooperative.WinRate:N2}% of attempts.");
     }
 
     [BalanceFact]
     [Trait("BalanceShard", "WorldTowerLow")]
-    public async Task Floor_one_rejects_a_full_common_mixed_roster_even_with_four_essences()
+    public async Task Floor_one_rejects_a_full_common_cooperative_roster_even_with_four_essences()
     {
         var report = await CreateAnalyzer().AnalyzeAsync(
             new WorldTowerBalanceRequest(
@@ -148,10 +147,11 @@ public sealed class WorldTowerBalanceAnalyzerTests
             CancellationToken.None);
 
         var floor = Assert.Single(report.Floors);
-        var mixed = floor.Rosters.Single(roster => roster.Roster == "Mixed");
+        var cooperative = floor.Rosters.Single(roster =>
+            roster.Kind == WorldTowerBalanceRosterKind.Cooperative);
         Assert.True(
-            mixed.WinRate < 10,
-            $"The full-Common mixed roster still won {mixed.WinRate:N2}% of attempts.");
+            cooperative.WinRate < 50,
+            $"The full-Common cooperative roster still won {cooperative.WinRate:N2}% of attempts.");
         Assert.All(floor.Rosters, roster => Assert.True(
             roster.WinRate < 50,
             $"Full-Common {roster.Roster} roster still won {roster.WinRate:N2}% of attempts."));
@@ -209,8 +209,8 @@ public sealed class WorldTowerBalanceAnalyzerTests
         var benchmark = floor.BalanceBenchmark;
         var rung = fixture.Builds.GetProgressionLadder().Single(candidate =>
             candidate.Id.Equals(benchmark.BuildId, StringComparison.OrdinalIgnoreCase));
-        var unboosted = fixture.Builds.CreateBuildForArea(
-            CanonicalPartyProfile.Offense,
+        var canonical = fixture.Builds.CreateBuildForArea(
+            CanonicalCooperativeRole.Guardian,
             rung,
             benchmark.CharacterLevel,
             benchmark.EssenceCount);
@@ -218,7 +218,7 @@ public sealed class WorldTowerBalanceAnalyzerTests
         var build = factory.Create(characterId, "SeedGuest_Test", floor, rosterIndex: 0);
 
         Assert.Equal(
-            CombatRatingDisplay.FromRaw(unboosted.Rating.Overall) * WorldTowerDevelopmentRosterFactory.PowerMultiplier,
+            CombatRatingDisplay.FromRaw(canonical.Rating.Overall),
             build.PowerRating);
         Assert.Equal(characterId, build.Snapshot.CharacterId);
         Assert.Equal("SeedGuest_Test", build.Snapshot.Name);
@@ -228,13 +228,9 @@ public sealed class WorldTowerBalanceAnalyzerTests
             build.Snapshot.Equipment,
             equipment => Assert.Equal(expectedRarity, equipment.Rarity.ToString()));
         Assert.Equal(expectedEssenceCount, build.Snapshot.EquippedEssences.Count);
-        var powerBoost = Assert.Single(build.Snapshot.Equipment
-            .SelectMany(equipment => equipment.InstanceModifiers)
-            .Where(modifier =>
-                modifier.AttributeType == AttributeType.Power &&
-                modifier.ModifierType == ModifierType.Multiplicative &&
-                Math.Abs(modifier.Amount - 200f) < float.Epsilon));
-        Assert.Equal(200f, powerBoost.Amount);
+        Assert.DoesNotContain(
+            build.Snapshot.Equipment.SelectMany(equipment => equipment.InstanceModifiers),
+            modifier => Math.Abs(modifier.Amount - 200f) < float.Epsilon);
     }
 
     private static async Task AssertReleasedFloorAsync(
@@ -258,11 +254,14 @@ public sealed class WorldTowerBalanceAnalyzerTests
         Assert.Equal(4, floor.Rosters.Count);
         Assert.All(floor.Rosters, roster => Assert.Equal(256, roster.Attempts));
 
-        var mixed = floor.Rosters.Single(roster => roster.Roster == "Mixed");
+        var cooperative = floor.Rosters.Single(roster =>
+            roster.Kind == WorldTowerBalanceRosterKind.Cooperative);
+        Assert.Equal(floor.RequiredSlots, cooperative.Profiles.Count);
+        Assert.Equal((floor.RequiredSlots + 4) / 5, cooperative.Cooperation.Parties.Count);
         Assert.True(
-            mixed.WinRate is >= 5 and <= 15,
-            JsonSerializer.Serialize(mixed));
-        Assert.InRange(mixed.AverageSurvivors, 0, floor.RequiredSlots * 0.25);
+            floor.Passed,
+            JsonSerializer.Serialize(new { floor.Failures, floor.Rosters }));
+        Assert.True(report.Passed, string.Join(Environment.NewLine, report.Blockers));
     }
 
     private static WorldTowerBalanceAnalyzer CreateAnalyzer() => CreateFixture().Analyzer;

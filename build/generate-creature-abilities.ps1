@@ -127,7 +127,8 @@ function New-Ability {
         [string]$Description,
         [object[]]$Effects,
         [object[]]$Triggers = @(),
-        [int]$Cooldown = 100
+        [int]$Cooldown = 100,
+        [Nullable[int]]$ThreatValue = $null
     )
     $result = [ordered]@{
         id = "ability.creature.$Slug.$AbilitySlug"
@@ -137,6 +138,7 @@ function New-Ability {
         cooldownTicks = $(if ($Kind -eq 'Active') { $Cooldown } else { 0 })
         tags = @('Effect.Ability', "Creature.$($Creature.Replace(' ', ''))")
     }
+    if ($null -ne $ThreatValue) { $result.threatValue = [int]$ThreatValue }
     if ($Triggers.Count -gt 0) { $result.triggers = @($Triggers) }
     $result.effects = @($Effects)
     [pscustomobject]$result
@@ -310,9 +312,9 @@ Add-Creature 'Blue Slime' 'blue_slime' @(
 )
 
 Add-Creature 'Transparent Slime' 'transparent_slime' @(
-    (New-Ability 'Transparent Slime' 'transparent_slime' 'transparent_engulf' Active 'Transparent Engulf' 'Taunt a random enemy for 7 seconds.' @(
-        (New-Effect 'effect.creature.transparent_slime.transparent_engulf.taunt' ApplyCondition RandomEnemy 7 -Condition Taunt)
-    )),
+    (New-Ability 'Transparent Slime' 'transparent_slime' 'transparent_engulf' Active 'Gelatinous Defiance' 'Generate 100 threat and gain Guard(4).' @(
+        (New-Effect 'effect.creature.transparent_slime.transparent_engulf.guard' ApplyCondition Self 4 -Condition Guard)
+    ) -ThreatValue 100),
     (New-Ability 'Transparent Slime' 'transparent_slime' 'reconstitute' Passive 'Reconstitute' 'The first time you fall below 90% Health, heal 15% Max Health.' @(
         (New-Effect 'effect.creature.transparent_slime.reconstitute.heal' Heal Self 0 MaxHealth 0.15 -Uses 1)
     ) @((New-Trigger OnHealthChanged @('effect.creature.transparent_slime.reconstitute.heal') -Conditions @((New-Condition HealthBelowPercent Source 90)))))

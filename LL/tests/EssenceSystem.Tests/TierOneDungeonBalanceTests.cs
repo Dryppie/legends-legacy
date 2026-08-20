@@ -57,13 +57,23 @@ public sealed class TierOneDungeonBalanceTests
                 $"{measurement.Durations.MedianTicks}/{measurement.Durations.P90Ticks}, " +
                 $"damage={measurement.MedianTotalDamage:F0}, hp={measurement.MedianRemainingHealthPercent:F1}%, " +
                 $"break={measurement.MedianPressureBreakpoint}, passed={measurement.Passed}; " +
+                $"cooperation={FormatCooperation(measurement.MedianCooperativeTelemetry)}; " +
                 $"{string.Join(" | ", measurement.Failures)}; warnings=" +
                 $"{string.Join(" | ", measurement.Warnings)}");
         }
-        Assert.Equal(178, report.Measurements.Count);
+        Assert.Equal(184, report.Measurements.Count);
         Assert.All(report.Measurements, measurement => Assert.Equal(8, measurement.SampleCount));
         Assert.True(report.Passed, string.Join(Environment.NewLine, report.Blockers));
     }
+
+    private static string FormatCooperation(CooperativeCombatPacingTelemetry? telemetry) =>
+        telemetry is null
+            ? "n/a"
+            : $"guardian attention {telemetry.GuardianAttentionSharePercent:F1}%, " +
+              $"restorer attention {telemetry.RestorerAttentionSharePercent:F1}%, " +
+              $"threat {telemetry.GuardianThreatGenerated:F0}/{telemetry.RestorerThreatGenerated:F0}, " +
+              $"guardian incoming {telemetry.GuardianIncomingRawDamage:F0}, " +
+              $"healing {telemetry.RestorerHealingDone:F0}, survivors {telemetry.Survivors}";
 
     [BalanceFact]
     public async Task Canonical_equipment_pacing_development_gate_approves_every_checkpoint()
@@ -108,7 +118,7 @@ public sealed class TierOneDungeonBalanceTests
             _output.WriteLine(blocker);
 
         Assert.Equal(expectedSeeds, report.SeedsPerScenario);
-        Assert.Equal(178, report.Measurements.Count);
+        Assert.Equal(184, report.Measurements.Count);
         Assert.All(report.Measurements, measurement =>
             Assert.Equal(expectedSeeds, measurement.SampleCount));
         Assert.True(report.Passed, string.Join(Environment.NewLine, report.Blockers));

@@ -1,5 +1,10 @@
-using System.Globalization;
+using System.Security.Cryptography;
+using Application.Interfaces.Services.LL.PowerRatings;
+using Domain.Models.Raids;
 using Domain.Models.Professions.Crafting.V2;
+using Services.LL.Balance;
+using Services.LL.PowerRatings;
+using Services.LL.WorldTower;
 
 namespace EssenceSystem.Tests;
 
@@ -12,10 +17,9 @@ namespace EssenceSystem.Tests;
 /// inert there and never skips.
 /// </para>
 /// <para>
-/// Locally the suite costs minutes and only produces new information once the equipment stat
-/// budget moves, so it runs when <see cref="EquipmentStatBudgetCatalog.BalanceVersion"/> differs
-/// from the version recorded in the stamp file and is skipped otherwise. The stamp is written by
-/// <c>build/run-tests.ps1</c> after a successful balance run.
+/// Locally the suite costs minutes and only produces new information once a balance input moves,
+/// so it compares a composite identity covering code versions and data-file hashes with the stamp
+/// written by <c>build/run-tests.ps1</c> after a successful balance run.
 /// </para>
 /// </remarks>
 internal static class BalanceSuiteGate
@@ -31,6 +35,39 @@ internal static class BalanceSuiteGate
 
     /// <summary>The equipment balance version the current build was compiled against.</summary>
     public static int EquipmentBalanceVersion => EquipmentStatBudgetCatalog.BalanceVersion;
+
+    /// <summary>The complete identity of inputs that can invalidate balance conclusions.</summary>
+    public static string? BalanceIdentity
+    {
+        get
+        {
+            var root = FindRepositoryRoot();
+            if (root is null)
+                return null;
+
+            try
+            {
+                return string.Join('|',
+                    $"equipment={EquipmentStatBudgetCatalog.BalanceVersion}",
+                    $"combat={PowerRatingAlgorithm.CombatRulesVersion}",
+                    $"reference={EquipmentCombatPacingAnalyzer.ReferenceControlVersion}",
+                    $"raid={RaidRules.Version}",
+                    $"roster={CanonicalCooperativeRosterCatalog.Version}",
+                    $"tower={WorldTowerBalanceAnalyzer.BalanceVersion}",
+                    $"abilities={HashFile(root, "LL/src/API/API.LL/Data/combat/abilities.json")}",
+                    $"raidBosses={HashFile(root, "LL/src/API/API.LL/Data/raids/raid-bosses.json")}",
+                    $"towerFloors={HashFile(root, "LL/src/API/API.LL/Data/world-tower/tower-floors.json")}");
+            }
+            catch (IOException)
+            {
+                return null;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return null;
+            }
+        }
+    }
 
     /// <summary>
     /// <c>null</c> when the suite should run, otherwise the reason reported by the test runner.
@@ -87,22 +124,16 @@ internal static class BalanceSuiteGate
             return null;
         }
 
-        if (!int.TryParse(
-                stampContent.Trim(),
-                NumberStyles.Integer,
-                CultureInfo.InvariantCulture,
-                out var recordedVersion))
-        {
-            return null;
-        }
-
-        if (recordedVersion != EquipmentBalanceVersion)
+        var balanceIdentity = BalanceIdentity;
+        if (balanceIdentity is null)
             return null;
 
-        return $"Balance suite skipped locally: equipment balance version v{EquipmentBalanceVersion} is "
-            + $"unchanged since the last recorded local balance run. Bump "
-            + $"{nameof(EquipmentStatBudgetCatalog)}.{nameof(EquipmentStatBudgetCatalog.BalanceVersion)}, "
-            + $"delete '{StampRelativePath}', or set {OverrideEnvironmentVariable}=1 to run it anyway.";
+        if (!stampContent.Trim().Equals(balanceIdentity, StringComparison.Ordinal))
+            return null;
+
+        return "Balance suite skipped locally: the composite balance identity is unchanged since "
+            + $"the last recorded local balance run. Delete '{StampRelativePath}' or set "
+            + $"{OverrideEnvironmentVariable}=1 to run it anyway.";
     }
 
     private static bool TryReadOverride(out bool forced)
@@ -141,6 +172,14 @@ internal static class BalanceSuiteGate
         && (value.Trim().Equals("0", StringComparison.Ordinal)
             || value.Trim().Equals("false", StringComparison.OrdinalIgnoreCase)
             || value.Trim().Equals("no", StringComparison.OrdinalIgnoreCase));
+
+    private static string HashFile(string root, string relativePath)
+    {
+        var path = relativePath
+            .Split('/')
+            .Aggregate(root, Path.Combine);
+        return Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant();
+    }
 
     private static string? FindRepositoryRoot()
     {

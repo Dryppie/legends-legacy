@@ -79,6 +79,9 @@ export class CombatComponent implements OnInit, OnDestroy {
   @Input() playerTeamName: string | null = null;
   @Input() enemyTeamName: string | null = null;
   @Input() battleTitleOverride: string | null = null;
+  @Input() combatActionDisabled = false;
+  @Input() combatActionButtonTextOverride: string | null = null;
+  @Input() useParentScroll = false;
 
   @Output() skipBattle = new EventEmitter<void>();
 
@@ -308,6 +311,8 @@ export class CombatComponent implements OnInit, OnDestroy {
   }
 
   onStopOrSkip(): void {
+    if (this.combatActionDisabled) return;
+
     if (this.battleType === BattleType.IdleCombat) {
       this.initiateStoppingCombat();
     } else if (
@@ -322,6 +327,9 @@ export class CombatComponent implements OnInit, OnDestroy {
   }
 
   combatActionButtonText(): string {
+    if (this.combatActionButtonTextOverride)
+      return this.combatActionButtonTextOverride;
+
     if (this.battleType === BattleType.IdleCombat) {
       return this.isStoppingCombat ? 'Quitting...' : 'Quit';
     }
@@ -342,11 +350,15 @@ export class CombatComponent implements OnInit, OnDestroy {
   }
 
   combatActionButtonMobileText(): string {
+    if (this.combatActionButtonTextOverride)
+      return this.combatActionButtonTextOverride;
+
     return this.isEscapeDismissibleBattleType() ? 'Close Summary' : '';
   }
 
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
+    if (this.combatActionDisabled) return;
     if (!this.displayCombat || !this.outcome) return;
     if (!this.isEscapeDismissibleBattleType()) return;
 

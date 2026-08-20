@@ -8,6 +8,7 @@ import { TowerRallyComponent } from './tower/rally/tower-rally.component';
 import { TowerHallOfFameComponent } from './tower/hall-of-fame/tower-hall-of-fame.component';
 import { TowerPersonalExpeditionsComponent } from './tower/personal-expeditions/tower-personal-expeditions.component';
 import { RaidPageComponent } from './raid/raid-page.component';
+import { raidFeatureGuard } from '../../../core/guards/raid-feature.guard';
 
 export const WORLD_ROUTES: Routes = [
   {
@@ -22,6 +23,7 @@ export const WORLD_ROUTES: Routes = [
       {
         path: 'raid/:raidId',
         component: RaidPageComponent,
+        canActivate: [raidFeatureGuard],
         data: { guidePageId: GUIDE_PAGE_IDS.raids },
       },
       {

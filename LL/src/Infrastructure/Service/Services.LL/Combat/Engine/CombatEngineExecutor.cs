@@ -56,7 +56,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             cancellationToken,
             captureEventLog: captureEventLog);
         SyncCombatEntityState(runtime.FriendlyParticipants, execution.Friendly);
-        SyncCombatEntityState(runtime.HostileParticipants, execution.Hostile);
+        SyncCombatEntityState(runtime.AllHostileParticipants, execution.Hostile);
         execution.Result.StartedAt = runtime.Plan.StartsAt;
         return execution.Result;
     }
@@ -77,7 +77,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             checkpoint => checkpoints.Add(checkpoint),
             checkpointIntervalTicks);
         SyncCombatEntityState(runtime.FriendlyParticipants, execution.Friendly);
-        SyncCombatEntityState(runtime.HostileParticipants, execution.Hostile);
+        SyncCombatEntityState(runtime.AllHostileParticipants, execution.Hostile);
         execution.Result.StartedAt = runtime.Plan.StartsAt;
         return new CombatExecutionWithCheckpoints(execution.Result, checkpoints);
     }
@@ -113,7 +113,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             checkpointIntervalTicks,
             captureEventLog: false);
         SyncCombatEntityState(runtime.FriendlyParticipants, execution.Friendly);
-        SyncCombatEntityState(runtime.HostileParticipants, execution.Hostile);
+        SyncCombatEntityState(runtime.AllHostileParticipants, execution.Hostile);
         PopulatePostCombatTeams(execution.Result, execution.Friendly, execution.Hostile);
         execution.Result.StartedAt = runtime.Plan.StartsAt;
         return new CombatExecutionWithCheckpoints(execution.Result, checkpoints);
@@ -157,7 +157,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             checkpointIntervalTicks,
             captureEventLog: false);
         SyncCombatEntityState(runtime.FriendlyParticipants, execution.Friendly);
-        SyncCombatEntityState(runtime.HostileParticipants, execution.Hostile);
+        SyncCombatEntityState(runtime.AllHostileParticipants, execution.Hostile);
         execution.Result.StartedAt = runtime.Plan.StartsAt;
         return new CombatExecutionWithCheckpoints(execution.Result, checkpoints);
     }
@@ -218,7 +218,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         var supplementalAbilities = (options.SupplementalAbilities ?? [])
             .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
         var abilityIds = runtime.FriendlyParticipants
-            .Concat(runtime.HostileParticipants)
+            .Concat(runtime.AllHostileParticipants)
             .SelectMany(participant => GetCombatantAbilityIds(participant.Combatant, catalog))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         foreach (var supplementalId in runtime.AllCombatants
@@ -250,6 +250,20 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 compiledAbilities,
                 precompiledCatalog is not null))
             .ToList();
+        var hostileReinforcementWaves = runtime.HostileReinforcementWaves
+            .Select(wave => (IReadOnlyList<RuntimeCombatant>)wave
+                .Select(participant => CreateRuntimeCombatant(
+                    participant.Combatant,
+                    CombatTeam.Hostile,
+                    participant.Slot.PartyNumber,
+                    catalog,
+                    compiledAbilities,
+                    precompiledCatalog is not null))
+                .ToList())
+            .ToList();
+        var allHostile = hostile
+            .Concat(hostileReinforcementWaves.SelectMany(x => x))
+            .ToList();
         var engine = new FastCombatEngine(
             compiledStatuses,
             compiledSummons,
@@ -276,8 +290,15 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             hostile,
             cancellationToken,
             checkpointObserver,
-            checkpointIntervalTicks);
-        return Task.FromResult(new ExecutionResult(result, friendly, hostile));
+            checkpointIntervalTicks,
+            hostileReinforcementWaves);
+        var participatingHostileIds = result.EntityStats
+            .Select(x => x.EntityId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        return Task.FromResult(new ExecutionResult(
+            result,
+            friendly,
+            allHostile.Where(x => participatingHostileIds.Contains(x.Id)).ToList()));
     }
 
     private static void SyncCombatEntityState(
@@ -561,6 +582,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 ApplyMultiplierModifier(clone, modifier, catalog);
             else if (modifier.Operation.Equals("AddEffect", StringComparison.OrdinalIgnoreCase))
                 ApplyAddEffectModifier(clone, modifier, catalog);
+            else if (modifier.Operation.Equals("DelayCooldowns", StringComparison.OrdinalIgnoreCase))
+                ApplyCooldownDelay(clone, modifier.Value);
         }
 
         return clone ?? spec;
@@ -571,12 +594,30 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         if (string.IsNullOrWhiteSpace(modifier.Target))
             return false;
 
+        if (modifier.Operation.Equals("DelayCooldowns", StringComparison.OrdinalIgnoreCase))
+            return spec.Id.Equals(modifier.Target, StringComparison.OrdinalIgnoreCase);
+
         if (spec.Effects.Any(x => x.Id.Equals(modifier.Target, StringComparison.OrdinalIgnoreCase)))
             return true;
 
         return modifier.Effect is not null
             && spec.Triggers.Any(x => x.EffectIds.Contains(modifier.Target, StringComparer.OrdinalIgnoreCase));
     }
+
+    private static void ApplyCooldownDelay(AbilitySpec spec, double delayFraction)
+    {
+        if (delayFraction <= 0)
+            return;
+
+        if (spec.CooldownTicks > 0)
+            spec.CooldownTicks = ScaleCooldownTicks(spec.CooldownTicks, delayFraction);
+
+        foreach (var trigger in spec.Triggers.Where(x => x.InternalCooldownTicks > 0))
+            trigger.InternalCooldownTicks = ScaleCooldownTicks(trigger.InternalCooldownTicks, delayFraction);
+    }
+
+    private static int ScaleCooldownTicks(int ticks, double delayFraction) =>
+        Math.Max(1, (int)Math.Ceiling(ticks * (1 + delayFraction)));
 
     private static IReadOnlyList<EssenceAbilityModifierDefinition> SelectEvolutionModifiers(
         AbilitySpec spec,
@@ -824,6 +865,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             DurationTicks = effect.DurationTicks,
             IntervalTicks = effect.IntervalTicks,
             Uses = effect.Uses,
+            MaintainWhileConditionsMet = effect.MaintainWhileConditionsMet,
             ChancePercent = effect.ChancePercent,
             AttackType = effect.AttackType,
             DamageType = effect.DamageType,

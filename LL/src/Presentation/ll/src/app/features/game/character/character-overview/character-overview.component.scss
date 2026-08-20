@@ -1,0 +1,56 @@
+:host {
+  container-name: character-overview;
+  container-type: inline-size;
+  display: block;
+  min-width: 0;
+}
+
+.attribute-panel {
+  container-name: attribute-panel;
+  container-type: inline-size;
+}
+
+.profile-summary-grid,
+.overview-columns,
+.attribute-section-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.attribute-row {
+  grid-template-columns: minmax(0, 1fr) max-content;
+}
+
+.attribute-value {
+  max-width: 9rem;
+  overflow-wrap: anywhere;
+}
+
+@container character-overview (min-width: 48rem) {
+  .profile-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container character-overview (min-width: 64rem) {
+  .overview-columns {
+    grid-template-columns: minmax(0, 1fr) 22.5rem;
+  }
+}
+
+@container attribute-panel (min-width: 36rem) {
+  .attribute-section-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container attribute-panel (max-width: 18rem) {
+  .attribute-row {
+    gap: 0.25rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .attribute-value {
+    max-width: none;
+    text-align: left;
+  }
+}

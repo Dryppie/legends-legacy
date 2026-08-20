@@ -1,12 +1,25 @@
-<div class="flex h-full min-h-0 w-full flex-col overflow-hidden text-white">
-  <div class="min-h-0 flex-1 overflow-y-auto pt-3">
+<div
+  class="flex min-h-0 w-full flex-col text-white"
+  [ngClass]="{
+    'h-full overflow-hidden': !useParentScroll,
+    'h-auto overflow-visible': useParentScroll,
+  }"
+>
+  <div
+    class="min-h-0 pt-3"
+    [ngClass]="{
+      'flex-1 overflow-y-auto': !useParentScroll,
+      'overflow-visible': useParentScroll,
+    }"
+  >
     <div class="space-y-2 lg:hidden" data-tour="combatant-stats">
       <ng-container
         *ngFor="let group of participantGroups; trackBy: trackParticipantGroup"
       >
-        <div
+        <button
           *ngIf="hasPartyLayout"
-          class="flex items-center justify-between gap-3 rounded border-l-2 px-3 py-2"
+          type="button"
+          class="flex w-full items-center justify-between gap-3 rounded border-l-2 px-3 py-2 text-left transition-colors hover:bg-white/[0.04]"
           [ngClass]="{
             'border-primary bg-primary/[0.07]': group.partyNumber === 1,
             'border-[#8ecbff] bg-[#8ecbff]/[0.07]': group.partyNumber === 2,
@@ -16,28 +29,42 @@
               group.partyNumber !== 2,
             'border-danger bg-danger/[0.07]': group.team === 'Hostile',
           }"
+          (click)="toggleParticipantGroup(group)"
+          [attr.aria-expanded]="!isParticipantGroupCollapsed(group)"
+          [attr.aria-label]="
+            (isParticipantGroupCollapsed(group) ? 'Expand ' : 'Collapse ') +
+            group.label
+          "
         >
-          <span class="min-w-0">
-            <strong
-              class="font-display uppercase tracking-[0.1em]"
-              [ngClass]="{
-                'text-primary': group.partyNumber === 1,
-                'text-[#8ecbff]': group.partyNumber === 2,
-                'text-success':
-                  group.team === 'Friendly' &&
-                  group.partyNumber !== 1 &&
-                  group.partyNumber !== 2,
-                'text-danger': group.team === 'Hostile',
-              }"
+          <span class="flex min-w-0 items-center gap-2">
+            <span
+              class="w-3 shrink-0 text-[10px] text-light_gray"
+              aria-hidden="true"
             >
-              {{ group.label }}
-            </strong>
-            <small
-              *ngIf="group.isCurrentParty"
-              class="ml-2 text-[9px] uppercase tracking-[0.16em] text-light_gray"
-            >
-              Your party
-            </small>
+              {{ isParticipantGroupCollapsed(group) ? "▸" : "▾" }}
+            </span>
+            <span class="min-w-0">
+              <strong
+                class="font-display uppercase tracking-[0.1em]"
+                [ngClass]="{
+                  'text-primary': group.partyNumber === 1,
+                  'text-[#8ecbff]': group.partyNumber === 2,
+                  'text-success':
+                    group.team === 'Friendly' &&
+                    group.partyNumber !== 1 &&
+                    group.partyNumber !== 2,
+                  'text-danger': group.team === 'Hostile',
+                }"
+              >
+                {{ group.label }}
+              </strong>
+              <small
+                *ngIf="group.isCurrentParty"
+                class="ml-2 text-[9px] uppercase tracking-[0.16em] text-light_gray"
+              >
+                Your party
+              </small>
+            </span>
           </span>
           <span class="text-right text-[9px] uppercase tracking-[0.15em]">
             <span class="text-light_gray">Damage</span>
@@ -45,7 +72,7 @@
               group.damageDone | number
             }}</strong>
           </span>
-        </div>
+        </button>
 
         <button
           *ngFor="
@@ -312,9 +339,10 @@
             trackBy: trackParticipantGroup
           "
         >
-          <div
+          <button
             *ngIf="hasPartyLayout"
-            class="flex items-center justify-between gap-4 border-l-2 border-t border-white/[0.07] px-4 py-2"
+            type="button"
+            class="flex w-full items-center justify-between gap-4 border-l-2 border-t border-white/[0.07] px-4 py-2 text-left transition-colors hover:bg-white/[0.04]"
             [ngClass]="{
               'border-l-primary bg-primary/[0.07]': group.partyNumber === 1,
               'border-l-[#8ecbff] bg-[#8ecbff]/[0.07]': group.partyNumber === 2,
@@ -324,8 +352,20 @@
                 group.partyNumber !== 2,
               'border-l-danger bg-danger/[0.07]': group.team === 'Hostile',
             }"
+            (click)="toggleParticipantGroup(group)"
+            [attr.aria-expanded]="!isParticipantGroupCollapsed(group)"
+            [attr.aria-label]="
+              (isParticipantGroupCollapsed(group) ? 'Expand ' : 'Collapse ') +
+              group.label
+            "
           >
             <span class="flex min-w-0 items-baseline gap-3">
+              <span
+                class="w-3 shrink-0 text-[10px] text-light_gray"
+                aria-hidden="true"
+              >
+                {{ isParticipantGroupCollapsed(group) ? "▸" : "▾" }}
+              </span>
               <strong
                 class="font-display uppercase tracking-[0.1em]"
                 [ngClass]="{
@@ -353,7 +393,7 @@
                 group.damageDone | number
               }}</strong>
             </span>
-          </div>
+          </button>
 
           <ng-container
             *ngFor="

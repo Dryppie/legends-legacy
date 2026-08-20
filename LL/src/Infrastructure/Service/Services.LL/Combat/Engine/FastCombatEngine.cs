@@ -63,6 +63,8 @@ public sealed class FastCombatEngine
     private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationPotential = [];
     private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationOverhealed = [];
     private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationPulses = [];
+    private readonly Dictionary<MaintainedThreatSourceKey, float> _maintainedThreatRates = [];
+    private readonly Dictionary<MaintainedThreatSourceKey, double> _maintainedThreatRemainders = [];
     private readonly Dictionary<RuntimeCombatant, ThreatGenerationTelemetry> _threatGeneration = [];
     private readonly List<CombatLogItem> _log = [];
     private readonly Dictionary<string, int> _balanceDamageDone = new(StringComparer.OrdinalIgnoreCase);
@@ -141,16 +143,22 @@ public sealed class FastCombatEngine
         IReadOnlyList<RuntimeCombatant> hostile,
         CancellationToken cancellationToken = default,
         Action<CombatCheckpoint>? checkpointObserver = null,
-        int checkpointIntervalTicks = 0)
+        int checkpointIntervalTicks = 0,
+        IReadOnlyList<IReadOnlyList<RuntimeCombatant>>? hostileReinforcementWaves = null)
     {
         var combatants = friendly.Concat(hostile).ToList();
         for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
+            InitializeEncounterCombatant(combatants[combatantIndex]);
+
+        var reinforcementWaves = hostileReinforcementWaves ?? [];
+        var nextReinforcementWave = 0;
+        if (!HasLivingTeam(combatants, CombatTeam.Hostile))
         {
-            var combatant = combatants[combatantIndex];
-            RegisterListeners(combatant);
-            _basicAttackProgress[combatant] = 0;
-            _healthRegenerationProgress[combatant] = 0;
-            InitializeActiveAbilityCooldowns(combatant);
+            SpawnNextHostileWave(
+                combatants,
+                reinforcementWaves,
+                ref nextReinforcementWave,
+                publishCombatStart: false);
         }
 
         var checkpointSequence = 0;
@@ -179,6 +187,7 @@ public sealed class FastCombatEngine
                 cancellationToken.ThrowIfCancellationRequested();
 
             PublishIntervalEvents(combatants);
+            GenerateMaintainedThreat(combatants);
 
             var actingCombatantCount = combatants.Count;
             for (var combatantIndex = 0; combatantIndex < actingCombatantCount; combatantIndex++)
@@ -208,8 +217,32 @@ public sealed class FastCombatEngine
             TickSummons(combatants);
             _currentTick++;
 
+            var spawnedReinforcementWave = false;
+            if (HasLivingTeam(combatants, CombatTeam.Friendly)
+                && !HasLivingTeam(combatants, CombatTeam.Hostile))
+            {
+                spawnedReinforcementWave = SpawnNextHostileWave(
+                    combatants,
+                    reinforcementWaves,
+                    ref nextReinforcementWave,
+                    publishCombatStart: true);
+                if (spawnedReinforcementWave
+                    && checkpointObserver is not null
+                    && checkpointIntervalTicks > 0)
+                {
+                    checkpointObserver(CreateCheckpoint(
+                        combatants,
+                        checkpointStats!,
+                        checkpointSequence++,
+                        checkpointLogIndex,
+                        false));
+                    checkpointLogIndex = _log.Count;
+                }
+            }
+
             if (checkpointObserver is not null
                 && checkpointIntervalTicks > 0
+                && !spawnedReinforcementWave
                 && _currentTick % checkpointIntervalTicks == 0)
             {
                 var isFinalCheckpoint = _currentTick >= _maxTicks
@@ -249,6 +282,49 @@ public sealed class FastCombatEngine
             Outcome = DetermineOutcome(combatants),
             EntityStats = [.. entityStats]
         };
+    }
+
+    private void InitializeEncounterCombatant(RuntimeCombatant combatant)
+    {
+        RegisterListeners(combatant);
+        _basicAttackProgress[combatant] = 0;
+        _healthRegenerationProgress[combatant] = 0;
+        InitializeActiveAbilityCooldowns(combatant);
+    }
+
+    private bool SpawnNextHostileWave(
+        List<RuntimeCombatant> combatants,
+        IReadOnlyList<IReadOnlyList<RuntimeCombatant>> reinforcementWaves,
+        ref int nextWave,
+        bool publishCombatStart)
+    {
+        while (nextWave < reinforcementWaves.Count)
+        {
+            var wave = reinforcementWaves[nextWave++];
+            if (wave.Count == 0)
+                continue;
+
+            for (var index = 0; index < wave.Count; index++)
+            {
+                var combatant = wave[index];
+                if (combatant.Team != CombatTeam.Hostile)
+                    throw new InvalidOperationException("Hostile reinforcement waves can contain only hostile combatants.");
+                InitializeEncounterCombatant(combatant);
+                combatants.Add(combatant);
+            }
+
+            if (publishCombatStart)
+            {
+                Publish(
+                    new CombatEvent(AbilityTriggerEvent.OnCombatStart, null, null, null),
+                    combatants,
+                    wave);
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     private CombatCheckpoint CreateCheckpoint(
@@ -650,7 +726,10 @@ public sealed class FastCombatEngine
             combatants);
     }
 
-    private void Publish(CombatEvent combatEvent, IReadOnlyList<RuntimeCombatant> combatants)
+    private void Publish(
+        CombatEvent combatEvent,
+        IReadOnlyList<RuntimeCombatant> combatants,
+        IReadOnlyList<RuntimeCombatant>? listeners = null)
     {
         if (_eventDepth >= 64)
             throw new InvalidOperationException("Combat event recursion exceeded the maximum depth of 64.");
@@ -658,10 +737,11 @@ public sealed class FastCombatEngine
         _eventDepth++;
         try
         {
-            var combatantCount = combatants.Count;
+            var listeningCombatants = listeners ?? combatants;
+            var combatantCount = listeningCombatants.Count;
             for (var combatantIndex = 0; combatantIndex < combatantCount; combatantIndex++)
             {
-                var combatant = combatants[combatantIndex];
+                var combatant = listeningCombatants[combatantIndex];
                 if (!combatant.IsAlive
                     && (combatEvent.Event != AbilityTriggerEvent.OnDeath
                         || !ReferenceEquals(combatant, combatEvent.Source)))
@@ -742,6 +822,44 @@ public sealed class FastCombatEngine
             source,
             resolvedThreatValue * ability.ThreatMultiplier,
             ability.Name);
+    }
+
+    private void GenerateMaintainedThreat(IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        if (!_threatAndTankingEnabled)
+            return;
+
+        _maintainedThreatRates.Clear();
+        for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
+        {
+            var target = combatants[combatantIndex];
+            for (var modifierIndex = 0; modifierIndex < target.MaintainedModifiers.Count; modifierIndex++)
+            {
+                var modifier = target.MaintainedModifiers[modifierIndex];
+                var effect = modifier.Definition;
+                if (!modifier.Source.IsAlive
+                    || effect.MaintainedThreatPerSecond <= 0
+                    || effect.MaintainedThreatBand is not { } band)
+                {
+                    continue;
+                }
+
+                var key = new MaintainedThreatSourceKey(modifier.Source, modifier.StatsSource, band);
+                _maintainedThreatRates[key] = Math.Max(
+                    _maintainedThreatRates.GetValueOrDefault(key),
+                    effect.MaintainedThreatPerSecond);
+            }
+        }
+
+        foreach (var (key, threatPerSecond) in _maintainedThreatRates)
+        {
+            var accumulated = _maintainedThreatRemainders.GetValueOrDefault(key)
+                              + threatPerSecond / TicksPerSecond;
+            var wholeThreat = (int)Math.Floor(accumulated + 1e-9d);
+            _maintainedThreatRemainders[key] = accumulated - wholeThreat;
+            if (wholeThreat > 0)
+                AdjustThreatAndTrack(key.Source, wholeThreat, key.StatsSource);
+        }
     }
 
     private void PublishStatusTriggers(
@@ -861,14 +979,37 @@ public sealed class FastCombatEngine
                         if (!effectUsage.CanUseEffect(effect, target))
                             continue;
 
-                        if (!target.IsAlive
-                            || !CanAbilityAffectTarget(source, target)
-                            || !ConditionsPass(
-                                effect.Conditions,
-                                source,
-                                combatEvent,
-                                combatants,
-                                effectTarget: target))
+                        if (!target.IsAlive || !CanAbilityAffectTarget(source, target))
+                            continue;
+
+                        var effectConditionsPass = ConditionsPass(
+                            effect.Conditions,
+                            source,
+                            combatEvent,
+                            combatants,
+                            effectTarget: target);
+                        if (effect.MaintainWhileConditionsMet)
+                        {
+                            var countMaintainedActivation = countStatsActivation && !activationCounted;
+                            if (SynchronizeMaintainedModifier(
+                                    effect,
+                                    source,
+                                    target,
+                                    combatants,
+                                    combatEvent,
+                                    statsSourceOverride,
+                                    effectConditionsPass,
+                                    countMaintainedActivation,
+                                    targetIndex)
+                                && countMaintainedActivation)
+                            {
+                                activationCounted = true;
+                            }
+
+                            continue;
+                        }
+
+                        if (!effectConditionsPass)
                             continue;
 
                         if (effect.Operation != AbilityEffectOperation.ApplyRandomCondition
@@ -937,6 +1078,68 @@ public sealed class FastCombatEngine
 
     private EffectExecutionContext CreateEffectExecutionContext() =>
         new(++_activationSequence);
+
+    private bool SynchronizeMaintainedModifier(
+        CompiledEffect effect,
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        IReadOnlyList<RuntimeCombatant> combatants,
+        CombatEvent combatEvent,
+        string? statsSourceOverride,
+        bool shouldBeActive,
+        bool countStatsActivation,
+        int targetIndex)
+    {
+        var existing = target.MaintainedModifiers.FirstOrDefault(modifier =>
+            ReferenceEquals(modifier.Definition, effect)
+            && ReferenceEquals(modifier.Source, source));
+        if (shouldBeActive)
+        {
+            if (existing is not null)
+                return false;
+
+            var statsSource = statsSourceOverride ?? effect.StatsSource;
+            var appliedValue = CalculateValue(
+                effect,
+                source,
+                target,
+                combatants,
+                combatEvent,
+                targetIndex);
+            ApplyEffectOnce(
+                effect,
+                source,
+                target,
+                combatants,
+                combatEvent,
+                statsSource,
+                countStatsActivation,
+                precomputedValue: appliedValue,
+                targetIndex: targetIndex);
+            target.MaintainedModifiers.Add(new RuntimeMaintainedModifier(
+                effect,
+                source,
+                target,
+                statsSource,
+                appliedValue));
+            return true;
+        }
+
+        if (existing is null)
+            return false;
+
+        RemoveModifierValue(existing.Definition, existing.Target, existing.AppliedModifierValue);
+        target.MaintainedModifiers.Remove(existing);
+        Log(
+            existing.Source,
+            existing.Target,
+            existing.Definition.Id,
+            EventType.BuffExpired,
+            -existing.AppliedModifierValue,
+            $"{existing.Target.Name}'s conditional modifier returned to normal.",
+            existing.StatsSource);
+        return false;
+    }
 
     private void ExecuteEffect(
         CompiledEffect effect,
@@ -3090,39 +3293,47 @@ public sealed class FastCombatEngine
                     {
                         var value = effect.AppliedModifierValue
                                     ?? CalculateValue(effect.Definition, effect.Source, effect.Target, combatants);
-                        switch (effect.Definition.Operation)
-                        {
-                            case AbilityEffectOperation.ModifyAttribute:
-                                effect.Target.AdjustAttribute(effect.Definition.Attribute!.Value, -value);
-                                break;
-                            case AbilityEffectOperation.ModifyThreat:
-                                effect.Target.AdjustThreat(-value, _currentTick, _threatDecayPerTick);
-                                break;
-                            case AbilityEffectOperation.ModifyRegenerationRate:
-                                effect.Target.AdjustRegenerationRate(-value);
-                                break;
-                            case AbilityEffectOperation.ModifyRegenerationInterval:
-                                effect.Target.AdjustRegenerationInterval(-value);
-                                break;
-                            case AbilityEffectOperation.ModifyHealingReceived:
-                                effect.Target.AdjustHealingReceived(-value);
-                                break;
-                            case AbilityEffectOperation.ModifyDamageDealt:
-                                effect.Target.AdjustDamageDealt(effect.Definition.DamageType, -value);
-                                break;
-                            case AbilityEffectOperation.ModifyDamageTaken:
-                                effect.Target.AdjustDamageTaken(effect.Definition.DamageType, -value);
-                                break;
-                            case AbilityEffectOperation.ModifyDamageTakenFromCondition:
-                                effect.Target.AdjustDamageTakenFromCondition(effect.Definition.Condition!.Value, -value);
-                                break;
-                        }
+                        RemoveModifierValue(effect.Definition, effect.Target, value);
                         Log(effect.Source, effect.Target, effect.Definition.Id, EventType.BuffExpired, -value, $"{effect.Target.Name}'s modifier returned to normal.", effect.StatsSource);
                     }
 
                     combatant.ActiveEffects.Remove(effect);
                 }
             }
+        }
+    }
+
+    private void RemoveModifierValue(
+        CompiledEffect effect,
+        RuntimeCombatant target,
+        int value)
+    {
+        switch (effect.Operation)
+        {
+            case AbilityEffectOperation.ModifyAttribute:
+                target.AdjustAttribute(effect.Attribute!.Value, -value);
+                break;
+            case AbilityEffectOperation.ModifyThreat:
+                target.AdjustThreat(-value, _currentTick, _threatDecayPerTick);
+                break;
+            case AbilityEffectOperation.ModifyRegenerationRate:
+                target.AdjustRegenerationRate(-value);
+                break;
+            case AbilityEffectOperation.ModifyRegenerationInterval:
+                target.AdjustRegenerationInterval(-value);
+                break;
+            case AbilityEffectOperation.ModifyHealingReceived:
+                target.AdjustHealingReceived(-value);
+                break;
+            case AbilityEffectOperation.ModifyDamageDealt:
+                target.AdjustDamageDealt(effect.DamageType, -value);
+                break;
+            case AbilityEffectOperation.ModifyDamageTaken:
+                target.AdjustDamageTaken(effect.DamageType, -value);
+                break;
+            case AbilityEffectOperation.ModifyDamageTakenFromCondition:
+                target.AdjustDamageTakenFromCondition(effect.Condition!.Value, -value);
+                break;
         }
     }
 
@@ -4640,6 +4851,11 @@ public sealed class FastCombatEngine
 
     private static bool IsPeriodicEffect(CompiledEffect effect) =>
         effect.IntervalTicks > 0 && effect.DurationTicks > 0;
+
+    private readonly record struct MaintainedThreatSourceKey(
+        RuntimeCombatant Source,
+        string StatsSource,
+        AbilityThreatFunctionBand Band);
 
     private void Log(
         RuntimeCombatant source,
