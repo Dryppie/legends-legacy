@@ -8,13 +8,32 @@ describe('WorldTowerService', () => {
   let api: jasmine.SpyObj<ApiService>;
 
   beforeEach(() => {
-    api = jasmine.createSpyObj<ApiService>('ApiService', ['get', 'post']);
+    api = jasmine.createSpyObj<ApiService>('ApiService', [
+      'get',
+      'post',
+      'put',
+    ]);
     api.get.and.returnValue(of({}));
     api.post.and.returnValue(of({}));
+    api.put.and.returnValue(of({}));
     TestBed.configureTestingModule({
       providers: [WorldTowerService, { provide: ApiService, useValue: api }],
     });
     service = TestBed.inject(WorldTowerService);
+  });
+
+  it('saves a complete party layout, including benched participants', () => {
+    const assignments = [
+      { characterId: 'leader-id', partySlot: 1 },
+      { characterId: 'new-member-id', partySlot: null },
+    ];
+
+    service.updateRallyParties('rally-id', assignments).subscribe();
+
+    expect(api.put).toHaveBeenCalledOnceWith(
+      'world-tower/rallies/rally-id/parties',
+      { assignments },
+    );
   });
 
   it('maps all read operations to the Tower API', () => {

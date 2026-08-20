@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.PowerRatings;
+using Domain.Models.Entities.Characters;
 using Microsoft.Extensions.Logging;
 
 namespace Services.LL.PowerRatings;
@@ -27,6 +28,22 @@ public sealed class PowerRatingService : IPowerRatingService
             characterId,
             DungeonPartySelection.Solo,
             cancellationToken);
+        return CreateOverallRating(build);
+    }
+
+    public async Task<OverallPowerRating> GetCharacterOverallRatingAsync(
+        Character character,
+        CancellationToken cancellationToken)
+    {
+        var build = await _snapshots.CreateAsync(
+            character,
+            DungeonPartySelection.Solo,
+            cancellationToken);
+        return CreateOverallRating(build);
+    }
+
+    private OverallPowerRating CreateOverallRating(PowerBuildSnapshot? build)
+    {
         if (build is null)
         {
             return new OverallPowerRating(

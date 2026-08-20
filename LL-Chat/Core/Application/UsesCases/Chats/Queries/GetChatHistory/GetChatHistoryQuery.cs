@@ -6,6 +6,7 @@ namespace Application.UsesCases.Chats.Queries.GetChatHistory;
 public record GetChatHistoryQuery(
     Guid UserId,
     string? GuildChannel,
+    string? RaidChannel,
     int Take,
     DateTimeOffset? After) : IRequest<List<ChatMessageDto>>;
 public class GetChatHistoryQueryHandler : IRequestHandler<GetChatHistoryQuery, List<ChatMessageDto>>
@@ -23,6 +24,7 @@ public class GetChatHistoryQueryHandler : IRequestHandler<GetChatHistoryQuery, L
             request.UserId,
             request.Take,
             request.GuildChannel,
+            request.RaidChannel,
             request.After,
             cancellationToken);
 

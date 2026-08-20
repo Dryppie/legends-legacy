@@ -85,6 +85,43 @@ describe('CombatEntityStatsComponent', () => {
     expect(component.teamDisplayName('Hostile')).toBe('Enemy');
   });
 
+  it('groups party combatants and their summons under distinct party headers', () => {
+    component.currentCharacterId = 'party-one-player';
+    component.playerTeam = [
+      entity('party-one-player', 'Party One Player', 100, 100, 1),
+      entity('party-one-ally', 'Party One Ally', 100, 100, 1),
+      entity('party-one-player:summon:wisp:first', 'Wisp', 25, 25, 1),
+      entity('party-two-player', 'Party Two Player', 100, 100, 2),
+    ];
+    component.enemyTeam = [entity('enemy', 'Enemy', 100, 100)];
+    component.entityStats = [
+      stats('party-one-player', 'Party One Player', 100, 'Friendly'),
+      stats('party-one-ally', 'Party One Ally', 50, 'Friendly'),
+      stats('party-one-player:summon:wisp:first', 'Wisp', 25, 'Friendly'),
+      stats('party-two-player', 'Party Two Player', 200, 'Friendly'),
+      stats('enemy', 'Enemy', 75),
+    ];
+
+    refresh(component);
+
+    expect(component.hasPartyLayout).toBeTrue();
+    expect(component.participantGroups.map((group) => group.label)).toEqual([
+      'Party 1',
+      'Party 2',
+      'Enemy',
+    ]);
+    expect(component.participantGroups[0].damageDone).toBe(175);
+    expect(component.participantGroups[0].isCurrentParty).toBeTrue();
+    expect(component.participantGroups[1].damageDone).toBe(200);
+    expect(
+      component.participantSideLabel(
+        component.participantGroups[0].participants.find(
+          (participant) => participant.isSummonGroup,
+        )!,
+      ),
+    ).toBe('P1 · Minion');
+  });
+
   it('orders damage breakdowns consistently and scales segments to the largest ability', () => {
     component.playerTeam = [entity('player', 'Player', 100, 100)];
     component.entityStats = [stats('player', 'Player', 100, 'Friendly')];
@@ -120,6 +157,30 @@ describe('CombatEntityStatsComponent', () => {
     expect(component.trackAbility(0, first)).toBe('Attack');
     expect(component.trackAbility(0, updated)).toBe('Attack');
   });
+
+  it('shows threat generation as a total, rate, and sortable ability output', () => {
+    component.playerTeam = [entity('player', 'Player', 100, 100)];
+    component.combatDurationTicks = 50;
+    const playerStats = stats('player', 'Player', 100, 'Friendly');
+    playerStats.threatGenerated = 250;
+    playerStats.abilities = [
+      { ...playerStats.abilities[0], name: 'Low Threat', totalThreat: 40 },
+      { ...playerStats.abilities[0], name: 'High Threat', totalThreat: 120 },
+    ];
+    component.entityStats = [playerStats];
+
+    refresh(component);
+    component.sortAbilities('threat');
+
+    expect(component.threatPerSecond(component.selectedStats)).toBe(50);
+    expect(component.threatBarPercentage(component.sortedAbilities[0])).toBe(
+      100,
+    );
+    expect(component.sortedAbilities.map((ability) => ability.name)).toEqual([
+      'High Threat',
+      'Low Threat',
+    ]);
+  });
 });
 
 function refresh(component: CombatEntityStatsComponent): void {
@@ -133,6 +194,7 @@ function entity(
   name: string,
   health: number,
   maxHealth: number,
+  partyNumber?: number,
 ): SimpleCombatEntityDto {
   return {
     id,
@@ -142,6 +204,7 @@ function entity(
     barrier: 0,
     level: 1,
     imagePath: '',
+    partyNumber,
   };
 }
 

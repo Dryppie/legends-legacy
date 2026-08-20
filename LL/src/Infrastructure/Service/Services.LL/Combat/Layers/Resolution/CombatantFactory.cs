@@ -58,8 +58,9 @@ public sealed class CombatantFactory : ICombatantFactory
                     "Dungeon room combatant creation requires dungeon room environment data in the source context."),
 
             RaidEncounterSourceContext =>
-                throw new NotSupportedException(
-                    "Raid combatant creation requires raid phase environment data in the source context."),
+                _combatSetupService
+                    .CreateCreatureCombatEntities([creature], new Domain.Models.Regions.Areas.Area { DifficultyTier = 1 })
+                    .Single(),
 
             PvpEncounterSourceContext =>
                 throw new InvalidOperationException(

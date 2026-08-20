@@ -12,7 +12,8 @@ public sealed class JsonAbilityCatalogProvider : ICompiledAbilityCatalogProvider
     public JsonAbilityCatalogProvider(
         IConfiguration config,
         string contentRootPath,
-        JsonSerializerOptions options)
+        JsonSerializerOptions options,
+        ThreatAndTankingOptions? threatAndTankingOptions = null)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
         var abilityPath = Path.Combine(contentRootPath, contentRoot, "combat", "abilities.json");
@@ -27,11 +28,12 @@ public sealed class JsonAbilityCatalogProvider : ICompiledAbilityCatalogProvider
             .ToDictionary(x => x.Id, x => x.OwningEssenceId!, StringComparer.OrdinalIgnoreCase);
 
         _catalog = AbilityCatalogValidator.CreateCatalog(abilities, statuses, owningEssences, summons);
+        var threatTuning = (threatAndTankingOptions ?? new ThreatAndTankingOptions()).ToAbilityThreatTuning();
         _compiledCatalog = new Lazy<CompiledAbilityCatalog>(
             () => new CompiledAbilityCatalog(
-                AbilityCompiler.CompileAbilities(_catalog.Abilities),
+                AbilityCompiler.CompileAbilities(_catalog.Abilities, threatTuning),
                 AbilityCompiler.CompileStatuses(_catalog.Statuses),
-                AbilityCompiler.CompileSummons(_catalog.Summons)));
+                AbilityCompiler.CompileSummons(_catalog.Summons, threatTuning)));
     }
 
     public AbilityCatalog GetCatalog() => _catalog;

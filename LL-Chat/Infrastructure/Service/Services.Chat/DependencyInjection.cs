@@ -10,6 +10,7 @@ public static class DependencyInjection
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<IChatService, ChatService>();
         services.AddScoped<IChatModerationService, ChatModerationService>();
+        services.AddScoped<IRaidChatService, RaidChatService>();
 
         return services;
     }

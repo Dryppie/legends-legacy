@@ -156,9 +156,10 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
         {
             "Idle Area" => 0,
             "Dungeon" => 1,
-            "Rift" => 2,
-            "Future Dungeon" => 3,
-            _ => 4
+            "Raid" => 2,
+            "Rift" => 3,
+            "Future Dungeon" => 4,
+            _ => 5
         };
 
     private static int GetAreaSortOrder(string areaId) =>
@@ -237,8 +238,11 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
         new("region_01_dungeon_goblin_mines", "Goblin Mines", "Dungeon", "T1-T2", "Goblin Shaman", "goblin_shaman"),
         new("region_01_dungeon_goblin_mines", "Goblin Mines", "Dungeon", "T1-T2", "Hobgoblin", "hobgoblin"),
         new("region_01_dungeon_forgotten_catacombs", "Forgotten Catacombs", "Dungeon", "T1-T2", "Skeleton", "skeleton"),
-        new("region_01_rift_hives_abyss", "Hive's Abyss", "Rift", "T1", "Ant Worker", "ant_worker"),
-        new("region_01_rift_hives_abyss", "Hive's Abyss", "Rift", "T1", "Fire Ant", "fire_ant"),
+        new("raid-boss.hives-abyss", "The Hive's Abyss", "Raid", "T1-T3", "Ant Worker", "ant_worker"),
+        new("raid-boss.hives-abyss", "The Hive's Abyss", "Raid", "T1-T3", "Fire Ant", "fire_ant"),
+        new("raid-boss.hives-abyss", "The Hive's Abyss", "Raid", "T1-T3", "Queen's Guard Ant", "queens_guard_ant"),
+        new("raid-boss.hives-abyss", "The Hive's Abyss", "Raid", "T1-T3", "Ant Queen", "ant_queen"),
+        new("raid-boss.hives-abyss", "The Hive's Abyss", "Raid", "T1-T3", "Ant King", "ant_king"),
         new("region_01_future_dungeon_great_tree", "The Great Tree", "Future Dungeon", "T2", "Forest Spirit", "forest_spirit"),
         new("region_01_future_dungeon_great_tree", "The Great Tree", "Future Dungeon", "T2", "Wood Nymph", "wood_nymph"),
         new("region_01_future_dungeon_tangled_cave", "Tangled Cave", "Future Dungeon", "T2", "Giant Spider", "giant_spider"),
@@ -256,7 +260,10 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
         new("region_02_area_02", "Rotgrave Fields", "Idle Area", "T2", "Plague Ghoul", "plague_ghoul"),
         new("region_02_area_02", "Rotgrave Fields", "Idle Area", "T2", "Ravenous Ghoul", "ravenous_ghoul"),
         new("region_02_area_02", "Rotgrave Fields", "Idle Area", "T2", "Vampire Fledgeling", "vampire_fledgeling"),
-        new("region_02_area_02", "Rotgrave Fields", "Idle Area", "T2", "Wandering Ghost", "wandering_ghost")
+        new("region_02_area_02", "Rotgrave Fields", "Idle Area", "T2", "Wandering Ghost", "wandering_ghost"),
+        new("raid-boss.sanguine-horror", "Sanguine Horror", "Raid", "T2-T3", "Bloodthorn Vine", "bloodthorn_vine"),
+        new("raid-boss.sanguine-horror", "Sanguine Horror", "Raid", "T2-T3", "Wendigo", "wendigo"),
+        new("raid-boss.sanguine-horror", "Sanguine Horror", "Raid", "T2-T3", "Corpse Golem", "corpse_golem")
     ];
 
     private sealed record EssenceCatalogSourceEntry(

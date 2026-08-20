@@ -18,6 +18,7 @@ public static class StateSyncScopes
     public const string Guild = "guild";
     public const string Colosseum = "colosseum";
     public const string Tournament = "tournament";
+    public const string Raids = "raids";
 
     public static readonly IReadOnlyList<string> CharacterResources =
     [
@@ -40,6 +41,7 @@ public static class StateSyncScopes
         Marketplace,
         Guild,
         Colosseum,
-        Tournament
+        Tournament,
+        Raids
     ];
 }

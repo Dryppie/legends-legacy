@@ -27,6 +27,7 @@ public class ChatMessageRepository : IChatMessageRepository
         Guid userId,
         int take,
         string? guildChannel,
+        string? raidChannel,
         DateTimeOffset? after,
         CancellationToken cancellationToken)
     {
@@ -37,6 +38,7 @@ public class ChatMessageRepository : IChatMessageRepository
             .Where(m =>
                 publicChannels.Contains(m.ChannelType) ||
                 (m.ChannelType == ChatChannelType.Guild && m.ContextKey == guildChannel) ||
+                (m.ChannelType == ChatChannelType.Raid && m.ContextKey == raidChannel) ||
                 (m.ChannelType == ChatChannelType.Whisper &&
                     (m.SenderId == userId || m.TargetCharacterId == userId)) ||
                 (m.ChannelType == ChatChannelType.System &&

@@ -107,6 +107,22 @@
           </button>
           <button
             class="secondary ll-button"
+            *ngIf="vm.canManageParties && vm.participants.length > 1"
+            [disabled]="!!action()"
+            (click)="autoBalanceParties(vm)"
+          >
+            Auto-balance parties
+          </button>
+          <button
+            class="secondary ll-button"
+            *ngIf="vm.canManageParties && vm.participants.length"
+            [disabled]="!!action()"
+            (click)="resetParties(vm)"
+          >
+            Reset parties
+          </button>
+          <button
+            class="secondary ll-button"
             *ngIf="
               playback() && !playback()?.isCompleted && !watchingPlayback()
             "
@@ -143,53 +159,227 @@
         build.
       </p>
 
-      <section class="section tower-panel ll-panel">
-        <p class="eyebrow">Locked roster</p>
-        <h2>Ascendants</h2>
-        <div class="roster">
-          <div class="roster-row" *ngFor="let participant of vm.participants">
-            <div class="identity">
-              <strong>
-                <app-character-tag
-                  [id]="participant.characterId"
-                  [name]="participant.characterName"
-                ></app-character-tag>
-                <span class="badge" *ngIf="participant.isLeader">Leader</span>
-              </strong>
-              <span
-                >{{ participant.guildName || "Unaffiliated"
-                }}<ng-container *ngIf="participant.isCurrentCharacter">
-                  · You</ng-container
-                ></span
-              >
-            </div>
-            <div class="actions">
-              <strong>{{ participant.powerRating | number }} power</strong>
-              <button
-                class="secondary ll-button"
-                *ngIf="vm.canTransferLeadership && !participant.isLeader"
-                [disabled]="!!action()"
-                (click)="transferLeadership(participant)"
-              >
-                {{
-                  action() === "transfer-leadership-" + participant.characterId
-                    ? "Transferring..."
-                    : "Make leader"
-                }}
-              </button>
-            </div>
+      <p class="party-instructions" *ngIf="vm.canManageParties">
+        Drag an ascendant onto an open slot, or select one and then choose a
+        party or slot.
+      </p>
+
+      <section
+        class="section tower-panel ll-panel party-bench"
+        [class.party-drop-target]="vm.canManageParties"
+        (dragover)="allowPartyDrop($event)"
+        (drop)="dropOnBench($event, vm)"
+      >
+        <div class="party-section-heading">
+          <div>
+            <p class="eyebrow">Bench</p>
+            <h2>
+              Unassigned ascendants · {{ benchedParticipants(vm).length }}
+            </h2>
           </div>
-          <div class="roster-row" *ngFor="let slot of openSlots(vm)">
-            <div class="identity">
-              <strong>Open slot {{ slot }}</strong
-              ><span>Awaiting an ascendant</span>
-            </div>
+          <button
+            class="secondary ll-button"
+            *ngIf="vm.canManageParties && benchedParticipants(vm).length"
+            [disabled]="!!action()"
+            (click)="distributeBenched(vm)"
+          >
+            Distribute all
+          </button>
+        </div>
+
+        <div
+          class="bench-grid"
+          *ngIf="benchedParticipants(vm).length; else emptyBench"
+        >
+          <button
+            type="button"
+            class="bench-card"
+            *ngFor="let participant of benchedParticipants(vm)"
+            [class.selected]="
+              selectedParticipantId() === participant.characterId
+            "
+            [disabled]="!vm.canManageParties || !!action()"
+            [draggable]="vm.canManageParties"
+            (click)="selectParticipant(participant, vm)"
+            (dragstart)="dragParticipant($event, participant, vm)"
+          >
+            <span class="bench-identity">
+              <strong>{{ participant.characterName }}</strong>
+              <small>
+                {{ participant.guildName || "Unaffiliated" }}
+                <ng-container *ngIf="participant.isLeader">
+                  · Leader</ng-container
+                >
+                <ng-container *ngIf="participant.isCurrentCharacter">
+                  · You</ng-container
+                >
+              </small>
+            </span>
+            <strong class="party-power">{{
+              participant.powerRating | number
+            }}</strong>
+          </button>
+        </div>
+        <ng-template #emptyBench>
+          <p class="empty-state">Every ascendant is assigned to a party.</p>
+        </ng-template>
+      </section>
+
+      <section
+        class="section tower-panel ll-panel expedition-party"
+        *ngFor="let partyNumber of partyNumbers(vm)"
+        (dragover)="allowPartyDrop($event)"
+        (drop)="dropIntoParty($event, partyNumber, vm)"
+      >
+        <div
+          class="party-header"
+          role="button"
+          tabindex="0"
+          (click)="toggleParty(partyNumber)"
+          (keydown.enter)="toggleParty(partyNumber)"
+          (keydown.space)="$event.preventDefault(); toggleParty(partyNumber)"
+          [attr.aria-expanded]="!isPartyCollapsed(partyNumber)"
+          [attr.aria-controls]="'tower-party-roster-' + partyNumber"
+        >
+          <div class="party-collapse">
+            <span aria-hidden="true">{{
+              isPartyCollapsed(partyNumber) ? "▸" : "▾"
+            }}</span>
+            <strong>Party {{ partyNumber }}</strong>
+          </div>
+
+          <button
+            type="button"
+            class="party-slot-strip"
+            *ngIf="vm.canManageParties"
+            [disabled]="
+              !selectedParticipantId() || !partyOpenSlots(vm, partyNumber)
+            "
+            (click)="
+              $event.stopPropagation(); placeSelectedInParty(partyNumber, vm)
+            "
+            (keydown)="$event.stopPropagation()"
+            title="Place the selected ascendant in this party"
+          >
+            <span
+              *ngFor="let slot of partySlots(vm, partyNumber)"
+              [class.filled]="participantAtSlot(vm, slot)"
+            ></span>
+          </button>
+          <div class="party-slot-strip passive" *ngIf="!vm.canManageParties">
+            <span
+              *ngFor="let slot of partySlots(vm, partyNumber)"
+              [class.filled]="participantAtSlot(vm, slot)"
+            ></span>
+          </div>
+
+          <div class="party-summary">
+            <span
+              >Avg rating
+              <strong>{{
+                partyAverage(vm, partyNumber) | number
+              }}</strong></span
+            >
+            <span
+              >Open slots
+              <strong>{{ partyOpenSlots(vm, partyNumber) }}</strong></span
+            >
           </div>
         </div>
-        <div class="notice" *ngIf="vm.readiness.warnings.length">
-          <div *ngFor="let warning of vm.readiness.warnings">{{ warning }}</div>
+
+        <div
+          class="party-roster"
+          *ngIf="!isPartyCollapsed(partyNumber)"
+          [id]="'tower-party-roster-' + partyNumber"
+        >
+          <ng-container *ngFor="let slot of partySlots(vm, partyNumber)">
+            <div
+              class="party-member"
+              *ngIf="
+                participantAtSlot(vm, slot) as participant;
+                else openPartySlot
+              "
+              [class.selected]="
+                selectedParticipantId() === participant.characterId
+              "
+              [draggable]="vm.canManageParties"
+              (click)="selectParticipant(participant, vm)"
+              (dragstart)="dragParticipant($event, participant, vm)"
+            >
+              <span class="party-slot-number">{{ slotLabel(slot) }}</span>
+              <div class="identity">
+                <strong>
+                  <app-character-tag
+                    [id]="participant.characterId"
+                    [name]="participant.characterName"
+                  ></app-character-tag>
+                  <span class="badge" *ngIf="participant.isLeader">Leader</span>
+                </strong>
+                <span>
+                  {{ participant.guildName || "Unaffiliated" }}
+                  <ng-container *ngIf="participant.isCurrentCharacter">
+                    · You</ng-container
+                  >
+                </span>
+              </div>
+              <strong class="party-power">{{
+                participant.powerRating | number
+              }}</strong>
+              <div class="party-member-actions" *ngIf="vm.canManageParties">
+                <button
+                  type="button"
+                  class="secondary ll-button"
+                  [disabled]="!!action()"
+                  (click)="
+                    $event.stopPropagation(); benchParticipant(participant, vm)
+                  "
+                >
+                  Bench
+                </button>
+                <button
+                  type="button"
+                  class="secondary ll-button"
+                  *ngIf="vm.canTransferLeadership && !participant.isLeader"
+                  [disabled]="!!action()"
+                  (click)="
+                    $event.stopPropagation(); transferLeadership(participant)
+                  "
+                >
+                  Make leader
+                </button>
+              </div>
+            </div>
+
+            <ng-template #openPartySlot>
+              <button
+                type="button"
+                class="party-member open-party-slot"
+                [class.available]="
+                  vm.canManageParties && !!selectedParticipantId()
+                "
+                [disabled]="!vm.canManageParties || !!action()"
+                (click)="placeSelectedInSlot(slot, vm)"
+                (dragover)="allowPartyDrop($event)"
+                (drop)="
+                  $event.stopPropagation(); dropIntoSlot($event, slot, vm)
+                "
+              >
+                <span class="party-slot-number">{{ slotLabel(slot) }}</span>
+                <span>
+                  <strong>Open slot</strong>
+                  <small *ngIf="vm.canManageParties"
+                    >Drop an ascendant here</small
+                  >
+                </span>
+              </button>
+            </ng-template>
+          </ng-container>
         </div>
       </section>
+
+      <div class="notice" *ngIf="vm.readiness.warnings.length">
+        <div *ngFor="let warning of vm.readiness.warnings">{{ warning }}</div>
+      </div>
 
       <section
         class="section tower-panel ll-panel"
@@ -292,6 +482,9 @@
               >
             </div>
             <p class="muted">
+              <ng-container *ngIf="participant.partyNumber">
+                Party {{ participant.partyNumber }} ·
+              </ng-container>
               Damage {{ participant.damageDone | number }} · Taken
               {{ participant.damageTaken | number }} · Healing
               {{ participant.healingDone | number }}

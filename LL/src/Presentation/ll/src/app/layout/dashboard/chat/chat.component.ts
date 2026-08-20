@@ -30,6 +30,7 @@ import { Router, RouterLink } from '@angular/router';
 import { RegularButtonComponent } from '../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { StickyScrollDirective } from '../../../shared/directives/sticky-scroll/sticky-scroll.directive';
 import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
+import { RaidService } from '../../../core/services/api/raid/raid.service';
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
 import { CharacterTagComponent } from '../../../shared/components/character/character-tag/character-tag.component';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
@@ -151,6 +152,16 @@ interface ChatRoom {
   requiresGuild?: boolean;
 }
 
+export function fallbackFromUnavailableRaidChannel(
+  activeChannel: ActiveChatChannel,
+  raidId: string | null,
+): ActiveChatChannel {
+  return activeChannel.type === ChatChannelType.Raid &&
+    activeChannel.contextKey !== raidId
+    ? { type: ChatChannelType.General, contextKey: 'all' }
+    : activeChannel;
+}
+
 export interface ActiveChatChannel {
   type: ChatChannelType;
   contextKey: string;
@@ -247,6 +258,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   };
 
   readonly guild;
+  readonly raidId;
   readonly characterId;
   readonly characterName;
 
@@ -282,9 +294,22 @@ export class ChatComponent implements OnInit, OnDestroy {
   ];
 
   get visibleRooms(): ChatRoom[] {
-    return this.availableRooms.filter(
+    const rooms = this.availableRooms.filter(
       (r) => !r.requiresGuild || !!this.guild(),
     );
+    const raidId = this.raidId();
+    if (raidId) {
+      rooms.splice(3, 0, {
+        label: 'Raid',
+        contextKey: raidId,
+        channelType: ChatChannelType.Raid,
+      });
+    }
+    return rooms;
+  }
+
+  trackRoom(_: number, room: ChatRoom): string {
+    return `${room.channelType}:${room.contextKey}`;
   }
 
   messages: ChatMessageDto[] = [];
@@ -352,12 +377,14 @@ export class ChatComponent implements OnInit, OnDestroy {
   constructor(
     public chat: ChatService,
     private readonly guildState: GuildStateService,
+    private readonly raidService: RaidService,
     private readonly characterState: CharacterStateService,
     private readonly characterService: CharacterService,
     private readonly authService: AuthService,
     private readonly router: Router,
   ) {
     this.guild = this.guildState.guild;
+    this.raidId = this.raidService.activeRaidId;
     this.characterId = this.characterState.currentCharacterId;
     this.characterName = computed(
       () => this.characterState.currentCharacter()?.name ?? null,
@@ -366,6 +393,10 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.activeChannel = fallbackFromUnavailableGuildChannel(
         this.activeChannel,
         !!this.guild(),
+      );
+      this.activeChannel = fallbackFromUnavailableRaidChannel(
+        this.activeChannel,
+        this.raidId(),
       );
     });
     effect(() => {
@@ -576,6 +607,8 @@ export class ChatComponent implements OnInit, OnDestroy {
         return 'border-sky-400/40 bg-sky-400/10 text-sky-300';
       case ChatChannelType.Guild:
         return 'border-rose-400/40 bg-rose-400/10 text-rose-300';
+      case ChatChannelType.Raid:
+        return 'border-orange-400/40 bg-orange-400/10 text-orange-300';
       case ChatChannelType.Whisper:
         return 'border-fuchsia-400/40 bg-fuchsia-400/10 text-fuchsia-300';
       case ChatChannelType.System:
@@ -595,6 +628,8 @@ export class ChatComponent implements OnInit, OnDestroy {
         return 'border-l-sky-400';
       case ChatChannelType.Guild:
         return 'border-l-rose-400';
+      case ChatChannelType.Raid:
+        return 'border-l-orange-400 bg-orange-400/5';
       case ChatChannelType.Whisper:
         return 'border-l-fuchsia-400 bg-fuchsia-400/5';
       case ChatChannelType.System:
@@ -748,6 +783,9 @@ export class ChatComponent implements OnInit, OnDestroy {
         //   break;
         case ChatChannelType.Guild:
           await this.chat.sendGuild(this.guild()!.id, body);
+          break;
+        case ChatChannelType.Raid:
+          await this.chat.sendRaid(contextKey, body);
           break;
         default:
           return;

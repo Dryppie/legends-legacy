@@ -112,9 +112,9 @@
       <div
         #worldMapContent
         class="world-map-content"
-        [class.showing-dungeon]="selectedDungeonId"
+        [class.showing-dungeon]="selectedDungeonId || selectedRaidBossId"
       >
-        <ng-container *ngIf="selectedDungeonId as dungeonId; else areasSection">
+        <ng-container *ngIf="selectedDungeonId as dungeonId; else raidOrAreas">
           <section class="dungeon-preview-section">
             <header class="dungeon-preview-toolbar">
               <div>
@@ -131,10 +131,28 @@
               class="inline-dungeon-preview"
               [region]="regionNumber()"
               [selectedFamilyId]="dungeonId"
-              [expandSelected]="true"
             ></app-dungeons>
           </section>
         </ng-container>
+
+        <ng-template #raidOrAreas>
+          <section *ngIf="selectedRaidBoss() as raidBoss; else areasSection" class="dungeon-preview-section">
+            <header class="dungeon-preview-toolbar">
+              <div>
+                <div class="world-map-eyebrow">Raid muster</div>
+                <h2>{{ raidBoss.name }}</h2>
+              </div>
+              <button type="button" (click)="showAreas()">
+                <span aria-hidden="true">←</span>
+                Back to areas
+              </button>
+            </header>
+            <app-raids
+              [raidBoss]="raidBoss"
+              (changed)="refreshRaidBosses()"
+            ></app-raids>
+          </section>
+        </ng-template>
 
         <ng-template #areasSection>
           <section class="areas-section" aria-labelledby="areas-heading">
@@ -212,17 +230,24 @@
           <section class="activity-panel raids" data-tour="raids-introduction">
             <header>
               <h2>Raids</h2>
-              <span>{{ region.raids.length }}</span>
+              <span>{{ regionRaidBosses().length }}</span>
             </header>
 
-            <div *ngIf="region.raids.length; else noRaids">
-              <div
-                *ngFor="let raid of region.raids"
-                class="activity-row static"
+            <div *ngIf="regionRaidBosses().length; else noRaids">
+              <button
+                *ngFor="let boss of regionRaidBosses(); trackBy: trackRaidBoss"
+                type="button"
+                class="activity-row"
+                [class.locked]="!boss.isUnlocked"
+                [class.selected]="selectedRaidBossId === boss.id"
+                (click)="selectRaidBoss(boss.id)"
               >
-                <span class="activity-name">{{ raid.name }}</span>
-                <span class="activity-meta">Raid activity</span>
-              </div>
+                <span class="activity-name">{{ boss.name }}</span>
+                <span class="activity-level">Lv {{ boss.levelRequirement }}</span>
+                <span class="activity-meta">
+                  {{ boss.isUnlocked ? boss.openRaidCount + ' recruiting' : boss.lockReason }}
+                </span>
+              </button>
             </div>
 
             <ng-template #noRaids>

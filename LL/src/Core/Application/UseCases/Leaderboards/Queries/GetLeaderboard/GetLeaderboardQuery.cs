@@ -28,7 +28,7 @@ public class GetLeaderboardQueryHandler : IRequestHandler<GetLeaderboardQuery, R
 
     public async Task<Response<LeaderboardBoardDto>> Handle(GetLeaderboardQuery request, CancellationToken cancellationToken)
     {
-        if (!LeaderboardBoardKey.All.Contains(request.BoardKey))
+        if (!LeaderboardBoardKey.IsKnown(request.BoardKey))
         {
             return Response<LeaderboardBoardDto>.Fail("Unknown leaderboard board.");
         }

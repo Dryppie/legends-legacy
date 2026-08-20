@@ -1,0 +1,14 @@
+[
+  {
+    "key": "title.realm_first_raider",
+    "name": "Realm-First Raider",
+    "description": "Awarded to the first raid to slay a raid boss in the realm.",
+    "category": "Raids",
+    "rarity": "Exalted",
+    "scope": "Character",
+    "sourceAchievementKey": null,
+    "isHiddenUntilUnlocked": true,
+    "isActive": true,
+    "sortOrder": 70
+  }
+]

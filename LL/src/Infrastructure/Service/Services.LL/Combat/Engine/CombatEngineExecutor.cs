@@ -11,6 +11,7 @@ using Domain.Models.Professions.Crafting.V2;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces.Combat.Resolution;
 using Common.Randomness;
+using Microsoft.Extensions.Options;
 
 namespace Services.LL.Combat.Engine;
 
@@ -19,16 +20,21 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
     private readonly IAbilityCatalogProvider _catalogProvider;
     private readonly IEssenceDefinitionRepository? _essenceDefinitions;
     private readonly ICraftingDefinitionProvider? _craftingDefinitions;
+    private readonly ThreatAndTankingOptions _threatAndTankingOptions;
+    private readonly AbilityThreatTuning _abilityThreatTuning;
     private readonly Dictionary<EssenceAbilityCacheKey, CompiledAbility> _compiledEssenceAbilities = [];
 
     public CombatEngineExecutor(
         IAbilityCatalogProvider catalogProvider,
         IEssenceDefinitionRepository? essenceDefinitions = null,
-        ICraftingDefinitionProvider? craftingDefinitions = null)
+        ICraftingDefinitionProvider? craftingDefinitions = null,
+        IOptions<ThreatAndTankingOptions>? threatAndTankingOptions = null)
     {
         _catalogProvider = catalogProvider;
         _essenceDefinitions = essenceDefinitions;
         _craftingDefinitions = craftingDefinitions;
+        _threatAndTankingOptions = threatAndTankingOptions?.Value ?? new ThreatAndTankingOptions();
+        _abilityThreatTuning = _threatAndTankingOptions.ToAbilityThreatTuning();
     }
 
     public Task<CombatResult> ExecuteAsync(
@@ -91,6 +97,27 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             checkpointIntervalTicks,
             6000,
             cancellationToken);
+
+    public async Task<CombatExecutionWithCheckpoints> ExecuteRaidPlaybackAsync(
+        CombatEncounterRuntime runtime,
+        int checkpointIntervalTicks,
+        CombatSimulationOptions options,
+        CancellationToken cancellationToken)
+    {
+        var checkpoints = new List<CombatCheckpoint>();
+        var execution = await ExecuteCoreAsync(
+            runtime,
+            options with { CaptureEventLog = false },
+            cancellationToken,
+            checkpoint => checkpoints.Add(checkpoint),
+            checkpointIntervalTicks,
+            captureEventLog: false);
+        SyncCombatEntityState(runtime.FriendlyParticipants, execution.Friendly);
+        SyncCombatEntityState(runtime.HostileParticipants, execution.Hostile);
+        PopulatePostCombatTeams(execution.Result, execution.Friendly, execution.Hostile);
+        execution.Result.StartedAt = runtime.Plan.StartsAt;
+        return new CombatExecutionWithCheckpoints(execution.Result, checkpoints);
+    }
 
     public async Task<CombatExecutionWithCheckpoints> ExecuteTournamentPlaybackAsync(
         CombatEncounterRuntime runtime,
@@ -171,7 +198,9 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         ImagePath = combatant.ImagePath,
         MaxHealth = (int)combatant.GetAttribute(AttributeType.MaxHealth),
         Health = (int)combatant.Health,
-        Barrier = (int)combatant.Barrier
+        Barrier = (int)combatant.Barrier,
+        Threat = combatant.Threat,
+        PartyNumber = combatant.PartyNumber
     };
 
     private Task<ExecutionResult> ExecuteCoreAsync(
@@ -207,6 +236,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             .Select(participant => CreateRuntimeCombatant(
                 participant.Combatant,
                 CombatTeam.Friendly,
+                participant.Slot.PartyNumber,
                 catalog,
                 compiledAbilities,
                 precompiledCatalog is not null))
@@ -215,6 +245,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             .Select(participant => CreateRuntimeCombatant(
                 participant.Combatant,
                 CombatTeam.Hostile,
+                participant.Slot.PartyNumber,
                 catalog,
                 compiledAbilities,
                 precompiledCatalog is not null))
@@ -231,7 +262,15 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 CaptureEventLog: captureEventLog,
                 OvertimeStartsAtTick: options.OvertimeStartsAtTick,
                 OvertimePowerIncreaseIntervalTicks: options.OvertimePowerIncreaseIntervalTicks,
-                OvertimePowerIncreasePercent: options.OvertimePowerIncreasePercent));
+                OvertimePowerIncreasePercent: options.OvertimePowerIncreasePercent,
+                ThreatAndTankingEnabled: _threatAndTankingOptions.Enabled,
+                AttentionExponent: _threatAndTankingOptions.AttentionExponent,
+                MinimumAttentionWeight: _threatAndTankingOptions.MinimumAttentionWeight,
+                MaximumAttentionWeight: _threatAndTankingOptions.MaximumAttentionWeight,
+                ThreatHalfLifeSeconds: _threatAndTankingOptions.ThreatHalfLifeSeconds,
+                BasicAttackThreatValue: _threatAndTankingOptions.BasicAttackThreatValue,
+                MarkThreatBonus: _threatAndTankingOptions.MarkThreatBonus,
+                CoverBudgetMaxHealthFraction: _threatAndTankingOptions.CoverBudgetMaxHealthFraction));
         var result = engine.Run(
             friendly,
             hostile,
@@ -259,6 +298,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
     private RuntimeCombatant CreateRuntimeCombatant(
         CombatEntity combatant,
         CombatTeam team,
+        int? partyNumber,
         AbilityCatalog catalog,
         IReadOnlyDictionary<string, CompiledAbility> compiledAbilities,
         bool cacheStableEssenceAbilities)
@@ -283,7 +323,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             basicAttackIntervalMultiplier: behavior.IntervalMultiplier,
             basicAttackDamageMultiplier: behavior.DamageMultiplier,
             basicAttackType: behavior.AttackType,
-            basicAttackDamageType: behavior.DamageType);
+            basicAttackDamageType: behavior.DamageType,
+            partyNumber: partyNumber);
     }
 
     private BasicAttackBehavior ResolveBasicAttackBehavior(CombatEntity combatant)
@@ -349,7 +390,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                         modifiedSpec = EssenceAbilityProgressionScaler.Apply(modifiedSpec, essence.AscensionTier);
                         compiledAbility = ReferenceEquals(baseSpec, modifiedSpec)
                             ? compiledAbilities[abilityId]
-                            : AbilityCompiler.CompileAbility(modifiedSpec);
+                            : AbilityCompiler.CompileAbility(modifiedSpec, _abilityThreatTuning);
                         _compiledEssenceAbilities.Add(cacheKey, compiledAbility);
                     }
 
@@ -362,7 +403,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 uncachedSpec = ApplyTemporaryAbilityModifiers(uncachedSpec, combatant, catalog);
                 yield return ReferenceEquals(baseSpec, uncachedSpec)
                     ? compiledAbilities[abilityId]
-                    : AbilityCompiler.CompileAbility(uncachedSpec);
+                    : AbilityCompiler.CompileAbility(uncachedSpec, _abilityThreatTuning);
             }
         }
 
@@ -381,7 +422,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             var modifiedSpec = ApplyTemporaryAbilityModifiers(baseSpec, combatant, catalog);
             yield return ReferenceEquals(baseSpec, modifiedSpec)
                 ? compiledAbilities[abilityId]
-                : AbilityCompiler.CompileAbility(modifiedSpec);
+                : AbilityCompiler.CompileAbility(modifiedSpec, _abilityThreatTuning);
         }
 
         foreach (var essenceId in GetTaggedEssenceIds(combatant.Tags))
@@ -395,7 +436,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 var modifiedSpec = ApplyTemporaryAbilityModifiers(baseSpec, combatant, catalog);
                 yield return ReferenceEquals(baseSpec, modifiedSpec)
                     ? compiledAbilities[abilityId]
-                    : AbilityCompiler.CompileAbility(modifiedSpec);
+                    : AbilityCompiler.CompileAbility(modifiedSpec, _abilityThreatTuning);
             }
         }
     }
@@ -429,13 +470,13 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         }
     }
 
-    private static IReadOnlyDictionary<string, CompiledAbility> CompileSelectedAbilities(
+    private IReadOnlyDictionary<string, CompiledAbility> CompileSelectedAbilities(
         AbilityCatalog catalog,
         CompiledAbilityCatalog? precompiledCatalog,
         IReadOnlyList<AbilitySpec> abilitySpecs)
     {
         if (precompiledCatalog is null)
-            return AbilityCompiler.CompileAbilities(abilitySpecs);
+            return AbilityCompiler.CompileAbilities(abilitySpecs, _abilityThreatTuning);
 
         var compiled = new Dictionary<string, CompiledAbility>(abilitySpecs.Count, StringComparer.OrdinalIgnoreCase);
         foreach (var spec in abilitySpecs)
@@ -447,14 +488,14 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             }
             else
             {
-                compiled.Add(spec.Id, AbilityCompiler.CompileAbility(spec));
+                compiled.Add(spec.Id, AbilityCompiler.CompileAbility(spec, _abilityThreatTuning));
             }
         }
 
         return compiled;
     }
 
-    private static IReadOnlyDictionary<string, CompiledSummon> CompileSelectedSummons(
+    private IReadOnlyDictionary<string, CompiledSummon> CompileSelectedSummons(
         AbilityCatalog catalog,
         CompiledAbilityCatalog? precompiledCatalog,
         IReadOnlySet<string> summonIds)
@@ -462,7 +503,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         if (precompiledCatalog is null)
         {
             return AbilityCompiler.CompileSummons(
-                summonIds.Select(summonId => catalog.SummonsById[summonId]));
+                summonIds.Select(summonId => catalog.SummonsById[summonId]),
+                _abilityThreatTuning);
         }
 
         var compiled = new Dictionary<string, CompiledSummon>(summonIds.Count, StringComparer.OrdinalIgnoreCase);
@@ -694,6 +736,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             Description = spec.Description,
             OwningEssenceId = spec.OwningEssenceId,
             CooldownTicks = spec.CooldownTicks,
+            ThreatValue = spec.ThreatValue,
+            ThreatMultiplier = spec.ThreatMultiplier,
             Tags = [.. spec.Tags],
             DeliveryTags = [.. spec.DeliveryTags],
             EffectTags = [.. spec.EffectTags],

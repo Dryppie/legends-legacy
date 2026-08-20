@@ -136,12 +136,15 @@ export interface TowerRally {
   status: TowerRallyStatus;
   createdByCharacterId: string;
   requiredSlots: number;
+  partyCount: number;
+  maximumPartySize: number;
   createdAt: string;
   participants: TowerRallyParticipant[];
   applications: TowerRallyApplication[];
   readiness: TowerRosterReadiness;
   canApply: boolean;
   canManageApplications: boolean;
+  canManageParties: boolean;
   canLeave: boolean;
   canStart: boolean;
   canUpdateLoadout: boolean;
@@ -169,6 +172,8 @@ export interface TowerRallyParticipant {
   joinedAt: string;
   isLeader: boolean;
   isCurrentCharacter: boolean;
+  partySlot: number | null;
+  partyNumber: number | null;
 }
 
 export interface TowerRosterReadiness {
@@ -232,6 +237,7 @@ export interface TowerPlaybackEntity {
   isFriendly: boolean;
   maxHealth: number;
   level: number;
+  partyNumber?: number | null;
 }
 
 export interface TowerPlaybackAbility {
@@ -325,6 +331,7 @@ export interface TowerParticipantCombatSummary {
   damageTaken: number;
   healingDone: number;
   survived: boolean;
+  partyNumber: number | null;
 }
 
 export interface TowerHallOfFameEntry {
@@ -444,6 +451,18 @@ export class WorldTowerService {
 
   updateRallyLoadout(rallyId: string): Observable<TowerRally> {
     return this.api.post(`world-tower/rallies/${rallyId}/loadout`);
+  }
+
+  updateRallyParties(
+    rallyId: string,
+    assignments: ReadonlyArray<{
+      characterId: string;
+      partySlot: number | null;
+    }>,
+  ): Observable<TowerRally> {
+    return this.api.put(`world-tower/rallies/${rallyId}/parties`, {
+      assignments,
+    });
   }
 
   transferRallyLeadership(

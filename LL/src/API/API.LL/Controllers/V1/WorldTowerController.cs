@@ -1,5 +1,6 @@
 ﻿using Application.UseCases.WorldTower;
 using Application.UseCases.WorldTower.Dtos;
+using Application.UseCases.WorldTower.Commands.UpdateTowerRallyParties;
 using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using API.LL.Common;
 using Common.Primitives;
@@ -16,6 +17,8 @@ public sealed class WorldTowerController : BaseController
     public sealed record CreateRallyRequest(int FloorNumber, TowerRallyMode Mode);
     public sealed record ContributionRequest(TowerContributionKind Kind, int Amount);
     public sealed record TransferLeadershipRequest(Guid CharacterId);
+    public sealed record PartyAssignmentRequest(Guid CharacterId, int? PartySlot);
+    public sealed record UpdatePartiesRequest(IReadOnlyList<PartyAssignmentRequest> Assignments);
 
     [HttpGet]
     public async Task<ActionResult<TowerOverviewDto>> GetOverview() =>
@@ -102,6 +105,19 @@ public sealed class WorldTowerController : BaseController
     [HttpPost("rallies/{rallyId:guid}/loadout")]
     public async Task<ActionResult<Response<TowerRallyDto>>> UpdateLoadout(Guid rallyId) =>
         await Mediator.Send(new UpdateTowerRallyLoadoutCommand(CurrentCharacterGuid, rallyId));
+
+    [HttpPut("rallies/{rallyId:guid}/parties")]
+    public async Task<ActionResult<Response<TowerRallyDto>>> UpdateParties(
+        Guid rallyId,
+        UpdatePartiesRequest request) =>
+        await Mediator.Send(new UpdateTowerRallyPartiesCommand(
+            CurrentCharacterGuid,
+            rallyId,
+            (request.Assignments ?? [])
+                .Select(assignment => new TowerPartyAssignment(
+                    assignment.CharacterId,
+                    assignment.PartySlot))
+                .ToArray()));
 
     [HttpPost("rallies/{rallyId:guid}/leader")]
     public async Task<ActionResult<Response<TowerRallyDto>>> TransferLeadership(

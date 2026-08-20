@@ -77,6 +77,7 @@ export class CombatComponent implements OnInit, OnDestroy {
 
   @Input() playerTeamName: string | null = null;
   @Input() enemyTeamName: string | null = null;
+  @Input() battleTitleOverride: string | null = null;
 
   @Output() skipBattle = new EventEmitter<void>();
 
@@ -311,6 +312,7 @@ export class CombatComponent implements OnInit, OnDestroy {
       this.battleType === BattleType.Colosseum ||
       this.battleType === BattleType.Dungeon ||
       this.battleType === BattleType.Tower ||
+      this.battleType === BattleType.Raid ||
       this.battleType === BattleType.Training
     ) {
       this.skipCombat();
@@ -322,7 +324,11 @@ export class CombatComponent implements OnInit, OnDestroy {
       return this.isStoppingCombat ? 'Quitting...' : 'Quit';
     }
 
-    if (this.battleType === BattleType.Tower && !this.outcome) {
+    if (
+      (this.battleType === BattleType.Tower ||
+        this.battleType === BattleType.Raid) &&
+      !this.outcome
+    ) {
       return 'Leave Live View';
     }
 
@@ -366,7 +372,8 @@ export class CombatComponent implements OnInit, OnDestroy {
     return (
       this.battleType === BattleType.Colosseum ||
       this.battleType === BattleType.Dungeon ||
-      this.battleType === BattleType.Tower
+      this.battleType === BattleType.Tower ||
+      this.battleType === BattleType.Raid
     );
   }
 
@@ -415,6 +422,7 @@ export class CombatComponent implements OnInit, OnDestroy {
 
   battleTitle(): string {
     if (this.isLoading) return 'Resolving Combat';
+    if (this.battleTitleOverride) return this.battleTitleOverride;
 
     if (this.battleType === BattleType.IdleCombat) {
       const areaName = this.currentAction()?.combatActionDetails?.area?.name;
@@ -424,6 +432,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     if (this.battleType === BattleType.Dungeon) return 'Dungeon Battle';
     if (this.battleType === BattleType.Colosseum) return 'Arena Battle';
     if (this.battleType === BattleType.Tower) return 'World Tower Battle';
+    if (this.battleType === BattleType.Raid) return 'Raid Battle';
     if (this.battleType === BattleType.Training) return 'Training Battle';
 
     return 'Battle';

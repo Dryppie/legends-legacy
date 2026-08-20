@@ -125,6 +125,9 @@ public static class AbilityCatalogValidator
             if (ability.CooldownTicks < 0)
                 errors.Add($"{label}: cooldown cannot be negative.");
 
+            if (!float.IsFinite(ability.ThreatMultiplier) || ability.ThreatMultiplier < 0)
+                errors.Add($"{label}: threatMultiplier must be finite and non-negative.");
+
             ValidateCosts(label, ability.Costs, errors);
             ValidateEffects(label, ability.Effects, statusIds: null, errors);
             ValidateTriggers(label, ability.Triggers, ability.Effects, errors);
@@ -170,6 +173,10 @@ public static class AbilityCatalogValidator
 
             if (summon.MaxActive < 0)
                 errors.Add($"{label}: maxActive cannot be negative.");
+
+            if (summon.ThreatMultiplier is { } threatMultiplier
+                && (!float.IsFinite(threatMultiplier) || threatMultiplier < 0))
+                errors.Add($"{label}: threatMultiplier must be finite and non-negative.");
 
             ValidateSummonAttributes(label, summon.Attributes, errors);
         }
@@ -239,6 +246,15 @@ public static class AbilityCatalogValidator
 
             if (effect.DurationTicks < 0 || effect.IntervalTicks < 0 || effect.Uses < 0)
                 errors.Add($"{label}: duration, interval, and uses cannot be negative.");
+
+            if (effect.Operation is (AbilityEffectOperation.Damage
+                    or AbilityEffectOperation.Heal
+                    or AbilityEffectOperation.GrantBarrier)
+                && effect.BaseValue != 0)
+            {
+                errors.Add(
+                    $"{label}: {effect.Operation} cannot use baseValue; author its magnitude with scaling attributes or event-based coefficients.");
+            }
 
             if (effect.LivingNonSummonedAllyDamagePercent < 0)
                 errors.Add($"{label}: livingNonSummonedAllyDamagePercent cannot be negative.");
@@ -315,6 +331,12 @@ public static class AbilityCatalogValidator
 
             if (effect.Operation == AbilityEffectOperation.Summon && string.IsNullOrWhiteSpace(effect.SummonId))
                 errors.Add($"{label}: Summon requires summonId.");
+
+            if (effect.Operation == AbilityEffectOperation.GrantCover
+                && (effect.BaseValue is <= 0 or > 100 || effect.DurationTicks <= 0))
+            {
+                errors.Add($"{label}: GrantCover requires baseValue between 1 and 100 and a positive durationTicks.");
+            }
 
             if (effect.Target == AbilityTargetSelector.OwnedSummons
                 && string.IsNullOrWhiteSpace(effect.SummonId))

@@ -24,31 +24,71 @@ public sealed class DungeonPreviewRewardService : IDungeonPreviewRewardService
         DungeonDefinition dungeon,
         CancellationToken cancellationToken)
     {
-        var rewards = new List<DungeonPreviewReward>();
+        var rewardsByDungeon = await GetPossibleCompletionRewardsAsync(
+            new[] { dungeon },
+            cancellationToken);
+        return rewardsByDungeon[dungeon.Id];
+    }
+
+    public async Task<IReadOnlyDictionary<string, IReadOnlyList<DungeonPreviewReward>>> GetPossibleCompletionRewardsAsync(
+        IReadOnlyCollection<DungeonDefinition> dungeons,
+        CancellationToken cancellationToken)
+    {
+        if (dungeons.Count == 0)
+        {
+            return new Dictionary<string, IReadOnlyList<DungeonPreviewReward>>(
+                StringComparer.OrdinalIgnoreCase);
+        }
+
+        var entriesByDungeon = dungeons.ToDictionary(
+            dungeon => dungeon.Id,
+            BuildPreviewEntries,
+            StringComparer.OrdinalIgnoreCase);
+        var itemIds = entriesByDungeon.Values
+            .SelectMany(entries => entries)
+            .Select(entry => entry.ItemId)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var itemBases = await _itemBases.GetItemBasesByIdsAsync(itemIds, cancellationToken);
+
+        return entriesByDungeon.ToDictionary(
+            pair => pair.Key,
+            pair => (IReadOnlyList<DungeonPreviewReward>)MapRewards(pair.Value, itemBases),
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    private List<DungeonPreviewRewardEntry> BuildPreviewEntries(DungeonDefinition dungeon)
+    {
+        var rewards = new List<DungeonPreviewRewardEntry>();
 
         if (dungeon.CompletionRewardTableIds.Count > 0)
         {
-            rewards.AddRange(await MapRewardTablesAsync(
+            rewards.AddRange(MapRewardTables(
                 dungeon.CompletionRewardTableIds,
                 "Completion Loot",
-                "Every Completion",
-                cancellationToken));
+                "Every Completion"));
         }
 
         if (dungeon.TierRewardTableIds.Count > 0)
         {
-            rewards.AddRange(await MapRewardTablesAsync(
+            rewards.AddRange(MapRewardTables(
                 dungeon.TierRewardTableIds,
                 "Tier Loot",
-                $"Tier {dungeon.Tier} Completion",
-                cancellationToken));
+                $"Tier {dungeon.Tier} Completion"));
         }
 
-        rewards.AddRange(await MapMonsterCoreRewardsAsync(dungeon, cancellationToken));
-        rewards.AddRange(await MapFirstCompletionRewardsAsync(dungeon, cancellationToken));
+        rewards.AddRange(MapMonsterCoreRewards(dungeon));
+        rewards.AddRange(MapFirstCompletionRewards(dungeon));
 
-        return rewards
-            .GroupBy(x => new { x.ItemBase.Id, x.Category })
+        return rewards;
+    }
+
+    private static List<DungeonPreviewReward> MapRewards(
+        IEnumerable<DungeonPreviewRewardEntry> rewards,
+        IReadOnlyDictionary<string, ItemBase> itemBases) =>
+        rewards
+            .Where(reward => itemBases.ContainsKey(reward.ItemId))
+            .GroupBy(x => new { x.ItemId, x.Category })
             .Select(x =>
             {
                 var firstReward = x.First();
@@ -56,24 +96,22 @@ public sealed class DungeonPreviewRewardService : IDungeonPreviewRewardService
                 var chance = CombineChances(x.Select(reward => reward.DropChancePercent));
                 var noDropChance = CombineChances(x.Select(reward => reward.NoDropChancePercent));
 
-                return firstReward with
-                {
-                    Source = source,
-                    MinQuantity = x.Min(reward => reward.MinQuantity),
-                    MaxQuantity = x.Max(reward => reward.MaxQuantity),
-                    DropChancePercent = chance,
-                    CanDropNothing = x.Any(reward => reward.CanDropNothing),
-                    NoDropChancePercent = noDropChance
-                };
+                return new DungeonPreviewReward(
+                    itemBases[firstReward.ItemId],
+                    firstReward.Category,
+                    source,
+                    x.Min(reward => reward.MinQuantity),
+                    x.Max(reward => reward.MaxQuantity),
+                    chance,
+                    x.Any(reward => reward.CanDropNothing),
+                    noDropChance);
             })
             .ToList();
-    }
 
-    private async Task<IEnumerable<DungeonPreviewReward>> MapRewardTablesAsync(
+    private IEnumerable<DungeonPreviewRewardEntry> MapRewardTables(
         IReadOnlyCollection<string> rewardTableIds,
         string category,
-        string source,
-        CancellationToken cancellationToken)
+        string source)
     {
         var entries = rewardTableIds
             .Select(_rewardTables.GetById)
@@ -81,49 +119,35 @@ public sealed class DungeonPreviewRewardService : IDungeonPreviewRewardService
             .Where(x => !string.IsNullOrWhiteSpace(x.ItemId))
             .ToList();
 
-        var itemIds = entries
-            .Select(x => x.ItemId)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        var itemBases = await _itemBases.GetItemBasesByIdsAsync(itemIds, cancellationToken);
-
         return entries
-            .Where(entry => itemBases.ContainsKey(entry.ItemId))
-            .GroupBy(entry => entry.ItemId, StringComparer.OrdinalIgnoreCase)
-            .Select(group =>
-                new DungeonPreviewReward(
-                itemBases[group.Key],
+            .Select(entry => new DungeonPreviewRewardEntry(
+                entry.ItemId,
                 category,
                 source,
-                group.Min(entry => entry.MinQuantity),
-                group.Max(entry => entry.MaxQuantity),
-                CombineChances(group.Select(entry => entry.DropChancePercent)),
-                group.Any(entry => entry.CanDropNothing),
-                CombineChances(group.Select(entry => entry.NoDropChancePercent))))
+                entry.MinQuantity,
+                entry.MaxQuantity,
+                entry.DropChancePercent,
+                entry.CanDropNothing,
+                entry.NoDropChancePercent))
             .ToList();
     }
 
-    private async Task<IEnumerable<DungeonPreviewReward>> MapMonsterCoreRewardsAsync(
-        DungeonDefinition dungeon,
-        CancellationToken cancellationToken)
+    private static IEnumerable<DungeonPreviewRewardEntry> MapMonsterCoreRewards(
+        DungeonDefinition dungeon)
     {
         var itemIds = DungeonRewardCatalog.GetMonsterCoreRewardItemIds(dungeon.Grade);
-        var itemBases = await _itemBases.GetItemBasesByIdsAsync(itemIds, cancellationToken);
 
         return itemIds
-            .Where(itemBases.ContainsKey)
-            .Select(itemId => new DungeonPreviewReward(
-                itemBases[itemId],
+            .Select(itemId => new DungeonPreviewRewardEntry(
+                itemId,
                 "Monster Cores",
                 "Every Completion",
                 DropChancePercent: 100))
             .ToList();
     }
 
-    private async Task<IEnumerable<DungeonPreviewReward>> MapFirstCompletionRewardsAsync(
-        DungeonDefinition dungeon,
-        CancellationToken cancellationToken)
+    private static IEnumerable<DungeonPreviewRewardEntry> MapFirstCompletionRewards(
+        DungeonDefinition dungeon)
     {
         var grants = DungeonRewardCatalog.GetFirstCompletionGrants(dungeon);
         if (grants.Count == 0)
@@ -131,14 +155,10 @@ public sealed class DungeonPreviewRewardService : IDungeonPreviewRewardService
             return [];
         }
 
-        var itemBases = await _itemBases.GetItemBasesByIdsAsync(
-            grants.Select(x => x.ItemId).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().ToList(),
-            cancellationToken);
-
         return grants
-            .Where(x => itemBases.ContainsKey(x.ItemId))
-            .Select(x => new DungeonPreviewReward(
-                itemBases[x.ItemId],
+            .Where(x => !string.IsNullOrWhiteSpace(x.ItemId))
+            .Select(x => new DungeonPreviewRewardEntry(
+                x.ItemId,
                 "First Completion",
                 "Once Per Character",
                 x.MinAmount,
@@ -273,4 +293,14 @@ public sealed class DungeonPreviewRewardService : IDungeonPreviewRewardService
         double? DropChancePercent,
         bool CanDropNothing,
         double? NoDropChancePercent);
+
+    private sealed record DungeonPreviewRewardEntry(
+        string ItemId,
+        string Category,
+        string Source,
+        int MinQuantity = 1,
+        int MaxQuantity = 1,
+        double? DropChancePercent = null,
+        bool CanDropNothing = false,
+        double? NoDropChancePercent = null);
 }

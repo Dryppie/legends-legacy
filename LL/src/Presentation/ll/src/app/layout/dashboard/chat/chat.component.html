@@ -147,7 +147,7 @@
         (pointercancel)="onChannelPointerEnd($event)"
       >
         <button
-          *ngFor="let room of visibleRooms"
+          *ngFor="let room of visibleRooms; trackBy: trackRoom"
           type="button"
           class="shrink-0 whitespace-nowrap rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] px-2 py-0.5 text-[9px] tracking-wide text-[var(--ll-color-text-muted)] transition-colors"
           [ngClass]="{
@@ -492,7 +492,7 @@
           (pointercancel)="onChannelPointerEnd($event)"
         >
           <button
-            *ngFor="let room of visibleRooms"
+            *ngFor="let room of visibleRooms; trackBy: trackRoom"
             type="button"
             class="shrink-0 whitespace-nowrap rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] px-2.5 py-1 text-[10px] tracking-wide text-[var(--ll-color-text-muted)] transition-colors hover:border-[var(--ll-color-border-strong)] hover:bg-[var(--ll-color-primary-soft)] hover:text-primary"
             [ngClass]="{

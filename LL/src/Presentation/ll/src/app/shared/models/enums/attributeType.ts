@@ -21,5 +21,7 @@ export enum AttributeType {
   StatusResistance = 'StatusResistance',
   CrowdControlResistance = 'CrowdControlResistance',
 
+  Threat = 'Threat',
+
   AttackSpeed = 'AttackSpeed',
 }

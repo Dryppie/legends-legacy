@@ -25,7 +25,7 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
         CancellationToken cancellationToken)
     {
         var normalizedKey = boardKey.Trim().ToLowerInvariant();
-        if (!LeaderboardBoardKey.All.Contains(normalizedKey))
+        if (!LeaderboardBoardKey.IsKnown(normalizedKey))
         {
             throw new ArgumentOutOfRangeException(
                 nameof(boardKey),
@@ -37,6 +37,8 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
         var definition = GetDefinition(normalizedKey);
         var scores = definition.Profession is { } profession
             ? await GetProfessionScoresAsync(profession, cancellationToken)
+            : LeaderboardBoardKey.TryGetFastestRaidBossId(normalizedKey, out var fastestRaidBossId)
+                ? await GetFastestRaidSlainScoresAsync(fastestRaidBossId, cancellationToken)
             : normalizedKey switch
             {
                 LeaderboardBoardKey.SoulArchiveCompletion =>
@@ -55,9 +57,11 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
                     await GetWeeklyGuildContributionScoresAsync(now, cancellationToken),
                 LeaderboardBoardKey.GuildRenown =>
                     await GetGuildRenownScoresAsync(cancellationToken),
+                LeaderboardBoardKey.RaidBossKills =>
+                    await GetRaidBossKillScoresAsync(cancellationToken),
                 _ => await GetCharacterScoresAsync(normalizedKey, cancellationToken)
             };
-        var ranked = LeaderboardRanking.Rank(scores).ToList();
+        var ranked = LeaderboardRanking.Rank(scores, definition.PrimaryAscending).ToList();
         var viewerParticipantId = definition.IsGuildBoard
             ? await GetViewerGuildIdAsync(characterId, cancellationToken)
             : characterId;
@@ -407,6 +411,50 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
             .ToListAsync(cancellationToken);
     }
 
+    private async Task<List<LeaderboardScore>> GetRaidBossKillScoresAsync(
+        CancellationToken cancellationToken)
+    {
+        return await EligibleCharacters()
+            .Where(character => _context.RaidParticipantResults.Any(result =>
+                result.CharacterId == character.Id && result.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain))
+            .Select(character => new LeaderboardScore(
+                character.Id,
+                character.Name,
+                _context.RaidParticipantResults.LongCount(result =>
+                    result.CharacterId == character.Id && result.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain),
+                _context.RaidParticipantResults
+                    .Where(result => result.CharacterId == character.Id && result.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain)
+                    .Select(result => result.RaidRun.RaidBossId)
+                    .Distinct()
+                    .LongCount()))
+            .ToListAsync(cancellationToken);
+    }
+
+    private async Task<List<LeaderboardScore>> GetFastestRaidSlainScoresAsync(
+        string raidBossId,
+        CancellationToken cancellationToken)
+    {
+        return await EligibleCharacters()
+            .Where(character => _context.RaidParticipantResults.Any(result =>
+                result.CharacterId == character.Id
+                && result.RaidRun.RaidBossId == raidBossId
+                && result.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain))
+            .Select(character => new LeaderboardScore(
+                character.Id,
+                character.Name,
+                _context.RaidLaneResults
+                    .Where(lane => lane.Lane == Domain.Models.Raids.RaidLane.Vanguard
+                                   && lane.RaidRun.RaidBossId == raidBossId
+                                   && lane.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain
+                                   && lane.RaidRun.ParticipantResults.Any(result => result.CharacterId == character.Id))
+                    .Min(lane => (long)lane.DurationTicks),
+                _context.RaidParticipantResults.LongCount(result =>
+                    result.CharacterId == character.Id
+                    && result.RaidRun.RaidBossId == raidBossId
+                    && result.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain)))
+            .ToListAsync(cancellationToken);
+    }
+
     private async Task<Guid?> GetViewerGuildIdAsync(
         Guid characterId,
         CancellationToken cancellationToken)
@@ -531,6 +579,23 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
             UnrankedReason: "Join a guild to see its standing.",
             ParticipantLabel: "Guild",
             IsGuildBoard: true),
+        LeaderboardBoardKey.RaidBossKills => new(
+            boardKey,
+            "PvE",
+            "Raid Boss Kills",
+            "Raid boss victories earned across the realm.",
+            "Victorious raids",
+            "Raid bosses slain",
+            UnrankedReason: "Slay a raid boss to earn a place on this leaderboard."),
+        _ when LeaderboardBoardKey.TryGetFastestRaidBossId(boardKey, out var raidBossId) => new(
+            boardKey,
+            "PvE",
+            "Fastest Raid Boss Slain",
+            $"Fastest Vanguard victories against {raidBossId}.",
+            "Duration (ticks)",
+            "Victories",
+            UnrankedReason: "Slay this raid boss to record a time.",
+            PrimaryAscending: true),
         LeaderboardBoardKey.Crafting => ProfessionDefinition(boardKey, ProfessionType.Crafting),
         LeaderboardBoardKey.Mining => ProfessionDefinition(boardKey, ProfessionType.Mining),
         LeaderboardBoardKey.Woodcutting => ProfessionDefinition(boardKey, ProfessionType.Woodcutting),
@@ -561,5 +626,6 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
         string? UnrankedReason = null,
         string ParticipantLabel = "Character",
         string PeriodLabel = "All-time",
-        bool IsGuildBoard = false);
+        bool IsGuildBoard = false,
+        bool PrimaryAscending = false);
 }

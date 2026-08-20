@@ -15,4 +15,5 @@ public sealed record AbilityStats(
     int SelfDamage = 0,
     int AlliedDamage = 0,
     int TotalBarrier = 0,
-    IReadOnlyList<AbilityDamageTypeStats>? DamageByType = null);
+    IReadOnlyList<AbilityDamageTypeStats>? DamageByType = null,
+    int TotalThreat = 0);

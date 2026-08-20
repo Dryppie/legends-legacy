@@ -14,17 +14,25 @@ public sealed record FastCombatEngineOptions(
     int BasicAttackIntervalTicks = 30,
     int RandomSeed = 1337,
     bool StartActiveAbilitiesOnCooldown = false,
-    float TauntThreatBonus = 100f,
+    float MarkThreatBonus = 100f,
     bool CaptureEventLog = true,
     int? OvertimeStartsAtTick = null,
     int OvertimePowerIncreaseIntervalTicks = 0,
-    float OvertimePowerIncreasePercent = 0);
+    float OvertimePowerIncreasePercent = 0,
+    bool ThreatAndTankingEnabled = true,
+    double AttentionExponent = 2.5d,
+    double MinimumAttentionWeight = 0.05d,
+    double MaximumAttentionWeight = 20d,
+    double ThreatHalfLifeSeconds = 15d,
+    int BasicAttackThreatValue = 8,
+    float CoverBudgetMaxHealthFraction = 0.5f);
 
 public sealed class FastCombatEngine
 {
     public const int TicksPerSecond = 10;
     internal const double CombatMagnitudeVariance = 0.2d;
     private const int MagnitudeRandomSeedSalt = unchecked((int)0x9E3779B9);
+    private const int TargetingRandomSeedSalt = unchecked((int)0x6A09E667);
     private const int HealthRegenerationIntervalSeconds = 5;
     private const int HealthRegenerationIntervalTicks =
         TicksPerSecond * HealthRegenerationIntervalSeconds;
@@ -34,19 +42,28 @@ public sealed class FastCombatEngine
     private readonly IReadOnlyDictionary<string, CompiledAbility> _abilitiesById;
     private readonly Random _random;
     private readonly Random _magnitudeRandom;
+    private readonly Random _targetingRandom;
     private readonly int _maxTicks;
     private readonly int _basicAttackIntervalTicks;
     private readonly bool _startActiveAbilitiesOnCooldown;
-    private readonly float _tauntThreatBonus;
+    private readonly float _markThreatBonus;
     private readonly bool _captureEventLog;
     private readonly int _overtimeStartsAtTick;
     private readonly int _overtimePowerIncreaseIntervalTicks;
     private readonly float _overtimePowerIncreasePercent;
+    private readonly bool _threatAndTankingEnabled;
+    private readonly double _attentionExponent;
+    private readonly double _minimumAttentionWeight;
+    private readonly double _maximumAttentionWeight;
+    private readonly double _threatDecayPerTick;
+    private readonly int _basicAttackThreatValue;
+    private readonly float _coverBudgetMaxHealthFraction;
     private readonly Dictionary<RuntimeCombatant, float> _basicAttackProgress = [];
     private readonly Dictionary<RuntimeCombatant, float> _healthRegenerationProgress = [];
     private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationPotential = [];
     private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationOverhealed = [];
     private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationPulses = [];
+    private readonly Dictionary<RuntimeCombatant, ThreatGenerationTelemetry> _threatGeneration = [];
     private readonly List<CombatLogItem> _log = [];
     private readonly Dictionary<string, int> _balanceDamageDone = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _balanceDamageTaken = new(StringComparer.OrdinalIgnoreCase);
@@ -56,6 +73,7 @@ public sealed class FastCombatEngine
     private readonly List<RuntimeStatus> _statusTickBuffer = [];
     private readonly List<RuntimeCondition> _conditionTickBuffer = [];
     private readonly List<RuntimeBarrierContribution> _barrierTickBuffer = [];
+    private readonly List<RuntimeCover> _coverTickBuffer = [];
     private readonly List<RuntimeSummonGroup> _summonGroupTickBuffer = [];
     private readonly List<RuntimeCombatant> _summonTickBuffer = [];
     private readonly List<RuntimeCondition> _thornsBuffer = [];
@@ -73,7 +91,8 @@ public sealed class FastCombatEngine
         Periodic,
         Reflected,
         Stored,
-        Self
+        Self,
+        Redirected
     }
 
     public FastCombatEngine(
@@ -96,14 +115,25 @@ public sealed class FastCombatEngine
         _random = new Random(resolved.RandomSeed);
         _magnitudeRandom = new Random(
             unchecked(resolved.RandomSeed ^ MagnitudeRandomSeedSalt));
+        _targetingRandom = new Random(
+            unchecked(resolved.RandomSeed ^ TargetingRandomSeedSalt));
         _maxTicks = resolved.MaxTicks;
         _basicAttackIntervalTicks = resolved.BasicAttackIntervalTicks;
         _startActiveAbilitiesOnCooldown = resolved.StartActiveAbilitiesOnCooldown;
-        _tauntThreatBonus = Math.Max(0, resolved.TauntThreatBonus);
+        _markThreatBonus = Math.Max(0, resolved.MarkThreatBonus);
         _captureEventLog = resolved.CaptureEventLog;
         _overtimeStartsAtTick = resolved.OvertimeStartsAtTick ?? int.MaxValue;
         _overtimePowerIncreaseIntervalTicks = Math.Max(0, resolved.OvertimePowerIncreaseIntervalTicks);
         _overtimePowerIncreasePercent = Math.Max(0, resolved.OvertimePowerIncreasePercent);
+        _threatAndTankingEnabled = resolved.ThreatAndTankingEnabled;
+        _attentionExponent = Math.Max(1d, resolved.AttentionExponent);
+        _minimumAttentionWeight = Math.Max(0.0001d, resolved.MinimumAttentionWeight);
+        _maximumAttentionWeight = Math.Max(_minimumAttentionWeight, resolved.MaximumAttentionWeight);
+        _threatDecayPerTick = resolved.ThreatHalfLifeSeconds <= 0
+            ? 0d
+            : 1d - Math.Pow(0.5d, 1d / (resolved.ThreatHalfLifeSeconds * TicksPerSecond));
+        _basicAttackThreatValue = resolved.BasicAttackThreatValue;
+        _coverBudgetMaxHealthFraction = Math.Max(0, resolved.CoverBudgetMaxHealthFraction);
     }
 
     public CombatResult Run(
@@ -170,6 +200,7 @@ public sealed class FastCombatEngine
             TickConditions(combatants);
             TickHealthRegeneration(combatants);
             TickBarrierContributions(combatants);
+            TickCovers(combatants);
 
             for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
                 combatants[combatantIndex].Tick();
@@ -236,9 +267,12 @@ public sealed class FastCombatEngine
                 StringComparer.OrdinalIgnoreCase);
             stats.AddRange(intervalEvents, teams);
         }
-        var entityStats = AddFinalCombatantState(
-            AddHealthRegenerationTelemetry(
-                stats.Snapshot(),
+        var entityStats = AddAttentionTelemetry(
+            AddFinalCombatantState(
+                AddThreatGenerationTelemetry(
+                    AddHealthRegenerationTelemetry(
+                        stats.Snapshot(),
+                        combatants)),
                 combatants),
             combatants);
         return new CombatCheckpoint(
@@ -258,7 +292,9 @@ public sealed class FastCombatEngine
         ImagePath = combatant.ImagePath,
         Health = (int)combatant.Health,
         MaxHealth = (int)combatant.GetAttribute(AttributeType.MaxHealth),
-        Barrier = (int)combatant.Barrier
+        Barrier = (int)combatant.Barrier,
+        Threat = combatant.Threat,
+        PartyNumber = combatant.PartyNumber
     };
 
     private IReadOnlyList<EntityStats> CreateDetailedStats(
@@ -269,17 +305,23 @@ public sealed class FastCombatEngine
             combatant => combatant.Id,
             combatant => combatant.Team.ToString(),
             StringComparer.OrdinalIgnoreCase);
-        return AddFinalCombatantState(
-            AddHealthRegenerationTelemetry(
-                checkpointStats?.Snapshot()
-                ?? new CombatStatsAggregator().Aggregate(_log, teamsByEntityId),
+        return AddAttentionTelemetry(
+            AddFinalCombatantState(
+                AddThreatGenerationTelemetry(
+                    AddHealthRegenerationTelemetry(
+                        checkpointStats?.Snapshot()
+                        ?? new CombatStatsAggregator().Aggregate(_log, teamsByEntityId),
+                        combatants)),
                 combatants),
             combatants);
     }
 
     private IReadOnlyList<EntityStats> CreateBalanceStats(IReadOnlyList<RuntimeCombatant> combatants) =>
-        AddFinalCombatantState(
-            AddHealthRegenerationTelemetry(_balanceStats.Snapshot(), combatants),
+        AddAttentionTelemetry(
+            AddFinalCombatantState(
+                AddThreatGenerationTelemetry(
+                    AddHealthRegenerationTelemetry(_balanceStats.Snapshot(), combatants)),
+                combatants),
             combatants);
 
     private void PublishIntervalEvents(IReadOnlyList<RuntimeCombatant> combatants)
@@ -336,6 +378,7 @@ public sealed class FastCombatEngine
             ability.StartCooldown(
                 actor.GetAttribute(AttributeType.Cooldown),
                 additionalCooldownTicks);
+            GenerateAbilityThreat(actor, ability.Definition);
             Log(actor, null, ability.Definition.Name, EventType.AbilityUse, 0, $"{actor.Name} used {ability.Definition.Name}");
             var primaryTarget = SelectActiveAbilityPrimaryTarget(ability, actor, combatants);
             Publish(new CombatEvent(AbilityTriggerEvent.OnAbilityUsed, actor, primaryTarget, ability.Definition.Id), combatants);
@@ -353,8 +396,11 @@ public sealed class FastCombatEngine
         }
 
         _basicAttackProgress[actor] = progress - threshold;
-        if (SelectFirstEnemy(actor, combatants) is not { } target)
+        if (SelectAttentionTarget(actor, combatants) is not { } target)
             return;
+
+        if (_threatAndTankingEnabled)
+            AdjustThreatAndTrack(actor, _basicAttackThreatValue, "Basic Attack");
 
         var baseDamage = Math.Max(
             1,
@@ -649,12 +695,21 @@ public sealed class FastCombatEngine
                             ability.BeginTriggerExecution(trigger);
                             try
                             {
+                                var effectUsage = new EffectUsageTracker(ability);
+                                if (ability.Definition.Kind == AbilitySpecKind.Passive
+                                    && ability.CanGenerateThreat(trigger)
+                                    && (trigger.Effects.Count == 0
+                                        || trigger.Effects.Any(effect => effectUsage.CanUseEffect(effect, null))))
+                                {
+                                    GenerateAbilityThreat(combatant, ability.Definition, trigger.ThreatValue);
+                                    ability.StartThreatCooldown(trigger);
+                                }
                                 ExecuteTrigger(
                                     trigger,
                                     combatant,
                                     combatEvent,
                                     combatants,
-                                    new EffectUsageTracker(ability),
+                                    effectUsage,
                                     countStatsActivation: ability.Definition.Kind == AbilitySpecKind.Passive);
                             }
                             finally
@@ -672,6 +727,21 @@ public sealed class FastCombatEngine
         {
             _eventDepth--;
         }
+    }
+
+    private void GenerateAbilityThreat(
+        RuntimeCombatant source,
+        CompiledAbility ability,
+        int? threatValue = null)
+    {
+        var resolvedThreatValue = threatValue ?? ability.ThreatValue;
+        if (!_threatAndTankingEnabled || resolvedThreatValue == 0 || ability.ThreatMultiplier <= 0)
+            return;
+
+        AdjustThreatAndTrack(
+            source,
+            resolvedThreatValue * ability.ThreatMultiplier,
+            ability.Name);
     }
 
     private void PublishStatusTriggers(
@@ -792,6 +862,7 @@ public sealed class FastCombatEngine
                             continue;
 
                         if (!target.IsAlive
+                            || !CanAbilityAffectTarget(source, target)
                             || !ConditionsPass(
                                 effect.Conditions,
                                 source,
@@ -999,6 +1070,16 @@ public sealed class FastCombatEngine
                     combatants,
                     executionContext?.ActivationId);
                 break;
+            case AbilityEffectOperation.GrantCover:
+                GrantCover(
+                    source,
+                    target,
+                    value,
+                    effect.DurationTicks,
+                    statsSource ?? effect.StatsSource,
+                    effect.Id,
+                    countStatsActivation);
+                break;
             case AbilityEffectOperation.RestoreResource:
                 if (effect.Resource == AbilityResourceType.Cooldown)
                 {
@@ -1137,7 +1218,7 @@ public sealed class FastCombatEngine
                     countStatsActivation);
                 break;
             case AbilityEffectOperation.ModifyThreat:
-                target.AdjustThreat(value);
+                AdjustThreatAndTrack(target, value, statsSource ?? effect.Id);
                 Log(source, target, effect.Id, value >= 0 ? EventType.Buff : EventType.Debuff, value, $"{target.Name}'s Threat changed by {value}.", statsSource, countStatsActivation);
                 break;
             case AbilityEffectOperation.ModifyRegenerationRate:
@@ -1248,10 +1329,14 @@ public sealed class FastCombatEngine
         string? statsSource = null,
         bool countStatsActivation = false,
         DamageDelivery delivery = DamageDelivery.Direct,
-        float armorPenetrationBonus = 0)
+        float armorPenetrationBonus = 0,
+        bool skipSourceDamageModifier = false,
+        RuntimeCombatant? redirectedFrom = null)
     {
         if (!target.IsAlive || damage <= 0)
             return 0;
+
+        var redirectedIncomingDamage = delivery == DamageDelivery.Redirected ? damage : 0;
 
         if (delivery == DamageDelivery.Direct
             && CanDodge(attackType)
@@ -1273,13 +1358,14 @@ public sealed class FastCombatEngine
                     statsSource,
                     countStatsActivation,
                     incomingRawDamage: damage,
-                    avoidedDamage: damage);
+                    avoidedDamage: damage,
+                    countsAsTargetedAttack: true);
                 PublishIfObserved(AbilityTriggerEvent.OnDodge, target, source, null, combatants);
                 return 0;
             }
         }
 
-        var damageModifier = source.GetDamageDealtPercent(damageType)
+        var damageModifier = (skipSourceDamageModifier ? 0 : source.GetDamageDealtPercent(damageType))
                              + target.GetDamageTakenPercent(damageType, source);
         damage = Math.Max(0, (int)Math.Round(damage * Math.Max(0, 1 + damageModifier / 100f)));
         var isCritical = delivery == DamageDelivery.Direct
@@ -1329,6 +1415,36 @@ public sealed class FastCombatEngine
             && TryConsumeConditionCharge(target, StandardConditionType.Guard, source, combatants))
         {
             guardedDamage = Math.Max(0, (int)Math.Round(reducedDamage * 0.75f));
+        }
+        var damageRedirectedAway = 0;
+        if (_threatAndTankingEnabled
+            && delivery != DamageDelivery.Redirected
+            && guardedDamage > 0
+            && TryGetActiveCover(target) is { } cover)
+        {
+            damageRedirectedAway = Math.Max(
+                0,
+                (int)Math.Round(
+                    cover.ConsumeBudget(guardedDamage * cover.Percent / 100f),
+                    MidpointRounding.AwayFromZero));
+            guardedDamage = Math.Max(0, guardedDamage - damageRedirectedAway);
+            if (damageRedirectedAway > 0)
+            {
+                ApplyDamage(
+                    source,
+                    cover.Guardian,
+                    damageRedirectedAway,
+                    attackType,
+                    damageType,
+                    effect,
+                    combatants,
+                    sourceName,
+                    statsSource,
+                    delivery: DamageDelivery.Redirected,
+                    armorPenetrationBonus: armorPenetrationBonus,
+                    skipSourceDamageModifier: true,
+                    redirectedFrom: target);
+            }
         }
         var damageAmplified = vulnerableAmplified + Math.Max(0, reducedDamage - blockedDamage);
         var barrierBefore = target.Barrier;
@@ -1409,7 +1525,7 @@ public sealed class FastCombatEngine
                 _ => isCritical ? EventType.DamageCrit : EventType.Damage
             },
             healthDamage,
-            $"{source.Name} dealt {healthDamage} {damageType} damage to {target.Name}{(isCritical ? " (critical)" : string.Empty)}{(blocked ? " (blocked)" : string.Empty)}.",
+            $"{source.Name} dealt {healthDamage} {damageType} damage to {target.Name}{(isCritical ? " (critical)" : string.Empty)}{(blocked ? " (blocked)" : string.Empty)}{(redirectedFrom is null ? string.Empty : $" redirected from {redirectedFrom.Name}")}.",
             statsSource,
             countStatsActivation,
             barrierAbsorbed,
@@ -1422,7 +1538,10 @@ public sealed class FastCombatEngine
             damageReductionPrevented,
             damageAmplified,
             pendingHealthDamage,
-            damageType: damageType);
+            damageType: damageType,
+            damageRedirectedTo: redirectedIncomingDamage,
+            damageRedirectedAway: damageRedirectedAway,
+            countsAsTargetedAttack: delivery == DamageDelivery.Direct);
         if (delivery == DamageDelivery.Direct)
         {
             var abilityId = sourceName.Equals("Basic Attack", StringComparison.Ordinal)
@@ -1523,6 +1642,30 @@ public sealed class FastCombatEngine
         }
 
         return healthDamage;
+    }
+
+    private static RuntimeCover? TryGetActiveCover(RuntimeCombatant target)
+    {
+        RuntimeCover? selected = null;
+        for (var index = target.Covers.Count - 1; index >= 0; index--)
+        {
+            var cover = target.Covers[index];
+            if (!cover.IsActive || ReferenceEquals(cover.Guardian, target))
+            {
+                target.Covers.RemoveAt(index);
+                continue;
+            }
+
+            if (selected is null
+                || cover.Percent > selected.Percent
+                || cover.Percent == selected.Percent
+                && cover.ApplicationOrder > selected.ApplicationOrder)
+            {
+                selected = cover;
+            }
+        }
+
+        return selected;
     }
 
     private static bool CanDodge(AttackType attackType) =>
@@ -1632,6 +1775,55 @@ public sealed class FastCombatEngine
                 granted,
                 BarrierApplicationOrder: applicationOrder),
             combatants);
+    }
+
+    private void GrantCover(
+        RuntimeCombatant guardian,
+        RuntimeCombatant target,
+        int percent,
+        int durationTicks,
+        string statsSource,
+        string effectId,
+        bool countStatsActivation)
+    {
+        if (!_threatAndTankingEnabled
+            || ReferenceEquals(guardian, target)
+            || guardian.Team != target.Team
+            || percent <= 0)
+        {
+            return;
+        }
+
+        var normalizedPercent = Math.Clamp(percent, 1, 100);
+        var strongestExisting = target.Covers
+            .Where(cover => cover.IsActive)
+            .OrderByDescending(cover => cover.Percent)
+            .ThenByDescending(cover => cover.ApplicationOrder)
+            .FirstOrDefault();
+        if (strongestExisting is not null && strongestExisting.Percent > normalizedPercent)
+            return;
+
+        target.Covers.Clear();
+        var budget = guardian.GetAttribute(AttributeType.MaxHealth) * _coverBudgetMaxHealthFraction;
+        if (budget <= 0)
+            return;
+
+        target.Covers.Add(new RuntimeCover(
+            guardian,
+            normalizedPercent,
+            budget,
+            durationTicks,
+            ++_applicationOrder,
+            statsSource));
+        Log(
+            guardian,
+            target,
+            effectId,
+            EventType.Buff,
+            normalizedPercent,
+            $"{guardian.Name} covered {target.Name} for {normalizedPercent}% of incoming damage.",
+            statsSource,
+            countStatsActivation);
     }
 
     private bool RollBlock(RuntimeCombatant target)
@@ -1967,6 +2159,7 @@ public sealed class FastCombatEngine
             case StandardConditionType.Freeze:
             case StandardConditionType.Stun:
             case StandardConditionType.Taunt:
+            case StandardConditionType.Mark:
             case StandardConditionType.Stealth:
             case StandardConditionType.Unstoppable:
                 ApplyOrRefreshUniqueCondition(
@@ -2118,7 +2311,8 @@ public sealed class FastCombatEngine
             or StandardConditionType.Chill
             or StandardConditionType.Freeze
             or StandardConditionType.Corrosion
-            or StandardConditionType.Doom;
+            or StandardConditionType.Doom
+            or StandardConditionType.Mark;
 
     private static bool IsBeneficialCondition(StandardConditionType type) =>
         !IsHarmfulCondition(type);
@@ -2143,6 +2337,8 @@ public sealed class FastCombatEngine
             StandardConditionType.Bleed => "condition.bleed",
             StandardConditionType.Stun => "condition.stun",
             StandardConditionType.Taunt => "condition.taunt",
+            StandardConditionType.Mark => "condition.mark",
+            StandardConditionType.Cover => "condition.cover",
             StandardConditionType.Stealth => "condition.stealth",
             StandardConditionType.Chill => "condition.chill",
             StandardConditionType.Freeze => "condition.freeze",
@@ -2503,7 +2699,9 @@ public sealed class FastCombatEngine
             summonOwner: source,
             canBasicAttack: summonDefinition.CanBasicAttack,
             summonGroupId: effect.SummonGroupId,
-            summonGroupInstanceId: summonGroupInstanceId);
+            summonGroupInstanceId: summonGroupInstanceId,
+            threatMultiplier: _threatAndTankingEnabled ? summonDefinition.ThreatMultiplier : 1f,
+            partyNumber: source.PartyNumber);
     }
 
     private static Dictionary<AttributeType, float> CreateSummonAttributes(
@@ -2638,7 +2836,7 @@ public sealed class FastCombatEngine
 
         foreach (var type in types.Where(IsBeneficialCondition))
         {
-            if (type is StandardConditionType.Guard or StandardConditionType.Ward)
+            if (type is StandardConditionType.Guard or StandardConditionType.Ward or StandardConditionType.Taunt)
                 continue;
 
             var removeOne = type is StandardConditionType.Thorns
@@ -2898,7 +3096,7 @@ public sealed class FastCombatEngine
                                 effect.Target.AdjustAttribute(effect.Definition.Attribute!.Value, -value);
                                 break;
                             case AbilityEffectOperation.ModifyThreat:
-                                effect.Target.AdjustThreat(-value);
+                                effect.Target.AdjustThreat(-value, _currentTick, _threatDecayPerTick);
                                 break;
                             case AbilityEffectOperation.ModifyRegenerationRate:
                                 effect.Target.AdjustRegenerationRate(-value);
@@ -3173,6 +3371,88 @@ public sealed class FastCombatEngine
         return result;
     }
 
+    private void AdjustThreatAndTrack(
+        RuntimeCombatant combatant,
+        float amount,
+        string statsSource)
+    {
+        combatant.AdjustThreat(amount, _currentTick, _threatDecayPerTick);
+        if (amount <= 0)
+            return;
+
+        var generated = Math.Max(
+            0,
+            (int)Math.Round(
+                amount * combatant.ThreatMultiplier,
+                MidpointRounding.AwayFromZero));
+        if (generated <= 0)
+            return;
+
+        if (!_threatGeneration.TryGetValue(combatant, out var telemetry))
+        {
+            telemetry = new ThreatGenerationTelemetry();
+            _threatGeneration[combatant] = telemetry;
+        }
+
+        telemetry.Total += generated;
+        if (!string.IsNullOrWhiteSpace(statsSource))
+        {
+            telemetry.ByAbility[statsSource] =
+                telemetry.ByAbility.GetValueOrDefault(statsSource) + generated;
+        }
+    }
+
+    private IReadOnlyList<EntityStats> AddThreatGenerationTelemetry(
+        IReadOnlyList<EntityStats> aggregatedStats)
+    {
+        var result = aggregatedStats.ToList();
+
+        foreach (var (combatant, telemetry) in _threatGeneration)
+        {
+            var index = result.FindIndex(stats =>
+                stats.EntityId.Equals(combatant.Id, StringComparison.OrdinalIgnoreCase));
+            if (index < 0)
+            {
+                result.Add(new EntityStats(
+                    combatant.Id,
+                    combatant.Name,
+                    telemetry.ByAbility
+                        .Select(entry => new AbilityStats(entry.Key, TotalThreat: entry.Value))
+                        .ToList(),
+                    Team: combatant.Team.ToString(),
+                    ThreatGenerated: telemetry.Total));
+                continue;
+            }
+
+            var stats = result[index];
+            var abilities = stats.Abilities.ToList();
+            foreach (var (abilityName, totalThreat) in telemetry.ByAbility)
+            {
+                var abilityIndex = abilities.FindIndex(ability =>
+                    ability.Name.Equals(abilityName, StringComparison.OrdinalIgnoreCase));
+                if (abilityIndex >= 0)
+                {
+                    abilities[abilityIndex] = abilities[abilityIndex] with
+                    {
+                        TotalThreat = totalThreat
+                    };
+                }
+                else
+                {
+                    abilities.Add(new AbilityStats(abilityName, TotalThreat: totalThreat));
+                }
+            }
+
+            result[index] = stats with
+            {
+                Abilities = abilities,
+                ThreatGenerated = telemetry.Total
+            };
+        }
+
+        return result;
+    }
+
     private static IReadOnlyList<EntityStats> AddFinalCombatantState(
         IReadOnlyList<EntityStats> aggregatedStats,
         IReadOnlyList<RuntimeCombatant> combatants)
@@ -3191,6 +3471,33 @@ public sealed class FastCombatEngine
                 Health = (int)combatant.Health,
                 MaxHealth = (int)combatant.GetAttribute(AttributeType.MaxHealth),
                 Barrier = (int)combatant.Barrier
+            };
+        }
+
+        return result;
+    }
+
+    private static IReadOnlyList<EntityStats> AddAttentionTelemetry(
+        IReadOnlyList<EntityStats> aggregatedStats,
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        var result = aggregatedStats.ToList();
+        var totalsByTeam = result
+            .GroupBy(stats => stats.Team, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Sum(stats => stats.TargetedAttacks),
+                StringComparer.OrdinalIgnoreCase);
+
+        for (var index = 0; index < result.Count; index++)
+        {
+            var stats = result[index];
+            var total = totalsByTeam.GetValueOrDefault(stats.Team);
+            result[index] = stats with
+            {
+                AttentionSharePercent = total <= 0
+                    ? 0
+                    : Math.Round(stats.TargetedAttacks * 100d / total, 2)
             };
         }
 
@@ -3240,6 +3547,23 @@ public sealed class FastCombatEngine
                         contribution.EffectId,
                         BarrierApplicationOrder: contribution.ApplicationOrder),
                     combatants);
+            }
+        }
+    }
+
+    private void TickCovers(IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
+        {
+            var target = combatants[combatantIndex];
+            _coverTickBuffer.Clear();
+            _coverTickBuffer.AddRange(target.Covers);
+            for (var coverIndex = 0; coverIndex < _coverTickBuffer.Count; coverIndex++)
+            {
+                var cover = _coverTickBuffer[coverIndex];
+                cover.Tick();
+                if (!cover.IsActive)
+                    target.Covers.Remove(cover);
             }
         }
     }
@@ -3377,6 +3701,13 @@ public sealed class FastCombatEngine
             _ => true
         };
 
+    private static bool AreAbilityAllies(RuntimeCombatant source, RuntimeCombatant candidate) =>
+        candidate.Team == source.Team
+        && (!source.PartyNumber.HasValue || candidate.PartyNumber == source.PartyNumber);
+
+    private static bool CanAbilityAffectTarget(RuntimeCombatant source, RuntimeCombatant target) =>
+        target.Team != source.Team || AreAbilityAllies(source, target);
+
     private int FillTargets(
         RuntimeCombatant[] targets,
         RuntimeCombatant source,
@@ -3397,7 +3728,7 @@ public sealed class FastCombatEngine
             case AbilityTargetSelector.EventTarget:
                 return AddSingleTarget(targets, combatEvent.Target);
             case AbilityTargetSelector.CurrentTarget:
-                target = SelectLockedEnemy(source, combatEvent) ?? SelectFirstEnemy(source, combatants);
+                target = SelectLockedEnemy(source, combatEvent) ?? SelectAttentionTarget(source, combatants);
                 return AddSingleTarget(targets, target);
             case AbilityTargetSelector.RandomEnemy:
                 target = SelectLockedEnemy(source, combatEvent) ?? SelectRandomEnemy(source, combatants);
@@ -3409,6 +3740,16 @@ public sealed class FastCombatEngine
             case AbilityTargetSelector.LowestCurrentHealthEnemy:
             case AbilityTargetSelector.HighestMaxHealthEnemy:
             case AbilityTargetSelector.HighestCurrentHealthOwnedSummon:
+                if (targetSelector is AbilityTargetSelector.LowestHealthEnemy
+                        or AbilityTargetSelector.HighestHealthEnemy
+                        or AbilityTargetSelector.LowestCurrentHealthEnemy
+                        or AbilityTargetSelector.HighestMaxHealthEnemy
+                    && SelectForcedTaunter(source, combatants) is { } forcedTarget)
+                {
+                    targets[0] = forcedTarget;
+                    return 1;
+                }
+
                 if (targetSelector == AbilityTargetSelector.LowestHealthEnemy
                     && SelectLockedEnemy(source, combatEvent) is { } lockedTarget)
                 {
@@ -3425,11 +3766,17 @@ public sealed class FastCombatEngine
                 return FillRandomTargets(targets, source, combatants, allies: false, count: 2);
             case AbilityTargetSelector.ThreeRandomEnemies:
                 return FillRandomTargets(targets, source, combatants, allies: false, count: 3);
+            case AbilityTargetSelector.TwoEnemies:
+                return _threatAndTankingEnabled
+                    ? FillAttentionTargets(targets, source, combatants, 2)
+                    : FillFilteredTargets(targets, source, targetSelector, combatants, summonId);
+            case AbilityTargetSelector.ThreeEnemies:
+                return _threatAndTankingEnabled
+                    ? FillAttentionTargets(targets, source, combatants, 3)
+                    : FillFilteredTargets(targets, source, targetSelector, combatants, summonId);
             case AbilityTargetSelector.AllEnemies:
             case AbilityTargetSelector.AllAllies:
             case AbilityTargetSelector.EveryoneButSelf:
-            case AbilityTargetSelector.TwoEnemies:
-            case AbilityTargetSelector.ThreeEnemies:
             case AbilityTargetSelector.TwoAllies:
             case AbilityTargetSelector.SummonedAllies:
             case AbilityTargetSelector.NonSummonedAllies:
@@ -3439,6 +3786,22 @@ public sealed class FastCombatEngine
             default:
                 return 0;
         }
+    }
+
+    private int FillAttentionTargets(
+        RuntimeCombatant[] targets,
+        RuntimeCombatant source,
+        IReadOnlyList<RuntimeCombatant> combatants,
+        int maximumTargets)
+    {
+        var targetCount = 0;
+        while (targetCount < maximumTargets
+               && SelectAttentionTarget(source, combatants, targets, targetCount) is { } selected)
+        {
+            targets[targetCount++] = selected;
+        }
+
+        return targetCount;
     }
 
     private static int AddSingleTarget(RuntimeCombatant[] targets, RuntimeCombatant? target)
@@ -3480,10 +3843,11 @@ public sealed class FastCombatEngine
                     or AbilityTargetSelector.TwoEnemies
                     or AbilityTargetSelector.ThreeEnemies => candidate.Team != source.Team,
                 AbilityTargetSelector.AllAllies
-                    or AbilityTargetSelector.TwoAllies => candidate.Team == source.Team,
-                AbilityTargetSelector.EveryoneButSelf => candidate.Id != source.Id,
-                AbilityTargetSelector.SummonedAllies => candidate.Team == source.Team && candidate.IsSummoned,
-                AbilityTargetSelector.NonSummonedAllies => candidate.Team == source.Team && !candidate.IsSummoned,
+                    or AbilityTargetSelector.TwoAllies => AreAbilityAllies(source, candidate),
+                AbilityTargetSelector.EveryoneButSelf => candidate.Id != source.Id
+                    && (candidate.Team != source.Team || AreAbilityAllies(source, candidate)),
+                AbilityTargetSelector.SummonedAllies => AreAbilityAllies(source, candidate) && candidate.IsSummoned,
+                AbilityTargetSelector.NonSummonedAllies => AreAbilityAllies(source, candidate) && !candidate.IsSummoned,
                 AbilityTargetSelector.SummonedEnemies => candidate.Team != source.Team && candidate.IsSummoned,
                 AbilityTargetSelector.OwnedSummons => candidate.IsSummoned
                     && ReferenceEquals(candidate.SummonOwner, source)
@@ -3507,13 +3871,26 @@ public sealed class FastCombatEngine
     {
         Span<int> selectedOrders = stackalloc int[3];
         var selectedCount = 0;
+        RuntimeCombatant? forcedTaunter = null;
+        if (!allies && SelectForcedTaunter(source, combatants) is { } selectedTaunter)
+        {
+            forcedTaunter = selectedTaunter;
+            targets[0] = selectedTaunter;
+            selectedOrders[0] = int.MinValue;
+            selectedCount = 1;
+        }
+
         for (var index = 0; index < combatants.Count; index++)
         {
             var candidate = combatants[index];
-            if (!candidate.IsAlive || (candidate.Team == source.Team) != allies)
+            if (!candidate.IsAlive
+                || (allies
+                    ? !AreAbilityAllies(source, candidate)
+                    : candidate.Team == source.Team)
+                || ReferenceEquals(candidate, forcedTaunter))
                 continue;
 
-            var order = _random.Next();
+            var order = _targetingRandom.Next();
             var insertionIndex = selectedCount;
             while (insertionIndex > 0 && order < selectedOrders[insertionIndex - 1])
                 insertionIndex--;
@@ -3558,7 +3935,7 @@ public sealed class FastCombatEngine
             var isCandidate = targetSelector switch
             {
                 AbilityTargetSelector.LowestHealthAlly
-                    or AbilityTargetSelector.HighestMaxHealthAlly => candidate.Team == source.Team,
+                    or AbilityTargetSelector.HighestMaxHealthAlly => AreAbilityAllies(source, candidate),
                 AbilityTargetSelector.LowestHealthEnemy
                     or AbilityTargetSelector.HighestHealthEnemy
                     or AbilityTargetSelector.LowestCurrentHealthEnemy
@@ -3651,7 +4028,7 @@ public sealed class FastCombatEngine
 
         return selector switch
         {
-            AbilityTargetSelector.CurrentTarget => SelectFirstEnemy(source, combatants),
+            AbilityTargetSelector.CurrentTarget => SelectAttentionTarget(source, combatants),
             AbilityTargetSelector.RandomEnemy => SelectRandomEnemy(source, combatants),
             AbilityTargetSelector.LowestHealthEnemy
                 or AbilityTargetSelector.HighestHealthEnemy
@@ -3770,42 +4147,124 @@ public sealed class FastCombatEngine
             combatants);
     }
 
-    private RuntimeCombatant? SelectFirstEnemy(RuntimeCombatant source, IReadOnlyList<RuntimeCombatant> combatants)
+    private RuntimeCombatant? SelectAttentionTarget(
+        RuntimeCombatant source,
+        IReadOnlyList<RuntimeCombatant> combatants,
+        RuntimeCombatant[]? excludedTargets = null,
+        int excludedCount = 0)
     {
-        RuntimeCombatant? firstEnemy = null;
-        RuntimeCombatant? lastEnemy = null;
-        var totalThreat = 0d;
-        for (var index = 0; index < combatants.Count; index++)
+        var threatBuffer = ArrayPool<double>.Shared.Rent(Math.Max(1, combatants.Count));
+        try
         {
-            var combatant = combatants[index];
-            if (combatant.Team == source.Team || !combatant.IsAlive)
-                continue;
+            var threatCount = 0;
+            var hasTaunter = false;
+            for (var index = 0; index < combatants.Count; index++)
+            {
+                var candidate = combatants[index];
+                if (candidate.Team == source.Team || !candidate.IsAlive)
+                    continue;
 
-            firstEnemy ??= combatant;
-            lastEnemy = combatant;
-            totalThreat += GetEffectiveThreat(combatant);
+                threatBuffer[threatCount++] = GetEffectiveThreat(candidate);
+                if (_threatAndTankingEnabled
+                    && candidate.HasCondition(StandardConditionType.Taunt)
+                    && !candidate.HasCondition(StandardConditionType.Stealth)
+                    && !IsExcluded(candidate, excludedTargets, excludedCount))
+                {
+                    hasTaunter = true;
+                }
+            }
+
+            if (threatCount == 0)
+                return null;
+
+            Array.Sort(threatBuffer, 0, threatCount);
+            var median = threatCount % 2 == 0
+                ? (threatBuffer[threatCount / 2 - 1] + threatBuffer[threatCount / 2]) / 2d
+                : threatBuffer[threatCount / 2];
+
+            RuntimeCombatant? firstCandidate = null;
+            RuntimeCombatant? lastCandidate = null;
+            var totalWeight = 0d;
+            for (var index = 0; index < combatants.Count; index++)
+            {
+                var candidate = combatants[index];
+                if (!IsAttentionCandidate(
+                        candidate,
+                        source,
+                        hasTaunter,
+                        excludedTargets,
+                        excludedCount))
+                {
+                    continue;
+                }
+
+                firstCandidate ??= candidate;
+                lastCandidate = candidate;
+                totalWeight += GetAttentionWeight(candidate, median);
+            }
+
+            if (firstCandidate is null || totalWeight <= 0)
+                return firstCandidate;
+
+            var roll = _targetingRandom.NextDouble() * totalWeight;
+            for (var index = 0; index < combatants.Count; index++)
+            {
+                var candidate = combatants[index];
+                if (!IsAttentionCandidate(
+                        candidate,
+                        source,
+                        hasTaunter,
+                        excludedTargets,
+                        excludedCount))
+                {
+                    continue;
+                }
+
+                roll -= GetAttentionWeight(candidate, median);
+                if (roll < 0)
+                    return candidate;
+            }
+
+            return lastCandidate;
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(threatBuffer, clearArray: true);
+        }
+    }
+
+    private bool IsAttentionCandidate(
+        RuntimeCombatant candidate,
+        RuntimeCombatant source,
+        bool hasTaunter,
+        RuntimeCombatant[]? excludedTargets,
+        int excludedCount) =>
+        candidate.Team != source.Team
+        && candidate.IsAlive
+        && !IsExcluded(candidate, excludedTargets, excludedCount)
+        && (!hasTaunter
+            || candidate.HasCondition(StandardConditionType.Taunt)
+            && !candidate.HasCondition(StandardConditionType.Stealth));
+
+    private static bool IsExcluded(
+        RuntimeCombatant candidate,
+        RuntimeCombatant[]? excludedTargets,
+        int excludedCount)
+    {
+        for (var index = 0; index < excludedCount; index++)
+        {
+            if (ReferenceEquals(candidate, excludedTargets![index]))
+                return true;
         }
 
-        if (firstEnemy is null || totalThreat <= 0)
-            return firstEnemy;
-
-        var roll = _random.NextDouble() * totalThreat;
-        for (var index = 0; index < combatants.Count; index++)
-        {
-            var combatant = combatants[index];
-            if (combatant.Team == source.Team || !combatant.IsAlive)
-                continue;
-
-            roll -= GetEffectiveThreat(combatant);
-            if (roll < 0)
-                return combatant;
-        }
-
-        return lastEnemy;
+        return false;
     }
 
     private RuntimeCombatant? SelectRandomEnemy(RuntimeCombatant source, IReadOnlyList<RuntimeCombatant> combatants)
     {
+        if (SelectForcedTaunter(source, combatants) is { } forcedTarget)
+            return forcedTarget;
+
         var enemyCount = 0;
         for (var index = 0; index < combatants.Count; index++)
         {
@@ -3817,7 +4276,7 @@ public sealed class FastCombatEngine
         if (enemyCount == 0)
             return null;
 
-        var selectedIndex = _random.Next(enemyCount);
+        var selectedIndex = _targetingRandom.Next(enemyCount);
         for (var index = 0; index < combatants.Count; index++)
         {
             var combatant = combatants[index];
@@ -3831,25 +4290,46 @@ public sealed class FastCombatEngine
         return null;
     }
 
-    private RuntimeCombatant? SelectThreatWeightedEnemy(IReadOnlyList<RuntimeCombatant> enemies)
+    private RuntimeCombatant? SelectForcedTaunter(
+        RuntimeCombatant source,
+        IReadOnlyList<RuntimeCombatant> combatants)
     {
-        if (enemies.Count == 0)
+        if (!_threatAndTankingEnabled)
             return null;
 
-        var weights = enemies.Select(GetEffectiveThreat).ToArray();
-        var total = weights.Sum();
-        if (total <= 0)
-            return enemies[0];
-
-        var roll = _random.NextDouble() * total;
-        for (var index = 0; index < enemies.Count; index++)
+        var count = 0;
+        for (var index = 0; index < combatants.Count; index++)
         {
-            roll -= weights[index];
-            if (roll < 0)
-                return enemies[index];
+            var candidate = combatants[index];
+            if (candidate.Team != source.Team
+                && candidate.IsAlive
+                && candidate.HasCondition(StandardConditionType.Taunt)
+                && !candidate.HasCondition(StandardConditionType.Stealth))
+            {
+                count++;
+            }
         }
 
-        return enemies[^1];
+        if (count == 0)
+            return null;
+
+        var selectedIndex = _targetingRandom.Next(count);
+        for (var index = 0; index < combatants.Count; index++)
+        {
+            var candidate = combatants[index];
+            if (candidate.Team == source.Team
+                || !candidate.IsAlive
+                || !candidate.HasCondition(StandardConditionType.Taunt)
+                || candidate.HasCondition(StandardConditionType.Stealth))
+            {
+                continue;
+            }
+
+            if (selectedIndex-- == 0)
+                return candidate;
+        }
+
+        return null;
     }
 
     private double GetEffectiveThreat(RuntimeCombatant combatant)
@@ -3857,13 +4337,25 @@ public sealed class FastCombatEngine
         if (combatant.HasCondition(StandardConditionType.Stealth))
             return 1d;
 
-        var threat = combatant.Threat;
-        if (combatant.HasCondition(StandardConditionType.Taunt))
-        {
-            threat += _tauntThreatBonus;
-        }
+        var threat = combatant.GetThreat(_currentTick, _threatDecayPerTick);
+        if (combatant.HasCondition(StandardConditionType.Mark)
+            || !_threatAndTankingEnabled && combatant.HasCondition(StandardConditionType.Taunt))
+            threat += _markThreatBonus;
 
         return threat;
+    }
+
+    private double GetAttentionWeight(RuntimeCombatant combatant, double medianThreat)
+    {
+        var threat = GetEffectiveThreat(combatant);
+        if (!_threatAndTankingEnabled)
+            return threat;
+
+        var ratio = threat / Math.Max(1d, medianThreat);
+        return Math.Clamp(
+            Math.Pow(Math.Max(0, ratio), _attentionExponent),
+            _minimumAttentionWeight,
+            _maximumAttentionWeight);
     }
 
     private bool ConditionsPass(
@@ -3926,7 +4418,7 @@ public sealed class FastCombatEngine
 
         if (condition.Type == AbilityConditionType.EventSourceIsAlly)
             return combatEvent.Source is { } ally
-                   && ally.Team == source.Team
+                   && AreAbilityAllies(source, ally)
                    && !ReferenceEquals(ally, source);
 
         if (condition.Type == AbilityConditionType.EventMagnitudeAtLeast)
@@ -4052,7 +4544,7 @@ public sealed class FastCombatEngine
             var allyCount = combatants.Count(combatant =>
                 combatant.IsAlive
                 && !combatant.IsSummoned
-                && combatant.Team == source.Team
+                && AreAbilityAllies(source, combatant)
                 && !ReferenceEquals(combatant, source));
             value *= 1 + allyCount * effect.LivingNonSummonedAllyDamagePercent / 100f;
         }
@@ -4168,7 +4660,10 @@ public sealed class FastCombatEngine
         int damageReductionPrevented = 0,
         int damageAmplified = 0,
         int finalHealthDamage = 0,
-        DamageType damageType = DamageType.None)
+        DamageType damageType = DamageType.None,
+        int damageRedirectedTo = 0,
+        int damageRedirectedAway = 0,
+        bool countsAsTargetedAttack = false)
         => LogCore(
             source,
             target,
@@ -4188,7 +4683,10 @@ public sealed class FastCombatEngine
             damageReductionPrevented,
             damageAmplified,
             finalHealthDamage,
-            damageType);
+            damageType,
+            damageRedirectedTo,
+            damageRedirectedAway,
+            countsAsTargetedAttack);
 
     private void Log(
         RuntimeCombatant source,
@@ -4209,7 +4707,10 @@ public sealed class FastCombatEngine
         int damageReductionPrevented = 0,
         int damageAmplified = 0,
         int finalHealthDamage = 0,
-        DamageType damageType = DamageType.None)
+        DamageType damageType = DamageType.None,
+        int damageRedirectedTo = 0,
+        int damageRedirectedAway = 0,
+        bool countsAsTargetedAttack = false)
         => LogCore(
             source,
             target,
@@ -4229,7 +4730,10 @@ public sealed class FastCombatEngine
             damageReductionPrevented,
             damageAmplified,
             finalHealthDamage,
-            damageType);
+            damageType,
+            damageRedirectedTo,
+            damageRedirectedAway,
+            countsAsTargetedAttack);
 
     private void LogCore(
         RuntimeCombatant source,
@@ -4250,7 +4754,10 @@ public sealed class FastCombatEngine
         int damageReductionPrevented,
         int damageAmplified,
         int finalHealthDamage,
-        DamageType damageType)
+        DamageType damageType,
+        int damageRedirectedTo,
+        int damageRedirectedAway,
+        bool countsAsTargetedAttack)
     {
         if (!_captureEventLog)
         {
@@ -4275,7 +4782,10 @@ public sealed class FastCombatEngine
                 damageReductionPrevented,
                 damageAmplified,
                 finalHealthDamage,
-                damageType);
+                damageType,
+                damageRedirectedTo,
+                damageRedirectedAway,
+                countsAsTargetedAttack);
         }
 
         if (!_captureEventLog)
@@ -4302,6 +4812,9 @@ public sealed class FastCombatEngine
             DamageReductionPrevented = damageReductionPrevented,
             DamageAmplified = damageAmplified,
             FinalHealthDamage = finalHealthDamage,
+            DamageRedirectedTo = damageRedirectedTo,
+            DamageRedirectedAway = damageRedirectedAway,
+            CountsAsTargetedAttack = countsAsTargetedAttack,
             Details = details,
             CombatEntity = target is null
                 ? null
@@ -4312,7 +4825,8 @@ public sealed class FastCombatEngine
                     ImagePath = target.ImagePath,
                     MaxHealth = (int)target.GetAttribute(AttributeType.MaxHealth),
                     Health = (int)target.Health,
-                    Barrier = (int)target.Barrier
+                    Barrier = (int)target.Barrier,
+                    Threat = target.Threat
                 }
         });
     }
@@ -4393,6 +4907,12 @@ public sealed class FastCombatEngine
         AttackType AttackType = AttackType.None,
         bool WasCritical = false,
         bool WasDirectHit = false);
+
+    private sealed class ThreatGenerationTelemetry
+    {
+        public int Total { get; set; }
+        public Dictionary<string, int> ByAbility { get; } = new(StringComparer.OrdinalIgnoreCase);
+    }
 
     private sealed class EffectExecutionContext
     {

@@ -201,6 +201,9 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
             scaledAbility.Name,
             scaledAbility.Description,
             scaledAbility.CooldownTicks / 10d,
+            AbilityThreatRules.GetThreatValue(scaledAbility),
+            scaledAbility.ThreatMultiplier,
+            AbilityThreatRules.GetEstimatedThreatPerSecond(scaledAbility),
             AbilityTargetMapping.GetDistinctTargets(scaledAbility),
             scaledAbility.Tags,
             scaledAbility.Effects.Select(x => new EssenceEffectDto(

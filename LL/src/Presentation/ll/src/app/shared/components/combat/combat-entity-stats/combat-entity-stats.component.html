@@ -1,267 +1,79 @@
 <div class="flex h-full min-h-0 w-full flex-col overflow-hidden text-white">
   <div class="min-h-0 flex-1 overflow-y-auto pt-3">
     <div class="space-y-2 lg:hidden" data-tour="combatant-stats">
-      <button
-        *ngFor="
-          let participant of visibleParticipants;
-          trackBy: trackParticipant
-        "
-        type="button"
-        class="w-full rounded-lg border bg-black/20 p-3 text-left transition-colors"
-        [ngClass]="{
-          'border-primary/35 bg-primary/[0.045]':
-            selectedEntityId === participant.id &&
-            participant.team === 'Friendly',
-          'border-danger/35 bg-danger/[0.035]':
-            selectedEntityId === participant.id &&
-            participant.team === 'Hostile',
-          'border-white/10': selectedEntityId !== participant.id,
-        }"
-        (click)="activateParticipant(participant)"
-        [attr.aria-pressed]="selectedEntityId === participant.id"
-        [attr.aria-expanded]="
-          participant.isSummonGroup ? isSummonGroupExpanded(participant) : null
-        "
-        data-tour-action="combatant-row"
+      <ng-container
+        *ngFor="let group of participantGroups; trackBy: trackParticipantGroup"
       >
-        <div class="flex min-w-0 items-center justify-between gap-3">
-          <div class="min-w-0">
-            <span
-              *ngIf="participant.isSummonGroup"
-              class="mr-1 inline-block w-3 text-[9px] text-secondary"
-              aria-hidden="true"
-            >
-              {{ isSummonGroupExpanded(participant) ? "▾" : "▸" }}
-            </span>
-            <span
-              class="truncate font-semibold uppercase"
-              [ngClass]="
-                isDefeated(participant.entity)
-                  ? 'text-light_gray'
-                  : 'text-white'
-              "
-            >
-              {{ participant.name }}
-            </span>
-            <span
-              *ngIf="participant.isSummonGroup"
-              class="ml-2 rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold text-primary"
-            >
-              ×{{ participant.summonCount }}
-            </span>
-            <span
-              *ngIf="
-                !isDefeated(participant.entity) &&
-                !participant.isSummonGroup &&
-                participant.team === 'Friendly'
-              "
-              class="ml-1 text-[10px] text-secondary"
-            >
-              Lv. {{ participant.entity.level || 1 }}
-            </span>
-            <span
-              *ngIf="participant.isSummonGroup"
-              class="mt-1 block text-[9px] normal-case tracking-normal text-light_gray"
-            >
-              {{ participant.standingCount }} of
-              {{ participant.summonCount }} standing<span
-                *ngIf="participant.summonerName"
-              >
-                · summoned by {{ participant.summonerName }}</span
-              >
-            </span>
-            <span
-              *ngIf="
-                isDefeated(participant.entity) && !participant.isSummonGroup
-              "
-              class="ml-2 text-[9px] uppercase tracking-wider text-danger"
-            >
-              Defeated
-            </span>
-          </div>
-
-          <span
-            *ngIf="selectedEntityId === participant.id"
-            class="shrink-0 text-[10px] font-semibold uppercase tracking-[0.14em]"
-            [ngClass]="
-              participant.team === 'Friendly' ? 'text-primary' : 'text-danger'
-            "
-          >
-            {{ teamDisplayName(participant.team) }}
-          </span>
-          <span
-            *ngIf="selectedEntityId !== participant.id"
-            class="shrink-0 text-[10px] text-light_gray"
-          >
-            <ng-container
-              *ngIf="hasKnownHealth(participant.entity); else healthUnavailable"
-            >
-              {{ participant.entity.health | number }}/{{
-                participant.entity.maxHealth | number
-              }}
-            </ng-container>
-          </span>
-        </div>
-
         <div
-          class="mt-2 flex items-center gap-3"
-          [class.opacity-45]="isDefeated(participant.entity)"
+          *ngIf="hasPartyLayout"
+          class="flex items-center justify-between gap-3 rounded border-l-2 px-3 py-2"
+          [ngClass]="{
+            'border-primary bg-primary/[0.07]': group.partyNumber === 1,
+            'border-[#8ecbff] bg-[#8ecbff]/[0.07]': group.partyNumber === 2,
+            'border-success bg-success/[0.07]':
+              group.team === 'Friendly' &&
+              group.partyNumber !== 1 &&
+              group.partyNumber !== 2,
+            'border-danger bg-danger/[0.07]': group.team === 'Hostile',
+          }"
         >
-          <span
-            class="relative h-2 min-w-0 flex-1 overflow-hidden rounded-full border border-white/10 bg-black/40"
-          >
-            <span
-              class="absolute inset-y-0 left-0 transition-[width] duration-1000 ease-linear"
-              [ngClass]="[
-                participant.team === 'Friendly' ? 'bg-primary' : 'bg-danger',
-                participant.entity.barrier > 0
-                  ? 'rounded-l-full'
-                  : 'rounded-full',
-              ]"
-              [style.width.%]="healthPercentage(participant.entity)"
-            ></span>
-            <span
-              class="absolute inset-y-0 rounded-r-full bg-[#8ecbff]/55 transition-[left,width] duration-1000 ease-linear"
-              style="
-                background-image: repeating-linear-gradient(
-                  45deg,
-                  rgba(255, 255, 255, 0.2) 0,
-                  rgba(255, 255, 255, 0.2) 3px,
-                  transparent 3px,
-                  transparent 6px
-                );
-              "
-              [style.left.%]="barrierStartPercentage(participant.entity)"
-              [style.width.%]="barrierPercentage(participant.entity)"
-            ></span>
-          </span>
-
-          <span
-            *ngIf="selectedEntityId === participant.id"
-            class="shrink-0 text-xs font-semibold"
-          >
-            <ng-container
-              *ngIf="hasKnownHealth(participant.entity); else healthUnavailable"
+          <span class="min-w-0">
+            <strong
+              class="font-display uppercase tracking-[0.1em]"
+              [ngClass]="{
+                'text-primary': group.partyNumber === 1,
+                'text-[#8ecbff]': group.partyNumber === 2,
+                'text-success':
+                  group.team === 'Friendly' &&
+                  group.partyNumber !== 1 &&
+                  group.partyNumber !== 2,
+                'text-danger': group.team === 'Hostile',
+              }"
             >
-              {{ participant.entity.health | number }}/{{
-                participant.entity.maxHealth | number
-              }}
-              <span *ngIf="participant.entity.barrier > 0" class="ll-text-info"
-                >+{{ participant.entity.barrier | number }}</span
-              >
-            </ng-container>
+              {{ group.label }}
+            </strong>
+            <small
+              *ngIf="group.isCurrentParty"
+              class="ml-2 text-[9px] uppercase tracking-[0.16em] text-light_gray"
+            >
+              Your party
+            </small>
+          </span>
+          <span class="text-right text-[9px] uppercase tracking-[0.15em]">
+            <span class="text-light_gray">Damage</span>
+            <strong class="ml-2 text-primary">{{
+              group.damageDone | number
+            }}</strong>
           </span>
         </div>
 
-        <div
-          *ngIf="selectedEntityId === participant.id"
-          class="mt-3 grid grid-cols-2 gap-2"
-        >
-          <span class="ll-card flex justify-between px-3 py-2 text-xs">
-            <span class="text-secondary">Dmg done</span>
-            <strong
-              [ngClass]="
-                (statsFor(participant.id)?.damageDone ?? 0) > 0
-                  ? 'text-primary'
-                  : 'text-light_gray'
-              "
-              >{{ statsFor(participant.id)?.damageDone ?? 0 | number }}</strong
-            >
-          </span>
-          <span class="ll-card flex justify-between px-3 py-2 text-xs">
-            <span class="text-secondary">Taken</span>
-            <strong
-              [ngClass]="
-                (statsFor(participant.id)?.damageTaken ?? 0) > 0
-                  ? 'text-danger'
-                  : 'text-light_gray'
-              "
-              >{{ statsFor(participant.id)?.damageTaken ?? 0 | number }}</strong
-            >
-          </span>
-          <span class="ll-card flex justify-between px-3 py-2 text-xs">
-            <span class="text-secondary">Blocked</span>
-            <strong
-              [ngClass]="
-                (statsFor(participant.id)?.damageBlocked ?? 0) > 0
-                  ? 'll-text-info'
-                  : 'text-light_gray'
-              "
-              >{{
-                statsFor(participant.id)?.damageBlocked ?? 0 | number
-              }}</strong
-            >
-          </span>
-          <span class="ll-card flex justify-between px-3 py-2 text-xs">
-            <span class="text-secondary">Healing</span>
-            <strong
-              [ngClass]="
-                (statsFor(participant.id)?.healingDone ?? 0) > 0
-                  ? 'll-text-success'
-                  : 'text-light_gray'
-              "
-              >{{ statsFor(participant.id)?.healingDone ?? 0 | number }}</strong
-            >
-          </span>
-        </div>
-      </button>
-    </div>
-
-    <div class="hidden overflow-x-auto rounded border border-white/10 lg:block">
-      <div class="min-w-[66rem]" data-tour="combatant-stats">
-        <div
-          class="grid grid-cols-[minmax(4.5rem,7rem)_minmax(7rem,2fr)_minmax(16rem,1.3fr)_7rem_6rem_6rem_6rem_6rem] items-center gap-3 bg-white/[0.035] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
-        >
-          <div>Side</div>
-          <div>Unit</div>
-          <div>HP &amp; Barrier</div>
-          <div class="text-right">Current</div>
-          <div class="text-right">Dmg done</div>
-          <div class="text-right">Taken</div>
-          <div class="text-right">Healing</div>
-          <div class="text-right">Blocked</div>
-        </div>
-
-        <ng-container
+        <button
           *ngFor="
-            let participant of visibleParticipants;
+            let participant of visibleParticipantsForGroup(group);
             trackBy: trackParticipant
           "
+          type="button"
+          class="mt-2 w-full rounded-lg border bg-black/20 p-3 text-left transition-colors"
+          [ngClass]="{
+            'border-primary/35 bg-primary/[0.045]':
+              selectedEntityId === participant.id &&
+              participant.team === 'Friendly',
+            'border-danger/35 bg-danger/[0.035]':
+              selectedEntityId === participant.id &&
+              participant.team === 'Hostile',
+            'border-white/10': selectedEntityId !== participant.id,
+          }"
+          (click)="activateParticipant(participant)"
+          [attr.aria-pressed]="selectedEntityId === participant.id"
+          [attr.aria-expanded]="
+            participant.isSummonGroup
+              ? isSummonGroupExpanded(participant)
+              : null
+          "
+          data-tour-action="combatant-row"
         >
-          <button
-            type="button"
-            (click)="activateParticipant(participant)"
-            class="grid w-full grid-cols-[minmax(4.5rem,7rem)_minmax(7rem,2fr)_minmax(16rem,1.3fr)_7rem_6rem_6rem_6rem_6rem] items-center gap-3 border-t border-white/[0.07] px-4 py-2.5 text-left transition-colors hover:bg-white/[0.04]"
-            [ngClass]="{
-              'bg-primary/[0.055]': selectedEntityId === participant.id,
-            }"
-            [attr.aria-pressed]="selectedEntityId === participant.id"
-            [attr.aria-expanded]="
-              participant.isSummonGroup
-                ? isSummonGroupExpanded(participant)
-                : null
-            "
-            data-tour-action="combatant-row"
-          >
-            <span
-              class="text-[10px] font-semibold uppercase tracking-[0.14em]"
-              [class.opacity-45]="isDefeated(participant.entity)"
-              [ngClass]="
-                participant.team === 'Friendly' ? 'text-primary' : 'text-danger'
-              "
-            >
-              {{ teamDisplayName(participant.team) }}
-            </span>
-
-            <span
-              class="min-w-0 truncate font-semibold"
-              [class.pl-5]="participant.isSummonChild"
-              [ngClass]="
-                isDefeated(participant.entity)
-                  ? 'text-light_gray'
-                  : 'text-white'
-              "
-            >
+          <div class="flex min-w-0 items-center justify-between gap-3">
+            <div class="min-w-0">
               <span
                 *ngIf="participant.isSummonGroup"
                 class="mr-1 inline-block w-3 text-[9px] text-secondary"
@@ -269,10 +81,19 @@
               >
                 {{ isSummonGroupExpanded(participant) ? "▾" : "▸" }}
               </span>
-              {{ participant.name }}
+              <span
+                class="truncate font-semibold uppercase"
+                [ngClass]="
+                  isDefeated(participant.entity)
+                    ? 'text-light_gray'
+                    : 'text-white'
+                "
+              >
+                {{ participant.name }}
+              </span>
               <span
                 *ngIf="participant.isSummonGroup"
-                class="ml-2 rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[9px] text-primary"
+                class="ml-2 rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold text-primary"
               >
                 ×{{ participant.summonCount }}
               </span>
@@ -282,13 +103,13 @@
                   !participant.isSummonGroup &&
                   participant.team === 'Friendly'
                 "
-                class="ml-1 text-[10px] font-normal text-secondary"
+                class="ml-1 text-[10px] text-secondary"
               >
                 Lv. {{ participant.entity.level || 1 }}
               </span>
               <span
                 *ngIf="participant.isSummonGroup"
-                class="mt-0.5 block truncate text-[9px] font-normal text-light_gray"
+                class="mt-1 block text-[9px] normal-case tracking-normal text-light_gray"
               >
                 {{ participant.standingCount }} of
                 {{ participant.summonCount }} standing<span
@@ -301,15 +122,44 @@
                 *ngIf="
                   isDefeated(participant.entity) && !participant.isSummonGroup
                 "
-                class="ml-1 text-[10px] uppercase tracking-wider text-danger"
+                class="ml-2 text-[9px] uppercase tracking-wider text-danger"
               >
                 Defeated
               </span>
-            </span>
+            </div>
 
             <span
-              class="relative h-2 overflow-hidden rounded-full border border-white/10 bg-black/40"
-              [class.opacity-45]="isDefeated(participant.entity)"
+              *ngIf="selectedEntityId === participant.id"
+              class="shrink-0 text-[10px] font-semibold uppercase tracking-[0.14em]"
+              [ngClass]="
+                participant.team === 'Friendly' ? 'text-primary' : 'text-danger'
+              "
+            >
+              {{ teamDisplayName(participant.team) }}
+            </span>
+            <span
+              *ngIf="selectedEntityId !== participant.id"
+              class="shrink-0 text-[10px] text-light_gray"
+            >
+              <ng-container
+                *ngIf="
+                  hasKnownHealth(participant.entity);
+                  else healthUnavailable
+                "
+              >
+                {{ participant.entity.health | number }}/{{
+                  participant.entity.maxHealth | number
+                }}
+              </ng-container>
+            </span>
+          </div>
+
+          <div
+            class="mt-2 flex items-center gap-3"
+            [class.opacity-45]="isDefeated(participant.entity)"
+          >
+            <span
+              class="relative h-2 min-w-0 flex-1 overflow-hidden rounded-full border border-white/10 bg-black/40"
             >
               <span
                 class="absolute inset-y-0 left-0 transition-[width] duration-1000 ease-linear"
@@ -338,8 +188,8 @@
             </span>
 
             <span
-              class="whitespace-nowrap text-right font-semibold"
-              [class.opacity-45]="isDefeated(participant.entity)"
+              *ngIf="selectedEntityId === participant.id"
+              class="shrink-0 text-xs font-semibold"
             >
               <ng-container
                 *ngIf="
@@ -357,47 +207,355 @@
                 >
               </ng-container>
             </span>
-            <span
-              class="text-right font-semibold"
-              [ngClass]="
-                (statsFor(participant.id)?.damageDone ?? 0) > 0
-                  ? 'text-primary'
-                  : 'text-light_gray'
-              "
-            >
-              {{ statsFor(participant.id)?.damageDone ?? 0 | number }}
+          </div>
+
+          <div
+            *ngIf="selectedEntityId === participant.id"
+            class="mt-3 grid grid-cols-2 gap-2"
+          >
+            <span class="ll-card flex justify-between px-3 py-2 text-xs">
+              <span class="text-secondary">Dmg done</span>
+              <strong
+                [ngClass]="
+                  (statsFor(participant.id)?.damageDone ?? 0) > 0
+                    ? 'text-primary'
+                    : 'text-light_gray'
+                "
+                >{{
+                  statsFor(participant.id)?.damageDone ?? 0 | number
+                }}</strong
+              >
+            </span>
+            <span class="ll-card flex justify-between px-3 py-2 text-xs">
+              <span class="text-secondary">Taken</span>
+              <strong
+                [ngClass]="
+                  (statsFor(participant.id)?.damageTaken ?? 0) > 0
+                    ? 'text-danger'
+                    : 'text-light_gray'
+                "
+                >{{
+                  statsFor(participant.id)?.damageTaken ?? 0 | number
+                }}</strong
+              >
+            </span>
+            <span class="ll-card flex justify-between px-3 py-2 text-xs">
+              <span class="text-secondary">Blocked</span>
+              <strong
+                [ngClass]="
+                  (statsFor(participant.id)?.damageBlocked ?? 0) > 0
+                    ? 'll-text-info'
+                    : 'text-light_gray'
+                "
+                >{{
+                  statsFor(participant.id)?.damageBlocked ?? 0 | number
+                }}</strong
+              >
+            </span>
+            <span class="ll-card flex justify-between px-3 py-2 text-xs">
+              <span class="text-secondary">Healing</span>
+              <strong
+                [ngClass]="
+                  (statsFor(participant.id)?.healingDone ?? 0) > 0
+                    ? 'll-text-success'
+                    : 'text-light_gray'
+                "
+                >{{
+                  statsFor(participant.id)?.healingDone ?? 0 | number
+                }}</strong
+              >
             </span>
             <span
-              class="text-right font-semibold"
-              [ngClass]="
-                (statsFor(participant.id)?.damageTaken ?? 0) > 0
-                  ? 'text-danger'
-                  : 'text-light_gray'
-              "
+              class="ll-card col-span-2 flex justify-between px-3 py-2 text-xs"
             >
-              {{ statsFor(participant.id)?.damageTaken ?? 0 | number }}
+              <span class="text-secondary">Threat generated</span>
+              <strong
+                [ngClass]="
+                  (statsFor(participant.id)?.threatGenerated ?? 0) > 0
+                    ? 'text-amber-300'
+                    : 'text-light_gray'
+                "
+              >
+                {{ statsFor(participant.id)?.threatGenerated ?? 0 | number }}
+                <span class="ml-1 text-[10px] font-normal text-light_gray">
+                  ·
+                  {{
+                    threatPerSecond(statsFor(participant.id)) | number: "1.1-1"
+                  }}/s
+                </span>
+              </strong>
             </span>
-            <span
-              class="text-right font-semibold"
-              [ngClass]="
-                (statsFor(participant.id)?.healingDone ?? 0) > 0
-                  ? 'll-text-success'
-                  : 'text-light_gray'
+          </div>
+        </button>
+      </ng-container>
+    </div>
+
+    <div class="hidden overflow-x-auto rounded border border-white/10 lg:block">
+      <div class="min-w-[74rem]" data-tour="combatant-stats">
+        <div
+          class="grid grid-cols-[minmax(4.5rem,7rem)_minmax(7rem,2fr)_minmax(16rem,1.3fr)_7rem_6rem_6rem_6rem_6rem_7rem] items-center gap-3 bg-white/[0.035] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
+        >
+          <div>Side</div>
+          <div>Unit</div>
+          <div>HP &amp; Barrier</div>
+          <div class="text-right">Current</div>
+          <div class="text-right">Dmg done</div>
+          <div class="text-right">Taken</div>
+          <div class="text-right">Healing</div>
+          <div class="text-right">Blocked</div>
+          <div class="text-right">Threat</div>
+        </div>
+
+        <ng-container
+          *ngFor="
+            let group of participantGroups;
+            trackBy: trackParticipantGroup
+          "
+        >
+          <div
+            *ngIf="hasPartyLayout"
+            class="flex items-center justify-between gap-4 border-l-2 border-t border-white/[0.07] px-4 py-2"
+            [ngClass]="{
+              'border-l-primary bg-primary/[0.07]': group.partyNumber === 1,
+              'border-l-[#8ecbff] bg-[#8ecbff]/[0.07]': group.partyNumber === 2,
+              'border-l-success bg-success/[0.07]':
+                group.team === 'Friendly' &&
+                group.partyNumber !== 1 &&
+                group.partyNumber !== 2,
+              'border-l-danger bg-danger/[0.07]': group.team === 'Hostile',
+            }"
+          >
+            <span class="flex min-w-0 items-baseline gap-3">
+              <strong
+                class="font-display uppercase tracking-[0.1em]"
+                [ngClass]="{
+                  'text-primary': group.partyNumber === 1,
+                  'text-[#8ecbff]': group.partyNumber === 2,
+                  'text-success':
+                    group.team === 'Friendly' &&
+                    group.partyNumber !== 1 &&
+                    group.partyNumber !== 2,
+                  'text-danger': group.team === 'Hostile',
+                }"
+              >
+                {{ group.label }}
+              </strong>
+              <small
+                *ngIf="group.isCurrentParty"
+                class="text-[9px] uppercase tracking-[0.16em] text-light_gray"
+              >
+                Your party
+              </small>
+            </span>
+            <span class="text-[9px] uppercase tracking-[0.16em]">
+              <span class="text-light_gray">Party damage</span>
+              <strong class="ml-5 text-sm text-primary">{{
+                group.damageDone | number
+              }}</strong>
+            </span>
+          </div>
+
+          <ng-container
+            *ngFor="
+              let participant of visibleParticipantsForGroup(group);
+              trackBy: trackParticipant
+            "
+          >
+            <button
+              type="button"
+              (click)="activateParticipant(participant)"
+              class="grid w-full grid-cols-[minmax(4.5rem,7rem)_minmax(7rem,2fr)_minmax(16rem,1.3fr)_7rem_6rem_6rem_6rem_6rem_7rem] items-center gap-3 border-t border-white/[0.07] px-4 py-2.5 text-left transition-colors hover:bg-white/[0.04]"
+              [ngClass]="{
+                'bg-primary/[0.055]': selectedEntityId === participant.id,
+              }"
+              [attr.aria-pressed]="selectedEntityId === participant.id"
+              [attr.aria-expanded]="
+                participant.isSummonGroup
+                  ? isSummonGroupExpanded(participant)
+                  : null
               "
+              data-tour-action="combatant-row"
             >
-              {{ statsFor(participant.id)?.healingDone ?? 0 | number }}
-            </span>
-            <span
-              class="text-right font-semibold"
-              [ngClass]="
-                (statsFor(participant.id)?.damageBlocked ?? 0) > 0
-                  ? 'll-text-info'
-                  : 'text-light_gray'
-              "
-            >
-              {{ statsFor(participant.id)?.damageBlocked ?? 0 | number }}
-            </span>
-          </button>
+              <span
+                class="text-[10px] font-semibold uppercase tracking-[0.14em]"
+                [class.opacity-45]="isDefeated(participant.entity)"
+                [ngClass]="
+                  participant.team === 'Friendly'
+                    ? 'text-primary'
+                    : 'text-danger'
+                "
+              >
+                {{ participantSideLabel(participant) }}
+              </span>
+
+              <span
+                class="min-w-0 truncate font-semibold"
+                [class.pl-5]="participant.isSummonChild"
+                [ngClass]="
+                  isDefeated(participant.entity)
+                    ? 'text-light_gray'
+                    : 'text-white'
+                "
+              >
+                <span
+                  *ngIf="participant.isSummonGroup"
+                  class="mr-1 inline-block w-3 text-[9px] text-secondary"
+                  aria-hidden="true"
+                >
+                  {{ isSummonGroupExpanded(participant) ? "▾" : "▸" }}
+                </span>
+                {{ participant.name }}
+                <span
+                  *ngIf="participant.isSummonGroup"
+                  class="ml-2 rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[9px] text-primary"
+                >
+                  ×{{ participant.summonCount }}
+                </span>
+                <span
+                  *ngIf="
+                    !isDefeated(participant.entity) &&
+                    !participant.isSummonGroup &&
+                    participant.team === 'Friendly'
+                  "
+                  class="ml-1 text-[10px] font-normal text-secondary"
+                >
+                  Lv. {{ participant.entity.level || 1 }}
+                </span>
+                <span
+                  *ngIf="participant.isSummonGroup"
+                  class="mt-0.5 block truncate text-[9px] font-normal text-light_gray"
+                >
+                  {{ participant.standingCount }} of
+                  {{ participant.summonCount }} standing<span
+                    *ngIf="participant.summonerName"
+                  >
+                    · summoned by {{ participant.summonerName }}</span
+                  >
+                </span>
+                <span
+                  *ngIf="
+                    isDefeated(participant.entity) && !participant.isSummonGroup
+                  "
+                  class="ml-1 text-[10px] uppercase tracking-wider text-danger"
+                >
+                  Defeated
+                </span>
+              </span>
+
+              <span
+                class="relative h-2 overflow-hidden rounded-full border border-white/10 bg-black/40"
+                [class.opacity-45]="isDefeated(participant.entity)"
+              >
+                <span
+                  class="absolute inset-y-0 left-0 transition-[width] duration-1000 ease-linear"
+                  [ngClass]="[
+                    participant.team === 'Friendly'
+                      ? 'bg-primary'
+                      : 'bg-danger',
+                    participant.entity.barrier > 0
+                      ? 'rounded-l-full'
+                      : 'rounded-full',
+                  ]"
+                  [style.width.%]="healthPercentage(participant.entity)"
+                ></span>
+                <span
+                  class="absolute inset-y-0 rounded-r-full bg-[#8ecbff]/55 transition-[left,width] duration-1000 ease-linear"
+                  style="
+                    background-image: repeating-linear-gradient(
+                      45deg,
+                      rgba(255, 255, 255, 0.2) 0,
+                      rgba(255, 255, 255, 0.2) 3px,
+                      transparent 3px,
+                      transparent 6px
+                    );
+                  "
+                  [style.left.%]="barrierStartPercentage(participant.entity)"
+                  [style.width.%]="barrierPercentage(participant.entity)"
+                ></span>
+              </span>
+
+              <span
+                class="whitespace-nowrap text-right font-semibold"
+                [class.opacity-45]="isDefeated(participant.entity)"
+              >
+                <ng-container
+                  *ngIf="
+                    hasKnownHealth(participant.entity);
+                    else healthUnavailable
+                  "
+                >
+                  {{ participant.entity.health | number }}/{{
+                    participant.entity.maxHealth | number
+                  }}
+                  <span
+                    *ngIf="participant.entity.barrier > 0"
+                    class="ll-text-info"
+                    >+{{ participant.entity.barrier | number }}</span
+                  >
+                </ng-container>
+              </span>
+              <span
+                class="text-right font-semibold"
+                [ngClass]="
+                  (statsFor(participant.id)?.damageDone ?? 0) > 0
+                    ? 'text-primary'
+                    : 'text-light_gray'
+                "
+              >
+                {{ statsFor(participant.id)?.damageDone ?? 0 | number }}
+              </span>
+              <span
+                class="text-right font-semibold"
+                [ngClass]="
+                  (statsFor(participant.id)?.damageTaken ?? 0) > 0
+                    ? 'text-danger'
+                    : 'text-light_gray'
+                "
+              >
+                {{ statsFor(participant.id)?.damageTaken ?? 0 | number }}
+              </span>
+              <span
+                class="text-right font-semibold"
+                [ngClass]="
+                  (statsFor(participant.id)?.healingDone ?? 0) > 0
+                    ? 'll-text-success'
+                    : 'text-light_gray'
+                "
+              >
+                {{ statsFor(participant.id)?.healingDone ?? 0 | number }}
+              </span>
+              <span
+                class="text-right font-semibold"
+                [ngClass]="
+                  (statsFor(participant.id)?.damageBlocked ?? 0) > 0
+                    ? 'll-text-info'
+                    : 'text-light_gray'
+                "
+              >
+                {{ statsFor(participant.id)?.damageBlocked ?? 0 | number }}
+              </span>
+              <span
+                class="text-right font-semibold"
+                [ngClass]="
+                  (statsFor(participant.id)?.threatGenerated ?? 0) > 0
+                    ? 'text-amber-300'
+                    : 'text-light_gray'
+                "
+              >
+                <span class="block">
+                  {{ statsFor(participant.id)?.threatGenerated ?? 0 | number }}
+                </span>
+                <span
+                  *ngIf="(statsFor(participant.id)?.threatGenerated ?? 0) > 0"
+                  class="block text-[9px] font-normal text-light_gray"
+                >
+                  {{
+                    threatPerSecond(statsFor(participant.id)) | number: "1.1-1"
+                  }}/s
+                </span>
+              </span>
+            </button>
+          </ng-container>
         </ng-container>
       </div>
     </div>
@@ -426,6 +584,25 @@
                 <strong class="ll-text-info ml-1">{{
                   stats.damageBlocked | number
                 }}</strong>
+              </span>
+              <span class="ll-card px-3 py-1.5 text-xs text-secondary">
+                Attention share
+                <strong class="ml-1 text-amber-300"
+                  >{{
+                    stats.attentionSharePercent ?? 0 | number: "1.0-2"
+                  }}%</strong
+                >
+              </span>
+              <span class="ll-card px-3 py-1.5 text-xs text-secondary">
+                Damage redirected
+                <strong class="ll-text-info ml-1">{{
+                  stats.damageRedirectedTo ?? 0 | number
+                }}</strong>
+                <span class="ml-1 text-light_gray">received</span>
+                <strong class="ml-1 text-primary">{{
+                  stats.damageRedirectedAway ?? 0 | number
+                }}</strong>
+                <span class="ml-1 text-light_gray">redirected away</span>
               </span>
               <span class="ll-card px-3 py-1.5 text-xs text-secondary">
                 Healing done
@@ -463,6 +640,22 @@
                   >{{ stats.healthRegenerated | number }} hp</strong
                 >
               </span>
+              <span class="ll-card px-3 py-1.5 text-xs text-secondary">
+                Threat generated
+                <strong
+                  class="ml-1"
+                  [ngClass]="
+                    (stats.threatGenerated ?? 0) > 0
+                      ? 'text-amber-300'
+                      : 'text-light_gray'
+                  "
+                >
+                  {{ stats.threatGenerated ?? 0 | number }}
+                </strong>
+                <span class="ml-1 text-light_gray">
+                  · {{ threatPerSecond(stats) | number: "1.1-1" }}/s
+                </span>
+              </span>
             </div>
 
             <div
@@ -489,9 +682,9 @@
           class="hidden min-w-0 overflow-x-auto rounded border border-white/10 text-left text-sm lg:block"
           data-tour="current-combat-summary"
         >
-          <div class="min-w-[60rem]">
+          <div class="min-w-[69rem]">
             <div
-              class="grid grid-cols-[minmax(15rem,1fr)_9rem_18rem_7rem_7rem] gap-3 bg-white/[0.035] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
+              class="grid grid-cols-[minmax(15rem,1fr)_9rem_18rem_7rem_7rem_8rem] gap-3 bg-white/[0.035] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
             >
               <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
                 <span>Ability</span>
@@ -548,13 +741,21 @@
               >
                 Barrier {{ sortIndicator("barrier") }}
               </button>
+              <button
+                type="button"
+                class="text-right transition-colors hover:text-white"
+                [attr.aria-label]="sortAriaLabel('threat')"
+                (click)="sortAbilities('threat')"
+              >
+                Threat {{ sortIndicator("threat") }}
+              </button>
             </div>
             <ng-container
               *ngFor="let ability of sortedAbilities; trackBy: trackAbility"
             >
               <div
                 *ngIf="ability.name"
-                class="grid grid-cols-[minmax(15rem,1fr)_9rem_18rem_7rem_7rem] items-center gap-3 border-t border-white/[0.07] px-4 py-2 text-xs transition-colors hover:bg-white/[0.035]"
+                class="grid grid-cols-[minmax(15rem,1fr)_9rem_18rem_7rem_7rem_8rem] items-center gap-3 border-t border-white/[0.07] px-4 py-2 text-xs transition-colors hover:bg-white/[0.035]"
               >
                 <div class="font-medium text-white">{{ ability.name }}</div>
                 <div class="text-right text-secondary">
@@ -661,6 +862,27 @@
                 >
                   {{ ability.totalBarrier | number }}
                 </div>
+                <div class="flex min-w-0 items-center justify-end gap-2">
+                  <span
+                    class="h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-white/[0.04]"
+                    aria-hidden="true"
+                  >
+                    <span
+                      class="block h-full rounded-full bg-amber-300/80 transition-[width] duration-1000 ease-linear"
+                      [style.width.%]="threatBarPercentage(ability)"
+                    ></span>
+                  </span>
+                  <span
+                    class="w-11 text-right font-semibold tabular-nums"
+                    [ngClass]="
+                      (ability.totalThreat ?? 0) > 0
+                        ? 'text-amber-300'
+                        : 'text-light_gray'
+                    "
+                  >
+                    {{ ability.totalThreat ?? 0 | number }}
+                  </span>
+                </div>
               </div>
             </ng-container>
             <div
@@ -708,6 +930,12 @@
                 </span>
                 <span *ngIf="ability.totalBarrier > 0" class="ll-text-info">
                   · {{ ability.totalBarrier | number }} barrier
+                </span>
+                <span
+                  *ngIf="(ability.totalThreat ?? 0) > 0"
+                  class="text-amber-300"
+                >
+                  · {{ ability.totalThreat ?? 0 | number }} threat
                 </span>
               </div>
 

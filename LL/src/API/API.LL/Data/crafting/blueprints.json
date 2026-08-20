@@ -951,5 +951,77 @@
       "Poison"
     ],
     "enabled": true
+  },
+  {
+    "id": "blueprint_raidforged",
+    "name": "Blueprint: Raidforged",
+    "description": "Applies the raid-exclusive Raidforged design to compatible equipment.",
+    "itemId": "blueprint_raidforged",
+    "nameFormat": "Raidforged {BaseName}",
+    "requiredRecipeTags": [],
+    "anyRecipeTags": ["Weapon", "Armor", "OffHand", "Accessory", "Relic"],
+    "excludedRecipeTags": [],
+    "compatibleRecipeIds": [],
+    "bonusStatBudgetMultiplier": 0.25,
+    "bonusStatProfile": {
+      "Power": 0.3,
+      "Armor": 0.3,
+      "Resistance": 0.25,
+      "MaxHealth": 0.15
+    },
+    "temperingProfile": {
+      "id": "blueprint_raidforged.tempering",
+      "name": "Raidforged Tempering",
+      "stats": [
+        { "stat": "Power", "weight": 30, "category": "Primary", "canIntroduce": true, "canIncrease": true, "maxBudgetShare": 0.4, "minimumTier": 1 },
+        { "stat": "Armor", "weight": 30, "category": "Primary", "canIntroduce": true, "canIncrease": true, "maxBudgetShare": 0.4, "minimumTier": 1 },
+        { "stat": "Resistance", "weight": 25, "category": "Primary", "canIntroduce": true, "canIncrease": true, "maxBudgetShare": 0.35, "minimumTier": 1 },
+        { "stat": "MaxHealth", "weight": 15, "category": "Secondary", "canIntroduce": true, "canIncrease": true, "maxBudgetShare": 0.25, "minimumTier": 1 }
+      ]
+    },
+    "behaviorModifiers": { "handedness": "", "attackCategory": "", "rangeCategory": "", "basicAttackIntervalMultiplier": 1, "basicAttackDamageMultiplier": 1, "role": "" },
+    "additionalMaterialRequirements": [
+      { "type": "SpecialResource", "itemId": "raidforged_ingot", "baseAmount": 1, "amountPerTier": 0 }
+    ],
+    "sourceType": "Raid",
+    "sourceId": "raid-boss.hives-abyss",
+    "tags": ["Raid", "Raidforged", "Hybrid", "Durable"],
+    "enabled": true
+  },
+  {
+    "id": "blueprint_gravebound",
+    "name": "Blueprint: Gravebound",
+    "description": "Applies the raid-exclusive Gravebound design to compatible equipment.",
+    "itemId": "blueprint_gravebound",
+    "nameFormat": "Gravebound {BaseName}",
+    "requiredRecipeTags": [],
+    "anyRecipeTags": ["Weapon", "Armor", "OffHand", "Accessory", "Relic"],
+    "excludedRecipeTags": [],
+    "compatibleRecipeIds": [],
+    "bonusStatBudgetMultiplier": 0.25,
+    "bonusStatProfile": {
+      "MaxHealth": 0.35,
+      "HealthRegeneration": 0.25,
+      "DamageReduction": 0.2,
+      "Power": 0.2
+    },
+    "temperingProfile": {
+      "id": "blueprint_gravebound.tempering",
+      "name": "Gravebound Tempering",
+      "stats": [
+        { "stat": "MaxHealth", "weight": 35, "category": "Primary", "canIntroduce": true, "canIncrease": true, "maxBudgetShare": 0.45, "minimumTier": 2 },
+        { "stat": "HealthRegeneration", "weight": 25, "category": "Primary", "canIntroduce": true, "canIncrease": true, "maxBudgetShare": 0.35, "minimumTier": 2 },
+        { "stat": "DamageReduction", "weight": 20, "category": "Secondary", "canIntroduce": true, "canIncrease": true, "maxBudgetShare": 0.3, "minimumTier": 2 },
+        { "stat": "Power", "weight": 20, "category": "Secondary", "canIntroduce": true, "canIncrease": true, "maxBudgetShare": 0.3, "minimumTier": 2 }
+      ]
+    },
+    "behaviorModifiers": { "handedness": "", "attackCategory": "", "rangeCategory": "", "basicAttackIntervalMultiplier": 1, "basicAttackDamageMultiplier": 1, "role": "" },
+    "additionalMaterialRequirements": [
+      { "type": "SpecialResource", "itemId": "sanguine_ichor", "baseAmount": 1, "amountPerTier": 0 }
+    ],
+    "sourceType": "Raid",
+    "sourceId": "raid-boss.sanguine-horror",
+    "tags": ["Raid", "Gravebound", "Sustain", "Retaliation"],
+    "enabled": true
   }
 ]

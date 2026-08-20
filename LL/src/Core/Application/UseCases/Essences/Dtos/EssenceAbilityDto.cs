@@ -6,6 +6,9 @@ public sealed record EssenceAbilityDto(
     string Name,
     string Description,
     double CooldownSeconds,
+    int ThreatValue,
+    float ThreatMultiplier,
+    double EstimatedThreatPerSecond,
     IReadOnlyList<string> Targets,
     IReadOnlyList<string> Tags,
     IReadOnlyList<EssenceEffectDto> Effects);

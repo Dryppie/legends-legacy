@@ -7,6 +7,7 @@ import { TowerOverviewComponent } from './tower/overview/tower-overview.componen
 import { TowerRallyComponent } from './tower/rally/tower-rally.component';
 import { TowerHallOfFameComponent } from './tower/hall-of-fame/tower-hall-of-fame.component';
 import { TowerPersonalExpeditionsComponent } from './tower/personal-expeditions/tower-personal-expeditions.component';
+import { RaidPageComponent } from './raid/raid-page.component';
 
 export const WORLD_ROUTES: Routes = [
   {
@@ -17,6 +18,11 @@ export const WORLD_ROUTES: Routes = [
         path: 'dungeon',
         component: DungeonPageComponent,
         data: { guidePageId: GUIDE_PAGE_IDS.dungeons },
+      },
+      {
+        path: 'raid/:raidId',
+        component: RaidPageComponent,
+        data: { guidePageId: GUIDE_PAGE_IDS.raids },
       },
       {
         path: 'tower',

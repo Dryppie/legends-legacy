@@ -66,7 +66,6 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
 export class DungeonsComponent implements OnInit {
   readonly region = input<number | null>(null);
   readonly selectedFamilyId = input<string | null>(null);
-  readonly expandSelected = input(false);
   selectedRecordsDungeon = signal<DungeonPreviewData | null>(null);
   recordsData = signal<DungeonRecordsData | null>(null);
   recordsLoading = signal(false);

@@ -46,6 +46,8 @@ export class EssenceItemViewService {
       effectTags: this.filterEnumValues(tags, EffectTag, 'Effect'),
       targets: (ability.targets ?? []).filter(isAbilityTargetSelector),
       cooldown: ability.cooldownSeconds * 10,
+      threatValue: ability.threatValue ?? 0,
+      threatMultiplier: ability.threatMultiplier ?? 1,
       effects: ability.effects ?? [],
     };
   }

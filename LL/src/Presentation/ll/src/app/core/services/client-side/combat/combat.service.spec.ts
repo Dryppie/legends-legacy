@@ -78,6 +78,28 @@ describe('CombatService', () => {
     expect(state.getIsCombatActive(BattleType.Tower)()).toBeFalse();
     expect(state.getCombatResult(BattleType.Tower)()).toBeNull();
   });
+
+  it('applies and closes Raid playback in its own state slot', () => {
+    service.applyRaidCombatFrame({
+      sequence: 0,
+      tick: 10,
+      friendly: [combatant('raider')],
+      hostile: [combatant('raid-boss')],
+      entityStats: [],
+      events: [],
+      isFinal: true,
+      outcome: BattleOutcome.Victory,
+    });
+
+    expect(state.getIsCombatActive(BattleType.Raid)()).toBeTrue();
+    expect(state.getEnemyCharacters(BattleType.Raid)()[0].id).toBe('raid-boss');
+    expect(state.getCombatOutcome(BattleType.Raid)()).toBe(BattleOutcome.Victory);
+
+    service.closeCurrentRaidBattle();
+
+    expect(state.getIsCombatActive(BattleType.Raid)()).toBeFalse();
+    expect(state.getCombatResult(BattleType.Raid)()).toBeNull();
+  });
 });
 
 function combatAction(result: CombatResultDto): CharacterActionDto {

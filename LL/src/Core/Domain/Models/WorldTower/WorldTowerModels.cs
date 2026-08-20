@@ -156,6 +156,7 @@ public sealed class TowerRallyParticipant
     public int PowerRating { get; set; }
     public Guid CharacterSnapshotId { get; set; }
     public CharacterSnapshot CharacterSnapshot { get; set; } = null!;
+    public int? PartySlot { get; set; }
     public DateTimeOffset JoinedAt { get; set; }
 }
 

@@ -898,6 +898,12 @@
                               [abilityName]="essence.active.name"
                               [description]="essence.active.description"
                               [effects]="essence.active.effects"
+                              kind="Active"
+                              [cooldownSeconds]="essence.active.cooldown / 10"
+                              [threatValue]="essence.active.threatValue"
+                              [threatMultiplier]="
+                                essence.active.threatMultiplier
+                              "
                             ></app-essence-description>
                             <app-ability-tags
                               [targets]="essence.active.targets"
@@ -920,6 +926,11 @@
                               [abilityName]="essence.passive.name"
                               [description]="essence.passive.description"
                               [effects]="essence.passive.effects"
+                              kind="Passive"
+                              [threatValue]="essence.passive.threatValue"
+                              [threatMultiplier]="
+                                essence.passive.threatMultiplier
+                              "
                             ></app-essence-description>
                             <app-ability-tags
                               [targets]="essence.passive.targets"

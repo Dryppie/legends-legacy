@@ -270,10 +270,11 @@
               [abilityName]="essence.activeAbility.name"
               [description]="essence.activeAbility.description"
               [effects]="essence.activeAbility.effects"
+              kind="Active"
+              [cooldownSeconds]="essence.activeAbility.cooldownSeconds"
+              [threatValue]="essence.activeAbility.threatValue ?? 0"
+              [threatMultiplier]="essence.activeAbility.threatMultiplier ?? 1"
             ></app-essence-description>
-            <p class="mt-2 text-xs text-zinc-400">
-              Cooldown: {{ essence.activeAbility.cooldownSeconds }}s
-            </p>
             <app-ability-tags
               [targets]="essence.activeAbility.targets"
               [tags]="essence.activeAbility.tags"
@@ -291,6 +292,9 @@
               [abilityName]="essence.passiveAbility.name"
               [description]="essence.passiveAbility.description"
               [effects]="essence.passiveAbility.effects"
+              kind="Passive"
+              [threatValue]="essence.passiveAbility.threatValue ?? 0"
+              [threatMultiplier]="essence.passiveAbility.threatMultiplier ?? 1"
             ></app-essence-description>
             <app-ability-tags
               [targets]="essence.passiveAbility.targets"
@@ -301,41 +305,37 @@
 
         <section class="ll-card soul-progression mt-4 overflow-hidden">
           <header class="px-4 py-3">
-            <h3 class="ll-eyebrow text-primary">Progression Details</h3>
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="ll-heading text-base text-primary">
+                Ascend
+                <ng-container
+                  *ngIf="essence.ascendInfo.nextTier !== null; else maxTier"
+                >
+                  Tier {{ essence.ascendInfo.nextTier }}
+                </ng-container>
+                <ng-template #maxTier>Max Tier</ng-template>
+              </h3>
+              <span
+                class="soul-progression-status"
+                [ngClass]="{
+                  'text-emerald-400': canAscendEssence(essence),
+                  'text-zinc-500': !canAscendEssence(essence),
+                }"
+              >
+                {{ canAscendEssence(essence) ? "Ready" : "Locked" }}
+              </span>
+            </div>
+            <div
+              class="soul-progression-readiness"
+              [class.soul-progression-readiness-ready]="
+                canAscendEssence(essence)
+              "
+              aria-hidden="true"
+            ></div>
           </header>
 
           <div class="soul-progression-layout border-t border-light_gray/60">
             <article class="soul-progression-path">
-              <div class="flex items-start justify-between gap-3">
-                <h3 class="ll-heading text-base text-primary">
-                  Ascend
-                  <span aria-hidden="true">·</span>
-                  <ng-container
-                    *ngIf="essence.ascendInfo.nextTier !== null; else maxTier"
-                  >
-                    Tier {{ essence.ascendInfo.nextTier }}
-                  </ng-container>
-                  <ng-template #maxTier>Max Tier</ng-template>
-                </h3>
-                <span
-                  class="soul-progression-status"
-                  [ngClass]="{
-                    'text-emerald-400': canAscendEssence(essence),
-                    'text-zinc-500': !canAscendEssence(essence),
-                  }"
-                >
-                  {{ canAscendEssence(essence) ? "Ready" : "Locked" }}
-                </span>
-              </div>
-
-              <div
-                class="soul-progression-readiness"
-                [class.soul-progression-readiness-ready]="
-                  canAscendEssence(essence)
-                "
-                aria-hidden="true"
-              ></div>
-
               <div class="soul-progression-details">
                 <section class="soul-progression-requirement-panel">
                   <h4 class="soul-progression-section-title">Requirements</h4>

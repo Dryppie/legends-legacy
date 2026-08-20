@@ -7,6 +7,7 @@ public interface IChatMessageRepository
         Guid userId,
         int take,
         string? guildChannel,
+        string? raidChannel,
         DateTimeOffset? after,
         CancellationToken cancellationToken);
 }

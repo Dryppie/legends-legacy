@@ -78,7 +78,8 @@ public enum AbilityEffectOperation
     ConsumeOwnedSummon = 28,
     SynchronizeAttributePerStatusStack = 29,
     SwapHealth = 30,
-    SynchronizeAttributePerMissingHealthStep = 31
+    SynchronizeAttributePerMissingHealthStep = 31,
+    GrantCover = 32
 }
 
 public enum AbilityTargetSelector
@@ -162,7 +163,9 @@ public enum StandardConditionType
     Freeze = 19,
     Corrosion = 20,
     Doom = 21,
-    Thorns = 22
+    Thorns = 22,
+    Mark = 23,
+    Cover = 24
 }
 
 public enum AbilityConditionSubject
@@ -203,6 +206,8 @@ public sealed class AbilitySpec
     public string Description { get; set; } = string.Empty;
     public string? OwningEssenceId { get; set; }
     public int CooldownTicks { get; set; }
+    public int? ThreatValue { get; set; }
+    public float ThreatMultiplier { get; set; } = 1f;
     public List<string> Tags { get; set; } = [];
     public List<string> DeliveryTags { get; set; } = [];
     public List<string> EffectTags { get; set; } = [];
@@ -252,6 +257,8 @@ public sealed class AbilityEffectSpec
     public string Id { get; set; } = string.Empty;
     public AbilityEffectOperation Operation { get; set; }
     public AbilityTargetSelector Target { get; set; } = AbilityTargetSelector.CurrentTarget;
+    // Operation-specific parameter for percentages, stacks, charges, or counts.
+    // Damage, Heal, and GrantBarrier must derive magnitude from scaling inputs instead.
     public int BaseValue { get; set; }
     public AttributeType? ScalingAttribute { get; set; }
     public AbilityConditionSubject ScalingAttributeSubject { get; set; } = AbilityConditionSubject.Source;
@@ -337,9 +344,337 @@ public sealed class SummonSpec
     public int DurationTicks { get; set; }
     public int MaxActive { get; set; }
     public bool CanBasicAttack { get; set; } = true;
+    public float? ThreatMultiplier { get; set; }
     public List<string> Tags { get; set; } = [];
     public List<string> AbilityIds { get; set; } = [];
     public List<SummonAttributeSpec> Attributes { get; set; } = [];
+}
+
+public static class AbilityThreatRules
+{
+    private const int TicksPerSecond = 10;
+    private const int NominalBasicAttackIntervalTicks = 30;
+    private const int NominalOneShotPeriodTicks = 200;
+    private const int NominalReactivePeriodTicks = 40;
+
+    public const int BasicAttackThreatValue = 8;
+    public const float ProtectiveSelfThreatPerSecond = 5f;
+    public const float ProtectiveAllyThreatPerSecond = 5f;
+    public const float RetaliationThreatPerSecond = 3.5f;
+    public const float SupportAllyThreatPerSecond = 3.5f;
+    public const float HardControlThreatPerSecond = 2.5f;
+    public const float SoftControlThreatPerSecond = 2f;
+    public const float DamageThreatPerSecond = 1.5f;
+    public const float SelfSustainThreatPerSecond = 1.5f;
+    public const float UtilityThreatPerSecond = 0.5f;
+
+    public static int GetThreatValue(AbilitySpec ability, AbilityThreatTuning? tuning = null)
+    {
+        if (ability.ThreatValue is { } authored)
+            return authored;
+
+        tuning ??= AbilityThreatTuning.Default;
+
+        if (ability.Tags.Contains("NonCombat", StringComparer.OrdinalIgnoreCase))
+            return 0;
+
+        if (ability.Kind == AbilitySpecKind.Active)
+            return DeriveThreatValue(ability.Effects, ability.CooldownTicks, null, tuning);
+
+        var effectsById = ability.Effects.ToDictionary(effect => effect.Id, StringComparer.OrdinalIgnoreCase);
+        var triggers = ability.Triggers.Count == 0
+            ? [new AbilityTriggerSpec { Event = AbilityTriggerEvent.OnCombatStart }]
+            : ability.Triggers;
+
+        return triggers.Sum(trigger => GetThreatValue(ability, trigger, effectsById, tuning));
+    }
+
+    public static int GetThreatValue(
+        AbilitySpec ability,
+        AbilityTriggerSpec trigger,
+        AbilityThreatTuning? tuning = null)
+    {
+        if (ability.ThreatValue is { } authored)
+            return authored;
+
+        tuning ??= AbilityThreatTuning.Default;
+        if (ability.Tags.Contains("NonCombat", StringComparer.OrdinalIgnoreCase))
+            return 0;
+
+        var effectsById = ability.Effects.ToDictionary(effect => effect.Id, StringComparer.OrdinalIgnoreCase);
+        return GetThreatValue(ability, trigger, effectsById, tuning);
+    }
+
+    public static double GetEstimatedThreatPerSecond(
+        AbilitySpec ability,
+        AbilityThreatTuning? tuning = null)
+    {
+        var multiplier = Math.Max(0, ability.ThreatMultiplier);
+        if (multiplier == 0)
+            return 0;
+
+        if (ability.Kind == AbilitySpecKind.Active)
+        {
+            return GetThreatValue(ability, tuning)
+                * multiplier
+                * TicksPerSecond
+                / Math.Max(1, ability.CooldownTicks);
+        }
+
+        var triggers = ability.Triggers.Count == 0
+            ? [new AbilityTriggerSpec { Event = AbilityTriggerEvent.OnCombatStart }]
+            : ability.Triggers;
+
+        return triggers.Sum(trigger =>
+            GetThreatValue(ability, trigger, tuning)
+            * multiplier
+            * TicksPerSecond
+            / Math.Max(1, GetTriggerPeriodTicks(ability, trigger)));
+    }
+
+    public static int GetTriggerPeriodTicks(AbilitySpec ability, AbilityTriggerSpec trigger)
+    {
+        var effectsById = ability.Effects.ToDictionary(effect => effect.Id, StringComparer.OrdinalIgnoreCase);
+        var effects = trigger.EffectIds.Count == 0
+            ? ability.Effects
+            : trigger.EffectIds.Select(effectId => effectsById[effectId]).ToList();
+        return GetEffectivePeriodTicks(trigger, effects);
+    }
+
+    private static int GetThreatValue(
+        AbilitySpec ability,
+        AbilityTriggerSpec trigger,
+        IReadOnlyDictionary<string, AbilityEffectSpec> effectsById,
+        AbilityThreatTuning tuning)
+    {
+        var effects = trigger.EffectIds.Count == 0
+            ? ability.Effects
+            : trigger.EffectIds.Select(effectId => effectsById[effectId]).ToList();
+        var periodTicks = GetEffectivePeriodTicks(trigger, effects);
+        return DeriveThreatValue(effects, periodTicks, trigger.Event, tuning);
+    }
+
+    private static int DeriveThreatValue(
+        IEnumerable<AbilityEffectSpec> effects,
+        int periodTicks,
+        AbilityTriggerEvent? triggerEvent,
+        AbilityThreatTuning tuning)
+    {
+        var bands = effects
+            .Select(effect => GetBand(effect, triggerEvent))
+            .Where(band => band is not null)
+            .Select(band => band!.Value)
+            .Distinct()
+            .ToList();
+        if (bands.Count == 0)
+            return 0;
+
+        var threatPerSecond = bands.Sum(band => GetThreatPerSecond(band, tuning));
+        return (int)Math.Round(
+            threatPerSecond * Math.Max(1, periodTicks) / TicksPerSecond,
+            MidpointRounding.AwayFromZero);
+    }
+
+    private static int GetEffectivePeriodTicks(
+        AbilityTriggerSpec trigger,
+        IReadOnlyCollection<AbilityEffectSpec> effects)
+    {
+        if (trigger.InternalCooldownTicks > 0)
+            return trigger.InternalCooldownTicks;
+
+        if (trigger.Event == AbilityTriggerEvent.OnCombatStart || effects.Any(effect => effect.Uses == 1))
+            return NominalOneShotPeriodTicks;
+
+        if (trigger.Event == AbilityTriggerEvent.OnInterval)
+            return Math.Max(1, trigger.EveryNthOccurrence);
+
+        if (trigger.Event is AbilityTriggerEvent.OnBasicAttack
+                or AbilityTriggerEvent.OnMeleeAttack
+                or AbilityTriggerEvent.OnRangedAttack)
+        {
+            return NominalBasicAttackIntervalTicks * Math.Max(1, trigger.EveryNthOccurrence);
+        }
+
+        return NominalReactivePeriodTicks * Math.Max(1, trigger.EveryNthOccurrence);
+    }
+
+    private static ThreatFunctionBand? GetBand(
+        AbilityEffectSpec effect,
+        AbilityTriggerEvent? triggerEvent)
+    {
+        var targetsSelf = IsSelfTarget(effect.Target);
+        var targetsAllies = IsAllyTarget(effect.Target);
+        var reactive = triggerEvent is AbilityTriggerEvent.OnDamaged
+            or AbilityTriggerEvent.OnAttacked
+            or AbilityTriggerEvent.OnMeleeAttacked
+            or AbilityTriggerEvent.OnRangedAttacked
+            or AbilityTriggerEvent.OnBarrierAbsorbed
+            or AbilityTriggerEvent.OnBarrierBroken
+            or AbilityTriggerEvent.OnBarrierContributionBroken;
+
+        if (effect.Operation == AbilityEffectOperation.Damage)
+            return targetsSelf ? null : reactive ? ThreatFunctionBand.Retaliation : ThreatFunctionBand.Damage;
+
+        if (effect.Operation == AbilityEffectOperation.Heal)
+            return targetsSelf ? ThreatFunctionBand.SelfSustain : ThreatFunctionBand.SupportAlly;
+
+        if (effect.Operation == AbilityEffectOperation.GrantBarrier)
+            return targetsSelf ? ThreatFunctionBand.SelfSustain : ThreatFunctionBand.ProtectiveAlly;
+
+        if (effect.Operation == AbilityEffectOperation.GrantCover)
+            return ThreatFunctionBand.ProtectiveAlly;
+
+        if (effect.Operation == AbilityEffectOperation.Summon
+            || effect.Operation == AbilityEffectOperation.ModifyThreat)
+        {
+            return null;
+        }
+
+        if (effect.Operation == AbilityEffectOperation.ApplyStatus && !targetsSelf && !targetsAllies)
+            return ThreatFunctionBand.SoftControl;
+
+        if (effect.Operation == AbilityEffectOperation.ApplyCondition)
+            return GetConditionBand(effect, targetsSelf, targetsAllies);
+
+        if (effect.Operation is (AbilityEffectOperation.ModifyAttribute
+                or AbilityEffectOperation.ModifyAttributePercentOfInitial)
+            && IsDefensiveAttribute(effect.Attribute))
+        {
+            return targetsSelf ? ThreatFunctionBand.ProtectiveSelf : ThreatFunctionBand.ProtectiveAlly;
+        }
+
+        if (effect.Operation is (AbilityEffectOperation.ModifyDamageTaken
+                or AbilityEffectOperation.ModifyDamageTakenFromCondition)
+            && (effect.BaseValue < 0 || effect.ScalingCoefficient < 0))
+        {
+            return targetsSelf ? ThreatFunctionBand.ProtectiveSelf : ThreatFunctionBand.ProtectiveAlly;
+        }
+
+        if (effect.Operation == AbilityEffectOperation.ModifyHealingReceived)
+        {
+            if (effect.BaseValue > 0 || effect.ScalingCoefficient > 0)
+                return targetsSelf ? ThreatFunctionBand.SelfSustain : ThreatFunctionBand.SupportAlly;
+            return targetsSelf || targetsAllies ? null : ThreatFunctionBand.SoftControl;
+        }
+
+        if (effect.Operation == AbilityEffectOperation.ModifyRegenerationRate)
+        {
+            if (effect.BaseValue > 0 || effect.ScalingCoefficient > 0)
+                return targetsSelf ? ThreatFunctionBand.SelfSustain : ThreatFunctionBand.SupportAlly;
+            return targetsSelf || targetsAllies ? null : ThreatFunctionBand.SoftControl;
+        }
+
+        if (effect.Operation == AbilityEffectOperation.ModifyDamageDealt
+            && (effect.BaseValue < 0 || effect.ScalingCoefficient < 0)
+            && !targetsSelf
+            && !targetsAllies)
+        {
+            return ThreatFunctionBand.SoftControl;
+        }
+
+        return ThreatFunctionBand.Utility;
+    }
+
+    private static ThreatFunctionBand? GetConditionBand(
+        AbilityEffectSpec effect,
+        bool targetsSelf,
+        bool targetsAllies) => effect.Condition switch
+        {
+            StandardConditionType.Mark or StandardConditionType.Taunt or StandardConditionType.Stealth => null,
+            StandardConditionType.Thorns => ThreatFunctionBand.Retaliation,
+            StandardConditionType.Guard or StandardConditionType.Ward or StandardConditionType.Renewal
+                or StandardConditionType.Recovery or StandardConditionType.Unstoppable when targetsSelf
+                => ThreatFunctionBand.ProtectiveSelf,
+            StandardConditionType.Guard or StandardConditionType.Ward or StandardConditionType.Renewal
+                or StandardConditionType.Recovery or StandardConditionType.Unstoppable when targetsAllies
+                => ThreatFunctionBand.ProtectiveAlly,
+            StandardConditionType.Empower or StandardConditionType.Haste when !targetsSelf
+                => ThreatFunctionBand.SupportAlly,
+            StandardConditionType.Stun or StandardConditionType.Freeze when !targetsSelf && !targetsAllies
+                => ThreatFunctionBand.HardControl,
+            StandardConditionType.Slow or StandardConditionType.Weaken or StandardConditionType.Vulnerable
+                or StandardConditionType.Chill or StandardConditionType.Corrosion or StandardConditionType.Wound
+                or StandardConditionType.Decay or StandardConditionType.Doom when !targetsSelf && !targetsAllies
+                => ThreatFunctionBand.SoftControl,
+            StandardConditionType.Poison or StandardConditionType.Burn or StandardConditionType.Bleed
+                when !targetsSelf && !targetsAllies => ThreatFunctionBand.Damage,
+            _ => ThreatFunctionBand.Utility
+        };
+
+    private static bool IsSelfTarget(AbilityTargetSelector target) =>
+        target is AbilityTargetSelector.Self or AbilityTargetSelector.Source;
+
+    private static bool IsAllyTarget(AbilityTargetSelector target) => target is
+        AbilityTargetSelector.LowestHealthAlly
+        or AbilityTargetSelector.AllAllies
+        or AbilityTargetSelector.TwoAllies
+        or AbilityTargetSelector.HighestMaxHealthAlly
+        or AbilityTargetSelector.SummonedAllies
+        or AbilityTargetSelector.NonSummonedAllies
+        or AbilityTargetSelector.HighestCurrentHealthOwnedSummon
+        or AbilityTargetSelector.OwnedSummons
+        or AbilityTargetSelector.RandomAlly;
+
+    private static bool IsDefensiveAttribute(AttributeType? attribute) => attribute is
+        AttributeType.Armor
+        or AttributeType.Resistance
+        or AttributeType.MaxHealth
+        or AttributeType.DamageReduction
+        or AttributeType.BlockChance
+        or AttributeType.DodgeChance;
+
+    private static float GetThreatPerSecond(ThreatFunctionBand band, AbilityThreatTuning tuning) => band switch
+    {
+        ThreatFunctionBand.ProtectiveSelf => tuning.ProtectiveSelfThreatPerSecond,
+        ThreatFunctionBand.ProtectiveAlly => tuning.ProtectiveAllyThreatPerSecond,
+        ThreatFunctionBand.Retaliation => tuning.RetaliationThreatPerSecond,
+        ThreatFunctionBand.SupportAlly => tuning.SupportAllyThreatPerSecond,
+        ThreatFunctionBand.HardControl => tuning.HardControlThreatPerSecond,
+        ThreatFunctionBand.SoftControl => tuning.SoftControlThreatPerSecond,
+        ThreatFunctionBand.Damage => tuning.DamageThreatPerSecond,
+        ThreatFunctionBand.SelfSustain => tuning.SelfSustainThreatPerSecond,
+        _ => tuning.UtilityThreatPerSecond
+    };
+
+    private enum ThreatFunctionBand
+    {
+        ProtectiveSelf,
+        ProtectiveAlly,
+        Retaliation,
+        SupportAlly,
+        HardControl,
+        SoftControl,
+        Damage,
+        SelfSustain,
+        Utility
+    }
+}
+
+public sealed record AbilityThreatTuning(
+    int BasicAttackThreatValue,
+    float ProtectiveSelfThreatPerSecond,
+    float ProtectiveAllyThreatPerSecond,
+    float RetaliationThreatPerSecond,
+    float SupportAllyThreatPerSecond,
+    float HardControlThreatPerSecond,
+    float SoftControlThreatPerSecond,
+    float DamageThreatPerSecond,
+    float SelfSustainThreatPerSecond,
+    float UtilityThreatPerSecond,
+    float DefaultSummonThreatMultiplier)
+{
+    public static AbilityThreatTuning Default { get; } = new(
+        AbilityThreatRules.BasicAttackThreatValue,
+        AbilityThreatRules.ProtectiveSelfThreatPerSecond,
+        AbilityThreatRules.ProtectiveAllyThreatPerSecond,
+        AbilityThreatRules.RetaliationThreatPerSecond,
+        AbilityThreatRules.SupportAllyThreatPerSecond,
+        AbilityThreatRules.HardControlThreatPerSecond,
+        AbilityThreatRules.SoftControlThreatPerSecond,
+        AbilityThreatRules.DamageThreatPerSecond,
+        AbilityThreatRules.SelfSustainThreatPerSecond,
+        AbilityThreatRules.UtilityThreatPerSecond,
+        0.25f);
 }
 
 public sealed class SummonAttributeSpec

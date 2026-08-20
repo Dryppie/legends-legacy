@@ -167,6 +167,8 @@ export function essenceItemToEssence(item: EssenceItem): Essence {
       effectTags: [],
       targets: [],
       cooldown: 0,
+      threatValue: 0,
+      threatMultiplier: 1,
       effects: [],
     },
     passive: {
@@ -178,6 +180,8 @@ export function essenceItemToEssence(item: EssenceItem): Essence {
       effectTags: [],
       targets: [],
       cooldown: 0,
+      threatValue: 0,
+      threatMultiplier: 1,
       effects: [],
     },
     attributeModifiers: [],

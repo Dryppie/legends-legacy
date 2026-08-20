@@ -15,6 +15,10 @@ public class CharacterConfiguration : IEntityTypeConfiguration<Character>
             .HasMaxLength(80);
 
         builder
+            .Property(c => c.RaidTrophies)
+            .HasDefaultValue(0L);
+
+        builder
             .HasIndex(c => c.NormalizedName)
             .IsUnique()
             .HasFilter("\"EntityType\" = 1 AND \"NormalizedName\" IS NOT NULL");

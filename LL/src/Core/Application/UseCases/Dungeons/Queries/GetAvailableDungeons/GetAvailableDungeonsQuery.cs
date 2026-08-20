@@ -1,6 +1,5 @@
 using Application.MediatR.Markers;
 using Application.Interfaces.Services.LL.Dungeons;
-using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Items.Dtos;
@@ -8,6 +7,7 @@ using AutoMapper;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Definitions.Gathering;
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Entities.Characters;
 using Domain.Models.Items;
 using MediatR;
 
@@ -20,7 +20,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
     private readonly IDungeonDefinitions _dungeonDefinitions;
     private readonly IDungeonAccessPolicy _dungeonAccess;
     private readonly IDungeonPreviewRewardService _previewRewards;
-    private readonly ICharacterService _characters;
+    private readonly ICharacterRepository _characters;
     private readonly IDungeonRunService _dungeonRuns;
     private readonly IDungeonMasteryService _mastery;
     private readonly IItemBaseRepository _itemBases;
@@ -32,7 +32,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         IDungeonDefinitions dungeonDefinitions,
         IDungeonAccessPolicy dungeonAccess,
         IDungeonPreviewRewardService previewRewards,
-        ICharacterService characters,
+        ICharacterRepository characters,
         IDungeonRunService dungeonRuns,
         IDungeonMasteryService mastery,
         IItemBaseRepository itemBases,
@@ -57,7 +57,9 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         CancellationToken cancellationToken)
     {
         var previews = new List<DungeonPreviewDto>();
-        var character = await _characters.GetMyCharacterOverviewAsync(request.CharacterId, cancellationToken);
+        var sigilFragments = await _characters.GetSigilFragmentsAsync(
+            request.CharacterId,
+            cancellationToken);
 
         var dungeons = _dungeonDefinitions.GetAll()
             .OrderBy(x => DungeonDefinitionIdentity.GetFamilyId(x.Id))
@@ -77,6 +79,19 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         var accessByDungeon = await _dungeonAccess.EvaluateForPreviewAsync(
             request.CharacterId,
             dungeons,
+            cancellationToken);
+        var rewardsByDungeon = await _previewRewards.GetPossibleCompletionRewardsAsync(
+            dungeons,
+            cancellationToken);
+        var gatheringItemIds = dungeons
+            .SelectMany(dungeon => dungeon.GatheringNodes)
+            .SelectMany(node => node.Loot)
+            .Select(loot => loot.ItemId)
+            .Where(itemId => !string.IsNullOrWhiteSpace(itemId))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var gatheringItemBases = await _itemBases.GetItemBasesByIdsAsync(
+            gatheringItemIds,
             cancellationToken);
         var sigilSettings = _sigilAssemblySettings.GetSettings();
 
@@ -117,48 +132,28 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 MaxRooms = dungeon.MaxRooms,
                 Record = MapRecord(record),
                 Mastery = MapMastery(mastery),
-                Rewards = await MapRewardsAsync(dungeon, cancellationToken),
-                GatheringNodes = await MapGatheringNodesAsync(dungeon, cancellationToken)
+                Rewards = _mapper.Map<List<DungeonPreviewRewardDto>>(rewardsByDungeon[dungeon.Id]),
+                GatheringNodes = MapGatheringNodes(dungeon, gatheringItemBases)
             });
         }
 
         return new DungeonHubDto
         {
-            SigilFragments = character?.SigilFragments ?? 0,
+            SigilFragments = sigilFragments ?? 0,
             SigilAssemblyEnabled = sigilSettings.Enabled,
             SigilAssemblyCost = sigilSettings.FragmentCost,
             Dungeons = previews
         };
     }
 
-    private async Task<List<DungeonPreviewRewardDto>> MapRewardsAsync(
+    private List<DungeonGatheringNodePreviewDto> MapGatheringNodes(
         Domain.Models.Dungeons.DungeonDefinition dungeon,
-        CancellationToken cancellationToken)
-    {
-        var rewards = await _previewRewards.GetPossibleCompletionRewardsAsync(
-            dungeon,
-            cancellationToken);
-
-        return _mapper.Map<List<DungeonPreviewRewardDto>>(rewards);
-    }
-
-    private async Task<List<DungeonGatheringNodePreviewDto>> MapGatheringNodesAsync(
-        Domain.Models.Dungeons.DungeonDefinition dungeon,
-        CancellationToken cancellationToken)
+        IReadOnlyDictionary<string, ItemBase> itemBases)
     {
         if (dungeon.GatheringNodes.Count == 0)
         {
             return [];
         }
-
-        var itemIds = dungeon.GatheringNodes
-            .SelectMany(node => node.Loot)
-            .Select(loot => loot.ItemId)
-            .Where(itemId => !string.IsNullOrWhiteSpace(itemId))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-
-        var itemBases = await _itemBases.GetItemBasesByIdsAsync(itemIds, cancellationToken);
 
         return dungeon.GatheringNodes
             .Select(node => MapGatheringNode(node, itemBases))

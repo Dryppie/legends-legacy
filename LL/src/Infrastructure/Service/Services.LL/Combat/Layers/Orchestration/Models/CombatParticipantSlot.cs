@@ -3,4 +3,5 @@
 public sealed record CombatParticipantSlot(
     string SlotId,
     Guid SourceEntityId,
-    CombatSide Side);
+    CombatSide Side,
+    int? PartyNumber = null);

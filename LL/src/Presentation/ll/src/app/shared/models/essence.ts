@@ -20,6 +20,8 @@ export interface Ability {
   effectTags: EffectTag[];
   targets: AbilityTargetSelector[];
   cooldown: number;
+  threatValue: number;
+  threatMultiplier: number;
   effects: EssenceEffectDto[];
 }
 

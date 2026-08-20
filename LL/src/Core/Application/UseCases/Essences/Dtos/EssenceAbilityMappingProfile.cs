@@ -20,6 +20,9 @@ public sealed class AbilitySpecConverter : ITypeConverter<AbilitySpec, EssenceAb
             source.Name,
             source.Description,
             source.CooldownTicks / 10d,
+            AbilityThreatRules.GetThreatValue(source),
+            source.ThreatMultiplier,
+            AbilityThreatRules.GetEstimatedThreatPerSecond(source),
             AbilityTargetMapping.GetDistinctTargets(source),
             source.Tags,
             source.Effects.Select(x => context.Mapper.Map<EssenceEffectDto>(x)).ToList());

@@ -24,6 +24,14 @@ public sealed class RegionOneIdleAreaSeedTests
         "monster.eydis,_the_endless_spring",
         "monster.kodoku,_the_poisoned_vessel",
         "monster.ni,_the_ninefold",
+        "monster.ant_worker",
+        "monster.fire_ant",
+        "monster.queens_guard_ant",
+        "monster.ant_queen",
+        "monster.ant_king",
+        "monster.bloodthorn_vine",
+        "monster.wendigo",
+        "monster.corpse_golem",
         "monster.the_mad_king"
     };
     private static readonly HashSet<string> CreatureEssencesPendingAreaDropTuning = new(StringComparer.OrdinalIgnoreCase);

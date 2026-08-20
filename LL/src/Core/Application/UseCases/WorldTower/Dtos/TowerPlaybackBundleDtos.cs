@@ -18,7 +18,8 @@ public sealed record TowerPlaybackEntityDto(
     string ImagePath,
     bool IsFriendly,
     int MaxHealth,
-    int Level);
+    int Level,
+    int? PartyNumber = null);
 
 public sealed record TowerPlaybackAbilityDto(
     int Index,

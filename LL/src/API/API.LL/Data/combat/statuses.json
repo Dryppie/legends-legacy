@@ -23,7 +23,8 @@
         "id": "effect.curse.dot",
         "operation": "Damage",
         "target": "EventTarget",
-        "baseValue": 2,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.2,
         "durationTicks": 120,
         "intervalTicks": 20,
         "attackType": "DamageOverTime",
@@ -136,7 +137,6 @@
         "id": "effect.foxfire.damage",
         "operation": "Damage",
         "target": "EventTarget",
-        "baseValue": 0,
         "attackType": "None",
         "damageType": "Magical",
         "conditions": [

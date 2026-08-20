@@ -1,3 +1,4 @@
+using Domain.Helpers;
 using Domain.Models.Attributes;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Damages;
@@ -21,6 +22,8 @@ public sealed class CompiledAbility
     public required string Name { get; init; }
     public AbilitySpecKind Kind { get; init; }
     public int CooldownTicks { get; init; }
+    public int ThreatValue { get; init; }
+    public float ThreatMultiplier { get; init; } = 1f;
     public required IReadOnlyList<CompiledCost> Costs { get; init; }
     public required IReadOnlyDictionary<AbilityTriggerEvent, IReadOnlyList<CompiledTrigger>> TriggersByEvent { get; init; }
     public required IReadOnlySet<string> Tags { get; init; }
@@ -37,6 +40,8 @@ public sealed class CompiledCost
 public sealed class CompiledTrigger
 {
     public AbilityTriggerEvent Event { get; init; }
+    public int ThreatValue { get; init; }
+    public int ThreatInternalCooldownTicks { get; init; }
     public int InternalCooldownTicks { get; init; }
     public int InitialDelayTicks { get; init; }
     public int EveryNthOccurrence { get; init; } = 1;
@@ -134,6 +139,7 @@ public sealed class CompiledSummon
     public int DurationTicks { get; init; }
     public int MaxActive { get; init; }
     public bool CanBasicAttack { get; init; }
+    public float ThreatMultiplier { get; init; } = 0.25f;
     public required IReadOnlySet<string> Tags { get; init; }
     public required IReadOnlyList<string> AbilityIds { get; init; }
     public required IReadOnlyList<CompiledSummonAttribute> Attributes { get; init; }
@@ -151,6 +157,7 @@ public sealed class CompiledSummonAttribute
 public sealed class RuntimeAbility
 {
     private readonly Dictionary<CompiledTrigger, int> _triggerCooldowns = [];
+    private readonly Dictionary<CompiledTrigger, int> _triggerThreatCooldowns = [];
     private readonly List<CompiledTrigger> _triggerCooldownTickBuffer = [];
     private readonly Dictionary<CompiledTrigger, int> _triggerOccurrences = [];
     private readonly HashSet<CompiledTrigger> _activeTriggers = [];
@@ -202,6 +209,19 @@ public sealed class RuntimeAbility
             else
                 _triggerCooldowns[trigger]--;
         }
+
+        _triggerCooldownTickBuffer.Clear();
+        foreach (var trigger in _triggerThreatCooldowns.Keys)
+            _triggerCooldownTickBuffer.Add(trigger);
+
+        for (var index = 0; index < _triggerCooldownTickBuffer.Count; index++)
+        {
+            var trigger = _triggerCooldownTickBuffer[index];
+            if (_triggerThreatCooldowns[trigger] <= 1)
+                _triggerThreatCooldowns.Remove(trigger);
+            else
+                _triggerThreatCooldowns[trigger]--;
+        }
     }
 
     public bool CanUseTrigger(CompiledTrigger trigger, int currentTick)
@@ -221,6 +241,15 @@ public sealed class RuntimeAbility
     {
         if (trigger.InternalCooldownTicks > 0)
             _triggerCooldowns[trigger] = trigger.InternalCooldownTicks;
+    }
+
+    public bool CanGenerateThreat(CompiledTrigger trigger) =>
+        trigger.ThreatInternalCooldownTicks <= 0 || !_triggerThreatCooldowns.ContainsKey(trigger);
+
+    public void StartThreatCooldown(CompiledTrigger trigger)
+    {
+        if (trigger.ThreatInternalCooldownTicks > 0)
+            _triggerThreatCooldowns[trigger] = trigger.ThreatInternalCooldownTicks;
     }
 
     public void BeginTriggerExecution(CompiledTrigger trigger) => _activeTriggers.Add(trigger);
@@ -544,6 +573,50 @@ public sealed class RuntimeBarrierContribution
     }
 }
 
+public sealed class RuntimeCover
+{
+    public RuntimeCover(
+        RuntimeCombatant guardian,
+        int percent,
+        float budget,
+        int durationTicks,
+        long applicationOrder,
+        string statsSource)
+    {
+        Guardian = guardian;
+        Percent = Math.Clamp(percent, 1, 100);
+        BudgetRemaining = Math.Max(0, budget);
+        RemainingDurationTicks = Math.Max(0, durationTicks);
+        IsTimed = durationTicks > 0;
+        ApplicationOrder = applicationOrder;
+        StatsSource = statsSource;
+    }
+
+    public RuntimeCombatant Guardian { get; }
+    public int Percent { get; }
+    public float BudgetRemaining { get; private set; }
+    public int RemainingDurationTicks { get; private set; }
+    public bool IsTimed { get; }
+    public long ApplicationOrder { get; }
+    public string StatsSource { get; }
+    public bool IsActive => Guardian.IsAlive
+        && BudgetRemaining > 0
+        && (!IsTimed || RemainingDurationTicks > 0);
+
+    public float ConsumeBudget(float amount)
+    {
+        var consumed = Math.Min(BudgetRemaining, Math.Max(0, amount));
+        BudgetRemaining -= consumed;
+        return consumed;
+    }
+
+    public void Tick()
+    {
+        if (IsTimed && RemainingDurationTicks > 0)
+            RemainingDurationTicks--;
+    }
+}
+
 public sealed record RuntimeBarrierConsumptionEntry(
     RuntimeCombatant? Source,
     float Amount,
@@ -559,12 +632,13 @@ public sealed record RuntimeBarrierConsumption(
 
 public sealed class RuntimeCombatant
 {
-    public const float BaseThreat = 100f;
+    public const float BaseThreat = EntityBaseAttributeHelper.BaseThreat;
 
     private static readonly RuntimeBarrierConsumption EmptyBarrierConsumption =
         new(0, Array.Empty<RuntimeBarrierConsumptionEntry>());
 
     private float _threat;
+    private int _lastThreatUpdateTick;
     private float _regenerationRatePercent;
     private int _regenerationIntervalModifierTicks;
     private float _healingReceivedPercent;
@@ -594,19 +668,24 @@ public sealed class RuntimeCombatant
         double basicAttackIntervalMultiplier = 1d,
         double basicAttackDamageMultiplier = 1d,
         AttackType basicAttackType = AttackType.Melee,
-        DamageType basicAttackDamageType = DamageType.Physical)
+        DamageType basicAttackDamageType = DamageType.Physical,
+        float threatMultiplier = 1f,
+        int? partyNumber = null)
     {
         Id = id;
         Name = name;
         Team = team;
+        PartyNumber = partyNumber;
         Attributes = new Dictionary<AttributeType, float>(attributes);
-        InitialAttributes = new Dictionary<AttributeType, float>(attributes);
+        Attributes.TryAdd(AttributeType.Threat, BaseThreat);
+        InitialAttributes = new Dictionary<AttributeType, float>(Attributes);
         Health = GetAttribute(AttributeType.MaxHealth);
         Tags = new HashSet<string>(tags ?? [], StringComparer.OrdinalIgnoreCase);
         Abilities = abilities.Select(x => new RuntimeAbility(x)).ToList();
         ImagePath = imagePath;
         IsSummoned = isSummoned;
-        _threat = BaseThreat;
+        ThreatMultiplier = Math.Max(0, threatMultiplier);
+        _threat = GetBaseThreat();
         RemainingSummonDurationTicks = summonDurationTicks;
         SummonOwner = summonOwner;
         CanBasicAttack = canBasicAttack;
@@ -623,6 +702,7 @@ public sealed class RuntimeCombatant
     public string Name { get; }
     public string ImagePath { get; }
     public CombatTeam Team { get; }
+    public int? PartyNumber { get; }
     public Dictionary<AttributeType, float> Attributes { get; }
     public IReadOnlyDictionary<AttributeType, float> InitialAttributes { get; }
     public HashSet<string> Tags { get; }
@@ -631,6 +711,7 @@ public sealed class RuntimeCombatant
     public List<RuntimeCondition> Conditions { get; } = [];
     public List<RuntimeEffect> ActiveEffects { get; } = [];
     public List<RuntimeBarrierContribution> BarrierContributions { get; } = [];
+    public List<RuntimeCover> Covers { get; } = [];
     public Dictionary<AbilityTriggerEvent, List<RuntimeAbility>> AbilityTriggersByEvent { get; private set; } = [];
     public float Health { get; private set; }
     public float Barrier
@@ -645,6 +726,7 @@ public sealed class RuntimeCombatant
         }
     }
     public float Threat => Math.Max(0, _threat);
+    public float ThreatMultiplier { get; }
     public float RegenerationRatePercent => _regenerationRatePercent;
     public int RegenerationIntervalModifierTicks => _regenerationIntervalModifierTicks;
     public float HealingReceivedPercent => _healingReceivedPercent;
@@ -669,10 +751,17 @@ public sealed class RuntimeCombatant
     public void AdjustAttribute(AttributeType attributeType, float amount)
     {
         var oldMaxHealth = GetAttribute(AttributeType.MaxHealth);
+        var oldBaseThreat = attributeType == AttributeType.Threat ? GetBaseThreat() : 0;
         Attributes[attributeType] = Attributes.GetValueOrDefault(attributeType) + amount;
 
         if (attributeType == AttributeType.MaxHealth)
             SyncHealthAfterMaxHealthChange(oldMaxHealth, GetAttribute(AttributeType.MaxHealth));
+
+        if (attributeType == AttributeType.Threat)
+        {
+            Attributes[attributeType] = Math.Max(0, Attributes[attributeType]);
+            _threat = Math.Max(0, _threat + GetBaseThreat() - oldBaseThreat);
+        }
     }
 
     public float SynchronizeAttributeContribution(
@@ -837,8 +926,40 @@ public sealed class RuntimeCombatant
             ConsumeBarrier(-amount);
     }
 
+    public float GetThreat(int currentTick, double decayPerTick)
+    {
+        DecayThreat(currentTick, decayPerTick);
+        return Threat;
+    }
+
     public void AdjustThreat(float amount) =>
-        _threat += amount;
+        _threat = Math.Max(0, _threat + amount);
+
+    public void AdjustThreat(float amount, int currentTick, double decayPerTick)
+    {
+        DecayThreat(currentTick, decayPerTick);
+        _threat = Math.Max(0, _threat + amount * ThreatMultiplier);
+    }
+
+    private void DecayThreat(int currentTick, double decayPerTick)
+    {
+        var elapsedTicks = Math.Max(0, currentTick - _lastThreatUpdateTick);
+        if (elapsedTicks <= 0)
+            return;
+
+        var baseThreat = GetBaseThreat();
+        if (decayPerTick > 0 && _threat != baseThreat)
+        {
+            _threat = (float)(baseThreat
+                + (_threat - baseThreat) * Math.Pow(1d - decayPerTick, elapsedTicks));
+            _threat = Math.Max(0, _threat);
+        }
+
+        _lastThreatUpdateTick = currentTick;
+    }
+
+    private float GetBaseThreat() =>
+        Math.Max(0, GetAttribute(AttributeType.Threat) * ThreatMultiplier);
 
     public void AdjustRegenerationRate(float percentagePoints) =>
         _regenerationRatePercent += percentagePoints;
@@ -928,6 +1049,9 @@ public sealed class RuntimeCombatant
 
     public bool HasCondition(StandardConditionType type)
     {
+        if (type == StandardConditionType.Cover)
+            return Covers.Any(cover => cover.IsActive);
+
         for (var index = 0; index < Conditions.Count; index++)
         {
             var condition = Conditions[index];
@@ -940,6 +1064,9 @@ public sealed class RuntimeCombatant
 
     public int GetConditionStacks(StandardConditionType type)
     {
+        if (type == StandardConditionType.Cover)
+            return Covers.Count(cover => cover.IsActive);
+
         var stacks = 0;
         for (var index = 0; index < Conditions.Count; index++)
         {

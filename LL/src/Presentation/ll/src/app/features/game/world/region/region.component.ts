@@ -7,6 +7,7 @@ import {
   NgZone,
   OnDestroy,
   OnInit,
+  signal,
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -29,6 +30,12 @@ import { TRAINING_GROUNDS_AREA_ID } from '../../../../shared/models/quest';
 import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
 import { DungeonPreviewData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 import { HelpLauncherComponent } from '../../../../shared/help/help-launcher.component';
+import { RaidsComponent } from './raids/raids.component';
+import {
+  RaidBossSummary,
+  RaidService,
+} from '../../../../core/services/api/raid/raid.service';
+import { StateSyncCoordinator } from '../../../../core/services/real-time/game-realtime/state-sync-coordinator.service';
 
 interface WorldMapDungeonEntry {
   id: string;
@@ -61,6 +68,7 @@ const PRE_IMPLEMENTATION_SIGIL_DROPS_BY_AREA: Readonly<
     CombatComponent,
     RouterLink,
     HelpLauncherComponent,
+    RaidsComponent,
   ],
   templateUrl: './region.component.html',
   styleUrl: './region.component.scss',
@@ -73,8 +81,11 @@ export class RegionComponent implements OnInit, OnDestroy {
   readonly trainingBattleType = BattleType.Training;
   readonly activeBattle;
   selectedDungeonId: string | null = null;
+  readonly raidBosses = signal<RaidBossSummary[]>([]);
+  selectedRaidBossId: string | null = null;
   columnCount = 1;
   private contentResizeObserver: ResizeObserver | null = null;
+  private readonly raidSyncCleanup: () => void;
 
   constructor(
     private route: ActivatedRoute,
@@ -83,9 +94,18 @@ export class RegionComponent implements OnInit, OnDestroy {
     private readonly combatService: CombatService,
     private readonly questState: QuestStateService,
     private readonly dungeonState: DungeonStateService,
+    private readonly raids: RaidService,
+    stateSync: StateSyncCoordinator,
     private readonly ngZone: NgZone,
     characterActions: CharacterActionsStateService,
   ) {
+    this.raidSyncCleanup = stateSync.register(
+      'raids',
+      'world-map-raids',
+      async () => this.loadRaidBosses(),
+      () => this.regionNumber() !== null,
+    );
+
     this.activeBattle = computed(() => {
       const action = characterActions.currentAction();
       if (action?.characterActionType !== CharacterActionType.Combat) {
@@ -109,8 +129,10 @@ export class RegionComponent implements OnInit, OnDestroy {
     this.route.paramMap.subscribe((params) => {
       this.regionId = params.get('id') ?? '';
       this.selectedDungeonId = null;
+      this.selectedRaidBossId = null;
       this.questState.loadAreaAccess();
       this.getRegionDetails(this.regionId);
+      this.loadRaidBosses();
     });
 
     this.route.queryParamMap.subscribe((params) => {
@@ -123,6 +145,7 @@ export class RegionComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.raidSyncCleanup();
     this.contentResizeObserver?.disconnect();
     this.closeTrainingSummary();
   }
@@ -325,10 +348,52 @@ export class RegionComponent implements OnInit, OnDestroy {
 
   selectDungeon(dungeonId: string): void {
     this.selectedDungeonId = dungeonId;
+    this.selectedRaidBossId = null;
+  }
+
+  regionRaidBosses(): RaidBossSummary[] {
+    const region = this.regionNumber();
+    return region === null
+      ? []
+      : this.raidBosses().filter((boss) => boss.region === region);
+  }
+
+  trackRaidBoss(_: number, boss: RaidBossSummary): string {
+    return boss.id;
+  }
+
+  selectRaidBoss(raidBossId: string): void {
+    this.selectedRaidBossId = raidBossId;
+    this.selectedDungeonId = null;
+  }
+
+  selectedRaidBoss(): RaidBossSummary | null {
+    return (
+      this.regionRaidBosses().find(
+        (boss) => boss.id === this.selectedRaidBossId,
+      ) ?? null
+    );
+  }
+
+  private loadRaidBosses(): void {
+    const region = this.regionNumber();
+    if (region === null) {
+      this.raidBosses.set([]);
+      return;
+    }
+    this.raids.getRaidBosses(region).subscribe({
+      next: (bosses) => this.raidBosses.set(bosses),
+      error: () => this.raidBosses.set([]),
+    });
+  }
+
+  refreshRaidBosses(): void {
+    this.loadRaidBosses();
   }
 
   showAreas(): void {
     this.selectedDungeonId = null;
+    this.selectedRaidBossId = null;
   }
 
   selectedDungeonTitle(): string {

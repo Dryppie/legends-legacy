@@ -10,7 +10,7 @@ import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { RegularButtonComponent } from '../../custom-components/buttons/regular-button/regular-button.component';
 
 type CombatTeamName = 'Friendly' | 'Hostile';
-type AbilitySortColumn = 'uses' | 'damage' | 'healing' | 'barrier';
+type AbilitySortColumn = 'uses' | 'damage' | 'healing' | 'barrier' | 'threat';
 type SortDirection = 'asc' | 'desc';
 const DAMAGE_TYPE_ORDER: readonly DamageType[] = [
   'Physical',
@@ -52,6 +52,16 @@ type SummonIdentity = {
   summonId: string;
 };
 
+type StatsParticipantGroup = {
+  key: string;
+  label: string;
+  team: CombatTeamName;
+  partyNumber: number | null;
+  participants: StatsParticipant[];
+  damageDone: number;
+  isCurrentParty: boolean;
+};
+
 @Component({
   selector: 'app-combat-entity-stats',
   imports: [NgIf, NgFor, NgClass, DecimalPipe, RegularButtonComponent],
@@ -63,6 +73,7 @@ export class CombatEntityStatsComponent implements OnChanges {
   @Input() entityStats!: EntityStats[];
   @Input() playerTeamName: string | null = null;
   @Input() enemyTeamName: string | null = null;
+  @Input() combatDurationTicks = 0;
   /** Id of the logged-in character, used to pre-select their own unit. */
   @Input() currentCharacterId: string | null = null;
 
@@ -81,6 +92,8 @@ export class CombatEntityStatsComponent implements OnChanges {
 
   playerParticipants: StatsParticipant[] = [];
   enemyParticipants: StatsParticipant[] = [];
+  participantGroups: StatsParticipantGroup[] = [];
+  hasPartyLayout = false;
   private readonly rawStatsById = new Map<string, EntityStats>();
   private readonly aggregateStats = new Map<string, EntityStats>();
   private readonly expandedSummonGroups = new Set<string>();
@@ -103,19 +116,44 @@ export class CombatEntityStatsComponent implements OnChanges {
       this.enemyParticipants = this.groupSummons(
         this.buildParticipants('Hostile', this.enemyTeam),
       );
+      this.participantGroups = this.buildParticipantGroups();
       this.pruneExpandedSummonGroups();
       this.refreshSelection();
     }
   }
 
   get visibleParticipants(): StatsParticipant[] {
-    return [...this.playerParticipants, ...this.enemyParticipants].flatMap(
-      (participant) =>
-        participant.isSummonGroup &&
-        this.expandedSummonGroups.has(participant.id)
-          ? [participant, ...(participant.members ?? [])]
-          : [participant],
+    return this.participantGroups.flatMap((group) =>
+      this.visibleParticipantsForGroup(group),
     );
+  }
+
+  visibleParticipantsForGroup(
+    group: StatsParticipantGroup,
+  ): StatsParticipant[] {
+    return group.participants.flatMap((participant) =>
+      participant.isSummonGroup && this.expandedSummonGroups.has(participant.id)
+        ? [participant, ...(participant.members ?? [])]
+        : [participant],
+    );
+  }
+
+  trackParticipantGroup(_index: number, group: StatsParticipantGroup): string {
+    return group.key;
+  }
+
+  participantSideLabel(participant: StatsParticipant): string {
+    const partyNumber = participant.entity.partyNumber;
+    if (participant.team === 'Friendly' && partyNumber != null) {
+      return (
+        'P' +
+        partyNumber +
+        (participant.isSummonGroup || participant.isSummonChild
+          ? ' · Minion'
+          : '')
+      );
+    }
+    return this.teamDisplayName(participant.team);
   }
 
   activateParticipant(participant: StatsParticipant): void {
@@ -219,6 +257,22 @@ export class CombatEntityStatsComponent implements OnChanges {
     if (ability.totalHealing > 0) return 'bg-success/65';
     if (ability.totalBarrier > 0) return 'bg-[#8ecbff]/55';
     return 'bg-white/10';
+  }
+
+  threatBarPercentage(ability: AbilityStats): number {
+    const maximum = Math.max(
+      0,
+      ...(this.selectedStats?.abilities ?? []).map(
+        (item) => item.totalThreat ?? 0,
+      ),
+    );
+    if (maximum <= 0) return 0;
+    return ((ability.totalThreat ?? 0) / maximum) * 100;
+  }
+
+  threatPerSecond(stats: EntityStats | null | undefined): number {
+    if (!stats || this.combatDurationTicks <= 0) return 0;
+    return ((stats.threatGenerated ?? 0) * 10) / this.combatDurationTicks;
   }
 
   damageBreakdown(ability: AbilityStats): AbilityDamageTypeStats[] {
@@ -404,6 +458,90 @@ export class CombatEntityStatsComponent implements OnChanges {
     });
   }
 
+  private buildParticipantGroups(): StatsParticipantGroup[] {
+    const partyNumbers = [
+      ...new Set(
+        this.playerParticipants
+          .map((participant) => participant.entity.partyNumber)
+          .filter((partyNumber): partyNumber is number => partyNumber != null),
+      ),
+    ].sort((left, right) => left - right);
+    this.hasPartyLayout = partyNumbers.length > 0;
+
+    const friendlyGroups = this.hasPartyLayout
+      ? [
+          ...partyNumbers.map((partyNumber) =>
+            this.createParticipantGroup(
+              'friendly-party-' + partyNumber,
+              'Party ' + partyNumber,
+              'Friendly',
+              partyNumber,
+              this.playerParticipants.filter(
+                (participant) => participant.entity.partyNumber === partyNumber,
+              ),
+            ),
+          ),
+          this.createParticipantGroup(
+            'friendly-unassigned',
+            this.teamDisplayName('Friendly'),
+            'Friendly',
+            null,
+            this.playerParticipants.filter(
+              (participant) => participant.entity.partyNumber == null,
+            ),
+          ),
+        ].filter((group) => group.participants.length > 0)
+      : [
+          this.createParticipantGroup(
+            'friendly',
+            this.teamDisplayName('Friendly'),
+            'Friendly',
+            null,
+            this.playerParticipants,
+          ),
+        ];
+    const enemyGroup = this.createParticipantGroup(
+      'hostile',
+      this.teamDisplayName('Hostile'),
+      'Hostile',
+      null,
+      this.enemyParticipants,
+    );
+    return [...friendlyGroups, enemyGroup].filter(
+      (group) => group.participants.length > 0,
+    );
+  }
+
+  private createParticipantGroup(
+    key: string,
+    label: string,
+    team: CombatTeamName,
+    partyNumber: number | null,
+    participants: StatsParticipant[],
+  ): StatsParticipantGroup {
+    const currentCharacterId = this.currentCharacterId;
+    return {
+      key,
+      label,
+      team,
+      partyNumber,
+      participants,
+      damageDone: participants.reduce(
+        (total, participant) =>
+          total + (this.statsFor(participant.id)?.damageDone ?? 0),
+        0,
+      ),
+      isCurrentParty:
+        team === 'Friendly' &&
+        !!currentCharacterId &&
+        participants.some(
+          (participant) =>
+            !participant.isSummonGroup &&
+            this.isSameEntityId(participant.id, currentCharacterId),
+        ),
+    };
+  }
+
   private createSummonGroup(
     key: string,
     ownerId: string,
@@ -486,6 +624,7 @@ export class CombatEntityStatsComponent implements OnChanges {
         selfDamage: 0,
         alliedDamage: 0,
         totalBarrier: 0,
+        totalThreat: 0,
       };
       abilities.set(ability.name, {
         name: ability.name,
@@ -503,6 +642,7 @@ export class CombatEntityStatsComponent implements OnChanges {
         selfDamage: current.selfDamage + (ability.selfDamage ?? 0),
         alliedDamage: current.alliedDamage + (ability.alliedDamage ?? 0),
         totalBarrier: current.totalBarrier + (ability.totalBarrier ?? 0),
+        totalThreat: (current.totalThreat ?? 0) + (ability.totalThreat ?? 0),
       });
     }
     const sum = (selector: (item: EntityStats) => number): number =>
@@ -531,6 +671,11 @@ export class CombatEntityStatsComponent implements OnChanges {
       team: group.team,
       barrierGenerated: sum((item) => item.barrierGenerated),
       damageBlocked: sum((item) => item.damageBlocked),
+      damageRedirectedTo: sum((item) => item.damageRedirectedTo ?? 0),
+      damageRedirectedAway: sum((item) => item.damageRedirectedAway ?? 0),
+      targetedAttacks: sum((item) => item.targetedAttacks ?? 0),
+      attentionSharePercent: sum((item) => item.attentionSharePercent ?? 0),
+      threatGenerated: sum((item) => item.threatGenerated ?? 0),
       health: group.entity.health,
       maxHealth: group.entity.maxHealth,
       barrier: group.entity.barrier,
@@ -547,9 +692,15 @@ export class CombatEntityStatsComponent implements OnChanges {
         (participant) =>
           !participant.isSummonGroup &&
           !participant.isSummonChild &&
-          participant.id === ownId,
+          this.isSameEntityId(participant.id, ownId),
       ) ?? null
     );
+  }
+
+  private isSameEntityId(left: string, right: string): boolean {
+    const normalize = (value: string) =>
+      value.replaceAll('-', '').toLowerCase();
+    return normalize(left) === normalize(right);
   }
 
   private summonIdentity(id: string): SummonIdentity | null {
@@ -616,6 +767,11 @@ export class CombatEntityStatsComponent implements OnChanges {
       team: '',
       barrierGenerated: 0,
       damageBlocked: 0,
+      damageRedirectedTo: 0,
+      damageRedirectedAway: 0,
+      targetedAttacks: 0,
+      attentionSharePercent: 0,
+      threatGenerated: 0,
     };
   }
 
@@ -627,6 +783,8 @@ export class CombatEntityStatsComponent implements OnChanges {
         return ability.totalHealing ?? 0;
       case 'barrier':
         return ability.totalBarrier ?? 0;
+      case 'threat':
+        return ability.totalThreat ?? 0;
       default:
         return ability.totalDamage ?? 0;
     }

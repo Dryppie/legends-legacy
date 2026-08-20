@@ -7,7 +7,9 @@ public class SimpleCombatEntity
     public int Health { get; set; }
     public int MaxHealth { get; set; }
     public int Barrier { get; set; }
+    public float Threat { get; set; }
     public int Level { get; set; } = 1;
+    public int? PartyNumber { get; set; }
 
     public SimpleCombatEntity(string id, string name, string imagePath, int maxHealth, int barrier, int level = 1)
     {

@@ -1,4 +1,5 @@
 using Domain.Extensions;
+using Domain.Helpers;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
@@ -32,6 +33,7 @@ public static class AttributeCalculator
         entity.BaseCombatAttributes.Clear();
 
         var baseAttributes = entity.BaseAttributes.ToDictionary(a => a.AttributeType, a => a.Value);
+        AddUniversalBaseAttributes(baseAttributes);
         var equipment = entity.EquipmentSlots
             .Where(es => es.EquipmentInstance != null)
             .Select(es => es.EquipmentInstance!)
@@ -53,6 +55,7 @@ public static class AttributeCalculator
         entity.CombatAttributes.Clear();
         // Convert raw attributes to a dictionary for quick access
         var baseAttributes = entity.BaseAttributes.ToDictionary(a => a.AttributeType, a => a.Value);
+        AddUniversalBaseAttributes(baseAttributes);
         var equipmentModifiers = ProjectEquipmentModifiers(entity.Equipment, entity.Level);
 
         foreach (var (attributeType, attributeValue) in CalculateUncappedProjectedAttributes(baseAttributes, equipmentModifiers))
@@ -250,6 +253,13 @@ public static class AttributeCalculator
     private static void SyncBaseResources(Dictionary<AttributeType, float> attributes)
     {
         attributes[AttributeType.MaxHealth] = attributes.GetValueOrDefault(AttributeType.MaxHealth);
+    }
+
+    private static void AddUniversalBaseAttributes(Dictionary<AttributeType, float> attributes)
+    {
+        attributes.TryAdd(
+            AttributeType.Threat,
+            EntityBaseAttributeHelper.GetBaseValueForAttribute(AttributeType.Threat));
     }
 
 }

@@ -23,6 +23,7 @@ public class ChatService : IChatService
         Guid userId,
         int take,
         string? guildChannel,
+        string? raidChannel,
         DateTimeOffset? after,
         CancellationToken cancellationToken)
     {
@@ -30,6 +31,7 @@ public class ChatService : IChatService
             userId,
             take,
             guildChannel,
+            raidChannel,
             after,
             cancellationToken);
     }

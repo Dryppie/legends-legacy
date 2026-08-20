@@ -27,7 +27,9 @@ public sealed class AttributeCombatSystemTests
             Assert.False(string.IsNullOrWhiteSpace(definition.Description));
             Assert.True(definition.MinimumValue >= 0);
             Assert.InRange(definition.DisplayPrecision, 0, 4);
-            Assert.True(definition.IsEquipmentEligible);
+            Assert.Equal(
+                definition.AttributeType != AttributeType.Threat,
+                definition.IsEquipmentEligible);
             Assert.NotEmpty(definition.RelevantBenchmarkScenarios);
             Assert.Equal(
                 definition.Unit == AttributeUnit.PercentagePoints,
@@ -47,6 +49,11 @@ public sealed class AttributeCombatSystemTests
         Assert.Equal(AttributeUnit.Rating, armor.EquipmentUnit);
         Assert.Equal("Resistance Rating", resistance.EquipmentDisplayName);
         Assert.Equal(AttributeUnit.Rating, resistance.EquipmentUnit);
+
+        var threat = AttributeCatalog.Get(AttributeType.Threat);
+        Assert.Equal(AttributeUnit.FlatPoints, threat.Unit);
+        Assert.False(threat.IsEquipmentEligible);
+        Assert.True(threat.IsContentFacing);
 
         Assert.Equal(
             EquipmentStatBudgetCatalog.Attributes.Order(),
@@ -111,7 +118,6 @@ public sealed class AttributeCombatSystemTests
                 Id = "effect.invalid",
                 Operation = AbilityEffectOperation.Heal,
                 Target = AbilityTargetSelector.Self,
-                BaseValue = 10,
                 ScalingAttribute = AttributeType.Power,
                 ScalingCoefficient = 1
             });

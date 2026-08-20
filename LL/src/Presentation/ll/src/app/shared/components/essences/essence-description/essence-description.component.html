@@ -3,3 +3,33 @@
   class="whitespace-pre-line"
   abilityTooltipContainer
 ></p>
+
+<dl
+  *ngIf="kind === 'Active' || effectiveThreat !== 0"
+  class="mt-2 divide-y divide-white/10 overflow-hidden border-t border-white/10 text-xs"
+  aria-label="Ability combat details"
+>
+  <div
+    *ngIf="kind === 'Active'"
+    class="flex items-center justify-between gap-2 px-1 py-1.5 text-zinc-400"
+  >
+    <dt>Cooldown</dt>
+    <dd class="font-semibold text-white">
+      {{ cooldownSeconds | number: "1.0-1" }}s
+    </dd>
+  </div>
+
+  <div
+    *ngIf="effectiveThreat !== 0"
+    class="flex items-center justify-between gap-2 px-1 py-1.5 text-zinc-400"
+  >
+    <dt>Threat</dt>
+    <dd class="text-right tabular-nums">
+      <span *ngIf="hasThreatMultiplier" class="mr-1 text-zinc-500">
+        {{ threatValue | number }} × {{ threatMultiplier | number: "1.0-2" }} ≈
+      </span>
+      <strong class="text-white">{{ effectiveThreat | number }}</strong>
+      <span class="ml-1">/ {{ threatCadenceLabel }}</span>
+    </dd>
+  </div>
+</dl>

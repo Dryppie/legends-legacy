@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using API.LL.Controllers.V1;
 using Application.UseCases.WorldTower;
+using Application.UseCases.WorldTower.Commands.UpdateTowerRallyParties;
 using Application.UseCases.WorldTower.Dtos;
 using Domain.Models.WorldTower;
 using MediatR;
@@ -44,13 +45,18 @@ public sealed class WorldTowerControllerTests
         await controller.TransferLeadership(
             rallyId,
             new WorldTowerController.TransferLeadershipRequest(newLeaderId));
+        var partyMemberId = Guid.NewGuid();
+        await controller.UpdateParties(
+            rallyId,
+            new WorldTowerController.UpdatePartiesRequest(
+                [new WorldTowerController.PartyAssignmentRequest(partyMemberId, 2)]));
         await controller.FillDevelopmentRoster(rallyId, new TestWebHostEnvironment("Development"));
         await controller.StartRally(rallyId);
         await controller.Contribute(
             4,
             new WorldTowerController.ContributionRequest(TowerContributionKind.ScoutWeakPoints, 3));
 
-        Assert.Equal(17, sender.Requests.Count);
+        Assert.Equal(18, sender.Requests.Count);
         Assert.Equal(characterId, Assert.IsType<GetWorldTowerOverviewQuery>(sender.Requests[0]).CharacterId);
 
         var floor = Assert.IsType<GetTowerFloorQuery>(sender.Requests[1]);
@@ -84,12 +90,16 @@ public sealed class WorldTowerControllerTests
         Assert.Equal(
             (characterId, rallyId, newLeaderId),
             (transfer.CharacterId, transfer.RallyId, transfer.TargetCharacterId));
-        var fill = Assert.IsType<FillTowerRallyWithDevelopmentCharactersCommand>(sender.Requests[14]);
+        var parties = Assert.IsType<UpdateTowerRallyPartiesCommand>(sender.Requests[14]);
+        Assert.Equal((characterId, rallyId), (parties.CharacterId, parties.RallyId));
+        var partyAssignment = Assert.Single(parties.Assignments);
+        Assert.Equal((partyMemberId, 2), (partyAssignment.CharacterId, partyAssignment.PartySlot));
+        var fill = Assert.IsType<FillTowerRallyWithDevelopmentCharactersCommand>(sender.Requests[15]);
         Assert.Equal((characterId, rallyId), (fill.CharacterId, fill.RallyId));
-        var start = Assert.IsType<StartTowerRallyCommand>(sender.Requests[15]);
+        var start = Assert.IsType<StartTowerRallyCommand>(sender.Requests[16]);
         Assert.Equal((characterId, rallyId), (start.CharacterId, start.RallyId));
 
-        var contribute = Assert.IsType<ContributeToTowerCommand>(sender.Requests[16]);
+        var contribute = Assert.IsType<ContributeToTowerCommand>(sender.Requests[17]);
         Assert.Equal(characterId, contribute.CharacterId);
         Assert.Equal(4, contribute.FloorNumber);
         Assert.Equal(TowerContributionKind.ScoutWeakPoints, contribute.Kind);

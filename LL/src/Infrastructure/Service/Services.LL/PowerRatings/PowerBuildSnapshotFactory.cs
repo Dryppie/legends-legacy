@@ -45,6 +45,17 @@ public sealed class PowerBuildSnapshotFactory
         if (character is null)
             return null;
 
+        return await CreateAsync(character, partySelection, cancellationToken);
+    }
+
+    public async Task<PowerBuildSnapshot?> CreateAsync(
+        Character character,
+        DungeonPartySelection partySelection,
+        CancellationToken cancellationToken)
+    {
+        if (partySelection.CompanionIds.Count > 0)
+            return null;
+
         var activeLoadout = character.EssenceLoadouts.FirstOrDefault(x => x.IsActive);
         var equippedEssences = activeLoadout?.Slots
             .OrderBy(x => x.SlotIndex)

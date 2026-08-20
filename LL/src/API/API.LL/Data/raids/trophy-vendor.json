@@ -1,0 +1,64 @@
+{
+  "items": [
+    {
+      "id": "hive.raidforged-blueprint",
+      "raidBossId": "raid-boss.hives-abyss",
+      "name": "Blueprint: Raidforged",
+      "description": "Permanently teaches the Raidforged design for one compatible recipe.",
+      "category": "Blueprint",
+      "trophyCost": 300,
+      "rewardItemId": "blueprint_raidforged",
+      "rewardQuantity": 1,
+      "weeklyPurchaseLimit": 1,
+      "lifetimePurchaseLimit": null,
+      "requiredTier": 1,
+      "isEnabled": true,
+      "sortOrder": 10
+    },
+    {
+      "id": "hive.raidforged-ingots",
+      "raidBossId": "raid-boss.hives-abyss",
+      "name": "Raidforged Ingots",
+      "description": "Specialized metal required by Raidforged designs.",
+      "category": "Crafting Material",
+      "trophyCost": 35,
+      "rewardItemId": "raidforged_ingot",
+      "rewardQuantity": 2,
+      "weeklyPurchaseLimit": 6,
+      "lifetimePurchaseLimit": null,
+      "requiredTier": 1,
+      "isEnabled": true,
+      "sortOrder": 20
+    },
+    {
+      "id": "sanguine.gravebound-blueprint",
+      "raidBossId": "raid-boss.sanguine-horror",
+      "name": "Blueprint: Gravebound",
+      "description": "Permanently teaches the Gravebound design for one compatible recipe.",
+      "category": "Blueprint",
+      "trophyCost": 550,
+      "rewardItemId": "blueprint_gravebound",
+      "rewardQuantity": 1,
+      "weeklyPurchaseLimit": 1,
+      "lifetimePurchaseLimit": null,
+      "requiredTier": 2,
+      "isEnabled": true,
+      "sortOrder": 10
+    },
+    {
+      "id": "sanguine.sanguine-ichor",
+      "raidBossId": "raid-boss.sanguine-horror",
+      "name": "Sanguine Ichor",
+      "description": "A blood-rich alchemical binder used by Gravebound designs.",
+      "category": "Crafting Material",
+      "trophyCost": 60,
+      "rewardItemId": "sanguine_ichor",
+      "rewardQuantity": 2,
+      "weeklyPurchaseLimit": 6,
+      "lifetimePurchaseLimit": null,
+      "requiredTier": 2,
+      "isEnabled": true,
+      "sortOrder": 20
+    }
+  ]
+}

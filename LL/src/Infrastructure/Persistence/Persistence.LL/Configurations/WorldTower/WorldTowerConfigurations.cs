@@ -64,10 +64,14 @@ public sealed class TowerRallyParticipantConfiguration : IEntityTypeConfiguratio
     public void Configure(EntityTypeBuilder<TowerRallyParticipant> builder)
     {
         builder.HasKey(x => x.Id);
+        builder.ToTable(table => table.HasCheckConstraint(
+            "CK_TowerRallyParticipants_PartySlot",
+            "\"PartySlot\" IS NULL OR \"PartySlot\" > 0"));
         builder.Property(x => x.CharacterName).HasMaxLength(64).IsRequired();
         builder.Property(x => x.GuildName).HasMaxLength(64);
         builder.HasIndex(x => new { x.TowerRallyId, x.CharacterId }).IsUnique();
         builder.HasIndex(x => new { x.TowerRallyId, x.AccountId }).IsUnique();
+        builder.HasIndex(x => new { x.TowerRallyId, x.PartySlot });
         builder.HasIndex(x => x.CharacterId);
         builder.HasOne(x => x.CharacterSnapshot)
             .WithMany()

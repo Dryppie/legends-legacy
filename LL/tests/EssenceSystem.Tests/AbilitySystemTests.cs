@@ -992,12 +992,14 @@ public sealed class AbilitySystemTests
         var result = engine.Run([friendly, ally, highHealthAlly], [firstHostile, secondHostile, thirdHostile]);
 
         Assert.Equal(2, new[] { firstHostile, secondHostile, thirdHostile }.Count(x => x.Health < x.GetAttribute(AttributeType.MaxHealth)));
-        Assert.Equal(
-            new[] { "hostile-1", "hostile-2" },
-            result.EventLog
-                .Where(x => x.Source == "effect.two.enemies" && x.EventType == EventType.Damage)
-                .Select(x => x.TargetId)
-                .ToArray());
+        var selectedEnemies = result.EventLog
+            .Where(x => x.Source == "effect.two.enemies" && x.EventType == EventType.Damage)
+            .Select(x => x.TargetId)
+            .ToArray();
+        Assert.Equal(2, selectedEnemies.Distinct().Count());
+        Assert.All(
+            selectedEnemies,
+            id => Assert.Contains(id, new[] { "hostile-1", "hostile-2", "hostile-3" }));
         Assert.Equal(2, result.EventLog.Count(x => x.Source == "effect.two.allies" && x.EventType == EventType.RestoreBarrier));
         Assert.Single(result.EventLog, x => x.Source == "effect.highest.max.health" && x.TargetId == "high-health-ally");
         Assert.Equal(9, highHealthAlly.Barrier);
@@ -1042,6 +1044,65 @@ public sealed class AbilitySystemTests
                 .ToArray());
         Assert.Equal(0, deadAlly.Barrier);
         Assert.Equal(0, enemy.Barrier);
+    }
+
+    [Fact]
+    public void Party_allies_are_isolated_while_all_enemies_still_crosses_parties()
+    {
+        var partyBarrier = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.party.barrier",
+            Kind = AbilitySpecKind.Active,
+            Name = "Party Barrier",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.party.barrier",
+                    Operation = AbilityEffectOperation.GrantBarrier,
+                    Target = AbilityTargetSelector.AllAllies,
+                    BaseValue = 5
+                }
+            ]
+        });
+        var enemyAreaDamage = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.enemy.area",
+            Kind = AbilitySpecKind.Active,
+            Name = "Enemy Area Damage",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.enemy.area",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.AllEnemies,
+                    BaseValue = 5
+                }
+            ]
+        });
+        var caster = CreateCombatant("caster", CombatTeam.Friendly, [partyBarrier], partyNumber: 1);
+        var samePartyAlly = CreateCombatant("party-1-ally", CombatTeam.Friendly, [], partyNumber: 1);
+        var otherPartyAlly = CreateCombatant("party-2-ally", CombatTeam.Friendly, [], partyNumber: 2);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [enemyAreaDamage]);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000));
+
+        var result = engine.Run([caster, samePartyAlly, otherPartyAlly], [enemy]);
+
+        Assert.Equal(
+            ["caster", "party-1-ally"],
+            result.EventLog
+                .Where(log => log.Source == "effect.party.barrier" && log.EventType == EventType.RestoreBarrier)
+                .Select(log => log.TargetId)
+                .ToArray());
+        Assert.Equal(
+            ["caster", "party-1-ally", "party-2-ally"],
+            result.EventLog
+                .Where(log => log.Source == "effect.enemy.area" && log.EventType == EventType.Damage)
+                .Select(log => log.TargetId)
+                .ToArray());
     }
 
     [Fact]
@@ -1614,8 +1675,9 @@ public sealed class AbilitySystemTests
         var result = engine.Run([friendly], [firstHostile, secondHostile]);
 
         Assert.Single(result.EventLog, x => x.Source == "effect.limited.cleave" && x.EventType == EventType.Damage);
-        Assert.True(firstHostile.Health < firstHostile.GetAttribute(AttributeType.MaxHealth));
-        Assert.Equal(secondHostile.GetAttribute(AttributeType.MaxHealth), secondHostile.Health);
+        Assert.Single(
+            new[] { firstHostile, secondHostile },
+            hostile => hostile.Health < hostile.GetAttribute(AttributeType.MaxHealth));
     }
 
     [Fact]
@@ -3991,6 +4053,7 @@ public sealed class AbilitySystemTests
         var foxOwner = CreateCombatant("fox-owner", CombatTeam.Friendly, compiledAbilities.Values);
         var ally = CreateCombatant("ally", CombatTeam.Friendly, []);
         var attacker = CreateCombatant("attacker", CombatTeam.Hostile, []);
+        AddStandardCondition(ally, ally, StandardConditionType.Taunt);
         var allyTargetedEngine = new FastCombatEngine(
             compiledStatuses,
             new FastCombatEngineOptions(MaxTicks: 61, BasicAttackIntervalTicks: 60));
@@ -4010,6 +4073,7 @@ public sealed class AbilitySystemTests
         foxOwner = CreateCombatant("fox-owner", CombatTeam.Friendly, compiledAbilities.Values);
         ally = CreateCombatant("ally", CombatTeam.Friendly, []);
         attacker = CreateCombatant("attacker", CombatTeam.Hostile, []);
+        AddStandardCondition(foxOwner, foxOwner, StandardConditionType.Taunt);
         var ownerTargetedEngine = new FastCombatEngine(
             compiledStatuses,
             new FastCombatEngineOptions(MaxTicks: 61, BasicAttackIntervalTicks: 60));
@@ -4438,7 +4502,8 @@ public sealed class AbilitySystemTests
                     Id = "effect.damage.main",
                     Operation = AbilityEffectOperation.Damage,
                     Target = AbilityTargetSelector.CurrentTarget,
-                    BaseValue = 10
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 0.2f
                 }
             ]
         };
@@ -4501,8 +4566,8 @@ public sealed class AbilitySystemTests
 
         var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
 
-        Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage && x.Magnitude == 10);
-        Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main.evolved_bonus" && x.EventType == EventType.Damage && x.Magnitude == 5);
+        Assert.Contains(DamageMagnitudes(result, "effect.damage.main"), magnitude => magnitude is >= 8 and <= 12);
+        Assert.Contains(DamageMagnitudes(result, "effect.damage.main.evolved_bonus"), magnitude => magnitude is >= 4 and <= 6);
         Assert.Contains(result.EventLog, x => x.Source == "Evolved Strike" && x.EventType == EventType.AbilityUse);
     }
 
@@ -4531,7 +4596,8 @@ public sealed class AbilitySystemTests
                     Id = "effect.damage.main",
                     Operation = AbilityEffectOperation.Damage,
                     Target = AbilityTargetSelector.CurrentTarget,
-                    BaseValue = 10
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 0.2f
                 }
             ]
         };
@@ -4553,7 +4619,8 @@ public sealed class AbilitySystemTests
                             Id = "effect.damage.evolved",
                             Operation = AbilityEffectOperation.Damage,
                             Target = AbilityTargetSelector.CurrentTarget,
-                            BaseValue = 4
+                            ScalingAttribute = AttributeType.Power,
+                            ScalingCoefficient = 0.08f
                         }
                     }
                 ]
@@ -4593,8 +4660,8 @@ public sealed class AbilitySystemTests
 
         var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
 
-        Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage && x.Magnitude == 10);
-        Assert.Contains(result.EventLog, x => x.Source == "effect.damage.evolved" && x.EventType == EventType.Damage && x.Magnitude == 4);
+        Assert.Contains(DamageMagnitudes(result, "effect.damage.main"), magnitude => magnitude is >= 8 and <= 12);
+        Assert.Contains(DamageMagnitudes(result, "effect.damage.evolved"), magnitude => magnitude is >= 3 and <= 5);
         Assert.Contains(result.EventLog, x => x.Source == "Add Effect Strike" && x.EventType == EventType.AbilityUse);
     }
 
@@ -4615,7 +4682,8 @@ public sealed class AbilitySystemTests
                     Id = "effect.damage.main",
                     Operation = AbilityEffectOperation.Damage,
                     Target = AbilityTargetSelector.CurrentTarget,
-                    BaseValue = 100
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 2f
                 }
             ]
         };
@@ -4650,7 +4718,9 @@ public sealed class AbilitySystemTests
 
         var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
 
-        Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage && x.Magnitude == 124);
+        var scaled = EssenceAbilityProgressionScaler.Apply(ability, ascensionTier: 2);
+        Assert.Equal(2.48f, Assert.Single(scaled.Effects).ScalingCoefficient, precision: 3);
+        Assert.Contains(DamageMagnitudes(result, "effect.damage.main"), magnitude => magnitude is >= 99 and <= 149);
     }
 
     [Fact]
@@ -4670,7 +4740,8 @@ public sealed class AbilitySystemTests
                     Id = "effect.damage.main",
                     Operation = AbilityEffectOperation.Damage,
                     Target = AbilityTargetSelector.CurrentTarget,
-                    BaseValue = 100
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 2f
                 }
             ]
         };
@@ -4691,7 +4762,8 @@ public sealed class AbilitySystemTests
                             Id = "effect.damage.evolved",
                             Operation = AbilityEffectOperation.Damage,
                             Target = AbilityTargetSelector.CurrentTarget,
-                            BaseValue = 50
+                            ScalingAttribute = AttributeType.Power,
+                            ScalingCoefficient = 1f
                         }
                     }
                 ]
@@ -4730,8 +4802,10 @@ public sealed class AbilitySystemTests
 
         var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
 
-        Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage && x.Magnitude == 112);
-        Assert.Contains(result.EventLog, x => x.Source == "effect.damage.evolved" && x.EventType == EventType.Damage && x.Magnitude == 56);
+        var scaled = EssenceAbilityProgressionScaler.Apply(ability, ascensionTier: 1);
+        Assert.Equal(2.24f, Assert.Single(scaled.Effects).ScalingCoefficient, precision: 3);
+        Assert.Contains(DamageMagnitudes(result, "effect.damage.main"), magnitude => magnitude is >= 90 and <= 134);
+        Assert.Contains(DamageMagnitudes(result, "effect.damage.evolved"), magnitude => magnitude is >= 45 and <= 67);
     }
 
     [Fact]
@@ -4759,7 +4833,8 @@ public sealed class AbilitySystemTests
                     Id = "effect.damage.main",
                     Operation = AbilityEffectOperation.Damage,
                     Target = AbilityTargetSelector.CurrentTarget,
-                    BaseValue = 10
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 0.2f
                 }
             ]
         };
@@ -4801,7 +4876,7 @@ public sealed class AbilitySystemTests
 
         var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
 
-        Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage && x.Magnitude == 15);
+        Assert.Contains(DamageMagnitudes(result, "effect.damage.main"), magnitude => magnitude is >= 12 and <= 18);
         Assert.Contains(result.EventLog, x => x.Source == "Temporary Modifier Strike" && x.EventType == EventType.AbilityUse);
     }
 
@@ -5358,6 +5433,31 @@ public sealed class AbilitySystemTests
         Assert.InRange(hostile.Health, 0, hostile.MaxHealth);
     }
 
+    [Fact]
+    public async Task Raid_playback_returns_final_team_health_snapshots()
+    {
+        var runtime = CreateTrainingEncounterRuntime(out _, out _, CombatMode.Raid);
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+        var executor = new CombatEngineExecutor(provider);
+
+        var execution = await executor.ExecuteRaidPlaybackAsync(
+            runtime,
+            checkpointIntervalTicks: 10,
+            new CombatSimulationOptions(1337, 6000),
+            CancellationToken.None);
+
+        var friendly = Assert.Single(execution.Result.PlayerTeam);
+        var hostile = Assert.Single(execution.Result.EnemyTeam);
+        Assert.Equal("friendly-slot", friendly.Id);
+        Assert.Equal("hostile-slot", hostile.Id);
+        Assert.InRange(friendly.Health, 0, friendly.MaxHealth);
+        Assert.InRange(hostile.Health, 0, hostile.MaxHealth);
+        Assert.NotEmpty(execution.Checkpoints);
+    }
+
     [Theory]
     [InlineData(CombatMode.Idle)]
     [InlineData(CombatMode.Dungeon)]
@@ -5748,7 +5848,8 @@ public sealed class AbilitySystemTests
         CombatTeam team,
         IEnumerable<CompiledAbility> abilities,
         int maxHealth = 200,
-        int dodgeChance = 0) =>
+        int dodgeChance = 0,
+        int? partyNumber = null) =>
         new(
             id,
             id,
@@ -5762,7 +5863,8 @@ public sealed class AbilitySystemTests
                 [AttributeType.AttackSpeed] = 0
             },
             abilities,
-            ["Role.Test"]);
+            ["Role.Test"],
+            partyNumber: partyNumber);
 
     private static void AddStandardCondition(
         RuntimeCombatant owner,
@@ -5982,6 +6084,11 @@ public sealed class AbilitySystemTests
         combatant.SyncCurrentHealthToMax();
     }
 
+    private static IEnumerable<int> DamageMagnitudes(CombatResult result, string source) =>
+        result.EventLog
+            .Where(log => log.Source == source && log.EventType == EventType.Damage)
+            .Select(log => log.Magnitude);
+
     private static AbilitySpec CreateDamageAbility(string id, string tag) =>
         new()
         {
@@ -5997,9 +6104,8 @@ public sealed class AbilitySystemTests
                     Id = "effect.damage",
                     Operation = AbilityEffectOperation.Damage,
                     Target = AbilityTargetSelector.CurrentTarget,
-                    BaseValue = 10,
                     ScalingAttribute = AttributeType.Power,
-                    ScalingCoefficient = 0.2f,
+                    ScalingCoefficient = 0.4f,
                     AttackType = AttackType.Melee,
                     DamageType = DamageType.Physical
                 }
@@ -6050,7 +6156,8 @@ public sealed class AbilitySystemTests
                     Id = "effect.burn.dot",
                     Operation = AbilityEffectOperation.Damage,
                     Target = AbilityTargetSelector.EventTarget,
-                    BaseValue = 3,
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 0.06f,
                     DurationTicks = 9,
                     IntervalTicks = 3,
                     AttackType = AttackType.DamageOverTime,
@@ -6205,7 +6312,8 @@ public sealed class AbilitySystemTests
                     Id = "effect.noop",
                     Operation = AbilityEffectOperation.GrantBarrier,
                     Target = AbilityTargetSelector.Self,
-                    BaseValue = 1
+                    ScalingAttribute = AttributeType.MaxHealth,
+                    ScalingCoefficient = 0.01f
                 }
             ]
         };

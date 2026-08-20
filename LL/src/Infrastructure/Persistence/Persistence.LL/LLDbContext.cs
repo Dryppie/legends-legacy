@@ -33,6 +33,7 @@ using Domain.Models.Professions.Crafting;
 using Domain.Models.Prophecies;
 using Domain.Models.Quests;
 using Domain.Models.Quests.Events;
+using Domain.Models.Raids;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
@@ -227,6 +228,34 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         }
 
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes($"world-tower:{serverId}:{floorNumber}"));
+        var lockId = BitConverter.ToInt64(bytes, 0);
+        await ExecuteSqlRawAsync("SELECT pg_advisory_xact_lock({0})", ct, lockId);
+    }
+
+    public async Task AcquireRaidRunLockAsync(
+        Guid raidRunId,
+        CancellationToken ct = default)
+    {
+        if (Database.ProviderName != "Npgsql.EntityFrameworkCore.PostgreSQL")
+            return;
+        if (Database.CurrentTransaction is null)
+            throw new InvalidOperationException("A raid run advisory lock requires an active transaction.");
+
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes($"raid:{raidRunId:N}"));
+        var lockId = BitConverter.ToInt64(bytes, 0);
+        await ExecuteSqlRawAsync("SELECT pg_advisory_xact_lock({0})", ct, lockId);
+    }
+
+    public async Task AcquireRaidBossLockAsync(
+        string raidBossId,
+        CancellationToken ct = default)
+    {
+        if (Database.ProviderName != "Npgsql.EntityFrameworkCore.PostgreSQL")
+            return;
+        if (Database.CurrentTransaction is null)
+            throw new InvalidOperationException("A raid boss advisory lock requires an active transaction.");
+
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes($"raid-boss:{raidBossId}"));
         var lockId = BitConverter.ToInt64(bytes, 0);
         await ExecuteSqlRawAsync("SELECT pg_advisory_xact_lock({0})", ct, lockId);
     }
@@ -563,6 +592,16 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<DailyProphecyRerollState> DailyProphecyRerollStates => Set<DailyProphecyRerollState>();
 
     public DbSet<Region> Regions => Set<Region>();
+
+    public DbSet<RaidRun> RaidRuns => Set<RaidRun>();
+    public DbSet<RaidSignup> RaidSignups => Set<RaidSignup>();
+    public DbSet<RaidLaneResult> RaidLaneResults => Set<RaidLaneResult>();
+    public DbSet<RaidPlayback> RaidPlaybacks => Set<RaidPlayback>();
+    public DbSet<RaidPlaybackArtifact> RaidPlaybackArtifacts => Set<RaidPlaybackArtifact>();
+    public DbSet<RaidParticipantResult> RaidParticipantResults => Set<RaidParticipantResult>();
+    public DbSet<RaidRewardClaim> RaidRewardClaims => Set<RaidRewardClaim>();
+    public DbSet<RaidTrophyPurchase> RaidTrophyPurchases => Set<RaidTrophyPurchase>();
+    public DbSet<RaidPowerRecommendationCacheEntry> RaidPowerRecommendationCacheEntries => Set<RaidPowerRecommendationCacheEntry>();
 
     public DbSet<TowerFloorProgress> TowerFloorProgresses => Set<TowerFloorProgress>();
     public DbSet<TowerRally> TowerRallies => Set<TowerRally>();

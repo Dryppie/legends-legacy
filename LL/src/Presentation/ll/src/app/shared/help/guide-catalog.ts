@@ -6,6 +6,7 @@ export const GUIDE_PAGE_IDS = {
   combat: 'combat',
   world: 'world',
   dungeons: 'dungeons',
+  raids: 'raids',
   prophecies: 'prophecies',
   crafting: 'crafting',
   guild: 'guild',

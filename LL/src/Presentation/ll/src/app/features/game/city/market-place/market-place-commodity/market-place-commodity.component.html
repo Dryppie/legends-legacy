@@ -206,10 +206,13 @@
                     [abilityName]="essence.activeAbility.name"
                     [description]="essence.activeAbility.description"
                     [effects]="essence.activeAbility.effects"
+                    kind="Active"
+                    [cooldownSeconds]="essence.activeAbility.cooldownSeconds"
+                    [threatValue]="essence.activeAbility.threatValue ?? 0"
+                    [threatMultiplier]="
+                      essence.activeAbility.threatMultiplier ?? 1
+                    "
                   ></app-essence-description>
-                  <p class="mt-2 text-xs text-zinc-400">
-                    Cooldown: {{ essence.activeAbility.cooldownSeconds }}s
-                  </p>
                   <app-ability-tags
                     [targets]="essence.activeAbility.targets"
                     [tags]="essence.activeAbility.tags"
@@ -230,6 +233,11 @@
                     [abilityName]="essence.passiveAbility.name"
                     [description]="essence.passiveAbility.description"
                     [effects]="essence.passiveAbility.effects"
+                    kind="Passive"
+                    [threatValue]="essence.passiveAbility.threatValue ?? 0"
+                    [threatMultiplier]="
+                      essence.passiveAbility.threatMultiplier ?? 1
+                    "
                   ></app-essence-description>
                   <app-ability-tags
                     [targets]="essence.passiveAbility.targets"

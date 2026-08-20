@@ -1,3 +1,79 @@
-<div class="flex w-full flex-col gap-2 pt-4" data-tour="raids-introduction">
-  <div class="ll-empty-state">Raids are not available in this region yet.</div>
-</div>
+<section class="raid-boss-panel" data-tour="raids-introduction">
+  <a *ngIf="raidBoss.activeRaidId" class="active-raid-link" [routerLink]="['/game/world/raid', raidBoss.activeRaidId]">
+    Open my raid
+  </a>
+
+  <p *ngIf="raidBoss.rewardReducedThisWeek" class="notice">
+    You already earned the full weekly reward. Further clears pay 25%.
+  </p>
+  <p *ngIf="error()" class="error">{{ error() }}</p>
+
+  <div *ngIf="raidBoss.tiers.length > 1" class="tier-tabs" aria-label="Raid tier">
+    <button *ngFor="let tier of raidBoss.tiers" type="button" class="secondary" [class.active]="selectedTier() === tier.tier" (click)="selectTier(tier.tier)">
+      Tier {{ tier.tier }}
+    </button>
+  </div>
+
+  <div class="raid-actions" *ngIf="currentTier() as tier">
+    <button
+      type="button"
+      (click)="create()"
+      [disabled]="!raidBoss.isUnlocked || raidBoss.ownedRaidSealCount < 1 || !!raidBoss.activeRaidId || !!action()"
+    >
+      Create raid · {{ raidBoss.ownedRaidSealCount }} Raid Seal{{ raidBoss.ownedRaidSealCount === 1 ? '' : 's' }}
+    </button>
+    <button
+      *ngIf="raidBoss.developmentToolsEnabled"
+      type="button"
+      class="secondary"
+      (click)="createDevelopment()"
+      [disabled]="!raidBoss.isUnlocked || !!raidBoss.activeRaidId || !!action()"
+    >
+      {{ action() === 'development-create' ? 'Creating test raid...' : 'Create test raid · no Raid Seal required' }}
+    </button>
+    <button
+      type="button"
+      class="secondary"
+      (click)="assemble()"
+      [disabled]="tier.ownedRaidSealFragments < tier.raidSealFragmentCost || !!action()"
+    >
+      Assemble Raid Seal · {{ tier.ownedRaidSealFragments }}/{{ tier.raidSealFragmentCost }} fragments
+    </button>
+  </div>
+
+  <p *ngIf="loading()">Loading recruiting raids…</p>
+  <div *ngIf="!loading() && openRaids().length === 0" class="ll-empty-state">
+    No raids are recruiting. Bring a Raid Seal to lead one{{ raidBoss.developmentToolsEnabled ? ', or create a local test raid above' : '' }}.
+  </div>
+
+  <article *ngFor="let run of openRaids()" class="open-raid">
+    <div>
+      <strong>{{ run.leaderCharacterName }}</strong>
+      <span>Tier {{ run.tier }} · closes in {{ closesIn(run.signupClosesAt) }}</span>
+      <small>
+        {{ run.vanguardCount }} Vanguard · {{ run.flankCount }} Flank · {{ run.wardCount }} Ward
+      </small>
+    </div>
+    <button type="button" (click)="join(run)" [disabled]="!run.canJoin || !!action()">
+      {{ run.canJoin ? 'Join' : 'Unavailable' }}
+    </button>
+  </article>
+
+  <section *ngIf="vendor() as shop" class="trophy-vendor">
+    <header>
+      <div><span>Raid boss site</span><h3>Trophy Exchange</h3></div>
+      <strong>{{ shop.trophyBalance | number }} Trophies</strong>
+    </header>
+    <article *ngFor="let item of shop.items" class="vendor-item">
+      <div>
+        <strong>{{ item.name }}</strong>
+        <p>{{ item.description }}</p>
+        <small *ngIf="!item.isUnlocked">Slay Tier {{ item.requiredTier }} to unlock</small>
+        <small *ngIf="item.weeklyPurchaseLimit">Weekly {{ item.weeklyPurchased }}/{{ item.weeklyPurchaseLimit }}</small>
+      </div>
+      <button type="button" (click)="purchase(item.id)" [disabled]="!item.canPurchase || !!action()">
+        {{ item.trophyCost }} Trophies
+      </button>
+    </article>
+  </section>
+</section>

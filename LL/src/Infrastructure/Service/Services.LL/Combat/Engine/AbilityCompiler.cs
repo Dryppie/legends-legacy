@@ -4,7 +4,9 @@ namespace Services.LL.Combat.Engine;
 
 public static class AbilityCompiler
 {
-    public static CompiledAbility CompileAbility(AbilitySpec spec)
+    public static CompiledAbility CompileAbility(AbilitySpec spec) => CompileAbility(spec, threatTuning: null);
+
+    public static CompiledAbility CompileAbility(AbilitySpec spec, AbilityThreatTuning? threatTuning)
     {
         var effectsById = spec.Effects.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
         var triggers = spec.Triggers.Count == 0
@@ -12,7 +14,16 @@ public static class AbilityCompiler
             : spec.Triggers;
 
         var compiledTriggers = triggers
-            .Select(trigger => CompileTrigger(trigger, effectsById.Values, effectsById, spec.Name, spec.Kind, spec.Tags))
+            .Select(trigger => CompileTrigger(
+                trigger,
+                effectsById.Values,
+                effectsById,
+                spec.Name,
+                spec.Kind,
+                spec.Tags,
+                spec.Kind == AbilitySpecKind.Passive
+                    ? AbilityThreatRules.GetThreatValue(spec, trigger, threatTuning)
+                    : 0))
             .GroupBy(x => x.Event)
             .ToDictionary(x => x.Key, x => (IReadOnlyList<CompiledTrigger>)x.ToList());
 
@@ -22,6 +33,8 @@ public static class AbilityCompiler
             Name = spec.Name,
             Kind = spec.Kind,
             CooldownTicks = spec.CooldownTicks,
+            ThreatValue = AbilityThreatRules.GetThreatValue(spec, threatTuning),
+            ThreatMultiplier = Math.Max(0, spec.ThreatMultiplier),
             Costs = [.. spec.Costs.Select(CompileCost)],
             Tags = new HashSet<string>(spec.Tags, StringComparer.OrdinalIgnoreCase),
             TriggersByEvent = compiledTriggers
@@ -32,7 +45,14 @@ public static class AbilityCompiler
     {
         var effectsById = spec.Effects.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
         var compiledTriggers = spec.Triggers
-            .Select(trigger => CompileTrigger(trigger, spec.Effects, effectsById, spec.Name, AbilitySpecKind.Passive, spec.Tags))
+            .Select(trigger => CompileTrigger(
+                trigger,
+                spec.Effects,
+                effectsById,
+                spec.Name,
+                AbilitySpecKind.Passive,
+                spec.Tags,
+                threatValue: 0))
             .GroupBy(x => x.Event)
             .ToDictionary(x => x.Key, x => (IReadOnlyList<CompiledTrigger>)x.ToList());
 
@@ -50,16 +70,24 @@ public static class AbilityCompiler
         };
     }
 
-    public static IReadOnlyDictionary<string, CompiledAbility> CompileAbilities(IEnumerable<AbilitySpec> specs) =>
-        specs.Select(CompileAbility).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+    public static IReadOnlyDictionary<string, CompiledAbility> CompileAbilities(
+        IEnumerable<AbilitySpec> specs,
+        AbilityThreatTuning? threatTuning = null) =>
+        specs.Select(spec => CompileAbility(spec, threatTuning))
+            .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
     public static IReadOnlyDictionary<string, CompiledStatus> CompileStatuses(IEnumerable<StatusSpec> specs) =>
         specs.Select(CompileStatus).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
-    public static IReadOnlyDictionary<string, CompiledSummon> CompileSummons(IEnumerable<SummonSpec> specs) =>
-        specs.Select(CompileSummon).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+    public static IReadOnlyDictionary<string, CompiledSummon> CompileSummons(
+        IEnumerable<SummonSpec> specs,
+        AbilityThreatTuning? threatTuning = null) =>
+        specs.Select(spec => CompileSummon(spec, threatTuning))
+            .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
-    public static CompiledSummon CompileSummon(SummonSpec spec) =>
+    public static CompiledSummon CompileSummon(SummonSpec spec) => CompileSummon(spec, threatTuning: null);
+
+    public static CompiledSummon CompileSummon(SummonSpec spec, AbilityThreatTuning? threatTuning) =>
         new()
         {
             Id = spec.Id,
@@ -68,6 +96,10 @@ public static class AbilityCompiler
             DurationTicks = spec.DurationTicks,
             MaxActive = spec.MaxActive,
             CanBasicAttack = spec.CanBasicAttack,
+            ThreatMultiplier = Math.Max(
+                0,
+                spec.ThreatMultiplier ?? threatTuning?.DefaultSummonThreatMultiplier
+                    ?? AbilityThreatTuning.Default.DefaultSummonThreatMultiplier),
             Tags = new HashSet<string>(spec.Tags, StringComparer.OrdinalIgnoreCase),
             AbilityIds = spec.AbilityIds,
             Attributes = [.. spec.Attributes.Select(CompileSummonAttribute)]
@@ -79,7 +111,8 @@ public static class AbilityCompiler
         IReadOnlyDictionary<string, AbilityEffectSpec> effectsById,
         string statsSource,
         AbilitySpecKind abilityKind,
-        IReadOnlyList<string> abilityTags)
+        IReadOnlyList<string> abilityTags,
+        int threatValue)
     {
         var selectedEffects = trigger.EffectIds.Count == 0
             ? defaultEffects
@@ -88,6 +121,12 @@ public static class AbilityCompiler
         return new CompiledTrigger
         {
             Event = trigger.Event,
+            ThreatValue = threatValue,
+            ThreatInternalCooldownTicks = threatValue != 0
+                && trigger.InternalCooldownTicks <= 0
+                && IsReactiveThreatEvent(trigger.Event)
+                    ? 40
+                    : 0,
             InternalCooldownTicks = trigger.InternalCooldownTicks,
             InitialDelayTicks = trigger.InitialDelayTicks,
             EveryNthOccurrence = Math.Max(1, trigger.EveryNthOccurrence),
@@ -95,6 +134,16 @@ public static class AbilityCompiler
             Effects = [.. selectedEffects.Select(effect => CompileEffect(effect, statsSource, abilityKind, abilityTags))]
         };
     }
+
+    private static bool IsReactiveThreatEvent(AbilityTriggerEvent triggerEvent) => triggerEvent is
+        AbilityTriggerEvent.OnHit
+        or AbilityTriggerEvent.OnDamaged
+        or AbilityTriggerEvent.OnAttacked
+        or AbilityTriggerEvent.OnMeleeAttacked
+        or AbilityTriggerEvent.OnRangedAttacked
+        or AbilityTriggerEvent.OnBarrierAbsorbed
+        or AbilityTriggerEvent.OnBarrierBroken
+        or AbilityTriggerEvent.OnBarrierContributionBroken;
 
     private static CompiledEffect CompileEffect(
         AbilityEffectSpec effect,

@@ -50,7 +50,10 @@ public sealed class CombatStatsAccumulator
                 item.DamageReductionPrevented,
                 item.DamageAmplified,
                 item.FinalHealthDamage,
-                item.DamageType);
+                item.DamageType,
+                item.DamageRedirectedTo,
+                item.DamageRedirectedAway,
+                item.CountsAsTargetedAttack);
         }
     }
 
@@ -75,7 +78,10 @@ public sealed class CombatStatsAccumulator
         int damageReductionPrevented = 0,
         int damageAmplified = 0,
         int finalHealthDamage = 0,
-        DamageType damageType = DamageType.None)
+        DamageType damageType = DamageType.None,
+        int damageRedirectedTo = 0,
+        int damageRedirectedAway = 0,
+        bool countsAsTargetedAttack = false)
     {
         // ----- entity context ------------------------------------------------
         var entity = GetOrAddEntity(actorId);
@@ -197,6 +203,10 @@ public sealed class CombatStatsAccumulator
                 target.DamageReductionPrevented += damageReductionPrevented;
                 target.DamageAmplified += damageAmplified;
                 target.FinalHealthDamage += finalHealthDamage;
+                target.DamageRedirectedTo += damageRedirectedTo;
+                target.DamageRedirectedAway += damageRedirectedAway;
+                if (countsAsTargetedAttack)
+                    target.TargetedAttacks++;
                 if (relationship == DamageTargetRelationship.Opponent)
                     target.DamageTaken += magnitude;
                 else if (relationship == DamageTargetRelationship.Self)
@@ -209,6 +219,8 @@ public sealed class CombatStatsAccumulator
                 target.IncomingRawDamage += incomingRawDamage;
                 target.AvoidedDamage += avoidedDamage;
                 target.AvoidedAttacks++;
+                if (countsAsTargetedAttack)
+                    target.TargetedAttacks++;
             }
             else if (eventType == EventType.Heal || eventType == EventType.HealOverTime || eventType == EventType.HealCrit)
                 target.HealingReceived += magnitude;
@@ -269,6 +281,7 @@ public sealed class WorkEntity
     public int TypedMitigationPrevented, PhysicalMitigationPrevented, MagicalMitigationPrevented;
     public int BlockPrevented, DamageReductionPrevented;
     public int DamageAmplified, FinalHealthDamage;
+    public int DamageRedirectedTo, DamageRedirectedAway, TargetedAttacks;
 
     private readonly Dictionary<string, WorkAbility> _abilities = new(StringComparer.Ordinal);
     private string? _firstEntityName;
@@ -322,7 +335,10 @@ public sealed class WorkEntity
         BlockPrevented,
         DamageReductionPrevented,
         DamageAmplified,
-        FinalHealthDamage);
+        FinalHealthDamage,
+        DamageRedirectedTo: DamageRedirectedTo,
+        DamageRedirectedAway: DamageRedirectedAway,
+        TargetedAttacks: TargetedAttacks);
 }
 
 public sealed class WorkAbility

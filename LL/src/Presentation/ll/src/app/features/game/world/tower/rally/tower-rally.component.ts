@@ -51,6 +51,8 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
   readonly battleType = BattleType.Tower;
   readonly watchingPlayback = signal(false);
   readonly playback = signal<TowerCombatPlayback | null>(null);
+  readonly selectedParticipantId = signal<string | null>(null);
+  readonly collapsedParties = signal<ReadonlySet<number>>(new Set<number>());
   readonly realtimeStatus = this.events.connectionStatus;
   private rallyId = '';
   private lastRealtimeUpdateId: string | null = null;
@@ -393,8 +395,7 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
     if (!playback || playback.schemaVersion < 2 || !bundle) return;
 
     const serverNow =
-      this.serverClockAtSync +
-      (performance.now() - this.monotonicClockAtSync);
+      this.serverClockAtSync + (performance.now() - this.monotonicClockAtSync);
     const elapsedMilliseconds = Math.max(
       0,
       serverNow - Date.parse(playback.playbackStartedAt),
@@ -443,12 +444,258 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
     );
   }
 
+  benchedParticipants(rally: TowerRally): TowerRallyParticipant[] {
+    return rally.participants.filter(
+      (participant) => participant.partySlot === null,
+    );
+  }
+
+  partyNumbers(rally: TowerRally): number[] {
+    return Array.from({ length: rally.partyCount }, (_, index) => index + 1);
+  }
+
+  partySlots(rally: TowerRally, partyNumber: number): number[] {
+    const first = (partyNumber - 1) * rally.maximumPartySize + 1;
+    const count = Math.min(
+      rally.maximumPartySize,
+      Math.max(0, rally.requiredSlots - first + 1),
+    );
+    return Array.from({ length: count }, (_, index) => first + index);
+  }
+
+  participantAtSlot(
+    rally: TowerRally,
+    partySlot: number,
+  ): TowerRallyParticipant | null {
+    return (
+      rally.participants.find(
+        (participant) => participant.partySlot === partySlot,
+      ) ?? null
+    );
+  }
+
+  partyAverage(rally: TowerRally, partyNumber: number): number {
+    const participants = rally.participants.filter(
+      (participant) => participant.partyNumber === partyNumber,
+    );
+    if (!participants.length) return 0;
+    return Math.round(
+      participants.reduce(
+        (total, participant) => total + participant.powerRating,
+        0,
+      ) / participants.length,
+    );
+  }
+
+  partyOpenSlots(rally: TowerRally, partyNumber: number): number {
+    return this.partySlots(rally, partyNumber).filter(
+      (slot) => !this.participantAtSlot(rally, slot),
+    ).length;
+  }
+
+  slotLabel(partySlot: number): string {
+    return partySlot.toString().padStart(2, '0');
+  }
+
+  isPartyCollapsed(partyNumber: number): boolean {
+    return this.collapsedParties().has(partyNumber);
+  }
+
+  toggleParty(partyNumber: number): void {
+    const next = new Set(this.collapsedParties());
+    if (next.has(partyNumber)) next.delete(partyNumber);
+    else next.add(partyNumber);
+    this.collapsedParties.set(next);
+  }
+
+  selectParticipant(
+    participant: TowerRallyParticipant,
+    rally: TowerRally,
+  ): void {
+    if (!rally.canManageParties || this.action()) return;
+    this.selectedParticipantId.update((selected) =>
+      selected === participant.characterId ? null : participant.characterId,
+    );
+  }
+
+  placeSelectedInParty(partyNumber: number, rally: TowerRally): void {
+    const participantId = this.selectedParticipantId();
+    if (!participantId) return;
+    const openSlot = this.partySlots(rally, partyNumber).find(
+      (slot) => !this.participantAtSlot(rally, slot),
+    );
+    if (openSlot) this.moveParticipant(participantId, openSlot, rally);
+  }
+
+  placeSelectedInSlot(partySlot: number, rally: TowerRally): void {
+    const participantId = this.selectedParticipantId();
+    if (participantId) this.moveParticipant(participantId, partySlot, rally);
+  }
+
+  benchParticipant(
+    participant: TowerRallyParticipant,
+    rally: TowerRally,
+  ): void {
+    this.moveParticipant(participant.characterId, null, rally);
+  }
+
+  dragParticipant(
+    event: DragEvent,
+    participant: TowerRallyParticipant,
+    rally: TowerRally,
+  ): void {
+    if (!rally.canManageParties || !event.dataTransfer) return;
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', participant.characterId);
+    this.selectedParticipantId.set(participant.characterId);
+  }
+
+  allowPartyDrop(event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+  }
+
+  dropIntoSlot(event: DragEvent, partySlot: number, rally: TowerRally): void {
+    event.preventDefault();
+    const participantId = event.dataTransfer?.getData('text/plain');
+    if (participantId) this.moveParticipant(participantId, partySlot, rally);
+  }
+
+  dropIntoParty(
+    event: DragEvent,
+    partyNumber: number,
+    rally: TowerRally,
+  ): void {
+    event.preventDefault();
+    const participantId = event.dataTransfer?.getData('text/plain');
+    if (!participantId) return;
+    const openSlot = this.partySlots(rally, partyNumber).find(
+      (slot) => !this.participantAtSlot(rally, slot),
+    );
+    if (openSlot) this.moveParticipant(participantId, openSlot, rally);
+  }
+
+  dropOnBench(event: DragEvent, rally: TowerRally): void {
+    event.preventDefault();
+    const participantId = event.dataTransfer?.getData('text/plain');
+    if (participantId) this.moveParticipant(participantId, null, rally);
+  }
+
+  distributeBenched(rally: TowerRally): void {
+    const occupied = new Set(
+      rally.participants
+        .map((participant) => participant.partySlot)
+        .filter((slot): slot is number => slot !== null),
+    );
+    const openSlots = Array.from(
+      { length: rally.requiredSlots },
+      (_, index) => index + 1,
+    ).filter((slot) => !occupied.has(slot));
+    let openIndex = 0;
+    const assignments = rally.participants.map((participant) => ({
+      characterId: participant.characterId,
+      partySlot: participant.partySlot ?? openSlots[openIndex++] ?? null,
+    }));
+    this.savePartyAssignments(assignments);
+  }
+
+  autoBalanceParties(rally: TowerRally): void {
+    const parties = this.partyNumbers(rally).map((partyNumber) => ({
+      partyNumber,
+      totalPower: 0,
+      count: 0,
+      capacity: this.partySlots(rally, partyNumber).length,
+    }));
+    const assignments = [...rally.participants]
+      .sort(
+        (left, right) =>
+          right.powerRating - left.powerRating ||
+          left.characterName.localeCompare(right.characterName),
+      )
+      .map((participant) => {
+        const party = [...parties]
+          .filter((candidate) => candidate.count < candidate.capacity)
+          .sort(
+            (left, right) =>
+              left.totalPower - right.totalPower ||
+              left.count - right.count ||
+              left.partyNumber - right.partyNumber,
+          )[0];
+        const partySlot = party
+          ? (party.partyNumber - 1) * rally.maximumPartySize + party.count + 1
+          : null;
+        if (party) {
+          party.count++;
+          party.totalPower += participant.powerRating;
+        }
+        return { characterId: participant.characterId, partySlot };
+      });
+    this.savePartyAssignments(assignments);
+  }
+
+  resetParties(rally: TowerRally): void {
+    this.savePartyAssignments(
+      rally.participants.map((participant) => ({
+        characterId: participant.characterId,
+        partySlot: null,
+      })),
+    );
+  }
+
   currentApplication(rally: TowerRally): TowerRallyApplication | null {
     return (
       rally.applications.find(
         (application) => application.isCurrentCharacter,
       ) ?? null
     );
+  }
+
+  private moveParticipant(
+    participantId: string,
+    partySlot: number | null,
+    rally: TowerRally,
+  ): void {
+    if (!rally.canManageParties || this.action()) return;
+    const occupant = rally.participants.find(
+      (participant) =>
+        participant.partySlot === partySlot &&
+        participant.characterId !== participantId,
+    );
+    if (partySlot !== null && occupant) {
+      this.error.set('That party slot is already occupied.');
+      return;
+    }
+
+    this.savePartyAssignments(
+      rally.participants.map((participant) => ({
+        characterId: participant.characterId,
+        partySlot:
+          participant.characterId === participantId
+            ? partySlot
+            : participant.partySlot,
+      })),
+    );
+  }
+
+  private savePartyAssignments(
+    assignments: ReadonlyArray<{
+      characterId: string;
+      partySlot: number | null;
+    }>,
+  ): void {
+    if (this.action()) return;
+    this.action.set('parties');
+    this.error.set(null);
+    this.tower
+      .updateRallyParties(this.rallyId, assignments)
+      .pipe(finalize(() => this.action.set(null)))
+      .subscribe({
+        next: (rally) => {
+          this.rally.set(rally);
+          this.selectedParticipantId.set(null);
+        },
+        error: (error) => this.error.set(this.errorMessage(error)),
+      });
   }
 
   private runRallyAction(

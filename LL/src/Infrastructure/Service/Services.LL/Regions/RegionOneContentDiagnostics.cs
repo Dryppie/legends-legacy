@@ -183,10 +183,7 @@ public sealed class RegionOneContentDiagnostics : IRegionOneContentDiagnostics
         int staleAreaCount,
         IReadOnlyList<RegionOneContentEntryDiagnostic> entries)
     {
-        var warnings = new List<string>
-        {
-            "Hive's Abyss is intentionally hidden from dungeon availability and reserved for the future Rift model."
-        };
+        var warnings = new List<string>();
 
         if (staleAreaCount > 0)
             warnings.Add("Retired idle Goblin Mines area still exists locally; restart/API seed cleanup should remove region_01_area_05 when possible.");
@@ -256,11 +253,11 @@ public sealed class RegionOneContentDiagnostics : IRegionOneContentDiagnostics
         new("Goblin Shaman", "goblin_shaman", "Dungeon", "Goblin Mines", "T1", false),
         new("Hobgoblin", "hobgoblin", "Dungeon", "Goblin Mines", "T2", false),
         new("Skeleton", "skeleton", "Dungeon", "Forgotten Catacombs", "T1", true),
-        new("Ant Worker", "ant_worker", "Rift", "Hive's Abyss", "T1", true),
-        new("Fire Ant", "fire_ant", "Rift", "Hive's Abyss", "T1", false),
-        new("Queen's Guard Ant", "queens_guard_ant", "Rift", "Hive's Abyss", "T1", false),
-        new("Ant Queen", "ant_queen", "Rift", "Hive's Abyss", "T2", false),
-        new("Ant King", "ant_king", "Rift", "Hive's Abyss", "T2", false),
+        new("Ant Worker", "ant_worker", "Raid", "The Hive's Abyss", "T1", false),
+        new("Fire Ant", "fire_ant", "Raid", "The Hive's Abyss", "T1", false),
+        new("Queen's Guard Ant", "queens_guard_ant", "Raid", "The Hive's Abyss", "T1", false),
+        new("Ant Queen", "ant_queen", "Raid", "The Hive's Abyss", "T1", false),
+        new("Ant King", "ant_king", "Raid", "The Hive's Abyss", "T2", false),
         new("Forest Spirit", "forest_spirit", "Future Dungeon", "The Great Tree", "T2", false),
         new("Wood Nymph", "wood_nymph", "Future Dungeon", "The Great Tree", "T2", false),
         new("Giant Spider", "giant_spider", "Future Dungeon", "Tangled Cave", "T2", false),

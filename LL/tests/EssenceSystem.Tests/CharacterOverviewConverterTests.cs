@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL.Essences;
 using Application.UseCases.Characters.Dtos;
 using Domain.Helpers.Constants;
+using Domain.Models.Attributes;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.CharacterActions;
 using Domain.Models.Entities.Characters;
@@ -61,6 +62,20 @@ public sealed class CharacterOverviewConverterTests
         Assert.Equal(
             EntityLevelConstants.XP_REQUIRED(1),
             result.CraftingExperienceUntilNextLevel);
+    }
+
+    [Fact]
+    public void Convert_ProjectsDefaultThreatForExistingCharactersWithoutAStoredAttribute()
+    {
+        var result = new CharacterOverviewConverter(new EmptyEssenceDefinitions())
+            .Convert(new Character(), null!, null!);
+
+        Assert.Equal(
+            100,
+            result.BaseAttributes.Single(attribute => attribute.AttributeType == AttributeType.Threat).Value);
+        Assert.Equal(
+            100,
+            result.BaseCombatAttributes.Single(attribute => attribute.AttributeType == AttributeType.Threat).Value);
     }
 
     [Fact]

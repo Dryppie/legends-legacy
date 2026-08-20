@@ -31,6 +31,7 @@ using Microsoft.Extensions.Options;
 using Persistence.LL;
 using Persistence.LL.Repositories.Snapshots;
 using Services.LL.Combat.Layers.Orchestration.Models;
+using Services.LL.Combat.Layers.Resolution;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Combat.Engine;
 using Services.LL.Interfaces;
@@ -204,6 +205,7 @@ public sealed class WorldTowerServiceTests
         Assert.False(altApplication.Succeeded);
         Assert.Contains("account already occupies", altApplication.Error, StringComparison.OrdinalIgnoreCase);
         Assert.Contains(accepted.Value!.Participants, x => x.CharacterId == guest.Id);
+        Assert.Null(accepted.Value.Participants.Single(x => x.CharacterId == guest.Id).PartySlot);
         Assert.Equal(2, await db.TowerRallyParticipants.CountAsync(x => x.TowerRallyId == rallyId));
         Assert.Equal(
             ["Created", "ApplicationSubmitted", "ApplicationAccepted"],
@@ -502,7 +504,7 @@ public sealed class WorldTowerServiceTests
     }
 
     [Fact]
-    public async Task DevelopmentRosterFill_UsesSeededGuestsAndMakesRallyReady()
+    public async Task DevelopmentRosterFill_UsesSeededGuestsAndBenchesNewParticipants()
     {
         await using var db = CreateDbContext();
         var leader = SeedCharacter(db, "Leader", 20, Guid.NewGuid());
@@ -534,10 +536,12 @@ public sealed class WorldTowerServiceTests
             CancellationToken.None);
 
         Assert.True(filled.Succeeded, filled.Error);
-        Assert.Equal(TowerRallyStatus.Ready, filled.Value!.Status);
+        Assert.Equal(TowerRallyStatus.Recruiting, filled.Value!.Status);
         Assert.Equal(4, filled.Value.Participants.Count);
-        Assert.True(filled.Value.CanStart);
+        Assert.False(filled.Value.CanStart);
         Assert.True(filled.Value.DevelopmentToolsEnabled);
+        Assert.Equal(1, filled.Value.Participants.Single(x => x.IsLeader).PartySlot);
+        Assert.All(filled.Value.Participants.Where(x => !x.IsLeader), participant => Assert.Null(participant.PartySlot));
         Assert.All(
             filled.Value.Participants.Where(x => !x.IsLeader),
             participant => Assert.StartsWith("SeedGuest_Helper_", participant.CharacterName));
@@ -552,6 +556,84 @@ public sealed class WorldTowerServiceTests
         Assert.Contains(
             outbox.RallyEvents,
             towerEvent => towerEvent.Event == "DevelopmentRosterFilled");
+    }
+
+    [Fact]
+    public async Task UpdateRallyParties_RequiresLeaderAndPersistsCompleteSlotLayout()
+    {
+        await using var db = CreateDbContext();
+        var characters = Enumerable.Range(1, 4)
+            .Select(number => SeedCharacter(db, $"Member {number}", 20, Guid.NewGuid()))
+            .ToArray();
+        await db.SaveChangesAsync();
+        var service = CreateService(
+            db,
+            new FixedPowerRatingService(characters.Select(character => (character.Id, 1_000)).ToArray()));
+        var created = await service.CreateRallyAsync(
+            characters[0].Id,
+            1,
+            TowerRallyMode.FirstClear,
+            CancellationToken.None);
+        var rallyId = Assert.IsType<Guid>(created.Value?.Id);
+        db.ChangeTracker.Clear();
+        foreach (var character in characters.Skip(1))
+        {
+            var applied = await service.ApplyToRallyAsync(character.Id, rallyId, CancellationToken.None);
+            var applicationId = Assert.Single(applied.Value!.Applications).Id;
+            db.ChangeTracker.Clear();
+            Assert.True((await service.AcceptRallyApplicationAsync(
+                characters[0].Id,
+                rallyId,
+                applicationId,
+                CancellationToken.None)).Succeeded);
+            db.ChangeTracker.Clear();
+        }
+
+        var unauthorized = await service.UpdateRallyPartiesAsync(
+            characters[1].Id,
+            rallyId,
+            characters.Select((character, index) => new TowerPartyAssignment(character.Id, index + 1)).ToArray(),
+            CancellationToken.None);
+        db.ChangeTracker.Clear();
+        var duplicateSlot = await service.UpdateRallyPartiesAsync(
+            characters[0].Id,
+            rallyId,
+            characters.Select(character => new TowerPartyAssignment(character.Id, 1)).ToArray(),
+            CancellationToken.None);
+        db.ChangeTracker.Clear();
+        var outOfRangeSlot = await service.UpdateRallyPartiesAsync(
+            characters[0].Id,
+            rallyId,
+            characters.Select((character, index) => new TowerPartyAssignment(character.Id, index + 2)).ToArray(),
+            CancellationToken.None);
+        db.ChangeTracker.Clear();
+        var incomplete = await service.UpdateRallyPartiesAsync(
+            characters[0].Id,
+            rallyId,
+            characters.Select((character, index) => new TowerPartyAssignment(
+                character.Id,
+                index == 3 ? null : index + 1)).ToArray(),
+            CancellationToken.None);
+        db.ChangeTracker.Clear();
+        var completed = await service.UpdateRallyPartiesAsync(
+            characters[0].Id,
+            rallyId,
+            characters.Select((character, index) => new TowerPartyAssignment(character.Id, index + 1)).ToArray(),
+            CancellationToken.None);
+
+        Assert.False(unauthorized.Succeeded);
+        Assert.Contains("leader", unauthorized.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.False(duplicateSlot.Succeeded);
+        Assert.Contains("one participant", duplicateSlot.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.False(outOfRangeSlot.Succeeded);
+        Assert.Contains("between 1 and 4", outOfRangeSlot.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.True(incomplete.Succeeded, incomplete.Error);
+        Assert.Equal(TowerRallyStatus.Recruiting, incomplete.Value!.Status);
+        Assert.False(incomplete.Value.CanStart);
+        Assert.True(completed.Succeeded, completed.Error);
+        Assert.Equal(TowerRallyStatus.Ready, completed.Value!.Status);
+        Assert.True(completed.Value.CanStart);
+        Assert.Equal([1, 2, 3, 4], completed.Value.Participants.Select(x => x.PartySlot).Order().ToArray());
     }
 
     [Fact]
@@ -1093,6 +1175,7 @@ public sealed class WorldTowerServiceTests
         AssertUniqueIndex<TowerFloorProgress>(db, nameof(TowerFloorProgress.FirstClearAttemptId));
         AssertUniqueIndex<TowerRallyParticipant>(db, nameof(TowerRallyParticipant.TowerRallyId), nameof(TowerRallyParticipant.CharacterId));
         AssertUniqueIndex<TowerRallyParticipant>(db, nameof(TowerRallyParticipant.TowerRallyId), nameof(TowerRallyParticipant.AccountId));
+        AssertIndex<TowerRallyParticipant>(db, nameof(TowerRallyParticipant.TowerRallyId), nameof(TowerRallyParticipant.PartySlot));
         AssertUniqueIndex<TowerRallyApplication>(db, nameof(TowerRallyApplication.TowerRallyId), nameof(TowerRallyApplication.CharacterId));
         AssertUniqueIndex<TowerRallyApplication>(db, nameof(TowerRallyApplication.TowerRallyId), nameof(TowerRallyApplication.AccountId));
         AssertUniqueIndex<TowerAttempt>(db, nameof(TowerAttempt.TowerRallyId));
@@ -1820,14 +1903,16 @@ public sealed class WorldTowerServiceTests
         IWorldTowerDevelopmentRosterFactory? developmentRosters = null)
     {
         var snapshotService = new CharacterSnapshotService(new CharacterSnapshotRepository(db));
+        var resolvedCombatSetup = combatSetup ?? new ThrowingCombatSetupService();
         return new WorldTowerService(
             db,
             new FixedDefinitionProvider(),
             snapshotService,
             powerRatings,
             entities ?? new ThrowingEntityService(),
-            combatSetup ?? new ThrowingCombatSetupService(),
+            resolvedCombatSetup,
             combatEngine ?? new ThrowingCombatEngineExecutor(),
+            new SnapshotCombatantBuilder(db, resolvedCombatSetup),
             developmentRosters ?? new FixedDevelopmentRosterFactory(),
             new FixedCreatureAbilityDefinitionProvider(),
             new FixedAbilityCatalogProvider(),
@@ -1956,6 +2041,15 @@ public sealed class WorldTowerServiceTests
             db.ChangeTracker.Clear();
         }
 
+        var assigned = await service.UpdateRallyPartiesAsync(
+            characters[0].Id,
+            rallyId,
+            characters.Select((character, index) => new TowerPartyAssignment(character.Id, index + 1)).ToArray(),
+            CancellationToken.None);
+        Assert.True(assigned.Succeeded, assigned.Error);
+        Assert.Equal(TowerRallyStatus.Ready, assigned.Value!.Status);
+        db.ChangeTracker.Clear();
+
         return rallyId;
     }
 
@@ -1998,6 +2092,16 @@ public sealed class WorldTowerServiceTests
             entityType.GetIndexes(),
             index => index.IsUnique
                      && index.Properties.Select(property => property.Name).SequenceEqual(propertyNames));
+    }
+
+    private static void AssertIndex<TEntity>(LLDbContext db, params string[] propertyNames)
+        where TEntity : class
+    {
+        var entityType = db.Model.FindEntityType(typeof(TEntity));
+        Assert.NotNull(entityType);
+        Assert.Contains(
+            entityType.GetIndexes(),
+            index => index.Properties.Select(property => property.Name).SequenceEqual(propertyNames));
     }
 
     private sealed class FixedDefinitionProvider : IWorldTowerDefinitionProvider
@@ -2127,6 +2231,11 @@ public sealed class WorldTowerServiceTests
             Task.FromResult(new OverallPowerRating(
                 _ratings[characterId],
                 PowerAnalysisState.Available));
+
+        public Task<OverallPowerRating> GetCharacterOverallRatingAsync(
+            Character character,
+            CancellationToken cancellationToken) =>
+            GetCharacterOverallRatingAsync(character.Id, cancellationToken);
 
         public Task<PowerRatingSnapshot> GetCharacterRatingAsync(
             Guid characterId,

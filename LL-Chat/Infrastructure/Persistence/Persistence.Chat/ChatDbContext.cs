@@ -60,6 +60,8 @@ public class ChatDbContext(DbContextOptions<ChatDbContext> options) : DbContext(
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
     public DbSet<ChatRestriction> ChatRestrictions => Set<ChatRestriction>();
     public DbSet<ChatModerationAction> ChatModerationActions => Set<ChatModerationAction>();
+    public DbSet<RaidChatChannel> RaidChatChannels => Set<RaidChatChannel>();
+    public DbSet<RaidChatMembership> RaidChatMemberships => Set<RaidChatMembership>();
 }
 
 public class LLDbContextFactory : IDesignTimeDbContextFactory<ChatDbContext>

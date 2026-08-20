@@ -6,5 +6,6 @@ public enum ChatChannelType
     Help,     // e.g., "trade", "help"
     Guild,      // based on user's guild ID
     Whisper,     // direct player-to-player
-    System
+    System,
+    Raid         // isolated by raid run ID
 }

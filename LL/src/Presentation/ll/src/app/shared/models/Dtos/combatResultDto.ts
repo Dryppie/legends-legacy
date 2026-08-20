@@ -47,6 +47,11 @@ export interface EntityStats {
   team: string;
   barrierGenerated: number;
   damageBlocked: number;
+  damageRedirectedTo?: number;
+  damageRedirectedAway?: number;
+  targetedAttacks?: number;
+  attentionSharePercent?: number;
+  threatGenerated?: number;
   health?: number | null;
   maxHealth?: number | null;
   barrier?: number | null;
@@ -65,6 +70,7 @@ export interface AbilityStats {
   selfDamage: number;
   alliedDamage: number;
   totalBarrier: number;
+  totalThreat?: number;
 }
 
 export interface AbilityDamageTypeStats {
@@ -88,7 +94,9 @@ export interface SimpleCombatEntityDto {
   health: number;
   maxHealth: number;
   barrier: number;
+  threat?: number;
   level: number;
+  partyNumber?: number | null;
 }
 
 export interface CombatSessionDto {

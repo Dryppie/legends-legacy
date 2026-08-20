@@ -22,6 +22,7 @@ describe('TowerPlaybackService', () => {
         isFriendly: true,
         maxHealth: 100,
         level: 60,
+        partyNumber: 2,
       },
       {
         index: 1,
@@ -106,6 +107,7 @@ describe('TowerPlaybackService', () => {
 
     expect(frame.sequence).toBe(1);
     expect(frame.friendly[0].health).toBe(95);
+    expect(frame.friendly[0].partyNumber).toBe(2);
     expect(frame.hostile[0].health).toBe(180);
     expect(frame.entityStats[0].damageDone).toBe(20);
     expect(frame.entityStats[0].abilities[0].uses).toBe(1);

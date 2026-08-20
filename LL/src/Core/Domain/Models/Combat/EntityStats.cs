@@ -30,13 +30,19 @@ public sealed record EntityStats(
     int HealthRegenerationPulses = 0,
     int? Health = null,
     int? MaxHealth = null,
-    int? Barrier = null)
+    int? Barrier = null,
+    int DamageRedirectedTo = 0,
+    int DamageRedirectedAway = 0,
+    int TargetedAttacks = 0,
+    double AttentionSharePercent = 0,
+    int ThreatGenerated = 0)
 {
     public int AccountedIncomingDamage =>
         AvoidedDamage
         + TypedMitigationPrevented
         + BlockPrevented
         + DamageReductionPrevented
+        + DamageRedirectedAway
         + DamageBlocked
         + FinalHealthDamage;
 

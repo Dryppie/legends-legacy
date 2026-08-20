@@ -1,5 +1,8 @@
 import { AttributeType } from '../../../models/enums/attributeType';
-import { resolveEffectiveAttributeValue } from './essence-description.component';
+import {
+  resolveEffectiveAttributeValue,
+  resolveEffectiveThreatValue,
+} from './essence-description.component';
 
 describe('resolveEffectiveAttributeValue', () => {
   it('prefers the final equipped combat attribute over the raw base attribute', () => {
@@ -20,5 +23,16 @@ describe('resolveEffectiveAttributeValue', () => {
         [{ attributeType: AttributeType.Power, value: 10 }],
       ),
     ).toBe(10);
+  });
+});
+
+describe('resolveEffectiveThreatValue', () => {
+  it('applies the same ability multiplier used by combat', () => {
+    expect(resolveEffectiveThreatValue(256, 1.5)).toBe(384);
+  });
+
+  it('rounds negative threat away from zero and clamps invalid multipliers', () => {
+    expect(resolveEffectiveThreatValue(-5, 0.5)).toBe(-3);
+    expect(resolveEffectiveThreatValue(100, -1)).toBe(0);
   });
 });

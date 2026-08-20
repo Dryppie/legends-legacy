@@ -31,6 +31,7 @@ public interface ICharacterRepository
     /// <returns></returns>
     Task<Character?> GetCharacterOverviewByCharacterIdAsync(Guid currentUserId, CancellationToken cancellationToken);
     Task<Character?> GetCharacterOverviewByCharacterNameAsync(string characterName, CancellationToken cancellationToken);
+    Task<long?> GetSigilFragmentsAsync(Guid characterId, CancellationToken cancellationToken);
     Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken);
     Task<Character?> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken);
     Task<bool> IsCharacterNameTakenAsync(string name, Guid? excludedCharacterId, CancellationToken cancellationToken);

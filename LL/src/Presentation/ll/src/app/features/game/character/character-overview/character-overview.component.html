@@ -213,10 +213,21 @@
                 </span>
                 <span class="text-right">
                   <span class="block font-semibold text-primary">
-                    {{
-                      attribute.value
-                        | attributeValueFormat: attribute.attributeType
-                    }}
+                    <ng-container
+                      *ngIf="
+                        attribute.attributeType === AttributeType.Threat;
+                        else standardAttributeValue
+                      "
+                    >
+                      {{ estimatedEssenceThreatPerSecond() | number: "1.1-1" }}
+                      threat/s
+                    </ng-container>
+                    <ng-template #standardAttributeValue>
+                      {{
+                        attribute.value
+                          | attributeValueFormat: attribute.attributeType
+                      }}
+                    </ng-template>
                   </span>
                   <span
                     *ngIf="

@@ -1,5 +1,49 @@
 [
   {
+    "id": "raid_seal_fragment_hives_abyss",
+    "name": "Hive Raid Seal Fragment",
+    "description": "A chitin fragment used to assemble a Raid Seal for The Hive's Abyss.",
+    "itemType": "Resource",
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
+    "id": "raid_seal_hives_abyss",
+    "name": "Hive Raid Seal",
+    "description": "Consumed by a raid leader to muster an assault on The Hive's Abyss.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
+    "id": "raid_seal_fragment_sanguine_horror",
+    "name": "Sanguine Raid Seal Fragment",
+    "description": "A blood-dark fragment used to assemble a Raid Seal for the Sanguine Horror.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
+    "id": "raid_seal_sanguine_horror",
+    "name": "Sanguine Raid Seal",
+    "description": "Consumed by a raid leader to muster an assault on the Sanguine Horror.",
+    "itemType": "Resource",
+    "rarity": "Epic",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
     "id": "advancement_stone",
     "name": "Advancement Stone",
     "description": "A dungeon reward used for future character and gear advancement.",
@@ -2031,5 +2075,17 @@
   },
   {
     "id": "item.essence.wandering_ghost", "name": "Unbound Wandering Ghost Essence", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Common", "essenceDefinitionId": "essence.wandering_ghost", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "blueprint_raidforged", "name": "Blueprint: Raidforged", "description": "Permanently teaches the Raidforged design for one compatible recipe.", "itemType": "Resource", "rarity": "Epic", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "raidforged_ingot", "name": "Raidforged Ingot", "description": "A Trophy-forged ingot used in Raidforged crafting.", "itemType": "Resource", "rarity": "Epic", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "blueprint_gravebound", "name": "Blueprint: Gravebound", "description": "Permanently teaches the Gravebound design for one compatible recipe.", "itemType": "Resource", "rarity": "Epic", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "sanguine_ichor", "name": "Sanguine Ichor", "description": "A rare binder harvested from the Sanguine Horror.", "itemType": "Resource", "rarity": "Epic", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
   }
 ]

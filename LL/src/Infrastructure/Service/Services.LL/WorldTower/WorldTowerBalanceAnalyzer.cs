@@ -135,7 +135,10 @@ public sealed class WorldTowerBalanceAnalyzer : IWorldTowerBalanceAnalyzer
                     unchecked(seed + attempt * 7_919),
                     MaximumCombatTicks,
                     supplementalAbilities: null,
-                    cancellationToken));
+                    cancellationToken,
+                    friendlyPartyNumbers: Enumerable.Range(0, friendly.Count)
+                        .Select(index => (int?)(index / WorldTowerPartyRules.MaximumPartySize + 1))
+                        .ToArray()));
             }
 
             rosters.Add(CreateRosterResult(rosterName, profiles, outcomes));

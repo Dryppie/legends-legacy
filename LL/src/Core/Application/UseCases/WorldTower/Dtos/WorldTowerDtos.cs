@@ -91,12 +91,15 @@ public sealed record TowerRallyDto(
     TowerRallyStatus Status,
     Guid CreatedByCharacterId,
     int RequiredSlots,
+    int PartyCount,
+    int MaximumPartySize,
     DateTimeOffset CreatedAt,
     IReadOnlyList<TowerRallyParticipantDto> Participants,
     IReadOnlyList<TowerRallyApplicationDto> Applications,
     TowerRosterReadinessDto Readiness,
     bool CanApply,
     bool CanManageApplications,
+    bool CanManageParties,
     bool CanLeave,
     bool CanStart,
     bool CanUpdateLoadout,
@@ -111,7 +114,9 @@ public sealed record TowerRallyParticipantDto(
     int PowerRating,
     DateTimeOffset JoinedAt,
     bool IsLeader,
-    bool IsCurrentCharacter);
+    bool IsCurrentCharacter,
+    int? PartySlot,
+    int? PartyNumber);
 
 public sealed record TowerRallyApplicationDto(
     Guid Id,
@@ -206,7 +211,8 @@ public sealed record TowerParticipantCombatSummaryDto(
     decimal DamageDone,
     decimal DamageTaken,
     decimal HealingDone,
-    bool Survived);
+    bool Survived,
+    int? PartyNumber = null);
 
 public sealed record TowerHallOfFameEntryDto(
     int FloorNumber,

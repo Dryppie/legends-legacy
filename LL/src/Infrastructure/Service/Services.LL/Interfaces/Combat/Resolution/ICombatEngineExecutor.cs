@@ -58,6 +58,13 @@ public interface ICombatEngineExecutor
         CancellationToken cancellationToken) =>
         ExecuteWithCheckpointsAsync(runtime, checkpointIntervalTicks, cancellationToken);
 
+    Task<CombatExecutionWithCheckpoints> ExecuteRaidPlaybackAsync(
+        CombatEncounterRuntime runtime,
+        int checkpointIntervalTicks,
+        CombatSimulationOptions options,
+        CancellationToken cancellationToken) =>
+        ExecuteCompactPlaybackAsync(runtime, checkpointIntervalTicks, cancellationToken);
+
     Task<CombatExecutionWithCheckpoints> ExecuteTournamentPlaybackAsync(
         CombatEncounterRuntime runtime,
         int checkpointIntervalTicks,

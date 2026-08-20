@@ -1,31 +1,34 @@
 # Raid System — Game Design Document
 
-**Status:** Design proposal (not implemented)
+**Status:** Implemented (Phases 1–3)
 **Author:** Design pass, 2026-08-18
 **Feature name (player-facing):** **Raids**
 **Surface:** World Map, in the Raids rail alongside Dungeons
 **Guild involvement:** none
 
+**Implementation note:** Phases 1–3 are implemented. Simulation-backed power calibration is shipped behind `RaidPowerCalibration:Enabled` and uses authored values as a safe fallback until calibrated rows exist. Launch content is **The Hive's Abyss** (tiers 1–3) and **Sanguine Horror** (tiers 2–3). The Ant King is an 8% Vanguard boss replacement; Bloodthorn Vine is a 22% rare Ward guard.
+
 ---
 
 ## 0. Executive summary
 
-A **Raid** is a public, player-created assault on a **Scourge** — a regional raid boss that lives
+A **Raid** is a public, player-created assault on a **raid boss** — a regional raid boss that lives
 permanently on the World Map next to the region's dungeons. Any player can create a raid at a
-Scourge site. Any player can sign up. When signups are in, the **raid leader** sorts them into
+raid boss site. Any player can sign up. When signups are in, the **raid leader** sorts them into
 **three Wings** — _Vanguard_, _Flank_ and _Ward_ — and starts the raid. The server resolves the
 three wings as three separate simulated battles, in a fixed order, where the Flank and Ward results
-change the conditions the Vanguard fights under. Vanguard kills the Scourge, or it doesn't.
+change the conditions the Vanguard fights under. Vanguard kills the raid boss, or it doesn't.
 
 The strategy is not in twitch execution or role labels. It is entirely in **allocation**: the leader
 has a finite roster of known power ratings and must decide who fights where. Stack everyone strong
-into the Vanguard and it meets a shielded, reinforced Scourge and dies. Over-invest in the support
+into the Vanguard and it meets a shielded, reinforced raid boss and dies. Over-invest in the support
 wings and the Vanguard lacks the damage to finish. There is a right answer for every roster and it
 changes with every roster.
 
 Nothing needs to happen in real time. Every participant is a frozen `CharacterSnapshot`, exactly as
-World Tower Expeditions already work, and resolution is done by a worker and replayed frame-by-frame
-afterwards. Fifteen people never need to be online at once — they need to have signed up.
+World Tower Expeditions already work, and resolution is done by a worker with results displayed
+afterwards. Fifteen people never need to be online at once — they need to have signed up. Per-wing
+frame playback is stored per wing and available after resolution.
 
 ### Why this shape
 
@@ -41,9 +44,9 @@ afterwards. Fifteen people never need to be online at once — they need to have
 
 | Need                                     | Existing thing it reuses                                                                                                       |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Raids panel on the World Map             | `region.component.html` `<section class="activity-panel raids">`, bound to `region.raids` — **already rendered, always empty** |
-| Empty component to fill                  | `features/game/world/region/raids/raids.component.ts` — **existing 185-byte placeholder**                                      |
-| Stub DTO                                 | `shared/models/Dtos/regionDto.ts` → `Raid { id, name, creatures }`                                                             |
+| Raids panel on the World Map             | `region.component.html` `<section class="activity-panel raids">`, now populated from the raid API                             |
+| Raid-site component                      | `features/game/world/region/raids/raids.component.ts` — open raids, creation, joining, and Raid Seal assembly                  |
+| Region DTO                               | `shared/models/Dtos/regionDto.ts` → lightweight raid-boss map metadata                                                         |
 | Commented-out domain hook                | `Core/Domain/Models/Regions/Region.cs` → `// ICollection<Raid> Raids`                                                          |
 | Public lobby + signup + approval         | `TowerRally` / `TowerRallyApplication` / `TowerRallyParticipant`                                                               |
 | Frozen participants                      | `CharacterSnapshot`, `ICharacterSnapshotService.CreateAsync`                                                                   |
@@ -69,26 +72,25 @@ The World Map is `features/game/world/region/region.component.*`, routed as `wor
 (default `shenic`). It is a card grid of areas plus a right-hand rail
 (`<aside class="world-map-rail">`) with two `activity-panel` sections: **Dungeons** and **Raids**.
 
-**The Raids panel already exists in the markup** (`data-tour="raids-introduction"`), bound to
-`region.raids`, and is always empty because `region.service.ts` returns hardcoded client-side region
-data with `raids: []`. There is also an empty `region/raids/raids.component.ts` placeholder sitting
-next to the working `region/dungeons/dungeons.component.ts`.
+**The Raids panel uses the existing map markup** (`data-tour="raids-introduction"`). Phase 1 loads
+live raid-boss summaries separately from the still-hardcoded region data, then renders the implemented
+`region/raids/raids.component.ts` beside the working dungeon component.
 
 So raids do not need a new surface. They need that panel populated and made clickable, mirroring
 `selectDungeon()` → inline preview → enter.
 
-**Presentation parity with dungeons.** A Scourge row in the rail should read like a dungeon row:
+**Presentation parity with dungeons.** A raid boss row in the rail should read like a dungeon row:
 name, required level, whether you can act, and a state chip. Where a dungeon shows
-`ownedSigilCount` / `canEnter`, a Scourge shows **live raid state** — the thing that makes it feel
+`ownedSigilCount` / `canEnter`, a raid boss shows **live raid state** — the thing that makes it feel
 alive on the map:
 
 ```
-Ashen Scourge          Lv. 25    ● 2 raids recruiting
+The Hive's Abyss       Lv. 25    ● 2 raids recruiting
 Hollow Tyrant          Lv. 40    ○ locked — requires Lv. 40
 Duskmaw                Lv. 55    ⏱ on cooldown for you — 6h
 ```
 
-Clicking expands an inline panel (the raid equivalent of `dungeon-card`) listing that Scourge's
+Clicking expands an inline panel (the raid equivalent of `dungeon-card`) listing that raid boss's
 **open raids**: leader name, signup count per wing, tier, closes-in timer, and a Join button —
 plus a "Create raid" button if the player holds a key and isn't already committed.
 
@@ -100,13 +102,13 @@ plus a "Create raid" button if the player holds a key and isn't already committe
 
 ### Region anchoring and gating
 
-Each region gets 1–2 Scourges, gated like areas are: `levelRequirement`, optional
+Each region gets 1–2 Raid bosses, gated like areas are: `levelRequirement`, optional
 `requiredCompletedQuestId`, optional `requiredTowerFloor`. Region membership follows the existing
-convention — dungeons already carry `"region": 1` in `dungeons.json`, so Scourges carry the same.
-Shenic gets an entry-level Scourge; Meran a harder one. They are **always available** — no rotation,
-no windows. A player who wants a specific drop can keep raiding that specific Scourge.
+convention — dungeons already carry `"region": 1` in `dungeons.json`, so Raid bosses carry the same.
+Shenic gets an entry-level raid boss; Meran a harder one. They are **always available** — no rotation,
+no windows. A player who wants a specific drop can keep raiding that specific raid boss.
 
-Locked Scourges should be **visible but locked** (like areas without `hideWhenLocked`), because a
+Locked Raid bosses should be **visible but locked** (like areas without `hideWhenLocked`), because a
 visible locked raid is aspirational and teaches that the content exists.
 
 ---
@@ -115,18 +117,18 @@ visible locked raid is aspirational and teaches that the content exists.
 
 | Term        | Meaning                                                             | Code shape                        |
 | ----------- | ------------------------------------------------------------------- | --------------------------------- |
-| **Scourge** | A regional raid boss. Content, not state. Permanent map fixture.    | `ScourgeDefinition` (JSON)        |
+| **raid boss** | A regional raid boss. Content, not state. Permanent map fixture.    | `RaidBossDefinition` (JSON)        |
 | **Raid**    | One player-created instance: a roster, three wings, one resolution. | `RaidRun` aggregate (`RaidRunId`) |
 | **Leader**  | The player who created the raid. Sorts the roster, starts it.       | `RaidRun.LeaderCharacterId`       |
 | **Signup**  | A request to join, freezing a snapshot.                             | `RaidSignup`                      |
 | **Wing**    | One of three sub-forces. 1:1 with a lane.                           | `RaidWing` (`RaidPartyId`)        |
 | **Lane**    | Vanguard / Flank / Ward — what a wing attacks.                      | `RaidLane` enum, → `StageKey`     |
 | **Muster**  | The recruiting phase.                                               | `RaidRunStatus.Mustering`         |
-| **Warhorn** | The consumable key the leader spends to create a raid.              | Inventory item                    |
+| **Raid Seal** | The consumable key the leader spends to create a raid.            | Inventory item                    |
 | **Trophy**  | Bounded raid currency.                                              | New currency                      |
 
 > **Naming check:** do not call the boss a "Warden" — `TowerFloorType.Warden` already exists and the
-> collision will be confusing in code and in the UI. "Scourge" is used throughout this document;
+> collision will be confusing in code and in the UI. "raid boss" is used throughout this document;
 > grep before committing to it.
 
 ---
@@ -135,16 +137,17 @@ visible locked raid is aspirational and teaches that the content exists.
 
 ```
    ┌─ CREATE ────────────────────────────────────────────────────────────┐
-   │  Player spends a Warhorn at a Scourge site on the World Map.       │
-   │  Picks tier. Raid appears publicly in that Scourge's raid list.    │
+   │  Player spends a Raid Seal at a raid boss site on the World Map.     │
+   │  Picks tier. Raid appears publicly in that raid boss's raid list.    │
    │  Creator becomes Leader. Signup window opens (default 24h).        │
    └──────────────────────────────┬──────────────────────────────────────┘
                                   ▼
    ┌─ MUSTER ───────────────────────────────────────────────────────────┐
    │  Anyone eligible signs up → CharacterSnapshot + PowerRating frozen │
    │  Leader sees the roster with power ratings and suggested fits       │
-   │  Leader drags signups into Vanguard / Flank / Ward wings            │
-   │  Leader may run a free Battle Plan preview (§6) any number of times │
+   │  New signups remain benched until the Leader assigns them           │
+   │  Leader clicks or drags them into exact Vanguard / Flank / Ward slots│
+   │  Leader may run free Battle Plan previews (§6), rate-limited 30/hour│
    └──────────────────────────────┬──────────────────────────────────────┘
                                   ▼
    ┌─ RESOLVE (leader presses Commence; worker-driven) ─────────────────┐
@@ -162,13 +165,9 @@ visible locked raid is aspirational and teaches that the content exists.
 ```
 
 **Auto-expiry.** If the leader never presses Commence, the raid auto-resolves at the end of the
-signup window with whatever assignment exists, or auto-cancels (refunding the Warhorn) if fewer than
+signup window with whatever assignment exists, or auto-cancels (refunding the Raid Seal) if fewer than
 the minimum roster signed up. A leader going offline must not strand a dozen people's snapshots.
 This is the single most important reliability rule in the design.
-
-**Leader succession.** If the leader has not logged in for 12h and the window is within 2h of
-closing, leadership passes to the highest-power participant who has logged in most recently. Cheap
-to implement, prevents dead raids.
 
 ---
 
@@ -179,7 +178,7 @@ creates a dependency chain**:
 
 ### 4.1 Flank — resolved first
 
-**Fights:** the Scourge's escort — an add group (3–6 creatures, authored per tier).
+**Fights:** the raid boss's escort — an add group (3–6 creatures, authored per tier).
 
 **Produces:** `ReinforcementPenalty`, a scalar in `[0, 1]`.
 
@@ -191,14 +190,14 @@ ReinforcementPenalty  = addsRemainingFraction
 Every add left alive reinforces the boss. Applied to the Vanguard battle as:
 
 - the surviving adds **join the Vanguard fight** as extra hostiles, and
-- the Scourge gains `+ (ReinforcementPenalty × MaxReinforceOffense)` offense (authored, e.g. 40%).
+- the raid boss gains `+ (ReinforcementPenalty × MaxReinforceOffense)` offense (authored, e.g. 40%).
 
-Clearing the Flank completely means the Vanguard fights the Scourge alone. Ignoring the Flank means
-the Vanguard fights the Scourge _and_ its whole escort, with the Scourge hitting 40% harder.
+Clearing the Flank completely means the Vanguard fights the raid boss alone. Ignoring the Flank means
+the Vanguard fights the raid boss _and_ its whole escort, with the raid boss hitting 40% harder.
 
 ### 4.2 Ward — resolved second
 
-**Fights:** the Scourge's protective ward — a high-mitigation, high-barrier, low-damage objective
+**Fights:** the raid boss's protective ward — a high-mitigation, high-barrier, low-damage objective
 creature, plus a small guard.
 
 **Produces:** `WardBreak`, a scalar in `[0, 1]`.
@@ -207,7 +206,7 @@ creature, plus a small guard.
 WardBreak = min(1, damageDealtToWard / wardHealth)
 ```
 
-Applied to the Vanguard battle as a reduction of the Scourge's defences:
+Applied to the Vanguard battle as a reduction of the raid boss's defences:
 
 - `Armor`, `Resistance` and `DamageReduction` reduced by `WardBreak × MaxWardBreakPercent`
   (authored, e.g. 50%).
@@ -218,19 +217,19 @@ allocation a tuning problem rather than a binary.
 
 ### 4.3 Vanguard — resolved last
 
-**Fights:** the Scourge itself, with `ReinforcementPenalty` and `WardBreak` applied, plus any
+**Fights:** the raid boss itself, with `ReinforcementPenalty` and `WardBreak` applied, plus any
 surviving Flank adds.
 
 **Produces:** the raid outcome.
 
 ```
-Slain      — Scourge reaches 0 HP within the tick budget
-Broken     — Scourge ends below 25% HP
-Wounded    — Scourge ends below 60% HP
-Repelled   — Scourge ends above 60% HP, or the Vanguard wipes
+Slain      — raid boss reaches 0 HP within the tick budget
+Broken     — raid boss ends below 25% HP
+Wounded    — raid boss ends below 60% HP
+Repelled   — raid boss ends above 60% HP, or the Vanguard wipes
 ```
 
-The Scourge has real, authored HP and can genuinely die inside one battle. `BattleOutcome.Victory`
+The raid boss has real, authored HP and can genuinely die inside one battle. `BattleOutcome.Victory`
 means what it says. There is no shared pool and no artificial HP slice.
 
 ### 4.4 Why this is a real decision
@@ -238,8 +237,8 @@ means what it says. There is no shared pool and no artificial HP slice.
 The leader's roster is finite. Three examples with the same 12 players:
 
 - **All strength into Vanguard.** Flank and Ward wings are weak → adds survive, ward holds → the
-  Vanguard meets a 40%-stronger Scourge at full mitigation, alongside six adds. Repelled.
-- **Even split.** Flank clears, Ward breaks ~60% → Vanguard meets a solo Scourge at ~70% mitigation.
+  Vanguard meets a 40%-stronger raid boss at full mitigation, alongside six adds. Repelled.
+- **Even split.** Flank clears, Ward breaks ~60% → Vanguard meets a solo raid boss at ~70% mitigation.
   Usually Wounded or Broken.
 - **Correct read.** Enough in Flank to fully clear (it's a low-HP-many-targets fight — multi-target
   builds shine), the minimum in Ward that still caps `WardBreak` (it's a sustained-damage-into-a-wall
@@ -249,13 +248,6 @@ Build identity matters _emergently_ — a multi-target build is genuinely better
 high-sustained-DPS build is genuinely better in Ward — without any role labels, eligibility checks,
 or assignment validation. That is the whole point of the "no roles" decision: the lanes do the work
 that roles would have done, and they do it through the combat sim rather than through metadata.
-
-### 4.5 Empty and short wings
-
-A wing may be left empty. Its battle is skipped and its output takes the worst value
-(`ReinforcementPenalty = 1`, `WardBreak = 0`). Starting a raid with an empty Flank is a legitimate,
-punishing choice. Wings may be uneven — 6/3/3 is allowed. Cap per wing is authored
-(`laneSlots`, e.g. 5), which is what bounds total roster size.
 
 ---
 
@@ -274,12 +266,12 @@ never fire on a small server. Under-strength raids should be _possible and hard_
 
 **Eligibility to sign up**, following the Tower's `GetJoinEligibilityAsync` precedent almost exactly:
 
-1. Character meets the Scourge's `levelRequirement` and any quest/area gate.
+1. Character meets the raid boss's `levelRequirement` and any quest/area gate.
 2. Character is not already committed to another raid in `Mustering` or `Resolving` status —
    one active raid per character.
 3. One slot per **account** per raid (`AccountId == character.UserId`), so alts cannot stack a roster.
 4. `PowerRating` must be in `PowerAnalysisState.Available` — the leader needs a number to allocate on.
-5. Character is not on personal cooldown for this Scourge (§8.3).
+5. Character is not on personal cooldown for this raid boss (§8.3).
 
 **Snapshot freeze.** Signing up calls `ICharacterSnapshotService.CreateAsync` and stores
 `CharacterSnapshotId` + `PowerRating` + `LoadoutHash` on the signup, mirroring
@@ -291,12 +283,32 @@ and the leader sees a "loadout updated" marker so their plan isn't silently inva
 This is the load-bearing simplification: it makes signup windows arbitrarily long, removes all
 scheduling, and means a raid resolves correctly at 04:00 with everyone asleep.
 
+### Party layout and benching
+
+The three existing wings are the Raid's parties. A wing has the tier-authored number of exact slots
+(three, four, or five), so no Raid party can exceed five players. Every newly created signup,
+including development-roster participants, starts with both `Lane` and `WingSlotIndex` unset and is
+shown on the **Bench**. Only the Raid Leader can change the layout while the Raid is mustering and the
+signup window remains open.
+
+The Leader can select a benched participant and then click a destination slot, drag the participant
+onto a slot, return an assigned participant to the Bench, distribute all benched participants, or
+auto-balance/reset the full layout. Each interaction submits the complete roster layout atomically;
+the server rejects missing participants, duplicate participants, partial lane/slot pairs, out-of-range
+slots, and duplicate occupied positions. A Raid cannot commence or generate a Battle Plan while any
+participant is benched, and all three parties must contain at least one player.
+
+Each wing resolves as its own combat encounter. Friendly and self-or-ally targeting therefore stays
+inside that Raid party. Hostile `TargetAllEnemies` effects continue to hit every friendly participant
+in the encounter; Raid combatants also carry their wing-derived party number for consistency with the
+shared combat targeting rules.
+
 ---
 
 ## 6. The Battle Plan preview — the leader's tool
 
-Allocation is only strategic if the leader can reason about it. Give them a **free, unlimited,
-stateless simulation** of the current assignment:
+Allocation is only strategic if the leader can reason about it. Give them a **free, stateless
+simulation** of the current assignment, protected by a 30-per-hour leader rate limit:
 
 - Runs all three lane battles at reduced sample count (8–12 seeds).
 - Reports per lane: expected outcome, a Wilson-interval confidence band, and the derived
@@ -312,7 +324,7 @@ Rate-limit it (e.g. 30/hour per leader) purely to protect the CPU, not as a game
 preview should feel free, because a leader who is afraid to experiment will just guess.
 
 > This is the feature that turns raids from a lottery into a puzzle. If scope must be cut, cut a
-> Scourge, not this.
+> raid boss, not this.
 
 ---
 
@@ -327,7 +339,7 @@ seed_base = stableHash(RaidRunId)
              → ReinforcementPenalty, survivingAdds
 2. Ward:     engine.Run(wardWing,     wardObjective) seed = seed_base ^ 0x22
              → WardBreak
-3. Vanguard: engine.Run(vanguardWing, [scourge(mods)] + survivingAdds)
+3. Vanguard: engine.Run(vanguardWing, [boss(mods)] + survivingAdds)
              seed = seed_base ^ 0x33
              → outcome, per-entity damage
 ```
@@ -346,7 +358,7 @@ Copy the `TowerAttempt` pattern rather than resolving inline in the request:
 - `RaidRun` carries `SimulationLeaseOwner`, `SimulationLeaseUntil`, `SimulationAttempts`.
 - A worker picks up `Resolving` raids, takes the lease, runs the three battles, writes results.
 - Write playback artifacts per wing (`TowerCombatPlayback` / `TowerCombatPlaybackArtifact` pattern:
-  gzipped compact bundle, ETag'd, `TicksPerFrame 10`) so participants can watch their own wing.
+  Brotli-compressed compact bundle, ETag'd, `TicksPerFrame 10`) so participants can watch their own wing.
 - Take an advisory lock per raid (`AcquireWorldTowerFloorLockAsync` is the precedent for a
   scoped advisory lock).
 - Broadcast progress via the outbox → `Audience.World()`, and post a world-chat line on a kill with
@@ -375,7 +387,7 @@ Contribution and lane outputs both read `EntityStats.DamageDone`. Four verified 
 - **Tick budget must be explicit.** `FastCombatEngineOptions.MaxTicks` defaults to 6000 and the
   executor's `ExecuteAsync` / `ExecuteWithCheckpointsAsync` hardcode 6000, but
   `CombatSimulationOptions` — the record callers actually construct for `ExecuteSimulationAsync` —
-  defaults to **1800**. State the raid tick budget per lane in the Scourge definition; the entire
+  defaults to **1800**. State the raid tick budget per lane in the raid boss definition; the entire
   difficulty model is calibrated against it.
 
 ### 7.4 A note on threat, since there are no roles
@@ -386,23 +398,23 @@ against four allies. **This design does not depend on that**, because it has no 
 still worth knowing: a Vanguard wing of five glass cannons will lose members unpredictably, and
 that emergent lesson ("bring somebody who can absorb hits") is a _desirable_ teaching moment rather
 than a mechanic to specify. If playtesting shows Vanguard outcomes are too random, raising
-`TauntThreatBonus` per Scourge is a free dial — it is a constructor option, no engine change.
+`TauntThreatBonus` per raid boss is a free dial — it is a constructor option, no engine change.
 
 ---
 
 ## 8. Costs, cooldowns and anti-abuse
 
-### 8.1 The Warhorn — the leader's cost
+### 8.1 The Raid Seal — the leader's cost
 
-Creating a raid consumes one **Warhorn**, held by the leader only. Signing up is free — charging
+Creating a raid consumes one **Raid Seal**, held by the leader only. Signing up is free — charging
 participants would suppress the roster, which is the resource the design actually needs.
 
-Warhorns follow the sigil pattern exactly (`DungeonDefinition.EntryCosts` +
+Raid Seals follow the sigil pattern exactly (`DungeonDefinition.EntryCosts` +
 `SigilAssemblyCost` + `sigil-assembly.json`): they drop from tier-appropriate dungeons and areas,
-and can be assembled from **Warhorn Fragments**. This makes leading a raid an earned act, gives
-Scourge-tier progression a material gate, and reuses a system players already understand.
+and can be assembled from **Raid Seal Fragments**. This makes leading a raid an earned act, gives
+raid boss-tier progression a material gate, and reuses a system players already understand.
 
-Suggested: Tier I Warhorn = 20 fragments; Tier II = 40; Tier III = 70. Refunded in full on
+Suggested: Tier I Raid Seal = 20 fragments; Tier II = 40; Tier III = 70. Refunded in full on
 auto-cancel (insufficient roster), not refunded on a Repelled outcome — losing must cost something.
 
 ### 8.2 Participation locks
@@ -410,17 +422,17 @@ auto-cancel (insufficient roster), not refunded on a Repelled outcome — losing
 - **One active raid per character** (`Mustering` or `Resolving`) — the Tower's
   `ActiveRallyStatuses` check, verbatim in spirit.
 - **One slot per account per raid** — blocks alt-stacking a roster.
-- **One raid led at a time per character** — blocks a player farming Warhorns into a dozen
+- **One raid led at a time per character** — blocks a player farming Raid Seals into a dozen
   simultaneous raids they never resolve.
-- **Global cap on open raids per Scourge** (e.g. 20), oldest-expiring shown first, so the map list
+- **Global cap on open raids per raid boss** (e.g. 20), oldest-expiring shown first, so the map list
   stays readable on a busy server.
 
 ### 8.3 Reward cooldown, not attempt cooldown
 
 Signing up is unlimited. **Rewards** are capped: a character receives full rewards from a given
-Scourge **once per ISO week**, enforced by a `RaidRewardClaim { ScourgeId, CharacterId, WeekKey }`
+raid boss **once per ISO week**, enforced by a `RaidRewardClaim { RaidBossId, CharacterId, WeekKey }`
 row — precisely the `TowerEchoClear { ServerId, FloorNumber, CharacterId, WeekKey, ClearedAt }`
-pattern. Subsequent raids on the same Scourge that week pay **25%** (Trophies and materials only,
+pattern. Subsequent raids on the same raid boss that week pay **25%** (Trophies and materials only,
 no blueprint or jackpot rolls).
 
 This is the right shape because it lets a veteran help a friend's raid without being told "you have
@@ -481,31 +493,31 @@ bounded currency, prestige. **No guild currencies** (raids have no guild involve
 **no meaningful Cinders** (Cinders already have many faucets and almost no permanent sink; adding an
 endgame Cinder faucet would worsen a known inflation problem).
 
-- **Trophies** — bounded raid currency, spent at a Scourge-site vendor. Bounded by the weekly
+- **Trophies** — bounded raid currency, spent at a raid boss-site vendor. Bounded by the weekly
   reward cap rather than by attempts.
-- **Blueprints first, finished gear rarely.** Each Scourge owns a raid-exclusive blueprint family.
+- **Blueprints first, finished gear rarely.** Each raid boss owns a raid-exclusive blueprint family.
   Blueprints route power through crafting, which already consumes tiered materials, special
   materials, Potential and blueprint copies — all healthy sinks. Two groups who both kill the same
-  Scourge still differentiate on crafting. Blueprint copies stay marketplace-tradeable so
+  raid boss still differentiate on crafting. Blueprint copies stay marketplace-tradeable so
   non-raiders care that raids exist; finished raid gear is bound. A small chance (≈8% at Slain) of a
   finished **Unique**, much smaller for **Legendary**, keeps the jackpot moment.
-- **Essence progression** — Soul Dust, monster cores, and evolution catalysts in quantity. Scourge
+- **Essence progression** — Soul Dust, monster cores, and evolution catalysts in quantity. raid boss
   catalysts should be the best source in the game, since essence progression is currently
-  catalyst-starved. Plus one raid-exclusive **Scourge Essence** per boss, low drop rate with a
+  catalyst-starved. Plus one raid-exclusive **Raid Boss Essence** per boss, low drop rate with a
   Trophy purchase as a deterministic pity path.
-- **Prestige** — first server kill of each Scourge gets a world-chat announcement (the
+- **Prestige** — first server kill of each raid boss gets a world-chat announcement (the
   `WorldTowerChatGameEventOutboxConsumer` pattern already exists), a title and a banner. Cheap to
   build, disproportionately motivating.
 
 Reward tables in `rewards/reward-tables.json`, following existing namespacing:
 
 ```
-reward.raid.<scourge>.tier<N>.slain
-reward.raid.<scourge>.tier<N>.broken
-reward.raid.<scourge>.tier<N>.wounded
-reward.raid.<scourge>.tier<N>.repelled
-reward.raid.<scourge>.tier<N>.first_kill
-reward.raid.<scourge>.tier<N>.reduced      // post-weekly-cap, 25% payout
+reward.raid.<raid-boss>.tier<N>.slain
+reward.raid.<raid-boss>.tier<N>.broken
+reward.raid.<raid-boss>.tier<N>.wounded
+reward.raid.<raid-boss>.tier<N>.repelled
+reward.raid.<raid-boss>.tier<N>.first_kill
+reward.raid.<raid-boss>.tier<N>.reduced      // post-weekly-cap, 25% payout
 ```
 
 `WeightedWithNoDrop` rolls for jackpots, `All` rolls for the guaranteed Trophy/material floor.
@@ -515,8 +527,8 @@ not fanned out on resolution.
 
 ### 9.4 A leaderboard, since one is cheap
 
-`LeaderboardBoardKey` already has 14 board keys and no raid board. Add `raid-scourge-kills` and
-per-Scourge `fastest-slain` (by Vanguard `Duration` in ticks). The infrastructure
+`LeaderboardBoardKey` already has 14 board keys and no raid board. Add `raid-boss-kills` and
+per-raid boss `fastest-slain` (by Vanguard `Duration` in ticks). The infrastructure
 (`LeaderboardEntry`/`Board`/`Ranking`/`Cursor`) exists; this is close to free and gives raids a
 long tail.
 
@@ -524,30 +536,30 @@ long tail.
 
 ## 10. Content authoring
 
-`src/API/API.LL/Data/raids/scourges.json`, following the proven `tower-floors.json` shape.
+`src/API/API.LL/Data/raids/raid-bosses.json`, following the proven `tower-floors.json` shape.
 
 ```json
 {
-  "id": "scourge.ashen_colossus",
-  "name": "The Ashen Colossus",
+  "id": "raid-boss.hives-abyss",
+  "name": "The Hive's Abyss",
   "region": 1,
   "levelRequirement": 25,
   "requiredCompletedQuestId": null,
   "requiredTowerFloor": null,
-  "imagePath": "…",
+  "imagePath": "ant_queen",
   "tiers": [
     {
       "tier": 1,
       "laneSlots": 3,
       "minimumRoster": 3,
       "signupWindowHours": 24,
-      "warhornItemId": "warhorn_ashen",
+      "raidSealItemId": "raid_seal_hives_abyss",
       "recommendedWingPower": { "vanguard": 210, "flank": 150, "ward": 160 },
       "tickBudget": { "vanguard": 6000, "flank": 3000, "ward": 4000 },
 
-      "scourge": {
+      "boss": {
         "creatureId": "…",
-        "abilityProfileId": "monster.ashen_colossus",
+        "abilityProfileId": "monster.ant_queen",
         "scaling": {
           "health": 42.0,
           "offense": 26.0,
@@ -556,6 +568,9 @@ long tail.
           "penetration": 5.0,
           "regeneration": 3.0
         },
+        "variants": [
+          { "creatureId": "…ant_king", "spawnChancePercent": 8 }
+        ],
         "maxReinforceOffensePercent": 40,
         "maxWardBreakPercent": 50,
         "tauntThreatBonus": 100,
@@ -564,7 +579,7 @@ long tail.
       },
 
       "flank": {
-        "addGroupId": "raid.ashen.cinder_thralls",
+        "addGroupId": "raid.hive.worker_brood",
         "adds": [
           {
             "creatureId": "…",
@@ -599,27 +614,26 @@ long tail.
       },
 
       "rewardTableIds": {
-        "slain": "reward.raid.ashen_colossus.tier1.slain",
-        "broken": "reward.raid.ashen_colossus.tier1.broken",
-        "wounded": "reward.raid.ashen_colossus.tier1.wounded",
-        "repelled": "reward.raid.ashen_colossus.tier1.repelled",
-        "firstKill": "reward.raid.ashen_colossus.tier1.first_kill",
-        "reduced": "reward.raid.ashen_colossus.tier1.reduced"
+        "slain": "reward.raid.hives_abyss.tier1.slain",
+        "broken": "reward.raid.hives_abyss.tier1.broken",
+        "wounded": "reward.raid.hives_abyss.tier1.wounded",
+        "repelled": "reward.raid.hives_abyss.tier1.repelled",
+        "firstKill": "reward.raid.hives_abyss.tier1.first_kill",
+        "reduced": "reward.raid.hives_abyss.tier1.reduced"
       }
     }
   ]
 }
 ```
 
-Provided by `IScourgeDefinitionProvider` / `JsonScourgeDefinitionProvider`, validated at startup by
-a `ScourgeDefinitionValidator` in the same pattern as `DungeonDefinitionValidator` /
-`RewardTableDefinitionValidator`: unique ids, reward-table existence, ability-profile existence,
-positive health, `minimumRoster ≤ laneSlots × 3`, non-null add group when Flank is authored.
+Provided by `IRaidBossDefinitionProvider` / `JsonRaidBossDefinitionProvider` and validated at startup:
+unique ids, positive timing and roster values, `minimumRoster ≤ laneSlots × 3`, authored boss/Flank/Ward
+creatures, group spawn chances in `(0, 100]`, and cumulative boss-variant chance no greater than 100%.
 
 **Apply scaling the way `WorldTowerGuardianScaling.Apply` does** — convert each multiplier to a
 `DungeonAttributeModifier(attr, (m-1)*100, ModifierType.Multiplicative)`.
 
-> **Do not route Scourge scaling through `BossProfiles.RaidBoss`.** It exists with plausible
+> **Do not route raid boss scaling through `BossProfiles.RaidBoss`.** It exists with plausible
 > multipliers (Health ×6.0, Damage ×2.0, Defense ×2.0, Speed ×1.1, Cdr ×1.3) but is effectively dead
 > code: nothing in the JSON pipeline reads `BossRank` or calls `BossProfiles.Get`, and
 > `CreatureTemplate.IsBoss`/`BossRank` are authoring-only types with no JSON producer. Author
@@ -629,8 +643,8 @@ positive health, `minimumRoster ≤ laneSlots × 3`, non-null add group when Fla
 
 The ability system already supports HP-threshold phases via the shipped Garran idiom:
 `OnHealthChanged` + `HealthAtOrBelowPercent` + a stack-guard status so each threshold fires once.
-Since a Scourge's HP _is_ meaningfully depleted in the Vanguard battle, real HP-gated phases work
-here — unlike the shared-pool design, this is the natural fit. Use them: a Scourge that summons
+Since a raid boss's HP _is_ meaningfully depleted in the Vanguard battle, real HP-gated phases work
+here — unlike the shared-pool design, this is the natural fit. Use them: a raid boss that summons
 reinforcements at 50% makes the Flank wing's job feel consequential retroactively.
 
 There is no declarative phase container and nothing consumes `RaidEncounterSourceContext.PhaseIndex`
@@ -640,10 +654,10 @@ today; model phases as ability triggers, not as an engine phase machine.
 
 ## 11. Tuning
 
-### 11.1 Sizing the Scourge
+### 11.1 Sizing the raid boss
 
 ```
-ScourgeHealth = ExpectedVanguardDPS × TargetFightSeconds × ClearTargetFraction
+BossHealth = ExpectedVanguardDPS × TargetFightSeconds × ClearTargetFraction
 
 ExpectedVanguardDPS = per-character DPS at recommendedWingPower × laneSlots
 TargetFightSeconds  = 240–420   (well inside the 600 s tick budget)
@@ -670,9 +684,9 @@ the intended lane identities into the calibration itself.
 
 ### 11.3 Version gates
 
-Add `RaidRulesVersion` (starting at 1) alongside `PowerRatingAlgorithm.Version` (23),
-`CombatRulesVersion` (11) and the rating-definition version (13). Bumping any invalidates cached
-recommended power. **Scourge health and lane parameters must not change a raid already in
+Add `RaidRulesVersion` (starting at 1) alongside `PowerRatingAlgorithm.Version` (25),
+`CombatRulesVersion` (14) and the rating-definition version (16). Bumping any invalidates cached
+recommended power. **raid boss health and lane parameters must not change a raid already in
 `Mustering`** — pin the resolved tier definition (or its hash) onto `RaidRun` at creation, so a
 content deploy cannot alter a raid people have already signed up for.
 
@@ -682,10 +696,10 @@ content deploy cannot alter a raid people have already signed up for.
 
 New folder `Core/Domain/Models/Raids/`:
 
-- `ScourgeDefinition`, `ScourgeTierDefinition`, `ScourgeLaneDefinition` — content records from JSON.
-- `RaidRun` (aggregate) — `Id, ScourgeId, Tier, DefinitionHash, LeaderCharacterId, RaidRunStatus,
+- `RaidBossDefinition`, `RaidBossTierDefinition`, `RaidBossLaneDefinition` — content records from JSON.
+- `RaidRun` (aggregate) — `Id, RaidBossId, Tier, DefinitionHash, LeaderCharacterId, RaidRunStatus,
 CreatedAt, SignupClosesAt, CommencedAt, ResolvedAt, SettledAt, WeekKey,
-ReinforcementPenalty?, WardBreak?, ScourgeHealthRemainingPercent?, RaidOutcome?,
+ReinforcementPenalty?, WardBreak?, BossHealthRemainingPercent?, RaidOutcome?,
 SimulationLeaseOwner?, SimulationLeaseUntil?, SimulationAttempts, uint RowVersion`.
 - `RaidRunStatus { Mustering, Resolving, Resolved, Settled, Cancelled, Expired }`.
 - `RaidOutcome { Repelled, Wounded, Broken, Slain }`.
@@ -699,32 +713,35 @@ TotalFriendlyDamage, ObjectiveDamage, ObjectiveBarrierAbsorbed, SurvivingHostile
 DerivedModifier, PlaybackId?`.
 - `RaidParticipantResult` — `RaidRunId, CharacterId, RaidLane, DamageDone (incl. summons),
 DeathTick?, ContributionScore, PayoutMultiplier, ContributionRank`.
-- `RaidRewardClaim` — `ScourgeId, CharacterId, WeekKey, ClaimedAt, WasReduced`.
+- `RaidRewardClaim` — `RaidBossId, CharacterId, WeekKey, ClaimedAt, WasReduced`.
 - `RaidPlayback` / `RaidPlaybackArtifact` — mirror `TowerCombatPlayback*`.
 
 Commands under `Core/Application/UseCases/Raids/Commands/`:
 `CreateRaidCommand`, `JoinRaidCommand`, `LeaveRaidCommand`, `RefreshRaidSnapshotCommand`,
-`AssignRaidWingCommand`, `PreviewRaidBattlePlanCommand` (query — persists nothing),
+`AssignRaidWingCommand`, `UpdateRaidPartiesCommand`, `PreviewRaidBattlePlanCommand` (query — persists nothing),
 `CommenceRaidCommand`, `ResolveRaidCommand` (worker), `ClaimRaidRewardsCommand`,
-`CancelRaidCommand`, `AssembleWarhornCommand`, `TransferRaidLeadershipCommand`.
+`CancelRaidCommand`, `AssembleRaidSealCommand`, `TransferRaidLeadershipCommand`.
 
 Endpoints, following `POST /api/v1/<feature>/<action>`:
 
 ```
-GET  /api/v1/raids/scourges                  → map rail + inline panel data
-GET  /api/v1/raids/scourges/{id}/open        → open raids at this site
+GET  /api/v1/raids/bosses                       → map rail + inline panel data
+GET  /api/v1/raids/bosses/{id}/open             → open raids at this site
 POST /api/v1/raids/create
 POST /api/v1/raids/{id}/join
 POST /api/v1/raids/{id}/leave
+POST /api/v1/raids/{id}/cancel
+POST /api/v1/raids/{id}/transfer-leadership → { characterId }
 POST /api/v1/raids/{id}/loadout
 POST /api/v1/raids/{id}/assign               → { characterId, lane, slotIndex }
+PUT  /api/v1/raids/{id}/parties              → { assignments: [{ characterId, lane?, wingSlotIndex? }] }
 POST /api/v1/raids/{id}/battle-plan          → preview, stateless
 POST /api/v1/raids/{id}/commence
 POST /api/v1/raids/{id}/claim
 GET  /api/v1/raids/{id}
 GET  /api/v1/raids/{id}/lanes/{lane}/playback
 GET  /api/v1/raids/active                    → this character's current raid
-POST /api/v1/raids/scourges/{id}/assemble-warhorn
+POST /api/v1/raids/bosses/{id}/assemble-raid-seal
 ```
 
 Realtime — add to `GameRealtimeEventNames`, dispatch via the outbox to `Audience.World()` for
@@ -738,11 +755,11 @@ Frontend touch list (all confirmed to exist):
 
 1. `features/game/world/region/region.component.html` — the `activity-panel raids` section: swap the
    data source, make rows clickable mirroring `selectDungeon`.
-2. `features/game/world/region/region.component.ts` — add `regionScourges()`, `selectedScourgeId`,
-   `selectScourge()`.
+2. `features/game/world/region/region.component.ts` — add `regionRaidBosses()`, `selectedRaidBossId`,
+   `selectRaidBoss()`.
 3. `features/game/world/region/raids/raids.component.*` — fill the existing empty placeholder with
    the inline panel, mirroring `region/dungeons/dungeons.component.ts`.
-4. New `shared/components/raids/scourge-card/` and `raid-muster/` (roster + wing assignment UI),
+4. New `shared/components/raids/raid-boss-card/` and `raid-muster/` (roster + wing assignment UI),
    mirroring `shared/components/dungeons/dungeon-card/`.
 5. `features/game/world/world.routes.ts` — add `raid/:raidId` (muster + result view) alongside
    `dungeon` and `tower/expeditions/:rallyId`; register a `GUIDE_PAGE_IDS` entry in
@@ -755,7 +772,7 @@ Frontend touch list (all confirmed to exist):
    `RegionController` call (§1).
 
 Backend: `API/API.LL/Controllers/V1/RaidController.cs`,
-`Infrastructure/Service/Services.LL/Raids/`, `Data/raids/scourges.json` + provider + validator,
+`Infrastructure/Service/Services.LL/Raids/`, `Data/raids/raid-bosses.json` + provider + validator,
 DbSets in `LLDbContext.cs`, a migration, and an outbox consumer alongside
 `RealtimeWorldTowerGameEventOutboxConsumer.cs`.
 
@@ -789,19 +806,19 @@ source context.")` for `RaidEncounterSourceContext`. Implement that branch prope
 
 ## 13. Phasing
 
-**Phase 1 — MVP.** One Tier I Scourge in Shenic. Create / sign up / assign three wings / commence.
+**Phase 1 — MVP (shipped).** One Tier I raid boss in Shenic. Create / sign up / assign three wings / commence.
 Three-lane resolution with `ReinforcementPenalty` and `WardBreak`. Graded outcome. Lane-fair
-contribution and payout. Reward tables + Trophies. World Map Raids panel populated and clickable.
-Warhorn + fragment assembly. Weekly reward cap. Auto-expiry and leader succession. Implement the
+contribution and payout. Authored rewards + Trophies. World Map Raids panel populated and clickable.
+Raid Seal + fragment assembly. Weekly reward cap. Auto-expiry with Raid Seal refunds. Implement the
 `CombatantFactory` raid branch and extract the snapshot→combatant service.
 
-**Phase 2 — Depth.** Battle Plan preview (§6). Per-wing playback. Tier II + a second Scourge in
-Meran. Scourge-site Trophy vendor. Raid-exclusive blueprint families. Simulation-backed recommended
+**Phase 2 — Depth (shipped).** Battle Plan preview (§6). Per-wing playback. Tier II + a second raid boss in
+Meran. raid boss-site Trophy vendor. Raid-exclusive blueprint families. Simulation-backed recommended
 wing power via `RaidPowerCalibrationWorker`. Raid leaderboards.
 
-**Phase 3 — Spectacle.** Tier III. HP-gated Scourge phases that reach across lanes (a Scourge that
+**Phase 3 — Spectacle (shipped).** Tier III. HP-gated raid boss phases that reach across lanes (a raid boss that
 summons at 50%, making a cleared Flank retroactively valuable). First-kill world announcements and
-titles. Cross-region Scourge with unique mechanics.
+titles. Cross-region raid boss with unique mechanics.
 
 **Deliberately deferred:** guild integration of any kind, more than three lanes, live/synchronous
 raiding, in-fight player control, seasons.
@@ -812,8 +829,8 @@ raiding, in-fight player control, seasons.
 
 | Risk                                          | Mitigation                                                                                                                                                                                                                                                    |
 | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Not enough players sign up on a small server  | `minimumRoster` is a third of max; under-strength raids are allowed and hard. Empty wings are legal. Tier I sized for 3.                                                                                                                                      |
-| Leader goes offline and strands the roster    | Auto-resolve or auto-cancel at window close; leader succession after 12h idle (§3). Non-negotiable.                                                                                                                                                           |
+| Not enough players sign up on a small server  | `minimumRoster` is a third of max; under-strength raids are allowed and hard. All three wings must be staffed. Tier I is sized for 3.                                                                                                                         |
+| Leader goes offline and strands the roster    | Auto-resolve a valid roster or auto-cancel and refund its Raid Seal when the signup window closes.                                                                                                                                                            |
 | Allocation feels like a guess                 | The Battle Plan preview is the answer. If it slips, raids feel like a lottery — protect it in scope.                                                                                                                                                          |
 | Players resent being assigned the boring wing | Lane-fair contribution (§9.1) + 70% floor payout. All lanes weighted equally by construction.                                                                                                                                                                 |
 | Toxic leaders excluding people                | Signups are first-come and public; a leader can't kick after commence. Consider capping how many signups a leader may decline per raid if it becomes a problem.                                                                                               |
@@ -823,24 +840,23 @@ raiding, in-fight player control, seasons.
 
 ---
 
-## 15. Open questions
+## 15. Shipped implementation decisions
 
-1. **Should the leader approve signups, or is it first-come-first-served?** The Tower uses
-   leader-approved applications. First-come is friendlier and less work; approval gives leaders
-   control over roster quality. Recommendation: **first-come into an unassigned pool**, with the
-   leader's power being _allocation_, not admission. Revisit if griefing appears.
-2. **Can a player sign up to a raid whose tier is far above their level?** Allowing it means
-   under-levelled players get carried; blocking it means small servers can't fill rosters.
-   Recommendation: allow, but exclude from `firstKill` and jackpot rolls below a power floor.
-3. **Three lanes forever, or is lane count per Scourge?** Three is the design's spine and the UI is
-   built for it. A two-lane Tier I tutorial Scourge might teach better. Worth a playtest.
-4. **Does the leader get a bonus?** They spend the Warhorn and do the work. A modest Trophy bonus
-   (+15%) seems fair; anything larger creates lead-farming. Confirm.
-5. **Signup window length** — 24h default is a guess. Long enough that a small server can fill,
-   short enough that raids feel live. Instrument fill-rate-vs-window before authoring Tier II.
-6. **Is `Region.cs`'s commented-out `ICollection<Raid> Raids` the intended model?** Attaching
-   Scourges to `Region` in the domain is cleaner than the `"region": 1` int that dungeons use, but it
-   diverges from the dungeon precedent. Pick one convention for both and say so.
+1. **Signups are first-come-first-served.** Eligible characters enter an unassigned pool. The leader
+   controls allocation, not admission.
+2. **Raid boss unlock gates apply to every signup.** A character below the authored level, quest, or
+   World Tower requirement cannot join; there is no carry exception for first-kill rewards.
+3. **Every raid uses exactly three lanes.** Vanguard, Flank, and Ward are fixed parts of the system's
+   identity and its UI.
+4. **Leadership has no payout multiplier.** Contribution remains lane-fair. A transferred leader can
+   manage the raid, while cancellation refunds the Raid Seal to the character who originally spent it.
+5. **Signup windows are authored per tier.** Current content uses 18–24 hours. Fill-rate telemetry
+   should inform later content changes.
+6. **Raid boss regions follow the dungeon content convention.** JSON owns the numeric primary region;
+   the optional `regions` array exposes a raid boss in additional regions. No `Region` navigation is
+   added to the domain.
+7. **New participants start on the Bench.** Vanguard, Flank, and Ward are parties of at most five;
+   the Leader owns exact-slot assignment through an atomic full-layout update.
 
 ---
 
@@ -865,16 +881,17 @@ and `TauntThreatBonus` · `CharacterSnapshot` + `ICharacterSnapshotService.Creat
 `WorldTowerChatGameEventOutboxConsumer` world-chat pattern · `LeaderboardBoardKey` infrastructure ·
 `EntityStats.DamageDone` · advisory lock helpers.
 
-**Must be built:**
-All raid domain models, EF configs, DbSets and a migration (zero `Raid` DbSets today, no
-`Domain/Models/Raids` folder) · `Data/raids/scourges.json` + provider + validator ·
-`CombatantFactory` branch for `RaidEncounterSourceContext` (currently throws) · a **public
-snapshot→combatant service** extracted from the two private implementations · three-lane resolution
-pipeline and modifier derivation · lane-fair contribution maths · Battle Plan preview ·
-resolution worker + playback artifacts · Warhorn item + fragment assembly ·
-`RaidPowerCalibrationWorker` · World Map rail population, raid muster UI, routes, realtime handler ·
-server-side region endpoint wiring · `raid` `StateSyncScopes` const **and** grouping-list entry ·
-summon-aware damage attribution when summing `EntityStats`.
+**Implemented for Raids:**
+raid domain models, EF configs, DbSets and migrations · JSON raid-boss and Trophy-vendor catalogs with
+startup validation · the `CombatantFactory` raid branch and shared `ISnapshotCombatantBuilder` ·
+three-lane resolution and lane-fair, summon-aware contribution · Battle Plan previews · leased
+resolution worker and Brotli playback artifacts · Raid Seal assembly · persisted, version-gated
+`RaidPowerCalibrationWorker` recommendations · World Map rail, muster/result UI, routes and state-sync
+invalidation · Trophy vendor and raid blueprint families · aggregate and per-boss speed leaderboards ·
+first-kill titles and world-chat announcements · explicit cancellation and leadership transfer with
+refund ownership preserved · Tier II/III and cross-region raid-boss content.
+Raid muster additionally includes a bench-first, exact-slot three-party layout with click/drag
+placement, distribution and auto-balance controls, plus atomic server-side layout validation.
 
 **Do not build on:** `BossProfiles.RaidBoss` / `BossRank` / `CreatureTemplate.IsBoss` —
 authoring-only types with no JSON producer and no live consumer.

@@ -13,6 +13,16 @@ namespace EssenceSystem.Tests;
 
 public sealed class WorldTowerTests
 {
+    [Theory]
+    [InlineData(3, 1)]
+    [InlineData(5, 1)]
+    [InlineData(10, 2)]
+    [InlineData(15, 3)]
+    public void PartyCountUsesAtMostFiveSlotsPerParty(int requiredSlots, int expectedParties)
+    {
+        Assert.Equal(expectedParties, WorldTowerPartyRules.GetPartyCount(requiredSlots));
+    }
+
     [Fact]
     public void MultiPhaseStartCommandOwnsItsTransactionBoundaries()
     {

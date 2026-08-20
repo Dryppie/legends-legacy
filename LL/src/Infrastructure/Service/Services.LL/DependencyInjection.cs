@@ -21,6 +21,7 @@ using Application.Interfaces.Services.LL.Professions;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Services.LL.Regions;
 using Application.Interfaces.Services.LL.Rewards;
+using Application.Interfaces.Services.LL.Raids;
 using Application.Interfaces.Services.LL.WorldTower;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Runs;
@@ -87,6 +88,7 @@ using Services.LL.Professions.Craftings;
 using Services.LL.Providers;
 using Services.LL.Regions;
 using Services.LL.Regions.Areas;
+using Services.LL.Raids;
 using Services.LL.Rewards;
 using Services.LL.Snapshots;
 using Services.LL.Soulstones;
@@ -96,6 +98,7 @@ using Services.LL.Users;
 using Services.LL.WorldTower;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Options;
 
 namespace Services.LL;
 public static class DependencyInjection
@@ -319,6 +322,37 @@ public static class DependencyInjection
         services.AddScoped<ICombatService, CombatService>();
         services.AddScoped<ICombatSetupService, CombatSetupService>();
         services.AddScoped<ICombatStatsAggregator, CombatStatsAggregator>();
+        services.AddOptions<ThreatAndTankingOptions>()
+            .Bind(config.GetSection(ThreatAndTankingOptions.SectionName))
+            .Validate(options =>
+                    options.AttentionExponent >= 1
+                    && options.MinimumAttentionWeight > 0
+                    && options.MaximumAttentionWeight >= options.MinimumAttentionWeight
+                    && options.ThreatHalfLifeSeconds >= 0
+                    && float.IsFinite(options.ProtectiveSelfThreatPerSecond)
+                    && options.ProtectiveSelfThreatPerSecond >= 0
+                    && float.IsFinite(options.ProtectiveAllyThreatPerSecond)
+                    && options.ProtectiveAllyThreatPerSecond >= 0
+                    && float.IsFinite(options.RetaliationThreatPerSecond)
+                    && options.RetaliationThreatPerSecond >= 0
+                    && float.IsFinite(options.SupportAllyThreatPerSecond)
+                    && options.SupportAllyThreatPerSecond >= 0
+                    && float.IsFinite(options.HardControlThreatPerSecond)
+                    && options.HardControlThreatPerSecond >= 0
+                    && float.IsFinite(options.SoftControlThreatPerSecond)
+                    && options.SoftControlThreatPerSecond >= 0
+                    && float.IsFinite(options.DamageThreatPerSecond)
+                    && options.DamageThreatPerSecond >= 0
+                    && float.IsFinite(options.SelfSustainThreatPerSecond)
+                    && options.SelfSustainThreatPerSecond >= 0
+                    && float.IsFinite(options.UtilityThreatPerSecond)
+                    && options.UtilityThreatPerSecond >= 0
+                    && options.CoverBudgetMaxHealthFraction >= 0
+                    && options.DefaultSummonThreatMultiplier >= 0,
+                "Threat and tanking settings are invalid.")
+            .ValidateOnStart();
+        services.AddSingleton(sp =>
+            sp.GetRequiredService<IOptions<ThreatAndTankingOptions>>().Value.ToAbilityThreatTuning());
 
         services.AddScoped<ICraftingService, CraftingService>();
         services.Configure<CraftingBalanceOptions>(config.GetSection("Crafting:Balance"));
@@ -397,7 +431,8 @@ public static class DependencyInjection
             new JsonAbilityCatalogProvider(
                 config,
                 contentRootPath,
-                sp.GetRequiredService<JsonSerializerOptions>()));
+                sp.GetRequiredService<JsonSerializerOptions>(),
+                sp.GetRequiredService<IOptions<ThreatAndTankingOptions>>().Value));
         services.AddScoped<IAbilityCatalogDiagnostics, AbilityCatalogDiagnostics>();
         services.AddScoped<IAbilityBalanceSimulator, AbilityBalanceSimulator>();
         services.AddScoped<IAbilityBalanceAuditService, AbilityBalanceAuditService>();
@@ -425,6 +460,7 @@ public static class DependencyInjection
         services.AddScoped<PowerBuildSnapshotFactory>();
         services.AddScoped<CanonicalEquipmentBuildFactory>();
         services.AddScoped<IWorldTowerDevelopmentRosterFactory, WorldTowerDevelopmentRosterFactory>();
+        services.AddScoped<IRaidDevelopmentRosterFactory, RaidDevelopmentRosterFactory>();
         services.AddScoped<PowerAnalysisSimulationRunner>();
         services.AddScoped<PowerRatingService>();
         services.AddScoped<IPowerRatingService>(sp => sp.GetRequiredService<PowerRatingService>());
@@ -433,6 +469,10 @@ public static class DependencyInjection
         services.AddSingleton<IDungeonPowerRecommendationStore, DungeonPowerRecommendationStore>();
         services.AddScoped<IDungeonPowerAnalyzer, DungeonPowerAnalyzer>();
         services.AddScoped<IDungeonReadinessService, DungeonReadinessService>();
+        services.Configure<RaidPowerCalibrationOptions>(
+            config.GetSection(RaidPowerCalibrationOptions.SectionName));
+        services.AddSingleton<IRaidPowerRecommendationStore, RaidPowerRecommendationStore>();
+        services.AddScoped<IRaidPowerAnalyzer, RaidPowerAnalyzer>();
         services.AddScoped<IPowerAnalysisDiagnostics, PowerAnalysisDiagnostics>();
         services.AddSingleton<IPowerPredictionTelemetryBuffer, PowerPredictionTelemetryBuffer>();
         services.AddScoped<IEssenceResonanceService, EssenceSystemService>();
@@ -499,6 +539,25 @@ public static class DependencyInjection
         services.AddScoped<IWorldTowerService, WorldTowerService>();
         services.AddScoped<IWorldTowerBalanceAnalyzer, WorldTowerBalanceAnalyzer>();
         services.AddScoped<IWorldTowerWorkLeaseService, WorldTowerWorkLeaseService>();
+        services.AddOptions<RaidOptions>()
+            .Bind(config.GetSection(RaidOptions.SectionName))
+            .PostConfigure(options =>
+                options.DevelopmentToolsEnabled =
+                    isDevelopment
+                    && config.GetValue<bool>("FeatureManagement:RaidDevelopmentTools"));
+        services.AddSingleton<IRaidBossDefinitionProvider>(sp =>
+            new JsonRaidBossDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddSingleton<IRaidTrophyVendorCatalog>(sp =>
+            new JsonRaidTrophyVendorCatalog(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddScoped<IRaidCombatResolver, RaidCombatResolver>();
+        services.AddScoped<IRaidPlaybackBundleBuilder, RaidPlaybackBundleBuilder>();
+        services.AddScoped<IRaidService, RaidService>();
 
         services.AddScoped<ILootService, LootService>();
         services.AddSingleton<IRewardTableDefinitionValidator, RewardTableDefinitionValidator>();
@@ -575,6 +634,7 @@ public static class DependencyInjection
         services.AddScoped<IGameEventOutboxConsumer, TransferChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, TournamentChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, WorldTowerChatGameEventOutboxConsumer>();
+        services.AddScoped<IGameEventOutboxConsumer, RaidChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, EventQuestChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, GuildChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, GuildVaultChatGameEventOutboxConsumer>();
@@ -631,6 +691,7 @@ public static class DependencyInjection
         services.AddScoped<ICombatEngineExecutor, CombatEngineExecutor>();
         services.AddScoped<ICombatEncounterResultFactory, CombatEncounterResultFactory>();
         services.AddScoped<ICombatantFactory, CombatantFactory>();
+        services.AddScoped<ISnapshotCombatantBuilder, SnapshotCombatantBuilder>();
 
         // Outcome layer
         services.AddScoped<ICombatOutcomeCoordinator, CombatOutcomeCoordinator>();

@@ -5,6 +5,7 @@ using Application.UseCases.Achievements.Dtos;
 using Application.UseCases.Essences.Dtos;
 using AutoMapper;
 using Domain.Components.Attributes;
+using Domain.Helpers;
 using Domain.Helpers.Constants;
 using Domain.Models.Achievements;
 using Domain.Models.Attributes;
@@ -83,13 +84,8 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
             CraftingLevel = craftingLevel,
             CraftingExperience = (int)MathF.Floor(craftingProfession?.Experience ?? 0),
             CraftingExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(craftingLevel),
-            BaseAttributes = source.BaseAttributes.ToList(),
-            BaseCombatAttributes = source.BaseCombatAttributes.Select(kvp => new EntityAttribute
-            {
-                EntityId = source.Id,
-                AttributeType = kvp.Key,
-                Value = kvp.Value
-            }).ToList(),
+            BaseAttributes = MapBaseAttributes(source),
+            BaseCombatAttributes = MapBaseCombatAttributes(source),
             EquipmentRatings = AttributeCalculator
                 .CollectRawEquipmentRatings(source.EquipmentSlots
                     .Where(slot => slot.EquipmentInstance is not null)
@@ -108,6 +104,45 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
             IsOnline = source.CharacterAction?.UpdatedAt >
                        _timeProvider.GetUtcNow().Subtract(PlayerActivityConstants.OnlineWindow)
         };
+    }
+
+    private static List<EntityAttribute> MapBaseAttributes(Character source)
+    {
+        var attributes = source.BaseAttributes.ToList();
+        if (attributes.All(attribute => attribute.AttributeType != AttributeType.Threat))
+        {
+            attributes.Add(new EntityAttribute
+            {
+                EntityId = source.Id,
+                AttributeType = AttributeType.Threat,
+                Value = EntityBaseAttributeHelper.BaseThreat
+            });
+        }
+
+        return attributes;
+    }
+
+    private static List<EntityAttribute> MapBaseCombatAttributes(Character source)
+    {
+        var attributes = source.BaseCombatAttributes.Select(kvp => new EntityAttribute
+        {
+            EntityId = source.Id,
+            AttributeType = kvp.Key,
+            Value = kvp.Value
+        }).ToList();
+        if (attributes.All(attribute => attribute.AttributeType != AttributeType.Threat))
+        {
+            attributes.Add(new EntityAttribute
+            {
+                EntityId = source.Id,
+                AttributeType = AttributeType.Threat,
+                Value = source.BaseAttributes
+                    .FirstOrDefault(attribute => attribute.AttributeType == AttributeType.Threat)
+                    ?.Value ?? EntityBaseAttributeHelper.BaseThreat
+            });
+        }
+
+        return attributes;
     }
 
     private static EquippedTitleDto? MapEquippedTitle(Character source)

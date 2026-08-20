@@ -30,6 +30,9 @@ describe('GroupAttributesByCategoryPipe', () => {
     expect(types(grouped[AttributeCategory.Utility])).toContain(
       AttributeType.Cooldown,
     );
+    expect(types(grouped[AttributeCategory.Utility])).toContain(
+      AttributeType.Threat,
+    );
 
     expect(Object.values(grouped).flat()).toHaveSize(
       Object.values(AttributeType).length,

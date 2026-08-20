@@ -1,0 +1,645 @@
+<ng-container
+  *ngIf="combatState.getIsCombatActive(battleType)(); else raidPage"
+>
+  <app-combat
+    [battleType]="battleType"
+    [battleTitleOverride]="raidBattleTitle()"
+    [playerTeamName]="raidWingName()"
+    [enemyTeamName]="raidEnemyName()"
+    (skipBattle)="closeRaidPlayback()"
+  ></app-combat>
+</ng-container>
+
+<ng-template #raidPage>
+  <main class="tower-page">
+    <div class="tower-shell" *ngIf="raid() as current; else loadingState">
+      <a class="back-link" [routerLink]="worldPath()">
+        ← {{ worldName() }} overview
+      </a>
+
+      <header class="tower-hero section ll-panel ll-panel-strong">
+        <div class="card-meta">
+          <span class="floor-number">Tier {{ current.tier }} Raid</span>
+          <span class="badge" [ngClass]="raidStatusBadge(current.status)">
+            {{ raidStatusLabel(current.status) }}
+          </span>
+        </div>
+        <h1>{{ current.raidBossName }}</h1>
+        <p class="hero-copy" *ngIf="current.status === 'Mustering'">
+          Assemble three wings before mustering closes in
+          {{ closesIn(current.signupClosesAt) }}.
+        </p>
+        <p class="hero-copy" *ngIf="current.status === 'Resolving'">
+          Flank fights first, Ward second, and Vanguard confronts the raid boss.
+        </p>
+        <p
+          class="hero-copy"
+          *ngIf="
+            current.status !== 'Mustering' && current.status !== 'Resolving'
+          "
+        >
+          The raid has concluded. Review each wing's battle report below.
+        </p>
+
+        <div class="stats">
+          <div class="stat">
+            <span>Roster</span>
+            <strong>
+              {{ current.signups.length }}/{{ current.laneSlots * 3 }}
+            </strong>
+          </div>
+          <ng-container *ngIf="current.status === 'Mustering'">
+            <div class="stat">
+              <span>Minimum roster</span>
+              <strong>{{ current.minimumRoster }}</strong>
+            </div>
+            <div class="stat">
+              <span>Wing size</span>
+              <strong>{{ current.laneSlots }}</strong>
+            </div>
+            <div class="stat">
+              <span>Mustering closes</span>
+              <strong>{{ closesIn(current.signupClosesAt) }}</strong>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="current.status === 'Resolving'">
+            <div class="stat">
+              <span>Current phase</span>
+              <strong>Preparing battles</strong>
+            </div>
+            <div class="stat">
+              <span>First battle</span>
+              <strong>Flank</strong>
+            </div>
+            <div class="stat">
+              <span>Final battle</span>
+              <strong>Vanguard</strong>
+            </div>
+          </ng-container>
+          <ng-container
+            *ngIf="
+              current.status === 'Settled' || current.status === 'Resolved'
+            "
+          >
+            <div class="stat">
+              <span>Outcome</span>
+              <strong>{{ current.outcome }}</strong>
+            </div>
+            <div class="stat">
+              <span>Boss remaining</span>
+              <strong>
+                {{ current.bossHealthRemainingPercent | number: "1.0-1" }}%
+              </strong>
+            </div>
+            <div class="stat">
+              <span>Ward broken</span>
+              <strong>
+                {{ (current.wardBreak ?? 0) * 100 | number: "1.0-0" }}%
+              </strong>
+            </div>
+          </ng-container>
+        </div>
+
+        <div class="actions">
+          <button
+            class="ll-button ll-button-primary"
+            *ngIf="current.canJoin"
+            type="button"
+            (click)="join()"
+            [disabled]="!!action()"
+          >
+            Join raid
+          </button>
+          <button
+            class="secondary ll-button"
+            *ngIf="current.canLeave"
+            type="button"
+            (click)="leave()"
+            [disabled]="!!action()"
+          >
+            Leave raid
+          </button>
+          <button
+            class="secondary ll-button"
+            *ngIf="current.canRefreshSnapshot"
+            type="button"
+            (click)="refreshLoadout()"
+            [disabled]="!!action()"
+          >
+            {{
+              action() === "refresh-loadout"
+                ? "Updating loadout..."
+                : "Update loadout"
+            }}
+          </button>
+          <button
+            class="ll-button ll-button-primary"
+            *ngIf="current.canAssign"
+            type="button"
+            (click)="commence()"
+            [disabled]="!current.canCommence || !!action()"
+          >
+            {{ action() === "commence" ? "Commencing..." : "Commence raid" }}
+          </button>
+          <button
+            class="secondary ll-button"
+            *ngIf="
+              current.developmentToolsEnabled &&
+              current.canAssign &&
+              current.signups.length < current.laneSlots * 3
+            "
+            type="button"
+            (click)="fillDevelopmentRoster()"
+            [disabled]="!!action()"
+          >
+            {{
+              action() === "development-fill"
+                ? "Filling test roster..."
+                : "Fill with raid test roster"
+            }}
+          </button>
+          <button
+            class="secondary ll-button"
+            *ngIf="current.canAssign"
+            type="button"
+            (click)="previewBattlePlan()"
+            [disabled]="!current.canPreviewBattlePlan || !!action()"
+          >
+            Preview battle plan
+          </button>
+          <button
+            class="secondary ll-button"
+            *ngIf="current.canAssign && current.signups.length > 1"
+            type="button"
+            (click)="autoBalanceParties(current)"
+            [disabled]="!!action()"
+          >
+            Auto-balance wings
+          </button>
+          <button
+            class="secondary ll-button"
+            *ngIf="current.canAssign && current.signups.length"
+            type="button"
+            (click)="resetParties(current)"
+            [disabled]="!!action()"
+          >
+            Reset wings
+          </button>
+          <button
+            class="danger ll-button"
+            *ngIf="current.canCancel"
+            type="button"
+            (click)="cancelRaid()"
+            [disabled]="!!action()"
+          >
+            Cancel raid
+          </button>
+          <button
+            class="secondary ll-button"
+            type="button"
+            (click)="load()"
+            [disabled]="!!action()"
+          >
+            Refresh
+          </button>
+        </div>
+
+        <p class="notice" *ngIf="action() === 'commence'">
+          The raid is queued. The first battle will open when its simulation is
+          ready.
+        </p>
+      </header>
+
+      <p class="error" *ngIf="error() as message">{{ message }}</p>
+      <p class="notice" *ngIf="current.rewardWasReduced">
+        This result pays the 25% repeat reward for the current week.
+      </p>
+
+      <ng-container *ngIf="current.status === 'Mustering'">
+        <p class="party-instructions" *ngIf="current.canAssign">
+          Drag a raider onto an open slot, or select one and then choose a wing
+          or slot.
+        </p>
+
+        <section
+          class="section tower-panel ll-panel party-bench"
+          [class.party-drop-target]="current.canAssign"
+          (dragover)="allowPartyDrop($event)"
+          (drop)="dropOnBench($event, current)"
+        >
+          <div class="party-section-heading">
+            <div>
+              <p class="eyebrow">Bench</p>
+              <h2>Unassigned raiders · {{ benched().length }}</h2>
+            </div>
+            <button
+              class="secondary ll-button"
+              *ngIf="current.canAssign && benched().length"
+              type="button"
+              (click)="distributeBenched(current)"
+              [disabled]="!!action()"
+            >
+              Distribute all
+            </button>
+          </div>
+
+          <div class="bench-grid" *ngIf="benched().length; else emptyBench">
+            <button
+              type="button"
+              class="bench-card"
+              *ngFor="let signup of benched()"
+              [class.selected]="selectedSignupId() === signup.characterId"
+              [disabled]="!current.canAssign || !!action()"
+              [draggable]="current.canAssign"
+              (click)="selectSignup(signup, current)"
+              (dragstart)="dragSignup($event, signup, current)"
+            >
+              <span class="bench-identity">
+                <strong>
+                  <app-character-tag
+                    [id]="signup.characterId"
+                    [name]="signup.characterName"
+                  ></app-character-tag>
+                </strong>
+                <small>
+                  {{ signup.isLeader ? "Raid leader" : "Awaiting assignment" }}
+                  <ng-container *ngIf="signup.isCurrentCharacter">
+                    · You
+                  </ng-container>
+                </small>
+              </span>
+              <strong class="party-power">
+                {{ signup.powerRating | number }}
+              </strong>
+            </button>
+          </div>
+          <ng-template #emptyBench>
+            <p class="empty-state">Every raider is assigned to a wing.</p>
+          </ng-template>
+        </section>
+
+        <section
+          class="section tower-panel ll-panel expedition-party"
+          *ngFor="let lane of lanes"
+          (dragover)="allowPartyDrop($event)"
+          (drop)="dropIntoWing($event, lane, current)"
+        >
+          <div
+            class="party-header"
+            role="button"
+            tabindex="0"
+            (click)="toggleLane(lane)"
+            (keydown.enter)="toggleLane(lane)"
+            (keydown.space)="$event.preventDefault(); toggleLane(lane)"
+            [attr.aria-expanded]="!isLaneCollapsed(lane)"
+            [attr.aria-controls]="'raid-wing-roster-' + lane"
+          >
+            <div class="party-collapse">
+              <span aria-hidden="true">
+                {{ isLaneCollapsed(lane) ? "▸" : "▾" }}
+              </span>
+              <strong>{{ lane }}</strong>
+            </div>
+
+            <button
+              type="button"
+              class="party-slot-strip"
+              *ngIf="current.canAssign"
+              [disabled]="
+                !selectedSignupId() || wing(lane).length >= current.laneSlots
+              "
+              (click)="
+                $event.stopPropagation(); placeSelectedInWing(lane, current)
+              "
+              (keydown)="$event.stopPropagation()"
+              title="Place the selected raider in this wing"
+            >
+              <span
+                *ngFor="let slotIndex of wingSlots(current)"
+                [class.filled]="signupAtSlot(current, lane, slotIndex)"
+              ></span>
+            </button>
+            <div class="party-slot-strip passive" *ngIf="!current.canAssign">
+              <span
+                *ngFor="let slotIndex of wingSlots(current)"
+                [class.filled]="signupAtSlot(current, lane, slotIndex)"
+              ></span>
+            </div>
+
+            <div class="party-summary">
+              <span>
+                Avg rating
+                <strong>{{ wingAverage(current, lane) | number }}</strong>
+              </span>
+              <span>
+                Open slots
+                <strong>{{ current.laneSlots - wing(lane).length }}</strong>
+              </span>
+            </div>
+          </div>
+
+          <div
+            class="party-roster"
+            *ngIf="!isLaneCollapsed(lane)"
+            [id]="'raid-wing-roster-' + lane"
+          >
+            <ng-container *ngFor="let slotIndex of wingSlots(current)">
+              <div
+                class="party-member"
+                *ngIf="
+                  signupAtSlot(current, lane, slotIndex) as signup;
+                  else openRaidSlot
+                "
+                [class.selected]="selectedSignupId() === signup.characterId"
+                [draggable]="current.canAssign"
+                (click)="selectSignup(signup, current)"
+                (dragstart)="dragSignup($event, signup, current)"
+              >
+                <span class="party-slot-number">{{
+                  slotLabel(slotIndex)
+                }}</span>
+                <div class="identity">
+                  <strong>
+                    <app-character-tag
+                      [id]="signup.characterId"
+                      [name]="signup.characterName"
+                    ></app-character-tag>
+                    <span class="badge" *ngIf="signup.isLeader">Leader</span>
+                  </strong>
+                  <span>
+                    {{ lane }} wing
+                    <ng-container *ngIf="signup.isCurrentCharacter">
+                      · You
+                    </ng-container>
+                  </span>
+                </div>
+                <strong class="party-power">
+                  {{ signup.powerRating | number }}
+                </strong>
+                <div class="party-member-actions" *ngIf="current.canAssign">
+                  <button
+                    type="button"
+                    class="secondary ll-button"
+                    (click)="
+                      $event.stopPropagation(); benchSignup(signup, current)
+                    "
+                    [disabled]="!!action()"
+                  >
+                    Bench
+                  </button>
+                  <button
+                    type="button"
+                    class="secondary ll-button"
+                    *ngIf="current.canTransferLeadership && !signup.isLeader"
+                    (click)="
+                      $event.stopPropagation(); transferLeadership(signup)
+                    "
+                    [disabled]="!!action()"
+                  >
+                    Make leader
+                  </button>
+                </div>
+              </div>
+
+              <ng-template #openRaidSlot>
+                <button
+                  type="button"
+                  class="party-member open-party-slot"
+                  [class.available]="current.canAssign && !!selectedSignupId()"
+                  [disabled]="!current.canAssign || !!action()"
+                  (click)="placeSelectedInSlot(lane, slotIndex, current)"
+                  (dragover)="allowPartyDrop($event)"
+                  (drop)="
+                    $event.stopPropagation();
+                    dropIntoSlot($event, lane, slotIndex, current)
+                  "
+                >
+                  <span class="party-slot-number">
+                    {{ slotLabel(slotIndex) }}
+                  </span>
+                  <span>
+                    <strong>Open slot</strong>
+                    <small *ngIf="current.canAssign">
+                      Drop a raider here
+                    </small>
+                  </span>
+                </button>
+              </ng-template>
+            </ng-container>
+          </div>
+        </section>
+
+        <section
+          class="section tower-panel ll-panel battle-plan"
+          *ngIf="battlePlan() as plan"
+        >
+          <div class="report-header">
+            <div>
+              <p class="eyebrow">
+                Battle plan · {{ plan.sampleCount }} simulations
+              </p>
+              <h2>{{ plan.readiness }} · {{ plan.predictedOutcome }}</h2>
+            </div>
+            <span class="badge Rallying">
+              {{ plan.slainProbability * 100 | number: "1.0-0" }}% slain
+            </span>
+          </div>
+          <p class="muted">
+            95% confidence:
+            {{ plan.slainProbabilityLower * 100 | number: "1.0-0" }}–{{
+              plan.slainProbabilityUpper * 100 | number: "1.0-0"
+            }}%
+          </p>
+          <div class="plan-grid">
+            <article *ngFor="let lanePlan of plan.lanes">
+              <span>{{ lanePlan.lane }}</span>
+              <h3>{{ lanePlan.readiness }}</h3>
+              <p>
+                {{ lanePlan.successProbability * 100 | number: "1.0-0" }}%
+                success ·
+                {{ lanePlan.averageDurationTicks / 10 | number: "1.0-0" }}s
+                average
+              </p>
+              <p *ngIf="lanePlan.lane === 'Flank'">
+                Expected reinforcements:
+                {{ lanePlan.expectedDerivedModifier * 100 | number: "1.0-0" }}%
+              </p>
+              <p *ngIf="lanePlan.lane === 'Ward'">
+                Expected Ward break:
+                {{ lanePlan.expectedDerivedModifier * 100 | number: "1.0-0" }}%
+              </p>
+              <p *ngIf="lanePlan.lane === 'Vanguard'">
+                Expected boss health:
+                {{ lanePlan.expectedDerivedModifier * 100 | number: "1.0-0" }}%
+              </p>
+            </article>
+          </div>
+          <small class="muted">
+            Preview seeds differ from the real raid. No rewards, items, or raid
+            state are changed.
+          </small>
+        </section>
+      </ng-container>
+
+      <section
+        class="section tower-panel ll-panel resolving"
+        *ngIf="current.status === 'Resolving'"
+      >
+        <div class="spinner"></div>
+        <p class="eyebrow">Raid in progress</p>
+        <h2>Preparing raid battles</h2>
+        <p class="muted">
+          Flank fights first, Ward second, and Vanguard faces the raid boss
+          last. The battle viewer will open automatically.
+        </p>
+      </section>
+
+      <section
+        class="section tower-panel ll-panel results"
+        *ngIf="current.status === 'Settled' || current.status === 'Resolved'"
+        [class.result-victory]="current.outcome === 'Slain'"
+        [class.result-defeat]="current.outcome !== 'Slain'"
+      >
+        <div class="report-header">
+          <div>
+            <p class="eyebrow">Raid report</p>
+            <h2>{{ current.outcome }}</h2>
+          </div>
+          <span
+            class="badge"
+            [ngClass]="current.outcome === 'Slain' ? 'Succeeded' : 'Failed'"
+          >
+            {{ current.outcome === "Slain" ? "Victory" : "Defeat" }}
+          </span>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <span>Boss remaining</span>
+            <strong>
+              {{ current.bossHealthRemainingPercent | number: "1.0-1" }}%
+            </strong>
+          </div>
+          <div class="stat">
+            <span>Reinforcements</span>
+            <strong>
+              {{ (current.reinforcementPenalty ?? 0) * 100 | number: "1.0-0" }}%
+            </strong>
+          </div>
+          <div class="stat">
+            <span>Ward broken</span>
+            <strong>
+              {{ (current.wardBreak ?? 0) * 100 | number: "1.0-0" }}%
+            </strong>
+          </div>
+        </div>
+
+        <div class="report-grid section">
+          <article
+            class="report-item"
+            *ngFor="let laneResult of current.laneResults"
+          >
+            <div class="card-meta">
+              <h3>{{ laneResult.lane }}</h3>
+              <span
+                class="badge"
+                [ngClass]="
+                  laneResult.battleOutcome === 'Victory'
+                    ? 'Succeeded'
+                    : 'Failed'
+                "
+              >
+                {{ laneResult.battleOutcome }}
+              </span>
+            </div>
+            <p class="muted">
+              {{ laneResult.totalFriendlyDamage | number }} damage ·
+              {{ laneResult.durationTicks / 10 | number: "1.0-1" }}s
+            </p>
+            <button
+              class="secondary ll-button"
+              *ngIf="
+                laneResult.hasPlayback && canWatchPlayback(laneResult.lane)
+              "
+              type="button"
+              (click)="watchPlayback(laneResult.lane)"
+              [disabled]="!!action()"
+            >
+              Replay battle
+            </button>
+          </article>
+        </div>
+
+        <div class="contribution-section">
+          <p class="eyebrow">Raider contributions</p>
+          <div class="roster">
+            <div
+              class="roster-row"
+              *ngFor="let participant of current.participantResults"
+            >
+              <div class="identity">
+                <strong>
+                  <app-character-tag
+                    [id]="participant.characterId"
+                    [name]="participantName(participant.characterId)"
+                  ></app-character-tag>
+                </strong>
+                <span>{{ participant.lane }} wing</span>
+              </div>
+              <div class="contribution-score">
+                <strong>{{ participant.damageDone | number }} damage</strong>
+                <span>
+                  {{ participant.payoutMultiplier * 100 | number: "1.0-0" }}%
+                  reward
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button
+            class="secondary ll-button"
+            type="button"
+            (click)="replayRaid()"
+            [disabled]="!!action()"
+          >
+            Replay full raid
+          </button>
+          <button
+            class="ll-button ll-button-primary"
+            *ngIf="current.canClaim"
+            type="button"
+            (click)="claim()"
+            [disabled]="!!action()"
+          >
+            Claim rewards
+          </button>
+        </div>
+      </section>
+
+      <section
+        class="section tower-panel ll-panel reward"
+        *ngIf="reward() as claimed"
+      >
+        <p class="eyebrow">Raid rewards</p>
+        <h2>Rewards claimed</h2>
+        <p>
+          {{ claimed.trophies }} Trophies · balance
+          {{ claimed.trophyBalance }}
+        </p>
+        <p *ngFor="let item of claimed.items">
+          {{ item.quantity }} × {{ item.itemId }}
+        </p>
+      </section>
+    </div>
+
+    <ng-template #loadingState>
+      <div class="tower-shell">
+        <p class="notice">
+          {{ loading() ? "Finding the raid…" : "Raid not found." }}
+        </p>
+      </div>
+    </ng-template>
+  </main>
+</ng-template>

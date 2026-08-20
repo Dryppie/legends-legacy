@@ -74,11 +74,6 @@ export class DungeonCardComponent implements OnChanges {
 
   @Input({ required: true }) previewData!: DungeonPreviewData;
 
-  @Input() height = 176;
-  @Input() cornerSize = 32;
-  @Input() startExpanded = false;
-
-  @Output() backEvent = new EventEmitter<void>();
   @Output() recordsRequested = new EventEmitter<DungeonPreviewData>();
 
   readonly dungeonDifficulty = DungeonDifficulty;
@@ -94,12 +89,10 @@ export class DungeonCardComponent implements OnChanges {
     { id: 'mastery', label: 'Mastery' },
   ];
 
-  showPreview = signal(false);
   difficulty = signal<DungeonDifficulty>(DungeonDifficulty.Normal);
   private difficultyChosenManually = false;
   private appliedDefaultForDungeonId: string | null = null;
   selectedTab = signal<DungeonDetailTab>('rewards');
-  readonly previewMasteryTooltipOpen = signal(false);
   readonly selectedMasteryTooltipOpen = signal(false);
   readonly masteryTooltipPositions: ConnectedPosition[] = [
     {
@@ -138,13 +131,9 @@ export class DungeonCardComponent implements OnChanges {
     private readonly router: Router,
   ) {}
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(_changes: SimpleChanges): void {
     if (!this.previewData) {
       return;
-    }
-
-    if (changes['startExpanded']) {
-      this.showPreview.set(this.startExpanded);
     }
 
     const dungeonId = this.previewData.familyId ?? this.previewData.id;
@@ -251,15 +240,6 @@ export class DungeonCardComponent implements OnChanges {
   continueDungeon(): void {
     if (!this.isActiveDungeonPreview()) return;
     void this.router.navigate(['/game/world/dungeon']);
-  }
-
-  togglePreview() {
-    this.previewMasteryTooltipOpen.set(false);
-    this.selectedMasteryTooltipOpen.set(false);
-    if (!this.showPreview()) {
-      this.characterState.refreshIfDirty();
-    }
-    this.showPreview.set(!this.showPreview());
   }
 
   openRecords() {
@@ -589,14 +569,6 @@ export class DungeonCardComponent implements OnChanges {
     return types.length ? types.join(' · ') : 'None';
   }
 
-  previewMasteryLevel(): number {
-    return this.previewData.mastery?.level ?? 0;
-  }
-
-  previewMasteryExperienceLabel(): string {
-    return this.formatMasteryExperienceLabel(this.previewData.mastery);
-  }
-
   selectedMasteryLevel(): number {
     return this.selectedPreviewData().mastery?.level ?? 0;
   }
@@ -722,16 +694,6 @@ export class DungeonCardComponent implements OnChanges {
     return next ? `${experience} / ${next} XP` : `${experience} XP`;
   }
 
-  previewGatheringTypes(): string[] {
-    return [
-      ...new Set(
-        (this.previewData.gatheringNodes ?? []).map((node) =>
-          this.formatGatheringType(node.type),
-        ),
-      ),
-    ];
-  }
-
   gatheringChanceLabel(node: DungeonGatheringNodePreview): string {
     return `${Math.round((node.procChance ?? 0) * 100)}%`;
   }
@@ -820,9 +782,5 @@ export class DungeonCardComponent implements OnChanges {
 
   private isToolItem(reward: DungeonPreviewReward): boolean {
     return (reward.itemBase as Equipment).equipmentType === EquipmentType.Tool;
-  }
-
-  back() {
-    this.backEvent.emit();
   }
 }

@@ -28,6 +28,9 @@ export interface EssenceAbilityDto {
   name: string;
   description: string;
   cooldownSeconds: number;
+  threatValue?: number;
+  threatMultiplier?: number;
+  estimatedThreatPerSecond?: number;
   targets: string[];
   tags: string[];
   effects: EssenceEffectDto[];

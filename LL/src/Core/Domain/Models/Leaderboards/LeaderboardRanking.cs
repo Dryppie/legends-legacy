@@ -3,10 +3,13 @@ namespace Domain.Models.Leaderboards;
 public static class LeaderboardRanking
 {
     public static IReadOnlyList<LeaderboardBoardEntry> Rank(
-        IEnumerable<LeaderboardScore> scores)
+        IEnumerable<LeaderboardScore> scores,
+        bool primaryAscending = false)
     {
-        var ordered = scores
-            .OrderByDescending(x => x.PrimaryValue)
+        var source = scores.ToList();
+        var ordered = (primaryAscending
+                ? source.OrderBy(x => x.PrimaryValue)
+                : source.OrderByDescending(x => x.PrimaryValue))
             .ThenByDescending(x => x.SecondaryValue ?? long.MinValue)
             .ThenByDescending(x => x.TertiarySortValue ?? long.MinValue)
             .ThenByDescending(x => x.QuaternarySortValue ?? long.MinValue)

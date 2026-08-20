@@ -12,9 +12,34 @@ import {
   CharacterDto,
   CharacterOverviewDto,
 } from '../../../../shared/models/Dtos/characterDto';
-import { CharacterOverviewComponent } from './character-overview.component';
+import { AttributeType } from '../../../../shared/models/enums/attributeType';
+import {
+  CharacterOverviewComponent,
+  estimateEssenceThreatPerSecond,
+} from './character-overview.component';
 
 describe('CharacterOverviewComponent', () => {
+  it('totals nominal threat generation from the attuned Essence loadout', () => {
+    expect(
+      estimateEssenceThreatPerSecond({
+        id: 'loadout-1',
+        name: 'Tank',
+        isActive: true,
+        slots: [
+          {
+            slotIndex: 0,
+            definition: createEssenceDefinition(4.5, 2),
+          },
+          {
+            slotIndex: 1,
+            definition: createEssenceDefinition(3, 1.25),
+          },
+          { slotIndex: 2 },
+        ],
+      }),
+    ).toBe(10.75);
+  });
+
   it('updates current character and crafting experience from live state', () => {
     const currentCharacter = signal<CharacterDto>(createCharacter());
     const overview = signal<CharacterOverviewDto>(createOverview());
@@ -43,6 +68,10 @@ describe('CharacterOverviewComponent', () => {
 
     expect(component.character()?.experience).toBe(10);
     expect(component.character()?.craftingExperience).toBe(20);
+    expect(
+      component.attributeSections.find((section) => section.title === 'Utility')
+        ?.attributes,
+    ).toContain(AttributeType.Threat);
 
     currentCharacter.update((character) => ({
       ...character,
@@ -96,5 +125,47 @@ function createCrafting(): CharacterProfession {
     level: 2,
     experience: 20,
     experienceUntilNextLevel: 75,
+  };
+}
+
+function createEssenceDefinition(
+  activeThreatPerSecond: number,
+  passiveThreatPerSecond: number,
+) {
+  const ability = (
+    kind: 'Active' | 'Passive',
+    estimatedThreatPerSecond: number,
+  ) => ({
+    id: `ability.${kind.toLowerCase()}`,
+    kind,
+    name: `${kind} Ability`,
+    description: 'Test ability.',
+    cooldownSeconds: kind === 'Active' ? 10 : 0,
+    estimatedThreatPerSecond,
+    targets: [],
+    tags: [],
+    effects: [],
+  });
+
+  return {
+    id: 'essence.test',
+    sourceMonsterId: 'monster.test',
+    name: 'Test Essence',
+    variantName: 'Test',
+    displayName: 'Test Essence',
+    description: 'Test essence.',
+    rarity: 'Common',
+    tagsByCategory: {},
+    attributeBonuses: [],
+    activeAbility: ability('Active', activeThreatPerSecond),
+    passiveAbility: ability('Passive', passiveThreatPerSecond),
+    evolution: {
+      id: 'evolution.test',
+      name: 'Test Evolution',
+      description: 'Test evolution.',
+      requiredAscensionTier: 1,
+      requiredCatalystItemId: '',
+      addsTags: [],
+    },
   };
 }

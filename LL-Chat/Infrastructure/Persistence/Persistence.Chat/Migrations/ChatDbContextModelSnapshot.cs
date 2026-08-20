@@ -165,6 +165,59 @@ namespace Persistence.Chat.Migrations
 
                     b.ToTable("ChatRestrictions", (string)null);
                 });
+
+            modelBuilder.Entity("Domain.Models.Chats.RaidChatChannel", b =>
+                {
+                    b.Property<Guid>("RaidRunId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsOpen")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("Revision")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("RaidRunId");
+
+                    b.HasIndex("IsOpen", "UpdatedAt");
+
+                    b.ToTable("RaidChatChannels", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Chats.RaidChatMembership", b =>
+                {
+                    b.Property<Guid>("RaidRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("RaidRunId", "CharacterId");
+
+                    b.HasIndex("CharacterId");
+
+                    b.ToTable("RaidChatMemberships", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Chats.RaidChatMembership", b =>
+                {
+                    b.HasOne("Domain.Models.Chats.RaidChatChannel", "Channel")
+                        .WithMany("Memberships")
+                        .HasForeignKey("RaidRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Channel");
+                });
+
+            modelBuilder.Entity("Domain.Models.Chats.RaidChatChannel", b =>
+                {
+                    b.Navigation("Memberships");
+                });
 #pragma warning restore 612, 618
         }
     }

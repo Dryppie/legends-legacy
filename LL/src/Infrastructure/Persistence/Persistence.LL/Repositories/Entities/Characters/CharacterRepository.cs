@@ -76,6 +76,7 @@ public class CharacterRepository : ICharacterRepository
     public async Task<Character?> GetCharacterOverviewByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _context.Characters
             .AsNoTracking()
+            .AsSplitQuery()
             .EntireCharacter()
             .Include(c => c.EquippedTitleDefinition)
             .FirstOrDefaultAsync(c => c.Id.Equals(characterId), cancellationToken);
@@ -92,6 +93,13 @@ public class CharacterRepository : ICharacterRepository
             .Include(c => c.EquippedTitleDefinition)
             .FirstOrDefaultAsync(c => c.NormalizedName == normalizedName, cancellationToken);
     }
+
+    public async Task<long?> GetSigilFragmentsAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await _context.Characters
+            .AsNoTracking()
+            .Where(character => character.Id == characterId)
+            .Select(character => (long?)character.SigilFragments)
+            .SingleOrDefaultAsync(cancellationToken);
 
     public async Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken)
     {

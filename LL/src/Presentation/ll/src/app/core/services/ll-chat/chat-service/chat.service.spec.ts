@@ -12,6 +12,7 @@ import { CharacterService } from '../../api/character/character.service';
 import { GuildStateService } from '../../api/guild/guild-state.service';
 import { GameEventService } from '../../real-time/game-event.service';
 import { AuthService } from '../../api/auth/auth.service';
+import { RaidService } from '../../api/raid/raid.service';
 
 describe('mergeChatMessagesChronologically', () => {
   it('places history received after a live message into chronological order', () => {
@@ -78,6 +79,14 @@ describe('ChatService guild connection synchronization', () => {
           useValue: { guild: signal(null) },
         },
         { provide: GameEventService, useValue: gameEvents },
+        {
+          provide: RaidService,
+          useValue: {
+            activeRaidId: signal(null),
+            getActiveRaid: () => of(null),
+            clearActiveRaid: () => undefined,
+          },
+        },
         { provide: AuthService, useValue: auth },
       ],
     });
@@ -117,12 +126,7 @@ describe('ChatService guild connection synchronization', () => {
   it('does not refresh authentication for an unchanged guild context', async () => {
     spyOn(service, 'connectAndLoad').and.resolveTo();
 
-    await (service as any).connectForContext(
-      'guild-1',
-      false,
-      false,
-      false,
-    );
+    await (service as any).connectForContext('guild-1', false, false, false);
 
     expect(auth.refreshSession).not.toHaveBeenCalled();
   });

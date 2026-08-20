@@ -1,4 +1,5 @@
 using Application.UsesCases.Chats.Commands.SendSystemMessage;
+using Application.Interfaces.Services.Chats;
 using Application.UsesCases.Chats.Commands.SendMessage;
 using Application.UsesCases.Chats.Commands.MuteCharacter;
 using Application.UsesCases.Chats.Commands.UnmuteCharacter;
@@ -23,14 +24,23 @@ public class ChatController : BaseController
     private const string ModerationSecretHeader = "X-LL-Chat-Moderation-Secret";
     private readonly IConfiguration _configuration;
     private readonly IHubContext<ChatHub, IChatClient> _hub;
+    private readonly IRaidChatService _raidChat;
 
-    public ChatController(IConfiguration configuration, IHubContext<ChatHub, IChatClient> hub)
+    public ChatController(
+        IConfiguration configuration,
+        IHubContext<ChatHub, IChatClient> hub,
+        IRaidChatService raidChat)
     {
         _configuration = configuration;
         _hub = hub;
+        _raidChat = raidChat;
     }
 
-    public record GetChatRequest(string? GuildChannel, int Take = 50, DateTimeOffset? After = null);
+    public record GetChatRequest(
+        string? GuildChannel,
+        string? RaidChannel,
+        int Take = 50,
+        DateTimeOffset? After = null);
     public record SendSystemMessageRequest(
         string Body,
         bool IsGlobal,
@@ -48,6 +58,12 @@ public class ChatController : BaseController
         JsonElement? LinkedItem,
         Guid MessageId,
         DateTimeOffset SentAt);
+    public sealed record UpdateRaidChannelRequest(
+        Guid RaidRunId,
+        long Revision,
+        bool IsOpen,
+        IReadOnlyCollection<Guid> MemberCharacterIds,
+        DateTimeOffset UpdatedAt);
     public sealed record MuteCharacterRequest(
         Guid OperationId,
         Guid CharacterId,
@@ -70,11 +86,44 @@ public class ChatController : BaseController
             return Forbid();
         }
 
+        if (!string.IsNullOrWhiteSpace(chatRequest.RaidChannel))
+        {
+            if (!Guid.TryParse(chatRequest.RaidChannel, out var raidRunId) ||
+                !await _raidChat.CanAccessAsync(
+                    raidRunId,
+                    CurrentCharacterGuid,
+                    HttpContext.RequestAborted))
+            {
+                return Forbid();
+            }
+        }
+
         return await Mediator.Send(new GetChatHistoryQuery(
             CurrentCharacterGuid,
             chatRequest.GuildChannel,
+            chatRequest.RaidChannel,
             chatRequest.Take,
             chatRequest.After));
+    }
+
+    [AllowAnonymous]
+    [HttpPost("RaidChannel")]
+    public async Task<IActionResult> UpdateRaidChannel(
+        [FromBody] UpdateRaidChannelRequest request)
+    {
+        var authorizationFailure = AuthorizeSystemMessage();
+        if (authorizationFailure is not null) return authorizationFailure;
+        if (request.RaidRunId == Guid.Empty || request.Revision < 1)
+            return BadRequest("Invalid raid channel snapshot.");
+
+        await _raidChat.ApplySnapshotAsync(
+            request.RaidRunId,
+            request.Revision,
+            request.IsOpen,
+            request.MemberCharacterIds,
+            request.UpdatedAt,
+            HttpContext.RequestAborted);
+        return NoContent();
     }
 
     [AllowAnonymous]

@@ -17,9 +17,8 @@
         "id": "effect.shadow_image.shadow_strike.damage",
         "operation": "Damage",
         "target": "CurrentTarget",
-        "baseValue": 1,
         "scalingAttribute": "Power",
-        "scalingCoefficient": 0.2,
+        "scalingCoefficient": 0.3,
         "attackType": "None",
         "damageType": "Magical",
         "procCoefficient": 1
@@ -686,17 +685,10 @@
     "id": "ability.creature.hobgoblin.threatening_presence",
     "kind": "Passive",
     "name": "Threatening Presence",
-    "description": "At combat start gain 50 Threat and take 10% less damage from Vulnerable enemies.",
+    "description": "At combat start, take 10% less damage from Vulnerable enemies.",
     "cooldownTicks": 0,
     "tags": ["Buff", "Defensive"],
     "effects": [
-      {
-        "id": "effect.creature.hobgoblin.threatening_presence.threat",
-        "operation": "ModifyThreat",
-        "target": "Self",
-        "baseValue": 50,
-        "procCoefficient": 1
-      },
       {
         "id": "effect.creature.hobgoblin.threatening_presence.vulnerable",
         "operation": "ModifyDamageTakenFromCondition",
@@ -838,8 +830,8 @@
     "id": "ability.creature.transparent_slime.transparent_engulf",
     "kind": "Active",
     "name": "Transparent Engulf",
-    "description": "Gain Guard(4) and Taunt a random enemy for 11 seconds.",
-    "cooldownTicks": 160,
+    "description": "Gain Guard(4), Taunt enemies for 4 seconds, Mark a random enemy for 11 seconds, and Cover allies for 25% damage for 15 seconds.",
+    "cooldownTicks": 120,
     "tags": ["Buff", "Control", "Defensive"],
     "effects": [
       {
@@ -851,11 +843,27 @@
         "procCoefficient": 1
       },
       {
-        "id": "effect.creature.transparent_slime.transparent_engulf.taunt",
+        "id": "effect.creature.transparent_slime.transparent_engulf.taunt_self",
+        "operation": "ApplyCondition",
+        "target": "Self",
+        "baseValue": 4,
+        "condition": "Taunt",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.transparent_slime.transparent_engulf.mark",
         "operation": "ApplyCondition",
         "target": "RandomEnemy",
         "baseValue": 11,
-        "condition": "Taunt",
+        "condition": "Mark",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.transparent_slime.transparent_engulf.cover",
+        "operation": "GrantCover",
+        "target": "AllAllies",
+        "baseValue": 25,
+        "durationTicks": 150,
         "procCoefficient": 1
       }
     ],
@@ -898,8 +906,9 @@
     "id": "ability.creature.moss_lizard.moss_camouflage",
     "kind": "Active",
     "name": "Moss Camouflage",
-    "description": "Deal 150% Physical Damage and gain Stealth(2).",
+    "description": "Deal 150% Physical Damage, shed 250 threat, and gain Stealth(2).",
     "cooldownTicks": 140,
+    "threatValue": -250,
     "tags": ["Physical", "Melee", "Buff"],
     "effects": [
       {
@@ -1226,10 +1235,18 @@
     "id": "ability.creature.wood_nymph.bramble_shield",
     "kind": "Active",
     "name": "Bramble Shield",
-    "description": "Grant the highest-Max-Health ally Thorns(5) for 12 seconds and Barrier equal to 200% Power.",
+    "description": "Grant the highest-Max-Health ally Thorns(5), 50% Cover for 8 seconds, and Barrier equal to 200% Power.",
     "cooldownTicks": 160,
     "tags": ["Barrier", "Buff", "Retaliation"],
     "effects": [
+      {
+        "id": "effect.creature.wood_nymph.bramble_shield.cover",
+        "operation": "GrantCover",
+        "target": "HighestMaxHealthAlly",
+        "baseValue": 50,
+        "durationTicks": 80,
+        "procCoefficient": 1
+      },
       {
         "id": "effect.creature.wood_nymph.bramble_shield.thorns",
         "operation": "ApplyCondition",
@@ -2056,13 +2073,13 @@
     "id": "ability.creature.flame_imp.impish_flame",
     "kind": "Passive",
     "name": "Impish Flame",
-    "description": "Whenever you apply Burn, there is a 20% chance to apply Taunt(15).",
+    "description": "Whenever you apply Burn, there is a 20% chance to apply Mark for 15 seconds.",
     "cooldownTicks": 0,
     "tags": ["Burn", "Control"],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": ["effect.creature.flame_imp.impish_flame.taunt"],
+        "effectIds": ["effect.creature.flame_imp.impish_flame.mark"],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -2074,11 +2091,11 @@
     ],
     "effects": [
       {
-        "id": "effect.creature.flame_imp.impish_flame.taunt",
+        "id": "effect.creature.flame_imp.impish_flame.mark",
         "operation": "ApplyCondition",
         "target": "EventTarget",
         "baseValue": 15,
-        "condition": "Taunt",
+        "condition": "Mark",
         "chancePercent": 20,
         "procCoefficient": 1
       }
@@ -4634,11 +4651,11 @@
     "id": "ability.creature.ravenous_ghoul.draining_claws",
     "kind": "Active",
     "name": "Draining Claws",
-    "description": "Deal 31 Physical Melee damage and apply Weaken.",
+    "description": "Deal 310% Physical Melee damage and apply Weaken.",
     "cooldownTicks": 130,
     "tags": ["Physical", "Melee", "Debuff"],
     "effects": [
-      {"id": "effect.creature.ravenous_ghoul.draining_claws.damage", "operation": "Damage", "target": "CurrentTarget", "baseValue": 31, "attackType": "Melee", "damageType": "Physical", "procCoefficient": 1},
+      {"id": "effect.creature.ravenous_ghoul.draining_claws.damage", "operation": "Damage", "target": "CurrentTarget", "scalingAttribute": "Power", "scalingCoefficient": 3.1, "attackType": "Melee", "damageType": "Physical", "procCoefficient": 1},
       {"id": "effect.creature.ravenous_ghoul.draining_claws.weaken", "operation": "ApplyCondition", "target": "CurrentTarget", "condition": "Weaken", "baseValue": 1, "procCoefficient": 1}
     ],
     "owningEssenceId": "essence.ravenous_ghoul"

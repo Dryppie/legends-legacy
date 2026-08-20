@@ -29,6 +29,7 @@ using Domain.Models.Professions.Crafting;
 using Domain.Models.Prophecies;
 using Domain.Models.Quests;
 using Domain.Models.Quests.Events;
+using Domain.Models.Raids;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
@@ -156,6 +157,16 @@ public interface IDbContext
     DbSet<DailyProphecyRerollState> DailyProphecyRerollStates { get; }
     DbSet<Region> Regions { get; }
 
+    DbSet<RaidRun> RaidRuns { get; }
+    DbSet<RaidSignup> RaidSignups { get; }
+    DbSet<RaidLaneResult> RaidLaneResults { get; }
+    DbSet<RaidPlayback> RaidPlaybacks { get; }
+    DbSet<RaidPlaybackArtifact> RaidPlaybackArtifacts { get; }
+    DbSet<RaidParticipantResult> RaidParticipantResults { get; }
+    DbSet<RaidRewardClaim> RaidRewardClaims { get; }
+    DbSet<RaidTrophyPurchase> RaidTrophyPurchases { get; }
+    DbSet<RaidPowerRecommendationCacheEntry> RaidPowerRecommendationCacheEntries { get; }
+
     DbSet<TowerFloorProgress> TowerFloorProgresses { get; }
     DbSet<TowerRally> TowerRallies { get; }
     DbSet<TowerRallyParticipant> TowerRallyParticipants { get; }
@@ -202,6 +213,8 @@ public interface IDbContext
     Task AcquireCharacterCommandLockAsync(Guid characterId, CancellationToken ct = default);
     Task AcquireStateSyncScopeLockAsync(string scopeKey, CancellationToken ct = default) => Task.CompletedTask;
     Task AcquireWorldTowerFloorLockAsync(string serverId, int floorNumber, CancellationToken ct = default);
+    Task AcquireRaidRunLockAsync(Guid raidRunId, CancellationToken ct = default) => Task.CompletedTask;
+    Task AcquireRaidBossLockAsync(string raidBossId, CancellationToken ct = default) => Task.CompletedTask;
     Task<IReadOnlyList<Guid>> ClaimWorldTowerSimulationsAsync(
         string owner,
         DateTimeOffset now,

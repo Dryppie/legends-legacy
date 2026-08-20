@@ -18,6 +18,24 @@ import { ProfessionsService } from '../../../../core/services/api/professions/pr
 import { ProfessionType } from '../../../../shared/models/Dtos/characterProfession';
 import { EssencePreviewComponent } from '../../../../shared/components/essences/essence-preview/essence-preview.component';
 import { PresenceIndicatorComponent } from '../../../../shared/components/character/presence-indicator/presence-indicator.component';
+import { EssenceLoadoutDto } from '../../../../shared/models/essence-system';
+
+export function estimateEssenceThreatPerSecond(
+  loadout: EssenceLoadoutDto | null | undefined,
+): number {
+  return (
+    loadout?.slots.reduce((total, slot) => {
+      const definition = slot.definition;
+      if (!definition) return total;
+
+      return (
+        total +
+        (definition.activeAbility.estimatedThreatPerSecond ?? 0) +
+        (definition.passiveAbility.estimatedThreatPerSecond ?? 0)
+      );
+    }, 0) ?? 0
+  );
+}
 
 @Component({
   selector: 'app-character-overview',
@@ -49,6 +67,9 @@ export class CharacterOverviewComponent {
     this.isViewingSearchResult()
       ? this.searchedCharacter()
       : this.currentCharacterOverview(),
+  );
+  readonly estimatedEssenceThreatPerSecond = computed(() =>
+    estimateEssenceThreatPerSecond(this.character()?.activeEssenceLoadout),
   );
   private readonly currentCharacterOverview = computed(() => {
     const overview = this.characterState.overview();
@@ -140,6 +161,7 @@ export class CharacterOverviewComponent {
           AttributeType.Cooldown,
           AttributeType.StatusResistance,
           AttributeType.CrowdControlResistance,
+          AttributeType.Threat,
         ],
       },
     ];

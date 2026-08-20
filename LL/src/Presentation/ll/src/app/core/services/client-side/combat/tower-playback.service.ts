@@ -78,6 +78,7 @@ export class TowerPlaybackService {
         maxHealth: entity.maxHealth,
         health: state.health,
         barrier: state.barrier,
+        partyNumber: entity.partyNumber,
       };
     });
     const stats = activeEntities.map((entity): EntityStats => {

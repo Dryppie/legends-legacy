@@ -51,6 +51,8 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
             [GameEventTypes.TournamentGroundsUpdated] = [GameEventOutboxConsumerNames.RealtimeTournamentGrounds],
             [GameEventTypes.WorldTowerRallyUpdated] = [GameEventOutboxConsumerNames.RealtimeWorldTower],
             [GameEventTypes.WorldTowerChatAnnouncement] = [GameEventOutboxConsumerNames.WorldTowerChat],
+            [GameEventTypes.RaidChatAnnouncement] = [GameEventOutboxConsumerNames.RaidChat],
+            [GameEventTypes.RaidChatChannelSnapshot] = [GameEventOutboxConsumerNames.RaidChat],
             [GameEventTypes.EventQuestChatAnnouncement] = [GameEventOutboxConsumerNames.EventQuestChat],
             [GameEventTypes.RealtimeDeliveryRequested] = [GameEventOutboxConsumerNames.RealtimeDelivery],
             [GameEventTypes.AccountMultiplayerRestricted] = [GameEventOutboxConsumerNames.AccountRestrictionCleanup]

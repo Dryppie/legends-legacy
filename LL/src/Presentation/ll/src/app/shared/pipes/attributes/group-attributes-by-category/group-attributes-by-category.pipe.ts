@@ -37,6 +37,7 @@ export class GroupAttributesByCategoryPipe implements PipeTransform {
     [AttributeType.Cooldown]: AttributeCategory.Utility,
     [AttributeType.StatusResistance]: AttributeCategory.Utility,
     [AttributeType.CrowdControlResistance]: AttributeCategory.Utility,
+    [AttributeType.Threat]: AttributeCategory.Utility,
 
     [AttributeType.AttackSpeed]: AttributeCategory.Offense,
   };

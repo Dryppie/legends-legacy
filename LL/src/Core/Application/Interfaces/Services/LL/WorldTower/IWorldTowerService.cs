@@ -28,6 +28,7 @@ public interface IWorldTowerService
     Task<TowerOperationResult<TowerRallyDto>> DeclineRallyApplicationAsync(Guid characterId, Guid rallyId, Guid applicationId, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerRallyDto>> LeaveRallyAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerRallyDto>> UpdateRallyLoadoutAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
+    Task<TowerOperationResult<TowerRallyDto>> UpdateRallyPartiesAsync(Guid characterId, Guid rallyId, IReadOnlyList<TowerPartyAssignment> assignments, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerRallyDto>> TransferRallyLeadershipAsync(Guid characterId, Guid rallyId, Guid targetCharacterId, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerRallyDto>> FillRallyWithDevelopmentCharactersAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerAttemptResultDto>> StartRallyAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);

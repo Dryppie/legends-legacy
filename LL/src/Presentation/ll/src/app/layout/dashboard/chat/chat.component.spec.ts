@@ -1,6 +1,8 @@
+import { signal } from '@angular/core';
 import {
   ChatComponent,
   fallbackFromUnavailableGuildChannel,
+  fallbackFromUnavailableRaidChannel,
   getChatSendErrorMessage,
   getWireErrorMessage,
   isInlineGuildSystemMessage,
@@ -70,9 +72,53 @@ describe('fallbackFromUnavailableGuildChannel', () => {
       contextKey: 'trade',
     };
 
+    expect(fallbackFromUnavailableGuildChannel(activeChannel, false)).toBe(
+      activeChannel,
+    );
+  });
+});
+
+describe('fallbackFromUnavailableRaidChannel', () => {
+  it('selects All when the raid channel closes or changes', () => {
     expect(
-      fallbackFromUnavailableGuildChannel(activeChannel, false),
-    ).toBe(activeChannel);
+      fallbackFromUnavailableRaidChannel(
+        { type: ChatChannelType.Raid, contextKey: 'raid-1' },
+        null,
+      ),
+    ).toEqual({ type: ChatChannelType.General, contextKey: 'all' });
+  });
+
+  it('keeps the active channel for the same raid run', () => {
+    const active = { type: ChatChannelType.Raid, contextKey: 'raid-1' };
+    expect(fallbackFromUnavailableRaidChannel(active, 'raid-1')).toBe(active);
+  });
+});
+
+describe('ChatComponent raid room identity', () => {
+  it('keeps a stable tracking key when the derived Raid room is recreated', () => {
+    const component = Object.assign(Object.create(ChatComponent.prototype), {
+      guild: signal(null),
+      raidId: signal('raid-1'),
+      availableRooms: [
+        {
+          label: 'All',
+          contextKey: 'all',
+          channelType: ChatChannelType.General,
+        },
+      ],
+    }) as ChatComponent;
+
+    const firstRaidRoom = component.visibleRooms.find(
+      (room) => room.channelType === ChatChannelType.Raid,
+    )!;
+    const secondRaidRoom = component.visibleRooms.find(
+      (room) => room.channelType === ChatChannelType.Raid,
+    )!;
+
+    expect(firstRaidRoom).not.toBe(secondRaidRoom);
+    expect(component.trackRoom(0, firstRaidRoom)).toBe(
+      component.trackRoom(0, secondRaidRoom),
+    );
   });
 });
 

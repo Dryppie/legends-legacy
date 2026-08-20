@@ -1,638 +1,512 @@
-<!-- COLLAPSED CARD -->
-<ng-container *ngIf="!showPreview(); else previewTemplate">
-  <button
-    type="button"
-    class="group relative block w-full overflow-hidden rounded-md border border-primary/80 bg-black text-left text-white shadow-[0_0_24px_rgba(0,0,0,0.45)] transition hover:border-primary hover:brightness-110"
-    (click)="togglePreview()"
+<div
+  class="relative w-full overflow-hidden rounded-md border border-primary/80 bg-black text-white shadow-[0_0_32px_rgba(0,0,0,0.55)]"
+>
+  <div
+    class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/85 to-black/90"
+  ></div>
+  <div
+    class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/95 to-transparent"
+  ></div>
+
+  <div
+    class="relative grid gap-6 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_24rem]"
   >
-    <div
-      class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/85"
-    ></div>
+    <!-- MAIN CONTENT -->
+    <section class="flex min-w-0 flex-col">
+      <div class="flex h-full items-start justify-between gap-4">
+        <div class="min-w-0">
+          <div class="ll-eyebrow text-zinc-200/80">
+            Dungeon {{ previewData.number }}
+          </div>
 
-    <div
-      class="relative flex min-h-36 items-center justify-end gap-4 px-8 py-6 sm:min-h-40"
-      [style.min-height.px]="height"
-    >
-      <div class="min-w-0 text-right">
-        <div class="ll-eyebrow text-zinc-200/80">
-          Dungeon {{ previewData.number }}
+          <h2 class="ll-heading mt-1 text-4xl drop-shadow sm:text-5xl">
+            {{ previewData.title }}
+          </h2>
+
+          <img src="core/Divider.svg" alt="" class="mt-1 w-56 object-contain" />
         </div>
 
-        <h2 class="ll-heading mt-1 text-3xl drop-shadow sm:text-4xl">
-          {{ previewData.title }}
-        </h2>
-
-        <div class="mt-4 flex items-center justify-end gap-2">
-          <span class="ll-stat-label text-[10px] text-zinc-300/80">
-            Recommended Combat Rating
-          </span>
-          <span
-            *ngIf="
-              previewData.recommendedPartyPower as recommended;
-              else previewRecommendationPending
-            "
-            class="font-serif text-2xl font-semibold text-primary"
+        <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
+          <button
+            type="button"
+            class="ll-button text-left text-xs"
+            (click)="openRecords()"
           >
-            {{ displayCombatRating(recommended) | number: "1.0-0" }}
-          </span>
-          <ng-template #previewRecommendationPending>
-            <span class="text-xs text-zinc-400">
-              {{
-                previewData.powerRecommendationUnavailable
-                  ? "Unavailable"
-                  : "Calibrating…"
-              }}
+            <span class="block font-semibold text-white">
+              Dungeon Records
             </span>
-          </ng-template>
-        </div>
-
-        <div class="mt-3 flex flex-wrap items-center justify-end gap-1.5">
-          <span
-            #previewMasteryOrigin="cdkOverlayOrigin"
-            cdkOverlayOrigin
-            class="inline-flex"
-            (mouseenter)="previewMasteryTooltipOpen.set(true)"
-            (mouseleave)="previewMasteryTooltipOpen.set(false)"
-          >
-            <span class="ll-item-chip ll-item-chip-accent">
-              Mastery Lv. {{ previewMasteryLevel() }}
-            </span>
-
-            <ng-template
-              cdkConnectedOverlay
-              [cdkConnectedOverlayOrigin]="previewMasteryOrigin"
-              [cdkConnectedOverlayOpen]="previewMasteryTooltipOpen()"
-              [cdkConnectedOverlayPositions]="masteryTooltipPositions"
-              [cdkConnectedOverlayPush]="true"
-              [cdkConnectedOverlayViewportMargin]="12"
-              (detach)="previewMasteryTooltipOpen.set(false)"
-            >
-              <div
-                class="pointer-events-none w-80 max-w-[calc(100vw-2rem)] rounded border border-primary/50 bg-black/95 px-3 py-2 text-left text-[11px] text-zinc-200 shadow-lg"
-              >
-                <ng-container
-                  *ngTemplateOutlet="
-                    masteryTooltip;
-                    context: {
-                      $implicit: previewData.mastery,
-                      xpLabel: previewMasteryExperienceLabel(),
-                    }
-                  "
-                ></ng-container>
-              </div>
-            </ng-template>
-          </span>
-          <span
-            *ngFor="let type of previewGatheringTypes()"
-            class="ll-item-chip"
-          >
-            {{ type }}
-          </span>
+            <span class="ll-copy block text-[10px]">Rankings</span>
+          </button>
         </div>
       </div>
-    </div>
-  </button>
-</ng-container>
 
-<!-- EXPANDED PREVIEW -->
-<ng-template #previewTemplate>
-  <div
-    class="relative w-full overflow-hidden rounded-md border border-primary/80 bg-black text-white shadow-[0_0_32px_rgba(0,0,0,0.55)]"
-  >
-    <div
-      class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/85 to-black/90"
-    ></div>
-    <div
-      class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/95 to-transparent"
-    ></div>
+      <p
+        class="ll-copy mt-10 max-w-2xl font-serif text-base leading-7 text-zinc-100/90"
+      >
+        {{ previewData.lore }}
+      </p>
 
-    <div
-      class="relative grid gap-6 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_24rem]"
-    >
-      <!-- MAIN CONTENT -->
-      <section class="flex min-w-0 flex-col">
-        <div class="flex h-full items-start justify-between gap-4">
-          <div class="min-w-0">
-            <div class="ll-eyebrow text-zinc-200/80">
-              Dungeon {{ previewData.number }}
-            </div>
-
-            <h2 class="ll-heading mt-1 text-4xl drop-shadow sm:text-5xl">
-              {{ previewData.title }}
-            </h2>
-
-            <img
-              src="core/Divider.svg"
-              alt=""
-              class="mt-1 w-56 object-contain"
-            />
-          </div>
-
-          <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
-            <button
-              type="button"
-              class="ll-button text-left text-xs"
-              (click)="openRecords()"
-            >
-              <span class="block font-semibold text-white">
-                Dungeon Records
-              </span>
-              <span class="ll-copy block text-[10px]">Rankings</span>
-            </button>
-
-            <button
-              type="button"
-              class="ll-button text-xs"
-              aria-label="Close dungeon preview"
-              (click)="togglePreview()"
-            >
-              Close
-            </button>
-          </div>
+      <!-- COMPACT SUMMARY STRIP -->
+      <div class="mt-6 flex flex-wrap gap-2">
+        <div class="ll-stat-card px-3 py-2">
+          <span class="ll-stat-label"> Rooms </span>
+          <span class="ml-2 font-serif text-lg text-white">
+            {{ selectedPreviewData().minRooms ?? 0 }}-{{
+              selectedPreviewData().maxRooms ?? 0
+            }}
+          </span>
         </div>
 
-        <p
-          class="ll-copy mt-10 max-w-2xl font-serif text-base leading-7 text-zinc-100/90"
+        <div class="ll-stat-card px-3 py-2">
+          <span class="ll-stat-label"> Gathering Types </span>
+          <span class="ml-2 font-serif text-lg text-white">
+            {{ selectedGatheringTypes().length || "None" }}
+          </span>
+        </div>
+
+        <div class="ll-stat-card px-3 py-2">
+          <span class="ll-stat-label"> Clears </span>
+          <span class="ml-2 font-serif text-lg text-white">
+            {{ selectedPreviewData().record?.totalClears ?? 0 }}
+          </span>
+        </div>
+
+        <div
+          #selectedMasteryOrigin="cdkOverlayOrigin"
+          cdkOverlayOrigin
+          class="ll-stat-card px-3 py-2"
+          tabindex="0"
+          (mouseenter)="selectedMasteryTooltipOpen.set(true)"
+          (mouseleave)="selectedMasteryTooltipOpen.set(false)"
+          (focusin)="selectedMasteryTooltipOpen.set(true)"
+          (focusout)="selectedMasteryTooltipOpen.set(false)"
         >
-          {{ previewData.lore }}
-        </p>
+          <span class="ll-stat-label"> Mastery </span>
+          <span class="ml-2 font-serif text-lg text-white">
+            Lv. {{ selectedMasteryLevel() }}
+          </span>
 
-        <!-- COMPACT SUMMARY STRIP -->
-        <div class="mt-6 flex flex-wrap gap-2">
-          <div class="ll-stat-card px-3 py-2">
-            <span class="ll-stat-label"> Rooms </span>
-            <span class="ml-2 font-serif text-lg text-white">
-              {{ selectedPreviewData().minRooms ?? 0 }}-{{
-                selectedPreviewData().maxRooms ?? 0
-              }}
-            </span>
-          </div>
-
-          <div class="ll-stat-card px-3 py-2">
-            <span class="ll-stat-label"> Gathering Types </span>
-            <span class="ml-2 font-serif text-lg text-white">
-              {{ selectedGatheringTypes().length || "None" }}
-            </span>
-          </div>
-
-          <div class="ll-stat-card px-3 py-2">
-            <span class="ll-stat-label"> Clears </span>
-            <span class="ml-2 font-serif text-lg text-white">
-              {{ selectedPreviewData().record?.totalClears ?? 0 }}
-            </span>
-          </div>
-
-          <div
-            #selectedMasteryOrigin="cdkOverlayOrigin"
-            cdkOverlayOrigin
-            class="ll-stat-card px-3 py-2"
-            tabindex="0"
-            (mouseenter)="selectedMasteryTooltipOpen.set(true)"
-            (mouseleave)="selectedMasteryTooltipOpen.set(false)"
-            (focusin)="selectedMasteryTooltipOpen.set(true)"
-            (focusout)="selectedMasteryTooltipOpen.set(false)"
+          <ng-template
+            cdkConnectedOverlay
+            [cdkConnectedOverlayOrigin]="selectedMasteryOrigin"
+            [cdkConnectedOverlayOpen]="selectedMasteryTooltipOpen()"
+            [cdkConnectedOverlayPositions]="masteryTooltipPositions"
+            [cdkConnectedOverlayPush]="true"
+            [cdkConnectedOverlayViewportMargin]="12"
+            (detach)="selectedMasteryTooltipOpen.set(false)"
           >
-            <span class="ll-stat-label"> Mastery </span>
-            <span class="ml-2 font-serif text-lg text-white">
-              Lv. {{ selectedMasteryLevel() }}
-            </span>
-
-            <ng-template
-              cdkConnectedOverlay
-              [cdkConnectedOverlayOrigin]="selectedMasteryOrigin"
-              [cdkConnectedOverlayOpen]="selectedMasteryTooltipOpen()"
-              [cdkConnectedOverlayPositions]="masteryTooltipPositions"
-              [cdkConnectedOverlayPush]="true"
-              [cdkConnectedOverlayViewportMargin]="12"
-              (detach)="selectedMasteryTooltipOpen.set(false)"
+            <div
+              class="pointer-events-none w-80 max-w-[calc(100vw-2rem)] rounded border border-primary/50 bg-black/95 px-3 py-2 text-left text-[11px] text-zinc-200 shadow-lg"
             >
-              <div
-                class="pointer-events-none w-80 max-w-[calc(100vw-2rem)] rounded border border-primary/50 bg-black/95 px-3 py-2 text-left text-[11px] text-zinc-200 shadow-lg"
+              <ng-container
+                *ngTemplateOutlet="
+                  masteryTooltip;
+                  context: {
+                    $implicit: selectedPreviewData().mastery,
+                    xpLabel: masteryExperienceLabel(),
+                  }
+                "
+              ></ng-container>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- DETAILS -->
+      <div class="mt-6 flex h-full max-w-4xl flex-col">
+        <nav class="ll-segmented flex-wrap">
+          <button
+            *ngFor="let tab of detailTabs"
+            type="button"
+            class="ll-segmented-button text-xs uppercase"
+            [attr.aria-selected]="selectedTab() === tab.id"
+            [ngClass]="detailTabClass(tab.id)"
+            (click)="selectDetailTab(tab.id)"
+          >
+            {{ tab.label }}
+          </button>
+        </nav>
+
+        <div class="mt-3 min-h-40 backdrop-blur-sm">
+          <!-- REWARDS TAB -->
+          <div *ngIf="selectedTab() === 'rewards'" class="h-full">
+            <div
+              *ngIf="selectedRewardSections().length; else noRewardsListed"
+              class="grid h-full gap-3 lg:grid-cols-2"
+            >
+              <article
+                *ngFor="
+                  let group of selectedRewardSections();
+                  trackBy: trackRewardGroup
+                "
+                class="ll-card min-w-0 px-3 py-3"
               >
-                <ng-container
-                  *ngTemplateOutlet="
-                    masteryTooltip;
-                    context: {
-                      $implicit: selectedPreviewData().mastery,
-                      xpLabel: masteryExperienceLabel(),
-                    }
-                  "
-                ></ng-container>
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <h3 class="ll-eyebrow truncate text-white">
+                      {{ group.title }}
+                    </h3>
+
+                    <div class="mt-2 flex flex-wrap gap-1.5"></div>
+                  </div>
+
+                  <span
+                    class="ll-item-chip"
+                    [ngClass]="
+                      group.title === 'Run Rewards' ? 'll-item-chip-accent' : ''
+                    "
+                  >
+                    {{ group.title === "Run Rewards" ? "Repeatable" : "Once" }}
+                  </span>
+                </div>
+
+                <div class="mt-3 space-y-1 text-sm text-white">
+                  <div
+                    *ngFor="let reward of group.rewards; trackBy: trackReward"
+                    class="flex min-w-0 items-center justify-between gap-2"
+                  >
+                    <span class="min-w-0 truncate">
+                      <span *ngIf="isToolReward(reward); else rewardItem">
+                        <app-base-item
+                          [item]="reward.itemBase"
+                          [useBaseName]="true"
+                        ></app-base-item>
+                      </span>
+                      <ng-template #rewardItem>
+                        <app-item [item]="reward"></app-item>
+                      </ng-template>
+                    </span>
+                    <span
+                      class="flex shrink-0 flex-wrap justify-end gap-1 text-[10px]"
+                    >
+                      <span class="ll-item-chip tabular-nums">
+                        {{ rewardQuantityLabel(reward) }}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <ng-template #noRewardsListed>
+              <div class="ll-empty-state p-3 text-sm">No rewards listed.</div>
+            </ng-template>
+          </div>
+
+          <!-- GATHERING TAB -->
+          <div *ngIf="selectedTab() === 'gathering'" class="h-full">
+            <div
+              *ngIf="selectedGatheringNodes().length; else noGatheringNodes"
+              class="grid h-full gap-3 lg:grid-cols-2"
+            >
+              <article
+                *ngFor="
+                  let node of selectedGatheringNodes();
+                  trackBy: trackGatheringNode
+                "
+                class="ll-card min-w-0 px-3 py-3"
+              >
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <h3 class="ll-eyebrow truncate text-white">
+                      {{ node.name }}
+                    </h3>
+
+                    <div class="mt-2 flex flex-wrap gap-1.5">
+                      <span
+                        class="ll-item-chip"
+                        [ngClass]="gatheringTypeClass(node.type)"
+                      >
+                        {{ formatGatheringType(node.type) }}
+                      </span>
+                      <span class="ll-item-chip">
+                        {{ gatheringLevelLabel(node) }}
+                      </span>
+                      <span class="ll-item-chip ll-item-chip-accent">
+                        {{ gatheringChanceLabel(node) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-3 space-y-1 text-sm text-white">
+                  <div
+                    *ngFor="let loot of node.loot; trackBy: trackGatheringLoot"
+                    class="flex min-w-0 items-center justify-between gap-2"
+                  >
+                    <span class="min-w-0 truncate">
+                      <app-item [item]="loot"></app-item>
+                    </span>
+                    <span class="ll-item-chip shrink-0 tabular-nums">
+                      x{{ gatheringLootQuantityLabel(loot) }}
+                    </span>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <ng-template #noGatheringNodes>
+              <div class="ll-empty-state p-3 text-sm">
+                This dungeon has no gathering nodes.
               </div>
             </ng-template>
           </div>
+
+          <!-- MASTERY TAB -->
+          <div *ngIf="selectedTab() === 'mastery'" class="h-full">
+            <div class="grid gap-3">
+              <article class="ll-card min-w-0 px-3 py-3">
+                <div class="ll-eyebrow">Dungeon Mastery</div>
+                <div class="mt-2 flex items-end justify-between gap-3">
+                  <div>
+                    <div class="font-serif text-3xl text-white">
+                      Lv. {{ selectedMasteryLevel() }}
+                    </div>
+                    <div class="mt-1 text-xs text-secondary">
+                      {{ selectedMasteryCompletionCount() }}
+                      {{
+                        selectedMasteryCompletionCount() === 1
+                          ? "clear"
+                          : "clears"
+                      }}
+                    </div>
+                  </div>
+                  <span class="ll-item-chip ll-item-chip-accent">
+                    {{ masteryExperienceLabel() }}
+                  </span>
+                </div>
+
+                <div class="mt-4 h-2 overflow-hidden rounded bg-black/30">
+                  <div
+                    class="h-full bg-primary"
+                    [style.width.%]="selectedMasteryProgressPercent()"
+                  ></div>
+                </div>
+              </article>
+
+              <article class="ll-card min-w-0 px-3 py-3">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="ll-eyebrow">Mastery Benefits</div>
+                  <span class="text-xs text-secondary">
+                    {{ selectedMasteryLevel() }} / 10 unlocked
+                  </span>
+                </div>
+
+                <div class="mt-3 grid gap-2 sm:grid-cols-2">
+                  <div
+                    *ngFor="
+                      let benefit of selectedMasteryBenefitLevels();
+                      trackBy: trackMasteryBenefit
+                    "
+                    class="flex min-w-0 gap-3 rounded border bg-black/20 px-3 py-2"
+                    [ngClass]="masteryBenefitClass(benefit)"
+                  >
+                    <span
+                      class="ll-item-chip h-fit shrink-0"
+                      [class.ll-item-chip-accent]="
+                        isMasteryBenefitUnlocked(benefit)
+                      "
+                    >
+                      Lv. {{ benefit.level }}
+                    </span>
+                    <div class="min-w-0">
+                      <div class="text-sm text-white">{{ benefit.name }}</div>
+                      <div class="mt-0.5 text-xs leading-5 text-secondary">
+                        {{ benefit.description }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RUN SETUP PANEL -->
+    <aside
+      class="ll-panel-strong h-fit p-4 backdrop-blur-md lg:sticky lg:top-4"
+    >
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <div class="ll-eyebrow">Run Setup</div>
+          <h3 class="ll-heading mt-1 text-2xl">
+            {{ difficultyLabel(difficulty()) }}
+          </h3>
         </div>
 
-        <!-- DETAILS -->
-        <div class="mt-6 flex h-full max-w-4xl flex-col">
-          <nav class="ll-segmented flex-wrap">
-            <button
-              *ngFor="let tab of detailTabs"
-              type="button"
-              class="ll-segmented-button text-xs uppercase"
-              [attr.aria-selected]="selectedTab() === tab.id"
-              [ngClass]="detailTabClass(tab.id)"
-              (click)="selectDetailTab(tab.id)"
+        <span
+          class="ll-badge shrink-0 rounded"
+          [ngClass]="selectedStatusClass()"
+        >
+          {{ selectedStatusLabel() }}
+        </span>
+      </div>
+
+      <section class="mt-5">
+        <div class="ll-eyebrow">Difficulty</div>
+
+        <div class="mt-2 grid grid-cols-3 gap-2">
+          <button
+            *ngFor="let d of difficulties"
+            type="button"
+            class="ll-button px-2 py-2 text-xs disabled:cursor-not-allowed"
+            [ngClass]="difficultyButtonClass(d)"
+            [disabled]="!isDifficultyUnlocked(d)"
+            (click)="selectDifficulty(d)"
+          >
+            {{ difficultyLabel(d) }}
+          </button>
+        </div>
+      </section>
+
+      <section
+        class="ll-card mt-4 p-3"
+        title="This is a general recommendation calibrated from several simulated party profiles. Vigor, build matchups, and room composition still affect a run."
+      >
+        <div class="ll-eyebrow">Dungeon Rating</div>
+
+        <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
+          <div>
+            <div class="ll-stat-label">Your Combat Rating</div>
+            <ng-container
+              *ngIf="selectedPartyPower() !== null; else partyPowerUnavailable"
             >
-              {{ tab.label }}
-            </button>
-          </nav>
-
-          <div class="mt-3 min-h-40 backdrop-blur-sm">
-            <!-- REWARDS TAB -->
-            <div *ngIf="selectedTab() === 'rewards'" class="h-full">
-              <div
-                *ngIf="selectedRewardSections().length; else noRewardsListed"
-                class="grid h-full gap-3 lg:grid-cols-2"
-              >
-                <article
-                  *ngFor="
-                    let group of selectedRewardSections();
-                    trackBy: trackRewardGroup
-                  "
-                  class="ll-card min-w-0 px-3 py-3"
-                >
-                  <div class="flex items-start justify-between gap-2">
-                    <div class="min-w-0">
-                      <h3 class="ll-eyebrow truncate text-white">
-                        {{ group.title }}
-                      </h3>
-
-                      <div class="mt-2 flex flex-wrap gap-1.5"></div>
-                    </div>
-
-                    <span
-                      class="ll-item-chip"
-                      [ngClass]="
-                        group.title === 'Run Rewards'
-                          ? 'll-item-chip-accent'
-                          : ''
-                      "
-                    >
-                      {{
-                        group.title === "Run Rewards" ? "Repeatable" : "Once"
-                      }}
-                    </span>
-                  </div>
-
-                  <div class="mt-3 space-y-1 text-sm text-white">
-                    <div
-                      *ngFor="let reward of group.rewards; trackBy: trackReward"
-                      class="flex min-w-0 items-center justify-between gap-2"
-                    >
-                      <span class="min-w-0 truncate">
-                        <span *ngIf="isToolReward(reward); else rewardItem">
-                          <app-base-item
-                            [item]="reward.itemBase"
-                            [useBaseName]="true"
-                          ></app-base-item>
-                        </span>
-                        <ng-template #rewardItem>
-                          <app-item [item]="reward"></app-item>
-                        </ng-template>
-                      </span>
-                      <span
-                        class="flex shrink-0 flex-wrap justify-end gap-1 text-[10px]"
-                      >
-                        <span class="ll-item-chip tabular-nums">
-                          {{ rewardQuantityLabel(reward) }}
-                        </span>
-                      </span>
-                    </div>
-                  </div>
-                </article>
+              <div class="mt-1 font-serif text-xl tabular-nums text-primary">
+                {{
+                  displayCombatRating(selectedPartyPower()!) | number: "1.0-0"
+                }}
               </div>
+            </ng-container>
+            <ng-template #partyPowerUnavailable>
+              <div class="mt-1 text-xs text-zinc-400">Unavailable</div>
+            </ng-template>
+          </div>
 
-              <ng-template #noRewardsListed>
-                <div class="ll-empty-state p-3 text-sm">No rewards listed.</div>
-              </ng-template>
-            </div>
-
-            <!-- GATHERING TAB -->
-            <div *ngIf="selectedTab() === 'gathering'" class="h-full">
-              <div
-                *ngIf="selectedGatheringNodes().length; else noGatheringNodes"
-                class="grid h-full gap-3 lg:grid-cols-2"
-              >
-                <article
-                  *ngFor="
-                    let node of selectedGatheringNodes();
-                    trackBy: trackGatheringNode
-                  "
-                  class="ll-card min-w-0 px-3 py-3"
-                >
-                  <div class="flex items-start justify-between gap-2">
-                    <div class="min-w-0">
-                      <h3 class="ll-eyebrow truncate text-white">
-                        {{ node.name }}
-                      </h3>
-
-                      <div class="mt-2 flex flex-wrap gap-1.5">
-                        <span
-                          class="ll-item-chip"
-                          [ngClass]="gatheringTypeClass(node.type)"
-                        >
-                          {{ formatGatheringType(node.type) }}
-                        </span>
-                        <span class="ll-item-chip">
-                          {{ gatheringLevelLabel(node) }}
-                        </span>
-                        <span class="ll-item-chip ll-item-chip-accent">
-                          {{ gatheringChanceLabel(node) }}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="mt-3 space-y-1 text-sm text-white">
-                    <div
-                      *ngFor="
-                        let loot of node.loot;
-                        trackBy: trackGatheringLoot
-                      "
-                      class="flex min-w-0 items-center justify-between gap-2"
-                    >
-                      <span class="min-w-0 truncate">
-                        <app-item [item]="loot"></app-item>
-                      </span>
-                      <span class="ll-item-chip shrink-0 tabular-nums">
-                        x{{ gatheringLootQuantityLabel(loot) }}
-                      </span>
-                    </div>
-                  </div>
-                </article>
+          <div>
+            <div class="ll-stat-label">Recommended Combat Rating</div>
+            <ng-container
+              *ngIf="
+                selectedRecommendedPartyPower() as recommended;
+                else recommendationPending
+              "
+            >
+              <div class="mt-1 font-serif text-xl tabular-nums text-white">
+                {{ displayCombatRating(recommended) | number: "1.0-0" }}
               </div>
-
-              <ng-template #noGatheringNodes>
-                <div class="ll-empty-state p-3 text-sm">
-                  This dungeon has no gathering nodes.
-                </div>
-              </ng-template>
-            </div>
-
-            <!-- MASTERY TAB -->
-            <div *ngIf="selectedTab() === 'mastery'" class="h-full">
-              <div class="grid gap-3">
-                <article class="ll-card min-w-0 px-3 py-3">
-                  <div class="ll-eyebrow">Dungeon Mastery</div>
-                  <div class="mt-2 flex items-end justify-between gap-3">
-                    <div>
-                      <div class="font-serif text-3xl text-white">
-                        Lv. {{ selectedMasteryLevel() }}
-                      </div>
-                      <div class="mt-1 text-xs text-secondary">
-                        {{ selectedMasteryCompletionCount() }}
-                        {{
-                          selectedMasteryCompletionCount() === 1
-                            ? "clear"
-                            : "clears"
-                        }}
-                      </div>
-                    </div>
-                    <span class="ll-item-chip ll-item-chip-accent">
-                      {{ masteryExperienceLabel() }}
-                    </span>
-                  </div>
-
-                  <div class="mt-4 h-2 overflow-hidden rounded bg-black/30">
-                    <div
-                      class="h-full bg-primary"
-                      [style.width.%]="selectedMasteryProgressPercent()"
-                    ></div>
-                  </div>
-                </article>
-
-                <article class="ll-card min-w-0 px-3 py-3">
-                  <div class="flex items-center justify-between gap-3">
-                    <div class="ll-eyebrow">Mastery Benefits</div>
-                    <span class="text-xs text-secondary">
-                      {{ selectedMasteryLevel() }} / 10 unlocked
-                    </span>
-                  </div>
-
-                  <div class="mt-3 grid gap-2 sm:grid-cols-2">
-                    <div
-                      *ngFor="
-                        let benefit of selectedMasteryBenefitLevels();
-                        trackBy: trackMasteryBenefit
-                      "
-                      class="flex min-w-0 gap-3 rounded border bg-black/20 px-3 py-2"
-                      [ngClass]="masteryBenefitClass(benefit)"
-                    >
-                      <span
-                        class="ll-item-chip h-fit shrink-0"
-                        [class.ll-item-chip-accent]="
-                          isMasteryBenefitUnlocked(benefit)
-                        "
-                      >
-                        Lv. {{ benefit.level }}
-                      </span>
-                      <div class="min-w-0">
-                        <div class="text-sm text-white">{{ benefit.name }}</div>
-                        <div class="mt-0.5 text-xs leading-5 text-secondary">
-                          {{ benefit.description }}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </article>
+            </ng-container>
+            <ng-template #recommendationPending>
+              <div class="mt-1 text-xs text-zinc-400">
+                {{ recommendationPendingLabel() }}
               </div>
-            </div>
+            </ng-template>
           </div>
         </div>
       </section>
 
-      <!-- RUN SETUP PANEL -->
-      <aside
-        class="ll-panel-strong h-fit p-4 backdrop-blur-md lg:sticky lg:top-4"
-      >
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <div class="ll-eyebrow">Run Setup</div>
-            <h3 class="ll-heading mt-1 text-2xl">
-              {{ difficultyLabel(difficulty()) }}
-            </h3>
-          </div>
-
+      <section class="ll-card mt-3 p-3">
+        <div class="flex items-center justify-between gap-3">
+          <div class="ll-eyebrow">Entry Cost</div>
           <span
-            class="ll-badge shrink-0 rounded"
-            [ngClass]="selectedStatusClass()"
+            class="ll-badge rounded"
+            [ngClass]="checkStatusClass(!selectedHasMissingEntryRequirements())"
           >
-            {{ selectedStatusLabel() }}
+            {{ selectedEntryStatusLabel() }}
           </span>
         </div>
 
-        <section class="mt-5">
-          <div class="ll-eyebrow">Difficulty</div>
-
-          <div class="mt-2 grid grid-cols-3 gap-2">
-            <button
-              *ngFor="let d of difficulties"
-              type="button"
-              class="ll-button px-2 py-2 text-xs disabled:cursor-not-allowed"
-              [ngClass]="difficultyButtonClass(d)"
-              [disabled]="!isDifficultyUnlocked(d)"
-              (click)="selectDifficulty(d)"
-            >
-              {{ difficultyLabel(d) }}
-            </button>
-          </div>
-        </section>
-
-        <section
-          class="ll-card mt-4 p-3"
-          title="This is a general recommendation calibrated from several simulated party profiles. Vigor, build matchups, and room composition still affect a run."
+        <div
+          *ngIf="selectedEntryRequirements().length; else noEntryCost"
+          class="mt-3 space-y-2"
         >
-          <div class="ll-eyebrow">Dungeon Rating</div>
-
-          <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
-            <div>
-              <div class="ll-stat-label">Your Combat Rating</div>
-              <ng-container
-                *ngIf="
-                  selectedPartyPower() !== null;
-                  else partyPowerUnavailable
-                "
+          <div
+            *ngFor="let requirement of selectedEntryRequirements()"
+            class="ll-list-row px-2 py-2 text-xs"
+            [ngClass]="entryRequirementClass(requirement)"
+          >
+            <span class="min-w-0">
+              <span class="block truncate">{{ requirement.name }}</span>
+              <span
+                *ngIf="requirement.description"
+                class="mt-1 block text-[11px] leading-4 text-zinc-400"
               >
-                <div class="mt-1 font-serif text-xl tabular-nums text-primary">
-                  {{
-                    displayCombatRating(selectedPartyPower()!) | number: "1.0-0"
-                  }}
-                </div>
-              </ng-container>
-              <ng-template #partyPowerUnavailable>
-                <div class="mt-1 text-xs text-zinc-400">Unavailable</div>
-              </ng-template>
-            </div>
-
-            <div>
-              <div class="ll-stat-label">Recommended Combat Rating</div>
-              <ng-container
-                *ngIf="
-                  selectedRecommendedPartyPower() as recommended;
-                  else recommendationPending
-                "
-              >
-                <div class="mt-1 font-serif text-xl tabular-nums text-white">
-                  {{ displayCombatRating(recommended) | number: "1.0-0" }}
-                </div>
-              </ng-container>
-              <ng-template #recommendationPending>
-                <div class="mt-1 text-xs text-zinc-400">
-                  {{ recommendationPendingLabel() }}
-                </div>
-              </ng-template>
-            </div>
-          </div>
-        </section>
-
-        <section class="ll-card mt-3 p-3">
-          <div class="flex items-center justify-between gap-3">
-            <div class="ll-eyebrow">Entry Cost</div>
-            <span
-              class="ll-badge rounded"
-              [ngClass]="
-                checkStatusClass(!selectedHasMissingEntryRequirements())
-              "
-            >
-              {{ selectedEntryStatusLabel() }}
+                {{ requirement.description }}
+              </span>
+            </span>
+            <span class="shrink-0 tabular-nums">
+              {{ requirement.ownedAmount }}/{{ requirement.requiredAmount }}
             </span>
           </div>
+        </div>
+
+        <ng-template #noEntryCost>
+          <div class="ll-empty-state mt-3 p-3 text-sm">No key required.</div>
+        </ng-template>
+
+        <div *ngIf="shouldShowSigilAssembly()" class="ll-card mt-3 p-3">
+          <div class="ll-eyebrow">Create the missing key</div>
+          <p class="mt-2 text-xs leading-5 text-zinc-400">
+            Convert {{ dungeonState.sigilAssemblyCost() }} Sigil Fragments into
+            1 {{ selectedSigilRequirement()?.name }}.
+          </p>
+          <div class="my-3 flex items-center justify-between gap-3 text-xs">
+            <span class="text-zinc-400">Fragments owned</span>
+            <span class="ll-badge tabular-nums">
+              {{ dungeonState.sigilFragments() }}
+            </span>
+          </div>
+          <app-regular-button
+            [text]="
+              'Convert ' +
+              dungeonState.sigilAssemblyCost() +
+              ' Fragments → ' +
+              (selectedSigilRequirement()?.name ?? 'Sigil')
+            "
+            (pressed)="assembleSelectedSigil()"
+            [disabled]="!canAssembleSelectedSigil()"
+          />
+          <p
+            *ngIf="sigilAssemblyBlockingMessage()"
+            class="mt-2 text-xs leading-5 text-zinc-400"
+          >
+            {{ sigilAssemblyBlockingMessage() }}
+          </p>
+        </div>
+      </section>
+
+      <div class="mt-4">
+        <ng-container *ngIf="isActiveDungeonPreview(); else dungeonEntryAction">
+          <app-regular-button
+            text="Ongoing Dungeon Run - Continue"
+            (pressed)="continueDungeon()"
+            fullWidth
+          ></app-regular-button>
+        </ng-container>
+
+        <ng-template #dungeonEntryAction>
+          <app-regular-button
+            [text]="
+              selectedCanEnter()
+                ? 'Enter ' + difficultyLabel(difficulty())
+                : 'Cannot Enter'
+            "
+            [disabled]="!selectedCanEnter()"
+            (pressed)="startDungeon()"
+            fullWidth
+          ></app-regular-button>
 
           <div
-            *ngIf="selectedEntryRequirements().length; else noEntryCost"
-            class="mt-3 space-y-2"
+            *ngIf="!selectedCanEnter()"
+            class="ll-state ll-state-danger mt-3 text-xs leading-5"
           >
-            <div
-              *ngFor="let requirement of selectedEntryRequirements()"
-              class="ll-list-row px-2 py-2 text-xs"
-              [ngClass]="entryRequirementClass(requirement)"
-            >
-              <span class="min-w-0">
-                <span class="block truncate">{{ requirement.name }}</span>
-                <span
-                  *ngIf="requirement.description"
-                  class="mt-1 block text-[11px] leading-4 text-zinc-400"
-                >
-                  {{ requirement.description }}
-                </span>
-              </span>
-              <span class="shrink-0 tabular-nums">
-                {{ requirement.ownedAmount }}/{{ requirement.requiredAmount }}
-              </span>
-            </div>
+            {{ selectedBlockingMessage() }}
           </div>
-
-          <ng-template #noEntryCost>
-            <div class="ll-empty-state mt-3 p-3 text-sm">No key required.</div>
-          </ng-template>
-
-          <div *ngIf="shouldShowSigilAssembly()" class="ll-card mt-3 p-3">
-            <div class="ll-eyebrow">Create the missing key</div>
-            <p class="mt-2 text-xs leading-5 text-zinc-400">
-              Convert {{ dungeonState.sigilAssemblyCost() }} Sigil Fragments
-              into 1 {{ selectedSigilRequirement()?.name }}.
-            </p>
-            <div class="my-3 flex items-center justify-between gap-3 text-xs">
-              <span class="text-zinc-400">Fragments owned</span>
-              <span class="ll-badge tabular-nums">
-                {{ dungeonState.sigilFragments() }}
-              </span>
-            </div>
-            <app-regular-button
-              [text]="
-                'Convert ' +
-                dungeonState.sigilAssemblyCost() +
-                ' Fragments → ' +
-                (selectedSigilRequirement()?.name ?? 'Sigil')
-              "
-              (pressed)="assembleSelectedSigil()"
-              [disabled]="!canAssembleSelectedSigil()"
-            />
-            <p
-              *ngIf="sigilAssemblyBlockingMessage()"
-              class="mt-2 text-xs leading-5 text-zinc-400"
-            >
-              {{ sigilAssemblyBlockingMessage() }}
-            </p>
-          </div>
-        </section>
-
-        <div class="mt-4">
-          <ng-container
-            *ngIf="isActiveDungeonPreview(); else dungeonEntryAction"
-          >
-            <app-regular-button
-              text="Ongoing Dungeon Run - Continue"
-              (pressed)="continueDungeon()"
-              fullWidth
-            ></app-regular-button>
-          </ng-container>
-
-          <ng-template #dungeonEntryAction>
-            <app-regular-button
-              [text]="
-                selectedCanEnter()
-                  ? 'Enter ' + difficultyLabel(difficulty())
-                  : 'Cannot Enter'
-              "
-              [disabled]="!selectedCanEnter()"
-              (pressed)="startDungeon()"
-              fullWidth
-            ></app-regular-button>
-
-            <div
-              *ngIf="!selectedCanEnter()"
-              class="ll-state ll-state-danger mt-3 text-xs leading-5"
-            >
-              {{ selectedBlockingMessage() }}
-            </div>
-          </ng-template>
-        </div>
-      </aside>
-    </div>
+        </ng-template>
+      </div>
+    </aside>
   </div>
-</ng-template>
+</div>
 
 <ng-template #masteryTooltip let-mastery let-xpLabel="xpLabel">
   <span class="ll-eyebrow block text-[9px]">Mastery XP</span>

@@ -40,6 +40,5 @@ export interface Dungeon {
 export interface Raid {
   id: string;
   name: string;
-  creatures: string[];
-  // creatures: Creature[];
+  levelRequirement: number;
 }

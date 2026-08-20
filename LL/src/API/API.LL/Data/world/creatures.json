@@ -501,6 +501,86 @@
       "damageProfile": "Magical",
       "baseLevel": 55,
       "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000079",
+      "name": "Ant Worker",
+      "imagePath": "ant_worker",
+      "archetype": "DPS",
+      "damageProfile": "Physical",
+      "defenseProfile": "PhysicalTank",
+      "baseLevel": 25,
+      "tier": 1
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000080",
+      "name": "Fire Ant",
+      "imagePath": "fire_ant",
+      "archetype": "DPS",
+      "damageProfile": "Hybrid",
+      "defenseProfile": "PhysicalTank",
+      "baseLevel": 27,
+      "tier": 1
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000081",
+      "name": "Queen's Guard Ant",
+      "imagePath": "queens_guard_ant",
+      "archetype": "Tank",
+      "damageProfile": "Physical",
+      "defenseProfile": "PhysicalTank",
+      "baseLevel": 30,
+      "tier": 1
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000082",
+      "name": "Ant Queen",
+      "imagePath": "ant_queen",
+      "archetype": "Support",
+      "damageProfile": "Magical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 35,
+      "tier": 1
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000083",
+      "name": "Ant King",
+      "imagePath": "ant_king",
+      "archetype": "Bruiser",
+      "damageProfile": "Physical",
+      "defenseProfile": "PhysicalTank",
+      "baseLevel": 38,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000084",
+      "name": "Bloodthorn Vine",
+      "imagePath": "bloodthorn_vine",
+      "archetype": "DPS",
+      "damageProfile": "Magical",
+      "defenseProfile": "MagicalTank",
+      "baseLevel": 58,
+      "tier": 3
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000085",
+      "name": "Wendigo",
+      "imagePath": "wendigo",
+      "archetype": "Bruiser",
+      "damageProfile": "Physical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 58,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000086",
+      "name": "Corpse Golem",
+      "imagePath": "corpse_golem",
+      "archetype": "Tank",
+      "damageProfile": "Hybrid",
+      "defenseProfile": "Balanced",
+      "baseLevel": 62,
+      "tier": 2
     }
   ]
 }

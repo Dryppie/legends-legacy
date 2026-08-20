@@ -1,8 +1,145 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, OnChanges, Output, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
+import {
+  RaidBossSummary,
+  RaidRunSummary,
+  RaidService,
+  RaidTrophyVendor,
+} from '../../../../../core/services/api/raid/raid.service';
 
 @Component({
-    selector: 'app-raids',
-    imports: [],
-    templateUrl: './raids.component.html'
+  selector: 'app-raids',
+  imports: [CommonModule, RouterLink],
+  templateUrl: './raids.component.html',
+  styleUrl: './raids.component.scss',
 })
-export class RaidsComponent {}
+export class RaidsComponent implements OnChanges {
+  @Input({ required: true }) raidBoss!: RaidBossSummary;
+  @Output() changed = new EventEmitter<void>();
+  private readonly raids = inject(RaidService);
+  private readonly router = inject(Router);
+  readonly openRaids = signal<RaidRunSummary[]>([]);
+  readonly loading = signal(false);
+  readonly action = signal<string | null>(null);
+  readonly error = signal<string | null>(null);
+  readonly selectedTier = signal<number>(1);
+  readonly vendor = signal<RaidTrophyVendor | null>(null);
+
+  ngOnChanges(): void {
+    this.selectedTier.set(this.raidBoss?.tiers[0]?.tier ?? 1);
+    this.load();
+    this.loadVendor();
+  }
+
+  load(): void {
+    if (!this.raidBoss) return;
+    this.loading.set(true);
+    this.error.set(null);
+    this.raids
+      .getOpenRaids(this.raidBoss.id)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (runs) => this.openRaids.set(runs),
+        error: (error) => this.error.set(this.errorMessage(error)),
+      });
+  }
+
+  create(): void {
+    const tier = this.currentTier();
+    if (!tier || this.action()) return;
+    this.action.set('create');
+    this.raids
+      .create(this.raidBoss.id, tier.tier)
+      .pipe(finalize(() => this.action.set(null)))
+      .subscribe({
+        next: (run) => void this.router.navigate(['/game/world/raid', run.id]),
+        error: (error) => this.error.set(this.errorMessage(error)),
+      });
+  }
+
+  createDevelopment(): void {
+    const tier = this.currentTier();
+    if (!tier || this.action()) return;
+    this.action.set('development-create');
+    this.error.set(null);
+    this.raids
+      .createDevelopment(this.raidBoss.id, tier.tier)
+      .pipe(finalize(() => this.action.set(null)))
+      .subscribe({
+        next: (run) => void this.router.navigate(['/game/world/raid', run.id]),
+        error: (error) => this.error.set(this.errorMessage(error)),
+      });
+  }
+
+  join(run: RaidRunSummary): void {
+    if (this.action()) return;
+    this.action.set(`join-${run.id}`);
+    this.raids
+      .join(run.id)
+      .pipe(finalize(() => this.action.set(null)))
+      .subscribe({
+        next: (joined) =>
+          void this.router.navigate(['/game/world/raid', joined.id]),
+        error: (error) => this.error.set(this.errorMessage(error)),
+      });
+  }
+
+  assemble(): void {
+    const tier = this.currentTier();
+    if (!tier || this.action()) return;
+    this.action.set('assemble');
+    this.raids
+      .assembleRaidSeal(this.raidBoss.id, tier.tier)
+      .pipe(finalize(() => this.action.set(null)))
+      .subscribe({
+        next: () => {
+          this.changed.emit();
+          this.load();
+        },
+        error: (error) => this.error.set(this.errorMessage(error)),
+      });
+  }
+
+  purchase(itemId: string): void {
+    if (this.action()) return;
+    this.action.set(`purchase-${itemId}`);
+    this.error.set(null);
+    this.raids
+      .purchaseTrophyVendorItem(this.raidBoss.id, itemId)
+      .pipe(finalize(() => this.action.set(null)))
+      .subscribe({
+        next: () => this.loadVendor(),
+        error: (error) => this.error.set(this.errorMessage(error)),
+      });
+  }
+
+  closesIn(value: string): string {
+    const milliseconds = new Date(value).getTime() - Date.now();
+    if (milliseconds <= 0) return 'closing';
+    const hours = Math.floor(milliseconds / 3_600_000);
+    const minutes = Math.max(1, Math.floor((milliseconds % 3_600_000) / 60_000));
+    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+  }
+
+  selectTier(tier: number): void {
+    if (!this.action()) this.selectedTier.set(tier);
+  }
+
+  currentTier() {
+    return this.raidBoss.tiers.find((tier) => tier.tier === this.selectedTier());
+  }
+
+  private loadVendor(): void {
+    if (!this.raidBoss) return;
+    this.raids.getTrophyVendor(this.raidBoss.id).subscribe({
+      next: (vendor) => this.vendor.set(vendor),
+      error: (error) => this.error.set(this.errorMessage(error)),
+    });
+  }
+
+  private errorMessage(error: any): string {
+    return error?.errorMessage ?? error?.error?.errorMessage ?? 'Raid action failed.';
+  }
+}

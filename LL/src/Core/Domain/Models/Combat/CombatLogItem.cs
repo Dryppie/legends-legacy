@@ -21,6 +21,9 @@ public class CombatLogItem
     public int DamageReductionPrevented { get; set; }
     public int DamageAmplified { get; set; }
     public int FinalHealthDamage { get; set; }
+    public int DamageRedirectedTo { get; set; }
+    public int DamageRedirectedAway { get; set; }
+    public bool CountsAsTargetedAttack { get; set; }
     public string Details { get; set; } = string.Empty;
     public SimpleCombatEntity? CombatEntity { get; set; }
 
@@ -29,6 +32,7 @@ public class CombatLogItem
         + TypedMitigationPrevented
         + BlockPrevented
         + DamageReductionPrevented
+        + DamageRedirectedAway
         + BarrierAbsorbed
         + FinalHealthDamage;
 

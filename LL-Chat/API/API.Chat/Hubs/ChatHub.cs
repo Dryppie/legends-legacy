@@ -21,17 +21,20 @@ public sealed class ChatHub : Hub<IChatClient>
     private readonly IDistributedCache _cache;
     private readonly IChatPresenceTracker _presence;
     private readonly IChatModerationService _moderation;
+    private readonly IRaidChatService _raidChat;
 
     public ChatHub(
         IMediator mediator,
         IDistributedCache cache,
         IChatPresenceTracker presence,
-        IChatModerationService moderation)
+        IChatModerationService moderation,
+        IRaidChatService raidChat)
     {
         _mediator = mediator;
         _cache = cache;
         _presence = presence;
         _moderation = moderation;
+        _raidChat = raidChat;
     }
 
     public async Task Send(
@@ -79,6 +82,20 @@ public sealed class ChatHub : Hub<IChatClient>
             throw new HubException("Forbidden - not a member of that guild.");
         }
 
+        IReadOnlyList<string>? raidRecipients = null;
+        if (channelType == ChatChannelType.Raid)
+        {
+            if (!Guid.TryParse(contextKey, out var raidRunId))
+                throw new HubException("Invalid raid channel.");
+
+            raidRecipients = await _raidChat.GetRecipientsForMemberAsync(
+                raidRunId,
+                senderCharacterId,
+                Context.ConnectionAborted);
+            if (raidRecipients.Count == 0)
+                throw new HubException("Forbidden - not a member of that raid.");
+        }
+
         var senderName = Context.User!.Identity!.Name ?? "Unknown Sender";
         senderTitleDisplayName = NormalizeTitleDisplayName(senderTitleDisplayName)
             ?? NormalizeTitleDisplayName(Context.User.FindFirst("CharacterTitleDisplayName")?.Value);
@@ -111,6 +128,10 @@ public sealed class ChatHub : Hub<IChatClient>
                     return; // invalid guild id
 
                 await Clients.Group(GuildPrefix + contextKey).Receive(msg);
+                break;
+
+            case ChatChannelType.Raid:
+                await Clients.Users(raidRecipients!).Receive(msg);
                 break;
 
             case ChatChannelType.Whisper:

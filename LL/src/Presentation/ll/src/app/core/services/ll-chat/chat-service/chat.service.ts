@@ -11,6 +11,7 @@ import { GuildStateService } from '../../api/guild/guild-state.service';
 import { CharacterService } from '../../api/character/character.service';
 import { GameEventService } from '../../real-time/game-event.service';
 import { EquipmentInstance } from '../../../../shared/models/item';
+import { RaidService } from '../../api/raid/raid.service';
 
 export interface ChatMessageDto {
   id: string;
@@ -35,6 +36,7 @@ export enum ChatChannelType {
   Guild = 'Guild',
   Whisper = 'Whisper',
   System = 'System',
+  Raid = 'Raid',
 }
 
 export function mergeChatMessagesChronologically(
@@ -74,6 +76,8 @@ export class ChatService {
   private readonly whisperDraftRequests = new Subject<string>();
   private activeIdentity?: string;
   private activeGuildId: string | null = null;
+  private activeRaidId: string | null = null;
+  private raidLoadedForIdentity?: string;
   private activeAuthenticationContextVersion = -1;
   private connectAndLoadPromise?: Promise<void>;
   private unavailableUntil = 0;
@@ -95,6 +99,7 @@ export class ChatService {
     private chatApi: ChatApiService,
     private characterService: CharacterService,
     private guildState: GuildStateService,
+    private raidService: RaidService,
     private gameEvents: GameEventService,
     private auth: AuthService,
   ) {
@@ -163,22 +168,34 @@ export class ChatService {
       () => {
         const id = this.auth.identity(); // ← depends on username + login
         const guildId = this.guildState.guild()?.id ?? null;
+        const raidId = this.raidService.activeRaidId();
         const authenticationContextVersion =
           this.auth.authenticationContextVersion();
 
         if (!id) {
+          this.raidService.clearActiveRaid();
+          this.raidLoadedForIdentity = undefined;
           if (this.hub || this.activeIdentity) {
             void this.disconnect();
           }
           return;
         }
 
+        if (this.raidLoadedForIdentity !== id) {
+          this.raidLoadedForIdentity = id;
+          this.raidService.getActiveRaid().subscribe({
+            error: () => undefined,
+          });
+        }
+
         const connectionContextChanged =
           this.activeIdentity !== id ||
           this.activeGuildId !== guildId ||
+          this.activeRaidId !== raidId ||
           this.activeAuthenticationContextVersion !==
             authenticationContextVersion;
         const guildMembershipChanged = this.activeGuildId !== guildId;
+        const raidMembershipChanged = this.activeRaidId !== raidId;
 
         if (
           !connectionContextChanged &&
@@ -200,10 +217,12 @@ export class ChatService {
         const replaceExistingHub = !!this.hub && connectionContextChanged;
         const clearMessages =
           guildMembershipChanged ||
+          raidMembershipChanged ||
           (this.activeIdentity !== undefined && this.activeIdentity !== id);
 
         this.activeIdentity = id;
         this.activeGuildId = guildId;
+        this.activeRaidId = raidId;
         this.activeAuthenticationContextVersion = authenticationContextVersion;
 
         const connectionAttempt = this.connectForContext(
@@ -211,6 +230,7 @@ export class ChatService {
           replaceExistingHub,
           clearMessages,
           guildMembershipChanged,
+          raidId ?? undefined,
         ).catch((error) => {
           this.unavailableUntil = Date.now() + this.unavailableRetryDelayMs;
           this.handleConnectionError(error);
@@ -230,7 +250,12 @@ export class ChatService {
   /** Connect + load history in one call. */
   async connectAndLoad(guildId?: string, take = 50): Promise<void> {
     await this.joinChannel();
-    await this.loadHistory(guildId, take);
+    await this.loadHistory(
+      guildId,
+      take,
+      undefined,
+      this.activeRaidId ?? undefined,
+    );
     if (guildId) await this.joinGuildChannel(guildId);
   }
 
@@ -282,6 +307,20 @@ export class ChatService {
     );
   }
 
+  async sendRaid(raidRunId: string, body: string): Promise<void> {
+    await this.ensureConnected();
+    await this.hub!.invoke(
+      'Send',
+      raidRunId,
+      body,
+      ChatChannelType.Raid,
+      null,
+      null,
+      null,
+      this.currentSenderTitleDisplayName(),
+    );
+  }
+
   async sendWhisperToName(targetName: string, body: string): Promise<void> {
     const target = await firstValueFrom(
       this.characterService.searchCharacter(targetName),
@@ -326,11 +365,15 @@ export class ChatService {
     guildId?: string,
     take = 50,
     after?: string,
+    raidId?: string,
   ): Promise<void> {
     let params = new HttpParams().set('Take', take.toString());
 
     if (guildId != null) {
       params = params.set('GuildChannel', guildId);
+    }
+    if (raidId != null) {
+      params = params.set('RaidChannel', raidId);
     }
     if (after) {
       params = params.set('After', after);
@@ -359,6 +402,7 @@ export class ChatService {
     replaceExistingHub: boolean,
     clearMessages: boolean,
     guildMembershipChanged: boolean,
+    raidId?: string,
   ): Promise<void> {
     if (replaceExistingHub) {
       await this.stopHubConnection(clearMessages);
@@ -373,6 +417,7 @@ export class ChatService {
       await firstValueFrom(this.auth.refreshSession());
     }
 
+    this.activeRaidId = raidId ?? null;
     await this.connectAndLoad(guildId);
   }
 
@@ -449,11 +494,17 @@ export class ChatService {
 
     try {
       const guildId = this.activeGuildId ?? undefined;
+      const raidId = this.activeRaidId ?? undefined;
       if (guildId) {
         await hub.invoke('JoinGuild', guildId);
       }
 
-      await this.loadHistory(guildId, 200, this.lastPersistentMessageAt);
+      await this.loadHistory(
+        guildId,
+        200,
+        this.lastPersistentMessageAt,
+        raidId,
+      );
       const onlineCount = await hub.invoke<number>('GetOnlineCount');
       this.zone.run(() => this.setOnlinePlayerCount(onlineCount));
     } catch (error) {
@@ -470,9 +521,9 @@ export class ChatService {
     await this.stopHubConnection(true);
     this.activeIdentity = undefined;
     this.activeGuildId = null;
+    this.activeRaidId = null;
     this.activeAuthenticationContextVersion = -1;
     this.connectAndLoadPromise = undefined;
-
   }
 
   private async stopHubConnection(clearMessages: boolean): Promise<void> {
@@ -513,7 +564,6 @@ export class ChatService {
       this.auth.currentCharacter()?.equippedTitle?.displayName?.trim() || null
     );
   }
-
 
   private recordPersistentMessages(messages: readonly ChatMessageDto[]): void {
     for (const message of messages) {

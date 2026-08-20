@@ -63,6 +63,17 @@ export class TavernComponent implements OnInit {
       label: 'Most Dungeon Clears',
       category: 'PvE',
     },
+    { key: 'raid-boss-kills', label: 'Raid Boss Kills', category: 'PvE' },
+    {
+      key: 'fastest-raid-slain.raid-boss.hives-abyss',
+      label: "Fastest Hive's Abyss",
+      category: 'PvE',
+    },
+    {
+      key: 'fastest-raid-slain.raid-boss.sanguine-horror',
+      label: 'Fastest Sanguine Horror',
+      category: 'PvE',
+    },
     { key: 'arena-rating', label: 'Arena Rating', category: 'PvP' },
     { key: 'tournament-points', label: 'Tournament Points', category: 'PvP' },
     { key: 'profession-crafting', label: 'Crafting', category: 'Professions' },

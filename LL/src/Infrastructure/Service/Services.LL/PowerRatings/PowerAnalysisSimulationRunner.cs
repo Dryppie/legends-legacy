@@ -472,7 +472,8 @@ public sealed class PowerAnalysisSimulationRunner
         int basicAttackIntervalTicks = 30,
         Area? idleArea = null,
         bool startActiveAbilitiesOnCooldown = true,
-        bool captureEventLog = true)
+        bool captureEventLog = true,
+        IReadOnlyList<int?>? friendlyPartyNumbers = null)
     {
         var friendly = friendlyTemplates.Select(x => x.DeepCloneForEncounter()).ToList();
         var hostile = hostileTemplates.Select(x => x.DeepCloneForEncounter()).ToList();
@@ -480,7 +481,16 @@ public sealed class PowerAnalysisSimulationRunner
         var friendlyParticipants = new List<CombatRuntimeParticipant>();
         var hostileParticipants = new List<CombatRuntimeParticipant>();
 
-        AddParticipants(friendly, CombatSide.Friendly, "power-friendly", slots, friendlyParticipants);
+        if (friendlyPartyNumbers is not null && friendlyPartyNumbers.Count != friendly.Count)
+            throw new ArgumentException("A party number is required for every friendly participant.", nameof(friendlyPartyNumbers));
+
+        AddParticipants(
+            friendly,
+            CombatSide.Friendly,
+            "power-friendly",
+            slots,
+            friendlyParticipants,
+            friendlyPartyNumbers);
         AddParticipants(hostile, CombatSide.Hostile, "power-hostile", slots, hostileParticipants);
 
         var mode = idleArea is null ? CombatMode.Dungeon : CombatMode.Idle;
@@ -512,7 +522,8 @@ public sealed class PowerAnalysisSimulationRunner
         CombatSide side,
         string prefix,
         List<CombatParticipantSlot> slots,
-        List<CombatRuntimeParticipant> participants)
+        List<CombatRuntimeParticipant> participants,
+        IReadOnlyList<int?>? partyNumbers = null)
     {
         for (var index = 0; index < combatants.Count; index++)
         {
@@ -521,7 +532,11 @@ public sealed class PowerAnalysisSimulationRunner
                 Id = DeterministicGuid(side == CombatSide.Friendly ? index + 1 : index + 10_001),
                 Name = combatants[index].Name
             };
-            var slot = new CombatParticipantSlot($"{prefix}-{index + 1}", source.Id, side);
+            var slot = new CombatParticipantSlot(
+                $"{prefix}-{index + 1}",
+                source.Id,
+                side,
+                partyNumbers?[index]);
             combatants[index].Id = slot.SlotId;
             slots.Add(slot);
             participants.Add(new CombatRuntimeParticipant(slot, source, combatants[index]));
@@ -646,9 +661,10 @@ public sealed class PowerAnalysisSimulationRunner
                 new AbilityEffectSpec
                 {
                     Id = $"{BenchmarkAreaAnchorThreatAbilityId}.effect",
-                    Operation = AbilityEffectOperation.ModifyThreat,
+                    Operation = AbilityEffectOperation.ApplyCondition,
                     Target = AbilityTargetSelector.Self,
-                    BaseValue = 1_000_000_000
+                    BaseValue = 90,
+                    Condition = StandardConditionType.Taunt
                 }
             ]
         },

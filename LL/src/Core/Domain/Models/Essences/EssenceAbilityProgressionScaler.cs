@@ -140,6 +140,8 @@ public static class EssenceAbilityProgressionScaler
             Description = ability.Description,
             OwningEssenceId = ability.OwningEssenceId,
             CooldownTicks = ability.CooldownTicks,
+            ThreatValue = ability.ThreatValue,
+            ThreatMultiplier = ability.ThreatMultiplier,
             Tags = [.. ability.Tags],
             DeliveryTags = [.. ability.DeliveryTags],
             EffectTags = [.. ability.EffectTags],

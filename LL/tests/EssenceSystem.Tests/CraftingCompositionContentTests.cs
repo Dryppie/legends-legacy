@@ -20,7 +20,7 @@ public sealed class CraftingCompositionContentTests
         var provider = CreateProvider();
 
         Assert.Equal(31, provider.GetRecipes().Count);
-        Assert.Equal(11, provider.GetBlueprints().Count);
+        Assert.Equal(13, provider.GetBlueprints().Count);
         Assert.Equal(31, provider.GetRecipes().Select(recipe => recipe.OutputItemId).Distinct().Count());
         Assert.All(provider.GetRecipes(), recipe =>
         {

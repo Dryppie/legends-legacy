@@ -3959,6 +3959,447 @@ namespace Persistence.LL.Migrations
                     b.ToTable("QuestEventLedgers");
                 });
 
+            modelBuilder.Entity("Domain.Models.Raids.RaidLaneResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BattleOutcome")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("DerivedModifier")
+                        .HasPrecision(8, 6)
+                        .HasColumnType("numeric(8,6)");
+
+                    b.Property<int>("DurationTicks")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Lane")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("ObjectiveBarrierAbsorbed")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ObjectiveDamage")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid?>("PlaybackId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RaidRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Seed")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("SurvivingHostileHealthFraction")
+                        .HasPrecision(8, 6)
+                        .HasColumnType("numeric(8,6)");
+
+                    b.Property<long>("TotalFriendlyDamage")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlaybackId")
+                        .IsUnique();
+
+                    b.HasIndex("RaidRunId", "Lane")
+                        .IsUnique();
+
+                    b.ToTable("RaidLaneResults");
+                });
+
+            modelBuilder.Entity("Domain.Models.Raids.RaidParticipantResult", b =>
+                {
+                    b.Property<Guid>("RaidRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ContributionRank")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("ContributionScore")
+                        .HasPrecision(12, 8)
+                        .HasColumnType("numeric(12,8)");
+
+                    b.Property<long>("DamageDone")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("DeathTick")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Lane")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("PayoutMultiplier")
+                        .HasPrecision(8, 6)
+                        .HasColumnType("numeric(8,6)");
+
+                    b.HasKey("RaidRunId", "CharacterId");
+
+                    b.ToTable("RaidParticipantResults");
+                });
+
+            modelBuilder.Entity("Domain.Models.Raids.RaidPlayback", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BundleContentEncoding")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("BundleContentType")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("BundleHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("BundleLength")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FrameCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Lane")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RaidRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SchemaVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TicksPerFrame")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TicksPerSecond")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalTicks")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RaidRunId", "Lane")
+                        .IsUnique();
+
+                    b.ToTable("RaidPlaybacks");
+                });
+
+            modelBuilder.Entity("Domain.Models.Raids.RaidPlaybackArtifact", b =>
+                {
+                    b.Property<Guid>("RaidPlaybackId")
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("BundleBytes")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.HasKey("RaidPlaybackId");
+
+                    b.ToTable("RaidPlaybackArtifacts");
+                });
+
+            modelBuilder.Entity("Domain.Models.Raids.RaidPowerRecommendationCacheEntry", b =>
+                {
+                    b.Property<string>("RaidBossId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("Tier")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CombatRulesVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DefinitionHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("EquipmentBalanceVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PowerRatingAlgorithmVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RaidRulesVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RecommendationJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("SeedSetVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("RaidBossId", "Tier");
+
+                    b.ToTable("RaidPowerRecommendationCacheEntries");
+                });
+
+            modelBuilder.Entity("Domain.Models.Raids.RaidRewardClaim", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("ClaimedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PendingItemsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("RaidBossId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<Guid>("RaidRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Trophies")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("WasReduced")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("WeekKey")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RaidRunId", "CharacterId")
+                        .IsUnique();
+
+                    b.HasIndex("RaidBossId", "CharacterId", "WeekKey")
+                        .IsUnique()
+                        .HasFilter("\"WasReduced\" = false");
+
+                    b.ToTable("RaidRewardClaims");
+                });
+
+            modelBuilder.Entity("Domain.Models.Raids.RaidRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("BossHealthRemainingPercent")
+                        .HasPrecision(8, 4)
+                        .HasColumnType("numeric(8,4)");
+
+                    b.Property<DateTimeOffset?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("CommencedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DefinitionHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("DefinitionSnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("LeaderCharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("Outcome")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RaidBossId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<Guid>("RaidSealOwnerCharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("RaidSealRefunded")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal?>("ReinforcementPenalty")
+                        .HasPrecision(8, 6)
+                        .HasColumnType("numeric(8,6)");
+
+                    b.Property<DateTimeOffset?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset?>("SettledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("SignupClosesAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("SimulationAttempts")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SimulationLeaseOwner")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset?>("SimulationLeaseUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Tier")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal?>("WardBreak")
+                        .HasPrecision(8, 6)
+                        .HasColumnType("numeric(8,6)");
+
+                    b.Property<int>("WeekKey")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeaderCharacterId", "Status");
+
+                    b.HasIndex("Status", "SimulationLeaseUntil");
+
+                    b.HasIndex("RaidBossId", "Status", "SignupClosesAt");
+
+                    b.ToTable("RaidRuns");
+                });
+
+            modelBuilder.Entity("Domain.Models.Raids.RaidSignup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CharacterName")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid>("CharacterSnapshotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("Lane")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("LoadoutHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("PowerRating")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RaidRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("SignedUpAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("SnapshotRefreshedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("WingSlotIndex")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("CharacterSnapshotId");
+
+                    b.HasIndex("RaidRunId", "AccountId")
+                        .IsUnique();
+
+                    b.HasIndex("RaidRunId", "CharacterId")
+                        .IsUnique();
+
+                    b.HasIndex("RaidRunId", "Lane", "WingSlotIndex")
+                        .IsUnique();
+
+                    b.ToTable("RaidSignups");
+                });
+
+            modelBuilder.Entity("Domain.Models.Raids.RaidTrophyPurchase", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("PurchasedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RaidBossId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("TrophiesSpent")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("VendorItemId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("WeekKey")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId", "VendorItemId");
+
+                    b.HasIndex("CharacterId", "VendorItemId", "WeekKey");
+
+                    b.ToTable("RaidTrophyPurchases");
+                });
+
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
                 {
                     b.Property<string>("Id")
@@ -4907,6 +5348,9 @@ namespace Persistence.LL.Migrations
                     b.Property<DateTimeOffset>("JoinedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int?>("PartySlot")
+                        .HasColumnType("integer");
+
                     b.Property<int>("PowerRating")
                         .HasColumnType("integer");
 
@@ -4925,7 +5369,12 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("TowerRallyId", "CharacterId")
                         .IsUnique();
 
-                    b.ToTable("TowerRallyParticipants");
+                    b.HasIndex("TowerRallyId", "PartySlot");
+
+                    b.ToTable("TowerRallyParticipants", t =>
+                        {
+                            t.HasCheckConstraint("CK_TowerRallyParticipants_PartySlot", "\"PartySlot\" IS NULL OR \"PartySlot\" > 0");
+                        });
                 });
 
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterActionDetails.CombatActionDetails", b =>
@@ -4978,6 +5427,11 @@ namespace Persistence.LL.Migrations
                         .IsRequired()
                         .HasMaxLength(80)
                         .HasColumnType("character varying(80)");
+
+                    b.Property<long>("RaidTrophies")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(0L);
 
                     b.Property<long>("SigilFragments")
                         .HasColumnType("bigint");
@@ -5889,6 +6343,87 @@ namespace Persistence.LL.Migrations
                     b.Navigation("EventQuest");
                 });
 
+            modelBuilder.Entity("Domain.Models.Raids.RaidLaneResult", b =>
+                {
+                    b.HasOne("Domain.Models.Raids.RaidPlayback", "Playback")
+                        .WithOne()
+                        .HasForeignKey("Domain.Models.Raids.RaidLaneResult", "PlaybackId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Domain.Models.Raids.RaidRun", "RaidRun")
+                        .WithMany("LaneResults")
+                        .HasForeignKey("RaidRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Playback");
+
+                    b.Navigation("RaidRun");
+                });
+
+            modelBuilder.Entity("Domain.Models.Raids.RaidParticipantResult", b =>
+                {
+                    b.HasOne("Domain.Models.Raids.RaidRun", "RaidRun")
+                        .WithMany("ParticipantResults")
+                        .HasForeignKey("RaidRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RaidRun");
+                });
+
+            modelBuilder.Entity("Domain.Models.Raids.RaidPlayback", b =>
+                {
+                    b.HasOne("Domain.Models.Raids.RaidRun", "RaidRun")
+                        .WithMany("Playbacks")
+                        .HasForeignKey("RaidRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RaidRun");
+                });
+
+            modelBuilder.Entity("Domain.Models.Raids.RaidPlaybackArtifact", b =>
+                {
+                    b.HasOne("Domain.Models.Raids.RaidPlayback", "Playback")
+                        .WithOne("Artifact")
+                        .HasForeignKey("Domain.Models.Raids.RaidPlaybackArtifact", "RaidPlaybackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Playback");
+                });
+
+            modelBuilder.Entity("Domain.Models.Raids.RaidRewardClaim", b =>
+                {
+                    b.HasOne("Domain.Models.Raids.RaidRun", "RaidRun")
+                        .WithMany("RewardClaims")
+                        .HasForeignKey("RaidRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RaidRun");
+                });
+
+            modelBuilder.Entity("Domain.Models.Raids.RaidSignup", b =>
+                {
+                    b.HasOne("Domain.Models.Snapshots.CharacterSnapshot", "CharacterSnapshot")
+                        .WithMany()
+                        .HasForeignKey("CharacterSnapshotId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Raids.RaidRun", "RaidRun")
+                        .WithMany("Signups")
+                        .HasForeignKey("RaidRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CharacterSnapshot");
+
+                    b.Navigation("RaidRun");
+                });
+
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
                 {
                     b.HasOne("Domain.Models.Regions.Region", null)
@@ -6186,6 +6721,25 @@ namespace Persistence.LL.Migrations
                     b.Navigation("Objectives");
 
                     b.Navigation("RewardClaims");
+                });
+
+            modelBuilder.Entity("Domain.Models.Raids.RaidPlayback", b =>
+                {
+                    b.Navigation("Artifact")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Raids.RaidRun", b =>
+                {
+                    b.Navigation("LaneResults");
+
+                    b.Navigation("ParticipantResults");
+
+                    b.Navigation("Playbacks");
+
+                    b.Navigation("RewardClaims");
+
+                    b.Navigation("Signups");
                 });
 
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>

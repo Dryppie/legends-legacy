@@ -138,8 +138,10 @@ else
 {
     builder.Services.AddHostedService<GameEventOutboxWorker>();
     builder.Services.AddHostedService<DungeonPowerCalibrationWorker>();
+    builder.Services.AddHostedService<RaidPowerCalibrationWorker>();
     builder.Services.AddHostedService<WorldTowerCombatSimulationWorker>();
     builder.Services.AddHostedService<WorldTowerCombatPlaybackWorker>();
+    builder.Services.AddHostedService<RaidResolutionWorker>();
     builder.Services.AddHostedService<ChampionMarketTitleBackfillWorker>();
     if (builder.Environment.IsDevelopment())
     {

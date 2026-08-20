@@ -494,6 +494,70 @@
         "ability.creature.mad_king.unrestrained",
         "ability.creature.mad_king.bloodlust"
       ]
+    },
+    {
+      "monsterId": "monster.ant_worker",
+      "abilityIds": [
+        "ability.creature.blackjaw_spider.powerful_mandibles",
+        "ability.creature.giant_spider.thickened_carapace"
+      ]
+    },
+    {
+      "monsterId": "monster.fire_ant",
+      "abilityIds": [
+        "ability.creature.cinder_beetle.burning_mandibles",
+        "ability.creature.cinder_beetle.molten_shell"
+      ]
+    },
+    {
+      "monsterId": "monster.queens_guard_ant",
+      "abilityIds": [
+        "ability.creature.hobgoblin.intimidating_slam",
+        "ability.creature.hobgoblin.brutal_charge",
+        "ability.creature.hobgoblin.threatening_presence"
+      ]
+    },
+    {
+      "monsterId": "monster.ant_queen",
+      "abilityIds": [
+        "ability.creature.morrowmaw.hatch_the_brood",
+        "ability.creature.morrowmaw.spore_eruption",
+        "ability.creature.morrowmaw.devour_the_weak",
+        "ability.creature.morrowmaw.broodmother"
+      ]
+    },
+    {
+      "monsterId": "monster.ant_king",
+      "abilityIds": [
+        "ability.creature.mad_king.bloodbath",
+        "ability.creature.mad_king.kings_cleaver",
+        "ability.creature.mad_king.unrestrained",
+        "ability.creature.mad_king.bloodlust"
+      ]
+    },
+    {
+      "monsterId": "monster.bloodthorn_vine",
+      "abilityIds": [
+        "ability.creature.nightshade_blossom.withering_petals",
+        "ability.creature.nightshade_blossom.midnight_bloom",
+        "ability.creature.thornback_boar.bristling_hide"
+      ]
+    },
+    {
+      "monsterId": "monster.wendigo",
+      "abilityIds": [
+        "ability.creature.feral_ghoul.feral_pounce",
+        "ability.creature.feral_ghoul.shredding_claws",
+        "ability.creature.grave_hound.graveyard_howl"
+      ]
+    },
+    {
+      "monsterId": "monster.corpse_golem",
+      "abilityIds": [
+        "ability.creature.undead.necrotic_slash",
+        "ability.creature.undead.corpse_explosion",
+        "ability.creature.plague_ghoul.pestilent_touch"
+      ]
     }
   ]
 }

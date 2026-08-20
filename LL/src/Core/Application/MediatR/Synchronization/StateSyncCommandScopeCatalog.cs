@@ -46,6 +46,7 @@ public static class StateSyncCommandScopeCatalog
         "Application.UseCases.MarketPlaces.",
         "Application.UseCases.Prophecies.",
         "Application.UseCases.Quests.",
+        "Application.UseCases.Raids.",
         "Application.UseCases.Soulstones.",
         "Application.UseCases.Titles."
     ];
@@ -168,6 +169,22 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.Quests.Commands.PinQuest.PinQuestCommand),
             typeof(global::Application.UseCases.Quests.Commands.SelectQuestChoice.SelectQuestChoiceCommand),
             typeof(global::Application.UseCases.Quests.Commands.StartQuestEncounter.StartQuestEncounterCommand));
+
+        Register(profiles, [StateSyncScopes.Inventory], [StateSyncScopes.Raids],
+            typeof(global::Application.UseCases.Raids.CreateRaidCommand),
+            typeof(global::Application.UseCases.Raids.CreateDevelopmentRaidCommand),
+            typeof(global::Application.UseCases.Raids.JoinRaidCommand),
+            typeof(global::Application.UseCases.Raids.LeaveRaidCommand),
+            typeof(global::Application.UseCases.Raids.CancelRaidCommand),
+            typeof(global::Application.UseCases.Raids.TransferRaidLeadershipCommand),
+            typeof(global::Application.UseCases.Raids.RefreshRaidSnapshotCommand),
+            typeof(global::Application.UseCases.Raids.AssignRaidWingCommand),
+            typeof(global::Application.UseCases.Raids.Commands.UpdateRaidParties.UpdateRaidPartiesCommand),
+            typeof(global::Application.UseCases.Raids.FillRaidWithDevelopmentCharactersCommand),
+            typeof(global::Application.UseCases.Raids.CommenceRaidCommand),
+            typeof(global::Application.UseCases.Raids.ClaimRaidRewardsCommand),
+            typeof(global::Application.UseCases.Raids.AssembleRaidSealCommand),
+            typeof(global::Application.UseCases.Raids.PurchaseRaidTrophyVendorItemCommand));
 
         Register(profiles, [StateSyncScopes.Soulstones, StateSyncScopes.Inventory, StateSyncScopes.Quests], [],
             typeof(global::Application.UseCases.Soulstones.Commands.PurchaseSoulstoneUpgrade.PurchaseSoulstoneUpgradeCommand),

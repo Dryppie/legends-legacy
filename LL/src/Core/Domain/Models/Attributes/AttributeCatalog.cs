@@ -170,6 +170,13 @@ public static class AttributeCatalog
                 Scenarios(AttributeBenchmarkScenario.CrowdControlResilience),
                 "Crowd Control Resistance"),
 
+            [AttributeType.Threat] = Flat(
+                AttributeType.Threat,
+                "Threat",
+                "Baseline attention this character draws from enemies in combat.",
+                Scenarios(AttributeBenchmarkScenario.MixedPressure),
+                isEquipmentEligible: false),
+
             [AttributeType.AttackSpeed] = new(
                 AttributeType.AttackSpeed,
                 "Attack Speed",
@@ -243,7 +250,8 @@ public static class AttributeCatalog
         string displayName,
         string description,
         IReadOnlyList<AttributeBenchmarkScenario> scenarios,
-        int equipmentDisplayPrecision = 0) =>
+        int equipmentDisplayPrecision = 0,
+        bool isEquipmentEligible = true) =>
         new(
             attributeType,
             displayName,
@@ -253,7 +261,7 @@ public static class AttributeCatalog
             0,
             null,
             AttributeCapKind.None,
-            true,
+            isEquipmentEligible,
             true,
             0,
             string.Empty,

@@ -36,6 +36,24 @@ public sealed class LeaderboardRankingTests
     }
 
     [Fact]
+    public void Raid_time_boards_rank_shorter_vanguard_durations_first()
+    {
+        var entries = LeaderboardRanking.Rank([
+            Score("Slow", 4200, 8),
+            Score("Fast", 3100, 3),
+            Score("Fast veteran", 3100, 9)
+        ], primaryAscending: true);
+
+        Assert.Equal(
+            ["Fast veteran", "Fast", "Slow"],
+            entries.Select(x => x.ParticipantName));
+        var key = LeaderboardBoardKey.FastestRaidSlain("raid-boss.hives-abyss");
+        Assert.True(LeaderboardBoardKey.IsKnown(key));
+        Assert.True(LeaderboardBoardKey.TryGetFastestRaidBossId(key, out var raidBossId));
+        Assert.Equal("raid-boss.hives-abyss", raidBossId);
+    }
+
+    [Fact]
     public void Cursor_round_trips_for_its_board_only()
     {
         var participantId = Guid.NewGuid();

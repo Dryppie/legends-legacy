@@ -109,6 +109,20 @@ public sealed record WorldTowerChatAnnouncementPayload(
     string TargetUrl,
     DateTimeOffset SentAt);
 
+public sealed record RaidChatAnnouncementPayload(
+    Guid RaidRunId,
+    Guid MessageId,
+    string Body,
+    string TargetUrl,
+    DateTimeOffset SentAt);
+
+public sealed record RaidChatChannelSnapshotPayload(
+    Guid RaidRunId,
+    long Revision,
+    bool IsOpen,
+    IReadOnlyCollection<Guid> MemberCharacterIds,
+    DateTimeOffset UpdatedAt);
+
 public sealed record EventQuestChatAnnouncementPayload(
     string EventQuestId,
     Guid MessageId,

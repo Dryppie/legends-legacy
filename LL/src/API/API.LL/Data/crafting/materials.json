@@ -15,5 +15,7 @@
   { "id": "spirit_prism", "itemId": "spirit_prism", "name": "Spirit Prism", "family": "Special", "tier": null, "isStandardTieredMaterial": false, "isSpecialResource": true, "sources": ["Forgotten Catacombs II completion rewards."] },
   { "id": "venom_gland", "itemId": "venom_gland", "name": "Venom Gland", "family": "Special", "tier": null, "isStandardTieredMaterial": false, "isSpecialResource": true, "sources": ["Goblin Mines I completion rewards."] },
   { "id": "royal_chitin_plate", "itemId": "royal_chitin_plate", "name": "Royal Chitin Plate", "family": "Special", "tier": null, "isStandardTieredMaterial": false, "isSpecialResource": true, "sources": ["Goblin Mines II completion rewards."] },
-  { "id": "hive_ichor", "itemId": "hive_ichor", "name": "Hive Ichor", "family": "Special", "tier": null, "isStandardTieredMaterial": false, "isSpecialResource": true, "sources": ["Forgotten Catacombs II completion rewards."] }
+  { "id": "hive_ichor", "itemId": "hive_ichor", "name": "Hive Ichor", "family": "Special", "tier": null, "isStandardTieredMaterial": false, "isSpecialResource": true, "sources": ["Forgotten Catacombs II completion rewards."] },
+  { "id": "raidforged_ingot", "itemId": "raidforged_ingot", "name": "Raidforged Ingot", "family": "Special", "tier": null, "isStandardTieredMaterial": false, "isSpecialResource": true, "sources": ["Purchase from The Hive's Abyss Trophy vendor."] },
+  { "id": "sanguine_ichor", "itemId": "sanguine_ichor", "name": "Sanguine Ichor", "family": "Special", "tier": null, "isStandardTieredMaterial": false, "isSpecialResource": true, "sources": ["Purchase from the Sanguine Horror Trophy vendor."] }
 ]

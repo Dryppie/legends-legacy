@@ -27,7 +27,8 @@ public sealed class StandardConditionSystemTests
                 Id = "conditional.damage",
                 Operation = AbilityEffectOperation.Damage,
                 Target = AbilityTargetSelector.CurrentTarget,
-                BaseValue = 10,
+                ScalingAttribute = AttributeType.Power,
+                ScalingCoefficient = 1,
                 Conditions =
                 [
                     new AbilityConditionSpec
@@ -566,7 +567,7 @@ public sealed class StandardConditionSystemTests
     [Fact]
     public void Taunt_default_threat_bonus_is_one_hundred()
     {
-        Assert.Equal(100f, new FastCombatEngineOptions().TauntThreatBonus);
+        Assert.Equal(100f, new FastCombatEngineOptions().MarkThreatBonus);
     }
 
     [Fact]

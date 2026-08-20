@@ -67,6 +67,7 @@ public sealed class WorldTowerService : IWorldTowerService
     private readonly IEntityService _entities;
     private readonly ICombatSetupService _combatSetup;
     private readonly ICombatEngineExecutor _combatEngine;
+    private readonly ISnapshotCombatantBuilder _snapshotCombatants;
     private readonly IWorldTowerDevelopmentRosterFactory _developmentRosters;
     private readonly ICreatureAbilityDefinitionProvider _creatureAbilities;
     private readonly IAbilityCatalogProvider _abilityCatalog;
@@ -89,6 +90,7 @@ public sealed class WorldTowerService : IWorldTowerService
         IEntityService entities,
         ICombatSetupService combatSetup,
         ICombatEngineExecutor combatEngine,
+        ISnapshotCombatantBuilder snapshotCombatants,
         IWorldTowerDevelopmentRosterFactory developmentRosters,
         ICreatureAbilityDefinitionProvider creatureAbilities,
         IAbilityCatalogProvider abilityCatalog,
@@ -109,6 +111,7 @@ public sealed class WorldTowerService : IWorldTowerService
         _entities = entities;
         _combatSetup = combatSetup;
         _combatEngine = combatEngine;
+        _snapshotCombatants = snapshotCombatants;
         _developmentRosters = developmentRosters;
         _creatureAbilities = creatureAbilities;
         _abilityCatalog = abilityCatalog;
@@ -525,7 +528,9 @@ public sealed class WorldTowerService : IWorldTowerService
             RequiredSlots = definition.RequiredSlots,
             CreatedAt = now
         };
-        rally.Participants.Add(await CreateParticipantAsync(eligibility, rally, now, cancellationToken));
+        var leader = await CreateParticipantAsync(eligibility, rally, now, cancellationToken);
+        leader.PartySlot = 1;
+        rally.Participants.Add(leader);
         _db.TowerRallies.Add(rally);
         await EnqueueRallyUpdateAsync(rally, "Created", now, cancellationToken);
         await _db.SaveChangesAsync(cancellationToken);
@@ -668,7 +673,9 @@ public sealed class WorldTowerService : IWorldTowerService
         _db.TowerRallyParticipants.Add(participant);
         if (rally.Participants.Count == rally.RequiredSlots)
         {
-            rally.Status = TowerRallyStatus.Ready;
+            rally.Status = WorldTowerPartyRules.HasCompletePartyLayout(rally)
+                ? TowerRallyStatus.Ready
+                : TowerRallyStatus.Recruiting;
             foreach (var pending in rally.Applications.Where(x =>
                          x.Id != application.Id && x.Status == TowerRallyApplicationStatus.Pending))
             {
@@ -887,6 +894,69 @@ public sealed class WorldTowerService : IWorldTowerService
         return TowerOperationResult<TowerRallyDto>.Success(ToRallyDto(rally, characterId, accountId));
     }
 
+    public async Task<TowerOperationResult<TowerRallyDto>> UpdateRallyPartiesAsync(
+        Guid characterId,
+        Guid rallyId,
+        IReadOnlyList<TowerPartyAssignment> assignments,
+        CancellationToken cancellationToken)
+    {
+        var floorNumber = await GetRallyFloorNumberAsync(rallyId, cancellationToken);
+        if (!floorNumber.HasValue)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
+        await _db.AcquireWorldTowerFloorLockAsync(
+            _options.ServerId,
+            floorNumber.Value,
+            cancellationToken);
+
+        var rally = await GetMutableRallyWithApplicationsAsync(rallyId, cancellationToken);
+        if (rally is null)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
+        if (rally.CreatedByCharacterId != characterId)
+            return TowerOperationResult<TowerRallyDto>.Fail("Only the Expedition leader can arrange parties.");
+        if (rally.Status is not (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready))
+            return TowerOperationResult<TowerRallyDto>.Fail("Parties cannot be changed after the Expedition starts.");
+        if (assignments.Count != rally.Participants.Count)
+            return TowerOperationResult<TowerRallyDto>.Fail("The party layout must include every Expedition participant.");
+
+        var participantIds = rally.Participants.Select(participant => participant.CharacterId).ToHashSet();
+        var assignmentIds = assignments.Select(assignment => assignment.CharacterId).ToArray();
+        if (assignmentIds.Distinct().Count() != assignmentIds.Length
+            || assignmentIds.Any(character => !participantIds.Contains(character)))
+        {
+            return TowerOperationResult<TowerRallyDto>.Fail(
+                "The party layout contains a duplicate or unknown participant.");
+        }
+
+        if (assignments.Any(assignment =>
+                !WorldTowerPartyRules.IsValidSlot(assignment.PartySlot, rally.RequiredSlots)))
+        {
+            return TowerOperationResult<TowerRallyDto>.Fail(
+                $"Party slots must be between 1 and {rally.RequiredSlots}, or empty for the bench.");
+        }
+
+        var occupiedSlots = assignments
+            .Where(assignment => assignment.PartySlot.HasValue)
+            .Select(assignment => assignment.PartySlot!.Value)
+            .ToArray();
+        if (occupiedSlots.Distinct().Count() != occupiedSlots.Length)
+            return TowerOperationResult<TowerRallyDto>.Fail("Each party slot can hold only one participant.");
+
+        var assignmentByCharacter = assignments.ToDictionary(assignment => assignment.CharacterId);
+        foreach (var participant in rally.Participants)
+            participant.PartySlot = assignmentByCharacter[participant.CharacterId].PartySlot;
+
+        rally.Status = WorldTowerPartyRules.HasCompletePartyLayout(rally)
+            ? TowerRallyStatus.Ready
+            : TowerRallyStatus.Recruiting;
+        var now = _timeProvider.GetUtcNow();
+        await EnqueueRallyUpdateAsync(rally, "PartiesUpdated", now, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        var accountId = await GetAccountIdAsync(characterId, cancellationToken);
+        return TowerOperationResult<TowerRallyDto>.Success(
+            ToRallyDto(rally, characterId, accountId));
+    }
+
     public async Task<TowerOperationResult<TowerRallyDto>> TransferRallyLeadershipAsync(
         Guid characterId,
         Guid rallyId,
@@ -1009,7 +1079,9 @@ public sealed class WorldTowerService : IWorldTowerService
             added++;
         }
 
-        rally.Status = TowerRallyStatus.Ready;
+        rally.Status = WorldTowerPartyRules.HasCompletePartyLayout(rally)
+            ? TowerRallyStatus.Ready
+            : TowerRallyStatus.Recruiting;
         foreach (var pending in rally.Applications.Where(x =>
                      x.Status == TowerRallyApplicationStatus.Pending))
         {
@@ -1050,8 +1122,15 @@ public sealed class WorldTowerService : IWorldTowerService
 
             if (rally.CreatedByCharacterId != characterId)
                 return TowerOperationResult<TowerAttemptResultDto>.Fail("Only the Expedition leader can start the attempt.");
-            if (rally.Status != TowerRallyStatus.Ready || rally.Participants.Count != rally.RequiredSlots)
+            if (rally.Participants.Count != rally.RequiredSlots)
                 return TowerOperationResult<TowerAttemptResultDto>.Fail("The Expedition must fill every slot before it can start.");
+            if (!WorldTowerPartyRules.HasCompletePartyLayout(rally))
+            {
+                return TowerOperationResult<TowerAttemptResultDto>.Fail(
+                    "Every Expedition participant must be assigned to a party before the attempt can start.");
+            }
+            if (rally.Status != TowerRallyStatus.Ready)
+                return TowerOperationResult<TowerAttemptResultDto>.Fail("The Expedition is not ready to start.");
             var participantAccountIds = rally.Participants
                 .Select(x => x.AccountId)
                 .Distinct()
@@ -1448,16 +1527,6 @@ public sealed class WorldTowerService : IWorldTowerService
             attemptId,
             rally.Participants.Count,
             _timeProvider.GetElapsedTime(snapshotStartedAt).TotalMilliseconds);
-        var itemBaseIds = rally.Participants
-            .SelectMany(x => x.CharacterSnapshot.Equipment)
-            .Select(x => x.ItemBaseId)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-        var itemBases = await _db.ItemBases
-            .AsNoTracking()
-            .Where(x => itemBaseIds.Contains(x.Id))
-            .ToDictionaryAsync(x => x.Id, StringComparer.OrdinalIgnoreCase, cancellationToken);
-
         var weekKey = GetWeekKey(_timeProvider.GetUtcNow());
         var contributionTotals = await _db.TowerContributions
             .AsNoTracking()
@@ -1476,23 +1545,27 @@ public sealed class WorldTowerService : IWorldTowerService
                 cancellationToken);
         var preparation = CreatePreparationModifiers(contributionTotals, isFloorCleared);
 
-        var friendly = new List<CombatRuntimeParticipant>();
-        foreach (var participant in rally.Participants.OrderBy(x => x.JoinedAt))
+        var orderedParticipants = rally.Participants
+            .OrderBy(x => x.PartySlot)
+            .ThenBy(x => x.JoinedAt)
+            .ThenBy(x => x.Id)
+            .ToArray();
+        var friendly = (await _snapshotCombatants.BuildAsync(
+            orderedParticipants.Select(participant => new SnapshotCombatantRequest(
+                participant.CharacterSnapshot,
+                new CombatParticipantSlot(
+                    participant.CharacterId.ToString(),
+                    participant.CharacterId,
+                    CombatSide.Friendly,
+                    participant.PartySlot.HasValue
+                        ? WorldTowerPartyRules.GetPartyNumber(participant.PartySlot.Value)
+                        : null))).ToArray(),
+            cancellationToken)).ToList();
+        foreach (var participant in friendly)
         {
-            var source = RehydrateCharacter(participant.CharacterSnapshot, itemBases);
-            var combatant = _combatSetup.CreatePlayerCombatEntities([source]).Single();
-            combatant.EquippedEssences = participant.CharacterSnapshot.EquippedEssences
-                .OrderBy(x => x.SlotIndex)
-                .Select(x => x.ToPlayerEssence(participant.CharacterId))
-                .ToList();
-            combatant.HasEquippedEssenceSnapshot = true;
-            AddPercentModifier(combatant, AttributeType.Power, preparation.PlayerDamagePercent);
-            AddPercentModifier(combatant, AttributeType.ArmorPenetration, preparation.WeakPointPercent);
-            AddPercentModifier(combatant, AttributeType.MagicPenetration, preparation.WeakPointPercent);
-            friendly.Add(new CombatRuntimeParticipant(
-                new CombatParticipantSlot(participant.CharacterId.ToString(), participant.CharacterId, CombatSide.Friendly),
-                source,
-                combatant));
+            AddPercentModifier(participant.Combatant, AttributeType.Power, preparation.PlayerDamagePercent);
+            AddPercentModifier(participant.Combatant, AttributeType.ArmorPenetration, preparation.WeakPointPercent);
+            AddPercentModifier(participant.Combatant, AttributeType.MagicPenetration, preparation.WeakPointPercent);
         }
 
         var guardianSource = (await _entities.GetEntitiesByIdsForCombatAsync(
@@ -1563,7 +1636,10 @@ public sealed class WorldTowerService : IWorldTowerService
                     entityStats?.DamageDone ?? 0,
                     entityStats?.DamageTaken ?? 0,
                     entityStats?.HealingDone ?? 0,
-                    postState?.Health > 0);
+                    postState?.Health > 0,
+                    participant.PartySlot.HasValue
+                        ? WorldTowerPartyRules.GetPartyNumber(participant.PartySlot.Value)
+                        : null);
             })
             .ToArray();
         var guardianState = resolution.HostilePostState.Single();
@@ -2011,65 +2087,6 @@ public sealed class WorldTowerService : IWorldTowerService
         await _db.SaveChangesAsync(cancellationToken);
     }
 
-    private static Character RehydrateCharacter(
-        Domain.Models.Snapshots.CharacterSnapshot snapshot,
-        IReadOnlyDictionary<string, Domain.Models.Items.ItemBase> itemBases)
-    {
-        var character = new Character
-        {
-            Id = snapshot.CharacterId,
-            Name = snapshot.Name,
-            Level = snapshot.Level,
-            BaseAttributes = snapshot.BaseAttributes
-                .Select(x => new EntityAttribute
-                {
-                    AttributeType = x.AttributeType,
-                    Value = x.Value
-                })
-                .ToList()
-        };
-
-        character.EquipmentSlots = snapshot.Equipment.Select(equipment =>
-        {
-            if (!itemBases.TryGetValue(equipment.ItemBaseId, out var itemBase)
-                || itemBase is not EquipmentBase equipmentBase)
-            {
-                throw new InvalidOperationException(
-                    $"Snapshot equipment definition '{equipment.ItemBaseId}' was not found.");
-            }
-
-            var instance = new EquipmentInstance
-            {
-                Id = equipment.EquipmentInstanceId,
-                ItemBaseId = equipment.ItemBaseId,
-                ItemBase = equipmentBase,
-                BaseRecipeId = equipment.BaseRecipeId,
-                BlueprintId = equipment.BlueprintId,
-                Rarity = equipment.Rarity,
-                Quality = equipment.Quality,
-                Tier = equipment.Tier,
-                StatModelVersion = equipment.StatModelVersion,
-                Potential = equipment.Potential,
-                ItemXp = equipment.ItemXp,
-                IsMasterpiece = equipment.IsMasterpiece,
-                IsLevelingItem = equipment.IsLevelingItem,
-                InstanceModifiers = equipment.InstanceModifiers
-                    .Select(x => x.ToInstanceModifier(equipment.EquipmentInstanceId))
-                    .ToList()
-            };
-            return new EquipmentSlot
-            {
-                EntityId = character.Id,
-                Entity = character,
-                EquipmentInstanceId = instance.Id,
-                EquipmentInstance = instance,
-                EquipmentSlotType = equipment.Slot
-            };
-        }).ToList();
-
-        return character;
-    }
-
     private static void AddPercentModifier(CombatEntity entity, AttributeType attribute, decimal amount)
     {
         if (amount == 0)
@@ -2279,9 +2296,13 @@ public sealed class WorldTowerService : IWorldTowerService
             rally.Status,
             rally.CreatedByCharacterId,
             rally.RequiredSlots,
+            WorldTowerPartyRules.GetPartyCount(rally.RequiredSlots),
+            WorldTowerPartyRules.MaximumPartySize,
             rally.CreatedAt,
             rally.Participants
-                .OrderBy(x => x.JoinedAt)
+                .OrderBy(x => x.PartySlot.HasValue)
+                .ThenBy(x => x.PartySlot)
+                .ThenBy(x => x.JoinedAt)
                 .Select(x => new TowerRallyParticipantDto(
                     x.CharacterId,
                     x.CharacterName,
@@ -2289,7 +2310,11 @@ public sealed class WorldTowerService : IWorldTowerService
                     x.PowerRating,
                     x.JoinedAt,
                     x.CharacterId == rally.CreatedByCharacterId,
-                    x.CharacterId == characterId))
+                    x.CharacterId == characterId,
+                    x.PartySlot,
+                    x.PartySlot.HasValue
+                        ? WorldTowerPartyRules.GetPartyNumber(x.PartySlot.Value)
+                        : null))
                 .ToArray(),
             visibleApplications,
             CreateReadiness(rally.Participants, definition),
@@ -2298,9 +2323,12 @@ public sealed class WorldTowerService : IWorldTowerService
                 && rally.Status == TowerRallyStatus.Recruiting
                 && rally.Participants.Count < rally.RequiredSlots,
             isLeader && rally.Status == TowerRallyStatus.Recruiting,
+            isLeader && rally.Status is (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready),
             (isParticipant || visibleApplications.Any(x => x.IsCurrentCharacter && x.Status == TowerRallyApplicationStatus.Pending))
                 && rally.Status is (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready),
-            isLeader && rally.Status == TowerRallyStatus.Ready,
+            isLeader
+                && rally.Status == TowerRallyStatus.Ready
+                && WorldTowerPartyRules.HasCompletePartyLayout(rally),
             (isParticipant || visibleApplications.Any(x => x.IsCurrentCharacter && x.Status == TowerRallyApplicationStatus.Pending))
                 && rally.Status is (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready),
             isLeader
@@ -2488,7 +2516,8 @@ public sealed class WorldTowerService : IWorldTowerService
                     entity.ImagePath,
                     isFriendly,
                     entity.MaxHealth,
-                    entity.Level);
+                    entity.Level,
+                    entity.PartyNumber);
             }
         }
     }
@@ -2661,6 +2690,9 @@ public sealed class WorldTowerService : IWorldTowerService
         var warnings = new List<string>();
         if (list.Length < definition.RequiredSlots)
             warnings.Add($"{definition.RequiredSlots - list.Length} Expedition slot(s) are still empty.");
+        var benched = list.Count(participant => !participant.PartySlot.HasValue);
+        if (benched > 0)
+            warnings.Add($"{benched} participant(s) must be assigned from the bench before the Expedition can start.");
         if (average < definition.RecommendedPowerRating)
             warnings.Add("Average Power Rating is below the floor recommendation.");
         if (list.Length > 0 && list.Min(x => x.PowerRating) < definition.RecommendedPowerRating * 0.75m)

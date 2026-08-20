@@ -5,12 +5,16 @@ public static class EntityBaseAttributeHelper
 {
     public const float PowerPerCharacterLevel = 0.25f;
     public const int MaxHealthPerCharacterLevel = 20;
+    public const int BaseThreat = 100;
 
     public static List<EntityAttribute> CreateEntityAttributesWithIncrease(Guid entityId, float percentage)
     {
         var entityAttributes = CreateEntityAttributes(entityId);
         foreach (var entityAttribute in entityAttributes)
         {
+            if (entityAttribute.AttributeType == AttributeType.Threat)
+                continue;
+
             entityAttribute.Value = (int)(entityAttribute.Value * (1 + percentage));
         }
 
@@ -57,7 +61,7 @@ public static class EntityBaseAttributeHelper
         };
     }
 
-    private static int GetBaseValueForAttribute(AttributeType attributeType)
+    public static int GetBaseValueForAttribute(AttributeType attributeType)
     {
         return attributeType switch
         {
@@ -65,6 +69,7 @@ public static class EntityBaseAttributeHelper
             AttributeType.MaxHealth => 140,
             AttributeType.CritDamage => 100,
             AttributeType.HealthRegeneration => 2,
+            AttributeType.Threat => BaseThreat,
             _ => 0
         };
     }
@@ -77,7 +82,9 @@ public static class EntityBaseAttributeHelper
             {
                 EntityId = new Guid(),
                 AttributeType = attributeType,
-                Value = GetBaseValueForAttribute(attributeType) * tier
+                Value = attributeType == AttributeType.Threat
+                    ? GetBaseValueForAttribute(attributeType)
+                    : GetBaseValueForAttribute(attributeType) * tier
             })
             .ToList();
 

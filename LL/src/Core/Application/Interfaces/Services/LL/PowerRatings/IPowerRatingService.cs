@@ -1,11 +1,12 @@
 using Domain.Models.Dungeons.Definitions;
+using Domain.Models.Entities.Characters;
 
 namespace Application.Interfaces.Services.LL.PowerRatings;
 
 public static class PowerRatingAlgorithm
 {
     public const int Version = 25;
-    public const int CombatRulesVersion = 13;
+    public const int CombatRulesVersion = 14;
     // Retained under its existing name for persistence compatibility. It now
     // versions the deterministic Combat Rating definition, not a benchmark.
     public const int BenchmarkDefinitionVersion = 16;
@@ -66,6 +67,10 @@ public interface IPowerRatingService
 {
     Task<OverallPowerRating> GetCharacterOverallRatingAsync(
         Guid characterId,
+        CancellationToken cancellationToken);
+
+    Task<OverallPowerRating> GetCharacterOverallRatingAsync(
+        Character character,
         CancellationToken cancellationToken);
 
     Task<PowerRatingSnapshot> GetCharacterRatingAsync(

@@ -129,6 +129,7 @@ public sealed class CharacterExperienceProgressionTests
 
         Assert.Equal(134.75f, attributes[AttributeType.Power]);
         Assert.Equal(10_120, attributes[AttributeType.MaxHealth]);
+        Assert.Equal(100, attributes[AttributeType.Threat]);
     }
 
     [Fact]

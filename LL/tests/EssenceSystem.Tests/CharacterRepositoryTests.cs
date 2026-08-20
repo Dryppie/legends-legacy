@@ -55,6 +55,26 @@ public sealed class CharacterRepositoryTests
     }
 
     [Fact]
+    public async Task GetSigilFragmentsAsync_returns_only_the_character_balance()
+    {
+        await using var db = CreateDb();
+        var character = AddCharacter(db, "Sigil Holder");
+        character.SigilFragments = 37;
+        await db.SaveChangesAsync();
+        var repository = new CharacterRepository(db);
+
+        var fragments = await repository.GetSigilFragmentsAsync(
+            character.Id,
+            CancellationToken.None);
+        var missing = await repository.GetSigilFragmentsAsync(
+            Guid.NewGuid(),
+            CancellationToken.None);
+
+        Assert.Equal(37, fragments);
+        Assert.Null(missing);
+    }
+
+    [Fact]
     public async Task Character_name_search_is_case_insensitive_limited_and_excludes_sender()
     {
         await using var db = CreateDb();

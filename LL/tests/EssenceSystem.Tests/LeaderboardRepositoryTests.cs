@@ -8,6 +8,7 @@ using Domain.Models.Essences;
 using Domain.Models.Guilds;
 using Domain.Models.Guilds.Missions;
 using Domain.Models.Leaderboards;
+using Domain.Models.Raids;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
@@ -225,6 +226,39 @@ public sealed class LeaderboardRepositoryTests
         Assert.Equal([15L, 14L], board.Entries.Select(entry => entry.PrimaryValue));
         Assert.Equal([2L, 1L], board.Entries.Select(entry => entry.SecondaryValue));
         Assert.False(board.IsViewerRanked);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardAsync_ranks_raid_kills_and_fastest_boss_slaying()
+    {
+        await using var db = CreateDb();
+        var veteran = AddCharacter(db, "Veteran", level: 60);
+        var sprinter = AddCharacter(db, "Sprinter", level: 60);
+        AddRaidSlain(db, veteran.Id, "raid-boss.hives-abyss", 3900);
+        AddRaidSlain(db, veteran.Id, "raid-boss.sanguine-horror", 3700);
+        AddRaidSlain(db, sprinter.Id, "raid-boss.hives-abyss", 2800);
+        await db.SaveChangesAsync();
+        var repository = new LeaderboardRepository(db);
+
+        var kills = await repository.GetLeaderboardAsync(
+            veteran.Id,
+            LeaderboardBoardKey.RaidBossKills,
+            10,
+            null,
+            null,
+            CancellationToken.None);
+        Assert.Equal([veteran.Id, sprinter.Id], kills.Entries.Select(x => x.ParticipantId));
+        Assert.Equal([2L, 1L], kills.Entries.Select(x => x.PrimaryValue));
+
+        var fastest = await repository.GetLeaderboardAsync(
+            veteran.Id,
+            LeaderboardBoardKey.FastestRaidSlain("raid-boss.hives-abyss"),
+            10,
+            null,
+            null,
+            CancellationToken.None);
+        Assert.Equal([sprinter.Id, veteran.Id], fastest.Entries.Select(x => x.ParticipantId));
+        Assert.Equal([2800L, 3900L], fastest.Entries.Select(x => x.PrimaryValue));
     }
 
     [Fact]
@@ -475,6 +509,44 @@ public sealed class LeaderboardRepositoryTests
             Rating = rating,
             LifetimeHighestRating = lifetimeHighestRating
         });
+    }
+
+    private static void AddRaidSlain(
+        LLDbContext db,
+        Guid characterId,
+        string raidBossId,
+        int durationTicks)
+    {
+        var run = new RaidRun
+        {
+            Id = Guid.NewGuid(),
+            RaidBossId = raidBossId,
+            Tier = 1,
+            DefinitionHash = "test",
+            DefinitionSnapshotJson = "{}",
+            LeaderCharacterId = characterId,
+            Status = RaidRunStatus.Settled,
+            Outcome = RaidOutcome.Slain,
+            CreatedAt = DateTimeOffset.UtcNow,
+            SignupClosesAt = DateTimeOffset.UtcNow,
+            ResolvedAt = DateTimeOffset.UtcNow
+        };
+        run.LaneResults.Add(new RaidLaneResult
+        {
+            RaidRun = run,
+            RaidRunId = run.Id,
+            Lane = RaidLane.Vanguard,
+            DurationTicks = durationTicks
+        });
+        run.ParticipantResults.Add(new RaidParticipantResult
+        {
+            RaidRun = run,
+            RaidRunId = run.Id,
+            CharacterId = characterId,
+            Lane = RaidLane.Vanguard,
+            ContributionRank = 1
+        });
+        db.RaidRuns.Add(run);
     }
 
     private static void AddCompletedTournament(
