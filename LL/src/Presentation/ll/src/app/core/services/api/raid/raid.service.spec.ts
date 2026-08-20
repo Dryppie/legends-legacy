@@ -52,6 +52,20 @@ describe('RaidService', () => {
     );
   });
 
+  it('loads personal raid history for a boss', () => {
+    service.getHistory('raid-boss.hives-abyss', 12).subscribe();
+
+    expect(api.get).toHaveBeenCalledOnceWith(
+      'raids/history?raidBossId=raid-boss.hives-abyss&take=12',
+    );
+  });
+
+  it('loads personal raid history across all bosses', () => {
+    service.getHistory(undefined, 20).subscribe();
+
+    expect(api.get).toHaveBeenCalledOnceWith('raids/history?take=20');
+  });
+
   it('tracks a joined raid and clears it after leaving', () => {
     api.post.and.returnValue(
       of({

@@ -16,12 +16,17 @@ public sealed class RaidChatOutboxTests
         var handler = new RecordingHttpMessageHandler();
         var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
         var memberIds = new[] { Guid.NewGuid(), Guid.NewGuid() };
+        var lifecycleMessage = new RaidChatLifecycleMessagePayload(
+            Guid.NewGuid(),
+            "Raider joined the raid.",
+            DateTimeOffset.UtcNow);
         var payload = new RaidChatChannelSnapshotPayload(
             Guid.NewGuid(),
             7,
             true,
             memberIds,
-            DateTimeOffset.UtcNow);
+            DateTimeOffset.UtcNow,
+            lifecycleMessage);
         var message = new GameEventOutboxMessage
         {
             EventType = GameEventTypes.RaidChatChannelSnapshot,
@@ -48,6 +53,9 @@ public sealed class RaidChatOutboxTests
         Assert.Equal(7, request.RootElement.GetProperty("revision").GetInt64());
         Assert.True(request.RootElement.GetProperty("isOpen").GetBoolean());
         Assert.Equal(2, request.RootElement.GetProperty("memberCharacterIds").GetArrayLength());
+        var lifecycleJson = request.RootElement.GetProperty("lifecycleMessage");
+        Assert.Equal(lifecycleMessage.MessageId, lifecycleJson.GetProperty("messageId").GetGuid());
+        Assert.Equal(lifecycleMessage.Body, lifecycleJson.GetProperty("body").GetString());
     }
 
     private sealed class RecordingHttpMessageHandler : HttpMessageHandler

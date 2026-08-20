@@ -1,7 +1,10 @@
 using System.Text.Json;
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Raids;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Outbox;
+using Application.UseCases.Outbox;
+using RaidUpdated = Application.WebSockets.Contracts.RaidUpdated;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
@@ -79,6 +82,7 @@ public sealed class RaidSystemTests
                 "Corpse Golem"
             });
         var tiers = bosses.SelectMany(x => x.Tiers).ToArray();
+        Assert.All(tiers, tier => Assert.Equal(RaidRules.RaidSealFragmentCost, tier.RaidSealFragmentCost));
         var referencedCreatures = tiers.SelectMany(tier => tier.Flank.Adds
             .Concat(tier.Ward.Guards)
             .Select(x => x.CreatureId)
@@ -163,6 +167,8 @@ public sealed class RaidSystemTests
         var run = db.Model.FindEntityType(typeof(RaidRun));
         Assert.NotNull(run);
         Assert.NotNull(run.FindProperty(nameof(RaidRun.RaidSealOwnerCharacterId)));
+        Assert.Contains(run.GetIndexes(), index =>
+            PropertyNames(index).SequenceEqual(["Status", "PlaybackEndsAt"]));
 
         var character = db.Model.FindEntityType(typeof(Domain.Models.Entities.Characters.Character));
         Assert.NotNull(character);
@@ -447,13 +453,15 @@ public sealed class RaidSystemTests
             LevelRequirement = 25,
             Tiers = [tierOne, tierTwo]
         };
+        var outbox = new RecordingGameEventOutbox();
         var service = CreateRaidService(
             db,
             boss,
             new FixedRaidDevelopmentRosterFactory(),
             developmentToolsEnabled: true,
             powerRatings: new FixedPowerRatingService(),
-            snapshots: new FixedCharacterSnapshotService());
+            snapshots: new FixedCharacterSnapshotService(db),
+            outbox: outbox);
 
         var result = await service.CreateDevelopmentAsync(
             character.Id,
@@ -467,10 +475,107 @@ public sealed class RaidSystemTests
         var run = await db.RaidRuns.AsNoTracking().SingleAsync();
         Assert.True(run.RaidSealRefunded);
         Assert.Equal(character.Id, run.RaidSealOwnerCharacterId);
+        var channelSnapshot = Assert.IsType<RaidChatChannelSnapshotPayload>(
+            Assert.Single(outbox.Payloads.OfType<RaidChatChannelSnapshotPayload>()));
+        Assert.Equal([character.Id], channelSnapshot.MemberCharacterIds);
+        Assert.Equal(
+            "Raid channel opened. Raid Developer is leading the raid.",
+            channelSnapshot.LifecycleMessage?.Body);
     }
 
     [Fact]
-    public async Task Settled_raid_participant_can_view_every_lane_playback()
+    public async Task Raid_channel_announces_members_joining_and_leaving()
+    {
+        await using var db = CreateDbContext();
+        var leaderUser = AppUser.Guest();
+        leaderUser.Username = "RaidLeader";
+        leaderUser.IsGuest = false;
+        var memberUser = AppUser.Guest();
+        memberUser.Username = "RaidMember";
+        memberUser.IsGuest = false;
+        var leader = new Character
+        {
+            Id = Guid.NewGuid(),
+            UserId = leaderUser.Id,
+            User = leaderUser,
+            Name = "Raid Leader",
+            Level = 30
+        };
+        var member = new Character
+        {
+            Id = Guid.NewGuid(),
+            UserId = memberUser.Id,
+            User = memberUser,
+            Name = "Raid Member",
+            Level = 30
+        };
+        db.Users.AddRange(leaderUser, memberUser);
+        db.Characters.AddRange(leader, member);
+        await db.SaveChangesAsync();
+
+        var boss = new RaidBossDefinition
+        {
+            Id = "raid-boss.test",
+            Name = "Test Raid Boss",
+            Region = 1,
+            LevelRequirement = 25,
+            Tiers =
+            [
+                new RaidBossTierDefinition
+                {
+                    Tier = 1,
+                    LaneSlots = 3,
+                    MinimumRoster = 3
+                }
+            ]
+        };
+        var outbox = new RecordingGameEventOutbox();
+        var service = CreateRaidService(
+            db,
+            boss,
+            new FixedRaidDevelopmentRosterFactory(),
+            developmentToolsEnabled: true,
+            powerRatings: new FixedPowerRatingService(),
+            snapshots: new FixedCharacterSnapshotService(db),
+            outbox: outbox);
+
+        var created = await service.CreateDevelopmentAsync(
+            leader.Id,
+            boss.Id,
+            1,
+            CancellationToken.None);
+        Assert.True(created.Succeeded, created.Error);
+        db.ChangeTracker.Clear();
+        var joined = await service.JoinAsync(
+            member.Id,
+            created.Value!.Id,
+            CancellationToken.None);
+        Assert.True(joined.Succeeded, joined.Error);
+        db.ChangeTracker.Clear();
+        var left = await service.LeaveAsync(
+            member.Id,
+            created.Value.Id,
+            CancellationToken.None);
+        Assert.True(left.Succeeded, left.Error);
+
+        var snapshots = outbox.Payloads
+            .OfType<RaidChatChannelSnapshotPayload>()
+            .ToArray();
+        Assert.Equal(3, snapshots.Length);
+        Assert.Equal("Raid Member joined the raid.", snapshots[1].LifecycleMessage?.Body);
+        Assert.Contains(member.Id, snapshots[1].MemberCharacterIds);
+        Assert.Equal("Raid Member left the raid.", snapshots[2].LifecycleMessage?.Body);
+        Assert.DoesNotContain(member.Id, snapshots[2].MemberCharacterIds);
+        Assert.Equal(
+            ["Created", "ParticipantJoined", "ParticipantLeft"],
+            outbox.Payloads.OfType<RaidUpdated>().Select(update => update.Event));
+    }
+
+    [Theory]
+    [InlineData(RaidRunStatus.Playback)]
+    [InlineData(RaidRunStatus.Settled)]
+    public async Task Raid_participant_can_view_every_lane_during_and_after_playback(
+        RaidRunStatus status)
     {
         await using var db = CreateDbContext();
         var participantId = Guid.NewGuid();
@@ -481,7 +586,7 @@ public sealed class RaidSystemTests
             Tier = 1,
             LeaderCharacterId = participantId,
             RaidSealOwnerCharacterId = participantId,
-            Status = RaidRunStatus.Settled,
+            Status = status,
             CreatedAt = DateTimeOffset.UtcNow,
             SignupClosesAt = DateTimeOffset.UtcNow,
             Signups =
@@ -537,6 +642,132 @@ public sealed class RaidSystemTests
             CancellationToken.None));
     }
 
+    [Fact]
+    public async Task Personal_raid_history_prioritizes_unclaimed_rewards_and_filters_by_boss()
+    {
+        await using var db = CreateDbContext();
+        var characterId = Guid.NewGuid();
+        var now = DateTimeOffset.UtcNow;
+        var boss = new RaidBossDefinition
+        {
+            Id = "raid-boss.test",
+            Name = "Test Raid Boss"
+        };
+
+        var unclaimedRun = CreateCompletedRun(boss.Id, 2, RaidOutcome.Broken, now.AddDays(-2));
+        var claimedRun = CreateCompletedRun(boss.Id, 1, RaidOutcome.Slain, now.AddDays(-1));
+        var otherBossRun = CreateCompletedRun("raid-boss.other", 3, RaidOutcome.Wounded, now);
+        unclaimedRun.RewardClaims.Add(CreateRewardClaim(unclaimedRun, characterId, 65));
+        claimedRun.RewardClaims.Add(CreateRewardClaim(claimedRun, characterId, 100, now));
+        otherBossRun.RewardClaims.Add(CreateRewardClaim(otherBossRun, characterId, 40));
+        db.RaidRuns.AddRange(unclaimedRun, claimedRun, otherBossRun);
+        await db.SaveChangesAsync();
+
+        var service = CreateRaidService(
+            db,
+            boss,
+            new FixedRaidDevelopmentRosterFactory(),
+            developmentToolsEnabled: false);
+
+        var history = await service.GetHistoryAsync(characterId, boss.Id, 10, CancellationToken.None);
+
+        Assert.Collection(
+            history,
+            entry =>
+            {
+                Assert.Equal(unclaimedRun.Id, entry.RaidRunId);
+                Assert.Equal("Test Raid Boss", entry.RaidBossName);
+                Assert.True(entry.CanClaim);
+                Assert.Null(entry.ClaimedAt);
+                Assert.Equal(65, entry.Trophies);
+            },
+            entry =>
+            {
+                Assert.Equal(claimedRun.Id, entry.RaidRunId);
+                Assert.False(entry.CanClaim);
+                Assert.NotNull(entry.ClaimedAt);
+            });
+    }
+
+    [Fact]
+    public async Task Slain_announcement_waits_until_visual_playback_has_ended()
+    {
+        await using var db = CreateDbContext();
+        var now = DateTimeOffset.UtcNow;
+        var leaderId = Guid.NewGuid();
+        var boss = new RaidBossDefinition
+        {
+            Id = "raid-boss.playback-test",
+            Name = "Playback Test Boss",
+            Tiers = [new RaidBossTierDefinition { Tier = 1 }]
+        };
+        db.RaidRuns.Add(new RaidRun
+        {
+            Id = Guid.NewGuid(),
+            RaidBossId = boss.Id,
+            Tier = 1,
+            LeaderCharacterId = Guid.NewGuid(),
+            RaidSealOwnerCharacterId = Guid.NewGuid(),
+            Status = RaidRunStatus.Settled,
+            Outcome = RaidOutcome.Slain,
+            CreatedAt = now.AddDays(-1),
+            SignupClosesAt = now.AddDays(-1),
+            ResolvedAt = now.AddDays(-1),
+            SettledAt = now.AddDays(-1)
+        });
+        var run = new RaidRun
+        {
+            Id = Guid.NewGuid(),
+            RaidBossId = boss.Id,
+            Tier = 1,
+            LeaderCharacterId = leaderId,
+            RaidSealOwnerCharacterId = leaderId,
+            Status = RaidRunStatus.Playback,
+            Outcome = RaidOutcome.Slain,
+            CreatedAt = now,
+            SignupClosesAt = now,
+            PlaybackStartedAt = now,
+            PlaybackEndsAt = now.AddMinutes(1),
+            Signups =
+            [
+                new RaidSignup
+                {
+                    CharacterId = leaderId,
+                    AccountId = Guid.NewGuid(),
+                    CharacterName = "Raid Leader",
+                    Lane = RaidLane.Vanguard,
+                    WingSlotIndex = 0,
+                    SignedUpAt = now
+                }
+            ]
+        };
+        db.RaidRuns.Add(run);
+        await db.SaveChangesAsync();
+
+        var outbox = new RecordingGameEventOutbox();
+        var service = CreateRaidService(
+            db,
+            boss,
+            new FixedRaidDevelopmentRosterFactory(),
+            developmentToolsEnabled: false,
+            outbox: outbox,
+            stateSync: new NoopStateSyncService());
+
+        await service.ProcessDueRaidsAsync("test-worker", 10, CancellationToken.None);
+
+        Assert.Equal(RaidRunStatus.Playback, run.Status);
+        Assert.DoesNotContain(GameEventTypes.RaidChatAnnouncement, outbox.EventTypes);
+
+        run.PlaybackEndsAt = now.AddSeconds(-1);
+        await db.SaveChangesAsync();
+        await service.ProcessDueRaidsAsync("test-worker", 10, CancellationToken.None);
+
+        Assert.Equal(RaidRunStatus.Settled, run.Status);
+        Assert.NotNull(run.ResolvedAt);
+        Assert.Contains(GameEventTypes.RaidChatAnnouncement, outbox.EventTypes);
+        Assert.Contains(GameEventTypes.RaidChatChannelSnapshot, outbox.EventTypes);
+    }
+
     private static LLDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()
@@ -546,13 +777,48 @@ public sealed class RaidSystemTests
         return new LLDbContext(options);
     }
 
+    private static RaidRun CreateCompletedRun(
+        string raidBossId,
+        int tier,
+        RaidOutcome outcome,
+        DateTimeOffset resolvedAt) =>
+        new()
+        {
+            RaidBossId = raidBossId,
+            Tier = tier,
+            Status = RaidRunStatus.Settled,
+            Outcome = outcome,
+            CreatedAt = resolvedAt.AddHours(-1),
+            SignupClosesAt = resolvedAt.AddHours(-1),
+            ResolvedAt = resolvedAt,
+            SettledAt = resolvedAt
+        };
+
+    private static RaidRewardClaim CreateRewardClaim(
+        RaidRun run,
+        Guid characterId,
+        int trophies,
+        DateTimeOffset? claimedAt = null) =>
+        new()
+        {
+            RaidRun = run,
+            RaidRunId = run.Id,
+            RaidBossId = run.RaidBossId,
+            CharacterId = characterId,
+            Trophies = trophies,
+            CreatedAt = run.ResolvedAt!.Value,
+            ClaimedAt = claimedAt
+        };
+
     private static RaidService CreateRaidService(
         LLDbContext db,
         RaidBossDefinition boss,
         IRaidDevelopmentRosterFactory developmentRosters,
         bool developmentToolsEnabled,
         IPowerRatingService? powerRatings = null,
-        ICharacterSnapshotService? snapshots = null) =>
+        ICharacterSnapshotService? snapshots = null,
+        IGameEventOutbox? outbox = null,
+        IStateSyncService? stateSync = null) =>
         new(
             db: db,
             definitions: new FixedRaidBossDefinitionProvider(boss),
@@ -567,8 +833,8 @@ public sealed class RaidSystemTests
             combatResolver: null!,
             playbackBundles: null!,
             achievements: null!,
-            outbox: new NoopGameEventOutbox(),
-            stateSync: null!,
+            outbox: outbox ?? new NoopGameEventOutbox(),
+            stateSync: stateSync!,
             memoryCache: new MemoryCache(new MemoryCacheOptions()),
             timeProvider: TimeProvider.System,
             jsonOptions: new JsonSerializerOptions(JsonSerializerDefaults.Web),
@@ -587,6 +853,54 @@ public sealed class RaidSystemTests
             Guid? characterId,
             Guid? accountId,
             CancellationToken cancellationToken) => Task.CompletedTask;
+    }
+
+    private sealed class RecordingGameEventOutbox : IGameEventOutbox
+    {
+        public List<string> EventTypes { get; } = [];
+        public List<object> Payloads { get; } = [];
+
+        public Task EnqueueAsync<TPayload>(
+            string eventType,
+            TPayload payload,
+            Guid? characterId,
+            Guid? accountId,
+            CancellationToken cancellationToken)
+        {
+            EventTypes.Add(eventType);
+            Payloads.Add(payload!);
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class NoopStateSyncService : IStateSyncService
+    {
+        public IReadOnlyDictionary<string, long> GetChangedRevisions(Guid? characterId) =>
+            new Dictionary<string, long>();
+
+        public Task InvalidateCharacterAsync(
+            Guid characterId,
+            string reason,
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task InvalidateCharacterScopeAsync(
+            Guid characterId,
+            string scope,
+            string reason,
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task InvalidateWorldScopeAsync(
+            string scope,
+            string reason,
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task<Application.WebSockets.Contracts.StateSyncCheckpoint> GetCheckpointAsync(
+            Guid characterId,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(new Application.WebSockets.Contracts.StateSyncCheckpoint(
+                characterId,
+                new Dictionary<string, long>(),
+                DateTimeOffset.UtcNow));
     }
 
     private sealed class FixedPowerRatingService : IPowerRatingService
@@ -625,16 +939,25 @@ public sealed class RaidSystemTests
             GetCharacterRatingAsync(characterId, cancellationToken);
     }
 
-    private sealed class FixedCharacterSnapshotService : ICharacterSnapshotService
+    private sealed class FixedCharacterSnapshotService(LLDbContext? db = null) : ICharacterSnapshotService
     {
-        public Task<CharacterSnapshot> CreateAsync(Guid characterId, CancellationToken ct) =>
-            Task.FromResult(new CharacterSnapshot
+        public async Task<CharacterSnapshot> CreateAsync(Guid characterId, CancellationToken ct)
+        {
+            var snapshot = new CharacterSnapshot
             {
                 Id = Guid.NewGuid(),
                 CharacterId = characterId,
                 Name = "Raid Developer",
                 Level = 30
-            });
+            };
+            if (db is not null)
+            {
+                db.CharacterSnapshots.Add(snapshot);
+                await db.SaveChangesAsync(ct);
+            }
+
+            return snapshot;
+        }
 
         public Task<CharacterSnapshot?> GetSnapshotByCharacterIdAsync(
             Guid characterId,

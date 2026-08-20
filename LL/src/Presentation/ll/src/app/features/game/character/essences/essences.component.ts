@@ -59,14 +59,16 @@ import { PopoverComponent } from '../../../../shared/components/custom-component
 import { EssenceItemViewService } from '../../../../core/services/api/essences/essence-item-view.service';
 import { Essence } from '../../../../shared/models/essence';
 import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
-import { creatureArchiveSearchText } from './creature-archive-search';
+import {
+  CreatureEssenceFilter,
+  creatureArchiveSearchText,
+  matchesCreatureEssenceFilter,
+} from './creature-archive-search';
 import { playerEssenceSearchText } from '../../../../shared/search/essence-search';
 
 type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'ready';
 type ArchiveSort = 'name' | 'level' | 'tier';
 type CreatureSourceFilter = 'all' | 'Area' | 'Dungeon';
-type CreatureEssenceFilter = 'all' | 'found' | 'not-found';
-
 interface AscendRequirementView {
   label: string;
   current?: number;
@@ -261,11 +263,7 @@ export class EssencesComponent implements OnInit {
         return false;
       }
 
-      const hasFoundEssence = creature.essences.some(
-        (essence) => essence.isAbsorbed,
-      );
-      if (essenceFilter === 'found' && !hasFoundEssence) return false;
-      if (essenceFilter === 'not-found' && hasFoundEssence) return false;
+      if (!matchesCreatureEssenceFilter(creature, essenceFilter)) return false;
 
       if (!search) return true;
 

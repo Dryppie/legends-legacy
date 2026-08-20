@@ -70,6 +70,14 @@ public sealed record WorldTowerRallyUpdated(
     int PendingApplicationCount,
     DateTimeOffset OccurredAtUtc) : GameRealtimeEvent;
 
+public sealed record RaidUpdated(
+    Guid RaidRunId,
+    string RaidBossId,
+    string Event,
+    string Status,
+    int SignupCount,
+    DateTimeOffset OccurredAtUtc) : GameRealtimeEvent;
+
 public sealed record WorldTowerCombatFrameUpdated(
     Guid AttemptId,
     Guid RallyId,

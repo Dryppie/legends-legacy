@@ -15,6 +15,21 @@ namespace EssenceSystem.Tests;
 public sealed class RaidControllerTests
 {
     [Fact]
+    public async Task HistoryEndpointDispatchesAuthenticatedCharacterAndFilters()
+    {
+        var characterId = Guid.NewGuid();
+        var sender = new RecordingSender();
+        var controller = CreateController(sender, characterId);
+
+        await controller.GetHistory("raid-boss.hives-abyss", 12);
+
+        var query = Assert.IsType<GetRaidHistoryQuery>(Assert.Single(sender.Requests));
+        Assert.Equal(
+            (characterId, "raid-boss.hives-abyss", 12),
+            (query.CharacterId, query.RaidBossId, query.Take));
+    }
+
+    [Fact]
     public async Task UpdatePartiesEndpointDispatchesCompleteLayoutForAuthenticatedLeader()
     {
         var leaderId = Guid.NewGuid();

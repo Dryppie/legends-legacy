@@ -5,7 +5,7 @@ import {
   fallbackFromUnavailableRaidChannel,
   getChatSendErrorMessage,
   getWireErrorMessage,
-  isInlineGuildSystemMessage,
+  isInlineChannelSystemMessage,
   isWorldSystemMessage,
   parseWireCommand,
   splitCurrentPlayerMentions,
@@ -122,10 +122,10 @@ describe('ChatComponent raid room identity', () => {
   });
 });
 
-describe('isInlineGuildSystemMessage', () => {
+describe('isInlineChannelSystemMessage', () => {
   it('recognizes explicitly flagged guild notices', () => {
     expect(
-      isInlineGuildSystemMessage({
+      isInlineChannelSystemMessage({
         channelType: ChatChannelType.Guild,
         body: 'A guild notice.',
         isSystemGenerated: true,
@@ -135,9 +135,19 @@ describe('isInlineGuildSystemMessage', () => {
 
   it('recognizes building target notices created before the flag existed', () => {
     expect(
-      isInlineGuildSystemMessage({
+      isInlineChannelSystemMessage({
         channelType: ChatChannelType.Guild,
         body: 'set the current building target to Guild Hall level 2.',
+      }),
+    ).toBeTrue();
+  });
+
+  it('recognizes explicitly flagged raid notices', () => {
+    expect(
+      isInlineChannelSystemMessage({
+        channelType: ChatChannelType.Raid,
+        body: 'A raider joined the raid.',
+        isSystemGenerated: true,
       }),
     ).toBeTrue();
   });

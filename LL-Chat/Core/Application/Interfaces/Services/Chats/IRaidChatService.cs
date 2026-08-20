@@ -2,7 +2,7 @@ namespace Application.Interfaces.Services.Chats;
 
 public interface IRaidChatService
 {
-    Task ApplySnapshotAsync(
+    Task<bool> ApplySnapshotAsync(
         Guid raidRunId,
         long revision,
         bool isOpen,

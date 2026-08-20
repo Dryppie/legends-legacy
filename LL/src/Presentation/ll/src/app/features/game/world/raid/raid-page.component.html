@@ -29,13 +29,20 @@
           Assemble three wings before mustering closes in
           {{ closesIn(current.signupClosesAt) }}.
         </p>
-        <p class="hero-copy" *ngIf="current.status === 'Resolving'">
+        <p
+          class="hero-copy"
+          *ngIf="
+            current.status === 'Resolving' || current.status === 'Playback'
+          "
+        >
           Flank fights first, Ward second, and Vanguard confronts the raid boss.
         </p>
         <p
           class="hero-copy"
           *ngIf="
-            current.status !== 'Mustering' && current.status !== 'Resolving'
+            current.status !== 'Mustering' &&
+            current.status !== 'Resolving' &&
+            current.status !== 'Playback'
           "
         >
           The raid has concluded. Review each wing's battle report below.
@@ -62,10 +69,20 @@
               <strong>{{ closesIn(current.signupClosesAt) }}</strong>
             </div>
           </ng-container>
-          <ng-container *ngIf="current.status === 'Resolving'">
+          <ng-container
+            *ngIf="
+              current.status === 'Resolving' || current.status === 'Playback'
+            "
+          >
             <div class="stat">
               <span>Current phase</span>
-              <strong>Preparing battles</strong>
+              <strong>
+                {{
+                  current.status === "Playback"
+                    ? "Battles underway"
+                    : "Preparing battles"
+                }}
+              </strong>
             </div>
             <div class="stat">
               <span>First battle</span>
@@ -483,14 +500,21 @@
 
       <section
         class="section tower-panel ll-panel resolving"
-        *ngIf="current.status === 'Resolving'"
+        *ngIf="current.status === 'Resolving' || current.status === 'Playback'"
       >
         <div class="spinner"></div>
         <p class="eyebrow">Raid in progress</p>
-        <h2>Preparing raid battles</h2>
+        <h2>
+          {{
+            current.status === "Playback"
+              ? "Raid battles underway"
+              : "Preparing raid battles"
+          }}
+        </h2>
         <p class="muted">
           Flank fights first, Ward second, and Vanguard faces the raid boss
-          last. The battle viewer will open automatically.
+          last. The battle viewer opens automatically and resumes from the
+          current battle after a refresh.
         </p>
       </section>
 

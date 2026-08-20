@@ -52,7 +52,9 @@ public sealed class JsonRaidBossDefinitionProvider : IRaidBossDefinitionProvider
                     throw new InvalidOperationException($"Raid boss '{boss.Id}' tier {tier.Tier} has invalid roster settings.");
                 if (tier.SignupWindowHours <= 0 || tier.TickBudget.Vanguard <= 0 || tier.TickBudget.Flank <= 0 || tier.TickBudget.Ward <= 0)
                     throw new InvalidOperationException($"Raid boss '{boss.Id}' tier {tier.Tier} has invalid timing settings.");
-                if (string.IsNullOrWhiteSpace(tier.RaidSealItemId) || string.IsNullOrWhiteSpace(tier.RaidSealFragmentItemId) || tier.RaidSealFragmentCost <= 0)
+                if (string.IsNullOrWhiteSpace(tier.RaidSealItemId) ||
+                    string.IsNullOrWhiteSpace(tier.RaidSealFragmentItemId) ||
+                    tier.RaidSealFragmentCost != RaidRules.RaidSealFragmentCost)
                     throw new InvalidOperationException($"Raid boss '{boss.Id}' tier {tier.Tier} has invalid Raid Seal settings.");
                 if (tier.Boss.CreatureId == Guid.Empty || tier.Ward.ObjectiveCreatureId == Guid.Empty || tier.Flank.Adds.Count == 0)
                     throw new InvalidOperationException($"Raid boss '{boss.Id}' tier {tier.Tier} must author a boss, Flank adds, and a Ward objective.");

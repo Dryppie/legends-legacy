@@ -112,7 +112,8 @@
       <div
         #worldMapContent
         class="world-map-content"
-        [class.showing-dungeon]="selectedDungeonId || selectedRaidBossId"
+        [class.showing-dungeon]="selectedDungeonId"
+        [class.showing-raid]="selectedRaidBossId"
       >
         <ng-container *ngIf="selectedDungeonId as dungeonId; else raidOrAreas">
           <section class="dungeon-preview-section">
@@ -139,8 +140,11 @@
           <section *ngIf="selectedRaidBoss() as raidBoss; else areasSection" class="dungeon-preview-section">
             <header class="dungeon-preview-toolbar">
               <div>
-                <div class="world-map-eyebrow">Raid muster</div>
-                <h2>{{ raidBoss.name }}</h2>
+                <div class="world-map-eyebrow">Raid preview</div>
+                <div class="raid-preview-title">
+                  <h2>{{ raidBoss.name }}</h2>
+                  <span>Lv {{ raidBoss.levelRequirement }} · Region {{ raidBoss.region }}</span>
+                </div>
               </div>
               <button type="button" (click)="showAreas()">
                 <span aria-hidden="true">←</span>

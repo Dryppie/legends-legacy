@@ -1,5 +1,8 @@
 import { CreatureArchiveEntryDto } from '../../../../shared/models/essence-system';
-import { creatureArchiveSearchText } from './creature-archive-search';
+import {
+  creatureArchiveSearchText,
+  matchesCreatureEssenceFilter,
+} from './creature-archive-search';
 
 describe('creatureArchiveSearchText', () => {
   it('includes tags from every Essence and ability tag source', () => {
@@ -31,5 +34,25 @@ describe('creatureArchiveSearchText', () => {
     expect(searchable).toContain('physical');
     expect(searchable).toContain('buff');
     expect(searchable).toContain('mechanic.execute');
+  });
+
+  it('keeps a creature with both found and missing Essences in both filters', () => {
+    const hobgoblin = {
+      name: 'Hobgoblin',
+      essences: [{ isAbsorbed: true }, { isAbsorbed: false }],
+    } as CreatureArchiveEntryDto;
+
+    expect(matchesCreatureEssenceFilter(hobgoblin, 'found')).toBeTrue();
+    expect(matchesCreatureEssenceFilter(hobgoblin, 'not-found')).toBeTrue();
+  });
+
+  it('hides a creature from Not found only after every Essence is absorbed', () => {
+    const completedCreature = {
+      essences: [{ isAbsorbed: true }, { isAbsorbed: true }],
+    } as CreatureArchiveEntryDto;
+
+    expect(
+      matchesCreatureEssenceFilter(completedCreature, 'not-found'),
+    ).toBeFalse();
   });
 });

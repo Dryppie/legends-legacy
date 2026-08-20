@@ -1,5 +1,5 @@
 <div
-  class="relative w-full overflow-hidden rounded-md border border-primary/80 bg-black text-white shadow-[0_0_32px_rgba(0,0,0,0.55)]"
+  class="dungeon-card-shell relative w-full overflow-hidden rounded-md border border-primary/80 bg-black text-white shadow-[0_0_32px_rgba(0,0,0,0.55)]"
 >
   <div
     class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/85 to-black/90"
@@ -8,25 +8,27 @@
     class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/95 to-transparent"
   ></div>
 
-  <div
-    class="relative grid gap-6 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_24rem]"
-  >
+  <div class="dungeon-card-layout relative grid gap-6">
     <!-- MAIN CONTENT -->
     <section class="flex min-w-0 flex-col">
-      <div class="flex h-full items-start justify-between gap-4">
+      <div
+        class="dungeon-card-heading flex h-full items-start justify-between gap-4"
+      >
         <div class="min-w-0">
           <div class="ll-eyebrow text-zinc-200/80">
             Dungeon {{ previewData.number }}
           </div>
 
-          <h2 class="ll-heading mt-1 text-4xl drop-shadow sm:text-5xl">
+          <h2 class="dungeon-card-title ll-heading mt-1 drop-shadow">
             {{ previewData.title }}
           </h2>
 
           <img src="core/Divider.svg" alt="" class="mt-1 w-56 object-contain" />
         </div>
 
-        <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
+        <div
+          class="dungeon-records-actions flex shrink-0 flex-col gap-2 sm:flex-row"
+        >
           <button
             type="button"
             class="ll-button text-left text-xs"
@@ -325,9 +327,7 @@
     </section>
 
     <!-- RUN SETUP PANEL -->
-    <aside
-      class="ll-panel-strong h-fit p-4 backdrop-blur-md lg:sticky lg:top-4"
-    >
+    <aside class="run-setup-panel ll-panel-strong h-fit p-4 backdrop-blur-md">
       <div class="flex items-start justify-between gap-3">
         <div>
           <div class="ll-eyebrow">Run Setup</div>

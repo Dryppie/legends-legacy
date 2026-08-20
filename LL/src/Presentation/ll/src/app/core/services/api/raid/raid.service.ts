@@ -9,6 +9,7 @@ import { ApiService } from '../api.service';
 export type RaidRunStatus =
   | 'Mustering'
   | 'Resolving'
+  | 'Playback'
   | 'Resolved'
   | 'Settled'
   | 'Cancelled'
@@ -74,6 +75,19 @@ export interface RaidRunSummary {
   flankCount: number;
   wardCount: number;
   canJoin: boolean;
+}
+
+export interface RaidHistoryEntry {
+  raidRunId: string;
+  raidBossId: string;
+  raidBossName: string;
+  tier: number;
+  outcome: RaidOutcome;
+  resolvedAt: string;
+  trophies: number;
+  wasReduced: boolean;
+  claimedAt: string | null;
+  canClaim: boolean;
 }
 
 export interface RaidSignup {
@@ -210,6 +224,9 @@ export interface RaidRun {
   createdAt: string;
   signupClosesAt: string;
   commencedAt: string | null;
+  playbackStartedAt: string | null;
+  playbackEndsAt: string | null;
+  serverNow: string;
   resolvedAt: string | null;
   laneSlots: number;
   minimumRoster: number;
@@ -295,6 +312,13 @@ export class RaidService {
 
   getOpenRaids(raidBossId: string): Observable<RaidRunSummary[]> {
     return this.api.get(`raids/bosses/${encodeURIComponent(raidBossId)}/open`);
+  }
+
+  getHistory(raidBossId?: string, take = 20): Observable<RaidHistoryEntry[]> {
+    const bossFilter = raidBossId
+      ? `raidBossId=${encodeURIComponent(raidBossId)}&`
+      : '';
+    return this.api.get(`raids/history?${bossFilter}take=${take}`);
   }
 
   getRaid(raidRunId: string): Observable<RaidRun | null> {
@@ -447,7 +471,10 @@ export class RaidService {
   private trackRaid(raid: RaidRun | null | undefined): void {
     if (!raid?.id) return;
 
-    const isActive = raid.status === 'Mustering' || raid.status === 'Resolving';
+    const isActive =
+      raid.status === 'Mustering' ||
+      raid.status === 'Resolving' ||
+      raid.status === 'Playback';
     const isMember = raid.signups?.some((signup) => signup.isCurrentCharacter);
     if (isActive && isMember) {
       this._activeRaidId.set(raid.id);

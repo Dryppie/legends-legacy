@@ -643,6 +643,7 @@ public static class DependencyInjection
         services.AddScoped<IGameEventOutboxConsumer, RealtimeInventoryGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RealtimeTournamentGroundsGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RealtimeWorldTowerGameEventOutboxConsumer>();
+        services.AddScoped<IGameEventOutboxConsumer, RealtimeRaidGameEventOutboxConsumer>();
         services.AddSingleton<IQuestDefinitionProvider>(sp =>
             new JsonQuestDefinitionProvider(
                 config,

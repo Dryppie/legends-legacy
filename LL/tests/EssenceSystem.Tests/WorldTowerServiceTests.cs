@@ -1591,10 +1591,12 @@ public sealed class WorldTowerServiceTests
             spectatorId,
             attempt.Id,
             CancellationToken.None));
-        Assert.Null(await service.GetAttemptCombatResultAsync(
+        var publicFirstClearReplay = await service.GetAttemptCombatResultAsync(
             Guid.NewGuid(),
             attempt.Id,
-            CancellationToken.None));
+            CancellationToken.None);
+        Assert.NotNull(publicFirstClearReplay);
+        Assert.Equal(BattleOutcome.Victory, publicFirstClearReplay.Outcome);
         Assert.Single(await service.GetHallOfFameAsync(CancellationToken.None));
     }
 

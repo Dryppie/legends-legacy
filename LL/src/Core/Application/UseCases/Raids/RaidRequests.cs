@@ -10,6 +10,7 @@ namespace Application.UseCases.Raids;
 
 public sealed record GetRaidBossesQuery(Guid CharacterId, int? Region) : IQuery<IReadOnlyList<RaidBossSummaryDto>>;
 public sealed record GetOpenRaidsQuery(Guid CharacterId, string RaidBossId) : IQuery<IReadOnlyList<RaidRunSummaryDto>>;
+public sealed record GetRaidHistoryQuery(Guid CharacterId, string? RaidBossId, int Take) : IQuery<IReadOnlyList<RaidHistoryEntryDto>>;
 public sealed record GetRaidQuery(Guid CharacterId, Guid RaidRunId) : IQuery<RaidRunDto?>;
 public sealed record GetActiveRaidQuery(Guid CharacterId) : IQuery<RaidRunDto?>;
 public sealed record GetRaidPlaybackQuery(Guid CharacterId, Guid RaidRunId, RaidLane Lane) : IQuery<RaidPlaybackDto?>;
@@ -42,6 +43,12 @@ public sealed class GetOpenRaidsQueryHandler(IRaidService raids) : IRequestHandl
 {
     public Task<IReadOnlyList<RaidRunSummaryDto>> Handle(GetOpenRaidsQuery request, CancellationToken cancellationToken) =>
         raids.GetOpenRaidsAsync(request.CharacterId, request.RaidBossId, cancellationToken);
+}
+
+public sealed class GetRaidHistoryQueryHandler(IRaidService raids) : IRequestHandler<GetRaidHistoryQuery, IReadOnlyList<RaidHistoryEntryDto>>
+{
+    public Task<IReadOnlyList<RaidHistoryEntryDto>> Handle(GetRaidHistoryQuery request, CancellationToken cancellationToken) =>
+        raids.GetHistoryAsync(request.CharacterId, request.RaidBossId, request.Take, cancellationToken);
 }
 
 public sealed class GetRaidQueryHandler(IRaidService raids) : IRequestHandler<GetRaidQuery, RaidRunDto?>

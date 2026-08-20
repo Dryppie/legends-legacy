@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, effect, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import {
   RaidBossSummary,
+  RaidHistoryEntry,
   RaidRunSummary,
   RaidService,
   RaidTrophyVendor,
 } from '../../../../../core/services/api/raid/raid.service';
+import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
 
 @Component({
   selector: 'app-raids',
@@ -20,16 +22,38 @@ export class RaidsComponent implements OnChanges {
   @Output() changed = new EventEmitter<void>();
   private readonly raids = inject(RaidService);
   private readonly router = inject(Router);
+  private readonly events = inject(GameEventService);
+  private lastRealtimeUpdateId: string | null = null;
   readonly openRaids = signal<RaidRunSummary[]>([]);
   readonly loading = signal(false);
   readonly action = signal<string | null>(null);
   readonly error = signal<string | null>(null);
   readonly selectedTier = signal<number>(1);
   readonly vendor = signal<RaidTrophyVendor | null>(null);
+  readonly history = signal<RaidHistoryEntry[]>([]);
+  readonly historyLoading = signal(false);
+
+  constructor() {
+    effect(() => {
+      const envelope = this.events.eventEnvelope.RaidUpdated();
+      if (
+        !envelope?.updateId ||
+        envelope.updateId === this.lastRealtimeUpdateId ||
+        envelope.payload.raidBossId !== this.raidBoss?.id
+      ) {
+        return;
+      }
+
+      this.lastRealtimeUpdateId = envelope.updateId;
+      this.load();
+      this.changed.emit();
+    });
+  }
 
   ngOnChanges(): void {
     this.selectedTier.set(this.raidBoss?.tiers[0]?.tier ?? 1);
     this.load();
+    this.loadHistory();
     this.loadVendor();
   }
 
@@ -131,12 +155,28 @@ export class RaidsComponent implements OnChanges {
     return this.raidBoss.tiers.find((tier) => tier.tier === this.selectedTier());
   }
 
+  unclaimedRewardCount(): number {
+    return this.history().filter((entry) => entry.canClaim).length;
+  }
+
   private loadVendor(): void {
     if (!this.raidBoss) return;
     this.raids.getTrophyVendor(this.raidBoss.id).subscribe({
       next: (vendor) => this.vendor.set(vendor),
       error: (error) => this.error.set(this.errorMessage(error)),
     });
+  }
+
+  private loadHistory(): void {
+    if (!this.raidBoss) return;
+    this.historyLoading.set(true);
+    this.raids
+      .getHistory(undefined, 20)
+      .pipe(finalize(() => this.historyLoading.set(false)))
+      .subscribe({
+        next: (history) => this.history.set(history),
+        error: (error) => this.error.set(this.errorMessage(error)),
+      });
   }
 
   private errorMessage(error: any): string {

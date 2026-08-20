@@ -12,6 +12,7 @@ import { EquipmentStateService } from '../../../core/services/api/equipment/equi
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
 import { FirstPartyTourService } from '../../../core/services/client-side/first-party-tour/first-party-tour.service';
 import { GameService } from '../../../core/services/client-side/game/game.service';
+import { RegionService } from '../../../core/services/client-side/region/region.service';
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
 import { BattleType } from '../../../core/state/combat-state/combatState';
 import { BattleOutcome } from '../../models/Dtos/combatResultDto';
@@ -87,6 +88,13 @@ describe('CombatComponent', () => {
         {
           provide: GameService,
           useValue: { endCombat: jasmine.createSpy('endCombat') },
+        },
+        {
+          provide: RegionService,
+          useValue: {
+            getRegionNameByAreaId: (areaId: string) =>
+              areaId === 'region_02_area_02' ? 'Meran' : null,
+          },
         },
         {
           provide: FirstPartyTourService,
@@ -233,6 +241,23 @@ describe('CombatComponent', () => {
     component.onEscapeKey();
 
     expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  it('uses the active area parent region in the idle combat title', () => {
+    currentAction.set({
+      characterActionType: CharacterActionType.Combat,
+      isDeleted: false,
+      combatActionDetails: {
+        area: {
+          id: 'region_02_area_02',
+          name: 'Rotgrave Fields',
+        },
+      },
+    });
+
+    expect(fixture.componentInstance.battleTitle()).toBe(
+      'Meran — Rotgrave Fields',
+    );
   });
 
   it('does not clear a successor action when delayed Combat cleanup runs', () => {

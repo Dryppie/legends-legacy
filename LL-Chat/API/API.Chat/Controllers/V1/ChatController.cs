@@ -63,7 +63,12 @@ public class ChatController : BaseController
         long Revision,
         bool IsOpen,
         IReadOnlyCollection<Guid> MemberCharacterIds,
-        DateTimeOffset UpdatedAt);
+        DateTimeOffset UpdatedAt,
+        RaidChatLifecycleMessageRequest? LifecycleMessage = null);
+    public sealed record RaidChatLifecycleMessageRequest(
+        Guid MessageId,
+        string Body,
+        DateTimeOffset SentAt);
     public sealed record MuteCharacterRequest(
         Guid OperationId,
         Guid CharacterId,
@@ -115,14 +120,46 @@ public class ChatController : BaseController
         if (authorizationFailure is not null) return authorizationFailure;
         if (request.RaidRunId == Guid.Empty || request.Revision < 1)
             return BadRequest("Invalid raid channel snapshot.");
+        if (request.LifecycleMessage is not null
+            && (!request.IsOpen
+                || request.LifecycleMessage.MessageId == Guid.Empty
+                || string.IsNullOrWhiteSpace(request.LifecycleMessage.Body)))
+        {
+            return BadRequest("Invalid raid channel lifecycle message.");
+        }
 
-        await _raidChat.ApplySnapshotAsync(
+        var isCurrentRevision = await _raidChat.ApplySnapshotAsync(
             request.RaidRunId,
             request.Revision,
             request.IsOpen,
             request.MemberCharacterIds,
             request.UpdatedAt,
             HttpContext.RequestAborted);
+
+        if (!isCurrentRevision || request.LifecycleMessage is null)
+            return NoContent();
+
+        var message = await Mediator.Send(new SendMessageCommand(
+            request.RaidRunId.ToString(),
+            request.LifecycleMessage.Body,
+            Guid.Empty.ToString(),
+            "Raid",
+            null,
+            ChatChannelType.Raid,
+            MessageId: request.LifecycleMessage.MessageId,
+            SentAt: request.LifecycleMessage.SentAt,
+            IsSystemGenerated: true));
+        if (message is null)
+            return BadRequest("Invalid raid channel lifecycle message.");
+
+        var recipients = request.MemberCharacterIds
+            .Where(x => x != Guid.Empty)
+            .Distinct()
+            .Select(x => x.ToString())
+            .ToArray();
+        if (recipients.Length > 0)
+            await _hub.Clients.Users(recipients).Receive(message);
+
         return NoContent();
     }
 

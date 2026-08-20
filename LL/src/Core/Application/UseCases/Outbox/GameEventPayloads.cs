@@ -121,7 +121,13 @@ public sealed record RaidChatChannelSnapshotPayload(
     long Revision,
     bool IsOpen,
     IReadOnlyCollection<Guid> MemberCharacterIds,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt,
+    RaidChatLifecycleMessagePayload? LifecycleMessage = null);
+
+public sealed record RaidChatLifecycleMessagePayload(
+    Guid MessageId,
+    string Body,
+    DateTimeOffset SentAt);
 
 public sealed record EventQuestChatAnnouncementPayload(
     string EventQuestId,

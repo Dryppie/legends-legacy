@@ -29,6 +29,7 @@ public static class GameEventTypes
     public const string InventoryItemsGranted = "inventory.items_granted";
     public const string WorldTowerRallyUpdated = "world_tower.rally_updated";
     public const string WorldTowerChatAnnouncement = "world_tower.chat_announcement";
+    public const string RaidUpdated = "raid.updated";
     public const string RaidChatAnnouncement = "raid.chat_announcement";
     public const string RaidChatChannelSnapshot = "raid.chat_channel_snapshot";
     public const string EventQuestChatAnnouncement = "event_quest.chat_announcement";

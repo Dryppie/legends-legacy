@@ -416,14 +416,23 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
     {
         return await EligibleCharacters()
             .Where(character => _context.RaidParticipantResults.Any(result =>
-                result.CharacterId == character.Id && result.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain))
+                result.CharacterId == character.Id
+                && result.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain
+                && (result.RaidRun.Status == Domain.Models.Raids.RaidRunStatus.Resolved
+                    || result.RaidRun.Status == Domain.Models.Raids.RaidRunStatus.Settled)))
             .Select(character => new LeaderboardScore(
                 character.Id,
                 character.Name,
                 _context.RaidParticipantResults.LongCount(result =>
-                    result.CharacterId == character.Id && result.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain),
+                    result.CharacterId == character.Id
+                    && result.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain
+                    && (result.RaidRun.Status == Domain.Models.Raids.RaidRunStatus.Resolved
+                        || result.RaidRun.Status == Domain.Models.Raids.RaidRunStatus.Settled)),
                 _context.RaidParticipantResults
-                    .Where(result => result.CharacterId == character.Id && result.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain)
+                    .Where(result => result.CharacterId == character.Id
+                                     && result.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain
+                                     && (result.RaidRun.Status == Domain.Models.Raids.RaidRunStatus.Resolved
+                                         || result.RaidRun.Status == Domain.Models.Raids.RaidRunStatus.Settled))
                     .Select(result => result.RaidRun.RaidBossId)
                     .Distinct()
                     .LongCount()))
@@ -438,7 +447,9 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
             .Where(character => _context.RaidParticipantResults.Any(result =>
                 result.CharacterId == character.Id
                 && result.RaidRun.RaidBossId == raidBossId
-                && result.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain))
+                && result.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain
+                && (result.RaidRun.Status == Domain.Models.Raids.RaidRunStatus.Resolved
+                    || result.RaidRun.Status == Domain.Models.Raids.RaidRunStatus.Settled)))
             .Select(character => new LeaderboardScore(
                 character.Id,
                 character.Name,
@@ -446,12 +457,16 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
                     .Where(lane => lane.Lane == Domain.Models.Raids.RaidLane.Vanguard
                                    && lane.RaidRun.RaidBossId == raidBossId
                                    && lane.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain
+                                   && (lane.RaidRun.Status == Domain.Models.Raids.RaidRunStatus.Resolved
+                                       || lane.RaidRun.Status == Domain.Models.Raids.RaidRunStatus.Settled)
                                    && lane.RaidRun.ParticipantResults.Any(result => result.CharacterId == character.Id))
                     .Min(lane => (long)lane.DurationTicks),
                 _context.RaidParticipantResults.LongCount(result =>
                     result.CharacterId == character.Id
                     && result.RaidRun.RaidBossId == raidBossId
-                    && result.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain)))
+                    && result.RaidRun.Outcome == Domain.Models.Raids.RaidOutcome.Slain
+                    && (result.RaidRun.Status == Domain.Models.Raids.RaidRunStatus.Resolved
+                        || result.RaidRun.Status == Domain.Models.Raids.RaidRunStatus.Settled))))
             .ToListAsync(cancellationToken);
     }
 

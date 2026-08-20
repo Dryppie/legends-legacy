@@ -1,79 +1,227 @@
 <section class="raid-boss-panel" data-tour="raids-introduction">
-  <a *ngIf="raidBoss.activeRaidId" class="active-raid-link" [routerLink]="['/game/world/raid', raidBoss.activeRaidId]">
-    Open my raid
-  </a>
+  <p *ngIf="error()" class="error raid-message">{{ error() }}</p>
 
-  <p *ngIf="raidBoss.rewardReducedThisWeek" class="notice">
-    You already earned the full weekly reward. Further clears pay 25%.
-  </p>
-  <p *ngIf="error()" class="error">{{ error() }}</p>
+  <ng-container *ngIf="currentTier() as tier">
+    <div class="raid-preview-layout">
+      <div class="encounter-column">
+        <section class="encounter-overview">
+          <p class="raid-introduction">
+            Three parties muster for one coordinated assault. Each party holds a
+            distinct wing of the raid, and every wing contributes to the final
+            outcome.
+          </p>
 
-  <div *ngIf="raidBoss.tiers.length > 1" class="tier-tabs" aria-label="Raid tier">
-    <button *ngFor="let tier of raidBoss.tiers" type="button" class="secondary" [class.active]="selectedTier() === tier.tier" (click)="selectTier(tier.tier)">
-      Tier {{ tier.tier }}
-    </button>
-  </div>
+          <header class="lane-summary">
+            <span>Wings · 3 parties</span>
+            <span>Boss wing follows the support wings</span>
+          </header>
 
-  <div class="raid-actions" *ngIf="currentTier() as tier">
-    <button
-      type="button"
-      (click)="create()"
-      [disabled]="!raidBoss.isUnlocked || raidBoss.ownedRaidSealCount < 1 || !!raidBoss.activeRaidId || !!action()"
-    >
-      Create raid · {{ raidBoss.ownedRaidSealCount }} Raid Seal{{ raidBoss.ownedRaidSealCount === 1 ? '' : 's' }}
-    </button>
-    <button
-      *ngIf="raidBoss.developmentToolsEnabled"
-      type="button"
-      class="secondary"
-      (click)="createDevelopment()"
-      [disabled]="!raidBoss.isUnlocked || !!raidBoss.activeRaidId || !!action()"
-    >
-      {{ action() === 'development-create' ? 'Creating test raid...' : 'Create test raid · no Raid Seal required' }}
-    </button>
-    <button
-      type="button"
-      class="secondary"
-      (click)="assemble()"
-      [disabled]="tier.ownedRaidSealFragments < tier.raidSealFragmentCost || !!action()"
-    >
-      Assemble Raid Seal · {{ tier.ownedRaidSealFragments }}/{{ tier.raidSealFragmentCost }} fragments
-    </button>
-  </div>
+          <div class="encounter-list">
+            <article class="encounter-card">
+              <div class="party-marker" aria-label="Party one">
+                <strong>I</strong>
+                <span>Party</span>
+              </div>
+              <div class="encounter-copy">
+                <span class="eyebrow">Flank</span>
+                <h3>Adds wing</h3>
+                <p>Contain the supporting enemies before they overwhelm the raid.</p>
+              </div>
+              <div class="recommended-power">
+                <span>Recommended power</span>
+                <strong>{{ tier.recommendedWingPower.flank | number }}</strong>
+              </div>
+            </article>
 
-  <p *ngIf="loading()">Loading recruiting raids…</p>
-  <div *ngIf="!loading() && openRaids().length === 0" class="ll-empty-state">
-    No raids are recruiting. Bring a Raid Seal to lead one{{ raidBoss.developmentToolsEnabled ? ', or create a local test raid above' : '' }}.
-  </div>
+            <article class="encounter-card">
+              <div class="party-marker" aria-label="Party two">
+                <strong>II</strong>
+                <span>Party</span>
+              </div>
+              <div class="encounter-copy">
+                <span class="eyebrow">Ward</span>
+                <h3>Objective wing</h3>
+                <p>Break the ward to weaken the boss wing for the final assault.</p>
+              </div>
+              <div class="recommended-power">
+                <span>Recommended power</span>
+                <strong>{{ tier.recommendedWingPower.ward | number }}</strong>
+              </div>
+            </article>
 
-  <article *ngFor="let run of openRaids()" class="open-raid">
-    <div>
-      <strong>{{ run.leaderCharacterName }}</strong>
-      <span>Tier {{ run.tier }} · closes in {{ closesIn(run.signupClosesAt) }}</span>
-      <small>
-        {{ run.vanguardCount }} Vanguard · {{ run.flankCount }} Flank · {{ run.wardCount }} Ward
-      </small>
-    </div>
-    <button type="button" (click)="join(run)" [disabled]="!run.canJoin || !!action()">
-      {{ run.canJoin ? 'Join' : 'Unavailable' }}
-    </button>
-  </article>
+            <article class="encounter-card boss-encounter">
+              <div class="party-marker" aria-label="Party three">
+                <strong>III</strong>
+                <span>Party</span>
+              </div>
+              <div class="encounter-copy">
+                <span class="eyebrow">Vanguard · Raid boss</span>
+                <h3>{{ raidBoss.name }}</h3>
+                <p>Lead the final assault after the support parties have done their work.</p>
+              </div>
+              <div class="recommended-power">
+                <span>Recommended power</span>
+                <strong>{{ tier.recommendedWingPower.vanguard | number }}</strong>
+              </div>
+            </article>
+          </div>
 
-  <section *ngIf="vendor() as shop" class="trophy-vendor">
-    <header>
-      <div><span>Raid boss site</span><h3>Trophy Exchange</h3></div>
-      <strong>{{ shop.trophyBalance | number }} Trophies</strong>
-    </header>
-    <article *ngFor="let item of shop.items" class="vendor-item">
-      <div>
-        <strong>{{ item.name }}</strong>
-        <p>{{ item.description }}</p>
-        <small *ngIf="!item.isUnlocked">Slay Tier {{ item.requiredTier }} to unlock</small>
-        <small *ngIf="item.weeklyPurchaseLimit">Weekly {{ item.weeklyPurchased }}/{{ item.weeklyPurchaseLimit }}</small>
+          <footer class="raid-facts">
+            <div><span>Raid size</span><strong>{{ tier.laneSlots * 3 }}</strong></div>
+            <div><span>Formation</span><strong>3 × {{ tier.laneSlots }}</strong></div>
+            <div><span>Muster window</span><strong>{{ tier.signupWindowHours }}h</strong></div>
+            <div><span>Open musters</span><strong>{{ raidBoss.openRaidCount }}</strong></div>
+          </footer>
+        </section>
+
+        <section *ngIf="vendor() as shop" class="trophy-vendor panel-card">
+          <header>
+            <div><span class="eyebrow">Raid boss site</span><h3>Trophy Exchange</h3></div>
+            <strong>{{ shop.trophyBalance | number }} Trophies</strong>
+          </header>
+          <article *ngFor="let item of shop.items" class="vendor-item">
+            <div>
+              <strong>{{ item.name }}</strong>
+              <p>{{ item.description }}</p>
+              <small *ngIf="!item.isUnlocked">Slay Tier {{ item.requiredTier }} to unlock</small>
+              <small *ngIf="item.weeklyPurchaseLimit">Weekly {{ item.weeklyPurchased }}/{{ item.weeklyPurchaseLimit }}</small>
+            </div>
+            <button type="button" (click)="purchase(item.id)" [disabled]="!item.canPurchase || !!action()">
+              {{ item.trophyCost }} Trophies
+            </button>
+          </article>
+        </section>
       </div>
-      <button type="button" (click)="purchase(item.id)" [disabled]="!item.canPurchase || !!action()">
-        {{ item.trophyCost }} Trophies
-      </button>
-    </article>
-  </section>
+
+      <aside class="muster-rail" aria-label="Raid muster setup">
+        <section class="muster-card panel-card">
+          <header class="muster-heading">
+            <span class="eyebrow">Muster setup</span>
+            <h3>Tier {{ selectedTier() }}</h3>
+          </header>
+
+          <div *ngIf="raidBoss.tiers.length > 1" class="tier-tabs" aria-label="Raid tier">
+            <button
+              *ngFor="let raidTier of raidBoss.tiers"
+              type="button"
+              class="secondary"
+              [class.active]="selectedTier() === raidTier.tier"
+              (click)="selectTier(raidTier.tier)"
+            >
+              Tier {{ raidTier.tier }}
+            </button>
+          </div>
+
+          <div class="entry-cost">
+            <div class="entry-cost-heading">
+              <span class="eyebrow">Entry cost</span>
+              <strong>{{ tier.ownedRaidSealFragments }}/{{ tier.raidSealFragmentCost }} fragments</strong>
+            </div>
+            <h4>Raid Seal</h4>
+            <p>Assemble one from fragments. Only the raid leader consumes a seal.</p>
+            <progress
+              [value]="tier.ownedRaidSealFragments"
+              [max]="tier.raidSealFragmentCost"
+              aria-label="Raid Seal fragment progress"
+            ></progress>
+            <button
+              type="button"
+              class="secondary full-width"
+              (click)="assemble()"
+              [disabled]="tier.ownedRaidSealFragments < tier.raidSealFragmentCost || !!action()"
+            >
+              Assemble Raid Seal
+            </button>
+          </div>
+
+          <div class="raid-actions">
+            <a
+              *ngIf="raidBoss.activeRaidId"
+              class="active-raid-link full-width"
+              [routerLink]="['/game/world/raid', raidBoss.activeRaidId]"
+            >
+              Open my raid
+            </a>
+            <button
+              type="button"
+              class="full-width"
+              (click)="create()"
+              [disabled]="!raidBoss.isUnlocked || raidBoss.ownedRaidSealCount < 1 || !!raidBoss.activeRaidId || !!action()"
+            >
+              Create raid · {{ raidBoss.ownedRaidSealCount }} Raid Seal{{ raidBoss.ownedRaidSealCount === 1 ? '' : 's' }}
+            </button>
+            <button
+              *ngIf="raidBoss.developmentToolsEnabled"
+              type="button"
+              class="secondary full-width"
+              (click)="createDevelopment()"
+              [disabled]="!raidBoss.isUnlocked || !!raidBoss.activeRaidId || !!action()"
+            >
+              {{ action() === 'development-create' ? 'Creating test raid...' : 'Create test raid · free' }}
+            </button>
+          </div>
+        </section>
+
+        <p *ngIf="raidBoss.rewardReducedThisWeek" class="notice panel-card">
+          <span class="eyebrow">Weekly reward spent</span>
+          You already earned the full weekly reward. Further clears pay 25%.
+        </p>
+
+        <section class="recruiting-card panel-card">
+          <header>
+            <span class="eyebrow">Open musters</span>
+            <strong>{{ openRaids().length }} recruiting</strong>
+          </header>
+
+          <p *ngIf="loading()" class="loading-state">Loading recruiting raids…</p>
+          <div *ngIf="!loading() && openRaids().length === 0" class="ll-empty-state">
+            No raids are recruiting. Bring a Raid Seal to lead one{{ raidBoss.developmentToolsEnabled ? ', or create a local test raid above' : '' }}.
+          </div>
+
+          <article *ngFor="let run of openRaids()" class="open-raid">
+            <div class="open-raid-copy">
+              <div class="open-raid-heading">
+                <strong>{{ run.leaderCharacterName }}</strong>
+                <span>{{ closesIn(run.signupClosesAt) }}</span>
+              </div>
+              <span>Tier {{ run.tier }} · {{ run.signupCount }}/{{ run.maximumRoster }} mustered</span>
+              <small>
+                Vanguard {{ run.vanguardCount }} · Flank {{ run.flankCount }} · Ward {{ run.wardCount }}
+              </small>
+            </div>
+            <button type="button" class="secondary" (click)="join(run)" [disabled]="!run.canJoin || !!action()">
+              {{ run.canJoin ? 'Join raid' : 'Unavailable' }}
+            </button>
+          </article>
+        </section>
+
+        <details class="raid-history panel-card">
+          <summary>
+            <span class="eyebrow">Raid history</span>
+            <strong *ngIf="unclaimedRewardCount() as count">{{ count }} unclaimed</strong>
+            <span *ngIf="!unclaimedRewardCount()">{{ history().length }} recent</span>
+          </summary>
+
+          <div class="history-content">
+            <p *ngIf="historyLoading()" class="loading-state">Loading raid history…</p>
+            <div *ngIf="!historyLoading() && history().length === 0" class="ll-empty-state">
+              Your completed raids will appear here.
+            </div>
+            <article *ngFor="let entry of history()" class="history-entry" [class.reward-ready]="entry.canClaim">
+              <div>
+                <strong>{{ entry.raidBossName }} · Tier {{ entry.tier }}</strong>
+                <span>{{ entry.outcome }} · {{ entry.resolvedAt | date:'mediumDate' }}</span>
+                <small>{{ entry.trophies | number }} Trophies{{ entry.wasReduced ? ' · repeat-clear reward' : '' }}</small>
+                <small *ngIf="entry.canClaim" class="claim-status">Reward ready to collect</small>
+                <small *ngIf="!entry.canClaim">Claimed {{ entry.claimedAt | date:'mediumDate' }}</small>
+              </div>
+              <a [routerLink]="['/game/world/raid', entry.raidRunId]">
+                {{ entry.canClaim ? 'Claim reward' : 'View result' }}
+              </a>
+            </article>
+          </div>
+        </details>
+      </aside>
+    </div>
+  </ng-container>
 </section>

@@ -135,7 +135,15 @@
 }
 
 .world-map-content.showing-dungeon {
-  grid-template-columns: minmax(0, 3fr) minmax(17rem, 1fr);
+  grid-template-columns: minmax(0, 1fr) clamp(10rem, 14vw, 13rem);
+}
+
+.world-map-content.showing-raid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.world-map-content.showing-raid .world-map-rail {
+  display: none;
 }
 
 .areas-section,
@@ -153,6 +161,19 @@
 
 .dungeon-preview-toolbar h2 {
   margin-top: 0.15rem;
+}
+
+.raid-preview-title {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: var(--ll-space-3);
+}
+
+.raid-preview-title span {
+  color: var(--ll-color-text-muted);
+  font-size: var(--ll-text-xs);
+  white-space: nowrap;
 }
 
 .dungeon-preview-toolbar button {
@@ -378,14 +399,44 @@
 }
 
 @media (max-width: 72rem) {
-  .world-map-content,
-  .world-map-content.showing-dungeon {
+  .world-map-content {
     grid-template-columns: 1fr;
+  }
+
+  .world-map-content.showing-dungeon {
+    grid-template-columns: minmax(0, 1fr) 10rem;
+  }
+
+  .world-map-content.showing-raid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .world-map-rail {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .world-map-content.showing-dungeon .world-map-rail {
+    display: flex;
+  }
+
+  .world-map-content.showing-raid .world-map-rail {
+    display: none;
+  }
+}
+
+@media (max-width: 52rem) {
+  .world-map-content.showing-dungeon {
+    grid-template-columns: 1fr;
+  }
+
+  .world-map-content.showing-dungeon .world-map-rail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .world-map-content.showing-raid .world-map-rail {
+    display: none;
   }
 }
 
@@ -426,8 +477,18 @@
     grid-template-columns: 1fr;
   }
 
+  .world-map-content.showing-dungeon .world-map-rail {
+    grid-template-columns: 1fr;
+  }
+
   .dungeon-preview-toolbar {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .raid-preview-title {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--ll-space-1);
   }
 }

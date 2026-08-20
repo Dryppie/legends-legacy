@@ -8,7 +8,17 @@ import { GatheringType } from '../../../../shared/models/enums/gatheringType';
   providedIn: 'root',
 })
 export class RegionService {
+  private readonly regionNameByAreaId: ReadonlyMap<string, string> = new Map(
+    [this.getShenicRegion(), this.getMeranRegion()].flatMap((region) =>
+      region.areas.map((area) => [area.id, region.name]),
+    ),
+  );
+
   constructor(private apiService: ApiService) {}
+
+  public getRegionNameByAreaId(areaId: string): string | null {
+    return this.regionNameByAreaId.get(areaId) ?? null;
+  }
 
   public getRegionById(id: string): Observable<Region> {
     let region: Region = { name: '', areas: [], dungeons: [], raids: [] };

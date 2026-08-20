@@ -260,14 +260,20 @@ public sealed class WorldTowerService : IWorldTowerService
         Guid attemptId,
         CancellationToken cancellationToken)
     {
+        var isPublicFirstClear = await _db.TowerFloorProgresses
+            .AsNoTracking()
+            .AnyAsync(x => x.ServerId == _options.ServerId
+                           && x.FirstClearAttemptId == attemptId,
+                cancellationToken);
         var json = await _db.TowerAttempts
             .AsNoTracking()
             .Where(x => x.Id == attemptId
                         && x.ServerId == _options.ServerId
                         && x.Status != TowerAttemptStatus.Started
                         && x.Status != TowerAttemptStatus.Playback
-                        && x.TowerRally.Participants.Any(participant =>
-                            participant.CharacterId == characterId))
+                        && (isPublicFirstClear
+                            || x.TowerRally.Participants.Any(participant =>
+                                participant.CharacterId == characterId)))
             .Select(x => x.CombatResultJson)
             .SingleOrDefaultAsync(cancellationToken);
         if (string.IsNullOrWhiteSpace(json))

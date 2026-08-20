@@ -183,17 +183,23 @@ export function isWorldSystemMessage(message: ChatMessageDto): boolean {
   );
 }
 
-export function isInlineGuildSystemMessage(
+export function isInlineChannelSystemMessage(
   message: Pick<ChatMessageDto, 'channelType' | 'body' | 'isSystemGenerated'>,
 ): boolean {
-  if (message.channelType !== ChatChannelType.Guild) return false;
+  if (
+    message.channelType !== ChatChannelType.Guild &&
+    message.channelType !== ChatChannelType.Raid
+  ) {
+    return false;
+  }
 
   return (
     message.isSystemGenerated === true ||
-    message.body
-      .trimStart()
-      .toLowerCase()
-      .startsWith('set the current building target to ')
+    (message.channelType === ChatChannelType.Guild &&
+      message.body
+        .trimStart()
+        .toLowerCase()
+        .startsWith('set the current building target to '))
   );
 }
 
@@ -656,7 +662,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   isInlineSystemNotice(message: ChatMessageDto): boolean {
-    return isInlineGuildSystemMessage(message);
+    return isInlineChannelSystemMessage(message);
   }
 
   navigateToMessageTarget(message: ChatMessageDto, event?: Event): void {

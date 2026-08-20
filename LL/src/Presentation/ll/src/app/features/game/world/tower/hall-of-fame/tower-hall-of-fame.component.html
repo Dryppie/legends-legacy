@@ -1,49 +1,77 @@
-<main class="tower-page">
-  <div class="tower-shell">
-    <a class="back-link" routerLink="/game/world/tower">← Legacy's Ascension</a>
+<ng-container
+  *ngIf="combatState.getIsCombatActive(battleType)(); else hallOfFamePage"
+>
+  <app-combat
+    [battleType]="battleType"
+    (skipBattle)="closeReplay()"
+  ></app-combat>
+</ng-container>
 
-    <section class="hall-panel section ll-panel">
-      <header class="panel-heading hall-heading">
-        <span>♜ &nbsp; Hall of Fame · First realm clears</span>
-        <small>Permanent realm history</small>
-      </header>
+<ng-template #hallOfFamePage>
+  <main class="tower-page">
+    <div class="tower-shell">
+      <a class="back-link" routerLink="/game/world/tower"
+        >← Legacy's Ascension</a
+      >
 
-      <p class="error" *ngIf="error() as message">{{ message }}</p>
-      <p class="empty-state section" *ngIf="!loading() && !records().length">
-        No Guardian has fallen yet. The first page is still waiting to be
-        written.
-      </p>
+      <section class="hall-panel section ll-panel">
+        <header class="panel-heading hall-heading">
+          <span>♜ &nbsp; Hall of Fame · First realm clears</span>
+          <small>Permanent realm history</small>
+        </header>
 
-      <div class="hall-table-wrap" *ngIf="records().length">
-        <table class="hall-table">
-          <thead>
-            <tr>
-              <th>Floor</th>
-              <th>Guardian</th>
-              <th>Roster</th>
-              <th>Attempt</th>
-              <th>Duration</th>
-              <th>Cleared</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let record of records()">
-              <td>{{ floorLabel(record.floorNumber) }}</td>
-              <td>{{ record.guardianName }}</td>
-              <td [title]="rosterSummary(record)">
-                {{ rosterSummary(record) }}
-              </td>
-              <td>#{{ record.attemptNumber }}</td>
-              <td>{{ duration(record.fightDurationSeconds) }}</td>
-              <td>{{ record.clearedAt | date: "MMM d, HH:mm" }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <p class="error" *ngIf="error() as message">{{ message }}</p>
+        <p class="empty-state section" *ngIf="!loading() && !records().length">
+          No Guardian has fallen yet. The first page is still waiting to be
+          written.
+        </p>
 
-      <p class="empty-state section" *ngIf="loading()">
-        Opening the realm chronicle…
-      </p>
-    </section>
-  </div>
-</main>
+        <div class="hall-table-wrap" *ngIf="records().length">
+          <table class="hall-table">
+            <thead>
+              <tr>
+                <th>Floor</th>
+                <th>Guardian</th>
+                <th>Roster</th>
+                <th>Attempt</th>
+                <th>Duration</th>
+                <th>Cleared</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let record of records()">
+                <td>{{ floorLabel(record.floorNumber) }}</td>
+                <td>{{ record.guardianName }}</td>
+                <td [title]="rosterSummary(record)">
+                  {{ rosterSummary(record) }}
+                </td>
+                <td>#{{ record.attemptNumber }}</td>
+                <td>{{ duration(record.fightDurationSeconds) }}</td>
+                <td>{{ record.clearedAt | date: "MMM d, HH:mm" }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="history-link"
+                    [disabled]="!!replayingAttemptId()"
+                    (click)="replay(record)"
+                  >
+                    {{
+                      replayingAttemptId() === record.attemptId
+                        ? "Loading…"
+                        : "Replay"
+                    }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="empty-state section" *ngIf="loading()">
+          Opening the realm chronicle…
+        </p>
+      </section>
+    </div>
+  </main>
+</ng-template>

@@ -37,6 +37,7 @@ import { EventQuestChangedMsg } from '../quest/event-quest-changed';
 import { PlayerTransferMsg } from '../transfer/player-transfer';
 import { WorldTowerRallyUpdated } from '../world-tower/world-tower-rally-updated';
 import { WorldTowerCombatFrameUpdated } from '../world-tower/world-tower-combat-frame-updated';
+import { RaidUpdated } from '../raid/raid-updated';
 
 export const gameEventNames = [
   'LootReceivedMsg',
@@ -68,6 +69,7 @@ export const gameEventNames = [
   'PlayerTransferMsg',
   'WorldTowerRallyUpdated',
   'WorldTowerCombatFrameUpdated',
+  'RaidUpdated',
   'AccountAccessChanged',
 ] as const;
 
@@ -110,6 +112,7 @@ export interface GameEventMap {
   PlayerTransferMsg: PlayerTransferMsg;
   WorldTowerRallyUpdated: WorldTowerRallyUpdated;
   WorldTowerCombatFrameUpdated: WorldTowerCombatFrameUpdated;
+  RaidUpdated: RaidUpdated;
   AccountAccessChanged: {
     accountId: string;
     reason: string;

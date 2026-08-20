@@ -137,6 +137,9 @@ public sealed class GameEventOutboxTests
         Assert.Equal(
             [GameEventOutboxConsumerNames.RealtimeWorldTower],
             registry.GetConsumers(GameEventTypes.WorldTowerRallyUpdated));
+        Assert.Equal(
+            [GameEventOutboxConsumerNames.RealtimeRaid],
+            registry.GetConsumers(GameEventTypes.RaidUpdated));
     }
 
     [Fact]

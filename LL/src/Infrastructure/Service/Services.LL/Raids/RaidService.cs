@@ -53,7 +53,9 @@ public sealed class RaidService(
     private const int BattlePlanSampleCount = 10;
     private const int BattlePlanHourlyLimit = 30;
     private const string RealmFirstRaidTitleKey = "title.realm_first_raider";
-    private static readonly RaidRunStatus[] ActiveStatuses = [RaidRunStatus.Mustering, RaidRunStatus.Resolving];
+    private static readonly TimeSpan PlaybackTransitionDelay = TimeSpan.FromMilliseconds(1500);
+    private static readonly RaidRunStatus[] ActiveStatuses =
+        [RaidRunStatus.Mustering, RaidRunStatus.Resolving, RaidRunStatus.Playback];
 
     public async Task<IReadOnlyList<RaidBossSummaryDto>> GetRaidBossesAsync(
         Guid characterId,
@@ -123,7 +125,7 @@ public sealed class RaidService(
                     tier.SignupWindowHours,
                     tier.RaidSealItemId,
                     tier.RaidSealFragmentItemId,
-                    tier.RaidSealFragmentCost,
+                    RaidRules.RaidSealFragmentCost,
                     quantities.GetValueOrDefault(tier.RaidSealFragmentItemId),
                     ToPowerDto(boss.Id, tier))).ToArray(),
                 options.Value.DevelopmentToolsEnabled);
@@ -193,6 +195,54 @@ public sealed class RaidService(
             && unlockError is null
             && !run.Signups.Any(x => x.AccountId == character.UserId)
             && run.Signups.Count < ResolvePinnedTier(run).LaneSlots * 3)).ToArray();
+    }
+
+    public async Task<IReadOnlyList<RaidHistoryEntryDto>> GetHistoryAsync(
+        Guid characterId,
+        string? raidBossId,
+        int take,
+        CancellationToken cancellationToken)
+    {
+        var limit = Math.Clamp(take, 1, 50);
+        raidBossId = string.IsNullOrWhiteSpace(raidBossId) ? null : raidBossId.Trim();
+
+        var query = db.RaidRewardClaims.AsNoTracking()
+            .Where(x =>
+                x.CharacterId == characterId &&
+                x.RaidRun.Outcome.HasValue &&
+                (x.RaidRun.Status == RaidRunStatus.Resolved || x.RaidRun.Status == RaidRunStatus.Settled));
+        if (raidBossId is not null)
+            query = query.Where(x => x.RaidBossId == raidBossId);
+
+        var rows = await query
+            .OrderBy(x => x.ClaimedAt.HasValue)
+            .ThenByDescending(x => x.RaidRun.ResolvedAt ?? x.CreatedAt)
+            .Take(limit)
+            .Select(x => new
+            {
+                x.RaidRunId,
+                x.RaidBossId,
+                x.RaidRun.Tier,
+                x.RaidRun.Outcome,
+                x.RaidRun.ResolvedAt,
+                x.Trophies,
+                x.WasReduced,
+                x.ClaimedAt,
+                x.CreatedAt
+            })
+            .ToArrayAsync(cancellationToken);
+
+        return rows.Select(x => new RaidHistoryEntryDto(
+            x.RaidRunId,
+            x.RaidBossId,
+            definitions.Get(x.RaidBossId)?.Name ?? x.RaidBossId,
+            x.Tier,
+            x.Outcome!.Value,
+            x.ResolvedAt ?? x.CreatedAt,
+            x.Trophies,
+            x.WasReduced,
+            x.ClaimedAt,
+            !x.ClaimedAt.HasValue)).ToArray();
     }
 
     public async Task<RaidRunDto?> GetRaidAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken)
@@ -274,7 +324,9 @@ public sealed class RaidService(
                 x => x.CharacterId == characterId
                      && x.RaidRun.RaidBossId == boss.Id
                      && x.RaidRun.Tier == previousTier.Tier
-                     && x.RaidRun.Outcome == RaidOutcome.Slain,
+                     && x.RaidRun.Outcome == RaidOutcome.Slain
+                     && (x.RaidRun.Status == RaidRunStatus.Resolved
+                         || x.RaidRun.Status == RaidRunStatus.Settled),
                 cancellationToken))
             return RaidOperationResult<RaidRunDto>.Fail(
                 $"Slay Tier {previousTier.Tier} of this raid boss before leading Tier {tier.Tier}.");
@@ -309,7 +361,12 @@ public sealed class RaidService(
         };
         run.Signups.Add(CreateSignup(run, snapshot, eligibility, now));
         db.RaidRuns.Add(run);
-        await QueueRaidChatSnapshotAsync(run, cancellationToken);
+        await QueueRaidChatSnapshotAsync(
+            run,
+            cancellationToken,
+            $"Raid channel opened. {eligibility.CharacterName} is leading the raid.",
+            "opened");
+        await QueueRaidUpdateAsync(run, "Created", cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         return RaidOperationResult<RaidRunDto>.Success(await ToDtoAsync(run, characterId, cancellationToken));
     }
@@ -336,9 +393,16 @@ public sealed class RaidService(
             return RaidOperationResult<RaidRunDto>.Fail("This account already occupies a slot in this raid.");
 
         var snapshot = await snapshots.CreateAsync(characterId, cancellationToken);
-        run.Signups.Add(CreateSignup(run, snapshot, eligibility, timeProvider.GetUtcNow()));
+        var signup = CreateSignup(run, snapshot, eligibility, timeProvider.GetUtcNow());
+        run.Signups.Add(signup);
+        db.RaidSignups.Add(signup);
         run.RowVersion++;
-        await QueueRaidChatSnapshotAsync(run, cancellationToken);
+        await QueueRaidChatSnapshotAsync(
+            run,
+            cancellationToken,
+            $"{eligibility.CharacterName} joined the raid.",
+            $"joined:{characterId:N}");
+        await QueueRaidUpdateAsync(run, "ParticipantJoined", cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         return RaidOperationResult<RaidRunDto>.Success(await ToDtoAsync(run, characterId, cancellationToken));
     }
@@ -370,7 +434,19 @@ public sealed class RaidService(
             db.RaidSignups.Remove(signup);
         }
         run.RowVersion++;
-        await QueueRaidChatSnapshotAsync(run, cancellationToken);
+        await QueueRaidChatSnapshotAsync(
+            run,
+            cancellationToken,
+            run.Status == RaidRunStatus.Mustering
+                ? $"{signup.CharacterName} left the raid."
+                : null,
+            run.Status == RaidRunStatus.Mustering
+                ? $"left:{characterId:N}"
+                : null);
+        await QueueRaidUpdateAsync(
+            run,
+            run.Status == RaidRunStatus.Cancelled ? "Cancelled" : "ParticipantLeft",
+            cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         return RaidOperationResult<RaidRunDto>.Success(await ToDtoAsync(run, characterId, cancellationToken));
     }
@@ -400,6 +476,7 @@ public sealed class RaidService(
             run.RowVersion++;
             await RefundRaidSealAsync(run, cancellationToken);
             await QueueRaidChatSnapshotAsync(run, cancellationToken);
+            await QueueRaidUpdateAsync(run, "Cancelled", cancellationToken);
             await db.SaveChangesAsync(cancellationToken);
             if (transaction is not null)
                 await transaction.CommitAsync(cancellationToken);
@@ -435,6 +512,7 @@ public sealed class RaidService(
         run.LeaderCharacterId = targetCharacterId;
         run.RowVersion++;
         await QueueRaidChatSnapshotAsync(run, cancellationToken);
+        await QueueRaidUpdateAsync(run, "LeadershipTransferred", cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         return RaidOperationResult<RaidRunDto>.Success(await ToDtoAsync(run, characterId, cancellationToken));
     }
@@ -459,6 +537,7 @@ public sealed class RaidService(
         signup.LoadoutHash = rating.BuildFingerprint;
         signup.SnapshotRefreshedAt = timeProvider.GetUtcNow();
         run.RowVersion++;
+        await QueueRaidUpdateAsync(run, "LoadoutRefreshed", cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         return RaidOperationResult<RaidRunDto>.Success(await ToDtoAsync(run, characterId, cancellationToken));
     }
@@ -494,6 +573,7 @@ public sealed class RaidService(
         signup.Lane = lane;
         signup.WingSlotIndex = slotIndex;
         run.RowVersion++;
+        await QueueRaidUpdateAsync(run, "PartiesUpdated", cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         return RaidOperationResult<RaidRunDto>.Success(await ToDtoAsync(run, characterId, cancellationToken));
     }
@@ -571,6 +651,7 @@ public sealed class RaidService(
 
             run.RowVersion++;
             await QueueRaidChatSnapshotAsync(run, cancellationToken);
+            await QueueRaidUpdateAsync(run, "PartiesUpdated", cancellationToken);
             await db.SaveChangesAsync(cancellationToken);
             if (transaction is not null)
                 await transaction.CommitAsync(cancellationToken);
@@ -675,6 +756,7 @@ public sealed class RaidService(
 
         run.RowVersion++;
         await QueueRaidChatSnapshotAsync(run, cancellationToken);
+        await QueueRaidUpdateAsync(run, "DevelopmentRosterFilled", cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         return RaidOperationResult<RaidRunDto>.Success(
             await ToDtoAsync(run, characterId, cancellationToken));
@@ -776,6 +858,7 @@ public sealed class RaidService(
             run.Status = RaidRunStatus.Resolving;
             run.CommencedAt = timeProvider.GetUtcNow();
             run.RowVersion++;
+            await QueueRaidUpdateAsync(run, "Commenced", cancellationToken);
             await stateSync.InvalidateWorldScopeAsync(
                 StateSyncScopes.Raids,
                 "CommenceRaidCommand",
@@ -795,6 +878,13 @@ public sealed class RaidService(
     public async Task<RaidOperationResult<RaidRewardDto>> ClaimAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken)
     {
         await db.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
+        var raidStatus = await db.RaidRuns.AsNoTracking()
+            .Where(x => x.Id == raidRunId)
+            .Select(x => (RaidRunStatus?)x.Status)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (raidStatus is not RaidRunStatus.Resolved and not RaidRunStatus.Settled)
+            return RaidOperationResult<RaidRewardDto>.Fail(
+                "Raid rewards become available after the battle playback concludes.");
         var claim = await db.RaidRewardClaims.SingleOrDefaultAsync(
             x => x.RaidRunId == raidRunId && x.CharacterId == characterId,
             cancellationToken);
@@ -845,9 +935,9 @@ public sealed class RaidService(
             return RaidOperationResult<RaidSealAssemblyDto>.Fail(unlockError);
         if (!await inventoryRepository.TryRemoveItemsByBaseIdAsync(
                 characterId,
-                new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase) { [tier.RaidSealFragmentItemId] = tier.RaidSealFragmentCost },
+                new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase) { [tier.RaidSealFragmentItemId] = RaidRules.RaidSealFragmentCost },
                 cancellationToken))
-            return RaidOperationResult<RaidSealAssemblyDto>.Fail($"Assembling this Raid Seal requires {tier.RaidSealFragmentCost} fragments.");
+            return RaidOperationResult<RaidSealAssemblyDto>.Fail($"Assembling this Raid Seal requires {RaidRules.RaidSealFragmentCost} fragments.");
         var bases = await itemBases.GetItemBasesByIdsAsync([tier.RaidSealItemId], cancellationToken);
         if (!bases.TryGetValue(tier.RaidSealItemId, out var raidSealBase))
             throw new InvalidOperationException($"Raid Seal item '{tier.RaidSealItemId}' was not found.");
@@ -892,7 +982,9 @@ public sealed class RaidService(
         var highestSlainTier = await db.RaidParticipantResults.AsNoTracking()
             .Where(x => x.CharacterId == characterId
                         && x.RaidRun.RaidBossId == raidBossId
-                        && x.RaidRun.Outcome == RaidOutcome.Slain)
+                        && x.RaidRun.Outcome == RaidOutcome.Slain
+                        && (x.RaidRun.Status == RaidRunStatus.Resolved
+                            || x.RaidRun.Status == RaidRunStatus.Settled))
             .Select(x => (int?)x.RaidRun.Tier)
             .MaxAsync(cancellationToken) ?? 0;
 
@@ -947,7 +1039,9 @@ public sealed class RaidService(
         var highestSlainTier = await db.RaidParticipantResults.AsNoTracking()
             .Where(x => x.CharacterId == characterId
                         && x.RaidRun.RaidBossId == raidBossId
-                        && x.RaidRun.Outcome == RaidOutcome.Slain)
+                        && x.RaidRun.Outcome == RaidOutcome.Slain
+                        && (x.RaidRun.Status == RaidRunStatus.Resolved
+                            || x.RaidRun.Status == RaidRunStatus.Settled))
             .Select(x => (int?)x.RaidRun.Tier)
             .MaxAsync(cancellationToken) ?? 0;
         if (highestSlainTier < item.RequiredTier)
@@ -1035,6 +1129,15 @@ public sealed class RaidService(
             if (await TryClaimResolutionAsync(raidRunId, workerId, cancellationToken))
                 await ResolveClaimedAsync(raidRunId, workerId, cancellationToken);
         }
+
+        var playbackIds = await db.RaidRuns.AsNoTracking()
+            .Where(x => x.Status == RaidRunStatus.Playback && x.PlaybackEndsAt <= now)
+            .OrderBy(x => x.PlaybackEndsAt)
+            .Select(x => x.Id)
+            .Take(batchSize)
+            .ToArrayAsync(cancellationToken);
+        foreach (var raidRunId in playbackIds)
+            await FinalizePlaybackAsync(raidRunId, cancellationToken);
     }
 
     private async Task HandleExpiredAsync(Guid raidRunId, CancellationToken cancellationToken)
@@ -1062,6 +1165,10 @@ public sealed class RaidService(
             run.Status == RaidRunStatus.Cancelled ? "RaidExpired" : "RaidAutoCommenced",
             cancellationToken);
         await QueueRaidChatSnapshotAsync(run, cancellationToken);
+        await QueueRaidUpdateAsync(
+            run,
+            run.Status == RaidRunStatus.Cancelled ? "Cancelled" : "AutoCommenced",
+            cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
     }
@@ -1107,21 +1214,14 @@ public sealed class RaidService(
                 ?? throw new InvalidOperationException($"Raid '{raidRunId}' disappeared during resolution.");
             if (run.Status != RaidRunStatus.Resolving || run.SimulationLeaseOwner != workerId)
                 return;
-            if (resolution.Outcome == RaidOutcome.Slain)
-                await db.AcquireRaidBossLockAsync(run.RaidBossId, cancellationToken);
-            var isFirstSlain = resolution.Outcome == RaidOutcome.Slain
-                && !await db.RaidRuns.AsNoTracking().AnyAsync(
-                    x => x.Id != run.Id
-                         && x.RaidBossId == run.RaidBossId
-                         && x.Outcome == RaidOutcome.Slain,
-                    cancellationToken);
+            var playbackStartedAt = timeProvider.GetUtcNow();
             run.ReinforcementPenalty = resolution.ReinforcementPenalty;
             run.WardBreak = resolution.WardBreak;
             run.BossHealthRemainingPercent = resolution.BossHealthRemainingPercent;
             run.Outcome = resolution.Outcome;
-            run.ResolvedAt = timeProvider.GetUtcNow();
-            run.SettledAt = run.ResolvedAt;
-            run.Status = RaidRunStatus.Settled;
+            run.PlaybackStartedAt = playbackStartedAt;
+            run.PlaybackEndsAt = playbackStartedAt.Add(GetPlaybackDuration(playbacks));
+            run.Status = RaidRunStatus.Playback;
             run.SimulationLeaseOwner = null;
             run.SimulationLeaseUntil = null;
             run.RowVersion++;
@@ -1129,27 +1229,11 @@ public sealed class RaidService(
             db.RaidPlaybacks.AddRange(playbacks);
             db.RaidParticipantResults.AddRange(resolution.ParticipantResults);
             await CreateRewardsAsync(run, tier, resolution, cancellationToken);
-            if (resolution.Outcome == RaidOutcome.Slain)
-            {
-                if (isFirstSlain)
-                {
-                    foreach (var signup in run.Signups)
-                    {
-                        await achievements.UnlockTitleAsync(
-                            signup.AccountId,
-                            signup.CharacterId,
-                            RealmFirstRaidTitleKey,
-                            JsonSerializer.Serialize(new { run.RaidBossId, run.Id }, jsonOptions),
-                            cancellationToken);
-                    }
-                }
-
-                await EnqueueSlainAnnouncementAsync(run, isFirstSlain, cancellationToken);
-            }
             await QueueRaidChatSnapshotAsync(run, cancellationToken);
+            await QueueRaidUpdateAsync(run, "PlaybackReady", cancellationToken);
             await stateSync.InvalidateWorldScopeAsync(
                 StateSyncScopes.Raids,
-                "RaidResolved",
+                "RaidPlaybackReady",
                 cancellationToken);
             await db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
@@ -1164,6 +1248,71 @@ public sealed class RaidService(
             logger.LogError(exception, "Raid {RaidRunId} resolution failed.", raidRunId);
             await ReleaseLeaseAsync(raidRunId, workerId, CancellationToken.None);
         }
+    }
+
+    private async Task FinalizePlaybackAsync(Guid raidRunId, CancellationToken cancellationToken)
+    {
+        await using var transaction = await db.BeginTransactionAsync(cancellationToken);
+        await db.AcquireRaidRunLockAsync(raidRunId, cancellationToken);
+        var run = await LoadRunAsync(raidRunId, includeSnapshots: false, cancellationToken);
+        var now = timeProvider.GetUtcNow();
+        if (run is null
+            || run.Status != RaidRunStatus.Playback
+            || !run.PlaybackEndsAt.HasValue
+            || run.PlaybackEndsAt > now)
+            return;
+
+        var isFirstSlain = false;
+        if (run.Outcome == RaidOutcome.Slain)
+        {
+            await db.AcquireRaidBossLockAsync(run.RaidBossId, cancellationToken);
+            isFirstSlain = !await db.RaidRuns.AsNoTracking().AnyAsync(
+                x => x.Id != run.Id
+                     && x.RaidBossId == run.RaidBossId
+                     && x.Outcome == RaidOutcome.Slain
+                     && (x.Status == RaidRunStatus.Resolved || x.Status == RaidRunStatus.Settled),
+                cancellationToken);
+        }
+
+        run.ResolvedAt = now;
+        run.SettledAt = now;
+        run.Status = RaidRunStatus.Settled;
+        run.RowVersion++;
+
+        if (run.Outcome == RaidOutcome.Slain)
+        {
+            if (isFirstSlain)
+            {
+                foreach (var signup in run.Signups)
+                {
+                    await achievements.UnlockTitleAsync(
+                        signup.AccountId,
+                        signup.CharacterId,
+                        RealmFirstRaidTitleKey,
+                        JsonSerializer.Serialize(new { run.RaidBossId, run.Id }, jsonOptions),
+                        cancellationToken);
+                }
+            }
+
+            await EnqueueSlainAnnouncementAsync(run, isFirstSlain, cancellationToken);
+        }
+
+        await QueueRaidChatSnapshotAsync(run, cancellationToken);
+        await QueueRaidUpdateAsync(run, "Resolved", cancellationToken);
+        await stateSync.InvalidateWorldScopeAsync(
+            StateSyncScopes.Raids,
+            "RaidResolved",
+            cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+    }
+
+    private static TimeSpan GetPlaybackDuration(IReadOnlyCollection<RaidPlayback> playbacks)
+    {
+        var combatSeconds = playbacks.Sum(playback =>
+            playback.TotalTicks / (double)Math.Max(1, playback.TicksPerSecond));
+        return TimeSpan.FromSeconds(combatSeconds)
+            .Add(TimeSpan.FromTicks(PlaybackTransitionDelay.Ticks * playbacks.Count));
     }
 
     private async Task CreateRewardsAsync(
@@ -1390,6 +1539,9 @@ public sealed class RaidService(
             run.CreatedAt,
             run.SignupClosesAt,
             run.CommencedAt,
+            run.PlaybackStartedAt,
+            run.PlaybackEndsAt,
+            timeProvider.GetUtcNow(),
             run.ResolvedAt,
             tier.LaneSlots,
             tier.MinimumRoster,
@@ -1429,7 +1581,8 @@ public sealed class RaidService(
             run.LeaderCharacterId == characterId && run.Status == RaidRunStatus.Mustering,
             run.LeaderCharacterId == characterId && ValidateCommencement(run, tier) is null,
             currentSignup is not null && run.Status == RaidRunStatus.Mustering,
-            currentReward is { ClaimedAt: null },
+            currentReward is { ClaimedAt: null }
+            && (run.Status == RaidRunStatus.Resolved || run.Status == RaidRunStatus.Settled),
             currentReward?.WasReduced == true,
             run.LeaderCharacterId == characterId
             && run.Status == RaidRunStatus.Mustering
@@ -1473,7 +1626,9 @@ public sealed class RaidService(
         await db.RaidSignups.AsNoTracking().AnyAsync(
             x => x.RaidRunId == raidRunId
                  && x.CharacterId == characterId
-                 && (x.RaidRun.Status == RaidRunStatus.Resolved || x.RaidRun.Status == RaidRunStatus.Settled),
+                 && (x.RaidRun.Status == RaidRunStatus.Playback
+                     || x.RaidRun.Status == RaidRunStatus.Resolved
+                     || x.RaidRun.Status == RaidRunStatus.Settled),
             cancellationToken);
 
     private bool TryReserveBattlePlanPreview(Guid characterId, out TimeSpan retryAfter)
@@ -1604,9 +1759,27 @@ public sealed class RaidService(
 
     private Task QueueRaidChatSnapshotAsync(
         RaidRun run,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        string? lifecycleMessage = null,
+        string? lifecycleEventKey = null)
     {
         var isOpen = ActiveStatuses.Contains(run.Status);
+        var now = timeProvider.GetUtcNow();
+        RaidChatLifecycleMessagePayload? message = null;
+        if (isOpen
+            && !string.IsNullOrWhiteSpace(lifecycleMessage)
+            && !string.IsNullOrWhiteSpace(lifecycleEventKey))
+        {
+            message = new RaidChatLifecycleMessagePayload(
+                StableRandom.Guid(
+                    "raid-chat-lifecycle-v1",
+                    run.Id.ToString("N"),
+                    lifecycleEventKey,
+                    run.RowVersion.ToString(CultureInfo.InvariantCulture)),
+                lifecycleMessage,
+                now);
+        }
+
         return outbox.EnqueueAsync(
             GameEventTypes.RaidChatChannelSnapshot,
             new RaidChatChannelSnapshotPayload(
@@ -1616,11 +1789,29 @@ public sealed class RaidService(
                 isOpen
                     ? run.Signups.Select(x => x.CharacterId).Distinct().ToArray()
                     : [],
-                timeProvider.GetUtcNow()),
+                now,
+                message),
             characterId: null,
             accountId: null,
             cancellationToken);
     }
+
+    private Task QueueRaidUpdateAsync(
+        RaidRun run,
+        string eventName,
+        CancellationToken cancellationToken) =>
+        outbox.EnqueueAsync(
+            GameEventTypes.RaidUpdated,
+            new RaidUpdated(
+                run.Id,
+                run.RaidBossId,
+                eventName,
+                run.Status.ToString(),
+                run.Signups.Count,
+                timeProvider.GetUtcNow()),
+            characterId: null,
+            accountId: null,
+            cancellationToken);
 
     private static int GetWeekKey(DateTimeOffset value)
     {

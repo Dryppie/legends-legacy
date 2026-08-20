@@ -44,4 +44,12 @@ describe('RegionService', () => {
     ]);
     expect(region.areas[1].gatheringTypes).toEqual([GatheringType.Mining]);
   });
+
+  it('resolves the parent region from an area id', () => {
+    const service = new RegionService({} as ApiService);
+
+    expect(service.getRegionNameByAreaId('region_01_area_01')).toBe('Shenic');
+    expect(service.getRegionNameByAreaId('region_02_area_02')).toBe('Meran');
+    expect(service.getRegionNameByAreaId('unknown_area')).toBeNull();
+  });
 });

@@ -17,13 +17,13 @@ public sealed class RaidChatServiceTests
         var leaderId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
 
-        await service.ApplySnapshotAsync(
+        Assert.True(await service.ApplySnapshotAsync(
             raidRunId,
             1,
             true,
             [leaderId, memberId],
             DateTimeOffset.UtcNow,
-            CancellationToken.None);
+            CancellationToken.None));
 
         var recipients = await service.GetRecipientsForMemberAsync(
             raidRunId,
@@ -33,31 +33,31 @@ public sealed class RaidChatServiceTests
             new[] { leaderId.ToString(), memberId.ToString() }.Order(),
             recipients.Order());
 
-        await service.ApplySnapshotAsync(
+        Assert.True(await service.ApplySnapshotAsync(
             raidRunId,
             2,
             true,
             [memberId],
             DateTimeOffset.UtcNow,
-            CancellationToken.None);
+            CancellationToken.None));
         Assert.False(await service.CanAccessAsync(raidRunId, leaderId, CancellationToken.None));
 
-        await service.ApplySnapshotAsync(
+        Assert.False(await service.ApplySnapshotAsync(
             raidRunId,
             1,
             true,
             [leaderId, memberId],
             DateTimeOffset.UtcNow,
-            CancellationToken.None);
+            CancellationToken.None));
         Assert.False(await service.CanAccessAsync(raidRunId, leaderId, CancellationToken.None));
 
-        await service.ApplySnapshotAsync(
+        Assert.True(await service.ApplySnapshotAsync(
             raidRunId,
             3,
             false,
             [memberId],
             DateTimeOffset.UtcNow,
-            CancellationToken.None);
+            CancellationToken.None));
         Assert.False(await service.CanAccessAsync(raidRunId, memberId, CancellationToken.None));
         Assert.Empty(await db.RaidChatMemberships.ToListAsync());
     }

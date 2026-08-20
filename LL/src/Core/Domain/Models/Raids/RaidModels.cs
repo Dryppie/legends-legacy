@@ -10,7 +10,8 @@ public enum RaidRunStatus
     Resolved = 2,
     Settled = 3,
     Cancelled = 4,
-    Expired = 5
+    Expired = 5,
+    Playback = 6
 }
 
 public enum RaidOutcome
@@ -41,6 +42,8 @@ public sealed class RaidRun
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset SignupClosesAt { get; set; }
     public DateTimeOffset? CommencedAt { get; set; }
+    public DateTimeOffset? PlaybackStartedAt { get; set; }
+    public DateTimeOffset? PlaybackEndsAt { get; set; }
     public DateTimeOffset? ResolvedAt { get; set; }
     public DateTimeOffset? SettledAt { get; set; }
     public DateTimeOffset? CancelledAt { get; set; }

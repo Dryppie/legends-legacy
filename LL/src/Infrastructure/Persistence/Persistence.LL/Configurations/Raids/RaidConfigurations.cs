@@ -19,6 +19,7 @@ public sealed class RaidRunConfiguration : IEntityTypeConfiguration<RaidRun>
         builder.Property(x => x.RowVersion).IsConcurrencyToken();
         builder.HasIndex(x => new { x.RaidBossId, x.Status, x.SignupClosesAt });
         builder.HasIndex(x => new { x.Status, x.SimulationLeaseUntil });
+        builder.HasIndex(x => new { x.Status, x.PlaybackEndsAt });
         builder.HasIndex(x => new { x.LeaderCharacterId, x.Status });
         builder.HasMany(x => x.Signups).WithOne(x => x.RaidRun).HasForeignKey(x => x.RaidRunId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(x => x.LaneResults).WithOne(x => x.RaidRun).HasForeignKey(x => x.RaidRunId).OnDelete(DeleteBehavior.Cascade);

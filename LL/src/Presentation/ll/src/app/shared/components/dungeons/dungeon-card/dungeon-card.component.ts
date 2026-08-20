@@ -68,6 +68,7 @@ type DungeonDetailTab = 'rewards' | 'gathering' | 'mastery';
     BaseItemComponent,
   ],
   templateUrl: './dungeon-card.component.html',
+  styleUrl: './dungeon-card.component.scss',
 })
 export class DungeonCardComponent implements OnChanges {
   readonly displayCombatRating = toDisplayedCombatRating;

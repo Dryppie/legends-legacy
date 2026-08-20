@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject, finalize, interval, startWith, takeUntil } from 'rxjs';
 import {
@@ -11,7 +11,7 @@ import {
   RaidService,
   RaidSignup,
 } from '../../../../core/services/api/raid/raid.service';
-import { StateSyncCoordinator } from '../../../../core/services/real-time/game-realtime/state-sync-coordinator.service';
+import { GameEventService } from '../../../../core/services/real-time/game-event.service';
 import { CombatComponent } from '../../../../shared/components/combat/combat.component';
 import { CombatService } from '../../../../core/services/client-side/combat/combat.service';
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
@@ -29,7 +29,7 @@ export class RaidPageComponent implements OnInit, OnDestroy {
   private readonly raids = inject(RaidService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly stateSync = inject(StateSyncCoordinator);
+  private readonly events = inject(GameEventService);
   private readonly combat = inject(CombatService);
   private readonly playbackPlayer = inject(RaidPlaybackService);
   readonly combatState = inject(CombatStateService);
@@ -49,7 +49,8 @@ export class RaidPageComponent implements OnInit, OnDestroy {
   readonly lanes: RaidLane[] = ['Vanguard', 'Flank', 'Ward'];
   readonly raidPlaybackOrder: RaidLane[] = ['Flank', 'Ward', 'Vanguard'];
   private raidRunId = '';
-  private raidSyncCleanup: () => void = () => undefined;
+  private lastRealtimeUpdateId: string | null = null;
+  private lastReconnectCount = this.events.reconnectCount();
   private playbackTimer: ReturnType<typeof setInterval> | null = null;
   private playbackAdvanceTimer: ReturnType<typeof setTimeout> | null = null;
   private activePlaybackBundle: RaidPlaybackBundle | null = null;
@@ -59,29 +60,50 @@ export class RaidPageComponent implements OnInit, OnDestroy {
   private autoPlaybackRequested = false;
   private autoPlaybackStarted = false;
   private playbackGeneration = 0;
+  private scheduledPlaybackStartedAt: number | null = null;
+  private playbackServerClockAtSync = 0;
+  private playbackMonotonicClockAtSync = 0;
+  private playbackStageOffsetMilliseconds = 0;
+  private readonly playbackTransitionMilliseconds = 1500;
+
+  constructor() {
+    effect(() => {
+      const envelope = this.events.eventEnvelope.RaidUpdated();
+      if (
+        !envelope?.updateId ||
+        envelope.updateId === this.lastRealtimeUpdateId ||
+        envelope.payload.raidRunId !== this.raidRunId
+      ) {
+        return;
+      }
+
+      this.lastRealtimeUpdateId = envelope.updateId;
+      this.load(false);
+    });
+
+    effect(() => {
+      const reconnectCount = this.events.reconnectCount();
+      if (reconnectCount <= this.lastReconnectCount) return;
+      this.lastReconnectCount = reconnectCount;
+      this.load(false);
+    });
+  }
 
   ngOnInit(): void {
     this.route.paramMap.pipe(takeUntil(this.destroyed)).subscribe((params) => {
       this.raidRunId = params.get('raidId') ?? '';
-      this.raidSyncCleanup();
-      this.raidSyncCleanup = this.stateSync.register(
-        'raids',
-        `raid-${this.raidRunId}`,
-        async () => this.load(false),
-        () => !!this.raidRunId,
-      );
       this.load();
     });
     interval(5000)
       .pipe(startWith(0), takeUntil(this.destroyed))
       .subscribe(() => {
-        if (this.raid()?.status === 'Resolving') this.load(false);
+        const status = this.raid()?.status;
+        if (status === 'Resolving' || status === 'Playback') this.load(false);
       });
   }
 
   ngOnDestroy(): void {
     this.closeRaidPlayback();
-    this.raidSyncCleanup();
     this.destroyed.next();
     this.destroyed.complete();
   }
@@ -241,6 +263,8 @@ export class RaidPageComponent implements OnInit, OnDestroy {
     this.playbackLane.set(null);
     this.playbackStageIndex.set(-1);
     this.watchingPlayback.set(false);
+    this.scheduledPlaybackStartedAt = null;
+    this.playbackStageOffsetMilliseconds = 0;
     this.combat.closeCurrentRaidBattle();
   }
 
@@ -322,6 +346,7 @@ export class RaidPageComponent implements OnInit, OnDestroy {
       case 'Mustering':
         return 'Recruiting';
       case 'Resolving':
+      case 'Playback':
         return 'In battle';
       case 'Settled':
       case 'Resolved':
@@ -336,6 +361,7 @@ export class RaidPageComponent implements OnInit, OnDestroy {
       case 'Mustering':
         return 'Rallying';
       case 'Resolving':
+      case 'Playback':
         return 'InProgress';
       case 'Settled':
       case 'Resolved':
@@ -562,21 +588,28 @@ export class RaidPageComponent implements OnInit, OnDestroy {
   }
 
   private acceptRaid(raid: RaidRun): void {
-    if (raid.status === 'Resolving') this.autoPlaybackRequested = true;
+    if (raid.status === 'Resolving' || raid.status === 'Playback')
+      this.autoPlaybackRequested = true;
     this.raid.set(raid);
     if (
-      (raid.status === 'Settled' || raid.status === 'Resolved') &&
+      raid.status === 'Playback' &&
       this.autoPlaybackRequested &&
       !this.autoPlaybackStarted
     ) {
       this.autoPlaybackStarted = true;
-      queueMicrotask(() => this.startRaidPlayback(this.raidPlaybackOrder));
+      queueMicrotask(() =>
+        this.startRaidPlayback(this.raidPlaybackOrder, raid),
+      );
     }
   }
 
-  private startRaidPlayback(lanes: readonly RaidLane[]): void {
+  private startRaidPlayback(
+    lanes: readonly RaidLane[],
+    schedule?: RaidRun,
+  ): void {
     if (this.action() || !lanes.length) return;
     this.closeRaidPlayback();
+    this.setPlaybackSchedule(schedule);
     this.activePlaybackLanes = [...lanes];
     this.watchingPlayback.set(true);
     this.loadPlaybackStage(0);
@@ -585,7 +618,10 @@ export class RaidPageComponent implements OnInit, OnDestroy {
   private loadPlaybackStage(index: number): void {
     const lane = this.activePlaybackLanes[index];
     if (!lane) {
+      const completedScheduledPlayback =
+        this.scheduledPlaybackStartedAt !== null;
       this.closeRaidPlayback();
+      if (completedScheduledPlayback) this.load(false);
       return;
     }
 
@@ -603,13 +639,42 @@ export class RaidPageComponent implements OnInit, OnDestroy {
           if (generation !== this.playbackGeneration) return;
           this.action.set(null);
           this.activePlaybackBundle = bundle;
-          this.playbackStartedAt = performance.now();
+          this.playbackStageOffsetMilliseconds = this.activePlaybackLanes
+            .slice(0, index)
+            .reduce(
+              (total, previousLane) =>
+                total +
+                this.playbackDurationMilliseconds(previousLane, bundle) +
+                this.playbackTransitionMilliseconds,
+              0,
+            );
+          const stageElapsedMilliseconds = Math.max(
+            0,
+            (this.scheduledPlaybackElapsedMilliseconds() ??
+              this.playbackStageOffsetMilliseconds) -
+              this.playbackStageOffsetMilliseconds,
+          );
+          const stageDurationMilliseconds =
+            (bundle.totalTicks / bundle.ticksPerSecond) * 1000;
+          if (
+            stageElapsedMilliseconds >=
+            stageDurationMilliseconds + this.playbackTransitionMilliseconds
+          ) {
+            queueMicrotask(() => this.loadPlaybackStage(index + 1));
+            return;
+          }
+
+          this.playbackStartedAt =
+            performance.now() -
+            Math.min(stageElapsedMilliseconds, stageDurationMilliseconds);
           this.lastPlaybackFrameSequence = -1;
           this.renderPlaybackFrame(true);
-          this.playbackTimer = setInterval(
-            () => this.renderPlaybackFrame(false),
-            250,
-          );
+          if (stageElapsedMilliseconds < stageDurationMilliseconds) {
+            this.playbackTimer = setInterval(
+              () => this.renderPlaybackFrame(false),
+              250,
+            );
+          }
         },
         error: (error) => {
           if (generation !== this.playbackGeneration) return;
@@ -641,10 +706,58 @@ export class RaidPageComponent implements OnInit, OnDestroy {
 
     if (this.playbackTimer !== null) clearInterval(this.playbackTimer);
     this.playbackTimer = null;
+    const scheduledElapsed = this.scheduledPlaybackElapsedMilliseconds();
+    const transitionDelay =
+      scheduledElapsed === null
+        ? this.playbackTransitionMilliseconds
+        : Math.max(
+            0,
+            this.playbackStageOffsetMilliseconds +
+              (bundle.totalTicks / bundle.ticksPerSecond) * 1000 +
+              this.playbackTransitionMilliseconds -
+              scheduledElapsed,
+          );
     this.playbackAdvanceTimer = setTimeout(() => {
       this.playbackAdvanceTimer = null;
       this.loadPlaybackStage(this.playbackStageIndex() + 1);
-    }, 1500);
+    }, transitionDelay);
+  }
+
+  private setPlaybackSchedule(schedule?: RaidRun): void {
+    const playbackStartedAt = schedule?.playbackStartedAt
+      ? Date.parse(schedule.playbackStartedAt)
+      : Number.NaN;
+    const serverNow = schedule?.serverNow
+      ? Date.parse(schedule.serverNow)
+      : Number.NaN;
+    if (!Number.isFinite(playbackStartedAt) || !Number.isFinite(serverNow)) {
+      this.scheduledPlaybackStartedAt = null;
+      return;
+    }
+
+    this.scheduledPlaybackStartedAt = playbackStartedAt;
+    this.playbackServerClockAtSync = serverNow;
+    this.playbackMonotonicClockAtSync = performance.now();
+  }
+
+  private scheduledPlaybackElapsedMilliseconds(): number | null {
+    if (this.scheduledPlaybackStartedAt === null) return null;
+    return Math.max(
+      0,
+      this.playbackServerClockAtSync +
+        (performance.now() - this.playbackMonotonicClockAtSync) -
+        this.scheduledPlaybackStartedAt,
+    );
+  }
+
+  private playbackDurationMilliseconds(
+    lane: RaidLane,
+    bundle: RaidPlaybackBundle,
+  ): number {
+    const durationTicks =
+      this.raid()?.laneResults.find((result) => result.lane === lane)
+        ?.durationTicks ?? 0;
+    return (durationTicks / bundle.ticksPerSecond) * 1000;
   }
 
   private stopPlaybackTimers(): void {

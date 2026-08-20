@@ -7,7 +7,7 @@ namespace Services.Chat.Chats;
 
 public sealed class RaidChatService(IDbContext db) : IRaidChatService
 {
-    public async Task ApplySnapshotAsync(
+    public async Task<bool> ApplySnapshotAsync(
         Guid raidRunId,
         long revision,
         bool isOpen,
@@ -19,8 +19,10 @@ public sealed class RaidChatService(IDbContext db) : IRaidChatService
             .Include(x => x.Memberships)
             .SingleOrDefaultAsync(x => x.RaidRunId == raidRunId, cancellationToken);
 
-        if (channel is not null && channel.Revision >= revision)
-            return;
+        if (channel is not null && channel.Revision > revision)
+            return false;
+        if (channel is not null && channel.Revision == revision)
+            return true;
 
         if (channel is null)
         {
@@ -55,6 +57,7 @@ public sealed class RaidChatService(IDbContext db) : IRaidChatService
         }
 
         await db.SaveChangesAsync(cancellationToken);
+        return true;
     }
 
     public Task<bool> CanAccessAsync(

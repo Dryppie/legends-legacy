@@ -37,6 +37,7 @@ import { CharacterStateService } from '../../../core/services/api/character/char
 import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
 import { EquipmentSlotType } from '../../models/Dtos/equipment-slots/equipmentSlot';
 import { GatheringType } from '../../models/enums/gatheringType';
+import { RegionService } from '../../../core/services/client-side/region/region.service';
 
 @Component({
   selector: 'app-combat',
@@ -112,6 +113,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     private readonly tour: FirstPartyTourService,
     private readonly router: Router,
     private readonly equipmentState: EquipmentStateService,
+    private readonly regionService: RegionService,
     bootstrapState: GameBootstrapStateService,
     characterState: CharacterStateService,
   ) {
@@ -425,8 +427,11 @@ export class CombatComponent implements OnInit, OnDestroy {
     if (this.battleTitleOverride) return this.battleTitleOverride;
 
     if (this.battleType === BattleType.IdleCombat) {
-      const areaName = this.currentAction()?.combatActionDetails?.area?.name;
-      return areaName ? `Shenic — ${areaName}` : 'Idle Battle';
+      const area = this.currentAction()?.combatActionDetails?.area;
+      if (!area?.name) return 'Idle Battle';
+
+      const regionName = this.regionService.getRegionNameByAreaId(area.id);
+      return regionName ? `${regionName} — ${area.name}` : area.name;
     }
 
     if (this.battleType === BattleType.Dungeon) return 'Dungeon Battle';

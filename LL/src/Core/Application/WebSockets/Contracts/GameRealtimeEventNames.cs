@@ -10,4 +10,5 @@ public static class GameRealtimeEventNames
     public const string TournamentGroundsUpdated = nameof(TournamentGroundsUpdated);
     public const string WorldTowerRallyUpdated = nameof(WorldTowerRallyUpdated);
     public const string WorldTowerCombatFrameUpdated = nameof(WorldTowerCombatFrameUpdated);
+    public const string RaidUpdated = nameof(RaidUpdated);
 }

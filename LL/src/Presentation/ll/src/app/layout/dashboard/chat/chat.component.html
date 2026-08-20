@@ -347,11 +347,17 @@
                   <div
                     class="flex min-w-0 basis-full flex-wrap items-baseline gap-x-1 pl-0.5"
                   >
-                    <app-character-tag
-                      [id]="m.senderId"
-                      [name]="m.senderName"
-                      [titleDisplayName]="m.senderTitleDisplayName"
-                    ></app-character-tag>
+                    <ng-container
+                      *ngIf="
+                        m.channelType !== 'Raid' || !m.isSystemGenerated
+                      "
+                    >
+                      <app-character-tag
+                        [id]="m.senderId"
+                        [name]="m.senderName"
+                        [titleDisplayName]="m.senderTitleDisplayName"
+                      ></app-character-tag>
+                    </ng-container>
                     <span
                       class="min-w-0 break-words text-xs italic leading-5 text-[var(--ll-color-text)]"
                     >

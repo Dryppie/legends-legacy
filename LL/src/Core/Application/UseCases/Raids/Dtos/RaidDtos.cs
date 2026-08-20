@@ -60,6 +60,18 @@ public sealed record RaidRunSummaryDto(
     int WardCount,
     bool CanJoin);
 
+public sealed record RaidHistoryEntryDto(
+    Guid RaidRunId,
+    string RaidBossId,
+    string RaidBossName,
+    int Tier,
+    RaidOutcome Outcome,
+    DateTimeOffset ResolvedAt,
+    int Trophies,
+    bool WasReduced,
+    DateTimeOffset? ClaimedAt,
+    bool CanClaim);
+
 public sealed record RaidRunDto(
     Guid Id,
     string RaidBossId,
@@ -72,6 +84,9 @@ public sealed record RaidRunDto(
     DateTimeOffset CreatedAt,
     DateTimeOffset SignupClosesAt,
     DateTimeOffset? CommencedAt,
+    DateTimeOffset? PlaybackStartedAt,
+    DateTimeOffset? PlaybackEndsAt,
+    DateTimeOffset ServerNow,
     DateTimeOffset? ResolvedAt,
     int LaneSlots,
     int MinimumRoster,

@@ -30,6 +30,12 @@ public sealed class RaidController : BaseController
     public async Task<ActionResult<IReadOnlyList<RaidRunSummaryDto>>> GetOpenRaids(string raidBossId) =>
         Ok(await Mediator.Send(new GetOpenRaidsQuery(CurrentCharacterGuid, raidBossId)));
 
+    [HttpGet("history")]
+    public async Task<ActionResult<IReadOnlyList<RaidHistoryEntryDto>>> GetHistory(
+        [FromQuery] string? raidBossId,
+        [FromQuery] int take = 20) =>
+        Ok(await Mediator.Send(new GetRaidHistoryQuery(CurrentCharacterGuid, raidBossId, take)));
+
     [HttpGet("active")]
     public async Task<ActionResult<RaidRunDto?>> GetActiveRaid() =>
         await Mediator.Send(new GetActiveRaidQuery(CurrentCharacterGuid));

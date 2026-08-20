@@ -1,0 +1,58 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.dungeon-card-shell {
+  container-type: inline-size;
+}
+
+.dungeon-card-layout {
+  grid-template-columns: minmax(0, 1fr) 22rem;
+  padding: var(--ll-space-6);
+}
+
+.dungeon-card-title {
+  font-size: clamp(2.25rem, 5cqi, 3rem);
+}
+
+.run-setup-panel {
+  position: sticky;
+  top: var(--ll-space-4);
+}
+
+@container (min-width: 75rem) {
+  .dungeon-card-layout {
+    grid-template-columns: minmax(0, 1fr) 24rem;
+  }
+}
+
+@container (max-width: 62rem) {
+  .dungeon-card-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .run-setup-panel {
+    position: static;
+  }
+}
+
+@container (max-width: 36rem) {
+  .dungeon-card-layout {
+    gap: var(--ll-space-4);
+    padding: var(--ll-space-4);
+  }
+
+  .dungeon-card-title {
+    font-size: 2rem;
+  }
+
+  .dungeon-card-heading {
+    flex-direction: column;
+  }
+
+  .dungeon-records-actions,
+  .dungeon-records-actions .ll-button {
+    width: 100%;
+  }
+}

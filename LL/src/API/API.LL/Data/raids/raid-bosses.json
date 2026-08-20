@@ -17,7 +17,7 @@
           "signupWindowHours": 24,
           "raidSealItemId": "raid_seal_hives_abyss",
           "raidSealFragmentItemId": "raid_seal_fragment_hives_abyss",
-          "raidSealFragmentCost": 20,
+          "raidSealFragmentCost": 50,
           "recommendedWingPower": { "vanguard": 210, "flank": 150, "ward": 160 },
           "tickBudget": { "vanguard": 6000, "flank": 3000, "ward": 4000 },
           "boss": {
@@ -67,7 +67,7 @@
           "signupWindowHours": 24,
           "raidSealItemId": "raid_seal_hives_abyss",
           "raidSealFragmentItemId": "raid_seal_fragment_hives_abyss",
-          "raidSealFragmentCost": 35,
+          "raidSealFragmentCost": 50,
           "recommendedWingPower": { "vanguard": 390, "flank": 300, "ward": 320 },
           "tickBudget": { "vanguard": 6000, "flank": 3400, "ward": 4400 },
           "boss": {
@@ -181,7 +181,7 @@
           "signupWindowHours": 24,
           "raidSealItemId": "raid_seal_sanguine_horror",
           "raidSealFragmentItemId": "raid_seal_fragment_sanguine_horror",
-          "raidSealFragmentCost": 30,
+          "raidSealFragmentCost": 50,
           "recommendedWingPower": { "vanguard": 440, "flank": 350, "ward": 370 },
           "tickBudget": { "vanguard": 6000, "flank": 3600, "ward": 4500 },
           "boss": {
@@ -223,7 +223,7 @@
           "signupWindowHours": 24,
           "raidSealItemId": "raid_seal_sanguine_horror",
           "raidSealFragmentItemId": "raid_seal_fragment_sanguine_horror",
-          "raidSealFragmentCost": 45,
+          "raidSealFragmentCost": 50,
           "recommendedWingPower": { "vanguard": 690, "flank": 540, "ward": 570 },
           "tickBudget": { "vanguard": 6000, "flank": 4000, "ward": 5000 },
           "boss": {
