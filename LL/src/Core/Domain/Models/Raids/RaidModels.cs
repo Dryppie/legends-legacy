@@ -37,7 +37,6 @@ public sealed class RaidRun
     public string DefinitionHash { get; set; } = string.Empty;
     public string DefinitionSnapshotJson { get; set; } = string.Empty;
     public Guid LeaderCharacterId { get; set; }
-    public Guid RaidSealOwnerCharacterId { get; set; }
     public RaidRunStatus Status { get; set; } = RaidRunStatus.Mustering;
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset SignupClosesAt { get; set; }
@@ -55,7 +54,6 @@ public sealed class RaidRun
     public string? SimulationLeaseOwner { get; set; }
     public DateTimeOffset? SimulationLeaseUntil { get; set; }
     public int SimulationAttempts { get; set; }
-    public bool RaidSealRefunded { get; set; }
     public long RowVersion { get; set; }
     public ICollection<RaidSignup> Signups { get; set; } = [];
     public ICollection<RaidLaneResult> LaneResults { get; set; } = [];

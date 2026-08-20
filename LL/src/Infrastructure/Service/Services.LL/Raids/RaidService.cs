@@ -33,7 +33,6 @@ public sealed class RaidService(
     IRaidPowerRecommendationStore raidPowerRecommendations,
     ICharacterSnapshotService snapshots,
     IPowerRatingService powerRatings,
-    IInventoryRepository inventoryRepository,
     IInventoryService inventory,
     IInventoryItemFactory inventoryItemFactory,
     IItemBaseRepository itemBases,
@@ -91,14 +90,6 @@ public sealed class RaidService(
         var unlockErrors = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
         foreach (var boss in selected)
             unlockErrors[boss.Id] = await GetBossUnlockErrorAsync(characterId, character.Level, boss, cancellationToken);
-        var itemIds = selected.SelectMany(x => x.Tiers)
-            .SelectMany(x => new[] { x.RaidSealItemId, x.RaidSealFragmentItemId })
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-        var quantities = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        foreach (var itemId in itemIds)
-            quantities[itemId] = await inventoryRepository.GetInventoryQuantityAsync(characterId, itemId, cancellationToken);
-
         return selected.Select(boss =>
         {
             var unlockError = unlockErrors[boss.Id];
@@ -113,9 +104,6 @@ public sealed class RaidService(
                 unlocked,
                 unlockError,
                 openCounts.GetValueOrDefault(boss.Id),
-                boss.Tiers.Select(x => x.RaidSealItemId)
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .Sum(itemId => quantities.GetValueOrDefault(itemId)),
                 reducedBossIds.Contains(boss.Id, StringComparer.OrdinalIgnoreCase),
                 activeRaidId,
                 boss.Tiers.Select(tier => new RaidBossTierSummaryDto(
@@ -123,10 +111,6 @@ public sealed class RaidService(
                     tier.LaneSlots,
                     tier.MinimumRoster,
                     tier.SignupWindowHours,
-                    tier.RaidSealItemId,
-                    tier.RaidSealFragmentItemId,
-                    RaidRules.RaidSealFragmentCost,
-                    quantities.GetValueOrDefault(tier.RaidSealFragmentItemId),
                     ToPowerDto(boss.Id, tier))).ToArray(),
                 options.Value.DevelopmentToolsEnabled);
         }).ToArray();
@@ -275,7 +259,6 @@ public sealed class RaidService(
             raidBossId,
             tierNumber,
             requirePriorTierSlay: true,
-            consumeRaidSeal: true,
             cancellationToken: cancellationToken);
 
     public Task<RaidOperationResult<RaidRunDto>> CreateDevelopmentAsync(
@@ -295,7 +278,6 @@ public sealed class RaidService(
             raidBossId,
             tierNumber,
             requirePriorTierSlay: false,
-            consumeRaidSeal: false,
             cancellationToken: cancellationToken);
     }
 
@@ -304,7 +286,6 @@ public sealed class RaidService(
         string raidBossId,
         int tierNumber,
         bool requirePriorTierSlay,
-        bool consumeRaidSeal,
         CancellationToken cancellationToken)
     {
         var boss = definitions.Get(raidBossId);
@@ -334,12 +315,6 @@ public sealed class RaidService(
             return RaidOperationResult<RaidRunDto>.Fail("This character already leads an active raid.");
         if (await db.RaidRuns.CountAsync(x => x.RaidBossId == boss.Id && x.Status == RaidRunStatus.Mustering, cancellationToken) >= MaximumOpenRaidsPerBoss)
             return RaidOperationResult<RaidRunDto>.Fail("This raid boss already has the maximum number of recruiting raids.");
-        if (consumeRaidSeal
-            && !await inventoryRepository.TryRemoveItemsByBaseIdAsync(
-                characterId,
-                new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase) { [tier.RaidSealItemId] = 1 },
-                cancellationToken))
-            return RaidOperationResult<RaidRunDto>.Fail("Creating this raid requires a Raid Seal.");
 
         var snapshot = await snapshots.CreateAsync(characterId, cancellationToken);
         var now = timeProvider.GetUtcNow();
@@ -351,12 +326,10 @@ public sealed class RaidService(
             DefinitionHash = HashDefinition(definitionJson),
             DefinitionSnapshotJson = definitionJson,
             LeaderCharacterId = characterId,
-            RaidSealOwnerCharacterId = characterId,
             Status = RaidRunStatus.Mustering,
             CreatedAt = now,
             SignupClosesAt = now.AddHours(tier.SignupWindowHours),
             WeekKey = GetWeekKey(now),
-            RaidSealRefunded = !consumeRaidSeal,
             RowVersion = 1
         };
         run.Signups.Add(CreateSignup(run, snapshot, eligibility, now));
@@ -426,7 +399,6 @@ public sealed class RaidService(
         {
             run.Status = RaidRunStatus.Cancelled;
             run.CancelledAt = timeProvider.GetUtcNow();
-            await RefundRaidSealAsync(run, cancellationToken);
         }
         else
         {
@@ -474,7 +446,6 @@ public sealed class RaidService(
             run.Status = RaidRunStatus.Cancelled;
             run.CancelledAt = timeProvider.GetUtcNow();
             run.RowVersion++;
-            await RefundRaidSealAsync(run, cancellationToken);
             await QueueRaidChatSnapshotAsync(run, cancellationToken);
             await QueueRaidUpdateAsync(run, "Cancelled", cancellationToken);
             await db.SaveChangesAsync(cancellationToken);
@@ -917,41 +888,6 @@ public sealed class RaidService(
             claim.ClaimedAt.Value));
     }
 
-    public async Task<RaidOperationResult<RaidSealAssemblyDto>> AssembleRaidSealAsync(
-        Guid characterId,
-        string raidBossId,
-        int tierNumber,
-        CancellationToken cancellationToken)
-    {
-        var boss = definitions.Get(raidBossId);
-        var tier = boss?.Tiers.SingleOrDefault(x => x.Tier == tierNumber);
-        if (boss is null || tier is null)
-            return RaidOperationResult<RaidSealAssemblyDto>.Fail("Raid boss or tier was not found.");
-        var characterLevel = await db.Characters.AsNoTracking().Where(x => x.Id == characterId).Select(x => (int?)x.Level).SingleOrDefaultAsync(cancellationToken);
-        if (!characterLevel.HasValue)
-            return RaidOperationResult<RaidSealAssemblyDto>.Fail("Character was not found.");
-        var unlockError = await GetBossUnlockErrorAsync(characterId, characterLevel.Value, boss, cancellationToken);
-        if (unlockError is not null)
-            return RaidOperationResult<RaidSealAssemblyDto>.Fail(unlockError);
-        if (!await inventoryRepository.TryRemoveItemsByBaseIdAsync(
-                characterId,
-                new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase) { [tier.RaidSealFragmentItemId] = RaidRules.RaidSealFragmentCost },
-                cancellationToken))
-            return RaidOperationResult<RaidSealAssemblyDto>.Fail($"Assembling this Raid Seal requires {RaidRules.RaidSealFragmentCost} fragments.");
-        var bases = await itemBases.GetItemBasesByIdsAsync([tier.RaidSealItemId], cancellationToken);
-        if (!bases.TryGetValue(tier.RaidSealItemId, out var raidSealBase))
-            throw new InvalidOperationException($"Raid Seal item '{tier.RaidSealItemId}' was not found.");
-        await inventory.AddItemsToInventory(
-            characterId,
-            [inventoryItemFactory.Create(raidSealBase, 1, characterId)],
-            ItemAcquisitionSources.RaidSealAssembly,
-            cancellationToken);
-        await db.SaveChangesAsync(cancellationToken);
-        var owned = await inventoryRepository.GetInventoryQuantityAsync(characterId, tier.RaidSealItemId, cancellationToken);
-        var fragments = await inventoryRepository.GetInventoryQuantityAsync(characterId, tier.RaidSealFragmentItemId, cancellationToken);
-        return RaidOperationResult<RaidSealAssemblyDto>.Success(new RaidSealAssemblyDto(boss.Id, tier.Tier, tier.RaidSealItemId, owned, fragments));
-    }
-
     public async Task<RaidTrophyVendorDto?> GetTrophyVendorAsync(
         Guid characterId,
         string raidBossId,
@@ -1152,7 +1088,6 @@ public sealed class RaidService(
         {
             run.Status = RaidRunStatus.Cancelled;
             run.CancelledAt = timeProvider.GetUtcNow();
-            await RefundRaidSealAsync(run, cancellationToken);
         }
         else
         {
@@ -1375,28 +1310,6 @@ public sealed class RaidService(
         run.SimulationLeaseUntil = timeProvider.GetUtcNow();
         run.RowVersion++;
         await db.SaveChangesAsync(cancellationToken);
-    }
-
-    private async Task RefundRaidSealAsync(RaidRun run, CancellationToken cancellationToken)
-    {
-        if (run.RaidSealRefunded)
-            return;
-        var tier = ResolvePinnedTier(run);
-        var bases = await itemBases.GetItemBasesByIdsAsync([tier.RaidSealItemId], cancellationToken);
-        if (!bases.TryGetValue(tier.RaidSealItemId, out var raidSealBase))
-            throw new InvalidOperationException($"Raid Seal item '{tier.RaidSealItemId}' was not found for refund.");
-        await inventory.AddItemsToInventory(
-            run.RaidSealOwnerCharacterId,
-            [inventoryItemFactory.Create(raidSealBase, 1, run.RaidSealOwnerCharacterId)],
-            ItemAcquisitionSources.RaidSealRefund,
-            run.Id,
-            cancellationToken);
-        await stateSync.InvalidateCharacterScopeAsync(
-            run.RaidSealOwnerCharacterId,
-            StateSyncScopes.Inventory,
-            "RaidSealRefunded",
-            cancellationToken);
-        run.RaidSealRefunded = true;
     }
 
     private async Task<Eligibility> GetEligibilityAsync(

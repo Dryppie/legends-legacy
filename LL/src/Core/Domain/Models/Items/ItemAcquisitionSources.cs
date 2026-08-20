@@ -20,7 +20,5 @@ public static class ItemAcquisitionSources
     public const string LootGeneratedEvent = "loot-generated-event";
     public const string AdminCompensation = "admin-compensation";
     public const string RaidReward = "raid-reward";
-    public const string RaidSealAssembly = "raid-seal-assembly";
-    public const string RaidSealRefund = "raid-seal-refund";
     public const string RaidTrophyVendor = "raid-trophy-vendor";
 }

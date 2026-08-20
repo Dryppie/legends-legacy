@@ -14,7 +14,6 @@ public sealed record RaidBossSummaryDto(
     bool IsUnlocked,
     string? LockReason,
     int OpenRaidCount,
-    int OwnedRaidSealCount,
     bool RewardReducedThisWeek,
     Guid? ActiveRaidId,
     IReadOnlyList<RaidBossTierSummaryDto> Tiers,
@@ -25,10 +24,6 @@ public sealed record RaidBossTierSummaryDto(
     int LaneSlots,
     int MinimumRoster,
     int SignupWindowHours,
-    string RaidSealItemId,
-    string RaidSealFragmentItemId,
-    int RaidSealFragmentCost,
-    int OwnedRaidSealFragments,
     RaidRecommendedWingPowerDto RecommendedWingPower);
 
 public sealed record RaidRecommendedWingPowerDto(
@@ -235,13 +230,6 @@ public sealed record RaidRewardDto(
     DateTimeOffset ClaimedAt);
 
 public sealed record RaidRewardItemDto(string ItemId, int Quantity);
-
-public sealed record RaidSealAssemblyDto(
-    string RaidBossId,
-    int Tier,
-    string RaidSealItemId,
-    int OwnedRaidSealCount,
-    int FragmentsRemaining);
 
 public sealed record RaidTrophyVendorDto(
     string RaidBossId,

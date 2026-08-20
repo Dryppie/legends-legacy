@@ -110,22 +110,6 @@ export class RaidsComponent implements OnChanges {
       });
   }
 
-  assemble(): void {
-    const tier = this.currentTier();
-    if (!tier || this.action()) return;
-    this.action.set('assemble');
-    this.raids
-      .assembleRaidSeal(this.raidBoss.id, tier.tier)
-      .pipe(finalize(() => this.action.set(null)))
-      .subscribe({
-        next: () => {
-          this.changed.emit();
-          this.load();
-        },
-        error: (error) => this.error.set(this.errorMessage(error)),
-      });
-  }
-
   purchase(itemId: string): void {
     if (this.action()) return;
     this.action.set(`purchase-${itemId}`);

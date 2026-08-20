@@ -1,10 +1,10 @@
 {
   "title": "Raids Guide",
-  "lastReviewed": "2026-08-19",
+  "lastReviewed": "2026-08-20",
   "sections": [
     {
       "heading": "Rallying a raid",
-      "body": "Raid bosses are permanent regional encounters. Spend the matching Raid Seal to create a public raid, or join an existing muster. A character can participate in only one active raid at a time, and each account can occupy only one place in a raid."
+      "body": "Raid bosses are permanent regional encounters. Create a public raid for free, or join an existing muster. A character can participate in only one active raid at a time, and each account can occupy only one place in a raid."
     },
     {
       "heading": "The three wings",
@@ -13,10 +13,6 @@
     {
       "heading": "Resolution and rewards",
       "body": "After commencement the three battles resolve in the background from the saved character snapshots. Return to the raid page to see the outcome and claim trophies and materials. Your first reward from a particular raid boss each week is the full payout; later completions pay a reduced amount."
-    },
-    {
-      "heading": "Raid Seals",
-      "body": "Raid Seals open raids and are assembled from boss-specific Raid Seal Fragments at the raid site. If a muster expires before commencement, its Raid Seal is returned to the leader."
     }
   ]
 }

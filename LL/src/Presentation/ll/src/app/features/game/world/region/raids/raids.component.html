@@ -112,28 +112,6 @@
             </button>
           </div>
 
-          <div class="entry-cost">
-            <div class="entry-cost-heading">
-              <span class="eyebrow">Entry cost</span>
-              <strong>{{ tier.ownedRaidSealFragments }}/{{ tier.raidSealFragmentCost }} fragments</strong>
-            </div>
-            <h4>Raid Seal</h4>
-            <p>Assemble one from fragments. Only the raid leader consumes a seal.</p>
-            <progress
-              [value]="tier.ownedRaidSealFragments"
-              [max]="tier.raidSealFragmentCost"
-              aria-label="Raid Seal fragment progress"
-            ></progress>
-            <button
-              type="button"
-              class="secondary full-width"
-              (click)="assemble()"
-              [disabled]="tier.ownedRaidSealFragments < tier.raidSealFragmentCost || !!action()"
-            >
-              Assemble Raid Seal
-            </button>
-          </div>
-
           <div class="raid-actions">
             <a
               *ngIf="raidBoss.activeRaidId"
@@ -146,9 +124,9 @@
               type="button"
               class="full-width"
               (click)="create()"
-              [disabled]="!raidBoss.isUnlocked || raidBoss.ownedRaidSealCount < 1 || !!raidBoss.activeRaidId || !!action()"
+              [disabled]="!raidBoss.isUnlocked || !!raidBoss.activeRaidId || !!action()"
             >
-              Create raid · {{ raidBoss.ownedRaidSealCount }} Raid Seal{{ raidBoss.ownedRaidSealCount === 1 ? '' : 's' }}
+              {{ action() === 'create' ? 'Creating raid...' : 'Create raid' }}
             </button>
             <button
               *ngIf="raidBoss.developmentToolsEnabled"
@@ -175,7 +153,7 @@
 
           <p *ngIf="loading()" class="loading-state">Loading recruiting raids…</p>
           <div *ngIf="!loading() && openRaids().length === 0" class="ll-empty-state">
-            No raids are recruiting. Bring a Raid Seal to lead one{{ raidBoss.developmentToolsEnabled ? ', or create a local test raid above' : '' }}.
+            No raids are recruiting. Create one to begin mustering{{ raidBoss.developmentToolsEnabled ? ', or create a local test raid above' : '' }}.
           </div>
 
           <article *ngFor="let run of openRaids()" class="open-raid">

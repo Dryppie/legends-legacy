@@ -170,7 +170,7 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.Quests.Commands.SelectQuestChoice.SelectQuestChoiceCommand),
             typeof(global::Application.UseCases.Quests.Commands.StartQuestEncounter.StartQuestEncounterCommand));
 
-        Register(profiles, [StateSyncScopes.Inventory], [StateSyncScopes.Raids],
+        Register(profiles, [], [StateSyncScopes.Raids],
             typeof(global::Application.UseCases.Raids.CreateRaidCommand),
             typeof(global::Application.UseCases.Raids.CreateDevelopmentRaidCommand),
             typeof(global::Application.UseCases.Raids.JoinRaidCommand),
@@ -181,9 +181,10 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.Raids.AssignRaidWingCommand),
             typeof(global::Application.UseCases.Raids.Commands.UpdateRaidParties.UpdateRaidPartiesCommand),
             typeof(global::Application.UseCases.Raids.FillRaidWithDevelopmentCharactersCommand),
-            typeof(global::Application.UseCases.Raids.CommenceRaidCommand),
+            typeof(global::Application.UseCases.Raids.CommenceRaidCommand));
+
+        Register(profiles, [StateSyncScopes.Inventory], [StateSyncScopes.Raids],
             typeof(global::Application.UseCases.Raids.ClaimRaidRewardsCommand),
-            typeof(global::Application.UseCases.Raids.AssembleRaidSealCommand),
             typeof(global::Application.UseCases.Raids.PurchaseRaidTrophyVendorItemCommand));
 
         Register(profiles, [StateSyncScopes.Soulstones, StateSyncScopes.Inventory, StateSyncScopes.Quests], [],

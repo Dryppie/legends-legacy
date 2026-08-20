@@ -159,7 +159,7 @@ export class RaidPageComponent implements OnInit, OnDestroy {
     if (
       this.action() ||
       !window.confirm(
-        'Cancel this raid and return its Raid Seal to the player who created it?',
+        'Cancel this raid? All participants will be removed from the muster.',
       )
     )
       return;

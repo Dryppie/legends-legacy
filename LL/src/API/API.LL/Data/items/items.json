@@ -1,49 +1,5 @@
 [
   {
-    "id": "raid_seal_fragment_hives_abyss",
-    "name": "Hive Raid Seal Fragment",
-    "description": "A chitin fragment used to assemble a Raid Seal for The Hive's Abyss.",
-    "itemType": "Resource",
-    "rarity": "Uncommon",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "raid_seal_hives_abyss",
-    "name": "Hive Raid Seal",
-    "description": "Consumed by a raid leader to muster an assault on The Hive's Abyss.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "raid_seal_fragment_sanguine_horror",
-    "name": "Sanguine Raid Seal Fragment",
-    "description": "A blood-dark fragment used to assemble a Raid Seal for the Sanguine Horror.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "raid_seal_sanguine_horror",
-    "name": "Sanguine Raid Seal",
-    "description": "Consumed by a raid leader to muster an assault on the Sanguine Horror.",
-    "itemType": "Resource",
-    "rarity": "Epic",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
     "id": "advancement_stone",
     "name": "Advancement Stone",
     "description": "A dungeon reward used for future character and gear advancement.",

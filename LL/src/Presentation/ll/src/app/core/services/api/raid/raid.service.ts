@@ -36,10 +36,6 @@ export interface RaidBossTierSummary {
   laneSlots: number;
   minimumRoster: number;
   signupWindowHours: number;
-  raidSealItemId: string;
-  raidSealFragmentItemId: string;
-  raidSealFragmentCost: number;
-  ownedRaidSealFragments: number;
   recommendedWingPower: RaidRecommendedWingPower;
 }
 
@@ -53,7 +49,6 @@ export interface RaidBossSummary {
   isUnlocked: boolean;
   lockReason: string | null;
   openRaidCount: number;
-  ownedRaidSealCount: number;
   rewardReducedThisWeek: boolean;
   activeRaidId: string | null;
   tiers: RaidBossTierSummary[];
@@ -259,14 +254,6 @@ export interface RaidReward {
   claimedAt: string;
 }
 
-export interface RaidSealAssembly {
-  raidBossId: string;
-  tier: number;
-  raidSealItemId: string;
-  ownedRaidSealCount: number;
-  fragmentsRemaining: number;
-}
-
 export interface RaidTrophyVendorItem {
   id: string;
   name: string;
@@ -433,16 +420,6 @@ export class RaidService {
 
   claim(raidRunId: string): Observable<RaidReward> {
     return this.api.post(`raids/${raidRunId}/claim`);
-  }
-
-  assembleRaidSeal(
-    raidBossId: string,
-    tier: number,
-  ): Observable<RaidSealAssembly> {
-    return this.api.post(
-      `raids/bosses/${encodeURIComponent(raidBossId)}/assemble-raid-seal`,
-      { tier },
-    );
   }
 
   getTrophyVendor(raidBossId: string): Observable<RaidTrophyVendor | null> {

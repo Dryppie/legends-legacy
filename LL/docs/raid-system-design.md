@@ -42,21 +42,21 @@ frame playback is stored per wing and available after resolution.
 
 ### What already exists to build on
 
-| Need                                     | Existing thing it reuses                                                                                                       |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Raids panel on the World Map             | `region.component.html` `<section class="activity-panel raids">`, now populated from the raid API                             |
-| Raid-site component                      | `features/game/world/region/raids/raids.component.ts` — open raids, creation, joining, and Raid Seal assembly                  |
-| Region DTO                               | `shared/models/Dtos/regionDto.ts` → lightweight raid-boss map metadata                                                         |
-| Commented-out domain hook                | `Core/Domain/Models/Regions/Region.cs` → `// ICollection<Raid> Raids`                                                          |
-| Public lobby + signup + approval         | `TowerRally` / `TowerRallyApplication` / `TowerRallyParticipant`                                                               |
-| Frozen participants                      | `CharacterSnapshot`, `ICharacterSnapshotService.CreateAsync`                                                                   |
-| N-vs-M tick combat                       | `FastCombatEngine.Run(friendly, hostile, …)`                                                                                   |
-| Boss authoring & scaling                 | `tower-floors.json` schema + `WorldTowerGuardianScaling.Apply`                                                                 |
-| Worker resolution + replay               | `TowerAttempt` leases, `TowerCombatPlayback` / `TowerCombatPlaybackArtifact`                                                   |
-| Entry cost pattern                       | `DungeonDefinition.EntryCosts` + sigil assembly                                                                                |
-| Broadcast to everyone                    | `GameHub` + `Audience.World()` + outbox consumer                                                                               |
-| Rewards                                  | `rewards/reward-tables.json` + `IRewardRoller`                                                                                 |
-| Once-per-week-per-character reward locks | `TowerEchoClear`                                                                                                               |
+| Need                                     | Existing thing it reuses                                                                          |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Raids panel on the World Map             | `region.component.html` `<section class="activity-panel raids">`, now populated from the raid API |
+| Raid-site component                      | `features/game/world/region/raids/raids.component.ts` — open raids, free creation, and joining    |
+| Region DTO                               | `shared/models/Dtos/regionDto.ts` → lightweight raid-boss map metadata                            |
+| Commented-out domain hook                | `Core/Domain/Models/Regions/Region.cs` → `// ICollection<Raid> Raids`                             |
+| Public lobby + signup + approval         | `TowerRally` / `TowerRallyApplication` / `TowerRallyParticipant`                                  |
+| Frozen participants                      | `CharacterSnapshot`, `ICharacterSnapshotService.CreateAsync`                                      |
+| N-vs-M tick combat                       | `FastCombatEngine.Run(friendly, hostile, …)`                                                      |
+| Boss authoring & scaling                 | `tower-floors.json` schema + `WorldTowerGuardianScaling.Apply`                                    |
+| Worker resolution + replay               | `TowerAttempt` leases, `TowerCombatPlayback` / `TowerCombatPlaybackArtifact`                      |
+| Entry cost pattern                       | `DungeonDefinition.EntryCosts` + sigil assembly                                                   |
+| Broadcast to everyone                    | `GameHub` + `Audience.World()` + outbox consumer                                                  |
+| Rewards                                  | `rewards/reward-tables.json` + `IRewardRoller`                                                    |
+| Once-per-week-per-character reward locks | `TowerEchoClear`                                                                                  |
 
 `CombatMode.Raid` (=3), `RaidEncounterSourceContext(Guid RaidRunId, int PhaseIndex, string StageKey)`
 and `RaidCombatOrchestrationRequest(Guid RaidRunId, Guid RaidPartyId, DateTimeOffset Now)` already
@@ -115,17 +115,16 @@ visible locked raid is aspirational and teaches that the content exists.
 
 ## 2. Vocabulary
 
-| Term        | Meaning                                                             | Code shape                        |
-| ----------- | ------------------------------------------------------------------- | --------------------------------- |
-| **raid boss** | A regional raid boss. Content, not state. Permanent map fixture.    | `RaidBossDefinition` (JSON)        |
-| **Raid**    | One player-created instance: a roster, three wings, one resolution. | `RaidRun` aggregate (`RaidRunId`) |
-| **Leader**  | The player who created the raid. Sorts the roster, starts it.       | `RaidRun.LeaderCharacterId`       |
-| **Signup**  | A request to join, freezing a snapshot.                             | `RaidSignup`                      |
-| **Wing**    | One of three sub-forces. 1:1 with a lane.                           | `RaidWing` (`RaidPartyId`)        |
-| **Lane**    | Vanguard / Flank / Ward — what a wing attacks.                      | `RaidLane` enum, → `StageKey`     |
-| **Muster**  | The recruiting phase.                                               | `RaidRunStatus.Mustering`         |
-| **Raid Seal** | The consumable key the leader spends to create a raid.            | Inventory item                    |
-| **Trophy**  | Bounded raid currency.                                              | New currency                      |
+| Term          | Meaning                                                             | Code shape                        |
+| ------------- | ------------------------------------------------------------------- | --------------------------------- |
+| **raid boss** | A regional raid boss. Content, not state. Permanent map fixture.    | `RaidBossDefinition` (JSON)       |
+| **Raid**      | One player-created instance: a roster, three wings, one resolution. | `RaidRun` aggregate (`RaidRunId`) |
+| **Leader**    | The player who created the raid. Sorts the roster, starts it.       | `RaidRun.LeaderCharacterId`       |
+| **Signup**    | A request to join, freezing a snapshot.                             | `RaidSignup`                      |
+| **Wing**      | One of three sub-forces. 1:1 with a lane.                           | `RaidWing` (`RaidPartyId`)        |
+| **Lane**      | Vanguard / Flank / Ward — what a wing attacks.                      | `RaidLane` enum, → `StageKey`     |
+| **Muster**    | The recruiting phase.                                               | `RaidRunStatus.Mustering`         |
+| **Trophy**    | Bounded raid currency.                                              | New currency                      |
 
 > **Naming check:** do not call the boss a "Warden" — `TowerFloorType.Warden` already exists and the
 > collision will be confusing in code and in the UI. "raid boss" is used throughout this document;
@@ -137,7 +136,7 @@ visible locked raid is aspirational and teaches that the content exists.
 
 ```
    ┌─ CREATE ────────────────────────────────────────────────────────────┐
-   │  Player spends a Raid Seal at a raid boss site on the World Map.     │
+   │  Player creates a free raid at a raid boss site on the World Map.    │
    │  Picks tier. Raid appears publicly in that raid boss's raid list.    │
    │  Creator becomes Leader. Signup window opens (default 24h).        │
    └──────────────────────────────┬──────────────────────────────────────┘
@@ -165,7 +164,7 @@ visible locked raid is aspirational and teaches that the content exists.
 ```
 
 **Auto-expiry.** If the leader never presses Commence, the raid auto-resolves at the end of the
-signup window with whatever assignment exists, or auto-cancels (refunding the Raid Seal) if fewer than
+signup window with whatever assignment exists, or auto-cancels if fewer than
 the minimum roster signed up. A leader going offline must not strand a dozen people's snapshots.
 This is the single most important reliability rule in the design.
 
@@ -404,26 +403,19 @@ than a mechanic to specify. If playtesting shows Vanguard outcomes are too rando
 
 ## 8. Costs, cooldowns and anti-abuse
 
-### 8.1 The Raid Seal — the leader's cost
+### 8.1 Free raid creation
 
-Creating a raid consumes one **Raid Seal**, held by the leader only. Signing up is free — charging
-participants would suppress the roster, which is the resource the design actually needs.
-
-Raid Seals follow the sigil pattern exactly (`DungeonDefinition.EntryCosts` +
-`SigilAssemblyCost` + `sigil-assembly.json`): they drop from tier-appropriate dungeons and areas,
-and can be assembled from **Raid Seal Fragments**. This makes leading a raid an earned act, gives
-raid boss-tier progression a material gate, and reuses a system players already understand.
-
-Suggested: Tier I Raid Seal = 20 fragments; Tier II = 40; Tier III = 70. Refunded in full on
-auto-cancel (insufficient roster), not refunded on a Repelled outcome — losing must cost something.
+Creating and joining a raid are free. The system already limits a character to one active raid and
+one led raid, while the server caps the number of open musters per boss. These direct constraints
+control lobby spam without introducing an entry currency or punishing the player who volunteers to lead.
 
 ### 8.2 Participation locks
 
 - **One active raid per character** (`Mustering` or `Resolving`) — the Tower's
   `ActiveRallyStatuses` check, verbatim in spirit.
 - **One slot per account per raid** — blocks alt-stacking a roster.
-- **One raid led at a time per character** — blocks a player farming Raid Seals into a dozen
-  simultaneous raids they never resolve.
+- **One raid led at a time per character** — blocks a player opening a dozen simultaneous raids they
+  never resolve.
 - **Global cap on open raids per raid boss** (e.g. 20), oldest-expiring shown first, so the map list
   stays readable on a busy server.
 
@@ -553,7 +545,6 @@ long tail.
       "laneSlots": 3,
       "minimumRoster": 3,
       "signupWindowHours": 24,
-      "raidSealItemId": "raid_seal_hives_abyss",
       "recommendedWingPower": { "vanguard": 210, "flank": 150, "ward": 160 },
       "tickBudget": { "vanguard": 6000, "flank": 3000, "ward": 4000 },
 
@@ -568,9 +559,7 @@ long tail.
           "penetration": 5.0,
           "regeneration": 3.0
         },
-        "variants": [
-          { "creatureId": "…ant_king", "spawnChancePercent": 8 }
-        ],
+        "variants": [{ "creatureId": "…ant_king", "spawnChancePercent": 8 }],
         "maxReinforceOffensePercent": 40,
         "maxWardBreakPercent": 50,
         "tauntThreatBonus": 100,
@@ -720,7 +709,7 @@ Commands under `Core/Application/UseCases/Raids/Commands/`:
 `CreateRaidCommand`, `JoinRaidCommand`, `LeaveRaidCommand`, `RefreshRaidSnapshotCommand`,
 `AssignRaidWingCommand`, `UpdateRaidPartiesCommand`, `PreviewRaidBattlePlanCommand` (query — persists nothing),
 `CommenceRaidCommand`, `ResolveRaidCommand` (worker), `ClaimRaidRewardsCommand`,
-`CancelRaidCommand`, `AssembleRaidSealCommand`, `TransferRaidLeadershipCommand`.
+`CancelRaidCommand`, `TransferRaidLeadershipCommand`.
 
 Endpoints, following `POST /api/v1/<feature>/<action>`:
 
@@ -741,7 +730,6 @@ POST /api/v1/raids/{id}/claim
 GET  /api/v1/raids/{id}
 GET  /api/v1/raids/{id}/lanes/{lane}/playback
 GET  /api/v1/raids/active                    → this character's current raid
-POST /api/v1/raids/bosses/{id}/assemble-raid-seal
 ```
 
 Realtime — add to `GameRealtimeEventNames`, dispatch via the outbox to `Audience.World()` for
@@ -809,7 +797,7 @@ source context.")` for `RaidEncounterSourceContext`. Implement that branch prope
 **Phase 1 — MVP (shipped).** One Tier I raid boss in Shenic. Create / sign up / assign three wings / commence.
 Three-lane resolution with `ReinforcementPenalty` and `WardBreak`. Graded outcome. Lane-fair
 contribution and payout. Authored rewards + Trophies. World Map Raids panel populated and clickable.
-Raid Seal + fragment assembly. Weekly reward cap. Auto-expiry with Raid Seal refunds. Implement the
+Free raid creation. Weekly reward cap. Auto-expiry for invalid musters. Implement the
 `CombatantFactory` raid branch and extract the snapshot→combatant service.
 
 **Phase 2 — Depth (shipped).** Battle Plan preview (§6). Per-wing playback. Tier II + a second raid boss in
@@ -830,7 +818,7 @@ raiding, in-fight player control, seasons.
 | Risk                                          | Mitigation                                                                                                                                                                                                                                                    |
 | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Not enough players sign up on a small server  | `minimumRoster` is a third of max; under-strength raids are allowed and hard. All three wings must be staffed. Tier I is sized for 3.                                                                                                                         |
-| Leader goes offline and strands the roster    | Auto-resolve a valid roster or auto-cancel and refund its Raid Seal when the signup window closes.                                                                                                                                                            |
+| Leader goes offline and strands the roster    | Auto-resolve a valid roster or auto-cancel when the signup window closes.                                                                                                                                                                                     |
 | Allocation feels like a guess                 | The Battle Plan preview is the answer. If it slips, raids feel like a lottery — protect it in scope.                                                                                                                                                          |
 | Players resent being assigned the boring wing | Lane-fair contribution (§9.1) + 70% floor payout. All lanes weighted equally by construction.                                                                                                                                                                 |
 | Toxic leaders excluding people                | Signups are first-come and public; a leader can't kick after commence. Consider capping how many signups a leader may decline per raid if it becomes a problem.                                                                                               |
@@ -849,7 +837,7 @@ raiding, in-fight player control, seasons.
 3. **Every raid uses exactly three lanes.** Vanguard, Flank, and Ward are fixed parts of the system's
    identity and its UI.
 4. **Leadership has no payout multiplier.** Contribution remains lane-fair. A transferred leader can
-   manage the raid, while cancellation refunds the Raid Seal to the character who originally spent it.
+   manage or cancel the raid without transferring or refunding an entry resource.
 5. **Signup windows are authored per tier.** Current content uses 18–24 hours. Fill-rate telemetry
    should inform later content changes.
 6. **Raid boss regions follow the dungeon content convention.** JSON owns the numeric primary region;
@@ -874,7 +862,7 @@ and `TauntThreatBonus` · `CharacterSnapshot` + `ICharacterSnapshotService.Creat
 `GetJoinEligibilityAsync` locks · `TowerAttempt` lease pattern ·
 `TowerCombatPlayback` / `TowerCombatPlaybackArtifact` · `TowerEchoClear` weekly reward lock ·
 `WorldTowerService.GetWeekKey` ISO week · `tower-floors.json` boss schema ·
-`WorldTowerGuardianScaling.Apply` · `DungeonDefinition.EntryCosts` + `sigil-assembly.json` ·
+`WorldTowerGuardianScaling.Apply` ·
 `DungeonReadinessService` Wilson-interval readiness · `DungeonPowerAnalyzer` +
 `CanonicalEquipmentBuildFactory` · `DungeonPendingRewardWriter` / `DungeonRunRewardClaimer` ·
 `IRewardRoller` + `reward-tables.json` · `GameHub` + `Audience.World()` + outbox consumers ·
@@ -885,11 +873,11 @@ and `TauntThreatBonus` · `CharacterSnapshot` + `ICharacterSnapshotService.Creat
 raid domain models, EF configs, DbSets and migrations · JSON raid-boss and Trophy-vendor catalogs with
 startup validation · the `CombatantFactory` raid branch and shared `ISnapshotCombatantBuilder` ·
 three-lane resolution and lane-fair, summon-aware contribution · Battle Plan previews · leased
-resolution worker and Brotli playback artifacts · Raid Seal assembly · persisted, version-gated
+resolution worker and Brotli playback artifacts · free raid creation · persisted, version-gated
 `RaidPowerCalibrationWorker` recommendations · World Map rail, muster/result UI, routes and state-sync
 invalidation · Trophy vendor and raid blueprint families · aggregate and per-boss speed leaderboards ·
-first-kill titles and world-chat announcements · explicit cancellation and leadership transfer with
-refund ownership preserved · Tier II/III and cross-region raid-boss content.
+first-kill titles and world-chat announcements · explicit cancellation and leadership transfer ·
+Tier II/III and cross-region raid-boss content.
 Raid muster additionally includes a bench-first, exact-slot three-party layout with click/drag
 placement, distribution and auto-balance controls, plus atomic server-side layout validation.
 

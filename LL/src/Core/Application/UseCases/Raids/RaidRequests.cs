@@ -30,7 +30,6 @@ public sealed record PreviewRaidBattlePlanQuery(Guid CharacterId, Guid RaidRunId
 [NonTransactional]
 public sealed record CommenceRaidCommand(Guid CharacterId, Guid RaidRunId) : ICommand<Response<RaidRunDto>>;
 public sealed record ClaimRaidRewardsCommand(Guid CharacterId, Guid RaidRunId) : ICommand<Response<RaidRewardDto>>;
-public sealed record AssembleRaidSealCommand(Guid CharacterId, string RaidBossId, int Tier) : ICommand<Response<RaidSealAssemblyDto>>;
 public sealed record PurchaseRaidTrophyVendorItemCommand(Guid CharacterId, string RaidBossId, string ItemId, int Quantity) : ICommand<Response<RaidTrophyPurchaseDto>>;
 
 public sealed class GetRaidBossesQueryHandler(IRaidService raids) : IRequestHandler<GetRaidBossesQuery, IReadOnlyList<RaidBossSummaryDto>>
@@ -183,12 +182,6 @@ public sealed class ClaimRaidRewardsCommandHandler(IRaidService raids) : RaidCom
 {
     public async Task<Response<RaidRewardDto>> Handle(ClaimRaidRewardsCommand request, CancellationToken cancellationToken) =>
         ToResponse(await Raids.ClaimAsync(request.CharacterId, request.RaidRunId, cancellationToken));
-}
-
-public sealed class AssembleRaidSealCommandHandler(IRaidService raids) : RaidCommandHandler<AssembleRaidSealCommand, RaidSealAssemblyDto>(raids), IRequestHandler<AssembleRaidSealCommand, Response<RaidSealAssemblyDto>>
-{
-    public async Task<Response<RaidSealAssemblyDto>> Handle(AssembleRaidSealCommand request, CancellationToken cancellationToken) =>
-        ToResponse(await Raids.AssembleRaidSealAsync(request.CharacterId, request.RaidBossId, request.Tier, cancellationToken));
 }
 
 public sealed class PurchaseRaidTrophyVendorItemCommandHandler(IRaidService raids) : RaidCommandHandler<PurchaseRaidTrophyVendorItemCommand, RaidTrophyPurchaseDto>(raids), IRequestHandler<PurchaseRaidTrophyVendorItemCommand, Response<RaidTrophyPurchaseDto>>

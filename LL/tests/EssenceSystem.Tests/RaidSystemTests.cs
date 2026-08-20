@@ -82,7 +82,6 @@ public sealed class RaidSystemTests
                 "Corpse Golem"
             });
         var tiers = bosses.SelectMany(x => x.Tiers).ToArray();
-        Assert.All(tiers, tier => Assert.Equal(RaidRules.RaidSealFragmentCost, tier.RaidSealFragmentCost));
         var referencedCreatures = tiers.SelectMany(tier => tier.Flank.Adds
             .Concat(tier.Ward.Guards)
             .Select(x => x.CreatureId)
@@ -99,10 +98,14 @@ public sealed class RaidSystemTests
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         Assert.All(tiers, tier =>
         {
-            Assert.Contains(tier.RaidSealItemId, itemIds!);
-            Assert.Contains(tier.RaidSealFragmentItemId, itemIds!);
             Assert.All(tier.Rewards.GuaranteedItems, reward => Assert.Contains(reward.ItemId, itemIds!));
+            Assert.DoesNotContain(
+                tier.Rewards.GuaranteedItems,
+                reward => reward.ItemId.Contains("raid_seal", StringComparison.OrdinalIgnoreCase));
         });
+
+        Assert.DoesNotContain(itemIds!, itemId =>
+            itemId!.Contains("raid_seal", StringComparison.OrdinalIgnoreCase));
 
         var vendor = new JsonRaidTrophyVendorCatalog(
             configuration,
@@ -166,7 +169,8 @@ public sealed class RaidSystemTests
 
         var run = db.Model.FindEntityType(typeof(RaidRun));
         Assert.NotNull(run);
-        Assert.NotNull(run.FindProperty(nameof(RaidRun.RaidSealOwnerCharacterId)));
+        Assert.Null(run.FindProperty("RaidSealOwnerCharacterId"));
+        Assert.Null(run.FindProperty("RaidSealRefunded"));
         Assert.Contains(run.GetIndexes(), index =>
             PropertyNames(index).SequenceEqual(["Status", "PlaybackEndsAt"]));
 
@@ -249,7 +253,6 @@ public sealed class RaidSystemTests
                 tier,
                 new JsonSerializerOptions(JsonSerializerDefaults.Web)),
             LeaderCharacterId = characters[0].Id,
-            RaidSealOwnerCharacterId = characters[0].Id,
             Status = RaidRunStatus.Mustering,
             CreatedAt = DateTimeOffset.UtcNow,
             SignupClosesAt = DateTimeOffset.UtcNow.AddHours(1)
@@ -367,7 +370,6 @@ public sealed class RaidSystemTests
                 tier,
                 new JsonSerializerOptions(JsonSerializerDefaults.Web)),
             LeaderCharacterId = leader.Id,
-            RaidSealOwnerCharacterId = leader.Id,
             Status = RaidRunStatus.Mustering,
             CreatedAt = DateTimeOffset.UtcNow,
             SignupClosesAt = DateTimeOffset.UtcNow.AddHours(1)
@@ -415,7 +417,7 @@ public sealed class RaidSystemTests
     }
 
     [Fact]
-    public async Task Development_raid_creation_bypasses_seal_and_prior_tier_without_refunding_one()
+    public async Task Development_raid_creation_bypasses_prior_tier_requirement()
     {
         await using var db = CreateDbContext();
         var user = AppUser.Guest();
@@ -473,8 +475,6 @@ public sealed class RaidSystemTests
         Assert.Equal(tierTwo.Tier, result.Value!.Tier);
         Assert.True(result.Value.DevelopmentToolsEnabled);
         var run = await db.RaidRuns.AsNoTracking().SingleAsync();
-        Assert.True(run.RaidSealRefunded);
-        Assert.Equal(character.Id, run.RaidSealOwnerCharacterId);
         var channelSnapshot = Assert.IsType<RaidChatChannelSnapshotPayload>(
             Assert.Single(outbox.Payloads.OfType<RaidChatChannelSnapshotPayload>()));
         Assert.Equal([character.Id], channelSnapshot.MemberCharacterIds);
@@ -585,7 +585,6 @@ public sealed class RaidSystemTests
             RaidBossId = "raid-boss.test",
             Tier = 1,
             LeaderCharacterId = participantId,
-            RaidSealOwnerCharacterId = participantId,
             Status = status,
             CreatedAt = DateTimeOffset.UtcNow,
             SignupClosesAt = DateTimeOffset.UtcNow,
@@ -707,7 +706,6 @@ public sealed class RaidSystemTests
             RaidBossId = boss.Id,
             Tier = 1,
             LeaderCharacterId = Guid.NewGuid(),
-            RaidSealOwnerCharacterId = Guid.NewGuid(),
             Status = RaidRunStatus.Settled,
             Outcome = RaidOutcome.Slain,
             CreatedAt = now.AddDays(-1),
@@ -721,7 +719,6 @@ public sealed class RaidSystemTests
             RaidBossId = boss.Id,
             Tier = 1,
             LeaderCharacterId = leaderId,
-            RaidSealOwnerCharacterId = leaderId,
             Status = RaidRunStatus.Playback,
             Outcome = RaidOutcome.Slain,
             CreatedAt = now,
@@ -826,7 +823,6 @@ public sealed class RaidSystemTests
             raidPowerRecommendations: null!,
             snapshots: snapshots!,
             powerRatings: powerRatings!,
-            inventoryRepository: null!,
             inventory: null!,
             inventoryItemFactory: null!,
             itemBases: null!,

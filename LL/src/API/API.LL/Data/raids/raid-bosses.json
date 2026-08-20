@@ -15,9 +15,6 @@
           "laneSlots": 3,
           "minimumRoster": 3,
           "signupWindowHours": 24,
-          "raidSealItemId": "raid_seal_hives_abyss",
-          "raidSealFragmentItemId": "raid_seal_fragment_hives_abyss",
-          "raidSealFragmentCost": 50,
           "recommendedWingPower": { "vanguard": 210, "flank": 150, "ward": 160 },
           "tickBudget": { "vanguard": 6000, "flank": 3000, "ward": 4000 },
           "boss": {
@@ -55,8 +52,7 @@
             "repelledTrophies": 20,
             "guaranteedItems": [
               { "itemId": "soul_dust", "quantity": 25 },
-              { "itemId": "item.monster_core.lesser", "quantity": 2 },
-              { "itemId": "raid_seal_fragment_hives_abyss", "quantity": 5 }
+              { "itemId": "item.monster_core.lesser", "quantity": 2 }
             ]
           }
         },
@@ -65,9 +61,6 @@
           "laneSlots": 4,
           "minimumRoster": 6,
           "signupWindowHours": 24,
-          "raidSealItemId": "raid_seal_hives_abyss",
-          "raidSealFragmentItemId": "raid_seal_fragment_hives_abyss",
-          "raidSealFragmentCost": 50,
           "recommendedWingPower": { "vanguard": 390, "flank": 300, "ward": 320 },
           "tickBudget": { "vanguard": 6000, "flank": 3400, "ward": 4400 },
           "boss": {
@@ -106,8 +99,7 @@
             "repelledTrophies": 36,
             "guaranteedItems": [
               { "itemId": "soul_dust", "quantity": 45 },
-              { "itemId": "item.monster_core.greater", "quantity": 2 },
-              { "itemId": "raid_seal_fragment_hives_abyss", "quantity": 8 }
+              { "itemId": "item.monster_core.greater", "quantity": 2 }
             ]
           }
         },
@@ -116,9 +108,6 @@
           "laneSlots": 5,
           "minimumRoster": 9,
           "signupWindowHours": 24,
-          "raidSealItemId": "raid_seal_hives_abyss",
-          "raidSealFragmentItemId": "raid_seal_fragment_hives_abyss",
-          "raidSealFragmentCost": 50,
           "recommendedWingPower": { "vanguard": 620, "flank": 480, "ward": 510 },
           "tickBudget": { "vanguard": 6000, "flank": 3800, "ward": 4800 },
           "boss": {
@@ -157,8 +146,7 @@
             "repelledTrophies": 60,
             "guaranteedItems": [
               { "itemId": "soul_dust", "quantity": 70 },
-              { "itemId": "item.monster_core.primal", "quantity": 2 },
-              { "itemId": "raid_seal_fragment_hives_abyss", "quantity": 12 }
+              { "itemId": "item.monster_core.primal", "quantity": 2 }
             ]
           }
         }
@@ -179,9 +167,6 @@
           "laneSlots": 4,
           "minimumRoster": 6,
           "signupWindowHours": 24,
-          "raidSealItemId": "raid_seal_sanguine_horror",
-          "raidSealFragmentItemId": "raid_seal_fragment_sanguine_horror",
-          "raidSealFragmentCost": 50,
           "recommendedWingPower": { "vanguard": 440, "flank": 350, "ward": 370 },
           "tickBudget": { "vanguard": 6000, "flank": 3600, "ward": 4500 },
           "boss": {
@@ -211,8 +196,7 @@
             "repelledTrophies": 42,
             "guaranteedItems": [
               { "itemId": "soul_dust", "quantity": 50 },
-              { "itemId": "item.monster_core.greater", "quantity": 3 },
-              { "itemId": "raid_seal_fragment_sanguine_horror", "quantity": 8 }
+              { "itemId": "item.monster_core.greater", "quantity": 3 }
             ]
           }
         },
@@ -221,9 +205,6 @@
           "laneSlots": 5,
           "minimumRoster": 9,
           "signupWindowHours": 24,
-          "raidSealItemId": "raid_seal_sanguine_horror",
-          "raidSealFragmentItemId": "raid_seal_fragment_sanguine_horror",
-          "raidSealFragmentCost": 50,
           "recommendedWingPower": { "vanguard": 690, "flank": 540, "ward": 570 },
           "tickBudget": { "vanguard": 6000, "flank": 4000, "ward": 5000 },
           "boss": {
@@ -253,8 +234,7 @@
             "repelledTrophies": 68,
             "guaranteedItems": [
               { "itemId": "soul_dust", "quantity": 80 },
-              { "itemId": "item.monster_core.primal", "quantity": 3 },
-              { "itemId": "raid_seal_fragment_sanguine_horror", "quantity": 12 }
+              { "itemId": "item.monster_core.primal", "quantity": 3 }
             ]
           }
         }

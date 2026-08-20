@@ -2,8 +2,7 @@ namespace Domain.Models.Raids;
 
 public static class RaidRules
 {
-    public const int Version = 1;
-    public const int RaidSealFragmentCost = 50;
+    public const int Version = 2;
 }
 
 public sealed class RaidBossCatalogDocument
@@ -30,9 +29,6 @@ public sealed class RaidBossTierDefinition
     public int LaneSlots { get; init; }
     public int MinimumRoster { get; init; }
     public int SignupWindowHours { get; init; } = 24;
-    public string RaidSealItemId { get; init; } = string.Empty;
-    public string RaidSealFragmentItemId { get; init; } = string.Empty;
-    public int RaidSealFragmentCost { get; init; } = RaidRules.RaidSealFragmentCost;
     public RaidRecommendedWingPowerDefinition RecommendedWingPower { get; init; } = new();
     public RaidTickBudgetDefinition TickBudget { get; init; } = new();
     public RaidBossCombatDefinition Boss { get; init; } = new();

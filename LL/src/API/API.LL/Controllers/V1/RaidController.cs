@@ -19,7 +19,6 @@ public sealed class RaidController : BaseController
     public sealed record RaidPartyAssignmentRequest(Guid CharacterId, RaidLane? Lane, int? WingSlotIndex);
     public sealed record UpdateRaidPartiesRequest(IReadOnlyList<RaidPartyAssignmentRequest> Assignments);
     public sealed record TransferRaidLeadershipRequest(Guid CharacterId);
-    public sealed record AssembleRaidSealRequest(int Tier);
     public sealed record PurchaseTrophyVendorItemRequest(string ItemId, int Quantity = 1);
 
     [HttpGet("bosses")]
@@ -166,12 +165,6 @@ public sealed class RaidController : BaseController
         Response.Headers.ContentEncoding = bundle.ContentEncoding;
         return File(bundle.Bytes, bundle.ContentType);
     }
-
-    [HttpPost("bosses/{raidBossId}/assemble-raid-seal")]
-    public async Task<ActionResult<Response<RaidSealAssemblyDto>>> AssembleRaidSeal(
-        string raidBossId,
-        AssembleRaidSealRequest request) =>
-        await Mediator.Send(new AssembleRaidSealCommand(CurrentCharacterGuid, raidBossId, request.Tier));
 
     [HttpGet("bosses/{raidBossId}/vendor")]
     public async Task<ActionResult<RaidTrophyVendorDto?>> GetTrophyVendor(string raidBossId) =>

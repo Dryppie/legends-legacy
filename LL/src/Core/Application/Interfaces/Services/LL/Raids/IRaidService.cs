@@ -37,7 +37,6 @@ public interface IRaidService
     Task<RaidPlaybackDto?> GetPlaybackAsync(Guid characterId, Guid raidRunId, RaidLane lane, CancellationToken cancellationToken);
     Task<RaidPlaybackBundleContentDto?> GetPlaybackBundleAsync(Guid characterId, Guid raidRunId, RaidLane lane, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRewardDto>> ClaimAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken);
-    Task<RaidOperationResult<RaidSealAssemblyDto>> AssembleRaidSealAsync(Guid characterId, string raidBossId, int tier, CancellationToken cancellationToken);
     Task<RaidTrophyVendorDto?> GetTrophyVendorAsync(Guid characterId, string raidBossId, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidTrophyPurchaseDto>> PurchaseTrophyVendorItemAsync(Guid characterId, string raidBossId, string itemId, int quantity, CancellationToken cancellationToken);
     Task ProcessDueRaidsAsync(string workerId, int batchSize, CancellationToken cancellationToken);
