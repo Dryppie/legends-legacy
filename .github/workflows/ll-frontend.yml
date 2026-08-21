@@ -8,10 +8,11 @@ on:
       - "releases/**"
     paths:
       - "LL/src/Presentation/ll/**"
+      - "LL/src/Core/Application/WebSockets/Contracts/StateSyncScopes.cs"
 
 env:
   buildConfiguration: Release
-  dockerfilePath: "LL/src/Presentation/ll/"
+  dockerfilePath: "LL/src/"
   major: 0
   minor: 1
   patch: ${{ github.run_number }}
@@ -118,7 +119,7 @@ jobs:
             --build-arg name=ll `
             --build-arg BUILD_VERSION=${{ needs.setup.outputs.version }} `
             --tag ghcr.io/${{ env.OWNER_LC }}/ll-frontend:${{ needs.setup.outputs.TAG }} `
-            LL/src/Presentation/ll
+            LL/src
 
       - name: Helm Package and Push
         uses: ./.github/actions/build-and-push-helm

@@ -1,0 +1,16 @@
+**
+
+!Presentation/
+!Presentation/ll/
+!Presentation/ll/**
+
+Presentation/ll/.angular/
+Presentation/ll/coverage/
+Presentation/ll/dist/
+Presentation/ll/node_modules/
+
+!Core/
+!Core/Application/
+!Core/Application/WebSockets/
+!Core/Application/WebSockets/Contracts/
+!Core/Application/WebSockets/Contracts/StateSyncScopes.cs
