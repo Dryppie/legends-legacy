@@ -35,6 +35,7 @@ public sealed class RealtimeRaidGameEventOutboxConsumer(
                 payload.Event,
                 payload.Status,
                 payload.SignupCount,
+                payload.Version,
                 payload.OccurredAtUtc),
             nameof(RealtimeRaidGameEventOutboxConsumer),
             cancellationToken);

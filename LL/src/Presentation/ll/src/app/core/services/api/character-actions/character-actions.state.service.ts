@@ -333,18 +333,24 @@ export class CharacterActionsStateService {
     // Doing this in the response callback could clear a successor action.
     this.clear();
 
+    let stopSucceeded = false;
     this.actionsService
       .stop()
       .pipe(
+        tap(() => {
+          stopSucceeded = true;
+        }),
         catchError((err) => {
           console.error('Failed to stop action', err);
+          this.pendingStartAfterStop = null;
+          this.refreshCurrentAction(true);
           return of(null);
         }),
         finalize(() => {
           this._stoppingAction.set(false);
           const pendingStart = this.pendingStartAfterStop;
           this.pendingStartAfterStop = null;
-          if (pendingStart) {
+          if (stopSucceeded && pendingStart) {
             this.startAction(pendingStart.type, pendingStart.payload);
           }
         }),
@@ -482,7 +488,7 @@ export class CharacterActionsStateService {
     this._showAction.set(false);
   }
 
-  refreshCurrentAction(): void {
+  refreshCurrentAction(restartPolling = false): void {
     const requestVersion = this.resetVersion;
 
     this.trackActionRefresh(
@@ -495,7 +501,8 @@ export class CharacterActionsStateService {
       ),
     ).subscribe((action) => {
       if (requestVersion !== this.resetVersion) return;
-      this.applyActionUpdate(action);
+      this.applyActionUpdate(action, restartPolling);
+      if (restartPolling) this.startPolling(action);
     });
   }
 
@@ -530,7 +537,10 @@ export class CharacterActionsStateService {
     this.applyActionUpdate(action);
   }
 
-  private applyActionUpdate(action: CharacterActionDto | null): void {
+  private applyActionUpdate(
+    action: CharacterActionDto | null,
+    authoritative = false,
+  ): void {
     if (
       (action?.hasMoreDueWork ?? action?.hasPendingCombatResolution) &&
       this._idleCombatError() === null
@@ -543,11 +553,18 @@ export class CharacterActionsStateService {
     const currentKey = this.getActionUpdateKey(current);
     const nextKey = this.getActionUpdateKey(action);
 
-    if (currentKey && nextKey && currentKey === nextKey) {
+    if (!authoritative && currentKey && nextKey && currentKey === nextKey) {
       return;
     }
 
-    if (current && action && this.isOlderUpdate(current, action)) return;
+    if (
+      !authoritative &&
+      current &&
+      action &&
+      this.isOlderUpdate(current, action)
+    ) {
+      return;
+    }
 
     this._currentAction.set(action);
     if (action) {

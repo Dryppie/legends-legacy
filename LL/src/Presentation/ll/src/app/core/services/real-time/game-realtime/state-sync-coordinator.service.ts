@@ -25,6 +25,7 @@ interface StateSyncRegistration {
   retryTimeoutId?: number;
   lastError?: unknown;
   generation: number;
+  acceptsMutationResponses: boolean;
 }
 
 export type StateSyncRefreshResult =
@@ -66,6 +67,7 @@ export class StateSyncCoordinator {
   private reconcilePromise?: Promise<void>;
   private reconcileRetryAttempt = 0;
   private reconcileRetryTimeoutId?: number;
+  private sessionGeneration = 0;
   private initialized = false;
   private lastBlurAt?: number;
   private readonly longSuspensionMs = 5 * 60_000;
@@ -121,6 +123,7 @@ export class StateSyncCoordinator {
   }
 
   dispose(): void {
+    this.sessionGeneration += 1;
     if (this.initialized) {
       window.removeEventListener('blur', this.handleBlur);
       window.removeEventListener('focus', this.handleFocus);
@@ -146,11 +149,13 @@ export class StateSyncCoordinator {
       this.reconcileRetryTimeoutId = undefined;
     }
     this.reconcileRetryAttempt = 0;
+    this.reconcilePromise = undefined;
     for (const scopedRegistrations of this.registrations.values()) {
       for (const registration of scopedRegistrations.values()) {
         if (registration.retryTimeoutId !== undefined) {
           window.clearTimeout(registration.retryTimeoutId);
         }
+        registration.generation += 1;
         registration.lastRefreshRevision = 0;
         registration.inFlight = false;
         registration.retryAttempt = 0;
@@ -166,6 +171,7 @@ export class StateSyncCoordinator {
     key: string,
     refresh: StateSyncRefresh,
     shouldRefresh: () => boolean = () => true,
+    acceptsMutationResponses = key === scope,
   ): () => void {
     let scoped = this.registrations.get(scope);
     if (!scoped) {
@@ -186,6 +192,7 @@ export class StateSyncCoordinator {
       inFlight: false,
       retryAttempt: 0,
       generation: 0,
+      acceptsMutationResponses,
     };
     scoped.set(key, registration);
     this.publishStatus();
@@ -222,6 +229,16 @@ export class StateSyncCoordinator {
   acceptInvalidation(event: StateInvalidated, updateId?: string): void {
     if (!this.updateDeduper.shouldProcess(updateId)) return;
     this.acceptRevision(event.scope, event.revision);
+  }
+
+  acceptInvalidations(
+    revisions: Readonly<Record<StateSyncScope, number>>,
+    updateId?: string,
+  ): void {
+    if (!this.updateDeduper.shouldProcess(updateId)) return;
+    for (const [scope, revision] of Object.entries(revisions)) {
+      this.acceptRevision(scope, revision);
+    }
   }
 
   acceptDomainVersion(
@@ -262,19 +279,25 @@ export class StateSyncCoordinator {
     }
 
     const service = this.injector.get(StateSyncService);
-    this.reconcilePromise = firstValueFrom(service.getCheckpoint())
+    const generation = this.sessionGeneration;
+    const reconcilePromise = firstValueFrom(service.getCheckpoint())
       .then((checkpoint) => {
+        if (generation !== this.sessionGeneration) return;
         this.reconcileRetryAttempt = 0;
         this.acceptCheckpoint(checkpoint);
       })
       .catch((error) => {
+        if (generation !== this.sessionGeneration) return;
         console.warn('State checkpoint reconciliation failed', error);
         this.scheduleReconcileRetry();
       })
       .finally(() => {
-        this.reconcilePromise = undefined;
+        if (this.reconcilePromise === reconcilePromise) {
+          this.reconcilePromise = undefined;
+        }
       });
-    return this.reconcilePromise;
+    this.reconcilePromise = reconcilePromise;
+    return reconcilePromise;
   }
 
   private scheduleReconcileRetry(): void {
@@ -388,6 +411,7 @@ export class StateSyncCoordinator {
     const registrations = this.registrations.get(scope);
     if (registrations) {
       for (const registration of registrations.values()) {
+        if (!registration.acceptsMutationResponses) continue;
         registration.lastRefreshRevision = Math.max(
           registration.lastRefreshRevision,
           revision,

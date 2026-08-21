@@ -1,5 +1,5 @@
 {
-  "version": 8,
+  "version": 9,
   "fallbackProfileId": "content-foundation-v1",
   "foundation": {
     "areasPerRegion": 10,
@@ -7,6 +7,57 @@
     "regionJump": 1.12
   },
   "profiles": [
+    {
+      "id": "gated-region-one-v1",
+      "targetWinRateBasisPoints": 8500,
+      "healthCurve": {
+        "model": "Polynomial",
+        "baseMultiplier": 2.0,
+        "growthPerStep": 0.005,
+        "exponent": 2.494443472572,
+        "linearAfterStep": 11,
+        "linearGrowthPerStep": 0.240873150087,
+        "postTutorialBonus": 0.28,
+        "postTutorialFloorEndStep": 9
+      },
+      "offenseCurve": {
+        "model": "Polynomial",
+        "baseMultiplier": 2.2,
+        "growthPerStep": 0.005,
+        "exponent": 2.920505135607,
+        "linearAfterStep": 11,
+        "linearGrowthPerStep": 0.835593870808,
+        "postTutorialBonus": 2.3,
+        "postTutorialFloorEndStep": 9
+      },
+      "defenseCurve": {
+        "model": "Polynomial",
+        "baseMultiplier": 1.3,
+        "growthPerStep": 0.07,
+        "exponent": 1.1487450048,
+        "linearAfterStep": 11,
+        "postTutorialBonus": 0.1,
+        "postTutorialFloorEndStep": 9
+      },
+      "resistanceCurve": {
+        "model": "Polynomial",
+        "baseMultiplier": 1.3,
+        "growthPerStep": 0.07,
+        "exponent": 1.1487450048,
+        "linearAfterStep": 11,
+        "postTutorialBonus": 0.1,
+        "postTutorialFloorEndStep": 9
+      },
+      "attackSpeedGrowthPerStep": 0.10,
+      "penetrationGrowthPerStep": 0.12,
+      "softDefenseGrowthPerStep": 0.04,
+      "critChancePerStep": 0.10,
+      "critDamagePerStep": 0.25,
+      "critChanceCap": 45.0,
+      "critDamageCap": 200.0,
+      "maximumStepIncrease": 0.29,
+      "maximumFirstStepIncrease": 1.1
+    },
     {
       "id": "unified-global-v1",
       "targetWinRateBasisPoints": 8500,
@@ -89,7 +140,7 @@
   "regions": [
     {
       "regionKey": "shenic",
-      "profileId": "unified-global-v1",
+      "profileId": "gated-region-one-v1",
       "startingGlobalStep": 1,
       "startingCombatRating": 47,
       "endingCombatRating": 180,

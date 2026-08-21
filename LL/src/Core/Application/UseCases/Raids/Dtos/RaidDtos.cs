@@ -60,6 +60,7 @@ public sealed record RaidHistoryEntryDto(
 
 public sealed record RaidRunDto(
     Guid Id,
+    long Version,
     string RaidBossId,
     string RaidBossName,
     string ImagePath,

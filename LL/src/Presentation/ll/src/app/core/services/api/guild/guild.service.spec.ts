@@ -7,15 +7,15 @@ describe('GuildService response ownership', () => {
   let service: GuildService;
 
   beforeEach(() => {
-    api = jasmine.createSpyObj<ApiService>('ApiService', ['post']);
-    api.post.and.returnValue(of({}));
+    api = jasmine.createSpyObj<ApiService>('ApiService', ['postVersioned']);
+    api.postVersioned.and.returnValue(of({ data: {}, domainVersions: {} }));
     service = new GuildService(api);
   });
 
   it('marks complete building responses as authoritative for buildings only', () => {
     service.constructBuilding('GuildHall' as never).subscribe();
 
-    expect(api.post).toHaveBeenCalledOnceWith(
+    expect(api.postVersioned).toHaveBeenCalledOnceWith(
       'guild/constructBuilding',
       'GuildHall',
       { stateSyncScopesHandledByResponse: ['guild-buildings'] },
@@ -25,7 +25,7 @@ describe('GuildService response ownership', () => {
   it('marks complete mission responses as authoritative for missions only', () => {
     service.claimOrderReward('order-id').subscribe();
 
-    expect(api.post).toHaveBeenCalledOnceWith(
+    expect(api.postVersioned).toHaveBeenCalledOnceWith(
       'guild/claimOrderReward',
       'order-id',
       { stateSyncScopesHandledByResponse: ['guild-missions'] },
@@ -35,7 +35,7 @@ describe('GuildService response ownership', () => {
   it('keeps adjacent character domains reconciled after a shop purchase', () => {
     service.purchaseShopItem('item-key').subscribe();
 
-    expect(api.post).toHaveBeenCalledOnceWith(
+    expect(api.postVersioned).toHaveBeenCalledOnceWith(
       'guild/purchaseShopItem',
       'item-key',
       { stateSyncScopesHandledByResponse: ['guild-shop', 'inventory'] },

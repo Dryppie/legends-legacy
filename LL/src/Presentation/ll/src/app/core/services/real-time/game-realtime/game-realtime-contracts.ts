@@ -38,6 +38,7 @@ export const gameRealtimeSignalEventNames = {
 export const gameRealtimeEventNames = {
   lootReceived: 'LootReceived',
   stateInvalidated: 'StateInvalidated',
+  stateInvalidations: 'StateInvalidations',
   ...gameRealtimeSignalEventNames,
 } as const;
 
@@ -57,6 +58,12 @@ export interface LootReceived {
   source: string;
   location?: string | null;
   grantId?: string | null;
+}
+
+export interface StateInvalidations {
+  characterId: string;
+  revisions: Readonly<Record<string, number>>;
+  reason: string;
 }
 
 export interface AccountAccessChanged {

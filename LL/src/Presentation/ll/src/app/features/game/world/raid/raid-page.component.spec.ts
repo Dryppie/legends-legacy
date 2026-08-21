@@ -6,7 +6,7 @@ import {
 } from '@angular/core/testing';
 import { WritableSignal, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import {
   RaidLane,
   RaidPlaybackBundle,
@@ -51,7 +51,10 @@ describe('RaidPageComponent playback', () => {
         { provide: Router, useValue: {} },
         {
           provide: GameRealtimeConnection,
-          useValue: { setRaidSubscription: () => Promise.resolve() },
+          useValue: {
+            setRaidSubscription: () => Promise.resolve(),
+            reconnectCount,
+          },
         },
         {
           provide: GameRealtimeEventRegistry,
@@ -195,6 +198,34 @@ describe('RaidPageComponent playback', () => {
 
     expect(raids.getRaid).toHaveBeenCalledOnceWith('raid-run');
   }));
+
+  it('does not refetch a realtime echo already represented by the accepted response', fakeAsync(() => {
+    component.raid.set({ ...raid('Mustering'), version: 8 });
+    raids.getRaid.calls.reset();
+
+    raidUpdated.set({
+      updateId: 'raid-update-current',
+      payload: { raidRunId: 'raid-run', version: 8 },
+    });
+    TestBed.flushEffects();
+    tick();
+
+    expect(raids.getRaid).not.toHaveBeenCalled();
+  }));
+
+  it('does not let a delayed load replace a newer accepted raid response', () => {
+    const delayedLoad = new Subject<RaidRun | null>();
+    const accepted = raid('Mustering');
+    raids.getRaid.and.returnValue(delayedLoad.asObservable());
+
+    component.load(false);
+    (component as unknown as { acceptRaid(value: RaidRun): void }).acceptRaid(
+      accepted,
+    );
+    delayedLoad.next(raid('Settled'));
+
+    expect(component.raid()).toBe(accepted);
+  });
 
   function requestedLanes(): RaidLane[] {
     return raids.getPlaybackBundle.calls.allArgs().map((args) => args[1]);

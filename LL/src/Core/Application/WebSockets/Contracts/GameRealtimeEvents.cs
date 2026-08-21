@@ -21,6 +21,11 @@ public sealed record StateInvalidated(
     long Revision,
     string Reason) : GameRealtimeEvent;
 
+public sealed record StateInvalidations(
+    Guid CharacterId,
+    IReadOnlyDictionary<string, long> Revisions,
+    string Reason) : GameRealtimeEvent;
+
 public sealed record AccountAccessChanged(
     Guid AccountId,
     string Reason,
@@ -175,6 +180,7 @@ public sealed record RaidUpdated(
     string Event,
     string Status,
     int SignupCount,
+    long Version,
     DateTimeOffset OccurredAtUtc) : GameRealtimeEvent;
 
 public sealed record RaidDirectoryUpdated(
@@ -183,6 +189,7 @@ public sealed record RaidDirectoryUpdated(
     string Event,
     string Status,
     int SignupCount,
+    long Version,
     DateTimeOffset OccurredAtUtc) : GameRealtimeEvent;
 
 public sealed record WorldTowerCombatFrameUpdated(

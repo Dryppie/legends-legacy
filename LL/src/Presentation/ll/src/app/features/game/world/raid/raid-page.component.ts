@@ -89,6 +89,7 @@ export class RaidPageComponent implements OnInit, OnDestroy {
     'FinalAssault',
   ];
   private raidRunId = '';
+  private raidLoadEpoch = 0;
   private readonly realtimeDeduper = new RealtimeSignalDeduper();
   private lastReconnectCount = this.realtime.reconnectCount();
   private playbackTimer: ReturnType<typeof setInterval> | null = null;
@@ -125,6 +126,18 @@ export class RaidPageComponent implements OnInit, OnDestroy {
         return;
       }
 
+      const eventVersion = envelope.payload.version;
+      const acceptedVersion = this.raid()?.version;
+      if (
+        typeof eventVersion === 'number' &&
+        Number.isSafeInteger(eventVersion) &&
+        typeof acceptedVersion === 'number' &&
+        Number.isSafeInteger(acceptedVersion) &&
+        acceptedVersion >= eventVersion
+      ) {
+        return;
+      }
+
       this.load(false);
     });
 
@@ -138,6 +151,7 @@ export class RaidPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.route.paramMap.pipe(takeUntil(this.destroyed)).subscribe((params) => {
+      this.raidLoadEpoch += 1;
       this.raidRunId = params.get('raidId') ?? '';
       void this.realtime
         .setRaidSubscription(this.raidRunId || null)
@@ -167,19 +181,37 @@ export class RaidPageComponent implements OnInit, OnDestroy {
 
   load(showLoading = true): void {
     if (!this.raidRunId) return;
+    const expectedRaidRunId = this.raidRunId;
+    const requestEpoch = ++this.raidLoadEpoch;
     if (showLoading) this.loading.set(true);
     this.raids
-      .getRaid(this.raidRunId)
-      .pipe(finalize(() => showLoading && this.loading.set(false)))
+      .getRaid(expectedRaidRunId)
+      .pipe(
+        finalize(() => {
+          if (showLoading && requestEpoch === this.raidLoadEpoch) {
+            this.loading.set(false);
+          }
+        }),
+      )
       .subscribe({
         next: (raid) => {
+          if (
+            requestEpoch !== this.raidLoadEpoch ||
+            expectedRaidRunId !== this.raidRunId
+          ) {
+            return;
+          }
           if (!raid) {
             void this.router.navigate(this.worldPath());
             return;
           }
-          this.acceptRaid(raid);
+          this.acceptRaid(raid, false);
         },
-        error: (error) => this.error.set(this.errorMessage(error)),
+        error: (error) => {
+          if (requestEpoch === this.raidLoadEpoch) {
+            this.error.set(this.errorMessage(error));
+          }
+        },
       });
   }
 
@@ -227,7 +259,7 @@ export class RaidPageComponent implements OnInit, OnDestroy {
           ) {
             void this.router.navigate(this.worldPath());
           } else {
-            this.raid.set(raid);
+            this.acceptRaid(raid);
           }
         },
         error: (error) => this.error.set(this.errorMessage(error)),
@@ -260,7 +292,7 @@ export class RaidPageComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => this.action.set(null)))
       .subscribe({
         next: (raid) => {
-          this.raid.set(raid);
+          this.acceptRaid(raid);
           void this.router.navigate(this.worldPath());
         },
         error: (error) => this.error.set(this.errorMessage(error)),
@@ -589,7 +621,8 @@ export class RaidPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  private acceptRaid(raid: RaidRun): void {
+  private acceptRaid(raid: RaidRun, invalidateLoads = true): void {
+    if (invalidateLoads) this.raidLoadEpoch += 1;
     if (raid.status === 'Resolving' || raid.status === 'Playback')
       this.autoPlaybackRequested = true;
     this.raid.set(raid);

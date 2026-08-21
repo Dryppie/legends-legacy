@@ -327,7 +327,7 @@ export class DungeonStateService {
     ) {
       this.setActiveDungeon(response.activeRun);
       this.setDungeonHub(response.hub);
-      this.realtimeStore.setRewardClaim(
+      this.realtimeStore.addLoot(
         response.claimedLoot,
         undefined,
         'dungeon-reward',

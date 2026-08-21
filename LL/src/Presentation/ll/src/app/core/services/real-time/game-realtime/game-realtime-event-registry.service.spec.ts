@@ -7,6 +7,7 @@ import { GameRealtimeConnection } from './game-realtime-connection.service';
 import { GameRealtimeEnvelope } from './game-realtime-contracts';
 import { GameRealtimeEventRegistry } from './game-realtime-event-registry.service';
 import { GameRealtimeStore } from './game-realtime-store.service';
+import { StateSyncCoordinator } from './state-sync-coordinator.service';
 
 describe('GameRealtimeEventRegistry', () => {
   it('ignores a replayed envelope after reconnect and reports unknown events', () => {
@@ -139,6 +140,61 @@ describe('GameRealtimeEventRegistry', () => {
         'grant-id',
       );
       expect(inventory.applyInventoryGrant).not.toHaveBeenCalled();
+    } finally {
+      (window as any).env = previousEnvironment;
+    }
+  });
+
+  it('applies a batched character invalidation once for every included scope', () => {
+    const events = new Subject<GameRealtimeEnvelope>();
+    const coordinator = jasmine.createSpyObj<StateSyncCoordinator>(
+      'StateSyncCoordinator',
+      ['acceptInvalidations'],
+    );
+
+    TestBed.configureTestingModule({
+      providers: [
+        GameRealtimeEventRegistry,
+        {
+          provide: GameRealtimeConnection,
+          useValue: { events$: events.asObservable() },
+        },
+        {
+          provide: GameRealtimeDiagnostics,
+          useValue: {
+            runHandler: (
+              _envelope: GameRealtimeEnvelope,
+              handler: () => void,
+            ) => handler(),
+            recordDuplicate: () => undefined,
+            recordUnknown: () => undefined,
+          },
+        },
+        { provide: StateSyncCoordinator, useValue: coordinator },
+      ],
+    });
+
+    const previousEnvironment = (window as any).env;
+    (window as any).env = { gameSignalREnabled: 'true' };
+
+    try {
+      const registry = TestBed.inject(GameRealtimeEventRegistry);
+      registry.initialize();
+
+      events.next({
+        updateId: 'expiration-update',
+        event: 'StateInvalidations',
+        payload: {
+          characterId: 'character-id',
+          revisions: { character: 3, inventory: 5 },
+          reason: 'MarketplaceOrdersExpired',
+        },
+      });
+
+      expect(coordinator.acceptInvalidations).toHaveBeenCalledOnceWith(
+        { character: 3, inventory: 5 },
+        'expiration-update',
+      );
     } finally {
       (window as any).env = previousEnvironment;
     }

@@ -234,6 +234,14 @@ public sealed class RaidService(
             : await ToDtoAsync(run, characterId, cancellationToken);
     }
 
+    public Task<bool> CanAccessRaidAsync(
+        Guid characterId,
+        Guid raidRunId,
+        CancellationToken cancellationToken) =>
+        db.RaidSignups.AsNoTracking().AnyAsync(
+            signup => signup.RaidRunId == raidRunId && signup.CharacterId == characterId,
+            cancellationToken);
+
     public async Task<RaidRunDto?> GetActiveRaidAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var raidRunId = await db.RaidSignups.AsNoTracking()
@@ -1666,6 +1674,7 @@ public sealed class RaidService(
                       && !await HasActiveRaidAsync(characterId, run.Id, cancellationToken);
         return new RaidRunDto(
             run.Id,
+            run.RowVersion,
             run.RaidBossId,
             boss?.Name ?? run.RaidBossId,
             boss?.ImagePath ?? string.Empty,
@@ -2015,6 +2024,7 @@ public sealed class RaidService(
                 eventName,
                 run.Status.ToString(),
                 ApprovedSignups(run).Count,
+                run.RowVersion,
                 timeProvider.GetUtcNow()),
             characterId: null,
             accountId: null,

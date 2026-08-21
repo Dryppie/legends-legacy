@@ -17,12 +17,36 @@ public interface IStateSyncService
         string reason,
         CancellationToken cancellationToken = default);
 
+    async Task InvalidateCharacterScopesAsync(
+        Guid characterId,
+        IReadOnlyCollection<string> scopes,
+        string reason,
+        CancellationToken cancellationToken = default)
+    {
+        foreach (var scope in scopes.Distinct(StringComparer.Ordinal))
+        {
+            await InvalidateCharacterScopeAsync(characterId, scope, reason, cancellationToken);
+        }
+    }
+
     Task AdvanceCharacterScopeAsync(
         Guid characterId,
         string scope,
         string reason,
         CancellationToken cancellationToken = default) =>
         InvalidateCharacterScopeAsync(characterId, scope, reason, cancellationToken);
+
+    async Task AdvanceCharacterScopesAsync(
+        Guid characterId,
+        IReadOnlyCollection<string> scopes,
+        string reason,
+        CancellationToken cancellationToken = default)
+    {
+        foreach (var scope in scopes.Distinct(StringComparer.Ordinal))
+        {
+            await AdvanceCharacterScopeAsync(characterId, scope, reason, cancellationToken);
+        }
+    }
 
     Task InvalidateWorldScopeAsync(
         string scope,

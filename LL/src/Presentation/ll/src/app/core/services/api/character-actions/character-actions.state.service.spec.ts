@@ -268,6 +268,20 @@ describe('CharacterActionsStateService', () => {
     expect(polling.start).toHaveBeenCalled();
   });
 
+  it('restores authoritative action state when stopping fails', () => {
+    const activeAction = combatAction();
+    actions.stop.and.returnValue(throwError(() => new Error('offline')));
+    actions.resolveCurrentAction.and.returnValue(of(activeAction));
+    service.applyCurrentActionSnapshot(activeAction);
+
+    service.stopAction();
+
+    expect(actions.resolveCurrentAction).toHaveBeenCalledTimes(1);
+    expect(service.currentAction()).toBe(activeAction);
+    expect(service.currentAction()?.isDeleted).toBeFalse();
+    expect(polling.start).toHaveBeenCalled();
+  });
+
   it('clears the previous idle-combat encounter after Tempering starts', () => {
     const payload = {
       queueId: '8f6cb596-94df-4a84-b6f2-4b4d6384e065',
@@ -311,6 +325,7 @@ describe('CharacterActionsStateService', () => {
     actions.startCombat.and.returnValue(of(startedCombat));
 
     service.startAction(CharacterActionType.Combat, { areaId: 'lumo-ruins' });
+    TestBed.flushEffects();
     flushMicrotasks();
 
     expect(service.currentAction()).toBe(startedCombat);

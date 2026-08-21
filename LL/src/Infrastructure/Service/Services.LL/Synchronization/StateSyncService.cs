@@ -57,6 +57,18 @@ public sealed class StateSyncService(
             cancellationToken);
     }
 
+    public Task InvalidateCharacterScopesAsync(
+        Guid characterId,
+        IReadOnlyCollection<string> scopes,
+        string reason,
+        CancellationToken cancellationToken = default) =>
+        UpdateCharacterScopesAsync(
+            characterId,
+            scopes,
+            reason,
+            publishRealtime: true,
+            cancellationToken);
+
     public Task AdvanceCharacterScopeAsync(
         Guid characterId,
         string scope,
@@ -73,6 +85,18 @@ public sealed class StateSyncService(
             publishRealtime: false,
             cancellationToken);
     }
+
+    public Task AdvanceCharacterScopesAsync(
+        Guid characterId,
+        IReadOnlyCollection<string> scopes,
+        string reason,
+        CancellationToken cancellationToken = default) =>
+        UpdateCharacterScopesAsync(
+            characterId,
+            scopes,
+            reason,
+            publishRealtime: false,
+            cancellationToken);
 
     public Task InvalidateWorldScopeAsync(
         string scope,
@@ -244,6 +268,91 @@ public sealed class StateSyncService(
 
     private static string GetGuildScopeKey(Guid guildId, string scope) =>
         $"guild:{guildId:N}:{scope}";
+
+    private async Task UpdateCharacterScopesAsync(
+        Guid characterId,
+        IReadOnlyCollection<string> scopes,
+        string reason,
+        bool publishRealtime,
+        CancellationToken cancellationToken)
+    {
+        var transactionId = context.CurrentTransaction?.TransactionId ?? Guid.Empty;
+        var pendingScopes = scopes
+            .Where(scope => !string.IsNullOrWhiteSpace(scope))
+            .Distinct(StringComparer.Ordinal)
+            .Select(scope => (Scope: scope, ScopeKey: GetCharacterScopeKey(characterId, scope)))
+            .Where(item => _invalidatedScopes.Add((transactionId, item.ScopeKey)))
+            .ToArray();
+        if (pendingScopes.Length == 0)
+        {
+            return;
+        }
+
+        foreach (var item in pendingScopes)
+        {
+            await context.AcquireStateSyncScopeLockAsync(item.ScopeKey, cancellationToken);
+        }
+
+        var scopeKeys = pendingScopes.Select(item => item.ScopeKey).ToArray();
+        var revisionsByKey = context.StateSyncRevisions.Local
+            .Where(revision => scopeKeys.Contains(revision.ScopeKey, StringComparer.Ordinal))
+            .ToDictionary(revision => revision.ScopeKey, StringComparer.Ordinal);
+        var missingKeys = scopeKeys
+            .Where(scopeKey => !revisionsByKey.ContainsKey(scopeKey))
+            .ToArray();
+        if (missingKeys.Length > 0)
+        {
+            var persisted = await context.StateSyncRevisions
+                .Where(revision => missingKeys.Contains(revision.ScopeKey))
+                .ToListAsync(cancellationToken);
+            foreach (var revision in persisted)
+            {
+                revisionsByKey[revision.ScopeKey] = revision;
+            }
+        }
+
+        var changed = new Dictionary<string, long>(StringComparer.Ordinal);
+        foreach (var item in pendingScopes)
+        {
+            if (!revisionsByKey.TryGetValue(item.ScopeKey, out var revision))
+            {
+                revision = new StateSyncRevision
+                {
+                    ScopeKey = item.ScopeKey,
+                    Revision = 1,
+                    UpdatedAt = timeProvider.GetUtcNow()
+                };
+                context.StateSyncRevisions.Add(revision);
+            }
+            else
+            {
+                revision.Revision++;
+                revision.UpdatedAt = timeProvider.GetUtcNow();
+            }
+
+            _changedRevisions[(characterId, item.Scope)] = revision.Revision;
+            changed[item.Scope] = revision.Revision;
+        }
+
+        if (!publishRealtime)
+        {
+            return;
+        }
+
+        foreach (var scope in changed.Keys)
+        {
+            InvalidationCounter.Add(
+                1,
+                new KeyValuePair<string, object?>("scope", scope),
+                new KeyValuePair<string, object?>("audience", "character"));
+        }
+
+        await realtimeBroadcaster.PublishAsync(
+            new Audience.Character(characterId),
+            new StateInvalidations(characterId, changed, reason),
+            nameof(StateSyncService),
+            cancellationToken);
+    }
 
     private async Task InvalidateAsync(
         string scopeKey,

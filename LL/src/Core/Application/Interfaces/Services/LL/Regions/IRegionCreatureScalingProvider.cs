@@ -53,7 +53,8 @@ public sealed record RegionCombatBalanceProfile(
     double CritDamagePerStep,
     float CritChanceCap,
     float CritDamageCap,
-    double MaximumStepIncrease);
+    double MaximumStepIncrease,
+    double? MaximumFirstStepIncrease = null);
 
 public sealed record RegionCombatGrowthCurve(
     string Model,
@@ -61,7 +62,9 @@ public sealed record RegionCombatGrowthCurve(
     double GrowthPerStep,
     double Exponent,
     int? LinearAfterStep = null,
-    double? LinearGrowthPerStep = null);
+    double? LinearGrowthPerStep = null,
+    double PostTutorialBonus = 0d,
+    int? PostTutorialFloorEndStep = null);
 
 public sealed record RegionCombatBalanceRegion(
     string RegionKey,

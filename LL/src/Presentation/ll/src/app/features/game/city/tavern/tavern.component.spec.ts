@@ -102,7 +102,13 @@ describe('TavernComponent', () => {
 
     expect(
       fixture.componentInstance.categoryBoards.map((option) => option.label),
-    ).toEqual(['Dungeon Mastery', 'Most Dungeon Clears']);
+    ).toEqual([
+      'Dungeon Mastery',
+      'Most Dungeon Clears',
+      'Raid Boss Kills',
+      "Fastest Hive's Abyss",
+      'Fastest Sanguine Horror',
+    ]);
     expect(state.load).toHaveBeenCalledWith('dungeon-mastery');
   });
 

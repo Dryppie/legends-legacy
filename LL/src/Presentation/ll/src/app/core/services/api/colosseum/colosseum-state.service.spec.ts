@@ -50,6 +50,7 @@ describe('ColosseumStateService', () => {
       requiredRankMinRating: 1250,
     });
     const response = createBattleResponse(0, 1250);
+    response.state.status.glory = 149;
     const { service, colosseumApi } = setupStateService({
       market,
       response,

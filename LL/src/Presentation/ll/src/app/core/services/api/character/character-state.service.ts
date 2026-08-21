@@ -48,6 +48,7 @@ export class CharacterStateService {
       'character-summary',
       () => this.synchronizeCharacterSummary(),
       () => !!this.currentCharacterId(),
+      true,
     );
     this.stateSync.register(
       'character-overview',

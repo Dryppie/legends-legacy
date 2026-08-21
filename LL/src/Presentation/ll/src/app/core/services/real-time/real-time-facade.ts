@@ -34,9 +34,8 @@ export class RealTimeFacade {
             this.gameRealtimeRegistry.initialize();
             this.stateSync.initialize();
             this.gameRealtime
-              .connect()
+              .subscribeToWorld()
               .then(async () => {
-                await this.gameRealtime.subscribeToWorld();
                 await this.loadInitialSnapshot();
                 await this.stateSync.reconcile();
                 if ((window as any).__gameSignalRDebug) {
@@ -44,9 +43,12 @@ export class RealTimeFacade {
                     this.gameRealtime.isConnected();
                 }
               })
-              .catch((error) =>
-                console.warn('Failed to connect game realtime', error),
-              )
+              .catch(async (error) => {
+                console.warn('Failed to connect game realtime', error);
+                // HTTP state remains usable while the connection service retries.
+                await this.loadInitialSnapshot();
+                await this.stateSync.reconcile();
+              })
               .finally(() => this.markInitialReady());
           } else {
             this.markInitialReady();

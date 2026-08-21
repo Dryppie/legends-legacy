@@ -13,6 +13,7 @@ import {
   GameRealtimeSignalEventMap,
   LootReceived,
   StateInvalidated,
+  StateInvalidations,
   gameRealtimeEventNames,
   isGameRealtimeSignalEventName,
 } from './game-realtime-contracts';
@@ -137,6 +138,13 @@ export class GameRealtimeEventRegistry {
           envelope.payload as StateInvalidated,
           envelope.updateId,
         );
+    });
+
+    this.addHandler(gameRealtimeEventNames.stateInvalidations, (envelope) => {
+      const payload = envelope.payload as StateInvalidations;
+      this.injector
+        .get(StateSyncCoordinator)
+        .acceptInvalidations(payload.revisions, envelope.updateId);
     });
   }
 

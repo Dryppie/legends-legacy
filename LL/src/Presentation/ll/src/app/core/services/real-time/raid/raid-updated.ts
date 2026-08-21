@@ -4,5 +4,6 @@ export interface RaidUpdated {
   event: string;
   status: string;
   signupCount: number;
+  version?: number;
   occurredAtUtc: string;
 }

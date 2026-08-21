@@ -16,7 +16,10 @@ describe('EventQuestStateService', () => {
       event: { EventQuestChanged: changed },
     };
     const eventBus = { logout: signal(0) };
-    const stateSync = { register: jasmine.createSpy('register') };
+    const stateSync = {
+      register: jasmine.createSpy('register'),
+      activate: jasmine.createSpy('activate'),
+    };
     const domainVersions = {
       isCurrent: jasmine.createSpy('isCurrent').and.returnValue(true),
     };
@@ -70,7 +73,10 @@ describe('EventQuestStateService', () => {
           api as never,
           { event: { EventQuestChanged: signal(null) } } as never,
           { logout: signal(0) } as never,
-          { register: jasmine.createSpy('register') } as never,
+          {
+            register: jasmine.createSpy('register'),
+            activate: jasmine.createSpy('activate'),
+          } as never,
           { isCurrent: () => false } as never,
         ),
     );

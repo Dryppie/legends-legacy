@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import { RaidRun } from '../../../../../core/services/api/raid/raid.service';
+import { ChatService } from '../../../../../core/services/ll-chat/chat-service/chat.service';
 import { RaidPartyBuilderComponent } from './raid-party-builder.component';
 
 describe('RaidPartyBuilderComponent', () => {
@@ -9,6 +11,13 @@ describe('RaidPartyBuilderComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RaidPartyBuilderComponent],
+      providers: [
+        { provide: Router, useValue: { navigate: jasmine.createSpy() } },
+        {
+          provide: ChatService,
+          useValue: { prepareWhisperToName: jasmine.createSpy() },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RaidPartyBuilderComponent);

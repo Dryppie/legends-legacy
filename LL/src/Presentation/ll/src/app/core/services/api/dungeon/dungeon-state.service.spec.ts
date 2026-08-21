@@ -69,7 +69,7 @@ describe('DungeonStateService synchronization', () => {
         { provide: ToastService, useValue: {} },
         {
           provide: GameRealtimeStore,
-          useValue: { setRewardClaim: jasmine.createSpy('setRewardClaim') },
+          useValue: { addLoot: jasmine.createSpy('addLoot') },
         },
         { provide: StateSyncCoordinator, useValue: stateSync },
       ],
@@ -125,9 +125,12 @@ describe('DungeonStateService synchronization', () => {
     expect(
       TestBed.inject(CharacterStateService).applyVersionedCharacter,
     ).toHaveBeenCalled();
-    expect(
-      TestBed.inject(GameRealtimeStore).setRewardClaim,
-    ).toHaveBeenCalledOnceWith([], undefined, 'dungeon-reward', 'Goblin Mines');
+    expect(TestBed.inject(GameRealtimeStore).addLoot).toHaveBeenCalledOnceWith(
+      [],
+      undefined,
+      'dungeon-reward',
+      'Goblin Mines',
+    );
   });
 
   it('does not apply a claim hub older than the observed dungeon version', () => {

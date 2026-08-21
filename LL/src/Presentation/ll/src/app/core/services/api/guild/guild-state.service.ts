@@ -29,6 +29,7 @@ import { GameRealtimeSignalEventName } from '../../real-time/game-realtime/game-
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 import { EquipmentStateService } from '../equipment/equipment-state.service';
+import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
 
 type GuildRealtimeEventName = Extract<
   GameRealtimeSignalEventName,
@@ -155,6 +156,8 @@ export class GuildStateService {
   private buildingRequestId = 0;
   private missionRequestId = 0;
   private shopRequestId = 0;
+  private directoryRequestId = 0;
+  private inviteRequestId = 0;
   private descriptionMutationId = 0;
   private pendingDescription: PendingGuildDescription | null = null;
   private activeMissionViews = 0;
@@ -196,6 +199,7 @@ export class GuildStateService {
     private readonly inventoryState: InventoryStateService,
     private readonly injector: Injector,
     private readonly stateSync: StateSyncCoordinator,
+    private readonly domainVersions: DomainVersionTracker,
   ) {
     this.stateSync.register(
       'guild',
@@ -618,7 +622,16 @@ export class GuildStateService {
       .constructBuilding(buildingType)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (buildings) => {
+        next: (response) => {
+          const buildings = response.data;
+          if (
+            !this.domainVersions.isCurrent(
+              'guild-buildings',
+              response.domainVersions['guild-buildings'],
+            )
+          ) {
+            return;
+          }
           if (buildings.guildId === this._guild()?.id) {
             this.buildingRequestId += 1;
             this._buildings.set(buildings);
@@ -638,7 +651,16 @@ export class GuildStateService {
       .upgradeBuilding(building.id)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (buildings) => {
+        next: (response) => {
+          const buildings = response.data;
+          if (
+            !this.domainVersions.isCurrent(
+              'guild-buildings',
+              response.domainVersions['guild-buildings'],
+            )
+          ) {
+            return;
+          }
           if (buildings.guildId === this._guild()?.id) {
             this.buildingRequestId += 1;
             this._buildings.set(buildings);
@@ -656,7 +678,16 @@ export class GuildStateService {
       .setBuildingTarget(building.definition.type)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (buildings) => {
+        next: (response) => {
+          const buildings = response.data;
+          if (
+            !this.domainVersions.isCurrent(
+              'guild-buildings',
+              response.domainVersions['guild-buildings'],
+            )
+          ) {
+            return;
+          }
           if (buildings.guildId === this._guild()?.id) {
             this.buildingRequestId += 1;
             this._buildings.set(buildings);
@@ -674,7 +705,16 @@ export class GuildStateService {
       .selectMission(optionId)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (missions) => this.setMissionOverviewIfCurrent(missions),
+        next: (response) => {
+          if (
+            this.domainVersions.isCurrent(
+              'guild-missions',
+              response.domainVersions['guild-missions'],
+            )
+          ) {
+            this.setMissionOverviewIfCurrent(response.data);
+          }
+        },
         error: (e) =>
           this._error.set(e.message ?? 'Failed to select guild mission'),
       });
@@ -687,8 +727,15 @@ export class GuildStateService {
       .claimOrderReward(orderId)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (missions) => {
-          this.setMissionOverviewIfCurrent(missions);
+        next: (response) => {
+          if (
+            this.domainVersions.isCurrent(
+              'guild-missions',
+              response.domainVersions['guild-missions'],
+            )
+          ) {
+            this.setMissionOverviewIfCurrent(response.data);
+          }
         },
         error: (e) =>
           this._error.set(e.message ?? 'Failed to claim guild order'),
@@ -702,8 +749,15 @@ export class GuildStateService {
       .claimWeeklyMissionReward()
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (missions) => {
-          this.setMissionOverviewIfCurrent(missions);
+        next: (response) => {
+          if (
+            this.domainVersions.isCurrent(
+              'guild-missions',
+              response.domainVersions['guild-missions'],
+            )
+          ) {
+            this.setMissionOverviewIfCurrent(response.data);
+          }
         },
         error: (e) =>
           this._error.set(
@@ -731,8 +785,15 @@ export class GuildStateService {
       .purchaseShopItem(itemKey)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (response) => {
-          if (response.guildId === this._guild()?.id) {
+        next: (result) => {
+          const response = result.data;
+          if (
+            this.domainVersions.isCurrent(
+              'guild-shop',
+              result.domainVersions['guild-shop'],
+            ) &&
+            response.guildId === this._guild()?.id
+          ) {
             this.shopRequestId += 1;
             this._shop.set(response);
           }
@@ -740,7 +801,6 @@ export class GuildStateService {
             response.inventoryGrantId,
             response.inventoryItemsGranted ?? [],
           );
-          this.auth.refreshCurrentCharacter();
         },
         error: (e) =>
           this._error.set(e.message ?? 'Failed to purchase guild shop item'),
@@ -758,24 +818,39 @@ export class GuildStateService {
   }
 
   private synchronizeDirectory(): Observable<GuildSimple[]> {
+    const requestId = ++this.directoryRequestId;
     return this.service.getAllGuilds().pipe(
       tap({
-        next: (guilds) => this._allGuilds.set(guilds),
-        error: (e) => this._error.set(e.message ?? 'Failed to load guild list'),
+        next: (guilds) => {
+          if (requestId === this.directoryRequestId) {
+            this._allGuilds.set(guilds);
+          }
+        },
+        error: (e) => {
+          if (requestId === this.directoryRequestId) {
+            this._error.set(e.message ?? 'Failed to load guild list');
+          }
+        },
       }),
     );
   }
 
   private synchronizeInvites(): Observable<GuildInvite[]> {
+    const requestId = ++this.inviteRequestId;
     return this.service.getMyInvites().pipe(
       tap({
         next: (invites) => {
+          if (requestId !== this.inviteRequestId) return;
           this._invites.set(invites);
           this.initializeGuildNotificationCount(
             invites.filter((invite: GuildInvite) => invite.isInvite).length,
           );
         },
-        error: (e) => this._error.set(e.message ?? 'Failed to load invites'),
+        error: (e) => {
+          if (requestId === this.inviteRequestId) {
+            this._error.set(e.message ?? 'Failed to load invites');
+          }
+        },
       }),
     );
   }
@@ -1085,6 +1160,7 @@ export class GuildStateService {
     this.buildingRequestId += 1;
     this.missionRequestId += 1;
     this.shopRequestId += 1;
+    this.inviteRequestId += 1;
     this.descriptionMutationId += 1;
     this.pendingDescription = null;
     this.missionsDirty = false;

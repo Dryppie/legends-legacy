@@ -388,12 +388,31 @@ Audited on 2026-08-21: **not ready for removal**. The revision/checkpoint path i
 
 Removal must therefore be a later staged migration: first make every remaining mutation response or semantic event authoritative, remove each scope registration and invalidation writer with coverage, then disable checkpoint/header consumers for at least one monitored release. Only after no runtime readers or writers remain should the API endpoint, middleware, coordinator/interceptor, scope catalog, model, and table be removed. No part of that infrastructure is deleted in this hardening pass.
 
+## P0–P3 hardening status (2026-08-21)
+
+The follow-up hardening pass retained the hybrid architecture and closed the audit's concrete correctness and performance gaps:
+
+- Mutation ownership is projection-specific. A response can acknowledge only registrations that explicitly declare themselves canonical response owners; derived projections remain eligible for reconciliation.
+- Coordinator refresh/reconcile completions are session-generation guarded, and character-scoped stores reset or invalidate pending work when the active character changes.
+- Initial SignalR startup retries with backoff. Reconnect restoration rejoins world, guild, raid, and Tournament Grounds audiences before recovery is announced and before the checkpoint is reconciled. Forbidden audience subscriptions are discarded instead of retried forever.
+- Raid group subscription now verifies that the character can access the raid.
+- Failed optimistic action stops reload authoritative action state and restore polling when the server still owns an active action.
+- Guild building, mission, and shop mutations and RaidRun mutations use versioned authoritative responses with stale-response protection. Guild and Raid query epochs prevent an older GET from replacing a newer accepted response.
+- Guild-shop purchase applies the response's inventory grant without issuing a second manual character refresh; the remaining character invalidation is the single recovery source for response fields that are not returned.
+- RaidRun DTOs and `RaidUpdated` events carry the raid row version. A detailed raid page ignores a semantic echo whose version is already represented by its accepted mutation response, while a newer event and all versionless compatibility events still trigger an authoritative GET.
+- Multi-scope character revision updates are batched behind the same per-scope advisory locks, loaded with one revision query, and emitted as one `StateInvalidations` envelope. Marketplace expiration now sends one private invalidation envelope per affected character instead of separate character and inventory deliveries.
+- Realtime and state-sync trace buffers, payload sizing, handler timing, and the one-second freeze heartbeat are no-ops when the runtime environment is `prod`. The browser debug API remains available in non-production environments.
+- Unused realtime reconnect and store fields were removed. Explicit character-group removal on disconnect was also removed because SignalR owns connection-group cleanup.
+
+Durable revisions remain intentional: response-owned versions still protect against late HTTP responses and participate in reconnect checkpoints. The pass batches multi-scope character work rather than deleting those correctness boundaries. Old rows for retired scope names are harmless and are not deleted automatically; operational cleanup can remove known retired keys after a monitored release. Renaming the remaining abstractions is deferred until every partial-response domain has migrated, avoiding terminology churn while the compatibility path is still active.
+
 ## Verification and rollout notes
 
 - The browser diagnostic is intentionally development-only and keeps at most 100 mutation traces in memory. A follow-up GET is a correlation candidate, not proof of causality; use the attached refresh callback list to distinguish coordinator fan-out from component activity.
 - Realtime browser traces now classify each received envelope as `handled`, `duplicate`, `unknown`, or `failed`, and retain a failure message for handler exceptions. During staged rollout, inspect `window.__gameSignalRDebug.recentEvents()` and treat any `unknown` or `failed` entry as a rollback/investigation signal; duplicates are expected during retry/reconnect replay and should not update state.
 - The API outbox worker already exports `game_event_outbox.delivery_lag`, `game_event_outbox.deliveries.retried`, and `game_event_outbox.deliveries.failed` from the `LegendsLegacy.GameEventOutbox` meter. Alert on sustained delivery lag above five minutes, any increasing failed-delivery count, or a retry-rate step change. The LiveOps operational status exposes pending deliveries, failed deliveries, and the oldest pending timestamp and marks the outbox degraded when failures exist or the oldest delivery is more than five minutes old.
 - Roll out the API and Angular client together in a canary/staging environment. Exercise one character, guild, world, raid, Tournament Grounds, and World Tower audience; verify event-name parity tests, zero unknown/failed browser dispositions, stable duplicate counts after reconnect, and a draining realtime-delivery outbox before widening traffic.
+- For mixed-version rollout, publish the Angular client that understands `StateInvalidations` before the API and worker begin emitting the batched contract. An older client ignores that new event name and would otherwise recover those scopes only at its next checkpoint.
 - The .NET metrics use `System.Diagnostics.Metrics` and require the deployment's existing OpenTelemetry/Meter listener to include `LegendsLegacy.StateSync` before they are exported. No exporter or environment configuration is added here.
 - Include `LegendsLegacy.GameEventOutbox` in that listener as well to export the realtime delivery-lag/retry/failure instruments. Client unknown-name and handler-failure diagnostics are currently local development/staging diagnostics rather than aggregated production telemetry; add a client telemetry sink before relying on them for production alerting.
 - The domain-version header is additive and CORS-exposed. No database migration, external configuration change, deployment, or revision-table removal is part of this pass.

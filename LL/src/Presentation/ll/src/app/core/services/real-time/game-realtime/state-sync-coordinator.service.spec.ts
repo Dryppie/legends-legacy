@@ -1,6 +1,6 @@
 import { Injector } from '@angular/core';
 import { fakeAsync, tick } from '@angular/core/testing';
-import { defer, of, throwError } from 'rxjs';
+import { defer, of, Subject, throwError } from 'rxjs';
 import { StateSyncService } from '../../api/state-sync/state-sync.service';
 import { StateSyncCoordinator } from './state-sync-coordinator.service';
 
@@ -373,6 +373,68 @@ describe('StateSyncCoordinator', () => {
     tick();
 
     expect(refresh).toHaveBeenCalledTimes(1);
+  }));
+
+  it('acknowledges only the projection that owns mutation responses', fakeAsync(() => {
+    const injector = {
+      get: () => ({
+        getCheckpoint: () =>
+          of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),
+      }),
+    } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    const inventoryRefresh = jasmine
+      .createSpy('inventoryRefresh')
+      .and.returnValue(Promise.resolve());
+    const dungeonRefresh = jasmine
+      .createSpy('dungeonRefresh')
+      .and.returnValue(Promise.resolve());
+    coordinator.register('inventory', 'inventory', inventoryRefresh);
+    coordinator.register('inventory', 'dungeons-inventory', dungeonRefresh);
+
+    coordinator.acceptMutationResponse({ inventory: 5 }, true, ['inventory']);
+    tick(51);
+    tick();
+
+    expect(inventoryRefresh).not.toHaveBeenCalled();
+    expect(dungeonRefresh).toHaveBeenCalledTimes(1);
+    expect(coordinator.status()).toContain(
+      jasmine.objectContaining({
+        key: 'inventory',
+        appliedRevision: 5,
+      }),
+    );
+  }));
+
+  it('ignores refresh completion from a disposed session', fakeAsync(() => {
+    const injector = {
+      get: () => ({
+        getCheckpoint: () =>
+          of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),
+      }),
+    } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    const completion = new Subject<void>();
+    coordinator.register('inventory', 'inventory', () => completion);
+
+    coordinator.acceptInvalidation({
+      scope: 'inventory',
+      revision: 5,
+      reason: 'old-session',
+    });
+    tick(51);
+    coordinator.dispose();
+    completion.complete();
+    tick();
+
+    expect(coordinator.latestRevision('inventory')).toBe(0);
+    expect(coordinator.status()[0]).toEqual(
+      jasmine.objectContaining({
+        targetRevision: 0,
+        appliedRevision: 0,
+        refreshing: false,
+      }),
+    );
   }));
 
   it('reconciles a response-owned scope when the store rejects its mutation body', fakeAsync(() => {

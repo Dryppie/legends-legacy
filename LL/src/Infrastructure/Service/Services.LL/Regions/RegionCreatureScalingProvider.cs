@@ -111,30 +111,62 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         int globalStep)
     {
         if (curve.Model.Equals("Foundation", StringComparison.OrdinalIgnoreCase))
-            return curve.BaseMultiplier * Math.Pow(EvaluateFoundation(globalStep), curve.Exponent);
+        {
+            return ApplyPostTutorialBonus(
+                curve,
+                progressionStep,
+                curve.BaseMultiplier * Math.Pow(EvaluateFoundation(globalStep), curve.Exponent));
+        }
 
         if (curve.Model.Equals("Polynomial", StringComparison.OrdinalIgnoreCase))
         {
-            var polynomialStep = curve.LinearAfterStep.HasValue
-                ? Math.Min(progressionStep, curve.LinearAfterStep.Value)
-                : progressionStep;
-            var growth = curve.GrowthPerStep * Math.Pow(polynomialStep, curve.Exponent);
-            if (curve.LinearAfterStep.HasValue && progressionStep > polynomialStep)
-            {
-                var linearGrowthPerStep = curve.LinearGrowthPerStep
-                                          ?? curve.GrowthPerStep
-                                          * curve.Exponent
-                                          * Math.Pow(polynomialStep, curve.Exponent - 1d);
-                growth += (progressionStep - polynomialStep) * linearGrowthPerStep;
-            }
-
-            return curve.BaseMultiplier
-                   * (1d + growth);
+            return ApplyPostTutorialBonus(
+                curve,
+                progressionStep,
+                EvaluatePolynomial(curve, progressionStep));
         }
 
-        return curve.Model.Equals("Exponential", StringComparison.OrdinalIgnoreCase)
+        var result = curve.Model.Equals("Exponential", StringComparison.OrdinalIgnoreCase)
             ? curve.BaseMultiplier * Math.Pow(1d + curve.GrowthPerStep, progressionStep)
             : curve.BaseMultiplier * Math.Pow(1d + curve.GrowthPerStep * progressionStep, curve.Exponent);
+        return ApplyPostTutorialBonus(curve, progressionStep, result);
+    }
+
+    private static double EvaluatePolynomial(
+        RegionCombatGrowthCurve curve,
+        int progressionStep)
+    {
+        var polynomialStep = curve.LinearAfterStep.HasValue
+            ? Math.Min(progressionStep, curve.LinearAfterStep.Value)
+            : progressionStep;
+        var growth = curve.GrowthPerStep * Math.Pow(polynomialStep, curve.Exponent);
+        if (curve.LinearAfterStep.HasValue && progressionStep > polynomialStep)
+        {
+            var linearGrowthPerStep = curve.LinearGrowthPerStep
+                                      ?? curve.GrowthPerStep
+                                      * curve.Exponent
+                                      * Math.Pow(polynomialStep, curve.Exponent - 1d);
+            growth += (progressionStep - polynomialStep) * linearGrowthPerStep;
+        }
+
+        return curve.BaseMultiplier * (1d + growth);
+    }
+
+    private static double ApplyPostTutorialBonus(
+        RegionCombatGrowthCurve curve,
+        int progressionStep,
+        double value)
+    {
+        if (progressionStep <= 0 || curve.PostTutorialBonus <= 0)
+            return value;
+        if (!curve.PostTutorialFloorEndStep.HasValue)
+            return value + curve.PostTutorialBonus;
+
+        if (progressionStep >= curve.PostTutorialFloorEndStep.Value)
+            return value;
+
+        var entryValue = EvaluatePolynomial(curve, 1) + curve.PostTutorialBonus;
+        return Math.Max(value, entryValue);
     }
 
     private double EvaluateFoundation(int globalStep)
@@ -198,7 +230,8 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         profile.CritDamagePerStep,
         profile.CritChanceCap,
         profile.CritDamageCap,
-        profile.MaximumStepIncrease);
+        profile.MaximumStepIncrease,
+        profile.MaximumFirstStepIncrease);
 
     private static RegionCombatGrowthCurve MapCurve(GrowthCurveDocument curve) => new(
         curve.Model,
@@ -206,7 +239,9 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         curve.GrowthPerStep,
         curve.Exponent,
         curve.LinearAfterStep,
-        curve.LinearGrowthPerStep);
+        curve.LinearGrowthPerStep,
+        curve.PostTutorialBonus,
+        curve.PostTutorialFloorEndStep);
 
     private void Validate(RegionCombatBalanceCatalog catalog)
     {
@@ -243,6 +278,7 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
             if (string.IsNullOrWhiteSpace(profile.Id) ||
                 profile.TargetWinRateBasisPoints is <= 0 or > 10_000 ||
                 profile.MaximumStepIncrease < 0 ||
+                profile.MaximumFirstStepIncrease is < 0 ||
                 profile.CritChanceCap is < 0 or > 100 ||
                 profile.CritDamageCap is < 0 or > 500)
             {
@@ -299,10 +335,13 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
                         region.AreaIds.Count));
                 if (previous is not null)
                 {
-                    ValidateStepIncrease(region.RegionKey, "health", previous.HealthMultiplier, current.HealthMultiplier, profile.MaximumStepIncrease);
-                    ValidateStepIncrease(region.RegionKey, "offense", previous.OffenseMultiplier, current.OffenseMultiplier, profile.MaximumStepIncrease);
-                    ValidateStepIncrease(region.RegionKey, "defense", previous.DefenseMultiplier, current.DefenseMultiplier, profile.MaximumStepIncrease);
-                    ValidateStepIncrease(region.RegionKey, "resistance", previous.ResistanceMultiplier, current.ResistanceMultiplier, profile.MaximumStepIncrease);
+                    var maximumStepIncrease = index == 1
+                        ? profile.MaximumFirstStepIncrease ?? profile.MaximumStepIncrease
+                        : profile.MaximumStepIncrease;
+                    ValidateStepIncrease(region.RegionKey, "health", previous.HealthMultiplier, current.HealthMultiplier, maximumStepIncrease);
+                    ValidateStepIncrease(region.RegionKey, "offense", previous.OffenseMultiplier, current.OffenseMultiplier, maximumStepIncrease);
+                    ValidateStepIncrease(region.RegionKey, "defense", previous.DefenseMultiplier, current.DefenseMultiplier, maximumStepIncrease);
+                    ValidateStepIncrease(region.RegionKey, "resistance", previous.ResistanceMultiplier, current.ResistanceMultiplier, maximumStepIncrease);
                 }
                 previous = current;
             }
@@ -350,7 +389,11 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
              !curve.Model.Equals("Polynomial", StringComparison.OrdinalIgnoreCase)) ||
             curve.BaseMultiplier <= 0 || curve.GrowthPerStep < 0 || curve.Exponent <= 0 ||
             curve.LinearAfterStep is <= 0 || curve.LinearGrowthPerStep is < 0 ||
-            curve.LinearGrowthPerStep.HasValue && !curve.LinearAfterStep.HasValue)
+            curve.LinearGrowthPerStep.HasValue && !curve.LinearAfterStep.HasValue ||
+            curve.PostTutorialBonus < 0 || curve.PostTutorialFloorEndStep is <= 1 ||
+            curve.PostTutorialFloorEndStep.HasValue
+            && (curve.PostTutorialBonus <= 0
+                || !curve.Model.Equals("Polynomial", StringComparison.OrdinalIgnoreCase)))
             throw new InvalidOperationException($"{profileId}.{name} is invalid.");
     }
 
@@ -442,6 +485,7 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         public float CritChanceCap { get; set; }
         public float CritDamageCap { get; set; }
         public double MaximumStepIncrease { get; set; }
+        public double? MaximumFirstStepIncrease { get; set; }
     }
 
     private sealed class GrowthCurveDocument
@@ -452,6 +496,8 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         public double Exponent { get; set; }
         public int? LinearAfterStep { get; set; }
         public double? LinearGrowthPerStep { get; set; }
+        public double PostTutorialBonus { get; set; }
+        public int? PostTutorialFloorEndStep { get; set; }
     }
 
     private sealed class RegionDocument

@@ -127,10 +127,12 @@ describe('MarketplaceStateService semantic sequencing', () => {
     });
 
     expect(service.listings()).toEqual([]);
-    expect(stateSync.rejectMutationResponse).toHaveBeenCalledOnceWith(
-      'marketplace',
-      5,
-    );
+    expect(stateSync.acceptInvalidation).toHaveBeenCalledOnceWith({
+      characterId: null,
+      scope: 'marketplace',
+      revision: 5,
+      reason: 'Marketplace semantic sequence gap',
+    });
   });
 
   it('applies a contiguous mutation response using the pre-response coordinator revision', () => {
@@ -173,12 +175,10 @@ describe('MarketplaceStateService semantic sequencing', () => {
 
     expect(applied).toBeFalse();
     expect(service.listings()).toEqual([]);
-    expect(stateSync.acceptInvalidation).toHaveBeenCalledOnceWith({
-      characterId: null,
-      scope: 'marketplace',
-      revision: 5,
-      reason: 'Marketplace semantic sequence gap',
-    });
+    expect(stateSync.rejectMutationResponse).toHaveBeenCalledOnceWith(
+      'marketplace',
+      5,
+    );
   });
 
   it('does not reapply an equal-version event after the mutation response', () => {

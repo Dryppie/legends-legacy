@@ -4,6 +4,7 @@ public static class GameRealtimeEventNames
 {
     public const string LootReceived = nameof(LootReceived);
     public const string StateInvalidated = nameof(StateInvalidated);
+    public const string StateInvalidations = nameof(StateInvalidations);
     public const string AccountAccessChanged = nameof(AccountAccessChanged);
     public const string CharacterLevelUp = nameof(CharacterLevelUp);
     public const string MarketplaceChanged = nameof(MarketplaceChanged);

@@ -1,7 +1,7 @@
 import { Injectable, NgZone, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { environment } from '../../../../../environments/environment';
 import { GameRealtimeEnvelope } from './game-realtime-contracts';
+import { isProductionRuntime } from './game-realtime-feature';
 import { StateSyncDiagnostics } from './state-sync-diagnostics.service';
 
 export interface GameRealtimeDiagnosticEvent {
@@ -30,13 +30,19 @@ export class GameRealtimeDiagnostics {
   private heartbeatStarted = false;
 
   start(): void {
-    if (this.heartbeatStarted || typeof window === 'undefined') return;
+    if (
+      isProductionRuntime() ||
+      this.heartbeatStarted ||
+      typeof window === 'undefined'
+    )
+      return;
     this.heartbeatStarted = true;
     this.installDebugApi();
     this.startFreezeHeartbeat();
   }
 
   recordReceive(envelope: GameRealtimeEnvelope): void {
+    if (isProductionRuntime()) return;
     this.push({
       event: envelope.event,
       updateId: envelope.updateId,
@@ -48,11 +54,13 @@ export class GameRealtimeDiagnostics {
   }
 
   recordDuplicate(envelope: GameRealtimeEnvelope): void {
+    if (isProductionRuntime()) return;
     const entry = this.findEntry(envelope.updateId);
     if (entry) entry.disposition = 'duplicate';
   }
 
   recordUnknown(envelope: GameRealtimeEnvelope): void {
+    if (isProductionRuntime()) return;
     const entry = this.findEntry(envelope.updateId);
     if (entry) entry.disposition = 'unknown';
   }
@@ -63,6 +71,11 @@ export class GameRealtimeDiagnostics {
     updatedState: boolean,
     causedHttpRequest = false,
   ): void {
+    if (isProductionRuntime()) {
+      handler();
+      return;
+    }
+
     const start = performance.now();
     const entry = this.findEntry(envelope.updateId);
     if (entry) {
@@ -153,7 +166,7 @@ export class GameRealtimeDiagnostics {
   }
 
   private installDebugApi(): void {
-    if (environment.production || typeof window === 'undefined') return;
+    if (isProductionRuntime() || typeof window === 'undefined') return;
 
     (window as any).__gameSignalRDebug = {
       printRecentEvents: () => this.printRecentEvents(),

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from '../api.service';
+import { ApiService, VersionedMutationResult } from '../api.service';
 import { catchError, map, Observable, throwError } from 'rxjs';
 import { InviteToGuild } from '../../../../shared/models/requestDtos/guilds/inviteToGuild';
 import { GuildMissionOverview } from '../../../../shared/models/Dtos/guild/guildMission';
@@ -80,11 +80,17 @@ export class GuildService {
     );
   }
 
-  selectMission(missionOptionId: string): Observable<GuildMissionOverview> {
+  selectMission(
+    missionOptionId: string,
+  ): Observable<VersionedMutationResult<GuildMissionOverview>> {
     return this.api
-      .post('guild/selectMission', missionOptionId, {
-        stateSyncScopesHandledByResponse: ['guild-missions'],
-      })
+      .postVersioned<GuildMissionOverview>(
+        'guild/selectMission',
+        missionOptionId,
+        {
+          stateSyncScopesHandledByResponse: ['guild-missions'],
+        },
+      )
       .pipe(
         map((missions) => {
           return missions;
@@ -96,9 +102,11 @@ export class GuildService {
       );
   }
 
-  claimOrderReward(orderId: string): Observable<GuildMissionOverview> {
+  claimOrderReward(
+    orderId: string,
+  ): Observable<VersionedMutationResult<GuildMissionOverview>> {
     return this.api
-      .post('guild/claimOrderReward', orderId, {
+      .postVersioned<GuildMissionOverview>('guild/claimOrderReward', orderId, {
         stateSyncScopesHandledByResponse: ['guild-missions'],
       })
       .pipe(
@@ -112,9 +120,11 @@ export class GuildService {
       );
   }
 
-  claimWeeklyMissionReward(): Observable<GuildMissionOverview> {
+  claimWeeklyMissionReward(): Observable<
+    VersionedMutationResult<GuildMissionOverview>
+  > {
     return this.api
-      .post(
+      .postVersioned<GuildMissionOverview>(
         'guild/claimWeeklyMissionReward',
         {},
         {
@@ -146,11 +156,17 @@ export class GuildService {
     );
   }
 
-  purchaseShopItem(itemKey: string): Observable<GuildShopPurchaseResponse> {
+  purchaseShopItem(
+    itemKey: string,
+  ): Observable<VersionedMutationResult<GuildShopPurchaseResponse>> {
     return this.api
-      .post('guild/purchaseShopItem', itemKey, {
-        stateSyncScopesHandledByResponse: ['guild-shop', 'inventory'],
-      })
+      .postVersioned<GuildShopPurchaseResponse>(
+        'guild/purchaseShopItem',
+        itemKey,
+        {
+          stateSyncScopesHandledByResponse: ['guild-shop', 'inventory'],
+        },
+      )
       .pipe(
         map((shop) => {
           return shop;
@@ -196,11 +212,15 @@ export class GuildService {
 
   constructBuilding(
     buildingType: GuildBuildingType,
-  ): Observable<GuildBuildingOverview> {
+  ): Observable<VersionedMutationResult<GuildBuildingOverview>> {
     return this.api
-      .post('guild/constructBuilding', buildingType, {
-        stateSyncScopesHandledByResponse: ['guild-buildings'],
-      })
+      .postVersioned<GuildBuildingOverview>(
+        'guild/constructBuilding',
+        buildingType,
+        {
+          stateSyncScopesHandledByResponse: ['guild-buildings'],
+        },
+      )
       .pipe(
         map((buildings) => {
           return buildings;
@@ -212,9 +232,11 @@ export class GuildService {
       );
   }
 
-  upgradeBuilding(id: string): Observable<GuildBuildingOverview> {
+  upgradeBuilding(
+    id: string,
+  ): Observable<VersionedMutationResult<GuildBuildingOverview>> {
     return this.api
-      .post('guild/upgradeBuilding', id, {
+      .postVersioned<GuildBuildingOverview>('guild/upgradeBuilding', id, {
         stateSyncScopesHandledByResponse: ['guild-buildings'],
       })
       .pipe(
@@ -230,11 +252,15 @@ export class GuildService {
 
   setBuildingTarget(
     buildingType: GuildBuildingType,
-  ): Observable<GuildBuildingOverview> {
+  ): Observable<VersionedMutationResult<GuildBuildingOverview>> {
     return this.api
-      .post('guild/setBuildingTarget', buildingType, {
-        stateSyncScopesHandledByResponse: ['guild-buildings'],
-      })
+      .postVersioned<GuildBuildingOverview>(
+        'guild/setBuildingTarget',
+        buildingType,
+        {
+          stateSyncScopesHandledByResponse: ['guild-buildings'],
+        },
+      )
       .pipe(
         catchError(() => {
           return throwError(() => new Error('Failed to set building target'));

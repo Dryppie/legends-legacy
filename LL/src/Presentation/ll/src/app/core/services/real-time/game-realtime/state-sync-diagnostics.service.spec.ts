@@ -32,4 +32,25 @@ describe('StateSyncDiagnostics', () => {
     diagnostics.recordGet('/api/v1/character');
     expect(diagnostics.snapshot().candidateFollowUpGetCount).toBe(1);
   }));
+
+  it('does not retain mutation traces in production', () => {
+    const previousEnvironment = (window as any).env;
+    (window as any).env = { ...previousEnvironment, environment: 'prod' };
+
+    try {
+      const diagnostics = new StateSyncDiagnostics();
+      diagnostics.recordMutation('POST', '/api/v1/test', { inventory: 1 }, []);
+      diagnostics.recordGet('/api/v1/inventory');
+      diagnostics.recordRefresh('inventory', 'inventory');
+
+      expect(diagnostics.snapshot()).toEqual({
+        mutationCount: 0,
+        candidateFollowUpGetCount: 0,
+        refreshCallbackCount: 0,
+        mutations: [],
+      });
+    } finally {
+      (window as any).env = previousEnvironment;
+    }
+  });
 });

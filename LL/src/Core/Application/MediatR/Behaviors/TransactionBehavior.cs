@@ -189,29 +189,55 @@ public sealed class TransactionBehavior<TRequest, TResponse>
 
         foreach (var affectedCharacterId in affectedCharacterIds.Order())
         {
-            foreach (var characterScope in GetCharacterScopes(affectedCharacterId, scopeProfile).Distinct(StringComparer.Ordinal))
+            var characterScopes = GetCharacterScopes(affectedCharacterId, scopeProfile)
+                .Distinct(StringComparer.Ordinal)
+                .ToArray();
+            var responseOwnedScopes = primaryCharacterId == affectedCharacterId
+                ? characterScopes
+                    .Where(scopeProfile.ResponseOwnedCharacterScopes.Contains)
+                    .ToArray()
+                : [];
+            var invalidatingScopes = characterScopes
+                .Except(responseOwnedScopes, StringComparer.Ordinal)
+                .ToArray();
+
+            if (responseOwnedScopes.Length == 1)
             {
-                if (primaryCharacterId == affectedCharacterId
-                    && scopeProfile.ResponseOwnedCharacterScopes.Contains(characterScope))
-                {
-                    await _stateSync.AdvanceCharacterScopeAsync(
-                        affectedCharacterId,
-                        characterScope,
-                        reason,
-                        cancellationToken);
-                    responseOwnedRevisionWriteCount += 1;
-                }
-                else
-                {
-                    await _stateSync.InvalidateCharacterScopeAsync(
-                        affectedCharacterId,
-                        characterScope,
-                        reason,
-                        cancellationToken);
-                    invalidationCount += 1;
-                }
-                revisionWriteCount += 1;
+                await _stateSync.AdvanceCharacterScopeAsync(
+                    affectedCharacterId,
+                    responseOwnedScopes[0],
+                    reason,
+                    cancellationToken);
             }
+            else if (responseOwnedScopes.Length > 1)
+            {
+                await _stateSync.AdvanceCharacterScopesAsync(
+                    affectedCharacterId,
+                    responseOwnedScopes,
+                    reason,
+                    cancellationToken);
+            }
+
+            if (invalidatingScopes.Length == 1)
+            {
+                await _stateSync.InvalidateCharacterScopeAsync(
+                    affectedCharacterId,
+                    invalidatingScopes[0],
+                    reason,
+                    cancellationToken);
+            }
+            else if (invalidatingScopes.Length > 1)
+            {
+                await _stateSync.InvalidateCharacterScopesAsync(
+                    affectedCharacterId,
+                    invalidatingScopes,
+                    reason,
+                    cancellationToken);
+            }
+
+            responseOwnedRevisionWriteCount += responseOwnedScopes.Length;
+            invalidationCount += invalidatingScopes.Length;
+            revisionWriteCount += characterScopes.Length;
         }
 
         foreach (var worldScope in scopeProfile.WorldScopes)

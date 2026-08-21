@@ -1,5 +1,4 @@
 import { Injectable, computed, effect, signal, untracked } from '@angular/core';
-import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { LootHistoryEntry } from '../../../../shared/models/loot-history';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
@@ -9,13 +8,9 @@ import { BusinessGrantDeduper } from './realtime-deduplication';
 export class GameRealtimeStore {
   private readonly maxLootEntries = 50;
   private readonly _recentLoot = signal<LootHistoryEntry[]>([]);
-  private readonly _lastIdleAction = signal<CharacterActionDto | null>(null);
-  private readonly _lastRewardClaim = signal<InventoryItem[]>([]);
   private readonly lootGrantDeduper = new BusinessGrantDeduper();
 
   readonly recentLoot = computed(() => this._recentLoot());
-  readonly lastIdleAction = computed(() => this._lastIdleAction());
-  readonly lastRewardClaim = computed(() => this._lastRewardClaim());
 
   constructor(private readonly eventBus: EventBusService) {
     effect(
@@ -54,29 +49,12 @@ export class GameRealtimeStore {
     );
   }
 
-  setRewardClaim(
-    items: InventoryItem[],
-    receivedAt?: string,
-    source = 'dungeon-reward',
-    location?: string | null,
-  ): void {
-    this._lastRewardClaim.set(items.slice(0, this.maxLootEntries));
-    this.addLoot(items, receivedAt, source, location);
-  }
-
-  setIdleAction(action: CharacterActionDto): void {
-    this._lastIdleAction.set(action);
-  }
-
   clear(): void {
     this.clearLootHistory();
-    this._lastIdleAction.set(null);
-    this._lastRewardClaim.set([]);
     this.lootGrantDeduper.clear();
   }
 
   clearLootHistory(): void {
     this._recentLoot.set([]);
   }
-
 }

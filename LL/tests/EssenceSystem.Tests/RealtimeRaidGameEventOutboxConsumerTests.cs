@@ -19,6 +19,7 @@ public sealed class RealtimeRaidGameEventOutboxConsumerTests
             "ParticipantJoined",
             "Mustering",
             4,
+            12,
             DateTimeOffset.UtcNow);
         var realtime = new RecordingRealtimeBroadcaster();
         var consumer = new RealtimeRaidGameEventOutboxConsumer(realtime, options);
@@ -47,6 +48,7 @@ public sealed class RealtimeRaidGameEventOutboxConsumerTests
                 Assert.Equal(payload.Event, published.Event);
                 Assert.Equal(payload.Status, published.Status);
                 Assert.Equal(payload.SignupCount, published.SignupCount);
+                Assert.Equal(payload.Version, published.Version);
             });
     }
 

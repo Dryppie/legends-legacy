@@ -62,14 +62,9 @@ public sealed class MarketplaceOrderExpirationJob : IJob
                             const string reason = "MarketplaceOrdersExpired";
                             foreach (var characterId in result.AffectedCharacterIds.Order())
                             {
-                                await stateSync.InvalidateCharacterScopeAsync(
+                                await stateSync.InvalidateCharacterScopesAsync(
                                     characterId,
-                                    StateSyncScopes.Character,
-                                    reason,
-                                    cancellationToken);
-                                await stateSync.InvalidateCharacterScopeAsync(
-                                    characterId,
-                                    StateSyncScopes.Inventory,
+                                    [StateSyncScopes.Character, StateSyncScopes.Inventory],
                                     reason,
                                     cancellationToken);
                             }

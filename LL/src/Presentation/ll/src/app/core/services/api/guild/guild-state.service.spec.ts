@@ -10,6 +10,7 @@ import {
   normalizeGuildMissionOverview,
 } from './guild-state.service';
 import { StateSyncRefresh } from '../../real-time/game-realtime/state-sync-coordinator.service';
+import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
 
 describe('normalizeGuild', () => {
   it('defaults guild-vault fields omitted by an older API response', () => {
@@ -129,6 +130,7 @@ describe('GuildStateService description updates', () => {
           {} as never,
           injector,
           stateSync as never,
+          TestBed.inject(DomainVersionTracker),
         ),
     );
   }
@@ -227,6 +229,7 @@ describe('GuildStateService refreshes', () => {
           {} as never,
           injector,
           stateSync as never,
+          TestBed.inject(DomainVersionTracker),
         ),
     );
 
@@ -299,6 +302,7 @@ describe('GuildStateService refreshes', () => {
           {} as never,
           TestBed.inject(Injector),
           stateSync as never,
+          TestBed.inject(DomainVersionTracker),
         ),
     );
 
@@ -379,6 +383,7 @@ describe('GuildStateService refreshes', () => {
           {} as never,
           TestBed.inject(Injector),
           stateSync as never,
+          TestBed.inject(DomainVersionTracker),
         ),
     );
 

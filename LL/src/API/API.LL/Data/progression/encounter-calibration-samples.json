@@ -1,5 +1,5 @@
 {
-  "version": 9,
+  "version": 10,
   "assessmentGearEnvelopeId": "expected",
   "assessmentEssenceEnvelopeId": "expected",
   "maximumBuildWinRateSpread": 0.35,
@@ -75,16 +75,13 @@
       "maxTicks": 600
     },
     {
-      "id": "idle.crystal-shore.double",
+      "id": "idle.crystal-shore.single",
       "contentType": "Idle",
-      "difficultyRole": "Elite",
-      "bandId": "idle-double",
+      "difficultyRole": "Normal",
+      "bandId": "idle-single",
       "snapshotAnchorId": "region-01-mid",
       "areaId": "region_01_area_06",
-      "creatureIds": [
-        "00000000-0000-0000-0000-000000000019",
-        "00000000-0000-0000-0000-000000000035"
-      ],
+      "creatureIds": ["00000000-0000-0000-0000-000000000019"],
       "maxTicks": 900
     },
     {

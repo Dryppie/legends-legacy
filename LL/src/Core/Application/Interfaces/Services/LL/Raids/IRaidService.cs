@@ -21,6 +21,7 @@ public interface IRaidService
     Task<IReadOnlyList<RaidRunSummaryDto>> GetOpenRaidsAsync(Guid characterId, string raidBossId, CancellationToken cancellationToken);
     Task<IReadOnlyList<RaidHistoryEntryDto>> GetHistoryAsync(Guid characterId, string? raidBossId, int take, CancellationToken cancellationToken);
     Task<RaidRunDto?> GetRaidAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken);
+    Task<bool> CanAccessRaidAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken);
     Task<RaidRunDto?> GetActiveRaidAsync(Guid characterId, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> CreateAsync(Guid characterId, string raidBossId, int tier, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> CreateDevelopmentAsync(Guid characterId, string raidBossId, int tier, CancellationToken cancellationToken);

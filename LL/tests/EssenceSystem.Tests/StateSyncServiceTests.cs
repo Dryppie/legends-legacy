@@ -236,6 +236,36 @@ public sealed class StateSyncServiceTests
     }
 
     [Fact]
+    public async Task Character_resource_batch_uses_one_delivery_and_preserves_each_revision()
+    {
+        await using var db = CreateDb();
+        var realtime = new RecordingRealtimeBroadcaster();
+        var service = new StateSyncService(db, realtime, new FixedTimeProvider(Now));
+        var characterId = Guid.NewGuid();
+
+        await service.InvalidateCharacterScopesAsync(
+            characterId,
+            [StateSyncScopes.Character, StateSyncScopes.Inventory],
+            "marketplace-expiration",
+            CancellationToken.None);
+        await db.SaveChangesAsync(CancellationToken.None);
+
+        var checkpoint = await service.GetCheckpointAsync(characterId, CancellationToken.None);
+        Assert.Equal(1, checkpoint.Revisions[StateSyncScopes.Character]);
+        Assert.Equal(1, checkpoint.Revisions[StateSyncScopes.Inventory]);
+        Assert.Equal(2, await db.StateSyncRevisions.CountAsync());
+
+        var publication = Assert.Single(realtime.Messages);
+        Assert.Equal(
+            characterId,
+            Assert.IsType<Audience.Character>(publication.Audience).CharacterId);
+        var invalidations = Assert.IsType<StateInvalidations>(publication.Message);
+        Assert.Equal(characterId, invalidations.CharacterId);
+        Assert.Equal(1, invalidations.Revisions[StateSyncScopes.Character]);
+        Assert.Equal(1, invalidations.Revisions[StateSyncScopes.Inventory]);
+    }
+
+    [Fact]
     public async Task Colosseum_revision_is_isolated_to_the_affected_character()
     {
         await using var db = CreateDb();

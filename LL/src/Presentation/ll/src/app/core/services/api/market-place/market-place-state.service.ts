@@ -54,6 +54,7 @@ export class MarketplaceStateService {
   private readonly hasLoaded = signal(false);
   private semanticGapRevision = 0;
   private refreshVersion = 0;
+  private activeCharacterId: string | null | undefined;
 
   readonly listings = computed(() => this._listings());
   readonly buyOrders = computed(() => this._buyOrders());
@@ -103,6 +104,33 @@ export class MarketplaceStateService {
       },
       { allowSignalWrites: true },
     );
+
+    effect(
+      () => {
+        const characterId = this.myCharacterId();
+        if (
+          this.activeCharacterId !== undefined &&
+          this.activeCharacterId !== characterId
+        ) {
+          untracked(() => this.resetForCharacterChange());
+        }
+        this.activeCharacterId = characterId;
+      },
+      { allowSignalWrites: true },
+    );
+  }
+
+  private resetForCharacterChange(): void {
+    this.refreshVersion += 1;
+    this.semanticGapRevision = 0;
+    this.hasLoaded.set(false);
+    this.eventDeduper.clear();
+    this._listings.set([]);
+    this._buyOrders.set([]);
+    this._catalog.set([]);
+    this._history.set([]);
+    this._loading.set(false);
+    this._error.set(null);
   }
 
   byType = (type: ItemType) =>

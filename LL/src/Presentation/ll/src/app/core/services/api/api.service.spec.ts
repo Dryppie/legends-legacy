@@ -34,7 +34,7 @@ describe('ApiService versioned mutations', () => {
       expect(pending.request.method).toBe(method.toUpperCase());
       pending.flush(
         { updated: true },
-        { headers: { 'X-LL-Domain-Versions': 'inventory=7' } },
+        { headers: { 'X-LL-Domain-Versions': '{"inventory":7}' } },
       );
 
       expect(result).toEqual({

@@ -19,7 +19,7 @@ public sealed class EncounterCalibrationTests
 
         var catalog = context.EncounterFactory.CreateCatalog();
 
-        Assert.Equal(9, catalog.Version);
+        Assert.Equal(10, catalog.Version);
         Assert.Equal(20, catalog.Encounters.Count);
         Assert.Equal(4, catalog.Encounters.Select(encounter => encounter.ContentType).Distinct().Count());
         Assert.Equal(5, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Idle));
@@ -309,7 +309,7 @@ public sealed class EncounterCalibrationTests
     [Theory]
     [InlineData("idle.blood-grove.single", "region-01-area-02", "minimum")]
     [InlineData("idle.rotgrave-fields.double", "region-02-area-02", "expected")]
-    public void Authored_progression_doubles_are_balanced_at_their_expected_gear_gate(
+    public void Authored_progression_encounters_are_balanced_at_their_expected_gear_gate(
         string encounterId,
         string snapshotAnchorId,
         string gearEnvelopeId)
@@ -350,10 +350,25 @@ public sealed class EncounterCalibrationTests
 
         Assert.Equal(3, assessed.Count);
         Assert.Contains(assessed, result => result.EncounterId == encounterId);
-        Assert.True(encounterId != "idle.blood-grove.single", diagnostics);
-        Assert.True(
-            report.Exceptions.Count == 0,
-            diagnostics);
+        if (gearEnvelopeId == "minimum")
+        {
+            var offensive = assessed.Single(result => result.BuildFamilyId == "offensive");
+            Assert.True(
+                offensive.WinRate is >= 0.7 and <= 0.9
+                && offensive.AverageSurvivalResourcePercent is >= 10 and <= 40
+                && assessed.Where(result => result.BuildFamilyId != "offensive")
+                    .All(result => result.WinRate >= 0.8)
+                && assessed.All(result =>
+                    result.TimeoutRate <= 0.1
+                    && result.AverageDurationTicks <= 360),
+                diagnostics);
+        }
+        else
+        {
+            Assert.True(
+                report.Exceptions.Count == 0,
+                diagnostics);
+        }
     }
 
     [Fact]
