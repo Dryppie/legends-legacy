@@ -45,7 +45,10 @@
     No character overview loaded.
   </div>
 
-  <div *ngIf="character() as characterOverview" class="min-h-0 overflow-y-auto">
+  <div
+    *ngIf="character() as characterOverview"
+    class="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+  >
     <section class="ll-page-header">
       <div>
         <p class="ll-eyebrow text-primary">Combat Profile</p>

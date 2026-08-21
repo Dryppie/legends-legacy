@@ -18,12 +18,7 @@ import {
   ChatService,
 } from '../../../core/services/ll-chat/chat-service/chat.service';
 import { firstValueFrom, Subscription } from 'rxjs';
-import {
-  NgClass,
-  NgFor,
-  NgIf,
-  NgTemplateOutlet,
-} from '@angular/common';
+import { NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { RegularButtonComponent } from '../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
@@ -47,6 +42,19 @@ export interface WireCommand {
 export type WireCommandParseResult =
   | { isWire: false }
   | { isWire: true; command: WireCommand | null };
+
+export interface ChannelCommand {
+  channelType: ChatChannelType;
+  body: string;
+}
+
+export type ChannelCommandParseResult =
+  | { isChannelCommand: false }
+  | {
+      isChannelCommand: true;
+      commandName: string;
+      command: ChannelCommand | null;
+    };
 
 export interface ChatTextSegment {
   text: string;
@@ -143,6 +151,36 @@ export function parseWireCommand(body: string): WireCommandParseResult {
   return {
     isWire: true,
     command: { recipientName: match[1].trim(), amount },
+  };
+}
+
+export function parseChannelCommand(body: string): ChannelCommandParseResult {
+  const match = /^\/(general|trade|help|guild|raid)(?:\s+(.*))?$/i.exec(
+    body.trim(),
+  );
+  if (!match) return { isChannelCommand: false };
+
+  const commandName = match[1].toLowerCase();
+  const messageBody = match[2]?.trim() ?? '';
+  if (!messageBody) {
+    return { isChannelCommand: true, commandName, command: null };
+  }
+
+  const channelTypes: Record<string, ChatChannelType> = {
+    general: ChatChannelType.General,
+    trade: ChatChannelType.Trade,
+    help: ChatChannelType.Help,
+    guild: ChatChannelType.Guild,
+    raid: ChatChannelType.Raid,
+  };
+
+  return {
+    isChannelCommand: true,
+    commandName,
+    command: {
+      channelType: channelTypes[commandName],
+      body: messageBody,
+    },
   };
 }
 
@@ -733,6 +771,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (!body || !isMessageAllowed(body)) return;
 
     let { type, contextKey } = this.activeChannel;
+    let messageBody = body;
     this.isSending = true;
 
     try {
@@ -776,12 +815,48 @@ export class ChatComponent implements OnInit, OnDestroy {
         return;
       }
 
+      const channelCommand = parseChannelCommand(body);
+      if (channelCommand.isChannelCommand) {
+        if (!channelCommand.command) {
+          this.sendError = `Usage: /${channelCommand.commandName} Message`;
+          return;
+        }
+
+        type = channelCommand.command.channelType;
+        messageBody = channelCommand.command.body;
+        switch (type) {
+          case ChatChannelType.General:
+            contextKey = 'general';
+            break;
+          case ChatChannelType.Trade:
+            contextKey = 'trade';
+            break;
+          case ChatChannelType.Help:
+            contextKey = 'help';
+            break;
+          case ChatChannelType.Guild:
+            if (!this.guild()) {
+              this.sendError = 'You are not currently in a guild.';
+              return;
+            }
+            contextKey = this.guild()!.id;
+            break;
+          case ChatChannelType.Raid:
+            if (!environment.features.raids || !this.raidId()) {
+              this.sendError = 'You are not currently in a raid.';
+              return;
+            }
+            contextKey = this.raidId()!;
+            break;
+        }
+      }
+
       if (contextKey === 'all') contextKey = 'general';
       switch (type) {
         case ChatChannelType.General:
         case ChatChannelType.Trade:
         case ChatChannelType.Help:
-          await this.chat.sendPublic(type, contextKey, body);
+          await this.chat.sendPublic(type, contextKey, messageBody);
           break;
         // case ChatChannelType.Whisper:
         //   if (this.chat.targetUserId) {
@@ -789,10 +864,10 @@ export class ChatComponent implements OnInit, OnDestroy {
         //   }
         //   break;
         case ChatChannelType.Guild:
-          await this.chat.sendGuild(this.guild()!.id, body);
+          await this.chat.sendGuild(this.guild()!.id, messageBody);
           break;
         case ChatChannelType.Raid:
-          await this.chat.sendRaid(contextKey, body);
+          await this.chat.sendRaid(contextKey, messageBody);
           break;
         default:
           return;

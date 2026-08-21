@@ -7,6 +7,7 @@ import {
   getWireErrorMessage,
   isInlineChannelSystemMessage,
   isWorldSystemMessage,
+  parseChannelCommand,
   parseWireCommand,
   splitCurrentPlayerMentions,
   startsNewChatDay,
@@ -53,6 +54,95 @@ describe('ChatComponent message submission', () => {
 
     expect(component.isSending).toBeFalse();
     expect(component.draft).toBe('');
+  });
+
+  it('sends a /raid message to the active raid without changing the viewed channel', async () => {
+    const sendRaid = jasmine
+      .createSpy('sendRaid')
+      .and.returnValue(Promise.resolve());
+    const activeChannel = {
+      type: ChatChannelType.General,
+      contextKey: 'general',
+    };
+    const component = Object.assign(Object.create(ChatComponent.prototype), {
+      userInfoLoaded: true,
+      userInfo: { isRegisteredUser: true },
+      draft: '/raid Form up at the gate',
+      sendError: '',
+      isSending: false,
+      activeChannel,
+      raidId: () => 'raid-run-id',
+      guild: () => null,
+      chat: { sendRaid },
+    }) as ChatComponent;
+
+    await component.send();
+
+    expect(sendRaid).toHaveBeenCalledOnceWith(
+      'raid-run-id',
+      'Form up at the gate',
+    );
+    expect(component.activeChannel).toBe(activeChannel);
+    expect(component.draft).toBe('');
+  });
+
+  it('explains when /raid cannot target an active raid', async () => {
+    const sendRaid = jasmine.createSpy('sendRaid');
+    const component = Object.assign(Object.create(ChatComponent.prototype), {
+      userInfoLoaded: true,
+      userInfo: { isRegisteredUser: true },
+      draft: '/raid Form up at the gate',
+      sendError: '',
+      isSending: false,
+      activeChannel: {
+        type: ChatChannelType.General,
+        contextKey: 'general',
+      },
+      raidId: () => null,
+      guild: () => null,
+      chat: { sendRaid },
+    }) as ChatComponent;
+
+    await component.send();
+
+    expect(sendRaid).not.toHaveBeenCalled();
+    expect(component.sendError).toBe('You are not currently in a raid.');
+    expect(component.draft).toBe('/raid Form up at the gate');
+  });
+});
+
+describe('parseChannelCommand', () => {
+  it('parses supported channel commands case-insensitively', () => {
+    expect(parseChannelCommand('/RAID Form up')).toEqual({
+      isChannelCommand: true,
+      commandName: 'raid',
+      command: {
+        channelType: ChatChannelType.Raid,
+        body: 'Form up',
+      },
+    });
+    expect(parseChannelCommand('/trade Selling ore')).toEqual({
+      isChannelCommand: true,
+      commandName: 'trade',
+      command: {
+        channelType: ChatChannelType.Trade,
+        body: 'Selling ore',
+      },
+    });
+  });
+
+  it('recognizes a channel command that is missing its message', () => {
+    expect(parseChannelCommand('/guild')).toEqual({
+      isChannelCommand: true,
+      commandName: 'guild',
+      command: null,
+    });
+  });
+
+  it('does not intercept unknown slash commands', () => {
+    expect(parseChannelCommand('/dance')).toEqual({
+      isChannelCommand: false,
+    });
   });
 });
 

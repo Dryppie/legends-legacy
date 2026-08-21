@@ -2,6 +2,8 @@
   container-name: character-overview;
   container-type: inline-size;
   display: block;
+  height: 100%;
+  min-height: 0;
   min-width: 0;
 }
 
