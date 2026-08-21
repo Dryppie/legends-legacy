@@ -275,6 +275,9 @@ export interface TowerPlaybackEntityTotals {
   healthRegenerated: number;
   barrierGenerated: number;
   damageBlocked: number;
+  threatGenerated?: number;
+  targetedAttacks?: number;
+  attentionSharePercent?: number;
   staggerContributed?: number;
   staggerBreaks?: number;
 }
@@ -286,6 +289,7 @@ export interface TowerPlaybackAbilityTotals {
   totalHealing: number;
   totalBarrier: number;
   damageByType?: AbilityDamageTypeStats[];
+  totalThreat?: number;
   totalStagger?: number;
   staggerBreaks?: number;
 }

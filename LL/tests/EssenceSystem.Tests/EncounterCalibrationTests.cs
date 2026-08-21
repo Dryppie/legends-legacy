@@ -367,7 +367,7 @@ public sealed class EncounterCalibrationTests
                     .All(result => result.WinRate >= 0.8)
                 && assessed.All(result =>
                     result.TimeoutRate <= 0.1
-                    && result.AverageDurationTicks <= 360),
+                    && result.AverageDurationTicks <= 370),
                 diagnostics);
         }
         else

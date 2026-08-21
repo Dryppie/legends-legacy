@@ -65,6 +65,9 @@ describe('TowerPlaybackService', () => {
             healthRegenerated: 0,
             barrierGenerated: 10,
             damageBlocked: 0,
+            threatGenerated: 34,
+            targetedAttacks: 3,
+            attentionSharePercent: 75,
           },
         ],
         abilityTotals: [
@@ -78,6 +81,7 @@ describe('TowerPlaybackService', () => {
             ],
             totalHealing: 0,
             totalBarrier: 0,
+            totalThreat: 34,
           },
         ],
         isFinal: true,
@@ -110,7 +114,11 @@ describe('TowerPlaybackService', () => {
     expect(frame.friendly[0].partyNumber).toBe(2);
     expect(frame.hostile[0].health).toBe(180);
     expect(frame.entityStats[0].damageDone).toBe(20);
+    expect(frame.entityStats[0].threatGenerated).toBe(34);
+    expect(frame.entityStats[0].targetedAttacks).toBe(3);
+    expect(frame.entityStats[0].attentionSharePercent).toBe(75);
     expect(frame.entityStats[0].abilities[0].uses).toBe(1);
+    expect(frame.entityStats[0].abilities[0].totalThreat).toBe(34);
     expect(frame.entityStats[0].abilities[0].damageByType).toEqual([
       { damageType: 'Physical', totalDamage: 12 },
       { damageType: 'Burn', totalDamage: 8 },

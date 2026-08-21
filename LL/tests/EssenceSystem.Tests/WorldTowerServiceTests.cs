@@ -1509,6 +1509,15 @@ public sealed class WorldTowerServiceTests
         Assert.NotEmpty(bundle.Frames);
         Assert.True(bundle.Frames[^1].IsFinal);
         Assert.All(bundle.Frames, frame => Assert.NotNull(frame.EntityStates));
+        Assert.All(bundle.Frames[^1].EntityTotals, totals =>
+        {
+            Assert.Equal(25, totals.ThreatGenerated);
+            Assert.Equal(4, totals.TargetedAttacks);
+            Assert.Equal(50, totals.AttentionSharePercent);
+        });
+        Assert.Contains(
+            bundle.Frames[^1].AbilityTotals,
+            totals => totals.TotalThreat == 25);
         var damagingAbilityTotals = bundle.Frames
             .SelectMany(frame => frame.AbilityTotals)
             .Where(ability => ability.TotalDamage > 0)
@@ -2413,9 +2422,21 @@ public sealed class WorldTowerServiceTests
                 .Select(participant => new EntityStats(
                     participant.Combatant.Id,
                     participant.Combatant.Name,
-                    [],
+                    [new AbilityStats(
+                        "Basic Attack",
+                        TotalDamage: 100,
+                        DamageByType:
+                        [
+                            new AbilityDamageTypeStats(
+                                Domain.Models.Damages.DamageType.Physical,
+                                100)
+                        ],
+                        TotalThreat: 25)],
                     DamageDone: 100,
-                    DamageTaken: outcome == BattleOutcome.Victory ? 10 : 100))
+                    DamageTaken: outcome == BattleOutcome.Victory ? 10 : 100,
+                    TargetedAttacks: 4,
+                    AttentionSharePercent: 50,
+                    ThreatGenerated: 25))
                 .ToList()
         };
     }

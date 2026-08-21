@@ -173,7 +173,7 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
-    public void Catalog_requires_combat_summons_to_inherit_health_and_power()
+    public void Catalog_requires_combat_summons_to_have_health_and_inherit_power()
     {
         var summon = new SummonSpec
         {
@@ -181,7 +181,7 @@ public sealed class AbilitySystemTests
             Name = "Unscaled summon",
             Attributes =
             [
-                new() { Attribute = AttributeType.MaxHealth, BaseValue = 10 },
+                new() { Attribute = AttributeType.MaxHealth, BaseValue = 0 },
                 new() { Attribute = AttributeType.Power, BaseValue = 5 }
             ]
         };
@@ -5423,9 +5423,18 @@ public sealed class AbilitySystemTests
         Assert.NotNull(summonLog.CombatEntity);
         Assert.Equal("Creature Shadow Image", summonLog.CombatEntity!.Name);
         Assert.Equal("shadow_image", summonLog.CombatEntity.ImagePath);
-        Assert.Equal(21, summonLog.CombatEntity.MaxHealth);
-        Assert.Equal(21, summonLog.CombatEntity.Health);
-        Assert.True(provider.GetCatalog().SummonsById.ContainsKey("creatureShadowImage"));
+        Assert.Equal(1, summonLog.CombatEntity.MaxHealth);
+        Assert.Equal(1, summonLog.CombatEntity.Health);
+        var catalog = provider.GetCatalog();
+        Assert.True(catalog.SummonsById.ContainsKey("creatureShadowImage"));
+        foreach (var summonIdToVerify in new[] { "shadowImage", "creatureShadowImage" })
+        {
+            var maxHealth = Assert.Single(
+                catalog.SummonsById[summonIdToVerify].Attributes,
+                attribute => attribute.Attribute == AttributeType.MaxHealth);
+            Assert.Equal(1, maxHealth.BaseValue);
+            Assert.Null(maxHealth.ScalingAttribute);
+        }
         Assert.Contains(result.EventLog, x =>
             x.ActorId == summonId
             && x.Source == "Shadow Strike"
@@ -5451,7 +5460,7 @@ public sealed class AbilitySystemTests
             result.EntityStats,
             stats => stats.EntityId == summonId);
         Assert.Equal(0, summonStats.Health);
-        Assert.Equal(21, summonStats.MaxHealth);
+        Assert.Equal(1, summonStats.MaxHealth);
     }
 
     [Fact]

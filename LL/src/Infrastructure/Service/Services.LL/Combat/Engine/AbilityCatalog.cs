@@ -736,11 +736,16 @@ public static class AbilityCatalogValidator
             errors.Add($"{summonId}: summon attributes must include MaxHealth.");
 
         var health = summon.Attributes.FirstOrDefault(x => x.Attribute == AttributeType.MaxHealth);
-        if (health is not null
-            && (health.ScalingAttribute != AttributeType.MaxHealth || health.ScalingCoefficient <= 0))
+        if (health is not null)
         {
-            errors.Add(
-                $"{summonId}/MaxHealth: summon durability must scale positively from owner MaxHealth.");
+            var hasFixedPositiveHealth = health.BaseValue > 0 && health.ScalingAttribute is null;
+            var hasOwnerHealthScaling = health.ScalingAttribute == AttributeType.MaxHealth
+                && health.ScalingCoefficient > 0;
+            if (!hasFixedPositiveHealth && !hasOwnerHealthScaling)
+            {
+                errors.Add(
+                    $"{summonId}/MaxHealth: summon durability must use positive fixed health or scale positively from owner MaxHealth.");
+            }
         }
 
         if (summon.CanBasicAttack)

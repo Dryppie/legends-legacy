@@ -53,6 +53,9 @@ public sealed record TowerPlaybackEntityTotalsDto(
     int HealthRegenerated,
     int BarrierGenerated,
     int DamageBlocked,
+    int ThreatGenerated = 0,
+    int TargetedAttacks = 0,
+    double AttentionSharePercent = 0,
     int StaggerContributed = 0,
     int StaggerBreaks = 0);
 
@@ -63,6 +66,7 @@ public sealed record TowerPlaybackAbilityTotalsDto(
     int TotalHealing,
     int TotalBarrier,
     IReadOnlyList<AbilityDamageTypeStats>? DamageByType = null,
+    int TotalThreat = 0,
     int TotalStagger = 0,
     int StaggerBreaks = 0);
 

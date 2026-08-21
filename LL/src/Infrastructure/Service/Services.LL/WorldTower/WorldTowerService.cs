@@ -2539,6 +2539,9 @@ public sealed class WorldTowerService : IWorldTowerService
                     entity.HealthRegenerated,
                     entity.BarrierGenerated,
                     entity.DamageBlocked,
+                    entity.ThreatGenerated,
+                    entity.TargetedAttacks,
+                    entity.AttentionSharePercent,
                     entity.StaggerContributed,
                     entity.StaggerBreaks))
                 .OrderBy(x => x.EntityIndex)
@@ -2553,6 +2556,7 @@ public sealed class WorldTowerService : IWorldTowerService
                         ability.TotalHealing,
                         ability.TotalBarrier,
                         ability.DamageByType,
+                        ability.TotalThreat,
                         ability.TotalStagger,
                         ability.StaggerBreaks)))
                 .OrderBy(x => x.AbilityIndex)
