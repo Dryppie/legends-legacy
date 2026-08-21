@@ -19,11 +19,11 @@ public sealed class EncounterCalibrationTests
 
         var catalog = context.EncounterFactory.CreateCatalog();
 
-        Assert.Equal(10, catalog.Version);
-        Assert.Equal(20, catalog.Encounters.Count);
+        Assert.Equal(11, catalog.Version);
+        Assert.Equal(24, catalog.Encounters.Count);
         Assert.Equal(4, catalog.Encounters.Select(encounter => encounter.ContentType).Distinct().Count());
         Assert.Equal(5, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Idle));
-        Assert.Equal(4, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Dungeon));
+        Assert.Equal(8, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Dungeon));
         Assert.Equal(4, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Tower));
         Assert.Equal(7, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Raid));
         Assert.All(catalog.Encounters, encounter =>
@@ -44,6 +44,10 @@ public sealed class EncounterCalibrationTests
         var bloodGroveSingle = catalog.Encounters.Single(encounter => encounter.Id == "idle.blood-grove.single");
         var rotgraveDouble = catalog.Encounters.Single(encounter => encounter.Id == "idle.rotgrave-fields.double");
         var dungeonBoss = catalog.Encounters.Single(encounter => encounter.Id == "dungeon.goblin-mines.boss");
+        var regionTwoDungeons = catalog.Encounters.Where(encounter =>
+                encounter.Id.StartsWith("dungeon.tangled-cave", StringComparison.Ordinal)
+                || encounter.Id.StartsWith("dungeon.great-tree", StringComparison.Ordinal))
+            .ToList();
         var tower = catalog.Encounters.Single(encounter => encounter.Id == "tower.floor-01.guardian");
         var staggerTower = catalog.Encounters.Single(encounter => encounter.Id == "tower.floor-05.warden");
         var floorSeven = catalog.Encounters.Single(encounter => encounter.Id == "tower.floor-07.guardian");
@@ -55,6 +59,9 @@ public sealed class EncounterCalibrationTests
         Assert.Equal(2, rotgraveDouble.Hostiles.Count);
         Assert.Equal(12, rotgraveDouble.ProgressionPosition);
         Assert.Equal(4, dungeonBoss.Hostiles.Count);
+        Assert.Equal(4, regionTwoDungeons.Count);
+        Assert.All(regionTwoDungeons, encounter =>
+            Assert.True(encounter.ProgressionPosition > rotgraveDouble.ProgressionPosition));
         Assert.Equal(5, tower.PlayerCount);
         Assert.Single(tower.Hostiles);
         Assert.Equal(5, tower.PartyCompositions.Count);
@@ -136,7 +143,7 @@ public sealed class EncounterCalibrationTests
 
         var report = context.Runner.Run(catalog, players);
 
-        Assert.Equal(1_092, report.Results.Count);
+        Assert.Equal(1_284, report.Results.Count);
         Assert.All(report.Results, result =>
         {
             Assert.Equal(3, result.SampleCount);
@@ -154,9 +161,9 @@ public sealed class EncounterCalibrationTests
                 result.GearEnvelopeId == catalog.AssessmentGearEnvelopeId
                 && result.EssenceEnvelopeId == catalog.AssessmentEssenceEnvelopeId)
             .ToList();
-        Assert.Equal(91, expectedCohort.Count);
-        Assert.Equal(82, expectedCohort.Count(result => result.IncludedInRoleAssessment));
-        Assert.Equal(9, expectedCohort.Count(result => !result.IncludedInRoleAssessment));
+        Assert.Equal(107, expectedCohort.Count);
+        Assert.Equal(94, expectedCohort.Count(result => result.IncludedInRoleAssessment));
+        Assert.Equal(13, expectedCohort.Count(result => !result.IncludedInRoleAssessment));
         Assert.All(
             report.Results.Where(result =>
                 (result.ContentType == EncounterCalibrationContentType.Idle
@@ -255,9 +262,9 @@ public sealed class EncounterCalibrationTests
         var artifact = EncounterCalibrationReportRenderer.CreateArtifact(report, catalog);
         var markdown = EncounterCalibrationReportRenderer.RenderMarkdown(artifact);
         Assert.Equal(7, artifact.SchemaVersion);
-        Assert.Equal(1_092, artifact.Summary.ResultCount);
-        Assert.Equal(3_276, artifact.Summary.SeededSampleCount);
-        Assert.Equal(82, artifact.Summary.AssessedResultCount);
+        Assert.Equal(1_284, artifact.Summary.ResultCount);
+        Assert.Equal(3_852, artifact.Summary.SeededSampleCount);
+        Assert.Equal(94, artifact.Summary.AssessedResultCount);
         Assert.Equal(4, artifact.Summary.Content.Count);
         Assert.NotNull(artifact.SupportComparisons);
         Assert.Equal(11 * 3 * 4, artifact.SupportComparisons.Count);
@@ -369,6 +376,62 @@ public sealed class EncounterCalibrationTests
                 report.Exceptions.Count == 0,
                 diagnostics);
         }
+    }
+
+    [Theory]
+    [InlineData("dungeon.tangled-cave.room")]
+    [InlineData("dungeon.tangled-cave.boss")]
+    [InlineData("dungeon.great-tree.room")]
+    [InlineData("dungeon.great-tree.boss")]
+    public void Region_two_dungeons_scale_above_their_hardest_authored_area_and_exert_pressure(
+        string encounterId)
+    {
+        var context = CreateContext();
+        var fullCatalog = context.EncounterFactory.CreateCatalog();
+        var area = fullCatalog.Encounters.Single(encounter =>
+            encounter.Id == "idle.rotgrave-fields.double");
+        var dungeon = fullCatalog.Encounters.Single(encounter => encounter.Id == encounterId);
+        var catalog = fullCatalog with { Encounters = [dungeon] };
+        var players = context.PlayerFactory.CreateScenarios()
+            .Where(player => player.SnapshotAnchorId == "region-02-end"
+                             && player.GearEnvelopeId == "expected")
+            .ToList();
+
+        var report = context.Runner.Run(
+            catalog,
+            players,
+            new EncounterCalibrationRunOptions(
+                EssenceEnvelopeIds: ["expected"],
+                SampleCount: 10));
+        var assessed = report.Results.Where(result => result.IncludedInRoleAssessment).ToList();
+        var diagnostics = JsonSerializer.Serialize(new
+        {
+            AreaProgressionPosition = area.ProgressionPosition,
+            DungeonProgressionPosition = dungeon.ProgressionPosition,
+            Results = assessed.Select(result => new
+            {
+                result.BuildFamilyId,
+                result.WinRate,
+                result.TimeoutRate,
+                result.AverageDurationTicks,
+                result.AverageSurvivalResourcePercent,
+                result.AverageEnemyAbilityUses
+            }),
+            report.Exceptions
+        });
+
+        Assert.True(dungeon.ProgressionPosition > area.ProgressionPosition, diagnostics);
+        Assert.Equal(3, assessed.Count);
+        Assert.All(assessed, result =>
+        {
+            Assert.Equal(0, result.TimeoutRate);
+            Assert.True(result.AverageEnemyAbilityUses > 0);
+        });
+        var offensive = assessed.Single(result => result.BuildFamilyId == "offensive");
+        Assert.True(offensive.AverageSurvivalResourcePercent < 90, diagnostics);
+        Assert.True(
+            offensive.AverageDurationTicks >= (dungeon.DifficultyRole == "Boss" ? 90 : 30),
+            diagnostics);
     }
 
     [Fact]

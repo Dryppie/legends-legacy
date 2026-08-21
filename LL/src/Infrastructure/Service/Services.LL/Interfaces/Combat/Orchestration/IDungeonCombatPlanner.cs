@@ -12,6 +12,7 @@ public interface IDungeonCombatPlanner
         Guid characterId,
         CharacterSnapshot characterSnapshot,
         int dungeonTier,
+        int dungeonRegion,
         IReadOnlyList<Guid> playerEntityIds,
         IReadOnlyList<Guid> enemySourceEntityIds,
         IReadOnlyList<AttributeModifierBase>? runAttributeModifiers = null,

@@ -6,8 +6,9 @@ namespace Services.LL.Combat.Layers.Resolution.Dungeon;
 
 public static class DungeonEnemyDifficultyScaling
 {
-    // Each difficulty uses the end of its matching Region as its global baseline.
-    // These multipliers are content pressure, applied after the shared stat curves.
+    // Each difficulty uses its matching region end as a global baseline, with the
+    // dungeon's content region acting as a floor. Content pressure is applied after
+    // the shared stat curves.
     public const int AreasPerRegion = 10;
     public const float TierOneStrengthMultiplier = 1.6f;
     public const float TierTwoStrengthMultiplier = 2.0f;
@@ -53,7 +54,7 @@ public static class DungeonEnemyDifficultyScaling
         return contentMultiplier;
     }
 
-    public static int GetProgressionPosition(int dungeonTier)
+    public static int GetProgressionPosition(int dungeonTier, int dungeonRegion = 1)
     {
         if (dungeonTier is < 1 or > 3)
         {
@@ -63,7 +64,17 @@ public static class DungeonEnemyDifficultyScaling
                 "Dungeon tiers must be between 1 and 3.");
         }
 
-        return checked(dungeonTier * AreasPerRegion);
+        if (dungeonRegion < 1)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(dungeonRegion),
+                dungeonRegion,
+                "Dungeon regions must be positive.");
+        }
+
+        // A difficulty grade may raise a dungeon into a later progression band,
+        // but it must never pull a later-region dungeon below its own region.
+        return checked(Math.Max(dungeonTier, dungeonRegion) * AreasPerRegion);
     }
 
     public static void Apply(CombatEntity enemy, int dungeonTier, float? authoredMultiplier = null)

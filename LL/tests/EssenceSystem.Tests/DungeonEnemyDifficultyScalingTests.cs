@@ -42,6 +42,20 @@ public sealed class DungeonEnemyDifficultyScalingTests
     }
 
     [Theory]
+    [InlineData(1, 2, 20)]
+    [InlineData(2, 2, 20)]
+    [InlineData(3, 2, 30)]
+    public void GetProgressionPosition_never_places_a_dungeon_below_its_content_region(
+        int dungeonTier,
+        int dungeonRegion,
+        int expectedPosition)
+    {
+        Assert.Equal(
+            expectedPosition,
+            DungeonEnemyDifficultyScaling.GetProgressionPosition(dungeonTier, dungeonRegion));
+    }
+
+    [Theory]
     [InlineData(1, 160, 16)]
     [InlineData(2, 200, 20)]
     [InlineData(3, 200, 20)]

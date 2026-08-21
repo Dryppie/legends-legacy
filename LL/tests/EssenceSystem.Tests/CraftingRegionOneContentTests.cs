@@ -368,7 +368,7 @@ public sealed class CraftingRegionOneContentTests
             .Where(drop => specialResourceIds.Contains(
                 drop?["itemId"]?.GetValue<string>() ?? string.Empty))
             .ToList();
-        Assert.Equal(11, catalystDrops.Count);
+        Assert.Equal(15, catalystDrops.Count);
         Assert.All(catalystDrops, drop =>
         {
             Assert.Equal(2, drop?["minAmount"]?.GetValue<int>());

@@ -77,7 +77,7 @@ public sealed class ChampionMarketCatalogTests
         Assert.All(
             items.Where(item => item.Category == "Title"),
             item => Assert.Contains(item.RewardTitleKey!, titleKeys));
-        Assert.Equal(11, CatalystSelectionCrateCatalog.Options.Count);
+        Assert.Equal(9, CatalystSelectionCrateCatalog.Options.Count);
         Assert.All(CatalystSelectionCrateCatalog.Options, option => Assert.Equal(6, option.Quantity));
         var crateItem = itemDocument.RootElement
             .EnumerateArray()

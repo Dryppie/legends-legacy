@@ -74,6 +74,7 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
             hostileIds,
             sourceEntitiesById,
             plan.DungeonTier,
+            plan.DungeonRegion,
             plan.EnemyAttributeModifiers,
             plan.EnemyStrengthMultiplier);
 
@@ -144,6 +145,7 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
         IReadOnlyCollection<Guid> hostileIds,
         Dictionary<Guid, Entity> sourceEntitiesById,
         int dungeonTier,
+        int dungeonRegion,
         IReadOnlyList<Domain.Models.Attributes.Modifiers.AttributeModifierBase> enemyAttributeModifiers,
         float? enemyStrengthMultiplier)
     {
@@ -162,7 +164,9 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
                     [creature],
                     new Area
                     {
-                        DifficultyTier = DungeonEnemyDifficultyScaling.GetProgressionPosition(dungeonTier)
+                        DifficultyTier = DungeonEnemyDifficultyScaling.GetProgressionPosition(
+                            dungeonTier,
+                            dungeonRegion)
                     })
                 .Single();
 

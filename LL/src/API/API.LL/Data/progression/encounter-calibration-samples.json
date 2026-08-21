@@ -1,5 +1,5 @@
 {
-  "version": 10,
+  "version": 11,
   "assessmentGearEnvelopeId": "expected",
   "assessmentEssenceEnvelopeId": "expected",
   "maximumBuildWinRateSpread": 0.35,
@@ -162,6 +162,50 @@
       "snapshotAnchorId": "region-02-end",
       "dungeonFamilyId": "forgotten_catacombs",
       "dungeonDifficulty": 2,
+      "roomTemplateId": "boss.1",
+      "maxTicks": 1800
+    },
+    {
+      "id": "dungeon.tangled-cave.room",
+      "contentType": "Dungeon",
+      "difficultyRole": "Room",
+      "bandId": "dungeon-room",
+      "snapshotAnchorId": "region-02-end",
+      "dungeonFamilyId": "tangled_cave",
+      "dungeonDifficulty": 1,
+      "roomTemplateId": "combat.1",
+      "maxTicks": 1200
+    },
+    {
+      "id": "dungeon.tangled-cave.boss",
+      "contentType": "Dungeon",
+      "difficultyRole": "Boss",
+      "bandId": "dungeon-boss",
+      "snapshotAnchorId": "region-02-end",
+      "dungeonFamilyId": "tangled_cave",
+      "dungeonDifficulty": 1,
+      "roomTemplateId": "boss.1",
+      "maxTicks": 1800
+    },
+    {
+      "id": "dungeon.great-tree.room",
+      "contentType": "Dungeon",
+      "difficultyRole": "Room",
+      "bandId": "dungeon-room",
+      "snapshotAnchorId": "region-02-end",
+      "dungeonFamilyId": "great_tree",
+      "dungeonDifficulty": 1,
+      "roomTemplateId": "combat.1",
+      "maxTicks": 1200
+    },
+    {
+      "id": "dungeon.great-tree.boss",
+      "contentType": "Dungeon",
+      "difficultyRole": "Boss",
+      "bandId": "dungeon-boss",
+      "snapshotAnchorId": "region-02-end",
+      "dungeonFamilyId": "great_tree",
+      "dungeonDifficulty": 1,
       "roomTemplateId": "boss.1",
       "maxTicks": 1800
     },

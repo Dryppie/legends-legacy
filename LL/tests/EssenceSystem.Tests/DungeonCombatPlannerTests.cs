@@ -20,10 +20,12 @@ public sealed class DungeonCombatPlannerTests
             characterId,
             new CharacterSnapshot { CharacterId = characterId },
             requestedTier,
+            2,
             [characterId],
             [Guid.NewGuid()]);
 
         Assert.Equal(expectedTier, plan.DungeonTier);
+        Assert.Equal(2, plan.DungeonRegion);
     }
 
     [Fact]
@@ -35,6 +37,7 @@ public sealed class DungeonCombatPlannerTests
             characterId,
             new CharacterSnapshot { CharacterId = characterId },
             1,
+            2,
             [characterId],
             [Guid.NewGuid()],
             enemyStrengthMultiplier: 3.7f);

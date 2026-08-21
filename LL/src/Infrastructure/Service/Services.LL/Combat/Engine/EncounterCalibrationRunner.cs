@@ -136,7 +136,8 @@ public sealed class AuthoredEncounterCalibrationFactory
         var template = family.RoomTemplates.Single(candidate =>
             candidate.Id.Equals(sample.RoomTemplateId, StringComparison.OrdinalIgnoreCase));
         var progressionPosition = DungeonEnemyDifficultyScaling.GetProgressionPosition(
-            sample.DungeonDifficulty);
+            sample.DungeonDifficulty,
+            family.Region);
         var strengthMultiplier = DungeonEnemyDifficultyScaling.GetStrengthMultiplier(
             sample.DungeonDifficulty,
             difficulty.EnemyStrengthMultiplier);
@@ -1726,6 +1727,7 @@ internal sealed class DungeonContentDocument
 internal sealed class DungeonFamilyContentDefinition
 {
     public string Id { get; set; } = string.Empty;
+    public int Region { get; set; } = 1;
     public List<DungeonRoomTemplateContentDefinition> RoomTemplates { get; set; } = [];
     public List<DungeonDifficultyContentDefinition> Difficulties { get; set; } = [];
 }

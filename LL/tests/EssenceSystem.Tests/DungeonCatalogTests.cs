@@ -7,6 +7,7 @@ using Domain.Models.Dungeons.Definitions.Encounters;
 using Services.LL.JsonDefinitions;
 using Services.LL.JsonDefinitions.Dungeons;
 using Services.LL.JsonDefinitions.Reader;
+using Services.LL.Combat.Layers.Resolution.Dungeon;
 
 namespace EssenceSystem.Tests;
 
@@ -31,12 +32,12 @@ public sealed class DungeonCatalogTests
             new ExpectedDungeon("forgotten_catacombs", "Forgotten Catacombs I", DungeonGrade.GradeI, 11, 13, 1, null, 1.05f),
             new ExpectedDungeon("forgotten_catacombs_ii", "Forgotten Catacombs II", DungeonGrade.GradeII, 12, 14, 1, "forgotten_catacombs", 1.02f),
             new ExpectedDungeon("forgotten_catacombs_iii", "Forgotten Catacombs III", DungeonGrade.GradeIII, 13, 15, 1, "forgotten_catacombs_ii", 1.04f),
-            new ExpectedDungeon("tangled_cave", "Tangled Cave I", DungeonGrade.GradeI, 11, 13, 1, null, 1f),
-            new ExpectedDungeon("tangled_cave_ii", "Tangled Cave II", DungeonGrade.GradeII, 12, 14, 1, "tangled_cave", 1f),
-            new ExpectedDungeon("tangled_cave_iii", "Tangled Cave III", DungeonGrade.GradeIII, 13, 15, 1, "tangled_cave_ii", 1f),
-            new ExpectedDungeon("great_tree", "The Great Tree I", DungeonGrade.GradeI, 11, 13, 1, null, 1f),
-            new ExpectedDungeon("great_tree_ii", "The Great Tree II", DungeonGrade.GradeII, 12, 14, 1, "great_tree", 1f),
-            new ExpectedDungeon("great_tree_iii", "The Great Tree III", DungeonGrade.GradeIII, 13, 15, 1, "great_tree_ii", 1f)
+            new ExpectedDungeon("tangled_cave", "Tangled Cave I", DungeonGrade.GradeI, 11, 13, 1, null, 1.5f),
+            new ExpectedDungeon("tangled_cave_ii", "Tangled Cave II", DungeonGrade.GradeII, 12, 14, 1, "tangled_cave", 1.25f),
+            new ExpectedDungeon("tangled_cave_iii", "Tangled Cave III", DungeonGrade.GradeIII, 13, 15, 1, "tangled_cave_ii", 1.3f),
+            new ExpectedDungeon("great_tree", "The Great Tree I", DungeonGrade.GradeI, 11, 13, 1, null, 1.25f),
+            new ExpectedDungeon("great_tree_ii", "The Great Tree II", DungeonGrade.GradeII, 12, 14, 1, "great_tree", 1.1f),
+            new ExpectedDungeon("great_tree_iii", "The Great Tree III", DungeonGrade.GradeIII, 13, 15, 1, "great_tree_ii", 1.2f)
         };
 
         Assert.Collection(
@@ -150,13 +151,75 @@ public sealed class DungeonCatalogTests
     }
 
     [Fact]
+    public void Region_two_dungeon_grades_increase_in_effective_enemy_pressure()
+    {
+        var dungeons = MaterializeCurrentCatalog();
+
+        foreach (var familyId in new[] { "tangled_cave", "great_tree" })
+        {
+            var pressure = dungeons
+                .Where(dungeon => DungeonDefinitionIdentity.GetFamilyId(dungeon.Id) == familyId)
+                .OrderBy(dungeon => dungeon.Tier)
+                .Select(dungeon => DungeonEnemyDifficultyScaling.GetStrengthMultiplier(
+                    dungeon.Tier,
+                    dungeon.EnemyStrengthMultiplier))
+                .ToArray();
+
+            Assert.Equal(3, pressure.Length);
+            Assert.True(pressure[0] < pressure[1]);
+            Assert.True(pressure[1] < pressure[2]);
+        }
+    }
+
+    [Theory]
+    [InlineData("tangled_cave", "blueprint_execution", "executioners_mark")]
+    [InlineData("great_tree", "blueprint_spirit", "spirit_prism")]
+    public void Region_two_dungeons_reward_their_blueprint_once_and_its_catalyst_on_runs(
+        string familyId,
+        string blueprintItemId,
+        string catalystItemId)
+    {
+        var allDungeons = MaterializeCurrentCatalog();
+        var family = allDungeons
+            .Where(dungeon => DungeonDefinitionIdentity.GetFamilyId(dungeon.Id) == familyId)
+            .OrderBy(dungeon => dungeon.Tier)
+            .ToList();
+        var expectedCatalystChances = new[] { 0.22, 0.16, 0.12 };
+
+        Assert.Equal(3, family.Count);
+        for (var index = 0; index < family.Count; index++)
+        {
+            var dungeon = family[index];
+            var blueprint = Assert.Single(
+                dungeon.RewardTable.FirstClearRewards,
+                reward => reward.ItemId == blueprintItemId);
+            Assert.Equal(1, blueprint.MinAmount);
+            Assert.Equal(1, blueprint.MaxAmount);
+            Assert.Equal(1, blueprint.Chance);
+
+            var catalyst = Assert.Single(dungeon.RewardTable.CompletionRewards);
+            Assert.Equal(catalystItemId, catalyst.ItemId);
+            Assert.Equal(2, catalyst.MinAmount);
+            Assert.Equal(2, catalyst.MaxAmount);
+            Assert.Equal(expectedCatalystChances[index], catalyst.Chance, 3);
+        }
+
+        var rewardsOutsideFamily = allDungeons
+            .Except(family)
+            .SelectMany(dungeon => dungeon.RewardTable.FirstClearRewards
+                .Concat(dungeon.RewardTable.CompletionRewards));
+        Assert.DoesNotContain(rewardsOutsideFamily, reward =>
+            reward.ItemId == blueprintItemId || reward.ItemId == catalystItemId);
+    }
+
+    [Fact]
     public void TangledCave_and_GreatTree_use_the_requested_encounter_roles()
     {
         var dungeons = MaterializeCurrentCatalog();
 
         AssertEncounterRoles(
             Assert.Single(dungeons, dungeon => dungeon.Id == "tangled_cave"),
-            ["giant_spider", "venomous_spider"],
+            ["giant_spider", "venomous_spiderling"],
             "web_weaver_spider",
             "spider_queen");
         AssertEncounterRoles(

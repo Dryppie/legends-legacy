@@ -10,6 +10,7 @@ public sealed record DungeonCombatOrchestrationRequest(
     CharacterSnapshot CharacterSnapshot,
     int CurrentRoomIndex,
     int DungeonTier,
+    int DungeonRegion,
     IReadOnlyList<string> EnemyCreatureKeys,
     IReadOnlyList<AttributeModifierBase>? RunAttributeModifiers = null,
     IReadOnlyList<EssenceAbilityModifierDefinition>? RunAbilityModifiers = null,
