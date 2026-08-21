@@ -285,6 +285,27 @@ describe('EssenceStateService loadout drafts', () => {
     expect(service.spendingDust()).toBeFalse();
   });
 
+  it('applies a Dust upgrade response without reloading companion archives', () => {
+    const upgradedEssence = { id: 'essence-1', level: 2 } as PlayerEssenceDto;
+    essences.getCreatureArchive.calls.reset();
+    essences.getCodex.calls.reset();
+    essences.spendDust.and.returnValue(
+      of({
+        succeeded: true,
+        message: 'Essence Dust spent.',
+        archive: { essences: [upgradedEssence], essenceDust: 9 },
+        inventoryItems: [],
+      }),
+    );
+
+    service.spendDust(upgradedEssence);
+
+    expect(service.archive()?.essences[0].level).toBe(2);
+    expect(service.archive()?.essenceDust).toBe(9);
+    expect(essences.getCreatureArchive).not.toHaveBeenCalled();
+    expect(essences.getCodex).not.toHaveBeenCalled();
+  });
+
   it('reconciles stale Dust state and shows the API validation message', () => {
     const essence = { id: 'essence-1' } as PlayerEssenceDto;
     essences.spendDust.and.returnValue(

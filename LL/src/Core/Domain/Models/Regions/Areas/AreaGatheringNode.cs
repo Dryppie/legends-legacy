@@ -13,5 +13,6 @@ public class AreaGatheringNode
     public GatheringType Type { get; set; }
     public int? LevelRequirement { get; set; }
     public float ProcChance { get; set; } = 1.0f;
+    public double YieldBonusPercent { get; set; }
     public string? RewardTableId { get; set; }
 }

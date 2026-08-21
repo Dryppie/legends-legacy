@@ -64,8 +64,8 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
             GetAscendInfo(essence, definition, canAscend),
             GetEvolveInfo(essence, definition, canEvolve),
             [],
-            MapAbility(definition.ActiveAbility, essence),
-            MapAbility(definition.PassiveAbility, essence),
+            MapAbility(definition.ActiveAbility, essence, context),
+            MapAbility(definition.PassiveAbility, essence, context),
             definition.Tags);
     }
 
@@ -192,39 +192,13 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
         return string.Join(' ', parts);
     }
 
-    private static EssenceAbilityDto MapAbility(AbilitySpec ability, PlayerEssence essence)
+    private static EssenceAbilityDto MapAbility(
+        AbilitySpec ability,
+        PlayerEssence essence,
+        ResolutionContext context)
     {
         var scaledAbility = EssenceAbilityProgressionScaler.Apply(ability, essence.AscensionTier);
-        return new(
-            scaledAbility.Id,
-            scaledAbility.Kind.ToString(),
-            scaledAbility.Name,
-            scaledAbility.Description,
-            scaledAbility.CooldownTicks / 10d,
-            AbilityThreatRules.GetThreatValue(scaledAbility),
-            scaledAbility.ThreatMultiplier,
-            AbilityThreatRules.GetEstimatedThreatPerSecond(scaledAbility),
-            AbilityThreatRules.HasMaintainedThreat(scaledAbility),
-            AbilityTargetMapping.GetDistinctTargets(scaledAbility),
-            scaledAbility.Tags,
-            scaledAbility.Effects.Select(x => new EssenceEffectDto(
-                x.Id,
-                x.Operation.ToString(),
-                x.Target.ToString(),
-                x.BaseValue,
-                x.BaseValue,
-                x.Attribute?.ToString(),
-                x.StatusId,
-                x.DurationTicks > 0 ? x.DurationTicks / 10d : null,
-                x.ScalingAttribute is { } attribute
-                    ? [new EssenceEffectScalingDto(
-                        attribute.ToString(),
-                        x.ScalingCoefficient,
-                        x.MaximumScalingCoefficient > x.ScalingCoefficient
-                            ? x.MaximumScalingCoefficient
-                            : null)]
-                    : [],
-                [])).ToList());
+        return context.Mapper.Map<EssenceAbilityDto>(scaledAbility);
     }
 
     private IReadOnlyList<EssenceAscensionGrantDto> GetAscensionGrants(

@@ -6,6 +6,7 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
+using Domain.Models.Regions.Areas;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Extensions;
 using Services.LL.Interfaces;
@@ -178,7 +179,9 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                         node.Type,
                         node.LevelRequirement,
                         node.ProcChance,
-                        node.RewardTableId))
+                        node.RewardTableId,
+                        YieldMultiplier: AreaGatheringYieldBalance.ResolveMultiplier(node.YieldBonusPercent),
+                        AreaYieldBonusPercent: node.YieldBonusPercent))
                     .ToArray()),
             cancellationToken,
             factors);

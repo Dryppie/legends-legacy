@@ -121,6 +121,39 @@ public sealed class CombatGatheringRewardProcessorTests
     }
 
     [Fact]
+    public async Task Node_yield_multiplier_scales_gathered_quantity()
+    {
+        var processor = new CombatGatheringRewardProcessor(
+            new RecordingRewardRoller(quantity: 15),
+            new StaticItemBaseRepository(),
+            new InventoryItemFactory(),
+            new FixedRandomSource(0d),
+            new StaticProfessionService(),
+            new NoopLevelingService(),
+            new EmptyBonusService());
+        var facts = new CombatGatheringRewardFacts(
+            Guid.NewGuid(),
+            Victories: 1,
+            new EquippedGatheringTool
+            {
+                Name = "Test Pickaxe",
+                GatheringType = GatheringType.Mining
+            },
+            [new CombatGatheringNode(
+                "ore",
+                "Ore",
+                GatheringType.Mining,
+                null,
+                1f,
+                "loot.test",
+                YieldMultiplier: 2d / 3d)]);
+
+        var reward = Assert.Single(await processor.ProcessAsync(facts, CancellationToken.None));
+
+        Assert.Equal(10, Assert.Single(reward.ItemsGained).Quantity);
+    }
+
+    [Fact]
     public async Task Tool_and_soulstone_rare_bonuses_compound_multiplicatively()
     {
         var rewardRoller = new RecordingRewardRoller();

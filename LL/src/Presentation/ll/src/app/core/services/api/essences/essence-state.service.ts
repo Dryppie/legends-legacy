@@ -517,7 +517,7 @@ export class EssenceStateService {
             return;
           }
 
-          this.applyEssenceMutation(response);
+          this.applyEssenceMutation(response, false);
         },
         error: (error) => {
           if (
@@ -875,13 +875,16 @@ export class EssenceStateService {
     this._selectedPlayerEssenceId.set(archive.essences[0]?.id ?? null);
   }
 
-  private applyEssenceMutation(response: EssenceMutationResponseDto): void {
+  private applyEssenceMutation(
+    response: EssenceMutationResponseDto,
+    refreshCompanionArchives = true,
+  ): void {
     this.archiveRequestEpoch += 1;
     this._archive.set(response.archive);
     this.inventoryState.setInventory(response.inventoryItems);
     this.characterState.markOverviewDirty();
     this.ensureSelectedEssence(response.archive);
-    this.refreshCompanionArchives();
+    if (refreshCompanionArchives) this.refreshCompanionArchives();
   }
 
   private updateFavorite(essenceId: string, isFavorite: boolean): void {

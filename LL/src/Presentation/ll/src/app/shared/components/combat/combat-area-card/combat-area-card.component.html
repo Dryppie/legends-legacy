@@ -80,7 +80,7 @@
         [class.border-amber-500/80]="gatheringType === GatheringType.Skinning"
         [class.bg-amber-950/90]="gatheringType === GatheringType.Skinning"
         [class.text-amber-200]="gatheringType === GatheringType.Skinning"
-        [attr.aria-label]="gatheringType + ' gathering node'"
+        [attr.aria-label]="gatheringType + ' abundant area, 50% bonus yield'"
       >
         <span
           class="-rotate-45 text-[0.65rem] font-semibold"
@@ -103,7 +103,7 @@
           [class.bg-amber-400]="gatheringType === GatheringType.Skinning"
           aria-hidden="true"
         ></span>
-        {{ gatheringType }} node
+        Abundant {{ gatheringType }}: +50% yield
       </span>
     </li>
   </ul>

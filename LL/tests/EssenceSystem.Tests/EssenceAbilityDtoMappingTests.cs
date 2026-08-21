@@ -70,6 +70,56 @@ public sealed class EssenceAbilityDtoMappingTests
         Assert.Empty(dto.Targets);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public void Ability_mapping_exposes_description_values_at_every_ascension_tier(int tier)
+    {
+        var ability = new AbilitySpec
+        {
+            Id = "ability.scaled-description",
+            Kind = AbilitySpecKind.Passive,
+            Name = "Scaled Description",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.event",
+                    Operation = AbilityEffectOperation.Heal,
+                    EventMagnitudeCoefficient = 0.05f
+                },
+                new()
+                {
+                    Id = "effect.condition",
+                    Operation = AbilityEffectOperation.Damage,
+                    ConditionScalingCoefficient = 0.02f
+                },
+                new()
+                {
+                    Id = "effect.status",
+                    Operation = AbilityEffectOperation.Damage,
+                    StatusScalingCoefficient = 0.2f
+                },
+                new()
+                {
+                    Id = "effect.duration",
+                    Operation = AbilityEffectOperation.ModifyAttribute,
+                    DurationTicks = 60
+                }
+            ]
+        };
+
+        var scaled = EssenceAbilityProgressionScaler.Apply(ability, tier);
+        var dto = _mapper.Map<EssenceAbilityDto>(scaled);
+
+        Assert.Equal(scaled.Effects[0].EventMagnitudeCoefficient, dto.Effects[0].EventMagnitudeCoefficient, precision: 6);
+        Assert.Equal(scaled.Effects[1].ConditionScalingCoefficient, dto.Effects[1].ConditionScalingCoefficient, precision: 6);
+        Assert.Equal(scaled.Effects[2].StatusScalingCoefficient, dto.Effects[2].StatusScalingCoefficient, precision: 6);
+        Assert.Equal(scaled.Effects[3].DurationTicks / 10d, dto.Effects[3].DurationSeconds);
+    }
+
     [Fact]
     public void Equipped_essence_definition_uses_the_players_ascension_tier()
     {

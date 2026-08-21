@@ -2,11 +2,16 @@ using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Attributes;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Essences.Definitions;
+using System.Text.RegularExpressions;
 
 namespace Services.LL.Essences;
 
 public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
 {
+    private static readonly Regex DescriptionPlaceholderPattern = new(
+        @"\{(?<kind>[a-zA-Z]+)(?<index>\d*)\}",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
     public IReadOnlyList<string> Validate(IReadOnlyList<EssenceDefinition> definitions)
     {
         var errors = new List<string>();
@@ -81,6 +86,7 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
 
         if (string.IsNullOrWhiteSpace(ability.Id)) errors.Add($"{essenceId}: ability id is required.");
         if (string.IsNullOrWhiteSpace(ability.Name)) errors.Add($"{essenceId}/{ability.Id}: ability name is required.");
+        ValidateDescriptionPlaceholders(essenceId, ability, errors);
 
         if (ability.Kind == AbilitySpecKind.Active)
         {
@@ -126,6 +132,49 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
 
             ValidateConditions(essenceId, $"{ability.Id}/{effect.Id}", effect.Conditions, errors);
         }
+    }
+
+    private static void ValidateDescriptionPlaceholders(
+        string essenceId,
+        AbilitySpec ability,
+        ICollection<string> errors)
+    {
+        foreach (Match match in DescriptionPlaceholderPattern.Matches(ability.Description ?? string.Empty))
+        {
+            var kind = match.Groups["kind"].Value;
+            var rawIndex = match.Groups["index"].Value;
+            var index = string.IsNullOrEmpty(rawIndex) ? 1 : int.Parse(rawIndex);
+            var matchingEffectCount = CountPlaceholderEffects(ability.Effects, kind);
+
+            if (index < 1 || matchingEffectCount < index)
+            {
+                errors.Add(
+                    $"{essenceId}/{ability.Id}: description placeholder '{match.Value}' could not be resolved to an effect.");
+            }
+        }
+    }
+
+    private static int CountPlaceholderEffects(
+        IEnumerable<AbilityEffectSpec> effects,
+        string kind)
+    {
+        var normalizedKind = kind.ToLowerInvariant();
+        return normalizedKind switch
+        {
+            "eventscaling" => effects.Count(x => x.EventMagnitudeCoefficient != 0),
+            "conditionscaling" => effects.Count(x => x.ConditionScalingCoefficient != 0),
+            "statusscaling" => effects.Count(x => x.StatusScalingCoefficient != 0),
+            "duration" => effects.Count(x => x.DurationTicks > 0),
+            "damage" => effects.Count(x => x.Operation == AbilityEffectOperation.Damage),
+            "heal" => effects.Count(x => x.Operation == AbilityEffectOperation.Heal),
+            "barrier" => effects.Count(x => x.Operation == AbilityEffectOperation.GrantBarrier),
+            "modify" => effects.Count(x => x.Operation == AbilityEffectOperation.ModifyAttribute),
+            "resource" => effects.Count(x => x.Operation == AbilityEffectOperation.RestoreResource),
+            "status" => effects.Count(x => x.Operation == AbilityEffectOperation.ApplyStatus),
+            _ => Enum.TryParse<AbilityEffectOperation>(kind, true, out var operation)
+                ? effects.Count(x => x.Operation == operation)
+                : 0
+        };
     }
 
     private static void ValidateAbilityModifiers(

@@ -1106,7 +1106,7 @@
     "id": "ability.creature.grave_wisp.pale_flame",
     "kind": "Passive",
     "name": "Pale Flame",
-    "description": "Magical hits deal an additional 5% Shadow Damage.",
+    "description": "Magical hits deal an additional {eventScaling} Shadow Damage.",
     "cooldownTicks": 0,
     "tags": ["Magical", "Buff"],
     "triggers": [
@@ -1447,7 +1447,7 @@
     "id": "ability.creature.thornback_boar.thorned_rush",
     "kind": "Active",
     "name": "Thorned Rush",
-    "description": "Deal 180% Physical Damage plus 2% per Thorns stack.",
+    "description": "Deal 180% Physical Damage plus {conditionScaling} per Thorns stack.",
     "cooldownTicks": 120,
     "tags": ["Physical", "Melee"],
     "effects": [
@@ -2363,7 +2363,7 @@
     "id": "ability.creature.bog_mite.blood_feeders",
     "kind": "Passive",
     "name": "Blood Feeders",
-    "description": "Heal for 5% of damage dealt to Poisoned targets.",
+    "description": "Lifesteal for {eventScaling} of damage dealt to Poisoned targets.",
     "cooldownTicks": 0,
     "tags": ["Healing", "Lifesteal", "Poison"],
     "triggers": [
@@ -2695,7 +2695,7 @@
     "id": "ability.creature.brown_slime.layered_mud",
     "kind": "Passive",
     "name": "Layered Mud",
-    "description": "When hit by a Basic Attack, gain 1 Armor for 6 seconds, up to 30 applications.",
+    "description": "When hit by a Basic Attack, gain 1 Armor for {duration}, up to 30 applications.",
     "cooldownTicks": 0,
     "tags": ["Buff", "Defensive"],
     "triggers": [
@@ -4191,7 +4191,7 @@
     "id": "ability.creature.eydis.springtide",
     "kind": "Active",
     "name": "Springtide",
-    "description": "Deal 100% Magical Damage plus 20% per stack of Abundance to all enemies.",
+    "description": "Deal 100% Magical Damage plus {statusScaling} per stack of Abundance to all enemies.",
     "cooldownTicks": 120,
     "tags": ["Magical", "Area", "Abundance"],
     "effects": [
@@ -4214,7 +4214,7 @@
     "id": "ability.creature.eydis.ancient_heartwood",
     "kind": "Active",
     "name": "Ancient Heartwood",
-    "description": "Increase Defense and Resistance by 50% for 10 seconds.",
+    "description": "Increase Defense and Resistance by 50% for {duration}.",
     "cooldownTicks": 200,
     "tags": ["Defensive", "Transformation", "Nature"],
     "effects": [
@@ -4270,7 +4270,7 @@
     "id": "ability.creature.eydis.endless_spring",
     "kind": "Passive",
     "name": "Endless Spring",
-    "description": "Every 10 seconds, gain 1 Abundance, then heal for 1% of Max Health per Abundance stack.",
+    "description": "Every 10 seconds, gain 1 Abundance, then heal for {statusScaling} of Max Health per Abundance stack.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Healing", "Abundance", "Periodic"],
     "triggers": [
@@ -4433,14 +4433,16 @@
     "description": "Apply Empower to a random ally.",
     "cooldownTicks": 140,
     "tags": ["Buff", "Power"],
-    "effects": [{
-      "id": "effect.creature.gnoll_pack_leader.rallying_cry.empower",
-      "operation": "ApplyCondition",
-      "target": "RandomAlly",
-      "condition": "Empower",
-      "baseValue": 1,
-      "procCoefficient": 1
-    }],
+    "effects": [
+      {
+        "id": "effect.creature.gnoll_pack_leader.rallying_cry.empower",
+        "operation": "ApplyCondition",
+        "target": "RandomAlly",
+        "condition": "Empower",
+        "baseValue": 1,
+        "procCoefficient": 1
+      }
+    ],
     "owningEssenceId": "essence.gnoll_pack_leader"
   },
   {
@@ -4450,19 +4452,23 @@
     "description": "Gain 5% of initial Power whenever an ally dies.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Power"],
-    "triggers": [{
-      "event": "OnDeath",
-      "effectIds": ["effect.creature.gnoll_pack_leader.savage_leader.power"],
-      "conditions": [{"type": "EventSourceIsAlly"}]
-    }],
-    "effects": [{
-      "id": "effect.creature.gnoll_pack_leader.savage_leader.power",
-      "operation": "ModifyAttributePercentOfInitial",
-      "target": "Self",
-      "attribute": "Power",
-      "scalingCoefficient": 0.05,
-      "procCoefficient": 1
-    }],
+    "triggers": [
+      {
+        "event": "OnDeath",
+        "effectIds": ["effect.creature.gnoll_pack_leader.savage_leader.power"],
+        "conditions": [{ "type": "EventSourceIsAlly" }]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.gnoll_pack_leader.savage_leader.power",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Power",
+        "scalingCoefficient": 0.05,
+        "procCoefficient": 1
+      }
+    ],
     "owningEssenceId": "essence.gnoll_pack_leader"
   },
   {
@@ -4472,16 +4478,18 @@
     "description": "Deal 130% Physical Melee damage to three enemies.",
     "cooldownTicks": 180,
     "tags": ["Physical", "Melee", "Area"],
-    "effects": [{
-      "id": "effect.creature.gnoll_raider.loot_and_slash.damage",
-      "operation": "Damage",
-      "target": "ThreeEnemies",
-      "scalingAttribute": "Power",
-      "scalingCoefficient": 1.3,
-      "attackType": "Melee",
-      "damageType": "Physical",
-      "procCoefficient": 1
-    }],
+    "effects": [
+      {
+        "id": "effect.creature.gnoll_raider.loot_and_slash.damage",
+        "operation": "Damage",
+        "target": "ThreeEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.3,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      }
+    ],
     "owningEssenceId": "essence.gnoll_raider"
   },
   {
@@ -4491,20 +4499,38 @@
     "description": "The first time any enemy falls below 40% Health, gain Empower and Haste.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Buff", "Empower", "Haste", "HealthThreshold"],
-    "triggers": [{
-      "event": "OnHealthChanged",
-      "effectIds": [
-        "effect.creature.gnoll_raider.pillage_the_weak.empower",
-        "effect.creature.gnoll_raider.pillage_the_weak.haste"
-      ],
-      "conditions": [
-        {"type": "EventSourceIsEnemy"},
-        {"type": "AnyEnemyHealthBelowPercent", "value": 40}
-      ]
-    }],
+    "triggers": [
+      {
+        "event": "OnHealthChanged",
+        "effectIds": [
+          "effect.creature.gnoll_raider.pillage_the_weak.empower",
+          "effect.creature.gnoll_raider.pillage_the_weak.haste"
+        ],
+        "conditions": [
+          { "type": "EventSourceIsEnemy" },
+          { "type": "AnyEnemyHealthBelowPercent", "value": 40 }
+        ]
+      }
+    ],
     "effects": [
-      {"id": "effect.creature.gnoll_raider.pillage_the_weak.empower", "operation": "ApplyCondition", "target": "Self", "condition": "Empower", "baseValue": 1, "uses": 1, "procCoefficient": 1},
-      {"id": "effect.creature.gnoll_raider.pillage_the_weak.haste", "operation": "ApplyCondition", "target": "Self", "condition": "Haste", "baseValue": 1, "uses": 1, "procCoefficient": 1}
+      {
+        "id": "effect.creature.gnoll_raider.pillage_the_weak.empower",
+        "operation": "ApplyCondition",
+        "target": "Self",
+        "condition": "Empower",
+        "baseValue": 1,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.gnoll_raider.pillage_the_weak.haste",
+        "operation": "ApplyCondition",
+        "target": "Self",
+        "condition": "Haste",
+        "baseValue": 1,
+        "uses": 1,
+        "procCoefficient": 1
+      }
     ],
     "owningEssenceId": "essence.gnoll_raider"
   },
@@ -4515,8 +4541,24 @@
     "description": "Every 4 seconds, grant all allies Barrier equal to 20% Power.",
     "cooldownTicks": 0,
     "tags": ["Summon", "Barrier", "Periodic"],
-    "triggers": [{"event": "OnInterval", "internalCooldownTicks": 40, "initialDelayTicks": 40, "effectIds": ["effect.summon.totemic_ward.warding_pulse.barrier"]}],
-    "effects": [{"id": "effect.summon.totemic_ward.warding_pulse.barrier", "operation": "GrantBarrier", "target": "AllAllies", "scalingAttribute": "Power", "scalingCoefficient": 0.2, "procCoefficient": 1}]
+    "triggers": [
+      {
+        "event": "OnInterval",
+        "internalCooldownTicks": 40,
+        "initialDelayTicks": 40,
+        "effectIds": ["effect.summon.totemic_ward.warding_pulse.barrier"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.summon.totemic_ward.warding_pulse.barrier",
+        "operation": "GrantBarrier",
+        "target": "AllAllies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.2,
+        "procCoefficient": 1
+      }
+    ]
   },
   {
     "id": "ability.creature.gnoll_shaman.totemic_ward",
@@ -4525,7 +4567,16 @@
     "description": "Summon a Totemic Ward with 3% Max Health for 12 seconds. It grants all allies Barrier equal to 20% Power every 4 seconds.",
     "cooldownTicks": 180,
     "tags": ["Summon", "Barrier", "Support"],
-    "effects": [{"id": "effect.creature.gnoll_shaman.totemic_ward.summon", "operation": "Summon", "target": "Self", "summonId": "totemicWard", "durationTicks": 120, "procCoefficient": 1}],
+    "effects": [
+      {
+        "id": "effect.creature.gnoll_shaman.totemic_ward.summon",
+        "operation": "Summon",
+        "target": "Self",
+        "summonId": "totemicWard",
+        "durationTicks": 120,
+        "procCoefficient": 1
+      }
+    ],
     "owningEssenceId": "essence.gnoll_shaman"
   },
   {
@@ -4535,8 +4586,22 @@
     "description": "At the start of combat, apply Weaken to two random enemies.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Debuff"],
-    "triggers": [{"event": "OnCombatStart", "effectIds": ["effect.creature.gnoll_shaman.hex_of_weakness.weaken"]}],
-    "effects": [{"id": "effect.creature.gnoll_shaman.hex_of_weakness.weaken", "operation": "ApplyCondition", "target": "TwoRandomEnemies", "condition": "Weaken", "baseValue": 1, "procCoefficient": 1}],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": ["effect.creature.gnoll_shaman.hex_of_weakness.weaken"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.gnoll_shaman.hex_of_weakness.weaken",
+        "operation": "ApplyCondition",
+        "target": "TwoRandomEnemies",
+        "condition": "Weaken",
+        "baseValue": 1,
+        "procCoefficient": 1
+      }
+    ],
     "owningEssenceId": "essence.gnoll_shaman"
   },
   {
@@ -4546,7 +4611,19 @@
     "description": "Deal 180% Physical Damage, increased by 15% for each living non-summoned ally.",
     "cooldownTicks": 130,
     "tags": ["Physical", "Melee"],
-    "effects": [{"id": "effect.creature.kobold_skirmisher.coordinated_assault.damage", "operation": "Damage", "target": "CurrentTarget", "scalingAttribute": "Power", "scalingCoefficient": 1.8, "livingNonSummonedAllyDamagePercent": 15, "attackType": "Melee", "damageType": "Physical", "procCoefficient": 1}],
+    "effects": [
+      {
+        "id": "effect.creature.kobold_skirmisher.coordinated_assault.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.8,
+        "livingNonSummonedAllyDamagePercent": 15,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      }
+    ],
     "owningEssenceId": "essence.kobold_skirmisher"
   },
   {
@@ -4567,7 +4644,19 @@
     "description": "Deal 110% Magical Damage to up to three enemies; each subsequent hit deals 20% less damage.",
     "cooldownTicks": 130,
     "tags": ["Magical", "Ranged", "Area"],
-    "effects": [{"id": "effect.creature.kobold_sorcerer.chain_lightning.damage", "operation": "Damage", "target": "ThreeRandomEnemies", "scalingAttribute": "Power", "scalingCoefficient": 1.1, "subsequentTargetDamagePercent": 80, "attackType": "Ranged", "damageType": "Magical", "procCoefficient": 1}],
+    "effects": [
+      {
+        "id": "effect.creature.kobold_sorcerer.chain_lightning.damage",
+        "operation": "Damage",
+        "target": "ThreeRandomEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.1,
+        "subsequentTargetDamagePercent": 80,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      }
+    ],
     "owningEssenceId": "essence.kobold_sorcerer"
   },
   {
@@ -4578,16 +4667,72 @@
     "cooldownTicks": 0,
     "tags": ["Passive", "Power", "Periodic"],
     "triggers": [
-      {"event": "OnInterval", "internalCooldownTicks": 30, "initialDelayTicks": 30, "effectIds": ["effect.creature.kobold_sorcerer.focused_energy.gain"]},
-      {"event": "OnDamaged", "effectIds": ["effect.creature.kobold_sorcerer.focused_energy.reset"]},
-      {"event": "OnStatusApplied", "effectIds": ["effect.creature.kobold_sorcerer.focused_energy.power"], "conditions": [{"type": "EventIdIs", "statusId": "status.kobold_sorcerer.focused_energy"}]},
-      {"event": "OnStatusChanged", "effectIds": ["effect.creature.kobold_sorcerer.focused_energy.power"], "conditions": [{"type": "EventIdIs", "statusId": "status.kobold_sorcerer.focused_energy"}]},
-      {"event": "OnStatusRemoved", "effectIds": ["effect.creature.kobold_sorcerer.focused_energy.power"], "conditions": [{"type": "EventIdIs", "statusId": "status.kobold_sorcerer.focused_energy"}]}
+      {
+        "event": "OnInterval",
+        "internalCooldownTicks": 30,
+        "initialDelayTicks": 30,
+        "effectIds": ["effect.creature.kobold_sorcerer.focused_energy.gain"]
+      },
+      {
+        "event": "OnDamaged",
+        "effectIds": ["effect.creature.kobold_sorcerer.focused_energy.reset"]
+      },
+      {
+        "event": "OnStatusApplied",
+        "effectIds": ["effect.creature.kobold_sorcerer.focused_energy.power"],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "status.kobold_sorcerer.focused_energy"
+          }
+        ]
+      },
+      {
+        "event": "OnStatusChanged",
+        "effectIds": ["effect.creature.kobold_sorcerer.focused_energy.power"],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "status.kobold_sorcerer.focused_energy"
+          }
+        ]
+      },
+      {
+        "event": "OnStatusRemoved",
+        "effectIds": ["effect.creature.kobold_sorcerer.focused_energy.power"],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "status.kobold_sorcerer.focused_energy"
+          }
+        ]
+      }
     ],
     "effects": [
-      {"id": "effect.creature.kobold_sorcerer.focused_energy.gain", "operation": "ApplyStatus", "target": "Self", "statusId": "status.kobold_sorcerer.focused_energy", "baseValue": 1, "procCoefficient": 1},
-      {"id": "effect.creature.kobold_sorcerer.focused_energy.reset", "operation": "RemoveStatus", "target": "Self", "statusId": "status.kobold_sorcerer.focused_energy", "procCoefficient": 1},
-      {"id": "effect.creature.kobold_sorcerer.focused_energy.power", "operation": "SynchronizeAttributePerStatusStack", "target": "Self", "statusId": "status.kobold_sorcerer.focused_energy", "attribute": "Power", "scalingCoefficient": 0.02, "procCoefficient": 1}
+      {
+        "id": "effect.creature.kobold_sorcerer.focused_energy.gain",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.kobold_sorcerer.focused_energy",
+        "baseValue": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.kobold_sorcerer.focused_energy.reset",
+        "operation": "RemoveStatus",
+        "target": "Self",
+        "statusId": "status.kobold_sorcerer.focused_energy",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.kobold_sorcerer.focused_energy.power",
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.kobold_sorcerer.focused_energy",
+        "attribute": "Power",
+        "scalingCoefficient": 0.02,
+        "procCoefficient": 1
+      }
     ],
     "owningEssenceId": "essence.kobold_sorcerer"
   },
@@ -4599,8 +4744,24 @@
     "cooldownTicks": 150,
     "tags": ["Physical", "Melee", "Control"],
     "effects": [
-      {"id": "effect.creature.feral_ghoul.feral_pounce.damage", "operation": "Damage", "target": "CurrentTarget", "scalingAttribute": "Power", "scalingCoefficient": 1.5, "attackType": "Melee", "damageType": "Physical", "procCoefficient": 1},
-      {"id": "effect.creature.feral_ghoul.feral_pounce.stun", "operation": "ApplyCondition", "target": "CurrentTarget", "condition": "Stun", "baseValue": 3, "procCoefficient": 1}
+      {
+        "id": "effect.creature.feral_ghoul.feral_pounce.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.5,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.feral_ghoul.feral_pounce.stun",
+        "operation": "ApplyCondition",
+        "target": "CurrentTarget",
+        "condition": "Stun",
+        "baseValue": 3,
+        "procCoefficient": 1
+      }
     ],
     "owningEssenceId": "essence.feral_ghoul"
   },
@@ -4611,8 +4772,23 @@
     "description": "Melee attacks have a 27% chance to apply Bleed(4).",
     "cooldownTicks": 0,
     "tags": ["Passive", "Bleed", "Melee"],
-    "triggers": [{"event": "OnMeleeAttack", "effectIds": ["effect.creature.feral_ghoul.shredding_claws.bleed"]}],
-    "effects": [{"id": "effect.creature.feral_ghoul.shredding_claws.bleed", "operation": "ApplyCondition", "target": "EventTarget", "condition": "Bleed", "baseValue": 4, "chancePercent": 27, "procCoefficient": 1}],
+    "triggers": [
+      {
+        "event": "OnMeleeAttack",
+        "effectIds": ["effect.creature.feral_ghoul.shredding_claws.bleed"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.feral_ghoul.shredding_claws.bleed",
+        "operation": "ApplyCondition",
+        "target": "EventTarget",
+        "condition": "Bleed",
+        "baseValue": 4,
+        "chancePercent": 27,
+        "procCoefficient": 1
+      }
+    ],
     "owningEssenceId": "essence.feral_ghoul"
   },
   {
@@ -4623,8 +4799,24 @@
     "cooldownTicks": 140,
     "tags": ["Physical", "Melee", "Poison", "Area"],
     "effects": [
-      {"id": "effect.creature.plague_ghoul.plague_swipe.damage", "operation": "Damage", "target": "TwoEnemies", "scalingAttribute": "Power", "scalingCoefficient": 1.3, "attackType": "Melee", "damageType": "Physical", "procCoefficient": 1},
-      {"id": "effect.creature.plague_ghoul.plague_swipe.poison", "operation": "ApplyCondition", "target": "TwoEnemies", "condition": "Poison", "baseValue": 15, "procCoefficient": 1}
+      {
+        "id": "effect.creature.plague_ghoul.plague_swipe.damage",
+        "operation": "Damage",
+        "target": "TwoEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.3,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.plague_ghoul.plague_swipe.poison",
+        "operation": "ApplyCondition",
+        "target": "TwoEnemies",
+        "condition": "Poison",
+        "baseValue": 15,
+        "procCoefficient": 1
+      }
     ],
     "owningEssenceId": "essence.plague_ghoul"
   },
@@ -4635,8 +4827,23 @@
     "description": "Melee attacks have a 27% chance to apply Poison(4).",
     "cooldownTicks": 0,
     "tags": ["Passive", "Poison", "Melee"],
-    "triggers": [{"event": "OnMeleeAttack", "effectIds": ["effect.creature.plague_ghoul.pestilent_touch.poison"]}],
-    "effects": [{"id": "effect.creature.plague_ghoul.pestilent_touch.poison", "operation": "ApplyCondition", "target": "EventTarget", "condition": "Poison", "baseValue": 4, "chancePercent": 27, "procCoefficient": 1}],
+    "triggers": [
+      {
+        "event": "OnMeleeAttack",
+        "effectIds": ["effect.creature.plague_ghoul.pestilent_touch.poison"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.plague_ghoul.pestilent_touch.poison",
+        "operation": "ApplyCondition",
+        "target": "EventTarget",
+        "condition": "Poison",
+        "baseValue": 4,
+        "chancePercent": 27,
+        "procCoefficient": 1
+      }
+    ],
     "owningEssenceId": "essence.plague_ghoul"
   },
   {
@@ -4647,8 +4854,24 @@
     "cooldownTicks": 130,
     "tags": ["Physical", "Melee", "Debuff"],
     "effects": [
-      {"id": "effect.creature.ravenous_ghoul.draining_claws.damage", "operation": "Damage", "target": "CurrentTarget", "scalingAttribute": "Power", "scalingCoefficient": 3.1, "attackType": "Melee", "damageType": "Physical", "procCoefficient": 1},
-      {"id": "effect.creature.ravenous_ghoul.draining_claws.weaken", "operation": "ApplyCondition", "target": "CurrentTarget", "condition": "Weaken", "baseValue": 1, "procCoefficient": 1}
+      {
+        "id": "effect.creature.ravenous_ghoul.draining_claws.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 3.1,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.ravenous_ghoul.draining_claws.weaken",
+        "operation": "ApplyCondition",
+        "target": "CurrentTarget",
+        "condition": "Weaken",
+        "baseValue": 1,
+        "procCoefficient": 1
+      }
     ],
     "owningEssenceId": "essence.ravenous_ghoul"
   },
@@ -4659,8 +4882,24 @@
     "description": "The first time an ally dies, heal 40% of Max Health.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Healing"],
-    "triggers": [{"event": "OnDeath", "effectIds": ["effect.creature.ravenous_ghoul.vile_feast.heal"], "conditions": [{"type": "EventSourceIsAlly"}]}],
-    "effects": [{"id": "effect.creature.ravenous_ghoul.vile_feast.heal", "operation": "Heal", "target": "Self", "scalingAttribute": "MaxHealth", "scalingCoefficient": 0.4, "uses": 1, "procCoefficient": 1}],
+    "triggers": [
+      {
+        "event": "OnDeath",
+        "effectIds": ["effect.creature.ravenous_ghoul.vile_feast.heal"],
+        "conditions": [{ "type": "EventSourceIsAlly" }]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.ravenous_ghoul.vile_feast.heal",
+        "operation": "Heal",
+        "target": "Self",
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.4,
+        "uses": 1,
+        "procCoefficient": 1
+      }
+    ],
     "owningEssenceId": "essence.ravenous_ghoul"
   },
   {
@@ -4670,18 +4909,50 @@
     "description": "Deal 175% Physical Damage. If the target is Bleeding, heal for 75% of damage dealt.",
     "cooldownTicks": 140,
     "tags": ["Physical", "Melee", "Lifesteal"],
-    "effects": [{"id": "effect.creature.vampire_fledgeling.taste_of_blood.damage", "operation": "Damage", "target": "CurrentTarget", "scalingAttribute": "Power", "scalingCoefficient": 1.75, "attackType": "Melee", "damageType": "Physical", "lifeStealPercentage": 75, "lifeStealTargetCondition": "Bleed", "procCoefficient": 1}],
+    "effects": [
+      {
+        "id": "effect.creature.vampire_fledgeling.taste_of_blood.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.75,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "lifeStealPercentage": 75,
+        "lifeStealTargetCondition": "Bleed",
+        "procCoefficient": 1
+      }
+    ],
     "owningEssenceId": "essence.vampire_fledgeling"
   },
   {
     "id": "ability.creature.vampire_fledgeling.fresh_hunger",
     "kind": "Passive",
     "name": "Fresh Hunger",
-    "description": "The first ability used against each enemy deals 35% additional damage.",
+    "description": "The first ability used against each enemy deals {eventScaling} additional damage.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Burst"],
-    "triggers": [{"event": "OnHit", "effectIds": ["effect.creature.vampire_fledgeling.fresh_hunger.damage"], "conditions": [{"type": "EventIdIsNot", "statusId": "basic_attack"}]}],
-    "effects": [{"id": "effect.creature.vampire_fledgeling.fresh_hunger.damage", "operation": "Damage", "target": "EventTarget", "eventMagnitudeCoefficient": 0.35, "oncePerTarget": true, "attackType": "None", "damageType": "None", "critEligibility": "Disallowed", "tags": ["Damage.Secondary"], "procCoefficient": 1}],
+    "triggers": [
+      {
+        "event": "OnHit",
+        "effectIds": ["effect.creature.vampire_fledgeling.fresh_hunger.damage"],
+        "conditions": [{ "type": "EventIdIsNot", "statusId": "basic_attack" }]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.vampire_fledgeling.fresh_hunger.damage",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "eventMagnitudeCoefficient": 0.35,
+        "oncePerTarget": true,
+        "attackType": "None",
+        "damageType": "None",
+        "critEligibility": "Disallowed",
+        "tags": ["Damage.Secondary"],
+        "procCoefficient": 1
+      }
+    ],
     "owningEssenceId": "essence.vampire_fledgeling"
   },
   {
@@ -4692,8 +4963,24 @@
     "cooldownTicks": 140,
     "tags": ["Magical", "Melee", "Chill"],
     "effects": [
-      {"id": "effect.creature.wandering_ghost.spectral_passage.damage", "operation": "Damage", "target": "CurrentTarget", "scalingAttribute": "Power", "scalingCoefficient": 1.5, "attackType": "Melee", "damageType": "Magical", "procCoefficient": 1},
-      {"id": "effect.creature.wandering_ghost.spectral_passage.chill", "operation": "ApplyCondition", "target": "CurrentTarget", "condition": "Chill", "baseValue": 3, "procCoefficient": 1}
+      {
+        "id": "effect.creature.wandering_ghost.spectral_passage.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.5,
+        "attackType": "Melee",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.wandering_ghost.spectral_passage.chill",
+        "operation": "ApplyCondition",
+        "target": "CurrentTarget",
+        "condition": "Chill",
+        "baseValue": 3,
+        "procCoefficient": 1
+      }
     ],
     "owningEssenceId": "essence.wandering_ghost"
   },
@@ -4704,8 +4991,25 @@
     "description": "Whenever an enemy dies, deal 120% Magical Damage to another enemy.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Magical"],
-    "triggers": [{"event": "OnDeath", "effectIds": ["effect.creature.wandering_ghost.restless_spirit.damage"], "conditions": [{"type": "EventSourceIsEnemy"}]}],
-    "effects": [{"id": "effect.creature.wandering_ghost.restless_spirit.damage", "operation": "Damage", "target": "RandomEnemy", "scalingAttribute": "Power", "scalingCoefficient": 1.2, "attackType": "None", "damageType": "Magical", "procCoefficient": 1}],
+    "triggers": [
+      {
+        "event": "OnDeath",
+        "effectIds": ["effect.creature.wandering_ghost.restless_spirit.damage"],
+        "conditions": [{ "type": "EventSourceIsEnemy" }]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.wandering_ghost.restless_spirit.damage",
+        "operation": "Damage",
+        "target": "RandomEnemy",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.2,
+        "attackType": "None",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      }
+    ],
     "owningEssenceId": "essence.wandering_ghost"
   }
 ]

@@ -4,7 +4,7 @@
     "kind": "info",
     "element": "[data-tour=lumo-ruins-gathering]",
     "title": "1. Gathering while fighting",
-    "description": "Lumo Ruins has Mining, Woodcutting, and Skinning nodes. After each victory, you use your equipped tool to automatically attempt to collect from the matching node, but the odds are low.",
+    "description": "Every normal combat area supports Mining, Woodcutting, and Skinning. Lumo Ruins is abundant in all three, granting +50% yield when your equipped tool gathers after a victory.",
     "position": "left"
   },
   {

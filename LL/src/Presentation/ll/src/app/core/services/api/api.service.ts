@@ -10,10 +10,15 @@ import { Observable, throwError } from 'rxjs';
 
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
-import { FORCE_STATE_SYNC_RESPONSE_REFRESH } from '../../interceptors/state-sync-context';
+import {
+  FORCE_STATE_SYNC_RESPONSE_REFRESH,
+  STATE_SYNC_SCOPES_HANDLED_BY_RESPONSE,
+} from '../../interceptors/state-sync-context';
 
 export interface ApiMutationOptions {
   forceStateSyncRefresh?: boolean;
+  /** Scopes patched from the response or known to be unchanged by this mutation. */
+  stateSyncScopesHandledByResponse?: readonly string[];
 }
 
 @Injectable({
@@ -92,10 +97,15 @@ export class ApiService {
       .post(`${this.apiUrl}${path}`, JSON.stringify(body), {
         withCredentials: true,
         headers: this.getHeaders(path),
-        context: new HttpContext().set(
-          FORCE_STATE_SYNC_RESPONSE_REFRESH,
-          options.forceStateSyncRefresh ?? true,
-        ),
+        context: new HttpContext()
+          .set(
+            FORCE_STATE_SYNC_RESPONSE_REFRESH,
+            options.forceStateSyncRefresh ?? true,
+          )
+          .set(
+            STATE_SYNC_SCOPES_HANDLED_BY_RESPONSE,
+            options.stateSyncScopesHandledByResponse ?? [],
+          ),
       })
       .pipe(catchError(this.formatErrors));
   }

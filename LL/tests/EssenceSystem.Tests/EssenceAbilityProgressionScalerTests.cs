@@ -102,4 +102,33 @@ public sealed class EssenceAbilityProgressionScalerTests
         Assert.Equal(1.12, scaled.Effects[2].SummonPowerMultiplier, precision: 3);
         Assert.Equal(1.12, scaled.Effects[2].SummonHealthMultiplier, precision: 3);
     }
+
+    [Fact]
+    public void Apply_preserves_effect_behavior_fields_when_cloning_for_ascension()
+    {
+        var ability = new AbilitySpec
+        {
+            Kind = AbilitySpecKind.Passive,
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Operation = AbilityEffectOperation.Damage,
+                    HealthStepPercent = 10,
+                    OncePerTarget = true,
+                    LivingNonSummonedAllyDamagePercent = 15,
+                    SubsequentTargetDamagePercent = 80,
+                    LifeStealTargetCondition = StandardConditionType.Bleed
+                }
+            ]
+        };
+
+        var effect = Assert.Single(EssenceAbilityProgressionScaler.Apply(ability, 1).Effects);
+
+        Assert.Equal(10, effect.HealthStepPercent);
+        Assert.True(effect.OncePerTarget);
+        Assert.Equal(15, effect.LivingNonSummonedAllyDamagePercent);
+        Assert.Equal(80, effect.SubsequentTargetDamagePercent);
+        Assert.Equal(StandardConditionType.Bleed, effect.LifeStealTargetCondition);
+    }
 }

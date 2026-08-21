@@ -10,7 +10,9 @@ public sealed record CombatGatheringNode(
     int? LevelRequirement,
     float ProcChance,
     string? RewardTableId = null,
-    RewardTableDefinition? RewardTable = null)
+    RewardTableDefinition? RewardTable = null,
+    double YieldMultiplier = 1d,
+    double AreaYieldBonusPercent = 0d)
 {
     public bool HasRewards =>
         !string.IsNullOrWhiteSpace(RewardTableId) ||

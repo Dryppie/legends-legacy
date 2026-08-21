@@ -411,6 +411,11 @@ public static class SeedCreatures
             changed |= SetIfChanged(existing.Type, desired.Type, value => existing.Type = value);
             changed |= SetIfChanged(existing.LevelRequirement, desired.LevelRequirement, value => existing.LevelRequirement = value);
             changed |= SetIfChanged(existing.RewardTableId, desired.RewardTableId, value => existing.RewardTableId = value);
+            if (Math.Abs(existing.YieldBonusPercent - desired.YieldBonusPercent) > double.Epsilon)
+            {
+                existing.YieldBonusPercent = desired.YieldBonusPercent;
+                changed = true;
+            }
             if (Math.Abs(existing.ProcChance - desired.ProcChance) > FloatTolerance)
             {
                 existing.ProcChance = desired.ProcChance;
@@ -436,6 +441,7 @@ public static class SeedCreatures
             Type = seed.Type,
             LevelRequirement = seed.LevelRequirement,
             ProcChance = seed.ProcChance,
+            YieldBonusPercent = seed.YieldBonusPercent,
             RewardTableId = seed.RewardTableId
         };
 
@@ -538,6 +544,7 @@ public static class SeedCreatures
         public GatheringType Type { get; set; }
         public int? LevelRequirement { get; set; }
         public float ProcChance { get; set; } = 1f;
+        public double YieldBonusPercent { get; set; }
         public string? RewardTableId { get; set; }
     }
 }

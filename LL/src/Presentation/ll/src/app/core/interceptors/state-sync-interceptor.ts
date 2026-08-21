@@ -8,7 +8,10 @@ import {
 } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { StateSyncCoordinator } from '../services/real-time/game-realtime/state-sync-coordinator.service';
-import { FORCE_STATE_SYNC_RESPONSE_REFRESH } from './state-sync-context';
+import {
+  FORCE_STATE_SYNC_RESPONSE_REFRESH,
+  STATE_SYNC_SCOPES_HANDLED_BY_RESPONSE,
+} from './state-sync-context';
 
 const STATE_REVISIONS_HEADER = 'X-LL-State-Revisions';
 const mutationMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
@@ -49,6 +52,7 @@ export class StateSyncInterceptor implements HttpInterceptor {
             .acceptMutationResponse(
               revisions,
               request.context.get(FORCE_STATE_SYNC_RESPONSE_REFRESH),
+              request.context.get(STATE_SYNC_SCOPES_HANDLED_BY_RESPONSE),
             ),
         );
       }),

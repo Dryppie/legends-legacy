@@ -28,6 +28,7 @@ export interface AreaGatheringNode {
   id: string;
   name: string;
   type: GatheringType;
+  yieldBonusPercent?: number;
 }
 
 export interface Dungeon {

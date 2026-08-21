@@ -43,6 +43,39 @@
   text-underline-offset: 3px;
 }
 
+:host ::ng-deep .damage-type-physical {
+  --ll-description-damage-type: var(--ll-damage-type-physical);
+}
+
+:host ::ng-deep .damage-type-magical {
+  --ll-description-damage-type: var(--ll-damage-type-magical);
+}
+
+:host ::ng-deep .damage-type-bleed {
+  --ll-description-damage-type: var(--ll-damage-type-bleed);
+}
+
+:host ::ng-deep .damage-type-burn {
+  --ll-description-damage-type: var(--ll-damage-type-burn);
+}
+
+:host ::ng-deep .damage-type-poison {
+  --ll-description-damage-type: var(--ll-damage-type-poison);
+}
+
+:host ::ng-deep .damage-type-shadow {
+  --ll-description-damage-type: var(--ll-damage-type-shadow);
+}
+
+:host ::ng-deep [class*="damage-type-"] {
+  color: var(--ll-description-damage-type);
+  text-decoration-color: color-mix(
+    in srgb,
+    var(--ll-description-damage-type) 40%,
+    transparent
+  );
+}
+
 :host ::ng-deep .dmg:focus-visible,
 :host ::ng-deep .heal:focus-visible,
 :host ::ng-deep .mod:focus-visible,

@@ -216,9 +216,15 @@ export class StateSyncCoordinator {
   acceptMutationResponse(
     revisions: Record<string, number>,
     forceRefresh = true,
+    scopesHandledByResponse: readonly StateSyncScope[] = [],
   ): void {
+    const handledScopes = new Set(scopesHandledByResponse);
     for (const [scope, revision] of Object.entries(revisions)) {
       if (!Number.isSafeInteger(revision) || revision < 1) continue;
+      if (handledScopes.has(scope)) {
+        this.acceptHandledMutationRevision(scope, revision);
+        continue;
+      }
       if (!forceRefresh) {
         this.acceptRevision(scope, revision);
         continue;
@@ -239,6 +245,36 @@ export class StateSyncCoordinator {
       this.scheduleRefresh(scope);
     }
     this.publishStatus();
+  }
+
+  private acceptHandledMutationRevision(
+    scope: StateSyncScope,
+    revision: number,
+  ): void {
+    const current = this.revisions.get(scope) ?? 0;
+    const targetRevision = Math.max(current, revision);
+    this.revisions.set(scope, targetRevision);
+
+    const registrations = this.registrations.get(scope);
+    if (registrations) {
+      for (const registration of registrations.values()) {
+        registration.lastRefreshRevision = Math.max(
+          registration.lastRefreshRevision,
+          revision,
+        );
+      }
+    }
+
+    if (this.hasStaleRegistration(scope, targetRevision)) {
+      this.scheduleRefresh(scope);
+      return;
+    }
+
+    const pendingRefresh = this.pendingRefreshes.get(scope);
+    if (pendingRefresh !== undefined) {
+      window.clearTimeout(pendingRefresh);
+      this.pendingRefreshes.delete(scope);
+    }
   }
 
   private refreshRegistration(

@@ -65,7 +65,10 @@ import {
   matchesCreatureEssenceFilter,
 } from './creature-archive-search';
 import { playerEssenceSearchText } from '../../../../shared/search/essence-search';
-import { LocalDatePipe } from '../../../../shared/pipes/local-date/local-date.pipe';
+import {
+  formatLocalDate,
+  LocalDatePipe,
+} from '../../../../shared/pipes/local-date/local-date.pipe';
 
 type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'ready';
 type ArchiveSort = 'name' | 'level' | 'tier';
@@ -874,7 +877,7 @@ export class EssencesComponent implements OnInit {
       return 'You can choose a new target now. After setting one, Focus is locked for 8 hours.';
     }
     if (archive.essenceFocusAvailableAtUtc) {
-      return `New target available ${new Date(archive.essenceFocusAvailableAtUtc).toLocaleString()}.`;
+      return `New target available ${formatLocalDate(archive.essenceFocusAvailableAtUtc, 'short')}.`;
     }
 
     return 'Focus is locked for 8 hours after choosing a target.';

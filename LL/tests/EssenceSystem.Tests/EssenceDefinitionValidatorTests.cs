@@ -129,6 +129,26 @@ public sealed class EssenceDefinitionValidatorTests
     }
 
     [Fact]
+    public void Validate_rejects_description_placeholders_without_a_matching_effect_value()
+    {
+        var definition = ValidDefinition();
+        definition.PassiveAbility.Description = "Heal for {eventScaling2} of damage dealt.";
+        definition.PassiveAbility.Effects =
+        [
+            new()
+            {
+                Id = "effect.heal",
+                Operation = AbilityEffectOperation.Heal,
+                EventMagnitudeCoefficient = 0.05f
+            }
+        ];
+
+        var errors = _validator.Validate([definition]);
+
+        Assert.Contains(errors, error => error.Contains("placeholder '{eventScaling2}' could not be resolved", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void Authored_essence_json_passes_definition_validation()
     {
         var options = new JsonSerializerOptions

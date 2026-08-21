@@ -2,7 +2,7 @@
   class="flex h-full min-h-0 w-full flex-col gap-4 overflow-y-auto overscroll-contain py-4 md:grid md:grid-cols-[minmax(0,1fr)_minmax(20rem,26rem)]"
 >
   <div class="order-2 flex w-full shrink-0 flex-col space-y-2">
-    <section class="ll-panel shrink-0 p-4">
+    <section class="ll-panel hidden shrink-0 p-4 md:block">
       <h2 class="ll-heading text-xl">Tempering</h2>
       <ng-container
         *ngIf="selectedEquipmentInstance() as equipment; else noItem"
@@ -377,7 +377,147 @@
       </div>
 
       <div
-        class="shrink-0 overflow-hidden border-y border-light_gray/60 md:min-h-0 md:flex-1 md:overflow-y-auto md:overscroll-contain"
+        class="flex flex-wrap items-center gap-2 px-1 text-xs md:hidden"
+        aria-label="Sort items to temper"
+      >
+        <span class="mr-1 uppercase tracking-[0.12em] text-secondary"
+          >Sort</span
+        >
+        <button
+          *ngFor="let sort of mobileTemperingSorts"
+          type="button"
+          class="ll-button rounded-full px-3 py-1.5 text-xs"
+          [class.ll-button-primary]="temperingSort() === sort"
+          (click)="setTemperingSort(sort)"
+        >
+          {{ sort }}
+          <span *ngIf="temperingSort() === sort" aria-hidden="true">
+            {{ sortIndicator(sort) }}
+          </span>
+        </button>
+      </div>
+
+      <div
+        class="overflow-hidden border-y border-light_gray/60 md:hidden"
+        role="list"
+        aria-label="Items to temper"
+      >
+        <ng-container *ngFor="let item of filteredInventory()">
+          <article
+            *ngIf="equipmentInstance(item) as equipment"
+            class="border-b border-l-2 border-light_gray/60 last:border-b-0"
+            [ngClass]="{
+              'border-l-primary bg-primary/5':
+                expandedMobileItemId() === equipment.id,
+              'border-l-transparent': expandedMobileItemId() !== equipment.id,
+            }"
+            role="listitem"
+          >
+            <button
+              type="button"
+              class="grid min-h-14 w-full grid-cols-[minmax(0,1fr)_4.75rem_3.75rem_0.75rem] items-center gap-2 px-3 py-2 text-left transition-colors hover:bg-white/5"
+              [attr.aria-expanded]="expandedMobileItemId() === equipment.id"
+              [attr.aria-controls]="'tempering-item-details-' + equipment.id"
+              (click)="toggleMobileItem(equipment)"
+            >
+              <div class="min-w-0 overflow-hidden">
+                <div class="flex min-w-0 items-center gap-2">
+                  <app-item
+                    class="min-w-0"
+                    [item]="equipment"
+                    [popoverTouchDisabled]="true"
+                  ></app-item>
+                  <span
+                    *ngIf="item.isNew"
+                    class="ll-badge ll-badge-accent shrink-0 px-1.5 text-[0.625rem] tracking-[0.04em]"
+                  >
+                    New
+                  </span>
+                </div>
+                <div class="mt-1 truncate text-[0.65rem] text-secondary">
+                  {{ equipment.equipmentBase.equipmentType }} ·
+                  {{ equipment.quality }} · T{{ equipment.itemBudgetTier }}
+                </div>
+              </div>
+
+              <span class="text-right tabular-nums">
+                <strong class="block text-base text-primary">
+                  {{ equipment.itemBudget | number: "1.0-2" }}
+                </strong>
+                <span
+                  class="block text-[0.6rem] uppercase tracking-[0.08em] text-secondary"
+                >
+                  Gear Pwr
+                </span>
+              </span>
+
+              <span class="text-right tabular-nums">
+                <strong class="block text-sm text-white">
+                  {{ equipment.potential ?? 0 }}
+                </strong>
+                <span
+                  class="block text-[0.6rem] uppercase tracking-[0.08em] text-secondary"
+                >
+                  Pot
+                </span>
+              </span>
+
+              <span
+                class="text-sm text-primary transition-transform"
+                [class.rotate-180]="expandedMobileItemId() === equipment.id"
+                aria-hidden="true"
+              >
+                ▼
+              </span>
+            </button>
+
+            <section
+              *ngIf="expandedMobileItemId() === equipment.id"
+              [id]="'tempering-item-details-' + equipment.id"
+              class="border-t border-primary/20 bg-black/20 px-3 pb-3 pt-2"
+            >
+              <div
+                *ngIf="(equipment.requiredLevel ?? 1) > 1"
+                class="ll-item-meta mb-2 text-primary"
+              >
+                Requires level {{ equipment.requiredLevel }}
+              </div>
+
+              <app-equipment-display
+                [item]="equipment"
+                [embedded]="true"
+                [compactCraftingDesign]="true"
+                [showPossibleUpgradeAttributes]="true"
+              ></app-equipment-display>
+
+              <div
+                *ngIf="error() as errorMessage"
+                class="ll-state ll-state-danger mt-3"
+              >
+                {{ errorMessage }}
+              </div>
+
+              <button
+                type="button"
+                class="ll-button ll-button-primary mt-3 w-full py-3"
+                [disabled]="!canTemper()"
+                (click)="temper(equipment)"
+              >
+                Queue Tempering
+              </button>
+              <p
+                *ngIf="selectedIneligibilityReason() as reason"
+                class="mt-2 text-xs text-rose-500"
+              >
+                {{ reason }}
+              </p>
+            </section>
+          </article>
+        </ng-container>
+      </div>
+
+      <div
+        class="hidden shrink-0 overflow-hidden border-y border-light_gray/60 md:block md:min-h-0 md:flex-1 md:overflow-y-auto md:overscroll-contain"
         role="table"
         aria-label="Items to temper"
       >

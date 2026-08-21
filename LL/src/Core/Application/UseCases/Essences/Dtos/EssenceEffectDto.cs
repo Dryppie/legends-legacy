@@ -9,6 +9,9 @@ public sealed record EssenceEffectDto(
     string? Attribute,
     string? Status,
     double? DurationSeconds,
+    double EventMagnitudeCoefficient,
+    double ConditionScalingCoefficient,
+    double StatusScalingCoefficient,
     IReadOnlyList<EssenceEffectScalingDto> Scaling,
     IReadOnlyList<EssenceEffectDto> NestedEffects);
 

@@ -36,7 +36,10 @@ import {
   TournamentTeam,
   TournamentTeamInvite,
 } from '../../../../../shared/models/Dtos/colosseum/tournamentGrounds';
-import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
+import {
+  formatLocalDate,
+  LocalDatePipe,
+} from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 @Component({
   selector: 'app-tournament-grounds',
@@ -665,10 +668,7 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
   }
 
   private shortTime(value: string): string {
-    return new Date(value).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    return formatLocalDate(value, 'shortTime') ?? '';
   }
 
   navigateRound(offset: number): void {

@@ -67,6 +67,11 @@ export class TemperingComponent implements OnDestroy {
   @Input({ required: true }) inventory!: Signal<InventoryItem[]>;
 
   private readonly itemXpPerRarity = 10;
+  readonly mobileTemperingSorts: readonly TemperingSort[] = [
+    'Gear Power',
+    'Potential',
+    'Quality',
+  ];
 
   readonly craftingQueue: Signal<CraftingQueueItem[]>;
   readonly recentOutcomes: Signal<TemperingOutcomeEntry[]>;
@@ -95,6 +100,7 @@ export class TemperingComponent implements OnDestroy {
     this.characterActionsState.stoppingAction(),
   );
   readonly outcomesOpen = signal(false);
+  readonly expandedMobileItemId = signal<string | null>(null);
   readonly error = signal<string | null>(null);
   readonly removingQueueItemId = signal<string | null>(null);
   readonly movingQueueItemId = signal<string | null>(null);
@@ -220,6 +226,12 @@ export class TemperingComponent implements OnDestroy {
     this.selectedItemId.set(e.id);
   }
 
+  toggleMobileItem(equipment: EquipmentInstance): void {
+    const isExpanded = this.expandedMobileItemId() === equipment.id;
+    this.selectedItemId.set(isExpanded ? null : equipment.id);
+    this.expandedMobileItemId.set(isExpanded ? null : equipment.id);
+  }
+
   equipmentInstance(item: InventoryItem): EquipmentInstance {
     return item.itemInstance as EquipmentInstance;
   }
@@ -274,6 +286,7 @@ export class TemperingComponent implements OnDestroy {
         .filter((item) => item.itemInstance.id !== equipment.id),
     );
     this.selectedItemId.set(equipment.id);
+    this.expandedMobileItemId.set(null);
   }
 
   resumeTempering(): void {

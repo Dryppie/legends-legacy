@@ -102,7 +102,10 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.Essences.Commands.EvolveEssence.EvolveEssenceCommand),
             typeof(global::Application.UseCases.Essences.Commands.FavoriteEssence.FavoriteEssenceCommand),
             typeof(global::Application.UseCases.Essences.Commands.SaveEssenceLoadout.SaveEssenceLoadoutCommand),
-            typeof(global::Application.UseCases.Essences.Commands.SetEssenceFocus.SetEssenceFocusCommand),
+            typeof(global::Application.UseCases.Essences.Commands.SetEssenceFocus.SetEssenceFocusCommand));
+
+        Register(profiles, [StateSyncScopes.Essences, StateSyncScopes.Inventory], [],
+            refreshCharacterOverview: true, inventoryWhenChanged: false, refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Essences.Commands.SpendEssenceDust.SpendEssenceDustCommand));
 
         Register(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment], [StateSyncScopes.Guild],

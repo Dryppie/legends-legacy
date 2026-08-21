@@ -238,7 +238,8 @@ public sealed class CraftingRegionOneContentTests
                 {
                     var rewardTableId = node?["rewardTableId"]?.GetValue<string>() ?? string.Empty;
                     return rewardTables.TryGetValue(rewardTableId, out var rewardItemIds) &&
-                           rewardItemIds.Contains(itemId);
+                           rewardItemIds.Contains(itemId) &&
+                           node?["yieldBonusPercent"]?.GetValue<double>() == 50d;
                 }))
                 .Select(area => area?["name"]?.GetValue<string>() ?? string.Empty)
                 .Order(StringComparer.OrdinalIgnoreCase)
@@ -250,13 +251,17 @@ public sealed class CraftingRegionOneContentTests
                 .ToArray();
 
             Assert.DoesNotContain("Cinder Bazaar", source, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains(
+                material?["tier"]?.GetValue<int>() == 1 ? "any Shenic combat area" : "any Meran combat area",
+                source,
+                StringComparison.OrdinalIgnoreCase);
             Assert.NotEmpty(expectedAreaNames);
             Assert.Equal(expectedAreaNames, listedAreaNames);
         }
     }
 
     [Fact]
-    public void CombatAreaGathering_YieldsAboutThirtyTwoAverageEquipmentCraftsPerDay()
+    public void CombatAreaGathering_PreservesAbundantOutputAndScalesBaselineToTwoThirds()
     {
         const double encountersPerDay = 24 * 60 * 60 / 10d;
         var recipes = ReadArray("crafting/base-recipes.json");
@@ -284,6 +289,8 @@ public sealed class CraftingRegionOneContentTests
             .ToList();
 
         Assert.NotEmpty(nodes);
+        Assert.Contains(nodes, node => node?["yieldBonusPercent"]?.GetValue<double>() == 50d);
+        Assert.Contains(nodes, node => node?["yieldBonusPercent"] is null);
         Assert.All(nodes, node =>
         {
             var rewardTableId = node?["rewardTableId"]?.GetValue<string>() ?? string.Empty;
@@ -303,9 +310,18 @@ public sealed class CraftingRegionOneContentTests
                     .Select(entry => entry?["itemId"]?.GetValue<string>() ?? string.Empty));
             Assert.True(materialTierByItemId.TryGetValue(rewardItemId, out var materialTier));
             var procChance = node?["procChance"]?.GetValue<double>() ?? 0;
-            var expectedCrafts = encountersPerDay * procChance * averageYield / averageRecipeCostByTier[materialTier];
+            var yieldBonusPercent = node?["yieldBonusPercent"]?.GetValue<double>() ?? 0d;
+            var yieldMultiplier = (2d / 3d) * (1d + yieldBonusPercent / 100d);
+            var expectedCrafts = encountersPerDay * procChance * averageYield * yieldMultiplier / averageRecipeCostByTier[materialTier];
 
-            Assert.InRange(expectedCrafts, 31.2, 32.8);
+            if (yieldBonusPercent == 50d)
+            {
+                Assert.InRange(expectedCrafts, 31.2, 32.8);
+            }
+            else
+            {
+                Assert.InRange(expectedCrafts, 20.8, 21.9);
+            }
         });
     }
 

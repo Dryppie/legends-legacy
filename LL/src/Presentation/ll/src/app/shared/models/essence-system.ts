@@ -46,6 +46,9 @@ export interface EssenceEffectDto {
   attribute?: string | null;
   status?: string | null;
   durationSeconds?: number | null;
+  eventMagnitudeCoefficient?: number;
+  conditionScalingCoefficient?: number;
+  statusScalingCoefficient?: number;
   scaling?: EssenceEffectScalingDto[];
   nestedEffects?: EssenceEffectDto[];
 }

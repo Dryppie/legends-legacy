@@ -76,6 +76,14 @@
   --ll-color-info: #8ecbff;
   --ll-color-info-soft: rgba(14, 165, 233, 0.14);
 
+  --ll-damage-type-physical: #e6e2d9;
+  --ll-damage-type-magical: #9d86ef;
+  --ll-damage-type-bleed: #d94d5c;
+  --ll-damage-type-burn: #ef8a3c;
+  --ll-damage-type-poison: #82b94b;
+  --ll-damage-type-shadow: #69b6dd;
+  --ll-damage-type-none: #8d8991;
+
   --ll-rarity-common: #d4d4d8;
   --ll-rarity-uncommon: #41f1b6;
   --ll-rarity-rare: #7cb7ff;

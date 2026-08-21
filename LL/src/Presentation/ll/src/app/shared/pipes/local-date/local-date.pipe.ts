@@ -27,6 +27,37 @@ const FORMAT_OPTIONS: Record<LocalDateFormat, Intl.DateTimeFormatOptions> = {
   },
 };
 
+export function resolveLocalDateLocale(
+  browserLocale: string | undefined =
+    typeof navigator === 'undefined' ? undefined : navigator.language,
+  timeZone: string | undefined = new Intl.DateTimeFormat().resolvedOptions()
+    .timeZone,
+): string | undefined {
+  if (!browserLocale || !timeZone?.startsWith('Europe/')) {
+    return browserLocale;
+  }
+
+  const locale = new Intl.Locale(browserLocale);
+  return locale.language === 'en' && locale.region === 'US'
+    ? 'en-GB'
+    : browserLocale;
+}
+
+export function formatLocalDate(
+  value: string | number | Date | null | undefined,
+  format: LocalDateFormat = 'medium',
+): string | null {
+  if (value === null || value === undefined || value === '') return null;
+
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+
+  return new Intl.DateTimeFormat(
+    resolveLocalDateLocale(),
+    FORMAT_OPTIONS[format] ?? FORMAT_OPTIONS.medium,
+  ).format(date);
+}
+
 @Pipe({
   name: 'localDate',
   standalone: true,
@@ -36,14 +67,6 @@ export class LocalDatePipe implements PipeTransform {
     value: string | number | Date | null | undefined,
     format: LocalDateFormat = 'medium',
   ): string | null {
-    if (value === null || value === undefined || value === '') return null;
-
-    const date = value instanceof Date ? value : new Date(value);
-    if (Number.isNaN(date.getTime())) return null;
-
-    return new Intl.DateTimeFormat(
-      undefined,
-      FORMAT_OPTIONS[format] ?? FORMAT_OPTIONS.medium,
-    ).format(date);
+    return formatLocalDate(value, format);
   }
 }

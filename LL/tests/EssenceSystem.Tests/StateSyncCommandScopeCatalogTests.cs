@@ -2,6 +2,7 @@ using Application.MediatR.Attributes;
 using Application.MediatR.Markers;
 using Application.MediatR.Synchronization;
 using Application.UseCases.CharacterActions.Commands.ResolveCharacterAction;
+using Application.UseCases.Essences.Commands.SpendEssenceDust;
 using Application.UseCases.MarketPlaces.Commands.BuyCommodity;
 using Application.WebSockets.Contracts;
 
@@ -41,6 +42,19 @@ public sealed class StateSyncCommandScopeCatalogTests
     {
         var profile = StateSyncCommandScopeCatalog.GetProfile(typeof(ResolveCharacterActionCommand));
 
+        Assert.True(profile.RefreshCharacterSummaryWhenChanged);
+    }
+
+    [Fact]
+    public void SpendingEssenceDustInvalidatesOnlyItsChangedResources()
+    {
+        var profile = StateSyncCommandScopeCatalog.GetProfile(typeof(SpendEssenceDustCommand));
+
+        Assert.Equal(
+            [StateSyncScopes.Essences, StateSyncScopes.Inventory],
+            profile.CharacterScopes);
+        Assert.Empty(profile.WorldScopes);
+        Assert.True(profile.RefreshCharacterOverview);
         Assert.True(profile.RefreshCharacterSummaryWhenChanged);
     }
 }

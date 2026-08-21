@@ -24,7 +24,7 @@
     "targetTimeoutMs": 5000,
     "showBack": true,
     "title": "2. Equip the tool",
-    "description": "Equip your chosen tool. It will automatically gather from matching nodes whenever you win fights in an area that contains them.",
+    "description": "Equip your chosen tool. It will automatically gather its matching resource after victories in any normal combat area. Areas marked abundant grant +50% yield.",
     "position": "bottom"
   }
 ]

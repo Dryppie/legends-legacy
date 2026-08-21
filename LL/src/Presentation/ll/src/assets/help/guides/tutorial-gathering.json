@@ -11,7 +11,7 @@
     },
     {
       "heading": "Gather while fighting",
-      "body": "Combat areas show their available gathering nodes. After victories, your equipped tool automatically attempts to collect from a matching node: Pickaxes gather Ore, Hatchets gather Wood, and Skinning Knives gather Hide."
+      "body": "Every normal combat area supports Mining, Woodcutting, and Skinning. After victories, your equipped tool automatically attempts to collect its matching resource: Pickaxes gather Ore, Hatchets gather Wood, and Skinning Knives gather Hide. Area gathering icons mark abundant resources that receive +50% yield."
     }
   ]
 }

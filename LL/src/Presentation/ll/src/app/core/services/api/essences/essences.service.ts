@@ -58,9 +58,21 @@ export class EssencesService {
     playerEssenceId: string,
     dustAmount: number,
   ): Observable<EssenceMutationResponseDto> {
-    return this.apiService.post(`essence/${playerEssenceId}/spend-dust`, {
-      dustAmount,
-    });
+    return this.apiService.post(
+      `essence/${playerEssenceId}/spend-dust`,
+      { dustAmount },
+      {
+        // The response patches the changed archive/inventory state. These other
+        // legacy Essence scopes are unchanged by leveling and need no refetch.
+        stateSyncScopesHandledByResponse: [
+          'essences',
+          'inventory',
+          'character',
+          'equipment',
+          'quests',
+        ],
+      },
+    );
   }
 
   public ascend(playerEssenceId: string): Observable<EssenceMutationResponseDto> {

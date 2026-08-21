@@ -246,7 +246,7 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         var yieldBonus = PercentageBonusMath.Combine(
             tool.GetBonus(ToolBonusType.GatheringYieldPercent),
             tool.GetBonus(ToolBonusType.SpecificNodeYieldPercent, node.Id));
-        var yieldMultiplier = 1d + yieldBonus / 100d;
+        var yieldMultiplier = Math.Max(0d, node.YieldMultiplier) * (1d + yieldBonus / 100d);
         var doubleChance = Math.Clamp(
             Math.Max(0d, tool.GetBonus(ToolBonusType.DoubleGatherChancePercent)),
             0d,
@@ -290,6 +290,10 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         AddEffect(effects, ToolBonusType.RareMaterialChancePercent, tool.GetBonus(ToolBonusType.RareMaterialChancePercent));
         AddEffect(effects, ToolBonusType.DoubleGatherChancePercent, tool.GetBonus(ToolBonusType.DoubleGatherChancePercent));
         AddEffect(effects, ToolBonusType.BonusRollChancePercent, tool.GetBonus(ToolBonusType.BonusRollChancePercent));
+        if (node.AreaYieldBonusPercent > 0d)
+        {
+            effects.Add($"Abundant area yield: +{node.AreaYieldBonusPercent:0.##}%");
+        }
         AddSoulstoneEffect(effects, "Soulstone yield", gatheringYieldBps);
         AddSoulstoneEffect(effects, "Soulstone gathering EXP", gatheringExperienceGainBps);
         AddSoulstoneEffect(effects, "Soulstone rare chance", rareChanceRelativeBps);

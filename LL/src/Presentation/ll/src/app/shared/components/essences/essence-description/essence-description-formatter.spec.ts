@@ -60,4 +60,108 @@ describe('EssenceDescriptionFormatter magnitude coefficients', () => {
     expect(html).toContain('>134.4% Magical Damage</span>');
     expect(html).not.toContain('134.4%-134.4%');
   });
+
+  it('uses combat-summary colors for damage types and damaging conditions', () => {
+    const html = formatter.format(
+      'Deal 90% Physical Damage and apply Burn(12) and Bleed(12).',
+      [
+        {
+          id: 'effect.burning-mandibles.damage',
+          type: 'Damage',
+          target: 'CurrentTarget',
+          baseValue: 0,
+          currentValue: 0,
+          attribute: null,
+          status: null,
+          durationSeconds: null,
+          scaling: [{ attribute: 'Power', coefficient: 0.9 }],
+          nestedEffects: [],
+        },
+      ],
+      () => 100,
+      'Burning Mandibles',
+    );
+
+    expect(html).toContain('class="dmg damage-type-physical"');
+    expect(html).toContain('class="keyword damage-type-burn"');
+    expect(html).toContain('class="keyword damage-type-bleed"');
+  });
+
+  it('colors damage-type phrases even when they have no authored magnitude', () => {
+    const html = formatter.format(
+      'Combusts for Magical Damage equal to Max Health.',
+      [],
+      () => 0,
+    );
+
+    expect(html).toContain('class="damage-type damage-type-magical"');
+    expect(html).toContain('>Magical Damage</span>');
+  });
+});
+
+describe('EssenceDescriptionFormatter ascension-scaled placeholders', () => {
+  const formatter = new EssenceDescriptionFormatter();
+
+  it('renders event, condition, and status coefficients from effect data', () => {
+    const html = formatter.format(
+      'Heal for {eventScaling}; add {conditionScaling}; then add {statusScaling}.',
+      [
+        {
+          id: 'effect.event',
+          type: 'Heal',
+          target: 'Self',
+          currentValue: 0,
+          eventMagnitudeCoefficient: 0.055,
+        },
+        {
+          id: 'effect.condition',
+          type: 'Damage',
+          target: 'CurrentTarget',
+          currentValue: 0,
+          conditionScalingCoefficient: 0.0224,
+        },
+        {
+          id: 'effect.status',
+          type: 'Damage',
+          target: 'AllEnemies',
+          currentValue: 0,
+          statusScalingCoefficient: 0.224,
+        },
+      ],
+      () => 0,
+    );
+
+    expect(html).toBe('Heal for 5.5%; add 2.24%; then add 22.4%.');
+  });
+
+  it('renders the selected scaled duration with its unit', () => {
+    const html = formatter.format(
+      'Gain Armor for {duration2}.',
+      [
+        {
+          id: 'effect.first',
+          type: 'ModifyAttribute',
+          target: 'Self',
+          currentValue: 0,
+          durationSeconds: 3,
+        },
+        {
+          id: 'effect.second',
+          type: 'ModifyAttribute',
+          target: 'Self',
+          currentValue: 0,
+          durationSeconds: 6.3,
+        },
+      ],
+      () => 0,
+    );
+
+    expect(html).toBe('Gain Armor for 6.3 seconds.');
+  });
+
+  it('leaves an unresolved placeholder visible for diagnosis', () => {
+    const html = formatter.format('Heal for {eventScaling}.', [], () => 0);
+
+    expect(html).toBe('Heal for {eventScaling}.');
+  });
 });

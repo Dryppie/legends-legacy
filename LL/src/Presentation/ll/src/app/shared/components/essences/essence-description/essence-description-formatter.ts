@@ -57,11 +57,15 @@ export class EssenceDescriptionFormatter {
     let text = description.replace(
       placeholder,
       (token, kind: string, rawIndex: string) => {
-        const effect = this.findEffect(
+        const index = rawIndex ? Number(rawIndex) : 1;
+        const scalarValue = this.formatScalarPlaceholder(
           flattenedEffects,
           kind,
-          rawIndex ? Number(rawIndex) : 1,
+          index,
         );
+        if (scalarValue) return protect(this.escapeHtml(scalarValue));
+
+        const effect = this.findEffect(flattenedEffects, kind, index);
         return effect
           ? protect(
               this.buildMagnitudeSpan(
@@ -90,6 +94,7 @@ export class EssenceDescriptionFormatter {
       abilityName,
     );
     text = this.decorateKeywords(text, protect);
+    text = this.decorateStandaloneDamageTypes(text, protect);
 
     let html = this.escapeHtml(text);
     replacements.forEach((replacement, index) => {
@@ -108,7 +113,7 @@ export class EssenceDescriptionFormatter {
     abilityName: string,
   ): string {
     const magnitude =
-      /\b(\d+(?:\.\d+)?(?:\s*-\s*\d+(?:\.\d+)?)?%)\s+((?:(?:ranged|melee)\s+)?(?:(?:Physical|Magical|Shadow|Poison|Burn|Bleed)\s+)?(?:Damage|Power|Max Health)|additional damage)\b/gi;
+      /\b(\d+(?:\.\d+)?(?:\s*-\s*\d+(?:\.\d+)?)?%)\s+((?:(?:ranged|melee|Physical|Magical|Shadow|Poison|Burn|Bleed)\s+){0,2}(?:Damage|Power|Max Health)|additional damage)\b/gi;
 
     return text.replace(
       magnitude,
@@ -164,7 +169,9 @@ export class EssenceDescriptionFormatter {
           this.buildMagnitudeSpan(
             effect,
             total,
-            effectType === 'Heal' ? 'heal' : 'dmg',
+            effectType === 'Heal'
+              ? 'heal'
+              : this.withDamageTypeClass('dmg', suffix),
             unit,
             resolveAttributeValue,
             visibleText.replace(percentText, scaledPercentText),
@@ -194,8 +201,9 @@ export class EssenceDescriptionFormatter {
         const detail = definition.descriptionWithValue
           ? ''
           : this.keywordValueDetail(definition, value);
+        const cssClass = this.withDamageTypeClass('keyword', definition.name);
         const span =
-          '<span class="keyword" tabindex="0" data-tooltip-kind="keyword" ' +
+          `<span class="${cssClass}" tabindex="0" data-tooltip-kind="keyword" ` +
           `data-title="${this.escapeAttribute(definition.name)}" ` +
           `data-description="${this.escapeAttribute(description)}" ` +
           `data-detail="${this.escapeAttribute(detail)}" ` +
@@ -205,6 +213,33 @@ export class EssenceDescriptionFormatter {
         return `${prefix}${protect(span)}`;
       },
     );
+  }
+
+  private decorateStandaloneDamageTypes(
+    text: string,
+    protect: (html: string) => string,
+  ): string {
+    const damageTypePhrase =
+      /\b(Physical|Magical|Shadow)(\s+(?:(?:Melee|Ranged)\s+)?Damage)\b/gi;
+
+    return text.replace(
+      damageTypePhrase,
+      (visibleText: string, damageType: string) =>
+        protect(
+          `<span class="${this.withDamageTypeClass('damage-type', damageType)}">` +
+            `${this.escapeHtml(visibleText)}</span>`,
+        ),
+    );
+  }
+
+  private withDamageTypeClass(baseClass: string, text: string): string {
+    const damageType = text.match(
+      /\b(Physical|Magical|Shadow|Poison|Burn|Bleed)\b/i,
+    )?.[1];
+
+    return damageType
+      ? `${baseClass} damage-type-${damageType.toLowerCase()}`
+      : baseClass;
   }
 
   private buildMagnitudeSpan(
@@ -330,6 +365,40 @@ export class EssenceDescriptionFormatter {
       this.matchesPlaceholderKind(kind, effect.type),
     );
     return matching[index - 1];
+  }
+
+  private formatScalarPlaceholder(
+    effects: EssenceEffectDto[],
+    kind: string,
+    index: number,
+  ): string | undefined {
+    const normalizedKind = kind.toLowerCase();
+    const coefficientField =
+      normalizedKind === 'eventscaling'
+        ? 'eventMagnitudeCoefficient'
+        : normalizedKind === 'conditionscaling'
+          ? 'conditionScalingCoefficient'
+          : normalizedKind === 'statusscaling'
+            ? 'statusScalingCoefficient'
+            : undefined;
+
+    if (coefficientField) {
+      const matching = effects.filter(
+        (effect) => (effect[coefficientField] ?? 0) !== 0,
+      );
+      const coefficient = matching[index - 1]?.[coefficientField];
+      return coefficient ? this.formatPercent(coefficient) : undefined;
+    }
+
+    if (normalizedKind !== 'duration') return undefined;
+
+    const matching = effects.filter(
+      (effect) => (effect.durationSeconds ?? 0) > 0,
+    );
+    const duration = matching[index - 1]?.durationSeconds;
+    if (!duration) return undefined;
+
+    return `${this.formatValue(duration)} ${duration === 1 ? 'second' : 'seconds'}`;
   }
 
   private flattenEffects(effects: EssenceEffectDto[]): EssenceEffectDto[] {

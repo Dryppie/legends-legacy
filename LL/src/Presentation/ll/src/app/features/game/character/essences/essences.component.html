@@ -42,7 +42,10 @@
     {{ essenceState.error() }}
   </div>
 
-  <div *ngIf="essenceState.loading()" class="ll-state ll-state-muted">
+  <div
+    *ngIf="essenceState.loading() && !essenceState.archive()"
+    class="ll-state ll-state-muted"
+  >
     Updating Soul Archive...
   </div>
 
@@ -319,7 +322,7 @@
           <header class="px-4 py-3">
             <div class="flex items-center justify-between gap-3">
               <h3 class="ll-heading text-base text-primary">
-                Ascend
+                Ascend to
                 <ng-container
                   *ngIf="essence.ascendInfo.nextTier !== null; else maxTier"
                 >

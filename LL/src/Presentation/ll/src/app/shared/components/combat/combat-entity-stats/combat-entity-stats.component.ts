@@ -25,13 +25,13 @@ const DAMAGE_TYPE_ORDER_INDEX = new Map(
   DAMAGE_TYPE_ORDER.map((damageType, index) => [damageType, index]),
 );
 const DAMAGE_TYPE_COLORS: Readonly<Record<DamageType, string>> = {
-  Physical: '#e6e2d9',
-  Magical: '#9d86ef',
-  Bleed: '#d94d5c',
-  Burn: '#ef8a3c',
-  Poison: '#82b94b',
-  Shadow: '#69b6dd',
-  None: '#8d8991',
+  Physical: 'var(--ll-damage-type-physical)',
+  Magical: 'var(--ll-damage-type-magical)',
+  Bleed: 'var(--ll-damage-type-bleed)',
+  Burn: 'var(--ll-damage-type-burn)',
+  Poison: 'var(--ll-damage-type-poison)',
+  Shadow: 'var(--ll-damage-type-shadow)',
+  None: 'var(--ll-damage-type-none)',
 };
 type StatsParticipant = {
   id: string;
