@@ -146,7 +146,12 @@ describe('AchievementsComponent title position', () => {
   });
 
   it('persists an equipped title immediately when its position changes', () => {
-    achievementsApi.equipTitle.and.returnValue(of(updatedTitle));
+    achievementsApi.equipTitle.and.returnValue(
+      of({
+        data: updatedTitle,
+        domainVersions: { achievements: 1, character: 1 },
+      }),
+    );
     component.titles.set([{ ...title }]);
 
     component.setTitleDisplayPosition('Suffix');

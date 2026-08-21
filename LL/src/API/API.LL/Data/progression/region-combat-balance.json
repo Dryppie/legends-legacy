@@ -1,119 +1,52 @@
 {
-  "version": 5,
+  "version": 6,
+  "foundation": {
+    "areasPerRegion": 10,
+    "areaGrowth": 1.02,
+    "regionJump": 1.12
+  },
   "profiles": [
     {
-      "id": "legacy-area-v1",
+      "id": "unified-global-v1",
       "targetWinRateBasisPoints": 8500,
       "healthCurve": {
-        "model": "Power",
-        "baseMultiplier": 1.0,
-        "growthPerStep": 0.22,
-        "exponent": 1.12
-      },
-      "offenseCurve": {
-        "model": "Power",
-        "baseMultiplier": 1.0,
-        "growthPerStep": 0.18,
-        "exponent": 1.10
-      },
-      "defenseCurve": {
-        "model": "Power",
-        "baseMultiplier": 1.0,
-        "growthPerStep": 0.16,
-        "exponent": 1.08
-      },
-      "resistanceCurve": {
-        "model": "Power",
-        "baseMultiplier": 1.0,
-        "growthPerStep": 0.16,
-        "exponent": 1.08
-      },
-      "attackSpeedGrowthPerStep": 0.08,
-      "penetrationGrowthPerStep": 0.10,
-      "softDefenseGrowthPerStep": 0.05,
-      "critChancePerStep": 0.03,
-      "critDamagePerStep": 0.04,
-      "critChanceCap": 0.45,
-      "critDamageCap": 2.0,
-      "maximumStepIncrease": 0.50
-    },
-    {
-      "id": "shenic-area-v4",
-      "targetWinRateBasisPoints": 8500,
-      "healthCurve": {
-        "model": "Exponential",
+        "model": "Foundation",
         "baseMultiplier": 1.6,
-        "growthPerStep": 0.180298,
-        "exponent": 1.0
+        "growthPerStep": 0.0,
+        "exponent": 1.35
       },
       "offenseCurve": {
-        "model": "Exponential",
+        "model": "Foundation",
         "baseMultiplier": 1.85,
-        "growthPerStep": 0.122646,
+        "growthPerStep": 0.0,
         "exponent": 1.0
       },
       "defenseCurve": {
-        "model": "Exponential",
+        "model": "Foundation",
         "baseMultiplier": 1.15,
-        "growthPerStep": 0.127070,
-        "exponent": 1.0
+        "growthPerStep": 0.0,
+        "exponent": 0.45
       },
       "resistanceCurve": {
-        "model": "Exponential",
+        "model": "Foundation",
         "baseMultiplier": 1.15,
-        "growthPerStep": 0.127070,
-        "exponent": 1.0
+        "growthPerStep": 0.0,
+        "exponent": 0.45
       },
-      "attackSpeedGrowthPerStep": 0.048830,
-      "penetrationGrowthPerStep": 0.058596,
-      "softDefenseGrowthPerStep": 0.029298,
-      "critChancePerStep": 0.014649,
-      "critDamagePerStep": 0.019532,
-      "critChanceCap": 0.45,
-      "critDamageCap": 2.0,
-      "maximumStepIncrease": 0.27
-    },
-    {
-      "id": "meran-area-v1",
-      "targetWinRateBasisPoints": 8500,
-      "healthCurve": {
-        "model": "Exponential",
-        "baseMultiplier": 8.395309,
-        "growthPerStep": 0.180298,
-        "exponent": 1.0
-      },
-      "offenseCurve": {
-        "model": "Exponential",
-        "baseMultiplier": 5.883016,
-        "growthPerStep": 0.122646,
-        "exponent": 1.0
-      },
-      "defenseCurve": {
-        "model": "Exponential",
-        "baseMultiplier": 3.803705,
-        "growthPerStep": 0.127070,
-        "exponent": 1.0
-      },
-      "resistanceCurve": {
-        "model": "Exponential",
-        "baseMultiplier": 3.803705,
-        "growthPerStep": 0.127070,
-        "exponent": 1.0
-      },
-      "attackSpeedGrowthPerStep": 0.048830,
-      "penetrationGrowthPerStep": 0.058596,
-      "softDefenseGrowthPerStep": 0.029298,
-      "critChancePerStep": 0.014649,
-      "critDamagePerStep": 0.019532,
-      "critChanceCap": 0.45,
-      "critDamageCap": 2.0,
-      "maximumStepIncrease": 0.27
+      "attackSpeedGrowthPerStep": 0.10,
+      "penetrationGrowthPerStep": 0.12,
+      "softDefenseGrowthPerStep": 0.04,
+      "critChancePerStep": 0.10,
+      "critDamagePerStep": 0.25,
+      "critChanceCap": 45.0,
+      "critDamageCap": 200.0,
+      "maximumStepIncrease": 0.20
     }
   ],
   "regions": [
     {
       "regionKey": "shenic",
-      "profileId": "shenic-area-v4",
+      "profileId": "unified-global-v1",
       "startingGlobalStep": 1,
       "startingCombatRating": 47,
       "endingCombatRating": 180,
@@ -144,7 +77,7 @@
     },
     {
       "regionKey": "meran",
-      "profileId": "meran-area-v1",
+      "profileId": "unified-global-v1",
       "startingGlobalStep": 11,
       "startingCombatRating": 200,
       "endingCombatRating": 246,

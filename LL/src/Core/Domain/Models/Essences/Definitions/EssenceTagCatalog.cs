@@ -41,7 +41,7 @@ public static class EssenceTagCatalog
                 "Trigger.OnStatusDispelled", "Trigger.OnSummonDeath", "Trigger.OnAbilityUse", "Trigger.OnAbilityUsed",
                 "Trigger.OnBasicAttack", "Trigger.OnAttacked", "Trigger.OnMeleeAttack", "Trigger.OnRangedAttack",
                 "Trigger.OnMeleeAttacked", "Trigger.OnRangedAttacked", "Trigger.OnHealthChanged", "Trigger.OnDeath",
-                "Trigger.OnEnemyDeath", "Trigger.OnHeal", "Trigger.OnHealed", "Trigger.OnLifestealHeal"
+                "Trigger.OnEnemyDeath", "Trigger.OnDamageDealt", "Trigger.OnHeal", "Trigger.OnHealed", "Trigger.OnLifestealHeal"
             ],
             ["Target"] =
             [

@@ -187,7 +187,7 @@ public static class AbilityCatalogValidator
                 && (!float.IsFinite(threatMultiplier) || threatMultiplier < 0))
                 errors.Add($"{label}: threatMultiplier must be finite and non-negative.");
 
-            ValidateSummonAttributes(label, summon.Attributes, errors);
+            ValidateSummonAttributes(summon, errors);
         }
 
         var knownStatusIds = new HashSet<string>(statuses.Select(x => x.Id), StringComparer.OrdinalIgnoreCase);
@@ -270,6 +270,20 @@ public static class AbilityCatalogValidator
                     errors.Add($"{label}: maintained conditional modifiers cannot use oncePerTarget or chance.");
             }
 
+            if (effect.GuaranteedConditionApplication
+                && effect.Operation is not (AbilityEffectOperation.ApplyCondition
+                    or AbilityEffectOperation.ApplyRandomCondition))
+            {
+                errors.Add($"{label}: guaranteedConditionApplication requires a condition application operation.");
+            }
+            if (effect.StaggerPower < 0)
+                errors.Add($"{label}: staggerPower cannot be negative.");
+            if (effect.StaggerPower > 0
+                && (effect.Operation != AbilityEffectOperation.ApplyCondition
+                    || effect.Condition is not (StandardConditionType.Stun or StandardConditionType.Freeze)))
+            {
+                errors.Add($"{label}: staggerPower requires an ApplyCondition Stun or Freeze effect.");
+            }
             if (effect.Operation is (AbilityEffectOperation.Damage
                     or AbilityEffectOperation.Heal
                     or AbilityEffectOperation.GrantBarrier)
@@ -277,6 +291,15 @@ public static class AbilityCatalogValidator
             {
                 errors.Add(
                     $"{label}: {effect.Operation} cannot use baseValue; author its magnitude with scaling attributes or event-based coefficients.");
+            }
+
+            if (effect.Operation is (AbilityEffectOperation.Damage
+                    or AbilityEffectOperation.Heal
+                    or AbilityEffectOperation.GrantBarrier)
+                && !HasProgressionMagnitudeSource(effect))
+            {
+                errors.Add(
+                    $"{label}: {effect.Operation} requires a positive attribute, event, condition, status, or owned-summon scaling source.");
             }
 
             if (effect.LivingNonSummonedAllyDamagePercent < 0)
@@ -503,6 +526,13 @@ public static class AbilityCatalogValidator
             or AbilityEffectOperation.ModifyDamageTaken
             or AbilityEffectOperation.ModifyDamageTakenFromCondition;
 
+    private static bool HasProgressionMagnitudeSource(AbilityEffectSpec effect) =>
+        (effect.ScalingAttribute is not null && effect.ScalingCoefficient > 0)
+        || effect.EventMagnitudeCoefficient > 0
+        || (effect.ScalingCondition is not null && effect.ConditionScalingCoefficient > 0)
+        || (!string.IsNullOrWhiteSpace(effect.ScalingStatusId) && effect.StatusScalingCoefficient > 0)
+        || (!string.IsNullOrWhiteSpace(effect.ScalingOwnedSummonId) && effect.OwnedSummonScalingCoefficient > 0);
+
     private static void ValidateCosts(
         string ownerId,
         IEnumerable<AbilityCostSpec> costs,
@@ -563,7 +593,9 @@ public static class AbilityCatalogValidator
                 errors.Add($"{ownerId}: condition HasTag requires tag.");
 
             if ((condition.Type == AbilityConditionType.HasCondition
-                 || condition.Type == AbilityConditionType.ConditionStacksAtLeast)
+                 || condition.Type == AbilityConditionType.ConditionStacksAtLeast
+                 || condition.Type == AbilityConditionType.AnyEnemyHasCondition
+                 || condition.Type == AbilityConditionType.NoEnemyHasCondition)
                 && condition.Condition is null)
             {
                 errors.Add($"{ownerId}: condition {condition.Type} requires condition.");
@@ -675,23 +707,53 @@ public static class AbilityCatalogValidator
     }
 
     private static void ValidateSummonAttributes(
-        string summonId,
-        IEnumerable<SummonAttributeSpec> attributes,
+        SummonSpec summon,
         ICollection<string> errors)
     {
+        var summonId = summon.Id;
         var attributeTypes = new HashSet<AttributeType>();
 
-        foreach (var attribute in attributes)
+        foreach (var attribute in summon.Attributes)
         {
             if (!attributeTypes.Add(attribute.Attribute))
                 errors.Add($"{summonId}: duplicate summon attribute '{attribute.Attribute}'.");
 
-            if (attribute.ScalingCoefficient < 0)
-                errors.Add($"{summonId}/{attribute.Attribute}: scaling coefficient cannot be negative.");
+            if (!float.IsFinite(attribute.ScalingCoefficient) || attribute.ScalingCoefficient < 0)
+                errors.Add($"{summonId}/{attribute.Attribute}: scaling coefficient must be finite and non-negative.");
+
+            if (attribute.ScalingCoefficient > 0 && attribute.ScalingAttribute is null)
+                errors.Add($"{summonId}/{attribute.Attribute}: positive scaling requires scalingAttribute.");
+
+            if (attribute.ScalingAttribute is { } scalingAttribute
+                && !AttributeCatalog.IsContentFacing(scalingAttribute))
+            {
+                errors.Add(
+                    $"{summonId}/{attribute.Attribute}: scaling attribute '{scalingAttribute}' is runtime-only and cannot be authored.");
+            }
         }
 
         if (!attributeTypes.Contains(AttributeType.MaxHealth))
             errors.Add($"{summonId}: summon attributes must include MaxHealth.");
+
+        var health = summon.Attributes.FirstOrDefault(x => x.Attribute == AttributeType.MaxHealth);
+        if (health is not null
+            && (health.ScalingAttribute != AttributeType.MaxHealth || health.ScalingCoefficient <= 0))
+        {
+            errors.Add(
+                $"{summonId}/MaxHealth: summon durability must scale positively from owner MaxHealth.");
+        }
+
+        if (summon.CanBasicAttack)
+        {
+            var power = summon.Attributes.FirstOrDefault(x => x.Attribute == AttributeType.Power);
+            if (power is null
+                || power.ScalingAttribute != AttributeType.Power
+                || power.ScalingCoefficient <= 0)
+            {
+                errors.Add(
+                    $"{summonId}/Power: basic-attacking summons must scale positively from owner Power.");
+            }
+        }
     }
 
     private static bool RequiresPositiveConditionValue(StandardConditionType condition) =>

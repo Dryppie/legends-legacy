@@ -2,14 +2,33 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of, Subject, throwError } from 'rxjs';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
-import { GameEventService } from '../../real-time/game-event.service';
 import { InventoryDto } from '../../../../shared/models/Dtos/inventoryDto';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { InventoryService } from './inventory.service';
 import { InventoryStateService } from './inventory-state.service';
+import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
+import { VersionedMutationResult } from '../api.service';
+import { SetInventoryItemFavoriteResponse } from './inventory.service';
 
 describe('InventoryStateService', () => {
+  it('does not let an older inventory request overwrite a mutation response', () => {
+    const initialRequest = new Subject<InventoryDto>();
+    const inventoryApi = jasmine.createSpyObj<InventoryService>(
+      'InventoryService',
+      ['getInventory'],
+    );
+    inventoryApi.getInventory.and.returnValue(initialRequest);
+
+    const service = createService(inventoryApi);
+    service.setInventory([item('mutation-response')]);
+    initialRequest.next({ inventoryItems: [item('stale-item')] });
+
+    expect(service.items().map((entry) => entry.id)).toEqual([
+      'mutation-response',
+    ]);
+  });
+
   it('does not let an older inventory request overwrite a forced refresh', () => {
     const initialRequest = new Subject<InventoryDto>();
     const purchaseRefresh = new Subject<InventoryDto>();
@@ -23,13 +42,6 @@ describe('InventoryStateService', () => {
       providers: [
         InventoryStateService,
         { provide: InventoryService, useValue: inventoryApi },
-        {
-          provide: GameEventService,
-          useValue: {
-            eventEnvelope: { LootReceivedMsg: signal(null) },
-            reconnectCount: signal(0),
-          },
-        },
         { provide: EventBusService, useValue: { logout: signal(false) } },
       ],
     });
@@ -56,13 +68,6 @@ describe('InventoryStateService', () => {
       providers: [
         InventoryStateService,
         { provide: InventoryService, useValue: inventoryApi },
-        {
-          provide: GameEventService,
-          useValue: {
-            eventEnvelope: { LootReceivedMsg: signal(null) },
-            reconnectCount: signal(0),
-          },
-        },
         { provide: EventBusService, useValue: { logout: signal(false) } },
       ],
     });
@@ -91,13 +96,6 @@ describe('InventoryStateService', () => {
       providers: [
         InventoryStateService,
         { provide: InventoryService, useValue: inventoryApi },
-        {
-          provide: GameEventService,
-          useValue: {
-            eventEnvelope: { LootReceivedMsg: signal(null) },
-            reconnectCount: signal(0),
-          },
-        },
         { provide: EventBusService, useValue: { logout: signal(false) } },
       ],
     });
@@ -124,7 +122,15 @@ describe('InventoryStateService', () => {
     inventoryApi.getInventory.and.returnValue(
       of({ inventoryItems: [item('crafted', true), item('old')] }),
     );
-    inventoryApi.markItemSeen.and.returnValue(of({}));
+    inventoryApi.markItemSeen.and.returnValue(
+      of({
+        data: {
+          itemInstanceId: 'crafted-instance',
+          inventoryItems: [item('crafted'), item('old')],
+        },
+        domainVersions: { inventory: 1 },
+      }),
+    );
 
     const service = createService(inventoryApi);
 
@@ -166,10 +172,9 @@ describe('InventoryStateService', () => {
   });
 
   it('updates a favorite optimistically and persists the preference', () => {
-    const favoriteRequest = new Subject<{
-      itemInstanceId: string;
-      isFavorite: boolean;
-    }>();
+    const favoriteRequest = new Subject<
+      VersionedMutationResult<SetInventoryItemFavoriteResponse>
+    >();
     const inventoryApi = jasmine.createSpyObj<InventoryService>(
       'InventoryService',
       ['getInventory', 'setItemFavorite'],
@@ -190,8 +195,12 @@ describe('InventoryStateService', () => {
     );
 
     favoriteRequest.next({
-      itemInstanceId: 'favorite-instance',
-      isFavorite: true,
+      data: {
+        itemInstanceId: 'favorite-instance',
+        isFavorite: true,
+        inventoryItems: [{ ...item('favorite'), isFavorite: true }],
+      },
+      domainVersions: { inventory: 1, equipment: 1 },
     });
     favoriteRequest.complete();
     expect(service.items()[0].isFavorite).toBeTrue();
@@ -220,10 +229,9 @@ describe('InventoryStateService', () => {
   });
 
   it('updates a favorite while the item is equipped', () => {
-    const favoriteRequest = new Subject<{
-      itemInstanceId: string;
-      isFavorite: boolean;
-    }>();
+    const favoriteRequest = new Subject<
+      VersionedMutationResult<SetInventoryItemFavoriteResponse>
+    >();
     const inventoryApi = jasmine.createSpyObj<InventoryService>(
       'InventoryService',
       ['getInventory', 'setItemFavorite'],
@@ -242,8 +250,12 @@ describe('InventoryStateService', () => {
     );
 
     favoriteRequest.next({
-      itemInstanceId: 'equipped-instance',
-      isFavorite: true,
+      data: {
+        itemInstanceId: 'equipped-instance',
+        isFavorite: true,
+        inventoryItems: [],
+      },
+      domainVersions: { inventory: 1, equipment: 1 },
     });
     favoriteRequest.complete();
     expect(service.isFavorite('equipped-instance')).toBeTrue();
@@ -267,6 +279,26 @@ describe('InventoryStateService', () => {
 
     expect(service.isFavorite('equipped-instance')).toBeFalse();
   });
+
+  it('rejects a late mutation snapshot after a newer inventory version is observed', () => {
+    const inventoryApi = jasmine.createSpyObj<InventoryService>(
+      'InventoryService',
+      ['getInventory'],
+    );
+    inventoryApi.getInventory.and.returnValue(
+      of({ inventoryItems: [item('current')] }),
+    );
+    const service = createService(inventoryApi);
+    TestBed.inject(DomainVersionTracker).observe({ inventory: 5 });
+
+    const applied = service.applyVersionedInventory({
+      data: { inventoryItems: [item('late')] },
+      domainVersions: { inventory: 4 },
+    });
+
+    expect(applied).toBeFalse();
+    expect(service.items().map((entry) => entry.id)).toEqual(['current']);
+  });
 });
 
 function createService(
@@ -276,13 +308,6 @@ function createService(
     providers: [
       InventoryStateService,
       { provide: InventoryService, useValue: inventoryApi },
-      {
-        provide: GameEventService,
-        useValue: {
-          eventEnvelope: { LootReceivedMsg: signal(null) },
-          reconnectCount: signal(0),
-        },
-      },
       { provide: EventBusService, useValue: { logout: signal(false) } },
     ],
   });

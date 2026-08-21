@@ -13,7 +13,7 @@ namespace EssenceSystem.Tests;
 public sealed class RealtimeInventoryGameEventOutboxConsumerTests
 {
     [Fact]
-    public async Task Publishes_the_committed_grant_to_both_realtime_protocols()
+    public async Task Publishes_the_committed_grant_to_the_realtime_protocol()
     {
         var characterId = Guid.NewGuid();
         var grantId = Guid.NewGuid();
@@ -40,9 +40,8 @@ public sealed class RealtimeInventoryGameEventOutboxConsumerTests
             [item],
             "champion-market",
             "Champion's Market");
-        var legacy = new RecordingLegacyPublisher();
         var realtime = new RecordingRealtimeBroadcaster();
-        var consumer = new RealtimeInventoryGameEventOutboxConsumer(legacy, realtime, options);
+        var consumer = new RealtimeInventoryGameEventOutboxConsumer(realtime, options);
 
         await consumer.HandleAsync(
             new GameEventOutboxMessage
@@ -52,26 +51,10 @@ public sealed class RealtimeInventoryGameEventOutboxConsumerTests
             },
             CancellationToken.None);
 
-        var legacyEvent = Assert.IsType<LootReceivedMsg>(legacy.Message);
-        Assert.Equal(grantId, legacyEvent.GrantId);
-        Assert.Equal(characterId, legacyEvent.CharacterId);
-        Assert.Equal(3, Assert.Single(legacyEvent.Payload).Quantity);
-
         var realtimeEvent = Assert.IsType<LootReceived>(realtime.Message);
         Assert.Equal(grantId, realtimeEvent.GrantId);
         Assert.Equal(characterId, realtimeEvent.CharacterId);
         Assert.Equal(3, Assert.Single(realtimeEvent.Items).Quantity);
-    }
-
-    private sealed class RecordingLegacyPublisher : IGameEventPublisher
-    {
-        public GameEventMsg? Message { get; private set; }
-
-        public Task PublishAsync(Audience audience, GameEventMsg message)
-        {
-            Message = message;
-            return Task.CompletedTask;
-        }
     }
 
     private sealed class RecordingRealtimeBroadcaster : IGameRealtimeBroadcaster

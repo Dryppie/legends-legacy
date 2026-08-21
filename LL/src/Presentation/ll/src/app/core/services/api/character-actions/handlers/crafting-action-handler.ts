@@ -33,7 +33,7 @@ export class CraftingActionHandler {
       );
     }
 
-    // Crafting Soulstones are applied from the authoritative SoulstoneDropMsg.
+    // Crafting Soulstones are applied from the authoritative SoulstoneDrop event.
     // Adding the session total here as well makes the displayed balance depend
     // on whether the action response or the real-time event arrives first.
   }

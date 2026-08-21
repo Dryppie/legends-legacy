@@ -21,7 +21,6 @@ public sealed record WireCindersCommand(
 public sealed class WireCindersCommandHandler(
     ICurrencyTransferService currencyTransfers,
     IGameEventOutbox outbox,
-    IGameEventPublisher legacyEvents,
     IGameRealtimeBroadcaster gameRealtime,
     IMapper mapper)
     : IRequestHandler<WireCindersCommand, Response<WireCindersResponseDto>>
@@ -108,9 +107,11 @@ public sealed class WireCindersCommandHandler(
             accountId,
             cancellationToken);
 
-        await legacyEvents.PublishAsync(
+        await gameRealtime.PublishAsync(
             new Audience.Character(characterId),
-            new PlayerTransferMsg(transferId, messageId, characterId, message));
+            new PlayerTransfer(transferId, messageId, characterId, message),
+            nameof(WireCindersCommandHandler),
+            cancellationToken);
     }
 
     private static string GetFailureMessage(CinderTransferFailure failure) => failure switch

@@ -10,4 +10,5 @@ public sealed class BuyoutMarketPlaceListingResponseDto
     public required int PurchasedQuantity { get; init; }
     public required long TotalPrice { get; init; }
     public required long BuyerCinders { get; init; }
+    public required MarketplaceChangeSetDto Marketplace { get; init; }
 }

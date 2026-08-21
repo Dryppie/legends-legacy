@@ -1,8 +1,7 @@
 using Application.Interfaces.Services.LL;
-using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
+using Application.UseCases.MarketPlaces;
 using Application.UseCases.MarketPlaces.Dtos.Responses;
-using Application.WebSockets.Contracts;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
@@ -12,16 +11,16 @@ public record CancelMarketPlaceListingCommand(Guid CharacterId, string ListingId
 public class CancelMarketPlaceListingCommandHandler : IRequestHandler<CancelMarketPlaceListingCommand, Response<CancelMarketPlaceListingResponseDto>>
 {
     private readonly IMarketPlaceService _marketPlaceService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly MarketplaceChangePublisher _changePublisher;
     private readonly IMapper _mapper;
 
     public CancelMarketPlaceListingCommandHandler(
         IMarketPlaceService marketPlaceService,
-        IGameEventPublisher eventPublisher,
+        MarketplaceChangePublisher changePublisher,
         IMapper mapper)
     {
         _marketPlaceService = marketPlaceService;
-        _eventPublisher = eventPublisher;
+        _changePublisher = changePublisher;
         _mapper = mapper;
     }
 
@@ -32,14 +31,19 @@ public class CancelMarketPlaceListingCommandHandler : IRequestHandler<CancelMark
         var canceled = await _marketPlaceService.CancelMarketPlaceListingAsync(request.CharacterId, listingId, cancellationToken);
         if (canceled == null) return Response<CancelMarketPlaceListingResponseDto>.Fail("Failed to cancel listing");
 
-        await _eventPublisher.PublishAsync(
-            new Audience.World(),
-            new MarketListingCanceledMsg(listingId, request.CharacterId));
+        var marketplace = await _changePublisher.PublishAsync(
+            [new MarketplaceListingChangeDto(listingId, null)],
+            [],
+            [],
+            [request.CharacterId],
+            nameof(CancelMarketPlaceListingCommand),
+            cancellationToken);
 
         return Response<CancelMarketPlaceListingResponseDto>.Success(new CancelMarketPlaceListingResponseDto
         {
             ListingId = listingId,
-            ReturnedItem = _mapper.Map<Application.UseCases.Inventories.Dtos.InventoryItemDto>(canceled)
+            ReturnedItem = _mapper.Map<Application.UseCases.Inventories.Dtos.InventoryItemDto>(canceled),
+            Marketplace = marketplace
         });
     }
 }

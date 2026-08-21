@@ -25,7 +25,6 @@ public sealed class TransferInventoryItemCommandHandler
 {
     private readonly ICharacterService _characters;
     private readonly IInventoryService _inventory;
-    private readonly IGameEventPublisher _legacyEvents;
     private readonly IGameRealtimeBroadcaster _gameRealtime;
     private readonly IGameEventOutbox _outbox;
     private readonly ILootHistoryService _lootHistory;
@@ -34,7 +33,6 @@ public sealed class TransferInventoryItemCommandHandler
     public TransferInventoryItemCommandHandler(
         ICharacterService characters,
         IInventoryService inventory,
-        IGameEventPublisher legacyEvents,
         IGameRealtimeBroadcaster gameRealtime,
         IGameEventOutbox outbox,
         ILootHistoryService lootHistory,
@@ -42,7 +40,6 @@ public sealed class TransferInventoryItemCommandHandler
     {
         _characters = characters;
         _inventory = inventory;
-        _legacyEvents = legacyEvents;
         _gameRealtime = gameRealtime;
         _outbox = outbox;
         _lootHistory = lootHistory;
@@ -107,20 +104,25 @@ public sealed class TransferInventoryItemCommandHandler
             tradeCounterparty,
             cancellationToken);
 
-        await _legacyEvents.PublishAsync(
-            new Audience.Character(recipientId.Value),
-            new LootReceivedMsg(recipientId.Value, transferredItems, source, tradeCounterparty));
         await _gameRealtime.PublishAsync(
             new Audience.Character(recipientId.Value),
             new LootReceived(recipientId.Value, transferredItems, source, tradeCounterparty),
             nameof(TransferInventoryItemCommandHandler),
             cancellationToken);
 
+        var senderInventory = await _inventory.GetInventoryByIdAsync(
+            request.CharacterId,
+            cancellationToken);
+        if (senderInventory is null)
+            return Response<TransferInventoryItemResponseDto>.Fail(
+                "Your inventory could not be loaded.");
+
         return Response<TransferInventoryItemResponseDto>.Success(new TransferInventoryItemResponseDto
         {
             ItemInstanceId = request.ItemInstanceId,
             RecipientName = transfer.TransferRecord.RecipientCharacterName,
-            Quantity = request.Quantity
+            Quantity = request.Quantity,
+            InventoryItems = _mapper.Map<List<InventoryItemDto>>(senderInventory.InventoryItems)
         });
     }
 
@@ -145,9 +147,11 @@ public sealed class TransferInventoryItemCommandHandler
             accountId,
             cancellationToken);
 
-        await _legacyEvents.PublishAsync(
+        await _gameRealtime.PublishAsync(
             new Audience.Character(characterId),
-            new PlayerTransferMsg(transferId, messageId, characterId, message));
+            new PlayerTransfer(transferId, messageId, characterId, message),
+            nameof(TransferInventoryItemCommandHandler),
+            cancellationToken);
     }
 
     private static string GetFailureMessage(InventoryTransferFailure failure) => failure switch

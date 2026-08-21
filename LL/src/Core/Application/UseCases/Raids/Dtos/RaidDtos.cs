@@ -194,7 +194,14 @@ public sealed record RaidPlaybackFrameDto(
     bool IsFinal,
     BattleOutcome? Outcome);
 
-public sealed record RaidPlaybackEntityStateDto(int EntityIndex, int Health, int Barrier);
+public sealed record RaidPlaybackEntityStateDto(
+    int EntityIndex,
+    int Health,
+    int Barrier,
+    int CurrentStagger = 0,
+    int MaxStagger = 0,
+    bool IsStaggered = false,
+    bool IsStaggerRecovering = false);
 
 public sealed record RaidPlaybackEntityTotalsDto(
     int EntityIndex,
@@ -205,7 +212,9 @@ public sealed record RaidPlaybackEntityTotalsDto(
     int HealthRegenerated,
     int BarrierGenerated,
     int DamageBlocked,
-    int ThreatGenerated = 0);
+    int ThreatGenerated = 0,
+    int StaggerContributed = 0,
+    int StaggerBreaks = 0);
 
 public sealed record RaidPlaybackAbilityTotalsDto(
     int AbilityIndex,
@@ -214,7 +223,9 @@ public sealed record RaidPlaybackAbilityTotalsDto(
     int TotalHealing,
     int TotalBarrier,
     IReadOnlyList<AbilityDamageTypeStats>? DamageByType = null,
-    int TotalThreat = 0);
+    int TotalThreat = 0,
+    int TotalStagger = 0,
+    int StaggerBreaks = 0);
 
 public sealed record RaidParticipantResultDto(
     Guid CharacterId,

@@ -283,11 +283,8 @@ export class InventoryTransferComponent implements OnChanges, OnDestroy {
       .transferItem(this.inventoryItem.itemInstance.id, recipientName, quantity)
       .pipe(finalize(() => this.isTransferring.set(false)))
       .subscribe({
-        next: () => {
-          this.inventoryState.decrementItem(
-            this.inventoryItem.itemInstance.id,
-            quantity,
-          );
+        next: (response) => {
+          this.inventoryState.applyVersionedInventory(response);
           this.transferred.emit();
         },
         error: (err) => {

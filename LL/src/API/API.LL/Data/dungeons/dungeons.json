@@ -40,7 +40,7 @@
         {
           "id": "goblin_mines",
           "difficulty": 1,
-          "enemyStrengthMultiplier": 3.5,
+          "enemyStrengthMultiplier": 1.0,
           "minRooms": 10,
           "maxRooms": 12,
           "rewardTable": {
@@ -139,7 +139,7 @@
         {
           "id": "goblin_mines_ii",
           "difficulty": 2,
-          "enemyStrengthMultiplier": 5.88,
+          "enemyStrengthMultiplier": 1.0,
           "minRooms": 11,
           "maxRooms": 13,
           "rewardTable": {
@@ -238,7 +238,7 @@
         {
           "id": "goblin_mines_iii",
           "difficulty": 3,
-          "enemyStrengthMultiplier": 8.0,
+          "enemyStrengthMultiplier": 1.0,
           "minRooms": 12,
           "maxRooms": 14,
           "rewardTable": {
@@ -383,7 +383,7 @@
         {
           "id": "forgotten_catacombs",
           "difficulty": 1,
-          "enemyStrengthMultiplier": 3.7,
+          "enemyStrengthMultiplier": 1.05,
           "minRooms": 11,
           "maxRooms": 13,
           "rewardTable": {
@@ -467,7 +467,7 @@
         {
           "id": "forgotten_catacombs_ii",
           "difficulty": 2,
-          "enemyStrengthMultiplier": 6.0,
+          "enemyStrengthMultiplier": 1.02,
           "minRooms": 12,
           "maxRooms": 14,
           "rewardTable": {
@@ -551,7 +551,7 @@
         {
           "id": "forgotten_catacombs_iii",
           "difficulty": 3,
-          "enemyStrengthMultiplier": 8.3,
+          "enemyStrengthMultiplier": 1.04,
           "minRooms": 13,
           "maxRooms": 15,
           "rewardTable": {
@@ -631,6 +631,181 @@
               ]
             }
           ]
+        }
+      ]
+    },
+    {
+      "id": "tangled_cave",
+      "name": "Tangled Cave",
+      "sigilItemId": "sigil_tangled_cave",
+      "region": 2,
+      "entryCosts": [
+        {
+          "itemId": "sigil_tangled_cave",
+          "amount": 1
+        }
+      ],
+      "restSiteCount": 1,
+      "roomTemplates": [
+        {
+          "id": "combat.1",
+          "type": "Combat",
+          "weight": 1,
+          "encounterIds": ["venomous_spider", "giant_spider"]
+        },
+        {
+          "id": "miniboss.1",
+          "type": "MiniBoss",
+          "weight": 1,
+          "encounterIds": ["web_weaver_spider", "venomous_spider", "giant_spider"],
+          "featuredEncounterId": "web_weaver_spider"
+        },
+        {
+          "id": "boss.1",
+          "type": "Boss",
+          "weight": 1,
+          "encounterIds": [
+            "spider_queen",
+            "web_weaver_spider",
+            "venomous_spider",
+            "giant_spider"
+          ],
+          "featuredEncounterId": "spider_queen"
+        }
+      ],
+      "difficulties": [
+        {
+          "id": "tangled_cave",
+          "difficulty": 1,
+          "enemyStrengthMultiplier": 1.0,
+          "minRooms": 11,
+          "maxRooms": 13,
+          "rewardTable": {
+            "firstClearRewards": [
+              {
+                "itemId": "item.monster_core.lesser",
+                "minAmount": 6,
+                "maxAmount": 6
+              }
+            ]
+          }
+        },
+        {
+          "id": "tangled_cave_ii",
+          "difficulty": 2,
+          "enemyStrengthMultiplier": 1.0,
+          "minRooms": 12,
+          "maxRooms": 14,
+          "rewardTable": {
+            "firstClearRewards": [
+              {
+                "itemId": "item.monster_core.greater",
+                "minAmount": 12,
+                "maxAmount": 12
+              }
+            ]
+          }
+        },
+        {
+          "id": "tangled_cave_iii",
+          "difficulty": 3,
+          "enemyStrengthMultiplier": 1.0,
+          "minRooms": 13,
+          "maxRooms": 15,
+          "rewardTable": {
+            "firstClearRewards": [
+              {
+                "itemId": "item.monster_core.primal",
+                "minAmount": 24,
+                "maxAmount": 24
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "great_tree",
+      "name": "The Great Tree",
+      "sigilItemId": "sigil_great_tree",
+      "region": 2,
+      "entryCosts": [
+        {
+          "itemId": "sigil_great_tree",
+          "amount": 1
+        }
+      ],
+      "restSiteCount": 1,
+      "roomTemplates": [
+        {
+          "id": "combat.1",
+          "type": "Combat",
+          "weight": 1,
+          "encounterIds": ["wood_nymph", "forest_spirit", "bark_golem"]
+        },
+        {
+          "id": "miniboss.1",
+          "type": "MiniBoss",
+          "weight": 1,
+          "encounterIds": ["treant_guardian", "bark_golem", "wood_nymph"],
+          "featuredEncounterId": "treant_guardian"
+        },
+        {
+          "id": "boss.1",
+          "type": "Boss",
+          "weight": 1,
+          "encounterIds": ["elder_treant", "treant_guardian", "forest_spirit", "wood_nymph"],
+          "featuredEncounterId": "elder_treant"
+        }
+      ],
+      "difficulties": [
+        {
+          "id": "great_tree",
+          "difficulty": 1,
+          "enemyStrengthMultiplier": 1.0,
+          "minRooms": 11,
+          "maxRooms": 13,
+          "rewardTable": {
+            "firstClearRewards": [
+              {
+                "itemId": "item.monster_core.lesser",
+                "minAmount": 6,
+                "maxAmount": 6
+              }
+            ]
+          }
+        },
+        {
+          "id": "great_tree_ii",
+          "difficulty": 2,
+          "enemyStrengthMultiplier": 1.0,
+          "minRooms": 12,
+          "maxRooms": 14,
+          "rewardTable": {
+            "firstClearRewards": [
+              {
+                "itemId": "item.monster_core.greater",
+                "minAmount": 12,
+                "maxAmount": 12
+              }
+            ]
+          }
+        },
+        {
+          "id": "great_tree_iii",
+          "difficulty": 3,
+          "enemyStrengthMultiplier": 1.0,
+          "minRooms": 13,
+          "maxRooms": 15,
+          "rewardTable": {
+            "firstClearRewards": [
+              {
+                "itemId": "item.monster_core.primal",
+                "minAmount": 24,
+                "maxAmount": 24
+              }
+            ]
+          }
         }
       ]
     }

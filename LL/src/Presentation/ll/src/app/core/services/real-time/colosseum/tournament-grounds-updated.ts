@@ -1,5 +1,6 @@
 export interface TournamentGroundsUpdated {
   tournamentId: string;
+  stateVersion: number;
   tournamentNumber: number;
   tournamentName: string;
   event: string;

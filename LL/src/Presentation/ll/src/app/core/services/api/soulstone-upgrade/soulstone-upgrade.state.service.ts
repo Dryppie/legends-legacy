@@ -8,6 +8,8 @@ import {
 import { SoulstoneUpgradeService } from './soulstone-upgrade.service';
 import { CharacterStateService } from '../character/character-state.service';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
+import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
+import { VersionedMutationResult } from '../api.service';
 
 export interface SoulstoneBranchGroup {
   branch: SoulstoneUpgradeBranch;
@@ -45,6 +47,7 @@ export class SoulstoneUpgradeStateService {
   constructor(
     private readonly service: SoulstoneUpgradeService,
     private readonly characterState: CharacterStateService,
+    private readonly domainVersions: DomainVersionTracker,
     stateSync: StateSyncCoordinator,
   ) {
     stateSync.register(
@@ -216,22 +219,39 @@ export class SoulstoneUpgradeStateService {
   }
 
   private applyMutationResult(
-    result: SoulstoneUpgradeMutationResult,
+    result: VersionedMutationResult<SoulstoneUpgradeMutationResult>,
     characterId: string,
   ): void {
     if (this.characterState.currentCharacterId() !== characterId) return;
 
-    this._upgrades.set(result.upgrades);
-    this._loadedCharacterId.set(characterId);
-    this._lastRefund.set(result.refundedSoulstones ?? 0);
-    this._error.set(null);
+    const response = result.data;
+
+    if (
+      this.domainVersions.isCurrent(
+        'soulstones',
+        result.domainVersions['soulstones'],
+      )
+    ) {
+      this.loadEpoch += 1;
+      this._upgrades.set(response.upgrades);
+      this._loadedCharacterId.set(characterId);
+      this._lastRefund.set(response.refundedSoulstones ?? 0);
+      this._error.set(null);
+    }
 
     const latestCharacter = this.characterState.currentCharacter();
-    if (!latestCharacter) return;
+    if (
+      !latestCharacter ||
+      !this.domainVersions.isCurrent(
+        'character',
+        result.domainVersions['character'],
+      )
+    )
+      return;
 
     this.characterState.updateCharacter({
       ...latestCharacter,
-      soulstones: result.soulstones,
+      soulstones: response.soulstones,
     });
   }
 

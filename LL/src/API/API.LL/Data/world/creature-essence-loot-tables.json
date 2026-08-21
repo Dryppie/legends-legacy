@@ -772,6 +772,86 @@
     {
       "id": "monster.wandering_ghost",
       "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.wandering_ghost.restless_spirit", "variants": [{"essenceDefinitionId": "essence.wandering_ghost", "activeAbilityId": "ability.creature.wandering_ghost.spectral_passage", "weight": 1}]}
+    },
+    {
+      "id": "monster.web_weaver_spider",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.web_weaver_spider.web_walker",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.web_weaver_spider",
+            "activeAbilityId": "ability.creature.web_weaver_spider.weavers_grasp",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.spider_queen",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.spider_queen.royal_cocoon",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.spider_queen",
+            "activeAbilityId": "ability.creature.spider_queen.webbed_domain",
+            "weight": 1
+          },
+          {
+            "essenceDefinitionId": "essence.spider_queen_royal_venom",
+            "activeAbilityId": "ability.creature.spider_queen.royal_venom",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.bark_golem",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.bark_golem.barkskin",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.bark_golem",
+            "activeAbilityId": "ability.creature.bark_golem.timber_slam",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.treant_guardian",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.treant_guardian.forest_vitality",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.treant_guardian",
+            "activeAbilityId": "ability.creature.treant_guardian.rootbound_shield",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.elder_treant",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.elder_treant.ancient_essence",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.elder_treant",
+            "activeAbilityId": "ability.creature.elder_treant.ancient_sap",
+            "weight": 1
+          },
+          {
+            "essenceDefinitionId": "essence.elder_treant_thornstorm",
+            "activeAbilityId": "ability.creature.elder_treant.thornstorm",
+            "weight": 1
+          }
+        ]
+      }
     }
   ]
 }

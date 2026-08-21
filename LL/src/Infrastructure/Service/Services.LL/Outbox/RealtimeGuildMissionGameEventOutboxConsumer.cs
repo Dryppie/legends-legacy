@@ -11,7 +11,7 @@ namespace Services.LL.Outbox;
 /// Notifies online guild members after a mission change has committed.
 /// </summary>
 public sealed class RealtimeGuildMissionGameEventOutboxConsumer(
-    IGameEventPublisher eventPublisher,
+    IGameRealtimeBroadcaster eventPublisher,
     JsonSerializerOptions jsonOptions) : IGameEventOutboxConsumer
 {
     public string Consumer => GameEventOutboxConsumerNames.RealtimeGuildMission;
@@ -35,6 +35,8 @@ public sealed class RealtimeGuildMissionGameEventOutboxConsumer(
 
         await eventPublisher.PublishAsync(
             new Audience.Guild(guildId.Value),
-            new GuildMissionsChangedMsg(guildId.Value));
+            new GuildMissionsChanged(guildId.Value),
+            nameof(RealtimeGuildMissionGameEventOutboxConsumer),
+            cancellationToken);
     }
 }

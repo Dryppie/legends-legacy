@@ -16,13 +16,13 @@ public record DonateGuildVaultItemCommand(Guid CharacterId, Guid EquipmentInstan
 public class DonateGuildVaultItemCommandHandler : IRequestHandler<DonateGuildVaultItemCommand, Response<bool>>
 {
     private readonly IGuildVaultService _vault;
-    private readonly IGameEventPublisher _events;
+    private readonly IGameRealtimeBroadcaster _events;
     private readonly IGameEventOutbox _outbox;
     private readonly IMapper _mapper;
 
     public DonateGuildVaultItemCommandHandler(
         IGuildVaultService vault,
-        IGameEventPublisher events,
+        IGameRealtimeBroadcaster events,
         IGameEventOutbox outbox,
         IMapper mapper)
     {
@@ -57,18 +57,22 @@ public class DonateGuildVaultItemCommandHandler : IRequestHandler<DonateGuildVau
 
         await _events.PublishAsync(
             new Audience.Guild(mutation.GuildId),
-            new GuildVaultChatMessageMsg(
+            new GuildVaultChatMessage(
                 mutation.GuildId,
                 messageId,
                 mutation.CharacterId,
                 mutation.CharacterName,
                 "donated",
                 equipment,
-                sentAt));
+                sentAt),
+            nameof(DonateGuildVaultItemCommandHandler),
+            cancellationToken);
 
         await _events.PublishAsync(
             new Audience.Guild(mutation.GuildId),
-            new GuildStateChangedMsg(mutation.GuildId));
+            new GuildStateChanged(mutation.GuildId),
+            nameof(DonateGuildVaultItemCommandHandler),
+            cancellationToken);
         return Response<bool>.Success(true);
     }
 }

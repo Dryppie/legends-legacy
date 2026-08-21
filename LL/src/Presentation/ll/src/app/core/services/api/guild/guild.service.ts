@@ -81,41 +81,57 @@ export class GuildService {
   }
 
   selectMission(missionOptionId: string): Observable<GuildMissionOverview> {
-    return this.api.post('guild/selectMission', missionOptionId).pipe(
-      map((missions) => {
-        return missions;
-      }),
+    return this.api
+      .post('guild/selectMission', missionOptionId, {
+        stateSyncScopesHandledByResponse: ['guild-missions'],
+      })
+      .pipe(
+        map((missions) => {
+          return missions;
+        }),
 
-      catchError(() => {
-        return throwError(() => new Error('Failed to select guild mission'));
-      }),
-    );
+        catchError(() => {
+          return throwError(() => new Error('Failed to select guild mission'));
+        }),
+      );
   }
 
   claimOrderReward(orderId: string): Observable<GuildMissionOverview> {
-    return this.api.post('guild/claimOrderReward', orderId).pipe(
-      map((missions) => {
-        return missions;
-      }),
+    return this.api
+      .post('guild/claimOrderReward', orderId, {
+        stateSyncScopesHandledByResponse: ['guild-missions'],
+      })
+      .pipe(
+        map((missions) => {
+          return missions;
+        }),
 
-      catchError(() => {
-        return throwError(() => new Error('Failed to claim guild order'));
-      }),
-    );
+        catchError(() => {
+          return throwError(() => new Error('Failed to claim guild order'));
+        }),
+      );
   }
 
   claimWeeklyMissionReward(): Observable<GuildMissionOverview> {
-    return this.api.post('guild/claimWeeklyMissionReward').pipe(
-      map((missions) => {
-        return missions;
-      }),
+    return this.api
+      .post(
+        'guild/claimWeeklyMissionReward',
+        {},
+        {
+          stateSyncScopesHandledByResponse: ['guild-missions'],
+        },
+      )
+      .pipe(
+        map((missions) => {
+          return missions;
+        }),
 
-      catchError(() => {
-        return throwError(
-          () => new Error('Failed to claim weekly guild mission reward'),
-        );
-      }),
-    );
+        catchError(() => {
+          return throwError(
+            () => new Error('Failed to claim weekly guild mission reward'),
+          );
+        }),
+      );
   }
 
   getShop(): Observable<GuildShopOverview | null> {
@@ -131,15 +147,19 @@ export class GuildService {
   }
 
   purchaseShopItem(itemKey: string): Observable<GuildShopPurchaseResponse> {
-    return this.api.post('guild/purchaseShopItem', itemKey).pipe(
-      map((shop) => {
-        return shop;
-      }),
+    return this.api
+      .post('guild/purchaseShopItem', itemKey, {
+        stateSyncScopesHandledByResponse: ['guild-shop', 'inventory'],
+      })
+      .pipe(
+        map((shop) => {
+          return shop;
+        }),
 
-      catchError(() => {
-        return throwError(() => new Error('Failed to purchase guild item'));
-      }),
-    );
+        catchError(() => {
+          return throwError(() => new Error('Failed to purchase guild item'));
+        }),
+      );
   }
 
   donateVaultItem(equipmentInstanceId: string): Observable<void> {
@@ -177,37 +197,49 @@ export class GuildService {
   constructBuilding(
     buildingType: GuildBuildingType,
   ): Observable<GuildBuildingOverview> {
-    return this.api.post('guild/constructBuilding', buildingType).pipe(
-      map((buildings) => {
-        return buildings;
-      }),
+    return this.api
+      .post('guild/constructBuilding', buildingType, {
+        stateSyncScopesHandledByResponse: ['guild-buildings'],
+      })
+      .pipe(
+        map((buildings) => {
+          return buildings;
+        }),
 
-      catchError(() => {
-        return throwError(() => new Error('Failed to construct building'));
-      }),
-    );
+        catchError(() => {
+          return throwError(() => new Error('Failed to construct building'));
+        }),
+      );
   }
 
   upgradeBuilding(id: string): Observable<GuildBuildingOverview> {
-    return this.api.post('guild/upgradeBuilding', id).pipe(
-      map((buildings) => {
-        return buildings;
-      }),
+    return this.api
+      .post('guild/upgradeBuilding', id, {
+        stateSyncScopesHandledByResponse: ['guild-buildings'],
+      })
+      .pipe(
+        map((buildings) => {
+          return buildings;
+        }),
 
-      catchError(() => {
-        return throwError(() => new Error('Failed to upgrade building'));
-      }),
-    );
+        catchError(() => {
+          return throwError(() => new Error('Failed to upgrade building'));
+        }),
+      );
   }
 
   setBuildingTarget(
     buildingType: GuildBuildingType,
   ): Observable<GuildBuildingOverview> {
-    return this.api.post('guild/setBuildingTarget', buildingType).pipe(
-      catchError(() => {
-        return throwError(() => new Error('Failed to set building target'));
-      }),
-    );
+    return this.api
+      .post('guild/setBuildingTarget', buildingType, {
+        stateSyncScopesHandledByResponse: ['guild-buildings'],
+      })
+      .pipe(
+        catchError(() => {
+          return throwError(() => new Error('Failed to set building target'));
+        }),
+      );
   }
 
   applyToGuild(guildId: string) {

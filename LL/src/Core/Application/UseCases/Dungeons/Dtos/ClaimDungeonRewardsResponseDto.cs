@@ -9,4 +9,5 @@ public sealed class ClaimDungeonRewardsResponseDto
     public required List<InventoryItemDto> InventoryItems { get; init; }
     public required List<InventoryItemDto> ClaimedLoot { get; init; }
     public required CharacterDto Character { get; init; }
+    public required DungeonHubDto Hub { get; init; }
 }

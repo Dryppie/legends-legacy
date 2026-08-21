@@ -1,5 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import {
@@ -9,7 +18,8 @@ import {
   RaidService,
   RaidTrophyVendor,
 } from '../../../../../core/services/api/raid/raid.service';
-import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
+import { GameRealtimeEventRegistry } from '../../../../../core/services/real-time/game-realtime/game-realtime-event-registry.service';
+import { RealtimeSignalDeduper } from '../../../../../core/services/real-time/game-realtime/realtime-deduplication';
 import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 @Component({
@@ -23,8 +33,8 @@ export class RaidsComponent implements OnChanges {
   @Output() changed = new EventEmitter<void>();
   private readonly raids = inject(RaidService);
   private readonly router = inject(Router);
-  private readonly events = inject(GameEventService);
-  private lastRealtimeUpdateId: string | null = null;
+  private readonly events = inject(GameRealtimeEventRegistry);
+  private readonly realtimeDeduper = new RealtimeSignalDeduper();
   readonly openRaids = signal<RaidRunSummary[]>([]);
   readonly loading = signal(false);
   readonly action = signal<string | null>(null);
@@ -36,16 +46,15 @@ export class RaidsComponent implements OnChanges {
 
   constructor() {
     effect(() => {
-      const envelope = this.events.eventEnvelope.RaidUpdated();
+      const envelope = this.events.eventEnvelope.RaidDirectoryUpdated();
       if (
         !envelope?.updateId ||
-        envelope.updateId === this.lastRealtimeUpdateId ||
+        !this.realtimeDeduper.shouldProcess('raid-directory', envelope) ||
         envelope.payload.raidBossId !== this.raidBoss?.id
       ) {
         return;
       }
 
-      this.lastRealtimeUpdateId = envelope.updateId;
       this.load();
       this.changed.emit();
     });
@@ -128,7 +137,10 @@ export class RaidsComponent implements OnChanges {
     const milliseconds = new Date(value).getTime() - Date.now();
     if (milliseconds <= 0) return 'closing';
     const hours = Math.floor(milliseconds / 3_600_000);
-    const minutes = Math.max(1, Math.floor((milliseconds % 3_600_000) / 60_000));
+    const minutes = Math.max(
+      1,
+      Math.floor((milliseconds % 3_600_000) / 60_000),
+    );
     return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
   }
 
@@ -155,7 +167,9 @@ export class RaidsComponent implements OnChanges {
   }
 
   currentTier() {
-    return this.raidBoss.tiers.find((tier) => tier.tier === this.selectedTier());
+    return this.raidBoss.tiers.find(
+      (tier) => tier.tier === this.selectedTier(),
+    );
   }
 
   unclaimedRewardCount(): number {
@@ -183,6 +197,8 @@ export class RaidsComponent implements OnChanges {
   }
 
   private errorMessage(error: any): string {
-    return error?.errorMessage ?? error?.error?.errorMessage ?? 'Raid action failed.';
+    return (
+      error?.errorMessage ?? error?.error?.errorMessage ?? 'Raid action failed.'
+    );
   }
 }

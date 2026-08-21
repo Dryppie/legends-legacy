@@ -11,11 +11,11 @@ import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { computed, effect, Injectable, signal, untracked } from '@angular/core';
 import { InventoryService } from './inventory.service';
 import { ItemType } from '../../../../shared/models/enums/itemType';
-import { GameEventService } from '../../real-time/game-event.service';
-import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
-import { isGameRealtimeEnabled } from '../../real-time/game-realtime/game-realtime-feature';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
+import { VersionedMutationResult } from '../api.service';
+import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
+import { BusinessGrantDeduper } from '../../real-time/game-realtime/realtime-deduplication';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryStateService {
@@ -47,18 +47,15 @@ export class InventoryStateService {
     return favorites;
   });
   private readonly _lastLoot = signal<InventoryItem[] | null>(null);
-  private readonly suppressedLootSignatures = new Set<string>();
-  private readonly processedInventoryGrantIds = new Set<string>();
-  private readonly processedInventoryGrantOrder: string[] = [];
-  private readonly eventDeduper = new GameEventDeduper();
+  private readonly inventoryGrantDeduper = new BusinessGrantDeduper();
   private resetVersion = 0;
   private loadVersion = 0;
 
   constructor(
     private inventoryService: InventoryService,
-    private readonly eventService: GameEventService,
     private readonly eventBus: EventBusService,
     private readonly stateSync: StateSyncCoordinator,
+    private readonly domainVersions: DomainVersionTracker,
   ) {
     this.stateSync.register('inventory', 'inventory', () =>
       this.synchronize(true),
@@ -74,32 +71,6 @@ export class InventoryStateService {
       { allowSignalWrites: true },
     );
 
-    effect(
-      () => {
-        if (isGameRealtimeEnabled()) return;
-
-        const envelope = this.eventService.eventEnvelope.LootReceivedMsg();
-        const loot = envelope?.payload;
-        if (loot) {
-          if (!this.eventDeduper.shouldProcess('loot-received', envelope)) {
-            return;
-          }
-
-          const signature = this.getLootSignature(loot.payload);
-          if (this.suppressedLootSignatures.delete(signature)) {
-            return;
-          }
-
-          if (loot.grantId) {
-            this.applyInventoryGrant(loot.grantId, loot.payload);
-          } else {
-            this._lastLoot.set(loot.payload);
-          }
-        }
-      },
-      { allowSignalWrites: true },
-    );
-
     // React to new loot and mutate state once
     effect(
       () => {
@@ -108,16 +79,6 @@ export class InventoryStateService {
 
         this.addOrIncrementMany(loot);
         this._lastLoot.set(null); // Clear to prevent retriggering
-      },
-      { allowSignalWrites: true },
-    );
-
-    effect(
-      () => {
-        const reconnectCount = this.eventService.reconnectCount();
-        if (reconnectCount > 0) {
-          this.load(true);
-        }
       },
       { allowSignalWrites: true },
     );
@@ -190,9 +151,7 @@ export class InventoryStateService {
     this._loading.set(false);
     this._error.set(null);
     this._lastLoot.set(null);
-    this.suppressedLootSignatures.clear();
-    this.processedInventoryGrantIds.clear();
-    this.processedInventoryGrantOrder.length = 0;
+    this.inventoryGrantDeduper.clear();
   }
 
   shatterEssences(essence: InventoryItem, shatterAmount: number) {
@@ -218,7 +177,7 @@ export class InventoryStateService {
             }
           }
 
-          this._items.set(items);
+          this.setInventory(items);
         },
         error: (err) => this._error.set(err.message ?? 'Unknown error'),
       });
@@ -230,21 +189,53 @@ export class InventoryStateService {
       .scrapEquipment(equipmentIds)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (response) =>
-          this._items.set(this.sortItems(response.inventoryItems)),
+        next: (response) => this.applyVersionedInventory(response),
         error: (err) => this._error.set(err.message ?? 'Unknown error'),
       });
   }
 
-  setInventory(
-    items: InventoryItem[],
-    suppressNextLoot?: InventoryItem[],
-  ): void {
-    this._items.set(this.sortItems(items));
-
-    if (suppressNextLoot?.length) {
-      this.suppressNextLoot(suppressNextLoot);
+  applyVersionedInventory<T extends { inventoryItems: InventoryItem[] }>(
+    result: VersionedMutationResult<T>,
+    grantId?: string | null,
+  ): boolean {
+    if (
+      !this.domainVersions.isCurrent(
+        'inventory',
+        result.domainVersions['inventory'],
+      )
+    ) {
+      return false;
     }
+
+    if (!this.inventoryGrantDeduper.shouldApply(grantId)) {
+      return false;
+    }
+
+    this.setInventory(result.data.inventoryItems);
+    return true;
+  }
+
+  applyVersionedInventoryDelta<T>(
+    result: VersionedMutationResult<T>,
+    apply: (data: T) => void,
+  ): boolean {
+    if (
+      !this.domainVersions.isCurrent(
+        'inventory',
+        result.domainVersions['inventory'],
+      )
+    ) {
+      return false;
+    }
+
+    this.invalidateInFlightLoad();
+    apply(result.data);
+    return true;
+  }
+
+  setInventory(items: InventoryItem[]): void {
+    this.invalidateInFlightLoad();
+    this._items.set(this.sortItems(items));
   }
 
   setEquippedItems(
@@ -264,6 +255,7 @@ export class InventoryStateService {
       return;
     }
 
+    this.invalidateInFlightLoad();
     const items = this._items();
     const index = items.findIndex(
       (current) => current.itemInstance.id === item.itemInstance.id,
@@ -283,6 +275,7 @@ export class InventoryStateService {
       return;
     }
 
+    this.invalidateInFlightLoad();
     const updated = [...this._items()];
 
     for (const newItem of itemsToAdd) {
@@ -310,7 +303,7 @@ export class InventoryStateService {
     grantId: string | null | undefined,
     items: InventoryItem[],
   ): boolean {
-    if (grantId && !this.markInventoryGrantProcessed(grantId)) {
+    if (!this.inventoryGrantDeduper.shouldApply(grantId)) {
       return false;
     }
 
@@ -323,6 +316,7 @@ export class InventoryStateService {
   }
 
   addOrIncrement(item: InventoryItem): void {
+    this.invalidateInFlightLoad();
     const items = this._items();
     const index = items.findIndex(
       (i) =>
@@ -342,6 +336,7 @@ export class InventoryStateService {
   }
 
   decrementItem(itemInstanceId: string, qty: number): void {
+    this.invalidateInFlightLoad();
     const updated = this._items()
       .map((item) => {
         if (item.itemInstance.id !== itemInstanceId) return item;
@@ -374,11 +369,13 @@ export class InventoryStateService {
     );
     if (index === -1 || !items[index].isNew) return items[index];
 
+    this.invalidateInFlightLoad();
     const updated = [...items];
     updated[index] = { ...updated[index], isNew: false };
     this._items.set(updated);
 
     this.inventoryService.markItemSeen(itemInstanceId).subscribe({
+      next: (response) => this.applyVersionedInventory(response),
       error: () => undefined,
     });
 
@@ -407,6 +404,7 @@ export class InventoryStateService {
 
     const previous = index === -1 ? undefined : items[index];
     const previousEquippedFavorite = equippedFavorites.get(itemInstanceId);
+    this.invalidateInFlightLoad();
     if (previous) {
       const optimistic = { ...previous, isFavorite };
       const updated = [...items];
@@ -421,9 +419,17 @@ export class InventoryStateService {
     return this.inventoryService
       .setItemFavorite(itemInstanceId, isFavorite)
       .pipe(
-        map(() =>
-          this._items().find((item) => item.itemInstance.id === itemInstanceId),
-        ),
+        map((response) => {
+          const applied = this.applyVersionedInventory(response);
+          if (applied && isEquipped) {
+            const current = new Map(this._equippedItemFavoriteState());
+            current.set(itemInstanceId, response.data.isFavorite);
+            this._equippedItemFavoriteState.set(current);
+          }
+          return this._items().find(
+            (item) => item.itemInstance.id === itemInstanceId,
+          );
+        }),
         catchError((error) => {
           const currentItems = this._items();
           const currentIndex = currentItems.findIndex(
@@ -456,43 +462,17 @@ export class InventoryStateService {
   }
 
   removeItem(itemInstanceId: string): void {
+    this.invalidateInFlightLoad();
     const filtered = this._items().filter(
       (item) => item.itemInstance.id !== itemInstanceId,
     );
     this._items.set(filtered);
   }
 
-  private suppressNextLoot(items: InventoryItem[]): void {
-    const signature = this.getLootSignature(items);
-    if (!signature) return;
-
-    this.suppressedLootSignatures.add(signature);
-    setTimeout(() => this.suppressedLootSignatures.delete(signature), 5000);
-  }
-
-  private markInventoryGrantProcessed(grantId: string): boolean {
-    if (this.processedInventoryGrantIds.has(grantId)) {
-      return false;
-    }
-
-    this.processedInventoryGrantIds.add(grantId);
-    this.processedInventoryGrantOrder.push(grantId);
-    while (this.processedInventoryGrantOrder.length > 500) {
-      const expired = this.processedInventoryGrantOrder.shift();
-      if (expired) this.processedInventoryGrantIds.delete(expired);
-    }
-
-    return true;
-  }
-
-  private getLootSignature(items: InventoryItem[]): string {
-    return items
-      .map(
-        (item) =>
-          `${item.itemInstance.id}:${item.itemInstance.itemBase.id}:${item.quantity}`,
-      )
-      .sort()
-      .join('|');
+  private invalidateInFlightLoad(): void {
+    // A local delta or mutation response is newer than any inventory GET
+    // already in flight, so that GET must not replace the patched state.
+    this.loadVersion += 1;
   }
 
   private sortItems(items: InventoryItem[]): InventoryItem[] {

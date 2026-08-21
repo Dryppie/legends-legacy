@@ -581,6 +581,54 @@
       "defenseProfile": "Balanced",
       "baseLevel": 62,
       "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000087",
+      "name": "Venomous Spider",
+      "imagePath": "venomous_spider",
+      "archetype": "DPS",
+      "damageProfile": "Hybrid",
+      "defenseProfile": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000088",
+      "name": "Web Weaver Spider",
+      "imagePath": "web_weaver_spider",
+      "archetype": "Support",
+      "damageProfile": "Magical",
+      "defenseProfile": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000089",
+      "name": "Spider Queen",
+      "imagePath": "spider_queen",
+      "archetype": "Bruiser",
+      "damageProfile": "Hybrid",
+      "defenseProfile": "PhysicalTank"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000090",
+      "name": "Bark Golem",
+      "imagePath": "bark_golem",
+      "archetype": "Tank",
+      "damageProfile": "Physical",
+      "defenseProfile": "PhysicalTank"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000091",
+      "name": "Treant Guardian",
+      "imagePath": "treant_guardian",
+      "archetype": "Tank",
+      "damageProfile": "Physical",
+      "defenseProfile": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000092",
+      "name": "Elder Treant",
+      "imagePath": "elder_treant",
+      "archetype": "Support",
+      "damageProfile": "Magical",
+      "defenseProfile": "MagicalTank"
     }
   ]
 }

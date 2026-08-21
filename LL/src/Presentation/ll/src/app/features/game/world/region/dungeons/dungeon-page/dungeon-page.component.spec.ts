@@ -22,13 +22,7 @@ describe('DungeonPageComponent', () => {
     activeDungeon.set(createRestSiteRun());
     dungeonState = jasmine.createSpyObj<DungeonStateService>(
       'DungeonStateService',
-      [
-        'chooseRoute',
-        'fight',
-        'restAtSite',
-        'retreat',
-        'claimDungeonRewards',
-      ],
+      ['chooseRoute', 'fight', 'restAtSite', 'retreat', 'claimDungeonRewards'],
       {
         activeDungeon: activeDungeon.asReadonly(),
         loading: signal(false).asReadonly(),
@@ -206,10 +200,16 @@ describe('DungeonPageComponent', () => {
     } as InventoryItem;
     const response = {
       activeRun: null,
+      hub: {
+        sigilFragments: 0,
+        sigilAssemblyEnabled: false,
+        sigilAssemblyCost: 0,
+        dungeons: [],
+      },
       inventoryItems: [claimedItem],
       claimedLoot: [claimedItem],
       character: {},
-    } as ClaimDungeonRewardsResponse;
+    } as unknown as ClaimDungeonRewardsResponse;
 
     dungeonState.claimDungeonRewards.and.callFake((onSuccess) => {
       activeDungeon.set(null);

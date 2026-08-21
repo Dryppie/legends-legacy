@@ -588,7 +588,6 @@ public static class DependencyInjection
 
         services.AddScoped<ISimulatorService, SimulatorService>();
         services.AddScoped<IGameEventOutbox, GameEventOutbox>();
-        services.AddScoped<IGameEventPublisher, OutboxGameEventPublisher>();
         services.AddScoped<IGameRealtimeBroadcaster, OutboxGameRealtimeBroadcaster>();
         services.AddScoped<IGameRealtimeImmediatePublisher, NoOpGameRealtimeImmediatePublisher>();
         services.AddScoped<IStateSyncService, StateSyncService>();

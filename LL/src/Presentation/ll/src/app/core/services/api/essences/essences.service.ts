@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from '../../api/api.service';
+import { ApiService, VersionedMutationResult } from '../../api/api.service';
 import {
   CreatureArchiveDto,
   EssenceLoadoutDto,
@@ -11,6 +11,12 @@ import {
   SaveEssenceLoadoutDto,
   SoulArchiveDto,
 } from '../../../../shared/models/essence-system';
+
+const ESSENCE_MUTATION_HANDLED_SCOPES = [
+  'essences',
+  'inventory',
+  'equipment',
+] as const;
 
 @Injectable({
   providedIn: 'root',
@@ -44,43 +50,57 @@ export class EssencesService {
     return this.apiService.get('essence/loadouts/active');
   }
 
-  public absorb(inventoryItemId: string): Observable<EssenceMutationResponseDto> {
-    return this.apiService.post(`essence/items/${inventoryItemId}/absorb`, {});
+  public absorb(
+    inventoryItemId: string,
+  ): Observable<VersionedMutationResult<EssenceMutationResponseDto>> {
+    return this.apiService.postVersioned<EssenceMutationResponseDto>(
+      `essence/items/${inventoryItemId}/absorb`,
+      {},
+      { stateSyncScopesHandledByResponse: ESSENCE_MUTATION_HANDLED_SCOPES },
+    );
   }
 
   public dismantle(
     inventoryItemId: string,
-  ): Observable<EssenceMutationResponseDto> {
-    return this.apiService.post(`essence/items/${inventoryItemId}/dismantle`, {});
+  ): Observable<VersionedMutationResult<EssenceMutationResponseDto>> {
+    return this.apiService.postVersioned<EssenceMutationResponseDto>(
+      `essence/items/${inventoryItemId}/dismantle`,
+      {},
+      { stateSyncScopesHandledByResponse: ESSENCE_MUTATION_HANDLED_SCOPES },
+    );
   }
 
   public spendDust(
     playerEssenceId: string,
     dustAmount: number,
-  ): Observable<EssenceMutationResponseDto> {
-    return this.apiService.post(
+  ): Observable<VersionedMutationResult<EssenceMutationResponseDto>> {
+    return this.apiService.postVersioned<EssenceMutationResponseDto>(
       `essence/${playerEssenceId}/spend-dust`,
       { dustAmount },
       {
-        // The response patches the changed archive/inventory state. These other
-        // legacy Essence scopes are unchanged by leveling and need no refetch.
-        stateSyncScopesHandledByResponse: [
-          'essences',
-          'inventory',
-          'character',
-          'equipment',
-          'quests',
-        ],
+        stateSyncScopesHandledByResponse: ESSENCE_MUTATION_HANDLED_SCOPES,
       },
     );
   }
 
-  public ascend(playerEssenceId: string): Observable<EssenceMutationResponseDto> {
-    return this.apiService.post(`essence/${playerEssenceId}/ascend`, {});
+  public ascend(
+    playerEssenceId: string,
+  ): Observable<VersionedMutationResult<EssenceMutationResponseDto>> {
+    return this.apiService.postVersioned<EssenceMutationResponseDto>(
+      `essence/${playerEssenceId}/ascend`,
+      {},
+      { stateSyncScopesHandledByResponse: ESSENCE_MUTATION_HANDLED_SCOPES },
+    );
   }
 
-  public evolve(playerEssenceId: string): Observable<EssenceMutationResponseDto> {
-    return this.apiService.post(`essence/${playerEssenceId}/evolve`, {});
+  public evolve(
+    playerEssenceId: string,
+  ): Observable<VersionedMutationResult<EssenceMutationResponseDto>> {
+    return this.apiService.postVersioned<EssenceMutationResponseDto>(
+      `essence/${playerEssenceId}/evolve`,
+      {},
+      { stateSyncScopesHandledByResponse: ESSENCE_MUTATION_HANDLED_SCOPES },
+    );
   }
 
   public setFavorite(
@@ -105,15 +125,11 @@ export class EssencesService {
     return this.apiService.put(`essence/loadouts/${loadoutId}`, request);
   }
 
-  public activateLoadout(
-    loadoutId: string,
-  ): Observable<ResponseMessageDto> {
+  public activateLoadout(loadoutId: string): Observable<ResponseMessageDto> {
     return this.apiService.post(`essence/loadouts/${loadoutId}/activate`, {});
   }
 
-  public deleteLoadout(
-    loadoutId: string,
-  ): Observable<ResponseMessageDto> {
+  public deleteLoadout(loadoutId: string): Observable<ResponseMessageDto> {
     return this.apiService.delete(`essence/loadouts/${loadoutId}`);
   }
 }

@@ -9,11 +9,11 @@ namespace Application.UseCases.Soulstones.EventHandlers;
 public class SoulstoneDropEventHandler : INotificationHandler<SoulstoneDropEvent>
 {
     private readonly ICharacterService _characterService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _eventPublisher;
 
     public SoulstoneDropEventHandler(
         ICharacterService characterService,
-        IGameEventPublisher eventPublisher)
+        IGameRealtimeBroadcaster eventPublisher)
     {
         _characterService = characterService;
         _eventPublisher = eventPublisher;
@@ -28,9 +28,11 @@ public class SoulstoneDropEventHandler : INotificationHandler<SoulstoneDropEvent
 
         await _eventPublisher.PublishAsync(
             new Audience.Character(notification.CharacterId),
-            new SoulstoneDropMsg(
+            new SoulstoneDrop(
                 notification.CharacterId,
                 notification.SoulstonesEarned,
-                character.Soulstones));
+                character.Soulstones),
+            nameof(SoulstoneDropEventHandler),
+            cancellationToken);
     }
 }

@@ -65,6 +65,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     private readonly ICombatEngineExecutor _combatEngineExecutor;
     private readonly ICombatEncounterResultFactory _combatEncounterResultFactory;
     private readonly IGameRealtimeBroadcaster _gameRealtime;
+    private readonly IStateSyncService _stateSync;
     private readonly ITournamentLockService _tournamentLockService;
     private readonly TimeProvider _timeProvider;
     private readonly TournamentGroundsOptions _options;
@@ -83,6 +84,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         ICombatEncounterResultFactory combatEncounterResultFactory,
         IGameRealtimeBroadcaster gameRealtime,
         ITournamentLockService tournamentLockService,
+        IStateSyncService stateSync,
         TimeProvider timeProvider,
         IOptions<TournamentGroundsOptions> options,
         IAchievementService? achievementService = null,
@@ -99,6 +101,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         _combatEncounterResultFactory = combatEncounterResultFactory;
         _gameRealtime = gameRealtime;
         _tournamentLockService = tournamentLockService;
+        _stateSync = stateSync;
         _timeProvider = timeProvider;
         _options = options.Value;
         _achievementService = achievementService;
@@ -3704,8 +3707,10 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         try
         {
+            var stateVersion = await AdvanceTournamentVersionAsync(eventName, cancellationToken);
             var update = await BuildTournamentUpdateAsync(
                 tournament,
+                stateVersion,
                 eventName,
                 now,
                 cancellationToken);
@@ -3728,8 +3733,10 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
+        var stateVersion = await AdvanceTournamentVersionAsync(eventName, cancellationToken);
         var update = await BuildTournamentUpdateAsync(
             tournament,
+            stateVersion,
             eventName,
             now,
             cancellationToken);
@@ -3743,6 +3750,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     private async Task<TournamentGroundsUpdated> BuildTournamentUpdateAsync(
         TournamentInstance tournament,
+        long stateVersion,
         string eventName,
         DateTimeOffset now,
         CancellationToken cancellationToken)
@@ -3778,6 +3786,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         return new TournamentGroundsUpdated(
             tournament.Id,
+            stateVersion,
             tournament.TournamentNumber,
             tournament.Name,
             eventName,
@@ -3792,6 +3801,14 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             tournament.CancelledAtUtc,
             now);
     }
+
+    private Task<long> AdvanceTournamentVersionAsync(
+        string eventName,
+        CancellationToken cancellationToken) =>
+        _stateSync.AdvanceWorldScopeWithRevisionAsync(
+            Application.WebSockets.Contracts.StateSyncScopes.Tournament,
+            eventName,
+            cancellationToken);
 
     private sealed record TournamentRegistrationWindow(
         DateTimeOffset StartsAtUtc,

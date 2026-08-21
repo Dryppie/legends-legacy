@@ -14,8 +14,8 @@ public class BorrowGuildVaultItemCommandHandler : IRequestHandler<BorrowGuildVau
 {
     private readonly IGuildVaultService _vault;
     private readonly IGuildService _guild;
-    private readonly IGameEventPublisher _events;
-    public BorrowGuildVaultItemCommandHandler(IGuildVaultService vault, IGuildService guild, IGameEventPublisher events)
+    private readonly IGameRealtimeBroadcaster _events;
+    public BorrowGuildVaultItemCommandHandler(IGuildVaultService vault, IGuildService guild, IGameRealtimeBroadcaster events)
     {
         _vault = vault;
         _guild = guild;
@@ -28,7 +28,7 @@ public class BorrowGuildVaultItemCommandHandler : IRequestHandler<BorrowGuildVau
         var result = await _vault.BorrowAsync(request.CharacterId, request.VaultItemId, cancellationToken);
         if (!result.Succeeded) return Response<bool>.Fail(result.Error ?? "Failed to borrow equipment.");
         if (guild is not null)
-            await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChangedMsg(guild.Id));
+            await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChanged(guild.Id), nameof(BorrowGuildVaultItemCommandHandler), cancellationToken);
         return Response<bool>.Success(true);
     }
 }

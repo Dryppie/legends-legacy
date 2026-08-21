@@ -1,10 +1,9 @@
 using Application.Interfaces.Services.LL;
-using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
 using Application.UseCases.Inventories.Dtos;
+using Application.UseCases.MarketPlaces;
 using Application.UseCases.MarketPlaces.Dtos.Requests;
 using Application.UseCases.MarketPlaces.Dtos.Responses;
-using Application.WebSockets.Contracts;
 using AutoMapper;
 using Common.Primitives;
 using Domain.Models.MarketPlaces;
@@ -15,16 +14,16 @@ public record CreateMarketPlaceListingCommand(Guid CharacterId, CreateMarketPlac
 public class CreateMarketPlaceListingCommandHandler : IRequestHandler<CreateMarketPlaceListingCommand, Response<CreateMarketPlaceListingResponseDto>>
 {
     private readonly IMarketPlaceService _marketPlaceService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly MarketplaceChangePublisher _changePublisher;
     private readonly IMapper _mapper;
 
     public CreateMarketPlaceListingCommandHandler(
         IMarketPlaceService marketPlaceService,
-        IGameEventPublisher eventPublisher,
+        MarketplaceChangePublisher changePublisher,
         IMapper mapper)
     {
         _marketPlaceService = marketPlaceService;
-        _eventPublisher = eventPublisher;
+        _changePublisher = changePublisher;
         _mapper = mapper;
     }
 
@@ -43,28 +42,18 @@ public class CreateMarketPlaceListingCommandHandler : IRequestHandler<CreateMark
         var result = await _marketPlaceService.CreateMarketPlaceListingAsync(request.CharacterId, marketPlaceListing, cancellationToken);
         if (result == null) return Response<CreateMarketPlaceListingResponseDto>.Fail("Failed to create marketplace listing.");
 
-        foreach (var fill in result.Fills)
-        {
-            await _eventPublisher.PublishAsync(
-                new Audience.World(),
-                new MarketBuyOrderFulfilledMsg(
-                    fill.BuyOrderId,
-                    fill.BuyerId,
-                    fill.SellerId,
-                    fill.Quantity,
-                    fill.TotalPrice,
-                    fill.SellerCinders,
-                    _mapper.Map<InventoryItemDto>(fill.PurchasedItem),
-                    _mapper.Map<MarketPlaceBuyOrderDto?>(fill.RemainingBuyOrder)));
-        }
-
         var listing = _mapper.Map<MarketPlaceListingDto?>(result.Listing);
-        if (listing != null)
-        {
-            await _eventPublisher.PublishAsync(
-                new Audience.World(),
-                new MarketListingCreatedMsg(listing));
-        }
+        var marketplace = await _changePublisher.PublishAsync(
+            listing is null
+                ? []
+                : [new MarketplaceListingChangeDto(listing.Id, listing)],
+            result.Fills.Select(fill => new MarketplaceBuyOrderChangeDto(
+                fill.BuyOrderId,
+                _mapper.Map<MarketPlaceBuyOrderDto?>(fill.RemainingBuyOrder))).ToArray(),
+            result.Fills.Select(fill => _mapper.Map<MarketPlaceOrderDto>(fill.Order)).ToArray(),
+            result.Fills.Select(fill => fill.BuyerId).Append(request.CharacterId),
+            nameof(CreateMarketPlaceListingCommand),
+            cancellationToken);
 
         return Response<CreateMarketPlaceListingResponseDto>.Success(new CreateMarketPlaceListingResponseDto
         {
@@ -75,7 +64,8 @@ public class CreateMarketPlaceListingCommandHandler : IRequestHandler<CreateMark
             FilledTotalPrice = result.FilledTotalPrice,
             SellerFees = result.SellerFees,
             SellerCinders = result.SellerCinders,
-            RemainingInventoryItem = _mapper.Map<InventoryItemDto?>(result.RemainingSellerInventoryItem)
+            RemainingInventoryItem = _mapper.Map<InventoryItemDto?>(result.RemainingSellerInventoryItem),
+            Marketplace = marketplace
         });
     }
 }

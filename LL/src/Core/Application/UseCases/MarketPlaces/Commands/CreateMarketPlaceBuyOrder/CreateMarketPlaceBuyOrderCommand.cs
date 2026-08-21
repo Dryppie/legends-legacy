@@ -1,9 +1,8 @@
 using Application.Interfaces.Services.LL;
-using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
+using Application.UseCases.MarketPlaces;
 using Application.UseCases.MarketPlaces.Dtos.Requests;
 using Application.UseCases.MarketPlaces.Dtos.Responses;
-using Application.WebSockets.Contracts;
 using AutoMapper;
 using Common.Primitives;
 using Domain.Models.MarketPlaces;
@@ -16,16 +15,16 @@ public record CreateMarketPlaceBuyOrderCommand(Guid CharacterId, CreateMarketPla
 public class CreateMarketPlaceBuyOrderCommandHandler : IRequestHandler<CreateMarketPlaceBuyOrderCommand, Response<CreateMarketPlaceBuyOrderResponseDto>>
 {
     private readonly IMarketPlaceService _marketPlaceService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly MarketplaceChangePublisher _changePublisher;
     private readonly IMapper _mapper;
 
     public CreateMarketPlaceBuyOrderCommandHandler(
         IMarketPlaceService marketPlaceService,
-        IGameEventPublisher eventPublisher,
+        MarketplaceChangePublisher changePublisher,
         IMapper mapper)
     {
         _marketPlaceService = marketPlaceService;
-        _eventPublisher = eventPublisher;
+        _changePublisher = changePublisher;
         _mapper = mapper;
     }
 
@@ -48,25 +47,17 @@ public class CreateMarketPlaceBuyOrderCommandHandler : IRequestHandler<CreateMar
 
         var response = _mapper.Map<CreateMarketPlaceBuyOrderResponseDto>(result);
 
-        foreach (var fill in result.Fills)
-        {
-            await _eventPublisher.PublishAsync(
-                new Audience.World(),
-                new MarketListingSoldMsg(
-                    fill.ListingId,
-                    fill.SellerId,
-                    fill.Quantity,
-                    fill.TotalPrice,
-                    fill.SellerCinders,
-                    _mapper.Map<MarketPlaceListingDto?>(fill.RemainingListing)));
-        }
-
-        if (response.BuyOrder != null)
-        {
-            await _eventPublisher.PublishAsync(
-                new Audience.World(),
-                new MarketBuyOrderCreatedMsg(response.BuyOrder));
-        }
+        response.Marketplace = await _changePublisher.PublishAsync(
+            result.Fills.Select(fill => new MarketplaceListingChangeDto(
+                fill.ListingId,
+                _mapper.Map<MarketPlaceListingDto?>(fill.RemainingListing))).ToArray(),
+            response.BuyOrder is null
+                ? []
+                : [new MarketplaceBuyOrderChangeDto(response.BuyOrder.Id, response.BuyOrder)],
+            result.Fills.Select(fill => _mapper.Map<MarketPlaceOrderDto>(fill.Order)).ToArray(),
+            result.Fills.Select(fill => fill.SellerId).Append(request.CharacterId),
+            nameof(CreateMarketPlaceBuyOrderCommand),
+            cancellationToken);
 
         return Response<CreateMarketPlaceBuyOrderResponseDto>.Success(response);
     }

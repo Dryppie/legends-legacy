@@ -682,6 +682,7 @@
         "target": "CurrentTarget",
         "baseValue": 1,
         "condition": "Stun",
+        "staggerPower": 25,
         "conditions": [
           {
             "type": "HealthBelowPercent",
@@ -1381,6 +1382,7 @@
         "target": "AllEnemies",
         "baseValue": 3,
         "condition": "Stun",
+        "staggerPower": 40,
         "chancePercent": 80,
         "procCoefficient": 1
       }
@@ -2296,6 +2298,7 @@
         "target": "CurrentTarget",
         "baseValue": 2,
         "condition": "Stun",
+        "staggerPower": 35,
         "procCoefficient": 1
       }
     ],
@@ -4760,6 +4763,7 @@
         "target": "CurrentTarget",
         "condition": "Stun",
         "baseValue": 3,
+        "staggerPower": 50,
         "procCoefficient": 1
       }
     ],
@@ -5011,5 +5015,451 @@
       }
     ],
     "owningEssenceId": "essence.wandering_ghost"
+  },
+  {
+    "id": "ability.creature.web_weaver_spider.weavers_grasp",
+    "kind": "Active",
+    "name": "Weaver's Grasp",
+    "description": "Deal 80% Physical Damage. If the target is Slowed, deal 160% Physical Damage instead.",
+    "cooldownTicks": 90,
+    "tags": ["Physical", "Melee", "Slow"],
+    "effects": [
+      {
+        "id": "effect.creature.web_weaver_spider.weavers_grasp.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.8,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.web_weaver_spider.weavers_grasp.slowed_damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.8,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "tags": ["Damage.Secondary"],
+        "conditions": [
+          {
+            "type": "HasCondition",
+            "subject": "Target",
+            "condition": "Slow"
+          }
+        ],
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.web_weaver_spider"
+  },
+  {
+    "id": "ability.creature.web_weaver_spider.web_walker",
+    "kind": "Passive",
+    "name": "Web Walker",
+    "description": "Gain Haste while any enemy is Slowed.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Buff", "Haste", "Slow"],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": ["effect.creature.web_weaver_spider.web_walker.apply"]
+      },
+      {
+        "event": "OnStatusApplied",
+        "effectIds": ["effect.creature.web_weaver_spider.web_walker.apply"],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "condition.slow"
+          }
+        ]
+      },
+      {
+        "event": "OnStatusExpired",
+        "effectIds": ["effect.creature.web_weaver_spider.web_walker.remove"],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "condition.slow"
+          }
+        ]
+      },
+      {
+        "event": "OnStatusRemoved",
+        "effectIds": ["effect.creature.web_weaver_spider.web_walker.remove"],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "condition.slow"
+          }
+        ]
+      },
+      {
+        "event": "OnStatusCleansed",
+        "effectIds": ["effect.creature.web_weaver_spider.web_walker.remove"],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "condition.slow"
+          }
+        ]
+      },
+      {
+        "event": "OnStatusDispelled",
+        "effectIds": ["effect.creature.web_weaver_spider.web_walker.remove"],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "condition.slow"
+          }
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.web_weaver_spider.web_walker.apply",
+        "operation": "ApplyCondition",
+        "target": "Self",
+        "condition": "Haste",
+        "baseValue": 1,
+        "conditions": [
+          {
+            "type": "AnyEnemyHasCondition",
+            "condition": "Slow"
+          }
+        ],
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.web_weaver_spider.web_walker.remove",
+        "operation": "RemoveCondition",
+        "target": "Self",
+        "condition": "Haste",
+        "conditions": [
+          {
+            "type": "NoEnemyHasCondition",
+            "condition": "Slow"
+          }
+        ],
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.web_weaver_spider"
+  },
+  {
+    "id": "ability.creature.spider_queen.webbed_domain",
+    "kind": "Active",
+    "name": "Webbed Domain",
+    "description": "Spread webs across the battlefield. Gain Haste, and apply Slow to all enemies.",
+    "cooldownTicks": 160,
+    "tags": ["Buff", "Debuff", "Haste", "Slow", "Area"],
+    "effects": [
+      {
+        "id": "effect.creature.spider_queen.webbed_domain.haste",
+        "operation": "ApplyCondition",
+        "target": "Self",
+        "condition": "Haste",
+        "baseValue": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.spider_queen.webbed_domain.slow",
+        "operation": "ApplyCondition",
+        "target": "AllEnemies",
+        "condition": "Slow",
+        "baseValue": 1,
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.spider_queen"
+  },
+  {
+    "id": "ability.creature.spider_queen.royal_venom",
+    "kind": "Active",
+    "name": "Royal Venom",
+    "description": "For 8 seconds, your Basic Attacks apply Poison(20).",
+    "cooldownTicks": 150,
+    "tags": ["Buff", "Poison", "Basic Attack"],
+    "effects": [
+      {
+        "id": "effect.creature.spider_queen.royal_venom.apply",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.spider_queen.royal_venom",
+        "baseValue": 1,
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.spider_queen_royal_venom"
+  },
+  {
+    "id": "ability.creature.spider_queen.royal_cocoon",
+    "kind": "Passive",
+    "name": "Royal Cocoon",
+    "description": "After dropping below 40% Max Health for the first time, become Stunned for 8 seconds, then heal 30% of Max Health.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Healing", "Stun", "HealthThreshold"],
+    "triggers": [
+      {
+        "event": "OnHealthChanged",
+        "effectIds": [
+          "effect.creature.spider_queen.royal_cocoon.stun",
+          "effect.creature.spider_queen.royal_cocoon.timer"
+        ],
+        "conditions": [
+          {
+            "type": "HealthBelowPercent",
+            "subject": "Source",
+            "value": 40
+          }
+        ]
+      },
+      {
+        "event": "OnStatusExpired",
+        "effectIds": ["effect.creature.spider_queen.royal_cocoon.heal"],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "status.spider_queen.royal_cocoon"
+          }
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.spider_queen.royal_cocoon.stun",
+        "operation": "ApplyCondition",
+        "target": "Self",
+        "condition": "Stun",
+        "baseValue": 8,
+        "uses": 1,
+        "guaranteedConditionApplication": true,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.spider_queen.royal_cocoon.timer",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.spider_queen.royal_cocoon",
+        "baseValue": 1,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.spider_queen.royal_cocoon.heal",
+        "operation": "Heal",
+        "target": "Self",
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.3,
+        "uses": 1,
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.spider_queen"
+  },
+  {
+    "id": "ability.creature.bark_golem.timber_slam",
+    "kind": "Active",
+    "name": "Timber Slam",
+    "description": "Slam the ground with immense force, dealing 270% Physical Damage to all enemies.",
+    "cooldownTicks": 240,
+    "tags": ["Physical", "Melee", "Area"],
+    "effects": [
+      {
+        "id": "effect.creature.bark_golem.timber_slam.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.7,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.bark_golem"
+  },
+  {
+    "id": "ability.creature.bark_golem.barkskin",
+    "kind": "Passive",
+    "name": "Barkskin",
+    "description": "Increase Physical Defense by 30%, but Burn damage taken is doubled.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Buff", "Defensive", "Burn", "RiskReward"],
+    "effects": [
+      {
+        "id": "effect.creature.bark_golem.barkskin.armor",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Armor",
+        "scalingCoefficient": 0.3,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.bark_golem.barkskin.burn_vulnerability",
+        "operation": "ModifyDamageTaken",
+        "target": "Self",
+        "baseValue": 100,
+        "damageType": "Burn",
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.bark_golem"
+  },
+  {
+    "id": "ability.creature.treant_guardian.rootbound_shield",
+    "kind": "Active",
+    "name": "Rootbound Shield",
+    "description": "Plant yourself firmly in the ground, and gain Barrier equal to 200% Power.",
+    "cooldownTicks": 180,
+    "tags": ["Barrier", "Buff", "Defensive"],
+    "effects": [
+      {
+        "id": "effect.creature.treant_guardian.rootbound_shield.barrier",
+        "operation": "GrantBarrier",
+        "target": "Self",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.0,
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.treant_guardian"
+  },
+  {
+    "id": "ability.creature.treant_guardian.forest_vitality",
+    "kind": "Passive",
+    "name": "Forest Vitality",
+    "description": "Every 10 seconds, increase Health Regeneration by 2%.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Healing", "Regeneration", "Periodic"],
+    "triggers": [
+      {
+        "event": "OnInterval",
+        "internalCooldownTicks": 100,
+        "initialDelayTicks": 100,
+        "effectIds": ["effect.creature.treant_guardian.forest_vitality.regeneration"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.treant_guardian.forest_vitality.regeneration",
+        "operation": "ModifyRegenerationRate",
+        "target": "Self",
+        "baseValue": 2,
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.treant_guardian"
+  },
+  {
+    "id": "ability.creature.elder_treant.ancient_sap",
+    "kind": "Active",
+    "name": "Ancient Sap",
+    "description": "Cover the target in enchanted sap. Apply Doom(410), and when Doom triggers, apply Weaken to the target.",
+    "cooldownTicks": 180,
+    "tags": ["Magical", "Doom", "Weaken", "Debuff"],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": ["effect.creature.elder_treant.ancient_sap.doom"]
+      },
+      {
+        "event": "OnStatusExpired",
+        "effectIds": ["effect.creature.elder_treant.ancient_sap.weaken"],
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "condition.doom"
+          },
+          {
+            "type": "EventSourceIsSelf"
+          }
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.elder_treant.ancient_sap.doom",
+        "operation": "ApplyCondition",
+        "target": "CurrentTarget",
+        "baseValue": 410,
+        "condition": "Doom",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.elder_treant.ancient_sap.weaken",
+        "operation": "ApplyCondition",
+        "target": "EventTarget",
+        "condition": "Weaken",
+        "baseValue": 1,
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.elder_treant"
+  },
+  {
+    "id": "ability.creature.elder_treant.thornstorm",
+    "kind": "Active",
+    "name": "Thornstorm",
+    "description": "Conjure a storm of enchanted thorns, dealing 80% Magical and 80% Physical Damage to all enemies.",
+    "cooldownTicks": 100,
+    "tags": ["Magical", "Physical", "Ranged", "Area"],
+    "effects": [
+      {
+        "id": "effect.creature.elder_treant.thornstorm.magical_damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.8,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.elder_treant.thornstorm.physical_damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.8,
+        "attackType": "Ranged",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.elder_treant_thornstorm"
+  },
+  {
+    "id": "ability.creature.elder_treant.ancient_essence",
+    "kind": "Passive",
+    "name": "Ancient Essence",
+    "description": "Whenever you deal Magical Damage, restore 0.5% Max Health. Can occur once every 3 seconds.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Healing", "Magical", "Trigger.OnDamageDealt"],
+    "triggers": [
+      {
+        "event": "OnDamageDealt",
+        "internalCooldownTicks": 30,
+        "effectIds": ["effect.creature.elder_treant.ancient_essence.heal"],
+        "conditions": [
+          {
+            "type": "EventDamageTypeIs",
+            "damageType": "Magical"
+          }
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.elder_treant.ancient_essence.heal",
+        "operation": "Heal",
+        "target": "Self",
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.005,
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.elder_treant"
   }
 ]

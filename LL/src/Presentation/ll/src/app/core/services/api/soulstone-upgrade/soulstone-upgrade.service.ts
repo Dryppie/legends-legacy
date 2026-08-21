@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from '../api.service';
+import { ApiService, VersionedMutationResult } from '../api.service';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import {
   SoulstoneUpgradeMutationResult,
@@ -21,21 +21,41 @@ export class SoulstoneUpgradeService {
     );
   }
 
-  upgrade(soulstoneUpgradeId: string): Observable<SoulstoneUpgradeMutationResult> {
-    return this.api.post('soulstoneUpgrade/upgrade', soulstoneUpgradeId).pipe(
-      tap(() => {}),
-      catchError((e) => {
-        return throwError(() => e);
-      }),
-    );
+  upgrade(
+    soulstoneUpgradeId: string,
+  ): Observable<VersionedMutationResult<SoulstoneUpgradeMutationResult>> {
+    return this.api
+      .postVersioned<SoulstoneUpgradeMutationResult>(
+        'soulstoneUpgrade/upgrade',
+        soulstoneUpgradeId,
+        {
+          stateSyncScopesHandledByResponse: ['soulstones', 'character'],
+        },
+      )
+      .pipe(
+        tap(() => {}),
+        catchError((e) => {
+          return throwError(() => e);
+        }),
+      );
   }
 
-  resetSoulstoneUpgrades(): Observable<SoulstoneUpgradeMutationResult> {
-    return this.api.post('soulstoneUpgrade/reset').pipe(
-      tap(() => {}),
-      catchError((e) => {
-        return throwError(() => e);
-      }),
-    );
+  resetSoulstoneUpgrades(): Observable<
+    VersionedMutationResult<SoulstoneUpgradeMutationResult>
+  > {
+    return this.api
+      .postVersioned<SoulstoneUpgradeMutationResult>(
+        'soulstoneUpgrade/reset',
+        {},
+        {
+          stateSyncScopesHandledByResponse: ['soulstones', 'character'],
+        },
+      )
+      .pipe(
+        tap(() => {}),
+        catchError((e) => {
+          return throwError(() => e);
+        }),
+      );
   }
 }

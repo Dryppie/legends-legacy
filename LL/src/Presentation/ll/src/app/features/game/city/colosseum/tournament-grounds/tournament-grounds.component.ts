@@ -1,9 +1,4 @@
-import {
-  Location,
-  NgFor,
-  NgIf,
-  NgTemplateOutlet,
-} from '@angular/common';
+import { Location, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
 import {
   Component,
   OnDestroy,
@@ -17,11 +12,13 @@ import { RouterLink } from '@angular/router';
 import { Observable, finalize, tap } from 'rxjs';
 import { ColosseumService } from '../../../../../core/services/api/colosseum/colosseum.service';
 import { ToastService } from '../../../../../core/services/client-side/components/toast/toast.service';
-import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
+import { GameRealtimeEventRegistry } from '../../../../../core/services/real-time/game-realtime/game-realtime-event-registry.service';
 import { TournamentGroundsUpdated } from '../../../../../core/services/real-time/colosseum/tournament-grounds-updated';
 import { CharacterTagComponent } from '../../../../../shared/components/character/character-tag/character-tag.component';
 import { TournamentGroundsViewStateService } from '../../../../../core/services/api/colosseum/tournament-grounds-view-state.service';
 import { StateSyncCoordinator } from '../../../../../core/services/real-time/game-realtime/state-sync-coordinator.service';
+import { GameRealtimeConnection } from '../../../../../core/services/real-time/game-realtime/game-realtime-connection.service';
+import { RealtimeSignalDeduper } from '../../../../../core/services/real-time/game-realtime/realtime-deduplication';
 import {
   TournamentBracket,
   TournamentHallOfFameEntry,
@@ -106,10 +103,7 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     return (
       (this.bracket()?.rounds ?? [])
         .flatMap((round) =>
-          round.matches.flatMap((match) => [
-            match.playerOne,
-            match.playerTwo,
-          ]),
+          round.matches.flatMap((match) => [match.playerOne, match.playerTwo]),
         )
         .find((team) => team?.teamId === selectedTeamId) ?? null
     );
@@ -293,7 +287,7 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
           .toString()
           .padStart(2, '0')}`;
   });
-  private lastRealtimeUpdateId: string | null = null;
+  private readonly realtimeDeduper = new RealtimeSignalDeduper();
   private clockHandle: ReturnType<typeof setInterval> | null = null;
   private lastAutoSelectedRoundNumber: number | null = null;
   private unregisterStateSync: (() => void) | null = null;
@@ -301,39 +295,56 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
   constructor(
     private readonly colosseumService: ColosseumService,
     private readonly toastService: ToastService,
-    private readonly eventService: GameEventService,
-    stateSync: StateSyncCoordinator,
+    private readonly eventService: GameRealtimeEventRegistry,
+    private readonly stateSync: StateSyncCoordinator,
+    private readonly realtime: GameRealtimeConnection,
   ) {
-    this.unregisterStateSync = stateSync.register(
+    this.unregisterStateSync = this.stateSync.register(
       'tournament',
       'tournament-grounds',
       () => this.synchronize(),
     );
-    this.lastRealtimeUpdateId =
-      this.eventService.eventEnvelope.TournamentGroundsUpdated()?.updateId ??
-      null;
+    this.realtimeDeduper.shouldProcess(
+      'tournament-grounds',
+      this.eventService.eventEnvelope.TournamentGroundsUpdated(),
+    );
     effect(
       () => {
         const envelope =
           this.eventService.eventEnvelope.TournamentGroundsUpdated();
         if (
           !envelope?.updateId ||
-          envelope.updateId === this.lastRealtimeUpdateId
+          !this.realtimeDeduper.shouldProcess('tournament-grounds', envelope)
         ) {
           return;
         }
 
-        this.lastRealtimeUpdateId = envelope.updateId;
         this.latestRealtimeUpdate.set(envelope.payload);
+        if (envelope.payload.stateVersion > 0) {
+          this.stateSync.acceptDomainVersion(
+            'tournament',
+            envelope.payload.stateVersion,
+            envelope.updateId,
+          );
+        } else {
+          this.refresh();
+        }
       },
       { allowSignalWrites: true },
     );
   }
 
   ngOnInit(): void {
+    void this.realtime
+      .setTournamentGroundsSubscription(true, 'tournament-grounds-page')
+      .catch((error) =>
+        console.warn(
+          'Failed to subscribe to Tournament Grounds realtime',
+          error,
+        ),
+      );
     this.clockHandle = setInterval(
-      () =>
-        this.clock.set(Date.now() + this.viewState.serverClockOffsetMs),
+      () => this.clock.set(Date.now() + this.viewState.serverClockOffsetMs),
       1000,
     );
     this.loadRewardTiers();
@@ -344,6 +355,14 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    void this.realtime
+      .setTournamentGroundsSubscription(false, 'tournament-grounds-page')
+      .catch((error) =>
+        console.warn(
+          'Failed to unsubscribe from Tournament Grounds realtime',
+          error,
+        ),
+      );
     if (this.clockHandle) clearInterval(this.clockHandle);
     this.unregisterStateSync?.();
   }
@@ -356,16 +375,14 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.error.set(null);
 
-    return this.colosseumService
-      .getTournamentGroundsStatus()
-      .pipe(
-        tap({
-          next: (status) => this.applyTournamentStatus(status),
-          error: (err) =>
-            this.error.set(err.message ?? 'Failed to load tournament grounds'),
-        }),
-        finalize(() => this.loading.set(false)),
-      );
+    return this.colosseumService.getTournamentGroundsStatus().pipe(
+      tap({
+        next: (status) => this.applyTournamentStatus(status),
+        error: (err) =>
+          this.error.set(err.message ?? 'Failed to load tournament grounds'),
+      }),
+      finalize(() => this.loading.set(false)),
+    );
   }
 
   private applyTournamentStatus(
@@ -414,7 +431,6 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     this.runAction(
       this.colosseumService.registerTournament(tournament.id),
       'Registration complete',
-      () => this.refresh(),
     );
   }
 
@@ -422,7 +438,6 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     this.runAction(
       this.colosseumService.startDevelopmentTournament(),
       'Test tournament started',
-      () => this.refresh(),
     );
   }
 
@@ -430,7 +445,6 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     this.runAction(
       this.colosseumService.withdrawTournament(tournament.id),
       'Registration withdrawn',
-      () => this.refresh(),
     );
   }
 
@@ -438,7 +452,6 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     this.runAction(
       this.colosseumService.updateTournamentLoadout(tournament.id),
       'Tournament loadout updated',
-      () => this.refresh(),
     );
   }
 
@@ -448,7 +461,6 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     this.runAction(
       this.colosseumService.createTournamentTeam(tournament.id, name),
       'Team created',
-      () => this.refresh(),
     );
   }
 
@@ -466,7 +478,6 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
       'Invite sent',
       () => {
         this.invitePickerOpen.set(false);
-        this.refresh();
       },
     );
   }
@@ -480,7 +491,6 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     this.runAction(
       this.colosseumService.applyToTournamentTeam(tournament.id, team.teamId),
       'Application sent',
-      () => this.refresh(),
     );
   }
 
@@ -488,7 +498,6 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     this.runAction(
       this.colosseumService.acceptTournamentTeamInvite(invite.inviteId),
       'Invite accepted',
-      () => this.refresh(),
     );
   }
 
@@ -496,7 +505,6 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     this.runAction(
       this.colosseumService.acceptTournamentTeamApplication(applicationId),
       'Application accepted',
-      () => this.refresh(),
     );
   }
 
@@ -512,7 +520,6 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
         participant.participantId,
       ),
       'Team member removed',
-      () => this.refresh(),
     );
   }
 
@@ -520,10 +527,6 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     this.runAction(
       this.colosseumService.claimTournamentRewards(tournament.id),
       'Rewards claimed',
-      () => {
-        this.loadRewards(tournament.id);
-        this.refresh();
-      },
     );
   }
 
@@ -764,10 +767,7 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     return 'Participation reward';
   }
 
-  rewardTierPlacementLabel(
-    tier: TournamentRewardTier,
-    index: number,
-  ): string {
+  rewardTierPlacementLabel(tier: TournamentRewardTier, index: number): string {
     const previousMax =
       index > 0 ? (this.rewardTiers()[index - 1].maxPlacement ?? 0) : 0;
     const minimum = previousMax + 1;
@@ -926,7 +926,7 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
   private runAction<T>(
     request: Observable<T>,
     successTitle: string,
-    onSuccess: () => void,
+    onSuccess: () => void = () => undefined,
   ): void {
     this.actionLoading.set(true);
     this.error.set(null);

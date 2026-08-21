@@ -1,16 +1,23 @@
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, OnDestroy, OnInit, computed, effect, signal } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  computed,
+  effect,
+  signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DefaultHeaderComponent } from '../../../shared/components/default-header/default-header.component';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
 import { ToastService } from '../../../core/services/client-side/components/toast/toast.service';
 import {
-  GameEventDeduper,
-  getGameEventId,
-} from '../../../core/services/real-time/game-event/game-event-consumer';
-import { GameEventService } from '../../../core/services/real-time/game-event.service';
-import { ProphecyProgressedMsg } from '../../../core/services/real-time/prophecies/prophecy-progressed';
+  RealtimeSignalDeduper,
+  getRealtimeDeliveryId,
+} from '../../../core/services/real-time/game-realtime/realtime-deduplication';
+import { GameRealtimeEventRegistry } from '../../../core/services/real-time/game-realtime/game-realtime-event-registry.service';
+import { ProphecyProgressed } from '../../../core/services/real-time/game-realtime/game-realtime-contracts';
 import {
   PropheciesOverviewDto,
   ProphecyCacheInventoryDto,
@@ -22,6 +29,8 @@ import {
 } from '../../../core/services/api/prophecies/prophecy.service';
 import { ProphecyNotificationService } from '../../../core/services/api/prophecies/prophecy-notification.service';
 import { StateSyncCoordinator } from '../../../core/services/real-time/game-realtime/state-sync-coordinator.service';
+import { DomainVersionTracker } from '../../../core/services/real-time/game-realtime/domain-version-tracker.service';
+import { VersionedMutationResult } from '../../../core/services/api/api.service';
 import { finalize, Observable, tap } from 'rxjs';
 
 interface RewardDisplayItem {
@@ -33,13 +42,23 @@ interface RewardDisplayItem {
 }
 
 @Component({
-    selector: 'app-prophecies-page',
-    imports: [DefaultHeaderComponent, NgClass, NgFor, NgIf, OverlayModule, RouterLink],
-    templateUrl: './prophecies-page.component.html',
-    styleUrl: './prophecies-page.component.scss'
+  selector: 'app-prophecies-page',
+  imports: [
+    DefaultHeaderComponent,
+    NgClass,
+    NgFor,
+    NgIf,
+    OverlayModule,
+    RouterLink,
+  ],
+  templateUrl: './prophecies-page.component.html',
+  styleUrl: './prophecies-page.component.scss',
 })
 export class PropheciesPageComponent implements OnInit, OnDestroy {
-  private readonly guidanceRoutes: Record<ProphecyGuidanceDestination, string[]> = {
+  private readonly guidanceRoutes: Record<
+    ProphecyGuidanceDestination,
+    string[]
+  > = {
     WorldCombat: ['/game/world/shenic'],
     Dungeons: ['/game/world/dungeon'],
     Essences: ['/game/character/essences'],
@@ -83,7 +102,7 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
       offsetY: -8,
     },
   ];
-  private readonly eventDeduper = new GameEventDeduper();
+  private readonly eventDeduper = new RealtimeSignalDeduper();
   private readonly initialProgressEventId: string | null;
   private clockIntervalId: ReturnType<typeof setInterval> | null = null;
   private readonly unregisterStateSync: () => void;
@@ -91,27 +110,41 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   hoveredRewardOverflowId: string | null = null;
   hoveredWeeklyMilestoneFavor: number | null = null;
 
-  readonly dailyProphecies = computed(() => this.overview()?.dailyProphecies ?? []);
-  readonly dailyRerollsRemaining = computed(() => this.overview()?.dailyRerollsRemaining ?? 0);
-  readonly activeDailyProphecy = computed(() => this.overview()?.activeDailyProphecy ?? null);
-  readonly greaterProphecy = computed(() => this.overview()?.greaterProphecy ?? null);
-  readonly weeklyRevelation = computed(() => this.overview()?.weeklyRevelation ?? null);
+  readonly dailyProphecies = computed(
+    () => this.overview()?.dailyProphecies ?? [],
+  );
+  readonly dailyRerollsRemaining = computed(
+    () => this.overview()?.dailyRerollsRemaining ?? 0,
+  );
+  readonly activeDailyProphecy = computed(
+    () => this.overview()?.activeDailyProphecy ?? null,
+  );
+  readonly greaterProphecy = computed(
+    () => this.overview()?.greaterProphecy ?? null,
+  );
+  readonly weeklyRevelation = computed(
+    () => this.overview()?.weeklyRevelation ?? null,
+  );
   readonly caches = computed(() => this.overview()?.caches ?? []);
-  readonly ownedCaches = computed(() => this.caches().filter((cache) => cache.quantity > 0));
+  readonly ownedCaches = computed(() =>
+    this.caches().filter((cache) => cache.quantity > 0),
+  );
   readonly readyProphecies = computed(() => {
     const overview = this.overview();
     if (!overview) return [];
 
-    return [
-      ...overview.dailyProphecies,
-      overview.greaterProphecy,
-    ].filter((prophecy) => this.canClaim(prophecy));
+    return [...overview.dailyProphecies, overview.greaterProphecy].filter(
+      (prophecy) => this.canClaim(prophecy),
+    );
   });
-  readonly readyMilestones = computed(() =>
-    this.weeklyRevelation()?.milestones.filter((milestone) => milestone.isUnlocked && !milestone.isClaimed) ?? [],
+  readonly readyMilestones = computed(
+    () =>
+      this.weeklyRevelation()?.milestones.filter(
+        (milestone) => milestone.isUnlocked && !milestone.isClaimed,
+      ) ?? [],
   );
-  readonly readyClaimCount = computed(() =>
-    this.readyProphecies().length + this.readyMilestones().length,
+  readonly readyClaimCount = computed(
+    () => this.readyProphecies().length + this.readyMilestones().length,
   );
 
   constructor(
@@ -119,7 +152,8 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     private readonly toast: ToastService,
     private readonly prophecyNotificationService: ProphecyNotificationService,
     private readonly authService: AuthService,
-    private readonly eventService: GameEventService,
+    private readonly eventService: GameRealtimeEventRegistry,
+    private readonly domainVersions: DomainVersionTracker,
     stateSync: StateSyncCoordinator,
   ) {
     this.unregisterStateSync = stateSync.register(
@@ -127,16 +161,17 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
       'prophecies-page',
       () => this.synchronize(),
     );
-    this.initialProgressEventId = getGameEventId(
-      this.eventService.eventEnvelope.ProphecyProgressedMsg(),
+    this.initialProgressEventId = getRealtimeDeliveryId(
+      this.eventService.eventEnvelope.ProphecyProgressed(),
     );
 
     effect(
       () => {
         const characterId = this.authService.currentCharacter()?.id;
-        const envelope = this.eventService.eventEnvelope.ProphecyProgressedMsg();
+        const envelope =
+          this.eventService.eventEnvelope.ProphecyProgressed();
         const update = envelope?.payload;
-        const eventId = getGameEventId(envelope);
+        const eventId = getRealtimeDeliveryId(envelope);
 
         if (
           !characterId ||
@@ -202,8 +237,15 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     this.error.set(null);
 
     this.prophecyService.acceptProphecy(prophecy.id).subscribe({
-      next: (overview) => {
-        this.overview.set(overview);
+      next: (result) => {
+        if (
+          !this.applyVersionedProphecy(result, (overview) =>
+            this.overview.set(overview),
+          )
+        ) {
+          this.loading.set(false);
+          return;
+        }
         this.syncNotificationCount();
         this.toast.showToast('Prophecy accepted', prophecy.title, true);
         this.loading.set(false);
@@ -224,12 +266,21 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     this.error.set(null);
 
     this.prophecyService.rerollDailyProphecies().subscribe({
-      next: (overview) => {
-        this.overview.set(overview);
+      next: (result) => {
+        if (
+          !this.applyVersionedProphecy(result, (overview) =>
+            this.overview.set(overview),
+          )
+        ) {
+          this.loading.set(false);
+          return;
+        }
         this.syncNotificationCount();
         this.toast.showToast(
           'Prophecies rerolled',
-          cost > 0 ? `${cost} Fate Echo spent.` : 'Your free daily reroll has been used.',
+          cost > 0
+            ? `${cost} Fate Echo spent.`
+            : 'Your free daily reroll has been used.',
           true,
         );
         this.loading.set(false);
@@ -249,7 +300,12 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     this.error.set(null);
 
     this.prophecyService.claimProphecy(prophecy.id).subscribe({
-      next: (response) => {
+      next: (result) => {
+        const response = result.data;
+        if (!this.applyVersionedProphecy(result, () => undefined)) {
+          this.loading.set(false);
+          return;
+        }
         const current = this.overview();
         if (current) {
           this.overview.set({
@@ -291,31 +347,41 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.error.set(null);
 
-    this.prophecyService.claimWeeklyMilestone(milestone.favorRequired).subscribe({
-      next: (response) => {
-        const current = this.overview();
-        if (current) {
-          this.overview.set({
-            ...current,
-            weeklyRevelation: response.weeklyRevelation,
-            caches: this.updateCacheInventory(current.caches, response.reward),
-          });
-        }
-        this.syncNotificationCount();
-        this.toast.showToast(
-          'Weekly Revelation claimed',
-          this.rewardSummary(response.reward),
-          true,
-        );
-        this.loading.set(false);
-      },
-      error: (error) => {
-        const message = error?.message ?? 'Failed to claim weekly milestone.';
-        this.error.set(message);
-        this.toast.showToast('Revelation failed', message, false);
-        this.loading.set(false);
-      },
-    });
+    this.prophecyService
+      .claimWeeklyMilestone(milestone.favorRequired)
+      .subscribe({
+        next: (result) => {
+          const response = result.data;
+          if (!this.applyVersionedProphecy(result, () => undefined)) {
+            this.loading.set(false);
+            return;
+          }
+          const current = this.overview();
+          if (current) {
+            this.overview.set({
+              ...current,
+              weeklyRevelation: response.weeklyRevelation,
+              caches: this.updateCacheInventory(
+                current.caches,
+                response.reward,
+              ),
+            });
+          }
+          this.syncNotificationCount();
+          this.toast.showToast(
+            'Weekly Revelation claimed',
+            this.rewardSummary(response.reward),
+            true,
+          );
+          this.loading.set(false);
+        },
+        error: (error) => {
+          const message = error?.message ?? 'Failed to claim weekly milestone.';
+          this.error.set(message);
+          this.toast.showToast('Revelation failed', message, false);
+          this.loading.set(false);
+        },
+      });
   }
 
   openCache(cache: ProphecyCacheInventoryDto): void {
@@ -324,16 +390,17 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     this.error.set(null);
 
     this.prophecyService.openCache(cache.itemId).subscribe({
-      next: (response) => {
+      next: (result) => {
+        const response = result.data;
+        if (!this.applyVersionedProphecy(result, () => undefined)) {
+          this.loading.set(false);
+          return;
+        }
         const current = this.overview();
         if (current) {
           this.overview.set({
             ...current,
-            caches: this.updateCacheInventory(
-              current.caches,
-              response.reward,
-              cache.itemId,
-            ),
+            caches: response.caches,
           });
         }
 
@@ -354,7 +421,25 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  private applyProgressUpdate(update: ProphecyProgressedMsg): void {
+  private applyVersionedProphecy<T>(
+    result: VersionedMutationResult<T>,
+    apply: (data: T) => void,
+  ): boolean {
+    if (
+      !this.domainVersions.isCurrent(
+        'prophecies',
+        result.domainVersions['prophecies'],
+      )
+    ) {
+      return false;
+    }
+
+    this.requestEpoch += 1;
+    apply(result.data);
+    return true;
+  }
+
+  private applyProgressUpdate(update: ProphecyProgressed): void {
     const current = this.overview();
     if (!current) {
       this.toast.showToast(
@@ -394,7 +479,7 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     );
   }
 
-  private progressToastMessage(update: ProphecyProgressedMsg): string {
+  private progressToastMessage(update: ProphecyProgressed): string {
     const amount = update.amountGained > 0 ? `+${update.amountGained} ` : '';
     return `${update.title}: ${amount}${update.currentValue}/${update.targetValue}`;
   }
@@ -418,7 +503,9 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
       addQuantityChange(reward.cacheItemId, 1);
     }
 
-    const cacheItemIds = new Set(caches.map((cache) => cache.itemId.toLowerCase()));
+    const cacheItemIds = new Set(
+      caches.map((cache) => cache.itemId.toLowerCase()),
+    );
     for (const item of reward.items) {
       if (cacheItemIds.has(item.itemId.toLowerCase())) {
         addQuantityChange(item.itemId, item.quantity);
@@ -426,7 +513,8 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     }
 
     return caches.map((cache) => {
-      const quantityChange = quantityChanges.get(cache.itemId.toLowerCase()) ?? 0;
+      const quantityChange =
+        quantityChanges.get(cache.itemId.toLowerCase()) ?? 0;
       return quantityChange === 0
         ? cache
         : { ...cache, quantity: Math.max(0, cache.quantity + quantityChange) };
@@ -435,7 +523,10 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
 
   progressPercent(prophecy: ProphecyInstanceDto): number {
     if (prophecy.targetValue <= 0) return 0;
-    return Math.min(100, Math.round((prophecy.currentValue / prophecy.targetValue) * 100));
+    return Math.min(
+      100,
+      Math.round((prophecy.currentValue / prophecy.targetValue) * 100),
+    );
   }
 
   canAccept(prophecy: ProphecyInstanceDto): boolean {
@@ -444,11 +535,15 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
 
   canReroll(): boolean {
     const overview = this.overview();
-    return this.dailyProphecies().length === 3 &&
-      this.dailyProphecies().every((prophecy) => prophecy.status === 'Offered') &&
+    return (
+      this.dailyProphecies().length === 3 &&
+      this.dailyProphecies().every(
+        (prophecy) => prophecy.status === 'Offered',
+      ) &&
       !this.activeDailyProphecy() &&
       !!overview &&
-      overview.dailyRerollsUsed < overview.dailyRerollLimit;
+      overview.dailyRerollsUsed < overview.dailyRerollLimit
+    );
   }
 
   canAffordReroll(): boolean {
@@ -463,22 +558,29 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   }
 
   canClaim(prophecy: ProphecyInstanceDto): boolean {
-    return prophecy.status !== 'Claimed' &&
+    return (
+      prophecy.status !== 'Claimed' &&
       prophecy.status !== 'Declined' &&
       prophecy.status !== 'Expired' &&
-      (prophecy.status === 'Completed' || this.isObjectiveComplete(prophecy));
+      (prophecy.status === 'Completed' || this.isObjectiveComplete(prophecy))
+    );
   }
 
   canContinue(prophecy: ProphecyInstanceDto): boolean {
-    return prophecy.status === 'Accepted' && !this.isObjectiveComplete(prophecy);
+    return (
+      prophecy.status === 'Accepted' && !this.isObjectiveComplete(prophecy)
+    );
   }
 
   isObjectiveComplete(prophecy: ProphecyInstanceDto): boolean {
-    return prophecy.targetValue > 0 && prophecy.currentValue >= prophecy.targetValue;
+    return (
+      prophecy.targetValue > 0 && prophecy.currentValue >= prophecy.targetValue
+    );
   }
 
   prophecyStatusLabel(prophecy: ProphecyInstanceDto): string {
-    if (prophecy.status === 'Accepted' && this.isObjectiveComplete(prophecy)) return 'Completed';
+    if (prophecy.status === 'Accepted' && this.isObjectiveComplete(prophecy))
+      return 'Completed';
     return prophecy.status;
   }
 
@@ -489,7 +591,9 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   }
 
   rewardLines(reward: ProphecyRewardSnapshotDto): string[] {
-    return this.rewardItems(reward).map((item) => `${item.amount} ${item.label}`);
+    return this.rewardItems(reward).map(
+      (item) => `${item.amount} ${item.label}`,
+    );
   }
 
   rewardSummary(reward: ProphecyRewardSnapshotDto): string {
@@ -497,7 +601,10 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     return lines.length > 0 ? lines.join(', ') : 'No rewards listed';
   }
 
-  rewardPreview(reward: ProphecyRewardSnapshotDto, limit = 3): RewardDisplayItem[] {
+  rewardPreview(
+    reward: ProphecyRewardSnapshotDto,
+    limit = 3,
+  ): RewardDisplayItem[] {
     return this.rewardItems(reward).slice(0, limit);
   }
 
@@ -505,21 +612,33 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     return Math.max(0, this.rewardItems(reward).length - limit);
   }
 
-  rewardOverflowItems(reward: ProphecyRewardSnapshotDto, limit = 3): RewardDisplayItem[] {
+  rewardOverflowItems(
+    reward: ProphecyRewardSnapshotDto,
+    limit = 3,
+  ): RewardDisplayItem[] {
     return this.rewardItems(reward).slice(limit);
   }
 
   weeklyProgressPercent(): number {
     const favor = this.weeklyRevelation()?.propheticFavor ?? 0;
-    return Math.min(this.weeklyTrackEndPercent, Math.round((favor / 7) * this.weeklyTrackEndPercent));
+    return Math.min(
+      this.weeklyTrackEndPercent,
+      Math.round((favor / 7) * this.weeklyTrackEndPercent),
+    );
   }
 
   weeklyMilestonePercent(milestone: WeeklyRevelationMilestoneDto): number {
-    return Math.min(this.weeklyTrackEndPercent, Math.max(0, (milestone.favorRequired / 7) * this.weeklyTrackEndPercent));
+    return Math.min(
+      this.weeklyTrackEndPercent,
+      Math.max(0, (milestone.favorRequired / 7) * this.weeklyTrackEndPercent),
+    );
   }
 
   weeklyFavorMarkerPercent(marker: number): number {
-    return Math.min(this.weeklyTrackEndPercent, Math.max(0, (marker / 7) * this.weeklyTrackEndPercent));
+    return Math.min(
+      this.weeklyTrackEndPercent,
+      Math.max(0, (marker / 7) * this.weeklyTrackEndPercent),
+    );
   }
 
   weeklyMilestoneAlignment(milestone: WeeklyRevelationMilestoneDto): string {
@@ -567,13 +686,62 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
 
   rewardItems(reward: ProphecyRewardSnapshotDto): RewardDisplayItem[] {
     const items: RewardDisplayItem[] = [];
-    this.addReward(items, 'cinders', reward.cinders, 'Cinders', 'Currency', 'Ci');
-    this.addReward(items, 'characterExperience', reward.characterExperience, 'Character XP', 'Progress', 'XP');
-    this.addReward(items, 'essenceExperience', reward.essenceExperience, 'Essence XP', 'Essence', 'EX');
-    this.addReward(items, 'soulstones', reward.soulstones, 'Soulstones', 'Currency', 'So');
-    this.addReward(items, 'sigilFragments', reward.sigilFragments, 'Sigil Fragments', 'Dungeon', 'Sf');
-    this.addReward(items, 'propheticFavor', reward.propheticFavor, 'Prophetic Favor', 'Weekly', 'Fa');
-    this.addReward(items, 'fateEcho', reward.fateEcho, 'Fate Echo', 'Prophecy', 'Fe');
+    this.addReward(
+      items,
+      'cinders',
+      reward.cinders,
+      'Cinders',
+      'Currency',
+      'Ci',
+    );
+    this.addReward(
+      items,
+      'characterExperience',
+      reward.characterExperience,
+      'Character XP',
+      'Progress',
+      'XP',
+    );
+    this.addReward(
+      items,
+      'essenceExperience',
+      reward.essenceExperience,
+      'Essence XP',
+      'Essence',
+      'EX',
+    );
+    this.addReward(
+      items,
+      'soulstones',
+      reward.soulstones,
+      'Soulstones',
+      'Currency',
+      'So',
+    );
+    this.addReward(
+      items,
+      'sigilFragments',
+      reward.sigilFragments,
+      'Sigil Fragments',
+      'Dungeon',
+      'Sf',
+    );
+    this.addReward(
+      items,
+      'propheticFavor',
+      reward.propheticFavor,
+      'Prophetic Favor',
+      'Weekly',
+      'Fa',
+    );
+    this.addReward(
+      items,
+      'fateEcho',
+      reward.fateEcho,
+      'Fate Echo',
+      'Prophecy',
+      'Fe',
+    );
 
     if (reward.cacheItemId) {
       items.push({
@@ -600,7 +768,9 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   }
 
   cacheContents(cache: ProphecyCacheInventoryDto): string[] {
-    return cache.possibleRewards?.length ? cache.possibleRewards : ['Prophecy rewards'];
+    return cache.possibleRewards?.length
+      ? cache.possibleRewards
+      : ['Prophecy rewards'];
   }
 
   timeRemaining(end: string): string {
@@ -614,14 +784,21 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   }
 
   guidanceRoute(prophecy: ProphecyInstanceDto): string[] {
-    return this.guidanceRoutes[prophecy.guidance.destination] ?? this.guidanceRoutes.WorldCombat;
+    return (
+      this.guidanceRoutes[prophecy.guidance.destination] ??
+      this.guidanceRoutes.WorldCombat
+    );
   }
 
   statusClasses(prophecy: ProphecyInstanceDto): string {
-    if (prophecy.status === 'Accepted') return 'll-prophecy-status ll-prophecy-status-active';
-    if (prophecy.status === 'Completed' || this.isObjectiveComplete(prophecy)) return 'll-prophecy-status ll-prophecy-status-active';
-    if (prophecy.status === 'Claimed') return 'll-prophecy-status ll-prophecy-status-claimed';
-    if (prophecy.status === 'Declined' || prophecy.status === 'Expired') return 'll-prophecy-status ll-prophecy-status-declined';
+    if (prophecy.status === 'Accepted')
+      return 'll-prophecy-status ll-prophecy-status-active';
+    if (prophecy.status === 'Completed' || this.isObjectiveComplete(prophecy))
+      return 'll-prophecy-status ll-prophecy-status-active';
+    if (prophecy.status === 'Claimed')
+      return 'll-prophecy-status ll-prophecy-status-claimed';
+    if (prophecy.status === 'Declined' || prophecy.status === 'Expired')
+      return 'll-prophecy-status ll-prophecy-status-declined';
     return 'll-prophecy-status';
   }
 
@@ -632,7 +809,10 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
       .replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
-  trackById(index: number, value: { id?: string; favorRequired?: number }): string {
+  trackById(
+    index: number,
+    value: { id?: string; favorRequired?: number },
+  ): string {
     return value.id ?? `${value.favorRequired ?? index}`;
   }
 

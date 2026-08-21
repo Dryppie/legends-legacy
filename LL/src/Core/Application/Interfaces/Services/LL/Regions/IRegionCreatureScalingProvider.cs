@@ -19,9 +19,9 @@ public sealed record CreatureScalingProfile(
     double OffenseMultiplier,
     double DefenseMultiplier,
     double ResistanceMultiplier,
-    double AttackSpeedMultiplier,
-    double PenetrationMultiplier,
-    double SoftDefenseMultiplier,
+    double AttackSpeedBonus,
+    double PenetrationBonus,
+    double SoftDefenseBonus,
     double CritChanceBonus,
     double CritDamageBonus,
     float CritChanceCap,
@@ -29,8 +29,14 @@ public sealed record CreatureScalingProfile(
 
 public sealed record RegionCombatBalanceCatalog(
     int Version,
+    CombatProgressionFoundation Foundation,
     IReadOnlyList<RegionCombatBalanceProfile> Profiles,
     IReadOnlyList<RegionCombatBalanceRegion> Regions);
+
+public sealed record CombatProgressionFoundation(
+    int AreasPerRegion,
+    double AreaGrowth,
+    double RegionJump);
 
 public sealed record RegionCombatBalanceProfile(
     string Id,

@@ -10,11 +10,11 @@ public record RejectApplicationCommand(Guid CharacterId, string ApplicationChara
 public class RejectApplicationCommandHandler : IRequestHandler<RejectApplicationCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _eventPublisher;
 
     public RejectApplicationCommandHandler(
         IGuildService guildService,
-        IGameEventPublisher eventPublisher)
+        IGameRealtimeBroadcaster eventPublisher)
     {
         _guildService = guildService;
         _eventPublisher = eventPublisher;
@@ -32,9 +32,9 @@ public class RejectApplicationCommandHandler : IRequestHandler<RejectApplication
         if (!rejected)
             return Response<bool>.Fail("Failed to reject application");
 
-        var msg = new GuildApplicationRejectedMsg(guild.Id, applicationCharacterId);
-        await _eventPublisher.PublishAsync(new Audience.Character(applicationCharacterId), msg);
-        await _eventPublisher.PublishAsync(new Audience.Guild(guild.Id), msg);
+        var message = new GuildApplicationRejected(guild.Id, applicationCharacterId);
+        await _eventPublisher.PublishAsync(new Audience.Character(applicationCharacterId), message, nameof(RejectApplicationCommandHandler), cancellationToken);
+        await _eventPublisher.PublishAsync(new Audience.Guild(guild.Id), message, nameof(RejectApplicationCommandHandler), cancellationToken);
 
         return Response<bool>.Success(true);
     }

@@ -403,5 +403,46 @@
     "tags": ["Status.Buff", "Pattern.StackingBuff"],
     "triggers": [],
     "effects": []
+  },
+  {
+    "id": "status.spider_queen.royal_venom",
+    "name": "Royal Venom",
+    "description": "Basic Attacks apply Poison(20).",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 80,
+    "tags": ["Status.Buff", "Poison", "Pattern.TimedBuff"],
+    "triggers": [
+      {
+        "event": "OnBasicAttack",
+        "effectIds": ["effect.status.spider_queen.royal_venom.poison"],
+        "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          }
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.status.spider_queen.royal_venom.poison",
+        "operation": "ApplyCondition",
+        "target": "EventTarget",
+        "condition": "Poison",
+        "baseValue": 20,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "status.spider_queen.royal_cocoon",
+    "name": "Royal Cocoon",
+    "description": "After 8 seconds, Royal Cocoon completes and restores 30% of Max Health.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 80,
+    "tags": ["Status.Buff", "Pattern.HealthThreshold", "Pattern.TimedBuff"],
+    "triggers": [],
+    "effects": []
   }
 ]

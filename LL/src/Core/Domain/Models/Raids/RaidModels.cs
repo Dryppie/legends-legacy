@@ -152,7 +152,7 @@ public sealed class RaidLaneResult
 
 public sealed class RaidPlayback
 {
-    public const int CompactBundleSchemaVersion = 3;
+    public const int CompactBundleSchemaVersion = 4;
 
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid RaidRunId { get; set; }

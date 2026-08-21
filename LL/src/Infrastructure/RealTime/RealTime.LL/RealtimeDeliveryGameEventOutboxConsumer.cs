@@ -61,6 +61,9 @@ internal sealed class RealtimeDeliveryGameEventOutboxConsumer(
                 new Audience.Characters(audience.CharacterIds),
             "guild" when audience.TargetId.HasValue =>
                 new Audience.Guild(audience.TargetId.Value),
+            "raid" when audience.TargetId.HasValue =>
+                new Audience.Raid(audience.TargetId.Value),
+            "tournament-grounds" => new Audience.TournamentGrounds(),
             "world" => new Audience.World(),
             _ => throw new InvalidOperationException(
                 $"Realtime audience '{audience.Kind}' is invalid.")
@@ -71,6 +74,8 @@ internal sealed class RealtimeDeliveryGameEventOutboxConsumer(
         Audience.Character character => $"character:{character.CharacterId}",
         Audience.Characters characters => $"characters:{characters.CharacterIds.Count}",
         Audience.Guild guild => $"guild:{guild.GuildId}",
+        Audience.Raid raid => $"raid:{raid.RaidRunId}",
+        Audience.TournamentGrounds => "tournament-grounds",
         Audience.World => "world",
         _ => audience.GetType().Name
     };

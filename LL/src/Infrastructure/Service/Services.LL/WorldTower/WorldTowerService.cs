@@ -308,7 +308,7 @@ public sealed class WorldTowerService : IWorldTowerService
         var metadata = await _db.TowerCombatPlaybacks
             .AsNoTracking()
             .Where(x => x.TowerAttemptId == attemptId
-                        && x.SchemaVersion == TowerCombatPlayback.CompactBundleSchemaVersion
+                        && x.SchemaVersion >= TowerCombatPlayback.MinimumCompactBundleSchemaVersion
                         && x.TowerAttempt.ServerId == _options.ServerId
                         && (x.TowerAttempt.TowerRally.Status == TowerRallyStatus.InProgress
                             || x.TowerAttempt.TowerRally.Participants.Any(participant =>
@@ -365,7 +365,7 @@ public sealed class WorldTowerService : IWorldTowerService
         if (playback is null)
             return null;
 
-        if (playback.SchemaVersion == TowerCombatPlayback.CompactBundleSchemaVersion)
+        if (playback.SchemaVersion >= TowerCombatPlayback.MinimumCompactBundleSchemaVersion)
         {
             var manifest = ToPlaybackDto(playback, _timeProvider.GetUtcNow());
             return new TowerCombatFrameBatchDto(
@@ -1473,8 +1473,13 @@ public sealed class WorldTowerService : IWorldTowerService
             ?? throw new InvalidOperationException($"Guardian creature '{definition.GuardianCreatureId}' was not found.");
         var guardian = _combatSetup.CreateCreatureCombatEntities(
             [guardianSource],
-            new Area { DifficultyTier = 1 }).Single();
-        WorldTowerGuardianScaling.Apply(guardian, definition.GuardianScaling);
+            new Area { DifficultyTier = definition.ProgressionPosition }).Single();
+        WorldTowerGuardianScaling.Apply(
+            guardian,
+            definition.GuardianScaling,
+            definition.RequiredSlots);
+        guardian.StaggerDefinition = definition.Stagger;
+        guardian.StaggerParticipantCount = friendly.Count;
         AddPercentModifier(guardian, AttributeType.Power, -preparation.GuardianDamageReductionPercent);
         var hostileSlot = new CombatParticipantSlot(
             definition.GuardianCreatureId.ToString(),
@@ -1536,7 +1541,9 @@ public sealed class WorldTowerService : IWorldTowerService
                     postState?.Health > 0,
                     participant.PartySlot.HasValue
                         ? WorldTowerPartyRules.GetPartyNumber(participant.PartySlot.Value)
-                        : null);
+                        : null,
+                    entityStats?.StaggerContributed ?? 0,
+                    entityStats?.StaggerBreaks ?? 0);
             })
             .ToArray();
         var guardianState = resolution.HostilePostState.Single();
@@ -1697,7 +1704,7 @@ public sealed class WorldTowerService : IWorldTowerService
             || playback.DispatchLeaseUntil <= now)
             return false;
 
-        if (playback.SchemaVersion == TowerCombatPlayback.CompactBundleSchemaVersion)
+        if (playback.SchemaVersion >= TowerCombatPlayback.MinimumCompactBundleSchemaVersion)
         {
             if (now < playback.PlaybackEndsAt
                 || playback.TowerAttempt.Status != TowerAttemptStatus.Playback)
@@ -2256,7 +2263,7 @@ public sealed class WorldTowerService : IWorldTowerService
         DateTimeOffset now)
     {
         var completed = playback.TowerAttempt.Status is TowerAttemptStatus.Succeeded or TowerAttemptStatus.Failed;
-        if (playback.SchemaVersion == TowerCombatPlayback.CompactBundleSchemaVersion)
+        if (playback.SchemaVersion >= TowerCombatPlayback.MinimumCompactBundleSchemaVersion)
         {
             var elapsedTicks = Math.Clamp(
                 (int)Math.Floor((now - playback.PlaybackStartedAt).TotalSeconds * playback.TicksPerSecond),
@@ -2352,7 +2359,11 @@ public sealed class WorldTowerService : IWorldTowerService
                 .Select(entity => new TowerPlaybackEntityStateDto(
                     entityById[entity.Id].Index,
                     entity.Health,
-                    entity.Barrier))
+                    entity.Barrier,
+                    entity.CurrentStagger,
+                    entity.MaxStagger,
+                    entity.IsStaggered,
+                    entity.IsStaggerRecovering))
                 .OrderBy(x => x.EntityIndex)
                 .ToArray();
             var totals = checkpoint.EntityStats
@@ -2365,7 +2376,9 @@ public sealed class WorldTowerService : IWorldTowerService
                     entity.HealingReceived,
                     entity.HealthRegenerated,
                     entity.BarrierGenerated,
-                    entity.DamageBlocked))
+                    entity.DamageBlocked,
+                    entity.StaggerContributed,
+                    entity.StaggerBreaks))
                 .OrderBy(x => x.EntityIndex)
                 .ToArray();
             var abilityTotals = checkpoint.EntityStats
@@ -2377,7 +2390,9 @@ public sealed class WorldTowerService : IWorldTowerService
                         ability.TotalDamage,
                         ability.TotalHealing,
                         ability.TotalBarrier,
-                        ability.DamageByType)))
+                        ability.DamageByType,
+                        ability.TotalStagger,
+                        ability.StaggerBreaks)))
                 .OrderBy(x => x.AbilityIndex)
                 .ToArray();
             return new TowerPlaybackBundleFrameDto(

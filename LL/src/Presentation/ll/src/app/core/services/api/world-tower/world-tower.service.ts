@@ -259,6 +259,10 @@ export interface TowerPlaybackEntityState {
   entityIndex: number;
   health: number;
   barrier: number;
+  currentStagger?: number;
+  maxStagger?: number;
+  isStaggered?: boolean;
+  isStaggerRecovering?: boolean;
 }
 
 export interface TowerPlaybackEntityTotals {
@@ -270,6 +274,8 @@ export interface TowerPlaybackEntityTotals {
   healthRegenerated: number;
   barrierGenerated: number;
   damageBlocked: number;
+  staggerContributed?: number;
+  staggerBreaks?: number;
 }
 
 export interface TowerPlaybackAbilityTotals {
@@ -279,6 +285,8 @@ export interface TowerPlaybackAbilityTotals {
   totalHealing: number;
   totalBarrier: number;
   damageByType?: AbilityDamageTypeStats[];
+  totalStagger?: number;
+  staggerBreaks?: number;
 }
 
 export interface TowerCombatFrame {
@@ -331,6 +339,8 @@ export interface TowerParticipantCombatSummary {
   healingDone: number;
   survived: boolean;
   partyNumber: number | null;
+  staggerContributed?: number;
+  staggerBreaks?: number;
 }
 
 export interface TowerHallOfFameEntry {

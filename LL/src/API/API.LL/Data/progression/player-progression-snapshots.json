@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "combatLoadoutBudgetWeight": 8.0,
+  "gearEnvelopes": [
+    {
+      "id": "minimum",
+      "slotFillPercent": 0.75,
+      "quality": "Crude",
+      "rollMultiplier": 0.95,
+      "temperingBudgetPercent": 0.0,
+      "currentTierShareAtRegionEntry": 0.0,
+      "currentTierShareAtRegionCompletion": 0.4
+    },
+    {
+      "id": "expected",
+      "slotFillPercent": 1.0,
+      "quality": "Standard",
+      "rollMultiplier": 1.0,
+      "temperingBudgetPercent": 0.05,
+      "currentTierShareAtRegionEntry": 0.15,
+      "currentTierShareAtRegionCompletion": 0.85
+    },
+    {
+      "id": "optimized",
+      "slotFillPercent": 1.0,
+      "quality": "Exceptional",
+      "rollMultiplier": 1.05,
+      "temperingBudgetPercent": 0.2,
+      "currentTierShareAtRegionEntry": 0.65,
+      "currentTierShareAtRegionCompletion": 1.0
+    }
+  ],
+  "allocationProfiles": [
+    {
+      "id": "offensive",
+      "weights": {
+        "Power": 0.4,
+        "CritChance": 0.1,
+        "CritDamage": 0.1,
+        "ArmorPenetration": 0.08,
+        "MagicPenetration": 0.08,
+        "AttackSpeed": 0.12,
+        "Cooldown": 0.12
+      }
+    },
+    {
+      "id": "balanced",
+      "weights": {
+        "Power": 0.2,
+        "MaxHealth": 0.25,
+        "Armor": 0.1,
+        "Resistance": 0.1,
+        "CritChance": 0.05,
+        "CritDamage": 0.05,
+        "ArmorPenetration": 0.03,
+        "MagicPenetration": 0.03,
+        "DamageReduction": 0.05,
+        "HealingPowerPercent": 0.04,
+        "HealthRegeneration": 0.04,
+        "Cooldown": 0.03,
+        "AttackSpeed": 0.03
+      }
+    },
+    {
+      "id": "defensive-support",
+      "weights": {
+        "MaxHealth": 0.3,
+        "Armor": 0.12,
+        "Resistance": 0.12,
+        "DamageReduction": 0.08,
+        "BlockChance": 0.06,
+        "DodgeChance": 0.04,
+        "HealingPowerPercent": 0.08,
+        "HealthRegeneration": 0.08,
+        "Cooldown": 0.05,
+        "StatusResistance": 0.035,
+        "CrowdControlResistance": 0.035
+      }
+    }
+  ],
+  "anchors": [
+    { "id": "campaign-start", "progressionPosition": 1, "characterLevel": 1 },
+    { "id": "region-01-mid", "progressionPosition": 5, "characterLevel": 20 },
+    { "id": "region-01-end", "progressionPosition": 10, "characterLevel": 45 },
+    { "id": "region-02-entry", "progressionPosition": 11, "characterLevel": 50 },
+    { "id": "region-02-mid", "progressionPosition": 15, "characterLevel": 70 },
+    { "id": "region-02-end", "progressionPosition": 20, "characterLevel": 95 },
+    { "id": "region-03-entry", "progressionPosition": 21, "characterLevel": 100 },
+    { "id": "region-03-end", "progressionPosition": 30, "characterLevel": 145 },
+    { "id": "region-05-entry", "progressionPosition": 41, "characterLevel": 200 },
+    { "id": "region-05-end", "progressionPosition": 50, "characterLevel": 245 },
+    { "id": "region-10-entry", "progressionPosition": 91, "characterLevel": 450 },
+    { "id": "region-10-end", "progressionPosition": 100, "characterLevel": 495 }
+  ]
+}

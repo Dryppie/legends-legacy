@@ -400,7 +400,7 @@ public sealed class DungeonVigorStateTests
             Assert.Contains(3, encounterRowCounts);
         });
         Assert.Equal(
-            [2, 3, 4],
+            [2, 2, 2, 3, 4],
             delves.GetAll()
                 .Select(delve => delve.Nodes.Count(node => node.RoomType == RoomType.RestSite))
                 .Order()

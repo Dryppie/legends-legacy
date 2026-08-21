@@ -282,6 +282,41 @@
         "valuePerCollectionAscensionTier": 15,
         "description": "+0.75% Essence EXP gained."
       }
+    },
+    {
+      "id": "codex.collection.meran.tangled-cave-royal-brood",
+      "title": "Royal Brood of the Tangled Cave",
+      "description": "Archive the web-weaving sovereigns that rule the Tangled Cave and turn every strand into a weapon.",
+      "category": "Creature Families",
+      "essenceDefinitionIds": [
+        "essence.web_weaver_spider",
+        "essence.spider_queen",
+        "essence.spider_queen_royal_venom"
+      ],
+      "bonus": {
+        "kind": "FocusedMonsterEssenceDropRateRelativeBps",
+        "value": 75,
+        "valuePerCollectionAscensionTier": 15,
+        "description": "+0.75% Essence drop rate against focused monsters."
+      }
+    },
+    {
+      "id": "codex.collection.meran.great-tree-ancient-guardians",
+      "title": "Ancient Guardians of the Great Tree",
+      "description": "Archive the living bulwarks that defend the Great Tree with root, bark, thorn, and ancient magic.",
+      "category": "Creature Families",
+      "essenceDefinitionIds": [
+        "essence.bark_golem",
+        "essence.treant_guardian",
+        "essence.elder_treant",
+        "essence.elder_treant_thornstorm"
+      ],
+      "bonus": {
+        "kind": "FocusedMonsterEssenceDropRateRelativeBps",
+        "value": 75,
+        "valuePerCollectionAscensionTier": 15,
+        "description": "+0.75% Essence drop rate against focused monsters."
+      }
     }
   ]
 }

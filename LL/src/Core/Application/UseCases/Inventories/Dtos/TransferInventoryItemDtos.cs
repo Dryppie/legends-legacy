@@ -11,4 +11,5 @@ public sealed class TransferInventoryItemResponseDto
     public Guid ItemInstanceId { get; set; }
     public string RecipientName { get; set; } = string.Empty;
     public int Quantity { get; set; }
+    public required IReadOnlyList<InventoryItemDto> InventoryItems { get; init; }
 }

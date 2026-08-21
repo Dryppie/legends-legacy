@@ -261,6 +261,11 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
         new("region_02_area_02", "Rotgrave Fields", "Idle Area", "T2", "Ravenous Ghoul", "ravenous_ghoul"),
         new("region_02_area_02", "Rotgrave Fields", "Idle Area", "T2", "Vampire Fledgeling", "vampire_fledgeling"),
         new("region_02_area_02", "Rotgrave Fields", "Idle Area", "T2", "Wandering Ghost", "wandering_ghost"),
+        new("region_02_dungeon_tangled_cave", "Tangled Cave", "Dungeon", "T1-T3", "Web Weaver Spider", "web_weaver_spider"),
+        new("region_02_dungeon_tangled_cave", "Tangled Cave", "Dungeon", "T1-T3", "Spider Queen", "spider_queen"),
+        new("region_02_dungeon_great_tree", "The Great Tree", "Dungeon", "T1-T3", "Bark Golem", "bark_golem"),
+        new("region_02_dungeon_great_tree", "The Great Tree", "Dungeon", "T1-T3", "Treant Guardian", "treant_guardian"),
+        new("region_02_dungeon_great_tree", "The Great Tree", "Dungeon", "T1-T3", "Elder Treant", "elder_treant"),
         new("raid-boss.sanguine-horror", "Sanguine Horror", "Raid", "T2-T3", "Bloodthorn Vine", "bloodthorn_vine"),
         new("raid-boss.sanguine-horror", "Sanguine Horror", "Raid", "T2-T3", "Wendigo", "wendigo"),
         new("raid-boss.sanguine-horror", "Sanguine Horror", "Raid", "T2-T3", "Corpse Golem", "corpse_golem")

@@ -35,7 +35,9 @@ public sealed record EntityStats(
     int DamageRedirectedAway = 0,
     int TargetedAttacks = 0,
     double AttentionSharePercent = 0,
-    int ThreatGenerated = 0)
+    int ThreatGenerated = 0,
+    int StaggerContributed = 0,
+    int StaggerBreaks = 0)
 {
     public int AccountedIncomingDamage =>
         AvoidedDamage

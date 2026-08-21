@@ -15,9 +15,10 @@ import {
   GameBootstrapService,
 } from './game-bootstrap.service';
 import { QuestStateService } from '../quest/quest-state.service';
-import { GameEventService } from '../../real-time/game-event.service';
+import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
 import { setAttributeDefinitions } from '../../../../shared/models/attribute-definition';
 import { TimeSyncService } from '../time-sync/time-sync.service';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 
 @Injectable({ providedIn: 'root' })
 export class GameBootstrapStateService {
@@ -43,8 +44,9 @@ export class GameBootstrapStateService {
     private readonly auth: AuthService,
     private readonly questState: QuestStateService,
     private readonly characterActionsState: CharacterActionsStateService,
-    private readonly gameEvents: GameEventService,
+    private readonly gameEvents: GameRealtimeEventRegistry,
     private readonly timeSync: TimeSyncService,
+    private readonly stateSync: StateSyncCoordinator,
   ) {
     effect(
       () => {
@@ -53,9 +55,8 @@ export class GameBootstrapStateService {
           return;
         }
 
-        const reconnectCount = this.gameEvents.reconnectCount();
         const accessChanged = this.gameEvents.event.AccountAccessChanged();
-        if (!this._loaded() || (reconnectCount <= 0 && !accessChanged)) {
+        if (!this._loaded() || !accessChanged) {
           return;
         }
 
@@ -129,6 +130,10 @@ export class GameBootstrapStateService {
     this.questState.initialize(bootstrap.questJournal);
     this.questState.loadAreaAccess();
     this.characterActionsState.initializeFromBootstrap(bootstrap.currentAction);
+    this.stateSync.acceptSnapshotResponse(bootstrap.stateVersions ?? {}, [
+      'character',
+      'quests',
+    ]);
     this._loaded.set(true);
   }
 

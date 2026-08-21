@@ -14,12 +14,12 @@ public sealed record ProphecyProgressBatchNotification(IReadOnlyList<ProphecyPro
 public sealed class ProphecyProgressNotificationHandler : INotificationHandler<ProphecyProgressNotification>
 {
     private readonly IProphecyService _prophecyService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _eventPublisher;
     private readonly IGameEventOutbox _outbox;
 
     public ProphecyProgressNotificationHandler(
         IProphecyService prophecyService,
-        IGameEventPublisher eventPublisher,
+        IGameRealtimeBroadcaster eventPublisher,
         IGameEventOutbox outbox)
     {
         _prophecyService = prophecyService;
@@ -36,7 +36,7 @@ public sealed class ProphecyProgressNotificationHandler : INotificationHandler<P
             await EnqueueCompletionAsync(update, cancellationToken);
             await _eventPublisher.PublishAsync(
                 new Audience.Character(update.CharacterId),
-                new ProphecyProgressedMsg(
+                new ProphecyProgressed(
                     update.CharacterId,
                     update.ProphecyId,
                     update.Title,
@@ -46,7 +46,9 @@ public sealed class ProphecyProgressNotificationHandler : INotificationHandler<P
                     update.CurrentValue,
                     update.TargetValue,
                     update.AmountGained,
-                    update.Completed));
+                    update.Completed),
+                nameof(ProphecyProgressNotificationHandler),
+                cancellationToken);
         }
     }
 
@@ -66,12 +68,12 @@ public sealed class ProphecyProgressNotificationHandler : INotificationHandler<P
 public sealed class ProphecyProgressBatchNotificationHandler : INotificationHandler<ProphecyProgressBatchNotification>
 {
     private readonly IProphecyService _prophecyService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _eventPublisher;
     private readonly IGameEventOutbox _outbox;
 
     public ProphecyProgressBatchNotificationHandler(
         IProphecyService prophecyService,
-        IGameEventPublisher eventPublisher,
+        IGameRealtimeBroadcaster eventPublisher,
         IGameEventOutbox outbox)
     {
         _prophecyService = prophecyService;
@@ -88,7 +90,7 @@ public sealed class ProphecyProgressBatchNotificationHandler : INotificationHand
             await EnqueueCompletionAsync(update, cancellationToken);
             await _eventPublisher.PublishAsync(
                 new Audience.Character(update.CharacterId),
-                new ProphecyProgressedMsg(
+                new ProphecyProgressed(
                     update.CharacterId,
                     update.ProphecyId,
                     update.Title,
@@ -98,7 +100,9 @@ public sealed class ProphecyProgressBatchNotificationHandler : INotificationHand
                     update.CurrentValue,
                     update.TargetValue,
                     update.AmountGained,
-                    update.Completed));
+                    update.Completed),
+                nameof(ProphecyProgressBatchNotificationHandler),
+                cancellationToken);
         }
     }
 

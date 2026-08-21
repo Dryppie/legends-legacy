@@ -8,6 +8,7 @@ public sealed class CancelMarketPlaceBuyOrderResponseDto : IMapFrom<CancelMarket
 {
     public required Guid BuyOrderId { get; init; }
     public required long BuyerCinders { get; init; }
+    public MarketplaceChangeSetDto Marketplace { get; set; } = null!;
 
     public void Mapping(Profile profile)
     {

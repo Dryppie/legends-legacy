@@ -14,7 +14,16 @@ namespace Application.UseCases.Dungeons.Queries.GetAvailableDungeons;
 
 public record GetAvailableDungeonsQuery(Guid CharacterId) : IQuery<DungeonHubDto>;
 
-public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvailableDungeonsQuery, DungeonHubDto>
+public sealed class GetAvailableDungeonsQueryHandler(DungeonHubFactory hub)
+    : IRequestHandler<GetAvailableDungeonsQuery, DungeonHubDto>
+{
+    public Task<DungeonHubDto> Handle(
+        GetAvailableDungeonsQuery request,
+        CancellationToken cancellationToken) =>
+        hub.CreateAsync(request.CharacterId, cancellationToken);
+}
+
+public sealed class DungeonHubFactory
 {
     private readonly IDungeonDefinitions _dungeonDefinitions;
     private readonly IDungeonAccessPolicy _dungeonAccess;
@@ -26,7 +35,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
     private readonly IDungeonSigilAssemblySettingsProvider _sigilAssemblySettings;
     private readonly IMapper _mapper;
 
-    public GetAvailableDungeonsQueryHandler(
+    public DungeonHubFactory(
         IDungeonDefinitions dungeonDefinitions,
         IDungeonAccessPolicy dungeonAccess,
         IDungeonPreviewRewardService previewRewards,
@@ -48,13 +57,13 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         _mapper = mapper;
     }
 
-    public async Task<DungeonHubDto> Handle(
-        GetAvailableDungeonsQuery request,
+    public async Task<DungeonHubDto> CreateAsync(
+        Guid characterId,
         CancellationToken cancellationToken)
     {
         var previews = new List<DungeonPreviewDto>();
         var sigilFragments = await _characters.GetSigilFragmentsAsync(
-            request.CharacterId,
+            characterId,
             cancellationToken);
 
         var dungeons = _dungeonDefinitions.GetAll()
@@ -62,18 +71,18 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             .ThenBy(x => x.Grade)
             .ToList();
         var completionRecords = await _dungeonRuns.GetCompletionRecordsAsync(
-            request.CharacterId,
+            characterId,
             dungeons.Select(x => x.Id).ToArray(),
             cancellationToken);
         var records = completionRecords.ToDictionary(
             x => x.DungeonDefinitionId,
             StringComparer.OrdinalIgnoreCase);
         var masteryByDungeon = await _mastery.GetMasteryByDungeonAsync(
-            request.CharacterId,
+            characterId,
             dungeons.Select(x => x.Id).ToArray(),
             cancellationToken);
         var accessByDungeon = await _dungeonAccess.EvaluateForPreviewAsync(
-            request.CharacterId,
+            characterId,
             dungeons,
             cancellationToken);
         var rewardsByDungeon = await _previewRewards.GetPossibleCompletionRewardsAsync(

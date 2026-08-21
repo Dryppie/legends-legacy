@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using Application.Interfaces.Outbox;
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Quests;
 using Application.Interfaces.Services.LL.Quests.Events;
 using Application.Interfaces.WebSockets;
@@ -22,8 +23,9 @@ public sealed class EventQuestService(
     IInventoryItemFactory inventoryItemFactory,
     ILootRewardWriter lootRewardWriter,
     TimeProvider timeProvider,
-    IGameEventPublisher eventPublisher,
-    IGameEventOutbox outbox) : IEventQuestService, IEventQuestProgressionService
+    IGameRealtimeBroadcaster eventPublisher,
+    IGameEventOutbox outbox,
+    IStateSyncService? stateSync = null) : IEventQuestService, IEventQuestProgressionService
 {
     private const string EventQuestTargetUrl = "/game/quests";
 
@@ -151,17 +153,35 @@ public sealed class EventQuestService(
         if (!changed) return;
         await EnqueueAnnouncementsAsync(announcements, now, cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
+        if (stateSync is not null &&
+            (globallyChangedEventIds.Count > 0 || personallyChangedEventIds.Count > 0))
+        {
+            // The semantic event below is the authoritative refresh signal. Advancing
+            // silently prevents the outbox worker from emitting a second invalidation
+            // for the same contributor transaction while preserving checkpoint recovery.
+            await stateSync.AdvanceCharacterScopeAsync(
+                characterId,
+                StateSyncScopes.EventQuests,
+                nameof(EventQuestChanged),
+                cancellationToken);
+        }
         foreach (var eventQuestId in globallyChangedEventIds)
         {
             await eventPublisher.PublishAsync(
                 new Audience.World(),
-                new EventQuestChangedMsg(eventQuestId, now));
+                new EventQuestChanged(eventQuestId, now),
+                nameof(EventQuestService),
+                cancellationToken);
         }
-        foreach (var eventQuestId in personallyChangedEventIds)
+        foreach (var eventQuestId in personallyChangedEventIds.Except(
+                     globallyChangedEventIds,
+                     StringComparer.OrdinalIgnoreCase))
         {
             await eventPublisher.PublishAsync(
                 new Audience.Character(characterId),
-                new EventQuestChangedMsg(eventQuestId, now));
+                new EventQuestChanged(eventQuestId, now),
+                nameof(EventQuestService),
+                cancellationToken);
         }
     }
 

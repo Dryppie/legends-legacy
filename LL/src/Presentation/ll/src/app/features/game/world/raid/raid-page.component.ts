@@ -26,7 +26,9 @@ import {
   RaidService,
   RaidSignup,
 } from '../../../../core/services/api/raid/raid.service';
-import { GameEventService } from '../../../../core/services/real-time/game-event.service';
+import { GameRealtimeEventRegistry } from '../../../../core/services/real-time/game-realtime/game-realtime-event-registry.service';
+import { RealtimeSignalDeduper } from '../../../../core/services/real-time/game-realtime/realtime-deduplication';
+import { GameRealtimeConnection } from '../../../../core/services/real-time/game-realtime/game-realtime-connection.service';
 import { CombatService } from '../../../../core/services/client-side/combat/combat.service';
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
 import { BattleType } from '../../../../core/state/combat-state/combatState';
@@ -60,7 +62,8 @@ export class RaidPageComponent implements OnInit, OnDestroy {
   private readonly raids = inject(RaidService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly events = inject(GameEventService);
+  private readonly events = inject(GameRealtimeEventRegistry);
+  private readonly realtime = inject(GameRealtimeConnection);
   private readonly combat = inject(CombatService);
   private readonly playbackPlayer = inject(RaidPlaybackService);
   readonly combatState = inject(CombatStateService);
@@ -86,8 +89,8 @@ export class RaidPageComponent implements OnInit, OnDestroy {
     'FinalAssault',
   ];
   private raidRunId = '';
-  private lastRealtimeUpdateId: string | null = null;
-  private lastReconnectCount = this.events.reconnectCount();
+  private readonly realtimeDeduper = new RealtimeSignalDeduper();
+  private lastReconnectCount = this.realtime.reconnectCount();
   private playbackTimer: ReturnType<typeof setInterval> | null = null;
   private playbackAdvanceTimer: ReturnType<typeof setTimeout> | null = null;
   private activePlaybackBundle: RaidPlaybackBundle | null = null;
@@ -116,18 +119,17 @@ export class RaidPageComponent implements OnInit, OnDestroy {
       const envelope = this.events.eventEnvelope.RaidUpdated();
       if (
         !envelope?.updateId ||
-        envelope.updateId === this.lastRealtimeUpdateId ||
+        !this.realtimeDeduper.shouldProcess('raid', envelope) ||
         envelope.payload.raidRunId !== this.raidRunId
       ) {
         return;
       }
 
-      this.lastRealtimeUpdateId = envelope.updateId;
       this.load(false);
     });
 
     effect(() => {
-      const reconnectCount = this.events.reconnectCount();
+      const reconnectCount = this.realtime.reconnectCount();
       if (reconnectCount <= this.lastReconnectCount) return;
       this.lastReconnectCount = reconnectCount;
       this.load(false);
@@ -137,6 +139,11 @@ export class RaidPageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.route.paramMap.pipe(takeUntil(this.destroyed)).subscribe((params) => {
       this.raidRunId = params.get('raidId') ?? '';
+      void this.realtime
+        .setRaidSubscription(this.raidRunId || null)
+        .catch((error) =>
+          console.warn('Failed to subscribe to raid realtime', error),
+        );
       this.load();
     });
     interval(5000)
@@ -148,6 +155,11 @@ export class RaidPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    void this.realtime
+      .setRaidSubscription(null)
+      .catch((error) =>
+        console.warn('Failed to unsubscribe from raid realtime', error),
+      );
     this.closeRaidPlayback();
     this.destroyed.next();
     this.destroyed.complete();

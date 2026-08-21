@@ -139,12 +139,11 @@ public sealed class SelectionCrateServiceTests
                 Stackable = true
             }));
         var lootHistory = new RecordingLootHistoryService();
-        var legacy = new RecordingGameEventPublisher();
         var realtime = new RecordingRealtimeBroadcaster();
         var handler = new OpenCatalystSelectionCrateCommandHandler(
             new SelectionCrateService(inventory, itemBases, new InventoryItemFactory()),
+            inventory,
             lootHistory,
-            legacy,
             realtime,
             CreateMapper());
 
@@ -158,9 +157,7 @@ public sealed class SelectionCrateServiceTests
         Assert.Equal("Catalyst Selection Cache", lootHistory.Location);
         Assert.Equal(6, Assert.Single(lootHistory.Items!).Quantity);
 
-        var legacyMessage = Assert.IsType<LootReceivedMsg>(legacy.Message);
         var realtimeMessage = Assert.IsType<LootReceived>(realtime.Message);
-        Assert.Equal(response.Data.GrantId, legacyMessage.GrantId);
         Assert.Equal(response.Data.GrantId, realtimeMessage.GrantId);
         Assert.Equal("Catalyst Selection Cache", realtimeMessage.Location);
     }
@@ -233,7 +230,25 @@ public sealed class SelectionCrateServiceTests
             return Task.CompletedTask;
         }
 
-        public Task<Inventory?> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<Inventory?> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken)
+        {
+            if (crate.InventoryId != characterId)
+            {
+                return Task.FromResult<Inventory?>(null);
+            }
+
+            var items = AddedRewards.ToList();
+            if (crate.Quantity > 0)
+            {
+                items.Add(crate);
+            }
+
+            return Task.FromResult<Inventory?>(new Inventory
+            {
+                CharacterId = characterId,
+                InventoryItems = items
+            });
+        }
         public Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<bool> TryRemoveCraftingMaterialsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<bool> MarkItemSeenAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken) => throw new NotSupportedException();
@@ -285,17 +300,6 @@ public sealed class SelectionCrateServiceTests
 
         public Task<int> ClearAsync(Guid characterId, CancellationToken cancellationToken) =>
             throw new NotSupportedException();
-    }
-
-    private sealed class RecordingGameEventPublisher : IGameEventPublisher
-    {
-        public GameEventMsg? Message { get; private set; }
-
-        public Task PublishAsync(Audience audience, GameEventMsg message)
-        {
-            Message = message;
-            return Task.CompletedTask;
-        }
     }
 
     private sealed class RecordingRealtimeBroadcaster : IGameRealtimeBroadcaster

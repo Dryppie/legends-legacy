@@ -43,7 +43,7 @@ public class CreatureScaler : ICreatureScaler
 
         foreach (var kvp in MonsterBaseStats.Baseline)
         {
-            creature.BaseAttributesDict[kvp.Key] = (int)kvp.Value;
+            creature.BaseAttributesDict[kvp.Key] = kvp.Value;
         }
     }
 
@@ -58,20 +58,22 @@ public class CreatureScaler : ICreatureScaler
             {
                 AttributeType.MaxHealth => (float)(baseValue * scaling.HealthMultiplier),
                 AttributeType.Power => (float)(baseValue * scaling.OffenseMultiplier),
-                AttributeType.AttackSpeed => (float)(baseValue * scaling.AttackSpeedMultiplier),
+                AttributeType.AttackSpeed => baseValue + (float)scaling.AttackSpeedBonus,
                 AttributeType.CritChance => Math.Min(baseValue + (float)scaling.CritChanceBonus, scaling.CritChanceCap),
                 AttributeType.CritDamage => Math.Min(baseValue + (float)scaling.CritDamageBonus, scaling.CritDamageCap),
-                AttributeType.ArmorPenetration => (float)(baseValue * scaling.PenetrationMultiplier),
-                AttributeType.MagicPenetration => (float)(baseValue * scaling.PenetrationMultiplier),
+                AttributeType.ArmorPenetration => baseValue + (float)scaling.PenetrationBonus,
+                AttributeType.MagicPenetration => baseValue + (float)scaling.PenetrationBonus,
                 AttributeType.Armor => (float)(baseValue * scaling.DefenseMultiplier),
                 AttributeType.Resistance => (float)(baseValue * scaling.ResistanceMultiplier),
-                AttributeType.DamageReduction => (float)(baseValue * scaling.SoftDefenseMultiplier),
-                AttributeType.CrowdControlResistance => (float)(baseValue * scaling.SoftDefenseMultiplier),
-                AttributeType.StatusResistance => (float)(baseValue * scaling.SoftDefenseMultiplier),
+                AttributeType.HealthRegeneration => (float)(baseValue * Math.Sqrt(
+                    scaling.HealthMultiplier * scaling.OffenseMultiplier)),
+                AttributeType.DamageReduction => baseValue + (float)scaling.SoftDefenseBonus,
+                AttributeType.CrowdControlResistance => baseValue + (float)scaling.SoftDefenseBonus,
+                AttributeType.StatusResistance => baseValue + (float)scaling.SoftDefenseBonus,
                 _ => baseValue
             };
 
-            creature.BaseAttributesDict[type] = (int)scaled;
+            creature.BaseAttributesDict[type] = scaled;
         }
     }
 
@@ -116,7 +118,7 @@ public class CreatureScaler : ICreatureScaler
             if (o.Additive.HasValue)
                 val += o.Additive.Value;
 
-            creature.BaseAttributesDict[o.AttributeType] = (int)val;
+            creature.BaseAttributesDict[o.AttributeType] = val;
         }
     }
 
@@ -139,7 +141,7 @@ public class CreatureScaler : ICreatureScaler
         if (creature.BaseAttributesDict.TryGetValue(AttributeType.CritDamage, out var cd))
         {
             creature.BaseAttributesDict[AttributeType.CritDamage] =
-                Math.Clamp(cd, 1f, scaling.CritDamageCap);
+                Math.Clamp(cd, 0f, scaling.CritDamageCap);
         }
     }
 
@@ -154,6 +156,6 @@ public class CreatureScaler : ICreatureScaler
         if (!c.BaseAttributesDict.TryGetValue(type, out var value))
             return;
 
-        c.BaseAttributesDict[type] = (int)(value * factor);
+        c.BaseAttributesDict[type] = value * factor;
     }
 }

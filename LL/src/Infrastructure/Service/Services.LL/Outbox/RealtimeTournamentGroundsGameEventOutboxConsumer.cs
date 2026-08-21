@@ -22,7 +22,7 @@ public sealed class RealtimeTournamentGroundsGameEventOutboxConsumer(
             ?? throw new InvalidOperationException("Tournament Grounds realtime payload is invalid.");
 
         await realtimeBroadcaster.PublishAsync(
-            new Audience.World(),
+            new Audience.TournamentGrounds(),
             payload,
             nameof(RealtimeTournamentGroundsGameEventOutboxConsumer),
             cancellationToken);

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from '../api.service';
+import { ApiService, VersionedMutationResult } from '../api.service';
 import { Observable } from 'rxjs';
 import {
   EquipmentSlot,
@@ -54,17 +54,29 @@ export class EquipmentService {
   public equipEquipment(
     equipment: EquipmentInstance,
     slotType: EquipmentSlotType,
-  ): Observable<EquipmentChangeResponse> {
+  ): Observable<VersionedMutationResult<EquipmentChangeResponse>> {
     const equipmentRequestDto = {
       equipmentItemId: equipment.id,
       slotType: slotType,
     };
-    return this.apiService.post('equipment/equip', equipmentRequestDto);
+    return this.apiService.postVersioned<EquipmentChangeResponse>(
+      'equipment/equip',
+      equipmentRequestDto,
+      {
+        stateSyncScopesHandledByResponse: ['equipment', 'inventory'],
+      },
+    );
   }
 
   unequipEquipment(
     slotType: EquipmentSlotType,
-  ): Observable<EquipmentChangeResponse> {
-    return this.apiService.post('equipment/unequip', slotType);
+  ): Observable<VersionedMutationResult<EquipmentChangeResponse>> {
+    return this.apiService.postVersioned<EquipmentChangeResponse>(
+      'equipment/unequip',
+      slotType,
+      {
+        stateSyncScopesHandledByResponse: ['equipment', 'inventory'],
+      },
+    );
   }
 }

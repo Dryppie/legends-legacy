@@ -9,11 +9,13 @@ import {
 import { Observable, tap } from 'rxjs';
 import { StateSyncCoordinator } from '../services/real-time/game-realtime/state-sync-coordinator.service';
 import {
+  readDomainVersions,
   FORCE_STATE_SYNC_RESPONSE_REFRESH,
   STATE_SYNC_SCOPES_HANDLED_BY_RESPONSE,
 } from './state-sync-context';
+import { StateSyncDiagnostics } from '../services/real-time/game-realtime/state-sync-diagnostics.service';
+import { DomainVersionTracker } from '../services/real-time/game-realtime/domain-version-tracker.service';
 
-const STATE_REVISIONS_HEADER = 'X-LL-State-Revisions';
 const mutationMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 @Injectable()
@@ -24,6 +26,10 @@ export class StateSyncInterceptor implements HttpInterceptor {
     request: HttpRequest<unknown>,
     next: HttpHandler,
   ): Observable<HttpEvent<unknown>> {
+    if (request.method === 'GET') {
+      this.injector.get(StateSyncDiagnostics).recordGet(request.urlWithParams);
+    }
+
     return next.handle(request).pipe(
       tap((event) => {
         if (
@@ -33,16 +39,22 @@ export class StateSyncInterceptor implements HttpInterceptor {
           return;
         }
 
-        const encodedRevisions = event.headers.get(STATE_REVISIONS_HEADER);
-        if (!encodedRevisions) return;
+        const revisions = readDomainVersions(event.headers);
+        if (!Object.keys(revisions).length) return;
 
-        let revisions: Record<string, number>;
-        try {
-          revisions = JSON.parse(encodedRevisions) as Record<string, number>;
-        } catch {
-          console.warn('Ignoring malformed state revision response header');
-          return;
-        }
+        this.injector.get(DomainVersionTracker).observe(revisions);
+
+        const handledScopes = request.context.get(
+          STATE_SYNC_SCOPES_HANDLED_BY_RESPONSE,
+        );
+        this.injector
+          .get(StateSyncDiagnostics)
+          .recordMutation(
+            request.method,
+            request.urlWithParams,
+            revisions,
+            handledScopes,
+          );
 
         // Run after the response subscriber has applied its snapshot. If an older
         // mutation response arrived late, the forced refresh repairs that overwrite.
@@ -52,7 +64,7 @@ export class StateSyncInterceptor implements HttpInterceptor {
             .acceptMutationResponse(
               revisions,
               request.context.get(FORCE_STATE_SYNC_RESPONSE_REFRESH),
-              request.context.get(STATE_SYNC_SCOPES_HANDLED_BY_RESPONSE),
+              handledScopes,
             ),
         );
       }),

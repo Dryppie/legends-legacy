@@ -358,6 +358,8 @@ public sealed class RaidCombatResolver(
             hostile[0].Slot with { SlotId = "raid-boss" },
             hostile[0].SourceEntity,
             hostile[0].Combatant);
+        hostile[0].Combatant.StaggerDefinition = tier.Boss.Stagger;
+        hostile[0].Combatant.StaggerParticipantCount = friendly.Count;
         var defenceReduction = -(guardianBreak * tier.Boss.MaxGuardianBreakPercent);
         RaidCombatScaling.AddPercent(hostile[0].Combatant, AttributeType.Armor, defenceReduction);
         RaidCombatScaling.AddPercent(hostile[0].Combatant, AttributeType.Resistance, defenceReduction);

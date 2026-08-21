@@ -16,13 +16,13 @@ public record WithdrawGuildVaultItemCommand(Guid CharacterId, Guid VaultItemId) 
 public class WithdrawGuildVaultItemCommandHandler : IRequestHandler<WithdrawGuildVaultItemCommand, Response<bool>>
 {
     private readonly IGuildVaultService _vault;
-    private readonly IGameEventPublisher _events;
+    private readonly IGameRealtimeBroadcaster _events;
     private readonly IGameEventOutbox _outbox;
     private readonly IMapper _mapper;
 
     public WithdrawGuildVaultItemCommandHandler(
         IGuildVaultService vault,
-        IGameEventPublisher events,
+        IGameRealtimeBroadcaster events,
         IGameEventOutbox outbox,
         IMapper mapper)
     {
@@ -57,18 +57,22 @@ public class WithdrawGuildVaultItemCommandHandler : IRequestHandler<WithdrawGuil
 
         await _events.PublishAsync(
             new Audience.Guild(mutation.GuildId),
-            new GuildVaultChatMessageMsg(
+            new GuildVaultChatMessage(
                 mutation.GuildId,
                 messageId,
                 mutation.CharacterId,
                 mutation.CharacterName,
                 "withdrew",
                 equipment,
-                sentAt));
+                sentAt),
+            nameof(WithdrawGuildVaultItemCommandHandler),
+            cancellationToken);
 
         await _events.PublishAsync(
             new Audience.Guild(mutation.GuildId),
-            new GuildStateChangedMsg(mutation.GuildId));
+            new GuildStateChanged(mutation.GuildId),
+            nameof(WithdrawGuildVaultItemCommandHandler),
+            cancellationToken);
         return Response<bool>.Success(true);
     }
 }

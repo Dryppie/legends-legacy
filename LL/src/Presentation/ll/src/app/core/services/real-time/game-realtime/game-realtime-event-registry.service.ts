@@ -1,4 +1,11 @@
-import { Injectable, Injector, inject } from '@angular/core';
+import {
+  Injectable,
+  Injector,
+  Signal,
+  WritableSignal,
+  inject,
+  signal,
+} from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CharacterStateService } from '../../api/character/character-state.service';
 import { InventoryStateService } from '../../api/inventory/inventory-state.service';
@@ -7,17 +14,30 @@ import {
   CharacterSnapshot,
   DungeonRewardsClaimed,
   GameRealtimeEnvelope,
+  GameRealtimeSignalEventMap,
   InventorySnapshot,
   LootReceived,
   StateInvalidated,
   gameRealtimeEventNames,
+  isGameRealtimeSignalEventName,
 } from './game-realtime-contracts';
 import { GameRealtimeConnection } from './game-realtime-connection.service';
 import { isGameRealtimeEnabled } from './game-realtime-feature';
 import { GameRealtimeStore } from './game-realtime-store.service';
 import { StateSyncCoordinator } from './state-sync-coordinator.service';
+import { RealtimeUpdateDeduper } from './realtime-deduplication';
 
 type Handler = (envelope: GameRealtimeEnvelope) => void;
+type RegistryEventMap = GameRealtimeSignalEventMap;
+type RegistryEventName = keyof RegistryEventMap & string;
+type RegistryEventSignalMap = {
+  [K in RegistryEventName]: Signal<RegistryEventMap[K] | null>;
+};
+type RegistryEnvelopeSignalMap = {
+  [K in RegistryEventName]: Signal<
+    GameRealtimeEnvelope<RegistryEventMap[K]> | null
+  >;
+};
 
 @Injectable({ providedIn: 'root' })
 export class GameRealtimeEventRegistry {
@@ -25,8 +45,26 @@ export class GameRealtimeEventRegistry {
   private readonly diagnostics = inject(GameRealtimeDiagnostics);
   private readonly injector = inject(Injector);
   private readonly handlers = new Map<string, Handler>();
+  private readonly updateDeduper = new RealtimeUpdateDeduper();
+  private readonly channels = new Map<
+    RegistryEventName,
+    WritableSignal<unknown | null>
+  >();
+  private readonly envelopes = new Map<
+    RegistryEventName,
+    WritableSignal<GameRealtimeEnvelope | null>
+  >();
   private registered = false;
   private subscription?: Subscription;
+
+  readonly event = new Proxy({} as RegistryEventSignalMap, {
+    get: (_target, key: string) => this.eventSignal(key as RegistryEventName),
+  }) as RegistryEventSignalMap;
+
+  readonly eventEnvelope = new Proxy({} as RegistryEnvelopeSignalMap, {
+    get: (_target, key: string) =>
+      this.eventEnvelopeSignal(key as RegistryEventName),
+  }) as RegistryEnvelopeSignalMap;
 
   initialize(): void {
     if (!isGameRealtimeEnabled() || this.registered) return;
@@ -43,7 +81,41 @@ export class GameRealtimeEventRegistry {
     this.subscription?.unsubscribe();
     this.subscription = undefined;
     this.handlers.clear();
+    this.channels.forEach((channel) => channel.set(null));
+    this.envelopes.forEach((envelope) => envelope.set(null));
+    this.updateDeduper.clear();
     this.registered = false;
+  }
+
+  eventSignal<K extends RegistryEventName>(
+    name: K,
+  ): Signal<RegistryEventMap[K] | null> {
+    let channel = this.channels.get(name) as
+      | WritableSignal<RegistryEventMap[K] | null>
+      | undefined;
+    if (!channel) {
+      channel = signal<RegistryEventMap[K] | null>(null);
+      this.channels.set(name, channel);
+    }
+    return channel.asReadonly();
+  }
+
+  eventEnvelopeSignal<K extends RegistryEventName>(
+    name: K,
+  ): Signal<GameRealtimeEnvelope<RegistryEventMap[K]> | null> {
+    let envelope = this.envelopes.get(name) as
+      | WritableSignal<GameRealtimeEnvelope<RegistryEventMap[K]> | null>
+      | undefined;
+    if (!envelope) {
+      envelope = signal<GameRealtimeEnvelope<RegistryEventMap[K]> | null>(
+        null,
+      );
+      this.envelopes.set(
+        name,
+        envelope as WritableSignal<GameRealtimeEnvelope | null>,
+      );
+    }
+    return envelope.asReadonly();
   }
 
   private registerHandlers(): void {
@@ -115,11 +187,43 @@ export class GameRealtimeEventRegistry {
   }
 
   private dispatch(envelope: GameRealtimeEnvelope): void {
-    const handler = this.handlers.get(envelope.event);
-    if (!handler) {
+    if (!this.updateDeduper.shouldProcess(envelope.updateId)) {
+      this.diagnostics.recordDuplicate(envelope);
       return;
     }
 
-    this.diagnostics.runHandler(envelope, () => handler(envelope), true);
+    const handler = this.handlers.get(envelope.event);
+    if (handler) {
+      this.diagnostics.runHandler(envelope, () => handler(envelope), true);
+      return;
+    }
+
+    if (!isGameRealtimeSignalEventName(envelope.event)) {
+      this.diagnostics.recordUnknown(envelope);
+      return;
+    }
+
+    const eventName = envelope.event as RegistryEventName;
+    let channel = this.channels.get(eventName);
+    if (!channel) {
+      channel = signal<unknown | null>(null);
+      this.channels.set(eventName, channel);
+    }
+
+    let envelopeChannel = this.envelopes.get(eventName);
+    if (!envelopeChannel) {
+      envelopeChannel = signal<GameRealtimeEnvelope | null>(null);
+      this.envelopes.set(eventName, envelopeChannel);
+    }
+
+    this.diagnostics.runHandler(
+      envelope,
+      () => {
+        channel.set(envelope.payload);
+        envelopeChannel.set(envelope);
+      },
+      true,
+    );
   }
+
 }

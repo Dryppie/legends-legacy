@@ -7,6 +7,7 @@ using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
 using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Dungeons.Dtos;
+using Application.UseCases.Dungeons.Queries.GetAvailableDungeons;
 using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
@@ -27,6 +28,7 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
     private readonly IMapper _mapper;
     private readonly IGameEventOutbox _outbox;
     private readonly ILootHistoryService _lootHistory;
+    private readonly DungeonHubFactory _dungeonHub;
 
     public ClaimDungeonRewardsCommandHandler(
         IDungeonRunService dungeonRunService,
@@ -35,7 +37,8 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
         IGameRealtimeBroadcaster gameRealtime,
         IMapper mapper,
         IGameEventOutbox outbox,
-        ILootHistoryService lootHistory)
+        ILootHistoryService lootHistory,
+        DungeonHubFactory dungeonHub)
     {
         _dungeonRunService = dungeonRunService;
         _inventoryService = inventoryService;
@@ -44,6 +47,7 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
         _mapper = mapper;
         _outbox = outbox;
         _lootHistory = lootHistory;
+        _dungeonHub = dungeonHub;
     }
 
     public async Task<Response<ClaimDungeonRewardsResponseDto>> Handle(ClaimDungeonRewardsCommand request, CancellationToken cancellationToken)
@@ -90,24 +94,15 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
             nameof(ClaimDungeonRewardsCommandHandler),
             cancellationToken);
 
-        await _gameRealtime.PublishAsync(
-            new Audience.Character(request.CharacterId),
-            new InventorySnapshot(request.CharacterId, inventoryItems, "dungeon-reward-claim"),
-            nameof(ClaimDungeonRewardsCommandHandler),
-            cancellationToken);
-
-        await _gameRealtime.PublishAsync(
-            new Audience.Character(request.CharacterId),
-            new CharacterSnapshot(request.CharacterId, characterDto, "dungeon-reward-claim"),
-            nameof(ClaimDungeonRewardsCommandHandler),
-            cancellationToken);
+        var hub = await _dungeonHub.CreateAsync(request.CharacterId, cancellationToken);
 
         return Response<ClaimDungeonRewardsResponseDto>.Success(new ClaimDungeonRewardsResponseDto
         {
             ActiveRun = null,
             InventoryItems = inventoryItems,
             ClaimedLoot = claimedLoot,
-            Character = characterDto
+            Character = characterDto,
+            Hub = hub
         });
     }
 }

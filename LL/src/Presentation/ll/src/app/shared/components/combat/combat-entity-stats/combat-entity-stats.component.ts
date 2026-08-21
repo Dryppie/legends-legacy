@@ -131,6 +131,13 @@ export class CombatEntityStatsComponent implements OnChanges {
     );
   }
 
+  get staggerableBosses(): StatsParticipant[] {
+    return this.enemyParticipants.filter(
+      (participant) =>
+        !participant.isSummonGroup && this.hasStagger(participant.entity),
+    );
+  }
+
   visibleParticipantsForGroup(
     group: StatsParticipantGroup,
   ): StatsParticipant[] {
@@ -217,6 +224,38 @@ export class CombatEntityStatsComponent implements OnChanges {
 
   barrierStartPercentage(entity: SimpleCombatEntityDto): number {
     return this.healthPercentage(entity);
+  }
+
+  hasStagger(entity: SimpleCombatEntityDto): boolean {
+    return (entity.maxStagger ?? 0) > 0;
+  }
+
+  staggerPercentage(entity: SimpleCombatEntityDto): number {
+    const maximum = entity.maxStagger ?? 0;
+    if (maximum <= 0) return 0;
+    return Math.max(
+      0,
+      Math.min(100, ((entity.currentStagger ?? 0) / maximum) * 100),
+    );
+  }
+
+  staggerStateLabel(entity: SimpleCombatEntityDto): string {
+    const value = `${entity.currentStagger ?? 0} of ${entity.maxStagger ?? 0}`;
+    if (entity.isStaggered) return `Staggered, ${value}`;
+    if (entity.isStaggerRecovering) return `Recovering, ${value}`;
+    return `${value} stagger`;
+  }
+
+  staggerPhaseLabel(entity: SimpleCombatEntityDto): string {
+    if (entity.isStaggered) return 'Staggered';
+    if (entity.isStaggerRecovering) return 'Recovering';
+    return 'Building';
+  }
+
+  staggerHint(entity: SimpleCombatEntityDto): string {
+    if (entity.isStaggered) return 'Defenses broken — focus damage';
+    if (entity.isStaggerRecovering) return 'Stagger is temporarily unavailable';
+    return "Build stagger to break the boss's defenses";
   }
 
   trackParticipant(_index: number, participant: StatsParticipant): string {

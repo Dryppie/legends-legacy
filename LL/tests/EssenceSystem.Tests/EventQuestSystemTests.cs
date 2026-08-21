@@ -148,7 +148,7 @@ public sealed class EventQuestSystemTests
         Assert.Equal(1, state.ContributorCount);
         Assert.Equal("RealmTester", Assert.Single(state.TopContributors).CharacterName);
         Assert.Single(await db.EventQuestEventLedgers.ToListAsync());
-        Assert.Equal(2, publisher.Messages.OfType<EventQuestChangedMsg>().Count());
+        Assert.Single(publisher.Messages.OfType<EventQuestChanged>());
     }
 
     [Fact]
@@ -679,11 +679,15 @@ public sealed class EventQuestSystemTests
         }
     }
 
-    private sealed class RecordingPublisher : IGameEventPublisher
+    private sealed class RecordingPublisher : IGameRealtimeBroadcaster
     {
-        public List<GameEventMsg> Messages { get; } = [];
+        public List<GameRealtimeEvent> Messages { get; } = [];
 
-        public Task PublishAsync(Audience audience, GameEventMsg message)
+        public Task PublishAsync(
+            Audience audience,
+            GameRealtimeEvent message,
+            string sender,
+            CancellationToken cancellationToken = default)
         {
             Messages.Add(message);
             return Task.CompletedTask;

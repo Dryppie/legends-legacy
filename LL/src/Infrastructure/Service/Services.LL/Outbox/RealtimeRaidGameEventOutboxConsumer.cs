@@ -22,8 +22,20 @@ public sealed class RealtimeRaidGameEventOutboxConsumer(
             ?? throw new InvalidOperationException("Raid realtime payload is invalid.");
 
         await realtimeBroadcaster.PublishAsync(
-            new Audience.World(),
+            new Audience.Raid(payload.RaidRunId),
             payload,
+            nameof(RealtimeRaidGameEventOutboxConsumer),
+            cancellationToken);
+
+        await realtimeBroadcaster.PublishAsync(
+            new Audience.World(),
+            new RaidDirectoryUpdated(
+                payload.RaidRunId,
+                payload.RaidBossId,
+                payload.Event,
+                payload.Status,
+                payload.SignupCount,
+                payload.OccurredAtUtc),
             nameof(RealtimeRaidGameEventOutboxConsumer),
             cancellationToken);
     }

@@ -11,12 +11,12 @@ namespace Application.UseCases.Inventories.EventHandlers;
 public sealed class LootGeneratedEventHandler : INotificationHandler<LootGeneratedEvent>
 {
     private readonly IInventoryService _inventory;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _gameRealtime;
     private readonly IMapper _mapper;
-    public LootGeneratedEventHandler(IInventoryService inventory, IGameEventPublisher eventPublisher, IMapper mapper)
+    public LootGeneratedEventHandler(IInventoryService inventory, IGameRealtimeBroadcaster gameRealtime, IMapper mapper)
     {
         _inventory = inventory;
-        _eventPublisher = eventPublisher;
+        _gameRealtime = gameRealtime;
         _mapper = mapper;
     }
 
@@ -28,8 +28,11 @@ public sealed class LootGeneratedEventHandler : INotificationHandler<LootGenerat
             ItemAcquisitionSources.LootGeneratedEvent,
             ct);
 
-        var msg = new LootReceivedMsg(notification.CharacterId, notification.Loot.Select(i => _mapper.Map<InventoryItemDto>(i)).ToList());
-
-        await _eventPublisher.PublishAsync(new Audience.Character(notification.CharacterId), msg);
+        var items = notification.Loot.Select(i => _mapper.Map<InventoryItemDto>(i)).ToList();
+        await _gameRealtime.PublishAsync(
+            new Audience.Character(notification.CharacterId),
+            new LootReceived(notification.CharacterId, items, "combat-reward", null),
+            nameof(LootGeneratedEventHandler),
+            ct);
     }
 }

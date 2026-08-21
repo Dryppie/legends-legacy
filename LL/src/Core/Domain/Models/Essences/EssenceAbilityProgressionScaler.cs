@@ -229,6 +229,8 @@ public static class EssenceAbilityProgressionScaler
             IntervalTicks = effect.IntervalTicks,
             Uses = effect.Uses,
             OncePerTarget = effect.OncePerTarget,
+            GuaranteedConditionApplication = effect.GuaranteedConditionApplication,
+            StaggerPower = effect.StaggerPower,
             MaintainWhileConditionsMet = effect.MaintainWhileConditionsMet,
             LivingNonSummonedAllyDamagePercent = effect.LivingNonSummonedAllyDamagePercent,
             SubsequentTargetDamagePercent = effect.SubsequentTargetDamagePercent,

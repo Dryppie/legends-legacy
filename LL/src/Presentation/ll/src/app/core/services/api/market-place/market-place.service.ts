@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { catchError, map, Observable, throwError } from 'rxjs';
 import { MarketPlaceListing } from '../../../../shared/models/Dtos/market-place/market-place-listing';
 import { MarketPlaceBuyOrder } from '../../../../shared/models/Dtos/market-place/market-place-buy-order';
-import { ApiService } from '../api.service';
+import { ApiService, VersionedMutationResult } from '../api.service';
 import { CreateMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/create-market-place-listing-request';
 import { CreateMarketPlaceBuyOrderRequest } from '../../../../shared/models/requestDtos/market-place/create-market-place-buy-order-request';
 import { BuyoutMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/buyout-market.place-listing-request';
@@ -11,6 +11,17 @@ import { ToastService } from '../../client-side/components/toast/toast.service';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { ItemBase } from '../../../../shared/models/item';
 import { MarketPlaceOrder } from '../../../../shared/models/Dtos/market-place/market-place-order';
+import { MarketplaceChangeSet } from '../../../../shared/models/Dtos/market-place/marketplace-change-set';
+
+const MARKETPLACE_RESPONSE_HANDLED_SCOPES = [
+  'marketplace',
+  'inventory',
+  'character',
+] as const;
+const MARKETPLACE_RESPONSE_HANDLED_WITHOUT_INVENTORY = [
+  'marketplace',
+  'character',
+] as const;
 
 export interface BuyoutMarketPlaceListingResponse {
   listingId: string;
@@ -19,12 +30,14 @@ export interface BuyoutMarketPlaceListingResponse {
   purchasedQuantity: number;
   totalPrice: number;
   buyerCinders: number;
+  marketplace: MarketplaceChangeSet;
 }
 
 export interface BuyCommodityResponse {
   filledQuantity: number;
   totalPrice: number;
   buyerCinders: number;
+  marketplace: MarketplaceChangeSet;
 }
 
 export interface SellCommodityResponse {
@@ -33,6 +46,7 @@ export interface SellCommodityResponse {
   sellerFees: number;
   sellerCinders: number;
   remainingInventoryItem: InventoryItem | null;
+  marketplace: MarketplaceChangeSet;
 }
 
 export interface CreateMarketPlaceListingResponse {
@@ -44,6 +58,7 @@ export interface CreateMarketPlaceListingResponse {
   sellerFees: number;
   sellerCinders: number;
   remainingInventoryItem: InventoryItem | null;
+  marketplace: MarketplaceChangeSet;
 }
 
 export interface CreateMarketPlaceBuyOrderResponse {
@@ -51,6 +66,7 @@ export interface CreateMarketPlaceBuyOrderResponse {
   filledQuantity: number;
   filledTotalPrice: number;
   buyerCinders: number;
+  marketplace: MarketplaceChangeSet;
 }
 
 export interface FulfillMarketPlaceBuyOrderResponse {
@@ -63,16 +79,19 @@ export interface FulfillMarketPlaceBuyOrderResponse {
   totalPrice: number;
   sellerFee: number;
   sellerCinders: number;
+  marketplace: MarketplaceChangeSet;
 }
 
 export interface CancelMarketPlaceBuyOrderResponse {
   buyOrderId: string;
   buyerCinders: number;
+  marketplace: MarketplaceChangeSet;
 }
 
 export interface CancelMarketPlaceListingResponse {
   listingId: string;
   returnedItem: InventoryItem;
+  marketplace: MarketplaceChangeSet;
 }
 
 export interface MarketPlaceItemSummary {
@@ -147,45 +166,77 @@ export class MarketPlaceService {
 
   createListing(
     listing: CreateMarketPlaceListingRequest,
-  ): Observable<CreateMarketPlaceListingResponse> {
-    return this.api.post('marketplace/createListing', listing).pipe(
-      catchError(() => {
-        return throwError(() => new Error('Failed to create listing'));
-      }),
-    );
+  ): Observable<VersionedMutationResult<CreateMarketPlaceListingResponse>> {
+    return this.api
+      .postVersioned<CreateMarketPlaceListingResponse>(
+        'marketplace/createListing',
+        listing,
+        {
+          stateSyncScopesHandledByResponse: MARKETPLACE_RESPONSE_HANDLED_SCOPES,
+        },
+      )
+      .pipe(
+        catchError(() => {
+          return throwError(() => new Error('Failed to create listing'));
+        }),
+      );
   }
 
   createBuyOrder(
     buyOrder: CreateMarketPlaceBuyOrderRequest,
-  ): Observable<CreateMarketPlaceBuyOrderResponse> {
-    return this.api.post('marketplace/createBuyOrder', buyOrder).pipe(
-      catchError(() => {
-        return throwError(() => new Error('Failed to create buy order'));
-      }),
-    );
+  ): Observable<VersionedMutationResult<CreateMarketPlaceBuyOrderResponse>> {
+    return this.api
+      .postVersioned<CreateMarketPlaceBuyOrderResponse>(
+        'marketplace/createBuyOrder',
+        buyOrder,
+        {
+          stateSyncScopesHandledByResponse:
+            MARKETPLACE_RESPONSE_HANDLED_WITHOUT_INVENTORY,
+        },
+      )
+      .pipe(
+        catchError(() => {
+          return throwError(() => new Error('Failed to create buy order'));
+        }),
+      );
   }
 
   buyoutListing(
     listing: BuyoutMarketPlaceListingRequest,
-  ): Observable<BuyoutMarketPlaceListingResponse> {
-    return this.api.post('marketplace/buyoutListing', listing).pipe(
-      catchError(() => {
-        return throwError(() => new Error('Failed to buy listing'));
-      }),
-    );
+  ): Observable<VersionedMutationResult<BuyoutMarketPlaceListingResponse>> {
+    return this.api
+      .postVersioned<BuyoutMarketPlaceListingResponse>(
+        'marketplace/buyoutListing',
+        listing,
+        {
+          stateSyncScopesHandledByResponse: MARKETPLACE_RESPONSE_HANDLED_SCOPES,
+        },
+      )
+      .pipe(
+        catchError(() => {
+          return throwError(() => new Error('Failed to buy listing'));
+        }),
+      );
   }
 
   buyCommodity(
     itemBaseId: string,
     quantity: number,
     maximumUnitPrice: number,
-  ): Observable<BuyCommodityResponse> {
+  ): Observable<VersionedMutationResult<BuyCommodityResponse>> {
     return this.api
-      .post('marketplace/buyCommodity', {
-        itemBaseId,
-        quantity,
-        maximumUnitPrice,
-      })
+      .postVersioned<BuyCommodityResponse>(
+        'marketplace/buyCommodity',
+        {
+          itemBaseId,
+          quantity,
+          maximumUnitPrice,
+        },
+        {
+          stateSyncScopesHandledByResponse:
+            MARKETPLACE_RESPONSE_HANDLED_WITHOUT_INVENTORY,
+        },
+      )
       .pipe(
         catchError(() => {
           return throwError(() => new Error('Failed to buy commodity'));
@@ -197,13 +248,19 @@ export class MarketPlaceService {
     itemInstanceId: string,
     quantity: number,
     minimumUnitPrice: number,
-  ): Observable<SellCommodityResponse> {
+  ): Observable<VersionedMutationResult<SellCommodityResponse>> {
     return this.api
-      .post('marketplace/sellCommodity', {
-        itemInstanceId,
-        quantity,
-        minimumUnitPrice,
-      })
+      .postVersioned<SellCommodityResponse>(
+        'marketplace/sellCommodity',
+        {
+          itemInstanceId,
+          quantity,
+          minimumUnitPrice,
+        },
+        {
+          stateSyncScopesHandledByResponse: MARKETPLACE_RESPONSE_HANDLED_SCOPES,
+        },
+      )
       .pipe(
         catchError(() => {
           return throwError(() => new Error('Failed to sell commodity'));
@@ -213,41 +270,68 @@ export class MarketPlaceService {
 
   fulfillBuyOrder(
     fulfillment: FulfillMarketPlaceBuyOrderRequest,
-  ): Observable<FulfillMarketPlaceBuyOrderResponse> {
-    return this.api.post('marketplace/fulfillBuyOrder', fulfillment).pipe(
-      catchError(() => {
-        return throwError(() => new Error('Failed to fulfill buy order'));
-      }),
-    );
+  ): Observable<VersionedMutationResult<FulfillMarketPlaceBuyOrderResponse>> {
+    return this.api
+      .postVersioned<FulfillMarketPlaceBuyOrderResponse>(
+        'marketplace/fulfillBuyOrder',
+        fulfillment,
+        {
+          stateSyncScopesHandledByResponse: MARKETPLACE_RESPONSE_HANDLED_SCOPES,
+        },
+      )
+      .pipe(
+        catchError(() => {
+          return throwError(() => new Error('Failed to fulfill buy order'));
+        }),
+      );
   }
 
-  cancelListing(listingId: string): Observable<CancelMarketPlaceListingResponse> {
-    return this.api.post('marketplace/cancelListing', listingId).pipe(
-      catchError(() => {
-        this.toast.showToast(
-          'Order cancellation failed',
-          'Order might have been purchased.',
-          false,
-          't',
-        );
-        return throwError(() => new Error('Failed to cancel listing'));
-      }),
-    );
+  cancelListing(
+    listingId: string,
+  ): Observable<VersionedMutationResult<CancelMarketPlaceListingResponse>> {
+    return this.api
+      .postVersioned<CancelMarketPlaceListingResponse>(
+        'marketplace/cancelListing',
+        listingId,
+        {
+          stateSyncScopesHandledByResponse: MARKETPLACE_RESPONSE_HANDLED_SCOPES,
+        },
+      )
+      .pipe(
+        catchError(() => {
+          this.toast.showToast(
+            'Order cancellation failed',
+            'Order might have been purchased.',
+            false,
+            't',
+          );
+          return throwError(() => new Error('Failed to cancel listing'));
+        }),
+      );
   }
 
   cancelBuyOrder(
     buyOrderId: string,
-  ): Observable<CancelMarketPlaceBuyOrderResponse> {
-    return this.api.post('marketplace/cancelBuyOrder', buyOrderId).pipe(
-      catchError(() => {
-        this.toast.showToast(
-          'Buy order cancellation failed',
-          'Order might have already been filled.',
-          false,
-          't',
-        );
-        return throwError(() => new Error('Failed to cancel buy order'));
-      }),
-    );
+  ): Observable<VersionedMutationResult<CancelMarketPlaceBuyOrderResponse>> {
+    return this.api
+      .postVersioned<CancelMarketPlaceBuyOrderResponse>(
+        'marketplace/cancelBuyOrder',
+        buyOrderId,
+        {
+          stateSyncScopesHandledByResponse:
+            MARKETPLACE_RESPONSE_HANDLED_WITHOUT_INVENTORY,
+        },
+      )
+      .pipe(
+        catchError(() => {
+          this.toast.showToast(
+            'Buy order cancellation failed',
+            'Order might have already been filled.',
+            false,
+            't',
+          );
+          return throwError(() => new Error('Failed to cancel buy order'));
+        }),
+      );
   }
 }

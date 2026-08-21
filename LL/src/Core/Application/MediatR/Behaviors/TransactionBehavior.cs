@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Text.Json;
+using System.Diagnostics.Metrics;
 
 namespace Application.MediatR.Behaviors;
 public sealed class TransactionBehavior<TRequest, TResponse>
@@ -141,6 +142,7 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         CancellationToken cancellationToken)
     {
         var reason = typeof(TRequest).Name;
+        var invalidationCount = 0L;
         var scopeProfile = StateSyncCommandScopeCatalog.GetProfile(typeof(TRequest));
         var affectedCharacterIds = _db.GameEventOutboxMessages.Local
             .Where(message =>
@@ -152,25 +154,262 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         {
             affectedCharacterIds.Add(primaryCharacterId.Value);
         }
+        foreach (var member in _db.GuildMembers.Local.Where(member =>
+                     _db.GetEntry(member).State is EntityState.Added
+                         or EntityState.Modified
+                         or EntityState.Deleted))
+        {
+            affectedCharacterIds.Add(member.CharacterId);
+        }
+        foreach (var item in _db.InventoryItems.Local.Where(item =>
+                     _db.GetEntry(item).State is EntityState.Added
+                         or EntityState.Modified
+                         or EntityState.Deleted))
+        {
+            affectedCharacterIds.Add(item.InventoryId);
+        }
+        foreach (var slot in _db.EquipmentSlots.Local.Where(slot =>
+                     _db.GetEntry(slot).State is EntityState.Added
+                         or EntityState.Modified
+                         or EntityState.Deleted))
+        {
+            affectedCharacterIds.Add(slot.EntityId);
+        }
+        foreach (var message in _db.GameEventOutboxMessages.Local.Where(message =>
+                     message.EventType == GameEventTypes.RealtimeDeliveryRequested
+                     && _db.GetEntry(message).State == EntityState.Added))
+        {
+            foreach (var characterId in GetMarketplaceAffectedCharacterIds(message.PayloadJson))
+            {
+                affectedCharacterIds.Add(characterId);
+            }
+        }
 
         foreach (var affectedCharacterId in affectedCharacterIds.Order())
         {
             foreach (var characterScope in GetCharacterScopes(affectedCharacterId, scopeProfile).Distinct(StringComparer.Ordinal))
             {
-                await _stateSync.InvalidateCharacterScopeAsync(
-                    affectedCharacterId,
-                    characterScope,
-                    reason,
-                    cancellationToken);
+                if (primaryCharacterId == affectedCharacterId
+                    && scopeProfile.VersionOnlyCharacterScopes.Contains(characterScope))
+                {
+                    await _stateSync.AdvanceCharacterScopeAsync(
+                        affectedCharacterId,
+                        characterScope,
+                        reason,
+                        cancellationToken);
+                }
+                else
+                {
+                    await _stateSync.InvalidateCharacterScopeAsync(
+                        affectedCharacterId,
+                        characterScope,
+                        reason,
+                        cancellationToken);
+                    invalidationCount += 1;
+                }
             }
         }
 
         foreach (var worldScope in scopeProfile.WorldScopes)
         {
+            if (StateSyncScopes.GuildResources.Contains(worldScope, StringComparer.Ordinal))
+            {
+                var guildAudienceIds = await GetGuildAudienceIdsAsync(
+                    primaryCharacterId,
+                    cancellationToken);
+                if (guildAudienceIds.Count > 0)
+                {
+                    foreach (var guildId in guildAudienceIds)
+                    {
+                        if (scopeProfile.VersionOnlyWorldScopes.Contains(worldScope))
+                        {
+                            await _stateSync.AdvanceGuildScopeAsync(
+                                guildId,
+                                worldScope,
+                                reason,
+                                cancellationToken);
+                        }
+                        else
+                        {
+                            await _stateSync.InvalidateGuildScopeAsync(
+                                guildId,
+                                worldScope,
+                                reason,
+                                cancellationToken);
+                            invalidationCount += 1;
+                        }
+                    }
+                    continue;
+                }
+
+                throw new InvalidOperationException(
+                    $"{reason} changed guild state without an identifiable guild audience.");
+            }
+
+            if (scopeProfile.VersionOnlyWorldScopes.Contains(worldScope))
+            {
+                await _stateSync.AdvanceWorldScopeAsync(
+                    worldScope,
+                    reason,
+                    cancellationToken);
+                continue;
+            }
+
             await _stateSync.InvalidateWorldScopeAsync(
                 worldScope,
                 reason,
                 cancellationToken);
+            invalidationCount += 1;
+        }
+
+        if (invalidationCount > 0)
+        {
+            StateSyncCommandMetrics.InvalidatingCommands.Add(
+                1,
+                new KeyValuePair<string, object?>("command", reason));
+            StateSyncCommandMetrics.InvalidationFanout.Record(
+                invalidationCount,
+                new KeyValuePair<string, object?>("command", reason));
+        }
+    }
+
+    private async Task<IReadOnlySet<Guid>> GetGuildAudienceIdsAsync(
+        Guid? primaryCharacterId,
+        CancellationToken cancellationToken)
+    {
+        var guildIds = _db.Guilds.Local
+            .Where(guild => _db.GetEntry(guild).State is EntityState.Added
+                or EntityState.Modified
+                or EntityState.Deleted)
+            .Select(guild => guild.Id)
+            .Where(guildId => guildId != Guid.Empty)
+            .ToHashSet();
+
+        AddChangedGuildIds(_db.GuildInvites, entity => entity.GuildId, guildIds);
+        AddChangedGuildIds(_db.GuildMembers, entity => entity.GuildId, guildIds);
+        AddChangedGuildIds(_db.GuildBuildings, entity => entity.GuildId, guildIds);
+        AddChangedGuildIds(_db.GuildActivityLogs, entity => entity.GuildId, guildIds);
+        AddChangedGuildIds(_db.GuildMissionOptions, entity => entity.GuildId, guildIds);
+        AddChangedGuildIds(_db.GuildMissionInstances, entity => entity.GuildId, guildIds);
+        AddChangedGuildIds(_db.GuildMissionContributions, entity => entity.GuildId, guildIds);
+        AddChangedGuildIds(_db.PersonalGuildOrders, entity => entity.GuildId, guildIds);
+        AddChangedGuildIds(_db.GuildMemberContributionPeriods, entity => entity.GuildId, guildIds);
+        AddChangedGuildIds(_db.GuildContributionLedgers, entity => entity.GuildId, guildIds);
+        AddChangedGuildIds(_db.GuildShopPurchases, entity => entity.GuildId, guildIds);
+        AddChangedGuildIds(_db.GuildRolePermissions, entity => entity.GuildId, guildIds);
+        AddChangedGuildIds(_db.GuildVaultItems, entity => entity.GuildId, guildIds);
+
+        foreach (var message in _db.GameEventOutboxMessages.Local.Where(message =>
+                     message.EventType == GameEventTypes.RealtimeDeliveryRequested
+                     && _db.GetEntry(message).State == EntityState.Added))
+        {
+            if (TryGetGuildAudienceId(message.PayloadJson, out var guildId))
+            {
+                guildIds.Add(guildId);
+            }
+        }
+
+        if (primaryCharacterId.HasValue)
+        {
+            var currentGuildId = await _db.GuildMembers
+                .AsNoTracking()
+                .Where(member => member.CharacterId == primaryCharacterId.Value)
+                .Select(member => (Guid?)member.GuildId)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (currentGuildId.HasValue)
+            {
+                guildIds.Add(currentGuildId.Value);
+            }
+        }
+
+        return guildIds;
+    }
+
+    private void AddChangedGuildIds<TEntity>(
+        DbSet<TEntity> entities,
+        Func<TEntity, Guid> getGuildId,
+        ISet<Guid> guildIds)
+        where TEntity : class
+    {
+        foreach (var entity in entities.Local.Where(entity =>
+                     _db.GetEntry(entity).State is EntityState.Added
+                         or EntityState.Modified
+                         or EntityState.Deleted))
+        {
+            var guildId = getGuildId(entity);
+            if (guildId != Guid.Empty)
+            {
+                guildIds.Add(guildId);
+            }
+        }
+    }
+
+    private static IReadOnlyList<Guid> GetMarketplaceAffectedCharacterIds(string payloadJson)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(payloadJson);
+            var root = document.RootElement;
+            if ((!root.TryGetProperty("eventName", out var eventName)
+                    && !root.TryGetProperty("EventName", out eventName))
+                || !string.Equals(
+                    eventName.GetString(),
+                    nameof(MarketplaceChanged),
+                    StringComparison.Ordinal)
+                || (!root.TryGetProperty("payload", out var payload)
+                    && !root.TryGetProperty("Payload", out payload))
+                || (!payload.TryGetProperty("changes", out var changes)
+                    && !payload.TryGetProperty("Changes", out changes))
+                || (!changes.TryGetProperty("affectedCharacterIds", out var affected)
+                    && !changes.TryGetProperty("AffectedCharacterIds", out affected))
+                || affected.ValueKind != JsonValueKind.Array)
+            {
+                return [];
+            }
+
+            var characterIds = new List<Guid>();
+            foreach (var value in affected.EnumerateArray())
+            {
+                if (Guid.TryParse(value.GetString(), out var characterId)
+                    && characterId != Guid.Empty)
+                {
+                    characterIds.Add(characterId);
+                }
+            }
+            return characterIds;
+        }
+        catch (JsonException)
+        {
+            return [];
+        }
+    }
+
+    private static bool TryGetGuildAudienceId(
+        string payloadJson,
+        out Guid guildId)
+    {
+        guildId = Guid.Empty;
+        try
+        {
+            using var document = JsonDocument.Parse(payloadJson);
+            var root = document.RootElement;
+            if ((!root.TryGetProperty("audience", out var audience)
+                    && !root.TryGetProperty("Audience", out audience))
+                || (!audience.TryGetProperty("kind", out var kind)
+                    && !audience.TryGetProperty("Kind", out kind))
+                || !string.Equals(kind.GetString(), "guild", StringComparison.OrdinalIgnoreCase)
+                || (!audience.TryGetProperty("targetId", out var targetId)
+                    && !audience.TryGetProperty("TargetId", out targetId)))
+            {
+                return false;
+            }
+
+            return Guid.TryParse(targetId.GetString(), out guildId)
+                && guildId != Guid.Empty;
+        }
+        catch (JsonException)
+        {
+            return false;
         }
     }
 
@@ -296,5 +535,18 @@ public sealed class TransactionBehavior<TRequest, TResponse>
             ? characterId
             : null;
     }
+}
+
+internal static class StateSyncCommandMetrics
+{
+    private static readonly Meter Meter = new("LegendsLegacy.StateSync");
+
+    internal static readonly Histogram<long> InvalidationFanout =
+        Meter.CreateHistogram<long>(
+            "state_sync.command.invalidation_fanout",
+            "invalidations");
+
+    internal static readonly Counter<long> InvalidatingCommands =
+        Meter.CreateCounter<long>("state_sync.commands_with_invalidations");
 }
 

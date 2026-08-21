@@ -12,4 +12,5 @@ public sealed class CreateMarketPlaceListingResponseDto
     public required long SellerFees { get; init; }
     public required long SellerCinders { get; init; }
     public InventoryItemDto? RemainingInventoryItem { get; init; }
+    public required MarketplaceChangeSetDto Marketplace { get; init; }
 }

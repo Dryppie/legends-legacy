@@ -8,7 +8,7 @@ namespace Services.LL.Regions;
 
 public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvider
 {
-    public const string DefaultProfileId = "legacy-area-v1";
+    public const string DefaultProfileId = "unified-global-v1";
     private readonly RegionCombatBalanceCatalog _catalog;
     private readonly IReadOnlyDictionary<string, RegionCombatBalanceProfile> _profiles;
     private readonly IReadOnlyDictionary<string, AreaPlacement> _areas;
@@ -23,8 +23,8 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
 
     public RegionCreatureScalingProvider(RegionCombatBalanceCatalog catalog)
     {
-        Validate(catalog);
         _catalog = catalog;
+        Validate(catalog);
         _profiles = catalog.Profiles.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
         _areas = catalog.Regions
             .SelectMany(region => region.AreaIds.Select((areaId, index) => new AreaPlacement(
@@ -54,6 +54,7 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
                 placement.RegionKey,
                 placement.GlobalStep,
                 placement.RegionStep,
+                placement.GlobalStep - 1,
                 placement.RecommendedCombatRating);
         }
 
@@ -63,6 +64,7 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
             fallback,
             null,
             fallbackGlobalStep,
+            null,
             fallbackGlobalStep - 1,
             null);
     }
@@ -70,13 +72,15 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
     public static IRegionCreatureScalingProvider CreateLegacyFallback() =>
         new RegionCreatureScalingProvider(new RegionCombatBalanceCatalog(
             1,
+            new CombatProgressionFoundation(10, 1, 1),
             [CreateLegacyProfile()],
             []));
 
-    private static CreatureScalingProfile CreateScaling(
+    private CreatureScalingProfile CreateScaling(
         RegionCombatBalanceProfile profile,
         string? regionKey,
         int globalStep,
+        int? regionStep,
         int progressionStep,
         int? recommendedCombatRating)
     {
@@ -85,26 +89,46 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
             profile.Id,
             regionKey,
             globalStep,
-            regionKey is null ? null : progressionStep,
+            regionStep,
             progressionStep,
             recommendedCombatRating,
-            Evaluate(profile.HealthCurve, progressionStep),
-            Evaluate(profile.OffenseCurve, progressionStep),
-            Evaluate(profile.DefenseCurve, progressionStep),
-            Evaluate(profile.ResistanceCurve, progressionStep),
-            1d + profile.AttackSpeedGrowthPerStep * progressionStep,
-            1d + profile.PenetrationGrowthPerStep * progressionStep,
-            1d + profile.SoftDefenseGrowthPerStep * progressionStep,
+            Evaluate(profile.HealthCurve, progressionStep, globalStep),
+            Evaluate(profile.OffenseCurve, progressionStep, globalStep),
+            Evaluate(profile.DefenseCurve, progressionStep, globalStep),
+            Evaluate(profile.ResistanceCurve, progressionStep, globalStep),
+            profile.AttackSpeedGrowthPerStep * progressionStep,
+            profile.PenetrationGrowthPerStep * progressionStep,
+            profile.SoftDefenseGrowthPerStep * progressionStep,
             profile.CritChancePerStep * progressionStep,
             profile.CritDamagePerStep * progressionStep,
             profile.CritChanceCap,
             profile.CritDamageCap);
     }
 
-    private static double Evaluate(RegionCombatGrowthCurve curve, int progressionStep) =>
-        curve.Model.Equals("Exponential", StringComparison.OrdinalIgnoreCase)
+    private double Evaluate(
+        RegionCombatGrowthCurve curve,
+        int progressionStep,
+        int globalStep)
+    {
+        if (curve.Model.Equals("Foundation", StringComparison.OrdinalIgnoreCase))
+            return curve.BaseMultiplier * Math.Pow(EvaluateFoundation(globalStep), curve.Exponent);
+
+        return curve.Model.Equals("Exponential", StringComparison.OrdinalIgnoreCase)
             ? curve.BaseMultiplier * Math.Pow(1d + curve.GrowthPerStep, progressionStep)
             : curve.BaseMultiplier * Math.Pow(1d + curve.GrowthPerStep * progressionStep, curve.Exponent);
+    }
+
+    private double EvaluateFoundation(int globalStep)
+    {
+        var zeroBasedPosition = Math.Max(0, globalStep - 1);
+        var regionIndex = zeroBasedPosition / _catalog.Foundation.AreasPerRegion;
+        var areaIndex = zeroBasedPosition % _catalog.Foundation.AreasPerRegion;
+        var withinRegionSteps = checked(
+            (_catalog.Foundation.AreasPerRegion - 1) * regionIndex + areaIndex);
+
+        return Math.Pow(_catalog.Foundation.AreaGrowth, withinRegionSteps)
+               * Math.Pow(_catalog.Foundation.RegionJump, regionIndex);
+    }
 
     private static RegionCombatBalanceCatalog ReadCatalog(
         IConfiguration configuration,
@@ -125,6 +149,10 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
 
         return new RegionCombatBalanceCatalog(
             document.Version,
+            new CombatProgressionFoundation(
+                document.Foundation.AreasPerRegion,
+                document.Foundation.AreaGrowth,
+                document.Foundation.RegionJump),
             document.Profiles.Select(MapProfile).ToArray(),
             document.Regions.Select(region => new RegionCombatBalanceRegion(
                 region.RegionKey,
@@ -158,10 +186,19 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         curve.GrowthPerStep,
         curve.Exponent);
 
-    private static void Validate(RegionCombatBalanceCatalog catalog)
+    private void Validate(RegionCombatBalanceCatalog catalog)
     {
         if (catalog.Version <= 0 || catalog.Profiles.Count == 0)
             throw new InvalidOperationException("Region combat balance requires a positive version and at least one profile.");
+
+        if (catalog.Foundation.AreasPerRegion <= 0
+            || !double.IsFinite(catalog.Foundation.AreaGrowth)
+            || catalog.Foundation.AreaGrowth < 1
+            || !double.IsFinite(catalog.Foundation.RegionJump)
+            || catalog.Foundation.RegionJump < 1)
+        {
+            throw new InvalidOperationException("Region combat balance has an invalid progression foundation.");
+        }
 
         var duplicateProfiles = catalog.Profiles
             .GroupBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
@@ -180,8 +217,8 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
             if (string.IsNullOrWhiteSpace(profile.Id) ||
                 profile.TargetWinRateBasisPoints is <= 0 or > 10_000 ||
                 profile.MaximumStepIncrease < 0 ||
-                profile.CritChanceCap is < 0 or > 1 ||
-                profile.CritDamageCap < 1)
+                profile.CritChanceCap is < 0 or > 100 ||
+                profile.CritDamageCap is < 0 or > 500)
             {
                 throw new InvalidOperationException($"Region combat profile '{profile.Id}' is invalid.");
             }
@@ -228,6 +265,7 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
                     region.RegionKey,
                     region.StartingGlobalStep + index,
                     index,
+                    region.StartingGlobalStep + index - 1,
                     InterpolateCombatRating(
                         region.StartingCombatRating,
                         region.EndingCombatRating,
@@ -281,7 +319,8 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         RegionCombatGrowthCurve curve)
     {
         if ((!curve.Model.Equals("Power", StringComparison.OrdinalIgnoreCase) &&
-             !curve.Model.Equals("Exponential", StringComparison.OrdinalIgnoreCase)) ||
+             !curve.Model.Equals("Exponential", StringComparison.OrdinalIgnoreCase) &&
+             !curve.Model.Equals("Foundation", StringComparison.OrdinalIgnoreCase)) ||
             curve.BaseMultiplier <= 0 || curve.GrowthPerStep < 0 || curve.Exponent <= 0)
             throw new InvalidOperationException($"{profileId}.{name} is invalid.");
     }
@@ -345,8 +384,16 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
     private sealed class RegionCombatBalanceDocument
     {
         public int Version { get; set; }
+        public FoundationDocument Foundation { get; set; } = new();
         public List<ProfileDocument> Profiles { get; set; } = [];
         public List<RegionDocument> Regions { get; set; } = [];
+    }
+
+    private sealed class FoundationDocument
+    {
+        public int AreasPerRegion { get; set; }
+        public double AreaGrowth { get; set; }
+        public double RegionJump { get; set; }
     }
 
     private sealed class ProfileDocument

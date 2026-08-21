@@ -211,7 +211,9 @@ public sealed record TowerParticipantCombatSummaryDto(
     decimal DamageTaken,
     decimal HealingDone,
     bool Survived,
-    int? PartyNumber = null);
+    int? PartyNumber = null,
+    int StaggerContributed = 0,
+    int StaggerBreaks = 0);
 
 public sealed record TowerHallOfFameEntryDto(
     int FloorNumber,

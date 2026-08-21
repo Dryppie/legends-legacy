@@ -13,7 +13,8 @@ import {
   TowerRallySummary,
   WorldTowerService,
 } from '../../../../../core/services/api/world-tower/world-tower.service';
-import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
+import { GameRealtimeEventRegistry } from '../../../../../core/services/real-time/game-realtime/game-realtime-event-registry.service';
+import { RealtimeSignalDeduper } from '../../../../../core/services/real-time/game-realtime/realtime-deduplication';
 import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 type TowerReadinessTab = 'scouting' | 'preparation';
@@ -27,8 +28,8 @@ type TowerReadinessTab = 'scouting' | 'preparation';
 export class TowerOverviewComponent implements OnInit {
   private readonly tower = inject(WorldTowerService);
   private readonly router = inject(Router);
-  private readonly events = inject(GameEventService);
-  private lastRealtimeUpdateId: string | null = null;
+  private readonly events = inject(GameRealtimeEventRegistry);
+  private readonly realtimeDeduper = new RealtimeSignalDeduper();
   readonly overview = signal<TowerOverview | null>(null);
   readonly selectedFloor = signal<TowerFloorDetail | null>(null);
   readonly selectedFloorNumber = signal<number | null>(null);
@@ -48,12 +49,11 @@ export class TowerOverviewComponent implements OnInit {
         const envelope = this.events.eventEnvelope.WorldTowerRallyUpdated();
         if (
           !envelope?.updateId ||
-          envelope.updateId === this.lastRealtimeUpdateId
+          !this.realtimeDeduper.shouldProcess('rally', envelope)
         ) {
           return;
         }
 
-        this.lastRealtimeUpdateId = envelope.updateId;
         this.refreshFromRealtime(envelope.payload.floorNumber);
       },
       { allowSignalWrites: true },

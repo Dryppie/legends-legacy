@@ -208,9 +208,13 @@ public sealed class GuildMembershipChatCommandTests
         Guid SubjectCharacterId,
         GuildSystemChatEvent EventType);
 
-    private sealed class RecordingEventPublisher : IGameEventPublisher
+    private sealed class RecordingEventPublisher : IGameRealtimeBroadcaster
     {
-        public Task PublishAsync(Audience audience, GameEventMsg message) =>
+        public Task PublishAsync(
+            Audience audience,
+            GameRealtimeEvent message,
+            string sender,
+            CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
     }
 

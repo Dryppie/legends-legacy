@@ -16,7 +16,9 @@ import { CombatComponent } from '../../../../../shared/components/combat/combat.
 import { CombatResultDto } from '../../../../../shared/models/Dtos/combatResultDto';
 import { CombatService } from '../../../../../core/services/client-side/combat/combat.service';
 import { TournamentPlaybackService } from '../../../../../core/services/client-side/combat/tournament-playback.service';
-import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
+import { GameRealtimeEventRegistry } from '../../../../../core/services/real-time/game-realtime/game-realtime-event-registry.service';
+import { GameRealtimeConnection } from '../../../../../core/services/real-time/game-realtime/game-realtime-connection.service';
+import { RealtimeSignalDeduper } from '../../../../../core/services/real-time/game-realtime/realtime-deduplication';
 import {
   TournamentBracket,
   TournamentDetails,
@@ -50,7 +52,7 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
   private playbackClockAtSync = 0;
   private playbackTickAtSync = 0;
   private lastSequence = -1;
-  private lastRealtimeUpdateId: string | null = null;
+  private readonly realtimeDeduper = new RealtimeSignalDeduper();
   private lastReconnectCount = 0;
 
   readonly round = computed(() => {
@@ -102,16 +104,13 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
 
     const remainingSeconds = Math.max(
       0,
-      Math.ceil(
-        (overtimeEndsAtTick - currentTick) / ticksPerSecond,
-      ),
+      Math.ceil((overtimeEndsAtTick - currentTick) / ticksPerSecond),
     );
     const minutes = Math.floor(remainingSeconds / 60);
     const seconds = remainingSeconds % 60;
     const overtimePowerIncreaseIntervalTicks =
       playback.overtimePowerIncreaseIntervalTicks;
-    const overtimePowerIncreasePercent =
-      playback.overtimePowerIncreasePercent;
+    const overtimePowerIncreasePercent = playback.overtimePowerIncreasePercent;
 
     let powerBonus = 0;
     if (
@@ -139,24 +138,24 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
     private readonly colosseumService: ColosseumService,
     private readonly combatService: CombatService,
     private readonly playbackService: TournamentPlaybackService,
-    private readonly eventService: GameEventService,
+    private readonly eventService: GameRealtimeEventRegistry,
+    private readonly realtime: GameRealtimeConnection,
     private readonly tournamentViewState: TournamentGroundsViewStateService,
     public readonly combatStateService: CombatStateService,
   ) {
-    this.lastReconnectCount = this.eventService.reconnectCount();
+    this.lastReconnectCount = this.realtime.reconnectCount();
     effect(
       () => {
         const envelope =
           this.eventService.eventEnvelope.TournamentGroundsUpdated();
         if (
           !envelope?.updateId ||
-          envelope.updateId === this.lastRealtimeUpdateId ||
+          !this.realtimeDeduper.shouldProcess('tournament', envelope) ||
           envelope.payload.tournamentId !== this.tournamentId()
         ) {
           return;
         }
 
-        this.lastRealtimeUpdateId = envelope.updateId;
         const tournamentId = this.tournamentId();
         const matchId = this.matchId();
         if (tournamentId && matchId) this.loadMetadata(tournamentId, matchId);
@@ -165,7 +164,7 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
     );
     effect(
       () => {
-        const reconnectCount = this.eventService.reconnectCount();
+        const reconnectCount = this.realtime.reconnectCount();
         if (reconnectCount <= this.lastReconnectCount) return;
         this.lastReconnectCount = reconnectCount;
         const tournamentId = this.tournamentId();
@@ -177,6 +176,14 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    void this.realtime
+      .setTournamentGroundsSubscription(true, 'tournament-replay')
+      .catch((error) =>
+        console.warn(
+          'Failed to subscribe to Tournament Grounds realtime',
+          error,
+        ),
+      );
     const tournamentId = this.route.snapshot.paramMap.get('tournamentId');
     const matchId = this.route.snapshot.paramMap.get('matchId');
     this.tournamentId.set(tournamentId);
@@ -191,6 +198,14 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    void this.realtime
+      .setTournamentGroundsSubscription(false, 'tournament-replay')
+      .catch((error) =>
+        console.warn(
+          'Failed to unsubscribe from Tournament Grounds realtime',
+          error,
+        ),
+      );
     this.stopPlaybackTimer();
     this.destroyed.next();
     this.destroyed.complete();

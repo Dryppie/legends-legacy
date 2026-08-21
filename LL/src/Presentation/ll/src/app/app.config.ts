@@ -21,19 +21,17 @@ import { RealTimeFacade } from './core/services/real-time/real-time-facade';
 import { TimeSyncService } from './core/services/api/time-sync/time-sync.service';
 import { environment } from '../environments/environment';
 
-export function initializeApp(authService: AuthService) {
+export function initializeApp(
+  authService: AuthService,
+  realTime: RealTimeFacade,
+) {
   if (environment.maintenance.enabled) {
     return () => Promise.resolve();
   }
 
-  return () =>
-    firstValueFrom(authService.checkAuth()).catch(() => Promise.resolve());
-}
-function startRealTime(realTime: RealTimeFacade) {
-  return () => {
-    if (!environment.maintenance.enabled) {
-      realTime.initialize();
-    }
+  return async () => {
+    await firstValueFrom(authService.checkAuth()).catch(() => undefined);
+    await realTime.initialize();
   };
 }
 export function initializeTimeSync(timeSyncService: TimeSyncService) {
@@ -56,13 +54,7 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
-      deps: [AuthService],
-      multi: true,
-    },
-    {
-      provide: APP_INITIALIZER,
-      useFactory: startRealTime,
-      deps: [RealTimeFacade],
+      deps: [AuthService, RealTimeFacade],
       multi: true,
     },
     {

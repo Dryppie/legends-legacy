@@ -10,11 +10,12 @@ namespace EssenceSystem.Tests;
 public sealed class RealtimeTournamentGroundsGameEventOutboxConsumerTests
 {
     [Fact]
-    public async Task PublishesCommittedTournamentStateToTheWorldAudience()
+    public async Task PublishesCommittedTournamentStateToInterestedViewers()
     {
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
         var payload = new TournamentGroundsUpdated(
             Guid.NewGuid(),
+            17,
             42,
             "Weekly Open Grounds",
             "TournamentStateChanged",
@@ -39,7 +40,7 @@ public sealed class RealtimeTournamentGroundsGameEventOutboxConsumerTests
             },
             CancellationToken.None);
 
-        Assert.IsType<Audience.World>(realtime.Audience);
+        Assert.IsType<Audience.TournamentGrounds>(realtime.Audience);
         var published = Assert.IsType<TournamentGroundsUpdated>(realtime.Message);
         Assert.Equal(payload, published);
     }

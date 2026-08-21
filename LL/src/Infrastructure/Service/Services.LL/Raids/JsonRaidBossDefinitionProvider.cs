@@ -85,7 +85,21 @@ public sealed class JsonRaidBossDefinitionProvider : IRaidBossDefinitionProvider
                 if (tier.Boss.Variants.Any(x => x.CreatureId == Guid.Empty || x.SpawnChancePercent is <= 0 or > 100) ||
                     tier.Boss.Variants.Sum(x => x.SpawnChancePercent) > 100)
                     throw new InvalidOperationException($"Raid boss '{boss.Id}' tier {tier.Tier} contains invalid boss variants.");
+                if (tier.Boss.Stagger is not null && !IsValidStagger(tier.Boss.Stagger))
+                    throw new InvalidOperationException($"Raid boss '{boss.Id}' tier {tier.Tier} has invalid Stagger settings.");
             }
         }
     }
+
+    private static bool IsValidStagger(Domain.Models.Combat.BossStaggerDefinition stagger) =>
+        !stagger.Enabled
+        || (stagger.BaseThreshold > 0
+            && stagger.ReferenceParticipantCount > 0
+            && double.IsFinite(stagger.ParticipantExponent)
+            && stagger.ParticipantExponent is >= 0.5d and <= 1.5d
+            && stagger.BreakDurationTicks is > 0 and <= 300
+            && stagger.RecoveryDurationTicks is >= 0 and <= 600
+            && stagger.DamageTakenBonusPercent is >= 0 and <= 100
+            && stagger.ThresholdGrowthPercentPerBreak is >= 0 and <= 500
+            && stagger.MaximumBreaks is null or > 0);
 }

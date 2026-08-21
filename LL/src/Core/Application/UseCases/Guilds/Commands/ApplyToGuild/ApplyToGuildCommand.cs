@@ -10,11 +10,11 @@ public record ApplyToGuildCommand(Guid CharacterId, string GuildId) : ICommand<R
 public class ApplyToGuildCommandHandler : IRequestHandler<ApplyToGuildCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _eventPublisher;
 
     public ApplyToGuildCommandHandler(
         IGuildService guildService,
-        IGameEventPublisher eventPublisher)
+        IGameRealtimeBroadcaster eventPublisher)
     {
         _guildService = guildService;
         _eventPublisher = eventPublisher;
@@ -30,7 +30,9 @@ public class ApplyToGuildCommandHandler : IRequestHandler<ApplyToGuildCommand, R
 
         await _eventPublisher.PublishAsync(
             new Audience.Guild(guildId),
-            new GuildApplicationMsg(guildId, request.CharacterId));
+            new GuildApplication(guildId, request.CharacterId),
+            nameof(ApplyToGuildCommandHandler),
+            cancellationToken);
 
         return Response<bool>.Success(true);
     }

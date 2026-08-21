@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, catchError, throwError } from 'rxjs';
-import { ApiService } from '../api.service';
+import { ApiService, VersionedMutationResult } from '../api.service';
 import { StartDungeonRequest } from '../../../../shared/models/requestDtos/dungeons/startDungeonRequest';
 import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
 import { DungeonHubData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
@@ -163,6 +163,7 @@ export interface ExecuteDungeonActionResponse {
 
 export interface ClaimDungeonRewardsResponse {
   activeRun: DungeonRun | null;
+  hub: DungeonHubData;
   inventoryItems: InventoryItem[];
   claimedLoot: InventoryItem[];
   character: CharacterDto;
@@ -252,12 +253,26 @@ export class DungeonService {
     );
   }
 
-  claimDungeonRewards(): Observable<ClaimDungeonRewardsResponse> {
-    return this.api.post('dungeon/claimDungeonRewards').pipe(
-      catchError(() => {
-        return throwError(() => new Error('Failed to claim dungeon rewards'));
-      }),
-    );
+  claimDungeonRewards(): Observable<
+    VersionedMutationResult<ClaimDungeonRewardsResponse>
+  > {
+    return this.api
+      .postVersioned<ClaimDungeonRewardsResponse>(
+        'dungeon/claimDungeonRewards',
+        {},
+        {
+          stateSyncScopesHandledByResponse: [
+            'dungeons',
+            'inventory',
+            'character',
+          ],
+        },
+      )
+      .pipe(
+        catchError(() => {
+          return throwError(() => new Error('Failed to claim dungeon rewards'));
+        }),
+      );
   }
 
   dismissFailedDungeonRun(): Observable<DismissFailedDungeonRunResponse> {

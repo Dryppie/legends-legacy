@@ -7,9 +7,11 @@ import {
 } from '../../../../shared/models/Dtos/characterDto';
 import { AuthService } from '../auth/auth.service';
 import { CharacterService } from './character.service';
-import { GameEventService } from '../../real-time/game-event.service';
-import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
+import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
+import { RealtimeSignalDeduper } from '../../real-time/game-realtime/realtime-deduplication';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
+import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
+import { VersionedMutationResult } from '../api.service';
 
 @Injectable({ providedIn: 'root' })
 export class CharacterStateService {
@@ -18,7 +20,7 @@ export class CharacterStateService {
   private readonly _overviewDirty = signal(false);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
-  private readonly eventDeduper = new GameEventDeduper();
+  private readonly eventDeduper = new RealtimeSignalDeduper();
   private dirtyVersion = 0;
   private activeRefreshDirtyVersion: number | null = null;
   private refreshAfterCurrentRequest = false;
@@ -40,9 +42,10 @@ export class CharacterStateService {
   constructor(
     private readonly service: CharacterService,
     private readonly auth: AuthService,
-    private readonly eventService: GameEventService,
+    private readonly eventService: GameRealtimeEventRegistry,
     private readonly stateSync: StateSyncCoordinator,
     private readonly router: Router,
+    private readonly domainVersions: DomainVersionTracker,
   ) {
     this.stateSync.register(
       'character',
@@ -78,9 +81,9 @@ export class CharacterStateService {
       () => {
         const characterId = this.currentCharacterId();
         const soulstoneDropEnvelope =
-          this.eventService.eventEnvelope.SoulstoneDropMsg();
+          this.eventService.eventEnvelope.SoulstoneDrop();
         const levelUpEnvelope =
-          this.eventService.eventEnvelope.CharacterLevelUpMsg();
+          this.eventService.eventEnvelope.CharacterLevelUp();
         const soulstoneDrop = soulstoneDropEnvelope?.payload;
         const levelUp = levelUpEnvelope?.payload;
 
@@ -109,18 +112,6 @@ export class CharacterStateService {
             experience: levelUp.experience,
             experienceUntilNextLevel: levelUp.experienceUntilNextLevel,
           });
-          this.markOverviewDirty();
-          if (this.isOverviewRouteActive()) this.refreshIfDirty();
-        }
-      },
-      { allowSignalWrites: true },
-    );
-
-    effect(
-      () => {
-        const reconnectCount = this.eventService.reconnectCount();
-        if (reconnectCount > 0) {
-          this.auth.refreshCurrentCharacter();
           this.markOverviewDirty();
           if (this.isOverviewRouteActive()) this.refreshIfDirty();
         }
@@ -201,9 +192,9 @@ export class CharacterStateService {
   }
 
   private synchronizeCharacterSummary(): Observable<unknown> {
-    return this.auth.refreshCurrentCharacterRequest().pipe(
-      tap((character) => this.patchOverviewFromSummary(character)),
-    );
+    return this.auth
+      .refreshCurrentCharacterRequest()
+      .pipe(tap((character) => this.patchOverviewFromSummary(character)));
   }
 
   private handleOverviewInvalidation(): Observable<unknown> {
@@ -273,6 +264,22 @@ export class CharacterStateService {
   /** Forward the change to AuthService */
   updateCharacter(updated: CharacterDto): void {
     this.auth.updateCharacter(updated);
+  }
+
+  applyVersionedCharacter<T extends { character: CharacterDto }>(
+    result: VersionedMutationResult<T>,
+  ): boolean {
+    if (
+      !this.domainVersions.isCurrent(
+        'character',
+        result.domainVersions['character'],
+      )
+    ) {
+      return false;
+    }
+
+    this.updateCharacter(result.data.character);
+    return true;
   }
 
   updateEquippedTitle(equippedTitle: CharacterDto['equippedTitle']): void {

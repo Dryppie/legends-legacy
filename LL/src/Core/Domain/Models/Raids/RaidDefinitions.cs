@@ -1,8 +1,10 @@
+using Domain.Models.Combat;
+
 namespace Domain.Models.Raids;
 
 public static class RaidRules
 {
-    public const int Version = 6;
+    public const int Version = 7;
 }
 
 public static class RaidPlusDifficulty
@@ -56,6 +58,7 @@ public static class RaidPlusDifficulty
                 MaxGuardianBreakPercent = regular.Boss.MaxGuardianBreakPercent,
                 MaxSignaturePowerReductionPercent = regular.Boss.MaxSignaturePowerReductionPercent,
                 MaxSignatureCooldownDelayPercent = regular.Boss.MaxSignatureCooldownDelayPercent,
+                Stagger = ScaleStagger(regular.Boss.Stagger, plusLevel),
                 OvertimeStartsAtTick = Math.Max(1, regular.Boss.OvertimeStartsAtTick - milestoneRank * 150),
                 OvertimePowerIncreasePercent = regular.Boss.OvertimePowerIncreasePercent + milestoneRank
             },
@@ -133,6 +136,25 @@ public static class RaidPlusDifficulty
     private static int ScaleLinear(int value, double growth, int plusLevel) =>
         ScaleToInt(value * (1d + growth * plusLevel));
 
+    private static BossStaggerDefinition? ScaleStagger(BossStaggerDefinition? value, int plusLevel)
+    {
+        if (value is null)
+            return null;
+
+        return new BossStaggerDefinition
+        {
+            Enabled = value.Enabled,
+            BaseThreshold = ScaleToInt(value.BaseThreshold * (1d + 0.05d * plusLevel)),
+            ReferenceParticipantCount = value.ReferenceParticipantCount,
+            ParticipantExponent = value.ParticipantExponent,
+            BreakDurationTicks = value.BreakDurationTicks,
+            RecoveryDurationTicks = value.RecoveryDurationTicks,
+            DamageTakenBonusPercent = value.DamageTakenBonusPercent,
+            ThresholdGrowthPercentPerBreak = value.ThresholdGrowthPercentPerBreak,
+            MaximumBreaks = value.MaximumBreaks
+        };
+    }
+
     private static int ScaleToInt(double value)
     {
         if (!double.IsFinite(value) || value > int.MaxValue)
@@ -197,6 +219,7 @@ public sealed class RaidBossCombatDefinition
     public decimal MaxGuardianBreakPercent { get; init; } = 50;
     public decimal MaxSignaturePowerReductionPercent { get; init; } = 30;
     public decimal MaxSignatureCooldownDelayPercent { get; init; } = 25;
+    public BossStaggerDefinition? Stagger { get; init; }
     public int OvertimeStartsAtTick { get; init; } = 4500;
     public float OvertimePowerIncreasePercent { get; init; } = 6;
 }

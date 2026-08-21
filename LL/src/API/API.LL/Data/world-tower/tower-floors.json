@@ -16,13 +16,14 @@
       "guardianAbilityProfileId": "monster.garran,_the_gatekeeper",
       "requiredSlots": 5,
       "recommendedPowerRating": 161,
+      "progressionPosition": 1,
       "guardianScaling": {
-        "health": 36.0,
-        "offense": 44.0,
-        "defense": 5.0,
-        "resistance": 5.0,
-        "penetration": 5.0,
-        "regeneration": 5.0
+        "health": 1.27,
+        "offense": 1.24,
+        "defense": 1.09,
+        "resistance": 1.09,
+        "penetration": 1.0,
+        "regeneration": 1.0
       },
       "echoEnabledAfterClear": true,
       "unlocks": [
@@ -41,13 +42,14 @@
       "guardianAbilityProfileId": "monster.velka,_the_bloodwing_huntress",
       "requiredSlots": 5,
       "recommendedPowerRating": 163,
+      "progressionPosition": 2,
       "guardianScaling": {
-        "health": 42.0,
-        "offense": 52.0,
-        "defense": 6.0,
-        "resistance": 6.0,
-        "penetration": 6.0,
-        "regeneration": 6.0
+        "health": 1.45,
+        "offense": 1.44,
+        "defense": 1.29,
+        "resistance": 1.29,
+        "penetration": 1.0,
+        "regeneration": 1.0
       },
       "echoEnabledAfterClear": true,
       "unlocks": []
@@ -61,13 +63,14 @@
       "guardianAbilityProfileId": "monster.morrowmaw,_broodkeeper",
       "requiredSlots": 5,
       "recommendedPowerRating": 165,
+      "progressionPosition": 3,
       "guardianScaling": {
-        "health": 25.7,
-        "offense": 140.0,
-        "defense": 8.0,
-        "resistance": 8.0,
-        "penetration": 8.0,
-        "regeneration": 8.0
+        "health": 0.86,
+        "offense": 3.79,
+        "defense": 1.71,
+        "resistance": 1.71,
+        "penetration": 1.0,
+        "regeneration": 1.0
       },
       "echoEnabledAfterClear": true,
       "unlocks": []
@@ -81,13 +84,14 @@
       "guardianAbilityProfileId": "monster.vaelor,_the_mirrorbound",
       "requiredSlots": 5,
       "recommendedPowerRating": 171,
+      "progressionPosition": 4,
       "guardianScaling": {
-        "health": 34.0,
-        "offense": 60.0,
-        "defense": 11.0,
-        "resistance": 11.0,
-        "penetration": 11.0,
-        "regeneration": 11.0
+        "health": 1.11,
+        "offense": 1.59,
+        "defense": 2.33,
+        "resistance": 2.33,
+        "penetration": 1.0,
+        "regeneration": 1.0
       },
       "echoEnabledAfterClear": true,
       "unlocks": [
@@ -106,13 +110,25 @@
       "guardianAbilityProfileId": "monster.kharad,_the_first_warden",
       "requiredSlots": 10,
       "recommendedPowerRating": 173,
+      "progressionPosition": 5,
       "guardianScaling": {
-        "health": 46.5,
-        "offense": 135.0,
-        "defense": 15.0,
-        "resistance": 15.0,
-        "penetration": 15.0,
-        "regeneration": 15.0
+        "health": 0.70,
+        "offense": 1.25,
+        "defense": 2.65,
+        "resistance": 2.65,
+        "penetration": 1.0,
+        "regeneration": 1.0
+      },
+      "stagger": {
+        "enabled": true,
+        "baseThreshold": 250,
+        "referenceParticipantCount": 10,
+        "participantExponent": 0.85,
+        "breakDurationTicks": 30,
+        "recoveryDurationTicks": 20,
+        "damageTakenBonusPercent": 15,
+        "thresholdGrowthPercentPerBreak": 35,
+        "maximumBreaks": 4
       },
       "echoEnabledAfterClear": true,
       "unlocks": [
@@ -131,13 +147,14 @@
       "guardianAbilityProfileId": "monster.orsenn,_the_ashen_bellkeeper",
       "requiredSlots": 5,
       "recommendedPowerRating": 175,
+      "progressionPosition": 6,
       "guardianScaling": {
-        "health": 58.0,
-        "offense": 50.0,
-        "defense": 12.0,
-        "resistance": 12.0,
-        "penetration": 12.0,
-        "regeneration": 12.0
+        "health": 1.79,
+        "offense": 1.27,
+        "defense": 2.50,
+        "resistance": 2.50,
+        "penetration": 1.0,
+        "regeneration": 1.0
       },
       "echoEnabledAfterClear": true,
       "unlocks": []
@@ -149,15 +166,16 @@
       "guardianCreatureId": "00000000-0000-0000-0000-000000000064",
       "guardianName": "Eydis, the Endless Spring",
       "guardianAbilityProfileId": "monster.eydis,_the_endless_spring",
-      "requiredSlots": 3,
+      "requiredSlots": 5,
       "recommendedPowerRating": 185,
+      "progressionPosition": 7,
       "guardianScaling": {
-        "health": 8.0,
-        "offense": 35.0,
-        "defense": 8.7,
-        "resistance": 8.7,
-        "penetration": 8.7,
-        "regeneration": 0.001
+        "health": 0.65,
+        "offense": 1.50,
+        "defense": 2.04,
+        "resistance": 2.04,
+        "penetration": 1.0,
+        "regeneration": 0.10
       },
       "echoEnabledAfterClear": true,
       "unlocks": [
@@ -176,13 +194,14 @@
       "guardianAbilityProfileId": "monster.kodoku,_the_poisoned_vessel",
       "requiredSlots": 10,
       "recommendedPowerRating": 188,
+      "progressionPosition": 8,
       "guardianScaling": {
-        "health": 75.0,
-        "offense": 65.0,
-        "defense": 15.2,
-        "resistance": 15.2,
-        "penetration": 15.0,
-        "regeneration": 15.0
+        "health": 1.22,
+        "offense": 1.32,
+        "defense": 2.61,
+        "resistance": 2.61,
+        "penetration": 1.0,
+        "regeneration": 1.0
       },
       "echoEnabledAfterClear": true,
       "unlocks": [
@@ -201,13 +220,14 @@
       "guardianAbilityProfileId": "monster.ni,_the_ninefold",
       "requiredSlots": 10,
       "recommendedPowerRating": 189,
+      "progressionPosition": 9,
       "guardianScaling": {
-        "health": 76.0,
-        "offense": 100.0,
-        "defense": 15.0,
-        "resistance": 15.0,
-        "penetration": 15.0,
-        "regeneration": 15.0
+        "health": 1.20,
+        "offense": 1.99,
+        "defense": 2.55,
+        "resistance": 2.55,
+        "penetration": 1.0,
+        "regeneration": 1.0
       },
       "echoEnabledAfterClear": true,
       "unlocks": []
@@ -221,13 +241,25 @@
       "guardianAbilityProfileId": "monster.the_mad_king",
       "requiredSlots": 15,
       "recommendedPowerRating": 196,
+      "progressionPosition": 10,
       "guardianScaling": {
-        "health": 150.0,
-        "offense": 55.0,
-        "defense": 15.0,
-        "resistance": 15.0,
-        "penetration": 15.0,
-        "regeneration": 15.0
+        "health": 1.64,
+        "offense": 0.92,
+        "defense": 2.29,
+        "resistance": 2.29,
+        "penetration": 1.0,
+        "regeneration": 1.0
+      },
+      "stagger": {
+        "enabled": true,
+        "baseThreshold": 375,
+        "referenceParticipantCount": 15,
+        "participantExponent": 0.85,
+        "breakDurationTicks": 30,
+        "recoveryDurationTicks": 25,
+        "damageTakenBonusPercent": 15,
+        "thresholdGrowthPercentPerBreak": 35,
+        "maximumBreaks": 4
       },
       "echoEnabledAfterClear": false,
       "unlocks": [

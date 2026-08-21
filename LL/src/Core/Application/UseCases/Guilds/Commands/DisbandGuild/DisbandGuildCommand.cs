@@ -10,11 +10,11 @@ public record DisbandGuildCommand(Guid CharacterId) : ICommand<Response<bool>>;
 public class DisbandGuildCommandHandler : IRequestHandler<DisbandGuildCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _eventPublisher;
 
     public DisbandGuildCommandHandler(
         IGuildService guildService,
-        IGameEventPublisher eventPublisher)
+        IGameRealtimeBroadcaster eventPublisher)
     {
         _guildService = guildService;
         _eventPublisher = eventPublisher;
@@ -32,10 +32,14 @@ public class DisbandGuildCommandHandler : IRequestHandler<DisbandGuildCommand, R
 
         await _eventPublisher.PublishAsync(
             new Audience.Guild(guild.Id),
-            new GuildDisbandedMsg(guild.Id));
+            new GuildDisbanded(guild.Id),
+            nameof(DisbandGuildCommandHandler),
+            cancellationToken);
         await _eventPublisher.PublishAsync(
             new Audience.World(),
-            new GuildDirectoryChangedMsg("disbanded"));
+            new GuildDirectoryChanged("disbanded"),
+            nameof(DisbandGuildCommandHandler),
+            cancellationToken);
 
         return Response<bool>.Success(true);
     }

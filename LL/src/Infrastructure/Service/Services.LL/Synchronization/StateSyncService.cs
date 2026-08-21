@@ -53,6 +53,24 @@ public sealed class StateSyncService(
             characterId,
             new Audience.Character(characterId),
             reason,
+            publishRealtime: true,
+            cancellationToken);
+    }
+
+    public Task AdvanceCharacterScopeAsync(
+        Guid characterId,
+        string scope,
+        string reason,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(scope);
+        return InvalidateAsync(
+            GetCharacterScopeKey(characterId, scope),
+            scope,
+            characterId,
+            new Audience.Character(characterId),
+            reason,
+            publishRealtime: false,
             cancellationToken);
     }
 
@@ -68,8 +86,108 @@ public sealed class StateSyncService(
             null,
             new Audience.World(),
             reason,
+            publishRealtime: true,
             cancellationToken);
     }
+
+    public Task AdvanceWorldScopeAsync(
+        string scope,
+        string reason,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(scope);
+        return InvalidateAsync(
+            $"world:{scope}",
+            scope,
+            null,
+            new Audience.World(),
+            reason,
+            publishRealtime: false,
+            cancellationToken);
+    }
+
+    public async Task<long> AdvanceWorldScopeWithRevisionAsync(
+        string scope,
+        string reason,
+        CancellationToken cancellationToken = default)
+    {
+        await AdvanceWorldScopeAsync(scope, reason, cancellationToken);
+        return GetChangedRevisions(null).GetValueOrDefault(scope);
+    }
+
+    public Task InvalidateGuildScopeAsync(
+        Guid guildId,
+        string scope,
+        string reason,
+        CancellationToken cancellationToken = default)
+    {
+        if (guildId == Guid.Empty)
+        {
+            throw new ArgumentException("Guild id is required.", nameof(guildId));
+        }
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(scope);
+        if (!StateSyncScopes.GuildResources.Contains(scope, StringComparer.Ordinal))
+        {
+            throw new ArgumentException($"'{scope}' is not a guild synchronization scope.", nameof(scope));
+        }
+
+        return InvalidateAsync(
+            GetGuildScopeKey(guildId, scope),
+            scope,
+            null,
+            new Audience.Guild(guildId),
+            reason,
+            publishRealtime: true,
+            cancellationToken);
+    }
+
+    public Task InvalidateGuildScopeAsync(
+        Guid guildId,
+        string reason,
+        CancellationToken cancellationToken = default) =>
+        InvalidateGuildScopeAsync(
+            guildId,
+            StateSyncScopes.Guild,
+            reason,
+            cancellationToken);
+
+    public Task AdvanceGuildScopeAsync(
+        Guid guildId,
+        string scope,
+        string reason,
+        CancellationToken cancellationToken = default)
+    {
+        if (guildId == Guid.Empty)
+        {
+            throw new ArgumentException("Guild id is required.", nameof(guildId));
+        }
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(scope);
+        if (!StateSyncScopes.GuildResources.Contains(scope, StringComparer.Ordinal))
+        {
+            throw new ArgumentException($"'{scope}' is not a guild synchronization scope.", nameof(scope));
+        }
+
+        return InvalidateAsync(
+            GetGuildScopeKey(guildId, scope),
+            scope,
+            null,
+            new Audience.Guild(guildId),
+            reason,
+            publishRealtime: false,
+            cancellationToken);
+    }
+
+    public Task AdvanceGuildScopeAsync(
+        Guid guildId,
+        string reason,
+        CancellationToken cancellationToken = default) =>
+        AdvanceGuildScopeAsync(
+            guildId,
+            StateSyncScopes.Guild,
+            reason,
+            cancellationToken);
 
     public async Task<StateSyncCheckpoint> GetCheckpointAsync(
         Guid characterId,
@@ -79,7 +197,19 @@ public sealed class StateSyncService(
             .ToDictionary(scope => scope, scope => GetCharacterScopeKey(characterId, scope));
         var worldKeys = StateSyncScopes.WorldResources
             .ToDictionary(scope => scope, scope => $"world:{scope}");
-        var checkpointKeys = characterKeys.Values.Concat(worldKeys.Values).ToArray();
+        var guildId = await context.GuildMembers
+            .AsNoTracking()
+            .Where(member => member.CharacterId == characterId)
+            .Select(member => (Guid?)member.GuildId)
+            .FirstOrDefaultAsync(cancellationToken);
+        var guildKeys = StateSyncScopes.GuildResources.ToDictionary(
+            scope => scope,
+            scope => guildId.HasValue ? GetGuildScopeKey(guildId.Value, scope) : null,
+            StringComparer.Ordinal);
+        var checkpointKeys = characterKeys.Values
+            .Concat(worldKeys.Values)
+            .Concat(guildKeys.Values.OfType<string>())
+            .ToArray();
         var revisions = await context.StateSyncRevisions
             .AsNoTracking()
             .Where(x => checkpointKeys.Contains(x.ScopeKey))
@@ -92,6 +222,12 @@ public sealed class StateSyncService(
         foreach (var (scope, scopeKey) in characterKeys)
         {
             checkpointRevisions[scope] = revisions.GetValueOrDefault(scopeKey);
+        }
+        foreach (var (scope, scopeKey) in guildKeys)
+        {
+            checkpointRevisions[scope] = scopeKey is null
+                ? 0
+                : revisions.GetValueOrDefault(scopeKey);
         }
 
         CheckpointCounter.Add(1);
@@ -106,12 +242,16 @@ public sealed class StateSyncService(
             ? $"character:{characterId:N}"
             : $"character:{characterId:N}:{scope}";
 
+    private static string GetGuildScopeKey(Guid guildId, string scope) =>
+        $"guild:{guildId:N}:{scope}";
+
     private async Task InvalidateAsync(
         string scopeKey,
         string publicScope,
         Guid? characterId,
         Audience audience,
         string reason,
+        bool publishRealtime,
         CancellationToken cancellationToken)
     {
         var transactionId = context.CurrentTransaction?.TransactionId ?? Guid.Empty;
@@ -144,12 +284,26 @@ public sealed class StateSyncService(
         }
 
         _changedRevisions[(characterId, publicScope)] = revision.Revision;
+        if (!publishRealtime)
+        {
+            return;
+        }
+
         InvalidationCounter.Add(
             1,
             new KeyValuePair<string, object?>("scope", publicScope),
             new KeyValuePair<string, object?>(
                 "audience",
-                characterId.HasValue ? "character" : "world"));
+                audience switch
+                {
+                    Audience.Character => "character",
+                    Audience.Characters => "characters",
+                    Audience.Guild => "guild",
+                    Audience.Raid => "raid",
+                    Audience.TournamentGrounds => "tournament-grounds",
+                    Audience.World => "world",
+                    _ => "unknown"
+                }));
 
         await realtimeBroadcaster.PublishAsync(
             audience,

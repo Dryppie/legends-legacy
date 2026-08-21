@@ -226,12 +226,13 @@ public class MarketPlaceService : IMarketPlaceService
                 _marketPlaceRepository.RemoveBuyOrder(order);
             }
 
-            await _marketPlaceRepository.AddOrderAsync(new MarketPlaceOrder
+            var trade = new MarketPlaceOrder
             {
                 Id = Guid.NewGuid(),
                 SellerId = characterId,
                 BuyerId = order.BuyerId,
                 ItemBaseId = itemBaseId,
+                ItemBase = order.ItemBase,
                 ItemInstanceId = null,
                 Quantity = fillQuantity,
                 UnitPrice = order.UnitPrice,
@@ -239,7 +240,8 @@ public class MarketPlaceService : IMarketPlaceService
                 SellerFee = fee,
                 Source = MarketPlaceTradeSource.BuyOrder,
                 PurchasedAt = now
-            }, cancellationToken);
+            };
+            await _marketPlaceRepository.AddOrderAsync(trade, cancellationToken);
             await RecordMarketplaceSaleAsync(characterId, cancellationToken);
 
             fills.Add(new FulfillMarketPlaceBuyOrderResult(
@@ -252,7 +254,8 @@ public class MarketPlaceService : IMarketPlaceService
                 fillQuantity,
                 fillTotal,
                 fee,
-                seller.Cinders));
+                seller.Cinders,
+                trade));
         }
 
         fills = fills.Select(fill => fill with
@@ -421,12 +424,13 @@ public class MarketPlaceService : IMarketPlaceService
                 _marketPlaceRepository.RemoveListingAsync(listing);
             }
 
-            await _marketPlaceRepository.AddOrderAsync(new MarketPlaceOrder
+            var trade = new MarketPlaceOrder
             {
                 Id = Guid.NewGuid(),
                 SellerId = listing.SellerId,
                 BuyerId = characterId,
                 ItemBaseId = buyOrder.ItemBaseId,
+                ItemBase = listing.ItemInstance.ItemBase,
                 ItemInstanceId = null,
                 Quantity = fillQuantity,
                 UnitPrice = listing.UnitPrice,
@@ -434,7 +438,8 @@ public class MarketPlaceService : IMarketPlaceService
                 SellerFee = fee,
                 Source = MarketPlaceTradeSource.SellListing,
                 PurchasedAt = now
-            }, cancellationToken);
+            };
+            await _marketPlaceRepository.AddOrderAsync(trade, cancellationToken);
             await RecordMarketplaceSaleAsync(listing.SellerId, cancellationToken);
 
             fills.Add(new BuyoutMarketPlaceListingResult(
@@ -445,7 +450,8 @@ public class MarketPlaceService : IMarketPlaceService
                 fillQuantity,
                 fillTotal,
                 buyer.Cinders,
-                seller.Cinders));
+                seller.Cinders,
+                trade));
         }
 
         return new CreateMarketPlaceBuyOrderResult(
@@ -502,12 +508,13 @@ public class MarketPlaceService : IMarketPlaceService
             _marketPlaceRepository.RemoveListingAsync(listing);
         }
 
-        await _marketPlaceRepository.AddOrderAsync(new MarketPlaceOrder
+        var trade = new MarketPlaceOrder
         {
             Id = Guid.NewGuid(),
             SellerId = listing.SellerId,
             BuyerId = characterId,
             ItemBaseId = listing.ItemInstance.ItemBaseId,
+            ItemBase = listing.ItemInstance.ItemBase,
             ItemInstanceId = listing.ItemInstance.ItemBase.Stackable ? null : listing.ItemInstanceId,
             Quantity = quantity,
             UnitPrice = listing.UnitPrice,
@@ -515,7 +522,8 @@ public class MarketPlaceService : IMarketPlaceService
             SellerFee = fee,
             Source = MarketPlaceTradeSource.SellListing,
             PurchasedAt = now
-        }, cancellationToken);
+        };
+        await _marketPlaceRepository.AddOrderAsync(trade, cancellationToken);
         await RecordMarketplaceSaleAsync(listing.SellerId, cancellationToken);
 
         return new BuyoutMarketPlaceListingResult(
@@ -526,7 +534,8 @@ public class MarketPlaceService : IMarketPlaceService
             quantity,
             totalPrice,
             buyer.Cinders,
-            seller.Cinders);
+            seller.Cinders,
+            trade);
     }
 
     public async Task<BuyCommodityResult?> BuyCommodityAsync(
@@ -629,12 +638,13 @@ public class MarketPlaceService : IMarketPlaceService
                 _marketPlaceRepository.RemoveListingAsync(listing);
             }
 
-            await _marketPlaceRepository.AddOrderAsync(new MarketPlaceOrder
+            var trade = new MarketPlaceOrder
             {
                 Id = Guid.NewGuid(),
                 SellerId = listing.SellerId,
                 BuyerId = characterId,
                 ItemBaseId = itemBaseId,
+                ItemBase = listing.ItemInstance.ItemBase,
                 ItemInstanceId = null,
                 Quantity = fillQuantity,
                 UnitPrice = listing.UnitPrice,
@@ -642,7 +652,8 @@ public class MarketPlaceService : IMarketPlaceService
                 SellerFee = fee,
                 Source = MarketPlaceTradeSource.SellListing,
                 PurchasedAt = now
-            }, cancellationToken);
+            };
+            await _marketPlaceRepository.AddOrderAsync(trade, cancellationToken);
             await RecordMarketplaceSaleAsync(listing.SellerId, cancellationToken);
 
             fills.Add(new BuyoutMarketPlaceListingResult(
@@ -653,7 +664,8 @@ public class MarketPlaceService : IMarketPlaceService
                 fillQuantity,
                 fillTotal,
                 buyer.Cinders,
-                seller.Cinders));
+                seller.Cinders,
+                trade));
         }
 
         return new BuyCommodityResult(fills, quantity, totalPrice, buyer.Cinders);
@@ -715,12 +727,13 @@ public class MarketPlaceService : IMarketPlaceService
             _marketPlaceRepository.RemoveBuyOrder(buyOrder);
         }
 
-        await _marketPlaceRepository.AddOrderAsync(new MarketPlaceOrder
+        var trade = new MarketPlaceOrder
         {
             Id = Guid.NewGuid(),
             SellerId = characterId,
             BuyerId = buyOrder.BuyerId,
             ItemBaseId = buyOrder.ItemBaseId,
+            ItemBase = buyOrder.ItemBase,
             ItemInstanceId = null,
             Quantity = quantity,
             UnitPrice = buyOrder.UnitPrice,
@@ -728,7 +741,8 @@ public class MarketPlaceService : IMarketPlaceService
             SellerFee = fee,
             Source = MarketPlaceTradeSource.BuyOrder,
             PurchasedAt = now
-        }, cancellationToken);
+        };
+        await _marketPlaceRepository.AddOrderAsync(trade, cancellationToken);
         await RecordMarketplaceSaleAsync(characterId, cancellationToken);
 
         var remainingSellerInventoryItem = await _inventoryService.GetInventoryItemAsync(characterId, itemInstanceId, cancellationToken);
@@ -743,7 +757,8 @@ public class MarketPlaceService : IMarketPlaceService
             quantity,
             totalPrice,
             fee,
-            seller.Cinders);
+            seller.Cinders,
+            trade);
     }
 
     public async Task<SellCommodityResult?> SellCommodityAsync(
@@ -858,12 +873,13 @@ public class MarketPlaceService : IMarketPlaceService
                 _marketPlaceRepository.RemoveBuyOrder(order);
             }
 
-            await _marketPlaceRepository.AddOrderAsync(new MarketPlaceOrder
+            var trade = new MarketPlaceOrder
             {
                 Id = Guid.NewGuid(),
                 SellerId = characterId,
                 BuyerId = order.BuyerId,
                 ItemBaseId = itemBaseId,
+                ItemBase = order.ItemBase,
                 ItemInstanceId = null,
                 Quantity = fillQuantity,
                 UnitPrice = order.UnitPrice,
@@ -871,7 +887,8 @@ public class MarketPlaceService : IMarketPlaceService
                 SellerFee = fee,
                 Source = MarketPlaceTradeSource.BuyOrder,
                 PurchasedAt = now
-            }, cancellationToken);
+            };
+            await _marketPlaceRepository.AddOrderAsync(trade, cancellationToken);
             await RecordMarketplaceSaleAsync(characterId, cancellationToken);
 
             fills.Add(new FulfillMarketPlaceBuyOrderResult(
@@ -884,7 +901,8 @@ public class MarketPlaceService : IMarketPlaceService
                 fillQuantity,
                 fillTotal,
                 fee,
-                seller.Cinders));
+                seller.Cinders,
+                trade));
         }
 
         fills = fills.Select(fill => fill with

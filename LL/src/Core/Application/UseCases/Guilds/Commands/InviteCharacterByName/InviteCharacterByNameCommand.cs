@@ -14,13 +14,13 @@ public class InviteCharacterByNameCommandHandler : IRequestHandler<InviteCharact
 {
     private readonly IGuildService _guildService;
     private readonly ICharacterService _characterService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _eventPublisher;
     private readonly IGuildSystemChatPublisher _guildChat;
 
     public InviteCharacterByNameCommandHandler(
         IGuildService guildService,
         ICharacterService characterService,
-        IGameEventPublisher eventPublisher,
+        IGameRealtimeBroadcaster eventPublisher,
         IGuildSystemChatPublisher guildChat)
     {
         _guildService = guildService;
@@ -55,10 +55,14 @@ public class InviteCharacterByNameCommandHandler : IRequestHandler<InviteCharact
 
         await _eventPublisher.PublishAsync(
             new Audience.Character(invitedCharacterId.Value),
-            new GuildInviteReceivedMsg(guildId, invitedCharacterId.Value));
+            new GuildInviteReceived(guildId, invitedCharacterId.Value),
+            nameof(InviteCharacterByNameCommandHandler),
+            cancellationToken);
         await _eventPublisher.PublishAsync(
             new Audience.Guild(guildId),
-            new GuildStateChangedMsg(guildId));
+            new GuildStateChanged(guildId),
+            nameof(InviteCharacterByNameCommandHandler),
+            cancellationToken);
 
         return Response<bool>.Success(true);
     }

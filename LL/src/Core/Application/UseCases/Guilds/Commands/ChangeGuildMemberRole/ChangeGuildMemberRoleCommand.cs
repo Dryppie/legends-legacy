@@ -15,11 +15,11 @@ public record ChangeGuildMemberRoleCommand(Guid CharacterId, ChangeGuildMemberRo
 public class ChangeGuildMemberRoleCommandHandler : IRequestHandler<ChangeGuildMemberRoleCommand, Response<bool>>
 {
     private readonly IGuildService _guild;
-    private readonly IGameEventPublisher _events;
+    private readonly IGameRealtimeBroadcaster _events;
     private readonly IGuildSystemChatPublisher _guildChat;
     public ChangeGuildMemberRoleCommandHandler(
         IGuildService guild,
-        IGameEventPublisher events,
+        IGameRealtimeBroadcaster events,
         IGuildSystemChatPublisher guildChat)
     {
         _guild = guild;
@@ -51,7 +51,7 @@ public class ChangeGuildMemberRoleCommandHandler : IRequestHandler<ChangeGuildMe
                 cancellationToken);
         }
 
-        await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChangedMsg(guild.Id));
+        await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChanged(guild.Id), nameof(ChangeGuildMemberRoleCommandHandler), cancellationToken);
         return Response<bool>.Success(true);
     }
 }

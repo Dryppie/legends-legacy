@@ -17,7 +17,7 @@ namespace Services.LL.Outbox;
 /// visible and end up stale until a manual reload.
 /// </remarks>
 public sealed class RealtimeCharacterGameEventOutboxConsumer(
-    IGameEventPublisher eventPublisher,
+    IGameRealtimeBroadcaster eventPublisher,
     JsonSerializerOptions jsonOptions) : IGameEventOutboxConsumer
 {
     public string Consumer => GameEventOutboxConsumerNames.RealtimeCharacter;
@@ -32,11 +32,13 @@ public sealed class RealtimeCharacterGameEventOutboxConsumer(
 
         await eventPublisher.PublishAsync(
             new Audience.Character(payload.CharacterId),
-            new CharacterLevelUpMsg(
+            new CharacterLevelUp(
                 payload.CharacterId,
                 payload.Level,
                 payload.Experience,
                 payload.ExperienceUntilNextLevel,
-                payload.UnlockedEssenceSlots));
+                payload.UnlockedEssenceSlots),
+            nameof(RealtimeCharacterGameEventOutboxConsumer),
+            cancellationToken);
     }
 }

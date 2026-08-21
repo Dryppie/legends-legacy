@@ -2033,6 +2033,27 @@
     "id": "item.essence.wandering_ghost", "name": "Unbound Wandering Ghost Essence", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Common", "essenceDefinitionId": "essence.wandering_ghost", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
   },
   {
+    "id": "item.essence.web_weaver_spider", "name": "Unbound Web Weaver Spider Essence", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Rare", "essenceDefinitionId": "essence.web_weaver_spider", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "item.essence.spider_queen", "name": "Unbound Spider Queen Essence — Webbed Domain", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Rare", "essenceDefinitionId": "essence.spider_queen", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "item.essence.spider_queen_royal_venom", "name": "Unbound Spider Queen Essence — Royal Venom", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Rare", "essenceDefinitionId": "essence.spider_queen_royal_venom", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "item.essence.bark_golem", "name": "Unbound Bark Golem Essence", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Common", "essenceDefinitionId": "essence.bark_golem", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "item.essence.treant_guardian", "name": "Unbound Treant Guardian Essence", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Rare", "essenceDefinitionId": "essence.treant_guardian", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "item.essence.elder_treant", "name": "Unbound Elder Treant Essence — Ancient Sap", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Rare", "essenceDefinitionId": "essence.elder_treant", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
+    "id": "item.essence.elder_treant_thornstorm", "name": "Unbound Elder Treant Essence — Thornstorm", "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.", "itemType": "Essence", "rarity": "Rare", "essenceDefinitionId": "essence.elder_treant_thornstorm", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
+  },
+  {
     "id": "blueprint_raidforged", "name": "Blueprint: Raidforged", "description": "Permanently teaches the Raidforged design for one compatible recipe.", "itemType": "Resource", "rarity": "Epic", "equipmentType": "Head", "attributeModifiers": [], "toolBonuses": [], "gatheringType": null
   },
   {

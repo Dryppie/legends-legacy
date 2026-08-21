@@ -14,6 +14,7 @@ export interface GameBootstrapDto {
   serverTimeUtc: string;
   attributeDefinitions: AttributeDefinition[];
   accountAccess: AccountAccessDto;
+  stateVersions: Readonly<Record<string, number>>;
 }
 
 export interface AccountAccessDto {

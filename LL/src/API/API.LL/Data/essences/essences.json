@@ -1267,6 +1267,80 @@
       "activeAbilityId": "ability.creature.wandering_ghost.spectral_passage",
       "passiveAbilityId": "ability.creature.wandering_ghost.restless_spirit",
       "evolution": {"id": "evolution.wandering_ghost", "name": "Awakened Wandering Ghost", "description": "The awakened form of Wandering Ghost Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.web_weaver_spider",
+      "sourceMonsterId": "monster.web_weaver_spider",
+      "name": "Web Weaver Spider Essence",
+      "description": "The combat essence of Web Weaver Spider, granting Weaver's Grasp and Web Walker.",
+      "rarity": "Rare", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.web_weaver_spider.weavers_grasp",
+      "passiveAbilityId": "ability.creature.web_weaver_spider.web_walker",
+      "evolution": {"id": "evolution.web_weaver_spider", "name": "Awakened Web Weaver Spider", "description": "The awakened form of Web Weaver Spider Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.spider_queen",
+      "sourceMonsterId": "monster.spider_queen",
+      "name": "Spider Queen Essence",
+      "variantName": "Webbed Domain",
+      "description": "The combat essence of Spider Queen, granting Webbed Domain and Royal Cocoon.",
+      "rarity": "Rare", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.spider_queen.webbed_domain",
+      "passiveAbilityId": "ability.creature.spider_queen.royal_cocoon",
+      "evolution": {"id": "evolution.spider_queen", "name": "Awakened Spider Queen", "description": "The awakened form of Spider Queen Essence — Webbed Domain.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.spider_queen_royal_venom",
+      "sourceMonsterId": "monster.spider_queen",
+      "name": "Spider Queen Essence",
+      "variantName": "Royal Venom",
+      "description": "The combat essence of Spider Queen, granting Royal Venom and Royal Cocoon.",
+      "rarity": "Rare", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.spider_queen.royal_venom",
+      "passiveAbilityId": "ability.creature.spider_queen.royal_cocoon",
+      "evolution": {"id": "evolution.spider_queen_royal_venom", "name": "Awakened Spider Queen", "description": "The awakened form of Spider Queen Essence — Royal Venom.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.bark_golem",
+      "sourceMonsterId": "monster.bark_golem",
+      "name": "Bark Golem Essence",
+      "description": "The combat essence of Bark Golem, granting Timber Slam and Barkskin.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.bark_golem.timber_slam",
+      "passiveAbilityId": "ability.creature.bark_golem.barkskin",
+      "evolution": {"id": "evolution.bark_golem", "name": "Awakened Bark Golem", "description": "The awakened form of Bark Golem Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.treant_guardian",
+      "sourceMonsterId": "monster.treant_guardian",
+      "name": "Treant Guardian Essence",
+      "description": "The combat essence of Treant Guardian, granting Rootbound Shield and Forest Vitality.",
+      "rarity": "Rare", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.treant_guardian.rootbound_shield",
+      "passiveAbilityId": "ability.creature.treant_guardian.forest_vitality",
+      "evolution": {"id": "evolution.treant_guardian", "name": "Awakened Treant Guardian", "description": "The awakened form of Treant Guardian Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.elder_treant",
+      "sourceMonsterId": "monster.elder_treant",
+      "name": "Elder Treant Essence",
+      "variantName": "Ancient Sap",
+      "description": "The combat essence of Elder Treant, granting Ancient Sap and Ancient Essence.",
+      "rarity": "Rare", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.elder_treant.ancient_sap",
+      "passiveAbilityId": "ability.creature.elder_treant.ancient_essence",
+      "evolution": {"id": "evolution.elder_treant", "name": "Awakened Elder Treant", "description": "The awakened form of Elder Treant Essence — Ancient Sap.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.elder_treant_thornstorm",
+      "sourceMonsterId": "monster.elder_treant",
+      "name": "Elder Treant Essence",
+      "variantName": "Thornstorm",
+      "description": "The combat essence of Elder Treant, granting Thornstorm and Ancient Essence.",
+      "rarity": "Rare", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.elder_treant.thornstorm",
+      "passiveAbilityId": "ability.creature.elder_treant.ancient_essence",
+      "evolution": {"id": "evolution.elder_treant_thornstorm", "name": "Awakened Elder Treant", "description": "The awakened form of Elder Treant Essence — Thornstorm.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
     }
   ]
 }

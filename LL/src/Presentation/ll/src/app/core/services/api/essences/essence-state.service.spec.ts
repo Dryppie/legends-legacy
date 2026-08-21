@@ -2,10 +2,12 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Subject, of, throwError } from 'rxjs';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
-import { GameEventService } from '../../real-time/game-event.service';
+import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
 import { CharacterStateService } from '../character/character-state.service';
+import { EquipmentStateService } from '../equipment/equipment-state.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
-import { QuestStateService } from '../quest/quest-state.service';
+import { VersionedMutationResult } from '../api.service';
+import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
 import { EssenceItemViewService } from './essence-item-view.service';
 import { EssenceStateService } from './essence-state.service';
 import { EssencesService } from './essences.service';
@@ -18,6 +20,39 @@ describe('EssenceStateService loadout drafts', () => {
   let service: EssenceStateService;
   let essences: jasmine.SpyObj<EssencesService>;
   const levelUpEnvelope = signal<any>(null);
+
+  const versionedMutation = (
+    overrides: Partial<EssenceMutationResponseDto> = {},
+    domainVersions: Readonly<Record<string, number>> = {
+      essences: 1,
+      inventory: 1,
+      equipment: 1,
+    },
+  ): VersionedMutationResult<EssenceMutationResponseDto> => ({
+    data: {
+      succeeded: true,
+      message: 'Essence updated.',
+      archive: { essences: [], essenceDust: 0 },
+      loadouts: {
+        loadouts: [
+          {
+            id: 'loadout-1',
+            name: 'Default',
+            isActive: true,
+            slots: [],
+          },
+        ],
+        limit: 3,
+        unlockedSlots: 1,
+      },
+      creatureArchive: { creatures: [], canChangeEssenceFocus: true },
+      codex: { entries: [] },
+      inventoryItems: [],
+      equipmentSlots: [],
+      ...overrides,
+    },
+    domainVersions,
+  });
 
   beforeEach(() => {
     levelUpEnvelope.set(null);
@@ -57,15 +92,22 @@ describe('EssenceStateService loadout drafts', () => {
         { provide: EssencesService, useValue: essences },
         {
           provide: InventoryStateService,
-          useValue: { items: signal([]), setInventory: jasmine.createSpy() },
+          useValue: {
+            items: signal([]),
+            setInventory: jasmine.createSpy(),
+            applyVersionedInventory: jasmine.createSpy().and.returnValue(true),
+          },
+        },
+        {
+          provide: EquipmentStateService,
+          useValue: { setSlots: jasmine.createSpy() },
         },
         { provide: EssenceItemViewService, useValue: {} },
-        { provide: QuestStateService, useValue: {} },
         { provide: EventBusService, useValue: { logout: signal(false) } },
         {
-          provide: GameEventService,
+          provide: GameRealtimeEventRegistry,
           useValue: {
-            eventEnvelope: { CharacterLevelUpMsg: levelUpEnvelope },
+            eventEnvelope: { CharacterLevelUp: levelUpEnvelope },
           },
         },
         {
@@ -126,7 +168,7 @@ describe('EssenceStateService loadout drafts', () => {
 
     levelUpEnvelope.set({
       updateId: 'level-up-10',
-      event: 'CharacterLevelUpMsg',
+      event: 'CharacterLevelUp',
       payload: {
         characterId: 'character-1',
         level: 10,
@@ -270,7 +312,9 @@ describe('EssenceStateService loadout drafts', () => {
   });
 
   it('allows only one pending Essence Dust request', () => {
-    const request = new Subject<EssenceMutationResponseDto>();
+    const request = new Subject<
+      VersionedMutationResult<EssenceMutationResponseDto>
+    >();
     const essence = { id: 'essence-1' } as PlayerEssenceDto;
     essences.spendDust.and.returnValue(request.asObservable());
 
@@ -290,20 +334,64 @@ describe('EssenceStateService loadout drafts', () => {
     essences.getCreatureArchive.calls.reset();
     essences.getCodex.calls.reset();
     essences.spendDust.and.returnValue(
-      of({
-        succeeded: true,
-        message: 'Essence Dust spent.',
-        archive: { essences: [upgradedEssence], essenceDust: 9 },
-        inventoryItems: [],
-      }),
+      of(
+        versionedMutation({
+          message: 'Essence Dust spent.',
+          archive: { essences: [upgradedEssence], essenceDust: 9 },
+          loadouts: {
+            loadouts: [
+              {
+                id: 'loadout-1',
+                name: 'Default',
+                isActive: true,
+                slots: [],
+              },
+            ],
+            limit: 3,
+            unlockedSlots: 2,
+          },
+          creatureArchive: {
+            creatures: [],
+            canChangeEssenceFocus: false,
+          },
+        }),
+      ),
     );
 
     service.spendDust(upgradedEssence);
 
     expect(service.archive()?.essences[0].level).toBe(2);
     expect(service.archive()?.essenceDust).toBe(9);
+    expect(service.loadouts()?.unlockedSlots).toBe(2);
+    expect(service.creatureArchive()?.canChangeEssenceFocus).toBeFalse();
+    expect(
+      TestBed.inject(InventoryStateService).applyVersionedInventory,
+    ).toHaveBeenCalled();
+    expect(TestBed.inject(EquipmentStateService).setSlots).toHaveBeenCalledWith(
+      [],
+    );
     expect(essences.getCreatureArchive).not.toHaveBeenCalled();
     expect(essences.getCodex).not.toHaveBeenCalled();
+  });
+
+  it('ignores an Essence snapshot older than the latest observed version', () => {
+    const upgradedEssence = { id: 'essence-1', level: 2 } as PlayerEssenceDto;
+    TestBed.inject(DomainVersionTracker).observe({ essences: 3 });
+    essences.spendDust.and.returnValue(
+      of(
+        versionedMutation(
+          {
+            archive: { essences: [upgradedEssence], essenceDust: 9 },
+          },
+          { essences: 2, inventory: 4, equipment: 4 },
+        ),
+      ),
+    );
+
+    service.spendDust(upgradedEssence);
+
+    expect(service.archive()?.essences).toEqual([]);
+    expect(service.archive()?.essenceDust).toBe(0);
   });
 
   it('reconciles stale Dust state and shows the API validation message', () => {

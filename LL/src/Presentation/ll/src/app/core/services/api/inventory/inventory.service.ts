@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from '../../api/api.service';
+import { ApiService, VersionedMutationResult } from '../../api/api.service';
 import { catchError, map, Observable, throwError } from 'rxjs';
 import { InventoryDto } from '../../../../shared/models/Dtos/inventoryDto';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
@@ -13,17 +13,25 @@ export interface OpenSelectionCrateResponse {
   consumedItemInstanceId: string;
   grantId: string;
   rewards: InventoryItem[];
+  inventoryItems: InventoryItem[];
 }
 
 export interface TransferInventoryItemResponse {
   itemInstanceId: string;
   recipientName: string;
   quantity: number;
+  inventoryItems: InventoryItem[];
 }
 
 export interface SetInventoryItemFavoriteResponse {
   itemInstanceId: string;
   isFavorite: boolean;
+  inventoryItems: InventoryItem[];
+}
+
+export interface MarkInventoryItemSeenResponse {
+  itemInstanceId: string;
+  inventoryItems: InventoryItem[];
 }
 
 @Injectable({
@@ -82,59 +90,83 @@ export class InventoryService {
       );
   }
 
-  scrapEquipment(equipmentIds: string[]): Observable<ScrapEquipmentsResponse> {
-    return this.apiService.post('inventory/scrap', equipmentIds).pipe(
-      map((inventory) => {
-        // this.toastService.showToast(
-        //   'Action completed successfully!',
-        //   'success',
-        // );
-        return inventory;
-      }),
+  scrapEquipment(
+    equipmentIds: string[],
+  ): Observable<VersionedMutationResult<ScrapEquipmentsResponse>> {
+    return this.apiService
+      .postVersioned<ScrapEquipmentsResponse>('inventory/scrap', equipmentIds, {
+        stateSyncScopesHandledByResponse: ['inventory'],
+      })
+      .pipe(
+        map((inventory) => {
+          // this.toastService.showToast(
+          //   'Action completed successfully!',
+          //   'success',
+          // );
+          return inventory;
+        }),
 
-      catchError(() => {
-        // this.toastService.showToast(
-        //   'Login Failed',
-        //   'Wrong email or password',
-        //   'error',
-        //   't',
-        // );
-        return throwError(() => new Error('Failed to scrap equipment'));
-      }),
-    );
+        catchError(() => {
+          // this.toastService.showToast(
+          //   'Login Failed',
+          //   'Wrong email or password',
+          //   'error',
+          //   't',
+          // );
+          return throwError(() => new Error('Failed to scrap equipment'));
+        }),
+      );
   }
 
   openSelectionContainer(
     containerItemInstanceId: string,
     optionId: string,
-  ): Observable<OpenSelectionCrateResponse> {
-    return this.apiService.post(
+  ): Observable<VersionedMutationResult<OpenSelectionCrateResponse>> {
+    return this.apiService.postVersioned<OpenSelectionCrateResponse>(
       `inventory/items/${containerItemInstanceId}/open-selection-container`,
       { optionId },
+      {
+        stateSyncScopesHandledByResponse: ['inventory'],
+      },
     );
   }
 
-  markItemSeen(itemInstanceId: string): Observable<unknown> {
-    return this.apiService.post(`inventory/items/${itemInstanceId}/seen`, {});
+  markItemSeen(
+    itemInstanceId: string,
+  ): Observable<VersionedMutationResult<MarkInventoryItemSeenResponse>> {
+    return this.apiService.postVersioned<MarkInventoryItemSeenResponse>(
+      `inventory/items/${itemInstanceId}/seen`,
+      {},
+      {
+        stateSyncScopesHandledByResponse: ['inventory'],
+      },
+    );
   }
 
   setItemFavorite(
     itemInstanceId: string,
     isFavorite: boolean,
-  ): Observable<SetInventoryItemFavoriteResponse> {
-    return this.apiService.post(`inventory/items/${itemInstanceId}/favorite`, {
-      isFavorite,
-    });
+  ): Observable<VersionedMutationResult<SetInventoryItemFavoriteResponse>> {
+    return this.apiService.postVersioned<SetInventoryItemFavoriteResponse>(
+      `inventory/items/${itemInstanceId}/favorite`,
+      { isFavorite },
+      {
+        stateSyncScopesHandledByResponse: ['inventory'],
+      },
+    );
   }
 
   transferItem(
     itemInstanceId: string,
     recipientName: string,
     quantity: number,
-  ): Observable<TransferInventoryItemResponse> {
-    return this.apiService.post(`inventory/items/${itemInstanceId}/transfer`, {
-      recipientName,
-      quantity,
-    });
+  ): Observable<VersionedMutationResult<TransferInventoryItemResponse>> {
+    return this.apiService.postVersioned<TransferInventoryItemResponse>(
+      `inventory/items/${itemInstanceId}/transfer`,
+      { recipientName, quantity },
+      {
+        stateSyncScopesHandledByResponse: ['inventory'],
+      },
+    );
   }
 }

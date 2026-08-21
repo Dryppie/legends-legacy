@@ -2,6 +2,7 @@ import { Injectable, NgZone, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '../../../../../environments/environment';
 import { GameRealtimeEnvelope } from './game-realtime-contracts';
+import { StateSyncDiagnostics } from './state-sync-diagnostics.service';
 
 export interface GameRealtimeDiagnosticEvent {
   event: string;
@@ -13,6 +14,8 @@ export interface GameRealtimeDiagnosticEvent {
   causedHttpRequest?: boolean;
   updatedState?: boolean;
   route?: string;
+  disposition: 'received' | 'handled' | 'duplicate' | 'unknown' | 'failed';
+  handlerError?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -23,6 +26,7 @@ export class GameRealtimeDiagnostics {
   private readonly events: GameRealtimeDiagnosticEvent[] = [];
   private readonly router = inject(Router);
   private readonly zone = inject(NgZone);
+  private readonly stateSyncDiagnostics = inject(StateSyncDiagnostics);
   private heartbeatStarted = false;
 
   start(): void {
@@ -39,7 +43,18 @@ export class GameRealtimeDiagnostics {
       timestamp: Date.now(),
       payloadBytes: this.estimatePayloadBytes(envelope.payload),
       route: this.router.url,
+      disposition: 'received',
     });
+  }
+
+  recordDuplicate(envelope: GameRealtimeEnvelope): void {
+    const entry = this.findEntry(envelope.updateId);
+    if (entry) entry.disposition = 'duplicate';
+  }
+
+  recordUnknown(envelope: GameRealtimeEnvelope): void {
+    const entry = this.findEntry(envelope.updateId);
+    if (entry) entry.disposition = 'unknown';
   }
 
   runHandler(
@@ -59,6 +74,14 @@ export class GameRealtimeDiagnostics {
 
     try {
       handler();
+      if (entry) entry.disposition = 'handled';
+    } catch (error) {
+      if (entry) {
+        entry.disposition = 'failed';
+        entry.handlerError =
+          error instanceof Error ? error.message : String(error);
+      }
+      throw error;
     } finally {
       const duration = performance.now() - start;
       if (entry) {
@@ -93,7 +116,9 @@ export class GameRealtimeDiagnostics {
     }
   }
 
-  private findEntry(updateId?: string): GameRealtimeDiagnosticEvent | undefined {
+  private findEntry(
+    updateId?: string,
+  ): GameRealtimeDiagnosticEvent | undefined {
     if (!updateId) return this.events[this.events.length - 1];
     for (let i = this.events.length - 1; i >= 0; i -= 1) {
       if (this.events[i].updateId === updateId) return this.events[i];
@@ -134,6 +159,11 @@ export class GameRealtimeDiagnostics {
       printRecentEvents: () => this.printRecentEvents(),
       clear: () => this.clear(),
       recentEvents: () => this.recentEvents(),
+      stateSync: {
+        snapshot: () => this.stateSyncDiagnostics.snapshot(),
+        print: () => this.stateSyncDiagnostics.print(),
+        clear: () => this.stateSyncDiagnostics.clear(),
+      },
     };
   }
 }

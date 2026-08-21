@@ -95,10 +95,9 @@ export class InventoryItemModalComponent implements OnInit {
       .openSelectionContainer(this.inventoryItem.itemInstance.id, optionId)
       .subscribe({
         next: (response) => {
-          this.inventoryState.decrementItem(response.consumedItemInstanceId, 1);
-          this.inventoryState.applyInventoryGrant(
-            response.grantId,
-            response.rewards,
+          this.inventoryState.applyVersionedInventory(
+            response,
+            response.data.grantId,
           );
           this.close.emit();
         },

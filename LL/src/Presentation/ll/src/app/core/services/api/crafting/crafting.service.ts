@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
-import { ApiService } from '../api.service';
+import { ApiService, VersionedMutationResult } from '../api.service';
 import {
   BehaviorSubject,
   catchError,
@@ -64,32 +64,42 @@ export class CraftingService {
     );
   }
 
-  public craftItems(request: CraftItemsRequest): Observable<CraftItemsResult> {
-    return this.api.post('Crafting/craft', request).pipe(
-      map((response) => {
-        const result = this.unwrapResponse<CraftItemsResult>(response);
-        const count = result.createdItems.length;
-        this.toast.showToast(
-          `Crafted ${count} item${count === 1 ? '' : 's'}`,
-          'success',
-          true,
-          'tr',
-        );
-        return result;
-      }),
-      catchError(() => throwError(() => new Error('Failed to craft items'))),
-    );
+  public craftItems(
+    request: CraftItemsRequest,
+  ): Observable<VersionedMutationResult<CraftItemsResult>> {
+    return this.api
+      .postVersioned<ApiResponse<CraftItemsResult>>('Crafting/craft', request, {
+        stateSyncScopesHandledByResponse: ['inventory'],
+      })
+      .pipe(
+        map((response) => {
+          const result = this.unwrapResponse<CraftItemsResult>(response.data);
+          const count = result.createdItems.length;
+          this.toast.showToast(
+            `Crafted ${count} item${count === 1 ? '' : 's'}`,
+            'success',
+            true,
+            'tr',
+          );
+          return { data: result, domainVersions: response.domainVersions };
+        }),
+        catchError(() => throwError(() => new Error('Failed to craft items'))),
+      );
   }
 
   public learnBlueprint(
     blueprintItemInstanceId: string,
     recipeId: string,
-  ): Observable<LearnBlueprintResult> {
+  ): Observable<VersionedMutationResult<LearnBlueprintResult>> {
     return this.api
-      .post('Crafting/blueprints/learn', { blueprintItemInstanceId, recipeId })
+      .postVersioned<
+        ApiResponse<LearnBlueprintResult>
+      >('Crafting/blueprints/learn', { blueprintItemInstanceId, recipeId }, { stateSyncScopesHandledByResponse: ['inventory'] })
       .pipe(
         map((response) => {
-          const result = this.unwrapResponse<LearnBlueprintResult>(response);
+          const result = this.unwrapResponse<LearnBlueprintResult>(
+            response.data,
+          );
           this.blueprintLearnedSubject.next(result);
           this.toast.showToast(
             `Learned ${result.blueprintName} for ${result.recipeName}`,
@@ -97,7 +107,7 @@ export class CraftingService {
             true,
             'tr',
           );
-          return result;
+          return { data: result, domainVersions: response.domainVersions };
         }),
         catchError((err) =>
           throwError(
@@ -110,40 +120,69 @@ export class CraftingService {
   removeItemFromQueue(queueItem: {
     id: string;
   }): Observable<RemoveCraftingQueueItemResponse> {
-    return this.api.post('Crafting/RemoveCraftingQueueItem', queueItem.id).pipe(
-      map((response) => {
-        const result =
-          this.unwrapResponse<RemoveCraftingQueueItemResponse>(response);
-        this.toast.showToast('Removed item from queue', 'success', true, 'tr');
-        return result;
-      }),
+    return this.api
+      .post('Crafting/RemoveCraftingQueueItem', queueItem.id, {
+        stateSyncScopesHandledByResponse: [
+          'inventory',
+          'character',
+          'character-overview',
+        ],
+      })
+      .pipe(
+        map((response) => {
+          const result =
+            this.unwrapResponse<RemoveCraftingQueueItemResponse>(response);
+          this.toast.showToast(
+            'Removed item from queue',
+            'success',
+            true,
+            'tr',
+          );
+          return result;
+        }),
 
-      catchError(() => {
-        return throwError(() => new Error('Failed to remove item from queue'));
-      }),
-    );
+        catchError(() => {
+          return throwError(
+            () => new Error('Failed to remove item from queue'),
+          );
+        }),
+      );
   }
 
   cancelTemperingQueue(): Observable<RemoveCraftingQueueItemResponse> {
-    return this.api.post('Crafting/queue/cancel', {}).pipe(
-      map((response) => {
-        const result =
-          this.unwrapResponse<RemoveCraftingQueueItemResponse>(response);
-        this.toast.showToast(
-          'Cancelled the Tempering queue',
-          'success',
-          true,
-          'tr',
-        );
-        return result;
-      }),
-      catchError((error) =>
-        throwError(
-          () =>
-            new Error(error?.message ?? 'Failed to cancel the Tempering queue'),
+    return this.api
+      .post(
+        'Crafting/queue/cancel',
+        {},
+        {
+          stateSyncScopesHandledByResponse: [
+            'inventory',
+            'character',
+            'character-overview',
+          ],
+        },
+      )
+      .pipe(
+        map((response) => {
+          const result =
+            this.unwrapResponse<RemoveCraftingQueueItemResponse>(response);
+          this.toast.showToast(
+            'Cancelled the Tempering queue',
+            'success',
+            true,
+            'tr',
+          );
+          return result;
+        }),
+        catchError((error) =>
+          throwError(
+            () =>
+              new Error(
+                error?.message ?? 'Failed to cancel the Tempering queue',
+              ),
+          ),
         ),
-      ),
-    );
+      );
   }
 
   moveQueueItem(

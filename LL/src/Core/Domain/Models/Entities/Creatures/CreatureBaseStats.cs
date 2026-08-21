@@ -6,13 +6,13 @@ public static class MonsterBaseStats
 {
     // Tier 1 baseline. Difficulty scaling starts after the first area.
     public const float BaseMaxHealth = 60f;
-    public const float BaseHealthRegeneration = 0f;
+    public const float BaseHealthRegeneration = 0.25f;
 
     public const float BasePower = 7f;
     public const float BaseArmor = 10f;
     public const float BaseResistance = 10f;
-    public const float BaseCritChance = 0.05f;
-    public const float BaseCritDamage = 1.5f;
+    public const float BaseCritChance = 5f;
+    public const float BaseCritDamage = 50f;
     public const float BaseArmorPenetration = 0.0f;
     public const float BaseMagicPenetration = 0.0f;
     public const float BaseDamageReduction = 0.0f;

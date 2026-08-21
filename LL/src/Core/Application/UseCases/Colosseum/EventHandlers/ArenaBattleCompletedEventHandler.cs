@@ -8,11 +8,11 @@ using MediatR;
 namespace Application.UseCases.Colosseum.EventHandlers;
 public class ArenaBattleCompletedEventHandler : INotificationHandler<ArenaBattleCompletedEvent>
 {
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _eventPublisher;
     private readonly IGameEventOutbox _outbox;
 
     public ArenaBattleCompletedEventHandler(
-        IGameEventPublisher eventPublisher,
+        IGameRealtimeBroadcaster eventPublisher,
         IGameEventOutbox outbox)
     {
         _eventPublisher = eventPublisher;
@@ -33,7 +33,7 @@ public class ArenaBattleCompletedEventHandler : INotificationHandler<ArenaBattle
             null,
             cancellationToken);
 
-        var msg = new ArenaBattleCompletedMsg(
+        var message = new ArenaBattleCompleted(
             notification.CharacterId,
             notification.EnemyId,
             notification.Outcome.ToString(),
@@ -42,7 +42,15 @@ public class ArenaBattleCompletedEventHandler : INotificationHandler<ArenaBattle
             notification.EnemyRatingBefore,
             notification.EnemyRatingAfter);
 
-        await _eventPublisher.PublishAsync(new Audience.Character(notification.CharacterId), msg);
-        await _eventPublisher.PublishAsync(new Audience.Character(notification.EnemyId), msg);
+        await _eventPublisher.PublishAsync(
+            new Audience.Character(notification.CharacterId),
+            message,
+            nameof(ArenaBattleCompletedEventHandler),
+            cancellationToken);
+        await _eventPublisher.PublishAsync(
+            new Audience.Character(notification.EnemyId),
+            message,
+            nameof(ArenaBattleCompletedEventHandler),
+            cancellationToken);
     }
 }

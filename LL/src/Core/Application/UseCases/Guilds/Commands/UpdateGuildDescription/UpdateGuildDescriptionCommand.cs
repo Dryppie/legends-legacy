@@ -13,9 +13,9 @@ public record UpdateGuildDescriptionCommand(Guid CharacterId, UpdateGuildDescrip
 public class UpdateGuildDescriptionCommandHandler : IRequestHandler<UpdateGuildDescriptionCommand, Response<bool>>
 {
     private readonly IGuildService _guild;
-    private readonly IGameEventPublisher _events;
+    private readonly IGameRealtimeBroadcaster _events;
 
-    public UpdateGuildDescriptionCommandHandler(IGuildService guild, IGameEventPublisher events)
+    public UpdateGuildDescriptionCommandHandler(IGuildService guild, IGameRealtimeBroadcaster events)
     {
         _guild = guild;
         _events = events;
@@ -31,7 +31,7 @@ public class UpdateGuildDescriptionCommandHandler : IRequestHandler<UpdateGuildD
         if (!updated || guild is null)
             return Response<bool>.Fail("Only the guild leader and officers can change the guild description.");
 
-        await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChangedMsg(guild.Id));
+        await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChanged(guild.Id), nameof(UpdateGuildDescriptionCommandHandler), cancellationToken);
         return Response<bool>.Success(true);
     }
 }

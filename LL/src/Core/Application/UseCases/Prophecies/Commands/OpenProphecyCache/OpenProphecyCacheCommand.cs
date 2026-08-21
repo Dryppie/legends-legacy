@@ -17,20 +17,17 @@ public sealed class OpenProphecyCacheCommandHandler : IRequestHandler<OpenProphe
 {
     private readonly IProphecyService _prophecyService;
     private readonly ILootHistoryService _lootHistory;
-    private readonly IGameEventPublisher _legacyEvents;
     private readonly IGameRealtimeBroadcaster _gameRealtime;
     private readonly IMapper _mapper;
 
     public OpenProphecyCacheCommandHandler(
         IProphecyService prophecyService,
         ILootHistoryService lootHistory,
-        IGameEventPublisher legacyEvents,
         IGameRealtimeBroadcaster gameRealtime,
         IMapper mapper)
     {
         _prophecyService = prophecyService;
         _lootHistory = lootHistory;
-        _legacyEvents = legacyEvents;
         _gameRealtime = gameRealtime;
         _mapper = mapper;
     }
@@ -60,9 +57,6 @@ public sealed class OpenProphecyCacheCommandHandler : IRequestHandler<OpenProphe
                 result.Value.CacheTitle,
                 cancellationToken);
 
-            await _legacyEvents.PublishAsync(
-                new Audience.Character(request.CharacterId),
-                new LootReceivedMsg(request.CharacterId, rewards, source, result.Value.CacheTitle, grantId));
             await _gameRealtime.PublishAsync(
                 new Audience.Character(request.CharacterId),
                 new LootReceived(request.CharacterId, rewards, source, result.Value.CacheTitle, grantId),

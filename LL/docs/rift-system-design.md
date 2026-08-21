@@ -41,13 +41,11 @@ Three things about this codebase shaped the design more than any genre conventio
    (leader-approved) and `TournamentTeam` (merged into threes at bracket time). A Rift Warband is
    therefore new state — but it is the _simplest possible_ new state, because membership is
    append-only and closes forever when the window closes.
-3. **Rifts have dormant integration hooks in the codebase.** `Domain.Models.Regions.Region` carries a
-   commented-out `//public ICollection<Rift> Rifts { get; set; }`;
-   `Application.WebSockets.Contracts.GameEventMsg` already declares
-   `public record RiftOpenedMsg(Guid ZoneId, DateTimeOffset Time)` with a matching commented-out
-   `// RiftOpened: RiftOpenedMsg;` in the client's `game-event.map.ts`. An earlier proposal reserved
-   The Hive's Abyss for this system, but that encounter and its ant roster now belong to Raids. Rift
-   launch content therefore needs a distinct encounter family.
+3. **Rifts have one dormant domain hook but no realtime scaffolding.** `Domain.Models.Regions.Region`
+   carries a commented-out `//public ICollection<Rift> Rifts { get; set; }`. The old compatibility
+   message and client event-map placeholders were removed with the rest of that transport. An earlier
+   proposal reserved The Hive's Abyss for this system, but that encounter and its ant roster now belong
+   to Raids. Rift launch content therefore needs a distinct encounter family and typed realtime events.
 
 ### What this reuses instead of inventing
 
@@ -133,12 +131,11 @@ Three things about this codebase shaped the design more than any genre conventio
 Naming notes. Avoid **Warden** and **Sovereign** — both are taken by `TowerFloorType`, and Sieges use
 Warden for its raid bosses. **Warband** is unused anywhere in the solution.
 
-> **Fix the dead scaffolding rather than working around it.** `RiftOpenedMsg(Guid ZoneId, DateTimeOffset Time)`
-> cannot be used as written: `Region.Id` is an `int` and `Area.Id` is a `string`, so `Guid ZoneId`
-> matches no existing identity. Re-author it as
-> `RiftOpenedMsg(Guid RiftInstanceId, int RegionId, string RiftDefinitionId, DateTimeOffset OpensAt, DateTimeOffset SealsAt)`
-> and add the corresponding `DomainToClientMapper.Map` case plus the client `game-event.map.ts` entry —
-> the client's dispatch is fail-silent, so an envelope with no registered name is received and dropped.
+> **Define the event against real identities.** Add a typed
+> `RiftOpened(Guid RiftInstanceId, int RegionId, string RiftDefinitionId, DateTimeOffset OpensAt, DateTimeOffset SealsAt)`
+> event to `GameRealtimeEvents`, its name to `GameRealtimeEventNames`, and its payload/name mapping to
+> the Angular `game-realtime-contracts.ts` registry. `Region.Id` is an `int` and `Area.Id` is a `string`,
+> so a generic `Guid ZoneId` would match no existing identity. Unregistered envelope names are ignored.
 > Likewise uncomment `Region.Rifts` only if rifts are actually navigated from the region aggregate;
 > since rift _instances_ are transient and region-scoped by `RegionId`, a navigation collection on the
 > content entity is probably wrong. Delete the comment rather than honouring it.
@@ -1051,10 +1048,10 @@ Two more that are Rift-specific but small: a `TauntThreatBonus` field on `Combat
   logged-in client already calls `subscribeToWorld()` on connect. Rift open/seal/resolve announcements go
   to `Audience.World`; participant-specific payloads go to `Audience.Characters(participantIds)`.
   Region filtering is a client concern.
-- New events: `RiftOpened` (rewrite the dead `RiftOpenedMsg`, §2), `RiftParticipantsUpdated`,
+- New events: `RiftOpened` (using the typed payload in §2), `RiftParticipantsUpdated`,
   `RiftSealed`, `RiftResolved`, `RiftAutoJoined`, `RiftRewardsClaimed`. Add each to
-  `GameRealtimeEventNames` **and** to the client's registry/`GameEventMap`, or the envelope arrives and
-  is silently dropped.
+  `GameRealtimeEvents`, `GameRealtimeEventNames`, and the client's `GameRealtimeSignalEventMap`, or the
+  envelope arrives and is silently dropped.
 - Add `StateSyncScopes.Rift = "rift"` **and** put it in the `WorldResources` grouping list next to
   `marketplace`, `guild`, `colosseum`, `tournament`. Adding the const alone makes
   `GetCheckpointAsync` skip the scope and the client can never reconcile it. If per-character rift state
@@ -1226,8 +1223,8 @@ a **public** `ISnapshotCombatantBuilder` extracted from three private copies ·
 `Character.Riftshards` · `RiftAttunement` — the **first server-side player preference in the solution** ·
 `IRiftAutoJoinEntitlementProvider` (no subscription/entitlement concept exists at all) ·
 `CharacterSnapshot.CapturedAt` + `Purpose` + `SnapshotRetentionJob` + a real `ILoadoutHasher` ·
-Echo support for partially filled rosters · a rewrite of `RiftOpenedMsg` and its
-`DomainToClientMapper` + client map entries · `StateSyncScopes.Rift` in the const list **and** in
+Echo support for partially filled rosters · typed Rift events in `GameRealtimeEvents` and the Angular
+`GameRealtimeSignalEventMap` · `StateSyncScopes.Rift` in the const list **and** in
 `WorldResources` · new outbox event types registered in `GameEventOutboxConsumerRegistry` ·
 Rifts tab, rift page, `rift-state.service.ts`, DTO folder, sidebar entry, server-backed settings toggle ·
 reward-roller tests for `All` / `RewardTableReference` / quantity ranges / tag bonuses · a content test

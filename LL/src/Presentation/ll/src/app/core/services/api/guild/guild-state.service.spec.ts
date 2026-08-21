@@ -1,6 +1,6 @@
 import { Injector, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NEVER, Subject } from 'rxjs';
+import { NEVER, of, Subject } from 'rxjs';
 import { Guild } from '../../../../shared/models/Dtos/guild/guild';
 import { GuildMissionOverview } from '../../../../shared/models/Dtos/guild/guildMission';
 import {
@@ -54,16 +54,16 @@ describe('GuildStateService description updates', () => {
     let updateRequestIndex = 0;
 
     const eventEnvelope = {
-      GuildDirectoryChangedMsg: signal(null),
-      GuildInviteReceivedMsg: signal(null),
-      GuildInviteRejectedMsg: signal(null),
-      GuildApplicationRejectedMsg: signal(null),
-      GuildMembershipChangedMsg: signal(null),
-      GuildBuildingsChangedMsg: signal(null),
-      GuildMissionsChangedMsg: signal(null),
-      GuildApplicationMsg: signal(null),
-      GuildStateChangedMsg: signal(null),
-      GuildDisbandedMsg: signal(null),
+      GuildDirectoryChanged: signal(null),
+      GuildInviteReceived: signal(null),
+      GuildInviteRejected: signal(null),
+      GuildApplicationRejected: signal(null),
+      GuildMembershipChanged: signal(null),
+      GuildBuildingsChanged: signal(null),
+      GuildMissionsChanged: signal(null),
+      GuildApplication: signal(null),
+      GuildStateChanged: signal(null),
+      GuildDisbanded: signal(null),
     };
     const guildService = {
       getMyGuild: jasmine.createSpy().and.returnValue(NEVER),
@@ -95,6 +95,7 @@ describe('GuildStateService description updates', () => {
       () =>
         new GuildStateService(
           guildService as never,
+          eventService as never,
           eventService as never,
           auth as never,
           notifications as never,
@@ -164,16 +165,16 @@ describe('GuildStateService refreshes', () => {
     };
     const eventService = {
       eventEnvelope: {
-        GuildDirectoryChangedMsg: signal(null),
-        GuildInviteReceivedMsg: signal(null),
-        GuildInviteRejectedMsg: signal(null),
-        GuildApplicationRejectedMsg: signal(null),
-        GuildMembershipChangedMsg: signal(null),
-        GuildBuildingsChangedMsg: signal(null),
-        GuildMissionsChangedMsg: signal(null),
-        GuildApplicationMsg: signal(null),
-        GuildStateChangedMsg: signal(null),
-        GuildDisbandedMsg: signal(null),
+        GuildDirectoryChanged: signal(null),
+        GuildInviteReceived: signal(null),
+        GuildInviteRejected: signal(null),
+        GuildApplicationRejected: signal(null),
+        GuildMembershipChanged: signal(null),
+        GuildBuildingsChanged: signal(null),
+        GuildMissionsChanged: signal(null),
+        GuildApplication: signal(null),
+        GuildStateChanged: signal(null),
+        GuildDisbanded: signal(null),
       },
       reconnectCount: signal(0),
       setGuildSubscription: jasmine
@@ -186,6 +187,7 @@ describe('GuildStateService refreshes', () => {
       () =>
         new GuildStateService(
           guildService as never,
+          eventService as never,
           eventService as never,
           { isAuthenticated: () => false } as never,
           { count: () => 0 } as never,
@@ -204,6 +206,80 @@ describe('GuildStateService refreshes', () => {
     state.refresh();
 
     expect(guildService.getMyGuild).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not cascade a same-guild core refresh into every guild subresource', () => {
+    TestBed.configureTestingModule({});
+    const firstGuildRequest = new Subject<Guild | null>();
+    const secondGuildRequest = new Subject<Guild | null>();
+    let requestIndex = 0;
+    const guildService = {
+      getMyGuild: jasmine
+        .createSpy()
+        .and.callFake(() =>
+          [firstGuildRequest, secondGuildRequest][
+            requestIndex++
+          ].asObservable(),
+        ),
+      getBuildings: jasmine.createSpy().and.returnValue(of(null)),
+      getMissions: jasmine.createSpy().and.returnValue(of(null)),
+      getShop: jasmine.createSpy().and.returnValue(of(null)),
+      getAllGuilds: jasmine.createSpy().and.returnValue(of([])),
+    };
+    const eventService = {
+      eventEnvelope: {
+        GuildDirectoryChanged: signal(null),
+        GuildInviteReceived: signal(null),
+        GuildInviteRejected: signal(null),
+        GuildApplicationRejected: signal(null),
+        GuildMembershipChanged: signal(null),
+        GuildBuildingsChanged: signal(null),
+        GuildMissionsChanged: signal(null),
+        GuildApplication: signal(null),
+        GuildStateChanged: signal(null),
+        GuildDisbanded: signal(null),
+      },
+      setGuildSubscription: jasmine
+        .createSpy()
+        .and.returnValue(Promise.resolve()),
+    };
+    const stateSync = {
+      register: jasmine.createSpy(),
+      resetScope: jasmine.createSpy(),
+      reconcile: jasmine.createSpy().and.returnValue(Promise.resolve()),
+    };
+    const state = TestBed.runInInjectionContext(
+      () =>
+        new GuildStateService(
+          guildService as never,
+          eventService as never,
+          eventService as never,
+          { isAuthenticated: () => false } as never,
+          {
+            count: () => 0,
+            initializeCount: jasmine.createSpy(),
+          } as never,
+          {} as never,
+          TestBed.inject(Injector),
+          stateSync as never,
+        ),
+    );
+
+    const guild = createGuild('Description');
+    firstGuildRequest.next(guild);
+    firstGuildRequest.complete();
+
+    expect(guildService.getBuildings).toHaveBeenCalledTimes(1);
+    expect(guildService.getMissions).toHaveBeenCalledTimes(1);
+    expect(guildService.getShop).toHaveBeenCalledTimes(1);
+
+    state.refresh();
+    secondGuildRequest.next(guild);
+    secondGuildRequest.complete();
+
+    expect(guildService.getBuildings).toHaveBeenCalledTimes(1);
+    expect(guildService.getMissions).toHaveBeenCalledTimes(1);
+    expect(guildService.getShop).toHaveBeenCalledTimes(1);
   });
 });
 

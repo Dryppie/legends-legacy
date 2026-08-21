@@ -120,6 +120,12 @@ public sealed class CombatStatsAccumulator
             case EventType.RestoreBarrier:
                 entity.BarrierGenerated += magnitude;
                 break;
+            case EventType.StaggerApplied:
+                entity.StaggerContributed += magnitude;
+                break;
+            case EventType.StaggerBroken:
+                entity.StaggerBreaks++;
+                break;
         }
 
         // ----- ability context -----------------------------------------------
@@ -176,6 +182,16 @@ public sealed class CombatStatsAccumulator
 
                 var summonAbility = entity.GetOrAddAbility(statsSource);
                 summonAbility.Summons++;
+                break;
+
+            case EventType.StaggerApplied:
+                if (!string.IsNullOrWhiteSpace(statsSource))
+                    entity.GetOrAddAbility(statsSource).TotalStagger += magnitude;
+                break;
+
+            case EventType.StaggerBroken:
+                if (!string.IsNullOrWhiteSpace(statsSource))
+                    entity.GetOrAddAbility(statsSource).StaggerBreaks++;
                 break;
 
                 //case EventType.StatusEffect:
@@ -282,6 +298,7 @@ public sealed class WorkEntity
     public int BlockPrevented, DamageReductionPrevented;
     public int DamageAmplified, FinalHealthDamage;
     public int DamageRedirectedTo, DamageRedirectedAway, TargetedAttacks;
+    public int StaggerContributed, StaggerBreaks;
 
     private readonly Dictionary<string, WorkAbility> _abilities = new(StringComparer.Ordinal);
     private string? _firstEntityName;
@@ -338,13 +355,16 @@ public sealed class WorkEntity
         FinalHealthDamage,
         DamageRedirectedTo: DamageRedirectedTo,
         DamageRedirectedAway: DamageRedirectedAway,
-        TargetedAttacks: TargetedAttacks);
+        TargetedAttacks: TargetedAttacks,
+        StaggerContributed: StaggerContributed,
+        StaggerBreaks: StaggerBreaks);
 }
 
 public sealed class WorkAbility
 {
     public string Name { get; }
     public int TotalDamage, TotalHealing, Uses, Hits, Crits, Summons, Stuns, SelfDamage, AlliedDamage, TotalBarrier;
+    public int TotalStagger, StaggerBreaks;
     private readonly Dictionary<DamageType, int> _damageByType = [];
 
     public WorkAbility(string name) => Name = name;
@@ -372,5 +392,7 @@ public sealed class WorkAbility
         _damageByType
             .OrderBy(entry => entry.Key)
             .Select(entry => new AbilityDamageTypeStats(entry.Key, entry.Value))
-            .ToList());
+            .ToList(),
+        TotalStagger: TotalStagger,
+        StaggerBreaks: StaggerBreaks);
 }

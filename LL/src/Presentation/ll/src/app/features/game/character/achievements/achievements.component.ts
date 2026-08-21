@@ -5,6 +5,8 @@ import { finalize, forkJoin, tap } from 'rxjs';
 import { AchievementService } from '../../../../core/services/api/achievements/achievement.service';
 import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
 import { StateSyncCoordinator } from '../../../../core/services/real-time/game-realtime/state-sync-coordinator.service';
+import { DomainVersionTracker } from '../../../../core/services/real-time/game-realtime/domain-version-tracker.service';
+import { VersionedMutationResult } from '../../../../core/services/api/api.service';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import {
@@ -16,6 +18,7 @@ import {
   AchievementCategory,
   AchievementDto,
   AchievementOverviewDto,
+  EquippedTitleDto,
   TitleDto,
   TitleDisplayPosition,
 } from '../../../../shared/models/achievement';
@@ -113,6 +116,7 @@ export class AchievementsComponent implements OnInit, OnDestroy {
   readonly titleState = signal<TitleStateFilter>('All');
   readonly titleDisplayPosition = signal<TitleDisplayPosition>('Prefix');
   readonly titlePositionUpdating = signal(false);
+  private loadEpoch = 0;
   private readonly unregisterStateSync: () => void;
 
   readonly achievementStates: AchievementStateFilter[] = [
@@ -254,6 +258,7 @@ export class AchievementsComponent implements OnInit, OnDestroy {
   constructor(
     private readonly achievementsApi: AchievementService,
     private readonly characterState: CharacterStateService,
+    private readonly domainVersions: DomainVersionTracker,
     stateSync: StateSyncCoordinator,
   ) {
     this.unregisterStateSync = stateSync.register(
@@ -278,6 +283,7 @@ export class AchievementsComponent implements OnInit, OnDestroy {
   }
 
   private synchronize() {
+    const loadEpoch = ++this.loadEpoch;
     this.loading.set(true);
     this.error.set('');
 
@@ -287,11 +293,14 @@ export class AchievementsComponent implements OnInit, OnDestroy {
       titles: this.achievementsApi.getTitles(),
     }).pipe(
       tap(({ overview, achievements, titles }) => {
+        if (loadEpoch !== this.loadEpoch) return;
         this.overview.set(overview);
         this.achievements.set(achievements);
         this.applyTitles(titles);
       }),
-      finalize(() => this.loading.set(false)),
+      finalize(() => {
+        if (loadEpoch === this.loadEpoch) this.loading.set(false);
+      }),
     );
   }
 
@@ -319,8 +328,27 @@ export class AchievementsComponent implements OnInit, OnDestroy {
     this.achievementsApi
       .equipTitle(title.key, this.titleDisplayPosition())
       .subscribe({
-        next: (equippedTitle) => {
-          this.characterState.updateEquippedTitle(equippedTitle);
+        next: (result) => {
+          const equippedTitle = result.data;
+          this.applyVersionedEquippedTitle(result);
+          if (!this.applyVersionedTitles(result)) return;
+          this.titles.update((titles) =>
+            titles.map((candidate) => ({
+              ...candidate,
+              isEquipped: candidate.key === equippedTitle.key,
+              displayPosition:
+                candidate.key === equippedTitle.key
+                  ? equippedTitle.displayPosition
+                  : candidate.displayPosition,
+              preview:
+                candidate.key === equippedTitle.key
+                  ? equippedTitle.displayPosition === 'Prefix'
+                    ? candidate.prefixPreview
+                    : candidate.suffixPreview
+                  : candidate.preview,
+            })),
+          );
+          this.titleDisplayPosition.set(equippedTitle.displayPosition);
         },
         error: (err) => this.error.set(err.message),
       });
@@ -349,8 +377,10 @@ export class AchievementsComponent implements OnInit, OnDestroy {
       .equipTitle(equippedTitle.key, position)
       .pipe(finalize(() => this.titlePositionUpdating.set(false)))
       .subscribe({
-        next: (updatedTitle) => {
-          this.characterState.updateEquippedTitle(updatedTitle);
+        next: (result) => {
+          const updatedTitle = result.data;
+          this.applyVersionedEquippedTitle(result);
+          if (!this.applyVersionedTitles(result)) return;
           this.titles.update((titles) =>
             titles.map((title) =>
               title.key === equippedTitle.key
@@ -375,11 +405,45 @@ export class AchievementsComponent implements OnInit, OnDestroy {
 
   unequip(): void {
     this.achievementsApi.unequipTitle().subscribe({
-      next: () => {
-        this.characterState.updateEquippedTitle(null);
+      next: (result) => {
+        this.applyVersionedEquippedTitle(result);
+        if (!this.applyVersionedTitles(result)) return;
+        this.titles.update((titles) =>
+          titles.map((title) => ({ ...title, isEquipped: false })),
+        );
       },
       error: (err) => this.error.set(err.message),
     });
+  }
+
+  private applyVersionedTitles<T>(result: VersionedMutationResult<T>): boolean {
+    if (
+      !this.domainVersions.isCurrent(
+        'achievements',
+        result.domainVersions['achievements'],
+      )
+    ) {
+      return false;
+    }
+
+    this.loadEpoch += 1;
+    return true;
+  }
+
+  private applyVersionedEquippedTitle(
+    result: VersionedMutationResult<EquippedTitleDto | null>,
+  ): boolean {
+    if (
+      !this.domainVersions.isCurrent(
+        'character',
+        result.domainVersions['character'],
+      )
+    ) {
+      return false;
+    }
+
+    this.characterState.updateEquippedTitle(result.data);
+    return true;
   }
 
   progressPercent(achievement: AchievementDto): number {

@@ -1,0 +1,357 @@
+{
+  "version": 7,
+  "assessmentGearEnvelopeId": "expected",
+  "assessmentEssenceEnvelopeId": "expected",
+  "maximumBuildWinRateSpread": 0.35,
+  "supportAssessment": {
+    "baselineCompositionId": "balanced",
+    "supportCompositionId": "sustain-heavy",
+    "minimumDeathRateReduction": 0.10,
+    "minimumSurvivalResourceIncreasePercent": 5.0,
+    "minimumFirstDeathDelayTicks": 60,
+    "maximumDurationIncreaseRate": 0.25
+  },
+  "compositionAssessment": {
+    "alternativeMinimumWinRate": 0.20,
+    "alternativeMaximumTimeoutRate": 0.60,
+    "counteredMaximumWinRate": 0.35,
+    "challengeMaximumWinRate": 0.65
+  },
+  "partyCompositions": [
+    {
+      "id": "balanced",
+      "memberBuildFamilyIds": ["offensive", "offensive", "sustain", "summon", "control"],
+      "rosterOverrides": [
+        { "playerCount": 3, "memberBuildFamilyIds": ["offensive", "offensive", "sustain"] }
+      ]
+    },
+    {
+      "id": "offense-heavy",
+      "memberBuildFamilyIds": ["offensive", "offensive", "offensive", "sustain", "control"],
+      "rosterOverrides": [
+        { "playerCount": 3, "memberBuildFamilyIds": ["offensive", "offensive", "offensive"] }
+      ]
+    },
+    {
+      "id": "sustain-heavy",
+      "memberBuildFamilyIds": ["offensive", "sustain", "sustain", "summon", "control"],
+      "rosterOverrides": [
+        { "playerCount": 3, "memberBuildFamilyIds": ["offensive", "sustain", "sustain"] }
+      ]
+    },
+    {
+      "id": "control-oriented",
+      "memberBuildFamilyIds": ["offensive", "sustain", "summon", "control", "control"],
+      "rosterOverrides": [
+        { "playerCount": 3, "memberBuildFamilyIds": ["offensive", "control", "control"] }
+      ]
+    },
+    {
+      "id": "summon-oriented",
+      "memberBuildFamilyIds": ["offensive", "sustain", "summon", "summon", "control"],
+      "rosterOverrides": [
+        { "playerCount": 3, "memberBuildFamilyIds": ["offensive", "summon", "summon"] }
+      ]
+    }
+  ],
+  "bands": [
+    { "id": "idle-single", "minimumWinRate": 0.80, "maximumWinRate": 1.00, "maximumTimeoutRate": 0.10, "minimumDurationTicks": 1, "maximumDurationTicks": 360, "minimumSurvivalResourcePercent": 25.0, "assessedBuildFamilyIds": ["offensive", "control", "summon"] },
+    { "id": "idle-double", "minimumWinRate": 0.65, "maximumWinRate": 1.00, "maximumTimeoutRate": 0.10, "minimumDurationTicks": 20, "maximumDurationTicks": 540, "minimumSurvivalResourcePercent": 15.0, "assessedBuildFamilyIds": ["offensive", "control", "summon"] },
+    { "id": "idle-triple", "minimumWinRate": 0.50, "maximumWinRate": 0.95, "maximumTimeoutRate": 0.10, "minimumDurationTicks": 30, "maximumDurationTicks": 720, "minimumSurvivalResourcePercent": 5.0, "assessedBuildFamilyIds": ["offensive", "control", "summon"] },
+    { "id": "dungeon-room", "minimumWinRate": 0.65, "maximumWinRate": 1.00, "maximumTimeoutRate": 0.10, "minimumDurationTicks": 30, "maximumDurationTicks": 720, "minimumSurvivalResourcePercent": 10.0, "assessedBuildFamilyIds": ["offensive", "control", "summon"] },
+    { "id": "dungeon-boss", "minimumWinRate": 0.35, "maximumWinRate": 0.90, "maximumTimeoutRate": 0.10, "minimumDurationTicks": 90, "maximumDurationTicks": 1200, "minimumSurvivalResourcePercent": 1.0, "assessedBuildFamilyIds": ["offensive", "control", "summon"] },
+    { "id": "tower-guardian", "minimumWinRate": 0.35, "maximumWinRate": 0.85, "maximumTimeoutRate": 0.15, "minimumDurationTicks": 120, "maximumDurationTicks": 1500, "minimumSurvivalResourcePercent": 1.0, "stagger": { "minimumAverageBreaks": 1.0, "maximumAverageBreaks": 3.0, "maximumAverageFirstBreakTick": 1200, "maximumUptimePercent": 10.0, "maximumBreakCapRate": 0.25 } },
+    { "id": "raid-final-assault", "minimumWinRate": 0.20, "maximumWinRate": 0.90, "maximumTimeoutRate": 0.40, "minimumDurationTicks": 120, "maximumDurationTicks": 5000, "minimumSurvivalResourcePercent": 1.0, "stagger": { "minimumAverageBreaks": 1.0, "maximumAverageBreaks": 3.0, "maximumAverageFirstBreakTick": 3000, "maximumUptimePercent": 10.0, "maximumBreakCapRate": 0.25 } }
+  ],
+  "samples": [
+    {
+      "id": "idle.lumo-ruins.single",
+      "contentType": "Idle",
+      "difficultyRole": "Normal",
+      "bandId": "idle-single",
+      "snapshotAnchorId": "campaign-start",
+      "areaId": "region_01_area_01",
+      "creatureIds": ["00000000-0000-0000-0000-000000000001"],
+      "maxTicks": 600
+    },
+    {
+      "id": "idle.crystal-shore.double",
+      "contentType": "Idle",
+      "difficultyRole": "Elite",
+      "bandId": "idle-double",
+      "snapshotAnchorId": "region-01-mid",
+      "areaId": "region_01_area_06",
+      "creatureIds": [
+        "00000000-0000-0000-0000-000000000019",
+        "00000000-0000-0000-0000-000000000035"
+      ],
+      "maxTicks": 900
+    },
+    {
+      "id": "idle.duskmire.triple",
+      "contentType": "Idle",
+      "difficultyRole": "Peak",
+      "bandId": "idle-triple",
+      "snapshotAnchorId": "region-01-end",
+      "areaId": "region_01_area_07",
+      "creatureIds": [
+        "00000000-0000-0000-0000-000000000049",
+        "00000000-0000-0000-0000-000000000050",
+        "00000000-0000-0000-0000-000000000051"
+      ],
+      "maxTicks": 1200
+    },
+    {
+      "id": "dungeon.goblin-mines.room",
+      "contentType": "Dungeon",
+      "difficultyRole": "Room",
+      "bandId": "dungeon-room",
+      "snapshotAnchorId": "region-01-end",
+      "dungeonFamilyId": "goblin_mines",
+      "dungeonDifficulty": 1,
+      "roomTemplateId": "combat.1",
+      "maxTicks": 1200
+    },
+    {
+      "id": "dungeon.goblin-mines.boss",
+      "contentType": "Dungeon",
+      "difficultyRole": "Boss",
+      "bandId": "dungeon-boss",
+      "snapshotAnchorId": "region-01-end",
+      "dungeonFamilyId": "goblin_mines",
+      "dungeonDifficulty": 1,
+      "roomTemplateId": "boss.1",
+      "maxTicks": 1800
+    },
+    {
+      "id": "dungeon.forgotten-catacombs.room",
+      "contentType": "Dungeon",
+      "difficultyRole": "Room",
+      "bandId": "dungeon-room",
+      "snapshotAnchorId": "region-02-end",
+      "dungeonFamilyId": "forgotten_catacombs",
+      "dungeonDifficulty": 2,
+      "roomTemplateId": "combat.1",
+      "maxTicks": 1200
+    },
+    {
+      "id": "dungeon.forgotten-catacombs.boss",
+      "contentType": "Dungeon",
+      "difficultyRole": "Boss",
+      "bandId": "dungeon-boss",
+      "snapshotAnchorId": "region-02-end",
+      "dungeonFamilyId": "forgotten_catacombs",
+      "dungeonDifficulty": 2,
+      "roomTemplateId": "boss.1",
+      "maxTicks": 1800
+    },
+    {
+      "id": "tower.floor-01.guardian",
+      "contentType": "Tower",
+      "difficultyRole": "Guardian",
+      "bandId": "tower-guardian",
+      "snapshotAnchorId": "region-01-end",
+      "towerFloorNumber": 1,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Expected",
+        "offense-heavy": "Expected",
+        "sustain-heavy": "Expected",
+        "control-oriented": "Expected",
+        "summon-oriented": "Expected"
+      },
+      "maxTicks": 1800
+    },
+    {
+      "id": "tower.floor-05.warden",
+      "contentType": "Tower",
+      "difficultyRole": "Warden",
+      "bandId": "tower-guardian",
+      "snapshotAnchorId": "region-01-end",
+      "towerFloorNumber": 5,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Alternative",
+        "offense-heavy": "Challenge",
+        "sustain-heavy": "Countered",
+        "control-oriented": "Expected",
+        "summon-oriented": "Alternative"
+      },
+      "maxTicks": 1800
+    },
+    {
+      "id": "tower.floor-07.guardian",
+      "contentType": "Tower",
+      "difficultyRole": "Guardian",
+      "bandId": "tower-guardian",
+      "snapshotAnchorId": "region-01-end",
+      "towerFloorNumber": 7,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Challenge",
+        "offense-heavy": "Alternative",
+        "sustain-heavy": "Countered",
+        "control-oriented": "Expected",
+        "summon-oriented": "Alternative"
+      },
+      "maxTicks": 1800
+    },
+    {
+      "id": "tower.floor-10.sovereign",
+      "contentType": "Tower",
+      "difficultyRole": "Sovereign",
+      "bandId": "tower-guardian",
+      "snapshotAnchorId": "region-02-end",
+      "towerFloorNumber": 10,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Expected",
+        "offense-heavy": "Challenge",
+        "sustain-heavy": "Countered",
+        "control-oriented": "Expected",
+        "summon-oriented": "Challenge"
+      },
+      "maxTicks": 1800
+    },
+    {
+      "id": "raid.hives-abyss.tier-1.final-assault",
+      "contentType": "Raid",
+      "difficultyRole": "FinalAssault",
+      "bandId": "raid-final-assault",
+      "snapshotAnchorId": "region-01-end",
+      "progressionPosition": 10,
+      "raidBossId": "raid-boss.hives-abyss",
+      "raidTier": 1,
+      "raidPreparationPercent": 100,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Expected",
+        "offense-heavy": "Expected",
+        "sustain-heavy": "Expected",
+        "control-oriented": "Expected",
+        "summon-oriented": "Expected"
+      },
+      "maxTicks": 6000
+    },
+    {
+      "id": "raid.hives-abyss.tier-2.final-assault",
+      "contentType": "Raid",
+      "difficultyRole": "FinalAssault",
+      "bandId": "raid-final-assault",
+      "snapshotAnchorId": "region-02-end",
+      "progressionPosition": 20,
+      "raidBossId": "raid-boss.hives-abyss",
+      "raidTier": 2,
+      "raidPreparationPercent": 100,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Expected",
+        "offense-heavy": "Expected",
+        "sustain-heavy": "Expected",
+        "control-oriented": "Expected",
+        "summon-oriented": "Expected"
+      },
+      "maxTicks": 6000
+    },
+    {
+      "id": "raid.hives-abyss.tier-3.final-assault",
+      "contentType": "Raid",
+      "difficultyRole": "FinalAssault",
+      "bandId": "raid-final-assault",
+      "snapshotAnchorId": "region-03-end",
+      "progressionPosition": 30,
+      "raidBossId": "raid-boss.hives-abyss",
+      "raidTier": 3,
+      "raidPreparationPercent": 100,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Expected",
+        "offense-heavy": "Expected",
+        "sustain-heavy": "Expected",
+        "control-oriented": "Expected",
+        "summon-oriented": "Expected"
+      },
+      "maxTicks": 6000
+    },
+    {
+      "id": "raid.sanguine-horror.tier-2.final-assault",
+      "contentType": "Raid",
+      "difficultyRole": "FinalAssault",
+      "bandId": "raid-final-assault",
+      "snapshotAnchorId": "region-02-end",
+      "progressionPosition": 20,
+      "raidBossId": "raid-boss.sanguine-horror",
+      "raidTier": 2,
+      "raidPreparationPercent": 100,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Expected",
+        "offense-heavy": "Expected",
+        "sustain-heavy": "Expected",
+        "control-oriented": "Expected",
+        "summon-oriented": "Expected"
+      },
+      "maxTicks": 6000
+    },
+    {
+      "id": "raid.sanguine-horror.tier-3.final-assault",
+      "contentType": "Raid",
+      "difficultyRole": "FinalAssault",
+      "bandId": "raid-final-assault",
+      "snapshotAnchorId": "region-03-end",
+      "progressionPosition": 30,
+      "raidBossId": "raid-boss.sanguine-horror",
+      "raidTier": 3,
+      "raidPreparationPercent": 100,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Expected",
+        "offense-heavy": "Expected",
+        "sustain-heavy": "Expected",
+        "control-oriented": "Expected",
+        "summon-oriented": "Expected"
+      },
+      "maxTicks": 6000
+    },
+    {
+      "id": "raid.hives-abyss.plus-3.final-assault",
+      "contentType": "Raid",
+      "difficultyRole": "FinalAssaultPlus",
+      "bandId": "raid-final-assault",
+      "snapshotAnchorId": "region-05-end",
+      "progressionPosition": 50,
+      "raidBossId": "raid-boss.hives-abyss",
+      "raidPlusLevel": 3,
+      "raidPreparationPercent": 100,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Expected",
+        "offense-heavy": "Expected",
+        "sustain-heavy": "Expected",
+        "control-oriented": "Expected",
+        "summon-oriented": "Expected"
+      },
+      "maxTicks": 6000
+    },
+    {
+      "id": "raid.sanguine-horror.plus-3.final-assault",
+      "contentType": "Raid",
+      "difficultyRole": "FinalAssaultPlus",
+      "bandId": "raid-final-assault",
+      "snapshotAnchorId": "region-05-end",
+      "progressionPosition": 50,
+      "raidBossId": "raid-boss.sanguine-horror",
+      "raidPlusLevel": 3,
+      "raidPreparationPercent": 100,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Expected",
+        "offense-heavy": "Expected",
+        "sustain-heavy": "Expected",
+        "control-oriented": "Expected",
+        "summon-oriented": "Expected"
+      },
+      "maxTicks": 6000
+    }
+  ]
+}

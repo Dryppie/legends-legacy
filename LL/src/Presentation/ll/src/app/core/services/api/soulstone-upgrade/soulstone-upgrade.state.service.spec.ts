@@ -23,9 +23,12 @@ describe('SoulstoneUpgradeStateService', () => {
     );
     api.upgrade.and.returnValue(
       of({
-        upgrades: [createUpgrade('affordability', 'Not enough Soulstones.')],
-        soulstones: 45,
-        refundedSoulstones: 0,
+        data: {
+          upgrades: [createUpgrade('affordability', 'Not enough Soulstones.')],
+          soulstones: 45,
+          refundedSoulstones: 0,
+        },
+        domainVersions: { soulstones: 1, character: 1 },
       }),
     );
     const updateCharacter = jasmine

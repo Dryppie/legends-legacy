@@ -10,11 +10,11 @@ public record RejectInviteCommand(Guid CharacterId, string GuildId) : ICommand<R
 public class RejectInviteCommandHandler : IRequestHandler<RejectInviteCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _eventPublisher;
 
     public RejectInviteCommandHandler(
         IGuildService guildService,
-        IGameEventPublisher eventPublisher)
+        IGameRealtimeBroadcaster eventPublisher)
     {
         _guildService = guildService;
         _eventPublisher = eventPublisher;
@@ -28,9 +28,9 @@ public class RejectInviteCommandHandler : IRequestHandler<RejectInviteCommand, R
         if (!rejected)
             return Response<bool>.Fail("Failed to reject invite");
 
-        var msg = new GuildInviteRejectedMsg(guildId, request.CharacterId);
-        await _eventPublisher.PublishAsync(new Audience.Character(request.CharacterId), msg);
-        await _eventPublisher.PublishAsync(new Audience.Guild(guildId), msg);
+        var message = new GuildInviteRejected(guildId, request.CharacterId);
+        await _eventPublisher.PublishAsync(new Audience.Character(request.CharacterId), message, nameof(RejectInviteCommandHandler), cancellationToken);
+        await _eventPublisher.PublishAsync(new Audience.Guild(guildId), message, nameof(RejectInviteCommandHandler), cancellationToken);
 
         return Response<bool>.Success(true);
     }

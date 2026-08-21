@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { EventQuestJournal } from '../../../../shared/models/event-quest';
 import { ApiResponse } from '../../../../shared/models/response';
-import { ApiService } from '../api.service';
+import { ApiService, VersionedMutationResult } from '../api.service';
+
+const EVENT_QUEST_MUTATION_HANDLED_SCOPES = ['event-quests'] as const;
 
 @Injectable({ providedIn: 'root' })
 export class EventQuestService {
@@ -12,31 +14,63 @@ export class EventQuestService {
     return this.api.get('EventQuest');
   }
 
-  claim(eventQuestId: string): Observable<EventQuestJournal> {
+  claim(eventQuestId: string): Observable<VersionedMutationResult<EventQuestJournal>> {
     return this.api
-      .post(`EventQuest/${encodeURIComponent(eventQuestId)}/claim`, {})
-      .pipe(map((response) => this.unwrap(response)));
+      .postVersioned<EventQuestJournal | ApiResponse<EventQuestJournal>>(
+        `EventQuest/${encodeURIComponent(eventQuestId)}/claim`,
+        {},
+        {
+          stateSyncScopesHandledByResponse:
+            EVENT_QUEST_MUTATION_HANDLED_SCOPES,
+        },
+      )
+      .pipe(
+        map((response) => ({
+          ...response,
+          data: this.unwrap(response.data),
+        })),
+      );
   }
 
   claimMilestone(
     eventQuestId: string,
     milestoneKey: string,
-  ): Observable<EventQuestJournal> {
+  ): Observable<VersionedMutationResult<EventQuestJournal>> {
     return this.api
-      .post(
+      .postVersioned<EventQuestJournal | ApiResponse<EventQuestJournal>>(
         `EventQuest/${encodeURIComponent(eventQuestId)}/milestones/${encodeURIComponent(milestoneKey)}/claim`,
         {},
+        {
+          stateSyncScopesHandledByResponse:
+            EVENT_QUEST_MUTATION_HANDLED_SCOPES,
+        },
       )
-      .pipe(map((response) => this.unwrap(response)));
+      .pipe(
+        map((response) => ({
+          ...response,
+          data: this.unwrap(response.data),
+        })),
+      );
   }
 
-  claimAllMilestones(eventQuestId: string): Observable<EventQuestJournal> {
+  claimAllMilestones(
+    eventQuestId: string,
+  ): Observable<VersionedMutationResult<EventQuestJournal>> {
     return this.api
-      .post(
+      .postVersioned<EventQuestJournal | ApiResponse<EventQuestJournal>>(
         `EventQuest/${encodeURIComponent(eventQuestId)}/milestones/claim-all`,
         {},
+        {
+          stateSyncScopesHandledByResponse:
+            EVENT_QUEST_MUTATION_HANDLED_SCOPES,
+        },
       )
-      .pipe(map((response) => this.unwrap(response)));
+      .pipe(
+        map((response) => ({
+          ...response,
+          data: this.unwrap(response.data),
+        })),
+      );
   }
 
   private unwrap(

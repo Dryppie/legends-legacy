@@ -16,6 +16,7 @@ public sealed class FulfillMarketPlaceBuyOrderResponseDto : IMapFrom<FulfillMark
     public required long TotalPrice { get; init; }
     public required long SellerFee { get; init; }
     public required long SellerCinders { get; init; }
+    public MarketplaceChangeSetDto Marketplace { get; set; } = null!;
 
     public void Mapping(Profile profile)
     {

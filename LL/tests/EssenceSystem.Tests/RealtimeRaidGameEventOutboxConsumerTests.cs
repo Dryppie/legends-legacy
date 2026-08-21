@@ -10,7 +10,7 @@ namespace EssenceSystem.Tests;
 public sealed class RealtimeRaidGameEventOutboxConsumerTests
 {
     [Fact]
-    public async Task PublishesCommittedRaidStateToTheWorldAudience()
+    public async Task PublishesRaidDetailToItsSubscribersAndDirectorySummaryToTheWorld()
     {
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
         var payload = new RaidUpdated(
@@ -31,15 +31,28 @@ public sealed class RealtimeRaidGameEventOutboxConsumerTests
             },
             CancellationToken.None);
 
-        Assert.IsType<Audience.World>(realtime.Audience);
-        var published = Assert.IsType<RaidUpdated>(realtime.Message);
-        Assert.Equal(payload, published);
+        Assert.Collection(
+            realtime.Publications,
+            detail =>
+            {
+                Assert.Equal(payload.RaidRunId, Assert.IsType<Audience.Raid>(detail.Audience).RaidRunId);
+                Assert.Equal(payload, Assert.IsType<RaidUpdated>(detail.Message));
+            },
+            directory =>
+            {
+                Assert.IsType<Audience.World>(directory.Audience);
+                var published = Assert.IsType<RaidDirectoryUpdated>(directory.Message);
+                Assert.Equal(payload.RaidRunId, published.RaidRunId);
+                Assert.Equal(payload.RaidBossId, published.RaidBossId);
+                Assert.Equal(payload.Event, published.Event);
+                Assert.Equal(payload.Status, published.Status);
+                Assert.Equal(payload.SignupCount, published.SignupCount);
+            });
     }
 
     private sealed class RecordingRealtimeBroadcaster : IGameRealtimeBroadcaster
     {
-        public Audience? Audience { get; private set; }
-        public GameRealtimeEvent? Message { get; private set; }
+        public List<(Audience Audience, GameRealtimeEvent Message)> Publications { get; } = [];
 
         public Task PublishAsync(
             Audience audience,
@@ -47,8 +60,7 @@ public sealed class RealtimeRaidGameEventOutboxConsumerTests
             string sender,
             CancellationToken cancellationToken = default)
         {
-            Audience = audience;
-            Message = message;
+            Publications.Add((audience, message));
             return Task.CompletedTask;
         }
     }

@@ -558,6 +558,43 @@
         "ability.creature.undead.corpse_explosion",
         "ability.creature.plague_ghoul.pestilent_touch"
       ]
+    },
+    {
+      "monsterId": "monster.web_weaver_spider",
+      "abilityIds": [
+        "ability.creature.web_weaver_spider.weavers_grasp",
+        "ability.creature.web_weaver_spider.web_walker"
+      ]
+    },
+    {
+      "monsterId": "monster.spider_queen",
+      "abilityIds": [
+        "ability.creature.spider_queen.webbed_domain",
+        "ability.creature.spider_queen.royal_venom",
+        "ability.creature.spider_queen.royal_cocoon"
+      ]
+    },
+    {
+      "monsterId": "monster.bark_golem",
+      "abilityIds": [
+        "ability.creature.bark_golem.timber_slam",
+        "ability.creature.bark_golem.barkskin"
+      ]
+    },
+    {
+      "monsterId": "monster.treant_guardian",
+      "abilityIds": [
+        "ability.creature.treant_guardian.rootbound_shield",
+        "ability.creature.treant_guardian.forest_vitality"
+      ]
+    },
+    {
+      "monsterId": "monster.elder_treant",
+      "abilityIds": [
+        "ability.creature.elder_treant.ancient_sap",
+        "ability.creature.elder_treant.thornstorm",
+        "ability.creature.elder_treant.ancient_essence"
+      ]
     }
   ]
 }

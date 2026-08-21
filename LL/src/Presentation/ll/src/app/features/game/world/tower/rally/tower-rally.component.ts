@@ -20,7 +20,9 @@ import {
   TowerRallyParticipant,
   WorldTowerService,
 } from '../../../../../core/services/api/world-tower/world-tower.service';
-import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
+import { GameRealtimeEventRegistry } from '../../../../../core/services/real-time/game-realtime/game-realtime-event-registry.service';
+import { GameRealtimeConnection } from '../../../../../core/services/real-time/game-realtime/game-realtime-connection.service';
+import { RealtimeSignalDeduper } from '../../../../../core/services/real-time/game-realtime/realtime-deduplication';
 import { CharacterTagComponent } from '../../../../../shared/components/character/character-tag/character-tag.component';
 import { CombatComponent } from '../../../../../shared/components/combat/combat.component';
 import { CombatService } from '../../../../../core/services/client-side/combat/combat.service';
@@ -45,7 +47,8 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
   private readonly tower = inject(WorldTowerService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly events = inject(GameEventService);
+  private readonly events = inject(GameRealtimeEventRegistry);
+  private readonly realtime = inject(GameRealtimeConnection);
   private readonly combat = inject(CombatService);
   private readonly playbackPlayer = inject(TowerPlaybackService);
   readonly combatState = inject(CombatStateService);
@@ -60,12 +63,11 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
   readonly playback = signal<TowerCombatPlayback | null>(null);
   readonly selectedParticipantId = signal<string | null>(null);
   readonly collapsedParties = signal<ReadonlySet<number>>(new Set<number>());
-  readonly realtimeStatus = this.events.connectionStatus;
+  readonly realtimeStatus = this.realtime.connectionStatus;
   private rallyId = '';
-  private lastRealtimeUpdateId: string | null = null;
-  private lastCombatFrameUpdateId: string | null = null;
+  private readonly realtimeDeduper = new RealtimeSignalDeduper();
   private lastCombatSequence = -1;
-  private lastReconnectCount = this.events.reconnectCount();
+  private lastReconnectCount = this.realtime.reconnectCount();
   private recoveringFrames = false;
   private pendingRealtimeFrame: TowerCombatFrame | null = null;
   private compactBundle: TowerPlaybackBundle | null = null;
@@ -80,13 +82,12 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
         const envelope = this.events.eventEnvelope.WorldTowerRallyUpdated();
         if (
           !envelope?.updateId ||
-          envelope.updateId === this.lastRealtimeUpdateId ||
+          !this.realtimeDeduper.shouldProcess('rally', envelope) ||
           envelope.payload.rallyId !== this.rallyId
         ) {
           return;
         }
 
-        this.lastRealtimeUpdateId = envelope.updateId;
         this.load(false);
       },
       { allowSignalWrites: true },
@@ -99,14 +100,13 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
         if ((this.playback()?.schemaVersion ?? 1) >= 2) return;
         if (
           !envelope?.updateId ||
-          envelope.updateId === this.lastCombatFrameUpdateId ||
+          !this.realtimeDeduper.shouldProcess('combat-frame', envelope) ||
           envelope.payload.rallyId !== this.rallyId ||
           envelope.payload.frame.sequence <= this.lastCombatSequence
         ) {
           return;
         }
 
-        this.lastCombatFrameUpdateId = envelope.updateId;
         if (envelope.payload.frame.sequence > this.lastCombatSequence + 1) {
           this.pendingRealtimeFrame = envelope.payload.frame;
           this.recoverMissingFrames();
@@ -120,7 +120,7 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
 
     effect(
       () => {
-        const reconnectCount = this.events.reconnectCount();
+        const reconnectCount = this.realtime.reconnectCount();
         if (reconnectCount <= this.lastReconnectCount) return;
         this.lastReconnectCount = reconnectCount;
         if ((this.playback()?.schemaVersion ?? 1) >= 2) this.load(false);

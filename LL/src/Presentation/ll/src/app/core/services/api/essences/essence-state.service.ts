@@ -1,14 +1,24 @@
 import { Injectable, computed, effect, signal, untracked } from '@angular/core';
-import { EMPTY, forkJoin, Observable, catchError, finalize, tap } from 'rxjs';
+import {
+  EMPTY,
+  forkJoin,
+  Observable,
+  catchError,
+  finalize,
+  map,
+  tap,
+} from 'rxjs';
 import { InventoryStateService } from '../inventory/inventory-state.service';
-import { QuestStateService } from '../quest/quest-state.service';
 import { EssencesService } from './essences.service';
 import { EssenceItemViewService } from './essence-item-view.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { CharacterStateService } from '../character/character-state.service';
-import { GameEventService } from '../../real-time/game-event.service';
-import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
+import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
+import { RealtimeSignalDeduper } from '../../real-time/game-realtime/realtime-deduplication';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
+import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
+import { EquipmentStateService } from '../equipment/equipment-state.service';
+import { VersionedMutationResult } from '../api.service';
 import { Essence } from '../../../../shared/models/essence';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
@@ -49,7 +59,7 @@ export class EssenceStateService {
   private readonly _loading = signal(false);
   private readonly _spendingDust = signal(false);
   private readonly _error = signal<string | null>(null);
-  private readonly eventDeduper = new GameEventDeduper();
+  private readonly eventDeduper = new RealtimeSignalDeduper();
   private resetVersion = 0;
   private dustMutationVersion = 0;
   private fullRefreshEpoch = 0;
@@ -262,11 +272,12 @@ export class EssenceStateService {
     private readonly essencesService: EssencesService,
     private readonly inventoryState: InventoryStateService,
     private readonly essenceItemView: EssenceItemViewService,
-    private readonly questState: QuestStateService,
     private readonly eventBus: EventBusService,
     private readonly characterState: CharacterStateService,
-    private readonly gameEvents: GameEventService,
+    private readonly gameEvents: GameRealtimeEventRegistry,
     private readonly stateSync: StateSyncCoordinator,
+    private readonly equipmentState: EquipmentStateService,
+    private readonly domainVersions: DomainVersionTracker,
   ) {
     this.stateSync.register(
       'essences',
@@ -287,7 +298,7 @@ export class EssenceStateService {
 
     effect(
       () => {
-        const envelope = this.gameEvents.eventEnvelope.CharacterLevelUpMsg();
+        const envelope = this.gameEvents.eventEnvelope.CharacterLevelUp();
         const levelUp = envelope?.payload;
         const loadouts = this._loadouts();
         if (
@@ -331,7 +342,9 @@ export class EssenceStateService {
   }
 
   refresh(preserveLoadoutDraft = false): void {
-    this.synchronize(preserveLoadoutDraft).subscribe({ error: () => undefined });
+    this.synchronize(preserveLoadoutDraft).subscribe({
+      error: () => undefined,
+    });
   }
 
   private synchronize(preserveLoadoutDraft = false): Observable<unknown> {
@@ -504,7 +517,7 @@ export class EssenceStateService {
         }),
       )
       .subscribe({
-        next: (response) => {
+        next: (result) => {
           if (
             resetVersion !== this.resetVersion ||
             mutationVersion !== this.dustMutationVersion
@@ -512,12 +525,14 @@ export class EssenceStateService {
             return;
           }
 
-          if (!response.succeeded) {
-            this._error.set(response.message || 'Failed to level up essence');
+          if (!result.data.succeeded) {
+            this._error.set(
+              result.data.message || 'Failed to level up essence',
+            );
             return;
           }
 
-          this.applyEssenceMutation(response, false);
+          this.applyEssenceMutation(result);
         },
         error: (error) => {
           if (
@@ -556,15 +571,13 @@ export class EssenceStateService {
     const isFavorite = !essence.isFavorite;
     const mutationEpoch = ++this.archiveRequestEpoch;
     this.updateFavorite(essence.id, isFavorite);
-    this.essencesService
-      .setFavorite(essence.id, isFavorite)
-      .subscribe({
-        error: (error) => {
-          if (mutationEpoch !== this.archiveRequestEpoch) return;
-          this.updateFavorite(essence.id, !isFavorite);
-          this._error.set(error?.message ?? 'Failed to update favorite');
-        },
-      });
+    this.essencesService.setFavorite(essence.id, isFavorite).subscribe({
+      error: (error) => {
+        if (mutationEpoch !== this.archiveRequestEpoch) return;
+        this.updateFavorite(essence.id, !isFavorite);
+        this._error.set(error?.message ?? 'Failed to update favorite');
+      },
+    });
   }
 
   setEssenceFocus(creatureId: string | null): void {
@@ -592,19 +605,19 @@ export class EssenceStateService {
 
     this._error.set(null);
     return this.essencesService.absorb(inventoryItemId).pipe(
-      tap((response) => {
+      tap((result) => {
+        const response = result.data;
         if (!response.succeeded) {
           this._error.set(response.message || 'Failed to absorb essence');
           return;
         }
 
-        this.applyEssenceMutation(response);
-        this.refreshLoadouts();
-        this.questState.refreshAfterMutation();
+        this.applyEssenceMutation(result);
         this._selectedInventoryItemId.set(
           this.getFirstAbsorbableInventoryEssenceId(),
         );
       }),
+      map((result) => result.data),
       catchError((error) => {
         this._error.set(error?.message ?? 'Failed to absorb essence');
         return EMPTY;
@@ -618,15 +631,17 @@ export class EssenceStateService {
 
     this._error.set(null);
     return this.essencesService.dismantle(item.itemInstance.id).pipe(
-      tap((response) => {
+      tap((result) => {
+        const response = result.data;
         if (!response.succeeded) {
           this._error.set(response.message || 'Failed to shatter essence');
           return;
         }
 
-        this.applyEssenceMutation(response);
+        this.applyEssenceMutation(result);
         this._selectedInventoryItemId.set(null);
       }),
+      map((result) => result.data),
       catchError((error) => {
         this._error.set(error?.message ?? 'Failed to shatter essence');
         return EMPTY;
@@ -742,8 +757,6 @@ export class EssenceStateService {
             next: () => {
               this._savingLoadout.set(false);
               this.characterState.markOverviewDirty();
-              this.refresh();
-              this.questState.refreshAfterMutation();
             },
             error: (error) => {
               this._savingLoadout.set(false);
@@ -762,9 +775,6 @@ export class EssenceStateService {
           // only patches _loadouts, so without this the Archive list keeps rendering the
           // previous attunedSlot badges until a manual reload.
           this.refreshArchive();
-        }
-        if (activateAfterSave) {
-          this.questState.refreshAfterMutation();
         }
       },
       error: (error) => {
@@ -823,8 +833,6 @@ export class EssenceStateService {
     if (!id) return;
     this.essencesService.activateLoadout(id).subscribe(() => {
       this.characterState.markOverviewDirty();
-      this.refresh();
-      this.questState.refreshAfterMutation();
     });
   }
 
@@ -837,7 +845,6 @@ export class EssenceStateService {
       if (deletesActiveLoadout) {
         this.characterState.markOverviewDirty();
       }
-      this.refresh();
     });
   }
 
@@ -876,15 +883,38 @@ export class EssenceStateService {
   }
 
   private applyEssenceMutation(
-    response: EssenceMutationResponseDto,
-    refreshCompanionArchives = true,
-  ): void {
-    this.archiveRequestEpoch += 1;
-    this._archive.set(response.archive);
-    this.inventoryState.setInventory(response.inventoryItems);
+    result: VersionedMutationResult<EssenceMutationResponseDto>,
+  ): boolean {
+    const response = result.data;
+    const appliesEssences = this.domainVersions.isCurrent(
+      'essences',
+      result.domainVersions['essences'],
+    );
+    if (appliesEssences) {
+      this.fullRefreshEpoch += 1;
+      this.archiveRequestEpoch += 1;
+      this.loadoutRequestEpoch += 1;
+      this.creatureArchiveRequestEpoch += 1;
+      this.codexRequestEpoch += 1;
+      this._archive.set(response.archive);
+      this._loadouts.set(response.loadouts);
+      this._creatureArchive.set(response.creatureArchive);
+      this._codex.set(response.codex);
+      this.ensureSelectedEssence(response.archive);
+      this.ensureSelectedLoadout(response.loadouts);
+    }
+
+    this.inventoryState.applyVersionedInventory(result);
+    if (
+      this.domainVersions.isCurrent(
+        'equipment',
+        result.domainVersions['equipment'],
+      )
+    ) {
+      this.equipmentState.setSlots(response.equipmentSlots);
+    }
     this.characterState.markOverviewDirty();
-    this.ensureSelectedEssence(response.archive);
-    if (refreshCompanionArchives) this.refreshCompanionArchives();
+    return appliesEssences;
   }
 
   private updateFavorite(essenceId: string, isFavorite: boolean): void {
@@ -976,35 +1006,6 @@ export class EssenceStateService {
     }
 
     return fallback;
-  }
-
-  private refreshCompanionArchives(): void {
-    const requestVersion = this.resetVersion;
-    const creatureArchiveEpoch = ++this.creatureArchiveRequestEpoch;
-    const codexEpoch = ++this.codexRequestEpoch;
-
-    forkJoin({
-      creatureArchive: this.essencesService.getCreatureArchive(),
-      codex: this.essencesService.getCodex(),
-    }).subscribe({
-      next: ({ creatureArchive, codex }) => {
-        if (requestVersion !== this.resetVersion) return;
-        if (creatureArchiveEpoch === this.creatureArchiveRequestEpoch) {
-          this._creatureArchive.set(creatureArchive);
-        }
-        if (codexEpoch === this.codexRequestEpoch) this._codex.set(codex);
-      },
-      error: (error) => {
-        if (
-          requestVersion !== this.resetVersion ||
-          (creatureArchiveEpoch !== this.creatureArchiveRequestEpoch &&
-            codexEpoch !== this.codexRequestEpoch)
-        ) {
-          return;
-        }
-        this._error.set(error?.message ?? 'Failed to refresh Essence records');
-      },
-    });
   }
 
   private refreshLoadouts(preserveDraft = false): void {

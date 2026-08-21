@@ -102,7 +102,7 @@ export class RegionComponent implements OnInit, OnDestroy {
     characterActions: CharacterActionsStateService,
   ) {
     this.raidSyncCleanup = stateSync.register(
-      'raids',
+      'raid-directory',
       'world-map-raids',
       async () => this.loadRaidBosses(),
       () => this.raidsEnabled && this.regionNumber() !== null,

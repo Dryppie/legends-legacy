@@ -83,14 +83,14 @@ public sealed class GuildVaultChatCommandTests
         {
             var payload = Assert.IsType<GuildVaultChatMessagePayload>(
                 Assert.Single(Outbox.Calls).Payload);
-            var realtime = Assert.Single(Publisher.Messages.OfType<GuildVaultChatMessageMsg>());
+            var realtime = Assert.Single(Publisher.Messages.OfType<GuildVaultChatMessage>());
 
             Assert.Equal(GameEventTypes.GuildVaultChatMessage, Outbox.Calls[0].EventType);
             Assert.Equal(expectedAction, payload.Body);
             Assert.Equal(expectedAction, realtime.Action);
             Assert.Equal(payload.MessageId, realtime.MessageId);
             Assert.Equal(payload.Equipment.Id, realtime.Equipment.Id);
-            Assert.Single(Publisher.Messages.OfType<GuildStateChangedMsg>());
+            Assert.Single(Publisher.Messages.OfType<GuildStateChanged>());
         }
     }
 
@@ -121,11 +121,15 @@ public sealed class GuildVaultChatCommandTests
             Task.FromResult(GuildOperationResult<GuildVaultMutation>.Success(mutation));
     }
 
-    private sealed class RecordingPublisher : IGameEventPublisher
+    private sealed class RecordingPublisher : IGameRealtimeBroadcaster
     {
-        public List<GameEventMsg> Messages { get; } = [];
+        public List<GameRealtimeEvent> Messages { get; } = [];
 
-        public Task PublishAsync(Audience audience, GameEventMsg message)
+        public Task PublishAsync(
+            Audience audience,
+            GameRealtimeEvent message,
+            string sender,
+            CancellationToken cancellationToken = default)
         {
             Messages.Add(message);
             return Task.CompletedTask;

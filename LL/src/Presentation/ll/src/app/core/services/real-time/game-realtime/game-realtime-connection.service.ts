@@ -28,8 +28,12 @@ export class GameRealtimeConnection {
   private handlersRegistered = false;
   private readonly guildSubscriptions = new Set<string>();
   private readonly activeGuildSubscriptions = new Set<string>();
+  private readonly raidSubscriptions = new Set<string>();
+  private readonly activeRaidSubscriptions = new Set<string>();
   private worldSubscriptionRequested = false;
   private worldSubscriptionActive = false;
+  private readonly tournamentGroundsSubscriptionOwners = new Set<string>();
+  private tournamentGroundsSubscriptionActive = false;
 
   readonly events$ = this.eventsSubject.asObservable();
   readonly connectionStatus = computed(() => this._connectionStatus());
@@ -82,8 +86,12 @@ export class GameRealtimeConnection {
     await this.hub?.stop();
     this.guildSubscriptions.clear();
     this.activeGuildSubscriptions.clear();
+    this.raidSubscriptions.clear();
+    this.activeRaidSubscriptions.clear();
     this.worldSubscriptionRequested = false;
     this.worldSubscriptionActive = false;
+    this.tournamentGroundsSubscriptionOwners.clear();
+    this.tournamentGroundsSubscriptionActive = false;
     this._connectionStatus.set('disconnected');
   }
 
@@ -140,6 +148,56 @@ export class GameRealtimeConnection {
     }
   }
 
+  async subscribeToRaid(raidRunId: string): Promise<void> {
+    this.raidSubscriptions.add(raidRunId);
+    await this.ensureConnected();
+    if (this.activeRaidSubscriptions.has(raidRunId)) return;
+
+    await this.hub?.invoke('SubscribeToRaid', raidRunId);
+    this.activeRaidSubscriptions.add(raidRunId);
+  }
+
+  async setRaidSubscription(raidRunId: string | null): Promise<void> {
+    const obsoleteRaidIds = [...this.raidSubscriptions].filter(
+      (existingRaidId) => existingRaidId !== raidRunId,
+    );
+
+    for (const obsoleteRaidId of obsoleteRaidIds) {
+      this.raidSubscriptions.delete(obsoleteRaidId);
+      if (
+        this.activeRaidSubscriptions.delete(obsoleteRaidId) &&
+        this.hub?.state === HubConnectionState.Connected
+      ) {
+        await this.hub.invoke('UnsubscribeFromRaid', obsoleteRaidId);
+      }
+    }
+
+    if (raidRunId) {
+      await this.subscribeToRaid(raidRunId);
+    }
+  }
+
+  async setTournamentGroundsSubscription(
+    active: boolean,
+    owner = 'default',
+  ): Promise<void> {
+    if (active) this.tournamentGroundsSubscriptionOwners.add(owner);
+    else this.tournamentGroundsSubscriptionOwners.delete(owner);
+
+    if (this.tournamentGroundsSubscriptionOwners.size === 0) {
+      if (
+        this.tournamentGroundsSubscriptionActive &&
+        this.hub?.state === HubConnectionState.Connected
+      ) {
+        await this.hub.invoke('UnsubscribeFromTournamentGrounds');
+      }
+      this.tournamentGroundsSubscriptionActive = false;
+      return;
+    }
+
+    await this.ensureTournamentGroundsSubscription();
+  }
+
   private registerHubHandlers(): void {
     if (!this.hub || this.handlersRegistered) return;
     this.handlersRegistered = true;
@@ -151,7 +209,9 @@ export class GameRealtimeConnection {
 
     this.hub.onreconnecting((error) => {
       this.activeGuildSubscriptions.clear();
+      this.activeRaidSubscriptions.clear();
       this.worldSubscriptionActive = false;
+      this.tournamentGroundsSubscriptionActive = false;
       this.zone.run(() => this._connectionStatus.set('reconnecting'));
       if (error) console.warn('Game realtime reconnecting', error);
     });
@@ -166,7 +226,9 @@ export class GameRealtimeConnection {
 
     this.hub.onclose((error) => {
       this.activeGuildSubscriptions.clear();
+      this.activeRaidSubscriptions.clear();
       this.worldSubscriptionActive = false;
+      this.tournamentGroundsSubscriptionActive = false;
       this.zone.run(() => this._connectionStatus.set('disconnected'));
       if (error) console.warn('Game realtime disconnected', error);
     });
@@ -193,5 +255,31 @@ export class GameRealtimeConnection {
         console.warn('Failed to resubscribe to guild realtime', error);
       }
     }
+
+    for (const raidRunId of this.raidSubscriptions) {
+      try {
+        await this.subscribeToRaid(raidRunId);
+      } catch (error) {
+        console.warn('Failed to resubscribe to raid realtime', error);
+      }
+    }
+
+    if (this.tournamentGroundsSubscriptionOwners.size > 0) {
+      try {
+        await this.ensureTournamentGroundsSubscription();
+      } catch (error) {
+        console.warn(
+          'Failed to resubscribe to Tournament Grounds realtime',
+          error,
+        );
+      }
+    }
+  }
+
+  private async ensureTournamentGroundsSubscription(): Promise<void> {
+    await this.ensureConnected();
+    if (this.tournamentGroundsSubscriptionActive) return;
+    await this.hub?.invoke('SubscribeToTournamentGrounds');
+    this.tournamentGroundsSubscriptionActive = true;
   }
 }

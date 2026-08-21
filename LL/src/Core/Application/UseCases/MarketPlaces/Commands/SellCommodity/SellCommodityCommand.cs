@@ -1,10 +1,9 @@
 using Application.Interfaces.Services.LL;
-using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
 using Application.UseCases.Inventories.Dtos;
+using Application.UseCases.MarketPlaces;
 using Application.UseCases.MarketPlaces.Dtos.Requests;
 using Application.UseCases.MarketPlaces.Dtos.Responses;
-using Application.WebSockets.Contracts;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
@@ -16,7 +15,7 @@ public sealed record SellCommodityCommand(Guid CharacterId, SellCommodityRequest
 
 public sealed class SellCommodityCommandHandler(
     IMarketPlaceService marketPlaceService,
-    IGameEventPublisher eventPublisher,
+    MarketplaceChangePublisher changePublisher,
     IMapper mapper)
     : IRequestHandler<SellCommodityCommand, Response<SellCommodityResponseDto>>
 {
@@ -34,20 +33,15 @@ public sealed class SellCommodityCommandHandler(
             return Response<SellCommodityResponseDto>.Fail(
                 "There is not enough demand at or above that price.");
 
-        foreach (var fill in result.Fills)
-        {
-            await eventPublisher.PublishAsync(
-                new Audience.World(),
-                new MarketBuyOrderFulfilledMsg(
-                    fill.BuyOrderId,
-                    fill.BuyerId,
-                    fill.SellerId,
-                    fill.Quantity,
-                    fill.TotalPrice,
-                    fill.SellerCinders,
-                    mapper.Map<InventoryItemDto>(fill.PurchasedItem),
-                    mapper.Map<MarketPlaceBuyOrderDto?>(fill.RemainingBuyOrder)));
-        }
+        var marketplace = await changePublisher.PublishAsync(
+            [],
+            result.Fills.Select(fill => new MarketplaceBuyOrderChangeDto(
+                fill.BuyOrderId,
+                mapper.Map<MarketPlaceBuyOrderDto?>(fill.RemainingBuyOrder))).ToArray(),
+            result.Fills.Select(fill => mapper.Map<MarketPlaceOrderDto>(fill.Order)).ToArray(),
+            result.Fills.Select(fill => fill.BuyerId).Append(request.CharacterId),
+            nameof(SellCommodityCommand),
+            cancellationToken);
 
         var remaining = result.Fills.LastOrDefault()?.RemainingSellerInventoryItem;
         return Response<SellCommodityResponseDto>.Success(new(
@@ -55,6 +49,7 @@ public sealed class SellCommodityCommandHandler(
             result.TotalPrice,
             result.SellerFees,
             result.SellerCinders,
-            mapper.Map<InventoryItemDto?>(remaining)));
+            mapper.Map<InventoryItemDto?>(remaining),
+            marketplace));
     }
 }

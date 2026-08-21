@@ -16,9 +16,9 @@ public class ReturnGuildVaultItemCommandHandler : IRequestHandler<ReturnGuildVau
 {
     private readonly IGuildVaultService _vault;
     private readonly IGuildService _guild;
-    private readonly IGameEventPublisher _events;
+    private readonly IGameRealtimeBroadcaster _events;
     private readonly IGameEventOutbox _outbox;
-    public ReturnGuildVaultItemCommandHandler(IGuildVaultService vault, IGuildService guild, IGameEventPublisher events, IGameEventOutbox outbox)
+    public ReturnGuildVaultItemCommandHandler(IGuildVaultService vault, IGuildService guild, IGameRealtimeBroadcaster events, IGameEventOutbox outbox)
     {
         _vault = vault;
         _guild = guild;
@@ -33,7 +33,7 @@ public class ReturnGuildVaultItemCommandHandler : IRequestHandler<ReturnGuildVau
         if (!result.Succeeded) return Response<bool>.Fail(result.Error ?? "Failed to return equipment.");
         await _outbox.EnqueueAsync(GameEventTypes.EquipmentChanged, new EquipmentChangedPayload(request.CharacterId), request.CharacterId, null, cancellationToken);
         if (guild is not null)
-            await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChangedMsg(guild.Id));
+            await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChanged(guild.Id), nameof(ReturnGuildVaultItemCommandHandler), cancellationToken);
         return Response<bool>.Success(true);
     }
 }

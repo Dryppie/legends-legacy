@@ -1,10 +1,9 @@
 using Application.Interfaces.Services.LL;
-using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
 using Application.UseCases.Inventories.Dtos;
+using Application.UseCases.MarketPlaces;
 using Application.UseCases.MarketPlaces.Dtos.Requests;
 using Application.UseCases.MarketPlaces.Dtos.Responses;
-using Application.WebSockets.Contracts;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
@@ -16,16 +15,16 @@ public record BuyoutMarketPlaceListingCommand(Guid CharacterId, BuyoutMarketPlac
 public class BuyoutMarketPlaceListingCommandHandler : IRequestHandler<BuyoutMarketPlaceListingCommand, Response<BuyoutMarketPlaceListingResponseDto>>
 {
     private readonly IMarketPlaceService _marketPlaceService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly MarketplaceChangePublisher _changePublisher;
     private readonly IMapper _mapper;
 
     public BuyoutMarketPlaceListingCommandHandler(
         IMarketPlaceService marketPlaceService,
-        IGameEventPublisher eventPublisher,
+        MarketplaceChangePublisher changePublisher,
         IMapper mapper)
     {
         _marketPlaceService = marketPlaceService;
-        _eventPublisher = eventPublisher;
+        _changePublisher = changePublisher;
         _mapper = mapper;
     }
 
@@ -45,15 +44,13 @@ public class BuyoutMarketPlaceListingCommandHandler : IRequestHandler<BuyoutMark
 
         var remainingListing = _mapper.Map<MarketPlaceListingDto?>(result.RemainingListing);
 
-        await _eventPublisher.PublishAsync(
-            new Audience.World(),
-            new MarketListingSoldMsg(
-                result.ListingId,
-                result.SellerId,
-                result.Quantity,
-                result.TotalPrice,
-                result.SellerCinders,
-                remainingListing));
+        var marketplace = await _changePublisher.PublishAsync(
+            [new MarketplaceListingChangeDto(result.ListingId, remainingListing)],
+            [],
+            [_mapper.Map<MarketPlaceOrderDto>(result.Order)],
+            [request.CharacterId, result.SellerId],
+            nameof(BuyoutMarketPlaceListingCommand),
+            cancellationToken);
 
         return Response<BuyoutMarketPlaceListingResponseDto>.Success(new BuyoutMarketPlaceListingResponseDto
         {
@@ -62,7 +59,8 @@ public class BuyoutMarketPlaceListingCommandHandler : IRequestHandler<BuyoutMark
             PurchasedItem = _mapper.Map<InventoryItemDto>(result.PurchasedItem),
             PurchasedQuantity = result.Quantity,
             TotalPrice = result.TotalPrice,
-            BuyerCinders = result.BuyerCinders
+            BuyerCinders = result.BuyerCinders,
+            Marketplace = marketplace
         });
     }
 }

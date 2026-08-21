@@ -9,6 +9,75 @@ import { GameRealtimeEventRegistry } from './game-realtime-event-registry.servic
 import { GameRealtimeStore } from './game-realtime-store.service';
 
 describe('GameRealtimeEventRegistry', () => {
+  it('ignores a replayed envelope after reconnect and reports unknown events', () => {
+    const events = new Subject<GameRealtimeEnvelope>();
+    const diagnostics = jasmine.createSpyObj<GameRealtimeDiagnostics>(
+      'GameRealtimeDiagnostics',
+      ['runHandler', 'recordDuplicate', 'recordUnknown'],
+    );
+    diagnostics.runHandler.and.callFake(
+      (_envelope: GameRealtimeEnvelope, handler: () => void) => handler(),
+    );
+
+    TestBed.configureTestingModule({
+      providers: [
+        GameRealtimeEventRegistry,
+        {
+          provide: GameRealtimeConnection,
+          useValue: { events$: events.asObservable() },
+        },
+        {
+          provide: GameRealtimeDiagnostics,
+          useValue: diagnostics,
+        },
+      ],
+    });
+
+    const previousEnvironment = (window as any).env;
+    (window as any).env = { gameSignalREnabled: 'true' };
+
+    try {
+      const registry = TestBed.inject(GameRealtimeEventRegistry);
+      registry.initialize();
+
+      events.next({
+        updateId: 'access-update',
+        event: 'AccountAccessChanged',
+        payload: {
+          accountId: 'account-id',
+          reason: 'revoked',
+          occurredAtUtc: '2026-08-21T12:00:00Z',
+        },
+      });
+      events.next({
+        updateId: 'unknown-update',
+        event: 'UnknownRealtimeEvent',
+        payload: {},
+      });
+      events.next({
+        updateId: 'access-update',
+        event: 'AccountAccessChanged',
+        payload: {
+          accountId: 'account-id',
+          reason: 'duplicate',
+          occurredAtUtc: '2026-08-21T12:00:01Z',
+        },
+      });
+
+      expect(registry.event.AccountAccessChanged()?.reason).toBe('revoked');
+      expect(
+        registry.eventEnvelope.AccountAccessChanged()?.updateId,
+      ).toBe('access-update');
+      expect(diagnostics.recordDuplicate).toHaveBeenCalledTimes(1);
+      expect(diagnostics.recordUnknown).toHaveBeenCalledTimes(1);
+
+      registry.dispose();
+      expect(registry.event.AccountAccessChanged()).toBeNull();
+    } finally {
+      (window as any).env = previousEnvironment;
+    }
+  });
+
   it('records loot without applying the grant on top of the inventory snapshot', () => {
     const events = new Subject<GameRealtimeEnvelope>();
     const store = jasmine.createSpyObj<GameRealtimeStore>('GameRealtimeStore', [
@@ -33,6 +102,8 @@ describe('GameRealtimeEventRegistry', () => {
               _envelope: GameRealtimeEnvelope,
               handler: () => void,
             ) => handler(),
+            recordDuplicate: () => undefined,
+            recordUnknown: () => undefined,
           },
         },
         { provide: GameRealtimeStore, useValue: store },

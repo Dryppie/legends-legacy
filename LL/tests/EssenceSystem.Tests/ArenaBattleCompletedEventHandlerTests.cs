@@ -58,11 +58,11 @@ public sealed class ArenaBattleCompletedEventHandlerTests
     }
 
     private static void AssertArenaMessage(
-        GameEventMsg message,
+        GameRealtimeEvent message,
         Guid characterId,
         Guid enemyId)
     {
-        var arenaMessage = Assert.IsType<ArenaBattleCompletedMsg>(message);
+        var arenaMessage = Assert.IsType<ArenaBattleCompleted>(message);
         Assert.Equal(characterId, arenaMessage.CharacterId);
         Assert.Equal(enemyId, arenaMessage.EnemyId);
         Assert.Equal("Victory", arenaMessage.Outcome);
@@ -72,11 +72,15 @@ public sealed class ArenaBattleCompletedEventHandlerTests
         Assert.Equal(956, arenaMessage.EnemyRatingAfter);
     }
 
-    private sealed class RecordingGameEventPublisher : IGameEventPublisher
+    private sealed class RecordingGameEventPublisher : IGameRealtimeBroadcaster
     {
-        public List<(Audience Audience, GameEventMsg Message)> Published { get; } = [];
+        public List<(Audience Audience, GameRealtimeEvent Message)> Published { get; } = [];
 
-        public Task PublishAsync(Audience audience, GameEventMsg message)
+        public Task PublishAsync(
+            Audience audience,
+            GameRealtimeEvent message,
+            string sender,
+            CancellationToken cancellationToken = default)
         {
             Published.Add((audience, message));
             return Task.CompletedTask;

@@ -32,7 +32,8 @@ public sealed class RegionOneIdleAreaSeedTests
         "monster.bloodthorn_vine",
         "monster.wendigo",
         "monster.corpse_golem",
-        "monster.the_mad_king"
+        "monster.the_mad_king",
+        "monster.venomous_spider"
     };
     private static readonly HashSet<string> CreatureEssencesPendingAreaDropTuning = new(StringComparer.OrdinalIgnoreCase);
 

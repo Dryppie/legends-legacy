@@ -158,7 +158,12 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
             }
 
             var template = _combatSetupService
-                .CreateCreatureCombatEntities([creature], new Area { DifficultyTier = 1 })
+                .CreateCreatureCombatEntities(
+                    [creature],
+                    new Area
+                    {
+                        DifficultyTier = DungeonEnemyDifficultyScaling.GetProgressionPosition(dungeonTier)
+                    })
                 .Single();
 
             DungeonEnemyDifficultyScaling.Apply(template, dungeonTier, enemyStrengthMultiplier);

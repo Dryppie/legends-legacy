@@ -16,7 +16,8 @@ import {
 import { CombatService } from '../../../../core/services/client-side/combat/combat.service';
 import { RaidPlaybackService } from '../../../../core/services/client-side/combat/raid-playback.service';
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
-import { GameEventService } from '../../../../core/services/real-time/game-event.service';
+import { GameRealtimeEventRegistry } from '../../../../core/services/real-time/game-realtime/game-realtime-event-registry.service';
+import { GameRealtimeConnection } from '../../../../core/services/real-time/game-realtime/game-realtime-connection.service';
 import { BattleOutcome } from '../../../../shared/models/Dtos/combatResultDto';
 import { RaidPageComponent } from './raid-page.component';
 
@@ -49,7 +50,11 @@ describe('RaidPageComponent playback', () => {
         { provide: ActivatedRoute, useValue: {} },
         { provide: Router, useValue: {} },
         {
-          provide: GameEventService,
+          provide: GameRealtimeConnection,
+          useValue: { setRaidSubscription: () => Promise.resolve() },
+        },
+        {
+          provide: GameRealtimeEventRegistry,
           useValue: {
             eventEnvelope: { RaidUpdated: raidUpdated },
             reconnectCount,

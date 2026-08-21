@@ -1,9 +1,8 @@
 using Application.Interfaces.Services.LL;
-using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
+using Application.UseCases.MarketPlaces;
 using Application.UseCases.MarketPlaces.Dtos.Requests;
 using Application.UseCases.MarketPlaces.Dtos.Responses;
-using Application.WebSockets.Contracts;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
@@ -15,16 +14,16 @@ public record FulfillMarketPlaceBuyOrderCommand(Guid CharacterId, FulfillMarketP
 public class FulfillMarketPlaceBuyOrderCommandHandler : IRequestHandler<FulfillMarketPlaceBuyOrderCommand, Response<FulfillMarketPlaceBuyOrderResponseDto>>
 {
     private readonly IMarketPlaceService _marketPlaceService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly MarketplaceChangePublisher _changePublisher;
     private readonly IMapper _mapper;
 
     public FulfillMarketPlaceBuyOrderCommandHandler(
         IMarketPlaceService marketPlaceService,
-        IGameEventPublisher eventPublisher,
+        MarketplaceChangePublisher changePublisher,
         IMapper mapper)
     {
         _marketPlaceService = marketPlaceService;
-        _eventPublisher = eventPublisher;
+        _changePublisher = changePublisher;
         _mapper = mapper;
     }
 
@@ -45,17 +44,13 @@ public class FulfillMarketPlaceBuyOrderCommandHandler : IRequestHandler<FulfillM
 
         var response = _mapper.Map<FulfillMarketPlaceBuyOrderResponseDto>(result);
 
-        await _eventPublisher.PublishAsync(
-            new Audience.World(),
-            new MarketBuyOrderFulfilledMsg(
-                result.BuyOrderId,
-                result.BuyerId,
-                result.SellerId,
-                result.Quantity,
-                result.TotalPrice,
-                result.SellerCinders,
-                response.PurchasedItem,
-                response.RemainingBuyOrder));
+        response.Marketplace = await _changePublisher.PublishAsync(
+            [],
+            [new MarketplaceBuyOrderChangeDto(result.BuyOrderId, response.RemainingBuyOrder)],
+            [_mapper.Map<MarketPlaceOrderDto>(result.Order)],
+            [result.BuyerId, result.SellerId],
+            nameof(FulfillMarketPlaceBuyOrderCommand),
+            cancellationToken);
 
         return Response<FulfillMarketPlaceBuyOrderResponseDto>.Success(response);
     }

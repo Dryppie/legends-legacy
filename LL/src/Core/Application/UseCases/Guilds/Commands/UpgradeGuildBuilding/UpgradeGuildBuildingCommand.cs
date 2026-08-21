@@ -12,12 +12,12 @@ public record UpgradeGuildBuildingCommand(Guid CharacterId, Guid BuildingId) : I
 public class UpgradeGuildBuildingCommandHandler : IRequestHandler<UpgradeGuildBuildingCommand, Response<GuildBuildingOverviewDto>>
 {
     private readonly IGuildBuildingService _guildBuildingService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _eventPublisher;
     private readonly IGuildSystemChatPublisher _guildChat;
 
     public UpgradeGuildBuildingCommandHandler(
         IGuildBuildingService guildBuildingService,
-        IGameEventPublisher eventPublisher,
+        IGameRealtimeBroadcaster eventPublisher,
         IGuildSystemChatPublisher guildChat)
     {
         _guildBuildingService = guildBuildingService;
@@ -48,7 +48,9 @@ public class UpgradeGuildBuildingCommandHandler : IRequestHandler<UpgradeGuildBu
 
         await _eventPublisher.PublishAsync(
             new Audience.Guild(result.Value.GuildId),
-            new GuildBuildingsChangedMsg(result.Value.GuildId, request.BuildingId.ToString()));
+            new GuildBuildingsChanged(result.Value.GuildId, request.BuildingId.ToString()),
+            nameof(UpgradeGuildBuildingCommandHandler),
+            cancellationToken);
 
         return Response<GuildBuildingOverviewDto>.Success(result.Value);
     }

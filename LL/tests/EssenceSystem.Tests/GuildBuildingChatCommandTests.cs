@@ -141,8 +141,12 @@ public sealed class GuildBuildingChatCommandTests
         int BuildingLevel,
         GuildBuildingChatEvent EventType);
 
-    private sealed class RecordingEventPublisher : IGameEventPublisher
+    private sealed class RecordingEventPublisher : IGameRealtimeBroadcaster
     {
-        public Task PublishAsync(Audience audience, GameEventMsg message) => Task.CompletedTask;
+        public Task PublishAsync(
+            Audience audience,
+            GameRealtimeEvent message,
+            string sender,
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 }

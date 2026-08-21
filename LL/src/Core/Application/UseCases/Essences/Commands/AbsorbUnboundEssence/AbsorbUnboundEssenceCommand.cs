@@ -1,9 +1,7 @@
-using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Essences;
 using Application.MediatR.Markers;
+using Application.UseCases.Essences.Commands;
 using Application.UseCases.Essences.Dtos;
-using Application.UseCases.Inventories.Dtos;
-using AutoMapper;
 using Common.Primitives;
 using MediatR;
 
@@ -13,18 +11,15 @@ public record AbsorbUnboundEssenceCommand(Guid CharacterId, Guid InventoryItemId
 
 public class AbsorbUnboundEssenceCommandHandler : IRequestHandler<AbsorbUnboundEssenceCommand, Response<EssenceMutationResponseDto>>
 {
-    private readonly IMapper _mapper;
     private readonly IEssenceService _service;
-    private readonly IInventoryService _inventoryService;
+    private readonly EssenceMutationResponseFactory _responses;
 
     public AbsorbUnboundEssenceCommandHandler(
-        IMapper mapper,
         IEssenceService service,
-        IInventoryService inventoryService)
+        EssenceMutationResponseFactory responses)
     {
-        _mapper = mapper;
         _service = service;
-        _inventoryService = inventoryService;
+        _responses = responses;
     }
 
     public async Task<Response<EssenceMutationResponseDto>> Handle(AbsorbUnboundEssenceCommand request, CancellationToken cancellationToken)
@@ -33,17 +28,14 @@ public class AbsorbUnboundEssenceCommandHandler : IRequestHandler<AbsorbUnboundE
         if (!result.Succeeded)
             return Response<EssenceMutationResponseDto>.Fail(result.Message);
 
-        var archive = await _service.GetSoulArchiveAsync(request.CharacterId, cancellationToken);
-        var inventory = await _inventoryService.GetInventoryByIdAsync(request.CharacterId, cancellationToken);
-        if (inventory == null)
+        var response = await _responses.CreateAsync(
+            request.CharacterId,
+            result.Succeeded,
+            result.Message,
+            cancellationToken);
+        if (response is null)
             return Response<EssenceMutationResponseDto>.Fail("Failed to load updated Essence state.");
 
-        return Response<EssenceMutationResponseDto>.Success(new EssenceMutationResponseDto
-        {
-            Succeeded = result.Succeeded,
-            Message = result.Message,
-            Archive = _mapper.Map<SoulArchiveDto>(archive),
-            InventoryItems = _mapper.Map<List<InventoryItemDto>>(inventory.InventoryItems)
-        });
+        return Response<EssenceMutationResponseDto>.Success(response);
     }
 }

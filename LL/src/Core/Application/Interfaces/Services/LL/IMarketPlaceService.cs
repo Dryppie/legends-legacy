@@ -12,7 +12,8 @@ public sealed record BuyoutMarketPlaceListingResult(
     int Quantity,
     long TotalPrice,
     long BuyerCinders,
-    long SellerCinders);
+    long SellerCinders,
+    MarketPlaceOrder Order);
 
 public sealed record CreateMarketPlaceBuyOrderResult(
     MarketPlaceBuyOrder? BuyOrder,
@@ -40,7 +41,8 @@ public sealed record FulfillMarketPlaceBuyOrderResult(
     int Quantity,
     long TotalPrice,
     long SellerFee,
-    long SellerCinders);
+    long SellerCinders,
+    MarketPlaceOrder Order);
 
 public sealed record CancelMarketPlaceBuyOrderResult(
     Guid BuyOrderId,

@@ -6,7 +6,7 @@ import {
   Signal,
   untracked,
 } from '@angular/core';
-import { finalize, tap } from 'rxjs/operators';
+import { finalize, map, tap } from 'rxjs/operators';
 
 import {
   BuyoutMarketPlaceListingResponse,
@@ -30,18 +30,15 @@ import { BuyoutMarketPlaceListingRequest } from '../../../../shared/models/reque
 import { FulfillMarketPlaceBuyOrderRequest } from '../../../../shared/models/requestDtos/market-place/fulfill-market-place-buy-order-request';
 import { CharacterService } from '../character/character.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
-import { GameEventService } from '../../real-time/game-event.service';
-import { MarketListingSoldMsg } from '../../real-time/market/market-listing-sold';
-import { MarketListingCreatedMsg } from '../../real-time/market/market-listing-created';
-import { MarketListingCanceledMsg } from '../../real-time/market/market-listing-canceled';
-import { MarketBuyOrderCreatedMsg } from '../../real-time/market/market-buy-order-created';
-import { MarketBuyOrderFulfilledMsg } from '../../real-time/market/market-buy-order-fulfilled';
-import { MarketBuyOrderCanceledMsg } from '../../real-time/market/market-buy-order-canceled';
-import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
+import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
+import { RealtimeSignalDeduper } from '../../real-time/game-realtime/realtime-deduplication';
 import { ItemBase } from '../../../../shared/models/item';
 import { MarketPlaceOrder } from '../../../../shared/models/Dtos/market-place/market-place-order';
 import { ToastService } from '../../client-side/components/toast/toast.service';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
+import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
+import { VersionedMutationResult } from '../api.service';
+import { MarketplaceChangeSet } from '../../../../shared/models/Dtos/market-place/marketplace-change-set';
 
 @Injectable({ providedIn: 'root' })
 export class MarketplaceStateService {
@@ -53,8 +50,9 @@ export class MarketplaceStateService {
   private readonly _error = signal<string | null>(null);
 
   private readonly myCharacterId!: Signal<string | null>;
-  private readonly eventDeduper = new GameEventDeduper();
+  private readonly eventDeduper = new RealtimeSignalDeduper();
   private hasLoaded = false;
+  private semanticGapRevision = 0;
   private refreshVersion = 0;
 
   readonly listings = computed(() => this._listings());
@@ -77,9 +75,10 @@ export class MarketplaceStateService {
     private marketplaceService: MarketPlaceService,
     private characterService: CharacterService,
     private inventoryState: InventoryStateService,
-    private eventService: GameEventService,
+    private eventService: GameRealtimeEventRegistry,
     private toast: ToastService,
     private readonly stateSync: StateSyncCoordinator,
+    private readonly domainVersions: DomainVersionTracker,
   ) {
     this.stateSync.register(
       'marketplace',
@@ -87,78 +86,21 @@ export class MarketplaceStateService {
       () => this.synchronize(),
       () => this.hasLoaded,
     );
-    this.myCharacterId = computed(() => this.characterService.currentCharacterId());
-
-    effect(
-      () => {
-        const saleEnvelope =
-          this.eventService.eventEnvelope.MarketListingSoldMsg();
-        const createdEnvelope =
-          this.eventService.eventEnvelope.MarketListingCreatedMsg();
-        const canceledEnvelope =
-          this.eventService.eventEnvelope.MarketListingCanceledMsg();
-        const buyOrderCreatedEnvelope =
-          this.eventService.eventEnvelope.MarketBuyOrderCreatedMsg();
-        const buyOrderFulfilledEnvelope =
-          this.eventService.eventEnvelope.MarketBuyOrderFulfilledMsg();
-        const buyOrderCanceledEnvelope =
-          this.eventService.eventEnvelope.MarketBuyOrderCanceledMsg();
-
-        const sale = saleEnvelope?.payload;
-        const created = createdEnvelope?.payload;
-        const canceled = canceledEnvelope?.payload;
-        const buyOrderCreated = buyOrderCreatedEnvelope?.payload;
-        const buyOrderFulfilled = buyOrderFulfilledEnvelope?.payload;
-        const buyOrderCanceled = buyOrderCanceledEnvelope?.payload;
-
-        if (sale && this.eventDeduper.shouldProcess('sold', saleEnvelope)) {
-          untracked(() => this.applySellerSale(sale));
-        }
-
-        if (
-          created &&
-          this.eventDeduper.shouldProcess('created', createdEnvelope)
-        ) {
-          untracked(() => this.applyCreatedListing(created));
-        }
-
-        if (
-          canceled &&
-          this.eventDeduper.shouldProcess('canceled', canceledEnvelope)
-        ) {
-          untracked(() => this.applyCanceledListing(canceled));
-        }
-
-        if (
-          buyOrderCreated &&
-          this.eventDeduper.shouldProcess('buy-order-created', buyOrderCreatedEnvelope)
-        ) {
-          untracked(() => this.applyCreatedBuyOrder(buyOrderCreated));
-        }
-
-        if (
-          buyOrderFulfilled &&
-          this.eventDeduper.shouldProcess('buy-order-fulfilled', buyOrderFulfilledEnvelope)
-        ) {
-          untracked(() => this.applyFulfilledBuyOrder(buyOrderFulfilled));
-        }
-
-        if (
-          buyOrderCanceled &&
-          this.eventDeduper.shouldProcess('buy-order-canceled', buyOrderCanceledEnvelope)
-        ) {
-          untracked(() => this.applyCanceledBuyOrder(buyOrderCanceled));
-        }
-      },
-      { allowSignalWrites: true },
+    this.myCharacterId = computed(() =>
+      this.characterService.currentCharacterId(),
     );
 
     effect(
       () => {
-        const reconnectCount = this.eventService.reconnectCount();
-        if (reconnectCount <= 0 || !this.hasLoaded) return;
-
-        untracked(() => this.refresh());
+        const envelope =
+          this.eventService.eventEnvelope.MarketplaceChanged();
+        const event = envelope?.payload;
+        if (
+          event &&
+          this.eventDeduper.shouldProcess('marketplace-changed', envelope)
+        ) {
+          untracked(() => this.applySemanticChanges(event.changes));
+        }
       },
       { allowSignalWrites: true },
     );
@@ -184,7 +126,7 @@ export class MarketplaceStateService {
   readonly essences = this.byType(ItemType.Essence);
 
   load(): void {
-    if (this._listings().length || this._buyOrders().length) return;
+    if (this.hasLoaded) return;
     this.refresh();
   }
 
@@ -193,7 +135,6 @@ export class MarketplaceStateService {
   }
 
   private synchronize(): Observable<unknown> {
-    this.hasLoaded = true;
     this._loading.set(true);
     this._error.set(null);
     const refreshVersion = ++this.refreshVersion;
@@ -203,41 +144,44 @@ export class MarketplaceStateService {
       catalog: this.marketplaceService.getCatalog(),
       history: this.marketplaceService.getHistory(),
       buyOrders: this.marketplaceService.getBuyOrders(),
-    })
-      .pipe(
-        tap({
-          next: ({ listings, catalog, history, buyOrders }) => {
-            if (refreshVersion !== this.refreshVersion) return;
+    }).pipe(
+      tap({
+        next: ({ listings, catalog, history, buyOrders }) => {
+          if (refreshVersion !== this.refreshVersion) return;
 
-            this._listings.set(
-              listings.slice().sort((a, b) =>
+          this._listings.set(
+            listings
+              .slice()
+              .sort((a, b) =>
                 a.itemInstance.itemBase.itemType.localeCompare(
                   b.itemInstance.itemBase.itemType,
                 ),
               ),
-            );
-            this._catalog.set(catalog);
-            this._history.set(history);
-            this._buyOrders.set(
-              buyOrders
-                .slice()
-                .sort((a, b) =>
-                  a.itemBase.itemType.localeCompare(b.itemBase.itemType),
-                ),
-            );
-          },
-          error: (err) => {
-            if (refreshVersion === this.refreshVersion) {
-              this._error.set(err.message ?? 'Unknown error');
-            }
-          },
-        }),
-        finalize(() => {
+          );
+          this._catalog.set(catalog);
+          this._history.set(history);
+          this._buyOrders.set(
+            buyOrders
+              .slice()
+              .sort((a, b) =>
+                a.itemBase.itemType.localeCompare(b.itemBase.itemType),
+              ),
+          );
+          this.hasLoaded = true;
+          this.semanticGapRevision = 0;
+        },
+        error: (err) => {
           if (refreshVersion === this.refreshVersion) {
-            this._loading.set(false);
+            this._error.set(err.message ?? 'Unknown error');
           }
-        }),
-      );
+        },
+      }),
+      finalize(() => {
+        if (refreshVersion === this.refreshVersion) {
+          this._loading.set(false);
+        }
+      }),
+    );
   }
 
   buyoutListing(
@@ -250,9 +194,10 @@ export class MarketplaceStateService {
     };
 
     return this.marketplaceService.buyoutListing(listing).pipe(
-      tap((response) => {
-        this.applyBuyoutResponse(response);
+      tap((result) => {
+        this.applyBuyoutResponse(result);
       }),
+      map((result) => result.data),
     );
   }
 
@@ -264,10 +209,10 @@ export class MarketplaceStateService {
     return this.marketplaceService
       .buyCommodity(itemBaseId, quantity, maximumUnitPrice)
       .pipe(
-        tap((response) => {
-          this.updateCurrentCharacterCinders(response.buyerCinders);
-          this.inventoryState.load(true);
-          this.refresh();
+        tap((result) => {
+          const response = result.data;
+          this.applyVersionedMarketplace(result);
+          this.applyVersionedCinders(result, response.buyerCinders);
           this.showTradeReceipt(
             'Bought',
             response.filledQuantity,
@@ -275,6 +220,7 @@ export class MarketplaceStateService {
             this.itemName(itemBaseId),
           );
         }),
+        map((result) => result.data),
       );
   }
 
@@ -285,18 +231,21 @@ export class MarketplaceStateService {
   ): Observable<SellCommodityResponse> {
     const itemName = this.inventoryState
       .items()
-      .find((item) => item.itemInstance.id === itemInstanceId)
-      ?.itemInstance.itemBase.name;
+      .find((item) => item.itemInstance.id === itemInstanceId)?.itemInstance
+      .itemBase.name;
     return this.marketplaceService
       .sellCommodity(itemInstanceId, quantity, minimumUnitPrice)
       .pipe(
-        tap((response) => {
-          this.updateCurrentCharacterCinders(response.sellerCinders);
-          this.inventoryState.applyInventoryItemState(
-            itemInstanceId,
-            response.remainingInventoryItem,
+        tap((result) => {
+          const response = result.data;
+          this.applyVersionedMarketplace(result);
+          this.applyVersionedCinders(result, response.sellerCinders);
+          this.inventoryState.applyVersionedInventoryDelta(result, (data) =>
+            this.inventoryState.applyInventoryItemState(
+              itemInstanceId,
+              data.remainingInventoryItem,
+            ),
           );
-          this.refresh();
           this.showTradeReceipt(
             'Sold',
             response.filledQuantity,
@@ -305,6 +254,7 @@ export class MarketplaceStateService {
             response.sellerFees,
           );
         }),
+        map((result) => result.data),
       );
   }
 
@@ -320,17 +270,21 @@ export class MarketplaceStateService {
     };
 
     return this.marketplaceService.fulfillBuyOrder(fulfillment).pipe(
-      tap((response) => {
-        this.applyFulfillBuyOrderResponse(response);
+      tap((result) => {
+        this.applyFulfillBuyOrderResponse(result);
       }),
+      map((result) => result.data),
     );
   }
 
-  cancelListing(listingId: string): Observable<CancelMarketPlaceListingResponse> {
+  cancelListing(
+    listingId: string,
+  ): Observable<CancelMarketPlaceListingResponse> {
     return this.marketplaceService.cancelListing(listingId).pipe(
-      tap((response) => {
-        this.applyCancelResponse(response);
+      tap((result) => {
+        this.applyCancelResponse(result);
       }),
+      map((result) => result.data),
     );
   }
 
@@ -338,9 +292,10 @@ export class MarketplaceStateService {
     buyOrderId: string,
   ): Observable<CancelMarketPlaceBuyOrderResponse> {
     return this.marketplaceService.cancelBuyOrder(buyOrderId).pipe(
-      tap((response) => {
-        this.applyCancelBuyOrderResponse(response);
+      tap((result) => {
+        this.applyCancelBuyOrderResponse(result);
       }),
+      map((result) => result.data),
     );
   }
 
@@ -356,12 +311,10 @@ export class MarketplaceStateService {
     };
 
     return this.marketplaceService.createListing(listing).pipe(
-      tap((response) => {
-        this.applyCreateResponse(
-          response,
-          item.itemInstance.itemBase.name,
-        );
+      tap((result) => {
+        this.applyCreateResponse(result, item.itemInstance.itemBase.name);
       }),
+      map((result) => result.data),
     );
   }
 
@@ -377,9 +330,10 @@ export class MarketplaceStateService {
     };
 
     return this.marketplaceService.createBuyOrder(buyOrder).pipe(
-      tap((response) => {
-        this.applyCreateBuyOrderResponse(response, itemBaseId);
+      tap((result) => {
+        this.applyCreateBuyOrderResponse(result, itemBaseId);
       }),
+      map((result) => result.data),
     );
   }
 
@@ -406,10 +360,15 @@ export class MarketplaceStateService {
     this._listings.set(updated);
   }
 
-  private applyBuyoutResponse(response: BuyoutMarketPlaceListingResponse): void {
-    this.applyListingChange(response.listingId, response.remainingListing);
-    this.inventoryState.addOrIncrement(response.purchasedItem);
-    this.updateCurrentCharacterCinders(response.buyerCinders);
+  private applyBuyoutResponse(
+    result: VersionedMutationResult<BuyoutMarketPlaceListingResponse>,
+  ): void {
+    const response = result.data;
+    this.applyVersionedMarketplace(result);
+    this.inventoryState.applyVersionedInventoryDelta(result, (data) =>
+      this.inventoryState.addOrIncrement(data.purchasedItem),
+    );
+    this.applyVersionedCinders(result, response.buyerCinders);
     this.showTradeReceipt(
       'Bought',
       response.purchasedQuantity,
@@ -419,17 +378,18 @@ export class MarketplaceStateService {
   }
 
   private applyCreateResponse(
-    response: CreateMarketPlaceListingResponse,
+    result: VersionedMutationResult<CreateMarketPlaceListingResponse>,
     itemName: string,
   ): void {
-    if (response.listing) {
-      this.upsertListing(response.listing);
-    }
-    this.inventoryState.applyInventoryItemState(
-      response.listedItemInstanceId,
-      response.remainingInventoryItem,
+    const response = result.data;
+    this.applyVersionedMarketplace(result);
+    this.inventoryState.applyVersionedInventoryDelta(result, (data) =>
+      this.inventoryState.applyInventoryItemState(
+        data.listedItemInstanceId,
+        data.remainingInventoryItem,
+      ),
     );
-    this.updateCurrentCharacterCinders(response.sellerCinders);
+    this.applyVersionedCinders(result, response.sellerCinders);
     if (response.filledQuantity > 0) {
       const remainder = response.listing
         ? ` ${this.formatNumber(response.listedQuantity)} listed at ${this.formatNumber(response.listing.unitPrice)} each.`
@@ -453,16 +413,14 @@ export class MarketplaceStateService {
   }
 
   private applyCreateBuyOrderResponse(
-    response: CreateMarketPlaceBuyOrderResponse,
+    result: VersionedMutationResult<CreateMarketPlaceBuyOrderResponse>,
     itemBaseId: string,
   ): void {
-    if (response.buyOrder) {
-      this.upsertBuyOrder(response.buyOrder);
-    }
+    const response = result.data;
+    this.applyVersionedMarketplace(result);
 
-    this.updateCurrentCharacterCinders(response.buyerCinders);
+    this.applyVersionedCinders(result, response.buyerCinders);
     if (response.filledQuantity > 0) {
-      this.inventoryState.load(true);
       const remainder = response.buyOrder
         ? ` ${this.formatNumber(response.buyOrder.quantity)} remain ordered at ${this.formatNumber(response.buyOrder.unitPrice)} each.`
         : '';
@@ -482,18 +440,20 @@ export class MarketplaceStateService {
         't',
       );
     }
-    this.refresh();
   }
 
   private applyFulfillBuyOrderResponse(
-    response: FulfillMarketPlaceBuyOrderResponse,
+    result: VersionedMutationResult<FulfillMarketPlaceBuyOrderResponse>,
   ): void {
-    this.applyBuyOrderChange(response.buyOrderId, response.remainingBuyOrder);
-    this.inventoryState.applyInventoryItemState(
-      response.soldItemInstanceId,
-      response.remainingSellerInventoryItem,
+    const response = result.data;
+    this.applyVersionedMarketplace(result);
+    this.inventoryState.applyVersionedInventoryDelta(result, (data) =>
+      this.inventoryState.applyInventoryItemState(
+        data.soldItemInstanceId,
+        data.remainingSellerInventoryItem,
+      ),
     );
-    this.updateCurrentCharacterCinders(response.sellerCinders);
+    this.applyVersionedCinders(result, response.sellerCinders);
     this.showTradeReceipt(
       'Sold',
       response.soldQuantity,
@@ -531,52 +491,22 @@ export class MarketplaceStateService {
     return value.toLocaleString();
   }
 
-  private applyCancelResponse(response: CancelMarketPlaceListingResponse): void {
-    this.removeListing(response.listingId);
-    this.inventoryState.addOrIncrement(response.returnedItem);
+  private applyCancelResponse(
+    result: VersionedMutationResult<CancelMarketPlaceListingResponse>,
+  ): void {
+    const response = result.data;
+    this.applyVersionedMarketplace(result);
+    this.inventoryState.applyVersionedInventoryDelta(result, (data) =>
+      this.inventoryState.addOrIncrement(data.returnedItem),
+    );
   }
 
   private applyCancelBuyOrderResponse(
-    response: CancelMarketPlaceBuyOrderResponse,
+    result: VersionedMutationResult<CancelMarketPlaceBuyOrderResponse>,
   ): void {
-    this.removeBuyOrder(response.buyOrderId);
-    this.updateCurrentCharacterCinders(response.buyerCinders);
-  }
-
-  private applySellerSale(sale: MarketListingSoldMsg): void {
-    this.applyListingChange(sale.listingId, sale.remainingListing);
-
-    if (sale.sellerId === this.myCharacterId()) {
-      this.updateCurrentCharacterCinders(sale.sellerCinders);
-    }
-  }
-
-  private applyCreatedListing(event: MarketListingCreatedMsg): void {
-    this.upsertListing(event.listing);
-  }
-
-  private applyCanceledListing(event: MarketListingCanceledMsg): void {
-    this.removeListing(event.listingId);
-  }
-
-  private applyCreatedBuyOrder(event: MarketBuyOrderCreatedMsg): void {
-    this.upsertBuyOrder(event.buyOrder);
-  }
-
-  private applyFulfilledBuyOrder(event: MarketBuyOrderFulfilledMsg): void {
-    this.applyBuyOrderChange(event.buyOrderId, event.remainingBuyOrder);
-
-    if (event.buyerId === this.myCharacterId()) {
-      this.inventoryState.addOrIncrement(event.purchasedItem);
-    }
-
-    if (event.sellerId === this.myCharacterId()) {
-      this.updateCurrentCharacterCinders(event.sellerCinders);
-    }
-  }
-
-  private applyCanceledBuyOrder(event: MarketBuyOrderCanceledMsg): void {
-    this.removeBuyOrder(event.buyOrderId);
+    const response = result.data;
+    this.applyVersionedMarketplace(result);
+    this.applyVersionedCinders(result, response.buyerCinders);
   }
 
   private applyListingChange(
@@ -622,6 +552,108 @@ export class MarketplaceStateService {
     });
   }
 
+  private applyVersionedCinders<T>(
+    result: VersionedMutationResult<T>,
+    cinders: number,
+  ): boolean {
+    if (
+      !this.domainVersions.isCurrent(
+        'character',
+        result.domainVersions['character'],
+      )
+    ) {
+      return false;
+    }
+
+    this.updateCurrentCharacterCinders(cinders);
+    return true;
+  }
+
+  private applyVersionedMarketplace<
+    T extends { marketplace: MarketplaceChangeSet },
+  >(result: VersionedMutationResult<T>): boolean {
+    const changes = result.data.marketplace;
+    const headerVersion = result.domainVersions['marketplace'];
+    if (headerVersion !== undefined && headerVersion !== changes.version) {
+      return false;
+    }
+
+    const currentVersion = this.stateSync.latestRevision('marketplace');
+    if (changes.version < currentVersion) return false;
+    if (changes.version > currentVersion + 1) {
+      this.requestSemanticGapReconciliation(changes.version, true);
+      return false;
+    }
+
+    this.applyMarketplaceChanges(changes);
+    this.stateSync.acceptSnapshotResponse({ marketplace: changes.version }, [
+      'marketplace',
+    ]);
+    return true;
+  }
+
+  private applySemanticChanges(changes: MarketplaceChangeSet): void {
+    const currentVersion = this.domainVersions.latest('marketplace');
+    if (changes.version < currentVersion) return;
+
+    if (changes.version > currentVersion + 1) {
+      this.requestSemanticGapReconciliation(changes.version);
+      return;
+    }
+
+    this.applyMarketplaceChanges(changes);
+    this.domainVersions.observe({ marketplace: changes.version });
+    this.stateSync.acceptSnapshotResponse({ marketplace: changes.version }, [
+      'marketplace',
+    ]);
+  }
+
+  private requestSemanticGapReconciliation(
+    revision: number,
+    rejectedMutationResponse = false,
+  ): void {
+    if (revision <= this.semanticGapRevision) return;
+    this.semanticGapRevision = revision;
+    if (rejectedMutationResponse) {
+      this.stateSync.rejectMutationResponse('marketplace', revision);
+      return;
+    }
+    this.stateSync.acceptInvalidation({
+      characterId: null,
+      scope: 'marketplace',
+      revision,
+      reason: 'Marketplace semantic sequence gap',
+    });
+  }
+
+  private applyMarketplaceChanges(changes: MarketplaceChangeSet): void {
+    for (const change of changes.listingChanges) {
+      this.applyListingChange(change.listingId, change.listing);
+    }
+    for (const change of changes.buyOrderChanges) {
+      this.applyBuyOrderChange(change.buyOrderId, change.buyOrder);
+    }
+
+    const characterId = this.myCharacterId();
+    if (!characterId || changes.orders.length === 0) return;
+
+    const history = new Map(this._history().map((order) => [order.id, order]));
+    for (const order of changes.orders) {
+      if (order.buyerId === characterId || order.sellerId === characterId) {
+        history.set(order.id, order);
+      }
+    }
+    this._history.set(
+      [...history.values()]
+        .sort(
+          (left, right) =>
+            new Date(right.purchasedAt).getTime() -
+            new Date(left.purchasedAt).getTime(),
+        )
+        .slice(0, 50),
+    );
+  }
+
   private upsertListing(listing: MarketPlaceListing): void {
     const listings = this._listings();
     const index = listings.findIndex((current) => current.id === listing.id);
@@ -649,7 +681,9 @@ export class MarketplaceStateService {
   }
 
   private removeBuyOrder(buyOrderId: string): void {
-    const filtered = this._buyOrders().filter((order) => order.id !== buyOrderId);
+    const filtered = this._buyOrders().filter(
+      (order) => order.id !== buyOrderId,
+    );
     this._buyOrders.set(filtered);
   }
 }

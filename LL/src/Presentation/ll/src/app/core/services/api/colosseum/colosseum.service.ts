@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from '../api.service';
+import { ApiService, VersionedMutationResult } from '../api.service';
 import { catchError, Observable, throwError } from 'rxjs';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { CombatResultDto } from '../../../../shared/models/Dtos/combatResultDto';
@@ -35,6 +35,8 @@ import {
   WithdrawTournamentResponse,
 } from '../../../../shared/models/Dtos/colosseum/tournamentGrounds';
 
+const COLOSSEUM_RESPONSE_HANDLED_SCOPES = ['colosseum'] as const;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -60,12 +62,22 @@ export class ColosseumService {
     );
   }
 
-  updateDefenseSnapshot(): Observable<{ data?: ArenaDefenseStatus }> {
-    return this.apiService.post('colosseum/defense-snapshot').pipe(
-      catchError(() => {
-        return throwError(() => new Error('Failed to update arena defense'));
-      }),
-    );
+  updateDefenseSnapshot(): Observable<
+    VersionedMutationResult<ArenaDefenseStatus>
+  > {
+    return this.apiService
+      .postVersioned<ArenaDefenseStatus>(
+        'colosseum/defense-snapshot',
+        {},
+        {
+          stateSyncScopesHandledByResponse: COLOSSEUM_RESPONSE_HANDLED_SCOPES,
+        },
+      )
+      .pipe(
+        catchError(() => {
+          return throwError(() => new Error('Failed to update arena defense'));
+        }),
+      );
   }
 
   getChampionMarket(): Observable<ChampionMarket> {
@@ -79,12 +91,18 @@ export class ColosseumService {
   purchaseChampionMarketItem(
     itemId: string,
     quantity = 1,
-  ): Observable<ChampionMarketPurchaseResponse> {
+  ): Observable<VersionedMutationResult<ChampionMarketPurchaseResponse>> {
     return this.apiService
-      .post('colosseum/market/purchase', {
-        itemId,
-        quantity,
-      })
+      .postVersioned<ChampionMarketPurchaseResponse>(
+        'colosseum/market/purchase',
+        {
+          itemId,
+          quantity,
+        },
+        {
+          stateSyncScopesHandledByResponse: COLOSSEUM_RESPONSE_HANDLED_SCOPES,
+        },
+      )
       .pipe(
         catchError((err) => {
           return throwError(

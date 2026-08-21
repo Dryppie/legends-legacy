@@ -3,6 +3,7 @@ import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActi
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { LootHistoryEntry } from '../../../../shared/models/loot-history';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
+import { BusinessGrantDeduper } from './realtime-deduplication';
 
 @Injectable({ providedIn: 'root' })
 export class GameRealtimeStore {
@@ -10,8 +11,7 @@ export class GameRealtimeStore {
   private readonly _recentLoot = signal<LootHistoryEntry[]>([]);
   private readonly _lastIdleAction = signal<CharacterActionDto | null>(null);
   private readonly _lastRewardClaim = signal<InventoryItem[]>([]);
-  private readonly processedLootGrantIds = new Set<string>();
-  private readonly processedLootGrantOrder: string[] = [];
+  private readonly lootGrantDeduper = new BusinessGrantDeduper();
 
   readonly recentLoot = computed(() => this._recentLoot());
   readonly lastIdleAction = computed(() => this._lastIdleAction());
@@ -40,7 +40,7 @@ export class GameRealtimeStore {
     grantId?: string | null,
   ): void {
     if (!items.length) return;
-    if (grantId && !this.markLootGrantProcessed(grantId)) return;
+    if (!this.lootGrantDeduper.shouldApply(grantId)) return;
 
     const entries = items.map((item, index) => ({
       id: `live:${receivedAt}:${item.itemInstance.id}:${index}`,
@@ -72,26 +72,11 @@ export class GameRealtimeStore {
     this.clearLootHistory();
     this._lastIdleAction.set(null);
     this._lastRewardClaim.set([]);
-    this.processedLootGrantIds.clear();
-    this.processedLootGrantOrder.length = 0;
+    this.lootGrantDeduper.clear();
   }
 
   clearLootHistory(): void {
     this._recentLoot.set([]);
   }
 
-  private markLootGrantProcessed(grantId: string): boolean {
-    if (this.processedLootGrantIds.has(grantId)) {
-      return false;
-    }
-
-    this.processedLootGrantIds.add(grantId);
-    this.processedLootGrantOrder.push(grantId);
-    while (this.processedLootGrantOrder.length > 500) {
-      const expired = this.processedLootGrantOrder.shift();
-      if (expired) this.processedLootGrantIds.delete(expired);
-    }
-
-    return true;
-  }
 }

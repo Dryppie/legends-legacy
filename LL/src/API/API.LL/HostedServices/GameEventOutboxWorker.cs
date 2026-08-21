@@ -173,13 +173,6 @@ public sealed class GameEventOutboxWorker(
                         }
                     }
 
-                    if (delivery.Message.EventType == GameEventTypes.TournamentGroundsUpdated)
-                    {
-                        await stateSync.InvalidateWorldScopeAsync(
-                            StateSyncScopes.Tournament,
-                            $"Outbox:{delivery.Message.EventType}",
-                            cancellationToken);
-                    }
                 }
 
                 await repository.MarkProcessedAsync(delivery.Id, cancellationToken);

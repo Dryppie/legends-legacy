@@ -12,6 +12,11 @@ public class SimpleCombatEntityDto : IMapFrom<SimpleCombatEntity>
     public int MaxHealth { get; set; }
     public int Barrier { get; set; }
     public int Level { get; set; } = 1;
+    public int? PartyNumber { get; set; }
+    public int CurrentStagger { get; set; }
+    public int MaxStagger { get; set; }
+    public bool IsStaggered { get; set; }
+    public bool IsStaggerRecovering { get; set; }
 
     public void Mapping(Profile profile)
     {

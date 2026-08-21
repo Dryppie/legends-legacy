@@ -30,9 +30,15 @@ describe('RaidService', () => {
 
     service.updateParties('raid-id', assignments).subscribe();
 
-    expect(api.put).toHaveBeenCalledOnceWith('raids/raid-id/parties', {
-      assignments,
-    });
+    expect(api.put).toHaveBeenCalledOnceWith(
+      'raids/raid-id/parties',
+      {
+        assignments,
+      },
+      {
+        stateSyncScopesHandledByResponse: ['raids', 'raid-directory'],
+      },
+    );
   });
 
   it('maps local raid creation to the development endpoint', () => {
@@ -41,23 +47,36 @@ describe('RaidService', () => {
     expect(api.post).toHaveBeenCalledOnceWith(
       'raids/bosses/raid-boss.hives-abyss/development/create',
       { plusLevel: 2 },
+      { stateSyncScopesHandledByResponse: ['raids', 'raid-directory'] },
     );
   });
 
   it('maps signup approval to the leader decision endpoint', () => {
     service.approveSignup('raid-id', 'member-id').subscribe();
 
-    expect(api.post).toHaveBeenCalledOnceWith('raids/raid-id/signups/approve', {
-      characterId: 'member-id',
-    });
+    expect(api.post).toHaveBeenCalledOnceWith(
+      'raids/raid-id/signups/approve',
+      {
+        characterId: 'member-id',
+      },
+      {
+        stateSyncScopesHandledByResponse: ['raids', 'raid-directory'],
+      },
+    );
   });
 
   it('maps signup removal to the leader decision endpoint', () => {
     service.removeSignup('raid-id', 'member-id').subscribe();
 
-    expect(api.post).toHaveBeenCalledOnceWith('raids/raid-id/signups/remove', {
-      characterId: 'member-id',
-    });
+    expect(api.post).toHaveBeenCalledOnceWith(
+      'raids/raid-id/signups/remove',
+      {
+        characterId: 'member-id',
+      },
+      {
+        stateSyncScopesHandledByResponse: ['raids', 'raid-directory'],
+      },
+    );
   });
 
   it('loads personal raid history for a boss', () => {

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiService } from '../api.service';
+import { ApiService, VersionedMutationResult } from '../api.service';
 import {
   AchievementCategory,
   AchievementDto,
@@ -22,7 +22,9 @@ export class AchievementService {
     return this.api.get('Achievements/overview');
   }
 
-  getAchievements(category?: AchievementCategory): Observable<AchievementDto[]> {
+  getAchievements(
+    category?: AchievementCategory,
+  ): Observable<AchievementDto[]> {
     let params = new HttpParams();
     if (category) {
       params = params.set('category', category);
@@ -31,11 +33,13 @@ export class AchievementService {
     return this.api.get('Achievements', params);
   }
 
-  getTitles(filters: {
-    category?: AchievementCategory;
-    rarity?: TitleRarity;
-    unlocked?: boolean;
-  } = {}): Observable<TitleDto[]> {
+  getTitles(
+    filters: {
+      category?: AchievementCategory;
+      rarity?: TitleRarity;
+      unlocked?: boolean;
+    } = {},
+  ): Observable<TitleDto[]> {
     let params = new HttpParams();
     if (filters.category) {
       params = params.set('category', filters.category);
@@ -53,11 +57,21 @@ export class AchievementService {
   equipTitle(
     titleKey: string,
     displayPosition: TitleDisplayPosition,
-  ): Observable<EquippedTitleDto> {
-    return this.api.post('Titles/equip', { titleKey, displayPosition });
+  ): Observable<VersionedMutationResult<EquippedTitleDto>> {
+    return this.api.postVersioned<EquippedTitleDto>(
+      'Titles/equip',
+      { titleKey, displayPosition },
+      { stateSyncScopesHandledByResponse: ['achievements', 'character'] },
+    );
   }
 
-  unequipTitle(): Observable<EquippedTitleDto | null> {
-    return this.api.post('Titles/unequip');
+  unequipTitle(): Observable<VersionedMutationResult<EquippedTitleDto | null>> {
+    return this.api.postVersioned<EquippedTitleDto | null>(
+      'Titles/unequip',
+      {},
+      {
+        stateSyncScopesHandledByResponse: ['achievements', 'character'],
+      },
+    );
   }
 }

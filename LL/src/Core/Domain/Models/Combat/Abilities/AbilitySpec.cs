@@ -42,7 +42,8 @@ public enum AbilityTriggerEvent
     OnBarrierExpired = 28,
     OnSummonGroupResolved = 29,
     OnStatusChanged = 30,
-    OnEnemyDeath = 31
+    OnEnemyDeath = 31,
+    OnDamageDealt = 32
 }
 
 public enum AbilityEffectOperation
@@ -136,7 +137,9 @@ public enum AbilityConditionType
     EventMagnitudeAtLeast = 19,
     EventMagnitudeAtMost = 20,
     EventSourceIsAlly = 21,
-    EventIdIsNot = 22
+    EventIdIsNot = 22,
+    AnyEnemyHasCondition = 23,
+    NoEnemyHasCondition = 24
 }
 
 public enum StandardConditionType
@@ -293,6 +296,8 @@ public sealed class AbilityEffectSpec
     public int IntervalTicks { get; set; }
     public int Uses { get; set; }
     public bool OncePerTarget { get; set; }
+    public bool GuaranteedConditionApplication { get; set; }
+    public int StaggerPower { get; set; }
     public bool MaintainWhileConditionsMet { get; set; }
     public int LivingNonSummonedAllyDamagePercent { get; set; }
     public int SubsequentTargetDamagePercent { get; set; } = 100;

@@ -35,6 +35,7 @@ using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
 using Services.LL.Inventories;
+using Services.LL.Synchronization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.IO.Compression;
@@ -1715,6 +1716,8 @@ public sealed class TournamentGroundsServiceTests
             DefaultMinParticipants = 4,
             DefaultMaxParticipants = 32
         };
+        var realtimeBroadcaster = realtime ?? new CapturingGameRealtimeBroadcaster();
+        var clock = timeProvider ?? new FixedTimeProvider(Now);
 
         return new TournamentGroundsService(
             tournaments,
@@ -1726,11 +1729,12 @@ public sealed class TournamentGroundsServiceTests
             inventoryItemFactory ?? new InventoryItemFactory(),
             combatEngineExecutor ?? new ThrowingCombatEngineExecutor(),
             combatEncounterResultFactory ?? new ThrowingCombatEncounterResultFactory(),
-            realtime ?? new CapturingGameRealtimeBroadcaster(),
+            realtimeBroadcaster,
             tournamentLockService ?? new PostgresTournamentLockService(
                 tournaments,
                 Options.Create(tournamentOptions)),
-            timeProvider ?? new FixedTimeProvider(Now),
+            new StateSyncService(db, realtimeBroadcaster, clock),
+            clock,
             Options.Create(tournamentOptions),
             achievementService: null,
             outbox);

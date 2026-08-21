@@ -31,6 +31,9 @@ export enum EventType {
   StatusEffectRemoved = 'StatusEffectRemoved',
   StatusEffectCleansed = 'StatusEffectCleansed',
   StatusEffectDispelled = 'StatusEffectDispelled',
+  StaggerApplied = 'StaggerApplied',
+  StaggerBroken = 'StaggerBroken',
+  StaggerRecovered = 'StaggerRecovered',
 }
 
 export interface CombatEvent {

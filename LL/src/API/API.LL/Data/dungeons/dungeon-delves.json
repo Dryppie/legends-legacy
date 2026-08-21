@@ -89,6 +89,48 @@
         { "id": "throne-nest", "displayName": "Throne Nest", "roomType": "Combat", "depth": 12, "lane": 0, "section": 4, "nextRoomIndexes": [24], "forecast": "Royal defenders crowd the Matriarch's nest.", "vigorCostMin": 15, "vigorCostMax": 28, "tags": ["Elite"] },
         { "id": "boss", "displayName": "Hive Matriarch", "roomType": "Boss", "depth": 13, "lane": 0, "section": 4, "nextRoomIndexes": [], "forecast": "The final encounter.", "vigorCostMin": 0, "vigorCostMax": 0, "tags": ["Boss"] }
       ]
+    },
+    {
+      "id": "tangled-cave-waypoint-delve",
+      "dungeonDefinitionIds": ["tangled_cave"],
+      "nodes": [
+        { "id": "entrance", "displayName": "Silken Mouth", "roomType": "Entrance", "depth": 0, "lane": 0, "section": 1, "nextRoomIndexes": [1, 2, 3], "forecast": "Web-choked passages descend into the brood caverns." },
+        { "id": "venom-run", "displayName": "Venom Run", "roomType": "Combat", "depth": 1, "lane": -1, "section": 1, "nextRoomIndexes": [4], "forecast": "Venomous spiders stalk the narrow passage.", "vigorCostMin": 12, "vigorCostMax": 22, "tags": ["Skirmish"] },
+        { "id": "hanging-webs", "displayName": "Hanging Webs", "roomType": "Combat", "depth": 1, "lane": 0, "section": 1, "nextRoomIndexes": [4, 5], "forecast": "Giant spiders wait above a cocooned trail.", "vigorCostMin": 11, "vigorCostMax": 20, "tags": ["Skirmish", "Loot"] },
+        { "id": "brood-tunnel", "displayName": "Brood Tunnel", "roomType": "Combat", "depth": 1, "lane": 1, "section": 1, "nextRoomIndexes": [5], "forecast": "Fresh webbing trembles with movement.", "vigorCostMin": 11, "vigorCostMax": 20, "tags": ["Skirmish"] },
+        { "id": "silk-gallery", "displayName": "Silk Gallery", "roomType": "Combat", "depth": 2, "lane": -1, "section": 1, "nextRoomIndexes": [6], "forecast": "A hunting pack guards the upper gallery.", "vigorCostMin": 12, "vigorCostMax": 22, "tags": ["Elite"] },
+        { "id": "cocoon-vault", "displayName": "Cocoon Vault", "roomType": "Combat", "depth": 2, "lane": 1, "section": 1, "nextRoomIndexes": [6], "forecast": "The cave's prey hangs behind a wall of fangs.", "vigorCostMin": 13, "vigorCostMax": 23, "tags": ["Skirmish", "Loot"] },
+        { "id": "rest-site-one", "displayName": "Dry Ledge", "roomType": "RestSite", "depth": 3, "lane": 0, "section": 1, "nextRoomIndexes": [7, 8], "forecast": "Rest beyond the reach of the grasping webs." },
+        { "id": "weavers-den", "displayName": "Web Weaver's Den", "roomType": "MiniBoss", "depth": 4, "lane": -1, "section": 2, "nextRoomIndexes": [9, 10], "forecast": "Defeat the Web Weaver Spider to reach the queen's nest.", "vigorCostMin": 17, "vigorCostMax": 30, "tags": ["Miniboss"] },
+        { "id": "egg-chamber", "displayName": "Egg Chamber", "roomType": "Combat", "depth": 4, "lane": 1, "section": 2, "nextRoomIndexes": [10, 11], "forecast": "Brood guards swarm around clusters of eggs.", "vigorCostMin": 14, "vigorCostMax": 25, "tags": ["Elite"] },
+        { "id": "queen-road", "displayName": "Queen's Road", "roomType": "Combat", "depth": 5, "lane": -1, "section": 2, "nextRoomIndexes": [12], "forecast": "The colony closes ranks along the royal path.", "vigorCostMin": 14, "vigorCostMax": 25, "tags": ["Elite"] },
+        { "id": "fang-pit", "displayName": "Fang Pit", "roomType": "Combat", "depth": 5, "lane": 0, "section": 2, "nextRoomIndexes": [12], "forecast": "Giant spiders defend the central descent.", "vigorCostMin": 13, "vigorCostMax": 24, "tags": ["Skirmish"] },
+        { "id": "silk-hoard", "displayName": "Silk Hoard", "roomType": "Combat", "depth": 5, "lane": 1, "section": 2, "nextRoomIndexes": [12], "forecast": "Venomous guardians protect a cache of wrapped spoils.", "vigorCostMin": 14, "vigorCostMax": 25, "tags": ["Elite", "Loot"] },
+        { "id": "throne-web", "displayName": "Throne Web", "roomType": "Combat", "depth": 6, "lane": 0, "section": 2, "nextRoomIndexes": [13], "forecast": "The last brood guards bar the royal chamber.", "vigorCostMin": 15, "vigorCostMax": 27, "tags": ["Elite"] },
+        { "id": "rest-site-two", "displayName": "Final Ledge", "roomType": "RestSite", "depth": 7, "lane": 0, "section": 2, "nextRoomIndexes": [14], "forecast": "Rest before entering the queen's inner nest." },
+        { "id": "boss", "displayName": "Spider Queen", "roomType": "Boss", "depth": 8, "lane": 0, "section": 2, "nextRoomIndexes": [], "forecast": "The Spider Queen waits at the heart of her web.", "vigorCostMin": 0, "vigorCostMax": 0, "tags": ["Boss"] }
+      ]
+    },
+    {
+      "id": "great-tree-waypoint-delve",
+      "dungeonDefinitionIds": ["great_tree"],
+      "nodes": [
+        { "id": "entrance", "displayName": "Root Gate", "roomType": "Entrance", "depth": 0, "lane": 0, "section": 1, "nextRoomIndexes": [1, 2, 3], "forecast": "Three living paths wind into the ancient trunk." },
+        { "id": "nymph-grove", "displayName": "Nymph Grove", "roomType": "Combat", "depth": 1, "lane": -1, "section": 1, "nextRoomIndexes": [4], "forecast": "Wood nymphs defend the wounded roots.", "vigorCostMin": 12, "vigorCostMax": 22, "tags": ["Skirmish"] },
+        { "id": "spirit-bough", "displayName": "Spirit Bough", "roomType": "Combat", "depth": 1, "lane": 0, "section": 1, "nextRoomIndexes": [4, 5], "forecast": "Forest spirits gather beneath a luminous canopy.", "vigorCostMin": 11, "vigorCostMax": 20, "tags": ["Skirmish", "Loot"] },
+        { "id": "bark-hall", "displayName": "Bark Hall", "roomType": "Combat", "depth": 1, "lane": 1, "section": 1, "nextRoomIndexes": [5], "forecast": "Bark golems block the hollow passage.", "vigorCostMin": 12, "vigorCostMax": 22, "tags": ["Skirmish"] },
+        { "id": "sapwood-rise", "displayName": "Sapwood Rise", "roomType": "Combat", "depth": 2, "lane": -1, "section": 1, "nextRoomIndexes": [6], "forecast": "The tree's defenders rally on the rising path.", "vigorCostMin": 13, "vigorCostMax": 23, "tags": ["Elite"] },
+        { "id": "heartwood-cache", "displayName": "Heartwood Cache", "roomType": "Combat", "depth": 2, "lane": 1, "section": 1, "nextRoomIndexes": [6], "forecast": "Living wood closes around an ancient cache.", "vigorCostMin": 13, "vigorCostMax": 23, "tags": ["Skirmish", "Loot"] },
+        { "id": "rest-site-one", "displayName": "Quiet Hollow", "roomType": "RestSite", "depth": 3, "lane": 0, "section": 1, "nextRoomIndexes": [7, 8], "forecast": "Rest in a sheltered hollow before climbing higher." },
+        { "id": "guardian-bough", "displayName": "Guardian Bough", "roomType": "MiniBoss", "depth": 4, "lane": -1, "section": 2, "nextRoomIndexes": [9, 10], "forecast": "The Treant Guardian seals the way to the elder crown.", "vigorCostMin": 17, "vigorCostMax": 30, "tags": ["Miniboss"] },
+        { "id": "golem-ring", "displayName": "Golem Ring", "roomType": "Combat", "depth": 4, "lane": 1, "section": 2, "nextRoomIndexes": [10, 11], "forecast": "Bark golems awaken around the inner trunk.", "vigorCostMin": 14, "vigorCostMax": 25, "tags": ["Elite"] },
+        { "id": "elder-ascent", "displayName": "Elder Ascent", "roomType": "Combat", "depth": 5, "lane": -1, "section": 2, "nextRoomIndexes": [12], "forecast": "Ancient defenders hold the upper path.", "vigorCostMin": 14, "vigorCostMax": 25, "tags": ["Elite"] },
+        { "id": "spirit-canopy", "displayName": "Spirit Canopy", "roomType": "Combat", "depth": 5, "lane": 0, "section": 2, "nextRoomIndexes": [12], "forecast": "Forest spirits fill the canopy with restless magic.", "vigorCostMin": 13, "vigorCostMax": 24, "tags": ["Skirmish"] },
+        { "id": "ancient-grove", "displayName": "Ancient Grove", "roomType": "Combat", "depth": 5, "lane": 1, "section": 2, "nextRoomIndexes": [12], "forecast": "The eldest servants guard a hidden grove.", "vigorCostMin": 14, "vigorCostMax": 25, "tags": ["Elite", "Loot"] },
+        { "id": "heart-ring", "displayName": "Heart Ring", "roomType": "Combat", "depth": 6, "lane": 0, "section": 2, "nextRoomIndexes": [13], "forecast": "The final guardians encircle the heartwood throne.", "vigorCostMin": 15, "vigorCostMax": 27, "tags": ["Elite"] },
+        { "id": "rest-site-two", "displayName": "Crown Hollow", "roomType": "RestSite", "depth": 7, "lane": 0, "section": 2, "nextRoomIndexes": [14], "forecast": "Rest beneath the crown before facing the elder." },
+        { "id": "boss", "displayName": "Elder Treant", "roomType": "Boss", "depth": 8, "lane": 0, "section": 2, "nextRoomIndexes": [], "forecast": "The Elder Treant awakens in the crown chamber.", "vigorCostMin": 0, "vigorCostMax": 0, "tags": ["Boss"] }
+      ]
     }
   ]
 }

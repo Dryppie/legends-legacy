@@ -5,6 +5,33 @@ import { StateSyncService } from '../../api/state-sync/state-sync.service';
 import { StateSyncCoordinator } from './state-sync-coordinator.service';
 
 describe('StateSyncCoordinator', () => {
+  it('reconciles on focus only after a long suspension', fakeAsync(() => {
+    const getCheckpoint = jasmine
+      .createSpy()
+      .and.returnValue(
+        of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),
+      );
+    const injector = {
+      get: () => ({ getCheckpoint }),
+    } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    coordinator.initialize();
+
+    window.dispatchEvent(new Event('blur'));
+    tick(1_000);
+    window.dispatchEvent(new Event('focus'));
+    tick();
+    expect(getCheckpoint).not.toHaveBeenCalled();
+
+    window.dispatchEvent(new Event('blur'));
+    tick(5 * 60_000);
+    window.dispatchEvent(new Event('focus'));
+    tick();
+    expect(getCheckpoint).toHaveBeenCalledTimes(1);
+
+    coordinator.dispose();
+  }));
+
   it('coalesces newer revisions and ignores duplicate or stale invalidations', fakeAsync(() => {
     const api = {
       getCheckpoint: () =>
@@ -35,6 +62,67 @@ describe('StateSyncCoordinator', () => {
     tick();
 
     expect(refresh).toHaveBeenCalledTimes(1);
+  }));
+
+  it('does not refresh twice when a semantic event repeats the mutation version', fakeAsync(() => {
+    const api = {
+      getCheckpoint: () =>
+        of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),
+    } as unknown as StateSyncService;
+    const injector = { get: () => api } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    const refresh = jasmine
+      .createSpy('refresh')
+      .and.returnValue(Promise.resolve());
+    coordinator.register('tournament', 'tournament-grounds', refresh);
+
+    coordinator.acceptMutationResponse({ tournament: 5 });
+    tick(51);
+    tick();
+    coordinator.acceptDomainVersion('tournament', 5, 'semantic-5');
+    tick(51);
+    tick();
+
+    expect(refresh).toHaveBeenCalledTimes(1);
+
+    coordinator.acceptDomainVersion('tournament', 6, 'semantic-6');
+    tick(51);
+    tick();
+    expect(refresh).toHaveBeenCalledTimes(2);
+  }));
+
+  it('accepts a lower revision after an audience identity changes', fakeAsync(() => {
+    const api = {
+      getCheckpoint: () =>
+        of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),
+    } as unknown as StateSyncService;
+    const injector = { get: () => api } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    const refresh = jasmine
+      .createSpy('refresh')
+      .and.returnValue(Promise.resolve());
+    coordinator.register('guild', 'guild', refresh);
+
+    coordinator.acceptInvalidation({
+      scope: 'guild',
+      revision: 9,
+      reason: 'old-guild',
+    });
+    tick(51);
+    tick();
+
+    coordinator.resetScope('guild');
+    coordinator.acceptInvalidation({
+      scope: 'guild',
+      revision: 1,
+      reason: 'new-guild',
+    });
+    tick(51);
+    tick();
+
+    expect(refresh).toHaveBeenCalledTimes(2);
+    expect(coordinator.latestRevision('guild')).toBe(1);
+    expect(coordinator.status()[0].appliedRevision).toBe(1);
   }));
 
   it('reconciles a missed checkpoint revision through the same resource callback', fakeAsync(() => {
@@ -70,11 +158,13 @@ describe('StateSyncCoordinator', () => {
     const injector = { get: () => api } as unknown as Injector;
     const coordinator = new StateSyncCoordinator(injector);
     let attempt = 0;
-    const refresh = jasmine.createSpy('refresh').and.callFake(() =>
-      attempt++ === 0
-        ? throwError(() => new Error('offline'))
-        : of(undefined),
-    );
+    const refresh = jasmine
+      .createSpy('refresh')
+      .and.callFake(() =>
+        attempt++ === 0
+          ? throwError(() => new Error('offline'))
+          : of(undefined),
+      );
     coordinator.register('inventory', 'inventory', refresh);
 
     coordinator.acceptInvalidation({
@@ -226,6 +316,61 @@ describe('StateSyncCoordinator', () => {
     tick();
 
     expect(refresh).toHaveBeenCalledTimes(1);
+  }));
+
+  it('reconciles a response-owned scope when the store rejects its mutation body', fakeAsync(() => {
+    const api = {
+      getCheckpoint: () =>
+        of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),
+    } as unknown as StateSyncService;
+    const injector = { get: () => api } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    const refresh = jasmine
+      .createSpy('refresh')
+      .and.returnValue(Promise.resolve());
+    coordinator.register('colosseum', 'colosseum', refresh);
+
+    coordinator.rejectMutationResponse('colosseum', 5);
+    coordinator.acceptMutationResponse({ colosseum: 5 }, true, ['colosseum']);
+    tick(51);
+    tick();
+
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(coordinator.status()[0].appliedRevision).toBe(5);
+  }));
+
+  it('accepts bootstrap versions only for resources included in the snapshot', fakeAsync(() => {
+    const api = {
+      getCheckpoint: () =>
+        of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),
+    } as unknown as StateSyncService;
+    const injector = { get: () => api } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    const characterRefresh = jasmine
+      .createSpy('characterRefresh')
+      .and.returnValue(Promise.resolve());
+    const inventoryRefresh = jasmine
+      .createSpy('inventoryRefresh')
+      .and.returnValue(Promise.resolve());
+    coordinator.register('character', 'character', characterRefresh);
+    coordinator.register('inventory', 'inventory', inventoryRefresh);
+
+    coordinator.acceptSnapshotResponse({ character: 4, inventory: 7 }, [
+      'character',
+    ]);
+    coordinator.acceptInvalidation({
+      scope: 'inventory',
+      revision: 7,
+      reason: 'checkpoint',
+    });
+    tick(51);
+    tick();
+
+    expect(characterRefresh).not.toHaveBeenCalled();
+    expect(inventoryRefresh).toHaveBeenCalledTimes(1);
+    expect(coordinator.status()).toContain(
+      jasmine.objectContaining({ scope: 'character', appliedRevision: 4 }),
+    );
   }));
 
   it('retries checkpoint reconciliation after a transient failure', fakeAsync(() => {

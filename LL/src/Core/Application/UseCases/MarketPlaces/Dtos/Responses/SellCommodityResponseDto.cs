@@ -7,4 +7,5 @@ public sealed record SellCommodityResponseDto(
     long TotalPrice,
     long SellerFees,
     long SellerCinders,
-    InventoryItemDto? RemainingInventoryItem);
+    InventoryItemDto? RemainingInventoryItem,
+    MarketplaceChangeSetDto Marketplace);

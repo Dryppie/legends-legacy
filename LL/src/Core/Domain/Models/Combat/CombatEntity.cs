@@ -39,6 +39,8 @@ public class CombatEntity
     public Dictionary<AttributeType, float> CombatAttributes { get; } = [];
     public List<AttributeModifierBase> TemporaryModifiers { get; set; } = [];
     public List<EssenceAbilityModifierDefinition> TemporaryAbilityModifiers { get; set; } = [];
+    public BossStaggerDefinition? StaggerDefinition { get; set; }
+    public int StaggerParticipantCount { get; set; } = 1;
     public int Level { get; set; }
     public bool IsSummoned = false;
 
@@ -179,6 +181,8 @@ public class CombatEntity
         OffHandEquipment = entity.OffHandEquipment;
         TemporaryModifiers = entity.TemporaryModifiers.Select(tm => tm).ToList();
         TemporaryAbilityModifiers = entity.TemporaryAbilityModifiers.Select(tm => tm).ToList();
+        StaggerDefinition = entity.StaggerDefinition;
+        StaggerParticipantCount = entity.StaggerParticipantCount;
         BaseAttributes = [.. entity.BaseAttributes];
         BaseCombatAttributes = new Dictionary<AttributeType, float>(entity.BaseCombatAttributes);
         CombatAttributes = new Dictionary<AttributeType, float>(entity.CombatAttributes);

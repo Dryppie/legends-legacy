@@ -128,6 +128,14 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
                 errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: ApplyStatus requires status.");
             if (effect.Operation == AbilityEffectOperation.ApplyCondition && effect.Condition is null)
                 errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: ApplyCondition requires condition.");
+            if (effect.StaggerPower < 0)
+                errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: staggerPower cannot be negative.");
+            if (effect.StaggerPower > 0
+                && (effect.Operation != AbilityEffectOperation.ApplyCondition
+                    || effect.Condition is not (StandardConditionType.Stun or StandardConditionType.Freeze)))
+            {
+                errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: staggerPower requires an ApplyCondition Stun or Freeze effect.");
+            }
             ValidateStandardConditionEffect(essenceId, $"{ability.Id}/{effect.Id}", effect, errors);
 
             ValidateConditions(essenceId, $"{ability.Id}/{effect.Id}", effect.Conditions, errors);
@@ -247,6 +255,14 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
             errors.Add($"{essenceId}/{ownerId}: ApplyStatus requires status.");
         if (effect.Operation == AbilityEffectOperation.ApplyCondition && effect.Condition is null)
             errors.Add($"{essenceId}/{ownerId}: ApplyCondition requires condition.");
+        if (effect.StaggerPower < 0)
+            errors.Add($"{essenceId}/{ownerId}: staggerPower cannot be negative.");
+        if (effect.StaggerPower > 0
+            && (effect.Operation != AbilityEffectOperation.ApplyCondition
+                || effect.Condition is not (StandardConditionType.Stun or StandardConditionType.Freeze)))
+        {
+            errors.Add($"{essenceId}/{ownerId}: staggerPower requires an ApplyCondition Stun or Freeze effect.");
+        }
         ValidateStandardConditionEffect(essenceId, ownerId, effect, errors);
 
         ValidateConditions(essenceId, ownerId, effect.Conditions, errors);

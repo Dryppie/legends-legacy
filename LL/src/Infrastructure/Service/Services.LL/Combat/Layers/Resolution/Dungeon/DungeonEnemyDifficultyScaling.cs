@@ -6,13 +6,12 @@ namespace Services.LL.Combat.Layers.Resolution.Dungeon;
 
 public static class DungeonEnemyDifficultyScaling
 {
-    // Each dungeon difficulty is anchored to the matching full Epic equipment
-    // milestone: Tier I equipment for Normal, Tier II for Heroic, and Tier III
-    // for Mythic. Keep these explicit so later tiers cannot accidentally inherit
-    // an exponential multiplier unrelated to attainable equipment progression.
-    public const float TierOneStrengthMultiplier = 3.5f;
-    public const float TierTwoStrengthMultiplier = 6.05f;
-    public const float TierThreeStrengthMultiplier = 8.2f;
+    // Each difficulty uses the end of its matching Region as its global baseline.
+    // These multipliers are content pressure, applied after the shared stat curves.
+    public const int AreasPerRegion = 10;
+    public const float TierOneStrengthMultiplier = 1.6f;
+    public const float TierTwoStrengthMultiplier = 2.0f;
+    public const float TierThreeStrengthMultiplier = 2.0f;
 
     private static readonly HashSet<AttributeType> ScaledAttributes =
     [
@@ -35,27 +34,42 @@ public static class DungeonEnemyDifficultyScaling
                 "Dungeon tiers must be between 1 and 3.");
         }
 
-        if (authoredMultiplier is { } multiplier)
-        {
-            if (!float.IsFinite(multiplier) || multiplier <= 1f)
-                throw new ArgumentOutOfRangeException(nameof(authoredMultiplier));
-
-            return multiplier;
-        }
-
-        return dungeonTier switch
+        var contentMultiplier = dungeonTier switch
         {
             1 => TierOneStrengthMultiplier,
             2 => TierTwoStrengthMultiplier,
             3 => TierThreeStrengthMultiplier,
             _ => throw new ArgumentOutOfRangeException(nameof(dungeonTier))
         };
+
+        if (authoredMultiplier is { } multiplier)
+        {
+            if (!float.IsFinite(multiplier) || multiplier <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(authoredMultiplier));
+
+            contentMultiplier *= multiplier;
+        }
+
+        return contentMultiplier;
+    }
+
+    public static int GetProgressionPosition(int dungeonTier)
+    {
+        if (dungeonTier is < 1 or > 3)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(dungeonTier),
+                dungeonTier,
+                "Dungeon tiers must be between 1 and 3.");
+        }
+
+        return checked(dungeonTier * AreasPerRegion);
     }
 
     public static void Apply(CombatEntity enemy, int dungeonTier, float? authoredMultiplier = null)
     {
         var multiplier = GetStrengthMultiplier(dungeonTier, authoredMultiplier);
-        if (multiplier <= 1f)
+        if (Math.Abs(multiplier - 1f) < float.Epsilon)
             return;
 
         var modifierAmount = (multiplier - 1f) * 100f;

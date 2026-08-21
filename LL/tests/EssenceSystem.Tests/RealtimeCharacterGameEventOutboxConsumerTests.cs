@@ -26,7 +26,7 @@ public sealed class RealtimeCharacterGameEventOutboxConsumerTests
             },
             CancellationToken.None);
 
-        var message = Assert.IsType<CharacterLevelUpMsg>(publisher.Message);
+        var message = Assert.IsType<CharacterLevelUp>(publisher.Message);
         Assert.Equal(characterId, message.CharacterId);
         Assert.Equal(11, message.Level);
         Assert.Equal(240, message.Experience);
@@ -52,7 +52,7 @@ public sealed class RealtimeCharacterGameEventOutboxConsumerTests
             },
             CancellationToken.None);
 
-        var message = Assert.IsType<CharacterLevelUpMsg>(publisher.Message);
+        var message = Assert.IsType<CharacterLevelUp>(publisher.Message);
         Assert.Equal(characterId, message.CharacterId);
         Assert.Equal(7, message.Level);
         Assert.Equal(0, message.UnlockedEssenceSlots);
@@ -70,12 +70,16 @@ public sealed class RealtimeCharacterGameEventOutboxConsumerTests
         Assert.Equal(GameEventOutboxConsumerNames.RealtimeCharacter, consumer.Consumer);
     }
 
-    private sealed class RecordingPublisher : IGameEventPublisher
+    private sealed class RecordingPublisher : IGameRealtimeBroadcaster
     {
-        public GameEventMsg? Message { get; private set; }
+        public GameRealtimeEvent? Message { get; private set; }
         public Audience? Audience { get; private set; }
 
-        public Task PublishAsync(Audience audience, GameEventMsg message)
+        public Task PublishAsync(
+            Audience audience,
+            GameRealtimeEvent message,
+            string sender,
+            CancellationToken cancellationToken = default)
         {
             Audience = audience;
             Message = message;

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from '../api.service';
+import { ApiService, VersionedMutationResult } from '../api.service';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 
 export interface PropheciesOverviewDto {
@@ -125,29 +125,61 @@ export class ProphecyService {
     return this.api.get('prophecies');
   }
 
-  acceptProphecy(id: string): Observable<PropheciesOverviewDto> {
-    return this.api.post(`prophecies/${id}/accept`);
+  acceptProphecy(
+    id: string,
+  ): Observable<VersionedMutationResult<PropheciesOverviewDto>> {
+    return this.api.postVersioned<PropheciesOverviewDto>(
+      `prophecies/${id}/accept`,
+      {},
+      {
+        stateSyncScopesHandledByResponse: ['prophecies'],
+      },
+    );
   }
 
-  rerollDailyProphecies(): Observable<PropheciesOverviewDto> {
-    return this.api.post('prophecies/reroll');
+  rerollDailyProphecies(): Observable<
+    VersionedMutationResult<PropheciesOverviewDto>
+  > {
+    return this.api.postVersioned<PropheciesOverviewDto>(
+      'prophecies/reroll',
+      {},
+      {
+        stateSyncScopesHandledByResponse: ['prophecies'],
+      },
+    );
   }
 
-  claimProphecy(id: string): Observable<ProphecyClaimResponseDto> {
-    return this.api.post(`prophecies/${id}/claim`);
+  claimProphecy(
+    id: string,
+  ): Observable<VersionedMutationResult<ProphecyClaimResponseDto>> {
+    return this.api.postVersioned<ProphecyClaimResponseDto>(
+      `prophecies/${id}/claim`,
+      {},
+      {
+        stateSyncScopesHandledByResponse: ['prophecies'],
+      },
+    );
   }
 
   claimWeeklyMilestone(
     favorRequired: number,
-  ): Observable<ClaimWeeklyRevelationMilestoneResponseDto> {
-    return this.api.post('prophecies/weekly-revelation/claim', {
-      favorRequired,
-    });
+  ): Observable<
+    VersionedMutationResult<ClaimWeeklyRevelationMilestoneResponseDto>
+  > {
+    return this.api.postVersioned<ClaimWeeklyRevelationMilestoneResponseDto>(
+      'prophecies/weekly-revelation/claim',
+      { favorRequired },
+      { stateSyncScopesHandledByResponse: ['prophecies'] },
+    );
   }
 
-  openCache(cacheItemId: string): Observable<OpenProphecyCacheResponseDto> {
-    return this.api.post('prophecies/caches/open', {
-      cacheItemId,
-    });
+  openCache(
+    cacheItemId: string,
+  ): Observable<VersionedMutationResult<OpenProphecyCacheResponseDto>> {
+    return this.api.postVersioned<OpenProphecyCacheResponseDto>(
+      'prophecies/caches/open',
+      { cacheItemId },
+      { stateSyncScopesHandledByResponse: ['prophecies'] },
+    );
   }
 }

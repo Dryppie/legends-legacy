@@ -18,7 +18,6 @@ public sealed record ClaimTournamentRewardsCommand(Guid CharacterId, Guid? Tourn
 public sealed class ClaimTournamentRewardsCommandHandler(
     ITournamentGroundsService service,
     ILootHistoryService lootHistory,
-    IGameEventPublisher legacyEvents,
     IGameRealtimeBroadcaster gameRealtime,
     IMapper mapper)
     : IRequestHandler<ClaimTournamentRewardsCommand, Response<ClaimTournamentRewardsResponseDto>>
@@ -40,14 +39,6 @@ public sealed class ClaimTournamentRewardsCommandHandler(
                 source,
                 location,
                 cancellationToken);
-            await legacyEvents.PublishAsync(
-                new Audience.Character(request.CharacterId),
-                new LootReceivedMsg(
-                    request.CharacterId,
-                    inventoryRewards,
-                    source,
-                    location,
-                    result.InventoryGrantId));
             await gameRealtime.PublishAsync(
                 new Audience.Character(request.CharacterId),
                 new LootReceived(

@@ -1,10 +1,11 @@
 import { effect, Injectable, signal, untracked } from '@angular/core';
 import { finalize, Observable, tap } from 'rxjs';
 import { EventQuestJournal } from '../../../../shared/models/event-quest';
-import { GameEventService } from '../../real-time/game-event.service';
+import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { EventQuestService } from './event-quest.service';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
+import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
 
 @Injectable({ providedIn: 'root' })
 export class EventQuestStateService {
@@ -26,9 +27,10 @@ export class EventQuestStateService {
 
   constructor(
     private readonly api: EventQuestService,
-    events: GameEventService,
+    events: GameRealtimeEventRegistry,
     eventBus: EventBusService,
     stateSync: StateSyncCoordinator,
+    private readonly domainVersions: DomainVersionTracker,
   ) {
     stateSync.register(
       'event-quests',
@@ -38,7 +40,7 @@ export class EventQuestStateService {
     );
     effect(
       () => {
-        if (!events.event.EventQuestChangedMsg()) return;
+        if (!events.event.EventQuestChanged()) return;
         untracked(() => {
           this.changeVersion += 1;
           this.dirty = true;
@@ -170,9 +172,19 @@ export class EventQuestStateService {
         }),
       )
       .subscribe({
-        next: (journal) => {
+        next: (result) => {
+          if (
+            !this.domainVersions.isCurrent(
+              'event-quests',
+              result.domainVersions['event-quests'],
+            )
+          ) {
+            return;
+          }
           this.loadEpoch += 1;
-          this._journal.set(journal);
+          this._journal.set(result.data);
+          this._loaded.set(true);
+          this.dirty = false;
         },
         error: (error) =>
           this._error.set(error?.message ?? errorMessage),
@@ -190,5 +202,4 @@ export class EventQuestStateService {
     this._loading.set(false);
     this._error.set(null);
   }
-
 }

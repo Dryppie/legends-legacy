@@ -200,8 +200,8 @@ public sealed class EssenceDefinitionValidatorTests
             .Select(definition => definition.ActiveAbility.CooldownTicks)
             .ToArray();
 
-        Assert.Equal(63, cooldowns.Length);
-        Assert.All(cooldowns, cooldown => Assert.InRange(cooldown, 75, 220));
+        Assert.Equal(70, cooldowns.Length);
+        Assert.All(cooldowns, cooldown => Assert.InRange(cooldown, 75, 240));
         Assert.True(cooldowns.Distinct().Count() >= 10);
         Assert.Contains(cooldowns, cooldown => cooldown < 100);
         Assert.Contains(cooldowns, cooldown => cooldown > 100);
@@ -241,7 +241,7 @@ public sealed class EssenceDefinitionValidatorTests
             .SelectMany(collection => collection.EssenceDefinitionIds)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        Assert.Equal(15, collections.Count);
+        Assert.Equal(17, collections.Count);
         Assert.All(collections, collection =>
         {
             Assert.InRange(collection.EssenceDefinitionIds.Count, 2, 6);
@@ -249,7 +249,7 @@ public sealed class EssenceDefinitionValidatorTests
         Assert.Equal(
             ["Creature Families", "Essence Affinities", "Regional Ecologies"],
             collections.Select(collection => collection.Category).Distinct().Order().ToArray());
-        Assert.Equal(63, regionOneEssences.Count);
+        Assert.Equal(70, regionOneEssences.Count);
         Assert.Equal(regionOneEssences.Order(StringComparer.OrdinalIgnoreCase), collectedEssences.Order(StringComparer.OrdinalIgnoreCase));
         var allowedBonusKinds = new HashSet<BonusKind>
         {

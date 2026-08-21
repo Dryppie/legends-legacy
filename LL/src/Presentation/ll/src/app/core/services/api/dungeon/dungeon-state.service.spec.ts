@@ -3,8 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import { Observable, of } from 'rxjs';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { ToastService } from '../../client-side/components/toast/toast.service';
-import { GameEventService } from '../../real-time/game-event.service';
+import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
+import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
 import { CharacterStateService } from '../character/character-state.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { DungeonStateService } from './dungeon-state.service';
@@ -31,6 +32,7 @@ describe('DungeonStateService synchronization', () => {
     dungeonService = jasmine.createSpyObj<DungeonService>('DungeonService', [
       'getActiveDungeon',
       'getAvailableDungeons',
+      'claimDungeonRewards',
     ]);
     dungeonService.getActiveDungeon.and.returnValue(of(null));
     dungeonService.getAvailableDungeons.and.returnValue(
@@ -52,11 +54,17 @@ describe('DungeonStateService synchronization', () => {
         { provide: DungeonService, useValue: dungeonService },
         { provide: CombatService, useValue: {} },
         {
-          provide: GameEventService,
+          provide: GameRealtimeEventRegistry,
           useValue: { reconnectCount: signal(0) },
         },
-        { provide: InventoryStateService, useValue: {} },
-        { provide: CharacterStateService, useValue: {} },
+        {
+          provide: InventoryStateService,
+          useValue: { applyVersionedInventory: jasmine.createSpy() },
+        },
+        {
+          provide: CharacterStateService,
+          useValue: { applyVersionedCharacter: jasmine.createSpy() },
+        },
         { provide: ToastService, useValue: {} },
         { provide: StateSyncCoordinator, useValue: stateSync },
       ],
@@ -78,5 +86,64 @@ describe('DungeonStateService synchronization', () => {
     refresh().subscribe();
 
     expect(dungeonService.getAvailableDungeons).toHaveBeenCalledTimes(1);
+  });
+
+  it('applies the versioned claim hub without a follow-up availability GET', () => {
+    dungeonService.claimDungeonRewards.and.returnValue(
+      of({
+        data: {
+          activeRun: null,
+          hub: {
+            sigilFragments: 9,
+            sigilAssemblyEnabled: true,
+            sigilAssemblyCost: 3,
+            dungeons: [],
+          },
+          inventoryItems: [],
+          claimedLoot: [],
+          character: {} as never,
+        },
+        domainVersions: { dungeons: 2, inventory: 2, character: 2 },
+      }),
+    );
+    const state = TestBed.inject(DungeonStateService);
+    dungeonService.getAvailableDungeons.calls.reset();
+
+    state.claimDungeonRewards();
+
+    expect(state.sigilFragments()).toBe(9);
+    expect(dungeonService.getAvailableDungeons).not.toHaveBeenCalled();
+    expect(
+      TestBed.inject(InventoryStateService).applyVersionedInventory,
+    ).toHaveBeenCalled();
+    expect(
+      TestBed.inject(CharacterStateService).applyVersionedCharacter,
+    ).toHaveBeenCalled();
+  });
+
+  it('does not apply a claim hub older than the observed dungeon version', () => {
+    TestBed.inject(DomainVersionTracker).observe({ dungeons: 3 });
+    dungeonService.claimDungeonRewards.and.returnValue(
+      of({
+        data: {
+          activeRun: null,
+          hub: {
+            sigilFragments: 9,
+            sigilAssemblyEnabled: true,
+            sigilAssemblyCost: 3,
+            dungeons: [],
+          },
+          inventoryItems: [],
+          claimedLoot: [],
+          character: {} as never,
+        },
+        domainVersions: { dungeons: 2, inventory: 4, character: 4 },
+      }),
+    );
+    const state = TestBed.inject(DungeonStateService);
+
+    state.claimDungeonRewards();
+
+    expect(state.sigilFragments()).toBe(0);
   });
 });

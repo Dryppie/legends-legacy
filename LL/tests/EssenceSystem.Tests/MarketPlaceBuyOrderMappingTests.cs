@@ -53,7 +53,18 @@ public sealed class MarketPlaceBuyOrderMappingTests
                 2,
                 24,
                 1,
-                524));
+                524,
+                new MarketPlaceOrder
+                {
+                    Id = Guid.NewGuid(),
+                    SellerId = Guid.NewGuid(),
+                    BuyerId = buyOrder.BuyerId,
+                    ItemBaseId = buyOrder.ItemBaseId,
+                    Quantity = 2,
+                    UnitPrice = 12,
+                    TotalPrice = 24,
+                    PurchasedAt = DateTimeOffset.UtcNow
+                }));
         var cancelDto = mapper.Map<CancelMarketPlaceBuyOrderResponseDto>(
             new CancelMarketPlaceBuyOrderResult(buyOrder.Id, 548));
 

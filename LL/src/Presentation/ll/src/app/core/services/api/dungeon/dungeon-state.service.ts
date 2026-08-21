@@ -1,4 +1,4 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 import { finalize } from 'rxjs/operators';
 import {
   DungeonActionOutcome,
@@ -14,16 +14,13 @@ import { DungeonRecordsData } from '../../../../shared/models/Dtos/dungeons/dung
 import { DungeonDifficulty } from '../../../../shared/models/enums/dungeonDifficulty';
 import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
 import { CombatService } from '../../client-side/combat/combat.service';
-import {
-  Observable,
-  forkJoin,
-  tap,
-} from 'rxjs';
-import { GameEventService } from '../../real-time/game-event.service';
+import { Observable, forkJoin, tap } from 'rxjs';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { CharacterStateService } from '../character/character-state.service';
 import { ToastService } from '../../client-side/components/toast/toast.service';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
+import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
+import { VersionedMutationResult } from '../api.service';
 
 @Injectable({
   providedIn: 'root',
@@ -61,27 +58,17 @@ export class DungeonStateService {
   constructor(
     private readonly service: DungeonService,
     private readonly combatService: CombatService,
-    private readonly eventService: GameEventService,
     private readonly inventoryState: InventoryStateService,
     private readonly characterState: CharacterStateService,
     private readonly toast: ToastService,
     private readonly stateSync: StateSyncCoordinator,
+    private readonly domainVersions: DomainVersionTracker,
   ) {
     this.stateSync.register('dungeons', 'dungeons', () => this.synchronize());
     this.stateSync.register('inventory', 'dungeons-inventory', () =>
       this.synchronizeAvailableDungeons(),
     );
     this.refresh();
-
-    effect(
-      () => {
-        const reconnectCount = this.eventService.reconnectCount();
-        if (reconnectCount > 0) {
-          this.refresh();
-        }
-      },
-      { allowSignalWrites: true },
-    );
   }
 
   refresh(): void {
@@ -287,10 +274,9 @@ export class DungeonStateService {
       .claimDungeonRewards()
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (response) => {
-          this.applyClaimDungeonRewards(response);
-          onSuccess?.(response);
-          this.loadAvailableDungeons();
+        next: (result) => {
+          this.applyClaimDungeonRewards(result);
+          onSuccess?.(result.data);
         },
         error: (e) =>
           this._error.set(e.message ?? 'Failed to claim dungeon rewards'),
@@ -325,14 +311,20 @@ export class DungeonStateService {
   }
 
   private applyClaimDungeonRewards(
-    response: ClaimDungeonRewardsResponse,
+    result: VersionedMutationResult<ClaimDungeonRewardsResponse>,
   ): void {
-    this.setActiveDungeon(response.activeRun);
-    this.inventoryState.setInventory(
-      response.inventoryItems,
-      response.claimedLoot,
-    );
-    this.characterState.updateCharacter(response.character);
+    const response = result.data;
+    if (
+      this.domainVersions.isCurrent(
+        'dungeons',
+        result.domainVersions['dungeons'],
+      )
+    ) {
+      this.setActiveDungeon(response.activeRun);
+      this.setDungeonHub(response.hub);
+    }
+    this.inventoryState.applyVersionedInventory(result);
+    this.characterState.applyVersionedCharacter(result);
   }
 
   private applyDismissFailedDungeonRun(
@@ -357,6 +349,19 @@ export class DungeonStateService {
   setDungeons(dungeons: DungeonPreviewData[]): void {
     this.dungeonHubEpoch += 1;
     this._dungeons.set(dungeons);
+  }
+
+  private setDungeonHub(hub: {
+    dungeons: DungeonPreviewData[];
+    sigilFragments: number;
+    sigilAssemblyEnabled: boolean;
+    sigilAssemblyCost: number;
+  }): void {
+    this.dungeonHubEpoch += 1;
+    this._dungeons.set(hub.dungeons);
+    this._sigilFragments.set(hub.sigilFragments);
+    this._sigilAssemblyEnabled.set(hub.sigilAssemblyEnabled);
+    this._sigilAssemblyCost.set(hub.sigilAssemblyCost);
   }
 
   clearError(): void {

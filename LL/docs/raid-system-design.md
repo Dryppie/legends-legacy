@@ -707,7 +707,8 @@ Frontend touch list (all confirmed to exist):
 6. `shared/models/Dtos/regionDto.ts` — replace the stub `Raid` interface; add `shared/models/Dtos/raids/`.
 7. `core/services/api/raid/raid.service.ts` + `raid-state.service.ts`, mirroring
    `world-tower/world-tower.service.ts` and `dungeon/dungeon-state.service.ts`.
-8. `core/services/real-time/game-event/game-event.map.ts` + `core/services/real-time/raid/`.
+8. `core/services/real-time/game-realtime/game-realtime-contracts.ts` +
+   `core/services/real-time/raid/`.
 9. `core/services/client-side/region/region.service.ts` — replace hardcoded region data with the
    `RegionController` call (§1).
 

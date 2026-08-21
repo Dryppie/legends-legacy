@@ -1,4 +1,5 @@
 import { InventoryItem } from './inventoryItem';
+import { EquipmentSlot } from './Dtos/equipment-slots/equipmentSlot';
 
 export interface EssenceDefinitionDto {
   id: string;
@@ -245,7 +246,11 @@ export interface SpendEssenceDustResultDto extends ResponseMessageDto {
 
 export interface EssenceMutationResponseDto extends ResponseMessageDto {
   archive: SoulArchiveDto;
+  loadouts: EssenceLoadoutsDto;
+  creatureArchive: CreatureArchiveDto;
+  codex: EssenceCodexDto;
   inventoryItems: InventoryItem[];
+  equipmentSlots: EquipmentSlot[];
   dustGained?: number | null;
   dustSpent?: number | null;
   xpGained?: number | null;

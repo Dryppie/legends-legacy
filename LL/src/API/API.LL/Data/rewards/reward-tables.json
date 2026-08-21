@@ -840,6 +840,100 @@
           ]
         }
       ]
+    },
+    {
+      "id": "reward.dungeon.tangled_cave.completion",
+      "displayName": "Tangled Cave I Completion Loot",
+      "rolls": [
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 85.25,
+          "entries": [
+            { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 8 },
+            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 1, "tags": ["rare", "tool"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.tangled_cave_ii.completion",
+      "displayName": "Tangled Cave II Completion Loot",
+      "rolls": [
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 84.1,
+          "entries": [
+            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 7, "tags": ["rare", "tool"] },
+            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 2, "tags": ["rare", "tool"] },
+            { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 0.4, "tags": ["rare", "tool"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.tangled_cave_iii.completion",
+      "displayName": "Tangled Cave III Completion Loot",
+      "rolls": [
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 82.8,
+          "entries": [
+            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 7, "tags": ["rare", "tool"] },
+            { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 2.5, "tags": ["rare", "tool"] },
+            { "id": "legendary_skinning_knife", "type": "Item", "itemId": "legendary_skinning_knife", "weight": 0.75, "tags": ["rare", "tool"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.great_tree.completion",
+      "displayName": "The Great Tree I Completion Loot",
+      "rolls": [
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 85.25,
+          "entries": [
+            { "id": "woodcutting_hatchet", "type": "Item", "itemId": "woodcutting_hatchet", "weight": 8 },
+            { "id": "rare_hatchet", "type": "Item", "itemId": "rare_hatchet", "weight": 1, "tags": ["rare", "tool"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.great_tree_ii.completion",
+      "displayName": "The Great Tree II Completion Loot",
+      "rolls": [
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 84.1,
+          "entries": [
+            { "id": "rare_hatchet", "type": "Item", "itemId": "rare_hatchet", "weight": 7, "tags": ["rare", "tool"] },
+            { "id": "epic_hatchet", "type": "Item", "itemId": "epic_hatchet", "weight": 2, "tags": ["rare", "tool"] },
+            { "id": "unique_hatchet", "type": "Item", "itemId": "unique_hatchet", "weight": 0.4, "tags": ["rare", "tool"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.great_tree_iii.completion",
+      "displayName": "The Great Tree III Completion Loot",
+      "rolls": [
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 82.8,
+          "entries": [
+            { "id": "epic_hatchet", "type": "Item", "itemId": "epic_hatchet", "weight": 7, "tags": ["rare", "tool"] },
+            { "id": "unique_hatchet", "type": "Item", "itemId": "unique_hatchet", "weight": 2.5, "tags": ["rare", "tool"] },
+            { "id": "legendary_hatchet", "type": "Item", "itemId": "legendary_hatchet", "weight": 0.75, "tags": ["rare", "tool"] }
+          ]
+        }
+      ]
     }
   ]
 }

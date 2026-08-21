@@ -1,5 +1,6 @@
 using Domain.Helpers;
 using Domain.Models.Attributes;
+using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Damages;
 
@@ -89,6 +90,8 @@ public sealed class CompiledEffect
     public int IntervalTicks { get; init; }
     public int Uses { get; init; }
     public bool OncePerTarget { get; init; }
+    public bool GuaranteedConditionApplication { get; init; }
+    public int StaggerPower { get; init; }
     public bool MaintainWhileConditionsMet { get; init; }
     public AbilityThreatFunctionBand? MaintainedThreatBand { get; init; }
     public float MaintainedThreatPerSecond { get; init; }
@@ -640,6 +643,77 @@ public sealed record RuntimeBarrierConsumption(
     float Total,
     IReadOnlyList<RuntimeBarrierConsumptionEntry> Contributions);
 
+public enum RuntimeStaggerTransition
+{
+    None = 0,
+    Recovered = 1
+}
+
+public sealed class RuntimeStaggerState
+{
+    private readonly BossStaggerDefinition _definition;
+    private readonly int _participantCount;
+
+    public RuntimeStaggerState(BossStaggerDefinition definition, int participantCount)
+    {
+        _definition = definition;
+        _participantCount = Math.Max(1, participantCount);
+        Max = definition.CalculateThreshold(_participantCount, 0);
+    }
+
+    public int Current { get; private set; }
+    public int Max { get; private set; }
+    public int StaggeredRemainingTicks { get; private set; }
+    public int RecoveryRemainingTicks { get; private set; }
+    public int BreakCount { get; private set; }
+    public bool IsStaggered => StaggeredRemainingTicks > 0;
+    public bool IsRecovering => RecoveryRemainingTicks > 0;
+    public int DamageTakenBonusPercent => IsStaggered
+        ? Math.Max(0, _definition.DamageTakenBonusPercent)
+        : 0;
+    public bool CanBreak => !_definition.MaximumBreaks.HasValue
+        || BreakCount < _definition.MaximumBreaks.Value;
+    public bool CanAcceptContribution => CanBreak && !IsStaggered && !IsRecovering;
+
+    public int Apply(int amount, out bool broke)
+    {
+        broke = false;
+        if (amount <= 0 || !CanAcceptContribution)
+            return 0;
+
+        var applied = Math.Min(amount, Math.Max(0, Max - Current));
+        Current += applied;
+        if (Current < Max)
+            return applied;
+
+        BreakCount++;
+        StaggeredRemainingTicks = Math.Max(1, _definition.BreakDurationTicks);
+        RecoveryRemainingTicks = 0;
+        broke = true;
+        return applied;
+    }
+
+    public RuntimeStaggerTransition Tick()
+    {
+        if (StaggeredRemainingTicks > 0)
+        {
+            StaggeredRemainingTicks--;
+            if (StaggeredRemainingTicks > 0)
+                return RuntimeStaggerTransition.None;
+
+            Current = 0;
+            Max = _definition.CalculateThreshold(_participantCount, BreakCount);
+            RecoveryRemainingTicks = Math.Max(0, _definition.RecoveryDurationTicks);
+            return RuntimeStaggerTransition.Recovered;
+        }
+
+        if (RecoveryRemainingTicks > 0)
+            RecoveryRemainingTicks--;
+
+        return RuntimeStaggerTransition.None;
+    }
+}
+
 public sealed class RuntimeCombatant
 {
     public const float BaseThreat = EntityBaseAttributeHelper.BaseThreat;
@@ -680,7 +754,9 @@ public sealed class RuntimeCombatant
         AttackType basicAttackType = AttackType.Melee,
         DamageType basicAttackDamageType = DamageType.Physical,
         float threatMultiplier = 1f,
-        int? partyNumber = null)
+        int? partyNumber = null,
+        BossStaggerDefinition? staggerDefinition = null,
+        int staggerParticipantCount = 1)
     {
         Id = id;
         Name = name;
@@ -705,6 +781,9 @@ public sealed class RuntimeCombatant
         BasicAttackDamageMultiplier = Math.Max(0.1d, basicAttackDamageMultiplier);
         BasicAttackType = basicAttackType;
         BasicAttackDamageType = basicAttackDamageType;
+        Stagger = staggerDefinition is { Enabled: true }
+            ? new RuntimeStaggerState(staggerDefinition, staggerParticipantCount)
+            : null;
         RebuildTriggerIndex();
     }
 
@@ -751,6 +830,7 @@ public sealed class RuntimeCombatant
     public double BasicAttackDamageMultiplier { get; }
     public AttackType BasicAttackType { get; }
     public DamageType BasicAttackDamageType { get; }
+    public RuntimeStaggerState? Stagger { get; }
     public bool IsAlive => Health > 0;
 
     public float GetAttribute(AttributeType attributeType) =>
@@ -999,6 +1079,7 @@ public sealed class RuntimeCombatant
     {
         var total = _damageTakenPercent.GetValueOrDefault(DamageType.None)
                     + _damageTakenPercent.GetValueOrDefault(damageType);
+        total += Stagger?.DamageTakenBonusPercent ?? 0;
 
         foreach (var entry in _damageTakenFromConditionPercent)
         {

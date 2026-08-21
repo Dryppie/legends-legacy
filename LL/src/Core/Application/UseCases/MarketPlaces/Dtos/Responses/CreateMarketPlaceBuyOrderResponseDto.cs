@@ -10,6 +10,7 @@ public sealed class CreateMarketPlaceBuyOrderResponseDto : IMapFrom<CreateMarket
     public required int FilledQuantity { get; init; }
     public required long FilledTotalPrice { get; init; }
     public required long BuyerCinders { get; init; }
+    public MarketplaceChangeSetDto Marketplace { get; set; } = null!;
 
     public void Mapping(Profile profile)
     {

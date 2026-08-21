@@ -15,12 +15,12 @@ public record KickGuildMemberCommand(Guid CharacterId, Guid TargetCharacterId) :
 public class KickGuildMemberCommandHandler : IRequestHandler<KickGuildMemberCommand, Response<bool>>
 {
     private readonly IGuildService _guild;
-    private readonly IGameEventPublisher _events;
+    private readonly IGameRealtimeBroadcaster _events;
     private readonly IGameEventOutbox _outbox;
     private readonly IGuildSystemChatPublisher _guildChat;
     public KickGuildMemberCommandHandler(
         IGuildService guild,
-        IGameEventPublisher events,
+        IGameRealtimeBroadcaster events,
         IGameEventOutbox outbox,
         IGuildSystemChatPublisher guildChat)
     {
@@ -37,9 +37,9 @@ public class KickGuildMemberCommandHandler : IRequestHandler<KickGuildMemberComm
         if (!kicked || guild is null) return Response<bool>.Fail("You cannot kick that member.");
         await _outbox.EnqueueAsync(GameEventTypes.EquipmentChanged, new EquipmentChangedPayload(request.TargetCharacterId), request.TargetCharacterId, null, cancellationToken);
         await _guildChat.PublishAsync(guild.Id, request.TargetCharacterId, GuildSystemChatEvent.Kicked, cancellationToken);
-        await _events.PublishAsync(new Audience.Character(request.TargetCharacterId), new GuildMembershipChangedMsg(guild.Id, request.TargetCharacterId));
-        await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChangedMsg(guild.Id));
-        await _events.PublishAsync(new Audience.World(), new GuildDirectoryChangedMsg("membership"));
+        await _events.PublishAsync(new Audience.Character(request.TargetCharacterId), new GuildMembershipChanged(guild.Id, request.TargetCharacterId), nameof(KickGuildMemberCommandHandler), cancellationToken);
+        await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChanged(guild.Id), nameof(KickGuildMemberCommandHandler), cancellationToken);
+        await _events.PublishAsync(new Audience.World(), new GuildDirectoryChanged("membership"), nameof(KickGuildMemberCommandHandler), cancellationToken);
         return Response<bool>.Success(true);
     }
 }

@@ -6,7 +6,10 @@ import { ArenaOpponentPreview } from '../../../../shared/models/Dtos/colosseum/a
 import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
 import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
 import { LeaderboardEntry } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntry';
-import { ColosseumStatus } from '../../../../shared/models/Dtos/colosseum/colosseumStatus';
+import {
+  ArenaDefenseStatus,
+  ColosseumStatus,
+} from '../../../../shared/models/Dtos/colosseum/colosseumStatus';
 import { StartArenaBattleResponse } from '../../../../shared/models/Dtos/colosseum/startArenaBattleResponse';
 import {
   ChampionMarket,
@@ -15,18 +18,19 @@ import {
   ChampionMarketPurchaseResponse,
   ChampionMarketView,
 } from '../../../../shared/models/Dtos/colosseum/championMarket';
-import { GameEventService } from '../../real-time/game-event.service';
+import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
 import { CharacterStateService } from '../character/character-state.service';
-import { ArenaBattleCompletedMsg } from '../../real-time/colosseum/arena-battle-completed';
+import { ArenaBattleCompleted } from '../../real-time/game-realtime/game-realtime-contracts';
 import {
   NOTIFICATION_SURFACE,
   NotificationService,
   SIDEBAR_NOTIFICATION,
 } from '../../client-side/notifications/notification.service';
-import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
+import { RealtimeSignalDeduper } from '../../real-time/game-realtime/realtime-deduplication';
 import { ToastService } from '../../client-side/components/toast/toast.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
+import { VersionedMutationResult } from '../api.service';
 
 @Injectable({ providedIn: 'root' })
 export class ColosseumStateService {
@@ -41,7 +45,7 @@ export class ColosseumStateService {
   private readonly _error = signal<string | null>(null);
   private hasLoaded = false;
   private notificationLoading = false;
-  private readonly eventDeduper = new GameEventDeduper();
+  private readonly eventDeduper = new RealtimeSignalDeduper();
   private statusRequestEpoch = 0;
   private ticketRequestEpoch = 0;
   private opponentsRequestEpoch = 0;
@@ -67,7 +71,7 @@ export class ColosseumStateService {
   constructor(
     private readonly colosseumService: ColosseumService,
     private readonly combatService: CombatService,
-    private readonly eventService: GameEventService,
+    private readonly eventService: GameRealtimeEventRegistry,
     private readonly characterState: CharacterStateService,
     private readonly notificationService: NotificationService,
     private readonly toastService: ToastService,
@@ -77,23 +81,13 @@ export class ColosseumStateService {
     this.stateSync.register(
       'colosseum',
       'colosseum',
-      () => this.synchronize(),
+      () => this.reconcileArena(),
       () => this.hasLoaded,
     );
     effect(
       () => {
-        const reconnectCount = this.eventService.reconnectCount();
-        if (reconnectCount > 0 && this.hasLoaded) {
-          this.refresh();
-        }
-      },
-      { allowSignalWrites: true },
-    );
-
-    effect(
-      () => {
         const envelope =
-          this.eventService.eventEnvelope.ArenaBattleCompletedMsg();
+          this.eventService.eventEnvelope.ArenaBattleCompleted();
         const event = envelope?.payload;
         const characterId = this.characterState.currentCharacterId();
         if (
@@ -110,13 +104,6 @@ export class ColosseumStateService {
 
         this.applyArenaRating(event, characterId);
         this.addNotification();
-
-        if (this.hasLoaded) {
-          this.loadStatus();
-          this.loadArenaOpponents();
-          this.loadColosseumRankings();
-          this.loadColosseumMatchResults();
-        }
       },
       { allowSignalWrites: true },
     );
@@ -132,35 +119,27 @@ export class ColosseumStateService {
     this.loadChampionMarket();
   }
 
-  private synchronize(): Observable<unknown> {
-    this.hasLoaded = true;
+  private reconcileArena(): Observable<unknown> {
     this._loading.set(true);
     this._error.set(null);
     const epochs = {
       status: ++this.statusRequestEpoch,
-      ticket: ++this.ticketRequestEpoch,
       opponents: ++this.opponentsRequestEpoch,
       rankings: ++this.rankingsRequestEpoch,
       matches: ++this.matchesRequestEpoch,
-      market: ++this.marketRequestEpoch,
     };
 
     return forkJoin({
       status: this.colosseumService.getStatus(),
-      ticket: this.colosseumService.getArenaTicketStatus(),
       opponents: this.colosseumService.getArenaOpponents(),
       rankings: this.colosseumService.getColosseumRankings(),
       matches: this.colosseumService.getColosseumMatchResults(),
-      market: this.colosseumService.getChampionMarket(),
     }).pipe(
       tap({
-        next: ({ status, ticket, opponents, rankings, matches, market }) => {
+        next: ({ status, opponents, rankings, matches }) => {
           if (epochs.status === this.statusRequestEpoch) {
             this._status.set(status);
             this.syncNotificationCount(status);
-          }
-          if (epochs.ticket === this.ticketRequestEpoch) {
-            this._arenaTicketStatus.set(ticket);
           }
           if (epochs.opponents === this.opponentsRequestEpoch) {
             this._allOpponents.set(opponents);
@@ -178,12 +157,9 @@ export class ColosseumStateService {
               ),
             );
           }
-          if (epochs.market === this.marketRequestEpoch) {
-            this._championMarket.set(market);
-          }
         },
         error: (error) =>
-          this._error.set(error?.message ?? 'Failed to synchronize colosseum'),
+          this._error.set(error?.message ?? 'Failed to reconcile arena state'),
       }),
       finalize(() => this._loading.set(false)),
     );
@@ -319,10 +295,10 @@ export class ColosseumStateService {
       .updateDefenseSnapshot()
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: () => {
-          this.loadStatus();
-          this.loadArenaOpponents();
-        },
+        next: (result) =>
+          this.applyOwnedColosseumMutation(result, (defenseStatus) =>
+            this.applyDefenseStatus(defenseStatus),
+          ),
         error: (err) =>
           this._error.set(err.message ?? 'Failed to update arena defense'),
       });
@@ -336,9 +312,14 @@ export class ColosseumStateService {
       .purchaseChampionMarketItem(itemId, quantity)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (response) => {
-          this.applyChampionMarketPurchase(response);
-          this.showChampionMarketPurchaseToast(itemId, response);
+        next: (result) => {
+          if (
+            this.applyOwnedColosseumMutation(result, (response) =>
+              this.applyChampionMarketPurchase(response),
+            )
+          ) {
+            this.showChampionMarketPurchaseToast(itemId, result.data);
+          }
         },
         error: (err) => {
           const message =
@@ -384,10 +365,6 @@ export class ColosseumStateService {
     this.applyTicketStatus(response.arenaTicketStatus);
     this.applyCurrentCharacterArenaRating(response.attackerRating.ratingAfter);
     this.applyArenaBattleStatus(response);
-    this.loadStatus();
-    this.loadArenaOpponents();
-    this.loadColosseumRankings();
-    this.loadColosseumMatchResults();
     this.combatService.startColosseumMatchSimulation(response.battle);
   }
 
@@ -407,14 +384,14 @@ export class ColosseumStateService {
   }
 
   private isParticipant(
-    event: ArenaBattleCompletedMsg,
+    event: ArenaBattleCompleted,
     characterId: string,
   ): boolean {
     return event.characterId === characterId || event.enemyId === characterId;
   }
 
   private applyArenaRating(
-    event: ArenaBattleCompletedMsg,
+    event: ArenaBattleCompleted,
     characterId: string,
   ): void {
     const arenaRating =
@@ -533,6 +510,39 @@ export class ColosseumStateService {
           character.sigilFragments + response.sigilFragmentsGranted,
       });
     }
+  }
+
+  private applyDefenseStatus(defenseStatus: ArenaDefenseStatus): void {
+    const status = this._status();
+    if (!status) return;
+
+    this.statusRequestEpoch += 1;
+    this._status.set({ ...status, defenseStatus });
+    this.syncNotificationCount(this._status());
+  }
+
+  private applyOwnedColosseumMutation<T>(
+    result: VersionedMutationResult<T>,
+    apply: (response: T) => void,
+  ): boolean {
+    const version = result.domainVersions['colosseum'];
+    if (version === undefined) {
+      apply(result.data);
+      return true;
+    }
+
+    const currentVersion = this.stateSync.latestRevision('colosseum');
+    if (version < currentVersion) return false;
+    if (version > currentVersion + 1) {
+      this.stateSync.rejectMutationResponse('colosseum', version);
+      return false;
+    }
+
+    apply(result.data);
+    this.stateSync.acceptSnapshotResponse({ colosseum: version }, [
+      'colosseum',
+    ]);
+    return true;
   }
 
   private applyChampionMarketItemPurchase(

@@ -1,3 +1,4 @@
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Inventories;
 using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
@@ -19,20 +20,20 @@ public sealed class OpenCatalystSelectionCrateCommandHandler
 {
     private readonly ISelectionCrateService _selectionCrates;
     private readonly ILootHistoryService _lootHistory;
-    private readonly IGameEventPublisher _legacyEvents;
+    private readonly IInventoryService _inventory;
     private readonly IGameRealtimeBroadcaster _gameRealtime;
     private readonly IMapper _mapper;
 
     public OpenCatalystSelectionCrateCommandHandler(
         ISelectionCrateService selectionCrates,
+        IInventoryService inventory,
         ILootHistoryService lootHistory,
-        IGameEventPublisher legacyEvents,
         IGameRealtimeBroadcaster gameRealtime,
         IMapper mapper)
     {
         _selectionCrates = selectionCrates;
+        _inventory = inventory;
         _lootHistory = lootHistory;
-        _legacyEvents = legacyEvents;
         _gameRealtime = gameRealtime;
         _mapper = mapper;
     }
@@ -64,20 +65,25 @@ public sealed class OpenCatalystSelectionCrateCommandHandler
             result.ContainerName,
             cancellationToken);
 
-        await _legacyEvents.PublishAsync(
-            new Audience.Character(request.CharacterId),
-            new LootReceivedMsg(request.CharacterId, rewards, source, result.ContainerName, grantId));
         await _gameRealtime.PublishAsync(
             new Audience.Character(request.CharacterId),
             new LootReceived(request.CharacterId, rewards, source, result.ContainerName, grantId),
             nameof(OpenCatalystSelectionCrateCommandHandler),
             cancellationToken);
 
+        var inventory = await _inventory.GetInventoryByIdAsync(
+            request.CharacterId,
+            cancellationToken);
+        if (inventory is null)
+            return Response<OpenSelectionCrateResultDto>.Fail(
+                "The inventory could not be loaded.");
+
         return Response<OpenSelectionCrateResultDto>.Success(new OpenSelectionCrateResultDto
         {
             ConsumedItemInstanceId = request.CrateItemInstanceId,
             GrantId = grantId,
-            Rewards = rewards
+            Rewards = rewards,
+            InventoryItems = _mapper.Map<List<InventoryItemDto>>(inventory.InventoryItems)
         });
     }
 }

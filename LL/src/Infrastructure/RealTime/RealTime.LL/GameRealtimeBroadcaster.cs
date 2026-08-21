@@ -46,6 +46,8 @@ internal sealed class GameRealtimeImmediatePublisher : IGameRealtimeImmediatePub
         Audience.Character character => $"character:{character.CharacterId}",
         Audience.Characters characters => $"characters:{characters.CharacterIds.Count}",
         Audience.Guild guild => $"guild:{guild.GuildId}",
+        Audience.Raid raid => $"raid:{raid.RaidRunId}",
+        Audience.TournamentGrounds => "tournament-grounds",
         Audience.World => "world",
         _ => audience.GetType().Name
     };

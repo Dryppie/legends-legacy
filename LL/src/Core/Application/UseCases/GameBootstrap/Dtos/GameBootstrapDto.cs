@@ -16,6 +16,8 @@ public sealed class GameBootstrapDto : IMapFrom<GameBootstrapSnapshot>
     public DateTimeOffset ServerTimeUtc { get; init; }
     public IReadOnlyCollection<AttributeDefinition> AttributeDefinitions { get; init; } = [];
     public required AccountAccessDto AccountAccess { get; init; }
+    public IReadOnlyDictionary<string, long> StateVersions { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
 
     public void Mapping(Profile profile)
     {
@@ -31,6 +33,8 @@ public sealed class GameBootstrapSnapshot
     public DateTimeOffset ServerTimeUtc { get; init; }
     public IReadOnlyCollection<AttributeDefinition> AttributeDefinitions { get; init; } = [];
     public required AccountAccessDto AccountAccess { get; init; }
+    public IReadOnlyDictionary<string, long> StateVersions { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
 }
 
 public sealed record AccountAccessDto(

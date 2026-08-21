@@ -425,6 +425,10 @@ export class CombatComponent implements OnInit, OnDestroy {
     character.health = combatEntity.health;
     character.maxHealth = combatEntity.maxHealth;
     character.barrier = combatEntity.barrier;
+    character.currentStagger = combatEntity.currentStagger;
+    character.maxStagger = combatEntity.maxStagger;
+    character.isStaggered = combatEntity.isStaggered;
+    character.isStaggerRecovering = combatEntity.isStaggerRecovering;
   }
 
   private findCharacterById(id: string): SimpleCombatEntityDto | undefined {

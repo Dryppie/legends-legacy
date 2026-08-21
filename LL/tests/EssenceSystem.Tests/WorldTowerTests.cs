@@ -2,7 +2,11 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Application.MediatR.Attributes;
 using Application.UseCases.WorldTower;
+using Domain.Components.Attributes;
+using Domain.Models.Attributes;
 using Domain.Models.Combat.Abilities;
+using Domain.Models.Combat;
+using Domain.Models.Entities.Characters;
 using Domain.Models.WorldTower;
 using Microsoft.Extensions.Configuration;
 using Services.LL.Combat;
@@ -13,6 +17,26 @@ namespace EssenceSystem.Tests;
 
 public sealed class WorldTowerTests
 {
+    [Fact]
+    public void Participant_scaling_grows_health_faster_than_pressure()
+    {
+        var fivePlayerGuardian = CreateGuardian();
+        var tenPlayerGuardian = CreateGuardian();
+
+        WorldTowerGuardianScaling.Apply(fivePlayerGuardian, new TowerGuardianScalingDefinition(), 5);
+        WorldTowerGuardianScaling.Apply(tenPlayerGuardian, new TowerGuardianScalingDefinition(), 10);
+        AttributeCalculator.CalculateBaseCombatAttributes(fivePlayerGuardian);
+        AttributeCalculator.CalculateBaseCombatAttributes(tenPlayerGuardian);
+
+        var healthRatio = tenPlayerGuardian.GetAttributeValue(AttributeType.MaxHealth)
+                          / (float)fivePlayerGuardian.GetAttributeValue(AttributeType.MaxHealth);
+        var offenseRatio = tenPlayerGuardian.GetAttributeValue(AttributeType.Power)
+                           / (float)fivePlayerGuardian.GetAttributeValue(AttributeType.Power);
+
+        Assert.InRange(healthRatio, 1.7f, 1.9f);
+        Assert.InRange(offenseRatio, 1.1f, 1.3f);
+    }
+
     [Theory]
     [InlineData(3, 1)]
     [InlineData(5, 1)]
@@ -69,7 +93,8 @@ public sealed class WorldTowerTests
             options).GetCatalog();
 
         Assert.Equal(Enumerable.Range(1, 10), floors.Select(x => x.FloorNumber));
-        Assert.Equal([5, 5, 5, 5, 10, 5, 3, 10, 10, 15], floors.Select(x => x.RequiredSlots));
+        Assert.Equal(Enumerable.Range(1, 10), floors.Select(x => x.ProgressionPosition));
+        Assert.Equal([5, 5, 5, 5, 10, 5, 5, 10, 10, 15], floors.Select(x => x.RequiredSlots));
         Assert.Null(provider.GetFloor(11));
         Assert.All(floors, floor => Assert.Contains(floor.GuardianCreatureId, creatureIds));
         Assert.All(floors, floor => Assert.False(string.IsNullOrWhiteSpace(floor.GuardianAbilityProfileId)));
@@ -103,6 +128,7 @@ public sealed class WorldTowerTests
         Assert.Equal("Orsenn, the Ashen Bellkeeper", floors[5].GuardianName);
         Assert.Equal(Guid.Parse("00000000-0000-0000-0000-000000000064"), floors[6].GuardianCreatureId);
         Assert.Equal("Eydis, the Endless Spring", floors[6].GuardianName);
+        Assert.Equal(5, floors[6].RequiredSlots);
         Assert.Equal(Guid.Parse("00000000-0000-0000-0000-000000000063"), floors[7].GuardianCreatureId);
         Assert.Equal("Kodoku, the Poisoned Vessel", floors[7].GuardianName);
         Assert.Equal(Guid.Parse("00000000-0000-0000-0000-000000000062"), floors[8].GuardianCreatureId);
@@ -152,4 +178,16 @@ public sealed class WorldTowerTests
         Assert.Equal(100, progress.ScoutingProgress);
         Assert.Throws<ArgumentOutOfRangeException>(() => progress.AddScoutingProgress(-1, now));
     }
+
+    private static CombatEntity CreateGuardian() =>
+        new(new Character
+        {
+            BaseAttributes =
+            [
+                new EntityAttribute { AttributeType = AttributeType.MaxHealth, Value = 100 },
+                new EntityAttribute { AttributeType = AttributeType.Power, Value = 10 },
+                new EntityAttribute { AttributeType = AttributeType.Armor, Value = 10 },
+                new EntityAttribute { AttributeType = AttributeType.Resistance, Value = 10 }
+            ]
+        });
 }

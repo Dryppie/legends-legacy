@@ -13,6 +13,8 @@ internal static class RealtimeAudienceMapper
             null,
             characters.CharacterIds.Distinct().ToArray()),
         Audience.Guild guild => new("guild", guild.GuildId, null),
+        Audience.Raid raid => new("raid", raid.RaidRunId, null),
+        Audience.TournamentGrounds => new("tournament-grounds", null, null),
         Audience.World => new("world", null, null),
         _ => throw new ArgumentException(
             $"Unsupported audience type: {audience.GetType().Name}",

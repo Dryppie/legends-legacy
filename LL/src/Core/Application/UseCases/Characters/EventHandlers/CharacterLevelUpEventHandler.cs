@@ -24,7 +24,7 @@ public class CharacterLevelUpEventHandler : INotificationHandler<CharacterLevelU
         // Essence attunement slots are now derived by IEssenceSlotUnlockService from character level.
         // No legacy EssenceSlot rows are created on level-up.
         //
-        // The realtime CharacterLevelUpMsg is broadcast by RealtimeCharacterGameEventOutboxConsumer
+        // The realtime CharacterLevelUp event is broadcast by RealtimeCharacterGameEventOutboxConsumer
         // instead of from here. This handler runs inside the command transaction, so publishing
         // directly raced the commit: clients received the level-up, immediately refetched derived
         // state such as essence attunement slots, and could still read the pre-level-up row.

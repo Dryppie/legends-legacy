@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "anchorIds": [
+    "campaign-start",
+    "region-01-mid",
+    "region-01-end",
+    "region-02-end",
+    "region-03-end",
+    "region-05-end",
+    "region-10-end"
+  ],
+  "gearEnvelopeIds": ["minimum", "expected", "optimized"],
+  "randomSeeds": [17, 29, 43],
+  "maxTicks": 300,
+  "playerStartingHealthPercent": 0.7,
+  "targetPowerFraction": 0.1,
+  "essenceEnvelopes": [
+    { "id": "attributes-only", "slotFillPercent": 0.0, "ascensionTier": 0, "isEvolved": false },
+    { "id": "minimum", "slotFillPercent": 0.4, "ascensionTier": 0, "isEvolved": false },
+    { "id": "expected", "slotFillPercent": 0.7, "ascensionTier": 1, "isEvolved": false },
+    { "id": "optimized", "slotFillPercent": 1.0, "ascensionTier": 3, "isEvolved": false }
+  ],
+  "buildFamilies": [
+    {
+      "id": "offensive",
+      "allocationProfileId": "offensive",
+      "essenceIds": [
+        "essence.goblin", "essence.raven", "essence.venomous_snake", "essence.goblin_archer",
+        "essence.frost_imp", "essence.crystal_wisp", "essence.grave_hound", "essence.skeleton",
+        "essence.glade_panther", "essence.flame_imp"
+      ]
+    },
+    {
+      "id": "sustain",
+      "allocationProfileId": "defensive-support",
+      "essenceIds": [
+        "essence.lumo_wisp", "essence.blue_slime", "essence.goblin_shaman", "essence.transparent_slime",
+        "essence.nightshade_blossom", "essence.wood_nymph", "essence.treant_sapling", "essence.forest_spirit",
+        "essence.rotfly_toad", "essence.ravenous_ghoul"
+      ]
+    },
+    {
+      "id": "summon",
+      "allocationProfileId": "balanced",
+      "essenceIds": [
+        "essence.shadow_imp", "essence.gnoll_shaman", "essence.bog_mite", "essence.illusion_fox",
+        "essence.lumo_wisp", "essence.wood_nymph", "essence.forest_spirit", "essence.goblin_shaman",
+        "essence.hollow_stag", "essence.brown_slime"
+      ]
+    },
+    {
+      "id": "control",
+      "allocationProfileId": "balanced",
+      "essenceIds": [
+        "essence.enchanted_fairy", "essence.giant_worm", "essence.raven", "essence.frost_imp",
+        "essence.grave_hound", "essence.skeleton", "essence.venomous_spiderling", "essence.gnoll_raider",
+        "essence.plague_ghoul", "essence.wandering_ghost"
+      ]
+    }
+  ]
+}

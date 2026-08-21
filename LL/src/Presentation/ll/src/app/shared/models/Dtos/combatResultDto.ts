@@ -52,6 +52,8 @@ export interface EntityStats {
   targetedAttacks?: number;
   attentionSharePercent?: number;
   threatGenerated?: number;
+  staggerContributed?: number;
+  staggerBreaks?: number;
   health?: number | null;
   maxHealth?: number | null;
   barrier?: number | null;
@@ -71,6 +73,8 @@ export interface AbilityStats {
   alliedDamage: number;
   totalBarrier: number;
   totalThreat?: number;
+  totalStagger?: number;
+  staggerBreaks?: number;
 }
 
 export interface AbilityDamageTypeStats {
@@ -97,6 +101,10 @@ export interface SimpleCombatEntityDto {
   threat?: number;
   level: number;
   partyNumber?: number | null;
+  currentStagger?: number;
+  maxStagger?: number;
+  isStaggered?: boolean;
+  isStaggerRecovering?: boolean;
 }
 
 export interface CombatSessionDto {

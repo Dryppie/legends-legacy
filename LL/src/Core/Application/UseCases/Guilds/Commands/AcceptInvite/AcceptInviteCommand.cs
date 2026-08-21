@@ -11,12 +11,12 @@ public record AcceptInviteCommand(Guid CharacterId, string GuildId) : ICommand<R
 public class AcceptInviteCommandHandler : IRequestHandler<AcceptInviteCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _eventPublisher;
     private readonly IGuildSystemChatPublisher _guildChat;
 
     public AcceptInviteCommandHandler(
         IGuildService guildService,
-        IGameEventPublisher eventPublisher,
+        IGameRealtimeBroadcaster eventPublisher,
         IGuildSystemChatPublisher guildChat)
     {
         _guildService = guildService;
@@ -40,13 +40,19 @@ public class AcceptInviteCommandHandler : IRequestHandler<AcceptInviteCommand, R
 
         await _eventPublisher.PublishAsync(
             new Audience.Character(request.CharacterId),
-            new GuildMembershipChangedMsg(guildId, request.CharacterId));
+            new GuildMembershipChanged(guildId, request.CharacterId),
+            nameof(AcceptInviteCommandHandler),
+            cancellationToken);
         await _eventPublisher.PublishAsync(
             new Audience.Guild(guildId),
-            new GuildStateChangedMsg(guildId));
+            new GuildStateChanged(guildId),
+            nameof(AcceptInviteCommandHandler),
+            cancellationToken);
         await _eventPublisher.PublishAsync(
             new Audience.World(),
-            new GuildDirectoryChangedMsg("membership"));
+            new GuildDirectoryChanged("membership"),
+            nameof(AcceptInviteCommandHandler),
+            cancellationToken);
 
         return Response<bool>.Success(true);
     }

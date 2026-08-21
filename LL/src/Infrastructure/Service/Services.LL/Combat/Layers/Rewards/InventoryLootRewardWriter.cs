@@ -12,20 +12,17 @@ namespace Services.LL.Combat.Layers.Rewards;
 public sealed class InventoryLootRewardWriter : ILootRewardWriter
 {
     private readonly IInventoryService _inventoryService;
-    private readonly IGameEventPublisher _gameEventPublisher;
     private readonly IGameRealtimeBroadcaster _gameRealtime;
     private readonly ILootHistoryService _lootHistory;
     private readonly IMapper _mapper;
 
     public InventoryLootRewardWriter(
         IInventoryService inventoryService,
-        IGameEventPublisher gameEventPublisher,
         IGameRealtimeBroadcaster gameRealtime,
         ILootHistoryService lootHistory,
         IMapper mapper)
     {
         _inventoryService = inventoryService;
-        _gameEventPublisher = gameEventPublisher;
         _gameRealtime = gameRealtime;
         _lootHistory = lootHistory;
         _mapper = mapper;
@@ -56,12 +53,6 @@ public sealed class InventoryLootRewardWriter : ILootRewardWriter
             source,
             location,
             cancellationToken);
-
-        var message = new LootReceivedMsg(ownerCharacterId, mappedItems, source, location);
-
-        await _gameEventPublisher.PublishAsync(
-            new Audience.Character(ownerCharacterId),
-            message);
 
         await _gameRealtime.PublishAsync(
             new Audience.Character(ownerCharacterId),

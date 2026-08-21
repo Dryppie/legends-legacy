@@ -8,7 +8,6 @@ using Domain.Models.Outbox;
 namespace Services.LL.Outbox;
 
 public sealed class RealtimeInventoryGameEventOutboxConsumer(
-    IGameEventPublisher legacyPublisher,
     IGameRealtimeBroadcaster realtimeBroadcaster,
     JsonSerializerOptions jsonOptions) : IGameEventOutboxConsumer
 {
@@ -33,13 +32,5 @@ public sealed class RealtimeInventoryGameEventOutboxConsumer(
                 payload.GrantId),
             nameof(RealtimeInventoryGameEventOutboxConsumer),
             cancellationToken);
-        await legacyPublisher.PublishAsync(
-            audience,
-            new LootReceivedMsg(
-                payload.CharacterId,
-                payload.Items,
-                payload.Source,
-                payload.Location,
-                payload.GrantId));
     }
 }

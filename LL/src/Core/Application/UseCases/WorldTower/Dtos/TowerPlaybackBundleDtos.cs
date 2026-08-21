@@ -38,7 +38,11 @@ public sealed record TowerPlaybackBundleFrameDto(
 public sealed record TowerPlaybackEntityStateDto(
     int EntityIndex,
     int Health,
-    int Barrier);
+    int Barrier,
+    int CurrentStagger = 0,
+    int MaxStagger = 0,
+    bool IsStaggered = false,
+    bool IsStaggerRecovering = false);
 
 public sealed record TowerPlaybackEntityTotalsDto(
     int EntityIndex,
@@ -48,7 +52,9 @@ public sealed record TowerPlaybackEntityTotalsDto(
     int HealingReceived,
     int HealthRegenerated,
     int BarrierGenerated,
-    int DamageBlocked);
+    int DamageBlocked,
+    int StaggerContributed = 0,
+    int StaggerBreaks = 0);
 
 public sealed record TowerPlaybackAbilityTotalsDto(
     int AbilityIndex,
@@ -56,7 +62,9 @@ public sealed record TowerPlaybackAbilityTotalsDto(
     int TotalDamage,
     int TotalHealing,
     int TotalBarrier,
-    IReadOnlyList<AbilityDamageTypeStats>? DamageByType = null);
+    IReadOnlyList<AbilityDamageTypeStats>? DamageByType = null,
+    int TotalStagger = 0,
+    int StaggerBreaks = 0);
 
 public sealed record TowerPlaybackBundleContentDto(
     byte[] Bytes,

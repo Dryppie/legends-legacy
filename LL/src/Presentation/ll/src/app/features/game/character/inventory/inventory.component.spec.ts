@@ -577,10 +577,12 @@ describe('InventoryComponent quest presentation', () => {
       items: inventoryItems.asReadonly(),
       materials: inventoryItems.asReadonly(),
       essences: signal<InventoryItem[]>([]).asReadonly(),
-      decrementItem: jasmine
-        .createSpy('decrementItem')
-        .and.callFake(() => inventoryItems.set([])),
-      applyInventoryGrant: jasmine.createSpy('applyInventoryGrant'),
+      applyVersionedInventory: jasmine
+        .createSpy('applyVersionedInventory')
+        .and.callFake(() => {
+          inventoryItems.set([]);
+          return true;
+        }),
     } as unknown as InventoryStateService;
     const inventoryService = jasmine.createSpyObj<InventoryService>(
       'InventoryService',
@@ -588,9 +590,13 @@ describe('InventoryComponent quest presentation', () => {
     );
     inventoryService.openSelectionContainer.and.returnValue(
       of({
-        consumedItemInstanceId: cache.itemInstance.id,
-        grantId: 'grant-1',
-        rewards: [reward],
+        data: {
+          consumedItemInstanceId: cache.itemInstance.id,
+          grantId: 'grant-1',
+          rewards: [reward],
+          inventoryItems: [],
+        },
+        domainVersions: { inventory: 1 },
       }),
     );
     const component = TestBed.runInInjectionContext(
@@ -624,13 +630,10 @@ describe('InventoryComponent quest presentation', () => {
       'catalyst-cache',
       'frost',
     );
-    expect(inventoryState.decrementItem).toHaveBeenCalledOnceWith(
-      'catalyst-cache',
-      1,
-    );
-    expect(inventoryState.applyInventoryGrant).toHaveBeenCalledOnceWith(
-      'grant-1',
+    expect(inventoryState.applyVersionedInventory).toHaveBeenCalledOnceWith(
+      jasmine.objectContaining({ domainVersions: { inventory: 1 } }),
       [reward],
+      'grant-1',
     );
     expect(component.selectedItem()).toBeNull();
     expect(component.isOpeningContainer()).toBeFalse();
@@ -644,6 +647,14 @@ describe('InventoryComponent quest presentation', () => {
       materials: inventoryItems.asReadonly(),
       essences: signal<InventoryItem[]>([]).asReadonly(),
       decrementItem: jasmine.createSpy('decrementItem'),
+      applyVersionedInventoryDelta: jasmine
+        .createSpy('applyVersionedInventoryDelta')
+        .and.callFake(
+          (result: { data: unknown }, apply: (data: unknown) => void) => {
+            apply(result.data);
+            return true;
+          },
+        ),
     } as unknown as InventoryStateService;
     const craftingService = jasmine.createSpyObj<CraftingService>(
       'CraftingService',
@@ -664,10 +675,13 @@ describe('InventoryComponent quest presentation', () => {
     );
     craftingService.learnBlueprint.and.returnValue(
       of({
-        blueprintId: 'blueprint.endurance',
-        blueprintName: 'Endurance',
-        recipeId: 'recipe.sword',
-        recipeName: 'Sword',
+        data: {
+          blueprintId: 'blueprint.endurance',
+          blueprintName: 'Endurance',
+          recipeId: 'recipe.sword',
+          recipeName: 'Sword',
+        },
+        domainVersions: { inventory: 1 },
       }),
     );
     const component = TestBed.runInInjectionContext(

@@ -14,8 +14,8 @@ public record UpdateGuildRolePermissionsCommand(Guid CharacterId, UpdateGuildRol
 public class UpdateGuildRolePermissionsCommandHandler : IRequestHandler<UpdateGuildRolePermissionsCommand, Response<bool>>
 {
     private readonly IGuildService _guild;
-    private readonly IGameEventPublisher _events;
-    public UpdateGuildRolePermissionsCommandHandler(IGuildService guild, IGameEventPublisher events)
+    private readonly IGameRealtimeBroadcaster _events;
+    public UpdateGuildRolePermissionsCommandHandler(IGuildService guild, IGameRealtimeBroadcaster events)
     {
         _guild = guild;
         _events = events;
@@ -36,7 +36,7 @@ public class UpdateGuildRolePermissionsCommandHandler : IRequestHandler<UpdateGu
             CanWithdrawVault = value.Role == GuildRole.Officer && value.CanWithdrawVault
         }, cancellationToken);
         if (!updated || guild is null) return Response<bool>.Fail("Only the guild leader can change role permissions.");
-        await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChangedMsg(guild.Id));
+        await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChanged(guild.Id), nameof(UpdateGuildRolePermissionsCommandHandler), cancellationToken);
         return Response<bool>.Success(true);
     }
 }

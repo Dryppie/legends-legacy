@@ -6,4 +6,5 @@ public sealed class CancelMarketPlaceListingResponseDto
 {
     public required Guid ListingId { get; init; }
     public required InventoryItemDto ReturnedItem { get; init; }
+    public required MarketplaceChangeSetDto Marketplace { get; init; }
 }

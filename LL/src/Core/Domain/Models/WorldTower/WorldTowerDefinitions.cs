@@ -1,3 +1,5 @@
+using Domain.Models.Combat;
+
 namespace Domain.Models.WorldTower;
 
 public sealed class TowerFloorDefinition
@@ -10,7 +12,9 @@ public sealed class TowerFloorDefinition
     public string GuardianAbilityProfileId { get; init; } = string.Empty;
     public int RequiredSlots { get; init; }
     public int RecommendedPowerRating { get; init; }
+    public int ProgressionPosition { get; init; }
     public TowerGuardianScalingDefinition GuardianScaling { get; init; } = new();
+    public BossStaggerDefinition? Stagger { get; init; }
     public bool EchoEnabledAfterClear { get; init; }
     public int TowerTokens { get; set; }
     public int FirstClearTowerTokens => checked(TowerTokens * 4);

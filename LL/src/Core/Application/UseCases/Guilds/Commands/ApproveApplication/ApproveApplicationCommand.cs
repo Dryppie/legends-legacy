@@ -11,12 +11,12 @@ public record ApproveApplicationCommand(Guid CharacterId, string ApplicationChar
 public class ApproveApplicationCommandHandler : IRequestHandler<ApproveApplicationCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _eventPublisher;
     private readonly IGuildSystemChatPublisher _guildChat;
 
     public ApproveApplicationCommandHandler(
         IGuildService guildService,
-        IGameEventPublisher eventPublisher,
+        IGameRealtimeBroadcaster eventPublisher,
         IGuildSystemChatPublisher guildChat)
     {
         _guildService = guildService;
@@ -44,13 +44,19 @@ public class ApproveApplicationCommandHandler : IRequestHandler<ApproveApplicati
 
         await _eventPublisher.PublishAsync(
             new Audience.Character(applicationCharacterId),
-            new GuildMembershipChangedMsg(guild.Id, applicationCharacterId));
+            new GuildMembershipChanged(guild.Id, applicationCharacterId),
+            nameof(ApproveApplicationCommandHandler),
+            cancellationToken);
         await _eventPublisher.PublishAsync(
             new Audience.Guild(guild.Id),
-            new GuildStateChangedMsg(guild.Id));
+            new GuildStateChanged(guild.Id),
+            nameof(ApproveApplicationCommandHandler),
+            cancellationToken);
         await _eventPublisher.PublishAsync(
             new Audience.World(),
-            new GuildDirectoryChangedMsg("membership"));
+            new GuildDirectoryChanged("membership"),
+            nameof(ApproveApplicationCommandHandler),
+            cancellationToken);
 
         return Response<bool>.Success(true);
     }

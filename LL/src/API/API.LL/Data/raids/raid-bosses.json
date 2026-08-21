@@ -30,6 +30,7 @@
             "maxGuardianBreakPercent": 50,
             "maxSignaturePowerReductionPercent": 30,
             "maxSignatureCooldownDelayPercent": 25,
+            "stagger": { "enabled": true, "baseThreshold": 150, "referenceParticipantCount": 3, "participantExponent": 0.85, "breakDurationTicks": 30, "recoveryDurationTicks": 20, "damageTakenBonusPercent": 15, "thresholdGrowthPercentPerBreak": 35, "maximumBreaks": 4 },
             "overtimeStartsAtTick": 4500,
             "overtimePowerIncreasePercent": 6
           },
@@ -83,6 +84,7 @@
             "maxGuardianBreakPercent": 55,
             "maxSignaturePowerReductionPercent": 30,
             "maxSignatureCooldownDelayPercent": 25,
+            "stagger": { "enabled": true, "baseThreshold": 240, "referenceParticipantCount": 6, "participantExponent": 0.85, "breakDurationTicks": 30, "recoveryDurationTicks": 20, "damageTakenBonusPercent": 15, "thresholdGrowthPercentPerBreak": 35, "maximumBreaks": 4 },
             "overtimeStartsAtTick": 4400,
             "overtimePowerIncreasePercent": 7
           },
@@ -137,6 +139,7 @@
             "maxGuardianBreakPercent": 60,
             "maxSignaturePowerReductionPercent": 30,
             "maxSignatureCooldownDelayPercent": 25,
+            "stagger": { "enabled": true, "baseThreshold": 330, "referenceParticipantCount": 9, "participantExponent": 0.85, "breakDurationTicks": 30, "recoveryDurationTicks": 20, "damageTakenBonusPercent": 15, "thresholdGrowthPercentPerBreak": 35, "maximumBreaks": 4 },
             "overtimeStartsAtTick": 4200,
             "overtimePowerIncreasePercent": 8
           },
@@ -196,6 +199,7 @@
             "maxGuardianBreakPercent": 55,
             "maxSignaturePowerReductionPercent": 30,
             "maxSignatureCooldownDelayPercent": 25,
+            "stagger": { "enabled": true, "baseThreshold": 240, "referenceParticipantCount": 6, "participantExponent": 0.85, "breakDurationTicks": 30, "recoveryDurationTicks": 20, "damageTakenBonusPercent": 15, "thresholdGrowthPercentPerBreak": 35, "maximumBreaks": 4 },
             "overtimeStartsAtTick": 4400,
             "overtimePowerIncreasePercent": 7
           },
@@ -241,6 +245,7 @@
             "maxGuardianBreakPercent": 62,
             "maxSignaturePowerReductionPercent": 30,
             "maxSignatureCooldownDelayPercent": 25,
+            "stagger": { "enabled": true, "baseThreshold": 330, "referenceParticipantCount": 9, "participantExponent": 0.85, "breakDurationTicks": 30, "recoveryDurationTicks": 20, "damageTakenBonusPercent": 15, "thresholdGrowthPercentPerBreak": 35, "maximumBreaks": 4 },
             "overtimeStartsAtTick": 4100,
             "overtimePowerIncreasePercent": 9
           },

@@ -32,13 +32,13 @@ public sealed class AchievementService : IAchievementService
     ];
 
     private readonly IAchievementRepository _repository;
-    private readonly IGameEventPublisher? _eventPublisher;
+    private readonly IGameRealtimeBroadcaster? _eventPublisher;
     private readonly IAchievementSystemChatPublisher? _systemChatPublisher;
     private readonly SoulstoneUpgradeDefinitionProvider? _soulstoneUpgrades;
 
     public AchievementService(
         IAchievementRepository repository,
-        IGameEventPublisher? eventPublisher = null,
+        IGameRealtimeBroadcaster? eventPublisher = null,
         IAchievementSystemChatPublisher? systemChatPublisher = null,
         SoulstoneUpgradeDefinitionProvider? soulstoneUpgrades = null)
     {
@@ -1663,7 +1663,7 @@ public sealed class AchievementService : IAchievementService
             {
                 await _eventPublisher.PublishAsync(
                     new Audience.Character(characterId.Value),
-                    new AchievementUnlockedMsg(
+                    new AchievementUnlocked(
                         characterId,
                         unlock.AchievementKey,
                         unlock.AchievementName,
@@ -1671,14 +1671,16 @@ public sealed class AchievementService : IAchievementService
                         unlock.TitleKey,
                         unlock.TitleName,
                         unlock.PlayerSystemMessage,
-                        IsGlobal: false));
+                        IsGlobal: false),
+                    nameof(AchievementService),
+                    cancellationToken);
             }
 
             if (!string.IsNullOrWhiteSpace(unlock.GlobalSystemMessage))
             {
                 await _eventPublisher.PublishAsync(
                     new Audience.World(),
-                    new AchievementUnlockedMsg(
+                    new AchievementUnlocked(
                         characterId,
                         unlock.AchievementKey,
                         unlock.AchievementName,
@@ -1686,7 +1688,9 @@ public sealed class AchievementService : IAchievementService
                         unlock.TitleKey,
                         unlock.TitleName,
                         unlock.GlobalSystemMessage,
-                        IsGlobal: true));
+                        IsGlobal: true),
+                    nameof(AchievementService),
+                    cancellationToken);
             }
         }
 

@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.Quests;
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.WebSockets;
 using Application.WebSockets.Contracts;
 using Domain.Models.Inventories;
@@ -16,7 +17,8 @@ public sealed class QuestService(
     IInventoryItemFactory inventoryItemFactory,
     ILootRewardWriter lootRewardWriter,
     TimeProvider timeProvider,
-    IGameEventPublisher? eventPublisher = null) : IQuestService, IQuestProgressionService
+    IGameRealtimeBroadcaster? eventPublisher = null,
+    IStateSyncService? stateSync = null) : IQuestService, IQuestProgressionService
 {
     public async Task<QuestJournal> GetJournalAsync(
         Guid characterId,
@@ -865,15 +867,32 @@ public sealed class QuestService(
             .ToList();
     }
 
-    private Task PublishChangedAsync(
+    private async Task PublishChangedAsync(
         Guid characterId,
         QuestJournal journal,
-        CancellationToken cancellationToken) =>
-        eventPublisher is null
-            ? Task.CompletedTask
-            : eventPublisher.PublishAsync(
-                new Audience.Character(characterId),
-                new QuestJournalChangedMsg(journal));
+        CancellationToken cancellationToken)
+    {
+        if (eventPublisher is null) return;
+
+        var stateVersion = 0L;
+        if (stateSync is not null)
+        {
+            await stateSync.AdvanceCharacterScopeAsync(
+                characterId,
+                StateSyncScopes.Quests,
+                nameof(QuestJournalChanged),
+                cancellationToken);
+            stateVersion = stateSync
+                .GetChangedRevisions(characterId)
+                .GetValueOrDefault(StateSyncScopes.Quests);
+        }
+
+        await eventPublisher.PublishAsync(
+            new Audience.Character(characterId),
+            new QuestJournalChanged(journal, stateVersion),
+            nameof(QuestService),
+            cancellationToken);
+    }
 
     private static bool Matches(string? expected, string? actual) =>
         string.IsNullOrWhiteSpace(expected) ||

@@ -159,7 +159,15 @@ export interface RaidPlaybackEntity {
 export interface RaidPlaybackFrame {
   sequence: number;
   tick: number;
-  entityStates: { entityIndex: number; health: number; barrier: number }[];
+  entityStates: {
+    entityIndex: number;
+    health: number;
+    barrier: number;
+    currentStagger?: number;
+    maxStagger?: number;
+    isStaggered?: boolean;
+    isStaggerRecovering?: boolean;
+  }[];
   entityTotals: {
     entityIndex: number;
     damageDone: number;
@@ -170,6 +178,8 @@ export interface RaidPlaybackFrame {
     barrierGenerated: number;
     damageBlocked: number;
     threatGenerated?: number;
+    staggerContributed?: number;
+    staggerBreaks?: number;
   }[];
   abilityTotals: RaidPlaybackAbilityTotals[];
   isFinal: boolean;
@@ -200,6 +210,8 @@ export interface RaidPlaybackAbilityTotals {
   totalBarrier: number;
   damageByType?: AbilityDamageTypeStats[];
   totalThreat?: number;
+  totalStagger?: number;
+  staggerBreaks?: number;
 }
 
 export interface RaidParticipantResult {
@@ -292,6 +304,9 @@ export interface RaidTrophyPurchase {
   purchasedAt: string;
 }
 
+const RAID_RUN_MUTATION_HANDLED_SCOPES = ['raids', 'raid-directory'] as const;
+const RAID_DETAIL_MUTATION_HANDLED_SCOPES = ['raids'] as const;
+
 @Injectable({ providedIn: 'root' })
 export class RaidService {
   private readonly api = inject(ApiService);
@@ -332,46 +347,74 @@ export class RaidService {
 
   create(raidBossId: string, plusLevel: number): Observable<RaidRun> {
     return this.api
-      .post('raids/create', { raidBossId, plusLevel })
+      .post(
+        'raids/create',
+        { raidBossId, plusLevel },
+        { stateSyncScopesHandledByResponse: RAID_RUN_MUTATION_HANDLED_SCOPES },
+      )
       .pipe(tap((raid) => this.trackRaid(raid as RaidRun)));
   }
 
-  createDevelopment(raidBossId: string, plusLevel: number): Observable<RaidRun> {
+  createDevelopment(
+    raidBossId: string,
+    plusLevel: number,
+  ): Observable<RaidRun> {
     return this.api
       .post(
         `raids/bosses/${encodeURIComponent(raidBossId)}/development/create`,
         { plusLevel },
+        { stateSyncScopesHandledByResponse: RAID_RUN_MUTATION_HANDLED_SCOPES },
       )
       .pipe(tap((raid) => this.trackRaid(raid as RaidRun)));
   }
 
   join(raidRunId: string): Observable<RaidRun> {
     return this.api
-      .post(`raids/${raidRunId}/join`)
+      .post(
+        `raids/${raidRunId}/join`,
+        {},
+        { stateSyncScopesHandledByResponse: RAID_RUN_MUTATION_HANDLED_SCOPES },
+      )
       .pipe(tap((raid) => this.trackRaid(raid as RaidRun)));
   }
 
   approveSignup(raidRunId: string, characterId: string): Observable<RaidRun> {
-    return this.api.post(`raids/${raidRunId}/signups/approve`, {
-      characterId,
-    });
+    return this.api
+      .post(
+        `raids/${raidRunId}/signups/approve`,
+        { characterId },
+        { stateSyncScopesHandledByResponse: RAID_RUN_MUTATION_HANDLED_SCOPES },
+      )
+      .pipe(tap((raid) => this.trackRaid(raid as RaidRun)));
   }
 
   removeSignup(raidRunId: string, characterId: string): Observable<RaidRun> {
-    return this.api.post(`raids/${raidRunId}/signups/remove`, {
-      characterId,
-    });
+    return this.api
+      .post(
+        `raids/${raidRunId}/signups/remove`,
+        { characterId },
+        { stateSyncScopesHandledByResponse: RAID_RUN_MUTATION_HANDLED_SCOPES },
+      )
+      .pipe(tap((raid) => this.trackRaid(raid as RaidRun)));
   }
 
   leave(raidRunId: string): Observable<RaidRun> {
     return this.api
-      .post(`raids/${raidRunId}/leave`)
+      .post(
+        `raids/${raidRunId}/leave`,
+        {},
+        { stateSyncScopesHandledByResponse: RAID_RUN_MUTATION_HANDLED_SCOPES },
+      )
       .pipe(tap(() => this.clearActiveRaid(raidRunId)));
   }
 
   cancel(raidRunId: string): Observable<RaidRun> {
     return this.api
-      .post(`raids/${raidRunId}/cancel`)
+      .post(
+        `raids/${raidRunId}/cancel`,
+        {},
+        { stateSyncScopesHandledByResponse: RAID_RUN_MUTATION_HANDLED_SCOPES },
+      )
       .pipe(tap(() => this.clearActiveRaid(raidRunId)));
   }
 
@@ -379,13 +422,19 @@ export class RaidService {
     raidRunId: string,
     characterId: string,
   ): Observable<RaidRun> {
-    return this.api.post(`raids/${raidRunId}/transfer-leadership`, {
-      characterId,
-    });
+    return this.api.post(
+      `raids/${raidRunId}/transfer-leadership`,
+      { characterId },
+      { stateSyncScopesHandledByResponse: RAID_RUN_MUTATION_HANDLED_SCOPES },
+    );
   }
 
   refreshLoadout(raidRunId: string): Observable<RaidRun> {
-    return this.api.post(`raids/${raidRunId}/loadout`);
+    return this.api.post(
+      `raids/${raidRunId}/loadout`,
+      {},
+      { stateSyncScopesHandledByResponse: RAID_DETAIL_MUTATION_HANDLED_SCOPES },
+    );
   }
 
   assign(
@@ -394,11 +443,11 @@ export class RaidService {
     lane: RaidLane,
     slotIndex: number,
   ): Observable<RaidRun> {
-    return this.api.post(`raids/${raidRunId}/assign`, {
-      characterId,
-      lane,
-      slotIndex,
-    });
+    return this.api.post(
+      `raids/${raidRunId}/assign`,
+      { characterId, lane, slotIndex },
+      { stateSyncScopesHandledByResponse: RAID_RUN_MUTATION_HANDLED_SCOPES },
+    );
   }
 
   updateParties(
@@ -409,12 +458,20 @@ export class RaidService {
       wingSlotIndex: number | null;
     }>,
   ): Observable<RaidRun> {
-    return this.api.put(`raids/${raidRunId}/parties`, { assignments });
+    return this.api.put(
+      `raids/${raidRunId}/parties`,
+      { assignments },
+      { stateSyncScopesHandledByResponse: RAID_RUN_MUTATION_HANDLED_SCOPES },
+    );
   }
 
   commence(raidRunId: string): Observable<RaidRun> {
     return this.api
-      .post(`raids/${raidRunId}/commence`)
+      .post(
+        `raids/${raidRunId}/commence`,
+        {},
+        { stateSyncScopesHandledByResponse: RAID_RUN_MUTATION_HANDLED_SCOPES },
+      )
       .pipe(tap((raid) => this.trackRaid(raid as RaidRun)));
   }
 

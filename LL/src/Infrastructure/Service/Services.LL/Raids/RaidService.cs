@@ -807,8 +807,13 @@ public sealed class RaidService(
             run.CommencedAt = timeProvider.GetUtcNow();
             run.RowVersion++;
             await QueueRaidUpdateAsync(run, "Commenced", cancellationToken);
-            await stateSync.InvalidateWorldScopeAsync(
+            await stateSync.AdvanceCharacterScopeAsync(
+                characterId,
                 StateSyncScopes.Raids,
+                "CommenceRaidCommand",
+                cancellationToken);
+            await stateSync.AdvanceWorldScopeAsync(
+                StateSyncScopes.RaidDirectory,
                 "CommenceRaidCommand",
                 cancellationToken);
             await db.SaveChangesAsync(cancellationToken);
@@ -1079,8 +1084,8 @@ public sealed class RaidService(
             run.CommencedAt = timeProvider.GetUtcNow();
         }
         run.RowVersion++;
-        await stateSync.InvalidateWorldScopeAsync(
-            StateSyncScopes.Raids,
+        await stateSync.AdvanceWorldScopeAsync(
+            StateSyncScopes.RaidDirectory,
             run.Status == RaidRunStatus.Cancelled ? "RaidExpired" : "RaidAutoCommenced",
             cancellationToken);
         await QueueRaidChatSnapshotAsync(run, cancellationToken);
@@ -1153,8 +1158,8 @@ public sealed class RaidService(
             await CreateRewardsAsync(run, tier, resolution, cancellationToken);
             await QueueRaidChatSnapshotAsync(run, cancellationToken);
             await QueueRaidUpdateAsync(run, "PlaybackReady", cancellationToken);
-            await stateSync.InvalidateWorldScopeAsync(
-                StateSyncScopes.Raids,
+            await stateSync.AdvanceWorldScopeAsync(
+                StateSyncScopes.RaidDirectory,
                 "RaidPlaybackReady",
                 cancellationToken);
             await db.SaveChangesAsync(cancellationToken);
@@ -1221,8 +1226,8 @@ public sealed class RaidService(
 
         await QueueRaidChatSnapshotAsync(run, cancellationToken);
         await QueueRaidUpdateAsync(run, "Resolved", cancellationToken);
-        await stateSync.InvalidateWorldScopeAsync(
-            StateSyncScopes.Raids,
+        await stateSync.AdvanceWorldScopeAsync(
+            StateSyncScopes.RaidDirectory,
             "RaidResolved",
             cancellationToken);
         await db.SaveChangesAsync(cancellationToken);

@@ -114,6 +114,85 @@ public sealed class AbilitySystemTests
         Assert.Contains(validation.Errors, x => x.Contains("missing.summon", StringComparison.OrdinalIgnoreCase));
     }
 
+    [Theory]
+    [InlineData(AbilityEffectOperation.Damage)]
+    [InlineData(AbilityEffectOperation.Heal)]
+    [InlineData(AbilityEffectOperation.GrantBarrier)]
+    public void Catalog_rejects_progression_magnitudes_without_a_scaling_source(
+        AbilityEffectOperation operation)
+    {
+        var ability = new AbilitySpec
+        {
+            Id = $"ability.unscaled.{operation}",
+            Kind = AbilitySpecKind.Active,
+            Name = "Unscaled magnitude",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.unscaled",
+                    Operation = operation,
+                    Target = operation == AbilityEffectOperation.Damage
+                        ? AbilityTargetSelector.CurrentTarget
+                        : AbilityTargetSelector.Self
+                }
+            ]
+        };
+
+        var validation = AbilityCatalogValidator.Validate([ability], []);
+
+        Assert.False(validation.IsValid);
+        Assert.Contains(validation.Errors, error =>
+            error.Contains("requires a positive", StringComparison.OrdinalIgnoreCase)
+            && error.Contains("scaling source", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Catalog_accepts_event_scaled_progression_magnitudes()
+    {
+        var ability = new AbilitySpec
+        {
+            Id = "ability.event-scaled",
+            Kind = AbilitySpecKind.Passive,
+            Name = "Event scaled",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.event-scaled",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.EventTarget,
+                    EventMagnitudeCoefficient = 0.1f
+                }
+            ]
+        };
+
+        var validation = AbilityCatalogValidator.Validate([ability], []);
+
+        Assert.True(validation.IsValid, string.Join(Environment.NewLine, validation.Errors));
+    }
+
+    [Fact]
+    public void Catalog_requires_combat_summons_to_inherit_health_and_power()
+    {
+        var summon = new SummonSpec
+        {
+            Id = "summon.unscaled",
+            Name = "Unscaled summon",
+            Attributes =
+            [
+                new() { Attribute = AttributeType.MaxHealth, BaseValue = 10 },
+                new() { Attribute = AttributeType.Power, BaseValue = 5 }
+            ]
+        };
+
+        var validation = AbilityCatalogValidator.Validate([], [], summons: [summon]);
+
+        Assert.False(validation.IsValid);
+        Assert.Contains(validation.Errors, error => error.Contains("durability", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(validation.Errors, error => error.Contains("basic-attacking", StringComparison.OrdinalIgnoreCase));
+    }
+
     [Fact]
     public void Engine_executes_direct_damage_and_barrier()
     {
@@ -3641,18 +3720,19 @@ public sealed class AbilitySystemTests
             "red_slime", "giant_worm", "bog_mite", "green_slime", "large_rat", "viper",
             "poisonous_rat", "rotfly_toad", "brown_slime", "cave_bat", "giant_bat", "undead",
             "gnoll_pack_leader", "gnoll_raider", "gnoll_shaman", "kobold_skirmisher", "kobold_sorcerer",
-            "feral_ghoul", "plague_ghoul", "ravenous_ghoul", "vampire_fledgeling", "wandering_ghost"
+            "feral_ghoul", "plague_ghoul", "ravenous_ghoul", "vampire_fledgeling", "wandering_ghost",
+            "web_weaver_spider", "spider_queen", "bark_golem", "treant_guardian", "elder_treant"
         };
 
         var allAbilityIds = monsterIds
             .Select(id => (MonsterId: $"monster.{id}", AbilityIds: profiles.GetAbilityIds($"monster.{id}")))
             .ToArray();
 
-        Assert.Equal(62, allAbilityIds.Length);
+        Assert.Equal(67, allAbilityIds.Length);
         Assert.All(allAbilityIds, profile =>
-            Assert.Equal(profile.MonsterId == "monster.hobgoblin" ? 3 : 2, profile.AbilityIds.Count));
-        Assert.Equal(125, allAbilityIds.SelectMany(x => x.AbilityIds).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(168, catalog.AbilitiesById.Count);
+            Assert.Equal(profile.MonsterId is "monster.hobgoblin" or "monster.spider_queen" or "monster.elder_treant" ? 3 : 2, profile.AbilityIds.Count));
+        Assert.Equal(137, allAbilityIds.SelectMany(x => x.AbilityIds).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(180, catalog.AbilitiesById.Count);
         Assert.Contains("ability.summon.shadow_image.shadow_strike", catalog.AbilitiesById.Keys);
         Assert.All(allAbilityIds.SelectMany(x => x.AbilityIds), abilityId =>
         {
@@ -3686,10 +3766,10 @@ public sealed class AbilitySystemTests
             item.TryGetProperty("itemType", out var itemType)
             && itemType.GetString()?.Equals("Essence", StringComparison.OrdinalIgnoreCase) == true).ToList();
 
-        Assert.Equal(63, allDefinitions.Count);
-        Assert.Equal(62, allDefinitions.Select(x => x.SourceMonsterId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(62, allLootTables.Count);
-        Assert.Equal(63, essenceItems.Count);
+        Assert.Equal(70, allDefinitions.Count);
+        Assert.Equal(67, allDefinitions.Select(x => x.SourceMonsterId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(67, allLootTables.Count);
+        Assert.Equal(70, essenceItems.Count);
         Assert.All(allDefinitions, definition =>
         {
             Assert.StartsWith("monster.", definition.SourceMonsterId, StringComparison.Ordinal);
@@ -3697,6 +3777,8 @@ public sealed class AbilitySystemTests
             Assert.StartsWith("ability.creature.", definition.PassiveAbilityId, StringComparison.Ordinal);
         });
         Assert.Equal(2, allDefinitions.Count(x => x.SourceMonsterId == "monster.hobgoblin"));
+        Assert.Equal(2, allDefinitions.Count(x => x.SourceMonsterId == "monster.spider_queen"));
+        Assert.Equal(2, allDefinitions.Count(x => x.SourceMonsterId == "monster.elder_treant"));
     }
 
     [Fact]
@@ -3743,17 +3825,26 @@ public sealed class AbilitySystemTests
             .Where(x => x.Count() > 1)
             .ToList();
 
-        var hobgoblin = Assert.Single(multiEssenceCreatures);
-        Assert.Equal("monster.hobgoblin", hobgoblin.Key);
-        Assert.Single(hobgoblin.Select(x => x.Name).Distinct(StringComparer.OrdinalIgnoreCase));
-        Assert.Equal(hobgoblin.Count(), hobgoblin.Select(x => x.VariantName).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.All(hobgoblin, essence =>
+        Assert.Equal(3, multiEssenceCreatures.Count);
+        Assert.All(multiEssenceCreatures, variants =>
         {
-            Assert.False(string.IsNullOrWhiteSpace(essence.VariantName));
-            Assert.Equal($"{essence.Name} — {essence.VariantName}", essence.DisplayName);
+            Assert.Single(variants.Select(x => x.Name).Distinct(StringComparer.OrdinalIgnoreCase));
+            Assert.Equal(variants.Count(), variants.Select(x => x.VariantName).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+            Assert.All(variants, essence =>
+            {
+                Assert.False(string.IsNullOrWhiteSpace(essence.VariantName));
+                Assert.Equal($"{essence.Name} — {essence.VariantName}", essence.DisplayName);
+            });
         });
+        var hobgoblin = multiEssenceCreatures.Single(group => group.Key == "monster.hobgoblin");
         Assert.Contains(hobgoblin, x => x.DisplayName == "Hobgoblin Essence — Intimidating Slam");
         Assert.Contains(hobgoblin, x => x.DisplayName == "Hobgoblin Essence — Brutal Charge");
+        var spiderQueen = multiEssenceCreatures.Single(group => group.Key == "monster.spider_queen");
+        Assert.Contains(spiderQueen, x => x.DisplayName == "Spider Queen Essence — Webbed Domain");
+        Assert.Contains(spiderQueen, x => x.DisplayName == "Spider Queen Essence — Royal Venom");
+        var elderTreant = multiEssenceCreatures.Single(group => group.Key == "monster.elder_treant");
+        Assert.Contains(elderTreant, x => x.DisplayName == "Elder Treant Essence — Ancient Sap");
+        Assert.Contains(elderTreant, x => x.DisplayName == "Elder Treant Essence — Thornstorm");
     }
 
     [Fact]
@@ -3955,6 +4046,76 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Engine_converts_hard_control_into_boss_stagger_and_captures_transition_frames()
+    {
+        var staggerAbility = new AbilitySpec
+        {
+            Id = "ability.test.stagger",
+            Kind = AbilitySpecKind.Active,
+            Name = "Stagger Test",
+            CooldownTicks = 100,
+            Triggers =
+            [
+                new AbilityTriggerSpec
+                {
+                    Event = AbilityTriggerEvent.OnAbilityUsed,
+                    EffectIds = ["effect.test.stagger"]
+                }
+            ],
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "effect.test.stagger",
+                    Operation = AbilityEffectOperation.ApplyCondition,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    Condition = StandardConditionType.Stun,
+                    BaseValue = 2,
+                    GuaranteedConditionApplication = true,
+                    StaggerPower = 100
+                }
+            ]
+        };
+        var compiled = AbilityCompiler.CompileAbility(staggerAbility);
+        var friendly = CreateCombatant(
+            "friendly",
+            CombatTeam.Friendly,
+            [compiled],
+            canBasicAttack: false);
+        var hostile = CreateCombatant(
+            "boss",
+            CombatTeam.Hostile,
+            [],
+            canBasicAttack: false,
+            staggerDefinition: new BossStaggerDefinition
+            {
+                Enabled = true,
+                BaseThreshold = 100,
+                BreakDurationTicks = 3,
+                RecoveryDurationTicks = 2,
+                ThresholdGrowthPercentPerBreak = 50
+            });
+        var checkpoints = new List<CombatCheckpoint>();
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 5, BasicAttackIntervalTicks: 1_000));
+
+        var result = engine.Run([friendly], [hostile], checkpointObserver: checkpoints.Add, checkpointIntervalTicks: 10);
+
+        Assert.False(hostile.HasCondition(StandardConditionType.Stun));
+        Assert.Contains(result.EventLog, item => item.EventType == EventType.StaggerApplied && item.Magnitude == 100);
+        Assert.Contains(result.EventLog, item => item.EventType == EventType.StaggerBroken);
+        Assert.Contains(result.EventLog, item => item.EventType == EventType.StaggerRecovered);
+        Assert.Equal(100, result.EntityStats.Single(x => x.EntityId == "friendly").StaggerContributed);
+        Assert.Equal(1, result.EntityStats.Single(x => x.EntityId == "friendly").StaggerBreaks);
+        Assert.Contains(checkpoints, checkpoint => checkpoint.Hostile.Single().IsStaggered);
+        Assert.Contains(checkpoints, checkpoint =>
+            !checkpoint.Hostile.Single().IsStaggered
+            && checkpoint.Hostile.Single().IsStaggerRecovering
+            && checkpoint.Hostile.Single().MaxStagger == 150);
+    }
+
+    [Fact]
     public void Json_catalog_feral_pounce_stun_blocks_actions()
     {
         var provider = new JsonAbilityCatalogProvider(
@@ -4139,6 +4300,322 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Web_weaver_spider_abilities_double_grasp_against_slow_and_track_web_walker_haste()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var abilities = AbilityCompiler.CompileAbilities(
+        [
+            catalog.AbilitiesById["ability.creature.web_weaver_spider.weavers_grasp"],
+            catalog.AbilitiesById["ability.creature.web_weaver_spider.web_walker"]
+        ]);
+
+        var unslowedWeaver = CreateCombatant(
+            "unslowed-weaver",
+            CombatTeam.Friendly,
+            [abilities["ability.creature.web_weaver_spider.weavers_grasp"]],
+            canBasicAttack: false);
+        var unslowedTarget = CreateCombatant("unslowed-target", CombatTeam.Hostile, [], canBasicAttack: false);
+        var unslowedResult = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1000, RandomSeed: 7))
+            .Run([unslowedWeaver], [unslowedTarget]);
+
+        var slowedWeaver = CreateCombatant(
+            "slowed-weaver",
+            CombatTeam.Friendly,
+            [abilities["ability.creature.web_weaver_spider.weavers_grasp"]],
+            canBasicAttack: false);
+        var slowedTarget = CreateCombatant("slowed-target", CombatTeam.Hostile, [], canBasicAttack: false);
+        AddStandardCondition(slowedTarget, slowedTarget, StandardConditionType.Slow);
+        var slowedResult = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1000, RandomSeed: 7))
+            .Run([slowedWeaver], [slowedTarget]);
+
+        var unslowedDamage = Assert.Single(
+            DamageMagnitudes(unslowedResult, "effect.creature.web_weaver_spider.weavers_grasp.damage"));
+        var slowedDamageEvents = slowedResult.EventLog
+            .Where(log => log.Source.StartsWith("effect.creature.web_weaver_spider.weavers_grasp", StringComparison.Ordinal)
+                          && log.EventType == EventType.Damage)
+            .ToArray();
+        Assert.Equal(2, slowedDamageEvents.Length);
+        Assert.Equal(
+            unslowedDamage,
+            Assert.Single(slowedDamageEvents, log => log.Source.EndsWith(".damage", StringComparison.Ordinal)).Magnitude);
+        Assert.Contains(
+            slowedDamageEvents,
+            log => log.Source == "effect.creature.web_weaver_spider.weavers_grasp.slowed_damage");
+
+        var walker = CreateCombatant(
+            "walker",
+            CombatTeam.Friendly,
+            [abilities["ability.creature.web_weaver_spider.web_walker"]],
+            canBasicAttack: false);
+        var webbedEnemy = CreateCombatant("webbed-enemy", CombatTeam.Hostile, [], canBasicAttack: false);
+        AddStandardCondition(webbedEnemy, webbedEnemy, StandardConditionType.Slow);
+        var walkerResult = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 101, BasicAttackIntervalTicks: 1000, RandomSeed: 7))
+            .Run([walker], [webbedEnemy]);
+
+        Assert.Contains(
+            walkerResult.EventLog,
+            log => log.Source == "condition.haste" && log.EventType == EventType.StatusEffect);
+        Assert.False(walker.HasCondition(StandardConditionType.Haste));
+    }
+
+    [Fact]
+    public void Spider_queen_abilities_apply_domain_venom_and_complete_royal_cocoon()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var abilities = AbilityCompiler.CompileAbilities(
+        [
+            catalog.AbilitiesById["ability.creature.spider_queen.webbed_domain"],
+            catalog.AbilitiesById["ability.creature.spider_queen.royal_venom"],
+            catalog.AbilitiesById["ability.creature.spider_queen.royal_cocoon"]
+        ]);
+
+        var domainQueen = CreateCombatant(
+            "domain-queen",
+            CombatTeam.Friendly,
+            [abilities["ability.creature.spider_queen.webbed_domain"]],
+            canBasicAttack: false);
+        var domainEnemyOne = CreateCombatant("domain-enemy-1", CombatTeam.Hostile, [], canBasicAttack: false);
+        var domainEnemyTwo = CreateCombatant("domain-enemy-2", CombatTeam.Hostile, [], canBasicAttack: false);
+        new FastCombatEngine(statuses, new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1000, RandomSeed: 11))
+            .Run([domainQueen], [domainEnemyOne, domainEnemyTwo]);
+
+        Assert.True(domainQueen.HasCondition(StandardConditionType.Haste));
+        Assert.True(domainEnemyOne.HasCondition(StandardConditionType.Slow));
+        Assert.True(domainEnemyTwo.HasCondition(StandardConditionType.Slow));
+
+        var venomQueen = CreateCombatant(
+            "venom-queen",
+            CombatTeam.Friendly,
+            [abilities["ability.creature.spider_queen.royal_venom"]]);
+        var venomEnemy = CreateCombatant("venom-enemy", CombatTeam.Hostile, [], canBasicAttack: false);
+        new FastCombatEngine(statuses, new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1, RandomSeed: 11))
+            .Run([venomQueen], [venomEnemy]);
+
+        Assert.Equal(1, venomQueen.GetStatusStacks("status.spider_queen.royal_venom"));
+        Assert.Equal(20, venomEnemy.GetConditionStacks(StandardConditionType.Poison));
+
+        var thresholdStrike = new AbilitySpec
+        {
+            Id = "ability.test.royal_cocoon_threshold_strike",
+            Kind = AbilitySpecKind.Active,
+            Name = "Royal Cocoon Threshold Strike",
+            CooldownTicks = 1000,
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.royal_cocoon_threshold_strike.damage",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 14,
+                    AttackType = AttackType.Melee,
+                    DamageType = DamageType.Physical
+                }
+            ]
+        };
+        var strike = Assert.Single(AbilityCompiler.CompileAbilities([thresholdStrike]).Values);
+        var cocoonQueen = CreateCombatant(
+            "cocoon-queen",
+            CombatTeam.Friendly,
+            [abilities["ability.creature.spider_queen.royal_cocoon"]],
+            maxHealth: 1000,
+            canBasicAttack: false);
+        var attacker = CreateCombatant(
+            "cocoon-attacker",
+            CombatTeam.Hostile,
+            [strike],
+            maxHealth: 1000,
+            canBasicAttack: false);
+        AddStandardCondition(cocoonQueen, cocoonQueen, StandardConditionType.Unstoppable);
+        AddStandardCondition(cocoonQueen, cocoonQueen, StandardConditionType.Ward);
+        var cocoonResult = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 81, BasicAttackIntervalTicks: 1000, RandomSeed: 11))
+            .Run([cocoonQueen], [attacker]);
+
+        var thresholdDamage = Assert.Single(
+            cocoonResult.EventLog,
+            log => log.Source == "effect.test.royal_cocoon_threshold_strike.damage"
+                   && log.EventType == EventType.Damage);
+        Assert.Equal(1000 - thresholdDamage.Magnitude + 300, cocoonQueen.Health);
+        Assert.False(cocoonQueen.HasCondition(StandardConditionType.Stun));
+        Assert.Equal(0, cocoonQueen.GetStatusStacks("status.spider_queen.royal_cocoon"));
+        Assert.Contains(
+            cocoonResult.EventLog,
+            log => log.Source == "condition.stun" && log.EventType == EventType.StatusEffect);
+        Assert.Contains(
+            cocoonResult.EventLog,
+            log => log.Source == "effect.creature.spider_queen.royal_cocoon.heal"
+                   && log.EventType == EventType.Heal
+                   && log.Magnitude == 300);
+    }
+
+    [Fact]
+    public void Bark_golem_abilities_slam_all_enemies_and_apply_barkskin_tradeoff()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var abilities = AbilityCompiler.CompileAbilities(
+        [
+            catalog.AbilitiesById["ability.creature.bark_golem.timber_slam"],
+            catalog.AbilitiesById["ability.creature.bark_golem.barkskin"]
+        ]);
+
+        var golem = new RuntimeCombatant(
+            "bark-golem",
+            "Bark Golem",
+            CombatTeam.Friendly,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 1000,
+                [AttributeType.Power] = 50,
+                [AttributeType.Armor] = 100,
+                [AttributeType.CritDamage] = 100,
+                [AttributeType.AttackSpeed] = 0
+            },
+            abilities.Values,
+            canBasicAttack: false);
+        var enemies = new[]
+        {
+            CreateCombatant("enemy-1", CombatTeam.Hostile, [], maxHealth: 1000, canBasicAttack: false),
+            CreateCombatant("enemy-2", CombatTeam.Hostile, [], maxHealth: 1000, canBasicAttack: false)
+        };
+        var result = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1000, RandomSeed: 7))
+            .Run([golem], enemies);
+
+        Assert.Equal(2, result.EventLog.Count(log =>
+            log.Source == "effect.creature.bark_golem.timber_slam.damage"
+            && log.EventType == EventType.Damage));
+        Assert.Equal(130, golem.GetAttribute(AttributeType.Armor));
+        Assert.Equal(100, golem.GetDamageTakenPercent(DamageType.Burn, enemies[0]));
+    }
+
+    [Fact]
+    public void Treant_guardian_abilities_grant_power_barrier_and_stack_regeneration_every_ten_seconds()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var abilities = AbilityCompiler.CompileAbilities(
+        [
+            catalog.AbilitiesById["ability.creature.treant_guardian.rootbound_shield"],
+            catalog.AbilitiesById["ability.creature.treant_guardian.forest_vitality"]
+        ]);
+        var guardian = CreateCombatant(
+            "treant-guardian",
+            CombatTeam.Friendly,
+            abilities.Values,
+            maxHealth: 1000,
+            canBasicAttack: false);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [], maxHealth: 10000, canBasicAttack: false);
+
+        new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 201, BasicAttackIntervalTicks: 1000, RandomSeed: 7))
+            .Run([guardian], [enemy]);
+
+        Assert.Equal(200, guardian.Barrier);
+        Assert.Equal(4, guardian.RegenerationRatePercent);
+    }
+
+    [Fact]
+    public void Ancient_sap_weakens_on_doom_and_its_magical_damage_activates_ancient_essence()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var abilities = AbilityCompiler.CompileAbilities(
+        [
+            catalog.AbilitiesById["ability.creature.elder_treant.ancient_sap"],
+            catalog.AbilitiesById["ability.creature.elder_treant.ancient_essence"]
+        ]);
+        var elder = CreateCombatant(
+            "elder-treant",
+            CombatTeam.Friendly,
+            abilities.Values,
+            maxHealth: 1000,
+            canBasicAttack: false);
+        elder.AdjustHealth(-500);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [], maxHealth: 10000, canBasicAttack: false);
+        var result = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 151, BasicAttackIntervalTicks: 1000, RandomSeed: 7))
+            .Run([elder], [enemy]);
+
+        Assert.True(enemy.HasCondition(StandardConditionType.Weaken));
+        Assert.Equal(505, elder.Health);
+        Assert.Contains(result.EventLog, log =>
+            log.Source == "condition.doom"
+            && log.EventType == EventType.Damage
+            && log.DamageType == DamageType.Magical);
+        Assert.Contains(result.EventLog, log =>
+            log.Source == "effect.creature.elder_treant.ancient_essence.heal"
+            && log.EventType == EventType.Heal
+            && log.Magnitude == 5);
+    }
+
+    [Fact]
+    public void Thornstorm_deals_both_damage_types_to_all_enemies_and_ancient_essence_obeys_its_cooldown()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var abilities = AbilityCompiler.CompileAbilities(
+        [
+            catalog.AbilitiesById["ability.creature.elder_treant.thornstorm"],
+            catalog.AbilitiesById["ability.creature.elder_treant.ancient_essence"]
+        ]);
+        var elder = CreateCombatant(
+            "elder-treant",
+            CombatTeam.Friendly,
+            abilities.Values,
+            maxHealth: 1000,
+            canBasicAttack: false);
+        elder.AdjustHealth(-500);
+        var enemies = new[]
+        {
+            CreateCombatant("enemy-1", CombatTeam.Hostile, [], maxHealth: 1000, canBasicAttack: false),
+            CreateCombatant("enemy-2", CombatTeam.Hostile, [], maxHealth: 1000, canBasicAttack: false)
+        };
+        var result = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1000, RandomSeed: 7))
+            .Run([elder], enemies);
+
+        Assert.Equal(2, result.EventLog.Count(log =>
+            log.Source == "effect.creature.elder_treant.thornstorm.magical_damage"
+            && log.EventType == EventType.Damage));
+        Assert.Equal(2, result.EventLog.Count(log =>
+            log.Source == "effect.creature.elder_treant.thornstorm.physical_damage"
+            && log.EventType == EventType.Damage));
+        Assert.Equal(505, elder.Health);
+        Assert.Single(result.EventLog, log =>
+            log.Source == "effect.creature.elder_treant.ancient_essence.heal"
+            && log.EventType == EventType.Heal);
+    }
+
+    [Fact]
     public void Json_catalog_loads_compiles_and_runs_seeded_battle()
     {
         var provider = new JsonAbilityCatalogProvider(
@@ -4221,6 +4698,123 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Essence_progression_calibration_compares_attribute_only_expected_and_optimized_envelopes()
+    {
+        var contentRoot = FindApiContentRoot();
+        var options = CreateJsonOptions();
+        var config = CreateConfig();
+        var catalogProvider = new JsonAbilityCatalogProvider(config, contentRoot, options);
+        var essenceRepository = new JsonEssenceDefinitionRepository(
+            config,
+            contentRoot,
+            options,
+            new EssenceDefinitionValidator());
+        var slotUnlocks = new EssenceSlotUnlockService();
+        var runner = new EssenceProgressionCalibrationRunner(
+            catalogProvider,
+            essenceRepository,
+            slotUnlocks);
+        string[] offensiveEssences =
+        [
+            "essence.goblin",
+            "essence.raven",
+            "essence.venomous_snake",
+            "essence.goblin_archer",
+            "essence.frost_imp",
+            "essence.crystal_wisp",
+            "essence.grave_hound",
+            "essence.skeleton",
+            "essence.glade_panther",
+            "essence.flame_imp"
+        ];
+        int[] anchors = [1, 10, 30, 90];
+        var scenarios = anchors.Select(level =>
+        {
+            var slots = slotUnlocks.GetUnlockedSlotCount(level);
+            var expectedCount = Math.Max(1, (int)Math.Ceiling(slots * 0.6));
+            var playerHealth = 140 + 20 * (level - 1);
+            var playerPower = 10 + 0.25f * (level - 1);
+            return new EssenceProgressionCalibrationScenario(
+                $"anchor-{level}",
+                ProgressionPosition: Math.Max(1, level / 5),
+                CharacterLevel: level,
+                PlayerAttributes: new Dictionary<AttributeType, float>
+                {
+                    [AttributeType.MaxHealth] = playerHealth,
+                    [AttributeType.Power] = playerPower,
+                    [AttributeType.CritChance] = 5,
+                    [AttributeType.CritDamage] = 100
+                },
+                TargetAttributes: new Dictionary<AttributeType, float>
+                {
+                    [AttributeType.MaxHealth] = 100_000_000,
+                    [AttributeType.Power] = 0,
+                    [AttributeType.DodgeChance] = 0
+                },
+                Envelopes:
+                [
+                    new("attributes-only", []),
+                    new("minimum", [new(offensiveEssences[0], 0)]),
+                    new("expected", offensiveEssences.Take(expectedCount)
+                        .Select(id => new EssenceProgressionCalibrationEssence(id, 1)).ToList()),
+                    new("optimized", offensiveEssences.Take(slots)
+                        .Select(id => new EssenceProgressionCalibrationEssence(id, 3)).ToList())
+                ],
+                RandomSeeds: [17, 29, 43],
+                MaxTicks: 300);
+        }).ToList();
+
+        var first = runner.Run(scenarios);
+        var second = runner.Run(scenarios);
+
+        Assert.Equal(anchors.Length * 4, first.Results.Count);
+        Assert.Equal(first.Results, second.Results);
+        Assert.All(anchors, level =>
+        {
+            var scenarioId = $"anchor-{level}";
+            var baseline = first.Results.Single(result =>
+                result.ScenarioId == scenarioId && result.EnvelopeId == "attributes-only");
+            var optimized = first.Results.Single(result =>
+                result.ScenarioId == scenarioId && result.EnvelopeId == "optimized");
+            Assert.True(
+                optimized.AverageDamageDone > baseline.AverageDamageDone,
+                $"{scenarioId}: optimized Essence envelope should exceed attribute-only damage.");
+        });
+    }
+
+    [Fact]
+    public void Essence_progression_calibration_rejects_loadouts_above_the_level_slot_limit()
+    {
+        var contentRoot = FindApiContentRoot();
+        var options = CreateJsonOptions();
+        var config = CreateConfig();
+        var runner = new EssenceProgressionCalibrationRunner(
+            new JsonAbilityCatalogProvider(config, contentRoot, options),
+            new JsonEssenceDefinitionRepository(
+                config,
+                contentRoot,
+                options,
+                new EssenceDefinitionValidator()),
+            new EssenceSlotUnlockService());
+        var scenario = new EssenceProgressionCalibrationScenario(
+            "slot-limit",
+            1,
+            1,
+            new Dictionary<AttributeType, float> { [AttributeType.MaxHealth] = 140 },
+            new Dictionary<AttributeType, float> { [AttributeType.MaxHealth] = 1_000 },
+            [
+                new("attributes-only", []),
+                new("invalid", [new("essence.goblin", 0), new("essence.raven", 0)])
+            ],
+            [17]);
+
+        var exception = Assert.Throws<InvalidOperationException>(() => runner.Run([scenario]));
+
+        Assert.Contains("exceed", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("slots", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Json_catalog_covers_authored_essence_slots()
     {
         var contentRoot = FindApiContentRoot();
@@ -4237,8 +4831,8 @@ public sealed class AbilitySystemTests
 
         Assert.True(report.IsComplete, string.Join(Environment.NewLine, report.Gaps.Select(x => $"{x.EssenceId} {x.Slot}: {x.Reason}")));
         Assert.Equal(report.RequiredSlotCount, report.CoveredSlotCount);
-        Assert.Equal(126, report.RequiredSlotCount);
-        Assert.Equal(63, report.EssenceCount);
+        Assert.Equal(140, report.RequiredSlotCount);
+        Assert.Equal(70, report.EssenceCount);
         Assert.Equal(report.EssenceCount, report.RuntimeLoadoutChecks.Count);
         Assert.All(report.RuntimeLoadoutChecks, check =>
         {
@@ -4829,8 +5423,8 @@ public sealed class AbilitySystemTests
         Assert.NotNull(summonLog.CombatEntity);
         Assert.Equal("Creature Shadow Image", summonLog.CombatEntity!.Name);
         Assert.Equal("shadow_image", summonLog.CombatEntity.ImagePath);
-        Assert.Equal(1, summonLog.CombatEntity.MaxHealth);
-        Assert.Equal(1, summonLog.CombatEntity.Health);
+        Assert.Equal(21, summonLog.CombatEntity.MaxHealth);
+        Assert.Equal(21, summonLog.CombatEntity.Health);
         Assert.True(provider.GetCatalog().SummonsById.ContainsKey("creatureShadowImage"));
         Assert.Contains(result.EventLog, x =>
             x.ActorId == summonId
@@ -4857,7 +5451,7 @@ public sealed class AbilitySystemTests
             result.EntityStats,
             stats => stats.EntityId == summonId);
         Assert.Equal(0, summonStats.Health);
-        Assert.Equal(1, summonStats.MaxHealth);
+        Assert.Equal(21, summonStats.MaxHealth);
     }
 
     [Fact]
@@ -5711,7 +6305,9 @@ public sealed class AbilitySystemTests
         int maxHealth = 200,
         int dodgeChance = 0,
         int? partyNumber = null,
-        bool canBasicAttack = true) =>
+        bool canBasicAttack = true,
+        BossStaggerDefinition? staggerDefinition = null,
+        int staggerParticipantCount = 1) =>
         new(
             id,
             id,
@@ -5727,7 +6323,9 @@ public sealed class AbilitySystemTests
             abilities,
             ["Role.Test"],
             canBasicAttack: canBasicAttack,
-            partyNumber: partyNumber);
+            partyNumber: partyNumber,
+            staggerDefinition: staggerDefinition,
+            staggerParticipantCount: staggerParticipantCount);
 
     private static void AddStandardCondition(
         RuntimeCombatant owner,

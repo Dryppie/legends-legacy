@@ -13,13 +13,13 @@ public record LeaveGuildCommand(Guid CharacterId) : ICommand<Response<bool>>;
 public class LeaveGuildCommandHandler : IRequestHandler<LeaveGuildCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _eventPublisher;
     private readonly IGameEventOutbox _outbox;
     private readonly IGuildSystemChatPublisher _guildChat;
 
     public LeaveGuildCommandHandler(
         IGuildService guildService,
-        IGameEventPublisher eventPublisher,
+        IGameRealtimeBroadcaster eventPublisher,
         IGameEventOutbox outbox,
         IGuildSystemChatPublisher guildChat)
     {
@@ -54,13 +54,19 @@ public class LeaveGuildCommandHandler : IRequestHandler<LeaveGuildCommand, Respo
 
         await _eventPublisher.PublishAsync(
             new Audience.Character(request.CharacterId),
-            new GuildMembershipChangedMsg(guild.Id, request.CharacterId));
+            new GuildMembershipChanged(guild.Id, request.CharacterId),
+            nameof(LeaveGuildCommandHandler),
+            cancellationToken);
         await _eventPublisher.PublishAsync(
             new Audience.Guild(guild.Id),
-            new GuildStateChangedMsg(guild.Id));
+            new GuildStateChanged(guild.Id),
+            nameof(LeaveGuildCommandHandler),
+            cancellationToken);
         await _eventPublisher.PublishAsync(
             new Audience.World(),
-            new GuildDirectoryChangedMsg("membership"));
+            new GuildDirectoryChanged("membership"),
+            nameof(LeaveGuildCommandHandler),
+            cancellationToken);
 
         return Response<bool>.Success(true);
     }

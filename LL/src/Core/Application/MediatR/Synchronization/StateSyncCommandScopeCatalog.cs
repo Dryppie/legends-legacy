@@ -7,7 +7,13 @@ public sealed record StateSyncCommandScopeProfile(
     IReadOnlyList<string> WorldScopes,
     bool RefreshCharacterOverview = true,
     bool InventoryWhenChanged = false,
-    bool RefreshCharacterSummaryWhenChanged = false);
+    bool RefreshCharacterSummaryWhenChanged = false)
+{
+    public IReadOnlySet<string> VersionOnlyCharacterScopes { get; init; } =
+        new HashSet<string>(StringComparer.Ordinal);
+    public IReadOnlySet<string> VersionOnlyWorldScopes { get; init; } =
+        new HashSet<string>(StringComparer.Ordinal);
+}
 
 /// <summary>
 /// Compile-time command-to-resource contract used by the transaction pipeline.
@@ -56,7 +62,15 @@ public static class StateSyncCommandScopeCatalog
         var profiles = new Dictionary<Type, StateSyncCommandScopeProfile>();
 
         Register(profiles, [StateSyncScopes.Achievements], [],
-            typeof(global::Application.UseCases.Achievements.Commands.RecalculateAchievements.RecalculateAchievementsCommand),
+            typeof(global::Application.UseCases.Achievements.Commands.RecalculateAchievements.RecalculateAchievementsCommand));
+
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Achievements],
+            [],
+            [StateSyncScopes.Achievements, StateSyncScopes.Character],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Titles.Commands.EquipTitle.EquipTitleCommand),
             typeof(global::Application.UseCases.Titles.Commands.UnequipTitle.UnequipTitleCommand));
 
@@ -68,13 +82,49 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.CharacterActions.Commands.StartCombatAction.StartCombatActionCommand),
             typeof(global::Application.UseCases.CharacterActions.Commands.StartCraftingAction.StartCraftingActionCommand));
 
-        Register(profiles, [StateSyncScopes.Inventory], [StateSyncScopes.Colosseum],
-            typeof(global::Application.UseCases.Colosseum.Commands.BackfillChampionMarketTitleGrants.BackfillChampionMarketTitleGrantsCommand),
-            typeof(global::Application.UseCases.Colosseum.Commands.PurchaseChampionMarketItem.PurchaseChampionMarketItemCommand),
-            typeof(global::Application.UseCases.Colosseum.Commands.StartArenaBattle.StartArenaBattleCommand),
+        Register(
+            profiles,
+            [],
+            [],
+            refreshCharacterOverview: false,
+            inventoryWhenChanged: false,
+            refreshCharacterSummaryWhenChanged: false,
+            typeof(global::Application.UseCases.Colosseum.Commands.BackfillChampionMarketTitleGrants.BackfillChampionMarketTitleGrantsCommand));
+
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Colosseum, StateSyncScopes.Inventory],
+            [],
+            [StateSyncScopes.Colosseum],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Colosseum.Commands.PurchaseChampionMarketItem.PurchaseChampionMarketItemCommand));
+
+        Register(
+            profiles,
+            [StateSyncScopes.Colosseum],
+            [],
+            refreshCharacterOverview: true,
+            inventoryWhenChanged: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Colosseum.Commands.StartArenaBattle.StartArenaBattleCommand));
+
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Colosseum],
+            [],
+            [StateSyncScopes.Colosseum],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: false,
             typeof(global::Application.UseCases.Colosseum.Commands.UpdateArenaDefenseSnapshot.UpdateArenaDefenseSnapshotCommand));
 
-        Register(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Quests], [],
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Inventory, StateSyncScopes.Quests],
+            [],
+            [StateSyncScopes.Inventory],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Crafting.Commands.CraftItems.CraftItemsCommand),
             typeof(global::Application.UseCases.Crafting.Commands.LearnBlueprint.LearnBlueprintCommand));
 
@@ -84,112 +134,307 @@ public static class StateSyncCommandScopeCatalog
 
         Register(profiles, [StateSyncScopes.Dungeons, StateSyncScopes.Inventory, StateSyncScopes.Quests], [],
             typeof(global::Application.UseCases.Dungeons.Commands.AssembleDungeonSigil.AssembleDungeonSigilCommand),
-            typeof(global::Application.UseCases.Dungeons.Commands.ClaimDungeonRewards.ClaimDungeonRewardsCommand),
             typeof(global::Application.UseCases.Dungeons.Commands.DismissFailedDungeonRun.DismissFailedDungeonRunCommand),
             typeof(global::Application.UseCases.Dungeons.Commands.ExecuteDungeonAction.ExecuteDungeonActionCommand),
             typeof(global::Application.UseCases.Dungeons.Commands.StartDungeonRun.StartDungeonRunCommand));
 
-        Register(profiles, [StateSyncScopes.Equipment, StateSyncScopes.Inventory, StateSyncScopes.Quests], [],
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Dungeons, StateSyncScopes.Inventory],
+            [],
+            [StateSyncScopes.Dungeons, StateSyncScopes.Inventory, StateSyncScopes.Character],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Dungeons.Commands.ClaimDungeonRewards.ClaimDungeonRewardsCommand));
+
+        RegisterResponseOwned(profiles, [StateSyncScopes.Equipment, StateSyncScopes.Inventory], [],
+            [StateSyncScopes.Equipment, StateSyncScopes.Inventory],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Equipments.Commands.EquipEquipment.EquipEquipmentCommand),
             typeof(global::Application.UseCases.Equipments.Commands.UnequipEquipment.UnequipEquipmentCommand));
 
-        Register(profiles, [StateSyncScopes.Essences, StateSyncScopes.Inventory, StateSyncScopes.Equipment, StateSyncScopes.Quests], [],
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Essences, StateSyncScopes.Inventory, StateSyncScopes.Equipment],
+            [],
+            [StateSyncScopes.Essences, StateSyncScopes.Inventory, StateSyncScopes.Equipment],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Essences.Commands.AbsorbUnboundEssence.AbsorbUnboundEssenceCommand),
-            typeof(global::Application.UseCases.Essences.Commands.ActivateEssenceLoadout.ActivateEssenceLoadoutCommand),
             typeof(global::Application.UseCases.Essences.Commands.AscendEssence.AscendEssenceCommand),
-            typeof(global::Application.UseCases.Essences.Commands.DeleteEssenceLoadout.DeleteEssenceLoadoutCommand),
             typeof(global::Application.UseCases.Essences.Commands.DismantleUnboundEssence.DismantleUnboundEssenceCommand),
             typeof(global::Application.UseCases.Essences.Commands.EvolveEssence.EvolveEssenceCommand),
+            typeof(global::Application.UseCases.Essences.Commands.SpendEssenceDust.SpendEssenceDustCommand));
+
+        Register(profiles, [StateSyncScopes.Essences, StateSyncScopes.Inventory, StateSyncScopes.Equipment, StateSyncScopes.Quests], [],
+            typeof(global::Application.UseCases.Essences.Commands.ActivateEssenceLoadout.ActivateEssenceLoadoutCommand),
+            typeof(global::Application.UseCases.Essences.Commands.DeleteEssenceLoadout.DeleteEssenceLoadoutCommand),
             typeof(global::Application.UseCases.Essences.Commands.FavoriteEssence.FavoriteEssenceCommand),
             typeof(global::Application.UseCases.Essences.Commands.SaveEssenceLoadout.SaveEssenceLoadoutCommand),
             typeof(global::Application.UseCases.Essences.Commands.SetEssenceFocus.SetEssenceFocusCommand));
 
-        Register(profiles, [StateSyncScopes.Essences, StateSyncScopes.Inventory], [],
-            refreshCharacterOverview: true, inventoryWhenChanged: false, refreshCharacterSummaryWhenChanged: true,
-            typeof(global::Application.UseCases.Essences.Commands.SpendEssenceDust.SpendEssenceDustCommand));
-
-        Register(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment], [StateSyncScopes.Guild],
+        RegisterSemanticWorldResponseOwned(
+            profiles,
+            [
+                StateSyncScopes.Achievements,
+                StateSyncScopes.GuildMembership,
+                StateSyncScopes.GuildInvites
+            ],
+            [StateSyncScopes.Guild, StateSyncScopes.GuildDirectory],
+            [],
+            [StateSyncScopes.GuildDirectory],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: false,
             typeof(global::Application.UseCases.Guilds.Commands.AcceptInvite.AcceptInviteCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.ApplyToGuild.ApplyToGuildCommand),
             typeof(global::Application.UseCases.Guilds.Commands.ApproveApplication.ApproveApplicationCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.BorrowGuildVaultItem.BorrowGuildVaultItemCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.ChangeGuildMemberRole.ChangeGuildMemberRoleCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.ClaimGuildOrderReward.ClaimGuildOrderRewardCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.ClaimGuildWeeklyMissionReward.ClaimGuildWeeklyMissionRewardCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.ConstructGuildBuilding.ConstructGuildBuildingCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.CreateGuild.CreateGuildCommand),
+            typeof(global::Application.UseCases.Guilds.Commands.CreateGuild.CreateGuildCommand));
+
+        RegisterSemanticWorldResponseOwned(
+            profiles,
+            [
+                StateSyncScopes.Inventory,
+                StateSyncScopes.Equipment,
+                StateSyncScopes.GuildMembership,
+                StateSyncScopes.GuildInvites
+            ],
+            [StateSyncScopes.Guild, StateSyncScopes.GuildDirectory],
+            [],
+            [StateSyncScopes.GuildDirectory],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: false,
             typeof(global::Application.UseCases.Guilds.Commands.DisbandGuild.DisbandGuildCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.DonateGuildVaultItem.DonateGuildVaultItemCommand),
+            typeof(global::Application.UseCases.Guilds.Commands.KickGuildMember.KickGuildMemberCommand),
+            typeof(global::Application.UseCases.Guilds.Commands.LeaveGuild.LeaveGuildCommand));
+
+        Register(
+            profiles,
+            [StateSyncScopes.GuildInvites],
+            [StateSyncScopes.Guild],
+            refreshCharacterOverview: false,
+            inventoryWhenChanged: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Guilds.Commands.ApplyToGuild.ApplyToGuildCommand),
             typeof(global::Application.UseCases.Guilds.Commands.Invite.InviteCommand),
             typeof(global::Application.UseCases.Guilds.Commands.InviteCharacterByName.InviteCharacterByNameCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.KickGuildMember.KickGuildMemberCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.LeaveGuild.LeaveGuildCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.PurchaseGuildShopItem.PurchaseGuildShopItemCommand),
             typeof(global::Application.UseCases.Guilds.Commands.RejectApplication.RejectApplicationCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.RejectInvite.RejectInviteCommand),
+            typeof(global::Application.UseCases.Guilds.Commands.RejectInvite.RejectInviteCommand));
+
+        Register(
+            profiles,
+            [StateSyncScopes.Inventory],
+            [StateSyncScopes.Guild],
+            refreshCharacterOverview: false,
+            inventoryWhenChanged: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Guilds.Commands.BorrowGuildVaultItem.BorrowGuildVaultItemCommand),
+            typeof(global::Application.UseCases.Guilds.Commands.DonateGuildVaultItem.DonateGuildVaultItemCommand));
+
+        Register(
+            profiles,
+            [StateSyncScopes.Inventory, StateSyncScopes.Equipment],
+            [StateSyncScopes.Guild],
+            refreshCharacterOverview: false,
+            inventoryWhenChanged: false,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Guilds.Commands.ReturnGuildVaultItem.ReturnGuildVaultItemCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.SelectGuildMission.SelectGuildMissionCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.SetGuildBuildingTarget.SetGuildBuildingTargetCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.UpdateGuildDescription.UpdateGuildDescriptionCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.UpdateGuildRolePermissions.UpdateGuildRolePermissionsCommand),
-            typeof(global::Application.UseCases.Guilds.Commands.UpgradeGuildBuilding.UpgradeGuildBuildingCommand),
             typeof(global::Application.UseCases.Guilds.Commands.WithdrawGuildVaultItem.WithdrawGuildVaultItemCommand));
 
-        Register(profiles, [StateSyncScopes.Inventory], [],
+        Register(
+            profiles,
+            [],
+            [StateSyncScopes.Guild],
+            refreshCharacterOverview: false,
+            inventoryWhenChanged: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Guilds.Commands.ChangeGuildMemberRole.ChangeGuildMemberRoleCommand),
+            typeof(global::Application.UseCases.Guilds.Commands.UpdateGuildDescription.UpdateGuildDescriptionCommand),
+            typeof(global::Application.UseCases.Guilds.Commands.UpdateGuildRolePermissions.UpdateGuildRolePermissionsCommand));
+
+        RegisterSemanticWorldResponseOwned(
+            profiles,
+            [StateSyncScopes.GuildShop],
+            [StateSyncScopes.Guild, StateSyncScopes.GuildBuildings],
+            [],
+            [StateSyncScopes.GuildBuildings],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Guilds.Commands.ConstructGuildBuilding.ConstructGuildBuildingCommand),
+            typeof(global::Application.UseCases.Guilds.Commands.UpgradeGuildBuilding.UpgradeGuildBuildingCommand));
+
+        RegisterSemanticWorldResponseOwned(
+            profiles,
+            [],
+            [StateSyncScopes.GuildBuildings],
+            [],
+            [StateSyncScopes.GuildBuildings],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Guilds.Commands.SetGuildBuildingTarget.SetGuildBuildingTargetCommand));
+
+        RegisterSemanticWorldResponseOwned(
+            profiles,
+            [],
+            [StateSyncScopes.GuildMissions],
+            [],
+            [StateSyncScopes.GuildMissions],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Guilds.Commands.SelectGuildMission.SelectGuildMissionCommand));
+
+        RegisterSemanticWorldResponseOwned(
+            profiles,
+            [StateSyncScopes.GuildShop],
+            [StateSyncScopes.Guild, StateSyncScopes.GuildMissions],
+            [],
+            [StateSyncScopes.GuildMissions],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Guilds.Commands.ClaimGuildOrderReward.ClaimGuildOrderRewardCommand),
+            typeof(global::Application.UseCases.Guilds.Commands.ClaimGuildWeeklyMissionReward.ClaimGuildWeeklyMissionRewardCommand));
+
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Inventory, StateSyncScopes.Achievements, StateSyncScopes.GuildShop],
+            [],
+            [StateSyncScopes.Inventory, StateSyncScopes.GuildShop],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Guilds.Commands.PurchaseGuildShopItem.PurchaseGuildShopItemCommand));
+
+        RegisterResponseOwned(profiles, [StateSyncScopes.Inventory], [],
+            [StateSyncScopes.Inventory],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Inventories.Commands.MarkInventoryItemSeen.MarkInventoryItemSeenCommand),
             typeof(global::Application.UseCases.Inventories.Commands.OpenCatalystSelectionCrate.OpenCatalystSelectionCrateCommand),
             typeof(global::Application.UseCases.Inventories.Commands.ScrapEquipments.ScrapEquipmentsCommand),
             typeof(global::Application.UseCases.Inventories.Commands.TransferInventoryItem.TransferInventoryItemCommand));
 
-        Register(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment], [],
+        RegisterResponseOwned(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment], [],
+            [StateSyncScopes.Inventory],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Inventories.Commands.SetInventoryItemFavorite.SetInventoryItemFavoriteCommand));
 
-        Register(profiles, [StateSyncScopes.Inventory], [StateSyncScopes.Marketplace],
-            typeof(global::Application.UseCases.MarketPlaces.Commands.BuyCommodity.BuyCommodityCommand),
+        RegisterSemanticWorldResponseOwned(
+            profiles,
+            [StateSyncScopes.Inventory],
+            [StateSyncScopes.Marketplace],
+            [StateSyncScopes.Inventory, StateSyncScopes.Character],
+            [StateSyncScopes.Marketplace],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.MarketPlaces.Commands.BuyoutMarketPlaceListing.BuyoutMarketPlaceListingCommand),
-            typeof(global::Application.UseCases.MarketPlaces.Commands.CancelMarketPlaceBuyOrder.CancelMarketPlaceBuyOrderCommand),
             typeof(global::Application.UseCases.MarketPlaces.Commands.CancelMarketPlaceListing.CancelMarketPlaceListingCommand),
-            typeof(global::Application.UseCases.MarketPlaces.Commands.CreateMarketPlaceBuyOrder.CreateMarketPlaceBuyOrderCommand),
             typeof(global::Application.UseCases.MarketPlaces.Commands.CreateMarketPlaceListing.CreateMarketPlaceListingCommand),
             typeof(global::Application.UseCases.MarketPlaces.Commands.FulfillMarketPlaceBuyOrder.FulfillMarketPlaceBuyOrderCommand),
             typeof(global::Application.UseCases.MarketPlaces.Commands.SellCommodity.SellCommodityCommand));
 
-        Register(profiles, [StateSyncScopes.Prophecies, StateSyncScopes.Inventory], [],
+        RegisterSemanticWorldResponseOwned(
+            profiles,
+            [StateSyncScopes.Inventory],
+            [StateSyncScopes.Marketplace],
+            [StateSyncScopes.Character],
+            [StateSyncScopes.Marketplace],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.MarketPlaces.Commands.BuyCommodity.BuyCommodityCommand),
+            typeof(global::Application.UseCases.MarketPlaces.Commands.CreateMarketPlaceBuyOrder.CreateMarketPlaceBuyOrderCommand));
+
+        RegisterSemanticWorldResponseOwned(
+            profiles,
+            [],
+            [StateSyncScopes.Marketplace],
+            [StateSyncScopes.Character],
+            [StateSyncScopes.Marketplace],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.MarketPlaces.Commands.CancelMarketPlaceBuyOrder.CancelMarketPlaceBuyOrderCommand));
+
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Prophecies, StateSyncScopes.Inventory],
+            [],
+            [StateSyncScopes.Prophecies],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Prophecies.Commands.AcceptProphecy.AcceptProphecyCommand),
             typeof(global::Application.UseCases.Prophecies.Commands.ClaimProphecy.ClaimProphecyCommand),
             typeof(global::Application.UseCases.Prophecies.Commands.ClaimWeeklyRevelationMilestone.ClaimWeeklyRevelationMilestoneCommand),
-            typeof(global::Application.UseCases.Prophecies.Commands.GetPropheciesOverview.GetPropheciesOverviewCommand),
             typeof(global::Application.UseCases.Prophecies.Commands.OpenProphecyCache.OpenProphecyCacheCommand),
             typeof(global::Application.UseCases.Prophecies.Commands.RerollProphecy.RerollProphecyCommand));
 
-        Register(profiles, [StateSyncScopes.EventQuests, StateSyncScopes.Inventory], [],
+        Register(profiles, [StateSyncScopes.Prophecies, StateSyncScopes.Inventory], [],
+            typeof(global::Application.UseCases.Prophecies.Commands.GetPropheciesOverview.GetPropheciesOverviewCommand));
+
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.EventQuests, StateSyncScopes.Inventory],
+            [],
+            [StateSyncScopes.EventQuests],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Quests.Events.Commands.ClaimAllEventQuestMilestones.ClaimAllEventQuestMilestonesCommand),
             typeof(global::Application.UseCases.Quests.Events.Commands.ClaimEventQuestMilestone.ClaimEventQuestMilestoneCommand),
             typeof(global::Application.UseCases.Quests.Events.Commands.ClaimEventQuestReward.ClaimEventQuestRewardCommand));
 
-        Register(profiles, [StateSyncScopes.Quests, StateSyncScopes.AreaAccess], [],
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Quests],
+            [],
+            [StateSyncScopes.Quests],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: false,
             typeof(global::Application.UseCases.Quests.Commands.AcknowledgeQuestWelcome.AcknowledgeQuestWelcomeCommand),
             typeof(global::Application.UseCases.Quests.Commands.PinQuest.PinQuestCommand),
-            typeof(global::Application.UseCases.Quests.Commands.SelectQuestChoice.SelectQuestChoiceCommand),
+            typeof(global::Application.UseCases.Quests.Commands.SelectQuestChoice.SelectQuestChoiceCommand));
+
+        Register(profiles, [StateSyncScopes.Quests, StateSyncScopes.AreaAccess], [],
             typeof(global::Application.UseCases.Quests.Commands.StartQuestEncounter.StartQuestEncounterCommand));
 
-        Register(profiles, [], [StateSyncScopes.Raids],
+        RegisterSemanticWorldResponseOwned(
+            profiles,
+            [StateSyncScopes.Raids],
+            [StateSyncScopes.RaidDirectory],
+            [StateSyncScopes.Raids],
+            [StateSyncScopes.RaidDirectory],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Raids.CreateRaidCommand),
             typeof(global::Application.UseCases.Raids.CreateDevelopmentRaidCommand),
             typeof(global::Application.UseCases.Raids.JoinRaidCommand),
+            typeof(global::Application.UseCases.Raids.ApproveRaidSignupCommand),
+            typeof(global::Application.UseCases.Raids.RemoveRaidSignupCommand),
             typeof(global::Application.UseCases.Raids.LeaveRaidCommand),
             typeof(global::Application.UseCases.Raids.CancelRaidCommand),
             typeof(global::Application.UseCases.Raids.TransferRaidLeadershipCommand),
-            typeof(global::Application.UseCases.Raids.RefreshRaidSnapshotCommand),
             typeof(global::Application.UseCases.Raids.AssignRaidWingCommand),
             typeof(global::Application.UseCases.Raids.Commands.UpdateRaidParties.UpdateRaidPartiesCommand),
             typeof(global::Application.UseCases.Raids.CommenceRaidCommand));
 
-        Register(profiles, [StateSyncScopes.Inventory], [StateSyncScopes.Raids],
-            typeof(global::Application.UseCases.Raids.ClaimRaidRewardsCommand),
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Raids],
+            [],
+            [StateSyncScopes.Raids],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Raids.RefreshRaidSnapshotCommand));
+
+        Register(profiles, [StateSyncScopes.Raids, StateSyncScopes.Inventory], [],
+            typeof(global::Application.UseCases.Raids.ClaimRaidRewardsCommand));
+
+        Register(profiles, [StateSyncScopes.Raids, StateSyncScopes.Inventory], [],
             typeof(global::Application.UseCases.Raids.PurchaseRaidTrophyVendorItemCommand));
 
-        Register(profiles, [StateSyncScopes.Soulstones, StateSyncScopes.Inventory, StateSyncScopes.Quests], [],
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Soulstones, StateSyncScopes.Inventory, StateSyncScopes.Quests],
+            [],
+            [StateSyncScopes.Soulstones, StateSyncScopes.Character],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Soulstones.Commands.PurchaseSoulstoneUpgrade.PurchaseSoulstoneUpgradeCommand),
             typeof(global::Application.UseCases.Soulstones.Commands.ResetSoulstoneUpgrades.ResetSoulstoneUpgradesCommand));
 
@@ -218,6 +463,56 @@ public static class StateSyncCommandScopeCatalog
             refreshCharacterOverview,
             inventoryWhenChanged,
             refreshCharacterSummaryWhenChanged);
+        foreach (var commandType in commandTypes)
+        {
+            profiles.Add(commandType, profile);
+        }
+    }
+
+    private static void RegisterResponseOwned(
+        IDictionary<Type, StateSyncCommandScopeProfile> profiles,
+        IReadOnlyList<string> characterScopes,
+        IReadOnlyList<string> worldScopes,
+        IReadOnlyList<string> versionOnlyCharacterScopes,
+        bool refreshCharacterOverview,
+        bool refreshCharacterSummaryWhenChanged,
+        params Type[] commandTypes)
+    {
+        var profile = new StateSyncCommandScopeProfile(
+            characterScopes,
+            worldScopes,
+            refreshCharacterOverview,
+            InventoryWhenChanged: false,
+            refreshCharacterSummaryWhenChanged)
+        {
+            VersionOnlyCharacterScopes = versionOnlyCharacterScopes.ToHashSet(StringComparer.Ordinal)
+        };
+        foreach (var commandType in commandTypes)
+        {
+            profiles.Add(commandType, profile);
+        }
+    }
+
+    private static void RegisterSemanticWorldResponseOwned(
+        IDictionary<Type, StateSyncCommandScopeProfile> profiles,
+        IReadOnlyList<string> characterScopes,
+        IReadOnlyList<string> worldScopes,
+        IReadOnlyList<string> versionOnlyCharacterScopes,
+        IReadOnlyList<string> versionOnlyWorldScopes,
+        bool refreshCharacterOverview,
+        bool refreshCharacterSummaryWhenChanged,
+        params Type[] commandTypes)
+    {
+        var profile = new StateSyncCommandScopeProfile(
+            characterScopes,
+            worldScopes,
+            refreshCharacterOverview,
+            InventoryWhenChanged: false,
+            refreshCharacterSummaryWhenChanged)
+        {
+            VersionOnlyCharacterScopes = versionOnlyCharacterScopes.ToHashSet(StringComparer.Ordinal),
+            VersionOnlyWorldScopes = versionOnlyWorldScopes.ToHashSet(StringComparer.Ordinal)
+        };
         foreach (var commandType in commandTypes)
         {
             profiles.Add(commandType, profile);

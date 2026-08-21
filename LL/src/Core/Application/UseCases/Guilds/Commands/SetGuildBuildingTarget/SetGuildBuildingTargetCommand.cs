@@ -20,13 +20,13 @@ public sealed class SetGuildBuildingTargetCommandHandler
 {
     private readonly IGuildBuildingService _guildBuildingService;
     private readonly ICharacterService _characters;
-    private readonly IGameEventPublisher _events;
+    private readonly IGameRealtimeBroadcaster _events;
     private readonly IGameEventOutbox _outbox;
 
     public SetGuildBuildingTargetCommandHandler(
         IGuildBuildingService guildBuildingService,
         ICharacterService characters,
-        IGameEventPublisher events,
+        IGameRealtimeBroadcaster events,
         IGameEventOutbox outbox)
     {
         _guildBuildingService = guildBuildingService;
@@ -73,9 +73,11 @@ public sealed class SetGuildBuildingTargetCommandHandler
 
         await _events.PublishAsync(
             new Audience.Guild(result.Value.GuildId),
-            new GuildBuildingsChangedMsg(
+            new GuildBuildingsChanged(
                 result.Value.GuildId,
-                request.BuildingType.ToString()));
+                request.BuildingType.ToString()),
+            nameof(SetGuildBuildingTargetCommandHandler),
+            cancellationToken);
 
         return Response<GuildBuildingOverviewDto>.Success(result.Value);
     }

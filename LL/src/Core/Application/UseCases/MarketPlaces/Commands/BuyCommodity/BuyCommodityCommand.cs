@@ -1,9 +1,8 @@
 using Application.Interfaces.Services.LL;
-using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
+using Application.UseCases.MarketPlaces;
 using Application.UseCases.MarketPlaces.Dtos.Requests;
 using Application.UseCases.MarketPlaces.Dtos.Responses;
-using Application.WebSockets.Contracts;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
@@ -15,7 +14,7 @@ public sealed record BuyCommodityCommand(Guid CharacterId, BuyCommodityRequest B
 
 public sealed class BuyCommodityCommandHandler(
     IMarketPlaceService marketPlaceService,
-    IGameEventPublisher eventPublisher,
+    MarketplaceChangePublisher changePublisher,
     IMapper mapper)
     : IRequestHandler<BuyCommodityCommand, Response<BuyCommodityResponseDto>>
 {
@@ -33,22 +32,20 @@ public sealed class BuyCommodityCommandHandler(
             return Response<BuyCommodityResponseDto>.Fail(
                 "The requested quantity is no longer available within that price limit.");
 
-        foreach (var fill in result.Fills)
-        {
-            await eventPublisher.PublishAsync(
-                new Audience.World(),
-                new MarketListingSoldMsg(
-                    fill.ListingId,
-                    fill.SellerId,
-                    fill.Quantity,
-                    fill.TotalPrice,
-                    fill.SellerCinders,
-                    mapper.Map<MarketPlaceListingDto?>(fill.RemainingListing)));
-        }
+        var marketplace = await changePublisher.PublishAsync(
+            result.Fills.Select(fill => new MarketplaceListingChangeDto(
+                fill.ListingId,
+                mapper.Map<MarketPlaceListingDto?>(fill.RemainingListing))).ToArray(),
+            [],
+            result.Fills.Select(fill => mapper.Map<MarketPlaceOrderDto>(fill.Order)).ToArray(),
+            result.Fills.Select(fill => fill.SellerId).Append(request.CharacterId),
+            nameof(BuyCommodityCommand),
+            cancellationToken);
 
         return Response<BuyCommodityResponseDto>.Success(new(
             result.FilledQuantity,
             result.TotalPrice,
-            result.BuyerCinders));
+            result.BuyerCinders,
+            marketplace));
     }
 }

@@ -45,16 +45,17 @@ public sealed class EssenceCatalogServiceTests
         Assert.Equal(["Shenic", "Meran"], report.Regions.Select(region => region.Name));
         var meran = report.Regions.Single(region => region.Id == "region_02");
         Assert.Equal(
-            ["Warfang Frontier", "Rotgrave Fields", "Sanguine Horror"],
+            ["Warfang Frontier", "Rotgrave Fields", "Tangled Cave", "The Great Tree", "Sanguine Horror"],
             meran.Areas.Select(area => area.Name));
         Assert.All(meran.Areas.Where(area => area.SourceType == "Idle Area"), area => Assert.Equal("T2", area.Tier));
+        Assert.All(meran.Areas.Where(area => area.SourceType == "Dungeon"), area => Assert.Equal("T1-T3", area.Tier));
         Assert.Equal("T2-T3", meran.Areas.Single(area => area.SourceType == "Raid").Tier);
 
         var essences = meran.Areas
             .SelectMany(area => area.Monsters)
             .SelectMany(monster => monster.Essences)
             .ToList();
-        Assert.Equal(10, essences.Count);
+        Assert.Equal(17, essences.Count);
         Assert.All(essences, essence =>
         {
             Assert.Equal($"item.{essence.Id}", essence.ItemId);

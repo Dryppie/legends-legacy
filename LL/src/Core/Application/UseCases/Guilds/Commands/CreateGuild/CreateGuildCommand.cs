@@ -11,11 +11,11 @@ public record CreateGuildCommand(Guid CharacterId, string Name) : ICommand<Respo
 public record CreateGuildCommandHandler : IRequestHandler<CreateGuildCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _eventPublisher;
 
     public CreateGuildCommandHandler(
         IGuildService guildService,
-        IGameEventPublisher eventPublisher)
+        IGameRealtimeBroadcaster eventPublisher)
     {
         _guildService = guildService;
         _eventPublisher = eventPublisher;
@@ -29,7 +29,9 @@ public record CreateGuildCommandHandler : IRequestHandler<CreateGuildCommand, Re
 
         await _eventPublisher.PublishAsync(
             new Audience.World(),
-            new GuildDirectoryChangedMsg("created"));
+            new GuildDirectoryChanged("created"),
+            nameof(CreateGuildCommandHandler),
+            cancellationToken);
 
         return Response<bool>.Success(true);
     }

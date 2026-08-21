@@ -152,6 +152,7 @@ public static class AbilityCompiler
 
     private static bool IsReactiveThreatEvent(AbilityTriggerEvent triggerEvent) => triggerEvent is
         AbilityTriggerEvent.OnHit
+        or AbilityTriggerEvent.OnDamageDealt
         or AbilityTriggerEvent.OnDamaged
         or AbilityTriggerEvent.OnAttacked
         or AbilityTriggerEvent.OnMeleeAttacked
@@ -207,6 +208,8 @@ public static class AbilityCompiler
             IntervalTicks = effect.IntervalTicks,
             Uses = effect.Uses,
             OncePerTarget = effect.OncePerTarget,
+            GuaranteedConditionApplication = effect.GuaranteedConditionApplication,
+            StaggerPower = Math.Max(0, effect.StaggerPower),
             MaintainWhileConditionsMet = effect.MaintainWhileConditionsMet,
             MaintainedThreatBand = effect.MaintainWhileConditionsMet
                 ? AbilityThreatRules.GetFunctionBand(effect, triggerEvent: null)

@@ -10,7 +10,7 @@ import { Subject, of } from 'rxjs';
 import { ChatApiService } from '../chat-api.service';
 import { CharacterService } from '../../api/character/character.service';
 import { GuildStateService } from '../../api/guild/guild-state.service';
-import { GameEventService } from '../../real-time/game-event.service';
+import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
 import { AuthService } from '../../api/auth/auth.service';
 import { RaidService } from '../../api/raid/raid.service';
 
@@ -63,9 +63,9 @@ describe('ChatService guild connection synchronization', () => {
     const emptyEnvelope = signal(undefined);
     const gameEvents = {
       eventEnvelope: {
-        AchievementUnlockedMsg: emptyEnvelope,
-        PlayerTransferMsg: emptyEnvelope,
-        GuildVaultChatMessageMsg: emptyEnvelope,
+        AchievementUnlocked: emptyEnvelope,
+        PlayerTransfer: emptyEnvelope,
+        GuildVaultChatMessage: emptyEnvelope,
       },
     };
 
@@ -78,7 +78,7 @@ describe('ChatService guild connection synchronization', () => {
           provide: GuildStateService,
           useValue: { guild: signal(null) },
         },
-        { provide: GameEventService, useValue: gameEvents },
+        { provide: GameRealtimeEventRegistry, useValue: gameEvents },
         {
           provide: RaidService,
           useValue: {

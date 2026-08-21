@@ -9,7 +9,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../api/auth/auth.service';
 import { GuildStateService } from '../../api/guild/guild-state.service';
 import { CharacterService } from '../../api/character/character.service';
-import { GameEventService } from '../../real-time/game-event.service';
+import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
 import { EquipmentInstance } from '../../../../shared/models/item';
 import { RaidService } from '../../api/raid/raid.service';
 
@@ -102,12 +102,12 @@ export class ChatService {
     private characterService: CharacterService,
     private guildState: GuildStateService,
     private raidService: RaidService,
-    private gameEvents: GameEventService,
+    private gameEvents: GameRealtimeEventRegistry,
     private auth: AuthService,
   ) {
     effect(
       () => {
-        const envelope = this.gameEvents.eventEnvelope.AchievementUnlockedMsg();
+        const envelope = this.gameEvents.eventEnvelope.AchievementUnlocked();
         const payload = envelope?.payload;
         if (!payload?.message) return;
 
@@ -126,7 +126,7 @@ export class ChatService {
 
     effect(
       () => {
-        const envelope = this.gameEvents.eventEnvelope.PlayerTransferMsg();
+        const envelope = this.gameEvents.eventEnvelope.PlayerTransfer();
         const payload = envelope?.payload;
         if (!payload?.message || !payload.messageId) return;
 
@@ -146,7 +146,7 @@ export class ChatService {
     effect(
       () => {
         const envelope =
-          this.gameEvents.eventEnvelope.GuildVaultChatMessageMsg();
+          this.gameEvents.eventEnvelope.GuildVaultChatMessage();
         const payload = envelope?.payload;
         if (!payload?.messageId || !payload.equipment) return;
 

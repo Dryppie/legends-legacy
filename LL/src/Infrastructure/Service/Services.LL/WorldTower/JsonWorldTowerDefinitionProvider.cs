@@ -58,6 +58,7 @@ public sealed class JsonWorldTowerDefinitionProvider : IWorldTowerDefinitionProv
 
         var expected = 1;
         var previousTowerTokens = 0;
+        var previousProgressionPosition = 0;
         foreach (var floor in floors)
         {
             if (floor.FloorNumber != expected++)
@@ -72,6 +73,9 @@ public sealed class JsonWorldTowerDefinitionProvider : IWorldTowerDefinitionProv
                 throw new InvalidOperationException($"World Tower floor {floor.FloorNumber} has invalid Expedition slots.");
             if (floor.RecommendedPowerRating < 0)
                 throw new InvalidOperationException($"World Tower floor {floor.FloorNumber} has an invalid recommended Power Rating.");
+            if (floor.ProgressionPosition <= previousProgressionPosition)
+                throw new InvalidOperationException($"World Tower floor {floor.FloorNumber} must advance its progression position.");
+            previousProgressionPosition = floor.ProgressionPosition;
             if (floor.Type == TowerFloorType.Sovereign && floor.EchoEnabledAfterClear)
                 throw new InvalidOperationException($"World Tower Sovereign floor {floor.FloorNumber} cannot enable Echo Mode.");
             if (floor.TowerTokens <= previousTowerTokens)
@@ -82,6 +86,8 @@ public sealed class JsonWorldTowerDefinitionProvider : IWorldTowerDefinitionProv
             previousTowerTokens = floor.TowerTokens;
             if (!IsValidScaling(floor.GuardianScaling))
                 throw new InvalidOperationException($"World Tower floor {floor.FloorNumber} has invalid Guardian scaling.");
+            if (floor.Stagger is not null && !IsValidStagger(floor.Stagger))
+                throw new InvalidOperationException($"World Tower floor {floor.FloorNumber} has invalid Stagger settings.");
             if (floor.Unlocks.Any(x => string.IsNullOrWhiteSpace(x.Key) || string.IsNullOrWhiteSpace(x.Description))
                 || floor.Unlocks.Select(x => x.Key).Distinct(StringComparer.OrdinalIgnoreCase).Count() != floor.Unlocks.Count)
             {
@@ -148,4 +154,16 @@ public sealed class JsonWorldTowerDefinitionProvider : IWorldTowerDefinitionProv
             scaling.Penetration,
             scaling.Regeneration
         }.All(value => float.IsFinite(value) && value > 0);
+
+    private static bool IsValidStagger(Domain.Models.Combat.BossStaggerDefinition stagger) =>
+        !stagger.Enabled
+        || (stagger.BaseThreshold > 0
+            && stagger.ReferenceParticipantCount > 0
+            && double.IsFinite(stagger.ParticipantExponent)
+            && stagger.ParticipantExponent is >= 0.5d and <= 1.5d
+            && stagger.BreakDurationTicks is > 0 and <= 300
+            && stagger.RecoveryDurationTicks is >= 0 and <= 600
+            && stagger.DamageTakenBonusPercent is >= 0 and <= 100
+            && stagger.ThresholdGrowthPercentPerBreak is >= 0 and <= 500
+            && stagger.MaximumBreaks is null or > 0);
 }

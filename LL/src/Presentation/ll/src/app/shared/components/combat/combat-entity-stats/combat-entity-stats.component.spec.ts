@@ -196,6 +196,44 @@ describe('CombatEntityStatsComponent', () => {
       'Low Threat',
     ]);
   });
+
+  it('exposes a dedicated meter only for stagger-capable enemies', () => {
+    const boss = entity('boss', 'The First Warden', 1000, 1000);
+    boss.currentStagger = 420;
+    boss.maxStagger = 1000;
+    component.enemyTeam = [boss, entity('add', 'Warden Guard', 100, 100)];
+    component.entityStats = [
+      stats('boss', 'The First Warden', 0),
+      stats('add', 'Warden Guard', 0),
+    ];
+
+    refresh(component);
+
+    expect(
+      component.staggerableBosses.map((participant) => participant.id),
+    ).toEqual(['boss']);
+    expect(component.staggerPercentage(boss)).toBe(42);
+    expect(component.staggerPhaseLabel(boss)).toBe('Building');
+    expect(component.staggerStateLabel(boss)).toBe('420 of 1000 stagger');
+  });
+
+  it('describes staggered and recovery phases', () => {
+    const boss = entity('boss', 'The First Warden', 1000, 1000);
+    boss.currentStagger = 1000;
+    boss.maxStagger = 1000;
+    boss.isStaggered = true;
+
+    expect(component.staggerPhaseLabel(boss)).toBe('Staggered');
+    expect(component.staggerHint(boss)).toBe('Defenses broken — focus damage');
+
+    boss.isStaggered = false;
+    boss.isStaggerRecovering = true;
+
+    expect(component.staggerPhaseLabel(boss)).toBe('Recovering');
+    expect(component.staggerHint(boss)).toBe(
+      'Stagger is temporarily unavailable',
+    );
+  });
 });
 
 function refresh(component: CombatEntityStatsComponent): void {

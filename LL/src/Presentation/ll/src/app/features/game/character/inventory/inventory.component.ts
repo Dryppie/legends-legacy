@@ -680,8 +680,11 @@ export class InventoryComponent implements OnInit {
       .openSelectionContainer(item.itemInstance.id, optionId)
       .subscribe({
         next: (response) => {
-          this.state.decrementItem(response.consumedItemInstanceId, 1);
-          this.state.applyInventoryGrant(response.grantId, response.rewards);
+          const data = response.data;
+          this.state.applyVersionedInventory(
+            response,
+            data.grantId,
+          );
           this.isOpeningContainer.set(false);
 
           if (this.selectedItem()?.itemInstance.id !== item.itemInstance.id) {
@@ -692,7 +695,7 @@ export class InventoryComponent implements OnInit {
             .items()
             .find(
               (candidate) =>
-                candidate.itemInstance.id === response.consumedItemInstanceId,
+                candidate.itemInstance.id === data.consumedItemInstanceId,
             );
           if (remainingItem) {
             this.selectedItem.set(remainingItem);
@@ -733,8 +736,10 @@ export class InventoryComponent implements OnInit {
     this.craftingService
       .learnBlueprint(item.itemInstance.id, recipeId)
       .subscribe({
-        next: () => {
-          this.state.decrementItem(item.itemInstance.id, 1);
+        next: (result) => {
+          this.state.applyVersionedInventoryDelta(result, () =>
+            this.state.decrementItem(item.itemInstance.id, 1),
+          );
           const remainingItem = this.state
             .items()
             .find(

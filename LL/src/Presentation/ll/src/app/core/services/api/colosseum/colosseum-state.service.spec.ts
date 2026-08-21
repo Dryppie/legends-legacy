@@ -7,10 +7,15 @@ import {
   ChampionMarketPurchaseResponse,
 } from '../../../../shared/models/Dtos/colosseum/championMarket';
 import { StartArenaBattleResponse } from '../../../../shared/models/Dtos/colosseum/startArenaBattleResponse';
+import {
+  ArenaDefenseStatus,
+  ColosseumStatus,
+} from '../../../../shared/models/Dtos/colosseum/colosseumStatus';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { ToastService } from '../../client-side/components/toast/toast.service';
 import { NotificationService } from '../../client-side/notifications/notification.service';
-import { GameEventService } from '../../real-time/game-event.service';
+import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 import { CharacterStateService } from '../character/character-state.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { ColosseumStateService } from './colosseum-state.service';
@@ -82,7 +87,7 @@ describe('ColosseumStateService', () => {
       inventoryGrantId: null,
       inventoryItemsGranted: [],
     };
-    const { service, colosseumApi } = setupStateService({
+    const { service, colosseumApi, stateSync } = setupStateService({
       market,
       purchaseResponse,
     });
@@ -97,6 +102,73 @@ describe('ColosseumStateService', () => {
     expect(updatedItem?.canPurchase).toBeTrue();
     expect(updatedItem?.cannotPurchaseReason).toBeNull();
     expect(colosseumApi.getChampionMarket).toHaveBeenCalledTimes(1);
+    expect(stateSync.acceptSnapshotResponse).toHaveBeenCalledOnceWith(
+      { colosseum: 1 },
+      ['colosseum'],
+    );
+  });
+
+  it('rejects a gapped Champion Market response and reconciles the character arena', () => {
+    const market = createMarket(281, { weeklyPurchaseLimit: 2 });
+    const purchaseResponse: ChampionMarketPurchaseResponse = {
+      itemId: 'sigil-fragments',
+      quantity: 1,
+      glorySpent: 140,
+      gloryRemaining: 141,
+      cindersGranted: 0,
+      soulstonesGranted: 0,
+      sigilFragmentsGranted: 20,
+      rewardItemId: null,
+      rewardItemName: null,
+      rewardItemQuantity: 0,
+      inventoryGrantId: null,
+      inventoryItemsGranted: [],
+    };
+    const { service, stateSync } = setupStateService({
+      market,
+      purchaseResponse,
+      colosseumVersion: 3,
+      latestColosseumRevision: 1,
+    });
+    service.loadChampionMarket();
+
+    service.purchaseChampionMarketItem('sigil-fragments');
+
+    expect(service.championMarket()?.glory).toBe(281);
+    expect(stateSync.rejectMutationResponse).toHaveBeenCalledOnceWith(
+      'colosseum',
+      3,
+    );
+  });
+
+  it('applies a defense snapshot without reloading arena views', () => {
+    const originalDefense = { isValid: false } as ArenaDefenseStatus;
+    const updatedDefense = {
+      hasSnapshot: true,
+      isValid: true,
+      isOutdated: false,
+    } as ArenaDefenseStatus;
+    const status = {
+      defenseStatus: originalDefense,
+      maxTickets: 5,
+      tickets: 1,
+      dailyFirstWinAvailable: false,
+    } as ColosseumStatus;
+    const { service, colosseumApi, stateSync } = setupStateService({
+      market: createMarket(100),
+      status,
+      defenseResponse: updatedDefense,
+    });
+    service.loadStatus();
+
+    service.updateDefenseSnapshot();
+
+    expect(service.status()?.defenseStatus).toBe(updatedDefense);
+    expect(colosseumApi.getStatus).toHaveBeenCalledTimes(1);
+    expect(stateSync.acceptSnapshotResponse).toHaveBeenCalledOnceWith(
+      { colosseum: 1 },
+      ['colosseum'],
+    );
   });
 });
 
@@ -151,13 +223,24 @@ function setupStateService(options: {
   response?: StartArenaBattleResponse;
   purchaseResponse?: ChampionMarketPurchaseResponse;
   arenaRating?: number;
+  colosseumVersion?: number;
+  latestColosseumRevision?: number;
+  status?: ColosseumStatus;
+  defenseResponse?: ArenaDefenseStatus;
 }): {
   service: ColosseumStateService;
   colosseumApi: jasmine.SpyObj<ColosseumService>;
+  stateSync: jasmine.SpyObj<StateSyncCoordinator>;
 } {
   const colosseumApi = jasmine.createSpyObj<ColosseumService>(
     'ColosseumService',
-    ['getChampionMarket', 'startArenaBattle', 'purchaseChampionMarketItem'],
+    [
+      'getChampionMarket',
+      'getStatus',
+      'startArenaBattle',
+      'purchaseChampionMarketItem',
+      'updateDefenseSnapshot',
+    ],
   );
   colosseumApi.getChampionMarket.and.returnValue(of(options.market));
   if (options.response) {
@@ -165,9 +248,36 @@ function setupStateService(options: {
   }
   if (options.purchaseResponse) {
     colosseumApi.purchaseChampionMarketItem.and.returnValue(
-      of(options.purchaseResponse),
+      of({
+        data: options.purchaseResponse,
+        domainVersions: { colosseum: options.colosseumVersion ?? 1 },
+      }),
     );
   }
+  if (options.status) {
+    colosseumApi.getStatus.and.returnValue(of(options.status));
+  }
+  if (options.defenseResponse) {
+    colosseumApi.updateDefenseSnapshot.and.returnValue(
+      of({
+        data: options.defenseResponse,
+        domainVersions: { colosseum: options.colosseumVersion ?? 1 },
+      }),
+    );
+  }
+  const stateSync = jasmine.createSpyObj<StateSyncCoordinator>(
+    'StateSyncCoordinator',
+    [
+      'register',
+      'latestRevision',
+      'acceptSnapshotResponse',
+      'rejectMutationResponse',
+    ],
+  );
+  stateSync.register.and.returnValue(() => undefined);
+  stateSync.latestRevision.and.returnValue(
+    options.latestColosseumRevision ?? 0,
+  );
   const combatService = jasmine.createSpyObj<CombatService>('CombatService', [
     'startColosseumMatchSimulation',
   ]);
@@ -188,10 +298,10 @@ function setupStateService(options: {
       { provide: ColosseumService, useValue: colosseumApi },
       { provide: CombatService, useValue: combatService },
       {
-        provide: GameEventService,
+        provide: GameRealtimeEventRegistry,
         useValue: {
           reconnectCount: signal(0),
-          eventEnvelope: { ArenaBattleCompletedMsg: signal(null) },
+          eventEnvelope: { ArenaBattleCompleted: signal(null) },
         },
       },
       {
@@ -206,6 +316,8 @@ function setupStateService(options: {
         provide: NotificationService,
         useValue: {
           count: jasmine.createSpy('count').and.returnValue(0),
+          increment: jasmine.createSpy('increment'),
+          setCount: jasmine.createSpy('setCount'),
         },
       },
       {
@@ -218,11 +330,13 @@ function setupStateService(options: {
           applyInventoryGrant: jasmine.createSpy('applyInventoryGrant'),
         },
       },
+      { provide: StateSyncCoordinator, useValue: stateSync },
     ],
   });
 
   return {
     service: TestBed.inject(ColosseumStateService),
     colosseumApi,
+    stateSync,
   };
 }

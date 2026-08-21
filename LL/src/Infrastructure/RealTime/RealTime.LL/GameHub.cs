@@ -9,6 +9,7 @@ namespace RealTime.LL;
 public sealed class GameHub : Hub<IGameClient>
 {
     public const string WorldGroup = "world";
+    public const string TournamentGroundsGroup = "tournament-grounds";
 
     private readonly IGuildService _guildService;
 
@@ -48,6 +49,35 @@ public sealed class GameHub : Hub<IGameClient>
         return Groups.RemoveFromGroupAsync(Context.ConnectionId, GuildGroup(guildId));
     }
 
+    public Task SubscribeToRaid(Guid raidRunId)
+    {
+        _ = Context.RequireCharacterId();
+        if (raidRunId == Guid.Empty)
+        {
+            throw new HubException("Raid id is required.");
+        }
+
+        return Groups.AddToGroupAsync(Context.ConnectionId, RaidGroup(raidRunId));
+    }
+
+    public Task UnsubscribeFromRaid(Guid raidRunId)
+    {
+        _ = Context.RequireCharacterId();
+        return Groups.RemoveFromGroupAsync(Context.ConnectionId, RaidGroup(raidRunId));
+    }
+
+    public Task SubscribeToTournamentGrounds()
+    {
+        _ = Context.RequireCharacterId();
+        return Groups.AddToGroupAsync(Context.ConnectionId, TournamentGroundsGroup);
+    }
+
+    public Task UnsubscribeFromTournamentGrounds()
+    {
+        _ = Context.RequireCharacterId();
+        return Groups.RemoveFromGroupAsync(Context.ConnectionId, TournamentGroundsGroup);
+    }
+
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         var characterId = Context.TryGetCharacterId();
@@ -58,6 +88,7 @@ public sealed class GameHub : Hub<IGameClient>
 
     public static string CharacterGroup(Guid id) => $"char:{id}";
     public static string GuildGroup(Guid id) => $"guild:{id}";
+    public static string RaidGroup(Guid id) => $"raid:{id}";
 }
 
 public static class HubCallerContextExtensions

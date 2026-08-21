@@ -764,8 +764,10 @@ export class RegularCraftingComponent {
     this.craftingService
       .learnBlueprint(inventoryItem.itemInstance.id, recipe.id)
       .subscribe({
-        next: () => {
-          this.inventoryState.decrementItem(inventoryItem.itemInstance.id, 1);
+        next: (result) => {
+          this.inventoryState.applyVersionedInventoryDelta(result, () =>
+            this.inventoryState.decrementItem(inventoryItem.itemInstance.id, 1),
+          );
           this.learningBlueprintId.set(null);
         },
         error: (err) => {
@@ -870,16 +872,26 @@ export class RegularCraftingComponent {
         quantity: this.quantity(),
       })
       .subscribe({
-        next: (result) => {
-          const inventory = this.consumeMaterials(
-            this.inventoryState.items(),
-            this.selectedMaterialCosts(),
-            this.quantity(),
+        next: (versionedResult) => {
+          const result = versionedResult.data;
+          const applied = this.inventoryState.applyVersionedInventoryDelta(
+            versionedResult,
+            () => {
+              const inventory = this.consumeMaterials(
+                this.inventoryState.items(),
+                this.selectedMaterialCosts(),
+                this.quantity(),
+              );
+              this.inventoryState.setInventory([
+                ...inventory,
+                ...result.createdItems,
+              ]);
+            },
           );
-          this.inventoryState.setInventory([
-            ...inventory,
-            ...result.createdItems,
-          ]);
+          if (!applied) {
+            this.isLoading.set(false);
+            return;
+          }
           const newestItem =
             result.createdItems[result.createdItems.length - 1];
           const equipment = newestItem?.itemInstance as

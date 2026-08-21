@@ -30,4 +30,7 @@ public enum EventType
     StatusEffectRemoved,
     StatusEffectCleansed,
     StatusEffectDispelled,
+    StaggerApplied,
+    StaggerBroken,
+    StaggerRecovered,
 }

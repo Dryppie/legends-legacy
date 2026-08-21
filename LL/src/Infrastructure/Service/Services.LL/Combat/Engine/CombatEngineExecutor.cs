@@ -345,7 +345,9 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             basicAttackDamageMultiplier: behavior.DamageMultiplier,
             basicAttackType: behavior.AttackType,
             basicAttackDamageType: behavior.DamageType,
-            partyNumber: partyNumber);
+            partyNumber: partyNumber,
+            staggerDefinition: combatant.StaggerDefinition,
+            staggerParticipantCount: combatant.StaggerParticipantCount);
     }
 
     private BasicAttackBehavior ResolveBasicAttackBehavior(CombatEntity combatant)
@@ -865,6 +867,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             DurationTicks = effect.DurationTicks,
             IntervalTicks = effect.IntervalTicks,
             Uses = effect.Uses,
+            GuaranteedConditionApplication = effect.GuaranteedConditionApplication,
+            StaggerPower = effect.StaggerPower,
             MaintainWhileConditionsMet = effect.MaintainWhileConditionsMet,
             ChancePercent = effect.ChancePercent,
             AttackType = effect.AttackType,

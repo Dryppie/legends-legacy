@@ -86,6 +86,7 @@ public sealed class FastCombatEngine
     private long _summonSequence;
     private ulong _listenerMask;
     private int _eventDepth;
+    private bool _forceCheckpoint;
 
     private enum DamageDelivery
     {
@@ -187,6 +188,7 @@ public sealed class FastCombatEngine
                 cancellationToken.ThrowIfCancellationRequested();
 
             PublishIntervalEvents(combatants);
+            TickStaggerStates(combatants);
             GenerateMaintainedThreat(combatants);
 
             var actingCombatantCount = combatants.Count;
@@ -243,7 +245,7 @@ public sealed class FastCombatEngine
             if (checkpointObserver is not null
                 && checkpointIntervalTicks > 0
                 && !spawnedReinforcementWave
-                && _currentTick % checkpointIntervalTicks == 0)
+                && (_forceCheckpoint || _currentTick % checkpointIntervalTicks == 0))
             {
                 var isFinalCheckpoint = _currentTick >= _maxTicks
                     || !HasLivingTeam(combatants, CombatTeam.Friendly)
@@ -255,6 +257,7 @@ public sealed class FastCombatEngine
                     checkpointLogIndex,
                     isFinalCheckpoint));
                 checkpointLogIndex = _log.Count;
+                _forceCheckpoint = false;
             }
         }
 
@@ -370,7 +373,11 @@ public sealed class FastCombatEngine
         MaxHealth = (int)combatant.GetAttribute(AttributeType.MaxHealth),
         Barrier = (int)combatant.Barrier,
         Threat = combatant.Threat,
-        PartyNumber = combatant.PartyNumber
+        PartyNumber = combatant.PartyNumber,
+        CurrentStagger = combatant.Stagger?.Current ?? 0,
+        MaxStagger = combatant.Stagger?.Max ?? 0,
+        IsStaggered = combatant.Stagger?.IsStaggered == true,
+        IsStaggerRecovering = combatant.Stagger?.IsRecovering == true
     };
 
     private IReadOnlyList<EntityStats> CreateDetailedStats(
@@ -510,7 +517,8 @@ public sealed class FastCombatEngine
                 return true;
         }
 
-        return combatant.HasCondition(StandardConditionType.Stun)
+        return combatant.Stagger?.IsStaggered == true
+               || combatant.HasCondition(StandardConditionType.Stun)
                || combatant.HasCondition(StandardConditionType.Freeze);
     }
 
@@ -755,6 +763,7 @@ public sealed class FastCombatEngine
                     {
                         var ability = abilities[abilityIndex];
                         if (ability.Definition.Kind == AbilitySpecKind.Active
+                            && combatEvent.Event == AbilityTriggerEvent.OnAbilityUsed
                             && !string.Equals(combatEvent.AbilityId, ability.Definition.Id, StringComparison.OrdinalIgnoreCase))
                         {
                             continue;
@@ -1332,7 +1341,9 @@ public sealed class FastCombatEngine
                     effect.DurationTicks,
                     combatants,
                     statsSource,
-                    countStatsActivation);
+                    countStatsActivation,
+                    effect.GuaranteedConditionApplication,
+                    effect.StaggerPower);
                 break;
             case AbilityEffectOperation.ModifyStatusStacks:
                 ModifyStatusStacks(source, target, effect.StatusId!, value, combatants);
@@ -1355,7 +1366,9 @@ public sealed class FastCombatEngine
                     effect.DurationTicks,
                     combatants,
                     statsSource,
-                    countStatsActivation);
+                    countStatsActivation,
+                    effect.GuaranteedConditionApplication,
+                    effect.StaggerPower);
                 break;
             case AbilityEffectOperation.Cleanse:
                 CleanseStatuses(source, target, combatants);
@@ -1745,11 +1758,25 @@ public sealed class FastCombatEngine
             damageRedirectedTo: redirectedIncomingDamage,
             damageRedirectedAway: damageRedirectedAway,
             countsAsTargetedAttack: delivery == DamageDelivery.Direct);
+        var abilityId = sourceName.Equals("Basic Attack", StringComparison.Ordinal)
+            ? "basic_attack"
+            : effect?.Id;
+        if (healthDamage > 0)
+        {
+            PublishIfObserved(
+                AbilityTriggerEvent.OnDamageDealt,
+                source,
+                target,
+                abilityId,
+                combatants,
+                healthDamage,
+                damageType: damageType,
+                attackType: attackType,
+                wasCritical: isCritical,
+                wasDirectHit: delivery == DamageDelivery.Direct);
+        }
         if (delivery == DamageDelivery.Direct)
         {
-            var abilityId = sourceName.Equals("Basic Attack", StringComparison.Ordinal)
-                ? "basic_attack"
-                : effect?.Id;
             PublishIfObserved(
                 AbilityTriggerEvent.OnHit,
                 source,
@@ -2333,20 +2360,33 @@ public sealed class FastCombatEngine
         int authoredDurationTicks,
         IReadOnlyList<RuntimeCombatant> combatants,
         string? statsSource,
-        bool countStatsActivation)
+        bool countStatsActivation,
+        bool guaranteedApplication,
+        int staggerPower)
     {
-        if (IsControlCondition(type) && target.HasCondition(StandardConditionType.Unstoppable))
+        if (!guaranteedApplication
+            && IsControlCondition(type)
+            && target.HasCondition(StandardConditionType.Unstoppable))
             return;
 
-        if (type is StandardConditionType.Freeze or StandardConditionType.Stun
+        if (!guaranteedApplication
+            && type is StandardConditionType.Freeze or StandardConditionType.Stun
             && _random.Next(1, 101) > 80)
         {
             return;
         }
 
-        if (IsHarmfulCondition(type)
+        if (!guaranteedApplication
+            && IsHarmfulCondition(type)
             && TryConsumeConditionCharge(target, StandardConditionType.Ward, source, combatants))
         {
+            return;
+        }
+
+        if (type is StandardConditionType.Freeze or StandardConditionType.Stun
+            && target.Stagger is not null)
+        {
+            ApplyStagger(source, target, staggerPower, statsSource, countStatsActivation);
             return;
         }
 
@@ -2428,6 +2468,67 @@ public sealed class FastCombatEngine
             statsSource,
             countStatsActivation);
         Publish(new CombatEvent(AbilityTriggerEvent.OnStatusApplied, source, target, conditionId), combatants);
+    }
+
+    private void ApplyStagger(
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        int staggerPower,
+        string? statsSource,
+        bool countStatsActivation)
+    {
+        var stagger = target.Stagger;
+        if (stagger is null || staggerPower <= 0)
+            return;
+
+        var creditedSource = source.IsSummoned && source.SummonOwner is not null
+            ? source.SummonOwner
+            : source;
+        var applied = stagger.Apply(staggerPower, out var broke);
+        if (applied <= 0)
+            return;
+
+        Log(
+            creditedSource,
+            target,
+            statsSource ?? "Stagger",
+            EventType.StaggerApplied,
+            applied,
+            $"{source.Name} applied {applied} Stagger to {target.Name}.",
+            statsSource,
+            countStatsActivation);
+        if (!broke)
+            return;
+
+        Log(
+            creditedSource,
+            target,
+            statsSource ?? "Stagger",
+            EventType.StaggerBroken,
+            1,
+            $"{target.Name} was Staggered.",
+            statsSource,
+            false);
+        _forceCheckpoint = true;
+    }
+
+    private void TickStaggerStates(IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        for (var index = 0; index < combatants.Count; index++)
+        {
+            var combatant = combatants[index];
+            if (combatant.Stagger?.Tick() != RuntimeStaggerTransition.Recovered)
+                continue;
+
+            Log(
+                combatant,
+                combatant,
+                "Stagger",
+                EventType.StaggerRecovered,
+                0,
+                $"{combatant.Name} recovered from Stagger.");
+            _forceCheckpoint = true;
+        }
     }
 
     private void ApplyOrRefreshUniqueCondition(
@@ -3880,6 +3981,7 @@ public sealed class FastCombatEngine
                 or AbilityTriggerEvent.OnBasicAttack
                 or AbilityTriggerEvent.OnRangedAttack
                 or AbilityTriggerEvent.OnHit
+                or AbilityTriggerEvent.OnDamageDealt
                 or AbilityTriggerEvent.OnKill
                 or AbilityTriggerEvent.OnMeleeAttacked
                 or AbilityTriggerEvent.OnRangedAttacked
@@ -4624,6 +4726,18 @@ public sealed class FastCombatEngine
             return true;
         }
 
+        if (condition.Type is AbilityConditionType.AnyEnemyHasCondition
+                or AbilityConditionType.NoEnemyHasCondition)
+        {
+            var anyEnemyHasCondition = combatants.Any(combatant =>
+                combatant.Team != source.Team
+                && combatant.IsAlive
+                && combatant.HasCondition(condition.Condition!.Value));
+            return condition.Type == AbilityConditionType.AnyEnemyHasCondition
+                ? anyEnemyHasCondition
+                : !anyEnemyHasCondition;
+        }
+
         if (condition.Type == AbilityConditionType.EventSourceIsEnemy)
             return combatEvent.Source is { } eventSource && eventSource.Team != source.Team;
 
@@ -5042,7 +5156,11 @@ public sealed class FastCombatEngine
                     MaxHealth = (int)target.GetAttribute(AttributeType.MaxHealth),
                     Health = (int)target.Health,
                     Barrier = (int)target.Barrier,
-                    Threat = target.Threat
+                    Threat = target.Threat,
+                    CurrentStagger = target.Stagger?.Current ?? 0,
+                    MaxStagger = target.Stagger?.Max ?? 0,
+                    IsStaggered = target.Stagger?.IsStaggered == true,
+                    IsStaggerRecovering = target.Stagger?.IsRecovering == true
                 }
         });
     }

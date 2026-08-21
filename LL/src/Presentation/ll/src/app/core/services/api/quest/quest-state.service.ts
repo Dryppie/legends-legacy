@@ -15,11 +15,13 @@ import {
   QuestStatus,
 } from '../../../../shared/models/quest';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
-import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
-import { GameEventService } from '../../real-time/game-event.service';
+import { RealtimeSignalDeduper } from '../../real-time/game-realtime/realtime-deduplication';
+import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
 import { AuthService } from '../auth/auth.service';
 import { QuestService } from './quest.service';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
+import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
+import { VersionedMutationResult } from '../api.service';
 
 @Injectable({ providedIn: 'root' })
 export class QuestStateService {
@@ -29,11 +31,10 @@ export class QuestStateService {
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
   private readonly auth = inject(AuthService);
-  private readonly eventDeduper = new GameEventDeduper();
+  private readonly eventDeduper = new RealtimeSignalDeduper();
   private journalRequestEpoch = 0;
   private areaAccessRequestEpoch = 0;
   private lastLogoutCount = 0;
-  private lastReconnectCount = 0;
 
   readonly journal = this._journal.asReadonly();
   readonly areaAccess = this._areaAccess.asReadonly();
@@ -80,9 +81,10 @@ export class QuestStateService {
   constructor(
     private readonly api: QuestService,
     private readonly router: Router,
-    private readonly events: GameEventService,
+    private readonly events: GameRealtimeEventRegistry,
     private readonly eventBus: EventBusService,
     private readonly stateSync: StateSyncCoordinator,
+    private readonly domainVersions: DomainVersionTracker,
   ) {
     this.stateSync.register(
       'quests',
@@ -98,10 +100,22 @@ export class QuestStateService {
     );
     effect(
       () => {
-        const event = this.events.event.QuestJournalChangedMsg();
+        const event = this.events.event.QuestJournalChanged();
         if (!event?.journal) return;
         untracked(() => {
-          this.initializeAndRefreshAccessWhenNeeded(event.journal);
+          if (
+            event.stateVersion > 0 &&
+            !this.domainVersions.isCurrent('quests', event.stateVersion)
+          ) {
+            return;
+          }
+          this.initialize(event.journal);
+          if (event.stateVersion > 0) {
+            this.stateSync.acceptSnapshotResponse(
+              { quests: event.stateVersion },
+              ['quests'],
+            );
+          }
         });
       },
       { allowSignalWrites: true },
@@ -112,29 +126,13 @@ export class QuestStateService {
     // newly unlocked area stays locked until something else refetches.
     effect(
       () => {
-        const envelope = this.events.eventEnvelope.CharacterLevelUpMsg();
+        const envelope = this.events.eventEnvelope.CharacterLevelUp();
         const levelUp = envelope?.payload;
         if (!levelUp) return;
         untracked(() => {
           const characterId = this.auth.currentCharacter()?.id;
           if (!characterId || levelUp.characterId !== characterId) return;
           if (!this.eventDeduper.shouldProcess('level-up', envelope)) return;
-          this.resyncSilently();
-        });
-      },
-      { allowSignalWrites: true },
-    );
-
-    this.lastReconnectCount = this.events.reconnectCount();
-    effect(
-      () => {
-        const reconnectCount = this.events.reconnectCount();
-        if (reconnectCount === this.lastReconnectCount) return;
-        this.lastReconnectCount = reconnectCount;
-        // Events that landed while the socket was down are gone, so re-pull
-        // rather than trusting the state we were holding.
-        untracked(() => {
-          if (!this._loaded()) return;
           this.resyncSilently();
         });
       },
@@ -180,10 +178,6 @@ export class QuestStateService {
       });
   }
 
-  refreshAfterMutation(): void {
-    this.loadJournalSilently();
-  }
-
   selectChoice(
     questId: string,
     optionKey: string,
@@ -196,8 +190,8 @@ export class QuestStateService {
       .selectChoice(questId, optionKey)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (journal) => {
-          this.initialize(journal);
+        next: (result) => {
+          this.applyVersionedJournal(result);
           onComplete?.();
         },
         error: (error) =>
@@ -213,8 +207,8 @@ export class QuestStateService {
       .acknowledgeWelcome()
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (journal) => {
-          this.initialize(journal);
+        next: (result) => {
+          this.applyVersionedJournal(result);
           onComplete?.();
         },
         error: (error) => {
@@ -234,7 +228,7 @@ export class QuestStateService {
       .pin(questId)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (journal) => this.initialize(journal),
+        next: (result) => this.applyVersionedJournal(result),
         error: (error) =>
           this._error.set(error?.message ?? 'Failed to pin quest'),
       });
@@ -342,30 +336,19 @@ export class QuestStateService {
     );
   }
 
-  private loadJournalSilently(): void {
-    const requestEpoch = ++this.journalRequestEpoch;
-    this.api.getJournal().subscribe({
-      next: (journal) => {
-        if (requestEpoch === this.journalRequestEpoch) {
-          this.initializeAndRefreshAccessWhenNeeded(journal);
-        }
-      },
-      error: () => undefined,
-    });
-  }
+  private applyVersionedJournal(
+    result: VersionedMutationResult<QuestJournal>,
+  ): boolean {
+    if (
+      !this.domainVersions.isCurrent(
+        'quests',
+        result.domainVersions['quests'],
+      )
+    ) {
+      return false;
+    }
 
-  private initializeAndRefreshAccessWhenNeeded(journal: QuestJournal): void {
-    const previousCompleted = this.completedQuestSignature(this._journal());
-    const nextCompleted = this.completedQuestSignature(journal);
-    this.initialize(journal);
-    if (previousCompleted !== nextCompleted) this.loadAreaAccess();
-  }
-
-  private completedQuestSignature(journal: QuestJournal): string {
-    return journal.quests
-      .filter((quest) => quest.status === QuestStatus.Completed)
-      .map((quest) => quest.questId)
-      .sort()
-      .join('|');
+    this.initialize(result.data);
+    return true;
   }
 }

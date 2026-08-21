@@ -79,6 +79,10 @@ export class TowerPlaybackService {
         health: state.health,
         barrier: state.barrier,
         partyNumber: entity.partyNumber,
+        currentStagger: state.currentStagger ?? 0,
+        maxStagger: state.maxStagger ?? 0,
+        isStaggered: state.isStaggered ?? false,
+        isStaggerRecovering: state.isStaggerRecovering ?? false,
       };
     });
     const stats = activeEntities.map((entity): EntityStats => {
@@ -101,6 +105,8 @@ export class TowerPlaybackService {
             stuns: 0,
             selfDamage: 0,
             alliedDamage: 0,
+            totalStagger: values?.totalStagger ?? 0,
+            staggerBreaks: values?.staggerBreaks ?? 0,
           };
         });
       return {
@@ -115,6 +121,8 @@ export class TowerPlaybackService {
         healthRegenerated: totals?.healthRegenerated ?? 0,
         barrierGenerated: totals?.barrierGenerated ?? 0,
         damageBlocked: totals?.damageBlocked ?? 0,
+        staggerContributed: totals?.staggerContributed ?? 0,
+        staggerBreaks: totals?.staggerBreaks ?? 0,
         healthRegenerationPotential: 0,
         healthRegenerationOverhealed: 0,
         healthRegenerationPulses: 0,

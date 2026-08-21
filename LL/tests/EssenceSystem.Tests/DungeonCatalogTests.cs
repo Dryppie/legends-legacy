@@ -21,16 +21,22 @@ public sealed class DungeonCatalogTests
         var runtimeValidator = new DungeonDefinitionValidator();
 
         Assert.Empty(runtimeValidator.Validate(definitions));
-        Assert.Equal(6, definitions.Count);
+        Assert.Equal(12, definitions.Count);
 
         var expected = new[]
         {
-            new ExpectedDungeon("goblin_mines", "Goblin Mines I", DungeonGrade.GradeI, 10, 12, 2, null, 3.5f),
-            new ExpectedDungeon("goblin_mines_ii", "Goblin Mines II", DungeonGrade.GradeII, 11, 13, 2, "goblin_mines", 5.88f),
-            new ExpectedDungeon("goblin_mines_iii", "Goblin Mines III", DungeonGrade.GradeIII, 12, 14, 2, "goblin_mines_ii", 8f),
-            new ExpectedDungeon("forgotten_catacombs", "Forgotten Catacombs I", DungeonGrade.GradeI, 11, 13, 1, null, 3.7f),
-            new ExpectedDungeon("forgotten_catacombs_ii", "Forgotten Catacombs II", DungeonGrade.GradeII, 12, 14, 1, "forgotten_catacombs", 6f),
-            new ExpectedDungeon("forgotten_catacombs_iii", "Forgotten Catacombs III", DungeonGrade.GradeIII, 13, 15, 1, "forgotten_catacombs_ii", 8.3f)
+            new ExpectedDungeon("goblin_mines", "Goblin Mines I", DungeonGrade.GradeI, 10, 12, 2, null, 1f),
+            new ExpectedDungeon("goblin_mines_ii", "Goblin Mines II", DungeonGrade.GradeII, 11, 13, 2, "goblin_mines", 1f),
+            new ExpectedDungeon("goblin_mines_iii", "Goblin Mines III", DungeonGrade.GradeIII, 12, 14, 2, "goblin_mines_ii", 1f),
+            new ExpectedDungeon("forgotten_catacombs", "Forgotten Catacombs I", DungeonGrade.GradeI, 11, 13, 1, null, 1.05f),
+            new ExpectedDungeon("forgotten_catacombs_ii", "Forgotten Catacombs II", DungeonGrade.GradeII, 12, 14, 1, "forgotten_catacombs", 1.02f),
+            new ExpectedDungeon("forgotten_catacombs_iii", "Forgotten Catacombs III", DungeonGrade.GradeIII, 13, 15, 1, "forgotten_catacombs_ii", 1.04f),
+            new ExpectedDungeon("tangled_cave", "Tangled Cave I", DungeonGrade.GradeI, 11, 13, 1, null, 1f),
+            new ExpectedDungeon("tangled_cave_ii", "Tangled Cave II", DungeonGrade.GradeII, 12, 14, 1, "tangled_cave", 1f),
+            new ExpectedDungeon("tangled_cave_iii", "Tangled Cave III", DungeonGrade.GradeIII, 13, 15, 1, "tangled_cave_ii", 1f),
+            new ExpectedDungeon("great_tree", "The Great Tree I", DungeonGrade.GradeI, 11, 13, 1, null, 1f),
+            new ExpectedDungeon("great_tree_ii", "The Great Tree II", DungeonGrade.GradeII, 12, 14, 1, "great_tree", 1f),
+            new ExpectedDungeon("great_tree_iii", "The Great Tree III", DungeonGrade.GradeIII, 13, 15, 1, "great_tree_ii", 1f)
         };
 
         Assert.Collection(
@@ -143,6 +149,23 @@ public sealed class DungeonCatalogTests
             forgottenCatacombsCreatures);
     }
 
+    [Fact]
+    public void TangledCave_and_GreatTree_use_the_requested_encounter_roles()
+    {
+        var dungeons = MaterializeCurrentCatalog();
+
+        AssertEncounterRoles(
+            Assert.Single(dungeons, dungeon => dungeon.Id == "tangled_cave"),
+            ["giant_spider", "venomous_spider"],
+            "web_weaver_spider",
+            "spider_queen");
+        AssertEncounterRoles(
+            Assert.Single(dungeons, dungeon => dungeon.Id == "great_tree"),
+            ["bark_golem", "forest_spirit", "wood_nymph"],
+            "treant_guardian",
+            "elder_treant");
+    }
+
     [Theory]
     [InlineData("skeleton")]
     [InlineData("poisonous_rat")]
@@ -210,8 +233,33 @@ public sealed class DungeonCatalogTests
             new DungeonDefinitionMaterializer(new DungeonCatalogValidator()),
             new DungeonDefinitionValidator());
 
-        Assert.Equal(6, provider.GetAll().Count);
+        Assert.Equal(12, provider.GetAll().Count);
         Assert.DoesNotContain(provider.GetAll(), x => x.Id.StartsWith("hives_abyss", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static void AssertEncounterRoles(
+        DungeonDefinition dungeon,
+        IReadOnlyList<string> regularCreatureIds,
+        string miniBossCreatureId,
+        string bossCreatureId)
+    {
+        var regularCreatures = dungeon.Rooms
+            .Where(room => room.Type == Domain.Models.Dungeons.Definitions.Rooms.RoomType.Combat)
+            .SelectMany(room => room.EncounterIds)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(id => id)
+            .ToArray();
+        Assert.Equal(regularCreatureIds.OrderBy(id => id), regularCreatures);
+
+        var miniBoss = Assert.Single(
+            dungeon.Rooms,
+            room => room.Type == Domain.Models.Dungeons.Definitions.Rooms.RoomType.MiniBoss);
+        Assert.Equal(miniBossCreatureId, miniBoss.EncounterIds[0]);
+
+        var boss = Assert.Single(
+            dungeon.Rooms,
+            room => room.Type == Domain.Models.Dungeons.Definitions.Rooms.RoomType.Boss);
+        Assert.Equal(bossCreatureId, boss.EncounterIds[0]);
     }
 
     private static IReadOnlyList<DungeonDefinition> MaterializeCurrentCatalog() =>

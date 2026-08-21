@@ -13,12 +13,12 @@ public record ConstructGuildBuildingCommand(Guid CharacterId, GuildBuildingType 
 public class ConstructGuildBuildingCommandHandler : IRequestHandler<ConstructGuildBuildingCommand, Response<GuildBuildingOverviewDto>>
 {
     private readonly IGuildBuildingService _guildBuildingService;
-    private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameRealtimeBroadcaster _eventPublisher;
     private readonly IGuildSystemChatPublisher _guildChat;
 
     public ConstructGuildBuildingCommandHandler(
         IGuildBuildingService guildBuildingService,
-        IGameEventPublisher eventPublisher,
+        IGameRealtimeBroadcaster eventPublisher,
         IGuildSystemChatPublisher guildChat)
     {
         _guildBuildingService = guildBuildingService;
@@ -49,7 +49,9 @@ public class ConstructGuildBuildingCommandHandler : IRequestHandler<ConstructGui
 
         await _eventPublisher.PublishAsync(
             new Audience.Guild(result.Value.GuildId),
-            new GuildBuildingsChangedMsg(result.Value.GuildId, request.BuildingType.ToString()));
+            new GuildBuildingsChanged(result.Value.GuildId, request.BuildingType.ToString()),
+            nameof(ConstructGuildBuildingCommandHandler),
+            cancellationToken);
 
         return Response<GuildBuildingOverviewDto>.Success(result.Value);
     }

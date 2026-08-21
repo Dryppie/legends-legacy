@@ -52,7 +52,8 @@ public sealed class GuildMissionSelectionRealtimeTests
 
         var audience = Assert.IsType<Audience.Guild>(publisher.Audience);
         Assert.Equal(guildId, audience.GuildId);
-        Assert.Equal(guildId, Assert.IsType<GuildMissionsChangedMsg>(publisher.Message).GuildId);
+        Assert.Equal(guildId, Assert.IsType<GuildMissionsChanged>(publisher.Message).GuildId);
+        Assert.Equal(nameof(RealtimeGuildMissionGameEventOutboxConsumer), publisher.Sender);
         Assert.Equal(GameEventOutboxConsumerNames.RealtimeGuildMission, consumer.Consumer);
         Assert.True(consumer.CanHandle(GameEventTypes.GuildMissionSelected));
     }
@@ -85,7 +86,7 @@ public sealed class GuildMissionSelectionRealtimeTests
 
         var audience = Assert.IsType<Audience.Guild>(publisher.Audience);
         Assert.Equal(guildId, audience.GuildId);
-        Assert.Equal(guildId, Assert.IsType<GuildMissionsChangedMsg>(publisher.Message).GuildId);
+        Assert.Equal(guildId, Assert.IsType<GuildMissionsChanged>(publisher.Message).GuildId);
         Assert.True(consumer.CanHandle(GameEventTypes.GuildMissionProgressed));
         Assert.Equal(
             [GameEventOutboxConsumerNames.RealtimeGuildMission],
@@ -145,15 +146,21 @@ public sealed class GuildMissionSelectionRealtimeTests
         }
     }
 
-    private sealed class RecordingPublisher : IGameEventPublisher
+    private sealed class RecordingPublisher : IGameRealtimeBroadcaster
     {
         public Audience? Audience { get; private set; }
-        public GameEventMsg? Message { get; private set; }
+        public GameRealtimeEvent? Message { get; private set; }
+        public string? Sender { get; private set; }
 
-        public Task PublishAsync(Audience audience, GameEventMsg message)
+        public Task PublishAsync(
+            Audience audience,
+            GameRealtimeEvent message,
+            string sender,
+            CancellationToken cancellationToken = default)
         {
             Audience = audience;
             Message = message;
+            Sender = sender;
             return Task.CompletedTask;
         }
     }

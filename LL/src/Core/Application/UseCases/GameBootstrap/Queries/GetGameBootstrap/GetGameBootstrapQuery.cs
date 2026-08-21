@@ -1,5 +1,6 @@
 using Application.MediatR.Markers;
 using Application.Interfaces.Services.LL.Administration;
+using Application.Interfaces.Services.LL;
 using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Application.UseCases.Characters.Queries.GetCharacter;
 using Application.UseCases.GameBootstrap.Dtos;
@@ -21,16 +22,19 @@ public sealed class GetGameBootstrapQueryHandler
     private readonly ISender _sender;
     private readonly TimeProvider _timeProvider;
     private readonly IAccountRestrictionIndex _accountRestrictions;
+    private readonly IStateSyncService _stateSync;
 
     public GetGameBootstrapQueryHandler(
         IMapper mapper,
         ISender sender,
         IAccountRestrictionIndex accountRestrictions,
+        IStateSyncService stateSync,
         TimeProvider? timeProvider = null)
     {
         _mapper = mapper;
         _sender = sender;
         _accountRestrictions = accountRestrictions;
+        _stateSync = stateSync;
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
@@ -38,6 +42,13 @@ public sealed class GetGameBootstrapQueryHandler
         GetGameBootstrapQuery request,
         CancellationToken cancellationToken)
     {
+        // Versions are captured before the snapshot reads. A mutation racing
+        // this request therefore cannot be acknowledged accidentally; the
+        // subsequent checkpoint will observe its newer revision.
+        var stateVersions = await _stateSync.GetCheckpointAsync(
+            request.CharacterId,
+            cancellationToken);
+
         var characterResponse = await _sender.Send(
             new GetCharacterQuery(request.UserId),
             cancellationToken);
@@ -72,6 +83,7 @@ public sealed class GetGameBootstrapQueryHandler
             AttributeDefinitions = AttributeCatalog.All,
             AccountAccess = AccountAccessDto.From(
                 _accountRestrictions.Get(request.UserId)),
+            StateVersions = stateVersions.Revisions,
         };
 
         return Response<GameBootstrapDto>.Success(
