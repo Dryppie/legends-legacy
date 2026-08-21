@@ -1,13 +1,15 @@
 import { Injector, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NEVER, of, Subject } from 'rxjs';
+import { NEVER, Observable, of, Subject } from 'rxjs';
 import { Guild } from '../../../../shared/models/Dtos/guild/guild';
 import { GuildMissionOverview } from '../../../../shared/models/Dtos/guild/guildMission';
 import {
   GuildStateService,
+  isHandledGuildInitiatorEcho,
   normalizeGuild,
   normalizeGuildMissionOverview,
 } from './guild-state.service';
+import { StateSyncRefresh } from '../../real-time/game-realtime/state-sync-coordinator.service';
 
 describe('normalizeGuild', () => {
   it('defaults guild-vault fields omitted by an older API response', () => {
@@ -48,6 +50,29 @@ describe('normalizeGuildMissionOverview', () => {
   });
 });
 
+describe('isHandledGuildInitiatorEcho', () => {
+  it('matches only an authoritative response already handled by this actor', () => {
+    expect(
+      isHandledGuildInitiatorEcho(
+        { actorCharacterId: 'character-1', initiatorHandled: true },
+        'character-1',
+      ),
+    ).toBeTrue();
+    expect(
+      isHandledGuildInitiatorEcho(
+        { actorCharacterId: 'character-2', initiatorHandled: true },
+        'character-1',
+      ),
+    ).toBeFalse();
+    expect(
+      isHandledGuildInitiatorEcho(
+        { actorCharacterId: 'character-1', initiatorHandled: false },
+        'character-1',
+      ),
+    ).toBeFalse();
+  });
+});
+
 describe('GuildStateService description updates', () => {
   function createState(...updateRequests: Subject<void>[]): GuildStateService {
     TestBed.configureTestingModule({});
@@ -82,12 +107,14 @@ describe('GuildStateService description updates', () => {
     };
     const auth = {
       isAuthenticated: jasmine.createSpy().and.returnValue(false),
+      currentCharacter: jasmine.createSpy().and.returnValue(null),
     };
     const notifications = {
       count: jasmine.createSpy().and.returnValue(0),
     };
     const stateSync = {
       register: jasmine.createSpy(),
+      activate: jasmine.createSpy(),
     };
     const injector = TestBed.inject(Injector);
 
@@ -181,7 +208,10 @@ describe('GuildStateService refreshes', () => {
         .createSpy()
         .and.returnValue(Promise.resolve()),
     };
-    const stateSync = { register: jasmine.createSpy() };
+    const stateSync = {
+      register: jasmine.createSpy(),
+      activate: jasmine.createSpy(),
+    };
     const injector = TestBed.inject(Injector);
     const state = TestBed.runInInjectionContext(
       () =>
@@ -189,7 +219,10 @@ describe('GuildStateService refreshes', () => {
           guildService as never,
           eventService as never,
           eventService as never,
-          { isAuthenticated: () => false } as never,
+          {
+            isAuthenticated: () => false,
+            currentCharacter: () => null,
+          } as never,
           { count: () => 0 } as never,
           {} as never,
           injector,
@@ -245,6 +278,7 @@ describe('GuildStateService refreshes', () => {
     };
     const stateSync = {
       register: jasmine.createSpy(),
+      activate: jasmine.createSpy(),
       resetScope: jasmine.createSpy(),
       reconcile: jasmine.createSpy().and.returnValue(Promise.resolve()),
     };
@@ -254,7 +288,10 @@ describe('GuildStateService refreshes', () => {
           guildService as never,
           eventService as never,
           eventService as never,
-          { isAuthenticated: () => false } as never,
+          {
+            isAuthenticated: () => false,
+            currentCharacter: () => null,
+          } as never,
           {
             count: () => 0,
             initializeCount: jasmine.createSpy(),
@@ -280,6 +317,86 @@ describe('GuildStateService refreshes', () => {
     expect(guildService.getBuildings).toHaveBeenCalledTimes(1);
     expect(guildService.getMissions).toHaveBeenCalledTimes(1);
     expect(guildService.getShop).toHaveBeenCalledTimes(1);
+  });
+
+  it('starts a newer guild request for a coordinator revision', () => {
+    TestBed.configureTestingModule({});
+    const oldRequest = new Subject<Guild | null>();
+    const currentRequest = new Subject<Guild | null>();
+    const guildService = {
+      getMyGuild: jasmine
+        .createSpy()
+        .and.returnValues(
+          oldRequest.asObservable(),
+          currentRequest.asObservable(),
+        ),
+      getBuildings: jasmine.createSpy().and.returnValue(of(null)),
+      getMissions: jasmine.createSpy().and.returnValue(of(null)),
+      getShop: jasmine.createSpy().and.returnValue(of(null)),
+      getAllGuilds: jasmine.createSpy().and.returnValue(of([])),
+    };
+    const eventService = {
+      eventEnvelope: {
+        GuildDirectoryChanged: signal(null),
+        GuildInviteReceived: signal(null),
+        GuildInviteRejected: signal(null),
+        GuildApplicationRejected: signal(null),
+        GuildMembershipChanged: signal(null),
+        GuildBuildingsChanged: signal(null),
+        GuildMissionsChanged: signal(null),
+        GuildApplication: signal(null),
+        GuildStateChanged: signal(null),
+        GuildDisbanded: signal(null),
+      },
+      setGuildSubscription: jasmine
+        .createSpy()
+        .and.returnValue(Promise.resolve()),
+    };
+    let guildRefresh!: StateSyncRefresh;
+    const stateSync = {
+      register: jasmine
+        .createSpy()
+        .and.callFake(
+          (scope: string, key: string, refresh: StateSyncRefresh) => {
+            if (scope === 'guild' && key === 'guild') guildRefresh = refresh;
+          },
+        ),
+      activate: jasmine.createSpy(),
+      resetScope: jasmine.createSpy(),
+      reconcile: jasmine.createSpy().and.returnValue(Promise.resolve()),
+    };
+    const state = TestBed.runInInjectionContext(
+      () =>
+        new GuildStateService(
+          guildService as never,
+          eventService as never,
+          eventService as never,
+          {
+            isAuthenticated: () => false,
+            currentCharacter: () => null,
+          } as never,
+          { count: () => 0, initializeCount: () => undefined } as never,
+          {} as never,
+          TestBed.inject(Injector),
+          stateSync as never,
+        ),
+    );
+
+    expect(guildService.getMyGuild).toHaveBeenCalledTimes(1);
+    const refreshResult = guildRefresh({
+      scope: 'guild',
+      key: 'guild',
+      targetRevision: 7,
+    });
+    (refreshResult as Observable<unknown>).subscribe();
+    expect(guildService.getMyGuild).toHaveBeenCalledTimes(2);
+
+    currentRequest.next(createGuild('Current'));
+    currentRequest.complete();
+    oldRequest.next(createGuild('Stale'));
+    oldRequest.complete();
+
+    expect(state.guild()?.description).toBe('Current');
   });
 });
 

@@ -287,7 +287,9 @@ public class GuildMissionService : IGuildMissionService
         {
             await _outbox.EnqueueAsync(
                 GameEventTypes.GuildMissionProgressed,
-                new GuildMissionProgressedPayload(guild.Id),
+                new GuildMissionProgressedPayload(
+                    guild.Id,
+                    contributionEvent.CharacterId),
                 contributionEvent.CharacterId,
                 accountId,
                 cancellationToken);

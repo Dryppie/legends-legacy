@@ -1,5 +1,6 @@
 {
-  "version": 6,
+  "version": 8,
+  "fallbackProfileId": "content-foundation-v1",
   "foundation": {
     "areasPerRegion": 10,
     "areaGrowth": 1.02,
@@ -8,6 +9,48 @@
   "profiles": [
     {
       "id": "unified-global-v1",
+      "targetWinRateBasisPoints": 8500,
+      "healthCurve": {
+        "model": "Polynomial",
+        "baseMultiplier": 2.0,
+        "growthPerStep": 0.005,
+        "exponent": 2.494443472572,
+        "linearAfterStep": 11,
+        "linearGrowthPerStep": 0.240873150087
+      },
+      "offenseCurve": {
+        "model": "Polynomial",
+        "baseMultiplier": 2.2,
+        "growthPerStep": 0.005,
+        "exponent": 2.920505135607,
+        "linearAfterStep": 11,
+        "linearGrowthPerStep": 0.835593870808
+      },
+      "defenseCurve": {
+        "model": "Polynomial",
+        "baseMultiplier": 1.3,
+        "growthPerStep": 0.07,
+        "exponent": 1.1487450048,
+        "linearAfterStep": 11
+      },
+      "resistanceCurve": {
+        "model": "Polynomial",
+        "baseMultiplier": 1.3,
+        "growthPerStep": 0.07,
+        "exponent": 1.1487450048,
+        "linearAfterStep": 11
+      },
+      "attackSpeedGrowthPerStep": 0.10,
+      "penetrationGrowthPerStep": 0.12,
+      "softDefenseGrowthPerStep": 0.04,
+      "critChancePerStep": 0.10,
+      "critDamagePerStep": 0.25,
+      "critChanceCap": 45.0,
+      "critDamageCap": 200.0,
+      "maximumStepIncrease": 0.29
+    },
+    {
+      "id": "content-foundation-v1",
       "targetWinRateBasisPoints": 8500,
       "healthCurve": {
         "model": "Foundation",

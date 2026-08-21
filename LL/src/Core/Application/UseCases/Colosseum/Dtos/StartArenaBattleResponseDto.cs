@@ -1,6 +1,8 @@
 using Application.Common.Mappings;
 using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
+using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Colosseum.Models;
+using Application.UseCases.Leaderboards.Dtos;
 using AutoMapper;
 using Domain.Models.Colosseum;
 
@@ -19,11 +21,22 @@ public sealed class StartArenaBattleResponseDto : IMapFrom<StartArenaBattleRespo
     public required ArenaRankChangeDto AttackerRank { get; init; }
     public required ArenaStreakChangeDto Streak { get; init; }
     public required ArenaOpponentPreviewDto Opponent { get; init; }
+    public required ColosseumStateSnapshotDto State { get; set; }
 
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<StartArenaBattleResponseModel, StartArenaBattleResponseDto>();
+        profile.CreateMap<StartArenaBattleResponseModel, StartArenaBattleResponseDto>()
+            .ForMember(destination => destination.State, options => options.Ignore());
     }
+}
+
+public sealed class ColosseumStateSnapshotDto
+{
+    public required CharacterDto Character { get; init; }
+    public required ColosseumStatusDto Status { get; init; }
+    public required List<ArenaOpponentPreviewDto> Opponents { get; init; }
+    public required List<LeaderboardEntryDto> Rankings { get; init; }
+    public required List<ColosseumMatchResultDto> PreviousMatches { get; init; }
 }
 
 public sealed class StartArenaBattleRequestDto : IMapFrom<StartArenaBattleRequestModel>

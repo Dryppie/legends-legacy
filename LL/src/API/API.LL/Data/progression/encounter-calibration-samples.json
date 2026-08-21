@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 9,
   "assessmentGearEnvelopeId": "expected",
   "assessmentEssenceEnvelopeId": "expected",
   "maximumBuildWinRateSpread": 0.35,
@@ -88,6 +88,16 @@
       "maxTicks": 900
     },
     {
+      "id": "idle.blood-grove.single",
+      "contentType": "Idle",
+      "difficultyRole": "Normal",
+      "bandId": "idle-single",
+      "snapshotAnchorId": "region-01-area-02",
+      "areaId": "region_01_area_02",
+      "creatureIds": ["00000000-0000-0000-0000-000000000008"],
+      "maxTicks": 900
+    },
+    {
       "id": "idle.duskmire.triple",
       "contentType": "Idle",
       "difficultyRole": "Peak",
@@ -100,6 +110,19 @@
         "00000000-0000-0000-0000-000000000051"
       ],
       "maxTicks": 1200
+    },
+    {
+      "id": "idle.rotgrave-fields.double",
+      "contentType": "Idle",
+      "difficultyRole": "Elite",
+      "bandId": "idle-double",
+      "snapshotAnchorId": "region-02-area-02",
+      "areaId": "region_02_area_02",
+      "creatureIds": [
+        "00000000-0000-0000-0000-000000000071",
+        "00000000-0000-0000-0000-000000000071"
+      ],
+      "maxTicks": 900
     },
     {
       "id": "dungeon.goblin-mines.room",

@@ -1,4 +1,3 @@
-import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { MarketplaceChangeSet } from '../../../../shared/models/Dtos/market-place/marketplace-change-set';
 import { EquipmentInstance } from '../../../../shared/models/item';
@@ -11,7 +10,6 @@ import { WorldTowerRallyUpdated } from '../world-tower/world-tower-rally-updated
 export const gameRealtimeSignalEventNames = {
   accountAccessChanged: 'AccountAccessChanged',
   characterLevelUp: 'CharacterLevelUp',
-  soulstoneDrop: 'SoulstoneDrop',
   marketplaceChanged: 'MarketplaceChanged',
   guildApplication: 'GuildApplication',
   guildInviteReceived: 'GuildInviteReceived',
@@ -38,10 +36,7 @@ export const gameRealtimeSignalEventNames = {
 } as const;
 
 export const gameRealtimeEventNames = {
-  dungeonRewardsClaimed: 'DungeonRewardsClaimed',
   lootReceived: 'LootReceived',
-  inventorySnapshot: 'InventorySnapshot',
-  characterSnapshot: 'CharacterSnapshot',
   stateInvalidated: 'StateInvalidated',
   ...gameRealtimeSignalEventNames,
 } as const;
@@ -56,30 +51,12 @@ export interface GameRealtimeEnvelope<TPayload = unknown> {
   payload: TPayload;
 }
 
-export interface DungeonRewardsClaimed {
-  characterId: string;
-  claimedLoot: InventoryItem[];
-  location?: string | null;
-}
-
 export interface LootReceived {
   characterId: string;
   items: InventoryItem[];
   source: string;
   location?: string | null;
   grantId?: string | null;
-}
-
-export interface InventorySnapshot {
-  characterId: string;
-  items: InventoryItem[];
-  reason: string;
-}
-
-export interface CharacterSnapshot {
-  characterId: string;
-  character: CharacterDto;
-  reason: string;
 }
 
 export interface AccountAccessChanged {
@@ -94,12 +71,6 @@ export interface CharacterLevelUp {
   experience: number;
   experienceUntilNextLevel: number;
   unlockedEssenceSlots: number;
-}
-
-export interface SoulstoneDrop {
-  characterId: string;
-  soulstonesEarned: number;
-  totalSoulstones: number;
 }
 
 export interface MarketplaceChanged {
@@ -129,14 +100,20 @@ export interface GuildApplicationRejected {
 export interface GuildBuildingsChanged {
   guildId: string;
   buildingId: string;
+  actorCharacterId?: string;
+  initiatorHandled?: boolean;
 }
 
 export interface GuildMissionsChanged {
   guildId: string;
+  actorCharacterId?: string;
+  initiatorHandled?: boolean;
 }
 
 export interface GuildStateChanged {
   guildId: string;
+  actorCharacterId?: string;
+  initiatorHandled?: boolean;
 }
 
 export interface GuildVaultChatMessage {
@@ -152,14 +129,19 @@ export interface GuildVaultChatMessage {
 export interface GuildMembershipChanged {
   guildId: string;
   characterId: string;
+  actorCharacterId?: string;
+  initiatorHandled?: boolean;
 }
 
 export interface GuildDisbanded {
   guildId: string;
+  actorCharacterId?: string;
+  initiatorHandled?: boolean;
 }
 
 export interface GuildDirectoryChanged {
   reason: string;
+  actorCharacterId?: string;
 }
 
 export interface QuestJournalChanged {
@@ -216,7 +198,6 @@ export interface PlayerTransfer {
 export interface GameRealtimeSignalEventMap {
   AccountAccessChanged: AccountAccessChanged;
   CharacterLevelUp: CharacterLevelUp;
-  SoulstoneDrop: SoulstoneDrop;
   MarketplaceChanged: MarketplaceChanged;
   GuildApplication: GuildApplication;
   GuildInviteReceived: GuildInviteReceived;
@@ -268,13 +249,9 @@ export interface StateSyncCheckpoint {
 }
 
 export type GameRealtimePayload =
-  | DungeonRewardsClaimed
   | LootReceived
-  | InventorySnapshot
-  | CharacterSnapshot
   | AccountAccessChanged
   | CharacterLevelUp
-  | SoulstoneDrop
   | MarketplaceChanged
   | GuildApplication
   | GuildInviteReceived

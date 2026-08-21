@@ -99,6 +99,23 @@
           </button>
           <button
             class="secondary ll-button"
+            *ngIf="
+              vm.developmentToolsEnabled &&
+              vm.canManageParties &&
+              vm.participants.length < vm.requiredSlots
+            "
+            [disabled]="!!action()"
+            (click)="generateDevelopmentTeam()"
+            title="Development only: fill and arrange the Expedition with locally seeded guest characters."
+          >
+            {{
+              action() === "development-team"
+                ? "Generating team..."
+                : "Generate local team"
+            }}
+          </button>
+          <button
+            class="secondary ll-button"
             *ngIf="vm.canManageParties && vm.participants.length"
             [disabled]="!!action()"
             (click)="resetParties(vm)"
@@ -139,8 +156,8 @@
 
       <p class="notice" *ngIf="currentApplication(vm) as application">
         Your application is {{ application.status | lowercase }}. The build from
-        {{ application.appliedAt | localDate: "shortTime" }} remains the submitted
-        build.
+        {{ application.appliedAt | localDate: "shortTime" }} remains the
+        submitted build.
       </p>
 
       <p class="party-instructions" *ngIf="vm.canManageParties">

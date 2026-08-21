@@ -29,10 +29,10 @@ export class EventQuestStateService {
     private readonly api: EventQuestService,
     events: GameRealtimeEventRegistry,
     eventBus: EventBusService,
-    stateSync: StateSyncCoordinator,
+    private readonly stateSync: StateSyncCoordinator,
     private readonly domainVersions: DomainVersionTracker,
   ) {
-    stateSync.register(
+    this.stateSync.register(
       'event-quests',
       'event-quests',
       () => this.synchronize(),
@@ -89,6 +89,7 @@ export class EventQuestStateService {
           if (requestEpoch !== this.loadEpoch) return;
           this._journal.set(journal ?? { events: [] });
           this._loaded.set(true);
+          this.stateSync.activate('event-quests', 'event-quests');
           if (requestChangeVersion === this.changeVersion) this.dirty = false;
         },
         error: (error) => {
@@ -110,6 +111,7 @@ export class EventQuestStateService {
           if (requestEpoch !== this.loadEpoch) return;
           this._journal.set(journal ?? { events: [] });
           this._loaded.set(true);
+          this.stateSync.activate('event-quests', 'event-quests');
           if (requestChangeVersion === this.changeVersion) this.dirty = false;
         },
         error: (error) => {
@@ -133,6 +135,7 @@ export class EventQuestStateService {
 
   activateView(): void {
     this.activeViews += 1;
+    this.stateSync.activate('event-quests', 'event-quests');
     if (this.activeViews === 1 && this.dirty) this.load(true);
   }
 
@@ -186,8 +189,7 @@ export class EventQuestStateService {
           this._loaded.set(true);
           this.dirty = false;
         },
-        error: (error) =>
-          this._error.set(error?.message ?? errorMessage),
+        error: (error) => this._error.set(error?.message ?? errorMessage),
       });
   }
 

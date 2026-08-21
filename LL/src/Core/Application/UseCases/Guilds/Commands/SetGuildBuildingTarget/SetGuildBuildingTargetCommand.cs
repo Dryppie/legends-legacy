@@ -75,7 +75,9 @@ public sealed class SetGuildBuildingTargetCommandHandler
             new Audience.Guild(result.Value.GuildId),
             new GuildBuildingsChanged(
                 result.Value.GuildId,
-                request.BuildingType.ToString()),
+                request.BuildingType.ToString(),
+                request.CharacterId,
+                true),
             nameof(SetGuildBuildingTargetCommandHandler),
             cancellationToken);
 

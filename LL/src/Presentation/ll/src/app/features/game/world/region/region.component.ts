@@ -97,11 +97,11 @@ export class RegionComponent implements OnInit, OnDestroy {
     private readonly questState: QuestStateService,
     private readonly dungeonState: DungeonStateService,
     private readonly raids: RaidService,
-    stateSync: StateSyncCoordinator,
+    private readonly stateSync: StateSyncCoordinator,
     private readonly ngZone: NgZone,
     characterActions: CharacterActionsStateService,
   ) {
-    this.raidSyncCleanup = stateSync.register(
+    this.raidSyncCleanup = this.stateSync.register(
       'raid-directory',
       'world-map-raids',
       async () => this.loadRaidBosses(),
@@ -123,6 +123,8 @@ export class RegionComponent implements OnInit, OnDestroy {
     effect(() => {
       this.questState.areaAccess();
       this.dungeonState.dungeons();
+      this.regionNumber();
+      this.stateSync.activate('raid-directory', 'world-map-raids');
       this.applyRegionView();
     });
   }

@@ -9,9 +9,12 @@ public sealed record StateSyncCommandScopeProfile(
     bool InventoryWhenChanged = false,
     bool RefreshCharacterSummaryWhenChanged = false)
 {
-    public IReadOnlySet<string> VersionOnlyCharacterScopes { get; init; } =
+    // Response-owned scopes still advance their persisted revision, but the
+    // initiating client applies the authoritative mutation response instead of
+    // receiving a StateInvalidated echo. Counterparties continue to invalidate.
+    public IReadOnlySet<string> ResponseOwnedCharacterScopes { get; init; } =
         new HashSet<string>(StringComparer.Ordinal);
-    public IReadOnlySet<string> VersionOnlyWorldScopes { get; init; } =
+    public IReadOnlySet<string> ResponseOwnedWorldScopes { get; init; } =
         new HashSet<string>(StringComparer.Ordinal);
 }
 
@@ -100,13 +103,13 @@ public static class StateSyncCommandScopeCatalog
             refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Colosseum.Commands.PurchaseChampionMarketItem.PurchaseChampionMarketItemCommand));
 
-        Register(
+        RegisterResponseOwned(
             profiles,
             [StateSyncScopes.Colosseum],
             [],
-            refreshCharacterOverview: true,
-            inventoryWhenChanged: false,
-            refreshCharacterSummaryWhenChanged: true,
+            [StateSyncScopes.Colosseum, StateSyncScopes.Character],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: false,
             typeof(global::Application.UseCases.Colosseum.Commands.StartArenaBattle.StartArenaBattleCommand));
 
         RegisterResponseOwned(
@@ -128,15 +131,51 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.Crafting.Commands.CraftItems.CraftItemsCommand),
             typeof(global::Application.UseCases.Crafting.Commands.LearnBlueprint.LearnBlueprintCommand));
 
-        Register(profiles, [StateSyncScopes.Inventory], [],
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Inventory],
+            [],
+            [StateSyncScopes.Inventory],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Professions.Commands.CancelTemperingQueue.CancelTemperingQueueCommand),
             typeof(global::Application.UseCases.Professions.Commands.RemoveCraftingQueueItem.RemoveCraftingQueueItemCommand));
 
-        Register(profiles, [StateSyncScopes.Dungeons, StateSyncScopes.Inventory, StateSyncScopes.Quests], [],
-            typeof(global::Application.UseCases.Dungeons.Commands.AssembleDungeonSigil.AssembleDungeonSigilCommand),
-            typeof(global::Application.UseCases.Dungeons.Commands.DismissFailedDungeonRun.DismissFailedDungeonRunCommand),
-            typeof(global::Application.UseCases.Dungeons.Commands.ExecuteDungeonAction.ExecuteDungeonActionCommand),
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Dungeons, StateSyncScopes.Inventory, StateSyncScopes.Quests],
+            [],
+            [StateSyncScopes.Dungeons, StateSyncScopes.Inventory],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Dungeons.Commands.StartDungeonRun.StartDungeonRunCommand));
+
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Dungeons, StateSyncScopes.Quests],
+            [],
+            [StateSyncScopes.Dungeons],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Dungeons.Commands.ExecuteDungeonAction.ExecuteDungeonActionCommand));
+
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Dungeons],
+            [],
+            [StateSyncScopes.Dungeons],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Dungeons.Commands.DismissFailedDungeonRun.DismissFailedDungeonRunCommand));
+
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Dungeons, StateSyncScopes.Inventory],
+            [],
+            [StateSyncScopes.Dungeons, StateSyncScopes.Inventory, StateSyncScopes.Character],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: false,
+            typeof(global::Application.UseCases.Dungeons.Commands.AssembleDungeonSigil.AssembleDungeonSigilCommand));
 
         RegisterResponseOwned(
             profiles,
@@ -167,12 +206,26 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.Essences.Commands.EvolveEssence.EvolveEssenceCommand),
             typeof(global::Application.UseCases.Essences.Commands.SpendEssenceDust.SpendEssenceDustCommand));
 
-        Register(profiles, [StateSyncScopes.Essences, StateSyncScopes.Inventory, StateSyncScopes.Equipment, StateSyncScopes.Quests], [],
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Essences],
+            [],
+            [StateSyncScopes.Essences],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Essences.Commands.FavoriteEssence.FavoriteEssenceCommand),
+            typeof(global::Application.UseCases.Essences.Commands.SetEssenceFocus.SetEssenceFocusCommand));
+
+        RegisterResponseOwned(
+            profiles,
+            [StateSyncScopes.Essences],
+            [],
+            [StateSyncScopes.Essences],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Essences.Commands.ActivateEssenceLoadout.ActivateEssenceLoadoutCommand),
             typeof(global::Application.UseCases.Essences.Commands.DeleteEssenceLoadout.DeleteEssenceLoadoutCommand),
-            typeof(global::Application.UseCases.Essences.Commands.FavoriteEssence.FavoriteEssenceCommand),
-            typeof(global::Application.UseCases.Essences.Commands.SaveEssenceLoadout.SaveEssenceLoadoutCommand),
-            typeof(global::Application.UseCases.Essences.Commands.SetEssenceFocus.SetEssenceFocusCommand));
+            typeof(global::Application.UseCases.Essences.Commands.SaveEssenceLoadout.SaveEssenceLoadoutCommand));
 
         RegisterSemanticWorldResponseOwned(
             profiles,
@@ -403,6 +456,7 @@ public static class StateSyncCommandScopeCatalog
             refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Raids.CreateRaidCommand),
             typeof(global::Application.UseCases.Raids.CreateDevelopmentRaidCommand),
+            typeof(global::Application.UseCases.Raids.FillDevelopmentRaidTeamCommand),
             typeof(global::Application.UseCases.Raids.JoinRaidCommand),
             typeof(global::Application.UseCases.Raids.ApproveRaidSignupCommand),
             typeof(global::Application.UseCases.Raids.RemoveRaidSignupCommand),
@@ -473,7 +527,7 @@ public static class StateSyncCommandScopeCatalog
         IDictionary<Type, StateSyncCommandScopeProfile> profiles,
         IReadOnlyList<string> characterScopes,
         IReadOnlyList<string> worldScopes,
-        IReadOnlyList<string> versionOnlyCharacterScopes,
+        IReadOnlyList<string> responseOwnedCharacterScopes,
         bool refreshCharacterOverview,
         bool refreshCharacterSummaryWhenChanged,
         params Type[] commandTypes)
@@ -485,7 +539,7 @@ public static class StateSyncCommandScopeCatalog
             InventoryWhenChanged: false,
             refreshCharacterSummaryWhenChanged)
         {
-            VersionOnlyCharacterScopes = versionOnlyCharacterScopes.ToHashSet(StringComparer.Ordinal)
+            ResponseOwnedCharacterScopes = responseOwnedCharacterScopes.ToHashSet(StringComparer.Ordinal)
         };
         foreach (var commandType in commandTypes)
         {
@@ -497,8 +551,8 @@ public static class StateSyncCommandScopeCatalog
         IDictionary<Type, StateSyncCommandScopeProfile> profiles,
         IReadOnlyList<string> characterScopes,
         IReadOnlyList<string> worldScopes,
-        IReadOnlyList<string> versionOnlyCharacterScopes,
-        IReadOnlyList<string> versionOnlyWorldScopes,
+        IReadOnlyList<string> responseOwnedCharacterScopes,
+        IReadOnlyList<string> responseOwnedWorldScopes,
         bool refreshCharacterOverview,
         bool refreshCharacterSummaryWhenChanged,
         params Type[] commandTypes)
@@ -510,8 +564,8 @@ public static class StateSyncCommandScopeCatalog
             InventoryWhenChanged: false,
             refreshCharacterSummaryWhenChanged)
         {
-            VersionOnlyCharacterScopes = versionOnlyCharacterScopes.ToHashSet(StringComparer.Ordinal),
-            VersionOnlyWorldScopes = versionOnlyWorldScopes.ToHashSet(StringComparer.Ordinal)
+            ResponseOwnedCharacterScopes = responseOwnedCharacterScopes.ToHashSet(StringComparer.Ordinal),
+            ResponseOwnedWorldScopes = responseOwnedWorldScopes.ToHashSet(StringComparer.Ordinal)
         };
         foreach (var commandType in commandTypes)
         {

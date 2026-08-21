@@ -526,7 +526,7 @@ export class CharacterActionsStateService {
       .subscribe();
   }
 
-  applyCurrentActionSnapshot(action: CharacterActionDto): void {
+  applyCurrentActionSnapshot(action: CharacterActionDto | null): void {
     this.applyActionUpdate(action);
   }
 
@@ -592,8 +592,10 @@ export class CharacterActionsStateService {
     if (!action) return null;
 
     const craftingQueueOrder =
-      (action.temperingQueueItems ??
-        action.craftingActionDetails?.craftingQueueItems)
+      (
+        action.temperingQueueItems ??
+        action.craftingActionDetails?.craftingQueueItems
+      )
         ?.map((item) => item.id)
         .join(',') ?? '';
 

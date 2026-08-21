@@ -32,7 +32,10 @@ public class SelectGuildMissionCommandHandler : IRequestHandler<SelectGuildMissi
 
         await _outbox.EnqueueAsync(
             GameEventTypes.GuildMissionSelected,
-            new GuildMissionSelectedPayload(result.Value.GuildId),
+            new GuildMissionSelectedPayload(
+                result.Value.GuildId,
+                request.CharacterId,
+                InitiatorHandled: true),
             request.CharacterId,
             null,
             cancellationToken);

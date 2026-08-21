@@ -21,7 +21,8 @@
         "Chat__SystemMessages__Secret": "local-development-system-chat-secret",
         "FeatureManagement__SeedLocalGuestAccounts": "true",
         "FeatureManagement__TournamentGroundsDevelopmentTools": "true",
-        "FeatureManagement__RaidDevelopmentTools": "true"
+        "FeatureManagement__RaidDevelopmentTools": "true",
+        "FeatureManagement__WorldTowerDevelopmentTools": "true"
       }
     },
     "https": {
@@ -36,7 +37,8 @@
         "Chat__SystemMessages__Secret": "local-development-system-chat-secret",
         "FeatureManagement__SeedLocalGuestAccounts": "true",
         "FeatureManagement__TournamentGroundsDevelopmentTools": "true",
-        "FeatureManagement__RaidDevelopmentTools": "true"
+        "FeatureManagement__RaidDevelopmentTools": "true",
+        "FeatureManagement__WorldTowerDevelopmentTools": "true"
       }
     },
     "IIS Express": {
@@ -49,7 +51,8 @@
         "Chat__SystemMessages__Secret": "local-development-system-chat-secret",
         "FeatureManagement__SeedLocalGuestAccounts": "true",
         "FeatureManagement__TournamentGroundsDevelopmentTools": "true",
-        "FeatureManagement__RaidDevelopmentTools": "true"
+        "FeatureManagement__RaidDevelopmentTools": "true",
+        "FeatureManagement__WorldTowerDevelopmentTools": "true"
       }
     }
   }

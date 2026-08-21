@@ -29,7 +29,7 @@ public record CreateGuildCommandHandler : IRequestHandler<CreateGuildCommand, Re
 
         await _eventPublisher.PublishAsync(
             new Audience.World(),
-            new GuildDirectoryChanged("created"),
+            new GuildDirectoryChanged("created", request.CharacterId),
             nameof(CreateGuildCommandHandler),
             cancellationToken);
 

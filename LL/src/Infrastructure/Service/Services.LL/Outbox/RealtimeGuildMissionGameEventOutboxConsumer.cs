@@ -22,12 +22,17 @@ public sealed class RealtimeGuildMissionGameEventOutboxConsumer(
 
     public async Task HandleAsync(GameEventOutboxMessage message, CancellationToken cancellationToken)
     {
-        var guildId = string.Equals(
+        var isProgress = string.Equals(
             message.EventType,
             GameEventTypes.GuildMissionProgressed,
-            StringComparison.OrdinalIgnoreCase)
-            ? JsonSerializer.Deserialize<GuildMissionProgressedPayload>(message.PayloadJson, jsonOptions)?.GuildId
-            : JsonSerializer.Deserialize<GuildMissionSelectedPayload>(message.PayloadJson, jsonOptions)?.GuildId;
+            StringComparison.OrdinalIgnoreCase);
+        var progress = isProgress
+            ? JsonSerializer.Deserialize<GuildMissionProgressedPayload>(message.PayloadJson, jsonOptions)
+            : null;
+        var selected = isProgress
+            ? null
+            : JsonSerializer.Deserialize<GuildMissionSelectedPayload>(message.PayloadJson, jsonOptions);
+        var guildId = progress?.GuildId ?? selected?.GuildId;
         if (!guildId.HasValue)
         {
             throw new InvalidOperationException("Guild mission change payload is invalid.");
@@ -35,7 +40,10 @@ public sealed class RealtimeGuildMissionGameEventOutboxConsumer(
 
         await eventPublisher.PublishAsync(
             new Audience.Guild(guildId.Value),
-            new GuildMissionsChanged(guildId.Value),
+            new GuildMissionsChanged(
+                guildId.Value,
+                progress?.ActorCharacterId ?? selected?.ActorCharacterId ?? message.CharacterId,
+                selected?.InitiatorHandled ?? false),
             nameof(RealtimeGuildMissionGameEventOutboxConsumer),
             cancellationToken);
     }

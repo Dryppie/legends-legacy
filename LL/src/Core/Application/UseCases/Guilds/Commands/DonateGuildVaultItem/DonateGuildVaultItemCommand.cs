@@ -70,7 +70,7 @@ public class DonateGuildVaultItemCommandHandler : IRequestHandler<DonateGuildVau
 
         await _events.PublishAsync(
             new Audience.Guild(mutation.GuildId),
-            new GuildStateChanged(mutation.GuildId),
+            new GuildStateChanged(mutation.GuildId, request.CharacterId, true),
             nameof(DonateGuildVaultItemCommandHandler),
             cancellationToken);
         return Response<bool>.Success(true);

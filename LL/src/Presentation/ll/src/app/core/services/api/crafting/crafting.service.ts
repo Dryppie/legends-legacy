@@ -119,26 +119,27 @@ export class CraftingService {
 
   removeItemFromQueue(queueItem: {
     id: string;
-  }): Observable<RemoveCraftingQueueItemResponse> {
+  }): Observable<VersionedMutationResult<RemoveCraftingQueueItemResponse>> {
     return this.api
-      .post('Crafting/RemoveCraftingQueueItem', queueItem.id, {
-        stateSyncScopesHandledByResponse: [
-          'inventory',
-          'character',
-          'character-overview',
-        ],
-      })
+      .postVersioned<ApiResponse<RemoveCraftingQueueItemResponse>>(
+        'Crafting/RemoveCraftingQueueItem',
+        queueItem.id,
+        {
+          stateSyncScopesHandledByResponse: ['inventory'],
+        },
+      )
       .pipe(
         map((response) => {
-          const result =
-            this.unwrapResponse<RemoveCraftingQueueItemResponse>(response);
+          const result = this.unwrapResponse<RemoveCraftingQueueItemResponse>(
+            response.data,
+          );
           this.toast.showToast(
             'Removed item from queue',
             'success',
             true,
             'tr',
           );
-          return result;
+          return { data: result, domainVersions: response.domainVersions };
         }),
 
         catchError(() => {
@@ -149,30 +150,29 @@ export class CraftingService {
       );
   }
 
-  cancelTemperingQueue(): Observable<RemoveCraftingQueueItemResponse> {
+  cancelTemperingQueue(): Observable<
+    VersionedMutationResult<RemoveCraftingQueueItemResponse>
+  > {
     return this.api
-      .post(
+      .postVersioned<ApiResponse<RemoveCraftingQueueItemResponse>>(
         'Crafting/queue/cancel',
         {},
         {
-          stateSyncScopesHandledByResponse: [
-            'inventory',
-            'character',
-            'character-overview',
-          ],
+          stateSyncScopesHandledByResponse: ['inventory'],
         },
       )
       .pipe(
         map((response) => {
-          const result =
-            this.unwrapResponse<RemoveCraftingQueueItemResponse>(response);
+          const result = this.unwrapResponse<RemoveCraftingQueueItemResponse>(
+            response.data,
+          );
           this.toast.showToast(
             'Cancelled the Tempering queue',
             'success',
             true,
             'tr',
           );
-          return result;
+          return { data: result, domainVersions: response.domainVersions };
         }),
         catchError((error) =>
           throwError(

@@ -62,34 +62,6 @@ export class InventoryService {
     );
   }
 
-  public shatterEssence(
-    essence: InventoryItem,
-    amount: number,
-  ): Observable<unknown> {
-    void amount;
-    return this.apiService
-      .post(`essence/items/${essence.itemInstance.id}/dismantle`, {})
-      .pipe(
-        map((inventory) => {
-          // this.toastService.showToast(
-          //   'Action completed successfully!',
-          //   'success',
-          // );
-          return inventory;
-        }),
-
-        catchError(() => {
-          // this.toastService.showToast(
-          //   'Login Failed',
-          //   'Wrong email or password',
-          //   'error',
-          //   't',
-          // );
-          return throwError(() => new Error('Failed to shatter essences'));
-        }),
-      );
-  }
-
   scrapEquipment(
     equipmentIds: string[],
   ): Observable<VersionedMutationResult<ScrapEquipmentsResponse>> {

@@ -238,6 +238,13 @@ export class RaidPageComponent implements OnInit, OnDestroy {
     this.runAction('loadout', this.raids.refreshLoadout(this.raidRunId));
   }
 
+  generateDevelopmentTeam(): void {
+    this.runAction(
+      'development-team',
+      this.raids.fillDevelopmentTeam(this.raidRunId),
+    );
+  }
+
   cancelRaid(): void {
     if (
       this.action() ||

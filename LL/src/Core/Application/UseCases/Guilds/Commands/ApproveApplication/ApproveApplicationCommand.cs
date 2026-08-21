@@ -44,17 +44,17 @@ public class ApproveApplicationCommandHandler : IRequestHandler<ApproveApplicati
 
         await _eventPublisher.PublishAsync(
             new Audience.Character(applicationCharacterId),
-            new GuildMembershipChanged(guild.Id, applicationCharacterId),
+            new GuildMembershipChanged(guild.Id, applicationCharacterId, request.CharacterId, true),
             nameof(ApproveApplicationCommandHandler),
             cancellationToken);
         await _eventPublisher.PublishAsync(
             new Audience.Guild(guild.Id),
-            new GuildStateChanged(guild.Id),
+            new GuildStateChanged(guild.Id, request.CharacterId, true),
             nameof(ApproveApplicationCommandHandler),
             cancellationToken);
         await _eventPublisher.PublishAsync(
             new Audience.World(),
-            new GuildDirectoryChanged("membership"),
+            new GuildDirectoryChanged("membership", request.CharacterId),
             nameof(ApproveApplicationCommandHandler),
             cancellationToken);
 

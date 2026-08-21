@@ -32,6 +32,7 @@ import {
   EssenceLoadoutDto,
   EssenceLoadoutsDto,
   EssenceMutationResponseDto,
+  EssenceStateResponseDto,
   PlayerEssenceDto,
   SaveEssenceLoadoutSlotDto,
   SoulArchiveDto,
@@ -387,6 +388,7 @@ export class EssenceStateService {
             this._creatureArchive.set(creatureArchive);
           }
           if (codexEpoch === this.codexRequestEpoch) this._codex.set(codex);
+          this.stateSync.activate('essences', 'essences');
         },
         error: (error) => {
           if (
@@ -572,6 +574,7 @@ export class EssenceStateService {
     const mutationEpoch = ++this.archiveRequestEpoch;
     this.updateFavorite(essence.id, isFavorite);
     this.essencesService.setFavorite(essence.id, isFavorite).subscribe({
+      next: (result) => this.applyEssenceState(result),
       error: (error) => {
         if (mutationEpoch !== this.archiveRequestEpoch) return;
         this.updateFavorite(essence.id, !isFavorite);
@@ -587,10 +590,7 @@ export class EssenceStateService {
     }
 
     this.essencesService.setEssenceFocus(creatureId).subscribe({
-      next: (archive) => {
-        this.creatureArchiveRequestEpoch += 1;
-        this._creatureArchive.set(archive);
-      },
+      next: (result) => this.applyEssenceState(result),
       error: (error) =>
         this._error.set(error?.message ?? 'Failed to update Essence Focus'),
     });
@@ -746,15 +746,20 @@ export class EssenceStateService {
       : this.essencesService.saveLoadout(request);
 
     save.subscribe({
-      next: (loadout) => {
-        this.applySavedLoadout(loadout);
+      next: (result) => {
+        const loadout = result.data.savedLoadout;
+        if (!loadout || !this.applyEssenceState(result, loadout.id)) {
+          this._savingLoadout.set(false);
+          return;
+        }
         if (preservePendingName) {
           this._draftLoadoutName.set(pendingDraftName);
         }
 
         if (activateAfterSave && !loadout.isActive) {
           this.essencesService.activateLoadout(loadout.id).subscribe({
-            next: () => {
+            next: (activation) => {
+              this.applyEssenceState(activation, loadout.id);
               this._savingLoadout.set(false);
               this.characterState.markOverviewDirty();
             },
@@ -771,10 +776,6 @@ export class EssenceStateService {
         this._savingLoadout.set(false);
         if (loadout.isActive) {
           this.characterState.markOverviewDirty();
-          // Re-saving the active loadout changes which essences are attuned. applySavedLoadout
-          // only patches _loadouts, so without this the Archive list keeps rendering the
-          // previous attunedSlot badges until a manual reload.
-          this.refreshArchive();
         }
       },
       error: (error) => {
@@ -809,30 +810,13 @@ export class EssenceStateService {
     );
   }
 
-  private applySavedLoadout(loadout: EssenceLoadoutDto): void {
-    this.loadoutRequestEpoch += 1;
-    const loadouts = this._loadouts();
-    if (loadouts) {
-      const existingIndex = loadouts.loadouts.findIndex(
-        (existing) => existing.id === loadout.id,
-      );
-      const savedLoadouts = [...loadouts.loadouts];
-      if (existingIndex >= 0) {
-        savedLoadouts[existingIndex] = loadout;
-      } else {
-        savedLoadouts.push(loadout);
-      }
-      this._loadouts.set({ ...loadouts, loadouts: savedLoadouts });
-    }
-
-    this.selectLoadout(loadout);
-  }
-
   activateSelectedLoadout(): void {
     const id = this._selectedLoadoutId();
     if (!id) return;
-    this.essencesService.activateLoadout(id).subscribe(() => {
-      this.characterState.markOverviewDirty();
+    this.essencesService.activateLoadout(id).subscribe((result) => {
+      if (this.applyEssenceState(result, id)) {
+        this.characterState.markOverviewDirty();
+      }
     });
   }
 
@@ -840,9 +824,8 @@ export class EssenceStateService {
     const id = this._selectedLoadoutId();
     if (!id) return;
     const deletesActiveLoadout = this.selectedLoadout()?.isActive === true;
-    this.essencesService.deleteLoadout(id).subscribe(() => {
-      this._selectedLoadoutId.set(null);
-      if (deletesActiveLoadout) {
+    this.essencesService.deleteLoadout(id).subscribe((result) => {
+      if (this.applyEssenceState(result) && deletesActiveLoadout) {
         this.characterState.markOverviewDirty();
       }
     });
@@ -886,23 +869,7 @@ export class EssenceStateService {
     result: VersionedMutationResult<EssenceMutationResponseDto>,
   ): boolean {
     const response = result.data;
-    const appliesEssences = this.domainVersions.isCurrent(
-      'essences',
-      result.domainVersions['essences'],
-    );
-    if (appliesEssences) {
-      this.fullRefreshEpoch += 1;
-      this.archiveRequestEpoch += 1;
-      this.loadoutRequestEpoch += 1;
-      this.creatureArchiveRequestEpoch += 1;
-      this.codexRequestEpoch += 1;
-      this._archive.set(response.archive);
-      this._loadouts.set(response.loadouts);
-      this._creatureArchive.set(response.creatureArchive);
-      this._codex.set(response.codex);
-      this.ensureSelectedEssence(response.archive);
-      this.ensureSelectedLoadout(response.loadouts);
-    }
+    const appliesEssences = this.applyEssenceState(result);
 
     this.inventoryState.applyVersionedInventory(result);
     if (
@@ -915,6 +882,42 @@ export class EssenceStateService {
     }
     this.characterState.markOverviewDirty();
     return appliesEssences;
+  }
+
+  private applyEssenceState(
+    result: VersionedMutationResult<EssenceStateResponseDto>,
+    preferredLoadoutId?: string,
+  ): boolean {
+    if (
+      !this.domainVersions.isCurrent(
+        'essences',
+        result.domainVersions['essences'],
+      )
+    ) {
+      return false;
+    }
+
+    const response = result.data;
+    this.fullRefreshEpoch += 1;
+    this.archiveRequestEpoch += 1;
+    this.loadoutRequestEpoch += 1;
+    this.creatureArchiveRequestEpoch += 1;
+    this.codexRequestEpoch += 1;
+    this._archive.set(response.archive);
+    this._loadouts.set(response.loadouts);
+    this._creatureArchive.set(response.creatureArchive);
+    this._codex.set(response.codex);
+    this.ensureSelectedEssence(response.archive);
+
+    const preferredLoadout = preferredLoadoutId
+      ? response.loadouts.loadouts.find(
+          (loadout) => loadout.id === preferredLoadoutId,
+        )
+      : null;
+    preferredLoadout
+      ? this.selectLoadout(preferredLoadout)
+      : this.ensureSelectedLoadout(response.loadouts);
+    return true;
   }
 
   private updateFavorite(essenceId: string, isFavorite: boolean): void {

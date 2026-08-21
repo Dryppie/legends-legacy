@@ -21,6 +21,7 @@ import { ToastService } from '../../client-side/components/toast/toast.service';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
 import { VersionedMutationResult } from '../api.service';
+import { GameRealtimeStore } from '../../real-time/game-realtime/game-realtime-store.service';
 
 @Injectable({
   providedIn: 'root',
@@ -63,6 +64,7 @@ export class DungeonStateService {
     private readonly toast: ToastService,
     private readonly stateSync: StateSyncCoordinator,
     private readonly domainVersions: DomainVersionTracker,
+    private readonly realtimeStore: GameRealtimeStore,
   ) {
     this.stateSync.register('dungeons', 'dungeons', () => this.synchronize());
     this.stateSync.register('inventory', 'dungeons-inventory', () =>
@@ -173,17 +175,16 @@ export class DungeonStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (response) => {
-          this._sigilFragments.set(response.sigilFragmentsRemaining);
-          const character = this.characterState.currentCharacter();
-          if (character) {
-            this.characterState.updateCharacter({
-              ...character,
-              sigilFragments: response.sigilFragmentsRemaining,
-            });
-          }
-          this.inventoryState.load(true);
-          this.toast.showToast('Sigil assembled', response.sigilName, true);
-          this.loadAvailableDungeons();
+          this.applyVersionedDungeonState(response, (data) =>
+            this.setDungeonHub(data.hub),
+          );
+          this.inventoryState.applyVersionedInventory(response);
+          this.characterState.applyVersionedCharacter(response);
+          this.toast.showToast(
+            'Sigil assembled',
+            response.data.sigilName,
+            true,
+          );
         },
         error: (error) => {
           const message =
@@ -234,12 +235,17 @@ export class DungeonStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (result) => {
-          this.setActiveDungeon(result.run);
-          this._lastOutcome.set(result.outcome);
-          this._combatSession.set(result.combatSession ?? null);
-          this._message.set(result.message ?? null);
-
-          this.handleActionCombat(result);
+          if (
+            this.applyVersionedDungeonState(result, (response) => {
+              this.setActiveDungeon(response.run);
+              this.setDungeonHub(response.hub);
+              this._lastOutcome.set(response.outcome);
+              this._combatSession.set(response.combatSession ?? null);
+              this._message.set(response.message ?? null);
+            })
+          ) {
+            this.handleActionCombat(result.data);
+          }
         },
         error: (e) =>
           this._error.set(e.message ?? 'Failed to execute dungeon action'),
@@ -294,7 +300,6 @@ export class DungeonStateService {
         next: (response) => {
           this.applyDismissFailedDungeonRun(response);
           onSuccess?.();
-          this.loadAvailableDungeons();
         },
         error: (e) =>
           this._error.set(e.message ?? 'Failed to leave failed dungeon'),
@@ -322,23 +327,51 @@ export class DungeonStateService {
     ) {
       this.setActiveDungeon(response.activeRun);
       this.setDungeonHub(response.hub);
+      this.realtimeStore.setRewardClaim(
+        response.claimedLoot,
+        undefined,
+        'dungeon-reward',
+        response.location,
+      );
     }
     this.inventoryState.applyVersionedInventory(result);
     this.characterState.applyVersionedCharacter(result);
   }
 
   private applyDismissFailedDungeonRun(
-    response: DismissFailedDungeonRunResponse,
+    result: VersionedMutationResult<DismissFailedDungeonRunResponse>,
   ): void {
-    this.setActiveDungeon(response.activeRun);
+    this.applyVersionedDungeonState(result, (response) => {
+      this.setActiveDungeon(response.activeRun);
+      this.setDungeonHub(response.hub);
+    });
   }
 
-  private applyStartDungeon(response: StartDungeonRunResponse): void {
-    this.setActiveDungeon(response.run);
+  private applyStartDungeon(
+    result: VersionedMutationResult<StartDungeonRunResponse>,
+  ): void {
+    this.applyVersionedDungeonState(result, (response) => {
+      this.setActiveDungeon(response.run);
+      this.setDungeonHub(response.hub);
+    });
+    this.inventoryState.applyVersionedInventory(result);
+  }
 
-    if (response.inventoryItems) {
-      this.inventoryState.setInventory(response.inventoryItems);
+  private applyVersionedDungeonState<T>(
+    result: VersionedMutationResult<T>,
+    apply: (response: T) => void,
+  ): boolean {
+    if (
+      !this.domainVersions.isCurrent(
+        'dungeons',
+        result.domainVersions['dungeons'],
+      )
+    ) {
+      return false;
     }
+
+    apply(result.data);
+    return true;
   }
 
   setActiveDungeon(run: DungeonRun | null): void {

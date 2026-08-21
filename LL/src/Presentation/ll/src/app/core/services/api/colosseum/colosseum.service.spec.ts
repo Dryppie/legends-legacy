@@ -34,4 +34,16 @@ describe('ColosseumService response ownership', () => {
       { stateSyncScopesHandledByResponse: ['colosseum'] },
     );
   });
+
+  it('marks an arena battle response as owning attacker arena and character state', () => {
+    service.startArenaBattle('opponent-1').subscribe();
+
+    expect(api.postVersioned).toHaveBeenCalledOnceWith(
+      'colosseum/battle',
+      { opponentId: 'opponent-1' },
+      {
+        stateSyncScopesHandledByResponse: ['colosseum', 'character'],
+      },
+    );
+  });
 });

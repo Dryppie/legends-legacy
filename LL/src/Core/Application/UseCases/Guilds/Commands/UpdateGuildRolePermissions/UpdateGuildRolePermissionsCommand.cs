@@ -36,7 +36,7 @@ public class UpdateGuildRolePermissionsCommandHandler : IRequestHandler<UpdateGu
             CanWithdrawVault = value.Role == GuildRole.Officer && value.CanWithdrawVault
         }, cancellationToken);
         if (!updated || guild is null) return Response<bool>.Fail("Only the guild leader can change role permissions.");
-        await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChanged(guild.Id), nameof(UpdateGuildRolePermissionsCommandHandler), cancellationToken);
+        await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChanged(guild.Id, request.CharacterId, true), nameof(UpdateGuildRolePermissionsCommandHandler), cancellationToken);
         return Response<bool>.Success(true);
     }
 }

@@ -3,14 +3,12 @@ using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Inventories;
-using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
 using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Dungeons.Queries.GetAvailableDungeons;
 using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.Outbox;
-using Application.WebSockets.Contracts;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
@@ -24,7 +22,6 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
     private readonly IDungeonRunService _dungeonRunService;
     private readonly IInventoryService _inventoryService;
     private readonly ICharacterService _characterService;
-    private readonly IGameRealtimeBroadcaster _gameRealtime;
     private readonly IMapper _mapper;
     private readonly IGameEventOutbox _outbox;
     private readonly ILootHistoryService _lootHistory;
@@ -34,7 +31,6 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
         IDungeonRunService dungeonRunService,
         IInventoryService inventoryService,
         ICharacterService characterService,
-        IGameRealtimeBroadcaster gameRealtime,
         IMapper mapper,
         IGameEventOutbox outbox,
         ILootHistoryService lootHistory,
@@ -43,7 +39,6 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
         _dungeonRunService = dungeonRunService;
         _inventoryService = inventoryService;
         _characterService = characterService;
-        _gameRealtime = gameRealtime;
         _mapper = mapper;
         _outbox = outbox;
         _lootHistory = lootHistory;
@@ -88,12 +83,6 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
             result.DungeonName,
             cancellationToken);
 
-        await _gameRealtime.PublishAsync(
-            new Audience.Character(request.CharacterId),
-            new DungeonRewardsClaimed(request.CharacterId, claimedLoot, result.DungeonName),
-            nameof(ClaimDungeonRewardsCommandHandler),
-            cancellationToken);
-
         var hub = await _dungeonHub.CreateAsync(request.CharacterId, cancellationToken);
 
         return Response<ClaimDungeonRewardsResponseDto>.Success(new ClaimDungeonRewardsResponseDto
@@ -101,6 +90,7 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
             ActiveRun = null,
             InventoryItems = inventoryItems,
             ClaimedLoot = claimedLoot,
+            Location = result.DungeonName,
             Character = characterDto,
             Hub = hub
         });

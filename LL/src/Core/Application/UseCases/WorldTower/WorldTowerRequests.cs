@@ -20,6 +20,7 @@ public sealed record GetTowerAttemptPlaybackFramesQuery(Guid CharacterId, Guid A
 public sealed record GetTowerHallOfFameQuery : IQuery<IReadOnlyList<TowerHallOfFameEntryDto>>;
 public sealed record GetPersonalTowerExpeditionsQuery(Guid CharacterId) : IQuery<IReadOnlyList<TowerPersonalExpeditionDto>>;
 public sealed record CreateTowerRallyCommand(Guid CharacterId, int FloorNumber, TowerRallyMode Mode) : ICommand<Response<TowerRallyDto>>;
+public sealed record FillDevelopmentTowerTeamCommand(Guid CharacterId, Guid RallyId) : ICommand<Response<TowerRallyDto>>;
 public sealed record ApplyToTowerRallyCommand(Guid CharacterId, Guid RallyId) : ICommand<Response<TowerRallyDto>>;
 public sealed record AcceptTowerRallyApplicationCommand(Guid CharacterId, Guid RallyId, Guid ApplicationId) : ICommand<Response<TowerRallyDto>>;
 public sealed record DeclineTowerRallyApplicationCommand(Guid CharacterId, Guid RallyId, Guid ApplicationId) : ICommand<Response<TowerRallyDto>>;
@@ -125,6 +126,23 @@ public sealed class CreateTowerRallyCommandHandler(IWorldTowerService tower)
 
     private static Response<TowerRallyDto> ToResponse(TowerOperationResult<TowerRallyDto> result) =>
         result.Succeeded ? Response<TowerRallyDto>.Success(result.Value!) : Response<TowerRallyDto>.Fail(result.Error!);
+}
+
+public sealed class FillDevelopmentTowerTeamCommandHandler(IWorldTowerService tower)
+    : IRequestHandler<FillDevelopmentTowerTeamCommand, Response<TowerRallyDto>>
+{
+    public async Task<Response<TowerRallyDto>> Handle(
+        FillDevelopmentTowerTeamCommand request,
+        CancellationToken cancellationToken)
+    {
+        var result = await tower.FillDevelopmentTeamAsync(
+            request.CharacterId,
+            request.RallyId,
+            cancellationToken);
+        return result.Succeeded
+            ? Response<TowerRallyDto>.Success(result.Value!)
+            : Response<TowerRallyDto>.Fail(result.Error!);
+    }
 }
 
 public sealed class ApplyToTowerRallyCommandHandler(IWorldTowerService tower)

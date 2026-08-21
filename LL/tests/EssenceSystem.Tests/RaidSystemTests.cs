@@ -638,6 +638,96 @@ public sealed class RaidSystemTests
     }
 
     [Fact]
+    public async Task Development_team_generation_fills_and_assigns_a_complete_seeded_roster()
+    {
+        await using var db = CreateDbContext();
+        var leaderUser = AppUser.Guest();
+        leaderUser.Username = "RaidDeveloper";
+        leaderUser.IsGuest = false;
+        var leader = new Character
+        {
+            Id = Guid.NewGuid(),
+            UserId = leaderUser.Id,
+            User = leaderUser,
+            Name = "Raid Developer",
+            Level = 30
+        };
+        db.Users.Add(leaderUser);
+        db.Characters.Add(leader);
+        for (var number = 1; number <= 5; number++)
+            SeedDevelopmentCharacter(db, $"SeedGuest_Raid_{number:D2}", $"Seed Raider {number}");
+        await db.SaveChangesAsync();
+
+        var tier = new RaidBossTierDefinition
+        {
+            Tier = 0,
+            LaneSlots = 2,
+            MinimumRoster = 3
+        };
+        var boss = new RaidBossDefinition
+        {
+            Id = "raid-boss.test",
+            Name = "Test Raid Boss",
+            Region = 1,
+            LevelRequirement = 25,
+            Tiers = [tier]
+        };
+        var outbox = new RecordingGameEventOutbox();
+        var service = CreateRaidService(
+            db,
+            boss,
+            developmentToolsEnabled: true,
+            powerRatings: new FixedPowerRatingService(),
+            snapshots: new FixedCharacterSnapshotService(db),
+            outbox: outbox);
+        var created = await service.CreateDevelopmentAsync(
+            leader.Id,
+            boss.Id,
+            tier.Tier,
+            CancellationToken.None);
+        Assert.True(created.Succeeded, created.Error);
+        db.ChangeTracker.Clear();
+
+        var result = await service.FillDevelopmentTeamAsync(
+            leader.Id,
+            created.Value!.Id,
+            CancellationToken.None);
+
+        Assert.True(result.Succeeded, result.Error);
+        Assert.True(result.Value!.DevelopmentToolsEnabled);
+        Assert.True(result.Value.CanCommence);
+        Assert.Equal(tier.LaneSlots * 3, result.Value.Signups.Count);
+        foreach (var lane in RaidParties.All)
+        {
+            var laneSignups = result.Value.Signups.Where(signup => signup.Lane == lane).ToArray();
+            Assert.Equal(tier.LaneSlots, laneSignups.Length);
+            Assert.Equal([0, 1], laneSignups.Select(signup => signup.WingSlotIndex).Order().ToArray());
+        }
+        Assert.Equal(tier.LaneSlots * 3, await db.CharacterSnapshots.CountAsync());
+        Assert.Contains(
+            outbox.Payloads.OfType<RaidUpdated>(),
+            update => update.Event == "DevelopmentTeamGenerated");
+    }
+
+    [Fact]
+    public async Task Development_team_generation_is_rejected_when_tools_are_disabled()
+    {
+        await using var db = CreateDbContext();
+        var service = CreateRaidService(
+            db,
+            new RaidBossDefinition { Id = "raid-boss.test" },
+            developmentToolsEnabled: false);
+
+        var result = await service.FillDevelopmentTeamAsync(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            CancellationToken.None);
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("Raid development tools are disabled.", result.Error);
+    }
+
+    [Fact]
     public async Task Raid_leader_approves_join_request_and_can_remove_accepted_member()
     {
         await using var db = CreateDbContext();
@@ -1063,6 +1153,26 @@ public sealed class RaidSystemTests
                 DevelopmentToolsEnabled = developmentToolsEnabled
             }),
             logger: NullLogger<RaidService>.Instance);
+
+    private static Character SeedDevelopmentCharacter(
+        LLDbContext db,
+        string username,
+        string characterName)
+    {
+        var user = AppUser.Guest();
+        user.Username = username;
+        var character = new Character
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            User = user,
+            Name = characterName,
+            Level = 30
+        };
+        db.Users.Add(user);
+        db.Characters.Add(character);
+        return character;
+    }
 
     private sealed class NoopGameEventOutbox : IGameEventOutbox
     {

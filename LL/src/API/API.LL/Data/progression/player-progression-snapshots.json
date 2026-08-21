@@ -1,12 +1,12 @@
 {
-  "version": 1,
+  "version": 4,
   "combatLoadoutBudgetWeight": 8.0,
   "gearEnvelopes": [
     {
       "id": "minimum",
       "slotFillPercent": 0.75,
-      "quality": "Crude",
-      "rollMultiplier": 0.95,
+      "quality": "Standard",
+      "rollMultiplier": 1.0,
       "temperingBudgetPercent": 0.0,
       "currentTierShareAtRegionEntry": 0.0,
       "currentTierShareAtRegionCompletion": 0.4
@@ -80,9 +80,11 @@
   ],
   "anchors": [
     { "id": "campaign-start", "progressionPosition": 1, "characterLevel": 1 },
+    { "id": "region-01-area-02", "progressionPosition": 2, "characterLevel": 5 },
     { "id": "region-01-mid", "progressionPosition": 5, "characterLevel": 20 },
     { "id": "region-01-end", "progressionPosition": 10, "characterLevel": 45 },
     { "id": "region-02-entry", "progressionPosition": 11, "characterLevel": 50 },
+    { "id": "region-02-area-02", "progressionPosition": 12, "characterLevel": 55 },
     { "id": "region-02-mid", "progressionPosition": 15, "characterLevel": 70 },
     { "id": "region-02-end", "progressionPosition": 20, "characterLevel": 95 },
     { "id": "region-03-entry", "progressionPosition": 21, "characterLevel": 100 },

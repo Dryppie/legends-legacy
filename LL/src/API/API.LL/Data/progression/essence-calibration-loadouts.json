@@ -1,9 +1,11 @@
 {
-  "version": 1,
+  "version": 3,
   "anchorIds": [
     "campaign-start",
+    "region-01-area-02",
     "region-01-mid",
     "region-01-end",
+    "region-02-area-02",
     "region-02-end",
     "region-03-end",
     "region-05-end",

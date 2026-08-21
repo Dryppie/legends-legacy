@@ -48,10 +48,15 @@ type GuildRealtimeScope = 'any' | 'member' | 'nonMember';
 
 interface GuildRealtimeContext {
   guildId: string | null;
+  characterId: string | null;
   shouldRefresh: boolean;
 }
 
-type GuildRealtimePayload = { guildId?: string };
+type GuildRealtimePayload = {
+  guildId?: string;
+  actorCharacterId?: string;
+  initiatorHandled?: boolean;
+};
 
 interface GuildRealtimeHandler {
   eventName: GuildRealtimeEventName;
@@ -66,6 +71,7 @@ interface GuildRealtimeHandler {
     context: GuildRealtimeContext,
   ) => void;
   refresh?: boolean;
+  skipForHandledInitiator?: boolean;
 }
 
 interface PendingGuildDescription {
@@ -73,6 +79,17 @@ interface PendingGuildDescription {
   guildId: string;
   description: string;
   previousDescription: string;
+}
+
+export function isHandledGuildInitiatorEcho(
+  payload: GuildRealtimePayload,
+  characterId: string | null,
+): boolean {
+  return (
+    payload.initiatorHandled === true &&
+    !!characterId &&
+    payload.actorCharacterId === characterId
+  );
 }
 
 export function normalizeGuildMissionOverview(
@@ -130,10 +147,11 @@ export class GuildStateService {
   private readonly _error = signal<string | null>(null);
   private readonly eventDeduper = new RealtimeSignalDeduper();
   private readonly guildRealtimeHandlers = this.createGuildRealtimeHandlers();
-  private hasLoaded = false;
+  private readonly hasLoaded = signal(false);
   private lastTokenGuildId: string | null | undefined = undefined;
   private refreshRequestId = 0;
   private guildSync$: Observable<unknown> | null = null;
+  private guildSyncTargetRevision = 0;
   private buildingRequestId = 0;
   private missionRequestId = 0;
   private shopRequestId = 0;
@@ -182,44 +200,44 @@ export class GuildStateService {
     this.stateSync.register(
       'guild',
       'guild',
-      () => this.synchronize(),
-      () => this.hasLoaded,
+      (context) => this.synchronize(context.targetRevision),
+      () => this.hasLoaded(),
     );
     this.stateSync.register(
       'guild-buildings',
       'guild-buildings',
       () => this.synchronizeBuildings(),
-      () => this.hasLoaded && !!this._guild(),
+      () => this.hasLoaded() && !!this._guild(),
     );
     this.stateSync.register(
       'guild-missions',
       'guild-missions',
       () => this.synchronizeMissions(),
-      () => this.hasLoaded && !!this._guild(),
+      () => this.hasLoaded() && !!this._guild(),
     );
     this.stateSync.register(
       'guild-shop',
       'guild-shop',
       () => this.synchronizeShop(),
-      () => this.hasLoaded && !!this._guild(),
+      () => this.hasLoaded() && !!this._guild(),
     );
     this.stateSync.register(
       'guild-membership',
       'guild-membership',
-      () => this.synchronize(),
-      () => this.hasLoaded,
+      (context) => this.synchronize(context.targetRevision),
+      () => this.hasLoaded(),
     );
     this.stateSync.register(
       'guild-invites',
       'guild-invites',
       () => this.synchronizeInvites(),
-      () => this.hasLoaded && !this._guild(),
+      () => this.hasLoaded() && !this._guild(),
     );
     this.stateSync.register(
       'guild-directory',
       'guild-directory',
       () => this.synchronizeDirectory(),
-      () => this.hasLoaded,
+      () => this.hasLoaded(),
     );
     this.refresh(); // initial fetch
 
@@ -310,14 +328,17 @@ export class GuildStateService {
         key: 'guild-membership-changed',
         scope: 'nonMember',
         refresh: true,
+        skipForHandledInitiator: true,
       },
       {
         eventName: 'GuildBuildingsChanged',
         key: 'guild-buildings-changed',
         scope: 'member',
         matches: inCurrentGuild,
-        action: (_, context) => {
-          this.loadGuildBuildings(context.guildId);
+        action: (payload, context) => {
+          if (!isHandledGuildInitiatorEcho(payload, context.characterId)) {
+            this.loadGuildBuildings(context.guildId);
+          }
           this.loadGuildShop(context.guildId);
         },
       },
@@ -326,8 +347,10 @@ export class GuildStateService {
         key: 'guild-missions-changed',
         scope: 'member',
         matches: inCurrentGuild,
-        action: (_, context) => {
-          this.markMissionsChanged(context.guildId);
+        action: (payload, context) => {
+          if (!isHandledGuildInitiatorEcho(payload, context.characterId)) {
+            this.markMissionsChanged(context.guildId);
+          }
           this.loadGuildShop(context.guildId);
         },
       },
@@ -345,6 +368,7 @@ export class GuildStateService {
         scope: 'member',
         matches: inCurrentGuild,
         refresh: true,
+        skipForHandledInitiator: true,
       },
       {
         eventName: 'GuildMembershipChanged',
@@ -352,6 +376,7 @@ export class GuildStateService {
         scope: 'member',
         matches: inCurrentGuild,
         refresh: true,
+        skipForHandledInitiator: true,
       },
       {
         eventName: 'GuildDisbanded',
@@ -359,6 +384,7 @@ export class GuildStateService {
         scope: 'member',
         matches: inCurrentGuild,
         refresh: true,
+        skipForHandledInitiator: true,
       },
       {
         eventName: 'GuildInviteRejected',
@@ -380,6 +406,7 @@ export class GuildStateService {
   private handleGuildRealtimeEvents(): void {
     const context: GuildRealtimeContext = {
       guildId: this._guild()?.id ?? null,
+      characterId: this.auth.currentCharacter()?.id ?? null,
       shouldRefresh: false,
     };
 
@@ -403,6 +430,12 @@ export class GuildStateService {
     if (!payload) return;
     if (handler.matches && !handler.matches(payload, context)) return;
     if (!this.eventDeduper.shouldProcess(handler.key, envelope)) return;
+    if (
+      handler.skipForHandledInitiator &&
+      isHandledGuildInitiatorEcho(payload, context.characterId)
+    ) {
+      return;
+    }
 
     handler.action?.(payload, context);
     context.shouldRefresh ||= !!handler.refresh;
@@ -429,10 +462,12 @@ export class GuildStateService {
     this.synchronize().subscribe({ error: () => undefined });
   }
 
-  private synchronize(): Observable<unknown> {
-    if (this.guildSync$) return this.guildSync$;
+  private synchronize(targetRevision = 0): Observable<unknown> {
+    if (this.guildSync$ && this.guildSyncTargetRevision >= targetRevision) {
+      return this.guildSync$;
+    }
 
-    this.hasLoaded = true;
+    this.hasLoaded.set(true);
     this._loading.set(true);
     const requestId = ++this.refreshRequestId;
 
@@ -445,13 +480,17 @@ export class GuildStateService {
         error: (err) => this._error.set(err.message ?? 'Unknown error'),
       }),
       finalize(() => {
-        if (this.guildSync$ === request$) this.guildSync$ = null;
+        if (this.guildSync$ === request$) {
+          this.guildSync$ = null;
+          this.guildSyncTargetRevision = 0;
+        }
         if (requestId === this.refreshRequestId) this._loading.set(false);
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
     );
 
     this.guildSync$ = request$;
+    this.guildSyncTargetRevision = targetRevision;
     return request$;
   }
 
@@ -507,6 +546,18 @@ export class GuildStateService {
       this.clearGuildScopedState();
       this.loadAllGuilds();
       this.loadMyInvites();
+    }
+
+    for (const scope of [
+      'guild',
+      'guild-buildings',
+      'guild-missions',
+      'guild-shop',
+      'guild-membership',
+      'guild-invites',
+      'guild-directory',
+    ]) {
+      this.stateSync.activate(scope, scope);
     }
   }
 
@@ -871,12 +922,14 @@ export class GuildStateService {
 
   invite(payload: InviteToGuild): void {
     this.service.invite(payload).subscribe({
+      next: () => this.refresh(),
       error: (e) => this._error.set(e.message ?? 'Failed to invite'),
     });
   }
 
   inviteCharacterByName(payload: InviteToGuild): void {
     this.service.inviteCharacterByName(payload).subscribe({
+      next: () => this.refresh(),
       error: (e) => this._error.set(e.message ?? 'Failed to invite character'),
     });
   }

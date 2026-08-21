@@ -51,6 +51,16 @@ describe('RaidService', () => {
     );
   });
 
+  it('maps local team generation to the development endpoint', () => {
+    service.fillDevelopmentTeam('raid-id').subscribe();
+
+    expect(api.post).toHaveBeenCalledOnceWith(
+      'raids/raid-id/development/fill',
+      {},
+      { stateSyncScopesHandledByResponse: ['raids', 'raid-directory'] },
+    );
+  });
+
   it('maps signup approval to the leader decision endpoint', () => {
     service.approveSignup('raid-id', 'member-id').subscribe();
 

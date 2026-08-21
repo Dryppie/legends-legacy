@@ -64,6 +64,20 @@ public sealed class RaidController : BaseController
             request.PlusLevel));
     }
 
+    [HttpPost("{raidRunId:guid}/development/fill")]
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public async Task<ActionResult<Response<RaidRunDto>>> FillDevelopmentTeam(
+        Guid raidRunId,
+        [FromServices] IWebHostEnvironment environment)
+    {
+        if (!environment.IsDevelopment())
+            return NotFound();
+
+        return await Mediator.Send(new FillDevelopmentRaidTeamCommand(
+            CurrentCharacterGuid,
+            raidRunId));
+    }
+
     [HttpPost("{raidRunId:guid}/join")]
     public async Task<ActionResult<Response<RaidRunDto>>> Join(Guid raidRunId) =>
         await Mediator.Send(new JoinRaidCommand(CurrentCharacterGuid, raidRunId));

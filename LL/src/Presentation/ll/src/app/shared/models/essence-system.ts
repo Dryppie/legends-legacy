@@ -244,11 +244,15 @@ export interface SpendEssenceDustResultDto extends ResponseMessageDto {
   reachedTierCap: boolean;
 }
 
-export interface EssenceMutationResponseDto extends ResponseMessageDto {
+export interface EssenceStateResponseDto extends ResponseMessageDto {
   archive: SoulArchiveDto;
   loadouts: EssenceLoadoutsDto;
   creatureArchive: CreatureArchiveDto;
   codex: EssenceCodexDto;
+  savedLoadout?: EssenceLoadoutDto | null;
+}
+
+export interface EssenceMutationResponseDto extends EssenceStateResponseDto {
   inventoryItems: InventoryItem[];
   equipmentSlots: EquipmentSlot[];
   dustGained?: number | null;

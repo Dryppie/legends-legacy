@@ -104,7 +104,8 @@ public sealed record TowerRallyDto(
     bool CanStart,
     bool CanUpdateLoadout,
     bool CanTransferLeadership,
-    TowerAttemptSummaryDto? Attempt);
+    TowerAttemptSummaryDto? Attempt,
+    bool DevelopmentToolsEnabled);
 
 public sealed record TowerRallyParticipantDto(
     Guid CharacterId,

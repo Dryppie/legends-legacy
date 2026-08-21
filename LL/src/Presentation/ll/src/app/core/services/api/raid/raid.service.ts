@@ -368,6 +368,16 @@ export class RaidService {
       .pipe(tap((raid) => this.trackRaid(raid as RaidRun)));
   }
 
+  fillDevelopmentTeam(raidRunId: string): Observable<RaidRun> {
+    return this.api
+      .post(
+        `raids/${raidRunId}/development/fill`,
+        {},
+        { stateSyncScopesHandledByResponse: RAID_RUN_MUTATION_HANDLED_SCOPES },
+      )
+      .pipe(tap((raid) => this.trackRaid(raid as RaidRun)));
+  }
+
   join(raidRunId: string): Observable<RaidRun> {
     return this.api
       .post(

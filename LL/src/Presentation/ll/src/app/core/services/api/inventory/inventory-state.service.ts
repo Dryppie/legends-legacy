@@ -154,35 +154,6 @@ export class InventoryStateService {
     this.inventoryGrantDeduper.clear();
   }
 
-  shatterEssences(essence: InventoryItem, shatterAmount: number) {
-    this._loading.set(true);
-    this.inventoryService
-      .shatterEssence(essence, shatterAmount)
-      .pipe(finalize(() => this._loading.set(false)))
-      .subscribe({
-        next: () => {
-          const items = [...this._items()];
-
-          const essenceItem = items.find(
-            (i) => i.itemInstance.id === essence.itemInstance.id,
-          );
-
-          if (essenceItem) {
-            essenceItem.quantity -= 1;
-            if (essenceItem.quantity <= 0) {
-              const index = items.indexOf(essenceItem);
-              if (index !== -1) {
-                items.splice(index, 1);
-              }
-            }
-          }
-
-          this.setInventory(items);
-        },
-        error: (err) => this._error.set(err.message ?? 'Unknown error'),
-      });
-  }
-
   scrapEquipment(equipmentIds: string[]) {
     this._loading.set(true);
     this.inventoryService

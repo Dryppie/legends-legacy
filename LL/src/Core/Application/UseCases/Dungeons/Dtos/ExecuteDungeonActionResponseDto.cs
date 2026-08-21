@@ -12,7 +12,9 @@ public sealed class ExecuteDungeonActionResponseDto : IMapFrom<ExecuteDungeonAct
     public required DungeonActionOutcomeDto Outcome { get; init; }
     public CombatSessionDto? CombatSession { get; init; }
     public string? Message { get; init; }
+    public required DungeonHubDto Hub { get; set; }
 
     public void Mapping(Profile profile) =>
-        profile.CreateMap<ExecuteDungeonActionResult, ExecuteDungeonActionResponseDto>();
+        profile.CreateMap<ExecuteDungeonActionResult, ExecuteDungeonActionResponseDto>()
+            .ForMember(destination => destination.Hub, options => options.Ignore());
 }

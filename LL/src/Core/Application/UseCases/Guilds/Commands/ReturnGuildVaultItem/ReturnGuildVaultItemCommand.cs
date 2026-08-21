@@ -33,7 +33,7 @@ public class ReturnGuildVaultItemCommandHandler : IRequestHandler<ReturnGuildVau
         if (!result.Succeeded) return Response<bool>.Fail(result.Error ?? "Failed to return equipment.");
         await _outbox.EnqueueAsync(GameEventTypes.EquipmentChanged, new EquipmentChangedPayload(request.CharacterId), request.CharacterId, null, cancellationToken);
         if (guild is not null)
-            await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChanged(guild.Id), nameof(ReturnGuildVaultItemCommandHandler), cancellationToken);
+            await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChanged(guild.Id, request.CharacterId, true), nameof(ReturnGuildVaultItemCommandHandler), cancellationToken);
         return Response<bool>.Success(true);
     }
 }

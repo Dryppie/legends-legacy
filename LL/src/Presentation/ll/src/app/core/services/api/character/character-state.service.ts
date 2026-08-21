@@ -7,8 +7,6 @@ import {
 } from '../../../../shared/models/Dtos/characterDto';
 import { AuthService } from '../auth/auth.service';
 import { CharacterService } from './character.service';
-import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
-import { RealtimeSignalDeduper } from '../../real-time/game-realtime/realtime-deduplication';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
 import { VersionedMutationResult } from '../api.service';
@@ -20,7 +18,6 @@ export class CharacterStateService {
   private readonly _overviewDirty = signal(false);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
-  private readonly eventDeduper = new RealtimeSignalDeduper();
   private dirtyVersion = 0;
   private activeRefreshDirtyVersion: number | null = null;
   private refreshAfterCurrentRequest = false;
@@ -42,7 +39,6 @@ export class CharacterStateService {
   constructor(
     private readonly service: CharacterService,
     private readonly auth: AuthService,
-    private readonly eventService: GameRealtimeEventRegistry,
     private readonly stateSync: StateSyncCoordinator,
     private readonly router: Router,
     private readonly domainVersions: DomainVersionTracker,
@@ -69,51 +65,11 @@ export class CharacterStateService {
           this.dirtyVersion = 0;
           return;
         }
+        this.stateSync.activate('character', 'character-summary');
+        this.stateSync.activate('character-overview', 'character-overview');
         this.markOverviewDirty();
         if (this.isOverviewRouteActive()) {
           this.refresh(); // writes _loading, _overview
-        }
-      },
-      { allowSignalWrites: true },
-    );
-
-    effect(
-      () => {
-        const characterId = this.currentCharacterId();
-        const soulstoneDropEnvelope =
-          this.eventService.eventEnvelope.SoulstoneDrop();
-        const levelUpEnvelope =
-          this.eventService.eventEnvelope.CharacterLevelUp();
-        const soulstoneDrop = soulstoneDropEnvelope?.payload;
-        const levelUp = levelUpEnvelope?.payload;
-
-        if (
-          characterId &&
-          soulstoneDrop &&
-          this.eventDeduper.shouldProcess(
-            'soulstone-drop',
-            soulstoneDropEnvelope,
-          ) &&
-          soulstoneDrop.characterId === characterId
-        ) {
-          this.updateCurrentCharacter({
-            soulstones: soulstoneDrop.totalSoulstones,
-          });
-        }
-
-        if (
-          characterId &&
-          levelUp &&
-          this.eventDeduper.shouldProcess('level-up', levelUpEnvelope) &&
-          levelUp.characterId === characterId
-        ) {
-          this.updateCurrentCharacter({
-            level: levelUp.level,
-            experience: levelUp.experience,
-            experienceUntilNextLevel: levelUp.experienceUntilNextLevel,
-          });
-          this.markOverviewDirty();
-          if (this.isOverviewRouteActive()) this.refreshIfDirty();
         }
       },
       { allowSignalWrites: true },
@@ -297,16 +253,6 @@ export class CharacterStateService {
     this._overview.set({
       ...overview,
       equippedTitle,
-    });
-  }
-
-  private updateCurrentCharacter(patch: Partial<CharacterDto>): void {
-    const character = this.currentCharacter();
-    if (!character) return;
-
-    this.auth.updateCharacter({
-      ...character,
-      ...patch,
     });
   }
 }

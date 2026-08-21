@@ -218,6 +218,13 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
     );
   }
 
+  generateDevelopmentTeam(): void {
+    this.runRallyAction(
+      'development-team',
+      this.tower.fillDevelopmentTeam(this.rallyId),
+    );
+  }
+
   transferLeadership(participant: TowerRallyParticipant): void {
     this.runRallyAction(
       `transfer-leadership-${participant.characterId}`,

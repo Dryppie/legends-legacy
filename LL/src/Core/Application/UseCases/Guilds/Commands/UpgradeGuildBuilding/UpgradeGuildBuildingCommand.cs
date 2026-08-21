@@ -48,7 +48,11 @@ public class UpgradeGuildBuildingCommandHandler : IRequestHandler<UpgradeGuildBu
 
         await _eventPublisher.PublishAsync(
             new Audience.Guild(result.Value.GuildId),
-            new GuildBuildingsChanged(result.Value.GuildId, request.BuildingId.ToString()),
+            new GuildBuildingsChanged(
+                result.Value.GuildId,
+                request.BuildingId.ToString(),
+                request.CharacterId,
+                true),
             nameof(UpgradeGuildBuildingCommandHandler),
             cancellationToken);
 

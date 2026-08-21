@@ -225,6 +225,63 @@ describe('StateSyncCoordinator', () => {
     expect(refresh).toHaveBeenCalledTimes(1);
   }));
 
+  it('refreshes a stale registration when its owner becomes active', fakeAsync(() => {
+    const api = {
+      getCheckpoint: () =>
+        of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),
+    } as unknown as StateSyncService;
+    const injector = { get: () => api } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    let active = false;
+    const refresh = jasmine
+      .createSpy('refresh')
+      .and.returnValue(Promise.resolve());
+    coordinator.register('inventory', 'inventory', refresh, () => active);
+
+    coordinator.acceptInvalidation({
+      scope: 'inventory',
+      revision: 4,
+      reason: 'while-inactive',
+    });
+    tick(51);
+    expect(refresh).not.toHaveBeenCalled();
+
+    active = true;
+    coordinator.activate('inventory', 'inventory');
+    tick(51);
+    tick();
+
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(coordinator.status()[0].appliedRevision).toBe(4);
+  }));
+
+  it('passes the target revision to refresh owners', fakeAsync(() => {
+    const api = {
+      getCheckpoint: () =>
+        of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),
+    } as unknown as StateSyncService;
+    const injector = { get: () => api } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    const refresh = jasmine
+      .createSpy('refresh')
+      .and.returnValue(Promise.resolve());
+    coordinator.register('guild', 'guild', refresh);
+
+    coordinator.acceptInvalidation({
+      scope: 'guild',
+      revision: 9,
+      reason: 'new-guild-state',
+    });
+    tick(51);
+    tick();
+
+    expect(refresh).toHaveBeenCalledOnceWith({
+      scope: 'guild',
+      key: 'guild',
+      targetRevision: 9,
+    });
+  }));
+
   it('forces reconciliation after a mutation response even when its revision is older', fakeAsync(() => {
     const api = {
       getCheckpoint: () =>

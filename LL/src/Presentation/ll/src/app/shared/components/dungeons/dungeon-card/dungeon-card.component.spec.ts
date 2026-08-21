@@ -1,5 +1,4 @@
 import { Router } from '@angular/router';
-import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
 import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
 import {
   DungeonPreviewData,
@@ -10,11 +9,7 @@ import { DungeonCardComponent } from './dungeon-card.component';
 
 describe('DungeonCardComponent', () => {
   function createComponent(): DungeonCardComponent {
-    return new DungeonCardComponent(
-      {} as DungeonStateService,
-      {} as CharacterStateService,
-      {} as Router,
-    );
+    return new DungeonCardComponent({} as DungeonStateService, {} as Router);
   }
 
   function createComponentWithActiveDungeon(
@@ -25,7 +20,6 @@ describe('DungeonCardComponent', () => {
       {
         activeDungeon: () => ({ dungeonDefinitionId }),
       } as unknown as DungeonStateService,
-      {} as CharacterStateService,
       { navigate } as unknown as Router,
     );
   }

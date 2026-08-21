@@ -54,6 +54,35 @@ describe('EssenceStateService loadout drafts', () => {
     domainVersions,
   });
 
+  const versionedLoadout = (loadout: {
+    id: string;
+    name: string;
+    isActive: boolean;
+    slots: { slotIndex: number; playerEssenceId: string }[];
+  }): VersionedMutationResult<EssenceMutationResponseDto> =>
+    versionedMutation(
+      {
+        savedLoadout: loadout,
+        loadouts: {
+          loadouts:
+            loadout.id === 'loadout-1'
+              ? [loadout]
+              : [
+                  {
+                    id: 'loadout-1',
+                    name: 'Default',
+                    isActive: true,
+                    slots: [],
+                  },
+                  loadout,
+                ],
+          limit: 3,
+          unlockedSlots: 1,
+        },
+      },
+      { essences: 1 },
+    );
+
   beforeEach(() => {
     levelUpEnvelope.set(null);
     essences = jasmine.createSpyObj<EssencesService>('EssencesService', [
@@ -186,12 +215,14 @@ describe('EssenceStateService loadout drafts', () => {
 
   it('persists an equipped Essence immediately without enabling name save', () => {
     essences.updateLoadout.and.returnValue(
-      of({
-        id: 'loadout-1',
-        name: 'Default',
-        isActive: true,
-        slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
-      }),
+      of(
+        versionedLoadout({
+          id: 'loadout-1',
+          name: 'Default',
+          isActive: true,
+          slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
+        }),
+      ),
     );
     service.setDraftSlot(0, 'essence-1');
 
@@ -207,33 +238,35 @@ describe('EssenceStateService loadout drafts', () => {
     expect(service.canSaveDraft()).toBeFalse();
   });
 
-  it('resyncs the Archive after re-saving the active loadout', () => {
+  it('uses the returned Archive after re-saving the active loadout', () => {
     essences.updateLoadout.and.returnValue(
-      of({
-        id: 'loadout-1',
-        name: 'Default',
-        isActive: true,
-        slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
-      }),
+      of(
+        versionedLoadout({
+          id: 'loadout-1',
+          name: 'Default',
+          isActive: true,
+          slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
+        }),
+      ),
     );
     expect(essences.getArchive).toHaveBeenCalledTimes(1);
 
     service.setDraftSlot(0, 'essence-1');
     service.saveDraftSlots();
 
-    // attunedSlot lives on the archive snapshot, so it has to be refetched or the Archive list
-    // keeps rendering the previous slot badges.
-    expect(essences.getArchive).toHaveBeenCalledTimes(2);
+    expect(essences.getArchive).toHaveBeenCalledTimes(1);
   });
 
   it('leaves the Archive alone when the saved loadout is not active', () => {
     essences.saveLoadout.and.returnValue(
-      of({
-        id: 'loadout-2',
-        name: 'New Loadout',
-        isActive: false,
-        slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
-      }),
+      of(
+        versionedLoadout({
+          id: 'loadout-2',
+          name: 'New Loadout',
+          isActive: false,
+          slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
+        }),
+      ),
     );
     service.newLoadout();
     service.setDraftSlot(0, 'essence-1');
@@ -245,12 +278,14 @@ describe('EssenceStateService loadout drafts', () => {
 
   it('creates a new loadout when its first Essence is equipped', () => {
     essences.saveLoadout.and.returnValue(
-      of({
-        id: 'loadout-2',
-        name: 'New Loadout',
-        isActive: false,
-        slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
-      }),
+      of(
+        versionedLoadout({
+          id: 'loadout-2',
+          name: 'New Loadout',
+          isActive: false,
+          slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
+        }),
+      ),
     );
     service.newLoadout();
     service.setDraftSlot(0, 'essence-1');
@@ -268,12 +303,14 @@ describe('EssenceStateService loadout drafts', () => {
 
   it('keeps a pending name edit separate from an automatic slot save', () => {
     essences.updateLoadout.and.returnValue(
-      of({
-        id: 'loadout-1',
-        name: 'Default',
-        isActive: true,
-        slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
-      }),
+      of(
+        versionedLoadout({
+          id: 'loadout-1',
+          name: 'Default',
+          isActive: true,
+          slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
+        }),
+      ),
     );
     service.setDraftLoadoutName('Boss fights');
     service.setDraftSlot(0, 'essence-1');
@@ -291,12 +328,14 @@ describe('EssenceStateService loadout drafts', () => {
 
   it('uses the manual save action only for a changed name', () => {
     essences.updateLoadout.and.returnValue(
-      of({
-        id: 'loadout-1',
-        name: 'Boss fights',
-        isActive: true,
-        slots: [],
-      }),
+      of(
+        versionedLoadout({
+          id: 'loadout-1',
+          name: 'Boss fights',
+          isActive: true,
+          slots: [],
+        }),
+      ),
     );
     service.setDraftLoadoutName('Boss fights');
 

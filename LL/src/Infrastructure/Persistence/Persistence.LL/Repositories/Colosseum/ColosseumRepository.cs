@@ -40,7 +40,6 @@ public class ColosseumRepository : IColosseumRepository
                 (restriction.ExpiresAt == null || restriction.ExpiresAt > now) &&
                 (restriction.RestrictionType == AccountRestrictionType.Ban ||
                  restriction.RestrictionType == AccountRestrictionType.MultiplayerRestriction)))
-            .Select(c => new { c.Id, c.Name, c.ArenaProfile.Rating, Character = c })
             .ToListAsync(cancellationToken);
 
         var self = characters.FirstOrDefault(c => c.Id == characterId);
@@ -48,13 +47,12 @@ public class ColosseumRepository : IColosseumRepository
 
         var opponents = characters
             .Where(c => c.Id != characterId
-                        && c.Character.UserId != self.Character.UserId)
-            .OrderBy(c => Math.Abs(c.Rating - self.Rating))
+                        && c.UserId != self.UserId)
+            .OrderBy(c => Math.Abs(c.ArenaProfile.Rating - self.ArenaProfile.Rating))
             .Take(25)
-            .Select(c => c.Character)
             .ToList();
 
-        return (opponents, self.Rating);
+        return (opponents, self.ArenaProfile.Rating);
     }
 
     public async Task<List<ColosseumMatchResult>> GetColosseumMatchResults(Guid characterId, CancellationToken cancellationToken)
@@ -117,10 +115,11 @@ public class ColosseumRepository : IColosseumRepository
                 (restriction.ExpiresAt == null || restriction.ExpiresAt > now) &&
                 (restriction.RestrictionType == AccountRestrictionType.Ban ||
                  restriction.RestrictionType == AccountRestrictionType.MultiplayerRestriction)))
-            .OrderByDescending(c => c.ArenaProfile.Rating)
             .ToListAsync(cancellationToken);
 
-        return characters;
+        return characters
+            .OrderByDescending(c => c.ArenaProfile.Rating)
+            .ToList();
     }
 
     public async Task SaveArenaMatchResult(ColosseumMatchResult arenaMatchResult, CancellationToken cancellationToken)

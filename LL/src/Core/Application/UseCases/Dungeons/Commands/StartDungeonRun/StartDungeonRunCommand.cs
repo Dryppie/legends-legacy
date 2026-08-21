@@ -4,6 +4,7 @@ using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
 using Application.MediatR.Markers;
 using Application.UseCases.Dungeons.Dtos;
+using Application.UseCases.Dungeons.Queries.GetAvailableDungeons;
 using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.Outbox;
 using AutoMapper;
@@ -25,6 +26,7 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
     private readonly ICharacterService _characters;
     private readonly IInventoryService _inventoryService;
     private readonly IGameEventOutbox _outbox;
+    private readonly DungeonHubFactory _dungeonHub;
 
     public StartDungeonRunCommandHandler(
         IMapper mapper,
@@ -33,7 +35,8 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
         IDungeonAccessPolicy dungeonAccess,
         ICharacterService characters,
         IInventoryService inventoryService,
-        IGameEventOutbox outbox)
+        IGameEventOutbox outbox,
+        DungeonHubFactory dungeonHub)
     {
         _mapper = mapper;
         _dungeonRunService = dungeonRunService;
@@ -42,6 +45,7 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
         _characters = characters;
         _inventoryService = inventoryService;
         _outbox = outbox;
+        _dungeonHub = dungeonHub;
     }
 
     public async Task<Response<StartDungeonRunResponseDto>> Handle(StartDungeonRunCommand request, CancellationToken cancellationToken)
@@ -72,13 +76,16 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
             cancellationToken);
 
         var inventory = await _inventoryService.GetInventoryByIdAsync(request.CharacterId, cancellationToken);
+        if (inventory is null)
+            return Response<StartDungeonRunResponseDto>.Fail("Failed to load updated dungeon inventory.");
+
+        var hub = await _dungeonHub.CreateAsync(request.CharacterId, cancellationToken);
 
         var result = new StartDungeonRunResponseDto
         {
             Run = _mapper.Map<DungeonRunDto>(dungeon),
-            InventoryItems = inventory == null
-                ? null
-                : _mapper.Map<List<InventoryItemDto>>(inventory.InventoryItems)
+            InventoryItems = _mapper.Map<List<InventoryItemDto>>(inventory.InventoryItems),
+            Hub = hub
         };
 
         return Response<StartDungeonRunResponseDto>.Success(result);

@@ -60,7 +60,7 @@ public class InviteCharacterByNameCommandHandler : IRequestHandler<InviteCharact
             cancellationToken);
         await _eventPublisher.PublishAsync(
             new Audience.Guild(guildId),
-            new GuildStateChanged(guildId),
+            new GuildStateChanged(guildId, request.CurrentCharacterId, true),
             nameof(InviteCharacterByNameCommandHandler),
             cancellationToken);
 

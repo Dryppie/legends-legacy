@@ -28,7 +28,7 @@ public class BorrowGuildVaultItemCommandHandler : IRequestHandler<BorrowGuildVau
         var result = await _vault.BorrowAsync(request.CharacterId, request.VaultItemId, cancellationToken);
         if (!result.Succeeded) return Response<bool>.Fail(result.Error ?? "Failed to borrow equipment.");
         if (guild is not null)
-            await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChanged(guild.Id), nameof(BorrowGuildVaultItemCommandHandler), cancellationToken);
+            await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChanged(guild.Id, request.CharacterId, true), nameof(BorrowGuildVaultItemCommandHandler), cancellationToken);
         return Response<bool>.Success(true);
     }
 }

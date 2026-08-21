@@ -5,7 +5,6 @@ using Application.MediatR.Markers;
 using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
-using AutoMapper;
 using Common.Primitives;
 using Domain.Models.Entities.Characters;
 using MediatR;
@@ -21,8 +20,7 @@ public sealed record WireCindersCommand(
 public sealed class WireCindersCommandHandler(
     ICurrencyTransferService currencyTransfers,
     IGameEventOutbox outbox,
-    IGameRealtimeBroadcaster gameRealtime,
-    IMapper mapper)
+    IGameRealtimeBroadcaster gameRealtime)
     : IRequestHandler<WireCindersCommand, Response<WireCindersResponseDto>>
 {
     public async Task<Response<WireCindersResponseDto>> Handle(
@@ -61,21 +59,6 @@ public sealed class WireCindersCommandHandler(
             result.Recipient.UserId,
             receivedMessage,
             result.TransferRecord.OccurredAt,
-            cancellationToken);
-
-        var senderDto = mapper.Map<CharacterDto>(result.Sender);
-        var recipientDto = mapper.Map<CharacterDto>(result.Recipient);
-
-        await gameRealtime.PublishAsync(
-            new Audience.Character(result.Sender.Id),
-            new CharacterSnapshot(result.Sender.Id, senderDto, "cinders-wire-sent"),
-            nameof(WireCindersCommandHandler),
-            cancellationToken);
-
-        await gameRealtime.PublishAsync(
-            new Audience.Character(result.Recipient.Id),
-            new CharacterSnapshot(result.Recipient.Id, recipientDto, "cinders-wire-received"),
-            nameof(WireCindersCommandHandler),
             cancellationToken);
 
         return Response<WireCindersResponseDto>.Success(new WireCindersResponseDto

@@ -23,4 +23,5 @@ public sealed class WorldTowerOptions
     public int RecoveryFrameLimit { get; set; } = 60;
     public int MaximumBundleUncompressedBytes { get; set; } = 16 * 1024 * 1024;
     public int MaximumBundleCompressedBytes { get; set; } = 4 * 1024 * 1024;
+    public bool DevelopmentToolsEnabled { get; set; }
 }

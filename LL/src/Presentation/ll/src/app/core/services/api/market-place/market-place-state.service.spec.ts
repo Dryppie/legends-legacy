@@ -3,9 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { MarketPlaceListing } from '../../../../shared/models/Dtos/market-place/market-place-listing';
 import { MarketPlaceOrder } from '../../../../shared/models/Dtos/market-place/market-place-order';
-import {
-  MarketplaceChangeSet,
-} from '../../../../shared/models/Dtos/market-place/marketplace-change-set';
+import { MarketplaceChangeSet } from '../../../../shared/models/Dtos/market-place/marketplace-change-set';
 import { ToastService } from '../../client-side/components/toast/toast.service';
 import {
   GameRealtimeEnvelope,
@@ -22,9 +20,7 @@ import { MarketPlaceService } from './market-place.service';
 
 describe('MarketplaceStateService semantic sequencing', () => {
   const characterId = 'character-1';
-  let eventEnvelope: WritableSignal<
-    GameRealtimeEnvelope<MarketplaceChanged> | null
-  >;
+  let eventEnvelope: WritableSignal<GameRealtimeEnvelope<MarketplaceChanged> | null>;
   let stateSync: jasmine.SpyObj<StateSyncCoordinator>;
   let domainVersions: DomainVersionTracker;
   let service: MarketplaceStateService;
@@ -37,6 +33,7 @@ describe('MarketplaceStateService semantic sequencing', () => {
       'StateSyncCoordinator',
       [
         'register',
+        'activate',
         'latestRevision',
         'acceptSnapshotResponse',
         'acceptInvalidation',
@@ -182,6 +179,52 @@ describe('MarketplaceStateService semantic sequencing', () => {
       revision: 5,
       reason: 'Marketplace semantic sequence gap',
     });
+  });
+
+  it('does not reapply an equal-version event after the mutation response', () => {
+    const applyChanges = spyOn(
+      service as unknown as {
+        applyMarketplaceChanges(changes: MarketplaceChangeSet): void;
+      },
+      'applyMarketplaceChanges',
+    ).and.callThrough();
+    const listing = { id: 'listing-1' } as MarketPlaceListing;
+    const changes: MarketplaceChangeSet = {
+      version: 1,
+      listingChanges: [{ listingId: listing.id, listing }],
+      buyOrderChanges: [],
+      orders: [],
+      affectedCharacterIds: [characterId],
+    };
+
+    expect(applyResponse(changes)).toBeTrue();
+    domainVersions.observe({ marketplace: 1 });
+    emit(changes);
+
+    expect(applyChanges).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not reapply an equal-version response after the event arrived first', () => {
+    const applyChanges = spyOn(
+      service as unknown as {
+        applyMarketplaceChanges(changes: MarketplaceChangeSet): void;
+      },
+      'applyMarketplaceChanges',
+    ).and.callThrough();
+    const listing = { id: 'listing-1' } as MarketPlaceListing;
+    const changes: MarketplaceChangeSet = {
+      version: 1,
+      listingChanges: [{ listingId: listing.id, listing }],
+      buyOrderChanges: [],
+      orders: [],
+      affectedCharacterIds: [characterId],
+    };
+
+    emit(changes);
+    stateSync.latestRevision.and.returnValue(1);
+
+    expect(applyResponse(changes)).toBeTrue();
+    expect(applyChanges).toHaveBeenCalledTimes(1);
   });
 
   function emit(changes: MarketplaceChanged['changes']): void {

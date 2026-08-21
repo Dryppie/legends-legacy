@@ -1,6 +1,5 @@
 import { HttpContextToken, HttpHeaders } from '@angular/common/http';
 
-export const STATE_REVISIONS_HEADER = 'X-LL-State-Revisions';
 export const DOMAIN_VERSIONS_HEADER = 'X-LL-Domain-Versions';
 
 export const FORCE_STATE_SYNC_RESPONSE_REFRESH = new HttpContextToken<boolean>(
@@ -14,8 +13,7 @@ export const STATE_SYNC_SCOPES_HANDLED_BY_RESPONSE = new HttpContextToken<
 export function readDomainVersions(
   headers: HttpHeaders,
 ): Readonly<Record<string, number>> {
-  const encoded =
-    headers.get(DOMAIN_VERSIONS_HEADER) ?? headers.get(STATE_REVISIONS_HEADER);
+  const encoded = headers.get(DOMAIN_VERSIONS_HEADER);
   if (!encoded) return {};
 
   try {

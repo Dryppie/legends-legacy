@@ -632,7 +632,6 @@ describe('InventoryComponent quest presentation', () => {
     );
     expect(inventoryState.applyVersionedInventory).toHaveBeenCalledOnceWith(
       jasmine.objectContaining({ domainVersions: { inventory: 1 } }),
-      [reward],
       'grant-1',
     );
     expect(component.selectedItem()).toBeNull();

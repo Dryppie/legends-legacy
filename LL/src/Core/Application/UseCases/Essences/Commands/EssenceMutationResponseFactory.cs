@@ -5,6 +5,7 @@ using Application.UseCases.Equipments.Dtos;
 using Application.UseCases.Essences.Dtos;
 using Application.UseCases.Inventories.Dtos;
 using AutoMapper;
+using Domain.Models.Essences;
 
 namespace Application.UseCases.Essences.Commands;
 
@@ -15,6 +16,42 @@ public sealed class EssenceMutationResponseFactory(
     IInventoryService inventory,
     IEquipmentSlotService equipment)
 {
+    public async Task<EssenceStateResponseDto> CreateStateAsync(
+        Guid characterId,
+        bool succeeded,
+        string message,
+        CancellationToken cancellationToken,
+        EssenceLoadout? savedLoadout = null,
+        Guid? removedLoadoutId = null)
+    {
+        var archive = await essences.GetSoulArchiveAsync(characterId, cancellationToken);
+        var loadouts = await essences.GetLoadoutsAsync(characterId, cancellationToken);
+        var creatures = await creatureArchive.GetCreatureArchiveAsync(characterId, cancellationToken);
+        var codex = await creatureArchive.GetEssenceCodexAsync(characterId, cancellationToken);
+
+        var loadoutsDto = mapper.Map<EssenceLoadoutsDto>(loadouts);
+        var mappedLoadouts = loadoutsDto.Loadouts
+            .Where(loadout => loadout.Id != removedLoadoutId)
+            .ToList();
+        var savedLoadoutDto = mapper.Map<EssenceLoadoutDto?>(savedLoadout);
+        if (savedLoadoutDto is not null)
+        {
+            mappedLoadouts.RemoveAll(loadout => loadout.Id == savedLoadoutDto.Id);
+            mappedLoadouts.Add(savedLoadoutDto);
+        }
+
+        return new EssenceStateResponseDto
+        {
+            Succeeded = succeeded,
+            Message = message,
+            Archive = mapper.Map<SoulArchiveDto>(archive),
+            Loadouts = loadoutsDto with { Loadouts = mappedLoadouts },
+            CreatureArchive = mapper.Map<CreatureArchiveDto>(creatures),
+            Codex = mapper.Map<EssenceCodexDto>(codex),
+            SavedLoadout = savedLoadoutDto
+        };
+    }
+
     public async Task<EssenceMutationResponseDto?> CreateAsync(
         Guid characterId,
         bool succeeded,

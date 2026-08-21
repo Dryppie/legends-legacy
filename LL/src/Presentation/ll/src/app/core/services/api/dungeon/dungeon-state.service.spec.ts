@@ -6,6 +6,7 @@ import { ToastService } from '../../client-side/components/toast/toast.service';
 import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
+import { GameRealtimeStore } from '../../real-time/game-realtime/game-realtime-store.service';
 import { CharacterStateService } from '../character/character-state.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { DungeonStateService } from './dungeon-state.service';
@@ -66,6 +67,10 @@ describe('DungeonStateService synchronization', () => {
           useValue: { applyVersionedCharacter: jasmine.createSpy() },
         },
         { provide: ToastService, useValue: {} },
+        {
+          provide: GameRealtimeStore,
+          useValue: { setRewardClaim: jasmine.createSpy('setRewardClaim') },
+        },
         { provide: StateSyncCoordinator, useValue: stateSync },
       ],
     });
@@ -101,6 +106,7 @@ describe('DungeonStateService synchronization', () => {
           },
           inventoryItems: [],
           claimedLoot: [],
+          location: 'Goblin Mines',
           character: {} as never,
         },
         domainVersions: { dungeons: 2, inventory: 2, character: 2 },
@@ -119,6 +125,9 @@ describe('DungeonStateService synchronization', () => {
     expect(
       TestBed.inject(CharacterStateService).applyVersionedCharacter,
     ).toHaveBeenCalled();
+    expect(
+      TestBed.inject(GameRealtimeStore).setRewardClaim,
+    ).toHaveBeenCalledOnceWith([], undefined, 'dungeon-reward', 'Goblin Mines');
   });
 
   it('does not apply a claim hub older than the observed dungeon version', () => {
@@ -135,6 +144,7 @@ describe('DungeonStateService synchronization', () => {
           },
           inventoryItems: [],
           claimedLoot: [],
+          location: 'Goblin Mines',
           character: {} as never,
         },
         domainVersions: { dungeons: 2, inventory: 4, character: 4 },

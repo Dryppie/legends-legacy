@@ -52,8 +52,8 @@ public sealed class StateSyncCommandScopeCatalogTests
         var profile = StateSyncCommandScopeCatalog.GetProfile(typeof(BuyCommodityCommand));
 
         Assert.Contains(StateSyncScopes.Inventory, profile.CharacterScopes);
-        Assert.DoesNotContain(StateSyncScopes.Inventory, profile.VersionOnlyCharacterScopes);
-        Assert.Contains(StateSyncScopes.Marketplace, profile.VersionOnlyWorldScopes);
+        Assert.DoesNotContain(StateSyncScopes.Inventory, profile.ResponseOwnedCharacterScopes);
+        Assert.Contains(StateSyncScopes.Marketplace, profile.ResponseOwnedWorldScopes);
     }
 
     [Fact]
@@ -64,7 +64,8 @@ public sealed class StateSyncCommandScopeCatalogTests
 
         var battle = StateSyncCommandScopeCatalog.GetProfile(typeof(StartArenaBattleCommand));
         Assert.Contains(StateSyncScopes.Colosseum, battle.CharacterScopes);
-        Assert.DoesNotContain(StateSyncScopes.Colosseum, battle.VersionOnlyCharacterScopes);
+        Assert.Contains(StateSyncScopes.Colosseum, battle.ResponseOwnedCharacterScopes);
+        Assert.Contains(StateSyncScopes.Character, battle.ResponseOwnedCharacterScopes);
         Assert.Empty(battle.WorldScopes);
     }
 
@@ -96,9 +97,9 @@ public sealed class StateSyncCommandScopeCatalogTests
         var claim = StateSyncCommandScopeCatalog.GetProfile(
             typeof(global::Application.UseCases.Raids.ClaimRaidRewardsCommand));
 
-        Assert.Contains(StateSyncScopes.Raids, join.VersionOnlyCharacterScopes);
-        Assert.Contains(StateSyncScopes.RaidDirectory, join.VersionOnlyWorldScopes);
-        Assert.Contains(StateSyncScopes.Raids, refresh.VersionOnlyCharacterScopes);
+        Assert.Contains(StateSyncScopes.Raids, join.ResponseOwnedCharacterScopes);
+        Assert.Contains(StateSyncScopes.RaidDirectory, join.ResponseOwnedWorldScopes);
+        Assert.Contains(StateSyncScopes.Raids, refresh.ResponseOwnedCharacterScopes);
         Assert.Empty(refresh.WorldScopes);
         Assert.Contains(StateSyncScopes.Raids, claim.CharacterScopes);
         Assert.Contains(StateSyncScopes.Inventory, claim.CharacterScopes);
@@ -127,16 +128,16 @@ public sealed class StateSyncCommandScopeCatalogTests
 
         Assert.Contains(StateSyncScopes.Guild, building.WorldScopes);
         Assert.Contains(StateSyncScopes.GuildBuildings, building.WorldScopes);
-        Assert.Contains(StateSyncScopes.GuildBuildings, building.VersionOnlyWorldScopes);
+        Assert.Contains(StateSyncScopes.GuildBuildings, building.ResponseOwnedWorldScopes);
         Assert.Contains(StateSyncScopes.GuildShop, building.CharacterScopes);
         Assert.DoesNotContain(StateSyncScopes.Inventory, building.CharacterScopes);
 
         Assert.Equal([StateSyncScopes.GuildMissions], mission.WorldScopes);
-        Assert.Contains(StateSyncScopes.GuildMissions, mission.VersionOnlyWorldScopes);
+        Assert.Contains(StateSyncScopes.GuildMissions, mission.ResponseOwnedWorldScopes);
         Assert.Empty(mission.CharacterScopes);
 
-        Assert.Contains(StateSyncScopes.GuildShop, shop.VersionOnlyCharacterScopes);
-        Assert.Contains(StateSyncScopes.Inventory, shop.VersionOnlyCharacterScopes);
+        Assert.Contains(StateSyncScopes.GuildShop, shop.ResponseOwnedCharacterScopes);
+        Assert.Contains(StateSyncScopes.Inventory, shop.ResponseOwnedCharacterScopes);
         Assert.Contains(StateSyncScopes.Achievements, shop.CharacterScopes);
         Assert.Empty(shop.WorldScopes);
     }
@@ -157,8 +158,8 @@ public sealed class StateSyncCommandScopeCatalogTests
         Assert.Contains(StateSyncScopes.GuildInvites, lifecycle.CharacterScopes);
         Assert.Contains(StateSyncScopes.Achievements, lifecycle.CharacterScopes);
         Assert.Contains(StateSyncScopes.GuildDirectory, lifecycle.WorldScopes);
-        Assert.Contains(StateSyncScopes.GuildDirectory, lifecycle.VersionOnlyWorldScopes);
-        Assert.DoesNotContain(StateSyncScopes.Guild, lifecycle.VersionOnlyWorldScopes);
+        Assert.Contains(StateSyncScopes.GuildDirectory, lifecycle.ResponseOwnedWorldScopes);
+        Assert.DoesNotContain(StateSyncScopes.Guild, lifecycle.ResponseOwnedWorldScopes);
         Assert.Contains(StateSyncScopes.GuildInvites, invitation.CharacterScopes);
         Assert.DoesNotContain(StateSyncScopes.GuildDirectory, invitation.WorldScopes);
         Assert.Contains(StateSyncScopes.Inventory, departure.CharacterScopes);
@@ -175,7 +176,7 @@ public sealed class StateSyncCommandScopeCatalogTests
         var profile = StateSyncCommandScopeCatalog.GetProfile(commandType);
 
         Assert.Contains(StateSyncScopes.Colosseum, profile.CharacterScopes);
-        Assert.Contains(StateSyncScopes.Colosseum, profile.VersionOnlyCharacterScopes);
+        Assert.Contains(StateSyncScopes.Colosseum, profile.ResponseOwnedCharacterScopes);
         Assert.Empty(profile.WorldScopes);
     }
 
@@ -212,7 +213,7 @@ public sealed class StateSyncCommandScopeCatalogTests
             profile.CharacterScopes);
         Assert.Equal(
             profile.CharacterScopes.Order(),
-            profile.VersionOnlyCharacterScopes.Order());
+            profile.ResponseOwnedCharacterScopes.Order());
         Assert.DoesNotContain(StateSyncScopes.Quests, profile.CharacterScopes);
         Assert.Empty(profile.WorldScopes);
         Assert.True(profile.RefreshCharacterOverview);
@@ -220,13 +221,56 @@ public sealed class StateSyncCommandScopeCatalogTests
     }
 
     [Fact]
-    public void PartialEssenceMutationsRemainCoordinatorReconciled()
+    public void EssenceStateMutationsOwnOnlyTheEssenceSnapshot()
     {
         var profile = StateSyncCommandScopeCatalog.GetProfile(typeof(FavoriteEssenceCommand));
 
-        Assert.Empty(profile.VersionOnlyCharacterScopes);
-        Assert.Contains(StateSyncScopes.Essences, profile.CharacterScopes);
-        Assert.Contains(StateSyncScopes.Quests, profile.CharacterScopes);
+        Assert.Equal([StateSyncScopes.Essences], profile.CharacterScopes);
+        Assert.Contains(StateSyncScopes.Essences, profile.ResponseOwnedCharacterScopes);
+        Assert.DoesNotContain(StateSyncScopes.Inventory, profile.CharacterScopes);
+        Assert.DoesNotContain(StateSyncScopes.Equipment, profile.CharacterScopes);
+        Assert.DoesNotContain(StateSyncScopes.Quests, profile.CharacterScopes);
+    }
+
+    [Theory]
+    [InlineData(typeof(global::Application.UseCases.Essences.Commands.ActivateEssenceLoadout.ActivateEssenceLoadoutCommand))]
+    [InlineData(typeof(global::Application.UseCases.Essences.Commands.DeleteEssenceLoadout.DeleteEssenceLoadoutCommand))]
+    [InlineData(typeof(global::Application.UseCases.Essences.Commands.SaveEssenceLoadout.SaveEssenceLoadoutCommand))]
+    [InlineData(typeof(global::Application.UseCases.Essences.Commands.SetEssenceFocus.SetEssenceFocusCommand))]
+    public void RemainingEssenceStateMutationsOwnTheirSnapshot(Type commandType)
+    {
+        var profile = StateSyncCommandScopeCatalog.GetProfile(commandType);
+
+        Assert.Equal([StateSyncScopes.Essences], profile.CharacterScopes);
+        Assert.Equal([StateSyncScopes.Essences], profile.ResponseOwnedCharacterScopes);
+    }
+
+    [Theory]
+    [InlineData(typeof(global::Application.UseCases.Professions.Commands.CancelTemperingQueue.CancelTemperingQueueCommand))]
+    [InlineData(typeof(global::Application.UseCases.Professions.Commands.RemoveCraftingQueueItem.RemoveCraftingQueueItemCommand))]
+    public void CompleteTemperingResponsesOwnInventoryWithoutCharacterRefreshes(Type commandType)
+    {
+        var profile = StateSyncCommandScopeCatalog.GetProfile(commandType);
+
+        Assert.Equal([StateSyncScopes.Inventory], profile.CharacterScopes);
+        Assert.Equal([StateSyncScopes.Inventory], profile.ResponseOwnedCharacterScopes);
+        Assert.False(profile.RefreshCharacterOverview);
+        Assert.True(profile.RefreshCharacterSummaryWhenChanged);
+    }
+
+    [Theory]
+    [InlineData(typeof(global::Application.UseCases.Dungeons.Commands.StartDungeonRun.StartDungeonRunCommand))]
+    [InlineData(typeof(global::Application.UseCases.Dungeons.Commands.ExecuteDungeonAction.ExecuteDungeonActionCommand))]
+    [InlineData(typeof(global::Application.UseCases.Dungeons.Commands.DismissFailedDungeonRun.DismissFailedDungeonRunCommand))]
+    [InlineData(typeof(global::Application.UseCases.Dungeons.Commands.AssembleDungeonSigil.AssembleDungeonSigilCommand))]
+    public void DungeonMutationResponsesOwnTheDungeonSnapshot(Type commandType)
+    {
+        var profile = StateSyncCommandScopeCatalog.GetProfile(commandType);
+
+        Assert.Contains(StateSyncScopes.Dungeons, profile.ResponseOwnedCharacterScopes);
+        Assert.All(
+            profile.ResponseOwnedCharacterScopes.Where(scope => scope != StateSyncScopes.Character),
+            scope => Assert.Contains(scope, profile.CharacterScopes));
     }
 
     [Fact]
@@ -234,9 +278,9 @@ public sealed class StateSyncCommandScopeCatalogTests
     {
         var profile = StateSyncCommandScopeCatalog.GetProfile(typeof(ClaimDungeonRewardsCommand));
 
-        Assert.Contains(StateSyncScopes.Dungeons, profile.VersionOnlyCharacterScopes);
-        Assert.Contains(StateSyncScopes.Inventory, profile.VersionOnlyCharacterScopes);
-        Assert.Contains(StateSyncScopes.Character, profile.VersionOnlyCharacterScopes);
+        Assert.Contains(StateSyncScopes.Dungeons, profile.ResponseOwnedCharacterScopes);
+        Assert.Contains(StateSyncScopes.Inventory, profile.ResponseOwnedCharacterScopes);
+        Assert.Contains(StateSyncScopes.Character, profile.ResponseOwnedCharacterScopes);
         Assert.DoesNotContain(StateSyncScopes.Quests, profile.CharacterScopes);
     }
 
@@ -249,13 +293,13 @@ public sealed class StateSyncCommandScopeCatalogTests
             typeof(global::Application.UseCases.Quests.Commands.StartQuestEncounter.StartQuestEncounterCommand));
 
         Assert.Equal([StateSyncScopes.Quests], choice.CharacterScopes);
-        Assert.Contains(StateSyncScopes.Quests, choice.VersionOnlyCharacterScopes);
+        Assert.Contains(StateSyncScopes.Quests, choice.ResponseOwnedCharacterScopes);
         Assert.DoesNotContain(StateSyncScopes.AreaAccess, choice.CharacterScopes);
         Assert.False(choice.RefreshCharacterOverview);
 
         Assert.Contains(StateSyncScopes.Quests, encounter.CharacterScopes);
         Assert.Contains(StateSyncScopes.AreaAccess, encounter.CharacterScopes);
-        Assert.Empty(encounter.VersionOnlyCharacterScopes);
+        Assert.Empty(encounter.ResponseOwnedCharacterScopes);
     }
 
     [Fact]
@@ -264,9 +308,9 @@ public sealed class StateSyncCommandScopeCatalogTests
         var claim = StateSyncCommandScopeCatalog.GetProfile(
             typeof(global::Application.UseCases.Quests.Events.Commands.ClaimEventQuestReward.ClaimEventQuestRewardCommand));
 
-        Assert.Contains(StateSyncScopes.EventQuests, claim.VersionOnlyCharacterScopes);
+        Assert.Contains(StateSyncScopes.EventQuests, claim.ResponseOwnedCharacterScopes);
         Assert.Contains(StateSyncScopes.Inventory, claim.CharacterScopes);
-        Assert.DoesNotContain(StateSyncScopes.Inventory, claim.VersionOnlyCharacterScopes);
+        Assert.DoesNotContain(StateSyncScopes.Inventory, claim.ResponseOwnedCharacterScopes);
     }
 
     [Theory]
@@ -280,7 +324,7 @@ public sealed class StateSyncCommandScopeCatalogTests
     {
         var profile = StateSyncCommandScopeCatalog.GetProfile(commandType);
 
-        Assert.Contains(ownedScope, profile.VersionOnlyCharacterScopes);
+        Assert.Contains(ownedScope, profile.ResponseOwnedCharacterScopes);
         Assert.Empty(profile.WorldScopes);
     }
 
@@ -292,20 +336,20 @@ public sealed class StateSyncCommandScopeCatalogTests
         var profile = StateSyncCommandScopeCatalog.GetProfile(commandType);
 
         Assert.Contains(StateSyncScopes.Marketplace, profile.WorldScopes);
-        Assert.Contains(StateSyncScopes.Marketplace, profile.VersionOnlyWorldScopes);
-        Assert.Contains(StateSyncScopes.Character, profile.VersionOnlyCharacterScopes);
+        Assert.Contains(StateSyncScopes.Marketplace, profile.ResponseOwnedWorldScopes);
+        Assert.Contains(StateSyncScopes.Character, profile.ResponseOwnedCharacterScopes);
     }
 
     [Theory]
     [InlineData(typeof(EquipEquipmentCommand))]
     [InlineData(typeof(MarkInventoryItemSeenCommand))]
-    public void Inventory_pilot_commands_return_their_owned_scope_versions(Type commandType)
+    public void Complete_inventory_responses_own_their_scope_versions(Type commandType)
     {
         var profile = StateSyncCommandScopeCatalog.GetProfile(commandType);
 
-        Assert.NotEmpty(profile.VersionOnlyCharacterScopes);
+        Assert.NotEmpty(profile.ResponseOwnedCharacterScopes);
         Assert.All(
-            profile.VersionOnlyCharacterScopes,
+            profile.ResponseOwnedCharacterScopes,
             scope => Assert.Contains(scope, profile.CharacterScopes));
     }
 
@@ -314,7 +358,7 @@ public sealed class StateSyncCommandScopeCatalogTests
     {
         var profile = StateSyncCommandScopeCatalog.GetProfile(typeof(SetInventoryItemFavoriteCommand));
 
-        Assert.Contains(StateSyncScopes.Inventory, profile.VersionOnlyCharacterScopes);
-        Assert.DoesNotContain(StateSyncScopes.Equipment, profile.VersionOnlyCharacterScopes);
+        Assert.Contains(StateSyncScopes.Inventory, profile.ResponseOwnedCharacterScopes);
+        Assert.DoesNotContain(StateSyncScopes.Equipment, profile.ResponseOwnedCharacterScopes);
     }
 }

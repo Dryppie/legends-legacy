@@ -156,6 +156,7 @@ export interface ExecuteDungeonActionRequest {
 
 export interface ExecuteDungeonActionResponse {
   run: DungeonRun;
+  hub: DungeonHubData;
   outcome: DungeonActionOutcome;
   combatSession?: CombatSessionDto | null;
   message?: string | null;
@@ -166,16 +167,19 @@ export interface ClaimDungeonRewardsResponse {
   hub: DungeonHubData;
   inventoryItems: InventoryItem[];
   claimedLoot: InventoryItem[];
+  location: string;
   character: CharacterDto;
 }
 
 export interface DismissFailedDungeonRunResponse {
   activeRun: DungeonRun | null;
+  hub: DungeonHubData;
 }
 
 export interface StartDungeonRunResponse {
   run: DungeonRun;
-  inventoryItems?: InventoryItem[] | null;
+  inventoryItems: InventoryItem[];
+  hub: DungeonHubData;
 }
 
 export interface DungeonSigilAssemblyResponse {
@@ -184,6 +188,9 @@ export interface DungeonSigilAssemblyResponse {
   sigilName: string;
   inventoryQuantity: number;
   sigilFragmentsRemaining: number;
+  inventoryItems: InventoryItem[];
+  character: CharacterDto;
+  hub: DungeonHubData;
 }
 
 export enum DungeonActionOutcome {
@@ -210,9 +217,21 @@ export class DungeonService {
     );
   }
 
-  assembleSigil(dungeonId: string): Observable<DungeonSigilAssemblyResponse> {
+  assembleSigil(
+    dungeonId: string,
+  ): Observable<VersionedMutationResult<DungeonSigilAssemblyResponse>> {
     return this.api
-      .post(`dungeon/${encodeURIComponent(dungeonId)}/assemble-sigil`)
+      .postVersioned<DungeonSigilAssemblyResponse>(
+        `dungeon/${encodeURIComponent(dungeonId)}/assemble-sigil`,
+        {},
+        {
+          stateSyncScopesHandledByResponse: [
+            'dungeons',
+            'inventory',
+            'character',
+          ],
+        },
+      )
       .pipe(catchError((error) => throwError(() => error)));
   }
 
@@ -234,23 +253,33 @@ export class DungeonService {
 
   startDungeon(
     request: StartDungeonRequest,
-  ): Observable<StartDungeonRunResponse> {
-    return this.api.post('dungeon/startDungeon', request).pipe(
-      catchError(() => {
-        return throwError(() => new Error('Failed to start dungeon'));
-      }),
-    );
+  ): Observable<VersionedMutationResult<StartDungeonRunResponse>> {
+    return this.api
+      .postVersioned<StartDungeonRunResponse>('dungeon/startDungeon', request, {
+        stateSyncScopesHandledByResponse: ['dungeons', 'inventory'],
+      })
+      .pipe(
+        catchError(() => {
+          return throwError(() => new Error('Failed to start dungeon'));
+        }),
+      );
   }
 
   executeDungeonAction(
     runId: string,
     request: ExecuteDungeonActionRequest,
-  ): Observable<ExecuteDungeonActionResponse> {
-    return this.api.post(`dungeon/executeAction/${runId}`, request).pipe(
-      catchError(() => {
-        return throwError(() => new Error('Failed to progress dungeon'));
-      }),
-    );
+  ): Observable<VersionedMutationResult<ExecuteDungeonActionResponse>> {
+    return this.api
+      .postVersioned<ExecuteDungeonActionResponse>(
+        `dungeon/executeAction/${runId}`,
+        request,
+        { stateSyncScopesHandledByResponse: ['dungeons'] },
+      )
+      .pipe(
+        catchError(() => {
+          return throwError(() => new Error('Failed to progress dungeon'));
+        }),
+      );
   }
 
   claimDungeonRewards(): Observable<
@@ -275,11 +304,19 @@ export class DungeonService {
       );
   }
 
-  dismissFailedDungeonRun(): Observable<DismissFailedDungeonRunResponse> {
-    return this.api.post('dungeon/dismissFailedDungeonRun').pipe(
-      catchError(() => {
-        return throwError(() => new Error('Failed to leave failed dungeon'));
-      }),
-    );
+  dismissFailedDungeonRun(): Observable<
+    VersionedMutationResult<DismissFailedDungeonRunResponse>
+  > {
+    return this.api
+      .postVersioned<DismissFailedDungeonRunResponse>(
+        'dungeon/dismissFailedDungeonRun',
+        {},
+        { stateSyncScopesHandledByResponse: ['dungeons'] },
+      )
+      .pipe(
+        catchError(() => {
+          return throwError(() => new Error('Failed to leave failed dungeon'));
+        }),
+      );
   }
 }

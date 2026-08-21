@@ -7,15 +7,10 @@ import {
   signal,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { CharacterStateService } from '../../api/character/character-state.service';
-import { InventoryStateService } from '../../api/inventory/inventory-state.service';
 import { GameRealtimeDiagnostics } from './game-realtime-diagnostics.service';
 import {
-  CharacterSnapshot,
-  DungeonRewardsClaimed,
   GameRealtimeEnvelope,
   GameRealtimeSignalEventMap,
-  InventorySnapshot,
   LootReceived,
   StateInvalidated,
   gameRealtimeEventNames,
@@ -34,9 +29,9 @@ type RegistryEventSignalMap = {
   [K in RegistryEventName]: Signal<RegistryEventMap[K] | null>;
 };
 type RegistryEnvelopeSignalMap = {
-  [K in RegistryEventName]: Signal<
-    GameRealtimeEnvelope<RegistryEventMap[K]> | null
-  >;
+  [K in RegistryEventName]: Signal<GameRealtimeEnvelope<
+    RegistryEventMap[K]
+  > | null>;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -107,9 +102,7 @@ export class GameRealtimeEventRegistry {
       | WritableSignal<GameRealtimeEnvelope<RegistryEventMap[K]> | null>
       | undefined;
     if (!envelope) {
-      envelope = signal<GameRealtimeEnvelope<RegistryEventMap[K]> | null>(
-        null,
-      );
+      envelope = signal<GameRealtimeEnvelope<RegistryEventMap[K]> | null>(null);
       this.envelopes.set(
         name,
         envelope as WritableSignal<GameRealtimeEnvelope | null>,
@@ -119,21 +112,6 @@ export class GameRealtimeEventRegistry {
   }
 
   private registerHandlers(): void {
-    this.addHandler(
-      gameRealtimeEventNames.dungeonRewardsClaimed,
-      (envelope) => {
-        const payload = envelope.payload as DungeonRewardsClaimed;
-        this.injector
-          .get(GameRealtimeStore)
-          .setRewardClaim(
-            payload.claimedLoot ?? [],
-            envelope.occurredAt,
-            'dungeon-reward',
-            payload.location,
-          );
-      },
-    );
-
     this.addHandler(gameRealtimeEventNames.lootReceived, (envelope) => {
       const payload = envelope.payload as LootReceived;
       this.injector
@@ -150,20 +128,6 @@ export class GameRealtimeEventRegistry {
       // Applying this delta as well races the authoritative snapshot: when the
       // snapshot already includes the grant, adding the delta doubles the local
       // quantity even though the database and loot history are correct.
-    });
-
-    this.addHandler(gameRealtimeEventNames.inventorySnapshot, (envelope) => {
-      const payload = envelope.payload as InventorySnapshot;
-      this.injector
-        .get(InventoryStateService)
-        .setInventory(payload.items ?? []);
-    });
-
-    this.addHandler(gameRealtimeEventNames.characterSnapshot, (envelope) => {
-      const payload = envelope.payload as CharacterSnapshot;
-      this.injector
-        .get(CharacterStateService)
-        .updateCharacter(payload.character);
     });
 
     this.addHandler(gameRealtimeEventNames.stateInvalidated, (envelope) => {
@@ -225,5 +189,4 @@ export class GameRealtimeEventRegistry {
       true,
     );
   }
-
 }

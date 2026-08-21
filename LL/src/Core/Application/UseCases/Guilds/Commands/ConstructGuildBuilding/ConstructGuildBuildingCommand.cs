@@ -49,7 +49,11 @@ public class ConstructGuildBuildingCommandHandler : IRequestHandler<ConstructGui
 
         await _eventPublisher.PublishAsync(
             new Audience.Guild(result.Value.GuildId),
-            new GuildBuildingsChanged(result.Value.GuildId, request.BuildingType.ToString()),
+            new GuildBuildingsChanged(
+                result.Value.GuildId,
+                request.BuildingType.ToString(),
+                request.CharacterId,
+                true),
             nameof(ConstructGuildBuildingCommandHandler),
             cancellationToken);
 

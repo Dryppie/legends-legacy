@@ -24,6 +24,7 @@ public interface IRaidService
     Task<RaidRunDto?> GetActiveRaidAsync(Guid characterId, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> CreateAsync(Guid characterId, string raidBossId, int tier, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> CreateDevelopmentAsync(Guid characterId, string raidBossId, int tier, CancellationToken cancellationToken);
+    Task<RaidOperationResult<RaidRunDto>> FillDevelopmentTeamAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> JoinAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> ApproveSignupAsync(Guid characterId, Guid raidRunId, Guid targetCharacterId, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> RemoveSignupAsync(Guid characterId, Guid raidRunId, Guid targetCharacterId, CancellationToken cancellationToken);

@@ -119,7 +119,6 @@ builder.Services.AddCors(options =>
                           .AllowAnyMethod()
                           .AllowAnyHeader()
                           .WithExposedHeaders(
-                              "X-LL-State-Revisions",
                               "X-LL-Domain-Versions",
                               RequestLoggingMiddleware.RequestIdHeaderName));
 });
@@ -321,8 +320,6 @@ app.Use(async (context, next) =>
         var changedRevisions = stateSync.GetChangedRevisions(characterId);
         if (changedRevisions.Count > 0)
         {
-            context.Response.Headers["X-LL-State-Revisions"] =
-                System.Text.Json.JsonSerializer.Serialize(changedRevisions);
             context.Response.Headers["X-LL-Domain-Versions"] =
                 System.Text.Json.JsonSerializer.Serialize(changedRevisions);
         }

@@ -31,13 +31,17 @@ public sealed class GuildMissionSelectionRealtimeTests
         var call = Assert.Single(outbox.Calls);
         Assert.Equal(GameEventTypes.GuildMissionSelected, call.EventType);
         Assert.Equal(characterId, call.CharacterId);
-        Assert.Equal(guildId, Assert.IsType<GuildMissionSelectedPayload>(call.Payload).GuildId);
+        var payload = Assert.IsType<GuildMissionSelectedPayload>(call.Payload);
+        Assert.Equal(guildId, payload.GuildId);
+        Assert.Equal(characterId, payload.ActorCharacterId);
+        Assert.True(payload.InitiatorHandled);
     }
 
     [Fact]
     public async Task Committed_selection_event_notifies_the_whole_guild()
     {
         var guildId = Guid.NewGuid();
+        var actorCharacterId = Guid.NewGuid();
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
         var publisher = new RecordingPublisher();
         var consumer = new RealtimeGuildMissionGameEventOutboxConsumer(publisher, options);
@@ -46,13 +50,19 @@ public sealed class GuildMissionSelectionRealtimeTests
             new GameEventOutboxMessage
             {
                 EventType = GameEventTypes.GuildMissionSelected,
-                PayloadJson = JsonSerializer.Serialize(new GuildMissionSelectedPayload(guildId), options)
+                CharacterId = actorCharacterId,
+                PayloadJson = JsonSerializer.Serialize(
+                    new GuildMissionSelectedPayload(guildId, actorCharacterId, true),
+                    options)
             },
             CancellationToken.None);
 
         var audience = Assert.IsType<Audience.Guild>(publisher.Audience);
         Assert.Equal(guildId, audience.GuildId);
-        Assert.Equal(guildId, Assert.IsType<GuildMissionsChanged>(publisher.Message).GuildId);
+        var message = Assert.IsType<GuildMissionsChanged>(publisher.Message);
+        Assert.Equal(guildId, message.GuildId);
+        Assert.Equal(actorCharacterId, message.ActorCharacterId);
+        Assert.True(message.InitiatorHandled);
         Assert.Equal(nameof(RealtimeGuildMissionGameEventOutboxConsumer), publisher.Sender);
         Assert.Equal(GameEventOutboxConsumerNames.RealtimeGuildMission, consumer.Consumer);
         Assert.True(consumer.CanHandle(GameEventTypes.GuildMissionSelected));
@@ -72,6 +82,7 @@ public sealed class GuildMissionSelectionRealtimeTests
     public async Task Committed_progress_event_notifies_the_whole_guild()
     {
         var guildId = Guid.NewGuid();
+        var actorCharacterId = Guid.NewGuid();
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
         var publisher = new RecordingPublisher();
         var consumer = new RealtimeGuildMissionGameEventOutboxConsumer(publisher, options);
@@ -80,13 +91,19 @@ public sealed class GuildMissionSelectionRealtimeTests
             new GameEventOutboxMessage
             {
                 EventType = GameEventTypes.GuildMissionProgressed,
-                PayloadJson = JsonSerializer.Serialize(new GuildMissionProgressedPayload(guildId), options)
+                CharacterId = actorCharacterId,
+                PayloadJson = JsonSerializer.Serialize(
+                    new GuildMissionProgressedPayload(guildId, actorCharacterId),
+                    options)
             },
             CancellationToken.None);
 
         var audience = Assert.IsType<Audience.Guild>(publisher.Audience);
         Assert.Equal(guildId, audience.GuildId);
-        Assert.Equal(guildId, Assert.IsType<GuildMissionsChanged>(publisher.Message).GuildId);
+        var message = Assert.IsType<GuildMissionsChanged>(publisher.Message);
+        Assert.Equal(guildId, message.GuildId);
+        Assert.Equal(actorCharacterId, message.ActorCharacterId);
+        Assert.False(message.InitiatorHandled);
         Assert.True(consumer.CanHandle(GameEventTypes.GuildMissionProgressed));
         Assert.Equal(
             [GameEventOutboxConsumerNames.RealtimeGuildMission],

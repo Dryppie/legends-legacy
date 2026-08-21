@@ -143,6 +143,8 @@ public sealed class TransactionBehavior<TRequest, TResponse>
     {
         var reason = typeof(TRequest).Name;
         var invalidationCount = 0L;
+        var revisionWriteCount = 0L;
+        var responseOwnedRevisionWriteCount = 0L;
         var scopeProfile = StateSyncCommandScopeCatalog.GetProfile(typeof(TRequest));
         var affectedCharacterIds = _db.GameEventOutboxMessages.Local
             .Where(message =>
@@ -190,13 +192,14 @@ public sealed class TransactionBehavior<TRequest, TResponse>
             foreach (var characterScope in GetCharacterScopes(affectedCharacterId, scopeProfile).Distinct(StringComparer.Ordinal))
             {
                 if (primaryCharacterId == affectedCharacterId
-                    && scopeProfile.VersionOnlyCharacterScopes.Contains(characterScope))
+                    && scopeProfile.ResponseOwnedCharacterScopes.Contains(characterScope))
                 {
                     await _stateSync.AdvanceCharacterScopeAsync(
                         affectedCharacterId,
                         characterScope,
                         reason,
                         cancellationToken);
+                    responseOwnedRevisionWriteCount += 1;
                 }
                 else
                 {
@@ -207,6 +210,7 @@ public sealed class TransactionBehavior<TRequest, TResponse>
                         cancellationToken);
                     invalidationCount += 1;
                 }
+                revisionWriteCount += 1;
             }
         }
 
@@ -221,13 +225,14 @@ public sealed class TransactionBehavior<TRequest, TResponse>
                 {
                     foreach (var guildId in guildAudienceIds)
                     {
-                        if (scopeProfile.VersionOnlyWorldScopes.Contains(worldScope))
+                        if (scopeProfile.ResponseOwnedWorldScopes.Contains(worldScope))
                         {
                             await _stateSync.AdvanceGuildScopeAsync(
                                 guildId,
                                 worldScope,
                                 reason,
                                 cancellationToken);
+                            responseOwnedRevisionWriteCount += 1;
                         }
                         else
                         {
@@ -238,6 +243,7 @@ public sealed class TransactionBehavior<TRequest, TResponse>
                                 cancellationToken);
                             invalidationCount += 1;
                         }
+                        revisionWriteCount += 1;
                     }
                     continue;
                 }
@@ -246,12 +252,14 @@ public sealed class TransactionBehavior<TRequest, TResponse>
                     $"{reason} changed guild state without an identifiable guild audience.");
             }
 
-            if (scopeProfile.VersionOnlyWorldScopes.Contains(worldScope))
+            if (scopeProfile.ResponseOwnedWorldScopes.Contains(worldScope))
             {
                 await _stateSync.AdvanceWorldScopeAsync(
                     worldScope,
                     reason,
                     cancellationToken);
+                revisionWriteCount += 1;
+                responseOwnedRevisionWriteCount += 1;
                 continue;
             }
 
@@ -260,7 +268,18 @@ public sealed class TransactionBehavior<TRequest, TResponse>
                 reason,
                 cancellationToken);
             invalidationCount += 1;
+            revisionWriteCount += 1;
         }
+
+        var commandTag = new KeyValuePair<string, object?>("command", reason);
+        StateSyncCommandMetrics.RevisionWrites.Record(revisionWriteCount, commandTag);
+        StateSyncCommandMetrics.ResponseOwnedRevisionWrites.Record(
+            responseOwnedRevisionWriteCount,
+            commandTag);
+        StateSyncCommandMetrics.OutboxMessages.Record(
+            _db.GameEventOutboxMessages.Local.LongCount(message =>
+                _db.GetEntry(message).State == EntityState.Added),
+            commandTag);
 
         if (invalidationCount > 0)
         {
@@ -548,5 +567,20 @@ internal static class StateSyncCommandMetrics
 
     internal static readonly Counter<long> InvalidatingCommands =
         Meter.CreateCounter<long>("state_sync.commands_with_invalidations");
+
+    internal static readonly Histogram<long> RevisionWrites =
+        Meter.CreateHistogram<long>(
+            "state_sync.command.revision_writes",
+            "revisions");
+
+    internal static readonly Histogram<long> ResponseOwnedRevisionWrites =
+        Meter.CreateHistogram<long>(
+            "state_sync.command.response_owned_revision_writes",
+            "revisions");
+
+    internal static readonly Histogram<long> OutboxMessages =
+        Meter.CreateHistogram<long>(
+            "state_sync.command.outbox_messages",
+            "messages");
 }
 

@@ -150,6 +150,7 @@ export interface TowerRally {
   canUpdateLoadout: boolean;
   canTransferLeadership: boolean;
   attempt: TowerAttemptSummary | null;
+  developmentToolsEnabled: boolean;
 }
 
 export interface TowerRallyApplication {
@@ -460,6 +461,10 @@ export class WorldTowerService {
 
   updateRallyLoadout(rallyId: string): Observable<TowerRally> {
     return this.api.post(`world-tower/rallies/${rallyId}/loadout`);
+  }
+
+  fillDevelopmentTeam(rallyId: string): Observable<TowerRally> {
+    return this.api.post(`world-tower/rallies/${rallyId}/development/fill`);
   }
 
   updateRallyParties(

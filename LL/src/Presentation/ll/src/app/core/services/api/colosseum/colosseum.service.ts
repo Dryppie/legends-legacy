@@ -141,14 +141,22 @@ export class ColosseumService {
 
   public startArenaBattle(
     opponentId: string,
-  ): Observable<StartArenaBattleResponse> {
-    return this.apiService.post('colosseum/battle', { opponentId }).pipe(
-      catchError((err) => {
-        return throwError(
-          () => new Error(err.message ?? 'Failed to start match'),
-        );
-      }),
-    );
+  ): Observable<VersionedMutationResult<StartArenaBattleResponse>> {
+    return this.apiService
+      .postVersioned<StartArenaBattleResponse>(
+        'colosseum/battle',
+        { opponentId },
+        {
+          stateSyncScopesHandledByResponse: ['colosseum', 'character'],
+        },
+      )
+      .pipe(
+        catchError((err) => {
+          return throwError(
+            () => new Error(err.message ?? 'Failed to start match'),
+          );
+        }),
+      );
   }
 
   skipColosseumMatch() {

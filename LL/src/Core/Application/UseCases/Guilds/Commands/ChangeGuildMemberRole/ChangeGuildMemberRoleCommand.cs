@@ -51,7 +51,7 @@ public class ChangeGuildMemberRoleCommandHandler : IRequestHandler<ChangeGuildMe
                 cancellationToken);
         }
 
-        await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChanged(guild.Id), nameof(ChangeGuildMemberRoleCommandHandler), cancellationToken);
+        await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChanged(guild.Id, request.CharacterId, true), nameof(ChangeGuildMemberRoleCommandHandler), cancellationToken);
         return Response<bool>.Success(true);
     }
 }

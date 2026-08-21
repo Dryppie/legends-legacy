@@ -1,4 +1,3 @@
-using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Equipments.Dtos;
 using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.MarketPlaces.Dtos.Responses;
@@ -9,27 +8,12 @@ namespace Application.WebSockets.Contracts;
 
 public abstract record GameRealtimeEvent;
 
-public sealed record DungeonRewardsClaimed(
-    Guid CharacterId,
-    IReadOnlyList<InventoryItemDto> ClaimedLoot,
-    string? Location) : GameRealtimeEvent;
-
 public sealed record LootReceived(
     Guid CharacterId,
     IReadOnlyList<InventoryItemDto> Items,
     string Source,
     string? Location,
     Guid? GrantId = null) : GameRealtimeEvent;
-
-public sealed record InventorySnapshot(
-    Guid CharacterId,
-    IReadOnlyList<InventoryItemDto> Items,
-    string Reason) : GameRealtimeEvent;
-
-public sealed record CharacterSnapshot(
-    Guid CharacterId,
-    CharacterDto Character,
-    string Reason) : GameRealtimeEvent;
 
 public sealed record StateInvalidated(
     Guid? CharacterId,
@@ -48,11 +32,6 @@ public sealed record CharacterLevelUp(
     long Experience,
     long ExperienceUntilNextLevel,
     int UnlockedEssenceSlots) : GameRealtimeEvent;
-
-public sealed record SoulstoneDrop(
-    Guid CharacterId,
-    int SoulstonesEarned,
-    long TotalSoulstones) : GameRealtimeEvent;
 
 public sealed record MarketplaceChanged(
     MarketplaceChangeSetDto Changes) : GameRealtimeEvent;
@@ -75,13 +54,19 @@ public sealed record GuildApplicationRejected(
 
 public sealed record GuildBuildingsChanged(
     Guid GuildId,
-    string BuildingId) : GameRealtimeEvent;
+    string BuildingId,
+    Guid? ActorCharacterId = null,
+    bool InitiatorHandled = false) : GameRealtimeEvent;
 
 public sealed record GuildMissionsChanged(
-    Guid GuildId) : GameRealtimeEvent;
+    Guid GuildId,
+    Guid? ActorCharacterId = null,
+    bool InitiatorHandled = false) : GameRealtimeEvent;
 
 public sealed record GuildStateChanged(
-    Guid GuildId) : GameRealtimeEvent;
+    Guid GuildId,
+    Guid? ActorCharacterId = null,
+    bool InitiatorHandled = false) : GameRealtimeEvent;
 
 public sealed record GuildVaultChatMessage(
     Guid GuildId,
@@ -94,13 +79,18 @@ public sealed record GuildVaultChatMessage(
 
 public sealed record GuildMembershipChanged(
     Guid GuildId,
-    Guid CharacterId) : GameRealtimeEvent;
+    Guid CharacterId,
+    Guid? ActorCharacterId = null,
+    bool InitiatorHandled = false) : GameRealtimeEvent;
 
 public sealed record GuildDisbanded(
-    Guid GuildId) : GameRealtimeEvent;
+    Guid GuildId,
+    Guid? ActorCharacterId = null,
+    bool InitiatorHandled = false) : GameRealtimeEvent;
 
 public sealed record GuildDirectoryChanged(
-    string Reason) : GameRealtimeEvent;
+    string Reason,
+    Guid? ActorCharacterId = null) : GameRealtimeEvent;
 
 public sealed record QuestJournalChanged(
     QuestJournal Journal,

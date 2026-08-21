@@ -70,7 +70,7 @@ public class WithdrawGuildVaultItemCommandHandler : IRequestHandler<WithdrawGuil
 
         await _events.PublishAsync(
             new Audience.Guild(mutation.GuildId),
-            new GuildStateChanged(mutation.GuildId),
+            new GuildStateChanged(mutation.GuildId, request.CharacterId, true),
             nameof(WithdrawGuildVaultItemCommandHandler),
             cancellationToken);
         return Response<bool>.Success(true);

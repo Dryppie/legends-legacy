@@ -40,17 +40,17 @@ public class AcceptInviteCommandHandler : IRequestHandler<AcceptInviteCommand, R
 
         await _eventPublisher.PublishAsync(
             new Audience.Character(request.CharacterId),
-            new GuildMembershipChanged(guildId, request.CharacterId),
+            new GuildMembershipChanged(guildId, request.CharacterId, request.CharacterId, true),
             nameof(AcceptInviteCommandHandler),
             cancellationToken);
         await _eventPublisher.PublishAsync(
             new Audience.Guild(guildId),
-            new GuildStateChanged(guildId),
+            new GuildStateChanged(guildId, request.CharacterId, true),
             nameof(AcceptInviteCommandHandler),
             cancellationToken);
         await _eventPublisher.PublishAsync(
             new Audience.World(),
-            new GuildDirectoryChanged("membership"),
+            new GuildDirectoryChanged("membership", request.CharacterId),
             nameof(AcceptInviteCommandHandler),
             cancellationToken);
 

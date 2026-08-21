@@ -2,6 +2,7 @@ using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.MediatR.Markers;
 using Application.UseCases.Dungeons.Dtos;
+using Application.UseCases.Dungeons.Queries.GetAvailableDungeons;
 using Application.UseCases.Prophecies.Events;
 using AutoMapper;
 using Common.Primitives;
@@ -16,15 +17,18 @@ public class ExecuteDungeonActionCommandHandler : IRequestHandler<ExecuteDungeon
     private readonly IDungeonRunService _dungeonRunService;
     private readonly IMapper _mapper;
     private readonly IPublisher _publisher;
+    private readonly DungeonHubFactory _dungeonHub;
 
     public ExecuteDungeonActionCommandHandler(
         IDungeonRunService dungeonRunService,
         IMapper mapper,
-        IPublisher publisher)
+        IPublisher publisher,
+        DungeonHubFactory dungeonHub)
     {
         _dungeonRunService = dungeonRunService;
         _mapper = mapper;
         _publisher = publisher;
+        _dungeonHub = dungeonHub;
     }
 
     public async Task<Response<ExecuteDungeonActionResponseDto>> Handle(
@@ -44,6 +48,7 @@ public class ExecuteDungeonActionCommandHandler : IRequestHandler<ExecuteDungeon
         await PublishProphecyProgressAsync(request.CharacterId, result.Outcome, cancellationToken);
 
         var response = _mapper.Map<ExecuteDungeonActionResponseDto>(result);
+        response.Hub = await _dungeonHub.CreateAsync(request.CharacterId, cancellationToken);
 
         return Response<ExecuteDungeonActionResponseDto>.Success(response);
     }

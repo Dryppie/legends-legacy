@@ -366,9 +366,9 @@ public sealed class GuildMissionServiceTests
         var call = Assert.Single(outbox.Calls);
         Assert.Equal(GameEventTypes.GuildMissionProgressed, call.EventType);
         Assert.Equal(characterId, call.CharacterId);
-        Assert.Equal(
-            db.Guilds.Local.Single().Id,
-            Assert.IsType<GuildMissionProgressedPayload>(call.Payload).GuildId);
+        var payload = Assert.IsType<GuildMissionProgressedPayload>(call.Payload);
+        Assert.Equal(db.Guilds.Local.Single().Id, payload.GuildId);
+        Assert.Equal(characterId, payload.ActorCharacterId);
     }
 
     [Fact]

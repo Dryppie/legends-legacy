@@ -211,11 +211,25 @@ function createBattleResponse(
   ratingAfter: number,
 ): StartArenaBattleResponse {
   return {
-    arenaTicketStatus: {},
+    arenaTicketStatus: { currentTickets: 4, maxTickets: 5 },
     attackerRating: { ratingAfter },
     rewards: { gloryEarned },
     battle: {},
-  } as StartArenaBattleResponse;
+    state: {
+      character: { id: 'character-1', arenaRating: ratingAfter },
+      status: {
+        rating: ratingAfter,
+        glory: 129 + gloryEarned,
+        maxTickets: 5,
+        tickets: 4,
+        dailyFirstWinAvailable: false,
+        defenseStatus: { isValid: true, isOutdated: false },
+      },
+      opponents: [],
+      rankings: [],
+      previousMatches: [],
+    },
+  } as unknown as StartArenaBattleResponse;
 }
 
 function setupStateService(options: {
@@ -244,7 +258,12 @@ function setupStateService(options: {
   );
   colosseumApi.getChampionMarket.and.returnValue(of(options.market));
   if (options.response) {
-    colosseumApi.startArenaBattle.and.returnValue(of(options.response));
+    colosseumApi.startArenaBattle.and.returnValue(
+      of({
+        data: options.response,
+        domainVersions: { colosseum: 1, character: 1 },
+      }),
+    );
   }
   if (options.purchaseResponse) {
     colosseumApi.purchaseChampionMarketItem.and.returnValue(
@@ -291,6 +310,12 @@ function setupStateService(options: {
   const updateCharacter = jasmine
     .createSpy('updateCharacter')
     .and.callFake((character) => currentCharacter.set(character));
+  const applyVersionedCharacter = jasmine
+    .createSpy('applyVersionedCharacter')
+    .and.callFake((result) => {
+      currentCharacter.set(result.data.character);
+      return true;
+    });
 
   TestBed.configureTestingModule({
     providers: [
@@ -310,6 +335,7 @@ function setupStateService(options: {
           currentCharacterId: signal(null),
           currentCharacter,
           updateCharacter,
+          applyVersionedCharacter,
         },
       },
       {

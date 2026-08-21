@@ -278,6 +278,141 @@ public sealed class RaidService(
             cancellationToken: cancellationToken);
     }
 
+    public async Task<RaidOperationResult<RaidRunDto>> FillDevelopmentTeamAsync(
+        Guid characterId,
+        Guid raidRunId,
+        CancellationToken cancellationToken)
+    {
+        if (!options.Value.DevelopmentToolsEnabled)
+            return RaidOperationResult<RaidRunDto>.Fail("Raid development tools are disabled.");
+
+        var transaction = db.CurrentTransaction is null
+            ? await db.BeginTransactionAsync(cancellationToken)
+            : null;
+        try
+        {
+            await db.AcquireRaidRunLockAsync(raidRunId, cancellationToken);
+            var run = await LoadRunAsync(raidRunId, includeSnapshots: false, cancellationToken);
+            if (run is null)
+                return RaidOperationResult<RaidRunDto>.Fail("Raid was not found.");
+            if (run.LeaderCharacterId != characterId)
+                return RaidOperationResult<RaidRunDto>.Fail("Only the raid leader can generate a local team.");
+            if (run.Status != RaidRunStatus.Mustering || run.SignupClosesAt <= timeProvider.GetUtcNow())
+                return RaidOperationResult<RaidRunDto>.Fail("A local team can only be generated while the raid is mustering.");
+
+            var tier = ResolvePinnedTier(run);
+            var capacity = tier.LaneSlots * RaidParties.All.Count;
+            var approvedSignups = ApprovedSignups(run).ToList();
+            var missing = capacity - approvedSignups.Count;
+            if (missing <= 0)
+                return RaidOperationResult<RaidRunDto>.Success(
+                    await ToDtoAsync(run, characterId, cancellationToken));
+
+            var occupiedCharacterIds = run.Signups
+                .Select(signup => signup.CharacterId)
+                .ToArray();
+            var occupiedAccountIds = run.Signups
+                .Select(signup => signup.AccountId)
+                .ToArray();
+            var unavailableCharacterIds = await db.RaidSignups
+                .AsNoTracking()
+                .Where(signup => signup.RaidRunId != raidRunId
+                                 && ActiveStatuses.Contains(signup.RaidRun.Status))
+                .Select(signup => signup.CharacterId)
+                .ToArrayAsync(cancellationToken);
+            var candidates = await db.Characters
+                .AsNoTracking()
+                .Where(candidate => candidate.User.IsGuest
+                                    && candidate.User.Username.StartsWith("SeedGuest")
+                                    && !occupiedCharacterIds.Contains(candidate.Id)
+                                    && !occupiedAccountIds.Contains(candidate.UserId)
+                                    && !unavailableCharacterIds.Contains(candidate.Id))
+                .OrderBy(candidate => candidate.Name)
+                .Take(missing)
+                .Select(candidate => new
+                {
+                    candidate.Id,
+                    AccountId = candidate.UserId,
+                    candidate.Name
+                })
+                .ToArrayAsync(cancellationToken);
+            if (candidates.Length < missing)
+            {
+                return RaidOperationResult<RaidRunDto>.Fail(
+                    $"Only {candidates.Length} of {missing} required local teammates were available. Restart the API with local guest seeding enabled.");
+            }
+
+            var now = timeProvider.GetUtcNow();
+            foreach (var candidate in candidates)
+            {
+                var rating = await powerRatings.GetCharacterRatingAsync(
+                    candidate.Id,
+                    cancellationToken);
+                if (rating.State != PowerAnalysisState.Available)
+                {
+                    return RaidOperationResult<RaidRunDto>.Fail(
+                        $"Combat Rating is unavailable for generated teammate {candidate.Name}.");
+                }
+
+                var snapshot = await snapshots.CreateAsync(candidate.Id, cancellationToken);
+                var eligibility = new Eligibility(
+                    candidate.Id,
+                    candidate.AccountId,
+                    candidate.Name,
+                    CombatRatingDisplay.FromRaw(rating.Overall),
+                    rating.BuildFingerprint,
+                    null);
+                var signup = CreateSignup(run, snapshot, eligibility, now);
+                run.Signups.Add(signup);
+                db.RaidSignups.Add(signup);
+                approvedSignups.Add(signup);
+            }
+
+            foreach (var signup in approvedSignups)
+            {
+                signup.Lane = null;
+                signup.WingSlotIndex = null;
+            }
+            await db.SaveChangesAsync(cancellationToken);
+
+            var partyCounts = RaidParties.All.ToDictionary(lane => lane, _ => 0);
+            var partyPower = RaidParties.All.ToDictionary(lane => lane, _ => 0L);
+            foreach (var signup in approvedSignups
+                         .OrderByDescending(signup => signup.PowerRating)
+                         .ThenBy(signup => signup.CharacterName))
+            {
+                var lane = RaidParties.All
+                    .Where(candidate => partyCounts[candidate] < tier.LaneSlots)
+                    .OrderBy(candidate => partyPower[candidate])
+                    .ThenBy(candidate => partyCounts[candidate])
+                    .ThenBy(RaidParties.EncounterOrder)
+                    .First();
+                signup.Lane = lane;
+                signup.WingSlotIndex = partyCounts[lane]++;
+                partyPower[lane] += signup.PowerRating;
+            }
+
+            run.RowVersion++;
+            await QueueRaidChatSnapshotAsync(
+                run,
+                cancellationToken,
+                $"Local development team generated with {candidates.Length} seeded raiders.",
+                "development-team-generated");
+            await QueueRaidUpdateAsync(run, "DevelopmentTeamGenerated", cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
+            if (transaction is not null)
+                await transaction.CommitAsync(cancellationToken);
+
+            return RaidOperationResult<RaidRunDto>.Success(
+                await ToDtoAsync(run, characterId, cancellationToken));
+        }
+        finally
+        {
+            if (transaction is not null)
+                await transaction.DisposeAsync();
+        }
+    }
+
     private async Task<RaidOperationResult<RaidRunDto>> CreateCoreAsync(
         Guid characterId,
         string raidBossId,

@@ -32,20 +32,62 @@ public sealed class CreatureScalerTests
     }
 
     [Fact]
-    public void Unified_curve_applies_area_growth_and_a_distinct_region_jump()
+    public void Unified_curve_tracks_canonical_player_growth_across_the_campaign()
     {
         var provider = CreateContentProvider();
 
+        var campaignStart = provider.GetScaling(new Area { Id = "region_01_area_01" });
+        var bloodGrove = provider.GetScaling(new Area { Id = "region_01_area_02" });
+        var regionOneMid = provider.GetScaling(new Area { Id = "region_01_area_06" });
         var regionOneEnd = provider.GetScaling(new Area { Id = "region_01_area_07" });
         var regionTwoStart = provider.GetScaling(new Area { Id = "region_02_area_01" });
+        var rotgraveFields = provider.GetScaling(new Area { Id = "region_02_area_02" });
         var campaignEnd = provider.GetScaling(new Area { DifficultyTier = 100 });
+        var unifiedCurve = provider.GetCatalog().Profiles.Single(profile =>
+            profile.Id == "unified-global-v1");
 
+        Assert.Equal(2.0, campaignStart.HealthMultiplier, 5);
+        Assert.Equal(2.2, campaignStart.OffenseMultiplier, 5);
+        Assert.Equal(2.01, bloodGrove.HealthMultiplier, 5);
+        Assert.Equal(2.211, bloodGrove.OffenseMultiplier, 5);
+        Assert.Equal(2.31754451, regionOneMid.HealthMultiplier, 5);
+        Assert.Equal(2.83053904, regionOneMid.OffenseMultiplier, 5);
         Assert.Equal(10, regionOneEnd.GlobalStep);
+        Assert.Equal(4.40051265, regionOneEnd.HealthMultiplier, 5);
+        Assert.Equal(8.93384064, regionOneEnd.OffenseMultiplier, 5);
         Assert.Equal(11, regionTwoStart.GlobalStep);
-        Assert.Equal(1.12, regionTwoStart.OffenseMultiplier / regionOneEnd.OffenseMultiplier, 5);
+        Assert.Equal(12, rotgraveFields.GlobalStep);
+        Assert.Equal(5.96, rotgraveFields.HealthMultiplier, 5);
+        Assert.Equal(14.3, rotgraveFields.OffenseMultiplier, 5);
+        Assert.Equal(2.73, rotgraveFields.DefenseMultiplier, 5);
         Assert.True(regionTwoStart.HealthMultiplier > regionOneEnd.HealthMultiplier);
         Assert.True(regionTwoStart.DefenseMultiplier > regionOneEnd.DefenseMultiplier);
-        Assert.Equal(16.48, campaignEnd.OffenseMultiplier / 1.85, 2);
+        Assert.Equal(11, unifiedCurve.OffenseCurve.LinearAfterStep);
+        Assert.NotNull(unifiedCurve.OffenseCurve.LinearGrowthPerStep);
+        Assert.Equal(0.835593870808, unifiedCurve.OffenseCurve.LinearGrowthPerStep.Value, 10);
+        Assert.Equal("content-foundation-v1", campaignEnd.ProfileId);
+        Assert.Equal(30.49, campaignEnd.OffenseMultiplier, 2);
+    }
+
+    [Fact]
+    public void Rotgrave_feral_ghoul_has_level_appropriate_health_and_offense()
+    {
+        var creature = new Creature
+        {
+            Name = "Feral Ghoul",
+            Archetype = CreatureArchetype.Bruiser,
+            DamageProfile = DamageProfile.Physical,
+            DefenseProfile = DefenseProfile.Balanced,
+            BaseLevel = 55,
+            Tier = 2
+        };
+
+        new CreatureScaler(CreateContentProvider()).ApplyScaling(
+            creature,
+            new Area { Id = "region_02_area_02" });
+
+        Assert.Equal(429.12f, creature.BaseAttributesDict[AttributeType.MaxHealth], 2);
+        Assert.Equal(90.09f, creature.BaseAttributesDict[AttributeType.Power], 2);
     }
 
     [Fact]

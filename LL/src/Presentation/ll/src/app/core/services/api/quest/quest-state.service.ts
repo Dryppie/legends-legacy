@@ -155,6 +155,8 @@ export class QuestStateService {
     this.journalRequestEpoch += 1;
     this._journal.set(journal ?? { quests: [] });
     this._loaded.set(true);
+    this.stateSync.activate('quests', 'quests');
+    this.stateSync.activate('area-access', 'area-access');
     this._loading.set(false);
     this._error.set(null);
   }
@@ -340,10 +342,7 @@ export class QuestStateService {
     result: VersionedMutationResult<QuestJournal>,
   ): boolean {
     if (
-      !this.domainVersions.isCurrent(
-        'quests',
-        result.domainVersions['quests'],
-      )
+      !this.domainVersions.isCurrent('quests', result.domainVersions['quests'])
     ) {
       return false;
     }

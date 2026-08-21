@@ -25,23 +25,28 @@ describe('EssencesService', () => {
     );
   });
 
-  it('leaves partial loadout mutations for coordinator reconciliation', () => {
+  it('marks loadout mutation responses as essence-owned', () => {
     const api = jasmine.createSpyObj<ApiService>('ApiService', [
-      'put',
-      'delete',
+      'putVersioned',
+      'deleteVersioned',
     ]);
-    api.put.and.returnValue(of({}));
-    api.delete.and.returnValue(of({}));
+    api.putVersioned.and.returnValue(of({ data: {}, domainVersions: {} }));
+    api.deleteVersioned.and.returnValue(of({ data: {}, domainVersions: {} }));
     const service = new EssencesService(api);
     const request = { id: 'loadout-1', name: 'Loadout', slots: [] };
 
     service.updateLoadout('loadout-1', request).subscribe();
     service.deleteLoadout('loadout-1').subscribe();
 
-    expect(api.put).toHaveBeenCalledOnceWith(
+    expect(api.putVersioned).toHaveBeenCalledOnceWith(
       'essence/loadouts/loadout-1',
       request,
+      { stateSyncScopesHandledByResponse: ['essences'] },
     );
-    expect(api.delete).toHaveBeenCalledOnceWith('essence/loadouts/loadout-1');
+    expect(api.deleteVersioned).toHaveBeenCalledOnceWith(
+      'essence/loadouts/loadout-1',
+      {},
+      { stateSyncScopesHandledByResponse: ['essences'] },
+    );
   });
 });

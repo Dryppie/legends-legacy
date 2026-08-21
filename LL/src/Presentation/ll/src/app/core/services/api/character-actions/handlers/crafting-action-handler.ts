@@ -33,9 +33,8 @@ export class CraftingActionHandler {
       );
     }
 
-    // Crafting Soulstones are applied from the authoritative SoulstoneDrop event.
-    // Adding the session total here as well makes the displayed balance depend
-    // on whether the action response or the real-time event arrives first.
+    // The versioned character invalidation refreshes the authoritative balance.
+    // Applying this session total locally would race that snapshot.
   }
 
   clear(): void {

@@ -541,6 +541,167 @@ public sealed class WorldTowerService : IWorldTowerService
         return TowerOperationResult<TowerRallyDto>.Success(ToRallyDto(rally, characterId, eligibility.AccountId));
     }
 
+    public async Task<TowerOperationResult<TowerRallyDto>> FillDevelopmentTeamAsync(
+        Guid characterId,
+        Guid rallyId,
+        CancellationToken cancellationToken)
+    {
+        if (!_options.DevelopmentToolsEnabled)
+            return TowerOperationResult<TowerRallyDto>.Fail("World Tower development tools are disabled.");
+
+        var floorNumber = await GetRallyFloorNumberAsync(rallyId, cancellationToken);
+        if (!floorNumber.HasValue)
+            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
+
+        var transaction = _db.CurrentTransaction is null
+            ? await _db.BeginTransactionAsync(cancellationToken)
+            : null;
+        try
+        {
+            await _db.AcquireWorldTowerFloorLockAsync(
+                _options.ServerId,
+                floorNumber.Value,
+                cancellationToken);
+            var rally = await GetMutableRallyWithApplicationsAsync(rallyId, cancellationToken);
+            if (rally is null)
+                return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
+            if (rally.CreatedByCharacterId != characterId)
+                return TowerOperationResult<TowerRallyDto>.Fail("Only the Expedition leader can generate a local team.");
+            if (rally.Status is not (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready))
+                return TowerOperationResult<TowerRallyDto>.Fail("A local team can only be generated before the Expedition starts.");
+
+            var missing = rally.RequiredSlots - rally.Participants.Count;
+            if (missing <= 0)
+            {
+                var currentAccountId = await GetAccountIdAsync(characterId, cancellationToken);
+                return TowerOperationResult<TowerRallyDto>.Success(
+                    ToRallyDto(rally, characterId, currentAccountId));
+            }
+
+            var occupiedCharacterIds = rally.Participants
+                .Select(participant => participant.CharacterId)
+                .ToArray();
+            var occupiedAccountIds = rally.Participants
+                .Select(participant => participant.AccountId)
+                .ToArray();
+            var unavailableCharacterIds = await _db.TowerRallyParticipants
+                .AsNoTracking()
+                .Where(participant => participant.TowerRallyId != rallyId
+                                      && ActiveRallyStatuses.Contains(participant.TowerRally.Status))
+                .Select(participant => participant.CharacterId)
+                .ToArrayAsync(cancellationToken);
+            var candidates = await _db.Characters
+                .AsNoTracking()
+                .Where(candidate => candidate.User.IsGuest
+                                    && candidate.User.Username.StartsWith("SeedGuest")
+                                    && !occupiedCharacterIds.Contains(candidate.Id)
+                                    && !occupiedAccountIds.Contains(candidate.UserId)
+                                    && !unavailableCharacterIds.Contains(candidate.Id))
+                .OrderBy(candidate => candidate.Name)
+                .Take(missing)
+                .Select(candidate => new
+                {
+                    candidate.Id,
+                    AccountId = candidate.UserId,
+                    candidate.Name
+                })
+                .ToArrayAsync(cancellationToken);
+            if (candidates.Length < missing)
+            {
+                return TowerOperationResult<TowerRallyDto>.Fail(
+                    $"Only {candidates.Length} of {missing} required local teammates were available. Restart the API with local guest seeding enabled.");
+            }
+
+            var now = _timeProvider.GetUtcNow();
+            foreach (var candidate in candidates)
+            {
+                var rating = await _powerRatings.GetCharacterRatingAsync(
+                    candidate.Id,
+                    cancellationToken);
+                if (rating.State != PowerAnalysisState.Available)
+                {
+                    return TowerOperationResult<TowerRallyDto>.Fail(
+                        $"Combat Rating is unavailable for generated teammate {candidate.Name}.");
+                }
+
+                var eligibility = new JoinEligibility(
+                    candidate.Id,
+                    candidate.AccountId,
+                    candidate.Name,
+                    null,
+                    null,
+                    CombatRatingDisplay.FromRaw(rating.Overall),
+                    null);
+                var participant = await CreateParticipantAsync(
+                    eligibility,
+                    rally,
+                    now,
+                    cancellationToken);
+                rally.Participants.Add(participant);
+                _db.TowerRallyParticipants.Add(participant);
+            }
+
+            foreach (var participant in rally.Participants)
+                participant.PartySlot = null;
+            await _db.SaveChangesAsync(cancellationToken);
+
+            var partyNumbers = Enumerable.Range(
+                1,
+                WorldTowerPartyRules.GetPartyCount(rally.RequiredSlots));
+            var partyCapacities = partyNumbers.ToDictionary(
+                partyNumber => partyNumber,
+                partyNumber => Math.Min(
+                    WorldTowerPartyRules.MaximumPartySize,
+                    rally.RequiredSlots
+                    - (partyNumber - 1) * WorldTowerPartyRules.MaximumPartySize));
+            var partyCounts = partyNumbers.ToDictionary(partyNumber => partyNumber, _ => 0);
+            var partyPower = partyNumbers.ToDictionary(partyNumber => partyNumber, _ => 0L);
+            foreach (var participant in rally.Participants
+                         .OrderByDescending(participant => participant.PowerRating)
+                         .ThenBy(participant => participant.CharacterName))
+            {
+                var partyNumber = partyNumbers
+                    .Where(candidate => partyCounts[candidate] < partyCapacities[candidate])
+                    .OrderBy(candidate => partyPower[candidate])
+                    .ThenBy(candidate => partyCounts[candidate])
+                    .ThenBy(candidate => candidate)
+                    .First();
+                participant.PartySlot =
+                    (partyNumber - 1) * WorldTowerPartyRules.MaximumPartySize
+                    + partyCounts[partyNumber]
+                    + 1;
+                partyCounts[partyNumber]++;
+                partyPower[partyNumber] += participant.PowerRating;
+            }
+
+            rally.Status = TowerRallyStatus.Ready;
+            foreach (var pending in rally.Applications.Where(application =>
+                         application.Status == TowerRallyApplicationStatus.Pending))
+            {
+                pending.Status = TowerRallyApplicationStatus.Declined;
+                pending.ResolvedAt = now;
+                pending.ResolvedByCharacterId = characterId;
+            }
+            await EnqueueRallyUpdateAsync(
+                rally,
+                "DevelopmentTeamGenerated",
+                now,
+                cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
+            if (transaction is not null)
+                await transaction.CommitAsync(cancellationToken);
+
+            var accountId = await GetAccountIdAsync(characterId, cancellationToken);
+            return TowerOperationResult<TowerRallyDto>.Success(
+                ToRallyDto(rally, characterId, accountId));
+        }
+        finally
+        {
+            if (transaction is not null)
+                await transaction.DisposeAsync();
+        }
+    }
+
     public async Task<TowerOperationResult<TowerRallyDto>> ApplyToRallyAsync(
         Guid characterId,
         Guid rallyId,
@@ -2255,7 +2416,8 @@ public sealed class WorldTowerService : IWorldTowerService
                     string.IsNullOrWhiteSpace(rally.Attempt.BattleReportJson)
                         || rally.Attempt.Status is TowerAttemptStatus.Started or TowerAttemptStatus.Playback
                         ? null
-                        : JsonSerializer.Deserialize<TowerBattleReportDto>(rally.Attempt.BattleReportJson, _jsonOptions)));
+                        : JsonSerializer.Deserialize<TowerBattleReportDto>(rally.Attempt.BattleReportJson, _jsonOptions)),
+            _options.DevelopmentToolsEnabled);
     }
 
     private TowerCombatPlaybackDto ToPlaybackDto(

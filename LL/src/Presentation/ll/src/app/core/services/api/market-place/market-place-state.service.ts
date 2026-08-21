@@ -51,7 +51,7 @@ export class MarketplaceStateService {
 
   private readonly myCharacterId!: Signal<string | null>;
   private readonly eventDeduper = new RealtimeSignalDeduper();
-  private hasLoaded = false;
+  private readonly hasLoaded = signal(false);
   private semanticGapRevision = 0;
   private refreshVersion = 0;
 
@@ -84,7 +84,7 @@ export class MarketplaceStateService {
       'marketplace',
       'marketplace',
       () => this.synchronize(),
-      () => this.hasLoaded,
+      () => this.hasLoaded(),
     );
     this.myCharacterId = computed(() =>
       this.characterService.currentCharacterId(),
@@ -92,8 +92,7 @@ export class MarketplaceStateService {
 
     effect(
       () => {
-        const envelope =
-          this.eventService.eventEnvelope.MarketplaceChanged();
+        const envelope = this.eventService.eventEnvelope.MarketplaceChanged();
         const event = envelope?.payload;
         if (
           event &&
@@ -126,7 +125,7 @@ export class MarketplaceStateService {
   readonly essences = this.byType(ItemType.Essence);
 
   load(): void {
-    if (this.hasLoaded) return;
+    if (this.hasLoaded()) return;
     this.refresh();
   }
 
@@ -167,7 +166,8 @@ export class MarketplaceStateService {
                 a.itemBase.itemType.localeCompare(b.itemBase.itemType),
               ),
           );
-          this.hasLoaded = true;
+          this.hasLoaded.set(true);
+          this.stateSync.activate('marketplace', 'marketplace');
           this.semanticGapRevision = 0;
         },
         error: (err) => {
@@ -580,6 +580,7 @@ export class MarketplaceStateService {
 
     const currentVersion = this.stateSync.latestRevision('marketplace');
     if (changes.version < currentVersion) return false;
+    if (changes.version === currentVersion) return true;
     if (changes.version > currentVersion + 1) {
       this.requestSemanticGapReconciliation(changes.version, true);
       return false;
@@ -594,7 +595,7 @@ export class MarketplaceStateService {
 
   private applySemanticChanges(changes: MarketplaceChangeSet): void {
     const currentVersion = this.domainVersions.latest('marketplace');
-    if (changes.version < currentVersion) return;
+    if (changes.version <= currentVersion) return;
 
     if (changes.version > currentVersion + 1) {
       this.requestSemanticGapReconciliation(changes.version);

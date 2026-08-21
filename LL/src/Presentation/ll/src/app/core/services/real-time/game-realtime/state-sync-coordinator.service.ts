@@ -30,7 +30,14 @@ interface StateSyncRegistration {
 export type StateSyncRefreshResult =
   | PromiseLike<unknown>
   | ObservableInput<unknown>;
-export type StateSyncRefresh = () => StateSyncRefreshResult;
+export interface StateSyncRefreshContext {
+  scope: StateSyncScope;
+  key: string;
+  targetRevision: number;
+}
+export type StateSyncRefresh = (
+  context: StateSyncRefreshContext,
+) => StateSyncRefreshResult;
 
 export interface StateSyncRegistrationStatus {
   scope: StateSyncScope;
@@ -191,6 +198,25 @@ export class StateSyncCoordinator {
       scoped?.delete(key);
       this.publishStatus();
     };
+  }
+
+  activate(scope: StateSyncScope, key?: string): void {
+    // Owners call this when a previously-false shouldRefresh predicate becomes
+    // true. The coordinator intentionally does not poll predicates.
+    const revision = this.revisions.get(scope) ?? 0;
+    const registrations = this.registrations.get(scope);
+    if (!registrations) return;
+
+    for (const registration of registrations.values()) {
+      if (key !== undefined && registration.key !== key) continue;
+      if (
+        registration.lastRefreshRevision < revision &&
+        untracked(registration.shouldRefresh)
+      ) {
+        this.scheduleRefresh(scope);
+        return;
+      }
+    }
   }
 
   acceptInvalidation(event: StateInvalidated, updateId?: string): void {
@@ -410,7 +436,13 @@ export class StateSyncCoordinator {
 
     let result: StateSyncRefreshResult;
     try {
-      result = untracked(registration.refresh);
+      result = untracked(() =>
+        registration.refresh({
+          scope,
+          key: registration.key,
+          targetRevision: revision,
+        }),
+      );
     } catch (error) {
       this.handleRefreshFailure(scope, registration, error);
       return;

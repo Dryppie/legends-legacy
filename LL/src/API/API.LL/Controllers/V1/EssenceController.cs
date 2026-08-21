@@ -34,7 +34,7 @@ public class EssenceController : BaseController
         await Mediator.Send(new GetEssenceCodexQuery(CurrentCharacterGuid));
 
     [HttpPost("creatures/focus")]
-    public async Task<ActionResult<CreatureArchiveDto>> SetEssenceFocus([FromBody] SetEssenceFocusRequestDto request) =>
+    public async Task<ActionResult<EssenceStateResponseDto>> SetEssenceFocus([FromBody] SetEssenceFocusRequestDto request) =>
         await Mediator.Send(new SetEssenceFocusCommand(CurrentCharacterGuid, request.CreatureId));
 
     [HttpGet("loadouts")]
@@ -66,22 +66,22 @@ public class EssenceController : BaseController
         await Mediator.Send(new EvolveEssenceCommand(CurrentCharacterGuid, playerEssenceId));
 
     [HttpPost("{playerEssenceId:guid}/favorite")]
-    public async Task<ActionResult<Response<ResponseMessageDto>>> Favorite(Guid playerEssenceId, [FromBody] SetFavoriteEssenceRequestDto request) =>
+    public async Task<ActionResult<Response<EssenceStateResponseDto>>> Favorite(Guid playerEssenceId, [FromBody] SetFavoriteEssenceRequestDto request) =>
         await Mediator.Send(new FavoriteEssenceCommand(CurrentCharacterGuid, playerEssenceId, request.IsFavorite));
 
     [HttpPost("loadouts")]
-    public async Task<ActionResult<Response<EssenceLoadoutDto>>> SaveLoadout([FromBody] SaveEssenceLoadoutDto request) =>
+    public async Task<ActionResult<Response<EssenceStateResponseDto>>> SaveLoadout([FromBody] SaveEssenceLoadoutDto request) =>
         await Mediator.Send(new SaveEssenceLoadoutCommand(CurrentCharacterGuid, request));
 
     [HttpPut("loadouts/{loadoutId:guid}")]
-    public async Task<ActionResult<Response<EssenceLoadoutDto>>> UpdateLoadout(Guid loadoutId, [FromBody] SaveEssenceLoadoutDto request) =>
+    public async Task<ActionResult<Response<EssenceStateResponseDto>>> UpdateLoadout(Guid loadoutId, [FromBody] SaveEssenceLoadoutDto request) =>
         await Mediator.Send(new SaveEssenceLoadoutCommand(CurrentCharacterGuid, request with { Id = loadoutId }));
 
     [HttpPost("loadouts/{loadoutId:guid}/activate")]
-    public async Task<ActionResult<Response<ResponseMessageDto>>> ActivateLoadout(Guid loadoutId) =>
+    public async Task<ActionResult<Response<EssenceStateResponseDto>>> ActivateLoadout(Guid loadoutId) =>
         await Mediator.Send(new ActivateEssenceLoadoutCommand(CurrentCharacterGuid, loadoutId));
 
     [HttpDelete("loadouts/{loadoutId:guid}")]
-    public async Task<ActionResult<Response<ResponseMessageDto>>> DeleteLoadout(Guid loadoutId) =>
+    public async Task<ActionResult<Response<EssenceStateResponseDto>>> DeleteLoadout(Guid loadoutId) =>
         await Mediator.Send(new DeleteEssenceLoadoutCommand(CurrentCharacterGuid, loadoutId));
 }

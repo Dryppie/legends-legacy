@@ -43,7 +43,7 @@ export class ColosseumStateService {
   private readonly _previousMatches = signal<ColosseumMatchResult[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
-  private hasLoaded = false;
+  private readonly hasLoaded = signal(false);
   private notificationLoading = false;
   private readonly eventDeduper = new RealtimeSignalDeduper();
   private statusRequestEpoch = 0;
@@ -82,12 +82,11 @@ export class ColosseumStateService {
       'colosseum',
       'colosseum',
       () => this.reconcileArena(),
-      () => this.hasLoaded,
+      () => this.hasLoaded(),
     );
     effect(
       () => {
-        const envelope =
-          this.eventService.eventEnvelope.ArenaBattleCompleted();
+        const envelope = this.eventService.eventEnvelope.ArenaBattleCompleted();
         const event = envelope?.payload;
         const characterId = this.characterState.currentCharacterId();
         if (
@@ -97,7 +96,8 @@ export class ColosseumStateService {
             envelope,
           ) ||
           !characterId ||
-          !this.isParticipant(event, characterId)
+          !this.isParticipant(event, characterId) ||
+          event.characterId === characterId
         ) {
           return;
         }
@@ -110,7 +110,8 @@ export class ColosseumStateService {
   }
 
   refresh(): void {
-    this.hasLoaded = true;
+    this.hasLoaded.set(true);
+    this.stateSync.activate('colosseum', 'colosseum');
     this.loadStatus();
     this.loadArenaTicketStatus();
     this.loadArenaOpponents();
@@ -361,20 +362,40 @@ export class ColosseumStateService {
     this.colosseumService.skipColosseumMatch();
   }
 
-  private applyStartBattleResponse(response: StartArenaBattleResponse): void {
-    this.applyTicketStatus(response.arenaTicketStatus);
-    this.applyCurrentCharacterArenaRating(response.attackerRating.ratingAfter);
-    this.applyArenaBattleStatus(response);
-    this.combatService.startColosseumMatchSimulation(response.battle);
-  }
+  private applyStartBattleResponse(
+    result: VersionedMutationResult<StartArenaBattleResponse>,
+  ): void {
+    if (
+      !this.applyOwnedColosseumMutation(result, (response) => {
+        const state = response.state;
+        this.statusRequestEpoch += 1;
+        this.opponentsRequestEpoch += 1;
+        this.rankingsRequestEpoch += 1;
+        this.matchesRequestEpoch += 1;
+        this._status.set(state.status);
+        this._allOpponents.set(state.opponents);
+        this.pickRandomOpponents();
+        this._rankings.set(
+          [...state.rankings].sort((left, right) => left.rank - right.rank),
+        );
+        this._previousMatches.set(
+          [...state.previousMatches].sort(
+            (left, right) =>
+              new Date(right.playedAt).getTime() -
+              new Date(left.playedAt).getTime(),
+          ),
+        );
+        this.applyTicketStatus(response.arenaTicketStatus);
+        this.syncNotificationCount(state.status);
+        this.combatService.startColosseumMatchSimulation(response.battle);
+      })
+    ) {
+      return;
+    }
 
-  private applyCurrentCharacterArenaRating(arenaRating: number): void {
-    const character = this.characterState.currentCharacter();
-    if (!character) return;
-
-    this.characterState.updateCharacter({
-      ...character,
-      arenaRating,
+    this.characterState.applyVersionedCharacter({
+      data: { character: result.data.state.character },
+      domainVersions: result.domainVersions,
     });
   }
 
@@ -574,59 +595,6 @@ export class ColosseumStateService {
         };
       }),
     });
-  }
-
-  private applyArenaBattleStatus(response: StartArenaBattleResponse): void {
-    const status = this._status();
-    const glory =
-      (status?.glory ?? this._championMarket()?.glory ?? 0) +
-      response.rewards.gloryEarned;
-
-    this.applyGloryBalance(glory);
-
-    if (!status) return;
-
-    this.statusRequestEpoch += 1;
-    this._status.set({
-      ...status,
-      rating: response.attackerRating.ratingAfter,
-      lifetimeHighestRating: Math.max(
-        status.lifetimeHighestRating,
-        response.attackerRating.ratingAfter,
-      ),
-      rankProgress: response.attackerRank.after,
-      glory,
-      tickets: response.arenaTicketStatus.currentTickets,
-      maxTickets: response.arenaTicketStatus.maxTickets,
-      nextTicketAt: response.arenaTicketStatus.nextTicketAt,
-      currentAttackWinStreak: response.streak.after,
-      bestAttackWinStreak: Math.max(
-        status.bestAttackWinStreak,
-        response.streak.after,
-      ),
-      dailyFirstWinAvailable:
-        response.rewards.dailyFirstWinBonus > 0
-          ? false
-          : status.dailyFirstWinAvailable,
-      attackRecord: this.applyAttackRecord(status.attackRecord, response),
-    });
-    this.syncNotificationCount(this._status());
-  }
-
-  private applyAttackRecord(
-    record: ColosseumStatus['attackRecord'],
-    response: StartArenaBattleResponse,
-  ): ColosseumStatus['attackRecord'] {
-    switch (response.outcome.result) {
-      case 'Victory':
-        return { ...record, wins: record.wins + 1 };
-      case 'Draw':
-        return { ...record, draws: record.draws + 1 };
-      case 'Defeat':
-        return { ...record, losses: record.losses + 1 };
-      default:
-        return record;
-    }
   }
 
   private applyGloryBalance(glory: number): void {

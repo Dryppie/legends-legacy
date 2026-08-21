@@ -18,6 +18,7 @@ public sealed record GetRaidPlaybackBundleQuery(Guid CharacterId, Guid RaidRunId
 public sealed record GetRaidTrophyVendorQuery(Guid CharacterId, string RaidBossId) : IQuery<RaidTrophyVendorDto?>;
 public sealed record CreateRaidCommand(Guid CharacterId, string RaidBossId, int PlusLevel) : ICommand<Response<RaidRunDto>>;
 public sealed record CreateDevelopmentRaidCommand(Guid CharacterId, string RaidBossId, int PlusLevel) : ICommand<Response<RaidRunDto>>;
+public sealed record FillDevelopmentRaidTeamCommand(Guid CharacterId, Guid RaidRunId) : ICommand<Response<RaidRunDto>>;
 public sealed record JoinRaidCommand(Guid CharacterId, Guid RaidRunId) : ICommand<Response<RaidRunDto>>;
 public sealed record ApproveRaidSignupCommand(Guid CharacterId, Guid RaidRunId, Guid TargetCharacterId) : ICommand<Response<RaidRunDto>>;
 public sealed record RemoveRaidSignupCommand(Guid CharacterId, Guid RaidRunId, Guid TargetCharacterId) : ICommand<Response<RaidRunDto>>;
@@ -106,6 +107,19 @@ public sealed class CreateDevelopmentRaidCommandHandler(IRaidService raids)
             request.CharacterId,
             request.RaidBossId,
             request.PlusLevel,
+            cancellationToken));
+}
+
+public sealed class FillDevelopmentRaidTeamCommandHandler(IRaidService raids)
+    : RaidCommandHandler<FillDevelopmentRaidTeamCommand, RaidRunDto>(raids),
+        IRequestHandler<FillDevelopmentRaidTeamCommand, Response<RaidRunDto>>
+{
+    public async Task<Response<RaidRunDto>> Handle(
+        FillDevelopmentRaidTeamCommand request,
+        CancellationToken cancellationToken) =>
+        ToResponse(await Raids.FillDevelopmentTeamAsync(
+            request.CharacterId,
+            request.RaidRunId,
             cancellationToken));
 }
 

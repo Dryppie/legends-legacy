@@ -54,17 +54,17 @@ public class LeaveGuildCommandHandler : IRequestHandler<LeaveGuildCommand, Respo
 
         await _eventPublisher.PublishAsync(
             new Audience.Character(request.CharacterId),
-            new GuildMembershipChanged(guild.Id, request.CharacterId),
+            new GuildMembershipChanged(guild.Id, request.CharacterId, request.CharacterId, true),
             nameof(LeaveGuildCommandHandler),
             cancellationToken);
         await _eventPublisher.PublishAsync(
             new Audience.Guild(guild.Id),
-            new GuildStateChanged(guild.Id),
+            new GuildStateChanged(guild.Id, request.CharacterId, true),
             nameof(LeaveGuildCommandHandler),
             cancellationToken);
         await _eventPublisher.PublishAsync(
             new Audience.World(),
-            new GuildDirectoryChanged("membership"),
+            new GuildDirectoryChanged("membership", request.CharacterId),
             nameof(LeaveGuildCommandHandler),
             cancellationToken);
 

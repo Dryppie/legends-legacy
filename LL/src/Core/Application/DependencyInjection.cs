@@ -2,6 +2,7 @@ using Application.MediatR.Behaviors;
 using Application.UseCases.Dungeons.Queries.GetAvailableDungeons;
 using Application.UseCases.Essences.Commands;
 using Application.UseCases.MarketPlaces;
+using Application.UseCases.Colosseum;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -20,6 +21,7 @@ public static class DependencyInjection
         services.AddAutoMapper(cfg => { }, Assembly.GetExecutingAssembly());
         services.AddTransient<DungeonHubFactory>();
         services.AddTransient<EssenceMutationResponseFactory>();
+        services.AddTransient<ColosseumStateResponseFactory>();
         services.AddTransient<MarketplaceChangePublisher>();
 
         return services;

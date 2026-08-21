@@ -86,6 +86,20 @@ public sealed class WorldTowerController : BaseController
     public async Task<ActionResult<Response<TowerRallyDto>>> CreateRally(CreateRallyRequest request) =>
         await Mediator.Send(new CreateTowerRallyCommand(CurrentCharacterGuid, request.FloorNumber, request.Mode));
 
+    [HttpPost("rallies/{rallyId:guid}/development/fill")]
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public async Task<ActionResult<Response<TowerRallyDto>>> FillDevelopmentTeam(
+        Guid rallyId,
+        [FromServices] IWebHostEnvironment environment)
+    {
+        if (!environment.IsDevelopment())
+            return NotFound();
+
+        return await Mediator.Send(new FillDevelopmentTowerTeamCommand(
+            CurrentCharacterGuid,
+            rallyId));
+    }
+
     [HttpPost("rallies/{rallyId:guid}/applications")]
     public async Task<ActionResult<Response<TowerRallyDto>>> ApplyToRally(Guid rallyId) =>
         await Mediator.Send(new ApplyToTowerRallyCommand(CurrentCharacterGuid, rallyId));

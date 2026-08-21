@@ -165,8 +165,13 @@ public sealed record GuildVaultChatMessagePayload(
     Guid MessageId,
     DateTimeOffset SentAt);
 
-public sealed record GuildMissionSelectedPayload(Guid GuildId);
-public sealed record GuildMissionProgressedPayload(Guid GuildId);
+public sealed record GuildMissionSelectedPayload(
+    Guid GuildId,
+    Guid? ActorCharacterId = null,
+    bool InitiatorHandled = false);
+public sealed record GuildMissionProgressedPayload(
+    Guid GuildId,
+    Guid? ActorCharacterId = null);
 
 public sealed record RealtimeAudiencePayload(
     string Kind,

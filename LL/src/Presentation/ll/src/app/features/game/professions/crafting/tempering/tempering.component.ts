@@ -295,11 +295,7 @@ export class TemperingComponent implements OnDestroy {
   }
 
   pauseTempering(): void {
-    if (
-      this.temperingPaused() ||
-      this.queueIsBusy() ||
-      this.pausingTempering()
-    )
+    if (this.temperingPaused() || this.queueIsBusy() || this.pausingTempering())
       return;
     this.characterActionsState.stopAction();
   }
@@ -307,17 +303,16 @@ export class TemperingComponent implements OnDestroy {
   cancelEntireQueue(): void {
     if (this.craftingQueue().length === 0 || this.queueIsBusy()) return;
 
-    const wasActiveTempering = this.characterActionsState.isCraftingAction();
     this.cancellingQueue.set(true);
     this.error.set(null);
     this.craftingService.cancelTemperingQueue().subscribe({
       next: (response) => {
-        this.inventoryState.setInventory(response.inventoryItems);
+        this.inventoryState.applyVersionedInventory(response);
         this.craftingService.setQueue([]);
+        this.characterActionsState.applyCurrentActionSnapshot(
+          response.data.currentAction,
+        );
         this.cancellingQueue.set(false);
-        if (wasActiveTempering) {
-          this.characterActionsState.reset();
-        }
       },
       error: (err) => {
         this.error.set(err.message ?? 'Failed to cancel the Tempering queue.');
@@ -372,12 +367,15 @@ export class TemperingComponent implements OnDestroy {
     this.craftingService.removeItemFromQueue(queueItem).subscribe({
       next: (response) => {
         const nextQueue =
-          response.currentAction?.temperingQueueItems ??
-          response.currentAction?.craftingActionDetails?.craftingQueueItems ??
+          response.data.currentAction?.temperingQueueItems ??
+          response.data.currentAction?.craftingActionDetails
+            ?.craftingQueueItems ??
           [];
-        this.inventoryState.setInventory(response.inventoryItems);
+        this.inventoryState.applyVersionedInventory(response);
         this.craftingService.setQueue(nextQueue);
-        this.characterActionsState.refreshCurrentAction();
+        this.characterActionsState.applyCurrentActionSnapshot(
+          response.data.currentAction,
+        );
 
         if (wasSelected) {
           this.selectedItemId.set(queueItem.equipmentInstance.id);

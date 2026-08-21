@@ -48,9 +48,9 @@ export class SoulstoneUpgradeStateService {
     private readonly service: SoulstoneUpgradeService,
     private readonly characterState: CharacterStateService,
     private readonly domainVersions: DomainVersionTracker,
-    stateSync: StateSyncCoordinator,
+    private readonly stateSync: StateSyncCoordinator,
   ) {
-    stateSync.register(
+    this.stateSync.register(
       'soulstones',
       'soulstone-upgrades',
       () => this.synchronize(true),
@@ -73,6 +73,7 @@ export class SoulstoneUpgradeStateService {
             return;
           }
 
+          this.stateSync.activate('soulstones', 'soulstone-upgrades');
           if (characterId !== this._loadedCharacterId()) {
             this._upgrades.set([]);
             this.load(true);

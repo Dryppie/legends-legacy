@@ -191,6 +191,24 @@
           </button>
           <button
             class="secondary ll-button"
+            *ngIf="
+              current.developmentToolsEnabled &&
+              current.canAssign &&
+              current.signups.length < current.laneSlots * 3
+            "
+            type="button"
+            (click)="generateDevelopmentTeam()"
+            [disabled]="!!action()"
+            title="Development only: fill and arrange the raid with locally seeded guest characters."
+          >
+            {{
+              action() === "development-team"
+                ? "Generating team..."
+                : "Generate local team"
+            }}
+          </button>
+          <button
+            class="secondary ll-button"
             *ngIf="current.canAssign && current.signups.length"
             type="button"
             (click)="resetParties(current)"

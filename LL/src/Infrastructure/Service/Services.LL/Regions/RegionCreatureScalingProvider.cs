@@ -58,7 +58,7 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
                 placement.RecommendedCombatRating);
         }
 
-        var fallback = _profiles[DefaultProfileId];
+        var fallback = _profiles[_catalog.FallbackProfileId];
         var fallbackGlobalStep = Math.Max(1, area.DifficultyTier);
         return CreateScaling(
             fallback,
@@ -113,6 +113,25 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         if (curve.Model.Equals("Foundation", StringComparison.OrdinalIgnoreCase))
             return curve.BaseMultiplier * Math.Pow(EvaluateFoundation(globalStep), curve.Exponent);
 
+        if (curve.Model.Equals("Polynomial", StringComparison.OrdinalIgnoreCase))
+        {
+            var polynomialStep = curve.LinearAfterStep.HasValue
+                ? Math.Min(progressionStep, curve.LinearAfterStep.Value)
+                : progressionStep;
+            var growth = curve.GrowthPerStep * Math.Pow(polynomialStep, curve.Exponent);
+            if (curve.LinearAfterStep.HasValue && progressionStep > polynomialStep)
+            {
+                var linearGrowthPerStep = curve.LinearGrowthPerStep
+                                          ?? curve.GrowthPerStep
+                                          * curve.Exponent
+                                          * Math.Pow(polynomialStep, curve.Exponent - 1d);
+                growth += (progressionStep - polynomialStep) * linearGrowthPerStep;
+            }
+
+            return curve.BaseMultiplier
+                   * (1d + growth);
+        }
+
         return curve.Model.Equals("Exponential", StringComparison.OrdinalIgnoreCase)
             ? curve.BaseMultiplier * Math.Pow(1d + curve.GrowthPerStep, progressionStep)
             : curve.BaseMultiplier * Math.Pow(1d + curve.GrowthPerStep * progressionStep, curve.Exponent);
@@ -161,7 +180,8 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
                 region.StartingCombatRating,
                 region.EndingCombatRating,
                 region.AreaIds,
-                region.DefaultBuildIds)).ToArray());
+                region.DefaultBuildIds)).ToArray(),
+            document.FallbackProfileId);
     }
 
     private static RegionCombatBalanceProfile MapProfile(ProfileDocument profile) => new(
@@ -184,7 +204,9 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         curve.Model,
         curve.BaseMultiplier,
         curve.GrowthPerStep,
-        curve.Exponent);
+        curve.Exponent,
+        curve.LinearAfterStep,
+        curve.LinearGrowthPerStep);
 
     private void Validate(RegionCombatBalanceCatalog catalog)
     {
@@ -209,8 +231,12 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
             throw new InvalidOperationException($"Duplicate region combat profiles: {string.Join(", ", duplicateProfiles)}.");
 
         var profileIds = catalog.Profiles.Select(x => x.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        if (!profileIds.Contains(DefaultProfileId))
-            throw new InvalidOperationException($"Region combat balance must define fallback profile '{DefaultProfileId}'.");
+        if (string.IsNullOrWhiteSpace(catalog.FallbackProfileId)
+            || !profileIds.Contains(catalog.FallbackProfileId))
+        {
+            throw new InvalidOperationException(
+                $"Region combat balance must define fallback profile '{catalog.FallbackProfileId}'.");
+        }
 
         foreach (var profile in catalog.Profiles)
         {
@@ -320,8 +346,11 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
     {
         if ((!curve.Model.Equals("Power", StringComparison.OrdinalIgnoreCase) &&
              !curve.Model.Equals("Exponential", StringComparison.OrdinalIgnoreCase) &&
-             !curve.Model.Equals("Foundation", StringComparison.OrdinalIgnoreCase)) ||
-            curve.BaseMultiplier <= 0 || curve.GrowthPerStep < 0 || curve.Exponent <= 0)
+             !curve.Model.Equals("Foundation", StringComparison.OrdinalIgnoreCase) &&
+             !curve.Model.Equals("Polynomial", StringComparison.OrdinalIgnoreCase)) ||
+            curve.BaseMultiplier <= 0 || curve.GrowthPerStep < 0 || curve.Exponent <= 0 ||
+            curve.LinearAfterStep is <= 0 || curve.LinearGrowthPerStep is < 0 ||
+            curve.LinearGrowthPerStep.HasValue && !curve.LinearAfterStep.HasValue)
             throw new InvalidOperationException($"{profileId}.{name} is invalid.");
     }
 
@@ -384,6 +413,7 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
     private sealed class RegionCombatBalanceDocument
     {
         public int Version { get; set; }
+        public string FallbackProfileId { get; set; } = DefaultProfileId;
         public FoundationDocument Foundation { get; set; } = new();
         public List<ProfileDocument> Profiles { get; set; } = [];
         public List<RegionDocument> Regions { get; set; } = [];
@@ -420,6 +450,8 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         public double BaseMultiplier { get; set; }
         public double GrowthPerStep { get; set; }
         public double Exponent { get; set; }
+        public int? LinearAfterStep { get; set; }
+        public double? LinearGrowthPerStep { get; set; }
     }
 
     private sealed class RegionDocument

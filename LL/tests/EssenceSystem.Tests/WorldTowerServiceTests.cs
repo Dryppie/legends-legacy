@@ -145,6 +145,67 @@ public sealed class WorldTowerServiceTests
     }
 
     [Fact]
+    public async Task Development_team_generation_fills_and_assigns_a_ready_seeded_roster()
+    {
+        await using var db = CreateDbContext();
+        var leader = SeedCharacter(db, "Tower Developer", 20, Guid.NewGuid());
+        var generated = Enumerable.Range(1, 3)
+            .Select(number => SeedDevelopmentCharacter(db, $"SeedGuest_Tower_{number:D2}", 20))
+            .ToArray();
+        await db.SaveChangesAsync();
+        var outbox = new TestGameEventOutbox();
+        var ratings = new[] { leader }
+            .Concat(generated)
+            .Select((character, index) => (character.Id, 1_000 - index * 50))
+            .ToArray();
+        var service = CreateService(
+            db,
+            new FixedPowerRatingService(ratings),
+            outbox: outbox,
+            developmentToolsEnabled: true);
+        var created = await service.CreateRallyAsync(
+            leader.Id,
+            floorNumber: 1,
+            TowerRallyMode.FirstClear,
+            CancellationToken.None);
+        Assert.True(created.Succeeded, created.Error);
+        db.ChangeTracker.Clear();
+
+        var result = await service.FillDevelopmentTeamAsync(
+            leader.Id,
+            created.Value!.Id,
+            CancellationToken.None);
+
+        Assert.True(result.Succeeded, result.Error);
+        Assert.True(result.Value!.DevelopmentToolsEnabled);
+        Assert.Equal(TowerRallyStatus.Ready, result.Value.Status);
+        Assert.True(result.Value.CanStart);
+        Assert.Equal(result.Value.RequiredSlots, result.Value.Participants.Count);
+        Assert.Equal(
+            [1, 2, 3, 4],
+            result.Value.Participants.Select(participant => participant.PartySlot).Order().ToArray());
+        Assert.Equal(result.Value.RequiredSlots, await db.CharacterSnapshots.CountAsync());
+        Assert.Contains(
+            outbox.RallyEvents,
+            update => update.Event == "DevelopmentTeamGenerated");
+    }
+
+    [Fact]
+    public async Task Development_team_generation_is_rejected_when_tools_are_disabled()
+    {
+        await using var db = CreateDbContext();
+        var service = CreateService(db, new FixedPowerRatingService());
+
+        var result = await service.FillDevelopmentTeamAsync(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            CancellationToken.None);
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("World Tower development tools are disabled.", result.Error);
+    }
+
+    [Fact]
     public async Task RallyApplication_AllowsDistinctGuestAccount_AndLeaderAcceptsIt()
     {
         await using var db = CreateDbContext();
@@ -1845,7 +1906,8 @@ public sealed class WorldTowerServiceTests
         ICombatSetupService? combatSetup = null,
         ICombatEngineExecutor? combatEngine = null,
         ICombatEncounterResultFactory? resultFactory = null,
-        IGameEventOutbox? outbox = null)
+        IGameEventOutbox? outbox = null,
+        bool developmentToolsEnabled = false)
     {
         var snapshotService = new CharacterSnapshotService(new CharacterSnapshotRepository(db));
         var resolvedCombatSetup = combatSetup ?? new ThrowingCombatSetupService();
@@ -1874,7 +1936,8 @@ public sealed class WorldTowerServiceTests
                 ManualScoutingWeeklyCapPerCharacter = 3,
                 PreparationWeeklyCapPerCharacter = 3,
                 PreparationPercentPerPoint = 0.25m,
-                PreparationMaxEffectPercent = 10m
+                PreparationMaxEffectPercent = 10m,
+                DevelopmentToolsEnabled = developmentToolsEnabled
             }),
             new JsonSerializerOptions(JsonSerializerDefaults.Web),
             new MemoryCache(new MemoryCacheOptions()),

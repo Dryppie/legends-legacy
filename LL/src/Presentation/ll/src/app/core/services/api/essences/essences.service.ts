@@ -7,7 +7,7 @@ import {
   EssenceLoadoutsDto,
   EssenceCodexDto,
   EssenceMutationResponseDto,
-  ResponseMessageDto,
+  EssenceStateResponseDto,
   SaveEssenceLoadoutDto,
   SoulArchiveDto,
 } from '../../../../shared/models/essence-system';
@@ -17,6 +17,7 @@ const ESSENCE_MUTATION_HANDLED_SCOPES = [
   'inventory',
   'equipment',
 ] as const;
+const ESSENCE_STATE_HANDLED_SCOPES = ['essences'] as const;
 
 @Injectable({
   providedIn: 'root',
@@ -38,8 +39,12 @@ export class EssencesService {
 
   public setEssenceFocus(
     creatureId: string | null,
-  ): Observable<CreatureArchiveDto> {
-    return this.apiService.post('essence/creatures/focus', { creatureId });
+  ): Observable<VersionedMutationResult<EssenceStateResponseDto>> {
+    return this.apiService.postVersioned<EssenceStateResponseDto>(
+      'essence/creatures/focus',
+      { creatureId },
+      { stateSyncScopesHandledByResponse: ESSENCE_STATE_HANDLED_SCOPES },
+    );
   }
 
   public getCodex(): Observable<EssenceCodexDto> {
@@ -106,30 +111,52 @@ export class EssencesService {
   public setFavorite(
     playerEssenceId: string,
     isFavorite: boolean,
-  ): Observable<ResponseMessageDto> {
-    return this.apiService.post(`essence/${playerEssenceId}/favorite`, {
-      isFavorite,
-    });
+  ): Observable<VersionedMutationResult<EssenceStateResponseDto>> {
+    return this.apiService.postVersioned<EssenceStateResponseDto>(
+      `essence/${playerEssenceId}/favorite`,
+      { isFavorite },
+      { stateSyncScopesHandledByResponse: ESSENCE_STATE_HANDLED_SCOPES },
+    );
   }
 
   public saveLoadout(
     request: SaveEssenceLoadoutDto,
-  ): Observable<EssenceLoadoutDto> {
-    return this.apiService.post('essence/loadouts', request);
+  ): Observable<VersionedMutationResult<EssenceStateResponseDto>> {
+    return this.apiService.postVersioned<EssenceStateResponseDto>(
+      'essence/loadouts',
+      request,
+      { stateSyncScopesHandledByResponse: ESSENCE_STATE_HANDLED_SCOPES },
+    );
   }
 
   public updateLoadout(
     loadoutId: string,
     request: SaveEssenceLoadoutDto,
-  ): Observable<EssenceLoadoutDto> {
-    return this.apiService.put(`essence/loadouts/${loadoutId}`, request);
+  ): Observable<VersionedMutationResult<EssenceStateResponseDto>> {
+    return this.apiService.putVersioned<EssenceStateResponseDto>(
+      `essence/loadouts/${loadoutId}`,
+      request,
+      { stateSyncScopesHandledByResponse: ESSENCE_STATE_HANDLED_SCOPES },
+    );
   }
 
-  public activateLoadout(loadoutId: string): Observable<ResponseMessageDto> {
-    return this.apiService.post(`essence/loadouts/${loadoutId}/activate`, {});
+  public activateLoadout(
+    loadoutId: string,
+  ): Observable<VersionedMutationResult<EssenceStateResponseDto>> {
+    return this.apiService.postVersioned<EssenceStateResponseDto>(
+      `essence/loadouts/${loadoutId}/activate`,
+      {},
+      { stateSyncScopesHandledByResponse: ESSENCE_STATE_HANDLED_SCOPES },
+    );
   }
 
-  public deleteLoadout(loadoutId: string): Observable<ResponseMessageDto> {
-    return this.apiService.delete(`essence/loadouts/${loadoutId}`);
+  public deleteLoadout(
+    loadoutId: string,
+  ): Observable<VersionedMutationResult<EssenceStateResponseDto>> {
+    return this.apiService.deleteVersioned<EssenceStateResponseDto>(
+      `essence/loadouts/${loadoutId}`,
+      {},
+      { stateSyncScopesHandledByResponse: ESSENCE_STATE_HANDLED_SCOPES },
+    );
   }
 }

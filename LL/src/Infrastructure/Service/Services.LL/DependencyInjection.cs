@@ -475,6 +475,10 @@ public static class DependencyInjection
 
         services.AddOptions<WorldTowerOptions>()
             .Bind(config.GetSection(WorldTowerOptions.SectionName))
+            .PostConfigure(options =>
+                options.DevelopmentToolsEnabled =
+                    isDevelopment
+                    && config.GetValue<bool>("FeatureManagement:WorldTowerDevelopmentTools"))
             .Validate(options =>
                     !string.IsNullOrWhiteSpace(options.ServerId)
                     && options.FailedAttemptScoutingGain > 0

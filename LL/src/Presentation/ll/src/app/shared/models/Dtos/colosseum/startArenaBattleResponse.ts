@@ -1,7 +1,10 @@
 import { CombatResultDto } from '../combatResultDto';
+import { CharacterDto } from '../characterDto';
+import { LeaderboardEntry } from '../leaderboard/leaderboardEntry';
 import { ArenaOpponentPreview } from './arenaOpponentPreview';
 import { ArenaTicketStatus } from './arenaTicketStatus';
-import { ArenaRankProgress } from './colosseumStatus';
+import { ColosseumMatchResult } from './colosseumMatchResult';
+import { ArenaRankProgress, ColosseumStatus } from './colosseumStatus';
 
 export interface ArenaBattleOutcome {
   result: 'Victory' | 'Defeat' | 'Draw';
@@ -49,4 +52,13 @@ export interface StartArenaBattleResponse {
   attackerRank: ArenaRankChange;
   streak: ArenaStreakChange;
   opponent: ArenaOpponentPreview;
+  state: ColosseumStateSnapshot;
+}
+
+export interface ColosseumStateSnapshot {
+  character: CharacterDto;
+  status: ColosseumStatus;
+  opponents: ArenaOpponentPreview[];
+  rankings: LeaderboardEntry[];
+  previousMatches: ColosseumMatchResult[];
 }

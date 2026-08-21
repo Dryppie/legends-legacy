@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.MediatR.Markers;
 using Application.UseCases.Colosseum.Dtos;
+using Application.UseCases.Colosseum;
 using Application.UseCases.Colosseum.Events;
 using Application.UseCases.Colosseum.Models;
 using AutoMapper;
@@ -18,17 +19,20 @@ public class StartArenaBattleCommandHandler : IRequestHandler<StartArenaBattleCo
     private readonly IColosseumRepository _colosseumRepository;
     private readonly IMapper _mapper;
     private readonly IPublisher _publisher;
+    private readonly ColosseumStateResponseFactory _responses;
 
     public StartArenaBattleCommandHandler(
         IColosseumService colosseumService,
         IColosseumRepository colosseumRepository,
         IMapper mapper,
-        IPublisher publisher)
+        IPublisher publisher,
+        ColosseumStateResponseFactory responses)
     {
         _colosseumService = colosseumService;
         _colosseumRepository = colosseumRepository;
         _mapper = mapper;
         _publisher = publisher;
+        _responses = responses;
     }
 
     public async Task<Response<StartArenaBattleResponseDto>> Handle(StartArenaBattleCommand request, CancellationToken cancellationToken)
@@ -58,7 +62,7 @@ public class StartArenaBattleCommandHandler : IRequestHandler<StartArenaBattleCo
             result.MatchResult.CharacterBRatingBefore,
             result.MatchResult.CharacterBRatingAfter), cancellationToken);
 
-        return Response<StartArenaBattleResponseDto>.Success(_mapper.Map<StartArenaBattleResponseDto>(
+        var response = _mapper.Map<StartArenaBattleResponseDto>(
             new StartArenaBattleResponseModel(
                 result.BattleId,
                 result.CombatResult,
@@ -92,6 +96,12 @@ public class StartArenaBattleCommandHandler : IRequestHandler<StartArenaBattleCo
                     result.AttackStreakBefore,
                     result.AttackStreakAfter,
                     0),
-                result.Opponent)));
+                result.Opponent));
+        response.State = await _responses.CreateAsync(
+            request.CharacterId,
+            cancellationToken,
+            result.MatchResult);
+
+        return Response<StartArenaBattleResponseDto>.Success(response);
     }
 }

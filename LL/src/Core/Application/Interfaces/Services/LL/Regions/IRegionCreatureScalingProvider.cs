@@ -31,7 +31,8 @@ public sealed record RegionCombatBalanceCatalog(
     int Version,
     CombatProgressionFoundation Foundation,
     IReadOnlyList<RegionCombatBalanceProfile> Profiles,
-    IReadOnlyList<RegionCombatBalanceRegion> Regions);
+    IReadOnlyList<RegionCombatBalanceRegion> Regions,
+    string FallbackProfileId = "unified-global-v1");
 
 public sealed record CombatProgressionFoundation(
     int AreasPerRegion,
@@ -58,7 +59,9 @@ public sealed record RegionCombatGrowthCurve(
     string Model,
     double BaseMultiplier,
     double GrowthPerStep,
-    double Exponent);
+    double Exponent,
+    int? LinearAfterStep = null,
+    double? LinearGrowthPerStep = null);
 
 public sealed record RegionCombatBalanceRegion(
     string RegionKey,
