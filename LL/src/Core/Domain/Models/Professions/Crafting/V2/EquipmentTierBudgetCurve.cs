@@ -9,7 +9,7 @@ public static class EquipmentTierBudgetCurve
     public const double BaseBudget = 100d;
     public const double TierTenBudget = 1_520d;
     public const int ReferenceEndTier = 10;
-    public const int MaximumCalibrationTier = 100;
+    public const int MaximumSupportedTier = 100;
     public const int CharacterLevelsPerEquipmentTier = 50;
 
     public static readonly double GrowthPerTier = Math.Pow(

@@ -8,7 +8,6 @@ using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Colosseum;
 using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Dungeons.Mastery;
-using Domain.Models.Dungeons.PowerRatings;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Economy;
 using Domain.Models.Entities;
@@ -520,7 +519,6 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<RunReward> RunRewards => Set<RunReward>();
     public DbSet<DungeonCompletionRecord> DungeonCompletionRecords => Set<DungeonCompletionRecord>();
     public DbSet<CharacterDungeonMastery> CharacterDungeonMasteries => Set<CharacterDungeonMastery>();
-    public DbSet<DungeonPowerRecommendationCacheEntry> DungeonPowerRecommendationCacheEntries => Set<DungeonPowerRecommendationCacheEntry>();
 
     // Effects
 
@@ -601,7 +599,6 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<RaidParticipantResult> RaidParticipantResults => Set<RaidParticipantResult>();
     public DbSet<RaidRewardClaim> RaidRewardClaims => Set<RaidRewardClaim>();
     public DbSet<RaidTrophyPurchase> RaidTrophyPurchases => Set<RaidTrophyPurchase>();
-    public DbSet<RaidPowerRecommendationCacheEntry> RaidPowerRecommendationCacheEntries => Set<RaidPowerRecommendationCacheEntry>();
 
     public DbSet<TowerFloorProgress> TowerFloorProgresses => Set<TowerFloorProgress>();
     public DbSet<TowerRally> TowerRallies => Set<TowerRally>();

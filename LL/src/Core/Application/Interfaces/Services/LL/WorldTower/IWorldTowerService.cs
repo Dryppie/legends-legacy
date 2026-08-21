@@ -30,7 +30,6 @@ public interface IWorldTowerService
     Task<TowerOperationResult<TowerRallyDto>> UpdateRallyLoadoutAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerRallyDto>> UpdateRallyPartiesAsync(Guid characterId, Guid rallyId, IReadOnlyList<TowerPartyAssignment> assignments, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerRallyDto>> TransferRallyLeadershipAsync(Guid characterId, Guid rallyId, Guid targetCharacterId, CancellationToken cancellationToken);
-    Task<TowerOperationResult<TowerRallyDto>> FillRallyWithDevelopmentCharactersAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerAttemptResultDto>> StartRallyAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
     Task<bool> SimulateQueuedAttemptAsync(Guid attemptId, string leaseOwner, CancellationToken cancellationToken);
     Task<bool> PublishDuePlaybackFrameAsync(Guid attemptId, string leaseOwner, DateTimeOffset now, CancellationToken cancellationToken);

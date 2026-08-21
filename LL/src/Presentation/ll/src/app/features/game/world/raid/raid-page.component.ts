@@ -73,8 +73,6 @@ export class RaidPageComponent implements OnInit, OnDestroy {
   readonly error = signal<string | null>(null);
   readonly reward = signal<RaidReward | null>(null);
   readonly battlePlan = signal<RaidBattlePlanPreview | null>(null);
-  readonly developmentRosterPowerMultiplier = signal(1);
-  readonly developmentRosterPowerMultipliers = [0.5, 0.75, 1, 1.25, 1.5, 2];
   readonly battleType = BattleType.Raid;
   readonly watchingPlayback = signal(false);
   readonly playbackLane = signal<RaidLane | null>(null);
@@ -263,16 +261,6 @@ export class RaidPageComponent implements OnInit, OnDestroy {
     this.runAction(
       `transfer-${signup.characterId}`,
       this.raids.transferLeadership(this.raidRunId, signup.characterId),
-    );
-  }
-
-  fillDevelopmentRoster(): void {
-    this.runAction(
-      'development-fill',
-      this.raids.fillDevelopmentRoster(
-        this.raidRunId,
-        this.developmentRosterPowerMultiplier(),
-      ),
     );
   }
 

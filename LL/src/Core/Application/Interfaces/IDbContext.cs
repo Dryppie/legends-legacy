@@ -165,7 +165,6 @@ public interface IDbContext
     DbSet<RaidParticipantResult> RaidParticipantResults { get; }
     DbSet<RaidRewardClaim> RaidRewardClaims { get; }
     DbSet<RaidTrophyPurchase> RaidTrophyPurchases { get; }
-    DbSet<RaidPowerRecommendationCacheEntry> RaidPowerRecommendationCacheEntries { get; }
 
     DbSet<TowerFloorProgress> TowerFloorProgresses { get; }
     DbSet<TowerRally> TowerRallies { get; }

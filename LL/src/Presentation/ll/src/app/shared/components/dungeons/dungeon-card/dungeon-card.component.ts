@@ -433,27 +433,6 @@ export class DungeonCardComponent implements OnChanges {
     return power?.state === 'Available' ? power.overall : null;
   }
 
-  selectedRecommendedPartyPower(): number | null {
-    return this.selectedPreviewData().recommendedPartyPower ?? null;
-  }
-
-  recommendationPendingLabel(): string {
-    return this.selectedPreviewData().powerRecommendationUnavailable
-      ? 'Unavailable'
-      : 'Calibrating…';
-  }
-
-  powerComparisonClass(): string {
-    const recommended = this.selectedRecommendedPartyPower();
-    const partyPower = this.selectedPartyPower();
-    if (!recommended || partyPower === null) return 'll-badge-muted';
-    if (this.selectedPreviewData().powerRecommendationLowConfidence)
-      return 'll-badge-warning';
-    return partyPower >= recommended * 0.9
-      ? 'll-badge-accent'
-      : 'll-badge-warning';
-  }
-
   entryRequirementClass(requirement: EntryRequirementPreview): string {
     return requirement.ownedAmount >= requirement.requiredAmount
       ? 'll-card-accent text-primary'

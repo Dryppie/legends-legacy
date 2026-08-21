@@ -504,61 +504,6 @@ public sealed class WorldTowerServiceTests
     }
 
     [Fact]
-    public async Task DevelopmentRosterFill_UsesSeededGuestsAndBenchesNewParticipants()
-    {
-        await using var db = CreateDbContext();
-        var leader = SeedCharacter(db, "Leader", 20, Guid.NewGuid());
-        var helpers = Enumerable.Range(1, 3)
-            .Select(number => SeedDevelopmentCharacter(db, $"SeedGuest_Helper_{number}", 10))
-            .ToArray();
-        await db.SaveChangesAsync();
-        var outbox = new TestGameEventOutbox();
-        var ratings = new[] { leader }
-            .Concat(helpers)
-            .Select(character => (character.Id, 1_000))
-            .ToArray();
-        var service = CreateService(
-            db,
-            new FixedPowerRatingService(ratings),
-            outbox: outbox,
-            developmentToolsEnabled: true);
-        var created = await service.CreateRallyAsync(
-            leader.Id,
-            1,
-            TowerRallyMode.FirstClear,
-            CancellationToken.None);
-        var rallyId = Assert.IsType<Guid>(created.Value?.Id);
-        db.ChangeTracker.Clear();
-
-        var filled = await service.FillRallyWithDevelopmentCharactersAsync(
-            leader.Id,
-            rallyId,
-            CancellationToken.None);
-
-        Assert.True(filled.Succeeded, filled.Error);
-        Assert.Equal(TowerRallyStatus.Recruiting, filled.Value!.Status);
-        Assert.Equal(4, filled.Value.Participants.Count);
-        Assert.False(filled.Value.CanStart);
-        Assert.True(filled.Value.DevelopmentToolsEnabled);
-        Assert.Equal(1, filled.Value.Participants.Single(x => x.IsLeader).PartySlot);
-        Assert.All(filled.Value.Participants.Where(x => !x.IsLeader), participant => Assert.Null(participant.PartySlot));
-        Assert.All(
-            filled.Value.Participants.Where(x => !x.IsLeader),
-            participant => Assert.StartsWith("SeedGuest_Helper_", participant.CharacterName));
-        Assert.Equal(4, await db.CharacterSnapshots.CountAsync());
-        var helperSnapshots = await db.CharacterSnapshots
-            .AsNoTracking()
-            .Where(snapshot => helpers.Select(helper => helper.Id).Contains(snapshot.CharacterId))
-            .ToArrayAsync();
-        Assert.Equal(3, helperSnapshots.Length);
-        Assert.All(helperSnapshots, snapshot => Assert.Equal(30, snapshot.Level));
-        Assert.All(helpers, helper => Assert.Equal(10, helper.Level));
-        Assert.Contains(
-            outbox.RallyEvents,
-            towerEvent => towerEvent.Event == "DevelopmentRosterFilled");
-    }
-
-    [Fact]
     public async Task UpdateRallyParties_RequiresLeaderAndPersistsCompleteSlotLayout()
     {
         await using var db = CreateDbContext();
@@ -1900,9 +1845,7 @@ public sealed class WorldTowerServiceTests
         ICombatSetupService? combatSetup = null,
         ICombatEngineExecutor? combatEngine = null,
         ICombatEncounterResultFactory? resultFactory = null,
-        IGameEventOutbox? outbox = null,
-        bool developmentToolsEnabled = false,
-        IWorldTowerDevelopmentRosterFactory? developmentRosters = null)
+        IGameEventOutbox? outbox = null)
     {
         var snapshotService = new CharacterSnapshotService(new CharacterSnapshotRepository(db));
         var resolvedCombatSetup = combatSetup ?? new ThrowingCombatSetupService();
@@ -1915,7 +1858,6 @@ public sealed class WorldTowerServiceTests
             resolvedCombatSetup,
             combatEngine ?? new ThrowingCombatEngineExecutor(),
             new SnapshotCombatantBuilder(db, resolvedCombatSetup),
-            developmentRosters ?? new FixedDevelopmentRosterFactory(),
             new FixedCreatureAbilityDefinitionProvider(),
             new FixedAbilityCatalogProvider(),
             resultFactory ?? new ThrowingCombatEncounterResultFactory(),
@@ -1932,8 +1874,7 @@ public sealed class WorldTowerServiceTests
                 ManualScoutingWeeklyCapPerCharacter = 3,
                 PreparationWeeklyCapPerCharacter = 3,
                 PreparationPercentPerPoint = 0.25m,
-                PreparationMaxEffectPercent = 10m,
-                DevelopmentToolsEnabled = developmentToolsEnabled
+                PreparationMaxEffectPercent = 10m
             }),
             new JsonSerializerOptions(JsonSerializerDefaults.Web),
             new MemoryCache(new MemoryCacheOptions()),
@@ -2128,13 +2069,6 @@ public sealed class WorldTowerServiceTests
                     Penetration = 2,
                     Regeneration = 2
                 },
-                BalanceBenchmark = new TowerBalanceBenchmarkDefinition
-                {
-                    CharacterLevel = 30,
-                    EquipmentTier = 1,
-                    EquipmentRarity = Domain.Models.Items.Rarity.Uncommon,
-                    EssenceCount = 4
-                },
                 EchoEnabledAfterClear = number != 5,
                 TowerTokens = new TowerRewardCurveDefinition().Calculate(number),
                 Unlocks = number == 1
@@ -2159,24 +2093,6 @@ public sealed class WorldTowerServiceTests
 
         public TowerFloorDefinition? GetFloor(int floorNumber) =>
             Floors.SingleOrDefault(x => x.FloorNumber == floorNumber);
-    }
-
-    private sealed class FixedDevelopmentRosterFactory : IWorldTowerDevelopmentRosterFactory
-    {
-        public WorldTowerDevelopmentBuild Create(
-            Guid characterId,
-            string characterName,
-            TowerFloorDefinition floor,
-            int rosterIndex) =>
-            new(
-                floor.RecommendedPowerRating,
-                new Domain.Models.Snapshots.CharacterSnapshot
-                {
-                    Id = Guid.NewGuid(),
-                    CharacterId = characterId,
-                    Name = characterName,
-                    Level = floor.BalanceBenchmark.CharacterLevel
-                });
     }
 
     private sealed class FixedCreatureAbilityDefinitionProvider : ICreatureAbilityDefinitionProvider

@@ -20,7 +20,6 @@ public sealed class RaidController : BaseController
     public sealed record UpdateRaidPartiesRequest(IReadOnlyList<RaidPartyAssignmentRequest> Assignments);
     public sealed record TransferRaidLeadershipRequest(Guid CharacterId);
     public sealed record RaidSignupDecisionRequest(Guid CharacterId);
-    public sealed record FillDevelopmentRosterRequest(double PowerMultiplier = 1d);
     public sealed record PurchaseTrophyVendorItemRequest(string ItemId, int Quantity = 1);
 
     [HttpGet("bosses")]
@@ -130,23 +129,6 @@ public sealed class RaidController : BaseController
                     assignment.Lane,
                     assignment.WingSlotIndex))
                 .ToArray()));
-
-    [HttpPost("{raidRunId:guid}/development/fill-roster")]
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public async Task<ActionResult<Response<RaidRunDto>>> FillDevelopmentRoster(
-        Guid raidRunId,
-        FillDevelopmentRosterRequest request,
-        [FromServices] IWebHostEnvironment environment)
-    {
-        if (!environment.IsDevelopment())
-            return NotFound();
-
-        return await Mediator.Send(
-            new FillRaidWithDevelopmentCharactersCommand(
-                CurrentCharacterGuid,
-                raidRunId,
-                request.PowerMultiplier));
-    }
 
     [HttpPost("{raidRunId:guid}/battle-plan")]
     public async Task<ActionResult<Response<RaidBattlePlanPreviewDto>>> PreviewBattlePlan(Guid raidRunId) =>

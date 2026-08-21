@@ -180,7 +180,6 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.Raids.RefreshRaidSnapshotCommand),
             typeof(global::Application.UseCases.Raids.AssignRaidWingCommand),
             typeof(global::Application.UseCases.Raids.Commands.UpdateRaidParties.UpdateRaidPartiesCommand),
-            typeof(global::Application.UseCases.Raids.FillRaidWithDevelopmentCharactersCommand),
             typeof(global::Application.UseCases.Raids.CommenceRaidCommand));
 
         Register(profiles, [StateSyncScopes.Inventory], [StateSyncScopes.Raids],

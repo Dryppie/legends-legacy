@@ -1,7 +1,5 @@
 ﻿using Application.Common.Interfaces;
 using Application.Interfaces.Outbox;
-using Application.Interfaces.Services.LL.PowerRatings;
-using Application.Interfaces.Services.LL.Raids;
 using Domain.Models.Achievements;
 using Domain.Models.Administration;
 using Domain.Models.Attributes;
@@ -44,7 +42,6 @@ using Persistence.LL.Repositories.Attributes;
 using Persistence.LL.Repositories.CharacterActions;
 using Persistence.LL.Repositories.Colosseum;
 using Persistence.LL.Repositories.Dungeons;
-using Persistence.LL.Repositories.Raids;
 using Persistence.LL.Repositories.Entities;
 using Persistence.LL.Repositories.Entities.Characters;
 using Persistence.LL.Repositories.Entities.Creatures;
@@ -110,8 +107,6 @@ public static class DependencyInjection
         services.AddScoped<IDungeonRunRepository, DungeonRunRepository>();
         services.AddScoped<IDungeonSigilAssemblyRepository, DungeonSigilAssemblyRepository>();
         services.AddScoped<ICharacterDungeonMasteryRepository, CharacterDungeonMasteryRepository>();
-        services.AddScoped<IDungeonPowerRecommendationRepository, DungeonPowerRecommendationRepository>();
-        services.AddScoped<IRaidPowerRecommendationRepository, RaidPowerRecommendationRepository>();
 
         services.AddScoped<IEntityRepository, EntityRepository>();
         services.AddScoped<IEconomyLedgerRepository, EconomyLedgerRepository>();

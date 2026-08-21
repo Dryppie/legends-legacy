@@ -146,7 +146,7 @@ Search should index both readable labels and raw selectors so existing and new t
 Run the relevant checks after implementation:
 
 ```powershell
-./build/run-tests.ps1 -SkipBalance
+./build/run-tests.ps1
 ```
 
 From `LL/src/Presentation/ll`:

@@ -13,7 +13,7 @@ public sealed class DungeonEnemyDifficultyScalingTests
     [InlineData(1, 3.5)]
     [InlineData(2, 6.05)]
     [InlineData(3, 8.2)]
-    public void GetStrengthMultiplier_uses_the_calibrated_tier_curve(
+    public void GetStrengthMultiplier_uses_the_authored_tier_curve(
         int dungeonTier,
         float expectedMultiplier)
     {

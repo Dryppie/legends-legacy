@@ -30,7 +30,6 @@ public sealed class RaidService(
     IDbContext db,
     IRaidBossDefinitionProvider definitions,
     IRaidTrophyVendorCatalog trophyVendor,
-    IRaidPowerRecommendationStore raidPowerRecommendations,
     ICharacterSnapshotService snapshots,
     IPowerRatingService powerRatings,
     IInventoryService inventory,
@@ -44,7 +43,6 @@ public sealed class RaidService(
     IMemoryCache memoryCache,
     TimeProvider timeProvider,
     JsonSerializerOptions jsonOptions,
-    IRaidDevelopmentRosterFactory developmentRosters,
     IOptions<RaidOptions> options,
     ILogger<RaidService> logger) : IRaidService
 {
@@ -138,44 +136,11 @@ public sealed class RaidService(
 
     private RaidRecommendedWingPowerDto ToPowerDto(string raidBossId, RaidBossTierDefinition tier)
     {
-        if (raidPowerRecommendations.TryGet(raidBossId, 0, out var recommendation))
-        {
-            var multiplier = Math.Pow(RaidPlusDifficulty.RecommendedPowerGrowth, tier.Tier);
-            return new RaidRecommendedWingPowerDto(
-                ScaleRecommendedPower(recommendation.Rearguard.RecommendedPower, multiplier),
-                ScaleRecommendedPower(recommendation.Vanguard.RecommendedPower, multiplier),
-                ScaleRecommendedPower(recommendation.MainGuard.RecommendedPower, multiplier),
-                ScaleRecommendedPower(recommendation.Rearguard.LowerRecommendedPower, multiplier),
-                ScaleRecommendedPower(recommendation.Rearguard.UpperRecommendedPower, multiplier),
-                ScaleRecommendedPower(recommendation.Vanguard.LowerRecommendedPower, multiplier),
-                ScaleRecommendedPower(recommendation.Vanguard.UpperRecommendedPower, multiplier),
-                ScaleRecommendedPower(recommendation.MainGuard.LowerRecommendedPower, multiplier),
-                ScaleRecommendedPower(recommendation.MainGuard.UpperRecommendedPower, multiplier),
-                recommendation.Confidence,
-                tier.Tier == 0);
-        }
-
         var authored = tier.RecommendedWingPower;
         return new RaidRecommendedWingPowerDto(
             authored.Rearguard,
             authored.Vanguard,
-            authored.MainGuard,
-            authored.Rearguard,
-            authored.Rearguard,
-            authored.Vanguard,
-            authored.Vanguard,
-            authored.MainGuard,
-            authored.MainGuard,
-            PowerRatingConfidence.Low,
-            false);
-    }
-
-    private static int ScaleRecommendedPower(int value, double multiplier)
-    {
-        var scaled = value * multiplier;
-        if (!double.IsFinite(scaled) || scaled > int.MaxValue)
-            throw new ArgumentOutOfRangeException(nameof(multiplier), "Raid +level exceeds numeric limits.");
-        return Math.Max(1, (int)Math.Round(scaled, MidpointRounding.AwayFromZero));
+            authored.MainGuard);
     }
 
     public async Task<IReadOnlyList<RaidRunSummaryDto>> GetOpenRaidsAsync(
@@ -742,112 +707,6 @@ public sealed class RaidService(
             if (transaction is not null)
                 await transaction.DisposeAsync();
         }
-    }
-
-    public async Task<RaidOperationResult<RaidRunDto>> FillWithDevelopmentCharactersAsync(
-        Guid characterId,
-        Guid raidRunId,
-        double powerMultiplier,
-        CancellationToken cancellationToken)
-    {
-        if (!options.Value.DevelopmentToolsEnabled)
-            return RaidOperationResult<RaidRunDto>.Fail("Raid development tools are disabled.");
-        if (!RaidDevelopmentRosterFactory.IsSupportedPowerMultiplier(powerMultiplier))
-        {
-            return RaidOperationResult<RaidRunDto>.Fail(
-                $"Test roster power must be between {RaidDevelopmentRosterFactory.MinimumPowerMultiplier:0.##}x and {RaidDevelopmentRosterFactory.MaximumPowerMultiplier:0.##}x.");
-        }
-
-        await db.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
-        await db.AcquireRaidRunLockAsync(raidRunId, cancellationToken);
-        var run = await LoadRunAsync(raidRunId, includeSnapshots: false, cancellationToken);
-        if (run is null)
-            return RaidOperationResult<RaidRunDto>.Fail("Raid was not found.");
-        if (run.LeaderCharacterId != characterId)
-            return RaidOperationResult<RaidRunDto>.Fail("Only the raid leader can fill a development roster.");
-        if (run.Status != RaidRunStatus.Mustering || run.SignupClosesAt <= timeProvider.GetUtcNow())
-            return RaidOperationResult<RaidRunDto>.Fail("Only an open raid muster can be filled.");
-
-        var boss = definitions.Get(run.RaidBossId);
-        if (boss is null)
-            return RaidOperationResult<RaidRunDto>.Fail("Raid boss content is unavailable.");
-        var tier = ResolvePinnedTier(run);
-        var approvedSignups = ApprovedSignups(run);
-        var openSlots = tier.LaneSlots * 3 - approvedSignups.Count;
-        if (openSlots <= 0)
-            return RaidOperationResult<RaidRunDto>.Fail("This raid roster is already full.");
-
-        var occupiedCharacterIds = await db.RaidSignups.AsNoTracking()
-            .Where(signup => ActiveStatuses.Contains(signup.RaidRun.Status))
-            .Select(signup => signup.CharacterId)
-            .ToArrayAsync(cancellationToken);
-        var occupiedAccountIds = run.Signups.Select(signup => signup.AccountId).ToArray();
-        var candidates = await db.Characters.AsNoTracking()
-            .Where(candidate =>
-                candidate.User.IsGuest
-                && candidate.User.Username.StartsWith("SeedGuest")
-                && !occupiedCharacterIds.Contains(candidate.Id)
-                && !occupiedAccountIds.Contains(candidate.UserId))
-            .OrderBy(candidate => candidate.Name)
-            .Select(candidate => new
-            {
-                candidate.Id,
-                candidate.UserId,
-                candidate.Name
-            })
-            .Take(openSlots)
-            .ToArrayAsync(cancellationToken);
-        if (candidates.Length != openSlots)
-        {
-            return RaidOperationResult<RaidRunDto>.Fail(
-                $"Only {candidates.Length} seeded development character(s) were available for {openSlots} open slot(s). Restart the API with local guest seeding enabled.");
-        }
-
-        var developmentPositions = RaidParties.All
-            .SelectMany(lane => Enumerable.Range(0, tier.LaneSlots)
-                .Select(slotIndex => (Lane: lane, SlotIndex: slotIndex)))
-            .ToArray();
-
-        var now = timeProvider.GetUtcNow();
-        var multiplierLabel = powerMultiplier.ToString("0.##", CultureInfo.InvariantCulture);
-        for (var index = 0; index < candidates.Length; index++)
-        {
-            var candidate = candidates[index];
-            var position = developmentPositions[(approvedSignups.Count + index) % developmentPositions.Length];
-            var build = developmentRosters.Create(
-                candidate.Id,
-                candidate.Name,
-                boss,
-                tier,
-                position.Lane,
-                position.SlotIndex,
-                powerMultiplier);
-            var signup = new RaidSignup
-            {
-                RaidRun = run,
-                RaidRunId = run.Id,
-                CharacterId = candidate.Id,
-                AccountId = candidate.UserId,
-                CharacterName = candidate.Name,
-                CharacterSnapshotId = build.Snapshot.Id,
-                CharacterSnapshot = build.Snapshot,
-                LoadoutHash = $"development:{tier.Tier}:{position.Lane}:{position.SlotIndex}:{multiplierLabel}x",
-                PowerRating = build.PowerRating,
-                Lane = null,
-                WingSlotIndex = null,
-                SignedUpAt = now.AddTicks(position.SlotIndex + 1),
-                SnapshotRefreshedAt = now
-            };
-            run.Signups.Add(signup);
-            db.RaidSignups.Add(signup);
-        }
-
-        run.RowVersion++;
-        await QueueRaidChatSnapshotAsync(run, cancellationToken);
-        await QueueRaidUpdateAsync(run, "DevelopmentRosterFilled", cancellationToken);
-        await db.SaveChangesAsync(cancellationToken);
-        return RaidOperationResult<RaidRunDto>.Success(
-            await ToDtoAsync(run, characterId, cancellationToken));
     }
 
     public async Task<RaidOperationResult<RaidBattlePlanPreviewDto>> PreviewBattlePlanAsync(
@@ -1868,7 +1727,7 @@ public sealed class RaidService(
                 ? samples.Count(x => x.Outcome == RaidOutcome.Slain)
                 : results.Count(x => x.BattleOutcome == Domain.Models.Combat.BattleOutcome.Victory);
             var probability = successes / (decimal)samples.Count;
-            var interval = DungeonReadinessService.WilsonInterval(successes, samples.Count);
+            var interval = WilsonInterval(successes, samples.Count);
             var modifiers = results.Select(x => x.DerivedModifier).Order().ToArray();
             return new RaidBattlePlanLaneDto(
                 lane,
@@ -1883,7 +1742,7 @@ public sealed class RaidService(
         }).ToArray();
         var slainCount = samples.Count(x => x.Outcome == RaidOutcome.Slain);
         var slainProbability = slainCount / (decimal)samples.Count;
-        var slainInterval = DungeonReadinessService.WilsonInterval(slainCount, samples.Count);
+        var slainInterval = WilsonInterval(slainCount, samples.Count);
         var predictedOutcome = (RaidOutcome)Math.Clamp(
             (int)Math.Round(samples.Average(x => (int)x.Outcome), MidpointRounding.AwayFromZero),
             (int)RaidOutcome.Repelled,
@@ -1904,16 +1763,32 @@ public sealed class RaidService(
             outcomeCounts);
     }
 
-    private static string ReadinessLabel(decimal probability) =>
-        DungeonReadinessService.GetBand(probability) switch
-        {
-            DungeonReadinessBand.VeryUnlikely => "Very Unlikely",
-            DungeonReadinessBand.Risky => "Risky",
-            DungeonReadinessBand.Uncertain => "Uncertain",
-            DungeonReadinessBand.Favored => "Favored",
-            DungeonReadinessBand.Comfortable => "Comfortable",
-            _ => "Uncertain"
-        };
+    private static string ReadinessLabel(decimal probability) => probability switch
+    {
+        >= 0.80m => "Comfortable",
+        >= 0.60m => "Favored",
+        >= 0.40m => "Uncertain",
+        >= 0.15m => "Risky",
+        _ => "Very Unlikely"
+    };
+
+    private static (decimal Lower, decimal Upper) WilsonInterval(int successes, int samples)
+    {
+        if (samples <= 0)
+            return (0m, 1m);
+
+        const double z = 1.959963984540054d;
+        var count = (double)samples;
+        var probability = successes / count;
+        var denominator = 1d + z * z / count;
+        var center = (probability + z * z / (2d * count)) / denominator;
+        var margin = z * Math.Sqrt(
+            probability * (1d - probability) / count
+            + z * z / (4d * count * count)) / denominator;
+        return (
+            (decimal)Math.Clamp(center - margin, 0d, 1d),
+            (decimal)Math.Clamp(center + margin, 0d, 1d));
+    }
 
     private Task EnqueueSlainAnnouncementAsync(
         RaidRun run,

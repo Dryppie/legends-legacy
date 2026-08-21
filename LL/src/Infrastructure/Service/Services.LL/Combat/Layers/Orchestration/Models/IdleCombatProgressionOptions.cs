@@ -10,5 +10,4 @@ public sealed class IdleCombatProgressionOptions
     public int MaximumEncountersPerResolution { get; set; } = 100;
     /// <summary>Maximum internal batches aggregated into one API resolution.</summary>
     public int MaximumBatchesPerResolution { get; set; } = 100;
-    public int ReferenceWinRateBasisPoints { get; set; } = 8_500;
 }

@@ -218,13 +218,6 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
     );
   }
 
-  fillDevelopmentRoster(): void {
-    this.runRallyAction(
-      'development-fill',
-      this.tower.fillDevelopmentRoster(this.rallyId),
-    );
-  }
-
   start(): void {
     if (this.action()) return;
     this.action.set('start');

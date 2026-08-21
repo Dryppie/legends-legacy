@@ -184,32 +184,6 @@ public sealed class CharacterExperienceProgressionTests
     }
 
     [Fact]
-    public void Area_rewards_use_the_same_difficulty_curve_and_normalize_for_expected_group_size()
-    {
-        var provider = CreateAreaExperienceProvider();
-
-        Assert.Equal(10_000m, provider.GetTargetExperiencePerHour("tutorial_area_training_grounds"));
-        Assert.Equal(10_800m, provider.GetTargetExperiencePerHour("region_01_area_01"));
-        Assert.Equal(11_664m, provider.GetTargetExperiencePerHour("region_01_area_02"));
-        Assert.Equal(21_589.24997272786698240000m, provider.GetTargetExperiencePerHour("region_01_area_07"));
-        Assert.Equal(1_000m, provider.GetTargetCindersPerHour("tutorial_area_training_grounds"));
-        Assert.Equal(1_080m, provider.GetTargetCindersPerHour("region_01_area_01"));
-        Assert.Equal(1_166.4m, provider.GetTargetCindersPerHour("region_01_area_02"));
-        Assert.Equal(2_158.924997272786698240000m, provider.GetTargetCindersPerHour("region_01_area_07"));
-
-        Assert.Equal(29, provider.CalculateEncounterExperience("region_01_area_01", 1));
-        Assert.Equal(16, provider.CalculateEncounterExperience("region_01_area_02", 1));
-        Assert.Equal(87, provider.CalculateEncounterExperience("region_01_area_01", 3));
-        Assert.Equal(49, provider.CalculateEncounterExperience("region_01_area_02", 3));
-        Assert.Equal(3, provider.CalculateEncounterCinders("region_01_area_01", 1));
-        Assert.Equal(2, provider.CalculateEncounterCinders("region_01_area_02", 1));
-        Assert.Equal(9, provider.CalculateEncounterCinders("region_01_area_01", 3));
-        Assert.Equal(5, provider.CalculateEncounterCinders("region_01_area_02", 3));
-        Assert.Throws<KeyNotFoundException>(() =>
-            provider.CalculateEncounterExperience("unknown-area", 1));
-    }
-
-    [Fact]
     public void Dungeon_rewards_scale_by_tier_and_room_type_independently_from_creatures()
     {
         var provider = new JsonDungeonRewardBalanceProvider(
@@ -232,15 +206,6 @@ public sealed class CharacterExperienceProgressionTests
     {
         var apiRoot = FindApiRoot();
         return new JsonCharacterExperienceProgressionProvider(
-            CreateConfiguration(),
-            apiRoot,
-            new JsonSerializerOptions(JsonSerializerDefaults.Web));
-    }
-
-    private static JsonAreaExperienceBalanceProvider CreateAreaExperienceProvider()
-    {
-        var apiRoot = FindApiRoot();
-        return new JsonAreaExperienceBalanceProvider(
             CreateConfiguration(),
             apiRoot,
             new JsonSerializerOptions(JsonSerializerDefaults.Web));

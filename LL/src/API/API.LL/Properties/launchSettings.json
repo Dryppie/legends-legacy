@@ -21,7 +21,6 @@
         "Chat__SystemMessages__Secret": "local-development-system-chat-secret",
         "FeatureManagement__SeedLocalGuestAccounts": "true",
         "FeatureManagement__TournamentGroundsDevelopmentTools": "true",
-        "FeatureManagement__WorldTowerDevelopmentTools": "true",
         "FeatureManagement__RaidDevelopmentTools": "true"
       }
     },
@@ -37,7 +36,6 @@
         "Chat__SystemMessages__Secret": "local-development-system-chat-secret",
         "FeatureManagement__SeedLocalGuestAccounts": "true",
         "FeatureManagement__TournamentGroundsDevelopmentTools": "true",
-        "FeatureManagement__WorldTowerDevelopmentTools": "true",
         "FeatureManagement__RaidDevelopmentTools": "true"
       }
     },
@@ -51,7 +49,6 @@
         "Chat__SystemMessages__Secret": "local-development-system-chat-secret",
         "FeatureManagement__SeedLocalGuestAccounts": "true",
         "FeatureManagement__TournamentGroundsDevelopmentTools": "true",
-        "FeatureManagement__WorldTowerDevelopmentTools": "true",
         "FeatureManagement__RaidDevelopmentTools": "true"
       }
     }

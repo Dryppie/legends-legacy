@@ -201,27 +201,6 @@ Compatibility behavior:
 
 The migration may be generated in this repository but must not be applied to a shared or production database.
 
-## 8. Keep World Tower Balance Analysis Representative
-
-Party-limited healing, barriers, and buffs will materially change ten- and fifteen-player encounters.
-
-Update `WorldTowerBalanceAnalyzer` so simulated participants receive the same five-player grouping as production combat. Otherwise balance reports would continue measuring the obsolete all-roster support behavior.
-
-Expected balance changes:
-
-- `LL/src/Infrastructure/Service/Services.LL/WorldTower/WorldTowerBalanceAnalyzer.cs`
-- Supporting simulation-runner changes that allow optional friendly party assignments
-- `LL/tests/EssenceSystem.Tests/WorldTowerBalanceAnalyzerTests.cs`
-
-After implementation, reassess:
-
-- Warden and Sovereign win rates
-- Average survivors
-- Guardian scaling
-- Recommended Power Ratings
-
-This feature may require balance-data adjustments even though no authored Guardian ability needs to change.
-
 ## Test Coverage
 
 ### Backend
@@ -238,7 +217,6 @@ Add tests for:
 - Ally-event conditions and ally-count scaling being party-local.
 - Enemy `AllEnemies` effects hitting players in every party.
 - Unscoped non-Tower combat retaining existing team-wide behavior.
-- World Tower balance simulations using production-equivalent parties.
 - Controller dispatch for the new endpoint.
 
 Primary test files:
@@ -247,7 +225,6 @@ Primary test files:
 - `LL/tests/EssenceSystem.Tests/WorldTowerServiceTests.cs`
 - `LL/tests/EssenceSystem.Tests/WorldTowerControllerTests.cs`
 - `LL/tests/EssenceSystem.Tests/WorldTowerTests.cs`
-- `LL/tests/EssenceSystem.Tests/WorldTowerBalanceAnalyzerTests.cs`
 
 ### Frontend
 

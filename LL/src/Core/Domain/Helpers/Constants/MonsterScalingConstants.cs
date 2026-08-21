@@ -33,7 +33,4 @@ public static class MonsterScalingConstants
 
     public const double AttackSpeedPerTier = 0.04;  // +4% per D
 
-    // Rubber banding vs PS band
-    public const double OvergearedClampDeltaD = 2;       // cap effective D when PS >> band
-    public const double UndergearedMinTtkHpMultiplier = 0.6; // reduce HP when player undergeared
 }

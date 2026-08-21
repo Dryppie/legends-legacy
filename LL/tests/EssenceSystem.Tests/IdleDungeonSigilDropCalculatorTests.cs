@@ -36,7 +36,7 @@ public sealed class IdleDungeonSigilDropCalculatorTests
             new QueueRandomSource(0.5),
             new InventoryItemFactory(),
             bonusService,
-            new API.LL.Benchmarking.FixedTimeProvider(fixedNow));
+            new FixedTimeProvider(fixedNow));
 
         await calculator.RollAsync(
             Guid.NewGuid(),
@@ -231,6 +231,11 @@ public sealed class IdleDungeonSigilDropCalculatorTests
             DateTimeOffset now,
             CancellationToken ct = default) =>
             ValueTask.FromResult(bonuses);
+    }
+
+    private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => now;
     }
 
     private sealed class CapturingBonusService : IBonusService

@@ -768,9 +768,7 @@ Any change to the *number* or *order* of draws — adding a taunt pre-filter, sw
 (which consumes zero draws), sampling without replacement — **shifts every downstream roll and
 diverges every replay and every balance baseline.** Pinned to that stream:
 
-- `AbilityBalanceSimulator`
 - the `expectedLogs` assertions across **168 `ability-behaviors.json` fixtures**
-- `DungeonPowerRecommendationCacheEntries` recommended-power values
 - any stored Tower playback artifacts
 
 ### 6.2 Therefore: land targeting changes as ONE change
@@ -951,4 +949,4 @@ integration, then the actual tuning passes on `AttentionExponent` per content ty
 | Multi-target selectors | `TwoEnemies`/`ThreeEnemies` take first-in-list-order; `*Random*` uniform; all threat-blind |
 | Dead code | `SelectThreatWeightedEnemy` (never called) |
 | Randomness | Single order-sensitive `_random`; `_magnitudeRandom` separate for ±20% variance |
-| Baselines pinned to draw order | `AbilityBalanceSimulator`, 168 `ability-behaviors.json` fixtures, power recommendations |
+| Behavior fixtures pinned to draw order | 168 `ability-behaviors.json` fixtures |

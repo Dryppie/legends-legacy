@@ -26,7 +26,6 @@ public sealed record CancelRaidCommand(Guid CharacterId, Guid RaidRunId) : IComm
 public sealed record TransferRaidLeadershipCommand(Guid CharacterId, Guid RaidRunId, Guid TargetCharacterId) : ICommand<Response<RaidRunDto>>;
 public sealed record RefreshRaidSnapshotCommand(Guid CharacterId, Guid RaidRunId) : ICommand<Response<RaidRunDto>>;
 public sealed record AssignRaidWingCommand(Guid CharacterId, Guid RaidRunId, Guid TargetCharacterId, RaidLane Lane, int SlotIndex) : ICommand<Response<RaidRunDto>>;
-public sealed record FillRaidWithDevelopmentCharactersCommand(Guid CharacterId, Guid RaidRunId, double PowerMultiplier) : ICommand<Response<RaidRunDto>>;
 [NonTransactional]
 public sealed record PreviewRaidBattlePlanQuery(Guid CharacterId, Guid RaidRunId) : IQuery<Response<RaidBattlePlanPreviewDto>>;
 [NonTransactional]
@@ -176,20 +175,6 @@ public sealed class AssignRaidWingCommandHandler(IRaidService raids) : RaidComma
 {
     public async Task<Response<RaidRunDto>> Handle(AssignRaidWingCommand request, CancellationToken cancellationToken) =>
         ToResponse(await Raids.AssignAsync(request.CharacterId, request.RaidRunId, request.TargetCharacterId, request.Lane, request.SlotIndex, cancellationToken));
-}
-
-public sealed class FillRaidWithDevelopmentCharactersCommandHandler(IRaidService raids)
-    : RaidCommandHandler<FillRaidWithDevelopmentCharactersCommand, RaidRunDto>(raids),
-        IRequestHandler<FillRaidWithDevelopmentCharactersCommand, Response<RaidRunDto>>
-{
-    public async Task<Response<RaidRunDto>> Handle(
-        FillRaidWithDevelopmentCharactersCommand request,
-        CancellationToken cancellationToken) =>
-        ToResponse(await Raids.FillWithDevelopmentCharactersAsync(
-            request.CharacterId,
-            request.RaidRunId,
-            request.PowerMultiplier,
-            cancellationToken));
 }
 
 public sealed class PreviewRaidBattlePlanQueryHandler(IRaidService raids) : IRequestHandler<PreviewRaidBattlePlanQuery, Response<RaidBattlePlanPreviewDto>>

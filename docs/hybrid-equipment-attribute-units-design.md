@@ -138,7 +138,7 @@ damage-reduction percentages shown on the character sheet.
 | Armor Penetration        | Percentage points |         60% | Percentage of target Armor ignored                            |
 | Magic Penetration        | Percentage points |         60% | Percentage of target Resistance ignored                       |
 
-The caps are activation candidates and must pass the combat analyzer before the
+The caps are authored requirements and must pass mechanic-correctness tests before the
 new stat model is enabled. They mostly preserve the current effective ceilings;
 Cooldown Reduction changes to a direct 40% cap.
 
@@ -215,7 +215,7 @@ Final cooldown             8.0 seconds
 
 The previously documented equipment-rating-to-cooldown-rate conversion is
 superseded by this decision. The rate-based documentation, formulas, catalog
-definitions, analyzers, and tests must be updated when this model is implemented.
+definitions and correctness tests must be updated when this model is implemented.
 
 ## Percentage penetration against ratings
 
@@ -304,64 +304,6 @@ The 25% minimum is the content-validation floor. The approved armor recipes all
 exceed it, but it remains useful for weapons, jewelry, offhands, and future content.
 It is large enough for the tier change to remain visible rather than existing as a
 token one-point technicality.
-
-## Base-crafted tier dominance
-
-In addition to equivalent-roll monotonicity, an ordinary freshly crafted item
-must not linger behind the previous tier because of overlapping base roll ranges.
-
-For the same base recipe and design, before tempering:
-
-```text
-Minimum Tier N+1 Anchor > Maximum Tier N Anchor
-```
-
-The comparison occurs after persistence quantization. The minimum difference is
-one visible display quantum:
-
-- one point for whole-number attributes;
-- `0.01` for two-decimal attributes.
-
-If the tier curve and quality range fail this condition, content activation fails.
-The correction should normally narrow the base quality spread rather than add a
-hidden per-recipe tier multiplier.
-
-This dominance guarantee applies to equivalent base recipe families and the
-ordinary untempered crafting range. It does not promise that every untempered
-Common Tier N+1 item beats all possible lower-tier Legendary, Masterpiece,
-Blueprint, or fully tempered items. Those systems intentionally create exceptional
-equipment and must retain temporary value.
-
-The intended lifecycle is:
-
-- a normal next-tier craft replaces a normal previous-tier craft;
-- an exceptionally developed previous-tier item may remain competitive briefly;
-- continued tempering and crafting at the new tier ultimately provide a decisive
-  upgrade;
-- no ordinary item remains best for several later tiers solely because its
-  percentage attributes stopped changing.
-
-## Outcome-level upgrade gate
-
-Raw anchor growth is necessary but not sufficient. The canonical analyzer must
-also verify role-relevant outcomes.
-
-For each base recipe at representative checkpoints, equip a minimum-roll Tier N+1
-item in place of a maximum-roll ordinary Tier N version while holding the rest of
-the build constant. At least one declared role outcome must improve:
-
-- offensive equipment: sustained damage or reference TTK;
-- defensive equipment: raw TTD or effective Health;
-- sustain equipment: effective TTD or restored Health over the reference window;
-- hybrid equipment: its declared primary role outcome.
-
-The replacement must not make every relevant outcome worse. A percentage
-secondary may roll lower, but the tier anchor must produce a measurable net role
-upgrade under the ordinary tier-dominance comparison.
-
-These gates supplement the existing complete-build overgear targets. They test
-individual recipe progression, while the canonical TTK/TTD analyzer tests the
-whole equipment ecosystem.
 
 ## Current recipe audit
 
@@ -505,8 +447,7 @@ The crafting system must:
 - remove `Rating` from every direct-percentage equipment label and tooltip.
 
 Tempering percentage gains remain intrinsically stable. Tier-scaled anchor gains
-increase with the item's tier. Potential cost and marginal-value calibration must
-be rerun so neither unit class dominates tempering choices.
+increase with the item's tier.
 
 ## Stat-model versioning and existing equipment
 
@@ -533,8 +474,7 @@ For every v16 direct-percentage candidate:
 6. mark the instance as v17.
 
 This preserves economic investment rather than pretending that the old raw rating
-was already a percentage. It requires full balance validation because aggregating
-direct item percentages differs from aggregating ratings before one shared curve.
+was already a percentage.
 
 ### Legacy separation
 
@@ -545,7 +485,7 @@ New crafts use v17 exclusively.
 The migration decision must be made before implementation. No database migration
 should silently reinterpret stored numeric values in place.
 
-## Validation and analyzer gates
+## Correctness verification
 
 ### Unit and cap gates
 
@@ -559,31 +499,6 @@ should silently reinterpret stored numeric values in place.
   below one tick.
 - Critical Damage item bonus and character total multiplier are displayed
   consistently.
-
-### Tier-progression gates
-
-- Every recipe has at least 25% tier-anchor allocation.
-- Every Medium, Light, and Cloth recipe allocates exactly 50% to tier anchors;
-  every Heavy recipe allocates 100%.
-- Equivalent-roll anchors strictly increase at every adjacent tier.
-- Minimum Tier N+1 base anchor exceeds maximum Tier N base anchor after
-  quantization.
-- The rule passes at least Tiers 1, 2, 5, 10, 20, 50, and 100, with adjacent-tier
-  checks performed across the complete supported authored range.
-- No attribute increase is lost to display precision.
-- A next-tier ordinary replacement improves at least one declared role outcome.
-- Full-build overgear TTK and TTD remain within the existing activation bands.
-
-### Marginal-value gates
-
-- A fixed percentage remains valuable at every tier because its underlying damage,
-  healing, cooldown, or pressure basis scales.
-- No percentage attribute becomes universally best across all scenarios.
-- No rating attribute becomes mandatory outside its intended defensive role.
-- Percentage caps do not make an intended recipe allocation routinely wasted in a
-  canonical build.
-- Direct percentage secondary allocations retain the intended 5-12% scenario
-  advantage over an irrelevant equal-budget secondary.
 
 ## Documentation changes
 
@@ -611,14 +526,11 @@ Effective outcome    The complete character result after aggregation and caps
 
 1. Add explicit attribute unit/scaling classifications and v17 catalog rules.
 2. Implement direct percentage aggregation and the revised combat formulas.
-3. Add cap enforcement and over-cap comparison telemetry.
+3. Add cap enforcement.
 4. Revise the recipe allocator to materialize normalized budgets by unit class.
 5. Change Light Armor from Critical Chance to Maximum Health.
-6. Add tier-anchor and adjacent-tier dominance content validators.
-7. Update crafting, item, marketplace, vault, chat, and character presentation.
-8. Implement the selected v16-to-v17 equipment policy.
-9. Recalibrate costs, tempering, marginal values, TTK/TTD, and overgear gates.
-10. Run the complete activation analyzer before enabling v17 crafting.
+6. Update crafting, item, marketplace, vault, chat, and character presentation.
+7. Implement the selected v16-to-v17 equipment policy.
 
 ## Production readiness
 
@@ -626,11 +538,7 @@ The hybrid model is not production-ready until:
 
 - all current recipes pass the tier-anchor rule;
 - the new Light Armor profile is approved;
-- percentage caps are calibrated;
-- direct percentage costs pass marginal-value analysis;
-- adjacent-tier dominance is proven across the authored and projected tier range;
 - v16 compatibility behavior is selected and tested;
 - combat, crafting, tempering, comparison, marketplace, chat-link, simulation, and
   checkpoint tests pass;
-- the canonical TTK/TTD and overgear gates pass under one declared v17 model;
 - no shared or production database is modified automatically.

@@ -218,17 +218,3 @@ public sealed class RaidTrophyPurchase
     public int WeekKey { get; set; }
     public DateTimeOffset PurchasedAt { get; set; }
 }
-
-public sealed class RaidPowerRecommendationCacheEntry
-{
-    public string RaidBossId { get; set; } = string.Empty;
-    public int Tier { get; set; }
-    public string DefinitionHash { get; set; } = string.Empty;
-    public int RaidRulesVersion { get; set; }
-    public int PowerRatingAlgorithmVersion { get; set; }
-    public int CombatRulesVersion { get; set; }
-    public int EquipmentBalanceVersion { get; set; }
-    public int SeedSetVersion { get; set; }
-    public string RecommendationJson { get; set; } = string.Empty;
-    public DateTimeOffset UpdatedAtUtc { get; set; }
-}

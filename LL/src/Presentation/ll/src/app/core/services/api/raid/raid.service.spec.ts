@@ -35,15 +35,6 @@ describe('RaidService', () => {
     });
   });
 
-  it('maps the local roster shortcut to the development endpoint', () => {
-    service.fillDevelopmentRoster('raid-id', 0.75).subscribe();
-
-    expect(api.post).toHaveBeenCalledOnceWith(
-      'raids/raid-id/development/fill-roster',
-      { powerMultiplier: 0.75 },
-    );
-  });
-
   it('maps local raid creation to the development endpoint', () => {
     service.createDevelopment('raid-boss.hives-abyss', 2).subscribe();
 

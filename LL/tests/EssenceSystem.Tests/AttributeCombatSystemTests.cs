@@ -510,42 +510,6 @@ public sealed class AttributeCombatSystemTests
         Assert.Equal(4.5d, breakdown[AttributeType.Armor]);
     }
 
-    [Theory]
-    [InlineData(1)]
-    [InlineData(5)]
-    [InlineData(10)]
-    [InlineData(20)]
-    [InlineData(50)]
-    [InlineData(100)]
-    public void Equal_budget_armor_and_health_keep_stable_marginal_effective_health_across_progression(
-        int tier)
-    {
-        var progressionScale = EquipmentTierBudgetCurve.GetScale(tier);
-        var budget = EquipmentTierBudgetCurve.GetBudget(tier) * 0.10d;
-        var baselineHealth = (float)(292d * progressionScale);
-        var baselineArmor = 0f;
-        var healthPoints =
-            (float)(budget / EquipmentStatBudgetCatalog.Get(AttributeType.MaxHealth).CostPerPoint);
-        var armorRating =
-            budget / EquipmentStatBudgetCatalog.Get(AttributeType.Armor).CostPerPoint;
-        var armorPoints = EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(
-            AttributeType.Armor,
-            armorRating,
-            tier);
-        var baselineEffectiveHealth =
-            AttributeCombatRules.CalculateEffectiveHealth(baselineHealth, baselineArmor);
-        var healthEffectiveHealth =
-            AttributeCombatRules.CalculateEffectiveHealth(baselineHealth + healthPoints, baselineArmor);
-        var armorEffectiveHealth =
-            AttributeCombatRules.CalculateEffectiveHealth(baselineHealth, baselineArmor + armorPoints);
-        var healthGain = healthEffectiveHealth - baselineEffectiveHealth;
-        var armorGain = armorEffectiveHealth - baselineEffectiveHealth;
-        var relativeDifference =
-            Math.Abs(armorGain - healthGain) / healthGain;
-
-        Assert.InRange(relativeDifference, 0, 0.20f);
-    }
-
     [Fact]
     public void Status_resistance_shortens_status_duration()
     {

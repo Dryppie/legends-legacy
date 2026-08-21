@@ -66,7 +66,6 @@ describe('WorldTowerService', () => {
     service.acceptApplication('rally-id', 'application-id').subscribe();
     service.declineApplication('rally-id', 'application-id').subscribe();
     service.leaveRally('rally-id').subscribe();
-    service.fillDevelopmentRoster('rally-id').subscribe();
     service.startRally('rally-id').subscribe();
     service.contribute(4, 'ScoutWeakPoints', 3).subscribe();
 
@@ -76,7 +75,6 @@ describe('WorldTowerService', () => {
       ['world-tower/rallies/rally-id/applications/application-id/accept'],
       ['world-tower/rallies/rally-id/applications/application-id/decline'],
       ['world-tower/rallies/rally-id/leave'],
-      ['world-tower/rallies/rally-id/development/fill-roster'],
       ['world-tower/rallies/rally-id/start'],
       [
         'world-tower/floors/4/contributions',

@@ -363,7 +363,7 @@
 
       <section
         class="ll-card mt-4 p-3"
-        title="This is a general recommendation calibrated from several simulated party profiles. Vigor, build matchups, and room composition still affect a run."
+        title="Combat Rating summarizes the selected party's current combat stats. Vigor, build matchups, and room composition still affect a run."
       >
         <div class="ll-eyebrow">Dungeon Rating</div>
 
@@ -381,25 +381,6 @@
             </ng-container>
             <ng-template #partyPowerUnavailable>
               <div class="mt-1 text-xs text-zinc-400">Unavailable</div>
-            </ng-template>
-          </div>
-
-          <div>
-            <div class="ll-stat-label">Recommended Combat Rating</div>
-            <ng-container
-              *ngIf="
-                selectedRecommendedPartyPower() as recommended;
-                else recommendationPending
-              "
-            >
-              <div class="mt-1 font-serif text-xl tabular-nums text-white">
-                {{ displayCombatRating(recommended) | number: "1.0-0" }}
-              </div>
-            </ng-container>
-            <ng-template #recommendationPending>
-              <div class="mt-1 text-xs text-zinc-400">
-                {{ recommendationPendingLabel() }}
-              </div>
             </ng-template>
           </div>
         </div>

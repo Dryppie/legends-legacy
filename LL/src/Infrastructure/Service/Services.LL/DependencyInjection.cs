@@ -6,7 +6,6 @@ using Application.Interfaces.Services.LL.Administration;
 using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.CharacterActions;
-using Application.Interfaces.Services.LL.Balance;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Combat;
 using Application.Interfaces.Services.LL.Dungeons;
@@ -35,7 +34,6 @@ using Services.LL.Attributes;
 using Services.LL.Achievements;
 using Services.LL.Administration;
 using Services.LL.Authorization;
-using Services.LL.Balance;
 using Services.LL.Bonuses;
 using Services.LL.CharacterActions;
 using Services.LL.Colosseum;
@@ -184,10 +182,6 @@ public static class DependencyInjection
         services.AddScoped<IRegionService, RegionService>();
         services.AddScoped<IAreaService, AreaService>();
         services.AddScoped<IRegionOneContentDiagnostics, RegionOneContentDiagnostics>();
-        services.AddScoped<IAreaCombatSimulator, AreaCombatSimulator>();
-        services.AddScoped<IRegionAreaBalanceAnalyzer, RegionAreaBalanceAnalyzer>();
-        services.AddSingleton<ICombatDifficultyEvaluator, CombatDifficultyEvaluator>();
-        services.AddScoped<ICombatCalibrationService, CombatCalibrationService>();
         services.AddSingleton<IAreaExperienceBalanceProvider>(sp =>
             new JsonAreaExperienceBalanceProvider(
                 config,
@@ -265,8 +259,7 @@ public static class DependencyInjection
                 options => options.EncounterCadenceSeconds > 0 &&
                            options.MaximumOfflineHours > 0 &&
                            options.MaximumEncountersPerResolution > 0 &&
-                           options.MaximumBatchesPerResolution > 0 &&
-                           options.ReferenceWinRateBasisPoints is > 0 and <= 10_000,
+                           options.MaximumBatchesPerResolution > 0,
                 "Idle combat progression settings are invalid.")
             .ValidateOnStart();
         services.AddOptions<TemperingProgressionOptions>()
@@ -391,8 +384,6 @@ public static class DependencyInjection
         services.AddScoped<IDungeonPreviewRewardService, DungeonPreviewRewardService>();
         services.AddScoped<IDungeonMasteryService, DungeonMasteryService>();
         services.AddScoped<IDungeonVigorService, DungeonVigorService>();
-        services.AddScoped<DungeonSimulationEquipmentFactory>();
-        services.AddScoped<IDungeonRunSimulator, DungeonRunSimulator>();
         services.AddSingleton<IDungeonDelveDefinitionProvider>(sp =>
             new JsonDungeonDelveDefinitionProvider(
                 config,
@@ -436,13 +427,6 @@ public static class DependencyInjection
                 sp.GetRequiredService<JsonSerializerOptions>(),
                 sp.GetRequiredService<IOptions<ThreatAndTankingOptions>>().Value));
         services.AddScoped<IAbilityCatalogDiagnostics, AbilityCatalogDiagnostics>();
-        services.AddScoped<IAbilityBalanceSimulator, AbilityBalanceSimulator>();
-        services.AddScoped<IAbilityBalanceAuditService, AbilityBalanceAuditService>();
-        services.AddScoped<IAttributeMarginalValueAnalyzer, AttributeMarginalValueAnalyzer>();
-        services.AddScoped<ICanonicalCombatPacingSampleSource, CanonicalCombatPacingSampleSource>();
-        services.AddSingleton<IEquipmentCombatPacingArtifactStore>(
-            new EquipmentCombatPacingArtifactStore(contentRootPath));
-        services.AddScoped<IEquipmentCombatPacingAnalyzer, EquipmentCombatPacingAnalyzer>();
         services.AddScoped<IAbilityCatalogBehaviorDiagnostics>(sp =>
             new AbilityCatalogBehaviorDiagnostics(
                 sp.GetRequiredService<IAbilityCatalogProvider>(),
@@ -460,23 +444,8 @@ public static class DependencyInjection
         services.AddScoped<IEssenceAbilityProvider, EssenceSystemService>();
         services.AddScoped<IEssenceCombatLoadoutResolver, EssenceSystemService>();
         services.AddScoped<PowerBuildSnapshotFactory>();
-        services.AddScoped<CanonicalEquipmentBuildFactory>();
-        services.AddScoped<IWorldTowerDevelopmentRosterFactory, WorldTowerDevelopmentRosterFactory>();
-        services.AddScoped<IRaidDevelopmentRosterFactory, RaidDevelopmentRosterFactory>();
-        services.AddScoped<PowerAnalysisSimulationRunner>();
         services.AddScoped<PowerRatingService>();
         services.AddScoped<IPowerRatingService>(sp => sp.GetRequiredService<PowerRatingService>());
-        services.Configure<DungeonPowerCalibrationOptions>(
-            config.GetSection(DungeonPowerCalibrationOptions.SectionName));
-        services.AddSingleton<IDungeonPowerRecommendationStore, DungeonPowerRecommendationStore>();
-        services.AddScoped<IDungeonPowerAnalyzer, DungeonPowerAnalyzer>();
-        services.AddScoped<IDungeonReadinessService, DungeonReadinessService>();
-        services.Configure<RaidPowerCalibrationOptions>(
-            config.GetSection(RaidPowerCalibrationOptions.SectionName));
-        services.AddSingleton<IRaidPowerRecommendationStore, RaidPowerRecommendationStore>();
-        services.AddScoped<IRaidPowerAnalyzer, RaidPowerAnalyzer>();
-        services.AddScoped<IPowerAnalysisDiagnostics, PowerAnalysisDiagnostics>();
-        services.AddSingleton<IPowerPredictionTelemetryBuffer, PowerPredictionTelemetryBuffer>();
         services.AddScoped<IEssenceResonanceService, EssenceSystemService>();
         services.AddScoped<IEssenceCatalogService, EssenceCatalogService>();
         services.AddScoped<IEssenceCodexCollectionService, EssenceCodexCollectionService>();
@@ -506,10 +475,6 @@ public static class DependencyInjection
 
         services.AddOptions<WorldTowerOptions>()
             .Bind(config.GetSection(WorldTowerOptions.SectionName))
-            .PostConfigure(options =>
-                options.DevelopmentToolsEnabled =
-                    isDevelopment
-                    && config.GetValue<bool>("FeatureManagement:WorldTowerDevelopmentTools"))
             .Validate(options =>
                     !string.IsNullOrWhiteSpace(options.ServerId)
                     && options.FailedAttemptScoutingGain > 0
@@ -539,7 +504,6 @@ public static class DependencyInjection
                 Path.Combine(contentRootPath, config["Content:Root"] ?? "Data", "world-tower", "tower-floors.json"),
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IWorldTowerService, WorldTowerService>();
-        services.AddScoped<IWorldTowerBalanceAnalyzer, WorldTowerBalanceAnalyzer>();
         services.AddScoped<IWorldTowerWorkLeaseService, WorldTowerWorkLeaseService>();
         services.AddOptions<RaidOptions>()
             .Bind(config.GetSection(RaidOptions.SectionName))

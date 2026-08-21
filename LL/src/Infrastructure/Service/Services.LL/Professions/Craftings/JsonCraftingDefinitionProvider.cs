@@ -243,7 +243,7 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         {
             var cost = EquipmentStatBudgetCatalog.Get(attribute).CostPerPoint;
             for (var tier = EquipmentStatBudgetCatalog.MinimumTier;
-                 tier < EquipmentTierBudgetCurve.MaximumCalibrationTier;
+                 tier < EquipmentTierBudgetCurve.MaximumSupportedTier;
                  tier++)
             {
                 var previousMaximum = AttributeValueQuantizer.Quantize(

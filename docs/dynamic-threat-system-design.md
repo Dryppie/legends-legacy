@@ -14,12 +14,12 @@ The system must support all of the following:
 - Threat is tracked independently for each enemy.
 - Threat scales naturally from Region 1 through Region 10 and beyond.
 - Tanks can reliably hold ordinary attacks when performing their role correctly.
-- Exceptional damage or healing can matter, but the balance coefficients determine
+- Exceptional damage or healing can matter, but the authored coefficients determine
   how strongly it matters.
 - Taunt is reliable and never merely increases a random chance.
 - Bosses can deliberately bypass the tank through explicitly authored selectors.
 - Targeting is stable and does not bounce randomly between party members.
-- The complete behavior is measurable through the canonical combat analyzer.
+- The complete behavior is observable through combat telemetry and verifiable with mechanic-correctness tests.
 
 ## Current behavior and its limitations
 
@@ -108,7 +108,7 @@ The initial recommended event coefficients are:
 | Applying a normal condition          |     `0` initially | None unless authored  |
 | Explicit Threat effect               |          Authored | Defined by the effect |
 
-These are calibration defaults, not immutable constants. Each coefficient must
+These are authored defaults, not immutable constants. Each coefficient must
 be represented in one versioned options object and measured through canonical
 party simulations before activation.
 
@@ -145,7 +145,7 @@ It is not divided by the number of enemies. Dividing would make a healer less
 noticeable to each individual enemy merely because more enemies entered combat.
 
 Self-healing, regeneration, and lifesteal use the same effective-restoration rule.
-Their coefficients remain independently configurable if calibration shows that
+Their coefficients remain independently configurable if runtime observation shows that
 one source needs different behavior.
 
 ### Barrier Threat
@@ -215,7 +215,7 @@ Threat Generation: x4.0
 Heavy Armor Presence: +300%
 ```
 
-The x4.0 value is a calibration starting point. It is intended to let a tank with
+The x4.0 value is an authored starting point. It is intended to let a tank with
 substantially lower damage remain ahead of a dedicated damage character while
 leaving room for poor Threat generation, deaths, Threat reductions, and encounter
 mechanics to matter.
@@ -435,7 +435,7 @@ public sealed record ThreatSystemOptions(
 ```
 
 These values must not be scattered through combat resolution. Changing them
-changes encounter behavior and requires a new balance report. Production
+changes encounter behavior and requires focused mechanics verification. Production
 activation should reference a declared Threat model version in the same manner as
 the equipment balance version.
 
@@ -474,60 +474,6 @@ ExplicitSelector
 The character overview should display the final Threat Generation multiplier.
 Developer diagnostics should expose the full per-enemy table and its event-source
 breakdown.
-
-## Canonical analyzer contract
-
-The existing TTK/TTD analyzer measures whether the tank survives pressure. Threat
-verification must additionally measure whether the tank receives the intended
-pressure in a real four-role party.
-
-The canonical party contains:
-
-- one full-Heavy defensive build;
-- one sustain build;
-- one balanced build;
-- one offense build.
-
-At Tiers 1, 5, 10, 20, 50, and 100, the analyzer runs single-target, multi-enemy,
-Taunt, Stealth, and scripted-bypass scenarios over the same production combat
-engine.
-
-Initial activation gates:
-
-- After the opening second, the defensive build receives at least 95% of ordinary
-  `CurrentTarget` attacks in the canonical single-target party scenario.
-- Taunt redirects the next eligible ordinary action in 100% of valid cases.
-- Taunt remains effective for its exact authored duration.
-- A competitor that exceeds 110% of current-target Threat pulls aggro on the next
-  ordinary target resolution.
-- A competitor below the switching threshold never causes target oscillation.
-- Healing creates measurable Threat but does not overtake a correctly functioning
-  canonical tank under expected throughput.
-- Every enemy maintains an independent table in the multi-enemy scenario.
-- Tank death produces a valid replacement target before the enemy's next action.
-- Explicit random and area mechanics produce exactly the same target behavior with
-  Threat enabled or disabled.
-- Tank ordinary-target share varies by no more than 3 percentage points across
-  tier checkpoints.
-- Threat event totals reconcile with damage, healing, regeneration, lifesteal, and
-  Barrier telemetry within rounding tolerance.
-
-Calibration must also include adversarial scenarios:
-
-- offense damage increased substantially above the canonical value;
-- sustain healing increased substantially above the canonical value;
-- tank damage reduced to zero;
-- tank abilities disabled;
-- one, two, and three Heavy pieces;
-- two simultaneous tanks;
-- multiple Taunts during an existing Taunt;
-- summoned tanks and threat-producing summons;
-- long encounters that expose numerical growth or precision problems.
-
-The zero-damage tank scenario is diagnostic even though the initial dynamic model
-does not promise indefinite passive aggro. Its result tells us whether opening
-Threat, Heavy multipliers, Taunt cadence, and any future defensive Threat source
-need adjustment.
 
 ## Player-facing rules
 
@@ -579,17 +525,8 @@ Suggested glossary text:
 - Expose the multiplier in combat construction and character overview DTOs.
 - Replace flat Taunt bonus behavior with forced targeting and leader matching.
 - Audit and migrate existing `ModifyThreat` content.
-- Replace the benchmark's billion-point Threat pin with an explicit diagnostic lock.
 
-### Phase 5: Telemetry and analysis
-
-- Add Threat source totals and target-change events to combat telemetry.
-- Extend canonical party analysis with Threat-share and Taunt gates.
-- Run smoke, development, and activation seed counts at every tier checkpoint.
-- Calibrate coefficients without changing damage, healing, or equipment budget
-  formulas merely to make Threat pass.
-
-### Phase 6: Documentation and UI
+### Phase 5: Documentation and UI
 
 - Update the combat lexicon's targeting, Taunt, Stealth, and formula references.
 - Add the Threat Generation multiplier to the character overview.
@@ -608,11 +545,8 @@ checkpoints require an explicit compatibility decision: either migrate the saved
 runtime state, finish them under the old Threat model, or invalidate them during
 the version transition. The selected behavior must be documented before release.
 
-Existing balance baselines, combat snapshots, power-rating simulations, dungeon
-simulations, World Tower simulations, and ability-system tests must be regenerated
-or deliberately reconciled because target selection can change damage distribution
-without changing total authored damage.
+Saved combat snapshots must be deliberately reconciled because target selection can
+change damage distribution without changing total authored damage.
 
-No production activation should occur until the canonical Threat gates, existing
-TTK/TTD gates, deterministic replay tests, and encounter-specific regression tests
-all pass under the same declared model version.
+No production activation should occur until deterministic replay and mechanic-
+correctness tests pass under the same declared model version.

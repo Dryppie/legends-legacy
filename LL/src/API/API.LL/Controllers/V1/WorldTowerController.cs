@@ -128,21 +128,6 @@ public sealed class WorldTowerController : BaseController
             rallyId,
             request.CharacterId));
 
-    [HttpPost("rallies/{rallyId:guid}/development/fill-roster")]
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public async Task<ActionResult<Response<TowerRallyDto>>> FillDevelopmentRoster(
-        Guid rallyId,
-        [FromServices] IWebHostEnvironment environment)
-    {
-        if (!environment.IsDevelopment())
-            return NotFound();
-
-        return await Mediator.Send(
-            new FillTowerRallyWithDevelopmentCharactersCommand(
-                CurrentCharacterGuid,
-                rallyId));
-    }
-
     [HttpPost("rallies/{rallyId:guid}/start")]
     public async Task<ActionResult<Response<TowerAttemptResultDto>>> StartRally(Guid rallyId)
     {

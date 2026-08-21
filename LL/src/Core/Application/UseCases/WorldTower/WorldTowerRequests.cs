@@ -26,7 +26,6 @@ public sealed record DeclineTowerRallyApplicationCommand(Guid CharacterId, Guid 
 public sealed record LeaveTowerRallyCommand(Guid CharacterId, Guid RallyId) : ICommand<Response<TowerRallyDto>>;
 public sealed record UpdateTowerRallyLoadoutCommand(Guid CharacterId, Guid RallyId) : ICommand<Response<TowerRallyDto>>;
 public sealed record TransferTowerRallyLeadershipCommand(Guid CharacterId, Guid RallyId, Guid TargetCharacterId) : ICommand<Response<TowerRallyDto>>;
-public sealed record FillTowerRallyWithDevelopmentCharactersCommand(Guid CharacterId, Guid RallyId) : ICommand<Response<TowerRallyDto>>;
 [NonTransactional]
 public sealed record StartTowerRallyCommand(Guid CharacterId, Guid RallyId) : ICommand<Response<TowerAttemptResultDto>>;
 public sealed record ContributeToTowerCommand(Guid CharacterId, int FloorNumber, TowerContributionKind Kind, int Amount) : ICommand<Response<TowerFloorDetailDto>>;
@@ -189,23 +188,6 @@ public sealed class TransferTowerRallyLeadershipCommandHandler(IWorldTowerServic
             request.TargetCharacterId,
             cancellationToken);
         return result.Succeeded ? Response<TowerRallyDto>.Success(result.Value!) : Response<TowerRallyDto>.Fail(result.Error!);
-    }
-}
-
-public sealed class FillTowerRallyWithDevelopmentCharactersCommandHandler(IWorldTowerService tower)
-    : IRequestHandler<FillTowerRallyWithDevelopmentCharactersCommand, Response<TowerRallyDto>>
-{
-    public async Task<Response<TowerRallyDto>> Handle(
-        FillTowerRallyWithDevelopmentCharactersCommand request,
-        CancellationToken cancellationToken)
-    {
-        var result = await tower.FillRallyWithDevelopmentCharactersAsync(
-            request.CharacterId,
-            request.RallyId,
-            cancellationToken);
-        return result.Succeeded
-            ? Response<TowerRallyDto>.Success(result.Value!)
-            : Response<TowerRallyDto>.Fail(result.Error!);
     }
 }
 

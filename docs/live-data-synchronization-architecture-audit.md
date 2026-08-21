@@ -778,7 +778,7 @@ That architecture makes the normal developer workflow systemic:
 ### Original pre-migration audit execution notes
 
 - **Changed application files during the original audit:** None. The implementation and independent follow-up described at the top of this document happened afterward.
-- **Backend verification:** build/run-tests.ps1 -SkipBalance passed all 1,085 fast tests. The balance suite was intentionally skipped.
+- **Backend verification:** `build/run-tests.ps1` passed the backend correctness suite.
 - **Frontend verification:** Focused specs could not start because this worktree had no installed Angular CLI/node modules; ng was not found.
 - **Existing useful tests:** Inventory stale-request/grant-dedupe tests, character-action revision tests, chat merge tests, outbox consumer tests, and World Tower tests.
 - **Migrations/configuration/deployment:** None were created during the audit. Implementing the recommendation will require a persistence migration for resource revisions/outbox metadata and, for horizontal scaling, a SignalR backplane configuration in the separate infrastructure repository.

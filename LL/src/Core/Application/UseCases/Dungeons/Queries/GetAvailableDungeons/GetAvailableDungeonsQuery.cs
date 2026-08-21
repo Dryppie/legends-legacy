@@ -1,6 +1,5 @@
 using Application.MediatR.Markers;
 using Application.Interfaces.Services.LL.Dungeons;
-using Application.Interfaces.Services.LL.PowerRatings;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Items.Dtos;
 using AutoMapper;
@@ -26,7 +25,6 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
     private readonly IItemBaseRepository _itemBases;
     private readonly IDungeonSigilAssemblySettingsProvider _sigilAssemblySettings;
     private readonly IMapper _mapper;
-    private readonly IDungeonPowerRecommendationStore _powerRecommendations;
 
     public GetAvailableDungeonsQueryHandler(
         IDungeonDefinitions dungeonDefinitions,
@@ -37,7 +35,6 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         IDungeonMasteryService mastery,
         IItemBaseRepository itemBases,
         IDungeonSigilAssemblySettingsProvider sigilAssemblySettings,
-        IDungeonPowerRecommendationStore powerRecommendations,
         IMapper mapper)
     {
         _dungeonDefinitions = dungeonDefinitions;
@@ -49,7 +46,6 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         _itemBases = itemBases;
         _sigilAssemblySettings = sigilAssemblySettings;
         _mapper = mapper;
-        _powerRecommendations = powerRecommendations;
     }
 
     public async Task<DungeonHubDto> Handle(
@@ -97,7 +93,6 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
 
         foreach (var dungeon in dungeons)
         {
-            _powerRecommendations.TryGet(dungeon.Id, out var powerRecommendation);
             records.TryGetValue(dungeon.Id, out var record);
             masteryByDungeon.TryGetValue(dungeon.Id, out var mastery);
             var accessSnapshot = accessByDungeon[dungeon.Id];
@@ -116,10 +111,6 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 Difficulty = FormatDifficulty(dungeon.Grade),
                 Tier = dungeon.Tier,
                 Grade = FormatGrade(dungeon.Grade),
-                RecommendedPartyPower = powerRecommendation?.RecommendedPartyPower,
-                PowerRecommendationLowConfidence = powerRecommendation is not null &&
-                    (powerRecommendation.Confidence == PowerRatingConfidence.Low ||
-                     powerRecommendation.State == PowerAnalysisState.LowConfidence),
                 CanEnter = access.CanEnter,
                 MissingRequirements = [.. access.MissingRequirements],
                 EntryRequirements = _mapper.Map<List<DungeonEntryRequirementDto>>(access.EntryRequirements),

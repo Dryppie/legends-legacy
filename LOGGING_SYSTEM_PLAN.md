@@ -79,7 +79,7 @@ The repository has two .NET solution boundaries and several browser applications
 | `LL/src/Presentation/liveops`   | Angular LiveOps SPA                                                                 | Built into and served by `API.LiveOps`                                          | Packaged by `build/build-ll-liveops.ps1`; no separate runtime chart                                                 |
 | `LL/src/Presentation/dashboard` | Development-only Angular content workbench                                          | Local AdminDashboard API                                                        | Dockerfile exists, but no production chart and project documentation says it is not a production boundary           |
 
-The main API also owns hosted loops for outbox delivery, dungeon calibration, World Tower simulation/playback, and a title backfill (`LL/src/API/API.LL/Program.cs:122-129`). This matters operationally: filtering only for a future `ll-worker` pod would miss substantial background processing that currently runs inside the API pod.
+The main API also owns hosted loops for outbox delivery, World Tower simulation/playback, and a title backfill. This matters operationally: filtering only for a future `ll-worker` pod would miss substantial background processing that currently runs inside the API pod.
 
 The separate worker uses Quartz persistent storage, clustering, deterministic job identities, and graceful shutdown. Its chart is present but disabled by default (`LL/deploy/ll-backend/values.yaml:14-23`). Production overrides in `ll-infrastructure` determine whether it is actually enabled.
 

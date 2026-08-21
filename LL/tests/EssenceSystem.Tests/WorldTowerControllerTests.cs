@@ -8,10 +8,7 @@ using Domain.Models.WorldTower;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EssenceSystem.Tests;
@@ -50,13 +47,12 @@ public sealed class WorldTowerControllerTests
             rallyId,
             new WorldTowerController.UpdatePartiesRequest(
                 [new WorldTowerController.PartyAssignmentRequest(partyMemberId, 2)]));
-        await controller.FillDevelopmentRoster(rallyId, new TestWebHostEnvironment("Development"));
         await controller.StartRally(rallyId);
         await controller.Contribute(
             4,
             new WorldTowerController.ContributionRequest(TowerContributionKind.ScoutWeakPoints, 3));
 
-        Assert.Equal(18, sender.Requests.Count);
+        Assert.Equal(17, sender.Requests.Count);
         Assert.Equal(characterId, Assert.IsType<GetWorldTowerOverviewQuery>(sender.Requests[0]).CharacterId);
 
         var floor = Assert.IsType<GetTowerFloorQuery>(sender.Requests[1]);
@@ -94,12 +90,10 @@ public sealed class WorldTowerControllerTests
         Assert.Equal((characterId, rallyId), (parties.CharacterId, parties.RallyId));
         var partyAssignment = Assert.Single(parties.Assignments);
         Assert.Equal((partyMemberId, 2), (partyAssignment.CharacterId, partyAssignment.PartySlot));
-        var fill = Assert.IsType<FillTowerRallyWithDevelopmentCharactersCommand>(sender.Requests[15]);
-        Assert.Equal((characterId, rallyId), (fill.CharacterId, fill.RallyId));
-        var start = Assert.IsType<StartTowerRallyCommand>(sender.Requests[16]);
+        var start = Assert.IsType<StartTowerRallyCommand>(sender.Requests[15]);
         Assert.Equal((characterId, rallyId), (start.CharacterId, start.RallyId));
 
-        var contribute = Assert.IsType<ContributeToTowerCommand>(sender.Requests[17]);
+        var contribute = Assert.IsType<ContributeToTowerCommand>(sender.Requests[16]);
         Assert.Equal(characterId, contribute.CharacterId);
         Assert.Equal(4, contribute.FloorNumber);
         Assert.Equal(TowerContributionKind.ScoutWeakPoints, contribute.Kind);
@@ -165,20 +159,6 @@ public sealed class WorldTowerControllerTests
         Assert.NotEmpty(typeof(WorldTowerController).GetCustomAttributes<AuthorizeAttribute>(inherit: true));
     }
 
-    [Fact]
-    public async Task DevelopmentRosterEndpointReturnsNotFoundOutsideDevelopment()
-    {
-        var sender = new RecordingSender();
-        var controller = CreateController(sender, Guid.NewGuid());
-
-        var result = await controller.FillDevelopmentRoster(
-            Guid.NewGuid(),
-            new TestWebHostEnvironment("Production"));
-
-        Assert.IsType<NotFoundResult>(result.Result);
-        Assert.Empty(sender.Requests);
-    }
-
     private static WorldTowerController CreateController(
         RecordingSender sender,
         Guid? characterId)
@@ -240,13 +220,4 @@ public sealed class WorldTowerControllerTests
             throw new NotSupportedException();
     }
 
-    private sealed class TestWebHostEnvironment(string environmentName) : IWebHostEnvironment
-    {
-        public string ApplicationName { get; set; } = "Tests";
-        public IFileProvider WebRootFileProvider { get; set; } = new NullFileProvider();
-        public string WebRootPath { get; set; } = string.Empty;
-        public string EnvironmentName { get; set; } = environmentName;
-        public string ContentRootPath { get; set; } = string.Empty;
-        public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
-    }
 }

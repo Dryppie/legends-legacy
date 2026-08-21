@@ -6,7 +6,7 @@
 **Surface:** World Map, in the Raids rail alongside Dungeons
 **Guild involvement:** none
 
-**Implementation note:** Phases 1–3 are implemented. Simulation-backed power calibration is shipped behind `RaidPowerCalibration:Enabled` and uses authored values as a safe fallback until calibrated rows exist. Launch content is **The Hive's Abyss** (tiers 1–3) and **Sanguine Horror** (tiers 2–3). The Ant King is an 8% Vanguard boss replacement; Bloodthorn Vine is a 22% rare Ward guard.
+**Implementation note:** Phases 1–3 are implemented. Recommended wing power is authored with each raid tier. Launch content is **The Hive's Abyss** (tiers 1–3) and **Sanguine Horror** (tiers 2–3). The Ant King is an 8% Vanguard boss replacement; Bloodthorn Vine is a 22% rare Ward guard.
 
 ---
 
@@ -314,10 +314,9 @@ simulation** of the current assignment, protected by a 30-per-hour leader rate l
   `ReinforcementPenalty` / `WardBreak`.
 - Reports overall: predicted raid outcome band (Repelled → Slain) with confidence.
 
-This is `DungeonReadinessService` pointed at a raid: simulate the real snapshots in batches, report
-a band, **persist nothing, grant nothing, spend nothing**. That service already establishes the
-exact vocabulary (Very Unlikely / Risky / Uncertain / Favored / Comfortable) and the Wilson-interval
-approach, so this is a re-point rather than new invention.
+The preview simulates the real locked snapshots in batches, reports a band, and
+**persists nothing, grants nothing, and spends nothing**. Its confidence display
+uses a local Wilson interval.
 
 Rate-limit it (e.g. 30/hour per leader) purely to protect the CPU, not as a game mechanic. The
 preview should feel free, because a leader who is afraid to experiment will just guess.
@@ -386,8 +385,8 @@ Contribution and lane outputs both read `EntityStats.DamageDone`. Four verified 
 - **Tick budget must be explicit.** `FastCombatEngineOptions.MaxTicks` defaults to 6000 and the
   executor's `ExecuteAsync` / `ExecuteWithCheckpointsAsync` hardcode 6000, but
   `CombatSimulationOptions` — the record callers actually construct for `ExecuteSimulationAsync` —
-  defaults to **1800**. State the raid tick budget per lane in the raid boss definition; the entire
-  difficulty model is calibrated against it.
+  defaults to **1800**. State the raid tick budget per lane in the raid boss definition so runtime
+  behavior is explicit and stable.
 
 ### 7.4 A note on threat, since there are no roles
 
@@ -595,13 +594,6 @@ long tail.
         ]
       },
 
-      "balanceBenchmark": {
-        "characterLevel": 30,
-        "equipmentTier": 1,
-        "equipmentRarity": "Rare",
-        "essenceCount": 4
-      },
-
       "rewardTableIds": {
         "slain": "reward.raid.hives_abyss.tier1.slain",
         "broken": "reward.raid.hives_abyss.tier1.broken",
@@ -638,46 +630,6 @@ reinforcements at 50% makes the Flank wing's job feel consequential retroactivel
 
 There is no declarative phase container and nothing consumes `RaidEncounterSourceContext.PhaseIndex`
 today; model phases as ability triggers, not as an engine phase machine.
-
----
-
-## 11. Tuning
-
-### 11.1 Sizing the raid boss
-
-```
-BossHealth = ExpectedVanguardDPS × TargetFightSeconds × ClearTargetFraction
-
-ExpectedVanguardDPS = per-character DPS at recommendedWingPower × laneSlots
-TargetFightSeconds  = 240–420   (well inside the 600 s tick budget)
-ClearTargetFraction = 0.85      // a well-allocated raid at recommended power should usually win
-```
-
-Critically, `ExpectedVanguardDPS` must be measured **with `WardBreak` at its expected value**, not
-at zero and not at one. Calibrate against a reference allocation, not a best case — otherwise every
-raid is either trivial or impossible.
-
-### 11.2 Recommended wing power
-
-Do not author it by hand. Follow `DungeonPowerAnalyzer`: build canonical rosters from
-`CanonicalEquipmentBuildFactory` across the equipment tier/rarity ladder, allocate them to wings by
-a reference rule, run fixed-seed resolutions, and publish the lowest rung reaching the 85% clear
-target with a Wilson interval. Publish `RecommendedWingPower` per lane plus
-`Lower/UpperRecommendedPower` and `Confidence`. Cache as
-`DungeonPowerRecommendationCacheEntries` does, loaded by a `RaidPowerCalibrationWorker` behind a
-config flag.
-
-Reference allocation for calibration: fill Flank with the Area profile, Ward with Sustain, Vanguard
-with Offense + Defensive. This reuses the five existing canonical profiles and, usefully, encodes
-the intended lane identities into the calibration itself.
-
-### 11.3 Version gates
-
-Add `RaidRulesVersion` (starting at 1) alongside `PowerRatingAlgorithm.Version` (25),
-`CombatRulesVersion` (14) and the rating-definition version (16). Bumping any invalidates cached
-recommended power. **raid boss health and lane parameters must not change a raid already in
-`Mustering`** — pin the resolved tier definition (or its hash) onto `RaidRun` at creation, so a
-content deploy cannot alter a raid people have already signed up for.
 
 ---
 
@@ -801,8 +753,8 @@ Free raid creation. Weekly reward cap. Auto-expiry for invalid musters. Implemen
 `CombatantFactory` raid branch and extract the snapshot→combatant service.
 
 **Phase 2 — Depth (shipped).** Battle Plan preview (§6). Per-wing playback. Tier II + a second raid boss in
-Meran. raid boss-site Trophy vendor. Raid-exclusive blueprint families. Simulation-backed recommended
-wing power via `RaidPowerCalibrationWorker`. Raid leaderboards.
+Meran. raid boss-site Trophy vendor. Raid-exclusive blueprint families. Authored recommended
+wing power. Raid leaderboards.
 
 **Phase 3 — Spectacle (shipped).** Tier III. HP-gated raid boss phases that reach across lanes (a raid boss that
 summons at 50%, making a cleared Flank retroactively valuable). First-kill world announcements and
@@ -863,8 +815,7 @@ and `TauntThreatBonus` · `CharacterSnapshot` + `ICharacterSnapshotService.Creat
 `TowerCombatPlayback` / `TowerCombatPlaybackArtifact` · `TowerEchoClear` weekly reward lock ·
 `WorldTowerService.GetWeekKey` ISO week · `tower-floors.json` boss schema ·
 `WorldTowerGuardianScaling.Apply` ·
-`DungeonReadinessService` Wilson-interval readiness · `DungeonPowerAnalyzer` +
-`CanonicalEquipmentBuildFactory` · `DungeonPendingRewardWriter` / `DungeonRunRewardClaimer` ·
+`DungeonPendingRewardWriter` / `DungeonRunRewardClaimer` ·
 `IRewardRoller` + `reward-tables.json` · `GameHub` + `Audience.World()` + outbox consumers ·
 `WorldTowerChatGameEventOutboxConsumer` world-chat pattern · `LeaderboardBoardKey` infrastructure ·
 `EntityStats.DamageDone` · advisory lock helpers.
@@ -873,8 +824,8 @@ and `TauntThreatBonus` · `CharacterSnapshot` + `ICharacterSnapshotService.Creat
 raid domain models, EF configs, DbSets and migrations · JSON raid-boss and Trophy-vendor catalogs with
 startup validation · the `CombatantFactory` raid branch and shared `ISnapshotCombatantBuilder` ·
 three-lane resolution and lane-fair, summon-aware contribution · Battle Plan previews · leased
-resolution worker and Brotli playback artifacts · free raid creation · persisted, version-gated
-`RaidPowerCalibrationWorker` recommendations · World Map rail, muster/result UI, routes and state-sync
+resolution worker and Brotli playback artifacts · free raid creation · authored recommended
+wing power · World Map rail, muster/result UI, routes and state-sync
 invalidation · Trophy vendor and raid blueprint families · aggregate and per-boss speed leaderboards ·
 first-kill titles and world-chat announcements · explicit cancellation and leadership transfer ·
 Tier II/III and cross-region raid-boss content.

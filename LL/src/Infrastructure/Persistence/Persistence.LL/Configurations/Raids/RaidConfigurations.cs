@@ -117,15 +117,3 @@ public sealed class RaidTrophyPurchaseConfiguration : IEntityTypeConfiguration<R
         builder.HasIndex(x => new { x.CharacterId, x.VendorItemId });
     }
 }
-
-public sealed class RaidPowerRecommendationCacheEntryConfiguration
-    : IEntityTypeConfiguration<RaidPowerRecommendationCacheEntry>
-{
-    public void Configure(EntityTypeBuilder<RaidPowerRecommendationCacheEntry> builder)
-    {
-        builder.HasKey(x => new { x.RaidBossId, x.Tier });
-        builder.Property(x => x.RaidBossId).HasMaxLength(128);
-        builder.Property(x => x.DefinitionHash).HasMaxLength(64).IsRequired();
-        builder.Property(x => x.RecommendationJson).HasColumnType("jsonb").IsRequired();
-    }
-}

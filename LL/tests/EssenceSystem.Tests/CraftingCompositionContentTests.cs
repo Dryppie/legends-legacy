@@ -294,7 +294,7 @@ public sealed class CraftingCompositionContentTests
     }
 
     [Fact]
-    public void CalibratedBlueprintProfilesRetainTheirReviewedBonusBudgetsAndWeights()
+    public void ReviewedBlueprintProfilesRetainTheirBonusBudgetsAndWeights()
     {
         var provider = CreateProvider();
         var execution = provider.GetBlueprint("blueprint_execution")!;

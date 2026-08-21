@@ -91,22 +91,6 @@
           </button>
           <button
             class="secondary ll-button"
-            *ngIf="
-              vm.developmentToolsEnabled &&
-              vm.canManageApplications &&
-              vm.participants.length < vm.requiredSlots
-            "
-            [disabled]="!!action()"
-            (click)="fillDevelopmentRoster()"
-          >
-            {{
-              action() === "development-fill"
-                ? "Filling test roster..."
-                : "Fill with floor test roster"
-            }}
-          </button>
-          <button
-            class="secondary ll-button"
             *ngIf="vm.canManageParties && vm.participants.length > 1"
             [disabled]="!!action()"
             (click)="autoBalanceParties(vm)"

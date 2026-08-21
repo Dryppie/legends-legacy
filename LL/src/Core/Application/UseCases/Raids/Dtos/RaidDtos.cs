@@ -1,6 +1,5 @@
 using Domain.Models.Combat;
 using Domain.Models.Raids;
-using Application.Interfaces.Services.LL.PowerRatings;
 
 namespace Application.UseCases.Raids.Dtos;
 
@@ -29,15 +28,7 @@ public sealed record RaidBossTierSummaryDto(
 public sealed record RaidRecommendedWingPowerDto(
     int Rearguard,
     int Vanguard,
-    int MainGuard,
-    int RearguardLower,
-    int RearguardUpper,
-    int VanguardLower,
-    int VanguardUpper,
-    int MainGuardLower,
-    int MainGuardUpper,
-    PowerRatingConfidence Confidence,
-    bool IsCalibrated);
+    int MainGuard);
 
 public sealed record RaidRunSummaryDto(
     Guid Id,

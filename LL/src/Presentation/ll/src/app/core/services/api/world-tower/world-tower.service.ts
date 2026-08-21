@@ -149,7 +149,6 @@ export interface TowerRally {
   canStart: boolean;
   canUpdateLoadout: boolean;
   canTransferLeadership: boolean;
-  developmentToolsEnabled: boolean;
   attempt: TowerAttemptSummary | null;
 }
 
@@ -472,12 +471,6 @@ export class WorldTowerService {
     return this.api.post(`world-tower/rallies/${rallyId}/leader`, {
       characterId,
     });
-  }
-
-  fillDevelopmentRoster(rallyId: string): Observable<TowerRally> {
-    return this.api.post(
-      `world-tower/rallies/${rallyId}/development/fill-roster`,
-    );
   }
 
   startRally(rallyId: string): Observable<TowerAttemptResult> {

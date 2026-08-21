@@ -31,10 +31,6 @@ public class CreatureScaler : ICreatureScaler
         ApplyArchetype(creature);
         ApplyDamageProfile(creature);
         ApplyDefenseProfile(creature);
-        //ApplyElementProfile(creature);
-        //ApplyBossProfile(creature);
-        //ApplyCreatureFactors(creature);
-        //ApplyRubberBanding(creature, area, D);
         ApplyStatOverrides(creature);
         SyncHealth(creature);
         ClampCrits(creature, scaling);
@@ -107,76 +103,6 @@ public class CreatureScaler : ICreatureScaler
         ScaleSingle(creature, AttributeType.Resistance, p.MagicalDefenseBias);
         ScaleSingle(creature, AttributeType.Resistance, p.ResistBias);
     }
-
-    //private static void ApplyElementProfile(Creature creature)
-    //{
-    //    var p = ElementProfiles.Get(creature.ElementProfileId);
-
-    //    ScaleSingle(creature, AttributeType.Resistance, p.FireResMultiplier);
-    //    ScaleSingle(creature, AttributeType.Resistance, p.WaterResMultiplier);
-    //    ScaleSingle(creature, AttributeType.Resistance, p.EarthResMultiplier);
-    //    ScaleSingle(creature, AttributeType.Resistance, p.AirResMultiplier);
-    //}
-
-    //private static void ApplyBossProfile(Creature creature)
-    //{
-    //    if (!creature.IsBoss || creature.BossRank == BossRank.None)
-    //        return;
-
-    //    var p = BossProfiles.Get(creature.BossRank);
-
-    //    ScaleGroup(creature, AttributeType.MaxHealth, AttributeType.MaxHealth, p.HealthMultiplier);
-    //    ScaleGroup(creature, AttributeType.Power, AttributeType.Power, p.DamageMultiplier);
-    //    ScaleGroup(creature, AttributeType.Armor, AttributeType.Resistance, p.DefenseMultiplier);
-
-    //    ScaleSingle(creature, AttributeType.AttackSpeed, p.SpeedMultiplier);
-    //    ScaleSingle(creature, AttributeType.Cooldown, p.CdrMultiplier);
-    //}
-
-    //private static void ApplyCreatureFactors(Creature creature)
-    //{
-    //    ScaleGroup(creature, AttributeType.MaxHealth, AttributeType.MaxHealth, creature.HealthFactor);
-    //    ScaleGroup(creature, AttributeType.Power, AttributeType.Power, creature.DamageFactor);
-    //    ScaleGroup(creature, AttributeType.Armor, AttributeType.Resistance, creature.DefenseFactor);
-    //    ScaleSingle(creature, AttributeType.AttackSpeed, creature.SpeedFactor);
-    //}
-
-    //private static void ApplyRubberBanding(Creature creature, Area ctx, int effectiveD)
-    //{
-    //    var min = ctx.Area.TargetPsMin;
-    //    var max = ctx.Area.TargetPsMax;
-
-    //    if (ps <= 0 || min <= 0 || max <= 0)
-    //        return;
-
-    //    // Overgeared → cap effective difficulty for HP + damage
-    //    if (ps > max)
-    //    {
-    //        var clampedD = ctx.Area.DifficultyTier + MonsterScalingConstants.OvergearedClampDeltaD;
-    //        if (effectiveD > clampedD)
-    //        {
-    //            var ratio = (float)clampedD / effectiveD;
-
-    //            ScaleGroup(creature, AttributeType.MaxHealth, AttributeType.MaxHealth, ratio);
-    //            ScaleSingle(creature, AttributeType.Power, ratio);
-    //            ScaleSingle(creature, AttributeType.Power, ratio);
-    //        }
-
-    //        return;
-    //    }
-
-    //    // Undergeared → reduce HP only
-    //    if (ps < min)
-    //    {
-    //        var weaknessFactor = (float)ps / min;
-    //        var hpMult = Math.Max(
-    //            (float)MonsterScalingConstants.UndergearedMinTtkHpMultiplier,
-    //            weaknessFactor
-    //        );
-
-    //        ScaleGroup(creature, AttributeType.MaxHealth, AttributeType.MaxHealth, hpMult);
-    //    }
-    //}
 
     private static void ApplyStatOverrides(Creature creature)
     {

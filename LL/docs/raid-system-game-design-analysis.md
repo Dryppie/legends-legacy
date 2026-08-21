@@ -27,7 +27,7 @@ The preferred direction is:
 
 > **Raids are asynchronous shared build-puzzle encounters where three specialized preparation parties create visible consequences, then reunite for one combined automated boss encounter. Players use clear forecasts and combat diagnostics to adapt their builds and master boss-specific mechanics across inexpensive repeated attempts.**
 
-Overall Raid design score after the structural redesign: **7 / 10**. The architecture, idle compatibility, party identities, and climax are strong; strategic communication, content calibration, reward incentives, and social control still need work.
+Overall Raid design score after the structural redesign: **7 / 10**. The architecture, idle compatibility, party identities, and climax are strong; strategic communication, content tuning, reward incentives, and social control still need work.
 
 ## 2. Current Raid System
 
@@ -106,12 +106,6 @@ The strongest implemented pillar is asynchronous cooperation. Players do not nee
 
 The leader must distribute player power across three preparation battles whose results are linked to a combined climax. No party can simply be ignored: Rearguard determines surviving adds, Vanguard determines boss defenses, and Main Guard determines signature-mechanic strength. Every participant then appears in the Final Assault. This is the system's most distinctive strategic idea. It is strong at the structural level, although exact slot positioning still has less depth than the UI complexity suggests.
 
-### Automated build checks
-
-The calibration profiles now express three direct pressures: Area performance for Rearguard, focused offense for Vanguard, and Sustain for Main Guard. The Final Assault uses the whole roster. The content also contains summons, attrition, physical/magical defenses, barriers, and overtime. The intent is that different characters and builds belong in different parties without excluding anyone from the boss.
-
-This pillar is only partially realized. Players are shown recommended power and simulation readiness, but not enough encounter-specific explanation to understand which Essence, damage type, sustain tool, or targeting behavior should change.
-
 ### Boss mastery and tier progression
 
 Players unlock higher tiers by Slaying the prior tier as participants, then farm boss-specific Trophies and blueprints. This creates a boss mastery ladder. It is present but shallow because tiers mainly increase health, offense, defenses, enemy counts, timers, and reward quantities rather than introducing clear new rules.
@@ -178,7 +172,7 @@ Current position on the desired spectrum:
 
 > **Closer to “assign power correctly, then gain more stats” than to “build differently for this boss,” but with enough underlying combat hooks to improve without replacing the architecture.**
 
-Evidence: `CharacterSnapshotRepository.cs`, `ISnapshotCombatantBuilder`, `RaidPowerCalibration.cs`, `RaidCombatResolver.cs`, and the absence of Doctrine data in Raid snapshots.
+Evidence: `CharacterSnapshotRepository.cs`, `ISnapshotCombatantBuilder`, `RaidCombatResolver.cs`, and the absence of Doctrine data in Raid snapshots.
 
 ## 6. Encounter and Boss Design
 
@@ -918,4 +912,4 @@ It is already structurally distinct from normal combat. The three-party preparat
 
 The system is not yet strategically expressive enough for long-term expansion across ten regions. Current players can make meaningful allocation decisions, but insufficient encounter explanation and failure diagnostics push them back toward power ratings and general-purpose damage. Damage-only contribution, weekly reward ordering, limited roster control, and mostly numerical tier scaling create unhealthy behavior around an otherwise sound loop.
 
-The recommendation is to **keep the asynchronous three-party preparation and combined-boss architecture and stop adding bosses temporarily**. First calibrate the newly implemented Main Guard and Final Assault, then fix weekly rewards, contribution fairness, roster readiness/control, variant forecasting, and failure diagnostics. Next revise the existing boss identities so each higher tier teaches one new rule. Once those changes are proven, the architecture is worth building upon.
+The recommendation is to **keep the asynchronous three-party preparation and combined-boss architecture and stop adding bosses temporarily**. First playtest the newly implemented Main Guard and Final Assault, then fix weekly rewards, contribution fairness, roster readiness/control, variant forecasting, and failure diagnostics. Next revise the existing boss identities so each higher tier teaches one new rule. Once those changes are proven, the architecture is worth building upon.

@@ -180,16 +180,6 @@ The resolver:
 
 This keeps Combat Styles as a build-shaping layer over equipped Essence abilities instead of giving styles their own active ability list.
 
-### Balance Simulation
-
-`ICombatStyleBalanceSimulator` provides deterministic style-vs-style simulations for tuning. It builds a synthetic shared ability suite, creates base-style and focus-path candidates from static definitions, runs round-robin encounters through `FastCombatEngine`, and returns ranked style/focus results with battle summaries.
-
-The Admin Dashboard diagnostics API exposes this through:
-
-- `POST /api/v1/diagnostics/combat-style-balance-simulation`
-
-The simulator is intended as a balance report generator, not as a final authority on tuning. It gives repeatable signals for win rate, duration, and focus spread so manual balancing can be guided by combat output instead of intuition alone.
-
 ### Implemented Combat Rules
 
 Defensive:
@@ -357,26 +347,6 @@ All current styles now have level 10, level 25, and level 40 focus behavior.
 
 The current milestone implementation is intentionally numeric/scaling-focused rather than adding new ability-like behavior at each tier. Later tuning can add more expressive milestone mechanics if simulations show the identities need sharper differentiation.
 
-### Proc Coefficient Balance Depth
-
-The JSON ability/status catalog now has explicit `ProcCoefficient` values on all authored effects. The current pass uses broad balance buckets:
-
-- Full single-target active hits generally remain `1.0`.
-- AoE and two-target effects are reduced.
-- Status riders, buffs, debuffs, summons, and resource effects are reduced.
-- DoT ticks and reactive damage are reduced further.
-
-Future tuning should validate these coefficients through the combat style balance simulator and per-build balance reports rather than treating the first pass as final.
-
-### Balance Simulator Interpretation
-
-The balance simulator now exists and is available through the Admin Dashboard diagnostics API. What remains is the tuning workflow around it:
-
-- Define acceptable win-rate and matchup-duration bands.
-- Run reports after each major style or ability tuning pass.
-- Convert outlier reports into concrete rule, coefficient, or focus-path adjustments.
-- Add scenario-specific suites when real encounter telemetry shows gaps in the synthetic ability suite.
-
 ### Dungeon UI Integration
 
 Active dungeon state displays the snapshotted style/focus. Dungeon access/reward preview cards do not yet include active style, build identity, or dungeon-specific style recommendations.
@@ -520,8 +490,7 @@ Deployment implications:
 
 Recommended next steps:
 
-1. Use the Admin Dashboard balance simulator to establish acceptable win-rate and duration bands, then tune outliers.
-2. Add dungeon preview build identity display.
-3. Add generic rule-trigger logging so capped rules and resource gains can be inspected from combat reports.
-4. Add browser-level visual QA for the Combat Styles page.
-5. Add richer Support and Controller encounter-facing mechanics once healing, barriers, and status-control telemetry are available.
+1. Add dungeon preview build identity display.
+2. Add generic rule-trigger logging so capped rules and resource gains can be inspected from combat reports.
+3. Add browser-level visual QA for the Combat Styles page.
+4. Add richer Support and Controller encounter-facing mechanics once healing, barriers, and status-control telemetry are available.

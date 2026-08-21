@@ -10,9 +10,6 @@ Implemented locally on July 15, 2026:
 - Expected group size normalizes the XP assigned to each creature in an encounter.
 - Prophecy character XP remains a percentage of the next-level requirement.
 - Idle combat supports 24 hours of offline time and processes at most 500 encounters per batch.
-- The deterministic balance snapshot covers area rates, victory rates, combat bonuses, Prophecy shares, offline contribution, and level milestones.
-
-The current perfect-combat simulation reaches level 100 in approximately 1,446.32 hours. At 24 successful combat hours per day, that is approximately 60.26 days. At the configured 85% reference win rate, it is approximately 70.9 elapsed days.
 
 ## Character requirement curve
 
@@ -36,7 +33,7 @@ The settings live in `LL/src/API/API.LL/Data/progression/character-experience.js
 }
 ```
 
-The coefficient was recalibrated from 74 to 93 when area XP moved to the fixed throughput model. This preserves the two-month level-100 target while allowing early areas to start at approximately 10,000 XP/hour.
+The coefficient is 93 in the current authored progression curve.
 
 Representative requirements are:
 
@@ -148,31 +145,6 @@ Idle encounter character XP is resolved in this order:
 6. Grant the result on victory, or the configured retained portion on defeat.
 ```
 
-At an 85% victory rate, effective base throughput is approximately:
-
-```text
-effective XP/hour = nominal area XP/hour × 0.85
-```
-
-The reference victory rate is used only by balance simulations. Actual encounter results determine runtime rewards.
-
-## Current milestone simulation
-
-The simulator always selects the highest-throughput area available at the character's current level.
-
-| Reached level | Cumulative perfect-combat hours |
-| ------------: | ------------------------------: |
-| 10 | 2.38 |
-| 20 | 17.80 |
-| 30 | 54.67 |
-| 40 | 117.02 |
-| 45 | 158.12 |
-| 60 | 334.13 |
-| 75 | 625.47 |
-| 100 | 1,446.32 |
-
-Early milestones are faster than in the previous creature-XP model, while the increased quadratic requirement keeps the full level-100 journey at approximately two months of uninterrupted successful combat.
-
 ## Prophecy contribution
 
 Prophecy XP is resolved as a percentage of the character's next-level requirement and stored in the reward snapshot. It does not use absolute early-level XP floors.
@@ -195,8 +167,6 @@ When adding an area:
 1. Assign a difficulty tier based on the intended combat and progression band.
 2. Author valid group-size probabilities; they do not need to match other areas in the tier.
 3. Do not add creature XP values to balance idle-area character progression.
-4. Re-run the progression snapshot after adding or changing an unlock tier.
-5. Check milestone timing at 70%, 85%, and 100% victory rates.
 
 Multiple areas may share a difficulty tier. They will have the same nominal XP/hour even when their group sizes differ. Such areas can differentiate themselves through enemies, loot, gathering, risk, and other rewards.
 
@@ -233,8 +203,6 @@ Automated coverage verifies:
 - unlimited leveling and overflow preservation;
 - area tier targets using the 1.08 multiplier;
 - higher per-creature XP in a lower-density area;
-- milestone timing and the two-month level-100 target;
-- 70%, 85%, and 100% area throughput projections;
 - Prophecy weekly contribution bounds;
 - 24-hour offline contribution.
 

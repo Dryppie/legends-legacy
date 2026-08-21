@@ -24,8 +24,6 @@ on:
 jobs:
   gate:
     uses: ./.github/workflows/backend-gate.yml
-    with:
-      run_full_balance: false
 
   setup:
     needs: gate

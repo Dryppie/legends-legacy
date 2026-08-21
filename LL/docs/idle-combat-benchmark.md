@@ -19,7 +19,7 @@ Benchmark mode uses the fixed instant `2026-08-18T12:00:00Z` by default. After e
 The API then:
 
 - Replaces the normal `TimeProvider` with a fixed provider.
-- Disables outbox, tower, tournament, calibration, backfill, and development progression workers.
+- Disables outbox, tower, tournament, raid-resolution, backfill, and development progression workers.
 - Uses the isolated benchmark database.
 - Resolves exactly 8,641 due actions through the normal authenticated API endpoint.
 

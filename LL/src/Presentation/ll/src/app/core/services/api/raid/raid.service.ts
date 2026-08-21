@@ -22,14 +22,6 @@ export interface RaidRecommendedWingPower {
   rearguard: number;
   vanguard: number;
   mainGuard: number;
-  rearguardLower: number;
-  rearguardUpper: number;
-  vanguardLower: number;
-  vanguardUpper: number;
-  mainGuardLower: number;
-  mainGuardUpper: number;
-  confidence: 'Low' | 'Medium' | 'High';
-  isCalibrated: boolean;
 }
 
 export interface RaidBossTierSummary {
@@ -418,15 +410,6 @@ export class RaidService {
     }>,
   ): Observable<RaidRun> {
     return this.api.put(`raids/${raidRunId}/parties`, { assignments });
-  }
-
-  fillDevelopmentRoster(
-    raidRunId: string,
-    powerMultiplier: number,
-  ): Observable<RaidRun> {
-    return this.api.post(`raids/${raidRunId}/development/fill-roster`, {
-      powerMultiplier,
-    });
   }
 
   commence(raidRunId: string): Observable<RaidRun> {

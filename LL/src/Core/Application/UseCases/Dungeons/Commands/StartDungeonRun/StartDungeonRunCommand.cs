@@ -2,7 +2,6 @@ using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
-using Application.Interfaces.Services.LL.PowerRatings;
 using Application.MediatR.Markers;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Inventories.Dtos;
@@ -26,7 +25,6 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
     private readonly ICharacterService _characters;
     private readonly IInventoryService _inventoryService;
     private readonly IGameEventOutbox _outbox;
-    private readonly IPowerPredictionTelemetryBuffer _powerTelemetry;
 
     public StartDungeonRunCommandHandler(
         IMapper mapper,
@@ -35,8 +33,7 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
         IDungeonAccessPolicy dungeonAccess,
         ICharacterService characters,
         IInventoryService inventoryService,
-        IGameEventOutbox outbox,
-        IPowerPredictionTelemetryBuffer powerTelemetry)
+        IGameEventOutbox outbox)
     {
         _mapper = mapper;
         _dungeonRunService = dungeonRunService;
@@ -45,7 +42,6 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
         _characters = characters;
         _inventoryService = inventoryService;
         _outbox = outbox;
-        _powerTelemetry = powerTelemetry;
     }
 
     public async Task<Response<StartDungeonRunResponseDto>> Handle(StartDungeonRunCommand request, CancellationToken cancellationToken)
@@ -67,21 +63,6 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
 
         if (dungeon == null)
             return Response<StartDungeonRunResponseDto>.Fail("You already have an ongoing dungeon run.");
-
-        if (_powerTelemetry.TryTake(request.CharacterId, request.DungeonId, out var prediction))
-        {
-            dungeon.State.PowerPrediction = new Domain.Models.Dungeons.Runs.DungeonPowerPredictionTelemetry
-            {
-                AlgorithmVersion = prediction.PartyPower.AlgorithmVersion,
-                BuildFingerprintHash = prediction.PartyPower.BuildFingerprint,
-                PartyPower = prediction.PartyPower.Overall,
-                RecommendedPartyPower = prediction.Recommendation.RecommendedPartyPower,
-                DungeonContentHash = prediction.Recommendation.DungeonContentHash,
-                PredictedReadinessBand = prediction.Band.ToString(),
-                PredictedCompletionLowerBound = prediction.CompletionProbabilityLowerBound,
-                PredictedCompletionUpperBound = prediction.CompletionProbabilityUpperBound
-            };
-        }
 
         await _outbox.EnqueueAsync(
             GameEventTypes.DungeonRunStarted,

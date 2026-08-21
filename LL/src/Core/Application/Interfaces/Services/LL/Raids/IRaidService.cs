@@ -33,7 +33,6 @@ public interface IRaidService
     Task<RaidOperationResult<RaidRunDto>> RefreshSnapshotAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> AssignAsync(Guid characterId, Guid raidRunId, Guid targetCharacterId, RaidLane lane, int slotIndex, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> UpdatePartiesAsync(Guid characterId, Guid raidRunId, IReadOnlyList<RaidPartyAssignment> assignments, CancellationToken cancellationToken);
-    Task<RaidOperationResult<RaidRunDto>> FillWithDevelopmentCharactersAsync(Guid characterId, Guid raidRunId, double powerMultiplier, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidBattlePlanPreviewDto>> PreviewBattlePlanAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken);
     Task<RaidOperationResult<RaidRunDto>> CommenceAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken);
     Task<RaidPlaybackDto?> GetPlaybackAsync(Guid characterId, Guid raidRunId, RaidLane lane, CancellationToken cancellationToken);

@@ -1,148 +1,34 @@
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
-using Application.Interfaces.Services.LL.Balance;
 using Application.Interfaces.Services.LL.Regions;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogBehaviorDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogCoverage;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogDiagnostics;
-using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAttributeBalanceDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetCreatureBuildProfileDiagnostics;
-using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetDungeonPowerDiagnostics;
-using Application.Interfaces.Services.LL.PowerRatings;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetRegionOneContentDiagnostics;
-using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunAbilityBalanceSimulation;
-using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunDungeonSimulation;
-using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunAreaSimulation;
-using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunEquipmentCombatPacing;
-using Application.Interfaces.Services.LL.Dungeons;
-using Application.Interfaces.Services.LL.WorldTower;
-using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunWorldTowerBalance;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.AdminDashboard.Controllers.V1;
 
 public class DiagnosticsController : BaseController
 {
-    private readonly IAbilityBalanceAuditService _balanceAudits;
-
-    public DiagnosticsController(IAbilityBalanceAuditService balanceAudits)
-    {
-        _balanceAudits = balanceAudits;
-    }
-
-    [HttpGet("attribute-balance")]
-    public async Task<ActionResult<AttributeBalanceAnalysisReport>> GetAttributeBalanceDiagnostics() =>
-        Ok(await Mediator.Send(new GetAttributeBalanceDiagnosticsQuery()));
-
-    [HttpGet("dungeon-power")]
-    public async Task<ActionResult<IReadOnlyList<DungeonPowerDiagnostic>>> GetDungeonPowerDiagnostics() =>
-        Ok(await Mediator.Send(new GetDungeonPowerDiagnosticsQuery()));
-
     [HttpGet("ability-catalog")]
-    public async Task<ActionResult<AbilityCatalogDiagnosticReport>> GetAbilityCatalogDiagnostics()
-    {
-        return await Mediator.Send(new GetAbilityCatalogDiagnosticsQuery());
-    }
+    public async Task<ActionResult<AbilityCatalogDiagnosticReport>> GetAbilityCatalogDiagnostics() =>
+        await Mediator.Send(new GetAbilityCatalogDiagnosticsQuery());
 
     [HttpGet("ability-catalog-coverage")]
-    public async Task<ActionResult<AbilityCatalogCoverageReport>> GetAbilityCatalogCoverage()
-    {
-        return await Mediator.Send(new GetAbilityCatalogCoverageQuery());
-    }
+    public async Task<ActionResult<AbilityCatalogCoverageReport>> GetAbilityCatalogCoverage() =>
+        await Mediator.Send(new GetAbilityCatalogCoverageQuery());
 
     [HttpGet("ability-catalog-behaviors")]
-    public async Task<ActionResult<AbilityCatalogBehaviorDiagnosticReport>> GetAbilityCatalogBehaviorDiagnostics()
-    {
-        return await Mediator.Send(new GetAbilityCatalogBehaviorDiagnosticsQuery());
-    }
+    public async Task<ActionResult<AbilityCatalogBehaviorDiagnosticReport>> GetAbilityCatalogBehaviorDiagnostics() =>
+        await Mediator.Send(new GetAbilityCatalogBehaviorDiagnosticsQuery());
 
     [HttpGet("creature-build-profiles")]
-    public async Task<ActionResult<CreatureBuildProfileDiagnosticReport>> GetCreatureBuildProfileDiagnostics()
-    {
-        return await Mediator.Send(new GetCreatureBuildProfileDiagnosticsQuery());
-    }
+    public async Task<ActionResult<CreatureBuildProfileDiagnosticReport>> GetCreatureBuildProfileDiagnostics() =>
+        await Mediator.Send(new GetCreatureBuildProfileDiagnosticsQuery());
 
     [HttpGet("region-one-content")]
-    public async Task<ActionResult<RegionOneContentDiagnosticReport>> GetRegionOneContentDiagnostics()
-    {
-        return await Mediator.Send(new GetRegionOneContentDiagnosticsQuery());
-    }
-
-    [HttpPost("ability-balance-simulation")]
-    public async Task<ActionResult<AbilityBalanceSimulationReport>> RunAbilityBalanceSimulation(
-        [FromBody] AbilityBalanceSimulationRequest request)
-    {
-        return await Mediator.Send(new RunAbilityBalanceSimulationQuery(request));
-    }
-
-    [HttpPost("ability-balance-audit")]
-    public ActionResult<AbilityBalanceAuditReport> RunAbilityBalanceAudit(
-        [FromBody] AbilityBalanceAuditRequest request,
-        CancellationToken cancellationToken)
-    {
-        return Ok(_balanceAudits.Run(request, cancellationToken));
-    }
-
-    [HttpGet("dungeon-simulation-options")]
-    public async Task<ActionResult<DungeonSimulationOptions>> GetDungeonSimulationOptions()
-    {
-        return await Mediator.Send(new GetDungeonSimulationOptionsQuery());
-    }
-
-    [HttpPost("dungeon-simulation")]
-    public async Task<ActionResult<DungeonSimulationReport>> RunDungeonSimulation(
-        [FromBody] DungeonSimulationRequest request)
-    {
-        return await Mediator.Send(new RunDungeonSimulationQuery(request));
-    }
-
-    [HttpGet("area-simulation-options")]
-    public async Task<ActionResult<AreaSimulationOptions>> GetAreaSimulationOptions()
-    {
-        return await Mediator.Send(new GetAreaSimulationOptionsQuery());
-    }
-
-    [HttpPost("area-simulation")]
-    public async Task<ActionResult<AreaSimulationReport>> RunAreaSimulation(
-        [FromBody] AreaSimulationRequest request)
-    {
-        return await Mediator.Send(new RunAreaSimulationQuery(request));
-    }
-
-    [HttpPost("region-area-balance")]
-    public async Task<ActionResult<RegionAreaBalanceReport>> AnalyzeRegionAreaBalance(
-        [FromBody] RegionAreaBalanceRequest request)
-    {
-        return await Mediator.Send(new AnalyzeRegionAreaBalanceQuery(request));
-    }
-
-    [HttpPost("combat-calibration/area")]
-    public async Task<ActionResult<AreaCalibrationReport>> AnalyzeAreaCalibration(
-        [FromBody] AreaCalibrationRequest request)
-    {
-        return await Mediator.Send(new AnalyzeAreaCalibrationQuery(request));
-    }
-
-    [HttpGet("combat-calibration/progression")]
-    public async Task<ActionResult<ProgressionCurveReport>> GetCombatProgressionCurve(
-        [FromQuery] string regionKey,
-        [FromQuery] CalibrationArchetype archetype = CalibrationArchetype.Balanced)
-    {
-        return await Mediator.Send(new GetProgressionCurveQuery(regionKey, archetype));
-    }
-
-    [HttpPost("world-tower-balance")]
-    public async Task<ActionResult<WorldTowerBalanceReport>> AnalyzeWorldTowerBalance(
-        [FromBody] WorldTowerBalanceRequest request)
-    {
-        return await Mediator.Send(new RunWorldTowerBalanceQuery(request));
-    }
-
-    [HttpPost("equipment-combat-pacing")]
-    public async Task<ActionResult<EquipmentCombatPacingReport>> AnalyzeEquipmentCombatPacing(
-        [FromBody] EquipmentCombatPacingRequest request)
-    {
-        return await Mediator.Send(new RunEquipmentCombatPacingQuery(request));
-    }
-
+    public async Task<ActionResult<RegionOneContentDiagnosticReport>> GetRegionOneContentDiagnostics() =>
+        await Mediator.Send(new GetRegionOneContentDiagnosticsQuery());
 }

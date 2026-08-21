@@ -1,7 +1,5 @@
 namespace Domain.Models.WorldTower;
 
-using Domain.Models.Items;
-
 public sealed class TowerFloorDefinition
 {
     public int FloorNumber { get; init; }
@@ -13,7 +11,6 @@ public sealed class TowerFloorDefinition
     public int RequiredSlots { get; init; }
     public int RecommendedPowerRating { get; init; }
     public TowerGuardianScalingDefinition GuardianScaling { get; init; } = new();
-    public TowerBalanceBenchmarkDefinition BalanceBenchmark { get; init; } = new();
     public bool EchoEnabledAfterClear { get; init; }
     public int TowerTokens { get; set; }
     public int FirstClearTowerTokens => checked(TowerTokens * 4);
@@ -34,17 +31,6 @@ public sealed class TowerGuardianScalingDefinition
     public float Resistance { get; init; } = 1;
     public float Penetration { get; init; } = 1;
     public float Regeneration { get; init; } = 1;
-}
-
-public sealed class TowerBalanceBenchmarkDefinition
-{
-    public int CharacterLevel { get; init; }
-    public int EquipmentTier { get; init; } = 1;
-    public Rarity EquipmentRarity { get; init; }
-    public int EssenceCount { get; init; }
-
-    public string BuildId =>
-        $"t{EquipmentTier}-standard-{EquipmentRarity.ToString().ToLowerInvariant()}";
 }
 
 public sealed class WorldTowerCatalogDocument

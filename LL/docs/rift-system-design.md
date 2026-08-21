@@ -5,7 +5,7 @@
 **Feature name (player-facing):** **Rifts**
 **Scope:** Open-world, region-scoped, cross-player. No guild involvement, no invites, no friend lists.
 **Sibling document:** `docs/raid-system-design.md` (Raids). Read §4 and Appendix A of that doc first — the
-two features share the snapshot, reward-table and calibration machinery, and this document deliberately
+two features share the snapshot and reward-table machinery, and this document deliberately
 does not re-litigate decisions made there.
 
 ---
@@ -60,8 +60,7 @@ Three things about this codebase shaped the design more than any genre conventio
 | Deterministic spawn schedule                    | `Common.Randomness.StableRandom.Seed(...)` (SHA-256 over canonical strings)                                                                  |
 | Enemy composition rolls                         | `WeightedSpawnSelector.SelectCreatures / SelectCreatureCount`                                                                                |
 | Creature scaling to a difficulty band           | `ICreatureScaler.ApplyScaling(creature, area)` + `WorldTowerGuardianScaling.Apply` for the Anchor                                            |
-| Boss authoring schema                           | `world-tower/tower-floors.json` (`guardianScaling`, `balanceBenchmark`, `recommendedPowerRating`)                                            |
-| Filler allies on a thin server                  | `IWorldTowerDevelopmentRosterFactory.Create(...)` → detached synthetic `CharacterSnapshot` from `CanonicalEquipmentBuildFactory`             |
+| Boss authoring schema                           | `world-tower/tower-floors.json` (`guardianScaling`, `recommendedPowerRating`)                                            |
 | Rewards                                         | `rewards/reward-tables.json` + `IRewardRoller` + `RewardRollContext` tag bonuses                                                             |
 | Per-participant claimable payout                | `TournamentRewardGrant` (+ `TournamentRewardStatus`) and `ClaimTournamentRewardsCommand`                                                     |
 | XP split across a party                         | `IExperienceRewardWriter.AddSplitExperienceAsync(IReadOnlyCollection<Guid>, int, ct)` — already multi-recipient                              |
@@ -69,8 +68,6 @@ Three things about this codebase shaped the design more than any genre conventio
 | Realtime                                        | `GameHub.WorldGroup` (`"world"`) — every logged-in client already calls `subscribeToWorld()` on connect                                      |
 | Worker → client delivery                        | `OutboxGameRealtimeBroadcaster` → `GameEventTypes.RealtimeDeliveryRequested` → API.LL's `RealtimeDeliveryGameEventOutboxConsumer`            |
 | Announcements                                   | `EventQuestChatGameEventOutboxConsumer` pattern (system chat POST with a deterministic `MessageId`)                                          |
-| Readiness surface                               | `DungeonReadinessService` Wilson-interval bands (`VeryUnlikely…Comfortable`)                                                                 |
-| Recommended power calibration                   | `DungeonPowerAnalyzer` + `CanonicalEquipmentBuildFactory` progression ladder                                                                 |
 
 ---
 
@@ -134,9 +131,7 @@ Three things about this codebase shaped the design more than any genre conventio
 | **Rift Focus**             | A consumable that opens a rift of your choosing. The main Riftshard sink.      | Inventory item                                    |
 
 Naming notes. Avoid **Warden** and **Sovereign** — both are taken by `TowerFloorType`, and Sieges use
-Warden for its raid bosses. Avoid bare **Party**: `RecommendedPartyPower`, `CanonicalPartyProfile` and
-`DungeonPartySelection` are all balance-simulation vocabulary that does _not_ mean a group of players,
-and the Siege doc already flags this ambiguity. **Warband** is unused anywhere in the solution.
+Warden for its raid bosses. **Warband** is unused anywhere in the solution.
 
 > **Fix the dead scaffolding rather than working around it.** `RiftOpenedMsg(Guid ZoneId, DateTimeOffset Time)`
 > cannot be used as written: `Region.Id` is an `int` and `Area.Id` is a `string`, so `Guid ZoneId`
@@ -384,35 +379,6 @@ keep across a restart.
 If a region reliably hits the cap, that is a signal to raise `RiftsPerDay` for that region, which is a
 JSON change. Populated regions getting more rifts is the correct response to popularity.
 
-### 5.4 Rift Echoes — the thin-server mechanic
-
-When the window seals, if `Participants.Count(kind == Player) < MinimumWarbandSize`, the resolver appends
-**Rift Echoes** until the minimum is met. An Echo is a synthetic party member built from
-`CanonicalEquipmentBuildFactory` at the rift definition's `balanceBenchmark` rung, using the existing
-`IWorldTowerDevelopmentRosterFactory.Create(characterId, characterName, floor, rosterIndex)` approach —
-which already returns a detached `CharacterSnapshot` plus a `PowerRating`, cycling the five
-`CanonicalPartyProfile` values (`Offense, Balanced, Sustain, Defensive, Area`). Generalise that factory
-to take a benchmark rather than a `TowerFloorDefinition` and both features share it.
-
-Rules:
-
-- Echoes are chosen to complement observed roles: a Warband with no sustainer gets the `Sustain` profile
-  first, then `Defensive`, then `Area`, then `Offense`.
-- Echoes deal and take damage normally and count toward the Anchor's threat pool.
-- **Echoes take no reward and generate no contribution.** They are not characters and have no
-  `CharacterId`; the participant row's `CharacterId` is null and `Kind = Echo`.
-- Echoes are visible and labelled as such, before and after the fight. Never present a synthetic ally as
-  a player. Players discover this kind of thing and the discovery is always worse than the disclosure.
-- Echoes are power-capped at the definition's benchmark rung, so they are helpful to a lone new player
-  and irrelevant to a strong one. They are a floor, not a crutch.
-
-The alternative — scale the Anchor down to a solo fight — is worse for two reasons: a 1-vs-1 rift is
-indistinguishable from a dungeon boss, so the feature loses its identity at exactly the population where
-it most needs to be attractive; and Anchor abilities authored for a group (an `AllEnemies` slam, a
-single-target focus) become nonsense against one target.
-
----
-
 ## 6. Resolution — how one rift actually resolves
 
 This is the load-bearing mechanic, so it is specified precisely.
@@ -613,47 +579,18 @@ Two measurement details that must not be got wrong, both inherited from the Sieg
 - **`EntityStats.DamageDone` accumulates `CombatLogItem.Magnitude`, which is post-mitigation,
   post-barrier `healthBefore - target.Health`.** Barrier-absorbed damage lands in `BarrierAbsorbed` /
   `DamageBlocked` instead, and overkill is clipped. That is the right measure for "how much of the
-  Anchor did you remove", but a barrier-heavy Anchor makes every participant look weak unless the
-  definition's expected-damage baseline is calibrated against that same Anchor.
+  Anchor did you remove", but a barrier-heavy Anchor requires contribution accounting to include the
+  barrier damage explicitly.
 - **Summon damage is attributed to the summon's own entity id** (`CombatStatsAggregator.GetOrAddEntity(actorId)`),
   not the owner. Sum over the participant _plus every `IsSummoned` entity on the friendly side_, or
   summon builds read as near-zero contribution.
 
-### 8.2 Contribution is measured against yourself
-
-```
-Expected      = definition.expectedDamagePerPower × PowerRatingAtJoin × (fightTicks / 1800)
-Performance   = (AnchorDamage + 0.5 × AddDamage + 0.3 × Mitigated) / Expected
-```
-
-| Band          | Performance                   | Contribution multiplier |
-| ------------- | ----------------------------- | ----------------------- |
-| **Present**   | ≥ 0 (you were in the Warband) | 0.70                    |
-| **Attuned**   | ≥ 0.55                        | 1.00                    |
-| **Resonant**  | ≥ 0.95                        | 1.15                    |
-| **Ascendant** | ≥ 1.45                        | 1.30                    |
-
-The denominator is the participant's _own_ power at join. A level-25 player in a Warband with a level-50
-player is measured against a level-25 expectation and can hit Ascendant while contributing a tenth of the
-absolute damage. This is the opposite of the Siege's median-relative tiers, and the difference is
-deliberate: a Siege Warband is a guild whose members chose each other, while a rift Warband is whoever
-happened to be online. Relative scoring in an arbitrary group punishes players for the company they keep.
-
-Final payout multiplier is `OutcomeMultiplier (§6.4) × ContributionMultiplier`, so the range across all
-cases is `0.30 × 0.70 = 0.21` to `1.00 × 1.30 = 1.30`. A floor of one fifth for showing up to a disaster;
-a ceiling of a third above baseline for carrying a success.
-
-`Present` at 0.70 with no performance requirement is the design's answer to the under-geared player: the
-worst possible rift is still worth roughly a fifth of the best possible rift. Nobody is ever told not to
-join.
-
-### 8.3 What Rifts pay
+### 8.2 What Rifts pay
 
 Rift definitions carry reward tables following the established namespacing:
 
 ```
 reward.rift.<rift_key>.completion            // the guaranteed floor: materials + Riftshards
-reward.rift.<rift_key>.{present|attuned|resonant|ascendant}
 reward.rift.<rift_key>.first_seal            // first time this character seals this rift
 reward.rift.<rift_key>.region_cosmetic       // low-weight WeightedWithNoDrop
 ```
@@ -927,15 +864,6 @@ is currently `"enabled": true` and loads in production. Do not leave example rif
         "captureReplay": true
       },
 
-      "balanceBenchmark": {
-        "characterLevel": 15,
-        "equipmentTier": 1,
-        "equipmentRarity": "Uncommon",
-        "essenceCount": 2
-      },
-      "recommendedPower": 0,
-      "expectedDamagePerPower": 0,
-
       "surges": [
         {
           "key": "onslaught",
@@ -973,10 +901,6 @@ is currently `"enabled": true` and loads in production. Do not leave example rif
 
       "rewardTables": {
         "completion": "reward.rift.moonveil_breach.completion",
-        "present": "reward.rift.moonveil_breach.present",
-        "attuned": "reward.rift.moonveil_breach.attuned",
-        "resonant": "reward.rift.moonveil_breach.resonant",
-        "ascendant": "reward.rift.moonveil_breach.ascendant",
         "firstSeal": "reward.rift.moonveil_breach.first_seal"
       },
       "riftshards": { "base": 8, "sealBonus": 6 }
@@ -984,10 +908,6 @@ is currently `"enabled": true` and loads in production. Do not leave example rif
   ]
 }
 ```
-
-`recommendedPower` and `expectedDamagePerPower` are authored as `0` and **overwritten by calibration**
-(§11), the same way `TowerFloorDefinition.TowerTokens` is authored-absent and computed by the provider.
-Authoring them by hand is how content drifts out of balance silently.
 
 ### 10.3 Validator
 
@@ -1017,79 +937,7 @@ reward tables, and final creature roster must be authored before Rift implementa
 
 One rift is enough to validate everything: pulse, join, Echoes, resolution, contribution bands, grants,
 claims, and auto-join. A second rift in the same region is a JSON change once the first is tuned; a rift
-in a second region is a JSON change plus a calibration run.
-
----
-
-## 11. Tuning and calibration
-
-### 11.1 The two numbers that matter
-
-**`anchorHealthPerParticipant`** decides the seal rate. **`expectedDamagePerPower`** decides the
-contribution bands. Everything else is flavour.
-
-```
-anchorHealthPerParticipant = MedianSoloDamageAtBenchmark × TargetSealFraction
-TargetSealFraction = 0.72
-```
-
-0.72 deliberately matches `DungeonPowerAnalyzer.TargetCompletionRate = 0.72m`, so rifts and dungeons
-communicate the same thing when they say "recommended power". A rift at recommended power seals about
-seven times in ten; the other three are `Held`, which still pays 0.60.
-
-### 11.2 Calibrate, do not guess
-
-Follow `DungeonPowerAnalyzer`: build canonical rosters from `CanonicalEquipmentBuildFactory` across the
-equipment tier/rarity ladder (120 rungs, tiers 1–20 × Common…Legendary, `Quality = Standard`), run
-fixed-seed rift simulations, and publish the lowest rung that reaches the 0.72 seal target with a Wilson
-interval. Publish `RecommendedPower`, `LowerRecommendedPower`, `UpperRecommendedPower`, `Confidence`,
-`ExpectedDamagePerPower`, and per-profile seal rates.
-
-Details worth copying rather than reinventing:
-
-- Pin the _displayed_ recommendation to `CanonicalPartyProfile.Balanced` and use the other four profiles
-  for the range and confidence, exactly as the dungeon analyzer does, so a specialised profile cannot
-  drag the communicated number below the equipment milestone.
-- The canonical Warband for calibration is the same five as everywhere else: one Defensive, one Sustain,
-  two Offense, one Area. Calibrate at Warband sizes 1, 3 and 5 — the participant-count curve in §6.3 is
-  a design assertion and must be verified, not assumed.
-- Cache per `RiftPowerCalibrationIdentity(RiftId, RiftVersion, RiftContentHash, AlgorithmVersion, CombatRulesVersion, BenchmarkDefinitionVersion, RecommendationSeedSetVersion, EquipmentBalanceVersion)`
-  — all eight must match for a cached row to be reusable, per `DungeonPowerRecommendationCacheEntry`.
-  **Do not copy its PK**: that table's primary key is a bare `DungeonId`, so it cannot hold two variants
-  of one dungeon. A rift table keyed `(RiftId, RiftVersion)` avoids inheriting that limitation.
-- Run it in a `RiftPowerCalibrationWorker` behind a config flag (`Rifts:Calibration:Enabled`), like
-  `DungeonPowerCalibrationWorker`. Loading from the DB should not be gated by the flag; only
-  recalculation.
-
-> **The version constants in the docs are stale.** `docs/power-rating-system.md` and
-> `docs/raid-system-design.md` §11.3 both cite Version 23 / CombatRules 11 / rating-definition 13. The
-> actual `PowerRatingAlgorithm` is **Version 25, CombatRulesVersion 13, BenchmarkDefinitionVersion 16**,
-> plus `RatingSeedSetVersion 1`, `DungeonSeedSetVersion 2`, `RecommendationSeedSetVersion 2`. Trust the
-> constants file, and add `RiftRulesVersion` (starting at 1) beside them. Bumping any of them invalidates
-> cached rift recommendations. Anchor health must **not** be auto-invalidated mid-day — changes apply from
-> the next `dayKey`, or a rift that opened under old tuning resolves under new tuning.
-
-### 11.3 Readiness
-
-Mirror `DungeonReadinessService` exactly: simulate the character's current loadout in a hypothetical
-Warband against the rift, return a Wilson-interval band —
-`VeryUnlikely (<0.15) / Risky (<0.40) / Uncertain (<0.60) / Favored (<0.80) / Comfortable (≥0.80)` —
-for "will this Warband seal", with the band forced to `Uncertain` when the interval spans bands. Adaptive
-batches 8→24 samples, early stop inside a single band. Detached: no state, no rewards, no entry spend.
-
-Surface it on the rift card as a single word. This is the entire pre-join decision support, and it is
-free because the service already exists.
-
-### 11.4 What to watch after launch
-
-Log per rift: participant count, Echo count, outcome, fight ticks, Anchor health remaining, per-participant
-performance ratio, and auto-join fill share. Three numbers decide whether the design works:
-
-1. **Median real participants per rift.** If it is 1.0 after two weeks, the join window or the announcement
-   is failing, not the combat.
-2. **Seal rate by Warband size.** If size-1 seals more often than size-5, the §6.3 curve is wrong.
-3. **Auto-join fill share.** If auto-joins are more than half of all participants, either the fairness key
-   or `AutoJoinFillCap` needs tightening — the feature is meant to add attendance, not replace it.
+in a second region is a JSON and content-authoring change.
 
 ---
 
@@ -1275,7 +1123,7 @@ key, `AutoJoinFillCap`. **Gated on** `CharacterSnapshot.CapturedAt` + `Purpose`,
 lifecycle is a slow-motion storage incident.
 
 **Phase 4 — Depth.**
-`RiftPowerCalibrationWorker`. Rift tiers per region and a per-region pool of 3+ definitions. Rift
+Rift tiers per region and a per-region pool of 3+ definitions. Rift
 leaderboards / first-seal prestige. Catalyst exchange and cosmetic vendor. Anchor stabilisation if §8.4's
 governance question resolves well.
 
@@ -1297,7 +1145,6 @@ finished gear; anything that requires a matchmaker; anything that requires a pus
 | Riftshards inflate with no sink                          | Phase 1 ships them with an explicit "sink coming" note and a low accrual rate; Phase 2 ships Rift Focus, which drains more than it grants. Do not raise accrual until a sink exists.                                                                                             |
 | The 25-minute window is wrong for the population         | It is one number in `regionPulses`. Read the join-rate telemetry before changing anything else.                                                                                                                                                                                  |
 | Realtime silently fails (worker resolves, API is down)   | Documented in §12.4; the client reconciles rift and grant state on load and never depends on having received an event.                                                                                                                                                           |
-| Rift combat diverges from dungeon balance                | Both calibrate to 0.72 against the same `CanonicalEquipmentBuildFactory` ladder and the same version constants, so "recommended power" means one thing across the game.                                                                                                          |
 | The `world` chat channel becomes rift spam               | 5–7 rifts per region per day across N regions adds up fast. Announce only rifts the reader can actually enter (level band + region unlocked) — that means the announcement is a targeted `Audience.Characters` message, not a global chat line, once more than two regions ship. |
 
 ---
@@ -1362,8 +1209,6 @@ lease columns and claim pattern from `TowerAttempt` / `IWorldTowerWorkLeaseServi
 `GameHub.WorldGroup` + `Audience.World` / `Audience.Characters` ·
 `OutboxGameRealtimeBroadcaster` → `RealtimeDeliveryGameEventOutboxConsumer` worker→client path ·
 `EventQuestChatGameEventOutboxConsumer` deterministic-`MessageId` announcement pattern ·
-`DungeonReadinessService` Wilson bands · `DungeonPowerAnalyzer` + `CanonicalEquipmentBuildFactory` ·
-`IWorldTowerDevelopmentRosterFactory` synthetic-snapshot construction (for Echoes) ·
 `JsonWorldTowerDefinitionProvider` / `JsonEventQuestDefinitionProvider` validate-in-constructor pattern ·
 a dedicated Rift creature set rather than reusing Raid content.
 
@@ -1381,8 +1226,7 @@ a **public** `ISnapshotCombatantBuilder` extracted from three private copies ·
 `Character.Riftshards` · `RiftAttunement` — the **first server-side player preference in the solution** ·
 `IRiftAutoJoinEntitlementProvider` (no subscription/entitlement concept exists at all) ·
 `CharacterSnapshot.CapturedAt` + `Purpose` + `SnapshotRetentionJob` + a real `ILoadoutHasher` ·
-Echo generalisation of the tower roster factory · `RiftPowerCalibrationWorker` + a
-`(RiftId, RiftVersion)`-keyed recommendation cache · a rewrite of `RiftOpenedMsg` and its
+Echo support for partially filled rosters · a rewrite of `RiftOpenedMsg` and its
 `DomainToClientMapper` + client map entries · `StateSyncScopes.Rift` in the const list **and** in
 `WorldResources` · new outbox event types registered in `GameEventOutboxConsumerRegistry` ·
 Rifts tab, rift page, `rift-state.service.ts`, DTO folder, sidebar entry, server-backed settings toggle ·

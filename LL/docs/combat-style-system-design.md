@@ -632,8 +632,7 @@ integration, not the sole purpose of Combat Style.
 ### Phase 3 — Mode integration and tuning
 
 - Attach Style snapshots to World Boss, Rift, raid, and Tournament submissions.
-- Add representative automated balance scenarios.
-- Tune against real encounter mixes, not a single training target.
+- Review behavior against real encounter mixes, not a single training target.
 - Expand node content only after the initial graph shows genuine build diversity.
 
 ---

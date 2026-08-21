@@ -251,11 +251,11 @@ Guardian identity and abilities are data-driven, and combat uses existing creatu
 
 Ni's source design omitted active cooldowns, copy durability, Ninth Seal hit semantics, and ended the passive mid-sentence. The authored defaults are 8/16/20-second cooldowns, copies with 10% of Ni's Max Health and inherited Armor/Resistance, and one combined `20% × surviving copies` Ninth Seal hit. No behavior was invented for the unfinished passive clause; it remains a content-design follow-up if the missing text is recovered.
 
-Eydis's source design omitted active cooldowns, whether percentage healing uses Max Health, and an Abundance cap. The authored defaults are 12/20/15-second active cooldowns, `1% Max Health × Abundance` periodic healing, and a 60-stack permanent combat cap (the maximum reachable within the 6,000-tick encounter limit). Her Floor 7 profile is calibrated at `23.3` Health, `12.5` Offense, and `8.7` on each defensive, penetration, and regeneration axis. Ni's relocated Floor 9 profile is calibrated at `70` Health, `58.2` Offense, and `15` on the remaining axes. Both fixed 256-attempt balance seeds pass the prepared mixed-roster 5–15% win-rate gate for both floors.
+Eydis's source design omitted active cooldowns, whether percentage healing uses Max Health, and an Abundance cap. The authored defaults are 12/20/15-second active cooldowns, `1% Max Health × Abundance` periodic healing, and a 60-stack permanent combat cap (the maximum reachable within the 6,000-tick encounter limit).
 
-The Mad King's Floor 10 profile is calibrated at `57` Health, `35` Offense, and `15` on each defensive, penetration, and regeneration axis. Both fixed 256-attempt balance seeds pass the prepared mixed-roster 5–15% win-rate gate. King's Cleaver selects and locks the highest-current-Health enemy once per cast; a target above 50% Health takes the base 300% strike plus a second 300% strike. Bloodlust recalculates on the Mad King's own Health changes, granting 5% Lifesteal per complete 10% of Max Health missing and removing steps again when he heals.
+King's Cleaver selects and locks the highest-current-Health enemy once per cast; a target above 50% Health takes the base 300% strike plus a second 300% strike. Bloodlust recalculates on the Mad King's own Health changes, granting 5% Lifesteal per complete 10% of Max Health missing and removing steps again when he heals.
 
-Kodoku's source design omitted Venomspawn combat stats. The authored defaults give each Venomspawn 8% of Kodoku's Max Health and 15% of Kodoku's Power, with normal Physical basic attacks and no active ability. Kodoku's Floor 8 profile is calibrated at `60` Health, `54` Offense, and `15` on each defensive, penetration, and regeneration axis; both fixed 256-attempt balance seeds pass the prepared mixed-roster 5–15% win-rate gate.
+Kodoku's source design omitted Venomspawn combat stats. The authored defaults give each Venomspawn 8% of Kodoku's Max Health and 15% of Kodoku's Power, with normal Physical basic attacks and no active ability.
 
 ### Hall of Fame depth
 
@@ -322,7 +322,6 @@ These items were proposed or identified during implementation but are not in the
 | Tower titles/cosmetics            | **Not implemented** | Cinders are the only delivered Tower reward.                                                                                                                                                                                   |
 | Active downstream unlock switches | **Not implemented** | Unlock keys are persisted but not generally consumed.                                                                                                                                                                          |
 | Operational telemetry dashboard   | **Not implemented** | Existing logging is used; no Tower-specific metrics/dashboard.                                                                                                                                                                 |
-| Simulation-led Tower calibration  | **Partial**         | Deterministic canonical roster analysis, split Guardian scaling, Tier 1 benchmark loadouts, recommendations, and initial floor values are shipped. Wider held-out seed validation, telemetry, and continued tuning remain.     |
 | Real-time combat hardening        | **Partial**         | Queued simulation, multi-instance leases, bounded reconnect recovery, visible reconnect state, and health/barrier interpolation are shipped. Telemetry, retention cleanup, size limits, and fake-time browser coverage remain. |
 
 ## Deferred beyond the MVP
@@ -421,10 +420,9 @@ The current status document itself should be updated whenever a Tower item moves
 
 ## Recommended next work
 
-1. Implement the simulation-led calibration workflow in `docs/world-tower-balancing-plan.md`, ending with its Tier 1-only Floor 10 release gate.
-2. Make Region 2 the first real consumer of the Floor 10 `ServerUnlock`; settle the stable key before Region 2 content ships.
-3. Finish real-time playback hardening with metrics, retention/size limits, and fake-time browser coverage.
-4. Add PostgreSQL integration tests for Expedition concurrency and first-clear races, followed by hosted HTTP integration tests.
+1. Make Region 2 the first real consumer of the Floor 10 `ServerUnlock`; settle the stable key before Region 2 content ships.
+2. Finish real-time playback hardening with metrics, retention/size limits, and fake-time browser coverage.
+3. Add PostgreSQL integration tests for Expedition concurrency and first-clear races, followed by hosted HTTP integration tests.
 5. Add Angular component tests and a two-account browser flow covering create, apply, accept/decline, withdraw/leave, start, realtime refresh, and report rendering.
 6. Decide concrete prestige rewards, then reuse existing title/cosmetic delivery systems instead of adding speculative Tower reward tables.
 7. Add Expedition expiration and durable notification/chat behavior when the asynchronous UX requires it.
@@ -451,16 +449,13 @@ The current status document itself should be updated whenever a Tower item moves
 
 - Released Floor 10 with the Mad King and a complete data-driven four-ability kit.
 - Added reversible missing-Health-step attribute synchronization for Bloodlust and fixed active-ability preflight to preserve conditional locked-target casts.
-- Calibrated Floor 10 against two deterministic 256-attempt mixed-roster seeds at its level-50 Tier 1 Legendary checkpoint.
 
 ### 2026-08-13
 
 - Added Eydis, the Endless Spring as Floor 7, moved Ni to Floor 9, and released the Tower through Floor 9.
 - Added general status-stack attribute scaling and exact timed-modifier reversal to support Abundance healing and Ancient Heartwood.
-- Calibrated both reassigned encounters against two deterministic 256-attempt mixed-roster seeds.
 - Released Floor 8 with Kodoku, the Poisoned Vessel and a complete data-driven four-ability kit.
 - Added acting Venomspawn, capped-summon overflow healing, owned-summon survivor targeting, lowest-Health Poison, and simultaneous healing/Health-Regeneration suppression.
-- Calibrated Floor 8 against two deterministic 256-attempt mixed-roster seeds at its level-46 Tier 1 Unique checkpoint.
 
 ### 2026-08-12
 
@@ -487,26 +482,19 @@ The current status document itself should be updated whenever a Tower item moves
 - Added bounded missed-frame REST recovery, automatic reconnect/gap repair, a visible reconnect state, and one-second health/barrier interpolation.
 - Added worker lease configuration and migration `20260812112124_HardenWorldTowerCombatWorkers`; generated but not applied.
 - Verified the full Angular development build.
-- Added a simulation-led Tower balancing plan anchored to Region 1's attainable Power Rating curve, with an explicit Tier 1-only Floor 10 and Region 2 unlock release gate.
-- Added authored Tier 1 benchmark checkpoints from level 30/Uncommon/four Essences on Floor 1 through level 50/Legendary/six Essences on Floor 10.
 - Replaced the single Guardian strength scalar with independent health, offense, defense, resistance, penetration, and regeneration scaling axes.
-- Added a deterministic, non-persisting World Tower balance analyzer to Admin diagnostics with canonical mixed and stress-test rosters, optional comparison loadouts, confidence intervals, duration, survival, and Guardian-health metrics.
-- Recalibrated recommendations to canonical average ratings (146–179) and added regression coverage proving pre-Tower level 25/Common/three-Essence rosters are not a reliable Floor 1 clear.
 - Made Sovereign floors first-clear-only by disabling Echo rewards in content and rejecting Sovereign Echo mode in catalog validation and service rules.
 - Serialized starts per server/floor so another ready Expedition cannot start while an attempt is queued or playing back.
 - Replaced raw unlock-key presentation with catalog-authored descriptions while retaining stable keys for persistence and future consumers.
 - Removed monster artwork from Tower, dungeon, and combat presentation and deleted both frontend creature artwork trees (660 image files).
 - Renamed the player-facing Tower group activity from Rally to Expedition across UI copy, catalog descriptions, validation messages, warnings, and the browser route; internal `TowerRally*` contracts remain stable and the former route redirects for compatibility.
-- Replaced Floor 1's placeholder Guardian with Garran, the Gatekeeper; added his complete data-driven kit, reusable percentage-transfer and combat-start-attribute effects, health-threshold Seal shatters, scouting copy, focused mechanics tests, and Floor 1 balance regression coverage.
-- Expanded Floor 1 to five Expedition slots and reran the released-floor balance matrix against the authored Tier 1 checkpoints.
-- Locked the 256-seed prepared mixed-roster win-rate regression for released Floors 1–5: Floors 1–4 remain within their 85–97% target band and Floor 5 remains within its 75–90% Warden band. Each floor also retains at least two viable canonical roster shapes. Clear duration is diagnostic only; any victory within the 6,000-tick limit is equally valid.
+- Replaced Floor 1's placeholder Guardian with Garran, the Gatekeeper; added his complete data-driven kit, reusable percentage-transfer and combat-start-attribute effects, health-threshold Seal shatters, scouting copy, and focused mechanics tests.
 - Replaced Floor 3's placeholder Guardian with Morrowmaw, Broodkeeper; added multi-target Broodling summoning, weakest-Broodling consumption and Max-Health healing, live brood-count modifiers, scouting copy, manifests, and focused catalog/combat tests.
 - Expanded Floor 3 to five Expedition slots and gave each Broodling 10% inherited Broodkeeper Max Health plus Venomous Bite, which has a ten-second cooldown and applies Poison(10) to one random Ascendant.
 - Replaced hand-authored scouting hints with combat-catalog ability reveals at 25%, 50%, 75%, and 100%; active abilities are shown first and the Guardian passive is always last, including type and cooldown metadata.
 - Added Legacy's Ascension directly to the shared World sidebar and simplified Tower headings so Expedition identity consistently uses the Guardian name without generated floor-description copy.
 - Completing a floor now permanently caps all three preparation bonuses at 10% for its UI and subsequent Echo Expeditions without fabricating weekly character contributions.
 - Changed scouting and preparation from per-floor point budgets to separate three-click weekly allowances shared across the Tower; scouting is immediate on locked floors, while preparation still requires an unlocked floor.
-- Upgraded the development roster shortcut to lock canonical, floor-benchmark combat builds for seeded guests (level, full equipment rarity, Essence count, and mixed party profiles) without modifying the guest accounts themselves.
 - Hardened Hall of Fame and Expedition endpoints at catalog release boundaries so stale records and links from unreleased floors cannot throw or prevent the Tower from loading; stale links return to the overview.
 
 ### 2026-08-11

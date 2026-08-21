@@ -137,8 +137,7 @@ public sealed class IdleCombatPlannerTests
             {
                 EncounterCadenceSeconds = 10,
                 MaximumOfflineHours = 24,
-                MaximumEncountersPerResolution = 100,
-                ReferenceWinRateBasisPoints = 8_500
+                MaximumEncountersPerResolution = 100
             }));
 
     private static CharacterAction CreateCombatAction(DateTimeOffset nextEncounterAt)

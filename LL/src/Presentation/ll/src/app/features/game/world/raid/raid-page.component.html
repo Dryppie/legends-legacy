@@ -341,47 +341,6 @@
           >
             {{ action() === "commence" ? "Commencing..." : "Commence raid" }}
           </button>
-          <div
-            class="development-roster-control"
-            *ngIf="
-              current.developmentToolsEnabled &&
-              current.canAssign &&
-              current.signups.length < current.laneSlots * 3
-            "
-          >
-            <label>
-              <span>Test roster power</span>
-              <select
-                class="ll-select"
-                [value]="developmentRosterPowerMultiplier()"
-                (change)="
-                  developmentRosterPowerMultiplier.set(
-                    +$any($event.target).value
-                  )
-                "
-                [disabled]="!!action()"
-              >
-                <option
-                  *ngFor="let multiplier of developmentRosterPowerMultipliers"
-                  [value]="multiplier"
-                >
-                  {{ multiplier }}× recommended
-                </option>
-              </select>
-            </label>
-            <button
-              class="secondary ll-button"
-              type="button"
-              (click)="fillDevelopmentRoster()"
-              [disabled]="!!action()"
-            >
-              {{
-                action() === "development-fill"
-                  ? "Filling test roster..."
-                  : "Fill test roster"
-              }}
-            </button>
-          </div>
           <button
             class="secondary ll-button"
             *ngIf="current.canAssign"

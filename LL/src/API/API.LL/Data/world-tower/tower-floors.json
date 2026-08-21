@@ -24,12 +24,6 @@
         "penetration": 5.0,
         "regeneration": 5.0
       },
-      "balanceBenchmark": {
-        "characterLevel": 30,
-        "equipmentTier": 1,
-        "equipmentRarity": "Rare",
-        "essenceCount": 4
-      },
       "echoEnabledAfterClear": true,
       "unlocks": [
         {
@@ -55,12 +49,6 @@
         "penetration": 6.0,
         "regeneration": 6.0
       },
-      "balanceBenchmark": {
-        "characterLevel": 32,
-        "equipmentTier": 1,
-        "equipmentRarity": "Rare",
-        "essenceCount": 4
-      },
       "echoEnabledAfterClear": true,
       "unlocks": []
     },
@@ -81,12 +69,6 @@
         "penetration": 8.0,
         "regeneration": 8.0
       },
-      "balanceBenchmark": {
-        "characterLevel": 34,
-        "equipmentTier": 1,
-        "equipmentRarity": "Rare",
-        "essenceCount": 4
-      },
       "echoEnabledAfterClear": true,
       "unlocks": []
     },
@@ -106,12 +88,6 @@
         "resistance": 11.0,
         "penetration": 11.0,
         "regeneration": 11.0
-      },
-      "balanceBenchmark": {
-        "characterLevel": 37,
-        "equipmentTier": 1,
-        "equipmentRarity": "Epic",
-        "essenceCount": 4
       },
       "echoEnabledAfterClear": true,
       "unlocks": [
@@ -138,12 +114,6 @@
         "penetration": 15.0,
         "regeneration": 15.0
       },
-      "balanceBenchmark": {
-        "characterLevel": 39,
-        "equipmentTier": 1,
-        "equipmentRarity": "Epic",
-        "essenceCount": 4
-      },
       "echoEnabledAfterClear": true,
       "unlocks": [
         {
@@ -169,12 +139,6 @@
         "penetration": 12.0,
         "regeneration": 12.0
       },
-      "balanceBenchmark": {
-        "characterLevel": 41,
-        "equipmentTier": 1,
-        "equipmentRarity": "Epic",
-        "essenceCount": 5
-      },
       "echoEnabledAfterClear": true,
       "unlocks": []
     },
@@ -194,12 +158,6 @@
         "resistance": 8.7,
         "penetration": 8.7,
         "regeneration": 0.001
-      },
-      "balanceBenchmark": {
-        "characterLevel": 43,
-        "equipmentTier": 1,
-        "equipmentRarity": "Unique",
-        "essenceCount": 5
       },
       "echoEnabledAfterClear": true,
       "unlocks": [
@@ -226,12 +184,6 @@
         "penetration": 15.0,
         "regeneration": 15.0
       },
-      "balanceBenchmark": {
-        "characterLevel": 46,
-        "equipmentTier": 1,
-        "equipmentRarity": "Unique",
-        "essenceCount": 5
-      },
       "echoEnabledAfterClear": true,
       "unlocks": [
         {
@@ -257,12 +209,6 @@
         "penetration": 15.0,
         "regeneration": 15.0
       },
-      "balanceBenchmark": {
-        "characterLevel": 48,
-        "equipmentTier": 1,
-        "equipmentRarity": "Unique",
-        "essenceCount": 5
-      },
       "echoEnabledAfterClear": true,
       "unlocks": []
     },
@@ -282,12 +228,6 @@
         "resistance": 15.0,
         "penetration": 15.0,
         "regeneration": 15.0
-      },
-      "balanceBenchmark": {
-        "characterLevel": 50,
-        "equipmentTier": 1,
-        "equipmentRarity": "Legendary",
-        "essenceCount": 6
       },
       "echoEnabledAfterClear": false,
       "unlocks": [

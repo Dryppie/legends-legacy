@@ -29,19 +29,6 @@ namespace EssenceSystem.Tests;
 
 public sealed class RaidSystemTests
 {
-    [Theory]
-    [InlineData(0.49d, false)]
-    [InlineData(0.5d, true)]
-    [InlineData(1d, true)]
-    [InlineData(2d, true)]
-    [InlineData(2.01d, false)]
-    public void Development_roster_power_multiplier_is_bounded(
-        double multiplier,
-        bool expected) =>
-        Assert.Equal(
-            expected,
-            RaidDevelopmentRosterFactory.IsSupportedPowerMultiplier(multiplier));
-
     [Fact]
     public void Raid_playback_bundle_preserves_entity_and_ability_threat()
     {
@@ -400,9 +387,6 @@ public sealed class RaidSystemTests
         Assert.Contains(purchase.GetIndexes(), index =>
             PropertyNames(index).SequenceEqual(["CharacterId", "VendorItemId", "WeekKey"]));
 
-        var recommendation = db.Model.FindEntityType(typeof(RaidPowerRecommendationCacheEntry));
-        Assert.NotNull(recommendation);
-        Assert.Equal(["RaidBossId", "Tier"], recommendation.FindPrimaryKey()!.Properties.Select(x => x.Name));
     }
 
     [Fact]
@@ -568,7 +552,6 @@ public sealed class RaidSystemTests
         var service = CreateRaidService(
             db,
             boss,
-            new FixedRaidDevelopmentRosterFactory(),
             developmentToolsEnabled: false);
         var result = await service.UpdatePartiesAsync(
             characters[0].Id,
@@ -586,121 +569,6 @@ public sealed class RaidSystemTests
         Assert.Equal((RaidLane.Vanguard, 0), (signups[characters[1].Id].Lane, signups[characters[1].Id].WingSlotIndex));
         Assert.Equal((null, null), (signups[characters[2].Id].Lane, signups[characters[2].Id].WingSlotIndex));
         Assert.False(result.Value.CanCommence);
-    }
-
-    [Fact]
-    public async Task Development_roster_fill_uses_seeded_guests_and_benches_new_participants()
-    {
-        await using var db = CreateDbContext();
-        var leaderUser = AppUser.Guest();
-        leaderUser.Username = "RaidLeader";
-        leaderUser.IsGuest = false;
-        var leader = new Character
-        {
-            Id = Guid.NewGuid(),
-            UserId = leaderUser.Id,
-            User = leaderUser,
-            Name = "Raid Leader",
-            Level = 30
-        };
-        db.Users.Add(leaderUser);
-        db.Characters.Add(leader);
-
-        var helpers = Enumerable.Range(1, 8).Select(number =>
-        {
-            var user = AppUser.Guest();
-            user.Username = $"SeedGuest_Raid_{number}";
-            var character = new Character
-            {
-                Id = Guid.NewGuid(),
-                UserId = user.Id,
-                User = user,
-                Name = user.Username,
-                Level = 1
-            };
-            db.Users.Add(user);
-            db.Characters.Add(character);
-            return character;
-        }).ToArray();
-
-        var tier = new RaidBossTierDefinition
-        {
-            Tier = 1,
-            LaneSlots = 3,
-            MinimumRoster = 3
-        };
-        var boss = new RaidBossDefinition
-        {
-            Id = "raid-boss.test",
-            Name = "Test Raid Boss",
-            Region = 1,
-            LevelRequirement = 30,
-            Tiers = [tier]
-        };
-        var leaderSnapshot = new CharacterSnapshot
-        {
-            Id = Guid.NewGuid(),
-            CharacterId = leader.Id,
-            Name = leader.Name,
-            Level = leader.Level
-        };
-        var run = new RaidRun
-        {
-            Id = Guid.NewGuid(),
-            RaidBossId = boss.Id,
-            Tier = tier.Tier,
-            DefinitionSnapshotJson = JsonSerializer.Serialize(
-                tier,
-                new JsonSerializerOptions(JsonSerializerDefaults.Web)),
-            LeaderCharacterId = leader.Id,
-            Status = RaidRunStatus.Mustering,
-            CreatedAt = DateTimeOffset.UtcNow,
-            SignupClosesAt = DateTimeOffset.UtcNow.AddHours(1)
-        };
-        run.Signups.Add(new RaidSignup
-        {
-            RaidRun = run,
-            RaidRunId = run.Id,
-            CharacterId = leader.Id,
-            AccountId = leader.UserId,
-            CharacterName = leader.Name,
-            CharacterSnapshotId = leaderSnapshot.Id,
-            CharacterSnapshot = leaderSnapshot,
-            LoadoutHash = "leader",
-            PowerRating = 100,
-            SignedUpAt = DateTimeOffset.UtcNow
-        });
-        db.RaidRuns.Add(run);
-        await db.SaveChangesAsync();
-
-        var developmentRosters = new FixedRaidDevelopmentRosterFactory();
-        var service = CreateRaidService(
-            db,
-            boss,
-            developmentRosters,
-            developmentToolsEnabled: true);
-        var result = await service.FillWithDevelopmentCharactersAsync(
-            leader.Id,
-            run.Id,
-            0.75d,
-            CancellationToken.None);
-
-        Assert.True(result.Succeeded, result.Error);
-        Assert.True(result.Value!.DevelopmentToolsEnabled);
-        Assert.False(result.Value.CanCommence);
-        Assert.Equal(9, result.Value.Signups.Count);
-        Assert.All(result.Value.Signups, signup =>
-        {
-            Assert.Null(signup.Lane);
-            Assert.Null(signup.WingSlotIndex);
-        });
-        Assert.Equal(9, await db.CharacterSnapshots.CountAsync());
-        Assert.All(helpers, helper => Assert.Equal(1, helper.Level));
-        Assert.All(
-            result.Value.Signups.Where(signup => !signup.IsLeader),
-            signup => Assert.StartsWith("SeedGuest_Raid_", signup.CharacterName));
-        Assert.Equal(8, developmentRosters.PowerMultipliers.Count);
-        Assert.All(developmentRosters.PowerMultipliers, multiplier => Assert.Equal(0.75d, multiplier));
     }
 
     [Fact]
@@ -746,7 +614,6 @@ public sealed class RaidSystemTests
         var service = CreateRaidService(
             db,
             boss,
-            new FixedRaidDevelopmentRosterFactory(),
             developmentToolsEnabled: true,
             powerRatings: new FixedPowerRatingService(),
             snapshots: new FixedCharacterSnapshotService(db),
@@ -820,7 +687,6 @@ public sealed class RaidSystemTests
         var service = CreateRaidService(
             db,
             boss,
-            new FixedRaidDevelopmentRosterFactory(),
             developmentToolsEnabled: true,
             powerRatings: new FixedPowerRatingService(),
             snapshots: new FixedCharacterSnapshotService(db),
@@ -929,7 +795,6 @@ public sealed class RaidSystemTests
         var service = CreateRaidService(
             db,
             new RaidBossDefinition { Id = run.RaidBossId },
-            new FixedRaidDevelopmentRosterFactory(),
             developmentToolsEnabled: false);
 
         foreach (var lane in Enum.GetValues<RaidLane>())
@@ -995,7 +860,6 @@ public sealed class RaidSystemTests
         var service = CreateRaidService(
             db,
             boss,
-            new FixedRaidDevelopmentRosterFactory(),
             developmentToolsEnabled: false);
 
         var history = await service.GetHistoryAsync(characterId, boss.Id, 10, CancellationToken.None);
@@ -1075,7 +939,6 @@ public sealed class RaidSystemTests
         var service = CreateRaidService(
             db,
             boss,
-            new FixedRaidDevelopmentRosterFactory(),
             developmentToolsEnabled: false,
             outbox: outbox,
             stateSync: new NoopStateSyncService());
@@ -1140,7 +1003,6 @@ public sealed class RaidSystemTests
     private static RaidService CreateRaidService(
         LLDbContext db,
         RaidBossDefinition boss,
-        IRaidDevelopmentRosterFactory developmentRosters,
         bool developmentToolsEnabled,
         IPowerRatingService? powerRatings = null,
         ICharacterSnapshotService? snapshots = null,
@@ -1150,7 +1012,6 @@ public sealed class RaidSystemTests
             db: db,
             definitions: new FixedRaidBossDefinitionProvider(boss),
             trophyVendor: null!,
-            raidPowerRecommendations: null!,
             snapshots: snapshots!,
             powerRatings: powerRatings!,
             inventory: null!,
@@ -1164,7 +1025,6 @@ public sealed class RaidSystemTests
             memoryCache: new MemoryCache(new MemoryCacheOptions()),
             timeProvider: TimeProvider.System,
             jsonOptions: new JsonSerializerOptions(JsonSerializerDefaults.Web),
-            developmentRosters: developmentRosters,
             options: Options.Create(new RaidOptions
             {
                 DevelopmentToolsEnabled = developmentToolsEnabled
@@ -1305,32 +1165,6 @@ public sealed class RaidSystemTests
             string.Equals(raidBossId, boss.Id, StringComparison.OrdinalIgnoreCase)
                 ? boss
                 : null;
-    }
-
-    private sealed class FixedRaidDevelopmentRosterFactory : IRaidDevelopmentRosterFactory
-    {
-        public List<double> PowerMultipliers { get; } = [];
-
-        public RaidDevelopmentBuild Create(
-            Guid characterId,
-            string characterName,
-            RaidBossDefinition boss,
-            RaidBossTierDefinition tier,
-            RaidLane lane,
-            int slotIndex,
-            double powerMultiplier)
-        {
-            PowerMultipliers.Add(powerMultiplier);
-            return new(
-                9_000,
-                new CharacterSnapshot
-                {
-                    Id = Guid.NewGuid(),
-                    CharacterId = characterId,
-                    Name = characterName,
-                    Level = boss.LevelRequirement
-                });
-        }
     }
 
     private static string[] PropertyNames(Microsoft.EntityFrameworkCore.Metadata.IReadOnlyIndex index) =>

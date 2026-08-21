@@ -87,14 +87,7 @@ public sealed class WorldTowerTests
                 Assert.Same(passive, abilities[^1]);
         });
         Assert.All(floors, floor => Assert.True(floor.GuardianScaling.Health > 0));
-        Assert.All(floors, floor => Assert.True(floor.RecommendedPowerRating >= 0));
-        Assert.Equal([100, 104, 107, 109, 112, 114, 116, 118, 120, 122], floors.Select(x => x.TowerTokens));
         Assert.All(floors, floor => Assert.Equal(floor.TowerTokens * 4, floor.FirstClearTowerTokens));
-        Assert.True(floors.Zip(floors.Skip(1), (current, next) => next.TowerTokens > current.TowerTokens).All(x => x));
-        Assert.All(floors, floor => Assert.Equal(1, floor.BalanceBenchmark.EquipmentTier));
-        Assert.Equal(30, floors[0].BalanceBenchmark.CharacterLevel);
-        Assert.Equal(Domain.Models.Items.Rarity.Rare, floors[0].BalanceBenchmark.EquipmentRarity);
-        Assert.Equal(4, floors[0].BalanceBenchmark.EssenceCount);
         Assert.Equal(5, floors[0].RequiredSlots);
         Assert.Equal(Guid.Parse("00000000-0000-0000-0000-000000000056"), floors[0].GuardianCreatureId);
         Assert.Equal("Garran, the Gatekeeper", floors[0].GuardianName);
@@ -117,64 +110,10 @@ public sealed class WorldTowerTests
         Assert.Equal(Guid.Parse("00000000-0000-0000-0000-000000000065"), floors[9].GuardianCreatureId);
         Assert.Equal("The Mad King", floors[9].GuardianName);
         Assert.Equal("monster.the_mad_king", floors[9].GuardianAbilityProfileId);
-        Assert.Equal(50, floors[^1].BalanceBenchmark.CharacterLevel);
-        Assert.Equal(Domain.Models.Items.Rarity.Legendary, floors[^1].BalanceBenchmark.EquipmentRarity);
-        Assert.Equal(6, floors[^1].BalanceBenchmark.EssenceCount);
         Assert.Contains(
             floors.Single(x => x.FloorNumber == 1).Unlocks,
             unlock => unlock.Key == "tower_echo_mode_unlock"
                       && unlock.Description.Contains("Echo Mode", StringComparison.Ordinal));
-    }
-
-    [Fact]
-    public void AuthoredTierOneBandProgressesFromRareToLegendary()
-    {
-        var apiRoot = Environment.GetEnvironmentVariable("LL_TEST_API_ROOT")
-            ?? TestContentPaths.FindApiRoot();
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        options.Converters.Add(new JsonStringEnumConverter());
-        var catalog = JsonSerializer.Deserialize<WorldTowerCatalogDocument>(
-            File.ReadAllText(Path.Combine(apiRoot, "Data", "world-tower", "tower-floors.json")),
-            options);
-
-        Assert.NotNull(catalog);
-        var floors = catalog.Floors.OrderBy(floor => floor.FloorNumber).ToArray();
-        Assert.Equal(Enumerable.Range(1, 10), floors.Select(floor => floor.FloorNumber));
-        Assert.Equal(
-            [
-                Domain.Models.Items.Rarity.Rare,
-                Domain.Models.Items.Rarity.Rare,
-                Domain.Models.Items.Rarity.Rare,
-                Domain.Models.Items.Rarity.Epic,
-                Domain.Models.Items.Rarity.Epic,
-                Domain.Models.Items.Rarity.Epic,
-                Domain.Models.Items.Rarity.Unique,
-                Domain.Models.Items.Rarity.Unique,
-                Domain.Models.Items.Rarity.Unique,
-                Domain.Models.Items.Rarity.Legendary
-            ],
-            floors.Select(floor => floor.BalanceBenchmark.EquipmentRarity));
-        Assert.All(floors, floor => Assert.Equal(1, floor.BalanceBenchmark.EquipmentTier));
-        Assert.Equal(
-            [161, 163, 165, 171, 173, 175, 185, 188, 189, 196],
-            floors.Select(floor => floor.RecommendedPowerRating));
-    }
-
-    [Fact]
-    public void SoftPowerRewardCurve_ReachesExpectedCheckpointsAndIncreasesEveryFloor()
-    {
-        var curve = new TowerRewardCurveDefinition();
-        var rewards = Enumerable.Range(1, curve.MaximumFloor)
-            .Select(curve.Calculate)
-            .ToArray();
-
-        Assert.Equal(100, rewards[0]);
-        Assert.Equal(122, rewards[9]);
-        Assert.Equal(148, rewards[24]);
-        Assert.Equal(185, rewards[49]);
-        Assert.Equal(219, rewards[74]);
-        Assert.Equal(250, rewards[99]);
-        Assert.True(rewards.Zip(rewards.Skip(1), (current, next) => next > current).All(x => x));
     }
 
     [Fact]

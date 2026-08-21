@@ -82,16 +82,6 @@ public sealed class JsonWorldTowerDefinitionProvider : IWorldTowerDefinitionProv
             previousTowerTokens = floor.TowerTokens;
             if (!IsValidScaling(floor.GuardianScaling))
                 throw new InvalidOperationException($"World Tower floor {floor.FloorNumber} has invalid Guardian scaling.");
-            if (floor.BalanceBenchmark.CharacterLevel <= 0
-                || floor.BalanceBenchmark.EquipmentTier != 1
-                || floor.BalanceBenchmark.EquipmentRarity > Domain.Models.Items.Rarity.Legendary
-                || floor.BalanceBenchmark.EssenceCount is < 1 or > 6
-                || floor.BalanceBenchmark.EssenceCount >
-                    Math.Clamp(floor.BalanceBenchmark.CharacterLevel / 10 + 1, 1, 10))
-            {
-                throw new InvalidOperationException(
-                    $"World Tower floor {floor.FloorNumber} has an invalid Tier 1 balance benchmark.");
-            }
             if (floor.Unlocks.Any(x => string.IsNullOrWhiteSpace(x.Key) || string.IsNullOrWhiteSpace(x.Description))
                 || floor.Unlocks.Select(x => x.Key).Distinct(StringComparer.OrdinalIgnoreCase).Count() != floor.Unlocks.Count)
             {

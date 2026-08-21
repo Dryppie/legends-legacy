@@ -160,11 +160,10 @@ The current Dungeon design has recently been consolidated around:
 - Gathering and reward tables.
 - First-clear and repeat rewards.
 - Mastery.
-- Simulated power recommendations and readiness feedback.
 
-**Strength:** Dungeons are the clearest active answer to “why improve my build?” The power recommendation system helps turn raw stats into a decision.
+**Strength:** Dungeons are the clearest active answer to “why improve my build?”
 
-**Risk:** The Dungeon redesign was large and recent. The active Dungeon component is also the reason the production frontend build fails. Power recommendations rely on calibration work, and the frontend polls while recommendations are missing. Dungeon start, reconnect, action execution, reward claiming, death/abandonment, and inventory updates must be tested as one workflow.
+**Risk:** The Dungeon redesign was large and recent. The active Dungeon component is also the reason the production frontend build fails. Dungeon start, reconnect, action execution, reward claiming, death/abandonment, and inventory updates must be tested as one workflow.
 
 **Alpha decision:** Ship all three families only if the common workflow passes. Otherwise expose the Goblin Mines family first and label the other two as alpha-locked.
 
@@ -265,7 +264,7 @@ By release, a fresh player should be able to:
 | Soulstones            | Functional                             | Medium         | Yet another early currency/sink                           | Ship, explain, do not expand                   |
 | Crafting V2           | Feature-complete but actively changing | High           | Migration, browser flow, first-pass balance               | Conditional ship gate                          |
 | Tempering             | Functional                             | High           | RNG trust, queue/action integration                       | Ship if full flow passes                       |
-| Dungeons              | Ambitious and recently redesigned      | High           | Regression, calibration, production CSS failure           | Must harden; reduce exposed families if needed |
+| Dungeons              | Ambitious and recently redesigned      | High           | Regression and production CSS failure                      | Must harden; reduce exposed families if needed |
 | Prophecies            | Mature retention feature               | High           | Chore pressure and reward balance                         | Ship                                           |
 | Achievements/titles   | Broad                                  | Medium         | Coverage and presentation polish                          | Ship                                           |
 | Guilds                | Broad alpha implementation             | Medium/high    | Low population and concurrency                            | Ship as experimental                           |
@@ -458,7 +457,6 @@ The chat service has detailed SignalR errors enabled unconditionally and a high-
 4. Add post-Tutorial next goals and ensure the first hour has no progression dead end.
 5. Run the full Crafting and Dungeon vertical-slice tests, including reconnect and duplicate/retry behavior.
 6. Test Marketplace, guild, chat, Colosseum, and Tournament flows with multiple accounts and low-population states.
-7. Perform a first-hour, six-hour, and 24-hour balance simulation focused on material bottlenecks, power spikes, and currency floods.
 8. Make feature flags/kill switches available for Crafting advanced features, Dungeons beyond the first family, Marketplace, and Tournament Grounds.
 
 ### P2 — useful only after P0/P1 are green
@@ -698,29 +696,24 @@ If this is not green by the end of Day 6, disable advanced blueprint learning/te
 - [x] Fixed the unimplemented Dungeon run update path that could crash completion rewards containing Cinders, Soulstones, or experience.
 - [x] Added regression coverage proving concurrent claim deletes cannot both commit and a second character cannot act on or claim another character's run.
 - [x] Added repeat-completion sources for all eleven Blueprint catalysts and strengthened the content tests so every special resource and every Dungeon Blueprint catalyst must be obtainable from its authored family.
-- [x] Added startup diagnostics for invalid ranges, missing simulation evidence, invalid completion rates, non-monotonic family recommendations, and obvious adjacent-tier outliers. Rejected recommendations are withheld and the completed calibration response lets the UI show them as unavailable.
 - [x] Backend solution build, all 580 backend tests, 13 focused Dungeon frontend tests, Angular production build, and the EF migration/model consistency check pass.
 - [ ] Apply `HardenDungeonRunTransactions` to the PostgreSQL rehearsal database, then complete the manual Goblin Mines first-clear, repeat-clear, retreat, defeat/expiry, reconnect, double-claim, and two-account ownership matrix.
-- [ ] Capture real calibration output for the six live difficulties and review the recommended Power values. The three authored Hive difficulties remain intentionally retired for the future Rift model and are not served or calibrated in the alpha runtime.
 - [ ] Repair the four pre-existing failures in the complete 35-test frontend suite (three `AppComponent` HTTP-provider setup failures and one Tavern podium-copy expectation); the Day 8 Dungeon-focused suite is green.
 
 **Work package A: Complete Goblin Mines workflow**
 
-- Verify entry cost, readiness recommendation, run creation, room progression, Vigor, combat, death/abandonment, reconnect, completion, first-clear reward, repeat reward, mastery, and claim.
+- Verify entry cost, run creation, room progression, Vigor, combat, death/abandonment, reconnect, completion, first-clear reward, repeat reward, mastery, and claim.
 - Verify action and reward ownership with two accounts.
 - Verify claims are idempotent.
 
-**Work package B: Catalog/calibration sanity**
+**Work package B: Catalog sanity**
 
-- Run simulation diagnostics for all nine difficulties.
-- Check recommendations for monotonicity and obvious impossible/easy outliers.
 - Confirm all Dungeon-gated crafting resources have a reachable source.
 
 **Acceptance criteria**
 
 - Goblin Mines passes end-to-end in browser/API tests.
 - No reward can be claimed twice.
-- Power recommendations are present or fail gracefully.
 - The production stylesheet/build remains green.
 
 **Fallback**

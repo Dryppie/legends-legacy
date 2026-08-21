@@ -42,7 +42,6 @@ jobs:
       Jwt__Issuer: release-gate
       Jwt__Audience: release-gate
       Debug__Tutorial__Enabled: "true"
-      DungeonPowerCalibration__Enabled: "false"
       LL_SMOKE_BASE_URL: http://127.0.0.1:5080
     steps:
       - name: Checkout code

@@ -11,28 +11,6 @@
   background: transparent;
 }
 
-.development-roster-control {
-  display: flex;
-  align-items: end;
-  flex-wrap: wrap;
-  gap: var(--ll-space-2);
-  padding: var(--ll-space-2);
-  border: 1px solid var(--ll-color-border);
-  border-radius: var(--ll-radius-sm);
-  background: var(--ll-color-surface-soft);
-}
-
-.development-roster-control label {
-  display: grid;
-  gap: var(--ll-space-1);
-  color: var(--ll-color-text-muted);
-  font-size: var(--ll-text-xs);
-}
-
-.development-roster-control .ll-select {
-  min-width: 10rem;
-}
-
 .request-card {
   cursor: default;
 }

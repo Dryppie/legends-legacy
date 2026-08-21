@@ -122,39 +122,6 @@ public sealed class RaidControllerTests
     }
 
     [Fact]
-    public async Task DevelopmentRosterEndpointDispatchesAuthenticatedCharacterInDevelopment()
-    {
-        var characterId = Guid.NewGuid();
-        var raidRunId = Guid.NewGuid();
-        var sender = new RecordingSender();
-        var controller = CreateController(sender, characterId);
-
-        await controller.FillDevelopmentRoster(
-            raidRunId,
-            new RaidController.FillDevelopmentRosterRequest(0.75d),
-            new TestWebHostEnvironment("Development"));
-
-        var command = Assert.IsType<FillRaidWithDevelopmentCharactersCommand>(
-            Assert.Single(sender.Requests));
-        Assert.Equal((characterId, raidRunId, 0.75d), (command.CharacterId, command.RaidRunId, command.PowerMultiplier));
-    }
-
-    [Fact]
-    public async Task DevelopmentRosterEndpointReturnsNotFoundOutsideDevelopment()
-    {
-        var sender = new RecordingSender();
-        var controller = CreateController(sender, Guid.NewGuid());
-
-        var result = await controller.FillDevelopmentRoster(
-            Guid.NewGuid(),
-            new RaidController.FillDevelopmentRosterRequest(),
-            new TestWebHostEnvironment("Production"));
-
-        Assert.IsType<NotFoundResult>(result.Result);
-        Assert.Empty(sender.Requests);
-    }
-
-    [Fact]
     public async Task DevelopmentCreateEndpointReturnsNotFoundOutsideDevelopment()
     {
         var sender = new RecordingSender();

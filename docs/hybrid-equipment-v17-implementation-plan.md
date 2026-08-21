@@ -10,8 +10,7 @@ Companion design: `docs/hybrid-equipment-attribute-units-design.md`
 This document is the execution plan for completing the hybrid equipment model
 after the armor recipe composition change. It deliberately follows the same
 sequence used for equipment v16: establish the canonical rules, change crafting
-and migration behavior, update combat and presentation, then approve the version
-through marginal-value and TTK/TTD gates.
+and migration behavior, then update combat and presentation.
 
 The target is equipment stat model **v17**.
 
@@ -349,12 +348,11 @@ The documented resolution order is:
 
 Update Dodge, Block, Damage Reduction, Healing Power, Life Steal, Status
 Resistance, Crowd Control Resistance, and Attack Speed to consume the direct
-aggregated value. Preserve their established ordering and caps unless analyzer
-results justify a separately documented change.
+aggregated value. Preserve their established ordering and caps unless a separately
+documented design change is approved.
 
 Increment `PowerRatingAlgorithm.CombatRulesVersion` when combat interpretation
-changes. Cached dungeon recommendations keyed by the old combat rules/equipment
-version must become stale and be recalibrated through the existing workflow.
+changes.
 
 ## Phase 5: API and player-facing presentation
 
@@ -387,62 +385,6 @@ Update the shared attribute definition and formatting pipes so:
 
 The admin dashboard must use the same unit metadata or an equivalent generated
 contract so authored content is not displayed with obsolete rating terminology.
-
-## Phase 6: recalibrate costs and constraints
-
-Do not copy every v16 rating `CostPerPoint` directly into v17. A rating point and
-a percentage point are different economic units.
-
-Use `AttributeMarginalValueAnalyzer` to establish v17 costs at representative low,
-mid, and high investment levels. Measure at least:
-
-- damage or TTK for offensive attributes;
-- raw and effective TTD for defensive/sustain attributes;
-- restored Health over the canonical sustain window;
-- ability throughput for Cooldown Reduction;
-- cap proximity and wasted value;
-- cross-stat synergies such as Critical Chance with Critical Damage and Dodge with
-  sustain.
-
-Then update:
-
-- `EquipmentStatBudgetCatalog` costs;
-- `EquipmentConstraintProfile` safety constraints;
-- tempering marginal-value assumptions;
-- canonical equipment build generation;
-- Power/Combat Rating valuation.
-
-The approved recipe weights remain composition decisions. Cost calibration
-changes the amount purchased by each budget share, not those shares themselves.
-
-## Phase 7: canonical TTK/TTD approval
-
-The existing `EquipmentCombatPacingAnalyzer` is the activation authority. Update
-its reference-control version when the v17 reference builds or enemies change and
-produce a new versioned artifact.
-
-Activation must enforce, for every canonical role and checkpoint tier:
-
-- Standard enemy TTK role bands;
-- raw TTD role bands;
-- effective TTD role bands;
-- elite, solo-boss, and party-boss TTK bands;
-- P10, median, and P90 measurements;
-- TTK and TTD volatility limits;
-- opening basic-attack and burst ceilings;
-- finite-pressure/immortality gates for sustain and defensive builds;
-- cross-tier pacing stability;
-- one-tier overgear targets;
-- 90-second and 120-second offensive-window consistency.
-
-Use paired deterministic seeds for cross-tier comparisons. Smoke execution is
-diagnostic only and cannot approve v17. Development execution produces reviewable
-evidence. Activation execution must pass without blockers and persist the artifact
-before `CanApproveBalanceVersion` can be true.
-
-Any failed gate blocks activation. Do not weaken a gate merely to accept the first
-cost table; tune costs, caps, constraints, combat formulas, or canonical builds and
-rerun the analyzer.
 
 ## Required verification matrix
 
@@ -496,15 +438,6 @@ rerun the analyzer.
   `<value> Resistance Rating` without an additional `from equipment` phrase;
 - comparison projections cannot replace canonical item values.
 
-### Balance tests
-
-- attribute marginal-value suite passes for v17;
-- canonical build factory produces legal v17 builds;
-- all TTK/TTD role, percentile, volatility, resolution, immortality, stability,
-  and overgear gates pass at activation seed count;
-- generated artifact versions match equipment v17, the new combat-rules version,
-  and the updated reference-control version.
-
 ## Rollout and production readiness
 
 Before production activation:
@@ -516,12 +449,9 @@ Before production activation:
 4. run a production-like database copy audit that counts equipment by storage
    location and stat model version;
 5. execute the migration twice and prove the second pass changes zero rows;
-6. run the activation-level marginal-value and TTK/TTD analyzers;
-7. archive the versioned analyzer artifacts;
-8. verify stale Combat Rating recommendations are recalibrated;
-9. smoke-test crafting, tempering, equip, market listing, market purchase, storage,
+6. smoke-test crafting, tempering, equip, market listing, market purchase, storage,
    and chat linking with migrated and newly crafted items;
-10. deploy API and frontend together so v17 values are never interpreted by a v16
+7. deploy API and frontend together so v17 values are never interpreted by a v16
     client contract.
 
 Rollback must restore both code and data semantics. Because v17 persists direct
@@ -539,6 +469,4 @@ Equipment v17 is complete only when:
 - every item displays the same intrinsic values to every viewer;
 - higher tiers visibly improve every recipe through its tier anchors;
 - all relevant gameplay systems consume the new units correctly;
-- the complete verification matrix passes;
-- the activation-level marginal-value and canonical TTK/TTD reports contain no
-  blockers.
+- the complete correctness verification matrix passes.

@@ -3,7 +3,7 @@ namespace Services.LL.Regions;
 /// <summary>
 /// Defines open-ended formula progression used by balance diagnostics.
 /// Regions that eventually use a different level cadence must introduce a new
-/// policy version instead of silently changing existing calibration anchors.
+/// policy version instead of silently changing existing progression anchors.
 /// </summary>
 public static class CanonicalRegionProgressionPolicy
 {

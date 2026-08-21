@@ -68,7 +68,6 @@ public sealed class WorldTowerService : IWorldTowerService
     private readonly ICombatSetupService _combatSetup;
     private readonly ICombatEngineExecutor _combatEngine;
     private readonly ISnapshotCombatantBuilder _snapshotCombatants;
-    private readonly IWorldTowerDevelopmentRosterFactory _developmentRosters;
     private readonly ICreatureAbilityDefinitionProvider _creatureAbilities;
     private readonly IAbilityCatalogProvider _abilityCatalog;
     private readonly ICombatEncounterResultFactory _resultFactory;
@@ -91,7 +90,6 @@ public sealed class WorldTowerService : IWorldTowerService
         ICombatSetupService combatSetup,
         ICombatEngineExecutor combatEngine,
         ISnapshotCombatantBuilder snapshotCombatants,
-        IWorldTowerDevelopmentRosterFactory developmentRosters,
         ICreatureAbilityDefinitionProvider creatureAbilities,
         IAbilityCatalogProvider abilityCatalog,
         ICombatEncounterResultFactory resultFactory,
@@ -112,7 +110,6 @@ public sealed class WorldTowerService : IWorldTowerService
         _combatSetup = combatSetup;
         _combatEngine = combatEngine;
         _snapshotCombatants = snapshotCombatants;
-        _developmentRosters = developmentRosters;
         _creatureAbilities = creatureAbilities;
         _abilityCatalog = abilityCatalog;
         _resultFactory = resultFactory;
@@ -995,112 +992,6 @@ public sealed class WorldTowerService : IWorldTowerService
 
         var accountId = await GetAccountIdAsync(characterId, cancellationToken);
         return TowerOperationResult<TowerRallyDto>.Success(ToRallyDto(rally, characterId, accountId));
-    }
-
-    public async Task<TowerOperationResult<TowerRallyDto>> FillRallyWithDevelopmentCharactersAsync(
-        Guid characterId,
-        Guid rallyId,
-        CancellationToken cancellationToken)
-    {
-        if (!_options.DevelopmentToolsEnabled)
-            return TowerOperationResult<TowerRallyDto>.Fail("World Tower development tools are disabled.");
-
-        var floorNumber = await GetRallyFloorNumberAsync(rallyId, cancellationToken);
-        if (!floorNumber.HasValue)
-            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
-        var definition = _definitions.GetFloor(floorNumber.Value)!;
-        await _db.AcquireWorldTowerFloorLockAsync(
-            _options.ServerId,
-            floorNumber.Value,
-            cancellationToken);
-
-        var rally = await GetMutableRallyWithApplicationsAsync(rallyId, cancellationToken);
-        if (rally is null)
-            return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
-        if (rally.CreatedByCharacterId != characterId)
-            return TowerOperationResult<TowerRallyDto>.Fail("Only the Expedition leader can fill a development roster.");
-        if (rally.Status != TowerRallyStatus.Recruiting)
-            return TowerOperationResult<TowerRallyDto>.Fail("Only a recruiting Expedition can be filled.");
-
-        var openSlots = rally.RequiredSlots - rally.Participants.Count;
-        if (openSlots <= 0)
-            return TowerOperationResult<TowerRallyDto>.Fail("This Expedition is already full.");
-
-        var occupiedCharacterIds = await _db.TowerRallyParticipants
-            .AsNoTracking()
-            .Where(x => ActiveRallyStatuses.Contains(x.TowerRally.Status))
-            .Select(x => x.CharacterId)
-            .ToArrayAsync(cancellationToken);
-        var occupiedAccountIds = rally.Participants.Select(x => x.AccountId).ToHashSet();
-        var candidates = await _db.Characters
-            .AsNoTracking()
-            .Where(x =>
-                x.User.IsGuest
-                && x.User.Username.StartsWith("SeedGuest")
-                && !occupiedCharacterIds.Contains(x.Id)
-                && !occupiedAccountIds.Contains(x.UserId))
-            .OrderBy(x => x.Name)
-            .Select(x => x.Id)
-            .ToArrayAsync(cancellationToken);
-
-        var eligible = new List<JoinEligibility>();
-        foreach (var candidateId in candidates)
-        {
-            var candidate = await GetJoinEligibilityAsync(
-                candidateId,
-                definition,
-                rally.Id,
-                cancellationToken);
-            if (candidate.Error is not null)
-                continue;
-
-            eligible.Add(candidate);
-            if (eligible.Count == openSlots)
-                break;
-        }
-
-        if (eligible.Count != openSlots)
-        {
-            return TowerOperationResult<TowerRallyDto>.Fail(
-                $"Only {eligible.Count} eligible seeded development character(s) were available for {openSlots} open slot(s). Restart the API with local guest seeding enabled.");
-        }
-
-        var now = DateTimeOffset.UtcNow;
-        var added = 0;
-        foreach (var candidate in eligible)
-        {
-            var developmentBuild = _developmentRosters.Create(
-                candidate.CharacterId,
-                candidate.CharacterName,
-                definition,
-                added);
-            var participant = await CreateParticipantAsync(
-                candidate with { PowerRating = developmentBuild.PowerRating },
-                rally,
-                now.AddTicks(added + 1),
-                cancellationToken,
-                developmentBuild.Snapshot);
-            rally.Participants.Add(participant);
-            _db.TowerRallyParticipants.Add(participant);
-            added++;
-        }
-
-        rally.Status = WorldTowerPartyRules.HasCompletePartyLayout(rally)
-            ? TowerRallyStatus.Ready
-            : TowerRallyStatus.Recruiting;
-        foreach (var pending in rally.Applications.Where(x =>
-                     x.Status == TowerRallyApplicationStatus.Pending))
-        {
-            pending.Status = TowerRallyApplicationStatus.Declined;
-            pending.ResolvedAt = now;
-            pending.ResolvedByCharacterId = characterId;
-        }
-        await EnqueueRallyUpdateAsync(rally, "DevelopmentRosterFilled", now, cancellationToken);
-        await _db.SaveChangesAsync(cancellationToken);
-
-        var accountId = await GetAccountIdAsync(characterId, cancellationToken);
-        return TowerOperationResult<TowerRallyDto>.Success(
-            ToRallyDto(rally, characterId, accountId));
     }
 
     public async Task<TowerOperationResult<TowerAttemptResultDto>> StartRallyAsync(
@@ -2340,7 +2231,6 @@ public sealed class WorldTowerService : IWorldTowerService
             isLeader
                 && rally.Status is (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready)
                 && rally.Participants.Any(x => x.CharacterId != characterId),
-            _options.DevelopmentToolsEnabled,
             rally.Attempt is null
                 ? null
                 : new TowerAttemptSummaryDto(

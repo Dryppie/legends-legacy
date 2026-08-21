@@ -45,20 +45,6 @@ export class SidebarService {
             description: 'Combat',
           },
           {
-            id: 'dungeon-simulator',
-            route: 'dungeon-simulator',
-            icon: 'settings/settings',
-            title: 'Dungeon Simulator',
-            description: 'Full runs',
-          },
-          {
-            id: 'area-simulator',
-            route: 'area-simulator',
-            icon: 'settings/settings',
-            title: 'Area Simulator',
-            description: 'Region curve',
-          },
-          {
             id: 'essence-catalog',
             route: 'essence-catalog',
             icon: 'character/essences',
