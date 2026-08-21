@@ -223,7 +223,7 @@ public sealed class RaidService(
             x.Trophies,
             x.Kind,
             x.ClaimedAt,
-            !x.ClaimedAt.HasValue)).ToArray();
+            options.Value.RewardsEnabled && !x.ClaimedAt.HasValue)).ToArray();
     }
 
     public async Task<RaidRunDto?> GetRaidAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken)
@@ -825,6 +825,9 @@ public sealed class RaidService(
 
     public async Task<RaidOperationResult<RaidRewardDto>> ClaimAsync(Guid characterId, Guid raidRunId, CancellationToken cancellationToken)
     {
+        if (!options.Value.RewardsEnabled)
+            return RaidOperationResult<RaidRewardDto>.Fail("Raid rewards are currently disabled.");
+
         await db.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
         var raidStatus = await db.RaidRuns.AsNoTracking()
             .Where(x => x.Id == raidRunId)
@@ -1200,7 +1203,7 @@ public sealed class RaidService(
 
         if (run.Outcome == RaidOutcome.Slain)
         {
-            if (isFirstSlain)
+            if (isFirstSlain && options.Value.RewardsEnabled)
             {
                 foreach (var signup in ApprovedSignups(run))
                 {
@@ -1293,6 +1296,9 @@ public sealed class RaidService(
         RaidCombatResolution resolution,
         CancellationToken cancellationToken)
     {
+        if (!options.Value.RewardsEnabled)
+            return;
+
         var fullPackage = RaidRewardCalculator.FullPackage(tier.Rewards, resolution.Outcome);
         var characterIds = resolution.ParticipantResults
             .Select(x => x.CharacterId)
@@ -1584,7 +1590,8 @@ public sealed class RaidService(
             && run.SignupClosesAt > now,
             run.LeaderCharacterId == characterId && ValidateCommencement(run, tier) is null,
             currentSignup is not null && run.Status == RaidRunStatus.Mustering,
-            currentReward is { ClaimedAt: null }
+            options.Value.RewardsEnabled
+            && currentReward is { ClaimedAt: null }
             && (run.Status == RaidRunStatus.Resolved || run.Status == RaidRunStatus.Settled),
             currentReward?.Kind,
             run.LeaderCharacterId == characterId

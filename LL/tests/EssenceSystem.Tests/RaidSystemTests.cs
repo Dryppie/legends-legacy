@@ -860,7 +860,8 @@ public sealed class RaidSystemTests
         var service = CreateRaidService(
             db,
             boss,
-            developmentToolsEnabled: false);
+            developmentToolsEnabled: false,
+            rewardsEnabled: true);
 
         var history = await service.GetHistoryAsync(characterId, boss.Id, 10, CancellationToken.None);
 
@@ -880,6 +881,36 @@ public sealed class RaidSystemTests
                 Assert.False(entry.CanClaim);
                 Assert.NotNull(entry.ClaimedAt);
             });
+    }
+
+    [Fact]
+    public async Task Disabled_raid_rewards_cannot_be_claimed_or_presented_as_claimable()
+    {
+        await using var db = CreateDbContext();
+        var characterId = Guid.NewGuid();
+        var now = DateTimeOffset.UtcNow;
+        var boss = new RaidBossDefinition
+        {
+            Id = "raid-boss.rewards-disabled",
+            Name = "Rewards Disabled Boss"
+        };
+        var run = CreateCompletedRun(boss.Id, 1, RaidOutcome.Slain, now);
+        run.RewardClaims.Add(CreateRewardClaim(run, characterId, 100));
+        db.RaidRuns.Add(run);
+        await db.SaveChangesAsync();
+
+        var service = CreateRaidService(
+            db,
+            boss,
+            developmentToolsEnabled: false);
+
+        var history = await service.GetHistoryAsync(characterId, boss.Id, 10, CancellationToken.None);
+        var claim = await service.ClaimAsync(characterId, run.Id, CancellationToken.None);
+
+        Assert.False(Assert.Single(history).CanClaim);
+        Assert.False(claim.Succeeded);
+        Assert.Equal("Raid rewards are currently disabled.", claim.Error);
+        Assert.False(run.RewardClaims.Single().ClaimedAt.HasValue);
     }
 
     [Fact]
@@ -1007,7 +1038,8 @@ public sealed class RaidSystemTests
         IPowerRatingService? powerRatings = null,
         ICharacterSnapshotService? snapshots = null,
         IGameEventOutbox? outbox = null,
-        IStateSyncService? stateSync = null) =>
+        IStateSyncService? stateSync = null,
+        bool rewardsEnabled = false) =>
         new(
             db: db,
             definitions: new FixedRaidBossDefinitionProvider(boss),
@@ -1027,6 +1059,7 @@ public sealed class RaidSystemTests
             jsonOptions: new JsonSerializerOptions(JsonSerializerDefaults.Web),
             options: Options.Create(new RaidOptions
             {
+                RewardsEnabled = rewardsEnabled,
                 DevelopmentToolsEnabled = developmentToolsEnabled
             }),
             logger: NullLogger<RaidService>.Instance);
