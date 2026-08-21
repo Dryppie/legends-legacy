@@ -25,6 +25,17 @@
         "penetration": 1.0,
         "regeneration": 1.0
       },
+      "stagger": {
+        "enabled": true,
+        "baseThreshold": 125,
+        "referenceParticipantCount": 5,
+        "participantExponent": 0.85,
+        "breakDurationTicks": 30,
+        "recoveryDurationTicks": 20,
+        "damageTakenBonusPercent": 15,
+        "thresholdGrowthPercentPerBreak": 35,
+        "maximumBreaks": 4
+      },
       "echoEnabledAfterClear": true,
       "unlocks": [
         {
@@ -51,6 +62,17 @@
         "penetration": 1.0,
         "regeneration": 1.0
       },
+      "stagger": {
+        "enabled": true,
+        "baseThreshold": 125,
+        "referenceParticipantCount": 5,
+        "participantExponent": 0.85,
+        "breakDurationTicks": 30,
+        "recoveryDurationTicks": 20,
+        "damageTakenBonusPercent": 15,
+        "thresholdGrowthPercentPerBreak": 35,
+        "maximumBreaks": 4
+      },
       "echoEnabledAfterClear": true,
       "unlocks": []
     },
@@ -72,6 +94,17 @@
         "penetration": 1.0,
         "regeneration": 1.0
       },
+      "stagger": {
+        "enabled": true,
+        "baseThreshold": 125,
+        "referenceParticipantCount": 5,
+        "participantExponent": 0.85,
+        "breakDurationTicks": 30,
+        "recoveryDurationTicks": 20,
+        "damageTakenBonusPercent": 15,
+        "thresholdGrowthPercentPerBreak": 35,
+        "maximumBreaks": 4
+      },
       "echoEnabledAfterClear": true,
       "unlocks": []
     },
@@ -92,6 +125,17 @@
         "resistance": 2.33,
         "penetration": 1.0,
         "regeneration": 1.0
+      },
+      "stagger": {
+        "enabled": true,
+        "baseThreshold": 125,
+        "referenceParticipantCount": 5,
+        "participantExponent": 0.85,
+        "breakDurationTicks": 30,
+        "recoveryDurationTicks": 20,
+        "damageTakenBonusPercent": 15,
+        "thresholdGrowthPercentPerBreak": 35,
+        "maximumBreaks": 4
       },
       "echoEnabledAfterClear": true,
       "unlocks": [
@@ -156,6 +200,17 @@
         "penetration": 1.0,
         "regeneration": 1.0
       },
+      "stagger": {
+        "enabled": true,
+        "baseThreshold": 125,
+        "referenceParticipantCount": 5,
+        "participantExponent": 0.85,
+        "breakDurationTicks": 30,
+        "recoveryDurationTicks": 20,
+        "damageTakenBonusPercent": 15,
+        "thresholdGrowthPercentPerBreak": 35,
+        "maximumBreaks": 4
+      },
       "echoEnabledAfterClear": true,
       "unlocks": []
     },
@@ -176,6 +231,17 @@
         "resistance": 2.04,
         "penetration": 1.0,
         "regeneration": 0.10
+      },
+      "stagger": {
+        "enabled": true,
+        "baseThreshold": 125,
+        "referenceParticipantCount": 5,
+        "participantExponent": 0.85,
+        "breakDurationTicks": 30,
+        "recoveryDurationTicks": 20,
+        "damageTakenBonusPercent": 15,
+        "thresholdGrowthPercentPerBreak": 35,
+        "maximumBreaks": 4
       },
       "echoEnabledAfterClear": true,
       "unlocks": [
@@ -203,6 +269,17 @@
         "penetration": 1.0,
         "regeneration": 1.0
       },
+      "stagger": {
+        "enabled": true,
+        "baseThreshold": 250,
+        "referenceParticipantCount": 10,
+        "participantExponent": 0.85,
+        "breakDurationTicks": 30,
+        "recoveryDurationTicks": 20,
+        "damageTakenBonusPercent": 15,
+        "thresholdGrowthPercentPerBreak": 35,
+        "maximumBreaks": 4
+      },
       "echoEnabledAfterClear": true,
       "unlocks": [
         {
@@ -228,6 +305,17 @@
         "resistance": 2.55,
         "penetration": 1.0,
         "regeneration": 1.0
+      },
+      "stagger": {
+        "enabled": true,
+        "baseThreshold": 250,
+        "referenceParticipantCount": 10,
+        "participantExponent": 0.85,
+        "breakDurationTicks": 30,
+        "recoveryDurationTicks": 20,
+        "damageTakenBonusPercent": 15,
+        "thresholdGrowthPercentPerBreak": 35,
+        "maximumBreaks": 4
       },
       "echoEnabledAfterClear": true,
       "unlocks": []

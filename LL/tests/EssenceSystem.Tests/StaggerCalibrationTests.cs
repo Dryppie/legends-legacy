@@ -14,8 +14,8 @@ public sealed class StaggerCalibrationTests
 
         Assert.Equal(1, catalog.Version);
         Assert.Equal(1_800, catalog.EvaluationDurationTicks);
-        Assert.Equal(11, catalog.Encounters.Count);
-        Assert.Equal(2, catalog.Encounters.Count(encounter =>
+        Assert.Equal(19, catalog.Encounters.Count);
+        Assert.Equal(10, catalog.Encounters.Count(encounter =>
             encounter.ContentType == StaggerCalibrationContentType.Tower));
         Assert.Equal(5, catalog.Encounters.Count(encounter =>
             encounter.ContentType == StaggerCalibrationContentType.Raid));
@@ -24,6 +24,11 @@ public sealed class StaggerCalibrationTests
         Assert.Equal(3, catalog.Cohorts.Count);
         Assert.Equal(3, catalog.Profiles.Count);
         Assert.Single(catalog.Cohorts, cohort => cohort.IsAssessmentCohort);
+
+        var floorOne = catalog.Encounters.Single(encounter =>
+            encounter.Id == "tower.floor-01");
+        Assert.Equal(125, floorOne.Definition.BaseThreshold);
+        Assert.Equal(5, floorOne.Definition.ReferenceParticipantCount);
 
         var floorFive = catalog.Encounters.Single(encounter =>
             encounter.Id == "tower.floor-05");
@@ -46,8 +51,8 @@ public sealed class StaggerCalibrationTests
         var first = runner.Run(catalog);
         var second = runner.Run(catalog);
 
-        Assert.Equal(99, first.Results.Count);
-        Assert.Equal(1_584, first.Results.Sum(result => result.SampleCount));
+        Assert.Equal(171, first.Results.Count);
+        Assert.Equal(2_736, first.Results.Sum(result => result.SampleCount));
         Assert.Equal(
             JsonSerializer.Serialize(first),
             JsonSerializer.Serialize(second));
