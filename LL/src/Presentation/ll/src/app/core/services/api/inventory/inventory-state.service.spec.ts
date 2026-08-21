@@ -1,5 +1,5 @@
 import { signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { of, Subject, throwError } from 'rxjs';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { InventoryDto } from '../../../../shared/models/Dtos/inventoryDto';
@@ -58,11 +58,15 @@ describe('InventoryStateService', () => {
   });
 
   it('applies a purchase grant only once across HTTP and websocket delivery', () => {
+    const reward = { ...item('reward'), quantity: 4 };
     const inventoryApi = jasmine.createSpyObj<InventoryService>(
       'InventoryService',
       ['getInventory'],
     );
-    inventoryApi.getInventory.and.returnValue(of({ inventoryItems: [] }));
+    inventoryApi.getInventory.and.returnValues(
+      of({ inventoryItems: [] }),
+      of({ inventoryItems: [reward] }),
+    );
 
     TestBed.configureTestingModule({
       providers: [
@@ -73,11 +77,11 @@ describe('InventoryStateService', () => {
     });
 
     const service = TestBed.inject(InventoryStateService);
-    const reward = { ...item('reward'), quantity: 4 };
 
     expect(service.applyInventoryGrant('grant-id', [reward])).toBeTrue();
     expect(service.applyInventoryGrant('grant-id', [reward])).toBeFalse();
     expect(service.items()).toEqual([reward]);
+    expect(inventoryApi.getInventory).toHaveBeenCalledTimes(2);
   });
 
   it('replaces an older in-flight snapshot with a post-grant snapshot', () => {
@@ -298,6 +302,51 @@ describe('InventoryStateService', () => {
 
     expect(applied).toBeFalse();
     expect(service.items().map((entry) => entry.id)).toEqual(['current']);
+  });
+
+  it('repairs a missing delta when mutation responses arrive newest-first', fakeAsync(() => {
+    const inventoryApi = jasmine.createSpyObj<InventoryService>(
+      'InventoryService',
+      ['getInventory'],
+    );
+    inventoryApi.getInventory.and.returnValues(
+      of({ inventoryItems: [item('initial')] }),
+      of({ inventoryItems: [item('after-both-mutations')] }),
+    );
+    const service = createService(inventoryApi);
+    TestBed.inject(DomainVersionTracker).observe({ inventory: 6 });
+
+    const applied = service.applyVersionedInventoryDelta(
+      {
+        data: { item: item('older-delta') },
+        domainVersions: { inventory: 5 },
+      },
+      (data) => service.addOrIncrement(data.item),
+    );
+    tick(51);
+
+    expect(applied).toBeFalse();
+    expect(inventoryApi.getInventory).toHaveBeenCalledTimes(2);
+    expect(service.items().map((entry) => entry.id)).toEqual([
+      'after-both-mutations',
+    ]);
+  }));
+
+  it('repairs a grant that arrives after a snapshot already containing it', () => {
+    const authoritativeReward = { ...item('reward'), quantity: 4 };
+    const inventoryApi = jasmine.createSpyObj<InventoryService>(
+      'InventoryService',
+      ['getInventory'],
+    );
+    inventoryApi.getInventory.and.returnValue(
+      of({ inventoryItems: [authoritativeReward] }),
+    );
+    const service = createService(inventoryApi);
+
+    service.applyInventoryGrant('late-grant', [authoritativeReward]);
+
+    expect(service.items()).toEqual([authoritativeReward]);
+    expect(inventoryApi.getInventory).toHaveBeenCalledTimes(2);
   });
 });
 

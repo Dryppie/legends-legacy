@@ -1,4 +1,4 @@
-export interface RaidUpdated {
+export interface RaidDirectoryUpdated {
   raidRunId: string;
   raidBossId: string;
   event: string;

@@ -375,7 +375,7 @@ describe('StateSyncCoordinator', () => {
     expect(refresh).toHaveBeenCalledTimes(1);
   }));
 
-  it('acknowledges only the projection that owns mutation responses', fakeAsync(() => {
+  it('acknowledges only the projection handled by mutation responses', fakeAsync(() => {
     const injector = {
       get: () => ({
         getCheckpoint: () =>
@@ -386,18 +386,18 @@ describe('StateSyncCoordinator', () => {
     const inventoryRefresh = jasmine
       .createSpy('inventoryRefresh')
       .and.returnValue(Promise.resolve());
-    const dungeonRefresh = jasmine
-      .createSpy('dungeonRefresh')
+    const sidebarRefresh = jasmine
+      .createSpy('sidebarRefresh')
       .and.returnValue(Promise.resolve());
     coordinator.register('inventory', 'inventory', inventoryRefresh);
-    coordinator.register('inventory', 'dungeons-inventory', dungeonRefresh);
+    coordinator.register('inventory', 'inventory-sidebar', sidebarRefresh);
 
     coordinator.acceptMutationResponse({ inventory: 5 }, true, ['inventory']);
     tick(51);
     tick();
 
     expect(inventoryRefresh).not.toHaveBeenCalled();
-    expect(dungeonRefresh).toHaveBeenCalledTimes(1);
+    expect(sidebarRefresh).toHaveBeenCalledTimes(1);
     expect(coordinator.status()).toContain(
       jasmine.objectContaining({
         key: 'inventory',
@@ -437,7 +437,7 @@ describe('StateSyncCoordinator', () => {
     );
   }));
 
-  it('reconciles a response-owned scope when the store rejects its mutation body', fakeAsync(() => {
+  it('reconciles a response-handled scope when the store rejects its mutation body', fakeAsync(() => {
     const api = {
       getCheckpoint: () =>
         of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),

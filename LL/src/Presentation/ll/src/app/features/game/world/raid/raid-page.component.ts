@@ -622,6 +622,15 @@ export class RaidPageComponent implements OnInit, OnDestroy {
   }
 
   private acceptRaid(raid: RaidRun, invalidateLoads = true): void {
+    const current = this.raid();
+    if (
+      current?.id === raid.id &&
+      Number.isSafeInteger(current.version) &&
+      Number.isSafeInteger(raid.version) &&
+      (current.version as number) > (raid.version as number)
+    ) {
+      return;
+    }
     if (invalidateLoads) this.raidLoadEpoch += 1;
     if (raid.status === 'Resolving' || raid.status === 'Playback')
       this.autoPlaybackRequested = true;

@@ -316,7 +316,10 @@ export class ColosseumStateService {
         next: (result) => {
           if (
             this.applyOwnedColosseumMutation(result, (response) =>
-              this.applyChampionMarketPurchase(response),
+              this.applyChampionMarketPurchase(
+                response,
+                result.domainVersions['inventory'],
+              ),
             )
           ) {
             this.showChampionMarketPurchaseToast(itemId, result.data);
@@ -513,6 +516,7 @@ export class ColosseumStateService {
 
   private applyChampionMarketPurchase(
     response: ChampionMarketPurchaseResponse,
+    inventoryRevision?: number,
   ): void {
     const character = this.characterState.currentCharacter();
     this.applyGloryBalance(response.gloryRemaining);
@@ -520,6 +524,7 @@ export class ColosseumStateService {
     this.inventoryState.applyInventoryGrant(
       response.inventoryGrantId,
       response.inventoryItemsGranted ?? [],
+      inventoryRevision,
     );
 
     if (character) {

@@ -14,6 +14,7 @@ using Application.UseCases.MarketPlaces.Queries.GetMarketPlaceCatalog;
 using Application.UseCases.Items.Dtos;
 using Application.UseCases.MarketPlaces.Queries.GetMarketPlaceOrderHistory;
 using Application.UseCases.MarketPlaces.Queries.GetMarketPlaceItemSummary;
+using Application.UseCases.MarketPlaces.Queries.GetMarketPlaceSnapshot;
 using API.LL.Common;
 using Common.Primitives;
 using Microsoft.AspNetCore.Authorization;
@@ -24,6 +25,11 @@ namespace API.LL.Controllers.V1;
 [Authorize(Policy = AuthorizationPolicies.MultiplayerAllowed)]
 public class MarketPlaceController : BaseController
 {
+    [HttpGet("Snapshot")]
+    public async Task<ActionResult<Response<MarketPlaceSnapshotDto>>> GetSnapshot(
+        [FromQuery] int historyTake = 50) =>
+        await Mediator.Send(new GetMarketPlaceSnapshotQuery(CurrentCharacterGuid, historyTake));
+
     [HttpGet("Catalog")]
     public async Task<ActionResult<Response<List<ItemBaseDto>>>> GetCatalog() =>
         await Mediator.Send(new GetMarketPlaceCatalogQuery());

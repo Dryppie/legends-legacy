@@ -144,7 +144,7 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         var reason = typeof(TRequest).Name;
         var invalidationCount = 0L;
         var revisionWriteCount = 0L;
-        var responseOwnedRevisionWriteCount = 0L;
+        var responseHandledRevisionWriteCount = 0L;
         var scopeProfile = StateSyncCommandScopeCatalog.GetProfile(typeof(TRequest));
         var affectedCharacterIds = _db.GameEventOutboxMessages.Local
             .Where(message =>
@@ -192,28 +192,28 @@ public sealed class TransactionBehavior<TRequest, TResponse>
             var characterScopes = GetCharacterScopes(affectedCharacterId, scopeProfile)
                 .Distinct(StringComparer.Ordinal)
                 .ToArray();
-            var responseOwnedScopes = primaryCharacterId == affectedCharacterId
+            var responseHandledScopes = primaryCharacterId == affectedCharacterId
                 ? characterScopes
-                    .Where(scopeProfile.ResponseOwnedCharacterScopes.Contains)
+                    .Where(scopeProfile.IsCharacterScopeHandledByResponse)
                     .ToArray()
                 : [];
             var invalidatingScopes = characterScopes
-                .Except(responseOwnedScopes, StringComparer.Ordinal)
+                .Except(responseHandledScopes, StringComparer.Ordinal)
                 .ToArray();
 
-            if (responseOwnedScopes.Length == 1)
+            if (responseHandledScopes.Length == 1)
             {
                 await _stateSync.AdvanceCharacterScopeAsync(
                     affectedCharacterId,
-                    responseOwnedScopes[0],
+                    responseHandledScopes[0],
                     reason,
                     cancellationToken);
             }
-            else if (responseOwnedScopes.Length > 1)
+            else if (responseHandledScopes.Length > 1)
             {
                 await _stateSync.AdvanceCharacterScopesAsync(
                     affectedCharacterId,
-                    responseOwnedScopes,
+                    responseHandledScopes,
                     reason,
                     cancellationToken);
             }
@@ -235,7 +235,7 @@ public sealed class TransactionBehavior<TRequest, TResponse>
                     cancellationToken);
             }
 
-            responseOwnedRevisionWriteCount += responseOwnedScopes.Length;
+            responseHandledRevisionWriteCount += responseHandledScopes.Length;
             invalidationCount += invalidatingScopes.Length;
             revisionWriteCount += characterScopes.Length;
         }
@@ -251,14 +251,14 @@ public sealed class TransactionBehavior<TRequest, TResponse>
                 {
                     foreach (var guildId in guildAudienceIds)
                     {
-                        if (scopeProfile.ResponseOwnedWorldScopes.Contains(worldScope))
+                        if (scopeProfile.IsWorldScopeHandledByResponse(worldScope))
                         {
                             await _stateSync.AdvanceGuildScopeAsync(
                                 guildId,
                                 worldScope,
                                 reason,
                                 cancellationToken);
-                            responseOwnedRevisionWriteCount += 1;
+                            responseHandledRevisionWriteCount += 1;
                         }
                         else
                         {
@@ -278,14 +278,14 @@ public sealed class TransactionBehavior<TRequest, TResponse>
                     $"{reason} changed guild state without an identifiable guild audience.");
             }
 
-            if (scopeProfile.ResponseOwnedWorldScopes.Contains(worldScope))
+            if (scopeProfile.IsWorldScopeHandledByResponse(worldScope))
             {
                 await _stateSync.AdvanceWorldScopeAsync(
                     worldScope,
                     reason,
                     cancellationToken);
                 revisionWriteCount += 1;
-                responseOwnedRevisionWriteCount += 1;
+                responseHandledRevisionWriteCount += 1;
                 continue;
             }
 
@@ -299,8 +299,8 @@ public sealed class TransactionBehavior<TRequest, TResponse>
 
         var commandTag = new KeyValuePair<string, object?>("command", reason);
         StateSyncCommandMetrics.RevisionWrites.Record(revisionWriteCount, commandTag);
-        StateSyncCommandMetrics.ResponseOwnedRevisionWrites.Record(
-            responseOwnedRevisionWriteCount,
+        StateSyncCommandMetrics.ResponseHandledRevisionWrites.Record(
+            responseHandledRevisionWriteCount,
             commandTag);
         StateSyncCommandMetrics.OutboxMessages.Record(
             _db.GameEventOutboxMessages.Local.LongCount(message =>
@@ -599,9 +599,9 @@ internal static class StateSyncCommandMetrics
             "state_sync.command.revision_writes",
             "revisions");
 
-    internal static readonly Histogram<long> ResponseOwnedRevisionWrites =
+    internal static readonly Histogram<long> ResponseHandledRevisionWrites =
         Meter.CreateHistogram<long>(
-            "state_sync.command.response_owned_revision_writes",
+            "state_sync.command.response_handled_revision_writes",
             "revisions");
 
     internal static readonly Histogram<long> OutboxMessages =

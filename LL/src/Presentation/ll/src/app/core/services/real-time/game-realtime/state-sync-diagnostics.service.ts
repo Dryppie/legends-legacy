@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { isProductionRuntime } from './game-realtime-feature';
+import { StateSyncScope, StateVersionMap } from './game-realtime-contracts';
 
 export interface StateSyncMutationTrace {
   method: string;
   url: string;
   timestamp: number;
-  revisions: Readonly<Record<string, number>>;
-  handledScopes: readonly string[];
+  revisions: StateVersionMap;
+  handledScopes: readonly StateSyncScope[];
   candidateFollowUpGets: string[];
-  refreshCallbacks: Array<{ scope: string; key: string }>;
+  refreshCallbacks: Array<{ scope: StateSyncScope; key: string }>;
 }
 
 export interface StateSyncDiagnosticSnapshot {
@@ -29,8 +30,8 @@ export class StateSyncDiagnostics {
   recordMutation(
     method: string,
     url: string,
-    revisions: Readonly<Record<string, number>>,
-    handledScopes: readonly string[],
+    revisions: StateVersionMap,
+    handledScopes: readonly StateSyncScope[],
   ): void {
     if (isProductionRuntime()) return;
     this.mutations.push({
@@ -53,7 +54,7 @@ export class StateSyncDiagnostics {
     this.candidateFollowUpGetCount += 1;
   }
 
-  recordRefresh(scope: string, key: string): void {
+  recordRefresh(scope: StateSyncScope, key: string): void {
     if (isProductionRuntime()) return;
     const mutation = this.latestActiveMutation();
     if (!mutation) return;

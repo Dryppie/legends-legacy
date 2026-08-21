@@ -5,7 +5,7 @@ import { ApiService } from '../api.service';
 import { EquipmentService } from './equipment.service';
 
 describe('EquipmentService', () => {
-  it('marks response-owned equipment mutation scopes as handled', () => {
+  it('marks authoritative equipment mutation scopes as handled', () => {
     const api = jasmine.createSpyObj<ApiService>('ApiService', [
       'postVersioned',
     ]);

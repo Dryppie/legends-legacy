@@ -2,7 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { ApiService } from '../api.service';
 import { RaidService } from './raid.service';
-import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
 
 describe('RaidService', () => {
   let service: RaidService;
@@ -40,9 +39,6 @@ describe('RaidService', () => {
       {
         assignments,
       },
-      {
-        stateSyncScopesHandledByResponse: ['raids'],
-      },
     );
   });
 
@@ -52,7 +48,6 @@ describe('RaidService', () => {
     expect(api.postVersioned).toHaveBeenCalledOnceWith(
       'raids/bosses/raid-boss.hives-abyss/development/create',
       { plusLevel: 2 },
-      { stateSyncScopesHandledByResponse: ['raids'] },
     );
   });
 
@@ -62,7 +57,6 @@ describe('RaidService', () => {
     expect(api.postVersioned).toHaveBeenCalledOnceWith(
       'raids/raid-id/development/fill',
       {},
-      { stateSyncScopesHandledByResponse: ['raids'] },
     );
   });
 
@@ -74,9 +68,6 @@ describe('RaidService', () => {
       {
         characterId: 'member-id',
       },
-      {
-        stateSyncScopesHandledByResponse: ['raids'],
-      },
     );
   });
 
@@ -87,9 +78,6 @@ describe('RaidService', () => {
       'raids/raid-id/signups/remove',
       {
         characterId: 'member-id',
-      },
-      {
-        stateSyncScopesHandledByResponse: ['raids'],
       },
     );
   });
@@ -117,7 +105,7 @@ describe('RaidService', () => {
           signups: [{ isCurrentCharacter: true }],
           joinRequests: [],
         },
-        domainVersions: { raids: 1 },
+        domainVersions: { 'raid-directory': 1 },
       }),
     );
 
@@ -139,7 +127,7 @@ describe('RaidService', () => {
           signups: [],
           joinRequests: [{ isCurrentCharacter: true }],
         },
-        domainVersions: { raids: 1 },
+        domainVersions: { 'raid-directory': 1 },
       }),
     );
 
@@ -149,8 +137,7 @@ describe('RaidService', () => {
     expect(service.activeRaidChatId()).toBeNull();
   });
 
-  it('does not emit a stale raid mutation response', () => {
-    TestBed.inject(DomainVersionTracker).observe({ raids: 2 });
+  it('leaves mutation ordering to the RaidRun domain version owner', () => {
     api.postVersioned.and.returnValue(
       of({
         data: {
@@ -159,13 +146,13 @@ describe('RaidService', () => {
           signups: [],
           joinRequests: [],
         },
-        domainVersions: { raids: 1 },
+        domainVersions: { 'raid-directory': 1 },
       }),
     );
     const next = jasmine.createSpy('next');
 
     service.join('raid-id').subscribe(next);
 
-    expect(next).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalled();
   });
 });

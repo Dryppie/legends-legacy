@@ -1,4 +1,4 @@
-import { Injector, signal } from '@angular/core';
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NEVER, Observable, of, Subject } from 'rxjs';
 import { Guild } from '../../../../shared/models/Dtos/guild/guild';
@@ -117,8 +117,6 @@ describe('GuildStateService description updates', () => {
       register: jasmine.createSpy(),
       activate: jasmine.createSpy(),
     };
-    const injector = TestBed.inject(Injector);
-
     return TestBed.runInInjectionContext(
       () =>
         new GuildStateService(
@@ -128,7 +126,6 @@ describe('GuildStateService description updates', () => {
           auth as never,
           notifications as never,
           {} as never,
-          injector,
           stateSync as never,
           TestBed.inject(DomainVersionTracker),
         ),
@@ -184,6 +181,56 @@ describe('GuildStateService description updates', () => {
 });
 
 describe('GuildStateService refreshes', () => {
+  it('does not manually reload guild or inventory after a vault mutation', () => {
+    TestBed.configureTestingModule({});
+    const guildService = {
+      getMyGuild: jasmine.createSpy().and.returnValue(NEVER),
+      donateVaultItem: jasmine.createSpy().and.returnValue(of(undefined)),
+    };
+    const eventService = {
+      eventEnvelope: {
+        GuildDirectoryChanged: signal(null),
+        GuildInviteReceived: signal(null),
+        GuildInviteRejected: signal(null),
+        GuildApplicationRejected: signal(null),
+        GuildMembershipChanged: signal(null),
+        GuildBuildingsChanged: signal(null),
+        GuildMissionsChanged: signal(null),
+        GuildApplication: signal(null),
+        GuildStateChanged: signal(null),
+        GuildDisbanded: signal(null),
+      },
+      setGuildSubscription: jasmine
+        .createSpy()
+        .and.returnValue(Promise.resolve()),
+    };
+    const inventory = { load: jasmine.createSpy('load') };
+    const state = TestBed.runInInjectionContext(
+      () =>
+        new GuildStateService(
+          guildService as never,
+          eventService as never,
+          eventService as never,
+          {
+            isAuthenticated: () => false,
+            currentCharacter: () => null,
+          } as never,
+          { count: () => 0 } as never,
+          inventory as never,
+          { register: jasmine.createSpy(), activate: jasmine.createSpy() } as never,
+          TestBed.inject(DomainVersionTracker),
+        ),
+    );
+
+    state.donateVaultItem('equipment-id').subscribe();
+
+    expect(guildService.donateVaultItem).toHaveBeenCalledOnceWith(
+      'equipment-id',
+    );
+    expect(guildService.getMyGuild).toHaveBeenCalledTimes(1);
+    expect(inventory.load).not.toHaveBeenCalled();
+  });
+
   it('shares overlapping guild refreshes', () => {
     TestBed.configureTestingModule({});
     const guildRequest = new Subject<Guild | null>();
@@ -214,7 +261,6 @@ describe('GuildStateService refreshes', () => {
       register: jasmine.createSpy(),
       activate: jasmine.createSpy(),
     };
-    const injector = TestBed.inject(Injector);
     const state = TestBed.runInInjectionContext(
       () =>
         new GuildStateService(
@@ -227,7 +273,6 @@ describe('GuildStateService refreshes', () => {
           } as never,
           { count: () => 0 } as never,
           {} as never,
-          injector,
           stateSync as never,
           TestBed.inject(DomainVersionTracker),
         ),
@@ -300,7 +345,6 @@ describe('GuildStateService refreshes', () => {
             initializeCount: jasmine.createSpy(),
           } as never,
           {} as never,
-          TestBed.inject(Injector),
           stateSync as never,
           TestBed.inject(DomainVersionTracker),
         ),
@@ -381,7 +425,6 @@ describe('GuildStateService refreshes', () => {
           } as never,
           { count: () => 0, initializeCount: () => undefined } as never,
           {} as never,
-          TestBed.inject(Injector),
           stateSync as never,
           TestBed.inject(DomainVersionTracker),
         ),

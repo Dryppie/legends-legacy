@@ -3,18 +3,20 @@ import { map, Observable } from 'rxjs';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { ApiResponse } from '../../../../shared/models/response';
-import { QuestJournal } from '../../../../shared/models/quest';
+import { CombatAreaAccess, QuestJournal } from '../../../../shared/models/quest';
 import { AttributeDefinition } from '../../../../shared/models/attribute-definition';
 import { ApiService } from '../api.service';
+import { StateVersionMap } from '../../real-time/game-realtime/game-realtime-contracts';
 
 export interface GameBootstrapDto {
   character: CharacterDto;
   questJournal: QuestJournal;
+  areaAccess: CombatAreaAccess[];
   currentAction: CharacterActionDto | null;
   serverTimeUtc: string;
   attributeDefinitions: AttributeDefinition[];
   accountAccess: AccountAccessDto;
-  stateVersions: Readonly<Record<string, number>>;
+  stateVersions: StateVersionMap;
 }
 
 export interface AccountAccessDto {

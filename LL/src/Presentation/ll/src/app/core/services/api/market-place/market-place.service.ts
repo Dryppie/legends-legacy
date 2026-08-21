@@ -105,6 +105,13 @@ export interface MarketPlaceItemSummary {
   tradeVolume24Hours: number;
 }
 
+export interface MarketPlaceSnapshot {
+  listings: MarketPlaceListing[];
+  catalog: ItemBase[];
+  history: MarketPlaceOrder[];
+  buyOrders: MarketPlaceBuyOrder[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -113,6 +120,14 @@ export class MarketPlaceService {
     private readonly api: ApiService,
     private toast: ToastService,
   ) {}
+
+  getSnapshot(historyTake = 50): Observable<MarketPlaceSnapshot> {
+    return this.api.get(`marketplace/snapshot?historyTake=${historyTake}`).pipe(
+      catchError(() => {
+        return throwError(() => new Error('Failed to get marketplace snapshot'));
+      }),
+    );
+  }
 
   getListings(): Observable<MarketPlaceListing[]> {
     return this.api.get('marketplace').pipe(

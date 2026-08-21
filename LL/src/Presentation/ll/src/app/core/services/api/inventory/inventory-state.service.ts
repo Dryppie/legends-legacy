@@ -46,7 +46,6 @@ export class InventoryStateService {
     }
     return favorites;
   });
-  private readonly _lastLoot = signal<InventoryItem[] | null>(null);
   private readonly inventoryGrantDeduper = new BusinessGrantDeduper();
   private resetVersion = 0;
   private loadVersion = 0;
@@ -71,17 +70,6 @@ export class InventoryStateService {
       { allowSignalWrites: true },
     );
 
-    // React to new loot and mutate state once
-    effect(
-      () => {
-        const loot = this._lastLoot();
-        if (!loot) return;
-
-        this.addOrIncrementMany(loot);
-        this._lastLoot.set(null); // Clear to prevent retriggering
-      },
-      { allowSignalWrites: true },
-    );
   }
 
   /* Generic selector: reuse everywhere */
@@ -150,7 +138,6 @@ export class InventoryStateService {
     this._equippedItemFavoriteState.set(new Map());
     this._loading.set(false);
     this._error.set(null);
-    this._lastLoot.set(null);
     this.inventoryGrantDeduper.clear();
   }
 
@@ -190,12 +177,16 @@ export class InventoryStateService {
     result: VersionedMutationResult<T>,
     apply: (data: T) => void,
   ): boolean {
-    if (
-      !this.domainVersions.isCurrent(
-        'inventory',
-        result.domainVersions['inventory'],
-      )
-    ) {
+    const revision = result.domainVersions['inventory'];
+    if (!this.domainVersions.isCurrent('inventory', revision)) {
+      // A newer partial response arrived first. Its delta does not contain this
+      // mutation, so repair from an authoritative snapshot instead of silently
+      // losing the older successful operation.
+      if (revision !== undefined) {
+        this.stateSync.rejectMutationResponse('inventory', revision);
+      } else {
+        this.load(true);
+      }
       return false;
     }
 
@@ -273,14 +264,19 @@ export class InventoryStateService {
   applyInventoryGrant(
     grantId: string | null | undefined,
     items: InventoryItem[],
+    inventoryRevision?: number,
   ): boolean {
     if (!this.inventoryGrantDeduper.shouldApply(grantId)) {
       return false;
     }
 
-    const hadInFlightSnapshot = this._loading();
     this.addOrIncrementMany(items);
-    if (hadInFlightSnapshot) {
+    // A grant delta cannot prove whether the last completed snapshot already
+    // contains the grant. Always follow it with a post-response snapshot; the
+    // delta keeps the UI responsive while the snapshot establishes authority.
+    if (inventoryRevision !== undefined) {
+      this.stateSync.rejectMutationResponse('inventory', inventoryRevision);
+    } else {
       this.load(true);
     }
     return true;

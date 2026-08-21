@@ -1,8 +1,9 @@
 import { signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { MarketPlaceListing } from '../../../../shared/models/Dtos/market-place/market-place-listing';
 import { MarketPlaceOrder } from '../../../../shared/models/Dtos/market-place/market-place-order';
+import { MarketPlaceBuyOrder } from '../../../../shared/models/Dtos/market-place/market-place-buy-order';
 import { MarketplaceChangeSet } from '../../../../shared/models/Dtos/market-place/marketplace-change-set';
 import { ToastService } from '../../client-side/components/toast/toast.service';
 import {
@@ -24,6 +25,7 @@ describe('MarketplaceStateService semantic sequencing', () => {
   let stateSync: jasmine.SpyObj<StateSyncCoordinator>;
   let domainVersions: DomainVersionTracker;
   let service: MarketplaceStateService;
+  let marketplace: jasmine.SpyObj<MarketPlaceService>;
 
   beforeEach(() => {
     eventEnvelope = signal<GameRealtimeEnvelope<MarketplaceChanged> | null>(
@@ -43,14 +45,13 @@ describe('MarketplaceStateService semantic sequencing', () => {
     stateSync.register.and.returnValue(() => undefined);
     stateSync.latestRevision.and.returnValue(0);
 
-    const marketplace = jasmine.createSpyObj<MarketPlaceService>(
+    marketplace = jasmine.createSpyObj<MarketPlaceService>(
       'MarketPlaceService',
-      ['getListings', 'getCatalog', 'getHistory', 'getBuyOrders'],
+      ['getSnapshot'],
     );
-    marketplace.getListings.and.returnValue(of([]));
-    marketplace.getCatalog.and.returnValue(of([]));
-    marketplace.getHistory.and.returnValue(of([]));
-    marketplace.getBuyOrders.and.returnValue(of([]));
+    marketplace.getSnapshot.and.returnValue(
+      of({ listings: [], catalog: [], history: [], buyOrders: [] }),
+    );
 
     TestBed.configureTestingModule({
       providers: [
@@ -225,6 +226,39 @@ describe('MarketplaceStateService semantic sequencing', () => {
 
     expect(applyResponse(changes)).toBeTrue();
     expect(applyChanges).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not let an older refresh overwrite a mutation response', () => {
+    const staleSnapshot = new Subject<{
+      listings: MarketPlaceListing[];
+      catalog: [];
+      history: MarketPlaceOrder[];
+      buyOrders: MarketPlaceBuyOrder[];
+    }>();
+    marketplace.getSnapshot.and.returnValue(staleSnapshot.asObservable());
+    service.refresh();
+
+    const current = { id: 'current-listing' } as MarketPlaceListing;
+    expect(
+      applyResponse({
+        version: 1,
+        listingChanges: [{ listingId: current.id, listing: current }],
+        buyOrderChanges: [],
+        orders: [],
+        affectedCharacterIds: [characterId],
+      }),
+    ).toBeTrue();
+
+    staleSnapshot.next({
+      listings: [{ id: 'stale-listing' } as MarketPlaceListing],
+      catalog: [],
+      history: [],
+      buyOrders: [],
+    });
+    staleSnapshot.complete();
+
+    expect(service.listings()).toEqual([current]);
+    expect(service.loading()).toBeFalse();
   });
 
   function emit(changes: MarketplaceChanged['changes']): void {

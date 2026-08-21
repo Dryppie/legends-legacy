@@ -105,9 +105,9 @@ export class ChatService {
     private gameEvents: GameRealtimeEventRegistry,
     private auth: AuthService,
   ) {
-    effect(
-      () => {
-        const envelope = this.gameEvents.eventEnvelope.AchievementUnlocked();
+    this.gameEvents
+      .eventEnvelope$('AchievementUnlocked')
+      .subscribe((envelope) => {
         const payload = envelope?.payload;
         if (!payload?.message) return;
 
@@ -120,13 +120,11 @@ export class ChatService {
           body: payload.message,
           sentAt: new Date(envelope?.occurredAt ?? Date.now()),
         });
-      },
-      { allowSignalWrites: true },
-    );
+      });
 
-    effect(
-      () => {
-        const envelope = this.gameEvents.eventEnvelope.PlayerTransfer();
+    this.gameEvents
+      .eventEnvelope$('PlayerTransfer')
+      .subscribe((envelope) => {
         const payload = envelope?.payload;
         if (!payload?.message || !payload.messageId) return;
 
@@ -139,14 +137,11 @@ export class ChatService {
           body: payload.message,
           sentAt: new Date(envelope?.occurredAt ?? Date.now()),
         });
-      },
-      { allowSignalWrites: true },
-    );
+      });
 
-    effect(
-      () => {
-        const envelope =
-          this.gameEvents.eventEnvelope.GuildVaultChatMessage();
+    this.gameEvents
+      .eventEnvelope$('GuildVaultChatMessage')
+      .subscribe((envelope) => {
         const payload = envelope?.payload;
         if (!payload?.messageId || !payload.equipment) return;
 
@@ -162,9 +157,7 @@ export class ChatService {
             payload.sentAt ?? envelope?.occurredAt ?? Date.now(),
           ),
         });
-      },
-      { allowSignalWrites: true },
-    );
+      });
 
     effect(
       () => {

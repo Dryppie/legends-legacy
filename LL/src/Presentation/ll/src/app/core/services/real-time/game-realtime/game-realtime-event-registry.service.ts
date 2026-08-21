@@ -6,7 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { GameRealtimeDiagnostics } from './game-realtime-diagnostics.service';
 import {
   GameRealtimeEnvelope,
@@ -49,6 +49,10 @@ export class GameRealtimeEventRegistry {
   private readonly envelopes = new Map<
     RegistryEventName,
     WritableSignal<GameRealtimeEnvelope | null>
+  >();
+  private readonly envelopeStreams = new Map<
+    RegistryEventName,
+    ReplaySubject<GameRealtimeEnvelope>
   >();
   private registered = false;
   private subscription?: Subscription;
@@ -110,6 +114,19 @@ export class GameRealtimeEventRegistry {
       );
     }
     return envelope.asReadonly();
+  }
+
+  eventEnvelope$<K extends RegistryEventName>(
+    name: K,
+  ): Observable<GameRealtimeEnvelope<RegistryEventMap[K]>> {
+    let stream = this.envelopeStreams.get(name);
+    if (!stream) {
+      stream = new ReplaySubject<GameRealtimeEnvelope>(100);
+      this.envelopeStreams.set(name, stream);
+    }
+    return stream.asObservable() as Observable<
+      GameRealtimeEnvelope<RegistryEventMap[K]>
+    >;
   }
 
   private registerHandlers(): void {
@@ -193,6 +210,7 @@ export class GameRealtimeEventRegistry {
       () => {
         channel.set(envelope.payload);
         envelopeChannel.set(envelope);
+        this.envelopeStreams.get(eventName)?.next(envelope);
       },
       true,
     );

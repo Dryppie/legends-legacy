@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, effect, Injector } from '@angular/core';
+import { Injectable, signal, computed, effect } from '@angular/core';
 import { finalize, Observable, of, shareReplay, tap } from 'rxjs';
 import { Guild, GuildSimple } from '../../../../shared/models/Dtos/guild/guild';
 import { GuildInvite } from '../../../../shared/models/Dtos/guild/guildInvite';
@@ -28,20 +28,15 @@ import { RealtimeSignalDeduper } from '../../real-time/game-realtime/realtime-de
 import { GameRealtimeSignalEventName } from '../../real-time/game-realtime/game-realtime-contracts';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
-import { EquipmentStateService } from '../equipment/equipment-state.service';
 import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
 
 type GuildRealtimeEventName = Extract<
   GameRealtimeSignalEventName,
   | 'GuildApplication'
   | 'GuildInviteReceived'
-  | 'GuildInviteRejected'
   | 'GuildApplicationRejected'
   | 'GuildBuildingsChanged'
   | 'GuildMissionsChanged'
-  | 'GuildStateChanged'
-  | 'GuildMembershipChanged'
-  | 'GuildDisbanded'
   | 'GuildDirectoryChanged'
 >;
 
@@ -50,7 +45,6 @@ type GuildRealtimeScope = 'any' | 'member' | 'nonMember';
 interface GuildRealtimeContext {
   guildId: string | null;
   characterId: string | null;
-  shouldRefresh: boolean;
 }
 
 type GuildRealtimePayload = {
@@ -71,8 +65,6 @@ interface GuildRealtimeHandler {
     payload: GuildRealtimePayload,
     context: GuildRealtimeContext,
   ) => void;
-  refresh?: boolean;
-  skipForHandledInitiator?: boolean;
 }
 
 interface PendingGuildDescription {
@@ -197,7 +189,6 @@ export class GuildStateService {
     private readonly auth: AuthService,
     private readonly notificationService: NotificationService,
     private readonly inventoryState: InventoryStateService,
-    private readonly injector: Injector,
     private readonly stateSync: StateSyncCoordinator,
     private readonly domainVersions: DomainVersionTracker,
   ) {
@@ -264,33 +255,19 @@ export class GuildStateService {
   }
 
   donateVaultItem(equipmentInstanceId: string): Observable<void> {
-    return this.service
-      .donateVaultItem(equipmentInstanceId)
-      .pipe(tap(() => this.refreshVaultDependencies()));
+    return this.service.donateVaultItem(equipmentInstanceId);
   }
 
   borrowVaultItem(vaultItemId: string): Observable<void> {
-    return this.service
-      .borrowVaultItem(vaultItemId)
-      .pipe(tap(() => this.refreshVaultDependencies()));
+    return this.service.borrowVaultItem(vaultItemId);
   }
 
   returnVaultItem(vaultItemId: string): Observable<void> {
-    return this.service
-      .returnVaultItem(vaultItemId)
-      .pipe(tap(() => this.refreshVaultDependencies()));
+    return this.service.returnVaultItem(vaultItemId);
   }
 
   withdrawVaultItem(vaultItemId: string): Observable<void> {
-    return this.service
-      .withdrawVaultItem(vaultItemId)
-      .pipe(tap(() => this.refreshVaultDependencies()));
-  }
-
-  private refreshVaultDependencies(): void {
-    this.refresh();
-    this.inventoryState.load(true);
-    this.injector.get(EquipmentStateService).load(true);
+    return this.service.withdrawVaultItem(vaultItemId);
   }
 
   private createGuildRealtimeHandlers(): GuildRealtimeHandler[] {
@@ -316,23 +293,10 @@ export class GuildStateService {
         },
       },
       {
-        eventName: 'GuildInviteRejected',
-        key: 'guild-invite-rejected',
-        scope: 'nonMember',
-        action: () => this.loadMyInvites(),
-      },
-      {
         eventName: 'GuildApplicationRejected',
         key: 'guild-application-rejected',
         scope: 'nonMember',
         action: () => this.loadMyInvites(),
-      },
-      {
-        eventName: 'GuildMembershipChanged',
-        key: 'guild-membership-changed',
-        scope: 'nonMember',
-        refresh: true,
-        skipForHandledInitiator: true,
       },
       {
         eventName: 'GuildBuildingsChanged',
@@ -364,45 +328,6 @@ export class GuildStateService {
         scope: 'member',
         matches: inCurrentGuild,
         action: () => this.addGuildNotification(),
-        refresh: true,
-      },
-      {
-        eventName: 'GuildStateChanged',
-        key: 'guild-state-changed',
-        scope: 'member',
-        matches: inCurrentGuild,
-        refresh: true,
-        skipForHandledInitiator: true,
-      },
-      {
-        eventName: 'GuildMembershipChanged',
-        key: 'guild-membership-changed',
-        scope: 'member',
-        matches: inCurrentGuild,
-        refresh: true,
-        skipForHandledInitiator: true,
-      },
-      {
-        eventName: 'GuildDisbanded',
-        key: 'guild-disbanded',
-        scope: 'member',
-        matches: inCurrentGuild,
-        refresh: true,
-        skipForHandledInitiator: true,
-      },
-      {
-        eventName: 'GuildInviteRejected',
-        key: 'guild-invite-rejected',
-        scope: 'member',
-        matches: inCurrentGuild,
-        refresh: true,
-      },
-      {
-        eventName: 'GuildApplicationRejected',
-        key: 'guild-application-rejected',
-        scope: 'member',
-        matches: inCurrentGuild,
-        refresh: true,
       },
     ];
   }
@@ -411,16 +336,12 @@ export class GuildStateService {
     const context: GuildRealtimeContext = {
       guildId: this._guild()?.id ?? null,
       characterId: this.auth.currentCharacter()?.id ?? null,
-      shouldRefresh: false,
     };
 
     for (const handler of this.guildRealtimeHandlers) {
       this.processGuildRealtimeHandler(handler, context);
     }
 
-    if (context.shouldRefresh) {
-      this.refresh();
-    }
   }
 
   private processGuildRealtimeHandler(
@@ -434,15 +355,7 @@ export class GuildStateService {
     if (!payload) return;
     if (handler.matches && !handler.matches(payload, context)) return;
     if (!this.eventDeduper.shouldProcess(handler.key, envelope)) return;
-    if (
-      handler.skipForHandledInitiator &&
-      isHandledGuildInitiatorEcho(payload, context.characterId)
-    ) {
-      return;
-    }
-
     handler.action?.(payload, context);
-    context.shouldRefresh ||= !!handler.refresh;
   }
 
   private isGuildHandlerInScope(
@@ -516,7 +429,7 @@ export class GuildStateService {
           'guild-buildings',
           'guild-missions',
           'guild-shop',
-        ]) {
+        ] as const) {
           this.stateSync.resetScope(scope);
         }
         void this.stateSync.reconcile();
@@ -560,7 +473,7 @@ export class GuildStateService {
       'guild-membership',
       'guild-invites',
       'guild-directory',
-    ]) {
+    ] as const) {
       this.stateSync.activate(scope, scope);
     }
   }
@@ -800,6 +713,7 @@ export class GuildStateService {
           this.inventoryState.applyInventoryGrant(
             response.inventoryGrantId,
             response.inventoryItemsGranted ?? [],
+            result.domainVersions['inventory'],
           );
         },
         error: (e) =>

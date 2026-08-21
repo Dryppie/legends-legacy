@@ -67,9 +67,6 @@ export class DungeonStateService {
     private readonly realtimeStore: GameRealtimeStore,
   ) {
     this.stateSync.register('dungeons', 'dungeons', () => this.synchronize());
-    this.stateSync.register('inventory', 'dungeons-inventory', () =>
-      this.synchronizeAvailableDungeons(),
-    );
     this.refresh();
   }
 

@@ -12,6 +12,7 @@ public sealed class GameBootstrapDto : IMapFrom<GameBootstrapSnapshot>
 {
     public required CharacterDto Character { get; init; }
     public required QuestJournalDto QuestJournal { get; init; }
+    public required IReadOnlyList<CombatAreaAccessDto> AreaAccess { get; init; }
     public CharacterActionDto? CurrentAction { get; init; }
     public DateTimeOffset ServerTimeUtc { get; init; }
     public IReadOnlyCollection<AttributeDefinition> AttributeDefinitions { get; init; } = [];
@@ -29,6 +30,7 @@ public sealed class GameBootstrapSnapshot
 {
     public required CharacterDto Character { get; init; }
     public required QuestJournalDto QuestJournal { get; init; }
+    public required IReadOnlyList<CombatAreaAccessDto> AreaAccess { get; init; }
     public CharacterActionDto? CurrentAction { get; init; }
     public DateTimeOffset ServerTimeUtc { get; init; }
     public IReadOnlyCollection<AttributeDefinition> AttributeDefinitions { get; init; } = [];

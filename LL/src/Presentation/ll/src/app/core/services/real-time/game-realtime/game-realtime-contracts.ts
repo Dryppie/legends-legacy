@@ -4,8 +4,20 @@ import { EquipmentInstance } from '../../../../shared/models/item';
 import { QuestJournal } from '../../../../shared/models/quest';
 import { TournamentGroundsUpdated } from '../colosseum/tournament-grounds-updated';
 import { RaidUpdated } from '../raid/raid-updated';
+import { RaidDirectoryUpdated } from '../raid/raid-directory-updated';
 import { WorldTowerCombatFrameUpdated } from '../world-tower/world-tower-combat-frame-updated';
 import { WorldTowerRallyUpdated } from '../world-tower/world-tower-rally-updated';
+import {
+  StateSyncScope,
+  StateVersionMap,
+} from './state-sync-scopes.generated';
+
+export {
+  isStateSyncScope,
+  stateSyncScopes,
+  StateSyncScope,
+  StateVersionMap,
+} from './state-sync-scopes.generated';
 
 export const gameRealtimeSignalEventNames = {
   accountAccessChanged: 'AccountAccessChanged',
@@ -62,7 +74,7 @@ export interface LootReceived {
 
 export interface StateInvalidations {
   characterId: string;
-  revisions: Readonly<Record<string, number>>;
+  revisions: StateVersionMap;
   reason: string;
 }
 
@@ -227,7 +239,7 @@ export interface GameRealtimeSignalEventMap {
   WorldTowerRallyUpdated: WorldTowerRallyUpdated;
   WorldTowerCombatFrameUpdated: WorldTowerCombatFrameUpdated;
   RaidUpdated: RaidUpdated;
-  RaidDirectoryUpdated: RaidUpdated;
+  RaidDirectoryUpdated: RaidDirectoryUpdated;
 }
 
 export type GameRealtimeSignalEventName = keyof GameRealtimeSignalEventMap;
@@ -240,8 +252,6 @@ export function isGameRealtimeSignalEventName(
   );
 }
 
-export type StateSyncScope = 'character' | 'marketplace' | string;
-
 export interface StateInvalidated {
   characterId?: string | null;
   scope: StateSyncScope;
@@ -251,7 +261,7 @@ export interface StateInvalidated {
 
 export interface StateSyncCheckpoint {
   characterId: string;
-  revisions: Record<string, number>;
+  revisions: StateVersionMap;
   serverTimeUtc: string;
 }
 
@@ -281,4 +291,6 @@ export type GameRealtimePayload =
   | WorldTowerRallyUpdated
   | WorldTowerCombatFrameUpdated
   | RaidUpdated
-  | StateInvalidated;
+  | RaidDirectoryUpdated
+  | StateInvalidated
+  | StateInvalidations;

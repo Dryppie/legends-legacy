@@ -25,7 +25,7 @@ import { MarketPlaceBuyOrder } from '../../../../shared/models/Dtos/market-place
 import { CreateMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/create-market-place-listing-request';
 import { CreateMarketPlaceBuyOrderRequest } from '../../../../shared/models/requestDtos/market-place/create-market-place-buy-order-request';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
-import { forkJoin, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { BuyoutMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/buyout-market.place-listing-request';
 import { FulfillMarketPlaceBuyOrderRequest } from '../../../../shared/models/requestDtos/market-place/fulfill-market-place-buy-order-request';
 import { CharacterService } from '../character/character.service';
@@ -166,12 +166,7 @@ export class MarketplaceStateService {
     this._error.set(null);
     const refreshVersion = ++this.refreshVersion;
 
-    return forkJoin({
-      listings: this.marketplaceService.getListings(),
-      catalog: this.marketplaceService.getCatalog(),
-      history: this.marketplaceService.getHistory(),
-      buyOrders: this.marketplaceService.getBuyOrders(),
-    }).pipe(
+    return this.marketplaceService.getSnapshot().pipe(
       tap({
         next: ({ listings, catalog, history, buyOrders }) => {
           if (refreshVersion !== this.refreshVersion) return;
@@ -656,6 +651,10 @@ export class MarketplaceStateService {
   }
 
   private applyMarketplaceChanges(changes: MarketplaceChangeSet): void {
+    // Any snapshot already in flight predates this ordered mutation/event.
+    // Prevent it from replacing the newly applied marketplace state.
+    this.refreshVersion += 1;
+    this._loading.set(false);
     for (const change of changes.listingChanges) {
       this.applyListingChange(change.listingId, change.listing);
     }

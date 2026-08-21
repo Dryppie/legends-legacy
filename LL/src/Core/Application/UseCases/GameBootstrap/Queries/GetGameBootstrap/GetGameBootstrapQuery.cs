@@ -5,6 +5,7 @@ using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Application.UseCases.Characters.Queries.GetCharacter;
 using Application.UseCases.GameBootstrap.Dtos;
 using Application.UseCases.Quests.Queries.GetQuestJournal;
+using Application.UseCases.Quests.Queries.GetCombatAreaAccess;
 using AutoMapper;
 using Common.Primitives;
 using Domain.Models.Attributes;
@@ -62,6 +63,10 @@ public sealed class GetGameBootstrapQueryHandler
             new GetQuestJournalQuery(request.CharacterId),
             cancellationToken);
 
+        var areaAccess = await _sender.Send(
+            new GetCombatAreaAccessQuery(request.CharacterId),
+            cancellationToken);
+
         // Bootstrap is a read-only snapshot. Action advancement is intentionally
         // owned by CharacterActions/Resolve so reconnecting clients cannot launch
         // a second, competing offline resolver through this endpoint.
@@ -78,6 +83,7 @@ public sealed class GetGameBootstrapQueryHandler
         {
             Character = characterResponse.Data,
             QuestJournal = questJournal,
+            AreaAccess = areaAccess,
             CurrentAction = currentActionResponse.Data,
             ServerTimeUtc = _timeProvider.GetUtcNow(),
             AttributeDefinitions = AttributeCatalog.All,

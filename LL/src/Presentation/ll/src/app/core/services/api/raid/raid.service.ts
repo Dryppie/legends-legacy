@@ -1,11 +1,10 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { filter, map, Observable, tap } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 import {
   AbilityDamageTypeStats,
   BattleOutcome,
 } from '../../../../shared/models/Dtos/combatResultDto';
 import { ApiService, VersionedMutationResult } from '../api.service';
-import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
 
 export type RaidRunStatus =
   | 'Mustering'
@@ -306,12 +305,9 @@ export interface RaidTrophyPurchase {
   purchasedAt: string;
 }
 
-const RAID_MUTATION_HANDLED_SCOPES = ['raids'] as const;
-
 @Injectable({ providedIn: 'root' })
 export class RaidService {
   private readonly api = inject(ApiService);
-  private readonly domainVersions = inject(DomainVersionTracker);
   private readonly _activeRaidId = signal<string | null>(null);
   private readonly _activeRaidChatId = signal<string | null>(null);
   private raidQueryEpoch = 0;
@@ -360,7 +356,6 @@ export class RaidService {
       this.api.postVersioned<RaidRun>(
         'raids/create',
         { raidBossId, plusLevel },
-        { stateSyncScopesHandledByResponse: RAID_MUTATION_HANDLED_SCOPES },
       ),
     ).pipe(tap((raid) => this.trackRaid(raid)));
   }
@@ -373,7 +368,6 @@ export class RaidService {
       this.api.postVersioned<RaidRun>(
         `raids/bosses/${encodeURIComponent(raidBossId)}/development/create`,
         { plusLevel },
-        { stateSyncScopesHandledByResponse: RAID_MUTATION_HANDLED_SCOPES },
       ),
     ).pipe(tap((raid) => this.trackRaid(raid)));
   }
@@ -383,7 +377,6 @@ export class RaidService {
       this.api.postVersioned<RaidRun>(
         `raids/${raidRunId}/development/fill`,
         {},
-        { stateSyncScopesHandledByResponse: RAID_MUTATION_HANDLED_SCOPES },
       ),
     ).pipe(tap((raid) => this.trackRaid(raid)));
   }
@@ -393,7 +386,6 @@ export class RaidService {
       this.api.postVersioned<RaidRun>(
         `raids/${raidRunId}/join`,
         {},
-        { stateSyncScopesHandledByResponse: RAID_MUTATION_HANDLED_SCOPES },
       ),
     ).pipe(tap((raid) => this.trackRaid(raid)));
   }
@@ -403,7 +395,6 @@ export class RaidService {
       this.api.postVersioned<RaidRun>(
         `raids/${raidRunId}/signups/approve`,
         { characterId },
-        { stateSyncScopesHandledByResponse: RAID_MUTATION_HANDLED_SCOPES },
       ),
     ).pipe(tap((raid) => this.trackRaid(raid)));
   }
@@ -413,7 +404,6 @@ export class RaidService {
       this.api.postVersioned<RaidRun>(
         `raids/${raidRunId}/signups/remove`,
         { characterId },
-        { stateSyncScopesHandledByResponse: RAID_MUTATION_HANDLED_SCOPES },
       ),
     ).pipe(tap((raid) => this.trackRaid(raid)));
   }
@@ -423,7 +413,6 @@ export class RaidService {
       this.api.postVersioned<RaidRun>(
         `raids/${raidRunId}/leave`,
         {},
-        { stateSyncScopesHandledByResponse: RAID_MUTATION_HANDLED_SCOPES },
       ),
     ).pipe(tap(() => this.clearActiveRaid(raidRunId)));
   }
@@ -433,7 +422,6 @@ export class RaidService {
       this.api.postVersioned<RaidRun>(
         `raids/${raidRunId}/cancel`,
         {},
-        { stateSyncScopesHandledByResponse: RAID_MUTATION_HANDLED_SCOPES },
       ),
     ).pipe(tap(() => this.clearActiveRaid(raidRunId)));
   }
@@ -446,7 +434,6 @@ export class RaidService {
       this.api.postVersioned<RaidRun>(
         `raids/${raidRunId}/transfer-leadership`,
         { characterId },
-        { stateSyncScopesHandledByResponse: RAID_MUTATION_HANDLED_SCOPES },
       ),
     );
   }
@@ -456,7 +443,6 @@ export class RaidService {
       this.api.postVersioned<RaidRun>(
         `raids/${raidRunId}/loadout`,
         {},
-        { stateSyncScopesHandledByResponse: RAID_MUTATION_HANDLED_SCOPES },
       ),
     );
   }
@@ -471,7 +457,6 @@ export class RaidService {
       this.api.postVersioned<RaidRun>(
         `raids/${raidRunId}/assign`,
         { characterId, lane, slotIndex },
-        { stateSyncScopesHandledByResponse: RAID_MUTATION_HANDLED_SCOPES },
       ),
     );
   }
@@ -488,7 +473,6 @@ export class RaidService {
       this.api.putVersioned<RaidRun>(
         `raids/${raidRunId}/parties`,
         { assignments },
-        { stateSyncScopesHandledByResponse: RAID_MUTATION_HANDLED_SCOPES },
       ),
     );
   }
@@ -498,7 +482,6 @@ export class RaidService {
       this.api.postVersioned<RaidRun>(
         `raids/${raidRunId}/commence`,
         {},
-        { stateSyncScopesHandledByResponse: RAID_MUTATION_HANDLED_SCOPES },
       ),
     ).pipe(tap((raid) => this.trackRaid(raid)));
   }
@@ -552,12 +535,7 @@ export class RaidService {
   private unwrapRaidMutation(
     request: Observable<VersionedMutationResult<RaidRun>>,
   ): Observable<RaidRun> {
-    return request.pipe(
-      filter((result) =>
-        this.domainVersions.isCurrent('raids', result.domainVersions['raids']),
-      ),
-      map((result) => result.data),
-    );
+    return request.pipe(map((result) => result.data));
   }
 
   private trackRaid(

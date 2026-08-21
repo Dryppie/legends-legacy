@@ -8,7 +8,12 @@ describe('readDomainVersions', () => {
   it('prefers the domain-version header and ignores invalid revisions', () => {
     const headers = new HttpHeaders().set(
       DOMAIN_VERSIONS_HEADER,
-      JSON.stringify({ inventory: 7, equipment: -1, quests: '8' }),
+      JSON.stringify({
+        inventory: 7,
+        equipment: -1,
+        quests: '8',
+        'unknown-future-scope': 9,
+      }),
     );
 
     expect(readDomainVersions(headers)).toEqual({ inventory: 7 });

@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { ToastService } from '../../client-side/components/toast/toast.service';
 import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
@@ -76,21 +76,13 @@ describe('DungeonStateService synchronization', () => {
     });
   });
 
-  it('refreshes dungeon availability when inventory is invalidated', () => {
+  it('does not couple general inventory invalidations to dungeon availability', () => {
     TestBed.inject(DungeonStateService);
-    const registration = stateSync.register.calls
-      .allArgs()
-      .find(
-        ([scope, key]) => scope === 'inventory' && key === 'dungeons-inventory',
-      );
-
-    expect(registration).toBeDefined();
-    dungeonService.getAvailableDungeons.calls.reset();
-
-    const refresh = registration?.[2] as () => Observable<unknown>;
-    refresh().subscribe();
-
-    expect(dungeonService.getAvailableDungeons).toHaveBeenCalledTimes(1);
+    expect(stateSync.register).not.toHaveBeenCalledWith(
+      'inventory',
+      'dungeons-inventory',
+      jasmine.any(Function),
+    );
   });
 
   it('applies the versioned claim hub without a follow-up availability GET', () => {

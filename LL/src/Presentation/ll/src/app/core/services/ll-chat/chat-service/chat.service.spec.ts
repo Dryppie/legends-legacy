@@ -60,13 +60,9 @@ describe('ChatService guild connection synchronization', () => {
     auth.ensureValidToken.and.returnValue(of(1));
     auth.getAccessToken.and.returnValue('access-token');
 
-    const emptyEnvelope = signal(undefined);
+    const transientEvents = new Subject<any>();
     const gameEvents = {
-      eventEnvelope: {
-        AchievementUnlocked: emptyEnvelope,
-        PlayerTransfer: emptyEnvelope,
-        GuildVaultChatMessage: emptyEnvelope,
-      },
+      eventEnvelope$: () => transientEvents.asObservable(),
     };
 
     TestBed.configureTestingModule({

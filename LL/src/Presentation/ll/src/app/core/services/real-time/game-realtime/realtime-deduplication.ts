@@ -37,7 +37,13 @@ class BoundedIdentifierCache {
   }
 }
 
-/** Deduplicates transport deliveries by envelope update ID. */
+/**
+ * Deduplicates transport deliveries by envelope update ID within a bounded,
+ * insertion-ordered window. The default remembers the latest 500 deliveries;
+ * older IDs are deliberately evicted so a long-running session cannot grow
+ * memory without limit. This is transport replay protection, not durable
+ * business idempotency: handlers must still make business grants idempotent.
+ */
 export class RealtimeUpdateDeduper {
   private readonly identifiers: BoundedIdentifierCache;
 
@@ -54,7 +60,11 @@ export class RealtimeUpdateDeduper {
   }
 }
 
-/** Deduplicates an idempotent business grant independently of its deliveries. */
+/**
+ * Suppresses recently observed business grant IDs independently of transport
+ * delivery IDs. Its bounded cache is a client-side safety net; durable grant
+ * idempotency remains a server responsibility.
+ */
 export class BusinessGrantDeduper {
   private readonly identifiers: BoundedIdentifierCache;
 

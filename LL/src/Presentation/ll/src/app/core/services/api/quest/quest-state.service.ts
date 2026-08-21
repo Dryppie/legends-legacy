@@ -7,7 +7,7 @@ import {
   untracked,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { finalize, forkJoin, Observable, tap } from 'rxjs';
+import { finalize, Observable, tap } from 'rxjs';
 import {
   CombatAreaAccess,
   ONBOARDING_QUEST_CATEGORY,
@@ -121,9 +121,8 @@ export class QuestStateService {
       { allowSignalWrites: true },
     );
 
-    // Area access and quest availability are both derived server-side from
-    // character level, and the level-up event carries neither. Without this the
-    // newly unlocked area stays locked until something else refetches.
+    // Area access is immediately derived from character level. Quest state is
+    // delivered separately as an authoritative QuestJournalChanged snapshot.
     effect(
       () => {
         const envelope = this.events.eventEnvelope.CharacterLevelUp();
@@ -133,7 +132,7 @@ export class QuestStateService {
           const characterId = this.auth.currentCharacter()?.id;
           if (!characterId || levelUp.characterId !== characterId) return;
           if (!this.eventDeduper.shouldProcess('level-up', envelope)) return;
-          this.resyncSilently();
+          this.synchronizeAreaAccess().subscribe({ error: () => undefined });
         });
       },
       { allowSignalWrites: true },
@@ -159,6 +158,12 @@ export class QuestStateService {
     this.stateSync.activate('area-access', 'area-access');
     this._loading.set(false);
     this._error.set(null);
+  }
+
+  initializeAreaAccess(access: CombatAreaAccess[]): void {
+    this.areaAccessRequestEpoch += 1;
+    this._areaAccess.set(access ?? []);
+    this.stateSync.activate('area-access', 'area-access');
   }
 
   load(): void {
@@ -258,7 +263,7 @@ export class QuestStateService {
     this.api.getAreaAccess().subscribe({
       next: (access) => {
         if (requestEpoch === this.areaAccessRequestEpoch) {
-          this._areaAccess.set(access);
+          this.initializeAreaAccess(access);
         }
       },
       error: () => undefined,
@@ -283,33 +288,6 @@ export class QuestStateService {
     this._error.set(null);
   }
 
-  /** Re-pull journal and area access together, without touching loading/error UI. */
-  private resyncSilently(): void {
-    this.synchronize().subscribe({ error: () => undefined });
-  }
-
-  private synchronize(): Observable<unknown> {
-    const requestEpoch = ++this.journalRequestEpoch;
-    const accessRequestEpoch = ++this.areaAccessRequestEpoch;
-    return forkJoin({
-      journal: this.api.getJournal(),
-      access: this.api.getAreaAccess(),
-    }).pipe(
-      tap({
-        next: ({ journal, access }) => {
-          if (requestEpoch === this.journalRequestEpoch) {
-            this.initialize(journal);
-          }
-          if (accessRequestEpoch === this.areaAccessRequestEpoch) {
-            this._areaAccess.set(access);
-          }
-        },
-        error: (error) =>
-          this._error.set(error?.message ?? 'Failed to synchronize quests'),
-      }),
-    );
-  }
-
   private synchronizeJournal(): Observable<unknown> {
     const requestEpoch = ++this.journalRequestEpoch;
     return this.api.getJournal().pipe(
@@ -331,7 +309,7 @@ export class QuestStateService {
       tap({
         next: (access) => {
           if (requestEpoch === this.areaAccessRequestEpoch) {
-            this._areaAccess.set(access);
+            this.initializeAreaAccess(access);
           }
         },
       }),

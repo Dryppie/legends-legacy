@@ -199,4 +199,56 @@ describe('GameRealtimeEventRegistry', () => {
       (window as any).env = previousEnvironment;
     }
   });
+
+  it('delivers every transient envelope when two arrive in the same turn', () => {
+    const events = new Subject<GameRealtimeEnvelope>();
+    TestBed.configureTestingModule({
+      providers: [
+        GameRealtimeEventRegistry,
+        {
+          provide: GameRealtimeConnection,
+          useValue: { events$: events.asObservable() },
+        },
+        {
+          provide: GameRealtimeDiagnostics,
+          useValue: {
+            runHandler: (
+              _envelope: GameRealtimeEnvelope,
+              handler: () => void,
+            ) => handler(),
+            recordDuplicate: () => undefined,
+            recordUnknown: () => undefined,
+          },
+        },
+      ],
+    });
+    const previousEnvironment = (window as any).env;
+    (window as any).env = { gameSignalREnabled: 'true' };
+
+    try {
+      const registry = TestBed.inject(GameRealtimeEventRegistry);
+      const received: string[] = [];
+      registry
+        .eventEnvelope$('PlayerTransfer')
+        .subscribe((envelope) => received.push(envelope.payload.messageId));
+      registry.initialize();
+
+      for (const messageId of ['message-1', 'message-2']) {
+        events.next({
+          updateId: messageId,
+          event: 'PlayerTransfer',
+          payload: {
+            transferId: messageId,
+            messageId,
+            characterId: 'character-id',
+            message: messageId,
+          },
+        });
+      }
+
+      expect(received).toEqual(['message-1', 'message-2']);
+    } finally {
+      (window as any).env = previousEnvironment;
+    }
+  });
 });

@@ -24,7 +24,6 @@ public static class StateSyncScopes
     public const string GuildDirectory = "guild-directory";
     public const string Colosseum = "colosseum";
     public const string Tournament = "tournament";
-    public const string Raids = "raids";
     public const string RaidDirectory = "raid-directory";
 
     public static readonly IReadOnlyList<string> CharacterResources =
@@ -42,7 +41,6 @@ public static class StateSyncScopes
         Dungeons,
         Prophecies,
         Colosseum,
-        Raids,
         GuildShop,
         GuildMembership,
         GuildInvites

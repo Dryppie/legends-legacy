@@ -950,11 +950,6 @@ public sealed class RaidService(
             run.CommencedAt = timeProvider.GetUtcNow();
             run.RowVersion++;
             await QueueRaidUpdateAsync(run, "Commenced", cancellationToken);
-            await stateSync.AdvanceCharacterScopeAsync(
-                characterId,
-                StateSyncScopes.Raids,
-                "CommenceRaidCommand",
-                cancellationToken);
             await stateSync.AdvanceWorldScopeAsync(
                 StateSyncScopes.RaidDirectory,
                 "CommenceRaidCommand",

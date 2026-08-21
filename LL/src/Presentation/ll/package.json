@@ -4,14 +4,15 @@
   "packageManager": "npm@10.9.2",
   "scripts": {
     "generate:version": "tsx ./scripts/write-build-version.ts",
+    "generate:state-sync-scopes": "tsx ./scripts/generate-state-sync-scopes.ts",
     "validate:guides": "tsx ./scripts/validate-guides.ts",
     "ng": "ng",
     "start": "ng serve --open",
-    "build": "npm run generate:version && npm run validate:guides && ng build",
-    "build:development": "npm run validate:guides && ng build --configuration development",
+    "build": "npm run generate:state-sync-scopes && npm run generate:version && npm run validate:guides && ng build",
+    "build:development": "npm run generate:state-sync-scopes && npm run validate:guides && ng build --configuration development",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:ci": "ng test --watch=false --browsers=ChromeHeadless"
+    "test:ci": "npm run generate:state-sync-scopes && ng test --watch=false --browsers=ChromeHeadless"
   },
   "private": true,
   "dependencies": {

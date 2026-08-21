@@ -10,6 +10,8 @@ import {
   StateInvalidated,
   StateSyncCheckpoint,
   StateSyncScope,
+  StateVersionMap,
+  isStateSyncScope,
 } from './game-realtime-contracts';
 import { StateSyncDiagnostics } from './state-sync-diagnostics.service';
 import { DomainVersionTracker } from './domain-version-tracker.service';
@@ -228,15 +230,17 @@ export class StateSyncCoordinator {
 
   acceptInvalidation(event: StateInvalidated, updateId?: string): void {
     if (!this.updateDeduper.shouldProcess(updateId)) return;
+    if (!isStateSyncScope(event.scope)) return;
     this.acceptRevision(event.scope, event.revision);
   }
 
   acceptInvalidations(
-    revisions: Readonly<Record<StateSyncScope, number>>,
+    revisions: StateVersionMap,
     updateId?: string,
   ): void {
     if (!this.updateDeduper.shouldProcess(updateId)) return;
     for (const [scope, revision] of Object.entries(revisions)) {
+      if (!isStateSyncScope(scope)) continue;
       this.acceptRevision(scope, revision);
     }
   }
@@ -252,11 +256,12 @@ export class StateSyncCoordinator {
   }
 
   acceptSnapshotResponse(
-    revisions: Readonly<Record<StateSyncScope, number>>,
+    revisions: StateVersionMap,
     scopesIncludedInSnapshot: readonly StateSyncScope[],
   ): void {
     const included = new Set(scopesIncludedInSnapshot);
     for (const [scope, revision] of Object.entries(revisions)) {
+      if (!isStateSyncScope(scope)) continue;
       if (!included.has(scope)) continue;
       this.acceptHandledMutationRevision(scope, revision);
     }
@@ -318,6 +323,7 @@ export class StateSyncCoordinator {
     for (const [scope, revision] of Object.entries(
       checkpoint.revisions ?? {},
     )) {
+      if (!isStateSyncScope(scope)) continue;
       this.acceptRevision(scope, revision);
     }
   }
@@ -356,12 +362,13 @@ export class StateSyncCoordinator {
   }
 
   acceptMutationResponse(
-    revisions: Record<string, number>,
+    revisions: StateVersionMap,
     forceRefresh = true,
     scopesHandledByResponse: readonly StateSyncScope[] = [],
   ): void {
     const handledScopes = new Set(scopesHandledByResponse);
     for (const [scope, revision] of Object.entries(revisions)) {
+      if (!isStateSyncScope(scope)) continue;
       if (!Number.isSafeInteger(revision) || revision < 1) continue;
       const responseWasRejected =
         this.rejectedMutationRevisions.get(scope) === revision;

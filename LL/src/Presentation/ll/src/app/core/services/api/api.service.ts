@@ -15,16 +15,20 @@ import {
   readDomainVersions,
   STATE_SYNC_SCOPES_HANDLED_BY_RESPONSE,
 } from '../../interceptors/state-sync-context';
+import {
+  StateSyncScope,
+  StateVersionMap,
+} from '../real-time/game-realtime/game-realtime-contracts';
 
 export interface ApiMutationOptions {
   forceStateSyncRefresh?: boolean;
   /** Scopes patched from the response or known to be unchanged by this mutation. */
-  stateSyncScopesHandledByResponse?: readonly string[];
+  stateSyncScopesHandledByResponse?: readonly StateSyncScope[];
 }
 
 export interface VersionedMutationResult<T> {
   data: T;
-  domainVersions: Readonly<Record<string, number>>;
+  domainVersions: StateVersionMap;
 }
 
 @Injectable({

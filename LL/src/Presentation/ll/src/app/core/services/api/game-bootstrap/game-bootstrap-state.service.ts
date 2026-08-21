@@ -19,6 +19,8 @@ import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-re
 import { setAttributeDefinitions } from '../../../../shared/models/attribute-definition';
 import { TimeSyncService } from '../time-sync/time-sync.service';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
+import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
+import { StateSyncScope } from '../../real-time/game-realtime/game-realtime-contracts';
 
 @Injectable({ providedIn: 'root' })
 export class GameBootstrapStateService {
@@ -47,6 +49,7 @@ export class GameBootstrapStateService {
     private readonly gameEvents: GameRealtimeEventRegistry,
     private readonly timeSync: TimeSyncService,
     private readonly stateSync: StateSyncCoordinator,
+    private readonly domainVersions: DomainVersionTracker,
   ) {
     effect(
       () => {
@@ -126,15 +129,27 @@ export class GameBootstrapStateService {
     this._serverTimeUtc.set(bootstrap.serverTimeUtc);
     this.timeSync.updateFromServerTime(bootstrap.serverTimeUtc);
     setAttributeDefinitions(bootstrap.attributeDefinitions);
-    this.auth.updateCharacter(bootstrap.character);
-    this.questState.initialize(bootstrap.questJournal);
-    this.questState.loadAreaAccess();
+    const versions = bootstrap.stateVersions ?? {};
+    const acceptedScopes: StateSyncScope[] = [];
+    if (this.isCurrentSnapshot('character', versions['character'])) {
+      this.auth.updateCharacter(bootstrap.character);
+      acceptedScopes.push('character');
+    }
+    if (this.isCurrentSnapshot('quests', versions['quests'])) {
+      this.questState.initialize(bootstrap.questJournal);
+      acceptedScopes.push('quests');
+    }
+    if (this.isCurrentSnapshot('area-access', versions['area-access'])) {
+      this.questState.initializeAreaAccess(bootstrap.areaAccess);
+      acceptedScopes.push('area-access');
+    }
     this.characterActionsState.initializeFromBootstrap(bootstrap.currentAction);
-    this.stateSync.acceptSnapshotResponse(bootstrap.stateVersions ?? {}, [
-      'character',
-      'quests',
-    ]);
+    this.stateSync.acceptSnapshotResponse(versions, acceptedScopes);
     this._loaded.set(true);
+  }
+
+  private isCurrentSnapshot(scope: StateSyncScope, revision: number | undefined): boolean {
+    return revision === undefined || this.domainVersions.isCurrent(scope, revision);
   }
 
   private canUseCachedBootstrap(): boolean {

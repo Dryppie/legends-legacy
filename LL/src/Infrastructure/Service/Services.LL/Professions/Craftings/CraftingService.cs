@@ -263,7 +263,7 @@ public class CraftingService : ICraftingService
             ProfessionType.Crafting,
             cancellationToken);
 
-        var recipes = recipeDefinitions
+        var recipes = CraftingRecipeOrdering.Order(recipeDefinitions
             .Select(recipe => ToRecipeDto(
                 recipe,
                 targetTier,
@@ -271,9 +271,7 @@ public class CraftingService : ICraftingService
                 ownedByItemId,
                 GetUnlockedBlueprintIdsForRecipe(blueprintUnlocks, recipe.Id),
                 itemBases,
-                craftingLevel))
-            .OrderBy(x => x.Category)
-            .ThenBy(x => x.Name)
+                craftingLevel)))
             .ToList();
 
         return Response<IReadOnlyList<CraftingRecipeDto>>.Success(recipes);

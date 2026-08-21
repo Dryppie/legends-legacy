@@ -227,6 +227,18 @@ describe('RaidPageComponent playback', () => {
     expect(component.raid()).toBe(accepted);
   });
 
+  it('rejects a lower domain version even when its mutation response arrives late', () => {
+    const current = { ...raid('Mustering'), version: 9 };
+    component.raid.set(current);
+
+    (component as unknown as { acceptRaid(value: RaidRun): void }).acceptRaid({
+      ...raid('Settled'),
+      version: 8,
+    });
+
+    expect(component.raid()).toBe(current);
+  });
+
   function requestedLanes(): RaidLane[] {
     return raids.getPlaybackBundle.calls.allArgs().map((args) => args[1]);
   }
