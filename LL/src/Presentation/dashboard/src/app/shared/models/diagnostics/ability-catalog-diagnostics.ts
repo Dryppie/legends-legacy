@@ -124,3 +124,149 @@ export interface RegionOneContentEntryDiagnostic {
   isComplete: boolean;
   missing: string[];
 }
+
+export interface AbilityBalanceSimulationRequest {
+  battleCount: number;
+  teamSize: number;
+  essencesPerParticipant: number;
+  randomSeed: number;
+  topResults: number;
+  candidatePoolSize: number;
+  candidateTeams: AbilityBalanceTeamLoadout[] | null;
+  equipmentTier: number;
+  equipmentRarity: string;
+  equipmentProfile: string;
+}
+
+export interface AbilityBalanceTeamLoadout {
+  participants: AbilityBalanceParticipantLoadout[];
+}
+
+export interface AbilityBalanceParticipantLoadout {
+  essenceIds: string[];
+}
+
+export interface AbilityBalanceSimulationReport {
+  mode: string;
+  requestedBattleCount: number;
+  battlesRun: number;
+  teamSize: number;
+  essencesPerParticipant: number;
+  randomSeed: number;
+  candidateTeamCount: number;
+  candidatePoolSize: number;
+  availableEssenceCount: number;
+  equipmentTier: number;
+  equipmentRarity: string;
+  equipmentProfile: string;
+  participantAttributes: Record<string, number>;
+  availableEssences: AbilityBalanceEssenceDefinition[];
+  rankedCombinations: AbilityBalanceCombinationResult[];
+  essenceResults: AbilityBalanceEssenceResult[];
+  battleSummaries: AbilityBalanceBattleSummary[];
+}
+
+export interface AbilityBalanceEssenceDefinition {
+  essenceId: string;
+  sourceMonsterId: string;
+  abilityIds: string[];
+}
+
+export interface AbilityBalanceEssenceResult {
+  essenceId: string;
+  displayName: string;
+  teamAppearances: number;
+  battles: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  score: number;
+  scoreDelta: number;
+  adjustedScoreDelta: number;
+  confidenceLower: number;
+  confidenceUpper: number;
+  averageDuration: number;
+  averageDamageDone: number;
+  averageDamageTaken: number;
+  classification: string;
+}
+
+export interface AbilityBalanceAuditRequest {
+  teamSize: number;
+  essencesPerParticipant: number;
+  candidatePoolSize: number;
+  screeningBattleCount: number;
+  finalistCount: number;
+  finalistBattleCount: number;
+  validationBattleCount: number;
+  randomSeeds: number[];
+  equipmentTier: number;
+  equipmentRarity: string;
+  equipmentProfile: string;
+}
+
+export interface AbilityBalanceAuditHistoryEntry {
+  id: string;
+  request: AbilityBalanceAuditRequest;
+  report: AbilityBalanceAuditReport;
+  completedAtUtc: string;
+}
+
+export interface AbilityBalanceAuditReport {
+  contentHash: string;
+  screeningBattlesRun: number;
+  validationBattlesRun: number;
+  finalistBattlesRun: number;
+  totalBattlesRun: number;
+  candidateTeamsTested: number;
+  finalistTeamCount: number;
+  equipmentTier: number;
+  equipmentRarity: string;
+  equipmentProfile: string;
+  participantAttributes: Record<string, number>;
+  essenceResults: AbilityBalanceEssenceResult[];
+  finalistEssenceResults: AbilityBalanceEssenceResult[];
+  validationResults: AbilityBalanceValidationResult[];
+  finalists: AbilityBalanceCombinationResult[];
+}
+
+export interface AbilityBalanceValidationResult {
+  essenceId: string;
+  displayName: string;
+  replacementEssenceId: string;
+  replacementDisplayName: string;
+  battles: number;
+  originalScore: number;
+  replacementScore: number;
+  scoreDelta: number;
+}
+
+export interface AbilityBalanceCombinationResult {
+  signature: string;
+  displayName: string;
+  participants: AbilityBalanceParticipantLoadout[];
+  battles: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  winRate: number;
+  lossRate: number;
+  drawRate: number;
+  averageDuration: number;
+  averageDamageDone: number;
+  averageDamageTaken: number;
+}
+
+export interface AbilityBalanceBattleSummary {
+  index: number;
+  friendlySignature: string;
+  friendlyDisplayName: string;
+  hostileSignature: string;
+  hostileDisplayName: string;
+  outcome: string;
+  duration: number;
+  friendlyDamageDone: number;
+  friendlyDamageTaken: number;
+  hostileDamageDone: number;
+  hostileDamageTaken: number;
+}

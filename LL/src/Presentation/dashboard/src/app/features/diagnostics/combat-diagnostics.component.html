@@ -343,5 +343,473 @@
         </div>
       </div>
     </section>
+
+    <section *ngIf="activeTab === 'balance'" class="min-h-0 flex-auto overflow-auto rounded border border-light_gray/40 bg-black/20 p-4">
+      <div class="rounded border border-primary/50 bg-black/30 p-4">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 class="text-lg font-semibold text-primary">Automated Balance Audit</h2>
+            <p class="mt-1 max-w-4xl text-sm text-light_gray">
+              Screens several deterministic random pools, selects a diverse finalist field, runs the round robin, and ranks individual Essences with confidence bounds.
+            </p>
+          </div>
+          <div class="rounded border border-light_gray/30 bg-black/30 px-3 py-2 text-right text-xs text-light_gray">
+            <div>Estimated total</div>
+            <div class="text-base font-semibold text-primary">{{ estimatedAuditBattles | number }} battles</div>
+          </div>
+        </div>
+
+        <div class="mt-4 grid gap-3 md:grid-cols-3 xl:grid-cols-6">
+          <label class="grid gap-1 text-sm">
+            <span class="text-light_gray">Participants / Team</span>
+            <input type="number" min="1" max="10" class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white" [(ngModel)]="auditSettings.teamSize" />
+          </label>
+          <label class="grid gap-1 text-sm">
+            <span class="text-light_gray">Essences / Participant</span>
+            <input type="number" min="1" max="10" class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white" [(ngModel)]="auditSettings.essencesPerParticipant" />
+          </label>
+          <label class="grid gap-1 text-sm">
+            <span class="text-light_gray">Random Pool / Seed</span>
+            <input type="number" min="2" max="1000" class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white" [(ngModel)]="auditSettings.candidatePoolSize" />
+          </label>
+          <label class="grid gap-1 text-sm">
+            <span class="text-light_gray">Battles / Screening</span>
+            <input type="number" min="1" class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white" [(ngModel)]="auditSettings.screeningBattleCount" />
+          </label>
+          <label class="grid gap-1 text-sm">
+            <span class="text-light_gray">Finalists</span>
+            <input type="number" min="2" max="1000" class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white" [(ngModel)]="auditSettings.finalistCount" />
+          </label>
+          <label class="grid gap-1 text-sm">
+            <span class="text-light_gray">Battles / Final Pairing</span>
+            <input type="number" min="1" class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white" [(ngModel)]="auditSettings.finalistBattleCount" />
+          </label>
+          <label class="grid gap-1 text-sm">
+            <span class="text-light_gray">Battles / Replacement Test</span>
+            <input type="number" min="1" class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white" [(ngModel)]="auditSettings.validationBattleCount" />
+          </label>
+          <label class="grid gap-1 text-sm md:col-span-2">
+            <span class="text-light_gray">Screening Seeds</span>
+            <input type="text" class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white" [(ngModel)]="auditSettings.randomSeeds" />
+          </label>
+          <label class="grid gap-1 text-sm">
+            <span class="text-light_gray">Equipment Tier</span>
+            <select class="rounded border border-light_gray/40 bg-black px-3 py-2 text-white" [(ngModel)]="auditSettings.equipmentTier">
+              <option *ngFor="let tier of equipmentTiers" [ngValue]="tier">Tier {{ tier }}</option>
+            </select>
+          </label>
+          <label class="grid gap-1 text-sm">
+            <span class="text-light_gray">Equipment Rarity</span>
+            <select class="rounded border border-light_gray/40 bg-black px-3 py-2 text-white" [(ngModel)]="auditSettings.equipmentRarity">
+              <option *ngFor="let rarity of equipmentRarities" [value]="rarity">{{ rarity }}</option>
+            </select>
+          </label>
+          <label class="grid gap-1 text-sm">
+            <span class="text-light_gray">Equipment Profile</span>
+            <select class="rounded border border-light_gray/40 bg-black px-3 py-2 text-white" [(ngModel)]="auditSettings.equipmentProfile">
+              <option *ngFor="let profile of equipmentProfiles" [value]="profile">{{ profile }}</option>
+            </select>
+          </label>
+          <div class="flex items-end">
+            <button
+              type="button"
+              class="w-full rounded border border-primary bg-primary/10 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/20 disabled:cursor-wait disabled:opacity-60"
+              [disabled]="isRunningAudit"
+              (click)="runFullAudit()"
+            >
+              {{ isRunningAudit ? 'Running Audit' : 'Run Full Audit' }}
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="auditError" class="mt-4 rounded border border-red-400/60 bg-red-950/40 p-3 text-sm text-red-100">
+          {{ auditError }}
+        </div>
+
+        <div *ngIf="isRunningAudit" class="mt-4 rounded border border-primary/40 bg-primary/5 p-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div class="text-sm font-semibold text-white">Running directly in the Admin API</div>
+              <div class="mt-1 text-xs text-light_gray">Keep this page open until the request completes. No server-side job or database record is created.</div>
+            </div>
+            <button
+              type="button"
+              class="rounded border border-red-300/60 px-3 py-2 text-xs font-semibold text-red-200 hover:bg-red-400/10"
+              (click)="cancelAudit()"
+            >Cancel Request</button>
+          </div>
+        </div>
+
+        <div *ngIf="selectedAudit" class="mt-4 rounded border border-light_gray/30 bg-black/20 p-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div class="text-sm font-semibold text-white">Completed Balance Audit</div>
+              <div class="mt-1 text-xs text-light_gray">
+                Tier {{ selectedAudit.request.equipmentTier }} {{ selectedAudit.request.equipmentRarity }} {{ selectedAudit.request.equipmentProfile }}
+                · {{ selectedAudit.request.teamSize }} participants per team
+                · {{ selectedAudit.request.essencesPerParticipant }} Essences per participant
+                · {{ selectedAudit.completedAtUtc | date:'medium' }}
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                class="rounded border border-light_gray/40 px-3 py-2 text-xs font-semibold text-light_gray hover:bg-white/5"
+                (click)="exportAuditCsv()"
+              >Export CSV</button>
+              <button
+                type="button"
+                class="rounded border border-light_gray/40 px-3 py-2 text-xs font-semibold text-light_gray hover:bg-white/5"
+                (click)="exportAuditJson()"
+              >Export JSON</button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="audits.length" class="mt-4 flex gap-2 overflow-x-auto pb-1">
+          <button
+            *ngFor="let audit of audits | slice:0:10; trackBy: trackAudit"
+            type="button"
+            class="min-w-48 rounded border px-3 py-2 text-left text-xs"
+            [ngClass]="selectedAudit?.id === audit.id ? 'border-primary bg-primary/10 text-white' : 'border-light_gray/30 bg-black/20 text-light_gray'"
+            (click)="selectAudit(audit)"
+          >
+            <div class="font-semibold">T{{ audit.request.equipmentTier }} {{ audit.request.equipmentRarity }}</div>
+            <div class="mt-1 text-light_gray">
+              {{ audit.request.teamSize }} participants · {{ audit.request.essencesPerParticipant }} Essences each
+            </div>
+            <div class="mt-1">{{ audit.completedAtUtc | date:'short' }}</div>
+          </button>
+        </div>
+
+        <ng-container *ngIf="selectedAudit?.report as report">
+          <div class="mt-4 grid gap-3 md:grid-cols-4 xl:grid-cols-7">
+            <div class="rounded border border-light_gray/30 bg-black/20 p-3"><div class="text-xs uppercase text-light_gray">Total Battles</div><div class="mt-1 text-lg text-primary">{{ report.totalBattlesRun | number }}</div></div>
+            <div class="rounded border border-light_gray/30 bg-black/20 p-3"><div class="text-xs uppercase text-light_gray">Teams Screened</div><div class="mt-1 text-lg text-primary">{{ report.candidateTeamsTested | number }}</div></div>
+            <div class="rounded border border-light_gray/30 bg-black/20 p-3"><div class="text-xs uppercase text-light_gray">Finalists</div><div class="mt-1 text-lg text-primary">{{ report.finalistTeamCount }}</div></div>
+            <div class="rounded border border-light_gray/30 bg-black/20 p-3"><div class="text-xs uppercase text-light_gray">Replacement Tests</div><div class="mt-1 text-lg text-primary">{{ report.validationResults.length }}</div></div>
+            <div class="rounded border border-light_gray/30 bg-black/20 p-3"><div class="text-xs uppercase text-light_gray">Participants / Team</div><div class="mt-1 text-lg text-primary">{{ selectedAudit?.request?.teamSize }}</div></div>
+            <div class="rounded border border-light_gray/30 bg-black/20 p-3"><div class="text-xs uppercase text-light_gray">Essences / Participant</div><div class="mt-1 text-lg text-primary">{{ selectedAudit?.request?.essencesPerParticipant }}</div></div>
+            <div class="rounded border border-light_gray/30 bg-black/20 p-3"><div class="text-xs uppercase text-light_gray">Build</div><div class="mt-1 text-lg text-primary">T{{ report.equipmentTier }} {{ report.equipmentRarity }}</div></div>
+          </div>
+
+          <div class="mt-4 overflow-auto rounded border border-light_gray/30">
+            <div class="grid min-w-[91rem] grid-cols-[3rem_15rem_10rem_7rem_8rem_8rem_8rem_11rem_8rem_8rem_8rem] border-b border-light_gray/40 bg-black/30 px-4 py-3 text-xs font-semibold uppercase text-light_gray">
+              <div>#</div><div>Essence</div><div>Assessment</div><div>Score</div><div>Raw Delta</div><div>Adjusted</div><div>Previous</div><div>95% Confidence</div><div>Fights</div><div>Teams</div><div>Damage</div>
+            </div>
+            <div
+              *ngFor="let essence of report.essenceResults; let i = index; trackBy: trackEssence"
+              class="grid min-w-[91rem] grid-cols-[3rem_15rem_10rem_7rem_8rem_8rem_8rem_11rem_8rem_8rem_8rem] items-center border-b border-light_gray/20 px-4 py-3 text-sm"
+            >
+              <div class="text-light_gray">{{ i + 1 }}</div>
+              <div
+                class="cursor-help rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-primary"
+                tabindex="0"
+                (mouseenter)="showEssenceTooltip(essence.essenceId, $event)"
+                (mousemove)="positionEssenceTooltip($event)"
+                (mouseleave)="hideEssenceTooltip()"
+                (focus)="showEssenceTooltip(essence.essenceId, $event)"
+                (blur)="hideEssenceTooltip()"
+                (keydown.escape)="hideEssenceTooltip()"
+              >
+                <div class="font-semibold text-white underline decoration-light_gray/40 decoration-dotted underline-offset-4">{{ essenceDisplayName(essence) }}</div>
+                <div class="text-xs text-light_gray">{{ essence.essenceId }}</div>
+              </div>
+              <div><span class="rounded border px-2 py-1 text-xs" [ngClass]="classificationClass(essence.classification)">{{ essence.classification }}</span></div>
+              <div class="font-semibold text-primary">{{ formatPercent(essence.score) }}</div>
+              <div [ngClass]="essence.scoreDelta > 0 ? 'text-red-200' : essence.scoreDelta < 0 ? 'text-sky-200' : 'text-light_gray'">{{ formatPercent(essence.scoreDelta) }}</div>
+              <div class="font-semibold" [ngClass]="essence.adjustedScoreDelta > 0 ? 'text-red-200' : essence.adjustedScoreDelta < 0 ? 'text-sky-200' : 'text-light_gray'">{{ formatPercent(essence.adjustedScoreDelta) }}</div>
+              <div class="text-light_gray">{{ formatOptionalPercent(comparisonDelta(essence)) }}</div>
+              <div class="text-light_gray">{{ formatPercent(essence.confidenceLower) }} – {{ formatPercent(essence.confidenceUpper) }}</div>
+              <div class="text-light_gray">{{ essence.battles | number }}</div>
+              <div class="text-light_gray">{{ essence.teamAppearances | number }}</div>
+              <div class="text-primary">{{ formatNumber(essence.averageDamageDone) }}</div>
+            </div>
+          </div>
+
+          <div *ngIf="report.validationResults.length" class="mt-4 overflow-auto rounded border border-light_gray/30">
+            <div class="border-b border-light_gray/40 bg-black/30 px-4 py-3 text-sm font-semibold text-light_gray">
+              Matched Replacement Validation
+            </div>
+            <div class="grid min-w-[65rem] grid-cols-[15rem_15rem_8rem_8rem_8rem_8rem] border-b border-light_gray/40 bg-black/20 px-4 py-2 text-xs font-semibold uppercase text-light_gray">
+              <div>Flagged Essence</div><div>Replacement</div><div>Original</div><div>Replacement</div><div>Difference</div><div>Battles</div>
+            </div>
+            <div *ngFor="let validation of report.validationResults" class="grid min-w-[65rem] grid-cols-[15rem_15rem_8rem_8rem_8rem_8rem] border-b border-light_gray/20 px-4 py-3 text-sm">
+              <div class="font-semibold text-white">{{ validation.displayName }}</div>
+              <div class="text-light_gray">{{ validation.replacementDisplayName }}</div>
+              <div class="text-primary">{{ formatPercent(validation.originalScore) }}</div>
+              <div class="text-light_gray">{{ formatPercent(validation.replacementScore) }}</div>
+              <div [ngClass]="validation.scoreDelta > 0 ? 'text-red-200' : 'text-sky-200'">{{ formatPercent(validation.scoreDelta) }}</div>
+              <div class="text-light_gray">{{ validation.battles | number }}</div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="my-6 flex items-center gap-3">
+        <div class="h-px flex-1 bg-light_gray/30"></div>
+        <div class="text-xs font-semibold uppercase text-light_gray">Manual Simulation</div>
+        <div class="h-px flex-1 bg-light_gray/30"></div>
+      </div>
+
+      <div class="grid gap-3 md:grid-cols-6">
+        <label class="grid gap-1 text-sm">
+          <span class="text-light_gray">Battles</span>
+          <input
+            type="number"
+            min="1"
+            class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white"
+            [(ngModel)]="balanceSettings.battleCount"
+          />
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span class="text-light_gray">Participants / Team</span>
+          <input
+            type="number"
+            min="1"
+            max="10"
+            class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white"
+            [(ngModel)]="balanceSettings.teamSize"
+          />
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span class="text-light_gray">Essences / Participant</span>
+          <input
+            type="number"
+            min="1"
+            max="10"
+            class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white"
+            [(ngModel)]="balanceSettings.essencesPerParticipant"
+          />
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span class="text-light_gray">Seed</span>
+          <input
+            type="number"
+            class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white"
+            [(ngModel)]="balanceSettings.randomSeed"
+          />
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span class="text-light_gray">Top Rows</span>
+          <input
+            type="number"
+            min="1"
+            max="1000"
+            class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white"
+            [(ngModel)]="balanceSettings.topResults"
+          />
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span class="text-light_gray">Random Pool</span>
+          <input
+            type="number"
+            min="2"
+            max="1000"
+            class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white"
+            [(ngModel)]="balanceSettings.candidatePoolSize"
+          />
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span class="text-light_gray">Equipment Tier</span>
+          <select class="rounded border border-light_gray/40 bg-black px-3 py-2 text-white" [(ngModel)]="balanceSettings.equipmentTier">
+            <option *ngFor="let tier of equipmentTiers" [ngValue]="tier">Tier {{ tier }}</option>
+          </select>
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span class="text-light_gray">Equipment Rarity</span>
+          <select class="rounded border border-light_gray/40 bg-black px-3 py-2 text-white" [(ngModel)]="balanceSettings.equipmentRarity">
+            <option *ngFor="let rarity of equipmentRarities" [value]="rarity">{{ rarity }}</option>
+          </select>
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span class="text-light_gray">Equipment Profile</span>
+          <select class="rounded border border-light_gray/40 bg-black px-3 py-2 text-white" [(ngModel)]="balanceSettings.equipmentProfile">
+            <option *ngFor="let profile of equipmentProfiles" [value]="profile">{{ profile }}</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="mt-4 grid gap-3 text-sm text-light_gray lg:grid-cols-3">
+        <div class="rounded border border-light_gray/30 bg-black/20 p-4">
+          <div class="font-semibold text-primary">Random Pool</div>
+          <p class="mt-2">
+            Builds a fixed pool of random teams using the selected participants per team and essences per participant.
+            The battle count is then spent matching teams from that pool, so each ranked combination can collect repeat fights.
+          </p>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-4">
+          <div class="font-semibold text-primary">Saved vs Saved</div>
+          <p class="mt-2">
+            Uses saved combinations as the candidate list and runs every saved team against every other saved team.
+            The battle count is applied per pairing, with sides alternated to reduce side bias.
+          </p>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-4">
+          <div class="font-semibold text-primary">Reading Results</div>
+          <p class="mt-2">
+            Win rate is calculated from that combination's fights only. Higher fight counts are more trustworthy.
+            Damage and ticks are averages across all fights for the listed combination.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          class="rounded border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/10 disabled:cursor-wait disabled:opacity-60"
+          [disabled]="isSimulating"
+          (click)="runRandomSimulation()"
+        >
+          {{ isSimulating ? 'Running' : 'Run Random Pool' }}
+        </button>
+        <button
+          type="button"
+          class="rounded border border-emerald-300/70 px-4 py-2 text-sm font-semibold text-emerald-200 hover:bg-emerald-400/10 disabled:opacity-50"
+          [disabled]="isSimulating || savedCombinations.length < 2"
+          (click)="runSavedSimulation()"
+        >
+          Run Saved vs Saved
+        </button>
+        <button
+          type="button"
+          class="rounded border border-light_gray/40 px-4 py-2 text-sm font-semibold text-light_gray hover:bg-white/5 disabled:opacity-50"
+          [disabled]="!balanceReport?.rankedCombinations?.length"
+          (click)="saveTop(10)"
+        >
+          Save Top 10
+        </button>
+        <button
+          type="button"
+          class="rounded border border-light_gray/40 px-4 py-2 text-sm font-semibold text-light_gray hover:bg-white/5 disabled:opacity-50"
+          [disabled]="!balanceReport?.rankedCombinations?.length"
+          (click)="saveTop(100)"
+        >
+          Save Top 100
+        </button>
+        <button
+          type="button"
+          class="rounded border border-red-300/60 px-4 py-2 text-sm font-semibold text-red-200 hover:bg-red-400/10 disabled:opacity-50"
+          [disabled]="savedCombinations.length === 0"
+          (click)="clearSavedCombinations()"
+        >
+          Clear Saved
+        </button>
+        <span class="text-sm text-light_gray">
+          {{ savedCombinations.length }} saved combination{{ savedCombinations.length === 1 ? '' : 's' }}
+        </span>
+      </div>
+
+      <div *ngIf="simulationError" class="mt-4 rounded border border-red-400/60 bg-red-950/40 p-4 text-red-100">
+        {{ simulationError }}
+      </div>
+
+      <div *ngIf="balanceReport" class="mt-4 grid gap-3 md:grid-cols-6">
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Mode</div>
+          <div class="mt-1 text-xl text-primary">{{ balanceReport.mode }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Battles Run</div>
+          <div class="mt-1 text-xl text-primary">{{ balanceReport.battlesRun }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Candidates</div>
+          <div class="mt-1 text-xl text-primary">{{ balanceReport.candidateTeamCount }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Pool Target</div>
+          <div class="mt-1 text-xl text-primary">{{ balanceReport.candidatePoolSize }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Available Essences</div>
+          <div class="mt-1 text-xl text-primary">{{ balanceReport.availableEssenceCount }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Seed</div>
+          <div class="mt-1 text-xl text-primary">{{ balanceReport.randomSeed }}</div>
+        </div>
+      </div>
+
+      <div *ngIf="rankedCombinations.length" class="mt-4 overflow-auto rounded border border-light_gray/30">
+        <div class="grid min-w-[76rem] grid-cols-[4rem_7rem_7rem_7rem_7rem_8rem_8rem_1fr] border-b border-light_gray/40 bg-black/30 px-4 py-3 text-xs font-semibold uppercase text-light_gray">
+          <div>Rank</div>
+          <div>Win</div>
+          <div>W / L / D</div>
+          <div>Fights</div>
+          <div>Ticks</div>
+          <div>Dmg Done</div>
+          <div>Dmg Taken</div>
+          <div>Combination</div>
+        </div>
+        <div
+          *ngFor="let combination of rankedCombinations; let i = index; trackBy: trackCombination"
+          class="grid min-w-[76rem] grid-cols-[4rem_7rem_7rem_7rem_7rem_8rem_8rem_1fr] border-b border-light_gray/20 px-4 py-3 text-sm"
+        >
+          <div class="text-light_gray">{{ i + 1 }}</div>
+          <div class="font-semibold text-emerald-300">{{ formatPercent(combination.winRate) }}</div>
+          <div class="text-white">{{ combination.wins }} / {{ combination.losses }} / {{ combination.draws }}</div>
+          <div class="text-light_gray">{{ combination.battles }}</div>
+          <div class="text-light_gray">{{ formatNumber(combination.averageDuration) }}</div>
+          <div class="text-primary">{{ formatNumber(combination.averageDamageDone) }}</div>
+          <div class="text-amber-200">{{ formatNumber(combination.averageDamageTaken) }}</div>
+          <div class="min-w-0 text-light_gray" [title]="combination.signature">{{ combination.displayName }}</div>
+        </div>
+      </div>
+
+      <div *ngIf="battleSummaries.length" class="mt-4 overflow-auto rounded border border-light_gray/30">
+        <div class="border-b border-light_gray/40 bg-black/30 px-4 py-3 text-sm font-semibold text-light_gray">
+          Battle Samples
+        </div>
+        <div
+          *ngFor="let battle of battleSummaries"
+          class="grid min-w-[70rem] grid-cols-[4rem_8rem_6rem_8rem_8rem_1fr_1fr] border-b border-light_gray/20 px-4 py-3 text-xs"
+        >
+          <div class="text-light_gray">#{{ battle.index }}</div>
+          <div class="text-primary">{{ battle.outcome }}</div>
+          <div class="text-light_gray">{{ battle.duration }}</div>
+          <div class="text-emerald-200">{{ battle.friendlyDamageDone }} / {{ battle.friendlyDamageTaken }}</div>
+          <div class="text-red-200">{{ battle.hostileDamageDone }} / {{ battle.hostileDamageTaken }}</div>
+          <div class="text-light_gray" [title]="battle.friendlySignature">{{ battle.friendlyDisplayName }}</div>
+          <div class="text-light_gray" [title]="battle.hostileSignature">{{ battle.hostileDisplayName }}</div>
+        </div>
+      </div>
+    </section>
   </div>
+
+  <div *ngIf="isLoading && !catalogReport" class="flex flex-auto items-center justify-center text-light_gray">
+    Loading diagnostics
+  </div>
+
+  <aside
+    *ngIf="hoveredEssence as essence"
+    class="pointer-events-none fixed z-[100] max-h-[70vh] w-[28rem] max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded border border-primary/50 bg-zinc-950/95 p-4 text-sm shadow-2xl shadow-black/70 backdrop-blur"
+    [style.left.px]="essenceTooltipLeft"
+    [style.top.px]="essenceTooltipTop"
+    role="tooltip"
+  >
+    <div class="border-b border-light_gray/30 pb-3">
+      <div class="font-serif text-lg font-semibold text-primary">{{ essence.name }}</div>
+      <p class="mt-1 text-xs text-light_gray">{{ essence.description }}</p>
+    </div>
+
+    <section *ngIf="essence.activeAbility as ability" class="border-b border-light_gray/20 py-3">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <div class="text-[11px] font-semibold uppercase tracking-wide text-primary">Active</div>
+          <div class="mt-0.5 font-semibold text-white">{{ ability.name }}</div>
+        </div>
+        <span *ngIf="ability.cooldownTicks > 0" class="shrink-0 text-xs text-light_gray">
+          {{ formatCooldown(ability.cooldownTicks) }}
+        </span>
+      </div>
+      <p class="mt-2 leading-relaxed text-zinc-300">{{ ability.description }}</p>
+    </section>
+
+    <section *ngIf="essence.passiveAbility as ability" class="pt-3">
+      <div class="text-[11px] font-semibold uppercase tracking-wide text-primary">Passive</div>
+      <div class="mt-0.5 font-semibold text-white">{{ ability.name }}</div>
+      <p class="mt-2 leading-relaxed text-zinc-300">{{ ability.description }}</p>
+    </section>
+  </aside>
 </div>

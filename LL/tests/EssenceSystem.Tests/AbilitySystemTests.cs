@@ -8,12 +8,15 @@ using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Regions.Areas;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Services.LL.Combat.Layers.Resolution;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Combat;
 using Services.LL.Combat.Engine;
 using Services.LL.Essences;
+using Services.LL.PowerRatings;
+using Services.LL.Professions.Craftings;
 using Services.LL.Interfaces.Combat.Resolution;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -22,6 +25,127 @@ namespace EssenceSystem.Tests;
 
 public sealed class AbilitySystemTests
 {
+    [Fact]
+    public void Balance_simulator_ranks_random_essence_combinations()
+    {
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+        var essenceRepository = new JsonEssenceDefinitionRepository(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions(),
+            new EssenceDefinitionValidator());
+        var simulator = new AbilityBalanceSimulator(provider, essenceRepository);
+
+        var report = simulator.Run(new AbilityBalanceSimulationRequest(
+            BattleCount: 20,
+            TeamSize: 2,
+            EssencesPerParticipant: 2,
+            RandomSeed: 123,
+            TopResults: 10,
+            CandidatePoolSize: 5,
+            CandidateTeams: null));
+
+        Assert.Equal("RandomPool", report.Mode);
+        Assert.Equal(20, report.BattlesRun);
+        Assert.Equal(5, report.CandidateTeamCount);
+        Assert.NotEmpty(report.RankedCombinations);
+        Assert.Equal(40, report.RankedCombinations.Sum(combination => combination.Battles));
+        Assert.All(report.RankedCombinations, combination =>
+        {
+            Assert.InRange(combination.WinRate, 0, 1);
+            Assert.Equal(2, combination.Participants.Count);
+            Assert.All(combination.Participants, participant => Assert.Equal(2, participant.EssenceIds.Count));
+        });
+    }
+
+    [Fact]
+    public void Balance_simulator_runs_saved_combinations_as_round_robin()
+    {
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+        var essenceRepository = new JsonEssenceDefinitionRepository(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions(),
+            new EssenceDefinitionValidator());
+        var simulator = new AbilityBalanceSimulator(provider, essenceRepository);
+        var first = new AbilityBalanceTeamLoadout(
+            [new AbilityBalanceParticipantLoadout(["essence.vampire_bat"])]);
+        var second = new AbilityBalanceTeamLoadout(
+            [new AbilityBalanceParticipantLoadout(["essence.raven"])]);
+
+        var report = simulator.Run(new AbilityBalanceSimulationRequest(
+            BattleCount: 6,
+            TeamSize: 1,
+            EssencesPerParticipant: 1,
+            RandomSeed: 456,
+            TopResults: 10,
+            CandidatePoolSize: 10,
+            CandidateTeams: [first, second]));
+
+        Assert.Equal("SavedRoundRobin", report.Mode);
+        Assert.Equal(6, report.BattlesRun);
+        Assert.Equal(2, report.CandidateTeamCount);
+        Assert.Equal(2, report.RankedCombinations.Count);
+        Assert.All(report.RankedCombinations, combination => Assert.Equal(6, combination.Battles));
+    }
+
+    [Fact]
+    public void Balance_simulator_uses_the_selected_canonical_equipment_build()
+    {
+        var configuration = CreateConfig();
+        var contentRoot = FindApiContentRoot();
+        var jsonOptions = CreateJsonOptions();
+        var essenceDefinitions = new JsonEssenceDefinitionRepository(
+            configuration,
+            contentRoot,
+            jsonOptions,
+            new EssenceDefinitionValidator());
+        var creatureEssences = new JsonCreatureEssenceLootTableRepository(
+            configuration,
+            contentRoot,
+            jsonOptions,
+            essenceDefinitions);
+        var essenceResolver = new EssenceSystemService(
+            null!, null!, null!, essenceDefinitions, creatureEssences,
+            null!, null!, null!, null!, null!, null!);
+        var balance = Options.Create(new CraftingBalanceOptions());
+        var canonicalBuilds = new CanonicalEquipmentBuildFactory(
+            new JsonCraftingDefinitionProvider(configuration, contentRoot, jsonOptions),
+            new ItemStatRollService(balance),
+            new TemperingMechanicsService(balance),
+            new ItemPotentialService(balance),
+            essenceResolver,
+            essenceDefinitions);
+        var simulator = new AbilityBalanceSimulator(
+            new JsonAbilityCatalogProvider(configuration, contentRoot, jsonOptions),
+            essenceDefinitions,
+            canonicalBuilds);
+
+        var report = simulator.Run(new AbilityBalanceSimulationRequest(
+            BattleCount: 2,
+            TeamSize: 1,
+            EssencesPerParticipant: 1,
+            RandomSeed: 789,
+            TopResults: 2,
+            CandidatePoolSize: 2,
+            CandidateTeams: null,
+            EquipmentTier: 3,
+            EquipmentRarity: "Rare",
+            EquipmentProfile: "Offense"));
+
+        Assert.Equal(3, report.EquipmentTier);
+        Assert.Equal("Rare", report.EquipmentRarity);
+        Assert.Equal("Offense", report.EquipmentProfile);
+        Assert.True(report.ParticipantAttributes.Count > 3);
+        Assert.True(report.ParticipantAttributes[AttributeType.MaxHealth.ToString()] > 200);
+    }
+
     [Fact]
     public void Log_free_engine_mode_preserves_outcome_duration_and_damage_totals()
     {

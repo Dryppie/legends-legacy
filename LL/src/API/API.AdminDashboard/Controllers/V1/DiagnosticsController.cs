@@ -6,12 +6,20 @@ using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalog
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetCreatureBuildProfileDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetRegionOneContentDiagnostics;
+using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunAbilityBalanceSimulation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.AdminDashboard.Controllers.V1;
 
 public class DiagnosticsController : BaseController
 {
+    private readonly IAbilityBalanceAuditService _balanceAudits;
+
+    public DiagnosticsController(IAbilityBalanceAuditService balanceAudits)
+    {
+        _balanceAudits = balanceAudits;
+    }
+
     [HttpGet("ability-catalog")]
     public async Task<ActionResult<AbilityCatalogDiagnosticReport>> GetAbilityCatalogDiagnostics() =>
         await Mediator.Send(new GetAbilityCatalogDiagnosticsQuery());
@@ -31,4 +39,15 @@ public class DiagnosticsController : BaseController
     [HttpGet("region-one-content")]
     public async Task<ActionResult<RegionOneContentDiagnosticReport>> GetRegionOneContentDiagnostics() =>
         await Mediator.Send(new GetRegionOneContentDiagnosticsQuery());
+
+    [HttpPost("ability-balance-simulation")]
+    public async Task<ActionResult<AbilityBalanceSimulationReport>> RunAbilityBalanceSimulation(
+        [FromBody] AbilityBalanceSimulationRequest request) =>
+        await Mediator.Send(new RunAbilityBalanceSimulationQuery(request));
+
+    [HttpPost("ability-balance-audit")]
+    public ActionResult<AbilityBalanceAuditReport> RunAbilityBalanceAudit(
+        [FromBody] AbilityBalanceAuditRequest request,
+        CancellationToken cancellationToken) =>
+        Ok(_balanceAudits.Run(request, cancellationToken));
 }

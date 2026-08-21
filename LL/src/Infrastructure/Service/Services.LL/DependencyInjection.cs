@@ -427,6 +427,8 @@ public static class DependencyInjection
                 sp.GetRequiredService<JsonSerializerOptions>(),
                 sp.GetRequiredService<IOptions<ThreatAndTankingOptions>>().Value));
         services.AddScoped<IAbilityCatalogDiagnostics, AbilityCatalogDiagnostics>();
+        services.AddScoped<IAbilityBalanceSimulator, AbilityBalanceSimulator>();
+        services.AddScoped<IAbilityBalanceAuditService, AbilityBalanceAuditService>();
         services.AddScoped<IAbilityCatalogBehaviorDiagnostics>(sp =>
             new AbilityCatalogBehaviorDiagnostics(
                 sp.GetRequiredService<IAbilityCatalogProvider>(),
@@ -444,6 +446,7 @@ public static class DependencyInjection
         services.AddScoped<IEssenceAbilityProvider, EssenceSystemService>();
         services.AddScoped<IEssenceCombatLoadoutResolver, EssenceSystemService>();
         services.AddScoped<PowerBuildSnapshotFactory>();
+        services.AddScoped<CanonicalEquipmentBuildFactory>();
         services.AddScoped<PowerRatingService>();
         services.AddScoped<IPowerRatingService>(sp => sp.GetRequiredService<PowerRatingService>());
         services.AddScoped<IEssenceResonanceService, EssenceSystemService>();

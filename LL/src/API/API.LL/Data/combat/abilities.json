@@ -4854,7 +4854,7 @@
     "id": "ability.creature.ravenous_ghoul.draining_claws",
     "kind": "Active",
     "name": "Draining Claws",
-    "description": "Deal 310% Physical Melee damage and apply Weaken.",
+    "description": "Deal 240% Physical Melee damage and apply Weaken.",
     "cooldownTicks": 130,
     "tags": ["Physical", "Melee", "Debuff"],
     "effects": [
@@ -4863,7 +4863,7 @@
         "operation": "Damage",
         "target": "CurrentTarget",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 3.1,
+        "scalingCoefficient": 2.4,
         "attackType": "Melee",
         "damageType": "Physical",
         "procCoefficient": 1
