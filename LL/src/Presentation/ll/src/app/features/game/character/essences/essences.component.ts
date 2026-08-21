@@ -65,6 +65,7 @@ import {
   matchesCreatureEssenceFilter,
 } from './creature-archive-search';
 import { playerEssenceSearchText } from '../../../../shared/search/essence-search';
+import { LocalDatePipe } from '../../../../shared/pipes/local-date/local-date.pipe';
 
 type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'ready';
 type ArchiveSort = 'name' | 'level' | 'tier';
@@ -80,6 +81,7 @@ interface AscendRequirementView {
   selector: 'app-essences',
   imports: [
     CommonModule,
+    LocalDatePipe,
     ScrollingModule,
     FormsModule,
     DefaultHeaderComponent,

@@ -49,7 +49,7 @@
               <td>
                 {{
                   (expedition.completedAt || expedition.startedAt)
-                    | date: "MMM d, HH:mm"
+                    | localDate: "short"
                 }}
               </td>
               <td>

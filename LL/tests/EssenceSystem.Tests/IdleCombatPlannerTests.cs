@@ -130,6 +130,27 @@ public sealed class IdleCombatPlannerTests
         Assert.False(final.CaptureEventLog);
     }
 
+    [Fact]
+    public void CreateEncounterPlan_skips_playback_when_the_safety_limited_batch_does_not_finish_catch_up()
+    {
+        var firstEncounterAt = DateTimeOffset.Parse("2026-06-23T12:00:00Z");
+        var now = firstEncounterAt.AddHours(24);
+        var planner = CreatePlanner();
+        var plan = planner.CreatePlan(new IdleCombatOrchestrationRequest(
+            CreateCombatAction(firstEncounterAt),
+            now,
+            CaptureFinalEncounterLog: true));
+
+        var lastEncounterInPartialBatch = planner.CreateEncounterPlan(
+            plan,
+            plan.PlannedEncounterCount,
+            plan.ExecutableUntil - plan.EncounterCadence);
+
+        Assert.Equal(100, plan.PlannedEncounterCount);
+        Assert.True(plan.ExecutableUntil <= plan.RequestedTo);
+        Assert.False(lastEncounterInPartialBatch.CaptureEventLog);
+    }
+
     private static IdleCombatPlanner CreatePlanner() =>
         new(
             new FakeSpawningService(),

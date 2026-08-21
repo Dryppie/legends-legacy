@@ -48,7 +48,7 @@
                 </td>
                 <td>#{{ record.attemptNumber }}</td>
                 <td>{{ duration(record.fightDurationSeconds) }}</td>
-                <td>{{ record.clearedAt | date: "MMM d, HH:mm" }}</td>
+                <td>{{ record.clearedAt | localDate: "short" }}</td>
                 <td>
                   <button
                     type="button"

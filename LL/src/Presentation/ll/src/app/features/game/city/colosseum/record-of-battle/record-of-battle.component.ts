@@ -1,10 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { ColosseumMatchResult } from '../../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
-import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
 import { CharacterTagComponent } from '../../../../../shared/components/character/character-tag/character-tag.component';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 import { FilterTabsComponent } from '../../../../../shared/components/custom-components/tabs/filter-tabs/filter-tabs.component';
+import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 @Component({
     selector: 'app-record-of-battle',
@@ -12,7 +13,7 @@ import { FilterTabsComponent } from '../../../../../shared/components/custom-com
         NgIf,
         NgFor,
         NgClass,
-        DatePipe,
+        LocalDatePipe,
         CharacterTagComponent,
         NumberFormatPipe,
         FilterTabsComponent,

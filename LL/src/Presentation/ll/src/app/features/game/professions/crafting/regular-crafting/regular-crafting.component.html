@@ -210,7 +210,7 @@
               {{ recipe.name }}
             </h2>
             <p class="mt-1 text-xs text-secondary">
-              {{ recipe.blueprints.length }} reusable Blueprints · Mastery
+              {{ formatDisplayLabel(recipe.outputItemType) }} · Mastery
               {{ recipe.currentMasteryLevel }} ·
               <ng-container
                 *ngIf="
@@ -226,15 +226,16 @@
               <ng-template #selectedMaxMastery>Max</ng-template>
             </p>
           </div>
-          <div class="flex max-w-xs flex-wrap justify-end gap-2 text-xs">
-            <span class="ll-state">{{
-              formatDisplayLabel(recipe.outputItemType)
-            }}</span>
+          <div class="text-right text-xs text-secondary">
+            {{ recipe.blueprints.length }} blueprints ·
+            <strong class="font-semibold text-primary">
+              {{ readyToLearnBlueprintCount() }} ready to learn
+            </strong>
           </div>
         </div>
 
         <div
-          class="mt-4 grid gap-2 md:grid-cols-[minmax(12rem,1fr)_auto]"
+          class="mt-4 grid gap-2 xl:grid-cols-[minmax(12rem,12rem)_minmax(0,1fr)]"
           data-tour="crafting-blueprint-browser"
         >
           <label
@@ -249,36 +250,58 @@
               (input)="setBlueprintSearch($any($event.target).value)"
             />
           </label>
-          <div class="ll-segmented min-h-10 normal-case">
+          <div
+            class="ll-segmented ll-scrollbar-none flex min-h-10 flex-nowrap overflow-x-auto normal-case"
+          >
             <button
               type="button"
-              class="rounded px-2 py-1"
+              class="min-w-max rounded px-3 py-1"
               [ngClass]="{
                 'bg-primary/20 text-primary': blueprintFilter() === 'all',
               }"
               (click)="blueprintFilter.set('all')"
             >
-              All {{ recipe.blueprints.length + 1 }}
+              All {{ recipe.blueprints.length }}
             </button>
             <button
               type="button"
-              class="rounded px-2 py-1"
+              class="min-w-max rounded px-3 py-1"
+              [ngClass]="{
+                'bg-primary/20 text-primary': blueprintFilter() === 'ready',
+              }"
+              (click)="blueprintFilter.set('ready')"
+            >
+              Ready to learn {{ readyToLearnBlueprintCount() }}
+            </button>
+            <button
+              type="button"
+              class="min-w-max rounded px-3 py-1"
               [ngClass]="{
                 'bg-primary/20 text-primary': blueprintFilter() === 'craftable',
               }"
               (click)="blueprintFilter.set('craftable')"
             >
-              Craftable {{ craftableDesignCount() }}
+              Craftable {{ craftableBlueprintCount() }}
             </button>
             <button
               type="button"
-              class="rounded px-2 py-1"
+              class="min-w-max rounded px-3 py-1"
               [ngClass]="{
-                'bg-primary/20 text-primary': blueprintFilter() === 'locked',
+                'bg-primary/20 text-primary': blueprintFilter() === 'missing',
               }"
-              (click)="blueprintFilter.set('locked')"
+              (click)="blueprintFilter.set('missing')"
             >
-              Locked {{ lockedBlueprintCount() }}
+              Missing materials {{ missingMaterialsBlueprintCount() }}
+            </button>
+            <button
+              type="button"
+              class="min-w-max rounded px-3 py-1"
+              [ngClass]="{
+                'bg-primary/20 text-primary': blueprintFilter() === 'notOwned',
+              }"
+              (click)="blueprintFilter.set('notOwned')"
+            >
+              Not owned {{ notOwnedBlueprintCount() }}
             </button>
           </div>
         </div>
@@ -289,7 +312,7 @@
       >
         <button
           *ngIf="
-            blueprintFilter() !== 'locked' &&
+            blueprintFilter() === 'all' &&
             (!blueprintSearch() ||
               recipe.name
                 .toLowerCase()
@@ -327,92 +350,226 @@
           </div>
         </button>
 
-        <button
-          *ngFor="
-            let blueprint of visibleBlueprints();
-            trackBy: trackByBlueprint
-          "
-          type="button"
-          class="w-full rounded-md border border-dashed p-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-          [ngClass]="{
-            'border-sky-400/35 bg-sky-400/[0.025] hover:bg-sky-400/[0.055]':
-              blueprint.isLocked,
-            'border-violet-400/35 bg-violet-400/[0.025] hover:bg-violet-400/[0.055]':
-              !blueprint.isLocked,
-            'ring-1 ring-primary/60': selectedBlueprint()?.id === blueprint.id,
-          }"
-          (click)="selectBlueprint(blueprint)"
-        >
-          <div class="flex items-center justify-between gap-3 px-2 py-1">
-            <div
-              class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide"
-              [ngClass]="
-                blueprint.isLocked ? 'text-sky-300' : 'text-violet-300'
-              "
+        <section *ngIf="readyToLearnBlueprints().length" class="space-y-2">
+          <div class="flex items-center gap-3">
+            <h3
+              class="shrink-0 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-primary"
             >
-              <span
-                class="h-2.5 w-2.5 rounded-sm"
-                [ngClass]="blueprint.isLocked ? 'bg-sky-300' : 'bg-violet-300'"
-              ></span>
-              {{ blueprint.name }}
-            </div>
-            <span class="truncate text-right text-xs text-secondary">
-              {{ blueprint.isLocked ? "0/1" : "Learned" }}
-              <ng-container *ngIf="blueprint.sourceType">
-                · {{ formatDisplayLabel(blueprint.sourceType) }}</ng-container
-              >
-              <ng-container *ngIf="blueprint.sourceId">
-                · {{ formatDisplayLabel(blueprint.sourceId) }}</ng-container
-              >
+              Ready to learn
+            </h3>
+            <div class="h-px flex-1 bg-primary/20"></div>
+            <span class="shrink-0 text-[0.65rem] text-secondary">
+              Blueprint available
             </span>
           </div>
 
-          <div
-            class="mt-2 flex w-full items-center justify-between gap-3 rounded bg-white/[0.035] p-3 text-left transition-colors hover:bg-white/[0.06]"
+          <article
+            *ngFor="
+              let blueprint of readyToLearnBlueprints();
+              trackBy: trackByBlueprint
+            "
+            class="w-full cursor-pointer rounded-md border border-dashed border-sky-400/35 bg-sky-400/[0.025] p-2 text-left transition-colors hover:bg-sky-400/[0.055] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
             [ngClass]="{
-              'opacity-70': blueprint.isLocked,
+              'ring-1 ring-primary/60':
+                selectedBlueprint()?.id === blueprint.id,
             }"
+            role="button"
+            tabindex="0"
+            (click)="selectBlueprint(blueprint)"
+            (keydown.enter)="selectBlueprint(blueprint)"
           >
-            <div class="min-w-0">
-              <div class="font-semibold text-white">
-                {{ blueprint.craftedItemName }}
+            <div class="flex items-center justify-between gap-3 px-2 py-1">
+              <div
+                class="flex min-w-0 items-center gap-2 truncate text-xs font-semibold uppercase tracking-wide text-sky-300"
+              >
+                <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-sky-300"></span>
+                <span class="truncate">{{ blueprint.name }}</span>
               </div>
-              <div class="mt-0.5 text-xs text-secondary">
-                {{ blueprint.description }}
+              <span class="truncate text-right text-xs text-secondary">
+                {{ blueprintSourceLabel(blueprint) }}
+              </span>
+            </div>
+
+            <div
+              class="mt-2 flex w-full items-center justify-between gap-3 rounded bg-white/[0.035] p-3 text-left transition-colors hover:bg-white/[0.06]"
+            >
+              <div class="min-w-0">
+                <div class="truncate font-semibold text-white">
+                  {{ blueprint.craftedItemName }}
+                </div>
+                <div class="mt-0.5 truncate text-xs text-secondary">
+                  {{ blueprint.description }}
+                </div>
+              </div>
+
+              <div class="shrink-0 text-right">
+                <button
+                  type="button"
+                  class="ll-button px-3 py-1.5 text-xs font-semibold uppercase"
+                  [disabled]="learningBlueprintId()"
+                  (click)="$event.stopPropagation(); learnBlueprint(blueprint)"
+                >
+                  {{
+                    learningBlueprintId() === blueprint.id
+                      ? "Learning..."
+                      : "Learn Blueprint"
+                  }}
+                </button>
+                <div class="mt-1 text-[0.65rem] text-secondary">
+                  {{ blueprintAvailabilityLabel(blueprint) }}
+                </div>
               </div>
             </div>
-            <span
-              class="ll-state shrink-0"
-              [ngClass]="
-                blueprint.isLocked ? 'text-secondary' : 'text-emerald-300'
-              "
+          </article>
+        </section>
+
+        <section *ngIf="learnedBlueprints().length" class="space-y-2">
+          <div class="flex items-center gap-3">
+            <h3
+              class="shrink-0 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-secondary"
             >
-              {{
-                blueprint.isLocked
-                  ? "Locked"
-                  : isBlueprintCraftable(blueprint)
-                    ? "Craftable"
-                    : "Learned"
-              }}
+              Learned
+            </h3>
+            <div class="h-px flex-1 bg-white/10"></div>
+          </div>
+
+          <article
+            *ngFor="
+              let blueprint of learnedBlueprints();
+              trackBy: trackByBlueprint
+            "
+            class="w-full cursor-pointer rounded-md border border-dashed border-violet-400/35 bg-violet-400/[0.025] p-2 text-left transition-colors hover:bg-violet-400/[0.055] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+            [ngClass]="{
+              'ring-1 ring-primary/60':
+                selectedBlueprint()?.id === blueprint.id,
+            }"
+            role="button"
+            tabindex="0"
+            (click)="selectBlueprint(blueprint)"
+            (keydown.enter)="selectBlueprint(blueprint)"
+          >
+            <div class="flex items-center justify-between gap-3 px-2 py-1">
+              <div
+                class="flex min-w-0 items-center gap-2 truncate text-xs font-semibold uppercase tracking-wide text-violet-300"
+              >
+                <span
+                  class="h-2.5 w-2.5 shrink-0 rounded-sm bg-violet-300"
+                ></span>
+                <span class="truncate">{{ blueprint.name }}</span>
+              </div>
+              <span class="truncate text-right text-xs text-secondary">
+                {{ blueprintSourceLabel(blueprint) }}
+              </span>
+            </div>
+
+            <div
+              class="mt-2 flex w-full items-center justify-between gap-3 rounded bg-white/[0.035] p-3 text-left transition-colors hover:bg-white/[0.06]"
+            >
+              <div class="min-w-0">
+                <div class="truncate font-semibold text-white">
+                  {{ blueprint.craftedItemName }}
+                </div>
+                <div class="mt-0.5 truncate text-xs text-secondary">
+                  {{ blueprint.description }}
+                </div>
+              </div>
+
+              <div class="shrink-0 text-right">
+                <span
+                  class="ll-state inline-flex px-3 py-1.5 text-xs font-semibold uppercase"
+                  [ngClass]="
+                    isBlueprintCraftable(blueprint)
+                      ? 'border-emerald-500/35 text-emerald-300'
+                      : 'border-orange-500/35 text-orange-300'
+                  "
+                >
+                  {{
+                    isBlueprintCraftable(blueprint)
+                      ? "Craftable"
+                      : "Missing materials"
+                  }}
+                </span>
+                <div
+                  *ngIf="!isBlueprintCraftable(blueprint)"
+                  class="mt-1 text-[0.65rem] text-secondary"
+                >
+                  {{ missingBlueprintMaterialsLabel(blueprint) }}
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section *ngIf="notOwnedBlueprints().length" class="space-y-2">
+          <div class="flex items-center gap-3">
+            <h3
+              class="shrink-0 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-zinc-500"
+            >
+              Not owned
+            </h3>
+            <div class="h-px flex-1 bg-white/10"></div>
+            <span class="shrink-0 text-[0.65rem] text-zinc-600">
+              Find a blueprint to learn it
             </span>
           </div>
-        </button>
 
-        <p
-          *ngIf="!visibleBlueprints().length && blueprintFilter() === 'locked'"
-          class="ll-empty-state"
-        >
-          This recipe has no locked Blueprints.
-        </p>
+          <article
+            *ngFor="
+              let blueprint of notOwnedBlueprints();
+              trackBy: trackByBlueprint
+            "
+            class="w-full cursor-pointer rounded-md border border-dashed border-sky-400/35 bg-sky-400/[0.025] p-2 text-left opacity-60 transition-colors hover:bg-sky-400/[0.055] hover:opacity-80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+            [ngClass]="{
+              'ring-1 ring-primary/60':
+                selectedBlueprint()?.id === blueprint.id,
+            }"
+            role="button"
+            tabindex="0"
+            (click)="selectBlueprint(blueprint)"
+            (keydown.enter)="selectBlueprint(blueprint)"
+          >
+            <div class="flex items-center justify-between gap-3 px-2 py-1">
+              <div
+                class="flex min-w-0 items-center gap-2 truncate text-xs font-semibold uppercase tracking-wide text-sky-300"
+              >
+                <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-sky-300"></span>
+                <span class="truncate">{{ blueprint.name }}</span>
+              </div>
+              <span class="shrink-0 text-xs text-secondary">0/1</span>
+            </div>
+
+            <div
+              class="mt-2 flex w-full items-center justify-between gap-3 rounded bg-white/[0.035] p-3 text-left transition-colors hover:bg-white/[0.06]"
+            >
+              <div class="min-w-0">
+                <div class="truncate font-semibold text-white">
+                  {{ blueprint.craftedItemName }}
+                </div>
+                <div class="mt-0.5 truncate text-xs text-secondary">
+                  {{ blueprintSourceLabel(blueprint) || blueprint.description }}
+                </div>
+              </div>
+              <span class="ll-state shrink-0 text-xs text-secondary"
+                >Locked</span
+              >
+            </div>
+          </article>
+        </section>
+
         <p
           *ngIf="
             !visibleBlueprints().length &&
-            blueprintFilter() !== 'locked' &&
-            blueprintSearch()
+            !(
+              blueprintFilter() === 'all' &&
+              (!blueprintSearch() ||
+                recipe.name
+                  .toLowerCase()
+                  .includes(blueprintSearch().toLowerCase()))
+            )
           "
           class="ll-empty-state"
         >
-          No Blueprints match “{{ blueprintSearch() }}”.
+          No blueprints match this filter.
         </p>
       </div>
     </ng-container>
@@ -905,7 +1062,7 @@
                 [template]="materialSourceTooltip"
                 [templateContext]="{ $implicit: material }"
                 [popoverClass]="materialTooltipClass"
-                [disabled]="!material.sources?.length"
+                [disabled]="!material.sources.length"
                 triggerClass="inline-flex"
               >
                 <span
@@ -942,7 +1099,7 @@
                 [template]="materialSourceTooltip"
                 [templateContext]="{ $implicit: material }"
                 [popoverClass]="materialTooltipClass"
-                [disabled]="!material.sources?.length"
+                [disabled]="!material.sources.length"
                 triggerClass="inline-flex"
               >
                 <span
@@ -1031,7 +1188,7 @@
           [template]="materialSourceTooltip"
           [templateContext]="{ $implicit: material }"
           [popoverClass]="materialTooltipClass"
-          [disabled]="!material.sources?.length"
+          [disabled]="!material.sources.length"
           triggerClass="inline-flex"
         >
           <span
@@ -1061,7 +1218,7 @@
           [template]="materialSourceTooltip"
           [templateContext]="{ $implicit: material }"
           [popoverClass]="materialTooltipClass"
-          [disabled]="!material.sources?.length"
+          [disabled]="!material.sources.length"
           triggerClass="inline-flex"
         >
           <span

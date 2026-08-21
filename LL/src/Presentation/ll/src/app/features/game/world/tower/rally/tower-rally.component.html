@@ -44,7 +44,7 @@
           </div>
           <div class="stat">
             <span>Created</span
-            ><strong>{{ vm.createdAt | date: "shortTime" }}</strong>
+            ><strong>{{ vm.createdAt | localDate: "shortTime" }}</strong>
           </div>
         </div>
         <div class="actions">
@@ -139,7 +139,7 @@
 
       <p class="notice" *ngIf="currentApplication(vm) as application">
         Your application is {{ application.status | lowercase }}. The build from
-        {{ application.appliedAt | date: "shortTime" }} remains the submitted
+        {{ application.appliedAt | localDate: "shortTime" }} remains the submitted
         build.
       </p>
 

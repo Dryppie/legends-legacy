@@ -134,7 +134,12 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
                 EncounterCadence: plan.EncounterCadence))
         {
             RandomSeed = randomSeed,
+            // A safety-limited batch may be the last batch in this API call
+            // without being the last due encounter. Do not log that historical
+            // battle; playback belongs only to the encounter that completes
+            // catch-up through the requested time.
             CaptureEventLog = plan.CaptureFinalEncounterLog &&
+                plan.ExecutableUntil > plan.RequestedTo &&
                 sequence == plan.PlannedEncounterCount
         };
     }

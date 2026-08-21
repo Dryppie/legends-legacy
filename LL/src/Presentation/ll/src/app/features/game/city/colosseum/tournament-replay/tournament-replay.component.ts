@@ -1,4 +1,4 @@
-import { DatePipe, NgIf } from '@angular/common';
+import { NgIf } from '@angular/common';
 import {
   Component,
   OnDestroy,
@@ -26,10 +26,11 @@ import {
 } from '../../../../../shared/models/Dtos/colosseum/tournamentGrounds';
 import { HelpLauncherComponent } from '../../../../../shared/help/help-launcher.component';
 import { TournamentGroundsViewStateService } from '../../../../../core/services/api/colosseum/tournament-grounds-view-state.service';
+import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 @Component({
   selector: 'app-tournament-replay',
-  imports: [CombatComponent, DatePipe, NgIf, HelpLauncherComponent],
+  imports: [CombatComponent, LocalDatePipe, NgIf, HelpLauncherComponent],
   templateUrl: './tournament-replay.component.html',
 })
 export class TournamentReplayComponent implements OnInit, OnDestroy {

@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
 import {
   GuildMissionOption,
@@ -9,6 +9,7 @@ import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/n
 import { HumanizeEnumPipe } from '../../../../../../shared/pipes/enums/humanize-enum.pipe';
 import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { CharacterTagComponent } from '../../../../../../shared/components/character/character-tag/character-tag.component';
+import { LocalDatePipe } from '../../../../../../shared/pipes/local-date/local-date.pipe';
 
 @Component({
   selector: 'app-guild-missions',
@@ -16,7 +17,7 @@ import { CharacterTagComponent } from '../../../../../../shared/components/chara
     NgIf,
     NgFor,
     NgClass,
-    DatePipe,
+    LocalDatePipe,
     NumberFormatPipe,
     HumanizeEnumPipe,
     RegularButtonComponent,

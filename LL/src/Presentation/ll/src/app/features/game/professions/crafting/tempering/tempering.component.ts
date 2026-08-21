@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
   Component,
   computed,
@@ -36,6 +36,7 @@ import { formatAttributeType } from '../../../../../shared/pipes/attributes/attr
 import { formatAttributeValue } from '../../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { getEstimatedTemperingQueueDuration } from '../../../../../shared/utils/tempering/tempering-duration.utils';
 import { ItemQuality } from '../../../../../shared/models/enums/itemQuality';
+import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 type TemperingSort = 'Name' | 'Quality' | 'Potential' | 'Gear Power';
 type SortDirection = 'asc' | 'desc';
@@ -51,7 +52,7 @@ const QUALITY_ORDER: Record<ItemQuality, number> = {
 @Component({
   selector: 'app-tempering',
   imports: [
-    DatePipe,
+    LocalDatePipe,
     DecimalPipe,
     NgFor,
     NgIf,

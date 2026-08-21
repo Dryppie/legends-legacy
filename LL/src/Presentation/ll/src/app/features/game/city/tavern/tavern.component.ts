@@ -1,4 +1,4 @@
-import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { LeaderboardStateService } from '../../../../core/services/api/leaderboard/leaderboard-state.service';
 import {
@@ -13,6 +13,7 @@ import {
 import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-format.pipe';
 import { CharacterTagComponent } from '../../../../shared/components/character/character-tag/character-tag.component';
 import { environment } from '../../../../../environments/environment';
+import { LocalDatePipe } from '../../../../shared/pipes/local-date/local-date.pipe';
 
 type LeaderboardCategory = 'Overall' | 'PvE' | 'PvP' | 'Professions' | 'Guilds';
 
@@ -25,7 +26,7 @@ interface BoardOption {
 @Component({
   selector: 'app-tavern',
   imports: [
-    DatePipe,
+    LocalDatePipe,
     DefaultHeaderComponent,
     DropdownComponent,
     NgClass,

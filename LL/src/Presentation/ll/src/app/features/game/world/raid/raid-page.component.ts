@@ -27,7 +27,6 @@ import {
   RaidSignup,
 } from '../../../../core/services/api/raid/raid.service';
 import { GameEventService } from '../../../../core/services/real-time/game-event.service';
-import { CombatComponent } from '../../../../shared/components/combat/combat.component';
 import { CombatService } from '../../../../core/services/client-side/combat/combat.service';
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
 import { BattleType } from '../../../../core/state/combat-state/combatState';
@@ -36,27 +35,26 @@ import {
   RaidPlaybackService,
 } from '../../../../core/services/client-side/combat/raid-playback.service';
 import { CharacterTagComponent } from '../../../../shared/components/character/character-tag/character-tag.component';
-
-interface RaidPreparationPlaybackView {
-  lane: RaidLane;
-  frame: RaidCombatFrame;
-  progressPercent: number;
-  elapsedSeconds: number;
-  durationSeconds: number;
-  friendlyAlive: number;
-  friendlyTotal: number;
-  hostileHealth: number;
-  hostileMaxHealth: number;
-  status: string;
-  completed: boolean;
-  isWaveTransitionHold: boolean;
-}
+import {
+  RaidPlaybackComponent,
+  RaidPreparationPlaybackView,
+} from './playback/raid-playback.component';
+import {
+  RaidPartyAssignment,
+  RaidPartyBuilderComponent,
+} from './party-builder/raid-party-builder.component';
 
 @Component({
   selector: 'app-raid-page',
-  imports: [CommonModule, RouterLink, CombatComponent, CharacterTagComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    CharacterTagComponent,
+    RaidPlaybackComponent,
+    RaidPartyBuilderComponent,
+  ],
   templateUrl: './raid-page.component.html',
-  styleUrl: './raid-page.component.scss',
+  styleUrls: ['../tower/tower-page.scss', './raid-page.component.scss'],
 })
 export class RaidPageComponent implements OnInit, OnDestroy {
   private readonly raids = inject(RaidService);
@@ -80,8 +78,6 @@ export class RaidPageComponent implements OnInit, OnDestroy {
   readonly preparationViews = signal<RaidPreparationPlaybackView[]>([]);
   readonly rearguardWaveNumber = signal(1);
   readonly playbackStageIndex = signal(-1);
-  readonly selectedSignupId = signal<string | null>(null);
-  readonly collapsedLanes = signal<Set<RaidLane>>(new Set());
   readonly lanes: RaidLane[] = ['Rearguard', 'Vanguard', 'MainGuard'];
   readonly raidPlaybackOrder: RaidLane[] = [
     'Rearguard',
@@ -352,37 +348,6 @@ export class RaidPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  preparationObjective(lane: RaidLane): string {
-    switch (lane) {
-      case 'Rearguard':
-        return 'Defeat ten reinforcement waves';
-      case 'Vanguard':
-        return 'Break the raid guardian';
-      case 'MainGuard':
-        return 'Disrupt the boss projection';
-      default:
-        return 'Prepare for the Final Assault';
-    }
-  }
-
-  preparationHostileName(view: RaidPreparationPlaybackView): string {
-    if (view.lane === 'Rearguard' && view.frame.waveNumber !== null)
-      return `Reinforcements · Wave ${view.frame.waveNumber}`;
-    return (
-      view.frame.hostile.map((entity) => entity.name).join(', ') || 'Objective'
-    );
-  }
-
-  preparationEntityDamage(
-    view: RaidPreparationPlaybackView,
-    entityId: string,
-  ): number {
-    return (
-      view.frame.entityStats.find((stats) => stats.entityId === entityId)
-        ?.damageDone ?? 0
-    );
-  }
-
   preparationSummaryLocked(): boolean {
     const lane = this.playbackLane();
     if (!lane || lane === 'FinalAssault') return false;
@@ -392,21 +357,6 @@ export class RaidPageComponent implements OnInit, OnDestroy {
       views.find((view) => view.lane === lane)?.completed === true &&
       views.some((view) => !view.completed)
     );
-  }
-
-  healthPercent(health: number, maxHealth: number): number {
-    return Math.max(0, Math.min(100, (health / Math.max(1, maxHealth)) * 100));
-  }
-
-  trackPreparationLane(
-    _index: number,
-    view: RaidPreparationPlaybackView,
-  ): RaidLane {
-    return view.lane;
-  }
-
-  trackCombatEntity(_index: number, entity: { id: string }): string {
-    return entity.id;
   }
 
   closeRaidPlayback(): void {
@@ -480,66 +430,8 @@ export class RaidPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  wing(lane: RaidLane): RaidSignup[] {
-    return (
-      this.raid()
-        ?.signups.filter((signup) => signup.lane === lane)
-        .sort(
-          (left, right) =>
-            (left.wingSlotIndex ?? Number.MAX_SAFE_INTEGER) -
-            (right.wingSlotIndex ?? Number.MAX_SAFE_INTEGER),
-        ) ?? []
-    );
-  }
-
-  benched(): RaidSignup[] {
-    return this.raid()?.signups.filter((signup) => !signup.lane) ?? [];
-  }
-
   hasPendingJoinRequest(raid: RaidRun): boolean {
     return raid.joinRequests.some((request) => request.isCurrentCharacter);
-  }
-
-  wingSlots(raid: RaidRun): number[] {
-    return Array.from({ length: raid.laneSlots }, (_, index) => index);
-  }
-
-  slotLabel(slotIndex: number): string {
-    return (slotIndex + 1).toString().padStart(2, '0');
-  }
-
-  signupAtSlot(
-    raid: RaidRun,
-    lane: RaidLane,
-    slotIndex: number,
-  ): RaidSignup | null {
-    return (
-      raid.signups.find(
-        (signup) => signup.lane === lane && signup.wingSlotIndex === slotIndex,
-      ) ?? null
-    );
-  }
-
-  wingAverage(raid: RaidRun, lane: RaidLane): number {
-    const signups = raid.signups.filter((signup) => signup.lane === lane);
-    if (!signups.length) return 0;
-    return Math.round(
-      signups.reduce((total, signup) => total + signup.powerRating, 0) /
-        signups.length,
-    );
-  }
-
-  isLaneCollapsed(lane: RaidLane): boolean {
-    return this.collapsedLanes().has(lane);
-  }
-
-  toggleLane(lane: RaidLane): void {
-    this.collapsedLanes.update((current) => {
-      const next = new Set(current);
-      if (next.has(lane)) next.delete(lane);
-      else next.add(lane);
-      return next;
-    });
   }
 
   raidStatusLabel(status: RaidRun['status']): string {
@@ -570,89 +462,6 @@ export class RaidPageComponent implements OnInit, OnDestroy {
       default:
         return 'Cancelled';
     }
-  }
-
-  selectSignup(signup: RaidSignup, raid: RaidRun): void {
-    if (!raid.canAssign || this.action()) return;
-    this.selectedSignupId.update((selected) =>
-      selected === signup.characterId ? null : signup.characterId,
-    );
-  }
-
-  placeSelectedInWing(lane: RaidLane, raid: RaidRun): void {
-    const signupId = this.selectedSignupId();
-    if (!signupId) return;
-    const openSlot = this.wingSlots(raid).find(
-      (slotIndex) => !this.signupAtSlot(raid, lane, slotIndex),
-    );
-    if (openSlot !== undefined) this.moveSignup(signupId, lane, openSlot, raid);
-  }
-
-  placeSelectedInSlot(lane: RaidLane, slotIndex: number, raid: RaidRun): void {
-    const signupId = this.selectedSignupId();
-    if (signupId) this.moveSignup(signupId, lane, slotIndex, raid);
-  }
-
-  benchSignup(signup: RaidSignup, raid: RaidRun): void {
-    this.moveSignup(signup.characterId, null, null, raid);
-  }
-
-  dragSignup(event: DragEvent, signup: RaidSignup, raid: RaidRun): void {
-    if (!raid.canAssign || !event.dataTransfer) return;
-    event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/plain', signup.characterId);
-    this.selectedSignupId.set(signup.characterId);
-  }
-
-  allowPartyDrop(event: DragEvent): void {
-    event.preventDefault();
-    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
-  }
-
-  dropIntoSlot(
-    event: DragEvent,
-    lane: RaidLane,
-    slotIndex: number,
-    raid: RaidRun,
-  ): void {
-    event.preventDefault();
-    const signupId = event.dataTransfer?.getData('text/plain');
-    if (signupId) this.moveSignup(signupId, lane, slotIndex, raid);
-  }
-
-  dropIntoWing(event: DragEvent, lane: RaidLane, raid: RaidRun): void {
-    event.preventDefault();
-    const signupId = event.dataTransfer?.getData('text/plain');
-    if (!signupId) return;
-    const openSlot = this.wingSlots(raid).find(
-      (slotIndex) => !this.signupAtSlot(raid, lane, slotIndex),
-    );
-    if (openSlot !== undefined) this.moveSignup(signupId, lane, openSlot, raid);
-  }
-
-  dropOnBench(event: DragEvent, raid: RaidRun): void {
-    event.preventDefault();
-    const signupId = event.dataTransfer?.getData('text/plain');
-    if (signupId) this.moveSignup(signupId, null, null, raid);
-  }
-
-  distributeBenched(raid: RaidRun): void {
-    const openPositions = this.lanes.flatMap((lane) =>
-      this.wingSlots(raid)
-        .filter((slotIndex) => !this.signupAtSlot(raid, lane, slotIndex))
-        .map((slotIndex) => ({ lane, slotIndex })),
-    );
-    let positionIndex = 0;
-    this.savePartyAssignments(
-      raid.signups.map((signup) => {
-        const position = signup.lane ? null : openPositions[positionIndex++];
-        return {
-          characterId: signup.characterId,
-          lane: signup.lane ?? position?.lane ?? null,
-          wingSlotIndex: signup.wingSlotIndex ?? position?.slotIndex ?? null,
-        };
-      }),
-    );
   }
 
   autoBalanceParties(raid: RaidRun): void {
@@ -700,6 +509,10 @@ export class RaidPageComponent implements OnInit, OnDestroy {
     );
   }
 
+  updatePartyAssignments(assignments: readonly RaidPartyAssignment[]): void {
+    this.savePartyAssignments(assignments);
+  }
+
   participantName(characterId: string): string {
     return (
       this.raid()?.signups.find((x) => x.characterId === characterId)
@@ -736,36 +549,6 @@ export class RaidPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  private moveSignup(
-    signupId: string,
-    lane: RaidLane | null,
-    wingSlotIndex: number | null,
-    raid: RaidRun,
-  ): void {
-    if (!raid.canAssign || this.action()) return;
-    const occupant = raid.signups.find(
-      (signup) =>
-        lane !== null &&
-        signup.lane === lane &&
-        signup.wingSlotIndex === wingSlotIndex &&
-        signup.characterId !== signupId,
-    );
-    if (occupant) {
-      this.error.set('That raid party slot is already occupied.');
-      return;
-    }
-    this.savePartyAssignments(
-      raid.signups.map((signup) => ({
-        characterId: signup.characterId,
-        lane: signup.characterId === signupId ? lane : signup.lane,
-        wingSlotIndex:
-          signup.characterId === signupId
-            ? wingSlotIndex
-            : signup.wingSlotIndex,
-      })),
-    );
-  }
-
   private savePartyAssignments(
     assignments: ReadonlyArray<{
       characterId: string;
@@ -782,7 +565,6 @@ export class RaidPageComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (raid) => {
           this.acceptRaid(raid);
-          this.selectedSignupId.set(null);
         },
         error: (error) => this.error.set(this.errorMessage(error)),
       });

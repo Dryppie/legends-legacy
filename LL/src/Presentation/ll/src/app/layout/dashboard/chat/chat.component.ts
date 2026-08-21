@@ -19,7 +19,6 @@ import {
 } from '../../../core/services/ll-chat/chat-service/chat.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 import {
-  DatePipe,
   NgClass,
   NgFor,
   NgIf,
@@ -38,6 +37,7 @@ import { UserInfoDto } from '../../../shared/models/Dtos/userInfoDto';
 import { CharacterService } from '../../../core/services/api/character/character.service';
 import { ItemComponent } from '../../../shared/components/item/item.component';
 import { environment } from '../../../../environments/environment';
+import { LocalDatePipe } from '../../../shared/pipes/local-date/local-date.pipe';
 
 export interface WireCommand {
   recipientName: string;
@@ -233,7 +233,7 @@ function localChatDateKey(value: Date | string): string {
     FormsModule,
     RegularButtonComponent,
     StickyScrollDirective,
-    DatePipe,
+    LocalDatePipe,
     CharacterTagComponent,
     ItemComponent,
     RouterLink,

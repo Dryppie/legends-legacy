@@ -9,13 +9,14 @@ import {
 } from '@angular/core';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { RouterOutlet } from '@angular/router';
-import { DatePipe, NgClass, NgIf } from '@angular/common';
+import { NgClass, NgIf } from '@angular/common';
 import { ChatComponent } from './chat/chat.component';
 import { LootTrackerComponent } from './loot-tracker/loot-tracker.component';
 import { CharacterActionsStateService } from '../../core/services/api/character-actions/character-actions.state.service';
 import { GameBootstrapStateService } from '../../core/services/api/game-bootstrap/game-bootstrap-state.service';
 import { ChatLayoutPreferenceService } from '../../core/services/client-side/chat-layout/chat-layout-preference.service';
 import { GameHeaderComponent } from './game-header/game-header.component';
+import { LocalDatePipe } from '../../shared/pipes/local-date/local-date.pipe';
 
 /** How long offline progress must stay unresolved before the banner appears. */
 export const DASHBOARD_RESOLVING_BANNER_DELAY_MS = 400;
@@ -74,7 +75,7 @@ export function shouldUseFloatingChatDrawer(
     SidebarComponent,
     NgIf,
     NgClass,
-    DatePipe,
+    LocalDatePipe,
     ChatComponent,
     LootTrackerComponent,
     GameHeaderComponent,

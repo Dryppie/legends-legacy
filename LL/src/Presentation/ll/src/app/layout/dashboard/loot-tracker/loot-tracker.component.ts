@@ -1,4 +1,4 @@
-import { DatePipe, NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { Component, effect, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 import { GameEventService } from '../../../core/services/real-time/game-event.service';
@@ -10,6 +10,7 @@ import { LocalStorageService } from '../../../core/services/client-side/local-st
 import { LootHistoryEntry } from '../../../shared/models/loot-history';
 import { LootHistoryService } from '../../../core/services/api/loot-history/loot-history.service';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
+import { LocalDatePipe } from '../../../shared/pipes/local-date/local-date.pipe';
 
 export function lootHistoryLocationLabel(
   entry: Pick<LootHistoryEntry, 'source' | 'location'>,
@@ -44,7 +45,7 @@ export function lootHistoryLocationLabel(
 
 @Component({
   selector: 'app-loot-tracker',
-  imports: [NgIf, NgFor, DatePipe, ItemComponent],
+  imports: [NgIf, NgFor, LocalDatePipe, ItemComponent],
   templateUrl: './loot-tracker.component.html',
 })
 export class LootTrackerComponent {

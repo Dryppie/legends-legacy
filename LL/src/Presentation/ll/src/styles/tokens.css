@@ -1,3 +1,39 @@
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("../assets/fonts/atkinson-hyperlegible/AtkinsonHyperlegible-Regular.woff2")
+    format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("../assets/fonts/atkinson-hyperlegible/AtkinsonHyperlegible-Italic.woff2")
+    format("woff2");
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("../assets/fonts/atkinson-hyperlegible/AtkinsonHyperlegible-Bold.woff2")
+    format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("../assets/fonts/atkinson-hyperlegible/AtkinsonHyperlegible-BoldItalic.woff2")
+    format("woff2");
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root {
   --ll-font-body: "Poppins", "Helvetica Neue", sans-serif;
   --ll-font-display: "Marcellus", "Helvetica Neue", serif;
@@ -77,4 +113,16 @@
   --ll-breakpoint-md: 48rem;
   --ll-breakpoint-lg: 64rem;
   --ll-breakpoint-xl: 80rem;
+}
+
+:root[data-reading-font="readable"] {
+  --ll-font-body: "Atkinson Hyperlegible", Arial, sans-serif;
+  --ll-font-display: "Atkinson Hyperlegible", Arial, sans-serif;
+}
+
+:root[data-reading-font="system"] {
+  --ll-font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --ll-font-display: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
 }

@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, input, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  effect,
+  input,
+  signal,
+} from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { DungeonCardComponent } from '../../../../../shared/components/dungeons/dungeon-card/dungeon-card.component';
 import { DungeonPreviewData } from '../../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
@@ -117,6 +124,26 @@ export class DungeonsComponent implements OnInit {
     characterState: CharacterStateService,
   ) {
     characterState.refreshIfDirty();
+    effect(
+      () => {
+        const selectedFamilyId = this.selectedFamilyId();
+        const openDungeon = this.selectedRecordsDungeon();
+        if (
+          !selectedFamilyId ||
+          !openDungeon ||
+          (openDungeon.familyId ?? openDungeon.id) === selectedFamilyId
+        ) {
+          return;
+        }
+
+        const selectedDungeon = this.dungeons().find(
+          (dungeon) =>
+            (dungeon.familyId ?? dungeon.id) === selectedFamilyId,
+        );
+        if (selectedDungeon) this.openRecords(selectedDungeon);
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   ngOnInit(): void {
@@ -124,6 +151,7 @@ export class DungeonsComponent implements OnInit {
   }
 
   openRecords(dungeon: DungeonPreviewData): void {
+    const requestId = ++this.recordsRequestId;
     this.selectedRecordsDungeon.set(dungeon);
     this.recordsData.set(null);
     this.recordsError.set(null);
@@ -132,11 +160,24 @@ export class DungeonsComponent implements OnInit {
 
     this.dungeonState
       .getDungeonRecords(dungeon.familyId ?? dungeon.id)
-      .pipe(finalize(() => this.recordsLoading.set(false)))
+      .pipe(
+        finalize(() => {
+          if (requestId === this.recordsRequestId) {
+            this.recordsLoading.set(false);
+          }
+        }),
+      )
       .subscribe({
-        next: (records) => this.recordsData.set(records),
-        error: (e) =>
-          this.recordsError.set(e.message ?? 'Failed to load dungeon records'),
+        next: (records) => {
+          if (requestId === this.recordsRequestId) this.recordsData.set(records);
+        },
+        error: (e) => {
+          if (requestId === this.recordsRequestId) {
+            this.recordsError.set(
+              e.message ?? 'Failed to load dungeon records',
+            );
+          }
+        },
       });
   }
 
@@ -210,11 +251,14 @@ export class DungeonsComponent implements OnInit {
   }
 
   closeRecords(): void {
+    this.recordsRequestId++;
     this.selectedRecordsDungeon.set(null);
     this.recordsData.set(null);
     this.recordsError.set(null);
     this.recordsLoading.set(false);
   }
+
+  private recordsRequestId = 0;
 
   totalRecordClears(): number {
     return (

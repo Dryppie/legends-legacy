@@ -286,11 +286,11 @@
                           started
                           {{
                             rally.startedAt || rally.createdAt
-                              | date: "MMM d, HH:mm"
+                              | localDate: "short"
                           }}
                         </ng-container>
                         <ng-container *ngIf="rally.status !== 'InProgress'">
-                          opened {{ rally.createdAt | date: "MMM d, HH:mm" }}
+                          opened {{ rally.createdAt | localDate: "short" }}
                         </ng-container>
                       </p>
                       <small

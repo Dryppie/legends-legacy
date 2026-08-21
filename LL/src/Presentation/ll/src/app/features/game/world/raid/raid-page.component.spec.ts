@@ -162,17 +162,6 @@ describe('RaidPageComponent playback', () => {
     expect(component.preparationSummaryLocked()).toBeFalse();
   });
 
-  it('collapses and expands individual raid wings', () => {
-    expect(component.isLaneCollapsed('Rearguard')).toBeFalse();
-
-    component.toggleLane('Rearguard');
-    expect(component.isLaneCollapsed('Rearguard')).toBeTrue();
-    expect(component.isLaneCollapsed('MainGuard')).toBeFalse();
-
-    component.toggleLane('Rearguard');
-    expect(component.isLaneCollapsed('Rearguard')).toBeFalse();
-  });
-
   it('maps raid states to the shared Tower status badges', () => {
     expect(component.raidStatusLabel('Mustering')).toBe('Recruiting');
     expect(component.raidStatusBadge('Mustering')).toBe('Rallying');

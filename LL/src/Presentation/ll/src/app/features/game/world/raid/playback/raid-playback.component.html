@@ -1,0 +1,178 @@
+<main class="raid-playback-overview">
+  <header class="raid-playback-header" *ngIf="showingAllPreparations()">
+    <div>
+      <div class="raid-playback-kicker">
+        {{ raidDifficultyLabel(raid().tier) }} ·
+        {{
+          playbackLane() === "FinalAssault"
+            ? "Final engagement"
+            : "3 engagements running"
+        }}
+      </div>
+      <h1>
+        {{ raid().raidBossName }}
+        {{
+          playbackLane() === "FinalAssault" ? "Final Assault" : "preparations"
+        }}
+      </h1>
+      <p *ngIf="preparationViews().length">
+        Select any party below to open or switch its full combat view.
+      </p>
+    </div>
+    <div class="raid-playback-actions">
+      <button
+        class="ll-button raid-playback-exit"
+        type="button"
+        (click)="closePlayback.emit()"
+      >
+        Leave live view
+      </button>
+    </div>
+  </header>
+
+  <section
+    class="raid-preparation-summaries"
+    aria-label="Battle summaries"
+    *ngIf="preparationViews().length"
+  >
+    <button
+      class="raid-preparation-summary"
+      type="button"
+      *ngFor="
+        let view of preparationViews();
+        let partyIndex = index;
+        trackBy: trackPreparationLane
+      "
+      [attr.data-lane]="view.lane"
+      [class.active]="!showingAllPreparations() && playbackLane() === view.lane"
+      [attr.aria-pressed]="
+        !showingAllPreparations() && playbackLane() === view.lane
+      "
+      (click)="focusLane.emit(view.lane)"
+    >
+      <div class="raid-summary-heading">
+        <strong>Party {{ partyIndex + 1 }}</strong>
+        <span>{{ view.status }}</span>
+        <small>
+          {{ view.friendlyAlive }}/{{ view.friendlyTotal }} standing
+        </small>
+      </div>
+      <p>{{ preparationObjective(view.lane) }}</p>
+      <div class="raid-summary-progress" aria-hidden="true">
+        <span [style.width.%]="view.progressPercent"></span>
+      </div>
+      <div class="raid-summary-time">
+        {{ view.elapsedSeconds | number: "1.0-0" }}s /
+        {{ view.durationSeconds | number: "1.0-0" }}s
+      </div>
+    </button>
+  </section>
+
+  <section
+    class="raid-preparation-grid"
+    aria-label="Live raid battles"
+    *ngIf="showingAllPreparations()"
+  >
+    <button
+      class="raid-preparation-card"
+      type="button"
+      *ngFor="
+        let view of preparationViews();
+        let partyIndex = index;
+        trackBy: trackPreparationLane
+      "
+      [attr.data-lane]="view.lane"
+      (click)="focusLane.emit(view.lane)"
+      [attr.aria-label]="'View ' + raidEncounterName(view.lane) + ' battle'"
+    >
+      <header>
+        <div>
+          <span>Party {{ partyIndex + 1 }}</span>
+          <h2>{{ raidEncounterName(view.lane) }}</h2>
+        </div>
+        <strong>{{ view.status }}</strong>
+      </header>
+      <p class="raid-card-objective">
+        {{ preparationObjective(view.lane) }}
+      </p>
+
+      <div class="raid-party-roster">
+        <div
+          class="raid-party-member"
+          *ngFor="let entity of view.frame.friendly; trackBy: trackCombatEntity"
+        >
+          <span class="raid-member-name">{{ entity.name }}</span>
+          <span class="raid-member-health" aria-hidden="true">
+            <i
+              [class.defeated]="entity.health <= 0"
+              [style.width.%]="healthPercent(entity.health, entity.maxHealth)"
+            ></i>
+          </span>
+          <strong>
+            {{ preparationEntityDamage(view, entity.id) | number: "1.0-0" }}
+          </strong>
+        </div>
+      </div>
+
+      <footer>
+        <div>
+          <span>{{ preparationHostileName(view) }}</span>
+          <strong>
+            {{ view.hostileHealth | number: "1.0-0" }} /
+            {{ view.hostileMaxHealth | number: "1.0-0" }}
+          </strong>
+        </div>
+        <div class="raid-hostile-health" aria-hidden="true">
+          <span
+            [style.width.%]="
+              healthPercent(view.hostileHealth, view.hostileMaxHealth)
+            "
+          ></span>
+        </div>
+      </footer>
+    </button>
+  </section>
+
+  <section class="raid-focused-playback" *ngIf="!showingAllPreparations()">
+    <app-combat
+      *ngIf="combatState.getIsCombatActive(battleType)()"
+      [battleType]="battleType"
+      [battleTitleOverride]="battleTitle()"
+      [playerTeamName]="wingName()"
+      [enemyTeamName]="enemyName()"
+      [combatActionDisabled]="preparationSummaryLocked()"
+      [combatActionButtonTextOverride]="
+        preparationSummaryLocked() ? 'Waiting for parties' : null
+      "
+      [useParentScroll]="true"
+      (skipBattle)="closePlayback.emit()"
+    >
+      <div
+        combat-header-actions
+        class="raid-view-toggle"
+        role="group"
+        aria-label="Battle view"
+        *ngIf="preparationViews().length"
+      >
+        <span>View</span>
+        <button
+          type="button"
+          class="active"
+          aria-pressed="true"
+          (click)="showOne.emit()"
+        >
+          One battle
+        </button>
+        <button type="button" aria-pressed="false" (click)="showAll.emit()">
+          All three
+        </button>
+      </div>
+    </app-combat>
+    <div
+      class="raid-playback-loading"
+      *ngIf="!combatState.getIsCombatActive(battleType)()"
+    >
+      Loading battle playback…
+    </div>
+  </section>
+</main>

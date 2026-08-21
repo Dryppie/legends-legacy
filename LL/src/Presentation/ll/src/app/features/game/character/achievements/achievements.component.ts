@@ -26,6 +26,49 @@ type AchievementSortMode = 'Progress' | 'Points' | 'Name' | 'Recent';
 type TitleStateFilter = 'All' | 'Unlocked' | 'Locked';
 type CollectionView = 'Achievements' | 'Titles';
 
+export interface AchievementListItem extends AchievementDto {
+  chainPosition: number;
+  chainLength: number;
+}
+
+export function collapseAchievementChains(
+  achievements: readonly AchievementDto[],
+  selection: 'current' | 'latestCompleted' = 'current',
+): AchievementListItem[] {
+  const chains = new Map<string, AchievementDto[]>();
+
+  for (const achievement of achievements) {
+    const chainKey = [
+      achievement.category,
+      achievement.scope,
+      achievement.requirementType,
+      achievement.requirementTarget ?? '',
+    ].join('|');
+    chains.set(chainKey, [...(chains.get(chainKey) ?? []), achievement]);
+  }
+
+  return [...chains.values()].flatMap((chain) => {
+    const ordered = [...chain].sort(
+      (a, b) =>
+        a.requiredAmount - b.requiredAmount || a.key.localeCompare(b.key),
+    );
+    const current =
+      selection === 'latestCompleted'
+        ? [...ordered].reverse().find((achievement) => achievement.isCompleted)
+        : (ordered.find((achievement) => !achievement.isCompleted) ??
+          ordered[ordered.length - 1]);
+    if (!current) return [];
+
+    const chainPosition = ordered.indexOf(current) + 1;
+
+    return {
+      ...current,
+      chainPosition,
+      chainLength: ordered.length,
+    };
+  });
+}
+
 @Component({
   selector: 'app-achievements',
   host: { class: 'block h-full min-h-0' },
@@ -96,12 +139,17 @@ export class AchievementsComponent implements OnInit, OnDestroy {
     const state = this.achievementState();
     const sort = this.sortMode();
 
-    let achievements = this.achievements();
+    let candidateAchievements = this.achievements();
     if (category !== 'All') {
-      achievements = achievements.filter(
+      candidateAchievements = candidateAchievements.filter(
         (achievement) => achievement.category === category,
       );
     }
+
+    let achievements = collapseAchievementChains(
+      candidateAchievements,
+      state === 'Unlocked' ? 'latestCompleted' : 'current',
+    );
 
     if (state === 'Unlocked') {
       achievements = achievements.filter(
@@ -129,6 +177,10 @@ export class AchievementsComponent implements OnInit, OnDestroy {
     }
 
     return [...achievements].sort((a, b) => {
+      if (a.isCompleted !== b.isCompleted) {
+        return a.isCompleted ? 1 : -1;
+      }
+
       switch (sort) {
         case 'Points':
           return b.points - a.points || a.name.localeCompare(b.name);

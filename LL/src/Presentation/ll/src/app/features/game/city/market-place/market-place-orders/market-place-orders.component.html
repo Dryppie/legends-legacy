@@ -27,7 +27,7 @@
         >
           {{ quality }}
         </span>
-        <span class="ll-helper">Expires {{ listing.expiresAt | date: 'MMM d, HH:mm' }}</span>
+        <span class="ll-helper">Expires {{ listing.expiresAt | localDate: 'short' }}</span>
         <span class="text-sm">x{{ listing.quantity | numberFormat }}</span>
         <span class="text-sm text-primary">
           {{ listing.unitPrice | numberFormat }} each
@@ -60,7 +60,7 @@
           <p class="truncate text-sm text-white">{{ order.itemBase.name }}</p>
           <p class="ll-helper">{{ order.itemBase.rarity }}</p>
         </div>
-        <span class="ll-helper">Expires {{ order.expiresAt | date: 'MMM d, HH:mm' }}</span>
+        <span class="ll-helper">Expires {{ order.expiresAt | localDate: 'short' }}</span>
         <span class="text-sm">x{{ order.quantity | numberFormat }}</span>
         <span class="text-sm text-primary">
           {{ order.unitPrice | numberFormat }} each

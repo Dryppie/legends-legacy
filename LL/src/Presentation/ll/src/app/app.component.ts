@@ -7,6 +7,7 @@ import { ToastService } from './core/services/client-side/components/toast/toast
 import { AppUpdatePopupComponent } from './shared/components/app-update-popup/app-update-popup.component';
 import { AppUpdateService } from './core/services/client-side/app-update/app-update.service';
 import { FirstPartyTourOverlayComponent } from './shared/components/first-party-tour-overlay/first-party-tour-overlay.component';
+import { TypographyPreferenceService } from './core/services/client-side/typography/typography-preference.service';
 
 @Component({
   selector: 'app-root',
@@ -28,6 +29,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   constructor(
     private readonly toastService: ToastService,
     private readonly appUpdate: AppUpdateService,
+    private readonly typographyPreference: TypographyPreferenceService,
   ) {}
 
   ngOnInit(): void {

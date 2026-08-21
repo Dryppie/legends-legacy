@@ -78,6 +78,12 @@ type RecipeFilterMode =
 
 type MobileCraftingPane = 'recipes' | 'blueprints' | 'preview';
 type RecipeEquipmentSlot = EquipmentSlotType | 'all';
+type BlueprintFilterMode =
+  | 'all'
+  | 'ready'
+  | 'craftable'
+  | 'missing'
+  | 'notOwned';
 
 const EQUIPMENT_SLOT_BY_TYPE: Record<EquipmentType, EquipmentSlotType> = {
   [EquipmentType.Head]: EquipmentSlotType.Head,
@@ -185,7 +191,8 @@ export class RegularCraftingComponent {
   readonly recipeSubcategory = signal('all');
   readonly recipeEquipmentSlot = signal<RecipeEquipmentSlot>('all');
   readonly blueprintSearch = signal('');
-  readonly blueprintFilter = signal<'all' | 'craftable' | 'locked'>('all');
+  readonly blueprintFilter = signal<BlueprintFilterMode>('all');
+  readonly learningBlueprintId = signal<string | null>(null);
   readonly mobilePane = signal<MobileCraftingPane>('recipes');
   readonly craftedItem = signal<CraftedItemPreviewState | null>(null);
   private readonly selectedRecipeId = signal<string | null>(null);
@@ -356,13 +363,25 @@ export class RegularCraftingComponent {
     const query = this.blueprintSearch().trim().toLowerCase();
     return recipe.blueprints
       .filter((blueprint) => {
-        if (this.blueprintFilter() === 'locked' && !blueprint.isLocked)
-          return false;
-        if (
-          this.blueprintFilter() === 'craftable' &&
-          !this.canCraftBlueprint(recipe, blueprint, 1)
-        )
-          return false;
+        const owned = this.blueprintOwnedQuantity(blueprint) > 0;
+        const craftable =
+          !blueprint.isLocked && this.canCraftBlueprint(recipe, blueprint, 1);
+
+        switch (this.blueprintFilter()) {
+          case 'ready':
+            if (!blueprint.isLocked || !owned) return false;
+            break;
+          case 'craftable':
+            if (!craftable) return false;
+            break;
+          case 'missing':
+            if (blueprint.isLocked || craftable) return false;
+            break;
+          case 'notOwned':
+            if (!blueprint.isLocked || owned) return false;
+            break;
+        }
+
         if (!query) return true;
 
         return [
@@ -372,25 +391,60 @@ export class RegularCraftingComponent {
           ...blueprint.tags,
         ].some((value) => value.toLowerCase().includes(query));
       })
-      .sort((left, right) => Number(left.isLocked) - Number(right.isLocked));
+      .sort((left, right) => left.name.localeCompare(right.name));
   });
 
-  readonly craftableDesignCount = computed(() => {
+  readonly readyToLearnBlueprints = computed(() =>
+    this.visibleBlueprints().filter(
+      (blueprint) =>
+        blueprint.isLocked && this.blueprintOwnedQuantity(blueprint) > 0,
+    ),
+  );
+
+  readonly learnedBlueprints = computed(() =>
+    this.visibleBlueprints().filter((blueprint) => !blueprint.isLocked),
+  );
+
+  readonly notOwnedBlueprints = computed(() =>
+    this.visibleBlueprints().filter(
+      (blueprint) =>
+        blueprint.isLocked && this.blueprintOwnedQuantity(blueprint) === 0,
+    ),
+  );
+
+  readonly readyToLearnBlueprintCount = computed(
+    () =>
+      this.selectedRecipe()?.blueprints.filter(
+        (blueprint) =>
+          blueprint.isLocked && this.blueprintOwnedQuantity(blueprint) > 0,
+      ).length ?? 0,
+  );
+
+  readonly craftableBlueprintCount = computed(() => {
     const recipe = this.selectedRecipe();
     if (!recipe) return 0;
 
-    return (
-      (this.canCraftRecipe(recipe, recipe.materialCosts, 1) ? 1 : 0) +
-      recipe.blueprints.filter((blueprint) =>
-        this.canCraftBlueprint(recipe, blueprint, 1),
-      ).length
-    );
+    return recipe.blueprints.filter(
+      (blueprint) =>
+        !blueprint.isLocked && this.canCraftBlueprint(recipe, blueprint, 1),
+    ).length;
   });
 
-  readonly lockedBlueprintCount = computed(
+  readonly missingMaterialsBlueprintCount = computed(() => {
+    const recipe = this.selectedRecipe();
+    if (!recipe) return 0;
+
+    return recipe.blueprints.filter(
+      (blueprint) =>
+        !blueprint.isLocked && !this.canCraftBlueprint(recipe, blueprint, 1),
+    ).length;
+  });
+
+  readonly notOwnedBlueprintCount = computed(
     () =>
       this.selectedRecipe()?.blueprints.filter(
-        (blueprint) => blueprint.isLocked,
+        (blueprint) =>
+          blueprint.isLocked && this.blueprintOwnedQuantity(blueprint) === 0,
       ).length ?? 0,
   );
 
@@ -693,8 +747,98 @@ export class RegularCraftingComponent {
     this.selectedBlueprintId.set(blueprint.id);
   }
 
+  learnBlueprint(blueprint: CraftingBlueprint): void {
+    const recipe = this.selectedRecipe();
+    const inventoryItem = this.blueprintInventoryItem(blueprint);
+    if (
+      !recipe ||
+      !blueprint.isLocked ||
+      !inventoryItem ||
+      this.learningBlueprintId()
+    ) {
+      return;
+    }
+
+    this.learningBlueprintId.set(blueprint.id);
+    this.error.set(null);
+    this.craftingService
+      .learnBlueprint(inventoryItem.itemInstance.id, recipe.id)
+      .subscribe({
+        next: () => {
+          this.inventoryState.decrementItem(inventoryItem.itemInstance.id, 1);
+          this.learningBlueprintId.set(null);
+        },
+        error: (err) => {
+          this.error.set(err.message ?? 'Failed to learn blueprint.');
+          this.learningBlueprintId.set(null);
+        },
+      });
+  }
+
+  blueprintOwnedQuantity(blueprint: CraftingBlueprint): number {
+    return this.inventoryState
+      .items()
+      .filter((item) => item.itemInstance.itemBase.id === blueprint.itemId)
+      .reduce((total, item) => total + item.quantity, 0);
+  }
+
+  blueprintSourceLabel(blueprint: CraftingBlueprint): string {
+    return [blueprint.sourceType, blueprint.sourceId]
+      .filter((value): value is string => !!value)
+      .map((value) => this.formatDisplayLabel(value))
+      .join(' · ');
+  }
+
+  blueprintAvailabilityLabel(blueprint: CraftingBlueprint): string {
+    const quantity = this.blueprintOwnedQuantity(blueprint);
+    return (
+      quantity +
+      ' ' +
+      (quantity === 1 ? 'blueprint' : 'blueprints') +
+      ' · uses 1'
+    );
+  }
+
+  missingBlueprintMaterialsLabel(blueprint: CraftingBlueprint): string {
+    const missingMaterials = blueprint.materialCosts
+      .filter(
+        (material) =>
+          this.getOwnedQuantity(material.itemId) < material.required,
+      )
+      .slice(0, 2)
+      .map(
+        (material) =>
+          material.name +
+          ' ' +
+          this.getOwnedQuantity(material.itemId) +
+          '/' +
+          material.required,
+      );
+
+    if (missingMaterials.length) return missingMaterials.join(' · ');
+    return (
+      'Crafting level ' +
+      (this.selectedRecipe()?.minimumProfessionLevel ?? 1) +
+      ' required'
+    );
+  }
+
   setBlueprintSearch(value: string): void {
     this.blueprintSearch.set(value);
+  }
+
+  private blueprintInventoryItem(
+    blueprint: CraftingBlueprint,
+  ): InventoryItem | null {
+    return (
+      this.inventoryState
+        .items()
+        .find(
+          (item) =>
+            item.quantity > 0 &&
+            item.itemInstance.itemBase.id === blueprint.itemId,
+        ) ?? null
+    );
   }
 
   setTargetTier(value: number): void {

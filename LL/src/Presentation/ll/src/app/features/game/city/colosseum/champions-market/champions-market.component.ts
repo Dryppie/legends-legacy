@@ -1,9 +1,10 @@
-import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, computed, effect, signal } from '@angular/core';
 import { ColosseumStateService } from '../../../../../core/services/api/colosseum/colosseum-state.service';
 import { ChampionMarketItemView } from '../../../../../shared/models/Dtos/colosseum/championMarket';
 import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
+import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 interface ChampionMarketReward {
   amount: string;
@@ -16,7 +17,7 @@ interface ChampionMarketReward {
     NgFor,
     NgIf,
     NgClass,
-    DatePipe,
+    LocalDatePipe,
     NumberFormatPipe,
     RegularButtonComponent,
   ],

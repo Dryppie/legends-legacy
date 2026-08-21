@@ -11,6 +11,7 @@ import { CharacterStateService } from '../../../../../core/services/api/characte
 import { EquipmentInstance } from '../../../../../shared/models/item';
 import { ItemType } from '../../../../../shared/models/enums/itemType';
 import { ItemQuality } from '../../../../../shared/models/enums/itemQuality';
+import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 @Component({
     selector: 'app-market-place-orders',
@@ -19,6 +20,7 @@ import { ItemQuality } from '../../../../../shared/models/enums/itemQuality';
         ItemComponent,
         NumberFormatPipe,
         RegularButtonComponent,
+        LocalDatePipe,
     ],
     templateUrl: './market-place-orders.component.html'
 })

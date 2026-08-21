@@ -83,7 +83,7 @@
             class="flex items-center gap-2 py-1 text-[9px] uppercase tracking-wide text-[var(--ll-color-text-subtle)]"
           >
             <span class="h-px flex-1 bg-[var(--ll-color-border)]"></span>
-            <time>{{ message.sentAt | date: "mediumDate" }}</time>
+            <time>{{ message.sentAt | localDate: "mediumDate" }}</time>
             <span class="h-px flex-1 bg-[var(--ll-color-border)]"></span>
           </div>
           <article
@@ -91,7 +91,7 @@
           >
             <div class="flex min-w-0 items-baseline gap-1.5 text-[10px]">
               <time class="shrink-0 text-[var(--ll-color-text-subtle)]">
-                {{ message.sentAt | date: "shortTime" }}
+                {{ message.sentAt | localDate: "shortTime" }}
               </time>
               <strong class="shrink-0 text-primary">
                 {{ message.senderName }}:
@@ -306,7 +306,7 @@
               [class.mt-auto]="first"
             >
               <span class="h-px flex-1 bg-[var(--ll-color-border)]"></span>
-              <time>{{ m.sentAt | date: "mediumDate" }}</time>
+              <time>{{ m.sentAt | localDate: "mediumDate" }}</time>
               <span class="h-px flex-1 bg-[var(--ll-color-border)]"></span>
             </div>
             <article
@@ -331,7 +331,7 @@
                 <time
                   class="text-[10px] leading-4 text-[var(--ll-color-text-subtle)]"
                 >
-                  {{ m.sentAt | date: "shortTime" }}
+                  {{ m.sentAt | localDate: "shortTime" }}
                 </time>
 
                 <span

@@ -70,7 +70,7 @@
                     <p class="font-bold">Multiplayer access restricted</p>
                     <p class="ll-copy text-xs">
                       You can continue playing solo content, but markets, transfers, competitive play, guild activity, rankings, and server events are unavailable.
-                      <span *ngIf="access.expiresAt"> Access is scheduled to return {{ access.expiresAt | date: 'medium' }}.</span>
+                      <span *ngIf="access.expiresAt"> Access is scheduled to return {{ access.expiresAt | localDate: 'medium' }}.</span>
                     </p>
                   </div>
                 </div>

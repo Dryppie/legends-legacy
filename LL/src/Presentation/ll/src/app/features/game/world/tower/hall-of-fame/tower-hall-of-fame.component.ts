@@ -10,10 +10,11 @@ import { CombatService } from '../../../../../core/services/client-side/combat/c
 import { CombatStateService } from '../../../../../core/state/combat-state/combat-state.service';
 import { BattleType } from '../../../../../core/state/combat-state/combatState';
 import { CombatComponent } from '../../../../../shared/components/combat/combat.component';
+import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 @Component({
   selector: 'app-tower-hall-of-fame',
-  imports: [CommonModule, RouterLink, CombatComponent],
+  imports: [CommonModule, RouterLink, CombatComponent, LocalDatePipe],
   templateUrl: './tower-hall-of-fame.component.html',
   styleUrl: '../tower-page.scss',
 })

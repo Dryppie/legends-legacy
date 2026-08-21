@@ -1,4 +1,4 @@
-import { DatePipe, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
+import { NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
 import { Component, Input, computed, effect, signal } from '@angular/core';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
 import {
@@ -7,11 +7,12 @@ import {
 } from '../../../../../../shared/models/Dtos/guild/guildBuilding';
 import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/number-format.pipe';
+import { LocalDatePipe } from '../../../../../../shared/pipes/local-date/local-date.pipe';
 
 @Component({
   selector: 'app-guild-buildings',
   imports: [
-    DatePipe,
+    LocalDatePipe,
     NgIf,
     NgFor,
     NgTemplateOutlet,

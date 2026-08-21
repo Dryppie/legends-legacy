@@ -846,13 +846,13 @@
           <div class="flex items-center justify-between gap-3">
             <span>First defeated</span>
             <span class="text-zinc-300">
-              {{ creature.firstDefeatedAtUtc | date: "mediumDate" }}
+              {{ creature.firstDefeatedAtUtc | localDate: "mediumDate" }}
             </span>
           </div>
           <div class="flex items-center justify-between gap-3">
             <span>Last defeated</span>
             <span class="text-zinc-300">
-              {{ creature.lastDefeatedAtUtc | date: "short" }}
+              {{ creature.lastDefeatedAtUtc | localDate: "short" }}
             </span>
           </div>
           <div class="flex items-center justify-between gap-3">

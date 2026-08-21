@@ -285,7 +285,7 @@
                 >
                 <span
                   >{{ entry.outcome }} ·
-                  {{ entry.resolvedAt | date: "mediumDate" }}</span
+                  {{ entry.resolvedAt | localDate: "mediumDate" }}</span
                 >
                 <small
                   >{{ entry.trophies | number }} Trophies{{
@@ -300,7 +300,7 @@
                   >Reward ready to collect</small
                 >
                 <small *ngIf="!entry.canClaim"
-                  >Claimed {{ entry.claimedAt | date: "mediumDate" }}</small
+                  >Claimed {{ entry.claimedAt | localDate: "mediumDate" }}</small
                 >
               </div>
               <a [routerLink]="['/game/world/raid', entry.raidRunId]">

@@ -6,10 +6,11 @@ import {
   TowerPersonalExpedition,
   WorldTowerService,
 } from '../../../../../core/services/api/world-tower/world-tower.service';
+import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 @Component({
   selector: 'app-tower-personal-expeditions',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, LocalDatePipe],
   templateUrl: './tower-personal-expeditions.component.html',
   styleUrl: '../tower-page.scss',
 })

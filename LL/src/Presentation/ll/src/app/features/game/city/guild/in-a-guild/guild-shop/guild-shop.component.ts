@@ -1,5 +1,5 @@
 import { Component, computed, effect, signal } from '@angular/core';
-import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
 import {
   GuildShopItem,
@@ -9,6 +9,7 @@ import {
 import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/number-format.pipe';
 import { HumanizeEnumPipe } from '../../../../../../shared/pipes/enums/humanize-enum.pipe';
 import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
+import { LocalDatePipe } from '../../../../../../shared/pipes/local-date/local-date.pipe';
 
 @Component({
   selector: 'app-guild-shop',
@@ -16,7 +17,7 @@ import { RegularButtonComponent } from '../../../../../../shared/components/cust
     NgIf,
     NgFor,
     NgClass,
-    DatePipe,
+    LocalDatePipe,
     NumberFormatPipe,
     HumanizeEnumPipe,
     RegularButtonComponent,

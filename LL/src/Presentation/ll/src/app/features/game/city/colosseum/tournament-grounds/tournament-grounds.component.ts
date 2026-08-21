@@ -1,5 +1,4 @@
 import {
-  DatePipe,
   Location,
   NgFor,
   NgIf,
@@ -37,11 +36,12 @@ import {
   TournamentTeam,
   TournamentTeamInvite,
 } from '../../../../../shared/models/Dtos/colosseum/tournamentGrounds';
+import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 @Component({
   selector: 'app-tournament-grounds',
   imports: [
-    DatePipe,
+    LocalDatePipe,
     NgFor,
     NgIf,
     NgTemplateOutlet,

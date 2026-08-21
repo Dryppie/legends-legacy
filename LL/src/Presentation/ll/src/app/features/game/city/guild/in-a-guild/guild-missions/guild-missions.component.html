@@ -7,7 +7,7 @@
             <p class="section-label">Weekly Mission</p>
             <span aria-hidden="true">•</span>
             <time [attr.datetime]="missions.nextWeeklyResetAt">
-              resets {{ missions.nextWeeklyResetAt | date: "mediumDate" }}
+              resets {{ missions.nextWeeklyResetAt | localDate: "mediumDate" }}
             </time>
           </div>
           <h1>
@@ -175,7 +175,7 @@
         <p>
           {{ claimableOrderCount(missions.personalOrders) }} of
           {{ missions.personalOrders.length }} ready · resets
-          {{ missions.nextDailyResetAt | date: "shortTime" }}
+          {{ missions.nextDailyResetAt | localDate: "shortTime" }}
         </p>
       </header>
 

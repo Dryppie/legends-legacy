@@ -14,12 +14,13 @@ import {
   WorldTowerService,
 } from '../../../../../core/services/api/world-tower/world-tower.service';
 import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
+import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 type TowerReadinessTab = 'scouting' | 'preparation';
 
 @Component({
   selector: 'app-tower-overview',
-  imports: [CommonModule, RouterLink, DefaultHeaderComponent],
+  imports: [CommonModule, RouterLink, DefaultHeaderComponent, LocalDatePipe],
   templateUrl: './tower-overview.component.html',
   styleUrls: ['../tower-page.scss', './tower-overview.component.scss'],
 })

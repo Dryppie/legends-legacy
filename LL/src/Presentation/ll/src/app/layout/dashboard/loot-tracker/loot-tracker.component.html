@@ -35,7 +35,7 @@
             class="shrink-0 text-[0.65rem] text-zinc-400"
             [attr.datetime]="entry.receivedAt"
           >
-            {{ entry.receivedAt | date: "MMM d, HH:mm" }}
+            {{ entry.receivedAt | localDate: "short" }}
           </time>
         </div>
         <div class="mt-0.5 truncate text-[0.65rem] text-zinc-400">

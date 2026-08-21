@@ -3,6 +3,10 @@ module.exports = {
   content: ["./src/**/*.{html,ts}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--ll-font-body)"],
+        serif: ["var(--ll-font-display)"],
+      },
       keyframes: {
         fadeInUp: {
           "0%": {

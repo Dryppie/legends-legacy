@@ -38,6 +38,7 @@ export class PopoverComponent implements AfterViewInit, OnDestroy {
   @Input({ required: true }) template!: TemplateRef<any>;
   @Input() trigger: TriggerType = 'click';
   @Input() disabled = false;
+  @Input() touchDisabled = false;
   @Input() originClass = 'relative inline-block';
   @Input() popoverClass =
     'bg-texture border border-light_gray rounded shadow p-2 text-sm text-white';
@@ -138,6 +139,7 @@ export class PopoverComponent implements AfterViewInit, OnDestroy {
       (e as PointerEvent).pointerType || this.lastOriginPointerType;
     this.lastOriginPointerType = undefined;
     if (this.trigger === 'hover' && pointerType && pointerType !== 'mouse') {
+      if (this.touchDisabled) return;
       this.clearTimers();
       this.openedByTouch = true;
       this.handleCtrl.requestToggle();

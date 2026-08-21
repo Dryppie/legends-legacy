@@ -242,9 +242,9 @@
             <p>{{ log.message }}</p>
             <time
               [attr.datetime]="log.createdAt"
-              [title]="log.createdAt | date: 'medium'"
+              [title]="log.createdAt | localDate: 'medium'"
             >
-              {{ log.createdAt | date: "shortTime" }}
+              {{ log.createdAt | localDate: "shortTime" }}
             </time>
           </article>
           <p *ngIf="overview.activityLogs.length === 0" class="empty-log">

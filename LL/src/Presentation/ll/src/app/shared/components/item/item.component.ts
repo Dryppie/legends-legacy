@@ -35,6 +35,7 @@ import { BlueprintAttributeSummaryComponent } from '../blueprint-attribute-summa
 })
 export class ItemComponent {
   @Input() item!: ItemInstance;
+  @Input() popoverTouchDisabled = false;
   itemHovered: boolean = false;
   tooltipPosition = {};
 

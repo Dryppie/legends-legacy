@@ -18,6 +18,11 @@ import {
   SidebarLayoutPreferenceService,
 } from '../../../core/services/client-side/sidebar-layout/sidebar-layout-preference.service';
 import { GoogleSignInButtonComponent } from '../../../shared/components/google-sign-in-button/google-sign-in-button.component';
+import {
+  ReadingFont,
+  ReadingFontSize,
+  TypographyPreferenceService,
+} from '../../../core/services/client-side/typography/typography-preference.service';
 
 @Component({
   selector: 'app-settings',
@@ -45,6 +50,42 @@ export class SettingsComponent {
   public readonly guild;
   readonly chatLayout;
   readonly sidebarLayout;
+  readonly readingFont;
+  readonly readingFontSize;
+  readonly readingFontOptions: ReadonlyArray<{
+    value: ReadingFont;
+    label: string;
+  }> = [
+    {
+      value: 'default',
+      label: 'Game default',
+    },
+    {
+      value: 'readable',
+      label: 'Readable sans',
+    },
+    {
+      value: 'system',
+      label: 'System',
+    },
+  ];
+  readonly readingFontSizeOptions: ReadonlyArray<{
+    value: ReadingFontSize;
+    label: string;
+  }> = [
+    {
+      value: 'default',
+      label: '14px',
+    },
+    {
+      value: 'large',
+      label: '16px',
+    },
+    {
+      value: 'extra-large',
+      label: '18px',
+    },
+  ];
 
   constructor(
     private authService: AuthService,
@@ -52,11 +93,14 @@ export class SettingsComponent {
     private readonly guildState: GuildStateService,
     private readonly chatLayoutPreference: ChatLayoutPreferenceService,
     private readonly sidebarLayoutPreference: SidebarLayoutPreferenceService,
+    private readonly typographyPreference: TypographyPreferenceService,
   ) {
     this.guild = guildState.guild;
     this.currentCharacter = this.authService.currentCharacter;
     this.chatLayout = this.chatLayoutPreference.layout;
     this.sidebarLayout = this.sidebarLayoutPreference.layout;
+    this.readingFont = this.typographyPreference.readingFont;
+    this.readingFontSize = this.typographyPreference.readingFontSize;
 
     effect(() => {
       this.userInfo = this.authService.userInfo();
@@ -81,6 +125,18 @@ export class SettingsComponent {
 
   setSidebarLayout(layout: SidebarLayout): void {
     this.sidebarLayoutPreference.setLayout(layout);
+  }
+
+  setReadingFont(readingFont: ReadingFont): void {
+    this.typographyPreference.setReadingFont(readingFont);
+  }
+
+  setReadingFontSize(readingFontSize: ReadingFontSize): void {
+    this.typographyPreference.setReadingFontSize(readingFontSize);
+  }
+
+  resetReadingPreferences(): void {
+    this.typographyPreference.resetReadingPreferences();
   }
 
   convertToRegistered() {

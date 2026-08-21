@@ -8,13 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { RegularButtonComponent } from '../../custom-components/buttons/regular-button/regular-button.component';
-import {
-  DecimalPipe,
-  NgClass,
-  NgFor,
-  NgIf,
-  NgTemplateOutlet,
-} from '@angular/common';
+import { NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
 import { ItemComponent } from '../../item/item.component';
 import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
 import {
@@ -31,8 +25,6 @@ import { Equipment } from '../../../models/item';
 import { EquipmentType } from '../../../models/enums/equipmentType';
 import { BaseItemComponent } from '../../base-item/base-item.component';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
-import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
-import { toDisplayedCombatRating } from '../../../models/combat-rating-display';
 
 interface RewardGroup {
   title: string;
@@ -61,7 +53,6 @@ type DungeonDetailTab = 'rewards' | 'gathering' | 'mastery';
     NgFor,
     NgClass,
     NgTemplateOutlet,
-    DecimalPipe,
     OverlayModule,
     RegularButtonComponent,
     ItemComponent,
@@ -71,8 +62,6 @@ type DungeonDetailTab = 'rewards' | 'gathering' | 'mastery';
   styleUrl: './dungeon-card.component.scss',
 })
 export class DungeonCardComponent implements OnChanges {
-  readonly displayCombatRating = toDisplayedCombatRating;
-
   @Input({ required: true }) previewData!: DungeonPreviewData;
 
   @Output() recordsRequested = new EventEmitter<DungeonPreviewData>();
@@ -128,7 +117,6 @@ export class DungeonCardComponent implements OnChanges {
 
   constructor(
     readonly dungeonState: DungeonStateService,
-    private readonly characterState: CharacterStateService,
     private readonly router: Router,
   ) {}
 
@@ -426,11 +414,6 @@ export class DungeonCardComponent implements OnChanges {
     }
 
     return 'This dungeon difficulty is locked or unavailable.';
-  }
-
-  selectedPartyPower(): number | null {
-    const power = this.characterState.overview()?.power;
-    return power?.state === 'Available' ? power.overall : null;
   }
 
   entryRequirementClass(requirement: EntryRequirementPreview): string {

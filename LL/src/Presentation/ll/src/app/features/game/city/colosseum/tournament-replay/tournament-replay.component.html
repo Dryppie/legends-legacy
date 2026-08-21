@@ -64,7 +64,7 @@
               {{ outcomeLabel(currentMatch) }}
             </span>
             <span *ngIf="details()?.summary?.completedAtUtc">
-              · {{ details()?.summary?.completedAtUtc | date: "short" }}
+              · {{ details()?.summary?.completedAtUtc | localDate: "short" }}
             </span>
           </p>
         </div>
@@ -157,7 +157,7 @@
         <div class="ll-panel p-3">
           <p class="ll-stat-label">Started</p>
           <p class="ll-heading mt-1 text-base text-white">
-            {{ loadedReplay.startedAt | date: "short" }}
+            {{ loadedReplay.startedAt | localDate: "short" }}
           </p>
         </div>
       </div>

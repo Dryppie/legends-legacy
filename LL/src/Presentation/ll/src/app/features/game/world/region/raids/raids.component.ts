@@ -10,10 +10,11 @@ import {
   RaidTrophyVendor,
 } from '../../../../../core/services/api/raid/raid.service';
 import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
+import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 @Component({
   selector: 'app-raids',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, LocalDatePipe],
   templateUrl: './raids.component.html',
   styleUrl: './raids.component.scss',
 })

@@ -27,12 +27,19 @@ import { CombatService } from '../../../../../core/services/client-side/combat/c
 import { CombatStateService } from '../../../../../core/state/combat-state/combat-state.service';
 import { BattleType } from '../../../../../core/state/combat-state/combatState';
 import { TowerPlaybackService } from '../../../../../core/services/client-side/combat/tower-playback.service';
+import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 @Component({
   selector: 'app-tower-rally',
-  imports: [CommonModule, RouterLink, CharacterTagComponent, CombatComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    CharacterTagComponent,
+    CombatComponent,
+    LocalDatePipe,
+  ],
   templateUrl: './tower-rally.component.html',
-  styleUrl: '../tower-page.scss',
+  styleUrls: ['../tower-page.scss', '../tower-party-builder.scss'],
 })
 export class TowerRallyComponent implements OnInit, OnDestroy {
   private readonly tower = inject(WorldTowerService);

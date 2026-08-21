@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
-import { DatePipe, Location, NgIf, NgTemplateOutlet } from '@angular/common';
+import { Location, NgIf, NgTemplateOutlet } from '@angular/common';
 import { CombatComponent } from '../../../../shared/components/combat/combat.component';
 import { BattleType } from '../../../../core/state/combat-state/combatState';
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
@@ -20,6 +20,7 @@ import { ColosseumStateService } from '../../../../core/services/api/colosseum/c
 import { LeaderboardEntry } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntry';
 import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
 import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-format.pipe';
+import { LocalDatePipe } from '../../../../shared/pipes/local-date/local-date.pipe';
 
 @Component({
   selector: 'app-colosseum',
@@ -29,7 +30,7 @@ import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-
     CombatComponent,
     NgIf,
     NgTemplateOutlet,
-    DatePipe,
+    LocalDatePipe,
     ArenaBattleComponent,
     ChampionsMarketComponent,
     RankingsGloryComponent,

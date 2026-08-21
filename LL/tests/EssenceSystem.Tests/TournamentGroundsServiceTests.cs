@@ -962,6 +962,45 @@ public sealed class TournamentGroundsServiceTests
     }
 
     [Fact]
+    public async Task AdvanceDueTournamentsAsync_claims_older_unclaimed_rewards_before_tournament_starts()
+    {
+        await using var db = CreateDbContext();
+        var service = CreateService(db);
+        var completedTournament = SeedTournament(db, TournamentStatus.Completed);
+        var startingTournament = SeedTournament(db, TournamentStatus.BracketGenerated);
+        startingTournament.StartsAtUtc = Now.AddMinutes(-1);
+        var character = SeedCharacter(db, rating: 1500, accountId: Guid.NewGuid());
+
+        await db.TournamentRewardGrants.AddAsync(new TournamentRewardGrant
+        {
+            Id = Guid.NewGuid(),
+            TournamentId = completedTournament.Id,
+            Tournament = completedTournament,
+            CharacterId = character.Id,
+            RewardKey = "placement-3",
+            Placement = 3,
+            ArenaGlory = 45,
+            Cinders = 250,
+            Soulstones = 5,
+            SigilFragments = 10,
+            Status = TournamentRewardStatus.Unclaimed,
+            CreatedAtUtc = Now.AddDays(-7)
+        });
+        await db.SaveChangesAsync();
+
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+
+        Assert.Equal(TournamentStatus.InProgress, startingTournament.Status);
+        Assert.Equal(45, character.ArenaProfile.Glory);
+        Assert.Equal(250, character.Cinders);
+        Assert.Equal(5, character.Soulstones);
+        Assert.Equal(10, character.SigilFragments);
+        var reward = await db.TournamentRewardGrants.SingleAsync();
+        Assert.Equal(TournamentRewardStatus.Claimed, reward.Status);
+        Assert.Equal(Now, reward.ClaimedAtUtc);
+    }
+
+    [Fact]
     public async Task ClaimRewardsAsync_claims_unclaimed_rewards_once()
     {
         await using var db = CreateDbContext();

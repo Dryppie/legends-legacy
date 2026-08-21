@@ -1319,6 +1319,40 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     {
         await using var transaction = await BeginOwnedTransactionIfNeededAsync(cancellationToken);
 
+        var now = UtcNow();
+        var rewardTournamentId = tournamentId ?? await _tournaments.RewardGrants
+            .Where(r =>
+                r.CharacterId == characterId
+                && r.Status == TournamentRewardStatus.Unclaimed)
+            .Select(r => (Guid?)r.TournamentId)
+            .FirstOrDefaultAsync(cancellationToken);
+        var result = await ClaimUnclaimedRewardsAsync(
+            characterId,
+            tournamentId,
+            now,
+            cancellationToken);
+        if (!result.Claimed)
+        {
+            return result;
+        }
+
+        await SaveCommitAndPublishTournamentEventAsync(
+            transaction,
+            rewardTournamentId!.Value,
+            "TournamentRewardsAvailable",
+            now,
+            cancellationToken);
+
+        return result;
+    }
+
+    private async Task<ClaimTournamentRewardsResult> ClaimUnclaimedRewardsAsync(
+        Guid characterId,
+        Guid? tournamentId,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+
         var character = await _tournaments.Characters
             .Include(c => c.ArenaProfile)
             .FirstOrDefaultAsync(c => c.Id == characterId, cancellationToken);
@@ -1340,7 +1374,6 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             return EmptyClaimResult();
         }
 
-        var now = UtcNow();
         var glory = rewards.Sum(r => r.ArenaGlory);
         var cinders = rewards.Sum(r => r.Cinders);
         var soulstones = rewards.Sum(r => r.Soulstones);
@@ -1372,13 +1405,6 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             reward.Status = TournamentRewardStatus.Claimed;
             reward.ClaimedAtUtc = now;
         }
-
-        await SaveCommitAndPublishTournamentEventAsync(
-            transaction,
-            rewards[0].TournamentId,
-            "TournamentRewardsAvailable",
-            now,
-            cancellationToken);
 
         return new ClaimTournamentRewardsResult(
             true,
@@ -1514,6 +1540,10 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                     }
                     break;
                 case TournamentStatus.BracketGenerated when tournament.StartsAtUtc <= now:
+                    await AutoClaimOutstandingRewardsAsync(
+                        tournament.Id,
+                        now,
+                        cancellationToken);
                     tournament.Status = TournamentStatus.InProgress;
                     changed = Touch(tournament, now);
                     await EnqueueTournamentChatAnnouncementAsync(
@@ -1553,6 +1583,33 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             await PublishTournamentEventAsync(
                 tournament,
                 "TournamentStateChanged",
+                now,
+                cancellationToken);
+        }
+    }
+
+    private async Task AutoClaimOutstandingRewardsAsync(
+        Guid startingTournamentId,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var pendingRewardOwners = await _tournaments.RewardGrants
+            .Where(reward =>
+                reward.TournamentId != startingTournamentId
+                && reward.Status == TournamentRewardStatus.Unclaimed)
+            .Select(reward => new
+            {
+                reward.CharacterId,
+                reward.TournamentId
+            })
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        foreach (var rewardOwner in pendingRewardOwners)
+        {
+            await ClaimUnclaimedRewardsAsync(
+                rewardOwner.CharacterId,
+                rewardOwner.TournamentId,
                 now,
                 cancellationToken);
         }

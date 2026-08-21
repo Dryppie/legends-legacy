@@ -3,370 +3,368 @@
     class="flex-none pr-4 sm:pr-6"
     section="Account"
     title="Settings"
-    text="Profile, account bindings, and game links"
+    text="Display, interface, and account preferences"
     icon="sidebar/system/settings"
     [showGuide]="false"
   ></app-default-header>
 
-  <div class="min-h-0 flex-1 overflow-y-auto">
-    <section class="ll-page-header">
-      <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+  <div class="min-h-0 flex-1 overflow-y-auto pr-2 sm:pr-6">
+    <section
+      class="ll-panel overflow-hidden p-4 sm:p-5"
+      aria-labelledby="display-heading"
+    >
+      <div
+        class="flex flex-wrap items-baseline justify-between gap-2 border-b border-light_gray/70 pb-3"
+      >
+        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h2 id="display-heading" class="ll-heading text-xl">Display</h2>
+          <span class="ll-text-muted text-xs">Saved on this device</span>
+        </div>
+        <button
+          type="button"
+          class="text-sm text-primary underline-offset-4 hover:underline disabled:cursor-default disabled:text-zinc-500 disabled:no-underline"
+          [disabled]="
+            readingFont() === 'default' && readingFontSize() === 'default'
+          "
+          (click)="resetReadingPreferences()"
+        >
+          Reset to default
+        </button>
+      </div>
+
+      <div
+        class="grid gap-3 border-b border-light_gray/40 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
+      >
         <div class="min-w-0">
-          <p class="ll-eyebrow">Current Character</p>
-          <div class="mt-2 flex flex-wrap items-start gap-4">
-            <img
-              src="./../../../../assets/portrait/Avatar.svg"
-              alt="Character avatar"
-              class="h-20 w-20 rounded border border-primary/50 bg-black/30 p-1"
-            />
-
-            <div class="min-w-0 flex-1">
-              <h1 class="ll-heading truncate text-2xl">
-                {{ character.name }}
-              </h1>
-              <p class="ll-copy mt-1 text-zinc-300">
-                Level {{ character.level }}
-                <span *ngIf="guild() as guild"> - {{ guild.name }}</span>
-              </p>
-
-              <div class="mt-4 max-w-xl">
-                <div class="ll-copy flex justify-between text-xs">
-                  <span>Experience</span>
-                  <span>
-                    {{ character.experience }} /
-                    {{ character.experienceUntilNextLevel }}
-                  </span>
-                </div>
-                <div class="ll-progress-track mt-1 h-2">
-                  <div
-                    class="ll-progress-bar rounded"
-                    [style.width.%]="experiencePercent(character)"
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid gap-2 text-sm sm:grid-cols-3 xl:grid-cols-1">
-          <div class="ll-stat-card px-3 py-2">
-            <div class="ll-stat-label">Account</div>
-            <div
-              class="mt-2 w-fit rounded border bg-black/30 px-2 py-0.5 font-semibold"
-              [ngClass]="accountTypeClass()"
-            >
-              {{ accountTypeLabel() }}
-            </div>
-          </div>
-
-          <div class="ll-stat-card px-3 py-2">
-            <div class="ll-stat-label">Email</div>
-            <div
-              class="mt-2 w-fit rounded border bg-black/30 px-2 py-0.5 font-semibold"
-              [ngClass]="emailStatusClass()"
-            >
-              {{ emailStatusLabel() }}
-            </div>
-          </div>
-
-          <div class="ll-stat-card px-3 py-2">
-            <div class="ll-stat-label">Gmail</div>
-            <div
-              class="mt-2 w-fit rounded border bg-black/30 px-2 py-0.5 font-semibold"
-              [ngClass]="gmailStatusClass()"
-            >
-              {{ gmailStatusLabel() }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="ll-panel mt-4 p-4">
-      <div class="border-b border-light_gray/70 pb-3">
-        <p class="ll-eyebrow">Interface</p>
-        <h2 class="ll-heading mt-1 text-xl">Layout</h2>
-      </div>
-
-      <div class="mt-4 grid gap-4">
-        <div class="min-w-0" role="group" aria-label="Navigation layout">
-          <h3 class="font-semibold text-primary">Sidebar</h3>
+          <h3 class="font-semibold text-white">Reading font</h3>
           <p class="ll-copy mt-1">
-            Choose how much space the sidebar uses on larger screens.
+            Pick the typeface that reads most comfortably.
           </p>
-
-          <div class="mt-3 grid gap-2 md:grid-cols-2">
-            <button
-              type="button"
-              class="ll-card flex items-start justify-between gap-3 p-3 text-left transition hover:border-primary/60"
-              [ngClass]="{
-                'border-primary/60 bg-primary/[0.08]':
-                  sidebarLayout() === 'detailed',
-              }"
-              [attr.aria-pressed]="sidebarLayout() === 'detailed'"
-              (click)="setSidebarLayout('detailed')"
-            >
-              <span>
-                <span class="block font-semibold text-white">
-                  Detailed sidebar
-                </span>
-                <span class="ll-copy mt-1 block">
-                  Show section headings, navigation names, and descriptions.
-                </span>
-              </span>
-              <span
-                class="ll-badge shrink-0 rounded"
-                [ngClass]="
-                  sidebarLayout() === 'detailed'
-                    ? 'll-badge-success'
-                    : 'll-badge-muted'
-                "
-              >
-                {{ sidebarLayout() === "detailed" ? "Active" : "Select" }}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              class="ll-card flex items-start justify-between gap-3 p-3 text-left transition hover:border-primary/60"
-              [ngClass]="{
-                'border-primary/60 bg-primary/[0.08]':
-                  sidebarLayout() === 'compact',
-              }"
-              [attr.aria-pressed]="sidebarLayout() === 'compact'"
-              (click)="setSidebarLayout('compact')"
-            >
-              <span>
-                <span class="block font-semibold text-white">Compact rail</span>
-                <span class="ll-copy mt-1 block">
-                  Use icon-led navigation with short labels to maximize space.
-                </span>
-              </span>
-              <span
-                class="ll-badge shrink-0 rounded"
-                [ngClass]="
-                  sidebarLayout() === 'compact'
-                    ? 'll-badge-success'
-                    : 'll-badge-muted'
-                "
-              >
-                {{ sidebarLayout() === "compact" ? "Active" : "Select" }}
-              </span>
-            </button>
-          </div>
         </div>
 
         <div
-          class="hidden min-w-0 border-t border-light_gray/40 pt-4 sm:block"
+          class="flex w-fit max-w-full flex-wrap rounded border border-[var(--ll-color-border)] bg-black/20 p-1"
           role="group"
-          aria-label="Chat layout"
+          aria-label="Reading font"
         >
-          <h3 class="font-semibold text-primary">Chat</h3>
+          <button
+            *ngFor="let option of readingFontOptions"
+            type="button"
+            class="rounded border border-transparent px-3 py-2 text-sm text-zinc-300 transition hover:text-primary sm:px-4"
+            [ngClass]="{
+              'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
+                readingFont() === option.value,
+            }"
+            [attr.aria-pressed]="readingFont() === option.value"
+            (click)="setReadingFont(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="grid gap-3 border-b border-light_gray/40 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
+      >
+        <div class="min-w-0">
+          <h3 class="font-semibold text-white">Text size</h3>
+          <p class="ll-copy mt-1">
+            Scale interface text without changing browser zoom.
+          </p>
+        </div>
+
+        <div
+          class="flex w-fit max-w-full flex-wrap rounded border border-[var(--ll-color-border)] bg-black/20 p-1"
+          role="group"
+          aria-label="Text size"
+        >
+          <button
+            *ngFor="let option of readingFontSizeOptions"
+            type="button"
+            class="rounded border border-transparent px-4 py-2 text-sm text-zinc-300 transition hover:text-primary"
+            [ngClass]="{
+              'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
+                readingFontSize() === option.value,
+            }"
+            [attr.aria-pressed]="readingFontSize() === option.value"
+            (click)="setReadingFontSize(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+      </div>
+
+      <div class="ll-card mt-4 p-4 sm:p-5" aria-live="polite">
+        <p class="ll-eyebrow">Live preview</p>
+        <p
+          class="mt-3 text-lg font-normal leading-relaxed text-primary [font-family:var(--ll-font-body)]"
+        >
+          A brave hero explores ancient ruins. 1 I l O 0
+        </p>
+        <p class="ll-copy mt-1">Quest reward: 240 Cinders, 3 Soulstones.</p>
+      </div>
+    </section>
+
+    <section
+      class="ll-panel mt-4 overflow-hidden p-4 sm:p-5"
+      aria-labelledby="interface-heading"
+    >
+      <div
+        class="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-light_gray/70 pb-3"
+      >
+        <h2 id="interface-heading" class="ll-heading text-xl">Interface</h2>
+        <span class="ll-text-muted text-xs">Layout on large screens</span>
+      </div>
+
+      <div
+        class="grid gap-3 border-b border-light_gray/40 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
+      >
+        <div class="min-w-0">
+          <h3 class="font-semibold text-white">Sidebar</h3>
+          <p class="ll-copy mt-1">
+            Choose between detailed navigation and a compact icon rail.
+          </p>
+        </div>
+
+        <div
+          class="flex w-fit rounded border border-[var(--ll-color-border)] bg-black/20 p-1"
+          role="group"
+          aria-label="Navigation layout"
+        >
+          <button
+            type="button"
+            class="rounded border border-transparent px-4 py-2 text-sm text-zinc-300 transition hover:text-primary"
+            [ngClass]="{
+              'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
+                sidebarLayout() === 'detailed',
+            }"
+            [attr.aria-pressed]="sidebarLayout() === 'detailed'"
+            (click)="setSidebarLayout('detailed')"
+          >
+            Detailed
+          </button>
+          <button
+            type="button"
+            class="rounded border border-transparent px-4 py-2 text-sm text-zinc-300 transition hover:text-primary"
+            [ngClass]="{
+              'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
+                sidebarLayout() === 'compact',
+            }"
+            [attr.aria-pressed]="sidebarLayout() === 'compact'"
+            (click)="setSidebarLayout('compact')"
+          >
+            Compact rail
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="hidden gap-3 py-4 sm:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
+      >
+        <div class="min-w-0">
+          <h3 class="font-semibold text-white">Chat</h3>
           <p class="ll-copy mt-1">
             Keep chat beside the game or in a floating drawer.
           </p>
+        </div>
 
-          <div class="mt-3 grid gap-2 md:grid-cols-2">
-            <button
-              type="button"
-              class="ll-card flex items-start justify-between gap-3 p-3 text-left transition hover:border-primary/60"
-              [ngClass]="{
-                'border-primary/60 bg-primary/[0.08]':
-                  chatLayout() === 'docked',
-              }"
-              [attr.aria-pressed]="chatLayout() === 'docked'"
-              (click)="setChatLayout('docked')"
-            >
-              <span>
-                <span class="block font-semibold text-white">
-                  Docked collapsible
-                </span>
-                <span class="ll-copy mt-1 block">
-                  Keep chat beside the game on large screens.
-                </span>
-              </span>
-              <span
-                class="ll-badge shrink-0 rounded"
-                [ngClass]="
-                  chatLayout() === 'docked'
-                    ? 'll-badge-success'
-                    : 'll-badge-muted'
-                "
-              >
-                {{ chatLayout() === "docked" ? "Active" : "Select" }}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              class="ll-card flex items-start justify-between gap-3 p-3 text-left transition hover:border-primary/60"
-              [ngClass]="{
-                'border-primary/60 bg-primary/[0.08]':
-                  chatLayout() === 'floating',
-              }"
-              [attr.aria-pressed]="chatLayout() === 'floating'"
-              (click)="setChatLayout('floating')"
-            >
-              <span>
-                <span class="block font-semibold text-white">
-                  Floating drawer
-                </span>
-                <span class="ll-copy mt-1 block">
-                  Overlay chat and collapse it to a responsive title bar.
-                </span>
-              </span>
-              <span
-                class="ll-badge shrink-0 rounded"
-                [ngClass]="
-                  chatLayout() === 'floating'
-                    ? 'll-badge-success'
-                    : 'll-badge-muted'
-                "
-              >
-                {{ chatLayout() === "floating" ? "Active" : "Select" }}
-              </span>
-            </button>
-          </div>
+        <div
+          class="flex w-fit rounded border border-[var(--ll-color-border)] bg-black/20 p-1"
+          role="group"
+          aria-label="Chat layout"
+        >
+          <button
+            type="button"
+            class="rounded border border-transparent px-4 py-2 text-sm text-zinc-300 transition hover:text-primary"
+            [ngClass]="{
+              'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
+                chatLayout() === 'docked',
+            }"
+            [attr.aria-pressed]="chatLayout() === 'docked'"
+            (click)="setChatLayout('docked')"
+          >
+            Docked
+          </button>
+          <button
+            type="button"
+            class="rounded border border-transparent px-4 py-2 text-sm text-zinc-300 transition hover:text-primary"
+            [ngClass]="{
+              'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
+                chatLayout() === 'floating',
+            }"
+            [attr.aria-pressed]="chatLayout() === 'floating'"
+            (click)="setChatLayout('floating')"
+          >
+            Floating drawer
+          </button>
         </div>
       </div>
     </section>
 
-    <div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
-      <section class="ll-panel p-4">
-        <div class="border-b border-light_gray/70 pb-3">
-          <p class="ll-eyebrow">Account Settings</p>
-          <h2 class="ll-heading mt-1 text-xl">Identity and Access</h2>
+    <section
+      class="ll-panel mt-4 overflow-hidden p-4 sm:p-5"
+      aria-labelledby="identity-heading"
+    >
+      <div
+        class="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-light_gray/70 pb-3"
+      >
+        <h2 id="identity-heading" class="ll-heading text-xl">
+          Identity and access
+        </h2>
+        <span class="ll-text-muted text-xs">
+          {{ character.name }} · Level {{ character.level }} ·
+          {{ accountTypeLabel() }}
+        </span>
+      </div>
+
+      <div
+        class="grid gap-3 border-b border-light_gray/40 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+      >
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 class="font-semibold text-white">Character name</h3>
+            <span
+              class="ll-badge rounded"
+              [ngClass]="
+                userInfo?.isNameEdited ? 'll-badge-muted' : 'll-badge-success'
+              "
+            >
+              {{ userInfo?.isNameEdited ? "Rename used" : "1 rename left" }}
+            </span>
+          </div>
+          <p class="ll-copy mt-1">{{ character.name }}</p>
         </div>
 
-        <div class="mt-4 grid gap-3 md:grid-cols-2">
-          <article class="ll-card p-3">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <h3 class="font-semibold text-white">Character Name</h3>
-                <p class="ll-copy mt-1">
-                  One rename is available for this character.
-                </p>
-              </div>
-              <span
-                class="ll-badge rounded"
-                [ngClass]="
-                  userInfo?.isNameEdited ? 'll-badge-muted' : 'll-badge-success'
-                "
-              >
-                {{ userInfo?.isNameEdited ? "Used" : "Available" }}
-              </span>
-            </div>
+        <app-regular-button
+          text="Edit name"
+          variant="primary"
+          (pressed)="!userInfo?.isNameEdited && editName()"
+          [disabled]="userInfo?.isNameEdited === true"
+        ></app-regular-button>
+      </div>
 
-            <app-regular-button
-              class="mt-4 block"
-              text="Edit Name"
-              (pressed)="!userInfo?.isNameEdited && editName()"
-              [disabled]="userInfo?.isNameEdited === true"
-            ></app-regular-button>
-          </article>
+      <div
+        class="grid gap-3 border-b border-light_gray/40 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+      >
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 class="font-semibold text-white">Email login</h3>
+            <span class="ll-badge rounded" [ngClass]="emailStatusClass()">
+              {{ emailStatusLabel() }}
+            </span>
+          </div>
+          <p class="ll-copy mt-1">
+            {{
+              userInfo?.isRegisteredUser
+                ? userInfo?.email
+                : "Bind email and password to secure this account."
+            }}
+          </p>
+        </div>
 
-          <article class="ll-card p-3">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <h3 class="font-semibold text-white">Gmail Binding</h3>
-                <p class="ll-copy mt-1">
-                  Connect Google and secure this account.
-                </p>
-              </div>
-              <span class="ll-badge rounded" [ngClass]="gmailStatusClass()">
-                {{ gmailStatusLabel() }}
-              </span>
-            </div>
+        <app-regular-button
+          *ngIf="!userInfo?.isRegisteredUser"
+          text="Bind email"
+          (pressed)="convertToRegistered()"
+          [disabled]="!userInfo"
+        ></app-regular-button>
+      </div>
 
-            <app-google-sign-in-button
-              *ngIf="!userInfo?.isGmailBound"
-              class="mt-4 block"
-              action="bind"
-            ></app-google-sign-in-button>
-          </article>
+      <div
+        class="grid gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+      >
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 class="font-semibold text-white">Google account</h3>
+            <span class="ll-badge rounded" [ngClass]="gmailStatusClass()">
+              {{ gmailStatusLabel() }}
+            </span>
+          </div>
+          <p class="ll-copy mt-1">
+            {{
+              userInfo?.isGmailBound
+                ? "Google recovery sign-in is connected."
+                : "Add a second way to recover this account."
+            }}
+          </p>
+        </div>
 
-          <article class="ll-card p-3">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <h3 class="font-semibold text-white">Email Login</h3>
-                <p class="ll-copy mt-1">
-                  Bind email/password. The name field becomes your character
-                  name.
-                </p>
-              </div>
-              <span class="ll-badge rounded" [ngClass]="emailStatusClass()">
-                {{ emailStatusLabel() }}
-              </span>
-            </div>
+        <app-google-sign-in-button
+          *ngIf="!userInfo?.isGmailBound"
+          action="bind"
+        ></app-google-sign-in-button>
+      </div>
+    </section>
 
-            <app-regular-button
-              class="mt-4 block"
-              text="Bind Email"
-              (pressed)="convertToRegistered()"
-              [disabled]="!userInfo || userInfo.isRegisteredUser"
-            ></app-regular-button>
-          </article>
+    <div class="mt-4 grid gap-4 lg:grid-cols-2">
+      <section
+        class="ll-panel overflow-hidden p-4 sm:p-5"
+        aria-labelledby="links-heading"
+      >
+        <h2
+          id="links-heading"
+          class="ll-heading border-b border-light_gray/70 pb-3 text-xl"
+        >
+          Game links
+        </h2>
 
-          <article class="ll-card ll-card-danger p-3">
-            <h3 class="ll-text-danger font-semibold">Session</h3>
-            <p class="ll-copy mt-1">
-              Leave the current session and return to login.
-            </p>
+        <button
+          type="button"
+          class="flex w-full items-center justify-between gap-4 border-b border-light_gray/40 py-4 text-left transition hover:text-primary"
+          (click)="viewPatchNotes()"
+        >
+          <span>
+            <span class="block font-semibold text-white">Patch notes</span>
+            <span class="ll-copy mt-1 block">Version {{ version }}</span>
+          </span>
+          <span class="text-primary" aria-hidden="true">→</span>
+        </button>
 
-            <app-regular-button
-              class="mt-4 block"
-              text="Logout"
-              variant="danger"
-              (pressed)="logout()"
-            ></app-regular-button>
-          </article>
+        <a
+          href="https://discord.gg/HXN4xnJUp3"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center justify-between gap-4 py-4 text-left transition hover:text-primary"
+        >
+          <span>
+            <span class="block font-semibold text-white">Discord</span>
+            <span class="ll-copy mt-1 block">Community and support</span>
+          </span>
+          <span class="text-primary" aria-hidden="true">→</span>
+        </a>
+
+        <div class="ll-card mt-2 p-3" *ngIf="activePanel === 'patchNotes'">
+          <p class="ll-eyebrow">Patch notes · {{ version }}</p>
+          <p class="ll-copy mt-2">Alpha Release</p>
         </div>
       </section>
 
-      <aside class="flex flex-col gap-4">
-        <section class="ll-panel p-4">
-          <p class="ll-eyebrow">Beta and Support</p>
-          <h2 class="ll-heading mt-1 text-xl">Game Links</h2>
+      <section
+        class="ll-panel overflow-hidden p-4 sm:p-5"
+        aria-labelledby="danger-heading"
+      >
+        <h2
+          id="danger-heading"
+          class="border-b border-[rgba(255,154,162,0.36)] pb-3 text-xl text-[var(--ll-color-danger)]"
+        >
+          Danger zone
+        </h2>
 
-          <div class="mt-4 space-y-3">
-            <button
-              type="button"
-              class="ll-card w-full px-3 py-2 text-left text-sm text-white transition hover:border-primary"
-              (click)="viewPatchNotes()"
-            >
-              <span class="block font-semibold text-primary">Patch Notes</span>
-              <span class="ll-text-muted">Version {{ version }}</span>
-            </button>
-
-            <a
-              href="https://discord.gg/HXN4xnJUp3"
-              target="_blank"
-              class="ll-card block px-3 py-2 text-sm text-white transition hover:border-primary"
-            >
-              <span class="block font-semibold text-primary">Discord</span>
-              <span class="ll-text-muted">Community and support</span>
-            </a>
+        <div
+          class="grid gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+        >
+          <div>
+            <h3 class="font-semibold text-white">Log out</h3>
+            <p class="ll-copy mt-1">End this session and return to login.</p>
           </div>
-        </section>
 
-        <section class="ll-panel p-4" *ngIf="activePanel">
-          <ng-container [ngSwitch]="activePanel">
-            <div *ngSwitchCase="'patchNotes'">
-              <p class="ll-eyebrow">Patch Notes</p>
-              <h2 class="ll-heading mt-1 text-xl">{{ version }}</h2>
-              <div class="ll-card mt-4 p-3">
-                <p class="ll-copy">Alpha Release</p>
-              </div>
-            </div>
-
-            <div *ngSwitchCase="'changeCredentials'">
-              <p class="ll-eyebrow">Credentials</p>
-              <h2 class="ll-heading mt-1 text-xl">Change Email / Password</h2>
-              <p class="ll-copy mt-4">Form coming soon.</p>
-            </div>
-          </ng-container>
-        </section>
-      </aside>
+          <app-regular-button
+            text="Log out"
+            variant="danger"
+            (pressed)="logout()"
+          ></app-regular-button>
+        </div>
+      </section>
     </div>
   </div>
 </div>
@@ -390,9 +388,9 @@
       <app-regular-button (pressed)="closeNameModal()">
         Cancel
       </app-regular-button>
-      <app-regular-button (pressed)="submitNameChange()"
-        >Save</app-regular-button
-      >
+      <app-regular-button (pressed)="submitNameChange()">
+        Save
+      </app-regular-button>
     </div>
   </div>
 </div>

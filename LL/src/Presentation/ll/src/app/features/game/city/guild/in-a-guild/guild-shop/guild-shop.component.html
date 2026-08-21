@@ -12,7 +12,7 @@
           <small>Resets in</small>
           <strong>{{ resetLabel(shop.nextWeeklyResetAt) }}</strong>
           <time [attr.datetime]="shop.nextWeeklyResetAt">
-            {{ shop.nextWeeklyResetAt | date: "mediumDate" }}
+            {{ shop.nextWeeklyResetAt | localDate: "mediumDate" }}
           </time>
         </div>
       </div>

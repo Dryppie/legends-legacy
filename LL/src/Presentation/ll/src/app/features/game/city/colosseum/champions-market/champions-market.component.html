@@ -19,7 +19,7 @@
             <small>Resets in</small>
             <strong>{{ resetLabel(market.weeklyResetAt) }}</strong>
             <time [attr.datetime]="market.weeklyResetAt">
-              {{ market.weeklyResetAt | date: "mediumDate" }}
+              {{ market.weeklyResetAt | localDate: "mediumDate" }}
             </time>
           </div>
         </div>

@@ -93,7 +93,7 @@
                 <span *ngIf="outcomeIndex === 0" class="mr-2 text-primary">
                   Latest
                 </span>
-                <span>{{ outcome.occurredAt | date: "mediumTime" }}</span>
+                <span>{{ outcome.occurredAt | localDate: "mediumTime" }}</span>
               </div>
             </div>
           </article>
@@ -189,7 +189,10 @@
         >
           <div class="mb-2 flex items-start justify-between gap-3">
             <div class="min-w-0">
-              <app-item [item]="workingItem.equipmentInstance"></app-item>
+              <app-item
+                [item]="workingItem.equipmentInstance"
+                [popoverTouchDisabled]="true"
+              ></app-item>
               <div class="ll-copy mt-2 flex flex-wrap gap-2">
                 <span
                   >{{
@@ -284,7 +287,10 @@
           >
             <div class="mb-2 flex items-start justify-between gap-3">
               <div class="min-w-0">
-                <app-item [item]="queueItem.equipmentInstance"></app-item>
+                <app-item
+                  [item]="queueItem.equipmentInstance"
+                  [popoverTouchDisabled]="true"
+                ></app-item>
                 <div class="ll-copy mt-2 flex flex-wrap gap-2">
                   <span
                     >{{
@@ -453,7 +459,11 @@
               class="flex min-w-0 items-center gap-2 overflow-hidden"
               role="cell"
             >
-              <app-item class="min-w-0" [item]="equipment"></app-item>
+              <app-item
+                class="min-w-0"
+                [item]="equipment"
+                [popoverTouchDisabled]="true"
+              ></app-item>
               <span
                 *ngIf="item.isNew"
                 class="ll-badge ll-badge-accent shrink-0 px-2 text-[0.625rem] tracking-[0.04em]"

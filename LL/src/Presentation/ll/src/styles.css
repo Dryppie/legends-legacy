@@ -1306,11 +1306,20 @@ html {
   font-size: 14px;
 }
 
+html[data-reading-font-size="large"] {
+  font-size: 16px;
+}
+
+html[data-reading-font-size="extra-large"] {
+  font-size: 18px;
+}
+
 html,
 body {
   height: 100dvh;
 }
-body {
+body,
+body.mat-typography {
   margin: 0;
   font-family: var(--ll-font-body);
   line-height: var(--ll-leading-normal);
@@ -1340,11 +1349,52 @@ h3 {
   font-style: normal;
 }
 
+.mat-typography h1,
+.mat-typography h2,
+.mat-typography h3 {
+  font-family: var(--ll-font-display);
+}
+
 input {
   font-family: var(--ll-font-body);
   line-height: var(--ll-leading-normal);
   font-weight: var(--ll-weight-regular);
   font-size: var(--ll-text-sm);
+}
+
+button,
+select,
+textarea {
+  font-family: var(--ll-font-body);
+}
+
+[data-reading-font-preview="default"] {
+  font-family: "Poppins", "Helvetica Neue", sans-serif;
+}
+
+[data-reading-font-preview="readable"] {
+  font-family: "Atkinson Hyperlegible", Arial, sans-serif;
+}
+
+[data-reading-font-preview="system"] {
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+[data-reading-font-size-preview="default"] {
+  font-size: 14px;
+}
+
+[data-reading-font-size-preview="large"] {
+  font-size: 16px;
+}
+
+[data-reading-font-size-preview="extra-large"] {
+  font-size: 18px;
 }
 
 label {
