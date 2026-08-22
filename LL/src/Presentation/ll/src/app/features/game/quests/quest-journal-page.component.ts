@@ -1,5 +1,13 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { QuestStateService } from '../../../core/services/api/quest/quest-state.service';
 import { EventQuestStateService } from '../../../core/services/api/quest/event-quest-state.service';
@@ -49,6 +57,11 @@ type QuestSortMode = 'Order' | 'Progress';
   templateUrl: './quest-journal-page.component.html',
 })
 export class QuestJournalPageComponent implements OnInit, OnDestroy {
+  @ViewChild('questDetailScroller')
+  private questDetailScroller?: ElementRef<HTMLElement>;
+  @ViewChild('firstHuntConfirmation')
+  private firstHuntConfirmation?: ElementRef<HTMLElement>;
+
   readonly tabs: QuestJournalTab[] = [
     QuestStatus.Active,
     QuestStatus.Completed,
@@ -62,6 +75,7 @@ export class QuestJournalPageComponent implements OnInit, OnDestroy {
   readonly clock = signal(Date.now());
   readonly realmProgressMarkers = [25, 50, 75, 100];
   private countdownTimer: number | null = null;
+  private choiceScrollFrame: number | null = null;
   readonly journalEntries = computed(() =>
     buildQuestJournalEntries(this.questState.journal().quests),
   );
@@ -147,6 +161,9 @@ export class QuestJournalPageComponent implements OnInit, OnDestroy {
     this.eventQuestState.deactivateView();
     if (this.countdownTimer !== null) {
       window.clearInterval(this.countdownTimer);
+    }
+    if (this.choiceScrollFrame !== null) {
+      window.cancelAnimationFrame(this.choiceScrollFrame);
     }
   }
 
@@ -473,6 +490,29 @@ export class QuestJournalPageComponent implements OnInit, OnDestroy {
 
   chooseOption(option: QuestChoiceOption): void {
     this.pendingChoiceKey.set(option.key);
+    if (this.choiceScrollFrame !== null) {
+      window.cancelAnimationFrame(this.choiceScrollFrame);
+    }
+    this.choiceScrollFrame = window.requestAnimationFrame(() => {
+      this.choiceScrollFrame = null;
+      this.scrollChoiceConfirmationIntoView();
+    });
+  }
+
+  private scrollChoiceConfirmationIntoView(): void {
+    const scroller = this.questDetailScroller?.nativeElement;
+    const confirmation = this.firstHuntConfirmation?.nativeElement;
+    if (!scroller || !confirmation) return;
+
+    const hiddenHeight =
+      confirmation.getBoundingClientRect().bottom -
+      scroller.getBoundingClientRect().bottom;
+    if (hiddenHeight <= 0) return;
+
+    scroller.scrollTo({
+      top: scroller.scrollTop + hiddenHeight + 12,
+      behavior: 'smooth',
+    });
   }
 
   confirmChoice(quest: QuestState): void {

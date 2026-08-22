@@ -30,7 +30,7 @@
   },
   {
     "id": "explain-item-preview",
-    "element": "[data-tour=crafting-item-preview-summary]",
+    "element": "[data-tour=crafting-item-preview]",
     "targetTimeoutMs": 5000,
     "showBack": true,
     "title": "3. Crafted item preview",

@@ -19,24 +19,30 @@ public sealed class TournamentGroundsDevelopmentProgressionWorker(
 
         var interval = TimeSpan.FromSeconds(
             options.Value.DevelopmentProgressionIntervalSeconds);
-        while (!stoppingToken.IsCancellationRequested)
+        try
         {
-            try
+            while (!stoppingToken.IsCancellationRequested)
             {
-                await ProgressTournamentsAsync(stoppingToken);
-            }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                break;
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(
-                    exception,
-                    "Local Tournament Grounds progression failed.");
-            }
+                try
+                {
+                    await ProgressTournamentsAsync(stoppingToken);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                catch (Exception exception)
+                {
+                    logger.LogError(
+                        exception,
+                        "Local Tournament Grounds progression failed.");
+                }
 
-            await Task.Delay(interval, timeProvider, stoppingToken);
+                await Task.Delay(interval, timeProvider, stoppingToken);
+            }
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
         }
     }
 

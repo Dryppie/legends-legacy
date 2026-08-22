@@ -17,25 +17,31 @@ public sealed class AccountRestrictionRefreshWorker(
             300);
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(intervalSeconds));
 
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        try
         {
-            try
+            while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                using var scope = scopeFactory.CreateScope();
-                await index.RefreshAsync(
-                    scope.ServiceProvider.GetRequiredService<IAdministrationRepository>(),
-                    stoppingToken);
+                try
+                {
+                    using var scope = scopeFactory.CreateScope();
+                    await index.RefreshAsync(
+                        scope.ServiceProvider.GetRequiredService<IAdministrationRepository>(),
+                        stoppingToken);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                catch (Exception exception)
+                {
+                    logger.LogError(
+                        exception,
+                        "Failed to refresh the active account-restriction snapshot; retaining the last known snapshot");
+                }
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                return;
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(
-                    exception,
-                    "Failed to refresh the active account-restriction snapshot; retaining the last known snapshot");
-            }
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
         }
     }
 }

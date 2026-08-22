@@ -34,7 +34,56 @@ describe('QuestJournalPageComponent', () => {
     expect(component.isSelectedEvent(event)).toBeTrue();
     expect(component.isSelected(entry)).toBeFalse();
   });
+
+  it('scrolls the quest detail pane down to reveal the first-hunt confirmation', () => {
+    const component = createComponent();
+    const scrollTo = jasmine.createSpy('scrollTo');
+    const scroller = {
+      scrollTop: 100,
+      getBoundingClientRect: () => ({ bottom: 600 }),
+      scrollTo,
+    } as unknown as HTMLElement;
+    const confirmation = {
+      getBoundingClientRect: () => ({ bottom: 750 }),
+    } as unknown as HTMLElement;
+    (
+      component as unknown as {
+        questDetailScroller: { nativeElement: HTMLElement };
+        firstHuntConfirmation: { nativeElement: HTMLElement };
+      }
+    ).questDetailScroller = { nativeElement: scroller };
+    (
+      component as unknown as {
+        firstHuntConfirmation: { nativeElement: HTMLElement };
+      }
+    ).firstHuntConfirmation = { nativeElement: confirmation };
+    spyOn(window, 'requestAnimationFrame').and.callFake((callback) => {
+      callback(0);
+      return 1;
+    });
+
+    component.chooseOption({ key: 'goblin-warrior' } as never);
+
+    expect(component.pendingChoiceKey()).toBe('goblin-warrior');
+    expect(scrollTo).toHaveBeenCalledOnceWith({
+      top: 262,
+      behavior: 'smooth',
+    });
+  });
 });
+
+function createComponent(): QuestJournalPageComponent {
+  return new QuestJournalPageComponent(
+    {
+      journal: signal({ quests: [] }).asReadonly(),
+    } as unknown as QuestStateService,
+    {
+      journal: signal({ events: [] }).asReadonly(),
+    } as unknown as EventQuestStateService,
+    {} as Router,
+    new EssenceItemViewService(),
+  );
+}
 
 function createQuest(): QuestState {
   return {

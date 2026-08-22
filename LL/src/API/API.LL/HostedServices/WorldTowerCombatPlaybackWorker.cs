@@ -17,22 +17,28 @@ public sealed class WorldTowerCombatPlaybackWorker(
         var delay = TimeSpan.FromMilliseconds(options.Value.CompactPlaybackEnabled
             ? options.Value.FinalizationPollMilliseconds
             : options.Value.PlaybackPollMilliseconds);
-        while (!stoppingToken.IsCancellationRequested)
+        try
         {
-            try
+            while (!stoppingToken.IsCancellationRequested)
             {
-                await DispatchDueFramesAsync(stoppingToken);
-            }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                break;
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(exception, "World Tower combat playback dispatch failed.");
-            }
+                try
+                {
+                    await DispatchDueFramesAsync(stoppingToken);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                catch (Exception exception)
+                {
+                    logger.LogError(exception, "World Tower combat playback dispatch failed.");
+                }
 
-            await Task.Delay(delay, timeProvider, stoppingToken);
+                await Task.Delay(delay, timeProvider, stoppingToken);
+            }
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
         }
     }
 

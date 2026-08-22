@@ -18,24 +18,30 @@ public sealed class RegionBossDevelopmentProgressionWorker(
         var interval = TimeSpan.FromSeconds(
             options.Value.DevelopmentProgressionIntervalSeconds);
         var workerId = $"{Environment.MachineName}:api-development-region-boss";
-        while (!stoppingToken.IsCancellationRequested)
+        try
         {
-            try
+            while (!stoppingToken.IsCancellationRequested)
             {
-                await ProgressEventsAsync(workerId, stoppingToken);
-            }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                break;
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(
-                    exception,
-                    "Local Region Boss progression failed.");
-            }
+                try
+                {
+                    await ProgressEventsAsync(workerId, stoppingToken);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                catch (Exception exception)
+                {
+                    logger.LogError(
+                        exception,
+                        "Local Region Boss progression failed.");
+                }
 
-            await Task.Delay(interval, timeProvider, stoppingToken);
+                await Task.Delay(interval, timeProvider, stoppingToken);
+            }
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
         }
     }
 

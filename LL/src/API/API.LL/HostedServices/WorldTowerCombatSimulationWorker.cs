@@ -15,22 +15,28 @@ public sealed class WorldTowerCombatSimulationWorker(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var delay = TimeSpan.FromMilliseconds(options.Value.SimulationPollMilliseconds);
-        while (!stoppingToken.IsCancellationRequested)
+        try
         {
-            try
+            while (!stoppingToken.IsCancellationRequested)
             {
-                await SimulateQueuedAttemptsAsync(stoppingToken);
-            }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                break;
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(exception, "World Tower queued combat simulation failed.");
-            }
+                try
+                {
+                    await SimulateQueuedAttemptsAsync(stoppingToken);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                catch (Exception exception)
+                {
+                    logger.LogError(exception, "World Tower queued combat simulation failed.");
+                }
 
-            await Task.Delay(delay, timeProvider, stoppingToken);
+                await Task.Delay(delay, timeProvider, stoppingToken);
+            }
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
         }
     }
 

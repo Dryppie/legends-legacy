@@ -34,6 +34,7 @@ public sealed class RegionBossDevelopmentProgressionWorkerTests
 
         Assert.Equal($"{Environment.MachineName}:api-development-region-boss", workerId);
         Assert.Equal(1, recorder.ProgressCalls);
+        Assert.True(worker.ExecuteTask?.IsCompletedSuccessfully);
     }
 
     private sealed class RecordingRegionBossService : IRegionBossService
