@@ -165,17 +165,19 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         if (!_options.Enabled) return;
 
         var now = UtcNow();
+        var preparationCutoff = now.AddSeconds(
+            Math.Max(0, _options.MatchPreparationLeadSeconds));
         var dueIds = await _tournaments.Tournaments
             .Where(t => t.Status != TournamentStatus.Completed && t.Status != TournamentStatus.Cancelled)
             .Where(t =>
                 (t.Status == TournamentStatus.Scheduled && t.RegistrationStartsAtUtc <= now) ||
                 (t.Status == TournamentStatus.RegistrationOpen && t.RegistrationEndsAtUtc <= now) ||
                 (t.Status == TournamentStatus.RegistrationClosed) ||
-                (t.Status == TournamentStatus.BracketGenerated && t.StartsAtUtc <= now) ||
+                (t.Status == TournamentStatus.BracketGenerated && t.StartsAtUtc <= preparationCutoff) ||
                 (t.Status == TournamentStatus.InProgress &&
                     _tournaments.Rounds.Any(r => r.TournamentId == t.Id &&
                         r.Status != TournamentRoundStatus.Completed &&
-                        r.StartsAtUtc <= now)))
+                        r.StartsAtUtc <= preparationCutoff)))
             .Select(t => t.Id)
             .Take(10)
             .ToListAsync(cancellationToken);
@@ -522,6 +524,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     public async Task<TournamentBracket?> GetBracketAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
     {
+        var now = UtcNow();
         var tournament = await _tournaments.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
         if (tournament is null) return null;
 
@@ -534,7 +537,9 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             .OrderBy(r => r.RoundNumber)
             .ToListAsync(cancellationToken);
         var replayMatchIds = (await _tournaments.CombatReplays
-                .Where(replay => replay.TournamentId == tournamentId)
+                .Where(replay => replay.TournamentId == tournamentId
+                                 && replay.Match.PlaybackStartedAtUtc.HasValue
+                                 && replay.Match.PlaybackStartedAtUtc.Value <= now)
                 .Select(replay => replay.MatchId)
                 .ToListAsync(cancellationToken))
             .ToHashSet();
@@ -576,8 +581,13 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         Guid matchId,
         CancellationToken cancellationToken)
     {
+        var now = UtcNow();
         var replay = await _tournaments.CombatReplays
-            .FirstOrDefaultAsync(r => r.TournamentId == tournamentId && r.MatchId == matchId, cancellationToken);
+            .FirstOrDefaultAsync(r => r.TournamentId == tournamentId
+                                      && r.MatchId == matchId
+                                      && r.Match.PlaybackStartedAtUtc.HasValue
+                                      && r.Match.PlaybackStartedAtUtc.Value <= now,
+                cancellationToken);
         if (replay is null) return null;
 
         if (string.IsNullOrWhiteSpace(replay.CombatResultJson)) return null;
@@ -648,10 +658,13 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         Guid matchId,
         CancellationToken cancellationToken)
     {
+        var now = UtcNow();
         var bundle = await _tournaments.CombatReplays
             .Where(replay => replay.TournamentId == tournamentId
                              && replay.MatchId == matchId
-                             && replay.SchemaVersion == TournamentCombatReplay.CompactBundleSchemaVersion)
+                             && replay.SchemaVersion == TournamentCombatReplay.CompactBundleSchemaVersion
+                             && replay.Match.PlaybackStartedAtUtc.HasValue
+                             && replay.Match.PlaybackStartedAtUtc.Value <= now)
             .Select(replay => new
             {
                 replay.BundleHash,
@@ -1556,6 +1569,13 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                         now,
                         cancellationToken);
                     break;
+                case TournamentStatus.BracketGenerated:
+                    changed = await PrepareUpcomingMatchPlaybacksAsync(
+                        tournament,
+                        now,
+                        cancellationToken);
+                    stopProgression = true;
+                    break;
                 case TournamentStatus.InProgress:
                     var progression = await ResolveDueRoundsAsync(tournament, now, cancellationToken);
                     changed = progression.Changed;
@@ -1782,6 +1802,14 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 .OrderBy(m => m.MatchNumber)
                 .ToListAsync(cancellationToken);
 
+            changed = await PrepareUpcomingMatchPlaybacksAsync(
+                tournament,
+                round,
+                rounds.Count,
+                matches,
+                now,
+                cancellationToken) || changed;
+
             var finalizedMatch = false;
             foreach (var playingMatch in matches.Where(match =>
                          match.Status == TournamentMatchStatus.Resolving
@@ -1869,33 +1897,144 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         return new TournamentProgressionResult(changed, false);
     }
 
+    private async Task<bool> PrepareUpcomingMatchPlaybacksAsync(
+        TournamentInstance tournament,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var rounds = await _tournaments.Rounds
+            .Where(round => round.TournamentId == tournament.Id)
+            .OrderBy(round => round.RoundNumber)
+            .ToListAsync(cancellationToken);
+        var round = rounds.FirstOrDefault(candidate =>
+            candidate.Status != TournamentRoundStatus.Completed);
+        if (round is null) return false;
+
+        var matches = await _tournaments.Matches
+            .Where(match => match.TournamentId == tournament.Id
+                            && match.RoundNumber == round.RoundNumber)
+            .OrderBy(match => match.MatchNumber)
+            .ToListAsync(cancellationToken);
+        return await PrepareUpcomingMatchPlaybacksAsync(
+            tournament,
+            round,
+            rounds.Count,
+            matches,
+            now,
+            cancellationToken);
+    }
+
+    private async Task<bool> PrepareUpcomingMatchPlaybacksAsync(
+        TournamentInstance tournament,
+        TournamentRound round,
+        int roundCount,
+        IReadOnlyList<TournamentMatch> matches,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var preparationCutoff = now.AddSeconds(
+            Math.Max(0, _options.MatchPreparationLeadSeconds));
+        var prepareAllSemifinals = round.RoundNumber == roundCount - 1
+            && matches.Any(match => match.Status == TournamentMatchStatus.Ready
+                                    && match.ScheduledAtUtc <= preparationCutoff);
+        var preparedMatchIds = (await _tournaments.CombatReplays
+                .Where(replay => replay.TournamentId == tournament.Id)
+                .Select(replay => replay.MatchId)
+                .ToListAsync(cancellationToken))
+            .ToHashSet();
+        var candidates = matches
+            .Where(match => match.Status == TournamentMatchStatus.Ready
+                            && match.PlayerOneParticipantId.HasValue
+                            && match.PlayerTwoParticipantId.HasValue
+                            && match.ScheduledAtUtc.HasValue
+                            && !preparedMatchIds.Contains(match.Id)
+                            && (match.ScheduledAtUtc.Value <= preparationCutoff
+                                || prepareAllSemifinals))
+            .OrderBy(match => match.MatchNumber)
+            .ToList();
+
+        var changed = false;
+        foreach (var match in candidates)
+        {
+            var replay = await PrepareMatchPlaybackAsync(
+                tournament,
+                match,
+                match.ScheduledAtUtc!.Value,
+                now,
+                cancellationToken);
+            changed |= replay is not null;
+        }
+
+        if (changed)
+            await _tournaments.SaveChangesAsync(cancellationToken);
+
+        return changed;
+    }
+
+    private async Task<TournamentCombatReplay?> PrepareMatchPlaybackAsync(
+        TournamentInstance tournament,
+        TournamentMatch match,
+        DateTimeOffset simulationStartsAt,
+        DateTimeOffset preparedAt,
+        CancellationToken cancellationToken)
+    {
+        var existing = await _tournaments.CombatReplays
+            .FirstOrDefaultAsync(replay => replay.MatchId == match.Id, cancellationToken);
+        if (existing is not null) return existing;
+        if (!match.PlayerOneParticipantId.HasValue || !match.PlayerTwoParticipantId.HasValue)
+            return null;
+
+        var playerOne = await LoadTeamAsync(match.PlayerOneParticipantId.Value, cancellationToken);
+        var playerTwo = await LoadTeamAsync(match.PlayerTwoParticipantId.Value, cancellationToken);
+        if (playerOne is null || playerTwo is null) return null;
+
+        var result = await ExecuteTournamentCombatAsync(
+            tournament.Id,
+            match.Id,
+            playerOne,
+            playerTwo,
+            simulationStartsAt,
+            cancellationToken);
+        return await SaveTournamentCombatPlaybackAsync(
+            match,
+            playerOne,
+            playerTwo,
+            result.BattleId,
+            result.Execution,
+            simulationStartsAt,
+            preparedAt,
+            cancellationToken);
+    }
+
     private async Task StartMatchPlaybackAsync(
         TournamentInstance tournament,
         TournamentMatch match,
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        if (!match.PlayerOneParticipantId.HasValue || !match.PlayerTwoParticipantId.HasValue) return;
-
-        var p1 = await LoadTeamAsync(match.PlayerOneParticipantId.Value, cancellationToken);
-        var p2 = await LoadTeamAsync(match.PlayerTwoParticipantId.Value, cancellationToken);
-        if (p1 is null || p2 is null) return;
-
         await ShiftDelayedMatchScheduleAsync(match, now, cancellationToken);
-        var result = await ExecuteTournamentCombatAsync(
-            tournament.Id,
-            match.Id,
-            p1,
-            p2,
+        var replay = await PrepareMatchPlaybackAsync(
+            tournament,
+            match,
+            now,
             now,
             cancellationToken);
+        if (replay is null) return;
+
+        if (!string.IsNullOrWhiteSpace(replay.CombatResultJson)
+            && JsonSerializer.Deserialize<CombatResult>(replay.CombatResultJson, ReplayJsonOptions) is { } combatResult)
+        {
+            combatResult.StartedAt = now;
+            replay.CombatResultJson = JsonSerializer.Serialize(combatResult, ReplayJsonOptions);
+        }
+
+        replay.StartedAtUtc = now;
         match.Status = TournamentMatchStatus.Resolving;
-        match.CombatSessionId = result.BattleId;
+        match.CombatSessionId = replay.CombatSessionId;
         match.PlaybackStartedAtUtc = now;
         match.PlaybackEndsAtUtc = now.AddSeconds(
-            result.Execution.Result.Duration / (double)Services.LL.Combat.Engine.FastCombatEngine.TicksPerSecond);
+            replay.Duration / (double)Services.LL.Combat.Engine.FastCombatEngine.TicksPerSecond);
         match.UpdatedAtUtc = now;
-        await SaveTournamentCombatPlaybackAsync(match, p1, p2, result.Execution, now, cancellationToken);
         await PublishTournamentEventAsync(tournament, "TournamentMatchStarted", now, cancellationToken);
     }
 
@@ -2204,16 +2343,19 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         }, cancellationToken);
     }
 
-    private async Task SaveTournamentCombatPlaybackAsync(
+    private async Task<TournamentCombatReplay> SaveTournamentCombatPlaybackAsync(
         TournamentMatch match,
         TournamentTeam playerOne,
         TournamentTeam playerTwo,
+        Guid combatSessionId,
         CombatExecutionWithCheckpoints execution,
-        DateTimeOffset now,
+        DateTimeOffset playbackStartsAt,
+        DateTimeOffset createdAt,
         CancellationToken cancellationToken)
     {
-        if (await _tournaments.CombatReplays.AnyAsync(replay => replay.MatchId == match.Id, cancellationToken))
-            return;
+        var existing = await _tournaments.CombatReplays
+            .FirstOrDefaultAsync(replay => replay.MatchId == match.Id, cancellationToken);
+        if (existing is not null) return existing;
 
         var playerOneRepresentative = await GetTeamRepresentativeAsync(playerOne.Id, cancellationToken);
         var playerTwoRepresentative = await GetTeamRepresentativeAsync(playerTwo.Id, cancellationToken);
@@ -2237,12 +2379,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             Id = match.Id,
             TournamentId = match.TournamentId,
             MatchId = match.Id,
-            CombatSessionId = match.CombatSessionId ?? match.Id,
+            CombatSessionId = combatSessionId,
             BattleHistoryId = match.Id,
             PlayerOneCharacterId = playerOneRepresentative.CharacterId,
             PlayerTwoCharacterId = playerTwoRepresentative.CharacterId,
             Outcome = execution.Result.Outcome.ToString(),
-            StartedAtUtc = match.PlaybackStartedAtUtc ?? now,
+            StartedAtUtc = playbackStartsAt,
             Duration = execution.Result.Duration,
             CombatResultJson = JsonSerializer.Serialize(execution.Result, ReplayJsonOptions),
             SchemaVersion = TournamentCombatReplay.CompactBundleSchemaVersion,
@@ -2253,7 +2395,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             BundleLength = compressedBytes.Length,
             BundleContentType = "application/json",
             BundleContentEncoding = "br",
-            CreatedAtUtc = now
+            CreatedAtUtc = createdAt
         };
         replay.Artifact = new TournamentCombatReplayArtifact
         {
@@ -2262,6 +2404,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             BundleBytes = compressedBytes
         };
         await _tournaments.AddAsync(replay, cancellationToken);
+        return replay;
     }
 
     private TournamentPlaybackBundleDto CreateTournamentPlaybackBundle(
@@ -2324,7 +2467,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                         ability.TotalDamage,
                         ability.TotalHealing,
                         ability.TotalBarrier,
-                        ability.TotalThreat)))
+                        ability.TotalThreat,
+                        ability.DamageByType)))
                 .OrderBy(total => total.AbilityIndex)
                 .ToArray();
             return new TournamentPlaybackFrameDto(

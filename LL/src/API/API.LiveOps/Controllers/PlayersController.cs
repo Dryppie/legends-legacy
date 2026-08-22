@@ -2,6 +2,7 @@ using Application.UseCases.Administration;
 using Application.UseCases.Administration.Dtos;
 using Application.UseCases.Administration.Queries.SearchPlayers;
 using Application.UseCases.Administration.Queries.GetPlayerAdministrationDetails;
+using Application.Interfaces.Services.LL.Administration;
 using Common.Primitives;
 using API.LiveOps.Support;
 using Microsoft.AspNetCore.Authorization;
@@ -11,7 +12,9 @@ namespace API.LiveOps.Controllers;
 
 [Route("api/liveops/players")]
 public sealed class PlayersController(
-    LiveOpsPlayerSupportSnapshotService supportSnapshot) : LiveOpsControllerBase
+    LiveOpsPlayerSupportSnapshotService supportSnapshot,
+    IChatModerationGateway chat,
+    ILogger<PlayersController> logger) : LiveOpsControllerBase
 {
     [HttpGet]
     [Authorize(Policy = AdministrationPermissions.Read)]
@@ -74,5 +77,85 @@ public sealed class PlayersController(
         }
         return Ok(Response<PlayerSupportSection<TransferHistorySupportSnapshotDto>>.Success(
             result.Section));
+    }
+
+    [HttpGet("{characterId:guid}/transfers/{transferId:guid}/conversation")]
+    [Authorize(Policy = AdministrationPermissions.Read)]
+    public async Task<ActionResult<Response<TransferConversationPageDto>>> GetTransferConversation(
+        Guid characterId,
+        Guid transferId,
+        [FromQuery] string? cursor,
+        [FromQuery] int take = 25,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation(
+            "Operator {OperatorSubject} accessed transfer conversation evidence for character {CharacterId} and transfer {TransferId}.",
+            CurrentActor.Subject,
+            characterId,
+            transferId);
+        var result = await supportSnapshot.GetTransferConversationAsync(
+            characterId,
+            transferId,
+            cursor,
+            take,
+            cancellationToken);
+        if (!result.CursorValid)
+        {
+            return BadRequest(Response<TransferConversationPageDto>.Fail(
+                "The transfer-conversation cursor is invalid or expired."));
+        }
+        if (!result.PlayerFound)
+        {
+            return NotFound(Response<TransferConversationPageDto>.Fail(
+                "The target player was not found."));
+        }
+        if (!result.TransferFound || result.Page is null)
+        {
+            return NotFound(Response<TransferConversationPageDto>.Fail(
+                "The transfer was not found for this player's account."));
+        }
+        return Ok(Response<TransferConversationPageDto>.Success(result.Page));
+    }
+
+    [HttpGet("{characterId:guid}/messages")]
+    [Authorize(Policy = AdministrationPermissions.Read)]
+    public async Task<ActionResult<Response<PlayerMessageHistoryPageDto>>> GetMessages(
+        Guid characterId,
+        [FromQuery] string? cursor,
+        [FromQuery] int take = 25,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation(
+            "Operator {OperatorSubject} accessed cross-channel message history for character {CharacterId}.",
+            CurrentActor.Subject,
+            characterId);
+        var result = await chat.GetPlayerMessagesAsync(
+            characterId,
+            cursor,
+            Math.Clamp(take, 1, 50),
+            cancellationToken);
+        if (!result.CursorValid)
+        {
+            return BadRequest(Response<PlayerMessageHistoryPageDto>.Fail(
+                "The player-message cursor is invalid or expired."));
+        }
+        if (!result.IsSuccess)
+        {
+            return StatusCode(
+                StatusCodes.Status503ServiceUnavailable,
+                Response<PlayerMessageHistoryPageDto>.Fail(result.ErrorMessage));
+        }
+
+        var page = new PlayerMessageHistoryPageDto(
+            result.Entries.Select(entry => new PlayerMessageHistoryEntryDto(
+                entry.Id,
+                entry.ChannelType,
+                entry.ContextKey,
+                entry.Body,
+                entry.TargetCharacterId,
+                entry.TargetCharacterName,
+                entry.SentAt)).ToList(),
+            result.NextCursor);
+        return Ok(Response<PlayerMessageHistoryPageDto>.Success(page));
     }
 }

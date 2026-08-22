@@ -81,4 +81,5 @@ public sealed record TournamentPlaybackAbilityTotalsDto(
     int TotalDamage,
     int TotalHealing,
     int TotalBarrier,
-    int TotalThreat = 0);
+    int TotalThreat = 0,
+    IReadOnlyList<AbilityDamageTypeStats>? DamageByType = null);

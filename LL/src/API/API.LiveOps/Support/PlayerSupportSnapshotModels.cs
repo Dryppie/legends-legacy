@@ -126,7 +126,43 @@ public sealed record PlayerTransferHistoryDto(
     Guid? SourceItemInstanceId,
     Guid? DestinationItemInstanceId,
     long Quantity,
-    DateTimeOffset OccurredAtUtc);
+    DateTimeOffset OccurredAtUtc,
+    TransferConversationSummaryDto Conversation);
+
+public sealed record TransferConversationSummaryDto(
+    string Status,
+    bool IsAvailable,
+    string? Message,
+    int SenderToRecipientMessageCount,
+    int RecipientToSenderMessageCount,
+    int ImmediateMessageCount,
+    DateTimeOffset? FirstMessageAt,
+    DateTimeOffset? LastMessageAt,
+    int SharedChannelCount,
+    int SharedChannelMessageCount,
+    DateTimeOffset WindowFrom,
+    DateTimeOffset WindowTo);
+
+public sealed record TransferConversationMessageDto(
+    Guid Id,
+    Guid SenderId,
+    string SenderName,
+    string Body,
+    Guid? TargetCharacterId,
+    string? TargetCharacterName,
+    DateTimeOffset SentAt);
+
+public sealed record TransferConversationPageDto(
+    Guid TransferId,
+    TransferConversationSummaryDto Summary,
+    IReadOnlyList<TransferConversationMessageDto> Messages,
+    string? NextCursor);
+
+public sealed record TransferConversationLookupResult(
+    bool PlayerFound,
+    bool TransferFound,
+    bool CursorValid,
+    TransferConversationPageDto? Page);
 
 public sealed record SynchronizationSupportSnapshotDto(
     int PendingDeliveries,

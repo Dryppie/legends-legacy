@@ -9,11 +9,15 @@ using Common.Primitives;
 using Domain.Models.Administration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using API.LiveOps.Support;
 
 namespace API.LiveOps.Controllers;
 
 [Route("api/liveops/account-risk")]
-public sealed class AccountRiskController : LiveOpsControllerBase
+public sealed class AccountRiskController(
+    TransferConversationCorrelationService transferConversationCorrelations,
+    ILogger<AccountRiskController> logger)
+    : LiveOpsControllerBase
 {
     public sealed record UpdateStatusRequest(Guid OperationId, AccountInvestigationStatus Status, string Reason);
     public sealed record AddNoteRequest(Guid OperationId, string Note);
@@ -64,6 +68,26 @@ public sealed class AccountRiskController : LiveOpsControllerBase
     {
         var result = await Mediator.Send(new GetAccountTemporalCorrelationsQuery(accountId, windowDays));
         return result.IsSuccess ? Ok(result) : NotFound(result);
+    }
+
+    [HttpGet("{accountId:guid}/transfer-conversation-correlations")]
+    [Authorize(Policy = AdministrationPermissions.Read)]
+    public async Task<ActionResult<Response<TransferConversationCorrelationReportDto>>>
+        GetTransferConversationCorrelations(
+            Guid accountId,
+            CancellationToken cancellationToken)
+    {
+        logger.LogInformation(
+            "Operator {OperatorSubject} accessed transfer conversation correlations for account {AccountId}.",
+            CurrentActor.Subject,
+            accountId);
+        var result = await transferConversationCorrelations.GetAsync(
+            accountId,
+            cancellationToken);
+        return result.AccountFound && result.Report is not null
+            ? Ok(Response<TransferConversationCorrelationReportDto>.Success(result.Report))
+            : NotFound(Response<TransferConversationCorrelationReportDto>.Fail(
+                "The account was not found."));
     }
 
     [HttpPost("{accountId:guid}/status")]

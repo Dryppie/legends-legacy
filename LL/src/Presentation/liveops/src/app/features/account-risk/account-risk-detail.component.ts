@@ -4,7 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LiveOpsApiService } from '../../liveops-api.service';
-import { AccountInvestigationStatus, AccountRiskDetails, AccountRiskTransfer, AccountTemporalCorrelationReport } from '../../liveops.models';
+import { AccountInvestigationStatus, AccountRiskDetails, AccountRiskTransfer, AccountTemporalCorrelationReport, TransferConversationCorrelationReport } from '../../liveops.models';
 import { OperatorContextService } from '../../operator-context.service';
 import { AccountRiskListStateService } from './account-risk-list-state.service';
 
@@ -17,9 +17,12 @@ import { AccountRiskListStateService } from './account-risk-list-state.service';
 export class AccountRiskDetailComponent implements OnInit {
   details: AccountRiskDetails | null = null;
   temporalReport: AccountTemporalCorrelationReport | null = null;
+  transferConversationReport: TransferConversationCorrelationReport | null = null;
   loading = true;
   temporalLoading = false;
   temporalError = '';
+  transferConversationLoading = false;
+  transferConversationError = '';
   saving = false;
   message = '';
   messageTone: 'error' | 'success' = 'success';
@@ -56,6 +59,15 @@ export class AccountRiskDetailComponent implements OnInit {
   openPlayer(characterId: string): void { if (characterId && !/^0+$/.test(characterId.replaceAll('-', ''))) void this.router.navigate(['/players', characterId]); }
   openAccount(accountId: string): void { void this.router.navigate(['/account-risk', accountId]); }
 
+  transferConversationAssessment(assessment: string): string {
+    switch (assessment) {
+      case 'UncommunicativeValueTransferPattern': return 'Uncommunicative value-transfer pattern';
+      case 'RecordedBidirectionalConversation': return 'Bidirectional conversation recorded';
+      case 'BelowPatternThreshold': return 'Below pattern threshold';
+      default: return 'Chat evidence unavailable';
+    }
+  }
+
   async updateStatus(): Promise<void> {
     if (!this.details || !this.statusReason.trim()) { this.showError('Add a reason for the review-state change.'); return; }
     this.saving = true;
@@ -89,12 +101,15 @@ export class AccountRiskDetailComponent implements OnInit {
     this.loading = true;
     this.temporalReport = null;
     this.temporalError = '';
+    this.transferConversationReport = null;
+    this.transferConversationError = '';
     try {
       const response = await this.api.accountRiskDetails(accountId);
       if (!response.isSuccess || !response.data) { this.showError(response.errorMessage || 'The investigation could not be loaded.'); return; }
       this.details = response.data;
       this.selectedStatus = response.data.account.investigationStatus;
       void this.loadTemporalCorrelations(accountId);
+      void this.loadTransferConversationCorrelations(accountId);
     } catch (error) { this.showError(this.errorMessage(error)); }
     finally { this.loading = false; }
   }
@@ -113,6 +128,23 @@ export class AccountRiskDetailComponent implements OnInit {
       this.temporalError = this.errorMessage(error);
     } finally {
       this.temporalLoading = false;
+    }
+  }
+
+  private async loadTransferConversationCorrelations(accountId: string): Promise<void> {
+    this.transferConversationLoading = true;
+    this.transferConversationError = '';
+    try {
+      const response = await this.api.accountTransferConversationCorrelations(accountId);
+      if (!response.isSuccess || !response.data) {
+        this.transferConversationError = response.errorMessage || 'Transfer conversation evidence could not be loaded.';
+        return;
+      }
+      this.transferConversationReport = response.data;
+    } catch (error) {
+      this.transferConversationError = this.errorMessage(error);
+    } finally {
+      this.transferConversationLoading = false;
     }
   }
 

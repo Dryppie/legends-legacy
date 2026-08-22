@@ -64,6 +64,65 @@
       </section>
     </div>
 
+    <section class="risk-panel transfer-chat-correlation-panel">
+      <header>
+        <div><p class="eyebrow">Direct transfers + in-game Chat · supporting context only</p><h2>Transfer and conversation cross-reference</h2></div>
+        @if (transferConversationReport) { <small>{{ transferConversationReport.windowStart | date: 'mediumDate' }} to {{ transferConversationReport.evaluatedAt | date: 'mediumDate' }}</small> }
+      </header>
+      <div class="temporal-disclaimer" role="note">
+        Repeated material transfers without recorded conversation are a review signal, not proof of shared ownership or abuse. Off-platform communication and legitimate relationships are not visible here. This evidence does not affect the risk score or trigger sanctions.
+      </div>
+      @if (transferConversationLoading) {
+        <div class="risk-empty">Cross-referencing bounded transfers with Chat evidence…</div>
+      } @else if (transferConversationError) {
+        <div class="temporal-error" role="status">{{ transferConversationError }} Missing Chat evidence is not treated as missing conversation.</div>
+      } @else if (transferConversationReport; as report) {
+        @if (!report.evidenceComplete) {
+          <div class="temporal-error" role="alert">This report is incomplete because Chat evidence was unavailable or the transfer safety cap was reached. Incomplete rows cannot meet the uncommunicative-transfer pattern.</div>
+        }
+        <div class="temporal-report-meta">
+          <span>{{ report.entries.length }} counterparty account(s)</span>
+          <span>{{ report.analyzedTransferCount | number }} retained transfer(s) analyzed</span>
+          <span>{{ report.unavailableConversationCount }} transfer conversation lookup(s) unavailable</span>
+          <span>Does not affect risk score or sanctions</span>
+        </div>
+        <div class="transfer-chat-correlation-list">
+          @for (entry of report.entries; track entry.counterpartyAccountId) {
+            <article [class.pattern-match]="entry.meetsPatternThreshold">
+              <div class="transfer-chat-correlation-summary">
+                <button type="button" (click)="openAccount(entry.counterpartyAccountId)">
+                  <strong>{{ entry.counterpartyCharacterName }}</strong>
+                  <small>{{ entry.counterpartyAccountId }}</small>
+                </button>
+                <span [class]="'transfer-chat-assessment ' + entry.assessment.toLowerCase()">{{ transferConversationAssessment(entry.assessment) }}</span>
+                <p>{{ entry.explanation }}</p>
+                <time>{{ entry.firstTransferAt | date: 'mediumDate' }} – {{ entry.lastTransferAt | date: 'mediumDate' }}</time>
+              </div>
+              <div class="transfer-chat-facts">
+                <div><span>Transfers</span><strong>{{ entry.transferCount }}</strong></div>
+                <div><span>Direction</span><strong>{{ entry.incomingTransferCount }} in / {{ entry.outgoingTransferCount }} out</strong></div>
+                <div><span>Cinders</span><strong>{{ entry.incomingCinders | number }} in / {{ entry.outgoingCinders | number }} out</strong></div>
+                <div><span>Item transfers</span><strong>{{ entry.itemTransferCount }}</strong></div>
+                <div><span>Two-way direct</span><strong>{{ entry.establishedConversationCount }}</strong></div>
+                <div><span>One-way direct</span><strong>{{ entry.oneWayConversationCount }}</strong></div>
+                <div><span>Shared channel only</span><strong>{{ entry.sharedChannelActivityCount }}</strong></div>
+                <div><span>No recorded contact</span><strong>{{ entry.noRecordedConversationCount }}</strong></div>
+                <div><span>Messages near transfer</span><strong>{{ entry.immediateMessageCount }}</strong></div>
+              </div>
+              <details class="temporal-evidence">
+                <summary>Review {{ entry.supportingTransferIds.length }} supporting transfer ID(s)</summary>
+                <div class="supporting-transfer-ids">
+                  @for (transferId of entry.supportingTransferIds; track transferId) { <code>{{ transferId }}</code> }
+                </div>
+              </details>
+            </article>
+          } @empty {
+            <div class="risk-empty">No cross-account direct transfers were retained in the configured window.</div>
+          }
+        </div>
+      }
+    </section>
+
     <section class="risk-panel temporal-correlation-panel">
       <header>
         <div><p class="eyebrow">Token-chain timing · supporting context only</p><h2>Possible account correlation</h2></div>

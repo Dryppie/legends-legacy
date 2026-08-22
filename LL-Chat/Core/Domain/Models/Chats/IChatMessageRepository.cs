@@ -10,4 +10,15 @@ public interface IChatMessageRepository
         string? raidChannel,
         DateTimeOffset? after,
         CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<ChatMessage>> SentByAsync(
+        Guid senderId,
+        int take,
+        DateTimeOffset? beforeSentAt,
+        Guid? beforeMessageId,
+        CancellationToken cancellationToken);
+
+    Task<ChatConversationEvidence> ConversationEvidenceAsync(
+        ChatConversationEvidenceQuery query,
+        CancellationToken cancellationToken);
 }

@@ -35,4 +35,22 @@ public class ChatService : IChatService
             after,
             cancellationToken);
     }
+
+    public Task<IReadOnlyList<ChatMessage>> SentByAsync(
+        Guid senderId,
+        int take,
+        DateTimeOffset? beforeSentAt,
+        Guid? beforeMessageId,
+        CancellationToken cancellationToken) =>
+        _messageRepository.SentByAsync(
+            senderId,
+            take,
+            beforeSentAt,
+            beforeMessageId,
+            cancellationToken);
+
+    public Task<ChatConversationEvidence> ConversationEvidenceAsync(
+        ChatConversationEvidenceQuery query,
+        CancellationToken cancellationToken) =>
+        _messageRepository.ConversationEvidenceAsync(query, cancellationToken);
 }

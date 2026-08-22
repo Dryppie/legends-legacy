@@ -17,6 +17,7 @@ public sealed class TournamentGroundsOptions
     public int DefaultStartDelayAfterRegistrationMinutes { get; set; } = 12 * 60;
     public int DefaultRoundIntervalMinutes { get; set; } = 10;
     public int MatchIntervalMinutes { get; set; } = 10;
+    public int MatchPreparationLeadSeconds { get; set; } = 60;
     public int RoundCompletionCooldownSeconds { get; set; } = 10;
     public int RegulationDurationMinutes { get; set; } = 5;
     public int OvertimeDurationMinutes { get; set; } = 5;

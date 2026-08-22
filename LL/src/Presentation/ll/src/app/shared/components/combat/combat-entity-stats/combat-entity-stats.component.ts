@@ -43,6 +43,7 @@ type StatsParticipant = {
   isSummonChild?: boolean;
   summonCount?: number;
   standingCount?: number;
+  summonerId?: string;
   summonerName?: string;
   summonGroupKey?: string;
   members?: StatsParticipant[];
@@ -524,13 +525,47 @@ export class CombatEntityStatsComponent implements OnChanges {
 
     // Groups are created when their first member is encountered. Refresh them
     // after collecting the team so their aggregate includes every instance.
-    return result.map((participant) => {
+    const groupedParticipants = result.map((participant) => {
       if (!participant.isSummonGroup) return participant;
       const members = participant.summonGroupKey
         ? (groups.get(participant.summonGroupKey) ?? [])
         : [];
       return this.populateSummonGroup(participant, members);
     });
+    return this.orderSummonsAfterOwners(groupedParticipants);
+  }
+
+  private orderSummonsAfterOwners(
+    participants: StatsParticipant[],
+  ): StatsParticipant[] {
+    const summonGroups = participants.filter(
+      (participant) => participant.isSummonGroup && participant.summonerId,
+    );
+    const ordered: StatsParticipant[] = [];
+    const attachedSummonIds = new Set<string>();
+
+    for (const participant of participants) {
+      if (participant.isSummonGroup) continue;
+      ordered.push(participant);
+      for (const summon of summonGroups) {
+        if (
+          summon.summonerId &&
+          this.isSameEntityId(summon.summonerId, participant.id)
+        ) {
+          ordered.push(summon);
+          attachedSummonIds.add(summon.id);
+        }
+      }
+    }
+
+    // Retain summons whose owner is absent from this checkpoint or stats set.
+    ordered.push(
+      ...participants.filter(
+        (participant) =>
+          participant.isSummonGroup && !attachedSummonIds.has(participant.id),
+      ),
+    );
+    return ordered;
   }
 
   private buildParticipantGroups(): StatsParticipantGroup[] {
@@ -633,6 +668,7 @@ export class CombatEntityStatsComponent implements OnChanges {
       entity: { ...first.entity },
       isSummonGroup: true,
       summonGroupKey: key,
+      summonerId: ownerId,
       summonerName: namesById.get(ownerId),
       members,
     };

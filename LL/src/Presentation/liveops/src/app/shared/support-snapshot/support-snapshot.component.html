@@ -62,7 +62,7 @@
         <p class="support-note">{{ transfers.entries.length }} account-level Cinder wires and direct inventory transfers loaded in pages of {{ transfers.historyLimit }}, including alternate characters.</p>
         <div class="support-list transfer-list">
           @for (transfer of transfers.entries; track transfer.transferId) {
-            <div>
+            <div [class.selected-transfer]="selectedTransfer?.transferId === transfer.transferId">
               <span class="support-state" [class.incoming]="transfer.direction === 'Incoming'" [class.own-transfer]="transfer.direction === 'BetweenOwnCharacters'">
                 {{ transfer.direction === 'BetweenOwnCharacters' ? 'Own account' : transfer.direction }}
               </span>
@@ -73,11 +73,57 @@
                 @if (transfer.sourceItemInstanceId || transfer.destinationItemInstanceId) {
                   <small title="Source {{ transfer.sourceItemInstanceId || 'none' }} · Destination {{ transfer.destinationItemInstanceId || 'none' }}">Item lineage: {{ transfer.sourceItemInstanceId || 'none' }} → {{ transfer.destinationItemInstanceId || 'none' }}</small>
                 }
+                <button
+                  type="button"
+                  [class]="'conversation-status ' + transfer.conversation.status.toLowerCase()"
+                  (click)="inspectTransferConversation.emit(transfer)">
+                  {{ conversationLabel(transfer.conversation.status) }}
+                  @if (transfer.conversation.isAvailable) {
+                    <small>{{ transfer.conversation.senderToRecipientMessageCount + transfer.conversation.recipientToSenderMessageCount }} direct · {{ transfer.conversation.immediateMessageCount }} near transfer</small>
+                  }
+                </button>
               </div>
               <time>{{ transfer.occurredAtUtc | date: 'short' }}</time>
             </div>
           } @empty { <p class="support-empty">No retained player transfers or Cinder wires.</p> }
         </div>
+        @if (selectedTransfer) {
+          <section class="transfer-conversation-detail" aria-label="Transfer conversation evidence">
+            <header>
+              <div><span>Conversation evidence</span><strong>{{ selectedTransfer.senderCharacterName }} → {{ selectedTransfer.recipientCharacterName }}</strong></div>
+              <button class="secondary" type="button" (click)="closeTransferConversation.emit()">Close</button>
+            </header>
+            @if (transferConversationLoading && !transferConversation) {
+              <p class="support-empty">Loading the newest 25 direct messages…</p>
+            } @else if (transferConversationError) {
+              <p class="support-unavailable" role="alert">{{ transferConversationError }}</p>
+            } @else if (transferConversation; as conversation) {
+              <div class="conversation-evidence-summary">
+                <span [class]="'conversation-status ' + conversation.summary.status.toLowerCase()">{{ conversationLabel(conversation.summary.status) }}</span>
+                <span>{{ conversation.summary.senderToRecipientMessageCount }} sender → recipient</span>
+                <span>{{ conversation.summary.recipientToSenderMessageCount }} recipient → sender</span>
+                <span>{{ conversation.summary.immediateMessageCount }} within 24h before / 2h after</span>
+                <span>{{ conversation.summary.sharedChannelCount }} shared guild/raid channel(s)</span>
+              </div>
+              <p class="support-note">Searched {{ conversation.summary.windowFrom | date: 'medium' }} through {{ conversation.summary.windowTo | date: 'medium' }}. No recorded in-game conversation does not rule out communication elsewhere.</p>
+              @if (!conversation.summary.isAvailable) {
+                <p class="support-unavailable">{{ conversation.summary.message }}</p>
+              } @else {
+                <div class="conversation-timeline">
+                  @for (entry of conversationTimeline(); track entry.id) {
+                    <article [class.transfer-event]="entry.kind === 'Transfer'">
+                      <time>{{ entry.occurredAt | date: 'medium' }}</time>
+                      <div><strong>{{ entry.kind === 'Transfer' ? 'Transfer' : entry.sender }}</strong><p>{{ entry.body }}</p></div>
+                    </article>
+                  } @empty { <p class="support-empty">No retained direct messages were found in this observation window.</p> }
+                </div>
+                @if (conversation.nextCursor) {
+                  <div class="transfer-pagination"><button class="secondary" type="button" [disabled]="transferConversationLoading" (click)="loadMoreTransferConversation.emit()">{{ transferConversationLoading ? 'Loading more…' : 'Load 25 more messages' }}</button></div>
+                }
+              }
+            }
+          </section>
+        }
         @if (transferError) { <p class="support-unavailable" role="alert">{{ transferError }}</p> }
         @if (transfers.nextCursor) {
           <div class="transfer-pagination">

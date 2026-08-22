@@ -66,6 +66,62 @@ public sealed record ChatModerationAuditGatewayResult(
     IReadOnlyList<ChatModerationHistoryGatewayEntry> Entries,
     string ErrorMessage);
 
+public sealed record ChatPlayerMessageGatewayEntry(
+    Guid Id,
+    string ChannelType,
+    string ContextKey,
+    string Body,
+    Guid? TargetCharacterId,
+    string? TargetCharacterName,
+    DateTimeOffset SentAt);
+
+public sealed record ChatPlayerMessageGatewayResult(
+    bool IsSuccess,
+    bool CursorValid,
+    IReadOnlyList<ChatPlayerMessageGatewayEntry> Entries,
+    string? NextCursor,
+    string ErrorMessage);
+
+public sealed record ChatConversationEvidenceGatewayQuery(
+    Guid EvidenceId,
+    Guid FirstCharacterId,
+    Guid SecondCharacterId,
+    DateTimeOffset From,
+    DateTimeOffset To,
+    DateTimeOffset TransferOccurredAt,
+    DateTimeOffset ImmediateFrom,
+    DateTimeOffset ImmediateTo,
+    string? Cursor,
+    int Limit);
+
+public sealed record ChatConversationEvidenceGatewayMessage(
+    Guid Id,
+    string ChannelType,
+    Guid SenderId,
+    string SenderName,
+    string Body,
+    Guid? TargetCharacterId,
+    string? TargetCharacterName,
+    DateTimeOffset SentAt);
+
+public sealed record ChatConversationEvidenceGatewayEntry(
+    Guid EvidenceId,
+    int FirstToSecondMessageCount,
+    int SecondToFirstMessageCount,
+    int ImmediateMessageCount,
+    DateTimeOffset? FirstMessageAt,
+    DateTimeOffset? LastMessageAt,
+    int SharedChannelCount,
+    int SharedChannelMessageCount,
+    IReadOnlyList<ChatConversationEvidenceGatewayMessage> Messages,
+    string? NextCursor);
+
+public sealed record ChatConversationEvidenceGatewayResult(
+    bool IsSuccess,
+    bool CursorValid,
+    IReadOnlyList<ChatConversationEvidenceGatewayEntry> Evidence,
+    string ErrorMessage);
+
 public interface IChatModerationGateway
 {
     Task<ChatModerationStateGatewayResult> GetStateAsync(
@@ -75,6 +131,16 @@ public interface IChatModerationGateway
 
     Task<ChatModerationAuditGatewayResult> GetAuditAsync(
         ChatModerationAuditGatewayQuery query,
+        CancellationToken cancellationToken);
+
+    Task<ChatPlayerMessageGatewayResult> GetPlayerMessagesAsync(
+        Guid characterId,
+        string? cursor,
+        int limit,
+        CancellationToken cancellationToken);
+
+    Task<ChatConversationEvidenceGatewayResult> GetConversationEvidenceAsync(
+        IReadOnlyList<ChatConversationEvidenceGatewayQuery> queries,
         CancellationToken cancellationToken);
 
     Task<ChatModerationGatewayResult> MuteAsync(

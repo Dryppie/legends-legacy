@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using Application.Interfaces.Services.LL.Administration;
 using Domain.Models.Administration;
 using Domain.Models.Outbox;
 using Domain.Models.Transfers;
@@ -13,6 +14,7 @@ namespace API.LiveOps.Support;
 
 public sealed class LiveOpsPlayerSupportSnapshotService(
     IDbContextFactory<LLDbContext> contextFactory,
+    IChatModerationGateway chat,
     IOptions<LiveOpsOptions> options,
     TimeProvider timeProvider,
     ILogger<LiveOpsPlayerSupportSnapshotService> logger)
@@ -22,6 +24,18 @@ public sealed class LiveOpsPlayerSupportSnapshotService(
         options.Value.SupportSnapshotSectionTimeoutSeconds,
         1,
         15);
+    private readonly int _conversationLookbackDays = Math.Clamp(
+        options.Value.TransferConversationLookbackDays,
+        1,
+        90);
+    private readonly int _conversationAfterHours = Math.Clamp(
+        options.Value.TransferConversationAfterHours,
+        1,
+        24);
+    private readonly int _conversationImmediateBeforeHours = Math.Clamp(
+        options.Value.TransferConversationImmediateBeforeHours,
+        1,
+        72);
 
     public async Task<PlayerSupportSnapshotDto?> GetAsync(
         Guid characterId,
@@ -99,6 +113,72 @@ public sealed class LiveOpsPlayerSupportSnapshotService(
             token => LoadTransfersAsync(target, cursor, Math.Clamp(take, 1, 50), token),
             cancellationToken);
         return new TransferHistoryLookupResult(true, true, section);
+    }
+
+    public async Task<TransferConversationLookupResult> GetTransferConversationAsync(
+        Guid characterId,
+        Guid transferId,
+        string? cursor,
+        int take,
+        CancellationToken cancellationToken)
+    {
+        await using var database = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var target = await database.Characters.AsNoTracking()
+            .Where(character => character.Id == characterId)
+            .Select(character => new TargetRow(character.UserId, character.Id))
+            .SingleOrDefaultAsync(cancellationToken);
+        if (target is null)
+            return new TransferConversationLookupResult(false, false, true, null);
+
+        var transfer = await database.PlayerTransferHistory.AsNoTracking()
+            .Where(row =>
+                row.Id == transferId &&
+                (row.SenderAccountId == target.AccountId ||
+                 row.RecipientAccountId == target.AccountId))
+            .Select(row => new TransferRow(
+                row.Id,
+                row.Kind,
+                row.SenderAccountId,
+                row.SenderCharacterId,
+                row.SenderCharacterName,
+                row.RecipientAccountId,
+                row.RecipientCharacterId,
+                row.RecipientCharacterName,
+                row.AssetId,
+                row.AssetName,
+                row.SourceItemInstanceId,
+                row.DestinationItemInstanceId,
+                row.Quantity,
+                row.OccurredAt))
+            .SingleOrDefaultAsync(cancellationToken);
+        if (transfer is null)
+            return new TransferConversationLookupResult(true, false, true, null);
+
+        var result = await chat.GetConversationEvidenceAsync(
+            [BuildConversationQuery(transfer, cursor, Math.Clamp(take, 1, 25))],
+            cancellationToken);
+        if (!result.CursorValid)
+            return new TransferConversationLookupResult(true, true, false, null);
+
+        var evidence = result.IsSuccess
+            ? result.Evidence.SingleOrDefault(entry => entry.EvidenceId == transfer.TransferId)
+            : null;
+        var summary = evidence is null
+            ? UnavailableConversation(transfer, result.ErrorMessage)
+            : ToConversationSummary(transfer, evidence);
+        var page = new TransferConversationPageDto(
+            transfer.TransferId,
+            summary,
+            evidence?.Messages.Select(message => new TransferConversationMessageDto(
+                message.Id,
+                message.SenderId,
+                message.SenderName,
+                message.Body,
+                message.TargetCharacterId,
+                message.TargetCharacterName,
+                message.SentAt)).ToList() ?? [],
+            evidence?.NextCursor);
+        return new TransferConversationLookupResult(true, true, true, page);
     }
 
     private async Task<AccountSupportSnapshotDto> LoadAccountAsync(
@@ -392,6 +472,7 @@ public sealed class LiveOpsPlayerSupportSnapshotService(
 
         var hasMore = rows.Count > historyLimit;
         var page = rows.Take(historyLimit).ToList();
+        var conversations = await LoadConversationSummariesAsync(page, cancellationToken);
         var nextCursor = hasMore && page.Count > 0
             ? TransferCursor.Encode(page[^1].OccurredAtUtc, page[^1].TransferId)
             : null;
@@ -412,9 +493,114 @@ public sealed class LiveOpsPlayerSupportSnapshotService(
                 x.SourceItemInstanceId,
                 x.DestinationItemInstanceId,
                 x.Quantity,
-                x.OccurredAtUtc)).ToList(),
+                x.OccurredAtUtc,
+                conversations.GetValueOrDefault(
+                    x.TransferId,
+                    UnavailableConversation(
+                        x,
+                        "Chat did not return evidence for this transfer.")))).ToList(),
             nextCursor);
     }
+
+    private async Task<IReadOnlyDictionary<Guid, TransferConversationSummaryDto>>
+        LoadConversationSummariesAsync(
+            IReadOnlyList<TransferRow> transfers,
+            CancellationToken cancellationToken)
+    {
+        var summaries = new Dictionary<Guid, TransferConversationSummaryDto>();
+        foreach (var batch in transfers.Chunk(25))
+        {
+            var result = await chat.GetConversationEvidenceAsync(
+                batch.Select(transfer => BuildConversationQuery(transfer, null, 0)).ToList(),
+                cancellationToken);
+            if (!result.IsSuccess)
+            {
+                foreach (var transfer in batch)
+                {
+                    summaries[transfer.TransferId] = UnavailableConversation(
+                        transfer,
+                        result.ErrorMessage);
+                }
+                continue;
+            }
+
+            var evidenceById = result.Evidence.ToDictionary(entry => entry.EvidenceId);
+            foreach (var transfer in batch)
+            {
+                summaries[transfer.TransferId] = evidenceById.TryGetValue(
+                    transfer.TransferId,
+                    out var evidence)
+                    ? ToConversationSummary(transfer, evidence)
+                    : UnavailableConversation(
+                        transfer,
+                        "Chat returned incomplete conversation evidence.");
+            }
+        }
+        return summaries;
+    }
+
+    private ChatConversationEvidenceGatewayQuery BuildConversationQuery(
+        TransferRow transfer,
+        string? cursor,
+        int limit) =>
+        new(
+            transfer.TransferId,
+            transfer.SenderCharacterId,
+            transfer.RecipientCharacterId,
+            transfer.OccurredAtUtc.AddDays(-_conversationLookbackDays),
+            transfer.OccurredAtUtc.AddHours(_conversationAfterHours),
+            transfer.OccurredAtUtc,
+            transfer.OccurredAtUtc.AddHours(-_conversationImmediateBeforeHours),
+            transfer.OccurredAtUtc.AddHours(_conversationAfterHours),
+            cursor,
+            limit);
+
+    private TransferConversationSummaryDto ToConversationSummary(
+        TransferRow transfer,
+        ChatConversationEvidenceGatewayEntry evidence)
+    {
+        var status = evidence.FirstToSecondMessageCount > 0 &&
+                     evidence.SecondToFirstMessageCount > 0
+            ? "EstablishedConversation"
+            : evidence.FirstToSecondMessageCount > 0 ||
+              evidence.SecondToFirstMessageCount > 0
+                ? "OneWayConversation"
+                : evidence.SharedChannelCount > 0
+                    ? "SharedChannelActivity"
+                    : "NoRecordedConversation";
+        return new TransferConversationSummaryDto(
+            status,
+            true,
+            null,
+            evidence.FirstToSecondMessageCount,
+            evidence.SecondToFirstMessageCount,
+            evidence.ImmediateMessageCount,
+            evidence.FirstMessageAt,
+            evidence.LastMessageAt,
+            evidence.SharedChannelCount,
+            evidence.SharedChannelMessageCount,
+            transfer.OccurredAtUtc.AddDays(-_conversationLookbackDays),
+            transfer.OccurredAtUtc.AddHours(_conversationAfterHours));
+    }
+
+    private TransferConversationSummaryDto UnavailableConversation(
+        TransferRow transfer,
+        string? message) =>
+        new(
+            "ChatUnavailable",
+            false,
+            string.IsNullOrWhiteSpace(message)
+                ? "Chat conversation evidence is unavailable."
+                : message,
+            0,
+            0,
+            0,
+            null,
+            null,
+            0,
+            0,
+            transfer.OccurredAtUtc.AddDays(-_conversationLookbackDays),
+            transfer.OccurredAtUtc.AddHours(_conversationAfterHours));
 
     private static string Direction(TransferRow transfer, Guid accountId)
     {

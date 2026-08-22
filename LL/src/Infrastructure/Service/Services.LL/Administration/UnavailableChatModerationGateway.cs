@@ -30,6 +30,27 @@ public sealed class UnavailableChatModerationGateway : IChatModerationGateway
             [],
             Error));
 
+    public Task<ChatPlayerMessageGatewayResult> GetPlayerMessagesAsync(
+        Guid characterId,
+        string? cursor,
+        int limit,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(new ChatPlayerMessageGatewayResult(
+            false,
+            true,
+            [],
+            null,
+            Error));
+
+    public Task<ChatConversationEvidenceGatewayResult> GetConversationEvidenceAsync(
+        IReadOnlyList<ChatConversationEvidenceGatewayQuery> queries,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(new ChatConversationEvidenceGatewayResult(
+            false,
+            true,
+            [],
+            Error));
+
     public Task<ChatModerationGatewayResult> MuteAsync(
         ChatMuteGatewayRequest request,
         CancellationToken cancellationToken) =>

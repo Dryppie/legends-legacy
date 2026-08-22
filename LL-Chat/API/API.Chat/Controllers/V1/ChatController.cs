@@ -10,8 +10,11 @@ using Domain.Models.Chats;
 using Application.UsesCases.Chats.Queries.GetChatHistory;
 using Application.UsesCases.Chats.Queries.GetModerationState;
 using Application.UsesCases.Chats.Queries.GetModerationAudit;
+using Application.UsesCases.Chats.Queries.GetPlayerMessageHistory;
+using Application.UsesCases.Chats.Queries.GetConversationEvidence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using System.Text.Json;
@@ -82,6 +85,32 @@ public class ChatController : BaseController
         string ActorSubject,
         string ActorDisplayName,
         string Reason);
+    public sealed record ConversationEvidenceBatchRequest(
+        IReadOnlyList<ConversationEvidenceRequest> Evidence);
+    public sealed record ConversationEvidenceRequest(
+        Guid EvidenceId,
+        Guid FirstCharacterId,
+        Guid SecondCharacterId,
+        DateTimeOffset From,
+        DateTimeOffset To,
+        DateTimeOffset TransferOccurredAt,
+        DateTimeOffset ImmediateFrom,
+        DateTimeOffset ImmediateTo,
+        string? Cursor,
+        int Take = 0);
+    public sealed record ConversationEvidenceBatchResponse(
+        IReadOnlyList<ConversationEvidenceResponse> Evidence);
+    public sealed record ConversationEvidenceResponse(
+        Guid EvidenceId,
+        int FirstToSecondMessageCount,
+        int SecondToFirstMessageCount,
+        int ImmediateMessageCount,
+        DateTimeOffset? FirstMessageAt,
+        DateTimeOffset? LastMessageAt,
+        int SharedChannelCount,
+        int SharedChannelMessageCount,
+        IReadOnlyList<ChatMessageDto> Messages,
+        string? NextCursor);
 
     [HttpGet("GetChatHistory")]
     public async Task<ActionResult<List<ChatMessageDto>>> GetChatHistory([FromQuery] GetChatRequest chatRequest)
@@ -260,6 +289,108 @@ public class ChatController : BaseController
     }
 
     [AllowAnonymous]
+    [HttpGet("Moderation/{characterId:guid}/Messages")]
+    public async Task<ActionResult<PlayerMessageHistoryPageDto>> GetPlayerMessageHistory(
+        Guid characterId,
+        [FromQuery] string? cursor,
+        [FromQuery] int take = 25)
+    {
+        var authorizationFailure = AuthorizeInternalModeration();
+        if (authorizationFailure is not null) return authorizationFailure;
+
+        if (!TryDecodeMessageCursor(cursor, out var beforeSentAt, out var beforeMessageId))
+        {
+            return BadRequest("The player-message cursor is invalid.");
+        }
+
+        var pageSize = Math.Clamp(take, 1, 50);
+        var messages = await Mediator.Send(new GetPlayerMessageHistoryQuery(
+            characterId,
+            pageSize + 1,
+            beforeSentAt,
+            beforeMessageId));
+        var entries = messages.Take(pageSize).ToList();
+        var nextCursor = messages.Count > pageSize && entries.Count > 0
+            ? EncodeMessageCursor(entries[^1])
+            : null;
+
+        return Ok(new PlayerMessageHistoryPageDto(entries, nextCursor));
+    }
+
+    [AllowAnonymous]
+    [HttpPost("Moderation/ConversationEvidence")]
+    public async Task<ActionResult<ConversationEvidenceBatchResponse>> GetConversationEvidence(
+        [FromBody] ConversationEvidenceBatchRequest request)
+    {
+        var authorizationFailure = AuthorizeInternalModeration();
+        if (authorizationFailure is not null) return authorizationFailure;
+        if (request.Evidence is null || request.Evidence.Count is < 1 or > 25)
+        {
+            return BadRequest("Between 1 and 25 conversation-evidence requests are required.");
+        }
+        if (request.Evidence.Select(item => item.EvidenceId).Distinct().Count() !=
+            request.Evidence.Count)
+        {
+            return BadRequest("Conversation-evidence IDs must be unique.");
+        }
+
+        var response = new List<ConversationEvidenceResponse>(request.Evidence.Count);
+        foreach (var item in request.Evidence)
+        {
+            if (item.EvidenceId == Guid.Empty ||
+                item.FirstCharacterId == Guid.Empty ||
+                item.SecondCharacterId == Guid.Empty ||
+                item.FirstCharacterId == item.SecondCharacterId ||
+                item.From > item.TransferOccurredAt ||
+                item.TransferOccurredAt > item.To ||
+                item.ImmediateFrom < item.From ||
+                item.ImmediateTo > item.To ||
+                item.ImmediateFrom > item.TransferOccurredAt ||
+                item.TransferOccurredAt > item.ImmediateTo ||
+                item.To - item.From > TimeSpan.FromDays(90) ||
+                item.Take is < 0 or > 25)
+            {
+                return BadRequest("A conversation-evidence request is invalid.");
+            }
+            if (!TryDecodeMessageCursor(
+                    item.Cursor,
+                    out var beforeSentAt,
+                    out var beforeMessageId))
+            {
+                return BadRequest("A conversation-evidence cursor is invalid.");
+            }
+
+            var evidence = await Mediator.Send(new GetConversationEvidenceQuery(
+                item.FirstCharacterId,
+                item.SecondCharacterId,
+                item.From,
+                item.To,
+                item.ImmediateFrom,
+                item.ImmediateTo,
+                beforeSentAt,
+                beforeMessageId,
+                item.Take),
+                HttpContext.RequestAborted);
+            var nextCursor = evidence.HasMoreMessages && evidence.Messages.Count > 0
+                ? EncodeMessageCursor(evidence.Messages[^1])
+                : null;
+            response.Add(new ConversationEvidenceResponse(
+                item.EvidenceId,
+                evidence.FirstToSecondMessageCount,
+                evidence.SecondToFirstMessageCount,
+                evidence.ImmediateMessageCount,
+                evidence.FirstMessageAt,
+                evidence.LastMessageAt,
+                evidence.SharedChannelCount,
+                evidence.SharedChannelMessageCount,
+                evidence.Messages,
+                nextCursor));
+        }
+
+        return Ok(new ConversationEvidenceBatchResponse(response));
+    }
+
+    [AllowAnonymous]
     [HttpGet("ModerationAudit")]
     public async Task<ActionResult<IReadOnlyList<ChatModerationHistoryEntryDto>>> GetModerationAudit(
         [FromQuery] DateTimeOffset? from,
@@ -352,4 +483,46 @@ public class ChatController : BaseController
         var currentGuildId = User.FindFirstValue("GuildId");
         return string.Equals(currentGuildId, guildId, StringComparison.OrdinalIgnoreCase);
     }
+
+    private static string EncodeMessageCursor(ChatMessageDto message)
+    {
+        var payload = JsonSerializer.SerializeToUtf8Bytes(new PlayerMessageCursor(
+            message.SentAt,
+            message.Id));
+        return WebEncoders.Base64UrlEncode(payload);
+    }
+
+    private static bool TryDecodeMessageCursor(
+        string? cursor,
+        out DateTimeOffset? sentAt,
+        out Guid? messageId)
+    {
+        sentAt = null;
+        messageId = null;
+        if (string.IsNullOrWhiteSpace(cursor)) return true;
+        if (cursor.Length > 256) return false;
+
+        try
+        {
+            var decoded = WebEncoders.Base64UrlDecode(cursor);
+            var value = JsonSerializer.Deserialize<PlayerMessageCursor>(decoded);
+            if (value is null || value.MessageId == Guid.Empty) return false;
+
+            sentAt = value.SentAt;
+            messageId = value.MessageId;
+            return true;
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
+    private sealed record PlayerMessageCursor(
+        DateTimeOffset SentAt,
+        Guid MessageId);
 }

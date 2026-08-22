@@ -26,10 +26,11 @@ import { CombatStateService } from '../../../../core/state/combat-state/combat-s
 import { BattleType } from '../../../../core/state/combat-state/combatState';
 import { CombatComponent } from '../../../../shared/components/combat/combat.component';
 import { CombatReviveCountdown } from '../../../../shared/models/Dtos/combatResultDto';
+import { LocalDatePipe } from '../../../../shared/pipes/local-date/local-date.pipe';
 
 @Component({
   selector: 'app-region-boss',
-  imports: [CommonModule, CombatComponent],
+  imports: [CommonModule, CombatComponent, LocalDatePipe],
   templateUrl: './region-boss.component.html',
   styleUrl: './region-boss.component.scss',
 })
@@ -182,10 +183,6 @@ export class RegionBossComponent implements OnInit, OnDestroy {
               'Could not spawn the local Region Boss event.',
           ),
       });
-  }
-
-  timeLabel(value: string): string {
-    return new Date(value).toLocaleString();
   }
 
   progress(event: RegionBossStatus): number {

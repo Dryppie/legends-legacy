@@ -37,7 +37,7 @@ describe('TournamentPlaybackService', () => {
       {
         index: 0,
         entityIndex: 0,
-        name: 'Taunt',
+        name: 'Flame Strike',
       },
     ],
     frames: [
@@ -51,7 +51,7 @@ describe('TournamentPlaybackService', () => {
         entityTotals: [
           {
             entityIndex: 0,
-            damageDone: 0,
+            damageDone: 20,
             damageTaken: 0,
             healingDone: 0,
             healingReceived: 0,
@@ -65,7 +65,11 @@ describe('TournamentPlaybackService', () => {
           {
             abilityIndex: 0,
             uses: 1,
-            totalDamage: 0,
+            totalDamage: 20,
+            damageByType: [
+              { damageType: 'Physical', totalDamage: 12 },
+              { damageType: 'Burn', totalDamage: 8 },
+            ],
             totalHealing: 0,
             totalBarrier: 0,
             totalThreat: 250,
@@ -111,6 +115,10 @@ describe('TournamentPlaybackService', () => {
     expect(final.hostile[0].health).toBe(0);
     expect(initial.entityStats[0].threatGenerated).toBe(250);
     expect(initial.entityStats[0].abilities[0].totalThreat).toBe(250);
+    expect(initial.entityStats[0].abilities[0].damageByType).toEqual([
+      { damageType: 'Physical', totalDamage: 12 },
+      { damageType: 'Burn', totalDamage: 8 },
+    ]);
   });
 
   it('downloads an immutable bundle only once for the same ETag', () => {

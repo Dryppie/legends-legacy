@@ -15,10 +15,13 @@ import {
   OperationalStatus,
   OperatorSession,
   PlayerDetails,
+  PlayerMessageHistoryPage,
   PlayerSupportSnapshot,
   PlayerSummary,
   SupportSection,
   TransferHistorySupportSnapshot,
+  TransferConversationPage,
+  TransferConversationCorrelationReport,
 } from './liveops.models';
 
 @Injectable({ providedIn: 'root' })
@@ -77,6 +80,37 @@ export class LiveOpsApiService {
     );
   }
 
+  playerTransferConversation(
+    characterId: string,
+    transferId: string,
+    cursor: string | null = null,
+    take = 25,
+  ): Promise<ApiResponse<TransferConversationPage>> {
+    let params = new HttpParams().set('take', take);
+    if (cursor) params = params.set('cursor', cursor);
+    return firstValueFrom(
+      this.http.get<ApiResponse<TransferConversationPage>>(
+        `/api/liveops/players/${characterId}/transfers/${transferId}/conversation`,
+        { params },
+      ),
+    );
+  }
+
+  playerMessageHistory(
+    characterId: string,
+    cursor: string | null = null,
+    take = 25,
+  ): Promise<ApiResponse<PlayerMessageHistoryPage>> {
+    let params = new HttpParams().set('take', take);
+    if (cursor) params = params.set('cursor', cursor);
+    return firstValueFrom(
+      this.http.get<ApiResponse<PlayerMessageHistoryPage>>(
+        `/api/liveops/players/${characterId}/messages`,
+        { params },
+      ),
+    );
+  }
+
   operationalStatus(): Promise<ApiResponse<OperationalStatus>> {
     return firstValueFrom(
       this.http.get<ApiResponse<OperationalStatus>>('/api/liveops/status'),
@@ -101,6 +135,12 @@ export class LiveOpsApiService {
     return firstValueFrom(this.http.get<ApiResponse<AccountTemporalCorrelationReport>>(
       `/api/liveops/account-risk/${accountId}/temporal-correlations`,
       { params },
+    ));
+  }
+
+  accountTransferConversationCorrelations(accountId: string): Promise<ApiResponse<TransferConversationCorrelationReport>> {
+    return firstValueFrom(this.http.get<ApiResponse<TransferConversationCorrelationReport>>(
+      `/api/liveops/account-risk/${accountId}/transfer-conversation-correlations`,
     ));
   }
 

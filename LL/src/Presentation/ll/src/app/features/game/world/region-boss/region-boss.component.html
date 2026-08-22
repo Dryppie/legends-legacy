@@ -190,7 +190,7 @@
           </p>
           <h2>{{ event.name }}</h2>
           <p>
-            {{ timeLabel(event.encounterStartsAtUtc) }} ·
+            {{ event.encounterStartsAtUtc | localDate: "short" }} ·
             {{ event.signupCount }} signed
           </p>
           <strong *ngIf="event.status === 'SignupOpen'; else signupScheduled">
@@ -254,7 +254,7 @@
         <div class="past-copy">
           <h2>{{ event.name }}</h2>
           <p>
-            {{ timeLabel(event.encounterStartsAtUtc) }} · boss level
+            {{ event.encounterStartsAtUtc | localDate: "short" }} · boss level
             {{ event.run?.highestLevelDefeated || 1 }} felled
           </p>
         </div>

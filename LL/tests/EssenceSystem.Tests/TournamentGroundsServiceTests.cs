@@ -15,6 +15,7 @@ using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Damages;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Inventories;
@@ -1113,6 +1114,92 @@ public sealed class TournamentGroundsServiceTests
     }
 
     [Fact]
+    public async Task AdvanceDueTournamentsAsync_prepares_playback_before_the_public_start_time()
+    {
+        await using var db = CreateDbContext();
+        var combatExecutor = new QueuedCombatEngineExecutor(
+            BattleOutcome.Victory,
+            BattleOutcome.Victory);
+        var clock = new MutableTimeProvider(Now);
+        var service = CreateService(
+            db,
+            entityService: new DbEntityService(db),
+            combatSetupService: new SimpleCombatSetupService(),
+            combatEngineExecutor: combatExecutor,
+            combatEncounterResultFactory: new PassthroughCombatEncounterResultFactory(),
+            timeProvider: clock,
+            options: new TournamentGroundsOptions
+            {
+                DevelopmentToolsEnabled = true,
+                UsePostgresAdvisoryLocks = false,
+                MatchPreparationLeadSeconds = 60
+            });
+        var tournament = SeedTournament(db, TournamentStatus.RegistrationClosed);
+        tournament.StartsAtUtc = Now.AddSeconds(30);
+        tournament.RoundIntervalMinutes = 0;
+        var spectator = SeedParticipant(
+            db,
+            tournament,
+            rating: 1800,
+            registeredOffsetMinutes: 0);
+        for (var i = 1; i < 10; i++)
+        {
+            SeedParticipant(db, tournament, rating: 1800 - (i * 100), registeredOffsetMinutes: i);
+        }
+
+        tournament.RegisteredParticipantCount = 10;
+        await db.SaveChangesAsync();
+
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+
+        Assert.Equal(TournamentStatus.BracketGenerated, tournament.Status);
+        Assert.Equal(2, combatExecutor.ExecutionCount);
+        Assert.Equal(2, await db.TournamentCombatReplays.CountAsync());
+        var semifinalMatches = await db.TournamentMatches
+            .Where(match => match.RoundNumber == 1)
+            .OrderBy(match => match.MatchNumber)
+            .ToListAsync();
+        Assert.All(semifinalMatches, match =>
+        {
+            Assert.Equal(TournamentMatchStatus.Ready, match.Status);
+            Assert.Null(match.CombatSessionId);
+            Assert.Null(match.PlaybackStartedAtUtc);
+            Assert.Null(match.PlaybackEndsAtUtc);
+        });
+        var bracket = await service.GetBracketAsync(
+            spectator.CharacterId,
+            tournament.Id,
+            CancellationToken.None);
+        Assert.NotNull(bracket);
+        Assert.All(bracket.Rounds.SelectMany(round => round.Matches), match =>
+            Assert.False(match.HasPlayback));
+        Assert.Null(await service.GetMatchReplayAsync(
+            spectator.CharacterId,
+            tournament.Id,
+            semifinalMatches[0].Id,
+            CancellationToken.None));
+        Assert.Null(await service.GetMatchPlaybackBundleAsync(
+            spectator.CharacterId,
+            tournament.Id,
+            semifinalMatches[0].Id,
+            CancellationToken.None));
+
+        clock.SetUtcNow(tournament.StartsAtUtc);
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+
+        Assert.Equal(TournamentStatus.InProgress, tournament.Status);
+        Assert.Equal(2, combatExecutor.ExecutionCount);
+        var liveMatch = Assert.Single(semifinalMatches, match =>
+            match.Status == TournamentMatchStatus.Resolving);
+        Assert.Equal(tournament.StartsAtUtc, liveMatch.PlaybackStartedAtUtc);
+        Assert.NotNull(await service.GetMatchPlaybackAsync(
+            spectator.CharacterId,
+            tournament.Id,
+            liveMatch.Id,
+            CancellationToken.None));
+    }
+
+    [Fact]
     public async Task AdvanceDueTournamentsAsync_resolves_combat_records_history_and_grants_rewards()
     {
         await using var db = CreateDbContext();
@@ -1152,7 +1239,7 @@ public sealed class TournamentGroundsServiceTests
         await service.AdvanceDueTournamentsAsync(CancellationToken.None);
 
         Assert.Equal(TournamentStatus.InProgress, tournament.Status);
-        Assert.Equal(1, combatExecutor.ExecutionCount);
+        Assert.Equal(2, combatExecutor.ExecutionCount);
         var liveMatch = Assert.Single(
             await db.TournamentMatches
                 .Where(m => m.Status == TournamentMatchStatus.Resolving)
@@ -1177,7 +1264,7 @@ public sealed class TournamentGroundsServiceTests
             });
 
         await service.AdvanceDueTournamentsAsync(CancellationToken.None);
-        Assert.Equal(1, combatExecutor.ExecutionCount);
+        Assert.Equal(2, combatExecutor.ExecutionCount);
         Assert.Equal(TournamentMatchStatus.Resolving, liveMatch.Status);
 
         clock.SetUtcNow(liveMatch.PlaybackEndsAtUtc!.Value);
@@ -1209,6 +1296,9 @@ public sealed class TournamentGroundsServiceTests
         var expectedFinalStart = clock.GetUtcNow().AddSeconds(10);
         Assert.Equal(expectedFinalStart, finalMatch.ScheduledAtUtc);
         Assert.Equal(expectedFinalStart, finalRound.StartsAtUtc);
+        Assert.Equal(3, combatExecutor.ExecutionCount);
+        Assert.Equal(TournamentMatchStatus.Ready, finalMatch.Status);
+        Assert.Null(finalMatch.PlaybackStartedAtUtc);
         Assert.Contains(
             outbox.Events,
             entry => entry.EventType == GameEventTypes.TournamentGroundsUpdated
@@ -1347,6 +1437,14 @@ public sealed class TournamentGroundsServiceTests
         Assert.All(
             playbackBundle.Frames[^1].AbilityTotals,
             totals => Assert.Equal(75, totals.TotalThreat));
+        Assert.All(
+            playbackBundle.Frames[^1].AbilityTotals,
+            totals =>
+            {
+                var damageByType = Assert.Single(totals.DamageByType!);
+                Assert.Equal(DamageType.Physical, damageByType.DamageType);
+                Assert.Equal(1, damageByType.TotalDamage);
+            });
 
         var historyEntries = await service.GetHistoryAsync(champion.CharacterId, CancellationToken.None);
         var historyEntry = Assert.Single(historyEntries);
@@ -2256,13 +2354,23 @@ public sealed class TournamentGroundsServiceTests
                     .Select(p => new EntityStats(
                         p.Combatant.Id,
                         p.Combatant.Name,
-                        [new AbilityStats("test.tournament.strike", Uses: 1, TotalThreat: 75)],
+                        [new AbilityStats(
+                            "test.tournament.strike",
+                            TotalDamage: 1,
+                            Uses: 1,
+                            DamageByType: [new AbilityDamageTypeStats(DamageType.Physical, 1)],
+                            TotalThreat: 75)],
                         Team: "Friendly",
                         ThreatGenerated: 100))
                     .Concat(runtime.HostileParticipants.Select(p => new EntityStats(
                         p.Combatant.Id,
                         p.Combatant.Name,
-                        [new AbilityStats("test.tournament.strike", Uses: 1, TotalThreat: 75)],
+                        [new AbilityStats(
+                            "test.tournament.strike",
+                            TotalDamage: 1,
+                            Uses: 1,
+                            DamageByType: [new AbilityDamageTypeStats(DamageType.Physical, 1)],
+                            TotalThreat: 75)],
                         Team: "Hostile",
                         ThreatGenerated: 100)))
                     .ToList()

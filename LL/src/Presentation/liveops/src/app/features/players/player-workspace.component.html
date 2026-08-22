@@ -55,8 +55,15 @@
             [error]="supportSnapshotError"
             [transferLoading]="transferHistoryLoading"
             [transferError]="transferHistoryError"
+            [selectedTransfer]="selectedTransfer"
+            [transferConversation]="transferConversation"
+            [transferConversationLoading]="transferConversationLoading"
+            [transferConversationError]="transferConversationError"
             (refresh)="loadSupportSnapshot()"
             (loadMoreTransfers)="loadMoreTransfers()"
+            (inspectTransferConversation)="inspectTransferConversation($event)"
+            (loadMoreTransferConversation)="loadMoreTransferConversation()"
+            (closeTransferConversation)="closeTransferConversation()"
             (copyIdentifier)="copyIdentifier($event.value, $event.label)" />
         }
 
@@ -93,6 +100,42 @@
         }
 
         @if (activeSection === 'chat') {
+          <section class="player-message-history" aria-labelledby="player-message-history-heading">
+            <div class="operation-copy message-history-heading">
+              <div>
+                <p class="eyebrow">Cross-channel history</p>
+                <h2 id="player-message-history-heading">Player-authored messages</h2>
+                <p>Newest first across public, guild, raid, and whisper channels. System-generated messages are excluded.</p>
+              </div>
+              @if (playerMessages.length) { <span>{{ playerMessages.length }} loaded</span> }
+            </div>
+
+            @if (playerMessagesLoading && !playerMessages.length) {
+              <div class="permission-note">Loading the latest 25 messages…</div>
+            } @else {
+              @if (playerMessagesError) {
+                <div class="permission-note danger-note message-history-error">
+                  <span>{{ playerMessagesError }}</span>
+                  <button class="secondary" type="button" [disabled]="playerMessagesLoading" (click)="loadPlayerMessages(!!playerMessages.length)">Retry</button>
+                </div>
+              }
+              <div class="player-message-list" aria-live="polite">
+                @for (entry of playerMessages; track entry.id) {
+                  <article>
+                    <header><span class="source-pill">{{ messageChannelLabel(entry) }}</span><time>{{ entry.sentAt | date: 'medium' }}</time></header>
+                    <p>{{ entry.body }}</p>
+                    <footer><code title="{{ entry.id }}">{{ entry.id.slice(0, 8) }}…</code></footer>
+                  </article>
+                } @empty {
+                  @if (!playerMessagesLoading && !playerMessagesError) { <div class="permission-note">No player-authored messages have been recorded.</div> }
+                }
+              </div>
+              @if (playerMessagesNextCursor) {
+                <div class="message-history-pagination"><button class="secondary" type="button" [disabled]="playerMessagesLoading" (click)="loadPlayerMessages(true)">{{ playerMessagesLoading ? 'Loading…' : 'Load 25 more' }}</button></div>
+              }
+            }
+          </section>
+
           @if (!selectedPlayer.chatAvailable) {
             <div class="permission-note danger-note">{{ selectedPlayer.chatStatusMessage }}</div>
           } @else if (!hasPermission(permissions.chat)) {

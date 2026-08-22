@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { LiveOpsApiService } from '../../liveops-api.service';
-import { AccountRiskDetails, AccountTemporalCorrelationReport } from '../../liveops.models';
+import { AccountRiskDetails, AccountTemporalCorrelationReport, TransferConversationCorrelationReport } from '../../liveops.models';
 import { OperatorContextService } from '../../operator-context.service';
 import { AccountRiskDetailComponent } from './account-risk-detail.component';
 
@@ -10,6 +10,7 @@ describe('AccountRiskDetailComponent', () => {
     const api = {
       accountRiskDetails: jasmine.createSpy().and.resolveTo({ isSuccess: true, data: riskDetails(), errorMessage: '' }),
       accountTemporalCorrelations: jasmine.createSpy().and.resolveTo({ isSuccess: true, data: temporalReport(), errorMessage: '' }),
+      accountTransferConversationCorrelations: jasmine.createSpy().and.resolveTo({ isSuccess: true, data: transferConversationReport(), errorMessage: '' }),
     };
     await TestBed.configureTestingModule({
       imports: [AccountRiskDetailComponent],
@@ -31,10 +32,14 @@ describe('AccountRiskDetailComponent', () => {
 
     expect(api.accountRiskDetails).toHaveBeenCalled();
     expect(api.accountTemporalCorrelations).toHaveBeenCalledOnceWith('11111111-1111-1111-1111-111111111111');
+    expect(api.accountTransferConversationCorrelations).toHaveBeenCalledOnceWith('11111111-1111-1111-1111-111111111111');
     expect(fixture.nativeElement.textContent).toContain('Possible account correlation');
     expect(fixture.nativeElement.textContent).toContain('Similar timing does not establish shared ownership');
     expect(fixture.nativeElement.textContent).toContain('Moderate temporal correlation');
     expect(fixture.nativeElement.textContent).toContain('Does not affect risk score or sanctions');
+    expect(fixture.nativeElement.textContent).toContain('Transfer and conversation cross-reference');
+    expect(fixture.nativeElement.textContent).toContain('Uncommunicative value-transfer pattern');
+    expect(fixture.nativeElement.textContent).toContain('review signal, not proof of shared ownership');
   });
 });
 
@@ -53,6 +58,40 @@ function riskDetails(): AccountRiskDetails {
       analyzedTransferCount: 1, investigationStatus: 'Unreviewed',
     },
     signals: [], relationships: [], transfers: [], totalRetainedTransferCount: 0, history: [], notes: [],
+  };
+}
+
+function transferConversationReport(): TransferConversationCorrelationReport {
+  return {
+    accountId: '11111111-1111-1111-1111-111111111111',
+    windowStart: '2026-05-24T00:00:00Z',
+    evaluatedAt: '2026-08-22T00:00:00Z',
+    evidenceComplete: true,
+    analyzedTransferCount: 3,
+    unavailableConversationCount: 0,
+    entries: [{
+      counterpartyAccountId: '33333333-3333-3333-3333-333333333333',
+      counterpartyCharacterId: '44444444-4444-4444-4444-444444444444',
+      counterpartyCharacterName: 'Related',
+      assessment: 'UncommunicativeValueTransferPattern',
+      meetsPatternThreshold: true,
+      explanation: '3 material transfers had no bidirectional conversation.',
+      transferCount: 3,
+      incomingTransferCount: 3,
+      outgoingTransferCount: 0,
+      cinderValue: 12000,
+      incomingCinders: 12000,
+      outgoingCinders: 0,
+      itemTransferCount: 0,
+      establishedConversationCount: 0,
+      oneWayConversationCount: 0,
+      sharedChannelActivityCount: 0,
+      noRecordedConversationCount: 3,
+      immediateMessageCount: 0,
+      firstTransferAt: '2026-08-01T00:00:00Z',
+      lastTransferAt: '2026-08-20T00:00:00Z',
+      supportingTransferIds: [],
+    }],
   };
 }
 

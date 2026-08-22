@@ -110,6 +110,37 @@ describe('LiveOpsApiService', () => {
     await promise;
   });
 
+  it('loads a bounded transfer conversation page', async () => {
+    const promise = service.playerTransferConversation(
+      'character-1',
+      'transfer-1',
+      'next-page',
+      25,
+    );
+    const request = http.expectOne((candidate) =>
+      candidate.url === '/api/liveops/players/character-1/transfers/transfer-1/conversation' &&
+      candidate.params.get('cursor') === 'next-page' &&
+      candidate.params.get('take') === '25');
+    expect(request.request.method).toBe('GET');
+    request.flush({ isSuccess: true, data: null, errorMessage: '' });
+    await promise;
+  });
+
+  it('loads a bounded cross-channel player-message page', async () => {
+    const promise = service.playerMessageHistory('character-1', 'next-page', 25);
+    const request = http.expectOne((candidate) =>
+      candidate.url === '/api/liveops/players/character-1/messages' &&
+      candidate.params.get('cursor') === 'next-page' &&
+      candidate.params.get('take') === '25');
+    expect(request.request.method).toBe('GET');
+    request.flush({
+      isSuccess: true,
+      data: { entries: [], nextCursor: null },
+      errorMessage: '',
+    });
+    await promise;
+  });
+
   it('sends account-risk investigation filters and pagination', async () => {
     const promise = service.accountRisks({
       minimumSeverity: 'High',
@@ -135,6 +166,16 @@ describe('LiveOpsApiService', () => {
     const request = http.expectOne((candidate) =>
       candidate.url === '/api/liveops/account-risk/account-1/temporal-correlations' &&
       candidate.params.get('windowDays') === '60');
+    expect(request.request.method).toBe('GET');
+    request.flush({ isSuccess: true, data: null, errorMessage: '' });
+    await promise;
+  });
+
+  it('loads transfer and conversation correlations independently from risk details', async () => {
+    const promise = service.accountTransferConversationCorrelations('account-1');
+    const request = http.expectOne(
+      '/api/liveops/account-risk/account-1/transfer-conversation-correlations',
+    );
     expect(request.request.method).toBe('GET');
     request.flush({ isSuccess: true, data: null, errorMessage: '' });
     await promise;

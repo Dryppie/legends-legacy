@@ -1,4 +1,5 @@
 import {
+  AbilityDamageTypeStats,
   BattleOutcome,
   EntityStats,
   SimpleCombatEntityDto,
@@ -253,6 +254,7 @@ export interface TournamentPlaybackAbilityTotals {
   totalHealing: number;
   totalBarrier: number;
   totalThreat?: number;
+  damageByType?: AbilityDamageTypeStats[];
 }
 
 export interface TournamentCombatFrame {

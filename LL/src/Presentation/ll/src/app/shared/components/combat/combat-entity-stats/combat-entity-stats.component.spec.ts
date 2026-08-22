@@ -38,6 +38,9 @@ describe('CombatEntityStatsComponent', () => {
     expect(group?.entity.maxHealth).toBe(100);
     expect(component.statsFor(group!.id)?.damageDone).toBe(40);
     expect(component.visibleParticipants).toHaveSize(2);
+    expect(
+      component.visibleParticipants.map((participant) => participant.name),
+    ).toEqual(['Morrowmaw, Broodkeeper', 'Broodling']);
 
     component.activateParticipant(group!);
 
@@ -49,6 +52,32 @@ describe('CombatEntityStatsComponent', () => {
     component.activateParticipant(group!);
 
     expect(component.visibleParticipants).toHaveSize(2);
+  });
+
+  it('places every summon group immediately below its summoner', () => {
+    component.playerTeam = [
+      entity('dryp:summon:shadow:first', 'Creature Shadow Image', 1, 3),
+      entity('dryp', 'Dryp', 100, 100),
+      entity('dryp:summon:ward:first', 'Totemic Ward', 20, 20),
+      entity('zed', 'Zed', 100, 100),
+    ];
+    component.entityStats = [
+      stats(
+        'dryp:summon:shadow:first',
+        'Creature Shadow Image',
+        20,
+        'Friendly',
+      ),
+      stats('dryp', 'Dryp', 100, 'Friendly'),
+      stats('dryp:summon:ward:first', 'Totemic Ward', 0, 'Friendly'),
+      stats('zed', 'Zed', 50, 'Friendly'),
+    ];
+
+    refresh(component);
+
+    expect(
+      component.playerParticipants.map((participant) => participant.name),
+    ).toEqual(['Dryp', 'Creature Shadow Image', 'Totemic Ward', 'Zed']);
   });
 
   it('does not group ordinary combatants that happen to share a name', () => {

@@ -203,6 +203,46 @@ export interface PlayerTransferHistory {
   destinationItemInstanceId: string | null;
   quantity: number;
   occurredAtUtc: string;
+  conversation: TransferConversationSummary;
+}
+
+export type TransferConversationStatus =
+  | 'EstablishedConversation'
+  | 'OneWayConversation'
+  | 'SharedChannelActivity'
+  | 'NoRecordedConversation'
+  | 'ChatUnavailable';
+
+export interface TransferConversationSummary {
+  status: TransferConversationStatus;
+  isAvailable: boolean;
+  message: string | null;
+  senderToRecipientMessageCount: number;
+  recipientToSenderMessageCount: number;
+  immediateMessageCount: number;
+  firstMessageAt: string | null;
+  lastMessageAt: string | null;
+  sharedChannelCount: number;
+  sharedChannelMessageCount: number;
+  windowFrom: string;
+  windowTo: string;
+}
+
+export interface TransferConversationMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  body: string;
+  targetCharacterId: string | null;
+  targetCharacterName: string | null;
+  sentAt: string;
+}
+
+export interface TransferConversationPage {
+  transferId: string;
+  summary: TransferConversationSummary;
+  messages: TransferConversationMessage[];
+  nextCursor: string | null;
 }
 
 export interface TransferHistorySupportSnapshot {
@@ -274,6 +314,21 @@ export interface AdministrationAuditEntry {
   riskLevel: 'Normal' | 'Permanent' | 'HighValue';
   outcome: 'Completed';
   occurredAt: string;
+}
+
+export interface PlayerMessageHistoryEntry {
+  id: string;
+  channelType: string;
+  contextKey: string;
+  body: string;
+  targetCharacterId: string | null;
+  targetCharacterName: string | null;
+  sentAt: string;
+}
+
+export interface PlayerMessageHistoryPage {
+  entries: PlayerMessageHistoryEntry[];
+  nextCursor: string | null;
 }
 
 export interface AdministrationAuditPage {
@@ -511,6 +566,46 @@ export interface AccountTemporalCorrelationReport {
   analyzedTransferCount: number;
   analysisVersion: number;
   entries: AccountTemporalCorrelation[];
+}
+
+export type TransferConversationCorrelationAssessment =
+  | 'ChatUnavailable'
+  | 'RecordedBidirectionalConversation'
+  | 'UncommunicativeValueTransferPattern'
+  | 'BelowPatternThreshold';
+
+export interface TransferConversationCorrelationEntry {
+  counterpartyAccountId: string;
+  counterpartyCharacterId: string;
+  counterpartyCharacterName: string;
+  assessment: TransferConversationCorrelationAssessment;
+  meetsPatternThreshold: boolean;
+  explanation: string;
+  transferCount: number;
+  incomingTransferCount: number;
+  outgoingTransferCount: number;
+  cinderValue: number;
+  incomingCinders: number;
+  outgoingCinders: number;
+  itemTransferCount: number;
+  establishedConversationCount: number;
+  oneWayConversationCount: number;
+  sharedChannelActivityCount: number;
+  noRecordedConversationCount: number;
+  immediateMessageCount: number;
+  firstTransferAt: string;
+  lastTransferAt: string;
+  supportingTransferIds: string[];
+}
+
+export interface TransferConversationCorrelationReport {
+  accountId: string;
+  windowStart: string;
+  evaluatedAt: string;
+  evidenceComplete: boolean;
+  analyzedTransferCount: number;
+  unavailableConversationCount: number;
+  entries: TransferConversationCorrelationEntry[];
 }
 
 export interface AccountRiskFilters {

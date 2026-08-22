@@ -105,8 +105,27 @@ describe('LiveOps routed frontend', () => {
               assetName: 'Potion', sourceItemInstanceId: '77777777-7777-7777-7777-777777777777',
               destinationItemInstanceId: '88888888-8888-8888-8888-888888888888', quantity: 2,
               occurredAtUtc: '2026-08-17T10:00:00Z',
+              conversation: conversation('OneWayConversation'),
             }],
           },
+        },
+        errorMessage: '',
+      }),
+      playerTransferConversation: jasmine.createSpy().and.resolveTo({
+        isSuccess: true,
+        data: {
+          transferId: '33333333-3333-3333-3333-333333333333',
+          summary: conversation('EstablishedConversation'),
+          messages: [{
+            id: '99999999-9999-9999-9999-999999999999',
+            senderId: characterId,
+            senderName: 'ArdentFox',
+            body: 'Send it to EmberKnight.',
+            targetCharacterId: '55555555-5555-5555-5555-555555555555',
+            targetCharacterName: 'EmberKnight',
+            sentAt: '2026-08-18T09:55:00Z',
+          }],
+          nextCursor: null,
         },
         errorMessage: '',
       }),
@@ -134,6 +153,18 @@ describe('LiveOps routed frontend', () => {
     expect(fixture.nativeElement.textContent).toContain('500 × Cinders');
     expect(fixture.nativeElement.textContent).toContain('ArdentFox → EmberKnight');
     expect(fixture.nativeElement.textContent).toContain(characterId);
+
+    const conversationButton = fixture.nativeElement.querySelector('.conversation-status') as HTMLButtonElement;
+    conversationButton.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(api.playerTransferConversation).toHaveBeenCalledWith(
+      characterId,
+      '33333333-3333-3333-3333-333333333333',
+      null,
+      25,
+    );
+    expect(fixture.nativeElement.textContent).toContain('Send it to EmberKnight.');
 
     const loadMore = fixture.nativeElement.querySelector('.transfer-pagination button') as HTMLButtonElement;
     loadMore.click();
@@ -206,9 +237,27 @@ function supportSnapshot(characterId: string) {
         recipientCharacterId: '55555555-5555-5555-5555-555555555555', recipientCharacterName: 'EmberKnight',
         assetId: 'currency:cinders', assetName: 'Cinders', sourceItemInstanceId: null,
         destinationItemInstanceId: null, quantity: 500, occurredAtUtc: fetchedAtUtc,
+        conversation: conversation('EstablishedConversation'),
       }],
     }),
     synchronization: available({ pendingDeliveries: 0, failedDeliveries: 0, oldestPendingAtUtc: null, lastOutboxEventAtUtc: null, revisions: [], pendingRewardMessage: 'No pending-reward registry exists.' }),
+  };
+}
+
+function conversation(status: 'EstablishedConversation' | 'OneWayConversation' | 'SharedChannelActivity' | 'NoRecordedConversation' | 'ChatUnavailable') {
+  return {
+    status,
+    isAvailable: status !== 'ChatUnavailable',
+    message: status === 'ChatUnavailable' ? 'Chat is unavailable.' : null,
+    senderToRecipientMessageCount: status === 'EstablishedConversation' ? 2 : status === 'OneWayConversation' ? 1 : 0,
+    recipientToSenderMessageCount: status === 'EstablishedConversation' ? 1 : 0,
+    immediateMessageCount: status === 'EstablishedConversation' ? 2 : 0,
+    firstMessageAt: status === 'EstablishedConversation' ? '2026-08-18T09:50:00Z' : null,
+    lastMessageAt: status === 'EstablishedConversation' ? '2026-08-18T09:55:00Z' : null,
+    sharedChannelCount: status === 'SharedChannelActivity' ? 1 : 0,
+    sharedChannelMessageCount: status === 'SharedChannelActivity' ? 4 : 0,
+    windowFrom: '2026-07-19T10:00:00Z',
+    windowTo: '2026-08-18T12:00:00Z',
   };
 }
 

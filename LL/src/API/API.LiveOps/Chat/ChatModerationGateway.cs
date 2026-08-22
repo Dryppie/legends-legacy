@@ -183,6 +183,173 @@ public sealed class ChatModerationGateway(
         }
     }
 
+    public async Task<ChatPlayerMessageGatewayResult> GetPlayerMessagesAsync(
+        Guid characterId,
+        string? cursor,
+        int limit,
+        CancellationToken cancellationToken)
+    {
+        var parameters = new List<string>();
+        AddParameter(parameters, "cursor", cursor);
+        AddParameter(parameters, "take", Math.Clamp(limit, 1, 50).ToString());
+        var relativePath =
+            $"api/v1/chat/Moderation/{characterId}/Messages?{string.Join('&', parameters)}";
+        if (!TryCreateConfiguredRequest(
+                HttpMethod.Get,
+                relativePath,
+                out var request,
+                out var configurationError))
+        {
+            return new ChatPlayerMessageGatewayResult(
+                false, true, [], null, configurationError);
+        }
+
+        using (request)
+        using (var timeoutCts = CreateTimeoutToken(cancellationToken))
+        {
+            try
+            {
+                using var response = await httpClient.SendAsync(request, timeoutCts.Token);
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    return new ChatPlayerMessageGatewayResult(
+                        false, false, [], null, "The player-message cursor is invalid.");
+                }
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ChatPlayerMessageGatewayResult(
+                        false,
+                        true,
+                        [],
+                        null,
+                        $"Chat player history returned status {(int)response.StatusCode}.");
+                }
+
+                var body = await response.Content.ReadFromJsonAsync<PlayerMessageHistoryResponse>(
+                    cancellationToken: timeoutCts.Token);
+                return body is null
+                    ? new ChatPlayerMessageGatewayResult(
+                        false, true, [], null, "Chat returned an invalid player-history response.")
+                    : new ChatPlayerMessageGatewayResult(
+                        true,
+                        true,
+                        body.Entries.Select(entry => new ChatPlayerMessageGatewayEntry(
+                            entry.Id,
+                            entry.ChannelType,
+                            entry.ContextKey,
+                            entry.Body,
+                            entry.TargetCharacterId,
+                            entry.TargetCharacterName,
+                            entry.SentAt)).ToList(),
+                        body.NextCursor,
+                        string.Empty);
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                return new ChatPlayerMessageGatewayResult(
+                    false, true, [], null, "Chat player history timed out.");
+            }
+            catch (HttpRequestException)
+            {
+                return new ChatPlayerMessageGatewayResult(
+                    false, true, [], null, "Chat player history is temporarily unavailable.");
+            }
+        }
+    }
+
+    public async Task<ChatConversationEvidenceGatewayResult> GetConversationEvidenceAsync(
+        IReadOnlyList<ChatConversationEvidenceGatewayQuery> queries,
+        CancellationToken cancellationToken)
+    {
+        if (queries.Count is < 1 or > 25)
+        {
+            return new ChatConversationEvidenceGatewayResult(
+                false, true, [], "Between 1 and 25 conversation-evidence queries are required.");
+        }
+        if (!TryCreateConfiguredRequest(
+                HttpMethod.Post,
+                "api/v1/chat/Moderation/ConversationEvidence",
+                out var request,
+                out var configurationError))
+        {
+            return new ChatConversationEvidenceGatewayResult(
+                false, true, [], configurationError);
+        }
+
+        using (request)
+        using (var timeoutCts = CreateTimeoutToken(cancellationToken))
+        {
+            request.Content = JsonContent.Create(new ConversationEvidenceBatchRequest(
+                queries.Select(query => new ConversationEvidenceRequest(
+                    query.EvidenceId,
+                    query.FirstCharacterId,
+                    query.SecondCharacterId,
+                    query.From,
+                    query.To,
+                    query.TransferOccurredAt,
+                    query.ImmediateFrom,
+                    query.ImmediateTo,
+                    query.Cursor,
+                    Math.Clamp(query.Limit, 0, 25))).ToList()));
+            try
+            {
+                using var response = await httpClient.SendAsync(request, timeoutCts.Token);
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    return new ChatConversationEvidenceGatewayResult(
+                        false, false, [], "The conversation-evidence request or cursor is invalid.");
+                }
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ChatConversationEvidenceGatewayResult(
+                        false,
+                        true,
+                        [],
+                        $"Chat conversation evidence returned status {(int)response.StatusCode}.");
+                }
+
+                var body = await response.Content.ReadFromJsonAsync<ConversationEvidenceBatchResponse>(
+                    cancellationToken: timeoutCts.Token);
+                return body is null
+                    ? new ChatConversationEvidenceGatewayResult(
+                        false, true, [], "Chat returned an invalid conversation-evidence response.")
+                    : new ChatConversationEvidenceGatewayResult(
+                        true,
+                        true,
+                        body.Evidence.Select(entry => new ChatConversationEvidenceGatewayEntry(
+                            entry.EvidenceId,
+                            entry.FirstToSecondMessageCount,
+                            entry.SecondToFirstMessageCount,
+                            entry.ImmediateMessageCount,
+                            entry.FirstMessageAt,
+                            entry.LastMessageAt,
+                            entry.SharedChannelCount,
+                            entry.SharedChannelMessageCount,
+                            entry.Messages.Select(message => new ChatConversationEvidenceGatewayMessage(
+                                message.Id,
+                                message.ChannelType,
+                                message.SenderId,
+                                message.SenderName,
+                                message.Body,
+                                message.TargetCharacterId,
+                                message.TargetCharacterName,
+                                message.SentAt)).ToList(),
+                            entry.NextCursor)).ToList(),
+                        string.Empty);
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                return new ChatConversationEvidenceGatewayResult(
+                    false, true, [], "Chat conversation evidence timed out.");
+            }
+            catch (HttpRequestException)
+            {
+                return new ChatConversationEvidenceGatewayResult(
+                    false, true, [], "Chat conversation evidence is temporarily unavailable.");
+            }
+        }
+    }
+
     public Task<ChatModerationGatewayResult> MuteAsync(
         ChatMuteGatewayRequest request,
         CancellationToken cancellationToken) =>
@@ -345,4 +512,57 @@ public sealed class ChatModerationGateway(
         string ActorDisplayName,
         string Reason,
         DateTimeOffset OccurredAt);
+
+    private sealed record PlayerMessageHistoryResponse(
+        IReadOnlyList<PlayerMessageResponse> Entries,
+        string? NextCursor);
+
+    private sealed record PlayerMessageResponse(
+        Guid Id,
+        string ChannelType,
+        string ContextKey,
+        string Body,
+        Guid? TargetCharacterId,
+        string? TargetCharacterName,
+        DateTimeOffset SentAt);
+
+    private sealed record ConversationEvidenceBatchRequest(
+        IReadOnlyList<ConversationEvidenceRequest> Evidence);
+
+    private sealed record ConversationEvidenceRequest(
+        Guid EvidenceId,
+        Guid FirstCharacterId,
+        Guid SecondCharacterId,
+        DateTimeOffset From,
+        DateTimeOffset To,
+        DateTimeOffset TransferOccurredAt,
+        DateTimeOffset ImmediateFrom,
+        DateTimeOffset ImmediateTo,
+        string? Cursor,
+        int Take);
+
+    private sealed record ConversationEvidenceBatchResponse(
+        IReadOnlyList<ConversationEvidenceResponse> Evidence);
+
+    private sealed record ConversationEvidenceResponse(
+        Guid EvidenceId,
+        int FirstToSecondMessageCount,
+        int SecondToFirstMessageCount,
+        int ImmediateMessageCount,
+        DateTimeOffset? FirstMessageAt,
+        DateTimeOffset? LastMessageAt,
+        int SharedChannelCount,
+        int SharedChannelMessageCount,
+        IReadOnlyList<ConversationEvidenceMessageResponse> Messages,
+        string? NextCursor);
+
+    private sealed record ConversationEvidenceMessageResponse(
+        Guid Id,
+        string ChannelType,
+        Guid SenderId,
+        string SenderName,
+        string Body,
+        Guid? TargetCharacterId,
+        string? TargetCharacterName,
+        DateTimeOffset SentAt);
 }

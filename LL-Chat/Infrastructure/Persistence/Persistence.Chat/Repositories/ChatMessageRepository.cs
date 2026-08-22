@@ -64,4 +64,135 @@ public class ChatMessageRepository : IChatMessageRepository
         latest.Reverse();
         return latest;
     }
+
+    public async Task<IReadOnlyList<ChatMessage>> SentByAsync(
+        Guid senderId,
+        int take,
+        DateTimeOffset? beforeSentAt,
+        Guid? beforeMessageId,
+        CancellationToken cancellationToken)
+    {
+        take = Math.Clamp(take, 1, 51);
+        var query = _context.ChatMessages
+            .AsNoTracking()
+            .Where(message =>
+                message.SenderId == senderId &&
+                !message.IsSystemGenerated);
+
+        if (beforeSentAt.HasValue && beforeMessageId.HasValue)
+        {
+            var sentAt = beforeSentAt.Value;
+            var messageId = beforeMessageId.Value;
+            query = query.Where(message =>
+                message.SentAt < sentAt ||
+                (message.SentAt == sentAt && message.Id.CompareTo(messageId) < 0));
+        }
+
+        return await query
+            .OrderByDescending(message => message.SentAt)
+            .ThenByDescending(message => message.Id)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<ChatConversationEvidence> ConversationEvidenceAsync(
+        ChatConversationEvidenceQuery query,
+        CancellationToken cancellationToken)
+    {
+        var direct = _context.ChatMessages
+            .AsNoTracking()
+            .Where(message =>
+                message.ChannelType == ChatChannelType.Whisper &&
+                !message.IsSystemGenerated &&
+                message.SentAt >= query.From &&
+                message.SentAt <= query.To &&
+                ((message.SenderId == query.FirstCharacterId &&
+                  message.TargetCharacterId == query.SecondCharacterId) ||
+                 (message.SenderId == query.SecondCharacterId &&
+                  message.TargetCharacterId == query.FirstCharacterId)));
+
+        var summary = await direct
+            .GroupBy(_ => 1)
+            .Select(messages => new DirectConversationSummary(
+                messages.Count(message => message.SenderId == query.FirstCharacterId),
+                messages.Count(message => message.SenderId == query.SecondCharacterId),
+                messages.Count(message =>
+                    message.SentAt >= query.ImmediateFrom &&
+                    message.SentAt <= query.ImmediateTo),
+                messages.Min(message => message.SentAt),
+                messages.Max(message => message.SentAt)))
+            .SingleOrDefaultAsync(cancellationToken);
+
+        var sharedRows = await _context.ChatMessages
+            .AsNoTracking()
+            .Where(message =>
+                (message.ChannelType == ChatChannelType.Guild ||
+                 message.ChannelType == ChatChannelType.Raid) &&
+                !message.IsSystemGenerated &&
+                message.SentAt >= query.From &&
+                message.SentAt <= query.To &&
+                (message.SenderId == query.FirstCharacterId ||
+                 message.SenderId == query.SecondCharacterId))
+            .GroupBy(message => new
+            {
+                message.ChannelType,
+                message.ContextKey,
+                message.SenderId
+            })
+            .Select(messages => new SharedChannelSummary(
+                messages.Key.ChannelType,
+                messages.Key.ContextKey,
+                messages.Key.SenderId,
+                messages.Count()))
+            .ToListAsync(cancellationToken);
+        var sharedChannels = sharedRows
+            .GroupBy(row => new { row.ChannelType, row.ContextKey })
+            .Where(channel =>
+                channel.Any(row => row.SenderId == query.FirstCharacterId) &&
+                channel.Any(row => row.SenderId == query.SecondCharacterId))
+            .ToList();
+
+        IReadOnlyList<ChatMessage> messages = [];
+        if (query.Take > 0)
+        {
+            var page = direct;
+            if (query.BeforeSentAt.HasValue && query.BeforeMessageId.HasValue)
+            {
+                var sentAt = query.BeforeSentAt.Value;
+                var messageId = query.BeforeMessageId.Value;
+                page = page.Where(message =>
+                    message.SentAt < sentAt ||
+                    (message.SentAt == sentAt && message.Id.CompareTo(messageId) < 0));
+            }
+
+            messages = await page
+                .OrderByDescending(message => message.SentAt)
+                .ThenByDescending(message => message.Id)
+                .Take(Math.Clamp(query.Take, 1, 26))
+                .ToListAsync(cancellationToken);
+        }
+
+        return new ChatConversationEvidence(
+            summary?.FirstToSecondMessageCount ?? 0,
+            summary?.SecondToFirstMessageCount ?? 0,
+            summary?.ImmediateMessageCount ?? 0,
+            summary?.FirstMessageAt,
+            summary?.LastMessageAt,
+            sharedChannels.Count,
+            sharedChannels.Sum(channel => channel.Sum(row => row.MessageCount)),
+            messages);
+    }
+
+    private sealed record DirectConversationSummary(
+        int FirstToSecondMessageCount,
+        int SecondToFirstMessageCount,
+        int ImmediateMessageCount,
+        DateTimeOffset FirstMessageAt,
+        DateTimeOffset LastMessageAt);
+
+    private sealed record SharedChannelSummary(
+        ChatChannelType ChannelType,
+        string ContextKey,
+        Guid SenderId,
+        int MessageCount);
 }

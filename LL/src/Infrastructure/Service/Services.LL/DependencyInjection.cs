@@ -315,6 +315,7 @@ public static class DependencyInjection
                     && options.DevelopmentProgressionIntervalSeconds is >= 1 and <= 60
                     && options.DefaultStartDelayAfterRegistrationMinutes is >= 0 and < 10_080
                     && options.MatchIntervalMinutes > 0
+                    && options.MatchPreparationLeadSeconds is >= 0 and <= 600
                     && options.RoundCompletionCooldownSeconds is >= 0 and <= 300
                     && options.RegulationDurationMinutes > 0
                     && options.OvertimeDurationMinutes > 0

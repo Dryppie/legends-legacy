@@ -72,6 +72,17 @@ namespace Persistence.Chat.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("SenderId", "IsSystemGenerated", "SentAt", "Id");
+
+                    b.HasIndex("ChannelType", "SenderId", "IsSystemGenerated", "SentAt", "ContextKey")
+                        .HasDatabaseName("IX_ChatMessages_SharedChannelEvidence");
+
+                    b.HasIndex("ChannelType", "SenderId", "TargetCharacterId", "IsSystemGenerated", "SentAt", "Id")
+                        .HasDatabaseName("IX_ChatMessages_DirectConversationForward");
+
+                    b.HasIndex("ChannelType", "TargetCharacterId", "SenderId", "IsSystemGenerated", "SentAt", "Id")
+                        .HasDatabaseName("IX_ChatMessages_DirectConversationReverse");
+
                     b.ToTable("ChatMessages");
                 });
 

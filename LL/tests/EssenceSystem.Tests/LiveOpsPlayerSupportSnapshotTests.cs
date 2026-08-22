@@ -1,4 +1,5 @@
 using API.LiveOps.Support;
+using Application.Interfaces.Services.LL.Administration;
 using Domain.Models.Administration;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Outbox;
@@ -41,6 +42,9 @@ public sealed class LiveOpsPlayerSupportSnapshotTests
             ["BetweenOwnCharacters", "Incoming", "Outgoing"],
             result.Transfers.Data.Entries.Select(x => x.Direction));
         Assert.Equal("Cinders", result.Transfers.Data.Entries[2].AssetName);
+        Assert.All(
+            result.Transfers.Data.Entries,
+            transfer => Assert.Equal("EstablishedConversation", transfer.Conversation.Status));
         Assert.Equal(1, result.Synchronization.Data!.PendingDeliveries);
         Assert.Equal(7, Assert.Single(result.Synchronization.Data.Revisions).Revision);
     }
@@ -121,6 +125,7 @@ public sealed class LiveOpsPlayerSupportSnapshotTests
     private static LiveOpsPlayerSupportSnapshotService CreateService(
         IDbContextFactory<LLDbContext> factory) => new(
         factory,
+        new TestChatGateway(),
         Options.Create(new LiveOpsOptions { SupportSnapshotSectionTimeoutSeconds = 3 }),
         new FixedTimeProvider(Now),
         NullLogger<LiveOpsPlayerSupportSnapshotService>.Instance);
@@ -276,5 +281,46 @@ public sealed class LiveOpsPlayerSupportSnapshotTests
     private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
     {
         public override DateTimeOffset GetUtcNow() => now;
+    }
+
+    private sealed class TestChatGateway : IChatModerationGateway
+    {
+        public Task<ChatConversationEvidenceGatewayResult> GetConversationEvidenceAsync(
+            IReadOnlyList<ChatConversationEvidenceGatewayQuery> queries,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(new ChatConversationEvidenceGatewayResult(
+                true,
+                true,
+                queries.Select(query => new ChatConversationEvidenceGatewayEntry(
+                    query.EvidenceId,
+                    2,
+                    1,
+                    2,
+                    query.TransferOccurredAt.AddHours(-1),
+                    query.TransferOccurredAt.AddMinutes(-1),
+                    0,
+                    0,
+                    [],
+                    null)).ToList(),
+                string.Empty));
+
+        public Task<ChatModerationStateGatewayResult> GetStateAsync(
+            Guid characterId,
+            int historyLimit,
+            CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<ChatModerationAuditGatewayResult> GetAuditAsync(
+            ChatModerationAuditGatewayQuery query,
+            CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<ChatPlayerMessageGatewayResult> GetPlayerMessagesAsync(
+            Guid characterId,
+            string? cursor,
+            int limit,
+            CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<ChatModerationGatewayResult> MuteAsync(
+            ChatMuteGatewayRequest request,
+            CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<ChatModerationGatewayResult> UnmuteAsync(
+            ChatUnmuteGatewayRequest request,
+            CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 }

@@ -19,6 +19,7 @@ import {
 import { finalize } from 'rxjs/operators';
 import { CharacterTagComponent } from '../../../../../shared/components/character/character-tag/character-tag.component';
 import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
+import { formatLocalDate } from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 type DungeonLeaderboardMode = 'firstClears' | 'mostClears' | 'recentClears';
 
@@ -275,15 +276,7 @@ export class DungeonsComponent implements OnInit {
   }
 
   formatRecordDate(value: string | null | undefined): string {
-    if (!value) {
-      return 'Never';
-    }
-
-    return new Intl.DateTimeFormat(undefined, {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }).format(new Date(value));
+    return formatLocalDate(value, 'mediumDate') ?? 'Never';
   }
 
   private groupDifficultyVariants(

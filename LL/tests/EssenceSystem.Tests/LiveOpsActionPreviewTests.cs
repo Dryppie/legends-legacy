@@ -198,6 +198,8 @@ public sealed class LiveOpsActionPreviewTests
         public Task<ChatModerationStateGatewayResult> GetStateAsync(Guid characterId, int historyLimit, CancellationToken cancellationToken) =>
             Task.FromResult(new ChatModerationStateGatewayResult(true, null, [], string.Empty));
         public Task<ChatModerationAuditGatewayResult> GetAuditAsync(ChatModerationAuditGatewayQuery query, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<ChatPlayerMessageGatewayResult> GetPlayerMessagesAsync(Guid characterId, string? cursor, int limit, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<ChatConversationEvidenceGatewayResult> GetConversationEvidenceAsync(IReadOnlyList<ChatConversationEvidenceGatewayQuery> queries, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<ChatModerationGatewayResult> MuteAsync(ChatMuteGatewayRequest request, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<ChatModerationGatewayResult> UnmuteAsync(ChatUnmuteGatewayRequest request, CancellationToken cancellationToken) => throw new NotSupportedException();
     }

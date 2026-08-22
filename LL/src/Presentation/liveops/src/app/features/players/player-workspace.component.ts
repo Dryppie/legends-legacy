@@ -10,9 +10,12 @@ import {
   ApiResponse,
   ItemCatalogEntry,
   PlayerDetails,
+  PlayerMessageHistoryEntry,
+  PlayerTransferHistory,
   PlayerSupportSnapshot,
   PlayerSummary,
   TimelineEntry,
+  TransferConversationPage,
 } from '../../liveops.models';
 import { OperatorContextService } from '../../operator-context.service';
 import { ActionPreviewComponent } from '../../shared/action-preview/action-preview.component';
@@ -37,6 +40,15 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
   supportSnapshotError = '';
   transferHistoryLoading = false;
   transferHistoryError = '';
+  selectedTransfer: PlayerTransferHistory | null = null;
+  transferConversation: TransferConversationPage | null = null;
+  transferConversationLoading = false;
+  transferConversationError = '';
+  playerMessages: PlayerMessageHistoryEntry[] = [];
+  playerMessagesNextCursor: string | null = null;
+  playerMessagesLoading = false;
+  playerMessagesError = '';
+  private playerMessagesLoaded = false;
   activeSection: WorkspaceSection = 'support';
   loadingSearch = false;
   loadingPlayer = false;
@@ -182,6 +194,117 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     }
   }
 
+  async inspectTransferConversation(transfer: PlayerTransferHistory): Promise<void> {
+    this.selectedTransfer = transfer;
+    this.transferConversation = null;
+    this.transferConversationError = '';
+    await this.loadTransferConversation(false);
+  }
+
+  async loadMoreTransferConversation(): Promise<void> {
+    await this.loadTransferConversation(true);
+  }
+
+  closeTransferConversation(): void {
+    this.resetTransferConversation();
+  }
+
+  private async loadTransferConversation(loadMore: boolean): Promise<void> {
+    const characterId = this.selectedPlayer?.player.characterId;
+    const transfer = this.selectedTransfer;
+    const current = this.transferConversation;
+    const cursor = loadMore ? current?.nextCursor : null;
+    if (!characterId || !transfer || this.transferConversationLoading ||
+        (loadMore && !cursor)) return;
+
+    this.transferConversationLoading = true;
+    this.transferConversationError = '';
+    try {
+      const response = await this.api.playerTransferConversation(
+        characterId,
+        transfer.transferId,
+        cursor,
+        25,
+      );
+      if (this.selectedPlayer?.player.characterId !== characterId ||
+          this.selectedTransfer?.transferId !== transfer.transferId) return;
+      if (!response.isSuccess || !response.data) {
+        this.transferConversationError = response.errorMessage || 'Transfer conversation evidence could not be loaded.';
+        return;
+      }
+
+      const existing = loadMore ? current?.messages ?? [] : [];
+      const seen = new Set(existing.map((message) => message.id));
+      this.transferConversation = {
+        ...response.data,
+        messages: [
+          ...existing,
+          ...response.data.messages.filter((message) => !seen.has(message.id)),
+        ],
+      };
+    } catch (error) {
+      if (this.selectedPlayer?.player.characterId === characterId &&
+          this.selectedTransfer?.transferId === transfer.transferId) {
+        this.transferConversationError = this.errorMessage(error);
+      }
+    } finally {
+      if (this.selectedPlayer?.player.characterId === characterId &&
+          this.selectedTransfer?.transferId === transfer.transferId) {
+        this.transferConversationLoading = false;
+      }
+    }
+  }
+
+  async loadPlayerMessages(loadMore = false): Promise<void> {
+    const characterId = this.selectedPlayer?.player.characterId;
+    const cursor = loadMore ? this.playerMessagesNextCursor : null;
+    if (!characterId || this.playerMessagesLoading || (loadMore && !cursor)) return;
+
+    this.playerMessagesLoading = true;
+    this.playerMessagesError = '';
+    try {
+      const response = await this.api.playerMessageHistory(characterId, cursor, 25);
+      if (this.selectedPlayer?.player.characterId !== characterId) return;
+      if (!response.isSuccess || !response.data) {
+        this.playerMessagesError = response.errorMessage || 'Player message history could not be loaded.';
+        return;
+      }
+
+      const existing = loadMore ? this.playerMessages : [];
+      const seen = new Set(existing.map((entry) => entry.id));
+      this.playerMessages = [
+        ...existing,
+        ...response.data.entries.filter((entry) => !seen.has(entry.id)),
+      ];
+      this.playerMessagesNextCursor = response.data.nextCursor;
+      this.playerMessagesLoaded = true;
+    } catch (error) {
+      if (this.selectedPlayer?.player.characterId === characterId) {
+        this.playerMessagesError = this.errorMessage(error);
+      }
+    } finally {
+      if (this.selectedPlayer?.player.characterId === characterId) {
+        this.playerMessagesLoading = false;
+      }
+    }
+  }
+
+  messageChannelLabel(entry: PlayerMessageHistoryEntry): string {
+    const context = entry.contextKey.length > 18
+      ? `${entry.contextKey.slice(0, 8)}…`
+      : entry.contextKey;
+    switch (entry.channelType.toLowerCase()) {
+      case 'whisper': {
+        const target = entry.targetCharacterName
+          || (entry.targetCharacterId ? `${entry.targetCharacterId.slice(0, 8)}…` : 'unknown player');
+        return `Whisper → ${target}`;
+      }
+      case 'guild': return `Guild · ${context}`;
+      case 'raid': return `Raid · ${context}`;
+      default: return entry.channelType;
+    }
+  }
+
   async copyIdentifier(value: string, label: string): Promise<void> {
     try { await navigator.clipboard.writeText(value); this.showSuccess(`${label} copied.`); }
     catch { this.showError(`Could not copy the ${label.toLowerCase()}.`); }
@@ -314,6 +437,9 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
   setSection(section: WorkspaceSection): void {
     this.activeSection = section;
     this.message = '';
+    if (section === 'chat' && !this.playerMessagesLoaded) {
+      void this.loadPlayerMessages();
+    }
   }
 
   get timeline(): TimelineEntry[] {
@@ -330,6 +456,8 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     this.supportSnapshotError = '';
     this.transferHistoryError = '';
     this.transferHistoryLoading = false;
+    this.resetTransferConversation();
+    this.resetPlayerMessages();
     this.activeSection = 'support';
     this.message = '';
     try {
@@ -350,8 +478,25 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     this.supportSnapshotError = '';
     this.transferHistoryError = '';
     this.transferHistoryLoading = false;
+    this.resetTransferConversation();
+    this.resetPlayerMessages();
     this.loadingPlayer = false;
     this.activeSection = 'support';
+  }
+
+  private resetPlayerMessages(): void {
+    this.playerMessages = [];
+    this.playerMessagesNextCursor = null;
+    this.playerMessagesLoading = false;
+    this.playerMessagesError = '';
+    this.playerMessagesLoaded = false;
+  }
+
+  private resetTransferConversation(): void {
+    this.selectedTransfer = null;
+    this.transferConversation = null;
+    this.transferConversationLoading = false;
+    this.transferConversationError = '';
   }
 
   private async openActionPreview(
