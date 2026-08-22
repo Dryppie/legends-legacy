@@ -233,6 +233,15 @@
     0 0 0.75rem rgba(249, 220, 160, 0.1);
 }
 
+.soul-detail-identity {
+  flex: 1 1 auto;
+}
+
+.soul-detail-actions {
+  align-items: center;
+  white-space: nowrap;
+}
+
 .soul-equip-button-remove {
   border-color: rgba(255, 119, 130, 0.48);
   background: var(--ll-color-danger-soft);
@@ -677,18 +686,6 @@
     flex: 1;
   }
 
-  .soul-detail-header {
-    flex-direction: column;
-  }
-
-  .soul-detail-actions {
-    width: 100%;
-  }
-
-  .soul-detail-actions .ll-button:first-child {
-    flex: 1;
-  }
-
   .soul-loadout-slot-summary {
     display: none;
   }
@@ -1041,6 +1038,10 @@
 
   .soul-detail-header .ll-heading {
     font-size: 1.15rem;
+  }
+
+  .soul-detail-identity {
+    grid-column: 2;
   }
 
   .soul-detail-actions {
