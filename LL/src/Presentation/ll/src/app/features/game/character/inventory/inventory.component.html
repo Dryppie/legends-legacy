@@ -511,6 +511,13 @@
                 </button>
               </div>
 
+              <div
+                *ngIf="equipActionError as message"
+                class="ll-state ll-state-danger mt-2"
+              >
+                {{ message }}
+              </div>
+
               <button
                 *ngIf="canDonateToGuild(item)"
                 type="button"

@@ -117,7 +117,7 @@
 .soul-archive-row {
   display: grid;
   min-width: 0;
-  grid-template-columns: minmax(0, 1fr) 3rem 3rem 4.5rem 4.5rem;
+  grid-template-columns: minmax(0, 1fr) 3rem 3rem 2.75rem 4.5rem;
   align-items: center;
   gap: var(--ll-space-2);
 }

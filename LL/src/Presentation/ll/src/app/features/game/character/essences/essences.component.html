@@ -165,10 +165,11 @@
           <button
             type="button"
             class="soul-archive-sort-button"
+            aria-label="Sort by threat"
             [class.soul-archive-sort-button-active]="archiveSort() === 'threat'"
             (click)="setArchiveSort('threat')"
           >
-            Threat
+            Thr
             <span aria-hidden="true">{{ archiveSortIndicator("threat") }}</span>
           </button>
         </div>

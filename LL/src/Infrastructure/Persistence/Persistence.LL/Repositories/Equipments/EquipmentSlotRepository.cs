@@ -4,7 +4,6 @@ using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Professions.Crafting.V2;
-using Domain.Models.Professions.Gathering;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Equipments;
@@ -101,7 +100,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         return true;
     }
 
-    public async Task<bool> EquipEquipmentAsync(Guid entityId, Guid equipmentId, EquipmentSlotType? slotType, CancellationToken cancellationToken)
+    public async Task<EquipmentEquipResult> EquipEquipmentAsync(Guid entityId, Guid equipmentId, EquipmentSlotType? slotType, CancellationToken cancellationToken)
     {
         // Include all equipped items, and all items from inventory
         var character = await _context.Characters
@@ -119,74 +118,53 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             .Include(c => c.Inventory)
                 .ThenInclude(i => i.InventoryItems)
                     .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).ToolAffixes)
-            .Include(c => c.Professions)
             .SingleOrDefaultAsync(c => c.Id == entityId, cancellationToken);
 
         if (character == null)
         {
-            return false;
+            return EquipmentEquipResult.Fail("Character was not found.");
         }
         var inventory = character.Inventory;
         if (inventory == null)
         {
-            return false;
+            return EquipmentEquipResult.Fail("Inventory was not found.");
         }
         var inventoryItem = inventory.InventoryItems.FirstOrDefault(ii => ii.ItemInstanceId == equipmentId);
         if (inventoryItem == null)
         {
-            return false;
+            return EquipmentEquipResult.Fail("Equipment was not found in your inventory.");
         }
         if (inventoryItem.ItemInstance == null || inventoryItem.Quantity < 1 || inventoryItem.ItemInstance.ItemBase == null)
         {
-            return false;
+            return EquipmentEquipResult.Fail("That inventory item cannot be equipped.");
         }
         if (inventoryItem.ItemInstance.ItemBase is not EquipmentBase)
         {
-            return false;
+            return EquipmentEquipResult.Fail("That inventory item is not equipment.");
         }
         var equipmentInstance = (EquipmentInstance)inventoryItem.ItemInstance;
-        var requiredLevel = EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(
-            equipmentInstance.Tier);
-        if (character.Level < requiredLevel)
+        var isTool = equipmentInstance.EquipmentBase.EquipmentType == EquipmentType.Tool;
+        var requiredLevel = EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(equipmentInstance.Tier);
+        if (!isTool && character.Level < requiredLevel)
         {
-            return false;
-        }
-
-        if (equipmentInstance.EquipmentBase.EquipmentType == EquipmentType.Tool)
-        {
-            var gatheringType = equipmentInstance.EquipmentBase.GatheringType;
-            if (gatheringType is null)
-            {
-                return false;
-            }
-
-            var professionType = GatheringProfessionProgression.ToProfessionType(gatheringType.Value);
-            var professionLevel = character.Professions
-                .FirstOrDefault(profession => profession.ProfessionType == professionType)
-                ?.Level ?? 1;
-            var requiredProfessionLevel = GatheringProfessionProgression
-                .GetRequiredLevelForTool(equipmentInstance.Rarity);
-            if (professionLevel < requiredProfessionLevel)
-            {
-                return false;
-            }
+            return EquipmentEquipResult.Fail($"Character level {requiredLevel} is required to equip this item.");
         }
 
         return await EquipEquipmentAsync(character, inventory, equipmentInstance, inventoryItem, slotType, cancellationToken);
     }
 
-    private async Task<bool> EquipEquipmentAsync(Character character, Inventory inventory, EquipmentInstance equipmentInstance,
+    private async Task<EquipmentEquipResult> EquipEquipmentAsync(Character character, Inventory inventory, EquipmentInstance equipmentInstance,
         InventoryItem inventoryItem, EquipmentSlotType? slotType, CancellationToken cancellationToken)
     {
         var equipmentBase = equipmentInstance.EquipmentBase;
 
         if (slotType == EquipmentSlotType.Tool && equipmentBase.EquipmentType != EquipmentType.Tool)
-            return false;
+            return EquipmentEquipResult.Fail("Only gathering tools can be equipped in the tool slot.");
 
         if (equipmentBase.EquipmentType == EquipmentType.Tool &&
             slotType is not null &&
             slotType != EquipmentSlotType.Tool)
-            return false;
+            return EquipmentEquipResult.Fail("Gathering tools can only be equipped in the tool slot.");
 
         // Equip logic based on EquipmentType
         switch (equipmentBase.EquipmentType)
@@ -197,7 +175,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                     var offHand = GetSlot(character, EquipmentSlotType.OffHand);
 
                     if (mainHand is null || offHand is null)
-                        return false;
+                        return EquipmentEquipResult.Fail("The required hand slots are unavailable.");
 
                     UnequipHandSlots(mainHand, offHand, inventory);
                     Equip(equipmentInstance, mainHand);
@@ -211,7 +189,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                     var offHand = GetSlot(character, EquipmentSlotType.OffHand);
 
                     if (mainHand is null || offHand is null)
-                        return false;
+                        return EquipmentEquipResult.Fail("The required hand slots are unavailable.");
 
                     // Prioritize empty hand; fall back to replacing OffHand if needed
                     if (slotType == null)
@@ -261,7 +239,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                     var mainHand = GetSlot(character, EquipmentSlotType.MainHand);
 
                     if (offHand is null || mainHand is null)
-                        return false;
+                        return EquipmentEquipResult.Fail("The required hand slots are unavailable.");
 
                     var mainHandItem = mainHand.EquipmentInstance;
                     if (mainHandItem != null && mainHandItem.EquipmentBase.EquipmentType == EquipmentType.TwoHanded)
@@ -289,7 +267,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                     var slot = GetSlot(character, equipmentSlotType);
 
                     if (slot == null)
-                        return false;
+                        return EquipmentEquipResult.Fail("The matching equipment slot is unavailable.");
 
                     UnequipSlotAsync(slot, inventory);
                     Equip(equipmentInstance, slot);
@@ -301,7 +279,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         _context.InventoryItems.Remove(inventoryItem);
         inventory.InventoryItems.Remove(inventoryItem);
 
-        return true;
+        return EquipmentEquipResult.Success();
     }
 
     private static void Equip(EquipmentInstance equipmentInstance, EquipmentSlot mainHand)

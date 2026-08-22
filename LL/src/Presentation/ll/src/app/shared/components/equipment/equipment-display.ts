@@ -112,7 +112,8 @@ export function mapInstanceToDisplay(
     attributes,
     itemBudget: inst.itemBudget ?? 0,
     itemBudgetTier: inst.itemBudgetTier ?? inst.tier ?? 1,
-    requiredLevel: inst.requiredLevel ?? 1,
+    requiredLevel:
+      base.equipmentType === EquipmentType.Tool ? 1 : (inst.requiredLevel ?? 1),
     statModelVersion: inst.statModelVersion ?? 15,
     gatheringType: base.gatheringType,
     toolBonuses: effectiveToolBonuses,

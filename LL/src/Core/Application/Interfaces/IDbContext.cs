@@ -218,6 +218,10 @@ public interface IDbContext
 
     IExecutionStrategy CreateExecutionStrategy();
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default);
+    Task<T> ExecuteWithCharacterLockAsync<T>(
+        Guid characterId,
+        Func<CancellationToken, Task<T>> operation,
+        CancellationToken ct = default) => operation(ct);
     Task AcquireCharacterCommandLockAsync(Guid characterId, CancellationToken ct = default);
     Task AcquireStateSyncScopeLockAsync(string scopeKey, CancellationToken ct = default) => Task.CompletedTask;
     Task AcquireWorldTowerFloorLockAsync(string serverId, int floorNumber, CancellationToken ct = default);

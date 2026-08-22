@@ -756,6 +756,22 @@ describe('InventoryComponent quest presentation', () => {
     );
   });
 
+  it('equips tools without applying level requirements', () => {
+    const item = inventoryEquipment('epic-pickaxe', EquipmentType.Tool);
+    const tool = item.itemInstance as EquipmentInstance;
+    tool.rarity = Rarity.Epic;
+    tool.requiredLevel = 50;
+    const equipmentState = equipmentStateStub();
+    const component = createComponentWithEquipmentState(equipmentState);
+
+    expect(component.canEquipItem(item)).toBeTrue();
+    component.equipItem(item);
+    expect(equipmentState.equip).toHaveBeenCalledOnceWith(
+      tool,
+      EquipmentSlotType.Tool,
+    );
+  });
+
   it('unequips the item from its equipped slot', () => {
     const item = inventoryEquipment('equipped-legs', EquipmentType.Legs);
     const equipmentState = equipmentStateStub([

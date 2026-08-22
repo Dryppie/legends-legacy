@@ -8,6 +8,7 @@ import { CharacterActionType } from '../../../models/enums/characterActionType';
 import { GatheringType } from '../../../models/enums/gatheringType';
 import { QuestStateService } from '../../../../core/services/api/quest/quest-state.service';
 import { QuestService } from '../../../../core/services/api/quest/quest.service';
+import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
 import { CombatService } from '../../../../core/services/client-side/combat/combat.service';
 import {
   INTO_LUMO_RUINS_QUEST_ID,
@@ -38,6 +39,7 @@ export class CombatAreaCardComponent implements OnInit {
     private readonly characterActionService: CharacterActionsStateService,
     private readonly questState: QuestStateService,
     private readonly questService: QuestService,
+    private readonly inventoryState: InventoryStateService,
     private readonly combatService: CombatService,
   ) {
     this.isStartingIdleCombat = this.characterActionService.loadingCombat;
@@ -155,7 +157,10 @@ export class CombatAreaCardComponent implements OnInit {
       .startEncounter(TRAINING_DAY_QUEST_ID, encounterKey)
       .pipe(
         tap((result) => {
-          this.combatService.startTrainingBattleSummary(result);
+          this.inventoryState.applyVersionedInventoryDelta(result, (response) =>
+            this.inventoryState.addOrIncrementMany(response.loot ?? []),
+          );
+          this.combatService.startTrainingBattleSummary(result.data);
         }),
         catchError((err) => {
           console.error('Failed to start training battle', err);

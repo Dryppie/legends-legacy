@@ -1,8 +1,8 @@
 using Application.UseCases.Equipments.Dtos;
 using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.MarketPlaces.Dtos.Responses;
+using Application.UseCases.Quests.Dtos;
 using Application.UseCases.WorldTower.Dtos;
-using Application.Interfaces.Services.LL.Quests;
 
 namespace Application.WebSockets.Contracts;
 
@@ -98,7 +98,7 @@ public sealed record GuildDirectoryChanged(
     Guid? ActorCharacterId = null) : GameRealtimeEvent;
 
 public sealed record QuestJournalChanged(
-    QuestJournal Journal,
+    QuestJournalDto Journal,
     long StateVersion) : GameRealtimeEvent;
 
 public sealed record EventQuestChanged(

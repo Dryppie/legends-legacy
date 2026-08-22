@@ -1,5 +1,6 @@
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Quests;
+using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Quests;
@@ -23,6 +24,7 @@ public sealed class QuestEncounterService(
     IQuestProgressionService progressionService) : IQuestEncounterService
 {
     private static readonly TimeSpan TrainingEncounterCadence = TimeSpan.FromSeconds(10);
+    private const int TrainingEnemyMaxHealth = 10;
 
     public async Task<CombatResult?> StartAsync(
         Guid characterId,
@@ -99,6 +101,7 @@ public sealed class QuestEncounterService(
         await combatSetupService.PrepareEntitiesForCombat(
             [.. combatPlayers, .. combatEnemies],
             EssenceCombatActivity.IdleCombat);
+        SetTrainingEnemyHealth(combatEnemies.Single());
 
         var startsAt = DateTimeOffset.UtcNow;
         var encounterId = Guid.NewGuid();
@@ -133,5 +136,12 @@ public sealed class QuestEncounterService(
             cancellationToken);
         result.Loot.AddRange(progression.Loot);
         return result;
+    }
+
+    private static void SetTrainingEnemyHealth(CombatEntity enemy)
+    {
+        enemy.BaseCombatAttributes[AttributeType.MaxHealth] = TrainingEnemyMaxHealth;
+        enemy.CombatAttributes[AttributeType.MaxHealth] = TrainingEnemyMaxHealth;
+        enemy.SetCurrentHealth(TrainingEnemyMaxHealth);
     }
 }

@@ -898,9 +898,17 @@ export class InventoryComponent implements OnInit {
     const equipment = this.equipmentInstance(item);
     if (!equipment) return false;
 
+    if (equipment.equipmentBase.equipmentType === EquipmentType.Tool) {
+      return true;
+    }
+
     const characterLevel =
       this.characterState?.currentCharacter()?.level ?? Number.MAX_SAFE_INTEGER;
     return characterLevel >= (equipment.requiredLevel ?? 1);
+  }
+
+  get equipActionError(): string | null {
+    return this.equipmentState?.error?.() ?? null;
   }
 
   itemTypeLabel(item: InventoryItem): string {

@@ -129,7 +129,10 @@ export class EquipmentStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (response) => this.applyEquipmentChange(response),
-        error: (err) => this._error.set(err.message ?? 'Failed to equip item.'),
+        error: (err) =>
+          this._error.set(
+            err.errorMessage ?? err.message ?? 'Failed to equip item.',
+          ),
       });
   }
 

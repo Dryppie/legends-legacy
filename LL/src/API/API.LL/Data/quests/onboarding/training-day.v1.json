@@ -23,8 +23,7 @@
       "presentation": {
         "actionLabel": "Head to the Training Area",
         "destinationRoute": "/game/world/shenic?area=tutorial_area_training_grounds",
-        "guidePageId": "tutorial-training",
-        "tourPageId": "tutorial-training-area"
+        "guidePageId": "tutorial-training"
       }
     }
   ],

@@ -166,6 +166,41 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default)
         => Database.BeginTransactionAsync(ct);
 
+    public async Task<T> ExecuteWithCharacterLockAsync<T>(
+        Guid characterId,
+        Func<CancellationToken, Task<T>> operation,
+        CancellationToken ct = default)
+    {
+        if (Database.ProviderName != "Npgsql.EntityFrameworkCore.PostgreSQL")
+        {
+            return await operation(ct);
+        }
+
+        if (Database.CurrentTransaction is not null)
+        {
+            await AcquireCharacterCommandLockAsync(characterId, ct);
+            return await operation(ct);
+        }
+
+        var strategy = Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
+        {
+            await using var transaction = await Database.BeginTransactionAsync(ct);
+            try
+            {
+                await AcquireCharacterCommandLockAsync(characterId, ct);
+                var result = await operation(ct);
+                await transaction.CommitAsync(ct);
+                return result;
+            }
+            catch
+            {
+                await transaction.RollbackAsync(ct);
+                throw;
+            }
+        });
+    }
+
     public async Task AcquireCharacterCommandLockAsync(
         Guid characterId,
         CancellationToken ct = default)

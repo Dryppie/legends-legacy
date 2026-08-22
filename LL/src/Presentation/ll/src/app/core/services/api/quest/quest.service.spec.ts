@@ -1,4 +1,5 @@
 import { of } from 'rxjs';
+import { CombatResultDto } from '../../../../shared/models/Dtos/combatResultDto';
 import { QuestJournal } from '../../../../shared/models/quest';
 import { QuestService } from './quest.service';
 
@@ -24,6 +25,30 @@ describe('QuestService', () => {
       'Quest/quest%2Fone/choice',
       { optionKey: 'option-a' },
       { stateSyncScopesHandledByResponse: ['quests'] },
+    );
+  });
+
+  it('returns encounter loot as a versioned inventory delta', () => {
+    const combatResult = { loot: [] } as unknown as CombatResultDto;
+    const api = {
+      postVersioned: jasmine.createSpy('postVersioned').and.returnValue(
+        of({
+          data: { isSuccess: true, data: combatResult },
+          domainVersions: { inventory: 9 },
+        }),
+      ),
+    };
+    const service = new QuestService(api as never);
+
+    service.startEncounter('training/day', 'skeleton').subscribe((result) => {
+      expect(result.data).toBe(combatResult);
+      expect(result.domainVersions['inventory']).toBe(9);
+    });
+
+    expect(api.postVersioned).toHaveBeenCalledWith(
+      'Quest/training%2Fday/encounters/skeleton/start',
+      {},
+      { stateSyncScopesHandledByResponse: ['inventory'] },
     );
   });
 });

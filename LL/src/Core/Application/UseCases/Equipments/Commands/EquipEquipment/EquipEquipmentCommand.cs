@@ -38,9 +38,10 @@ public class EquipEquipmentCommandHandler : IRequestHandler<EquipEquipmentComman
         if (!Guid.TryParse(request.EquipmentId, out var equipmentId))
             return Response<EquipmentChangeResponseDto>.Fail("Failed to equip item.");
 
-        var success = await _equipmentService.EquipEquipmentAsync(request.EntityId, equipmentId, request.SlotType, cancellationToken);
-        if (!success)
-            return Response<EquipmentChangeResponseDto>.Fail("Failed to equip item.");
+        var equipResult = await _equipmentService.EquipEquipmentAsync(request.EntityId, equipmentId, request.SlotType, cancellationToken);
+        if (!equipResult.Succeeded)
+            return Response<EquipmentChangeResponseDto>.Fail(
+                equipResult.ErrorMessage ?? "Failed to equip item.");
 
         await _outbox.EnqueueAsync(
             GameEventTypes.EquipmentChanged,

@@ -1,4 +1,3 @@
-using Domain.Models.Items;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 
 namespace Domain.Models.Professions.Gathering;
@@ -50,14 +49,4 @@ public static class GatheringProfessionProgression
         return checked(ExperienceCurveCoefficient * sumOfSquares);
     }
 
-    public static int GetRequiredLevelForTool(Rarity rarity) => rarity switch
-    {
-        Rarity.Common or Rarity.Uncommon => 1,
-        Rarity.Rare => 20,
-        Rarity.Epic => 40,
-        Rarity.Unique => 60,
-        Rarity.Legendary => 80,
-        Rarity.Legacy => 100,
-        _ => throw new ArgumentOutOfRangeException(nameof(rarity))
-    };
 }

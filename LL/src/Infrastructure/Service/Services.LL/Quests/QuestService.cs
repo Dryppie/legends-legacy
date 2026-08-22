@@ -1,7 +1,9 @@
 using Application.Interfaces.Services.LL.Quests;
 using Application.Interfaces.Services.LL;
+using Application.UseCases.Quests.Dtos;
 using Application.Interfaces.WebSockets;
 using Application.WebSockets.Contracts;
+using AutoMapper;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Quests;
@@ -18,7 +20,8 @@ public sealed class QuestService(
     ILootRewardWriter lootRewardWriter,
     TimeProvider timeProvider,
     IGameRealtimeBroadcaster? eventPublisher = null,
-    IStateSyncService? stateSync = null) : IQuestService, IQuestProgressionService
+    IStateSyncService? stateSync = null,
+    IMapper? mapper = null) : IQuestService, IQuestProgressionService
 {
     public async Task<QuestJournal> GetJournalAsync(
         Guid characterId,
@@ -873,6 +876,11 @@ public sealed class QuestService(
         CancellationToken cancellationToken)
     {
         if (eventPublisher is null) return;
+        if (mapper is null)
+        {
+            throw new InvalidOperationException(
+                "Quest realtime publishing requires the application mapper.");
+        }
 
         var stateVersion = 0L;
         if (stateSync is not null)
@@ -889,7 +897,7 @@ public sealed class QuestService(
 
         await eventPublisher.PublishAsync(
             new Audience.Character(characterId),
-            new QuestJournalChanged(journal, stateVersion),
+            new QuestJournalChanged(mapper.Map<QuestJournalDto>(journal), stateVersion),
             nameof(QuestService),
             cancellationToken);
     }

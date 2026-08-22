@@ -1,3 +1,4 @@
+using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL.Quests;
 using Application.MediatR.Markers;
 using Application.UseCases.Quests.Dtos;
@@ -9,12 +10,16 @@ namespace Application.UseCases.Quests.Queries.GetQuestJournal;
 public sealed record GetQuestJournalQuery(Guid CharacterId) : IQuery<QuestJournalDto>;
 
 public sealed class GetQuestJournalQueryHandler(
+    IDbContext db,
     IQuestService questService,
     IMapper mapper) : IRequestHandler<GetQuestJournalQuery, QuestJournalDto>
 {
     public async Task<QuestJournalDto> Handle(
         GetQuestJournalQuery request,
         CancellationToken cancellationToken) =>
-        mapper.Map<QuestJournalDto>(
-            await questService.GetJournalAsync(request.CharacterId, cancellationToken));
+        await db.ExecuteWithCharacterLockAsync(
+            request.CharacterId,
+            async ct => mapper.Map<QuestJournalDto>(
+                await questService.GetJournalAsync(request.CharacterId, ct)),
+            cancellationToken);
 }

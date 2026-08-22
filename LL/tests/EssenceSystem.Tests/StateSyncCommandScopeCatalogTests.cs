@@ -285,7 +285,7 @@ public sealed class StateSyncCommandScopeCatalogTests
     }
 
     [Fact]
-    public void CompleteQuestJournalMutationsOwnOnlyTheQuestScope()
+    public void QuestMutationsSynchronizeTheirOwnedState()
     {
         var choice = StateSyncCommandScopeCatalog.GetProfile(
             typeof(global::Application.UseCases.Quests.Commands.SelectQuestChoice.SelectQuestChoiceCommand));
@@ -299,7 +299,11 @@ public sealed class StateSyncCommandScopeCatalogTests
 
         Assert.Contains(StateSyncScopes.Quests, encounter.CharacterScopes);
         Assert.Contains(StateSyncScopes.AreaAccess, encounter.CharacterScopes);
-        Assert.Empty(encounter.CharacterResponseSemantics.Keys);
+        Assert.True(encounter.InventoryWhenChanged);
+        Assert.DoesNotContain(StateSyncScopes.Inventory, encounter.CharacterScopes);
+        Assert.Equal(
+            StateSyncResponseSemantics.OrderedDelta,
+            encounter.CharacterResponseSemantics[StateSyncScopes.Inventory]);
     }
 
     [Fact]

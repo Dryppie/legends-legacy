@@ -3,7 +3,6 @@ using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
-using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting.V2;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 using Microsoft.EntityFrameworkCore;
@@ -64,7 +63,7 @@ public sealed class EquipmentHandRuleTests
             CancellationToken.None);
         await db.SaveChangesAsync();
 
-        Assert.True(equipped);
+        Assert.True(equipped.Succeeded, equipped.ErrorMessage);
         var slots = await repository.GetEquipmentSlotsByEntityIdAsync(characterId, CancellationToken.None);
         Assert.Null(slots.Single(slot => slot.EquipmentSlotType == EquipmentSlotType.MainHand).EquipmentInstanceId);
         Assert.Equal(
@@ -98,11 +97,11 @@ public sealed class EquipmentHandRuleTests
         await db.SaveChangesAsync();
         var repository = new EquipmentSlotRepository(db);
 
-        Assert.True(await repository.EquipEquipmentAsync(
+        Assert.True((await repository.EquipEquipmentAsync(
             characterId,
             greatsword.Id,
             null,
-            CancellationToken.None));
+            CancellationToken.None)).Succeeded);
         await db.SaveChangesAsync();
 
         var slots = await repository.GetEquipmentSlotsByEntityIdAsync(characterId, CancellationToken.None);
@@ -130,9 +129,9 @@ public sealed class EquipmentHandRuleTests
         await db.SaveChangesAsync();
         var repository = new EquipmentSlotRepository(db);
 
-        Assert.True(await repository.EquipEquipmentAsync(characterId, first.Id, null, CancellationToken.None));
-        Assert.True(await repository.EquipEquipmentAsync(characterId, second.Id, null, CancellationToken.None));
-        Assert.True(await repository.EquipEquipmentAsync(characterId, third.Id, null, CancellationToken.None));
+        Assert.True((await repository.EquipEquipmentAsync(characterId, first.Id, null, CancellationToken.None)).Succeeded);
+        Assert.True((await repository.EquipEquipmentAsync(characterId, second.Id, null, CancellationToken.None)).Succeeded);
+        Assert.True((await repository.EquipEquipmentAsync(characterId, third.Id, null, CancellationToken.None)).Succeeded);
         await db.SaveChangesAsync();
 
         var slots = await repository.GetEquipmentSlotsByEntityIdAsync(characterId, CancellationToken.None);
@@ -155,11 +154,11 @@ public sealed class EquipmentHandRuleTests
         await db.SaveChangesAsync();
         var repository = new EquipmentSlotRepository(db);
 
-        Assert.True(await repository.EquipEquipmentAsync(
+        Assert.True((await repository.EquipEquipmentAsync(
             characterId,
             sword.Id,
             EquipmentSlotType.MainHand,
-            CancellationToken.None));
+            CancellationToken.None)).Succeeded);
         await db.SaveChangesAsync();
 
         var equipped = (await repository.GetEquipmentSlotsByEntityIdAsync(characterId, CancellationToken.None))
@@ -220,56 +219,44 @@ public sealed class EquipmentHandRuleTests
         var repository = new EquipmentSlotRepository(db);
 
         Assert.Equal(50, EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(2));
-        Assert.False(await repository.EquipEquipmentAsync(
+        Assert.False((await repository.EquipEquipmentAsync(
             characterId,
             tierTwoSword.Id,
             EquipmentSlotType.MainHand,
-            CancellationToken.None));
+            CancellationToken.None)).Succeeded);
 
         character.Level = 50;
         await db.SaveChangesAsync();
 
-        Assert.True(await repository.EquipEquipmentAsync(
+        Assert.True((await repository.EquipEquipmentAsync(
             characterId,
             tierTwoSword.Id,
             EquipmentSlotType.MainHand,
-            CancellationToken.None));
+            CancellationToken.None)).Succeeded);
     }
 
     [Fact]
-    public async Task Rare_gathering_tools_require_profession_level_twenty()
+    public async Task Gathering_tools_have_no_character_or_profession_level_requirements()
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
         var pickaxe = Equipment("rare-pickaxe", EquipmentType.Tool);
-        pickaxe.Rarity = Rarity.Rare;
+        pickaxe.Rarity = Rarity.Legacy;
+        pickaxe.Tier = 2;
         ((EquipmentBase)pickaxe.ItemBase).GatheringType = GatheringType.Mining;
         var character = CharacterWithHands(characterId, null, null, [pickaxe]);
-        var mining = new Profession
-        {
-            CharacterId = characterId,
-            ProfessionType = ProfessionType.Mining,
-            Level = 19
-        };
-        character.Professions.Add(mining);
+        character.Level = 1;
         db.Characters.Add(character);
         await db.SaveChangesAsync();
         var repository = new EquipmentSlotRepository(db);
 
-        Assert.False(await repository.EquipEquipmentAsync(
+        var result = await repository.EquipEquipmentAsync(
             characterId,
             pickaxe.Id,
             EquipmentSlotType.Tool,
-            CancellationToken.None));
+            CancellationToken.None);
 
-        mining.Level = 20;
-        await db.SaveChangesAsync();
-
-        Assert.True(await repository.EquipEquipmentAsync(
-            characterId,
-            pickaxe.Id,
-            EquipmentSlotType.Tool,
-            CancellationToken.None));
+        Assert.True(result.Succeeded, result.ErrorMessage);
     }
 
     private static LLDbContext CreateDb()

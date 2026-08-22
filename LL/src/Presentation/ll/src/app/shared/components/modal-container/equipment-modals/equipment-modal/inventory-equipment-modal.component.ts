@@ -64,11 +64,19 @@ export class InventoryEquipmentModalComponent implements OnInit {
   ) {}
 
   get requiredLevel(): number {
+    if (
+      this.equipmentInstance.equipmentBase.equipmentType === EquipmentType.Tool
+    ) {
+      return 1;
+    }
+
     return this.equipmentInstance.requiredLevel ?? 1;
   }
 
   get meetsLevelRequirement(): boolean {
-    return (this.characterState.currentCharacter()?.level ?? 0) >= this.requiredLevel;
+    return (
+      (this.characterState.currentCharacter()?.level ?? 0) >= this.requiredLevel
+    );
   }
 
   get inventoryItem(): InventoryItem | undefined {

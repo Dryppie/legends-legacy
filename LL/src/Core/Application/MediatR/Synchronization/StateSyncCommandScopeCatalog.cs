@@ -455,8 +455,19 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.Quests.Commands.PinQuest.PinQuestCommand),
             typeof(global::Application.UseCases.Quests.Commands.SelectQuestChoice.SelectQuestChoiceCommand));
 
-        Register(profiles, [StateSyncScopes.Quests, StateSyncScopes.AreaAccess], [],
-            typeof(global::Application.UseCases.Quests.Commands.StartQuestEncounter.StartQuestEncounterCommand));
+        profiles.Add(
+            typeof(global::Application.UseCases.Quests.Commands.StartQuestEncounter.StartQuestEncounterCommand),
+            new StateSyncCommandScopeProfile(
+                [StateSyncScopes.Quests, StateSyncScopes.AreaAccess],
+                [],
+                RefreshCharacterOverview: true,
+                InventoryWhenChanged: true,
+                RefreshCharacterSummaryWhenChanged: false)
+            {
+                CharacterResponseSemantics = CreateResponseSemantics(
+                    [StateSyncScopes.Inventory],
+                    StateSyncResponseSemantics.OrderedDelta)
+            });
 
         RegisterWorldResponse(
             profiles,

@@ -143,6 +143,13 @@ describe('mapInstanceToDisplay', () => {
 
     expect(mapInstanceToDisplay(item).requiredLevel).toBe(50);
   });
+
+  it('does not expose a character level requirement for tools', () => {
+    const item = toolInstance();
+    item.requiredLevel = 50;
+
+    expect(mapInstanceToDisplay(item).requiredLevel).toBe(1);
+  });
 });
 
 describe('EquipmentDisplayComponent', () => {

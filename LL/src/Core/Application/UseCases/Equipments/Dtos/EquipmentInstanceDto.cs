@@ -58,7 +58,9 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
             .ForMember(
                 destination => destination.RequiredLevel,
                 options => options.MapFrom(source =>
-                    EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(source.Tier)))
+                    source.EquipmentBase.EquipmentType == EquipmentType.Tool
+                        ? 1
+                        : EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(source.Tier)))
             .ForMember(
                 destination => destination.EffectiveAttributeModifiers,
                 options => options.MapFrom(source => AttributeCalculator.ProjectEquipmentModifiers(

@@ -10,6 +10,7 @@ import {
 import { ApiService, VersionedMutationResult } from '../api.service';
 
 const QUEST_MUTATION_HANDLED_SCOPES = ['quests'] as const;
+const QUEST_ENCOUNTER_HANDLED_SCOPES = ['inventory'] as const;
 
 @Injectable({ providedIn: 'root' })
 export class QuestService {
@@ -74,13 +75,21 @@ export class QuestService {
   startEncounter(
     questId: string,
     encounterKey: string,
-  ): Observable<CombatResultDto> {
+  ): Observable<VersionedMutationResult<CombatResultDto>> {
     return this.api
-      .post(
+      .postVersioned<CombatResultDto | ApiResponse<CombatResultDto>>(
         `Quest/${encodeURIComponent(questId)}/encounters/${encodeURIComponent(encounterKey)}/start`,
         {},
+        {
+          stateSyncScopesHandledByResponse: QUEST_ENCOUNTER_HANDLED_SCOPES,
+        },
       )
-      .pipe(map((response) => this.unwrapResponse<CombatResultDto>(response)));
+      .pipe(
+        map((response) => ({
+          ...response,
+          data: this.unwrapResponse<CombatResultDto>(response.data),
+        })),
+      );
   }
 
   private unwrapResponse<T>(response: T | ApiResponse<T>): T {

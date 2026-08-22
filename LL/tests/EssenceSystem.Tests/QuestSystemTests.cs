@@ -31,6 +31,10 @@ public sealed class QuestSystemTests
         Assert.Equal(QuestConstants.TrainingDay, definitions[0].Id);
         var firstHunt = provider.Get(QuestConstants.TrainingDay);
         Assert.Equal(4, firstHunt.Version);
+        Assert.All(
+            Enumerable.Range(1, firstHunt.Version),
+            version => Assert.Null(Assert.Single(
+                provider.Get(QuestConstants.TrainingDay, version).Objectives).Presentation.TourPageId));
         var firstHuntChoice = Assert.IsType<QuestChoiceDefinition>(firstHunt.Choice);
         Assert.Equal(3, firstHuntChoice.Options.Count);
         Assert.Equal(

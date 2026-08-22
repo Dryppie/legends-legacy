@@ -3,14 +3,13 @@ using Application.UseCases.Quests.Events.Commands.ClaimEventQuestMilestone;
 using Application.UseCases.Quests.Events.Commands.ClaimAllEventQuestMilestones;
 using Application.UseCases.Quests.Events.Dtos;
 using Application.UseCases.Quests.Events.Queries.GetEventQuestJournal;
-using API.LL.Common;
 using Common.Primitives;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.LL.Controllers.V1;
 
-[Authorize(Policy = AuthorizationPolicies.MultiplayerAllowed)]
+[Authorize]
 public sealed class EventQuestController : BaseController
 {
     [HttpGet]
