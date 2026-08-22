@@ -121,27 +121,68 @@
           {{ archiveSort() }}
         </p>
         <div class="flex items-center gap-2">
-          <app-dropdown
-            appearance="field"
-            label="Sort"
-            [value]="archiveSort()"
-            [options]="archiveSorts"
-            [selectedValue]="archiveSort()"
-            (selection)="setArchiveSortSelection($event)"
-          ></app-dropdown>
           <span class="ll-badge ll-badge-accent shrink-0 rounded">
             {{ essenceState.archive()?.essenceDust ?? 0 }} dust
           </span>
         </div>
       </div>
 
-      <div class="soul-archive-table-heading" aria-hidden="true">
-        <span>Essence</span>
-        <span>Lv</span>
-        <span>Asc</span>
-        <span>Ability</span>
-        <span>Thr</span>
-        <span>Status</span>
+      <div class="soul-archive-table-heading" role="row">
+        <div role="columnheader" [attr.aria-sort]="archiveAriaSort('name')">
+          <button
+            type="button"
+            class="soul-archive-sort-button"
+            [class.soul-archive-sort-button-active]="archiveSort() === 'name'"
+            (click)="setArchiveSort('name')"
+          >
+            Essence
+            <span aria-hidden="true">{{ archiveSortIndicator("name") }}</span>
+          </button>
+        </div>
+        <div role="columnheader" [attr.aria-sort]="archiveAriaSort('level')">
+          <button
+            type="button"
+            class="soul-archive-sort-button"
+            [class.soul-archive-sort-button-active]="archiveSort() === 'level'"
+            (click)="setArchiveSort('level')"
+          >
+            Lv
+            <span aria-hidden="true">{{ archiveSortIndicator("level") }}</span>
+          </button>
+        </div>
+        <div role="columnheader" [attr.aria-sort]="archiveAriaSort('tier')">
+          <button
+            type="button"
+            class="soul-archive-sort-button"
+            [class.soul-archive-sort-button-active]="archiveSort() === 'tier'"
+            (click)="setArchiveSort('tier')"
+          >
+            Asc
+            <span aria-hidden="true">{{ archiveSortIndicator("tier") }}</span>
+          </button>
+        </div>
+        <div role="columnheader" [attr.aria-sort]="archiveAriaSort('threat')">
+          <button
+            type="button"
+            class="soul-archive-sort-button"
+            [class.soul-archive-sort-button-active]="archiveSort() === 'threat'"
+            (click)="setArchiveSort('threat')"
+          >
+            Threat
+            <span aria-hidden="true">{{ archiveSortIndicator("threat") }}</span>
+          </button>
+        </div>
+        <div role="columnheader" [attr.aria-sort]="archiveAriaSort('status')">
+          <button
+            type="button"
+            class="soul-archive-sort-button"
+            [class.soul-archive-sort-button-active]="archiveSort() === 'status'"
+            (click)="setArchiveSort('status')"
+          >
+            Status
+            <span aria-hidden="true">{{ archiveSortIndicator("status") }}</span>
+          </button>
+        </div>
       </div>
 
       <cdk-virtual-scroll-viewport [itemSize]="48" class="min-h-0 flex-1">
@@ -174,9 +215,6 @@
           <span class="soul-archive-row-tier"
             >A{{ essence.ascensionTier }}</span
           >
-          <span class="soul-archive-row-ability">
-            {{ essence.activeAbility.name }}
-          </span>
           <strong class="soul-archive-row-threat">
             {{ essence.activeAbility.threatValue ?? 0 }}
           </strong>
@@ -200,7 +238,7 @@
         *ngIf="essenceState.selected() as essence"
       >
         <div
-          class="soul-detail-header flex flex-nowrap items-center gap-2 border-b border-light_gray/70 pb-4"
+          class="soul-detail-header flex flex-nowrap items-center gap-2 pb-2"
         >
           <button
             type="button"
@@ -265,7 +303,7 @@
           </div>
         </div>
 
-        <div class="mt-4 grid gap-3 md:grid-cols-2">
+        <div class="mt-2 grid gap-3 md:grid-cols-2">
           <article class="ll-card p-3">
             <div class="mb-2 flex items-center justify-between gap-2">
               <h3 class="font-semibold text-primary">
@@ -323,7 +361,7 @@
           </article>
         </div>
 
-        <section class="ll-card soul-progression mt-4 overflow-hidden">
+        <section class="ll-card soul-progression mt-2 overflow-hidden">
           <header class="px-4 py-3">
             <div class="flex items-center justify-between gap-3">
               <h3 class="ll-heading text-base text-primary">
