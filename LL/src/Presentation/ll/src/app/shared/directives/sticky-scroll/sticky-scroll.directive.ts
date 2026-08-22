@@ -13,7 +13,8 @@ import {
 export class StickyScrollDirective implements AfterViewInit, OnDestroy {
   private isUserScrolledUp = false;
   private isAutoScrolling = false;
-  private mutationObserver!: MutationObserver;
+  private mutationObserver?: MutationObserver;
+  private resizeObserver?: ResizeObserver;
 
   constructor(private el: ElementRef) {}
 
@@ -31,6 +32,17 @@ export class StickyScrollDirective implements AfterViewInit, OnDestroy {
       childList: true,
       subtree: true,
     });
+
+    // Keep the newest message visible when another panel changes the amount of
+    // space available to the scroll container (for example, a growing loot
+    // history). ResizeObserver does not report content mutations reliably when
+    // only the container's viewport height changes.
+    this.resizeObserver = new ResizeObserver(() => {
+      if (!this.isUserScrolledUp) {
+        this.scrollToBottom();
+      }
+    });
+    this.resizeObserver.observe(this.el.nativeElement);
   }
 
   @HostListener('scroll')
@@ -52,9 +64,7 @@ export class StickyScrollDirective implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // Disconnect the observer to prevent memory leaks
-    if (this.mutationObserver) {
-      this.mutationObserver.disconnect();
-    }
+    this.mutationObserver?.disconnect();
+    this.resizeObserver?.disconnect();
   }
 }
