@@ -313,7 +313,7 @@ export class RegionBossComponent implements OnInit, OnDestroy {
 
   bossHealthRemaining(event: RegionBossStatus): number {
     return (
-      this.liveBossFrame(event)?.hostile[0]?.health ??
+      this.liveBossFrame(event)?.hostile?.[0]?.health ??
       event.run?.currentBossHealthRemaining ??
       0
     );
@@ -321,7 +321,7 @@ export class RegionBossComponent implements OnInit, OnDestroy {
 
   bossMaxHealth(event: RegionBossStatus): number {
     return (
-      this.liveBossFrame(event)?.hostile[0]?.maxHealth ??
+      this.liveBossFrame(event)?.hostile?.[0]?.maxHealth ??
       event.run?.currentBossMaxHealth ??
       0
     );
@@ -498,8 +498,19 @@ export class RegionBossComponent implements OnInit, OnDestroy {
     if (frame.sequence === this.lastPlaybackSequence && !reset) return;
 
     this.lastPlaybackSequence = frame.sequence;
+    const playbackFrame = bundle.frames.find(
+      (item) => item.sequence === frame.sequence,
+    );
     this.currentPlaybackFrame.set(
-      bundle.frames.find((item) => item.sequence === frame.sequence) ?? null,
+      playbackFrame
+        ? {
+            ...playbackFrame,
+            friendly: frame.friendly,
+            hostile: frame.hostile,
+            entityStats: frame.entityStats,
+            events: frame.events,
+          }
+        : null,
     );
     if (this.watchingPlayback()) {
       this.combat.applyRegionBossCombatFrame(frame, reset);

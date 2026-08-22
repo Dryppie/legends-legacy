@@ -2,9 +2,15 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, shareReplay, throwError } from 'rxjs';
 import {
   RegionBossPlaybackBundle,
+  RegionBossPlaybackFrame,
   RegionBossService,
 } from '../../api/region-boss/region-boss.service';
 import { TowerCombatFrame } from '../../api/world-tower/world-tower.service';
+import {
+  AbilityStats,
+  EntityStats,
+  SimpleCombatEntityDto,
+} from '../../../../shared/models/Dtos/combatResultDto';
 
 @Injectable({ providedIn: 'root' })
 export class RegionBossPlaybackService {
@@ -45,13 +51,120 @@ export class RegionBossPlaybackService {
       else high = middle - 1;
     }
 
-    const frame = bundle.frames[low];
+    return this.toCombatFrame(bundle, bundle.frames[low]);
+  }
+
+  private toCombatFrame(
+    bundle: RegionBossPlaybackBundle,
+    frame: RegionBossPlaybackFrame,
+  ): TowerCombatFrame {
+    if (
+      !bundle.entities ||
+      !bundle.abilities ||
+      !frame.entityStates ||
+      !frame.entityTotals ||
+      !frame.abilityTotals
+    ) {
+      return {
+        sequence: frame.sequence,
+        tick: frame.tick,
+        friendly: frame.friendly ?? [],
+        hostile: frame.hostile ?? [],
+        entityStats: frame.entityStats ?? [],
+        events: [],
+        isFinal: frame.isFinal,
+        outcome: null,
+      };
+    }
+
+    const stateByEntity = new Map(
+      frame.entityStates.map((state) => [state.entityIndex, state]),
+    );
+    const totalsByEntity = new Map(
+      frame.entityTotals.map((totals) => [totals.entityIndex, totals]),
+    );
+    const abilityTotals = new Map(
+      frame.abilityTotals.map((totals) => [totals.abilityIndex, totals]),
+    );
+    const activeEntities = bundle.entities.filter((entity) =>
+      stateByEntity.has(entity.index),
+    );
+    const entities = activeEntities.map((entity): SimpleCombatEntityDto => {
+      const state = stateByEntity.get(entity.index)!;
+      return {
+        id: entity.id,
+        name: entity.name,
+        imagePath: entity.imagePath,
+        health: state.health,
+        maxHealth: entity.maxHealth,
+        barrier: state.barrier,
+        level: entity.level,
+        partyNumber: entity.partyNumber,
+        currentStagger: state.currentStagger,
+        maxStagger: state.maxStagger,
+        isStaggered: state.isStaggered,
+        isStaggerRecovering: state.isStaggerRecovering,
+      };
+    });
+    const stats = activeEntities.map((entity): EntityStats => {
+      const state = stateByEntity.get(entity.index)!;
+      const totals = totalsByEntity.get(entity.index);
+      const abilities = bundle.abilities!
+        .filter((ability) => ability.entityIndex === entity.index)
+        .map((ability): AbilityStats => {
+          const values = abilityTotals.get(ability.index);
+          return {
+            name: ability.name,
+            uses: values?.uses ?? 0,
+            totalDamage: values?.totalDamage ?? 0,
+            totalHealing: values?.totalHealing ?? 0,
+            totalBarrier: values?.totalBarrier ?? 0,
+            damageByType: values?.damageByType ?? [],
+            totalThreat: values?.totalThreat ?? 0,
+            hits: 0,
+            crits: 0,
+            summons: 0,
+            stuns: 0,
+            selfDamage: 0,
+            alliedDamage: 0,
+            totalStagger: values?.totalStagger ?? 0,
+            staggerBreaks: values?.staggerBreaks ?? 0,
+          };
+        });
+      return {
+        entityId: entity.id,
+        entityName: entity.name,
+        abilities,
+        damageDone: totals?.damageDone ?? 0,
+        damageTaken: totals?.damageTaken ?? 0,
+        healingDone: totals?.healingDone ?? 0,
+        healingReceived: totals?.healingReceived ?? 0,
+        healthRegenerated: totals?.healthRegenerated ?? 0,
+        healthRegenerationPotential: 0,
+        healthRegenerationOverhealed: 0,
+        healthRegenerationPulses: 0,
+        selfDamageDone: 0,
+        selfDamageTaken: 0,
+        alliedDamageDone: 0,
+        alliedDamageTaken: 0,
+        team: entity.isFriendly ? 'Friendly' : 'Hostile',
+        barrierGenerated: totals?.barrierGenerated ?? 0,
+        damageBlocked: totals?.damageBlocked ?? 0,
+        threatGenerated: totals?.threatGenerated ?? 0,
+        staggerContributed: totals?.staggerContributed ?? 0,
+        staggerBreaks: totals?.staggerBreaks ?? 0,
+        health: state.health,
+        maxHealth: entity.maxHealth,
+        barrier: state.barrier,
+      };
+    });
+
     return {
       sequence: frame.sequence,
       tick: frame.tick,
-      friendly: frame.friendly,
-      hostile: frame.hostile,
-      entityStats: frame.entityStats,
+      friendly: entities.filter((_, index) => activeEntities[index].isFriendly),
+      hostile: entities.filter((_, index) => !activeEntities[index].isFriendly),
+      entityStats: stats,
       events: [],
       isFinal: frame.isFinal,
       outcome: null,

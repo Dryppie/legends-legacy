@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
+  AbilityStats,
   EntityStats,
   SimpleCombatEntityDto,
 } from '../../../../shared/models/Dtos/combatResultDto';
@@ -92,10 +93,13 @@ export interface RegionBossStatus {
 export interface RegionBossPlaybackFrame {
   sequence: number;
   tick: number;
-  friendly: SimpleCombatEntityDto[];
-  hostile: SimpleCombatEntityDto[];
-  entityStats: EntityStats[];
-  events: unknown[];
+  entityStates?: RegionBossPlaybackEntityState[];
+  entityTotals?: RegionBossPlaybackEntityTotals[];
+  abilityTotals?: RegionBossPlaybackAbilityTotals[];
+  friendly?: SimpleCombatEntityDto[];
+  hostile?: SimpleCombatEntityDto[];
+  entityStats?: EntityStats[];
+  events?: unknown[];
   isFinal: boolean;
   context: {
     waveNumber: number;
@@ -119,7 +123,62 @@ export interface RegionBossPlaybackBundle {
   highestLevelDefeated: number;
   currentBossLevel: number;
   terminationReason: string;
+  entities?: RegionBossPlaybackEntity[];
+  abilities?: RegionBossPlaybackAbility[];
   frames: RegionBossPlaybackFrame[];
+}
+
+export interface RegionBossPlaybackEntity {
+  index: number;
+  id: string;
+  name: string;
+  imagePath: string;
+  isFriendly: boolean;
+  maxHealth: number;
+  level: number;
+  partyNumber: number | null;
+}
+
+export interface RegionBossPlaybackAbility {
+  index: number;
+  entityIndex: number;
+  name: string;
+}
+
+export interface RegionBossPlaybackEntityState {
+  entityIndex: number;
+  health: number;
+  barrier: number;
+  currentStagger: number;
+  maxStagger: number;
+  isStaggered: boolean;
+  isStaggerRecovering: boolean;
+}
+
+export interface RegionBossPlaybackEntityTotals {
+  entityIndex: number;
+  damageDone: number;
+  damageTaken: number;
+  healingDone: number;
+  healingReceived: number;
+  healthRegenerated: number;
+  barrierGenerated: number;
+  damageBlocked: number;
+  threatGenerated: number;
+  staggerContributed: number;
+  staggerBreaks: number;
+}
+
+export interface RegionBossPlaybackAbilityTotals {
+  abilityIndex: number;
+  uses: number;
+  totalDamage: number;
+  totalHealing: number;
+  totalBarrier: number;
+  damageByType: AbilityStats['damageByType'] | null;
+  totalThreat: number;
+  totalStagger: number;
+  staggerBreaks: number;
 }
 
 @Injectable({ providedIn: 'root' })

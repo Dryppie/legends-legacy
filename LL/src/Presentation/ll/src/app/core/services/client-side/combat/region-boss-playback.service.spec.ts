@@ -47,6 +47,94 @@ describe('RegionBossPlaybackService', () => {
       },
     ],
   };
+  const compactBundle: RegionBossPlaybackBundle = {
+    schemaVersion: 2,
+    ticksPerSecond: 10,
+    ticksPerFrame: 10,
+    totalTicks: 20,
+    highestLevelDefeated: 1,
+    currentBossLevel: 2,
+    terminationReason: 'PartyDefeated',
+    entities: [
+      {
+        index: 0,
+        id: 'player',
+        name: 'Ascendant',
+        imagePath: '',
+        isFriendly: true,
+        maxHealth: 100,
+        level: 60,
+        partyNumber: 1,
+      },
+      {
+        index: 1,
+        id: 'boss',
+        name: 'The Mad King',
+        imagePath: '',
+        isFriendly: false,
+        maxHealth: 100,
+        level: 2,
+        partyNumber: null,
+      },
+    ],
+    abilities: [{ index: 0, entityIndex: 0, name: 'Strike' }],
+    frames: [
+      {
+        sequence: 0,
+        tick: 20,
+        entityStates: [
+          {
+            entityIndex: 0,
+            health: 0,
+            barrier: 0,
+            currentStagger: 0,
+            maxStagger: 0,
+            isStaggered: false,
+            isStaggerRecovering: false,
+          },
+          {
+            entityIndex: 1,
+            health: 75,
+            barrier: 0,
+            currentStagger: 0,
+            maxStagger: 0,
+            isStaggered: false,
+            isStaggerRecovering: false,
+          },
+        ],
+        entityTotals: [
+          {
+            entityIndex: 0,
+            damageDone: 25,
+            damageTaken: 100,
+            healingDone: 0,
+            healingReceived: 0,
+            healthRegenerated: 0,
+            barrierGenerated: 0,
+            damageBlocked: 0,
+            threatGenerated: 25,
+            staggerContributed: 0,
+            staggerBreaks: 0,
+          },
+        ],
+        abilityTotals: [
+          {
+            abilityIndex: 0,
+            uses: 1,
+            totalDamage: 25,
+            totalHealing: 0,
+            totalBarrier: 0,
+            damageByType: [],
+            totalThreat: 25,
+            totalStagger: 0,
+            staggerBreaks: 0,
+          },
+        ],
+        isFinal: true,
+        context: { waveNumber: 2, furyStacks: 1, downed: [] },
+      },
+    ],
+  };
 
   let service: RegionBossPlaybackService;
   let regionBosses: jasmine.SpyObj<RegionBossService>;
@@ -72,6 +160,16 @@ describe('RegionBossPlaybackService', () => {
     expect(frame.friendly[0].health).toBe(0);
     expect(frame.hostile[0].name).toBe('The Mad King');
     expect(frame.isFinal).toBeTrue();
+  });
+
+  it('reconstructs combat state and telemetry from compact playback frames', () => {
+    const frame = service.frameAtTick(compactBundle, 20);
+
+    expect(frame.friendly[0].health).toBe(0);
+    expect(frame.hostile[0].name).toBe('The Mad King');
+    expect(frame.entityStats[0].damageDone).toBe(25);
+    expect(frame.entityStats[0].abilities[0].name).toBe('Strike');
+    expect(frame.entityStats[0].abilities[0].totalDamage).toBe(25);
   });
 
   it('reuses the immutable playback bundle for the same run', () => {

@@ -625,16 +625,15 @@ public sealed class RegionBossService(
         var candidates = await db.CharacterActions.AsNoTracking()
             .Where(action => action.UpdatedAt >= activityCutoff)
             .Join(
-                db.Characters.AsNoTracking(),
+                db.Characters.AsNoTracking()
+                    .Where(character => character.Level >= definition.LevelRequirement),
                 action => action.CharacterId,
                 character => character.Id,
                 (action, character) => new AutomaticSignupCandidate(
                     character.Id,
                     character.UserId,
                     character.Name,
-                    character.Level,
                     action.UpdatedAt))
-            .Where(candidate => candidate.Level >= definition.LevelRequirement)
             .ToArrayAsync(cancellationToken);
 
         if (!string.IsNullOrWhiteSpace(definition.RequiredCompletedQuestId))
@@ -698,7 +697,6 @@ public sealed class RegionBossService(
         Guid CharacterId,
         Guid AccountId,
         string CharacterName,
-        int Level,
         DateTimeOffset LastActivityAtUtc);
 
     private async Task<RegionBossEvent?> LoadSignupEventForUpdateAsync(
