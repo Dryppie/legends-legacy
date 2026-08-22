@@ -25,13 +25,18 @@
   <main class="region-boss-feed">
     <header class="feed-header">
       <div>
-        <p class="section-label">Recurring world event</p>
-        <h1>Region Boss</h1>
+        <p class="section-label">Region Boss preview</p>
+        <div class="feed-title-line">
+          <h1>{{ displayBossName() }}</h1>
+          <span>Region {{ displayRegionId() }} · Recurring world event</span>
+        </div>
       </div>
       <div class="feed-header-actions">
-        <span class="meta-box">Region {{ displayRegionId() }}</span>
-        <span class="meta-box muted">{{ timeSinceLastUpdate() }}</span>
+        <span *ngIf="!embedded" class="updated-label">
+          {{ timeSinceLastUpdate() }}
+        </span>
         <button
+          *ngIf="!embedded"
           type="button"
           class="meta-button"
           (click)="load()"

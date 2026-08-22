@@ -243,6 +243,7 @@ export interface TournamentPlaybackEntityTotals {
   healthRegenerated: number;
   barrierGenerated: number;
   damageBlocked: number;
+  threatGenerated?: number;
 }
 
 export interface TournamentPlaybackAbilityTotals {
@@ -251,6 +252,7 @@ export interface TournamentPlaybackAbilityTotals {
   totalDamage: number;
   totalHealing: number;
   totalBarrier: number;
+  totalThreat?: number;
 }
 
 export interface TournamentCombatFrame {

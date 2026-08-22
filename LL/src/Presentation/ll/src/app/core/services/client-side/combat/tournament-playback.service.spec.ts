@@ -33,7 +33,13 @@ describe('TournamentPlaybackService', () => {
         level: 1,
       },
     ],
-    abilities: [],
+    abilities: [
+      {
+        index: 0,
+        entityIndex: 0,
+        name: 'Taunt',
+      },
+    ],
     frames: [
       {
         sequence: 0,
@@ -42,8 +48,29 @@ describe('TournamentPlaybackService', () => {
           { entityIndex: 0, health: 100, barrier: 0 },
           { entityIndex: 1, health: 100, barrier: 0 },
         ],
-        entityTotals: [],
-        abilityTotals: [],
+        entityTotals: [
+          {
+            entityIndex: 0,
+            damageDone: 0,
+            damageTaken: 0,
+            healingDone: 0,
+            healingReceived: 0,
+            healthRegenerated: 0,
+            barrierGenerated: 0,
+            damageBlocked: 0,
+            threatGenerated: 250,
+          },
+        ],
+        abilityTotals: [
+          {
+            abilityIndex: 0,
+            uses: 1,
+            totalDamage: 0,
+            totalHealing: 0,
+            totalBarrier: 0,
+            totalThreat: 250,
+          },
+        ],
         isFinal: false,
       },
       {
@@ -82,6 +109,8 @@ describe('TournamentPlaybackService', () => {
     expect(final.sequence).toBe(1);
     expect(final.friendly[0].id).toBe('friendly');
     expect(final.hostile[0].health).toBe(0);
+    expect(initial.entityStats[0].threatGenerated).toBe(250);
+    expect(initial.entityStats[0].abilities[0].totalThreat).toBe(250);
   });
 
   it('downloads an immutable bundle only once for the same ETag', () => {

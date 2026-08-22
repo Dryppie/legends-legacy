@@ -1190,10 +1190,6 @@ public sealed class TournamentGroundsServiceTests
         clock.SetUtcNow(liveMatch.PlaybackEndsAtUtc.Value.AddSeconds(1));
         await service.AdvanceDueTournamentsAsync(CancellationToken.None);
         Assert.Equal(1, await db.TournamentMatches.CountAsync(m => m.Status == TournamentMatchStatus.Completed));
-        Assert.Equal(1, combatExecutor.ExecutionCount);
-
-        clock.SetUtcNow(Now.AddMinutes(10));
-        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
         Assert.Equal(2, combatExecutor.ExecutionCount);
         var secondLiveMatch = Assert.Single(
             await db.TournamentMatches
@@ -1276,8 +1272,8 @@ public sealed class TournamentGroundsServiceTests
             Assert.Equal(match.Id, match.BattleHistoryId);
         });
         Assert.Equal(
-            TimeSpan.FromMinutes(10),
-            matches[1].ScheduledAtUtc!.Value - matches[0].ScheduledAtUtc!.Value);
+            matches[0].ResolvedAtUtc,
+            matches[1].ScheduledAtUtc);
         Assert.Equal(
             matches[1].ResolvedAtUtc!.Value.AddSeconds(10),
             matches[2].ScheduledAtUtc);
@@ -1343,6 +1339,14 @@ public sealed class TournamentGroundsServiceTests
         Assert.NotNull(playbackBundle);
         Assert.NotEmpty(playbackBundle.Frames);
         Assert.True(playbackBundle.Frames[^1].IsFinal);
+        Assert.NotEmpty(playbackBundle.Frames[^1].EntityTotals);
+        Assert.All(
+            playbackBundle.Frames[^1].EntityTotals,
+            totals => Assert.Equal(100, totals.ThreatGenerated));
+        Assert.NotEmpty(playbackBundle.Frames[^1].AbilityTotals);
+        Assert.All(
+            playbackBundle.Frames[^1].AbilityTotals,
+            totals => Assert.Equal(75, totals.TotalThreat));
 
         var historyEntries = await service.GetHistoryAsync(champion.CharacterId, CancellationToken.None);
         var historyEntry = Assert.Single(historyEntries);
@@ -2247,6 +2251,20 @@ public sealed class TournamentGroundsServiceTests
                     .ToList(),
                 EnemyTeam = runtime.HostileParticipants
                     .Select(p => new SimpleCombatEntity(p.Combatant.Id, p.Combatant.Name, p.Combatant.ImagePath, 1, 0))
+                    .ToList(),
+                EntityStats = runtime.FriendlyParticipants
+                    .Select(p => new EntityStats(
+                        p.Combatant.Id,
+                        p.Combatant.Name,
+                        [new AbilityStats("test.tournament.strike", Uses: 1, TotalThreat: 75)],
+                        Team: "Friendly",
+                        ThreatGenerated: 100))
+                    .Concat(runtime.HostileParticipants.Select(p => new EntityStats(
+                        p.Combatant.Id,
+                        p.Combatant.Name,
+                        [new AbilityStats("test.tournament.strike", Uses: 1, TotalThreat: 75)],
+                        Team: "Hostile",
+                        ThreatGenerated: 100)))
                     .ToList()
             });
         }

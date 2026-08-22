@@ -140,7 +140,13 @@
               <header class="dungeon-preview-toolbar">
                 <div>
                   <div class="world-map-eyebrow">Dungeon preview</div>
-                  <h2>{{ selectedDungeonTitle() }}</h2>
+                  <div class="preview-title">
+                    <h2>{{ selectedDungeonTitle() }}</h2>
+                    <span
+                      >Lv {{ selectedDungeonRequiredLevel() }} · Region
+                      {{ regionNumber() }}</span
+                    >
+                  </div>
                 </div>
                 <button type="button" (click)="showAreas()">
                   <span aria-hidden="true">←</span>
@@ -164,7 +170,7 @@
               <header class="dungeon-preview-toolbar">
                 <div>
                   <div class="world-map-eyebrow">Raid preview</div>
-                  <div class="raid-preview-title">
+                  <div class="preview-title">
                     <h2>{{ raidBoss.name }}</h2>
                     <span
                       >Lv {{ raidBoss.levelRequirement }} · Region
@@ -230,21 +236,6 @@
         </ng-template>
 
         <aside class="world-map-rail" aria-label="Region activities">
-          <section *ngIf="regionNumber() === 1" class="activity-panel">
-            <header>
-              <h2>Region Boss</h2>
-              <span>Every 4–8h</span>
-            </header>
-            <button
-              type="button"
-              class="activity-row"
-              [class.selected]="selectedRegionBoss"
-              (click)="selectRegionBoss()"
-            >
-              <span class="activity-name">The Mad King</span>
-              <span class="activity-meta">Matchmade parties of up to 5</span>
-            </button>
-          </section>
           <section class="activity-panel" data-tour="dungeons-introduction">
             <header>
               <h2>Dungeons</h2>
@@ -312,6 +303,21 @@
             <ng-template #noRaids>
               <p class="activity-empty">No raids are available here yet.</p>
             </ng-template>
+          </section>
+          <section *ngIf="regionNumber() === 1" class="activity-panel">
+            <header>
+              <h2>Region Boss</h2>
+              <span>Every 4–8h</span>
+            </header>
+            <button
+              type="button"
+              class="activity-row"
+              [class.selected]="selectedRegionBoss"
+              (click)="selectRegionBoss()"
+            >
+              <span class="activity-name">The Mad King</span>
+              <span class="activity-meta">Matchmade parties of up to 5</span>
+            </button>
           </section>
         </aside>
       </div>

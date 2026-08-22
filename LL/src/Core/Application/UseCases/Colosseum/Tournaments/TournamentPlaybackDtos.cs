@@ -72,11 +72,13 @@ public sealed record TournamentPlaybackEntityTotalsDto(
     int HealingReceived,
     int HealthRegenerated,
     int BarrierGenerated,
-    int DamageBlocked);
+    int DamageBlocked,
+    int ThreatGenerated = 0);
 
 public sealed record TournamentPlaybackAbilityTotalsDto(
     int AbilityIndex,
     int Uses,
     int TotalDamage,
     int TotalHealing,
-    int TotalBarrier);
+    int TotalBarrier,
+    int TotalThreat = 0);

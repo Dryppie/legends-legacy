@@ -256,6 +256,15 @@ export class RegionBossComponent implements OnInit, OnDestroy {
     return this.regionId ?? this.events()[0]?.regionId ?? 1;
   }
 
+  displayBossName(): string {
+    return (
+      this.activeEvent()?.name ??
+      this.upcomingEvents()[0]?.name ??
+      this.settledEvents()[0]?.name ??
+      'Region Boss'
+    );
+  }
+
   timeUntil(value: string): string {
     const remainingSeconds = Math.max(
       0,

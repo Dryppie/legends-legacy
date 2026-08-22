@@ -1782,13 +1782,18 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 .OrderBy(m => m.MatchNumber)
                 .ToListAsync(cancellationToken);
 
+            var finalizedMatch = false;
             foreach (var playingMatch in matches.Where(match =>
                          match.Status == TournamentMatchStatus.Resolving
                          && match.PlaybackEndsAtUtc <= playbackFinalizationCutoff))
             {
                 await FinalizeMatchAsync(tournament, playingMatch, now, cancellationToken);
+                finalizedMatch = true;
                 changed = true;
             }
+
+            if (finalizedMatch)
+                StartNextSemifinalAsSoonAsAvailable(round, rounds.Count, matches, now);
 
             if (matches.All(match => match.Status is TournamentMatchStatus.Completed or TournamentMatchStatus.Bye))
             {
@@ -2306,7 +2311,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                     entity.HealingReceived,
                     entity.HealthRegenerated,
                     entity.BarrierGenerated,
-                    entity.DamageBlocked))
+                    entity.DamageBlocked,
+                    entity.ThreatGenerated))
                 .OrderBy(total => total.EntityIndex)
                 .ToArray();
             var abilityTotals = checkpoint.EntityStats
@@ -2317,7 +2323,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                         ability.Uses,
                         ability.TotalDamage,
                         ability.TotalHealing,
-                        ability.TotalBarrier)))
+                        ability.TotalBarrier,
+                        ability.TotalThreat)))
                 .OrderBy(total => total.AbilityIndex)
                 .ToArray();
             return new TournamentPlaybackFrameDto(
@@ -2811,6 +2818,27 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         nextRound.StartsAtUtc = startsAt;
         nextRound.UpdatedAtUtc = completedAt;
+    }
+
+    private static void StartNextSemifinalAsSoonAsAvailable(
+        TournamentRound round,
+        int roundCount,
+        IReadOnlyList<TournamentMatch> matches,
+        DateTimeOffset now)
+    {
+        if (round.RoundNumber != roundCount - 1
+            || matches.Any(match => match.Status == TournamentMatchStatus.Resolving))
+            return;
+
+        var nextMatch = matches
+            .Where(match => match.Status == TournamentMatchStatus.Ready
+                            && match.ScheduledAtUtc > now)
+            .OrderBy(match => match.MatchNumber)
+            .FirstOrDefault();
+        if (nextMatch is null) return;
+
+        nextMatch.ScheduledAtUtc = now;
+        nextMatch.UpdatedAtUtc = now;
     }
 
     private static IReadOnlyDictionary<Guid, DateTimeOffset> BuildTournamentMatchSchedule(

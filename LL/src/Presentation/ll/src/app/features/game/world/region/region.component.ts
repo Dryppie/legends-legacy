@@ -437,4 +437,12 @@ export class RegionComponent implements OnInit, OnDestroy {
       )?.title ?? 'Dungeon'
     );
   }
+
+  selectedDungeonRequiredLevel(): number {
+    return (
+      this.regionDungeons().find(
+        (dungeon) => dungeon.id === this.selectedDungeonId,
+      )?.requiredLevel ?? 1
+    );
+  }
 }
