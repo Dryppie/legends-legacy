@@ -93,12 +93,37 @@ describe('CombatService', () => {
 
     expect(state.getIsCombatActive(BattleType.Raid)()).toBeTrue();
     expect(state.getEnemyCharacters(BattleType.Raid)()[0].id).toBe('raid-boss');
-    expect(state.getCombatOutcome(BattleType.Raid)()).toBe(BattleOutcome.Victory);
+    expect(state.getCombatOutcome(BattleType.Raid)()).toBe(
+      BattleOutcome.Victory,
+    );
 
     service.closeCurrentRaidBattle();
 
     expect(state.getIsCombatActive(BattleType.Raid)()).toBeFalse();
     expect(state.getCombatResult(BattleType.Raid)()).toBeNull();
+  });
+
+  it('applies and closes Region Boss playback in its own state slot', () => {
+    service.applyRegionBossCombatFrame({
+      sequence: 0,
+      tick: 10,
+      friendly: [combatant('player')],
+      hostile: [combatant('mad-king')],
+      entityStats: [],
+      events: [],
+      isFinal: false,
+      outcome: null,
+    });
+
+    expect(state.getIsCombatActive(BattleType.RegionBoss)()).toBeTrue();
+    expect(state.getEnemyCharacters(BattleType.RegionBoss)()[0].id).toBe(
+      'mad-king',
+    );
+
+    service.closeCurrentRegionBossBattle();
+
+    expect(state.getIsCombatActive(BattleType.RegionBoss)()).toBeFalse();
+    expect(state.getCombatResult(BattleType.RegionBoss)()).toBeNull();
   });
 });
 

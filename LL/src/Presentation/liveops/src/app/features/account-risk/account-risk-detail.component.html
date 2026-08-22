@@ -64,6 +64,75 @@
       </section>
     </div>
 
+    <section class="risk-panel temporal-correlation-panel">
+      <header>
+        <div><p class="eyebrow">Token-chain timing · supporting context only</p><h2>Possible account correlation</h2></div>
+        @if (temporalReport) { <small>v{{ temporalReport.analysisVersion }} · {{ temporalReport.windowStart | date: 'mediumDate' }} to {{ temporalReport.evaluatedAt | date: 'mediumDate' }}</small> }
+      </header>
+      <div class="temporal-disclaimer" role="note">
+        Similar timing does not establish shared ownership. Token-chain starts can also be registration or account-maintenance issuance, and no device, network, user-agent, or authentication-method evidence is stored.
+      </div>
+      @if (temporalLoading) {
+        <div class="risk-empty">Analyzing bounded related-account timing…</div>
+      } @else if (temporalError) {
+        <div class="temporal-error" role="status">{{ temporalError }} The direct-transfer investigation remains available.</div>
+      } @else if (temporalReport; as temporal) {
+        @if (!temporal.evidenceComplete) {
+          <div class="temporal-error" role="alert">The token or transfer query reached its safety cap. Assessments are marked insufficient until complete evidence is available.</div>
+        }
+        <div class="temporal-report-meta">
+          <span>{{ temporal.entries.length }} related account(s) assessed</span>
+          <span>{{ temporal.analyzedTokenCount | number }} token issuance row(s)</span>
+          <span>{{ temporal.analyzedTransferCount | number }} retained transfer(s)</span>
+          <span>Does not affect risk score or sanctions</span>
+        </div>
+        <div class="temporal-correlation-list">
+          @for (entry of temporal.entries; track entry.relatedAccountId) {
+            <article>
+              <div class="temporal-correlation-summary">
+                <button type="button" (click)="openAccount(entry.relatedAccountId)"><strong>{{ entry.relatedCharacterName }}</strong><small>{{ entry.relatedAccountId }}</small></button>
+                <span [class]="'temporal-assessment ' + entry.assessment.toLowerCase()">{{ entry.assessment === 'NoMaterialCorrelation' ? 'No material correlation' : entry.assessment === 'InsufficientData' ? 'Insufficient data' : entry.assessment }}</span>
+                <p>{{ entry.summary }}</p>
+                <time>{{ entry.lastObservedAt ? ('Last support ' + (entry.lastObservedAt | date: 'medium')) : 'No supporting match' }}</time>
+              </div>
+              <div class="temporal-facts">
+                <div><span>Repeated days</span><strong>{{ entry.repeatedMatchDays }}</strong></div>
+                <div><span>Near starts</span><strong>{{ entry.nearStartMatchCount }}</strong><small>{{ entry.strongNearStartMatchCount }} within 5m</small></div>
+                <div><span>Match lift</span><strong>{{ entry.matchLift | number: '1.0-2' }}×</strong></div>
+                <div><span>Shared active days</span><strong>{{ entry.sharedActiveDays }}</strong><small>{{ entry.activeDaySimilarity | percent: '1.0-0' }} similarity</small></div>
+                <div><span>Hour profile</span><strong>{{ entry.hourOfWeekSimilarity | percent: '1.0-0' }}</strong></div>
+                <div><span>Transfer-adjacent</span><strong>{{ entry.transferAdjacentMatchCount }}</strong></div>
+              </div>
+              <details class="temporal-evidence">
+                <summary>Review measured timing and limitations</summary>
+                <div class="temporal-evidence-grid">
+                  <div>
+                    <h3>Newest matched chain starts</h3>
+                    @for (match of entry.matches; track match.subjectChainStartedAt + match.relatedChainStartedAt) {
+                      <div class="temporal-match">
+                        <time>{{ match.subjectChainStartedAt | date: 'medium' }}</time>
+                        <span>{{ match.sequence === 'SubjectThenRelated' ? 'subject → related' : 'related → subject' }}</span>
+                        <time>{{ match.relatedChainStartedAt | date: 'medium' }}</time>
+                        <strong>{{ match.deltaMinutes | number: '1.0-2' }}m</strong>
+                        <small>{{ match.nearbyTransferIds.length }} nearby transfer(s)</small>
+                      </div>
+                    } @empty { <p>No matched token-chain starts met the configured window.</p> }
+                  </div>
+                  <div>
+                    <h3>Coverage and limitations</h3>
+                    <p>{{ entry.subjectChainStartCount }} subject and {{ entry.relatedChainStartCount }} related chain start(s); {{ entry.subjectActiveDays }}/{{ entry.relatedActiveDays }} active day(s); {{ entry.analyzedTokenCount }} pair token row(s).</p>
+                    <ul>@for (limitation of entry.limitations; track limitation) { <li>{{ limitation }}</li> }</ul>
+                  </div>
+                </div>
+              </details>
+            </article>
+          } @empty {
+            <div class="risk-empty">No bounded related accounts are available for temporal comparison.</div>
+          }
+        </div>
+      }
+    </section>
+
     <section class="risk-panel risk-transfers">
       <header><div><p class="eyebrow">Underlying records</p><h2>Transaction timeline</h2></div><small>Items are shown as quantities and are not converted into cinders.</small></header>
       <div class="risk-transfer-filters">

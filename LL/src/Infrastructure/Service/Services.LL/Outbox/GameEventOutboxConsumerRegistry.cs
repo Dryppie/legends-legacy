@@ -54,6 +54,7 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
             [GameEventTypes.RaidUpdated] = [GameEventOutboxConsumerNames.RealtimeRaid],
             [GameEventTypes.RaidChatAnnouncement] = [GameEventOutboxConsumerNames.RaidChat],
             [GameEventTypes.RaidChatChannelSnapshot] = [GameEventOutboxConsumerNames.RaidChat],
+            [GameEventTypes.RegionBossChatAnnouncement] = [GameEventOutboxConsumerNames.RegionBossChat],
             [GameEventTypes.EventQuestChatAnnouncement] = [GameEventOutboxConsumerNames.EventQuestChat],
             [GameEventTypes.RealtimeDeliveryRequested] = [GameEventOutboxConsumerNames.RealtimeDelivery],
             [GameEventTypes.AccountMultiplayerRestricted] = [GameEventOutboxConsumerNames.AccountRestrictionCleanup]

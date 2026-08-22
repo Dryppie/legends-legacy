@@ -5,6 +5,7 @@ import { QuestJournal } from '../../../../shared/models/quest';
 import { TournamentGroundsUpdated } from '../colosseum/tournament-grounds-updated';
 import { RaidUpdated } from '../raid/raid-updated';
 import { RaidDirectoryUpdated } from '../raid/raid-directory-updated';
+import { RegionBossUpdated } from '../region-boss/region-boss-updated';
 import { WorldTowerCombatFrameUpdated } from '../world-tower/world-tower-combat-frame-updated';
 import { WorldTowerRallyUpdated } from '../world-tower/world-tower-rally-updated';
 import {
@@ -45,6 +46,7 @@ export const gameRealtimeSignalEventNames = {
   worldTowerCombatFrameUpdated: 'WorldTowerCombatFrameUpdated',
   raidUpdated: 'RaidUpdated',
   raidDirectoryUpdated: 'RaidDirectoryUpdated',
+  regionBossUpdated: 'RegionBossUpdated',
 } as const;
 
 export const gameRealtimeEventNames = {
@@ -240,6 +242,7 @@ export interface GameRealtimeSignalEventMap {
   WorldTowerCombatFrameUpdated: WorldTowerCombatFrameUpdated;
   RaidUpdated: RaidUpdated;
   RaidDirectoryUpdated: RaidDirectoryUpdated;
+  RegionBossUpdated: RegionBossUpdated;
 }
 
 export type GameRealtimeSignalEventName = keyof GameRealtimeSignalEventMap;
@@ -292,5 +295,6 @@ export type GameRealtimePayload =
   | WorldTowerCombatFrameUpdated
   | RaidUpdated
   | RaidDirectoryUpdated
+  | RegionBossUpdated
   | StateInvalidated
   | StateInvalidations;

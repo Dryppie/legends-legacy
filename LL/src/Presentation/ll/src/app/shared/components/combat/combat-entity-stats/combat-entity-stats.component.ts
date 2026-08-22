@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import {
   AbilityDamageTypeStats,
   AbilityStats,
+  CombatReviveCountdown,
   DamageType,
   EntityStats,
   SimpleCombatEntityDto,
@@ -75,6 +76,7 @@ export class CombatEntityStatsComponent implements OnChanges {
   @Input() enemyTeamName: string | null = null;
   @Input() combatDurationTicks = 0;
   @Input() useParentScroll = false;
+  @Input() reviveCountdowns: CombatReviveCountdown[] = [];
   /** Id of the logged-in character, used to pre-select their own unit. */
   @Input() currentCharacterId: string | null = null;
 
@@ -397,6 +399,23 @@ export class CombatEntityStatsComponent implements OnChanges {
 
   isDefeated(entity: SimpleCombatEntityDto): boolean {
     return this.hasKnownHealth(entity) && entity.health <= 0;
+  }
+
+  reviveCountdownLabel(participant: StatsParticipant): string | null {
+    if (
+      participant.team !== 'Friendly' ||
+      participant.isSummonGroup ||
+      !this.isDefeated(participant.entity)
+    ) {
+      return null;
+    }
+
+    const countdown = this.reviveCountdowns.find(
+      (item) => item.entityId === participant.id,
+    );
+    if (!countdown) return null;
+
+    return `Revives in ${Math.max(0, Math.ceil(countdown.remainingSeconds))}s`;
   }
 
   hasKnownHealth(entity: SimpleCombatEntityDto): boolean {

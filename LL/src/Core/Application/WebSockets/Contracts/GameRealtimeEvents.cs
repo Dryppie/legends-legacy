@@ -192,6 +192,13 @@ public sealed record RaidDirectoryUpdated(
     long Version,
     DateTimeOffset OccurredAtUtc) : GameRealtimeEvent;
 
+public sealed record RegionBossUpdated(
+    Guid EventId,
+    string RegionBossDefinitionId,
+    string Event,
+    string Status,
+    DateTimeOffset OccurredAtUtc) : GameRealtimeEvent;
+
 public sealed record WorldTowerCombatFrameUpdated(
     Guid AttemptId,
     Guid RallyId,

@@ -33,6 +33,7 @@ using Domain.Models.Prophecies;
 using Domain.Models.Quests;
 using Domain.Models.Quests.Events;
 using Domain.Models.Raids;
+using Domain.Models.RegionBosses;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
@@ -255,6 +256,29 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
             throw new InvalidOperationException("A raid boss advisory lock requires an active transaction.");
 
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes($"raid-boss:{raidBossId}"));
+        var lockId = BitConverter.ToInt64(bytes, 0);
+        await ExecuteSqlRawAsync("SELECT pg_advisory_xact_lock({0})", ct, lockId);
+    }
+
+    public Task AcquireRegionBossScheduleLockAsync(CancellationToken ct = default) =>
+        AcquireNamedAdvisoryLockAsync("region-boss:schedule", "A Region Boss schedule advisory lock requires an active transaction.", ct);
+
+    public Task AcquireRegionBossEventLockAsync(Guid eventId, CancellationToken ct = default) =>
+        AcquireNamedAdvisoryLockAsync($"region-boss:event:{eventId:N}", "A Region Boss event advisory lock requires an active transaction.", ct);
+
+    public Task AcquireRegionBossRunLockAsync(Guid runId, CancellationToken ct = default) =>
+        AcquireNamedAdvisoryLockAsync($"region-boss:run:{runId:N}", "A Region Boss run advisory lock requires an active transaction.", ct);
+
+    public Task AcquireRegionBossRewardGrantLockAsync(Guid grantId, CancellationToken ct = default) =>
+        AcquireNamedAdvisoryLockAsync($"region-boss:reward-grant:{grantId:N}", "A Region Boss reward grant advisory lock requires an active transaction.", ct);
+
+    private async Task AcquireNamedAdvisoryLockAsync(string key, string transactionError, CancellationToken ct)
+    {
+        if (Database.ProviderName != "Npgsql.EntityFrameworkCore.PostgreSQL")
+            return;
+        if (Database.CurrentTransaction is null)
+            throw new InvalidOperationException(transactionError);
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(key));
         var lockId = BitConverter.ToInt64(bytes, 0);
         await ExecuteSqlRawAsync("SELECT pg_advisory_xact_lock({0})", ct, lockId);
     }
@@ -599,6 +623,14 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<RaidParticipantResult> RaidParticipantResults => Set<RaidParticipantResult>();
     public DbSet<RaidRewardClaim> RaidRewardClaims => Set<RaidRewardClaim>();
     public DbSet<RaidTrophyPurchase> RaidTrophyPurchases => Set<RaidTrophyPurchase>();
+
+    public DbSet<RegionBossEvent> RegionBossEvents => Set<RegionBossEvent>();
+    public DbSet<RegionBossSignup> RegionBossSignups => Set<RegionBossSignup>();
+    public DbSet<RegionBossRun> RegionBossRuns => Set<RegionBossRun>();
+    public DbSet<RegionBossParticipantResult> RegionBossParticipantResults => Set<RegionBossParticipantResult>();
+    public DbSet<RegionBossPlayback> RegionBossPlaybacks => Set<RegionBossPlayback>();
+    public DbSet<RegionBossPlaybackArtifact> RegionBossPlaybackArtifacts => Set<RegionBossPlaybackArtifact>();
+    public DbSet<RegionBossRewardGrant> RegionBossRewardGrants => Set<RegionBossRewardGrant>();
 
     public DbSet<TowerFloorProgress> TowerFloorProgresses => Set<TowerFloorProgress>();
     public DbSet<TowerRally> TowerRallies => Set<TowerRally>();

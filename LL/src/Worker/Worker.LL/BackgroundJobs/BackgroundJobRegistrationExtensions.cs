@@ -12,6 +12,28 @@ public static class BackgroundJobRegistrationExtensions
         RegisterSmokeJob(q, configuration, environment);
         RegisterTournamentGroundsProgressionJob(q, configuration, environment);
         RegisterMarketplaceOrderExpirationJob(q, configuration);
+        RegisterRegionBossProgressionJob(q, configuration);
+    }
+
+    private static void RegisterRegionBossProgressionJob(
+        IServiceCollectionQuartzConfigurator q,
+        IConfiguration configuration)
+    {
+        var enabled = configuration.GetValue<bool?>("RegionBosses:Enabled") ?? true;
+        var intervalSeconds = Math.Max(10, configuration.GetValue<int?>("RegionBosses:ProgressionIntervalSeconds") ?? 30);
+        q.AddJob<RegionBossProgressionJob>(job => job
+            .WithIdentity(BackgroundJobNames.RegionBossProgression, BackgroundJobGroups.World)
+            .StoreDurably()
+            .RequestRecovery());
+        if (!enabled)
+            return;
+        q.AddTrigger(trigger => trigger
+            .WithIdentity("world.region-boss-progression.trigger", BackgroundJobGroups.World)
+            .ForJob(BackgroundJobNames.RegionBossProgression, BackgroundJobGroups.World)
+            .WithSimpleSchedule(schedule => schedule
+                .WithInterval(TimeSpan.FromSeconds(intervalSeconds))
+                .RepeatForever()
+                .WithMisfireHandlingInstructionNextWithRemainingCount()));
     }
 
     private static void RegisterMarketplaceOrderExpirationJob(

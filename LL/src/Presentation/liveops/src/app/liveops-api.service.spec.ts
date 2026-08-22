@@ -130,6 +130,16 @@ describe('LiveOpsApiService', () => {
     await promise;
   });
 
+  it('loads bounded temporal correlations independently from risk details', async () => {
+    const promise = service.accountTemporalCorrelations('account-1', 60);
+    const request = http.expectOne((candidate) =>
+      candidate.url === '/api/liveops/account-risk/account-1/temporal-correlations' &&
+      candidate.params.get('windowDays') === '60');
+    expect(request.request.method).toBe('GET');
+    request.flush({ isSuccess: true, data: null, errorMessage: '' });
+    await promise;
+  });
+
   it('uses antiforgery for investigation workflow mutations', async () => {
     const tokenPromise = service.initializeAntiforgery();
     http.expectOne('/auth/antiforgery').flush({ requestToken: 'xsrf-token' });

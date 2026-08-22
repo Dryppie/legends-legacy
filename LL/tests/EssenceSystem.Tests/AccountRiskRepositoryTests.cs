@@ -2,6 +2,7 @@ using System.Text.Json;
 using Domain.Models.Administration;
 using Domain.Models.Economy;
 using Domain.Models.Transfers;
+using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Repositories.Administration;
@@ -86,6 +87,49 @@ public sealed class AccountRiskRepositoryTests
         Assert.NotNull(details);
         Assert.Equal(3, details.TotalRetainedTransferCount);
         Assert.Equal(2, details.Transfers.Count);
+    }
+
+    [Fact]
+    public async Task TemporalDatasetBoundsRelatedAccountsAndResolvesTokenChainsWithoutReturningHashes()
+    {
+        await using var context = CreateContext();
+        var subjectId = Guid.NewGuid();
+        var relatedId = Guid.NewGuid();
+        var relationship = new AccountRiskRelationship(
+            relatedId, Guid.NewGuid(), "Related", "Sender", 10_000, 0, 3, false);
+        var snapshot = Snapshot(subjectId, evaluationVersion: 7, evaluatedAt: Now);
+        snapshot.CharacterName = "Subject";
+        snapshot.RelationshipsJson = JsonSerializer.Serialize(new[] { relationship });
+        context.AccountRiskSnapshots.Add(snapshot);
+        context.RefreshTokens.AddRange(
+            new RefreshToken
+            {
+                Id = 1, UserId = subjectId, TokenHash = "subject-root", ReplacedBy = "subject-refresh",
+                CreatedUtc = Now.AddDays(-1).UtcDateTime, ExpiresUtc = Now.AddDays(29).UtcDateTime
+            },
+            new RefreshToken
+            {
+                Id = 2, UserId = subjectId, TokenHash = "subject-refresh",
+                CreatedUtc = Now.AddDays(-1).AddMinutes(30).UtcDateTime, ExpiresUtc = Now.AddDays(29).UtcDateTime
+            },
+            new RefreshToken
+            {
+                Id = 3, UserId = relatedId, TokenHash = "related-root",
+                CreatedUtc = Now.AddDays(-1).AddMinutes(3).UtcDateTime, ExpiresUtc = Now.AddDays(29).UtcDateTime
+            });
+        await context.SaveChangesAsync();
+
+        var repository = new AccountTemporalCorrelationRepository(
+            context,
+            new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        var dataset = await repository.GetDatasetAsync(
+            subjectId, Now.AddDays(-90), Now, 20, 1_000, 1_000, CancellationToken.None);
+
+        Assert.NotNull(dataset);
+        Assert.Equal([relatedId], dataset.RelatedAccountIds);
+        Assert.Equal(3, dataset.Tokens.Count);
+        Assert.Equal(2, dataset.Tokens.Single(x => x.Id == 1).ReplacementId);
+        Assert.True(dataset.EvidenceComplete);
     }
 
     private static LLDbContext CreateContext() => new(

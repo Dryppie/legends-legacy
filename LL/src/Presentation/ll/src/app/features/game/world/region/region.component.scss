@@ -142,6 +142,10 @@
   grid-template-columns: minmax(0, 1fr) clamp(10rem, 14vw, 13rem);
 }
 
+.world-map-content.showing-region-boss {
+  grid-template-columns: minmax(0, 1fr) clamp(10rem, 14vw, 13rem);
+}
+
 .areas-section,
 .dungeon-preview-section,
 .world-map-rail {
@@ -200,6 +204,35 @@
 .inline-dungeon-preview {
   display: block;
   min-width: 0;
+}
+
+.inline-region-boss {
+  display: block;
+  min-width: 0;
+  min-height: 34rem;
+}
+
+.world-map-page.region-boss-playback-active {
+  padding-right: 0;
+}
+
+.region-boss-playback-active > .world-map-header,
+.region-boss-playback-active > .region-tabs,
+.region-boss-playback-active .world-map-rail {
+  display: none;
+}
+
+.region-boss-playback-active .world-map-content.showing-region-boss {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.region-boss-playback-active .region-boss-preview,
+.region-boss-playback-active .inline-region-boss {
+  height: 100%;
+  min-height: 0;
 }
 
 .areas-toolbar {
@@ -407,6 +440,10 @@
     grid-template-columns: minmax(0, 1fr) 10rem;
   }
 
+  .world-map-content.showing-region-boss {
+    grid-template-columns: minmax(0, 1fr) 10rem;
+  }
+
   .world-map-rail {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -417,6 +454,10 @@
   }
 
   .world-map-content.showing-raid .world-map-rail {
+    display: flex;
+  }
+
+  .world-map-content.showing-region-boss .world-map-rail {
     display: flex;
   }
 }
@@ -432,6 +473,15 @@
   }
 
   .world-map-content.showing-raid .world-map-rail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .world-map-content.showing-region-boss {
+    grid-template-columns: 1fr;
+  }
+
+  .world-map-content.showing-region-boss .world-map-rail {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -475,6 +525,10 @@
   }
 
   .world-map-content.showing-dungeon .world-map-rail {
+    grid-template-columns: 1fr;
+  }
+
+  .world-map-content.showing-region-boss .world-map-rail {
     grid-template-columns: 1fr;
   }
 

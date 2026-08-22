@@ -9,6 +9,7 @@ import { TowerHallOfFameComponent } from './tower/hall-of-fame/tower-hall-of-fam
 import { TowerPersonalExpeditionsComponent } from './tower/personal-expeditions/tower-personal-expeditions.component';
 import { RaidPageComponent } from './raid/raid-page.component';
 import { raidFeatureGuard } from '../../../core/guards/raid-feature.guard';
+import { RegionBossComponent } from './region-boss/region-boss.component';
 
 export const WORLD_ROUTES: Routes = [
   {
@@ -49,6 +50,11 @@ export const WORLD_ROUTES: Routes = [
       {
         path: 'tower/personal-expeditions',
         component: TowerPersonalExpeditionsComponent,
+        data: { guideDisabled: true },
+      },
+      {
+        path: 'region-boss',
+        component: RegionBossComponent,
         data: { guideDisabled: true },
       },
       {

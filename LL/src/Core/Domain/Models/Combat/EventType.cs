@@ -33,4 +33,7 @@ public enum EventType
     StaggerApplied,
     StaggerBroken,
     StaggerRecovered,
+    Revive,
+    WaveStarted,
+    FuryIncreased,
 }

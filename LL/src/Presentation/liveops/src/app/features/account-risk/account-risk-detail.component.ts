@@ -4,7 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LiveOpsApiService } from '../../liveops-api.service';
-import { AccountInvestigationStatus, AccountRiskDetails, AccountRiskTransfer } from '../../liveops.models';
+import { AccountInvestigationStatus, AccountRiskDetails, AccountRiskTransfer, AccountTemporalCorrelationReport } from '../../liveops.models';
 import { OperatorContextService } from '../../operator-context.service';
 import { AccountRiskListStateService } from './account-risk-list-state.service';
 
@@ -16,7 +16,10 @@ import { AccountRiskListStateService } from './account-risk-list-state.service';
 })
 export class AccountRiskDetailComponent implements OnInit {
   details: AccountRiskDetails | null = null;
+  temporalReport: AccountTemporalCorrelationReport | null = null;
   loading = true;
+  temporalLoading = false;
+  temporalError = '';
   saving = false;
   message = '';
   messageTone: 'error' | 'success' = 'success';
@@ -84,13 +87,33 @@ export class AccountRiskDetailComponent implements OnInit {
     const accountId = this.route.snapshot.paramMap.get('accountId');
     if (!accountId) { this.showError('The account ID is missing.'); this.loading = false; return; }
     this.loading = true;
+    this.temporalReport = null;
+    this.temporalError = '';
     try {
       const response = await this.api.accountRiskDetails(accountId);
       if (!response.isSuccess || !response.data) { this.showError(response.errorMessage || 'The investigation could not be loaded.'); return; }
       this.details = response.data;
       this.selectedStatus = response.data.account.investigationStatus;
+      void this.loadTemporalCorrelations(accountId);
     } catch (error) { this.showError(this.errorMessage(error)); }
     finally { this.loading = false; }
+  }
+
+  private async loadTemporalCorrelations(accountId: string): Promise<void> {
+    this.temporalLoading = true;
+    this.temporalError = '';
+    try {
+      const response = await this.api.accountTemporalCorrelations(accountId);
+      if (!response.isSuccess || !response.data) {
+        this.temporalError = response.errorMessage || 'Temporal account correlation could not be loaded.';
+        return;
+      }
+      this.temporalReport = response.data;
+    } catch (error) {
+      this.temporalError = this.errorMessage(error);
+    } finally {
+      this.temporalLoading = false;
+    }
   }
 
   private showError(message: string): void { this.message = message; this.messageTone = 'error'; }

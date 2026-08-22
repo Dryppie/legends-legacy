@@ -107,6 +107,11 @@ export interface SimpleCombatEntityDto {
   isStaggerRecovering?: boolean;
 }
 
+export interface CombatReviveCountdown {
+  entityId: string;
+  remainingSeconds: number;
+}
+
 export interface CombatSessionDto {
   from: Date;
   to: Date;

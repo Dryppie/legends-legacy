@@ -3,6 +3,7 @@ using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Damages;
 using Services.LL.Combat.Stats;
+using Services.LL.Interfaces.Combat.Resolution;
 using System.Buffers;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -25,7 +26,10 @@ public sealed record FastCombatEngineOptions(
     double MaximumAttentionWeight = 20d,
     double ThreatHalfLifeSeconds = 15d,
     int BasicAttackThreatValue = 8,
-    float CoverBudgetMaxHealthFraction = 0.5f);
+    float CoverBudgetMaxHealthFraction = 0.5f,
+    CombatDownedOptions? Downed = null,
+    CombatWaveRecoveryOptions? WaveRecovery = null,
+    CombatHostileFuryOptions? HostileFury = null);
 
 public sealed class FastCombatEngine
 {
@@ -58,6 +62,9 @@ public sealed class FastCombatEngine
     private readonly double _threatDecayPerTick;
     private readonly int _basicAttackThreatValue;
     private readonly float _coverBudgetMaxHealthFraction;
+    private readonly CombatDownedOptions? _downedOptions;
+    private readonly CombatWaveRecoveryOptions? _waveRecoveryOptions;
+    private readonly CombatHostileFuryOptions? _hostileFuryOptions;
     private readonly Dictionary<RuntimeCombatant, float> _basicAttackProgress = [];
     private readonly Dictionary<RuntimeCombatant, float> _healthRegenerationProgress = [];
     private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationPotential = [];
@@ -87,6 +94,11 @@ public sealed class FastCombatEngine
     private ulong _listenerMask;
     private int _eventDepth;
     private bool _forceCheckpoint;
+    private int _currentWaveNumber = 1;
+    private readonly Dictionary<RuntimeCombatant, int> _deathCounts = [];
+    private readonly Dictionary<RuntimeCombatant, int> _revivalCounts = [];
+    private readonly Dictionary<RuntimeCombatant, int> _reviveAtTicks = [];
+    private readonly Dictionary<RuntimeCombatant, int> _downedTicks = [];
 
     private enum DamageDelivery
     {
@@ -137,6 +149,9 @@ public sealed class FastCombatEngine
             : 1d - Math.Pow(0.5d, 1d / (resolved.ThreatHalfLifeSeconds * TicksPerSecond));
         _basicAttackThreatValue = resolved.BasicAttackThreatValue;
         _coverBudgetMaxHealthFraction = Math.Max(0, resolved.CoverBudgetMaxHealthFraction);
+        _downedOptions = resolved.Downed;
+        _waveRecoveryOptions = resolved.WaveRecovery;
+        _hostileFuryOptions = resolved.HostileFury;
     }
 
     public CombatResult Run(
@@ -145,7 +160,8 @@ public sealed class FastCombatEngine
         CancellationToken cancellationToken = default,
         Action<CombatCheckpoint>? checkpointObserver = null,
         int checkpointIntervalTicks = 0,
-        IReadOnlyList<IReadOnlyList<RuntimeCombatant>>? hostileReinforcementWaves = null)
+        IReadOnlyList<IReadOnlyList<RuntimeCombatant>>? hostileReinforcementWaves = null,
+        Func<int, IReadOnlyList<RuntimeCombatant>?>? hostileWaveFactory = null)
     {
         var combatants = friendly.Concat(hostile).ToList();
         for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
@@ -159,7 +175,8 @@ public sealed class FastCombatEngine
                 combatants,
                 reinforcementWaves,
                 ref nextReinforcementWave,
-                publishCombatStart: false);
+                publishCombatStart: false,
+                hostileWaveFactory);
         }
 
         var checkpointSequence = 0;
@@ -184,6 +201,7 @@ public sealed class FastCombatEngine
                && HasLivingTeam(combatants, CombatTeam.Friendly)
                && HasLivingTeam(combatants, CombatTeam.Hostile))
         {
+            TickDownedCombatants(combatants);
             if ((_currentTick & 63) == 0)
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -227,7 +245,8 @@ public sealed class FastCombatEngine
                     combatants,
                     reinforcementWaves,
                     ref nextReinforcementWave,
-                    publishCombatStart: true);
+                    publishCombatStart: true,
+                    hostileWaveFactory);
                 if (spawnedReinforcementWave
                     && checkpointObserver is not null
                     && checkpointIntervalTicks > 0)
@@ -299,13 +318,26 @@ public sealed class FastCombatEngine
         List<RuntimeCombatant> combatants,
         IReadOnlyList<IReadOnlyList<RuntimeCombatant>> reinforcementWaves,
         ref int nextWave,
-        bool publishCombatStart)
+        bool publishCombatStart,
+        Func<int, IReadOnlyList<RuntimeCombatant>?>? hostileWaveFactory)
     {
-        while (nextWave < reinforcementWaves.Count)
+        while (true)
         {
-            var wave = reinforcementWaves[nextWave++];
+            IReadOnlyList<RuntimeCombatant>? wave;
+            if (nextWave < reinforcementWaves.Count)
+                wave = reinforcementWaves[nextWave++];
+            else if (hostileWaveFactory is not null)
+                wave = hostileWaveFactory(++_currentWaveNumber);
+            else
+                return false;
+
+            if (wave is null)
+                return false;
             if (wave.Count == 0)
                 continue;
+
+            if (publishCombatStart)
+                ApplyWaveRecovery(combatants);
 
             for (var index = 0; index < wave.Count; index++)
             {
@@ -326,8 +358,56 @@ public sealed class FastCombatEngine
 
             return true;
         }
+    }
 
-        return false;
+    private void TickDownedCombatants(IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        if (_downedOptions is null)
+            return;
+
+        foreach (var combatant in combatants)
+        {
+            if (combatant.Team != CombatTeam.Friendly || combatant.IsAlive)
+                continue;
+            _downedTicks[combatant] = _downedTicks.GetValueOrDefault(combatant) + 1;
+            if (!_reviveAtTicks.TryGetValue(combatant, out var reviveAt) || reviveAt > _currentTick)
+                continue;
+            Revive(combatant, _downedOptions.ReviveHealthPercent, combatants, "Revival");
+        }
+    }
+
+    private void ApplyWaveRecovery(IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        if (_waveRecoveryOptions is null)
+            return;
+
+        foreach (var combatant in combatants.Where(x => x.Team == CombatTeam.Friendly && !x.IsSummoned))
+        {
+            if (combatant.IsAlive)
+            {
+                combatant.AdjustHealth(combatant.GetAttribute(AttributeType.MaxHealth)
+                                       * _waveRecoveryOptions.LivingHealPercent / 100f);
+                continue;
+            }
+
+            Revive(combatant, _waveRecoveryOptions.DownedReviveHealthPercent, combatants, "Level recovery");
+        }
+    }
+
+    private void Revive(
+        RuntimeCombatant combatant,
+        float healthPercent,
+        IReadOnlyList<RuntimeCombatant> combatants,
+        string source)
+    {
+        combatant.AdjustHealth(combatant.GetAttribute(AttributeType.MaxHealth)
+                               * Math.Clamp(healthPercent, 1, 100) / 100f);
+        combatant.BarrierContributions.Clear();
+        combatant.Covers.Clear();
+        _reviveAtTicks.Remove(combatant);
+        _revivalCounts[combatant] = _revivalCounts.GetValueOrDefault(combatant) + 1;
+        Log(combatant, combatant, source, EventType.Revive, 0, $"{combatant.Name} returned to battle.");
+        PublishIfObserved(AbilityTriggerEvent.OnHealthChanged, combatant, combatant, null, combatants);
     }
 
     private CombatCheckpoint CreateCheckpoint(
@@ -346,14 +426,14 @@ public sealed class FastCombatEngine
                 StringComparer.OrdinalIgnoreCase);
             stats.AddRange(intervalEvents, teams);
         }
-        var entityStats = AddAttentionTelemetry(
+        var entityStats = AddLifecycleTelemetry(AddAttentionTelemetry(
             AddFinalCombatantState(
                 AddThreatGenerationTelemetry(
                     AddHealthRegenerationTelemetry(
                         stats.Snapshot(),
                         combatants)),
                 combatants),
-            combatants);
+            combatants), combatants);
         return new CombatCheckpoint(
             sequence,
             _currentTick,
@@ -361,7 +441,15 @@ public sealed class FastCombatEngine
             combatants.Where(x => x.Team == CombatTeam.Hostile).Select(ToSimpleEntity).ToArray(),
             entityStats,
             intervalEvents,
-            isFinal);
+            isFinal,
+            new CombatCheckpointContext(
+                _currentWaveNumber,
+                GetFuryStacks(),
+                _reviveAtTicks.Select(entry => new CombatDownedState(
+                    entry.Key.Id,
+                    _deathCounts.GetValueOrDefault(entry.Key),
+                    entry.Value,
+                    Math.Max(0, entry.Value - _currentTick))).ToArray()));
     }
 
     private static SimpleCombatEntity ToSimpleEntity(RuntimeCombatant combatant) => new()
@@ -388,7 +476,7 @@ public sealed class FastCombatEngine
             combatant => combatant.Id,
             combatant => combatant.Team.ToString(),
             StringComparer.OrdinalIgnoreCase);
-        return AddAttentionTelemetry(
+        return AddLifecycleTelemetry(AddAttentionTelemetry(
             AddFinalCombatantState(
                 AddThreatGenerationTelemetry(
                     AddHealthRegenerationTelemetry(
@@ -396,16 +484,36 @@ public sealed class FastCombatEngine
                         ?? new CombatStatsAggregator().Aggregate(_log, teamsByEntityId),
                         combatants)),
                 combatants),
-            combatants);
+            combatants), combatants);
     }
 
     private IReadOnlyList<EntityStats> CreateBalanceStats(IReadOnlyList<RuntimeCombatant> combatants) =>
-        AddAttentionTelemetry(
+        AddLifecycleTelemetry(AddAttentionTelemetry(
             AddFinalCombatantState(
                 AddThreatGenerationTelemetry(
                     AddHealthRegenerationTelemetry(_balanceStats.Snapshot(), combatants)),
                 combatants),
-            combatants);
+            combatants), combatants);
+
+    private IReadOnlyList<EntityStats> AddLifecycleTelemetry(
+        IReadOnlyList<EntityStats> aggregatedStats,
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        var result = aggregatedStats.ToList();
+        foreach (var combatant in combatants)
+        {
+            var index = result.FindIndex(x => x.EntityId.Equals(combatant.Id, StringComparison.OrdinalIgnoreCase));
+            if (index < 0)
+                continue;
+            result[index] = result[index] with
+            {
+                Deaths = _deathCounts.GetValueOrDefault(combatant),
+                Revivals = _revivalCounts.GetValueOrDefault(combatant),
+                DownedTicks = _downedTicks.GetValueOrDefault(combatant)
+            };
+        }
+        return result;
+    }
 
     private void PublishIntervalEvents(IReadOnlyList<RuntimeCombatant> combatants)
     {
@@ -1833,6 +1941,18 @@ public sealed class FastCombatEngine
 
         if (!target.IsAlive)
         {
+            if (_downedOptions is not null
+                && target.Team == CombatTeam.Friendly
+                && !target.IsSummoned)
+            {
+                var deaths = _deathCounts.GetValueOrDefault(target) + 1;
+                _deathCounts[target] = deaths;
+                var delay = Math.Min(
+                    _downedOptions.MaximumDelayTicks,
+                    checked(_downedOptions.BaseDelayTicks
+                            + (deaths - 1) * _downedOptions.AdditionalDelayTicksPerDeath));
+                _reviveAtTicks[target] = checked(_currentTick + Math.Max(1, delay));
+            }
             Log(source, target, sourceName, EventType.Death, 0, $"{target.Name} was killed by {source.Name}.", statsSource);
             PublishIfObserved(
                 AbilityTriggerEvent.OnKill,
@@ -2941,10 +3061,15 @@ public sealed class FastCombatEngine
 
     private int GetBasicAttackChargeThreshold() => Math.Max(1, _basicAttackIntervalTicks);
 
-    private static float GetBasicAttackRate(RuntimeCombatant actor)
+    private float GetBasicAttackRate(RuntimeCombatant actor)
     {
+        var furyAttackSpeed = actor.Team == CombatTeam.Hostile
+                              && !actor.IsSummoned
+                              && _hostileFuryOptions is { IntervalTicks: > 0 }
+            ? GetFuryStacks() * _hostileFuryOptions.AttackSpeedPercentPerStack
+            : 0;
         var baseRate =
-            (1d + actor.GetAttribute(AttributeType.AttackSpeed) / 100d)
+            (1d + (actor.GetAttribute(AttributeType.AttackSpeed) + furyAttackSpeed) / 100d)
             / Math.Max(0.01d, actor.BasicAttackIntervalMultiplier);
         var hasteSlowMultiplier =
             1d
@@ -4914,8 +5039,18 @@ public sealed class FastCombatEngine
             ? (_currentTick - _overtimeStartsAtTick) / _overtimePowerIncreaseIntervalTicks
             : 0;
         var overtimeMultiplier = 1 + overtimeStacks * _overtimePowerIncreasePercent / 100f;
-        return Math.Max(0, GetConditionAdjustedPower(combatant) * overtimeMultiplier);
+        var furyMultiplier = combatant.Team == CombatTeam.Hostile
+                             && !combatant.IsSummoned
+                             && _hostileFuryOptions is not null
+            ? 1 + GetFuryStacks() * _hostileFuryOptions.PowerPercentPerStack / 100f
+            : 1;
+        return Math.Max(0, GetConditionAdjustedPower(combatant) * overtimeMultiplier * furyMultiplier);
     }
+
+    private int GetFuryStacks() =>
+        _hostileFuryOptions is { IntervalTicks: > 0 }
+            ? _currentTick / _hostileFuryOptions.IntervalTicks
+            : 0;
 
     private static float GetConditionAdjustedPower(RuntimeCombatant combatant)
     {

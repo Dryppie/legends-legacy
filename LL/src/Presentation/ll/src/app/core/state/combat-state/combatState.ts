@@ -12,6 +12,7 @@ export enum BattleType {
   Dungeon = 'Dungeon',
   Tower = 'Tower',
   Raid = 'Raid',
+  RegionBoss = 'RegionBoss',
   Training = 'Training',
 }
 

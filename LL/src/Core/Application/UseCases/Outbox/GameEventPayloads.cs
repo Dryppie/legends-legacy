@@ -116,6 +116,13 @@ public sealed record RaidChatAnnouncementPayload(
     string TargetUrl,
     DateTimeOffset SentAt);
 
+public sealed record RegionBossChatAnnouncementPayload(
+    Guid RegionBossEventId,
+    Guid MessageId,
+    string Body,
+    string TargetUrl,
+    DateTimeOffset SentAt);
+
 public sealed record RaidChatChannelSnapshotPayload(
     Guid RaidRunId,
     long Revision,

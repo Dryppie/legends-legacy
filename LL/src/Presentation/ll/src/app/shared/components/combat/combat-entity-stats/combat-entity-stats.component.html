@@ -245,7 +245,11 @@
                 "
                 class="ml-2 text-[9px] uppercase tracking-wider text-danger"
               >
-                Defeated
+                Defeated<span
+                  *ngIf="reviveCountdownLabel(participant) as label"
+                >
+                  · {{ label }}</span
+                >
               </span>
             </div>
 
@@ -572,7 +576,11 @@
                   "
                   class="ml-1 text-[10px] uppercase tracking-wider text-danger"
                 >
-                  Defeated
+                  Defeated<span
+                    *ngIf="reviveCountdownLabel(participant) as label"
+                  >
+                    · {{ label }}</span
+                  >
                 </span>
               </span>
 

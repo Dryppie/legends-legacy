@@ -9,4 +9,5 @@ public static class BackgroundJobNames
     public const string TournamentGroundsRollover = "pvp.tournament-grounds-rollover";
     public const string AuctionExpirationSettlement = "economy.auction-expiration-settlement";
     public const string GuildWarPhaseRollover = "guilds.guild-war-phase-rollover";
+    public const string RegionBossProgression = "world.region-boss-progression";
 }

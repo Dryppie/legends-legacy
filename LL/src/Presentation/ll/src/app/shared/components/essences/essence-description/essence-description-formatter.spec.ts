@@ -61,6 +61,31 @@ describe('EssenceDescriptionFormatter magnitude coefficients', () => {
     expect(html).not.toContain('134.4%-134.4%');
   });
 
+  it('describes conditional damage as an additional hit', () => {
+    const damageEffect = (id: string) => ({
+      id,
+      type: 'Damage',
+      target: 'CurrentTarget',
+      baseValue: 0,
+      currentValue: 0,
+      attribute: null,
+      status: null,
+      durationSeconds: null,
+      scaling: [{ attribute: 'Power', coefficient: 0.8 }],
+      nestedEffects: [],
+    });
+    const html = formatter.format(
+      'Deal 80% Physical Damage. If the target is Slowed, deal another 80% Physical Damage.',
+      [damageEffect('effect.grasp.damage'), damageEffect('effect.grasp.slowed-damage')],
+      () => 100,
+      "Weaver's Grasp",
+    );
+
+    expect(html).toContain('deal another');
+    expect(html.match(/>80% Physical Damage<\/span>/g)?.length).toBe(2);
+    expect(html).not.toContain('instead');
+  });
+
   it('uses combat-summary colors for damage types and damaging conditions', () => {
     const html = formatter.format(
       'Deal 90% Physical Damage and apply Burn(12) and Bleed(12).',

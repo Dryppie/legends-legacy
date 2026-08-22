@@ -30,6 +30,7 @@ using Domain.Models.Prophecies;
 using Domain.Models.Quests;
 using Domain.Models.Quests.Events;
 using Domain.Models.Raids;
+using Domain.Models.RegionBosses;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
@@ -166,6 +167,14 @@ public interface IDbContext
     DbSet<RaidRewardClaim> RaidRewardClaims { get; }
     DbSet<RaidTrophyPurchase> RaidTrophyPurchases { get; }
 
+    DbSet<RegionBossEvent> RegionBossEvents { get; }
+    DbSet<RegionBossSignup> RegionBossSignups { get; }
+    DbSet<RegionBossRun> RegionBossRuns { get; }
+    DbSet<RegionBossParticipantResult> RegionBossParticipantResults { get; }
+    DbSet<RegionBossPlayback> RegionBossPlaybacks { get; }
+    DbSet<RegionBossPlaybackArtifact> RegionBossPlaybackArtifacts { get; }
+    DbSet<RegionBossRewardGrant> RegionBossRewardGrants { get; }
+
     DbSet<TowerFloorProgress> TowerFloorProgresses { get; }
     DbSet<TowerRally> TowerRallies { get; }
     DbSet<TowerRallyParticipant> TowerRallyParticipants { get; }
@@ -214,6 +223,10 @@ public interface IDbContext
     Task AcquireWorldTowerFloorLockAsync(string serverId, int floorNumber, CancellationToken ct = default);
     Task AcquireRaidRunLockAsync(Guid raidRunId, CancellationToken ct = default) => Task.CompletedTask;
     Task AcquireRaidBossLockAsync(string raidBossId, CancellationToken ct = default) => Task.CompletedTask;
+    Task AcquireRegionBossScheduleLockAsync(CancellationToken ct = default) => Task.CompletedTask;
+    Task AcquireRegionBossEventLockAsync(Guid eventId, CancellationToken ct = default) => Task.CompletedTask;
+    Task AcquireRegionBossRunLockAsync(Guid runId, CancellationToken ct = default) => Task.CompletedTask;
+    Task AcquireRegionBossRewardGrantLockAsync(Guid grantId, CancellationToken ct = default) => Task.CompletedTask;
     Task<IReadOnlyList<Guid>> ClaimWorldTowerSimulationsAsync(
         string owner,
         DateTimeOffset now,

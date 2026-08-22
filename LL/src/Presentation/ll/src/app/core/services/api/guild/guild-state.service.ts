@@ -319,7 +319,6 @@ export class GuildStateService {
           if (!isHandledGuildInitiatorEcho(payload, context.characterId)) {
             this.markMissionsChanged(context.guildId);
           }
-          this.loadGuildShop(context.guildId);
         },
       },
       {
@@ -341,7 +340,6 @@ export class GuildStateService {
     for (const handler of this.guildRealtimeHandlers) {
       this.processGuildRealtimeHandler(handler, context);
     }
-
   }
 
   private processGuildRealtimeHandler(

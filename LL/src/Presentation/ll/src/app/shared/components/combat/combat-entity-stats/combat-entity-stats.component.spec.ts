@@ -85,6 +85,28 @@ describe('CombatEntityStatsComponent', () => {
     expect(component.teamDisplayName('Hostile')).toBe('Enemy');
   });
 
+  it('shows a revival countdown only for a downed ally with a scheduled revival', () => {
+    component.playerTeam = [entity('ally', 'Downed Ally', 0, 100)];
+    component.enemyTeam = [entity('enemy', 'Enemy', 0, 100)];
+    component.entityStats = [
+      stats('ally', 'Downed Ally', 0, 'Friendly'),
+      stats('enemy', 'Enemy', 0),
+    ];
+    component.reviveCountdowns = [
+      { entityId: 'ally', remainingSeconds: 14.1 },
+      { entityId: 'enemy', remainingSeconds: 8 },
+    ];
+
+    refresh(component);
+
+    expect(
+      component.reviveCountdownLabel(component.playerParticipants[0]),
+    ).toBe('Revives in 15s');
+    expect(
+      component.reviveCountdownLabel(component.enemyParticipants[0]),
+    ).toBeNull();
+  });
+
   it('groups party combatants and their summons under distinct party headers', () => {
     component.currentCharacterId = 'party-one-player';
     component.playerTeam = [

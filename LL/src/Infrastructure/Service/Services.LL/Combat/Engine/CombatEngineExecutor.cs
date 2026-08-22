@@ -264,6 +264,26 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         var allHostile = hostile
             .Concat(hostileReinforcementWaves.SelectMany(x => x))
             .ToList();
+        var dynamicHostiles = new List<RuntimeCombatant>();
+        Func<int, IReadOnlyList<RuntimeCombatant>?>? hostileWaveFactory = null;
+        if (runtime.HostileWaveFactory is not null)
+        {
+            hostileWaveFactory = waveNumber =>
+            {
+                var participants = runtime.HostileWaveFactory(waveNumber);
+                if (participants is null)
+                    return null;
+                var wave = participants.Select(participant => CreateRuntimeCombatant(
+                    participant.Combatant,
+                    CombatTeam.Hostile,
+                    participant.Slot.PartyNumber,
+                    catalog,
+                    compiledAbilities,
+                    precompiledCatalog is not null)).ToList();
+                dynamicHostiles.AddRange(wave);
+                return wave;
+            };
+        }
         var engine = new FastCombatEngine(
             compiledStatuses,
             compiledSummons,
@@ -284,21 +304,25 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 ThreatHalfLifeSeconds: _threatAndTankingOptions.ThreatHalfLifeSeconds,
                 BasicAttackThreatValue: _threatAndTankingOptions.BasicAttackThreatValue,
                 MarkThreatBonus: _threatAndTankingOptions.MarkThreatBonus,
-                CoverBudgetMaxHealthFraction: _threatAndTankingOptions.CoverBudgetMaxHealthFraction));
+                CoverBudgetMaxHealthFraction: _threatAndTankingOptions.CoverBudgetMaxHealthFraction,
+                Downed: options.Downed,
+                WaveRecovery: options.WaveRecovery,
+                HostileFury: options.HostileFury));
         var result = engine.Run(
             friendly,
             hostile,
             cancellationToken,
             checkpointObserver,
             checkpointIntervalTicks,
-            hostileReinforcementWaves);
+            hostileReinforcementWaves,
+            hostileWaveFactory);
         var participatingHostileIds = result.EntityStats
             .Select(x => x.EntityId)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         return Task.FromResult(new ExecutionResult(
             result,
             friendly,
-            allHostile.Where(x => participatingHostileIds.Contains(x.Id)).ToList()));
+            allHostile.Concat(dynamicHostiles).Where(x => participatingHostileIds.Contains(x.Id)).ToList()));
     }
 
     private static void SyncCombatEntityState(

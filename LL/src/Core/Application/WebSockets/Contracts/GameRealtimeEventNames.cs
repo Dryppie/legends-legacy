@@ -30,4 +30,5 @@ public static class GameRealtimeEventNames
     public const string WorldTowerCombatFrameUpdated = nameof(WorldTowerCombatFrameUpdated);
     public const string RaidUpdated = nameof(RaidUpdated);
     public const string RaidDirectoryUpdated = nameof(RaidDirectoryUpdated);
+    public const string RegionBossUpdated = nameof(RegionBossUpdated);
 }

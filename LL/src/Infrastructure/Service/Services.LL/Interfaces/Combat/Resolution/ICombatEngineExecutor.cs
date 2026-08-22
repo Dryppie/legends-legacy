@@ -99,7 +99,25 @@ public sealed record CombatSimulationOptions(
     int? OvertimeStartsAtTick = null,
     int OvertimePowerIncreaseIntervalTicks = 0,
     float OvertimePowerIncreasePercent = 0,
-    bool CaptureEventLog = true);
+    bool CaptureEventLog = true,
+    CombatDownedOptions? Downed = null,
+    CombatWaveRecoveryOptions? WaveRecovery = null,
+    CombatHostileFuryOptions? HostileFury = null);
+
+public sealed record CombatDownedOptions(
+    int BaseDelayTicks,
+    int AdditionalDelayTicksPerDeath,
+    int MaximumDelayTicks,
+    float ReviveHealthPercent);
+
+public sealed record CombatWaveRecoveryOptions(
+    float LivingHealPercent,
+    float DownedReviveHealthPercent);
+
+public sealed record CombatHostileFuryOptions(
+    int IntervalTicks,
+    float PowerPercentPerStack,
+    float AttackSpeedPercentPerStack);
 
 public sealed record TournamentCombatSimulationOptions(
     int RegulationTicks,

@@ -4424,15 +4424,168 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Self_health_catalog_passives_ignore_other_combatants_health_changes()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        string[] selfHealthAbilityIds =
+        [
+            "ability.creature.vampire_bat.erratic_flight",
+            "ability.creature.blood_zombie.clotted_flesh",
+            "ability.creature.lumo_sentinel.cracked_core",
+            "ability.creature.transparent_slime.reconstitute",
+            "ability.creature.moss_lizard.lost_tail",
+            "ability.creature.hollow_stag.hollow_core",
+            "ability.creature.rotroot_shambler.decaying_husk",
+            "ability.creature.garran.the_first_gate",
+            "ability.creature.mad_king.bloodlust",
+            "ability.creature.spider_queen.royal_cocoon"
+        ];
+
+        foreach (var abilityId in selfHealthAbilityIds)
+        {
+            var healthChangedTriggers = catalog.AbilitiesById[abilityId].Triggers
+                .Where(trigger => trigger.Event == AbilityTriggerEvent.OnHealthChanged)
+                .ToArray();
+
+            Assert.NotEmpty(healthChangedTriggers);
+            Assert.All(healthChangedTriggers, trigger =>
+                Assert.Contains(
+                    trigger.Conditions,
+                    condition => condition.Type == AbilityConditionType.EventSourceIsSelf));
+        }
+    }
+
+    [Fact]
+    public void Hollow_core_only_activates_and_generates_threat_for_its_owners_health_changes()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var hollowCoreSpec = catalog.AbilitiesById["ability.creature.hollow_stag.hollow_core"];
+        var healthChangedTriggers = hollowCoreSpec.Triggers
+            .Where(trigger => trigger.Event == AbilityTriggerEvent.OnHealthChanged)
+            .ToArray();
+        Assert.Equal(4, healthChangedTriggers.Length);
+        Assert.All(healthChangedTriggers, trigger => Assert.Single(trigger.EffectIds));
+
+        var hollowCore = AbilityCompiler.CompileAbility(hollowCoreSpec);
+        var selfDamage = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.self_damage",
+            Kind = AbilitySpecKind.Active,
+            Name = "Self Damage",
+            CooldownTicks = 100,
+            ThreatValue = 0,
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.self_damage",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.Self,
+                    BaseValue = 1
+                }
+            ]
+        });
+        var owner = CreateCombatant(
+            "foreign-event-owner",
+            CombatTeam.Friendly,
+            [hollowCore],
+            maxHealth: 1_000,
+            canBasicAttack: false);
+        owner.SetHealth(150);
+        var ally = CreateCombatant(
+            "foreign-event-ally",
+            CombatTeam.Friendly,
+            [selfDamage],
+            maxHealth: 1_000,
+            canBasicAttack: false);
+        var idleHostile = CreateCombatant(
+            "foreign-event-hostile",
+            CombatTeam.Hostile,
+            [],
+            maxHealth: 1_000,
+            canBasicAttack: false);
+
+        var foreignEventResult = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(
+                MaxTicks: 1,
+                BasicAttackIntervalTicks: 1_000,
+                ThreatHalfLifeSeconds: 0))
+            .Run([owner, ally], [idleHostile]);
+
+        Assert.Equal(0, owner.GetAttribute(AttributeType.DamageReduction));
+        Assert.DoesNotContain(
+            foreignEventResult.EntityStats.SelectMany(stats => stats.Abilities),
+            ability => ability.Name == hollowCore.Name);
+
+        var hostileDamage = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.hostile_damage",
+            Kind = AbilitySpecKind.Active,
+            Name = "Hostile Damage",
+            CooldownTicks = 100,
+            ThreatValue = 0,
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.hostile_damage",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = 1
+                }
+            ]
+        });
+        var damagedOwner = CreateCombatant(
+            "own-event-owner",
+            CombatTeam.Friendly,
+            [hollowCore],
+            maxHealth: 1_000,
+            canBasicAttack: false);
+        damagedOwner.SetHealth(150);
+        var attackingHostile = CreateCombatant(
+            "own-event-hostile",
+            CombatTeam.Hostile,
+            [hostileDamage],
+            maxHealth: 1_000,
+            canBasicAttack: false);
+
+        var ownEventResult = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(
+                MaxTicks: 1,
+                BasicAttackIntervalTicks: 1_000,
+                ThreatHalfLifeSeconds: 0))
+            .Run([damagedOwner], [attackingHostile]);
+
+        Assert.Equal(4, damagedOwner.GetAttribute(AttributeType.DamageReduction));
+        var ownOwnerStats = ownEventResult.EntityStats.Single(stats => stats.EntityId == damagedOwner.Id);
+        var hollowCoreStats = Assert.Single(ownOwnerStats.Abilities, ability => ability.Name == hollowCore.Name);
+        Assert.Equal(4, hollowCoreStats.Uses);
+        Assert.Equal(400, hollowCoreStats.TotalThreat);
+    }
+
+    [Fact]
     public void Web_weaver_spider_abilities_double_grasp_against_slow_and_track_web_walker_haste()
     {
         var catalog = new JsonAbilityCatalogProvider(
             CreateConfig(),
             FindApiContentRoot(),
             CreateJsonOptions()).GetCatalog();
+        var weaversGrasp = catalog.AbilitiesById["ability.creature.web_weaver_spider.weavers_grasp"];
+        Assert.Equal(
+            "Deal 80% Physical Damage. If the target is Slowed, deal another 80% Physical Damage.",
+            weaversGrasp.Description);
+
         var abilities = AbilityCompiler.CompileAbilities(
         [
-            catalog.AbilitiesById["ability.creature.web_weaver_spider.weavers_grasp"],
+            weaversGrasp,
             catalog.AbilitiesById["ability.creature.web_weaver_spider.web_walker"]
         ]);
 

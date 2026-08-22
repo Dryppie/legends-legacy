@@ -5,7 +5,6 @@ using Domain.Models.Economy;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Guilds;
 using Domain.Models.Guilds.Buildings;
-using Domain.Models.Guilds.Missions;
 using Domain.Models.Guilds.Shop;
 using Domain.Models.Items;
 using Microsoft.EntityFrameworkCore;
@@ -140,13 +139,7 @@ public class GuildShopService : IGuildShopService
         var purchases = await _context.GuildShopPurchases
             .Where(x => x.GuildId == guild.Id && x.CharacterId == characterId && x.PeriodKey == weeklyPeriod.Key)
             .ToListAsync(cancellationToken);
-        var contribution = await _context.GuildMemberContributionPeriods
-            .FirstOrDefaultAsync(x => x.GuildId == guild.Id
-                && x.CharacterId == characterId
-                && x.PeriodType == GuildMissionPeriodType.Weekly
-                && x.PeriodKey == weeklyPeriod.Key, cancellationToken);
-
-        return new ShopState(guild, character, purchases, contribution, weeklyPeriod.Key, weeklyPeriod.EndsAt);
+        return new ShopState(guild, character, purchases, weeklyPeriod.Key, weeklyPeriod.EndsAt);
     }
 
     private GuildShopOverviewDto BuildOverview(ShopState state, DateTimeOffset now) =>
@@ -167,7 +160,6 @@ public class GuildShopService : IGuildShopService
                     item.GuildFavorCost,
                     item.WeeklyLimit,
                     purchased,
-                    item.RequiredWeeklyContribution,
                     item.RequiredMarketOfficeLevel,
                     item.RotatesWeekly,
                     item.Rewards,
@@ -222,10 +214,6 @@ public class GuildShopService : IGuildShopService
         var purchased = state.Purchases.FirstOrDefault(x => x.ShopItemKey == item.Key && x.PeriodKey == state.WeeklyPeriodKey)?.Quantity ?? 0;
         if (item.WeeklyLimit > 0 && purchased >= item.WeeklyLimit)
             return "Weekly purchase limit reached.";
-
-        var contribution = state.Contribution?.ContributionScore ?? 0;
-        if (contribution < item.RequiredWeeklyContribution)
-            return $"Requires {item.RequiredWeeklyContribution:N0} weekly contribution.";
 
         if (state.Character.GuildFavor < item.GuildFavorCost)
             return "Not enough Guild Favor.";
@@ -385,7 +373,6 @@ public class GuildShopService : IGuildShopService
         Guild Guild,
         Character Character,
         List<GuildShopPurchase> Purchases,
-        GuildMemberContributionPeriod? Contribution,
         string WeeklyPeriodKey,
         DateTimeOffset NextWeeklyResetAt);
 

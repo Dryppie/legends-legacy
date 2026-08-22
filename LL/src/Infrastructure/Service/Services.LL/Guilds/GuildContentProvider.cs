@@ -180,7 +180,6 @@ public sealed class GuildContentValidator : IGuildContentValidator
             if (string.IsNullOrWhiteSpace(item.Name)) errors.Add($"Shop item '{item.Key}' name is required");
             if (item.GuildFavorCost < 0) errors.Add($"Shop item '{item.Key}' cost cannot be negative");
             if (item.WeeklyLimit < 0) errors.Add($"Shop item '{item.Key}' weekly limit cannot be negative");
-            if (item.RequiredWeeklyContribution < 0) errors.Add($"Shop item '{item.Key}' weekly contribution requirement cannot be negative");
             if (item.RequiredMarketOfficeLevel <= 0) errors.Add($"Shop item '{item.Key}' Market Office requirement must be positive");
             if (item.RotatesWeekly && string.IsNullOrWhiteSpace(item.RotationGroup)) errors.Add($"Shop item '{item.Key}' rotation group is required");
             if (item.Rewards.Count == 0) errors.Add($"Shop item '{item.Key}' must define at least one reward");
@@ -235,7 +234,6 @@ public sealed record GuildShopItemDefinition(
     GuildShopStockType StockType,
     long GuildFavorCost,
     int WeeklyLimit,
-    long RequiredWeeklyContribution,
     int RequiredMarketOfficeLevel,
     bool RotatesWeekly,
     string? RotationGroup,
@@ -455,10 +453,10 @@ internal static class GuildContentDefaults
     private static readonly GuildShopItemDefinition[] ShopItemDefinitions =
     [
         .. CreateCommonCatalystShopItems(),
-        new("common.soulstone_cache", "Soulstone Reserve", "A dependable supply of Soulstones for constellation progression.", GuildShopStockType.Common, 200, 2, 0, 1, false, null, [new GuildShopRewardDto(GuildShopRewardType.Soulstones, 25)]),
-        new("common.sigil_fragment_case", "Sigil Fragment Case", "Enough fragments to assemble a meaningful supply of dungeon sigils.", GuildShopStockType.Common, 200, 2, 100, 2, false, null, [new GuildShopRewardDto(GuildShopRewardType.SigilFragments, 10)]),
-        new("rare.soulstone_bundle", "Greater Soulstone Reserve", "A concentrated Soulstone shipment for long-term constellation upgrades.", GuildShopStockType.Rare, 350, 1, 300, 3, false, null, [new GuildShopRewardDto(GuildShopRewardType.Soulstones, 50)]),
-        new("rare.sigilwright_cache", "Sigilwright's Cache", "A large fragment cache for assembling dungeon sigils.", GuildShopStockType.Rare, 350, 1, 350, 3, false, null, [new GuildShopRewardDto(GuildShopRewardType.SigilFragments, 30)]),
+        new("common.soulstone_cache", "Soulstone Reserve", "A dependable supply of Soulstones for constellation progression.", GuildShopStockType.Common, 200, 2, 1, false, null, [new GuildShopRewardDto(GuildShopRewardType.Soulstones, 25)]),
+        new("common.sigil_fragment_case", "Sigil Fragment Case", "Enough fragments to assemble a meaningful supply of dungeon sigils.", GuildShopStockType.Common, 200, 2, 2, false, null, [new GuildShopRewardDto(GuildShopRewardType.SigilFragments, 10)]),
+        new("rare.soulstone_bundle", "Greater Soulstone Reserve", "A concentrated Soulstone shipment for long-term constellation upgrades.", GuildShopStockType.Rare, 350, 1, 3, false, null, [new GuildShopRewardDto(GuildShopRewardType.Soulstones, 50)]),
+        new("rare.sigilwright_cache", "Sigilwright's Cache", "A large fragment cache for assembling dungeon sigils.", GuildShopStockType.Rare, 350, 1, 3, false, null, [new GuildShopRewardDto(GuildShopRewardType.SigilFragments, 30)]),
         .. CreateRareCatalystShopItems(),
         .. CreateBlueprintShopItems(),
     ];
@@ -484,7 +482,6 @@ internal static class GuildContentDefaults
             GuildShopStockType.Common,
             GuildFavorCost: 100,
             WeeklyLimit: 2,
-            RequiredWeeklyContribution: 0,
             RequiredMarketOfficeLevel: 1,
             RotatesWeekly: true,
             RotationGroup: "common-catalysts",
@@ -511,7 +508,6 @@ internal static class GuildContentDefaults
             GuildShopStockType.Rare,
             GuildFavorCost: 250,
             WeeklyLimit: 1,
-            RequiredWeeklyContribution: 250,
             RequiredMarketOfficeLevel: 3,
             RotatesWeekly: true,
             RotationGroup: "rare-catalysts",
@@ -540,7 +536,6 @@ internal static class GuildContentDefaults
             GuildShopStockType.Rare,
             GuildFavorCost: 450,
             WeeklyLimit: 1,
-            RequiredWeeklyContribution: 400,
             RequiredMarketOfficeLevel: 4,
             RotatesWeekly: true,
             RotationGroup: "rare-blueprints",

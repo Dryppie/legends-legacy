@@ -99,18 +99,10 @@ export class GuildShopComponent {
   }
 
   requirementText(item: GuildShopItem): string {
-    const requirements: string[] = [];
     if (item.requiredMarketOfficeLevel > 0) {
-      requirements.push(`Market Office ${item.requiredMarketOfficeLevel}`);
+      return `Market Office ${item.requiredMarketOfficeLevel}`;
     }
-    if (item.requiredWeeklyContribution > 0) {
-      requirements.push(
-        `${item.requiredWeeklyContribution.toLocaleString()} weekly contribution`,
-      );
-    }
-    return requirements.length > 0
-      ? requirements.join(' / ')
-      : 'No requirement';
+    return 'No requirement';
   }
 
   rewardLabel(reward: GuildShopReward): string {
@@ -130,6 +122,14 @@ export class GuildShopComponent {
 
   remainingThisWeek(item: GuildShopItem): number {
     return Math.max(0, item.weeklyLimit - item.purchasedThisPeriod);
+  }
+
+  limitProgress(item: GuildShopItem): string {
+    return `${this.remainingThisWeek(item)} / ${item.weeklyLimit} left`;
+  }
+
+  limitDescription(item: GuildShopItem): string {
+    return `${this.remainingThisWeek(item)} / ${item.weeklyLimit} left this week`;
   }
 
   resetLabel(resetAt: string): string {

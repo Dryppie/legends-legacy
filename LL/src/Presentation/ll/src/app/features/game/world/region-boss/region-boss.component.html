@@ -1,0 +1,289 @@
+<ng-container *ngIf="watchingPlayback(); else regionBossPage">
+  <app-combat
+    [battleType]="battleType"
+    [battleTitleOverride]="playbackTitle()"
+    [playerTeamName]="
+      'Party ' + (currentPlaybackEvent()?.run?.partyNumber || '')
+    "
+    [enemyTeamName]="currentPlaybackEvent()?.name || 'Region Boss'"
+    [reviveCountdowns]="reviveCountdowns()"
+    (skipBattle)="closePlayback()"
+  >
+    <span combat-header-actions class="live-battle-status">
+      Level
+      {{
+        currentPlaybackFrame()?.context?.waveNumber ||
+          currentPlaybackEvent()?.run?.currentBossLevel ||
+          1
+      }}
+      · Fury {{ currentPlaybackFrame()?.context?.furyStacks || 0 }}
+    </span>
+  </app-combat>
+</ng-container>
+
+<ng-template #regionBossPage>
+  <main class="region-boss-feed">
+    <header class="feed-header">
+      <div>
+        <p class="section-label">Recurring world event</p>
+        <h1>Region Boss</h1>
+      </div>
+      <div class="feed-header-actions">
+        <span class="meta-box">Region {{ displayRegionId() }}</span>
+        <span class="meta-box muted">{{ timeSinceLastUpdate() }}</span>
+        <button
+          type="button"
+          class="meta-button"
+          (click)="load()"
+          [disabled]="loading()"
+        >
+          {{ loading() ? "Refreshing…" : "Refresh" }}
+        </button>
+        <button
+          *ngIf="embedded"
+          type="button"
+          class="meta-button back-button"
+          (click)="leave.emit()"
+        >
+          <span aria-hidden="true">←</span>
+          Back to areas
+        </button>
+      </div>
+    </header>
+
+    <p *ngIf="error()" class="error" role="alert">{{ error() }}</p>
+
+    <details *ngIf="developmentMode" class="development-tools">
+      <summary>Local development controls</summary>
+      <div class="development-tools-body">
+        <div>
+          <h2>Spawn The Mad King now</h2>
+          <small>
+            Your current character joins automatically. Matchmaking starts after
+            a short signup window.
+          </small>
+        </div>
+        <label>
+          Region
+          <input
+            #developmentRegion
+            type="number"
+            min="1"
+            [value]="displayRegionId()"
+          />
+        </label>
+        <label>
+          Simulated others
+          <input
+            #developmentSignups
+            type="number"
+            min="0"
+            max="95"
+            value="24"
+          />
+        </label>
+        <button
+          type="button"
+          class="primary-button"
+          (click)="
+            spawnDevelopment(developmentRegion.value, developmentSignups.value)
+          "
+          [disabled]="!!action()"
+        >
+          {{
+            action() === "development-spawn"
+              ? "Spawning…"
+              : "Spawn boss + signups"
+          }}
+        </button>
+      </div>
+    </details>
+
+    <ng-container *ngIf="activeEvent() as active; else noActiveEncounter">
+      <section *ngIf="active.run as run" class="active-encounter">
+        <div class="active-status-row">
+          <p class="live-status">
+            <span aria-hidden="true"></span>
+            <ng-container [ngSwitch]="active.status">
+              <ng-container *ngSwitchCase="'Playback'">
+                Fight in progress
+              </ng-container>
+              <ng-container *ngSwitchCase="'Resolving'">
+                Preparing live battle
+              </ng-container>
+              <ng-container *ngSwitchDefault>Parties forming</ng-container>
+            </ng-container>
+          </p>
+          <span *ngIf="active.playbackEndsAtUtc">
+            Ends in {{ timeUntil(active.playbackEndsAtUtc) }}
+          </span>
+        </div>
+
+        <div class="active-title-row">
+          <div>
+            <h2>{{ active.name }}</h2>
+            <p>
+              Boss level {{ bossLevel(active) }} ·
+              {{ active.signupCount }} fighters · Party {{ run.partyNumber }} of
+              {{ partyCount(active) }}
+            </p>
+          </div>
+          <div class="health-callout">
+            <strong>{{ bossHealthPercent(active) | number: "1.0-0" }}%</strong>
+            <span>Health left</span>
+          </div>
+        </div>
+
+        <div class="health-track" aria-label="Boss health remaining">
+          <span [style.width.%]="bossHealthPercent(active)"></span>
+        </div>
+
+        <div class="active-footer">
+          <span>
+            {{ bossHealthRemaining(active) | number }} /
+            {{ bossMaxHealth(active) | number }} health remaining
+          </span>
+          <button
+            *ngIf="run.hasPlayback"
+            type="button"
+            class="primary-button watch-button"
+            (click)="loadPlayback(run.runId)"
+            [disabled]="!!action()"
+          >
+            {{
+              active.status === "Playback" ? "Watch the fight" : "Open battle"
+            }}
+          </button>
+        </div>
+      </section>
+    </ng-container>
+
+    <ng-template #noActiveEncounter>
+      <section class="quiet-encounter">
+        <p class="section-label">The battlefield is quiet</p>
+        <h2>No fight is currently in progress</h2>
+        <p *ngIf="upcomingEvents()[0] as next; else noScheduledBoss">
+          The next encounter begins in
+          {{ timeUntil(next.encounterStartsAtUtc) }}.
+        </p>
+        <ng-template #noScheduledBoss>
+          <p>No Region Boss encounter is currently scheduled.</p>
+        </ng-template>
+      </section>
+    </ng-template>
+
+    <section *ngIf="upcomingEvents().length" class="feed-section">
+      <header class="section-header">
+        <p class="section-label">Signups &amp; upcoming</p>
+      </header>
+
+      <article *ngFor="let event of upcomingEvents()" class="signup-card">
+        <div class="signup-copy">
+          <p *ngIf="isClosingSoon(event)" class="closing-soon">
+            <span aria-hidden="true"></span>
+            Closing soon
+          </p>
+          <h2>{{ event.name }}</h2>
+          <p>
+            {{ timeLabel(event.encounterStartsAtUtc) }} ·
+            {{ event.signupCount }} signed
+          </p>
+          <strong *ngIf="event.status === 'SignupOpen'; else signupScheduled">
+            Closes in {{ timeUntil(event.signupClosesAtUtc) }}
+          </strong>
+          <ng-template #signupScheduled>
+            <strong>
+              Signup opens in {{ timeUntil(event.signupStartsAtUtc) }}
+            </strong>
+          </ng-template>
+        </div>
+
+        <div class="signup-actions">
+          <button
+            *ngIf="event.status === 'SignupOpen' && !event.isSignedUp"
+            type="button"
+            [class.primary-button]="!isClosingSoon(event)"
+            [class.outline-button]="isClosingSoon(event)"
+            (click)="signup(event)"
+            [disabled]="!event.isUnlocked || !!action()"
+          >
+            {{
+              event.isUnlocked
+                ? isClosingSoon(event)
+                  ? "Join now"
+                  : "Sign up"
+                : event.lockReason
+            }}
+          </button>
+          <button
+            *ngIf="event.status === 'SignupOpen' && event.isSignedUp"
+            type="button"
+            class="outline-button"
+            (click)="withdraw(event)"
+            [disabled]="!!action()"
+          >
+            Withdraw
+          </button>
+          <span *ngIf="event.status === 'Scheduled'" class="scheduled-badge">
+            Scheduled
+          </span>
+          <small *ngIf="event.status === 'SignupOpen'">
+            Players active in the previous 24 hours are entered automatically
+          </small>
+        </div>
+      </article>
+    </section>
+
+    <section *ngIf="settledEvents().length" class="feed-section past-section">
+      <header class="section-header">
+        <p class="section-label">Past encounters</p>
+        <span>Last 7 days</span>
+      </header>
+
+      <article
+        *ngFor="let event of settledEvents()"
+        class="past-card"
+        [class.victory]="resultLabel(event) === 'Victory'"
+      >
+        <strong class="result-badge">{{ resultLabel(event) }}</strong>
+        <div class="past-copy">
+          <h2>{{ event.name }}</h2>
+          <p>
+            {{ timeLabel(event.encounterStartsAtUtc) }} · boss level
+            {{ event.run?.highestLevelDefeated || 1 }} felled
+          </p>
+        </div>
+        <div class="past-result">
+          <strong>{{ rewardLabel(event) }}</strong>
+          <span>
+            Party {{ event.run?.partyNumber }} · {{ totalDeaths(event) }} deaths
+          </span>
+          <div class="past-actions">
+            <ng-container *ngIf="event.run as settledRun">
+              <button
+                *ngIf="settledRun.hasPlayback"
+                type="button"
+                class="text-button"
+                (click)="loadPlayback(settledRun.runId)"
+                [disabled]="!!action()"
+              >
+                Replay
+              </button>
+            </ng-container>
+            <ng-container *ngFor="let reward of event.rewards">
+              <button
+                *ngIf="reward.status === 'Unclaimed'"
+                type="button"
+                class="text-button"
+                (click)="claim(reward.grantId)"
+                [disabled]="!!action()"
+              >
+                Claim level {{ reward.milestoneLevel }}
+              </button>
+            </ng-container>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+</ng-template>

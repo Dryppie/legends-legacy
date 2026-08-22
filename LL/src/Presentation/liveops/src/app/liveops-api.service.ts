@@ -8,6 +8,7 @@ import {
   AccountRiskFilters,
   AccountRiskOperation,
   AccountRiskPage,
+  AccountTemporalCorrelationReport,
   AdministrationAuditFilters,
   AdministrationAuditPage,
   ItemCatalogEntry,
@@ -93,6 +94,14 @@ export class LiveOpsApiService {
   accountRiskDetails(accountId: string, transferLimit = 200): Promise<ApiResponse<AccountRiskDetails>> {
     const params = new HttpParams().set('transferLimit', transferLimit);
     return firstValueFrom(this.http.get<ApiResponse<AccountRiskDetails>>(`/api/liveops/account-risk/${accountId}`, { params }));
+  }
+
+  accountTemporalCorrelations(accountId: string, windowDays = 90): Promise<ApiResponse<AccountTemporalCorrelationReport>> {
+    const params = new HttpParams().set('windowDays', windowDays);
+    return firstValueFrom(this.http.get<ApiResponse<AccountTemporalCorrelationReport>>(
+      `/api/liveops/account-risk/${accountId}/temporal-correlations`,
+      { params },
+    ));
   }
 
   updateAccountRiskStatus(accountId: string, body: object): Promise<ApiResponse<AccountRiskOperation>> {

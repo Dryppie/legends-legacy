@@ -67,9 +67,7 @@
               </ng-container>
             </span>
 
-            <span class="row-limit">
-              {{ item.purchasedThisPeriod }} / {{ item.weeklyLimit }}
-            </span>
+            <span class="row-limit">{{ limitProgress(item) }}</span>
 
             <span class="row-cost">
               <strong *ngIf="item.guildFavorCost > 0">
@@ -116,8 +114,8 @@
           <dd>{{ selectedBalanceAfterPurchase() | numberFormat }}</dd>
         </div>
         <div>
-          <dt>Remaining this week</dt>
-          <dd>{{ remainingThisWeek(item) }} of {{ item.weeklyLimit }}</dd>
+          <dt>Purchase limit</dt>
+          <dd>{{ limitDescription(item) }}</dd>
         </div>
       </dl>
     </section>

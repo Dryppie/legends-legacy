@@ -90,6 +90,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IAdministrationRepository, AdministrationRepository>();
         services.AddScoped<IAccountRiskRepository, AccountRiskRepository>();
+        services.AddScoped<IAccountTemporalCorrelationRepository, AccountTemporalCorrelationRepository>();
         // Related to regions
         services.AddScoped<IAreaRepository, AreaRepository>();
 

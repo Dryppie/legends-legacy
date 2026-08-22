@@ -21,6 +21,7 @@ using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Services.LL.Regions;
 using Application.Interfaces.Services.LL.Rewards;
 using Application.Interfaces.Services.LL.Raids;
+using Application.Interfaces.Services.LL.RegionBosses;
 using Application.Interfaces.Services.LL.WorldTower;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Runs;
@@ -87,6 +88,7 @@ using Services.LL.Providers;
 using Services.LL.Regions;
 using Services.LL.Regions.Areas;
 using Services.LL.Raids;
+using Services.LL.RegionBosses;
 using Services.LL.Rewards;
 using Services.LL.Snapshots;
 using Services.LL.Soulstones;
@@ -139,6 +141,28 @@ public static class DependencyInjection
                            x.EphemeralItemTargetShareThreshold is > 0.5m and <= 1,
                 "Item consolidation, coordination, and ephemeral-outflow share thresholds must be within (0.5, 1].")
             .ValidateOnStart();
+        services.AddOptions<AccountTemporalCorrelationOptions>()
+            .Bind(config.GetSection(AccountTemporalCorrelationOptions.SectionName))
+            .Validate(x => x.AnalysisVersion > 0 &&
+                           x.DefaultWindowDays >= 7 &&
+                           x.MaximumWindowDays >= x.DefaultWindowDays &&
+                           x.RelatedAccountLimit > 0 &&
+                           x.MaximumTokenRows > 0 &&
+                           x.MaximumTransferRows > 0 &&
+                           x.MinimumActiveDays > 0 &&
+                           x.StrongNearStartWindowMinutes > 0 &&
+                           x.NearStartWindowMinutes >= x.StrongNearStartWindowMinutes &&
+                           x.TransferAdjacentWindowMinutes > 0 &&
+                           x.MinimumRepeatedMatchDays > 0 &&
+                           x.ModerateMinimumMatches > 0 &&
+                           x.HighMinimumRepeatedMatchDays >= x.MinimumRepeatedMatchDays &&
+                           x.HighMinimumMatches >= x.ModerateMinimumMatches &&
+                           x.ModerateMinimumLift > 0 &&
+                           x.HighMinimumLift >= x.ModerateMinimumLift &&
+                           x.HighMinimumTransferAdjacentMatches > 0 &&
+                           x.MaximumDisplayedMatches > 0,
+                "LiveOps temporal-correlation settings must be positive and ordered.")
+            .ValidateOnStart();
         services.AddSingleton(TimeProvider.System);
         services.TryAddSingleton<AccountRestrictionIndex>();
         services.TryAddSingleton<IAccountRestrictionIndex>(sp =>
@@ -146,6 +170,7 @@ public static class DependencyInjection
         services.AddScoped<IAccountAccessPolicy, AccountAccessPolicy>();
         services.AddScoped<ILiveOpsService, LiveOpsService>();
         services.AddScoped<ILiveOpsAccountRiskService, LiveOpsAccountRiskService>();
+        services.AddScoped<IAccountTemporalCorrelationService, AccountTemporalCorrelationService>();
         services.TryAddScoped<IChatModerationGateway, UnavailableChatModerationGateway>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IInventoryItemFactory, InventoryItemFactory>();
@@ -239,6 +264,9 @@ public static class DependencyInjection
                 "Item consolidation, coordination, and ephemeral-outflow share thresholds must be within (0.5, 1].")
             .ValidateOnStart();
         services.AddScoped<ILiveOpsAccountRiskService, LiveOpsAccountRiskService>();
+        services.Configure<AccountTemporalCorrelationOptions>(
+            config.GetSection(AccountTemporalCorrelationOptions.SectionName));
+        services.AddScoped<IAccountTemporalCorrelationService, AccountTemporalCorrelationService>();
         services.TryAddScoped<IChatModerationGateway, UnavailableChatModerationGateway>();
         services.Configure<AchievementSystemChatOptions>(config.GetSection("Chat:SystemMessages"));
         services.AddSingleton<HttpClient>();
@@ -531,6 +559,24 @@ public static class DependencyInjection
         services.AddScoped<IRaidCombatResolver, RaidCombatResolver>();
         services.AddScoped<IRaidPlaybackBundleBuilder, RaidPlaybackBundleBuilder>();
         services.AddScoped<IRaidService, RaidService>();
+        services.AddOptions<RegionBossOptions>()
+            .Bind(config.GetSection(RegionBossOptions.SectionName))
+            .PostConfigure(options =>
+                options.DevelopmentToolsEnabled =
+                    isDevelopment
+                    && config.GetValue<bool>("FeatureManagement:RegionBossDevelopmentTools"))
+            .Validate(
+                options => options.DevelopmentProgressionIntervalSeconds is >= 1 and <= 60,
+                "Region Boss settings are invalid.")
+            .ValidateOnStart();
+        services.AddSingleton<IRegionBossDefinitionProvider>(sp =>
+            new JsonRegionBossDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddScoped<IRegionBossCombatResolver, RegionBossCombatResolver>();
+        services.AddScoped<IRegionBossPlaybackBundleBuilder, RegionBossPlaybackBundleBuilder>();
+        services.AddScoped<IRegionBossService, RegionBossService>();
 
         services.AddScoped<ILootService, LootService>();
         services.AddSingleton<IRewardTableDefinitionValidator, RewardTableDefinitionValidator>();
@@ -607,6 +653,7 @@ public static class DependencyInjection
         services.AddScoped<IGameEventOutboxConsumer, TournamentChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, WorldTowerChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RaidChatGameEventOutboxConsumer>();
+        services.AddScoped<IGameEventOutboxConsumer, RegionBossChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, EventQuestChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, GuildChatGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, GuildVaultChatGameEventOutboxConsumer>();

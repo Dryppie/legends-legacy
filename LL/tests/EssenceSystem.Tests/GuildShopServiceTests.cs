@@ -3,7 +3,6 @@ using System.Text.Json.Serialization;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Guilds;
 using Domain.Models.Guilds.Buildings;
-using Domain.Models.Guilds.Missions;
 using Domain.Models.Guilds.Shop;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
@@ -111,6 +110,23 @@ public sealed class GuildShopServiceTests
         Assert.Single(result.Value.InventoryItemsGranted);
         Assert.Contains(db.InventoryItems.Local, item =>
             item.InventoryId == characterId && item.ItemInstance.ItemBaseId == reward.Key);
+    }
+
+    [Fact]
+    public async Task Market_office_level_unlocks_stock_without_weekly_contribution()
+    {
+        await using var db = CreateDbContext();
+        var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
+        var characterId = SeedGuild(db, now, marketOfficeLevel: 4);
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
+
+        Assert.Empty(await db.GuildMemberContributionPeriods.ToListAsync());
+        Assert.All(overview!.Items, item =>
+            Assert.DoesNotContain("contribution", item.LockedReason ?? string.Empty, StringComparison.OrdinalIgnoreCase));
+        Assert.True(overview.Items.Single(x => x.Key.StartsWith("rare.blueprint_")).CanPurchase);
     }
 
     [Fact]
@@ -246,15 +262,6 @@ public sealed class GuildShopServiceTests
                 }
             }
         });
-        db.GuildMemberContributionPeriods.Add(new GuildMemberContributionPeriod
-        {
-            GuildId = guildId,
-            CharacterId = characterId,
-            PeriodType = GuildMissionPeriodType.Weekly,
-            PeriodKey = "20260727",
-            ContributionScore = 400
-        });
-
         return characterId;
     }
 }

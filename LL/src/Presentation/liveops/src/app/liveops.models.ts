@@ -462,6 +462,57 @@ export interface AccountRiskDetails {
   notes: AccountRiskNote[];
 }
 
+export type AccountTemporalCorrelationAssessment = 'InsufficientData' | 'NoMaterialCorrelation' | 'Low' | 'Moderate' | 'High';
+
+export interface AccountTemporalCorrelationMatch {
+  subjectChainStartedAt: string;
+  relatedChainStartedAt: string;
+  deltaMinutes: number;
+  sequence: 'SubjectThenRelated' | 'RelatedThenSubject';
+  nearbyTransferIds: string[];
+}
+
+export interface AccountTemporalCorrelation {
+  relatedAccountId: string;
+  relatedCharacterId: string;
+  relatedCharacterName: string;
+  assessment: AccountTemporalCorrelationAssessment;
+  summary: string;
+  subjectChainStartCount: number;
+  relatedChainStartCount: number;
+  subjectActiveDays: number;
+  relatedActiveDays: number;
+  sharedActiveDays: number;
+  activeDaySimilarity: number;
+  nearStartMatchCount: number;
+  strongNearStartMatchCount: number;
+  repeatedMatchDays: number;
+  matchLift: number;
+  hourOfWeekSimilarity: number;
+  transferAdjacentMatchCount: number;
+  firstObservedAt: string | null;
+  lastObservedAt: string | null;
+  windowStart: string;
+  evaluatedAt: string;
+  evidenceComplete: boolean;
+  analyzedTokenCount: number;
+  analyzedTransferCount: number;
+  analysisVersion: number;
+  matches: AccountTemporalCorrelationMatch[];
+  limitations: string[];
+}
+
+export interface AccountTemporalCorrelationReport {
+  accountId: string;
+  windowStart: string;
+  evaluatedAt: string;
+  evidenceComplete: boolean;
+  analyzedTokenCount: number;
+  analyzedTransferCount: number;
+  analysisVersion: number;
+  entries: AccountTemporalCorrelation[];
+}
+
 export interface AccountRiskFilters {
   search?: string;
   minimumSeverity?: string;

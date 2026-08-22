@@ -37,6 +37,7 @@ import {
 } from '../../../../core/services/api/raid/raid.service';
 import { StateSyncCoordinator } from '../../../../core/services/real-time/game-realtime/state-sync-coordinator.service';
 import { environment } from '../../../../../environments/environment';
+import { RegionBossComponent } from '../region-boss/region-boss.component';
 
 interface WorldMapDungeonEntry {
   id: string;
@@ -70,6 +71,7 @@ const PRE_IMPLEMENTATION_SIGIL_DROPS_BY_AREA: Readonly<
     RouterLink,
     HelpLauncherComponent,
     RaidsComponent,
+    RegionBossComponent,
   ],
   templateUrl: './region.component.html',
   styleUrl: './region.component.scss',
@@ -85,6 +87,8 @@ export class RegionComponent implements OnInit, OnDestroy {
   selectedDungeonId: string | null = null;
   readonly raidBosses = signal<RaidBossSummary[]>([]);
   selectedRaidBossId: string | null = null;
+  selectedRegionBoss = false;
+  regionBossPlaybackActive = false;
   columnCount = 1;
   private contentResizeObserver: ResizeObserver | null = null;
   private readonly raidSyncCleanup: () => void;
@@ -134,6 +138,8 @@ export class RegionComponent implements OnInit, OnDestroy {
       this.regionId = params.get('id') ?? '';
       this.selectedDungeonId = null;
       this.selectedRaidBossId = null;
+      this.selectedRegionBoss = false;
+      this.regionBossPlaybackActive = false;
       this.questState.loadAreaAccess();
       this.getRegionDetails(this.regionId);
       this.loadRaidBosses();
@@ -353,6 +359,8 @@ export class RegionComponent implements OnInit, OnDestroy {
   selectDungeon(dungeonId: string): void {
     this.selectedDungeonId = dungeonId;
     this.selectedRaidBossId = null;
+    this.selectedRegionBoss = false;
+    this.regionBossPlaybackActive = false;
   }
 
   regionRaidBosses(): RaidBossSummary[] {
@@ -373,6 +381,15 @@ export class RegionComponent implements OnInit, OnDestroy {
 
     this.selectedRaidBossId = raidBossId;
     this.selectedDungeonId = null;
+    this.selectedRegionBoss = false;
+    this.regionBossPlaybackActive = false;
+  }
+
+  selectRegionBoss(): void {
+    this.selectedRegionBoss = true;
+    this.selectedDungeonId = null;
+    this.selectedRaidBossId = null;
+    this.regionBossPlaybackActive = false;
   }
 
   selectedRaidBoss(): RaidBossSummary | null {
@@ -409,6 +426,8 @@ export class RegionComponent implements OnInit, OnDestroy {
   showAreas(): void {
     this.selectedDungeonId = null;
     this.selectedRaidBossId = null;
+    this.selectedRegionBoss = false;
+    this.regionBossPlaybackActive = false;
   }
 
   selectedDungeonTitle(): string {

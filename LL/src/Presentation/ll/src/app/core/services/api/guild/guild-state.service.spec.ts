@@ -217,7 +217,10 @@ describe('GuildStateService refreshes', () => {
           } as never,
           { count: () => 0 } as never,
           inventory as never,
-          { register: jasmine.createSpy(), activate: jasmine.createSpy() } as never,
+          {
+            register: jasmine.createSpy(),
+            activate: jasmine.createSpy(),
+          } as never,
           TestBed.inject(DomainVersionTracker),
         ),
     );
@@ -364,6 +367,74 @@ describe('GuildStateService refreshes', () => {
 
     expect(guildService.getBuildings).toHaveBeenCalledTimes(1);
     expect(guildService.getMissions).toHaveBeenCalledTimes(1);
+    expect(guildService.getShop).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not reload the shop when guild mission progress changes', () => {
+    TestBed.configureTestingModule({});
+    const missionEvent = signal<{
+      payload: { guildId: string };
+      updateId: string;
+    } | null>(null);
+    const guildService = {
+      getMyGuild: jasmine
+        .createSpy()
+        .and.returnValue(of(createGuild('Description'))),
+      getBuildings: jasmine.createSpy().and.returnValue(of(null)),
+      getMissions: jasmine.createSpy().and.returnValue(of(null)),
+      getShop: jasmine.createSpy().and.returnValue(of(null)),
+      getAllGuilds: jasmine.createSpy().and.returnValue(of([])),
+    };
+    const eventService = {
+      eventEnvelope: {
+        GuildDirectoryChanged: signal(null),
+        GuildInviteReceived: signal(null),
+        GuildInviteRejected: signal(null),
+        GuildApplicationRejected: signal(null),
+        GuildMembershipChanged: signal(null),
+        GuildBuildingsChanged: signal(null),
+        GuildMissionsChanged: missionEvent,
+        GuildApplication: signal(null),
+        GuildStateChanged: signal(null),
+        GuildDisbanded: signal(null),
+      },
+      setGuildSubscription: jasmine
+        .createSpy()
+        .and.returnValue(Promise.resolve()),
+    };
+    TestBed.runInInjectionContext(
+      () =>
+        new GuildStateService(
+          guildService as never,
+          eventService as never,
+          eventService as never,
+          {
+            isAuthenticated: () => false,
+            currentCharacter: () => null,
+          } as never,
+          {
+            count: () => 0,
+            initializeCount: jasmine.createSpy(),
+          } as never,
+          {} as never,
+          {
+            register: jasmine.createSpy(),
+            activate: jasmine.createSpy(),
+            resetScope: jasmine.createSpy(),
+            reconcile: jasmine.createSpy().and.returnValue(Promise.resolve()),
+          } as never,
+          TestBed.inject(DomainVersionTracker),
+        ),
+    );
+    TestBed.flushEffects();
+    expect(guildService.getShop).toHaveBeenCalledTimes(1);
+
+    missionEvent.set({
+      payload: { guildId: 'guild-id' },
+      updateId: 'mission-progress-1',
+    });
+    TestBed.flushEffects();
+
     expect(guildService.getShop).toHaveBeenCalledTimes(1);
   });
 

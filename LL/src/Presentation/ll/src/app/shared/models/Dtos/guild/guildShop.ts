@@ -18,7 +18,6 @@ export interface GuildShopItem {
   guildFavorCost: number;
   weeklyLimit: number;
   purchasedThisPeriod: number;
-  requiredWeeklyContribution: number;
   requiredMarketOfficeLevel: number;
   isInWeeklyRotation: boolean;
   rewards: GuildShopReward[];

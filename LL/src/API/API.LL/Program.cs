@@ -146,6 +146,7 @@ else
     if (builder.Environment.IsDevelopment())
     {
         builder.Services.AddHostedService<TournamentGroundsDevelopmentProgressionWorker>();
+        builder.Services.AddHostedService<RegionBossDevelopmentProgressionWorker>();
     }
 }
 builder.Services.AddRealTime(); // RealTime services must be added after Application and Persistence, as they depend on them

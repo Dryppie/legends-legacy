@@ -14,6 +14,7 @@ import { CombatEvent } from '../../models/Dtos/combatEventDto';
 import { NgClass, NgIf } from '@angular/common';
 import {
   BattleOutcome,
+  CombatReviveCountdown,
   CombatResultDto,
   EntityStats,
   SimpleCombatEntityDto,
@@ -82,6 +83,7 @@ export class CombatComponent implements OnInit, OnDestroy {
   @Input() combatActionDisabled = false;
   @Input() combatActionButtonTextOverride: string | null = null;
   @Input() useParentScroll = false;
+  @Input() reviveCountdowns: CombatReviveCountdown[] = [];
 
   @Output() skipBattle = new EventEmitter<void>();
 
@@ -320,6 +322,7 @@ export class CombatComponent implements OnInit, OnDestroy {
       this.battleType === BattleType.Dungeon ||
       this.battleType === BattleType.Tower ||
       this.battleType === BattleType.Raid ||
+      this.battleType === BattleType.RegionBoss ||
       this.battleType === BattleType.Training
     ) {
       this.skipCombat();
@@ -336,7 +339,8 @@ export class CombatComponent implements OnInit, OnDestroy {
 
     if (
       (this.battleType === BattleType.Tower ||
-        this.battleType === BattleType.Raid) &&
+        this.battleType === BattleType.Raid ||
+        this.battleType === BattleType.RegionBoss) &&
       !this.outcome
     ) {
       return 'Leave Live View';
@@ -387,7 +391,8 @@ export class CombatComponent implements OnInit, OnDestroy {
       this.battleType === BattleType.Colosseum ||
       this.battleType === BattleType.Dungeon ||
       this.battleType === BattleType.Tower ||
-      this.battleType === BattleType.Raid
+      this.battleType === BattleType.Raid ||
+      this.battleType === BattleType.RegionBoss
     );
   }
 
@@ -454,6 +459,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     if (this.battleType === BattleType.Colosseum) return 'Arena Battle';
     if (this.battleType === BattleType.Tower) return 'World Tower Battle';
     if (this.battleType === BattleType.Raid) return 'Raid Battle';
+    if (this.battleType === BattleType.RegionBoss) return 'Region Boss Battle';
     if (this.battleType === BattleType.Training) return 'Training Battle';
 
     return 'Battle';

@@ -61,7 +61,12 @@
       },
       {
         "event": "OnHealthChanged",
-        "effectIds": ["effect.creature.vampire_bat.erratic_flight.dodge"]
+        "effectIds": ["effect.creature.vampire_bat.erratic_flight.dodge"],
+        "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          }
+        ]
       }
     ],
     "effects": [
@@ -280,7 +285,12 @@
       },
       {
         "event": "OnHealthChanged",
-        "effectIds": ["effect.creature.blood_zombie.clotted_flesh.defense"]
+        "effectIds": ["effect.creature.blood_zombie.clotted_flesh.defense"],
+        "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          }
+        ]
       }
     ],
     "effects": [
@@ -382,6 +392,11 @@
         "effectIds": [
           "effect.creature.lumo_sentinel.cracked_core.high",
           "effect.creature.lumo_sentinel.cracked_core.low"
+        ],
+        "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          }
         ]
       }
     ],
@@ -873,6 +888,9 @@
         "effectIds": ["effect.creature.transparent_slime.reconstitute.heal"],
         "conditions": [
           {
+            "type": "EventSourceIsSelf"
+          },
+          {
             "type": "HealthBelowPercent",
             "subject": "Source",
             "value": 90
@@ -935,6 +953,9 @@
         "event": "OnHealthChanged",
         "effectIds": ["effect.creature.moss_lizard.lost_tail.regeneration"],
         "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          },
           {
             "type": "HealthBelowPercent",
             "subject": "Source",
@@ -1527,11 +1548,58 @@
     "triggers": [
       {
         "event": "OnHealthChanged",
-        "effectIds": [
-          "effect.creature.hollow_stag.hollow_core.80",
-          "effect.creature.hollow_stag.hollow_core.60",
-          "effect.creature.hollow_stag.hollow_core.40",
-          "effect.creature.hollow_stag.hollow_core.20"
+        "effectIds": ["effect.creature.hollow_stag.hollow_core.80"],
+        "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          },
+          {
+            "type": "HealthBelowPercent",
+            "subject": "Source",
+            "value": 80
+          }
+        ]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": ["effect.creature.hollow_stag.hollow_core.60"],
+        "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          },
+          {
+            "type": "HealthBelowPercent",
+            "subject": "Source",
+            "value": 60
+          }
+        ]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": ["effect.creature.hollow_stag.hollow_core.40"],
+        "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          },
+          {
+            "type": "HealthBelowPercent",
+            "subject": "Source",
+            "value": 40
+          }
+        ]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": ["effect.creature.hollow_stag.hollow_core.20"],
+        "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          },
+          {
+            "type": "HealthBelowPercent",
+            "subject": "Source",
+            "value": 20
+          }
         ]
       }
     ],
@@ -1543,13 +1611,6 @@
         "baseValue": 1,
         "attribute": "DamageReduction",
         "uses": 1,
-        "conditions": [
-          {
-            "type": "HealthBelowPercent",
-            "subject": "Source",
-            "value": 80
-          }
-        ],
         "procCoefficient": 1
       },
       {
@@ -1559,13 +1620,6 @@
         "baseValue": 1,
         "attribute": "DamageReduction",
         "uses": 1,
-        "conditions": [
-          {
-            "type": "HealthBelowPercent",
-            "subject": "Source",
-            "value": 60
-          }
-        ],
         "procCoefficient": 1
       },
       {
@@ -1575,13 +1629,6 @@
         "baseValue": 1,
         "attribute": "DamageReduction",
         "uses": 1,
-        "conditions": [
-          {
-            "type": "HealthBelowPercent",
-            "subject": "Source",
-            "value": 40
-          }
-        ],
         "procCoefficient": 1
       },
       {
@@ -1591,13 +1638,6 @@
         "baseValue": 1,
         "attribute": "DamageReduction",
         "uses": 1,
-        "conditions": [
-          {
-            "type": "HealthBelowPercent",
-            "subject": "Source",
-            "value": 20
-          }
-        ],
         "procCoefficient": 1
       }
     ],
@@ -1771,6 +1811,9 @@
         ],
         "internalCooldownTicks": 100000,
         "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          },
           {
             "type": "HealthBelowPercent",
             "subject": "Source",
@@ -2970,6 +3013,9 @@
         ],
         "conditions": [
           {
+            "type": "EventSourceIsSelf"
+          },
+          {
             "type": "HealthAtOrBelowPercent",
             "subject": "Source",
             "value": 75
@@ -2991,6 +3037,9 @@
         ],
         "conditions": [
           {
+            "type": "EventSourceIsSelf"
+          },
+          {
             "type": "HealthAtOrBelowPercent",
             "subject": "Source",
             "value": 50
@@ -3011,6 +3060,9 @@
           "effect.creature.garran.the_first_gate.shatter_25_resistance"
         ],
         "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          },
           {
             "type": "HealthAtOrBelowPercent",
             "subject": "Source",
@@ -5020,7 +5072,7 @@
     "id": "ability.creature.web_weaver_spider.weavers_grasp",
     "kind": "Active",
     "name": "Weaver's Grasp",
-    "description": "Deal 80% Physical Damage. If the target is Slowed, deal 160% Physical Damage instead.",
+    "description": "Deal 80% Physical Damage. If the target is Slowed, deal another 80% Physical Damage.",
     "cooldownTicks": 90,
     "tags": ["Physical", "Melee", "Slow"],
     "effects": [
@@ -5210,6 +5262,9 @@
           "effect.creature.spider_queen.royal_cocoon.timer"
         ],
         "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          },
           {
             "type": "HealthBelowPercent",
             "subject": "Source",

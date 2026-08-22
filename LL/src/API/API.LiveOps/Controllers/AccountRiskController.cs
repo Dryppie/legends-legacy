@@ -4,6 +4,7 @@ using Application.UseCases.Administration.Commands.UpdateAccountRiskStatus;
 using Application.UseCases.Administration.Dtos;
 using Application.UseCases.Administration.Queries.GetAccountRiskDetails;
 using Application.UseCases.Administration.Queries.GetAccountRiskPage;
+using Application.UseCases.Administration.Queries.GetAccountTemporalCorrelations;
 using Common.Primitives;
 using Domain.Models.Administration;
 using Microsoft.AspNetCore.Authorization;
@@ -52,6 +53,16 @@ public sealed class AccountRiskController : LiveOpsControllerBase
         [FromQuery] int transferLimit = 100)
     {
         var result = await Mediator.Send(new GetAccountRiskDetailsQuery(accountId, transferLimit));
+        return result.IsSuccess ? Ok(result) : NotFound(result);
+    }
+
+    [HttpGet("{accountId:guid}/temporal-correlations")]
+    [Authorize(Policy = AdministrationPermissions.Read)]
+    public async Task<ActionResult<Response<AccountTemporalCorrelationReportDto>>> GetTemporalCorrelations(
+        Guid accountId,
+        [FromQuery] int? windowDays = null)
+    {
+        var result = await Mediator.Send(new GetAccountTemporalCorrelationsQuery(accountId, windowDays));
         return result.IsSuccess ? Ok(result) : NotFound(result);
     }
 

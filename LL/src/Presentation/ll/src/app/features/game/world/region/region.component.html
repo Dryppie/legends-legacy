@@ -14,7 +14,11 @@
 </ng-container>
 
 <ng-template #regionView>
-  <div *ngIf="region" class="world-map-page">
+  <div
+    *ngIf="region"
+    class="world-map-page"
+    [class.region-boss-playback-active]="regionBossPlaybackActive"
+  >
     <header class="world-map-header">
       <div class="world-map-identity">
         <div class="world-map-eyebrow">World Map</div>
@@ -114,48 +118,71 @@
         class="world-map-content"
         [class.showing-dungeon]="selectedDungeonId"
         [class.showing-raid]="selectedRaidBossId"
+        [class.showing-region-boss]="selectedRegionBoss"
       >
-        <ng-container *ngIf="selectedDungeonId as dungeonId; else raidOrAreas">
-          <section class="dungeon-preview-section">
-            <header class="dungeon-preview-toolbar">
-              <div>
-                <div class="world-map-eyebrow">Dungeon preview</div>
-                <h2>{{ selectedDungeonTitle() }}</h2>
-              </div>
-              <button type="button" (click)="showAreas()">
-                <span aria-hidden="true">←</span>
-                Back to areas
-              </button>
-            </header>
-
-            <app-dungeons
-              class="inline-dungeon-preview"
-              [region]="regionNumber()"
-              [selectedFamilyId]="dungeonId"
-            ></app-dungeons>
+        <ng-container *ngIf="selectedRegionBoss; else dungeonRaidOrAreas">
+          <section class="dungeon-preview-section region-boss-preview">
+            <app-region-boss
+              class="inline-region-boss"
+              [regionId]="regionNumber()"
+              [embedded]="true"
+              (leave)="showAreas()"
+              (playbackViewChange)="regionBossPlaybackActive = $event"
+            ></app-region-boss>
           </section>
         </ng-container>
 
-        <ng-template #raidOrAreas>
-          <section *ngIf="selectedRaidBoss() as raidBoss; else areasSection" class="dungeon-preview-section">
-            <header class="dungeon-preview-toolbar">
-              <div>
-                <div class="world-map-eyebrow">Raid preview</div>
-                <div class="raid-preview-title">
-                  <h2>{{ raidBoss.name }}</h2>
-                  <span>Lv {{ raidBoss.levelRequirement }} · Region {{ raidBoss.region }}</span>
+        <ng-template #dungeonRaidOrAreas>
+          <ng-container
+            *ngIf="selectedDungeonId as dungeonId; else raidOrAreas"
+          >
+            <section class="dungeon-preview-section">
+              <header class="dungeon-preview-toolbar">
+                <div>
+                  <div class="world-map-eyebrow">Dungeon preview</div>
+                  <h2>{{ selectedDungeonTitle() }}</h2>
                 </div>
-              </div>
-              <button type="button" (click)="showAreas()">
-                <span aria-hidden="true">←</span>
-                Back to areas
-              </button>
-            </header>
-            <app-raids
-              [raidBoss]="raidBoss"
-              (changed)="refreshRaidBosses()"
-            ></app-raids>
-          </section>
+                <button type="button" (click)="showAreas()">
+                  <span aria-hidden="true">←</span>
+                  Back to areas
+                </button>
+              </header>
+
+              <app-dungeons
+                class="inline-dungeon-preview"
+                [region]="regionNumber()"
+                [selectedFamilyId]="dungeonId"
+              ></app-dungeons>
+            </section>
+          </ng-container>
+
+          <ng-template #raidOrAreas>
+            <section
+              *ngIf="selectedRaidBoss() as raidBoss; else areasSection"
+              class="dungeon-preview-section"
+            >
+              <header class="dungeon-preview-toolbar">
+                <div>
+                  <div class="world-map-eyebrow">Raid preview</div>
+                  <div class="raid-preview-title">
+                    <h2>{{ raidBoss.name }}</h2>
+                    <span
+                      >Lv {{ raidBoss.levelRequirement }} · Region
+                      {{ raidBoss.region }}</span
+                    >
+                  </div>
+                </div>
+                <button type="button" (click)="showAreas()">
+                  <span aria-hidden="true">←</span>
+                  Back to areas
+                </button>
+              </header>
+              <app-raids
+                [raidBoss]="raidBoss"
+                (changed)="refreshRaidBosses()"
+              ></app-raids>
+            </section>
+          </ng-template>
         </ng-template>
 
         <ng-template #areasSection>
@@ -203,6 +230,21 @@
         </ng-template>
 
         <aside class="world-map-rail" aria-label="Region activities">
+          <section *ngIf="regionNumber() === 1" class="activity-panel">
+            <header>
+              <h2>Region Boss</h2>
+              <span>Every 4–8h</span>
+            </header>
+            <button
+              type="button"
+              class="activity-row"
+              [class.selected]="selectedRegionBoss"
+              (click)="selectRegionBoss()"
+            >
+              <span class="activity-name">The Mad King</span>
+              <span class="activity-meta">Matchmade parties of up to 5</span>
+            </button>
+          </section>
           <section class="activity-panel" data-tour="dungeons-introduction">
             <header>
               <h2>Dungeons</h2>
@@ -254,9 +296,15 @@
                 (click)="selectRaidBoss(boss.id)"
               >
                 <span class="activity-name">{{ boss.name }}</span>
-                <span class="activity-level">Lv {{ boss.levelRequirement }}</span>
+                <span class="activity-level"
+                  >Lv {{ boss.levelRequirement }}</span
+                >
                 <span class="activity-meta">
-                  {{ boss.isUnlocked ? boss.openRaidCount + ' recruiting' : boss.lockReason }}
+                  {{
+                    boss.isUnlocked
+                      ? boss.openRaidCount + " recruiting"
+                      : boss.lockReason
+                  }}
                 </span>
               </button>
             </div>

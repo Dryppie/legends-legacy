@@ -9,6 +9,7 @@ public sealed class AccountRiskAuthorizationTests
     [Theory]
     [InlineData(nameof(AccountRiskController.Search))]
     [InlineData(nameof(AccountRiskController.GetDetails))]
+    [InlineData(nameof(AccountRiskController.GetTemporalCorrelations))]
     public void Read_endpoints_require_liveops_read_permission(string methodName)
     {
         AssertPolicy(methodName, AdministrationPermissions.Read);

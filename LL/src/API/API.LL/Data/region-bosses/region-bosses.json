@@ -1,0 +1,55 @@
+{
+  "regionBosses": [
+    {
+      "id": "region-1-mad-king",
+      "name": "The Mad King",
+      "regionId": 1,
+      "creatureId": "00000000-0000-0000-0000-000000000065",
+      "imagePath": "the_mad_king",
+      "levelRequirement": 1,
+      "requiredTowerFloor": 10,
+      "baseScaling": {
+        "health": 50.0,
+        "power": 6.0,
+        "armor": 4.0,
+        "resistance": 4.0,
+        "penetration": 2.0,
+        "regeneration": 1.0
+      },
+      "levelScaling": {
+        "healthGrowth": 1.12,
+        "powerGrowth": 1.055,
+        "armorGrowthPerLevel": 0.03,
+        "resistanceGrowthPerLevel": 0.03,
+        "penetrationGrowthPerLevel": 0.01
+      },
+      "fury": {
+        "intervalSeconds": 60,
+        "powerPercentPerStack": 6,
+        "attackSpeedPercentPerStack": 4
+      },
+      "revival": {
+        "baseDelaySeconds": 15,
+        "additionalDelaySecondsPerDeath": 10,
+        "maximumDelaySeconds": 60,
+        "reviveHealthPercent": 50
+      },
+      "recovery": {
+        "livingHealPercent": 20,
+        "downedReviveHealthPercent": 50
+      },
+      "schedule": {
+        "minimumIntervalHours": 4,
+        "maximumIntervalHours": 8,
+        "signupDurationMinutes": 10
+      },
+      "rewardBrackets": [
+        { "key": "level-1", "minimumLevelDefeated": 1, "cinders": 500, "soulstones": 100 },
+        { "key": "level-3", "minimumLevelDefeated": 3, "cinders": 1000, "soulstones": 200 },
+        { "key": "level-5", "minimumLevelDefeated": 5, "cinders": 2000, "soulstones": 400 },
+        { "key": "level-8", "minimumLevelDefeated": 8, "cinders": 4000, "soulstones": 800 },
+        { "key": "level-12", "minimumLevelDefeated": 12, "cinders": 8000, "soulstones": 1600 }
+      ]
+    }
+  ]
+}

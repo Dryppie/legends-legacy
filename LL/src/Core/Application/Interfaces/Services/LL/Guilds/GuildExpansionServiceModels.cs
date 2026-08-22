@@ -136,7 +136,6 @@ public sealed record GuildShopItemDto(
     long GuildFavorCost,
     int WeeklyLimit,
     int PurchasedThisPeriod,
-    long RequiredWeeklyContribution,
     int RequiredMarketOfficeLevel,
     bool IsInWeeklyRotation,
     IReadOnlyList<GuildShopRewardDto> Rewards,

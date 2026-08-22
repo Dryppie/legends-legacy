@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { catchError, forkJoin, map, Observable, throwError } from 'rxjs';
 import { MarketPlaceListing } from '../../../../shared/models/Dtos/market-place/market-place-listing';
 import { MarketPlaceBuyOrder } from '../../../../shared/models/Dtos/market-place/market-place-buy-order';
 import { ApiService, VersionedMutationResult } from '../api.service';
@@ -123,8 +123,19 @@ export class MarketPlaceService {
 
   getSnapshot(historyTake = 50): Observable<MarketPlaceSnapshot> {
     return this.api.get(`marketplace/snapshot?historyTake=${historyTake}`).pipe(
-      catchError(() => {
-        return throwError(() => new Error('Failed to get marketplace snapshot'));
+      catchError((error) => {
+        if (error?.status === 404) {
+          return forkJoin({
+            listings: this.getListings(),
+            catalog: this.getCatalog(),
+            history: this.getHistory(historyTake),
+            buyOrders: this.getBuyOrders(),
+          });
+        }
+
+        return throwError(
+          () => new Error('Failed to get marketplace snapshot'),
+        );
       }),
     );
   }

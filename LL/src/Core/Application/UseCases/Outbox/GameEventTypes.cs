@@ -32,6 +32,7 @@ public static class GameEventTypes
     public const string RaidUpdated = "raid.updated";
     public const string RaidChatAnnouncement = "raid.chat_announcement";
     public const string RaidChatChannelSnapshot = "raid.chat_channel_snapshot";
+    public const string RegionBossChatAnnouncement = "region_boss.chat_announcement";
     public const string EventQuestChatAnnouncement = "event_quest.chat_announcement";
     public const string RealtimeDeliveryRequested = "realtime.delivery_requested";
     public const string AccountMultiplayerRestricted = "account.multiplayer_restricted";

@@ -1,5 +1,6 @@
 using API.LiveOps.Hosting;
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Administration;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.WebSockets;
 using Application.UseCases.Administration.Dtos;
@@ -38,7 +39,7 @@ public sealed class LiveOpsApplicationRegistrationTests
                     typeof(IRequestHandler<,>)))
             .ToList();
 
-        Assert.Equal(17, handlers.Count);
+        Assert.Equal(18, handlers.Count);
         Assert.All(handlers, descriptor => Assert.StartsWith(
             "Application.UseCases.Administration",
             descriptor.ImplementationType?.Namespace,
@@ -59,6 +60,8 @@ public sealed class LiveOpsApplicationRegistrationTests
             descriptor.ServiceType == typeof(IGameRealtimeBroadcaster));
         Assert.Contains(services, descriptor =>
             descriptor.ServiceType == typeof(IGameRealtimeImmediatePublisher));
+        Assert.Contains(services, descriptor =>
+            descriptor.ServiceType == typeof(IAccountTemporalCorrelationService));
     }
 
     [Fact]

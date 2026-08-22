@@ -79,6 +79,10 @@ export class CombatService {
     this.applyPlaybackFrame(BattleType.Raid, frame, reset);
   }
 
+  applyRegionBossCombatFrame(frame: TowerCombatFrame, reset = false): void {
+    this.applyPlaybackFrame(BattleType.RegionBoss, frame, reset);
+  }
+
   applyTournamentCombatFrame(
     frame: TournamentCombatFrame,
     reset = false,
@@ -163,6 +167,7 @@ export class CombatService {
       type === BattleType.Dungeon ||
       type === BattleType.Tower ||
       type === BattleType.Raid ||
+      type === BattleType.RegionBoss ||
       type === BattleType.Training
     ) {
       this.combatStateService.setCombatOutcome(type, combatAction.outcome);
@@ -214,8 +219,11 @@ export class CombatService {
     this.closePlaybackBattle(BattleType.Raid);
   }
 
-  private closePlaybackBattle(type: BattleType): void {
+  closeCurrentRegionBossBattle(): void {
+    this.closePlaybackBattle(BattleType.RegionBoss);
+  }
 
+  private closePlaybackBattle(type: BattleType): void {
     if (!this.combatStateService.getIsCombatActive(type)()) return;
 
     const combatResult = this.combatStateService.getCombatResult(type)();

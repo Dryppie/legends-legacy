@@ -4321,6 +4321,385 @@ namespace Persistence.LL.Migrations
                     b.ToTable("RaidTrophyPurchases");
                 });
 
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTimeOffset?>("CancelledAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CombatRulesVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DefinitionHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("DefinitionSnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("EncounterStartsAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("MatchmakingAlgorithmVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("PlaybackEndsAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("PlaybackStartsAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RegionBossDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("RegionId")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("SignupClosesAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("SignupStartsAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegionBossDefinitionId", "SignupStartsAtUtc")
+                        .IsUnique();
+
+                    b.HasIndex("Status", "PlaybackEndsAtUtc");
+
+                    b.HasIndex("Status", "SignupClosesAtUtc");
+
+                    b.HasIndex("Status", "SignupStartsAtUtc");
+
+                    b.ToTable("RegionBossEvents");
+                });
+
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossParticipantResult", b =>
+                {
+                    b.Property<Guid>("RegionBossRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BarrierGenerated")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DamageDone")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DamagePrevented")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DamageTaken")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Deaths")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DownedTicks")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("HealingDone")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("HealingReceived")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Revivals")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ThreatGenerated")
+                        .HasColumnType("integer");
+
+                    b.HasKey("RegionBossRunId", "CharacterId");
+
+                    b.ToTable("RegionBossParticipantResults");
+                });
+
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossPlayback", b =>
+                {
+                    b.Property<Guid>("RegionBossRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BundleContentEncoding")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("BundleContentType")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("BundleHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("BundleLength")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FrameCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SchemaVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TicksPerFrame")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TicksPerSecond")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalTicks")
+                        .HasColumnType("integer");
+
+                    b.HasKey("RegionBossRunId");
+
+                    b.ToTable("RegionBossPlaybacks");
+                });
+
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossPlaybackArtifact", b =>
+                {
+                    b.Property<Guid>("RegionBossRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("BundleBytes")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.HasKey("RegionBossRunId");
+
+                    b.ToTable("RegionBossPlaybackArtifacts");
+                });
+
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossRewardGrant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("ClaimedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("MilestoneLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RegionBossDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<Guid>("RegionBossEventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RegionBossRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RewardKey")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("RewardSnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId", "Status");
+
+                    b.HasIndex("RegionBossEventId", "CharacterId", "RewardKey")
+                        .IsUnique();
+
+                    b.ToTable("RegionBossRewardGrants");
+                });
+
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CurrentBossHealthRemaining")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CurrentBossLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CurrentBossMaxHealth")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CurrentBossProgressBasisPoints")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DurationTicks")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("FuryStacksAtEnd")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("HighestLevelDefeated")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<int>("MatchmakingBand")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PartyNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PartySize")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PartySizeScalingVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("PlaybackEndsAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("PlaybackStartsAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RandomSeed")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RegionBossEventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("ResolvedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("SimulationAttempts")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SimulationLeaseOwner")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset?>("SimulationLeaseUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("TerminationReason")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegionBossEventId", "PartyNumber")
+                        .IsUnique();
+
+                    b.HasIndex("Status", "SimulationLeaseUntil");
+
+                    b.HasIndex("RegionBossEventId", "HighestLevelDefeated", "CurrentBossProgressBasisPoints");
+
+                    b.ToTable("RegionBossRuns");
+                });
+
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossSignup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CharacterName")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int?>("PartySlot")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PowerRating")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PowerRatingAlgorithmVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RegionBossEventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("RegionBossRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("SignedUpAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("RegionBossEventId", "AccountId")
+                        .IsUnique();
+
+                    b.HasIndex("RegionBossEventId", "CharacterId")
+                        .IsUnique();
+
+                    b.HasIndex("RegionBossRunId", "PartySlot")
+                        .IsUnique();
+
+                    b.ToTable("RegionBossSignups");
+                });
+
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
                 {
                     b.Property<string>("Id")
@@ -4823,6 +5202,8 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("AppUserId");
 
                     b.HasIndex("TokenHash");
+
+                    b.HasIndex("UserId", "CreatedUtc");
 
                     b.ToTable("RefreshTokens");
                 });
@@ -6348,6 +6729,79 @@ namespace Persistence.LL.Migrations
                     b.Navigation("RaidRun");
                 });
 
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossParticipantResult", b =>
+                {
+                    b.HasOne("Domain.Models.RegionBosses.RegionBossRun", "Run")
+                        .WithMany("ParticipantResults")
+                        .HasForeignKey("RegionBossRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Run");
+                });
+
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossPlayback", b =>
+                {
+                    b.HasOne("Domain.Models.RegionBosses.RegionBossRun", "Run")
+                        .WithOne("Playback")
+                        .HasForeignKey("Domain.Models.RegionBosses.RegionBossPlayback", "RegionBossRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Run");
+                });
+
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossPlaybackArtifact", b =>
+                {
+                    b.HasOne("Domain.Models.RegionBosses.RegionBossPlayback", "Playback")
+                        .WithOne("Artifact")
+                        .HasForeignKey("Domain.Models.RegionBosses.RegionBossPlaybackArtifact", "RegionBossRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Playback");
+                });
+
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossRewardGrant", b =>
+                {
+                    b.HasOne("Domain.Models.RegionBosses.RegionBossEvent", "Event")
+                        .WithMany("RewardGrants")
+                        .HasForeignKey("RegionBossEventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+                });
+
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossRun", b =>
+                {
+                    b.HasOne("Domain.Models.RegionBosses.RegionBossEvent", "Event")
+                        .WithMany("Runs")
+                        .HasForeignKey("RegionBossEventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+                });
+
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossSignup", b =>
+                {
+                    b.HasOne("Domain.Models.RegionBosses.RegionBossEvent", "Event")
+                        .WithMany("Signups")
+                        .HasForeignKey("RegionBossEventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.RegionBosses.RegionBossRun", "Run")
+                        .WithMany("Members")
+                        .HasForeignKey("RegionBossRunId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Event");
+
+                    b.Navigation("Run");
+                });
+
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
                 {
                     b.HasOne("Domain.Models.Regions.Region", null)
@@ -6664,6 +7118,30 @@ namespace Persistence.LL.Migrations
                     b.Navigation("RewardClaims");
 
                     b.Navigation("Signups");
+                });
+
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossEvent", b =>
+                {
+                    b.Navigation("RewardGrants");
+
+                    b.Navigation("Runs");
+
+                    b.Navigation("Signups");
+                });
+
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossPlayback", b =>
+                {
+                    b.Navigation("Artifact")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossRun", b =>
+                {
+                    b.Navigation("Members");
+
+                    b.Navigation("ParticipantResults");
+
+                    b.Navigation("Playback");
                 });
 
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
