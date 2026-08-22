@@ -28,7 +28,7 @@
     },
     {
       "key": "equip_first_hunt_essence",
-      "description": "Attune your First Hunt Essence in your active Essence loadout.",
+      "description": "Attune your First Hunt Essence in a loadout.",
       "type": "EssenceEquipped",
       "requiredAmount": 1,
       "filters": {

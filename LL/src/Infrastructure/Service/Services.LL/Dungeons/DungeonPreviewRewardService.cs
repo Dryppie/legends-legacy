@@ -135,13 +135,15 @@ public sealed class DungeonPreviewRewardService : IDungeonPreviewRewardService
     private static IEnumerable<DungeonPreviewRewardEntry> MapMonsterCoreRewards(
         DungeonDefinition dungeon)
     {
-        var itemIds = DungeonRewardCatalog.GetMonsterCoreRewardItemIds(dungeon.Grade);
+        var grants = DungeonRewardCatalog.GetMonsterCoreRewardGrants(dungeon.Grade);
 
-        return itemIds
-            .Select(itemId => new DungeonPreviewRewardEntry(
-                itemId,
+        return grants
+            .Select(grant => new DungeonPreviewRewardEntry(
+                grant.ItemId,
                 "Monster Cores",
                 "Every Completion",
+                grant.MinAmount,
+                grant.MaxAmount,
                 DropChancePercent: 100))
             .ToList();
     }

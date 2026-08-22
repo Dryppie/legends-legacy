@@ -1173,7 +1173,7 @@ public sealed class QuestSystemTests
         public Task<bool> HasProcessedEventAsync(Guid outboxMessageId, CancellationToken cancellationToken) =>
             Task.FromResult(false);
 
-        public Task<bool> HasEssenceInActiveLoadoutAsync(Guid characterId, string essenceDefinitionId, CancellationToken cancellationToken) =>
+        public Task<bool> HasEssenceInAnyLoadoutAsync(Guid characterId, string essenceDefinitionId, CancellationToken cancellationToken) =>
             Task.FromResult(false);
 
         public Task<bool> HasQualifyingEquipmentEquippedAsync(Guid characterId, IReadOnlyCollection<string> itemBaseIds, int? tier, bool mustBeCrafted, bool toolSlotOnly, CancellationToken cancellationToken) =>

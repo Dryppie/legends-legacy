@@ -202,28 +202,29 @@
       "displayName": "Goblin Mines I Completion Loot",
       "rolls": [
         {
-          "id": "completion_weighted_drop",
+          "id": "blueprint_drop",
           "type": "WeightedWithNoDrop",
-          "noDropWeight": 75.25,
+          "noDropWeight": 90,
           "entries": [
             {
               "id": "blueprint_fury",
               "type": "Item",
               "itemId": "blueprint_fury",
-              "weight": 10
-            },
-            {
-              "id": "blueprint_arcane",
-              "type": "Item",
-              "itemId": "blueprint_arcane",
               "weight": 5
             },
             {
-              "id": "blueprint_execution",
+              "id": "blueprint_phoenix",
               "type": "Item",
-              "itemId": "blueprint_execution",
+              "itemId": "blueprint_phoenix",
               "weight": 5
-            },
+            }
+          ]
+        },
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 95.25,
+          "entries": [
             {
               "id": "pickaxe",
               "type": "Item",
@@ -258,6 +259,25 @@
       "id": "reward.dungeon.goblin_mines_ii.completion",
       "displayName": "Goblin Mines II Completion Loot",
       "rolls": [
+        {
+          "id": "blueprint_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 90,
+          "entries": [
+            {
+              "id": "blueprint_fury",
+              "type": "Item",
+              "itemId": "blueprint_fury",
+              "weight": 5
+            },
+            {
+              "id": "blueprint_phoenix",
+              "type": "Item",
+              "itemId": "blueprint_phoenix",
+              "weight": 5
+            }
+          ]
+        },
         {
           "id": "completion_weighted_drop",
           "type": "WeightedWithNoDrop",
@@ -306,6 +326,25 @@
       "id": "reward.dungeon.goblin_mines_iii.completion",
       "displayName": "Goblin Mines III Completion Loot",
       "rolls": [
+        {
+          "id": "blueprint_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 90,
+          "entries": [
+            {
+              "id": "blueprint_fury",
+              "type": "Item",
+              "itemId": "blueprint_fury",
+              "weight": 5
+            },
+            {
+              "id": "blueprint_phoenix",
+              "type": "Item",
+              "itemId": "blueprint_phoenix",
+              "weight": 5
+            }
+          ]
+        },
         {
           "id": "completion_weighted_drop",
           "type": "WeightedWithNoDrop",
@@ -362,34 +401,29 @@
       "displayName": "Forgotten Catacombs I Completion Loot",
       "rolls": [
         {
-          "id": "completion_weighted_drop",
+          "id": "blueprint_drop",
           "type": "WeightedWithNoDrop",
-          "noDropWeight": 86.25,
+          "noDropWeight": 90,
           "entries": [
             {
-              "id": "blueprint_aegis",
+              "id": "blueprint_arcane",
               "type": "Item",
-              "itemId": "blueprint_aegis",
-              "weight": 4
+              "itemId": "blueprint_arcane",
+              "weight": 5
             },
             {
               "id": "blueprint_endurance",
               "type": "Item",
               "itemId": "blueprint_endurance",
-              "weight": 4
-            },
-            {
-              "id": "blueprint_phoenix",
-              "type": "Item",
-              "itemId": "blueprint_phoenix",
-              "weight": 4
-            },
-            {
-              "id": "blueprint_spirit",
-              "type": "Item",
-              "itemId": "blueprint_spirit",
-              "weight": 4
-            },
+              "weight": 5
+            }
+          ]
+        },
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 102.25,
+          "entries": [
             {
               "id": "skinning_knife",
               "type": "Item",
@@ -424,6 +458,25 @@
       "id": "reward.dungeon.forgotten_catacombs_ii.completion",
       "displayName": "Forgotten Catacombs II Completion Loot",
       "rolls": [
+        {
+          "id": "blueprint_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 90,
+          "entries": [
+            {
+              "id": "blueprint_arcane",
+              "type": "Item",
+              "itemId": "blueprint_arcane",
+              "weight": 5
+            },
+            {
+              "id": "blueprint_endurance",
+              "type": "Item",
+              "itemId": "blueprint_endurance",
+              "weight": 5
+            }
+          ]
+        },
         {
           "id": "completion_weighted_drop",
           "type": "WeightedWithNoDrop",
@@ -472,6 +525,25 @@
       "id": "reward.dungeon.forgotten_catacombs_iii.completion",
       "displayName": "Forgotten Catacombs III Completion Loot",
       "rolls": [
+        {
+          "id": "blueprint_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 90,
+          "entries": [
+            {
+              "id": "blueprint_arcane",
+              "type": "Item",
+              "itemId": "blueprint_arcane",
+              "weight": 5
+            },
+            {
+              "id": "blueprint_endurance",
+              "type": "Item",
+              "itemId": "blueprint_endurance",
+              "weight": 5
+            }
+          ]
+        },
         {
           "id": "completion_weighted_drop",
           "type": "WeightedWithNoDrop",
@@ -690,6 +762,47 @@
       ]
     },
     {
+      "id": "reward.gathering.region_01.catalysts",
+      "displayName": "Shenic Gathering Catalysts",
+      "rolls": [
+        {
+          "id": "rare_catalyst_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 96,
+          "entries": [
+            {
+              "id": "fury_heart",
+              "type": "Item",
+              "itemId": "fury_heart",
+              "weight": 1,
+              "tags": ["rare", "catalyst"]
+            },
+            {
+              "id": "phoenix_ember",
+              "type": "Item",
+              "itemId": "phoenix_ember",
+              "weight": 1,
+              "tags": ["rare", "catalyst"]
+            },
+            {
+              "id": "arcane_focus",
+              "type": "Item",
+              "itemId": "arcane_focus",
+              "weight": 1,
+              "tags": ["rare", "catalyst"]
+            },
+            {
+              "id": "endurance_core",
+              "type": "Item",
+              "itemId": "endurance_core",
+              "weight": 1,
+              "tags": ["rare", "catalyst"]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "reward.gathering.lumo_ruins.ore_vein",
       "displayName": "Lumo Ruins Ore Vein",
       "rolls": [
@@ -703,6 +816,17 @@
               "itemId": "ore",
               "weight": 60,
               "quantity": { "min": 8, "max": 24 }
+            }
+          ]
+        },
+        {
+          "id": "region_01_catalyst",
+          "type": "Reference",
+          "entries": [
+            {
+              "id": "region_01_catalyst_pool",
+              "type": "RewardTableReference",
+              "rewardTableId": "reward.gathering.region_01.catalysts"
             }
           ]
         }
@@ -724,6 +848,17 @@
               "quantity": { "min": 8, "max": 24 }
             }
           ]
+        },
+        {
+          "id": "region_01_catalyst",
+          "type": "Reference",
+          "entries": [
+            {
+              "id": "region_01_catalyst_pool",
+              "type": "RewardTableReference",
+              "rewardTableId": "reward.gathering.region_01.catalysts"
+            }
+          ]
         }
       ]
     },
@@ -743,6 +878,17 @@
               "quantity": { "min": 8, "max": 24 }
             }
           ]
+        },
+        {
+          "id": "region_01_catalyst",
+          "type": "Reference",
+          "entries": [
+            {
+              "id": "region_01_catalyst_pool",
+              "type": "RewardTableReference",
+              "rewardTableId": "reward.gathering.region_01.catalysts"
+            }
+          ]
         }
       ]
     },
@@ -760,6 +906,17 @@
               "itemId": "wood",
               "weight": 60,
               "quantity": { "min": 8, "max": 24 }
+            }
+          ]
+        },
+        {
+          "id": "region_01_catalyst",
+          "type": "Reference",
+          "entries": [
+            {
+              "id": "region_01_catalyst_pool",
+              "type": "RewardTableReference",
+              "rewardTableId": "reward.gathering.region_01.catalysts"
             }
           ]
         }

@@ -289,7 +289,8 @@ public sealed class GameEventOutboxTests
                     100,
                     3,
                     "Mining",
-                    2)),
+                    2,
+                    17)),
             CancellationToken.None);
         await consumer.HandleAsync(
             CreateOutboxMessage(
@@ -313,6 +314,7 @@ public sealed class GameEventOutboxTests
         Assert.Equal(3, progression.Triggers[0].ActionCount);
         Assert.Equal("Mining", progression.Triggers[0].EquippedGatheringType);
         Assert.Equal(2, progression.Triggers[0].WinningEncounterCount);
+        Assert.Equal(17, progression.Triggers[0].GatheredResourceCount);
         Assert.Equal(37, progression.Triggers[2].ActionCount);
     }
 

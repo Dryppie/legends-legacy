@@ -3,6 +3,7 @@ using Application.Interfaces.Services.LL.Quests;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Quests;
+using Domain.Models.Essences;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
@@ -95,7 +96,9 @@ public sealed class QuestEncounterService(
 
         var combatPlayers = combatSetupService.CreatePlayerCombatEntities(playerTeam);
         var combatEnemies = combatSetupService.CreateCreatureCombatEntities(enemyTeam, area);
-        await combatSetupService.PrepareEntitiesForCombat([.. combatPlayers, .. combatEnemies]);
+        await combatSetupService.PrepareEntitiesForCombat(
+            [.. combatPlayers, .. combatEnemies],
+            EssenceCombatActivity.IdleCombat);
 
         var startsAt = DateTimeOffset.UtcNow;
         var encounterId = Guid.NewGuid();

@@ -132,6 +132,37 @@ public sealed class CharacterActionFlowTests
     }
 
     [Fact]
+    public async Task Peek_includes_timing_for_a_stopped_combat_switch_lock()
+    {
+        var repository = new CharacterActionRepositoryStub
+        {
+            Current = new CharacterAction
+            {
+                CharacterId = Guid.NewGuid(),
+                UpdatedAt = Now.AddSeconds(-2),
+                BlockedUntilUtc = Now.AddSeconds(8),
+                IsDeleted = true
+            }
+        };
+        var service = new CharacterActionService(
+            repository,
+            new CombatServiceStub(),
+            new CraftingServiceStub(),
+            new FixedTimeProvider(Now));
+
+        var result = await service.PeekCharacterActionAsync(
+            repository.Current.CharacterId,
+            CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Equal(CharacterActionType.Idle, result.CharacterActionType);
+        Assert.Equal(
+            CharacterActionTimingConstants.CombatSwitchLockSeconds * 1_000,
+            result.ResolutionIntervalMs);
+        Assert.Equal(Now.AddSeconds(8), result.BlockedUntilUtc);
+    }
+
+    [Fact]
     public async Task Resolve_hydrates_combat_and_updates_the_action_boundary()
     {
         var repository = new CharacterActionRepositoryStub

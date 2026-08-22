@@ -5,6 +5,7 @@ import {
   DungeonRecord,
 } from '../../../models/Dtos/dungeons/dungeonPreviewData';
 import { DungeonDifficulty } from '../../../models/enums/dungeonDifficulty';
+import { EquipmentType } from '../../../models/enums/equipmentType';
 import { DungeonCardComponent } from './dungeon-card.component';
 
 describe('DungeonCardComponent', () => {
@@ -161,5 +162,72 @@ describe('DungeonCardComponent', () => {
     component.continueDungeon();
 
     expect(navigate).toHaveBeenCalledOnceWith(['/game/world/dungeon']);
+  });
+
+  it('formats dungeon drop chances and quantity ranges explicitly', () => {
+    const component = createComponent();
+    const reward = {
+      minQuantity: 2,
+      maxQuantity: 5,
+      dropChancePercent: 4.125,
+    } as DungeonPreviewData['rewards'][number];
+
+    expect(component.rewardDropChanceLabel(reward)).toBe('4.13% drop');
+    expect(component.rewardQuantityLabel(reward)).toBe('Qty 2–5');
+  });
+
+  it('combines every tool pool into one random tool reward', () => {
+    const component = createComponent();
+    const preview = createPreview({}, [DungeonDifficulty.Normal]);
+    const toolReward = (
+      id: string,
+      category: string,
+      chance: number,
+    ): DungeonPreviewData['rewards'][number] =>
+      ({
+        id,
+        itemBase: {
+          id,
+          name: id,
+          equipmentType: EquipmentType.Tool,
+        },
+        category,
+        source: category,
+        minQuantity: 1,
+        maxQuantity: 1,
+        dropChancePercent: chance,
+      }) as unknown as DungeonPreviewData['rewards'][number];
+    const rewards = [
+      toolReward('pickaxe', 'Completion Loot', 5),
+      toolReward('hatchet', 'Completion Loot', 7),
+      toolReward('skinning-knife', 'Tier Loot', 10),
+    ];
+    preview.rewards = rewards;
+    preview.difficultyVariants![DungeonDifficulty.Normal]!.rewards = rewards;
+    component.previewData = preview;
+    component.ngOnChanges({});
+
+    const randomTool = component.selectedRunRewards()[0];
+
+    expect(component.selectedRunRewards().length).toBe(1);
+    expect(randomTool.displayName).toBe('Random Tool');
+    expect(randomTool.dropChancePercent).toBe(20.8);
+    expect(randomTool.minQuantity).toBe(1);
+    expect(randomTool.maxQuantity).toBe(1);
+  });
+
+  it('labels gathering percentages as base chances', () => {
+    const component = createComponent();
+    const loot = {
+      minQuantity: 1,
+      maxQuantity: 1,
+      dropChancePercent: 0.37,
+    } as NonNullable<
+      DungeonPreviewData['gatheringNodes']
+    >[number]['loot'][number];
+
+    expect(component.gatheringLootDropChanceLabel(loot)).toBe(
+      'Base 0.37% drop',
+    );
   });
 });

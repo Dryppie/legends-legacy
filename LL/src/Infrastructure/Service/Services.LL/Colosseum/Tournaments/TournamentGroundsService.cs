@@ -14,6 +14,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Snapshots;
+using Domain.Models.Essences;
 using Domain.Models.Administration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -767,7 +768,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             return null;
         }
 
-        var snapshot = await _characterSnapshotService.CreateAsync(characterId, cancellationToken);
+        var snapshot = await _characterSnapshotService.CreateAsync(characterId, EssenceCombatActivity.Tournament, cancellationToken);
         var tier = ArenaRank.GetTier(character.ArenaProfile.Rating);
         var tournamentSnapshot = await _tournaments.CombatSnapshots
             .FirstOrDefaultAsync(s => s.TournamentId == tournamentId && s.CharacterId == characterId, cancellationToken);
@@ -892,6 +893,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         var snapshot = await _characterSnapshotService.CreateAsync(
             characterId,
+            EssenceCombatActivity.Tournament,
             cancellationToken);
         tournamentSnapshot.CharacterSnapshotId = snapshot.Id;
         tournamentSnapshot.CharacterSnapshot = snapshot;
@@ -2594,7 +2596,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             hostileRuntime.Add(new CombatRuntimeParticipant(slot, source, combat));
         }
 
-        await _combatSetupService.PrepareEntitiesForCombat(combatEntities);
+        await _combatSetupService.PrepareEntitiesForCombat(combatEntities, EssenceCombatActivity.Tournament);
 
         var battleId = Guid.NewGuid();
         var encounterPlan = new CombatEncounterPlan(

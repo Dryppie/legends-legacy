@@ -4,6 +4,7 @@ using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.RegionBosses;
+using Domain.Models.Essences;
 using Services.LL.Combat.Engine;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
@@ -69,14 +70,16 @@ public sealed class RegionBossCombatResolver(
             combatant.OriginalId = member.CharacterId;
             return new CombatRuntimeParticipant(slot, source, combatant);
         }).ToArray();
-        await combatSetup.PrepareEntitiesForCombat(friendly.Select(x => x.Combatant).ToList());
+        await combatSetup.PrepareEntitiesForCombat(
+            friendly.Select(x => x.Combatant).ToList(),
+            EssenceCombatActivity.RegionBoss);
 
         var source = (await entities.GetEntitiesByIdsForCombatAsync([definition.CreatureId], cancellationToken))
             .OfType<Creature>()
             .SingleOrDefault()
             ?? throw new InvalidOperationException($"Region Boss creature '{definition.CreatureId}' was not found.");
         var template = combatSetup.CreateCreatureCombatEntities([source], new Domain.Models.Regions.Areas.Area { DifficultyTier = 1 }).Single();
-        await combatSetup.PrepareEntitiesForCombat([template]);
+        await combatSetup.PrepareEntitiesForCombat([template], EssenceCombatActivity.RegionBoss);
 
         CombatRuntimeParticipant CreateBoss(int level)
         {

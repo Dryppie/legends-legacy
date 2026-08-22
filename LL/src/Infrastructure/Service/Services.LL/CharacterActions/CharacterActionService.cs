@@ -251,6 +251,17 @@ public class CharacterActionService : ICharacterActionService
         action.HasMoreDueWork = !action.IsDeleted &&
             action.NextResolutionAtUtc is not null &&
             action.NextResolutionAtUtc <= now;
+
+        // A stopped combat row no longer has ActionDetails, so it maps to Idle
+        // after a refresh. Its retained switch lock is still a live gameplay
+        // timer and needs an interval so clients can render its progress.
+        if (action.IsDeleted && action.BlockedUntilUtc > now)
+        {
+            action.ResolutionIntervalMs = checked(
+                CharacterActionTimingConstants.CombatSwitchLockSeconds * 1_000);
+            return;
+        }
+
         switch (action.CharacterActionType)
         {
             case CharacterActionType.Combat:

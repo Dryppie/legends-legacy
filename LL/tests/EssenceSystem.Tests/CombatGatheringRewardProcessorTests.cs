@@ -194,6 +194,72 @@ public sealed class CombatGatheringRewardProcessorTests
         Assert.Equal(56d, rareBonus, 10);
     }
 
+    [Fact]
+    public async Task Every_eligible_attempt_awards_fifty_experience_even_when_gathering_fails()
+    {
+        var professions = new RecordingProfessionService();
+        var processor = new CombatGatheringRewardProcessor(
+            new StaticRewardRoller(),
+            new StaticItemBaseRepository(),
+            new InventoryItemFactory(),
+            new FixedRandomSource(1d),
+            professions,
+            new NoopLevelingService(),
+            new EmptyBonusService());
+        var characterId = Guid.NewGuid();
+        var facts = new CombatGatheringRewardFacts(
+            characterId,
+            Victories: 2,
+            new EquippedGatheringTool
+            {
+                Name = "Test Pickaxe",
+                GatheringType = GatheringType.Mining
+            },
+            [new CombatGatheringNode("ore", "Ore", GatheringType.Mining, null, 0f, "loot.test")]);
+
+        var rewards = await processor.ProcessAsync(facts, CancellationToken.None);
+
+        Assert.Equal(2, rewards.Count);
+        Assert.All(rewards, reward =>
+        {
+            Assert.False(reward.Success);
+            Assert.Equal(50, reward.ExperienceGained);
+        });
+        Assert.Equal(100, professions.Profession.Experience);
+        Assert.Equal(1, professions.UpdateCalls);
+    }
+
+    [Fact]
+    public async Task Multiple_matching_nodes_do_not_multiply_experience_per_encounter()
+    {
+        var professions = new RecordingProfessionService();
+        var processor = new CombatGatheringRewardProcessor(
+            new StaticRewardRoller(),
+            new StaticItemBaseRepository(),
+            new InventoryItemFactory(),
+            new FixedRandomSource(1d),
+            professions,
+            new NoopLevelingService(),
+            new EmptyBonusService());
+        var facts = new CombatGatheringRewardFacts(
+            Guid.NewGuid(),
+            Victories: 1,
+            new EquippedGatheringTool
+            {
+                Name = "Test Pickaxe",
+                GatheringType = GatheringType.Mining
+            },
+            [
+                new CombatGatheringNode("ore", "Ore", GatheringType.Mining, null, 0f, "loot.ore"),
+                new CombatGatheringNode("crystal", "Crystal", GatheringType.Mining, null, 0f, "loot.crystal")
+            ]);
+
+        var rewards = await processor.ProcessAsync(facts, CancellationToken.None);
+
+        Assert.Equal(50, rewards.Sum(reward => reward.ExperienceGained));
+        Assert.Equal(50, professions.Profession.Experience);
+    }
+
     private sealed class StaticRewardRoller : IRewardRoller
     {
         private static readonly RewardRollResult Result = new(
@@ -296,6 +362,38 @@ public sealed class CombatGatheringRewardProcessorTests
 
         public void UpdateProfessionLevel(List<Profession> professions)
         {
+        }
+    }
+
+    private sealed class RecordingProfessionService : IProfessionService
+    {
+        public Profession Profession { get; } = new() { Level = 1 };
+        public int UpdateCalls { get; private set; }
+
+        public Task<Profession> GetOrCreateProfessionAsync(
+            Guid characterId,
+            ProfessionType professionType,
+            CancellationToken cancellationToken)
+        {
+            Profession.CharacterId = characterId;
+            Profession.ProfessionType = professionType;
+            return Task.FromResult(Profession);
+        }
+
+        public Task<int> GetProfessionLevelAsync(
+            Guid characterId,
+            ProfessionType professionType,
+            CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public Task<List<Profession>> GetProfessionsAsync(
+            Guid characterId,
+            CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public void UpdateProfessionLevel(List<Profession> professions)
+        {
+            UpdateCalls++;
         }
     }
 

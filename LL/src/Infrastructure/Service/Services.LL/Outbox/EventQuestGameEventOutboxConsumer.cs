@@ -116,7 +116,8 @@ public sealed class EventQuestGameEventOutboxConsumer(
             payload.WonEncounter,
             Math.Max(1, payload.ActionCount),
             payload.EquippedGatheringType,
-            payload.WinningEncounterCount);
+            payload.WinningEncounterCount,
+            payload.GatheredResourceCount);
 
     private T Read<T>(GameEventOutboxMessage message) =>
         JsonSerializer.Deserialize<T>(message.PayloadJson, jsonOptions)

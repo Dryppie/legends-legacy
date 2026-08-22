@@ -62,10 +62,42 @@ public sealed class DungeonPreviewRewardServiceTests
             reward.ItemBase.Id == "shared_reward" &&
             reward.Category == "Completion Loot" &&
             reward.MinQuantity == 2 &&
-            reward.MaxQuantity == 4);
+            reward.MaxQuantity == 4 &&
+            reward.DropChancePercent == 100);
         Assert.Contains(previews["second"], reward =>
             reward.ItemBase.Id == "shared_reward" &&
             reward.Category == "Completion Loot");
+    }
+
+    [Theory]
+    [InlineData(DungeonGrade.GradeI, "item.monster_core.lesser", 3, 6)]
+    [InlineData(DungeonGrade.GradeII, "item.monster_core.greater", 2, 5)]
+    [InlineData(DungeonGrade.GradeIII, "item.monster_core.primal", 1, 4)]
+    public async Task Monster_core_previews_show_the_full_possible_quantity_range(
+        DungeonGrade grade,
+        string itemId,
+        int expectedMin,
+        int expectedMax)
+    {
+        var service = new DungeonPreviewRewardService(
+            new CountingItemBaseRepository(),
+            new StaticRewardTableProvider());
+        var dungeon = new DungeonDefinition
+        {
+            Id = "dungeon",
+            Grade = grade
+        };
+
+        var rewards = await service.GetPossibleCompletionRewardsAsync(
+            dungeon,
+            CancellationToken.None);
+
+        var reward = Assert.Single(rewards, candidate =>
+            candidate.ItemBase.Id == itemId &&
+            candidate.Category == "Monster Cores");
+        Assert.Equal(expectedMin, reward.MinQuantity);
+        Assert.Equal(expectedMax, reward.MaxQuantity);
+        Assert.Equal(100d, reward.DropChancePercent);
     }
 
     private sealed class CountingItemBaseRepository : IItemBaseRepository

@@ -1,0 +1,84 @@
+{
+  "id": "event.a_realm_replenished.2026_08",
+  "version": 1,
+  "enabled": true,
+  "title": "A Realm Replenished",
+  "summary": "Gather ore, timber, and hides to replenish the realm's stores for the trials ahead.",
+  "startsAtUtc": "2026-08-23T00:00:00Z",
+  "endsAtUtc": "2026-08-30T00:00:00Z",
+  "claimEndsAtUtc": "2026-09-01T00:00:00Z",
+  "minimumContribution": 1,
+  "sortOrder": 80,
+  "objectives": [
+    {
+      "key": "resources-gathered",
+      "description": "Gather 50,000 resources.",
+      "type": "ResourceGathered",
+      "requiredAmount": 50000,
+      "filters": {}
+    }
+  ],
+  "rewards": [
+    {
+      "key": "sigil-fragments",
+      "type": "SigilFragments",
+      "quantity": 50
+    }
+  ],
+  "personalMilestones": [
+    {
+      "key": "supply-the-realm",
+      "requiredContribution": 500,
+      "rewards": [
+        {
+          "key": "soul-dust",
+          "type": "Item",
+          "itemBaseId": "soul_dust",
+          "quantity": 50
+        },
+        {
+          "key": "lesser-monster-cores",
+          "type": "Item",
+          "itemBaseId": "item.monster_core.lesser",
+          "quantity": 10
+        }
+      ]
+    },
+    {
+      "key": "stock-the-storehouses",
+      "requiredContribution": 1000,
+      "rewards": [
+        {
+          "key": "blueprint-selection-box",
+          "type": "Item",
+          "itemBaseId": "item.blueprint_selection_box",
+          "quantity": 1
+        },
+        {
+          "key": "greater-monster-cores",
+          "type": "Item",
+          "itemBaseId": "item.monster_core.greater",
+          "quantity": 15
+        }
+      ]
+    },
+    {
+      "key": "restore-the-bounty",
+      "requiredContribution": 2000,
+      "rewards": [
+        {
+          "key": "catalyst-selection-cache",
+          "type": "Item",
+          "itemBaseId": "item.catalyst_selection_crate",
+          "quantity": 1
+        },
+        {
+          "key": "primal-monster-cores",
+          "type": "Item",
+          "itemBaseId": "item.monster_core.primal",
+          "quantity": 20
+        }
+      ]
+    }
+  ]
+}

@@ -36,9 +36,16 @@ public sealed class EssenceMutationResponseFactory(
         var savedLoadoutDto = mapper.Map<EssenceLoadoutDto?>(savedLoadout);
         if (savedLoadoutDto is not null)
         {
-            mappedLoadouts.RemoveAll(loadout => loadout.Id == savedLoadoutDto.Id);
-            mappedLoadouts.Add(savedLoadoutDto);
+            var savedIndex = mappedLoadouts.FindIndex(loadout => loadout.Id == savedLoadoutDto.Id);
+            if (savedIndex >= 0)
+                mappedLoadouts[savedIndex] = savedLoadoutDto;
+            else
+                mappedLoadouts.Add(savedLoadoutDto);
         }
+        mappedLoadouts = mappedLoadouts
+            .OrderBy(loadout => loadout.Name, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(loadout => loadout.Id)
+            .ToList();
 
         return new EssenceStateResponseDto
         {

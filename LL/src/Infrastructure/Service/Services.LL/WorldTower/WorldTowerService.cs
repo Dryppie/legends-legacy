@@ -16,6 +16,7 @@ using AutoMapper;
 using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
 using Domain.Models.Attributes;
+using Domain.Models.Essences;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
@@ -746,7 +747,7 @@ public sealed class WorldTowerService : IWorldTowerService
             return TowerOperationResult<TowerRallyDto>.Fail("This account already occupies a slot in the Expedition.");
         }
 
-        var snapshot = await _snapshots.CreateAsync(eligibility.CharacterId, cancellationToken);
+        var snapshot = await _snapshots.CreateAsync(eligibility.CharacterId, EssenceCombatActivity.WorldTower, cancellationToken);
         var now = DateTimeOffset.UtcNow;
         var application = existingApplication ?? new TowerRallyApplication
         {
@@ -1023,7 +1024,7 @@ public sealed class WorldTowerService : IWorldTowerService
             return TowerOperationResult<TowerRallyDto>.Fail(
                 rating.StatusMessage ?? "Power Rating is unavailable for this character.");
 
-        var snapshot = await _snapshots.CreateAsync(characterId, cancellationToken);
+        var snapshot = await _snapshots.CreateAsync(characterId, EssenceCombatActivity.WorldTower, cancellationToken);
         var powerRating = CombatRatingDisplay.FromRaw(rating.Overall);
         var now = DateTimeOffset.UtcNow;
         Guid? accountId;
@@ -1550,7 +1551,7 @@ public sealed class WorldTowerService : IWorldTowerService
         Domain.Models.Snapshots.CharacterSnapshot? suppliedSnapshot = null)
     {
         var snapshot = suppliedSnapshot
-            ?? await _snapshots.CreateAsync(eligibility.CharacterId, cancellationToken);
+            ?? await _snapshots.CreateAsync(eligibility.CharacterId, EssenceCombatActivity.WorldTower, cancellationToken);
         if (suppliedSnapshot is not null)
             _db.CharacterSnapshots.Add(snapshot);
         return new TowerRallyParticipant
@@ -1649,7 +1650,8 @@ public sealed class WorldTowerService : IWorldTowerService
         var hostile = new CombatRuntimeParticipant(hostileSlot, guardianSource, guardian);
 
         await _combatSetup.PrepareEntitiesForCombat(
-            [.. friendly.Select(x => x.Combatant), hostile.Combatant]);
+            [.. friendly.Select(x => x.Combatant), hostile.Combatant],
+            EssenceCombatActivity.WorldTower);
         var startedAt = _timeProvider.GetUtcNow();
         var plan = new CombatEncounterPlan(
             attemptId,

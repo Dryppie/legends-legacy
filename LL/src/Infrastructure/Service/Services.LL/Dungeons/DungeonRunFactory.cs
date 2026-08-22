@@ -5,6 +5,7 @@ using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
 using Services.LL.Interfaces;
 using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Essences;
 
 namespace Services.LL.Dungeons;
 
@@ -29,7 +30,7 @@ public sealed class DungeonRunFactory
         var dungeon = _dungeons.GetByKey(dungeonDefinitionId);
         var delve = _delves.GetForDungeon(dungeonDefinitionId);
         ValidateRestSiteCount(dungeon, delve);
-        var snapshot = await _snapshotService.CreateAsync(characterId, ct);
+        var snapshot = await _snapshotService.CreateAsync(characterId, EssenceCombatActivity.Dungeon, ct);
 
         var startedWithoutWeapon = snapshot.Equipment.All(x => x.Slot != EquipmentSlotType.MainHand);
         return CreateRun(characterId, snapshot.Id, dungeon, delve, seed, startedWithoutWeapon);

@@ -2,6 +2,7 @@ using Application.Interfaces.Services.LL;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
+using Domain.Models.Essences;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
@@ -39,6 +40,7 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
             await _experienceWriter.AddSplitExperienceAsync(
                 [run.CharacterId],
                 rewardState.Experience,
+                EssenceCombatActivity.Dungeon,
                 cancellationToken);
         }
 

@@ -15,6 +15,9 @@
       "monsterLootModifiers": {
         "Essence": 25
       },
+      "gatheringBonusRewardTableIds": [
+        "reward.gathering.region_01.catalysts"
+      ],
       "restSiteCount": 2,
       "roomTemplates": [
         {
@@ -56,37 +59,12 @@
                 "maxAmount": 1
               },
               {
-                "itemId": "blueprint_venom_touched_sword",
+                "itemId": "blueprint_phoenix",
                 "minAmount": 1,
                 "maxAmount": 1
               }
             ],
-            "completionRewards": [
-              {
-                "itemId": "blueprint_fury",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.05
-              },
-              {
-                "itemId": "fury_heart",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.22
-              },
-              {
-                "itemId": "blueprint_venom_touched_sword",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.05
-              },
-              {
-                "itemId": "venom_gland",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.22
-              }
-            ]
+            "completionRewards": []
           },
           "gatheringNodes": [
             {
@@ -150,25 +128,17 @@
                 "maxAmount": 12
               },
               {
-                "itemId": "blueprint_hivefang_dagger",
+                "itemId": "blueprint_fury",
+                "minAmount": 1,
+                "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_phoenix",
                 "minAmount": 1,
                 "maxAmount": 1
               }
             ],
-            "completionRewards": [
-              {
-                "itemId": "blueprint_hivefang_dagger",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.045
-              },
-              {
-                "itemId": "royal_chitin_plate",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.16
-              }
-            ]
+            "completionRewards": []
           },
           "gatheringNodes": [
             {
@@ -232,25 +202,17 @@
                 "maxAmount": 24
               },
               {
-                "itemId": "blueprint_arcane",
+                "itemId": "blueprint_fury",
+                "minAmount": 1,
+                "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_phoenix",
                 "minAmount": 1,
                 "maxAmount": 1
               }
             ],
-            "completionRewards": [
-              {
-                "itemId": "blueprint_arcane",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.04
-              },
-              {
-                "itemId": "arcane_focus",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.14
-              }
-            ]
+            "completionRewards": []
           },
           "gatheringNodes": [
             {
@@ -316,6 +278,9 @@
       "monsterLootModifiers": {
         "Essence": 15
       },
+      "gatheringBonusRewardTableIds": [
+        "reward.gathering.region_01.catalysts"
+      ],
       "restSiteCount": 1,
       "roomTemplates": [
         {
@@ -377,42 +342,17 @@
                 "maxAmount": 6
               },
               {
-                "itemId": "blueprint_aegis",
+                "itemId": "blueprint_arcane",
                 "minAmount": 1,
                 "maxAmount": 1
               },
               {
-                "itemId": "blueprint_warden",
+                "itemId": "blueprint_endurance",
                 "minAmount": 1,
                 "maxAmount": 1
               }
             ],
-            "completionRewards": [
-              {
-                "itemId": "blueprint_aegis",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.05
-              },
-              {
-                "itemId": "aegis_runestone",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.22
-              },
-              {
-                "itemId": "blueprint_warden",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.05
-              },
-              {
-                "itemId": "warden_sigil",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.22
-              }
-            ]
+            "completionRewards": []
           },
           "gatheringNodes": [
             {
@@ -461,25 +401,17 @@
                 "maxAmount": 12
               },
               {
-                "itemId": "blueprint_primal",
+                "itemId": "blueprint_arcane",
+                "minAmount": 1,
+                "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_endurance",
                 "minAmount": 1,
                 "maxAmount": 1
               }
             ],
-            "completionRewards": [
-              {
-                "itemId": "blueprint_primal",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.045
-              },
-              {
-                "itemId": "hive_ichor",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.16
-              }
-            ]
+            "completionRewards": []
           },
           "gatheringNodes": [
             {
@@ -528,42 +460,17 @@
                 "maxAmount": 24
               },
               {
-                "itemId": "blueprint_endurance",
+                "itemId": "blueprint_arcane",
                 "minAmount": 1,
                 "maxAmount": 1
               },
               {
-                "itemId": "blueprint_phoenix",
+                "itemId": "blueprint_endurance",
                 "minAmount": 1,
                 "maxAmount": 1
               }
             ],
-            "completionRewards": [
-              {
-                "itemId": "blueprint_endurance",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.035
-              },
-              {
-                "itemId": "blueprint_phoenix",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.03
-              },
-              {
-                "itemId": "endurance_core",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.12
-              },
-              {
-                "itemId": "phoenix_ember",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.12
-              }
-            ]
+            "completionRewards": []
           },
           "gatheringNodes": [
             {
@@ -657,11 +564,33 @@
                 "itemId": "blueprint_execution",
                 "minAmount": 1,
                 "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_venom_touched_sword",
+                "minAmount": 1,
+                "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_hivefang_dagger",
+                "minAmount": 1,
+                "maxAmount": 1
               }
             ],
             "completionRewards": [
               {
                 "itemId": "executioners_mark",
+                "minAmount": 2,
+                "maxAmount": 2,
+                "chance": 0.22
+              },
+              {
+                "itemId": "venom_gland",
+                "minAmount": 2,
+                "maxAmount": 2,
+                "chance": 0.22
+              },
+              {
+                "itemId": "royal_chitin_plate",
                 "minAmount": 2,
                 "maxAmount": 2,
                 "chance": 0.22
@@ -686,11 +615,33 @@
                 "itemId": "blueprint_execution",
                 "minAmount": 1,
                 "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_venom_touched_sword",
+                "minAmount": 1,
+                "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_hivefang_dagger",
+                "minAmount": 1,
+                "maxAmount": 1
               }
             ],
             "completionRewards": [
               {
                 "itemId": "executioners_mark",
+                "minAmount": 2,
+                "maxAmount": 2,
+                "chance": 0.16
+              },
+              {
+                "itemId": "venom_gland",
+                "minAmount": 2,
+                "maxAmount": 2,
+                "chance": 0.16
+              },
+              {
+                "itemId": "royal_chitin_plate",
                 "minAmount": 2,
                 "maxAmount": 2,
                 "chance": 0.16
@@ -715,11 +666,33 @@
                 "itemId": "blueprint_execution",
                 "minAmount": 1,
                 "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_venom_touched_sword",
+                "minAmount": 1,
+                "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_hivefang_dagger",
+                "minAmount": 1,
+                "maxAmount": 1
               }
             ],
             "completionRewards": [
               {
                 "itemId": "executioners_mark",
+                "minAmount": 2,
+                "maxAmount": 2,
+                "chance": 0.12
+              },
+              {
+                "itemId": "venom_gland",
+                "minAmount": 2,
+                "maxAmount": 2,
+                "chance": 0.12
+              },
+              {
+                "itemId": "royal_chitin_plate",
                 "minAmount": 2,
                 "maxAmount": 2,
                 "chance": 0.12
@@ -781,11 +754,44 @@
                 "itemId": "blueprint_spirit",
                 "minAmount": 1,
                 "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_warden",
+                "minAmount": 1,
+                "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_primal",
+                "minAmount": 1,
+                "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_aegis",
+                "minAmount": 1,
+                "maxAmount": 1
               }
             ],
             "completionRewards": [
               {
                 "itemId": "spirit_prism",
+                "minAmount": 2,
+                "maxAmount": 2,
+                "chance": 0.22
+              },
+              {
+                "itemId": "warden_sigil",
+                "minAmount": 2,
+                "maxAmount": 2,
+                "chance": 0.22
+              },
+              {
+                "itemId": "hive_ichor",
+                "minAmount": 2,
+                "maxAmount": 2,
+                "chance": 0.22
+              },
+              {
+                "itemId": "aegis_runestone",
                 "minAmount": 2,
                 "maxAmount": 2,
                 "chance": 0.22
@@ -810,11 +816,44 @@
                 "itemId": "blueprint_spirit",
                 "minAmount": 1,
                 "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_warden",
+                "minAmount": 1,
+                "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_primal",
+                "minAmount": 1,
+                "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_aegis",
+                "minAmount": 1,
+                "maxAmount": 1
               }
             ],
             "completionRewards": [
               {
                 "itemId": "spirit_prism",
+                "minAmount": 2,
+                "maxAmount": 2,
+                "chance": 0.16
+              },
+              {
+                "itemId": "warden_sigil",
+                "minAmount": 2,
+                "maxAmount": 2,
+                "chance": 0.16
+              },
+              {
+                "itemId": "hive_ichor",
+                "minAmount": 2,
+                "maxAmount": 2,
+                "chance": 0.16
+              },
+              {
+                "itemId": "aegis_runestone",
                 "minAmount": 2,
                 "maxAmount": 2,
                 "chance": 0.16
@@ -839,11 +878,44 @@
                 "itemId": "blueprint_spirit",
                 "minAmount": 1,
                 "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_warden",
+                "minAmount": 1,
+                "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_primal",
+                "minAmount": 1,
+                "maxAmount": 1
+              },
+              {
+                "itemId": "blueprint_aegis",
+                "minAmount": 1,
+                "maxAmount": 1
               }
             ],
             "completionRewards": [
               {
                 "itemId": "spirit_prism",
+                "minAmount": 2,
+                "maxAmount": 2,
+                "chance": 0.12
+              },
+              {
+                "itemId": "warden_sigil",
+                "minAmount": 2,
+                "maxAmount": 2,
+                "chance": 0.12
+              },
+              {
+                "itemId": "hive_ichor",
+                "minAmount": 2,
+                "maxAmount": 2,
+                "chance": 0.12
+              },
+              {
+                "itemId": "aegis_runestone",
                 "minAmount": 2,
                 "maxAmount": 2,
                 "chance": 0.12

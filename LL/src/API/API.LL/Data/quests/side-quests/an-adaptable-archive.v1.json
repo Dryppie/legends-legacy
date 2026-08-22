@@ -2,7 +2,7 @@
   "id": "quest.essences.an_adaptable_archive",
   "version": 1,
   "title": "An Adaptable Archive",
-  "summary": "Learn to reshape your active Essence loadout for different threats.",
+  "summary": "Learn to reshape your Essence loadouts for different threats.",
   "category": "Essences",
   "sortOrder": 210,
   "objectiveMode": "Sequential",
@@ -13,7 +13,7 @@
   "objectives": [
     {
       "key": "attune_goblin",
-      "description": "Attune the Goblin Essence in your active loadout.",
+      "description": "Attune the Goblin Essence in a loadout.",
       "type": "EssenceEquipped",
       "requiredAmount": 1,
       "filters": { "essenceDefinitionId": "essence.goblin" },
@@ -24,7 +24,7 @@
     },
     {
       "key": "attune_lumo_wisp",
-      "description": "Attune the Lumo Wisp Essence in your active loadout.",
+      "description": "Attune the Lumo Wisp Essence in a loadout.",
       "type": "EssenceEquipped",
       "requiredAmount": 1,
       "filters": { "essenceDefinitionId": "essence.lumo_wisp" },
@@ -35,7 +35,7 @@
     },
     {
       "key": "attune_lumo_sentinel",
-      "description": "Attune the Lumo Sentinel Essence in your active loadout.",
+      "description": "Attune the Lumo Sentinel Essence in a loadout.",
       "type": "EssenceEquipped",
       "requiredAmount": 1,
       "filters": { "essenceDefinitionId": "essence.lumo_sentinel" },

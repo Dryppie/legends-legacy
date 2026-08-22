@@ -188,11 +188,14 @@ public sealed class AchievementRepository(IDbContext context) : IAchievementRepo
             .Where(x => x.CharacterId == characterId)
             .ToListAsync(cancellationToken);
 
-    public Task<int> GetEquippedEssenceCountAsync(Guid characterId, CancellationToken cancellationToken) =>
-        context.EssenceLoadoutSlots
+    public async Task<int> GetEquippedEssenceCountAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await context.EssenceLoadoutSlots
             .AsNoTracking()
-            .Where(x => x.PlayerEssenceId != null && x.EssenceLoadout.CharacterId == characterId && x.EssenceLoadout.IsActive)
-            .CountAsync(cancellationToken);
+            .Where(x => x.PlayerEssenceId != null && x.EssenceLoadout.CharacterId == characterId)
+            .GroupBy(x => x.EssenceLoadoutId)
+            .Select(x => x.Count())
+            .OrderByDescending(x => x)
+            .FirstOrDefaultAsync(cancellationToken);
 
     public Task<int> GetBlueprintUnlockCountAsync(Guid characterId, CancellationToken cancellationToken) =>
         context.CharacterRecipeUnlocks

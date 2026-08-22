@@ -1,5 +1,6 @@
 ﻿using Domain.Models.Combat;
 using Domain.Models.Entities;
+using Domain.Models.Essences;
 using Domain.Models.Regions.Areas;
 
 namespace Services.LL.Interfaces;
@@ -13,5 +14,7 @@ public interface ICombatSetupService
     /// <param name="selectedCombatEnemyEntities"></param>
     void AppendPrefixToId(List<CombatEntity> selectedCombatEnemyEntities);
     Task PrepareEntitiesForCombat(List<CombatEntity> entities);
+    Task PrepareEntitiesForCombat(List<CombatEntity> entities, EssenceCombatActivity activity) =>
+        PrepareEntitiesForCombat(entities);
     List<SimpleCombatEntity> CreateSimpleCombatEntities(List<CombatEntity> combatEntities);
 }

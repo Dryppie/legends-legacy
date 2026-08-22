@@ -10,5 +10,6 @@ public sealed class DungeonGatheringNodeDefinition
     public int? LevelRequirement { get; set; }
     public float ProcChance { get; set; } = 1.0f;
     public string? RewardTableId { get; set; }
+    public List<string> BonusRewardTableIds { get; set; } = [];
     public List<DungeonGatheringLootEntryDefinition> Loot { get; set; } = [];
 }

@@ -54,23 +54,33 @@ export class ProgressBarComponent implements OnDestroy {
     const durationMs = action.resolutionIntervalMs;
     const resolutionDeadlineValue =
       action.nextResolutionAtUtc ?? action.nextResolutionAt;
+    const stoppedActionUnlockDeadline = action.isDeleted
+      ? action.blockedUntilUtc
+      : null;
     if (
-      action.isDeleted ||
       !durationMs ||
       durationMs <= 0 ||
-      !resolutionDeadlineValue
+      (!resolutionDeadlineValue && !stoppedActionUnlockDeadline)
     ) {
       this.stopProgressBar();
       return;
     }
 
-    const resolutionDeadline = new Date(resolutionDeadlineValue).getTime();
+    const resolutionDeadline = resolutionDeadlineValue
+      ? new Date(resolutionDeadlineValue).getTime()
+      : Number.NaN;
+    const stoppedActionUnlock = stoppedActionUnlockDeadline
+      ? new Date(stoppedActionUnlockDeadline).getTime()
+      : null;
     const combatUnlockDeadline =
       action.characterActionType === CharacterActionType.Crafting &&
       action.blockedUntilUtc
         ? new Date(action.blockedUntilUtc).getTime()
         : null;
-    if (!Number.isFinite(resolutionDeadline)) {
+    if (
+      (stoppedActionUnlock === null && !Number.isFinite(resolutionDeadline)) ||
+      (stoppedActionUnlock !== null && !Number.isFinite(stoppedActionUnlock))
+    ) {
       this.stopProgressBar();
       return;
     }
@@ -81,9 +91,9 @@ export class ProgressBarComponent implements OnDestroy {
       const now = this.timeSync.now();
       const isWaitingForCombat =
         combatUnlockDeadline !== null && combatUnlockDeadline > now;
-      const deadline = isWaitingForCombat
-        ? combatUnlockDeadline
-        : resolutionDeadline;
+      const deadline =
+        stoppedActionUnlock ??
+        (isWaitingForCombat ? combatUnlockDeadline : resolutionDeadline);
       const startTime = deadline - durationMs;
       const elapsed = (now - startTime) / 1000;
       const progress = Math.max(0, Math.min((elapsed / duration) * 100, 100));

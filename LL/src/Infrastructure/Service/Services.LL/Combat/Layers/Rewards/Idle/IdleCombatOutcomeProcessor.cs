@@ -129,6 +129,10 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
             .DefaultIfEmpty()
             .Min();
         var winningEncounterCount = checked(batches.Sum(batch => batch.WinningEncounterCount));
+        var gatheredResourceCount = checked(batches
+            .SelectMany(batch => batch.ProphecyProgressEvents)
+            .Where(progress => progress.Kind == ProphecyProgressKind.ResourceGathered)
+            .Sum(progress => progress.Amount));
 
         return _outbox.EnqueueAsync(
             GameEventTypes.IdleCombatEncounterCompleted,
@@ -142,7 +146,8 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
                 lowestWinningHealthPercent == 0 ? null : lowestWinningHealthPercent,
                 actionCount,
                 batches[^1].EquippedGatheringType,
-                winningEncounterCount),
+                winningEncounterCount,
+                gatheredResourceCount),
             batches[0].CharacterId,
             null,
             cancellationToken);

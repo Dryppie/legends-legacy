@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Entities;
+using Domain.Models.Essences;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
 
@@ -28,6 +29,19 @@ public sealed class CharacterExperienceRewardWriter : IExperienceRewardWriter
     public async Task AddSplitExperienceAsync(
         IReadOnlyCollection<Guid> recipientCharacterIds,
         int totalExperience,
+        CancellationToken cancellationToken)
+    {
+        await AddSplitExperienceAsync(
+            recipientCharacterIds,
+            totalExperience,
+            EssenceCombatActivity.None,
+            cancellationToken);
+    }
+
+    public async Task AddSplitExperienceAsync(
+        IReadOnlyCollection<Guid> recipientCharacterIds,
+        int totalExperience,
+        EssenceCombatActivity activity,
         CancellationToken cancellationToken)
     {
         if (totalExperience <= 0 || recipientCharacterIds.Count == 0)
@@ -66,7 +80,11 @@ public sealed class CharacterExperienceRewardWriter : IExperienceRewardWriter
             }
 
             character.Experience += award;
-            await _essenceSystemService.GrantCombatXpToAttunedEssencesAsync(characterId, award, cancellationToken);
+            await _essenceSystemService.GrantCombatXpToAttunedEssencesAsync(
+                characterId,
+                award,
+                activity,
+                cancellationToken);
 
             await _levelingService.UpdateCharacterLevel(
                 character,

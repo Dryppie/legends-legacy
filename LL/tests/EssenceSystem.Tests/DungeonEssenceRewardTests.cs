@@ -143,6 +143,44 @@ public sealed class DungeonEssenceRewardTests
     }
 
     [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    public async Task Blueprint_roll_is_excluded_on_first_completion_only(
+        bool hasCompleted,
+        bool expectedExcluded)
+    {
+        await using var db = CreateDb();
+        var run = new DungeonRun
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = Guid.NewGuid(),
+            DungeonDefinitionId = "blueprint_dungeon"
+        };
+        var definition = new DungeonDefinition
+        {
+            Id = run.DungeonDefinitionId,
+            Tier = 1,
+            CompletionRewardTableIds = ["reward.dungeon.blueprint.completion"]
+        };
+        var rewardRoller = new CapturingRewardRoller();
+        var applier = new DungeonCompletionRewardApplier(
+            new SingleDungeonDefinitions(definition),
+            new EmptyDungeonRunRepository(run, hasCompleted),
+            new ItemBaseRepository(db),
+            rewardRoller,
+            new CapturingDungeonPendingRewardWriter(),
+            new InventoryItemFactory(),
+            new NoOpDungeonMasteryService());
+
+        await applier.ApplyAsync(run, CancellationToken.None);
+
+        var context = Assert.Single(rewardRoller.Contexts);
+        Assert.Equal(
+            expectedExcluded,
+            context.ExcludedRollIds?.Contains("blueprint_drop") == true);
+    }
+
+    [Theory]
     [InlineData(RoomType.MiniBoss)]
     [InlineData(RoomType.Boss)]
     public async Task Dungeon_boss_essence_multipliers_only_apply_to_featured_monster(RoomType roomType)
@@ -232,7 +270,9 @@ public sealed class DungeonEssenceRewardTests
 
     private sealed record CapturedLootBatch(string Source, IReadOnlyList<InventoryItem> Loot);
 
-    private sealed class EmptyDungeonRunRepository(DungeonRun? run = null) : IDungeonRunRepository
+    private sealed class EmptyDungeonRunRepository(
+        DungeonRun? run = null,
+        bool hasCompleted = false) : IDungeonRunRepository
     {
         public Task<bool> CreateDungeonRunAsync(DungeonRun dungeonRun, CancellationToken cancellationToken) => Task.FromResult(true);
         public Task<bool> DeleteDungeonRunAsync(DungeonRun dungeonRun, CancellationToken cancellationToken) => Task.FromResult(true);
@@ -243,7 +283,7 @@ public sealed class DungeonEssenceRewardTests
         public Task<bool> HasActiveDungeonRunAsync(Guid characterId, CancellationToken cancellationToken) => Task.FromResult(false);
         public Task<IReadOnlyList<DungeonCompletionRecord>> GetCompletionRecordsAsync(Guid characterId, IReadOnlyCollection<string> dungeonDefinitionIds, CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<DungeonCompletionRecord>>([]);
         public Task<IReadOnlyList<DungeonCompletionLeaderboardEntry>> GetCompletionLeaderboardAsync(IReadOnlyCollection<string> dungeonDefinitionIds, CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<DungeonCompletionLeaderboardEntry>>([]);
-        public Task<bool> HasCompletedDungeonAsync(Guid characterId, string dungeonDefinitionId, CancellationToken cancellationToken) => Task.FromResult(false);
+        public Task<bool> HasCompletedDungeonAsync(Guid characterId, string dungeonDefinitionId, CancellationToken cancellationToken) => Task.FromResult(hasCompleted);
         public Task MarkDungeonCompletedAsync(Guid characterId, string dungeonDefinitionId, DateTimeOffset completedAt, CancellationToken cancellationToken) => Task.CompletedTask;
         public Task<bool> UpdateDungeonRunAsync(DungeonRun dungeonRun, CancellationToken cancellationToken) => Task.FromResult(true);
     }
@@ -278,6 +318,23 @@ public sealed class DungeonEssenceRewardTests
     {
         public RewardRollResult Roll(string rewardTableId, RewardRollContext context) => RewardRollResult.Empty;
         public RewardRollResult Roll(RewardTableDefinition table, RewardRollContext context) => RewardRollResult.Empty;
+    }
+
+    private sealed class CapturingRewardRoller : IRewardRoller
+    {
+        public List<RewardRollContext> Contexts { get; } = [];
+
+        public RewardRollResult Roll(string rewardTableId, RewardRollContext context)
+        {
+            Contexts.Add(context);
+            return RewardRollResult.Empty;
+        }
+
+        public RewardRollResult Roll(RewardTableDefinition table, RewardRollContext context)
+        {
+            Contexts.Add(context);
+            return RewardRollResult.Empty;
+        }
     }
 
     private sealed class FixedDungeonMasteryService(

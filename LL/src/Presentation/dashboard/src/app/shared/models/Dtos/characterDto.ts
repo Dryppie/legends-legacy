@@ -15,13 +15,12 @@ export interface CharacterOverviewDto {
   level: number;
   baseAttributes: AttributeDto[];
   baseCombatAttributes: AttributeDto[];
-  activeEssenceLoadout?: EssenceLoadoutDto | null;
+  essenceLoadout?: EssenceLoadoutDto | null;
 }
 
 export interface EssenceLoadoutDto {
   id: string;
   name: string;
-  isActive: boolean;
   slots: EssenceLoadoutSlotDto[];
 }
 

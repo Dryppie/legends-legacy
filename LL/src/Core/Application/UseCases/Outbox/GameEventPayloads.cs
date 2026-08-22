@@ -57,7 +57,8 @@ public sealed record IdleCombatEncounterCompletedPayload(
     int? LowestWinningHealthPercent,
     int ActionCount,
     string? EquippedGatheringType,
-    int? WinningEncounterCount = null);
+    int? WinningEncounterCount = null,
+    int GatheredResourceCount = 0);
 
 public sealed record CharacterCreatedPayload(Guid CharacterId);
 

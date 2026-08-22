@@ -12,6 +12,7 @@ import { EssenceItemViewService } from './essence-item-view.service';
 import { EssenceStateService } from './essence-state.service';
 import { EssencesService } from './essences.service';
 import {
+  EssenceLoadoutDto,
   EssenceMutationResponseDto,
   PlayerEssenceDto,
 } from '../../../../shared/models/essence-system';
@@ -38,7 +39,7 @@ describe('EssenceStateService loadout drafts', () => {
           {
             id: 'loadout-1',
             name: 'Default',
-            isActive: true,
+            autoUseActivities: [],
             slots: [],
           },
         ],
@@ -54,27 +55,29 @@ describe('EssenceStateService loadout drafts', () => {
     domainVersions,
   });
 
-  const versionedLoadout = (loadout: {
-    id: string;
-    name: string;
-    isActive: boolean;
-    slots: { slotIndex: number; playerEssenceId: string }[];
-  }): VersionedMutationResult<EssenceMutationResponseDto> =>
-    versionedMutation(
+  const versionedLoadout = (
+    loadout: Omit<EssenceLoadoutDto, 'autoUseActivities'> &
+      Partial<Pick<EssenceLoadoutDto, 'autoUseActivities'>>,
+  ): VersionedMutationResult<EssenceMutationResponseDto> => {
+    const resolvedLoadout: EssenceLoadoutDto = {
+      autoUseActivities: [],
+      ...loadout,
+    };
+    return versionedMutation(
       {
-        savedLoadout: loadout,
+        savedLoadout: resolvedLoadout,
         loadouts: {
           loadouts:
             loadout.id === 'loadout-1'
-              ? [loadout]
+              ? [resolvedLoadout]
               : [
                   {
                     id: 'loadout-1',
                     name: 'Default',
-                    isActive: true,
+                    autoUseActivities: [],
                     slots: [],
                   },
-                  loadout,
+                  resolvedLoadout,
                 ],
           limit: 3,
           unlockedSlots: 1,
@@ -82,6 +85,7 @@ describe('EssenceStateService loadout drafts', () => {
       },
       { essences: 1 },
     );
+  };
 
   beforeEach(() => {
     levelUpEnvelope.set(null);
@@ -92,7 +96,6 @@ describe('EssenceStateService loadout drafts', () => {
       'getCodex',
       'saveLoadout',
       'updateLoadout',
-      'activateLoadout',
       'spendDust',
     ]);
     essences.getArchive.and.returnValue(of({ essences: [], essenceDust: 0 }));
@@ -102,7 +105,7 @@ describe('EssenceStateService loadout drafts', () => {
           {
             id: 'loadout-1',
             name: 'Default',
-            isActive: true,
+            autoUseActivities: [],
             slots: [],
           },
         ],
@@ -186,7 +189,7 @@ describe('EssenceStateService loadout drafts', () => {
           {
             id: 'loadout-1',
             name: 'Default',
-            isActive: true,
+            autoUseActivities: [],
             slots: [],
           },
         ],
@@ -219,7 +222,6 @@ describe('EssenceStateService loadout drafts', () => {
         versionedLoadout({
           id: 'loadout-1',
           name: 'Default',
-          isActive: true,
           slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
         }),
       ),
@@ -238,13 +240,12 @@ describe('EssenceStateService loadout drafts', () => {
     expect(service.canSaveDraft()).toBeFalse();
   });
 
-  it('uses the returned Archive after re-saving the active loadout', () => {
+  it('uses the returned Archive after re-saving the default loadout', () => {
     essences.updateLoadout.and.returnValue(
       of(
         versionedLoadout({
           id: 'loadout-1',
           name: 'Default',
-          isActive: true,
           slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
         }),
       ),
@@ -257,13 +258,12 @@ describe('EssenceStateService loadout drafts', () => {
     expect(essences.getArchive).toHaveBeenCalledTimes(1);
   });
 
-  it('leaves the Archive alone when the saved loadout is not active', () => {
+  it('uses the mutation state without refetching the Archive for a new loadout', () => {
     essences.saveLoadout.and.returnValue(
       of(
         versionedLoadout({
           id: 'loadout-2',
           name: 'New Loadout',
-          isActive: false,
           slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
         }),
       ),
@@ -282,7 +282,6 @@ describe('EssenceStateService loadout drafts', () => {
         versionedLoadout({
           id: 'loadout-2',
           name: 'New Loadout',
-          isActive: false,
           slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
         }),
       ),
@@ -307,7 +306,6 @@ describe('EssenceStateService loadout drafts', () => {
         versionedLoadout({
           id: 'loadout-1',
           name: 'Default',
-          isActive: true,
           slots: [{ slotIndex: 0, playerEssenceId: 'essence-1' }],
         }),
       ),
@@ -332,7 +330,6 @@ describe('EssenceStateService loadout drafts', () => {
         versionedLoadout({
           id: 'loadout-1',
           name: 'Boss fights',
-          isActive: true,
           slots: [],
         }),
       ),
@@ -382,7 +379,7 @@ describe('EssenceStateService loadout drafts', () => {
               {
                 id: 'loadout-1',
                 name: 'Default',
-                isActive: true,
+                autoUseActivities: [],
                 slots: [],
               },
             ],

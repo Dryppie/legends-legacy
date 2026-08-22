@@ -11,7 +11,7 @@ public static class CharacterQueryProfiles
             .Include(c => c.BaseAttributes)
             .Include(c => c.CharacterAction)
             .Include(c => c.Professions)
-            .Include(c => c.EssenceLoadouts.Where(x => x.IsActive))
+            .Include(c => c.EssenceLoadouts)
                 .ThenInclude(x => x.Slots)
                     .ThenInclude(x => x.PlayerEssence)
             .Include(c => c.EquipmentSlots)

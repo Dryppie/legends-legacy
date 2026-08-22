@@ -1,4 +1,5 @@
 import { signal } from '@angular/core';
+import { fakeAsync, tick } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { CharacterService } from '../../../../core/services/api/character/character.service';
@@ -24,7 +25,7 @@ describe('CharacterOverviewComponent', () => {
       estimateEssenceThreatPerSecond({
         id: 'loadout-1',
         name: 'Tank',
-        isActive: true,
+        autoUseActivities: [],
         slots: [
           {
             slotIndex: 0,
@@ -84,8 +85,70 @@ describe('CharacterOverviewComponent', () => {
 
     expect(component.character()?.experience).toBe(35);
     expect(component.character()?.craftingExperience).toBe(45);
+    component.ngOnDestroy();
+  });
+
+  it('loads character suggestions after typing two characters', fakeAsync(() => {
+    const characterService = jasmine.createSpyObj<CharacterService>(
+      'CharacterService',
+      ['suggestCharacterNames'],
+      { currentCharacter: signal(createCharacter()).asReadonly() },
+    );
+    characterService.suggestCharacterNames.and.returnValue(
+      of(['Ember', 'Ember Knight']),
+    );
+    const component = createComponent(characterService);
+
+    component.onSearchValueChange('em');
+    tick(200);
+
+    expect(characterService.suggestCharacterNames).toHaveBeenCalledOnceWith(
+      'em',
+    );
+    expect(component.characterSuggestions()).toEqual(['Ember', 'Ember Knight']);
+    expect(component.showCharacterSuggestionPanel()).toBeTrue();
+    component.ngOnDestroy();
+  }));
+
+  it('fills the overview search from a selected suggestion', () => {
+    const component = createComponent();
+    const event = jasmine.createSpyObj<Event>('Event', ['preventDefault']);
+
+    component.selectCharacterSuggestion(event, 'Ember Knight');
+
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(component.searchValue()).toBe('Ember Knight');
+    expect(component.showCharacterSuggestionPanel()).toBeFalse();
+    component.ngOnDestroy();
   });
 });
+
+function createComponent(
+  characterService: CharacterService = jasmine.createSpyObj<CharacterService>(
+    'CharacterService',
+    ['suggestCharacterNames'],
+    { currentCharacter: signal(createCharacter()).asReadonly() },
+  ),
+): CharacterOverviewComponent {
+  return new CharacterOverviewComponent(
+    characterService,
+    {
+      overview: signal(createOverview()).asReadonly(),
+      currentCharacter: signal(createCharacter()).asReadonly(),
+      loading: signal(false).asReadonly(),
+      error: signal(null).asReadonly(),
+      refreshIfDirty: jasmine.createSpy('refreshIfDirty'),
+    } as unknown as CharacterStateService,
+    {
+      getProfession: () => undefined,
+    } as unknown as ProfessionsService,
+    {
+      snapshot: { queryParamMap: convertToParamMap({}) },
+      queryParamMap: of(convertToParamMap({})),
+    } as ActivatedRoute,
+    { navigate: jasmine.createSpy('navigate') } as unknown as Router,
+  );
+}
 
 function createCharacter(): CharacterDto {
   return {

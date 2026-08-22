@@ -4,7 +4,7 @@
   "sections": [
     {
       "heading": "Your combat profile",
-      "body": "The overview summarizes your character level, Combat Rating, equipment, active Essence loadout, and combat attributes."
+      "body": "The overview summarizes your character level, Combat Rating, equipment, default Essence loadout, and combat attributes."
     },
     {
       "heading": "Attributes",

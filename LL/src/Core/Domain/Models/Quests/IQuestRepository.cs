@@ -15,7 +15,7 @@ public interface IQuestRepository
 
     Task<bool> HasProcessedEventAsync(Guid outboxMessageId, CancellationToken cancellationToken);
 
-    Task<bool> HasEssenceInActiveLoadoutAsync(
+    Task<bool> HasEssenceInAnyLoadoutAsync(
         Guid characterId,
         string essenceDefinitionId,
         CancellationToken cancellationToken);

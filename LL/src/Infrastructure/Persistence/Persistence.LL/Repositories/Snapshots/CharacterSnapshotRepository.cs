@@ -1,4 +1,5 @@
 using Application.Common.Interfaces;
+using Domain.Models.Essences;
 using Domain.Models.Snapshots;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,7 +14,13 @@ public class CharacterSnapshotRepository : ICharacterSnapshotRepository
         _dbContext = dbContext;
     }
 
-    public async Task<CharacterSnapshot> CreateAsync(Guid characterId, CancellationToken ct = default)
+    public Task<CharacterSnapshot> CreateAsync(Guid characterId, CancellationToken ct = default) =>
+        CreateAsync(characterId, EssenceCombatActivity.None, ct);
+
+    public async Task<CharacterSnapshot> CreateAsync(
+        Guid characterId,
+        EssenceCombatActivity activity,
+        CancellationToken ct = default)
     {
         var snapshotId = Guid.NewGuid();
         var character = await _dbContext.Characters
@@ -22,7 +29,7 @@ public class CharacterSnapshotRepository : ICharacterSnapshotRepository
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.InstanceModifiers)
-            .Include(c => c.EssenceLoadouts.Where(x => x.IsActive))
+            .Include(c => c.EssenceLoadouts)
                 .ThenInclude(x => x.Slots)
                     .ThenInclude(x => x.PlayerEssence)
             .SingleAsync(c => c.Id == characterId, ct);
@@ -37,9 +44,8 @@ public class CharacterSnapshotRepository : ICharacterSnapshotRepository
             .ThenBy(e => e.EquipmentInstanceId)
             .ToList();
 
-        var equippedEssences = character.EssenceLoadouts
-            .Where(x => x.IsActive)
-            .SelectMany(x => x.Slots)
+        var selectedLoadout = EssenceLoadoutSelection.Select(character.EssenceLoadouts, activity);
+        var equippedEssences = (selectedLoadout?.Slots ?? [])
             .Where(x => x.PlayerEssenceId.HasValue && x.PlayerEssence is not null)
             .Select(x => EquippedEssenceSnapshot.From(snapshotId, x.SlotIndex, x.PlayerEssence!))
             .OrderBy(x => x.SlotIndex)

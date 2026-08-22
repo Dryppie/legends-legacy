@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces.Services.LL.Professions;
 using Domain.Helpers.Constants;
 using Domain.Models.Professions;
+using Domain.Models.Professions.Gathering;
 
 namespace Services.LL.Professions;
 public class ProfessionService : IProfessionService
@@ -21,7 +22,7 @@ public class ProfessionService : IProfessionService
         var profession = await _professionRepository.GetProfessionAsync(characterId, professionType, cancellationToken);
         if (profession is not null)
         {
-            profession.ExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(profession.Level);
+            profession.ExperienceUntilNextLevel = GetRequiredExperience(profession);
             return profession;
         }
 
@@ -31,7 +32,7 @@ public class ProfessionService : IProfessionService
             ProfessionType = professionType,
             Level = 1,
             Experience = 0,
-            ExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(1)
+            ExperienceUntilNextLevel = GetRequiredExperience(professionType, 1)
         };
 
         _professionRepository.AddProfession(profession);
@@ -53,7 +54,7 @@ public class ProfessionService : IProfessionService
 
         foreach (var profession in visibleProfessions)
         {
-            profession.ExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(profession.Level);
+            profession.ExperienceUntilNextLevel = GetRequiredExperience(profession);
         }
         return visibleProfessions;
     }
@@ -81,4 +82,12 @@ public class ProfessionService : IProfessionService
         return IsDeprecatedCraftingProfession(professionType) ||
             (int)professionType == RetiredFishingProfessionValue;
     }
+
+    private static int GetRequiredExperience(Profession profession) =>
+        GetRequiredExperience(profession.ProfessionType, profession.Level);
+
+    private static int GetRequiredExperience(ProfessionType professionType, int level) =>
+        GatheringProfessionProgression.IsGatheringProfession(professionType)
+            ? GatheringProfessionProgression.GetRequiredExperience(level)
+            : EntityLevelConstants.XP_REQUIRED(level);
 }

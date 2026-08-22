@@ -106,11 +106,16 @@ public class CombatSetupService : ICombatSetupService
         }
     }
 
-    public async Task PrepareEntitiesForCombat(List<CombatEntity> entities)
+    public Task PrepareEntitiesForCombat(List<CombatEntity> entities) =>
+        PrepareEntitiesForCombat(entities, EssenceCombatActivity.None);
+
+    public async Task PrepareEntitiesForCombat(
+        List<CombatEntity> entities,
+        EssenceCombatActivity activity)
     {
         foreach (var entity in entities)
         {
-            var essenceLoadout = await ResolveEssenceLoadoutForCombatEntityAsync(entity);
+            var essenceLoadout = await ResolveEssenceLoadoutForCombatEntityAsync(entity, activity);
             entity.EquippedEssences = [.. essenceLoadout.EquippedEssences];
             entity.HasEquippedEssenceSnapshot = entity.EquippedEssences.Count > 0;
 
@@ -151,7 +156,9 @@ public class CombatSetupService : ICombatSetupService
         return simpleCombatEntities;
     }
 
-    private Task<EssenceCombatLoadout> ResolveEssenceLoadoutForCombatEntityAsync(CombatEntity entity)
+    private Task<EssenceCombatLoadout> ResolveEssenceLoadoutForCombatEntityAsync(
+        CombatEntity entity,
+        EssenceCombatActivity activity)
     {
         if (entity.HasEquippedEssenceSnapshot)
             return Task.FromResult(_essenceCombatLoadoutResolver.Resolve(entity.OriginalId, entity.EquippedEssences));
@@ -182,6 +189,6 @@ public class CombatSetupService : ICombatSetupService
                 entity.Tags));
         }
 
-        return _essenceCombatLoadoutResolver.ResolveAsync(entity.OriginalId, CancellationToken.None);
+        return _essenceCombatLoadoutResolver.ResolveAsync(entity.OriginalId, activity, CancellationToken.None);
     }
 }

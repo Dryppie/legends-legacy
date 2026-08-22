@@ -134,60 +134,183 @@
           <div *ngIf="selectedTab() === 'rewards'" class="h-full">
             <div
               *ngIf="selectedRewardSections().length; else noRewardsListed"
-              class="grid h-full gap-3 lg:grid-cols-2"
+              class="reward-cards-layout"
             >
-              <article
-                *ngFor="
-                  let group of selectedRewardSections();
-                  trackBy: trackRewardGroup
-                "
-                class="ll-card min-w-0 px-3 py-3"
-              >
-                <div class="flex items-start justify-between gap-2">
-                  <div class="min-w-0">
-                    <h3 class="ll-eyebrow truncate text-white">
-                      {{ group.title }}
-                    </h3>
-
-                    <div class="mt-2 flex flex-wrap gap-1.5"></div>
-                  </div>
-
-                  <span
-                    class="ll-item-chip"
-                    [ngClass]="
-                      group.title === 'Run Rewards' ? 'll-item-chip-accent' : ''
-                    "
+              <ng-container *ngIf="selectedRunRewards() as runRewards">
+                <article
+                  *ngIf="runRewards.length"
+                  class="reward-card ll-card min-w-0 overflow-hidden"
+                >
+                  <header
+                    class="reward-card-header flex flex-wrap items-start justify-between gap-3 px-4 py-4"
                   >
-                    {{ group.title === "Run Rewards" ? "Repeatable" : "Once" }}
-                  </span>
-                </div>
+                    <div class="min-w-0">
+                      <h3 class="ll-heading text-xl text-white">Run Rewards</h3>
+                      <p class="ll-eyebrow mt-1 text-[9px] text-secondary">
+                        Per completed run · {{ difficultyLabel(difficulty()) }}
+                      </p>
+                    </div>
 
-                <div class="mt-3 space-y-1 text-sm text-white">
-                  <div
-                    *ngFor="let reward of group.rewards; trackBy: trackReward"
-                    class="flex min-w-0 items-center justify-between gap-2"
-                  >
-                    <span class="min-w-0 truncate">
-                      <span *ngIf="isToolReward(reward); else rewardItem">
-                        <app-base-item
-                          [item]="reward.itemBase"
-                          [useBaseName]="true"
-                        ></app-base-item>
+                    <div class="flex shrink-0 gap-2">
+                      <span class="ll-item-chip ll-item-chip-accent">
+                        Repeatable
                       </span>
-                      <ng-template #rewardItem>
-                        <app-item [item]="reward"></app-item>
-                      </ng-template>
-                    </span>
-                    <span
-                      class="flex shrink-0 flex-wrap justify-end gap-1 text-[10px]"
-                    >
                       <span class="ll-item-chip tabular-nums">
-                        {{ rewardQuantityLabel(reward) }}
+                        {{ runRewards.length }}
+                        {{ runRewards.length === 1 ? "item" : "items" }}
                       </span>
-                    </span>
+                    </div>
+                  </header>
+
+                  <div class="px-4 pb-4">
+                    <div
+                      class="reward-table-grid reward-table-heading border-b border-white/10 py-2"
+                    >
+                      <span>Item</span>
+                      <span class="text-right">Quantity</span>
+                      <span>Chance per run</span>
+                    </div>
+
+                    <section
+                      *ngIf="guaranteedRewards(runRewards).length"
+                      class="reward-section"
+                    >
+                      <div class="reward-section-title">
+                        <span
+                          class="reward-section-marker bg-emerald-300/70"
+                        ></span>
+                        <span>Guaranteed</span>
+                      </div>
+
+                      <div
+                        *ngFor="
+                          let reward of guaranteedRewards(runRewards);
+                          trackBy: trackReward
+                        "
+                        class="reward-table-grid reward-row"
+                      >
+                        <div class="min-w-0 truncate text-sm text-white">
+                          <span
+                            *ngIf="isToolReward(reward); else guaranteedItem"
+                          >
+                            Random Tool
+                          </span>
+                          <ng-template #guaranteedItem>
+                            <app-item [item]="reward"></app-item>
+                          </ng-template>
+                        </div>
+                        <span
+                          class="reward-quantity text-right text-sm tabular-nums text-white"
+                        >
+                          {{ rewardQuantityValue(reward) }}
+                        </span>
+                        <div class="reward-chance">
+                          <div class="reward-chance-track">
+                            <span
+                              class="reward-chance-fill bg-primary/70"
+                              [style.width.%]="rewardChanceBarWidth(reward)"
+                            ></span>
+                          </div>
+                          <span
+                            class="w-11 shrink-0 text-right text-[10px] tabular-nums text-primary"
+                          >
+                            {{ rewardChanceValueLabel(reward) }}
+                          </span>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section
+                      *ngIf="chanceRewards(runRewards).length"
+                      class="reward-section"
+                    >
+                      <div class="reward-section-title">
+                        <span
+                          class="reward-section-marker bg-secondary/70"
+                        ></span>
+                        <span>Chance Drops</span>
+                      </div>
+
+                      <div
+                        *ngFor="
+                          let reward of chanceRewards(runRewards);
+                          trackBy: trackReward
+                        "
+                        class="reward-table-grid reward-row"
+                      >
+                        <div class="min-w-0 truncate text-sm text-white">
+                          <span *ngIf="isToolReward(reward); else chanceItem">
+                            Random Tool
+                          </span>
+                          <ng-template #chanceItem>
+                            <app-item [item]="reward"></app-item>
+                          </ng-template>
+                        </div>
+                        <span
+                          class="reward-quantity text-right text-sm tabular-nums text-white"
+                        >
+                          {{ rewardQuantityValue(reward) }}
+                        </span>
+                        <div class="reward-chance">
+                          <div class="reward-chance-track">
+                            <span
+                              class="reward-chance-fill bg-primary/70"
+                              [style.width.%]="rewardChanceBarWidth(reward)"
+                            ></span>
+                          </div>
+                          <span
+                            class="w-11 shrink-0 text-right text-[10px] tabular-nums text-primary"
+                          >
+                            {{ rewardChanceValueLabel(reward) }}
+                          </span>
+                        </div>
+                      </div>
+                    </section>
                   </div>
-                </div>
-              </article>
+                </article>
+              </ng-container>
+
+              <ng-container
+                *ngIf="selectedFirstClearRewards() as firstClearRewards"
+              >
+                <article
+                  *ngIf="firstClearRewards.length"
+                  class="reward-card ll-card min-w-0 overflow-hidden"
+                >
+                  <header
+                    class="reward-card-header flex flex-wrap items-center justify-between gap-3 px-4 py-4"
+                  >
+                    <h3 class="ll-heading text-xl text-white">
+                      First Clear Rewards
+                    </h3>
+                    <span class="ll-item-chip ll-item-chip-accent">
+                      Once · Guaranteed
+                    </span>
+                  </header>
+
+                  <div class="px-4 py-2">
+                    <div
+                      *ngFor="
+                        let reward of firstClearRewards;
+                        trackBy: trackReward
+                      "
+                      class="first-clear-row"
+                    >
+                      <div class="min-w-0 truncate text-sm text-white">
+                        <span *ngIf="isToolReward(reward); else firstClearItem">
+                          Random Tool
+                        </span>
+                        <ng-template #firstClearItem>
+                          <app-item [item]="reward"></app-item>
+                        </ng-template>
+                      </div>
+                      <span class="text-sm tabular-nums text-white">
+                        {{ rewardQuantityValue(reward) }}
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              </ng-container>
             </div>
 
             <ng-template #noRewardsListed>
@@ -239,8 +362,17 @@
                     <span class="min-w-0 truncate">
                       <app-item [item]="loot"></app-item>
                     </span>
-                    <span class="ll-item-chip shrink-0 tabular-nums">
-                      x{{ gatheringLootQuantityLabel(loot) }}
+                    <span
+                      class="flex shrink-0 flex-wrap justify-end gap-1 text-[10px]"
+                    >
+                      <span
+                        class="ll-item-chip ll-item-chip-accent tabular-nums"
+                      >
+                        {{ gatheringLootDropChanceLabel(loot) }}
+                      </span>
+                      <span class="ll-item-chip tabular-nums">
+                        {{ gatheringLootQuantityLabel(loot) }}
+                      </span>
                     </span>
                   </div>
                 </div>

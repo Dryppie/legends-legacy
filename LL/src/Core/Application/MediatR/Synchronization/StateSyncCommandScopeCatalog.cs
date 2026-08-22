@@ -226,6 +226,7 @@ public static class StateSyncCommandScopeCatalog
             refreshCharacterOverview: false,
             refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Essences.Commands.FavoriteEssence.FavoriteEssenceCommand),
+            typeof(global::Application.UseCases.Essences.Commands.SetEssenceLoadoutAutoUseActivities.SetEssenceLoadoutAutoUseActivitiesCommand),
             typeof(global::Application.UseCases.Essences.Commands.SetEssenceFocus.SetEssenceFocusCommand));
 
         RegisterAuthoritativeResponse(
@@ -235,7 +236,6 @@ public static class StateSyncCommandScopeCatalog
             [StateSyncScopes.Essences],
             refreshCharacterOverview: true,
             refreshCharacterSummaryWhenChanged: true,
-            typeof(global::Application.UseCases.Essences.Commands.ActivateEssenceLoadout.ActivateEssenceLoadoutCommand),
             typeof(global::Application.UseCases.Essences.Commands.DeleteEssenceLoadout.DeleteEssenceLoadoutCommand),
             typeof(global::Application.UseCases.Essences.Commands.SaveEssenceLoadout.SaveEssenceLoadoutCommand));
 

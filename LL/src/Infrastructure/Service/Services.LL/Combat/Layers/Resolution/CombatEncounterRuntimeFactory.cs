@@ -2,6 +2,7 @@
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
+using Domain.Models.Essences;
 
 namespace Services.LL.Combat.Layers.Resolution;
 
@@ -47,11 +48,21 @@ public sealed class CombatEncounterRuntimeFactory : ICombatEncounterRuntimeFacto
         }
 
         await _combatSetupService.PrepareEntitiesForCombat(
-            [.. friendlyParticipants.Select(x => x.Combatant), .. hostileParticipants.Select(x => x.Combatant)]);
+            [.. friendlyParticipants.Select(x => x.Combatant), .. hostileParticipants.Select(x => x.Combatant)],
+            MapEssenceActivity(encounterPlan.Mode));
 
         return new CombatEncounterRuntime(
             encounterPlan,
             friendlyParticipants,
             hostileParticipants);
     }
+
+    private static EssenceCombatActivity MapEssenceActivity(CombatMode mode) => mode switch
+    {
+        CombatMode.Dungeon => EssenceCombatActivity.Dungeon,
+        CombatMode.Raid => EssenceCombatActivity.Raid,
+        CombatMode.Pvp => EssenceCombatActivity.Arena,
+        CombatMode.RegionBoss => EssenceCombatActivity.RegionBoss,
+        _ => EssenceCombatActivity.IdleCombat
+    };
 }

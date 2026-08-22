@@ -5,6 +5,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
+using Domain.Models.Essences;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
@@ -79,7 +80,8 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
             plan.EnemyStrengthMultiplier);
 
         await _combatSetupService.PrepareEntitiesForCombat(
-            [.. friendlyTemplates.Values, .. hostileTemplates.Values]);
+            [.. friendlyTemplates.Values, .. hostileTemplates.Values],
+            EssenceCombatActivity.Dungeon);
 
         var catalog = new DungeonCombatTemplateCatalog(
             sourceEntitiesById,

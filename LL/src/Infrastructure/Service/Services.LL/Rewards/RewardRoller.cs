@@ -40,6 +40,12 @@ public sealed class RewardRoller : IRewardRoller
     {
         foreach (var roll in table.Rolls)
         {
+            if (context.ExcludedRollIds?.Contains(roll.Id) == true)
+            {
+                state.Trace.Add(new(table.Id, roll.Id, null, "roll-excluded"));
+                continue;
+            }
+
             for (var i = 0; i < Math.Max(1, roll.Rolls); i++)
             {
                 if (!PassesChance(roll.Chance))

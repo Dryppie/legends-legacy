@@ -233,9 +233,9 @@ public sealed class StateSyncCommandScopeCatalogTests
     }
 
     [Theory]
-    [InlineData(typeof(global::Application.UseCases.Essences.Commands.ActivateEssenceLoadout.ActivateEssenceLoadoutCommand))]
     [InlineData(typeof(global::Application.UseCases.Essences.Commands.DeleteEssenceLoadout.DeleteEssenceLoadoutCommand))]
     [InlineData(typeof(global::Application.UseCases.Essences.Commands.SaveEssenceLoadout.SaveEssenceLoadoutCommand))]
+    [InlineData(typeof(global::Application.UseCases.Essences.Commands.SetEssenceLoadoutAutoUseActivities.SetEssenceLoadoutAutoUseActivitiesCommand))]
     [InlineData(typeof(global::Application.UseCases.Essences.Commands.SetEssenceFocus.SetEssenceFocusCommand))]
     public void RemainingEssenceStateMutationsOwnTheirSnapshot(Type commandType)
     {

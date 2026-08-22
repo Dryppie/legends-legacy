@@ -1,5 +1,6 @@
 using Application.Interfaces.Services.LL.Guilds;
 using Domain.Models.Guilds.Missions;
+using Domain.Models.Essences;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Interfaces.Combat.Reward.Idle;
@@ -46,6 +47,7 @@ public sealed class IdleCombatRewardApplier : IIdleCombatRewardApplier
             await _experienceWriter.AddSplitExperienceAsync(
                 facts.PlayerEntityIds,
                 outcome.TotalExperience,
+                EssenceCombatActivity.IdleCombat,
                 cancellationToken);
         }
 

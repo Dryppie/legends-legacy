@@ -9,6 +9,7 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Leaderboards;
 using Domain.Models.Snapshots;
+using Domain.Models.Essences;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
@@ -92,7 +93,9 @@ public class ColosseumService : IColosseumService
 
         var combatPlayerEntities = _combatSetupService.CreatePlayerCombatEntities(playerTeam);
         var combatEnemyEntities = await CreateDefenderCombatEntitiesAsync(enemyTeam, defenderSnapshot, cancellationToken);
-        await _combatSetupService.PrepareEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
+        await _combatSetupService.PrepareEntitiesForCombat(
+            [.. combatPlayerEntities, .. combatEnemyEntities],
+            EssenceCombatActivity.Arena);
 
         var encounterPlan = CreateArenaEncounterPlan(
             characterId,
@@ -393,9 +396,9 @@ public class ColosseumService : IColosseumService
         if (team.Count == 0) return null;
 
         var combatEntities = _combatSetupService.CreatePlayerCombatEntities(team);
-        await _combatSetupService.PrepareEntitiesForCombat(combatEntities);
+        await _combatSetupService.PrepareEntitiesForCombat(combatEntities, EssenceCombatActivity.Arena);
 
-        var snapshot = await _characterSnapshotService.CreateAsync(characterId, cancellationToken);
+        var snapshot = await _characterSnapshotService.CreateAsync(characterId, EssenceCombatActivity.Arena, cancellationToken);
         var now = DateTimeOffset.UtcNow;
         var defenseSnapshot = new ArenaDefenseSnapshot
         {
@@ -746,4 +749,3 @@ public class ColosseumService : IColosseumService
         return arenaTicketStatus;
     }
 }
-

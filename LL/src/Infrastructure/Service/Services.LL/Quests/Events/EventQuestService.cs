@@ -652,6 +652,10 @@ public sealed class EventQuestService(
             "AreaActionCompletedWithTool" when trigger.Type == "CombatEncounterCompleted" &&
                 Matches(filters.AreaId, trigger.AreaId) &&
                 Matches(filters.GatheringType, trigger.EquippedGatheringType) => Math.Max(0, trigger.ActionCount),
+            "ResourceGathered" when trigger.Type == "CombatEncounterCompleted" &&
+                Matches(filters.AreaId, trigger.AreaId) &&
+                Matches(filters.GatheringType, trigger.EquippedGatheringType) =>
+                Math.Max(0, trigger.GatheredResourceCount),
             "EssenceAbsorbed" when trigger.Type == "EssenceAbsorbed" &&
                 Matches(filters.EssenceDefinitionId, trigger.EssenceDefinitionId) => 1,
             "EssenceFocusSet" when trigger.Type == "EssenceFocusSet" => 1,

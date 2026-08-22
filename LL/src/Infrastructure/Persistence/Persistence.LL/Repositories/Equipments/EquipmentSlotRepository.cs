@@ -4,6 +4,7 @@ using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Professions.Crafting.V2;
+using Domain.Models.Professions.Gathering;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Equipments;
@@ -118,6 +119,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             .Include(c => c.Inventory)
                 .ThenInclude(i => i.InventoryItems)
                     .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).ToolAffixes)
+            .Include(c => c.Professions)
             .SingleOrDefaultAsync(c => c.Id == entityId, cancellationToken);
 
         if (character == null)
@@ -148,6 +150,26 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         if (character.Level < requiredLevel)
         {
             return false;
+        }
+
+        if (equipmentInstance.EquipmentBase.EquipmentType == EquipmentType.Tool)
+        {
+            var gatheringType = equipmentInstance.EquipmentBase.GatheringType;
+            if (gatheringType is null)
+            {
+                return false;
+            }
+
+            var professionType = GatheringProfessionProgression.ToProfessionType(gatheringType.Value);
+            var professionLevel = character.Professions
+                .FirstOrDefault(profession => profession.ProfessionType == professionType)
+                ?.Level ?? 1;
+            var requiredProfessionLevel = GatheringProfessionProgression
+                .GetRequiredLevelForTool(equipmentInstance.Rarity);
+            if (professionLevel < requiredProfessionLevel)
+            {
+                return false;
+            }
         }
 
         return await EquipEquipmentAsync(character, inventory, equipmentInstance, inventoryItem, slotType, cancellationToken);

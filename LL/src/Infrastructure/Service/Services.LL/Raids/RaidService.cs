@@ -15,6 +15,7 @@ using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Quests;
 using Domain.Models.Raids;
+using Domain.Models.Essences;
 using Common.Randomness;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -362,7 +363,7 @@ public sealed class RaidService(
                         $"Combat Rating is unavailable for generated teammate {candidate.Name}.");
                 }
 
-                var snapshot = await snapshots.CreateAsync(candidate.Id, cancellationToken);
+                var snapshot = await snapshots.CreateAsync(candidate.Id, EssenceCombatActivity.Raid, cancellationToken);
                 var eligibility = new Eligibility(
                     candidate.Id,
                     candidate.AccountId,
@@ -453,7 +454,7 @@ public sealed class RaidService(
         if (await db.RaidRuns.CountAsync(x => x.RaidBossId == boss.Id && x.Status == RaidRunStatus.Mustering, cancellationToken) >= MaximumOpenRaidsPerBoss)
             return RaidOperationResult<RaidRunDto>.Fail("This raid boss already has the maximum number of recruiting raids.");
 
-        var snapshot = await snapshots.CreateAsync(characterId, cancellationToken);
+        var snapshot = await snapshots.CreateAsync(characterId, EssenceCombatActivity.Raid, cancellationToken);
         var now = timeProvider.GetUtcNow();
         var definitionJson = JsonSerializer.Serialize(tier, jsonOptions);
         var run = new RaidRun
@@ -505,7 +506,7 @@ public sealed class RaidService(
         if (run.Signups.Any(x => x.AccountId == eligibility.AccountId))
             return RaidOperationResult<RaidRunDto>.Fail("This account already has a signup or pending request in this raid.");
 
-        var snapshot = await snapshots.CreateAsync(characterId, cancellationToken);
+        var snapshot = await snapshots.CreateAsync(characterId, EssenceCombatActivity.Raid, cancellationToken);
         var signup = CreateSignup(run, snapshot, eligibility, timeProvider.GetUtcNow());
         signup.Status = RaidSignupStatus.Pending;
         run.Signups.Add(signup);
@@ -715,7 +716,7 @@ public sealed class RaidService(
         var rating = await powerRatings.GetCharacterRatingAsync(characterId, cancellationToken);
         if (rating.State != PowerAnalysisState.Available)
             return RaidOperationResult<RaidRunDto>.Fail(rating.StatusMessage ?? "Combat Rating is unavailable.");
-        var snapshot = await snapshots.CreateAsync(characterId, cancellationToken);
+        var snapshot = await snapshots.CreateAsync(characterId, EssenceCombatActivity.Raid, cancellationToken);
         signup.CharacterSnapshotId = snapshot.Id;
         signup.CharacterSnapshot = snapshot;
         signup.PowerRating = CombatRatingDisplay.FromRaw(rating.Overall);

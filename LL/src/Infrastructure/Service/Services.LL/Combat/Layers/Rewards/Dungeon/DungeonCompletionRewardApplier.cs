@@ -15,6 +15,9 @@ namespace Services.LL.Combat.Layers.Rewards.Dungeon;
 
 public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApplier
 {
+    private static readonly IReadOnlySet<string> FirstCompletionExcludedRollIds =
+        new HashSet<string>(["blueprint_drop"], StringComparer.OrdinalIgnoreCase);
+
     private readonly IDungeonDefinitions _dungeonDefinitions;
     private readonly IDungeonRunRepository _dungeonRuns;
     private readonly IItemBaseRepository _itemBases;
@@ -48,6 +51,10 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
     {
         var dungeon = _dungeonDefinitions.GetByKey(run.DungeonDefinitionId);
         var masteryBenefits = DungeonMasteryBenefits.Resolve(run.State?.MasteryLevelAtStart ?? 0);
+        var isFirstCompletion = !await _dungeonRuns.HasCompletedDungeonAsync(
+            run.CharacterId,
+            run.DungeonDefinitionId,
+            cancellationToken);
 
         if (dungeon.CompletionRewardTableIds.Count > 0)
         {
@@ -58,6 +65,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
                     rewardTableId,
                     "Dungeon Completion",
                     masteryBenefits.CompletionCurrencyBonusPercent,
+                    isFirstCompletion ? FirstCompletionExcludedRollIds : null,
                     cancellationToken);
             }
         }
@@ -71,6 +79,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
                     rewardTableId,
                     $"Tier {dungeon.Tier} Completion",
                     masteryBenefits.CompletionCurrencyBonusPercent,
+                    excludedRollIds: null,
                     cancellationToken);
             }
         }
@@ -82,7 +91,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
             cancellationToken);
 
         await AddMonsterCoreRewardsAsync(run.Id, dungeon.Grade, cancellationToken);
-        await AddFirstCompletionRewardsIfNeededAsync(run, dungeon, cancellationToken);
+        await AddFirstCompletionRewardsIfNeededAsync(run, dungeon, isFirstCompletion, cancellationToken);
         var masteryAward = await _mastery.AwardCompletionAsync(run, cancellationToken);
         if (_achievementService is not null)
         {
@@ -117,11 +126,12 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         string rewardTableId,
         string source,
         int completionCurrencyBonusPercent,
+        IReadOnlySet<string>? excludedRollIds,
         CancellationToken cancellationToken)
     {
         var result = _rewardRoller.Roll(
             rewardTableId,
-            new RewardRollContext(source));
+            new RewardRollContext(source, ExcludedRollIds: excludedRollIds));
 
         result = ApplyCompletionCurrencyBonus(result, completionCurrencyBonusPercent);
 
@@ -245,9 +255,10 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
     private async Task AddFirstCompletionRewardsIfNeededAsync(
         DungeonRun run,
         Domain.Models.Dungeons.DungeonDefinition dungeon,
+        bool isFirstCompletion,
         CancellationToken cancellationToken)
     {
-        if (await _dungeonRuns.HasCompletedDungeonAsync(run.CharacterId, run.DungeonDefinitionId, cancellationToken))
+        if (!isFirstCompletion)
         {
             return;
         }

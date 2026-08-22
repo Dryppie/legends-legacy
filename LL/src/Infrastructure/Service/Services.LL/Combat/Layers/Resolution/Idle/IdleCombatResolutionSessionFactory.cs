@@ -3,6 +3,7 @@ using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.Essences;
 using Domain.Models.Regions.Areas;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
@@ -71,7 +72,9 @@ public sealed class IdleCombatResolutionSessionFactory : IIdleCombatResolutionSe
             }
 
             friendlyTemplates = BuildFriendlyTemplates(playerIds, sourceEntitiesById);
-            await _combatSetupService.PrepareEntitiesForCombat([.. friendlyTemplates.Values]);
+            await _combatSetupService.PrepareEntitiesForCombat(
+                [.. friendlyTemplates.Values],
+                EssenceCombatActivity.IdleCombat);
         }
         else
         {
@@ -88,7 +91,8 @@ public sealed class IdleCombatResolutionSessionFactory : IIdleCombatResolutionSe
             friendlyTemplates = BuildFriendlyTemplates(playerIds, sourceEntitiesById);
             var builtHostileTemplates = BuildHostileTemplates(hostileIds, sourceEntitiesById, plan.Area);
             await _combatSetupService.PrepareEntitiesForCombat(
-                [.. friendlyTemplates.Values, .. builtHostileTemplates.Values]);
+                [.. friendlyTemplates.Values, .. builtHostileTemplates.Values],
+                EssenceCombatActivity.IdleCombat);
 
             hostileSources = hostileIds.ToDictionary(id => id, id => sourceEntitiesById[id]);
             hostileTemplates = builtHostileTemplates;

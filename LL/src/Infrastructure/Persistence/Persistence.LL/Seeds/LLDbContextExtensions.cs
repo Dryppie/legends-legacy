@@ -640,11 +640,6 @@ public static class LLDbContextExtensions
             .FirstOrDefaultAsync(existingLoadout =>
                 existingLoadout.CharacterId == adminCharacterId &&
                 existingLoadout.Name == AdminStarterEssenceLoadoutName);
-        var hasActiveLoadout = await context.EssenceLoadouts
-            .AnyAsync(existingLoadout =>
-                existingLoadout.CharacterId == adminCharacterId &&
-                existingLoadout.IsActive);
-
         if (loadout is null)
         {
             loadout = new EssenceLoadout
@@ -652,7 +647,6 @@ public static class LLDbContextExtensions
                 Id = AdminStarterEssenceLoadoutId,
                 CharacterId = adminCharacterId,
                 Name = AdminStarterEssenceLoadoutName,
-                IsActive = !hasActiveLoadout,
                 CreatedAt = now,
                 UpdatedAt = now
             };
@@ -660,13 +654,6 @@ public static class LLDbContextExtensions
             await context.EssenceLoadouts.AddAsync(loadout);
             changed = true;
         }
-        else if (!hasActiveLoadout)
-        {
-            loadout.IsActive = true;
-            loadout.UpdatedAt = now;
-            changed = true;
-        }
-
         var desiredSlots = AdminStarterEssences
             .Select((seed, slotIndex) => new
             {

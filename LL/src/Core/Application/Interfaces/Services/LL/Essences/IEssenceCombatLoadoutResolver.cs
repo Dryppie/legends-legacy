@@ -6,6 +6,11 @@ namespace Application.Interfaces.Services.LL.Essences;
 public interface IEssenceCombatLoadoutResolver
 {
     Task<EssenceCombatLoadout> ResolveAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<EssenceCombatLoadout> ResolveAsync(
+        Guid characterId,
+        EssenceCombatActivity activity,
+        CancellationToken cancellationToken) =>
+        ResolveAsync(characterId, cancellationToken);
     EssenceCombatLoadout Resolve(Guid characterId, IEnumerable<PlayerEssence> equippedEssences);
 }
 

@@ -2,6 +2,7 @@ using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Components.Attributes;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Essences;
 
 namespace Services.LL.Entities.Characters;
 
@@ -91,8 +92,8 @@ public class CharacterService : ICharacterService
 
     private void ApplyCombatAttributes(Character character)
     {
-        var activeLoadout = character.EssenceLoadouts.FirstOrDefault(x => x.IsActive);
-        var equippedEssences = activeLoadout?.Slots
+        var defaultLoadout = EssenceLoadoutSelection.Select(character.EssenceLoadouts, EssenceCombatActivity.None);
+        var equippedEssences = defaultLoadout?.Slots
             .Select(x => x.PlayerEssence)
             .Where(x => x is not null)
             .Cast<Domain.Models.Essences.PlayerEssence>()

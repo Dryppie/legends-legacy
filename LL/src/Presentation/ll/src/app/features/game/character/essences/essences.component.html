@@ -61,49 +61,68 @@
     <section
       class="ll-panel soul-archive-list flex min-h-0 flex-col overflow-hidden p-3"
     >
-      <div
-        class="mb-3 flex items-center justify-between border-b border-light_gray/70 pb-3"
-      >
-        <div>
-          <h2 class="ll-heading">Archived Essences</h2>
-          <p class="ll-copy">
-            {{ essenceState.archive()?.essences?.length ?? 0 }} bound
-          </p>
-        </div>
-        <span class="ll-badge ll-badge-accent rounded">
-          {{ essenceState.archive()?.essenceDust ?? 0 }} dust
-        </span>
-      </div>
-
-      <div class="mb-3 grid gap-2">
+      <div class="soul-archive-search">
         <input
           class="ll-input w-full"
-          placeholder="Search name, description, ability, or tag"
+          placeholder="Search archived essences..."
+          aria-label="Search archived essences"
           [ngModel]="archiveSearch()"
           (ngModelChange)="archiveSearch.set($event)"
         />
+      </div>
 
-        <div class="soul-archive-filter-buttons flex flex-wrap gap-1">
+      <div class="soul-archive-filter-bar">
+        <div
+          class="soul-archive-filter-set"
+          role="group"
+          aria-label="Filter archived essences by status"
+        >
           <button
             *ngFor="let filter of archiveFilters"
             type="button"
-            class="ll-button px-2 py-1 text-xs"
-            [ngClass]="{
-              'll-card-accent text-primary': archiveFilter() === filter.value,
-            }"
+            class="soul-filter-chip"
+            [class.soul-filter-chip-active]="
+              archiveFilter() === filter.value
+            "
+            [attr.aria-pressed]="archiveFilter() === filter.value"
             (click)="setArchiveFilter(filter.value)"
           >
-            {{ filter.label }}
+            <span>{{ filter.label }}</span>
+            <span>{{ archiveFilterCount(filter.value) }}</span>
           </button>
         </div>
 
         <div
-          class="soul-archive-list-meta flex items-center justify-between gap-2"
+          *ngIf="archiveTags().length > 0"
+          class="soul-archive-filter-set soul-archive-tag-filters"
+          role="group"
+          aria-label="Filter archived essences by tag"
         >
-          <p class="ll-copy text-xs">
-            Showing {{ filteredArchiveEssences().length }} /
-            {{ essenceState.archive()?.essences?.length ?? 0 }}
-          </p>
+          <button
+            *ngFor="let tag of archiveTags()"
+            type="button"
+            class="soul-filter-chip"
+            [class.soul-filter-chip-active]="archiveTag() === tag"
+            [attr.aria-pressed]="archiveTag() === tag"
+            (click)="toggleArchiveTag(tag)"
+          >
+            {{ tag }}
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="soul-archive-list-header flex items-center justify-between gap-3 border-b border-light_gray/70"
+      >
+        <p class="text-xs text-zinc-400">
+          Showing
+          <strong class="font-semibold text-primary">
+            {{ filteredArchiveEssences().length }}
+          </strong>
+          of {{ essenceState.archive()?.essences?.length ?? 0 }} · sorted by
+          {{ archiveSort() }}
+        </p>
+        <div class="flex items-center gap-2">
           <app-dropdown
             appearance="field"
             label="Sort"
@@ -112,10 +131,22 @@
             [selectedValue]="archiveSort()"
             (selection)="setArchiveSortSelection($event)"
           ></app-dropdown>
+          <span class="ll-badge ll-badge-accent shrink-0 rounded">
+            {{ essenceState.archive()?.essenceDust ?? 0 }} dust
+          </span>
         </div>
       </div>
 
-      <cdk-virtual-scroll-viewport [itemSize]="84" class="h-[420px] min-h-0">
+      <div class="soul-archive-table-heading" aria-hidden="true">
+        <span>Essence</span>
+        <span>Lv</span>
+        <span>Asc</span>
+        <span>Ability</span>
+        <span>Thr</span>
+        <span>Status</span>
+      </div>
+
+      <cdk-virtual-scroll-viewport [itemSize]="48" class="min-h-0 flex-1">
         <button
           *cdkVirtualFor="
             let essence of filteredArchiveEssences();
@@ -123,57 +154,40 @@
           "
           data-tour="essence-archive-list"
           type="button"
-          class="ll-card mb-2 w-full px-3 py-2 text-left text-white transition-colors hover:border-primary hover:bg-zinc-300/10"
+          class="soul-archive-row w-full text-left text-white transition-colors"
           [ngClass]="{
             'll-card-accent shadow-inner':
               essenceState.selected()?.id === essence.id,
             'soul-essence-favorite': essence.isFavorite,
           }"
           [attr.aria-label]="
-            essence.name + (essence.isFavorite ? ', favorited' : '')
+            displayEssenceName(essence.name) +
+            (essence.isFavorite ? ', favorited' : '')
           "
           (click)="selectPlayerEssence(essence)"
         >
-          <div class="flex items-center justify-between gap-3">
-            <div class="flex min-w-0 items-center gap-1.5">
-              <span
-                *ngIf="essence.isFavorite"
-                class="soul-favorite-star"
-                aria-hidden="true"
-              >
-                ★
-              </span>
-              <span class="min-w-0 truncate font-semibold text-primary">
-                {{ essence.name }}
-              </span>
-            </div>
-            <span class="ll-badge shrink-0 rounded text-zinc-300">
-              L{{ essence.level }} A{{ essence.ascensionTier }}
+          <span class="soul-archive-row-name">
+            <span class="soul-favorite-star" aria-hidden="true">
+              {{ essence.isFavorite ? "★" : "☆" }}
             </span>
-          </div>
-          <div class="mt-2 flex items-center justify-between gap-3 text-xs">
-            <span class="min-w-0 truncate text-zinc-400">
-              {{ essence.activeAbility.name }}
-            </span>
-            <span class="shrink-0 text-zinc-500">
-              {{
-                essence.attunedSlot === null ||
-                essence.attunedSlot === undefined
-                  ? "Inactive"
-                  : "Slot " + (essence.attunedSlot + 1)
-              }}
-            </span>
-          </div>
-          <div class="ll-progress-track mt-2 h-1">
-            <div
-              class="ll-progress-bar"
-              [style.width.%]="
-                essence.xpRequiredForNextLevel > 0
-                  ? (essence.currentXp / essence.xpRequiredForNextLevel) * 100
-                  : 100
-              "
-            ></div>
-          </div>
+            <strong>{{ displayEssenceName(essence.name) }}</strong>
+          </span>
+          <span class="soul-archive-row-level">{{ essence.level }}</span>
+          <span class="soul-archive-row-tier"
+            >A{{ essence.ascensionTier }}</span
+          >
+          <span class="soul-archive-row-ability">
+            {{ essence.activeAbility.name }}
+          </span>
+          <strong class="soul-archive-row-threat">
+            {{ essence.activeAbility.threatValue ?? 0 }}
+          </strong>
+          <span
+            class="soul-archive-row-status"
+            [class.soul-archive-row-status-ready]="canAscendEssence(essence)"
+          >
+            {{ essenceStatus(essence) }}
+          </span>
         </button>
       </cdk-virtual-scroll-viewport>
 
@@ -200,7 +214,7 @@
           </button>
           <div>
             <h2 class="ll-heading text-2xl">
-              {{ essence.name }}
+              {{ displayEssenceName(essence.name) }}
             </h2>
             <p class="ll-copy mt-1">
               Level {{ essence.level }} / {{ essence.levelCap }} | Ascension
@@ -534,12 +548,10 @@
           class="soul-mobile-loadout-content"
           [class.soul-mobile-loadout-content-open]="mobileLoadoutOpen()"
         >
-          <div
-            class="soul-loadout-desktop-header mb-3 flex items-center justify-between gap-3"
-          >
-            <div>
+          <div class="soul-loadout-toolbar">
+            <div class="soul-loadout-title">
               <h2 class="ll-heading">Loadout</h2>
-              <p class="ll-copy">
+              <p class="ll-copy whitespace-nowrap">
                 <ng-container
                   *ngIf="
                     essenceState.loadouts() as loadouts;
@@ -548,60 +560,110 @@
                 >
                   {{ loadouts.loadouts.length }} / {{ loadouts.limit }} saved
                 </ng-container>
-                <ng-template #loadoutsPending>
-                  Loading loadout slots...
-                </ng-template>
+                <ng-template #loadoutsPending>Loading...</ng-template>
               </p>
             </div>
-            <button
-              type="button"
-              class="ll-button px-2 py-1 text-xs"
-              [disabled]="essenceState.savingLoadout()"
-              (click)="essenceState.newLoadout()"
-            >
-              + New
-            </button>
-          </div>
 
-          <div class="mb-3 grid gap-2">
-            <button
-              *ngFor="let loadout of essenceState.loadouts()?.loadouts ?? []"
-              type="button"
-              class="ll-card soul-loadout-choice px-3 py-2 text-left text-sm text-white transition-colors hover:border-primary hover:bg-zinc-300/10"
-              [ngClass]="{
-                'border-primary bg-primary/10':
-                  essenceState.selectedLoadoutId() === loadout.id,
-              }"
-              [disabled]="essenceState.savingLoadout()"
-              (click)="selectLoadout(loadout)"
-            >
-              <div class="flex items-center justify-between gap-2">
+            <div class="soul-loadout-tabs">
+              <button
+                *ngFor="let loadout of essenceState.loadouts()?.loadouts ?? []"
+                type="button"
+                class="soul-loadout-choice"
+                [ngClass]="{
+                  'soul-loadout-choice-active':
+                    essenceState.selectedLoadoutId() === loadout.id,
+                }"
+                [disabled]="essenceState.savingLoadout()"
+                (click)="selectLoadout(loadout)"
+              >
                 <span>{{ loadout.name }}</span>
-                <span class="text-xs text-primary" *ngIf="loadout.isActive"
-                  >Active</span
-                >
-              </div>
-            </button>
+              </button>
+              <button
+                type="button"
+                class="soul-loadout-choice soul-loadout-new"
+                [disabled]="essenceState.savingLoadout()"
+                (click)="essenceState.newLoadout()"
+              >
+                + New
+              </button>
+            </div>
+
+            <div class="soul-loadout-toolbar-actions">
+              <label class="ll-field soul-loadout-name-field">
+                <span class="sr-only">Loadout name</span>
+                <input
+                  class="ll-input ll-input-compact"
+                  aria-label="Loadout name"
+                  [ngModel]="essenceState.draftLoadoutName()"
+                  [disabled]="essenceState.savingLoadout()"
+                  (ngModelChange)="essenceState.setDraftLoadoutName($event)"
+                />
+              </label>
+              <button
+                type="button"
+                class="ll-button px-2 py-1 text-xs"
+                data-tour="essence-loadout-save"
+                [class.ll-button-primary]="essenceState.canSaveDraft()"
+                [class.soul-loadout-save-pending]="essenceState.canSaveDraft()"
+                [disabled]="!essenceState.canSaveDraft()"
+                (click)="saveLoadout()"
+              >
+                Save name
+              </button>
+              <button
+                type="button"
+                class="ll-button px-2 py-1 text-xs"
+                [disabled]="
+                  essenceState.savingLoadout() ||
+                  !essenceState.selectedLoadoutId()
+                "
+                (click)="essenceState.deleteSelectedLoadout()"
+              >
+                Delete
+              </button>
+            </div>
           </div>
 
-          <label class="ll-field mb-3">
-            <span class="ll-label">Name</span>
-            <input
-              class="ll-input ll-input-compact w-full"
-              [ngModel]="essenceState.draftLoadoutName()"
-              [disabled]="essenceState.savingLoadout()"
-              (ngModelChange)="essenceState.setDraftLoadoutName($event)"
-            />
-          </label>
+          <div class="soul-auto-use-row">
+            <span class="soul-filter-label mb-0">Auto-use for</span>
+            <div class="soul-auto-use-options">
+              <button
+                *ngFor="let content of combatContentOptions"
+                type="button"
+                class="soul-auto-use-option"
+                [class.soul-auto-use-option-active]="
+                  isAutoUseSelected(content.key)
+                "
+                [disabled]="
+                  !essenceState.selectedLoadoutId() ||
+                  essenceState.savingLoadout()
+                "
+                [attr.aria-pressed]="isAutoUseSelected(content.key)"
+                [attr.title]="
+                  autoUseOwnerName(content.key)
+                    ? 'Currently assigned to ' + autoUseOwnerName(content.key)
+                    : null
+                "
+                (click)="toggleAutoUse(content.key)"
+              >
+                {{ content.label }}
+                <span
+                  *ngIf="autoUseOwnerName(content.key)"
+                  class="soul-auto-use-owner"
+                  aria-hidden="true"
+                  >•</span
+                >
+              </button>
+            </div>
+            <span class="soul-auto-use-note">Saved automatically</span>
+          </div>
 
-          <div
-            class="ll-card mb-3 flex items-center justify-between px-3 py-2 text-xs"
-          >
-            <span class="text-zinc-400">Loadout slots</span>
-            <span class="text-primary">
+          <div class="soul-loadout-slot-summary">
+            <span>Loadout slots</span>
+            <strong>
               {{ draftSlotsFilled() }} / {{ essenceState.slotIndexes().length }}
               filled
-            </span>
+            </strong>
           </div>
 
           <div class="grid gap-2" data-tour="essence-loadout-slots">
@@ -621,10 +683,12 @@
                 <button
                   type="button"
                   class="soul-loadout-slot-name soul-loadout-slot-select"
-                  [attr.aria-label]="'View ' + slottedEssence.name"
+                  [attr.aria-label]="
+                    'View ' + displayEssenceName(slottedEssence.name)
+                  "
                   (click)="focusLoadoutEssence(slottedEssence)"
                 >
-                  {{ slottedEssence.name }}
+                  {{ displayEssenceName(slottedEssence.name) }}
                 </button>
                 <button
                   type="button"
@@ -651,50 +715,9 @@
             </div>
           </div>
 
-          <p class="ll-copy mt-2 text-xs" *ngIf="loadoutSaveHint() as saveHint">
+          <p class="soul-loadout-hint" *ngIf="loadoutSaveHint() as saveHint">
             {{ saveHint }}
           </p>
-
-          <div
-            class="mt-3 flex flex-wrap gap-2"
-            data-tour="essence-loadout-actions"
-          >
-            <button
-              type="button"
-              class="ll-button"
-              data-tour="essence-loadout-save"
-              [class.ll-button-primary]="essenceState.canSaveDraft()"
-              [class.soul-loadout-save-pending]="essenceState.canSaveDraft()"
-              [disabled]="!essenceState.canSaveDraft()"
-              (click)="saveLoadout()"
-            >
-              Save name
-            </button>
-            <button
-              type="button"
-              class="ll-button"
-              data-tour="essence-loadout-activate"
-              [disabled]="
-                essenceState.savingLoadout() ||
-                !essenceState.selectedLoadoutId() ||
-                essenceState.selectedLoadout()?.isActive
-              "
-              (click)="essenceState.activateSelectedLoadout()"
-            >
-              Activate
-            </button>
-            <button
-              type="button"
-              class="ll-button"
-              [disabled]="
-                essenceState.savingLoadout() ||
-                !essenceState.selectedLoadoutId()
-              "
-              (click)="essenceState.deleteSelectedLoadout()"
-            >
-              Delete
-            </button>
-          </div>
         </div>
       </section>
     </div>
@@ -909,7 +932,7 @@
                   essence.isAbsorbed ? 'text-primary' : 'text-zinc-300'
                 "
               >
-                {{ essence.name }}
+                {{ displayEssenceName(essence.name) }}
               </span>
               <span class="text-xs text-zinc-500">
                 {{ essence.isAbsorbed ? "Archived" : "Not archived" }}
@@ -1035,7 +1058,7 @@
                       : 'italic text-zinc-500'
                 "
               >
-                {{ member.name }}
+                {{ displayEssenceName(member.name) }}
               </span>
               <span
                 class="ll-badge shrink-0 rounded"

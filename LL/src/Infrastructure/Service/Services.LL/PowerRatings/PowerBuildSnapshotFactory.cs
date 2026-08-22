@@ -6,6 +6,7 @@ using Application.Interfaces.Services.LL.PowerRatings;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Essences;
 using Services.LL.Interfaces;
 
 namespace Services.LL.PowerRatings;
@@ -56,8 +57,8 @@ public sealed class PowerBuildSnapshotFactory
         if (partySelection.CompanionIds.Count > 0)
             return null;
 
-        var activeLoadout = character.EssenceLoadouts.FirstOrDefault(x => x.IsActive);
-        var equippedEssences = activeLoadout?.Slots
+        var defaultLoadout = EssenceLoadoutSelection.Select(character.EssenceLoadouts, EssenceCombatActivity.None);
+        var equippedEssences = defaultLoadout?.Slots
             .OrderBy(x => x.SlotIndex)
             .Select(x => x.PlayerEssence)
             .Where(x => x is not null)
@@ -141,8 +142,8 @@ public sealed class PowerBuildSnapshotFactory
                 value.Append(":affinity:").Append(affinity);
         }
 
-        var activeLoadout = character.EssenceLoadouts.FirstOrDefault(x => x.IsActive);
-        foreach (var slot in activeLoadout?.Slots.OrderBy(x => x.SlotIndex) ?? Enumerable.Empty<Domain.Models.Essences.EssenceLoadoutSlot>())
+        var defaultLoadout = EssenceLoadoutSelection.Select(character.EssenceLoadouts, EssenceCombatActivity.None);
+        foreach (var slot in defaultLoadout?.Slots.OrderBy(x => x.SlotIndex) ?? Enumerable.Empty<EssenceLoadoutSlot>())
         {
             value.Append("|essence-slot:").Append(slot.SlotIndex);
             if (slot.PlayerEssence is not { } essence)

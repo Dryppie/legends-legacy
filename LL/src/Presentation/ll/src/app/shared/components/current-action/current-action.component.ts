@@ -25,8 +25,7 @@ export class CurrentActionComponent {
 
     effect(() => {
       const action = this.state.currentAction();
-      const waitingForCombat =
-        this.state.isTemperingPendingCombatUnlock();
+      const waitingForCombat = this.state.isTemperingPendingCombatUnlock();
       this.currentAction = action;
       this.setPerformingAction(waitingForCombat);
     });
@@ -51,7 +50,10 @@ export class CurrentActionComponent {
     }
 
     const deadline = new Date(
-      action.nextResolutionAtUtc ?? action.nextResolutionAt ?? action.updatedAt,
+      (action.isDeleted ? action.blockedUntilUtc : null) ??
+        action.nextResolutionAtUtc ??
+        action.nextResolutionAt ??
+        action.updatedAt,
     ).getTime();
     if (action.isDeleted && deadline > Date.now()) {
       this.performingAction = 'Combat ending - recovery';

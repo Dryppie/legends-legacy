@@ -11,6 +11,7 @@ public sealed class JsonEventQuestDefinitionProvider : IEventQuestDefinitionProv
     [
         "CombatEncounterCompleted",
         "AreaActionCompletedWithTool",
+        "ResourceGathered",
         "EssenceAbsorbed",
         "EssenceFocusSet",
         "FocusedCreatureEssenceReceived",

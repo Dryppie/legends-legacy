@@ -4,7 +4,7 @@
   "sections": [
     {
       "heading": "Encounters",
-      "body": "Combat resolves encounters using your current character stats, equipment, active Essence loadout, and the enemy team. The combat view displays both teams, changing vitals, the encounter duration, and the final outcome."
+      "body": "Combat resolves encounters using your current character stats, equipment, the Essence loadout assigned to that activity, and the enemy team. The combat view displays both teams, changing vitals, the encounter duration, and the final outcome."
     },
     {
       "heading": "Ongoing and offline combat",

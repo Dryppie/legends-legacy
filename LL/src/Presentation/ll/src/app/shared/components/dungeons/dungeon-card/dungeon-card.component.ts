@@ -23,7 +23,6 @@ import { DungeonDifficulty } from '../../../models/enums/dungeonDifficulty';
 import { Router } from '@angular/router';
 import { Equipment } from '../../../models/item';
 import { EquipmentType } from '../../../models/enums/equipmentType';
-import { BaseItemComponent } from '../../base-item/base-item.component';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 
 interface RewardGroup {
@@ -56,7 +55,6 @@ type DungeonDetailTab = 'rewards' | 'gathering' | 'mastery';
     OverlayModule,
     RegularButtonComponent,
     ItemComponent,
-    BaseItemComponent,
   ],
   templateUrl: './dungeon-card.component.html',
   styleUrl: './dungeon-card.component.scss',
@@ -458,13 +456,37 @@ export class DungeonCardComponent implements OnChanges {
     return [
       {
         title: 'Run Rewards',
-        rewards: this.withUniqueTools(repeatableRewards),
+        rewards: this.withRandomToolReward(repeatableRewards),
       },
       {
         title: 'First Clear',
-        rewards: this.withUniqueTools(firstClearRewards),
+        rewards: this.withRandomToolReward(firstClearRewards),
       },
     ].filter((section) => section.rewards.length > 0);
+  }
+
+  selectedRunRewards(): DungeonPreviewReward[] {
+    return (
+      this.selectedRewardSections().find(
+        (section) => section.title === 'Run Rewards',
+      )?.rewards ?? []
+    );
+  }
+
+  selectedFirstClearRewards(): DungeonPreviewReward[] {
+    return (
+      this.selectedRewardSections().find(
+        (section) => section.title === 'First Clear',
+      )?.rewards ?? []
+    );
+  }
+
+  guaranteedRewards(rewards: DungeonPreviewReward[]): DungeonPreviewReward[] {
+    return rewards.filter((reward) => this.rewardChancePercent(reward) >= 100);
+  }
+
+  chanceRewards(rewards: DungeonPreviewReward[]): DungeonPreviewReward[] {
+    return rewards.filter((reward) => this.rewardChancePercent(reward) < 100);
   }
 
   trackRewardGroup(_: number, group: RewardGroup): string {
@@ -483,7 +505,35 @@ export class DungeonCardComponent implements OnChanges {
     const min = reward.minQuantity ?? 1;
     const max = reward.maxQuantity ?? min;
 
-    return min === max ? `x${min}` : `x${min}-${max}`;
+    return min === max ? `Qty ${min}` : `Qty ${min}–${max}`;
+  }
+
+  rewardQuantityValue(reward: DungeonPreviewReward): string {
+    const min = reward.minQuantity ?? 1;
+    const max = reward.maxQuantity ?? min;
+
+    return min === max ? `${min}` : `${min}–${max}`;
+  }
+
+  rewardDropChanceLabel(reward: DungeonPreviewReward): string | null {
+    const chance = reward.dropChancePercent;
+    if (chance === null || chance === undefined) {
+      return null;
+    }
+
+    return `${this.formatDropChance(chance)} drop`;
+  }
+
+  rewardChancePercent(reward: DungeonPreviewReward): number {
+    return Math.max(0, Math.min(100, reward.dropChancePercent ?? 100));
+  }
+
+  rewardChanceValueLabel(reward: DungeonPreviewReward): string {
+    return this.formatDropChance(this.rewardChancePercent(reward));
+  }
+
+  rewardChanceBarWidth(reward: DungeonPreviewReward): number {
+    return Math.sqrt(this.rewardChancePercent(reward) / 100) * 100;
   }
 
   trackGatheringNode(_: number, node: DungeonGatheringNodePreview): string {
@@ -658,7 +708,7 @@ export class DungeonCardComponent implements OnChanges {
   }
 
   gatheringChanceLabel(node: DungeonGatheringNodePreview): string {
-    return `${Math.round((node.procChance ?? 0) * 100)}%`;
+    return `Base node ${this.formatDropChance((node.procChance ?? 0) * 100)}`;
   }
 
   gatheringLevelLabel(node: DungeonGatheringNodePreview): string {
@@ -671,8 +721,20 @@ export class DungeonCardComponent implements OnChanges {
     loot: DungeonGatheringNodePreview['loot'][number],
   ): string {
     return loot.minQuantity === loot.maxQuantity
-      ? `${loot.minQuantity}`
-      : `${loot.minQuantity}-${loot.maxQuantity}`;
+      ? `Qty ${loot.minQuantity}`
+      : `Qty ${loot.minQuantity}–${loot.maxQuantity}`;
+  }
+
+  gatheringLootDropChanceLabel(
+    loot: DungeonGatheringNodePreview['loot'][number],
+  ): string {
+    return `Base ${this.formatDropChance(loot.dropChancePercent ?? 0)} drop`;
+  }
+
+  private formatDropChance(chance: number): string {
+    const clamped = Math.max(0, Math.min(100, chance));
+    const maximumFractionDigits = clamped > 0 && clamped < 1 ? 4 : 2;
+    return `${Number(clamped.toFixed(maximumFractionDigits))}%`;
   }
 
   formatGatheringType(type: string | null | undefined): string {
@@ -713,34 +775,47 @@ export class DungeonCardComponent implements OnChanges {
     }
   }
 
-  private withUniqueTools(
+  private withRandomToolReward(
     rewards: DungeonPreviewReward[],
   ): DungeonPreviewReward[] {
-    const seenTools = new Set<string>();
-    const toolRewards: DungeonPreviewReward[] = [];
-    const otherRewards: DungeonPreviewReward[] = [];
+    const toolRewards = rewards.filter((reward) => this.isToolItem(reward));
+    const otherRewards = rewards.filter((reward) => !this.isToolItem(reward));
 
-    for (const reward of rewards) {
-      if (!this.isToolItem(reward)) {
-        otherRewards.push(reward);
-        continue;
-      }
-
-      const equipment = reward.itemBase as Equipment;
-      const key = [
-        equipment.gatheringType ?? '',
-        reward.itemBase.name.trim().toLowerCase(),
-      ].join(':');
-
-      if (seenTools.has(key)) {
-        continue;
-      }
-
-      seenTools.add(key);
-      toolRewards.push(reward);
+    if (toolRewards.length === 0) {
+      return otherRewards;
     }
 
-    return [...toolRewards, ...otherRewards];
+    const firstTool = toolRewards[0];
+    const dropChancePercent = this.combinedToolDropChance(toolRewards);
+    const randomToolReward: DungeonPreviewReward = {
+      ...firstTool,
+      id: `random-tool:${firstTool.category ?? firstTool.source ?? 'dungeon'}`,
+      displayName: 'Random Tool',
+      minQuantity: 1,
+      maxQuantity: 1,
+      dropChancePercent,
+      canDropNothing: dropChancePercent < 100,
+      noDropChancePercent: Math.max(0, 100 - dropChancePercent),
+    };
+
+    return [randomToolReward, ...otherRewards];
+  }
+
+  private combinedToolDropChance(toolRewards: DungeonPreviewReward[]): number {
+    const chanceByPool = new Map<string, number>();
+
+    for (const reward of toolRewards) {
+      const poolKey = `${reward.category ?? ''}:${reward.source ?? ''}`;
+      const chance = this.rewardChancePercent(reward);
+      chanceByPool.set(poolKey, (chanceByPool.get(poolKey) ?? 0) + chance);
+    }
+
+    const noToolChance = [...chanceByPool.values()].reduce(
+      (product, poolChance) => product * (1 - Math.min(100, poolChance) / 100),
+      1,
+    );
+
+    return Number(((1 - noToolChance) * 100).toFixed(4));
   }
 
   private isToolItem(reward: DungeonPreviewReward): boolean {

@@ -1,5 +1,4 @@
 using Application.UseCases.Essences.Commands.AbsorbUnboundEssence;
-using Application.UseCases.Essences.Commands.ActivateEssenceLoadout;
 using Application.UseCases.Essences.Commands.AscendEssence;
 using Application.UseCases.Essences.Commands.DeleteEssenceLoadout;
 using Application.UseCases.Essences.Commands.DismantleUnboundEssence;
@@ -7,9 +6,9 @@ using Application.UseCases.Essences.Commands.EvolveEssence;
 using Application.UseCases.Essences.Commands.FavoriteEssence;
 using Application.UseCases.Essences.Commands.SaveEssenceLoadout;
 using Application.UseCases.Essences.Commands.SetEssenceFocus;
+using Application.UseCases.Essences.Commands.SetEssenceLoadoutAutoUseActivities;
 using Application.UseCases.Essences.Commands.SpendEssenceDust;
 using Application.UseCases.Essences.Dtos;
-using Application.UseCases.Essences.Queries.GetActiveEssenceLoadout;
 using Application.UseCases.Essences.Queries.GetCreatureArchive;
 using Application.UseCases.Essences.Queries.GetEssenceCodex;
 using Application.UseCases.Essences.Queries.GetEssenceLoadouts;
@@ -40,10 +39,6 @@ public class EssenceController : BaseController
     [HttpGet("loadouts")]
     public async Task<ActionResult<EssenceLoadoutsDto>> GetLoadouts() =>
         await Mediator.Send(new GetEssenceLoadoutsQuery(CurrentCharacterGuid));
-
-    [HttpGet("loadouts/active")]
-    public async Task<ActionResult<EssenceLoadoutDto?>> GetActiveLoadout() =>
-        await Mediator.Send(new GetActiveEssenceLoadoutQuery(CurrentCharacterGuid));
 
     [HttpPost("items/{inventoryItemId:guid}/absorb")]
     public async Task<ActionResult<Response<EssenceMutationResponseDto>>> AbsorbUnboundEssence(Guid inventoryItemId) =>
@@ -77,9 +72,14 @@ public class EssenceController : BaseController
     public async Task<ActionResult<Response<EssenceStateResponseDto>>> UpdateLoadout(Guid loadoutId, [FromBody] SaveEssenceLoadoutDto request) =>
         await Mediator.Send(new SaveEssenceLoadoutCommand(CurrentCharacterGuid, request with { Id = loadoutId }));
 
-    [HttpPost("loadouts/{loadoutId:guid}/activate")]
-    public async Task<ActionResult<Response<EssenceStateResponseDto>>> ActivateLoadout(Guid loadoutId) =>
-        await Mediator.Send(new ActivateEssenceLoadoutCommand(CurrentCharacterGuid, loadoutId));
+    [HttpPut("loadouts/{loadoutId:guid}/auto-use")]
+    public async Task<ActionResult<Response<EssenceStateResponseDto>>> SetLoadoutAutoUse(
+        Guid loadoutId,
+        [FromBody] SetEssenceLoadoutAutoUseActivitiesRequestDto request) =>
+        await Mediator.Send(new SetEssenceLoadoutAutoUseActivitiesCommand(
+            CurrentCharacterGuid,
+            loadoutId,
+            request.Activities));
 
     [HttpDelete("loadouts/{loadoutId:guid}")]
     public async Task<ActionResult<Response<EssenceStateResponseDto>>> DeleteLoadout(Guid loadoutId) =>

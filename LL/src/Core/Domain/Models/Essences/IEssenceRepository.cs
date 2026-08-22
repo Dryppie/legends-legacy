@@ -4,9 +4,7 @@ namespace Domain.Models.Essences;
 
 public interface IEssenceRepository
 {
-    Task<List<EssenceLoadoutSlot>> GetActiveSlotsAsync(Guid characterId, CancellationToken cancellationToken);
     Task<Character?> GetCharacterWithEssenceLoadoutsAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<EssenceLoadout?> GetActiveLoadoutAsync(Guid characterId, CancellationToken cancellationToken);
     Task<int> GetCharacterLevelAsync(Guid characterId, CancellationToken cancellationToken);
 
     Task<List<PlayerEssence>> GetPlayerEssencesAsync(Guid characterId, CancellationToken cancellationToken);

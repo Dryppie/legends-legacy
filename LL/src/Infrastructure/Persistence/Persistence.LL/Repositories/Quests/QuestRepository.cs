@@ -35,12 +35,12 @@ public sealed class QuestRepository(IDbContext context) : IQuestRepository
     public Task<bool> HasProcessedEventAsync(Guid outboxMessageId, CancellationToken cancellationToken) =>
         context.QuestEventLedgers.AnyAsync(x => x.OutboxMessageId == outboxMessageId, cancellationToken);
 
-    public Task<bool> HasEssenceInActiveLoadoutAsync(
+    public Task<bool> HasEssenceInAnyLoadoutAsync(
         Guid characterId,
         string essenceDefinitionId,
         CancellationToken cancellationToken) =>
         context.EssenceLoadouts
-            .Where(x => x.CharacterId == characterId && x.IsActive)
+            .Where(x => x.CharacterId == characterId)
             .SelectMany(x => x.Slots)
             .AnyAsync(
                 x => x.PlayerEssence != null &&

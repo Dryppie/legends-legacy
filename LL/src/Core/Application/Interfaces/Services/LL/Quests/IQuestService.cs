@@ -116,21 +116,24 @@ public sealed record QuestTrigger(
     string? EquippedGatheringType = null,
     bool HasCompatibleEssenceTrio = false,
     string? CreatureDefinitionId = null,
-    int? WinningEncounterCount = null)
+    int? WinningEncounterCount = null,
+    int GatheredResourceCount = 0)
 {
     public static QuestTrigger CombatCompleted(
         string areaId,
         bool wonEncounter,
         int actionCount = 1,
         string? equippedGatheringType = null,
-        int? winningEncounterCount = null) =>
+        int? winningEncounterCount = null,
+        int gatheredResourceCount = 0) =>
         new(
             "CombatEncounterCompleted",
             AreaId: areaId,
             WonEncounter: wonEncounter,
             ActionCount: actionCount,
             EquippedGatheringType: equippedGatheringType,
-            WinningEncounterCount: winningEncounterCount);
+            WinningEncounterCount: winningEncounterCount,
+            GatheredResourceCount: gatheredResourceCount);
 
     public static QuestTrigger EssenceAbsorbed(string essenceDefinitionId) =>
         new("EssenceAbsorbed", EssenceDefinitionId: essenceDefinitionId);

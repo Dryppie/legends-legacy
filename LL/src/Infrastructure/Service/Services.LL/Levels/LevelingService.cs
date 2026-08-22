@@ -5,6 +5,7 @@ using Domain.Helpers.Constants;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Professions;
+using Domain.Models.Professions.Gathering;
 using MediatR;
 using Services.LL.Interfaces;
 
@@ -62,6 +63,12 @@ public class LevelingService : ILevelingService
 
     public async Task UpdateProfessionLevel(Profession profession, CancellationToken cancellationToken)
     {
+        if (GatheringProfessionProgression.IsGatheringProfession(profession.ProfessionType))
+        {
+            UpdateGatheringProfessionLevel(profession);
+            return;
+        }
+
         var xpRequired = EntityLevelConstants.XP_REQUIRED(profession.Level);
 
         while (profession.Experience >= xpRequired)
@@ -74,6 +81,36 @@ public class LevelingService : ILevelingService
 
             //TODO: Add Publish Event to notify listeners that listen to level ups
             //await _publisher.Publish(new CharacterLevelUpEvent(character.Id, profession.Level));
+        }
+    }
+
+    private static void UpdateGatheringProfessionLevel(Profession profession)
+    {
+        if (profession.Level >= GatheringProfessionProgression.MaxLevel)
+        {
+            profession.Level = GatheringProfessionProgression.MaxLevel;
+            profession.Experience = 0;
+            return;
+        }
+
+        var xpRequired = GatheringProfessionProgression.GetRequiredExperience(profession.Level);
+
+        while (profession.Level < GatheringProfessionProgression.MaxLevel &&
+               profession.Experience >= xpRequired)
+        {
+            profession.Level++;
+            profession.Experience -= xpRequired;
+
+            if (profession.Level < GatheringProfessionProgression.MaxLevel)
+            {
+                xpRequired = GatheringProfessionProgression.GetRequiredExperience(profession.Level);
+            }
+        }
+
+        if (profession.Level >= GatheringProfessionProgression.MaxLevel)
+        {
+            profession.Level = GatheringProfessionProgression.MaxLevel;
+            profession.Experience = 0;
         }
     }
 }

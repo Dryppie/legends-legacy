@@ -126,8 +126,16 @@ public sealed class DungeonDefinitionValidator : IDungeonDefinitionValidator
             if (node.LevelRequirement is < 1)
                 errors.Add($"{dungeonId}: gathering node '{node.Id}' levelRequirement must be greater than zero.");
 
-            if (node.Loot.Count == 0 && string.IsNullOrWhiteSpace(node.RewardTableId))
+            if (node.Loot.Count == 0 &&
+                string.IsNullOrWhiteSpace(node.RewardTableId) &&
+                node.BonusRewardTableIds.Count == 0)
                 errors.Add($"{dungeonId}: gathering node '{node.Id}' requires either rewardTableId or at least one loot entry.");
+
+            ValidateRewardTableIds(
+                dungeonId,
+                $"gathering node '{node.Id}' bonusRewardTableIds",
+                node.BonusRewardTableIds,
+                errors);
 
             foreach (var loot in node.Loot)
             {

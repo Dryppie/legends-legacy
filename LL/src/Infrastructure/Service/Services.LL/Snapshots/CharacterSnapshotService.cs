@@ -17,6 +17,14 @@ public class CharacterSnapshotService : ICharacterSnapshotService
         return await _repository.CreateAsync(characterId, ct);
     }
 
+    public async Task<CharacterSnapshot> CreateAsync(
+        Guid characterId,
+        Domain.Models.Essences.EssenceCombatActivity activity,
+        CancellationToken ct)
+    {
+        return await _repository.CreateAsync(characterId, activity, ct);
+    }
+
     public async Task<CharacterSnapshot?> GetSnapshotByCharacterIdAsync(Guid characterId, CancellationToken ct)
     {
         return await _repository.GetSnapshotByCharacterIdAsync(characterId, ct);

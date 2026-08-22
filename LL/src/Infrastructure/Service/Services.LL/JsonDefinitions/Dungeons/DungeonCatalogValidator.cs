@@ -64,6 +64,11 @@ public sealed class DungeonCatalogValidator
             errors.Add($"{familyLabel}: restSiteCount must be specified and cannot be negative.");
 
         AddDuplicateErrors(
+            family.GatheringBonusRewardTableIds,
+            $"gathering bonus reward table in family '{familyLabel}'",
+            errors);
+
+        AddDuplicateErrors(
             family.RoomTemplates.Select(x => x.Id),
             $"room template in family '{familyLabel}'",
             errors);

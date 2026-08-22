@@ -111,6 +111,8 @@ public sealed class CraftingRegionOneContentTests
         var materials = ReadArray("crafting/materials.json");
         var blueprints = ReadArray("crafting/blueprints.json");
         var dungeons = ReadDungeonDifficulties();
+        var dungeonDocument = ReadDocument("dungeons/dungeons.json");
+        var rewardTables = ReadRewardTablesById();
 
         var firstClearItemIds = dungeons
             .SelectMany(dungeon => ChildArray(dungeon?["rewardTable"], "firstClearRewards"))
@@ -128,6 +130,12 @@ public sealed class CraftingRegionOneContentTests
                     .Select(reward => reward?["itemId"]?.GetValue<string>()))
             .Where(itemId => !string.IsNullOrWhiteSpace(itemId))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        sourcedItemIds.UnionWith(
+            ChildArray(dungeonDocument, "families")
+                .SelectMany(family => ChildArray(family, "gatheringBonusRewardTableIds"))
+                .Select(tableId => tableId?.GetValue<string>() ?? string.Empty)
+                .Where(tableId => !string.IsNullOrWhiteSpace(tableId))
+                .SelectMany(tableId => GetRewardTableItemIds(tableId, rewardTables)));
 
         var missingBlueprints = blueprints
             .Where(blueprint =>
@@ -163,11 +171,15 @@ public sealed class CraftingRegionOneContentTests
     {
         var blueprints = ReadArray("crafting/blueprints.json");
         var dungeonDocument = ReadDocument("dungeons/dungeons.json");
+        var rewardTables = ReadRewardTablesById();
         var sourcedByFamily = ChildArray(dungeonDocument, "families")
             .ToDictionary(
                 family => family?["id"]?.GetValue<string>() ?? string.Empty,
                 family => ChildArray(family, "difficulties")
                     .SelectMany(GetDungeonRewardItemIds)
+                    .Concat(ChildArray(family, "gatheringBonusRewardTableIds")
+                        .Select(tableId => tableId?.GetValue<string>() ?? string.Empty)
+                        .SelectMany(tableId => GetRewardTableItemIds(tableId, rewardTables)))
                     .ToHashSet(StringComparer.OrdinalIgnoreCase),
                 StringComparer.OrdinalIgnoreCase);
 
@@ -190,6 +202,77 @@ public sealed class CraftingRegionOneContentTests
             .ToList();
 
         Assert.Empty(missing);
+    }
+
+    [Fact]
+    public void RegionOne_uses_four_shared_gathering_catalysts_and_two_blueprints_per_dungeon()
+    {
+        var expectedCatalysts = new[]
+        {
+            "arcane_focus",
+            "endurance_core",
+            "fury_heart",
+            "phoenix_ember"
+        };
+        var expectedBlueprintsByFamily = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["goblin_mines"] = ["blueprint_fury", "blueprint_phoenix"],
+            ["forgotten_catacombs"] = ["blueprint_arcane", "blueprint_endurance"]
+        };
+        var dungeonDocument = ReadDocument("dungeons/dungeons.json");
+        var rewardTables = ReadRewardTablesById();
+        var catalystTable = rewardTables["reward.gathering.region_01.catalysts"];
+        var catalystRoll = Assert.Single(ChildArray(catalystTable, "rolls"));
+
+        Assert.Equal(96d, catalystRoll?["noDropWeight"]?.GetValue<double>());
+        Assert.Equal(
+            expectedCatalysts,
+            ChildArray(catalystRoll, "entries")
+                .Select(entry => entry?["itemId"]?.GetValue<string>() ?? string.Empty)
+                .Order(StringComparer.OrdinalIgnoreCase));
+        Assert.All(ChildArray(catalystRoll, "entries"), entry =>
+        {
+            Assert.Equal(1d, entry?["weight"]?.GetValue<double>());
+            Assert.Contains("rare", ChildArray(entry, "tags")
+                .Select(tag => tag?.GetValue<string>() ?? string.Empty));
+        });
+
+        foreach (var family in ChildArray(dungeonDocument, "families")
+                     .Where(family => expectedBlueprintsByFamily.ContainsKey(
+                         family?["id"]?.GetValue<string>() ?? string.Empty)))
+        {
+            var familyId = family?["id"]?.GetValue<string>() ?? string.Empty;
+            var expectedBlueprints = expectedBlueprintsByFamily[familyId]
+                .Order(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+            Assert.Equal(
+                ["reward.gathering.region_01.catalysts"],
+                ChildArray(family, "gatheringBonusRewardTableIds")
+                    .Select(tableId => tableId?.GetValue<string>() ?? string.Empty));
+
+            foreach (var difficulty in ChildArray(family, "difficulties"))
+            {
+                var firstClearBlueprints = ChildArray(difficulty?["rewardTable"], "firstClearRewards")
+                    .Select(reward => reward?["itemId"]?.GetValue<string>() ?? string.Empty)
+                    .Where(itemId => itemId.StartsWith("blueprint_", StringComparison.OrdinalIgnoreCase))
+                    .Order(StringComparer.OrdinalIgnoreCase);
+                Assert.Equal(expectedBlueprints, firstClearBlueprints);
+
+                var difficultyId = difficulty?["id"]?.GetValue<string>() ?? string.Empty;
+                var completionTable = rewardTables[$"reward.dungeon.{difficultyId}.completion"];
+                var blueprintRoll = Assert.Single(
+                    ChildArray(completionTable, "rolls"),
+                    roll => roll?["id"]?.GetValue<string>() == "blueprint_drop");
+                Assert.Equal(90d, blueprintRoll?["noDropWeight"]?.GetValue<double>());
+                Assert.Equal(
+                    expectedBlueprints,
+                    ChildArray(blueprintRoll, "entries")
+                        .Select(entry => entry?["itemId"]?.GetValue<string>() ?? string.Empty)
+                        .Order(StringComparer.OrdinalIgnoreCase));
+                Assert.All(ChildArray(blueprintRoll, "entries"), entry =>
+                    Assert.Equal(5d, entry?["weight"]?.GetValue<double>()));
+            }
+        }
     }
 
     [Fact]
@@ -307,7 +390,8 @@ public sealed class CraftingRegionOneContentTests
             var rewardItemId = Assert.Single(
                 ChildArray(rewardTable, "rolls")
                     .SelectMany(roll => ChildArray(roll, "entries"))
-                    .Select(entry => entry?["itemId"]?.GetValue<string>() ?? string.Empty));
+                    .Select(entry => entry?["itemId"]?.GetValue<string>() ?? string.Empty)
+                    .Where(itemId => !string.IsNullOrWhiteSpace(itemId)));
             Assert.True(materialTierByItemId.TryGetValue(rewardItemId, out var materialTier));
             var procChance = node?["procChance"]?.GetValue<double>() ?? 0;
             var yieldBonusPercent = node?["yieldBonusPercent"]?.GetValue<double>() ?? 0d;
@@ -368,7 +452,7 @@ public sealed class CraftingRegionOneContentTests
             .Where(drop => specialResourceIds.Contains(
                 drop?["itemId"]?.GetValue<string>() ?? string.Empty))
             .ToList();
-        Assert.Equal(15, catalystDrops.Count);
+        Assert.Equal(21, catalystDrops.Count);
         Assert.All(catalystDrops, drop =>
         {
             Assert.Equal(2, drop?["minAmount"]?.GetValue<int>());
@@ -381,10 +465,10 @@ public sealed class CraftingRegionOneContentTests
     {
         var expectedFamilyByBlueprintId = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["blueprint_warden"] = "forgotten_catacombs",
-            ["blueprint_primal"] = "forgotten_catacombs",
-            ["blueprint_venom"] = "goblin_mines",
-            ["blueprint_hive"] = "goblin_mines"
+            ["blueprint_warden"] = "great_tree",
+            ["blueprint_primal"] = "great_tree",
+            ["blueprint_venom"] = "tangled_cave",
+            ["blueprint_hive"] = "tangled_cave"
         };
         var migratedBlueprints = ReadArray("crafting/blueprints.json")
             .Where(blueprint => expectedFamilyByBlueprintId.ContainsKey(
@@ -601,6 +685,36 @@ public sealed class CraftingRegionOneContentTests
         return ChildArray(document, "families")
             .SelectMany(family => ChildArray(family, "difficulties"))
             .ToList();
+    }
+
+    private static IReadOnlyDictionary<string, JsonNode?> ReadRewardTablesById() =>
+        ChildArray(ReadDocument("rewards/reward-tables.json"), "rewardTables")
+            .ToDictionary(
+                table => table?["id"]?.GetValue<string>() ?? string.Empty,
+                table => table,
+                StringComparer.OrdinalIgnoreCase);
+
+    private static IEnumerable<string> GetRewardTableItemIds(
+        string tableId,
+        IReadOnlyDictionary<string, JsonNode?> rewardTables)
+    {
+        if (!rewardTables.TryGetValue(tableId, out var table))
+        {
+            return [];
+        }
+
+        return ChildArray(table, "rolls")
+            .SelectMany(roll => ChildArray(roll, "entries"))
+            .SelectMany(entry =>
+            {
+                var itemId = entry?["itemId"]?.GetValue<string>();
+                var referencedTableId = entry?["rewardTableId"]?.GetValue<string>();
+                return !string.IsNullOrWhiteSpace(itemId)
+                    ? [itemId]
+                    : !string.IsNullOrWhiteSpace(referencedTableId)
+                        ? GetRewardTableItemIds(referencedTableId, rewardTables)
+                        : [];
+            });
     }
 
     private static IEnumerable<JsonNode?> ChildArray(JsonNode? node, string propertyName) =>

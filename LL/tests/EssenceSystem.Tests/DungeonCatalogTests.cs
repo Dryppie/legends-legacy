@@ -171,45 +171,55 @@ public sealed class DungeonCatalogTests
         }
     }
 
-    [Theory]
-    [InlineData("tangled_cave", "blueprint_execution", "executioners_mark")]
-    [InlineData("great_tree", "blueprint_spirit", "spirit_prism")]
-    public void Region_two_dungeons_reward_their_blueprint_once_and_its_catalyst_on_runs(
-        string familyId,
-        string blueprintItemId,
-        string catalystItemId)
+    [Fact]
+    public void Region_two_dungeons_reward_their_blueprints_once_and_their_catalysts_on_runs()
     {
         var allDungeons = MaterializeCurrentCatalog();
-        var family = allDungeons
-            .Where(dungeon => DungeonDefinitionIdentity.GetFamilyId(dungeon.Id) == familyId)
-            .OrderBy(dungeon => dungeon.Tier)
-            .ToList();
         var expectedCatalystChances = new[] { 0.22, 0.16, 0.12 };
-
-        Assert.Equal(3, family.Count);
-        for (var index = 0; index < family.Count; index++)
+        var expectedByFamily = new Dictionary<string, (string[] Blueprints, string[] Catalysts)>
         {
-            var dungeon = family[index];
-            var blueprint = Assert.Single(
-                dungeon.RewardTable.FirstClearRewards,
-                reward => reward.ItemId == blueprintItemId);
-            Assert.Equal(1, blueprint.MinAmount);
-            Assert.Equal(1, blueprint.MaxAmount);
-            Assert.Equal(1, blueprint.Chance);
+            ["tangled_cave"] = (
+                ["blueprint_execution", "blueprint_venom_touched_sword", "blueprint_hivefang_dagger"],
+                ["executioners_mark", "venom_gland", "royal_chitin_plate"]),
+            ["great_tree"] = (
+                ["blueprint_spirit", "blueprint_warden", "blueprint_primal", "blueprint_aegis"],
+                ["spirit_prism", "warden_sigil", "hive_ichor", "aegis_runestone"])
+        };
 
-            var catalyst = Assert.Single(dungeon.RewardTable.CompletionRewards);
-            Assert.Equal(catalystItemId, catalyst.ItemId);
-            Assert.Equal(2, catalyst.MinAmount);
-            Assert.Equal(2, catalyst.MaxAmount);
-            Assert.Equal(expectedCatalystChances[index], catalyst.Chance, 3);
+        foreach (var (familyId, expected) in expectedByFamily)
+        {
+            var family = allDungeons
+                .Where(dungeon => DungeonDefinitionIdentity.GetFamilyId(dungeon.Id) == familyId)
+                .OrderBy(dungeon => dungeon.Tier)
+                .ToList();
+
+            Assert.Equal(3, family.Count);
+            for (var index = 0; index < family.Count; index++)
+            {
+                var dungeon = family[index];
+                foreach (var blueprintItemId in expected.Blueprints)
+                {
+                    var blueprint = Assert.Single(
+                        dungeon.RewardTable.FirstClearRewards,
+                        reward => reward.ItemId == blueprintItemId);
+                    Assert.Equal(1, blueprint.MinAmount);
+                    Assert.Equal(1, blueprint.MaxAmount);
+                    Assert.Equal(1, blueprint.Chance);
+                }
+
+                Assert.Equal(
+                    expected.Catalysts.Order(StringComparer.OrdinalIgnoreCase),
+                    dungeon.RewardTable.CompletionRewards
+                        .Select(reward => reward.ItemId)
+                        .Order(StringComparer.OrdinalIgnoreCase));
+                Assert.All(dungeon.RewardTable.CompletionRewards, catalyst =>
+                {
+                    Assert.Equal(2, catalyst.MinAmount);
+                    Assert.Equal(2, catalyst.MaxAmount);
+                    Assert.Equal(expectedCatalystChances[index], catalyst.Chance, 3);
+                });
+            }
         }
-
-        var rewardsOutsideFamily = allDungeons
-            .Except(family)
-            .SelectMany(dungeon => dungeon.RewardTable.FirstClearRewards
-                .Concat(dungeon.RewardTable.CompletionRewards));
-        Assert.DoesNotContain(rewardsOutsideFamily, reward =>
-            reward.ItemId == blueprintItemId || reward.ItemId == catalystItemId);
     }
 
     [Fact]

@@ -9,14 +9,85 @@
 
   <div class="grid gap-2">
     <div class="ll-input-group">
-      <input
-        type="text"
-        [ngModel]="searchValue()"
-        (ngModelChange)="searchValue.set($event)"
-        (keydown)="onEnter($event)"
-        class="ll-input min-w-0 flex-1"
-        placeholder="Search character by name..."
-      />
+      <div class="relative min-w-0 flex-1">
+        <input
+          #searchInput
+          #searchOrigin="cdkOverlayOrigin"
+          cdkOverlayOrigin
+          id="character-overview-search"
+          type="text"
+          class="ll-input w-full"
+          placeholder="Search character by name..."
+          autocomplete="off"
+          maxlength="80"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-controls="character-overview-search-suggestions"
+          [attr.aria-expanded]="showCharacterSuggestionPanel()"
+          [attr.aria-activedescendant]="
+            activeCharacterSuggestion() >= 0
+              ? 'character-overview-search-suggestion-' +
+                activeCharacterSuggestion()
+              : null
+          "
+          [ngModel]="searchValue()"
+          (ngModelChange)="onSearchValueChange($event)"
+          (focus)="openCharacterSuggestions()"
+          (blur)="closeCharacterSuggestions()"
+          (keydown)="handleSearchKeydown($event)"
+        />
+
+        <ng-template
+          cdkConnectedOverlay
+          [cdkConnectedOverlayOrigin]="searchOrigin"
+          [cdkConnectedOverlayOpen]="showCharacterSuggestionPanel()"
+          [cdkConnectedOverlayPositions]="characterSuggestionPositions"
+          [cdkConnectedOverlayPush]="true"
+          [cdkConnectedOverlayViewportMargin]="8"
+        >
+          <div
+            id="character-overview-search-suggestions"
+            class="max-h-[min(12rem,calc(100dvh-1rem))] overflow-y-auto rounded border border-light_gray bg-texture p-1 shadow-xl shadow-black/60"
+            [style.width.px]="searchInput.offsetWidth"
+            role="listbox"
+            (click)="$event.stopPropagation()"
+          >
+            <div
+              *ngIf="isSearchingCharacters()"
+              class="px-3 py-2 text-xs text-zinc-400"
+            >
+              Finding players...
+            </div>
+
+            <button
+              *ngFor="let suggestion of characterSuggestions(); index as i"
+              type="button"
+              class="ll-dropdown-option block w-full rounded px-3 py-2 text-left text-sm transition-colors"
+              [class.ll-dropdown-option-hovered]="
+                activeCharacterSuggestion() === i
+              "
+              [id]="'character-overview-search-suggestion-' + i"
+              [attr.aria-selected]="activeCharacterSuggestion() === i"
+              role="option"
+              (mouseenter)="activeCharacterSuggestion.set(i)"
+              (mousedown)="selectCharacterSuggestion($event, suggestion)"
+            >
+              {{ suggestion }}
+            </button>
+
+            <div
+              *ngIf="
+                !isSearchingCharacters() &&
+                characterSuggestionSearchCompleted() &&
+                characterSuggestions().length === 0
+              "
+              class="px-3 py-2 text-xs text-zinc-400"
+            >
+              No matching players
+            </div>
+          </div>
+        </ng-template>
+      </div>
       <app-regular-button
         (pressed)="onSearch()"
         [disabled]="isLoading()"
@@ -266,13 +337,13 @@
 
           <div
             *ngIf="
-              characterOverview.activeEssenceLoadout?.slots?.length;
+              characterOverview.essenceLoadout?.slots?.length;
               else noLoadout
             "
             class="mt-4 grid gap-2"
           >
             <app-essence-preview
-              *ngFor="let slot of characterOverview.activeEssenceLoadout?.slots"
+              *ngFor="let slot of characterOverview.essenceLoadout?.slots"
               [definition]="slot.definition"
               originClass="relative block"
             >
@@ -309,7 +380,7 @@
           </div>
 
           <ng-template #noLoadout>
-            <p class="ll-empty-state mt-3">No active Essence loadout.</p>
+            <p class="ll-empty-state mt-3">No Essence loadout.</p>
           </ng-template>
         </section>
       </aside>

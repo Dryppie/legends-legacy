@@ -200,6 +200,48 @@ public sealed class RewardRollerTests
         Assert.Equal(["ore", "gem"], result.Items.Select(x => x.ItemId));
     }
 
+    [Fact]
+    public void Excluded_roll_ids_are_skipped_without_affecting_other_rolls()
+    {
+        var roller = CreateRoller(
+            new SequenceRandomSource(),
+            new RewardTableDefinition
+            {
+                Id = "table",
+                Rolls =
+                [
+                    new()
+                    {
+                        Id = "blueprint_drop",
+                        Type = RewardRollType.All,
+                        Entries =
+                        [
+                            new() { Id = "blueprint", Type = RewardEntryType.Item, ItemId = "blueprint" }
+                        ]
+                    },
+                    new()
+                    {
+                        Id = "tool_drop",
+                        Type = RewardRollType.All,
+                        Entries =
+                        [
+                            new() { Id = "tool", Type = RewardEntryType.Item, ItemId = "tool" }
+                        ]
+                    }
+                ]
+            });
+
+        var result = roller.Roll(
+            "table",
+            new RewardRollContext(
+                "test",
+                ExcludedRollIds: new HashSet<string>(["blueprint_drop"], StringComparer.OrdinalIgnoreCase)));
+
+        Assert.Equal(["tool"], result.Items.Select(item => item.ItemId));
+        Assert.Contains(result.Trace, trace =>
+            trace.RollId == "blueprint_drop" && trace.Outcome == "roll-excluded");
+    }
+
     private static RewardRoller CreateRoller(IRandomSource random, params RewardTableDefinition[] definitions) =>
         new(new StaticRewardTableProvider(definitions), random);
 

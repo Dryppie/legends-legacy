@@ -6,22 +6,57 @@ namespace Domain.Models.Dungeons.Definitions;
 public static class DungeonRewardCatalog
 {
     public static IReadOnlyList<string> GetMonsterCoreRewardItemIds(DungeonGrade grade) =>
+        GetMonsterCoreRewardGrants(grade)
+            .Select(grant => grant.ItemId)
+            .ToArray();
+
+    public static IReadOnlyList<DungeonRewardGrant> GetMonsterCoreRewardGrants(DungeonGrade grade) =>
         grade switch
         {
             DungeonGrade.GradeII =>
             [
-                EssenceProgressionConstants.GreaterMonsterCoreItemId,
-                EssenceProgressionConstants.LesserMonsterCoreItemId
+                new DungeonRewardGrant
+                {
+                    ItemId = EssenceProgressionConstants.GreaterMonsterCoreItemId,
+                    MinAmount = 2,
+                    MaxAmount = 5
+                },
+                new DungeonRewardGrant
+                {
+                    ItemId = EssenceProgressionConstants.LesserMonsterCoreItemId,
+                    MinAmount = 2,
+                    MaxAmount = 4
+                }
             ],
             DungeonGrade.GradeIII =>
             [
-                EssenceProgressionConstants.PrimalMonsterCoreItemId,
-                EssenceProgressionConstants.GreaterMonsterCoreItemId,
-                EssenceProgressionConstants.LesserMonsterCoreItemId
+                new DungeonRewardGrant
+                {
+                    ItemId = EssenceProgressionConstants.PrimalMonsterCoreItemId,
+                    MinAmount = 1,
+                    MaxAmount = 4
+                },
+                new DungeonRewardGrant
+                {
+                    ItemId = EssenceProgressionConstants.GreaterMonsterCoreItemId,
+                    MinAmount = 2,
+                    MaxAmount = 5
+                },
+                new DungeonRewardGrant
+                {
+                    ItemId = EssenceProgressionConstants.LesserMonsterCoreItemId,
+                    MinAmount = 4,
+                    MaxAmount = 8
+                }
             ],
             _ =>
             [
-                EssenceProgressionConstants.LesserMonsterCoreItemId
+                new DungeonRewardGrant
+                {
+                    ItemId = EssenceProgressionConstants.LesserMonsterCoreItemId,
+                    MinAmount = 3,
+                    MaxAmount = 6
+                }
             ]
         };
 

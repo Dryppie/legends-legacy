@@ -28,6 +28,7 @@ import {
 } from '../../../../shared/models/item';
 import {
   CreatureArchiveDto,
+  EssenceCombatActivity,
   EssenceCodexDto,
   EssenceLoadoutDto,
   EssenceLoadoutsDto,
@@ -412,7 +413,7 @@ export class EssenceStateService {
 
   /**
    * Refetch the Soul Archive alone. Attunement (PlayerEssenceDto.attunedSlot) is what the
-   * Archive list renders, and it changes whenever the active loadout's slots change.
+   * Archive list renders, and it changes whenever the default loadout's slots change.
    */
   refreshArchive(): void {
     const requestVersion = this.resetVersion;
@@ -707,22 +708,19 @@ export class EssenceStateService {
     );
   }
 
-  saveDraftLoadout(activateAfterSave = false): void {
+  saveDraftLoadout(): void {
     if (!this.canSaveDraft()) return;
 
-    this.persistDraftLoadout(activateAfterSave, false);
+    this.persistDraftLoadout(false);
   }
 
-  saveDraftSlots(activateAfterSave = false): void {
+  saveDraftSlots(): void {
     if (!this.canPersistDraftLoadout()) return;
 
-    this.persistDraftLoadout(activateAfterSave, true);
+    this.persistDraftLoadout(true);
   }
 
-  private persistDraftLoadout(
-    activateAfterSave: boolean,
-    restoreSavedDraftOnError: boolean,
-  ): void {
+  private persistDraftLoadout(restoreSavedDraftOnError: boolean): void {
     const selectedLoadout = this.selectedLoadout();
     const pendingDraftName = this._draftLoadoutName();
     const preservePendingName =
@@ -756,27 +754,8 @@ export class EssenceStateService {
           this._draftLoadoutName.set(pendingDraftName);
         }
 
-        if (activateAfterSave && !loadout.isActive) {
-          this.essencesService.activateLoadout(loadout.id).subscribe({
-            next: (activation) => {
-              this.applyEssenceState(activation, loadout.id);
-              this._savingLoadout.set(false);
-              this.characterState.markOverviewDirty();
-            },
-            error: (error) => {
-              this._savingLoadout.set(false);
-              this._error.set(
-                error?.message ?? 'Failed to activate Essence loadout',
-              );
-            },
-          });
-          return;
-        }
-
         this._savingLoadout.set(false);
-        if (loadout.isActive) {
-          this.characterState.markOverviewDirty();
-        }
+        this.characterState.markOverviewDirty();
       },
       error: (error) => {
         this._savingLoadout.set(false);
@@ -810,22 +789,39 @@ export class EssenceStateService {
     );
   }
 
-  activateSelectedLoadout(): void {
+  setSelectedLoadoutAutoUseActivities(
+    activities: readonly EssenceCombatActivity[],
+  ): void {
     const id = this._selectedLoadoutId();
-    if (!id) return;
-    this.essencesService.activateLoadout(id).subscribe((result) => {
-      if (this.applyEssenceState(result, id)) {
-        this.characterState.markOverviewDirty();
-      }
+    if (!id || this._savingLoadout()) return;
+
+    const preserveDraft = this.hasDraftChanges();
+    const draftName = this._draftLoadoutName();
+    const draftSlots = [...this._draftSlots()];
+    this._savingLoadout.set(true);
+    this._error.set(null);
+    this.essencesService.setLoadoutAutoUseActivities(id, activities).subscribe({
+      next: (result) => {
+        if (this.applyEssenceState(result, id) && preserveDraft) {
+          this._draftLoadoutName.set(draftName);
+          this._draftSlots.set(draftSlots);
+        }
+        this._savingLoadout.set(false);
+      },
+      error: (error) => {
+        this._savingLoadout.set(false);
+        this._error.set(
+          error?.message ?? 'Failed to update automatic loadout use',
+        );
+      },
     });
   }
 
   deleteSelectedLoadout(): void {
     const id = this._selectedLoadoutId();
     if (!id) return;
-    const deletesActiveLoadout = this.selectedLoadout()?.isActive === true;
     this.essencesService.deleteLoadout(id).subscribe((result) => {
-      if (this.applyEssenceState(result) && deletesActiveLoadout) {
+      if (this.applyEssenceState(result)) {
         this.characterState.markOverviewDirty();
       }
     });
@@ -1071,7 +1067,6 @@ export class EssenceStateService {
       loadouts.loadouts.find(
         (loadout) => loadout.id === this._selectedLoadoutId(),
       ) ??
-      loadouts.loadouts.find((loadout) => loadout.isActive) ??
       loadouts.loadouts[0] ??
       null;
 

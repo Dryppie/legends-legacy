@@ -205,9 +205,18 @@ export interface EssenceLoadoutsDto {
 export interface EssenceLoadoutDto {
   id: string;
   name: string;
-  isActive: boolean;
+  autoUseActivities: EssenceCombatActivity[];
   slots: EssenceLoadoutSlotDto[];
 }
+
+export type EssenceCombatActivity =
+  | 'IdleCombat'
+  | 'Dungeon'
+  | 'Raid'
+  | 'WorldTower'
+  | 'Arena'
+  | 'Tournament'
+  | 'RegionBoss';
 
 export interface EssenceLoadoutSlotDto {
   slotIndex: number;

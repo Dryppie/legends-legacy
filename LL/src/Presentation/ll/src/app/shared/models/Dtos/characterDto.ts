@@ -30,7 +30,7 @@ export interface CharacterOverviewDto {
   baseAttributes: AttributeDto[];
   baseCombatAttributes: AttributeDto[];
   equipmentRatings?: AttributeDto[];
-  activeEssenceLoadout?: EssenceLoadoutDto | null;
+  essenceLoadout?: EssenceLoadoutDto | null;
   equippedTitle?: EquippedTitleDto | null;
   guild?: CharacterGuildDto | null;
   isOnline: boolean;

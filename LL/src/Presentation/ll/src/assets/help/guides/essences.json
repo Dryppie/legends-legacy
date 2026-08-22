@@ -8,11 +8,11 @@
     },
     {
       "heading": "Progression",
-      "body": "Essences equipped in your active Loadout gain experience whenever you win battles. Reach max level and gather the required resources to Ascend an Essence, making it stronger."
+      "body": "Essences equipped in the loadout used for a battle gain experience when you win. Reach max level and gather the required resources to Ascend an Essence, making it stronger."
     },
     {
       "heading": "Loadouts",
-      "body": "Only equipped Essences in your active Loadout are used in combat. Equipping and removing Essences saves automatically; use Save name after renaming a loadout."
+      "body": "Combat uses the loadout assigned to its activity, or the first loadout when none is assigned. Equipping and removing Essences saves automatically; use Save name after renaming a loadout."
     },
     {
       "heading": "Creature Archive",

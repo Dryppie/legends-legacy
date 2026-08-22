@@ -33,6 +33,7 @@ import {
   CreatureArchiveEntryDto,
   EssenceCodexEntryDto,
   EssenceCodexMemberDto,
+  EssenceCombatActivity,
   EssenceDefinitionDto,
   EssenceLoadoutDto,
   PlayerEssenceDto,
@@ -71,7 +72,7 @@ import {
 } from '../../../../shared/pipes/local-date/local-date.pipe';
 
 type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'ready';
-type ArchiveSort = 'name' | 'level' | 'tier';
+type ArchiveSort = 'name' | 'level' | 'tier' | 'threat';
 type CreatureSourceFilter = 'all' | 'Area' | 'Dungeon';
 interface AscendRequirementView {
   label: string;
@@ -135,7 +136,8 @@ export class EssencesComponent implements OnInit {
   readonly creatureLocationFilter = signal('all');
   readonly creatureEssenceFilter = signal<CreatureEssenceFilter>('all');
   readonly archiveFilter = signal<ArchiveFilter>('all');
-  readonly archiveSort = signal<ArchiveSort>('name');
+  readonly archiveSort = signal<ArchiveSort>('threat');
+  readonly archiveTag = signal<string | null>(null);
   readonly viewTabs = computed<readonly NavigationTab[]>(() => [
     { key: 'archive', label: 'Archive' },
     { key: 'absorb', label: 'Absorb' },
@@ -156,9 +158,23 @@ export class EssencesComponent implements OnInit {
   ];
 
   readonly archiveSorts: { label: string; value: ArchiveSort }[] = [
+    { label: 'Threat', value: 'threat' },
     { label: 'Name', value: 'name' },
     { label: 'Level', value: 'level' },
     { label: 'Tier', value: 'tier' },
+  ];
+
+  readonly combatContentOptions: readonly {
+    key: EssenceCombatActivity;
+    label: string;
+  }[] = [
+    { key: 'IdleCombat', label: 'Idle combat' },
+    { key: 'Dungeon', label: 'Dungeons' },
+    { key: 'Raid', label: 'Raids' },
+    { key: 'WorldTower', label: 'World Tower' },
+    { key: 'Arena', label: 'Arena' },
+    { key: 'Tournament', label: '3v3 Tournament' },
+    { key: 'RegionBoss', label: 'Region Boss' },
   ];
 
   readonly creatureSourceOptions: readonly DropdownOption<CreatureSourceFilter>[] =
@@ -206,6 +222,7 @@ export class EssencesComponent implements OnInit {
     const search = this.archiveSearch().trim().toLowerCase();
     const filter = this.archiveFilter();
     const sort = this.archiveSort();
+    const tag = this.archiveTag();
     const definitions = this.essenceDefinitionsById();
     const essences = [...(this.essenceState.archive()?.essences ?? [])];
 
@@ -221,6 +238,7 @@ export class EssencesComponent implements OnInit {
         if (filter === 'ready' && !this.canAscendEssence(essence)) {
           return false;
         }
+        if (tag && !essence.tags.includes(tag)) return false;
 
         if (!search) return true;
 
@@ -231,6 +249,12 @@ export class EssencesComponent implements OnInit {
       })
       .sort((a, b) => {
         switch (sort) {
+          case 'threat':
+            return (
+              (b.activeAbility.threatValue ?? 0) -
+                (a.activeAbility.threatValue ?? 0) ||
+              a.name.localeCompare(b.name)
+            );
           case 'level':
             return b.level - a.level || a.name.localeCompare(b.name);
           case 'tier':
@@ -244,6 +268,16 @@ export class EssencesComponent implements OnInit {
         }
       });
   });
+
+  readonly archiveTags = computed(() =>
+    [
+      ...new Set(
+        (this.essenceState.archive()?.essences ?? []).flatMap(
+          (essence) => essence.tags,
+        ),
+      ),
+    ].sort((left, right) => left.localeCompare(right)),
+  );
 
   readonly filteredCreatures = computed(() => {
     const search = this.creatureSearch().trim().toLowerCase();
@@ -535,6 +569,7 @@ export class EssencesComponent implements OnInit {
     if (archiveIndex < 0) {
       this.archiveSearch.set('');
       this.archiveFilter.set('all');
+      this.archiveTag.set(null);
       archiveIndex = this.filteredArchiveEssences().findIndex(
         (entry) => entry.id === essence.id,
       );
@@ -656,6 +691,69 @@ export class EssencesComponent implements OnInit {
     this.archiveFilter.set(filter);
   }
 
+  public archiveFilterCount(filter: ArchiveFilter): number {
+    const essences = this.essenceState.archive()?.essences ?? [];
+    switch (filter) {
+      case 'favorites':
+        return essences.filter((essence) => essence.isFavorite).length;
+      case 'attuned':
+        return essences.filter(
+          (essence) =>
+            essence.attunedSlot !== null && essence.attunedSlot !== undefined,
+        ).length;
+      case 'ready':
+        return essences.filter((essence) => this.canAscendEssence(essence))
+          .length;
+      default:
+        return essences.length;
+    }
+  }
+
+  public toggleArchiveTag(tag: string): void {
+    this.archiveTag.update((selected) => (selected === tag ? null : tag));
+  }
+
+  public essenceStatus(essence: PlayerEssenceDto): string {
+    if (essence.attunedSlot !== null && essence.attunedSlot !== undefined) {
+      return `Slot ${essence.attunedSlot + 1}`;
+    }
+    return this.canAscendEssence(essence) ? 'Ready' : 'Inactive';
+  }
+
+  public displayEssenceName(name: string): string {
+    const displayName = name.replace(/\s+Essence$/i, '').trim();
+    return displayName || name;
+  }
+
+  public toggleAutoUse(content: EssenceCombatActivity): void {
+    const loadout = this.essenceState.selectedLoadout();
+    if (!loadout) return;
+
+    const activities = loadout.autoUseActivities.includes(content)
+      ? loadout.autoUseActivities.filter((activity) => activity !== content)
+      : [...loadout.autoUseActivities, content];
+    this.essenceState.setSelectedLoadoutAutoUseActivities(activities);
+  }
+
+  public isAutoUseSelected(content: EssenceCombatActivity): boolean {
+    return (
+      this.essenceState.selectedLoadout()?.autoUseActivities.includes(content) ??
+      false
+    );
+  }
+
+  public autoUseOwnerName(content: EssenceCombatActivity): string | null {
+    return (
+      this.essenceState
+        .loadouts()
+        ?.loadouts.find(
+          (loadout) =>
+            loadout.id !== this.essenceState.selectedLoadoutId() &&
+            loadout.autoUseActivities.includes(content),
+        )?.name ?? null
+    );
+  }
+
   public setArchiveSortValue(sort: string): void {
     this.archiveSort.set(sort as ArchiveSort);
   }
@@ -702,7 +800,7 @@ export class EssencesComponent implements OnInit {
     if (slotIndex === null) return;
 
     this.essenceState.setDraftSlot(slotIndex, essence.id);
-    this.essenceState.saveDraftSlots(true);
+    this.essenceState.saveDraftSlots();
 
     if (window.matchMedia('(max-width: 639px)').matches) {
       this.mobileLoadoutOpen.set(true);

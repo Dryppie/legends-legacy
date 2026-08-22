@@ -558,7 +558,7 @@ public sealed class QuestService(
             "EssenceEquipped" when
                 trigger.Type == "EssenceLoadoutChanged" &&
                 !string.IsNullOrWhiteSpace(expectedEssenceDefinitionId) =>
-                await repository.HasEssenceInActiveLoadoutAsync(
+                await repository.HasEssenceInAnyLoadoutAsync(
                     characterId,
                     expectedEssenceDefinitionId,
                     cancellationToken) ? 1 : 0,

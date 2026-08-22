@@ -29,7 +29,7 @@ public class CharacterOverviewDto : IMapFrom<Character>
     public List<EntityAttribute> BaseAttributes { get; set; } = [];
     public List<EntityAttribute> BaseCombatAttributes { get; set; } = [];
     public List<EntityAttribute> EquipmentRatings { get; set; } = [];
-    public EssenceLoadoutDto? ActiveEssenceLoadout { get; set; }
+    public EssenceLoadoutDto? EssenceLoadout { get; set; }
     public EquippedTitleDto? EquippedTitle { get; set; }
     public CharacterGuildDto? Guild { get; set; }
     public bool IsOnline { get; set; }
@@ -98,7 +98,7 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
                     Value = (float)entry.Value
                 })
                 .ToList(),
-            ActiveEssenceLoadout = MapActiveLoadout(source, context),
+            EssenceLoadout = MapDefaultLoadout(source, context),
             EquippedTitle = MapEquippedTitle(source),
             LastSeenAt = source.CharacterAction?.UpdatedAt,
             IsOnline = source.CharacterAction?.UpdatedAt >
@@ -162,15 +162,17 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
         };
     }
 
-    private EssenceLoadoutDto? MapActiveLoadout(Character source, ResolutionContext context)
+    private EssenceLoadoutDto? MapDefaultLoadout(Character source, ResolutionContext context)
     {
-        var loadout = source.EssenceLoadouts.FirstOrDefault(x => x.IsActive);
+        var loadout = EssenceLoadoutSelection.Select(source.EssenceLoadouts, EssenceCombatActivity.None);
         if (loadout is null) return null;
 
         return new EssenceLoadoutDto(
             loadout.Id,
             loadout.Name,
-            loadout.IsActive,
+            Enum.GetValues<EssenceCombatActivity>()
+                .Where(activity => EssenceLoadoutSelection.IsValidSingleActivity(activity) && loadout.AutoUseActivities.HasFlag(activity))
+                .ToList(),
             loadout.Slots
                 .OrderBy(slot => slot.SlotIndex)
                 .Select(slot => MapSlot(slot, context))

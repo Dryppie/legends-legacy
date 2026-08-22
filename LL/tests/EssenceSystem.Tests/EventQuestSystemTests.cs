@@ -34,7 +34,7 @@ public sealed class EventQuestSystemTests
             apiRoot,
             new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
-        Assert.Equal(2, provider.GetAll().Count);
+        Assert.Equal(3, provider.GetAll().Count);
         var definition = provider.Get("event.lumo_defense.example");
         Assert.Equal("event.lumo_defense.example", definition.Id);
         Assert.True(definition.Enabled);
@@ -74,6 +74,61 @@ public sealed class EventQuestSystemTests
         Assert.Equal(
             "item.catalyst_selection_crate",
             Assert.Single(tempering.PersonalMilestones[2].Rewards).ItemBaseId);
+
+        var gathering = provider.Get("event.a_realm_replenished.2026_08");
+        Assert.Equal(new DateTimeOffset(2026, 8, 23, 0, 0, 0, TimeSpan.Zero), gathering.StartsAtUtc);
+        Assert.Equal(new DateTimeOffset(2026, 8, 30, 0, 0, 0, TimeSpan.Zero), gathering.EndsAtUtc);
+        Assert.Equal("ResourceGathered", Assert.Single(gathering.Objectives).Type);
+        Assert.Equal(50_000, gathering.Objectives[0].RequiredAmount);
+        Assert.Equal(("SigilFragments", 50),
+            (Assert.Single(gathering.Rewards).Type, Assert.Single(gathering.Rewards).Quantity));
+        Assert.Equal([500L, 1000L, 2000L], gathering.PersonalMilestones.Select(x => x.RequiredContribution));
+        Assert.Equal(
+            [("soul_dust", 50), ("item.monster_core.lesser", 10)],
+            gathering.PersonalMilestones[0].Rewards.Select(x => (x.ItemBaseId, x.Quantity)));
+        Assert.Equal(
+            [("item.blueprint_selection_box", 1), ("item.monster_core.greater", 15)],
+            gathering.PersonalMilestones[1].Rewards.Select(x => (x.ItemBaseId, x.Quantity)));
+        Assert.Equal(
+            [("item.catalyst_selection_crate", 1), ("item.monster_core.primal", 20)],
+            gathering.PersonalMilestones[2].Rewards.Select(x => (x.ItemBaseId, x.Quantity)));
+    }
+
+    [Fact]
+    public async Task Gathered_resources_advance_event_by_item_quantity_instead_of_action_count()
+    {
+        await using var db = CreateDb();
+        var definition = CreateActiveDefinition(requiredAmount: 100_000);
+        definition.Objectives =
+        [
+            new QuestObjectiveDefinition
+            {
+                Key = "resources-gathered",
+                Description = "Gather resources.",
+                Type = "ResourceGathered",
+                RequiredAmount = 100_000
+            }
+        ];
+        var service = CreateService(db, definition, new RecordingPublisher());
+        var characterId = Guid.NewGuid();
+        CompleteTutorial(db, characterId);
+        await db.SaveChangesAsync();
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.CombatCompleted(
+                "region_01_area_01",
+                true,
+                actionCount: 20,
+                equippedGatheringType: "Mining",
+                gatheredResourceCount: 73),
+            Guid.NewGuid(),
+            "IdleCombatEncounterCompleted",
+            CancellationToken.None);
+
+        var state = Assert.Single((await service.GetJournalAsync(characterId, CancellationToken.None)).Events);
+        Assert.Equal(73, Assert.Single(state.Objectives).CurrentAmount);
+        Assert.Equal(73, state.MyContribution);
     }
 
     [Fact]

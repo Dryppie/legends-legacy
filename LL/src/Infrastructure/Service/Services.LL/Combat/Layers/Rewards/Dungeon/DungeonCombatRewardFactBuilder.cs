@@ -161,7 +161,7 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
         string dungeonDefinitionId,
         DungeonGatheringNodeDefinition node)
     {
-        if (node.Loot.Count == 0)
+        if (node.Loot.Count == 0 && node.BonusRewardTableIds.Count == 0)
         {
             return null;
         }
@@ -184,20 +184,41 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
             })
             .ToList();
 
+        var rolls = new List<RewardRollDefinition>();
+        if (entries.Count > 0)
+        {
+            rolls.Add(new RewardRollDefinition
+            {
+                Id = "gathering_weighted_drop",
+                Type = RewardRollType.WeightedWithNoDrop,
+                NoDropWeight = Math.Max(0, 100 - totalWeight),
+                Entries = entries
+            });
+        }
+
+        rolls.AddRange(node.BonusRewardTableIds.Select((rewardTableId, index) =>
+            new RewardRollDefinition
+            {
+                Id = $"gathering_bonus_reference_{index + 1}",
+                Type = RewardRollType.Reference,
+                Entries =
+                [
+                    new RewardEntryDefinition
+                    {
+                        Id = $"bonus_reference_{index + 1}",
+                        Type = RewardEntryType.RewardTableReference,
+                        RewardTableId = rewardTableId,
+                        Weight = 1,
+                        Quantity = new RewardQuantityRange { Min = 1, Max = 1 }
+                    }
+                ]
+            }));
+
         return new RewardTableDefinition
         {
             Id = $"reward.dungeon.{dungeonDefinitionId}.gathering.{node.Id}",
             DisplayName = node.Name,
-            Rolls =
-            [
-                new RewardRollDefinition
-                {
-                    Id = "gathering_weighted_drop",
-                    Type = RewardRollType.WeightedWithNoDrop,
-                    NoDropWeight = Math.Max(0, 100 - totalWeight),
-                    Entries = entries
-                }
-            ]
+            Rolls = rolls
         };
     }
 

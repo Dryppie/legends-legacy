@@ -45,7 +45,9 @@ public sealed class DungeonDefinitionMaterializer(DungeonCatalogValidator catalo
                 CompletionRewardTableIds = [$"reward.dungeon.{difficulty.Id}.completion"],
                 TierRewardTableIds = [$"reward.dungeon.tier.{difficulty.Difficulty}"],
                 MonsterLootModifiers = family.MonsterLootModifiers.ToDictionary(x => x.Key, x => x.Value),
-                GatheringNodes = difficulty.GatheringNodes.Select(Clone).ToList(),
+                GatheringNodes = difficulty.GatheringNodes
+                    .Select(node => Clone(node, family.GatheringBonusRewardTableIds))
+                    .ToList(),
                 RestSiteCount = family.RestSiteCount,
                 MinRooms = difficulty.MinRooms,
                 MaxRooms = difficulty.MaxRooms,
@@ -105,7 +107,9 @@ public sealed class DungeonDefinitionMaterializer(DungeonCatalogValidator catalo
         Chance = reward.Chance
     };
 
-    private static DungeonGatheringNodeDefinition Clone(DungeonGatheringNodeDefinition node) => new()
+    private static DungeonGatheringNodeDefinition Clone(
+        DungeonGatheringNodeDefinition node,
+        IReadOnlyCollection<string> familyBonusRewardTableIds) => new()
     {
         Id = node.Id,
         Name = node.Name,
@@ -113,6 +117,11 @@ public sealed class DungeonDefinitionMaterializer(DungeonCatalogValidator catalo
         LevelRequirement = node.LevelRequirement,
         ProcChance = node.ProcChance,
         RewardTableId = node.RewardTableId,
+        BonusRewardTableIds = node.BonusRewardTableIds
+            .Concat(familyBonusRewardTableIds)
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList(),
         Loot = node.Loot.Select(Clone).ToList()
     };
 

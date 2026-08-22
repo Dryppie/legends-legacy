@@ -76,29 +76,21 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
     public async Task<SoulArchive> GetSoulArchiveAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var activeSlots = await GetActiveSlotsAsync(characterId, cancellationToken);
+        var defaultSlots = await GetDefaultSlotsAsync(characterId, cancellationToken);
         var dust = await GetInventoryQuantityAsync(characterId, EssenceDustItemId, cancellationToken);
         var entries = await _essences.GetPlayerEssencesAsync(characterId, cancellationToken);
-        return new(entries.Select(x => new PlayerEssenceArchiveEntry(x, activeSlots.FirstOrDefault(slot => slot.PlayerEssenceId == x.Id)?.SlotIndex)).ToList(), dust);
+        return new(entries.Select(x => new PlayerEssenceArchiveEntry(x, defaultSlots.FirstOrDefault(slot => slot.PlayerEssenceId == x.Id)?.SlotIndex)).ToList(), dust);
     }
 
     public async Task<EssenceLoadouts> GetLoadoutsAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _essences.GetCharacterWithEssenceLoadoutsAsync(characterId, cancellationToken);
 
-        var loadouts = character?.EssenceLoadouts
-            .OrderByDescending(x => x.IsActive)
-            .ThenBy(x => x.Name)
-            .ToList() ?? [];
+        var loadouts = character is null
+            ? []
+            : EssenceLoadoutSelection.InArchiveOrder(character.EssenceLoadouts).ToList();
 
         return new(loadouts, _loadoutLimits.GetLoadoutLimit(characterId), _slotUnlocks.GetUnlockedSlotCount(character?.Level ?? 0));
-    }
-
-    public async Task<EssenceLoadout?> GetActiveLoadoutAsync(Guid characterId, CancellationToken cancellationToken)
-    {
-        var loadout = await _essences.GetActiveLoadoutAsync(characterId, cancellationToken);
-
-        return loadout;
     }
 
     public async Task<EssenceOperationResult> AbsorbUnboundEssenceAsync(Guid characterId, Guid inventoryItemId, CancellationToken cancellationToken)
@@ -301,19 +293,16 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         loadout.Name = request.Name.Trim();
         loadout.UpdatedAt = DateTimeOffset.UtcNow;
         await ReplaceLoadoutSlotsAsync(loadout, normalizedSlots, cancellationToken);
-        if (loadout.IsActive)
-        {
-            await _outbox.EnqueueAsync(
-                GameEventTypes.EssenceLoadoutChanged,
-                new EssenceLoadoutChangedPayload(
-                    characterId,
-                    essenceIds,
-                    normalizedSlots.Count,
-                    await HasCompatibleEssenceTrioAsync(characterId, essenceIds, cancellationToken)),
+        await _outbox.EnqueueAsync(
+            GameEventTypes.EssenceLoadoutChanged,
+            new EssenceLoadoutChangedPayload(
                 characterId,
-                null,
-                cancellationToken);
-        }
+                essenceIds,
+                normalizedSlots.Count,
+                await HasCompatibleEssenceTrioAsync(characterId, essenceIds, cancellationToken)),
+            characterId,
+            null,
+            cancellationToken);
 
         return loadout;
     }
@@ -335,30 +324,31 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         loadout.Slots = slots;
     }
 
-    public async Task<EssenceOperationResult> ActivateLoadoutAsync(Guid characterId, Guid loadoutId, CancellationToken cancellationToken)
+    public async Task<EssenceOperationResult> SetAutoUseActivitiesAsync(
+        Guid characterId,
+        Guid loadoutId,
+        IReadOnlyCollection<EssenceCombatActivity> activities,
+        CancellationToken cancellationToken)
     {
+        if (activities.Any(activity => !EssenceLoadoutSelection.IsValidSingleActivity(activity)))
+            return Fail("An unsupported combat activity was selected.");
+
+        var requestedActivities = activities
+            .Distinct()
+            .Aggregate(EssenceCombatActivity.None, (current, activity) => current | activity);
         var loadouts = await _essences.GetLoadoutsWithSlotsAsync(characterId, cancellationToken);
-        var selected = loadouts.FirstOrDefault(x => x.Id == loadoutId);
+        var selected = loadouts.FirstOrDefault(loadout => loadout.Id == loadoutId);
         if (selected is null) return Fail("Essence loadout not found.");
 
-        var essenceIds = selected.Slots.Where(x => x.PlayerEssenceId.HasValue).Select(x => x.PlayerEssenceId!.Value).ToList();
-        var ownedCount = await _essences.CountOwnedPlayerEssencesAsync(characterId, essenceIds, cancellationToken);
-        if (ownedCount != essenceIds.Count) return Fail("Loadout references an Essence that is no longer absorbed.");
-        if (!await HasUniqueCreatureSourcesAsync(characterId, essenceIds, cancellationToken))
-            return Fail("A loadout cannot attune more than one Essence from the same creature.");
+        foreach (var loadout in loadouts)
+        {
+            loadout.AutoUseActivities = loadout.Id == loadoutId
+                ? requestedActivities
+                : loadout.AutoUseActivities & ~requestedActivities;
+            loadout.UpdatedAt = DateTimeOffset.UtcNow;
+        }
 
-        foreach (var loadout in loadouts) loadout.IsActive = loadout.Id == loadoutId;
-        await _outbox.EnqueueAsync(
-            GameEventTypes.EssenceLoadoutChanged,
-            new EssenceLoadoutChangedPayload(
-                characterId,
-                essenceIds,
-                selected.Slots.Count(x => x.PlayerEssenceId.HasValue),
-                await HasCompatibleEssenceTrioAsync(characterId, essenceIds, cancellationToken)),
-            characterId,
-            null,
-            cancellationToken);
-        return Ok("Essence loadout activated.");
+        return Ok("Automatic Essence loadout use updated.");
     }
 
     private async Task<bool> HasCompatibleEssenceTrioAsync(
@@ -435,13 +425,22 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         return Ok("Favorite updated.");
     }
 
-    public async Task GrantCombatXpToAttunedEssencesAsync(Guid characterId, int xp, CancellationToken cancellationToken)
+    public Task GrantCombatXpToAttunedEssencesAsync(Guid characterId, int xp, CancellationToken cancellationToken) =>
+        GrantCombatXpToAttunedEssencesAsync(characterId, xp, EssenceCombatActivity.None, cancellationToken);
+
+    public async Task GrantCombatXpToAttunedEssencesAsync(
+        Guid characterId,
+        int xp,
+        EssenceCombatActivity activity,
+        CancellationToken cancellationToken)
     {
         var totalGranted = 0;
         var factors = await GetBonusFactorsAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
         var adjustedXp = xp.ApplyPositiveBps(factors.Get(BonusKind.EssenceExperienceGainBps));
-        var activeSlots = await GetActiveSlotsAsync(characterId, cancellationToken);
-        foreach (var slot in activeSlots.Where(x => x.PlayerEssence is not null))
+        var loadout = EssenceLoadoutSelection.Select(
+            await _essences.GetLoadoutsWithSlotsAsync(characterId, cancellationToken),
+            activity);
+        foreach (var slot in loadout?.Slots.Where(x => x.PlayerEssence is not null) ?? [])
         {
             var definition = _definitions.GetById(slot.PlayerEssence!.EssenceDefinitionId);
             if (definition is not null)
@@ -468,8 +467,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
     public async Task<IReadOnlyList<AbilitySpec>> GetAttunedAbilitiesAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var activeSlots = await GetActiveSlotsAsync(characterId, cancellationToken);
-        return activeSlots
+        var defaultSlots = await GetDefaultSlotsAsync(characterId, cancellationToken);
+        return defaultSlots
             .Select(x => x.PlayerEssence)
             .Where(x => x is not null)
             .Select(x => _definitions.GetById(x!.EssenceDefinitionId))
@@ -485,14 +484,22 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             .SelectMany(x => new[] { x!.ActiveAbility, x.PassiveAbility })
             .ToList();
 
-    public async Task<EssenceCombatLoadout> ResolveAsync(Guid characterId, CancellationToken cancellationToken)
+    public Task<EssenceCombatLoadout> ResolveAsync(Guid characterId, CancellationToken cancellationToken) =>
+        ResolveAsync(characterId, EssenceCombatActivity.None, cancellationToken);
+
+    public async Task<EssenceCombatLoadout> ResolveAsync(
+        Guid characterId,
+        EssenceCombatActivity activity,
+        CancellationToken cancellationToken)
     {
-        var activeSlots = await GetActiveSlotsAsync(characterId, cancellationToken);
-        var equippedEssences = activeSlots
+        var loadout = EssenceLoadoutSelection.Select(
+            await _essences.GetLoadoutsWithSlotsAsync(characterId, cancellationToken),
+            activity);
+        var equippedEssences = loadout?.Slots
             .Select(x => x.PlayerEssence)
             .Where(x => x is not null)
             .Cast<PlayerEssence>()
-            .ToList();
+            .ToList() ?? [];
 
         return Resolve(characterId, equippedEssences);
     }
@@ -831,8 +838,12 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             ? new Dictionary<BonusKind, double>()
             : await _bonusService.GetAggregatedAsync(characterId, now, cancellationToken);
 
-    private async Task<List<EssenceLoadoutSlot>> GetActiveSlotsAsync(Guid characterId, CancellationToken cancellationToken) =>
-        await _essences.GetActiveSlotsAsync(characterId, cancellationToken);
+    private async Task<IReadOnlyCollection<EssenceLoadoutSlot>> GetDefaultSlotsAsync(
+        Guid characterId,
+        CancellationToken cancellationToken) =>
+        EssenceLoadoutSelection.Select(
+            await _essences.GetLoadoutsWithSlotsAsync(characterId, cancellationToken),
+            EssenceCombatActivity.None)?.Slots.ToList() ?? [];
 
     private async Task<InventoryItem?> GetInventoryItemAsync(Guid characterId, Guid inventoryItemId, CancellationToken cancellationToken) =>
         await _inventory.GetInventoryItemAsync(characterId, inventoryItemId, cancellationToken);

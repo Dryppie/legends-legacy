@@ -159,7 +159,7 @@
       }
     ],
     "sourceType": "Dungeon",
-    "sourceId": "goblin_mines",
+    "sourceId": "forgotten_catacombs",
     "tags": [
       "Arcane",
       "Magic",
@@ -329,7 +329,7 @@
       }
     ],
     "sourceType": "Dungeon",
-    "sourceId": "forgotten_catacombs",
+    "sourceId": "great_tree",
     "tags": [
       "Aegis",
       "Defensive",
@@ -419,7 +419,7 @@
       }
     ],
     "sourceType": "Dungeon",
-    "sourceId": "forgotten_catacombs",
+    "sourceId": "great_tree",
     "tags": [
       "Warden",
       "Support",
@@ -597,7 +597,7 @@
       }
     ],
     "sourceType": "Dungeon",
-    "sourceId": "forgotten_catacombs",
+    "sourceId": "goblin_mines",
     "tags": [
       "Phoenix",
       "Fire",
@@ -768,7 +768,7 @@
       }
     ],
     "sourceType": "Dungeon",
-    "sourceId": "forgotten_catacombs",
+    "sourceId": "great_tree",
     "tags": [
       "Primal",
       "Nature",
@@ -855,7 +855,7 @@
       }
     ],
     "sourceType": "Dungeon",
-    "sourceId": "goblin_mines",
+    "sourceId": "tangled_cave",
     "tags": [
       "Venom",
       "Poison",
@@ -943,7 +943,7 @@
       }
     ],
     "sourceType": "Dungeon",
-    "sourceId": "goblin_mines",
+    "sourceId": "tangled_cave",
     "tags": [
       "Hive",
       "Chitin",

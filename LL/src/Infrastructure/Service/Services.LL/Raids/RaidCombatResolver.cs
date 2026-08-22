@@ -6,6 +6,7 @@ using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences.Definitions;
+using Domain.Models.Essences;
 using Domain.Models.Raids;
 using Domain.Models.Regions.Areas;
 using Services.LL.Combat.Layers.Orchestration.Models;
@@ -376,7 +377,9 @@ public sealed class RaidCombatResolver(
                 Operation = "DelayCooldowns",
                 Value = cooldownDelay
             }));
-        await combatSetup.PrepareEntitiesForCombat(hostile.Select(x => x.Combatant).ToList());
+        await combatSetup.PrepareEntitiesForCombat(
+            hostile.Select(x => x.Combatant).ToList(),
+            EssenceCombatActivity.Raid);
         for (var i = 1; i < hostile.Count; i++)
         {
             var remainingFraction = rearguard.Survivors[i - 1].HealthFraction;
@@ -556,7 +559,9 @@ public sealed class RaidCombatResolver(
         var allHostile = hostile
             .Concat((hostileReinforcementWaves ?? []).SelectMany(x => x))
             .ToList();
-        await combatSetup.PrepareEntitiesForCombat(allHostile.Select(x => x.Combatant).ToList());
+        await combatSetup.PrepareEntitiesForCombat(
+            allHostile.Select(x => x.Combatant).ToList(),
+            EssenceCombatActivity.Raid);
         return await ExecutePreparedAsync(
             raidRunId,
             lane,
@@ -569,7 +574,9 @@ public sealed class RaidCombatResolver(
     }
 
     private Task PrepareFriendlyAsync(IReadOnlyList<CombatRuntimeParticipant> friendly) =>
-        combatSetup.PrepareEntitiesForCombat(friendly.Select(x => x.Combatant).ToList());
+        combatSetup.PrepareEntitiesForCombat(
+            friendly.Select(x => x.Combatant).ToList(),
+            EssenceCombatActivity.Raid);
 
     private async Task<RaidLaneCombatExecution> ExecutePreparedAsync(
         Guid raidRunId,

@@ -11,6 +11,7 @@ public sealed class EssenceLoadoutConfiguration : IEntityTypeConfiguration<Essen
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Name).HasMaxLength(80).IsRequired();
+        builder.Property(x => x.AutoUseActivities).HasConversion<int>().HasDefaultValue(EssenceCombatActivity.None);
         builder.HasIndex(x => x.CharacterId);
         builder.HasIndex(x => new { x.CharacterId, x.Name }).IsUnique();
         builder.HasOne<Character>()

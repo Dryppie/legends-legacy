@@ -14,13 +14,6 @@ public sealed class EssenceRepository : IEssenceRepository
         _context = context;
     }
 
-    public async Task<List<EssenceLoadoutSlot>> GetActiveSlotsAsync(Guid characterId, CancellationToken cancellationToken) =>
-        await _context.EssenceLoadoutSlots
-            .Include(x => x.PlayerEssence)
-            .Include(x => x.EssenceLoadout)
-            .Where(x => x.EssenceLoadout.CharacterId == characterId && x.EssenceLoadout.IsActive && x.PlayerEssenceId != null)
-            .ToListAsync(cancellationToken);
-
     public async Task<Character?> GetCharacterWithEssenceLoadoutsAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _context.Characters
             .Include(x => x.EssenceLoadouts)
@@ -28,12 +21,6 @@ public sealed class EssenceRepository : IEssenceRepository
                     .ThenInclude(x => x.PlayerEssence)
             .AsSingleQuery()
             .FirstOrDefaultAsync(x => x.Id == characterId, cancellationToken);
-
-    public async Task<EssenceLoadout?> GetActiveLoadoutAsync(Guid characterId, CancellationToken cancellationToken) =>
-        await _context.EssenceLoadouts
-            .Include(x => x.Slots)
-                .ThenInclude(x => x.PlayerEssence)
-            .FirstOrDefaultAsync(x => x.CharacterId == characterId && x.IsActive, cancellationToken);
 
     public async Task<int> GetCharacterLevelAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _context.Characters
@@ -123,6 +110,7 @@ public sealed class EssenceRepository : IEssenceRepository
     public async Task<List<EssenceLoadout>> GetLoadoutsWithSlotsAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _context.EssenceLoadouts
             .Include(x => x.Slots)
+                .ThenInclude(x => x.PlayerEssence)
             .Where(x => x.CharacterId == characterId)
             .ToListAsync(cancellationToken);
 
@@ -140,9 +128,10 @@ public sealed class EssenceRepository : IEssenceRepository
 
     public async Task ReplaceLoadoutSlotsAsync(Guid loadoutId, IReadOnlyCollection<EssenceLoadoutSlot> slots, CancellationToken cancellationToken)
     {
-        await _context.EssenceLoadoutSlots
+        var existingSlots = await _context.EssenceLoadoutSlots
             .Where(x => x.EssenceLoadoutId == loadoutId)
-            .ExecuteDeleteAsync(cancellationToken);
+            .ToListAsync(cancellationToken);
+        _context.EssenceLoadoutSlots.RemoveRange(existingSlots);
 
         if (slots.Count > 0)
             await _context.EssenceLoadoutSlots.AddRangeAsync(slots, cancellationToken);

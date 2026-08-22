@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { ApiService, VersionedMutationResult } from '../../api/api.service';
 import {
   CreatureArchiveDto,
+  EssenceCombatActivity,
   EssenceLoadoutDto,
   EssenceLoadoutsDto,
   EssenceCodexDto,
@@ -49,10 +50,6 @@ export class EssencesService {
 
   public getCodex(): Observable<EssenceCodexDto> {
     return this.apiService.get('essence/codex');
-  }
-
-  public getActiveLoadout(): Observable<EssenceLoadoutDto | null> {
-    return this.apiService.get('essence/loadouts/active');
   }
 
   public absorb(
@@ -140,12 +137,13 @@ export class EssencesService {
     );
   }
 
-  public activateLoadout(
+  public setLoadoutAutoUseActivities(
     loadoutId: string,
+    activities: readonly EssenceCombatActivity[],
   ): Observable<VersionedMutationResult<EssenceStateResponseDto>> {
-    return this.apiService.postVersioned<EssenceStateResponseDto>(
-      `essence/loadouts/${loadoutId}/activate`,
-      {},
+    return this.apiService.putVersioned<EssenceStateResponseDto>(
+      `essence/loadouts/${loadoutId}/auto-use`,
+      { activities },
       { stateSyncScopesHandledByResponse: ESSENCE_STATE_HANDLED_SCOPES },
     );
   }

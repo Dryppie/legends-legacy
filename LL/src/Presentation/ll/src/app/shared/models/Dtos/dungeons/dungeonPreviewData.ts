@@ -16,6 +16,7 @@ export interface DungeonGatheringLootPreview extends ItemInstance {
   itemId: string;
   minQuantity: number;
   maxQuantity: number;
+  dropChancePercent: number;
   isRare: boolean;
 }
 

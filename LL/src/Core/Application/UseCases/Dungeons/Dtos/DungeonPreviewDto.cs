@@ -146,5 +146,6 @@ public sealed class DungeonGatheringLootPreviewDto
     public ItemBaseDto ItemBase { get; set; } = null!;
     public int MinQuantity { get; set; }
     public int MaxQuantity { get; set; }
+    public double DropChancePercent { get; set; }
     public bool IsRare { get; set; }
 }

@@ -26,7 +26,7 @@
     },
     {
       "key": "equip_goblin_essence",
-      "description": "Attune the Goblin Essence in your active Essence loadout.",
+      "description": "Attune the Goblin Essence in a loadout.",
       "type": "EssenceEquipped",
       "requiredAmount": 1,
       "filters": { "essenceDefinitionId": "essence.goblin" },

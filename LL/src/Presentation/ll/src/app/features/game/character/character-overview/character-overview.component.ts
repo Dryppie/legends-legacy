@@ -1,7 +1,20 @@
+import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { DecimalPipe, NgFor, NgIf } from '@angular/common';
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { catchError, EMPTY, finalize, skip } from 'rxjs';
+import {
+  catchError,
+  distinctUntilChanged,
+  EMPTY,
+  finalize,
+  map,
+  of,
+  skip,
+  Subject,
+  switchMap,
+  takeUntil,
+  timer,
+} from 'rxjs';
 import { CharacterService } from '../../../../core/services/api/character/character.service';
 import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
@@ -51,14 +64,38 @@ export function estimateEssenceThreatPerSecond(
     DecimalPipe,
     EssencePreviewComponent,
     PresenceIndicatorComponent,
+    OverlayModule,
   ],
   templateUrl: './character-overview.component.html',
   styleUrl: './character-overview.component.scss',
 })
-export class CharacterOverviewComponent {
+export class CharacterOverviewComponent implements OnDestroy {
   readonly AttributeType = AttributeType;
   readonly displayCombatRating = toDisplayedCombatRating;
   searchValue = signal('');
+  readonly characterSuggestions = signal<string[]>([]);
+  readonly isSearchingCharacters = signal(false);
+  readonly characterSuggestionSearchCompleted = signal(false);
+  readonly characterSuggestionPanelOpen = signal(false);
+  readonly activeCharacterSuggestion = signal(-1);
+  readonly characterSuggestionPositions: ConnectedPosition[] = [
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 4,
+    },
+    {
+      originX: 'start',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'bottom',
+      offsetY: -4,
+    },
+  ];
+  private readonly characterSuggestionSearch = new Subject<string>();
+  private readonly destroy = new Subject<void>();
   private readonly searchedCharacter = signal<CharacterOverviewDto | null>(
     null,
   );
@@ -70,7 +107,7 @@ export class CharacterOverviewComponent {
       : this.currentCharacterOverview(),
   );
   readonly estimatedEssenceThreatPerSecond = computed(() =>
-    estimateEssenceThreatPerSecond(this.character()?.activeEssenceLoadout),
+    estimateEssenceThreatPerSecond(this.character()?.essenceLoadout),
   );
   private readonly currentCharacterOverview = computed(() => {
     const overview = this.characterState.overview();
@@ -174,6 +211,34 @@ export class CharacterOverviewComponent {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
   ) {
+    this.characterSuggestionSearch
+      .pipe(
+        map((prefix) => prefix.trim()),
+        distinctUntilChanged(),
+        switchMap((prefix) => {
+          if (prefix.length < 2) {
+            this.isSearchingCharacters.set(false);
+            return of([] as string[]);
+          }
+
+          this.isSearchingCharacters.set(true);
+          return timer(200).pipe(
+            switchMap(() =>
+              this.characterService
+                .suggestCharacterNames(prefix)
+                .pipe(catchError(() => of([] as string[]))),
+            ),
+          );
+        }),
+        takeUntil(this.destroy),
+      )
+      .subscribe((suggestions) => {
+        this.isSearchingCharacters.set(false);
+        this.characterSuggestionSearchCompleted.set(true);
+        this.characterSuggestions.set(suggestions);
+        this.activeCharacterSuggestion.set(suggestions.length ? 0 : -1);
+      });
+
     const initialCharacterName = this.route.snapshot.queryParamMap
       .get('characterName')
       ?.trim();
@@ -197,7 +262,89 @@ export class CharacterOverviewComponent {
     });
   }
 
+  ngOnDestroy(): void {
+    this.destroy.next();
+    this.destroy.complete();
+  }
+
+  onSearchValueChange(value: string): void {
+    this.searchValue.set(value);
+    this.searchErrorMessage.set('');
+    this.characterSuggestionSearchCompleted.set(false);
+    this.activeCharacterSuggestion.set(-1);
+
+    if (value.trim().length < 2) {
+      this.characterSuggestions.set([]);
+      this.isSearchingCharacters.set(false);
+      this.characterSuggestionPanelOpen.set(false);
+    } else {
+      this.characterSuggestionPanelOpen.set(true);
+    }
+
+    this.characterSuggestionSearch.next(value);
+  }
+
+  openCharacterSuggestions(): void {
+    if (this.searchValue().trim().length >= 2) {
+      this.characterSuggestionPanelOpen.set(true);
+    }
+  }
+
+  closeCharacterSuggestions(): void {
+    this.characterSuggestionPanelOpen.set(false);
+    this.activeCharacterSuggestion.set(-1);
+  }
+
+  selectCharacterSuggestion(event: Event, name: string): void {
+    event.preventDefault();
+    this.searchValue.set(name);
+    this.characterSuggestions.set([]);
+    this.characterSuggestionSearchCompleted.set(false);
+    this.closeCharacterSuggestions();
+  }
+
+  handleSearchKeydown(event: KeyboardEvent): void {
+    const suggestions = this.characterSuggestions();
+    if (event.key === 'Escape') {
+      this.closeCharacterSuggestions();
+      return;
+    }
+
+    if (this.characterSuggestionPanelOpen() && suggestions.length) {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const direction = event.key === 'ArrowDown' ? 1 : -1;
+        const nextIndex =
+          (this.activeCharacterSuggestion() + direction + suggestions.length) %
+          suggestions.length;
+        this.activeCharacterSuggestion.set(nextIndex);
+        return;
+      }
+
+      if (event.key === 'Enter' && this.activeCharacterSuggestion() >= 0) {
+        event.preventDefault();
+        this.selectCharacterSuggestion(
+          event,
+          suggestions[this.activeCharacterSuggestion()],
+        );
+        return;
+      }
+    }
+
+    if (event.key === 'Enter') {
+      this.onSearch();
+    }
+  }
+
+  showCharacterSuggestionPanel(): boolean {
+    return (
+      this.characterSuggestionPanelOpen() &&
+      this.searchValue().trim().length >= 2
+    );
+  }
+
   onSearch() {
+    this.closeCharacterSuggestions();
     const trimmed = this.searchValue().trim();
     if (!trimmed) {
       this.navigateToCharacter(null);
@@ -257,12 +404,6 @@ export class CharacterOverviewComponent {
     this.isViewingSearchResult.set(false);
   }
 
-  onEnter(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      this.onSearch();
-    }
-  }
-
   getAttribute(type: AttributeType): AttributeDto {
     const current = this.character();
     return (
@@ -302,13 +443,13 @@ export class CharacterOverviewComponent {
 
   get filledLoadoutSlots(): number {
     return (
-      this.character()?.activeEssenceLoadout?.slots.filter(
+      this.character()?.essenceLoadout?.slots.filter(
         (slot) => !!slot.playerEssenceId,
       ).length ?? 0
     );
   }
 
   get totalLoadoutSlots(): number {
-    return this.character()?.activeEssenceLoadout?.slots.length ?? 0;
+    return this.character()?.essenceLoadout?.slots.length ?? 0;
   }
 }

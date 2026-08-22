@@ -29,7 +29,14 @@ public sealed class EssenceLoadoutConverter : ITypeConverter<EssenceLoadout, Ess
     }
 
     public EssenceLoadoutDto Convert(EssenceLoadout source, EssenceLoadoutDto destination, ResolutionContext context) =>
-        new(source.Id, source.Name, source.IsActive, source.Slots.OrderBy(x => x.SlotIndex).Select(slot => MapSlot(slot, context)).ToList());
+        new(
+            source.Id,
+            source.Name,
+            Enum.GetValues<EssenceCombatActivity>()
+                .Where(activity => EssenceLoadoutSelection.IsValidSingleActivity(activity) &&
+                                   source.AutoUseActivities.HasFlag(activity))
+                .ToList(),
+            source.Slots.OrderBy(x => x.SlotIndex).Select(slot => MapSlot(slot, context)).ToList());
 
     private EssenceLoadoutSlotDto MapSlot(EssenceLoadoutSlot slot, ResolutionContext context)
     {

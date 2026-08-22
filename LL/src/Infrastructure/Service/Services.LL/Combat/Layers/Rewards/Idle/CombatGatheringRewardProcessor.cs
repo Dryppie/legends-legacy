@@ -7,6 +7,7 @@ using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Tools;
 using Domain.Models.Professions;
+using Domain.Models.Professions.Gathering;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Rewards;
 using Services.LL.Combat.Layers.Rewards.Models;
@@ -65,7 +66,7 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
             return [];
         }
 
-        var professionType = ToProfessionType(tool.GatheringType);
+        var professionType = GatheringProfessionProgression.ToProfessionType(tool.GatheringType);
         if (professionType == ProfessionType.None)
         {
             return [];
@@ -97,8 +98,12 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         var results = new List<GatheringRewardResult>();
         var pendingRewards = new List<PendingGatheringReward>();
 
-        foreach (var node in matchingNodes)
+        for (var nodeIndex = 0; nodeIndex < matchingNodes.Count; nodeIndex++)
         {
+            var node = matchingNodes[nodeIndex];
+            var experiencePerAttempt = nodeIndex == 0
+                ? GatheringProfessionProgression.ExperiencePerAttempt
+                : 0;
             var nodeSuccessBonus = Math.Max(0d, tool.GetBonus(ToolBonusType.NodeSuccessChancePercent));
             var chance = Math.Clamp(node.ProcChance * (1d + nodeSuccessBonus / 100d), 0d, 1d);
             var appliedBonusEffects = BuildAppliedBonusEffects(tool, node, nodeSuccessBonus, gatheringYieldBps, gatheringExperienceGainBps, rareChanceRelativeBps);
@@ -115,6 +120,7 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
                         ToolName = tool.Name,
                         ToolRarity = tool.Rarity,
                         Success = false,
+                        ExperienceGained = experiencePerAttempt,
                         AppliedBonusEffects = appliedBonusEffects,
                         Message = "No resources gathered."
                     });
@@ -140,7 +146,7 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
                     NodeName = ResolveNodeName(node.Id, node.Name),
                     ToolName = tool.Name,
                     ToolRarity = tool.Rarity,
-                    ExperienceGained = 1,
+                    ExperienceGained = experiencePerAttempt,
                     AppliedBonusEffects = appliedBonusEffects,
                 };
 
@@ -354,14 +360,6 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
 
         return nodeId.Replace('_', ' ');
     }
-
-    private static ProfessionType ToProfessionType(GatheringType gatheringType) => gatheringType switch
-    {
-        GatheringType.Mining => ProfessionType.Mining,
-        GatheringType.Woodcutting => ProfessionType.Woodcutting,
-        GatheringType.Skinning => ProfessionType.Skinning,
-        _ => ProfessionType.None
-    };
 
     private sealed record PendingGatheringReward(
         GatheringRewardResult Result,

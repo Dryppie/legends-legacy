@@ -6,6 +6,7 @@ using Common.Primitives;
 using Domain.Components.Attributes;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Essences;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using MediatR;
@@ -73,8 +74,7 @@ public sealed class CompareEquipmentQueryHandler
 
         var loadout = _essenceLoadouts.Resolve(
             character.Id,
-            character.EssenceLoadouts
-                .FirstOrDefault(loadout => loadout.IsActive)?
+            EssenceLoadoutSelection.Select(character.EssenceLoadouts, EssenceCombatActivity.None)?
                 .Slots
                 .Select(slot => slot.PlayerEssence)
                 .Where(essence => essence is not null)

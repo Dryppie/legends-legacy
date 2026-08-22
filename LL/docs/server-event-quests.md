@@ -80,7 +80,7 @@ Create a uniquely named JSON file in `LL/src/API/API.LL/Data/event-quests`. Do n
 }
 ```
 
-The supported objective types are the same durable event-backed types used by normal quests: combat completion, area actions with a gathering tool, Essence absorption/focus/ascension, crafting, tempering, character level, Colosseum and tournament battles, dungeon starts/completions, and daily prophecies. Equipment-state objectives are intentionally excluded from event definitions because they require querying mutable state after the original action.
+The supported objective types are the same durable event-backed types used by normal quests: combat completion, area actions with a gathering tool, gathered resource quantities (`ResourceGathered`), Essence absorption/focus/ascension, crafting, tempering, character level, Colosseum and tournament battles, dungeon starts/completions, and daily prophecies. Equipment-state objectives are intentionally excluded from event definitions because they require querying mutable state after the original action.
 
 `minimumContribution` is the total qualifying contribution a character must make across the event's objectives before claiming the community-completion reward. Global progress is capped at each objective's required amount, while personal contribution records the player's actual qualifying contribution through `endsAtUtc`, including after the community target completes.
 

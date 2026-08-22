@@ -25,6 +25,7 @@ using Persistence.LL;
 using Persistence.LL.Repositories.Essences;
 using Persistence.LL.Repositories.Inventories;
 using Persistence.LL.Repositories.Items;
+using Persistence.LL.Repositories.Snapshots;
 using Services.LL.Combat;
 using Services.LL.Combat.Stats;
 using Services.LL.Essences;
@@ -140,7 +141,7 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
-    public async Task Loadouts_allow_one_essence_per_creature_and_revalidate_on_activation()
+    public async Task Loadouts_allow_only_one_essence_per_creature()
     {
         await using var db = CreateDb();
         var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
@@ -170,38 +171,16 @@ public sealed class EssenceSystemServiceTests
                 new SaveEssenceLoadoutRequest(null, "Same creature", [new(0, firstVariantId), new(1, secondVariantId)]),
                 CancellationToken.None));
 
-        var allowedSavedLoadout = new EssenceLoadout
-        {
-            Id = Guid.NewGuid(),
-            CharacterId = characterId,
-            Name = "Different creatures",
-            Slots =
-            [
-                new() { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = firstVariantId },
-                new() { Id = Guid.NewGuid(), SlotIndex = 1, PlayerEssenceId = otherCreatureId }
-            ]
-        };
-        var invalidSavedLoadout = new EssenceLoadout
-        {
-            Id = Guid.NewGuid(),
-            CharacterId = characterId,
-            Name = "Legacy invalid",
-            Slots =
-            [
-                new() { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = firstVariantId },
-                new() { Id = Guid.NewGuid(), SlotIndex = 1, PlayerEssenceId = secondVariantId }
-            ]
-        };
-        db.EssenceLoadouts.AddRange(allowedSavedLoadout, invalidSavedLoadout);
-        await db.SaveChangesAsync();
-
-        var allowedActivation = await service.ActivateLoadoutAsync(characterId, allowedSavedLoadout.Id, CancellationToken.None);
-        var activation = await service.ActivateLoadoutAsync(characterId, invalidSavedLoadout.Id, CancellationToken.None);
+        var allowed = await service.SaveLoadoutAsync(
+            characterId,
+            new SaveEssenceLoadoutRequest(
+                null,
+                "Different creatures",
+                [new(0, firstVariantId), new(1, otherCreatureId)]),
+            CancellationToken.None);
 
         Assert.Contains("same creature", exception.Message, StringComparison.OrdinalIgnoreCase);
-        Assert.True(allowedActivation.Succeeded);
-        Assert.False(activation.Succeeded);
-        Assert.Contains("same creature", activation.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(2, allowed.Slots.Count);
     }
 
     [Fact]
@@ -216,7 +195,6 @@ public sealed class EssenceSystemServiceTests
             Id = Guid.NewGuid(),
             CharacterId = characterId,
             Name = "Active",
-            IsActive = true,
             Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = attunedId }]
         });
         await db.SaveChangesAsync();
@@ -231,7 +209,7 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
-    public async Task Saving_an_active_loadout_detects_three_essences_with_a_non_generic_shared_ability_tag()
+    public async Task Saving_a_loadout_detects_three_essences_with_a_non_generic_shared_ability_tag()
     {
         await using var db = CreateDb();
         var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
@@ -277,12 +255,16 @@ public sealed class EssenceSystemServiceTests
                     CreateLootTable(definition.SourceMonsterId, definition.Id)).ToList()),
             outbox: outbox);
 
-        var result = await service.ActivateLoadoutAsync(
+        await service.SaveLoadoutAsync(
             characterId,
-            loadout.Id,
+            new SaveEssenceLoadoutRequest(
+                loadout.Id,
+                loadout.Name,
+                loadout.Slots
+                    .Select(slot => new SaveEssenceLoadoutSlotRequest(slot.SlotIndex, slot.PlayerEssenceId))
+                    .ToList()),
             CancellationToken.None);
 
-        Assert.True(result.Succeeded);
         var payload = Assert.IsType<EssenceLoadoutChangedPayload>(Assert.Single(outbox.Payloads));
         Assert.True(payload.HasCompatibleEssenceTrio);
     }
@@ -298,7 +280,6 @@ public sealed class EssenceSystemServiceTests
             Id = Guid.NewGuid(),
             CharacterId = characterId,
             Name = "Active",
-            IsActive = true,
             Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = attunedId }]
         });
         await db.SaveChangesAsync();
@@ -363,7 +344,6 @@ public sealed class EssenceSystemServiceTests
             Id = Guid.NewGuid(),
             CharacterId = characterId,
             Name = "Active",
-            IsActive = true,
             Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = essenceId }]
         });
         await db.SaveChangesAsync();
@@ -378,7 +358,7 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
-    public async Task Attuned_essences_return_ability_specs_for_active_loadout_only()
+    public async Task Attuned_essences_return_ability_specs_for_default_loadout_only()
     {
         await using var db = CreateDb();
         var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
@@ -389,7 +369,6 @@ public sealed class EssenceSystemServiceTests
             Id = Guid.NewGuid(),
             CharacterId = characterId,
             Name = "Active",
-            IsActive = true,
             Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = attunedId }]
         });
         await db.SaveChangesAsync();
@@ -417,7 +396,6 @@ public sealed class EssenceSystemServiceTests
             Id = Guid.NewGuid(),
             CharacterId = characterId,
             Name = "Active",
-            IsActive = true,
             Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = attunedId }]
         });
         await db.SaveChangesAsync();
@@ -429,6 +407,115 @@ public sealed class EssenceSystemServiceTests
         Assert.Empty(loadout.AttributeModifiers);
         Assert.Contains("Species.Beast", loadout.Tags);
         Assert.Contains("Mechanic.Execute", loadout.Tags);
+    }
+
+    [Fact]
+    public async Task Resolve_combat_loadout_uses_activity_assignment_and_falls_back_to_first_archive_loadout()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
+        var fallbackEssenceId = await AddPlayerEssenceAsync(db, characterId, "essence.test", level: 3);
+        var dungeonEssenceId = await AddPlayerEssenceAsync(db, characterId, "essence.other", level: 3);
+        db.EssenceLoadouts.AddRange(
+            new EssenceLoadout
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = characterId,
+                Name = "A Fallback",
+                Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = fallbackEssenceId }]
+            },
+            new EssenceLoadout
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = characterId,
+                Name = "Dungeon",
+                AutoUseActivities = EssenceCombatActivity.Dungeon,
+                Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = dungeonEssenceId }]
+            });
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var assigned = await service.ResolveAsync(
+            characterId,
+            EssenceCombatActivity.Dungeon,
+            CancellationToken.None);
+        var fallback = await service.ResolveAsync(
+            characterId,
+            EssenceCombatActivity.Raid,
+            CancellationToken.None);
+
+        Assert.Equal(dungeonEssenceId, Assert.Single(assigned.EquippedEssences).Id);
+        Assert.Equal(fallbackEssenceId, Assert.Single(fallback.EquippedEssences).Id);
+    }
+
+    [Fact]
+    public async Task Set_auto_use_activities_moves_requested_activity_to_selected_loadout()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
+        var original = new EssenceLoadout
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            Name = "Original",
+            AutoUseActivities = EssenceCombatActivity.Dungeon | EssenceCombatActivity.Raid
+        };
+        var selected = new EssenceLoadout
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            Name = "Selected",
+            AutoUseActivities = EssenceCombatActivity.Arena
+        };
+        db.EssenceLoadouts.AddRange(original, selected);
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var result = await service.SetAutoUseActivitiesAsync(
+            characterId,
+            selected.Id,
+            [EssenceCombatActivity.Dungeon, EssenceCombatActivity.Arena],
+            CancellationToken.None);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(EssenceCombatActivity.Raid, original.AutoUseActivities);
+        Assert.Equal(
+            EssenceCombatActivity.Dungeon | EssenceCombatActivity.Arena,
+            selected.AutoUseActivities);
+    }
+
+    [Fact]
+    public async Task Character_snapshot_captures_the_loadout_assigned_to_the_activity()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
+        var fallbackEssenceId = await AddPlayerEssenceAsync(db, characterId, "essence.test", level: 3);
+        var raidEssenceId = await AddPlayerEssenceAsync(db, characterId, "essence.other", level: 4);
+        db.EssenceLoadouts.AddRange(
+            new EssenceLoadout
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = characterId,
+                Name = "A Fallback",
+                Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = fallbackEssenceId }]
+            },
+            new EssenceLoadout
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = characterId,
+                Name = "Raid",
+                AutoUseActivities = EssenceCombatActivity.Raid,
+                Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = raidEssenceId }]
+            });
+        await db.SaveChangesAsync();
+        var repository = new CharacterSnapshotRepository(db);
+
+        var snapshot = await repository.CreateAsync(
+            characterId,
+            EssenceCombatActivity.Raid,
+            CancellationToken.None);
+
+        Assert.Equal(raidEssenceId, Assert.Single(snapshot.EquippedEssences).PlayerEssenceId);
     }
 
     [Fact]
@@ -867,7 +954,6 @@ public sealed class EssenceSystemServiceTests
             Id = Guid.NewGuid(),
             CharacterId = characterId,
             Name = "Active",
-            IsActive = true,
             Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = essenceId }]
         });
         var character = db.Characters.Single(x => x.Id == characterId);

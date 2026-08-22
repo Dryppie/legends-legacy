@@ -1,8 +1,11 @@
 using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
+using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting.V2;
+using Domain.Models.Professions.Gathering.GatheringNodes;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Repositories.Equipments;
@@ -230,6 +233,42 @@ public sealed class EquipmentHandRuleTests
             characterId,
             tierTwoSword.Id,
             EquipmentSlotType.MainHand,
+            CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task Rare_gathering_tools_require_profession_level_twenty()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var pickaxe = Equipment("rare-pickaxe", EquipmentType.Tool);
+        pickaxe.Rarity = Rarity.Rare;
+        ((EquipmentBase)pickaxe.ItemBase).GatheringType = GatheringType.Mining;
+        var character = CharacterWithHands(characterId, null, null, [pickaxe]);
+        var mining = new Profession
+        {
+            CharacterId = characterId,
+            ProfessionType = ProfessionType.Mining,
+            Level = 19
+        };
+        character.Professions.Add(mining);
+        db.Characters.Add(character);
+        await db.SaveChangesAsync();
+        var repository = new EquipmentSlotRepository(db);
+
+        Assert.False(await repository.EquipEquipmentAsync(
+            characterId,
+            pickaxe.Id,
+            EquipmentSlotType.Tool,
+            CancellationToken.None));
+
+        mining.Level = 20;
+        await db.SaveChangesAsync();
+
+        Assert.True(await repository.EquipEquipmentAsync(
+            characterId,
+            pickaxe.Id,
+            EquipmentSlotType.Tool,
             CancellationToken.None));
     }
 
