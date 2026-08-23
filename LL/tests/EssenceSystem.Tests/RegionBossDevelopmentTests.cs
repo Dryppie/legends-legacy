@@ -394,6 +394,44 @@ public sealed class RegionBossDevelopmentTests
     }
 
     [Fact]
+    public async Task Oversized_playback_keeps_the_resolved_run_and_does_not_retry_combat()
+    {
+        await using var db = CreateDbContext();
+        var now = new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero);
+        var definition = new FixedDefinitionProvider().GetAll().Single();
+        var item = CreateEvent(definition, now, RegionBossEventStatus.Resolving);
+        item.Runs.Add(new RegionBossRun
+        {
+            Event = item,
+            RegionBossEventId = item.Id,
+            PartyNumber = 1,
+            PartySize = 1,
+            Status = RegionBossRunStatus.Queued
+        });
+        db.RegionBossEvents.Add(item);
+        await db.SaveChangesAsync();
+        var resolver = new CountingCombatResolver();
+        var service = CreateService(
+            db,
+            now,
+            developmentToolsEnabled: false,
+            combatResolver: resolver,
+            playbackBundles: new OversizedPlaybackBundleBuilder());
+
+        await service.ProgressEventsAsync("test-worker", CancellationToken.None);
+
+        var run = await db.RegionBossRuns.AsNoTracking()
+            .Include(candidate => candidate.Playback)
+            .SingleAsync(candidate => candidate.RegionBossEventId == item.Id);
+        Assert.Equal(RegionBossRunStatus.Ready, run.Status);
+        Assert.Equal(1, run.SimulationAttempts);
+        Assert.Equal(1, resolver.InvocationCount);
+        Assert.Null(run.Playback);
+        Assert.Null(run.LastError);
+        Assert.Equal(1, await db.RegionBossParticipantResults.CountAsync());
+    }
+
+    [Fact]
     public async Task A_failed_event_does_not_prevent_later_events_from_progressing()
     {
         await using var db = CreateDbContext();
@@ -840,6 +878,12 @@ public sealed class RegionBossDevelopmentTests
             };
             return playback;
         }
+    }
+
+    private sealed class OversizedPlaybackBundleBuilder : IRegionBossPlaybackBundleBuilder
+    {
+        public RegionBossPlayback Build(Guid runId, RegionBossCombatResolution resolution) =>
+            throw new RegionBossPlaybackSizeLimitExceededException("uncompressed", 25, 24);
     }
 
     private static LLDbContext CreateDbContext(params IInterceptor[] interceptors) =>

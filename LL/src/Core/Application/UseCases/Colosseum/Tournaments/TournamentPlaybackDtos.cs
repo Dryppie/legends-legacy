@@ -53,6 +53,7 @@ public sealed record TournamentPlaybackAbilityDto(
 public sealed record TournamentPlaybackFrameDto(
     int Sequence,
     int Tick,
+    bool IsKeyframe,
     IReadOnlyList<TournamentPlaybackEntityStateDto> EntityStates,
     IReadOnlyList<TournamentPlaybackEntityTotalsDto> EntityTotals,
     IReadOnlyList<TournamentPlaybackAbilityTotalsDto> AbilityTotals,

@@ -18,6 +18,7 @@ using Domain.Models.Essences;
 using Domain.Models.Administration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Services.LL.Combat.Engine;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
@@ -33,6 +34,7 @@ namespace Services.LL.Colosseum.Tournaments;
 
 public sealed class TournamentGroundsService : ITournamentGroundsService
 {
+    private const int PlaybackKeyframeIntervalTicks = 30 * FastCombatEngine.TicksPerSecond;
     private const string TournamentGroundsTargetUrl = "/game/city/colosseum?tab=tournaments";
     private static readonly Meter TournamentMeter = new("LegendsLegacy.TournamentGrounds");
     private static readonly Histogram<double> CombatDurationMilliseconds =
@@ -605,7 +607,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var playback = await _tournaments.CombatReplays
             .Where(replay => replay.TournamentId == tournamentId
                              && replay.MatchId == matchId
-                             && replay.SchemaVersion == TournamentCombatReplay.CompactBundleSchemaVersion)
+                             && replay.SchemaVersion >= TournamentCombatReplay.MinimumCompactBundleSchemaVersion)
             .Select(replay => new
             {
                 replay.SchemaVersion,
@@ -663,7 +665,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var bundle = await _tournaments.CombatReplays
             .Where(replay => replay.TournamentId == tournamentId
                              && replay.MatchId == matchId
-                             && replay.SchemaVersion == TournamentCombatReplay.CompactBundleSchemaVersion
+                             && replay.SchemaVersion >= TournamentCombatReplay.MinimumCompactBundleSchemaVersion
                              && replay.Match.PlaybackStartedAtUtc.HasValue
                              && replay.Match.PlaybackStartedAtUtc.Value <= now)
             .Select(replay => new
@@ -2436,9 +2438,15 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             ability => (ability.EntityIndex, ability.Name),
             ability => ability.Index);
 
-        var frames = execution.Checkpoints.Select(checkpoint =>
+        var materializedStates = new Dictionary<int, TournamentPlaybackEntityStateDto>();
+        var materializedTotals = new Dictionary<int, TournamentPlaybackEntityTotalsDto>();
+        var materializedAbilityTotals = new Dictionary<int, TournamentPlaybackAbilityTotalsDto>();
+        var frames = new TournamentPlaybackFrameDto[execution.Checkpoints.Count];
+        var lastKeyframeTick = int.MinValue;
+        for (var checkpointIndex = 0; checkpointIndex < execution.Checkpoints.Count; checkpointIndex++)
         {
-            var states = checkpoint.Friendly
+            var checkpoint = execution.Checkpoints[checkpointIndex];
+            var currentStates = checkpoint.Friendly
                 .Concat(checkpoint.Hostile)
                 .Select(entity => new TournamentPlaybackEntityStateDto(
                     entityById[entity.Id].Index,
@@ -2446,7 +2454,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                     entity.Barrier))
                 .OrderBy(state => state.EntityIndex)
                 .ToArray();
-            var totals = checkpoint.EntityStats
+            var currentTotals = checkpoint.EntityStats
                 .Where(entity => entityById.ContainsKey(entity.EntityId))
                 .Select(entity => new TournamentPlaybackEntityTotalsDto(
                     entityById[entity.EntityId].Index,
@@ -2460,7 +2468,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                     entity.ThreatGenerated))
                 .OrderBy(total => total.EntityIndex)
                 .ToArray();
-            var abilityTotals = checkpoint.EntityStats
+            var currentAbilityTotals = checkpoint.EntityStats
                 .Where(entity => entityById.ContainsKey(entity.EntityId))
                 .SelectMany(entity => entity.Abilities.Select(ability =>
                     new TournamentPlaybackAbilityTotalsDto(
@@ -2470,18 +2478,42 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                         ability.TotalHealing,
                         ability.TotalBarrier,
                         ability.TotalThreat,
-                        ability.DamageByType)))
+                        ability.DamageByType?.ToArray())))
                 .OrderBy(total => total.AbilityIndex)
                 .ToArray();
-            return new TournamentPlaybackFrameDto(
+
+            var isKeyframe = checkpointIndex == 0
+                || checkpoint.IsFinal
+                || checkpoint.Tick - lastKeyframeTick >= PlaybackKeyframeIntervalTicks;
+            var states = ApplyChanges(
+                currentStates,
+                materializedStates,
+                state => state.EntityIndex,
+                isKeyframe);
+            var totals = ApplyChanges(
+                currentTotals,
+                materializedTotals,
+                total => total.EntityIndex,
+                isKeyframe);
+            var abilityTotals = ApplyChanges(
+                currentAbilityTotals,
+                materializedAbilityTotals,
+                total => total.AbilityIndex,
+                isKeyframe,
+                AbilityTotalsEqual);
+            if (isKeyframe)
+                lastKeyframeTick = checkpoint.Tick;
+
+            frames[checkpointIndex] = new TournamentPlaybackFrameDto(
                 checkpoint.Sequence,
                 checkpoint.Tick,
+                isKeyframe,
                 states,
                 totals,
                 abilityTotals,
                 checkpoint.IsFinal,
                 checkpoint.IsFinal ? execution.Result.Outcome : null);
-        }).ToArray();
+        }
 
         return new TournamentPlaybackBundleDto(
             TournamentCombatReplay.CompactBundleSchemaVersion,
@@ -2491,6 +2523,45 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             entities,
             abilities,
             frames);
+
+        static IReadOnlyList<T> ApplyChanges<T>(
+            IEnumerable<T> current,
+            IDictionary<int, T> materialized,
+            Func<T, int> getIndex,
+            bool isKeyframe,
+            Func<T, T, bool>? equals = null)
+        {
+            equals ??= EqualityComparer<T>.Default.Equals;
+            var changed = new List<T>();
+            foreach (var value in current)
+            {
+                var index = getIndex(value);
+                if (!materialized.TryGetValue(index, out var previous) || !equals(previous, value))
+                    changed.Add(value);
+                materialized[index] = value;
+            }
+
+            return isKeyframe
+                ? materialized.OrderBy(pair => pair.Key).Select(pair => pair.Value).ToArray()
+                : changed;
+        }
+
+        static bool AbilityTotalsEqual(
+            TournamentPlaybackAbilityTotalsDto left,
+            TournamentPlaybackAbilityTotalsDto right) =>
+            left.AbilityIndex == right.AbilityIndex
+            && left.Uses == right.Uses
+            && left.TotalDamage == right.TotalDamage
+            && left.TotalHealing == right.TotalHealing
+            && left.TotalBarrier == right.TotalBarrier
+            && left.TotalThreat == right.TotalThreat
+            && DamageByTypeEqual(left.DamageByType, right.DamageByType);
+
+        static bool DamageByTypeEqual(
+            IReadOnlyList<AbilityDamageTypeStats>? left,
+            IReadOnlyList<AbilityDamageTypeStats>? right) =>
+            ReferenceEquals(left, right)
+            || left is not null && right is not null && left.SequenceEqual(right);
 
         void AddEntities(IEnumerable<SimpleCombatEntity> source, bool friendly)
         {

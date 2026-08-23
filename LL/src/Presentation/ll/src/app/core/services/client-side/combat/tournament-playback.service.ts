@@ -61,7 +61,58 @@ export class TournamentPlaybackService {
       if (bundle.frames[middle].tick <= tick) low = middle;
       else high = middle - 1;
     }
-    return this.toCombatFrame(bundle, bundle.frames[low]);
+    return this.toCombatFrame(bundle, this.materializeFrame(bundle, low));
+  }
+
+  private materializeFrame(
+    bundle: TournamentPlaybackBundle,
+    targetIndex: number,
+  ): TournamentPlaybackFrame {
+    const target = bundle.frames[targetIndex];
+    if (bundle.schemaVersion < 3 || target.isKeyframe) return target;
+
+    let keyframeIndex = targetIndex;
+    while (keyframeIndex > 0 && !bundle.frames[keyframeIndex].isKeyframe) {
+      keyframeIndex--;
+    }
+
+    const entityStates = new Map<
+      number,
+      TournamentPlaybackFrame['entityStates'][number]
+    >();
+    const entityTotals = new Map<
+      number,
+      TournamentPlaybackFrame['entityTotals'][number]
+    >();
+    const abilityTotals = new Map<
+      number,
+      TournamentPlaybackFrame['abilityTotals'][number]
+    >();
+    for (let index = keyframeIndex; index <= targetIndex; index++) {
+      const frame = bundle.frames[index];
+      frame.entityStates.forEach((state) =>
+        entityStates.set(state.entityIndex, state),
+      );
+      frame.entityTotals.forEach((totals) =>
+        entityTotals.set(totals.entityIndex, totals),
+      );
+      frame.abilityTotals.forEach((totals) =>
+        abilityTotals.set(totals.abilityIndex, totals),
+      );
+    }
+
+    return {
+      ...target,
+      entityStates: [...entityStates.values()].sort(
+        (left, right) => left.entityIndex - right.entityIndex,
+      ),
+      entityTotals: [...entityTotals.values()].sort(
+        (left, right) => left.entityIndex - right.entityIndex,
+      ),
+      abilityTotals: [...abilityTotals.values()].sort(
+        (left, right) => left.abilityIndex - right.abilityIndex,
+      ),
+    };
   }
 
   private toCombatFrame(

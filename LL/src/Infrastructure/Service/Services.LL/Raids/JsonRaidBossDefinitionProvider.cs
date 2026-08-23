@@ -43,6 +43,13 @@ public sealed class JsonRaidBossDefinitionProvider : IRaidBossDefinitionProvider
                 throw new InvalidOperationException("Raid boss id and name are required.");
             if (boss.Region <= 0 || boss.Regions.Any(x => x <= 0) || boss.LevelRequirement <= 0 || boss.Tiers.Count == 0)
                 throw new InvalidOperationException($"Raid boss '{boss.Id}' has invalid region, level, or tiers.");
+            if (boss.RequiredEquipmentTier <= 0
+                || !Enum.IsDefined(boss.RequiredArmorRarity)
+                || !boss.RequiresBlueprintArmor
+                || boss.RequiredEquippedEssences is <= 0 or > 10)
+            {
+                throw new InvalidOperationException($"Raid boss '{boss.Id}' has invalid loadout requirements.");
+            }
             if (boss.Tiers.Select(x => x.Tier).Distinct().Count() != boss.Tiers.Count)
                 throw new InvalidOperationException($"Raid boss '{boss.Id}' has duplicate tiers.");
 

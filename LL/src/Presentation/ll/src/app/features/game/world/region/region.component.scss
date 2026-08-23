@@ -467,6 +467,10 @@
     grid-template-columns: 1fr;
   }
 
+  .world-map-content.showing-raid {
+    grid-template-columns: 1fr;
+  }
+
   .world-map-content.showing-dungeon .world-map-rail {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -528,6 +532,10 @@
     grid-template-columns: 1fr;
   }
 
+  .world-map-content.showing-raid .world-map-rail {
+    grid-template-columns: 1fr;
+  }
+
   .world-map-content.showing-region-boss .world-map-rail {
     grid-template-columns: 1fr;
   }
@@ -542,4 +550,13 @@
     flex-direction: column;
     gap: var(--ll-space-1);
   }
+}
+
+// Playback owns the full content area at every breakpoint. Keep this after the
+// responsive rail rules so the embedded Region Boss uses the same full battle
+// presentation as arena, tower, raid, and other combat views.
+.world-map-page.region-boss-playback-active
+  .world-map-content.showing-region-boss
+  .world-map-rail {
+  display: none;
 }

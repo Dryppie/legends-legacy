@@ -98,36 +98,38 @@
           </footer>
         </section>
 
-        <section *ngIf="vendor() as shop" class="trophy-vendor panel-card">
-          <header>
-            <div>
-              <span class="eyebrow">Raid boss site</span>
-              <h3>Trophy Exchange</h3>
-            </div>
-            <strong>{{ shop.trophyBalance | number }} Trophies</strong>
-          </header>
-          <article *ngFor="let item of shop.items" class="vendor-item">
-            <div>
-              <strong>{{ item.name }}</strong>
-              <p>{{ item.description }}</p>
-              <small *ngIf="!item.isUnlocked"
-                >Slay {{ difficultyLabel(item.requiredTier) }} to unlock</small
+        <ng-container *ngIf="trophyExchangeEnabled">
+          <section *ngIf="vendor() as shop" class="trophy-vendor panel-card">
+            <header>
+              <div>
+                <span class="eyebrow">Raid boss site</span>
+                <h3>Trophy Exchange</h3>
+              </div>
+              <strong>{{ shop.trophyBalance | number }} Trophies</strong>
+            </header>
+            <article *ngFor="let item of shop.items" class="vendor-item">
+              <div>
+                <strong>{{ item.name }}</strong>
+                <p>{{ item.description }}</p>
+                <small *ngIf="!item.isUnlocked"
+                  >Slay {{ difficultyLabel(item.requiredTier) }} to unlock</small
+                >
+                <small *ngIf="item.weeklyPurchaseLimit"
+                  >Weekly {{ item.weeklyPurchased }}/{{
+                    item.weeklyPurchaseLimit
+                  }}</small
+                >
+              </div>
+              <button
+                type="button"
+                (click)="purchase(item.id)"
+                [disabled]="!item.canPurchase || !!action()"
               >
-              <small *ngIf="item.weeklyPurchaseLimit"
-                >Weekly {{ item.weeklyPurchased }}/{{
-                  item.weeklyPurchaseLimit
-                }}</small
-              >
-            </div>
-            <button
-              type="button"
-              (click)="purchase(item.id)"
-              [disabled]="!item.canPurchase || !!action()"
-            >
-              {{ item.trophyCost }} Trophies
-            </button>
-          </article>
-        </section>
+                {{ item.trophyCost }} Trophies
+              </button>
+            </article>
+          </section>
+        </ng-container>
       </div>
 
       <aside class="muster-rail" aria-label="Raid muster setup">

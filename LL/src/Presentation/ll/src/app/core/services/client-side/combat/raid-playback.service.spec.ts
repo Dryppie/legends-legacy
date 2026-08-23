@@ -197,4 +197,95 @@ describe('RaidPlaybackService', () => {
         .isWaveTransitionHold,
     ).toBeFalse();
   });
+
+  it('materializes sparse wave frames without dropping defeated enemies or summons', () => {
+    const service = TestBed.inject(RaidPlaybackService);
+    const sparseBundle: RaidPlaybackBundle = {
+      ...bundle,
+      schemaVersion: 5,
+      totalTicks: 20,
+      entities: [
+        bundle.entities[0],
+        {
+          index: 1,
+          id: 'rearguard-wave-1-0',
+          name: 'Ant Worker',
+          imagePath: '',
+          isFriendly: false,
+          maxHealth: 100,
+          level: 1,
+        },
+        {
+          index: 2,
+          id: 'rearguard-wave-2-0',
+          name: 'Fire Ant',
+          imagePath: '',
+          isFriendly: false,
+          maxHealth: 120,
+          level: 1,
+        },
+        {
+          index: 3,
+          id: 'summon',
+          name: 'Summon',
+          imagePath: '',
+          isFriendly: true,
+          maxHealth: 50,
+          level: 1,
+        },
+      ],
+      abilities: [],
+      frames: [
+        {
+          sequence: 0,
+          tick: 0,
+          isKeyframe: true,
+          entityStates: [
+            { entityIndex: 0, health: 100, barrier: 0 },
+            { entityIndex: 1, health: 100, barrier: 0 },
+            { entityIndex: 3, health: 50, barrier: 0 },
+          ],
+          entityTotals: [],
+          abilityTotals: [],
+          isFinal: false,
+          outcome: null,
+        },
+        {
+          sequence: 1,
+          tick: 10,
+          isKeyframe: false,
+          entityStates: [
+            { entityIndex: 1, health: 0, barrier: 0 },
+            { entityIndex: 2, health: 120, barrier: 0 },
+            { entityIndex: 3, health: 0, barrier: 0 },
+          ],
+          entityTotals: [],
+          abilityTotals: [],
+          isFinal: false,
+          outcome: null,
+        },
+        {
+          sequence: 2,
+          tick: 20,
+          isKeyframe: false,
+          entityStates: [{ entityIndex: 0, health: 90, barrier: 0 }],
+          entityTotals: [],
+          abilityTotals: [],
+          isFinal: false,
+          outcome: null,
+        },
+      ],
+    };
+
+    const currentWave = service.frameAtTick(sparseBundle, 20);
+    const defeatedWave = service.frameAtTick(sparseBundle, 20, true);
+
+    expect(currentWave.waveNumber).toBe(2);
+    expect(currentWave.hostile[0].id).toBe('rearguard-wave-2-0');
+    expect(
+      currentWave.friendly.find((entity) => entity.id === 'summon')?.health,
+    ).toBe(0);
+    expect(defeatedWave.hostile[0].id).toBe('rearguard-wave-1-0');
+    expect(defeatedWave.hostile[0].health).toBe(0);
+  });
 });

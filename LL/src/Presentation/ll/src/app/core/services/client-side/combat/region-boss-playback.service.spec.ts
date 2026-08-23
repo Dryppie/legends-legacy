@@ -135,6 +135,90 @@ describe('RegionBossPlaybackService', () => {
       },
     ],
   };
+  const deltaBundle: RegionBossPlaybackBundle = {
+    schemaVersion: 3,
+    ticksPerSecond: 10,
+    ticksPerFrame: 10,
+    totalTicks: 20,
+    highestLevelDefeated: 1,
+    currentBossLevel: 2,
+    terminationReason: 'TimeExpired',
+    entities: [
+      {
+        index: 0,
+        id: 'player',
+        name: 'Ascendant',
+        imagePath: '',
+        isFriendly: true,
+        maxHealth: 100,
+        level: 60,
+        partyNumber: 1,
+      },
+      {
+        index: 1,
+        id: 'summon',
+        name: 'Summon',
+        imagePath: '',
+        isFriendly: true,
+        maxHealth: 50,
+        level: 60,
+        partyNumber: 1,
+      },
+      {
+        index: 2,
+        id: 'boss-1',
+        name: 'Boss 1',
+        imagePath: '',
+        isFriendly: false,
+        maxHealth: 100,
+        level: 1,
+        partyNumber: null,
+      },
+      {
+        index: 3,
+        id: 'boss-2',
+        name: 'Boss 2',
+        imagePath: '',
+        isFriendly: false,
+        maxHealth: 100,
+        level: 2,
+        partyNumber: null,
+      },
+    ],
+    abilities: [],
+    frames: [
+      {
+        sequence: 0,
+        tick: 0,
+        isKeyframe: true,
+        entityStates: [state(0, 100), state(1, 50), state(2, 100)],
+        entityTotals: [],
+        abilityTotals: [],
+        isFinal: false,
+        context: { waveNumber: 1, furyStacks: 0, downed: [] },
+      },
+      {
+        sequence: 1,
+        tick: 10,
+        isKeyframe: false,
+        entityStates: [state(0, 90), state(1, 0), state(2, 0), state(3, 100)],
+        entityTotals: [],
+        abilityTotals: [],
+        isFinal: false,
+        context: { waveNumber: 2, furyStacks: 0, downed: [] },
+      },
+      {
+        sequence: 2,
+        tick: 20,
+        isKeyframe: false,
+        entityStates: [state(0, 80), state(3, 50)],
+        entityTotals: [],
+        abilityTotals: [],
+        isFinal: false,
+        context: { waveNumber: 2, furyStacks: 0, downed: [] },
+      },
+    ],
+  };
 
   let service: RegionBossPlaybackService;
   let regionBosses: jasmine.SpyObj<RegionBossService>;
@@ -172,10 +256,35 @@ describe('RegionBossPlaybackService', () => {
     expect(frame.entityStats[0].abilities[0].totalDamage).toBe(25);
   });
 
+  it('applies sparse frames without removing defeated bosses or expired summons', () => {
+    const frame = service.frameAtTick(deltaBundle, 20);
+
+    expect(frame.friendly.map((entity) => [entity.id, entity.health])).toEqual([
+      ['player', 80],
+      ['summon', 0],
+    ]);
+    expect(frame.hostile.map((entity) => [entity.id, entity.health])).toEqual([
+      ['boss-1', 0],
+      ['boss-2', 50],
+    ]);
+  });
+
   it('reuses the immutable playback bundle for the same run', () => {
     service.getBundle('run-id').subscribe();
     service.getBundle('run-id').subscribe();
 
     expect(regionBosses.getPlaybackBundle).toHaveBeenCalledTimes(1);
   });
+
+  function state(entityIndex: number, health: number) {
+    return {
+      entityIndex,
+      health,
+      barrier: 0,
+      currentStagger: 0,
+      maxStagger: 0,
+      isStaggered: false,
+      isStaggerRecovering: false,
+    };
+  }
 });

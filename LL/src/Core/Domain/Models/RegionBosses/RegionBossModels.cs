@@ -128,7 +128,7 @@ public sealed class RegionBossParticipantResult
 
 public sealed class RegionBossPlayback
 {
-    public const int CompactBundleSchemaVersion = 2;
+    public const int CompactBundleSchemaVersion = 3;
 
     public Guid RegionBossRunId { get; set; }
     public RegionBossRun Run { get; set; } = null!;

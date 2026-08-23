@@ -11,6 +11,7 @@ import { CharacterStateService } from '../../../core/services/api/character/char
 import { LocalStorageService } from '../../../core/services/client-side/local-storage/local-storage.service';
 import { SidebarService } from '../../../core/services/client-side/sidebar/sidebar.service';
 import { CurrentDungeonComponent } from '../../../shared/components/current-dungeon/current-dungeon.component';
+import { CurrentRaidComponent } from '../../../shared/components/current-raid/current-raid.component';
 import { SidebarSection, Tab } from '../../../shared/models/sidebar-item';
 import { NumberFormatPipe } from '../../../shared/pipes/number-format/number-format.pipe';
 import { ShortNumberPipe } from '../../../shared/pipes/number-format/short-number.pipe';
@@ -21,6 +22,7 @@ import { QuestTrackerComponent } from '../quest-tracker/quest-tracker.component'
   imports: [
     NgIf,
     CurrentDungeonComponent,
+    CurrentRaidComponent,
     NumberFormatPipe,
     ShortNumberPipe,
     QuestTrackerComponent,

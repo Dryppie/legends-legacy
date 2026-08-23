@@ -121,6 +121,71 @@ describe('TournamentPlaybackService', () => {
     ]);
   });
 
+  it('materializes sparse frames while retaining defeated combatants', () => {
+    const sparseBundle: TournamentPlaybackBundle = {
+      ...bundle,
+      schemaVersion: 3,
+      totalTicks: 30,
+      entities: [
+        ...bundle.entities,
+        {
+          index: 2,
+          id: 'summon',
+          name: 'Summon',
+          imagePath: '',
+          isFriendly: true,
+          maxHealth: 50,
+          level: 1,
+        },
+      ],
+      frames: [
+        {
+          sequence: 0,
+          tick: 0,
+          isKeyframe: true,
+          entityStates: [
+            { entityIndex: 0, health: 100, barrier: 0 },
+            { entityIndex: 1, health: 100, barrier: 0 },
+            { entityIndex: 2, health: 50, barrier: 0 },
+          ],
+          entityTotals: [],
+          abilityTotals: [],
+          isFinal: false,
+        },
+        {
+          sequence: 1,
+          tick: 10,
+          isKeyframe: false,
+          entityStates: [
+            { entityIndex: 1, health: 0, barrier: 0 },
+            { entityIndex: 2, health: 0, barrier: 0 },
+          ],
+          entityTotals: [],
+          abilityTotals: [],
+          isFinal: false,
+        },
+        {
+          sequence: 2,
+          tick: 20,
+          isKeyframe: false,
+          entityStates: [{ entityIndex: 0, health: 90, barrier: 0 }],
+          entityTotals: [],
+          abilityTotals: [],
+          isFinal: false,
+        },
+      ],
+    };
+
+    const frame = service.frameAtTick(sparseBundle, 20);
+
+    expect(frame.friendly.map((entity) => entity.id)).toEqual([
+      'friendly',
+      'summon',
+    ]);
+    expect(frame.friendly[1].health).toBe(0);
+    expect(frame.hostile[0].health).toBe(0);
+  });
+
   it('downloads an immutable bundle only once for the same ETag', () => {
     service.getBundle('tournament', 'match', 'hash').subscribe();
     service.getBundle('tournament', 'match', 'hash').subscribe();

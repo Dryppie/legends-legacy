@@ -110,10 +110,12 @@ describe('RaidService', () => {
     );
 
     service.join('raid-id').subscribe();
+    expect(service.activeRaid()?.id).toBe('raid-id');
     expect(service.activeRaidId()).toBe('raid-id');
     expect(service.activeRaidChatId()).toBe('raid-id');
 
     service.leave('raid-id').subscribe();
+    expect(service.activeRaid()).toBeNull();
     expect(service.activeRaidId()).toBeNull();
     expect(service.activeRaidChatId()).toBeNull();
   });
@@ -133,6 +135,7 @@ describe('RaidService', () => {
 
     service.join('raid-id').subscribe();
 
+    expect(service.activeRaid()?.id).toBe('raid-id');
     expect(service.activeRaidId()).toBe('raid-id');
     expect(service.activeRaidChatId()).toBeNull();
   });

@@ -249,6 +249,7 @@ export interface TowerPlaybackAbility {
 export interface TowerPlaybackBundleFrame {
   sequence: number;
   tick: number;
+  isKeyframe?: boolean;
   entityStates: TowerPlaybackEntityState[];
   entityTotals: TowerPlaybackEntityTotals[];
   abilityTotals: TowerPlaybackAbilityTotals[];

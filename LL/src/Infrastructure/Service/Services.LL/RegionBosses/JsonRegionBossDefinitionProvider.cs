@@ -44,7 +44,7 @@ public sealed class JsonRegionBossDefinitionProvider : IRegionBossDefinitionProv
             if (!IsPositive(boss.BaseScaling.Health) || !IsPositive(boss.BaseScaling.Power)
                 || !IsPositive(boss.BaseScaling.Armor) || !IsPositive(boss.BaseScaling.Resistance)
                 || !IsPositive(boss.BaseScaling.Penetration) || !IsPositive(boss.BaseScaling.Regeneration)
-                || !IsAtLeastOne(boss.LevelScaling.HealthGrowth) || !IsAtLeastOne(boss.LevelScaling.PowerGrowth)
+                || !IsValidGrowthCurve(boss.LevelScaling)
                 || !IsNonNegative(boss.LevelScaling.ArmorGrowthPerLevel)
                 || !IsNonNegative(boss.LevelScaling.ResistanceGrowthPerLevel)
                 || !IsNonNegative(boss.LevelScaling.PenetrationGrowthPerLevel)
@@ -76,6 +76,16 @@ public sealed class JsonRegionBossDefinitionProvider : IRegionBossDefinitionProv
     private static bool IsPositive(double value) => double.IsFinite(value) && value > 0;
     private static bool IsAtLeastOne(double value) => double.IsFinite(value) && value >= 1;
     private static bool IsNonNegative(double value) => double.IsFinite(value) && value >= 0;
+    private static bool IsValidGrowthCurve(RegionBossLevelScalingDefinition scaling) =>
+        scaling.GrowthCurve switch
+        {
+            RegionBossGrowthCurve.Exponential =>
+                IsAtLeastOne(scaling.HealthGrowth) && IsAtLeastOne(scaling.PowerGrowth),
+            RegionBossGrowthCurve.ShiftedPower =>
+                IsPositive(scaling.HealthGrowth) && IsPositive(scaling.HealthGrowthExponent)
+                && IsPositive(scaling.PowerGrowth) && IsPositive(scaling.PowerGrowthExponent),
+            _ => false
+        };
     private static bool IsPercentage(double value, bool allowZero) =>
         double.IsFinite(value) && value <= 100 && (allowZero ? value >= 0 : value > 0);
 }

@@ -2,7 +2,8 @@ namespace Domain.Models.Colosseum.Tournaments;
 
 public sealed class TournamentCombatReplay
 {
-    public const int CompactBundleSchemaVersion = 2;
+    public const int MinimumCompactBundleSchemaVersion = 2;
+    public const int CompactBundleSchemaVersion = 3;
 
     public Guid Id { get; set; }
     public Guid TournamentId { get; set; }

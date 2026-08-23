@@ -222,6 +222,7 @@ export interface TournamentPlaybackAbility {
 export interface TournamentPlaybackFrame {
   sequence: number;
   tick: number;
+  isKeyframe?: boolean;
   entityStates: TournamentPlaybackEntityState[];
   entityTotals: TournamentPlaybackEntityTotals[];
   abilityTotals: TournamentPlaybackAbilityTotals[];

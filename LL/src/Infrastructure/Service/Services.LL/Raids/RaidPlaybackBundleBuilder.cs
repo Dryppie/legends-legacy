@@ -18,6 +18,7 @@ public sealed class RaidPlaybackBundleBuilder(
     TimeProvider timeProvider) : IRaidPlaybackBundleBuilder
 {
     private const int TicksPerFrame = 10;
+    private const int KeyframeIntervalTicks = 30 * FastCombatEngine.TicksPerSecond;
     private const int MaximumUncompressedBytes = 16 * 1024 * 1024;
     private const int MaximumCompressedBytes = 4 * 1024 * 1024;
 
@@ -85,9 +86,15 @@ public sealed class RaidPlaybackBundleBuilder(
             x => (x.EntityIndex, x.Name),
             x => x.Index);
 
-        var frames = capture.Checkpoints.Select(checkpoint =>
+        var materializedStates = new Dictionary<int, RaidPlaybackEntityStateDto>();
+        var materializedTotals = new Dictionary<int, RaidPlaybackEntityTotalsDto>();
+        var materializedAbilityTotals = new Dictionary<int, RaidPlaybackAbilityTotalsDto>();
+        var frames = new RaidPlaybackFrameDto[capture.Checkpoints.Count];
+        var lastKeyframeTick = int.MinValue;
+        for (var checkpointIndex = 0; checkpointIndex < capture.Checkpoints.Count; checkpointIndex++)
         {
-            var state = checkpoint.Friendly
+            var checkpoint = capture.Checkpoints[checkpointIndex];
+            var currentStates = checkpoint.Friendly
                 .Concat(checkpoint.Hostile)
                 .Select(entity => new RaidPlaybackEntityStateDto(
                     entityById[entity.Id].Index,
@@ -99,7 +106,7 @@ public sealed class RaidPlaybackBundleBuilder(
                     entity.IsStaggerRecovering))
                 .OrderBy(x => x.EntityIndex)
                 .ToArray();
-            var totals = checkpoint.EntityStats
+            var currentTotals = checkpoint.EntityStats
                 .Where(entity => entityById.ContainsKey(entity.EntityId))
                 .Select(entity => new RaidPlaybackEntityTotalsDto(
                     entityById[entity.EntityId].Index,
@@ -115,7 +122,7 @@ public sealed class RaidPlaybackBundleBuilder(
                     entity.StaggerBreaks))
                 .OrderBy(x => x.EntityIndex)
                 .ToArray();
-            var abilityTotals = checkpoint.EntityStats
+            var currentAbilityTotals = checkpoint.EntityStats
                 .Where(entity => entityById.ContainsKey(entity.EntityId))
                 .SelectMany(entity => entity.Abilities.Select(ability =>
                     new RaidPlaybackAbilityTotalsDto(
@@ -124,21 +131,45 @@ public sealed class RaidPlaybackBundleBuilder(
                         ability.TotalDamage,
                         ability.TotalHealing,
                         ability.TotalBarrier,
-                        ability.DamageByType,
+                        ability.DamageByType?.ToArray(),
                         ability.TotalThreat,
                         ability.TotalStagger,
                         ability.StaggerBreaks)))
                 .OrderBy(x => x.AbilityIndex)
                 .ToArray();
-            return new RaidPlaybackFrameDto(
+
+            var isKeyframe = checkpointIndex == 0
+                || checkpoint.IsFinal
+                || checkpoint.Tick - lastKeyframeTick >= KeyframeIntervalTicks;
+            var states = ApplyChanges(
+                currentStates,
+                materializedStates,
+                state => state.EntityIndex,
+                isKeyframe);
+            var totals = ApplyChanges(
+                currentTotals,
+                materializedTotals,
+                total => total.EntityIndex,
+                isKeyframe);
+            var abilityTotals = ApplyChanges(
+                currentAbilityTotals,
+                materializedAbilityTotals,
+                total => total.AbilityIndex,
+                isKeyframe,
+                AbilityTotalsEqual);
+            if (isKeyframe)
+                lastKeyframeTick = checkpoint.Tick;
+
+            frames[checkpointIndex] = new RaidPlaybackFrameDto(
                 checkpoint.Sequence,
                 checkpoint.Tick,
-                state,
+                isKeyframe,
+                states,
                 totals,
                 abilityTotals,
                 checkpoint.IsFinal,
                 checkpoint.IsFinal ? capture.Result.Outcome : null);
-        }).ToArray();
+        }
 
         return new RaidPlaybackBundleDto(
             RaidPlayback.CompactBundleSchemaVersion,
@@ -148,6 +179,47 @@ public sealed class RaidPlaybackBundleBuilder(
             entities,
             abilities,
             frames);
+
+        static IReadOnlyList<T> ApplyChanges<T>(
+            IEnumerable<T> current,
+            IDictionary<int, T> materialized,
+            Func<T, int> getIndex,
+            bool isKeyframe,
+            Func<T, T, bool>? equals = null)
+        {
+            equals ??= EqualityComparer<T>.Default.Equals;
+            var changed = new List<T>();
+            foreach (var value in current)
+            {
+                var index = getIndex(value);
+                if (!materialized.TryGetValue(index, out var previous) || !equals(previous, value))
+                    changed.Add(value);
+                materialized[index] = value;
+            }
+
+            return isKeyframe
+                ? materialized.OrderBy(pair => pair.Key).Select(pair => pair.Value).ToArray()
+                : changed;
+        }
+
+        static bool AbilityTotalsEqual(
+            RaidPlaybackAbilityTotalsDto left,
+            RaidPlaybackAbilityTotalsDto right) =>
+            left.AbilityIndex == right.AbilityIndex
+            && left.Uses == right.Uses
+            && left.TotalDamage == right.TotalDamage
+            && left.TotalHealing == right.TotalHealing
+            && left.TotalBarrier == right.TotalBarrier
+            && DamageByTypeEqual(left.DamageByType, right.DamageByType)
+            && left.TotalThreat == right.TotalThreat
+            && left.TotalStagger == right.TotalStagger
+            && left.StaggerBreaks == right.StaggerBreaks;
+
+        static bool DamageByTypeEqual(
+            IReadOnlyList<AbilityDamageTypeStats>? left,
+            IReadOnlyList<AbilityDamageTypeStats>? right) =>
+            ReferenceEquals(left, right)
+            || left is not null && right is not null && left.SequenceEqual(right);
 
         void AddEntities(IEnumerable<SimpleCombatEntity> source, bool isFriendly)
         {

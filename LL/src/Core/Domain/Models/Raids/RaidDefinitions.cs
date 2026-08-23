@@ -1,17 +1,21 @@
 using Domain.Models.Combat;
+using Domain.Models.Items;
 
 namespace Domain.Models.Raids;
 
 public static class RaidRules
 {
-    public const int Version = 7;
+    public const int Version = 10;
 }
 
 public static class RaidPlusDifficulty
 {
-    public const double RecommendedPowerGrowth = 1.085d;
-    private const double HealthGrowth = 1.10d;
-    private const double OffenseGrowth = 1.075d;
+    public const double RecommendedPowerGrowth = 0.085d;
+    private const double RecommendedPowerGrowthExponent = 1.20d;
+    private const double HealthGrowth = 0.50d;
+    private const double HealthGrowthExponent = 1.50d;
+    private const double OffenseGrowth = 0.075d;
+    private const double OffenseGrowthExponent = 1.20d;
     private const double DefenseGrowth = 0.045d;
     private const double PenetrationGrowth = 0.03d;
     private const double RegenerationGrowth = 0.05d;
@@ -34,9 +38,12 @@ public static class RaidPlusDifficulty
             SignupWindowHours = regular.SignupWindowHours,
             RecommendedWingPower = new RaidRecommendedWingPowerDefinition
             {
-                Rearguard = ScaleInt(regular.RecommendedWingPower.Rearguard, RecommendedPowerGrowth, plusLevel),
-                Vanguard = ScaleInt(regular.RecommendedWingPower.Vanguard, RecommendedPowerGrowth, plusLevel),
-                MainGuard = ScaleInt(regular.RecommendedWingPower.MainGuard, RecommendedPowerGrowth, plusLevel)
+                Rearguard = ScalePower(regular.RecommendedWingPower.Rearguard, RecommendedPowerGrowth,
+                    RecommendedPowerGrowthExponent, plusLevel),
+                Vanguard = ScalePower(regular.RecommendedWingPower.Vanguard, RecommendedPowerGrowth,
+                    RecommendedPowerGrowthExponent, plusLevel),
+                MainGuard = ScalePower(regular.RecommendedWingPower.MainGuard, RecommendedPowerGrowth,
+                    RecommendedPowerGrowthExponent, plusLevel)
             },
             TickBudget = new RaidTickBudgetDefinition
             {
@@ -114,8 +121,8 @@ public static class RaidPlusDifficulty
         RaidAttributeScalingDefinition value,
         int plusLevel) => new()
     {
-        Health = ScaleFloat(value.Health, Math.Pow(HealthGrowth, plusLevel)),
-        Offense = ScaleFloat(value.Offense, Math.Pow(OffenseGrowth, plusLevel)),
+        Health = ScaleFloat(value.Health, ShiftedPowerMultiplier(HealthGrowth, HealthGrowthExponent, plusLevel)),
+        Offense = ScaleFloat(value.Offense, ShiftedPowerMultiplier(OffenseGrowth, OffenseGrowthExponent, plusLevel)),
         Defense = ScaleFloat(value.Defense, 1d + DefenseGrowth * plusLevel),
         Resistance = ScaleFloat(value.Resistance, 1d + DefenseGrowth * plusLevel),
         Penetration = ScaleFloat(value.Penetration, 1d + PenetrationGrowth * plusLevel),
@@ -130,8 +137,11 @@ public static class RaidPlusDifficulty
         return (float)scaled;
     }
 
-    private static int ScaleInt(int value, double growth, int plusLevel) =>
-        ScaleToInt(value * Math.Pow(growth, plusLevel));
+    private static int ScalePower(int value, double growth, double exponent, int plusLevel) =>
+        ScaleToInt(value * ShiftedPowerMultiplier(growth, exponent, plusLevel));
+
+    private static double ShiftedPowerMultiplier(double growth, double exponent, int plusLevel) =>
+        1d + growth * Math.Pow(plusLevel, exponent);
 
     private static int ScaleLinear(int value, double growth, int plusLevel) =>
         ScaleToInt(value * (1d + growth * plusLevel));
@@ -177,6 +187,10 @@ public sealed class RaidBossDefinition
     public int LevelRequirement { get; init; }
     public string? RequiredCompletedQuestId { get; init; }
     public int? RequiredTowerFloor { get; init; }
+    public int RequiredEquipmentTier { get; init; }
+    public Rarity RequiredArmorRarity { get; init; } = Rarity.Common;
+    public bool RequiresBlueprintArmor { get; init; }
+    public int RequiredEquippedEssences { get; init; }
     public string ImagePath { get; init; } = string.Empty;
     public IReadOnlyList<RaidBossTierDefinition> Tiers { get; init; } = [];
 }

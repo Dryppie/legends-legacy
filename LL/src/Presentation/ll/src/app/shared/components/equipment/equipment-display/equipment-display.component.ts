@@ -2,6 +2,7 @@ import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import {
   AttributeTypeFormatPipe,
+  formatAttributeType,
   isPercentAttribute,
 } from '../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import {
@@ -35,6 +36,8 @@ import { EquipmentSlotType } from '../../../models/Dtos/equipment-slots/equipmen
 import { sortAttributes } from '../../../utils/attributes/attribute-order.utils';
 import { EquippedComparison } from '../../../utils/equipment/equipment.utils';
 import { ToolBonusTooltipDirective } from '../../../directives/tool-bonus-tooltip/tool-bonus-tooltip.directive';
+import { TemperingBonusTooltipDirective } from '../../../directives/tempering-bonus-tooltip/tempering-bonus-tooltip.directive';
+import { TemperingBonusTooltipData } from '../../custom-components/tooltips/tempering-bonus-tooltip/tempering-bonus-tooltip-panel.component';
 
 interface EquipmentComparisonView {
   slotType: EquipmentSlotType | null;
@@ -53,6 +56,7 @@ interface EquipmentComparisonView {
     AttributeValueFormatPipe,
     AttributeTooltipDirective,
     ToolBonusTooltipDirective,
+    TemperingBonusTooltipDirective,
     DecimalPipe,
   ],
   templateUrl: './equipment-display.component.html',
@@ -211,17 +215,9 @@ export class EquipmentDisplayComponent {
     const range = this.attributeRollRange(item, attributeType);
     if (!range) return null;
 
+    if (!range.hasCraftedRange) return null;
+
     const equipmentRating = this.usesV16EquipmentPresentation(item);
-    const rarityBonus =
-      range.rarityBonusAmount > 0
-        ? `Rarity ${formatAttributeValue(
-            range.rarityBonusAmount,
-            attributeType,
-            true,
-            equipmentRating,
-          )}`
-        : '';
-    if (!range.hasCraftedRange) return rarityBonus || null;
 
     const minimum = formatAttributeValue(
       range.minimumAmount,
@@ -235,7 +231,59 @@ export class EquipmentDisplayComponent {
       false,
       equipmentRating,
     );
-    return ` / ${minimum}–${maximum}${rarityBonus ? ` · ${rarityBonus}` : ''}`;
+    return ` / ${minimum}–${maximum}`;
+  }
+
+  temperingBonus(
+    item: EquipmentDisplay,
+    attributeType: AttributeType,
+  ): EquipmentAttributeRollRange | null {
+    const range = this.attributeRollRange(item, attributeType);
+    return range && range.rarityBonusAmount > 0 ? range : null;
+  }
+
+  formatTemperingBonus(
+    item: EquipmentDisplay,
+    attributeType: AttributeType,
+  ): string {
+    const bonus = this.temperingBonus(item, attributeType)?.rarityBonusAmount;
+    return formatAttributeValue(
+      bonus,
+      attributeType,
+      true,
+      this.usesV16EquipmentPresentation(item),
+    );
+  }
+
+  temperingTooltipData(
+    item: EquipmentDisplay,
+    attributeType: AttributeType,
+    finalAmount: number,
+  ): TemperingBonusTooltipData {
+    const bonus =
+      this.temperingBonus(item, attributeType)?.rarityBonusAmount ?? 0;
+    const equipmentRating = this.usesV16EquipmentPresentation(item);
+    return {
+      attributeName: formatAttributeType(attributeType, equipmentRating),
+      originalAmount: formatAttributeValue(
+        finalAmount - bonus,
+        attributeType,
+        false,
+        equipmentRating,
+      ),
+      bonusAmount: formatAttributeValue(
+        bonus,
+        attributeType,
+        true,
+        equipmentRating,
+      ),
+      finalAmount: formatAttributeValue(
+        finalAmount,
+        attributeType,
+        false,
+        equipmentRating,
+      ),
+    };
   }
 
   rollPercentage(value: number, minimum: number, maximum: number): number {

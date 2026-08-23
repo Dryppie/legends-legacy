@@ -29,6 +29,7 @@ public sealed record TowerPlaybackAbilityDto(
 public sealed record TowerPlaybackBundleFrameDto(
     int Sequence,
     int Tick,
+    bool IsKeyframe,
     IReadOnlyList<TowerPlaybackEntityStateDto> EntityStates,
     IReadOnlyList<TowerPlaybackEntityTotalsDto> EntityTotals,
     IReadOnlyList<TowerPlaybackAbilityTotalsDto> AbilityTotals,

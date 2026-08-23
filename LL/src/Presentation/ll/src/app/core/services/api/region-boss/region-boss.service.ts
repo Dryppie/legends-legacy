@@ -93,6 +93,7 @@ export interface RegionBossStatus {
 export interface RegionBossPlaybackFrame {
   sequence: number;
   tick: number;
+  isKeyframe?: boolean;
   entityStates?: RegionBossPlaybackEntityState[];
   entityTotals?: RegionBossPlaybackEntityTotals[];
   abilityTotals?: RegionBossPlaybackAbilityTotals[];

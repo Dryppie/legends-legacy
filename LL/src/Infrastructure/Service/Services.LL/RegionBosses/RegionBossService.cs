@@ -665,7 +665,22 @@ public sealed class RegionBossService(
         try
         {
             var resolution = await combatResolver.ResolveAsync(run, definition, cancellationToken);
-            var playback = playbackBundles.Build(run.Id, resolution);
+            RegionBossPlayback? playback = null;
+            try
+            {
+                playback = playbackBundles.Build(run.Id, resolution);
+            }
+            catch (RegionBossPlaybackSizeLimitExceededException exception)
+            {
+                logger.LogWarning(
+                    exception,
+                    "Region Boss run {RunId} resolved without playback because its {SizeKind} bundle size "
+                    + "was {ActualBytes} bytes and exceeded the {MaximumBytes} byte limit.",
+                    runId,
+                    exception.SizeKind,
+                    exception.ActualBytes,
+                    exception.MaximumBytes);
+            }
             await using var persistTransaction = await db.BeginTransactionAsync(cancellationToken);
             await db.AcquireRegionBossRunLockAsync(runId, cancellationToken);
             db.ClearTrackedEntities();
@@ -696,8 +711,11 @@ public sealed class RegionBossService(
                 tracked.ParticipantResults.Add(participant);
                 db.RegionBossParticipantResults.Add(participant);
             }
-            tracked.Playback = playback;
-            db.RegionBossPlaybacks.Add(playback);
+            if (playback is not null)
+            {
+                tracked.Playback = playback;
+                db.RegionBossPlaybacks.Add(playback);
+            }
             tracked.RowVersion++;
             await db.SaveChangesAsync(cancellationToken);
             await persistTransaction.CommitAsync(cancellationToken);

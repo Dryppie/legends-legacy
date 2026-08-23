@@ -189,6 +189,7 @@ public sealed record RaidPlaybackAbilityDto(int Index, int EntityIndex, string N
 public sealed record RaidPlaybackFrameDto(
     int Sequence,
     int Tick,
+    bool IsKeyframe,
     IReadOnlyList<RaidPlaybackEntityStateDto> EntityStates,
     IReadOnlyList<RaidPlaybackEntityTotalsDto> EntityTotals,
     IReadOnlyList<RaidPlaybackAbilityTotalsDto> AbilityTotals,

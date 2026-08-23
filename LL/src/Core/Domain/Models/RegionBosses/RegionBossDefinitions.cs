@@ -4,7 +4,7 @@ namespace Domain.Models.RegionBosses;
 
 public static class RegionBossRules
 {
-    public const int Version = 1;
+    public const int Version = 3;
     public const int MatchmakingAlgorithmVersion = 2;
     public const int PartySizeScalingVersion = 1;
     public const int MaximumPartySize = 5;
@@ -52,11 +52,20 @@ public sealed class RegionBossBaseScalingDefinition
 
 public sealed class RegionBossLevelScalingDefinition
 {
+    public RegionBossGrowthCurve GrowthCurve { get; init; } = RegionBossGrowthCurve.Exponential;
     public double HealthGrowth { get; init; } = 1.12;
+    public double HealthGrowthExponent { get; init; } = 1;
     public double PowerGrowth { get; init; } = 1.055;
+    public double PowerGrowthExponent { get; init; } = 1;
     public double ArmorGrowthPerLevel { get; init; } = 0.03;
     public double ResistanceGrowthPerLevel { get; init; } = 0.03;
     public double PenetrationGrowthPerLevel { get; init; }
+}
+
+public enum RegionBossGrowthCurve
+{
+    Exponential,
+    ShiftedPower
 }
 
 public sealed class RegionBossFuryDefinition

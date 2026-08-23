@@ -89,6 +89,21 @@
                 >
                   {{ rangeSummary }}
                 </span>
+                <span
+                  *ngIf="temperingBonus(data, comparison.attributeType)"
+                  data-testid="tempering-bonus"
+                  class="equipment-tempering-bonus"
+                  [appTemperingBonusTooltip]="
+                    temperingTooltipData(
+                      data,
+                      comparison.attributeType,
+                      comparison.hoveredAmount
+                    )
+                  "
+                >
+                  <span aria-hidden="true">✦</span>
+                  {{ formatTemperingBonus(data, comparison.attributeType) }}
+                </span>
               </ng-container>
               <ng-template #noHoveredAttribute>&mdash;</ng-template>
             </span>
@@ -205,6 +220,28 @@
                   class="text-[0.62rem] font-normal text-secondary"
                 >
                   {{ rangeSummary }}
+                </span>
+                <span
+                  *ngIf="
+                    temperingBonus(equipped.data, comparison.attributeType)
+                  "
+                  data-testid="tempering-bonus"
+                  class="equipment-tempering-bonus"
+                  [appTemperingBonusTooltip]="
+                    temperingTooltipData(
+                      equipped.data,
+                      comparison.attributeType,
+                      equippedAmount(equipped, comparison.attributeType)
+                    )
+                  "
+                >
+                  <span aria-hidden="true">✦</span>
+                  {{
+                    formatTemperingBonus(
+                      equipped.data,
+                      comparison.attributeType
+                    )
+                  }}
                 </span>
               </ng-container>
               <ng-template #noEquippedAttribute>&mdash;</ng-template>
@@ -476,6 +513,21 @@
                   {{ rangeSummary }}
                 </span>
                 <span
+                  *ngIf="temperingBonus(data, comparison.attributeType)"
+                  data-testid="tempering-bonus"
+                  class="equipment-tempering-bonus"
+                  [appTemperingBonusTooltip]="
+                    temperingTooltipData(
+                      data,
+                      comparison.attributeType,
+                      comparison.hoveredAmount
+                    )
+                  "
+                >
+                  <span aria-hidden="true">✦</span>
+                  {{ formatTemperingBonus(data, comparison.attributeType) }}
+                </span>
+                <span
                   data-testid="inline-comparison-difference"
                   [attr.data-attribute]="comparison.attributeType"
                   class="equipment-inline-delta"
@@ -539,13 +591,9 @@
           <span class="text-primary">{{ formatToolBonusAmount(bonus) }}</span>
         </div>
 
-        <div
-          *ngFor="let attr of data.attributes"
-          class="equipment-design-row"
-          [appAttributeTooltip]="attr"
-        >
+        <div *ngFor="let attr of data.attributes" class="equipment-design-row">
           <div class="flex items-baseline justify-between gap-3 text-xs">
-            <span class="truncate text-white">
+            <span class="truncate text-white" [appAttributeTooltip]="attr">
               {{
                 attr.attributeType
                   | attributeTypeFormat: usesV16EquipmentPresentation(data)
@@ -571,6 +619,17 @@
                 class="text-[0.62rem] text-secondary"
               >
                 {{ rangeSummary }}
+              </span>
+              <span
+                *ngIf="temperingBonus(data, attr.attributeType)"
+                data-testid="tempering-bonus"
+                class="equipment-tempering-bonus"
+                [appTemperingBonusTooltip]="
+                  temperingTooltipData(data, attr.attributeType, attr.amount)
+                "
+              >
+                <span aria-hidden="true">✦</span>
+                {{ formatTemperingBonus(data, attr.attributeType) }}
               </span>
             </span>
           </div>

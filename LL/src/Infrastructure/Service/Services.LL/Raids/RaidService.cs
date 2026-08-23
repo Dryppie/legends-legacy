@@ -13,6 +13,7 @@ using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Quests;
 using Domain.Models.Raids;
 using Domain.Models.Essences;
@@ -713,6 +714,22 @@ public sealed class RaidService(
         var signup = run.Signups.SingleOrDefault(x => x.CharacterId == characterId);
         if (signup is null)
             return RaidOperationResult<RaidRunDto>.Fail("This character is not signed up for the raid.");
+        var boss = definitions.Get(run.RaidBossId);
+        if (boss is null)
+            return RaidOperationResult<RaidRunDto>.Fail("Raid boss content is unavailable.");
+        var characterLevel = await db.Characters.AsNoTracking()
+            .Where(character => character.Id == characterId)
+            .Select(character => (int?)character.Level)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (!characterLevel.HasValue)
+            return RaidOperationResult<RaidRunDto>.Fail("Character was not found.");
+        var loadoutError = await GetBossUnlockErrorAsync(
+            characterId,
+            characterLevel.Value,
+            boss,
+            cancellationToken);
+        if (loadoutError is not null)
+            return RaidOperationResult<RaidRunDto>.Fail(loadoutError);
         var rating = await powerRatings.GetCharacterRatingAsync(characterId, cancellationToken);
         if (rating.State != PowerAnalysisState.Available)
             return RaidOperationResult<RaidRunDto>.Fail(rating.StatusMessage ?? "Combat Rating is unavailable.");
@@ -1577,7 +1594,59 @@ public sealed class RaidService(
         {
             return $"Requires World Tower floor {boss.RequiredTowerFloor.Value}.";
         }
-        return null;
+        return await GetLoadoutRequirementErrorAsync(characterId, boss, cancellationToken);
+    }
+
+    private async Task<string?> GetLoadoutRequirementErrorAsync(
+        Guid characterId,
+        RaidBossDefinition boss,
+        CancellationToken cancellationToken)
+    {
+        if (boss.RequiredEquipmentTier <= 0 && boss.RequiredEquippedEssences <= 0)
+            return null;
+
+        var requiredArmorSlots = new[]
+        {
+            EquipmentSlotType.Head,
+            EquipmentSlotType.Chest,
+            EquipmentSlotType.Legs
+        };
+        var armor = await db.EquipmentSlots.AsNoTracking()
+            .Where(slot => slot.EntityId == characterId
+                           && requiredArmorSlots.Contains(slot.EquipmentSlotType)
+                           && slot.EquipmentInstance != null)
+            .Select(slot => new
+            {
+                slot.EquipmentSlotType,
+                slot.EquipmentInstance!.Tier,
+                slot.EquipmentInstance.Rarity,
+                slot.EquipmentInstance.BlueprintId
+            })
+            .ToArrayAsync(cancellationToken);
+        var armorMeetsRequirement = requiredArmorSlots.All(requiredSlot =>
+            armor.Any(item => item.EquipmentSlotType == requiredSlot
+                              && item.Tier >= boss.RequiredEquipmentTier
+                              && item.Rarity >= boss.RequiredArmorRarity
+                              && (!boss.RequiresBlueprintArmor
+                                  || !string.IsNullOrWhiteSpace(item.BlueprintId))));
+        if (!armorMeetsRequirement)
+        {
+            var blueprintLabel = boss.RequiresBlueprintArmor ? "Blueprint-crafted " : string.Empty;
+            return $"Requires {blueprintLabel}Tier {boss.RequiredEquipmentTier} "
+                   + $"{boss.RequiredArmorRarity} or better armor in Head, Chest, and Legs.";
+        }
+
+        if (boss.RequiredEquippedEssences <= 0)
+            return null;
+        var loadouts = await db.EssenceLoadouts.AsNoTracking()
+            .Where(loadout => loadout.CharacterId == characterId)
+            .Include(loadout => loadout.Slots)
+            .ToArrayAsync(cancellationToken);
+        var raidLoadout = EssenceLoadoutSelection.Select(loadouts, EssenceCombatActivity.Raid);
+        var equippedEssenceCount = raidLoadout?.Slots.Count(slot => slot.PlayerEssenceId.HasValue) ?? 0;
+        return equippedEssenceCount < boss.RequiredEquippedEssences
+            ? $"Requires {boss.RequiredEquippedEssences} equipped Essences in the Raid loadout."
+            : null;
     }
 
     private static RaidSignup CreateSignup(

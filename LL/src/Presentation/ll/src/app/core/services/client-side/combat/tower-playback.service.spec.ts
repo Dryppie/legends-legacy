@@ -127,6 +127,75 @@ describe('TowerPlaybackService', () => {
     expect(frame.outcome).toBe(BattleOutcome.Victory);
   });
 
+  it('materializes sparse frames without dropping defeated or expired entities', () => {
+    const sparseBundle: TowerPlaybackBundle = {
+      ...bundle,
+      schemaVersion: 5,
+      totalTicks: 20,
+      entities: [
+        bundle.entities[0],
+        { ...bundle.entities[1], index: 1 },
+        {
+          index: 2,
+          id: 'summon',
+          name: 'Summon',
+          imagePath: '',
+          isFriendly: true,
+          maxHealth: 50,
+          level: 60,
+        },
+      ],
+      frames: [
+        {
+          sequence: 0,
+          tick: 0,
+          isKeyframe: true,
+          entityStates: [
+            { entityIndex: 0, health: 100, barrier: 0 },
+            { entityIndex: 1, health: 200, barrier: 0 },
+            { entityIndex: 2, health: 50, barrier: 0 },
+          ],
+          entityTotals: [],
+          abilityTotals: [],
+          isFinal: false,
+          outcome: null,
+        },
+        {
+          sequence: 1,
+          tick: 10,
+          isKeyframe: false,
+          entityStates: [
+            { entityIndex: 1, health: 100, barrier: 0 },
+            { entityIndex: 2, health: 0, barrier: 0 },
+          ],
+          entityTotals: [],
+          abilityTotals: [],
+          isFinal: false,
+          outcome: null,
+        },
+        {
+          sequence: 2,
+          tick: 20,
+          isKeyframe: false,
+          entityStates: [{ entityIndex: 1, health: 0, barrier: 0 }],
+          entityTotals: [],
+          abilityTotals: [],
+          isFinal: true,
+          outcome: BattleOutcome.Victory,
+        },
+      ],
+    };
+
+    const frame = service.frameAtTick(sparseBundle, 20);
+
+    expect(frame.friendly.map((entity) => entity.id)).toEqual([
+      'player',
+      'summon',
+    ]);
+    expect(frame.friendly[1].health).toBe(0);
+    expect(frame.hostile[0].health).toBe(0);
+  });
+
   it('reuses the immutable bundle request for the same attempt and ETag', () => {
     service.getBundle('attempt', 'hash').subscribe();
     service.getBundle('attempt', 'hash').subscribe();

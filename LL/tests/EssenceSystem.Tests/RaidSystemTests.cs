@@ -1,5 +1,6 @@
 using System.IO.Compression;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Raids;
 using Application.Interfaces.Services.LL.PowerRatings;
@@ -12,6 +13,10 @@ using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.Essences;
+using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Raids;
 using Domain.Models.Snapshots;
 using Domain.Models.Users;
@@ -74,8 +79,87 @@ public sealed class RaidSystemTests
         Assert.NotNull(bundle);
         Assert.Equal(RaidPlayback.CompactBundleSchemaVersion, bundle.SchemaVersion);
         var frame = Assert.Single(bundle.Frames);
+        Assert.True(frame.IsKeyframe);
         Assert.Equal(34, Assert.Single(frame.EntityTotals).ThreatGenerated);
         Assert.Equal(34, Assert.Single(frame.AbilityTotals).TotalThreat);
+    }
+
+    [Fact]
+    public void Raid_delta_playback_retains_entities_that_disappear_after_death_or_expiration()
+    {
+        var player = Entity("player", "Player", 100);
+        var summonAlive = Entity("summon", "Summon", 50);
+        var bossAlive = Entity("boss", "Boss", 100);
+        var summonDead = Entity("summon", "Summon", 0);
+        var bossDead = Entity("boss", "Boss", 0);
+        var checkpoints = new[]
+        {
+            Checkpoint(0, false, [player, summonAlive], [bossAlive]),
+            Checkpoint(10, false, [player, summonDead], [bossDead]),
+            Checkpoint(20, true, [player], [])
+        };
+        var result = new CombatResult
+        {
+            Duration = 20,
+            Outcome = BattleOutcome.Victory,
+            PlayerTeam = [player],
+            EntityStats = checkpoints[^1].EntityStats.ToList()
+        };
+        var playback = new RaidPlaybackBundleBuilder(
+                new JsonSerializerOptions(JsonSerializerDefaults.Web),
+                TimeProvider.System)
+            .Build(
+                Guid.NewGuid(),
+                new RaidLanePlaybackCapture(RaidLane.FinalAssault, result, checkpoints));
+
+        using var compressed = new MemoryStream(playback.Artifact.BundleBytes);
+        using var decompressed = new BrotliStream(compressed, CompressionMode.Decompress);
+        var bundle = JsonSerializer.Deserialize<RaidPlaybackBundleDto>(
+            decompressed,
+            new JsonSerializerOptions(JsonSerializerDefaults.Web));
+
+        Assert.NotNull(bundle);
+        var entityIndex = bundle.Entities.ToDictionary(entity => entity.Id, entity => entity.Index);
+        Assert.True(bundle.Frames[0].IsKeyframe);
+        Assert.False(bundle.Frames[1].IsKeyframe);
+        Assert.True(bundle.Frames[2].IsKeyframe);
+        Assert.Equal(3, bundle.Frames[2].EntityStates.Count);
+        Assert.Equal(3, bundle.Frames[2].EntityTotals.Count);
+        Assert.Equal(0, bundle.Frames[2].EntityStates.Single(
+            state => state.EntityIndex == entityIndex["summon"]).Health);
+        Assert.Equal(0, bundle.Frames[2].EntityStates.Single(
+            state => state.EntityIndex == entityIndex["boss"]).Health);
+
+        static SimpleCombatEntity Entity(string id, string name, int health) => new()
+        {
+            Id = id,
+            Name = name,
+            ImagePath = string.Empty,
+            Health = health,
+            MaxHealth = 100,
+            Level = 60
+        };
+
+        static CombatCheckpoint Checkpoint(
+            int tick,
+            bool isFinal,
+            IReadOnlyList<SimpleCombatEntity> friendly,
+            IReadOnlyList<SimpleCombatEntity> hostile)
+        {
+            var entities = friendly.Concat(hostile).ToArray();
+            return new CombatCheckpoint(
+                tick / 10,
+                tick,
+                friendly,
+                hostile,
+                entities.Select(entity => new EntityStats(
+                    entity.Id,
+                    entity.Name,
+                    [],
+                    DamageDone: tick)).ToArray(),
+                [],
+                isFinal);
+        }
     }
 
     [Fact]
@@ -96,7 +180,7 @@ public sealed class RaidSystemTests
     }
 
     [Fact]
-    public void Raid_plus_difficulty_scales_from_regular_without_changing_roster_or_timers()
+    public void Raid_plus_difficulty_uses_shifted_power_growth_without_changing_roster_or_timers()
     {
         var regular = new RaidBossTierDefinition
         {
@@ -179,9 +263,9 @@ public sealed class RaidSystemTests
             plusThree.TickBudget.Vanguard,
             plusThree.TickBudget.MainGuard,
             plusThree.TickBudget.FinalAssault));
-        Assert.Equal(128, plusThree.RecommendedWingPower.Rearguard);
-        Assert.Equal(133.1f, plusThree.Boss.Scaling.Health, 1);
-        Assert.Equal(124.2f, plusThree.Boss.Scaling.Offense, 1);
+        Assert.Equal(132, plusThree.RecommendedWingPower.Rearguard);
+        Assert.Equal(359.8f, plusThree.Boss.Scaling.Health, 1);
+        Assert.Equal(128f, plusThree.Boss.Scaling.Offense, 1);
         Assert.Equal(113.5f, plusThree.Boss.Scaling.Defense, 1);
         Assert.Equal(109f, plusThree.Boss.Scaling.Penetration, 1);
         Assert.Equal(115f, plusThree.Boss.Scaling.Regeneration, 1);
@@ -196,6 +280,42 @@ public sealed class RaidSystemTests
     }
 
     [Fact]
+    public void Raid_plus_one_preserves_the_existing_first_step_in_difficulty()
+    {
+        var regular = new RaidBossTierDefinition
+        {
+            RecommendedWingPower = new RaidRecommendedWingPowerDefinition
+            {
+                Rearguard = 100,
+                Vanguard = 200,
+                MainGuard = 300
+            },
+            Boss = new RaidBossCombatDefinition
+            {
+                Scaling = new RaidAttributeScalingDefinition
+                {
+                    Health = 100,
+                    Offense = 100,
+                    Defense = 100,
+                    Resistance = 100,
+                    Penetration = 100,
+                    Regeneration = 100
+                }
+            }
+        };
+        var boss = new RaidBossDefinition { Id = "raid-boss.plus-one-test", Tiers = [regular] };
+
+        var plusOne = RaidPlusDifficulty.Create(boss, 1);
+
+        Assert.Equal(109, plusOne.RecommendedWingPower.Rearguard);
+        Assert.Equal(150f, plusOne.Boss.Scaling.Health);
+        Assert.Equal(107.5f, plusOne.Boss.Scaling.Offense);
+        Assert.Equal(104.5f, plusOne.Boss.Scaling.Defense);
+        Assert.Equal(103f, plusOne.Boss.Scaling.Penetration);
+        Assert.Equal(105f, plusOne.Boss.Scaling.Regeneration);
+    }
+
+    [Fact]
     public void Raid_boss_and_vendor_content_is_complete_and_references_existing_content()
     {
         var apiRoot = TestContentPaths.FindApiRoot();
@@ -205,12 +325,20 @@ public sealed class RaidSystemTests
         var provider = new JsonRaidBossDefinitionProvider(
             configuration,
             apiRoot,
-            new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            new JsonSerializerOptions(JsonSerializerDefaults.Web)
+            {
+                Converters = { new JsonStringEnumConverter() }
+            });
 
         var bosses = provider.GetAll();
         Assert.Equal(2, bosses.Count);
         var hive = Assert.Single(bosses, x => x.Id == "raid-boss.hives-abyss");
         Assert.Equal("The Hive's Abyss", hive.Name);
+        Assert.Equal(50, hive.LevelRequirement);
+        Assert.Equal(1, hive.RequiredEquipmentTier);
+        Assert.Equal(Rarity.Epic, hive.RequiredArmorRarity);
+        Assert.True(hive.RequiresBlueprintArmor);
+        Assert.Equal(6, hive.RequiredEquippedEssences);
         Assert.Equal([1, 2, 3], hive.Tiers.Select(x => x.Tier));
         Assert.All(hive.Tiers, tier =>
         {
@@ -221,6 +349,11 @@ public sealed class RaidSystemTests
 
         var sanguine = Assert.Single(bosses, x => x.Id == "raid-boss.sanguine-horror");
         Assert.Equal(2, sanguine.Region);
+        Assert.Equal(80, sanguine.LevelRequirement);
+        Assert.Equal(2, sanguine.RequiredEquipmentTier);
+        Assert.Equal(Rarity.Epic, sanguine.RequiredArmorRarity);
+        Assert.True(sanguine.RequiresBlueprintArmor);
+        Assert.Equal(9, sanguine.RequiredEquippedEssences);
         Assert.Equal([2, 3], sanguine.Tiers.Select(x => x.Tier));
         Assert.All(sanguine.Tiers, tier =>
         {
@@ -306,6 +439,126 @@ public sealed class RaidSystemTests
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         Assert.Contains("blueprint_raidforged", blueprintIds!);
         Assert.Contains("blueprint_gravebound", blueprintIds!);
+    }
+
+    [Fact]
+    public async Task Raid_unlock_requires_blueprint_epic_armor_and_the_authored_essence_count()
+    {
+        await using var db = CreateDbContext();
+        var user = AppUser.Guest();
+        user.Username = "RaidLoadoutUser";
+        var character = new Character
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            User = user,
+            Name = "Raid Loadout Character",
+            Level = 50
+        };
+        db.Users.Add(user);
+        db.Characters.Add(character);
+        await db.SaveChangesAsync();
+
+        var boss = new RaidBossDefinition
+        {
+            Id = "raid-boss.loadout-test",
+            Name = "Loadout Test Boss",
+            Region = 1,
+            Regions = [1],
+            LevelRequirement = 50,
+            RequiredEquipmentTier = 1,
+            RequiredArmorRarity = Rarity.Epic,
+            RequiresBlueprintArmor = true,
+            RequiredEquippedEssences = 6,
+            Tiers =
+            [
+                new RaidBossTierDefinition
+                {
+                    Tier = 1,
+                    LaneSlots = 3,
+                    MinimumRoster = 3
+                }
+            ]
+        };
+        var service = CreateRaidService(db, boss, developmentToolsEnabled: false);
+
+        var missingArmor = Assert.Single(await service.GetRaidBossesAsync(
+            character.Id,
+            region: 1,
+            CancellationToken.None));
+        Assert.False(missingArmor.IsUnlocked);
+        Assert.Equal(
+            "Requires Blueprint-crafted Tier 1 Epic or better armor in Head, Chest, and Legs.",
+            missingArmor.LockReason);
+
+        var armorBase = new EquipmentBase
+        {
+            Id = "raid-loadout-armor",
+            Name = "Raid Loadout Armor",
+            EquipmentType = EquipmentType.Chest
+        };
+        db.ItemBases.Add(armorBase);
+        foreach (var slotType in new[]
+                 {
+                     EquipmentSlotType.Head,
+                     EquipmentSlotType.Chest,
+                     EquipmentSlotType.Legs
+                 })
+        {
+            db.EquipmentSlots.Add(new EquipmentSlot
+            {
+                EntityId = character.Id,
+                Entity = character,
+                EquipmentSlotType = slotType,
+                EquipmentInstance = new EquipmentInstance
+                {
+                    Id = Guid.NewGuid(),
+                    ItemBaseId = armorBase.Id,
+                    ItemBase = armorBase,
+                    Tier = 1,
+                    Rarity = Rarity.Epic,
+                    BlueprintId = $"blueprint.test.{slotType.ToString().ToLowerInvariant()}"
+                }
+            });
+        }
+        var raidLoadout = new EssenceLoadout
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = character.Id,
+            Name = "Raid",
+            AutoUseActivities = EssenceCombatActivity.Raid,
+            Slots = Enumerable.Range(0, 5).Select(index => new EssenceLoadoutSlot
+            {
+                Id = Guid.NewGuid(),
+                SlotIndex = index,
+                PlayerEssenceId = Guid.NewGuid()
+            }).ToList()
+        };
+        db.EssenceLoadouts.Add(raidLoadout);
+        await db.SaveChangesAsync();
+
+        var missingEssence = Assert.Single(await service.GetRaidBossesAsync(
+            character.Id,
+            region: 1,
+            CancellationToken.None));
+        Assert.False(missingEssence.IsUnlocked);
+        Assert.Equal("Requires 6 equipped Essences in the Raid loadout.", missingEssence.LockReason);
+
+        db.EssenceLoadoutSlots.Add(new EssenceLoadoutSlot
+        {
+            Id = Guid.NewGuid(),
+            EssenceLoadoutId = raidLoadout.Id,
+            SlotIndex = 5,
+            PlayerEssenceId = Guid.NewGuid()
+        });
+        await db.SaveChangesAsync();
+
+        var unlocked = Assert.Single(await service.GetRaidBossesAsync(
+            character.Id,
+            region: 1,
+            CancellationToken.None));
+        Assert.True(unlocked.IsUnlocked, unlocked.LockReason);
+        Assert.Null(unlocked.LockReason);
     }
 
     [Fact]

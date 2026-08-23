@@ -5,9 +5,13 @@
       "name": "The Hive's Abyss",
       "region": 1,
       "regions": [1],
-      "levelRequirement": 25,
+      "levelRequirement": 50,
       "requiredCompletedQuestId": null,
       "requiredTowerFloor": null,
+      "requiredEquipmentTier": 1,
+      "requiredArmorRarity": "Epic",
+      "requiresBlueprintArmor": true,
+      "requiredEquippedEssences": 6,
       "imagePath": "ant_queen",
       "tiers": [
         {
@@ -181,9 +185,13 @@
       "name": "Sanguine Horror",
       "region": 2,
       "regions": [2],
-      "levelRequirement": 55,
+      "levelRequirement": 80,
       "requiredCompletedQuestId": null,
       "requiredTowerFloor": 10,
+      "requiredEquipmentTier": 2,
+      "requiredArmorRarity": "Epic",
+      "requiresBlueprintArmor": true,
+      "requiredEquippedEssences": 9,
       "imagePath": "corpse_golem",
       "tiers": [
         {

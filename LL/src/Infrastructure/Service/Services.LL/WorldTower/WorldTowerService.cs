@@ -44,6 +44,7 @@ namespace Services.LL.WorldTower;
 
 public sealed class WorldTowerService : IWorldTowerService
 {
+    private const int PlaybackKeyframeIntervalTicks = 30 * FastCombatEngine.TicksPerSecond;
     private const string EchoModeUnlockKey = "tower_echo_mode_unlock";
     private const string TowerExpeditionTargetUrlFormat = "/game/world/tower/expeditions/{0}";
     private const string TowerHallOfFameTargetUrl = "/game/world/tower/hall-of-fame";
@@ -2516,9 +2517,15 @@ public sealed class WorldTowerService : IWorldTowerService
             x => (x.EntityIndex, x.Name),
             x => x.Index);
 
-        var frames = outcome.Checkpoints.Select(checkpoint =>
+        var materializedStates = new Dictionary<int, TowerPlaybackEntityStateDto>();
+        var materializedTotals = new Dictionary<int, TowerPlaybackEntityTotalsDto>();
+        var materializedAbilityTotals = new Dictionary<int, TowerPlaybackAbilityTotalsDto>();
+        var frames = new TowerPlaybackBundleFrameDto[outcome.Checkpoints.Count];
+        var lastKeyframeTick = int.MinValue;
+        for (var checkpointIndex = 0; checkpointIndex < outcome.Checkpoints.Count; checkpointIndex++)
         {
-            var state = checkpoint.Friendly
+            var checkpoint = outcome.Checkpoints[checkpointIndex];
+            var currentStates = checkpoint.Friendly
                 .Concat(checkpoint.Hostile)
                 .Select(entity => new TowerPlaybackEntityStateDto(
                     entityById[entity.Id].Index,
@@ -2530,7 +2537,7 @@ public sealed class WorldTowerService : IWorldTowerService
                     entity.IsStaggerRecovering))
                 .OrderBy(x => x.EntityIndex)
                 .ToArray();
-            var totals = checkpoint.EntityStats
+            var currentTotals = checkpoint.EntityStats
                 .Where(entity => entityById.ContainsKey(entity.EntityId))
                 .Select(entity => new TowerPlaybackEntityTotalsDto(
                     entityById[entity.EntityId].Index,
@@ -2548,7 +2555,7 @@ public sealed class WorldTowerService : IWorldTowerService
                     entity.StaggerBreaks))
                 .OrderBy(x => x.EntityIndex)
                 .ToArray();
-            var abilityTotals = checkpoint.EntityStats
+            var currentAbilityTotals = checkpoint.EntityStats
                 .Where(entity => entityById.ContainsKey(entity.EntityId))
                 .SelectMany(entity => entity.Abilities.Select(ability =>
                     new TowerPlaybackAbilityTotalsDto(
@@ -2557,21 +2564,45 @@ public sealed class WorldTowerService : IWorldTowerService
                         ability.TotalDamage,
                         ability.TotalHealing,
                         ability.TotalBarrier,
-                        ability.DamageByType,
+                        ability.DamageByType?.ToArray(),
                         ability.TotalThreat,
                         ability.TotalStagger,
                         ability.StaggerBreaks)))
                 .OrderBy(x => x.AbilityIndex)
                 .ToArray();
-            return new TowerPlaybackBundleFrameDto(
+
+            var isKeyframe = checkpointIndex == 0
+                || checkpoint.IsFinal
+                || checkpoint.Tick - lastKeyframeTick >= PlaybackKeyframeIntervalTicks;
+            var states = ApplyChanges(
+                currentStates,
+                materializedStates,
+                state => state.EntityIndex,
+                isKeyframe);
+            var totals = ApplyChanges(
+                currentTotals,
+                materializedTotals,
+                total => total.EntityIndex,
+                isKeyframe);
+            var abilityTotals = ApplyChanges(
+                currentAbilityTotals,
+                materializedAbilityTotals,
+                total => total.AbilityIndex,
+                isKeyframe,
+                AbilityTotalsEqual);
+            if (isKeyframe)
+                lastKeyframeTick = checkpoint.Tick;
+
+            frames[checkpointIndex] = new TowerPlaybackBundleFrameDto(
                 checkpoint.Sequence,
                 checkpoint.Tick,
-                state,
+                isKeyframe,
+                states,
                 totals,
                 abilityTotals,
                 checkpoint.IsFinal,
                 checkpoint.IsFinal ? outcome.CombatResult.Outcome : null);
-        }).ToArray();
+        }
 
         return new TowerPlaybackBundleDto(
             TowerCombatPlayback.CompactBundleSchemaVersion,
@@ -2581,6 +2612,47 @@ public sealed class WorldTowerService : IWorldTowerService
             entities,
             abilities,
             frames);
+
+        static IReadOnlyList<T> ApplyChanges<T>(
+            IEnumerable<T> current,
+            IDictionary<int, T> materialized,
+            Func<T, int> getIndex,
+            bool isKeyframe,
+            Func<T, T, bool>? equals = null)
+        {
+            equals ??= EqualityComparer<T>.Default.Equals;
+            var changed = new List<T>();
+            foreach (var value in current)
+            {
+                var index = getIndex(value);
+                if (!materialized.TryGetValue(index, out var previous) || !equals(previous, value))
+                    changed.Add(value);
+                materialized[index] = value;
+            }
+
+            return isKeyframe
+                ? materialized.OrderBy(pair => pair.Key).Select(pair => pair.Value).ToArray()
+                : changed;
+        }
+
+        static bool AbilityTotalsEqual(
+            TowerPlaybackAbilityTotalsDto left,
+            TowerPlaybackAbilityTotalsDto right) =>
+            left.AbilityIndex == right.AbilityIndex
+            && left.Uses == right.Uses
+            && left.TotalDamage == right.TotalDamage
+            && left.TotalHealing == right.TotalHealing
+            && left.TotalBarrier == right.TotalBarrier
+            && DamageByTypeEqual(left.DamageByType, right.DamageByType)
+            && left.TotalThreat == right.TotalThreat
+            && left.TotalStagger == right.TotalStagger
+            && left.StaggerBreaks == right.StaggerBreaks;
+
+        static bool DamageByTypeEqual(
+            IReadOnlyList<AbilityDamageTypeStats>? left,
+            IReadOnlyList<AbilityDamageTypeStats>? right) =>
+            ReferenceEquals(left, right)
+            || left is not null && right is not null && left.SequenceEqual(right);
 
         void AddEntities(IEnumerable<SimpleCombatEntity> source, bool isFriendly)
         {

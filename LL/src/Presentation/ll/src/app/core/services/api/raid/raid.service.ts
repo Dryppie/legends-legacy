@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { map, Observable, tap } from 'rxjs';
 import {
   AbilityDamageTypeStats,
@@ -159,6 +159,7 @@ export interface RaidPlaybackEntity {
 export interface RaidPlaybackFrame {
   sequence: number;
   tick: number;
+  isKeyframe?: boolean;
   entityStates: {
     entityIndex: number;
     health: number;
@@ -308,11 +309,14 @@ export interface RaidTrophyPurchase {
 @Injectable({ providedIn: 'root' })
 export class RaidService {
   private readonly api = inject(ApiService);
+  private readonly _activeRaid = signal<RaidRun | null>(null);
   private readonly _activeRaidId = signal<string | null>(null);
   private readonly _activeRaidChatId = signal<string | null>(null);
   private raidQueryEpoch = 0;
+  readonly activeRaid = this._activeRaid.asReadonly();
   readonly activeRaidId = this._activeRaidId.asReadonly();
   readonly activeRaidChatId = this._activeRaidChatId.asReadonly();
+  readonly hasActiveRaid = computed(() => this._activeRaid() !== null);
 
   getRaidBosses(region?: number): Observable<RaidBossSummary[]> {
     return this.api.get(`raids/bosses${region ? `?region=${region}` : ''}`);
@@ -525,6 +529,7 @@ export class RaidService {
   clearActiveRaid(raidRunId?: string, invalidateQueries = true): void {
     if (invalidateQueries) this.raidQueryEpoch += 1;
     if (!raidRunId || this._activeRaidId() === raidRunId) {
+      this._activeRaid.set(null);
       this._activeRaidId.set(null);
     }
     if (!raidRunId || this._activeRaidChatId() === raidRunId) {
@@ -556,8 +561,10 @@ export class RaidService {
       (request) => request.isCurrentCharacter,
     );
     if (isActive && (isApprovedMember || hasPendingRequest)) {
+      this._activeRaid.set(raid);
       this._activeRaidId.set(raid.id);
     } else if (this._activeRaidId() === raid.id) {
+      this._activeRaid.set(null);
       this._activeRaidId.set(null);
     }
 

@@ -15,8 +15,10 @@ import { SidebarItemComponent } from './sidebar-item/sidebar-item.component';
 import { SidebarService } from '../../../core/services/client-side/sidebar/sidebar.service';
 import { CurrentActionComponent } from '../../../shared/components/current-action/current-action.component';
 import { CurrentDungeonComponent } from '../../../shared/components/current-dungeon/current-dungeon.component';
+import { CurrentRaidComponent } from '../../../shared/components/current-raid/current-raid.component';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { DungeonStateService } from '../../../core/services/api/dungeon/dungeon-state.service';
+import { RaidService } from '../../../core/services/api/raid/raid.service';
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
 import { SidebarSection, Tab } from '../../../shared/models/sidebar-item';
@@ -42,6 +44,7 @@ import { getEstimatedTemperingQueueDuration } from '../../../shared/utils/temper
     RouterLink,
     CurrentActionComponent,
     CurrentDungeonComponent,
+    CurrentRaidComponent,
     ProgressBarComponent,
   ],
   templateUrl: './sidebar.component.html',
@@ -80,6 +83,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     return getEstimatedTemperingQueueDuration(queue);
   });
   readonly hasActiveDungeon: DungeonStateService['hasActiveDungeon'];
+  readonly hasActiveRaid: RaidService['hasActiveRaid'];
   constructor(
     private readonly sidebarService: SidebarService,
     private readonly state: CharacterActionsStateService,
@@ -93,8 +97,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private readonly questState: QuestStateService,
     private readonly questPresenter: QuestPresenterService,
     dungeonState: DungeonStateService,
+    raidService: RaidService,
   ) {
     this.hasActiveDungeon = dungeonState.hasActiveDungeon;
+    this.hasActiveRaid = raidService.hasActiveRaid;
     this.sidebarLayout = this.sidebarLayoutPreference.layout;
 
     effect(() => {

@@ -240,7 +240,7 @@ describe('EquipmentDisplayComponent', () => {
     expect(Number.parseFloat(fills[0].style.width)).toBeCloseTo(64.52, 1);
   });
 
-  it('shows a rarity bonus without changing the crafted roll position', async () => {
+  it('shows a tempering bonus without changing the crafted roll position', async () => {
     await TestBed.configureTestingModule({
       imports: [EquipmentDisplayComponent],
     }).compileComponents();
@@ -272,11 +272,21 @@ describe('EquipmentDisplayComponent', () => {
       '.equipment-design-fill',
     );
 
-    expect(text).toContain('/ 103–134 · Rarity +10');
+    const temperingBonus: HTMLElement | null =
+      fixture.nativeElement.querySelector('[data-testid="tempering-bonus"]');
+
+    expect(text).toContain('/ 103–134');
+    expect(text).not.toContain('Rarity +10');
+    expect(temperingBonus?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+      '✦ +10',
+    );
+    expect(temperingBonus?.getAttribute('aria-label')).toBe(
+      'Max Health tempered by +10',
+    );
     expect(Number.parseFloat(fill?.style.width ?? '')).toBeCloseTo(64.52, 1);
   });
 
-  it('labels an attribute introduced by rarity without rendering a roll bar', async () => {
+  it('labels an attribute introduced by tempering without rendering a roll bar', async () => {
     await TestBed.configureTestingModule({
       imports: [EquipmentDisplayComponent],
     }).compileComponents();
@@ -299,10 +309,62 @@ describe('EquipmentDisplayComponent', () => {
     fixture.componentRef.setInput('item', item);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Rarity +6');
+    const temperingBonus: HTMLElement | null =
+      fixture.nativeElement.querySelector('[data-testid="tempering-bonus"]');
+
+    expect(temperingBonus?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+      '✦ +6',
+    );
     expect(
       fixture.nativeElement.querySelector('.equipment-design-fill'),
     ).toBeNull();
+  });
+
+  it('explains the original, upgrade, and final values in the tempering tooltip', async () => {
+    await TestBed.configureTestingModule({
+      imports: [EquipmentDisplayComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(EquipmentDisplayComponent);
+    const item = equipmentInstance(
+      'tempered-tooltip-item',
+      AttributeType.MaxHealth,
+      123,
+    );
+    item.rollRange = {
+      minimumPotential: 260,
+      maximumPotential: 380,
+      attributes: [
+        {
+          attributeType: AttributeType.MaxHealth,
+          minimumAmount: 103,
+          maximumAmount: 134,
+          rarityBonusAmount: 10,
+          hasCraftedRange: true,
+        },
+      ],
+    };
+
+    fixture.componentRef.setInput('item', item);
+    fixture.detectChanges();
+
+    const temperingBonus: HTMLElement = fixture.nativeElement.querySelector(
+      '[data-testid="tempering-bonus"]',
+    );
+    temperingBonus.dispatchEvent(new MouseEvent('mouseenter'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const tooltipId = temperingBonus.getAttribute('aria-describedby');
+    const tooltipText = document
+      .getElementById(tooltipId ?? '')
+      ?.textContent?.replace(/\s+/g, ' ')
+      .trim();
+
+    expect(tooltipText).toContain('Tempered attribute');
+    expect(tooltipText).toContain('Max Health');
+    expect(tooltipText).toContain('Original 113');
+    expect(tooltipText).toContain('Upgrade +10');
+    expect(tooltipText).toContain('Final 123');
   });
 
   it('renders tool affixes using the standard equipment attribute layout', async () => {

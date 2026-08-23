@@ -1429,7 +1429,9 @@ public sealed class TournamentGroundsServiceTests
             playbackJsonOptions);
         Assert.NotNull(playbackBundle);
         Assert.NotEmpty(playbackBundle.Frames);
+        Assert.True(playbackBundle.Frames[0].IsKeyframe);
         Assert.True(playbackBundle.Frames[^1].IsFinal);
+        Assert.True(playbackBundle.Frames[^1].IsKeyframe);
         Assert.NotEmpty(playbackBundle.Frames[^1].EntityTotals);
         Assert.All(
             playbackBundle.Frames[^1].EntityTotals,

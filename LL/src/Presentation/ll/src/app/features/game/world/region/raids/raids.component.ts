@@ -31,6 +31,7 @@ import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date
 export class RaidsComponent implements OnChanges {
   @Input({ required: true }) raidBoss!: RaidBossSummary;
   @Output() changed = new EventEmitter<void>();
+  readonly trophyExchangeEnabled = false;
   private readonly raids = inject(RaidService);
   private readonly router = inject(Router);
   private readonly events = inject(GameRealtimeEventRegistry);
@@ -64,7 +65,7 @@ export class RaidsComponent implements OnChanges {
     this.selectedTier.set(this.raidBoss?.tiers[0]?.tier ?? 0);
     this.load();
     this.loadHistory();
-    this.loadVendor();
+    if (this.trophyExchangeEnabled) this.loadVendor();
   }
 
   load(): void {

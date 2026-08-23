@@ -1,0 +1,51 @@
+<a
+  *ngIf="activeRaid() as raid"
+  [routerLink]="['/game/world/raid', raid.id]"
+  class="group flex min-h-8 w-full min-w-0 items-center gap-2 rounded-full border border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] px-3 py-1.5 text-xs transition-colors hover:border-primary hover:bg-primary/15 sm:w-auto sm:max-w-[24rem]"
+  [attr.aria-label]="statusLabel() + ': ' + raidTitle() + ', ' + progressText()"
+>
+  <span
+    class="h-1.5 w-1.5 shrink-0 rounded-full"
+    [ngClass]="statusDotClasses()"
+    aria-hidden="true"
+  ></span>
+
+  <span
+    class="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[var(--ll-color-text-muted)]"
+  >
+    {{ statusLabel() }}
+  </span>
+
+  <span
+    class="hidden text-[var(--ll-color-text-subtle)] sm:inline"
+    aria-hidden="true"
+  >
+    ·
+  </span>
+
+  <strong class="min-w-0 truncate font-medium text-primary">
+    {{ raidTitle() }}
+  </strong>
+
+  <span
+    *ngIf="progressText()"
+    class="shrink-0 text-[var(--ll-color-text-muted)]"
+  >
+    · {{ progressText() }}
+  </span>
+
+  <svg
+    class="h-3.5 w-3.5 shrink-0 text-primary/70 transition-transform group-hover:translate-x-0.5"
+    viewBox="0 0 16 16"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="m6 3 5 5-5 5"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+</a>

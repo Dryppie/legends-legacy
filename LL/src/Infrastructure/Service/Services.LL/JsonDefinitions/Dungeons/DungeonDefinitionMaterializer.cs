@@ -43,7 +43,7 @@ public sealed class DungeonDefinitionMaterializer(DungeonCatalogValidator catalo
                 EntryCosts = family.EntryCosts.Select(Clone).ToList(),
                 RewardTable = Clone(difficulty.RewardTable),
                 CompletionRewardTableIds = [$"reward.dungeon.{difficulty.Id}.completion"],
-                TierRewardTableIds = [$"reward.dungeon.tier.{difficulty.Difficulty}"],
+                TierRewardTableIds = [$"reward.dungeon.region.{family.Region}.tier.{difficulty.Difficulty}"],
                 MonsterLootModifiers = family.MonsterLootModifiers.ToDictionary(x => x.Key, x => x.Value),
                 GatheringNodes = difficulty.GatheringNodes
                     .Select(node => Clone(node, family.GatheringBonusRewardTableIds))

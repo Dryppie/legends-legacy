@@ -1507,7 +1507,9 @@ public sealed class WorldTowerServiceTests
             new JsonSerializerOptions(JsonSerializerDefaults.Web));
         Assert.NotNull(bundle);
         Assert.NotEmpty(bundle.Frames);
+        Assert.True(bundle.Frames[0].IsKeyframe);
         Assert.True(bundle.Frames[^1].IsFinal);
+        Assert.True(bundle.Frames[^1].IsKeyframe);
         Assert.All(bundle.Frames, frame => Assert.NotNull(frame.EntityStates));
         Assert.All(bundle.Frames[^1].EntityTotals, totals =>
         {

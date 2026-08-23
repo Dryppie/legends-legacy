@@ -13,19 +13,36 @@ public static class RegionBossCombatScaling
         var partyHealth = 0.6d + 0.1d * Math.Clamp(partySize - 1, 0, 4);
         var partyPower = 0.8d + 0.05d * Math.Clamp(partySize - 1, 0, 4);
         AddMultiplier(entity, AttributeType.MaxHealth,
-            definition.BaseScaling.Health * Math.Pow(definition.LevelScaling.HealthGrowth, levelOffset) * partyHealth);
+            definition.BaseScaling.Health
+            * LevelMultiplier(definition.LevelScaling, definition.LevelScaling.HealthGrowth,
+                definition.LevelScaling.HealthGrowthExponent, levelOffset)
+            * partyHealth);
         AddMultiplier(entity, AttributeType.Power,
-            definition.BaseScaling.Power * Math.Pow(definition.LevelScaling.PowerGrowth, levelOffset) * partyPower);
+            definition.BaseScaling.Power
+            * LevelMultiplier(definition.LevelScaling, definition.LevelScaling.PowerGrowth,
+                definition.LevelScaling.PowerGrowthExponent, levelOffset)
+            * partyPower);
         AddMultiplier(entity, AttributeType.Armor,
             definition.BaseScaling.Armor * (1 + definition.LevelScaling.ArmorGrowthPerLevel * levelOffset));
         AddMultiplier(entity, AttributeType.Resistance,
             definition.BaseScaling.Resistance * (1 + definition.LevelScaling.ResistanceGrowthPerLevel * levelOffset));
-        AddMultiplier(entity, AttributeType.ArmorPenetration,
+        AddFlat(entity, AttributeType.ArmorPenetration,
             definition.BaseScaling.Penetration * (1 + definition.LevelScaling.PenetrationGrowthPerLevel * levelOffset));
-        AddMultiplier(entity, AttributeType.MagicPenetration,
+        AddFlat(entity, AttributeType.MagicPenetration,
             definition.BaseScaling.Penetration * (1 + definition.LevelScaling.PenetrationGrowthPerLevel * levelOffset));
         AddMultiplier(entity, AttributeType.HealthRegeneration, definition.BaseScaling.Regeneration);
     }
+
+    private static double LevelMultiplier(
+        RegionBossLevelScalingDefinition scaling,
+        double growth,
+        double exponent,
+        int levelOffset) => scaling.GrowthCurve switch
+    {
+        RegionBossGrowthCurve.Exponential => Math.Pow(growth, levelOffset),
+        RegionBossGrowthCurve.ShiftedPower => 1 + growth * Math.Pow(levelOffset, exponent),
+        _ => throw new InvalidOperationException($"Unsupported Region Boss growth curve '{scaling.GrowthCurve}'.")
+    };
 
     private static void AddMultiplier(CombatEntity entity, AttributeType attribute, double multiplier)
     {
@@ -38,5 +55,17 @@ public static class RegionBossCombatScaling
             attribute,
             (float)percent,
             ModifierType.Multiplicative));
+    }
+
+    private static void AddFlat(CombatEntity entity, AttributeType attribute, double amount)
+    {
+        if (!double.IsFinite(amount) || amount < 0)
+            throw new InvalidOperationException($"Invalid Region Boss {attribute} amount '{amount}'.");
+        if (amount < 0.0001d)
+            return;
+        entity.ModifyAttribute(new DungeonAttributeModifier(
+            attribute,
+            (float)amount,
+            ModifierType.Flat));
     }
 }

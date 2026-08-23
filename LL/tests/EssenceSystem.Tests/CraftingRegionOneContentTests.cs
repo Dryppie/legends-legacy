@@ -618,9 +618,12 @@ public sealed class CraftingRegionOneContentTests
 
         var expectedTierNoDropWeights = new Dictionary<string, double>
         {
-            ["reward.dungeon.tier.1"] = 80,
-            ["reward.dungeon.tier.2"] = 78,
-            ["reward.dungeon.tier.3"] = 72.2
+            ["reward.dungeon.region.1.tier.1"] = 80,
+            ["reward.dungeon.region.1.tier.2"] = 78,
+            ["reward.dungeon.region.1.tier.3"] = 72.2,
+            ["reward.dungeon.region.2.tier.1"] = 80,
+            ["reward.dungeon.region.2.tier.2"] = 78,
+            ["reward.dungeon.region.2.tier.3"] = 72.2
         };
         foreach (var (tableId, expectedNoDropWeight) in expectedTierNoDropWeights)
         {
@@ -628,6 +631,62 @@ public sealed class CraftingRegionOneContentTests
                 candidate?["id"]?.GetValue<string>() == tableId);
             var roll = Assert.Single(ChildArray(table, "rolls"));
             Assert.Equal(expectedNoDropWeight, roll?["noDropWeight"]?.GetValue<double>());
+        }
+    }
+
+    [Fact]
+    public void DungeonToolRewardsFollowRegionAndDifficultyRarityProgression()
+    {
+        var items = ReadArray("items/items.json")
+            .ToDictionary(
+                item => item!["id"]!.GetValue<string>(),
+                item => new
+                {
+                    EquipmentType = item!["equipmentType"]?.GetValue<string>(),
+                    Rarity = item["rarity"]?.GetValue<string>()
+                },
+                StringComparer.OrdinalIgnoreCase);
+        var rewardTables = ChildArray(ReadDocument("rewards/reward-tables.json"), "rewardTables")
+            .ToDictionary(
+                table => table!["id"]!.GetValue<string>(),
+                StringComparer.OrdinalIgnoreCase);
+        var expectedRarity = new Dictionary<(int Region, int Difficulty), string>
+        {
+            [(1, 1)] = "Uncommon",
+            [(1, 2)] = "Uncommon",
+            [(1, 3)] = "Rare",
+            [(2, 1)] = "Uncommon",
+            [(2, 2)] = "Rare",
+            [(2, 3)] = "Epic"
+        };
+
+        foreach (var family in ChildArray(ReadDocument("dungeons/dungeons.json"), "families"))
+        {
+            var region = family!["region"]!.GetValue<int>();
+            foreach (var difficulty in ChildArray(family, "difficulties"))
+            {
+                var dungeonId = difficulty!["id"]!.GetValue<string>();
+                var tier = difficulty["difficulty"]!.GetValue<int>();
+                var tableIds = new[]
+                {
+                    $"reward.dungeon.{dungeonId}.completion",
+                    $"reward.dungeon.region.{region}.tier.{tier}"
+                };
+                var toolRarities = tableIds
+                    .Select(tableId => rewardTables[tableId])
+                    .SelectMany(table => ChildArray(table, "rolls"))
+                    .SelectMany(roll => ChildArray(roll, "entries"))
+                    .Select(entry => entry?["itemId"]?.GetValue<string>())
+                    .Where(itemId => !string.IsNullOrWhiteSpace(itemId) &&
+                                     items.TryGetValue(itemId!, out var item) &&
+                                     string.Equals(item.EquipmentType, "Tool", StringComparison.OrdinalIgnoreCase))
+                    .Select(itemId => items[itemId!].Rarity)
+                    .ToList();
+
+                Assert.NotEmpty(toolRarities);
+                Assert.All(toolRarities, rarity =>
+                    Assert.Equal(expectedRarity[(region, tier)], rarity));
+            }
         }
     }
 

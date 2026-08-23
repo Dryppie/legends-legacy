@@ -370,7 +370,9 @@ public sealed class DungeonCatalogTests
         Assert.Equal(expected.EnemyStrengthMultiplier, actual.EnemyStrengthMultiplier);
         Assert.Equal(expected.RequiredPreviousDungeonId is null ? null : (DungeonGrade?)((int)expected.Grade - 1), actual.RequiredPreviousDungeonGrade);
         Assert.Equal([$"reward.dungeon.{expected.Id}.completion"], actual.CompletionRewardTableIds);
-        Assert.Equal([$"reward.dungeon.tier.{(int)expected.Grade}"], actual.TierRewardTableIds);
+        Assert.Equal(
+            [$"reward.dungeon.region.{actual.Region}.tier.{(int)expected.Grade}"],
+            actual.TierRewardTableIds);
     }
 
     private static string FindDataRoot()

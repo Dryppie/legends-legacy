@@ -2,6 +2,9 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, shareReplay, throwError } from 'rxjs';
 import {
   RegionBossPlaybackBundle,
+  RegionBossPlaybackAbilityTotals,
+  RegionBossPlaybackEntityState,
+  RegionBossPlaybackEntityTotals,
   RegionBossPlaybackFrame,
   RegionBossService,
 } from '../../api/region-boss/region-boss.service';
@@ -51,7 +54,49 @@ export class RegionBossPlaybackService {
       else high = middle - 1;
     }
 
-    return this.toCombatFrame(bundle, bundle.frames[low]);
+    return this.toCombatFrame(bundle, this.materializeFrame(bundle, low));
+  }
+
+  private materializeFrame(
+    bundle: RegionBossPlaybackBundle,
+    targetIndex: number,
+  ): RegionBossPlaybackFrame {
+    const target = bundle.frames[targetIndex];
+    if (bundle.schemaVersion < 3 || target.isKeyframe) return target;
+
+    let keyframeIndex = targetIndex;
+    while (keyframeIndex > 0 && !bundle.frames[keyframeIndex].isKeyframe) {
+      keyframeIndex--;
+    }
+
+    const entityStates = new Map<number, RegionBossPlaybackEntityState>();
+    const entityTotals = new Map<number, RegionBossPlaybackEntityTotals>();
+    const abilityTotals = new Map<number, RegionBossPlaybackAbilityTotals>();
+    for (let index = keyframeIndex; index <= targetIndex; index++) {
+      const frame = bundle.frames[index];
+      frame.entityStates?.forEach((state) =>
+        entityStates.set(state.entityIndex, state),
+      );
+      frame.entityTotals?.forEach((totals) =>
+        entityTotals.set(totals.entityIndex, totals),
+      );
+      frame.abilityTotals?.forEach((totals) =>
+        abilityTotals.set(totals.abilityIndex, totals),
+      );
+    }
+
+    return {
+      ...target,
+      entityStates: [...entityStates.values()].sort(
+        (left, right) => left.entityIndex - right.entityIndex,
+      ),
+      entityTotals: [...entityTotals.values()].sort(
+        (left, right) => left.entityIndex - right.entityIndex,
+      ),
+      abilityTotals: [...abilityTotals.values()].sort(
+        (left, right) => left.abilityIndex - right.abilityIndex,
+      ),
+    };
   }
 
   private toCombatFrame(
@@ -109,8 +154,8 @@ export class RegionBossPlaybackService {
     const stats = activeEntities.map((entity): EntityStats => {
       const state = stateByEntity.get(entity.index)!;
       const totals = totalsByEntity.get(entity.index);
-      const abilities = bundle.abilities!
-        .filter((ability) => ability.entityIndex === entity.index)
+      const abilities = bundle
+        .abilities!.filter((ability) => ability.entityIndex === entity.index)
         .map((ability): AbilityStats => {
           const values = abilityTotals.get(ability.index);
           return {

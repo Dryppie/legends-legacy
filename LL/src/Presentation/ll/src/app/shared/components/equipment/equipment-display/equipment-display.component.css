@@ -103,6 +103,23 @@
   white-space: nowrap;
 }
 
+.equipment-tempering-bonus {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.15rem;
+  border-radius: 0.2rem;
+  color: var(--ll-color-primary);
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1;
+  text-shadow: 0 0 0.35rem rgba(247, 203, 124, 0.35);
+}
+
+.equipment-tempering-bonus:focus-visible {
+  outline: 1px solid var(--ll-color-primary);
+  outline-offset: 2px;
+}
+
 .equipment-inline-delta {
   min-width: 2.75rem;
   text-align: right;

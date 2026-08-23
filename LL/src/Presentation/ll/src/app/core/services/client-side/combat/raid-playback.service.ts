@@ -44,9 +44,60 @@ export class RaidPlaybackService {
     }
     return this.toCombatFrame(
       bundle,
-      bundle.frames[low],
+      this.materializeFrame(bundle, low),
       showDefeatedPreviousWave,
     );
+  }
+
+  private materializeFrame(
+    bundle: RaidPlaybackBundle,
+    targetIndex: number,
+  ): RaidPlaybackFrame {
+    const target = bundle.frames[targetIndex];
+    if (bundle.schemaVersion < 5 || target.isKeyframe) return target;
+
+    let keyframeIndex = targetIndex;
+    while (keyframeIndex > 0 && !bundle.frames[keyframeIndex].isKeyframe) {
+      keyframeIndex--;
+    }
+
+    const entityStates = new Map<
+      number,
+      RaidPlaybackFrame['entityStates'][number]
+    >();
+    const entityTotals = new Map<
+      number,
+      RaidPlaybackFrame['entityTotals'][number]
+    >();
+    const abilityTotals = new Map<
+      number,
+      RaidPlaybackFrame['abilityTotals'][number]
+    >();
+    for (let index = keyframeIndex; index <= targetIndex; index++) {
+      const frame = bundle.frames[index];
+      frame.entityStates.forEach((state) =>
+        entityStates.set(state.entityIndex, state),
+      );
+      frame.entityTotals.forEach((totals) =>
+        entityTotals.set(totals.entityIndex, totals),
+      );
+      frame.abilityTotals.forEach((totals) =>
+        abilityTotals.set(totals.abilityIndex, totals),
+      );
+    }
+
+    return {
+      ...target,
+      entityStates: [...entityStates.values()].sort(
+        (left, right) => left.entityIndex - right.entityIndex,
+      ),
+      entityTotals: [...entityTotals.values()].sort(
+        (left, right) => left.entityIndex - right.entityIndex,
+      ),
+      abilityTotals: [...abilityTotals.values()].sort(
+        (left, right) => left.abilityIndex - right.abilityIndex,
+      ),
+    };
   }
 
   playbackDurationMilliseconds(
@@ -278,7 +329,8 @@ export class RaidPlaybackService {
     );
     const transitionTicks: number[] = [];
     let currentWave: number | null = null;
-    for (const frame of bundle.frames) {
+    for (let index = 0; index < bundle.frames.length; index++) {
+      const frame = this.materializeFrame(bundle, index);
       const frameWave = this.currentRearguardWave(
         frame.entityStates
           .map((state) => entityByIndex.get(state.entityIndex))

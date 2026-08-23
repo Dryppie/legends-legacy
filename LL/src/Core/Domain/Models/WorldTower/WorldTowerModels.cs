@@ -186,7 +186,7 @@ public sealed class TowerAttempt
 public sealed class TowerCombatPlayback
 {
     public const int MinimumCompactBundleSchemaVersion = 2;
-    public const int CompactBundleSchemaVersion = 4;
+    public const int CompactBundleSchemaVersion = 5;
 
     public Guid TowerAttemptId { get; set; }
     public TowerAttempt TowerAttempt { get; set; } = null!;
