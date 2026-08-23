@@ -160,6 +160,9 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public EntityEntry<TEntity> GetEntry<TEntity>(TEntity entity) where TEntity : class
         => Entry(entity);
 
+    public void ClearTrackedEntities()
+        => ChangeTracker.Clear();
+
     public IExecutionStrategy CreateExecutionStrategy()
         => Database.CreateExecutionStrategy();
 

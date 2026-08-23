@@ -31,6 +31,7 @@ import { AttributeType } from '../../../models/enums/attributeType';
 import { EquipmentSlotType } from '../../../models/Dtos/equipment-slots/equipmentSlot';
 import { sortAttributes } from '../../../utils/attributes/attribute-order.utils';
 import { EquippedComparison } from '../../../utils/equipment/equipment.utils';
+import { ToolBonusTooltipDirective } from '../../../directives/tool-bonus-tooltip/tool-bonus-tooltip.directive';
 
 interface EquipmentComparisonView {
   slotType: EquipmentSlotType | null;
@@ -48,6 +49,7 @@ interface EquipmentComparisonView {
     AttributeTypeFormatPipe,
     AttributeValueFormatPipe,
     AttributeTooltipDirective,
+    ToolBonusTooltipDirective,
     DecimalPipe,
   ],
   templateUrl: './equipment-display.component.html',

@@ -181,6 +181,92 @@ public sealed class RegionBossDevelopmentTests
     }
 
     [Fact]
+    public async Task Finalization_refreshes_an_event_changed_while_a_run_is_resolving()
+    {
+        var databaseName = Guid.NewGuid().ToString();
+        await using var workerDb = CreateDbContext(databaseName);
+        var now = new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero);
+        var definition = new FixedDefinitionProvider().GetAll().Single();
+        var item = new RegionBossEvent
+        {
+            RegionBossDefinitionId = definition.Id,
+            RegionId = definition.RegionId,
+            Status = RegionBossEventStatus.Resolving,
+            SignupStartsAtUtc = now.AddMinutes(-10),
+            SignupClosesAtUtc = now.AddMinutes(-1),
+            EncounterStartsAtUtc = now.AddMinutes(-1),
+            DefinitionSnapshotJson = JsonSerializer.Serialize(
+                definition,
+                new JsonSerializerOptions(JsonSerializerDefaults.Web)),
+            DefinitionHash = "test",
+            MatchmakingAlgorithmVersion = RegionBossRules.MatchmakingAlgorithmVersion,
+            CombatRulesVersion = RegionBossRules.Version,
+            CreatedAtUtc = now.AddMinutes(-10),
+            UpdatedAtUtc = now.AddMinutes(-1)
+        };
+        item.Runs.Add(new RegionBossRun
+        {
+            Event = item,
+            RegionBossEventId = item.Id,
+            PartyNumber = 1,
+            PartySize = 1,
+            Status = RegionBossRunStatus.Queued
+        });
+        workerDb.RegionBossEvents.Add(item);
+        await workerDb.SaveChangesAsync();
+        var service = CreateService(
+            workerDb,
+            now,
+            developmentToolsEnabled: false,
+            combatResolver: new ConcurrentEventUpdateResolver(databaseName, item.Id, now),
+            playbackBundles: new StubPlaybackBundleBuilder(now));
+
+        await service.ProgressEventsAsync("test-worker", CancellationToken.None);
+
+        var progressed = await workerDb.RegionBossEvents.AsNoTracking()
+            .Include(x => x.Runs)
+            .SingleAsync(x => x.Id == item.Id);
+        Assert.Equal(RegionBossEventStatus.Playback, progressed.Status);
+        Assert.Equal(2, progressed.RowVersion);
+        Assert.Equal(RegionBossRunStatus.Ready, Assert.Single(progressed.Runs).Status);
+    }
+
+    [Fact]
+    public async Task Progression_does_not_increment_row_version_without_a_state_change()
+    {
+        await using var db = CreateDbContext();
+        var now = new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero);
+        var updatedAt = now.AddMinutes(-1);
+        var item = new RegionBossEvent
+        {
+            RegionBossDefinitionId = "test-region-boss",
+            RegionId = 1,
+            Status = RegionBossEventStatus.Playback,
+            SignupStartsAtUtc = now.AddMinutes(-10),
+            SignupClosesAtUtc = now.AddMinutes(-2),
+            EncounterStartsAtUtc = now.AddMinutes(-2),
+            PlaybackStartsAtUtc = now.AddMinutes(-1),
+            PlaybackEndsAtUtc = now.AddMinutes(1),
+            DefinitionSnapshotJson = "{}",
+            DefinitionHash = "test",
+            MatchmakingAlgorithmVersion = RegionBossRules.MatchmakingAlgorithmVersion,
+            CombatRulesVersion = RegionBossRules.Version,
+            RowVersion = 7,
+            CreatedAtUtc = now.AddMinutes(-10),
+            UpdatedAtUtc = updatedAt
+        };
+        db.RegionBossEvents.Add(item);
+        await db.SaveChangesAsync();
+        var service = CreateService(db, now, developmentToolsEnabled: false);
+
+        await service.ProgressEventsAsync("test-worker", CancellationToken.None);
+
+        var unchanged = await db.RegionBossEvents.AsNoTracking().SingleAsync(x => x.Id == item.Id);
+        Assert.Equal(7, unchanged.RowVersion);
+        Assert.Equal(updatedAt, unchanged.UpdatedAtUtc);
+    }
+
+    [Fact]
     public async Task Signup_opening_automatically_enrolls_eligible_characters_active_within_twenty_four_hours()
     {
         await using var db = CreateDbContext();
@@ -353,19 +439,76 @@ public sealed class RegionBossDevelopmentTests
         LLDbContext db,
         DateTimeOffset now,
         bool developmentToolsEnabled,
-        IGameEventOutbox? outbox = null) =>
+        IGameEventOutbox? outbox = null,
+        IRegionBossCombatResolver? combatResolver = null,
+        IRegionBossPlaybackBundleBuilder? playbackBundles = null) =>
         new(
             db,
             new FixedDefinitionProvider(),
             new FixedPowerRatingService(now),
-            null!,
-            null!,
+            combatResolver!,
+            playbackBundles!,
             new NoopRealtimeBroadcaster(),
             outbox ?? new RecordingGameEventOutbox(),
             new FixedTimeProvider(now),
             new JsonSerializerOptions(JsonSerializerDefaults.Web),
             Options.Create(new RegionBossOptions { DevelopmentToolsEnabled = developmentToolsEnabled }),
             NullLogger<RegionBossService>.Instance);
+
+    private sealed class ConcurrentEventUpdateResolver(
+        string databaseName,
+        Guid eventId,
+        DateTimeOffset now) : IRegionBossCombatResolver
+    {
+        public async Task<RegionBossCombatResolution> ResolveAsync(
+            RegionBossRun run,
+            RegionBossDefinition definition,
+            CancellationToken cancellationToken)
+        {
+            await using var concurrentDb = CreateDbContext(databaseName);
+            var concurrent = await concurrentDb.RegionBossEvents
+                .SingleAsync(x => x.Id == eventId, cancellationToken);
+            concurrent.RowVersion++;
+            concurrent.UpdatedAtUtc = now;
+            await concurrentDb.SaveChangesAsync(cancellationToken);
+
+            return new RegionBossCombatResolution(
+                1,
+                2,
+                500,
+                1_000,
+                5_000,
+                100,
+                0,
+                RegionBossTerminationReason.PartyDefeated,
+                [],
+                null!,
+                []);
+        }
+    }
+
+    private sealed class StubPlaybackBundleBuilder(DateTimeOffset now) : IRegionBossPlaybackBundleBuilder
+    {
+        public RegionBossPlayback Build(Guid runId, RegionBossCombatResolution resolution)
+        {
+            var playback = new RegionBossPlayback
+            {
+                RegionBossRunId = runId,
+                TotalTicks = resolution.DurationTicks,
+                FrameCount = 1,
+                BundleHash = "test",
+                BundleLength = 1,
+                CreatedAtUtc = now
+            };
+            playback.Artifact = new RegionBossPlaybackArtifact
+            {
+                RegionBossRunId = runId,
+                Playback = playback,
+                BundleBytes = [1]
+            };
+            return playback;
+        }
+    }
 
     private static LLDbContext CreateDbContext(params IInterceptor[] interceptors) =>
         CreateDbContext(Guid.NewGuid().ToString(), interceptors);

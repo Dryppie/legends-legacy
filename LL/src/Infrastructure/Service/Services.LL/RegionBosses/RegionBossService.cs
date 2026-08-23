@@ -441,11 +441,13 @@ public sealed class RegionBossService(
                 }
                 item.Status = RegionBossEventStatus.Resolving;
             }
-            item.UpdatedAtUtc = now;
-            item.RowVersion++;
             if (item.Status != initialStatus)
+            {
+                item.UpdatedAtUtc = now;
+                item.RowVersion++;
                 await QueueUpdateAsync(item, "Progressed", new Audience.World(), cancellationToken);
-            await db.SaveChangesAsync(cancellationToken);
+                await db.SaveChangesAsync(cancellationToken);
+            }
             await transaction.CommitAsync(cancellationToken);
         }
 
@@ -460,6 +462,10 @@ public sealed class RegionBossService(
 
         await using var finalTransaction = await db.BeginTransactionAsync(cancellationToken);
         await db.AcquireRegionBossEventLockAsync(eventId, cancellationToken);
+        // Every preceding phase has been saved. Discard its tracked graph only
+        // after taking the event lock so this transaction reads the current
+        // event and run concurrency tokens instead of reusing stale instances.
+        db.ClearTrackedEntities();
         item = await db.RegionBossEvents.Include(x => x.Runs).ThenInclude(x => x.Members)
             .Include(x => x.RewardGrants).SingleOrDefaultAsync(x => x.Id == eventId, cancellationToken);
         if (item is null)
@@ -478,6 +484,7 @@ public sealed class RegionBossService(
             {
                 run.PlaybackStartsAtUtc = item.PlaybackStartsAtUtc;
                 run.PlaybackEndsAtUtc = item.PlaybackEndsAtUtc;
+                run.RowVersion++;
             }
             if (item.Runs.Any(x => x.Status == RegionBossRunStatus.Ready))
             {
@@ -490,11 +497,13 @@ public sealed class RegionBossService(
         }
         if (item.Status == RegionBossEventStatus.Playback && current >= item.PlaybackEndsAtUtc)
             Settle(item, current);
-        item.UpdatedAtUtc = current;
-        item.RowVersion++;
         if (item.Status != finalInitialStatus)
+        {
+            item.UpdatedAtUtc = current;
+            item.RowVersion++;
             await QueueUpdateAsync(item, "Progressed", new Audience.World(), cancellationToken);
-        await db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
+        }
         await finalTransaction.CommitAsync(cancellationToken);
     }
 
@@ -537,15 +546,22 @@ public sealed class RegionBossService(
         await using (var claimTransaction = await db.BeginTransactionAsync(cancellationToken))
         {
             await db.AcquireRegionBossRunLockAsync(runId, cancellationToken);
+            db.ClearTrackedEntities();
             run = await db.RegionBossRuns.Include(x => x.Event).Include(x => x.Members)
                 .SingleAsync(x => x.Id == runId, cancellationToken);
-            if (run.Status == RegionBossRunStatus.Ready || run.Status == RegionBossRunStatus.Settled)
+            var claimedAt = timeProvider.GetUtcNow();
+            var canClaim = run.Status == RegionBossRunStatus.Queued
+                || (run.Status == RegionBossRunStatus.Errored && run.SimulationAttempts < 3)
+                || (run.Status == RegionBossRunStatus.Resolving
+                    && (!run.SimulationLeaseUntil.HasValue || run.SimulationLeaseUntil <= claimedAt));
+            if (!canClaim)
                 return;
             run.Status = RegionBossRunStatus.Resolving;
-            run.StartedAtUtc ??= timeProvider.GetUtcNow();
+            run.StartedAtUtc ??= claimedAt;
             run.SimulationAttempts++;
             run.SimulationLeaseOwner = workerId;
-            run.SimulationLeaseUntil = timeProvider.GetUtcNow().AddMinutes(5);
+            run.SimulationLeaseUntil = claimedAt.AddMinutes(5);
+            run.RowVersion++;
             await db.SaveChangesAsync(cancellationToken);
             await claimTransaction.CommitAsync(cancellationToken);
             definition = ReadDefinition(run.Event);
@@ -557,8 +573,14 @@ public sealed class RegionBossService(
             var playback = playbackBundles.Build(run.Id, resolution);
             await using var persistTransaction = await db.BeginTransactionAsync(cancellationToken);
             await db.AcquireRegionBossRunLockAsync(runId, cancellationToken);
+            db.ClearTrackedEntities();
             var tracked = await db.RegionBossRuns.Include(x => x.ParticipantResults)
                 .SingleAsync(x => x.Id == runId, cancellationToken);
+            if (tracked.Status != RegionBossRunStatus.Resolving
+                || !string.Equals(tracked.SimulationLeaseOwner, workerId, StringComparison.Ordinal))
+            {
+                return;
+            }
             tracked.HighestLevelDefeated = resolution.HighestLevelDefeated;
             tracked.CurrentBossLevel = resolution.CurrentBossLevel;
             tracked.CurrentBossHealthRemaining = resolution.CurrentBossHealthRemaining;
@@ -584,11 +606,18 @@ public sealed class RegionBossService(
             logger.LogError(exception, "Region Boss run {RunId} resolution failed.", runId);
             await using var errorTransaction = await db.BeginTransactionAsync(cancellationToken);
             await db.AcquireRegionBossRunLockAsync(runId, cancellationToken);
+            db.ClearTrackedEntities();
             var tracked = await db.RegionBossRuns.SingleAsync(x => x.Id == runId, cancellationToken);
+            if (tracked.Status != RegionBossRunStatus.Resolving
+                || !string.Equals(tracked.SimulationLeaseOwner, workerId, StringComparison.Ordinal))
+            {
+                return;
+            }
             tracked.Status = tracked.SimulationAttempts >= 3 ? RegionBossRunStatus.Errored : RegionBossRunStatus.Queued;
             tracked.LastError = exception.ToString()[..Math.Min(exception.ToString().Length, 4000)];
             tracked.SimulationLeaseOwner = null;
             tracked.SimulationLeaseUntil = null;
+            tracked.RowVersion++;
             await db.SaveChangesAsync(cancellationToken);
             await errorTransaction.CommitAsync(cancellationToken);
         }
@@ -753,6 +782,7 @@ public sealed class RegionBossService(
                 });
             }
             run.Status = RegionBossRunStatus.Settled;
+            run.RowVersion++;
         }
         item.Status = RegionBossEventStatus.Settled;
         item.CompletedAtUtc = now;

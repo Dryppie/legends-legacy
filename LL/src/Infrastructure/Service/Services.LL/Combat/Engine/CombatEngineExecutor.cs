@@ -316,6 +316,10 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             checkpointIntervalTicks,
             hostileReinforcementWaves,
             hostileWaveFactory);
+        AttachAbilityDefinitions(
+            result,
+            friendly.Concat(allHostile).Concat(dynamicHostiles),
+            compiledAbilities.Values);
         var participatingHostileIds = result.EntityStats
             .Select(x => x.EntityId)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -323,6 +327,48 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             result,
             friendly,
             allHostile.Concat(dynamicHostiles).Where(x => participatingHostileIds.Contains(x.Id)).ToList()));
+    }
+
+    private static void AttachAbilityDefinitions(
+        CombatResult result,
+        IEnumerable<RuntimeCombatant> combatants,
+        IEnumerable<CompiledAbility> fallbackAbilities)
+    {
+        var fallbackByName = fallbackAbilities
+            .Where(ability => ability.SourceSpec is not null)
+            .GroupBy(ability => ability.Name, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                group => group.Key,
+                group => group.First().SourceSpec!,
+                StringComparer.OrdinalIgnoreCase);
+        var definitionsByEntityId = combatants
+            .GroupBy(combatant => combatant.Id, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                group => group.Key,
+                group => group
+                    .SelectMany(combatant => combatant.Abilities)
+                    .Where(ability => ability.Definition.SourceSpec is not null)
+                    .GroupBy(ability => ability.Definition.Name, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(
+                        abilities => abilities.Key,
+                        abilities => abilities.First().Definition.SourceSpec!,
+                        StringComparer.OrdinalIgnoreCase),
+                StringComparer.OrdinalIgnoreCase);
+
+        for (var index = 0; index < result.EntityStats.Count; index++)
+        {
+            var stats = result.EntityStats[index];
+            definitionsByEntityId.TryGetValue(stats.EntityId, out var definitionsByName);
+            result.EntityStats[index] = stats with
+            {
+                Abilities = stats.Abilities.Select(ability =>
+                {
+                    var definition = definitionsByName?.GetValueOrDefault(ability.Name)
+                                     ?? fallbackByName.GetValueOrDefault(ability.Name);
+                    return definition is null ? ability : ability with { Definition = definition };
+                }).ToList()
+            };
+        }
     }
 
     private static void SyncCombatEntityState(

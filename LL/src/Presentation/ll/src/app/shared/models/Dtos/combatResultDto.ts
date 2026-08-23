@@ -2,6 +2,7 @@ import { BattleType } from '../../../core/state/combat-state/combatState';
 import { GatheringType } from '../enums/gatheringType';
 import { Rarity } from '../enums/rarity';
 import { InventoryItem } from '../inventoryItem';
+import { EssenceAbilityDto } from '../essence-system';
 
 export interface CombatResultDto {
   playerTeam: SimpleCombatEntityDto[];
@@ -76,6 +77,7 @@ export interface AbilityStats {
   totalThreat?: number;
   totalStagger?: number;
   staggerBreaks?: number;
+  definition?: EssenceAbilityDto | null;
 }
 
 export interface AbilityDamageTypeStats {

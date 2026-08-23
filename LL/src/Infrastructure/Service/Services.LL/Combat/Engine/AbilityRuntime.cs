@@ -21,6 +21,7 @@ public sealed class CompiledAbility
 {
     public required string Id { get; init; }
     public required string Name { get; init; }
+    public AbilitySpec? SourceSpec { get; init; }
     public AbilitySpecKind Kind { get; init; }
     public int CooldownTicks { get; init; }
     public int ThreatValue { get; init; }

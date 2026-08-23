@@ -921,6 +921,7 @@ public sealed class EncounterCalibrationRunner
         {
             Id = ability.Id,
             Name = ability.Name,
+            SourceSpec = ability.SourceSpec,
             Kind = ability.Kind,
             CooldownTicks = ScaleCooldown(ability.CooldownTicks, delayFraction),
             ThreatValue = ability.ThreatValue,

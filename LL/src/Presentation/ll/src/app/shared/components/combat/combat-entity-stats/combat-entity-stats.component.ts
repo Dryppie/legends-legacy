@@ -9,6 +9,7 @@ import {
 } from '../../../models/Dtos/combatResultDto';
 import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { RegularButtonComponent } from '../../custom-components/buttons/regular-button/regular-button.component';
+import { CombatAbilityNameComponent } from '../combat-ability-name/combat-ability-name.component';
 
 type CombatTeamName = 'Friendly' | 'Hostile';
 type AbilitySortColumn = 'uses' | 'damage' | 'healing' | 'barrier' | 'threat';
@@ -66,7 +67,14 @@ type StatsParticipantGroup = {
 
 @Component({
   selector: 'app-combat-entity-stats',
-  imports: [NgIf, NgFor, NgClass, DecimalPipe, RegularButtonComponent],
+  imports: [
+    NgIf,
+    NgFor,
+    NgClass,
+    DecimalPipe,
+    RegularButtonComponent,
+    CombatAbilityNameComponent,
+  ],
   templateUrl: './combat-entity-stats.component.html',
 })
 export class CombatEntityStatsComponent implements OnChanges {
@@ -724,6 +732,7 @@ export class CombatEntityStatsComponent implements OnChanges {
     for (const ability of stats.flatMap((item) => item.abilities ?? [])) {
       const current = abilities.get(ability.name) ?? {
         name: ability.name,
+        definition: ability.definition,
         totalDamage: 0,
         damageByType: [],
         totalHealing: 0,
@@ -739,6 +748,7 @@ export class CombatEntityStatsComponent implements OnChanges {
       };
       abilities.set(ability.name, {
         name: ability.name,
+        definition: current.definition ?? ability.definition,
         totalDamage: current.totalDamage + (ability.totalDamage ?? 0),
         damageByType: this.mergeDamageByType(
           current.damageByType,

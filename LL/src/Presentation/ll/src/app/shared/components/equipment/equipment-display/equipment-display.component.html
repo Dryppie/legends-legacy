@@ -395,6 +395,7 @@
           <div
             *ngFor="let comparison of toolComparisonRows"
             class="equipment-design-row ll-item-stat-row"
+            [appToolBonusTooltip]="comparison.bonusType"
           >
             <span>
               {{
@@ -552,6 +553,7 @@
         <div
           *ngFor="let bonus of data.toolBonuses"
           class="equipment-design-row ll-item-stat-row"
+          [appToolBonusTooltip]="bonus.bonusType"
         >
           <span>{{
             formatToolBonusLabel(bonus.bonusType, bonus.scopeId)
@@ -706,6 +708,7 @@
         <div
           *ngFor="let comparison of toolComparisonRows"
           class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-white/5 py-1 text-sm last:border-b-0"
+          [appToolBonusTooltip]="comparison.bonusType"
         >
           <span class="text-secondary">
             {{ formatToolBonusLabel(comparison.bonusType, comparison.scopeId) }}

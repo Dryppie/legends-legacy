@@ -266,6 +266,23 @@ describe('EquipmentDisplayComponent', () => {
     expect(difference?.textContent?.trim()).toBe('+4%');
   });
 
+  it('makes tool bonus rows focusable for their mechanic tooltips', async () => {
+    await TestBed.configureTestingModule({
+      imports: [EquipmentDisplayComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(EquipmentDisplayComponent);
+
+    fixture.componentRef.setInput('item', toolInstance());
+    fixture.detectChanges();
+
+    const row: HTMLElement | null = fixture.nativeElement.querySelector(
+      '[data-testid="tool-attributes"] .ll-item-stat-row',
+    );
+
+    expect(row?.classList).toContain('cursor-help');
+    expect(row?.getAttribute('tabindex')).toBe('0');
+  });
+
   it('renders separate main-hand and off-hand weapon comparisons', async () => {
     await TestBed.configureTestingModule({
       imports: [EquipmentDisplayComponent],

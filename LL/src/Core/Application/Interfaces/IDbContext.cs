@@ -216,6 +216,12 @@ public interface IDbContext
     /// </summary>
     EntityEntry<TEntity> GetEntry<TEntity>(TEntity entity) where TEntity : class;
 
+    /// <summary>
+    /// Clears tracked entities after a completed unit of work so a subsequent
+    /// transaction can reload concurrency-protected state from the database.
+    /// </summary>
+    void ClearTrackedEntities();
+
     IExecutionStrategy CreateExecutionStrategy();
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default);
     Task<T> ExecuteWithCharacterLockAsync<T>(

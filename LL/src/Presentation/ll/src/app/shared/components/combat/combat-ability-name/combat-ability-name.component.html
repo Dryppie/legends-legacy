@@ -1,0 +1,52 @@
+<app-popover
+  *ngIf="ability.definition; else plainName"
+  [template]="abilityTooltip"
+  trigger="hover"
+  originClass="relative inline-block max-w-full"
+  popoverClass="bg-texture border border-primary/30 rounded-lg shadow-lg p-3 text-sm text-white"
+>
+  <span
+    class="block cursor-help truncate decoration-primary/70 underline decoration-dotted underline-offset-4"
+  >
+    {{ ability.name }}
+  </span>
+</app-popover>
+
+<ng-template #plainName>
+  <span class="block truncate">{{ ability.name }}</span>
+</ng-template>
+
+<ng-template #abilityTooltip>
+  <div *ngIf="ability.definition as definition" class="w-80 max-w-full">
+    <div class="mb-2 flex items-start justify-between gap-3">
+      <h3 class="font-serif text-base leading-tight text-primary">
+        {{ definition.name }}
+      </h3>
+      <span
+        class="shrink-0 rounded border px-2 py-0.5 text-[11px]"
+        [class.border-primary]="definition.kind === 'Active'"
+        [class.text-primary]="definition.kind === 'Active'"
+        [class.border-white]="definition.kind === 'Passive'"
+        [class.text-zinc-300]="definition.kind === 'Passive'"
+      >
+        {{ definition.kind }}
+      </span>
+    </div>
+
+    <app-essence-description
+      [abilityName]="definition.name"
+      [description]="definition.description"
+      [effects]="definition.effects"
+      [kind]="definition.kind"
+      [cooldownSeconds]="definition.cooldownSeconds"
+      [threatValue]="definition.threatValue ?? 0"
+      [threatMultiplier]="definition.threatMultiplier ?? 1"
+      [estimatedThreatPerSecond]="definition.estimatedThreatPerSecond ?? 0"
+      [hasMaintainedThreat]="definition.hasMaintainedThreat ?? false"
+    ></app-essence-description>
+    <app-ability-tags
+      [targets]="definition.targets"
+      [tags]="definition.tags"
+    ></app-ability-tags>
+  </div>
+</ng-template>

@@ -1,4 +1,7 @@
-﻿namespace Domain.Models.Combat;
+using Domain.Models.Combat.Abilities;
+
+namespace Domain.Models.Combat;
+
 public sealed record AbilityDamageTypeStats(
     Domain.Models.Damages.DamageType DamageType,
     int TotalDamage);
@@ -18,4 +21,5 @@ public sealed record AbilityStats(
     IReadOnlyList<AbilityDamageTypeStats>? DamageByType = null,
     int TotalThreat = 0,
     int TotalStagger = 0,
-    int StaggerBreaks = 0);
+    int StaggerBreaks = 0,
+    AbilitySpec? Definition = null);

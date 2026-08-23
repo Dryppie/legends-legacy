@@ -8,7 +8,7 @@ public class CombatResultDto : IMapFrom<CombatResult>
 {
     public List<SimpleCombatEntityDto> PlayerTeam { get; set; } = [];
     public List<SimpleCombatEntityDto> EnemyTeam { get; set; } = [];
-    public List<EntityStats> EntityStats { get; set; } = [];
+    public List<EntityStatsDto> EntityStats { get; set; } = [];
     public BattleOutcome Outcome { get; set; }
     public List<InventoryItem> Loot { get; set; } = [];
     public List<GatheringRewardResult> GatheringRewards { get; set; } = [];

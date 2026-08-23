@@ -42,6 +42,7 @@ public static class AbilityCompiler
         {
             Id = spec.Id,
             Name = spec.Name,
+            SourceSpec = spec,
             Kind = spec.Kind,
             CooldownTicks = spec.CooldownTicks,
             ThreatValue = AbilityThreatRules.GetThreatValue(spec, threatTuning),
