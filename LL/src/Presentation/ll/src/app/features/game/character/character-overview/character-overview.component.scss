@@ -35,7 +35,6 @@
 
 .overview-combat-rating {
   border-top: 1px solid var(--ll-color-border);
-  background: var(--ll-color-surface-soft);
 }
 
 .overview-meta-divider {
@@ -69,10 +68,17 @@
 .overview-skill-item {
   display: grid;
   min-width: 0;
-  grid-template-columns: minmax(7rem, auto) minmax(5rem, 1fr);
-  align-items: center;
-  gap: var(--ll-space-3);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ll-space-2);
   padding: var(--ll-space-2) 0;
+}
+
+.overview-skill-header {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ll-space-3);
 }
 
 .overview-skill-name {
@@ -95,13 +101,10 @@
   text-overflow: ellipsis;
 }
 
-.overview-skill-progress {
-  display: grid;
-  min-width: 0;
-  grid-template-columns: minmax(2rem, 1fr) max-content;
-  align-items: center;
-  gap: var(--ll-space-3);
+.overview-skill-experience {
+  flex: 0 0 auto;
   font-size: var(--ll-text-xs);
+  text-align: right;
 }
 
 .overview-progress-track {
@@ -162,7 +165,7 @@
   }
 
   .overview-profile-progress {
-    grid-template-columns: minmax(18rem, 0.72fr) minmax(0, 1.28fr);
+    grid-template-columns: minmax(16rem, 0.62fr) minmax(0, 1.38fr);
   }
 
   .overview-skills {

@@ -212,13 +212,8 @@
   }
 
   .ll-sidebar-nav-item-quest {
-    border-color: color-mix(
-      in srgb,
-      var(--ll-color-primary) 68%,
-      transparent
-    );
-    background:
-      linear-gradient(
+    border-color: color-mix(in srgb, var(--ll-color-primary) 68%, transparent);
+    background: linear-gradient(
         105deg,
         transparent 0%,
         color-mix(in srgb, var(--ll-color-primary) 20%, transparent) 48%,
@@ -269,8 +264,7 @@
       box-shadow:
         inset 0 0 0 1px
           color-mix(in srgb, var(--ll-color-primary) 16%, transparent),
-        0 0 8px
-          color-mix(in srgb, var(--ll-color-primary) 16%, transparent);
+        0 0 8px color-mix(in srgb, var(--ll-color-primary) 16%, transparent);
     }
 
     70%,
@@ -279,8 +273,7 @@
       box-shadow:
         inset 0 0 0 1px
           color-mix(in srgb, var(--ll-color-primary) 24%, transparent),
-        0 0 18px
-          color-mix(in srgb, var(--ll-color-primary) 32%, transparent);
+        0 0 18px color-mix(in srgb, var(--ll-color-primary) 32%, transparent);
     }
   }
 

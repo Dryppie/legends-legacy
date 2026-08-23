@@ -10,6 +10,31 @@ import { CharacterService } from './character.service';
 import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
 import { VersionedMutationResult } from '../api.service';
+import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
+import { CharacterLevelUp } from '../../real-time/game-realtime/game-realtime-contracts';
+
+export function applyCharacterLevelUp(
+  character: CharacterDto,
+  levelUp: CharacterLevelUp,
+): CharacterDto {
+  if (character.id !== levelUp.characterId || levelUp.level < character.level) {
+    return character;
+  }
+
+  if (
+    levelUp.level === character.level &&
+    levelUp.experience <= character.experience
+  ) {
+    return character;
+  }
+
+  return {
+    ...character,
+    level: levelUp.level,
+    experience: levelUp.experience,
+    experienceUntilNextLevel: levelUp.experienceUntilNextLevel,
+  };
+}
 
 @Injectable({ providedIn: 'root' })
 export class CharacterStateService {
@@ -42,6 +67,7 @@ export class CharacterStateService {
     private readonly stateSync: StateSyncCoordinator,
     private readonly router: Router,
     private readonly domainVersions: DomainVersionTracker,
+    private readonly gameEvents: GameRealtimeEventRegistry,
   ) {
     this.stateSync.register(
       'character',
@@ -72,6 +98,25 @@ export class CharacterStateService {
         if (this.isOverviewRouteActive()) {
           this.refresh(); // writes _loading, _overview
         }
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        const levelUp = this.gameEvents.event.CharacterLevelUp();
+        if (!levelUp) return;
+
+        untracked(() => {
+          const current = this.currentCharacter();
+          if (!current) return;
+
+          const updated = applyCharacterLevelUp(current, levelUp);
+          if (updated === current) return;
+
+          this.updateCharacter(updated);
+          this.patchOverviewFromSummary(updated);
+        });
       },
       { allowSignalWrites: true },
     );
