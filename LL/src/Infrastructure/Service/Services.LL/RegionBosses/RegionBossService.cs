@@ -941,6 +941,9 @@ public sealed class RegionBossService(
         RegionBossDefinition definition,
         int highestLevelDefeated)
     {
+        if (!definition.RewardsEnabled)
+            return [];
+
         var qualifying = definition.RewardBrackets
             .Where(x => x.MinimumLevelDefeated <= highestLevelDefeated)
             .OrderBy(x => x.MinimumLevelDefeated)

@@ -23,6 +23,7 @@ import { catchError, finalize, of, tap } from 'rxjs';
   selector: 'app-combat-area-card',
   imports: [MiniButtonComponent, NgIf, CommonModule],
   templateUrl: './combat-area-card.component.html',
+  styleUrl: './combat-area-card.component.scss',
 })
 export class CombatAreaCardComponent implements OnInit {
   readonly GatheringType = GatheringType;
@@ -138,6 +139,13 @@ export class CombatAreaCardComponent implements OnInit {
 
   gatheringTypeInitial(gatheringType: GatheringType): string {
     return gatheringType.charAt(0).toUpperCase();
+  }
+
+  isEssenceCollectionCompleted(): boolean {
+    const progress = this.area.essenceProgress;
+    return (
+      !!progress && progress.total > 0 && progress.collected >= progress.total
+    );
   }
 
   specificCard(): void {

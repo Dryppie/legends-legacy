@@ -417,8 +417,13 @@ public sealed class RegionBossDevelopmentTests
         Assert.Equal(RegionBossEventStatus.Settled, statuses[valid.Id]);
     }
 
-    [Fact]
-    public async Task Settlement_awards_only_the_highest_bracket_when_rewards_are_not_cumulative()
+    [Theory]
+    [InlineData(false, 0, null)]
+    [InlineData(true, 1, "test-region-boss:level-5")]
+    public async Task Settlement_respects_reward_enablement_and_non_cumulative_brackets(
+        bool rewardsEnabled,
+        int expectedGrantCount,
+        string? expectedRewardKey)
     {
         var databaseName = Guid.NewGuid().ToString();
         var now = new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero);
@@ -430,6 +435,7 @@ public sealed class RegionBossDevelopmentTests
             RegionId = 1,
             CreatureId = Guid.NewGuid(),
             LevelRequirement = 1,
+            RewardsEnabled = rewardsEnabled,
             CumulativeRewards = false,
             RewardBrackets =
             [
@@ -491,9 +497,13 @@ public sealed class RegionBossDevelopmentTests
             .SingleAsync(x => x.Id == eventId);
         Assert.Equal(RegionBossEventStatus.Settled, settled.Status);
         Assert.Equal(RegionBossRunStatus.Settled, Assert.Single(settled.Runs).Status);
-        var grant = Assert.Single(settled.RewardGrants);
-        Assert.Equal("test-region-boss:level-5", grant.RewardKey);
-        Assert.Equal(5, grant.MilestoneLevel);
+        Assert.Equal(expectedGrantCount, settled.RewardGrants.Count);
+        if (expectedRewardKey is not null)
+        {
+            var grant = Assert.Single(settled.RewardGrants);
+            Assert.Equal(expectedRewardKey, grant.RewardKey);
+            Assert.Equal(5, grant.MilestoneLevel);
+        }
     }
 
     [Fact]

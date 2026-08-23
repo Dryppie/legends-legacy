@@ -35,6 +35,7 @@ public sealed class RegionBossDefinition
     public RegionBossRecoveryDefinition Recovery { get; init; } = new();
     public BossStaggerDefinition? Stagger { get; init; }
     public RegionBossScheduleDefinition Schedule { get; init; } = new();
+    public bool RewardsEnabled { get; init; }
     public bool CumulativeRewards { get; init; } = true;
     public IReadOnlyList<RegionBossRewardBracketDefinition> RewardBrackets { get; init; } = [];
 }

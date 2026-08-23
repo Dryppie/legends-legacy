@@ -16,6 +16,26 @@
   "
 >
   <div
+    *ngIf="area.essenceProgress as essenceProgress"
+    class="area-essence-counter absolute right-3 top-3 z-30"
+    [class.area-essence-counter-completed]="isEssenceCollectionCompleted()"
+    [attr.aria-label]="
+      essenceProgress.collected +
+      ' of ' +
+      essenceProgress.total +
+      ' area Essences archived'
+    "
+  >
+    <span
+      class="area-essence-counter-diamond"
+      aria-hidden="true"
+    ></span>
+    <span class="area-essence-counter-value">
+      {{ essenceProgress.collected }}/{{ essenceProgress.total }}
+    </span>
+  </div>
+
+  <div
     *ngIf="area.possibleDrops?.length"
     class="absolute z-30 w-full p-3"
   >
@@ -130,7 +150,17 @@
           In battle now
         </small>
         <ng-template #levelRequirement>
-          <small class="ll-stat-label">Req. LV: {{ area.levelRequirement }}</small>
+          <div class="flex items-center gap-3">
+            <small class="ll-stat-label">
+              Req. LV: {{ area.levelRequirement }}
+            </small>
+            <span
+              *ngIf="isEssenceCollectionCompleted()"
+              class="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-primary"
+            >
+              Completed
+            </span>
+          </div>
         </ng-template>
       </div>
       <div class="-mb-2" [attr.data-tour]="trainingBattleButtonTourId()">

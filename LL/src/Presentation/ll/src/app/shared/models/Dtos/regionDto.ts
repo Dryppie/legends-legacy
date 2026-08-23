@@ -13,10 +13,16 @@ export interface Area {
   name: string;
   levelRequirement: number;
   creatures: string[];
+  essenceProgress?: AreaEssenceProgress;
   possibleDrops?: AreaDrop[];
   gatheringTypes?: GatheringType[];
   gatheringNodes?: AreaGatheringNode[];
   // creatures: Creature[];
+}
+
+export interface AreaEssenceProgress {
+  collected: number;
+  total: number;
 }
 
 export interface AreaDrop {

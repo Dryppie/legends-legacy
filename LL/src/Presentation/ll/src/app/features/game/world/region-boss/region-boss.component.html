@@ -259,7 +259,7 @@
           </p>
         </div>
         <div class="past-result">
-          <strong>{{ rewardLabel(event) }}</strong>
+          <strong *ngIf="event.rewards.length">{{ rewardLabel(event) }}</strong>
           <span>
             Party {{ event.run?.partyNumber }} · {{ totalDeaths(event) }} deaths
           </span>

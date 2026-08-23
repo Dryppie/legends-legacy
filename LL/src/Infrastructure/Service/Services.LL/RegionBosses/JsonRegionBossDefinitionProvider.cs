@@ -63,7 +63,7 @@ public sealed class JsonRegionBossDefinitionProvider : IRegionBossDefinitionProv
                 || TimeSpan.FromMinutes(boss.Schedule.SignupDurationMinutes)
                     >= TimeSpan.FromHours(boss.Schedule.MinimumIntervalHours))
                 throw new InvalidOperationException($"Region Boss '{boss.Id}' has invalid schedule settings.");
-            if (boss.RewardBrackets.Count == 0
+            if ((boss.RewardsEnabled && boss.RewardBrackets.Count == 0)
                 || boss.RewardBrackets.Any(x => string.IsNullOrWhiteSpace(x.Key)
                     || x.MinimumLevelDefeated <= 0 || x.Cinders < 0 || x.Soulstones < 0
                     || x.Cinders == 0 && x.Soulstones == 0)

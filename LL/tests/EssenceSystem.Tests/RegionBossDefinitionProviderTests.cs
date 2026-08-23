@@ -38,7 +38,8 @@ public sealed class RegionBossDefinitionProviderTests
         Assert.Equal(50, boss.Recovery.DownedReviveHealthPercent);
         Assert.Equal(4, boss.Schedule.MinimumIntervalHours);
         Assert.Equal(8, boss.Schedule.MaximumIntervalHours);
-        Assert.True(boss.CumulativeRewards);
+        Assert.False(boss.RewardsEnabled);
+        Assert.Empty(boss.RewardBrackets);
     }
 
     [Fact]
@@ -118,6 +119,7 @@ public sealed class RegionBossDefinitionProviderTests
             RequiredTowerFloor = requiredTowerFloor,
             BaseScaling = new RegionBossBaseScalingDefinition { Health = baseHealth },
             Schedule = schedule ?? new RegionBossScheduleDefinition(),
+            RewardsEnabled = true,
             RewardBrackets = rewards ??
             [
                 new RegionBossRewardBracketDefinition

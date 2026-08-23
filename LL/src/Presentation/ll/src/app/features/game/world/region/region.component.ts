@@ -38,6 +38,9 @@ import {
 import { StateSyncCoordinator } from '../../../../core/services/real-time/game-realtime/state-sync-coordinator.service';
 import { environment } from '../../../../../environments/environment';
 import { RegionBossComponent } from '../region-boss/region-boss.component';
+import { EssencesService } from '../../../../core/services/api/essences/essences.service';
+import { SoulArchiveDto } from '../../../../shared/models/essence-system';
+import { calculateAreaEssenceProgress } from './area-essence-progress';
 
 interface WorldMapDungeonEntry {
   id: string;
@@ -81,6 +84,7 @@ export class RegionComponent implements OnInit, OnDestroy {
   regionId!: string;
   region!: Region; // You can define a more specific type based on your item data structure
   private sourceRegion: Region | null = null;
+  private soulArchive: SoulArchiveDto | null = null;
   targetAreaId: string | null = null;
   readonly trainingBattleType = BattleType.Training;
   readonly activeBattle;
@@ -103,6 +107,7 @@ export class RegionComponent implements OnInit, OnDestroy {
     private readonly raids: RaidService,
     private readonly stateSync: StateSyncCoordinator,
     private readonly ngZone: NgZone,
+    private readonly essences: EssencesService,
     characterActions: CharacterActionsStateService,
   ) {
     this.raidSyncCleanup = this.stateSync.register(
@@ -134,6 +139,8 @@ export class RegionComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.loadEssenceProgress();
+
     this.route.paramMap.subscribe((params) => {
       this.regionId = params.get('id') ?? '';
       this.selectedDungeonId = null;
@@ -236,9 +243,22 @@ export class RegionComponent implements OnInit, OnDestroy {
         )
         .map((area) => ({
           ...area,
+          essenceProgress: calculateAreaEssenceProgress(
+            area,
+            this.soulArchive,
+          ),
           possibleDrops: this.possibleDropsFor(area),
         })),
     };
+  }
+
+  private loadEssenceProgress(): void {
+    this.essences.getArchive().subscribe({
+      next: (archive) => {
+        this.soulArchive = archive;
+        this.applyRegionView();
+      },
+    });
   }
 
   private possibleDropsFor(area: Area): AreaDrop[] {
