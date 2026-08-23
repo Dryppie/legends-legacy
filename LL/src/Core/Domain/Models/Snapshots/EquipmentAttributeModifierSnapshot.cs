@@ -10,6 +10,7 @@ public sealed class EquipmentAttributeModifierSnapshot
     public AttributeType AttributeType { get; set; }
     public float Amount { get; set; }
     public ModifierType ModifierType { get; set; }
+    public float RarityBonusAmount { get; set; }
 
     private EquipmentAttributeModifierSnapshot() { }
 
@@ -18,13 +19,15 @@ public sealed class EquipmentAttributeModifierSnapshot
         Id = Guid.NewGuid(),
         AttributeType = modifier.AttributeType,
         Amount = modifier.Amount,
-        ModifierType = modifier.ModifierType
+        ModifierType = modifier.ModifierType,
+        RarityBonusAmount = modifier.RarityBonusAmount
     };
 
     public InstanceAttributeModifier ToInstanceModifier(Guid itemInstanceId) =>
         new(AttributeType, Amount, ModifierType)
         {
             Id = Guid.NewGuid(),
-            ItemInstanceId = itemInstanceId
+            ItemInstanceId = itemInstanceId,
+            RarityBonusAmount = RarityBonusAmount
         };
 }

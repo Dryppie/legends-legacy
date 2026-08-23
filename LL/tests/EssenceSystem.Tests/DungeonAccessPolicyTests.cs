@@ -95,6 +95,45 @@ public sealed class DungeonAccessPolicyTests
             Assert.Single(preview["test_dungeon.grade_2"].SigilAssembly!.MissingRequirements));
     }
 
+    [Fact]
+    public async Task Preview_access_uses_inventory_quantity_overrides_for_pending_mutations()
+    {
+        await using var db = CreateDb();
+        db.ItemBases.Add(new ItemBase
+        {
+            Id = "sigil_test",
+            Name = "Test Sigil",
+            ItemType = ItemType.Resource,
+            Stackable = true
+        });
+        await db.SaveChangesAsync();
+
+        var policy = new DungeonAccessPolicy(
+            new DungeonRunRepository(db),
+            new InventoryRepository(db),
+            new ItemBaseRepository(db));
+        var dungeon = new DungeonDefinition
+        {
+            Id = "test_dungeon.grade_1",
+            SigilItemId = "sigil_test",
+            EntryCosts = [new DungeonEntryCost { ItemId = "sigil_test", Amount = 1 }]
+        };
+
+        var preview = await policy.EvaluateForPreviewAsync(
+            Guid.NewGuid(),
+            [dungeon],
+            new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["sigil_test"] = 1
+            },
+            CancellationToken.None);
+
+        var entryAccess = preview[dungeon.Id].Entry;
+        Assert.True(entryAccess.CanEnter);
+        Assert.Empty(entryAccess.MissingRequirements);
+        Assert.Equal(1, Assert.Single(entryAccess.EntryRequirements).OwnedAmount);
+    }
+
     private static LLDbContext CreateDb()
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()

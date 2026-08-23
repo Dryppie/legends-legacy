@@ -46,75 +46,52 @@ public sealed class EquipmentRollRangeService : IEquipmentRollRangeService
         var qualities = equipment.Quality == ItemQuality.Masterwork
             ? [.. BaselineQualities, ItemQuality.Masterwork]
             : BaselineQualities;
-        var rarityUpgrades = TemperingConstants.GetRarityUpgradeCount(equipment.Rarity);
-        var rarityStepBudget = ResolveRarityStepBudget(equipment, qualities);
-        var attributes = _statRollService
+        var rarityBonuses = equipment.InstanceModifiers
+            .Where(modifier => modifier.RarityBonusAmount > 0f)
+            .GroupBy(modifier => modifier.AttributeType)
+            .ToDictionary(
+                group => group.Key,
+                group => (float)AttributeValueQuantizer.Quantize(
+                    group.Key,
+                    group.Sum(modifier => modifier.RarityBonusAmount)));
+        var craftedRanges = _statRollService
             .GetBaseStatRanges(equipment.EquipmentBase, design, equipment.Tier, qualities)
-            .Select(range => new EquipmentAttributeRollRange(
-                range.AttributeType,
-                range.MinimumAmount,
-                ApplyRarityHeadroom(range, equipment.Tier, rarityUpgrades, rarityStepBudget)))
+            .ToList();
+        var craftedAttributes = craftedRanges
+            .Select(range =>
+            {
+                var rarityBonus = rarityBonuses.GetValueOrDefault(range.AttributeType);
+                return new EquipmentAttributeRollRange(
+                    range.AttributeType,
+                    ShiftByRarityBonus(range.AttributeType, range.MinimumAmount, rarityBonus),
+                    ShiftByRarityBonus(range.AttributeType, range.MaximumAmount, rarityBonus),
+                    rarityBonus,
+                    HasCraftedRange: true);
+            });
+        var craftedAttributeTypes = craftedRanges
+            .Select(range => range.AttributeType)
+            .ToHashSet();
+        var introducedAttributes = rarityBonuses
+            .Where(pair => !craftedAttributeTypes.Contains(pair.Key))
+            .Select(pair => new EquipmentAttributeRollRange(
+                pair.Key,
+                pair.Value,
+                pair.Value,
+                pair.Value,
+                HasCraftedRange: false));
+        var attributes = craftedAttributes
+            .Concat(introducedAttributes)
             .ToList();
 
         var (minimumPotential, maximumPotential) = ResolvePotentialRange(equipment, qualities);
         return new EquipmentRollRange(minimumPotential, maximumPotential, attributes);
     }
 
-    /// <summary>
-    /// Budget funding a single rarity step's directed stat improvement. Mirrors the
-    /// budget that <c>TemperingMechanicsService.TryApplyDirectedImprovement</c> spends,
-    /// except that the highest quality in the displayed band is used instead of the
-    /// item's current quality, because the range spans that whole band and quality can
-    /// still rise after the improvement was granted.
-    /// </summary>
-    private double ResolveRarityStepBudget(
-        EquipmentInstance equipment,
-        IReadOnlyCollection<ItemQuality> qualities)
-    {
-        var tier = Math.Max(EquipmentStatBudgetCatalog.MinimumTier, equipment.Tier);
-        return TemperingConstants.GetDirectedImprovementBudget(tier)
-            * _options.GetSlotBudgetWeight(equipment.EquipmentBase.EquipmentType)
-            * qualities.Max(_options.GetQualityStatMultiplier);
-    }
-
-    /// <summary>
-    /// Crafted ranges only model craft-time variance (tier x slot x quality x +/-5%), but
-    /// every rarity step permanently adds a directed improvement to the instance modifiers.
-    /// Without accounting for that growth a tempered item renders above its own maximum.
-    /// Each step can land entirely on one attribute, so every attribute is granted the full
-    /// headroom; the minimum is left alone because a rarity upgrade never lowers a roll.
-    /// </summary>
-    private static float ApplyRarityHeadroom(
-        CraftedAttributeRange range,
-        int tier,
-        int rarityUpgrades,
-        double stepBudget)
-    {
-        if (rarityUpgrades <= 0
-            || stepBudget <= 0d
-            || !EquipmentStatBudgetCatalog.IsKnown(range.AttributeType))
-        {
-            return range.MaximumAmount;
-        }
-
-        var effectiveTier = Math.Max(EquipmentStatBudgetCatalog.MinimumTier, tier);
-        var costPerPoint = EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(
-            range.AttributeType,
-            effectiveTier);
-        if (costPerPoint <= 0d) return range.MaximumAmount;
-
-        // Matches how the improvement is materialized during tempering: direct
-        // percentages buy fractional value, everything else rounds up to at least one
-        // whole point per step.
-        var rawIncrease = stepBudget / costPerPoint;
-        var perStepIncrease = EquipmentStatBudgetCatalog.IsDirectPercentage(range.AttributeType)
-            ? AttributeValueQuantizer.Quantize(range.AttributeType, rawIncrease)
-            : Math.Max(1d, Math.Round(rawIncrease, MidpointRounding.AwayFromZero));
-
-        return (float)AttributeValueQuantizer.Quantize(
-            range.AttributeType,
-            range.MaximumAmount + (rarityUpgrades * perStepIncrease));
-    }
+    private static float ShiftByRarityBonus(
+        AttributeType attribute,
+        float amount,
+        float rarityBonus) =>
+        (float)AttributeValueQuantizer.Quantize(attribute, amount + rarityBonus);
 
     private (int Minimum, int Maximum) ResolvePotentialRange(
         EquipmentInstance equipment,

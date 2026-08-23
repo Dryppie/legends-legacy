@@ -64,10 +64,11 @@ export class EssencesService {
 
   public dismantle(
     inventoryItemId: string,
+    quantity = 1,
   ): Observable<VersionedMutationResult<EssenceMutationResponseDto>> {
     return this.apiService.postVersioned<EssenceMutationResponseDto>(
       `essence/items/${inventoryItemId}/dismantle`,
-      {},
+      { quantity },
       { stateSyncScopesHandledByResponse: ESSENCE_MUTATION_HANDLED_SCOPES },
     );
   }

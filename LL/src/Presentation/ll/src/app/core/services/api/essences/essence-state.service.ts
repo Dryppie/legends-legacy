@@ -1,11 +1,15 @@
 import { Injectable, computed, effect, signal, untracked } from '@angular/core';
 import {
   EMPTY,
+  concatMap,
   forkJoin,
+  from,
+  last,
   Observable,
   catchError,
   finalize,
   map,
+  takeWhile,
   tap,
 } from 'rxjs';
 import { InventoryStateService } from '../inventory/inventory-state.service';
@@ -626,23 +630,50 @@ export class EssenceStateService {
     );
   }
 
-  dismantleSelectedInventoryEssence(): Observable<EssenceMutationResponseDto> | null {
+  dismantleSelectedInventoryEssence(
+    quantity = 1,
+  ): Observable<EssenceMutationResponseDto> | null {
     const item = this.selectedInventoryItem();
     if (!item) return null;
 
-    this._error.set(null);
-    return this.essencesService.dismantle(item.itemInstance.id).pipe(
-      tap((result) => {
-        const response = result.data;
-        if (!response.succeeded) {
-          this._error.set(response.message || 'Failed to shatter essence');
-          return;
-        }
+    return this.dismantleInventoryEssences([
+      { inventoryItemId: item.itemInstance.id, quantity },
+    ]);
+  }
 
-        this.applyEssenceMutation(result);
-        this._selectedInventoryItemId.set(null);
+  dismantleInventoryEssences(
+    selections: readonly { inventoryItemId: string; quantity: number }[],
+  ): Observable<EssenceMutationResponseDto> | null {
+    const validSelections = selections.filter(
+      (selection) => selection.quantity > 0,
+    );
+    if (validSelections.length === 0) return null;
+
+    this._error.set(null);
+    return from(validSelections).pipe(
+      concatMap((selection) =>
+        this.essencesService
+          .dismantle(selection.inventoryItemId, selection.quantity)
+          .pipe(
+            map((result) => {
+              const response = result.data;
+              if (!response.succeeded) {
+                this._error.set(
+                  response.message || 'Failed to shatter essence',
+                );
+                return response;
+              }
+
+              this.applyEssenceMutation(result);
+              return response;
+            }),
+          ),
+      ),
+      takeWhile((response) => response.succeeded, true),
+      last(),
+      tap((response) => {
+        if (response.succeeded) this._selectedInventoryItemId.set(null);
       }),
-      map((result) => result.data),
       catchError((error) => {
         this._error.set(error?.message ?? 'Failed to shatter essence');
         return EMPTY;

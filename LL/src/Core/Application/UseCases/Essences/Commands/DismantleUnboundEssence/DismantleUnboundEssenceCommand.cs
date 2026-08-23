@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.UseCases.Essences.Commands.DismantleUnboundEssence;
 
-public record DismantleUnboundEssenceCommand(Guid CharacterId, Guid InventoryItemId) : ICommand<Response<EssenceMutationResponseDto>>;
+public record DismantleUnboundEssenceCommand(Guid CharacterId, Guid InventoryItemId, int Quantity = 1) : ICommand<Response<EssenceMutationResponseDto>>;
 
 public class DismantleUnboundEssenceCommandHandler : IRequestHandler<DismantleUnboundEssenceCommand, Response<EssenceMutationResponseDto>>
 {
@@ -24,7 +24,11 @@ public class DismantleUnboundEssenceCommandHandler : IRequestHandler<DismantleUn
 
     public async Task<Response<EssenceMutationResponseDto>> Handle(DismantleUnboundEssenceCommand request, CancellationToken cancellationToken)
     {
-        var result = await _service.DismantleUnboundEssenceAsync(request.CharacterId, request.InventoryItemId, cancellationToken);
+        var result = await _service.DismantleUnboundEssenceAsync(
+            request.CharacterId,
+            request.InventoryItemId,
+            cancellationToken,
+            request.Quantity);
         if (!result.Succeeded)
             return Response<EssenceMutationResponseDto>.Fail(result.Message);
 

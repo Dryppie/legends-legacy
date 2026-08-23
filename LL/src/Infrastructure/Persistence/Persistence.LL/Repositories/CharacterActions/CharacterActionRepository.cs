@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Crafting.V2;
@@ -173,30 +174,57 @@ public class CharacterActionRepository : ICharacterActionRepository
     // combat may be replaced or followed by queued tempering immediately, while the
     // tempering cadence still begins at the fixed switch lock. It does not wait for
     // a rolling combat resolution boundary.
-    public async Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem craftingQueueItem, DateTimeOffset now, CancellationToken cancellationToken)
+    public async Task<bool> UpdateCraftingActionAsync(
+        Guid characterId,
+        CraftingQueueItem craftingQueueItem,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var inventoryItem = await _context.InventoryItems
+            .Include(item => item.ItemInstance)
+                .ThenInclude(itemInstance => itemInstance.ItemBase)
+            .FirstOrDefaultAsync(
+                item => item.InventoryId == characterId &&
+                    item.ItemInstanceId == craftingQueueItem.EquipmentInstanceId,
+                cancellationToken);
+        return inventoryItem is not null &&
+            await UpdateCraftingActionAsync(
+                characterId,
+                craftingQueueItem,
+                inventoryItem,
+                now,
+                cancellationToken) is not null;
+    }
+
+    public async Task<CharacterAction?> UpdateCraftingActionAsync(
+        Guid characterId,
+        CraftingQueueItem craftingQueueItem,
+        InventoryItem inventoryItem,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
     {
         var existingAction = await _context.CharacterActions
-            .Include(a => a.ActionDetails)  // Ensure ActionDetails is loaded
+            .Include(a => a.ActionDetails)
                 .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
-                    .ThenInclude(ci => ci.EquipmentInstance)
             .FirstOrDefaultAsync(a => a.CharacterId == characterId, cancellationToken);
 
-        var pausedQueue = (await GetPausedTemperingQueueAsync(characterId, cancellationToken)).ToList();
+        var pausedQueue = existingAction?.ActionDetails is CraftingActionDetails
+            ? []
+            : await GetPausedTemperingQueueForMutationAsync(characterId, cancellationToken);
 
         var pendingSwitchLock = existingAction?.BlockedUntilUtc is { } blockedUntil && blockedUntil > now
             ? blockedUntil
             : (DateTimeOffset?)null;
 
-        var inventoryItem = await _context.InventoryItems
-            .Include(ii => ii.ItemInstance)
-                .ThenInclude(inventoryItem => inventoryItem.ItemBase)
-            .FirstOrDefaultAsync(ii => ii.ItemInstanceId == craftingQueueItem.EquipmentInstanceId && ii.InventoryId == characterId, cancellationToken);
-
-        if (inventoryItem?.ItemInstance is not EquipmentInstance equipmentInstance)
-            return false; // Item doesn't belong to the character or doesn't exist
+        if (inventoryItem.InventoryId != characterId ||
+            inventoryItem.ItemInstanceId != craftingQueueItem.EquipmentInstanceId ||
+            inventoryItem.ItemInstance is not EquipmentInstance equipmentInstance)
+            return null;
 
         if (equipmentInstance.EquipmentBase.EquipmentType == EquipmentType.Tool)
-            return false;
+            return null;
+
+        craftingQueueItem.EquipmentInstance = equipmentInstance;
 
         craftingQueueItem.CraftType = equipmentInstance.EquipmentBase.EquipmentType switch
         {
@@ -222,7 +250,7 @@ public class CharacterActionRepository : ICharacterActionRepository
             };
             AttachQueue(action.ActionDetails as CraftingActionDetails, pausedQueue, craftingQueueItem);
             await _context.CharacterActions.AddAsync(action, cancellationToken);
-            return true;
+            return action;
         }
 
         existingAction.IsDeleted = false;
@@ -272,8 +300,18 @@ public class CharacterActionRepository : ICharacterActionRepository
             _context.CraftingQueueItems.Add(craftingQueueItem);
         }
 
-        return true;
+        return existingAction;
     }
+
+    private async Task<List<CraftingQueueItem>> GetPausedTemperingQueueForMutationAsync(
+        Guid characterId,
+        CancellationToken cancellationToken) =>
+        await _context.CraftingQueueItems
+            .Where(item => item.PausedForCharacterId == characterId)
+            .OrderBy(item => item.Position)
+            .ThenBy(item => item.AddedAt)
+            .ThenBy(item => item.Id)
+            .ToListAsync(cancellationToken);
 
     public async Task<CharacterAction?> ResumeTemperingAsync(
         Guid characterId,

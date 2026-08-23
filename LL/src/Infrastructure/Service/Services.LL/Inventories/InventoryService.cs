@@ -85,7 +85,7 @@ public class InventoryService : IInventoryService
         return await _inventoryRepository.TryRemoveItemsForMarketPlaceListingAsync(characterId, marketplaceListing, cancellationToken);
     }
 
-    public async Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken)
+    public async Task<InventoryItem?> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken)
     {
         return await _inventoryRepository.AddItemInstanceBackToInventory(characterId, itemInstance, cancellationToken);
     }

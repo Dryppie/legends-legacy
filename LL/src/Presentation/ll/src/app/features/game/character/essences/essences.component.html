@@ -186,7 +186,7 @@
         </div>
       </div>
 
-      <cdk-virtual-scroll-viewport [itemSize]="48" class="min-h-0 flex-1">
+      <cdk-virtual-scroll-viewport [itemSize]="64" class="min-h-0 flex-1">
         <button
           *cdkVirtualFor="
             let essence of filteredArchiveEssences();
@@ -202,7 +202,14 @@
           }"
           [attr.aria-label]="
             displayEssenceName(essence.name) +
-            (essence.isFavorite ? ', favorited' : '')
+            (essence.isFavorite ? ', favorited' : '') +
+            (essence.xpRequiredForNextLevel > 0
+              ? ', ' +
+                essence.currentXp +
+                ' of ' +
+                essence.xpRequiredForNextLevel +
+                ' experience'
+              : ', level cap')
           "
           (click)="selectPlayerEssence(essence)"
         >
@@ -224,6 +231,43 @@
             [class.soul-archive-row-status-ready]="canAscendEssence(essence)"
           >
             {{ essenceStatus(essence) }}
+          </span>
+          <span class="soul-archive-row-experience">
+            <span class="soul-archive-row-experience-label">
+              <ng-container
+                *ngIf="essence.xpRequiredForNextLevel > 0; else levelCap"
+              >
+                {{ essence.currentXp | number }} /
+                {{ essence.xpRequiredForNextLevel | number }} XP
+              </ng-container>
+              <ng-template #levelCap>Level cap</ng-template>
+            </span>
+            <span
+              class="soul-archive-row-experience-track"
+              role="progressbar"
+              [attr.aria-valuemin]="0"
+              [attr.aria-valuenow]="essence.currentXp"
+              [attr.aria-valuemax]="essence.xpRequiredForNextLevel"
+              [attr.aria-valuetext]="
+                essence.xpRequiredForNextLevel > 0
+                  ? essence.currentXp +
+                    ' / ' +
+                    essence.xpRequiredForNextLevel +
+                    ' XP'
+                  : 'Level cap'
+              "
+            >
+              <span
+                class="soul-archive-row-experience-fill"
+                [style.width.%]="
+                  progressPercent(
+                    essence.currentXp,
+                    essence.xpRequiredForNextLevel
+                  )
+                "
+                aria-hidden="true"
+              ></span>
+            </span>
           </span>
         </button>
       </cdk-virtual-scroll-viewport>

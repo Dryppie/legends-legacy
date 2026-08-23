@@ -45,8 +45,13 @@ public class EssenceController : BaseController
         await Mediator.Send(new AbsorbUnboundEssenceCommand(CurrentCharacterGuid, inventoryItemId));
 
     [HttpPost("items/{inventoryItemId:guid}/dismantle")]
-    public async Task<ActionResult<Response<EssenceMutationResponseDto>>> DismantleUnboundEssence(Guid inventoryItemId) =>
-        await Mediator.Send(new DismantleUnboundEssenceCommand(CurrentCharacterGuid, inventoryItemId));
+    public async Task<ActionResult<Response<EssenceMutationResponseDto>>> DismantleUnboundEssence(
+        Guid inventoryItemId,
+        [FromBody] DismantleUnboundEssenceRequestDto? request) =>
+        await Mediator.Send(new DismantleUnboundEssenceCommand(
+            CurrentCharacterGuid,
+            inventoryItemId,
+            request?.Quantity ?? 1));
 
     [HttpPost("{playerEssenceId:guid}/spend-dust")]
     public async Task<ActionResult<Response<EssenceMutationResponseDto>>> SpendDust(Guid playerEssenceId, [FromBody] SpendEssenceDustRequestDto request) =>

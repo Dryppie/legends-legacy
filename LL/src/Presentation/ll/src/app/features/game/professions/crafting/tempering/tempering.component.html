@@ -58,6 +58,13 @@
           <h2 class="text-sm font-semibold uppercase text-primary">
             Latest Tempering Outcomes
           </h2>
+          <div
+            *ngIf="recentOutcomes()[0] as latestOutcome"
+            class="mt-1 text-xs"
+            [ngClass]="outcomeLabelClasses(latestOutcome.outcome)"
+          >
+            {{ outcomeDetail(latestOutcome) }}
+          </div>
         </div>
         <span class="shrink-0 text-sm text-primary">
           {{ outcomesOpen() ? "Hide" : "Show" }}
@@ -138,10 +145,10 @@
               pausingTempering()
                 ? "Pausing…"
                 : temperingPaused()
-                ? resumingTempering()
-                  ? "Continuing…"
-                  : "Continue Queue"
-                : "Pause Queue"
+                  ? resumingTempering()
+                    ? "Continuing…"
+                    : "Continue Queue"
+                  : "Pause Queue"
             }}
           </button>
         </div>

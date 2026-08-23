@@ -9,10 +9,10 @@ import {
   Subject,
   throwError,
 } from 'rxjs';
-import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { CraftingQueueItem } from '../../../../shared/models/profession';
 import { ToastService } from '../../client-side/components/toast/toast.service';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
+import { TemperingQueueMutationResponse } from '../../../../shared/models/Dtos/temperingQueueMutationDto';
 import {
   CraftingRecipe,
   CraftItemsRequest,
@@ -21,11 +21,6 @@ import {
 } from '../../../../shared/models/crafting-v2';
 import { ApiResponse } from '../../../../shared/models/response';
 import { TemperingOutcomeEntry } from '../../../../shared/models/Dtos/temperingSessionDto';
-
-export interface RemoveCraftingQueueItemResponse {
-  inventoryItems: InventoryItem[];
-  currentAction: CharacterActionDto | null;
-}
 
 export type CraftingQueueMoveDirection = 'Up' | 'Down' | 'Top';
 
@@ -119,9 +114,9 @@ export class CraftingService {
 
   removeItemFromQueue(queueItem: {
     id: string;
-  }): Observable<VersionedMutationResult<RemoveCraftingQueueItemResponse>> {
+  }): Observable<VersionedMutationResult<TemperingQueueMutationResponse>> {
     return this.api
-      .postVersioned<ApiResponse<RemoveCraftingQueueItemResponse>>(
+      .postVersioned<ApiResponse<TemperingQueueMutationResponse>>(
         'Crafting/RemoveCraftingQueueItem',
         queueItem.id,
         {
@@ -130,7 +125,7 @@ export class CraftingService {
       )
       .pipe(
         map((response) => {
-          const result = this.unwrapResponse<RemoveCraftingQueueItemResponse>(
+          const result = this.unwrapResponse<TemperingQueueMutationResponse>(
             response.data,
           );
           this.toast.showToast(
@@ -151,10 +146,10 @@ export class CraftingService {
   }
 
   cancelTemperingQueue(): Observable<
-    VersionedMutationResult<RemoveCraftingQueueItemResponse>
+    VersionedMutationResult<TemperingQueueMutationResponse>
   > {
     return this.api
-      .postVersioned<ApiResponse<RemoveCraftingQueueItemResponse>>(
+      .postVersioned<ApiResponse<TemperingQueueMutationResponse>>(
         'Crafting/queue/cancel',
         {},
         {
@@ -163,7 +158,7 @@ export class CraftingService {
       )
       .pipe(
         map((response) => {
-          const result = this.unwrapResponse<RemoveCraftingQueueItemResponse>(
+          const result = this.unwrapResponse<TemperingQueueMutationResponse>(
             response.data,
           );
           this.toast.showToast(

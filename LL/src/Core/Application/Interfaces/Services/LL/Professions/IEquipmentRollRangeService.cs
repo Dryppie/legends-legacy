@@ -16,4 +16,6 @@ public sealed record EquipmentRollRange(
 public sealed record EquipmentAttributeRollRange(
     AttributeType AttributeType,
     float MinimumAmount,
-    float MaximumAmount);
+    float MaximumAmount,
+    float RarityBonusAmount,
+    bool HasCraftedRange);

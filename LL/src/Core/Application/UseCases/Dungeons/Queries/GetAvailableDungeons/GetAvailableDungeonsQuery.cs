@@ -64,6 +64,15 @@ public sealed class DungeonHubFactory
 
     public async Task<DungeonHubDto> CreateAsync(
         Guid characterId,
+        CancellationToken cancellationToken) =>
+        await CreateAsync(
+            characterId,
+            new Dictionary<string, int>(),
+            cancellationToken);
+
+    public async Task<DungeonHubDto> CreateAsync(
+        Guid characterId,
+        IReadOnlyDictionary<string, int> inventoryQuantityOverrides,
         CancellationToken cancellationToken)
     {
         var previews = new List<DungeonPreviewDto>();
@@ -89,6 +98,7 @@ public sealed class DungeonHubFactory
         var accessByDungeon = await _dungeonAccess.EvaluateForPreviewAsync(
             characterId,
             dungeons,
+            inventoryQuantityOverrides,
             cancellationToken);
         var rewardsByDungeon = await _previewRewards.GetPossibleCompletionRewardsAsync(
             dungeons,

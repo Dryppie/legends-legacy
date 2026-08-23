@@ -100,21 +100,63 @@ public sealed class EquipmentRollRangeServiceTests
                 // threshold, which is what writes a directed improvement into the instance.
                 equipment.ItemXp = 9;
                 var previousRarity = equipment.Rarity;
-                tempering.ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.0005d));
+                var previousRange = service.Resolve(equipment);
+                Assert.NotNull(previousRange);
+                var result = tempering.ApplyTemperingAttempt(
+                    equipment,
+                    profile,
+                    new FixedRandom(0.0005d));
                 Assert.True(
                     equipment.Rarity > previousRarity,
                     $"{recipe.Id}: tempering did not advance rarity beyond {previousRarity}.");
+                Assert.NotNull(result.ImprovedStat);
+                Assert.NotNull(result.PreviousStatValue);
+                Assert.NotNull(result.NewStatValue);
 
                 var range = service.Resolve(equipment);
                 Assert.NotNull(range);
+                var improvedStat = result.ImprovedStat.Value;
+                var improvement = result.NewStatValue.Value - result.PreviousStatValue.Value;
+                foreach (var previousAttributeRange in previousRange.Attributes)
+                {
+                    var currentAttributeRange = Assert.Single(
+                        range.Attributes,
+                        candidate => candidate.AttributeType == previousAttributeRange.AttributeType);
+                    if (previousAttributeRange.AttributeType == improvedStat)
+                    {
+                        Assert.Equal(
+                            previousAttributeRange.MinimumAmount + improvement,
+                            currentAttributeRange.MinimumAmount,
+                            precision: 4);
+                        Assert.Equal(
+                            previousAttributeRange.MaximumAmount + improvement,
+                            currentAttributeRange.MaximumAmount,
+                            precision: 4);
+                        Assert.Equal(
+                            previousAttributeRange.RarityBonusAmount + improvement,
+                            currentAttributeRange.RarityBonusAmount,
+                            precision: 4);
+                    }
+                    else
+                    {
+                        Assert.Equal(previousAttributeRange, currentAttributeRange);
+                    }
+                }
+
+                var improvedRange = Assert.Single(
+                    range.Attributes,
+                    candidate => candidate.AttributeType == improvedStat);
+                if (previousRange.Attributes.All(candidate => candidate.AttributeType != improvedStat))
+                {
+                    Assert.False(improvedRange.HasCraftedRange);
+                    Assert.Equal(improvement, improvedRange.RarityBonusAmount, precision: 4);
+                }
+
                 foreach (var modifier in equipment.InstanceModifiers)
                 {
-                    var attributeRange = range.Attributes.SingleOrDefault(candidate =>
-                        candidate.AttributeType == modifier.AttributeType);
-
-                    // Rarity overflow can introduce a stat the recipe never designs for.
-                    // Those have no advertised range, so the client renders none either.
-                    if (attributeRange is null) continue;
+                    var attributeRange = Assert.Single(
+                        range.Attributes,
+                        candidate => candidate.AttributeType == modifier.AttributeType);
 
                     Assert.True(
                         modifier.Amount >= attributeRange.MinimumAmount
@@ -123,9 +165,11 @@ public sealed class EquipmentRollRangeServiceTests
                         + $"{modifier.Amount} is outside "
                         + $"{attributeRange.MinimumAmount}-{attributeRange.MaximumAmount}.");
 
-                    var craftedMaximum = craftedRange.Attributes
-                        .Single(candidate => candidate.AttributeType == modifier.AttributeType)
-                        .MaximumAmount;
+                    var craftedAttributeRange = craftedRange.Attributes
+                        .SingleOrDefault(candidate =>
+                            candidate.AttributeType == modifier.AttributeType);
+                    if (craftedAttributeRange is null) continue;
+                    var craftedMaximum = craftedAttributeRange.MaximumAmount;
                     observedGrowthBeyondTheCraftedRange |= modifier.Amount > craftedMaximum;
                 }
             }

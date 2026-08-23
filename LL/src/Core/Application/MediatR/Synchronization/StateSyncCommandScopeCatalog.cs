@@ -94,7 +94,15 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.CharacterActions.Commands.DeleteCharacterAction.DeleteCharacterActionCommand),
             typeof(global::Application.UseCases.CharacterActions.Commands.ResolveCharacterAction.ResolveCharacterActionCommand),
             typeof(global::Application.UseCases.CharacterActions.Commands.ResumeTempering.ResumeTemperingCommand),
-            typeof(global::Application.UseCases.CharacterActions.Commands.StartCombatAction.StartCombatActionCommand),
+            typeof(global::Application.UseCases.CharacterActions.Commands.StartCombatAction.StartCombatActionCommand));
+
+        RegisterOrderedDeltaResponse(
+            profiles,
+            [],
+            [StateSyncScopes.Inventory],
+            refreshCharacterOverview: false,
+            inventoryWhenChanged: true,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.CharacterActions.Commands.StartCraftingAction.StartCraftingActionCommand));
 
         Register(
@@ -143,12 +151,12 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.Crafting.Commands.CraftItems.CraftItemsCommand),
             typeof(global::Application.UseCases.Crafting.Commands.LearnBlueprint.LearnBlueprintCommand));
 
-        RegisterAuthoritativeResponse(
+        RegisterOrderedDeltaResponse(
             profiles,
             [StateSyncScopes.Inventory],
-            [],
             [StateSyncScopes.Inventory],
             refreshCharacterOverview: false,
+            inventoryWhenChanged: false,
             refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Professions.Commands.CancelTemperingQueue.CancelTemperingQueueCommand),
             typeof(global::Application.UseCases.Professions.Commands.RemoveCraftingQueueItem.RemoveCraftingQueueItemCommand));
@@ -560,6 +568,32 @@ public static class StateSyncCommandScopeCatalog
             CharacterResponseSemantics = CreateResponseSemantics(
                 responseHandledCharacterScopes,
                 StateSyncResponseSemantics.AuthoritativePayload)
+        };
+        foreach (var commandType in commandTypes)
+        {
+            profiles.Add(commandType, profile);
+        }
+    }
+
+    private static void RegisterOrderedDeltaResponse(
+        IDictionary<Type, StateSyncCommandScopeProfile> profiles,
+        IReadOnlyList<string> characterScopes,
+        IReadOnlyList<string> responseHandledCharacterScopes,
+        bool refreshCharacterOverview,
+        bool inventoryWhenChanged,
+        bool refreshCharacterSummaryWhenChanged,
+        params Type[] commandTypes)
+    {
+        var profile = new StateSyncCommandScopeProfile(
+            characterScopes,
+            [],
+            refreshCharacterOverview,
+            inventoryWhenChanged,
+            refreshCharacterSummaryWhenChanged)
+        {
+            CharacterResponseSemantics = CreateResponseSemantics(
+                responseHandledCharacterScopes,
+                StateSyncResponseSemantics.OrderedDelta)
         };
         foreach (var commandType in commandTypes)
         {

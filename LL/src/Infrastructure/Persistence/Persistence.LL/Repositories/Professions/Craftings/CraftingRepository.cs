@@ -24,26 +24,59 @@ public class CraftingRepository : ICraftingRepository
         actionDetails.CraftingQueueItems.Remove(queueItem);
     }
 
-    public async Task<EquipmentInstance?> RemoveCraftingQueueItemAndReturnItemAsync(Guid characterId, Guid queueItemId, CancellationToken cancellationToken)
+    public async Task<CraftingQueueRemovalResult?> RemoveCraftingQueueItemsAndReturnItemsAsync(
+        Guid characterId,
+        IReadOnlyCollection<Guid>? queueItemIds,
+        CancellationToken cancellationToken)
     {
         var characterAction = await _dbContext.CharacterActions
             .Include(ca => ca.ActionDetails)
                 .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
-                    .ThenInclude(cq => cq.EquipmentInstance)
             .FirstOrDefaultAsync(ca => ca.CharacterId == characterId, cancellationToken);
         var craftingDetails = characterAction?.ActionDetails as CraftingActionDetails;
-        var queueItem = craftingDetails?.CraftingQueueItems
-            .FirstOrDefault(cq => cq.Id == queueItemId)
-            ?? await _dbContext.CraftingQueueItems
-                .Include(item => item.EquipmentInstance)
-                .FirstOrDefaultAsync(
-                    item => item.Id == queueItemId &&
-                        item.PausedForCharacterId == characterId,
-                    cancellationToken);
-        if (queueItem == null) return null;
+        var craftingDetailsId = craftingDetails?.Id;
+        var requestedIds = queueItemIds?.Distinct().ToArray();
+        var queueQuery = _dbContext.CraftingQueueItems
+            .Where(item =>
+                (craftingDetailsId.HasValue &&
+                    item.CraftingActionDetailsId == craftingDetailsId) ||
+                item.PausedForCharacterId == characterId);
+        if (requestedIds is not null)
+        {
+            if (requestedIds.Length == 0)
+                return null;
+            queueQuery = queueQuery.Where(item => requestedIds.Contains(item.Id));
+        }
 
-        _dbContext.CraftingQueueItems.Remove(queueItem);
-        craftingDetails?.CraftingQueueItems.Remove(queueItem);
+        var queueItems = await queueQuery
+            .Include(item => item.EquipmentInstance)
+                .ThenInclude(equipment => equipment.ItemBase)
+                    .ThenInclude(itemBase => (itemBase as EquipmentBase).AttributeModifiers)
+            .Include(item => item.EquipmentInstance)
+                .ThenInclude(equipment => equipment.ItemBase)
+                    .ThenInclude(itemBase => (itemBase as EquipmentBase).ToolBonuses)
+            .Include(item => item.EquipmentInstance)
+                .ThenInclude(equipment => equipment.InstanceModifiers)
+            .Include(item => item.EquipmentInstance)
+                .ThenInclude(equipment => equipment.ToolAffixes)
+            .AsSingleQuery()
+            .OrderBy(item => item.Position)
+            .ThenBy(item => item.AddedAt)
+            .ThenBy(item => item.Id)
+            .ToListAsync(cancellationToken);
+        if (requestedIds is null && queueItems.Count == 0)
+            return new CraftingQueueRemovalResult(characterAction, [], []);
+        if (queueItems.Count == 0 ||
+            (requestedIds is not null && queueItems.Count != requestedIds.Length))
+            return null;
+
+        _dbContext.CraftingQueueItems.RemoveRange(queueItems);
+        if (craftingDetails is not null)
+        {
+            foreach (var queueItem in queueItems)
+                craftingDetails.CraftingQueueItems.Remove(queueItem);
+        }
+
         if (craftingDetails?.CraftingQueueItems.Count == 0 && characterAction != null)
         {
             var now = _timeProvider.GetUtcNow();
@@ -62,8 +95,20 @@ public class CraftingRepository : ICraftingRepository
             characterAction.UpdatedAt = _timeProvider.GetUtcNow();
             characterAction.RowVersion++;
         }
-        return queueItem.EquipmentInstance;
+        return new CraftingQueueRemovalResult(
+            characterAction,
+            queueItems.Select(item => item.EquipmentInstance).ToList(),
+            queueItems.Select(item => item.Id).ToList());
     }
+
+    public async Task<EquipmentInstance?> RemoveCraftingQueueItemAndReturnItemAsync(
+        Guid characterId,
+        Guid queueItemId,
+        CancellationToken cancellationToken) =>
+        (await RemoveCraftingQueueItemsAndReturnItemsAsync(
+            characterId,
+            [queueItemId],
+            cancellationToken))?.EquipmentInstances.SingleOrDefault();
 
     public async Task<bool> MoveCraftingQueueItemAsync(
         Guid characterId,

@@ -100,6 +100,48 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
+    public async Task DismantleUnboundEssence_consumes_requested_quantity_and_grants_combined_dust()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var itemInstanceId = await AddEssenceItemAsync(db, characterId, quantity: 5, dust: 3);
+        var service = CreateService(db);
+
+        var result = await service.DismantleUnboundEssenceAsync(
+            characterId,
+            itemInstanceId,
+            CancellationToken.None,
+            quantity: 4);
+        await db.SaveChangesAsync();
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(12, result.DustGained);
+        Assert.Equal(1, db.InventoryItems.Single(x => x.ItemInstanceId == itemInstanceId).Quantity);
+        Assert.Equal(12, await InventoryQuantityAsync(db, characterId, "soul_dust"));
+    }
+
+    [Fact]
+    public async Task DismantleUnboundEssence_rejects_quantity_above_owned_copies()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var itemInstanceId = await AddEssenceItemAsync(db, characterId, quantity: 2, dust: 3);
+        var service = CreateService(db);
+
+        var result = await service.DismantleUnboundEssenceAsync(
+            characterId,
+            itemInstanceId,
+            CancellationToken.None,
+            quantity: 3);
+        await db.SaveChangesAsync();
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(0, result.DustGained);
+        Assert.Equal(2, db.InventoryItems.Single(x => x.ItemInstanceId == itemInstanceId).Quantity);
+        Assert.Equal(0, await InventoryQuantityAsync(db, characterId, "soul_dust"));
+    }
+
+    [Fact]
     public async Task DismantleUnboundEssence_grants_extra_dust_for_duplicate_echo_bonus()
     {
         await using var db = CreateDb();

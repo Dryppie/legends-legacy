@@ -9,7 +9,13 @@ namespace Application.Interfaces.Services.LL.Professions;
 public interface ICraftingService
 {
     Task<TemperingSession> PerformIdleCrafting(CharacterAction characterAction, int actionsToPerform, DateTimeOffset now, CancellationToken cancellationToken);
-    Task<bool> RemoveCraftingQueueItemsAsync(Guid characterId, List<Guid> queueItemIds, CancellationToken cancellationToken);
+    Task<TemperingQueueRemovalResult?> RemoveCraftingQueueItemsAsync(
+        Guid characterId,
+        IReadOnlyCollection<Guid> queueItemIds,
+        CancellationToken cancellationToken);
+    Task<TemperingQueueRemovalResult> CancelTemperingQueueAsync(
+        Guid characterId,
+        CancellationToken cancellationToken);
     Task<bool> MoveCraftingQueueItemAsync(
         Guid characterId,
         Guid queueItemId,
@@ -19,3 +25,8 @@ public interface ICraftingService
     Task<Response<LearnBlueprintResult>> LearnBlueprintAsync(Guid characterId, Guid blueprintItemInstanceId, string recipeId, CancellationToken cancellationToken);
     Task<Response<CraftItemsResult>> CraftItemsAsync(Guid characterId, string recipeId, string? blueprintId, int targetTier, int quantity, CancellationToken cancellationToken);
 }
+
+public sealed record TemperingQueueRemovalResult(
+    CharacterAction? Action,
+    IReadOnlyList<Domain.Models.Inventories.InventoryItem> ReturnedInventoryItems,
+    IReadOnlyList<Guid> RemovedQueueItemIds);

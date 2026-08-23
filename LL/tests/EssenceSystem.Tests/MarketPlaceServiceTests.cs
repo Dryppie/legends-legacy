@@ -922,7 +922,7 @@ public sealed class MarketPlaceServiceTests
         public Task<bool> MarkItemSeenAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<bool> SetItemFavoriteAsync(Guid characterId, Guid itemInstanceId, bool isFavorite, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing listing, CancellationToken cancellationToken) { RemoveForListingCalls++; return Task.FromResult(true); }
-        public Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken) => Task.FromResult(true);
+        public Task<InventoryItem?> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken) => Task.FromResult<InventoryItem?>(new InventoryItem { InventoryId = characterId, ItemInstanceId = itemInstance.Id, ItemInstance = itemInstance, Quantity = 1 });
         public Task AddItemToInventoryFromMarketPlace(Guid characterId, InventoryItem inventoryItem, CancellationToken cancellationToken)
         {
             MarketPurchases.Add(inventoryItem);

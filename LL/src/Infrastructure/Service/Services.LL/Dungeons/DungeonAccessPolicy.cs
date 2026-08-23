@@ -37,6 +37,17 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
     public async Task<IReadOnlyDictionary<string, DungeonPreviewAccess>> EvaluateForPreviewAsync(
         Guid characterId,
         IReadOnlyCollection<DungeonDefinition> dungeons,
+        CancellationToken cancellationToken) =>
+        await EvaluateForPreviewAsync(
+            characterId,
+            dungeons,
+            new Dictionary<string, int>(),
+            cancellationToken);
+
+    public async Task<IReadOnlyDictionary<string, DungeonPreviewAccess>> EvaluateForPreviewAsync(
+        Guid characterId,
+        IReadOnlyCollection<DungeonDefinition> dungeons,
+        IReadOnlyDictionary<string, int> inventoryQuantityOverrides,
         CancellationToken cancellationToken)
     {
         if (dungeons.Count == 0)
@@ -52,12 +63,20 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
             .ToArray();
         var itemBases = await _itemBases.GetItemBasesByIdsAsync(itemIds, cancellationToken);
         var ownedQuantities = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var normalizedQuantityOverrides = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (itemId, quantity) in inventoryQuantityOverrides)
+        {
+            normalizedQuantityOverrides[itemId] = Math.Max(0, quantity);
+        }
+
         foreach (var itemId in itemIds)
         {
-            ownedQuantities[itemId] = await _inventory.GetInventoryQuantityAsync(
-                characterId,
-                itemId,
-                cancellationToken);
+            ownedQuantities[itemId] = normalizedQuantityOverrides.TryGetValue(itemId, out var quantityOverride)
+                ? quantityOverride
+                : await _inventory.GetInventoryQuantityAsync(
+                    characterId,
+                    itemId,
+                    cancellationToken);
         }
 
         var previousDungeonIds = dungeons

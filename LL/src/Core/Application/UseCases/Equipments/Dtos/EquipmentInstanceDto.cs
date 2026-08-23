@@ -96,6 +96,8 @@ public sealed class EquipmentAttributeRollRangeDto
     public AttributeType AttributeType { get; init; }
     public float MinimumAmount { get; init; }
     public float MaximumAmount { get; init; }
+    public float RarityBonusAmount { get; init; }
+    public bool HasCraftedRange { get; init; }
 }
 
 public sealed class EquipmentRollRangeResolver
@@ -130,7 +132,9 @@ public sealed class EquipmentRollRangeResolver
                 {
                     AttributeType = attribute.AttributeType,
                     MinimumAmount = attribute.MinimumAmount,
-                    MaximumAmount = attribute.MaximumAmount
+                    MaximumAmount = attribute.MaximumAmount,
+                    RarityBonusAmount = attribute.RarityBonusAmount,
+                    HasCraftedRange = attribute.HasCraftedRange
                 })
                 .ToList()
         };

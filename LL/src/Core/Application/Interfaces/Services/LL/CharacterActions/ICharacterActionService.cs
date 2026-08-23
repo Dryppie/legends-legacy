@@ -32,6 +32,10 @@ public interface ICharacterActionService
     /// <param name="characterId"></param>
     /// <returns></returns>
     public Task<bool> DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<bool> UpdateCraftingCharacterActionAsync(Guid characterId, CraftingQueueItem characterAction, CancellationToken cancellationToken);
+    Task<CharacterAction?> UpdateCraftingCharacterActionAsync(
+        Guid characterId,
+        CraftingQueueItem characterAction,
+        Domain.Models.Inventories.InventoryItem inventoryItem,
+        CancellationToken cancellationToken);
     Task<CharacterAction?> ResumeTemperingAsync(Guid characterId, CancellationToken cancellationToken);
 }

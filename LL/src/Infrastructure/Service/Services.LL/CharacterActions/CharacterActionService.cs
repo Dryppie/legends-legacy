@@ -3,6 +3,7 @@ using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
+using Domain.Models.Inventories;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Crafting.V2;
 using Services.LL.Combat.Layers.Orchestration.Models;
@@ -201,10 +202,19 @@ public class CharacterActionService : ICharacterActionService
         return processedAnyBatch ? accumulator.Build() : null;
     }
 
-    public async Task<bool> UpdateCraftingCharacterActionAsync(Guid characterId, CraftingQueueItem characterAction, CancellationToken cancellationToken)
+    public async Task<CharacterAction?> UpdateCraftingCharacterActionAsync(
+        Guid characterId,
+        CraftingQueueItem characterAction,
+        InventoryItem inventoryItem,
+        CancellationToken cancellationToken)
     {
         var now = _timeProvider.GetUtcNow();
-        return await _characterActionRepository.UpdateCraftingActionAsync(characterId, characterAction, now, cancellationToken);
+        return await _characterActionRepository.UpdateCraftingActionAsync(
+            characterId,
+            characterAction,
+            inventoryItem,
+            now,
+            cancellationToken);
     }
 
     public async Task<CharacterAction?> ResumeTemperingAsync(

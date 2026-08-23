@@ -13,6 +13,7 @@ import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { GameService } from '../../client-side/game/game.service';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
+import { CraftingService } from '../crafting/crafting.service';
 import { CharacterActionsService } from './character-actions.service';
 import {
   CharacterActionsStateService,
@@ -22,6 +23,8 @@ import { CombatActionHandler } from './handlers/combat-action-handler';
 import { CraftingActionHandler } from './handlers/crafting-action-handler';
 import { CharacterActionTypePersistenceService } from './helpers/character-action-type-persistence.service';
 import { CharacterActionsPollingService } from './helpers/characterActionsPollingService';
+import { VersionedMutationResult } from '../api.service';
+import { TemperingQueueMutationResponse } from '../../../../shared/models/Dtos/temperingQueueMutationDto';
 
 describe('CharacterActionsStateService', () => {
   let service: CharacterActionsStateService;
@@ -30,6 +33,7 @@ describe('CharacterActionsStateService', () => {
   let router: jasmine.SpyObj<Router>;
   let combat: jasmine.SpyObj<CombatService>;
   let craftingHandler: jasmine.SpyObj<CraftingActionHandler>;
+  let crafting: jasmine.SpyObj<CraftingService>;
   let inventory: jasmine.SpyObj<InventoryStateService>;
   let logoutCount: ReturnType<typeof signal<number>>;
 
@@ -60,10 +64,20 @@ describe('CharacterActionsStateService', () => {
       'CraftingActionHandler',
       ['handle', 'clear'],
     );
+    crafting = jasmine.createSpyObj<CraftingService>(
+      'CraftingService',
+      ['setQueue'],
+      { currentQueue: [] },
+    );
     inventory = jasmine.createSpyObj<InventoryStateService>(
       'InventoryStateService',
-      ['load'],
+      ['applyVersionedInventoryDelta', 'items', 'load', 'setInventory'],
     );
+    inventory.applyVersionedInventoryDelta.and.callFake((result, apply) => {
+      apply(result.data);
+      return true;
+    });
+    inventory.items.and.returnValue([]);
     logoutCount = signal(0);
 
     TestBed.configureTestingModule({
@@ -97,6 +111,10 @@ describe('CharacterActionsStateService', () => {
         {
           provide: InventoryStateService,
           useValue: inventory,
+        },
+        {
+          provide: CraftingService,
+          useValue: crafting,
         },
         { provide: EventBusService, useValue: { logout: logoutCount } },
         { provide: Router, useValue: router },
@@ -252,7 +270,7 @@ describe('CharacterActionsStateService', () => {
       itemInstanceId: '6c79774b-d048-4698-9c04-c77e481c7aa2',
     };
     actions.stop.and.returnValue(stopResult.asObservable());
-    actions.startCrafting.and.returnValue(of(true));
+    actions.startCrafting.and.returnValue(of(temperingStartResult()));
     service.applyCurrentActionSnapshot(combatAction());
 
     service.stopAction();
@@ -287,12 +305,40 @@ describe('CharacterActionsStateService', () => {
       queueId: '8f6cb596-94df-4a84-b6f2-4b4d6384e065',
       itemInstanceId: '6c79774b-d048-4698-9c04-c77e481c7aa2',
     };
-    actions.startCrafting.and.returnValue(of(true));
+    actions.startCrafting.and.returnValue(of(temperingStartResult()));
 
     service.startAction(CharacterActionType.Crafting, payload);
 
     expect(combat.clearAllCombat).toHaveBeenCalledTimes(1);
     expect(polling.start).toHaveBeenCalled();
+    expect(actions.resolveCurrentAction).not.toHaveBeenCalled();
+    expect(inventory.applyVersionedInventoryDelta).toHaveBeenCalled();
+  });
+
+  it('reconciles the queue, inventory, and action after a failed Tempering start', () => {
+    const payload = {
+      queueId: '8f6cb596-94df-4a84-b6f2-4b4d6384e065',
+      itemInstanceId: '6c79774b-d048-4698-9c04-c77e481c7aa2',
+    };
+    const activeAction = combatAction();
+    Object.defineProperty(crafting, 'currentQueue', {
+      configurable: true,
+      get: () => [{ id: payload.queueId }, { id: 'existing-item' }] as never[],
+    });
+    actions.startCrafting.and.returnValue(
+      throwError(() => new Error('offline')),
+    );
+    actions.resolveCurrentAction.and.returnValue(of(activeAction));
+    service.applyCurrentActionSnapshot(activeAction);
+
+    service.startAction(CharacterActionType.Crafting, payload);
+
+    expect(crafting.setQueue).toHaveBeenCalledWith([
+      { id: 'existing-item' } as never,
+    ]);
+    expect(inventory.load).toHaveBeenCalledWith(true);
+    expect(actions.resolveCurrentAction).toHaveBeenCalled();
+    expect(service.currentAction()).toBe(activeAction);
   });
 
   it('allows Combat to replace active Tempering immediately', () => {
@@ -604,5 +650,30 @@ function combatAction(): CharacterActionDto {
     nextResolutionAt,
     revision: 'combat-revision',
     isDeleted: false,
+  };
+}
+
+function temperingStartResult(): VersionedMutationResult<TemperingQueueMutationResponse> {
+  const now = new Date('2026-08-08T12:00:00Z');
+  return {
+    data: {
+      removedInventoryItemIds: [
+        '6c79774b-d048-4698-9c04-c77e481c7aa2',
+      ],
+      returnedInventoryItems: [],
+      removedQueueItemIds: [],
+      addedQueueItemId: '8f6cb596-94df-4a84-b6f2-4b4d6384e065',
+      action: {
+        characterActionType: CharacterActionType.Crafting,
+        updatedAt: now,
+        nextResolutionAtUtc: new Date(now.getTime() + 10_000),
+        blockedUntilUtc: null,
+        scheduleGeneration: 1,
+        isDeleted: false,
+        resolutionIntervalMs: 10_000,
+        revision: 'tempering-start-revision',
+      },
+    },
+    domainVersions: { inventory: 1 },
   };
 }

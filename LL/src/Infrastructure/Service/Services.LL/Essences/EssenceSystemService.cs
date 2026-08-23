@@ -146,24 +146,36 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         return Ok("Essence absorbed into the Soul Archive.");
     }
 
-    public async Task<DismantleEssenceResult> DismantleUnboundEssenceAsync(Guid characterId, Guid inventoryItemId, CancellationToken cancellationToken)
+    public async Task<DismantleEssenceResult> DismantleUnboundEssenceAsync(
+        Guid characterId,
+        Guid inventoryItemId,
+        CancellationToken cancellationToken,
+        int quantity = 1)
     {
+        if (quantity <= 0)
+            return new(false, "The shatter quantity must be greater than zero.", 0);
+
         var inventoryItem = await GetInventoryItemAsync(characterId, inventoryItemId, cancellationToken);
         if (inventoryItem?.ItemInstance.ItemBase is not EssenceItemBase essenceItem)
             return new(false, "The selected inventory item is not an Unbound Essence.", 0);
 
-        var dust = Math.Max(1, essenceItem.DismantleDustAmount);
+        if (inventoryItem.Quantity < quantity)
+            return new(false, "You do not have enough copies of the selected Essence.", 0);
+
+        var dust = checked(Math.Max(1, essenceItem.DismantleDustAmount) * quantity);
         var definitionId = ResolveDefinitionId(essenceItem);
         if (!string.IsNullOrWhiteSpace(definitionId) &&
-            await _essences.HasPlayerEssenceAsync(characterId, definitionId, cancellationToken) &&
-            await RollsDuplicateEchoBonusAsync(characterId, cancellationToken))
+            await _essences.HasPlayerEssenceAsync(characterId, definitionId, cancellationToken))
         {
-            dust++;
+            dust = checked(dust + await RollDuplicateEchoBonusesAsync(characterId, quantity, cancellationToken));
         }
 
-        ConsumeInventoryItem(inventoryItem, 1);
+        ConsumeInventoryItem(inventoryItem, quantity);
         await AddInventoryQuantityAsync(characterId, EssenceDustItemId, dust, cancellationToken);
-        return new(true, "Essence dismantled into Essence Dust.", dust);
+        var message = quantity == 1
+            ? "Essence dismantled into Essence Dust."
+            : $"{quantity} Essences dismantled into Essence Dust.";
+        return new(true, message, dust);
     }
 
     public async Task<SpendEssenceDustResult> SpendEssenceDustAsync(Guid characterId, Guid playerEssenceId, int dustAmount, CancellationToken cancellationToken)
@@ -851,16 +863,28 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private async Task<int> GetInventoryQuantityAsync(Guid characterId, string itemBaseId, CancellationToken cancellationToken) =>
         await _inventory.GetInventoryQuantityAsync(characterId, itemBaseId, cancellationToken);
 
-    private async Task<bool> RollsDuplicateEchoBonusAsync(Guid characterId, CancellationToken cancellationToken)
+    private async Task<int> RollDuplicateEchoBonusesAsync(
+        Guid characterId,
+        int quantity,
+        CancellationToken cancellationToken)
     {
         if (_bonusService is null)
         {
-            return false;
+            return 0;
         }
 
         var factors = await _bonusService.GetAggregatedAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
         var chanceBps = factors.Get(BonusKind.DuplicateEssenceExtraMaterialChanceBps);
-        return chanceBps > 0 && _random.NextDouble() < Math.Clamp(chanceBps, 0d, 10000d) / 10000d;
+        if (chanceBps <= 0) return 0;
+
+        var chance = Math.Clamp(chanceBps, 0d, 10000d) / 10000d;
+        var bonusDust = 0;
+        for (var index = 0; index < quantity; index++)
+        {
+            if (_random.NextDouble() < chance) bonusDust++;
+        }
+
+        return bonusDust;
     }
 
     private async Task AddInventoryQuantityAsync(Guid characterId, string itemBaseId, int quantity, CancellationToken cancellationToken)

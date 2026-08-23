@@ -1,13 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiService } from '../../api/api.service';
+import {
+  ApiService,
+  VersionedMutationResult,
+} from '../../api/api.service';
 import {
   CharacterActionDto,
   StartCombatActionRequest,
   StartCraftingActionRequest,
 } from '../../../../shared/models/Dtos/characterActionDto';
 import { ApiResponse } from '../../../../shared/models/response';
+import { TemperingQueueMutationResponse } from '../../../../shared/models/Dtos/temperingQueueMutationDto';
 
 @Injectable({ providedIn: 'root' })
 export class CharacterActionsService {
@@ -33,8 +37,23 @@ export class CharacterActionsService {
       .pipe(map((response) => this.unwrapResponse<CharacterActionDto>(response)));
   }
 
-  startCrafting(data: StartCraftingActionRequest): Observable<boolean> {
-    return this.api.post('CharacterActions/StartCrafting', data);
+  startCrafting(
+    data: StartCraftingActionRequest,
+  ): Observable<VersionedMutationResult<TemperingQueueMutationResponse>> {
+    return this.api
+      .postVersioned<ApiResponse<TemperingQueueMutationResponse>>(
+        'CharacterActions/StartCrafting',
+        data,
+        { stateSyncScopesHandledByResponse: ['inventory'] },
+      )
+      .pipe(
+        map((response) => ({
+          data: this.unwrapResponse<TemperingQueueMutationResponse>(
+            response.data,
+          ),
+          domainVersions: response.domainVersions,
+        })),
+      );
   }
 
   resumeTempering(): Observable<CharacterActionDto> {

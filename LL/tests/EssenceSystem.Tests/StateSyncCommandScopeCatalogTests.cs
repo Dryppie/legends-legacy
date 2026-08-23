@@ -248,14 +248,31 @@ public sealed class StateSyncCommandScopeCatalogTests
     [Theory]
     [InlineData(typeof(global::Application.UseCases.Professions.Commands.CancelTemperingQueue.CancelTemperingQueueCommand))]
     [InlineData(typeof(global::Application.UseCases.Professions.Commands.RemoveCraftingQueueItem.RemoveCraftingQueueItemCommand))]
-    public void CompleteTemperingResponsesOwnInventoryWithoutCharacterRefreshes(Type commandType)
+    public void TemperingQueueDeltasAdvanceInventoryWithoutCharacterRefreshes(Type commandType)
     {
         var profile = StateSyncCommandScopeCatalog.GetProfile(commandType);
 
         Assert.Equal([StateSyncScopes.Inventory], profile.CharacterScopes);
         Assert.Equal([StateSyncScopes.Inventory], profile.CharacterResponseSemantics.Keys);
+        Assert.Equal(
+            StateSyncResponseSemantics.OrderedDelta,
+            profile.CharacterResponseSemantics[StateSyncScopes.Inventory]);
         Assert.False(profile.RefreshCharacterOverview);
         Assert.True(profile.RefreshCharacterSummaryWhenChanged);
+    }
+
+    [Fact]
+    public void StartTemperingReturnsAnOrderedInventoryDelta()
+    {
+        var profile = StateSyncCommandScopeCatalog.GetProfile(
+            typeof(global::Application.UseCases.CharacterActions.Commands.StartCraftingAction.StartCraftingActionCommand));
+
+        Assert.Empty(profile.CharacterScopes);
+        Assert.Equal(
+            StateSyncResponseSemantics.OrderedDelta,
+            profile.CharacterResponseSemantics[StateSyncScopes.Inventory]);
+        Assert.True(profile.InventoryWhenChanged);
+        Assert.False(profile.RefreshCharacterOverview);
     }
 
     [Theory]

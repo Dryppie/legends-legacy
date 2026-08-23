@@ -25,6 +25,28 @@ describe('EssencesService', () => {
     );
   });
 
+  it('sends the requested shatter quantity with handled mutation scopes', () => {
+    const api = jasmine.createSpyObj<ApiService>('ApiService', [
+      'postVersioned',
+    ]);
+    api.postVersioned.and.returnValue(of({ data: {}, domainVersions: {} }));
+    const service = new EssencesService(api);
+
+    service.dismantle('inventory-item-1', 5).subscribe();
+
+    expect(api.postVersioned).toHaveBeenCalledOnceWith(
+      'essence/items/inventory-item-1/dismantle',
+      { quantity: 5 },
+      {
+        stateSyncScopesHandledByResponse: [
+          'essences',
+          'inventory',
+          'equipment',
+        ],
+      },
+    );
+  });
+
   it('marks loadout mutation responses as essence-owned', () => {
     const api = jasmine.createSpyObj<ApiService>('ApiService', [
       'putVersioned',

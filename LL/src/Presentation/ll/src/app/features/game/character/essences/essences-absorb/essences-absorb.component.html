@@ -1,111 +1,429 @@
-<div
-  class="flex h-full w-full flex-col gap-2 overflow-hidden text-white md:flex-row"
->
-  <!-- ESSENCE DESCRIPTION -->
-  <div class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-2">
-    <!-- ESSENCE DESCRIPTION -->
-    <div class="ll-panel p-4" data-tour="essence-absorb-details">
-      <ng-container
-        *ngIf="
-          essenceState.selectedInventoryEssence() as selectedEssence;
-          else noEssence
-        "
+<div class="absorb-workspace">
+  <section
+    class="ll-panel absorb-catalog"
+    [class.absorb-selection-mode]="mobileSelectionMode()"
+    aria-label="Inventory essences"
+    data-tour="inventory-essences-list"
+  >
+    <header class="absorb-catalog-toolbar">
+      <div
+        class="absorb-filter-set"
+        role="group"
+        aria-label="Filter inventory essences"
       >
+        <button
+          type="button"
+          class="ll-button absorb-filter-button"
+          [class.absorb-filter-button-active]="activeFilter() === 'all'"
+          [attr.aria-pressed]="activeFilter() === 'all'"
+          (click)="setFilter('all')"
+        >
+          All
+        </button>
+        <button
+          type="button"
+          class="ll-button absorb-filter-button"
+          [class.absorb-filter-button-active]="activeFilter() === 'absorbed'"
+          [attr.aria-pressed]="activeFilter() === 'absorbed'"
+          (click)="setFilter('absorbed')"
+        >
+          Absorbed
+        </button>
+        <button
+          type="button"
+          class="ll-button absorb-filter-button"
+          [class.absorb-filter-button-active]="
+            activeFilter() === 'not-absorbed'
+          "
+          [attr.aria-pressed]="activeFilter() === 'not-absorbed'"
+          (click)="setFilter('not-absorbed')"
+        >
+          Not absorbed
+        </button>
+      </div>
+
+      <label class="absorb-sort-control">
+        <span>Sort</span>
+        <select
+          class="ll-input"
+          [value]="activeSort()"
+          (change)="setSort($event)"
+        >
+          <option value="name">Name</option>
+          <option value="quantity">Quantity</option>
+          <option value="status">Absorbed status</option>
+        </select>
+      </label>
+    </header>
+
+    <div class="absorb-list-heading">
+      <label
+        class="absorb-duplicate-selector absorb-desktop-duplicate-selector"
+      >
+        <input
+          type="checkbox"
+          [checked]="allAbsorbedDuplicatesSelected()"
+          [indeterminate]="someAbsorbedDuplicatesSelected()"
+          [disabled]="absorbedDuplicateCandidates().length === 0"
+          (change)="toggleAbsorbedDuplicates($event)"
+        />
+        <span>Select absorbed duplicates</span>
+      </label>
+      <span class="absorb-mobile-selection-actions">
+        <button
+          type="button"
+          class="ll-button absorb-mobile-select-button"
+          [class.absorb-mobile-select-button-active]="mobileSelectionMode()"
+          [attr.aria-pressed]="mobileSelectionMode()"
+          (click)="toggleMobileSelectionMode()"
+        >
+          {{ mobileSelectionMode() ? "Done" : "Select" }}
+        </button>
+        <button
+          *ngIf="mobileSelectionMode()"
+          type="button"
+          class="absorb-mobile-duplicates-button"
+          [class.absorb-mobile-duplicates-button-active]="
+            allAbsorbedDuplicatesSelected()
+          "
+          [attr.aria-pressed]="allAbsorbedDuplicatesSelected()"
+          [disabled]="absorbedDuplicateCandidates().length === 0"
+          (click)="toggleMobileDuplicatesSelection()"
+        >
+          Duplicates
+        </button>
+      </span>
+      <span>{{ visibleEssences().length }} types</span>
+    </div>
+
+    <div class="absorb-list" *ngIf="visibleEssences().length; else noMatches">
+      <div
+        *ngFor="
+          let invItem of visibleEssences();
+          trackBy: trackInventoryEssence
+        "
+        class="absorb-list-row"
+        [ngClass]="{
+          'absorb-list-row-selected': isSelected(invItem),
+          'absorb-list-row-bulk-selected': isSelectedForShatter(invItem),
+        }"
+      >
+        <input
+          type="checkbox"
+          class="absorb-row-selector"
+          [checked]="isSelectedForShatter(invItem)"
+          [disabled]="spareCopies(invItem) === 0"
+          [attr.aria-label]="
+            'Select ' +
+            essenceState.asEssence(invItem).name +
+            ' copies to shatter'
+          "
+          (click)="$event.stopPropagation()"
+          (change)="toggleShatterSelection(invItem, $event)"
+        />
+
+        <button
+          type="button"
+          class="absorb-row-main"
+          [attr.aria-pressed]="isSelected(invItem)"
+          [attr.data-tour]="'inventory-essence-item'"
+          (click)="selectEssence(invItem)"
+        >
+          <span class="absorb-row-content">
+            <span class="absorb-row-name">
+              {{ essenceState.asEssence(invItem).name }}
+              <span
+                *ngIf="invItem.isFavorite"
+                class="absorb-favorite"
+                aria-label="Favorite"
+                title="Favorite"
+                >★</span
+              >
+            </span>
+            <span class="absorb-row-status">
+              {{
+                essenceState.isInventoryEssenceAbsorbed(invItem)
+                  ? "Absorbed"
+                  : "Not absorbed"
+              }}
+              <ng-container
+                *ngIf="essenceState.isInventoryEssenceAbsorbed(invItem)"
+              >
+                ·
+                {{
+                  spareCopies(invItem) === 1
+                    ? "1 spare copy"
+                    : spareCopies(invItem) + " spare copies"
+                }}
+              </ng-container>
+            </span>
+          </span>
+
+          <span class="absorb-row-trailing">
+            <span class="absorb-row-quantity">×{{ invItem.quantity }}</span>
+            <span class="absorb-row-chevron" aria-hidden="true">›</span>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <ng-template #noMatches>
+      <p class="ll-empty-state absorb-list-empty">
+        No essences match this filter.
+      </p>
+    </ng-template>
+
+    <footer *ngIf="selectedShatterCount() > 0" class="absorb-catalog-footer">
+      <span class="absorb-bulk-summary">
+        <strong>
+          {{ selectedShatterCount() }} essences across
+          {{ selectedShatterItems().length }}
+          {{ selectedShatterItems().length === 1 ? "type" : "types" }}
+        </strong>
+        <span>Yields at least {{ selectedShatterDust() }} Essence Dust</span>
+      </span>
+      <span class="absorb-bulk-actions">
+        <button
+          type="button"
+          class="ll-button"
+          [disabled]="shattering()"
+          (click)="clearShatterSelection()"
+        >
+          Clear
+        </button>
+        <app-regular-button
+          class="absorb-desktop-bulk-shatter"
+          variant="danger"
+          text="Shatter selected"
+          [disabled]="shattering()"
+          (pressed)="openBulkShatterModal()"
+        >
+        </app-regular-button>
+        <app-regular-button
+          class="absorb-mobile-bulk-shatter"
+          variant="danger"
+          text="Shatter"
+          [disabled]="shattering()"
+          (pressed)="openBulkShatterModal()"
+        >
+        </app-regular-button>
+      </span>
+    </footer>
+  </section>
+
+  <button
+    *ngIf="mobileDetailOpen()"
+    type="button"
+    class="absorb-mobile-detail-backdrop"
+    aria-label="Close Essence details"
+    (click)="closeMobileDetail()"
+  ></button>
+
+  <section
+    class="absorb-detail-column"
+    [class.absorb-detail-column-open]="mobileDetailOpen()"
+    data-tour="essence-absorb-details"
+  >
+    <header class="absorb-mobile-detail-header">
+      <span class="absorb-mobile-detail-handle" aria-hidden="true"></span>
+      <button
+        type="button"
+        class="absorb-mobile-detail-close"
+        aria-label="Close Essence details"
+        (click)="closeMobileDetail()"
+      >
+        ×
+      </button>
+    </header>
+
+    <ng-container
+      *ngIf="
+        essenceState.selectedInventoryEssence() as selectedEssence;
+        else noEssence
+      "
+    >
+      <article class="ll-panel absorb-detail-card">
         <div data-tour="essence-absorb-details-content">
           <app-essence-details
             [essence]="selectedEssence"
           ></app-essence-details>
         </div>
-        <div
-          class="mt-4 flex items-center justify-between gap-2"
-          data-tour="essence-absorb-actions"
+      </article>
+
+      <div
+        class="ll-panel absorb-archive-state"
+        [class.absorb-archive-state-ready]="
+          !essenceState.isSelectedInventoryEssenceAbsorbed()
+        "
+      >
+        <ng-container
+          *ngIf="
+            essenceState.isSelectedInventoryEssenceAbsorbed();
+            else canAbsorb
+          "
         >
-          <ng-container
-            *ngIf="
-              !essenceState.isSelectedInventoryEssenceAbsorbed();
-              else essenceIsAbsorbed
+          <strong>Already in your Soul Archive</strong>
+          <span>All inventory copies are duplicates and can be shattered.</span>
+        </ng-container>
+        <ng-template #canAbsorb>
+          <span>
+            Absorb one copy to permanently add this essence to your Soul
+            Archive.
+          </span>
+          <span class="shrink-0" data-tour="essence-absorb-action">
+            <app-regular-button
+              [fullWidth]="true"
+              (pressed)="absorb()"
+              text="Absorb essence"
+            >
+            </app-regular-button>
+          </span>
+        </ng-template>
+      </div>
+
+      <div
+        class="ll-panel absorb-shatter-bar"
+        data-tour="essence-absorb-actions"
+      >
+        <span class="absorb-shatter-copy">
+          <strong>Shatter for Essence Dust</strong>
+          <span>
+            {{
+              selectedSpareCopies() > 0
+                ? selectedSpareCopies() +
+                  " spare · " +
+                  selectedDustPerCopy() +
+                  " dust each"
+                : "No spare copies — one copy is reserved for absorption"
+            }}
+          </span>
+        </span>
+        <span class="absorb-single-shatter-actions">
+          <span class="absorb-quantity-stepper">
+            <button
+              type="button"
+              aria-label="Shatter one fewer copy"
+              [disabled]="shattering() || singleShatterQuantity() <= 1"
+              (click)="adjustSingleShatterQuantity(-1)"
+            >
+              −
+            </button>
+            <input
+              type="number"
+              min="1"
+              [max]="selectedSpareCopies()"
+              [value]="singleShatterQuantity()"
+              [disabled]="!canShatterSelected() || shattering()"
+              aria-label="Copies to shatter"
+              (change)="setSingleShatterQuantity($event)"
+            />
+            <button
+              type="button"
+              aria-label="Shatter one more copy"
+              [disabled]="
+                shattering() || singleShatterQuantity() >= selectedSpareCopies()
+              "
+              (click)="adjustSingleShatterQuantity(1)"
+            >
+              +
+            </button>
+          </span>
+          <button
+            type="button"
+            class="ll-button absorb-shatter-max"
+            [disabled]="
+              !canShatterSelected() ||
+              shattering() ||
+              singleShatterQuantity() >= selectedSpareCopies()
             "
+            (click)="maximizeSingleShatterQuantity()"
           >
-            <span class="inline-block" data-tour="essence-absorb-action">
-              <app-regular-button (pressed)="absorb()" text="Absorb essence">
-              </app-regular-button>
-            </span>
-          </ng-container>
-          <ng-template #essenceIsAbsorbed>
-            <span class="ll-state ll-state-danger">
-              This essence is already in your Soul Archive
-            </span>
-          </ng-template>
+            Max
+          </button>
           <app-regular-button
             (pressed)="openModal()"
+            [disabled]="!canShatterSelected() || shattering()"
             variant="danger"
-            text="Shatter"
+            [text]="'Shatter ×' + singleShatterQuantity()"
           >
           </app-regular-button>
-        </div>
-      </ng-container>
-      <ng-template #noEssence>
-        <div class="ll-empty-state">Select an essence to view details.</div>
-      </ng-template>
-    </div>
-  </div>
-  <!-- INVENTORY ESSENCES LIST -->
-  <div class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1">
-    <app-selectable-list-filter
-      [storageKey]="'essences-absorb'"
-      [items]="essenceState.inventoryEssences()"
-      [selectedItem]="essenceState.selectedInventoryItem()"
-      [filterOptions]="essenceFilters"
-      tourItemId="inventory-essence-item"
-      data-tour="inventory-essences-list"
-      (select)="selectEssence($event)"
-    >
-      <!-- How *one* essence row looks -->
-      <ng-template let-invItem>
-        <div class="flex justify-between font-semibold text-white">
-          <div class="flex min-w-0 items-center gap-1">
-            <span class="truncate">{{
-              essenceState.asEssence(invItem).name
-            }}</span>
-            <span
-              *ngIf="invItem.isFavorite"
-              class="shrink-0 leading-none text-primary"
-              aria-label="Favorite"
-              title="Favorite"
-              >★</span
-            >
-          </div>
-          <div>x{{ invItem.quantity }}</div>
-        </div>
-      </ng-template>
-    </app-selectable-list-filter>
-  </div>
+        </span>
+      </div>
+    </ng-container>
+
+    <ng-template #noEssence>
+      <div class="ll-panel ll-empty-state absorb-detail-empty">
+        Select an essence to view its abilities and available actions.
+      </div>
+    </ng-template>
+  </section>
 </div>
 
-<div *ngIf="showModal" class="ll-modal-backdrop" (click)="closeModal()">
+<div
+  *ngIf="showModal"
+  class="ll-modal-backdrop"
+  (click)="shattering() ? null : closeModal()"
+>
   <div class="ll-modal-panel" (click)="$event.stopPropagation()">
     <div class="mb-4">
       <h3 class="ll-heading">
-        Shatter {{ essenceState.selectedInventoryEssence()?.name }}
+        {{
+          shatterMode === "bulk"
+            ? "Shatter selected essences"
+            : "Shatter " + essenceState.selectedInventoryEssence()?.name
+        }}
       </h3>
-      <label class="ll-copy italic"
-        >Dismantle one Unbound Essence into Essence Dust.</label
-      >
+      <label class="ll-copy italic">
+        {{
+          shatterMode === "bulk"
+            ? "Dismantle every selected spare copy into Essence Dust."
+            : "Dismantle " +
+              singleShatterQuantity() +
+              " unbound " +
+              (singleShatterQuantity() === 1 ? "Essence" : "Essences") +
+              " into Essence Dust."
+        }}
+      </label>
     </div>
 
     <div class="mb-4">
-      <p class="text-sm text-white">
-        Owned: {{ essenceState.selectedInventoryEssenceQuantity() }}
-      </p>
+      <ng-container *ngIf="shatterMode === 'bulk'; else singleShatterSummary">
+        <p class="text-sm text-white">
+          {{ selectedShatterCount() }} copies across
+          {{ selectedShatterItems().length }}
+          {{ selectedShatterItems().length === 1 ? "type" : "types" }}
+        </p>
+        <p class="ll-copy mt-1">
+          Yields at least {{ selectedShatterDust() }} Essence Dust.
+        </p>
+      </ng-container>
+      <ng-template #singleShatterSummary>
+        <p class="text-sm text-white">
+          {{ singleShatterQuantity() }} of {{ selectedSpareCopies() }} spare
+          copies selected
+        </p>
+        <p class="ll-copy mt-1">
+          Yields at least
+          {{ singleShatterQuantity() * selectedDustPerCopy() }} Essence Dust.
+        </p>
+      </ng-template>
     </div>
 
     <div class="flex justify-end gap-2">
-      <app-regular-button (pressed)="closeModal()">Cancel</app-regular-button>
+      <app-regular-button [disabled]="shattering()" (pressed)="closeModal()">
+        Cancel
+      </app-regular-button>
       <app-regular-button
-        [disabled]="!essenceState.selectedInventoryItem()"
+        [disabled]="
+          shattering() ||
+          (shatterMode === 'bulk'
+            ? selectedShatterCount() === 0
+            : !canShatterSelected())
+        "
         (pressed)="confirmShatter()"
-        >Shatter</app-regular-button
       >
+        {{ shattering() ? "Shattering..." : "Shatter" }}
+      </app-regular-button>
     </div>
   </div>
 </div>

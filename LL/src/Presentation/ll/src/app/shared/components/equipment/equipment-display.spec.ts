@@ -125,6 +125,8 @@ describe('mapInstanceToDisplay', () => {
           attributeType: AttributeType.MaxHealth,
           minimumAmount: 93,
           maximumAmount: 124,
+          rarityBonusAmount: 0,
+          hasCraftedRange: true,
         },
       ],
     };
@@ -216,6 +218,8 @@ describe('EquipmentDisplayComponent', () => {
           attributeType: AttributeType.MaxHealth,
           minimumAmount: 93,
           maximumAmount: 124,
+          rarityBonusAmount: 0,
+          hasCraftedRange: true,
         },
       ],
     };
@@ -234,6 +238,71 @@ describe('EquipmentDisplayComponent', () => {
     expect(text).toContain('/ 93–124');
     expect(fills.length).toBe(1);
     expect(Number.parseFloat(fills[0].style.width)).toBeCloseTo(64.52, 1);
+  });
+
+  it('shows a rarity bonus without changing the crafted roll position', async () => {
+    await TestBed.configureTestingModule({
+      imports: [EquipmentDisplayComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(EquipmentDisplayComponent);
+    const item = equipmentInstance(
+      'tempered-item',
+      AttributeType.MaxHealth,
+      123,
+    );
+    item.rollRange = {
+      minimumPotential: 260,
+      maximumPotential: 380,
+      attributes: [
+        {
+          attributeType: AttributeType.MaxHealth,
+          minimumAmount: 103,
+          maximumAmount: 134,
+          rarityBonusAmount: 10,
+          hasCraftedRange: true,
+        },
+      ],
+    };
+
+    fixture.componentRef.setInput('item', item);
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    const fill: HTMLElement | null = fixture.nativeElement.querySelector(
+      '.equipment-design-fill',
+    );
+
+    expect(text).toContain('/ 103–134 · Rarity +10');
+    expect(Number.parseFloat(fill?.style.width ?? '')).toBeCloseTo(64.52, 1);
+  });
+
+  it('labels an attribute introduced by rarity without rendering a roll bar', async () => {
+    await TestBed.configureTestingModule({
+      imports: [EquipmentDisplayComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(EquipmentDisplayComponent);
+    const item = equipmentInstance('introduced-item', AttributeType.Armor, 6);
+    item.rollRange = {
+      minimumPotential: 260,
+      maximumPotential: 380,
+      attributes: [
+        {
+          attributeType: AttributeType.Armor,
+          minimumAmount: 6,
+          maximumAmount: 6,
+          rarityBonusAmount: 6,
+          hasCraftedRange: false,
+        },
+      ],
+    };
+
+    fixture.componentRef.setInput('item', item);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Rarity +6');
+    expect(
+      fixture.nativeElement.querySelector('.equipment-design-fill'),
+    ).toBeNull();
   });
 
   it('renders tool affixes using the standard equipment attribute layout', async () => {

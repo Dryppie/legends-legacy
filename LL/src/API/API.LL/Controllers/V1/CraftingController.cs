@@ -40,11 +40,11 @@ public class CraftingController : BaseController
             request.RecipeId));
 
     [HttpPost("RemoveCraftingQueueItem")]
-    public async Task<ActionResult<Response<RemoveCraftingQueueItemResponseDto>>> RemoveCraftingQueueItem([FromBody] string queueItemId) =>
+    public async Task<ActionResult<Response<TemperingQueueMutationResponseDto>>> RemoveCraftingQueueItem([FromBody] string queueItemId) =>
         await Mediator.Send(new RemoveCraftingQueueItemCommand(CurrentCharacterGuid, queueItemId));
 
     [HttpPost("queue/cancel")]
-    public async Task<ActionResult<Response<RemoveCraftingQueueItemResponseDto>>> CancelTemperingQueue() =>
+    public async Task<ActionResult<Response<TemperingQueueMutationResponseDto>>> CancelTemperingQueue() =>
         await Mediator.Send(new CancelTemperingQueueCommand(CurrentCharacterGuid));
 
     [HttpPost("queue/move")]

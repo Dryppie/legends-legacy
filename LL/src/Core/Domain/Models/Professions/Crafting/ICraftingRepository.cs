@@ -8,7 +8,10 @@ public interface ICraftingRepository
     void RemoveCompletedCraftingQueueItem(
         CraftingActionDetails actionDetails,
         CraftingQueueItem queueItem);
-    Task<EquipmentInstance?> RemoveCraftingQueueItemAndReturnItemAsync(Guid characterId, Guid queueItemId, CancellationToken cancellationToken);
+    Task<CraftingQueueRemovalResult?> RemoveCraftingQueueItemsAndReturnItemsAsync(
+        Guid characterId,
+        IReadOnlyCollection<Guid>? queueItemIds,
+        CancellationToken cancellationToken);
     Task<bool> MoveCraftingQueueItemAsync(
         Guid characterId,
         Guid queueItemId,

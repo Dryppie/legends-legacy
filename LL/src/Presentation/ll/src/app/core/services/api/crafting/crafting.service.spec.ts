@@ -12,7 +12,12 @@ describe('CraftingService response ownership', () => {
       of({
         data: {
           isSuccess: true,
-          data: { inventoryItems: [], currentAction: null },
+          data: {
+            removedInventoryItemIds: [],
+            returnedInventoryItems: [],
+            removedQueueItemIds: [],
+            action: null,
+          },
         },
         domainVersions: { inventory: 1 },
       }),

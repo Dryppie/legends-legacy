@@ -53,7 +53,15 @@ public sealed class AssembleDungeonSigilCommandHandler(
             SigilFragmentsRemaining = response.SigilFragmentsRemaining,
             InventoryItems = mapper.Map<List<InventoryItemDto>>(inventory.InventoryItems),
             Character = mapper.Map<CharacterDto>(character),
-            Hub = await dungeonHub.CreateAsync(request.CharacterId, cancellationToken)
+            // The inventory insert is committed after this handler returns, so use the
+            // authoritative mutation result while rebuilding database-backed access state.
+            Hub = await dungeonHub.CreateAsync(
+                request.CharacterId,
+                new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+                {
+                    [response.SigilItemId] = response.InventoryQuantity
+                },
+                cancellationToken)
         };
 
         return Response<DungeonSigilAssemblyResponseDto>.Success(response);

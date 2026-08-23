@@ -8,6 +8,14 @@ public class InstanceAttributeModifier(
     ModifierType modifierType = ModifierType.Flat) : AttributeModifierBase(attributeType, amount, modifierType)
 {
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// The portion of <see cref="AttributeModifierBase.Amount"/> granted by rarity
+    /// upgrades. Keeping the contribution on the modifier lets presentation shift only
+    /// the upgraded attribute's roll range without changing combat aggregation.
+    /// </summary>
+    public float RarityBonusAmount { get; set; }
+
     [JsonIgnore]
     public Guid ItemInstanceId { get; set; }
     [JsonIgnore]

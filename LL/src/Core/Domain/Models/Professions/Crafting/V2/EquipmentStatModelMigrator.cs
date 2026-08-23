@@ -112,7 +112,10 @@ public static class EquipmentStatModelMigrator
                 .Select(modifier => new InstanceAttributeModifier(
                     modifier.AttributeType,
                     modifier.Amount,
-                    modifier.ModifierType))
+                    modifier.ModifierType)
+                {
+                    RarityBonusAmount = modifier.RarityBonusAmount
+                })
                 .ToList()
         };
         MigrateToCurrent(temporary);
@@ -126,6 +129,7 @@ public static class EquipmentStatModelMigrator
                 existing[index].AttributeType = converted[index].AttributeType;
                 existing[index].Amount = converted[index].Amount;
                 existing[index].ModifierType = converted[index].ModifierType;
+                existing[index].RarityBonusAmount = converted[index].RarityBonusAmount;
                 continue;
             }
 

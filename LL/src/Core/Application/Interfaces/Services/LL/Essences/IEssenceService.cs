@@ -8,7 +8,11 @@ public interface IEssenceService
     Task<SoulArchive> GetSoulArchiveAsync(Guid characterId, CancellationToken cancellationToken);
     Task<EssenceLoadouts> GetLoadoutsAsync(Guid characterId, CancellationToken cancellationToken);
     Task<EssenceOperationResult> AbsorbUnboundEssenceAsync(Guid characterId, Guid inventoryItemId, CancellationToken cancellationToken);
-    Task<DismantleEssenceResult> DismantleUnboundEssenceAsync(Guid characterId, Guid inventoryItemId, CancellationToken cancellationToken);
+    Task<DismantleEssenceResult> DismantleUnboundEssenceAsync(
+        Guid characterId,
+        Guid inventoryItemId,
+        CancellationToken cancellationToken,
+        int quantity = 1);
     Task<SpendEssenceDustResult> SpendEssenceDustAsync(Guid characterId, Guid playerEssenceId, int dustAmount, CancellationToken cancellationToken);
     Task<EssenceOperationResult> AscendEssenceAsync(Guid characterId, Guid playerEssenceId, CancellationToken cancellationToken);
     Task<EssenceOperationResult> EvolveEssenceAsync(Guid characterId, Guid playerEssenceId, CancellationToken cancellationToken);

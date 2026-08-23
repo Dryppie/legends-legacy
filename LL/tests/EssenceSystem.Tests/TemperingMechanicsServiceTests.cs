@@ -59,7 +59,8 @@ public sealed class TemperingMechanicsServiceTests
         Assert.Equal(Rarity.Uncommon, equipment.Rarity);
         Assert.Equal(0, equipment.ItemXp);
         Assert.Equal(AttributeType.Armor, result.ImprovedStat);
-        Assert.Single(equipment.InstanceModifiers);
+        var introducedModifier = Assert.Single(equipment.InstanceModifiers);
+        Assert.Equal(introducedModifier.Amount, introducedModifier.RarityBonusAmount);
     }
 
     [Fact]
@@ -155,6 +156,7 @@ public sealed class TemperingMechanicsServiceTests
         Assert.Equal(AttributeType.Armor, result.ImprovedStat);
         var modifier = Assert.Single(equipment.InstanceModifiers);
         Assert.True(modifier.Amount > 40);
+        Assert.Equal(modifier.Amount - 40, modifier.RarityBonusAmount);
     }
 
     [Fact]

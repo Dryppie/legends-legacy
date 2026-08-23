@@ -37,6 +37,8 @@ import { formatAttributeValue } from '../../../../../shared/pipes/attributes/att
 import { getEstimatedTemperingQueueDuration } from '../../../../../shared/utils/tempering/tempering-duration.utils';
 import { ItemQuality } from '../../../../../shared/models/enums/itemQuality';
 import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
+import { VersionedMutationResult } from '../../../../../core/services/api/api.service';
+import { TemperingQueueMutationResponse } from '../../../../../shared/models/Dtos/temperingQueueMutationDto';
 
 type TemperingSort = 'Name' | 'Quality' | 'Potential' | 'Gear Power';
 type SortDirection = 'asc' | 'desc';
@@ -174,6 +176,7 @@ export class TemperingComponent implements OnDestroy {
     return (
       !!eq &&
       !this.actionUnavailable() &&
+      !this.queueIsBusy() &&
       this.isNonToolEquipment(eq) &&
       (eq.potential ?? 0) >= 1 &&
       eq.rarity !== Rarity.Legacy &&
@@ -263,7 +266,13 @@ export class TemperingComponent implements OnDestroy {
   }
 
   temper(equipment: EquipmentInstance): void {
-    if (!equipment || this.actionUnavailable() || !this.canTemper()) return;
+    if (
+      !equipment ||
+      this.actionUnavailable() ||
+      this.queueIsBusy() ||
+      !this.canTemper()
+    )
+      return;
 
     const queueId = crypto.randomUUID();
     const queueItem: CraftingQueueItem = {
@@ -303,18 +312,31 @@ export class TemperingComponent implements OnDestroy {
   cancelEntireQueue(): void {
     if (this.craftingQueue().length === 0 || this.queueIsBusy()) return;
 
+    const previousQueue = [...this.craftingQueue()];
+    const previousInventory = [...this.inventoryState.items()];
+    const previousAction = this.characterActionsState.currentAction();
     this.cancellingQueue.set(true);
     this.error.set(null);
+    this.craftingService.setQueue([]);
+    this.restoreEquipmentOptimistically(
+      previousQueue.map((item) => item.equipmentInstance),
+    );
+
     this.craftingService.cancelTemperingQueue().subscribe({
       next: (response) => {
-        this.inventoryState.applyVersionedInventory(response);
+        const applied = this.applyReturnedInventoryDelta(response);
         this.craftingService.setQueue([]);
-        this.characterActionsState.applyCurrentActionSnapshot(
-          response.data.currentAction,
+        this.characterActionsState.applyTemperingQueueMutation(
+          response.data.action ?? null,
+          [],
         );
+        if (!applied) this.characterActionsState.refreshCurrentAction();
         this.cancellingQueue.set(false);
       },
       error: (err) => {
+        this.inventoryState.setInventory(previousInventory);
+        this.craftingService.setQueue(previousQueue);
+        this.characterActionsState.applyCurrentActionSnapshot(previousAction);
         this.error.set(err.message ?? 'Failed to cancel the Tempering queue.');
         this.cancellingQueue.set(false);
       },
@@ -363,19 +385,28 @@ export class TemperingComponent implements OnDestroy {
     this.removingQueueItemId.set(queueItem.id);
     this.error.set(null);
     const wasSelected = this.selectedQueueItem()?.id === queueItem.id;
+    const previousQueue = [...this.craftingQueue()];
+    const previousInventory = [...this.inventoryState.items()];
+    const previousAction = this.characterActionsState.currentAction();
+    const optimisticQueue = previousQueue.filter(
+      (candidate) => candidate.id !== queueItem.id,
+    );
+    this.craftingService.setQueue(optimisticQueue);
+    this.restoreEquipmentOptimistically([queueItem.equipmentInstance]);
 
     this.craftingService.removeItemFromQueue(queueItem).subscribe({
       next: (response) => {
-        const nextQueue =
-          response.data.currentAction?.temperingQueueItems ??
-          response.data.currentAction?.craftingActionDetails
-            ?.craftingQueueItems ??
-          [];
-        this.inventoryState.applyVersionedInventory(response);
-        this.craftingService.setQueue(nextQueue);
-        this.characterActionsState.applyCurrentActionSnapshot(
-          response.data.currentAction,
+        const removedIds = new Set(response.data.removedQueueItemIds);
+        const nextQueue = this.craftingService.currentQueue.filter(
+          (candidate) => !removedIds.has(candidate.id),
         );
+        const applied = this.applyReturnedInventoryDelta(response);
+        this.craftingService.setQueue(nextQueue);
+        this.characterActionsState.applyTemperingQueueMutation(
+          response.data.action ?? null,
+          nextQueue,
+        );
+        if (!applied) this.characterActionsState.refreshCurrentAction();
 
         if (wasSelected) {
           this.selectedItemId.set(queueItem.equipmentInstance.id);
@@ -384,6 +415,9 @@ export class TemperingComponent implements OnDestroy {
         this.removingQueueItemId.set(null);
       },
       error: (err) => {
+        this.inventoryState.setInventory(previousInventory);
+        this.craftingService.setQueue(previousQueue);
+        this.characterActionsState.applyCurrentActionSnapshot(previousAction);
         this.error.set(err.message ?? 'Failed to remove item from queue.');
         this.removingQueueItemId.set(null);
       },
@@ -462,11 +496,18 @@ export class TemperingComponent implements OnDestroy {
     }
 
     const increase = entry.newStatValue - entry.previousStatValue;
-    return `${formatAttributeType(entry.improvedStat)} ${formatAttributeValue(
-      increase,
+    const previous = formatAttributeValue(
+      entry.previousStatValue,
       entry.improvedStat,
       true,
-    )}`;
+    );
+    const next = formatAttributeValue(
+      entry.newStatValue,
+      entry.improvedStat,
+      true,
+    );
+    const delta = formatAttributeValue(increase, entry.improvedStat, true);
+    return `${formatAttributeType(entry.improvedStat)} ${previous} → ${next} (${delta})`;
   }
 
   moveQueuedItem(
@@ -504,6 +545,49 @@ export class TemperingComponent implements OnDestroy {
       !!this.movingQueueItemId() ||
       !!this.removingQueueItemId() ||
       this.cancellingQueue()
+    );
+  }
+
+  private restoreEquipmentOptimistically(
+    equipmentInstances: EquipmentInstance[],
+  ): void {
+    const returnedIds = new Set(
+      equipmentInstances.map((equipment) => equipment.id),
+    );
+    this.inventoryState.setInventory([
+      ...this.inventoryState
+        .items()
+        .filter((item) => !returnedIds.has(item.itemInstance.id)),
+      ...equipmentInstances.map(
+        (equipment): InventoryItem => ({
+          id: equipment.id,
+          itemInstance: equipment,
+          quantity: 1,
+          isFavorite: equipment.isFavorite,
+          isNew: false,
+        }),
+      ),
+    ]);
+  }
+
+  private applyReturnedInventoryDelta(
+    response: VersionedMutationResult<TemperingQueueMutationResponse>,
+  ): boolean {
+    return this.inventoryState.applyVersionedInventoryDelta(
+      response,
+      (data) => {
+        const returnedIds = new Set(
+          data.returnedInventoryItems.map(
+            (item) => item.itemInstance.id,
+          ),
+        );
+        this.inventoryState.setInventory([
+          ...this.inventoryState
+            .items()
+            .filter((item) => !returnedIds.has(item.itemInstance.id)),
+          ...data.returnedInventoryItems,
+        ]);
+      },
     );
   }
 

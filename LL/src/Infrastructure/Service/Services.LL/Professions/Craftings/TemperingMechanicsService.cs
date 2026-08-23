@@ -179,9 +179,15 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             .FirstOrDefault(modifier => modifier.AttributeType == selected.Definition.Stat);
         if (existingModifier == null)
         {
+            var introducedAmount = AttributeValueQuantizer.Quantize(
+                selected.Definition.Stat,
+                increase);
             equipment.InstanceModifiers.Add(new InstanceAttributeModifier(
                 selected.Definition.Stat,
-                AttributeValueQuantizer.Quantize(selected.Definition.Stat, increase)));
+                introducedAmount)
+            {
+                RarityBonusAmount = introducedAmount
+            });
         }
         else
         {
@@ -193,6 +199,13 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         var updated = equipment.InstanceModifiers
             .Where(modifier => modifier.AttributeType == selected.Definition.Stat)
             .Sum(modifier => modifier.Amount);
+        if (existingModifier is not null)
+        {
+            existingModifier.RarityBonusAmount = AttributeValueQuantizer.Quantize(
+                selected.Definition.Stat,
+                existingModifier.RarityBonusAmount + (updated - previous));
+        }
+
         return new DirectedImprovement(selected.Definition.Stat, previous, updated);
 
         List<WeightedCandidate> CreateCandidates(
@@ -384,6 +397,9 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             modifier.Amount = AttributeValueQuantizer.Quantize(
                 modifier.AttributeType,
                 modifier.Amount);
+            modifier.RarityBonusAmount = AttributeValueQuantizer.Quantize(
+                modifier.AttributeType,
+                modifier.RarityBonusAmount);
         }
     }
 

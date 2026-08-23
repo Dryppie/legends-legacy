@@ -4,7 +4,10 @@ import {
   AttributeTypeFormatPipe,
   isPercentAttribute,
 } from '../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
-import { AttributeValueFormatPipe } from '../../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
+import {
+  AttributeValueFormatPipe,
+  formatAttributeValue,
+} from '../../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import {
   EquipmentDisplay,
   EquipmentAttributeRollRange,
@@ -175,10 +178,11 @@ export class EquipmentDisplayComponent {
   equipmentMeta(item: EquipmentDisplay): string {
     return [
       this.formatDisplayLabel(item.equipmentType),
-      item.quality
-        ? `${this.formatDisplayLabel(item.quality)} quality`
-        : this.formatDisplayLabel(item.rarity),
-    ].join(' · ');
+      this.formatDisplayLabel(item.rarity),
+      item.quality ? `${this.formatDisplayLabel(item.quality)} quality` : null,
+    ]
+      .filter((label): label is string => !!label)
+      .join(' · ');
   }
 
   attributeRollRange(
@@ -190,6 +194,48 @@ export class EquipmentDisplayComponent {
         (range) => range.attributeType === attributeType,
       ) ?? null
     );
+  }
+
+  craftedAttributeRollRange(
+    item: EquipmentDisplay,
+    attributeType: AttributeType,
+  ): EquipmentAttributeRollRange | null {
+    const range = this.attributeRollRange(item, attributeType);
+    return range?.hasCraftedRange !== false ? range : null;
+  }
+
+  attributeRangeSummary(
+    item: EquipmentDisplay,
+    attributeType: AttributeType,
+  ): string | null {
+    const range = this.attributeRollRange(item, attributeType);
+    if (!range) return null;
+
+    const equipmentRating = this.usesV16EquipmentPresentation(item);
+    const rarityBonus =
+      range.rarityBonusAmount > 0
+        ? `Rarity ${formatAttributeValue(
+            range.rarityBonusAmount,
+            attributeType,
+            true,
+            equipmentRating,
+          )}`
+        : '';
+    if (!range.hasCraftedRange) return rarityBonus || null;
+
+    const minimum = formatAttributeValue(
+      range.minimumAmount,
+      attributeType,
+      false,
+      equipmentRating,
+    );
+    const maximum = formatAttributeValue(
+      range.maximumAmount,
+      attributeType,
+      false,
+      equipmentRating,
+    );
+    return ` / ${minimum}–${maximum}${rarityBonus ? ` · ${rarityBonus}` : ''}`;
   }
 
   rollPercentage(value: number, minimum: number, maximum: number): number {

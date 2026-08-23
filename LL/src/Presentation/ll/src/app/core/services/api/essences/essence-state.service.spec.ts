@@ -97,6 +97,7 @@ describe('EssenceStateService loadout drafts', () => {
       'saveLoadout',
       'updateLoadout',
       'spendDust',
+      'dismantle',
     ]);
     essences.getArchive.and.returnValue(of({ essences: [], essenceDust: 0 }));
     essences.getLoadouts.and.returnValue(
@@ -363,6 +364,27 @@ describe('EssenceStateService loadout drafts', () => {
     request.error(new Error('Request failed'));
 
     expect(service.spendingDust()).toBeFalse();
+  });
+
+  it('shatters checked Essence stacks sequentially with their quantities', () => {
+    essences.dismantle.and.returnValues(
+      of(versionedMutation({}, { essences: 2, inventory: 2, equipment: 2 })),
+      of(versionedMutation({}, { essences: 3, inventory: 3, equipment: 3 })),
+    );
+    let response: EssenceMutationResponseDto | undefined;
+
+    service
+      .dismantleInventoryEssences([
+        { inventoryItemId: 'inventory-1', quantity: 5 },
+        { inventoryItemId: 'inventory-2', quantity: 3 },
+      ])
+      ?.subscribe((result) => (response = result));
+
+    expect(essences.dismantle.calls.allArgs()).toEqual([
+      ['inventory-1', 5],
+      ['inventory-2', 3],
+    ]);
+    expect(response?.succeeded).toBeTrue();
   });
 
   it('applies a Dust upgrade response without reloading companion archives', () => {

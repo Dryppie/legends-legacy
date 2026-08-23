@@ -383,13 +383,13 @@ public class InventoryRepository : IInventoryRepository
         return true;
     }
 
-    public async Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken)
+    public async Task<InventoryItem?> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken)
     {
         var itemToAdd = new InventoryItem
         {
             InventoryId = characterId,
             ItemInstanceId = itemInstance.Id,
-            //ItemInstance = itemInstance,
+            ItemInstance = itemInstance,
             Quantity = 1
         };
 
@@ -409,7 +409,7 @@ public class InventoryRepository : IInventoryRepository
         }
 
         await _context.InventoryItems.AddAsync(itemToAdd, cancellationToken);
-        return true;
+        return itemToAdd;
     }
 
     public async Task<InventoryItem?> ScrapEquipments(Guid characterId, List<Guid> parsedGuids, CancellationToken cancellationToken)

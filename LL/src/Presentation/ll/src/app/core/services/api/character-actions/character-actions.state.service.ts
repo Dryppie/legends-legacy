@@ -16,6 +16,10 @@ import { CombatService } from '../../client-side/combat/combat.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { InventoryStateService } from '../inventory/inventory-state.service';
+import { CraftingService } from '../crafting/crafting.service';
+import { TemperingActionState } from '../../../../shared/models/Dtos/temperingQueueMutationDto';
+import { CraftingQueueItem } from '../../../../shared/models/profession';
 
 export type IdleCombatPhase =
   | 'idle'
@@ -172,6 +176,8 @@ export class CharacterActionsStateService {
     private readonly combatService: CombatService,
     private readonly eventBus: EventBusService,
     private readonly router: Router,
+    private readonly inventoryState: InventoryStateService,
+    private readonly craftingService: CraftingService,
   ) {
     // When action changes, route to handler + update display
     effect(() => {
@@ -269,21 +275,19 @@ export class CharacterActionsStateService {
     }
 
     this.persistence.set(type);
-    let call$: Observable<boolean | CharacterActionDto>;
+    if (type === CharacterActionType.Crafting) {
+      this.startCraftingAction(payload as StartCraftingActionRequest);
+      return;
+    }
 
-    let isCombat = false;
+    let call$: Observable<CharacterActionDto>;
+
     switch (type) {
       case CharacterActionType.Combat:
         this._loadingCombat.set(true);
         this._idleCombatPhase.set('starting');
         call$ = this.actionsService.startCombat(
           payload as StartCombatActionRequest,
-        );
-        isCombat = true;
-        break;
-      case CharacterActionType.Crafting:
-        call$ = this.actionsService.startCrafting(
-          payload as StartCraftingActionRequest,
         );
         break;
       default:
@@ -295,27 +299,58 @@ export class CharacterActionsStateService {
       .pipe(
         tap((result) => {
           if (!result) {
-            if (isCombat) {
-              throw new Error(
-                'Combat start completed without returning an action.',
-              );
-            }
-            this.reset();
+            throw new Error(
+              'Combat start completed without returning an action.',
+            );
           } else {
-            if (isCombat) {
-              this.acceptStartedCombat(result as CharacterActionDto);
-              return;
-            }
-            this.combatService.clearAllCombat();
-            this.startPolling();
+            this.acceptStartedCombat(result);
           }
         }),
         catchError((err) => {
           console.error('Failed to start action', err);
-          if (isCombat) return this.recoverStartedCombat(err);
+          return this.recoverStartedCombat(err);
+        }),
+      )
+      .subscribe();
+  }
 
-          this.reset();
-          return of(false);
+  private startCraftingAction(payload: StartCraftingActionRequest): void {
+    this.actionsService
+      .startCrafting(payload)
+      .pipe(
+        tap((result) => {
+          const applied = this.inventoryState.applyVersionedInventoryDelta(
+            result,
+            (data) => {
+              const removedIds = new Set(data.removedInventoryItemIds);
+              this.inventoryState.setInventory(
+                this.inventoryState
+                  .items()
+                  .filter(
+                    (item) => !removedIds.has(item.itemInstance.id),
+                  ),
+              );
+            },
+          );
+          if (!applied) this.refreshCurrentAction();
+
+          this.combatService.clearAllCombat();
+          this.applyTemperingQueueMutation(
+            result.data.action ?? null,
+            this.craftingService.currentQueue,
+          );
+          this.startPolling(this._currentAction());
+        }),
+        catchError((error) => {
+          console.error('Failed to start Tempering', error);
+          this.craftingService.setQueue(
+            this.craftingService.currentQueue.filter(
+              (item) => item.id !== payload.queueId,
+            ),
+          );
+          this.inventoryState.load(true);
+          this.refreshCurrentAction(true);
+          return of(null);
         }),
       )
       .subscribe();
@@ -535,6 +570,62 @@ export class CharacterActionsStateService {
 
   applyCurrentActionSnapshot(action: CharacterActionDto | null): void {
     this.applyActionUpdate(action);
+  }
+
+  applyTemperingQueueMutation(
+    state: TemperingActionState | null,
+    queue: CraftingQueueItem[],
+  ): void {
+    if (!state) {
+      this.refreshCurrentAction();
+      return;
+    }
+
+    const current = this._currentAction();
+    const isCrafting =
+      state.characterActionType === CharacterActionType.Crafting;
+    const isCombat = state.characterActionType === CharacterActionType.Combat;
+    const action: CharacterActionDto = {
+      ...(current ?? {
+        lootTableId: '',
+        revision: state.revision,
+        updatedAt: state.updatedAt,
+        isDeleted: state.isDeleted,
+        characterActionType: state.characterActionType,
+      }),
+      characterActionType: state.characterActionType,
+      updatedAt: new Date(state.updatedAt),
+      nextResolutionAtUtc: state.nextResolutionAtUtc
+        ? new Date(state.nextResolutionAtUtc)
+        : null,
+      nextResolutionAt: state.nextResolutionAtUtc
+        ? new Date(state.nextResolutionAtUtc)
+        : null,
+      blockedUntilUtc: state.blockedUntilUtc
+        ? new Date(state.blockedUntilUtc)
+        : null,
+      scheduleGeneration: state.scheduleGeneration,
+      revision: state.revision,
+      isDeleted: state.isDeleted,
+      resolutionIntervalMs:
+        state.resolutionIntervalMs ??
+        current?.resolutionIntervalMs ??
+        DEFAULT_IDLE_COMBAT_RESOLUTION_INTERVAL_MS,
+      processedCount: 0,
+      hasMoreDueWork: false,
+      hasPendingCombatResolution: false,
+      temperingQueueItems: [...queue],
+      craftingActionDetails: isCrafting
+        ? { craftingQueueItems: [...queue] }
+        : undefined,
+      combatActionDetails: isCombat
+        ? current?.combatActionDetails
+        : undefined,
+      combatSession: isCombat ? current?.combatSession : undefined,
+      temperingSession: isCrafting ? current?.temperingSession : undefined,
+    };
+
+    this.applyActionUpdate(action, true);
   }
 
   private applyActionUpdate(

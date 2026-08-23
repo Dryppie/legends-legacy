@@ -33,7 +33,10 @@
       <div class="ll-item-meta mt-1 truncate">
         {{ equipmentMeta(data) }}
       </div>
-      <div *ngIf="data.requiredLevel > 1" class="ll-item-meta mt-1 text-primary">
+      <div
+        *ngIf="data.requiredLevel > 1"
+        class="ll-item-meta mt-1 text-primary"
+      >
         Requires level {{ data.requiredLevel }}
       </div>
 
@@ -77,31 +80,23 @@
                 </strong>
                 <span
                   *ngIf="
-                    attributeRollRange(data, comparison.attributeType) as range
+                    attributeRangeSummary(
+                      data,
+                      comparison.attributeType
+                    ) as rangeSummary
                   "
                   class="text-[0.62rem] font-normal text-secondary"
                 >
-                  /
-                  {{
-                    range.minimumAmount
-                      | attributeValueFormat
-                        : comparison.attributeType
-                        : false
-                        : usesV16EquipmentPresentation(data)
-                  }}–{{
-                    range.maximumAmount
-                      | attributeValueFormat
-                        : comparison.attributeType
-                        : false
-                        : usesV16EquipmentPresentation(data)
-                  }}
+                  {{ rangeSummary }}
                 </span>
               </ng-container>
               <ng-template #noHoveredAttribute>&mdash;</ng-template>
             </span>
           </div>
           <div
-            *ngIf="attributeRollRange(data, comparison.attributeType) as range"
+            *ngIf="
+              craftedAttributeRollRange(data, comparison.attributeType) as range
+            "
             class="equipment-design-track"
           >
             <span
@@ -202,27 +197,14 @@
                 </strong>
                 <span
                   *ngIf="
-                    attributeRollRange(
+                    attributeRangeSummary(
                       equipped.data,
                       comparison.attributeType
-                    ) as range
+                    ) as rangeSummary
                   "
                   class="text-[0.62rem] font-normal text-secondary"
                 >
-                  /
-                  {{
-                    range.minimumAmount
-                      | attributeValueFormat
-                        : comparison.attributeType
-                        : false
-                        : usesV16EquipmentPresentation(equipped.data)
-                  }}–{{
-                    range.maximumAmount
-                      | attributeValueFormat
-                        : comparison.attributeType
-                        : false
-                        : usesV16EquipmentPresentation(equipped.data)
-                  }}
+                  {{ rangeSummary }}
                 </span>
               </ng-container>
               <ng-template #noEquippedAttribute>&mdash;</ng-template>
@@ -250,7 +232,7 @@
           </div>
           <div
             *ngIf="
-              attributeRollRange(
+              craftedAttributeRollRange(
                 equipped.data,
                 comparison.attributeType
               ) as range
@@ -325,7 +307,10 @@
       <div class="ll-item-meta mt-1">
         {{ equipmentMeta(data) }}
       </div>
-      <div *ngIf="data.requiredLevel > 1" class="ll-item-meta mt-1 text-primary">
+      <div
+        *ngIf="data.requiredLevel > 1"
+        class="ll-item-meta mt-1 text-primary"
+      >
         Requires level {{ data.requiredLevel }}
       </div>
     </ng-container>
@@ -481,24 +466,14 @@
                 </strong>
                 <span
                   *ngIf="
-                    attributeRollRange(data, comparison.attributeType) as range
+                    attributeRangeSummary(
+                      data,
+                      comparison.attributeType
+                    ) as rangeSummary
                   "
                   class="text-[0.62rem] text-secondary"
                 >
-                  /
-                  {{
-                    range.minimumAmount
-                      | attributeValueFormat
-                        : comparison.attributeType
-                        : false
-                        : usesV16EquipmentPresentation(data)
-                  }}–{{
-                    range.maximumAmount
-                      | attributeValueFormat
-                        : comparison.attributeType
-                        : false
-                        : usesV16EquipmentPresentation(data)
-                  }}
+                  {{ rangeSummary }}
                 </span>
                 <span
                   data-testid="inline-comparison-difference"
@@ -530,7 +505,10 @@
             </div>
             <div
               *ngIf="
-                attributeRollRange(data, comparison.attributeType) as range
+                craftedAttributeRollRange(
+                  data,
+                  comparison.attributeType
+                ) as range
               "
               class="equipment-design-track"
             >
@@ -584,28 +562,20 @@
                 }}<span *ngIf="shouldAppendModifierPercent(attr)">%</span>
               </strong>
               <span
-                *ngIf="attributeRollRange(data, attr.attributeType) as range"
+                *ngIf="
+                  attributeRangeSummary(
+                    data,
+                    attr.attributeType
+                  ) as rangeSummary
+                "
                 class="text-[0.62rem] text-secondary"
               >
-                /
-                {{
-                  range.minimumAmount
-                    | attributeValueFormat
-                      : attr.attributeType
-                      : false
-                      : usesV16EquipmentPresentation(data)
-                }}–{{
-                  range.maximumAmount
-                    | attributeValueFormat
-                      : attr.attributeType
-                      : false
-                      : usesV16EquipmentPresentation(data)
-                }}
+                {{ rangeSummary }}
               </span>
             </span>
           </div>
           <div
-            *ngIf="attributeRollRange(data, attr.attributeType) as range"
+            *ngIf="craftedAttributeRollRange(data, attr.attributeType) as range"
             class="equipment-design-track"
           >
             <span

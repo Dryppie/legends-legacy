@@ -217,20 +217,56 @@ public class CraftingService : ICraftingService
         };
     }
 
-    public async Task<bool> RemoveCraftingQueueItemsAsync(Guid characterId, List<Guid> queueItemIds, CancellationToken cancellationToken)
+    public async Task<TemperingQueueRemovalResult?> RemoveCraftingQueueItemsAsync(
+        Guid characterId,
+        IReadOnlyCollection<Guid> queueItemIds,
+        CancellationToken cancellationToken)
     {
-        var anyItemAdded = false;
+        var removed = await _craftingRepository.RemoveCraftingQueueItemsAndReturnItemsAsync(
+            characterId,
+            queueItemIds,
+            cancellationToken);
+        return removed is null
+            ? null
+            : await ReturnRemovedItemsAsync(characterId, removed, cancellationToken);
+    }
 
-        foreach (var queueItemId in queueItemIds)
+    public async Task<TemperingQueueRemovalResult> CancelTemperingQueueAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var removed = await _craftingRepository.RemoveCraftingQueueItemsAndReturnItemsAsync(
+            characterId,
+            null,
+            cancellationToken);
+        return removed is null
+            ? new TemperingQueueRemovalResult(null, [], [])
+            : await ReturnRemovedItemsAsync(characterId, removed, cancellationToken);
+    }
+
+    private async Task<TemperingQueueRemovalResult> ReturnRemovedItemsAsync(
+        Guid characterId,
+        CraftingQueueRemovalResult removed,
+        CancellationToken cancellationToken)
+    {
+        var returnedItems = new List<InventoryItem>(removed.EquipmentInstances.Count);
+        foreach (var equipmentInstance in removed.EquipmentInstances)
         {
-            var equipmentInstance = await _craftingRepository.RemoveCraftingQueueItemAndReturnItemAsync(characterId, queueItemId, cancellationToken);
-            if (equipmentInstance == null) continue;
-
-            var itemAdded = await _inventoryService.AddItemInstanceBackToInventory(characterId, equipmentInstance, cancellationToken);
-            if (itemAdded) anyItemAdded = true;
+            var inventoryItem = await _inventoryService.AddItemInstanceBackToInventory(
+                characterId,
+                equipmentInstance,
+                cancellationToken);
+            if (inventoryItem is not null)
+                returnedItems.Add(inventoryItem);
         }
 
-        return anyItemAdded;
+        if (returnedItems.Count != removed.EquipmentInstances.Count)
+            throw new InvalidOperationException("Failed to return every removed Tempering item to inventory.");
+
+        return new TemperingQueueRemovalResult(
+            removed.Action,
+            returnedItems,
+            removed.RemovedQueueItemIds);
     }
 
     public Task<bool> MoveCraftingQueueItemAsync(

@@ -379,7 +379,7 @@ public sealed class CharacterActionFlowTests
             return Task.FromResult(true);
         }
         public Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem characterAction, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<CharacterAction?> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem characterAction, Domain.Models.Inventories.InventoryItem inventoryItem, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<CharacterAction?> ResumeTemperingAsync(Guid characterId, DateTimeOffset now, CancellationToken cancellationToken) =>
             Task.FromResult<CharacterAction?>(Current.ActionDetails is CraftingActionDetails ? Current : null);
         public Task<IReadOnlyList<CraftingQueueItem>> GetPausedTemperingQueueAsync(Guid characterId, CancellationToken cancellationToken) =>
@@ -439,10 +439,10 @@ public sealed class CharacterActionFlowTests
                     })]
             });
         }
-        public Task<bool> RemoveCraftingQueueItemsAsync(Guid characterId, List<Guid> queueItemIds, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(false);
-        }
+        public Task<TemperingQueueRemovalResult?> RemoveCraftingQueueItemsAsync(Guid characterId, IReadOnlyCollection<Guid> queueItemIds, CancellationToken cancellationToken) =>
+            Task.FromResult<TemperingQueueRemovalResult?>(null);
+        public Task<TemperingQueueRemovalResult> CancelTemperingQueueAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult(new TemperingQueueRemovalResult(null, [], []));
         public Task<bool> MoveCraftingQueueItemAsync(Guid characterId, Guid queueItemId, CraftingQueueMoveDirection direction, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Response<IReadOnlyList<CraftingRecipeDto>>> GetCraftingRecipesAsync(Guid characterId, int targetTier, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Response<LearnBlueprintResult>> LearnBlueprintAsync(Guid characterId, Guid blueprintItemInstanceId, string recipeId, CancellationToken cancellationToken) => throw new NotSupportedException();

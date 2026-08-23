@@ -1,5 +1,7 @@
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Regions.Areas;
@@ -232,6 +234,66 @@ public sealed class CraftingQueueReorderingTests
     }
 
     [Fact]
+    public async Task Removing_a_tempering_item_returns_the_equipment_graph_needed_by_inventory_mapping()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var equipmentBase = new EquipmentBase
+        {
+            Id = "mapped-test-sword",
+            Name = "Mapped Test Sword",
+            EquipmentType = EquipmentType.OneHanded,
+            AttributeModifiers =
+            [
+                new ItemAttributeModifier(AttributeType.Power, 5)
+            ]
+        };
+        var equipment = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = equipmentBase.Id,
+            ItemBase = equipmentBase,
+            InstanceModifiers =
+            [
+                new InstanceAttributeModifier(AttributeType.MaxHealth, 25)
+                {
+                    RarityBonusAmount = 3
+                }
+            ]
+        };
+        var queueItem = new CraftingQueueItem
+        {
+            Id = Guid.NewGuid(),
+            EquipmentInstanceId = equipment.Id,
+            EquipmentInstance = equipment
+        };
+        db.CharacterActions.Add(new CharacterAction
+        {
+            CharacterId = characterId,
+            UpdatedAt = DateTimeOffset.UtcNow,
+            ActionDetails = new CraftingActionDetails
+            {
+                CraftingQueueItems = [queueItem]
+            }
+        });
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        var removed = await new CraftingRepository(db)
+            .RemoveCraftingQueueItemAndReturnItemAsync(
+                characterId,
+                queueItem.Id,
+                CancellationToken.None);
+
+        Assert.NotNull(removed);
+        Assert.Equal("Mapped Test Sword", removed.DisplayName);
+        Assert.Single(removed.EquipmentBase.AttributeModifiers);
+        var instanceModifier = Assert.Single(removed.InstanceModifiers);
+        Assert.Equal(3, instanceModifier.RarityBonusAmount);
+        Assert.Equal(2, removed.AttributeModifiers.Count);
+    }
+
+    [Fact]
     public async Task Removing_queued_tempering_preserves_an_unexpired_combat_switch_lock()
     {
         await using var db = CreateDb();
@@ -303,30 +365,50 @@ public sealed class CraftingQueueReorderingTests
         db.CraftingQueueItems.AddRange(first, second);
         await db.SaveChangesAsync();
 
-        var repository = new CraftingRepository(db);
-        var returnedItems = new[]
-        {
-            await repository.RemoveCraftingQueueItemAndReturnItemAsync(
+        var result = await new CraftingRepository(db)
+            .RemoveCraftingQueueItemsAndReturnItemsAsync(
                 characterId,
-                first.Id,
-                CancellationToken.None),
-            await repository.RemoveCraftingQueueItemAndReturnItemAsync(
-                characterId,
-                second.Id,
-                CancellationToken.None)
-        };
+                null,
+                CancellationToken.None);
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
 
+        Assert.NotNull(result);
         Assert.Equal(
             [first.EquipmentInstanceId, second.EquipmentInstanceId],
-            returnedItems.Select(item => item!.Id));
+            result.EquipmentInstances.Select(item => item.Id));
+        Assert.Equal([first.Id, second.Id], result.RemovedQueueItemIds);
         Assert.Empty(await db.CraftingQueueItems.ToListAsync());
         var action = await db.CharacterActions
             .Include(candidate => candidate.ActionDetails)
             .SingleAsync(candidate => candidate.CharacterId == characterId);
         Assert.IsType<CombatActionDetails>(action.ActionDetails);
         Assert.False(action.IsDeleted);
+    }
+
+    [Fact]
+    public async Task Cancelling_an_empty_queue_returns_the_existing_action_snapshot()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        db.CharacterActions.Add(new CharacterAction
+        {
+            CharacterId = characterId,
+            UpdatedAt = DateTimeOffset.UtcNow,
+            IsDeleted = true
+        });
+        await db.SaveChangesAsync();
+
+        var result = await new CraftingRepository(db)
+            .RemoveCraftingQueueItemsAndReturnItemsAsync(
+                characterId,
+                null,
+                CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.NotNull(result.Action);
+        Assert.Empty(result.EquipmentInstances);
+        Assert.Empty(result.RemovedQueueItemIds);
     }
 
     private static CraftingQueueItem QueueItem(int position) => new()

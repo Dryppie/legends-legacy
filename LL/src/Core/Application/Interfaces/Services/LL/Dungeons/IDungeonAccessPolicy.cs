@@ -18,4 +18,10 @@ public interface IDungeonAccessPolicy
         Guid characterId,
         IReadOnlyCollection<DungeonDefinition> dungeons,
         CancellationToken cancellationToken);
+
+    Task<IReadOnlyDictionary<string, DungeonPreviewAccess>> EvaluateForPreviewAsync(
+        Guid characterId,
+        IReadOnlyCollection<DungeonDefinition> dungeons,
+        IReadOnlyDictionary<string, int> inventoryQuantityOverrides,
+        CancellationToken cancellationToken);
 }

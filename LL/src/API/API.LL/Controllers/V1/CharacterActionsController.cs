@@ -5,6 +5,7 @@ using Application.UseCases.CharacterActions.Commands.ResolveCharacterAction;
 using Application.UseCases.CharacterActions.Commands.ResumeTempering;
 using Application.UseCases.CharacterActions.Dtos.Responses;
 using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
+using Application.UseCases.Professions.Dtos;
 using Common.Primitives;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +30,7 @@ public class CharacterActionsController : BaseController
         await Mediator.Send(new StartCombatActionCommand(CurrentCharacterGuid, request.AreaId));
 
     [HttpPost("StartCrafting")]
-    public async Task<ActionResult<Response<bool>>> StartCrafting([FromBody] StartCraftingActionRequest request) =>
+    public async Task<ActionResult<Response<TemperingQueueMutationResponseDto>>> StartCrafting([FromBody] StartCraftingActionRequest request) =>
         await Mediator.Send(new StartCraftingActionCommand(CurrentCharacterGuid, request.QueueId, request.ItemInstanceId));
 
     [HttpPost("ResumeTempering")]

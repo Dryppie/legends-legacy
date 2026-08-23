@@ -44,6 +44,8 @@ export interface EquipmentAttributeRollRange {
   attributeType: AttributeType;
   minimumAmount: number;
   maximumAmount: number;
+  rarityBonusAmount: number;
+  hasCraftedRange: boolean;
 }
 
 export interface EquipmentAttributeComparison {
