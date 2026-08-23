@@ -18,7 +18,7 @@
 
 .overview-profile-primary,
 .overview-profile-progress,
-.overview-columns,
+.overview-layout,
 .overview-skills-grid,
 .attribute-section-grid {
   display: grid;
@@ -37,6 +37,10 @@
   border-top: 1px solid var(--ll-color-border);
 }
 
+.overview-character-level {
+  border-top: 1px solid var(--ll-color-border);
+}
+
 .overview-meta-divider {
   width: 1px;
   height: 1rem;
@@ -49,7 +53,7 @@
 }
 
 .overview-skills {
-  border-top: 1px solid var(--ll-color-border);
+  border-top: 0;
 }
 
 .overview-skills-heading {
@@ -154,23 +158,28 @@
   padding: var(--ll-space-4);
 }
 
+.overview-sidebar,
+.overview-loadout-panel {
+  min-width: 0;
+}
+
+.overview-loadout-panel {
+  height: 100%;
+}
+
 @container character-overview (min-width: 48rem) {
   .overview-profile-primary {
-    grid-template-columns: minmax(0, 1fr) 14rem;
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.7fr) 12.5rem;
   }
 
+  .overview-character-level,
   .overview-combat-rating {
     border-top: 0;
     border-left: 1px solid var(--ll-color-border);
   }
 
-  .overview-profile-progress {
-    grid-template-columns: minmax(16rem, 0.62fr) minmax(0, 1.38fr);
-  }
-
   .overview-skills {
     border-top: 0;
-    border-left: 1px solid var(--ll-color-border);
   }
 
   .overview-skills-grid {
@@ -179,8 +188,12 @@
 }
 
 @container character-overview (min-width: 64rem) {
-  .overview-columns {
+  .overview-layout {
     grid-template-columns: minmax(0, 1fr) 22.5rem;
+  }
+
+  .overview-sidebar {
+    height: 100%;
   }
 }
 
