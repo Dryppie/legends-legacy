@@ -1,5 +1,5 @@
 import { ToolBonusType } from '../../../../models/item';
-import { toolBonusTooltip } from './tool-bonus-tooltip';
+import { toolBonusDisplayLabel, toolBonusTooltip } from './tool-bonus-tooltip';
 
 describe('toolBonusTooltip', () => {
   it('explains that bonus and double rolls are independent', () => {
@@ -12,10 +12,10 @@ describe('toolBonusTooltip', () => {
   });
 
   it('identifies rare materials by reward-table tags and examples', () => {
-    const description = toolBonusTooltip(
-      ToolBonusType.RareMaterialChancePercent,
-    )?.description;
+    const tooltip = toolBonusTooltip(ToolBonusType.RareMaterialChancePercent);
+    const description = tooltip?.description;
 
+    expect(tooltip?.title).toContain('Catalytic');
     expect(description).toContain('tagged as rare');
     expect(description).toContain('Fury Heart');
     expect(description).toContain('does not change normal materials');
@@ -25,5 +25,11 @@ describe('toolBonusTooltip', () => {
     expect(
       toolBonusTooltip(ToolBonusType.DoubleGatherChancePercent)?.description,
     ).toContain('no base chance');
+  });
+
+  it('uses the Catalytic label for legacy rare-material bonus types', () => {
+    expect(toolBonusDisplayLabel(ToolBonusType.RareMaterialChancePercent)).toBe(
+      'Catalytic · Catalyst Chance',
+    );
   });
 });

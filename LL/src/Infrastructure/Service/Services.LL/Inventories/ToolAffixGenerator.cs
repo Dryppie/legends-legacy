@@ -8,11 +8,11 @@ internal static class ToolAffixGenerator
 {
     private static readonly ToolAffixDefinition[] Definitions =
     [
-        new("Abundant", ToolBonusType.GatheringYieldPercent, 4, 9),
-        new("Reliable", ToolBonusType.NodeSuccessChancePercent, 3, 7),
-        new("Prospector's", ToolBonusType.RareMaterialChancePercent, 2, 5),
-        new("Duplicating", ToolBonusType.DoubleGatherChancePercent, 1, 4),
-        new("Opportunist's", ToolBonusType.BonusRollChancePercent, 1, 3),
+        new(ToolBonusType.GatheringYieldPercent, 4, 9),
+        new(ToolBonusType.NodeSuccessChancePercent, 3, 7),
+        new(ToolBonusType.RareMaterialChancePercent, 2, 5),
+        new(ToolBonusType.DoubleGatherChancePercent, 1, 4),
+        new(ToolBonusType.BonusRollChancePercent, 1, 3),
     ];
 
     public static List<ToolBonusModifier> RollAffixes(Rarity rarity, IResolutionRandomSource? random = null)
@@ -29,7 +29,7 @@ internal static class ToolAffixGenerator
             .Select(definition => new ToolBonusModifier
             {
                 Id = random?.NextGuid() ?? Guid.NewGuid(),
-                Name = definition.Name,
+                Name = ToolBonusProfileCatalog.GetName(definition.BonusType),
                 BonusType = definition.BonusType,
                 Amount = RollAmount(definition, rarity, random)
             })
@@ -76,7 +76,6 @@ internal static class ToolAffixGenerator
     }
 
     private sealed record ToolAffixDefinition(
-        string Name,
         ToolBonusType BonusType,
         double MinAmount,
         double MaxAmount);

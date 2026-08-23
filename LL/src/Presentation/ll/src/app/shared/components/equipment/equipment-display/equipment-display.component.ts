@@ -38,6 +38,7 @@ import { EquippedComparison } from '../../../utils/equipment/equipment.utils';
 import { ToolBonusTooltipDirective } from '../../../directives/tool-bonus-tooltip/tool-bonus-tooltip.directive';
 import { TemperingBonusTooltipDirective } from '../../../directives/tempering-bonus-tooltip/tempering-bonus-tooltip.directive';
 import { TemperingBonusTooltipData } from '../../custom-components/tooltips/tempering-bonus-tooltip/tempering-bonus-tooltip-panel.component';
+import { toolBonusDisplayLabel } from '../../custom-components/tooltips/tool-bonus-tooltip/tool-bonus-tooltip';
 
 interface EquipmentComparisonView {
   slotType: EquipmentSlotType | null;
@@ -295,6 +296,9 @@ export class EquipmentDisplayComponent {
   }
 
   formatToolBonusType(type: string): string {
+    const profileLabel = toolBonusDisplayLabel(type);
+    if (profileLabel) return profileLabel;
+
     return type
       .replace(/Percent$/, '')
       .replace(/^Specific/, '')

@@ -12,6 +12,7 @@ using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Rewards;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Extensions;
+using Services.LL.Inventories;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Interfaces.Combat.Reward.Idle;
@@ -358,7 +359,10 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
             return;
         }
 
-        effects.Add($"{bonusType}: +{amount:0.##}");
+        var suffix = bonusType is ToolBonusType.MinimumQuantityBonus or ToolBonusType.MaximumQuantityBonus
+            ? string.Empty
+            : "%";
+        effects.Add($"{ToolBonusProfileCatalog.GetEffectLabel(bonusType)}: +{amount:0.##}{suffix}");
     }
 
     private static void AddSoulstoneEffect(List<string> effects, string label, double basisPoints)

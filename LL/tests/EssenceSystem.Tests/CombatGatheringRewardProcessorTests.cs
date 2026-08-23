@@ -187,11 +187,14 @@ public sealed class CombatGatheringRewardProcessorTests
             [BonusKind.GatheringRareDropChanceRelativeBps] = 3000d
         };
 
-        await processor.ProcessAsync(facts, CancellationToken.None, bonusFactors);
+        var rewards = await processor.ProcessAsync(facts, CancellationToken.None, bonusFactors);
 
         var rareBonus = Assert.IsType<Dictionary<string, double>>(
             rewardRoller.LastContext!.EntryWeightBonusPercentByTag)["rare"];
         Assert.Equal(56d, rareBonus, 10);
+        Assert.Contains(
+            "Catalytic Catalyst chance: +20%",
+            Assert.Single(rewards).AppliedBonusEffects);
     }
 
     [Fact]
