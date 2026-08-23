@@ -599,7 +599,7 @@
     align-items: center;
     flex-direction: row;
     padding: 0.65rem 0.75rem;
-    background: var(--ll-color-surface-strong);
+    background-color: #0e0c15;
   }
 
   .absorb-bulk-actions > .ll-button {
@@ -629,7 +629,7 @@
     border: 1px solid var(--ll-color-border-strong);
     border-bottom: 0;
     border-radius: 1.35rem 1.35rem 0 0;
-    background: var(--ll-color-bg-deep);
+    background-color: #0e0c15;
     box-shadow: 0 -1rem 3rem rgba(0, 0, 0, 0.5);
     isolation: isolate;
     opacity: 0;
@@ -656,7 +656,7 @@
     flex: none;
     align-items: center;
     justify-content: center;
-    background: var(--ll-color-bg-deep);
+    background-color: #0e0c15;
   }
 
   .absorb-mobile-detail-handle {
@@ -694,17 +694,21 @@
     border-right: 0;
     border-left: 0;
     border-radius: 0;
-    background: var(--ll-color-bg-deep);
+    background-color: rgba(14, 12, 21, 0.46);
   }
 
   .absorb-detail-card {
     padding: 0.75rem 1rem 1rem;
+    background: transparent;
+    box-shadow: none;
   }
 
   .absorb-archive-state {
     min-height: 0;
     gap: 0.75rem;
     padding: 1rem;
+    background: transparent;
+    box-shadow: none;
     text-align: left;
   }
 

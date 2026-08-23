@@ -1,6 +1,6 @@
 <div class="absorb-workspace">
   <section
-    class="ll-panel absorb-catalog"
+    class="ll-panel absorb-catalog bg-texture bg-auto"
     [class.absorb-selection-mode]="mobileSelectionMode()"
     aria-label="Inventory essences"
     data-tour="inventory-essences-list"
@@ -173,7 +173,10 @@
       </p>
     </ng-template>
 
-    <footer *ngIf="selectedShatterCount() > 0" class="absorb-catalog-footer">
+    <footer
+      *ngIf="selectedShatterCount() > 0"
+      class="absorb-catalog-footer bg-texture bg-auto"
+    >
       <span class="absorb-bulk-summary">
         <strong>
           {{ selectedShatterCount() }} essences across
@@ -220,11 +223,11 @@
   ></button>
 
   <section
-    class="absorb-detail-column"
+    class="absorb-detail-column bg-texture bg-auto"
     [class.absorb-detail-column-open]="mobileDetailOpen()"
     data-tour="essence-absorb-details"
   >
-    <header class="absorb-mobile-detail-header">
+    <header class="absorb-mobile-detail-header bg-texture bg-auto">
       <span class="absorb-mobile-detail-handle" aria-hidden="true"></span>
       <button
         type="button"
@@ -282,7 +285,7 @@
       </div>
 
       <div
-        class="ll-panel absorb-shatter-bar"
+        class="ll-panel absorb-shatter-bar bg-texture bg-auto"
         data-tour="essence-absorb-actions"
       >
         <span class="absorb-shatter-copy">
