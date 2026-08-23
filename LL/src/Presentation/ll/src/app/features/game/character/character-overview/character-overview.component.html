@@ -1,109 +1,109 @@
-<div class="ll-page-stack pb-4 sm:pb-0">
+<div class="ll-page-stack overview-page pb-4 sm:pb-0">
   <app-default-header
     class="flex-none pr-4 sm:pr-6"
     section="Character"
     title="Overview"
     text="Stats, combat rating, and Essence loadout"
     icon="sidebar/character/overview"
-  ></app-default-header>
+  >
+    <div header-actions class="overview-header-actions">
+      <div class="ll-input-group overview-search-group">
+        <div class="relative min-w-0 flex-1">
+          <input
+            #searchInput
+            #searchOrigin="cdkOverlayOrigin"
+            cdkOverlayOrigin
+            id="character-overview-search"
+            type="text"
+            class="ll-input w-full"
+            placeholder="Search character by name..."
+            autocomplete="off"
+            maxlength="80"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-controls="character-overview-search-suggestions"
+            [attr.aria-expanded]="showCharacterSuggestionPanel()"
+            [attr.aria-activedescendant]="
+              activeCharacterSuggestion() >= 0
+                ? 'character-overview-search-suggestion-' +
+                  activeCharacterSuggestion()
+                : null
+            "
+            [ngModel]="searchValue()"
+            (ngModelChange)="onSearchValueChange($event)"
+            (focus)="openCharacterSuggestions()"
+            (blur)="closeCharacterSuggestions()"
+            (keydown)="handleSearchKeydown($event)"
+          />
 
-  <div class="grid gap-2">
-    <div class="ll-input-group">
-      <div class="relative min-w-0 flex-1">
-        <input
-          #searchInput
-          #searchOrigin="cdkOverlayOrigin"
-          cdkOverlayOrigin
-          id="character-overview-search"
-          type="text"
-          class="ll-input w-full"
-          placeholder="Search character by name..."
-          autocomplete="off"
-          maxlength="80"
-          role="combobox"
-          aria-autocomplete="list"
-          aria-controls="character-overview-search-suggestions"
-          [attr.aria-expanded]="showCharacterSuggestionPanel()"
-          [attr.aria-activedescendant]="
-            activeCharacterSuggestion() >= 0
-              ? 'character-overview-search-suggestion-' +
-                activeCharacterSuggestion()
-              : null
-          "
-          [ngModel]="searchValue()"
-          (ngModelChange)="onSearchValueChange($event)"
-          (focus)="openCharacterSuggestions()"
-          (blur)="closeCharacterSuggestions()"
-          (keydown)="handleSearchKeydown($event)"
-        />
-
-        <ng-template
-          cdkConnectedOverlay
-          [cdkConnectedOverlayOrigin]="searchOrigin"
-          [cdkConnectedOverlayOpen]="showCharacterSuggestionPanel()"
-          [cdkConnectedOverlayPositions]="characterSuggestionPositions"
-          [cdkConnectedOverlayPush]="true"
-          [cdkConnectedOverlayViewportMargin]="8"
-        >
-          <div
-            id="character-overview-search-suggestions"
-            class="max-h-[min(12rem,calc(100dvh-1rem))] overflow-y-auto rounded border border-light_gray bg-texture p-1 shadow-xl shadow-black/60"
-            [style.width.px]="searchInput.offsetWidth"
-            role="listbox"
-            (click)="$event.stopPropagation()"
+          <ng-template
+            cdkConnectedOverlay
+            [cdkConnectedOverlayOrigin]="searchOrigin"
+            [cdkConnectedOverlayOpen]="showCharacterSuggestionPanel()"
+            [cdkConnectedOverlayPositions]="characterSuggestionPositions"
+            [cdkConnectedOverlayPush]="true"
+            [cdkConnectedOverlayViewportMargin]="8"
           >
             <div
-              *ngIf="isSearchingCharacters()"
-              class="px-3 py-2 text-xs text-zinc-400"
+              id="character-overview-search-suggestions"
+              class="max-h-[min(12rem,calc(100dvh-1rem))] overflow-y-auto rounded border border-light_gray bg-texture p-1 shadow-xl shadow-black/60"
+              [style.width.px]="searchInput.offsetWidth"
+              role="listbox"
+              (click)="$event.stopPropagation()"
             >
-              Finding players...
-            </div>
+              <div
+                *ngIf="isSearchingCharacters()"
+                class="px-3 py-2 text-xs text-zinc-400"
+              >
+                Finding players...
+              </div>
 
-            <button
-              *ngFor="let suggestion of characterSuggestions(); index as i"
-              type="button"
-              class="ll-dropdown-option block w-full rounded px-3 py-2 text-left text-sm transition-colors"
-              [class.ll-dropdown-option-hovered]="
-                activeCharacterSuggestion() === i
-              "
-              [id]="'character-overview-search-suggestion-' + i"
-              [attr.aria-selected]="activeCharacterSuggestion() === i"
-              role="option"
-              (mouseenter)="activeCharacterSuggestion.set(i)"
-              (mousedown)="selectCharacterSuggestion($event, suggestion)"
-            >
-              {{ suggestion }}
-            </button>
+              <button
+                *ngFor="let suggestion of characterSuggestions(); index as i"
+                type="button"
+                class="ll-dropdown-option block w-full rounded px-3 py-2 text-left text-sm transition-colors"
+                [class.ll-dropdown-option-hovered]="
+                  activeCharacterSuggestion() === i
+                "
+                [id]="'character-overview-search-suggestion-' + i"
+                [attr.aria-selected]="activeCharacterSuggestion() === i"
+                role="option"
+                (mouseenter)="activeCharacterSuggestion.set(i)"
+                (mousedown)="selectCharacterSuggestion($event, suggestion)"
+              >
+                {{ suggestion }}
+              </button>
 
-            <div
-              *ngIf="
-                !isSearchingCharacters() &&
-                characterSuggestionSearchCompleted() &&
-                characterSuggestions().length === 0
-              "
-              class="px-3 py-2 text-xs text-zinc-400"
-            >
-              No matching players
+              <div
+                *ngIf="
+                  !isSearchingCharacters() &&
+                  characterSuggestionSearchCompleted() &&
+                  characterSuggestions().length === 0
+                "
+                class="px-3 py-2 text-xs text-zinc-400"
+              >
+                No matching players
+              </div>
             </div>
-          </div>
-        </ng-template>
+          </ng-template>
+        </div>
+        <app-regular-button
+          (pressed)="onSearch()"
+          [disabled]="isLoading()"
+          [text]="isLoading() ? 'Loading' : 'Search'"
+        ></app-regular-button>
+        <app-regular-button
+          (pressed)="refresh()"
+          [disabled]="isLoading()"
+          [text]="isLoading() ? 'Refreshing' : 'Refresh'"
+        ></app-regular-button>
       </div>
-      <app-regular-button
-        (pressed)="onSearch()"
-        [disabled]="isLoading()"
-        [text]="isLoading() ? 'Loading' : 'Search'"
-      ></app-regular-button>
-      <app-regular-button
-        (pressed)="refresh()"
-        [disabled]="isLoading()"
-        [text]="isLoading() ? 'Refreshing' : 'Refresh'"
-      ></app-regular-button>
     </div>
+  </app-default-header>
 
-    <p *ngIf="errorMessage()" class="ll-state ll-state-danger">
-      {{ errorMessage() }}
-    </p>
-  </div>
+  <p *ngIf="errorMessage()" class="ll-state ll-state-danger">
+    {{ errorMessage() }}
+  </p>
 
   <div *ngIf="isLoading() && !character()" class="ll-state ll-state-muted">
     Loading character overview...
@@ -120,156 +120,206 @@
     *ngIf="character() as characterOverview"
     class="min-h-0 flex-1 overflow-y-auto overscroll-contain"
   >
-    <section class="ll-page-header">
-      <div>
-        <p class="ll-eyebrow text-primary">Combat Profile</p>
-        <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-          <h2 class="ll-heading text-2xl text-white">
-            {{ profileLabel() }}
-          </h2>
-          <app-presence-indicator
-            *ngIf="isViewingSearchResult()"
-            [isOnline]="characterOverview.isOnline"
-            [lastSeenAt]="characterOverview.lastSeenAt"
-          ></app-presence-indicator>
-        </div>
-        <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
-          <span class="text-secondary">Guild</span>
-          <ng-container *ngIf="characterOverview.guild as guild; else noGuild">
-            <span class="font-semibold text-zinc-200">{{ guild.name }}</span>
-            <span *ngIf="guild.tag" class="ll-badge ll-badge-accent rounded">
-              [{{ guild.tag }}]
+    <section class="overview-profile ll-panel overflow-hidden">
+      <div class="overview-profile-primary">
+        <div class="overview-profile-identity">
+          <p class="ll-eyebrow text-primary">Combat Profile</p>
+          <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <h2 class="ll-heading text-2xl text-white sm:text-3xl">
+              {{ profileLabel() }}
+            </h2>
+            <app-presence-indicator
+              *ngIf="isViewingSearchResult()"
+              [isOnline]="characterOverview.isOnline"
+              [lastSeenAt]="characterOverview.lastSeenAt"
+            ></app-presence-indicator>
+          </div>
+          <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
+            <span class="text-secondary">Guild</span>
+            <ng-container
+              *ngIf="characterOverview.guild as guild; else noGuild"
+            >
+              <span class="font-semibold text-zinc-200">{{ guild.name }}</span>
+              <span *ngIf="guild.tag" class="ll-badge ll-badge-accent rounded">
+                [{{ guild.tag }}]
+              </span>
+            </ng-container>
+            <ng-template #noGuild>
+              <span class="text-zinc-500">None</span>
+            </ng-template>
+            <span class="overview-meta-divider" aria-hidden="true"></span>
+            <span class="text-secondary">Essences</span>
+            <span class="font-semibold text-zinc-200">
+              {{ filledLoadoutSlots }} / {{ totalLoadoutSlots }} attuned
             </span>
-          </ng-container>
-          <ng-template #noGuild>
-            <span class="text-zinc-500">None</span>
-          </ng-template>
+          </div>
         </div>
-      </div>
-
-      <div class="profile-summary-grid mt-4 grid gap-3">
-        <article class="ll-stat-card">
-          <div class="ll-stat-label">Character Level</div>
-          <div class="mt-1">
-            <h2 class="ll-heading text-3xl leading-none">
-              Level {{ characterOverview.level }}
-            </h2>
-          </div>
-          <div class="mt-3">
-            <div
-              class="mb-1 flex items-center justify-between gap-3 text-[0.7rem] font-semibold uppercase tracking-wide text-secondary"
-            >
-              <span>Combat XP</span>
-              <span class="tabular-nums text-white">
-                {{ characterOverview.experience | number }}/{{
-                  characterOverview.experienceUntilNextLevel | number
-                }}
-              </span>
-            </div>
-            <div
-              class="h-2 overflow-hidden rounded-full border border-primary/30 bg-black/50"
-              role="progressbar"
-              aria-label="Combat experience"
-              [attr.aria-valuenow]="characterOverview.experience"
-              aria-valuemin="0"
-              [attr.aria-valuemax]="characterOverview.experienceUntilNextLevel"
-            >
-              <div
-                class="h-full rounded-full bg-primary transition-[width]"
-                [style.width.%]="
-                  experiencePercent(
-                    characterOverview.experience,
-                    characterOverview.experienceUntilNextLevel
-                  )
-                "
-              ></div>
-            </div>
-          </div>
-        </article>
-
-        <article class="ll-stat-card">
-          <div class="ll-stat-label">Crafting Level</div>
-          <div class="mt-1">
-            <h2 class="ll-heading text-3xl leading-none">
-              Level {{ characterOverview.craftingLevel }}
-            </h2>
-          </div>
-          <div class="mt-3">
-            <div
-              class="mb-1 flex items-center justify-between gap-3 text-[0.7rem] font-semibold uppercase tracking-wide text-secondary"
-            >
-              <span>Crafting XP</span>
-              <span class="tabular-nums text-white">
-                {{ characterOverview.craftingExperience | number }}/{{
-                  characterOverview.craftingExperienceUntilNextLevel | number
-                }}
-              </span>
-            </div>
-            <div
-              class="h-2 overflow-hidden rounded-full border border-primary/30 bg-black/50"
-              role="progressbar"
-              aria-label="Crafting experience"
-              [attr.aria-valuenow]="characterOverview.craftingExperience"
-              aria-valuemin="0"
-              [attr.aria-valuemax]="
-                characterOverview.craftingExperienceUntilNextLevel
-              "
-            >
-              <div
-                class="h-full rounded-full bg-primary transition-[width]"
-                [style.width.%]="
-                  experiencePercent(
-                    characterOverview.craftingExperience,
-                    characterOverview.craftingExperienceUntilNextLevel
-                  )
-                "
-              ></div>
-            </div>
-          </div>
-        </article>
 
         <article
-          class="ll-stat-card ll-card-accent relative overflow-hidden text-left"
+          class="overview-combat-rating"
           title="Combat Rating summarizes permanent combat attributes and the equipped build."
         >
-          <div class="relative">
-            <div class="ll-stat-label">Combat Rating</div>
-            <div class="ll-heading mt-1 text-3xl leading-none">
-              <ng-container
-                *ngIf="
-                  characterOverview.power?.state === 'Available';
-                  else powerUnavailable
-                "
-              >
-                {{
-                  displayCombatRating(characterOverview.power!.overall)
-                    | number: "1.0-0"
-                }}
-              </ng-container>
-              <ng-template #powerUnavailable>Unavailable</ng-template>
-            </div>
+          <div class="ll-stat-label">Combat Rating</div>
+          <div class="ll-heading mt-1 text-5xl leading-none">
+            <ng-container
+              *ngIf="
+                characterOverview.power?.state === 'Available';
+                else powerUnavailable
+              "
+            >
+              {{
+                displayCombatRating(characterOverview.power!.overall)
+                  | number: "1.0-0"
+              }}
+            </ng-container>
+            <ng-template #powerUnavailable>Unavailable</ng-template>
           </div>
         </article>
+      </div>
+
+      <div class="overview-profile-progress">
+        <article class="overview-character-level">
+          <div class="ll-stat-label">Character Level</div>
+          <div class="mt-2 flex items-end gap-3">
+            <h2 class="ll-heading text-4xl leading-none">
+              {{ characterOverview.level }}
+            </h2>
+            <span class="pb-1 text-xs uppercase tracking-wide text-secondary">
+              Combat XP
+            </span>
+            <span class="ml-auto pb-1 text-xs tabular-nums text-white">
+              {{ characterOverview.experience | number }} / {{
+                characterOverview.experienceUntilNextLevel | number
+              }}
+            </span>
+          </div>
+          <div
+            class="overview-progress-track mt-3"
+            role="progressbar"
+            aria-label="Combat experience"
+            [attr.aria-valuenow]="characterOverview.experience"
+            aria-valuemin="0"
+            [attr.aria-valuemax]="characterOverview.experienceUntilNextLevel"
+          >
+            <div
+              class="overview-progress-value"
+              [style.width.%]="
+                experiencePercent(
+                  characterOverview.experience,
+                  characterOverview.experienceUntilNextLevel
+                )
+              "
+            ></div>
+          </div>
+        </article>
+
+        <section class="overview-skills" aria-labelledby="overview-skills-title">
+          <div class="overview-skills-heading">
+            <h3 id="overview-skills-title" class="ll-eyebrow text-primary">
+              Skills
+            </h3>
+            <span class="ll-copy">Crafting and gathering progress</span>
+          </div>
+
+          <div class="overview-skills-grid">
+            <article class="overview-skill-item">
+              <div class="overview-skill-name">
+                <span aria-hidden="true">◆</span>
+                <strong>Crafting</strong>
+                <span class="ll-heading">{{ characterOverview.craftingLevel }}</span>
+              </div>
+              <div class="overview-skill-progress">
+                <div
+                  class="overview-progress-track"
+                  role="progressbar"
+                  aria-label="Crafting experience"
+                  [attr.aria-valuenow]="characterOverview.craftingExperience"
+                  aria-valuemin="0"
+                  [attr.aria-valuemax]="
+                    characterOverview.craftingExperienceUntilNextLevel
+                  "
+                >
+                  <div
+                    class="overview-progress-value"
+                    [style.width.%]="
+                      experiencePercent(
+                        characterOverview.craftingExperience,
+                        characterOverview.craftingExperienceUntilNextLevel
+                      )
+                    "
+                  ></div>
+                </div>
+                <span class="tabular-nums text-secondary">
+                  {{ characterOverview.craftingExperience | number }} / {{
+                    characterOverview.craftingExperienceUntilNextLevel | number
+                  }}
+                </span>
+              </div>
+            </article>
+
+            <article
+              *ngFor="let profession of characterOverview.gatheringProfessions"
+              class="overview-skill-item"
+            >
+              <div class="overview-skill-name">
+                <span aria-hidden="true">◆</span>
+                <strong>{{ profession.professionType }}</strong>
+                <span class="ll-heading">{{ profession.level }}</span>
+              </div>
+              <div class="overview-skill-progress">
+                <div
+                  class="overview-progress-track"
+                  role="progressbar"
+                  [attr.aria-label]="profession.professionType + ' experience'"
+                  [attr.aria-valuenow]="profession.experience"
+                  aria-valuemin="0"
+                  [attr.aria-valuemax]="profession.experienceUntilNextLevel"
+                >
+                  <div
+                    class="overview-progress-value"
+                    [style.width.%]="
+                      experiencePercent(
+                        profession.experience,
+                        profession.experienceUntilNextLevel
+                      )
+                    "
+                  ></div>
+                </div>
+                <span class="tabular-nums text-secondary">
+                  <ng-container
+                    *ngIf="
+                      profession.experienceUntilNextLevel > 0;
+                      else maxGatheringLevel
+                    "
+                  >
+                    {{ profession.experience | number }} / {{
+                      profession.experienceUntilNextLevel | number
+                    }}
+                  </ng-container>
+                  <ng-template #maxGatheringLevel>Max</ng-template>
+                </span>
+              </div>
+            </article>
+          </div>
+        </section>
       </div>
     </section>
 
     <div class="overview-columns mt-4 grid gap-4">
-      <section class="attribute-panel ll-panel min-w-0 p-4">
-        <div
-          class="mb-4 flex items-center justify-between gap-3 border-b border-light_gray/70 pb-3"
-        >
+      <section class="attribute-panel ll-panel min-w-0 overflow-hidden">
+        <header class="overview-section-heading">
           <div>
             <h2 class="ll-heading">Combat Attributes</h2>
             <p class="ll-copy">
               Combat values after equipment and permanent bonuses.
             </p>
           </div>
-        </div>
+        </header>
 
-        <div class="attribute-section-grid grid gap-3">
+        <div class="attribute-section-grid grid">
           <article
             *ngFor="let section of attributeSections"
-            class="ll-card p-3"
+            class="attribute-section"
           >
             <h3 class="ll-eyebrow text-primary">
               {{ section.title }}
@@ -325,29 +375,28 @@
         </div>
       </section>
 
-      <aside class="grid content-start gap-4">
-        <section class="ll-panel p-4">
-          <div class="border-b border-light_gray/70 pb-3">
+      <aside class="overview-sidebar grid content-start gap-4">
+        <section class="ll-panel overflow-hidden">
+          <header class="overview-section-heading">
             <h2 class="ll-heading">Essence Loadout</h2>
             <p class="ll-copy">
               {{ filledLoadoutSlots }} / {{ totalLoadoutSlots }} slots attuned
             </p>
-            <p class="ll-helper mt-1">Hover or tap an Essence for details.</p>
-          </div>
+          </header>
 
           <div
             *ngIf="
               characterOverview.essenceLoadout?.slots?.length;
               else noLoadout
             "
-            class="mt-4 grid gap-2"
+            class="overview-loadout-list grid gap-2"
           >
             <app-essence-preview
               *ngFor="let slot of characterOverview.essenceLoadout?.slots"
               [definition]="slot.definition"
               originClass="relative block"
             >
-              <div class="ll-card px-3 py-2">
+              <div class="ll-card px-3 py-3">
                 <div class="flex items-center justify-between gap-2">
                   <span class="text-xs uppercase text-zinc-500">
                     Slot {{ slot.slotIndex + 1 }}
@@ -375,12 +424,13 @@
                 >
                   {{ slot.essenceName || "Empty" }}
                 </div>
+                <p class="ll-helper mt-2">Hover or tap for details.</p>
               </div>
             </app-essence-preview>
           </div>
 
           <ng-template #noLoadout>
-            <p class="ll-empty-state mt-3">No Essence loadout.</p>
+            <p class="ll-empty-state m-4">No Essence loadout.</p>
           </ng-template>
         </section>
       </aside>

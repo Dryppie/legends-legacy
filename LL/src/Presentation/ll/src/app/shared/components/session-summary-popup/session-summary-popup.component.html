@@ -66,6 +66,12 @@
             >
               <app-item [item]="loot.itemInstance"></app-item>
               <div class="text-secondary">x{{ loot.quantity }}</div>
+              <span
+                *ngIf="section.key === 'gathering' && loot.isRare"
+                class="ll-badge ll-badge-accent"
+              >
+                Rare find
+              </span>
             </div>
           </div>
         </section>

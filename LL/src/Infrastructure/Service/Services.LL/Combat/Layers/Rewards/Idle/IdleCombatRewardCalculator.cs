@@ -193,7 +193,6 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         if (gatheringLoot.Count > 0)
         {
             totalLoot.AddRange(gatheringLoot);
-            craftingRewards.AddRange(gatheringLoot);
         }
 
         var totalSoulstones = _soulstoneRewardCalculator.Calculate(

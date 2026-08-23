@@ -260,6 +260,38 @@ public sealed class CombatGatheringRewardProcessorTests
         Assert.Equal(50, professions.Profession.Experience);
     }
 
+    [Fact]
+    public async Task Returned_experience_includes_the_awarded_gathering_experience_bonus()
+    {
+        var professions = new RecordingProfessionService();
+        var processor = new CombatGatheringRewardProcessor(
+            new StaticRewardRoller(),
+            new StaticItemBaseRepository(),
+            new InventoryItemFactory(),
+            new FixedRandomSource(1d),
+            professions,
+            new NoopLevelingService(),
+            new EmptyBonusService());
+        var facts = new CombatGatheringRewardFacts(
+            Guid.NewGuid(),
+            Victories: 2,
+            new EquippedGatheringTool
+            {
+                Name = "Test Pickaxe",
+                GatheringType = GatheringType.Mining
+            },
+            [new CombatGatheringNode("ore", "Ore", GatheringType.Mining, null, 0f, "loot.test")]);
+        var bonusFactors = new Dictionary<BonusKind, double>
+        {
+            [BonusKind.GatheringExperienceGainBps] = 2500d
+        };
+
+        var rewards = await processor.ProcessAsync(facts, CancellationToken.None, bonusFactors);
+
+        Assert.Equal(125, rewards.Sum(reward => reward.ExperienceGained));
+        Assert.Equal(125, professions.Profession.Experience);
+    }
+
     private sealed class StaticRewardRoller : IRewardRoller
     {
         private static readonly RewardRollResult Result = new(

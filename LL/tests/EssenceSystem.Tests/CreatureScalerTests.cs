@@ -46,10 +46,14 @@ public sealed class CreatureScalerTests
         var unifiedCurve = provider.GetCatalog().Profiles.Single(profile =>
             profile.Id == "unified-global-v1");
 
-        Assert.Equal(2.0, campaignStart.HealthMultiplier, 5);
-        Assert.Equal(2.2, campaignStart.OffenseMultiplier, 5);
+        Assert.Equal(1.7, campaignStart.HealthMultiplier, 5);
+        Assert.Equal(1.87, campaignStart.OffenseMultiplier, 5);
+        Assert.Equal(1.105, campaignStart.DefenseMultiplier, 5);
+        Assert.Equal(1.105, campaignStart.ResistanceMultiplier, 5);
         Assert.Equal(2.29, bloodGrove.HealthMultiplier, 5);
         Assert.Equal(4.511, bloodGrove.OffenseMultiplier, 5);
+        Assert.Equal(1.491, bloodGrove.DefenseMultiplier, 5);
+        Assert.Equal(1.491, bloodGrove.ResistanceMultiplier, 5);
         Assert.Equal(2.31754451, regionOneMid.HealthMultiplier, 5);
         Assert.Equal(4.511, regionOneMid.OffenseMultiplier, 5);
         Assert.Equal(10, regionOneEnd.GlobalStep);

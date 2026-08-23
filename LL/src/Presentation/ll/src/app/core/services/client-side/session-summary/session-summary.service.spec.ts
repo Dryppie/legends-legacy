@@ -5,6 +5,8 @@ import {
   CombatSessionDto,
 } from '../../../../shared/models/Dtos/combatResultDto';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
+import { GatheringType } from '../../../../shared/models/enums/gatheringType';
+import { Rarity } from '../../../../shared/models/enums/rarity';
 
 describe('SessionSummaryService', () => {
   it('holds chunk summaries until catch-up completes and then shows their total', () => {
@@ -28,6 +30,12 @@ describe('SessionSummaryService', () => {
     expect(summary?.combatSummary.rewardBreakdown?.powerItems[0].quantity).toBe(
       5,
     );
+    expect(summary?.combatResult.gatheringRewards[0].experienceGained).toBe(
+      8_000,
+    );
+    expect(
+      summary?.combatResult.gatheringRewards[0].itemsGained[0].quantity,
+    ).toBe(5);
     expect(new Date(summary!.from).toISOString()).toBe(
       '2026-08-11T00:00:00.000Z',
     );
@@ -52,7 +60,9 @@ describe('SessionSummaryService', () => {
       false,
     );
 
-    expect(completedSession?.combatResult).toBe(completedBattle.combatResult);
+    expect(completedSession?.combatResult.startedAt).toBe(
+      completedBattle.combatResult.startedAt,
+    );
     expect(completedSession?.combatSummary.totalBattles).toBe(100);
   });
 });
@@ -70,7 +80,24 @@ function session(
     combatResult: {
       startedAt: new Date(to),
       outcome: BattleOutcome.Victory,
-    } as CombatResultDto,
+      gatheringRewards:
+        battles > 0
+          ? [
+              {
+                toolType: GatheringType.Mining,
+                nodeId: 'ore',
+                nodeName: 'Ore',
+                toolName: 'Pickaxe',
+                toolRarity: Rarity.Common,
+                success: itemQuantity > 0,
+                experienceGained: battles * 50,
+                itemsGained:
+                  itemQuantity > 0 ? [gatheringItem(itemQuantity)] : [],
+                appliedBonusEffects: [],
+              },
+            ]
+          : [],
+    } as unknown as CombatResultDto,
     combatSummary: {
       totalBattles: battles,
       wins: battles,
@@ -88,6 +115,21 @@ function session(
       },
     },
   };
+}
+
+function gatheringItem(quantity: number): InventoryItem {
+  const result = item(quantity);
+  result.id = 'gathering-item';
+  result.itemInstance = {
+    ...result.itemInstance,
+    id: 'gathering-item-instance',
+    itemBase: {
+      ...result.itemInstance.itemBase,
+      id: 'ore',
+      name: 'Ore',
+    },
+  };
+  return result;
 }
 
 function item(quantity: number): InventoryItem {

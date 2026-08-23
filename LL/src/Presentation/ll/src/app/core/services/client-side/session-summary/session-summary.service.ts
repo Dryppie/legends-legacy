@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import {
   CombatRewardBreakdown,
   CombatSessionDto,
+  GatheringRewardResult,
   SessionSummary,
 } from '../../../../shared/models/Dtos/combatResultDto';
 import { TemperingSessionDto } from '../../../../shared/models/Dtos/temperingSessionDto';
@@ -71,12 +72,55 @@ export class SessionSummaryService {
           ? first.from
           : second.from,
       to: firstTo >= secondTo ? first.to : second.to,
-      combatResult: latest.combatResult,
+      combatResult: {
+        ...latest.combatResult,
+        gatheringRewards: this.mergeGatheringRewards(
+          first.combatResult.gatheringRewards,
+          second.combatResult.gatheringRewards,
+        ),
+      },
       combatSummary: this.mergeCombatSummaries(
         first.combatSummary,
         second.combatSummary,
       ),
     };
+  }
+
+  private mergeGatheringRewards(
+    first: GatheringRewardResult[] = [],
+    second: GatheringRewardResult[] = [],
+  ): GatheringRewardResult[] {
+    const merged = new Map<string, GatheringRewardResult>();
+
+    for (const reward of [...first, ...second]) {
+      const key = `${reward.toolType}:${reward.nodeId}`;
+      const existing = merged.get(key);
+      if (!existing) {
+        merged.set(key, {
+          ...reward,
+          itemsGained: this.mergeItems([], reward.itemsGained),
+          appliedBonusEffects: [...(reward.appliedBonusEffects ?? [])],
+        });
+        continue;
+      }
+
+      merged.set(key, {
+        ...existing,
+        success: existing.success || reward.success,
+        experienceGained:
+          (existing.experienceGained ?? 0) + (reward.experienceGained ?? 0),
+        itemsGained: this.mergeItems(existing.itemsGained, reward.itemsGained),
+        appliedBonusEffects: Array.from(
+          new Set([
+            ...(existing.appliedBonusEffects ?? []),
+            ...(reward.appliedBonusEffects ?? []),
+          ]),
+        ),
+        message: reward.message || existing.message,
+      });
+    }
+
+    return [...merged.values()];
   }
 
   private sessionsAreContiguous(

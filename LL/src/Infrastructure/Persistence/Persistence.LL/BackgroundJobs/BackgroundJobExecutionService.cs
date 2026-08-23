@@ -1,5 +1,4 @@
 using Application.BackgroundJobs;
-using Application.Common.Interfaces;
 using Domain.Models.BackgroundJobs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -10,16 +9,16 @@ namespace Persistence.LL.BackgroundJobs;
 
 public sealed class BackgroundJobExecutionService : IBackgroundJobExecutionService
 {
-    private readonly IDbContext _dbContext;
+    private readonly IDbContextFactory<LLDbContext> _dbContextFactory;
     private readonly ILogger<BackgroundJobExecutionService> _logger;
     private readonly TimeSpan _runningExecutionTimeout;
 
     public BackgroundJobExecutionService(
-        IDbContext dbContext,
+        IDbContextFactory<LLDbContext> dbContextFactory,
         IOptions<BackgroundJobOptions> options,
         ILogger<BackgroundJobExecutionService> logger)
     {
-        _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
         _logger = logger;
         _runningExecutionTimeout = TimeSpan.FromMinutes(options.Value.RunningExecutionTimeoutMinutes);
     }
@@ -34,7 +33,12 @@ public sealed class BackgroundJobExecutionService : IBackgroundJobExecutionServi
         ArgumentException.ThrowIfNullOrWhiteSpace(businessKey);
         ArgumentNullException.ThrowIfNull(execute);
 
-        var execution = await TryStartExecutionAsync(jobName, businessKey, cancellationToken);
+        await using var executionContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        var execution = await TryStartExecutionAsync(
+            executionContext,
+            jobName,
+            businessKey,
+            cancellationToken);
         if (execution is null)
         {
             return false;
@@ -51,27 +55,6 @@ public sealed class BackgroundJobExecutionService : IBackgroundJobExecutionServi
         try
         {
             await execute(cancellationToken);
-
-            var completedAt = DateTimeOffset.UtcNow;
-            execution.Status = BackgroundJobExecutionStatus.Completed;
-            execution.CompletedAt = completedAt;
-            execution.FailedAt = null;
-            execution.ErrorMessage = null;
-            execution.ErrorDetails = null;
-            execution.ConcurrencyStamp = Guid.NewGuid();
-            execution.UpdatedAt = completedAt;
-
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            _logger.LogInformation(
-                "Completed background job {JobName} for business key {BusinessKey}. ExecutionId: {ExecutionId}, Attempt: {Attempt}, ElapsedMs: {ElapsedMs}",
-                jobName,
-                businessKey,
-                execution.Id,
-                execution.Attempt,
-                Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds);
-
-            return true;
         }
         catch (Exception ex)
         {
@@ -83,7 +66,20 @@ public sealed class BackgroundJobExecutionService : IBackgroundJobExecutionServi
             execution.ConcurrencyStamp = Guid.NewGuid();
             execution.UpdatedAt = failedAt;
 
-            await _dbContext.SaveChangesAsync(CancellationToken.None);
+            try
+            {
+                await executionContext.SaveChangesAsync(CancellationToken.None);
+            }
+            catch (Exception persistenceException)
+            {
+                _logger.LogError(
+                    persistenceException,
+                    "Could not mark failed background job {JobName} for business key {BusinessKey}. ExecutionId: {ExecutionId}, Attempt: {Attempt}",
+                    jobName,
+                    businessKey,
+                    execution.Id,
+                    execution.Attempt);
+            }
 
             _logger.LogError(
                 ex,
@@ -96,22 +92,44 @@ public sealed class BackgroundJobExecutionService : IBackgroundJobExecutionServi
 
             throw;
         }
+
+        var completedAt = DateTimeOffset.UtcNow;
+        execution.Status = BackgroundJobExecutionStatus.Completed;
+        execution.CompletedAt = completedAt;
+        execution.FailedAt = null;
+        execution.ErrorMessage = null;
+        execution.ErrorDetails = null;
+        execution.ConcurrencyStamp = Guid.NewGuid();
+        execution.UpdatedAt = completedAt;
+
+        await executionContext.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation(
+            "Completed background job {JobName} for business key {BusinessKey}. ExecutionId: {ExecutionId}, Attempt: {Attempt}, ElapsedMs: {ElapsedMs}",
+            jobName,
+            businessKey,
+            execution.Id,
+            execution.Attempt,
+            Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds);
+
+        return true;
     }
 
     private async Task<BackgroundJobExecution?> TryStartExecutionAsync(
+        LLDbContext dbContext,
         string jobName,
         string businessKey,
         CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
-        var execution = await _dbContext.BackgroundJobExecutions
+        var execution = await dbContext.BackgroundJobExecutions
             .SingleOrDefaultAsync(
                 x => x.JobName == jobName && x.BusinessKey == businessKey,
                 cancellationToken);
 
         if (execution is not null)
         {
-            return await TryReuseExecutionAsync(execution, now, cancellationToken);
+            return await TryReuseExecutionAsync(dbContext, execution, now, cancellationToken);
         }
 
         execution = new BackgroundJobExecution
@@ -127,23 +145,23 @@ public sealed class BackgroundJobExecutionService : IBackgroundJobExecutionServi
             UpdatedAt = now
         };
 
-        _dbContext.BackgroundJobExecutions.Add(execution);
+        dbContext.BackgroundJobExecutions.Add(execution);
 
         try
         {
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
             return execution;
         }
         catch (DbUpdateException)
         {
-            _dbContext.GetEntry(execution).State = EntityState.Detached;
+            dbContext.GetEntry(execution).State = EntityState.Detached;
 
             _logger.LogInformation(
                 "Background job {JobName} for business key {BusinessKey} lost the insert race; loading existing execution row.",
                 jobName,
                 businessKey);
 
-            var existing = await _dbContext.BackgroundJobExecutions
+            var existing = await dbContext.BackgroundJobExecutions
                 .SingleOrDefaultAsync(
                     x => x.JobName == jobName && x.BusinessKey == businessKey,
                     cancellationToken);
@@ -153,11 +171,12 @@ public sealed class BackgroundJobExecutionService : IBackgroundJobExecutionServi
                 throw;
             }
 
-            return await TryReuseExecutionAsync(existing, now, cancellationToken);
+            return await TryReuseExecutionAsync(dbContext, existing, now, cancellationToken);
         }
     }
 
     private async Task<BackgroundJobExecution?> TryReuseExecutionAsync(
+        LLDbContext dbContext,
         BackgroundJobExecution execution,
         DateTimeOffset now,
         CancellationToken cancellationToken)
@@ -202,11 +221,11 @@ public sealed class BackgroundJobExecutionService : IBackgroundJobExecutionServi
 
         try
         {
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateConcurrencyException)
         {
-            _dbContext.GetEntry(execution).State = EntityState.Detached;
+            dbContext.GetEntry(execution).State = EntityState.Detached;
 
             _logger.LogWarning(
                 "Skipping background job {JobName} for business key {BusinessKey} because another worker claimed it first. ExecutionId: {ExecutionId}, PreviousAttempt: {PreviousAttempt}",

@@ -25,6 +25,7 @@ using Domain.Models.Regions.Areas;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Persistence.LL;
@@ -1848,7 +1849,7 @@ public sealed class TournamentGroundsServiceTests
         TournamentGroundsOptions options)
     {
         var executionService = new BackgroundJobExecutionService(
-            db,
+            new TestContextFactory((DbContextOptions<LLDbContext>)db.GetService<IDbContextOptions>()),
             Options.Create(new BackgroundJobOptions
             {
                 MaxConcurrency = 5,
@@ -1861,6 +1862,12 @@ public sealed class TournamentGroundsServiceTests
             executionService,
             Options.Create(options),
             NullLogger<TournamentGroundsProgressionJob>.Instance);
+    }
+
+    private sealed class TestContextFactory(DbContextOptions<LLDbContext> options)
+        : IDbContextFactory<LLDbContext>
+    {
+        public LLDbContext CreateDbContext() => new(options);
     }
 
     private static TournamentInstance SeedTournament(LLDbContext db, TournamentStatus status)

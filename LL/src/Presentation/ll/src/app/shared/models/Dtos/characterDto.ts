@@ -1,6 +1,7 @@
 import { AttributeDto } from './attributesDto';
 import { EssenceLoadoutDto } from '../essence-system';
 import { OverallPowerRating } from './powerRating';
+import { ProfessionType } from './characterProfession';
 
 export interface CharacterDto {
   id: string;
@@ -26,6 +27,7 @@ export interface CharacterOverviewDto {
   craftingLevel: number;
   craftingExperience: number;
   craftingExperienceUntilNextLevel: number;
+  gatheringProfessions: GatheringProfessionOverviewDto[];
   power?: OverallPowerRating | null;
   baseAttributes: AttributeDto[];
   baseCombatAttributes: AttributeDto[];
@@ -35,6 +37,13 @@ export interface CharacterOverviewDto {
   guild?: CharacterGuildDto | null;
   isOnline: boolean;
   lastSeenAt?: string | null;
+}
+
+export interface GatheringProfessionOverviewDto {
+  professionType: ProfessionType;
+  level: number;
+  experience: number;
+  experienceUntilNextLevel: number;
 }
 
 export interface CharacterGuildDto {

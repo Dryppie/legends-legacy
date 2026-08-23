@@ -1,6 +1,10 @@
 import { Injectable, Signal, signal } from '@angular/core';
 import { ApiService } from '../../api/api.service';
-import { CraftingProfession, Profession, Recipe } from '../../../../shared/models/profession';
+import {
+  CraftingProfession,
+  Profession,
+  Recipe,
+} from '../../../../shared/models/profession';
 import {
   CharacterProfession,
   ProfessionType,
@@ -26,23 +30,29 @@ export class ProfessionsService {
 
   addExperience(professionType: ProfessionType, experience: number): void {
     const updated = [...this._professions()];
-    const profession = updated.find((p) => p.professionType === professionType);
-    if (!profession) return;
-
-    profession.experience += experience;
-    let leveledUp = false;
-
-    while (profession.experience >= profession.experienceUntilNextLevel) {
-      profession.experience -= profession.experienceUntilNextLevel;
-      profession.level++;
-      leveledUp = true;
-    }
-
-    this._professions.set(updated);
-
-    if (leveledUp) {
+    const professionIndex = updated.findIndex(
+      (profession) => profession.professionType === professionType,
+    );
+    if (experience <= 0) return;
+    if (professionIndex < 0) {
       this.refresh();
+      return;
     }
+
+    const profession = updated[professionIndex];
+    if (
+      profession.experienceUntilNextLevel <= 0 ||
+      profession.experience + experience >= profession.experienceUntilNextLevel
+    ) {
+      this.refresh();
+      return;
+    }
+
+    updated[professionIndex] = {
+      ...profession,
+      experience: profession.experience + experience,
+    };
+    this._professions.set(updated);
   }
 
   getProfession(

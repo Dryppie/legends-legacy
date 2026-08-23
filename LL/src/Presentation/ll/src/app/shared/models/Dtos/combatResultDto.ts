@@ -23,6 +23,7 @@ export interface GatheringRewardResult {
   toolName: string;
   toolRarity: Rarity;
   success: boolean;
+  experienceGained: number;
   itemsGained: InventoryItem[];
   appliedBonusEffects: string[];
   message?: string;

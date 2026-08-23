@@ -503,6 +503,7 @@
                   *ngFor="let slotType of equipSlotOptions(item)"
                   type="button"
                   class="ll-button ll-button-primary"
+                  data-tour="tutorial-equipment-equip"
                   [class.col-span-2]="equipSlotOptions(item).length === 1"
                   [disabled]="isEquipPending || !canEquipItem(item)"
                   (click)="equipItem(item, slotType)"

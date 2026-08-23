@@ -8,6 +8,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Guilds;
 using Domain.Models.Professions;
+using Domain.Models.Professions.Gathering;
 
 namespace EssenceSystem.Tests;
 
@@ -62,6 +63,55 @@ public sealed class CharacterOverviewConverterTests
         Assert.Equal(
             EntityLevelConstants.XP_REQUIRED(1),
             result.CraftingExperienceUntilNextLevel);
+    }
+
+    [Fact]
+    public void Convert_ProjectsAllGatheringProfessionsWithTheirCanonicalCurve()
+    {
+        var character = new Character
+        {
+            Professions =
+            [
+                new Profession
+                {
+                    ProfessionType = ProfessionType.Mining,
+                    Level = 12,
+                    Experience = 345
+                },
+                new Profession
+                {
+                    ProfessionType = ProfessionType.Skinning,
+                    Level = 100,
+                    Experience = 0
+                }
+            ]
+        };
+
+        var result = new CharacterOverviewConverter(new EmptyEssenceDefinitions())
+            .Convert(character, null!, null!);
+
+        Assert.Collection(
+            result.GatheringProfessions,
+            mining =>
+            {
+                Assert.Equal(ProfessionType.Mining, mining.ProfessionType);
+                Assert.Equal(12, mining.Level);
+                Assert.Equal(345, mining.Experience);
+                Assert.Equal(GatheringProfessionProgression.GetRequiredExperience(12), mining.ExperienceUntilNextLevel);
+            },
+            woodcutting =>
+            {
+                Assert.Equal(ProfessionType.Woodcutting, woodcutting.ProfessionType);
+                Assert.Equal(1, woodcutting.Level);
+                Assert.Equal(0, woodcutting.Experience);
+                Assert.Equal(GatheringProfessionProgression.GetRequiredExperience(1), woodcutting.ExperienceUntilNextLevel);
+            },
+            skinning =>
+            {
+                Assert.Equal(ProfessionType.Skinning, skinning.ProfessionType);
+                Assert.Equal(100, skinning.Level);
+                Assert.Equal(0, skinning.ExperienceUntilNextLevel);
+            });
     }
 
     [Fact]

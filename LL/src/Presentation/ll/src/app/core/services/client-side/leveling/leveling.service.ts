@@ -45,23 +45,6 @@ export class LevelingService {
    *  PROFESSION XP / LEVEL
    * ────────────────────────────────────────────────────────*/
   gainProfessionExperience(type: ProfessionType, xp: number): void {
-    const prof = this.professionService.getProfession(type);
-    if (!prof) return;
-
-    prof.experience += xp;
-
-    let leveledUp = false;
-    while (prof.experience >= prof.experienceUntilNextLevel) {
-      prof.experience -= prof.experienceUntilNextLevel;
-      prof.level += 1;
-      leveledUp = true;
-    }
-
-    this.professionService.emitUpdate(); // toast / signal to UI
-
-    if (leveledUp) {
-      /* optional round-trip to backend to make sure numbers are canonical */
-      this.professionService.refresh();
-    }
+    this.professionService.addExperience(type, xp);
   }
 }

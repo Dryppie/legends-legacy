@@ -85,6 +85,9 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         int? recommendedCombatRating)
     {
         progressionStep = Math.Max(0, progressionStep);
+        var openingAreaMultiplier = progressionStep == 0
+            ? profile.OpeningAreaMultiplier
+            : 1d;
         return new CreatureScalingProfile(
             profile.Id,
             regionKey,
@@ -92,10 +95,10 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
             regionStep,
             progressionStep,
             recommendedCombatRating,
-            Evaluate(profile.HealthCurve, progressionStep, globalStep),
-            Evaluate(profile.OffenseCurve, progressionStep, globalStep),
-            Evaluate(profile.DefenseCurve, progressionStep, globalStep),
-            Evaluate(profile.ResistanceCurve, progressionStep, globalStep),
+            Evaluate(profile.HealthCurve, progressionStep, globalStep) * openingAreaMultiplier,
+            Evaluate(profile.OffenseCurve, progressionStep, globalStep) * openingAreaMultiplier,
+            Evaluate(profile.DefenseCurve, progressionStep, globalStep) * openingAreaMultiplier,
+            Evaluate(profile.ResistanceCurve, progressionStep, globalStep) * openingAreaMultiplier,
             profile.AttackSpeedGrowthPerStep * progressionStep,
             profile.PenetrationGrowthPerStep * progressionStep,
             profile.SoftDefenseGrowthPerStep * progressionStep,
@@ -231,7 +234,8 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         profile.CritChanceCap,
         profile.CritDamageCap,
         profile.MaximumStepIncrease,
-        profile.MaximumFirstStepIncrease);
+        profile.MaximumFirstStepIncrease,
+        profile.OpeningAreaMultiplier);
 
     private static RegionCombatGrowthCurve MapCurve(GrowthCurveDocument curve) => new(
         curve.Model,
@@ -279,6 +283,8 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
                 profile.TargetWinRateBasisPoints is <= 0 or > 10_000 ||
                 profile.MaximumStepIncrease < 0 ||
                 profile.MaximumFirstStepIncrease is < 0 ||
+                !double.IsFinite(profile.OpeningAreaMultiplier) ||
+                profile.OpeningAreaMultiplier <= 0 ||
                 profile.CritChanceCap is < 0 or > 100 ||
                 profile.CritDamageCap is < 0 or > 500)
             {
@@ -486,6 +492,7 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         public float CritDamageCap { get; set; }
         public double MaximumStepIncrease { get; set; }
         public double? MaximumFirstStepIncrease { get; set; }
+        public double OpeningAreaMultiplier { get; set; } = 1d;
     }
 
     private sealed class GrowthCurveDocument

@@ -119,12 +119,21 @@ export class CharacterOverviewComponent implements OnDestroy {
     const craftingProfession = this.professionsService.getProfession(
       ProfessionType.Crafting,
     );
+    const gatheringProfessions = (overview.gatheringProfessions ?? []).map(
+      (profession) => {
+        const liveProfession = this.professionsService.getProfession(
+          profession.professionType,
+        );
+        return liveProfession ?? profession;
+      },
+    );
 
     return {
       ...overview,
       level: currentCharacter.level,
       experience: currentCharacter.experience,
       experienceUntilNextLevel: currentCharacter.experienceUntilNextLevel,
+      gatheringProfessions,
       ...(craftingProfession
         ? {
             craftingLevel: craftingProfession.level,

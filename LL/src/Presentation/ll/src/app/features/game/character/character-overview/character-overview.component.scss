@@ -7,15 +7,135 @@
   min-width: 0;
 }
 
+.overview-header-actions {
+  min-width: 0;
+  width: min(34rem, 42vw);
+}
+
+.overview-search-group {
+  width: 100%;
+}
+
+.overview-profile-primary,
+.overview-profile-progress,
+.overview-columns,
+.overview-skills-grid,
+.attribute-section-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.overview-profile-identity,
+.overview-combat-rating,
+.overview-character-level,
+.overview-skills {
+  min-width: 0;
+  padding: var(--ll-space-4);
+}
+
+.overview-combat-rating {
+  border-top: 1px solid var(--ll-color-border);
+  background: var(--ll-color-surface-soft);
+}
+
+.overview-meta-divider {
+  width: 1px;
+  height: 1rem;
+  margin: 0 var(--ll-space-2);
+  background: var(--ll-color-border-strong);
+}
+
+.overview-profile-progress {
+  border-top: 1px solid var(--ll-color-border);
+}
+
+.overview-skills {
+  border-top: 1px solid var(--ll-color-border);
+}
+
+.overview-skills-heading {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--ll-space-2) var(--ll-space-3);
+  margin-bottom: var(--ll-space-3);
+}
+
+.overview-skills-grid {
+  gap: var(--ll-space-2) var(--ll-space-5);
+}
+
+.overview-skill-item {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(7rem, auto) minmax(5rem, 1fr);
+  align-items: center;
+  gap: var(--ll-space-3);
+  padding: var(--ll-space-2) 0;
+}
+
+.overview-skill-name {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--ll-space-2);
+  font-size: var(--ll-text-sm);
+  text-transform: uppercase;
+}
+
+.overview-skill-name > span:first-child {
+  color: var(--ll-color-text-muted);
+  font-size: 0.55rem;
+}
+
+.overview-skill-name strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.overview-skill-progress {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(2rem, 1fr) max-content;
+  align-items: center;
+  gap: var(--ll-space-3);
+  font-size: var(--ll-text-xs);
+}
+
+.overview-progress-track {
+  height: 0.35rem;
+  overflow: hidden;
+  border: 1px solid var(--ll-color-border);
+  border-radius: 999px;
+  background: var(--ll-color-surface-strong);
+}
+
+.overview-progress-value {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ll-color-primary);
+  transition: width 180ms ease;
+}
+
 .attribute-panel {
   container-name: attribute-panel;
   container-type: inline-size;
 }
 
-.profile-summary-grid,
-.overview-columns,
-.attribute-section-grid {
-  grid-template-columns: minmax(0, 1fr);
+.overview-section-heading {
+  padding: var(--ll-space-4);
+  border-bottom: 1px solid var(--ll-color-border);
+}
+
+.attribute-section {
+  min-width: 0;
+  padding: var(--ll-space-4);
+}
+
+.attribute-section + .attribute-section {
+  border-top: 1px solid var(--ll-color-border);
 }
 
 .attribute-row {
@@ -27,9 +147,31 @@
   overflow-wrap: anywhere;
 }
 
+.overview-loadout-list {
+  padding: var(--ll-space-4);
+}
+
 @container character-overview (min-width: 48rem) {
-  .profile-summary-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .overview-profile-primary {
+    grid-template-columns: minmax(0, 1fr) 14rem;
+  }
+
+  .overview-combat-rating {
+    border-top: 0;
+    border-left: 1px solid var(--ll-color-border);
+  }
+
+  .overview-profile-progress {
+    grid-template-columns: minmax(18rem, 0.72fr) minmax(0, 1.28fr);
+  }
+
+  .overview-skills {
+    border-top: 0;
+    border-left: 1px solid var(--ll-color-border);
+  }
+
+  .overview-skills-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -39,9 +181,23 @@
   }
 }
 
+@container character-overview (min-width: 76rem) {
+  .overview-skills-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 @container attribute-panel (min-width: 36rem) {
   .attribute-section-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .attribute-section:nth-child(2) {
+    border-top: 0;
+  }
+
+  .attribute-section:nth-child(even) {
+    border-left: 1px solid var(--ll-color-border);
   }
 }
 
@@ -54,5 +210,46 @@
   .attribute-value {
     max-width: none;
     text-align: left;
+  }
+}
+
+@container character-overview (max-width: 67.999rem) {
+  :host ::ng-deep app-default-header > div {
+    flex-wrap: wrap;
+  }
+
+  :host ::ng-deep app-default-header > div > div:last-child {
+    width: 100%;
+  }
+
+  .overview-header-actions {
+    flex: 1;
+    width: auto;
+  }
+}
+
+@container character-overview (max-width: 39.999rem) {
+  .overview-search-group {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .overview-profile-identity,
+  .overview-combat-rating,
+  .overview-character-level,
+  .overview-skills,
+  .overview-section-heading,
+  .attribute-section,
+  .overview-loadout-list {
+    padding: var(--ll-space-3);
+  }
+
+  .overview-meta-divider {
+    display: none;
+  }
+
+  .overview-skill-item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--ll-space-2);
   }
 }

@@ -4,12 +4,14 @@ import { SessionSummaryService } from '../../../core/services/client-side/sessio
 import { CombatSessionDto } from '../../models/Dtos/combatResultDto';
 import { InventoryItem } from '../../models/inventoryItem';
 import { ItemInstance } from '../../models/item';
+import { Rarity } from '../../models/enums/rarity';
 import { ItemComponent } from '../item/item.component';
 
 interface LootSummaryItem {
   key: string;
   itemInstance: ItemInstance;
   quantity: number;
+  isRare: boolean;
 }
 
 interface RewardMetric {
@@ -56,6 +58,10 @@ export class SessionSummaryPopupComponent {
   rewardSections(combatSession: CombatSessionDto): RewardSection[] {
     const summary = combatSession.combatSummary;
     const rewards = summary.rewardBreakdown;
+    const gatheringRewards = combatSession.combatResult.gatheringRewards ?? [];
+    const gatheringItems = gatheringRewards.flatMap(
+      (reward) => reward.itemsGained ?? [],
+    );
 
     const sections: RewardSection[] = [
       {
@@ -66,6 +72,14 @@ export class SessionSummaryPopupComponent {
           { label: 'Character XP', value: summary.totalExperience },
         ]),
         items: this.compactLoot(rewards?.powerItems ?? []),
+      },
+      {
+        key: 'gathering',
+        title: 'Gathering',
+        description:
+          'Profession progress, gathered materials, and rare Catalysts',
+        metrics: this.gatheringMetrics(gatheringRewards),
+        items: this.compactLoot(gatheringItems),
       },
       {
         key: 'crafting',
@@ -105,6 +119,25 @@ export class SessionSummaryPopupComponent {
     );
   }
 
+  private gatheringMetrics(
+    rewards: CombatSessionDto['combatResult']['gatheringRewards'],
+  ): RewardMetric[] {
+    const experienceByProfession = new Map<string, number>();
+
+    for (const reward of rewards ?? []) {
+      experienceByProfession.set(
+        reward.toolType,
+        (experienceByProfession.get(reward.toolType) ?? 0) +
+          (reward.experienceGained ?? 0),
+      );
+    }
+
+    return Array.from(experienceByProfession, ([profession, value]) => ({
+      label: `${profession} XP`,
+      value,
+    })).filter((metric) => metric.value > 0);
+  }
+
   hasRewards(combatSession: CombatSessionDto): boolean {
     return this.rewardSections(combatSession).length > 0;
   }
@@ -134,6 +167,9 @@ export class SessionSummaryPopupComponent {
         key,
         itemInstance: item.itemInstance,
         quantity: item.quantity,
+        isRare: ![Rarity.Common, Rarity.Uncommon].includes(
+          item.itemInstance.itemBase.rarity,
+        ),
       });
     }
 

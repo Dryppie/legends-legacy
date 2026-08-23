@@ -163,9 +163,29 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         await MaterializePendingRewardsAsync(pendingRewards, cancellationToken);
 
         ApplyBatchYieldBonus(results, gatheringYieldBps);
-        await AwardExperienceAsync(profession, results.Sum(x => x.ExperienceGained).ApplyPositiveBps(gatheringExperienceGainBps), cancellationToken);
+        var baseExperience = results.Sum(x => x.ExperienceGained);
+        var awardedExperience = baseExperience.ApplyPositiveBps(gatheringExperienceGainBps);
+        ApplyExperienceBonus(results, awardedExperience - baseExperience);
+        await AwardExperienceAsync(profession, awardedExperience, cancellationToken);
 
         return results;
+    }
+
+    private static void ApplyExperienceBonus(
+        IReadOnlyList<GatheringRewardResult> results,
+        int bonusExperience)
+    {
+        if (bonusExperience <= 0)
+        {
+            return;
+        }
+
+        var firstEligibleResult = results.FirstOrDefault(result => result.ExperienceGained > 0);
+        if (firstEligibleResult is not null)
+        {
+            firstEligibleResult.ExperienceGained = checked(
+                firstEligibleResult.ExperienceGained + bonusExperience);
+        }
     }
 
     private IReadOnlyList<IReadOnlyList<ItemRewardResult>> RollGatheringRewards(

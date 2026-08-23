@@ -41,10 +41,13 @@ describe('CharacterOverviewComponent', () => {
     ).toBe(10.75);
   });
 
-  it('updates current character and crafting experience from live state', () => {
+  it('updates current character and profession experience from live state', () => {
     const currentCharacter = signal<CharacterDto>(createCharacter());
     const overview = signal<CharacterOverviewDto>(createOverview());
     const craftingProfession = signal<CharacterProfession>(createCrafting());
+    const miningProfession = signal<CharacterProfession>(
+      createGatheringProfession(ProfessionType.Mining, 4, 120, 7_584),
+    );
     const component = new CharacterOverviewComponent(
       {
         currentCharacter: currentCharacter.asReadonly(),
@@ -57,8 +60,11 @@ describe('CharacterOverviewComponent', () => {
         refreshIfDirty: jasmine.createSpy('refreshIfDirty'),
       } as unknown as CharacterStateService,
       {
-        getProfession: (type: ProfessionType) =>
-          type === ProfessionType.Crafting ? craftingProfession() : undefined,
+        getProfession: (type: ProfessionType) => {
+          if (type === ProfessionType.Crafting) return craftingProfession();
+          if (type === ProfessionType.Mining) return miningProfession();
+          return undefined;
+        },
       } as unknown as ProfessionsService,
       {
         snapshot: { queryParamMap: convertToParamMap({}) },
@@ -69,6 +75,7 @@ describe('CharacterOverviewComponent', () => {
 
     expect(component.character()?.experience).toBe(10);
     expect(component.character()?.craftingExperience).toBe(20);
+    expect(component.character()?.gatheringProfessions[0].experience).toBe(120);
     expect(
       component.attributeSections.find((section) => section.title === 'Utility')
         ?.attributes,
@@ -82,9 +89,14 @@ describe('CharacterOverviewComponent', () => {
       ...profession,
       experience: 45,
     }));
+    miningProfession.update((profession) => ({
+      ...profession,
+      experience: 170,
+    }));
 
     expect(component.character()?.experience).toBe(35);
     expect(component.character()?.craftingExperience).toBe(45);
+    expect(component.character()?.gatheringProfessions[0].experience).toBe(170);
     component.ngOnDestroy();
   });
 
@@ -176,6 +188,11 @@ function createOverview(): CharacterOverviewDto {
     craftingLevel: 2,
     craftingExperience: 15,
     craftingExperienceUntilNextLevel: 75,
+    gatheringProfessions: [
+      createGatheringProfession(ProfessionType.Mining, 4, 100, 7_584),
+      createGatheringProfession(ProfessionType.Woodcutting, 2, 25, 1_896),
+      createGatheringProfession(ProfessionType.Skinning, 1, 0, 474),
+    ],
     baseAttributes: [],
     baseCombatAttributes: [],
     isOnline: true,
@@ -188,6 +205,20 @@ function createCrafting(): CharacterProfession {
     level: 2,
     experience: 20,
     experienceUntilNextLevel: 75,
+  };
+}
+
+function createGatheringProfession(
+  professionType: ProfessionType,
+  level: number,
+  experience: number,
+  experienceUntilNextLevel: number,
+): CharacterProfession {
+  return {
+    professionType,
+    level,
+    experience,
+    experienceUntilNextLevel,
   };
 }
 

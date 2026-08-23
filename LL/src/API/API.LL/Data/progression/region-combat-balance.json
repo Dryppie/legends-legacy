@@ -1,5 +1,5 @@
 {
-  "version": 9,
+  "version": 10,
   "fallbackProfileId": "content-foundation-v1",
   "foundation": {
     "areasPerRegion": 10,
@@ -56,7 +56,8 @@
       "critChanceCap": 45.0,
       "critDamageCap": 200.0,
       "maximumStepIncrease": 0.29,
-      "maximumFirstStepIncrease": 1.1
+      "maximumFirstStepIncrease": 1.45,
+      "openingAreaMultiplier": 0.85
     },
     {
       "id": "unified-global-v1",

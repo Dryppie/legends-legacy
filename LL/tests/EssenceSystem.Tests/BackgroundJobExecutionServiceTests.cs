@@ -1,6 +1,7 @@
 using Application.BackgroundJobs;
 using Domain.Models.BackgroundJobs;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Persistence.LL.BackgroundJobs;
@@ -141,6 +142,7 @@ public sealed class BackgroundJobExecutionServiceTests
             },
             CancellationToken.None);
 
+        context.ChangeTracker.Clear();
         var execution = await context.BackgroundJobExecutions.SingleAsync();
         Assert.True(result);
         Assert.True(callbackRan);
@@ -231,6 +233,7 @@ public sealed class BackgroundJobExecutionServiceTests
             },
             CancellationToken.None);
 
+        context.ChangeTracker.Clear();
         var execution = await context.BackgroundJobExecutions.SingleAsync();
         Assert.True(result);
         Assert.True(callbackRan);
@@ -240,6 +243,64 @@ public sealed class BackgroundJobExecutionServiceTests
         Assert.NotEqual(originalConcurrencyStamp, execution.ConcurrencyStamp);
         Assert.NotNull(execution.CompletedAt);
         Assert.Null(execution.FailedAt);
+    }
+
+    [Fact]
+    public async Task RunOnceAsync_DoesNotSavePendingCallbackChangesWithExecutionMetadata()
+    {
+        await using var context = CreateContext();
+        var service = CreateService(context);
+        var pendingExecution = new BackgroundJobExecution
+        {
+            Id = Guid.NewGuid(),
+            JobName = "system.pending",
+            BusinessKey = "pending:1",
+            Status = BackgroundJobExecutionStatus.Running,
+            StartedAt = DateTimeOffset.UtcNow,
+            Attempt = 1,
+            ConcurrencyStamp = Guid.NewGuid(),
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+
+        await service.RunOnceAsync(
+            "system.test",
+            "test:isolated-context",
+            _ =>
+            {
+                context.BackgroundJobExecutions.Add(pendingExecution);
+                return Task.CompletedTask;
+            },
+            CancellationToken.None);
+
+        await using var verificationContext = CreateSiblingContext(context);
+        var execution = await verificationContext.BackgroundJobExecutions.SingleAsync();
+        Assert.Equal("test:isolated-context", execution.BusinessKey);
+        Assert.Equal(BackgroundJobExecutionStatus.Completed, execution.Status);
+        Assert.Equal(EntityState.Added, context.Entry(pendingExecution).State);
+    }
+
+    [Fact]
+    public async Task RunOnceAsync_WhenFailureBookkeepingLosesConcurrencyRace_RethrowsCallbackException()
+    {
+        await using var context = CreateContext();
+        var service = CreateService(context);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.RunOnceAsync(
+            "system.test",
+            "test:preserve-original-error",
+            async _ =>
+            {
+                await using var competingContext = CreateSiblingContext(context);
+                var competingExecution = await competingContext.BackgroundJobExecutions.SingleAsync();
+                competingExecution.ConcurrencyStamp = Guid.NewGuid();
+                await competingContext.SaveChangesAsync();
+
+                throw new InvalidOperationException("original callback failure");
+            },
+            CancellationToken.None));
+
+        Assert.Equal("original callback failure", exception.Message);
     }
 
     private static LLDbContext CreateContext()
@@ -254,12 +315,23 @@ public sealed class BackgroundJobExecutionServiceTests
     private static BackgroundJobExecutionService CreateService(LLDbContext context)
     {
         return new BackgroundJobExecutionService(
-            context,
+            new TestContextFactory(GetOptions(context)),
             Options.Create(new BackgroundJobOptions
             {
                 MaxConcurrency = 5,
                 RunningExecutionTimeoutMinutes = 30
             }),
             NullLogger<BackgroundJobExecutionService>.Instance);
+    }
+
+    private static LLDbContext CreateSiblingContext(LLDbContext context) => new(GetOptions(context));
+
+    private static DbContextOptions<LLDbContext> GetOptions(LLDbContext context) =>
+        (DbContextOptions<LLDbContext>)context.GetService<IDbContextOptions>();
+
+    private sealed class TestContextFactory(DbContextOptions<LLDbContext> options)
+        : IDbContextFactory<LLDbContext>
+    {
+        public LLDbContext CreateDbContext() => new(options);
     }
 }
