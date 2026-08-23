@@ -5,7 +5,7 @@ namespace Domain.Models.RegionBosses;
 public static class RegionBossRules
 {
     public const int Version = 1;
-    public const int MatchmakingAlgorithmVersion = 1;
+    public const int MatchmakingAlgorithmVersion = 2;
     public const int PartySizeScalingVersion = 1;
     public const int MaximumPartySize = 5;
     public const int RecommendedMinimumPartySize = 3;
@@ -35,6 +35,7 @@ public sealed class RegionBossDefinition
     public RegionBossRecoveryDefinition Recovery { get; init; } = new();
     public BossStaggerDefinition? Stagger { get; init; }
     public RegionBossScheduleDefinition Schedule { get; init; } = new();
+    public bool CumulativeRewards { get; init; } = true;
     public IReadOnlyList<RegionBossRewardBracketDefinition> RewardBrackets { get; init; } = [];
 }
 

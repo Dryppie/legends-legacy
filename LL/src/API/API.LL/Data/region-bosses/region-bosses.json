@@ -43,6 +43,7 @@
         "maximumIntervalHours": 8,
         "signupDurationMinutes": 10
       },
+      "cumulativeRewards": true,
       "rewardBrackets": [
         { "key": "level-1", "minimumLevelDefeated": 1, "cinders": 500, "soulstones": 100 },
         { "key": "level-3", "minimumLevelDefeated": 3, "cinders": 1000, "soulstones": 200 },

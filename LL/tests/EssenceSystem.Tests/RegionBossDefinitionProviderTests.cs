@@ -38,6 +38,7 @@ public sealed class RegionBossDefinitionProviderTests
         Assert.Equal(50, boss.Recovery.DownedReviveHealthPercent);
         Assert.Equal(4, boss.Schedule.MinimumIntervalHours);
         Assert.Equal(8, boss.Schedule.MaximumIntervalHours);
+        Assert.True(boss.CumulativeRewards);
     }
 
     [Fact]

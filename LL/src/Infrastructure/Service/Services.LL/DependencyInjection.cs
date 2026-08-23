@@ -567,7 +567,9 @@ public static class DependencyInjection
                     isDevelopment
                     && config.GetValue<bool>("FeatureManagement:RegionBossDevelopmentTools"))
             .Validate(
-                options => options.DevelopmentProgressionIntervalSeconds is >= 1 and <= 60,
+                options => options.DevelopmentProgressionIntervalSeconds is >= 1 and <= 60
+                    && options.MaximumEventsPerProgression is >= 1 and <= 100
+                    && options.MaximumRunResolutionsPerEvent is >= 1 and <= 100,
                 "Region Boss settings are invalid.")
             .ValidateOnStart();
         services.AddSingleton<IRegionBossDefinitionProvider>(sp =>

@@ -34,7 +34,8 @@ public sealed class RegionBossService(
     private static readonly TimeSpan AutomaticSignupActivityWindow = TimeSpan.FromHours(24);
     private static readonly RegionBossEventStatus[] VisibleStatuses =
         [RegionBossEventStatus.Scheduled, RegionBossEventStatus.SignupOpen, RegionBossEventStatus.Matching,
-            RegionBossEventStatus.Resolving, RegionBossEventStatus.Playback, RegionBossEventStatus.Settled];
+            RegionBossEventStatus.Resolving, RegionBossEventStatus.Playback, RegionBossEventStatus.Settled,
+            RegionBossEventStatus.Cancelled];
 
     public async Task<IReadOnlyList<RegionBossStatusDto>> GetStatusAsync(
         Guid characterId,
@@ -373,12 +374,25 @@ public sealed class RegionBossService(
                 && (x.SignupStartsAtUtc <= now || x.SignupClosesAtUtc <= now || x.PlaybackEndsAtUtc <= now))
             .OrderBy(x => x.EncounterStartsAtUtc)
             .Select(x => x.Id)
-            .Take(10)
+            .Take(options.Value.MaximumEventsPerProgression)
             .ToArrayAsync(cancellationToken);
         foreach (var id in ids)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await ProgressEventAsync(id, workerId, cancellationToken);
+            try
+            {
+                await ProgressEventAsync(id, workerId, cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException exception)
+            {
+                await LogConcurrencyFailureAsync(id, exception, cancellationToken);
+                db.ClearTrackedEntities();
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                logger.LogError(exception, "Region Boss event {EventId} progression failed.", id);
+                db.ClearTrackedEntities();
+            }
         }
     }
 
@@ -425,21 +439,35 @@ public sealed class RegionBossService(
             if (item.Status == RegionBossEventStatus.SignupOpen && now >= item.SignupClosesAtUtc)
             {
                 item.Status = RegionBossEventStatus.Matching;
-                await RefreshPowerRatingsAsync(item.Signups, cancellationToken);
-                var assignments = CreateRuns(item);
-                if (assignments.Count > 0)
+                item.MatchmakingAlgorithmVersion = RegionBossRules.MatchmakingAlgorithmVersion;
+                var definition = ReadDefinition(item);
+                await RemoveIneligibleSignupsAsync(item, definition, cancellationToken);
+                if (item.Signups.Count < RegionBossRules.RecommendedMinimumPartySize)
                 {
-                    // Existing signup rows cannot reference new run rows until the runs
-                    // have been inserted. Keep both saves inside this transaction.
-                    await db.SaveChangesAsync(cancellationToken);
-                    foreach (var assignment in assignments)
-                    {
-                        assignment.Signup.Run = assignment.Run;
-                        assignment.Signup.RegionBossRunId = assignment.Run.Id;
-                        assignment.Signup.PartySlot = assignment.PartySlot;
-                    }
+                    item.Status = RegionBossEventStatus.Cancelled;
+                    item.CancelledAtUtc = now;
+                    item.CancellationReason =
+                        $"Only {item.Signups.Count} eligible participant(s) remained when signup closed; "
+                        + $"at least {RegionBossRules.RecommendedMinimumPartySize} are required.";
                 }
-                item.Status = RegionBossEventStatus.Resolving;
+                else
+                {
+                    await RefreshPowerRatingsAsync(item.Signups, cancellationToken);
+                    var assignments = CreateRuns(item);
+                    if (assignments.Count > 0)
+                    {
+                        // Existing signup rows cannot reference new run rows until the runs
+                        // have been inserted. Keep both saves inside this transaction.
+                        await db.SaveChangesAsync(cancellationToken);
+                        foreach (var assignment in assignments)
+                        {
+                            assignment.Signup.Run = assignment.Run;
+                            assignment.Signup.RegionBossRunId = assignment.Run.Id;
+                            assignment.Signup.PartySlot = assignment.PartySlot;
+                        }
+                    }
+                    item.Status = RegionBossEventStatus.Resolving;
+                }
             }
             if (item.Status != initialStatus)
             {
@@ -455,31 +483,48 @@ public sealed class RegionBossService(
             .Where(x => x.RegionBossEventId == eventId
                 && (x.Status == RegionBossRunStatus.Queued
                     || (x.Status == RegionBossRunStatus.Errored && x.SimulationAttempts < 3)
-                    || (x.Status == RegionBossRunStatus.Resolving && x.SimulationLeaseUntil < timeProvider.GetUtcNow())))
-            .Select(x => x.Id).ToArrayAsync(cancellationToken);
+                    || (x.Status == RegionBossRunStatus.Resolving
+                        && (!x.SimulationLeaseUntil.HasValue
+                            || x.SimulationLeaseUntil <= timeProvider.GetUtcNow()))))
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .Take(options.Value.MaximumRunResolutionsPerEvent)
+            .ToArrayAsync(cancellationToken);
         foreach (var runId in runIds)
             await ResolveRunAsync(runId, workerId, cancellationToken);
 
         await using var finalTransaction = await db.BeginTransactionAsync(cancellationToken);
         await db.AcquireRegionBossEventLockAsync(eventId, cancellationToken);
+        var finalRunIds = await db.RegionBossRuns.AsNoTracking()
+            .Where(x => x.RegionBossEventId == eventId)
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .ToArrayAsync(cancellationToken);
+        foreach (var runId in finalRunIds)
+            await db.AcquireRegionBossRunLockAsync(runId, cancellationToken);
         // Every preceding phase has been saved. Discard its tracked graph only
-        // after taking the event lock so this transaction reads the current
-        // event and run concurrency tokens instead of reusing stale instances.
+        // after taking the event and all run locks so this transaction reads
+        // current concurrency tokens and owns every row it may update.
         db.ClearTrackedEntities();
-        item = await db.RegionBossEvents.Include(x => x.Runs).ThenInclude(x => x.Members)
-            .Include(x => x.RewardGrants).SingleOrDefaultAsync(x => x.Id == eventId, cancellationToken);
+        item = await db.RegionBossEvents.Include(x => x.RewardGrants)
+            .SingleOrDefaultAsync(x => x.Id == eventId, cancellationToken);
         if (item is null)
             return;
+        await db.GetEntry(item).Collection(x => x.Runs).Query()
+            .Include(x => x.Members)
+            .LoadAsync(cancellationToken);
         var current = timeProvider.GetUtcNow();
         var finalInitialStatus = item.Status;
         if (item.Status == RegionBossEventStatus.Resolving
-            && item.Runs.All(x => x.Status is RegionBossRunStatus.Ready or RegionBossRunStatus.Errored))
+            && item.Runs.Count > 0
+            && item.Runs.All(IsTerminalRun))
         {
             item.Status = RegionBossEventStatus.Playback;
             item.PlaybackStartsAtUtc = current;
             var longestTicks = item.Runs.Where(x => x.Status == RegionBossRunStatus.Ready)
                 .Select(x => x.DurationTicks).DefaultIfEmpty(0).Max();
-            item.PlaybackEndsAtUtc = current.AddSeconds(Math.Max(10, longestTicks / 10d));
+            item.PlaybackEndsAtUtc = current.AddSeconds(
+                Math.Max(10, longestTicks / (double)RegionBossRules.TicksPerSecond));
             foreach (var run in item.Runs.Where(x => x.Status == RegionBossRunStatus.Ready))
             {
                 run.PlaybackStartsAtUtc = item.PlaybackStartsAtUtc;
@@ -539,6 +584,55 @@ public sealed class RegionBossService(
         RegionBossRun Run,
         int PartySlot);
 
+    private async Task LogConcurrencyFailureAsync(
+        Guid eventId,
+        DbUpdateConcurrencyException exception,
+        CancellationToken cancellationToken)
+    {
+        foreach (var entry in exception.Entries)
+        {
+            var key = string.Join(
+                ", ",
+                entry.Metadata.FindPrimaryKey()?.Properties.Select(property =>
+                    $"{property.Name}={entry.Property(property.Name).CurrentValue}") ?? []);
+            var tokens = entry.Properties
+                .Where(property => property.Metadata.IsConcurrencyToken)
+                .Select(property =>
+                    $"{property.Metadata.Name}:original={property.OriginalValue},current={property.CurrentValue}")
+                .ToArray();
+            try
+            {
+                var databaseValues = await entry.GetDatabaseValuesAsync(cancellationToken);
+                var databaseTokens = entry.Properties
+                    .Where(property => property.Metadata.IsConcurrencyToken)
+                    .Select(property =>
+                        $"{property.Metadata.Name}={databaseValues?[property.Metadata.Name] ?? "<deleted>"}")
+                    .ToArray();
+                logger.LogError(
+                    exception,
+                    "Region Boss event {EventId} concurrency conflict on {EntityType} ({EntityKey}). "
+                    + "Tracked tokens: {TrackedTokens}. Database tokens: {DatabaseTokens}.",
+                    eventId,
+                    entry.Metadata.ClrType.Name,
+                    key,
+                    string.Join("; ", tokens),
+                    string.Join("; ", databaseTokens));
+            }
+            catch (Exception diagnosticException) when (diagnosticException is not OperationCanceledException)
+            {
+                logger.LogError(
+                    exception,
+                    "Region Boss event {EventId} concurrency conflict on {EntityType} ({EntityKey}). "
+                    + "Tracked tokens: {TrackedTokens}. Database values could not be read: {DiagnosticError}.",
+                    eventId,
+                    entry.Metadata.ClrType.Name,
+                    key,
+                    string.Join("; ", tokens),
+                    diagnosticException.Message);
+            }
+        }
+    }
+
     private async Task ResolveRunAsync(Guid runId, string workerId, CancellationToken cancellationToken)
     {
         RegionBossRun run;
@@ -550,10 +644,11 @@ public sealed class RegionBossService(
             run = await db.RegionBossRuns.Include(x => x.Event).Include(x => x.Members)
                 .SingleAsync(x => x.Id == runId, cancellationToken);
             var claimedAt = timeProvider.GetUtcNow();
-            var canClaim = run.Status == RegionBossRunStatus.Queued
-                || (run.Status == RegionBossRunStatus.Errored && run.SimulationAttempts < 3)
-                || (run.Status == RegionBossRunStatus.Resolving
-                    && (!run.SimulationLeaseUntil.HasValue || run.SimulationLeaseUntil <= claimedAt));
+            var canClaim = run.Event.Status == RegionBossEventStatus.Resolving
+                && (run.Status == RegionBossRunStatus.Queued
+                    || (run.Status == RegionBossRunStatus.Errored && run.SimulationAttempts < 3)
+                    || (run.Status == RegionBossRunStatus.Resolving
+                        && (!run.SimulationLeaseUntil.HasValue || run.SimulationLeaseUntil <= claimedAt)));
             if (!canClaim)
                 return;
             run.Status = RegionBossRunStatus.Resolving;
@@ -574,9 +669,10 @@ public sealed class RegionBossService(
             await using var persistTransaction = await db.BeginTransactionAsync(cancellationToken);
             await db.AcquireRegionBossRunLockAsync(runId, cancellationToken);
             db.ClearTrackedEntities();
-            var tracked = await db.RegionBossRuns.Include(x => x.ParticipantResults)
+            var tracked = await db.RegionBossRuns.Include(x => x.Event).Include(x => x.ParticipantResults)
                 .SingleAsync(x => x.Id == runId, cancellationToken);
-            if (tracked.Status != RegionBossRunStatus.Resolving
+            if (tracked.Event.Status != RegionBossEventStatus.Resolving
+                || tracked.Status != RegionBossRunStatus.Resolving
                 || !string.Equals(tracked.SimulationLeaseOwner, workerId, StringComparison.Ordinal))
             {
                 return;
@@ -595,8 +691,13 @@ public sealed class RegionBossService(
             tracked.SimulationLeaseUntil = null;
             tracked.ParticipantResults.Clear();
             foreach (var participant in resolution.ParticipantResults)
+            {
+                participant.Run = tracked;
                 tracked.ParticipantResults.Add(participant);
+                db.RegionBossParticipantResults.Add(participant);
+            }
             tracked.Playback = playback;
+            db.RegionBossPlaybacks.Add(playback);
             tracked.RowVersion++;
             await db.SaveChangesAsync(cancellationToken);
             await persistTransaction.CommitAsync(cancellationToken);
@@ -632,6 +733,48 @@ public sealed class RegionBossService(
             var rating = await powerRatings.GetCharacterRatingAsync(signup.CharacterId, cancellationToken);
             signup.PowerRating = rating.Overall;
             signup.PowerRatingAlgorithmVersion = rating.AlgorithmVersion;
+        }
+    }
+
+    private async Task RemoveIneligibleSignupsAsync(
+        RegionBossEvent item,
+        RegionBossDefinition definition,
+        CancellationToken cancellationToken)
+    {
+        if (item.Signups.Count == 0)
+            return;
+
+        var characterIds = item.Signups.Select(x => x.CharacterId).ToArray();
+        var eligibleCharacterIds = await db.Characters.AsNoTracking()
+            .Where(x => characterIds.Contains(x.Id) && x.Level >= definition.LevelRequirement)
+            .Select(x => x.Id)
+            .ToHashSetAsync(cancellationToken);
+
+        if (!string.IsNullOrWhiteSpace(definition.RequiredCompletedQuestId))
+        {
+            var completedQuestCharacterIds = await db.CharacterQuestProgresses.AsNoTracking()
+                .Where(x => characterIds.Contains(x.CharacterId)
+                    && x.QuestId == definition.RequiredCompletedQuestId
+                    && x.Status == QuestStatus.Completed)
+                .Select(x => x.CharacterId)
+                .ToHashSetAsync(cancellationToken);
+            eligibleCharacterIds.IntersectWith(completedQuestCharacterIds);
+        }
+
+        if (definition.RequiredTowerFloor.HasValue
+            && !await db.TowerFloorProgresses.AsNoTracking().AnyAsync(
+                x => x.FloorNumber >= definition.RequiredTowerFloor.Value && x.IsCleared,
+                cancellationToken))
+        {
+            eligibleCharacterIds.Clear();
+        }
+
+        foreach (var signup in item.Signups
+            .Where(x => !eligibleCharacterIds.Contains(x.CharacterId))
+            .ToArray())
+        {
+            db.RegionBossSignups.Remove(signup);
+            item.Signups.Remove(signup);
         }
     }
 
@@ -762,14 +905,15 @@ public sealed class RegionBossService(
         foreach (var run in item.Runs.Where(x => x.Status == RegionBossRunStatus.Ready))
         {
             foreach (var member in run.Members)
-            foreach (var bracket in definition.RewardBrackets.Where(x => x.MinimumLevelDefeated <= run.HighestLevelDefeated))
+            foreach (var bracket in EarnedRewardBrackets(definition, run.HighestLevelDefeated))
             {
                 var key = $"{definition.Id}:{bracket.Key}";
                 if (item.RewardGrants.Any(x => x.CharacterId == member.CharacterId && x.RewardKey == key))
                     continue;
-                item.RewardGrants.Add(new RegionBossRewardGrant
+                var grant = new RegionBossRewardGrant
                 {
                     RegionBossEventId = item.Id,
+                    Event = item,
                     RegionBossRunId = run.Id,
                     RegionBossDefinitionId = definition.Id,
                     CharacterId = member.CharacterId,
@@ -779,7 +923,12 @@ public sealed class RegionBossService(
                         new RegionBossRewardSnapshot(bracket.Cinders, bracket.Soulstones), jsonOptions),
                     Status = RegionBossRewardStatus.Unclaimed,
                     CreatedAtUtc = now
-                });
+                };
+                item.RewardGrants.Add(grant);
+                // Client-generated GUIDs make an untracked entity look existing to
+                // EF graph discovery. Mark grants Added explicitly so settlement
+                // inserts them instead of issuing an update that affects zero rows.
+                db.RegionBossRewardGrants.Add(grant);
             }
             run.Status = RegionBossRunStatus.Settled;
             run.RowVersion++;
@@ -787,6 +936,23 @@ public sealed class RegionBossService(
         item.Status = RegionBossEventStatus.Settled;
         item.CompletedAtUtc = now;
     }
+
+    private static IReadOnlyList<RegionBossRewardBracketDefinition> EarnedRewardBrackets(
+        RegionBossDefinition definition,
+        int highestLevelDefeated)
+    {
+        var qualifying = definition.RewardBrackets
+            .Where(x => x.MinimumLevelDefeated <= highestLevelDefeated)
+            .OrderBy(x => x.MinimumLevelDefeated)
+            .ToArray();
+        return definition.CumulativeRewards || qualifying.Length <= 1
+            ? qualifying
+            : [qualifying[^1]];
+    }
+
+    private static bool IsTerminalRun(RegionBossRun run) =>
+        run.Status == RegionBossRunStatus.Ready
+        || run.Status == RegionBossRunStatus.Errored && run.SimulationAttempts >= 3;
 
     private IQueryable<RegionBossEvent> EventQuery(Guid characterId) =>
         db.RegionBossEvents.AsNoTracking()

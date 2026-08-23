@@ -372,6 +372,7 @@ export class RegionBossComponent implements OnInit, OnDestroy {
 
   closePlayback(): void {
     this.dismissedPlaybackRunId = this.playbackRunId;
+    this.stopPlaybackTimer();
     this.watchingPlayback.set(false);
     this.playbackViewChange.emit(false);
     this.combat.closeCurrentRegionBossBattle();

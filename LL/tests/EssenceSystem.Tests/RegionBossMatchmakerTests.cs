@@ -50,6 +50,24 @@ public sealed class RegionBossMatchmakerTests
         Assert.All(parties[1].Members, member => Assert.True(member.PowerRating >= 30_000));
     }
 
+    [Fact]
+    public void Match_does_not_mix_a_full_low_power_band_with_a_viable_high_power_band()
+    {
+        var signups = CreateSignups(10);
+        for (var index = 0; index < signups.Count; index++)
+            signups[index].PowerRating = index < 6 ? 1_000 + index : 30_000 + index;
+
+        var parties = RegionBossMatchmaker.Match(EventId, signups);
+
+        Assert.Equal(new[] { 3, 3, 4 }, parties.Select(x => x.Members.Count));
+        Assert.All(
+            parties,
+            party => Assert.False(
+                party.Members.Any(member => member.PowerRating < 5_000)
+                && party.Members.Any(member => member.PowerRating >= 30_000)));
+        Assert.Equal(2, parties.Select(x => x.MatchmakingBand).Distinct().Count());
+    }
+
     private static readonly Guid EventId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
 
     private static List<RegionBossSignup> CreateSignups(int count) =>

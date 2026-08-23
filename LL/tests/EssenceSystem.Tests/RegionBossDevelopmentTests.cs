@@ -11,6 +11,7 @@ using Domain.Models.RegionBosses;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Persistence.LL;
@@ -176,8 +177,50 @@ public sealed class RegionBossDevelopmentTests
 
         var progressed = await workerDb.RegionBossEvents.AsNoTracking()
             .SingleAsync(x => x.Id == item.Id);
-        Assert.Equal(RegionBossEventStatus.Playback, progressed.Status);
+        Assert.Equal(RegionBossEventStatus.Cancelled, progressed.Status);
         Assert.True(progressed.RowVersion >= 2);
+    }
+
+    [Fact]
+    public async Task Signup_close_removes_ineligible_players_and_cancels_an_undersized_event()
+    {
+        await using var db = CreateDbContext();
+        var now = new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero);
+        var definition = new FixedDefinitionProvider().GetAll().Single();
+        var eligibleOne = SeedCharacter(db, "EligibleOne", "Eligible One", isGuest: false);
+        var eligibleTwo = SeedCharacter(db, "EligibleTwo", "Eligible Two", isGuest: false);
+        var ineligible = SeedCharacter(db, "Ineligible", "Ineligible", isGuest: false);
+        ineligible.Level = definition.LevelRequirement - 1;
+        var item = CreateEvent(definition, now, RegionBossEventStatus.SignupOpen);
+        foreach (var character in new[] { eligibleOne, eligibleTwo, ineligible })
+        {
+            item.Signups.Add(new RegionBossSignup
+            {
+                Event = item,
+                RegionBossEventId = item.Id,
+                CharacterId = character.Id,
+                AccountId = character.UserId,
+                CharacterName = character.Name,
+                SignedUpAtUtc = now.AddMinutes(-5)
+            });
+        }
+        db.RegionBossEvents.Add(item);
+        await db.SaveChangesAsync();
+        var service = CreateService(db, now, developmentToolsEnabled: false);
+
+        await service.ProgressEventsAsync("test-worker", CancellationToken.None);
+
+        var progressed = await db.RegionBossEvents.AsNoTracking()
+            .Include(x => x.Signups)
+            .Include(x => x.Runs)
+            .SingleAsync(x => x.Id == item.Id);
+        Assert.Equal(RegionBossEventStatus.Cancelled, progressed.Status);
+        Assert.Equal(now, progressed.CancelledAtUtc);
+        Assert.Contains("at least 3", progressed.CancellationReason);
+        Assert.Equal(
+            new[] { eligibleOne.Id, eligibleTwo.Id }.Order(),
+            progressed.Signups.Select(x => x.CharacterId).Order());
+        Assert.Empty(progressed.Runs);
     }
 
     [Fact]
@@ -229,6 +272,228 @@ public sealed class RegionBossDevelopmentTests
         Assert.Equal(RegionBossEventStatus.Playback, progressed.Status);
         Assert.Equal(2, progressed.RowVersion);
         Assert.Equal(RegionBossRunStatus.Ready, Assert.Single(progressed.Runs).Status);
+    }
+
+    [Fact]
+    public async Task Finalization_serializes_run_updates_with_postgres_advisory_locks()
+    {
+        var connectionString = Environment.GetEnvironmentVariable("LL_TEST_REGION_BOSS_POSTGRES_CONNECTION")
+            ?? Environment.GetEnvironmentVariable("LL_TEST_TOURNAMENT_POSTGRES_CONNECTION");
+        if (string.IsNullOrWhiteSpace(connectionString))
+            return;
+
+        var schemaName = $"ll_region_boss_lock_tests_{Guid.NewGuid():N}";
+        await using var adminDb = CreatePostgresDbContext(connectionString);
+        var createSchemaSql = $"CREATE SCHEMA \"{schemaName}\"";
+        var dropSchemaSql = $"DROP SCHEMA IF EXISTS \"{schemaName}\" CASCADE";
+        await adminDb.Database.ExecuteSqlRawAsync(createSchemaSql);
+        try
+        {
+            var isolatedConnectionString = WithSearchPath(connectionString, schemaName);
+            await using (var migrationDb = CreatePostgresDbContext(isolatedConnectionString, schemaName))
+                await migrationDb.Database.MigrateAsync();
+
+            var now = new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero);
+            var definition = new FixedDefinitionProvider().GetAll().Single();
+            Guid eventId;
+            Guid runId;
+            await using (var seedDb = CreatePostgresDbContext(isolatedConnectionString, schemaName))
+            {
+                var item = CreateEvent(definition, now, RegionBossEventStatus.Resolving);
+                var run = new RegionBossRun
+                {
+                    Event = item,
+                    RegionBossEventId = item.Id,
+                    PartyNumber = 1,
+                    PartySize = 1,
+                    Status = RegionBossRunStatus.Ready,
+                    DurationTicks = 100
+                };
+                item.Runs.Add(run);
+                seedDb.RegionBossEvents.Add(item);
+                await seedDb.SaveChangesAsync();
+                eventId = item.Id;
+                runId = run.Id;
+            }
+
+            var realtime = new BlockingRealtimeBroadcaster();
+            await using var progressionDb = CreatePostgresDbContext(isolatedConnectionString, schemaName);
+            var service = CreateService(
+                progressionDb,
+                now,
+                developmentToolsEnabled: false,
+                realtime: realtime);
+            var progression = service.ProgressEventsAsync("postgres-worker", CancellationToken.None);
+            await realtime.PublishEntered.Task.WaitAsync(TimeSpan.FromSeconds(15));
+
+            var runLockAcquired = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var concurrentUpdate = UpdateRunAfterLockAsync(
+                isolatedConnectionString,
+                schemaName,
+                runId,
+                runLockAcquired);
+            var completedWhileFinalizerHeldLock = await Task.WhenAny(
+                runLockAcquired.Task,
+                Task.Delay(TimeSpan.FromMilliseconds(500))) == runLockAcquired.Task;
+            realtime.Release.SetResult();
+            await Task.WhenAll(progression, concurrentUpdate);
+            Assert.False(completedWhileFinalizerHeldLock);
+
+            await using var verifyDb = CreatePostgresDbContext(isolatedConnectionString, schemaName);
+            var progressed = await verifyDb.RegionBossEvents.AsNoTracking()
+                .Include(x => x.Runs)
+                .SingleAsync(x => x.Id == eventId);
+            Assert.Equal(RegionBossEventStatus.Playback, progressed.Status);
+            Assert.Equal(2, Assert.Single(progressed.Runs).RowVersion);
+        }
+        finally
+        {
+            await adminDb.Database.ExecuteSqlRawAsync(dropSchemaSql);
+        }
+    }
+
+    [Fact]
+    public async Task Progression_limits_run_resolution_work_per_event()
+    {
+        await using var db = CreateDbContext();
+        var now = new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero);
+        var definition = new FixedDefinitionProvider().GetAll().Single();
+        var item = CreateEvent(definition, now, RegionBossEventStatus.Resolving);
+        for (var partyNumber = 1; partyNumber <= 3; partyNumber++)
+        {
+            item.Runs.Add(new RegionBossRun
+            {
+                Event = item,
+                RegionBossEventId = item.Id,
+                PartyNumber = partyNumber,
+                PartySize = 1,
+                Status = RegionBossRunStatus.Queued
+            });
+        }
+        db.RegionBossEvents.Add(item);
+        await db.SaveChangesAsync();
+        var resolver = new CountingCombatResolver();
+        var service = CreateService(
+            db,
+            now,
+            developmentToolsEnabled: false,
+            combatResolver: resolver,
+            playbackBundles: new StubPlaybackBundleBuilder(now),
+            maximumRunResolutionsPerEvent: 1);
+
+        await service.ProgressEventsAsync("test-worker", CancellationToken.None);
+
+        var progressed = await db.RegionBossEvents.AsNoTracking()
+            .Include(x => x.Runs)
+            .SingleAsync(x => x.Id == item.Id);
+        Assert.Equal(RegionBossEventStatus.Resolving, progressed.Status);
+        Assert.Equal(1, resolver.InvocationCount);
+        Assert.Equal(1, progressed.Runs.Count(x => x.Status == RegionBossRunStatus.Ready));
+        Assert.Equal(2, progressed.Runs.Count(x => x.Status == RegionBossRunStatus.Queued));
+        Assert.Equal(1, await db.RegionBossParticipantResults.CountAsync());
+    }
+
+    [Fact]
+    public async Task A_failed_event_does_not_prevent_later_events_from_progressing()
+    {
+        await using var db = CreateDbContext();
+        var now = new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero);
+        var definition = new FixedDefinitionProvider().GetAll().Single();
+        var malformed = CreateEvent(definition, now.AddMinutes(-1), RegionBossEventStatus.Playback);
+        malformed.DefinitionSnapshotJson = "{";
+        malformed.PlaybackEndsAtUtc = now;
+        var valid = CreateEvent(definition, now, RegionBossEventStatus.Playback);
+        valid.PlaybackEndsAtUtc = now;
+        db.RegionBossEvents.AddRange(malformed, valid);
+        await db.SaveChangesAsync();
+        var service = CreateService(db, now, developmentToolsEnabled: false);
+
+        await service.ProgressEventsAsync("test-worker", CancellationToken.None);
+
+        var statuses = await db.RegionBossEvents.AsNoTracking()
+            .Where(x => x.Id == malformed.Id || x.Id == valid.Id)
+            .ToDictionaryAsync(x => x.Id, x => x.Status);
+        Assert.Equal(RegionBossEventStatus.Playback, statuses[malformed.Id]);
+        Assert.Equal(RegionBossEventStatus.Settled, statuses[valid.Id]);
+    }
+
+    [Fact]
+    public async Task Settlement_awards_only_the_highest_bracket_when_rewards_are_not_cumulative()
+    {
+        var databaseName = Guid.NewGuid().ToString();
+        var now = new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero);
+        var definition = new RegionBossDefinition
+        {
+            Id = "test-region-boss",
+            Name = "Test Region Boss",
+            ImagePath = "test_boss",
+            RegionId = 1,
+            CreatureId = Guid.NewGuid(),
+            LevelRequirement = 1,
+            CumulativeRewards = false,
+            RewardBrackets =
+            [
+                new RegionBossRewardBracketDefinition { Key = "level-1", MinimumLevelDefeated = 1, Cinders = 10 },
+                new RegionBossRewardBracketDefinition { Key = "level-3", MinimumLevelDefeated = 3, Cinders = 30 },
+                new RegionBossRewardBracketDefinition { Key = "level-5", MinimumLevelDefeated = 5, Cinders = 50 }
+            ]
+        };
+        Guid eventId;
+        await using (var seedDb = CreateDbContext(databaseName))
+        {
+            var item = CreateEvent(definition, now, RegionBossEventStatus.Playback);
+            item.PlaybackStartsAtUtc = now.AddMinutes(-1);
+            item.PlaybackEndsAtUtc = now;
+            var run = new RegionBossRun
+            {
+                Event = item,
+                RegionBossEventId = item.Id,
+                PartyNumber = 1,
+                PartySize = 1,
+                Status = RegionBossRunStatus.Ready,
+                HighestLevelDefeated = 5
+            };
+            item.Runs.Add(run);
+            seedDb.RegionBossEvents.Add(item);
+            await seedDb.SaveChangesAsync();
+            seedDb.RegionBossSignups.Add(new RegionBossSignup
+            {
+                Event = item,
+                RegionBossEventId = item.Id,
+                Run = run,
+                RegionBossRunId = run.Id,
+                CharacterId = Guid.NewGuid(),
+                AccountId = Guid.NewGuid(),
+                CharacterName = "Reward Tester",
+                PartySlot = 1,
+                SignedUpAtUtc = now.AddMinutes(-5)
+            });
+            await seedDb.SaveChangesAsync();
+            eventId = item.Id;
+        }
+
+        await using (var workerDb = CreateDbContext(databaseName))
+        {
+            var logger = new RecordingLogger();
+            var service = CreateService(
+                workerDb,
+                now,
+                developmentToolsEnabled: false,
+                logger: logger);
+            await service.ProgressEventsAsync("test-worker", CancellationToken.None);
+            Assert.True(logger.Errors.Count == 0, string.Join(Environment.NewLine, logger.Errors));
+        }
+
+        await using var verifyDb = CreateDbContext(databaseName);
+        var settled = await verifyDb.RegionBossEvents.AsNoTracking()
+            .Include(x => x.Runs)
+            .Include(x => x.RewardGrants)
+            .SingleAsync(x => x.Id == eventId);
+        Assert.Equal(RegionBossEventStatus.Settled, settled.Status);
+        Assert.Equal(RegionBossRunStatus.Settled, Assert.Single(settled.Runs).Status);
+        var grant = Assert.Single(settled.RewardGrants);
+        Assert.Equal("test-region-boss:level-5", grant.RewardKey);
+        Assert.Equal(5, grant.MilestoneLevel);
     }
 
     [Fact]
@@ -441,19 +706,76 @@ public sealed class RegionBossDevelopmentTests
         bool developmentToolsEnabled,
         IGameEventOutbox? outbox = null,
         IRegionBossCombatResolver? combatResolver = null,
-        IRegionBossPlaybackBundleBuilder? playbackBundles = null) =>
+        IRegionBossPlaybackBundleBuilder? playbackBundles = null,
+        IGameRealtimeBroadcaster? realtime = null,
+        int maximumRunResolutionsPerEvent = 25,
+        ILogger<RegionBossService>? logger = null) =>
         new(
             db,
             new FixedDefinitionProvider(),
             new FixedPowerRatingService(now),
             combatResolver!,
             playbackBundles!,
-            new NoopRealtimeBroadcaster(),
+            realtime ?? new NoopRealtimeBroadcaster(),
             outbox ?? new RecordingGameEventOutbox(),
             new FixedTimeProvider(now),
             new JsonSerializerOptions(JsonSerializerDefaults.Web),
-            Options.Create(new RegionBossOptions { DevelopmentToolsEnabled = developmentToolsEnabled }),
-            NullLogger<RegionBossService>.Instance);
+            Options.Create(new RegionBossOptions
+            {
+                DevelopmentToolsEnabled = developmentToolsEnabled,
+                MaximumRunResolutionsPerEvent = maximumRunResolutionsPerEvent
+            }),
+            logger ?? NullLogger<RegionBossService>.Instance);
+
+    private static RegionBossEvent CreateEvent(
+        RegionBossDefinition definition,
+        DateTimeOffset now,
+        RegionBossEventStatus status) => new()
+        {
+            RegionBossDefinitionId = definition.Id,
+            RegionId = definition.RegionId,
+            Status = status,
+            SignupStartsAtUtc = now.AddMinutes(-10),
+            SignupClosesAtUtc = now,
+            EncounterStartsAtUtc = now,
+            DefinitionSnapshotJson = JsonSerializer.Serialize(
+                definition,
+                new JsonSerializerOptions(JsonSerializerDefaults.Web)),
+            DefinitionHash = "test",
+            MatchmakingAlgorithmVersion = RegionBossRules.MatchmakingAlgorithmVersion,
+            CombatRulesVersion = RegionBossRules.Version,
+            CreatedAtUtc = now.AddMinutes(-10),
+            UpdatedAtUtc = now.AddMinutes(-1)
+        };
+
+    private sealed class CountingCombatResolver : IRegionBossCombatResolver
+    {
+        public int InvocationCount { get; private set; }
+
+        public Task<RegionBossCombatResolution> ResolveAsync(
+            RegionBossRun run,
+            RegionBossDefinition definition,
+            CancellationToken cancellationToken)
+        {
+            InvocationCount++;
+            return Task.FromResult(new RegionBossCombatResolution(
+                1,
+                2,
+                500,
+                1_000,
+                5_000,
+                100,
+                0,
+                RegionBossTerminationReason.PartyDefeated,
+                [new RegionBossParticipantResult
+                {
+                    RegionBossRunId = run.Id,
+                    CharacterId = Guid.NewGuid()
+                }],
+                null!,
+                []));
+        }
+    }
 
     private sealed class ConcurrentEventUpdateResolver(
         string databaseName,
@@ -523,6 +845,39 @@ public sealed class RegionBossDevelopmentTests
             .ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
         return new LLDbContext(options);
+    }
+
+    private static LLDbContext CreatePostgresDbContext(
+        string connectionString,
+        string? migrationsSchema = null)
+    {
+        var options = new DbContextOptionsBuilder<LLDbContext>()
+            .UseNpgsql(connectionString, postgres =>
+            {
+                if (!string.IsNullOrWhiteSpace(migrationsSchema))
+                    postgres.MigrationsHistoryTable("__EFMigrationsHistory", migrationsSchema);
+            })
+            .Options;
+        return new LLDbContext(options);
+    }
+
+    private static string WithSearchPath(string connectionString, string schemaName) =>
+        $"{connectionString.Trim().TrimEnd(';')};Search Path={schemaName}";
+
+    private static async Task UpdateRunAfterLockAsync(
+        string connectionString,
+        string schemaName,
+        Guid runId,
+        TaskCompletionSource runLockAcquired)
+    {
+        await using var db = CreatePostgresDbContext(connectionString, schemaName);
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        await db.AcquireRegionBossRunLockAsync(runId);
+        runLockAcquired.SetResult();
+        var run = await db.RegionBossRuns.SingleAsync(x => x.Id == runId);
+        run.RowVersion++;
+        await db.SaveChangesAsync();
+        await transaction.CommitAsync();
     }
 
     private static Character SeedCharacter(
@@ -608,6 +963,43 @@ public sealed class RegionBossDevelopmentTests
             GameRealtimeEvent message,
             string sender,
             CancellationToken cancellationToken = default) => Task.CompletedTask;
+    }
+
+    private sealed class BlockingRealtimeBroadcaster : IGameRealtimeBroadcaster
+    {
+        public TaskCompletionSource PublishEntered { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource Release { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public async Task PublishAsync(
+            Audience audience,
+            GameRealtimeEvent message,
+            string sender,
+            CancellationToken cancellationToken = default)
+        {
+            PublishEntered.TrySetResult();
+            await Release.Task.WaitAsync(cancellationToken);
+        }
+    }
+
+    private sealed class RecordingLogger : ILogger<RegionBossService>
+    {
+        public List<string> Errors { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            if (logLevel >= LogLevel.Error)
+                Errors.Add($"{formatter(state, exception)}{Environment.NewLine}{exception}");
+        }
     }
 
     private sealed class RecordingGameEventOutbox : IGameEventOutbox
