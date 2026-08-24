@@ -1,7 +1,6 @@
 using Application;
 using Common;
 using Persistence.LL;
-using Services.AdminDashboard;
 using Services.LL;
 using Worker.LL.BackgroundJobs;
 
@@ -19,7 +18,6 @@ builder.Services.AddRepositories();
 builder.Services.AddApplication();
 builder.Services.AddCommonServices();
 builder.Services.AddServices(config, builder.Environment.ContentRootPath, builder.Environment.IsDevelopment());
-builder.Services.AddAdminDashboardServices();
 builder.Services.AddBackgroundJobInfrastructure(config, builder.Environment);
 
 var host = builder.Build();

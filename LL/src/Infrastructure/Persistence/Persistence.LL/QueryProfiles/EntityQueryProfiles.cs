@@ -25,7 +25,4 @@ public static class EntityQueryProfiles
                     .ThenInclude(ei => ei.ItemBase)
                         .ThenInclude(ib => (ib as EquipmentBase)!.ToolBonuses)
             .Include(e => (e as Creature)!.StatOverrides);
-
-    public static IQueryable<Entity> CombatReadyWithLoot(this IQueryable<Entity> q)
-        => q.CombatReady();
 }

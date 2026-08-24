@@ -19,15 +19,4 @@
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="UseCases\CharacterActions\Dtos\Requests\" />
-    <Folder Include="UseCases\Characters\Commands\" />
-    <Folder Include="UseCases\MarketPlaces\Events\" />
-    <Folder Include="UseCases\MarketPlaces\EventHandlers\" />
-    <Folder Include="UseCases\Regions\Dtos\" />
-    <Folder Include="UseCases\Regions\Commands\" />
-    <Folder Include="UseCases\Soulstones\Dtos\" />
-    <Folder Include="WebSockets\Handlers\" />
-  </ItemGroup>
-
 </Project>

@@ -25,6 +25,7 @@ export interface EquipmentInstance extends ItemInstance {
 export interface ItemBase {
   id: string;
   name: string;
+  iconPath: string;
   rarity: Rarity;
   itemType: ItemType;
   description: string;

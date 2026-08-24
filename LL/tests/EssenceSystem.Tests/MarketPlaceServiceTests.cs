@@ -886,7 +886,6 @@ public sealed class MarketPlaceServiceTests
         public Task AddOrderAsync(MarketPlaceOrder order, CancellationToken cancellationToken) { Orders.Add(order); return Task.CompletedTask; }
         public Task<MarketPlaceListing?> CreateMarketPlaceListingAsync(Guid characterId, MarketPlaceListing listing, CancellationToken cancellationToken) { Listings.Add(listing); return Task.FromResult<MarketPlaceListing?>(listing); }
         public Task<MarketPlaceBuyOrder?> CreateMarketPlaceBuyOrderAsync(Guid characterId, MarketPlaceBuyOrder order, CancellationToken cancellationToken) { BuyOrders.Add(order); return Task.FromResult<MarketPlaceBuyOrder?>(order); }
-        public Task<bool> BuyoutMarketPlaceListingAsync(Guid characterId, Guid listingId, int quantity, CancellationToken cancellationToken) => Task.FromResult(true);
         public Task<bool> CancelMarketPlaceListingAsync(Guid characterId, Guid listingId, CancellationToken cancellationToken) => Task.FromResult(true);
         public Task<MarketPlaceListing?> GetListingAsync(Guid listingId, CancellationToken cancellationToken) => Task.FromResult(Listings.FirstOrDefault(x => x.Id == listingId));
         public Task<MarketPlaceBuyOrder?> GetBuyOrderAsync(Guid buyOrderId, CancellationToken cancellationToken) => Task.FromResult(BuyOrders.FirstOrDefault(x => x.Id == buyOrderId));

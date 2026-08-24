@@ -9,7 +9,6 @@ using Microsoft.Extensions.Hosting;
 using Persistence.LL;
 using Quartz;
 using Quartz.Impl.Triggers;
-using Services.AdminDashboard;
 using Services.LL;
 using Worker.LL.BackgroundJobs;
 
@@ -122,7 +121,6 @@ public sealed class WorkerServiceProviderTests
         builder.Services.AddApplication();
         builder.Services.AddCommonServices();
         builder.Services.AddServices(builder.Configuration, builder.Environment.ContentRootPath);
-        builder.Services.AddAdminDashboardServices();
         builder.Services.AddBackgroundJobInfrastructure(builder.Configuration, builder.Environment);
 
         return builder;

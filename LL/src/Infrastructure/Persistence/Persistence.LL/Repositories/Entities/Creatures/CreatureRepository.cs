@@ -62,8 +62,4 @@ public class CreatureRepository : ICreatureRepository
             .ToList();
     }
 
-    public Task<Creature> UpdateCreatureAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
 }

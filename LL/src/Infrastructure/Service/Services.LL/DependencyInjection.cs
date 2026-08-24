@@ -707,7 +707,6 @@ public static class DependencyInjection
         services.AddScoped<IDungeonCombatResolutionSessionFactory, DungeonCombatResolutionSessionFactory>();
         services.AddScoped<ICombatResolutionSession, IdleCombatResolutionSession>();
         services.AddScoped<IIdleCombatResolutionSessionFactory, IdleCombatResolutionSessionFactory>();
-        services.AddScoped<ICombatEncounterResolver, DefaultCombatEncounterResolver>();
         services.AddScoped<IEncounterEntityLoader, EncounterEntityLoader>();
         services.AddScoped<ICombatEncounterRuntimeFactory, CombatEncounterRuntimeFactory>();
         services.AddScoped<CombatEngineExecutor>();

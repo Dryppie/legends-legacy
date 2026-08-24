@@ -18,7 +18,6 @@ using Microsoft.IdentityModel.Tokens;
 using Persistence.LL;
 using Persistence.LL.Seeds;
 using RealTime.LL;
-using Services.AdminDashboard;
 using Services.LL;
 using Services.LL.Administration;
 using Services.LL.Validation;
@@ -150,8 +149,6 @@ else
     }
 }
 builder.Services.AddRealTime(); // RealTime services must be added after Application and Persistence, as they depend on them
-builder.Services.AddAdminDashboardServices(); // TODO: Application layer makes use of AdminDashboard services, so this is necessary at the moment.
-                                              // At some point the application layer should perhaps be split up into two? One for LL, another for Dashboard
 builder.Services.AddCommonServices();
 builder.Services.SetupApi();
 builder.Services.SetupSwagger("Legends Legacy", config);

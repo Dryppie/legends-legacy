@@ -7065,12 +7065,11 @@ public sealed class AbilitySystemTests
             ]
         };
 
-    private static IConfiguration CreateConfig(bool? useV2Engine = null) =>
+    private static IConfiguration CreateConfig() =>
         new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["Content:Root"] = "Data",
-                ["Combat:UseV2Engine"] = useV2Engine?.ToString()
+                ["Content:Root"] = "Data"
             })
             .Build();
 

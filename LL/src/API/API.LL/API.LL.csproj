@@ -7,13 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Authorization\**" />
-    <Content Remove="Authorization\**" />
-    <EmbeddedResource Remove="Authorization\**" />
-    <None Remove="Authorization\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="10.0.10" />
@@ -30,12 +23,7 @@
     <ProjectReference Include="..\..\Core\Domain\Domain.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Persistence\Persistence.LL\Persistence.LL.csproj" />
     <ProjectReference Include="..\..\Infrastructure\RealTime\RealTime.LL\RealTime.LL.csproj" />
-    <ProjectReference Include="..\..\Infrastructure\Service\Services.AdminDashboard\Services.AdminDashboard.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Service\Services.LL\Services.LL.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Hubs\Interfaces\" />
   </ItemGroup>
 
 </Project>

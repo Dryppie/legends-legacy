@@ -18,7 +18,6 @@ using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
-using Domain.Models.Items.Equipments.TierPackages;
 using Domain.Models.Leaderboards;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Professions;
@@ -144,8 +143,6 @@ public static class DependencyInjection
         services.AddScoped<IExternalLoginRepository, ExternalLoginRepository>();
 
         services.AddSingleton<ITokenHasher, Sha256TokenHasher>();
-        services.AddSingleton<ITierPackageProvider, InMemoryTierPackageProvider>();
-
         return services;
     }
 }

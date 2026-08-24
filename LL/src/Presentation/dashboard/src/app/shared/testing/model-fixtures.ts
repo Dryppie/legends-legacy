@@ -15,6 +15,7 @@ export const testItem: ItemInstance = {
   itemBase: {
     id: 'test-item',
     name: 'Test Item',
+    iconPath: 'test-item',
     rarity: Rarity.Common,
     itemType: ItemType.Equipment,
     description: 'Test item description',

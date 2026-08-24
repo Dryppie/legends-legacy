@@ -1,13 +1,13 @@
-﻿using Application.Interfaces.Services.AdminDashboard;
+﻿using Domain.Models.Entities.Creatures;
 using Services.LL.Interfaces.Combat.Resolution.Dungeon;
 
 namespace Services.LL.Combat.Layers.Orchestration.Dungeon;
 
 public sealed class DungeonEncounterParticipantResolver : IDungeonEncounterParticipantResolver
 {
-    private readonly ICreatureService _repository;
+    private readonly ICreatureRepository _repository;
 
-    public DungeonEncounterParticipantResolver(ICreatureService repository)
+    public DungeonEncounterParticipantResolver(ICreatureRepository repository)
     {
         _repository = repository;
     }
