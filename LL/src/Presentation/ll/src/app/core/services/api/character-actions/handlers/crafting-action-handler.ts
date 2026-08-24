@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CharacterActionDto } from '../../../../../shared/models/Dtos/characterActionDto';
 import { ProfessionType } from '../../../../../shared/models/Dtos/characterProfession';
-import { CharacterActionType } from '../../../../../shared/models/enums/characterActionType';
 import { LevelingService } from '../../../client-side/leveling/leveling.service';
 import { SessionSummaryService } from '../../../client-side/session-summary/session-summary.service';
 import { CraftingService } from '../../crafting/crafting.service';
@@ -16,8 +15,6 @@ export class CraftingActionHandler {
 
   handle(action: CharacterActionDto): void {
     this.craftingService.setQueue(action.temperingQueueItems ?? []);
-
-    if (action.characterActionType !== CharacterActionType.Crafting) return;
 
     const tempering = action.temperingSession;
     if (!tempering) return;

@@ -45,6 +45,7 @@ public sealed class EquipmentSnapshotPersistenceTests
             ItemBaseId = "test.snapshot.helm",
             BaseRecipeId = "recipe.test.snapshot.helm",
             BlueprintId = "blueprint.test.snapshot.helm",
+            EquipmentSetId = "set.test.snapshot",
             CraftedName = "Broken Snapshot Helm",
             ItemBase = new EquipmentBase
             {
@@ -100,6 +101,9 @@ public sealed class EquipmentSnapshotPersistenceTests
         Assert.Equal(
             "blueprint.test.snapshot.helm",
             Assert.Single(persistedSnapshot.Equipment).BlueprintId);
+        Assert.Equal(
+            "set.test.snapshot",
+            Assert.Single(persistedSnapshot.Equipment).EquipmentSetId);
         Assert.Equal("Broken Snapshot Helm", persistedEquipment.DisplayName);
         Assert.Equal(AttributeType.MaxHealth, snapshotModifier.AttributeType);
         Assert.Equal(11, snapshotModifier.Amount);

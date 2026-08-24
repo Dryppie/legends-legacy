@@ -71,7 +71,12 @@ public class CharacterActionRepository : ICharacterActionRepository
 
     public async Task<bool> DeleteCharacterActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        var wasCombat = characterAction.ActionDetails is CombatActionDetails;
+        var stoppedCombat = characterAction.ActionDetails as CombatActionDetails;
+        if (stoppedCombat != null)
+        {
+            characterAction.ReturnToCombatAreaId = stoppedCombat.AreaId;
+        }
+
         if (characterAction.ActionDetails is CraftingActionDetails craftingDetails)
         {
             foreach (var queueItem in craftingDetails.CraftingQueueItems)
@@ -89,7 +94,7 @@ public class CharacterActionRepository : ICharacterActionRepository
 
         characterAction.IsDeleted = true;
         characterAction.ActionDetails = null;
-        characterAction.BlockedUntilUtc = wasCombat && characterAction.BlockedUntilUtc > now
+        characterAction.BlockedUntilUtc = stoppedCombat != null && characterAction.BlockedUntilUtc > now
             ? characterAction.BlockedUntilUtc
             : null;
         characterAction.NextResolutionAtUtc = null;
@@ -260,6 +265,11 @@ public class CharacterActionRepository : ICharacterActionRepository
         {
             var temperingStartsAt = pendingSwitchLock ?? now;
 
+            if (existingAction.ActionDetails is CombatActionDetails interruptedCombat)
+            {
+                existingAction.ReturnToCombatAreaId = interruptedCombat.AreaId;
+            }
+
             if (existingAction.ActionDetails != null)
             {
                 _context.ActionDetails.Remove(existingAction.ActionDetails);
@@ -333,6 +343,11 @@ public class CharacterActionRepository : ICharacterActionRepository
             : (DateTimeOffset?)null;
         var temperingStartsAt = pendingSwitchLock ?? now;
 
+        if (existingAction?.ActionDetails is CombatActionDetails interruptedCombat)
+        {
+            existingAction.ReturnToCombatAreaId = interruptedCombat.AreaId;
+        }
+
         if (existingAction == null)
         {
             existingAction = new CharacterAction
@@ -365,6 +380,40 @@ public class CharacterActionRepository : ICharacterActionRepository
         existingAction.NextResolutionAtUtc = temperingStartsAt.AddSeconds(TemperingConstants.ActionDurationSeconds);
         existingAction.PausedTemperingQueueItems = [];
         return existingAction;
+    }
+
+    public bool ResumeCombatAfterTempering(
+        CharacterAction characterAction,
+        CombatActionDetails combatActionDetails,
+        DateTimeOffset combatStartsAt,
+        DateTimeOffset now)
+    {
+        if (characterAction.ActionDetails is not CraftingActionDetails craftingDetails ||
+            craftingDetails.CraftingQueueItems.Count != 0 ||
+            string.IsNullOrWhiteSpace(characterAction.ReturnToCombatAreaId) ||
+            !string.Equals(
+                characterAction.ReturnToCombatAreaId,
+                combatActionDetails.AreaId,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        _context.ActionDetails.Remove(craftingDetails);
+        combatActionDetails.CharacterActionId = characterAction.CharacterId;
+        _context.ActionDetails.Add(combatActionDetails);
+
+        characterAction.ActionDetails = combatActionDetails;
+        characterAction.IsDeleted = false;
+        characterAction.NextResolutionAtUtc = combatStartsAt;
+        characterAction.BlockedUntilUtc = combatStartsAt.AddSeconds(
+            CharacterActionTimingConstants.CombatSwitchLockSeconds);
+        characterAction.UpdatedAt = now;
+        characterAction.ScheduleGeneration = checked(
+            characterAction.ScheduleGeneration + 1);
+        characterAction.ReturnToCombatAreaId = null;
+        characterAction.AutoResumedFromTempering = true;
+        return true;
     }
 
     public async Task<IReadOnlyList<CraftingQueueItem>> GetPausedTemperingQueueAsync(

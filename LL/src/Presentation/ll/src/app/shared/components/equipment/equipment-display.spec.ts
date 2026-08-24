@@ -146,6 +146,18 @@ describe('mapInstanceToDisplay', () => {
     expect(mapInstanceToDisplay(item).requiredLevel).toBe(50);
   });
 
+  it('preserves equipment set metadata for shared item displays', () => {
+    const item = equipmentInstance('set-item', AttributeType.Armor, 100);
+    item.equipmentSetId = 'set.stormguard';
+    item.equipmentSet = {
+      id: 'set.stormguard',
+      name: 'Stormguard',
+      description: 'Equipment forged for the storm.',
+    };
+
+    expect(mapInstanceToDisplay(item).equipmentSet).toEqual(item.equipmentSet);
+  });
+
   it('does not expose a character level requirement for tools', () => {
     const item = toolInstance();
     item.requiredLevel = 50;

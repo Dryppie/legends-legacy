@@ -4,6 +4,7 @@ using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Crafting.Dtos;
+using Application.UseCases.Equipments.Dtos;
 using Application.UseCases.Outbox;
 using Application.UseCases.Prophecies.Events;
 using Application.UseCases.Soulstones.Events;
@@ -107,6 +108,7 @@ public class CraftingService : ICraftingService
         var temperingSummary = new TemperingSummary();
         var outcomes = new List<TemperingOutcomeEntry>();
         var completedItems = new List<EquipmentInstance>();
+        DateTimeOffset? queueCompletedAtUtc = null;
         using var randomScope = _resolutionRandom?.UseSeed(StableRandom.Seed(
             "tempering-batch-v1",
             characterAction.CharacterId.ToString("N"),
@@ -141,6 +143,8 @@ public class CraftingService : ICraftingService
             if (result == null)
             {
                 await CompleteCurrentQueueItemAsync(characterAction.CharacterId, actionDetails, current, temperingSummary, completedItems, cancellationToken);
+                if (actionDetails.CraftingQueueItems.Count == 0)
+                    queueCompletedAtUtc = attemptBoundary;
                 continue;
             }
 
@@ -176,11 +180,14 @@ public class CraftingService : ICraftingService
             if (!_temperingService.CanTemper(current))
             {
                 await CompleteCurrentQueueItemAsync(characterAction.CharacterId, actionDetails, current, temperingSummary, completedItems, cancellationToken);
+                if (actionDetails.CraftingQueueItems.Count == 0)
+                    queueCompletedAtUtc = attemptBoundary;
             }
         }
 
         if (actionDetails.CraftingQueueItems.Count == 0)
         {
+            queueCompletedAtUtc ??= sessionStartedAt;
             characterAction.IsDeleted = true;
             characterAction.NextResolutionAtUtc = null;
         }
@@ -212,6 +219,7 @@ public class CraftingService : ICraftingService
         {
             From = sessionStartedAt,
             To = now,
+            QueueCompletedAtUtc = queueCompletedAtUtc,
             TemperingSummary = temperingSummary,
             Outcomes = outcomes
         };
@@ -455,6 +463,7 @@ public class CraftingService : ICraftingService
                 ItemBase = itemBase,
                 BaseRecipeId = recipe.Id,
                 BlueprintId = blueprint?.Id,
+                EquipmentSetId = blueprint?.EquipmentSetId,
                 CraftedName = design.Name,
                 Tier = targetTier,
                 StatModelVersion = EquipmentStatBudgetCatalog.BalanceVersion,
@@ -674,6 +683,10 @@ public class CraftingService : ICraftingService
                     IsLearned = unlockedBlueprintIds.Contains(blueprint.Id),
                     SourceType = blueprint.SourceType,
                     SourceId = blueprint.SourceId,
+                    EquipmentSet = string.IsNullOrWhiteSpace(blueprint.EquipmentSetId)
+                        ? null
+                        : EquipmentSetDto.FromDefinition(
+                            _definitions.GetEquipmentSet(blueprint.EquipmentSetId)),
                     Behavior = design.Behavior,
                     InitialStatProfile = design.InitialStatProfile,
                     BonusStatProfile = blueprint.BonusStatProfile,

@@ -2,6 +2,7 @@ using Application.Interfaces.Services.LL.Professions;
 using AutoMapper;
 using Domain.Models.Attributes;
 using Domain.Models.Items;
+using Application.UseCases.Equipments.Dtos;
 
 namespace Application.UseCases.Items.Dtos;
 
@@ -18,6 +19,7 @@ public sealed class BlueprintItemMetadataDto
     public IReadOnlyList<BlueprintCompatibleRecipeDto> CompatibleRecipes { get; init; } = [];
     public string? SourceType { get; init; }
     public string? SourceId { get; init; }
+    public EquipmentSetDto? EquipmentSet { get; init; }
 }
 
 public sealed class BlueprintCompatibleRecipeDto
@@ -78,7 +80,11 @@ public sealed class BlueprintItemMetadataResolver
             CompatibleRecipeCount = compatibleRecipes.Count,
             CompatibleRecipes = compatibleRecipes,
             SourceType = blueprint.SourceType,
-            SourceId = blueprint.SourceId
+            SourceId = blueprint.SourceId,
+            EquipmentSet = string.IsNullOrWhiteSpace(blueprint.EquipmentSetId)
+                ? null
+                : EquipmentSetDto.FromDefinition(
+                    _definitions.GetEquipmentSet(blueprint.EquipmentSetId))
         };
     }
 }

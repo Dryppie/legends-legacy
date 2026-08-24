@@ -36,6 +36,7 @@ describe('CharacterActionsStateService', () => {
   let crafting: jasmine.SpyObj<CraftingService>;
   let inventory: jasmine.SpyObj<InventoryStateService>;
   let logoutCount: ReturnType<typeof signal<number>>;
+  let routerUrl: string;
 
   beforeEach(() => {
     actions = jasmine.createSpyObj<CharacterActionsService>(
@@ -52,9 +53,9 @@ describe('CharacterActionsStateService', () => {
       'CharacterActionsPollingService',
       ['start', 'stop'],
     );
-    router = jasmine.createSpyObj<Router>('Router', ['navigate'], {
-      url: '/game/combat',
-    });
+    routerUrl = '/game/combat';
+    router = jasmine.createSpyObj<Router>('Router', ['navigate']);
+    Object.defineProperty(router, 'url', { get: () => routerUrl });
     router.navigate.and.resolveTo(true);
     combat = jasmine.createSpyObj<CombatService>('CombatService', [
       'clearAllCombat',
@@ -146,6 +147,40 @@ describe('CharacterActionsStateService', () => {
     expect(service.currentAction()).toBe(action);
     expect(router.navigate).toHaveBeenCalledWith(['/game/combat']);
     expect(service.idleCombatError()).toBeNull();
+  });
+
+  it('opens combat when Tempering automatically resumes it', () => {
+    routerUrl = '/game/professions/crafting?tab=tempering';
+    service.applyCurrentActionSnapshot({
+      ...combatAction(),
+      characterActionType: CharacterActionType.Crafting,
+      revision: 'active-tempering',
+    });
+
+    service.applyCurrentActionSnapshot({
+      ...combatAction(),
+      autoResumedFromTempering: true,
+      revision: 'auto-resumed-combat',
+    });
+
+    expect(router.navigate).toHaveBeenCalledOnceWith(['/game/combat']);
+  });
+
+  it('does not interrupt another page when Tempering automatically resumes combat', () => {
+    routerUrl = '/game/character/inventory';
+    service.applyCurrentActionSnapshot({
+      ...combatAction(),
+      characterActionType: CharacterActionType.Crafting,
+      revision: 'active-tempering',
+    });
+
+    service.applyCurrentActionSnapshot({
+      ...combatAction(),
+      autoResumedFromTempering: true,
+      revision: 'auto-resumed-combat',
+    });
+
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
   it('lets polling stop after a resolve error instead of re-emitting the overdue action', () => {

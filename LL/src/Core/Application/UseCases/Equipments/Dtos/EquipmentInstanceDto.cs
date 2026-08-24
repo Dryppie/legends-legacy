@@ -18,6 +18,8 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public ItemQuality Quality { get; set; } = ItemQuality.Standard;
     public string? BaseRecipeId { get; set; }
     public string? BlueprintId { get; set; }
+    public string? EquipmentSetId { get; set; }
+    public EquipmentSetDto? EquipmentSet { get; set; }
     public EquipmentCraftingDesignMetadataDto? CraftingDesign { get; set; }
     public string? CraftedName { get; set; }
     public int Tier { get; set; } = 1;
@@ -69,6 +71,9 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
             .ForMember(
                 destination => destination.CraftingDesign,
                 options => options.MapFrom<EquipmentCraftingDesignMetadataResolver>())
+            .ForMember(
+                destination => destination.EquipmentSet,
+                options => options.MapFrom<EquipmentSetMetadataResolver>())
             .ForMember(
                 destination => destination.RollRange,
                 options => options.MapFrom<EquipmentRollRangeResolver>())

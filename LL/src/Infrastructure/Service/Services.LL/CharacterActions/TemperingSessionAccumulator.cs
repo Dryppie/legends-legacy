@@ -20,6 +20,7 @@ internal sealed class TemperingSessionAccumulator
             {
                 From = batch.From,
                 To = batch.To,
+                QueueCompletedAtUtc = batch.QueueCompletedAtUtc,
                 TemperingSummary = CopySummary(batch.TemperingSummary),
                 Outcomes = SelectLatestOutcomes(batch.Outcomes)
             };
@@ -27,6 +28,8 @@ internal sealed class TemperingSessionAccumulator
         }
 
         _session.To = batch.To;
+        _session.QueueCompletedAtUtc = batch.QueueCompletedAtUtc
+            ?? _session.QueueCompletedAtUtc;
         _session.TemperingSummary = MergeSummaries(
             _session.TemperingSummary,
             batch.TemperingSummary);

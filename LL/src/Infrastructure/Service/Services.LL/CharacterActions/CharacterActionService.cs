@@ -1,5 +1,6 @@
 using Application.Interfaces.Services.LL.CharacterActions;
 using Application.Interfaces.Services.LL.Professions;
+using Application.Interfaces.Services.LL.Quests;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
@@ -21,6 +22,8 @@ public class CharacterActionService : ICharacterActionService
     private readonly TemperingProgressionOptions _temperingOptions;
     private readonly IdleCombatProgressionOptions _idleCombatOptions;
     private readonly ILogger<CharacterActionService>? _logger;
+    private readonly IActionDetailsService? _actionDetailsService;
+    private readonly ICombatAreaAccessService? _combatAreaAccessService;
 
     public CharacterActionService(
         ICharacterActionRepository characterActionRepository,
@@ -29,7 +32,9 @@ public class CharacterActionService : ICharacterActionService
         TimeProvider? timeProvider = null,
         IOptions<TemperingProgressionOptions>? temperingOptions = null,
         IOptions<IdleCombatProgressionOptions>? idleCombatOptions = null,
-        ILogger<CharacterActionService>? logger = null)
+        ILogger<CharacterActionService>? logger = null,
+        IActionDetailsService? actionDetailsService = null,
+        ICombatAreaAccessService? combatAreaAccessService = null)
     {
         _characterActionRepository = characterActionRepository;
         _combatService = combatService;
@@ -38,6 +43,8 @@ public class CharacterActionService : ICharacterActionService
         _temperingOptions = temperingOptions?.Value ?? new TemperingProgressionOptions();
         _idleCombatOptions = idleCombatOptions?.Value ?? new IdleCombatProgressionOptions();
         _logger = logger;
+        _actionDetailsService = actionDetailsService;
+        _combatAreaAccessService = combatAreaAccessService;
     }
 
     public async Task<CharacterAction?> StartCharacterActionAsync(
@@ -107,6 +114,16 @@ public class CharacterActionService : ICharacterActionService
             case CharacterActionType.Crafting:
                 characterAction.TemperingSession = await HandleProfessionActionAsync(characterAction, now, cancellationToken);
                 actionChanged = characterAction.TemperingSession is not null;
+                if (characterAction.TemperingSession?.QueueCompletedAtUtc is { } queueCompletedAtUtc &&
+                    characterAction.IsDeleted &&
+                    !string.IsNullOrWhiteSpace(characterAction.ReturnToCombatAreaId))
+                {
+                    await TryResumeCombatAfterTemperingAsync(
+                        characterAction,
+                        queueCompletedAtUtc,
+                        now,
+                        cancellationToken);
+                }
                 break;
 
             default:
@@ -215,6 +232,68 @@ public class CharacterActionService : ICharacterActionService
             inventoryItem,
             now,
             cancellationToken);
+    }
+
+    private async Task<bool> TryResumeCombatAfterTemperingAsync(
+        CharacterAction characterAction,
+        DateTimeOffset queueCompletedAtUtc,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var areaId = characterAction.ReturnToCombatAreaId;
+        if (string.IsNullOrWhiteSpace(areaId))
+            return false;
+
+        if (_actionDetailsService is null || _combatAreaAccessService is null)
+        {
+            throw new InvalidOperationException(
+                "Automatic combat resumption requires combat action-detail and area-access services.");
+        }
+
+        var access = await _combatAreaAccessService.GetAccessAsync(
+            characterAction.CharacterId,
+            areaId,
+            cancellationToken);
+        if (!access.CanAccess)
+        {
+            characterAction.ReturnToCombatAreaId = null;
+            _logger?.LogWarning(
+                "Tempering completed for {CharacterId}, but combat could not resume in {AreaId}: {ReasonCode}",
+                characterAction.CharacterId,
+                areaId,
+                access.ReasonCode ?? "access_denied");
+            return false;
+        }
+
+        var combatDetails = await _actionDetailsService.CreateCombatActionDetailsAsync(
+            areaId,
+            characterAction.CharacterId,
+            cancellationToken);
+        if (combatDetails is null)
+        {
+            characterAction.ReturnToCombatAreaId = null;
+            _logger?.LogWarning(
+                "Tempering completed for {CharacterId}, but combat details could not be created for {AreaId}.",
+                characterAction.CharacterId,
+                areaId);
+            return false;
+        }
+
+        if (!_characterActionRepository.ResumeCombatAfterTempering(
+                characterAction,
+                combatDetails,
+                queueCompletedAtUtc,
+                now))
+        {
+            throw new InvalidOperationException(
+                "The completed Tempering queue could not transition back to combat.");
+        }
+
+        characterAction.CombatSession = await HandleCombatActionAsync(
+            characterAction,
+            now,
+            cancellationToken);
+        return true;
     }
 
     public async Task<CharacterAction?> ResumeTemperingAsync(

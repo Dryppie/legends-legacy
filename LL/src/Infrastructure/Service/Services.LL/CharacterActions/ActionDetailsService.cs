@@ -24,6 +24,7 @@ public class ActionDetailsService : IActionDetailsService
         return new CombatActionDetails
         {
             CharacterTeam = [characterId],
+            AreaId = area.Id,
             Area = area,
         };
     }

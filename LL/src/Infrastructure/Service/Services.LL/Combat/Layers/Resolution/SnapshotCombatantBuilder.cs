@@ -70,6 +70,7 @@ public sealed class SnapshotCombatantBuilder(
                 ItemBase = equipmentBase,
                 BaseRecipeId = equipment.BaseRecipeId,
                 BlueprintId = equipment.BlueprintId,
+                EquipmentSetId = equipment.EquipmentSetId,
                 Rarity = equipment.Rarity,
                 Quality = equipment.Quality,
                 Tier = equipment.Tier,

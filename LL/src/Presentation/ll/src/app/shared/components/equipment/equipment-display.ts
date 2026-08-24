@@ -6,6 +6,7 @@ import {
   Equipment,
   EquipmentInstance,
   EquipmentCraftingDesignMetadata,
+  EquipmentSetMetadata,
   ToolBonusModifier,
 } from '../../models/item';
 import {
@@ -38,6 +39,7 @@ export interface EquipmentDisplay {
   maximumPotential?: number;
   attributeRollRanges?: EquipmentAttributeRollRange[];
   craftingDesign?: EquipmentCraftingDesignMetadata | null;
+  equipmentSet?: EquipmentSetMetadata | null;
 }
 
 export interface EquipmentAttributeRollRange {
@@ -127,6 +129,7 @@ export function mapInstanceToDisplay(
     maximumPotential: inst.rollRange?.maximumPotential,
     attributeRollRanges: inst.rollRange?.attributes ?? [],
     craftingDesign: inst.craftingDesign,
+    equipmentSet: inst.equipmentSet,
   };
 }
 

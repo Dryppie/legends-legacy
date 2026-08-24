@@ -1,3 +1,16 @@
+<div
+  *ngIf="blueprint.equipmentSet as equipmentSet"
+  class="mt-3 rounded border border-primary/30 bg-primary/10 px-3 py-2"
+>
+  <div class="ll-item-meta text-primary">Equipment Set</div>
+  <div class="mt-1 text-sm font-medium text-primary">
+    {{ equipmentSet.name }}
+  </div>
+  <p *ngIf="equipmentSet.description" class="mt-1 text-xs text-secondary">
+    {{ equipmentSet.description }}
+  </p>
+</div>
+
 <div *ngIf="contributedAttributes.length" class="mt-3">
   <div class="ll-item-meta">Contributes Attributes</div>
 

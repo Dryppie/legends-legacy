@@ -16,6 +16,7 @@ export interface CharacterActionDto {
   scheduleGeneration?: number;
   revision: string;
   isDeleted: boolean;
+  autoResumedFromTempering?: boolean;
   temperingSession?: TemperingSessionDto;
   combatSession?: CombatSessionDto;
   craftingActionDetails?: CraftingActionDetails;

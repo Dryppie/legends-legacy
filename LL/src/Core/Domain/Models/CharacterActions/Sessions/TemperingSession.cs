@@ -5,6 +5,7 @@ public class TemperingSession
 {
     public DateTimeOffset From { get; set; }
     public DateTimeOffset To { get; set; }
+    public DateTimeOffset? QueueCompletedAtUtc { get; set; }
     public TemperingSummary TemperingSummary { get; set; } = null!;
     public List<TemperingOutcomeEntry> Outcomes { get; set; } = [];
     public TemperingSession()

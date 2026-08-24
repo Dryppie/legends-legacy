@@ -3,6 +3,7 @@ import { AttributeType } from './enums/attributeType';
 import { ItemQuality } from './enums/itemQuality';
 import { EquipmentType } from './enums/equipmentType';
 import { Rarity } from './enums/rarity';
+import { EquipmentSetMetadata } from './item';
 
 export interface CraftingMaterialCost {
   itemId: string;
@@ -60,6 +61,7 @@ export interface CraftingBlueprint {
   isLocked: boolean;
   sourceType?: string | null;
   sourceId?: string | null;
+  equipmentSet?: EquipmentSetMetadata | null;
   behavior: EquipmentBehavior;
   initialStatProfile: Record<string, number>;
   bonusStatProfile?: Record<string, number>;

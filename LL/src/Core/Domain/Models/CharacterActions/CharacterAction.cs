@@ -31,6 +31,13 @@ public class CharacterAction
     /// This is a fixed lock from combat start, not the rolling resolution boundary.
     /// </summary>
     public DateTimeOffset? BlockedUntilUtc { get; set; }
+    /// <summary>
+    /// Standard combat area to resume when the next active Tempering queue
+    /// finishes naturally. Captured when combat is interrupted by Tempering or
+    /// explicitly stopped. Null means queue completion should leave the
+    /// character idle.
+    /// </summary>
+    public string? ReturnToCombatAreaId { get; set; }
     public long ScheduleGeneration { get; set; } = 1;
     public bool IsDeleted { get; set; }
     public uint RowVersion { get; set; }
@@ -47,6 +54,8 @@ public class CharacterAction
     public int? ResolutionIntervalMs { get; set; }
     [NotMapped]
     public ICollection<CraftingQueueItem> PausedTemperingQueueItems { get; set; } = [];
+    [NotMapped]
+    public bool AutoResumedFromTempering { get; set; }
 
     public CharacterAction(Guid characterId, ActionDetails actionDetails, DateTimeOffset now)
     {

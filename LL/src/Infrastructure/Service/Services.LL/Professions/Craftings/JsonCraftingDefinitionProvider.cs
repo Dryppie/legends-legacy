@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Sets;
 using Domain.Models.Professions.Crafting.V2;
 using Domain.Models.Attributes;
 using Microsoft.Extensions.Configuration;
@@ -19,6 +20,7 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
     public IReadOnlyList<MaterialDefinition> GetMaterials() => _definitions.Value.Materials;
     public IReadOnlyList<CraftingRecipeDefinition> GetRecipes() => _definitions.Value.Recipes;
     public IReadOnlyList<BlueprintDefinition> GetBlueprints() => _definitions.Value.Blueprints;
+    public IReadOnlyList<EquipmentSetDefinition> GetEquipmentSets() => _definitions.Value.EquipmentSets;
     public IReadOnlyDictionary<string, EquipmentBase> GetEquipmentBases() =>
         _definitions.Value.EquipmentBases;
 
@@ -37,6 +39,10 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
     public BlueprintDefinition? GetBlueprintByItemId(string itemId) =>
         _definitions.Value.Blueprints.FirstOrDefault(x => x.ItemId.Equals(itemId, StringComparison.OrdinalIgnoreCase));
 
+    public EquipmentSetDefinition? GetEquipmentSet(string equipmentSetId) =>
+        _definitions.Value.EquipmentSets.FirstOrDefault(x =>
+            x.Id.Equals(equipmentSetId, StringComparison.OrdinalIgnoreCase));
+
     private static DefinitionSet Load(
         IConfiguration config,
         string contentRootPath,
@@ -48,12 +54,16 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         var materials = Read<IReadOnlyList<MaterialDefinition>>(craftingRoot, "materials.json", options);
         var recipes = Read<IReadOnlyList<CraftingRecipeDefinition>>(craftingRoot, "base-recipes.json", options);
         var blueprints = Read<IReadOnlyList<BlueprintDefinition>>(craftingRoot, "blueprints.json", options);
+        var equipmentSets = Read<IReadOnlyList<EquipmentSetDefinition>>(
+            craftingRoot,
+            "equipment-sets.json",
+            options);
         var equipmentBases = ReadEquipmentBases(
             Path.Combine(contentRootPath, contentRoot, "items", "items.json"),
             options);
 
-        Validate(materials, recipes, blueprints, equipmentBases);
-        return new DefinitionSet(materials, recipes, blueprints, equipmentBases);
+        Validate(materials, recipes, blueprints, equipmentSets, equipmentBases);
+        return new DefinitionSet(materials, recipes, blueprints, equipmentSets, equipmentBases);
     }
 
     private static IReadOnlyDictionary<string, EquipmentBase> ReadEquipmentBases(
@@ -93,6 +103,7 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         IReadOnlyList<MaterialDefinition> materials,
         IReadOnlyList<CraftingRecipeDefinition> recipes,
         IReadOnlyList<BlueprintDefinition> blueprints,
+        IReadOnlyList<EquipmentSetDefinition> equipmentSets,
         IReadOnlyDictionary<string, EquipmentBase> equipmentBases)
     {
         ValidateEquipmentUnitContract();
@@ -101,6 +112,14 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         EnsureUnique(recipes.Select(x => x.OutputItemId), "recipe output item");
         EnsureUnique(blueprints.Select(x => x.Id), "blueprint");
         EnsureUnique(blueprints.Select(x => x.ItemId), "blueprint item");
+        EnsureUnique(equipmentSets.Select(x => x.Id), "equipment set");
+
+        foreach (var equipmentSet in equipmentSets)
+        {
+            if (string.IsNullOrWhiteSpace(equipmentSet.Name))
+                throw new InvalidOperationException(
+                    $"Equipment set '{equipmentSet.Id}' has no name.");
+        }
 
         if (recipes.Count == 0)
             throw new InvalidOperationException("Equipment crafting requires at least one concrete recipe.");
@@ -146,6 +165,19 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
 
             if (!recipes.Any(recipe => EquipmentCraftingDesignComposer.IsCompatible(recipe, blueprint)))
                 throw new InvalidOperationException($"Blueprint '{blueprint.Id}' has no compatible equipment recipes.");
+
+            if (blueprint.EquipmentSetId is not null)
+            {
+                if (string.IsNullOrWhiteSpace(blueprint.EquipmentSetId))
+                    throw new InvalidOperationException(
+                        $"Blueprint '{blueprint.Id}' has an empty equipment-set ID.");
+                if (equipmentSets.All(set =>
+                        !set.Id.Equals(blueprint.EquipmentSetId, StringComparison.OrdinalIgnoreCase)))
+                {
+                    throw new InvalidOperationException(
+                        $"Blueprint '{blueprint.Id}' references missing equipment set '{blueprint.EquipmentSetId}'.");
+                }
+            }
 
             ValidateProfile(blueprint.Id, blueprint.BonusStatProfile, blueprint.TemperingProfile);
             ValidateRequirements(blueprint.Id, blueprint.AdditionalMaterialRequirements, materials);
@@ -404,5 +436,6 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         IReadOnlyList<MaterialDefinition> Materials,
         IReadOnlyList<CraftingRecipeDefinition> Recipes,
         IReadOnlyList<BlueprintDefinition> Blueprints,
+        IReadOnlyList<EquipmentSetDefinition> EquipmentSets,
         IReadOnlyDictionary<string, EquipmentBase> EquipmentBases);
 }

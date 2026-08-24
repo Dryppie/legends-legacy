@@ -646,12 +646,25 @@ export class CharacterActionsStateService {
       return;
     }
 
+    const shouldOpenAutoResumedCombat =
+      action?.autoResumedFromTempering === true && this.isTemperingRoute();
     this._currentAction.set(action);
     if (action) {
       this.persistence.set(action.characterActionType);
     } else {
       this.persistence.clear();
     }
+
+    if (shouldOpenAutoResumedCombat) {
+      void this.router.navigate(['/game/combat']);
+    }
+  }
+
+  private isTemperingRoute(): boolean {
+    return (
+      this.router.url.startsWith('/game/professions/crafting') &&
+      /(?:\?|&)tab=tempering(?:&|$)/.test(this.router.url)
+    );
   }
 
   private isOlderUpdate(

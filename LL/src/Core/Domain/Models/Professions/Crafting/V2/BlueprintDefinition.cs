@@ -21,6 +21,7 @@ public sealed class BlueprintDefinition
     public IReadOnlyList<MaterialRequirementDefinition> AdditionalMaterialRequirements { get; init; } = [];
     public string? SourceType { get; init; }
     public string? SourceId { get; init; }
+    public string? EquipmentSetId { get; init; }
     public IReadOnlyList<string> Tags { get; init; } = [];
     public bool Enabled { get; init; } = true;
 }

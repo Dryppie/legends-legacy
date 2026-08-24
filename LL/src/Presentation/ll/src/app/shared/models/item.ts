@@ -22,6 +22,8 @@ export interface EquipmentInstance extends ItemInstance {
   quality: ItemQuality;
   baseRecipeId?: string | null;
   blueprintId?: string | null;
+  equipmentSetId?: string | null;
+  equipmentSet?: EquipmentSetMetadata | null;
   craftingDesign?: EquipmentCraftingDesignMetadata | null;
   tier: number;
   requiredLevel?: number;
@@ -94,6 +96,13 @@ export interface BlueprintItemMetadata {
   compatibleRecipes: BlueprintCompatibleRecipe[];
   sourceType?: string | null;
   sourceId?: string | null;
+  equipmentSet?: EquipmentSetMetadata | null;
+}
+
+export interface EquipmentSetMetadata {
+  id: string;
+  name: string;
+  description: string;
 }
 
 export interface BlueprintCompatibleRecipe {

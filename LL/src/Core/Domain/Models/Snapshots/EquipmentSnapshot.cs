@@ -14,6 +14,7 @@ public sealed class EquipmentSnapshot
     public string ItemBaseId { get; init; } = default!;
     public string? BaseRecipeId { get; init; }
     public string? BlueprintId { get; init; }
+    public string? EquipmentSetId { get; init; }
     public Rarity Rarity { get; init; }
     public ItemQuality Quality { get; init; }
     public int Tier { get; init; } = 1;
@@ -41,6 +42,7 @@ public sealed class EquipmentSnapshot
             ItemBaseId = inst.ItemBaseId,
             BaseRecipeId = inst.BaseRecipeId,
             BlueprintId = inst.BlueprintId,
+            EquipmentSetId = inst.EquipmentSetId,
             Rarity = inst.Rarity,
             Quality = inst.Quality,
             Tier = inst.Tier,

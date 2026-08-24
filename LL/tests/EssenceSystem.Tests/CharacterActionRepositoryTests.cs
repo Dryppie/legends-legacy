@@ -163,6 +163,8 @@ public sealed class CharacterActionRepositoryTests
         await repository.DeleteCharacterActionAsync(combat, stoppedAt, CancellationToken.None);
         await db.SaveChangesAsync();
 
+        Assert.Equal("first-area", combat.ReturnToCombatAreaId);
+
         var queued = await repository.UpdateCraftingActionAsync(
             characterId,
             new CraftingQueueItem
@@ -184,6 +186,7 @@ public sealed class CharacterActionRepositoryTests
         Assert.Equal(
             switchUnlock.AddSeconds(TemperingConstants.ActionDurationSeconds),
             action.NextResolutionAtUtc);
+        Assert.Equal("first-area", action.ReturnToCombatAreaId);
     }
 
     [Fact]
@@ -233,6 +236,7 @@ public sealed class CharacterActionRepositoryTests
             action.NextResolutionAtUtc);
         Assert.Equal(switchUnlock, action.BlockedUntilUtc);
         Assert.Equal(2, action.ScheduleGeneration);
+        Assert.Equal("first-area", action.ReturnToCombatAreaId);
         Assert.Equal(queueItem.Id, Assert.Single(craftingDetails.CraftingQueueItems).Id);
         Assert.Empty(db.InventoryItems);
         Assert.Single(db.ActionDetails);
@@ -266,6 +270,8 @@ public sealed class CharacterActionRepositoryTests
             CancellationToken.None);
         await db.SaveChangesAsync();
 
+        Assert.Equal("first-area", combat.ReturnToCombatAreaId);
+
         var updated = await repository.UpdateCraftingActionAsync(
             characterId,
             new CraftingQueueItem
@@ -282,6 +288,7 @@ public sealed class CharacterActionRepositoryTests
             switchTime.AddSeconds(TemperingConstants.ActionDurationSeconds),
             action.NextResolutionAtUtc);
         Assert.Null(action.BlockedUntilUtc);
+        Assert.Equal("first-area", action.ReturnToCombatAreaId);
     }
 
     [Fact]
@@ -312,6 +319,7 @@ public sealed class CharacterActionRepositoryTests
         Assert.Equal(
             now.AddSeconds(TemperingConstants.ActionDurationSeconds),
             action.NextResolutionAtUtc);
+        Assert.Null(action.ReturnToCombatAreaId);
     }
 
     [Fact]
@@ -382,6 +390,52 @@ public sealed class CharacterActionRepositoryTests
         Assert.Equal(
             combat!.BlockedUntilUtc!.Value.AddSeconds(TemperingConstants.ActionDurationSeconds),
             resumed.NextResolutionAtUtc);
+        Assert.Equal("first-area", resumed.ReturnToCombatAreaId);
+    }
+
+    [Fact]
+    public async Task Completed_tempering_is_replaced_by_combat_at_its_completion_boundary()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var area = new Area { Id = "first-area", Name = "First Area" };
+        var completionBoundary = DateTimeOffset.Parse("2026-08-18T12:15:00Z");
+        var resolvedAt = completionBoundary.AddHours(1);
+        var craftingDetails = new CraftingActionDetails { Id = Guid.NewGuid() };
+        var action = new CharacterAction(characterId, craftingDetails, completionBoundary)
+        {
+            IsDeleted = true,
+            NextResolutionAtUtc = null,
+            ReturnToCombatAreaId = area.Id
+        };
+        db.Areas.Add(area);
+        db.CharacterActions.Add(action);
+        await db.SaveChangesAsync();
+
+        var repository = new CharacterActionRepository(db);
+        var resumed = repository.ResumeCombatAfterTempering(
+            action,
+            new CombatActionDetails([characterId], area),
+            completionBoundary,
+            resolvedAt);
+        repository.UpdateCharacterAction(action);
+        await db.SaveChangesAsync();
+
+        var persisted = await db.CharacterActions
+            .Include(candidate => candidate.ActionDetails)
+                .ThenInclude(details => (details as CombatActionDetails)!.Area)
+            .SingleAsync(candidate => candidate.CharacterId == characterId);
+        var combatDetails = Assert.IsType<CombatActionDetails>(persisted.ActionDetails);
+        Assert.True(resumed);
+        Assert.False(persisted.IsDeleted);
+        Assert.Equal(completionBoundary, persisted.NextResolutionAtUtc);
+        Assert.Equal(
+            completionBoundary.AddSeconds(CharacterActionTimingConstants.CombatSwitchLockSeconds),
+            persisted.BlockedUntilUtc);
+        Assert.Equal(2, persisted.ScheduleGeneration);
+        Assert.Null(persisted.ReturnToCombatAreaId);
+        Assert.Equal(area.Id, combatDetails.AreaId);
+        Assert.Single(db.ActionDetails);
     }
 
     [Fact]

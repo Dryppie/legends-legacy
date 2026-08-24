@@ -34,6 +34,12 @@
         {{ equipmentMeta(data) }}
       </div>
       <div
+        *ngIf="data.equipmentSet as equipmentSet"
+        class="mt-1 text-xs text-primary"
+      >
+        {{ equipmentSet.name }} Set
+      </div>
+      <div
         *ngIf="data.requiredLevel > 1"
         class="ll-item-meta mt-1 text-primary"
       >
@@ -168,6 +174,12 @@
       </h2>
       <div class="ll-item-meta mt-1 truncate">
         {{ equipmentMeta(equipped.data) }}
+      </div>
+      <div
+        *ngIf="equipped.data.equipmentSet as equipmentSet"
+        class="mt-1 text-xs text-primary"
+      >
+        {{ equipmentSet.name }} Set
       </div>
       <div
         *ngIf="equipped.data.requiredLevel > 1"
@@ -355,6 +367,17 @@
     <p *ngIf="data.description" class="ll-item-description">
       {{ data.description }}
     </p>
+
+    <div
+      *ngIf="data.equipmentSet as equipmentSet"
+      class="ll-item-detail-section"
+    >
+      <div class="ll-item-meta text-primary">Equipment Set</div>
+      <div class="mt-1 font-medium text-primary">{{ equipmentSet.name }}</div>
+      <p *ngIf="equipmentSet.description" class="mt-1 text-xs text-secondary">
+        {{ equipmentSet.description }}
+      </p>
+    </div>
 
     <div *ngIf="data.craftingDesign as design" class="ll-item-detail-section">
       <ng-container *ngIf="!compactCraftingDesign">

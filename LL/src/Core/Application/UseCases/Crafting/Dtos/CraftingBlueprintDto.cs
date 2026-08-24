@@ -1,5 +1,6 @@
 using Domain.Models.Attributes;
 using Domain.Models.Professions.Crafting.V2;
+using Application.UseCases.Equipments.Dtos;
 
 namespace Application.UseCases.Crafting.Dtos;
 
@@ -14,6 +15,7 @@ public sealed class CraftingBlueprintDto
     public bool IsLocked => !IsLearned;
     public string? SourceType { get; init; }
     public string? SourceId { get; init; }
+    public EquipmentSetDto? EquipmentSet { get; init; }
     public EquipmentBehaviorDefinition Behavior { get; init; } = new();
     public IReadOnlyDictionary<AttributeType, double> InitialStatProfile { get; init; } =
         new Dictionary<AttributeType, double>();

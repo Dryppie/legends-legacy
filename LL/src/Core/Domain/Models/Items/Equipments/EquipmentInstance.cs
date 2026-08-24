@@ -12,6 +12,7 @@ public class EquipmentInstance : ItemInstance
     public ItemQuality Quality { get; set; } = ItemQuality.Standard;
     public string? BaseRecipeId { get; set; }
     public string? BlueprintId { get; set; }
+    public string? EquipmentSetId { get; set; }
     public string? CraftedName { get; set; }
     public int Tier { get; set; } = 1;
     public int StatModelVersion { get; set; } = EquipmentStatBudgetCatalog.LegacyBalanceVersion;

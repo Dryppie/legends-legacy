@@ -47,6 +47,11 @@ public interface ICharacterActionRepository
         DateTimeOffset now,
         CancellationToken cancellationToken);
     Task<CharacterAction?> ResumeTemperingAsync(Guid characterId, DateTimeOffset now, CancellationToken cancellationToken);
+    bool ResumeCombatAfterTempering(
+        CharacterAction characterAction,
+        CharacterActionDetails.CombatActionDetails combatActionDetails,
+        DateTimeOffset combatStartsAt,
+        DateTimeOffset now);
     Task<IReadOnlyList<CraftingQueueItem>> GetPausedTemperingQueueAsync(Guid characterId, CancellationToken cancellationToken);
     Task<CharacterAction?> GetCharacterActionForDeletionAsync(Guid characterId, CancellationToken cancellationToken);
 }

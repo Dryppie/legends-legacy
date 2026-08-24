@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Persistence.LL;
@@ -12,9 +13,11 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    partial class LLDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260824123319_AutoResumeCombatAfterTempering")]
+    partial class AutoResumeCombatAfterTempering
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4916,10 +4919,6 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("EquipmentInstanceId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("EquipmentSetId")
-                        .HasMaxLength(160)
-                        .HasColumnType("character varying(160)");
-
                     b.Property<bool>("IsLevelingItem")
                         .HasColumnType("boolean");
 
@@ -5876,10 +5875,6 @@ namespace Persistence.LL.Migrations
                     b.Property<string>("CraftedName")
                         .HasColumnType("text");
 
-                    b.Property<string>("EquipmentSetId")
-                        .HasMaxLength(160)
-                        .HasColumnType("character varying(160)");
-
                     b.Property<bool>("IsFavorite")
                         .HasColumnType("boolean");
 
@@ -5918,8 +5913,6 @@ namespace Persistence.LL.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("xid")
                         .HasColumnName("xmin");
-
-                    b.HasIndex("EquipmentSetId");
 
                     b.HasDiscriminator().HasValue(0);
                 });

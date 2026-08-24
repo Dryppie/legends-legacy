@@ -84,6 +84,7 @@ public class CraftingRepository : ICraftingRepository
             characterAction.IsDeleted = true;
             characterAction.ActionDetails = null;
             characterAction.NextResolutionAtUtc = null;
+            characterAction.ReturnToCombatAreaId = null;
             characterAction.BlockedUntilUtc = characterAction.BlockedUntilUtc > now
                 ? characterAction.BlockedUntilUtc
                 : null;

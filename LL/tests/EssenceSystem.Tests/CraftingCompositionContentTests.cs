@@ -36,6 +36,46 @@ public sealed class CraftingCompositionContentTests
     }
 
     [Fact]
+    public void ProviderLoadsAndResolvesBlueprintEquipmentSetMembership()
+    {
+        var temporaryRoot = CreateTemporaryDataRoot(includeEquipmentSet: true);
+
+        try
+        {
+            var provider = CreateProvider(temporaryRoot);
+
+            var equipmentSet = Assert.Single(provider.GetEquipmentSets());
+            Assert.Equal("set.test", equipmentSet.Id);
+            Assert.Equal("Test Set", equipmentSet.Name);
+            Assert.Equal("set.test", provider.GetBlueprint("blueprint_fury")?.EquipmentSetId);
+            Assert.Same(equipmentSet, provider.GetEquipmentSet("SET.TEST"));
+        }
+        finally
+        {
+            Directory.Delete(temporaryRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void ProviderRejectsBlueprintWithMissingEquipmentSet()
+    {
+        var temporaryRoot = CreateTemporaryDataRoot(includeEquipmentSet: false);
+
+        try
+        {
+            var provider = CreateProvider(temporaryRoot);
+
+            var exception = Assert.Throws<InvalidOperationException>(provider.GetBlueprints);
+
+            Assert.Contains("references missing equipment set 'set.test'", exception.Message);
+        }
+        finally
+        {
+            Directory.Delete(temporaryRoot, recursive: true);
+        }
+    }
+
+    [Fact]
     public void CraftingFamiliesContainOnlyTheRequestedRecipes()
     {
         var recipes = CreateProvider().GetRecipes();
@@ -523,13 +563,60 @@ public sealed class CraftingCompositionContentTests
     }
 
     private static JsonCraftingDefinitionProvider CreateProvider()
+        => CreateProvider(FindDataRoot());
+
+    private static JsonCraftingDefinitionProvider CreateProvider(string dataRoot)
     {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?> { ["Content:Root"] = "." })
             .Build();
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         options.Converters.Add(new JsonStringEnumConverter());
-        return new JsonCraftingDefinitionProvider(configuration, FindDataRoot(), options);
+        return new JsonCraftingDefinitionProvider(configuration, dataRoot, options);
+    }
+
+    private static string CreateTemporaryDataRoot(bool includeEquipmentSet)
+    {
+        var sourceRoot = FindDataRoot();
+        var temporaryRoot = Path.Combine(
+            Path.GetTempPath(),
+            $"legends-legacy-equipment-set-tests-{Guid.NewGuid():N}");
+        var craftingRoot = Path.Combine(temporaryRoot, "crafting");
+        var itemsRoot = Path.Combine(temporaryRoot, "items");
+        Directory.CreateDirectory(craftingRoot);
+        Directory.CreateDirectory(itemsRoot);
+
+        foreach (var fileName in new[] { "materials.json", "base-recipes.json" })
+        {
+            File.Copy(
+                Path.Combine(sourceRoot, "crafting", fileName),
+                Path.Combine(craftingRoot, fileName));
+        }
+
+        File.Copy(
+            Path.Combine(sourceRoot, "items", "items.json"),
+            Path.Combine(itemsRoot, "items.json"));
+
+        var blueprints = JsonNode.Parse(File.ReadAllText(
+            Path.Combine(sourceRoot, "crafting", "blueprints.json")))!.AsArray();
+        blueprints[0]!["equipmentSetId"] = "set.test";
+        File.WriteAllText(
+            Path.Combine(craftingRoot, "blueprints.json"),
+            blueprints.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+
+        var equipmentSets = includeEquipmentSet
+            ? new JsonArray(new JsonObject
+            {
+                ["id"] = "set.test",
+                ["name"] = "Test Set",
+                ["description"] = "Test equipment-set metadata."
+            })
+            : [];
+        File.WriteAllText(
+            Path.Combine(craftingRoot, "equipment-sets.json"),
+            equipmentSets.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+
+        return temporaryRoot;
     }
 
     private static string FindDataRoot()
