@@ -77,7 +77,7 @@ public sealed class ChampionMarketCatalogTests
         Assert.All(
             items.Where(item => item.Category == "Title"),
             item => Assert.Contains(item.RewardTitleKey!, titleKeys));
-        Assert.Equal(4, CatalystSelectionCrateCatalog.Options.Count);
+        Assert.Equal(11, CatalystSelectionCrateCatalog.Options.Count);
         Assert.All(CatalystSelectionCrateCatalog.Options, option => Assert.Equal(6, option.Quantity));
         var crateItem = itemDocument.RootElement
             .EnumerateArray()
@@ -105,35 +105,16 @@ public sealed class ChampionMarketCatalogTests
     }
 
     [Fact]
-    public void CatalystSelectionCacheMatchesAllRegionOneDungeonBlueprintRequirements()
+    public void CatalystSelectionCacheMatchesAllBlueprintRequirementsExceptRaidforgedAndGravebound()
     {
         var apiRoot = TestContentPaths.FindApiRoot();
-        using var dungeonDocument = JsonDocument.Parse(File.ReadAllText(
-            Path.Combine(apiRoot, "Data", "dungeons", "dungeons.json")));
         using var blueprintDocument = JsonDocument.Parse(File.ReadAllText(
             Path.Combine(apiRoot, "Data", "crafting", "blueprints.json")));
 
-        var regionOneDungeonIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var regionOneBlueprintItemIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var family in dungeonDocument.RootElement.GetProperty("families").EnumerateArray())
-        {
-            if (family.GetProperty("region").GetInt32() != 1) continue;
-
-            regionOneDungeonIds.Add(family.GetProperty("id").GetString()!);
-            foreach (var difficulty in family.GetProperty("difficulties").EnumerateArray())
-            {
-                var rewards = difficulty.GetProperty("rewardTable");
-                AddBlueprintRewards(rewards.GetProperty("firstClearRewards"));
-                AddBlueprintRewards(rewards.GetProperty("completionRewards"));
-            }
-        }
-
         var requiredCatalystItemIds = blueprintDocument.RootElement
             .EnumerateArray()
-            .Where(blueprint =>
-                blueprint.GetProperty("sourceType").GetString() == "Dungeon" &&
-                regionOneDungeonIds.Contains(blueprint.GetProperty("sourceId").GetString()!) &&
-                regionOneBlueprintItemIds.Contains(blueprint.GetProperty("itemId").GetString()!))
+            .Where(blueprint => blueprint.GetProperty("id").GetString() is not
+                "blueprint_raidforged" and not "blueprint_gravebound")
             .SelectMany(blueprint => blueprint
                 .GetProperty("additionalMaterialRequirements")
                 .EnumerateArray()
@@ -146,17 +127,5 @@ public sealed class ChampionMarketCatalogTests
             CatalystSelectionCrateCatalog.Options
                 .Select(option => option.ItemId)
                 .OrderBy(itemId => itemId, StringComparer.OrdinalIgnoreCase));
-
-        void AddBlueprintRewards(JsonElement rewards)
-        {
-            foreach (var reward in rewards.EnumerateArray())
-            {
-                var itemId = reward.GetProperty("itemId").GetString();
-                if (itemId?.StartsWith("blueprint_", StringComparison.OrdinalIgnoreCase) == true)
-                {
-                    regionOneBlueprintItemIds.Add(itemId);
-                }
-            }
-        }
     }
 }
