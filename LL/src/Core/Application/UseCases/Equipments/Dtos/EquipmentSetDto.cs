@@ -10,6 +10,7 @@ public sealed class EquipmentSetDto
     public string Id { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;
     public string Description { get; init; } = string.Empty;
+    public IReadOnlyList<EquipmentSetBonusDto> Bonuses { get; init; } = [];
 
     public static EquipmentSetDto? FromDefinition(EquipmentSetDefinition? definition) =>
         definition is null
@@ -18,8 +19,25 @@ public sealed class EquipmentSetDto
             {
                 Id = definition.Id,
                 Name = definition.Name,
-                Description = definition.Description
+                Description = definition.Description,
+                Bonuses = definition.Bonuses
+                    .Where(bonus => bonus.Enabled)
+                    .OrderBy(bonus => bonus.RequiredEquippedItems)
+                    .Select(bonus => new EquipmentSetBonusDto
+                    {
+                        Id = bonus.Id,
+                        RequiredEquippedItems = bonus.RequiredEquippedItems,
+                        Description = bonus.Description
+                    })
+                    .ToArray()
             };
+}
+
+public sealed class EquipmentSetBonusDto
+{
+    public string Id { get; init; } = string.Empty;
+    public int RequiredEquippedItems { get; init; }
+    public string Description { get; init; } = string.Empty;
 }
 
 public sealed class EquipmentSetMetadataResolver

@@ -49,14 +49,18 @@ public static class AttributeCalculator
     }
 
     // Calculates all combat attributes for a given entity - used to initialize players before combat
-    public static void CalculateBaseCombatAttributes(CombatEntity entity)
+    public static void CalculateBaseCombatAttributes(
+        CombatEntity entity,
+        IEnumerable<AttributeModifierBase>? additionalBaseModifiers = null)
     {
         entity.BaseCombatAttributes.Clear();
         entity.CombatAttributes.Clear();
         // Convert raw attributes to a dictionary for quick access
         var baseAttributes = entity.BaseAttributes.ToDictionary(a => a.AttributeType, a => a.Value);
         AddUniversalBaseAttributes(baseAttributes);
-        var equipmentModifiers = ProjectEquipmentModifiers(entity.Equipment, entity.Level);
+        var equipmentModifiers = ProjectEquipmentModifiers(entity.Equipment, entity.Level)
+            .Concat(additionalBaseModifiers ?? [])
+            .ToArray();
 
         foreach (var (attributeType, attributeValue) in CalculateUncappedProjectedAttributes(baseAttributes, equipmentModifiers))
             entity.BaseCombatAttributes[attributeType] = attributeValue;

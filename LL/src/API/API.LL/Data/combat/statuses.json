@@ -444,5 +444,16 @@
     "tags": ["Status.Buff", "Pattern.HealthThreshold", "Pattern.TimedBuff"],
     "triggers": [],
     "effects": []
+  },
+  {
+    "id": "status.set.fury",
+    "name": "Fury",
+    "description": "Each stack increases Power by 2%.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 5,
+    "durationTicks": 50,
+    "tags": ["Status.Buff", "Set.Fury", "Status.Stack"],
+    "triggers": [],
+    "effects": []
   }
 ]

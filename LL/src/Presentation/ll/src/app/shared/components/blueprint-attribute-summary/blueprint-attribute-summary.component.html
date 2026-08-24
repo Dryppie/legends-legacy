@@ -9,6 +9,17 @@
   <p *ngIf="equipmentSet.description" class="mt-1 text-xs text-secondary">
     {{ equipmentSet.description }}
   </p>
+  <div *ngIf="equipmentSet.bonuses.length" class="mt-2 space-y-1">
+    <div
+      *ngFor="let bonus of equipmentSet.bonuses"
+      class="text-xs text-secondary"
+    >
+      <span class="font-medium text-primary"
+        >{{ bonus.requiredEquippedItems }} items:</span
+      >
+      {{ bonus.description }}
+    </div>
+  </div>
 </div>
 
 <div *ngIf="contributedAttributes.length" class="mt-3">

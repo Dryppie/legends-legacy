@@ -1,8 +1,11 @@
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.Professions;
 using Domain.Components.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
+using Domain.Models.Items.Equipments.Sets;
 
 namespace Services.LL.Entities.Characters;
 
@@ -11,15 +14,18 @@ public class CharacterService : ICharacterService
     private readonly ICharacterRepository _characterRepository;
     private readonly IEssenceCombatLoadoutResolver _essenceLoadouts;
     private readonly ICharacterExperienceProgressionProvider _experienceProgression;
+    private readonly ICraftingDefinitionProvider? _craftingDefinitions;
 
     public CharacterService(
         ICharacterRepository characterRepository,
         IEssenceCombatLoadoutResolver essenceLoadouts,
-        ICharacterExperienceProgressionProvider experienceProgression)
+        ICharacterExperienceProgressionProvider experienceProgression,
+        ICraftingDefinitionProvider? craftingDefinitions = null)
     {
         _characterRepository = characterRepository;
         _essenceLoadouts = essenceLoadouts;
         _experienceProgression = experienceProgression;
+        _craftingDefinitions = craftingDefinitions;
     }
 
     public async Task<Character> CreateCharacterAsync(Guid userId, string username, CancellationToken cancellationToken)
@@ -99,7 +105,19 @@ public class CharacterService : ICharacterService
             .Cast<Domain.Models.Essences.PlayerEssence>()
             .ToList() ?? [];
         var loadout = _essenceLoadouts.Resolve(character.Id, equippedEssences);
-        AttributeCalculator.CalculateBaseAttributes(character, loadout.AttributeModifiers);
+        var equipment = character.EquipmentSlots
+            .Where(slot => slot.EquipmentInstance is not null)
+            .Select(slot => slot.EquipmentInstance!)
+            .DistinctBy(item => item.Id)
+            .ToArray();
+        IReadOnlyList<AttributeModifierBase> setModifiers = _craftingDefinitions is null
+            ? Array.Empty<AttributeModifierBase>()
+            : EquipmentSetBonusResolver.ResolveAttributeModifiers(
+                equipment,
+                _craftingDefinitions.GetEquipmentSets());
+        AttributeCalculator.CalculateBaseAttributes(
+            character,
+            loadout.AttributeModifiers.Concat(setModifiers));
     }
 
     private void SetExperienceRequirement(Character? character)

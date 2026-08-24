@@ -1,1 +1,263 @@
-[]
+[
+  {
+    "id": "set_fury",
+    "name": "Fury",
+    "description": "Critical hits build short-lived offensive momentum.",
+    "bonuses": [
+      {
+        "id": "kindling",
+        "requiredEquippedItems": 2,
+        "description": "+5% Crit Chance.",
+        "attributeModifiers": [
+          { "attributeType": "CritChance", "amount": 5, "modifierType": "Flat" }
+        ]
+      },
+      {
+        "id": "unbound_fury",
+        "requiredEquippedItems": 4,
+        "description": "Direct critical hits grant Fury for 5 seconds, up to five stacks. Each stack increases Power by 2%.",
+        "grantedAbilityIds": ["ability.set.fury.unbound_fury"]
+      }
+    ]
+  },
+  {
+    "id": "set_arcane",
+    "name": "Arcane",
+    "description": "Repeated active ability use creates controlled burst windows.",
+    "bonuses": [
+      {
+        "id": "arcane_attunement",
+        "requiredEquippedItems": 2,
+        "description": "+5% Magic Penetration and +3% Cooldown Reduction.",
+        "attributeModifiers": [
+          { "attributeType": "MagicPenetration", "amount": 5, "modifierType": "Flat" },
+          { "attributeType": "Cooldown", "amount": 3, "modifierType": "Flat" }
+        ]
+      },
+      {
+        "id": "arcane_surge",
+        "requiredEquippedItems": 4,
+        "description": "Every third active ability reduces current cooldowns by 1 second and grants 12% of current Power for 6 seconds.",
+        "grantedAbilityIds": ["ability.set.arcane.arcane_surge"]
+      }
+    ]
+  },
+  {
+    "id": "set_execution",
+    "name": "Execution",
+    "description": "Specializes in ending enemies that have already been wounded.",
+    "bonuses": [
+      {
+        "id": "find_the_opening",
+        "requiredEquippedItems": 2,
+        "description": "+6% Armor Penetration and +8% Crit Damage.",
+        "attributeModifiers": [
+          { "attributeType": "ArmorPenetration", "amount": 6, "modifierType": "Flat" },
+          { "attributeType": "CritDamage", "amount": 8, "modifierType": "Flat" }
+        ]
+      },
+      {
+        "id": "no_escape",
+        "requiredEquippedItems": 4,
+        "description": "Deal 18% more damage to enemies at or below 30% Health.",
+        "grantedAbilityIds": ["ability.set.execution.no_escape"]
+      }
+    ]
+  },
+  {
+    "id": "set_aegis",
+    "name": "Aegis",
+    "description": "Defenses become stronger while protected by a barrier.",
+    "bonuses": [
+      {
+        "id": "fortified",
+        "requiredEquippedItems": 2,
+        "description": "+10% total Armor and Resistance rating.",
+        "attributeModifiers": [
+          { "attributeType": "Armor", "amount": 10, "modifierType": "Multiplicative" },
+          { "attributeType": "Resistance", "amount": 10, "modifierType": "Multiplicative" }
+        ]
+      },
+      {
+        "id": "raised_aegis",
+        "requiredEquippedItems": 4,
+        "description": "At combat start, gain a barrier equal to 10% of Max Health.",
+        "grantedAbilityIds": ["ability.set.aegis.raised_aegis"]
+      },
+      {
+        "id": "behind_the_shield",
+        "requiredEquippedItems": 6,
+        "description": "Take 10% less damage while any barrier remains.",
+        "grantedAbilityIds": ["ability.set.aegis.behind_the_shield"]
+      }
+    ]
+  },
+  {
+    "id": "set_warden",
+    "name": "Warden",
+    "description": "Stabilizes after taking sustained pressure.",
+    "bonuses": [
+      {
+        "id": "deep_roots",
+        "requiredEquippedItems": 2,
+        "description": "+10% total Max Health.",
+        "attributeModifiers": [
+          { "attributeType": "MaxHealth", "amount": 10, "modifierType": "Multiplicative" }
+        ]
+      },
+      {
+        "id": "unyielding_growth",
+        "requiredEquippedItems": 4,
+        "description": "+25% total Health Regen and +5% Crowd Control Resistance.",
+        "attributeModifiers": [
+          { "attributeType": "HealthRegeneration", "amount": 25, "modifierType": "Multiplicative" },
+          { "attributeType": "CrowdControlResistance", "amount": 5, "modifierType": "Flat" }
+        ]
+      },
+      {
+        "id": "wardens_refuge",
+        "requiredEquippedItems": 6,
+        "description": "Falling to 40% Health grants Renewal and 15% damage reduction for 8 seconds. 30-second cooldown.",
+        "grantedAbilityIds": ["ability.set.warden.wardens_refuge"]
+      }
+    ]
+  },
+  {
+    "id": "set_endurance",
+    "name": "Endurance",
+    "description": "Outlasts attrition and harmful control effects.",
+    "bonuses": [
+      {
+        "id": "second_wind",
+        "requiredEquippedItems": 2,
+        "description": "+25% total Health Regen.",
+        "attributeModifiers": [
+          { "attributeType": "HealthRegeneration", "amount": 25, "modifierType": "Multiplicative" }
+        ]
+      },
+      {
+        "id": "weather_the_storm",
+        "requiredEquippedItems": 4,
+        "description": "+8% total Max Health and +5% Status Resistance.",
+        "attributeModifiers": [
+          { "attributeType": "MaxHealth", "amount": 8, "modifierType": "Multiplicative" },
+          { "attributeType": "StatusResistance", "amount": 5, "modifierType": "Flat" }
+        ]
+      },
+      {
+        "id": "tested_resolve",
+        "requiredEquippedItems": 6,
+        "description": "+10% Status Resistance and +10% Crowd Control Resistance.",
+        "attributeModifiers": [
+          { "attributeType": "StatusResistance", "amount": 10, "modifierType": "Flat" },
+          { "attributeType": "CrowdControlResistance", "amount": 10, "modifierType": "Flat" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "set_phoenix",
+    "name": "Phoenix",
+    "description": "Recovery becomes stronger while wounded and culminates in a once-per-combat rebirth.",
+    "bonuses": [
+      {
+        "id": "warmth_of_embers",
+        "requiredEquippedItems": 2,
+        "description": "+8% Healing Power.",
+        "attributeModifiers": [
+          { "attributeType": "HealingPowerPercent", "amount": 8, "modifierType": "Flat" }
+        ]
+      },
+      {
+        "id": "rising_flame",
+        "requiredEquippedItems": 4,
+        "description": "Receive 15% more healing while below 50% Health.",
+        "grantedAbilityIds": ["ability.set.phoenix.rising_flame"]
+      },
+      {
+        "id": "rebirth",
+        "requiredEquippedItems": 6,
+        "description": "Once per combat, falling to 20% Health restores 25% Max Health and grants Renewal for 8 seconds.",
+        "grantedAbilityIds": ["ability.set.phoenix.rebirth"]
+      }
+    ]
+  },
+  {
+    "id": "set_spirit",
+    "name": "Spirit",
+    "description": "Converts sustained healing into protection for allies.",
+    "bonuses": [
+      {
+        "id": "gentle_current",
+        "requiredEquippedItems": 2,
+        "description": "+8% Healing Power.",
+        "attributeModifiers": [
+          { "attributeType": "HealingPowerPercent", "amount": 8, "modifierType": "Flat" }
+        ]
+      },
+      {
+        "id": "clear_mind",
+        "requiredEquippedItems": 4,
+        "description": "+5% Cooldown Reduction and +10% total Resistance rating.",
+        "attributeModifiers": [
+          { "attributeType": "Cooldown", "amount": 5, "modifierType": "Flat" },
+          { "attributeType": "Resistance", "amount": 10, "modifierType": "Multiplicative" }
+        ]
+      },
+      {
+        "id": "sheltering_spirit",
+        "requiredEquippedItems": 6,
+        "description": "Directly healing another ally grants them a barrier equal to 5% of their Max Health. 4-second cooldown.",
+        "grantedAbilityIds": ["ability.set.spirit.sheltering_spirit"]
+      }
+    ]
+  },
+  {
+    "id": "set_primal",
+    "name": "Primal",
+    "description": "The wearer and their owned summons reinforce one another.",
+    "bonuses": [
+      {
+        "id": "primal_vigor",
+        "requiredEquippedItems": 2,
+        "description": "+6% total Power and Max Health.",
+        "attributeModifiers": [
+          { "attributeType": "Power", "amount": 6, "modifierType": "Multiplicative" },
+          { "attributeType": "MaxHealth", "amount": 6, "modifierType": "Multiplicative" }
+        ]
+      },
+      {
+        "id": "strength_of_the_pack",
+        "requiredEquippedItems": 4,
+        "description": "Each living owned summon grants 4% of initial Power, up to three. At least one also grants 8% Crowd Control Resistance.",
+        "grantedAbilityIds": ["ability.set.primal.strength_of_the_pack"]
+      }
+    ]
+  },
+  {
+    "id": "set_venom",
+    "name": "Venom",
+    "description": "Two equipped Venom weapons turn direct hits into reliable Poison buildup.",
+    "bonuses": [
+      {
+        "id": "venomous_assault",
+        "requiredEquippedItems": 2,
+        "description": "Direct hits apply Poison. Targets at five Poison stacks also receive Corrosion.",
+        "grantedAbilityIds": ["ability.set.venom.venomous_assault"]
+      }
+    ]
+  },
+  {
+    "id": "set_hive",
+    "name": "Hive",
+    "description": "Rapid basic attacks hatch a temporary combat summon.",
+    "bonuses": [
+      {
+        "id": "brood_cycle",
+        "requiredEquippedItems": 2,
+        "description": "Every fifth basic attack summons a Hive Drone for 12 seconds. Only one can be active.",
+        "grantedAbilityIds": ["ability.set.hive.brood_cycle"]
+      }
+    ]
+  }
+]

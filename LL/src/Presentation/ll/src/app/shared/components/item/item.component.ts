@@ -128,6 +128,12 @@ export class ItemComponent {
     );
   }
 
+  get equippedItems(): EquipmentInstance[] {
+    return this.equipmentState
+      .equipmentSlots()
+      .flatMap((slot) => (slot.equipmentInstance ? [slot.equipmentInstance] : []));
+  }
+
   get rarityClasses() {
     switch (this.rarity) {
       case Rarity.Common:

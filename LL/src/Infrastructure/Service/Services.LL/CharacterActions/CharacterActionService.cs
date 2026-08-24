@@ -156,7 +156,7 @@ public class CharacterActionService : ICharacterActionService
         return characterAction;
     }
 
-    private async Task<CombatSession> HandleCombatActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task<CombatSession?> HandleCombatActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
         return await _combatService.PerformIdleCombatAsync(characterAction, now, cancellationToken);
     }

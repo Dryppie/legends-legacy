@@ -62,6 +62,21 @@ describe('CombatService', () => {
     expect(state.getCombatResult(BattleType.IdleCombat)()).toBe(idleResult);
   });
 
+  it('keeps the last idle encounter when a zero-encounter result arrives', () => {
+    const displayedResult = combatResult(BattleType.IdleCombat);
+    service.startCombatSimulation(combatAction(displayedResult));
+
+    const emptyResult = combatResult(BattleType.IdleCombat);
+    emptyResult.playerTeam = [];
+    emptyResult.enemyTeam = [];
+    service.startCombatSimulation(combatAction(emptyResult));
+
+    expect(state.getIsCombatActive(BattleType.IdleCombat)()).toBeTrue();
+    expect(state.getCombatResult(BattleType.IdleCombat)()).toBe(
+      displayedResult,
+    );
+  });
+
   it('opens and closes a Tower combat result in its own state slot', () => {
     const result = combatResult(BattleType.Tower);
 

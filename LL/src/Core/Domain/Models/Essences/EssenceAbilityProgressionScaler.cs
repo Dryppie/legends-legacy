@@ -215,6 +215,7 @@ public static class EssenceAbilityProgressionScaler
             Condition = effect.Condition,
             AlternativeCondition = effect.AlternativeCondition,
             SummonId = effect.SummonId,
+            CountAllOwnedSummons = effect.CountAllOwnedSummons,
             RepeatCount = effect.RepeatCount,
             HealthStepPercent = effect.HealthStepPercent,
             RepeatPerOwnedSummonId = effect.RepeatPerOwnedSummonId,

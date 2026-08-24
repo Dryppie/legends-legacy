@@ -8,6 +8,7 @@ using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Damages;
 using Domain.Models.Professions.Crafting.V2;
+using Domain.Models.Items.Equipments.Sets;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces.Combat.Resolution;
 using Common.Randomness;
@@ -924,6 +925,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             Condition = effect.Condition,
             AlternativeCondition = effect.AlternativeCondition,
             SummonId = effect.SummonId,
+            CountAllOwnedSummons = effect.CountAllOwnedSummons,
             RepeatCount = effect.RepeatCount,
             HealthStepPercent = effect.HealthStepPercent,
             RepeatPerOwnedSummonId = effect.RepeatPerOwnedSummonId,
@@ -979,6 +981,17 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         {
             if (selected.Add(abilityId))
                 yield return abilityId;
+        }
+
+        if (_craftingDefinitions is not null)
+        {
+            foreach (var abilityId in EquipmentSetBonusResolver.ResolveGrantedAbilityIds(
+                         combatant.Equipment,
+                         _craftingDefinitions.GetEquipmentSets()))
+            {
+                if (selected.Add(abilityId))
+                    yield return abilityId;
+            }
         }
 
         foreach (var essenceId in GetEquippedEssenceIds(combatant))

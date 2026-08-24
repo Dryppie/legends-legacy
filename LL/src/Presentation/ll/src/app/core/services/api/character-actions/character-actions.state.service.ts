@@ -689,9 +689,14 @@ export class CharacterActionsStateService {
     // is already on screen at the same boundary.
     return (
       candidateBoundary === currentBoundary &&
-      !!current.combatSession?.combatResult &&
-      !candidate.combatSession?.combatResult
+      this.hasRenderableCombatResult(current) &&
+      !this.hasRenderableCombatResult(candidate)
     );
+  }
+
+  private hasRenderableCombatResult(action: CharacterActionDto): boolean {
+    const result = action.combatSession?.combatResult;
+    return !!result?.playerTeam?.length && !!result.enemyTeam?.length;
   }
 
   private getActionUpdateKey(action: CharacterActionDto | null): string | null {

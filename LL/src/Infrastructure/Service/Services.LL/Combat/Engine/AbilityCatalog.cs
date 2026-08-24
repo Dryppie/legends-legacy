@@ -406,10 +406,19 @@ public static class AbilityCatalogValidator
 
             if (effect.Operation == AbilityEffectOperation.SynchronizeAttributePerOwnedSummon)
             {
-                if (string.IsNullOrWhiteSpace(effect.SummonId))
+                if (string.IsNullOrWhiteSpace(effect.SummonId) && !effect.CountAllOwnedSummons)
                     errors.Add($"{label}: SynchronizeAttributePerOwnedSummon requires summonId.");
-                if (effect.BaseValue == 0)
-                    errors.Add($"{label}: SynchronizeAttributePerOwnedSummon requires a non-zero baseValue.");
+                if (effect.CountAllOwnedSummons && !string.IsNullOrWhiteSpace(effect.SummonId))
+                    errors.Add($"{label}: countAllOwnedSummons cannot be combined with summonId.");
+                if (effect.BaseValue == 0 && Math.Abs(effect.ScalingCoefficient) <= float.Epsilon)
+                    errors.Add($"{label}: SynchronizeAttributePerOwnedSummon requires a non-zero baseValue or scalingCoefficient.");
+            }
+
+            if (effect.Operation == AbilityEffectOperation.ModifyDamageDealtToLowHealth
+                && effect.HealthStepPercent is <= 0 or > 100)
+            {
+                errors.Add(
+                    $"{label}: ModifyDamageDealtToLowHealth requires healthStepPercent between 1 and 100.");
             }
 
             if (effect.Operation == AbilityEffectOperation.SynchronizeAttributePerStatusStack

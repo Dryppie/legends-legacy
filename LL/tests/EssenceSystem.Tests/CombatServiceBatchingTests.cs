@@ -39,7 +39,8 @@ public sealed class CombatServiceBatchingTests
         Assert.Equal(250, action.ProcessedCount);
         Assert.False(action.HasMoreDueWork);
         Assert.Equal(FirstBoundary.AddSeconds(2_500), action.NextResolutionAtUtc);
-        Assert.Equal(250, session.CombatSummary.TotalBattles);
+        Assert.NotNull(session);
+        Assert.Equal(250, session!.CombatSummary.TotalBattles);
         Assert.Equal(250, session.CombatSummary.TotalExperience);
         Assert.Equal(250, session.CombatResult.ExperienceGained);
         Assert.Equal(250, Assert.Single(session.CombatResult.Loot).Quantity);
@@ -67,7 +68,8 @@ public sealed class CombatServiceBatchingTests
         Assert.Equal([false, true], coordinator.CaptureLogRequests);
         Assert.Equal(200, action.ProcessedCount);
         Assert.True(action.HasMoreDueWork);
-        Assert.Equal(200, session.CombatSummary.TotalBattles);
+        Assert.NotNull(session);
+        Assert.Equal(200, session!.CombatSummary.TotalBattles);
     }
 
     [Fact]
@@ -90,7 +92,29 @@ public sealed class CombatServiceBatchingTests
         Assert.True(coordinator.CaptureLogRequests[^1]);
         Assert.Equal(8_641, action.ProcessedCount);
         Assert.False(action.HasMoreDueWork);
-        Assert.Equal(8_641, session.CombatSummary.TotalBattles);
+        Assert.NotNull(session);
+        Assert.Equal(8_641, session!.CombatSummary.TotalBattles);
+    }
+
+    [Fact]
+    public async Task Early_resolution_returns_no_session_and_skips_the_outcome_pipeline()
+    {
+        var coordinator = new BatchingCoordinator(batchSize: 100, cadenceSeconds: 10);
+        var outcome = new OutcomeCoordinatorStub();
+        var service = CreateService(coordinator, outcome, maximumBatches: 10);
+        var action = CreateAction();
+
+        var session = await service.PerformIdleCombatAsync(
+            action,
+            FirstBoundary.AddMilliseconds(-1),
+            CancellationToken.None);
+
+        Assert.Null(session);
+        Assert.Equal(1, coordinator.CallCount);
+        Assert.Equal(0, outcome.CallCount);
+        Assert.Equal(0, action.ProcessedCount);
+        Assert.False(action.HasMoreDueWork);
+        Assert.Equal(FirstBoundary, action.NextResolutionAtUtc);
     }
 
     private static CombatService CreateService(

@@ -819,6 +819,16 @@ export class InventoryComponent implements OnInit {
     return equipped && equipped.id !== item.itemInstance.id ? equipped : null;
   }
 
+  get equippedItems(): EquipmentInstance[] {
+    return (
+      this.equipmentState
+        ?.equipmentSlots()
+        .flatMap((slot) =>
+          slot.equipmentInstance ? [slot.equipmentInstance] : [],
+        ) ?? []
+    );
+  }
+
   gearPowerDifference(item: InventoryItem): number | null {
     const equipment = this.equipmentInstance(item);
     const equipped = this.comparisonEquipmentFor(item);

@@ -70,6 +70,7 @@
     ],
     "sourceType": "Dungeon",
     "sourceId": "goblin_mines",
+    "equipmentSetId": "set_fury",
     "tags": [
       "Fury",
       "Physical",
@@ -160,6 +161,7 @@
     ],
     "sourceType": "Dungeon",
     "sourceId": "forgotten_catacombs",
+    "equipmentSetId": "set_arcane",
     "tags": [
       "Arcane",
       "Magic",
@@ -239,6 +241,7 @@
     ],
     "sourceType": "Dungeon",
     "sourceId": "tangled_cave",
+    "equipmentSetId": "set_execution",
     "tags": [
       "Execution",
       "Physical",
@@ -330,6 +333,7 @@
     ],
     "sourceType": "Dungeon",
     "sourceId": "great_tree",
+    "equipmentSetId": "set_aegis",
     "tags": [
       "Aegis",
       "Defensive",
@@ -420,6 +424,7 @@
     ],
     "sourceType": "Dungeon",
     "sourceId": "great_tree",
+    "equipmentSetId": "set_warden",
     "tags": [
       "Warden",
       "Support",
@@ -509,6 +514,7 @@
     ],
     "sourceType": "Dungeon",
     "sourceId": "forgotten_catacombs",
+    "equipmentSetId": "set_endurance",
     "tags": [
       "Endurance",
       "Sustain",
@@ -598,6 +604,7 @@
     ],
     "sourceType": "Dungeon",
     "sourceId": "goblin_mines",
+    "equipmentSetId": "set_phoenix",
     "tags": [
       "Phoenix",
       "Fire",
@@ -689,6 +696,7 @@
     ],
     "sourceType": "Dungeon",
     "sourceId": "great_tree",
+    "equipmentSetId": "set_spirit",
     "tags": [
       "HealingPowerPercent",
       "Support",
@@ -769,6 +777,7 @@
     ],
     "sourceType": "Dungeon",
     "sourceId": "great_tree",
+    "equipmentSetId": "set_primal",
     "tags": [
       "Primal",
       "Nature",
@@ -856,6 +865,7 @@
     ],
     "sourceType": "Dungeon",
     "sourceId": "tangled_cave",
+    "equipmentSetId": "set_venom",
     "tags": [
       "Venom",
       "Poison",
@@ -944,6 +954,7 @@
     ],
     "sourceType": "Dungeon",
     "sourceId": "tangled_cave",
+    "equipmentSetId": "set_hive",
     "tags": [
       "Hive",
       "Chitin",

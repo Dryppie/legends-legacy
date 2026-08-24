@@ -350,79 +350,6 @@
           </div>
         </button>
 
-        <section *ngIf="readyToLearnBlueprints().length" class="space-y-2">
-          <div class="flex items-center gap-3">
-            <h3
-              class="shrink-0 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-primary"
-            >
-              Ready to learn
-            </h3>
-            <div class="h-px flex-1 bg-primary/20"></div>
-            <span class="shrink-0 text-[0.65rem] text-secondary">
-              Blueprint available
-            </span>
-          </div>
-
-          <article
-            *ngFor="
-              let blueprint of readyToLearnBlueprints();
-              trackBy: trackByBlueprint
-            "
-            class="w-full cursor-pointer rounded-md border border-dashed border-sky-400/35 bg-sky-400/[0.025] p-2 text-left transition-colors hover:bg-sky-400/[0.055] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-            [ngClass]="{
-              'ring-1 ring-primary/60':
-                selectedBlueprint()?.id === blueprint.id,
-            }"
-            role="button"
-            tabindex="0"
-            (click)="selectBlueprint(blueprint)"
-            (keydown.enter)="selectBlueprint(blueprint)"
-          >
-            <div class="flex items-center justify-between gap-3 px-2 py-1">
-              <div
-                class="flex min-w-0 items-center gap-2 truncate text-xs font-semibold uppercase tracking-wide text-sky-300"
-              >
-                <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-sky-300"></span>
-                <span class="truncate">{{ blueprint.name }}</span>
-              </div>
-              <span class="truncate text-right text-xs text-secondary">
-                {{ blueprintSourceLabel(blueprint) }}
-              </span>
-            </div>
-
-            <div
-              class="mt-2 flex w-full items-center justify-between gap-3 rounded bg-white/[0.035] p-3 text-left transition-colors hover:bg-white/[0.06]"
-            >
-              <div class="min-w-0">
-                <div class="truncate font-semibold text-white">
-                  {{ blueprint.craftedItemName }}
-                </div>
-                <div class="mt-0.5 truncate text-xs text-secondary">
-                  {{ blueprint.description }}
-                </div>
-              </div>
-
-              <div class="shrink-0 text-right">
-                <button
-                  type="button"
-                  class="ll-button px-3 py-1.5 text-xs font-semibold uppercase"
-                  [disabled]="learningBlueprintId()"
-                  (click)="$event.stopPropagation(); learnBlueprint(blueprint)"
-                >
-                  {{
-                    learningBlueprintId() === blueprint.id
-                      ? "Learning..."
-                      : "Learn Blueprint"
-                  }}
-                </button>
-                <div class="mt-1 text-[0.65rem] text-secondary">
-                  {{ blueprintAvailabilityLabel(blueprint) }}
-                </div>
-              </div>
-            </div>
-          </article>
-        </section>
-
         <section *ngIf="learnedBlueprints().length" class="space-y-2">
           <div class="flex items-center gap-3">
             <h3
@@ -494,6 +421,79 @@
                   class="mt-1 text-[0.65rem] text-secondary"
                 >
                   {{ missingBlueprintMaterialsLabel(blueprint) }}
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section *ngIf="readyToLearnBlueprints().length" class="space-y-2">
+          <div class="flex items-center gap-3">
+            <h3
+              class="shrink-0 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-primary"
+            >
+              Ready to learn
+            </h3>
+            <div class="h-px flex-1 bg-primary/20"></div>
+            <span class="shrink-0 text-[0.65rem] text-secondary">
+              Blueprint available
+            </span>
+          </div>
+
+          <article
+            *ngFor="
+              let blueprint of readyToLearnBlueprints();
+              trackBy: trackByBlueprint
+            "
+            class="w-full cursor-pointer rounded-md border border-dashed border-sky-400/35 bg-sky-400/[0.025] p-2 text-left transition-colors hover:bg-sky-400/[0.055] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+            [ngClass]="{
+              'ring-1 ring-primary/60':
+                selectedBlueprint()?.id === blueprint.id,
+            }"
+            role="button"
+            tabindex="0"
+            (click)="selectBlueprint(blueprint)"
+            (keydown.enter)="selectBlueprint(blueprint)"
+          >
+            <div class="flex items-center justify-between gap-3 px-2 py-1">
+              <div
+                class="flex min-w-0 items-center gap-2 truncate text-xs font-semibold uppercase tracking-wide text-sky-300"
+              >
+                <span class="h-2.5 w-2.5 shrink-0 rounded-sm bg-sky-300"></span>
+                <span class="truncate">{{ blueprint.name }}</span>
+              </div>
+              <span class="truncate text-right text-xs text-secondary">
+                {{ blueprintSourceLabel(blueprint) }}
+              </span>
+            </div>
+
+            <div
+              class="mt-2 flex w-full items-center justify-between gap-3 rounded bg-white/[0.035] p-3 text-left transition-colors hover:bg-white/[0.06]"
+            >
+              <div class="min-w-0">
+                <div class="truncate font-semibold text-white">
+                  {{ blueprint.craftedItemName }}
+                </div>
+                <div class="mt-0.5 truncate text-xs text-secondary">
+                  {{ blueprint.description }}
+                </div>
+              </div>
+
+              <div class="shrink-0 text-right">
+                <button
+                  type="button"
+                  class="ll-button px-3 py-1.5 text-xs font-semibold uppercase"
+                  [disabled]="learningBlueprintId()"
+                  (click)="$event.stopPropagation(); learnBlueprint(blueprint)"
+                >
+                  {{
+                    learningBlueprintId() === blueprint.id
+                      ? "Learning..."
+                      : "Learn Blueprint"
+                  }}
+                </button>
+                <div class="mt-1 text-[0.65rem] text-secondary">
+                  {{ blueprintAvailabilityLabel(blueprint) }}
                 </div>
               </div>
             </div>
@@ -788,6 +788,17 @@
                 >
                   {{ equipmentSet.description }}
                 </p>
+                <div *ngIf="equipmentSet.bonuses.length" class="mt-2 space-y-1">
+                  <div
+                    *ngFor="let bonus of equipmentSet.bonuses"
+                    class="text-xs text-secondary"
+                  >
+                    <span class="font-medium text-primary"
+                      >{{ bonus.requiredEquippedItems }} items:</span
+                    >
+                    {{ bonus.description }}
+                  </div>
+                </div>
               </div>
 
               <div class="mt-4">

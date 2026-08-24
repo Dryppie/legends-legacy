@@ -1561,6 +1561,10 @@ public sealed class FastCombatEngine
                 target.AdjustDamageDealt(effect.DamageType, value);
                 Log(source, target, effect.Id, value >= 0 ? EventType.Buff : EventType.Debuff, value, $"{target.Name}'s {effect.DamageType} damage dealt changed by {value}%.", statsSource, countStatsActivation);
                 break;
+            case AbilityEffectOperation.ModifyDamageDealtToLowHealth:
+                target.AdjustDamageDealtToLowHealth(effect.HealthStepPercent, value);
+                Log(source, target, effect.Id, value >= 0 ? EventType.Buff : EventType.Debuff, value, $"{target.Name}'s damage against wounded targets changed by {value}%.", statsSource, countStatsActivation);
+                break;
             case AbilityEffectOperation.ModifyDamageTaken:
                 target.AdjustDamageTaken(effect.DamageType, value);
                 Log(source, target, effect.Id, value <= 0 ? EventType.Buff : EventType.Debuff, value, $"{target.Name}'s {effect.DamageType} damage taken changed by {value}%.", statsSource, countStatsActivation);
@@ -1689,7 +1693,10 @@ public sealed class FastCombatEngine
             }
         }
 
-        var damageModifier = (skipSourceDamageModifier ? 0 : source.GetDamageDealtPercent(damageType))
+        var damageModifier = (skipSourceDamageModifier
+                                 ? 0
+                                 : source.GetDamageDealtPercent(damageType)
+                                   + source.GetDamageDealtToLowHealthPercent(target))
                              + target.GetDamageTakenPercent(damageType, source);
         damage = Math.Max(0, (int)Math.Round(damage * Math.Max(0, 1 + damageModifier / 100f)));
         var isCritical = delivery == DamageDelivery.Direct
@@ -2908,8 +2915,14 @@ public sealed class FastCombatEngine
             combatant.IsAlive
             && combatant.IsSummoned
             && ReferenceEquals(combatant.SummonOwner, source)
-            && combatant.Tags.Contains(summonTag));
-        var desiredAmount = livingSummons * effect.BaseValue;
+            && (effect.CountAllOwnedSummons || combatant.Tags.Contains(summonTag)));
+        if (effect.CountAllOwnedSummons)
+            livingSummons = Math.Min(livingSummons, effect.RepeatCount);
+
+        var amountPerSummon = Math.Abs(effect.ScalingCoefficient) > float.Epsilon
+            ? target.GetInitialAttribute(effect.Attribute!.Value) * effect.ScalingCoefficient
+            : effect.BaseValue;
+        var desiredAmount = livingSummons * amountPerSummon;
         var delta = target.SynchronizeAttributeContribution(
             effect.Id,
             effect.Attribute!.Value,
@@ -3553,6 +3566,9 @@ public sealed class FastCombatEngine
                 break;
             case AbilityEffectOperation.ModifyDamageDealt:
                 target.AdjustDamageDealt(effect.DamageType, -value);
+                break;
+            case AbilityEffectOperation.ModifyDamageDealtToLowHealth:
+                target.AdjustDamageDealtToLowHealth(effect.HealthStepPercent, -value);
                 break;
             case AbilityEffectOperation.ModifyDamageTaken:
                 target.AdjustDamageTaken(effect.DamageType, -value);
@@ -4871,6 +4887,11 @@ public sealed class FastCombatEngine
                    && AreAbilityAllies(source, ally)
                    && !ReferenceEquals(ally, source);
 
+        if (condition.Type == AbilityConditionType.EventTargetIsAlly)
+            return combatEvent.Target is { } allyTarget
+                   && AreAbilityAllies(source, allyTarget)
+                   && !ReferenceEquals(allyTarget, source);
+
         if (condition.Type == AbilityConditionType.EventMagnitudeAtLeast)
             return combatEvent.Magnitude >= condition.Value;
 
@@ -4910,6 +4931,7 @@ public sealed class FastCombatEngine
             AbilityConditionType.EventSourceIsSelf => ReferenceEquals(combatEvent.Source, source),
             AbilityConditionType.HasTag => subject.Tags.Contains(condition.Tag!),
             AbilityConditionType.ChancePercent => _random.Next(1, 101) <= condition.Value,
+            AbilityConditionType.HasBarrier => subject.Barrier > 0,
             _ => false
         };
     }
@@ -5085,6 +5107,7 @@ public sealed class FastCombatEngine
             or AbilityEffectOperation.ModifyRegenerationInterval
             or AbilityEffectOperation.ModifyHealingReceived
             or AbilityEffectOperation.ModifyDamageDealt
+            or AbilityEffectOperation.ModifyDamageDealtToLowHealth
             or AbilityEffectOperation.ModifyDamageTaken
             or AbilityEffectOperation.ModifyDamageTakenFromCondition;
 
@@ -5095,6 +5118,7 @@ public sealed class FastCombatEngine
             or AbilityEffectOperation.ModifyRegenerationInterval
             or AbilityEffectOperation.ModifyHealingReceived
             or AbilityEffectOperation.ModifyDamageDealt
+            or AbilityEffectOperation.ModifyDamageDealtToLowHealth
             or AbilityEffectOperation.ModifyDamageTaken
             or AbilityEffectOperation.ModifyDamageTakenFromCondition;
 

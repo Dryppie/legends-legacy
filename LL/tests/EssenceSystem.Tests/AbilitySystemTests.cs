@@ -2069,6 +2069,201 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void EquipmentSetGrantedAbilitiesExistInTheValidatedCombatCatalog()
+    {
+        var configuration = CreateConfig();
+        var contentRoot = FindApiContentRoot();
+        var options = CreateJsonOptions();
+        var abilityCatalog = new JsonAbilityCatalogProvider(
+            configuration,
+            contentRoot,
+            options).GetCatalog();
+        var crafting = new JsonCraftingDefinitionProvider(
+            configuration,
+            contentRoot,
+            options);
+
+        var grantedAbilityIds = crafting.GetEquipmentSets()
+            .SelectMany(set => set.Bonuses)
+            .SelectMany(bonus => bonus.GrantedAbilityIds)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        Assert.NotEmpty(grantedAbilityIds);
+        Assert.All(
+            grantedAbilityIds,
+            abilityId => Assert.True(
+                abilityCatalog.AbilitiesById.ContainsKey(abilityId),
+                $"Equipment set references missing ability '{abilityId}'."));
+    }
+
+    [Fact]
+    public void ExecutionSetBonusAmplifiesDamageOnlyAgainstWoundedTargets()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var strike = new AbilitySpec
+        {
+            Id = "ability.test.execution_strike",
+            Kind = AbilitySpecKind.Active,
+            Name = "Execution Strike",
+            CooldownTicks = 1000,
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "effect.test.execution_strike.damage",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 1,
+                    DamageType = DamageType.None,
+                    AttackType = AttackType.Melee
+                }
+            ]
+        };
+        var abilities = AbilityCompiler.CompileAbilities(
+            [catalog.AbilitiesById["ability.set.execution.no_escape"], strike]);
+
+        (int Damage, float ModifierPercent) DealDamageAtHealth(float health)
+        {
+            var attacker = CreateCombatant(
+                "execution-attacker",
+                CombatTeam.Friendly,
+                abilities.Values,
+                canBasicAttack: false);
+            var target = CreateCombatant(
+                "execution-target",
+                CombatTeam.Hostile,
+                [],
+                canBasicAttack: false);
+            target.SetHealth(health);
+            var result = new FastCombatEngine(
+                    new Dictionary<string, CompiledStatus>(),
+                    new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1000))
+                .Run([attacker], [target]);
+            var damage = Assert.Single(
+                result.EventLog,
+                entry => entry.Source == "effect.test.execution_strike.damage"
+                         && entry.EventType == EventType.Damage).Magnitude;
+            return (damage, attacker.GetDamageDealtToLowHealthPercent(target));
+        }
+
+        var healthyTarget = DealDamageAtHealth(200);
+        var woundedTarget = DealDamageAtHealth(60);
+        Assert.Equal(0, healthyTarget.ModifierPercent);
+        Assert.Equal(18, woundedTarget.ModifierPercent);
+        Assert.True(woundedTarget.Damage > healthyTarget.Damage);
+    }
+
+    [Fact]
+    public void AegisSetMitigationTracksWhetherABarrierRemains()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var strike = new AbilitySpec
+        {
+            Id = "ability.test.aegis_strike",
+            Kind = AbilitySpecKind.Active,
+            Name = "Aegis Strike",
+            CooldownTicks = 1000,
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "effect.test.aegis_strike.damage",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 1,
+                    DamageType = DamageType.None,
+                    AttackType = AttackType.Melee
+                },
+                new AbilityEffectSpec
+                {
+                    Id = "effect.test.aegis_strike.follow_up",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 1,
+                    DamageType = DamageType.None,
+                    AttackType = AttackType.Melee
+                }
+            ]
+        };
+        var defenderAbilities = AbilityCompiler.CompileAbilities(
+        [
+            catalog.AbilitiesById["ability.set.aegis.raised_aegis"],
+            catalog.AbilitiesById["ability.set.aegis.behind_the_shield"]
+        ]);
+        var attackerAbility = AbilityCompiler.CompileAbility(strike);
+        var defender = CreateCombatant(
+            "aegis-defender",
+            CombatTeam.Friendly,
+            defenderAbilities.Values,
+            canBasicAttack: false);
+        var attacker = CreateCombatant(
+            "aegis-attacker",
+            CombatTeam.Hostile,
+            [attackerAbility],
+            canBasicAttack: false);
+
+        var result = new FastCombatEngine(
+                new Dictionary<string, CompiledStatus>(),
+                new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1000))
+            .Run([defender], [attacker]);
+
+        var barrierProtectedDamage = Assert.Single(
+            result.EventLog,
+            entry => entry.Source == "effect.test.aegis_strike.damage"
+                     && entry.EventType == EventType.Damage);
+        var unprotectedDamage = Assert.Single(
+            result.EventLog,
+            entry => entry.Source == "effect.test.aegis_strike.follow_up"
+                     && entry.EventType == EventType.Damage);
+        Assert.Equal(23, barrierProtectedDamage.Magnitude);
+        Assert.Equal(59, unprotectedDamage.Magnitude);
+        Assert.Equal(118, defender.Health);
+        Assert.Equal(0, defender.Barrier);
+    }
+
+    [Fact]
+    public void PrimalSetCountsAllOwnedSummonsAndCapsItsPowerContribution()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var ability = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.set.primal.strength_of_the_pack"]);
+        var owner = CreateCombatant(
+            "primal-owner",
+            CombatTeam.Friendly,
+            [ability],
+            canBasicAttack: false);
+        var summons = Enumerable.Range(1, 4)
+            .Select(index => CreateOwnedBroodling($"primal-summon-{index}", owner, 50))
+            .ToArray();
+        var hostile = CreateCombatant(
+            "primal-hostile",
+            CombatTeam.Hostile,
+            [],
+            canBasicAttack: false);
+
+        new FastCombatEngine(
+                new Dictionary<string, CompiledStatus>(),
+                new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1000))
+            .Run([owner, .. summons], [hostile]);
+
+        Assert.Equal(56, owner.GetAttribute(AttributeType.Power));
+        Assert.Equal(8, owner.GetAttribute(AttributeType.CrowdControlResistance));
+    }
+
+    [Fact]
     public void Json_catalog_garran_authors_the_requested_floor_one_kit()
     {
         var contentRoot = FindApiContentRoot();
@@ -3856,7 +4051,7 @@ public sealed class AbilitySystemTests
         Assert.All(allAbilityIds, profile =>
             Assert.Equal(profile.MonsterId is "monster.hobgoblin" or "monster.spider_queen" or "monster.elder_treant" ? 3 : 2, profile.AbilityIds.Count));
         Assert.Equal(137, allAbilityIds.SelectMany(x => x.AbilityIds).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(180, catalog.AbilitiesById.Count);
+        Assert.Equal(193, catalog.AbilitiesById.Count);
         Assert.Contains("ability.summon.shadow_image.shadow_strike", catalog.AbilitiesById.Keys);
         Assert.All(allAbilityIds.SelectMany(x => x.AbilityIds), abilityId =>
         {
@@ -3927,7 +4122,7 @@ public sealed class AbilitySystemTests
         Assert.Contains(sonicScreech.Id, catalog.AbilityIdsByTag["Debuff"]);
         Assert.Contains(echolocation.Id, catalog.AbilityIdsByTag["Buff"]);
         Assert.Contains(acidSplash.Id, catalog.AbilityIdsByTag["Poison"]);
-        Assert.False(catalog.AbilityIdsByTag.ContainsKey("Damage"));
+        Assert.Contains("ability.set.execution.no_escape", catalog.AbilityIdsByTag["Damage"]);
         Assert.Equal(
             "Ranged attacks have a 10% chance to apply Poison(10).",
             poisonedArrows.Description);

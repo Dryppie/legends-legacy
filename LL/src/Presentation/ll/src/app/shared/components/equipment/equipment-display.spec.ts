@@ -153,6 +153,7 @@ describe('mapInstanceToDisplay', () => {
       id: 'set.stormguard',
       name: 'Stormguard',
       description: 'Equipment forged for the storm.',
+      bonuses: [],
     };
 
     expect(mapInstanceToDisplay(item).equipmentSet).toEqual(item.equipmentSet);
@@ -548,6 +549,58 @@ describe('EquipmentDisplayComponent', () => {
     expect(
       fixture.nativeElement.querySelector('.equipment-design-card'),
     ).not.toHaveClass('bg-texture');
+  });
+
+  it('renders distinct equipped set progress with active and locked thresholds', async () => {
+    await TestBed.configureTestingModule({
+      imports: [EquipmentDisplayComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(EquipmentDisplayComponent);
+    const selected = equipmentInstance('selected-set-item', AttributeType.Armor, 20);
+    selected.equipmentSetId = 'set_warden';
+    selected.equipmentSet = {
+      id: 'set_warden',
+      name: 'Warden',
+      description: 'Stabilizes after taking sustained pressure.',
+      bonuses: [
+        {
+          id: 'deep_roots',
+          requiredEquippedItems: 2,
+          description: '+10% total Max Health.',
+        },
+        {
+          id: 'unyielding_growth',
+          requiredEquippedItems: 4,
+          description: '+25% total Health Regen.',
+        },
+        {
+          id: 'wardens_refuge',
+          requiredEquippedItems: 6,
+          description: 'Falling to 40% Health grants Renewal.',
+        },
+      ],
+    };
+    const first = equipmentInstance('warden-1', AttributeType.Armor, 1);
+    const second = equipmentInstance('warden-2', AttributeType.Armor, 1);
+    const third = equipmentInstance('warden-3', AttributeType.Armor, 1);
+    for (const equipment of [first, second, third]) {
+      equipment.equipmentSetId = 'SET_WARDEN';
+    }
+
+    fixture.componentRef.setInput('item', selected);
+    fixture.componentRef.setInput('embedded', true);
+    fixture.componentRef.setInput('equippedItems', [first, second, third, third]);
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    const rows = fixture.nativeElement.querySelectorAll('.equipment-set-bonus');
+    expect(text).toContain('3/6 equipped');
+    expect(text).toContain('Active');
+    expect(text).toContain('1 more item');
+    expect(text).toContain('3 more items');
+    expect(rows[0]).toHaveClass('equipment-set-bonus-active');
+    expect(rows[1]).toHaveClass('equipment-set-bonus-next');
+    expect(rows[2]).toHaveClass('equipment-set-bonus-locked');
   });
 });
 

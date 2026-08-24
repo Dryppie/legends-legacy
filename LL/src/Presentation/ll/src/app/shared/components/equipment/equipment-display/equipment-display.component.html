@@ -368,17 +368,6 @@
       {{ data.description }}
     </p>
 
-    <div
-      *ngIf="data.equipmentSet as equipmentSet"
-      class="ll-item-detail-section"
-    >
-      <div class="ll-item-meta text-primary">Equipment Set</div>
-      <div class="mt-1 font-medium text-primary">{{ equipmentSet.name }}</div>
-      <p *ngIf="equipmentSet.description" class="mt-1 text-xs text-secondary">
-        {{ equipmentSet.description }}
-      </p>
-    </div>
-
     <div *ngIf="data.craftingDesign as design" class="ll-item-detail-section">
       <ng-container *ngIf="!compactCraftingDesign">
         <div class="ll-item-meta">Crafting Design</div>
@@ -673,6 +662,56 @@
           </div>
         </div>
       </ng-template>
+    </div>
+
+    <div
+      *ngIf="data.equipmentSet as equipmentSet"
+      class="equipment-set-panel ll-item-detail-section"
+    >
+      <div class="equipment-set-heading">
+        <div class="equipment-set-name">{{ equipmentSet.name }}</div>
+        <div *ngIf="equippedItems !== null" class="equipment-set-count">
+          {{ equipmentSetEquippedCount(equipmentSet.id) }}/{{
+            equipmentSetMaximumThreshold(equipmentSet.bonuses)
+          }} equipped
+        </div>
+      </div>
+      <p *ngIf="equipmentSet.description" class="equipment-set-description">
+        {{ equipmentSet.description }}
+      </p>
+      <div *ngIf="equipmentSet.bonuses.length" class="equipment-set-bonus-list">
+        <div
+          *ngFor="let bonus of equipmentSet.bonuses"
+          class="equipment-set-bonus"
+          [ngClass]="
+            equipmentSetBonusClass(
+              bonus,
+              equipmentSet.bonuses,
+              equipmentSetEquippedCount(equipmentSet.id)
+            )
+          "
+        >
+          <span class="equipment-set-threshold">
+            {{ bonus.requiredEquippedItems }}
+          </span>
+          <span class="equipment-set-bonus-copy">
+            <span class="equipment-set-bonus-description">
+              {{ bonus.description }}
+            </span>
+            <span
+              *ngIf="equippedItems !== null"
+              class="equipment-set-bonus-state"
+            >
+              {{
+                equipmentSetBonusProgressLabel(
+                  bonus,
+                  equipmentSetEquippedCount(equipmentSet.id)
+                )
+              }}
+            </span>
+          </span>
+        </div>
+      </div>
     </div>
 
     <div

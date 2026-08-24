@@ -80,7 +80,8 @@ public enum AbilityEffectOperation
     SynchronizeAttributePerStatusStack = 29,
     SwapHealth = 30,
     SynchronizeAttributePerMissingHealthStep = 31,
-    GrantCover = 32
+    GrantCover = 32,
+    ModifyDamageDealtToLowHealth = 33
 }
 
 public enum AbilityTargetSelector
@@ -139,7 +140,9 @@ public enum AbilityConditionType
     EventSourceIsAlly = 21,
     EventIdIsNot = 22,
     AnyEnemyHasCondition = 23,
-    NoEnemyHasCondition = 24
+    NoEnemyHasCondition = 24,
+    HasBarrier = 25,
+    EventTargetIsAlly = 26
 }
 
 public enum StandardConditionType
@@ -282,6 +285,7 @@ public sealed class AbilityEffectSpec
     public StandardConditionType? Condition { get; set; }
     public StandardConditionType? AlternativeCondition { get; set; }
     public string? SummonId { get; set; }
+    public bool CountAllOwnedSummons { get; set; }
     public int RepeatCount { get; set; } = 1;
     public int HealthStepPercent { get; set; }
     public string? RepeatPerOwnedSummonId { get; set; }

@@ -132,7 +132,9 @@ export class CombatService {
 
   startCombatSimulation(characterAction: CharacterActionDto): void {
     const combatResult = characterAction.combatSession?.combatResult;
-    if (!combatResult) return;
+    if (!combatResult?.playerTeam?.length || !combatResult.enemyTeam?.length) {
+      return;
+    }
     combatResult.battleType = BattleType.IdleCombat;
 
     this.combatEndSubscriptions.get(BattleType.IdleCombat)?.unsubscribe();

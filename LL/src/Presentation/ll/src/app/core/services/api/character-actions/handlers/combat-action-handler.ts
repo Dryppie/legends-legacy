@@ -20,10 +20,18 @@ export class CombatActionHandler {
   ) {}
 
   handle(action: CharacterActionDto): void {
-    if (!action.combatSession) return;
+    const combatSession = action.combatSession;
+    const combatResult = combatSession?.combatResult;
+    if (
+      !combatSession ||
+      !combatResult?.playerTeam?.length ||
+      !combatResult.enemyTeam?.length
+    ) {
+      return;
+    }
     const hasPendingResolution = action.hasMoreDueWork ?? false;
     const completedSession = this.summary.loadCombatSince(
-      action.combatSession,
+      combatSession,
       hasPendingResolution,
     );
 
@@ -31,10 +39,10 @@ export class CombatActionHandler {
       return;
     }
 
-    const resolvedSession = completedSession ?? action.combatSession;
+    const resolvedSession = completedSession ?? combatSession;
     const resolvedSummary = resolvedSession.combatSummary;
     this.combat.startCombatSimulation(
-      resolvedSession === action.combatSession
+      resolvedSession === combatSession
         ? action
         : { ...action, combatSession: resolvedSession },
     );

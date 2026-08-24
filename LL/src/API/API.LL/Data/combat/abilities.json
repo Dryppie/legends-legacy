@@ -5517,5 +5517,442 @@
       }
     ],
     "owningEssenceId": "essence.elder_treant"
+  },
+  {
+    "id": "ability.set.fury.unbound_fury",
+    "kind": "Passive",
+    "name": "Unbound Fury",
+    "description": "Direct critical hits grant Fury for 5 seconds, up to five stacks. Each stack increases Power by 2%.",
+    "cooldownTicks": 0,
+    "tags": ["Set", "Fury", "Critical", "Status.Stack"],
+    "triggers": [
+      {
+        "event": "OnHit",
+        "internalCooldownTicks": 5,
+        "conditions": [
+          { "type": "EventWasDirectHit" },
+          { "type": "EventWasCritical" },
+          { "type": "EventSourceIsSelf" }
+        ],
+        "effectIds": ["effect.set.fury.unbound_fury.gain"]
+      },
+      {
+        "event": "OnStatusApplied",
+        "conditions": [{ "type": "EventIdIs", "statusId": "status.set.fury" }],
+        "effectIds": ["effect.set.fury.unbound_fury.power"]
+      },
+      {
+        "event": "OnStatusChanged",
+        "conditions": [{ "type": "EventIdIs", "statusId": "status.set.fury" }],
+        "effectIds": ["effect.set.fury.unbound_fury.power"]
+      },
+      {
+        "event": "OnStatusRemoved",
+        "conditions": [{ "type": "EventIdIs", "statusId": "status.set.fury" }],
+        "effectIds": ["effect.set.fury.unbound_fury.power"]
+      },
+      {
+        "event": "OnStatusExpired",
+        "conditions": [{ "type": "EventIdIs", "statusId": "status.set.fury" }],
+        "effectIds": ["effect.set.fury.unbound_fury.power"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.set.fury.unbound_fury.gain",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.set.fury",
+        "baseValue": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.set.fury.unbound_fury.power",
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.set.fury",
+        "attribute": "Power",
+        "scalingCoefficient": 0.02,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.set.arcane.arcane_surge",
+    "kind": "Passive",
+    "name": "Arcane Surge",
+    "description": "Every third active ability reduces current cooldowns by 1 second and grants 12% of current Power for 6 seconds.",
+    "cooldownTicks": 0,
+    "tags": ["Set", "Arcane", "Cooldown", "Buff"],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "everyNthOccurrence": 3,
+        "internalCooldownTicks": 120,
+        "effectIds": [
+          "effect.set.arcane.arcane_surge.cooldown",
+          "effect.set.arcane.arcane_surge.power"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.set.arcane.arcane_surge.cooldown",
+        "operation": "RestoreResource",
+        "target": "Self",
+        "resource": "Cooldown",
+        "baseValue": 10,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.set.arcane.arcane_surge.power",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "Power",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.12,
+        "durationTicks": 60,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.set.execution.no_escape",
+    "kind": "Passive",
+    "name": "No Escape",
+    "description": "Deal 18% more damage to enemies at or below 30% Health.",
+    "cooldownTicks": 0,
+    "tags": ["Set", "Execution", "Finisher", "Damage"],
+    "effects": [
+      {
+        "id": "effect.set.execution.no_escape.damage",
+        "operation": "ModifyDamageDealtToLowHealth",
+        "target": "Self",
+        "baseValue": 18,
+        "healthStepPercent": 30,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.set.aegis.raised_aegis",
+    "kind": "Passive",
+    "name": "Raised Aegis",
+    "description": "At combat start, gain a barrier equal to 10% of Max Health.",
+    "cooldownTicks": 0,
+    "tags": ["Set", "Aegis", "Barrier", "Defensive"],
+    "effects": [
+      {
+        "id": "effect.set.aegis.raised_aegis.barrier",
+        "operation": "GrantBarrier",
+        "target": "Self",
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.1,
+        "durationTicks": 150,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.set.aegis.behind_the_shield",
+    "kind": "Passive",
+    "name": "Behind the Shield",
+    "description": "Take 10% less damage while any barrier remains.",
+    "cooldownTicks": 0,
+    "tags": ["Set", "Aegis", "Barrier", "Defensive"],
+    "triggers": [
+      { "event": "OnCombatStart", "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"] },
+      { "event": "OnBarrierApplied", "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"] },
+      { "event": "OnBarrierAbsorbed", "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"] },
+      { "event": "OnBarrierBroken", "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"] },
+      { "event": "OnBarrierContributionBroken", "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"] },
+      { "event": "OnBarrierExpired", "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"] }
+    ],
+    "effects": [
+      {
+        "id": "effect.set.aegis.behind_the_shield.mitigation",
+        "operation": "ModifyDamageTaken",
+        "target": "Self",
+        "baseValue": -10,
+        "damageType": "None",
+        "maintainWhileConditionsMet": true,
+        "conditions": [{ "type": "HasBarrier", "subject": "Source" }],
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.set.warden.wardens_refuge",
+    "kind": "Passive",
+    "name": "Warden's Refuge",
+    "description": "Falling to 40% Health grants Renewal and 15% damage reduction for 8 seconds.",
+    "cooldownTicks": 0,
+    "tags": ["Set", "Warden", "Recovery", "Defensive"],
+    "triggers": [
+      {
+        "event": "OnHealthChanged",
+        "internalCooldownTicks": 300,
+        "conditions": [
+          { "type": "EventSourceIsSelf" },
+          { "type": "HealthAtOrBelowPercent", "subject": "Source", "value": 40 }
+        ],
+        "effectIds": [
+          "effect.set.warden.wardens_refuge.renewal",
+          "effect.set.warden.wardens_refuge.mitigation"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.set.warden.wardens_refuge.renewal",
+        "operation": "ApplyCondition",
+        "target": "Self",
+        "condition": "Renewal",
+        "baseValue": 20,
+        "guaranteedConditionApplication": true,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.set.warden.wardens_refuge.mitigation",
+        "operation": "ModifyDamageTaken",
+        "target": "Self",
+        "baseValue": -15,
+        "damageType": "None",
+        "durationTicks": 80,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.set.phoenix.rising_flame",
+    "kind": "Passive",
+    "name": "Rising Flame",
+    "description": "Receive 15% more healing while below 50% Health.",
+    "cooldownTicks": 0,
+    "tags": ["Set", "Phoenix", "Healing", "Recovery"],
+    "triggers": [
+      { "event": "OnCombatStart", "effectIds": ["effect.set.phoenix.rising_flame.healing"] },
+      {
+        "event": "OnHealthChanged",
+        "conditions": [{ "type": "EventSourceIsSelf" }],
+        "effectIds": ["effect.set.phoenix.rising_flame.healing"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.set.phoenix.rising_flame.healing",
+        "operation": "ModifyHealingReceived",
+        "target": "Self",
+        "baseValue": 15,
+        "maintainWhileConditionsMet": true,
+        "conditions": [{ "type": "HealthBelowPercent", "subject": "Source", "value": 50 }],
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.set.phoenix.rebirth",
+    "kind": "Passive",
+    "name": "Rebirth",
+    "description": "Once per combat, falling to 20% Health restores 25% Max Health and grants Renewal for 8 seconds.",
+    "cooldownTicks": 0,
+    "tags": ["Set", "Phoenix", "Healing", "Recovery"],
+    "triggers": [
+      {
+        "event": "OnHealthChanged",
+        "conditions": [
+          { "type": "EventSourceIsSelf" },
+          { "type": "HealthAtOrBelowPercent", "subject": "Source", "value": 20 }
+        ],
+        "effectIds": [
+          "effect.set.phoenix.rebirth.heal",
+          "effect.set.phoenix.rebirth.renewal"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.set.phoenix.rebirth.heal",
+        "operation": "Heal",
+        "target": "Self",
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.25,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.set.phoenix.rebirth.renewal",
+        "operation": "ApplyCondition",
+        "target": "Self",
+        "condition": "Renewal",
+        "baseValue": 20,
+        "uses": 1,
+        "guaranteedConditionApplication": true,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.set.spirit.sheltering_spirit",
+    "kind": "Passive",
+    "name": "Sheltering Spirit",
+    "description": "Directly healing another ally grants them a barrier equal to 5% of their Max Health.",
+    "cooldownTicks": 0,
+    "tags": ["Set", "Spirit", "Healing", "Barrier", "Support"],
+    "triggers": [
+      {
+        "event": "OnHeal",
+        "internalCooldownTicks": 40,
+        "conditions": [
+          { "type": "EventSourceIsSelf" },
+          { "type": "EventTargetIsAlly" }
+        ],
+        "effectIds": ["effect.set.spirit.sheltering_spirit.barrier"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.set.spirit.sheltering_spirit.barrier",
+        "operation": "GrantBarrier",
+        "target": "EventTarget",
+        "scalingAttribute": "MaxHealth",
+        "scalingAttributeSubject": "Target",
+        "scalingCoefficient": 0.05,
+        "durationTicks": 80,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.set.primal.strength_of_the_pack",
+    "kind": "Passive",
+    "name": "Strength of the Pack",
+    "description": "Owned summons grant Power and Crowd Control Resistance.",
+    "cooldownTicks": 0,
+    "tags": ["Set", "Primal", "Summon", "Power"],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.set.primal.strength_of_the_pack.power",
+          "effect.set.primal.strength_of_the_pack.resistance"
+        ]
+      },
+      {
+        "event": "OnSummonChanged",
+        "effectIds": [
+          "effect.set.primal.strength_of_the_pack.power",
+          "effect.set.primal.strength_of_the_pack.resistance"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.set.primal.strength_of_the_pack.power",
+        "operation": "SynchronizeAttributePerOwnedSummon",
+        "target": "Self",
+        "countAllOwnedSummons": true,
+        "repeatCount": 3,
+        "attribute": "Power",
+        "scalingCoefficient": 0.04,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.set.primal.strength_of_the_pack.resistance",
+        "operation": "SynchronizeAttributePerOwnedSummon",
+        "target": "Self",
+        "countAllOwnedSummons": true,
+        "repeatCount": 1,
+        "attribute": "CrowdControlResistance",
+        "baseValue": 8,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.set.venom.venomous_assault",
+    "kind": "Passive",
+    "name": "Venomous Assault",
+    "description": "Direct hits apply Poison. Targets at five Poison stacks also receive Corrosion.",
+    "cooldownTicks": 0,
+    "tags": ["Set", "Venom", "Poison", "Corrosion"],
+    "triggers": [
+      {
+        "event": "OnHit",
+        "internalCooldownTicks": 5,
+        "conditions": [
+          { "type": "EventWasDirectHit" },
+          { "type": "EventSourceIsSelf" }
+        ],
+        "effectIds": [
+          "effect.set.venom.venomous_assault.poison",
+          "effect.set.venom.venomous_assault.corrosion"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.set.venom.venomous_assault.poison",
+        "operation": "ApplyCondition",
+        "target": "EventTarget",
+        "condition": "Poison",
+        "baseValue": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.set.venom.venomous_assault.corrosion",
+        "operation": "ApplyCondition",
+        "target": "EventTarget",
+        "condition": "Corrosion",
+        "baseValue": 5,
+        "conditions": [
+          { "type": "ConditionStacksAtLeast", "subject": "Target", "condition": "Poison", "value": 5 }
+        ],
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.set.hive.brood_cycle",
+    "kind": "Passive",
+    "name": "Brood Cycle",
+    "description": "Every fifth basic attack summons a Hive Drone for 12 seconds.",
+    "cooldownTicks": 0,
+    "tags": ["Set", "Hive", "Summon", "Basic Attack"],
+    "triggers": [
+      {
+        "event": "OnBasicAttack",
+        "everyNthOccurrence": 5,
+        "effectIds": ["effect.set.hive.brood_cycle.summon"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.set.hive.brood_cycle.summon",
+        "operation": "Summon",
+        "target": "Self",
+        "summonId": "hiveDrone",
+        "durationTicks": 120,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.summon.hive_drone.venom_spit",
+    "kind": "Active",
+    "name": "Venom Spit",
+    "description": "Apply Poison to a random enemy.",
+    "cooldownTicks": 50,
+    "tags": ["Summon", "Hive", "Poison"],
+    "effects": [
+      {
+        "id": "effect.summon.hive_drone.venom_spit.poison",
+        "operation": "ApplyCondition",
+        "target": "RandomEnemy",
+        "condition": "Poison",
+        "baseValue": 3,
+        "procCoefficient": 1
+      }
+    ]
   }
 ]

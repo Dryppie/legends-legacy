@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.Professions;
 using Application.MediatR.Markers;
 using Common.Primitives;
 using Domain.Components.Attributes;
@@ -9,6 +10,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Items.Equipments.Sets;
 using MediatR;
 
 namespace Application.UseCases.Equipments.Queries.CompareEquipment;
@@ -40,15 +42,18 @@ public sealed class CompareEquipmentQueryHandler
     private readonly ICharacterService _characters;
     private readonly IInventoryService _inventories;
     private readonly IEssenceCombatLoadoutResolver _essenceLoadouts;
+    private readonly ICraftingDefinitionProvider? _craftingDefinitions;
 
     public CompareEquipmentQueryHandler(
         ICharacterService characters,
         IInventoryService inventories,
-        IEssenceCombatLoadoutResolver essenceLoadouts)
+        IEssenceCombatLoadoutResolver essenceLoadouts,
+        ICraftingDefinitionProvider? craftingDefinitions = null)
     {
         _characters = characters;
         _inventories = inventories;
         _essenceLoadouts = essenceLoadouts;
+        _craftingDefinitions = craftingDefinitions;
     }
 
     public async Task<Response<EquipmentComparisonDto>> Handle(
@@ -85,6 +90,7 @@ public sealed class CompareEquipmentQueryHandler
                 candidate,
                 request.SlotType,
                 loadout.AttributeModifiers,
+                _craftingDefinitions?.GetEquipmentSets(),
                 out var comparison))
         {
             return Response<EquipmentComparisonDto>.Fail(
@@ -107,6 +113,21 @@ public static class EquipmentComparisonProjector
         EquipmentInstance candidate,
         EquipmentSlotType? requestedSlot,
         IEnumerable<Domain.Models.Attributes.Modifiers.AttributeModifierBase> additionalModifiers,
+        out EquipmentComparisonDto? comparison) =>
+        TryProject(
+            character,
+            candidate,
+            requestedSlot,
+            additionalModifiers,
+            null,
+            out comparison);
+
+    public static bool TryProject(
+        Character character,
+        EquipmentInstance candidate,
+        EquipmentSlotType? requestedSlot,
+        IEnumerable<Domain.Models.Attributes.Modifiers.AttributeModifierBase> additionalModifiers,
+        IEnumerable<EquipmentSetDefinition>? equipmentSetDefinitions,
         out EquipmentComparisonDto? comparison)
     {
         comparison = null;
@@ -133,10 +154,17 @@ public static class EquipmentComparisonProjector
             attribute => attribute.AttributeType,
             attribute => attribute.Value);
         var extras = additionalModifiers.ToArray();
+        var definitions = equipmentSetDefinitions?.ToArray() ?? [];
+        var beforeExtras = extras
+            .Concat(EquipmentSetBonusResolver.ResolveAttributeModifiers(beforeEquipment, definitions))
+            .ToArray();
+        var afterExtras = extras
+            .Concat(EquipmentSetBonusResolver.ResolveAttributeModifiers(afterEquipment, definitions))
+            .ToArray();
         var beforeEffective = AttributeCalculator.CalculateProjectedEquipmentAttributes(
-            baseAttributes, beforeEquipment, character.Level, extras);
+            baseAttributes, beforeEquipment, character.Level, beforeExtras);
         var afterEffective = AttributeCalculator.CalculateProjectedEquipmentAttributes(
-            baseAttributes, afterEquipment, character.Level, extras);
+            baseAttributes, afterEquipment, character.Level, afterExtras);
         var beforeRatings = AttributeCalculator.CollectRawEquipmentRatings(beforeEquipment);
         var afterRatings = AttributeCalculator.CollectRawEquipmentRatings(afterEquipment);
 

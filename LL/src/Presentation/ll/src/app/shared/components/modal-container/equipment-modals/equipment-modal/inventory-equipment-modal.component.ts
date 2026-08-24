@@ -63,6 +63,12 @@ export class InventoryEquipmentModalComponent implements OnInit {
     private characterState: CharacterStateService,
   ) {}
 
+  get equippedItems(): EquipmentInstance[] {
+    return this.equipmentState
+      .equipmentSlots()
+      .flatMap((slot) => (slot.equipmentInstance ? [slot.equipmentInstance] : []));
+  }
+
   get requiredLevel(): number {
     if (
       this.equipmentInstance.equipmentBase.equipmentType === EquipmentType.Tool

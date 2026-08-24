@@ -37,7 +37,7 @@ public class CombatService : ICombatService
         _logger = logger;
     }
 
-    public async Task<CombatSession> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
+    public async Task<CombatSession?> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var resolveStartedAt = IdleCombatTelemetry.Start();
         var accumulator = new CombatSessionAccumulator();
@@ -88,13 +88,19 @@ public class CombatService : ICombatService
             processedCount = checked(processedCount + orchestrationResult.EncounterCount);
             lastDetails = details;
 
+            // An early or duplicate resolver has no encounter to reward or render.
+            // Treat it as a real no-op instead of manufacturing an empty combat
+            // result that can temporarily replace the last completed encounter.
+            if (orchestrationResult.EncounterCount == 0)
+                break;
+
             var session = await _outcomeCoordinator.ApplyAsync(
                 new CombatOutcomeRequest(orchestrationRequest, orchestrationResult),
                 cancellationToken);
             accumulator.Add(session);
             processedBatches++;
 
-            if (orchestrationResult.EncounterCount == 0 || details.ProcessedUntil > now)
+            if (details.ProcessedUntil > now)
                 break;
         }
 
@@ -115,7 +121,7 @@ public class CombatService : ICombatService
                 elapsed.TotalMilliseconds,
                 elapsed.TotalSeconds <= 0 ? processedCount : processedCount / elapsed.TotalSeconds);
         }
-        return accumulator.Build();
+        return processedCount == 0 ? null : accumulator.Build();
     }
 
     private bool IsFinalResponseBatch(

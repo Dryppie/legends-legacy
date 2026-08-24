@@ -1,11 +1,14 @@
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Combat;
+using Application.Interfaces.Services.LL.Professions;
 using Domain.Components.Attributes;
 using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
+using Domain.Models.Items.Equipments.Sets;
 using Domain.Models.Regions.Areas;
 using Services.LL.Interfaces;
 
@@ -18,19 +21,22 @@ public class CombatSetupService : ICombatSetupService
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
     private readonly ICreatureEssenceLootTableRepository _creatureEssenceLootTables;
     private readonly ICreatureAbilityDefinitionProvider? _creatureAbilities;
+    private readonly ICraftingDefinitionProvider? _craftingDefinitions;
 
     public CombatSetupService(
         ICreatureScaler creatureScaler,
         IEssenceCombatLoadoutResolver essenceCombatLoadoutResolver,
         IEssenceDefinitionRepository essenceDefinitions,
         ICreatureEssenceLootTableRepository creatureEssenceLootTables,
-        ICreatureAbilityDefinitionProvider? creatureAbilities = null)
+        ICreatureAbilityDefinitionProvider? creatureAbilities = null,
+        ICraftingDefinitionProvider? craftingDefinitions = null)
     {
         _creatureScaler = creatureScaler;
         _essenceCombatLoadoutResolver = essenceCombatLoadoutResolver;
         _essenceDefinitions = essenceDefinitions;
         _creatureEssenceLootTables = creatureEssenceLootTables;
         _creatureAbilities = creatureAbilities;
+        _craftingDefinitions = craftingDefinitions;
     }
 
     public List<CombatEntity> CreatePlayerCombatEntities(List<Entity> entities)
@@ -130,7 +136,12 @@ public class CombatSetupService : ICombatSetupService
             foreach (var tag in essenceLoadout.Tags)
                 entity.Tags.Add(tag);
 
-            AttributeCalculator.CalculateBaseCombatAttributes(entity);
+            IReadOnlyList<AttributeModifierBase> setModifiers = _craftingDefinitions is null
+                ? Array.Empty<AttributeModifierBase>()
+                : EquipmentSetBonusResolver.ResolveAttributeModifiers(
+                    entity.Equipment,
+                    _craftingDefinitions.GetEquipmentSets());
+            AttributeCalculator.CalculateBaseCombatAttributes(entity, setModifiers);
         }
     }
 

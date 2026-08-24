@@ -77,6 +77,7 @@ public sealed class CompiledEffect
     public StandardConditionType? Condition { get; init; }
     public StandardConditionType? AlternativeCondition { get; init; }
     public string? SummonId { get; init; }
+    public bool CountAllOwnedSummons { get; init; }
     public int RepeatCount { get; init; } = 1;
     public int HealthStepPercent { get; init; }
     public string? RepeatPerOwnedSummonId { get; init; }
@@ -728,6 +729,7 @@ public sealed class RuntimeCombatant
     private int _regenerationIntervalModifierTicks;
     private float _healingReceivedPercent;
     private readonly Dictionary<DamageType, float> _damageDealtPercent = [];
+    private readonly Dictionary<int, float> _damageDealtToLowHealthPercent = [];
     private readonly Dictionary<DamageType, float> _damageTakenPercent = [];
     private readonly Dictionary<StandardConditionType, float> _damageTakenFromConditionPercent = [];
     private readonly Dictionary<string, (AttributeType Attribute, float Amount)> _synchronizedAttributeContributions =
@@ -1065,6 +1067,10 @@ public sealed class RuntimeCombatant
     public void AdjustDamageDealt(DamageType damageType, float percentagePoints) =>
         _damageDealtPercent[damageType] = _damageDealtPercent.GetValueOrDefault(damageType) + percentagePoints;
 
+    public void AdjustDamageDealtToLowHealth(int healthThresholdPercent, float percentagePoints) =>
+        _damageDealtToLowHealthPercent[healthThresholdPercent] =
+            _damageDealtToLowHealthPercent.GetValueOrDefault(healthThresholdPercent) + percentagePoints;
+
     public void AdjustDamageTaken(DamageType damageType, float percentagePoints) =>
         _damageTakenPercent[damageType] = _damageTakenPercent.GetValueOrDefault(damageType) + percentagePoints;
 
@@ -1075,6 +1081,17 @@ public sealed class RuntimeCombatant
     public float GetDamageDealtPercent(DamageType damageType) =>
         _damageDealtPercent.GetValueOrDefault(DamageType.None)
         + _damageDealtPercent.GetValueOrDefault(damageType);
+
+    public float GetDamageDealtToLowHealthPercent(RuntimeCombatant target)
+    {
+        var maxHealth = target.GetAttribute(AttributeType.MaxHealth);
+        if (maxHealth <= 0)
+            return 0;
+
+        return _damageDealtToLowHealthPercent
+            .Where(entry => target.Health * 100 <= maxHealth * entry.Key + float.Epsilon)
+            .Sum(entry => entry.Value);
+    }
 
     public float GetDamageTakenPercent(DamageType damageType, RuntimeCombatant source)
     {

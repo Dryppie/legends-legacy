@@ -195,6 +195,7 @@ public static class AbilityCompiler
             Condition = effect.Condition,
             AlternativeCondition = effect.AlternativeCondition,
             SummonId = effect.SummonId,
+            CountAllOwnedSummons = effect.CountAllOwnedSummons,
             RepeatCount = Math.Max(1, effect.RepeatCount),
             HealthStepPercent = effect.HealthStepPercent,
             RepeatPerOwnedSummonId = effect.RepeatPerOwnedSummonId,

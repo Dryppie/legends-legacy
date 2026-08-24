@@ -103,6 +103,13 @@ export interface EquipmentSetMetadata {
   id: string;
   name: string;
   description: string;
+  bonuses: EquipmentSetBonusMetadata[];
+}
+
+export interface EquipmentSetBonusMetadata {
+  id: string;
+  requiredEquippedItems: number;
+  description: string;
 }
 
 export interface BlueprintCompatibleRecipe {

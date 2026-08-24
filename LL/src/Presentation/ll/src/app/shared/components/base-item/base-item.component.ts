@@ -1,6 +1,11 @@
 import { NgClass, NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { EssenceItem, Equipment, ItemBase } from '../../models/item';
+import {
+  EssenceItem,
+  Equipment,
+  EquipmentInstance,
+  ItemBase,
+} from '../../models/item';
 import { ItemType } from '../../models/enums/itemType';
 import { Rarity } from '../../models/enums/rarity';
 import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
@@ -72,6 +77,12 @@ export class BaseItemComponent {
       this.itemAsEquipment(this.item),
       this.equipmentState.equipmentSlots(),
     );
+  }
+
+  get equippedItems(): EquipmentInstance[] {
+    return this.equipmentState
+      .equipmentSlots()
+      .flatMap((slot) => (slot.equipmentInstance ? [slot.equipmentInstance] : []));
   }
 
   get rarityClasses() {

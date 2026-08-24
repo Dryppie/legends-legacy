@@ -84,6 +84,19 @@ describe('CombatActionHandler', () => {
     );
     expect(combatLog.addSession).toHaveBeenCalledOnceWith(combinedSession);
   });
+
+  it('ignores a zero-encounter session instead of replacing the displayed battle', () => {
+    const action = combatAction(false, 0);
+    action.combatSession!.combatResult.playerTeam = [];
+    action.combatSession!.combatResult.enemyTeam = [];
+
+    handler.handle(action);
+
+    expect(summary.loadCombatSince).not.toHaveBeenCalled();
+    expect(combat.startCombatSimulation).not.toHaveBeenCalled();
+    expect(combat.applyIdleCombatExperience).not.toHaveBeenCalled();
+    expect(combatLog.addSession).not.toHaveBeenCalled();
+  });
 });
 
 function combatAction(
@@ -123,6 +136,8 @@ function combatSession(experience: number): CombatSessionDto {
           appliedBonusEffects: [],
         },
       ],
+      playerTeam: [{}],
+      enemyTeam: [{}],
     } as unknown as CombatResultDto,
     combatSummary: {
       totalBattles: 100,

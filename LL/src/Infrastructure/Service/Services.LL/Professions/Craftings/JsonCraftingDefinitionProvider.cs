@@ -119,6 +119,43 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
             if (string.IsNullOrWhiteSpace(equipmentSet.Name))
                 throw new InvalidOperationException(
                     $"Equipment set '{equipmentSet.Id}' has no name.");
+
+            EnsureUnique(
+                equipmentSet.Bonuses.Select(bonus => bonus.Id),
+                $"bonus in equipment set '{equipmentSet.Id}'");
+            var duplicateThreshold = equipmentSet.Bonuses
+                .GroupBy(bonus => bonus.RequiredEquippedItems)
+                .FirstOrDefault(group => group.Count() > 1);
+            if (duplicateThreshold is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Equipment set '{equipmentSet.Id}' has duplicate threshold " +
+                    $"'{duplicateThreshold.Key}'.");
+            }
+
+            foreach (var bonus in equipmentSet.Bonuses)
+            {
+                if (bonus.RequiredEquippedItems <= 0)
+                    throw new InvalidOperationException(
+                        $"Equipment-set bonus '{equipmentSet.Id}/{bonus.Id}' has an invalid threshold.");
+                if (string.IsNullOrWhiteSpace(bonus.Description))
+                    throw new InvalidOperationException(
+                        $"Equipment-set bonus '{equipmentSet.Id}/{bonus.Id}' has no description.");
+                if (bonus.GrantedAbilityIds.Any(string.IsNullOrWhiteSpace))
+                    throw new InvalidOperationException(
+                        $"Equipment-set bonus '{equipmentSet.Id}/{bonus.Id}' has an empty ability ID.");
+
+                foreach (var modifier in bonus.AttributeModifiers)
+                {
+                    if (!AttributeCatalog.IsKnown(modifier.AttributeType)
+                        || !float.IsFinite(modifier.Amount))
+                    {
+                        throw new InvalidOperationException(
+                            $"Equipment-set bonus '{equipmentSet.Id}/{bonus.Id}' has an invalid " +
+                            $"'{modifier.AttributeType}' modifier.");
+                    }
+                }
+            }
         }
 
         if (recipes.Count == 0)
@@ -181,6 +218,56 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
 
             ValidateProfile(blueprint.Id, blueprint.BonusStatProfile, blueprint.TemperingProfile);
             ValidateRequirements(blueprint.Id, blueprint.AdditionalMaterialRequirements, materials);
+        }
+
+        ValidateEquipmentSetThresholdReachability(equipmentSets, blueprints, recipes);
+    }
+
+    private static void ValidateEquipmentSetThresholdReachability(
+        IReadOnlyList<EquipmentSetDefinition> equipmentSets,
+        IReadOnlyList<BlueprintDefinition> blueprints,
+        IReadOnlyList<CraftingRecipeDefinition> recipes)
+    {
+        foreach (var equipmentSet in equipmentSets)
+        {
+            var associatedBlueprints = blueprints
+                .Where(blueprint => blueprint.EquipmentSetId?.Equals(
+                    equipmentSet.Id,
+                    StringComparison.OrdinalIgnoreCase) == true)
+                .ToArray();
+            if (associatedBlueprints.Length == 0)
+                continue;
+
+            var compatibleTypes = recipes
+                .Where(recipe => associatedBlueprints.Any(blueprint =>
+                    EquipmentCraftingDesignComposer.IsCompatible(recipe, blueprint)))
+                .Select(recipe => recipe.OutputItemType)
+                .ToHashSet();
+            var reachableItems = compatibleTypes.Count(type => type is
+                EquipmentType.Head or
+                EquipmentType.Relic or
+                EquipmentType.Chest or
+                EquipmentType.Necklace or
+                EquipmentType.Legs or
+                EquipmentType.Ring or
+                EquipmentType.Tool);
+
+            reachableItems += compatibleTypes.Contains(EquipmentType.OneHanded)
+                ? 2
+                : compatibleTypes.Contains(EquipmentType.TwoHanded)
+                    || compatibleTypes.Contains(EquipmentType.OffHand)
+                        ? 1
+                        : 0;
+
+            var unreachable = equipmentSet.Bonuses
+                .FirstOrDefault(bonus => bonus.RequiredEquippedItems > reachableItems);
+            if (unreachable is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Equipment-set bonus '{equipmentSet.Id}/{unreachable.Id}' requires " +
+                    $"{unreachable.RequiredEquippedItems} items, but associated Blueprints can equip " +
+                    $"at most {reachableItems} distinct instances.");
+            }
         }
     }
 

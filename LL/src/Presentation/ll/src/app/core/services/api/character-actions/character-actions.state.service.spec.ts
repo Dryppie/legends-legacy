@@ -271,6 +271,46 @@ describe('CharacterActionsStateService', () => {
     expect(combat.clearAllCombat).not.toHaveBeenCalled();
   }));
 
+  it('keeps a hydrated encounter when an empty result arrives at the same boundary', () => {
+    const hydratedAction: CharacterActionDto = {
+      ...combatAction(),
+      revision: 'hydrated-combat-revision',
+      combatSession: {
+        from: new Date('2026-08-08T12:00:00Z'),
+        to: new Date('2026-08-08T12:00:10Z'),
+        combatResult: {
+          playerTeam: [{}],
+          enemyTeam: [{}],
+        } as never,
+        combatSummary: {
+          totalBattles: 1,
+          wins: 1,
+          losses: 0,
+          draws: 0,
+          totalExperience: 0,
+          totalGold: 0,
+          totalCinders: 0,
+          totalSoulstones: 0,
+        },
+      },
+    };
+    service.applyCurrentActionSnapshot(hydratedAction);
+
+    service.applyCurrentActionSnapshot({
+      ...hydratedAction,
+      revision: 'empty-combat-revision',
+      combatSession: {
+        ...hydratedAction.combatSession!,
+        combatResult: {
+          playerTeam: [],
+          enemyTeam: [],
+        } as never,
+      },
+    });
+
+    expect(service.currentAction()).toBe(hydratedAction);
+  });
+
   it('keeps stopped combat visible but allows Tempering to queue during its lock', fakeAsync(() => {
     const deadline = new Date(Date.now() + 10_000);
     const stoppingCombat: CharacterActionDto = {

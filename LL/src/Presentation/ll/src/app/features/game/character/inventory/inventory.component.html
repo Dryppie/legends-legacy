@@ -441,6 +441,7 @@
             *ngIf="equipmentInstance(item) as equipment; else genericItem"
             [item]="equipment"
             [comparisonItem]="comparisonEquipmentFor(item)"
+            [equippedItems]="equippedItems"
             comparisonSubjectLabel="Selected"
             [fitComparisonToContainer]="true"
             [inlineComparison]="true"

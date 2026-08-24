@@ -190,14 +190,14 @@ public sealed class CharacterActionFlowTests
         {
             Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails(), Now),
         };
-        var combat = new CombatServiceStub();
+        var combat = new CombatServiceStub { ReturnNoSession = true };
         var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
 
         var result = await service.GetCharacterActionAsync(
             repository.Current.CharacterId,
             CancellationToken.None);
 
-        Assert.Same(combat.Session, result!.CombatSession);
+        Assert.Null(result!.CombatSession);
         Assert.Equal(1, combat.CallCount);
         Assert.Equal(0, repository.UpdateCount);
     }
@@ -502,11 +502,12 @@ public sealed class CharacterActionFlowTests
     {
         public CombatSession Session { get; } = new();
         public bool AdvanceBoundary { get; init; }
+        public bool ReturnNoSession { get; init; }
         public int CallCount { get; private set; }
         public DateTimeOffset LastNow { get; private set; }
         public DateTimeOffset? LastBoundaryAtCall { get; private set; }
 
-        public Task<CombatSession> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
+        public Task<CombatSession?> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
         {
             CallCount++;
             LastNow = now;
@@ -515,7 +516,7 @@ public sealed class CharacterActionFlowTests
             {
                 characterAction.NextResolutionAtUtc = characterAction.NextResolutionAtUtc?.AddSeconds(10);
             }
-            return Task.FromResult(Session);
+            return Task.FromResult(ReturnNoSession ? null : Session);
         }
     }
 

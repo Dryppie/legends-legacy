@@ -21,6 +21,7 @@ public sealed class CraftingCompositionContentTests
 
         Assert.Equal(31, provider.GetRecipes().Count);
         Assert.Equal(13, provider.GetBlueprints().Count);
+        Assert.Equal(11, provider.GetEquipmentSets().Count);
         Assert.Equal(31, provider.GetRecipes().Select(recipe => recipe.OutputItemId).Distinct().Count());
         Assert.All(provider.GetRecipes(), recipe =>
         {
@@ -33,6 +34,20 @@ public sealed class CraftingCompositionContentTests
             provider.GetStandardMaterial(MaterialFamily.Wood, 2)).ItemId);
         Assert.Equal("thick_hide", Assert.IsType<MaterialDefinition>(
             provider.GetStandardMaterial(MaterialFamily.Hide, 2)).ItemId);
+    }
+
+    [Fact]
+    public void ProductionBlueprintsAssignSetsExceptDeferredRaidBlueprints()
+    {
+        var provider = CreateProvider();
+        var blueprints = provider.GetBlueprints().ToDictionary(blueprint => blueprint.Id);
+
+        Assert.All(
+            blueprints.Values.Where(blueprint => blueprint.Id is not
+                "blueprint_raidforged" and not "blueprint_gravebound"),
+            blueprint => Assert.False(string.IsNullOrWhiteSpace(blueprint.EquipmentSetId)));
+        Assert.Null(blueprints["blueprint_raidforged"].EquipmentSetId);
+        Assert.Null(blueprints["blueprint_gravebound"].EquipmentSetId);
     }
 
     [Fact]
@@ -599,6 +614,8 @@ public sealed class CraftingCompositionContentTests
 
         var blueprints = JsonNode.Parse(File.ReadAllText(
             Path.Combine(sourceRoot, "crafting", "blueprints.json")))!.AsArray();
+        foreach (var blueprint in blueprints)
+            blueprint!["equipmentSetId"] = null;
         blueprints[0]!["equipmentSetId"] = "set.test";
         File.WriteAllText(
             Path.Combine(craftingRoot, "blueprints.json"),
