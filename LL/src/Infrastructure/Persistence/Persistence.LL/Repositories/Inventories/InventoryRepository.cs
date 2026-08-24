@@ -530,6 +530,10 @@ public class InventoryRepository : IInventoryRepository
         if (quantity <= 0)
             return InventoryTransferResult.Fail(InventoryTransferFailure.InvalidQuantity);
 
+        await _context.AcquireCharacterRowsLockAsync(
+            [senderCharacterId, recipientCharacterId],
+            cancellationToken);
+
         var senderItem = await _context.InventoryItems
             .AsSplitQuery()
             .Include(x => x.ItemInstance)

@@ -20,6 +20,10 @@ public sealed class CurrencyTransferRepository(IDbContext context) : ICurrencyTr
         if (senderCharacterId == recipientCharacterId)
             return CinderTransferResult.Fail(CinderTransferFailure.SameRecipient);
 
+        await context.AcquireCharacterRowsLockAsync(
+            [senderCharacterId, recipientCharacterId],
+            cancellationToken);
+
         var characters = await context.Characters
             .Include(x => x.ArenaProfile)
             .Include(x => x.EquippedTitleDefinition)

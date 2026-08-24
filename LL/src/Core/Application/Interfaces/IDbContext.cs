@@ -229,6 +229,9 @@ public interface IDbContext
         Func<CancellationToken, Task<T>> operation,
         CancellationToken ct = default) => operation(ct);
     Task AcquireCharacterCommandLockAsync(Guid characterId, CancellationToken ct = default);
+    Task AcquireCharacterRowsLockAsync(
+        IReadOnlyCollection<Guid> characterIds,
+        CancellationToken ct = default) => Task.CompletedTask;
     Task AcquireStateSyncScopeLockAsync(string scopeKey, CancellationToken ct = default) => Task.CompletedTask;
     Task AcquireWorldTowerFloorLockAsync(string serverId, int floorNumber, CancellationToken ct = default);
     Task AcquireRaidRunLockAsync(Guid raidRunId, CancellationToken ct = default) => Task.CompletedTask;

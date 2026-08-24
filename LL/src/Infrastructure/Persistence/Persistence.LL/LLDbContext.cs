@@ -226,6 +226,31 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
             lockId);
     }
 
+    public async Task AcquireCharacterRowsLockAsync(
+        IReadOnlyCollection<Guid> characterIds,
+        CancellationToken ct = default)
+    {
+        if (Database.ProviderName != "Npgsql.EntityFrameworkCore.PostgreSQL" ||
+            characterIds.Count == 0)
+        {
+            return;
+        }
+
+        if (Database.CurrentTransaction is null)
+        {
+            throw new InvalidOperationException(
+                "Character row locks require an active transaction.");
+        }
+
+        foreach (var characterId in characterIds.Distinct().OrderBy(x => x))
+        {
+            await ExecuteSqlRawAsync(
+                "SELECT 1 FROM \"Entities\" WHERE \"Id\" = {0} FOR UPDATE",
+                ct,
+                characterId);
+        }
+    }
+
     public async Task AcquireStateSyncScopeLockAsync(
         string scopeKey,
         CancellationToken ct = default)

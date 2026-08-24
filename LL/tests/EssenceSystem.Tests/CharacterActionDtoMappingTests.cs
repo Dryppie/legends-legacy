@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Application.Common.Mappings;
 using Application.UseCases.CharacterActions.Dtos.Responses;
 using AutoMapper;
@@ -52,6 +53,27 @@ public sealed class CharacterActionDtoMappingTests
         var dto = _mapper.Map<CharacterActionDto>(action);
 
         Assert.False(dto.HasMoreDueWork);
+    }
+
+    [Fact]
+    public void Json_contract_exposes_only_explicit_schedule_fields()
+    {
+        var dto = new CharacterActionDto
+        {
+            UpdatedAt = DateTimeOffset.Parse("2026-08-24T12:00:00Z"),
+            NextResolutionAtUtc = DateTimeOffset.Parse("2026-08-24T12:00:10Z"),
+            HasMoreDueWork = true
+        };
+
+        using var document = JsonDocument.Parse(JsonSerializer.Serialize(
+            dto,
+            new JsonSerializerOptions(JsonSerializerDefaults.Web)));
+        var contract = document.RootElement;
+
+        Assert.True(contract.TryGetProperty("nextResolutionAtUtc", out _));
+        Assert.True(contract.TryGetProperty("hasMoreDueWork", out _));
+        Assert.False(contract.TryGetProperty("nextResolutionAt", out _));
+        Assert.False(contract.TryGetProperty("hasPendingCombatResolution", out _));
     }
 
     [Fact]
