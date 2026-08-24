@@ -112,7 +112,8 @@
                 <strong>{{ item.name }}</strong>
                 <p>{{ item.description }}</p>
                 <small *ngIf="!item.isUnlocked"
-                  >Slay {{ difficultyLabel(item.requiredTier) }} to unlock</small
+                  >Slay {{ difficultyLabel(item.requiredTier) }} to
+                  unlock</small
                 >
                 <small *ngIf="item.weeklyPurchaseLimit"
                   >Weekly {{ item.weeklyPurchased }}/{{
@@ -166,31 +167,45 @@
           </div>
 
           <div class="raid-actions">
-            <a
+            <div
               *ngIf="raidBoss.activeRaidId"
-              class="active-raid-link full-width"
-              [routerLink]="['/game/world/raid', raidBoss.activeRaidId]"
+              class="active-raid-status"
+              role="status"
             >
-              Open my raid
-            </a>
+              <div class="active-raid-heading">
+                <span class="active-raid-indicator" aria-hidden="true"></span>
+                <div>
+                  <span class="eyebrow">Active raid</span>
+                  <strong>You’re already in a raid</strong>
+                </div>
+              </div>
+              <p>
+                You can only join one raid at a time. Return to your active raid
+                to continue.
+              </p>
+              <a
+                class="active-raid-link full-width"
+                [routerLink]="['/game/world/raid', raidBoss.activeRaidId]"
+              >
+                Return to my raid
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
             <button
+              *ngIf="!raidBoss.activeRaidId"
               type="button"
               class="full-width"
               (click)="create()"
-              [disabled]="
-                !raidBoss.isUnlocked || !!raidBoss.activeRaidId || !!action()
-              "
+              [disabled]="!raidBoss.isUnlocked || !!action()"
             >
               {{ action() === "create" ? "Creating raid..." : "Create raid" }}
             </button>
             <button
-              *ngIf="raidBoss.developmentToolsEnabled"
+              *ngIf="raidBoss.developmentToolsEnabled && !raidBoss.activeRaidId"
               type="button"
               class="secondary full-width"
               (click)="createDevelopment()"
-              [disabled]="
-                !raidBoss.isUnlocked || !!raidBoss.activeRaidId || !!action()
-              "
+              [disabled]="!raidBoss.isUnlocked || !!action()"
             >
               {{
                 action() === "development-create"
@@ -283,7 +298,8 @@
             >
               <div>
                 <strong
-                  >{{ entry.raidBossName }} · {{ difficultyLabel(entry.tier) }}</strong
+                  >{{ entry.raidBossName }} ·
+                  {{ difficultyLabel(entry.tier) }}</strong
                 >
                 <span
                   >{{ entry.outcome }} ·
@@ -302,7 +318,8 @@
                   >Reward ready to collect</small
                 >
                 <small *ngIf="!entry.canClaim"
-                  >Claimed {{ entry.claimedAt | localDate: "mediumDate" }}</small
+                  >Claimed
+                  {{ entry.claimedAt | localDate: "mediumDate" }}</small
                 >
               </div>
               <a [routerLink]="['/game/world/raid', entry.raidRunId]">

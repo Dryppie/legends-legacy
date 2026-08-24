@@ -6,7 +6,7 @@ public static class TemperingConstants
 {
     public const int PotentialCost = 1;
     public const int ActionDurationSeconds = 10;
-    public const double DirectedImprovementBudgetFraction = 0.02d;
+    public const double DirectedImprovementBudgetFraction = 0.08d;
 
     public static int GetRarityUpgradeCount(Rarity rarity) =>
         Math.Max(0, (int)rarity);

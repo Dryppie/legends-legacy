@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '../../api/api.service';
-import { Observable, of } from 'rxjs';
-import { Region } from '../../../../shared/models/Dtos/regionDto';
+import { catchError, map, Observable, of } from 'rxjs';
+import {
+  AreaGatheringNode,
+  Region,
+} from '../../../../shared/models/Dtos/regionDto';
 import { GatheringType } from '../../../../shared/models/enums/gatheringType';
 
 @Injectable({
@@ -31,7 +34,43 @@ export class RegionService {
     //   region = getCitySidebar();
     // }
 
-    return of(region);
+    const apiRegionId = this.apiRegionId(id);
+    if (apiRegionId === null) return of(region);
+
+    return this.apiService
+      .get(`Region/${apiRegionId}/gathering`)
+      .pipe(
+        map((payload: RegionGatheringPayload) =>
+          this.mergeGatheringNodes(region, payload),
+        ),
+        catchError(() => of(region)),
+      );
+  }
+
+  private apiRegionId(id: string): number | null {
+    if (id.includes('shenic')) return 1;
+    if (id.includes('meran')) return 2;
+    return null;
+  }
+
+  private mergeGatheringNodes(
+    region: Region,
+    payload: RegionGatheringPayload,
+  ): Region {
+    const nodesByAreaId = new Map(
+      (payload.areas ?? []).map((area) => [
+        area.id,
+        area.gatheringNodes ?? [],
+      ]),
+    );
+
+    return {
+      ...region,
+      areas: region.areas.map((area) => ({
+        ...area,
+        gatheringNodes: nodesByAreaId.get(area.id) ?? area.gatheringNodes,
+      })),
+    };
   }
 
   private getShenicRegion(): Region {
@@ -226,4 +265,11 @@ export class RegionService {
       raids: [],
     };
   }
+}
+
+interface RegionGatheringPayload {
+  areas?: Array<{
+    id: string;
+    gatheringNodes?: AreaGatheringNode[];
+  }>;
 }

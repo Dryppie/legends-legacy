@@ -73,6 +73,9 @@ export class StateSyncCoordinator {
   private initialized = false;
   private lastBlurAt?: number;
   private readonly longSuspensionMs = 5 * 60_000;
+  private readonly periodicReconcileIntervalMs = 5 * 60_000;
+  private periodicReconciliationEnabled = false;
+  private periodicReconcileIntervalId?: number;
   private readonly _status = signal<StateSyncRegistrationStatus[]>([]);
 
   readonly status = this._status.asReadonly();
@@ -122,6 +125,12 @@ export class StateSyncCoordinator {
     window.addEventListener('blur', this.handleBlur);
     window.addEventListener('focus', this.handleFocus);
     window.addEventListener('online', this.handleOnline);
+    this.syncPeriodicReconciliation();
+  }
+
+  setPeriodicReconciliationEnabled(enabled: boolean): void {
+    this.periodicReconciliationEnabled = enabled;
+    this.syncPeriodicReconciliation();
   }
 
   dispose(): void {
@@ -132,6 +141,8 @@ export class StateSyncCoordinator {
       window.removeEventListener('online', this.handleOnline);
     }
     this.initialized = false;
+    this.periodicReconciliationEnabled = false;
+    this.clearPeriodicReconciliation();
     this.lastBlurAt = undefined;
     this.revisions.clear();
     (
@@ -190,7 +201,10 @@ export class StateSyncCoordinator {
       key,
       refresh,
       shouldRefresh,
-      lastRefreshRevision: this.revisions.get(scope) ?? 0,
+      // A newly registered owner has not proven that its retained cache has
+      // applied any coordinator revision. Successful refreshes or handled
+      // mutation responses advance this value explicitly.
+      lastRefreshRevision: 0,
       inFlight: false,
       retryAttempt: 0,
       generation: 0,
@@ -234,10 +248,7 @@ export class StateSyncCoordinator {
     this.acceptRevision(event.scope, event.revision);
   }
 
-  acceptInvalidations(
-    revisions: StateVersionMap,
-    updateId?: string,
-  ): void {
+  acceptInvalidations(revisions: StateVersionMap, updateId?: string): void {
     if (!this.updateDeduper.shouldProcess(updateId)) return;
     for (const [scope, revision] of Object.entries(revisions)) {
       if (!isStateSyncScope(scope)) continue;
@@ -276,7 +287,12 @@ export class StateSyncCoordinator {
     this.acceptRevision(scope, revision);
   }
 
-  reconcile(): Promise<void> {
+  reconcile({
+    afterCurrent = false,
+  }: { afterCurrent?: boolean } = {}): Promise<void> {
+    if (afterCurrent && this.reconcilePromise) {
+      return this.reconcilePromise.then(() => this.reconcile());
+    }
     if (this.reconcilePromise) return this.reconcilePromise;
     if (this.reconcileRetryTimeoutId !== undefined) {
       window.clearTimeout(this.reconcileRetryTimeoutId);
@@ -317,6 +333,32 @@ export class StateSyncCoordinator {
       this.reconcileRetryTimeoutId = undefined;
       void this.reconcile();
     }, delay);
+  }
+
+  private syncPeriodicReconciliation(): void {
+    if (!this.initialized || !this.periodicReconciliationEnabled) {
+      this.clearPeriodicReconciliation();
+      return;
+    }
+    if (this.periodicReconcileIntervalId !== undefined) return;
+
+    this.periodicReconcileIntervalId = window.setInterval(() => {
+      if (
+        !this.initialized ||
+        !this.periodicReconciliationEnabled ||
+        document.visibilityState !== 'visible' ||
+        !navigator.onLine
+      ) {
+        return;
+      }
+      void this.reconcile();
+    }, this.periodicReconcileIntervalMs);
+  }
+
+  private clearPeriodicReconciliation(): void {
+    if (this.periodicReconcileIntervalId === undefined) return;
+    window.clearInterval(this.periodicReconcileIntervalId);
+    this.periodicReconcileIntervalId = undefined;
   }
 
   private acceptCheckpoint(checkpoint: StateSyncCheckpoint): void {

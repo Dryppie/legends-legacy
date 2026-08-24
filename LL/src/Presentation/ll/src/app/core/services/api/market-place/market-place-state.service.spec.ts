@@ -261,6 +261,37 @@ describe('MarketplaceStateService semantic sequencing', () => {
     expect(service.loading()).toBeFalse();
   });
 
+  it('does not let an older refresh overwrite a realtime semantic change', () => {
+    const staleSnapshot = new Subject<{
+      listings: MarketPlaceListing[];
+      catalog: [];
+      history: MarketPlaceOrder[];
+      buyOrders: MarketPlaceBuyOrder[];
+    }>();
+    marketplace.getSnapshot.and.returnValue(staleSnapshot.asObservable());
+    service.refresh();
+
+    const current = { id: 'current-listing' } as MarketPlaceListing;
+    emit({
+      version: 1,
+      listingChanges: [{ listingId: current.id, listing: current }],
+      buyOrderChanges: [],
+      orders: [],
+      affectedCharacterIds: [],
+    });
+
+    staleSnapshot.next({
+      listings: [{ id: 'stale-listing' } as MarketPlaceListing],
+      catalog: [],
+      history: [],
+      buyOrders: [],
+    });
+    staleSnapshot.complete();
+
+    expect(service.listings()).toEqual([current]);
+    expect(service.loading()).toBeFalse();
+  });
+
   function emit(changes: MarketplaceChanged['changes']): void {
     eventEnvelope.set({
       event: 'MarketplaceChanged',

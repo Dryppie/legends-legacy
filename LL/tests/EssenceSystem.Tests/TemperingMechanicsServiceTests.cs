@@ -112,14 +112,13 @@ public sealed class TemperingMechanicsServiceTests
         var powerImprovement = equipment.InstanceModifiers.Single(x =>
             x.AttributeType == AttributeType.Power).Amount;
         Assert.Equal(
-            (float)Math.Max(
-                1d,
-                Math.Round(
-                    TemperingConstants.GetDirectedImprovementBudget(equipment.Tier)
-                    * options.GetQualityStatMultiplier(equipment.Quality)
-                    / EquipmentStatBudgetCatalog
-                        .Get(AttributeType.Power, equipment.Tier)
-                        .CostPerPoint)),
+            (float)AttributeValueQuantizer.Quantize(
+                AttributeType.Power,
+                TemperingConstants.GetDirectedImprovementBudget(equipment.Tier)
+                * options.GetQualityStatMultiplier(equipment.Quality)
+                / EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(
+                    AttributeType.Power,
+                    equipment.Tier)),
             powerImprovement);
     }
 
@@ -156,7 +155,7 @@ public sealed class TemperingMechanicsServiceTests
         Assert.Equal(AttributeType.Armor, result.ImprovedStat);
         var modifier = Assert.Single(equipment.InstanceModifiers);
         Assert.True(modifier.Amount > 40);
-        Assert.Equal(modifier.Amount - 40, modifier.RarityBonusAmount);
+        Assert.Equal(modifier.Amount - 40, modifier.RarityBonusAmount, precision: 4);
     }
 
     [Fact]
@@ -361,7 +360,69 @@ public sealed class TemperingMechanicsServiceTests
         Assert.Equal(AttributeType.Power, result.ImprovedStat);
         var modifier = Assert.Single(equipment.InstanceModifiers);
         Assert.Equal(AttributeType.Power, modifier.AttributeType);
-        Assert.Equal(5.95f, modifier.Amount);
+        Assert.Equal(5.40f, modifier.Amount);
+    }
+
+    [Fact]
+    public void Rarity_upgrade_spends_the_same_budget_within_quantization_tolerance_for_every_stat()
+    {
+        var options = new CraftingBalanceOptions();
+        var service = new TemperingMechanicsService(Options.Create(options));
+        var expectedBudget = TemperingConstants.GetDirectedImprovementBudget(tier: 1)
+            * options.GetSlotBudgetWeight(EquipmentType.Chest)
+            * options.GetQualityStatMultiplier(ItemQuality.Standard);
+
+        foreach (var attribute in EquipmentStatBudgetCatalog.Attributes)
+        {
+            var equipment = new EquipmentInstance
+            {
+                ItemBaseId = $"test-{attribute}",
+                ItemBase = new EquipmentBase
+                {
+                    Id = $"test-{attribute}",
+                    Name = $"Test {attribute}",
+                    EquipmentType = EquipmentType.Chest
+                },
+                Rarity = Rarity.Common,
+                Quality = ItemQuality.Standard,
+                Tier = 1,
+                StatModelVersion = EquipmentStatBudgetCatalog.BalanceVersion,
+                Potential = 10,
+                ItemXp = 9
+            };
+            var profile = new TemperingProfileDefinition
+            {
+                Id = $"profile-{attribute}",
+                Name = $"Test {attribute}",
+                Stats =
+                [
+                    new TemperingStatWeightDefinition
+                    {
+                        Stat = attribute,
+                        Weight = 100,
+                        Category = TemperingStatCategory.Primary,
+                        CanIntroduce = true,
+                        CanIncrease = true,
+                        MaxBudgetShare = 1d,
+                        MinimumTier = 1
+                    }
+                ]
+            };
+
+            var result = service.ApplyTemperingAttempt(
+                equipment,
+                profile,
+                new FixedRandom(0.01d));
+            var actualBudget = EquipmentBudgetEvaluator.Evaluate(
+                equipment.AttributeModifiers,
+                equipment.Tier);
+
+            Assert.Equal(attribute, result.ImprovedStat);
+            Assert.InRange(
+                actualBudget,
+                expectedBudget - 0.15d,
+                expectedBudget + 0.15d);
+        }
     }
 
     private static EquipmentInstance CreateEquipment() => new()

@@ -5,7 +5,7 @@ import { GameRealtimeStore } from '../../../core/services/real-time/game-realtim
 import { ItemComponent } from '../../../shared/components/item/item.component';
 import { LocalStorageService } from '../../../core/services/client-side/local-storage/local-storage.service';
 import { LootHistoryEntry } from '../../../shared/models/loot-history';
-import { LootHistoryService } from '../../../core/services/api/loot-history/loot-history.service';
+import { LootHistoryStateService } from '../../../core/services/api/loot-history/loot-history-state.service';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { LocalDatePipe } from '../../../shared/pipes/local-date/local-date.pipe';
 
@@ -53,7 +53,7 @@ export class LootTrackerComponent {
   constructor(
     private readonly realtimeStore: GameRealtimeStore,
     private readonly storage: LocalStorageService,
-    private readonly lootHistory: LootHistoryService,
+    private readonly lootHistory: LootHistoryStateService,
     private readonly characterActions: CharacterActionsStateService,
   ) {
     this.expanded.set(this.storage.get<boolean>('lootTrackerExpanded') ?? true);
@@ -78,7 +78,7 @@ export class LootTrackerComponent {
     this.lootHistory
       .clear()
       .pipe(finalize(() => this.clearing.set(false)))
-      .subscribe(() => this.realtimeStore.clearLootHistory());
+      .subscribe();
   }
 
   trackEntry(index: number, entry: LootHistoryEntry): string {
@@ -92,9 +92,6 @@ export class LootTrackerComponent {
   }
 
   private loadHistory(): void {
-    this.lootHistory
-      .getRecent()
-      .subscribe((entries) => this.realtimeStore.setLootHistory(entries));
+    this.lootHistory.reload().subscribe();
   }
-
 }

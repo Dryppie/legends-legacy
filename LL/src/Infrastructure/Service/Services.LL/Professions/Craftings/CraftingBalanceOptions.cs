@@ -14,9 +14,9 @@ public sealed class CraftingBalanceOptions
     {
         [ItemQuality.Crude] = 0.90d,
         [ItemQuality.Standard] = 1.00d,
-        [ItemQuality.Fine] = 1.04d,
-        [ItemQuality.Exceptional] = 1.08d,
-        [ItemQuality.Masterwork] = 1.12d
+        [ItemQuality.Fine] = 1.12d,
+        [ItemQuality.Exceptional] = 1.26d,
+        [ItemQuality.Masterwork] = 1.42d
     };
 
     public Dictionary<EquipmentType, double> PotentialSlotWeights { get; set; } = new()

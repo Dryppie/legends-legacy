@@ -73,6 +73,45 @@ public sealed class CraftingEquipmentScalingTests
     }
 
     [Fact]
+    public void RollBaseStats_AdjacentQualityBandsDoNotOverlap()
+    {
+        var service = new ItemStatRollService(Options.Create(new CraftingBalanceOptions()));
+        var equipment = new EquipmentBase
+        {
+            Id = "quality-band-ring",
+            Name = "Quality Band Ring",
+            EquipmentType = EquipmentType.Ring
+        };
+        var design = CreateSingleStatDesign();
+        var qualities = Enum.GetValues<ItemQuality>().OrderBy(quality => quality).ToArray();
+
+        for (var index = 0; index < qualities.Length - 1; index++)
+        {
+            var lowerQuality = qualities[index];
+            var higherQuality = qualities[index + 1];
+            var lowerMaximum = service.RollBaseStats(
+                    equipment,
+                    design,
+                    10,
+                    lowerQuality,
+                    new FixedRandom(1d))
+                .Single();
+            var higherMinimum = service.RollBaseStats(
+                    equipment,
+                    design,
+                    10,
+                    higherQuality,
+                    new FixedRandom(0d))
+                .Single();
+
+            Assert.True(
+                higherMinimum.Amount > lowerMaximum.Amount,
+                $"{higherQuality} minimum {higherMinimum.Amount} must exceed "
+                + $"{lowerQuality} maximum {lowerMaximum.Amount}.");
+        }
+    }
+
+    [Fact]
     public void GetBaseStatRanges_EnclosesEveryPossibleCurrentMasteryRoll()
     {
         var service = new ItemStatRollService(Options.Create(new CraftingBalanceOptions()));

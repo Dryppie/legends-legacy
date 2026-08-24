@@ -7,10 +7,7 @@ import { RaidUpdated } from '../raid/raid-updated';
 import { RaidDirectoryUpdated } from '../raid/raid-directory-updated';
 import { RegionBossUpdated } from '../region-boss/region-boss-updated';
 import { WorldTowerRallyUpdated } from '../world-tower/world-tower-rally-updated';
-import {
-  StateSyncScope,
-  StateVersionMap,
-} from './state-sync-scopes.generated';
+import { StateSyncScope, StateVersionMap } from './state-sync-scopes.generated';
 
 export {
   isStateSyncScope,
@@ -25,14 +22,10 @@ export const gameRealtimeSignalEventNames = {
   marketplaceChanged: 'MarketplaceChanged',
   guildApplication: 'GuildApplication',
   guildInviteReceived: 'GuildInviteReceived',
-  guildInviteRejected: 'GuildInviteRejected',
   guildApplicationRejected: 'GuildApplicationRejected',
   guildBuildingsChanged: 'GuildBuildingsChanged',
   guildMissionsChanged: 'GuildMissionsChanged',
-  guildStateChanged: 'GuildStateChanged',
   guildVaultChatMessage: 'GuildVaultChatMessage',
-  guildMembershipChanged: 'GuildMembershipChanged',
-  guildDisbanded: 'GuildDisbanded',
   guildDirectoryChanged: 'GuildDirectoryChanged',
   questJournalChanged: 'QuestJournalChanged',
   eventQuestChanged: 'EventQuestChanged',
@@ -106,11 +99,6 @@ export interface GuildInviteReceived {
   characterId: string;
 }
 
-export interface GuildInviteRejected {
-  guildId: string;
-  characterId: string;
-}
-
 export interface GuildApplicationRejected {
   guildId: string;
   characterId: string;
@@ -129,12 +117,6 @@ export interface GuildMissionsChanged {
   initiatorHandled?: boolean;
 }
 
-export interface GuildStateChanged {
-  guildId: string;
-  actorCharacterId?: string;
-  initiatorHandled?: boolean;
-}
-
 export interface GuildVaultChatMessage {
   guildId: string;
   messageId: string;
@@ -143,19 +125,6 @@ export interface GuildVaultChatMessage {
   action: 'donated' | 'withdrew';
   equipment: EquipmentInstance;
   sentAt: string;
-}
-
-export interface GuildMembershipChanged {
-  guildId: string;
-  characterId: string;
-  actorCharacterId?: string;
-  initiatorHandled?: boolean;
-}
-
-export interface GuildDisbanded {
-  guildId: string;
-  actorCharacterId?: string;
-  initiatorHandled?: boolean;
 }
 
 export interface GuildDirectoryChanged {
@@ -220,14 +189,10 @@ export interface GameRealtimeSignalEventMap {
   MarketplaceChanged: MarketplaceChanged;
   GuildApplication: GuildApplication;
   GuildInviteReceived: GuildInviteReceived;
-  GuildInviteRejected: GuildInviteRejected;
   GuildApplicationRejected: GuildApplicationRejected;
   GuildBuildingsChanged: GuildBuildingsChanged;
   GuildMissionsChanged: GuildMissionsChanged;
-  GuildStateChanged: GuildStateChanged;
   GuildVaultChatMessage: GuildVaultChatMessage;
-  GuildMembershipChanged: GuildMembershipChanged;
-  GuildDisbanded: GuildDisbanded;
   GuildDirectoryChanged: GuildDirectoryChanged;
   QuestJournalChanged: QuestJournalChanged;
   EventQuestChanged: EventQuestChanged;
@@ -272,14 +237,10 @@ export type GameRealtimePayload =
   | MarketplaceChanged
   | GuildApplication
   | GuildInviteReceived
-  | GuildInviteRejected
   | GuildApplicationRejected
   | GuildBuildingsChanged
   | GuildMissionsChanged
-  | GuildStateChanged
   | GuildVaultChatMessage
-  | GuildMembershipChanged
-  | GuildDisbanded
   | GuildDirectoryChanged
   | QuestJournalChanged
   | EventQuestChanged

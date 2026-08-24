@@ -90,9 +90,7 @@ public sealed class GuildVaultChatCommandTests
             Assert.Equal(expectedAction, realtime.Action);
             Assert.Equal(payload.MessageId, realtime.MessageId);
             Assert.Equal(payload.Equipment.Id, realtime.Equipment.Id);
-            var stateChanged = Assert.Single(Publisher.Messages.OfType<GuildStateChanged>());
-            Assert.Equal(CharacterId, stateChanged.ActorCharacterId);
-            Assert.True(stateChanged.InitiatorHandled);
+            Assert.Single(Publisher.Messages);
         }
     }
 

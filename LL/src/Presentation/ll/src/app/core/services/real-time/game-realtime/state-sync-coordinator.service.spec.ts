@@ -1,10 +1,78 @@
 import { Injector } from '@angular/core';
-import { fakeAsync, tick } from '@angular/core/testing';
+import { fakeAsync, flushMicrotasks, tick } from '@angular/core/testing';
 import { defer, of, Subject, throwError } from 'rxjs';
 import { StateSyncService } from '../../api/state-sync/state-sync.service';
+import { StateSyncCheckpoint } from './game-realtime-contracts';
 import { StateSyncCoordinator } from './state-sync-coordinator.service';
 
 describe('StateSyncCoordinator', () => {
+  it('periodically reconciles while enabled and stops when disabled', fakeAsync(() => {
+    const getCheckpoint = jasmine
+      .createSpy()
+      .and.returnValue(
+        of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),
+      );
+    const injector = {
+      get: () => ({ getCheckpoint }),
+    } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    coordinator.initialize();
+    coordinator.setPeriodicReconciliationEnabled(true);
+
+    tick(5 * 60_000 - 1);
+    expect(getCheckpoint).not.toHaveBeenCalled();
+
+    tick(1);
+    flushMicrotasks();
+    expect(getCheckpoint).toHaveBeenCalledTimes(1);
+
+    tick(5 * 60_000);
+    flushMicrotasks();
+    expect(getCheckpoint).toHaveBeenCalledTimes(2);
+
+    coordinator.setPeriodicReconciliationEnabled(false);
+    tick(5 * 60_000);
+    expect(getCheckpoint).toHaveBeenCalledTimes(2);
+
+    coordinator.dispose();
+  }));
+
+  it('skips periodic reconciliation while hidden or offline', fakeAsync(() => {
+    let visibilityState: DocumentVisibilityState = 'hidden';
+    let online = true;
+    spyOnProperty(document, 'visibilityState', 'get').and.callFake(
+      () => visibilityState,
+    );
+    spyOnProperty(navigator, 'onLine', 'get').and.callFake(() => online);
+
+    const getCheckpoint = jasmine
+      .createSpy()
+      .and.returnValue(
+        of({ characterId: 'character', revisions: {}, serverTimeUtc: '' }),
+      );
+    const injector = {
+      get: () => ({ getCheckpoint }),
+    } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+    coordinator.initialize();
+    coordinator.setPeriodicReconciliationEnabled(true);
+
+    tick(5 * 60_000);
+    expect(getCheckpoint).not.toHaveBeenCalled();
+
+    visibilityState = 'visible';
+    online = false;
+    tick(5 * 60_000);
+    expect(getCheckpoint).not.toHaveBeenCalled();
+
+    online = true;
+    tick(5 * 60_000);
+    flushMicrotasks();
+    expect(getCheckpoint).toHaveBeenCalledTimes(1);
+
+    coordinator.dispose();
+  }));
+
   it('reconciles on focus only after a long suspension', fakeAsync(() => {
     const getCheckpoint = jasmine
       .createSpy()
@@ -223,6 +291,48 @@ describe('StateSyncCoordinator', () => {
     tick();
 
     expect(refresh).toHaveBeenCalledTimes(1);
+  }));
+
+  it('does not assume a newly registered retained cache has applied the known revision', fakeAsync(() => {
+    const api = {
+      getCheckpoint: () =>
+        of({
+          characterId: 'character',
+          revisions: { tournament: 7 },
+          serverTimeUtc: '',
+        }),
+    } as unknown as StateSyncService;
+    const injector = { get: () => api } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+
+    coordinator.acceptDomainVersion('tournament', 7, 'while-owner-absent');
+    tick(51);
+
+    const refresh = jasmine
+      .createSpy('refresh')
+      .and.returnValue(Promise.resolve());
+    coordinator.register('tournament', 'tournament-grounds', refresh);
+
+    expect(coordinator.status()[0]).toEqual(
+      jasmine.objectContaining({
+        targetRevision: 7,
+        appliedRevision: 0,
+        stale: true,
+      }),
+    );
+
+    void coordinator.reconcile();
+    tick(51);
+    tick();
+
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(coordinator.status()[0]).toEqual(
+      jasmine.objectContaining({
+        targetRevision: 7,
+        appliedRevision: 7,
+        stale: false,
+      }),
+    );
   }));
 
   it('refreshes a stale registration when its owner becomes active', fakeAsync(() => {
@@ -526,6 +636,44 @@ describe('StateSyncCoordinator', () => {
     expect(attempts).toBe(2);
     expect(refresh).toHaveBeenCalledTimes(1);
     coordinator.dispose();
+  }));
+
+  it('starts a fresh checkpoint after an in-flight reconciliation', fakeAsync(() => {
+    const firstCheckpoint = new Subject<StateSyncCheckpoint>();
+    const secondCheckpoint = new Subject<StateSyncCheckpoint>();
+    const api = {
+      getCheckpoint: jasmine
+        .createSpy()
+        .and.returnValues(
+          firstCheckpoint.asObservable(),
+          secondCheckpoint.asObservable(),
+        ),
+    } as unknown as StateSyncService;
+    const injector = { get: () => api } as unknown as Injector;
+    const coordinator = new StateSyncCoordinator(injector);
+
+    void coordinator.reconcile();
+    void coordinator.reconcile({ afterCurrent: true });
+
+    expect(api.getCheckpoint).toHaveBeenCalledTimes(1);
+
+    firstCheckpoint.next({
+      characterId: 'character',
+      revisions: {},
+      serverTimeUtc: '',
+    });
+    firstCheckpoint.complete();
+    flushMicrotasks();
+
+    expect(api.getCheckpoint).toHaveBeenCalledTimes(2);
+
+    secondCheckpoint.next({
+      characterId: 'character',
+      revisions: {},
+      serverTimeUtc: '',
+    });
+    secondCheckpoint.complete();
+    flushMicrotasks();
   }));
 
   it('keeps a replacement registration when the old owner unregisters late', fakeAsync(() => {

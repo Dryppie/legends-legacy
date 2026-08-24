@@ -40,6 +40,7 @@ public sealed class StateSyncServiceTests
         Assert.Equal(1, checkpoint.Revisions[StateSyncScopes.Character]);
         Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.CharacterOverview]);
         Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Inventory]);
+        Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.LootHistory]);
         Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Soulstones]);
         Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Prophecies]);
         Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Marketplace]);
@@ -52,6 +53,7 @@ public sealed class StateSyncServiceTests
         Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.GuildDirectory]);
         Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Colosseum]);
         Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.Tournament]);
+        Assert.Equal(0, checkpoint.Revisions[StateSyncScopes.WorldTower]);
     }
 
     [Fact]

@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Application.Common.Interfaces;
 using Application.Interfaces.Outbox;
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Combat;
 using Application.Interfaces.Services.LL.PowerRatings;
@@ -73,6 +74,7 @@ public sealed class WorldTowerService : IWorldTowerService
     private readonly IAbilityCatalogProvider _abilityCatalog;
     private readonly ICombatEncounterResultFactory _resultFactory;
     private readonly IGameEventOutbox _outbox;
+    private readonly IStateSyncService _stateSync;
     private readonly IMapper _mapper;
     private readonly TimeProvider _timeProvider;
     private readonly WorldTowerOptions _options;
@@ -94,6 +96,7 @@ public sealed class WorldTowerService : IWorldTowerService
         IAbilityCatalogProvider abilityCatalog,
         ICombatEncounterResultFactory resultFactory,
         IGameEventOutbox outbox,
+        IStateSyncService stateSync,
         IMapper mapper,
         IOptions<WorldTowerOptions> options,
         JsonSerializerOptions jsonOptions,
@@ -113,6 +116,7 @@ public sealed class WorldTowerService : IWorldTowerService
         _abilityCatalog = abilityCatalog;
         _resultFactory = resultFactory;
         _outbox = outbox;
+        _stateSync = stateSync;
         _mapper = mapper;
         _options = options.Value;
         _jsonOptions = jsonOptions;
@@ -2525,10 +2529,15 @@ public sealed class WorldTowerService : IWorldTowerService
         DateTimeOffset occurredAt,
         CancellationToken cancellationToken)
     {
+        var stateVersion = await _stateSync.AdvanceWorldScopeWithRevisionAsync(
+            StateSyncScopes.WorldTower,
+            eventName,
+            cancellationToken);
         await _outbox.EnqueueAsync(
             GameEventTypes.WorldTowerRallyUpdated,
             new WorldTowerRallyUpdated(
                 rally.Id,
+                stateVersion,
                 rally.FloorNumber,
                 eventName,
                 rally.Status.ToString(),

@@ -82,14 +82,10 @@ describe('GuildStateService description updates', () => {
     const eventEnvelope = {
       GuildDirectoryChanged: signal(null),
       GuildInviteReceived: signal(null),
-      GuildInviteRejected: signal(null),
       GuildApplicationRejected: signal(null),
-      GuildMembershipChanged: signal(null),
       GuildBuildingsChanged: signal(null),
       GuildMissionsChanged: signal(null),
       GuildApplication: signal(null),
-      GuildStateChanged: signal(null),
-      GuildDisbanded: signal(null),
     };
     const guildService = {
       getMyGuild: jasmine.createSpy().and.returnValue(NEVER),
@@ -181,6 +177,80 @@ describe('GuildStateService description updates', () => {
 });
 
 describe('GuildStateService refreshes', () => {
+  it('reconciles only after the initial guild subscription is active', async () => {
+    TestBed.configureTestingModule({});
+    const order: string[] = [];
+    let resolveSubscription!: () => void;
+    const subscription = new Promise<void>((resolve) => {
+      resolveSubscription = resolve;
+    });
+    const guildService = {
+      getMyGuild: jasmine.createSpy().and.callFake(() => {
+        order.push('snapshot');
+        return of(createGuild('Description'));
+      }),
+      getBuildings: jasmine.createSpy().and.returnValue(of(null)),
+      getMissions: jasmine.createSpy().and.returnValue(of(null)),
+      getShop: jasmine.createSpy().and.returnValue(of(null)),
+      getAllGuilds: jasmine.createSpy().and.returnValue(of([])),
+    };
+    const eventService = {
+      eventEnvelope: {
+        GuildDirectoryChanged: signal(null),
+        GuildInviteReceived: signal(null),
+        GuildApplicationRejected: signal(null),
+        GuildBuildingsChanged: signal(null),
+        GuildMissionsChanged: signal(null),
+        GuildApplication: signal(null),
+      },
+      setGuildSubscription: jasmine.createSpy().and.callFake(() => {
+        order.push('subscribe');
+        return subscription;
+      }),
+    };
+    const stateSync = {
+      register: jasmine.createSpy(),
+      activate: jasmine.createSpy(),
+      resetScope: jasmine.createSpy(),
+      reconcile: jasmine.createSpy().and.callFake(() => {
+        order.push('checkpoint');
+        return Promise.resolve();
+      }),
+    };
+
+    TestBed.runInInjectionContext(
+      () =>
+        new GuildStateService(
+          guildService as never,
+          eventService as never,
+          eventService as never,
+          {
+            isAuthenticated: () => false,
+            currentCharacter: () => null,
+          } as never,
+          {
+            count: () => 0,
+            initializeCount: jasmine.createSpy(),
+          } as never,
+          {} as never,
+          stateSync as never,
+          TestBed.inject(DomainVersionTracker),
+        ),
+    );
+    TestBed.flushEffects();
+
+    expect(order).toEqual(['snapshot', 'subscribe']);
+    expect(stateSync.reconcile).not.toHaveBeenCalled();
+
+    resolveSubscription();
+    await subscription;
+    await Promise.resolve();
+
+    expect(order).toEqual(['snapshot', 'subscribe', 'checkpoint']);
+    expect(stateSync.reconcile).toHaveBeenCalledTimes(1);
+    expect(stateSync.reconcile).toHaveBeenCalledWith({ afterCurrent: true });
+  });
+
   it('does not manually reload guild or inventory after a vault mutation', () => {
     TestBed.configureTestingModule({});
     const guildService = {
@@ -191,14 +261,10 @@ describe('GuildStateService refreshes', () => {
       eventEnvelope: {
         GuildDirectoryChanged: signal(null),
         GuildInviteReceived: signal(null),
-        GuildInviteRejected: signal(null),
         GuildApplicationRejected: signal(null),
-        GuildMembershipChanged: signal(null),
         GuildBuildingsChanged: signal(null),
         GuildMissionsChanged: signal(null),
         GuildApplication: signal(null),
-        GuildStateChanged: signal(null),
-        GuildDisbanded: signal(null),
       },
       setGuildSubscription: jasmine
         .createSpy()
@@ -246,14 +312,10 @@ describe('GuildStateService refreshes', () => {
       eventEnvelope: {
         GuildDirectoryChanged: signal(null),
         GuildInviteReceived: signal(null),
-        GuildInviteRejected: signal(null),
         GuildApplicationRejected: signal(null),
-        GuildMembershipChanged: signal(null),
         GuildBuildingsChanged: signal(null),
         GuildMissionsChanged: signal(null),
         GuildApplication: signal(null),
-        GuildStateChanged: signal(null),
-        GuildDisbanded: signal(null),
       },
       reconnectCount: signal(0),
       setGuildSubscription: jasmine
@@ -314,14 +376,10 @@ describe('GuildStateService refreshes', () => {
       eventEnvelope: {
         GuildDirectoryChanged: signal(null),
         GuildInviteReceived: signal(null),
-        GuildInviteRejected: signal(null),
         GuildApplicationRejected: signal(null),
-        GuildMembershipChanged: signal(null),
         GuildBuildingsChanged: signal(null),
         GuildMissionsChanged: signal(null),
         GuildApplication: signal(null),
-        GuildStateChanged: signal(null),
-        GuildDisbanded: signal(null),
       },
       setGuildSubscription: jasmine
         .createSpy()
@@ -389,14 +447,10 @@ describe('GuildStateService refreshes', () => {
       eventEnvelope: {
         GuildDirectoryChanged: signal(null),
         GuildInviteReceived: signal(null),
-        GuildInviteRejected: signal(null),
         GuildApplicationRejected: signal(null),
-        GuildMembershipChanged: signal(null),
         GuildBuildingsChanged: signal(null),
         GuildMissionsChanged: missionEvent,
         GuildApplication: signal(null),
-        GuildStateChanged: signal(null),
-        GuildDisbanded: signal(null),
       },
       setGuildSubscription: jasmine
         .createSpy()
@@ -458,14 +512,10 @@ describe('GuildStateService refreshes', () => {
       eventEnvelope: {
         GuildDirectoryChanged: signal(null),
         GuildInviteReceived: signal(null),
-        GuildInviteRejected: signal(null),
         GuildApplicationRejected: signal(null),
-        GuildMembershipChanged: signal(null),
         GuildBuildingsChanged: signal(null),
         GuildMissionsChanged: signal(null),
         GuildApplication: signal(null),
-        GuildStateChanged: signal(null),
-        GuildDisbanded: signal(null),
       },
       setGuildSubscription: jasmine
         .createSpy()

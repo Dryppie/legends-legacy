@@ -1,5 +1,6 @@
 export interface WorldTowerRallyUpdated {
   rallyId: string;
+  stateVersion: number;
   floorNumber: number;
   event: string;
   status: string;

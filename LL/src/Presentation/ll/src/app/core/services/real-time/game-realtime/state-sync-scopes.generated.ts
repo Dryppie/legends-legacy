@@ -5,6 +5,7 @@ export const stateSyncScopes = [
   'character',
   'character-overview',
   'inventory',
+  'loot-history',
   'equipment',
   'quests',
   'area-access',
@@ -25,6 +26,7 @@ export const stateSyncScopes = [
   'colosseum',
   'tournament',
   'raid-directory',
+  'world-tower',
 ] as const;
 
 export type StateSyncScope = (typeof stateSyncScopes)[number];

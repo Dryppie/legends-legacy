@@ -1,11 +1,11 @@
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { ApiService } from '../../api/api.service';
 import { GatheringType } from '../../../../shared/models/enums/gatheringType';
 import { RegionService } from './region.service';
 
 describe('RegionService', () => {
   it('exposes all Lumo Ruins gathering node types', async () => {
-    const service = new RegionService({} as ApiService);
+    const service = createService();
 
     const region = await firstValueFrom(service.getRegionById('shenic'));
     const lumoRuins = region.areas.find(
@@ -20,7 +20,7 @@ describe('RegionService', () => {
   });
 
   it('exposes Meran and its Tower Floor 10 requirement', async () => {
-    const service = new RegionService({} as ApiService);
+    const service = createService();
 
     const region = await firstValueFrom(service.getRegionById('meran'));
 
@@ -46,10 +46,56 @@ describe('RegionService', () => {
   });
 
   it('resolves the parent region from an area id', () => {
-    const service = new RegionService({} as ApiService);
+    const service = createService();
 
     expect(service.getRegionNameByAreaId('region_01_area_01')).toBe('Shenic');
     expect(service.getRegionNameByAreaId('region_02_area_02')).toBe('Meran');
     expect(service.getRegionNameByAreaId('unknown_area')).toBeNull();
   });
+
+  it('merges authoritative gathering nodes into the static region layout', async () => {
+    const apiService = jasmine.createSpyObj<ApiService>('ApiService', ['get']);
+    apiService.get.and.returnValue(
+      of({
+        areas: [
+          {
+            id: 'region_01_area_02',
+            gatheringNodes: [
+              {
+                id: 'blood_grove_ore_vein',
+                name: 'Ore Vein',
+                type: GatheringType.Mining,
+                procChance: 0.0037,
+                yieldBonusPercent: 0,
+                minQuantity: 8,
+                maxQuantity: 24,
+              },
+            ],
+          },
+        ],
+      }),
+    );
+    const service = new RegionService(apiService);
+
+    const region = await firstValueFrom(service.getRegionById('shenic'));
+
+    expect(apiService.get).toHaveBeenCalledOnceWith('Region/1/gathering');
+    expect(
+      region.areas.find((area) => area.id === 'region_01_area_02')
+        ?.gatheringNodes,
+    ).toEqual([
+      jasmine.objectContaining({
+        id: 'blood_grove_ore_vein',
+        procChance: 0.0037,
+        minQuantity: 8,
+        maxQuantity: 24,
+      }),
+    ]);
+  });
 });
+
+function createService(): RegionService {
+  const apiService = jasmine.createSpyObj<ApiService>('ApiService', ['get']);
+  apiService.get.and.returnValue(of({ areas: [] }));
+  return new RegionService(apiService);
+}

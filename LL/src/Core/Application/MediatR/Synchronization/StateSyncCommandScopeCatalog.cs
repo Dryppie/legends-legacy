@@ -38,7 +38,11 @@ public sealed record StateSyncCommandScopeProfile(
 /// </summary>
 public static class StateSyncCommandScopeCatalog
 {
-    private static readonly StateSyncCommandScopeProfile DefaultProfile = new([], []);
+    private static readonly StateSyncCommandScopeProfile DefaultProfile = new(
+        [],
+        [],
+        RefreshCharacterOverview: false,
+        RefreshCharacterSummaryWhenChanged: true);
     private static readonly IReadOnlyDictionary<Type, StateSyncCommandScopeProfile> Profiles = BuildProfiles();
 
     public static StateSyncCommandScopeProfile GetProfile(Type commandType) =>
@@ -64,17 +68,37 @@ public static class StateSyncCommandScopeCatalog
         "Application.UseCases.Essences.",
         "Application.UseCases.Guilds.",
         "Application.UseCases.Inventories.",
+        "Application.UseCases.LootHistory.",
         "Application.UseCases.MarketPlaces.",
         "Application.UseCases.Prophecies.",
         "Application.UseCases.Quests.",
         "Application.UseCases.Raids.",
         "Application.UseCases.Soulstones.",
-        "Application.UseCases.Titles."
+        "Application.UseCases.Titles.",
+        "Application.UseCases.WorldTower."
     ];
 
     private static IReadOnlyDictionary<Type, StateSyncCommandScopeProfile> BuildProfiles()
     {
         var profiles = new Dictionary<Type, StateSyncCommandScopeProfile>();
+
+        Register(
+            profiles,
+            [StateSyncScopes.Inventory],
+            [],
+            refreshCharacterOverview: false,
+            inventoryWhenChanged: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Administration.Commands.GrantCompensationItems.GrantCompensationItemsCommand));
+
+        Register(
+            profiles,
+            [StateSyncScopes.LootHistory],
+            [],
+            refreshCharacterOverview: false,
+            inventoryWhenChanged: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.LootHistory.Commands.ClearLootHistory.ClearLootHistoryCommand));
 
         Register(profiles, [StateSyncScopes.Achievements], [],
             typeof(global::Application.UseCases.Achievements.Commands.RecalculateAchievements.RecalculateAchievementsCommand));
@@ -141,9 +165,18 @@ public static class StateSyncCommandScopeCatalog
             refreshCharacterSummaryWhenChanged: false,
             typeof(global::Application.UseCases.Colosseum.Commands.UpdateArenaDefenseSnapshot.UpdateArenaDefenseSnapshotCommand));
 
+        Register(
+            profiles,
+            [StateSyncScopes.Colosseum],
+            [],
+            refreshCharacterOverview: false,
+            inventoryWhenChanged: true,
+            refreshCharacterSummaryWhenChanged: false,
+            typeof(global::Application.UseCases.Colosseum.Tournaments.Commands.ClaimTournamentRewardsCommand));
+
         RegisterAuthoritativeResponse(
             profiles,
-            [StateSyncScopes.Inventory, StateSyncScopes.Quests],
+            [StateSyncScopes.Inventory],
             [],
             [StateSyncScopes.Inventory],
             refreshCharacterOverview: true,
@@ -163,7 +196,7 @@ public static class StateSyncCommandScopeCatalog
 
         RegisterAuthoritativeResponse(
             profiles,
-            [StateSyncScopes.Dungeons, StateSyncScopes.Inventory, StateSyncScopes.Quests],
+            [StateSyncScopes.Dungeons, StateSyncScopes.Inventory],
             [],
             [StateSyncScopes.Dungeons, StateSyncScopes.Inventory],
             refreshCharacterOverview: false,
@@ -172,7 +205,7 @@ public static class StateSyncCommandScopeCatalog
 
         RegisterAuthoritativeResponse(
             profiles,
-            [StateSyncScopes.Dungeons, StateSyncScopes.Quests],
+            [StateSyncScopes.Dungeons],
             [],
             [StateSyncScopes.Dungeons],
             refreshCharacterOverview: false,
@@ -508,9 +541,35 @@ public static class StateSyncCommandScopeCatalog
         Register(profiles, [StateSyncScopes.Inventory], [],
             typeof(global::Application.UseCases.Raids.PurchaseRaidTrophyVendorItemCommand));
 
+        Register(
+            profiles,
+            [],
+            [StateSyncScopes.WorldTower],
+            refreshCharacterOverview: false,
+            inventoryWhenChanged: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.WorldTower.ContributeToTowerCommand));
+
+        Register(
+            profiles,
+            [],
+            [],
+            refreshCharacterOverview: false,
+            inventoryWhenChanged: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.WorldTower.CreateTowerRallyCommand),
+            typeof(global::Application.UseCases.WorldTower.FillDevelopmentTowerTeamCommand),
+            typeof(global::Application.UseCases.WorldTower.ApplyToTowerRallyCommand),
+            typeof(global::Application.UseCases.WorldTower.AcceptTowerRallyApplicationCommand),
+            typeof(global::Application.UseCases.WorldTower.DeclineTowerRallyApplicationCommand),
+            typeof(global::Application.UseCases.WorldTower.LeaveTowerRallyCommand),
+            typeof(global::Application.UseCases.WorldTower.UpdateTowerRallyLoadoutCommand),
+            typeof(global::Application.UseCases.WorldTower.TransferTowerRallyLeadershipCommand),
+            typeof(global::Application.UseCases.WorldTower.Commands.UpdateTowerRallyParties.UpdateTowerRallyPartiesCommand));
+
         RegisterAuthoritativeResponse(
             profiles,
-            [StateSyncScopes.Soulstones, StateSyncScopes.Inventory, StateSyncScopes.Quests],
+            [StateSyncScopes.Soulstones, StateSyncScopes.Inventory],
             [],
             [StateSyncScopes.Soulstones, StateSyncScopes.Character],
             refreshCharacterOverview: true,

@@ -5,6 +5,7 @@ using Application.UseCases.WorldTower.Dtos;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.WebSockets;
 using Application.Common.Mappings;
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Combat;
 using Application.Interfaces.Services.LL.PowerRatings;
@@ -37,6 +38,7 @@ using Services.LL.Combat.Engine;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
 using Services.LL.Snapshots;
+using Services.LL.Synchronization;
 using Services.LL.WorldTower;
 
 namespace EssenceSystem.Tests;
@@ -142,6 +144,39 @@ public sealed class WorldTowerServiceTests
         var snapshot = await db.CharacterSnapshots.SingleAsync(x => x.Id == snapshotId);
         Assert.Equal("Underprepared", snapshot.Name);
         Assert.Equal(7, snapshot.Level);
+    }
+
+    [Fact]
+    public async Task Rally_updates_advance_a_durable_world_tower_revision()
+    {
+        await using var db = CreateDbContext();
+        var character = SeedCharacter(db, "Revision Keeper", level: 20, accountId: Guid.NewGuid());
+        await db.SaveChangesAsync();
+        var outbox = new TestGameEventOutbox();
+        var stateSync = new StateSyncService(
+            db,
+            new UnexpectedRealtimeBroadcaster(),
+            TimeProvider.System);
+        var service = CreateService(
+            db,
+            new FixedPowerRatingService((character.Id, 1_000)),
+            outbox: outbox,
+            stateSync: stateSync);
+
+        var result = await service.CreateRallyAsync(
+            character.Id,
+            floorNumber: 1,
+            TowerRallyMode.FirstClear,
+            CancellationToken.None);
+
+        Assert.True(result.Succeeded, result.Error);
+        var update = Assert.Single(outbox.RallyEvents);
+        Assert.Equal(1, update.StateVersion);
+        Assert.Equal("Created", update.Event);
+        var firstCheckpoint = await stateSync.GetCheckpointAsync(Guid.NewGuid(), CancellationToken.None);
+        var secondCheckpoint = await stateSync.GetCheckpointAsync(Guid.NewGuid(), CancellationToken.None);
+        Assert.Equal(1, firstCheckpoint.Revisions[StateSyncScopes.WorldTower]);
+        Assert.Equal(1, secondCheckpoint.Revisions[StateSyncScopes.WorldTower]);
     }
 
     [Fact]
@@ -1917,6 +1952,7 @@ public sealed class WorldTowerServiceTests
         ICombatEngineExecutor? combatEngine = null,
         ICombatEncounterResultFactory? resultFactory = null,
         IGameEventOutbox? outbox = null,
+        IStateSyncService? stateSync = null,
         bool developmentToolsEnabled = false)
     {
         var snapshotService = new CharacterSnapshotService(new CharacterSnapshotRepository(db));
@@ -1934,6 +1970,10 @@ public sealed class WorldTowerServiceTests
             new FixedAbilityCatalogProvider(),
             resultFactory ?? new ThrowingCombatEncounterResultFactory(),
             outbox ?? new TestGameEventOutbox(),
+            stateSync ?? new StateSyncService(
+                db,
+                new UnexpectedRealtimeBroadcaster(),
+                TimeProvider.System),
             new MapperConfiguration(
                 configuration => configuration.AddProfile<MappingProfile>(),
                 NullLoggerFactory.Instance).CreateMapper(),
@@ -2283,6 +2323,16 @@ public sealed class WorldTowerServiceTests
                 ChatAnnouncements.Add(announcement);
             return Task.CompletedTask;
         }
+    }
+
+    private sealed class UnexpectedRealtimeBroadcaster : IGameRealtimeBroadcaster
+    {
+        public Task PublishAsync(
+            Audience audience,
+            GameRealtimeEvent message,
+            string sender,
+            CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("Version-only Tower advances must use the semantic outbox event.");
     }
 
     private sealed class FixedGuardianEntityService : IEntityService

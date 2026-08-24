@@ -10,14 +10,10 @@ public static class GameRealtimeEventNames
     public const string MarketplaceChanged = nameof(MarketplaceChanged);
     public const string GuildApplication = nameof(GuildApplication);
     public const string GuildInviteReceived = nameof(GuildInviteReceived);
-    public const string GuildInviteRejected = nameof(GuildInviteRejected);
     public const string GuildApplicationRejected = nameof(GuildApplicationRejected);
     public const string GuildBuildingsChanged = nameof(GuildBuildingsChanged);
     public const string GuildMissionsChanged = nameof(GuildMissionsChanged);
-    public const string GuildStateChanged = nameof(GuildStateChanged);
     public const string GuildVaultChatMessage = nameof(GuildVaultChatMessage);
-    public const string GuildMembershipChanged = nameof(GuildMembershipChanged);
-    public const string GuildDisbanded = nameof(GuildDisbanded);
     public const string GuildDirectoryChanged = nameof(GuildDirectoryChanged);
     public const string QuestJournalChanged = nameof(QuestJournalChanged);
     public const string EventQuestChanged = nameof(EventQuestChanged);

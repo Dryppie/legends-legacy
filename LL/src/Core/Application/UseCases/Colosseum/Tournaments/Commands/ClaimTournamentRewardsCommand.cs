@@ -1,7 +1,6 @@
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Inventories;
 using Application.Interfaces.WebSockets;
-using Application.MediatR.Attributes;
 using Application.MediatR.Markers;
 using Application.UseCases.Inventories.Dtos;
 using Application.WebSockets.Contracts;
@@ -11,7 +10,6 @@ using MediatR;
 
 namespace Application.UseCases.Colosseum.Tournaments.Commands;
 
-[NonTransactional]
 public sealed record ClaimTournamentRewardsCommand(Guid CharacterId, Guid? TournamentId)
     : ICommand<Response<ClaimTournamentRewardsResponseDto>>;
 

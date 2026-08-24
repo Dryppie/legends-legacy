@@ -155,6 +155,7 @@ export class GuildStateService {
   private activeMissionViews = 0;
   private missionsDirty = false;
   private guildIdentityInitialized = false;
+  private reconciledGuildSubscriptionId: string | null = null;
 
   /* ─────────── public, read-only selectors ─────────── */
   readonly guild = computed(() => this._guild());
@@ -238,12 +239,7 @@ export class GuildStateService {
 
     effect(() => {
       const guildId = this._guild()?.id ?? null;
-
-      void this.realtime
-        .setGuildSubscription(guildId)
-        .catch((error) =>
-          console.warn('Failed to update guild realtime subscription', error),
-        );
+      void this.updateGuildRealtimeSubscription(guildId);
     });
 
     effect(
@@ -252,6 +248,30 @@ export class GuildStateService {
       },
       { allowSignalWrites: true },
     );
+  }
+
+  private async updateGuildRealtimeSubscription(
+    guildId: string | null,
+  ): Promise<void> {
+    if (!guildId) this.reconciledGuildSubscriptionId = null;
+
+    try {
+      await this.realtime.setGuildSubscription(guildId);
+    } catch (error) {
+      console.warn('Failed to update guild realtime subscription', error);
+      return;
+    }
+
+    if (
+      !guildId ||
+      this._guild()?.id !== guildId ||
+      this.reconciledGuildSubscriptionId === guildId
+    ) {
+      return;
+    }
+
+    this.reconciledGuildSubscriptionId = guildId;
+    await this.stateSync.reconcile({ afterCurrent: true });
   }
 
   donateVaultItem(equipmentInstanceId: string): Observable<void> {

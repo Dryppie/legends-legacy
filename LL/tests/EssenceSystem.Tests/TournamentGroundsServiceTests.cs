@@ -53,7 +53,6 @@ public sealed class TournamentGroundsServiceTests
     [Theory]
     [InlineData(typeof(RegisterTournamentCommand))]
     [InlineData(typeof(WithdrawTournamentRegistrationCommand))]
-    [InlineData(typeof(ClaimTournamentRewardsCommand))]
     [InlineData(typeof(CreateTournamentTeamCommand))]
     [InlineData(typeof(InviteTournamentTeamMemberCommand))]
     [InlineData(typeof(AcceptTournamentTeamInviteCommand))]
@@ -67,6 +66,14 @@ public sealed class TournamentGroundsServiceTests
         Assert.True(
             Attribute.IsDefined(commandType, typeof(NonTransactionalAttribute)),
             $"{commandType.Name} should let TournamentGroundsService own its advisory-lock transaction.");
+    }
+
+    [Fact]
+    public void Claim_rewards_command_joins_outer_transaction_pipeline()
+    {
+        Assert.False(
+            Attribute.IsDefined(typeof(ClaimTournamentRewardsCommand), typeof(NonTransactionalAttribute)),
+            "Reward mutation, revisions, loot history, and realtime outbox writes must commit atomically.");
     }
 
     [Fact]

@@ -98,7 +98,6 @@ public sealed class GuildMembershipChatCommandTests
         var fixture = new CommandFixture(previousRole);
         var handler = new ChangeGuildMemberRoleCommandHandler(
             fixture.GuildService,
-            fixture.Events,
             fixture.Chat);
 
         await handler.Handle(

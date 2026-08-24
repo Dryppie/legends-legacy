@@ -90,16 +90,19 @@ public class EquipmentInstance : ItemInstance
 
     public float Boost => GetRarityBoost(Rarity);
 
-    public static float GetRarityBoost(Rarity rarity) => rarity switch
+    public static float GetRarityBoost(Rarity rarity) =>
+        (float)CalculateRarityBoost(rarity);
+
+    private static decimal CalculateRarityBoost(Rarity rarity) => rarity switch
     {
-        Rarity.Common => 1.0f,
-        Rarity.Uncommon => 1.25f,
-        Rarity.Rare => 1.75f,
-        Rarity.Epic => 2.5f,
-        Rarity.Unique => 3.50f,
-        Rarity.Legendary => 4.75f,
-        Rarity.Legacy => 6.0f,
-        _ => 1.0f
+        Rarity.Common => 1m,
+        Rarity.Uncommon => 1.1m,
+        Rarity.Rare => 1.3m,
+        Rarity.Epic => 1.6m,
+        Rarity.Unique => 2m,
+        Rarity.Legendary => 2.5m,
+        Rarity.Legacy => 3m,
+        _ => 1m
     };
 
     public static int GetBoostedBaseModifierAmount(
@@ -116,7 +119,8 @@ public class EquipmentInstance : ItemInstance
                 (int)Math.Floor(definition.MaximumValue!.Value));
         }
 
-        var boosted = (int)Math.Ceiling(amount * GetRarityBoost(rarity));
+        var boostedAmount = (decimal)amount * CalculateRarityBoost(rarity);
+        var boosted = (int)decimal.Ceiling(boostedAmount);
         return definition.CapKind == AttributeCapKind.Fixed
                && definition.MaximumValue is { } maximum
             ? Math.Min(boosted, (int)Math.Floor(maximum))

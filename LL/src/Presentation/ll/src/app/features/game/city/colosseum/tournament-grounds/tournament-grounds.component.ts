@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Observable, finalize, tap } from 'rxjs';
+import { Observable, finalize, firstValueFrom, tap } from 'rxjs';
 import { ColosseumService } from '../../../../../core/services/api/colosseum/colosseum.service';
 import { ToastService } from '../../../../../core/services/client-side/components/toast/toast.service';
 import { GameRealtimeEventRegistry } from '../../../../../core/services/real-time/game-realtime/game-realtime-event-registry.service';
@@ -291,6 +291,8 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
   private clockHandle: ReturnType<typeof setInterval> | null = null;
   private lastAutoSelectedRoundNumber: number | null = null;
   private unregisterStateSync: (() => void) | null = null;
+  private destroyed = false;
+  private statusRequestEpoch = 0;
 
   constructor(
     private readonly colosseumService: ColosseumService,
@@ -335,26 +337,16 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    void this.realtime
-      .setTournamentGroundsSubscription(true, 'tournament-grounds-page')
-      .catch((error) =>
-        console.warn(
-          'Failed to subscribe to Tournament Grounds realtime',
-          error,
-        ),
-      );
+    void this.initializeRealtimeAndSnapshot();
     this.clockHandle = setInterval(
       () => this.clock.set(Date.now() + this.viewState.serverClockOffsetMs),
       1000,
     );
     this.loadRewardTiers();
-
-    if (!this.shouldRestoreViewState()) {
-      this.refresh();
-    }
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     void this.realtime
       .setTournamentGroundsSubscription(false, 'tournament-grounds-page')
       .catch((error) =>
@@ -367,6 +359,33 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     this.unregisterStateSync?.();
   }
 
+  private async initializeRealtimeAndSnapshot(): Promise<void> {
+    let subscribed = false;
+    try {
+      await this.realtime.setTournamentGroundsSubscription(
+        true,
+        'tournament-grounds-page',
+      );
+      subscribed = true;
+    } catch (error) {
+      console.warn('Failed to subscribe to Tournament Grounds realtime', error);
+    }
+
+    if (this.destroyed) return;
+
+    if (!this.shouldRestoreViewState()) {
+      try {
+        await firstValueFrom(this.synchronize());
+      } catch {
+        // synchronize records the user-facing HTTP error.
+      }
+    }
+
+    if (subscribed && !this.destroyed) {
+      await this.stateSync.reconcile({ afterCurrent: true });
+    }
+  }
+
   refresh(): void {
     this.synchronize().subscribe({ error: () => undefined });
   }
@@ -374,19 +393,35 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
   private synchronize(): Observable<unknown> {
     this.loading.set(true);
     this.error.set(null);
+    const requestEpoch = ++this.statusRequestEpoch;
+    const requestRevision = this.stateSync.latestRevision('tournament');
 
     return this.colosseumService.getTournamentGroundsStatus().pipe(
       tap({
-        next: (status) => this.applyTournamentStatus(status),
-        error: (err) =>
-          this.error.set(err.message ?? 'Failed to load tournament grounds'),
+        next: (status) => {
+          if (!this.isCurrentStatusRequest(requestEpoch, requestRevision)) {
+            return;
+          }
+          this.applyTournamentStatus(status, requestEpoch, requestRevision);
+        },
+        error: (err) => {
+          if (this.isCurrentStatusRequest(requestEpoch, requestRevision)) {
+            this.error.set(err.message ?? 'Failed to load tournament grounds');
+          }
+        },
       }),
-      finalize(() => this.loading.set(false)),
+      finalize(() => {
+        if (requestEpoch === this.statusRequestEpoch) {
+          this.loading.set(false);
+        }
+      }),
     );
   }
 
   private applyTournamentStatus(
     status: NonNullable<ReturnType<typeof this.status>>,
+    requestEpoch: number,
+    requestRevision: number,
   ): void {
     const serverNow = Date.parse(status.nowUtc);
     if (!Number.isNaN(serverNow)) {
@@ -405,16 +440,26 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
         : (currentTournament ?? previousTournament);
     const tournamentId = displayedTournament?.id;
     if (tournamentId) {
-      this.loadDetails(tournamentId);
-      this.loadBracket(tournamentId);
-      this.loadRewards(tournamentId);
-      this.loadArchives();
+      this.loadDetails(tournamentId, requestEpoch, requestRevision);
+      this.loadBracket(tournamentId, requestEpoch, requestRevision);
+      this.loadRewards(tournamentId, requestEpoch, requestRevision);
+      this.loadArchives(requestEpoch, requestRevision);
     } else {
       this.details.set(null);
       this.bracket.set(null);
       this.rewards.set([]);
-      this.loadArchives();
+      this.loadArchives(requestEpoch, requestRevision);
     }
+  }
+
+  private isCurrentStatusRequest(
+    requestEpoch: number,
+    requestRevision: number,
+  ): boolean {
+    return (
+      requestEpoch === this.statusRequestEpoch &&
+      this.stateSync.latestRevision('tournament') <= requestRevision
+    );
   }
 
   private shouldRestoreViewState(): boolean {
@@ -830,9 +875,16 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
       .trim();
   }
 
-  private loadBracket(tournamentId: string): void {
-    this.colosseumService.getTournamentBracket(tournamentId).subscribe({
-      next: (bracket) => {
+  private loadBracket(
+    tournamentId: string,
+    requestEpoch: number,
+    requestRevision: number,
+  ): void {
+    this.subscribeForStatusSnapshot(
+      this.colosseumService.getTournamentBracket(tournamentId),
+      requestEpoch,
+      requestRevision,
+      (bracket) => {
         this.bracket.set(bracket);
         const activeRoundNumber = this.preferredRoundNumber(bracket);
         if (
@@ -843,9 +895,8 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
         }
         this.lastAutoSelectedRoundNumber = activeRoundNumber;
       },
-      error: (err) =>
-        this.error.set(err.message ?? 'Failed to load tournament bracket'),
-    });
+      'Failed to load tournament bracket',
+    );
   }
 
   private preferredRoundNumber(bracket: TournamentBracket): number | null {
@@ -874,20 +925,32 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     );
   }
 
-  private loadDetails(tournamentId: string): void {
-    this.colosseumService.getTournament(tournamentId).subscribe({
-      next: (details) => this.details.set(details),
-      error: (err) =>
-        this.error.set(err.message ?? 'Failed to load tournament teams'),
-    });
+  private loadDetails(
+    tournamentId: string,
+    requestEpoch: number,
+    requestRevision: number,
+  ): void {
+    this.subscribeForStatusSnapshot(
+      this.colosseumService.getTournament(tournamentId),
+      requestEpoch,
+      requestRevision,
+      (details) => this.details.set(details),
+      'Failed to load tournament teams',
+    );
   }
 
-  private loadRewards(tournamentId: string): void {
-    this.colosseumService.getTournamentRewards(tournamentId).subscribe({
-      next: (rewards) => this.rewards.set(rewards),
-      error: (err) =>
-        this.error.set(err.message ?? 'Failed to load tournament rewards'),
-    });
+  private loadRewards(
+    tournamentId: string,
+    requestEpoch: number,
+    requestRevision: number,
+  ): void {
+    this.subscribeForStatusSnapshot(
+      this.colosseumService.getTournamentRewards(tournamentId),
+      requestEpoch,
+      requestRevision,
+      (rewards) => this.rewards.set(rewards),
+      'Failed to load tournament rewards',
+    );
   }
 
   private loadRewardTiers(): void {
@@ -900,26 +963,48 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
     });
   }
 
-  private loadArchives(): void {
-    this.colosseumService.getTournamentHistory().subscribe({
-      next: (history) => this.history.set(history),
-      error: (err) =>
-        this.error.set(err.message ?? 'Failed to load tournament history'),
-    });
+  private loadArchives(requestEpoch: number, requestRevision: number): void {
+    this.subscribeForStatusSnapshot(
+      this.colosseumService.getTournamentHistory(),
+      requestEpoch,
+      requestRevision,
+      (history) => this.history.set(history),
+      'Failed to load tournament history',
+    );
+    this.subscribeForStatusSnapshot(
+      this.colosseumService.getTournamentHallOfFame(),
+      requestEpoch,
+      requestRevision,
+      (hallOfFame) => this.hallOfFame.set(hallOfFame),
+      'Failed to load tournament Hall of Fame',
+    );
+    this.subscribeForStatusSnapshot(
+      this.colosseumService.getTournamentSeasonLeaderboard(),
+      requestEpoch,
+      requestRevision,
+      (seasonLeaderboard) => this.seasonLeaderboard.set(seasonLeaderboard),
+      'Failed to load tournament season leaderboard',
+    );
+  }
 
-    this.colosseumService.getTournamentHallOfFame().subscribe({
-      next: (hallOfFame) => this.hallOfFame.set(hallOfFame),
-      error: (err) =>
-        this.error.set(err.message ?? 'Failed to load tournament Hall of Fame'),
-    });
-
-    this.colosseumService.getTournamentSeasonLeaderboard().subscribe({
-      next: (seasonLeaderboard) =>
-        this.seasonLeaderboard.set(seasonLeaderboard),
-      error: (err) =>
-        this.error.set(
-          err.message ?? 'Failed to load tournament season leaderboard',
-        ),
+  private subscribeForStatusSnapshot<T>(
+    request: Observable<T>,
+    requestEpoch: number,
+    requestRevision: number,
+    apply: (value: T) => void,
+    fallbackError: string,
+  ): void {
+    request.subscribe({
+      next: (value) => {
+        if (this.isCurrentStatusRequest(requestEpoch, requestRevision)) {
+          apply(value);
+        }
+      },
+      error: (err) => {
+        if (this.isCurrentStatusRequest(requestEpoch, requestRevision)) {
+          this.error.set(err.message ?? fallbackError);
+        }
+      },
     });
   }
 

@@ -1,7 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { Observable, finalize, forkJoin, of, tap } from 'rxjs';
 import { DefaultHeaderComponent } from '../../../../../shared/components/default-header/default-header.component';
 import {
   TowerContributionKind,
@@ -15,6 +22,7 @@ import {
 } from '../../../../../core/services/api/world-tower/world-tower.service';
 import { GameRealtimeEventRegistry } from '../../../../../core/services/real-time/game-realtime/game-realtime-event-registry.service';
 import { RealtimeSignalDeduper } from '../../../../../core/services/real-time/game-realtime/realtime-deduplication';
+import { StateSyncCoordinator } from '../../../../../core/services/real-time/game-realtime/state-sync-coordinator.service';
 import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
 
 type TowerReadinessTab = 'scouting' | 'preparation';
@@ -25,11 +33,17 @@ type TowerReadinessTab = 'scouting' | 'preparation';
   templateUrl: './tower-overview.component.html',
   styleUrls: ['../tower-page.scss', './tower-overview.component.scss'],
 })
-export class TowerOverviewComponent implements OnInit {
+export class TowerOverviewComponent implements OnInit, OnDestroy {
   private readonly tower = inject(WorldTowerService);
   private readonly router = inject(Router);
   private readonly events = inject(GameRealtimeEventRegistry);
+  private readonly stateSync = inject(StateSyncCoordinator);
   private readonly realtimeDeduper = new RealtimeSignalDeduper();
+  private readonly unregisterStateSync = this.stateSync.register(
+    'world-tower',
+    'tower-overview',
+    () => this.synchronize(),
+  );
   readonly overview = signal<TowerOverview | null>(null);
   readonly selectedFloor = signal<TowerFloorDetail | null>(null);
   readonly selectedFloorNumber = signal<number | null>(null);
@@ -54,7 +68,15 @@ export class TowerOverviewComponent implements OnInit {
           return;
         }
 
-        this.refreshFromRealtime(envelope.payload.floorNumber);
+        if (envelope.payload.stateVersion > 0) {
+          this.stateSync.acceptDomainVersion(
+            'world-tower',
+            envelope.payload.stateVersion,
+            envelope.updateId,
+          );
+        } else {
+          this.synchronize().subscribe({ error: () => undefined });
+        }
       },
       { allowSignalWrites: true },
     );
@@ -62,6 +84,10 @@ export class TowerOverviewComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+  }
+
+  ngOnDestroy(): void {
+    this.unregisterStateSync();
   }
 
   openShop(): void {
@@ -347,15 +373,28 @@ export class TowerOverviewComponent implements OnInit {
     });
   }
 
-  private refreshFromRealtime(floorNumber: number): void {
-    this.tower.getOverview().subscribe({
-      next: (overview) => this.overview.set(overview),
-    });
-    if (this.selectedFloorNumber() === floorNumber) {
-      this.tower.getFloor(floorNumber).subscribe({
-        next: (detail) => this.selectedFloor.set(detail),
-      });
-    }
+  private synchronize(): Observable<unknown> {
+    const floorNumber = this.selectedFloorNumber();
+    this.error.set(null);
+
+    return forkJoin({
+      overview: this.tower.getOverview(),
+      floor:
+        floorNumber === null ? of(null) : this.tower.getFloor(floorNumber),
+    }).pipe(
+      tap({
+        next: ({ overview, floor }) => {
+          this.overview.set(overview);
+          if (
+            floorNumber !== null &&
+            this.selectedFloorNumber() === floorNumber
+          ) {
+            this.selectedFloor.set(floor);
+          }
+        },
+        error: (error) => this.error.set(this.errorMessage(error)),
+      }),
+    );
   }
 
   private errorMessage(error: unknown): string {

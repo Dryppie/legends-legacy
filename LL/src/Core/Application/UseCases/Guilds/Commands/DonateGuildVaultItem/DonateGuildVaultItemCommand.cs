@@ -68,11 +68,6 @@ public class DonateGuildVaultItemCommandHandler : IRequestHandler<DonateGuildVau
             nameof(DonateGuildVaultItemCommandHandler),
             cancellationToken);
 
-        await _events.PublishAsync(
-            new Audience.Guild(mutation.GuildId),
-            new GuildStateChanged(mutation.GuildId, request.CharacterId, true),
-            nameof(DonateGuildVaultItemCommandHandler),
-            cancellationToken);
         return Response<bool>.Success(true);
     }
 }

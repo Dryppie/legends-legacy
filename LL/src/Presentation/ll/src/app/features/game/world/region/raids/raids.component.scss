@@ -259,6 +259,69 @@
   gap: var(--ll-space-2);
 }
 
+.active-raid-status {
+  display: grid;
+  gap: var(--ll-space-3);
+  padding: var(--ll-space-3);
+  border: 1px solid color-mix(in srgb, var(--ll-color-success) 55%, transparent);
+  border-radius: var(--ll-radius-sm);
+  background: var(--ll-color-success-soft);
+}
+
+.active-raid-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--ll-space-2);
+}
+
+.active-raid-heading > div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.active-raid-heading strong {
+  color: var(--ll-color-text);
+  font-family: var(--ll-font-display);
+  font-size: var(--ll-text-base);
+  font-weight: var(--ll-weight-medium);
+}
+
+.active-raid-indicator {
+  width: 0.55rem;
+  height: 0.55rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--ll-color-success);
+  box-shadow: 0 0 0 0.25rem var(--ll-color-success-soft);
+}
+
+.active-raid-status p {
+  margin: 0;
+  color: var(--ll-color-text-muted);
+  font-size: var(--ll-text-xs);
+  line-height: var(--ll-leading-normal);
+}
+
+.active-raid-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ll-space-2);
+  border-color: var(--ll-color-success);
+  color: var(--ll-color-text);
+  background: color-mix(
+    in srgb,
+    var(--ll-color-success-soft) 70%,
+    var(--ll-color-surface)
+  );
+}
+
+.active-raid-link:hover,
+.active-raid-link:focus-visible {
+  color: var(--ll-color-success);
+  background: var(--ll-color-success-soft);
+}
+
 button,
 a {
   border: 1px solid var(--ll-color-primary);

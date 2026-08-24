@@ -5,6 +5,7 @@ public static class StateSyncScopes
     public const string Character = "character";
     public const string CharacterOverview = "character-overview";
     public const string Inventory = "inventory";
+    public const string LootHistory = "loot-history";
     public const string Equipment = "equipment";
     public const string Quests = "quests";
     public const string AreaAccess = "area-access";
@@ -25,12 +26,14 @@ public static class StateSyncScopes
     public const string Colosseum = "colosseum";
     public const string Tournament = "tournament";
     public const string RaidDirectory = "raid-directory";
+    public const string WorldTower = "world-tower";
 
     public static readonly IReadOnlyList<string> CharacterResources =
     [
         Character,
         CharacterOverview,
         Inventory,
+        LootHistory,
         Equipment,
         Quests,
         AreaAccess,
@@ -51,7 +54,8 @@ public static class StateSyncScopes
         Marketplace,
         GuildDirectory,
         Tournament,
-        RaidDirectory
+        RaidDirectory,
+        WorldTower
     ];
 
     public static readonly IReadOnlyList<string> GuildResources =

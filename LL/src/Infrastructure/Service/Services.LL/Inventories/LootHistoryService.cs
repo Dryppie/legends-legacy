@@ -1,7 +1,9 @@
 using Application.Common.Interfaces;
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Inventories;
 using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.LootHistory.Dtos;
+using Application.WebSockets.Contracts;
 using Domain.Models.LootHistory;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
@@ -15,11 +17,13 @@ public sealed class LootHistoryService : ILootHistoryService
     private readonly IDbContext _context;
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly TimeProvider _timeProvider;
+    private readonly IStateSyncService _stateSync;
 
     public LootHistoryService(
         IDbContext context,
         JsonSerializerOptions jsonOptions,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        IStateSyncService stateSync)
     {
         _context = context;
         _jsonOptions = new JsonSerializerOptions(jsonOptions)
@@ -29,6 +33,7 @@ public sealed class LootHistoryService : ILootHistoryService
             AllowOutOfOrderMetadataProperties = true
         };
         _timeProvider = timeProvider;
+        _stateSync = stateSync;
     }
 
     public async Task<IReadOnlyList<LootHistoryEntryDto>> GetRecentAsync(
@@ -77,6 +82,11 @@ public sealed class LootHistoryService : ILootHistoryService
         });
 
         await _context.LootHistoryEntries.AddRangeAsync(entries, cancellationToken);
+        await _stateSync.AdvanceCharacterScopeAsync(
+            characterId,
+            StateSyncScopes.LootHistory,
+            "LootHistoryRecorded",
+            cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
     }
 
@@ -92,6 +102,11 @@ public sealed class LootHistoryService : ILootHistoryService
         }
 
         _context.LootHistoryEntries.RemoveRange(entries);
+        await _stateSync.InvalidateCharacterScopeAsync(
+            characterId,
+            StateSyncScopes.LootHistory,
+            "LootHistoryCleared",
+            cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
         return entries.Count;
     }

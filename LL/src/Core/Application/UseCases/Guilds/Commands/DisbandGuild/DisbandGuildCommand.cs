@@ -31,11 +31,6 @@ public class DisbandGuildCommandHandler : IRequestHandler<DisbandGuildCommand, R
             return Response<bool>.Fail("Failed to disband guild");
 
         await _eventPublisher.PublishAsync(
-            new Audience.Guild(guild.Id),
-            new GuildDisbanded(guild.Id, request.CharacterId, true),
-            nameof(DisbandGuildCommandHandler),
-            cancellationToken);
-        await _eventPublisher.PublishAsync(
             new Audience.World(),
             new GuildDirectoryChanged("disbanded", request.CharacterId),
             nameof(DisbandGuildCommandHandler),

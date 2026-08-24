@@ -1,11 +1,13 @@
 using Application.MediatR.Attributes;
 using Application.MediatR.Markers;
 using Application.MediatR.Synchronization;
+using Application.UseCases.Administration.Commands.GrantCompensationItems;
 using Application.UseCases.CharacterActions.Commands.ResolveCharacterAction;
 using Application.UseCases.Colosseum.Commands.BackfillChampionMarketTitleGrants;
 using Application.UseCases.Colosseum.Commands.PurchaseChampionMarketItem;
 using Application.UseCases.Colosseum.Commands.StartArenaBattle;
 using Application.UseCases.Colosseum.Commands.UpdateArenaDefenseSnapshot;
+using Application.UseCases.Colosseum.Tournaments.Commands;
 using Application.UseCases.Crafting.Commands.CraftItems;
 using Application.UseCases.Dungeons.Commands.ClaimDungeonRewards;
 using Application.UseCases.Essences.Commands.AbsorbUnboundEssence;
@@ -17,17 +19,45 @@ using Application.UseCases.Essences.Commands.SpendEssenceDust;
 using Application.UseCases.Equipments.Commands.EquipEquipment;
 using Application.UseCases.Inventories.Commands.MarkInventoryItemSeen;
 using Application.UseCases.Inventories.Commands.SetInventoryItemFavorite;
+using Application.UseCases.LootHistory.Commands.ClearLootHistory;
 using Application.UseCases.MarketPlaces.Commands.BuyCommodity;
 using Application.UseCases.MarketPlaces.Commands.BuyoutMarketPlaceListing;
 using Application.UseCases.Prophecies.Commands.AcceptProphecy;
 using Application.UseCases.Soulstones.Commands.PurchaseSoulstoneUpgrade;
 using Application.UseCases.Titles.Commands.EquipTitle;
+using Application.UseCases.WorldTower;
 using Application.WebSockets.Contracts;
 
 namespace EssenceSystem.Tests;
 
 public sealed class StateSyncCommandScopeCatalogTests
 {
+    [Fact]
+    public void Admin_compensation_invalidates_authoritative_inventory_state()
+    {
+        var profile = StateSyncCommandScopeCatalog.GetProfile(typeof(GrantCompensationItemsCommand));
+
+        Assert.Equal([StateSyncScopes.Inventory], profile.CharacterScopes);
+        Assert.False(profile.RefreshCharacterOverview);
+        Assert.False(profile.InventoryWhenChanged);
+        Assert.True(profile.RefreshCharacterSummaryWhenChanged);
+        Assert.Empty(profile.CharacterResponseSemantics);
+        Assert.Empty(profile.WorldScopes);
+    }
+
+    [Fact]
+    public void Clearing_loot_history_invalidates_only_its_authoritative_cache()
+    {
+        var profile = StateSyncCommandScopeCatalog.GetProfile(typeof(ClearLootHistoryCommand));
+
+        Assert.Equal([StateSyncScopes.LootHistory], profile.CharacterScopes);
+        Assert.False(profile.RefreshCharacterOverview);
+        Assert.False(profile.InventoryWhenChanged);
+        Assert.True(profile.RefreshCharacterSummaryWhenChanged);
+        Assert.Empty(profile.CharacterResponseSemantics);
+        Assert.Empty(profile.WorldScopes);
+    }
+
     [Fact]
     public void SpecializedTransactionalCommandsRequireExplicitScopeRegistration()
     {
@@ -44,6 +74,17 @@ public sealed class StateSyncCommandScopeCatalogTests
         Assert.True(
             missingCommands.Length == 0,
             $"Commands missing an explicit state-sync scope contract:{Environment.NewLine}{string.Join(Environment.NewLine, missingCommands)}");
+    }
+
+    [Fact]
+    public void UncataloguedCommandsOnlyRefreshCharacterStateWhenItActuallyChanged()
+    {
+        var profile = StateSyncCommandScopeCatalog.GetProfile(typeof(UncataloguedCommand));
+
+        Assert.Empty(profile.CharacterScopes);
+        Assert.Empty(profile.WorldScopes);
+        Assert.False(profile.RefreshCharacterOverview);
+        Assert.True(profile.RefreshCharacterSummaryWhenChanged);
     }
 
     [Fact]
@@ -70,6 +111,19 @@ public sealed class StateSyncCommandScopeCatalogTests
         Assert.Contains(StateSyncScopes.Colosseum, battle.CharacterResponseSemantics.Keys);
         Assert.Contains(StateSyncScopes.Character, battle.CharacterResponseSemantics.Keys);
         Assert.Empty(battle.WorldScopes);
+    }
+
+    [Fact]
+    public void Tournament_reward_claim_invalidates_all_character_owned_reward_state()
+    {
+        var profile = StateSyncCommandScopeCatalog.GetProfile(typeof(ClaimTournamentRewardsCommand));
+
+        Assert.Contains(StateSyncScopes.Colosseum, profile.CharacterScopes);
+        Assert.True(profile.InventoryWhenChanged);
+        Assert.False(profile.RefreshCharacterOverview);
+        Assert.False(profile.RefreshCharacterSummaryWhenChanged);
+        Assert.Empty(profile.CharacterResponseSemantics);
+        Assert.Empty(profile.WorldScopes);
     }
 
     [Fact]
@@ -104,6 +158,24 @@ public sealed class StateSyncCommandScopeCatalogTests
         Assert.Empty(refresh.WorldScopes);
         Assert.Contains(StateSyncScopes.Inventory, claim.CharacterScopes);
         Assert.Empty(claim.WorldScopes);
+    }
+
+    [Fact]
+    public void World_tower_contributions_invalidate_shared_state_without_character_reloads()
+    {
+        Assert.Contains(StateSyncScopes.WorldTower, StateSyncScopes.WorldResources);
+
+        var contribution = StateSyncCommandScopeCatalog.GetProfile(typeof(ContributeToTowerCommand));
+        Assert.Equal([StateSyncScopes.WorldTower], contribution.WorldScopes);
+        Assert.Empty(contribution.CharacterScopes);
+        Assert.False(contribution.RefreshCharacterOverview);
+        Assert.True(contribution.RefreshCharacterSummaryWhenChanged);
+
+        var rally = StateSyncCommandScopeCatalog.GetProfile(typeof(CreateTowerRallyCommand));
+        Assert.Empty(rally.WorldScopes);
+        Assert.Empty(rally.CharacterScopes);
+        Assert.False(rally.RefreshCharacterOverview);
+        Assert.True(rally.RefreshCharacterSummaryWhenChanged);
     }
 
     [Fact]
@@ -290,6 +362,21 @@ public sealed class StateSyncCommandScopeCatalogTests
             scope => Assert.Contains(scope, profile.CharacterScopes));
     }
 
+    [Theory]
+    [InlineData(typeof(CraftItemsCommand))]
+    [InlineData(typeof(global::Application.UseCases.Crafting.Commands.LearnBlueprint.LearnBlueprintCommand))]
+    [InlineData(typeof(global::Application.UseCases.Dungeons.Commands.StartDungeonRun.StartDungeonRunCommand))]
+    [InlineData(typeof(global::Application.UseCases.Dungeons.Commands.ExecuteDungeonAction.ExecuteDungeonActionCommand))]
+    [InlineData(typeof(PurchaseSoulstoneUpgradeCommand))]
+    [InlineData(typeof(global::Application.UseCases.Soulstones.Commands.ResetSoulstoneUpgrades.ResetSoulstoneUpgradesCommand))]
+    public void AsynchronousQuestProgressionIsNotInvalidatedByOriginatingCommand(Type commandType)
+    {
+        var profile = StateSyncCommandScopeCatalog.GetProfile(commandType);
+
+        Assert.DoesNotContain(StateSyncScopes.Quests, profile.CharacterScopes);
+        Assert.DoesNotContain(StateSyncScopes.Quests, profile.CharacterResponseSemantics.Keys);
+    }
+
     [Fact]
     public void DungeonRewardClaimReturnsLocalVersionsButLeavesQuestProgressAsynchronous()
     {
@@ -385,4 +472,6 @@ public sealed class StateSyncCommandScopeCatalogTests
         Assert.Contains(StateSyncScopes.Inventory, profile.CharacterResponseSemantics.Keys);
         Assert.DoesNotContain(StateSyncScopes.Equipment, profile.CharacterResponseSemantics.Keys);
     }
+
+    private sealed class UncataloguedCommand { }
 }

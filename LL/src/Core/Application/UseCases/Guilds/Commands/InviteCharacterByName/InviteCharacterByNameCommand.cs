@@ -58,12 +58,6 @@ public class InviteCharacterByNameCommandHandler : IRequestHandler<InviteCharact
             new GuildInviteReceived(guildId, invitedCharacterId.Value),
             nameof(InviteCharacterByNameCommandHandler),
             cancellationToken);
-        await _eventPublisher.PublishAsync(
-            new Audience.Guild(guildId),
-            new GuildStateChanged(guildId, request.CurrentCharacterId, true),
-            nameof(InviteCharacterByNameCommandHandler),
-            cancellationToken);
-
         return Response<bool>.Success(true);
     }
 }

@@ -161,9 +161,9 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             selected.Definition.Stat,
             equipment.Tier);
         var rawIncrease = rollBudget / materializedCost;
-        float increase = EquipmentStatBudgetCatalog.IsDirectPercentage(selected.Definition.Stat)
-            ? (float)AttributeValueQuantizer.Quantize(selected.Definition.Stat, rawIncrease)
-            : (float)Math.Max(1d, Math.Round(rawIncrease, MidpointRounding.AwayFromZero));
+        var increase = (float)AttributeValueQuantizer.Quantize(
+            selected.Definition.Stat,
+            rawIncrease);
         increase = Math.Min(
             increase,
             (float)EquipmentConstraintProfile.GetMaximumAdditionalPoints(

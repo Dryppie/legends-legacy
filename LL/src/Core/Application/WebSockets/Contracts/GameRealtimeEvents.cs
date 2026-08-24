@@ -49,10 +49,6 @@ public sealed record GuildInviteReceived(
     Guid GuildId,
     Guid CharacterId) : GameRealtimeEvent;
 
-public sealed record GuildInviteRejected(
-    Guid GuildId,
-    Guid CharacterId) : GameRealtimeEvent;
-
 public sealed record GuildApplicationRejected(
     Guid GuildId,
     Guid CharacterId) : GameRealtimeEvent;
@@ -68,11 +64,6 @@ public sealed record GuildMissionsChanged(
     Guid? ActorCharacterId = null,
     bool InitiatorHandled = false) : GameRealtimeEvent;
 
-public sealed record GuildStateChanged(
-    Guid GuildId,
-    Guid? ActorCharacterId = null,
-    bool InitiatorHandled = false) : GameRealtimeEvent;
-
 public sealed record GuildVaultChatMessage(
     Guid GuildId,
     Guid MessageId,
@@ -81,17 +72,6 @@ public sealed record GuildVaultChatMessage(
     string Action,
     EquipmentInstanceDto Equipment,
     DateTimeOffset SentAt) : GameRealtimeEvent;
-
-public sealed record GuildMembershipChanged(
-    Guid GuildId,
-    Guid CharacterId,
-    Guid? ActorCharacterId = null,
-    bool InitiatorHandled = false) : GameRealtimeEvent;
-
-public sealed record GuildDisbanded(
-    Guid GuildId,
-    Guid? ActorCharacterId = null,
-    bool InitiatorHandled = false) : GameRealtimeEvent;
 
 public sealed record GuildDirectoryChanged(
     string Reason,
@@ -166,6 +146,7 @@ public sealed record TournamentGroundsUpdated(
 
 public sealed record WorldTowerRallyUpdated(
     Guid RallyId,
+    long StateVersion,
     int FloorNumber,
     string Event,
     string Status,

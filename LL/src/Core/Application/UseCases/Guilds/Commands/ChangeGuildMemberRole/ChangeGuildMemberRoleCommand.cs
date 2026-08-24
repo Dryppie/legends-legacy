@@ -1,8 +1,6 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Guilds;
 using Application.MediatR.Markers;
-using Application.Interfaces.WebSockets;
-using Application.WebSockets.Contracts;
 using Application.UseCases.Guilds.Dtos.Requests;
 using Common.Primitives;
 using Domain.Models.Guilds;
@@ -15,15 +13,12 @@ public record ChangeGuildMemberRoleCommand(Guid CharacterId, ChangeGuildMemberRo
 public class ChangeGuildMemberRoleCommandHandler : IRequestHandler<ChangeGuildMemberRoleCommand, Response<bool>>
 {
     private readonly IGuildService _guild;
-    private readonly IGameRealtimeBroadcaster _events;
     private readonly IGuildSystemChatPublisher _guildChat;
     public ChangeGuildMemberRoleCommandHandler(
         IGuildService guild,
-        IGameRealtimeBroadcaster events,
         IGuildSystemChatPublisher guildChat)
     {
         _guild = guild;
-        _events = events;
         _guildChat = guildChat;
     }
 
@@ -51,7 +46,6 @@ public class ChangeGuildMemberRoleCommandHandler : IRequestHandler<ChangeGuildMe
                 cancellationToken);
         }
 
-        await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChanged(guild.Id, request.CharacterId, true), nameof(ChangeGuildMemberRoleCommandHandler), cancellationToken);
         return Response<bool>.Success(true);
     }
 }

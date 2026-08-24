@@ -6,6 +6,7 @@ import { GameRealtimeEventRegistry } from './game-realtime/game-realtime-event-r
 import { isGameRealtimeEnabled } from './game-realtime/game-realtime-feature';
 import { StateSyncCoordinator } from './game-realtime/state-sync-coordinator.service';
 import { GameBootstrapStateService } from '../api/game-bootstrap/game-bootstrap-state.service';
+import { LootHistoryStateService } from '../api/loot-history/loot-history-state.service';
 
 @Injectable({ providedIn: 'root' })
 export class RealTimeFacade {
@@ -20,6 +21,7 @@ export class RealTimeFacade {
     private gameRealtimeRegistry: GameRealtimeEventRegistry,
     private stateSync: StateSyncCoordinator,
     private gameBootstrap: GameBootstrapStateService,
+    private lootHistoryState: LootHistoryStateService,
   ) {
     this.initialReady = new Promise<void>((resolve) => {
       this.resolveInitialReady = resolve;
@@ -30,6 +32,7 @@ export class RealTimeFacade {
         if (!this.initialized()) return;
 
         if (this.auth.isAuthenticated()) {
+          this.lootHistoryState.initialize();
           if (isGameRealtimeEnabled()) {
             this.gameRealtimeRegistry.initialize();
             this.stateSync.initialize();
@@ -66,6 +69,17 @@ export class RealTimeFacade {
       },
       { allowSignalWrites: true },
     );
+
+    effect(() => {
+      const periodicReconciliationEnabled =
+        this.initialized() &&
+        this.auth.isAuthenticated() &&
+        isGameRealtimeEnabled() &&
+        this.gameRealtime.connectionStatus() === 'connected';
+      this.stateSync.setPeriodicReconciliationEnabled(
+        periodicReconciliationEnabled,
+      );
+    });
 
     effect(() => {
       if (!this.initialized() || !this.auth.isAuthenticated()) return;

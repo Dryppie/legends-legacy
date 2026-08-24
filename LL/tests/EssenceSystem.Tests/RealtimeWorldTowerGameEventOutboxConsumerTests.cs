@@ -15,6 +15,7 @@ public sealed class RealtimeWorldTowerGameEventOutboxConsumerTests
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
         var payload = new WorldTowerRallyUpdated(
             Guid.NewGuid(),
+            7,
             3,
             "ApplicationSubmitted",
             "Recruiting",

@@ -34,7 +34,11 @@ export interface AreaGatheringNode {
   id: string;
   name: string;
   type: GatheringType;
+  levelRequirement?: number | null;
+  procChance?: number;
   yieldBonusPercent?: number;
+  minQuantity?: number | null;
+  maxQuantity?: number | null;
 }
 
 export interface Dungeon {

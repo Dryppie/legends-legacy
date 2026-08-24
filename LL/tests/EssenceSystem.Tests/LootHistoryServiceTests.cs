@@ -1,11 +1,14 @@
+using Application.Interfaces.WebSockets;
 using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.Equipments.Dtos;
 using Application.UseCases.Items.Dtos;
+using Application.WebSockets.Contracts;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Services.LL.Inventories;
+using Services.LL.Synchronization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -24,7 +27,8 @@ public sealed class LootHistoryServiceTests
         var service = new LootHistoryService(
             db,
             new JsonSerializerOptions(JsonSerializerDefaults.Web),
-            clock);
+            clock,
+            new StateSyncService(db, new RecordingRealtimeBroadcaster(), clock));
 
         for (var quantity = 1; quantity <= 55; quantity++)
         {
@@ -54,6 +58,13 @@ public sealed class LootHistoryServiceTests
             entries[0].ReceivedAt);
         Assert.All(entries, entry => Assert.Equal("combat-reward", entry.Source));
         Assert.All(entries, entry => Assert.Equal("Lumo Ruins", entry.Location));
+
+        var checkpoint = await new StateSyncService(
+                db,
+                new RecordingRealtimeBroadcaster(),
+                clock)
+            .GetCheckpointAsync(characterId, CancellationToken.None);
+        Assert.Equal(1, checkpoint.Revisions[StateSyncScopes.LootHistory]);
     }
 
     [Fact]
@@ -62,32 +73,47 @@ public sealed class LootHistoryServiceTests
         await using var db = CreateDbContext();
         var characterId = Guid.NewGuid();
         var otherCharacterId = Guid.NewGuid();
-        var service = new LootHistoryService(
+        var recordService = new LootHistoryService(
             db,
             new JsonSerializerOptions(JsonSerializerDefaults.Web),
-            TimeProvider.System);
+            TimeProvider.System,
+            new StateSyncService(
+                db,
+                new RecordingRealtimeBroadcaster(),
+                TimeProvider.System));
 
         var ownEntries = Enumerable.Range(1, 55)
             .Select(quantity => CreateItem(quantity))
             .ToList();
-        await service.RecordAsync(
+        await recordService.RecordAsync(
             characterId,
             ownEntries,
             "combat-reward",
             "Lumo Ruins",
             CancellationToken.None);
-        await service.RecordAsync(
+        await recordService.RecordAsync(
             otherCharacterId,
             [CreateItem(999)],
             "combat-reward",
             null,
             CancellationToken.None);
 
-        var deleted = await service.ClearAsync(characterId, CancellationToken.None);
+        var realtime = new RecordingRealtimeBroadcaster();
+        var clearService = new LootHistoryService(
+            db,
+            new JsonSerializerOptions(JsonSerializerDefaults.Web),
+            TimeProvider.System,
+            new StateSyncService(db, realtime, TimeProvider.System));
+        var deleted = await clearService.ClearAsync(characterId, CancellationToken.None);
 
         Assert.Equal(55, deleted);
-        Assert.Empty(await service.GetRecentAsync(characterId, CancellationToken.None));
-        Assert.Single(await service.GetRecentAsync(otherCharacterId, CancellationToken.None));
+        Assert.Empty(await clearService.GetRecentAsync(characterId, CancellationToken.None));
+        Assert.Single(await clearService.GetRecentAsync(otherCharacterId, CancellationToken.None));
+        var invalidation = Assert.IsType<StateInvalidated>(
+            Assert.Single(realtime.Messages).Message);
+        Assert.Equal(characterId, invalidation.CharacterId);
+        Assert.Equal(StateSyncScopes.LootHistory, invalidation.Scope);
+        Assert.Equal(2, invalidation.Revision);
     }
 
     [Fact]
@@ -99,7 +125,14 @@ public sealed class LootHistoryServiceTests
         {
             Converters = { new JsonStringEnumConverter() }
         };
-        var service = new LootHistoryService(db, jsonOptions, TimeProvider.System);
+        var service = new LootHistoryService(
+            db,
+            jsonOptions,
+            TimeProvider.System,
+            new StateSyncService(
+                db,
+                new RecordingRealtimeBroadcaster(),
+                TimeProvider.System));
         var equipmentBase = new EquipmentBaseDto
         {
             Id = "test-sword",
@@ -164,5 +197,20 @@ public sealed class LootHistoryServiceTests
         public override DateTimeOffset GetUtcNow() => now;
 
         public void Advance(TimeSpan amount) => now = now.Add(amount);
+    }
+
+    private sealed class RecordingRealtimeBroadcaster : IGameRealtimeBroadcaster
+    {
+        public List<(Audience Audience, GameRealtimeEvent Message)> Messages { get; } = [];
+
+        public Task PublishAsync(
+            Audience audience,
+            GameRealtimeEvent message,
+            string sender,
+            CancellationToken cancellationToken = default)
+        {
+            Messages.Add((audience, message));
+            return Task.CompletedTask;
+        }
     }
 }
