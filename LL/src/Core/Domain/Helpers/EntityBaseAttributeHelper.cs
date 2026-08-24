@@ -74,20 +74,4 @@ public static class EntityBaseAttributeHelper
         };
     }
 
-    public static List<EntityAttribute> CreateSimulatedAttributes(int tier)
-    {
-        var entityAttributes = AttributeCatalog.All
-            .Select(definition => definition.AttributeType)
-            .Select(attributeType => new EntityAttribute
-            {
-                EntityId = new Guid(),
-                AttributeType = attributeType,
-                Value = attributeType == AttributeType.Threat
-                    ? GetBaseValueForAttribute(attributeType)
-                    : GetBaseValueForAttribute(attributeType) * tier
-            })
-            .ToList();
-
-        return entityAttributes;
-    }
 }

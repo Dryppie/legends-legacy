@@ -16,6 +16,7 @@ import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-c
 import { VersionedMutationResult } from '../api.service';
 import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
 import { BusinessGrantDeduper } from '../../real-time/game-realtime/realtime-deduplication';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryStateService {
@@ -52,6 +53,7 @@ export class InventoryStateService {
 
   constructor(
     private inventoryService: InventoryService,
+    private readonly auth: AuthService,
     private readonly eventBus: EventBusService,
     private readonly stateSync: StateSyncCoordinator,
     private readonly domainVersions: DomainVersionTracker,
@@ -59,7 +61,14 @@ export class InventoryStateService {
     this.stateSync.register('inventory', 'inventory', () =>
       this.synchronize(true),
     );
-    this.load();
+
+    effect(
+      () => {
+        if (!this.auth.isAuthenticated()) return;
+        untracked(() => this.load());
+      },
+      { allowSignalWrites: true },
+    );
 
     effect(
       () => {
@@ -69,7 +78,6 @@ export class InventoryStateService {
       },
       { allowSignalWrites: true },
     );
-
   }
 
   /* Generic selector: reuse everywhere */

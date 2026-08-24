@@ -8,7 +8,9 @@ public class GuildMissionOptionConfiguration : IEntityTypeConfiguration<GuildMis
 {
     public void Configure(EntityTypeBuilder<GuildMissionOption> builder)
     {
-        builder.HasIndex(x => new { x.GuildId, x.WeekKey });
+        builder
+            .HasIndex(x => new { x.GuildId, x.WeekKey, x.MissionDefinitionId })
+            .IsUnique();
         builder.HasIndex(x => new { x.GuildId, x.WeekKey, x.IsSelected });
     }
 }

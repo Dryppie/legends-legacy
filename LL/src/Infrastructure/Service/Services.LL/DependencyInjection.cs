@@ -30,7 +30,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Services.LL._Simulator;
 using Services.LL.Attributes;
 using Services.LL.Achievements;
 using Services.LL.Administration;
@@ -642,7 +641,6 @@ public static class DependencyInjection
         services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 
-        services.AddScoped<ISimulatorService, SimulatorService>();
         services.AddScoped<IGameEventOutbox, GameEventOutbox>();
         services.AddScoped<IGameRealtimeBroadcaster, OutboxGameRealtimeBroadcaster>();
         services.AddScoped<IGameRealtimeImmediatePublisher, NoOpGameRealtimeImmediatePublisher>();

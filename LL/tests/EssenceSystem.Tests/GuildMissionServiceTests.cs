@@ -164,6 +164,46 @@ public sealed class GuildMissionServiceTests
     }
 
     [Fact]
+    public async Task GetOverview_removes_duplicate_weekly_options()
+    {
+        await using var db = CreateDbContext();
+        var characterId = SeedGuild(db);
+        var guild = db.Guilds.Local.Single();
+        var now = new DateTimeOffset(2026, 6, 23, 2, 0, 0, TimeSpan.Zero);
+        var definitions = new DefaultGuildContentProvider().WeeklyMissions.Take(3).ToList();
+
+        foreach (var definition in definitions)
+        {
+            db.GuildMissionOptions.AddRange(
+                new GuildMissionOption
+                {
+                    GuildId = guild.Id,
+                    MissionDefinitionId = definition.Id,
+                    WeekKey = "20260622",
+                    GeneratedAt = now.AddMinutes(-1),
+                    ExpiresAt = new DateTimeOffset(2026, 6, 29, 0, 0, 0, TimeSpan.Zero)
+                },
+                new GuildMissionOption
+                {
+                    GuildId = guild.Id,
+                    MissionDefinitionId = definition.Id,
+                    WeekKey = "20260622",
+                    GeneratedAt = now,
+                    ExpiresAt = new DateTimeOffset(2026, 6, 29, 0, 0, 0, TimeSpan.Zero)
+                });
+        }
+
+        await db.SaveChangesAsync();
+        var service = new GuildMissionService(db);
+
+        var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
+
+        Assert.Equal(3, overview!.WeeklyOptions.Count);
+        Assert.Equal(3, overview.WeeklyOptions.Select(x => x.Definition.Id).Distinct().Count());
+        Assert.Equal(3, await db.GuildMissionOptions.CountAsync());
+    }
+
+    [Fact]
     public async Task Repeated_contributions_before_save_do_not_duplicate_daily_orders()
     {
         await using var db = CreateDbContext();

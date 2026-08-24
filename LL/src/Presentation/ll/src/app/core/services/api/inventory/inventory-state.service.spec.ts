@@ -10,8 +10,38 @@ import { InventoryStateService } from './inventory-state.service';
 import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
 import { VersionedMutationResult } from '../api.service';
 import { SetInventoryItemFavoriteResponse } from './inventory.service';
+import { AuthService } from '../auth/auth.service';
 
 describe('InventoryStateService', () => {
+  it('waits for authentication before loading the inventory', () => {
+    const authenticated = signal(false);
+    const inventoryApi = jasmine.createSpyObj<InventoryService>(
+      'InventoryService',
+      ['getInventory'],
+    );
+    inventoryApi.getInventory.and.returnValue(of({ inventoryItems: [] }));
+
+    TestBed.configureTestingModule({
+      providers: [
+        InventoryStateService,
+        { provide: InventoryService, useValue: inventoryApi },
+        {
+          provide: AuthService,
+          useValue: { isAuthenticated: authenticated.asReadonly() },
+        },
+        { provide: EventBusService, useValue: { logout: signal(false) } },
+      ],
+    });
+
+    TestBed.inject(InventoryStateService);
+    TestBed.flushEffects();
+    expect(inventoryApi.getInventory).not.toHaveBeenCalled();
+
+    authenticated.set(true);
+    TestBed.flushEffects();
+    expect(inventoryApi.getInventory).toHaveBeenCalledTimes(1);
+  });
+
   it('does not let an older inventory request overwrite a mutation response', () => {
     const initialRequest = new Subject<InventoryDto>();
     const inventoryApi = jasmine.createSpyObj<InventoryService>(
@@ -42,11 +72,13 @@ describe('InventoryStateService', () => {
       providers: [
         InventoryStateService,
         { provide: InventoryService, useValue: inventoryApi },
+        { provide: AuthService, useValue: authenticatedAuth() },
         { provide: EventBusService, useValue: { logout: signal(false) } },
       ],
     });
 
     const service = TestBed.inject(InventoryStateService);
+    TestBed.flushEffects();
     service.load(true);
 
     purchaseRefresh.next({ inventoryItems: [item('purchased-item')] });
@@ -72,11 +104,13 @@ describe('InventoryStateService', () => {
       providers: [
         InventoryStateService,
         { provide: InventoryService, useValue: inventoryApi },
+        { provide: AuthService, useValue: authenticatedAuth() },
         { provide: EventBusService, useValue: { logout: signal(false) } },
       ],
     });
 
     const service = TestBed.inject(InventoryStateService);
+    TestBed.flushEffects();
 
     expect(service.applyInventoryGrant('grant-id', [reward])).toBeTrue();
     expect(service.applyInventoryGrant('grant-id', [reward])).toBeFalse();
@@ -100,11 +134,13 @@ describe('InventoryStateService', () => {
       providers: [
         InventoryStateService,
         { provide: InventoryService, useValue: inventoryApi },
+        { provide: AuthService, useValue: authenticatedAuth() },
         { provide: EventBusService, useValue: { logout: signal(false) } },
       ],
     });
 
     const service = TestBed.inject(InventoryStateService);
+    TestBed.flushEffects();
     const reward = item('reward');
     service.applyInventoryGrant('grant-id', [reward]);
 
@@ -357,11 +393,18 @@ function createService(
     providers: [
       InventoryStateService,
       { provide: InventoryService, useValue: inventoryApi },
+      { provide: AuthService, useValue: authenticatedAuth() },
       { provide: EventBusService, useValue: { logout: signal(false) } },
     ],
   });
 
-  return TestBed.inject(InventoryStateService);
+  const service = TestBed.inject(InventoryStateService);
+  TestBed.flushEffects();
+  return service;
+}
+
+function authenticatedAuth(): Pick<AuthService, 'isAuthenticated'> {
+  return { isAuthenticated: signal(true).asReadonly() };
 }
 
 function item(id: string, isNew = false): InventoryItem {

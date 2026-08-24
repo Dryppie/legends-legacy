@@ -307,6 +307,8 @@ public class GuildMissionService : IGuildMissionService
 
     private async Task EnsureCurrentStateAsync(Guild guild, Guid characterId, DateTimeOffset now, CancellationToken cancellationToken)
     {
+        await _context.AcquireStateSyncScopeLockAsync($"guild-missions:{guild.Id:N}", cancellationToken);
+
         var week = GetWeek(now);
         var dailyKey = GetDailyKey(now);
 
@@ -329,6 +331,20 @@ public class GuildMissionService : IGuildMissionService
         {
             _context.GuildMissionOptions.RemoveRange(obsoleteOptions);
             currentOptions = currentOptions.Except(obsoleteOptions).ToList();
+        }
+
+        var duplicateOptions = currentOptions
+            .GroupBy(x => x.MissionDefinitionId)
+            .SelectMany(group => group
+                .OrderByDescending(x => x.IsSelected)
+                .ThenBy(x => x.GeneratedAt)
+                .ThenBy(x => x.Id)
+                .Skip(1))
+            .ToList();
+        if (duplicateOptions.Count > 0)
+        {
+            _context.GuildMissionOptions.RemoveRange(duplicateOptions);
+            currentOptions = currentOptions.Except(duplicateOptions).ToList();
         }
 
         var currentInstance = await _context.GuildMissionInstances
