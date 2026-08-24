@@ -243,7 +243,7 @@ public interface IDbContext
         DateTimeOffset leaseUntil,
         int limit,
         CancellationToken ct = default);
-    Task<IReadOnlyList<Guid>> ClaimWorldTowerPlaybackDispatchesAsync(
+    Task<IReadOnlyList<Guid>> ClaimWorldTowerPlaybackFinalizationsAsync(
         string owner,
         DateTimeOffset now,
         DateTimeOffset leaseUntil,
@@ -254,7 +254,7 @@ public interface IDbContext
         string owner,
         DateTimeOffset leaseUntil,
         CancellationToken ct = default);
-    Task ReleaseWorldTowerPlaybackDispatchAsync(
+    Task ReleaseWorldTowerPlaybackFinalizationAsync(
         Guid attemptId,
         string owner,
         CancellationToken ct = default);

@@ -198,11 +198,3 @@ public sealed record RegionBossUpdated(
     string Event,
     string Status,
     DateTimeOffset OccurredAtUtc) : GameRealtimeEvent;
-
-public sealed record WorldTowerCombatFrameUpdated(
-    Guid AttemptId,
-    Guid RallyId,
-    DateTimeOffset PlaybackStartedAt,
-    int TicksPerSecond,
-    int TicksPerFrame,
-    TowerCombatFrameDto Frame) : GameRealtimeEvent;

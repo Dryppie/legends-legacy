@@ -38,6 +38,7 @@ public sealed class DungeonDefinitionMaterializer(DungeonCatalogValidator catalo
                 EnemyStrengthMultiplier = difficulty.EnemyStrengthMultiplier,
                 RequiredAreaId = family.RequiredAreaId,
                 RequiredQuestId = family.RequiredQuestId,
+                RequiredTowerFloor = family.RequiredTowerFloor,
                 RequiredPreviousDungeonId = previous?.Id,
                 RequiredPreviousDungeonGrade = previous is null ? null : (DungeonGrade)previous.Difficulty,
                 EntryCosts = family.EntryCosts.Select(Clone).ToList(),

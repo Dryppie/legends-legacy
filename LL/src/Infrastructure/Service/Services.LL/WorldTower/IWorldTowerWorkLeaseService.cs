@@ -8,7 +8,7 @@ public interface IWorldTowerWorkLeaseService
         int limit,
         CancellationToken cancellationToken);
 
-    Task<IReadOnlyList<Guid>> ClaimPlaybackDispatchesAsync(
+    Task<IReadOnlyList<Guid>> ClaimPlaybackFinalizationsAsync(
         string owner,
         DateTimeOffset now,
         int limit,
@@ -20,7 +20,7 @@ public interface IWorldTowerWorkLeaseService
         DateTimeOffset now,
         CancellationToken cancellationToken);
 
-    Task ReleasePlaybackDispatchAsync(
+    Task ReleasePlaybackFinalizationAsync(
         Guid attemptId,
         string owner,
         CancellationToken cancellationToken);

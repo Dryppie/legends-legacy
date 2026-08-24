@@ -190,24 +190,21 @@ public sealed class TowerCombatPlayback
 
     public Guid TowerAttemptId { get; set; }
     public TowerAttempt TowerAttempt { get; set; } = null!;
-    public int SchemaVersion { get; set; } = 1;
+    public int SchemaVersion { get; set; } = CompactBundleSchemaVersion;
     public int TicksPerSecond { get; set; } = 10;
     public int TicksPerFrame { get; set; } = 10;
     public int TotalTicks { get; set; }
     public int FrameCount { get; set; }
-    public string? TimelineJson { get; set; }
-    public string? BundleHash { get; set; }
-    public int? BundleLength { get; set; }
-    public string? BundleContentType { get; set; }
-    public string? BundleContentEncoding { get; set; }
+    public string BundleHash { get; set; } = null!;
+    public int BundleLength { get; set; }
+    public string BundleContentType { get; set; } = null!;
+    public string BundleContentEncoding { get; set; } = null!;
     public TowerCombatPlaybackArtifact? Artifact { get; set; }
     public DateTimeOffset SimulationCompletedAt { get; set; }
     public DateTimeOffset PlaybackStartedAt { get; set; }
     public DateTimeOffset PlaybackEndsAt { get; set; }
-    public DateTimeOffset NextFrameDueAt { get; set; }
-    public int LastPublishedSequence { get; set; } = -1;
-    public string? DispatchLeaseOwner { get; set; }
-    public DateTimeOffset? DispatchLeaseUntil { get; set; }
+    public string? FinalizationLeaseOwner { get; set; }
+    public DateTimeOffset? FinalizationLeaseUntil { get; set; }
     public long RowVersion { get; set; }
 }
 

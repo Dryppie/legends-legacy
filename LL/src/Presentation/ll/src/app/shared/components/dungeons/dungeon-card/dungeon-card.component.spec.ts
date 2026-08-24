@@ -52,7 +52,6 @@ describe('DungeonCardComponent', () => {
         title: 'Goblin Mines',
         difficulty,
         lore: '',
-        requiredLevel: 5,
         rewards: [],
         unlockedDifficulties: unlocked,
         record: records[difficulty],

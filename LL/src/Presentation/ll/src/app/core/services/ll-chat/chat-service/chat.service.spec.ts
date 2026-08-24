@@ -4,7 +4,7 @@ import {
   ChatService,
   mergeChatMessagesChronologically,
 } from './chat.service';
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { Subject, of } from 'rxjs';
 import { ChatApiService } from '../chat-api.service';
@@ -134,6 +134,77 @@ describe('ChatService guild connection synchronization', () => {
 
     expect(auth.refreshSession).not.toHaveBeenCalled();
   });
+
+  it('coalesces queued refresh context changes before starting SignalR', async () => {
+    let releaseQueue!: () => void;
+    (service as any).connectionQueue = new Promise<void>((resolve) => {
+      releaseQueue = resolve;
+    });
+    const connectForContext = spyOn<any>(
+      service,
+      'connectForContext',
+    ).and.resolveTo();
+
+    const initialContext = (service as any).enqueueConnectionForContext(
+      undefined,
+      false,
+      false,
+      false,
+      false,
+    );
+    const hydratedContext = (service as any).enqueueConnectionForContext(
+      'guild-1',
+      false,
+      true,
+      true,
+      false,
+    );
+
+    releaseQueue();
+    await Promise.all([initialContext, hydratedContext]);
+
+    expect(connectForContext).toHaveBeenCalledOnceWith(
+      'guild-1',
+      false,
+      true,
+      true,
+      false,
+      undefined,
+    );
+  });
+
+  it('shares an in-flight SignalR start between concurrent callers', async () => {
+    let finishStart!: () => void;
+    const start = new Promise<void>((resolve) => {
+      finishStart = resolve;
+    });
+    const startHubConnection = spyOn<any>(
+      service,
+      'startHubConnection',
+    ).and.returnValue(start);
+
+    const first = (service as any).buildHubConnection();
+    const second = (service as any).buildHubConnection();
+
+    expect(startHubConnection).toHaveBeenCalledTimes(1);
+    finishStart();
+    await Promise.all([first, second]);
+  });
+
+  it('wakes the connection effect after the unavailable delay', fakeAsync(() => {
+    const initialTrigger = (service as any).connectionRetryTrigger();
+    (service as any).unavailableUntil = Date.now() + 100;
+
+    (service as any).scheduleConnectionRetry();
+    tick(50);
+    (service as any).unavailableUntil = Date.now() + 100;
+    (service as any).scheduleConnectionRetry();
+    tick(99);
+    expect((service as any).connectionRetryTrigger()).toBe(initialTrigger);
+
+    tick(1);
+    expect((service as any).connectionRetryTrigger()).toBe(initialTrigger + 1);
+  }));
 
   it('keeps non-raid messages visible while raid membership synchronizes', async () => {
     const generalMessage = messageAt('general', '2026-08-11T10:00:00Z');

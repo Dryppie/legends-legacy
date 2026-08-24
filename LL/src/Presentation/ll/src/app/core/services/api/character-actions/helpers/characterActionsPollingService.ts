@@ -163,7 +163,7 @@ export class CharacterActionsPollingService {
   }
 
   private actionDeadline(action: CharacterActionDto): number | null {
-    const value = action.nextResolutionAtUtc ?? action.nextResolutionAt;
+    const value = action.nextResolutionAtUtc;
     if (!value) return null;
     const deadline = new Date(value).getTime();
     return Number.isFinite(deadline) ? deadline : null;

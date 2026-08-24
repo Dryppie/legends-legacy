@@ -44,7 +44,7 @@
     "scope": "Character",
     "sourceAchievementKey": "dungeon.hive_abyss_clear",
     "isHiddenUntilUnlocked": false,
-    "isActive": true,
+    "isActive": false,
     "sortOrder": 20
   },
   {
@@ -56,7 +56,7 @@
     "scope": "Character",
     "sourceAchievementKey": "dungeon.ant_king",
     "isHiddenUntilUnlocked": false,
-    "isActive": true,
+    "isActive": false,
     "sortOrder": 21
   },
   {

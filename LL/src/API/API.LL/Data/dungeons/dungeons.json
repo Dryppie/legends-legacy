@@ -512,6 +512,7 @@
       "name": "Tangled Cave",
       "sigilItemId": "sigil_tangled_cave",
       "region": 2,
+      "requiredTowerFloor": 10,
       "entryCosts": [
         {
           "itemId": "sigil_tangled_cave",
@@ -707,6 +708,7 @@
       "name": "The Great Tree",
       "sigilItemId": "sigil_great_tree",
       "region": 2,
+      "requiredTowerFloor": 10,
       "entryCosts": [
         {
           "itemId": "sigil_great_tree",

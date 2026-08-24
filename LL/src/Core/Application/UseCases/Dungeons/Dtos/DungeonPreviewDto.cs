@@ -32,6 +32,7 @@ public sealed class DungeonPreviewDto
     public string? SigilName { get; set; }
     public bool CanAssembleSigil { get; set; }
     public List<string> SigilAssemblyMissingRequirements { get; set; } = [];
+    public int? RequiredTowerFloor { get; set; }
     public string? RequiredPreviousDungeonId { get; set; }
     public int MinRooms { get; set; }
     public int MaxRooms { get; set; }

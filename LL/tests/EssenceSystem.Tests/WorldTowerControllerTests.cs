@@ -27,7 +27,6 @@ public sealed class WorldTowerControllerTests
         await controller.GetOverview();
         await controller.GetFloor(3);
         await controller.GetRally(rallyId);
-        await controller.GetAttemptReport(attemptId);
         await controller.GetAttemptCombatResult(attemptId);
         await controller.GetHallOfFame();
         await controller.GetPersonalExpeditions();
@@ -52,7 +51,7 @@ public sealed class WorldTowerControllerTests
             4,
             new WorldTowerController.ContributionRequest(TowerContributionKind.ScoutWeakPoints, 3));
 
-        Assert.Equal(17, sender.Requests.Count);
+        Assert.Equal(16, sender.Requests.Count);
         Assert.Equal(characterId, Assert.IsType<GetWorldTowerOverviewQuery>(sender.Requests[0]).CharacterId);
 
         var floor = Assert.IsType<GetTowerFloorQuery>(sender.Requests[1]);
@@ -60,40 +59,38 @@ public sealed class WorldTowerControllerTests
 
         var rally = Assert.IsType<GetTowerRallyQuery>(sender.Requests[2]);
         Assert.Equal((characterId, rallyId), (rally.CharacterId, rally.RallyId));
-        var report = Assert.IsType<GetTowerAttemptReportQuery>(sender.Requests[3]);
-        Assert.Equal((characterId, attemptId), (report.CharacterId, report.AttemptId));
-        var combatResult = Assert.IsType<GetTowerAttemptCombatResultQuery>(sender.Requests[4]);
+        var combatResult = Assert.IsType<GetTowerAttemptCombatResultQuery>(sender.Requests[3]);
         Assert.Equal((characterId, attemptId), (combatResult.CharacterId, combatResult.AttemptId));
-        Assert.IsType<GetTowerHallOfFameQuery>(sender.Requests[5]);
+        Assert.IsType<GetTowerHallOfFameQuery>(sender.Requests[4]);
         Assert.Equal(
             characterId,
-            Assert.IsType<GetPersonalTowerExpeditionsQuery>(sender.Requests[6]).CharacterId);
+            Assert.IsType<GetPersonalTowerExpeditionsQuery>(sender.Requests[5]).CharacterId);
 
-        var create = Assert.IsType<CreateTowerRallyCommand>(sender.Requests[7]);
+        var create = Assert.IsType<CreateTowerRallyCommand>(sender.Requests[6]);
         Assert.Equal((characterId, 2, TowerRallyMode.Echo), (create.CharacterId, create.FloorNumber, create.Mode));
 
-        var apply = Assert.IsType<ApplyToTowerRallyCommand>(sender.Requests[8]);
+        var apply = Assert.IsType<ApplyToTowerRallyCommand>(sender.Requests[7]);
         Assert.Equal((characterId, rallyId), (apply.CharacterId, apply.RallyId));
-        var accept = Assert.IsType<AcceptTowerRallyApplicationCommand>(sender.Requests[9]);
+        var accept = Assert.IsType<AcceptTowerRallyApplicationCommand>(sender.Requests[8]);
         Assert.Equal((characterId, rallyId, applicationId), (accept.CharacterId, accept.RallyId, accept.ApplicationId));
-        var decline = Assert.IsType<DeclineTowerRallyApplicationCommand>(sender.Requests[10]);
+        var decline = Assert.IsType<DeclineTowerRallyApplicationCommand>(sender.Requests[9]);
         Assert.Equal((characterId, rallyId, applicationId), (decline.CharacterId, decline.RallyId, decline.ApplicationId));
-        var leave = Assert.IsType<LeaveTowerRallyCommand>(sender.Requests[11]);
+        var leave = Assert.IsType<LeaveTowerRallyCommand>(sender.Requests[10]);
         Assert.Equal((characterId, rallyId), (leave.CharacterId, leave.RallyId));
-        var loadout = Assert.IsType<UpdateTowerRallyLoadoutCommand>(sender.Requests[12]);
+        var loadout = Assert.IsType<UpdateTowerRallyLoadoutCommand>(sender.Requests[11]);
         Assert.Equal((characterId, rallyId), (loadout.CharacterId, loadout.RallyId));
-        var transfer = Assert.IsType<TransferTowerRallyLeadershipCommand>(sender.Requests[13]);
+        var transfer = Assert.IsType<TransferTowerRallyLeadershipCommand>(sender.Requests[12]);
         Assert.Equal(
             (characterId, rallyId, newLeaderId),
             (transfer.CharacterId, transfer.RallyId, transfer.TargetCharacterId));
-        var parties = Assert.IsType<UpdateTowerRallyPartiesCommand>(sender.Requests[14]);
+        var parties = Assert.IsType<UpdateTowerRallyPartiesCommand>(sender.Requests[13]);
         Assert.Equal((characterId, rallyId), (parties.CharacterId, parties.RallyId));
         var partyAssignment = Assert.Single(parties.Assignments);
         Assert.Equal((partyMemberId, 2), (partyAssignment.CharacterId, partyAssignment.PartySlot));
-        var start = Assert.IsType<StartTowerRallyCommand>(sender.Requests[15]);
+        var start = Assert.IsType<StartTowerRallyCommand>(sender.Requests[14]);
         Assert.Equal((characterId, rallyId), (start.CharacterId, start.RallyId));
 
-        var contribute = Assert.IsType<ContributeToTowerCommand>(sender.Requests[16]);
+        var contribute = Assert.IsType<ContributeToTowerCommand>(sender.Requests[15]);
         Assert.Equal(characterId, contribute.CharacterId);
         Assert.Equal(4, contribute.FloorNumber);
         Assert.Equal(TowerContributionKind.ScoutWeakPoints, contribute.Kind);
@@ -119,16 +116,10 @@ public sealed class WorldTowerControllerTests
         var sender = new RecordingSender();
         var controller = CreateController(sender, characterId);
 
-        await controller.GetAttemptPlayback(attemptId);
-        await controller.GetAttemptPlaybackFrames(attemptId, 17);
         var bundleResult = await controller.GetAttemptPlaybackBundle(attemptId);
 
         Assert.IsType<NotFoundResult>(bundleResult);
-        var manifest = Assert.IsType<GetTowerAttemptPlaybackQuery>(sender.Requests[0]);
-        Assert.Equal((characterId, attemptId), (manifest.CharacterId, manifest.AttemptId));
-        var frames = Assert.IsType<GetTowerAttemptPlaybackFramesQuery>(sender.Requests[1]);
-        Assert.Equal((characterId, attemptId, 17), (frames.CharacterId, frames.AttemptId, frames.AfterSequence));
-        var bundle = Assert.IsType<GetTowerAttemptPlaybackBundleQuery>(sender.Requests[2]);
+        var bundle = Assert.IsType<GetTowerAttemptPlaybackBundleQuery>(sender.Requests[0]);
         Assert.Equal((characterId, attemptId), (bundle.CharacterId, bundle.AttemptId));
     }
 

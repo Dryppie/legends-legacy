@@ -357,7 +357,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
                 .ToArrayAsync(ct),
             ct);
 
-    public Task<IReadOnlyList<Guid>> ClaimWorldTowerPlaybackDispatchesAsync(
+    public Task<IReadOnlyList<Guid>> ClaimWorldTowerPlaybackFinalizationsAsync(
         string owner,
         DateTimeOffset now,
         DateTimeOffset leaseUntil,
@@ -368,11 +368,10 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
             SELECT p."TowerAttemptId" AS "Value"
             FROM "TowerCombatPlaybacks" p
             INNER JOIN "TowerAttempts" a ON a."Id" = p."TowerAttemptId"
-            WHERE p."PlaybackStartedAt" <= {0}
-              AND p."NextFrameDueAt" <= {0}
-              AND (p."LastPublishedSequence" < p."FrameCount" - 1 OR a."Status" = {1})
-              AND (p."DispatchLeaseUntil" IS NULL OR p."DispatchLeaseUntil" <= {0})
-            ORDER BY p."PlaybackStartedAt"
+            WHERE p."PlaybackEndsAt" <= {0}
+              AND a."Status" = {1}
+              AND (p."FinalizationLeaseUntil" IS NULL OR p."FinalizationLeaseUntil" <= {0})
+            ORDER BY p."PlaybackEndsAt"
             LIMIT {2}
             FOR UPDATE OF p SKIP LOCKED
             """,
@@ -384,17 +383,15 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
                     .ToListAsync(ct);
                 foreach (var row in rows)
                 {
-                    row.DispatchLeaseOwner = owner;
-                    row.DispatchLeaseUntil = leaseUntil;
+                    row.FinalizationLeaseOwner = owner;
+                    row.FinalizationLeaseUntil = leaseUntil;
                 }
             },
             async () => await TowerCombatPlaybacks
-                .Where(x => x.PlaybackStartedAt <= now
-                            && x.NextFrameDueAt <= now
-                            && (x.LastPublishedSequence < x.FrameCount - 1
-                                || x.TowerAttempt.Status == TowerAttemptStatus.Playback)
-                            && (x.DispatchLeaseUntil == null || x.DispatchLeaseUntil <= now))
-                .OrderBy(x => x.PlaybackStartedAt)
+                .Where(x => x.PlaybackEndsAt <= now
+                            && x.TowerAttempt.Status == TowerAttemptStatus.Playback
+                            && (x.FinalizationLeaseUntil == null || x.FinalizationLeaseUntil <= now))
+                .OrderBy(x => x.PlaybackEndsAt)
                 .Select(x => x.TowerAttemptId)
                 .Take(limit)
                 .ToArrayAsync(ct),
@@ -419,18 +416,18 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         return true;
     }
 
-    public async Task ReleaseWorldTowerPlaybackDispatchAsync(
+    public async Task ReleaseWorldTowerPlaybackFinalizationAsync(
         Guid attemptId,
         string owner,
         CancellationToken ct = default)
     {
         var playback = await TowerCombatPlaybacks.SingleOrDefaultAsync(
-            x => x.TowerAttemptId == attemptId && x.DispatchLeaseOwner == owner,
+            x => x.TowerAttemptId == attemptId && x.FinalizationLeaseOwner == owner,
             ct);
         if (playback is null)
             return;
-        playback.DispatchLeaseOwner = null;
-        playback.DispatchLeaseUntil = null;
+        playback.FinalizationLeaseOwner = null;
+        playback.FinalizationLeaseUntil = null;
         await SaveChangesAsync(ct);
     }
 

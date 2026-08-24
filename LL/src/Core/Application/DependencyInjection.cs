@@ -27,7 +27,6 @@ public static class DependencyInjection
             }
 
             cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
-            cfg.AddOpenBehavior(typeof(ExceptionToResponseBehaviour<,>));
             cfg.AddOpenBehavior(typeof(TransactionBehavior<,>));
         });
 

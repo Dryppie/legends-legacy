@@ -21,12 +21,12 @@ public sealed class WorldTowerWorkLeaseService(
             limit,
             cancellationToken);
 
-    public Task<IReadOnlyList<Guid>> ClaimPlaybackDispatchesAsync(
+    public Task<IReadOnlyList<Guid>> ClaimPlaybackFinalizationsAsync(
         string owner,
         DateTimeOffset now,
         int limit,
         CancellationToken cancellationToken) =>
-        db.ClaimWorldTowerPlaybackDispatchesAsync(
+        db.ClaimWorldTowerPlaybackFinalizationsAsync(
             owner,
             now,
             now.Add(leaseDuration),
@@ -44,12 +44,12 @@ public sealed class WorldTowerWorkLeaseService(
             now.Add(leaseDuration),
             cancellationToken);
 
-    public async Task ReleasePlaybackDispatchAsync(
+    public async Task ReleasePlaybackFinalizationAsync(
         Guid attemptId,
         string owner,
         CancellationToken cancellationToken)
     {
-        await db.ReleaseWorldTowerPlaybackDispatchAsync(
+        await db.ReleaseWorldTowerPlaybackFinalizationAsync(
             attemptId,
             owner,
             cancellationToken);

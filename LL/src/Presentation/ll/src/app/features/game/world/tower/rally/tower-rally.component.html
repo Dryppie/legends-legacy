@@ -1,14 +1,6 @@
 <ng-container
   *ngIf="combatState.getIsCombatActive(battleType)(); else rallyPage"
 >
-  <p
-    class="realtime-notice"
-    *ngIf="
-      realtimeStatus() !== 'connected' && (playback()?.schemaVersion ?? 1) < 2
-    "
-  >
-    Reconnecting to the live battle… The last confirmed state remains visible.
-  </p>
   <app-combat
     [battleType]="battleType"
     (skipBattle)="closeCombatDetails()"

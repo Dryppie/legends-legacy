@@ -142,10 +142,13 @@
                   <div class="world-map-eyebrow">Dungeon preview</div>
                   <div class="preview-title">
                     <h2>{{ selectedDungeonTitle() }}</h2>
-                    <span
-                      >Lv {{ selectedDungeonRequiredLevel() }} · Region
-                      {{ regionNumber() }}</span
-                    >
+                    <span>
+                      <ng-container
+                        *ngIf="selectedDungeonRequiredTowerFloor() as floor"
+                        >Tower {{ floor }} ·</ng-container
+                      >
+                      Region {{ regionNumber() }}
+                    </span>
                   </div>
                 </div>
                 <button type="button" (click)="showAreas()">
@@ -252,8 +255,10 @@
                 (click)="selectDungeon(dungeon.id)"
               >
                 <span class="activity-name">{{ dungeon.title }}</span>
-                <span class="activity-level"
-                  >Lv {{ dungeon.requiredLevel }}</span
+                <span
+                  *ngIf="dungeon.requiredTowerFloor"
+                  class="activity-level"
+                  >Tower {{ dungeon.requiredTowerFloor }}</span
                 >
                 <span class="activity-meta">
                   {{ dungeon.ownedSigilCount }}

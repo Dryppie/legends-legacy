@@ -212,11 +212,10 @@ export interface TowerCombatPlayback {
   totalTicks: number;
   frameCount: number;
   currentSequence: number;
-  currentFrame: TowerCombatFrame | null;
   isCompleted: boolean;
   schemaVersion: number;
-  serverNow: string | null;
-  bundleETag: string | null;
+  serverNow: string;
+  bundleETag: string;
 }
 
 export interface TowerPlaybackBundle {
@@ -306,14 +305,6 @@ export interface TowerCombatFrame {
   outcome: BattleOutcome | null;
 }
 
-export interface TowerCombatFrameBatch {
-  attemptId: string;
-  afterSequence: number;
-  currentSequence: number;
-  hasMore: boolean;
-  frames: TowerCombatFrame[];
-}
-
 export interface TowerCombatEvent {
   source: string;
   statsSource: string;
@@ -398,29 +389,12 @@ export class WorldTowerService {
     return this.api.get(`world-tower/rallies/${rallyId}`);
   }
 
-  getAttemptReport(attemptId: string): Observable<TowerBattleReport> {
-    return this.api.get(`world-tower/attempts/${attemptId}/report`);
-  }
-
   getAttemptCombatResult(attemptId: string): Observable<CombatResultDto> {
     return this.api.get(`world-tower/attempts/${attemptId}/combat-result`);
   }
 
-  getAttemptPlayback(attemptId: string): Observable<TowerCombatPlayback> {
-    return this.api.get(`world-tower/attempts/${attemptId}/playback`);
-  }
-
   getAttemptPlaybackBundle(attemptId: string): Observable<TowerPlaybackBundle> {
     return this.api.get(`world-tower/attempts/${attemptId}/playback/bundle`);
-  }
-
-  getAttemptPlaybackFrames(
-    attemptId: string,
-    afterSequence: number,
-  ): Observable<TowerCombatFrameBatch> {
-    return this.api.get(
-      `world-tower/attempts/${attemptId}/playback/frames?after=${afterSequence}`,
-    );
   }
 
   getHallOfFame(): Observable<TowerHallOfFameEntry[]> {

@@ -63,6 +63,9 @@ public sealed class DungeonCatalogValidator
         if (family.RestSiteCount < 0)
             errors.Add($"{familyLabel}: restSiteCount must be specified and cannot be negative.");
 
+        if (family.RequiredTowerFloor is <= 0)
+            errors.Add($"{familyLabel}: requiredTowerFloor must be greater than zero when specified.");
+
         AddDuplicateErrors(
             family.GatheringBonusRewardTableIds,
             $"gathering bonus reward table in family '{familyLabel}'",

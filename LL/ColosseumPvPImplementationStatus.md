@@ -8,8 +8,7 @@ This document tracks what is currently implemented from the Colosseum PvP finish
 
 ### Backend battle safety and response flow
 
-- Added canonical `POST /api/v1/colosseum/battle` route with structured `{ "opponentId": "..." }` body.
-- Kept compatibility route `POST /api/v1/colosseum/StartArenaBattle`.
+- Added `POST /api/v1/colosseum/battle` with structured `{ "opponentId": "..." }` body.
 - Battle start now validates before ticket spend:
   - opponent id must be present;
   - self-attacks are rejected;
@@ -31,7 +30,7 @@ This document tracks what is currently implemented from the Colosseum PvP finish
 ### Arena defense snapshots
 
 - Added `ArenaDefenseSnapshot` domain model, EF configuration, repository methods, and `DbSet`.
-- Added `POST /api/v1/colosseum/defense-snapshot` with compatibility route `UpdateDefenseSnapshot`.
+- Added `POST /api/v1/colosseum/defense-snapshot`.
 - Defense snapshots are built from the current character snapshot and include equipment, modifiers, base attributes, and equipped essences.
 - Rated battles prefer the defender's saved snapshot when it is valid and non-outdated.
 - If no valid snapshot exists, rated battles fall back to the defender's current live setup.
@@ -68,8 +67,8 @@ This document tracks what is currently implemented from the Colosseum PvP finish
 
 - Added data-driven `ChampionMarketItem` definitions in the Colosseum service.
 - Added `ChampionMarketPurchase` domain model, EF configuration, repository methods, and `DbSet`.
-- Added `GET /api/v1/colosseum/market` with compatibility route `GetChampionMarket`.
-- Added `POST /api/v1/colosseum/market/purchase` with compatibility route `PurchaseChampionMarketItem`.
+- Added `GET /api/v1/colosseum/market`.
+- Added `POST /api/v1/colosseum/market/purchase`.
 - Purchases validate:
   - enabled item;
   - positive quantity;

@@ -1,12 +1,15 @@
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Items;
+using Domain.Models.WorldTower;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Persistence.LL;
 using Persistence.LL.Repositories.Dungeons;
 using Persistence.LL.Repositories.Inventories;
 using Persistence.LL.Repositories.Items;
 using Services.LL.Dungeons;
+using Services.LL.WorldTower;
 
 namespace EssenceSystem.Tests;
 
@@ -26,10 +29,7 @@ public sealed class DungeonAccessPolicyTests
         });
         await db.SaveChangesAsync();
 
-        var policy = new DungeonAccessPolicy(
-            new DungeonRunRepository(db),
-            new InventoryRepository(db),
-            new ItemBaseRepository(db));
+        var policy = CreatePolicy(db);
         var dungeon = new DungeonDefinition
         {
             Id = "test_dungeon.grade_1",
@@ -61,10 +61,7 @@ public sealed class DungeonAccessPolicyTests
         });
         await db.SaveChangesAsync();
 
-        var policy = new DungeonAccessPolicy(
-            new DungeonRunRepository(db),
-            new InventoryRepository(db),
-            new ItemBaseRepository(db));
+        var policy = CreatePolicy(db);
         var dungeons = new[]
         {
             new DungeonDefinition
@@ -108,10 +105,7 @@ public sealed class DungeonAccessPolicyTests
         });
         await db.SaveChangesAsync();
 
-        var policy = new DungeonAccessPolicy(
-            new DungeonRunRepository(db),
-            new InventoryRepository(db),
-            new ItemBaseRepository(db));
+        var policy = CreatePolicy(db);
         var dungeon = new DungeonDefinition
         {
             Id = "test_dungeon.grade_1",
@@ -133,6 +127,70 @@ public sealed class DungeonAccessPolicyTests
         Assert.Empty(entryAccess.MissingRequirements);
         Assert.Equal(1, Assert.Single(entryAccess.EntryRequirements).OwnedAmount);
     }
+
+    [Fact]
+    public async Task Required_tower_floor_blocks_entry_assembly_and_preview_until_server_clear()
+    {
+        await using var db = CreateDb();
+        db.ItemBases.Add(new ItemBase
+        {
+            Id = "sigil_test",
+            Name = "Test Sigil",
+            ItemType = ItemType.Resource,
+            Stackable = true
+        });
+        await db.SaveChangesAsync();
+
+        var policy = CreatePolicy(db);
+        var characterId = Guid.NewGuid();
+        var dungeon = new DungeonDefinition
+        {
+            Id = "test_dungeon.grade_1",
+            SigilItemId = "sigil_test",
+            RequiredTowerFloor = 10,
+            EntryCosts = [new DungeonEntryCost { ItemId = "sigil_test", Amount = 1 }]
+        };
+
+        var entryBeforeClear = await policy.EvaluateAsync(characterId, dungeon, CancellationToken.None);
+        var assemblyBeforeClear = await policy.EvaluateForSigilAssemblyAsync(characterId, dungeon, CancellationToken.None);
+        var previewBeforeClear = await policy.EvaluateForPreviewAsync(
+            characterId,
+            [dungeon],
+            new Dictionary<string, int> { ["sigil_test"] = 1 },
+            CancellationToken.None);
+
+        Assert.Contains("Requires World Tower Floor 10 to be completed.", entryBeforeClear.MissingRequirements);
+        Assert.False(assemblyBeforeClear.CanEnter);
+        Assert.False(previewBeforeClear[dungeon.Id].Entry.CanEnter);
+        Assert.False(previewBeforeClear[dungeon.Id].SigilAssembly!.CanEnter);
+
+        db.TowerFloorProgresses.Add(new TowerFloorProgress
+        {
+            ServerId = "default",
+            FloorNumber = 10,
+            IsCleared = true
+        });
+        await db.SaveChangesAsync();
+
+        var assemblyAfterClear = await policy.EvaluateForSigilAssemblyAsync(characterId, dungeon, CancellationToken.None);
+        var previewAfterClear = await policy.EvaluateForPreviewAsync(
+            characterId,
+            [dungeon],
+            new Dictionary<string, int> { ["sigil_test"] = 1 },
+            CancellationToken.None);
+
+        Assert.True(assemblyAfterClear.CanEnter);
+        Assert.True(previewAfterClear[dungeon.Id].Entry.CanEnter);
+        Assert.True(previewAfterClear[dungeon.Id].SigilAssembly!.CanEnter);
+    }
+
+    private static DungeonAccessPolicy CreatePolicy(LLDbContext db) =>
+        new(
+            new DungeonRunRepository(db),
+            new InventoryRepository(db),
+            new ItemBaseRepository(db),
+            db,
+            Options.Create(new WorldTowerOptions()));
 
     private static LLDbContext CreateDb()
     {

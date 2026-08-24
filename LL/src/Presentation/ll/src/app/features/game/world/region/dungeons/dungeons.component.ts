@@ -27,7 +27,6 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
   goblin_mines: {
     number: '1',
     lore: 'The goblins have mined deep into cursed stone, guarding ancient relics.',
-    requiredLevel: 5,
     dailyEntries: 1,
     keyItem: {
       name: 'Goblin Sigil',
@@ -39,7 +38,6 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
   forgotten_catacombs: {
     number: '2',
     lore: 'An ancient burial site where the dead rise beneath soot-covered stone.',
-    requiredLevel: 10,
     dailyEntries: 2,
     keyItem: {
       name: 'Catacomb Sigil',
@@ -47,22 +45,6 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
       need: 1,
     },
     unlockedDifficulties: [DungeonDifficulty.Normal],
-  },
-  hives_abyss: {
-    number: '3',
-    lore: 'A living cave overtaken by roots, spores, and ancient territorial beasts.',
-    requiredLevel: 20,
-    dailyEntries: 1,
-    keyItem: {
-      name: 'Hive Sigil',
-      have: 0,
-      need: 1,
-    },
-    unlockedDifficulties: [
-      DungeonDifficulty.Normal,
-      DungeonDifficulty.Heroic,
-      DungeonDifficulty.Mythic,
-    ],
   },
 };
 
@@ -307,7 +289,6 @@ export class DungeonsComponent implements OnInit {
           title: selectedBase.familyTitle ?? selectedBase.title,
           number: presentation.number ?? index + 1,
           lore: presentation.lore ?? '',
-          requiredLevel: presentation.requiredLevel ?? 1,
           roomsRange: selectedBase.roomsRange ?? [
             (selectedBase as DungeonPreviewData & { minRooms?: number })
               .minRooms ?? 0,
@@ -329,11 +310,6 @@ export class DungeonsComponent implements OnInit {
       this.getDungeonSortValue(first) - this.getDungeonSortValue(second);
     if (numberSort !== 0) {
       return numberSort;
-    }
-
-    const levelSort = (first.requiredLevel ?? 0) - (second.requiredLevel ?? 0);
-    if (levelSort !== 0) {
-      return levelSort;
     }
 
     return first.title.localeCompare(second.title);

@@ -134,7 +134,7 @@ function combatAction(result: CombatResultDto): CharacterActionDto {
     characterActionType: CharacterActionType.Combat,
     lootTableId: 'lumo-ruins',
     updatedAt: nextResolutionAt,
-    nextResolutionAt,
+    nextResolutionAtUtc: nextResolutionAt,
     revision: 'lumo-combat',
     isDeleted: false,
     combatSession: {

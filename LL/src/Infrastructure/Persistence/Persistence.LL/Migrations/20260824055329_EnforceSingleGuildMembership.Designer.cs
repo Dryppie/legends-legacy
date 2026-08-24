@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Persistence.LL;
@@ -12,9 +13,11 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    partial class LLDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260824055329_EnforceSingleGuildMembership")]
+    partial class EnforceSingleGuildMembership
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -5328,32 +5331,35 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("BundleContentEncoding")
-                        .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
                     b.Property<string>("BundleContentType")
-                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
                     b.Property<string>("BundleHash")
-                        .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.Property<int>("BundleLength")
+                    b.Property<int?>("BundleLength")
                         .HasColumnType("integer");
 
-                    b.Property<string>("FinalizationLeaseOwner")
+                    b.Property<string>("DispatchLeaseOwner")
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
-                    b.Property<DateTimeOffset?>("FinalizationLeaseUntil")
+                    b.Property<DateTimeOffset?>("DispatchLeaseUntil")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("FrameCount")
                         .HasColumnType("integer");
+
+                    b.Property<int>("LastPublishedSequence")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("NextFrameDueAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("PlaybackEndsAt")
                         .HasColumnType("timestamp with time zone");
@@ -5377,12 +5383,19 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("TicksPerSecond")
                         .HasColumnType("integer");
 
+                    b.Property<string>("TimelineJson")
+                        .HasColumnType("jsonb");
+
                     b.Property<int>("TotalTicks")
                         .HasColumnType("integer");
 
                     b.HasKey("TowerAttemptId");
 
-                    b.HasIndex("PlaybackEndsAt", "FinalizationLeaseUntil");
+                    b.HasIndex("DispatchLeaseUntil");
+
+                    b.HasIndex("PlaybackEndsAt");
+
+                    b.HasIndex("NextFrameDueAt", "LastPublishedSequence");
 
                     b.ToTable("TowerCombatPlaybacks");
                 });

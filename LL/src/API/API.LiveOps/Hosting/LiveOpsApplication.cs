@@ -18,7 +18,6 @@ public static class LiveOpsApplication
         {
             // Register the MediatR runtime without scanning every Game use case.
             configuration.RegisterServicesFromAssembly(typeof(LiveOpsApplication).Assembly);
-            configuration.AddOpenBehavior(typeof(ExceptionToResponseBehaviour<,>));
             configuration.AddOpenBehavior(typeof(TransactionBehavior<,>));
         });
 

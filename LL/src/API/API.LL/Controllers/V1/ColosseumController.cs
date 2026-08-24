@@ -28,12 +28,10 @@ public class ColosseumController : BaseController
     public sealed record InviteTournamentTeamMemberRequest(Guid InvitedParticipantId);
 
     [HttpGet("status")]
-    [HttpGet("GetStatus")]
     public async Task<ActionResult<ColosseumStatusDto>> GetStatus() =>
         await Mediator.Send(new GetColosseumStatusQuery(CurrentCharacterGuid));
 
     [HttpGet("opponents")]
-    [HttpGet("GetArenaOpponents")]
     public async Task<ActionResult<List<ArenaOpponentPreviewDto>>> GetArenaOpponents() =>
         await Mediator.Send(new GetArenaOpponentsQuery(CurrentCharacterGuid));
 
@@ -51,22 +49,18 @@ public class ColosseumController : BaseController
         await Mediator.Send(new GetColosseumMatchResultsQuery(CurrentCharacterGuid));
 
     [HttpPost("battle")]
-    [HttpPost("StartArenaBattle")]
     public async Task<ActionResult<Response<StartArenaBattleResponseDto>>> StartArenaBattle([FromBody] StartArenaBattleRequestDto request) =>
         await Mediator.Send(new StartArenaBattleCommand(CurrentCharacterGuid, request.OpponentId));
 
     [HttpPost("defense-snapshot")]
-    [HttpPost("UpdateDefenseSnapshot")]
     public async Task<ActionResult<Response<ArenaDefenseStatusDto>>> UpdateDefenseSnapshot() =>
         await Mediator.Send(new UpdateArenaDefenseSnapshotCommand(CurrentCharacterGuid));
 
     [HttpGet("market")]
-    [HttpGet("GetChampionMarket")]
     public async Task<ActionResult<ChampionMarketDto>> GetChampionMarket() =>
         await Mediator.Send(new GetChampionMarketQuery(CurrentCharacterGuid));
 
     [HttpPost("market/purchase")]
-    [HttpPost("PurchaseChampionMarketItem")]
     public async Task<ActionResult<Response<PurchaseChampionMarketItemResponseDto>>> PurchaseChampionMarketItem([FromBody] PurchaseChampionMarketItemRequestDto request) =>
         await Mediator.Send(new PurchaseChampionMarketItemCommand(CurrentCharacterGuid, request.ItemId, request.Quantity));
 

@@ -154,7 +154,6 @@ describe('CharacterActionsStateService', () => {
       ...combatAction(),
       characterActionType: CharacterActionType.Crafting,
       nextResolutionAtUtc: new Date(Date.now() - 1_000),
-      nextResolutionAt: new Date(Date.now() - 1_000),
       revision: 'overdue-tempering-revision',
     };
     const resolveError = new Error('save failed');
@@ -196,7 +195,7 @@ describe('CharacterActionsStateService', () => {
     const staleAction: CharacterActionDto = {
       ...combatAction(),
       updatedAt: new Date('2026-08-08T12:00:20Z'),
-      nextResolutionAt: new Date('2026-08-08T12:00:20Z'),
+      nextResolutionAtUtc: new Date('2026-08-08T12:00:20Z'),
       revision: 'stale-combat-revision',
       isDeleted: true,
     };
@@ -218,7 +217,7 @@ describe('CharacterActionsStateService', () => {
       ...combatAction(),
       characterActionType: CharacterActionType.Crafting,
       updatedAt: deletedAt,
-      nextResolutionAt: deletedAt,
+      nextResolutionAtUtc: deletedAt,
       revision: 'deleted-crafting-revision',
       isDeleted: true,
     };
@@ -242,7 +241,7 @@ describe('CharacterActionsStateService', () => {
     const stoppingCombat: CharacterActionDto = {
       ...combatAction(),
       blockedUntilUtc: deadline,
-      nextResolutionAt: deadline,
+      nextResolutionAtUtc: deadline,
       revision: 'stopping-combat-revision',
       isDeleted: true,
     };
@@ -346,7 +345,7 @@ describe('CharacterActionsStateService', () => {
       ...combatAction(),
       characterActionType: CharacterActionType.Crafting,
       updatedAt: new Date(Date.now() - 1_000),
-      nextResolutionAt: new Date(Date.now() - 1_000),
+      nextResolutionAtUtc: new Date(Date.now() - 1_000),
       revision: 'active-crafting-revision',
       isDeleted: false,
     });
@@ -415,7 +414,6 @@ describe('CharacterActionsStateService', () => {
       characterActionType: CharacterActionType.Crafting,
       blockedUntilUtc: new Date(Date.now() + 5_000),
       nextResolutionAtUtc: new Date(Date.now() + 15_000),
-      nextResolutionAt: new Date(Date.now() + 15_000),
       revision: 'pending-tempering-revision',
       isDeleted: false,
     };
@@ -448,7 +446,6 @@ describe('CharacterActionsStateService', () => {
       ...combatAction(),
       characterActionType: CharacterActionType.Crafting,
       nextResolutionAtUtc: new Date(Date.now() + 10_000),
-      nextResolutionAt: new Date(Date.now() + 10_000),
       revision: 'active-crafting-revision',
       isDeleted: false,
     });
@@ -466,7 +463,6 @@ describe('CharacterActionsStateService', () => {
       ...combatAction(),
       blockedUntilUtc: new Date(Date.now() - 1_000),
       nextResolutionAtUtc: new Date(Date.now() + 9_000),
-      nextResolutionAt: new Date(Date.now() + 9_000),
       revision: 'unlocked-combat-revision',
     });
 
@@ -483,7 +479,6 @@ describe('CharacterActionsStateService', () => {
       characterActionType: CharacterActionType.Crafting,
       blockedUntilUtc: new Date(Date.now() + 5_000),
       nextResolutionAtUtc: new Date(Date.now() + 15_000),
-      nextResolutionAt: new Date(Date.now() + 15_000),
       revision: 'combat-queued-crafting-revision',
     });
 
@@ -540,7 +535,7 @@ describe('CharacterActionsStateService', () => {
   it('keeps offline progress visibly resolving until the final chunk is handled', fakeAsync(() => {
     const pendingAction: CharacterActionDto = {
       ...combatAction(),
-      hasPendingCombatResolution: true,
+      hasMoreDueWork: true,
       revision: 'pending-combat-revision',
     };
 
@@ -555,7 +550,7 @@ describe('CharacterActionsStateService', () => {
 
     applyUpdate({
       ...pendingAction,
-      hasPendingCombatResolution: false,
+      hasMoreDueWork: false,
       revision: 'completed-combat-revision',
       combatSession: {
         from: new Date('2026-08-08T12:00:00Z'),
@@ -647,7 +642,7 @@ function combatAction(): CharacterActionDto {
     characterActionType: CharacterActionType.Combat,
     lootTableId: 'lumo-ruins',
     updatedAt: nextResolutionAt,
-    nextResolutionAt,
+    nextResolutionAtUtc: nextResolutionAt,
     revision: 'combat-revision',
     isDeleted: false,
   };

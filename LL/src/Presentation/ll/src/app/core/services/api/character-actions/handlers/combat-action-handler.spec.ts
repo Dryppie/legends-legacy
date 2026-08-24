@@ -87,17 +87,17 @@ describe('CombatActionHandler', () => {
 });
 
 function combatAction(
-  hasPendingCombatResolution: boolean,
+  hasMoreDueWork: boolean,
   experience: number,
 ): CharacterActionDto {
   return {
     characterActionType: CharacterActionType.Combat,
     lootTableId: 'lumo-ruins',
     updatedAt: new Date('2026-08-11T00:16:40Z'),
-    nextResolutionAt: new Date('2026-08-11T00:16:50Z'),
+    nextResolutionAtUtc: new Date('2026-08-11T00:16:50Z'),
     revision: 'revision',
     isDeleted: false,
-    hasPendingCombatResolution,
+    hasMoreDueWork,
     combatSession: combatSession(experience),
   };
 }

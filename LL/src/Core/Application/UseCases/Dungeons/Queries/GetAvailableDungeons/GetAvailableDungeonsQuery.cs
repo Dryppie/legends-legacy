@@ -142,6 +142,7 @@ public sealed class DungeonHubFactory
                 SigilName = sigilRequirement?.Name,
                 CanAssembleSigil = sigilSettings.Enabled && sigilAssemblyAccess?.CanEnter == true,
                 SigilAssemblyMissingRequirements = sigilAssemblyAccess?.MissingRequirements.ToList() ?? [],
+                RequiredTowerFloor = dungeon.RequiredTowerFloor,
                 RequiredPreviousDungeonId = dungeon.RequiredPreviousDungeonId,
                 MinRooms = dungeon.MinRooms,
                 MaxRooms = dungeon.MaxRooms,

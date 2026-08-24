@@ -47,16 +47,33 @@ public class ItemBaseRepository : IItemBaseRepository
     {
         var essenceItems = await _context.ItemBases
             .OfType<EssenceItemBase>()
-            .Where(item => !string.IsNullOrWhiteSpace(item.EssenceDefinitionId))
             .Select(item => new { item.Id, item.EssenceDefinitionId })
             .ToListAsync(cancellationToken);
 
-        return essenceItems
-            .GroupBy(x => x.EssenceDefinitionId, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(
-                x => x.Key,
-                x => x.OrderBy(item => item.Id, StringComparer.OrdinalIgnoreCase).First().Id,
-                StringComparer.OrdinalIgnoreCase);
+        var resolvedMappings = essenceItems
+            .Select(item => new
+            {
+                item.Id,
+                DefinitionId = EssenceItemBase.ResolveDefinitionId(item.Id, item.EssenceDefinitionId)
+            })
+            .Where(item => !string.IsNullOrWhiteSpace(item.DefinitionId))
+            .ToList();
+
+        var duplicateMapping = resolvedMappings
+            .GroupBy(item => item.DefinitionId, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault(group => group.Skip(1).Any());
+
+        if (duplicateMapping is not null)
+        {
+            var itemIds = string.Join(", ", duplicateMapping.Select(item => item.Id).Order(StringComparer.OrdinalIgnoreCase));
+            throw new InvalidOperationException(
+                $"Multiple Essence item bases resolve to '{duplicateMapping.Key}': {itemIds}.");
+        }
+
+        return resolvedMappings.ToDictionary(
+            item => item.DefinitionId,
+            item => item.Id,
+            StringComparer.OrdinalIgnoreCase);
     }
 
     public async Task<EquipmentBase?> GetCraftableEquipmentBaseAsync(string itemBaseId, CancellationToken cancellationToken) =>

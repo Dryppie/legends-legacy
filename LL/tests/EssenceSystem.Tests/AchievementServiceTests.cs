@@ -57,6 +57,34 @@ public sealed class AchievementServiceTests
     }
 
     [Fact]
+    public void Retired_hive_achievements_and_titles_do_not_block_completionist()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        {
+            Converters = { new JsonStringEnumConverter() }
+        };
+        var dataPath = Path.Combine(AppContext.BaseDirectory, "Data");
+        var achievements = Directory.EnumerateFiles(Path.Combine(dataPath, "achievements"), "*.json")
+            .SelectMany(path => JsonSerializer.Deserialize<List<AchievementCatalogEntry>>(File.ReadAllText(path), options) ?? [])
+            .ToList();
+        var titles = Directory.EnumerateFiles(Path.Combine(dataPath, "titles"), "*.json")
+            .SelectMany(path => JsonSerializer.Deserialize<List<TitleCatalogEntry>>(File.ReadAllText(path), options) ?? [])
+            .ToList();
+
+        Assert.False(Assert.Single(achievements, x => x.Key == "dungeon.hive_abyss_clear").IsActive);
+        Assert.False(Assert.Single(achievements, x => x.Key == "dungeon.ant_king").IsActive);
+        Assert.False(Assert.Single(titles, x => x.Key == "title.hivebreaker").IsActive);
+        Assert.False(Assert.Single(titles, x => x.Key == "title.royal_exterminator").IsActive);
+
+        var completionist = Assert.Single(achievements, x => x.Key == "legacy.completionist");
+        var requiredActiveAchievements = achievements.Count(x =>
+            x.IsActive
+            && x.Visibility != AchievementVisibility.Hidden
+            && x.RequirementType != AchievementRequirementType.NonHiddenAchievementsCompleted);
+        Assert.Equal(requiredActiveAchievements, completionist.RequirementAmount);
+    }
+
+    [Fact]
     public async Task Progress_unlocks_achievement_once_and_awards_points_and_title_once()
     {
         await using var db = CreateDbContext();
@@ -740,10 +768,13 @@ public sealed class AchievementServiceTests
         AchievementVisibility Visibility,
         TitleRarity Rarity,
         AchievementRequirementType RequirementType,
+        long RequirementAmount,
+        bool IsActive,
         int SortOrder);
 
     private sealed record TitleCatalogEntry(
         string Key,
         string Name,
-        string? SourceAchievementKey);
+        string? SourceAchievementKey,
+        bool IsActive);
 }

@@ -6,7 +6,6 @@ import { TournamentGroundsUpdated } from '../colosseum/tournament-grounds-update
 import { RaidUpdated } from '../raid/raid-updated';
 import { RaidDirectoryUpdated } from '../raid/raid-directory-updated';
 import { RegionBossUpdated } from '../region-boss/region-boss-updated';
-import { WorldTowerCombatFrameUpdated } from '../world-tower/world-tower-combat-frame-updated';
 import { WorldTowerRallyUpdated } from '../world-tower/world-tower-rally-updated';
 import {
   StateSyncScope,
@@ -43,7 +42,6 @@ export const gameRealtimeSignalEventNames = {
   playerTransfer: 'PlayerTransfer',
   tournamentGroundsUpdated: 'TournamentGroundsUpdated',
   worldTowerRallyUpdated: 'WorldTowerRallyUpdated',
-  worldTowerCombatFrameUpdated: 'WorldTowerCombatFrameUpdated',
   raidUpdated: 'RaidUpdated',
   raidDirectoryUpdated: 'RaidDirectoryUpdated',
   regionBossUpdated: 'RegionBossUpdated',
@@ -239,7 +237,6 @@ export interface GameRealtimeSignalEventMap {
   PlayerTransfer: PlayerTransfer;
   TournamentGroundsUpdated: TournamentGroundsUpdated;
   WorldTowerRallyUpdated: WorldTowerRallyUpdated;
-  WorldTowerCombatFrameUpdated: WorldTowerCombatFrameUpdated;
   RaidUpdated: RaidUpdated;
   RaidDirectoryUpdated: RaidDirectoryUpdated;
   RegionBossUpdated: RegionBossUpdated;
@@ -292,7 +289,6 @@ export type GameRealtimePayload =
   | PlayerTransfer
   | TournamentGroundsUpdated
   | WorldTowerRallyUpdated
-  | WorldTowerCombatFrameUpdated
   | RaidUpdated
   | RaidDirectoryUpdated
   | RegionBossUpdated

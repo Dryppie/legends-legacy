@@ -16,7 +16,7 @@ public sealed class CharacterActionDtoMappingTests
         NullLoggerFactory.Instance).CreateMapper();
 
     [Fact]
-    public void Explicit_due_state_maps_to_new_and_compatibility_contracts()
+    public void Explicit_due_state_maps_to_the_current_contract()
     {
         var action = new CharacterAction
         {
@@ -31,10 +31,8 @@ public sealed class CharacterActionDtoMappingTests
 
         var dto = _mapper.Map<CharacterActionDto>(action);
 
-        Assert.True(dto.HasPendingCombatResolution);
         Assert.True(dto.HasMoreDueWork);
         Assert.Equal(action.NextResolutionAtUtc, dto.NextResolutionAtUtc);
-        Assert.Equal(action.NextResolutionAtUtc, dto.NextResolutionAt);
         Assert.Equal(100, dto.ProcessedCount);
         Assert.Equal(10_000, dto.ResolutionIntervalMs);
     }
@@ -53,7 +51,7 @@ public sealed class CharacterActionDtoMappingTests
 
         var dto = _mapper.Map<CharacterActionDto>(action);
 
-        Assert.False(dto.HasPendingCombatResolution);
+        Assert.False(dto.HasMoreDueWork);
     }
 
     [Fact]

@@ -22,6 +22,7 @@ public sealed class DungeonFamilyDefinition
     public int Region { get; set; } = 1;
     public string? RequiredAreaId { get; set; }
     public string? RequiredQuestId { get; set; }
+    public int? RequiredTowerFloor { get; set; }
     public List<DungeonEntryCost> EntryCosts { get; set; } = [];
     public Dictionary<ItemType, double> MonsterLootModifiers { get; set; } = [];
     public List<string> GatheringBonusRewardTableIds { get; set; } = [];

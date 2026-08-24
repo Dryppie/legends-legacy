@@ -40,9 +40,7 @@ describe('WorldTowerService', () => {
     service.getOverview().subscribe();
     service.getFloor(3).subscribe();
     service.getRally('rally-id').subscribe();
-    service.getAttemptReport('attempt-id').subscribe();
     service.getAttemptCombatResult('attempt-id').subscribe();
-    service.getAttemptPlayback('attempt-id').subscribe();
     service.getAttemptPlaybackBundle('attempt-id').subscribe();
     service.getHallOfFame().subscribe();
     service.getPersonalExpeditions().subscribe();
@@ -51,9 +49,7 @@ describe('WorldTowerService', () => {
       ['world-tower'],
       ['world-tower/floors/3'],
       ['world-tower/rallies/rally-id'],
-      ['world-tower/attempts/attempt-id/report'],
       ['world-tower/attempts/attempt-id/combat-result'],
-      ['world-tower/attempts/attempt-id/playback'],
       ['world-tower/attempts/attempt-id/playback/bundle'],
       ['world-tower/hall-of-fame'],
       ['world-tower/personal-expeditions'],

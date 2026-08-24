@@ -12,11 +12,8 @@ namespace Application.UseCases.WorldTower;
 public sealed record GetWorldTowerOverviewQuery(Guid CharacterId) : IQuery<TowerOverviewDto>;
 public sealed record GetTowerFloorQuery(Guid CharacterId, int FloorNumber) : IQuery<TowerFloorDetailDto?>;
 public sealed record GetTowerRallyQuery(Guid CharacterId, Guid RallyId) : IQuery<TowerRallyDto?>;
-public sealed record GetTowerAttemptReportQuery(Guid CharacterId, Guid AttemptId) : IQuery<TowerBattleReportDto?>;
 public sealed record GetTowerAttemptCombatResultQuery(Guid CharacterId, Guid AttemptId) : IQuery<CombatResultDto?>;
-public sealed record GetTowerAttemptPlaybackQuery(Guid CharacterId, Guid AttemptId) : IQuery<TowerCombatPlaybackDto?>;
 public sealed record GetTowerAttemptPlaybackBundleQuery(Guid CharacterId, Guid AttemptId) : IQuery<TowerPlaybackBundleContentDto?>;
-public sealed record GetTowerAttemptPlaybackFramesQuery(Guid CharacterId, Guid AttemptId, int AfterSequence) : IQuery<TowerCombatFrameBatchDto?>;
 public sealed record GetTowerHallOfFameQuery : IQuery<IReadOnlyList<TowerHallOfFameEntryDto>>;
 public sealed record GetPersonalTowerExpeditionsQuery(Guid CharacterId) : IQuery<IReadOnlyList<TowerPersonalExpeditionDto>>;
 public sealed record CreateTowerRallyCommand(Guid CharacterId, int FloorNumber, TowerRallyMode Mode) : ICommand<Response<TowerRallyDto>>;
@@ -52,13 +49,6 @@ public sealed class GetTowerRallyQueryHandler(IWorldTowerService tower)
         tower.GetRallyAsync(request.CharacterId, request.RallyId, cancellationToken);
 }
 
-public sealed class GetTowerAttemptReportQueryHandler(IWorldTowerService tower)
-    : IRequestHandler<GetTowerAttemptReportQuery, TowerBattleReportDto?>
-{
-    public Task<TowerBattleReportDto?> Handle(GetTowerAttemptReportQuery request, CancellationToken cancellationToken) =>
-        tower.GetAttemptReportAsync(request.CharacterId, request.AttemptId, cancellationToken);
-}
-
 public sealed class GetTowerAttemptCombatResultQueryHandler(IWorldTowerService tower)
     : IRequestHandler<GetTowerAttemptCombatResultQuery, CombatResultDto?>
 {
@@ -66,15 +56,6 @@ public sealed class GetTowerAttemptCombatResultQueryHandler(IWorldTowerService t
         GetTowerAttemptCombatResultQuery request,
         CancellationToken cancellationToken) =>
         tower.GetAttemptCombatResultAsync(request.CharacterId, request.AttemptId, cancellationToken);
-}
-
-public sealed class GetTowerAttemptPlaybackQueryHandler(IWorldTowerService tower)
-    : IRequestHandler<GetTowerAttemptPlaybackQuery, TowerCombatPlaybackDto?>
-{
-    public Task<TowerCombatPlaybackDto?> Handle(
-        GetTowerAttemptPlaybackQuery request,
-        CancellationToken cancellationToken) =>
-        tower.GetAttemptPlaybackAsync(request.CharacterId, request.AttemptId, cancellationToken);
 }
 
 public sealed class GetTowerAttemptPlaybackBundleQueryHandler(IWorldTowerService tower)
@@ -86,19 +67,6 @@ public sealed class GetTowerAttemptPlaybackBundleQueryHandler(IWorldTowerService
         tower.GetAttemptPlaybackBundleAsync(
             request.CharacterId,
             request.AttemptId,
-            cancellationToken);
-}
-
-public sealed class GetTowerAttemptPlaybackFramesQueryHandler(IWorldTowerService tower)
-    : IRequestHandler<GetTowerAttemptPlaybackFramesQuery, TowerCombatFrameBatchDto?>
-{
-    public Task<TowerCombatFrameBatchDto?> Handle(
-        GetTowerAttemptPlaybackFramesQuery request,
-        CancellationToken cancellationToken) =>
-        tower.GetAttemptPlaybackFramesAsync(
-            request.CharacterId,
-            request.AttemptId,
-            request.AfterSequence,
             cancellationToken);
 }
 

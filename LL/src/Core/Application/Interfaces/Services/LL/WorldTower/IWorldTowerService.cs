@@ -15,11 +15,8 @@ public interface IWorldTowerService
     Task<TowerOverviewDto> GetOverviewAsync(Guid characterId, CancellationToken cancellationToken);
     Task<TowerFloorDetailDto?> GetFloorAsync(Guid characterId, int floorNumber, CancellationToken cancellationToken);
     Task<TowerRallyDto?> GetRallyAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
-    Task<TowerBattleReportDto?> GetAttemptReportAsync(Guid characterId, Guid attemptId, CancellationToken cancellationToken);
     Task<CombatResultDto?> GetAttemptCombatResultAsync(Guid characterId, Guid attemptId, CancellationToken cancellationToken);
-    Task<TowerCombatPlaybackDto?> GetAttemptPlaybackAsync(Guid characterId, Guid attemptId, CancellationToken cancellationToken);
     Task<TowerPlaybackBundleContentDto?> GetAttemptPlaybackBundleAsync(Guid characterId, Guid attemptId, CancellationToken cancellationToken);
-    Task<TowerCombatFrameBatchDto?> GetAttemptPlaybackFramesAsync(Guid characterId, Guid attemptId, int afterSequence, CancellationToken cancellationToken);
     Task<IReadOnlyList<TowerHallOfFameEntryDto>> GetHallOfFameAsync(CancellationToken cancellationToken);
     Task<IReadOnlyList<TowerPersonalExpeditionDto>> GetPersonalExpeditionsAsync(Guid characterId, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerRallyDto>> CreateRallyAsync(Guid characterId, int floorNumber, TowerRallyMode mode, CancellationToken cancellationToken);
@@ -33,7 +30,7 @@ public interface IWorldTowerService
     Task<TowerOperationResult<TowerRallyDto>> TransferRallyLeadershipAsync(Guid characterId, Guid rallyId, Guid targetCharacterId, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerAttemptResultDto>> StartRallyAsync(Guid characterId, Guid rallyId, CancellationToken cancellationToken);
     Task<bool> SimulateQueuedAttemptAsync(Guid attemptId, string leaseOwner, CancellationToken cancellationToken);
-    Task<bool> PublishDuePlaybackFrameAsync(Guid attemptId, string leaseOwner, DateTimeOffset now, CancellationToken cancellationToken);
+    Task<bool> FinalizePlaybackAsync(Guid attemptId, string leaseOwner, DateTimeOffset now, CancellationToken cancellationToken);
     Task<TowerOperationResult<TowerFloorDetailDto>> ContributeAsync(Guid characterId, int floorNumber, TowerContributionKind kind, int amount, CancellationToken cancellationToken);
 }
 

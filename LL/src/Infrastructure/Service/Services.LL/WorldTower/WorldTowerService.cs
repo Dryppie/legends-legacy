@@ -5,7 +5,6 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Application.Common.Interfaces;
 using Application.Interfaces.Outbox;
-using Application.Interfaces.WebSockets;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Combat;
 using Application.Interfaces.Services.LL.PowerRatings;
@@ -74,12 +73,11 @@ public sealed class WorldTowerService : IWorldTowerService
     private readonly IAbilityCatalogProvider _abilityCatalog;
     private readonly ICombatEncounterResultFactory _resultFactory;
     private readonly IGameEventOutbox _outbox;
-    private readonly IGameRealtimeBroadcaster _realtime;
     private readonly IMapper _mapper;
     private readonly TimeProvider _timeProvider;
     private readonly WorldTowerOptions _options;
     private readonly JsonSerializerOptions _jsonOptions;
-    private readonly IMemoryCache _timelineCache;
+    private readonly IMemoryCache _playbackCache;
     private readonly ILogger<WorldTowerService> _logger;
     private readonly int _echoModeUnlockFloor;
 
@@ -96,11 +94,10 @@ public sealed class WorldTowerService : IWorldTowerService
         IAbilityCatalogProvider abilityCatalog,
         ICombatEncounterResultFactory resultFactory,
         IGameEventOutbox outbox,
-        IGameRealtimeBroadcaster realtime,
         IMapper mapper,
         IOptions<WorldTowerOptions> options,
         JsonSerializerOptions jsonOptions,
-        IMemoryCache timelineCache,
+        IMemoryCache playbackCache,
         TimeProvider timeProvider,
         ILogger<WorldTowerService> logger)
     {
@@ -116,11 +113,10 @@ public sealed class WorldTowerService : IWorldTowerService
         _abilityCatalog = abilityCatalog;
         _resultFactory = resultFactory;
         _outbox = outbox;
-        _realtime = realtime;
         _mapper = mapper;
         _options = options.Value;
         _jsonOptions = jsonOptions;
-        _timelineCache = timelineCache;
+        _playbackCache = playbackCache;
         _timeProvider = timeProvider;
         _logger = logger;
         _echoModeUnlockFloor = _definitions.GetFloors()
@@ -234,26 +230,6 @@ public sealed class WorldTowerService : IWorldTowerService
             : ToRallyDto(rally, characterId, accountId);
     }
 
-    public async Task<TowerBattleReportDto?> GetAttemptReportAsync(
-        Guid characterId,
-        Guid attemptId,
-        CancellationToken cancellationToken)
-    {
-        var json = await _db.TowerAttempts
-            .AsNoTracking()
-            .Where(x => x.Id == attemptId
-                        && x.ServerId == _options.ServerId
-                        && x.Status != TowerAttemptStatus.Started
-                        && x.Status != TowerAttemptStatus.Playback
-                        && x.TowerRally.Participants.Any(participant =>
-                            participant.CharacterId == characterId))
-            .Select(x => x.BattleReportJson)
-            .SingleOrDefaultAsync(cancellationToken);
-        return string.IsNullOrWhiteSpace(json)
-            ? null
-            : JsonSerializer.Deserialize<TowerBattleReportDto>(json, _jsonOptions);
-    }
-
     public async Task<CombatResultDto?> GetAttemptCombatResultAsync(
         Guid characterId,
         Guid attemptId,
@@ -282,26 +258,6 @@ public sealed class WorldTowerService : IWorldTowerService
         return result is null ? null : _mapper.Map<CombatResultDto>(result);
     }
 
-    public async Task<TowerCombatPlaybackDto?> GetAttemptPlaybackAsync(
-        Guid characterId,
-        Guid attemptId,
-        CancellationToken cancellationToken)
-    {
-        var playback = await _db.TowerCombatPlaybacks
-            .AsNoTracking()
-            .Include(x => x.TowerAttempt)
-                .ThenInclude(x => x.TowerRally)
-                    .ThenInclude(x => x.Participants)
-            .SingleOrDefaultAsync(x => x.TowerAttemptId == attemptId
-                && x.TowerAttempt.ServerId == _options.ServerId
-                && (x.TowerAttempt.TowerRally.Status == TowerRallyStatus.InProgress
-                    || x.TowerAttempt.TowerRally.Participants.Any(participant =>
-                        participant.CharacterId == characterId)), cancellationToken);
-        return playback is null
-            ? null
-            : ToPlaybackDto(playback, _timeProvider.GetUtcNow());
-    }
-
     public async Task<TowerPlaybackBundleContentDto?> GetAttemptPlaybackBundleAsync(
         Guid characterId,
         Guid attemptId,
@@ -328,7 +284,7 @@ public sealed class WorldTowerService : IWorldTowerService
             || string.IsNullOrWhiteSpace(metadata.BundleContentEncoding))
             return null;
 
-        var bytes = await _timelineCache.GetOrCreateAsync(
+        var bytes = await _playbackCache.GetOrCreateAsync(
             $"world-tower:bundle:{attemptId}:{metadata.BundleHash}",
             async entry =>
             {
@@ -346,51 +302,6 @@ public sealed class WorldTowerService : IWorldTowerService
             metadata.BundleContentType,
             metadata.BundleContentEncoding,
             metadata.BundleHash);
-    }
-
-    public async Task<TowerCombatFrameBatchDto?> GetAttemptPlaybackFramesAsync(
-        Guid characterId,
-        Guid attemptId,
-        int afterSequence,
-        CancellationToken cancellationToken)
-    {
-        var playback = await _db.TowerCombatPlaybacks
-            .AsNoTracking()
-            .Include(x => x.TowerAttempt)
-                .ThenInclude(x => x.TowerRally)
-                    .ThenInclude(x => x.Participants)
-            .SingleOrDefaultAsync(x => x.TowerAttemptId == attemptId
-                && x.TowerAttempt.ServerId == _options.ServerId
-                && (x.TowerAttempt.TowerRally.Status == TowerRallyStatus.InProgress
-                    || x.TowerAttempt.TowerRally.Participants.Any(participant =>
-                        participant.CharacterId == characterId)), cancellationToken);
-        if (playback is null)
-            return null;
-
-        if (playback.SchemaVersion >= TowerCombatPlayback.MinimumCompactBundleSchemaVersion)
-        {
-            var manifest = ToPlaybackDto(playback, _timeProvider.GetUtcNow());
-            return new TowerCombatFrameBatchDto(
-                attemptId,
-                afterSequence,
-                manifest.CurrentSequence,
-                false,
-                []);
-        }
-
-        var allFrames = DeserializeFrames(playback);
-        var completed = playback.TowerAttempt.Status is TowerAttemptStatus.Succeeded or TowerAttemptStatus.Failed;
-        var current = GetCurrentFrame(playback, allFrames, _timeProvider.GetUtcNow(), completed);
-        var frames = allFrames
-            .Where(frame => frame.Sequence > afterSequence && frame.Sequence <= current.Sequence)
-            .Take(_options.RecoveryFrameLimit)
-            .ToArray();
-        return new TowerCombatFrameBatchDto(
-            attemptId,
-            afterSequence,
-            current.Sequence,
-            frames.Length > 0 && frames[^1].Sequence < current.Sequence,
-            frames);
     }
 
     public async Task<IReadOnlyList<TowerHallOfFameEntryDto>> GetHallOfFameAsync(
@@ -1664,15 +1575,10 @@ public sealed class WorldTowerService : IWorldTowerService
         var runtime = new CombatEncounterRuntime(plan, friendly, [hostile]);
         var engineStartedAt = _timeProvider.GetTimestamp();
         var allocatedBefore = GC.GetTotalAllocatedBytes(precise: false);
-        var execution = _options.CompactPlaybackEnabled
-            ? await _combatEngine.ExecuteTowerPlaybackAsync(
-                runtime,
-                _options.CombatTicksPerFrame,
-                cancellationToken)
-            : await _combatEngine.ExecuteWithCheckpointsAsync(
-                runtime,
-                _options.CombatTicksPerFrame,
-                cancellationToken);
+        var execution = await _combatEngine.ExecuteTowerPlaybackAsync(
+            runtime,
+            _options.CombatTicksPerFrame,
+            cancellationToken);
         var engineElapsed = _timeProvider.GetElapsedTime(engineStartedAt).TotalMilliseconds;
         var allocatedBytes = Math.Max(0, GC.GetTotalAllocatedBytes(precise: false) - allocatedBefore);
         EngineDurationMilliseconds.Record(engineElapsed);
@@ -1761,79 +1667,48 @@ public sealed class WorldTowerService : IWorldTowerService
             throw new InvalidOperationException("Combat resolution did not produce a final playback frame.");
 
         var now = _timeProvider.GetUtcNow();
-        TowerCombatPlayback playback;
-        if (_options.CompactPlaybackEnabled)
-        {
-            var bundle = CreatePlaybackBundle(outcome);
-            var uncompressedBytes = JsonSerializer.SerializeToUtf8Bytes(bundle, _jsonOptions);
-            if (uncompressedBytes.Length > _options.MaximumBundleUncompressedBytes)
-                throw new InvalidOperationException(
-                    $"Tower playback exceeded the {_options.MaximumBundleUncompressedBytes} byte uncompressed limit.");
-            var compressedBytes = CompressPlaybackBundle(uncompressedBytes);
-            if (compressedBytes.Length > _options.MaximumBundleCompressedBytes)
-                throw new InvalidOperationException(
-                    $"Tower playback exceeded the {_options.MaximumBundleCompressedBytes} byte compressed limit.");
-            var bundleHash = Convert.ToHexString(SHA256.HashData(compressedBytes)).ToLowerInvariant();
-            PlaybackBundleBytes.Record(compressedBytes.Length);
-            _logger.LogInformation(
-                "World Tower attempt {AttemptId} created playback bundle {UncompressedBytes} -> {CompressedBytes} bytes ({FrameCount} frames).",
-                attemptId,
-                uncompressedBytes.Length,
-                compressedBytes.Length,
-                bundle.Frames.Count);
+        var bundle = CreatePlaybackBundle(outcome);
+        var uncompressedBytes = JsonSerializer.SerializeToUtf8Bytes(bundle, _jsonOptions);
+        if (uncompressedBytes.Length > _options.MaximumBundleUncompressedBytes)
+            throw new InvalidOperationException(
+                $"Tower playback exceeded the {_options.MaximumBundleUncompressedBytes} byte uncompressed limit.");
+        var compressedBytes = CompressPlaybackBundle(uncompressedBytes);
+        if (compressedBytes.Length > _options.MaximumBundleCompressedBytes)
+            throw new InvalidOperationException(
+                $"Tower playback exceeded the {_options.MaximumBundleCompressedBytes} byte compressed limit.");
+        var bundleHash = Convert.ToHexString(SHA256.HashData(compressedBytes)).ToLowerInvariant();
+        PlaybackBundleBytes.Record(compressedBytes.Length);
+        _logger.LogInformation(
+            "World Tower attempt {AttemptId} created playback bundle {UncompressedBytes} -> {CompressedBytes} bytes ({FrameCount} frames).",
+            attemptId,
+            uncompressedBytes.Length,
+            compressedBytes.Length,
+            bundle.Frames.Count);
 
-            playback = new TowerCombatPlayback
-            {
-                TowerAttemptId = attempt.Id,
-                TowerAttempt = attempt,
-                SchemaVersion = TowerCombatPlayback.CompactBundleSchemaVersion,
-                TicksPerSecond = FastCombatEngine.TicksPerSecond,
-                TicksPerFrame = _options.CombatTicksPerFrame,
-                TotalTicks = outcome.CombatResult.Duration,
-                FrameCount = bundle.Frames.Count,
-                BundleHash = bundleHash,
-                BundleLength = compressedBytes.Length,
-                BundleContentType = "application/json",
-                BundleContentEncoding = "br",
-                SimulationCompletedAt = now,
-                PlaybackStartedAt = now,
-                PlaybackEndsAt = now.AddSeconds(
-                    outcome.CombatResult.Duration / (double)FastCombatEngine.TicksPerSecond),
-                NextFrameDueAt = now.AddSeconds(
-                    outcome.CombatResult.Duration / (double)FastCombatEngine.TicksPerSecond),
-                LastPublishedSequence = bundle.Frames.Count - 1
-            };
-            playback.Artifact = new TowerCombatPlaybackArtifact
-            {
-                TowerAttemptId = attempt.Id,
-                Playback = playback,
-                BundleBytes = compressedBytes
-            };
-        }
-        else
+        var playback = new TowerCombatPlayback
         {
-            var frames = outcome.Checkpoints
-                .Select(checkpoint => ToFrameDto(
-                    checkpoint,
-                    checkpoint.IsFinal ? outcome.CombatResult.Outcome : null))
-                .ToArray();
-            playback = new TowerCombatPlayback
-            {
-                TowerAttemptId = attempt.Id,
-                TowerAttempt = attempt,
-                SchemaVersion = 1,
-                TicksPerSecond = FastCombatEngine.TicksPerSecond,
-                TicksPerFrame = _options.CombatTicksPerFrame,
-                TotalTicks = outcome.CombatResult.Duration,
-                FrameCount = frames.Length,
-                TimelineJson = JsonSerializer.Serialize(frames, _jsonOptions),
-                SimulationCompletedAt = now,
-                PlaybackStartedAt = now,
-                PlaybackEndsAt = now.AddSeconds(
-                    outcome.CombatResult.Duration / (double)FastCombatEngine.TicksPerSecond),
-                NextFrameDueAt = now
-            };
-        }
+            TowerAttemptId = attempt.Id,
+            TowerAttempt = attempt,
+            SchemaVersion = TowerCombatPlayback.CompactBundleSchemaVersion,
+            TicksPerSecond = FastCombatEngine.TicksPerSecond,
+            TicksPerFrame = _options.CombatTicksPerFrame,
+            TotalTicks = outcome.CombatResult.Duration,
+            FrameCount = bundle.Frames.Count,
+            BundleHash = bundleHash,
+            BundleLength = compressedBytes.Length,
+            BundleContentType = "application/json",
+            BundleContentEncoding = "br",
+            SimulationCompletedAt = now,
+            PlaybackStartedAt = now,
+            PlaybackEndsAt = now.AddSeconds(
+                outcome.CombatResult.Duration / (double)FastCombatEngine.TicksPerSecond)
+        };
+        playback.Artifact = new TowerCombatPlaybackArtifact
+        {
+            TowerAttemptId = attempt.Id,
+            Playback = playback,
+            BundleBytes = compressedBytes
+        };
 
         attempt.Status = TowerAttemptStatus.Playback;
         attempt.FightDurationSeconds = outcome.FightDurationSeconds;
@@ -1851,7 +1726,7 @@ public sealed class WorldTowerService : IWorldTowerService
         return ToPlaybackDto(playback, now);
     }
 
-    public async Task<bool> PublishDuePlaybackFrameAsync(
+    public async Task<bool> FinalizePlaybackAsync(
         Guid attemptId,
         string leaseOwner,
         DateTimeOffset now,
@@ -1864,85 +1739,26 @@ public sealed class WorldTowerService : IWorldTowerService
                     .ThenInclude(x => x.Participants)
             .SingleOrDefaultAsync(x => x.TowerAttemptId == attemptId, cancellationToken);
         if (playback is null
-            || playback.DispatchLeaseOwner != leaseOwner
-            || playback.DispatchLeaseUntil <= now)
+            || playback.FinalizationLeaseOwner != leaseOwner
+            || playback.FinalizationLeaseUntil <= now
+            || now < playback.PlaybackEndsAt
+            || playback.TowerAttempt.Status != TowerAttemptStatus.Playback)
             return false;
 
-        if (playback.SchemaVersion >= TowerCombatPlayback.MinimumCompactBundleSchemaVersion)
-        {
-            if (now < playback.PlaybackEndsAt
-                || playback.TowerAttempt.Status != TowerAttemptStatus.Playback)
-                return false;
+        var report = JsonSerializer.Deserialize<TowerBattleReportDto>(
+            playback.TowerAttempt.BattleReportJson!, _jsonOptions)
+            ?? throw new InvalidOperationException("The stored Tower battle report is invalid.");
+        await ApplyOutcomeAsync(
+            playback.TowerAttemptId,
+            GetRequiredFloor(playback.TowerAttempt.FloorNumber),
+            CreateStoredOutcome(playback.TowerAttempt, report),
+            cancellationToken);
 
-            var report = JsonSerializer.Deserialize<TowerBattleReportDto>(
-                playback.TowerAttempt.BattleReportJson!, _jsonOptions)
-                ?? throw new InvalidOperationException("The stored Tower battle report is invalid.");
-            await ApplyOutcomeAsync(
-                playback.TowerAttemptId,
-                GetRequiredFloor(playback.TowerAttempt.FloorNumber),
-                CreateStoredOutcome(playback.TowerAttempt, report),
-                cancellationToken);
-
-            var finalizedCursor = await _db.TowerCombatPlaybacks
-                .SingleAsync(x => x.TowerAttemptId == attemptId, cancellationToken);
-            finalizedCursor.DispatchLeaseOwner = null;
-            finalizedCursor.DispatchLeaseUntil = null;
-            finalizedCursor.NextFrameDueAt = DateTimeOffset.MaxValue;
-            finalizedCursor.RowVersion++;
-            await _db.SaveChangesAsync(cancellationToken);
-            return true;
-        }
-
-        var frames = DeserializeFrames(playback);
-        var dueFrame = GetCurrentFrame(playback, frames, now, revealFinal: true);
-        var needsFinalization = dueFrame.IsFinal
-            && playback.TowerAttempt.Status == TowerAttemptStatus.Playback;
-        if (dueFrame.Sequence <= playback.LastPublishedSequence && !needsFinalization)
-            return false;
-
-        if (needsFinalization)
-        {
-            var report = JsonSerializer.Deserialize<TowerBattleReportDto>(
-                playback.TowerAttempt.BattleReportJson!, _jsonOptions)
-                ?? throw new InvalidOperationException("The stored Tower battle report is invalid.");
-            await ApplyOutcomeAsync(
-                playback.TowerAttemptId,
-                GetRequiredFloor(playback.TowerAttempt.FloorNumber),
-                CreateStoredOutcome(playback.TowerAttempt, report),
-                cancellationToken);
-        }
-
-        var participantIds = playback.TowerAttempt.TowerRally.Participants
-            .Select(x => x.CharacterId)
-            .Distinct()
-            .ToArray();
-        if (dueFrame.Sequence > playback.LastPublishedSequence)
-        {
-            await _realtime.PublishAsync(
-                new Audience.Characters(participantIds),
-                new WorldTowerCombatFrameUpdated(
-                    playback.TowerAttemptId,
-                    playback.TowerAttempt.TowerRallyId,
-                    playback.PlaybackStartedAt,
-                    playback.TicksPerSecond,
-                    playback.TicksPerFrame,
-                    dueFrame),
-                nameof(WorldTowerService),
-                cancellationToken);
-        }
-
-        var cursor = await _db.TowerCombatPlaybacks
+        var finalizedPlayback = await _db.TowerCombatPlaybacks
             .SingleAsync(x => x.TowerAttemptId == attemptId, cancellationToken);
-        cursor.DispatchLeaseOwner = null;
-        cursor.DispatchLeaseUntil = null;
-        cursor.NextFrameDueAt = GetNextFrameDueAt(playback, frames, dueFrame);
-        if (cursor.LastPublishedSequence >= dueFrame.Sequence)
-        {
-            await _db.SaveChangesAsync(cancellationToken);
-            return true;
-        }
-        cursor.LastPublishedSequence = dueFrame.Sequence;
-        cursor.RowVersion++;
+        finalizedPlayback.FinalizationLeaseOwner = null;
+        finalizedPlayback.FinalizationLeaseUntil = null;
+        finalizedPlayback.RowVersion++;
         await _db.SaveChangesAsync(cancellationToken);
         return true;
     }
@@ -2427,37 +2243,23 @@ public sealed class WorldTowerService : IWorldTowerService
         TowerCombatPlayback playback,
         DateTimeOffset now)
     {
-        var completed = playback.TowerAttempt.Status is TowerAttemptStatus.Succeeded or TowerAttemptStatus.Failed;
-        if (playback.SchemaVersion >= TowerCombatPlayback.MinimumCompactBundleSchemaVersion)
-        {
-            var elapsedTicks = Math.Clamp(
-                (int)Math.Floor((now - playback.PlaybackStartedAt).TotalSeconds * playback.TicksPerSecond),
-                0,
-                playback.TotalTicks);
-            var currentSequence = elapsedTicks >= playback.TotalTicks
-                ? Math.Max(0, playback.FrameCount - 1)
-                : Math.Min(
-                    Math.Max(0, playback.FrameCount - 1),
-                    elapsedTicks / Math.Max(1, playback.TicksPerFrame));
-            return new TowerCombatPlaybackDto(
-                playback.TowerAttemptId,
-                playback.TowerAttempt.TowerRallyId,
-                playback.PlaybackStartedAt,
-                playback.PlaybackEndsAt,
-                playback.TicksPerSecond,
-                playback.TicksPerFrame,
-                playback.TotalTicks,
-                playback.FrameCount,
-                currentSequence,
-                null,
-                completed,
-                playback.SchemaVersion,
-                now,
-                playback.BundleHash);
-        }
+        if (playback.SchemaVersion < TowerCombatPlayback.MinimumCompactBundleSchemaVersion)
+            throw new InvalidOperationException(
+                $"Tower playback '{playback.TowerAttemptId}' uses retired schema version {playback.SchemaVersion}.");
 
-        var frames = DeserializeFrames(playback);
-        var current = GetCurrentFrame(playback, frames, now, completed);
+        var bundleHash = playback.BundleHash
+            ?? throw new InvalidOperationException(
+                $"Tower playback '{playback.TowerAttemptId}' has no bundle hash.");
+        var completed = playback.TowerAttempt.Status is TowerAttemptStatus.Succeeded or TowerAttemptStatus.Failed;
+        var elapsedTicks = Math.Clamp(
+            (int)Math.Floor((now - playback.PlaybackStartedAt).TotalSeconds * playback.TicksPerSecond),
+            0,
+            playback.TotalTicks);
+        var currentSequence = elapsedTicks >= playback.TotalTicks
+            ? Math.Max(0, playback.FrameCount - 1)
+            : Math.Min(
+                Math.Max(0, playback.FrameCount - 1),
+                elapsedTicks / Math.Max(1, playback.TicksPerFrame));
         return new TowerCombatPlaybackDto(
             playback.TowerAttemptId,
             playback.TowerAttempt.TowerRallyId,
@@ -2467,29 +2269,12 @@ public sealed class WorldTowerService : IWorldTowerService
             playback.TicksPerFrame,
             playback.TotalTicks,
             playback.FrameCount,
-            current.Sequence,
-            current,
+            currentSequence,
             completed,
             playback.SchemaVersion,
             now,
-            null);
+            bundleHash);
     }
-
-    private TowerCombatFrameDto[] DeserializeFrames(TowerCombatPlayback playback) =>
-        _timelineCache.GetOrCreate(
-            $"world-tower:timeline:{playback.TowerAttemptId}:{playback.SchemaVersion}",
-            entry =>
-            {
-                entry.SetSlidingExpiration(TimeSpan.FromMinutes(5));
-                entry.SetAbsoluteExpiration(TimeSpan.FromMinutes(30));
-                return JsonSerializer.Deserialize<TowerCombatFrameDto[]>(
-                           playback.TimelineJson
-                           ?? throw new InvalidOperationException(
-                               $"Tower playback for attempt '{playback.TowerAttemptId}' has no version 1 timeline."),
-                           _jsonOptions)
-                    ?? throw new InvalidOperationException(
-                        $"Tower playback for attempt '{playback.TowerAttemptId}' is invalid.");
-            })!;
 
     private TowerPlaybackBundleDto CreatePlaybackBundle(TowerCombatOutcome outcome)
     {
@@ -2680,70 +2465,6 @@ public sealed class WorldTowerService : IWorldTowerService
             brotli.Write(bytes);
         return output.ToArray();
     }
-
-    private static DateTimeOffset GetNextFrameDueAt(
-        TowerCombatPlayback playback,
-        IReadOnlyList<TowerCombatFrameDto> frames,
-        TowerCombatFrameDto publishedFrame)
-    {
-        var nextIndex = publishedFrame.Sequence + 1;
-        var nextFrame = nextIndex >= 0
-                        && nextIndex < frames.Count
-                        && frames[nextIndex].Sequence == nextIndex
-            ? frames[nextIndex]
-            : frames.FirstOrDefault(frame => frame.Sequence > publishedFrame.Sequence);
-        return nextFrame is null
-            ? DateTimeOffset.MaxValue
-            : playback.PlaybackStartedAt.AddSeconds(
-                nextFrame.Tick / (double)playback.TicksPerSecond);
-    }
-
-    private static TowerCombatFrameDto GetCurrentFrame(
-        TowerCombatPlayback playback,
-        IReadOnlyList<TowerCombatFrameDto> frames,
-        DateTimeOffset now,
-        bool revealFinal)
-    {
-        if (frames.Count == 0)
-            throw new InvalidOperationException("Tower playback has no frames.");
-
-        var elapsedTicks = Math.Max(0, (int)Math.Floor(
-            (now - playback.PlaybackStartedAt).TotalSeconds * playback.TicksPerSecond));
-        var low = 0;
-        var high = frames.Count - 1;
-        while (low < high)
-        {
-            var middle = low + (high - low + 1) / 2;
-            if (frames[middle].Tick <= elapsedTicks)
-                low = middle;
-            else
-                high = middle - 1;
-        }
-        var dueIndex = low;
-        if (!revealFinal && frames[dueIndex].IsFinal)
-            dueIndex = Math.Max(0, dueIndex - 1);
-        return frames[dueIndex];
-    }
-
-    private TowerCombatFrameDto ToFrameDto(CombatCheckpoint checkpoint, BattleOutcome? outcome) =>
-        new(
-            checkpoint.Sequence,
-            checkpoint.Tick,
-            checkpoint.Friendly.Select(_mapper.Map<SimpleCombatEntityDto>).ToArray(),
-            checkpoint.Hostile.Select(_mapper.Map<SimpleCombatEntityDto>).ToArray(),
-            checkpoint.EntityStats,
-            checkpoint.Events.Select(item => new CombatEventDto(
-                item.Source,
-                item.StatsSource,
-                item.CountsAsActivation,
-                item.Timestamp,
-                item.ActorId,
-                item.TargetId,
-                item.EventType,
-                item.Magnitude,
-                item.Details)).ToArray(),
-            checkpoint.IsFinal,
-            outcome);
 
     private Task EnqueueTowerBattleChatAnnouncementAsync(
         TowerRally rally,

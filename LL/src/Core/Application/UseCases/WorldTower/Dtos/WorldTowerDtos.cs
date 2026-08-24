@@ -161,11 +161,10 @@ public sealed record TowerCombatPlaybackDto(
     int TotalTicks,
     int FrameCount,
     int CurrentSequence,
-    TowerCombatFrameDto? CurrentFrame,
     bool IsCompleted,
-    int SchemaVersion = 1,
-    DateTimeOffset? ServerNow = null,
-    string? BundleETag = null);
+    int SchemaVersion,
+    DateTimeOffset ServerNow,
+    string BundleETag);
 
 public sealed record TowerCombatFrameDto(
     int Sequence,
@@ -176,13 +175,6 @@ public sealed record TowerCombatFrameDto(
     IReadOnlyList<CombatEventDto> Events,
     bool IsFinal,
     BattleOutcome? Outcome);
-
-public sealed record TowerCombatFrameBatchDto(
-    Guid AttemptId,
-    int AfterSequence,
-    int CurrentSequence,
-    bool HasMore,
-    IReadOnlyList<TowerCombatFrameDto> Frames);
 
 public sealed record CombatEventDto(
     string Source,

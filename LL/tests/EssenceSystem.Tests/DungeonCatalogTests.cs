@@ -44,6 +44,8 @@ public sealed class DungeonCatalogTests
             definitions,
             expected.Select<ExpectedDungeon, Action<DungeonDefinition>>(expectedDungeon =>
                 actual => AssertMatches(expectedDungeon, actual)).ToArray());
+        Assert.All(definitions.Where(x => x.Region == 1), dungeon => Assert.Null(dungeon.RequiredTowerFloor));
+        Assert.All(definitions.Where(x => x.Region == 2), dungeon => Assert.Equal(10, dungeon.RequiredTowerFloor));
     }
 
     [Fact]

@@ -17,6 +17,7 @@ public sealed class DungeonDefinition
     public float? EnemyStrengthMultiplier { get; set; }
     public string? RequiredAreaId { get; set; }
     public string? RequiredQuestId { get; set; }
+    public int? RequiredTowerFloor { get; set; }
     public string? RequiredPreviousDungeonId { get; set; }
     public DungeonGrade? RequiredPreviousDungeonGrade { get; set; }
     public List<DungeonEntryCost> EntryCosts { get; set; } = [];

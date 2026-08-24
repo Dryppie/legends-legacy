@@ -1,4 +1,5 @@
 using API.LiveOps.Hosting;
+using Application.MediatR.Behaviors;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Administration;
 using Application.Interfaces.Services.LL.Essences;
@@ -47,6 +48,27 @@ public sealed class LiveOpsApplicationRegistrationTests
     }
 
     [Fact]
+    public void LiveOps_pipeline_propagates_unexpected_exceptions_to_the_host_boundary()
+    {
+        var services = new ServiceCollection();
+
+        services.AddLiveOpsApplication();
+
+        var pipelineBehaviors = services
+            .Where(descriptor => descriptor.ServiceType == typeof(IPipelineBehavior<,>))
+            .ToArray();
+
+        var applicationBehaviors = pipelineBehaviors
+            .Select(descriptor => descriptor.ImplementationType!)
+            .Where(type =>
+                type is not null &&
+                type.Assembly == typeof(TransactionBehavior<,>).Assembly)
+            .ToArray();
+
+        Assert.Equal([typeof(TransactionBehavior<,>)], applicationBehaviors);
+    }
+
+    [Fact]
     public void LiveOps_registers_state_sync_and_outbox_realtime_dependencies()
     {
         var services = new ServiceCollection();
@@ -58,8 +80,6 @@ public sealed class LiveOpsApplicationRegistrationTests
             descriptor.ServiceType == typeof(IStateSyncService));
         Assert.Contains(services, descriptor =>
             descriptor.ServiceType == typeof(IGameRealtimeBroadcaster));
-        Assert.Contains(services, descriptor =>
-            descriptor.ServiceType == typeof(IGameRealtimeImmediatePublisher));
         Assert.Contains(services, descriptor =>
             descriptor.ServiceType == typeof(IAccountTemporalCorrelationService));
     }

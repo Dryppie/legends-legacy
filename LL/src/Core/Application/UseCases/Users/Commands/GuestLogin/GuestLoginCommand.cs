@@ -14,10 +14,14 @@ public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Respo
 {
     private readonly IUserService _userService;
     private readonly IJwtGenerator _jwtGenerator;
-    private readonly IMediator _publisher;
+    private readonly IPublisher _publisher;
     private readonly ICharacterService _characterService;
 
-    public GuestLoginCommandHandler(IUserService userRepository, IJwtGenerator jwtGenerator, IMediator publisher, ICharacterService characterService)
+    public GuestLoginCommandHandler(
+        IUserService userRepository,
+        IJwtGenerator jwtGenerator,
+        IPublisher publisher,
+        ICharacterService characterService)
     {
         _userService = userRepository;
         _jwtGenerator = jwtGenerator;
@@ -27,40 +31,33 @@ public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Respo
 
     public async Task<Response<Tokens>> Handle(GuestLoginCommand request, CancellationToken cancellationToken)
     {
-        try
+        // Create a new guest user
+        AppUser? user = null;
+        var characterName = string.Empty;
+
+        for (var attempt = 0; attempt < 10; attempt++)
         {
-            // Create a new guest user
-            AppUser? user = null;
-            var characterName = string.Empty;
-
-            for (var attempt = 0; attempt < 10; attempt++)
+            characterName = GuestCharacterNameGenerator.Generate();
+            if (await _characterService.IsCharacterNameTakenAsync(characterName, null, cancellationToken))
             {
-                characterName = GuestCharacterNameGenerator.Generate();
-                if (await _characterService.IsCharacterNameTakenAsync(characterName, null, cancellationToken))
-                {
-                    continue;
-                }
-
-                user = await _userService.RegisterGuestAsync(characterName, cancellationToken);
-                if (user is not null) break;
+                continue;
             }
 
-            if (user == null) return Response<Tokens>.Fail("Failed to register guest");
-
-            await _publisher.Publish(new UserCreatedEvent(user.Id, characterName), cancellationToken);
-
-            var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
-            if (character == null) return Response<Tokens>.Fail("Character creation failed during guest registration");
-
-            // Generate tokens
-            var tokens = await _jwtGenerator.IssueTokens(user, character);
-
-            return Response<Tokens>.Success(tokens);
-        }
-        catch (Exception)
-        {
-            return Response<Tokens>.Fail("Token Error");
+            user = await _userService.RegisterGuestAsync(characterName, cancellationToken);
+            if (user is not null) break;
         }
 
+        if (user == null) return Response<Tokens>.Fail("Failed to register guest");
+
+        await _publisher.Publish(new UserCreatedEvent(user.Id, characterName), cancellationToken);
+
+        var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken)
+            ?? throw new InvalidOperationException(
+                "Guest registration completed without creating a character.");
+
+        // Generate tokens
+        var tokens = await _jwtGenerator.IssueTokens(user, character);
+
+        return Response<Tokens>.Success(tokens);
     }
 }

@@ -13,7 +13,6 @@ import {
   TowerAttemptResult,
   TowerBattleReport,
   TowerCombatPlayback,
-  TowerCombatFrame,
   TowerPlaybackBundle,
   TowerRally,
   TowerRallyApplication,
@@ -63,13 +62,10 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
   readonly playback = signal<TowerCombatPlayback | null>(null);
   readonly selectedParticipantId = signal<string | null>(null);
   readonly collapsedParties = signal<ReadonlySet<number>>(new Set<number>());
-  readonly realtimeStatus = this.realtime.connectionStatus;
   private rallyId = '';
   private readonly realtimeDeduper = new RealtimeSignalDeduper();
   private lastCombatSequence = -1;
   private lastReconnectCount = this.realtime.reconnectCount();
-  private recoveringFrames = false;
-  private pendingRealtimeFrame: TowerCombatFrame | null = null;
   private compactBundle: TowerPlaybackBundle | null = null;
   private serverClockAtSync = 0;
   private monotonicClockAtSync = 0;
@@ -95,37 +91,10 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
 
     effect(
       () => {
-        const envelope =
-          this.events.eventEnvelope.WorldTowerCombatFrameUpdated();
-        if ((this.playback()?.schemaVersion ?? 1) >= 2) return;
-        if (
-          !envelope?.updateId ||
-          !this.realtimeDeduper.shouldProcess('combat-frame', envelope) ||
-          envelope.payload.rallyId !== this.rallyId ||
-          envelope.payload.frame.sequence <= this.lastCombatSequence
-        ) {
-          return;
-        }
-
-        if (envelope.payload.frame.sequence > this.lastCombatSequence + 1) {
-          this.pendingRealtimeFrame = envelope.payload.frame;
-          this.recoverMissingFrames();
-          return;
-        }
-        this.applyCombatFrame(envelope.payload.frame);
-        if (envelope.payload.frame.isFinal) this.load(false);
-      },
-      { allowSignalWrites: true },
-    );
-
-    effect(
-      () => {
         const reconnectCount = this.realtime.reconnectCount();
         if (reconnectCount <= this.lastReconnectCount) return;
         this.lastReconnectCount = reconnectCount;
-        if ((this.playback()?.schemaVersion ?? 1) >= 2) this.load(false);
-        else if (this.playback()) this.recoverMissingFrames();
-        else this.load(false);
+        this.load(false);
       },
       { allowSignalWrites: true },
     );
@@ -256,11 +225,7 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
     const currentPlayback = this.playback();
     if (currentPlayback && !currentPlayback.isCompleted) {
       this.watchingPlayback.set(true);
-      if (currentPlayback.schemaVersion >= 2) {
-        this.renderCompactPlayback(true);
-      } else if (currentPlayback.currentFrame) {
-        this.combat.applyTowerCombatFrame(currentPlayback.currentFrame, true);
-      }
+      this.renderCompactPlayback(true);
       return;
     }
 
@@ -292,94 +257,26 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
     playback: TowerCombatPlayback,
     openViewer: boolean,
   ): void {
-    if (playback.schemaVersion >= 2 && playback.bundleETag) {
-      this.playback.set(playback);
-      this.serverClockAtSync = playback.serverNow
-        ? Date.parse(playback.serverNow)
-        : Date.now();
-      this.monotonicClockAtSync = performance.now();
-      if (openViewer) this.watchingPlayback.set(true);
-      this.playbackPlayer
-        .getBundle(playback.attemptId, playback.bundleETag)
-        .pipe(takeUntil(this.destroyed))
-        .subscribe({
-          next: (bundle) => {
-            if (bundle.schemaVersion !== playback.schemaVersion) {
-              this.error.set('The Tower playback format is not supported.');
-              return;
-            }
-            this.compactBundle = bundle;
-            this.renderCompactPlayback(true);
-            if (!playback.isCompleted) this.startCompactPlayback();
-            else this.stopCompactPlayback();
-          },
-          error: (error) => this.error.set(this.errorMessage(error)),
-        });
-      return;
-    }
-
-    if (playback.currentSequence < this.lastCombatSequence) return;
-    this.lastCombatSequence = playback.currentSequence;
     this.playback.set(playback);
+    this.serverClockAtSync = Date.parse(playback.serverNow);
+    this.monotonicClockAtSync = performance.now();
     if (openViewer) this.watchingPlayback.set(true);
-    if (this.watchingPlayback()) {
-      if (playback.currentFrame)
-        this.combat.applyTowerCombatFrame(playback.currentFrame, true);
-    }
-  }
-
-  private recoverMissingFrames(): void {
-    const attemptId = this.playback()?.attemptId ?? this.rally()?.attempt?.id;
-    if (!attemptId || this.recoveringFrames) return;
-    this.recoveringFrames = true;
-    this.fetchMissingFrames(attemptId);
-  }
-
-  private fetchMissingFrames(attemptId: string): void {
-    this.tower
-      .getAttemptPlaybackFrames(attemptId, this.lastCombatSequence)
+    this.playbackPlayer
+      .getBundle(playback.attemptId, playback.bundleETag)
       .pipe(takeUntil(this.destroyed))
       .subscribe({
-        next: (batch) => {
-          for (const frame of batch.frames) this.applyCombatFrame(frame);
-          if (batch.hasMore) {
-            this.fetchMissingFrames(attemptId);
+        next: (bundle) => {
+          if (bundle.schemaVersion !== playback.schemaVersion) {
+            this.error.set('The Tower playback format is not supported.');
             return;
           }
-          this.recoveringFrames = false;
-          const pendingFrame = this.pendingRealtimeFrame;
-          this.pendingRealtimeFrame = null;
-          if (pendingFrame && pendingFrame.sequence > this.lastCombatSequence) {
-            if (pendingFrame.sequence === this.lastCombatSequence + 1) {
-              this.applyCombatFrame(pendingFrame);
-            } else {
-              this.pendingRealtimeFrame = pendingFrame;
-              this.recoverMissingFrames();
-            }
-          }
-          if (batch.frames.at(-1)?.isFinal) this.load(false);
+          this.compactBundle = bundle;
+          this.renderCompactPlayback(true);
+          if (!playback.isCompleted) this.startCompactPlayback();
+          else this.stopCompactPlayback();
         },
-        error: () => {
-          this.recoveringFrames = false;
-          this.load(false);
-        },
+        error: (error) => this.error.set(this.errorMessage(error)),
       });
-  }
-
-  private applyCombatFrame(frame: TowerCombatFrame): void {
-    if (frame.sequence <= this.lastCombatSequence) return;
-    this.lastCombatSequence = frame.sequence;
-    this.playback.update((current) =>
-      current
-        ? {
-            ...current,
-            currentSequence: frame.sequence,
-            currentFrame: frame,
-            isCompleted: frame.isFinal,
-          }
-        : current,
-    );
-    if (this.watchingPlayback()) this.combat.applyTowerCombatFrame(frame);
   }
 
   private startCompactPlayback(): void {
@@ -399,7 +296,7 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
   private renderCompactPlayback(reset: boolean): void {
     const playback = this.playback();
     const bundle = this.compactBundle;
-    if (!playback || playback.schemaVersion < 2 || !bundle) return;
+    if (!playback || !bundle) return;
 
     const serverNow =
       this.serverClockAtSync + (performance.now() - this.monotonicClockAtSync);
@@ -419,7 +316,6 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
           ? {
               ...current,
               currentSequence: frame.sequence,
-              currentFrame: frame,
             }
           : current,
       );

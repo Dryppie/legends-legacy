@@ -32,17 +32,9 @@ public sealed class WorldTowerController : BaseController
     public async Task<ActionResult<TowerRallyDto?>> GetRally(Guid rallyId) =>
         await Mediator.Send(new GetTowerRallyQuery(CurrentCharacterGuid, rallyId));
 
-    [HttpGet("attempts/{attemptId:guid}/report")]
-    public async Task<ActionResult<TowerBattleReportDto?>> GetAttemptReport(Guid attemptId) =>
-        await Mediator.Send(new GetTowerAttemptReportQuery(CurrentCharacterGuid, attemptId));
-
     [HttpGet("attempts/{attemptId:guid}/combat-result")]
     public async Task<ActionResult<CombatResultDto?>> GetAttemptCombatResult(Guid attemptId) =>
         await Mediator.Send(new GetTowerAttemptCombatResultQuery(CurrentCharacterGuid, attemptId));
-
-    [HttpGet("attempts/{attemptId:guid}/playback")]
-    public async Task<ActionResult<TowerCombatPlaybackDto?>> GetAttemptPlayback(Guid attemptId) =>
-        await Mediator.Send(new GetTowerAttemptPlaybackQuery(CurrentCharacterGuid, attemptId));
 
     [HttpGet("attempts/{attemptId:guid}/playback/bundle")]
     public async Task<IActionResult> GetAttemptPlaybackBundle(Guid attemptId)
@@ -64,15 +56,6 @@ public sealed class WorldTowerController : BaseController
         Response.Headers.ContentEncoding = bundle.ContentEncoding;
         return File(bundle.Bytes, bundle.ContentType);
     }
-
-    [HttpGet("attempts/{attemptId:guid}/playback/frames")]
-    public async Task<ActionResult<TowerCombatFrameBatchDto?>> GetAttemptPlaybackFrames(
-        Guid attemptId,
-        [FromQuery] int after = -1) =>
-        await Mediator.Send(new GetTowerAttemptPlaybackFramesQuery(
-            CurrentCharacterGuid,
-            attemptId,
-            after));
 
     [HttpGet("hall-of-fame")]
     public async Task<ActionResult<IReadOnlyList<TowerHallOfFameEntryDto>>> GetHallOfFame() =>

@@ -6459,6 +6459,7 @@ public sealed class AbilitySystemTests
             FindApiContentRoot(),
             CreateJsonOptions()).GetCatalog();
         var packLeader = catalog.AbilitiesById["ability.creature.gnoll_pack_leader.rallying_cry"];
+        var savageLeader = catalog.AbilitiesById["ability.creature.gnoll_pack_leader.savage_leader"];
         var raider = catalog.AbilitiesById["ability.creature.gnoll_raider.loot_and_slash"];
         var pillage = catalog.AbilitiesById["ability.creature.gnoll_raider.pillage_the_weak"];
         var skirmisher = catalog.AbilitiesById["ability.creature.kobold_skirmisher.coordinated_assault"];
@@ -6474,6 +6475,7 @@ public sealed class AbilitySystemTests
         Assert.Equal(AbilityEffectOperation.ApplyCondition, rallyingCry.Operation);
         Assert.Equal(AbilityTargetSelector.RandomAlly, rallyingCry.Target);
         Assert.Equal(StandardConditionType.Empower, rallyingCry.Condition);
+        Assert.Equal(4, Assert.Single(savageLeader.Effects).Uses);
         Assert.Empty(raider.Costs);
         Assert.Equal(180, raider.CooldownTicks);
         var raiderDamage = Assert.Single(raider.Effects);

@@ -1,8 +1,12 @@
+using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Services.LL.WorldTower;
 
 namespace Services.LL.Dungeons;
 
@@ -11,15 +15,21 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
     private readonly IDungeonRunRepository _dungeonRuns;
     private readonly IInventoryRepository _inventory;
     private readonly IItemBaseRepository _itemBases;
+    private readonly IDbContext _db;
+    private readonly string _serverId;
 
     public DungeonAccessPolicy(
         IDungeonRunRepository dungeonRuns,
         IInventoryRepository inventory,
-        IItemBaseRepository itemBases)
+        IItemBaseRepository itemBases,
+        IDbContext db,
+        IOptions<WorldTowerOptions> towerOptions)
     {
         _dungeonRuns = dungeonRuns;
         _inventory = inventory;
         _itemBases = itemBases;
+        _db = db;
+        _serverId = towerOptions.Value.ServerId;
     }
 
     public async Task<DungeonAccessResult> EvaluateAsync(
@@ -92,6 +102,7 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
         var completedDungeonIds = completionRecords
             .Select(x => x.DungeonDefinitionId)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var clearedTowerFloors = await GetClearedTowerFloorsAsync(dungeons, cancellationToken);
 
         return dungeons.ToDictionary(
             dungeon => dungeon.Id,
@@ -100,15 +111,21 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
                 var requirements = BuildEntryRequirements(dungeon, itemBases, ownedQuantities);
                 var completedPrevious = string.IsNullOrWhiteSpace(dungeon.RequiredPreviousDungeonId)
                     || completedDungeonIds.Contains(dungeon.RequiredPreviousDungeonId);
+                var towerFloorRequirementMet = !dungeon.RequiredTowerFloor.HasValue
+                    || clearedTowerFloors.Contains(dungeon.RequiredTowerFloor.Value);
                 var entry = BuildAccessResult(
                     requirements,
                     completedPrevious,
+                    towerFloorRequirementMet,
+                    dungeon.RequiredTowerFloor,
                     ignoredEntryCostItemId: null);
                 var sigilAssembly = string.IsNullOrWhiteSpace(dungeon.SigilItemId)
                     ? null
                     : BuildAccessResult(
                         requirements,
                         completedPrevious,
+                        towerFloorRequirementMet,
+                        dungeon.RequiredTowerFloor,
                         dungeon.SigilItemId);
 
                 return new DungeonPreviewAccess(entry, sigilAssembly);
@@ -132,11 +149,67 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
                 characterId,
                 dungeon.RequiredPreviousDungeonId,
                 cancellationToken);
+        var towerFloorRequirementMet = await HasClearedRequiredTowerFloorAsync(
+            dungeon.RequiredTowerFloor,
+            cancellationToken);
 
         return BuildAccessResult(
             entryRequirements,
             completedPrevious,
+            towerFloorRequirementMet,
+            dungeon.RequiredTowerFloor,
             ignoredEntryCostItemId);
+    }
+
+    private async Task<bool> HasClearedRequiredTowerFloorAsync(
+        int? requiredTowerFloor,
+        CancellationToken cancellationToken)
+    {
+        if (!requiredTowerFloor.HasValue)
+        {
+            return true;
+        }
+
+        return await _db.TowerFloorProgresses
+            .AsNoTracking()
+            .AnyAsync(
+                progress =>
+                    progress.ServerId == _serverId
+                    && progress.IsCleared
+                    && progress.FloorNumber >= requiredTowerFloor.Value,
+                cancellationToken);
+    }
+
+    private async Task<HashSet<int>> GetClearedTowerFloorsAsync(
+        IReadOnlyCollection<DungeonDefinition> dungeons,
+        CancellationToken cancellationToken)
+    {
+        var requiredFloors = dungeons
+            .Where(dungeon => dungeon.RequiredTowerFloor.HasValue)
+            .Select(dungeon => dungeon.RequiredTowerFloor!.Value)
+            .Distinct()
+            .ToArray();
+        if (requiredFloors.Length == 0)
+        {
+            return [];
+        }
+
+        var highestClearedFloor = await _db.TowerFloorProgresses
+            .AsNoTracking()
+            .Where(progress =>
+                progress.ServerId == _serverId
+                && progress.IsCleared)
+            .Select(progress => (int?)progress.FloorNumber)
+            .MaxAsync(cancellationToken);
+
+        if (!highestClearedFloor.HasValue)
+        {
+            return [];
+        }
+
+        return requiredFloors
+            .Where(requiredFloor => requiredFloor <= highestClearedFloor.Value)
+            .ToHashSet();
     }
 
     private async Task<IReadOnlyList<DungeonEntryRequirementResult>> GetEntryRequirementsAsync(
@@ -203,12 +276,19 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
     private static DungeonAccessResult BuildAccessResult(
         IReadOnlyList<DungeonEntryRequirementResult> entryRequirements,
         bool completedPrevious,
+        bool towerFloorRequirementMet,
+        int? requiredTowerFloor,
         string? ignoredEntryCostItemId)
     {
         var missingRequirements = new List<string>();
         if (!completedPrevious)
         {
             missingRequirements.Add("Complete the previous difficulty first.");
+        }
+
+        if (!towerFloorRequirementMet && requiredTowerFloor.HasValue)
+        {
+            missingRequirements.Add($"Requires World Tower Floor {requiredTowerFloor.Value} to be completed.");
         }
 
         AddMissingEntryCosts(entryRequirements, missingRequirements, ignoredEntryCostItemId);

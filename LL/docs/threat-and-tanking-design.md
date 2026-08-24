@@ -895,10 +895,10 @@ integration, then the actual tuning passes on `AttentionExponent` per content ty
    Note this becomes more relevant with 3-party content, where each party has its own tank but a raid
    Scourge's `AllEnemies` abilities may cross wings — confirm whether Cover can ever apply across
    parties (recommendation: no, Cover is party-scoped).
-7. **Should threat be visible mid-fight in playback?** The Tower already streams combat frames
-   (`WorldTowerCombatFrameUpdated`). Showing a live threat bar would be genuinely satisfying, but it
-   means adding threat to the frame payload and the checkpoint schema — currently threat appears in
-   neither `CombatCheckpoint` nor `SimpleCombatEntity`.
+7. **Should threat be visible mid-fight in playback?** The Tower client renders a compact schema-v2
+   playback bundle against server timestamps. Showing a live threat bar would be genuinely satisfying,
+   but it means adding threat to the bundle schema and its checkpoint/entity representation — currently
+   threat appears in neither `CombatCheckpoint` nor `SimpleCombatEntity`.
 8. **Decay or plain cumulative?** §3.1.4 recommends decay (half-life 15 s) because it keeps burst-threat
    abilities relevant and bounds the displayed number. Plain cumulative is slightly cheaper and
    converges to the same TPS ratio. Decide before authoring any burst-threat tank ability, since the

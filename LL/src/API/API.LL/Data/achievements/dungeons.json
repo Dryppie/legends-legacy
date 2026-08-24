@@ -110,7 +110,7 @@
     "points": 50,
     "hint": null,
     "isRepeatable": false,
-    "isActive": true,
+    "isActive": false,
     "sortOrder": 31,
     "playerSystemMessageTemplate": "Achievement unlocked: {achievementName} (+{points} points).",
     "globalSystemMessageTemplate": "{characterName} unlocked {achievementName} (+{points} points)."
@@ -130,7 +130,7 @@
     "points": 100,
     "hint": null,
     "isRepeatable": false,
-    "isActive": true,
+    "isActive": false,
     "sortOrder": 32,
     "playerSystemMessageTemplate": "Achievement unlocked: {achievementName} (+{points} points).",
     "globalSystemMessageTemplate": "{characterName} unlocked {achievementName} (+{points} points)."

@@ -5,6 +5,7 @@ using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Tools;
+using Domain.Models.Items.EssenceItems;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL.Seeds.JsonSeeding.JsonConverters;
 
@@ -24,6 +25,7 @@ public static class DbJsonSeeder
         var itemPath = Path.Combine(AppContext.BaseDirectory, "Data", "items", "items.json");
         var itemJson = await File.ReadAllTextAsync(itemPath);
         var items = JsonSerializer.Deserialize<List<ItemBase>>(itemJson, opt)!;
+        NormalizeEssenceItemMappings(items);
         var existingEquipmentById = await ctx.ItemBases
             .OfType<EquipmentBase>()
             .Include(x => x.AttributeModifiers)
@@ -100,6 +102,34 @@ public static class DbJsonSeeder
 
             if (existing == null) ctx.ItemBases.Add(item);
             else ctx.GetEntry(existing).CurrentValues.SetValues(item);
+        }
+    }
+
+    private static void NormalizeEssenceItemMappings(IEnumerable<ItemBase> items)
+    {
+        var essenceItems = items.OfType<EssenceItemBase>().ToList();
+
+        foreach (var item in essenceItems)
+        {
+            var definitionId = item.ResolveDefinitionId();
+            if (string.IsNullOrWhiteSpace(definitionId))
+            {
+                throw new InvalidOperationException(
+                    $"Essence item '{item.Id}' must declare essenceDefinitionId or use the 'item.essence.*' convention.");
+            }
+
+            item.EssenceDefinitionId = definitionId;
+        }
+
+        var duplicateMapping = essenceItems
+            .GroupBy(item => item.EssenceDefinitionId, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault(group => group.Skip(1).Any());
+
+        if (duplicateMapping is not null)
+        {
+            var itemIds = string.Join(", ", duplicateMapping.Select(item => item.Id).Order(StringComparer.OrdinalIgnoreCase));
+            throw new InvalidOperationException(
+                $"Multiple Essence items map to '{duplicateMapping.Key}': {itemIds}.");
         }
     }
 

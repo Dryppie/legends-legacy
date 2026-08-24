@@ -43,12 +43,11 @@ export function isOfflineCombatCatchUpRequest(
     return false;
   }
 
-  if (action.hasMoreDueWork || action.hasPendingCombatResolution) {
+  if (action.hasMoreDueWork) {
     return true;
   }
 
-  const boundaryValue =
-    action.nextResolutionAtUtc ?? action.nextResolutionAt ?? null;
+  const boundaryValue = action.nextResolutionAtUtc ?? null;
   if (!boundaryValue) return false;
 
   const boundary = new Date(boundaryValue).getTime();
@@ -193,10 +192,7 @@ export class CharacterActionsStateService {
             if (action.isDeleted || !action.combatSession?.combatResult) return;
             this._loadingCombat.set(false);
             this.combatHandler.handle(action);
-            const hasPendingResolution =
-              action.hasMoreDueWork ??
-              action.hasPendingCombatResolution ??
-              false;
+            const hasPendingResolution = action.hasMoreDueWork ?? false;
             this._idleCombatPhase.set(
               hasPendingResolution ? 'resolving' : 'active',
             );
@@ -406,9 +402,6 @@ export class CharacterActionsStateService {
       nextResolutionAtUtc: waitsForSwitchUnlock
         ? currentAction.nextResolutionAtUtc
         : null,
-      nextResolutionAt: waitsForSwitchUnlock
-        ? currentAction.nextResolutionAt
-        : null,
       craftingActionDetails: undefined,
       combatActionDetails: undefined,
     };
@@ -598,9 +591,6 @@ export class CharacterActionsStateService {
       nextResolutionAtUtc: state.nextResolutionAtUtc
         ? new Date(state.nextResolutionAtUtc)
         : null,
-      nextResolutionAt: state.nextResolutionAtUtc
-        ? new Date(state.nextResolutionAtUtc)
-        : null,
       blockedUntilUtc: state.blockedUntilUtc
         ? new Date(state.blockedUntilUtc)
         : null,
@@ -613,7 +603,6 @@ export class CharacterActionsStateService {
         DEFAULT_IDLE_COMBAT_RESOLUTION_INTERVAL_MS,
       processedCount: 0,
       hasMoreDueWork: false,
-      hasPendingCombatResolution: false,
       temperingQueueItems: [...queue],
       craftingActionDetails: isCrafting
         ? { craftingQueueItems: [...queue] }
@@ -633,7 +622,7 @@ export class CharacterActionsStateService {
     authoritative = false,
   ): void {
     if (
-      (action?.hasMoreDueWork ?? action?.hasPendingCombatResolution) &&
+      action?.hasMoreDueWork &&
       this._idleCombatError() === null
     ) {
       this._resolvingOfflineProgress.set(true);
@@ -674,14 +663,10 @@ export class CharacterActionsStateService {
     }
 
     const currentBoundary = new Date(
-      current.nextResolutionAtUtc ??
-        current.nextResolutionAt ??
-        current.updatedAt,
+      current.nextResolutionAtUtc ?? current.updatedAt,
     ).getTime();
     const candidateBoundary = new Date(
-      candidate.nextResolutionAtUtc ??
-        candidate.nextResolutionAt ??
-        candidate.updatedAt,
+      candidate.nextResolutionAtUtc ?? candidate.updatedAt,
     ).getTime();
 
     if (candidateBoundary < currentBoundary) return true;
@@ -807,10 +792,7 @@ export class CharacterActionsStateService {
         }
 
         const currentAction = this._currentAction();
-        const serverReportsMoreWork =
-          currentAction?.hasMoreDueWork ??
-          currentAction?.hasPendingCombatResolution ??
-          false;
+        const serverReportsMoreWork = currentAction?.hasMoreDueWork ?? false;
         if (this.activeOfflineCatchUpRequests === 0 && !serverReportsMoreWork) {
           this._resolvingOfflineProgress.set(false);
         }

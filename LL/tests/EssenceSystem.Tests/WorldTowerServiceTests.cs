@@ -1280,7 +1280,7 @@ public sealed class WorldTowerServiceTests
     }
 
     [Fact]
-    public async Task PlaybackClaims_OnlyReturnFramesWhoseNextDispatchIsDue()
+    public async Task PlaybackFinalizationClaims_OnlyReturnPlaybacksWhoseEndIsDue()
     {
         await using var db = CreateDbContext();
         var now = DateTimeOffset.UtcNow;
@@ -1308,20 +1308,26 @@ public sealed class WorldTowerServiceTests
         attempt.Playback = new TowerCombatPlayback
         {
             TowerAttempt = attempt,
+            BundleHash = new string('a', 64),
+            BundleLength = 1,
+            BundleContentType = "application/json",
+            BundleContentEncoding = "br",
             PlaybackStartedAt = now,
             PlaybackEndsAt = now.AddMinutes(1),
-            NextFrameDueAt = now.AddSeconds(10),
             FrameCount = 2,
-            TimelineJson = "[]",
-            SimulationCompletedAt = now
+            SimulationCompletedAt = now,
+            Artifact = new TowerCombatPlaybackArtifact
+            {
+                BundleBytes = [1]
+            }
         };
         db.TowerRallies.Add(rally);
         await db.SaveChangesAsync();
 
-        var earlyClaim = await db.ClaimWorldTowerPlaybackDispatchesAsync(
-            "worker-one", now.AddSeconds(5), now.AddSeconds(35), 1);
-        var dueClaim = await db.ClaimWorldTowerPlaybackDispatchesAsync(
-            "worker-one", now.AddSeconds(10), now.AddSeconds(40), 1);
+        var earlyClaim = await db.ClaimWorldTowerPlaybackFinalizationsAsync(
+            "worker-one", now.AddSeconds(59), now.AddSeconds(89), 1);
+        var dueClaim = await db.ClaimWorldTowerPlaybackFinalizationsAsync(
+            "worker-one", now.AddMinutes(1), now.AddSeconds(90), 1);
 
         Assert.Empty(earlyClaim);
         Assert.Equal(attempt.Id, Assert.Single(dueClaim));
@@ -1491,7 +1497,6 @@ public sealed class WorldTowerServiceTests
         var playback = await SimulatePlaybackAsync(db, service, result.Value);
         Assert.False(playback.IsCompleted);
         Assert.Equal(TowerCombatPlayback.CompactBundleSchemaVersion, playback.SchemaVersion);
-        Assert.Null(playback.CurrentFrame);
         Assert.NotNull(playback.BundleETag);
         var bundleContent = await service.GetAttemptPlaybackBundleAsync(
             characters[0].Id,
@@ -1536,15 +1541,6 @@ public sealed class WorldTowerServiceTests
             spectatorId,
             result.Value.AttemptId,
             CancellationToken.None));
-        Assert.NotNull(await service.GetAttemptPlaybackAsync(
-            spectatorId,
-            result.Value.AttemptId,
-            CancellationToken.None));
-        Assert.NotNull(await service.GetAttemptPlaybackFramesAsync(
-            spectatorId,
-            result.Value.AttemptId,
-            -1,
-            CancellationToken.None));
         var spectatorRally = await service.GetRallyAsync(
             spectatorId,
             rallyId,
@@ -1559,10 +1555,10 @@ public sealed class WorldTowerServiceTests
             characters[0].Id,
             result.Value.AttemptId,
             CancellationToken.None));
-        Assert.Null(await service.GetAttemptReportAsync(
+        Assert.Null((await service.GetRallyAsync(
             characters[0].Id,
-            result.Value.AttemptId,
-            CancellationToken.None));
+            rallyId,
+            CancellationToken.None))!.Attempt!.BattleReport);
         await FinalizePlaybackAsync(db, service, playback);
         db.ChangeTracker.Clear();
 
@@ -1592,7 +1588,10 @@ public sealed class WorldTowerServiceTests
         Assert.Equal(TowerAttemptStatus.Succeeded, attempt.Status);
         Assert.False(string.IsNullOrWhiteSpace(attempt.BattleReportJson));
         Assert.False(string.IsNullOrWhiteSpace(attempt.CombatResultJson));
-        var report = await service.GetAttemptReportAsync(characters[0].Id, attempt.Id, CancellationToken.None);
+        var report = (await service.GetRallyAsync(
+            characters[0].Id,
+            rallyId,
+            CancellationToken.None))!.Attempt!.BattleReport;
         Assert.NotNull(report);
         Assert.True(report.Succeeded);
         Assert.Equal(0, report.GuardianHealthRemainingPercent);
@@ -1935,7 +1934,6 @@ public sealed class WorldTowerServiceTests
             new FixedAbilityCatalogProvider(),
             resultFactory ?? new ThrowingCombatEncounterResultFactory(),
             outbox ?? new TestGameEventOutbox(),
-            new TestRealtimeBroadcaster(),
             new MapperConfiguration(
                 configuration => configuration.AddProfile<MappingProfile>(),
                 NullLoggerFactory.Instance).CreateMapper(),
@@ -1970,13 +1968,14 @@ public sealed class WorldTowerServiceTests
             .Where(x => x.Id == result.AttemptId)
             .Select(x => x.TowerRallyId)
             .SingleAsync();
-        return (await service.GetAttemptPlaybackAsync(
-            (await db.TowerRallyParticipants
-                .Where(x => x.TowerRallyId == rallyId)
-                .Select(x => x.CharacterId)
-                .FirstAsync()),
-            result.AttemptId,
-            CancellationToken.None))!;
+        var characterId = await db.TowerRallyParticipants
+            .Where(x => x.TowerRallyId == rallyId)
+            .Select(x => x.CharacterId)
+            .FirstAsync();
+        return (await service.GetRallyAsync(
+            characterId,
+            rallyId,
+            CancellationToken.None))!.Attempt!.Playback!;
     }
 
     private static async Task<bool> SimulatePlaybackAttemptAsync(
@@ -2005,11 +2004,11 @@ public sealed class WorldTowerServiceTests
         const string owner = "test-playback-worker";
         var entity = await db.TowerCombatPlaybacks.SingleAsync(
             x => x.TowerAttemptId == playback.AttemptId);
-        entity.DispatchLeaseOwner = owner;
-        entity.DispatchLeaseUntil = playback.PlaybackEndsAt.AddMinutes(1);
+        entity.FinalizationLeaseOwner = owner;
+        entity.FinalizationLeaseUntil = playback.PlaybackEndsAt.AddMinutes(1);
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
-        Assert.True(await service.PublishDuePlaybackFrameAsync(
+        Assert.True(await service.FinalizePlaybackAsync(
             playback.AttemptId,
             owner,
             playback.PlaybackEndsAt.AddSeconds(1),
@@ -2282,22 +2281,6 @@ public sealed class WorldTowerServiceTests
                 RallyEvents.Add(rallyEvent);
             if (payload is WorldTowerChatAnnouncementPayload announcement)
                 ChatAnnouncements.Add(announcement);
-            return Task.CompletedTask;
-        }
-    }
-
-    private sealed class TestRealtimeBroadcaster : IGameRealtimeBroadcaster
-    {
-        public List<WorldTowerCombatFrameUpdated> Frames { get; } = [];
-
-        public Task PublishAsync(
-            Audience audience,
-            GameRealtimeEvent message,
-            string sender,
-            CancellationToken cancellationToken = default)
-        {
-            if (message is WorldTowerCombatFrameUpdated frame)
-                Frames.Add(frame);
             return Task.CompletedTask;
         }
     }

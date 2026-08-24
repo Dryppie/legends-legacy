@@ -82,6 +82,11 @@ export class ChatService {
   private raidLoadedForIdentity?: string;
   private activeAuthenticationContextVersion = -1;
   private connectAndLoadPromise?: Promise<void>;
+  private connectionQueue: Promise<void> = Promise.resolve();
+  private connectionRequestVersion = 0;
+  private hubStartPromise?: Promise<void>;
+  private connectionRetryTimeoutId?: ReturnType<typeof setTimeout>;
+  private readonly connectionRetryTrigger = signal(0);
   private unavailableUntil = 0;
   private lastConnectionWarningAt = 0;
   private readonly connectionWarningThrottleMs = 30_000;
@@ -122,22 +127,20 @@ export class ChatService {
         });
       });
 
-    this.gameEvents
-      .eventEnvelope$('PlayerTransfer')
-      .subscribe((envelope) => {
-        const payload = envelope?.payload;
-        if (!payload?.message || !payload.messageId) return;
+    this.gameEvents.eventEnvelope$('PlayerTransfer').subscribe((envelope) => {
+      const payload = envelope?.payload;
+      if (!payload?.message || !payload.messageId) return;
 
-        this.addMessage({
-          id: payload.messageId,
-          channelType: ChatChannelType.System,
-          contextKey: 'system',
-          senderId: this.systemSenderId,
-          senderName: 'System',
-          body: payload.message,
-          sentAt: new Date(envelope?.occurredAt ?? Date.now()),
-        });
+      this.addMessage({
+        id: payload.messageId,
+        channelType: ChatChannelType.System,
+        contextKey: 'system',
+        senderId: this.systemSenderId,
+        senderName: 'System',
+        body: payload.message,
+        sentAt: new Date(envelope?.occurredAt ?? Date.now()),
       });
+    });
 
     this.gameEvents
       .eventEnvelope$('GuildVaultChatMessage')
@@ -161,6 +164,7 @@ export class ChatService {
 
     effect(
       () => {
+        this.connectionRetryTrigger();
         const id = this.auth.identity(); // ← depends on username + login
         const guildId = this.guildState.guild()?.id ?? null;
         const raidId = this.raidService.activeRaidChatId();
@@ -207,6 +211,7 @@ export class ChatService {
 
         if (connectionContextChanged) {
           this.unavailableUntil = 0;
+          this.clearConnectionRetry();
         }
 
         const hubAuthenticationContextChanged =
@@ -225,17 +230,23 @@ export class ChatService {
         this.activeRaidId = raidId;
         this.activeAuthenticationContextVersion = authenticationContextVersion;
 
-        const connectionAttempt = this.connectForContext(
+        const connectionAttempt = this.enqueueConnectionForContext(
           guildId ?? undefined,
           replaceExistingHub,
           clearMessages,
           guildMembershipChanged,
           raidMembershipChanged,
           raidId ?? undefined,
-        ).catch((error) => {
-          this.unavailableUntil = Date.now() + this.unavailableRetryDelayMs;
-          this.handleConnectionError(error);
-        });
+        )
+          .then(() => {
+            this.unavailableUntil = 0;
+            this.clearConnectionRetry();
+          })
+          .catch((error) => {
+            this.unavailableUntil = Date.now() + this.unavailableRetryDelayMs;
+            this.scheduleConnectionRetry();
+            this.handleConnectionError(error);
+          });
 
         this.connectAndLoadPromise = connectionAttempt;
         void connectionAttempt.finally(() => {
@@ -397,6 +408,34 @@ export class ChatService {
     );
   }
 
+  private enqueueConnectionForContext(
+    guildId: string | undefined,
+    replaceExistingHub: boolean,
+    clearMessages: boolean,
+    guildMembershipChanged: boolean,
+    raidMembershipChanged: boolean,
+    raidId?: string,
+  ): Promise<void> {
+    const requestVersion = ++this.connectionRequestVersion;
+    const queuedConnection = this.connectionQueue.then(() => {
+      if (requestVersion !== this.connectionRequestVersion) return;
+
+      return this.connectForContext(
+        guildId,
+        replaceExistingHub,
+        clearMessages,
+        guildMembershipChanged,
+        raidMembershipChanged,
+        raidId,
+      );
+    });
+
+    // Keep the queue usable after an unavailable Chat API while returning the
+    // original rejection to the caller so it can schedule a retry.
+    this.connectionQueue = queuedConnection.catch(() => undefined);
+    return queuedConnection;
+  }
+
   private async connectForContext(
     guildId: string | undefined,
     replaceExistingHub: boolean,
@@ -432,6 +471,26 @@ export class ChatService {
   }
 
   private async buildHubConnection(): Promise<void> {
+    if (this.hub?.state === signalR.HubConnectionState.Connected) return;
+
+    if (this.hubStartPromise) {
+      await this.hubStartPromise;
+      return;
+    }
+
+    const startPromise = this.startHubConnection();
+    this.hubStartPromise = startPromise;
+
+    try {
+      await startPromise;
+    } finally {
+      if (this.hubStartPromise === startPromise) {
+        this.hubStartPromise = undefined;
+      }
+    }
+  }
+
+  private async startHubConnection(): Promise<void> {
     await firstValueFrom(this.auth.ensureValidToken());
 
     const hub = new signalR.HubConnectionBuilder()
@@ -475,13 +534,12 @@ export class ChatService {
     try {
       await hub.start();
     } catch (error) {
-      if (
-        this.hub &&
-        this.hub.state !== signalR.HubConnectionState.Disconnected
-      ) {
-        await this.hub.stop();
+      if (hub.state !== signalR.HubConnectionState.Disconnected) {
+        await hub.stop();
       }
-      this.hub = undefined;
+      if (this.hub === hub) {
+        this.hub = undefined;
+      }
       this._onlinePlayerCount.set(null);
       throw error;
     }
@@ -561,6 +619,8 @@ export class ChatService {
   // }
 
   async disconnect(): Promise<void> {
+    this.connectionRequestVersion += 1;
+    this.clearConnectionRetry();
     await this.stopHubConnection(true);
     this.activeIdentity = undefined;
     this.activeGuildId = null;
@@ -572,6 +632,10 @@ export class ChatService {
   }
 
   private async stopHubConnection(clearMessages: boolean): Promise<void> {
+    if (this.hubStartPromise) {
+      await this.hubStartPromise.catch(() => undefined);
+    }
+
     const hub = this.hub;
 
     if (hub && hub.state !== signalR.HubConnectionState.Disconnected) {
@@ -602,6 +666,25 @@ export class ChatService {
 
   private isTemporarilyUnavailable(): boolean {
     return Date.now() < this.unavailableUntil;
+  }
+
+  private scheduleConnectionRetry(): void {
+    if (this.connectionRetryTimeoutId !== undefined) {
+      clearTimeout(this.connectionRetryTimeoutId);
+    }
+
+    const retryIn = Math.max(0, this.unavailableUntil - Date.now());
+    this.connectionRetryTimeoutId = setTimeout(() => {
+      this.connectionRetryTimeoutId = undefined;
+      this.connectionRetryTrigger.update((value) => value + 1);
+    }, retryIn);
+  }
+
+  private clearConnectionRetry(): void {
+    if (this.connectionRetryTimeoutId === undefined) return;
+
+    clearTimeout(this.connectionRetryTimeoutId);
+    this.connectionRetryTimeoutId = undefined;
   }
 
   private currentSenderTitleDisplayName(): string | null {

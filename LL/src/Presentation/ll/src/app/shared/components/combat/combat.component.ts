@@ -210,7 +210,6 @@ export class CombatComponent implements OnInit, OnDestroy {
       else
         this.nextCombatIn =
           this.currentAction()?.nextResolutionAtUtc ??
-          this.currentAction()?.nextResolutionAt ??
           this.currentAction()?.updatedAt ??
           new Date();
     });

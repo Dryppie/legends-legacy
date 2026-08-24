@@ -379,10 +379,8 @@ public sealed class StateSyncServiceTests
     public async Task Realtime_broadcaster_enqueues_persistent_delivery_with_character_metadata()
     {
         var outbox = new RecordingOutbox();
-        var immediate = new RecordingImmediatePublisher();
         var broadcaster = new OutboxGameRealtimeBroadcaster(
             outbox,
-            immediate,
             new JsonSerializerOptions(JsonSerializerDefaults.Web));
         var characterId = Guid.NewGuid();
 
@@ -398,7 +396,6 @@ public sealed class StateSyncServiceTests
         var payload = Assert.IsType<RealtimeDeliveryRequestedPayload>(queued.Payload);
         Assert.Equal(nameof(StateInvalidated), payload.EventName);
         Assert.Equal("character", payload.Audience.Kind);
-        Assert.Empty(immediate.Messages);
     }
 
     private static LLDbContext CreateDb()
@@ -425,21 +422,6 @@ public sealed class StateSyncServiceTests
             CancellationToken cancellationToken = default)
         {
             Messages.Add((audience, message));
-            return Task.CompletedTask;
-        }
-    }
-
-    private sealed class RecordingImmediatePublisher : IGameRealtimeImmediatePublisher
-    {
-        public List<GameRealtimeEvent> Messages { get; } = [];
-
-        public Task PublishAsync(
-            Audience audience,
-            GameRealtimeEvent message,
-            string sender,
-            CancellationToken cancellationToken = default)
-        {
-            Messages.Add(message);
             return Task.CompletedTask;
         }
     }

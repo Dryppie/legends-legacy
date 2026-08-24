@@ -52,8 +52,7 @@ export class ProgressBarComponent implements OnDestroy {
     this.cancelAnimation();
     const progressBarElement = this.progressBar.nativeElement;
     const durationMs = action.resolutionIntervalMs;
-    const resolutionDeadlineValue =
-      action.nextResolutionAtUtc ?? action.nextResolutionAt;
+    const resolutionDeadlineValue = action.nextResolutionAtUtc;
     const stoppedActionUnlockDeadline = action.isDeleted
       ? action.blockedUntilUtc
       : null;

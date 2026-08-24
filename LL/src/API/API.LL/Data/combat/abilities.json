@@ -4504,7 +4504,7 @@
     "id": "ability.creature.gnoll_pack_leader.savage_leader",
     "kind": "Passive",
     "name": "Savage Leader",
-    "description": "Gain 5% of initial Power whenever an ally dies.",
+    "description": "Gain 5% of initial Power whenever an ally dies, up to 4 times.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Power"],
     "triggers": [
@@ -4521,6 +4521,7 @@
         "target": "Self",
         "attribute": "Power",
         "scalingCoefficient": 0.05,
+        "uses": 4,
         "procCoefficient": 1
       }
     ],

@@ -144,7 +144,6 @@ export class CombatService {
       BattleType.IdleCombat,
       combatResult,
       characterAction.nextResolutionAtUtc ??
-        characterAction.nextResolutionAt ??
         characterAction.updatedAt,
     );
   }

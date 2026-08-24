@@ -45,7 +45,7 @@ import { calculateAreaEssenceProgress } from './area-essence-progress';
 interface WorldMapDungeonEntry {
   id: string;
   title: string;
-  requiredLevel: number;
+  requiredTowerFloor: number | null;
   ownedSigilCount: number;
   canEnter: boolean;
 }
@@ -363,9 +363,9 @@ export class RegionComponent implements OnInit, OnDestroy {
       return {
         id,
         title: variants[0]?.familyTitle ?? variants[0]?.title ?? id,
-        requiredLevel: Math.min(
-          ...variants.map((variant) => variant.requiredLevel ?? 1),
-        ),
+        requiredTowerFloor:
+          variants.find((variant) => variant.requiredTowerFloor != null)
+            ?.requiredTowerFloor ?? null,
         ownedSigilCount,
         canEnter: variants.some((variant) => variant.canEnter ?? true),
       };
@@ -458,11 +458,11 @@ export class RegionComponent implements OnInit, OnDestroy {
     );
   }
 
-  selectedDungeonRequiredLevel(): number {
+  selectedDungeonRequiredTowerFloor(): number | null {
     return (
       this.regionDungeons().find(
         (dungeon) => dungeon.id === this.selectedDungeonId,
-      )?.requiredLevel ?? 1
+      )?.requiredTowerFloor ?? null
     );
   }
 }

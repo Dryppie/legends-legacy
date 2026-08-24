@@ -17,13 +17,13 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Response<
     private readonly IUserService _userService;
     private readonly IJwtGenerator _jwtGenerator;
     private readonly ICharacterService _characterService;
-    private readonly IMediator _publisher;
+    private readonly IPublisher _publisher;
 
     public RegisterCommandHandler(
         IUserService userService,
         IJwtGenerator jwtGenerator,
         ICharacterService characterService,
-        IMediator publisher)
+        IPublisher publisher)
     {
         _userService = userService;
         _jwtGenerator = jwtGenerator;
@@ -33,37 +33,31 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Response<
 
     public async Task<Response<Tokens>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        try
+        if (!AuthInputValidator.TryValidateRegistration(
+                request.CharacterName,
+                request.Email,
+                request.Password,
+                out var input,
+                out var validationError))
         {
-            if (!AuthInputValidator.TryValidateRegistration(
-                    request.CharacterName,
-                    request.Email,
-                    request.Password,
-                    out var input,
-                    out var validationError))
-            {
-                return Response<Tokens>.Fail(validationError);
-            }
-
-            if (await _characterService.IsCharacterNameTakenAsync(input.CharacterName, null, cancellationToken))
-            {
-                return Response<Tokens>.Fail("Character name is already in use.");
-            }
-
-            var user = await _userService.RegisterAsync(input.CharacterName, input.Email, input.Password, cancellationToken);
-            if (user == null) return Response<Tokens>.Fail("Email is already in use.");
-
-            await _publisher.Publish(new UserCreatedEvent(user.Id, input.CharacterName), cancellationToken);
-
-            var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
-            if (character == null) return Response<Tokens>.Fail("Character creation failed during registration.");
-
-            var tokens = await _jwtGenerator.IssueTokens(user, character);
-            return Response<Tokens>.Success(tokens);
+            return Response<Tokens>.Fail(validationError);
         }
-        catch (Exception ex)
+
+        if (await _characterService.IsCharacterNameTakenAsync(input.CharacterName, null, cancellationToken))
         {
-            return Response<Tokens>.Fail(ex.Message);
+            return Response<Tokens>.Fail("Character name is already in use.");
         }
+
+        var user = await _userService.RegisterAsync(input.CharacterName, input.Email, input.Password, cancellationToken);
+        if (user == null) return Response<Tokens>.Fail("Email is already in use.");
+
+        await _publisher.Publish(new UserCreatedEvent(user.Id, input.CharacterName), cancellationToken);
+
+        var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken)
+            ?? throw new InvalidOperationException(
+                "Registration completed without creating a character.");
+
+        var tokens = await _jwtGenerator.IssueTokens(user, character);
+        return Response<Tokens>.Success(tokens);
     }
 }

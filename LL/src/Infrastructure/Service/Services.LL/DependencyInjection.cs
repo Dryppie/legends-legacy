@@ -176,7 +176,6 @@ public static class DependencyInjection
         services.AddSingleton<IGameEventOutboxConsumerRegistry, GameEventOutboxConsumerRegistry>();
         services.AddScoped<IGameEventOutbox, GameEventOutbox>();
         services.AddScoped<IGameRealtimeBroadcaster, OutboxGameRealtimeBroadcaster>();
-        services.AddScoped<IGameRealtimeImmediatePublisher, NoOpGameRealtimeImmediatePublisher>();
         services.AddScoped<IStateSyncService, StateSyncService>();
         services.TryAddSingleton<IEssenceDefinitionValidator, EssenceDefinitionValidator>();
         services.TryAddSingleton<IEssenceDefinitionRepository>(sp =>
@@ -519,15 +518,13 @@ public static class DependencyInjection
                     && options.PreparationPercentPerPoint > 0
                     && options.PreparationMaxEffectPercent > 0
                     && options.CombatTicksPerFrame == 10
-                    && options.PlaybackPollMilliseconds is >= 100 and <= 1000
                     && options.FinalizationPollMilliseconds is >= 250 and <= 5000
                     && options.SimulationPollMilliseconds is >= 100 and <= 1000
                     && options.WorkerLeaseSeconds is >= 10 and <= 300
                     && options.SimulationClaimBatchSize is >= 1 and <= 20
                     && options.SimulationMaxConcurrency >= 1
                     && options.SimulationMaxConcurrency <= options.SimulationClaimBatchSize
-                    && options.PlaybackClaimBatchSize is >= 1 and <= 200
-                    && options.RecoveryFrameLimit is >= 1 and <= 300
+                    && options.FinalizationClaimBatchSize is >= 1 and <= 200
                     && options.MaximumBundleUncompressedBytes is >= 1_048_576 and <= 67_108_864
                     && options.MaximumBundleCompressedBytes is >= 262_144
                     && options.MaximumBundleCompressedBytes <= options.MaximumBundleUncompressedBytes,
@@ -643,7 +640,6 @@ public static class DependencyInjection
 
         services.AddScoped<IGameEventOutbox, GameEventOutbox>();
         services.AddScoped<IGameRealtimeBroadcaster, OutboxGameRealtimeBroadcaster>();
-        services.AddScoped<IGameRealtimeImmediatePublisher, NoOpGameRealtimeImmediatePublisher>();
         services.AddScoped<IStateSyncService, StateSyncService>();
         services.AddSingleton<IGameEventOutboxConsumerRegistry, GameEventOutboxConsumerRegistry>();
         services.AddScoped<IGameEventOutboxConsumer, QuestGameEventOutboxConsumer>();

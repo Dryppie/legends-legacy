@@ -10,14 +10,11 @@ export interface CharacterActionDto {
   updatedAt: Date;
   nextResolutionAtUtc?: Date | null;
   blockedUntilUtc?: Date | null;
-  /** @deprecated compatibility alias; new clients use nextResolutionAtUtc. */
-  nextResolutionAt?: Date | null;
   resolutionIntervalMs?: number | null;
   hasMoreDueWork?: boolean;
   processedCount?: number;
   scheduleGeneration?: number;
   revision: string;
-  hasPendingCombatResolution?: boolean;
   isDeleted: boolean;
   temperingSession?: TemperingSessionDto;
   combatSession?: CombatSessionDto;

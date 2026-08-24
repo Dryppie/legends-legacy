@@ -16,6 +16,7 @@ public class GuildRepository : IGuildRepository
 
     public async Task<bool> CreateAsync(Guid ownerCharacterId, string name, CancellationToken cancellationToken)
     {
+        await _context.AcquireCharacterCommandLockAsync(ownerCharacterId, cancellationToken);
         if (await _context.Guilds.AnyAsync(g => g.Name.ToLower() == name.ToLower(), cancellationToken)) return false;
         if (await _context.GuildMembers.AnyAsync(gm => gm.CharacterId == ownerCharacterId, cancellationToken)) return false;
 
@@ -229,6 +230,7 @@ public class GuildRepository : IGuildRepository
     }
     private async Task<bool> TryAddCharacterToGuildAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken)
     {
+        await _context.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
         var guild = await _context.Guilds
             .Include(g => g.Members)
             .Include(g => g.Buildings)

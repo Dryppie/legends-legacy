@@ -60,7 +60,7 @@ The action type is inferred from the details subtype, not stored independently (
 - in tempering it is the **start/last processed boundary**, and the next attempt is implicitly `UpdatedAt + 10 seconds` (`LL/src/Infrastructure/Service/Services.LL/CharacterActions/CharacterActionService.cs:114-126`);
 - after stopping combat it can also act as a temporary action-blocking deadline because a replacement is rejected while the stored value is in the future (`LL/src/Infrastructure/Persistence/Persistence.LL/Repositories/CharacterActions/CharacterActionRepository.cs:31-35`).
 
-The DTO calls `UpdatedAt` itself `NextResolutionAt`, which is accurate for combat but not tempering (`LL/src/Core/Application/UseCases/CharacterActions/Dtos/Responses/CharacterActionDto.cs:19-27`).
+The action and DTO now expose `NextResolutionAtUtc` separately from `UpdatedAt`, so combat and tempering share an explicit next-due boundary without overloading the update timestamp.
 
 ### 2.3 Combat lifecycle
 
@@ -183,7 +183,7 @@ The Angular client owns wake-up timing, not action eligibility:
 - A resolved idle encounter is committed as one complete snapshot. The previous encounter remains visible until a hydrated replacement arrives (`LL/src/Presentation/ll/src/app/core/services/client-side/combat/combat.service.ts:125-139`; `LL/src/Presentation/ll/src/app/core/state/combat-state/combat-state.service.ts:111-126`). Personal idle combat is not streamed tick-by-tick.
 - Bootstrap and SignalR reconnect reload a read-only action snapshot, then restart the resolver poller (`game-bootstrap-state.service.ts:45-61,118-127`).
 
-SignalR/state sync is adjacent to, not the scheduler for, personal actions. Action commands invalidate character/inventory state through the transaction pipeline (`LL/src/Core/Application/MediatR/Synchronization/StateSyncCommandScopeCatalog.cs:61-65`), and durable outbox consumers update quests/achievements after commit. There is no realtime personal-action completion event that replaces polling. World Tower is different: its persisted playback worker publishes explicit combat frames (`LL/src/API/API.LL/HostedServices/WorldTowerCombatPlaybackWorker.cs:39-69`).
+SignalR/state sync is adjacent to, not the scheduler for, personal actions. Action commands invalidate character/inventory state through the transaction pipeline (`LL/src/Core/Application/MediatR/Synchronization/StateSyncCommandScopeCatalog.cs:61-65`), and durable outbox consumers update quests/achievements after commit. There is no realtime personal-action completion event that replaces polling. World Tower playback is bundle-based: the client renders the compact schema-v2 bundle against server timestamps, while a finalization worker advances completed attempts.
 
 ### 2.8 Other timed systems
 
@@ -191,7 +191,7 @@ The repository already demonstrates the two central patterns recommended for non
 
 - `Worker.LL` runs Quartz with PostgreSQL persistence, clustering, stable identities, recovery, and bounded concurrency (`LL/src/Worker/Worker.LL/BackgroundJobs/BackgroundJobInfrastructureServiceCollectionExtensions.cs:17-56`). Tournament progression and marketplace expiration are recurring global sweeps, not one job per player (`LL/src/Worker/Worker.LL/BackgroundJobs/BackgroundJobRegistrationExtensions.cs:17-36,65-91`). Marketplace expiration is idempotent and transactional (`LL/src/Worker/Worker.LL/BackgroundJobs/MarketplaceOrderExpirationJob.cs:35-99`).
 - `GameEventOutboxWorker` wakes every 500 ms and claims 20 due deliveries (`LL/src/API/API.LL/HostedServices/GameEventOutboxWorker.cs:12-49,74-100`). PostgreSQL claiming uses `FOR UPDATE SKIP LOCKED`, retry availability timestamps, and stale-processing recovery (`LL/src/Infrastructure/Persistence/Persistence.LL/Repositories/Outbox/GameEventOutboxRepository.cs:21-71`). This is a bucketed due-time scheduler.
-- World Tower claims queued simulation/playback work with renewable database leases and bounded parallelism (`LL/src/API/API.LL/HostedServices/WorldTowerCombatSimulationWorker.cs:37-88`; `LL/src/Infrastructure/Service/Services.LL/WorldTower/WorldTowerWorkLeaseService.cs:12-55`). Its domain model persists simulation lease fields, playback start/end, and `NextFrameDueAt` (`LL/src/Core/Domain/Models/WorldTower/WorldTowerModels.cs:171-205`).
+- World Tower claims queued simulation and due playback-finalization work with renewable database leases and bounded parallelism (`LL/src/API/API.LL/HostedServices/WorldTowerCombatSimulationWorker.cs`; `LL/src/API/API.LL/HostedServices/WorldTowerCombatFinalizationWorker.cs`; `LL/src/Infrastructure/Service/Services.LL/WorldTower/WorldTowerWorkLeaseService.cs`). Its domain model persists simulation and finalization lease fields plus playback start/end timestamps; individual playback-frame cursors are no longer persisted.
 
 Those systems should be reused as architectural precedents, not forced behind a new universal tick.
 
@@ -199,7 +199,7 @@ Those systems should be reused as architectural precedents, not forced behind a 
 
 ### 3.1 Observed current problems
 
-1. **Ambiguous timestamp semantics.** `UpdatedAt` means next due, last processed, action start, or stop cooldown depending on state. `NextResolutionAt => UpdatedAt` is wrong for crafting. This drives special cases into backend, polling, and progress UI.
+1. **Timestamp migration follow-through.** `NextResolutionAtUtc` and `BlockedUntilUtc` now carry explicit scheduling meanings, while `UpdatedAt` remains a general mutation timestamp. New action flows should preserve that separation and avoid reintroducing timing fallbacks to `UpdatedAt`.
 2. **Direct wall-clock access.** Personal action code calls `DateTimeOffset.UtcNow` directly in entities, services, repository checks, and DTO mapping. Workers already use `TimeProvider`, but personal actions do not. Deterministic boundary tests are harder than necessary.
 3. **Client-driven catch-up creates network chatter.** A 24-hour combat backlog at a 10-second cadence contains at most about 8,641 due boundaries. With a 100-encounter server cap and 100 ms catch-up polling, it needs up to 87 resolution requests and at least roughly 8.7 seconds before computation/network time.
 4. **Tempering has no explicit resolution-work cap.** Its natural resource bounds normally control the loop, but there is no configured maximum attempts or time budget per request.

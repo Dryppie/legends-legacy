@@ -31,11 +31,6 @@ public class CharacterActionDto : IMapFrom<CharacterAction>
         UpdatedAt.UtcDateTime.Ticks,
         IsDeleted);
 
-    // Temporary compatibility aliases for clients deployed before the explicit contract.
-    public DateTimeOffset? NextResolutionAt => NextResolutionAtUtc;
-    public bool HasPendingCombatResolution =>
-        CharacterActionType == CharacterActionType.Combat && HasMoreDueWork;
-
     public void Mapping(Profile profile)
     {
         profile.CreateMap<CharacterAction, CharacterActionDto>()

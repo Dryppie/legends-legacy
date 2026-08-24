@@ -84,9 +84,9 @@ export interface DungeonPreviewData {
   sigilName?: string | null;
   canAssembleSigil?: boolean;
   sigilAssemblyMissingRequirements?: string[];
+  requiredTowerFloor?: number | null;
   requiredPreviousDungeonId?: string | null;
   lore: string;
-  requiredLevel: number;
   minRooms?: number;
   maxRooms?: number;
   dailyEntries?: number;

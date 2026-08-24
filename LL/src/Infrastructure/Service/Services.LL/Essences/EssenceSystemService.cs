@@ -99,7 +99,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         if (inventoryItem?.ItemInstance.ItemBase is not EssenceItemBase essenceItem)
             return Fail("The selected inventory item is not an Unbound Essence.");
 
-        var definitionId = ResolveDefinitionId(essenceItem);
+        var definitionId = essenceItem.ResolveDefinitionId();
         var definition = _definitions.GetById(definitionId);
         if (definition is null) return Fail("The Essence definition no longer exists.");
 
@@ -163,7 +163,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             return new(false, "You do not have enough copies of the selected Essence.", 0);
 
         var dust = checked(Math.Max(1, essenceItem.DismantleDustAmount) * quantity);
-        var definitionId = ResolveDefinitionId(essenceItem);
+        var definitionId = essenceItem.ResolveDefinitionId();
         if (!string.IsNullOrWhiteSpace(definitionId) &&
             await _essences.HasPlayerEssenceAsync(characterId, definitionId, cancellationToken))
         {
@@ -941,20 +941,6 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     {
         inventoryItem.Quantity -= quantity;
         if (inventoryItem.Quantity <= 0) _inventory.RemoveInventoryItem(inventoryItem);
-    }
-
-    private string ResolveDefinitionId(EssenceItemBase essenceItem)
-    {
-        if (!string.IsNullOrWhiteSpace(essenceItem.EssenceDefinitionId)) return essenceItem.EssenceDefinitionId;
-        return InferDefinitionIdFromItemBaseId(essenceItem.Id);
-    }
-
-    private static string InferDefinitionIdFromItemBaseId(string itemBaseId)
-    {
-        const string itemPrefix = "item.";
-        return itemBaseId.StartsWith(itemPrefix, StringComparison.OrdinalIgnoreCase)
-            ? itemBaseId[itemPrefix.Length..]
-            : string.Empty;
     }
 
     private static IEnumerable<string> GetEssenceTags(EssenceDefinition definition, PlayerEssence essence) =>

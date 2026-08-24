@@ -4,26 +4,24 @@ using Services.LL.WorldTower;
 
 namespace API.LL.HostedServices;
 
-public sealed class WorldTowerCombatPlaybackWorker(
+public sealed class WorldTowerCombatFinalizationWorker(
     IServiceScopeFactory scopeFactory,
     TimeProvider timeProvider,
     IOptions<WorldTowerOptions> options,
-    ILogger<WorldTowerCombatPlaybackWorker> logger) : BackgroundService
+    ILogger<WorldTowerCombatFinalizationWorker> logger) : BackgroundService
 {
-    private readonly string workerId = $"{Environment.MachineName}:{Environment.ProcessId}:playback:{Guid.NewGuid():N}";
+    private readonly string workerId = $"{Environment.MachineName}:{Environment.ProcessId}:tower-finalization:{Guid.NewGuid():N}";
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var delay = TimeSpan.FromMilliseconds(options.Value.CompactPlaybackEnabled
-            ? options.Value.FinalizationPollMilliseconds
-            : options.Value.PlaybackPollMilliseconds);
+        var delay = TimeSpan.FromMilliseconds(options.Value.FinalizationPollMilliseconds);
         try
         {
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    await DispatchDueFramesAsync(stoppingToken);
+                    await FinalizeDuePlaybacksAsync(stoppingToken);
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
@@ -31,7 +29,7 @@ public sealed class WorldTowerCombatPlaybackWorker(
                 }
                 catch (Exception exception)
                 {
-                    logger.LogError(exception, "World Tower combat playback dispatch failed.");
+                    logger.LogError(exception, "World Tower combat finalization failed.");
                 }
 
                 await Task.Delay(delay, timeProvider, stoppingToken);
@@ -42,17 +40,17 @@ public sealed class WorldTowerCombatPlaybackWorker(
         }
     }
 
-    private async Task DispatchDueFramesAsync(CancellationToken cancellationToken)
+    private async Task FinalizeDuePlaybacksAsync(CancellationToken cancellationToken)
     {
         var now = timeProvider.GetUtcNow();
         IReadOnlyList<Guid> attemptIds;
         await using (var claimScope = scopeFactory.CreateAsyncScope())
         {
             var leases = claimScope.ServiceProvider.GetRequiredService<IWorldTowerWorkLeaseService>();
-            attemptIds = await leases.ClaimPlaybackDispatchesAsync(
+            attemptIds = await leases.ClaimPlaybackFinalizationsAsync(
                 workerId,
                 now,
-                options.Value.PlaybackClaimBatchSize,
+                options.Value.FinalizationClaimBatchSize,
                 cancellationToken);
         }
 
@@ -63,15 +61,15 @@ public sealed class WorldTowerCombatPlaybackWorker(
             var leases = scope.ServiceProvider.GetRequiredService<IWorldTowerWorkLeaseService>();
             try
             {
-                await tower.PublishDuePlaybackFrameAsync(attemptId, workerId, now, cancellationToken);
+                await tower.FinalizePlaybackAsync(attemptId, workerId, now, cancellationToken);
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                logger.LogError(exception, "Tower playback {AttemptId} dispatch failed.", attemptId);
+                logger.LogError(exception, "Tower playback {AttemptId} finalization failed.", attemptId);
             }
             finally
             {
-                await leases.ReleasePlaybackDispatchAsync(attemptId, workerId, cancellationToken);
+                await leases.ReleasePlaybackFinalizationAsync(attemptId, workerId, cancellationToken);
             }
         }
     }
