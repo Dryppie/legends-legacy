@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using Common.Primitives;
+using API.LL.Common;
 
 namespace API.LL.Filters;
 
@@ -14,12 +15,12 @@ public sealed class ResponseResultFilter : IAsyncResultFilter
         {
             // Controller returned Response<T> directly
             case ObjectResult { Value: { } value } obj when IsResponse(value):
-                context.Result = ToActionResult(value);
+                context.Result = ToActionResult(value, context.HttpContext);
                 break;
 
             // Minimal‑API / Endpoint returned Response<T> via "Results.Extensions"
             case IResult result when IsResponse(result):
-                context.Result = ToActionResult(Unwrap(result));
+                context.Result = ToActionResult(Unwrap(result), context.HttpContext);
                 break;
         }
 
@@ -32,16 +33,39 @@ public sealed class ResponseResultFilter : IAsyncResultFilter
         => o.GetType().IsGenericType &&
            o.GetType().GetGenericTypeDefinition() == typeof(Response<>);
 
-    private static IActionResult ToActionResult(object response)
+    private static IActionResult ToActionResult(
+        object response,
+        HttpContext httpContext)
     {
-        var isSuccess = (bool)response.GetType().GetProperty(nameof(Response<int>.IsSuccess))!
-                                        .GetValue(response)!;
+        var responseType = response.GetType();
+        var isSuccess = (bool)responseType
+            .GetProperty(nameof(Response<int>.IsSuccess))!
+            .GetValue(response)!;
 
-        return isSuccess
-            ? new OkObjectResult(response.GetType().GetProperty(nameof(Response<int>.Data))!
-                                            .GetValue(response))
-            : new BadRequestObjectResult(response.GetType().GetProperty(nameof(Response<int>.ErrorMessage))!
-                                                    .GetValue(response));
+        if (isSuccess)
+        {
+            return new OkObjectResult(
+                responseType.GetProperty(nameof(Response<int>.Data))!
+                    .GetValue(response));
+        }
+
+        var message = (string)responseType
+            .GetProperty(nameof(Response<int>.ErrorMessage))!
+            .GetValue(response)!;
+        var code = (string)responseType
+            .GetProperty(nameof(Response<int>.ErrorCode))!
+            .GetValue(response)!;
+
+        return new ObjectResult(ApiErrorContract.Create(
+            httpContext,
+            StatusCodes.Status400BadRequest,
+            "Action rejected",
+            message,
+            code,
+            ApiErrorContract.BusinessCategory))
+        {
+            StatusCode = StatusCodes.Status400BadRequest
+        };
     }
 
     private static object Unwrap(IResult result) =>

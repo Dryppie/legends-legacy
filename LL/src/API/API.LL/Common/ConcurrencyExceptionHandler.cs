@@ -38,19 +38,19 @@ public sealed class ConcurrencyExceptionHandler(
             route);
 
         httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+        httpContext.Response.ContentType = "application/problem+json";
         await httpContext.Response.WriteAsJsonAsync(
-            new ProblemDetails
-            {
-                Status = StatusCodes.Status409Conflict,
-                Title = "Game state changed",
-                Detail = duplicateDungeonStart
+            ApiErrorContract.Create(
+                httpContext,
+                StatusCodes.Status409Conflict,
+                "Game state changed",
+                duplicateDungeonStart
                     ? "A dungeon run is already active for this character. Refresh to continue it."
                     : "This action was already updated by another request. Refresh and try again.",
-                Extensions =
-                {
-                    ["requestId"] = RequestLoggingMiddleware.GetRequestId(httpContext)
-                }
-            },
+                duplicateDungeonStart
+                    ? "dungeon_run_already_active"
+                    : "concurrent_update",
+                ApiErrorContract.ConflictCategory),
             cancellationToken);
 
         return true;

@@ -18,7 +18,9 @@ using Domain.Models.Items.EssenceItems;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Services.LL;
+using Services.LL.Administration;
 
 namespace EssenceSystem.Tests;
 
@@ -82,6 +84,44 @@ public sealed class LiveOpsApplicationRegistrationTests
             descriptor.ServiceType == typeof(IGameRealtimeBroadcaster));
         Assert.Contains(services, descriptor =>
             descriptor.ServiceType == typeof(IAccountTemporalCorrelationService));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void LiveOps_registration_paths_register_shared_administration_services_once(
+        bool registerFullGameServices)
+    {
+        var configuration = new ConfigurationBuilder().Build();
+        var services = RegisterServices(configuration, registerFullGameServices);
+
+        AssertSingleRegistration<IAccountRestrictionIndex>(services, ServiceLifetime.Singleton);
+        AssertSingleRegistration<IAccountAccessPolicy>(services, ServiceLifetime.Scoped);
+        AssertSingleRegistration<ILiveOpsService>(services, ServiceLifetime.Scoped);
+        AssertSingleRegistration<ILiveOpsAccountRiskService>(services, ServiceLifetime.Scoped);
+        AssertSingleRegistration<IAccountTemporalCorrelationService>(services, ServiceLifetime.Scoped);
+        AssertSingleRegistration<IChatModerationGateway>(services, ServiceLifetime.Scoped);
+        AssertSingleRegistration<TimeProvider>(services, ServiceLifetime.Singleton);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void LiveOps_registration_paths_validate_temporal_correlation_options(
+        bool registerFullGameServices)
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                [$"{AccountTemporalCorrelationOptions.SectionName}:AnalysisVersion"] = "0"
+            })
+            .Build();
+        var services = RegisterServices(configuration, registerFullGameServices);
+
+        using var provider = services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<AccountTemporalCorrelationOptions>>();
+
+        Assert.Throws<OptionsValidationException>(() => options.Value);
     }
 
     [Fact]
@@ -209,5 +249,31 @@ public sealed class LiveOpsApplicationRegistrationTests
         Assert.Equal(10, result[0].Quantity);
         Assert.IsType<EquipmentInstanceDto>(result[1].ItemInstance);
         Assert.IsType<EssenceItemInstanceDto>(result[2].ItemInstance);
+    }
+
+    private static ServiceCollection RegisterServices(
+        IConfiguration configuration,
+        bool registerFullGameServices)
+    {
+        var services = new ServiceCollection();
+        if (registerFullGameServices)
+        {
+            services.AddServices(configuration, Directory.GetCurrentDirectory());
+        }
+        else
+        {
+            services.AddLiveOpsServices(configuration);
+        }
+
+        return services;
+    }
+
+    private static void AssertSingleRegistration<TService>(
+        ServiceCollection services,
+        ServiceLifetime expectedLifetime)
+    {
+        var descriptor = Assert.Single(services, candidate =>
+            candidate.ServiceType == typeof(TService));
+        Assert.Equal(expectedLifetime, descriptor.Lifetime);
     }
 }

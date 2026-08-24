@@ -8,5 +8,8 @@ public class ArenaTicketStatusConfiguration : IEntityTypeConfiguration<ArenaTick
     public void Configure(EntityTypeBuilder<ArenaTicketStatus> builder)
     {
         builder.HasKey(b => b.CharacterId);
+        builder.ToTable(table => table.HasCheckConstraint(
+            "CK_ArenaTicketStatus_CurrentTickets_Range",
+            "\"CurrentTickets\" >= 0 AND \"CurrentTickets\" <= 5"));
     }
 }

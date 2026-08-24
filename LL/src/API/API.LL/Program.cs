@@ -64,8 +64,9 @@ builder.Services.AddProblemDetails(options =>
 {
     options.CustomizeProblemDetails = context =>
     {
-        context.ProblemDetails.Extensions["requestId"] =
-            RequestLoggingMiddleware.GetRequestId(context.HttpContext);
+        ApiErrorContract.Enrich(
+            context.ProblemDetails,
+            context.HttpContext);
     };
 });
 builder.Services.AddExceptionHandler<ConcurrencyExceptionHandler>();

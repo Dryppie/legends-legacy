@@ -106,6 +106,35 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration config)
     {
+        services.AddLiveOpsAdministrationServices(config);
+        services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IInventoryItemFactory, InventoryItemFactory>();
+        services.AddSingleton<IGameEventOutboxConsumerRegistry, GameEventOutboxConsumerRegistry>();
+        services.AddScoped<IGameEventOutbox, GameEventOutbox>();
+        services.AddScoped<IGameRealtimeBroadcaster, OutboxGameRealtimeBroadcaster>();
+        services.AddScoped<IStateSyncService, StateSyncService>();
+        services.TryAddSingleton<IEssenceDefinitionValidator, EssenceDefinitionValidator>();
+        services.TryAddSingleton<IEssenceDefinitionRepository>(sp =>
+            new JsonEssenceDefinitionRepository(
+                config,
+                AppContext.BaseDirectory,
+                sp.GetRequiredService<JsonSerializerOptions>(),
+                sp.GetRequiredService<IEssenceDefinitionValidator>()));
+        services.TryAddScoped<IEssenceProgressionService, EssenceProgressionService>();
+        services.TryAddSingleton(_ =>
+        {
+            var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+            options.Converters.Add(new JsonStringEnumConverter());
+            return options;
+        });
+
+        return services;
+    }
+
+    private static IServiceCollection AddLiveOpsAdministrationServices(
+        this IServiceCollection services,
+        IConfiguration config)
+    {
         services.Configure<LiveOpsOptions>(
             config.GetSection(LiveOpsOptions.SectionName));
         services.AddOptions<AccountRiskOptions>()
@@ -171,26 +200,6 @@ public static class DependencyInjection
         services.AddScoped<ILiveOpsAccountRiskService, LiveOpsAccountRiskService>();
         services.AddScoped<IAccountTemporalCorrelationService, AccountTemporalCorrelationService>();
         services.TryAddScoped<IChatModerationGateway, UnavailableChatModerationGateway>();
-        services.AddScoped<IInventoryService, InventoryService>();
-        services.AddScoped<IInventoryItemFactory, InventoryItemFactory>();
-        services.AddSingleton<IGameEventOutboxConsumerRegistry, GameEventOutboxConsumerRegistry>();
-        services.AddScoped<IGameEventOutbox, GameEventOutbox>();
-        services.AddScoped<IGameRealtimeBroadcaster, OutboxGameRealtimeBroadcaster>();
-        services.AddScoped<IStateSyncService, StateSyncService>();
-        services.TryAddSingleton<IEssenceDefinitionValidator, EssenceDefinitionValidator>();
-        services.TryAddSingleton<IEssenceDefinitionRepository>(sp =>
-            new JsonEssenceDefinitionRepository(
-                config,
-                AppContext.BaseDirectory,
-                sp.GetRequiredService<JsonSerializerOptions>(),
-                sp.GetRequiredService<IEssenceDefinitionValidator>()));
-        services.TryAddScoped<IEssenceProgressionService, EssenceProgressionService>();
-        services.TryAddSingleton(_ =>
-        {
-            var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-            options.Converters.Add(new JsonStringEnumConverter());
-            return options;
-        });
 
         return services;
     }
@@ -223,49 +232,7 @@ public static class DependencyInjection
 
         services.AddScoped<IAttributeService, AttributeService>();
         services.AddScoped<IAchievementService, AchievementService>();
-        services.Configure<LiveOpsOptions>(config.GetSection(LiveOpsOptions.SectionName));
-        services.TryAddSingleton<AccountRestrictionIndex>();
-        services.TryAddSingleton<IAccountRestrictionIndex>(sp =>
-            sp.GetRequiredService<AccountRestrictionIndex>());
-        services.AddScoped<IAccountAccessPolicy, AccountAccessPolicy>();
-        services.AddScoped<ILiveOpsService, LiveOpsService>();
-        services.AddOptions<AccountRiskOptions>()
-            .Bind(config.GetSection(AccountRiskOptions.SectionName))
-            .Validate(x => x.EvaluationVersion > 0 && x.LookbackDays > 0 && x.CandidateLimit > 0 &&
-                           x.MaximumTransfersPerEvaluation > 0 && x.MinimumTransferCount > 0 &&
-                           x.MinimumCounterpartyCount > 0 && x.MinimumRelationshipCinders > 0 &&
-                           x.MinimumItemTransferCount > 0 && x.MinimumItemFunnelTransferCount > 0 &&
-                           x.MinimumItemFunnelCounterpartyCount > 0 &&
-                           x.ItemFunnelFullScaleTransferCount >= x.MinimumItemFunnelTransferCount &&
-                           x.MinimumConsolidatedItemAssetCount > 0 && x.MinimumConsolidatedItemQuantity > 0 &&
-                           x.MinimumConsolidatedItemTransferCount > 0 &&
-                           x.MinimumYoungItemSourceTransferCount > 0 &&
-                           x.MinimumYoungItemSourceCounterpartyCount > 0 &&
-                           x.MinimumYoungItemCoordinationTransferCount > 0 &&
-                           x.MinimumYoungItemCoordinationCounterpartyCount > 0 &&
-                           x.MinimumMixedDirectionItemTransferCount > 0 &&
-                           x.ItemTransferSessionWindowMinutes > 0 && x.MinimumItemCoordinationSessionCount > 0 &&
-                           x.MinimumEphemeralItemOutflowTransferCount > 0 &&
-                           x.MinimumEphemeralItemDistinctAssetCount > 0 &&
-                           x.EphemeralAccountMaximumSessionSpanHours > 0 &&
-                           x.EphemeralAccountMinimumDormantDays > 0 &&
-                           x.MinimumFeederCinders > 0 &&
-                           x.MinimumYoungAccountOutflowCinders > 0 && x.MinimumCircularTransferCinders > 0,
-                "LiveOps account-risk limits must be positive.")
-            .Validate(x => x.ModerateScore >= 0 && x.ModerateScore < x.HighScore && x.HighScore < x.CriticalScore && x.CriticalScore <= 100,
-                "LiveOps account-risk severity thresholds must be ordered within 0-100.")
-            .Validate(x => x.ItemFunnelIncomingShareThreshold is > 0 and <= 1,
-                "The incoming-item funnel share threshold must be within (0, 1].")
-            .Validate(x => x.ConsolidatedItemIncomingShareThreshold is > 0.5m and <= 1 &&
-                           x.ItemCoordinationDominantSessionShareThreshold is > 0.5m and <= 1 &&
-                           x.EphemeralItemTargetShareThreshold is > 0.5m and <= 1,
-                "Item consolidation, coordination, and ephemeral-outflow share thresholds must be within (0.5, 1].")
-            .ValidateOnStart();
-        services.AddScoped<ILiveOpsAccountRiskService, LiveOpsAccountRiskService>();
-        services.Configure<AccountTemporalCorrelationOptions>(
-            config.GetSection(AccountTemporalCorrelationOptions.SectionName));
-        services.AddScoped<IAccountTemporalCorrelationService, AccountTemporalCorrelationService>();
-        services.TryAddScoped<IChatModerationGateway, UnavailableChatModerationGateway>();
+        services.AddLiveOpsAdministrationServices(config);
         services.Configure<AchievementSystemChatOptions>(config.GetSection("Chat:SystemMessages"));
         services.AddSingleton<HttpClient>();
         services.AddScoped<IAchievementSystemChatPublisher, AchievementSystemChatPublisher>();
@@ -335,7 +302,6 @@ public static class DependencyInjection
                         && reward.SigilFragments >= 0)),
                 "Tournament Grounds scheduling, playback, and reward settings are invalid.")
             .ValidateOnStart();
-        services.AddSingleton(TimeProvider.System);
         services.AddScoped<ITournamentLockService, PostgresTournamentLockService>();
         services.AddScoped<ITournamentGroundsService, TournamentGroundsService>();
         services.AddScoped<IRatingService, RatingService>();

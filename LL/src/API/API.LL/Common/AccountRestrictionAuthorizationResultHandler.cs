@@ -40,18 +40,15 @@ public sealed class AccountRestrictionAuthorizationResultHandler(
 
         context.Response.StatusCode = StatusCodes.Status403Forbidden;
         context.Response.ContentType = "application/problem+json";
-        var details = new ProblemDetails
-        {
-            Status = StatusCodes.Status403Forbidden,
-            Title = "Account access restricted",
-            Detail = code == "account_multiplayer_restricted"
+        var details = ApiErrorContract.Create(
+            context,
+            StatusCodes.Status403Forbidden,
+            "Account access restricted",
+            code == "account_multiplayer_restricted"
                 ? "Access to multiplayer and player-economy services has been restricted for this account."
                 : "Access to the game has been restricted for this account.",
-            Instance = context.Request.Path
-        };
-        details.Extensions["code"] = code;
-        details.Extensions["requestId"] =
-            RequestLoggingMiddleware.GetRequestId(context);
+            code,
+            "authorization");
         if (access.EffectiveRestriction?.ExpiresAt is { } expiresAt)
         {
             details.Extensions["expiresAt"] = expiresAt;

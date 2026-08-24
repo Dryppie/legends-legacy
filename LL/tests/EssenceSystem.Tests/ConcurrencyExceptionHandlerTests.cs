@@ -34,5 +34,14 @@ public sealed class ConcurrencyExceptionHandlerTests
         Assert.Equal(
             "request-409",
             body.RootElement.GetProperty("requestId").GetString());
+        Assert.Equal(
+            "concurrent_update",
+            body.RootElement.GetProperty("code").GetString());
+        Assert.Equal(
+            "conflict",
+            body.RootElement.GetProperty("category").GetString());
+        Assert.Equal(
+            body.RootElement.GetProperty("detail").GetString(),
+            body.RootElement.GetProperty("message").GetString());
     }
 }

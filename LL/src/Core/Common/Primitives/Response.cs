@@ -1,13 +1,26 @@
 ﻿namespace Common.Primitives;
 public class Response<T>
 {
+    public const string DefaultErrorCode = "business_rule_rejected";
+
     public bool IsSuccess { get; init; }
     public T? Data { get; init; }
-    public string ErrorMessage { get; init; } =  string.Empty;
+    public string ErrorMessage { get; init; } = string.Empty;
+    public string ErrorCode { get; init; } = DefaultErrorCode;
 
     public static Response<T> Success(T data) =>
         new() { IsSuccess = true, Data = data };
 
     public static Response<T> Fail(string error) =>
-        new() { IsSuccess = false, ErrorMessage = error };
+        Fail(error, DefaultErrorCode);
+
+    public static Response<T> Fail(string error, string errorCode) =>
+        new()
+        {
+            IsSuccess = false,
+            ErrorMessage = error,
+            ErrorCode = string.IsNullOrWhiteSpace(errorCode)
+                ? DefaultErrorCode
+                : errorCode
+        };
 }
