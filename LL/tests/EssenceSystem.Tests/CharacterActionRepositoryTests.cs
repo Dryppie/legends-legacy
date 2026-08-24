@@ -156,6 +156,7 @@ public sealed class CharacterActionRepositoryTests
                 now),
             now,
             CancellationToken.None))!;
+        Assert.Equal("first-area", combat.ReturnToCombatAreaId);
         combat.NextResolutionAtUtc = now.AddSeconds(30);
         await db.SaveChangesAsync();
 
@@ -360,6 +361,7 @@ public sealed class CharacterActionRepositoryTests
 
         Assert.NotNull(combat);
         Assert.IsType<CombatActionDetails>(combat.ActionDetails);
+        Assert.Equal("first-area", combat.ReturnToCombatAreaId);
         var paused = await repository.GetPausedTemperingQueueAsync(
             characterId,
             CancellationToken.None);
@@ -433,7 +435,7 @@ public sealed class CharacterActionRepositoryTests
             completionBoundary.AddSeconds(CharacterActionTimingConstants.CombatSwitchLockSeconds),
             persisted.BlockedUntilUtc);
         Assert.Equal(2, persisted.ScheduleGeneration);
-        Assert.Null(persisted.ReturnToCombatAreaId);
+        Assert.Equal(area.Id, persisted.ReturnToCombatAreaId);
         Assert.Equal(area.Id, combatDetails.AreaId);
         Assert.Single(db.ActionDetails);
     }

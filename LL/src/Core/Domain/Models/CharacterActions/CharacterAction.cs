@@ -32,10 +32,9 @@ public class CharacterAction
     /// </summary>
     public DateTimeOffset? BlockedUntilUtc { get; set; }
     /// <summary>
-    /// Standard combat area to resume when the next active Tempering queue
-    /// finishes naturally. Captured when combat is interrupted by Tempering or
-    /// explicitly stopped. Null means queue completion should leave the
-    /// character idle.
+    /// Most recent standard combat area eligible for automatic return after a
+    /// Tempering queue finishes naturally. Set whenever standard combat begins.
+    /// Null means queue completion should leave the character idle.
     /// </summary>
     public string? ReturnToCombatAreaId { get; set; }
     public long ScheduleGeneration { get; set; } = 1;

@@ -379,7 +379,7 @@ public sealed class CharacterActionFlowTests
         Assert.Equal(CharacterActionType.Combat, result.CharacterActionType);
         Assert.False(result.IsDeleted);
         Assert.True(result.AutoResumedFromTempering);
-        Assert.Null(result.ReturnToCombatAreaId);
+        Assert.Equal("first-area", result.ReturnToCombatAreaId);
         Assert.NotNull(result.TemperingSession);
         Assert.Same(combat.Session, result.CombatSession);
         Assert.Equal(completionBoundary, repository.LastCombatResumeAt);
@@ -488,7 +488,7 @@ public sealed class CharacterActionFlowTests
             characterAction.BlockedUntilUtc = combatStartsAt.AddSeconds(
                 CharacterActionTimingConstants.CombatSwitchLockSeconds);
             characterAction.ScheduleGeneration++;
-            characterAction.ReturnToCombatAreaId = null;
+            characterAction.ReturnToCombatAreaId = combatActionDetails.AreaId;
             characterAction.AutoResumedFromTempering = true;
             return true;
         }

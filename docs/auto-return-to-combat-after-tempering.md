@@ -2,7 +2,7 @@
 
 ## Summary
 
-When a player interrupts an active standard combat action to begin tempering, or explicitly quits combat before starting tempering, the game should remember that combat area. Once the tempering queue finishes naturally, the character should automatically resume combat in that area.
+Whenever a player enters a standard combat area, the game should remember that area as the eligible return destination. Once a later tempering queue finishes naturally, the character should automatically resume combat in that area.
 
 This must be implemented as a server-side action transition rather than only as a frontend redirect. Queue resolution is lazy, so a client-only implementation would still cause idle time whenever the game is closed or backgrounded.
 
@@ -19,10 +19,10 @@ As a result, finishing a tempering queue leaves the character idle until the pla
 
 ### Remembering the return destination
 
-1. When tempering directly replaces an active standard combat action, the server must remember the combat area's identifier as the queue's return destination.
-2. Explicitly quitting standard combat must retain that combat area as the return destination for the next tempering queue.
-3. "Previously fought area" means either the active area directly interrupted by tempering or the most recently explicitly quit combat area, rather than any area merely visited in the past.
-4. Starting tempering while already idle must preserve a destination captured by explicitly quitting combat; otherwise it must not invent one.
+1. Whenever standard combat begins, including an automatic return from tempering, the server must store that combat area's identifier as the eligible return destination.
+2. Directly replacing or explicitly quitting standard combat must retain the stored destination for the next tempering queue.
+3. "Previously fought area" means the most recently entered standard combat area, rather than any area merely visited without starting combat.
+4. Starting tempering while already idle must preserve the remembered destination; if the player has never entered eligible combat, it must not invent one.
 5. Pausing and later resuming the same tempering queue must retain its return destination.
 6. If a paused tempering queue is resumed while the character is fighting in another standard combat area, that newer area must become the return destination.
 
@@ -61,12 +61,12 @@ Keeping this field on the action root is preferable to storing it on `CraftingAc
 
 The field should be managed as follows:
 
-- Set it when active combat is directly replaced by tempering.
-- Set it when active combat is explicitly stopped, for use by the next tempering queue.
+- Set or replace it whenever standard combat begins, including automatic combat resumption.
+- Retain it when active combat is directly replaced by tempering or explicitly stopped.
 - Preserve it when tempering is paused.
 - Replace it with the current combat area when tempering is resumed from another active combat action.
-- Preserve it when tempering begins from idle after combat was explicitly stopped; otherwise leave it null.
-- Clear it after a successful automatic combat transition.
+- Preserve it when tempering begins from idle; leave it null only when no eligible combat area has been entered.
+- Keep it set to the resumed area after a successful automatic combat transition.
 - Clear it when the queue is explicitly cancelled or its final item is manually removed.
 
 This requires an EF Core migration.
@@ -90,7 +90,7 @@ When natural queue completion is detected:
 7. Set the first combat boundary to the tempering completion timestamp.
 8. Apply the normal combat switch lock from that timestamp.
 9. Resolve combat through the current server time using the existing idle-combat service.
-10. Clear the persisted return destination after the transition succeeds.
+10. Keep the persisted destination set to the resumed combat area after the transition succeeds.
 
 The existing `CharacterActions/Resolve` endpoint should be sufficient. A separate public endpoint is not required.
 

@@ -28,6 +28,7 @@ public class CharacterActionRepository : ICharacterActionRepository
         {
             characterAction.IsDeleted = false; // Ensure it's not marked as deleted on creation
             characterAction.BlockedUntilUtc = GetSwitchLock(characterAction.ActionDetails, now);
+            RememberCombatArea(characterAction, characterAction.ActionDetails);
             await _context.CharacterActions.AddAsync(characterAction, cancellationToken);
             return characterAction;
         }
@@ -43,6 +44,7 @@ public class CharacterActionRepository : ICharacterActionRepository
         existingAction.ScheduleGeneration = checked(existingAction.ScheduleGeneration + 1);
         existingAction.IsDeleted = false;
         existingAction.RowVersion++;
+        RememberCombatArea(existingAction, characterAction.ActionDetails);
 
         if (characterAction.ActionDetails is CombatActionDetails &&
             existingAction.ActionDetails is CraftingActionDetails craftingDetails)
@@ -411,9 +413,19 @@ public class CharacterActionRepository : ICharacterActionRepository
         characterAction.UpdatedAt = now;
         characterAction.ScheduleGeneration = checked(
             characterAction.ScheduleGeneration + 1);
-        characterAction.ReturnToCombatAreaId = null;
+        characterAction.ReturnToCombatAreaId = combatActionDetails.AreaId;
         characterAction.AutoResumedFromTempering = true;
         return true;
+    }
+
+    private static void RememberCombatArea(
+        CharacterAction characterAction,
+        ActionDetails? actionDetails)
+    {
+        if (actionDetails is CombatActionDetails combatDetails)
+        {
+            characterAction.ReturnToCombatAreaId = combatDetails.AreaId;
+        }
     }
 
     public async Task<IReadOnlyList<CraftingQueueItem>> GetPausedTemperingQueueAsync(
