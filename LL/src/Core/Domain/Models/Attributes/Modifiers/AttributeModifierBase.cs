@@ -4,6 +4,7 @@ public class AttributeModifierBase
     public AttributeType AttributeType { get; set; }
     public float Amount { get; set; }
     public ModifierType ModifierType { get; set; }
+    [System.Text.Json.Serialization.JsonConstructor]
     protected AttributeModifierBase(AttributeType attributeType, float amount, ModifierType modifierType = ModifierType.Flat)
     {
         AttributeType = attributeType;

@@ -3,6 +3,8 @@ using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.Equipments.Dtos;
 using Application.UseCases.Items.Dtos;
 using Application.WebSockets.Contracts;
+using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Microsoft.EntityFrameworkCore;
@@ -165,6 +167,64 @@ public sealed class LootHistoryServiceTests
         var equipment = Assert.IsType<EquipmentInstanceDto>(entry.Item.ItemInstance);
         Assert.IsType<EquipmentBaseDto>(equipment.ItemBase);
         Assert.Equal("Test Sword", equipment.DisplayName);
+    }
+
+    [Fact]
+    public async Task Equipment_snapshots_round_trip_shared_attribute_modifiers()
+    {
+        await using var db = CreateDbContext();
+        var characterId = Guid.NewGuid();
+        var service = new LootHistoryService(
+            db,
+            new JsonSerializerOptions(JsonSerializerDefaults.Web)
+            {
+                Converters = { new JsonStringEnumConverter() }
+            },
+            TimeProvider.System,
+            new StateSyncService(
+                db,
+                new RecordingRealtimeBroadcaster(),
+                TimeProvider.System));
+        var item = new InventoryItemDto
+        {
+            ItemInstanceId = Guid.NewGuid(),
+            Quantity = 1,
+            ItemInstance = new EquipmentInstanceDto
+            {
+                Id = Guid.NewGuid(),
+                DisplayName = "Test Sword",
+                ItemBase = new EquipmentBaseDto
+                {
+                    Id = "test-sword",
+                    Name = "Test Sword",
+                    ItemType = ItemType.Equipment,
+                    Stackable = false,
+                    EquipmentType = EquipmentType.OneHanded
+                },
+                AttributeModifiers =
+                [
+                    new ItemAttributeModifier(
+                        AttributeType.Power,
+                        12.5f,
+                        ModifierType.Flat)
+                ]
+            }
+        };
+
+        await service.RecordAsync(
+            characterId,
+            [item],
+            "combat-reward",
+            "Lumo Ruins",
+            CancellationToken.None);
+
+        var entry = Assert.Single(
+            await service.GetRecentAsync(characterId, CancellationToken.None));
+        var equipment = Assert.IsType<EquipmentInstanceDto>(entry.Item.ItemInstance);
+        var modifier = Assert.Single(equipment.AttributeModifiers);
+        Assert.Equal(AttributeType.Power, modifier.AttributeType);
+        Assert.Equal(12.5f, modifier.Amount);
+        Assert.Equal(ModifierType.Flat, modifier.ModifierType);
     }
 
     private static InventoryItemDto CreateItem(int quantity) => new()
