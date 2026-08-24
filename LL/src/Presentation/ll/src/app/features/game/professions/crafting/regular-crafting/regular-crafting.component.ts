@@ -42,6 +42,7 @@ import { EquipmentInstance } from '../../../../../shared/models/item';
 import { Rarity } from '../../../../../shared/models/enums/rarity';
 import { mapInstanceToDisplay } from '../../../../../shared/components/equipment/equipment-display';
 import { AttributeModifier } from '../../../../../shared/models/Dtos/attributesDto';
+import { EquipmentSetProgressComponent } from '../../../../../shared/components/equipment/equipment-set-progress/equipment-set-progress.component';
 
 interface BaseAttributeDisplay {
   attributeType: AttributeType;
@@ -112,7 +113,6 @@ export function matchesRecipeSearch(
 
   const searchableText = [
     recipe.name,
-    recipe.description,
     recipe.category,
     recipe.outputItemType,
     ...recipe.tags,
@@ -120,7 +120,6 @@ export function matchesRecipeSearch(
     ...recipe.blueprints.flatMap((blueprint) => [
       blueprint.name,
       blueprint.craftedItemName,
-      blueprint.description,
       ...blueprint.tags,
     ]),
   ]
@@ -167,6 +166,7 @@ export function matchesCraftedSelection(
     NumberFormatPipe,
     AttributeTypeFormatPipe,
     AttributeValueFormatPipe,
+    EquipmentSetProgressComponent,
   ],
   templateUrl: './regular-crafting.component.html',
   styleUrl: './regular-crafting.component.css',
@@ -387,7 +387,6 @@ export class RegularCraftingComponent {
         return [
           blueprint.name,
           blueprint.craftedItemName,
-          blueprint.description,
           ...blueprint.tags,
         ].some((value) => value.toLowerCase().includes(query));
       })

@@ -227,6 +227,7 @@ public static class EssenceAbilityProgressionScaler
             SummonHealthMultiplier = effect.SummonHealthMultiplier,
             Resource = effect.Resource,
             DurationTicks = effect.DurationTicks,
+            RefreshDuration = effect.RefreshDuration,
             IntervalTicks = effect.IntervalTicks,
             Uses = effect.Uses,
             OncePerTarget = effect.OncePerTarget,

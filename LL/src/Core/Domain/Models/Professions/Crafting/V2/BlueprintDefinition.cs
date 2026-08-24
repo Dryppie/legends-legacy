@@ -6,7 +6,6 @@ public sealed class BlueprintDefinition
 {
     public string Id { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;
-    public string Description { get; init; } = string.Empty;
     public string ItemId { get; init; } = string.Empty;
     public string NameFormat { get; init; } = "{BlueprintName} {BaseName}";
     public IReadOnlyList<string> RequiredRecipeTags { get; init; } = [];

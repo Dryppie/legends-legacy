@@ -67,16 +67,16 @@ permit it.
 | Blueprint | Proposed set ID | Current maximum | Bonuses at | Intended role |
 | --- | --- | ---: | --- | --- |
 | Fury | `set_fury` | 5 | 2, 4 | Critical-hit momentum |
-| Arcane | `set_arcane` | 5 | 2, 4 | Spell cycling and burst windows |
+| Arcane | `set_arcane` | 5 | 2, 4 | Repeated-cast Power windows |
 | Execution | `set_execution` | 5 | 2, 4 | Finishing wounded enemies |
 | Aegis | `set_aegis` | 7 | 2, 4, 6 | Barrier-backed mitigation |
 | Warden | `set_warden` | 7 | 2, 4, 6 | Durable recovery under pressure |
 | Endurance | `set_endurance` | 6 | 2, 4, 6 | Attrition and status resilience |
 | Phoenix | `set_phoenix` | 8 | 2, 4, 6 | Emergency recovery and rebirth |
 | Spirit | `set_spirit` | 8 | 2, 4, 6 | Healing and ally protection |
-| Primal | `set_primal` | 5 | 2, 4 | Summon-linked hybrid power |
-| Venom | `set_venom` | 2 | 2 | Poison buildup and corrosion |
-| Hive | `set_hive` | 2 | 2 | Fast attacks that hatch a summon |
+| Primal | `set_primal` | 5 | 2, 4 | Power scaling from living summons |
+| Venom | `set_venom` | 2 | 2 | Basic-attack Poison application |
+| Hive | `set_hive` | 2 | 2 | Basic-attack-driven speed windows |
 | Raidforged | `set_raidforged` | 8 | 2, 4, 6, 8 | Raid-grade hybrid ramping |
 | Gravebound | `set_gravebound` | 8 | 2, 4, 6, 8 | Retaliation and death-defying sustain |
 
@@ -114,16 +114,17 @@ Source: Forgotten Catacombs dungeon. Current profile emphasizes Power, Magic
 Penetration, Cooldown Reduction, and Crit Chance. Compatible outputs cover
 weapons, Off Hand, Necklace, Relic, and Ring.
 
-Set identity: repeated active spell use creates a controlled burst window.
+Set identity: repeated active ability use creates a controlled Power window.
 
 | Equipped | Bonus | Implementation kind |
 | ---: | --- | --- |
 | 2 | **Arcane Attunement:** +5 percentage points Magic Penetration and +3 percentage points Cooldown Reduction. | Static attribute modifiers |
-| 4 | **Arcane Surge:** Using an active ability grants one Arcane Charge for 12 seconds. At 5 charges, consume them to gain Arcane Surge for 6 seconds. Arcane Surge increases damage, healing, and barriers by 12%. It has a 12-second cooldown. | Passive ability using `OnAbilityUsed`, condition stacks, resource restoration, and timed output modifiers |
+| 4 | **Arcane Surge:** Every third active ability grants +15% Power for 6 seconds. Reapplying the effect refreshes its duration rather than stacking it. | Passive ability using `OnAbilityUsed`, `everyNthOccurrence`, and a refreshing timed Power modifier |
 
-The cooldown begins when Arcane Surge activates, not when the first charge is
-gained. Characters without Mana still receive Arcane Surge but skip the resource
-restoration.
+Only active abilities count. The recurring trigger has no separate cooldown, so
+every third qualifying use activates Arcane Surge even while an earlier Surge is
+active; in that case the existing +15% modifier is replaced and its six-second
+duration starts again.
 
 ### Execution — `set_execution`
 
@@ -246,11 +247,11 @@ Set identity: the wearer and their owned summons reinforce one another.
 | Equipped | Bonus | Implementation kind |
 | ---: | --- | --- |
 | 2 | **Primal Vigor:** +6% total Power and +6% total Max Health. | Multiplicative static attribute modifiers |
-| 4 | **Strength of the Pack:** Each living owned summon increases the wearer's total Power by 4%, up to three summons. While at least one owned summon is alive, also gain +8 percentage points Crowd Control Resistance. | Maintained passive using `OnSummonChanged` and `SynchronizeAttributePerOwnedSummon` |
+| 4 | **Strength of the Pack:** Gain +5% Power for every living summon, up to three. | Maintained passive using `OnSummonChanged` and `SynchronizeAttributePerOwnedSummon` |
 
-Only summons owned by the wearer count; allied summons belonging to another
-character do not. The Power bonus caps at +12% even when more than three owned
-summons are alive.
+Only living summons owned by the wearer count; allied summons belonging to
+another character do not. The Power bonus caps at +15% even when more than three
+owned summons are alive.
 
 ### Venom — `set_venom`
 
@@ -258,16 +259,15 @@ Source: Tangled Cave dungeon. Current profile emphasizes Power, Life Steal,
 Crit Chance, and Attack Speed. It currently supports only one- and two-handed
 weapon recipes.
 
-Set identity: two equipped Venom weapons turn direct attacks into reliable
-poison buildup.
+Set identity: two equipped Venom weapons add a concentrated Poison application
+to every Basic Attack.
 
 | Equipped | Bonus | Implementation kind |
 | ---: | --- | --- |
-| 2 | **Venomous Assault:** Direct hits apply one Poison stack for 8 seconds, up to five stacks. Applying a fifth stack also applies Corrosion for 6 seconds. This effect can trigger at most once every 0.5 seconds. | Passive ability using `OnHit`, `EventWasDirectHit`, condition stacks, and condition application |
+| 2 | **Venomous Assault:** Basic Attack applies Poison(5). | Passive ability using `OnBasicAttack` and condition application |
 
-The trigger limiter prevents rapid multi-hit or area abilities from stacking
-Poison instantly. Refreshing a target already at five Poison stacks does not
-reapply Corrosion until Corrosion has expired.
+Only the wearer's Basic Attacks trigger the effect. Active abilities, periodic
+damage, and other direct hits do not apply this set's Poison.
 
 ### Hive — `set_hive`
 
@@ -276,15 +276,16 @@ Resistance, Crit Chance, and Life Steal. It currently supports only the Dagger
 recipe, so its set is completed by dual-wielding two separately crafted Hive
 Daggers.
 
-Set identity: rapid basic attacks incubate and hatch a temporary combat summon.
+Set identity: rapid basic attacks create recurring Attack Speed windows.
 
 | Equipped | Bonus | Implementation kind |
 | ---: | --- | --- |
-| 2 | **Brood Cycle:** Basic attacks grant one Brood stack for 6 seconds, up to five stacks. At five stacks, consume them to summon one Hive Drone for 12 seconds. Only one Hive Drone from this set may exist at a time; attacks while it lives do not build Brood. | Passive ability using `OnBasicAttack`, condition stacks, stack consumption, and `Summon` |
+| 2 | **Brood Cycle:** Every fifth Basic Attack grants +15% Attack Speed for 6 seconds. Reapplying the effect refreshes its duration rather than stacking it. | Passive ability using `OnBasicAttack`, `everyNthOccurrence`, and a refreshing timed Attack Speed modifier |
 
-The Hive Drone needs its own calibrated summon definition. It should deal
-steady poison-tagged damage rather than provide crowd control, keeping Hive
-distinct from Venom's direct Poison and Corrosion application.
+Brood Cycle counts Basic Attacks continuously. Reaching another fifth attack
+while the speed bonus is active replaces the existing modifier and restarts its
+six-second duration, preserving the cadence without allowing multiple +15%
+bonuses.
 
 ### Raidforged — `set_raidforged`
 
@@ -361,11 +362,11 @@ Implement benefits in increasing order of engine complexity:
    2/4, and Gravebound 2/4.
 3. Implement one conditional damage vertical slice with Execution 4.
 4. Implement maintained state with Aegis 6 and Phoenix 4.
-5. Implement stacking-condition bonuses with Fury 4, Arcane 4, Venom 2, and
-   Raidforged 6/8.
+5. Implement stacking-condition bonuses with Fury 4 and Raidforged 6/8, plus
+   recurring trigger bonuses for Arcane 4, Venom 2, and Hive 2.
 6. Implement event-driven recovery/support with Warden 6, Endurance 6, Phoenix
    6, Spirit 6, and Gravebound 8.
-7. Implement summon integration last with Primal 4 and Hive 2.
+7. Implement summon integration last with Primal 4.
 
 The first release can enable only calibrated static thresholds while leaving
 complex thresholds visible as "coming later." A set should never silently show
@@ -391,15 +392,14 @@ Before enabling a set in production:
 - Verify triggers cannot recursively activate themselves or other set triggers
   without the normal repeat/echo restrictions.
 - Verify Phoenix 6 and Gravebound 8 do not claim to prevent lethal damage.
-- Calibrate the Hive Drone as part of the Hive set's budget, not as free power in
-  addition to a normal two-item capstone.
+- Verify Arcane and Hive refresh their timed modifiers without increasing the
+  modifier amount.
 
 ## Decisions intentionally deferred
 
 - Final numerical tuning after combat calibration.
 - Player-facing set display names beyond the Blueprint names.
-- Exact status/condition definition IDs for Fury, Arcane Charge/Surge, Heat,
-  Forgeguard, Brood, and the Hive Drone.
+- Exact status/condition definition IDs for Fury, Heat, and Forgeguard.
 - Whether complex bonuses launch together or in staged content updates.
 - Whether retired Blueprints keep crafting enabled while their bonuses remain
   active for existing items.

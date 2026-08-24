@@ -1,0 +1,30 @@
+<div class="equipment-set-panel">
+  <div class="equipment-set-heading">
+    <div class="equipment-set-name">{{ equipmentSet.name }}</div>
+    <div *ngIf="equippedItems !== null" class="equipment-set-count">
+      <span>{{ equippedCount }}/{{ maximumThreshold }} equipped</span>
+    </div>
+  </div>
+  <p *ngIf="equipmentSet.description" class="equipment-set-description">
+    {{ equipmentSet.description }}
+  </p>
+  <div *ngIf="equipmentSet.bonuses.length" class="equipment-set-bonus-list">
+    <div
+      *ngFor="let bonus of equipmentSet.bonuses"
+      class="equipment-set-bonus"
+      [ngClass]="bonusClass(bonus)"
+    >
+      <span class="equipment-set-threshold">
+        {{ bonus.requiredEquippedItems }}
+      </span>
+      <span class="equipment-set-bonus-copy">
+        <span class="equipment-set-bonus-description">
+          {{ bonus.description }}
+        </span>
+        <span *ngIf="equippedItems !== null" class="equipment-set-bonus-state">
+          {{ bonusProgressLabel(bonus) }}
+        </span>
+      </span>
+    </div>
+  </div>
+</div>

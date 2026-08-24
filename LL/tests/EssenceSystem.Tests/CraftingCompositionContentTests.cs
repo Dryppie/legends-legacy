@@ -365,7 +365,6 @@ public sealed class CraftingCompositionContentTests
                 [AttributeType.CritDamage] = 0.25d
             },
             execution.BonusStatProfile);
-        Assert.Contains("Armor Penetration", execution.Description);
         Assert.Contains("ArmorPenetration", execution.Tags);
         Assert.DoesNotContain(AttributeType.CritChance, execution.BonusStatProfile.Keys);
         Assert.Equal(

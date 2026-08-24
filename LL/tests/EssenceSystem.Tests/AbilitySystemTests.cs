@@ -6,6 +6,7 @@ using Domain.Models.Damages;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
+using Domain.Models.Items.Equipments;
 using Domain.Models.Regions.Areas;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -2259,8 +2260,111 @@ public sealed class AbilitySystemTests
                 new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1000))
             .Run([owner, .. summons], [hostile]);
 
-        Assert.Equal(56, owner.GetAttribute(AttributeType.Power));
-        Assert.Equal(8, owner.GetAttribute(AttributeType.CrowdControlResistance));
+        Assert.Equal(57.5f, owner.GetAttribute(AttributeType.Power));
+        Assert.Equal(0, owner.GetAttribute(AttributeType.CrowdControlResistance));
+    }
+
+    [Fact]
+    public void ArcaneSetRefreshesItsPowerWindowWithoutStacking()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var repeatedActive = new AbilitySpec
+        {
+            Id = "ability.test.arcane.repeated_active",
+            Kind = AbilitySpecKind.Active,
+            Name = "Repeated Active",
+            CooldownTicks = 1,
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "effect.test.arcane.repeated_active.threat",
+                    Operation = AbilityEffectOperation.ModifyThreat,
+                    Target = AbilityTargetSelector.Self,
+                    BaseValue = 1
+                }
+            ]
+        };
+        var owner = CreateCombatant(
+            "arcane-owner",
+            CombatTeam.Friendly,
+            [
+                AbilityCompiler.CompileAbility(catalog.AbilitiesById["ability.set.arcane.arcane_surge"]),
+                AbilityCompiler.CompileAbility(repeatedActive)
+            ],
+            canBasicAttack: false);
+        var hostile = CreateCombatant(
+            "arcane-hostile",
+            CombatTeam.Hostile,
+            [],
+            maxHealth: 10_000,
+            canBasicAttack: false);
+
+        new FastCombatEngine(
+                new Dictionary<string, CompiledStatus>(),
+                new FastCombatEngineOptions(MaxTicks: 6, BasicAttackIntervalTicks: 1_000))
+            .Run([owner], [hostile]);
+
+        Assert.Equal(58, owner.GetAttribute(AttributeType.Power));
+        Assert.Single(owner.ActiveEffects, effect =>
+            effect.Definition.Id == "effect.set.arcane.arcane_surge.power");
+    }
+
+    [Fact]
+    public void VenomSetAppliesFivePoisonFromEachBasicAttack()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var owner = CreateCombatant(
+            "venom-owner",
+            CombatTeam.Friendly,
+            [AbilityCompiler.CompileAbility(catalog.AbilitiesById["ability.set.venom.venomous_assault"])]);
+        var hostile = CreateCombatant(
+            "venom-hostile",
+            CombatTeam.Hostile,
+            [],
+            maxHealth: 10_000,
+            canBasicAttack: false);
+
+        new FastCombatEngine(
+                new Dictionary<string, CompiledStatus>(),
+                new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1))
+            .Run([owner], [hostile]);
+
+        Assert.Equal(5, hostile.GetConditionStacks(StandardConditionType.Poison));
+    }
+
+    [Fact]
+    public void HiveSetRefreshesAttackSpeedEveryFifthBasicAttackWithoutStacking()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var owner = CreateCombatant(
+            "hive-owner",
+            CombatTeam.Friendly,
+            [AbilityCompiler.CompileAbility(catalog.AbilitiesById["ability.set.hive.brood_cycle"])]);
+        var hostile = CreateCombatant(
+            "hive-hostile",
+            CombatTeam.Hostile,
+            [],
+            maxHealth: 10_000,
+            canBasicAttack: false);
+
+        new FastCombatEngine(
+                new Dictionary<string, CompiledStatus>(),
+                new FastCombatEngineOptions(MaxTicks: 10, BasicAttackIntervalTicks: 1))
+            .Run([owner], [hostile]);
+
+        Assert.Equal(15, owner.GetAttribute(AttributeType.AttackSpeed));
+        Assert.Single(owner.ActiveEffects, effect =>
+            effect.Definition.Id == "effect.set.hive.brood_cycle.attack_speed");
     }
 
     [Fact]
@@ -4051,7 +4155,7 @@ public sealed class AbilitySystemTests
         Assert.All(allAbilityIds, profile =>
             Assert.Equal(profile.MonsterId is "monster.hobgoblin" or "monster.spider_queen" or "monster.elder_treant" ? 3 : 2, profile.AbilityIds.Count));
         Assert.Equal(137, allAbilityIds.SelectMany(x => x.AbilityIds).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(193, catalog.AbilitiesById.Count);
+        Assert.Equal(192, catalog.AbilitiesById.Count);
         Assert.Contains("ability.summon.shadow_image.shadow_strike", catalog.AbilitiesById.Keys);
         Assert.All(allAbilityIds.SelectMany(x => x.AbilityIds), abilityId =>
         {
@@ -6399,6 +6503,7 @@ public sealed class AbilitySystemTests
     [InlineData(CombatMode.Dungeon)]
     [InlineData(CombatMode.Pvp)]
     [InlineData(CombatMode.Raid)]
+    [InlineData(CombatMode.RegionBoss)]
     public async Task Combat_engine_executor_runs_outer_runtime_shapes(CombatMode mode)
     {
         var runtime = CreateTrainingEncounterRuntime(out _, out _, mode);
@@ -6417,6 +6522,46 @@ public sealed class AbilitySystemTests
         Assert.NotEmpty(result.EventLog);
         Assert.NotEmpty(result.EntityStats);
         Assert.Contains(result.EventLog, x => x.Source == "effect.creature.goblin.shiv_jab.damage" && x.EventType == EventType.Damage);
+    }
+
+    [Theory]
+    [InlineData(CombatMode.Idle)]
+    [InlineData(CombatMode.Dungeon)]
+    [InlineData(CombatMode.Pvp)]
+    [InlineData(CombatMode.Raid)]
+    [InlineData(CombatMode.RegionBoss)]
+    public async Task Equipped_set_abilities_activate_in_every_combat_mode(CombatMode mode)
+    {
+        var runtime = CreateTrainingEncounterRuntime(out _, out _, mode);
+        var friendly = runtime.FriendlyParticipants.Single().Combatant;
+        friendly.EquippedEssences.Clear();
+        friendly.Equipment =
+        [
+            new EquipmentInstance { Id = Guid.NewGuid(), EquipmentSetId = "set_hive" },
+            new EquipmentInstance { Id = Guid.NewGuid(), EquipmentSetId = "set_hive" }
+        ];
+        IncreaseMaxHealth(friendly, 10_000);
+        IncreaseMaxHealth(runtime.HostileParticipants.Single().Combatant, 10_000);
+
+        var configuration = CreateConfig();
+        var contentRoot = FindApiContentRoot();
+        var jsonOptions = CreateJsonOptions();
+        var executor = new CombatEngineExecutor(
+            new JsonAbilityCatalogProvider(configuration, contentRoot, jsonOptions),
+            craftingDefinitions: new JsonCraftingDefinitionProvider(configuration, contentRoot, jsonOptions));
+
+        var result = await executor.ExecuteSimulationAsync(
+            runtime,
+            new CombatSimulationOptions(
+                RandomSeed: 123,
+                MaxTicks: 10,
+                StartActiveAbilitiesOnCooldown: false,
+                BasicAttackIntervalTicks: 1),
+            CancellationToken.None);
+
+        Assert.Contains(result.EventLog, log =>
+            log.Source == "effect.set.hive.brood_cycle.attack_speed"
+            && log.EventType == EventType.Buff);
     }
 
     [Fact]
@@ -6778,6 +6923,7 @@ public sealed class AbilitySystemTests
             CombatMode.Dungeon => new DungeonEncounterSourceContext(Guid.NewGuid()),
             CombatMode.Pvp => new PvpEncounterSourceContext(Guid.NewGuid(), friendlyCharacterId, hostileCharacterId),
             CombatMode.Raid => new RaidEncounterSourceContext(Guid.NewGuid(), PhaseIndex: 1, StageKey: "test-stage"),
+            CombatMode.RegionBoss => new RegionBossEncounterSourceContext(Guid.NewGuid()),
             _ => new IdleEncounterSourceContext(friendlyCharacterId, new Area(), TimeSpan.FromSeconds(1))
         };
 

@@ -10,7 +10,6 @@ public sealed class BlueprintItemMetadataDto
 {
     public string BlueprintId { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;
-    public string Description { get; init; } = string.Empty;
     public IReadOnlyDictionary<AttributeType, double> BonusStatProfile { get; init; } =
         new Dictionary<AttributeType, double>();
     public IReadOnlyList<string> RequiredRecipeTags { get; init; } = [];
@@ -73,7 +72,6 @@ public sealed class BlueprintItemMetadataResolver
         {
             BlueprintId = blueprint.Id,
             Name = blueprint.Name,
-            Description = blueprint.Description,
             BonusStatProfile = blueprint.BonusStatProfile,
             RequiredRecipeTags = blueprint.RequiredRecipeTags,
             AnyRecipeTags = blueprint.AnyRecipeTags,

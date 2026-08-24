@@ -1849,6 +1849,5 @@
   {"id": "behavior.set.spirit.sheltering_spirit.catalog_only", "abilityId": "ability.set.spirit.sheltering_spirit", "friendlyAbilityIds": ["ability.set.spirit.sheltering_spirit"], "maxTicks": 1, "expectedLogs": []},
   {"id": "behavior.set.primal.strength_of_the_pack.catalog_only", "abilityId": "ability.set.primal.strength_of_the_pack", "friendlyAbilityIds": ["ability.set.primal.strength_of_the_pack"], "maxTicks": 1, "expectedLogs": []},
   {"id": "behavior.set.venom.venomous_assault.catalog_only", "abilityId": "ability.set.venom.venomous_assault", "friendlyAbilityIds": ["ability.set.venom.venomous_assault"], "maxTicks": 1, "expectedLogs": []},
-  {"id": "behavior.set.hive.brood_cycle.catalog_only", "abilityId": "ability.set.hive.brood_cycle", "friendlyAbilityIds": ["ability.set.hive.brood_cycle"], "maxTicks": 1, "expectedLogs": []},
-  {"id": "behavior.summon.hive_drone.venom_spit.applies_poison", "abilityId": "ability.summon.hive_drone.venom_spit", "friendlyAbilityIds": ["ability.summon.hive_drone.venom_spit"], "maxTicks": 1, "expectedConditions": [{"combatantId": "hostile-1", "condition": "Poison", "minStacks": 3}], "expectedLogs": []}
+  {"id": "behavior.set.hive.brood_cycle.catalog_only", "abilityId": "ability.set.hive.brood_cycle", "friendlyAbilityIds": ["ability.set.hive.brood_cycle"], "maxTicks": 1, "expectedLogs": []}
 ]

@@ -101,7 +101,6 @@ function recipeWithBlueprint(
 ): CraftingRecipe {
   return {
     name: recipeName,
-    description: `Craft a ${recipeName}.`,
     category: 'ArmorForging',
     outputItemType: EquipmentType.Head,
     tags: [],
@@ -110,7 +109,6 @@ function recipeWithBlueprint(
       {
         name: blueprintName,
         craftedItemName,
-        description: '',
         tags: [],
       },
     ],

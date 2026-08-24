@@ -88,7 +88,6 @@ export interface SelectionCrateOption {
 export interface BlueprintItemMetadata {
   blueprintId: string;
   name: string;
-  description: string;
   bonusStatProfile: Record<string, number>;
   requiredRecipeTags: string[];
   anyRecipeTags: string[];
@@ -121,7 +120,6 @@ export interface EquipmentCraftingDesignMetadata {
   recipeId: string;
   blueprintId?: string | null;
   name: string;
-  description: string;
   handedness: string;
   attackCategory: string;
   rangeCategory: string;

@@ -9,7 +9,6 @@ public sealed class CraftingBlueprintDto
     public string Id { get; init; } = string.Empty;
     public string ItemId { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;
-    public string Description { get; init; } = string.Empty;
     public string CraftedItemName { get; init; } = string.Empty;
     public bool IsLearned { get; init; }
     public bool IsLocked => !IsLearned;

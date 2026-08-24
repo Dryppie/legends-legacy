@@ -256,6 +256,12 @@ public static class AbilityCatalogValidator
             if (effect.DurationTicks < 0 || effect.IntervalTicks < 0 || effect.Uses < 0)
                 errors.Add($"{label}: duration, interval, and uses cannot be negative.");
 
+            if (effect.RefreshDuration
+                && (effect.DurationTicks <= 0 || !IsMaintainableModifierOperation(effect.Operation)))
+            {
+                errors.Add($"{label}: refreshDuration requires a timed modifier operation.");
+            }
+
             if (effect.MaintainWhileConditionsMet)
             {
                 if (!IsMaintainableModifierOperation(effect.Operation))

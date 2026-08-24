@@ -37,7 +37,7 @@
       {
         "id": "arcane_surge",
         "requiredEquippedItems": 4,
-        "description": "Every third active ability reduces current cooldowns by 1 second and grants 12% of current Power for 6 seconds.",
+        "description": "Every third active ability grants +15% Power for 6 seconds. Does not stack.",
         "grantedAbilityIds": ["ability.set.arcane.arcane_surge"]
       }
     ]
@@ -229,7 +229,7 @@
       {
         "id": "strength_of_the_pack",
         "requiredEquippedItems": 4,
-        "description": "Each living owned summon grants 4% of initial Power, up to three. At least one also grants 8% Crowd Control Resistance.",
+        "description": "Gain +5% Power for every living summon, up to three.",
         "grantedAbilityIds": ["ability.set.primal.strength_of_the_pack"]
       }
     ]
@@ -237,12 +237,12 @@
   {
     "id": "set_venom",
     "name": "Venom",
-    "description": "Two equipped Venom weapons turn direct hits into reliable Poison buildup.",
+    "description": "Basic attacks deliver a concentrated dose of Poison.",
     "bonuses": [
       {
         "id": "venomous_assault",
         "requiredEquippedItems": 2,
-        "description": "Direct hits apply Poison. Targets at five Poison stacks also receive Corrosion.",
+        "description": "Basic Attack applies Poison(5).",
         "grantedAbilityIds": ["ability.set.venom.venomous_assault"]
       }
     ]
@@ -250,12 +250,12 @@
   {
     "id": "set_hive",
     "name": "Hive",
-    "description": "Rapid basic attacks hatch a temporary combat summon.",
+    "description": "Rapid basic attacks accelerate the wearer.",
     "bonuses": [
       {
         "id": "brood_cycle",
         "requiredEquippedItems": 2,
-        "description": "Every fifth basic attack summons a Hive Drone for 12 seconds. Only one can be active.",
+        "description": "Every fifth Basic Attack grants +15% Attack Speed for 6 seconds. Does not stack.",
         "grantedAbilityIds": ["ability.set.hive.brood_cycle"]
       }
     ]

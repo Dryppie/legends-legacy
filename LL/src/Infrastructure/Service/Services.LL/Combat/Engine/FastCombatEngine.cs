@@ -1289,6 +1289,13 @@ public sealed class FastCombatEngine
             return;
         }
 
+        if (effect.RefreshDuration
+            && effect.DurationTicks > 0
+            && IsTimedModifierOperation(effect.Operation))
+        {
+            RemoveExistingTimedModifier(effect, source, target);
+        }
+
         var appliedModifierValue = effect.DurationTicks > 0 && IsTimedModifierOperation(effect.Operation)
             ? (int?)CalculateValue(effect, source, target, combatants, combatEvent, targetIndex)
             : null;
@@ -1314,6 +1321,27 @@ public sealed class FastCombatEngine
                 statsSource,
                 durationMultiplier,
                 appliedModifierValue: appliedModifierValue));
+        }
+    }
+
+    private void RemoveExistingTimedModifier(
+        CompiledEffect effect,
+        RuntimeCombatant source,
+        RuntimeCombatant target)
+    {
+        for (var index = target.ActiveEffects.Count - 1; index >= 0; index--)
+        {
+            var activeEffect = target.ActiveEffects[index];
+            if (!ReferenceEquals(activeEffect.Definition, effect)
+                || !ReferenceEquals(activeEffect.Source, source))
+            {
+                continue;
+            }
+
+            if (activeEffect.AppliedModifierValue is { } appliedModifierValue)
+                RemoveModifierValue(effect, target, appliedModifierValue);
+
+            target.ActiveEffects.RemoveAt(index);
         }
     }
 

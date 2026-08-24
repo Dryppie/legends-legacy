@@ -2,7 +2,6 @@
   {
     "id": "blueprint_fury",
     "name": "Blueprint: Fury",
-    "description": "Applies the Fury design to a compatible recipe.",
     "itemId": "blueprint_fury",
     "nameFormat": "{BaseName} of Fury",
     "requiredRecipeTags": [],
@@ -82,7 +81,6 @@
   {
     "id": "blueprint_arcane",
     "name": "Blueprint: Arcane",
-    "description": "Applies the Arcane design to a compatible recipe.",
     "itemId": "blueprint_arcane",
     "nameFormat": "Arcane {BaseName}",
     "requiredRecipeTags": [],
@@ -173,7 +171,6 @@
   {
     "id": "blueprint_execution",
     "name": "Blueprint: Execution",
-    "description": "Focuses Power, Armor Penetration, and critical impact into an anti-armor finishing design.",
     "itemId": "blueprint_execution",
     "nameFormat": "{BaseName} of Execution",
     "requiredRecipeTags": [],
@@ -254,7 +251,6 @@
   {
     "id": "blueprint_aegis",
     "name": "Blueprint: Aegis",
-    "description": "Applies the Aegis design to a compatible recipe.",
     "itemId": "blueprint_aegis",
     "nameFormat": "Aegis {BaseName}",
     "requiredRecipeTags": [],
@@ -345,7 +341,6 @@
   {
     "id": "blueprint_warden",
     "name": "Blueprint: Warden",
-    "description": "Applies the Warden design to a compatible recipe.",
     "itemId": "blueprint_warden",
     "nameFormat": "Warden's {BaseName}",
     "requiredRecipeTags": [],
@@ -436,7 +431,6 @@
   {
     "id": "blueprint_endurance",
     "name": "Blueprint: Endurance",
-    "description": "Applies the Endurance design to a compatible recipe.",
     "itemId": "blueprint_endurance",
     "nameFormat": "{BaseName} of Endurance",
     "requiredRecipeTags": [],
@@ -525,7 +519,6 @@
   {
     "id": "blueprint_phoenix",
     "name": "Blueprint: Phoenix",
-    "description": "Applies the Phoenix design to a compatible recipe.",
     "itemId": "blueprint_phoenix",
     "nameFormat": "Phoenix {BaseName}",
     "requiredRecipeTags": [],
@@ -616,7 +609,6 @@
   {
     "id": "blueprint_spirit",
     "name": "Blueprint: Spirit",
-    "description": "Applies the Spirit design to a compatible recipe.",
     "itemId": "blueprint_spirit",
     "nameFormat": "Spirit {BaseName}",
     "requiredRecipeTags": [],
@@ -708,7 +700,6 @@
   {
     "id": "blueprint_primal",
     "name": "Blueprint: Primal",
-    "description": "Applies the Primal design to a compatible recipe.",
     "itemId": "blueprint_primal",
     "nameFormat": "Primal {BaseName}",
     "requiredRecipeTags": [],
@@ -789,7 +780,6 @@
   {
     "id": "blueprint_venom",
     "name": "Blueprint: Venom",
-    "description": "Applies the Venom design to a compatible recipe.",
     "itemId": "blueprint_venom_touched_sword",
     "nameFormat": "Venom-Touched {BaseName}",
     "requiredRecipeTags": [
@@ -877,7 +867,6 @@
   {
     "id": "blueprint_hive",
     "name": "Blueprint: Hive",
-    "description": "Applies the Hive design to a compatible recipe.",
     "itemId": "blueprint_hivefang_dagger",
     "nameFormat": "Hivefang {BaseName}",
     "requiredRecipeTags": [
@@ -966,7 +955,6 @@
   {
     "id": "blueprint_raidforged",
     "name": "Blueprint: Raidforged",
-    "description": "Applies the raid-exclusive Raidforged design to compatible equipment.",
     "itemId": "blueprint_raidforged",
     "nameFormat": "Raidforged {BaseName}",
     "requiredRecipeTags": [],
@@ -1002,7 +990,6 @@
   {
     "id": "blueprint_gravebound",
     "name": "Blueprint: Gravebound",
-    "description": "Applies the raid-exclusive Gravebound design to compatible equipment.",
     "itemId": "blueprint_gravebound",
     "nameFormat": "Gravebound {BaseName}",
     "requiredRecipeTags": [],

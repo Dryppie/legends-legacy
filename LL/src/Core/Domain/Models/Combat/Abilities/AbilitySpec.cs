@@ -297,6 +297,7 @@ public sealed class AbilityEffectSpec
     public double SummonHealthMultiplier { get; set; } = 1d;
     public AbilityResourceType Resource { get; set; } = AbilityResourceType.Health;
     public int DurationTicks { get; set; }
+    public bool RefreshDuration { get; set; }
     public int IntervalTicks { get; set; }
     public int Uses { get; set; }
     public bool OncePerTarget { get; set; }

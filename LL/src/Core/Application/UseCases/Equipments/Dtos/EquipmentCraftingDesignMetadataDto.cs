@@ -10,7 +10,6 @@ public sealed class EquipmentCraftingDesignMetadataDto
     public string RecipeId { get; init; } = string.Empty;
     public string? BlueprintId { get; init; }
     public string Name { get; init; } = string.Empty;
-    public string Description { get; init; } = string.Empty;
     public string Handedness { get; init; } = string.Empty;
     public string AttackCategory { get; init; } = string.Empty;
     public string RangeCategory { get; init; } = string.Empty;
@@ -57,7 +56,6 @@ public sealed class EquipmentCraftingDesignMetadataResolver
             RecipeId = recipe.Id,
             BlueprintId = blueprint?.Id,
             Name = design.Name,
-            Description = design.Description,
             Handedness = design.Behavior.Handedness,
             AttackCategory = design.Behavior.AttackCategory,
             RangeCategory = design.Behavior.RangeCategory,

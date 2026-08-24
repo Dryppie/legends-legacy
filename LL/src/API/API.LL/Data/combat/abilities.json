@@ -5581,37 +5581,26 @@
     "id": "ability.set.arcane.arcane_surge",
     "kind": "Passive",
     "name": "Arcane Surge",
-    "description": "Every third active ability reduces current cooldowns by 1 second and grants 12% of current Power for 6 seconds.",
+    "description": "Every third active ability grants +15% Power for 6 seconds. Does not stack.",
     "cooldownTicks": 0,
-    "tags": ["Set", "Arcane", "Cooldown", "Buff"],
+    "tags": ["Set", "Arcane", "Power", "Buff"],
     "triggers": [
       {
         "event": "OnAbilityUsed",
         "everyNthOccurrence": 3,
-        "internalCooldownTicks": 120,
-        "effectIds": [
-          "effect.set.arcane.arcane_surge.cooldown",
-          "effect.set.arcane.arcane_surge.power"
-        ]
+        "effectIds": ["effect.set.arcane.arcane_surge.power"]
       }
     ],
     "effects": [
-      {
-        "id": "effect.set.arcane.arcane_surge.cooldown",
-        "operation": "RestoreResource",
-        "target": "Self",
-        "resource": "Cooldown",
-        "baseValue": 10,
-        "procCoefficient": 1
-      },
       {
         "id": "effect.set.arcane.arcane_surge.power",
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "Power",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 0.12,
+        "scalingCoefficient": 0.15,
         "durationTicks": 60,
+        "refreshDuration": true,
         "procCoefficient": 1
       }
     ]
@@ -5827,23 +5816,17 @@
     "id": "ability.set.primal.strength_of_the_pack",
     "kind": "Passive",
     "name": "Strength of the Pack",
-    "description": "Owned summons grant Power and Crowd Control Resistance.",
+    "description": "Gain +5% Power for every living summon, up to three.",
     "cooldownTicks": 0,
     "tags": ["Set", "Primal", "Summon", "Power"],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [
-          "effect.set.primal.strength_of_the_pack.power",
-          "effect.set.primal.strength_of_the_pack.resistance"
-        ]
+        "effectIds": ["effect.set.primal.strength_of_the_pack.power"]
       },
       {
         "event": "OnSummonChanged",
-        "effectIds": [
-          "effect.set.primal.strength_of_the_pack.power",
-          "effect.set.primal.strength_of_the_pack.resistance"
-        ]
+        "effectIds": ["effect.set.primal.strength_of_the_pack.power"]
       }
     ],
     "effects": [
@@ -5854,17 +5837,7 @@
         "countAllOwnedSummons": true,
         "repeatCount": 3,
         "attribute": "Power",
-        "scalingCoefficient": 0.04,
-        "procCoefficient": 1
-      },
-      {
-        "id": "effect.set.primal.strength_of_the_pack.resistance",
-        "operation": "SynchronizeAttributePerOwnedSummon",
-        "target": "Self",
-        "countAllOwnedSummons": true,
-        "repeatCount": 1,
-        "attribute": "CrowdControlResistance",
-        "baseValue": 8,
+        "scalingCoefficient": 0.05,
         "procCoefficient": 1
       }
     ]
@@ -5873,21 +5846,16 @@
     "id": "ability.set.venom.venomous_assault",
     "kind": "Passive",
     "name": "Venomous Assault",
-    "description": "Direct hits apply Poison. Targets at five Poison stacks also receive Corrosion.",
+    "description": "Basic Attack applies Poison(5).",
     "cooldownTicks": 0,
-    "tags": ["Set", "Venom", "Poison", "Corrosion"],
+    "tags": ["Set", "Venom", "Poison", "Basic Attack"],
     "triggers": [
       {
-        "event": "OnHit",
-        "internalCooldownTicks": 5,
+        "event": "OnBasicAttack",
         "conditions": [
-          { "type": "EventWasDirectHit" },
           { "type": "EventSourceIsSelf" }
         ],
-        "effectIds": [
-          "effect.set.venom.venomous_assault.poison",
-          "effect.set.venom.venomous_assault.corrosion"
-        ]
+        "effectIds": ["effect.set.venom.venomous_assault.poison"]
       }
     ],
     "effects": [
@@ -5896,18 +5864,7 @@
         "operation": "ApplyCondition",
         "target": "EventTarget",
         "condition": "Poison",
-        "baseValue": 1,
-        "procCoefficient": 1
-      },
-      {
-        "id": "effect.set.venom.venomous_assault.corrosion",
-        "operation": "ApplyCondition",
-        "target": "EventTarget",
-        "condition": "Corrosion",
         "baseValue": 5,
-        "conditions": [
-          { "type": "ConditionStacksAtLeast", "subject": "Target", "condition": "Poison", "value": 5 }
-        ],
         "procCoefficient": 1
       }
     ]
@@ -5916,41 +5873,25 @@
     "id": "ability.set.hive.brood_cycle",
     "kind": "Passive",
     "name": "Brood Cycle",
-    "description": "Every fifth basic attack summons a Hive Drone for 12 seconds.",
+    "description": "Every fifth Basic Attack grants +15% Attack Speed for 6 seconds. Does not stack.",
     "cooldownTicks": 0,
-    "tags": ["Set", "Hive", "Summon", "Basic Attack"],
+    "tags": ["Set", "Hive", "Attack Speed", "Basic Attack", "Buff"],
     "triggers": [
       {
         "event": "OnBasicAttack",
         "everyNthOccurrence": 5,
-        "effectIds": ["effect.set.hive.brood_cycle.summon"]
+        "effectIds": ["effect.set.hive.brood_cycle.attack_speed"]
       }
     ],
     "effects": [
       {
-        "id": "effect.set.hive.brood_cycle.summon",
-        "operation": "Summon",
+        "id": "effect.set.hive.brood_cycle.attack_speed",
+        "operation": "ModifyAttribute",
         "target": "Self",
-        "summonId": "hiveDrone",
-        "durationTicks": 120,
-        "procCoefficient": 1
-      }
-    ]
-  },
-  {
-    "id": "ability.summon.hive_drone.venom_spit",
-    "kind": "Active",
-    "name": "Venom Spit",
-    "description": "Apply Poison to a random enemy.",
-    "cooldownTicks": 50,
-    "tags": ["Summon", "Hive", "Poison"],
-    "effects": [
-      {
-        "id": "effect.summon.hive_drone.venom_spit.poison",
-        "operation": "ApplyCondition",
-        "target": "RandomEnemy",
-        "condition": "Poison",
-        "baseValue": 3,
+        "attribute": "AttackSpeed",
+        "baseValue": 15,
+        "durationTicks": 60,
+        "refreshDuration": true,
         "procCoefficient": 1
       }
     ]

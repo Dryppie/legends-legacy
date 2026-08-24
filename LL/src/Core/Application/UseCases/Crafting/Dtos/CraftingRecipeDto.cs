@@ -9,7 +9,6 @@ public sealed class CraftingRecipeDto
 {
     public string Id { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;
-    public string Description { get; init; } = string.Empty;
     public string Icon { get; init; } = string.Empty;
     public CraftType Category { get; init; }
     public string OutputItemId { get; init; } = string.Empty;

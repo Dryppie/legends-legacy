@@ -2,7 +2,6 @@
   {
     "id": "recipe.armor.head.heavy_helm",
     "name": "Heavy Helm",
-    "description": "Craft a Heavy Helm.",
     "icon": "heavy_helm",
     "category": "ArmorForging",
     "recipeFamily": "Armor",
@@ -103,7 +102,6 @@
   {
     "id": "recipe.armor.head.medium_helm",
     "name": "Medium Helm",
-    "description": "Craft a Medium Helm.",
     "icon": "medium_helm",
     "category": "ArmorForging",
     "recipeFamily": "Armor",
@@ -210,7 +208,6 @@
   {
     "id": "recipe.armor.head.light_hood",
     "name": "Light Hood",
-    "description": "Craft a Light Hood.",
     "icon": "light_hood",
     "category": "ArmorForging",
     "recipeFamily": "Armor",
@@ -319,7 +316,6 @@
   {
     "id": "recipe.armor.head.cloth_cowl",
     "name": "Cloth Cowl",
-    "description": "Craft a Cloth Cowl.",
     "icon": "cloth_cowl",
     "category": "ArmorForging",
     "recipeFamily": "Armor",
@@ -428,7 +424,6 @@
   {
     "id": "recipe.armor.chest.heavy_breastplate",
     "name": "Heavy Breastplate",
-    "description": "Craft a Heavy Breastplate.",
     "icon": "heavy_breastplate",
     "category": "ArmorForging",
     "recipeFamily": "Armor",
@@ -529,7 +524,6 @@
   {
     "id": "recipe.armor.chest.medium_mail",
     "name": "Medium Mail",
-    "description": "Craft a Medium Mail.",
     "icon": "medium_mail",
     "category": "ArmorForging",
     "recipeFamily": "Armor",
@@ -636,7 +630,6 @@
   {
     "id": "recipe.armor.chest.light_vest",
     "name": "Light Vest",
-    "description": "Craft a Light Vest.",
     "icon": "light_vest",
     "category": "ArmorForging",
     "recipeFamily": "Armor",
@@ -745,7 +738,6 @@
   {
     "id": "recipe.armor.chest.cloth_robe",
     "name": "Cloth Robe",
-    "description": "Craft a Cloth Robe.",
     "icon": "cloth_robe",
     "category": "ArmorForging",
     "recipeFamily": "Armor",
@@ -854,7 +846,6 @@
   {
     "id": "recipe.armor.legs.heavy_legplates",
     "name": "Heavy Legplates",
-    "description": "Craft a Heavy Legplates.",
     "icon": "heavy_legplates",
     "category": "ArmorForging",
     "recipeFamily": "Armor",
@@ -955,7 +946,6 @@
   {
     "id": "recipe.armor.legs.medium_greaves",
     "name": "Medium Greaves",
-    "description": "Craft a Medium Greaves.",
     "icon": "medium_greaves",
     "category": "ArmorForging",
     "recipeFamily": "Armor",
@@ -1062,7 +1052,6 @@
   {
     "id": "recipe.armor.legs.light_legwraps",
     "name": "Light Legwraps",
-    "description": "Craft a Light Legwraps.",
     "icon": "light_leggings",
     "category": "ArmorForging",
     "recipeFamily": "Armor",
@@ -1171,7 +1160,6 @@
   {
     "id": "recipe.armor.legs.cloth_pants",
     "name": "Cloth Pants",
-    "description": "Craft a Cloth Pants.",
     "icon": "cloth_pants",
     "category": "ArmorForging",
     "recipeFamily": "Armor",
@@ -1280,7 +1268,6 @@
   {
     "id": "recipe.jewelry.ring.band",
     "name": "Ring",
-    "description": "Craft a Ring.",
     "icon": "band",
     "category": "JewelryCrafting",
     "recipeFamily": "Accessory",
@@ -1353,7 +1340,6 @@
   {
     "id": "recipe.jewelry.necklace.amulet",
     "name": "Amulet",
-    "description": "Craft a Amulet.",
     "icon": "amulet",
     "category": "JewelryCrafting",
     "recipeFamily": "Accessory",
@@ -1428,7 +1414,6 @@
   {
     "id": "recipe.jewelry.relic.vial",
     "name": "Relic",
-    "description": "Craft a Relic.",
     "icon": "vial",
     "category": "JewelryCrafting",
     "recipeFamily": "Relic",
@@ -1499,7 +1484,6 @@
   {
     "id": "recipe.weapon.one_handed.shortsword",
     "name": "Shortsword",
-    "description": "Craft a Shortsword.",
     "icon": "shortsword",
     "category": "WeaponSmithing",
     "recipeFamily": "Weapon",
@@ -1584,7 +1568,6 @@
   {
     "id": "recipe.weapon.one_handed.dagger",
     "name": "Dagger",
-    "description": "Craft a Dagger.",
     "icon": "dagger",
     "category": "WeaponSmithing",
     "recipeFamily": "Weapon",
@@ -1675,7 +1658,6 @@
   {
     "id": "recipe.weapon.one_handed.hand_axe",
     "name": "Hand Axe",
-    "description": "Craft a Hand Axe.",
     "icon": "hatchet",
     "category": "WeaponSmithing",
     "recipeFamily": "Weapon",
@@ -1762,7 +1744,6 @@
   {
     "id": "recipe.weapon.one_handed.mace",
     "name": "Mace",
-    "description": "Craft a Mace.",
     "icon": "mace",
     "category": "WeaponSmithing",
     "recipeFamily": "Weapon",
@@ -1849,7 +1830,6 @@
   {
     "id": "recipe.weapon.one_handed.wand",
     "name": "Wand",
-    "description": "Craft a Wand.",
     "icon": "wand",
     "category": "WeaponSmithing",
     "recipeFamily": "Weapon",
@@ -1936,7 +1916,6 @@
   {
     "id": "recipe.weapon.two_handed.greatsword",
     "name": "Greatsword",
-    "description": "Craft a Greatsword.",
     "icon": "greatsword",
     "category": "WeaponSmithing",
     "recipeFamily": "Weapon",
@@ -2021,7 +2000,6 @@
   {
     "id": "recipe.weapon.two_handed.battle_axe",
     "name": "Battle Axe",
-    "description": "Craft a Battle Axe.",
     "icon": "battle_axe",
     "category": "WeaponSmithing",
     "recipeFamily": "Weapon",
@@ -2106,7 +2084,6 @@
   {
     "id": "recipe.weapon.two_handed.maul",
     "name": "Maul",
-    "description": "Craft a Maul.",
     "icon": "maul",
     "category": "WeaponSmithing",
     "recipeFamily": "Weapon",
@@ -2191,7 +2168,6 @@
   {
     "id": "recipe.weapon.two_handed.spear",
     "name": "Spear",
-    "description": "Craft a Spear.",
     "icon": "spear",
     "category": "WeaponSmithing",
     "recipeFamily": "Weapon",
@@ -2276,7 +2252,6 @@
   {
     "id": "recipe.weapon.two_handed.staff",
     "name": "Staff",
-    "description": "Craft a Staff.",
     "icon": "staff",
     "category": "WeaponSmithing",
     "recipeFamily": "Weapon",
@@ -2361,7 +2336,6 @@
   {
     "id": "recipe.weapon.two_handed.longbow",
     "name": "Longbow",
-    "description": "Craft a Longbow.",
     "icon": "longbow",
     "category": "WeaponSmithing",
     "recipeFamily": "Weapon",
@@ -2446,7 +2420,6 @@
   {
     "id": "recipe.weapon.two_handed.crossbow",
     "name": "Crossbow",
-    "description": "Craft a Crossbow.",
     "icon": "crossbow",
     "category": "WeaponSmithing",
     "recipeFamily": "Weapon",
@@ -2531,7 +2504,6 @@
   {
     "id": "recipe.weapon.two_handed.gauntlets",
     "name": "Gauntlets",
-    "description": "Craft a Gauntlets.",
     "icon": "gauntlets",
     "category": "WeaponSmithing",
     "recipeFamily": "Weapon",
@@ -2616,7 +2588,6 @@
   {
     "id": "recipe.offhand.towershield",
     "name": "Towershield",
-    "description": "Craft a Towershield.",
     "icon": "towershield",
     "category": "WeaponSmithing",
     "recipeFamily": "Offhand",
@@ -2711,7 +2682,6 @@
   {
     "id": "recipe.offhand.spiritward",
     "name": "Spiritward",
-    "description": "Craft a Spiritward.",
     "icon": "Spiritward",
     "category": "WeaponSmithing",
     "recipeFamily": "Offhand",
@@ -2814,7 +2784,6 @@
   {
     "id": "recipe.offhand.grimoire",
     "name": "Grimoire",
-    "description": "Craft a Grimoire.",
     "icon": "grimoire",
     "category": "WeaponSmithing",
     "recipeFamily": "Offhand",

@@ -207,6 +207,7 @@ public static class AbilityCompiler
             SummonHealthMultiplier = effect.SummonHealthMultiplier <= 0 ? 1d : effect.SummonHealthMultiplier,
             Resource = effect.Resource,
             DurationTicks = effect.DurationTicks,
+            RefreshDuration = effect.RefreshDuration,
             IntervalTicks = effect.IntervalTicks,
             Uses = effect.Uses,
             OncePerTarget = effect.OncePerTarget,

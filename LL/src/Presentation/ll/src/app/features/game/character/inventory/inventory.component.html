@@ -436,7 +436,7 @@
           </button>
         </header>
 
-        <div class="ll-scrollbar min-h-0 flex-1 overflow-y-auto p-3">
+        <div class="ll-scrollbar min-h-0 flex-1 overflow-y-auto px-3">
           <app-equipment-display
             *ngIf="equipmentInstance(item) as equipment; else genericItem"
             [item]="equipment"
@@ -799,7 +799,6 @@
           >
             <p class="ll-eyebrow">Blueprint</p>
             <h3 class="ll-heading mt-1 text-base">{{ blueprint.name }}</h3>
-            <p class="ll-copy mt-2">{{ blueprint.description }}</p>
 
             <app-blueprint-attribute-summary
               [blueprint]="blueprint"

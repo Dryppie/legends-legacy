@@ -678,7 +678,6 @@ public class CraftingService : ICraftingService
                     Id = blueprint.Id,
                     ItemId = blueprint.ItemId,
                     Name = blueprint.Name,
-                    Description = blueprint.Description,
                     CraftedItemName = design.Name,
                     IsLearned = unlockedBlueprintIds.Contains(blueprint.Id),
                     SourceType = blueprint.SourceType,
@@ -713,7 +712,6 @@ public class CraftingService : ICraftingService
         {
             Id = recipe.Id,
             Name = recipe.Name,
-            Description = recipe.Description,
             Icon = recipe.Icon,
             Category = recipe.Category,
             OutputItemId = recipe.OutputItemId,
@@ -783,9 +781,7 @@ public class CraftingService : ICraftingService
         return new CraftingItemPreviewDto
         {
             Name = design.Name,
-            Description = string.IsNullOrWhiteSpace(itemBase.Description)
-                ? design.Description
-                : itemBase.Description,
+            Description = itemBase.Description,
             EquipmentType = itemBase.EquipmentType,
             Rarity = itemBase.Rarity,
             Tier = tier,

@@ -55,7 +55,6 @@ export interface CraftingBlueprint {
   id: string;
   itemId: string;
   name: string;
-  description: string;
   craftedItemName: string;
   isLearned: boolean;
   isLocked: boolean;
@@ -77,7 +76,6 @@ export interface CraftingBlueprint {
 export interface CraftingRecipe {
   id: string;
   name: string;
-  description: string;
   icon: string;
   category: string;
   outputItemId: string;

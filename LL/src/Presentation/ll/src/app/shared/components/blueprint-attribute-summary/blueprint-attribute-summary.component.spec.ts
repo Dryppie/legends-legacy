@@ -6,7 +6,6 @@ describe('getBlueprintContributedAttributes', () => {
     const blueprint: BlueprintItemMetadata = {
       blueprintId: 'blueprint_fury',
       name: 'Blueprint: Fury',
-      description: 'Applies the Fury design.',
       bonusStatProfile: {
         CritDamage: 0.25,
         Power: 0.45,

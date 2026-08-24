@@ -519,6 +519,19 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 : AbilityCompiler.CompileAbility(modifiedSpec, _abilityThreatTuning);
         }
 
+        foreach (var abilityId in GetEquipmentSetAbilityIds(combatant))
+        {
+            if (!selected.Add(abilityId)
+                || !catalog.AbilitiesById.TryGetValue(abilityId, out var baseSpec)
+                || !compiledAbilities.TryGetValue(abilityId, out var compiledAbility))
+                continue;
+
+            var modifiedSpec = ApplyTemporaryAbilityModifiers(baseSpec, combatant, catalog);
+            yield return ReferenceEquals(baseSpec, modifiedSpec)
+                ? compiledAbility
+                : AbilityCompiler.CompileAbility(modifiedSpec, _abilityThreatTuning);
+        }
+
         foreach (var essenceId in GetTaggedEssenceIds(combatant.Tags))
         {
             foreach (var abilityId in GetAbilityIdsForEssence(essenceId, catalog))
@@ -937,6 +950,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             SummonHealthMultiplier = effect.SummonHealthMultiplier,
             Resource = effect.Resource,
             DurationTicks = effect.DurationTicks,
+            RefreshDuration = effect.RefreshDuration,
             IntervalTicks = effect.IntervalTicks,
             Uses = effect.Uses,
             GuaranteedConditionApplication = effect.GuaranteedConditionApplication,
@@ -983,15 +997,10 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 yield return abilityId;
         }
 
-        if (_craftingDefinitions is not null)
+        foreach (var abilityId in GetEquipmentSetAbilityIds(combatant))
         {
-            foreach (var abilityId in EquipmentSetBonusResolver.ResolveGrantedAbilityIds(
-                         combatant.Equipment,
-                         _craftingDefinitions.GetEquipmentSets()))
-            {
-                if (selected.Add(abilityId))
-                    yield return abilityId;
-            }
+            if (selected.Add(abilityId))
+                yield return abilityId;
         }
 
         foreach (var essenceId in GetEquippedEssenceIds(combatant))
@@ -1003,6 +1012,13 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             }
         }
     }
+
+    private IEnumerable<string> GetEquipmentSetAbilityIds(CombatEntity combatant) =>
+        _craftingDefinitions is null
+            ? []
+            : EquipmentSetBonusResolver.ResolveGrantedAbilityIds(
+                combatant.Equipment,
+                _craftingDefinitions.GetEquipmentSets());
 
     private IEnumerable<string> GetAbilityIdsForEssence(string essenceId, AbilityCatalog catalog)
     {

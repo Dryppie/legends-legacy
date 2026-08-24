@@ -89,6 +89,7 @@ public sealed class CompiledEffect
     public double SummonHealthMultiplier { get; init; } = 1d;
     public AbilityResourceType Resource { get; init; }
     public int DurationTicks { get; init; }
+    public bool RefreshDuration { get; init; }
     public int IntervalTicks { get; init; }
     public int Uses { get; init; }
     public bool OncePerTarget { get; init; }

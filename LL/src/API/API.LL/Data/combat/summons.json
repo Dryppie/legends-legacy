@@ -282,21 +282,5 @@
       {"attribute": "Power", "baseValue": 0, "minimumValue": 0, "scalingAttribute": "Power", "scalingCoefficient": 1},
       {"attribute": "AttackSpeed", "baseValue": 0, "minimumValue": 0}
     ]
-  },
-  {
-    "id": "hiveDrone",
-    "name": "Hive Drone",
-    "description": "A short-lived drone hatched by the Hive equipment set.",
-    "imagePath": "venomous_spiderling",
-    "durationTicks": 120,
-    "maxActive": 1,
-    "tags": ["Summon.HiveDrone", "Hive", "Poison"],
-    "abilityIds": ["ability.summon.hive_drone.venom_spit"],
-    "attributes": [
-      { "attribute": "MaxHealth", "baseValue": 0, "minimumValue": 1, "scalingAttribute": "MaxHealth", "scalingCoefficient": 0.08 },
-      { "attribute": "Power", "baseValue": 0, "minimumValue": 0, "scalingAttribute": "Power", "scalingCoefficient": 0.15 },
-      { "attribute": "CritDamage", "baseValue": 0, "minimumValue": 0, "scalingAttribute": "CritDamage", "scalingCoefficient": 1 },
-      { "attribute": "AttackSpeed", "baseValue": 0, "minimumValue": 0, "scalingAttribute": "AttackSpeed", "scalingCoefficient": 1 }
-    ]
   }
 ]

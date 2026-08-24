@@ -22,7 +22,6 @@ import {
 import {
   Equipment,
   EquipmentInstance,
-  EquipmentSetBonusMetadata,
   ToolBonusModifier,
 } from '../../../models/item';
 import {
@@ -40,6 +39,7 @@ import { ToolBonusTooltipDirective } from '../../../directives/tool-bonus-toolti
 import { TemperingBonusTooltipDirective } from '../../../directives/tempering-bonus-tooltip/tempering-bonus-tooltip.directive';
 import { TemperingBonusTooltipData } from '../../custom-components/tooltips/tempering-bonus-tooltip/tempering-bonus-tooltip-panel.component';
 import { toolBonusDisplayLabel } from '../../custom-components/tooltips/tool-bonus-tooltip/tool-bonus-tooltip';
+import { EquipmentSetProgressComponent } from '../equipment-set-progress/equipment-set-progress.component';
 
 interface EquipmentComparisonView {
   slotType: EquipmentSlotType | null;
@@ -59,6 +59,7 @@ interface EquipmentComparisonView {
     AttributeTooltipDirective,
     ToolBonusTooltipDirective,
     TemperingBonusTooltipDirective,
+    EquipmentSetProgressComponent,
     DecimalPipe,
   ],
   templateUrl: './equipment-display.component.html',
@@ -350,60 +351,6 @@ export class EquipmentDisplayComponent {
     secondary: readonly string[],
   ): string[] {
     return [...new Set([...primary, ...secondary])];
-  }
-
-  equipmentSetEquippedCount(setId: string): number {
-    if (!this.equippedItems) return 0;
-
-    const normalizedSetId = setId.toLowerCase();
-    return new Set(
-      this.equippedItems
-        .filter(
-          (equipment) =>
-            equipment.equipmentSetId?.toLowerCase() === normalizedSetId,
-        )
-        .map((equipment) => equipment.id),
-    ).size;
-  }
-
-  equipmentSetMaximumThreshold(
-    bonuses: readonly EquipmentSetBonusMetadata[],
-  ): number {
-    return bonuses.reduce(
-      (maximum, bonus) => Math.max(maximum, bonus.requiredEquippedItems),
-      0,
-    );
-  }
-
-  equipmentSetBonusClass(
-    bonus: EquipmentSetBonusMetadata,
-    bonuses: readonly EquipmentSetBonusMetadata[],
-    equippedCount: number,
-  ): string {
-    if (equippedCount >= bonus.requiredEquippedItems) {
-      return 'equipment-set-bonus-active';
-    }
-
-    const nextThreshold = bonuses
-      .filter((candidate) => candidate.requiredEquippedItems > equippedCount)
-      .reduce(
-        (minimum, candidate) =>
-          Math.min(minimum, candidate.requiredEquippedItems),
-        Number.POSITIVE_INFINITY,
-      );
-    return bonus.requiredEquippedItems === nextThreshold
-      ? 'equipment-set-bonus-next'
-      : 'equipment-set-bonus-locked';
-  }
-
-  equipmentSetBonusProgressLabel(
-    bonus: EquipmentSetBonusMetadata,
-    equippedCount: number,
-  ): string {
-    if (equippedCount >= bonus.requiredEquippedItems) return 'Active';
-
-    const remaining = bonus.requiredEquippedItems - equippedCount;
-    return `${remaining} more item${remaining === 1 ? '' : 's'}`;
   }
 
   comparisonClass(difference: number): string {
