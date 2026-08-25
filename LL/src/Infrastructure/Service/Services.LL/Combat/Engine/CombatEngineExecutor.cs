@@ -196,6 +196,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
     {
         Id = combatant.Id,
         Name = combatant.Name,
+        Level = combatant.Level,
         ImagePath = combatant.ImagePath,
         MaxHealth = (int)combatant.GetAttribute(AttributeType.MaxHealth),
         Health = (int)combatant.Health,
@@ -418,7 +419,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             basicAttackDamageType: behavior.DamageType,
             partyNumber: partyNumber,
             staggerDefinition: combatant.StaggerDefinition,
-            staggerParticipantCount: combatant.StaggerParticipantCount);
+            staggerParticipantCount: combatant.StaggerParticipantCount,
+            level: combatant.Level);
     }
 
     private BasicAttackBehavior ResolveBasicAttackBehavior(CombatEntity combatant)

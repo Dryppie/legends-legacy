@@ -39,6 +39,7 @@ using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
+using Services.LL.Interfaces.WorldTower;
 
 namespace Services.LL.WorldTower;
 
@@ -67,9 +68,8 @@ public sealed class WorldTowerService : IWorldTowerService
     private readonly ICharacterSnapshotService _snapshots;
     private readonly IPowerRatingService _powerRatings;
     private readonly IEntityService _entities;
-    private readonly ICombatSetupService _combatSetup;
     private readonly ICombatEngineExecutor _combatEngine;
-    private readonly ISnapshotCombatantBuilder _snapshotCombatants;
+    private readonly IWorldTowerCombatRuntimeFactory _runtimeFactory;
     private readonly ICreatureAbilityDefinitionProvider _creatureAbilities;
     private readonly IAbilityCatalogProvider _abilityCatalog;
     private readonly ICombatEncounterResultFactory _resultFactory;
@@ -89,9 +89,8 @@ public sealed class WorldTowerService : IWorldTowerService
         ICharacterSnapshotService snapshots,
         IPowerRatingService powerRatings,
         IEntityService entities,
-        ICombatSetupService combatSetup,
         ICombatEngineExecutor combatEngine,
-        ISnapshotCombatantBuilder snapshotCombatants,
+        IWorldTowerCombatRuntimeFactory runtimeFactory,
         ICreatureAbilityDefinitionProvider creatureAbilities,
         IAbilityCatalogProvider abilityCatalog,
         ICombatEncounterResultFactory resultFactory,
@@ -109,9 +108,8 @@ public sealed class WorldTowerService : IWorldTowerService
         _snapshots = snapshots;
         _powerRatings = powerRatings;
         _entities = entities;
-        _combatSetup = combatSetup;
         _combatEngine = combatEngine;
-        _snapshotCombatants = snapshotCombatants;
+        _runtimeFactory = runtimeFactory;
         _creatureAbilities = creatureAbilities;
         _abilityCatalog = abilityCatalog;
         _resultFactory = resultFactory;
@@ -1525,8 +1523,7 @@ public sealed class WorldTowerService : IWorldTowerService
             .ThenBy(x => x.JoinedAt)
             .ThenBy(x => x.Id)
             .ToArray();
-        var friendly = (await _snapshotCombatants.BuildAsync(
-            orderedParticipants.Select(participant => new SnapshotCombatantRequest(
+        var friendlyRequests = orderedParticipants.Select(participant => new SnapshotCombatantRequest(
                 participant.CharacterSnapshot,
                 new CombatParticipantSlot(
                     participant.CharacterId.ToString(),
@@ -1534,14 +1531,7 @@ public sealed class WorldTowerService : IWorldTowerService
                     CombatSide.Friendly,
                     participant.PartySlot.HasValue
                         ? WorldTowerPartyRules.GetPartyNumber(participant.PartySlot.Value)
-                        : null))).ToArray(),
-            cancellationToken)).ToList();
-        foreach (var participant in friendly)
-        {
-            AddPercentModifier(participant.Combatant, AttributeType.Power, preparation.PlayerDamagePercent);
-            AddPercentModifier(participant.Combatant, AttributeType.ArmorPenetration, preparation.WeakPointPercent);
-            AddPercentModifier(participant.Combatant, AttributeType.MagicPenetration, preparation.WeakPointPercent);
-        }
+                        : null))).ToArray();
 
         var guardianSource = (await _entities.GetEntitiesByIdsForCombatAsync(
                 [definition.GuardianCreatureId],
@@ -1549,34 +1539,20 @@ public sealed class WorldTowerService : IWorldTowerService
             .OfType<Creature>()
             .SingleOrDefault()
             ?? throw new InvalidOperationException($"Guardian creature '{definition.GuardianCreatureId}' was not found.");
-        var guardian = _combatSetup.CreateCreatureCombatEntities(
-            [guardianSource],
-            new Area { DifficultyTier = definition.ProgressionPosition }).Single();
-        WorldTowerGuardianScaling.Apply(
-            guardian,
-            definition.GuardianScaling,
-            definition.RequiredSlots);
-        guardian.StaggerDefinition = definition.Stagger;
-        guardian.StaggerParticipantCount = friendly.Count;
-        AddPercentModifier(guardian, AttributeType.Power, -preparation.GuardianDamageReductionPercent);
-        var hostileSlot = new CombatParticipantSlot(
-            definition.GuardianCreatureId.ToString(),
-            definition.GuardianCreatureId,
-            CombatSide.Hostile);
-        var hostile = new CombatRuntimeParticipant(hostileSlot, guardianSource, guardian);
-
-        await _combatSetup.PrepareEntitiesForCombat(
-            [.. friendly.Select(x => x.Combatant), hostile.Combatant],
-            EssenceCombatActivity.WorldTower);
         var startedAt = _timeProvider.GetUtcNow();
-        var plan = new CombatEncounterPlan(
-            attemptId,
-            CombatMode.Raid,
-            1,
-            startedAt,
-            [.. friendly.Select(x => x.Slot), hostileSlot],
-            new RaidEncounterSourceContext(rallyId, 1, $"tower-floor-{definition.FloorNumber}"));
-        var runtime = new CombatEncounterRuntime(plan, friendly, [hostile]);
+        var runtime = await _runtimeFactory.CreateAsync(
+            new WorldTowerCombatRuntimeRequest(
+                attemptId,
+                rallyId,
+                definition,
+                friendlyRequests,
+                guardianSource,
+                preparation.PlayerDamagePercent,
+                preparation.WeakPointPercent,
+                preparation.GuardianDamageReductionPercent,
+                startedAt),
+            cancellationToken);
+        var friendly = runtime.FriendlyParticipants.ToList();
         var engineStartedAt = _timeProvider.GetTimestamp();
         var allocatedBefore = GC.GetTotalAllocatedBytes(precise: false);
         var execution = await _combatEngine.ExecuteTowerPlaybackAsync(
@@ -1973,16 +1949,6 @@ public sealed class WorldTowerService : IWorldTowerService
             attempt.CompletedAt.Value,
             cancellationToken);
         await _db.SaveChangesAsync(cancellationToken);
-    }
-
-    private static void AddPercentModifier(CombatEntity entity, AttributeType attribute, decimal amount)
-    {
-        if (amount == 0)
-            return;
-        entity.TemporaryModifiers.Add(new InstanceAttributeModifier(
-            attribute,
-            (float)amount,
-            ModifierType.Multiplicative));
     }
 
     private PreparationModifiers CreatePreparationModifiers(

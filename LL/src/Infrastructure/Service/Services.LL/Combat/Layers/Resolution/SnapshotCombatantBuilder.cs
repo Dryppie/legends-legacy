@@ -23,6 +23,7 @@ public sealed class SnapshotCombatantBuilder(
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
         var itemBases = await db.ItemBases.AsNoTracking()
+            .Include(itemBase => (itemBase as EquipmentBase)!.AttributeModifiers)
             .Where(x => itemBaseIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, StringComparer.OrdinalIgnoreCase, cancellationToken);
 

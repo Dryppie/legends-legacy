@@ -19,12 +19,12 @@ public sealed class EncounterCalibrationTests
 
         var catalog = context.EncounterFactory.CreateCatalog();
 
-        Assert.Equal(11, catalog.Version);
-        Assert.Equal(26, catalog.Encounters.Count);
+        Assert.Equal(12, catalog.Version);
+        Assert.Equal(31, catalog.Encounters.Count);
         Assert.Equal(4, catalog.Encounters.Select(encounter => encounter.ContentType).Distinct().Count());
         Assert.Equal(7, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Idle));
         Assert.Equal(8, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Dungeon));
-        Assert.Equal(4, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Tower));
+        Assert.Equal(9, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Tower));
         Assert.Equal(7, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Raid));
         Assert.All(catalog.Encounters, encounter =>
         {
@@ -51,6 +51,12 @@ public sealed class EncounterCalibrationTests
         var tower = catalog.Encounters.Single(encounter => encounter.Id == "tower.floor-01.guardian");
         var staggerTower = catalog.Encounters.Single(encounter => encounter.Id == "tower.floor-05.warden");
         var floorSeven = catalog.Encounters.Single(encounter => encounter.Id == "tower.floor-07.guardian");
+        var lateTower = catalog.Encounters.Where(encounter =>
+                encounter.ContentType == EncounterCalibrationContentType.Tower
+                && encounter.ProgressionPosition is >= 11 and <= 15)
+            .OrderBy(encounter => encounter.ProgressionPosition)
+            .ToList();
+        var floorFifteen = lateTower.Single(encounter => encounter.ProgressionPosition == 15);
         var raid = catalog.Encounters.Single(encounter =>
             encounter.Id == "raid.hives-abyss.tier-1.final-assault");
         Assert.Equal(3, idleTriple.Hostiles.Count);
@@ -71,6 +77,10 @@ public sealed class EncounterCalibrationTests
         Assert.Equal(10, staggerTower.Hostiles.Single().StaggerParticipantCount);
         Assert.Equal(5, floorSeven.PlayerCount);
         Assert.Equal(7, floorSeven.ProgressionPosition);
+        Assert.Equal(new[] { 11, 12, 13, 14, 15 }, lateTower.Select(encounter => encounter.ProgressionPosition));
+        Assert.All(lateTower.Take(4), encounter => Assert.Equal(10, encounter.PlayerCount));
+        Assert.Equal(15, floorFifteen.PlayerCount);
+        Assert.Equal(15, floorFifteen.Hostiles.Single().StaggerParticipantCount);
         Assert.Equal(3, raid.PlayerCount);
         Assert.Single(raid.Hostiles);
         Assert.NotNull(raid.Hostiles.Single().StaggerDefinition);
@@ -143,7 +153,7 @@ public sealed class EncounterCalibrationTests
 
         var report = context.Runner.Run(catalog, players);
 
-        Assert.Equal(1_380, report.Results.Count);
+        Assert.Equal(1_680, report.Results.Count);
         Assert.All(report.Results, result =>
         {
             Assert.Equal(3, result.SampleCount);
@@ -161,8 +171,8 @@ public sealed class EncounterCalibrationTests
                 result.GearEnvelopeId == catalog.AssessmentGearEnvelopeId
                 && result.EssenceEnvelopeId == catalog.AssessmentEssenceEnvelopeId)
             .ToList();
-        Assert.Equal(115, expectedCohort.Count);
-        Assert.Equal(100, expectedCohort.Count(result => result.IncludedInRoleAssessment));
+        Assert.Equal(140, expectedCohort.Count);
+        Assert.Equal(125, expectedCohort.Count(result => result.IncludedInRoleAssessment));
         Assert.Equal(15, expectedCohort.Count(result => !result.IncludedInRoleAssessment));
         Assert.All(
             report.Results.Where(result =>
@@ -173,7 +183,7 @@ public sealed class EncounterCalibrationTests
         var towerResults = report.Results.Where(result =>
                 result.ContentType == EncounterCalibrationContentType.Tower)
             .ToList();
-        Assert.Equal(4 * 3 * 5 * 4, towerResults.Count);
+        Assert.Equal(9 * 3 * 5 * 4, towerResults.Count);
         Assert.All(towerResults, result => Assert.False(string.IsNullOrWhiteSpace(result.PartyCompositionId)));
         Assert.All(towerResults, result => Assert.True(result.IncludedInRoleAssessment));
         Assert.All(towerResults, result => Assert.NotEqual(
@@ -262,14 +272,14 @@ public sealed class EncounterCalibrationTests
         var artifact = EncounterCalibrationReportRenderer.CreateArtifact(report, catalog);
         var markdown = EncounterCalibrationReportRenderer.RenderMarkdown(artifact);
         Assert.Equal(7, artifact.SchemaVersion);
-        Assert.Equal(1_380, artifact.Summary.ResultCount);
-        Assert.Equal(4_140, artifact.Summary.SeededSampleCount);
-        Assert.Equal(100, artifact.Summary.AssessedResultCount);
+        Assert.Equal(1_680, artifact.Summary.ResultCount);
+        Assert.Equal(5_040, artifact.Summary.SeededSampleCount);
+        Assert.Equal(125, artifact.Summary.AssessedResultCount);
         Assert.Equal(4, artifact.Summary.Content.Count);
         Assert.NotNull(artifact.SupportComparisons);
-        Assert.Equal(11 * 3 * 4, artifact.SupportComparisons.Count);
+        Assert.Equal(16 * 3 * 4, artifact.SupportComparisons.Count);
         Assert.Equal(
-            11,
+            16,
             artifact.SupportComparisons.Count(comparison =>
                 comparison.GearEnvelopeId == "expected"
                 && comparison.EssenceEnvelopeId == "expected"));
@@ -295,7 +305,7 @@ public sealed class EncounterCalibrationTests
                 && comparison.GearEnvelopeId == "expected"
                 && comparison.EssenceEnvelopeId == "expected").Classification);
         Assert.Equal(
-            "HelpfulButInsufficient",
+            "Insufficient",
             artifact.SupportComparisons.Single(comparison =>
                 comparison.EncounterId == "tower.floor-07.guardian"
                 && comparison.GearEnvelopeId == "expected"
@@ -373,7 +383,7 @@ public sealed class EncounterCalibrationTests
                     .All(result => result.WinRate >= 0.8)
                 && assessed.All(result =>
                     result.TimeoutRate <= 0.1
-                    && result.AverageDurationTicks <= 370),
+                    && result.AverageDurationTicks <= 430),
                 diagnostics);
         }
         else

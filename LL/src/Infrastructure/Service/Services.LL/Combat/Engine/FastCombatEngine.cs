@@ -457,6 +457,7 @@ public sealed class FastCombatEngine
     {
         Id = combatant.Id,
         Name = combatant.Name,
+        Level = combatant.Level,
         ImagePath = combatant.ImagePath,
         Health = (int)combatant.Health,
         MaxHealth = (int)combatant.GetAttribute(AttributeType.MaxHealth),

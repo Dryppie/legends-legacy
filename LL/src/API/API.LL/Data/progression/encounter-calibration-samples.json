@@ -1,5 +1,5 @@
 {
-  "version": 11,
+  "version": 12,
   "assessmentGearEnvelopeId": "expected",
   "assessmentEssenceEnvelopeId": "expected",
   "maximumBuildWinRateSpread": 0.35,
@@ -56,7 +56,7 @@
   ],
   "bands": [
     { "id": "idle-single", "minimumWinRate": 0.80, "maximumWinRate": 1.00, "maximumTimeoutRate": 0.10, "minimumDurationTicks": 1, "maximumDurationTicks": 360, "minimumSurvivalResourcePercent": 25.0, "assessedBuildFamilyIds": ["offensive", "control", "summon"] },
-    { "id": "idle-double", "minimumWinRate": 0.65, "maximumWinRate": 1.00, "maximumTimeoutRate": 0.10, "minimumDurationTicks": 20, "maximumDurationTicks": 550, "minimumSurvivalResourcePercent": 15.0, "assessedBuildFamilyIds": ["offensive", "control", "summon"] },
+    { "id": "idle-double", "minimumWinRate": 0.65, "maximumWinRate": 1.00, "maximumTimeoutRate": 0.10, "minimumDurationTicks": 20, "maximumDurationTicks": 650, "minimumSurvivalResourcePercent": 15.0, "assessedBuildFamilyIds": ["offensive", "control", "summon"] },
     { "id": "idle-triple", "minimumWinRate": 0.50, "maximumWinRate": 0.95, "maximumTimeoutRate": 0.10, "minimumDurationTicks": 30, "maximumDurationTicks": 720, "minimumSurvivalResourcePercent": 5.0, "assessedBuildFamilyIds": ["offensive", "control", "summon"] },
     { "id": "dungeon-room", "minimumWinRate": 0.65, "maximumWinRate": 1.00, "maximumTimeoutRate": 0.10, "minimumDurationTicks": 30, "maximumDurationTicks": 720, "minimumSurvivalResourcePercent": 10.0, "assessedBuildFamilyIds": ["offensive", "control", "summon"] },
     { "id": "dungeon-boss", "minimumWinRate": 0.35, "maximumWinRate": 0.90, "maximumTimeoutRate": 0.10, "minimumDurationTicks": 90, "maximumDurationTicks": 1200, "minimumSurvivalResourcePercent": 1.0, "assessedBuildFamilyIds": ["offensive", "control", "summon"] },
@@ -300,6 +300,91 @@
         "sustain-heavy": "Countered",
         "control-oriented": "Expected",
         "summon-oriented": "Challenge"
+      },
+      "maxTicks": 1800
+    },
+    {
+      "id": "tower.floor-11.guardian",
+      "contentType": "Tower",
+      "difficultyRole": "Guardian",
+      "bandId": "tower-guardian",
+      "snapshotAnchorId": "region-02-end",
+      "towerFloorNumber": 11,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Expected",
+        "offense-heavy": "Expected",
+        "sustain-heavy": "Expected",
+        "control-oriented": "Expected",
+        "summon-oriented": "Expected"
+      },
+      "maxTicks": 1800
+    },
+    {
+      "id": "tower.floor-12.guardian",
+      "contentType": "Tower",
+      "difficultyRole": "Guardian",
+      "bandId": "tower-guardian",
+      "snapshotAnchorId": "region-02-end",
+      "towerFloorNumber": 12,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Expected",
+        "offense-heavy": "Expected",
+        "sustain-heavy": "Expected",
+        "control-oriented": "Expected",
+        "summon-oriented": "Expected"
+      },
+      "maxTicks": 1800
+    },
+    {
+      "id": "tower.floor-13.guardian",
+      "contentType": "Tower",
+      "difficultyRole": "Guardian",
+      "bandId": "tower-guardian",
+      "snapshotAnchorId": "region-02-end",
+      "towerFloorNumber": 13,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Expected",
+        "offense-heavy": "Expected",
+        "sustain-heavy": "Expected",
+        "control-oriented": "Expected",
+        "summon-oriented": "Expected"
+      },
+      "maxTicks": 1800
+    },
+    {
+      "id": "tower.floor-14.guardian",
+      "contentType": "Tower",
+      "difficultyRole": "Guardian",
+      "bandId": "tower-guardian",
+      "snapshotAnchorId": "region-02-end",
+      "towerFloorNumber": 14,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Expected",
+        "offense-heavy": "Expected",
+        "sustain-heavy": "Expected",
+        "control-oriented": "Expected",
+        "summon-oriented": "Expected"
+      },
+      "maxTicks": 1800
+    },
+    {
+      "id": "tower.floor-15.warden",
+      "contentType": "Tower",
+      "difficultyRole": "Warden",
+      "bandId": "tower-guardian",
+      "snapshotAnchorId": "region-02-end",
+      "towerFloorNumber": 15,
+      "partyCompositionIds": ["balanced", "offense-heavy", "sustain-heavy", "control-oriented", "summon-oriented"],
+      "compositionExpectations": {
+        "balanced": "Expected",
+        "offense-heavy": "Expected",
+        "sustain-heavy": "Expected",
+        "control-oriented": "Expected",
+        "summon-oriented": "Expected"
       },
       "maxTicks": 1800
     },

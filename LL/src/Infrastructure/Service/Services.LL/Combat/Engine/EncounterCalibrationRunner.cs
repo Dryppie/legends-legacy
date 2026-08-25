@@ -833,6 +833,7 @@ public sealed class EncounterCalibrationRunner
             new FastCombatEngineOptions(
                 encounter.MaxTicks,
                 RandomSeed: randomSeed,
+                StartActiveAbilitiesOnCooldown: true,
                 CaptureEventLog: true,
                 OvertimeStartsAtTick: encounter.OvertimeStartsAtTick,
                 OvertimePowerIncreaseIntervalTicks: encounter.OvertimePowerIncreaseIntervalTicks,

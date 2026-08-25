@@ -6568,6 +6568,8 @@ public sealed class AbilitySystemTests
             CreateJsonOptions());
         var friendlyCharacter = CreateSourceCharacter("Executor Friendly");
         var hostileCharacter = CreateSourceCharacter("Executor Hostile");
+        friendlyCharacter.Level = 60;
+        hostileCharacter.Level = 55;
         var friendlyCombatant = CreateCombatEntity("friendly-slot", friendlyCharacter, "essence.goblin");
         var hostileCombatant = CreateCombatEntity("hostile-slot", hostileCharacter);
         var plan = new CombatEncounterPlan(
@@ -6586,10 +6588,13 @@ public sealed class AbilitySystemTests
             [new CombatRuntimeParticipant(plan.HostileParticipants.Single(), hostileCharacter, hostileCombatant)]);
         var executor = new CombatEngineExecutor(provider);
 
-        var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
+        var execution = await executor.ExecuteWithCheckpointsAsync(runtime, 10, CancellationToken.None);
+        var result = execution.Result;
 
         Assert.Equal(plan.StartsAt, result.StartedAt);
         Assert.True(result.Duration > 0);
+        Assert.Equal(60, execution.Checkpoints.SelectMany(checkpoint => checkpoint.Friendly).First().Level);
+        Assert.Equal(55, execution.Checkpoints.SelectMany(checkpoint => checkpoint.Hostile).First().Level);
         Assert.Contains(result.EventLog, x => x.Source == "effect.creature.goblin.shiv_jab.damage" && x.EventType == EventType.Damage);
         Assert.Contains(result.EventLog, x => x.Source == "condition.bleed" && x.EventType == EventType.Damage);
     }

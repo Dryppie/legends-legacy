@@ -68,6 +68,7 @@ using Services.LL.Interfaces.Combat.Resolution.Idle;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
 using Services.LL.Interfaces.Combat.Reward.Idle;
+using Services.LL.Interfaces.WorldTower;
 using Services.LL.Inventories;
 using Services.LL.Items;
 using Services.LL.JsonDefinitions;
@@ -502,6 +503,8 @@ public static class DependencyInjection
                 Path.Combine(contentRootPath, config["Content:Root"] ?? "Data", "world-tower", "tower-floors.json"),
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IWorldTowerService, WorldTowerService>();
+        services.AddScoped<IWorldTowerCombatRuntimeFactory, WorldTowerCombatRuntimeFactory>();
+        services.AddScoped<WorldTowerProductionCalibrationRunner>();
         services.AddScoped<IWorldTowerWorkLeaseService, WorldTowerWorkLeaseService>();
         services.AddOptions<RaidOptions>()
             .Bind(config.GetSection(RaidOptions.SectionName))

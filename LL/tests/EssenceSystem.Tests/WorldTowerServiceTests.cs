@@ -1963,9 +1963,10 @@ public sealed class WorldTowerServiceTests
             snapshotService,
             powerRatings,
             entities ?? new ThrowingEntityService(),
-            resolvedCombatSetup,
             combatEngine ?? new ThrowingCombatEngineExecutor(),
-            new SnapshotCombatantBuilder(db, resolvedCombatSetup),
+            new WorldTowerCombatRuntimeFactory(
+                new SnapshotCombatantBuilder(db, resolvedCombatSetup),
+                resolvedCombatSetup),
             new FixedCreatureAbilityDefinitionProvider(),
             new FixedAbilityCatalogProvider(),
             resultFactory ?? new ThrowingCombatEncounterResultFactory(),

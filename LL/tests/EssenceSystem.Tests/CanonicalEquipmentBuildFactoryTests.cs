@@ -3,11 +3,20 @@ using Domain.Components.Attributes;
 using Domain.Models.Attributes;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Professions.Crafting.V2;
+using Domain.Models.Snapshots;
+using Domain.Models.Essences;
+using Persistence.LL;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using Services.LL.Combat;
 using Services.LL.Combat.Engine;
+using Services.LL.Combat.Layers.Orchestration.Models;
+using Services.LL.Combat.Layers.Resolution;
 using Services.LL.Essences;
+using Services.LL.Interfaces.Combat.Resolution;
 using Services.LL.PowerRatings;
 using Services.LL.Professions.Craftings;
 using System.Text.Json;
@@ -17,6 +26,124 @@ namespace EssenceSystem.Tests;
 
 public sealed class CanonicalEquipmentBuildFactoryTests
 {
+    [Fact]
+    public void Tier_two_epic_exceptional_build_materializes_seven_real_essences()
+    {
+        var services = CreateServices();
+        var rung = services.Factory.GetProgressionLadder().Single(candidate =>
+            candidate.Tier == 2
+            && candidate.Rarity == Rarity.Epic
+            && candidate.Quality == ItemQuality.Exceptional);
+
+        var build = services.Factory.CreateBuild(
+            CanonicalCooperativeRole.Guardian,
+            rung,
+            CanonicalEquipmentBuildFactory.MaximumCanonicalEssenceCount);
+
+        Assert.Equal("t2-exceptional-epic", rung.Id);
+        Assert.Equal(7, build.Equipment.Count);
+        Assert.Equal(7, build.EquippedEssences.Count);
+        Assert.All(build.Equipment, item =>
+        {
+            Assert.Equal(2, item.Tier);
+            Assert.Equal(Rarity.Epic, item.Rarity);
+            Assert.Equal(ItemQuality.Exceptional, item.Quality);
+            Assert.NotEmpty(item.InstanceModifiers);
+        });
+        Assert.Equal(7, build.EquippedEssences
+            .Select(essence => essence.EssenceDefinitionId)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Count());
+    }
+
+    [Fact]
+    public async Task Persisted_snapshot_rehydration_matches_direct_canonical_world_tower_preparation()
+    {
+        var services = CreateServices();
+        var rung = services.Factory.GetProgressionLadder().Single(candidate =>
+            candidate.Tier == 2
+            && candidate.Rarity == Rarity.Epic
+            && candidate.Quality == ItemQuality.Exceptional);
+        var build = services.Factory.CreateBuild(
+            CanonicalCooperativeRole.Guardian,
+            rung,
+            CanonicalEquipmentBuildFactory.MaximumCanonicalEssenceCount);
+        build.Character.EquipmentSlots = build.Equipment.Select(item => new EquipmentSlot
+        {
+            EntityId = build.Character.Id,
+            Entity = build.Character,
+            EquipmentInstanceId = item.Id,
+            EquipmentInstance = item,
+            EquipmentSlotType = ToSlot(item.EquipmentBase.EquipmentType)
+        }).ToList();
+
+        await using var db = CreateDbContext();
+        db.ItemBases.AddRange(services.CraftingDefinitions.GetEquipmentBases().Values);
+        var snapshotId = Guid.NewGuid();
+        var snapshot = new CharacterSnapshot
+        {
+            Id = snapshotId,
+            CharacterId = build.Character.Id,
+            Name = build.Character.Name,
+            Level = build.Character.Level,
+            BaseAttributes = build.Character.BaseAttributes.Select(attribute =>
+                new EntityAttributeSnapshot
+                {
+                    CharacterSnapshotId = snapshotId,
+                    AttributeType = attribute.AttributeType,
+                    Value = attribute.Value
+                }).ToArray(),
+            Equipment = build.Equipment.Select(item =>
+                EquipmentSnapshot.From(ToSlot(item.EquipmentBase.EquipmentType), item)).ToArray(),
+            EquippedEssences = build.EquippedEssences.Select((essence, index) =>
+                EquippedEssenceSnapshot.From(snapshotId, index, essence)).ToArray()
+        };
+        db.CharacterSnapshots.Add(snapshot);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        var persisted = await db.CharacterSnapshots.AsNoTracking()
+            .Include(candidate => candidate.BaseAttributes)
+            .Include(candidate => candidate.Equipment)
+                .ThenInclude(item => item.InstanceModifiers)
+            .Include(candidate => candidate.EquippedEssences)
+            .SingleAsync(candidate => candidate.Id == snapshotId);
+        var setup = new CombatSetupService(
+            null!,
+            services.EssenceResolver,
+            services.EssenceDefinitions,
+            services.CreatureEssences,
+            craftingDefinitions: services.CraftingDefinitions);
+
+        var direct = setup.CreatePlayerCombatEntities([build.Character]).Single();
+        direct.EquippedEssences = [.. build.EquippedEssences];
+        direct.HasEquippedEssenceSnapshot = true;
+        await setup.PrepareEntitiesForCombat([direct], EssenceCombatActivity.WorldTower);
+
+        var rehydrated = (await new SnapshotCombatantBuilder(db, setup).BuildAsync(
+            [new SnapshotCombatantRequest(
+                persisted,
+                new CombatParticipantSlot(
+                    build.Character.Id.ToString(),
+                    build.Character.Id,
+                    CombatSide.Friendly,
+                    PartyNumber: 1))],
+            CancellationToken.None)).Single().Combatant;
+        await setup.PrepareEntitiesForCombat([rehydrated], EssenceCombatActivity.WorldTower);
+
+        Assert.Equal(direct.Level, rehydrated.Level);
+        Assert.Equal(direct.CombatAttributes, rehydrated.CombatAttributes);
+        Assert.Equivalent(EquipmentSignature(direct), EquipmentSignature(rehydrated), strict: true);
+        Assert.Equivalent(EssenceSignature(direct), EssenceSignature(rehydrated), strict: true);
+        Assert.Equal(direct.Tags.Order(StringComparer.OrdinalIgnoreCase),
+            rehydrated.Tags.Order(StringComparer.OrdinalIgnoreCase));
+        Assert.Equal(direct.NativeAbilityIds.Order(StringComparer.OrdinalIgnoreCase),
+            rehydrated.NativeAbilityIds.Order(StringComparer.OrdinalIgnoreCase));
+        Assert.Equal(
+            direct.TemporaryAbilityModifiers.Select(modifier => modifier.ToString()),
+            rehydrated.TemporaryAbilityModifiers.Select(modifier => modifier.ToString()));
+    }
+
     [Fact]
     public void Tier_one_epic_balanced_profile_uses_crafted_gear_with_balanced_defenses()
     {
@@ -97,6 +224,59 @@ public sealed class CanonicalEquipmentBuildFactoryTests
                 build.Equipment,
                 build.Character.Level));
 
+    private static object[] EquipmentSignature(Domain.Models.Combat.CombatEntity combatant) =>
+        combatant.Equipment.OrderBy(item => item.ItemBaseId).Select(item => new
+        {
+            item.ItemBaseId,
+            item.BaseRecipeId,
+            item.BlueprintId,
+            item.EquipmentSetId,
+            item.Tier,
+            item.Rarity,
+            item.Quality,
+            Modifiers = item.AttributeModifiers
+                .OrderBy(modifier => modifier.AttributeType)
+                .ThenBy(modifier => modifier.ModifierType)
+                .Select(modifier => new
+                {
+                    modifier.AttributeType,
+                    modifier.Amount,
+                    modifier.ModifierType
+                }).ToArray()
+        }).Cast<object>().ToArray();
+
+    private static object[] EssenceSignature(Domain.Models.Combat.CombatEntity combatant) =>
+        combatant.EquippedEssences.OrderBy(essence => essence.EssenceDefinitionId).Select(essence => new
+        {
+            essence.EssenceDefinitionId,
+            essence.Level,
+            essence.CurrentXp,
+            essence.AscensionTier,
+            essence.IsEvolved
+        }).Cast<object>().ToArray();
+
+    private static EquipmentSlotType ToSlot(EquipmentType type) => type switch
+    {
+        EquipmentType.Head => EquipmentSlotType.Head,
+        EquipmentType.Relic => EquipmentSlotType.Relic,
+        EquipmentType.Chest => EquipmentSlotType.Chest,
+        EquipmentType.Necklace => EquipmentSlotType.Necklace,
+        EquipmentType.Legs => EquipmentSlotType.Legs,
+        EquipmentType.Ring => EquipmentSlotType.Ring,
+        EquipmentType.OneHanded or EquipmentType.TwoHanded => EquipmentSlotType.MainHand,
+        EquipmentType.OffHand => EquipmentSlotType.OffHand,
+        EquipmentType.Tool => EquipmentSlotType.Tool,
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+    };
+
+    private static LLDbContext CreateDbContext()
+    {
+        var options = new DbContextOptionsBuilder<LLDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        return new LLDbContext(options);
+    }
+
     private static CanonicalEquipmentProgressionRung GetTierOneEpicRung(
         CanonicalEquipmentBuildFactory factory) =>
         factory.GetProgressionLadder().Single(candidate =>
@@ -143,6 +323,8 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             jsonOptions,
             craftingDefinitions,
             essenceDefinitions,
+            creatureEssences,
+            essenceResolver,
             factory);
     }
 
@@ -166,5 +348,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         JsonSerializerOptions JsonOptions,
         JsonCraftingDefinitionProvider CraftingDefinitions,
         JsonEssenceDefinitionRepository EssenceDefinitions,
+        JsonCreatureEssenceLootTableRepository CreatureEssences,
+        EssenceSystemService EssenceResolver,
         CanonicalEquipmentBuildFactory Factory);
 }

@@ -772,11 +772,13 @@ public sealed class RuntimeCombatant
         float threatMultiplier = 1f,
         int? partyNumber = null,
         BossStaggerDefinition? staggerDefinition = null,
-        int staggerParticipantCount = 1)
+        int staggerParticipantCount = 1,
+        int level = 1)
     {
         Id = id;
         Name = name;
         Team = team;
+        Level = Math.Max(1, level);
         PartyNumber = partyNumber;
         Attributes = new Dictionary<AttributeType, float>(attributes);
         Attributes.TryAdd(AttributeType.Threat, BaseThreat);
@@ -807,6 +809,7 @@ public sealed class RuntimeCombatant
     public string Name { get; }
     public string ImagePath { get; }
     public CombatTeam Team { get; }
+    public int Level { get; }
     public int? PartyNumber { get; }
     public Dictionary<AttributeType, float> Attributes { get; }
     public IReadOnlyDictionary<AttributeType, float> InitialAttributes { get; }

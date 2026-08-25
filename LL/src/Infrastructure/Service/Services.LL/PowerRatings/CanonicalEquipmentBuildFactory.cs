@@ -52,7 +52,7 @@ public sealed class CanonicalEquipmentBuildFactory
 {
     public const string TutorialStarterBuildId = "tutorial-starter";
     private const int PositiveTemperingAttemptsPerRarity = 10;
-    private const int MaximumCanonicalEssenceCount = 6;
+    public const int MaximumCanonicalEssenceCount = 7;
     private const int MaximumCalibrationEquipmentTier = 100;
 
     // Stable slot order keeps every full-set matrix build deterministic.
@@ -109,7 +109,8 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.goblin_warrior",
                 "essence.glade_panther",
                 "essence.green_slime",
-                "essence.flame_imp"
+                "essence.flame_imp",
+                "essence.raven"
             ],
             [CanonicalPartyProfile.Offense] =
             [
@@ -118,7 +119,8 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.pixie",
                 "essence.giant_bat",
                 "essence.rotfly_toad",
-                "essence.poisonous_rat"
+                "essence.poisonous_rat",
+                "essence.venomous_snake"
             ],
             [CanonicalPartyProfile.Sustain] =
             [
@@ -127,7 +129,8 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.brown_slime",
                 "essence.flame_imp",
                 "essence.vampire_bat",
-                "essence.goblin_warrior"
+                "essence.goblin_warrior",
+                "essence.forest_spirit"
             ],
             [CanonicalPartyProfile.Defensive] =
             [
@@ -136,7 +139,8 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.goblin",
                 "essence.flame_imp",
                 "essence.green_slime",
-                "essence.illusion_fox"
+                "essence.illusion_fox",
+                "essence.hobgoblin"
             ],
             [CanonicalPartyProfile.Area] =
             [
@@ -145,7 +149,8 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.frost_imp",
                 "essence.shadow_imp",
                 "essence.goblin_shaman",
-                "essence.rainbow_slime"
+                "essence.rainbow_slime",
+                "essence.crystal_wisp"
             ]
         };
 
@@ -159,7 +164,8 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.wood_nymph",
                 "essence.hobgoblin",
                 "essence.cinder_beetle",
-                "essence.red_slime"
+                "essence.red_slime",
+                "essence.lumo_sentinel"
             ],
             [CanonicalCooperativeRole.Restorer] =
             [
@@ -168,7 +174,8 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.goblin_shaman",
                 "essence.lumo_wisp",
                 "essence.treant_sapling",
-                "essence.wood_nymph"
+                "essence.wood_nymph",
+                "essence.crystal_wisp"
             ],
             [CanonicalCooperativeRole.Striker] =
             [
@@ -181,7 +188,8 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.goblin",
                 "essence.giant_bat",
                 "essence.hollow_stag",
-                "essence.rainbow_slime"
+                "essence.rainbow_slime",
+                "essence.goblin_shaman"
             ],
             [CanonicalCooperativeRole.AreaSpecialist] =
             [
@@ -194,7 +202,8 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.vampire_bat",
                 "essence.blood_zombie",
                 "essence.lumo_sentinel",
-                "essence.cinder_beetle"
+                "essence.cinder_beetle",
+                "essence.hobgoblin"
             ]
         };
 
@@ -216,6 +225,12 @@ public sealed class CanonicalEquipmentBuildFactory
         Rarity.Epic,
         Rarity.Unique,
         Rarity.Legendary
+    ];
+
+    private static readonly ItemQuality[] CalibrationQualities =
+    [
+        ItemQuality.Standard,
+        ItemQuality.Exceptional
     ];
 
     private readonly ICraftingDefinitionProvider _craftingDefinitions;
@@ -604,15 +619,19 @@ public sealed class CanonicalEquipmentBuildFactory
                      minimumTier,
                      maximumTier - minimumTier + 1))
         {
-            foreach (var rarity in CalibrationRarities)
+            foreach (var quality in CalibrationQualities)
             {
-                candidates.Add((
-                    tier,
-                    ItemQuality.Standard,
-                    rarity,
-                    TemperingConstants.GetRarityUpgradeCount(rarity),
-                    CanonicalSlots.Length,
-                    $"t{tier}-standard-{rarity.ToString().ToLowerInvariant()}"));
+                foreach (var rarity in CalibrationRarities)
+                {
+                    candidates.Add((
+                        tier,
+                        quality,
+                        rarity,
+                        TemperingConstants.GetRarityUpgradeCount(rarity),
+                        CanonicalSlots.Length,
+                        $"t{tier}-{quality.ToString().ToLowerInvariant()}-" +
+                        rarity.ToString().ToLowerInvariant()));
+                }
             }
         }
 

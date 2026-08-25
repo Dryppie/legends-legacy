@@ -154,6 +154,7 @@ public sealed class EssenceProgressionCalibrationRunner
             new FastCombatEngineOptions(
                 MaxTicks: scenario.MaxTicks,
                 RandomSeed: randomSeed,
+                StartActiveAbilitiesOnCooldown: true,
                 CaptureEventLog: false,
                 OvertimeStartsAtTick: int.MaxValue));
         var result = engine.Run([player], [target]);
