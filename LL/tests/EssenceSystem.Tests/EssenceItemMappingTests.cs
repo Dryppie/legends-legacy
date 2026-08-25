@@ -39,7 +39,7 @@ public sealed class EssenceItemMappingTests
             })
             .ToList();
 
-        Assert.Equal(70, definitionIds.Count);
+        Assert.Equal(75, definitionIds.Count);
         Assert.Equal(definitionIds.Count, mappings.Count);
         Assert.DoesNotContain(mappings, mapping => string.IsNullOrWhiteSpace(mapping.DefinitionId));
         Assert.DoesNotContain(

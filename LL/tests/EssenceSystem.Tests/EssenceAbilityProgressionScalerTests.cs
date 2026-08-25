@@ -33,6 +33,7 @@ public sealed class EssenceAbilityProgressionScalerTests
                     ScalingCoefficient = 1.2f,
                     MaximumScalingCoefficient = 2f,
                     EventMagnitudeCoefficient = 0.5f,
+                    ScalingConditionSubject = AbilityConditionSubject.EventTarget,
                     ConditionScalingCoefficient = 0.25f,
                     StatusScalingCoefficient = 0.1f
                 }
@@ -49,6 +50,7 @@ public sealed class EssenceAbilityProgressionScalerTests
         Assert.Equal(1.344f, effect.ScalingCoefficient, precision: 3);
         Assert.Equal(2.24f, effect.MaximumScalingCoefficient, precision: 3);
         Assert.Equal(0.56f, effect.EventMagnitudeCoefficient, precision: 3);
+        Assert.Equal(AbilityConditionSubject.EventTarget, effect.ScalingConditionSubject);
         Assert.Equal(0.28f, effect.ConditionScalingCoefficient, precision: 3);
         Assert.Equal(0.112f, effect.StatusScalingCoefficient, precision: 3);
 

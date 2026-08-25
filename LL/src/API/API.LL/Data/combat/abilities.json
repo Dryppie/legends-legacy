@@ -5459,7 +5459,7 @@
     "id": "ability.creature.elder_treant.thornstorm",
     "kind": "Active",
     "name": "Thornstorm",
-    "description": "Conjure a storm of enchanted thorns, dealing 80% Magical and 80% Physical Damage to all enemies.",
+    "description": "Conjure a storm of enchanted thorns, dealing 80% Magical Damage and 80% Physical Damage to all enemies.",
     "cooldownTicks": 100,
     "tags": ["Magical", "Physical", "Ranged", "Area"],
     "effects": [
@@ -5490,7 +5490,7 @@
     "id": "ability.creature.elder_treant.ancient_essence",
     "kind": "Passive",
     "name": "Ancient Essence",
-    "description": "Whenever you deal Magical Damage, restore 0.5% Max Health. Can occur once every 3 seconds.",
+    "description": "Whenever you deal Magical Damage, restore 0.5% Max Health. Can occur once every {triggerCooldown}.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Healing", "Magical", "Trigger.OnDamageDealt"],
     "triggers": [
@@ -5895,5 +5895,295 @@
         "procCoefficient": 1
       }
     ]
+  },
+  {
+    "id": "ability.creature.blood_harpy.crimson_dive",
+    "kind": "Active",
+    "name": "Crimson Dive",
+    "description": "Deal 175% Physical Damage to the enemy with the lowest Health and apply Bleed(20).",
+    "cooldownTicks": 160,
+    "tags": ["Physical", "Melee", "Bleed", "Execute"],
+    "effects": [
+      {
+        "id": "effect.creature.blood_harpy.crimson_dive.damage",
+        "operation": "Damage",
+        "target": "LowestHealthEnemy",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.75,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.blood_harpy.crimson_dive.bleed",
+        "operation": "ApplyCondition",
+        "target": "LowestHealthEnemy",
+        "baseValue": 20,
+        "condition": "Bleed",
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.blood_harpy"
+  },
+  {
+    "id": "ability.creature.blood_harpy.rupturing_talons",
+    "kind": "Passive",
+    "name": "Rupturing Talons",
+    "description": "Melee attacks against Bleeding targets apply Bleed(4).",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Physical", "Melee", "Bleed"],
+    "triggers": [
+      {
+        "event": "OnMeleeAttack",
+        "conditions": [
+          { "type": "EventSourceIsSelf" }
+        ],
+        "effectIds": ["effect.creature.blood_harpy.rupturing_talons.bleed"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.blood_harpy.rupturing_talons.bleed",
+        "operation": "ApplyCondition",
+        "target": "EventTarget",
+        "baseValue": 4,
+        "condition": "Bleed",
+        "conditions": [
+          {
+            "type": "HasCondition",
+            "subject": "EventTarget",
+            "condition": "Bleed"
+          }
+        ],
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.blood_harpy"
+  },
+  {
+    "id": "ability.creature.flame_harpy.fire_claws",
+    "kind": "Active",
+    "name": "Fire Claws",
+    "description": "Deal 50% Physical Damage and apply Burn(50) to the target.",
+    "cooldownTicks": 150,
+    "tags": ["Physical", "Melee", "Burn"],
+    "effects": [
+      {
+        "id": "effect.creature.flame_harpy.fire_claws.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.5,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.flame_harpy.fire_claws.burn",
+        "operation": "ApplyCondition",
+        "target": "CurrentTarget",
+        "baseValue": 50,
+        "condition": "Burn",
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.flame_harpy"
+  },
+  {
+    "id": "ability.creature.flame_harpy.fiery_shriek",
+    "kind": "Passive",
+    "name": "Fiery Shriek",
+    "description": "Every 8 seconds, release a fiery screech that applies Burn(16) to a random enemy.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Burn", "Periodic", "Ranged"],
+    "triggers": [
+      {
+        "event": "OnInterval",
+        "internalCooldownTicks": 80,
+        "initialDelayTicks": 80,
+        "effectIds": ["effect.creature.flame_harpy.fiery_shriek.burn"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.flame_harpy.fiery_shriek.burn",
+        "operation": "ApplyCondition",
+        "target": "RandomEnemy",
+        "baseValue": 16,
+        "condition": "Burn",
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.flame_harpy"
+  },
+  {
+    "id": "ability.creature.ice_harpy.chilling_gust",
+    "kind": "Active",
+    "name": "Chilling Gust",
+    "description": "Deal 140% Magical Damage and apply Chill(1) to all enemies.",
+    "cooldownTicks": 170,
+    "tags": ["Magical", "Ranged", "Area", "Chill"],
+    "effects": [
+      {
+        "id": "effect.creature.ice_harpy.chilling_gust.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.4,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.ice_harpy.chilling_gust.chill",
+        "operation": "ApplyCondition",
+        "target": "AllEnemies",
+        "baseValue": 1,
+        "condition": "Chill",
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.ice_harpy"
+  },
+  {
+    "id": "ability.creature.ice_harpy.chilling_precision",
+    "kind": "Passive",
+    "name": "Chilling Precision",
+    "description": "Direct hits deal an additional 0.4% Magical Damage for every stack of Chill on the target.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Magical", "Chill", "Direct Hit"],
+    "triggers": [
+      {
+        "event": "OnHit",
+        "conditions": [
+          { "type": "EventWasDirectHit" },
+          { "type": "EventSourceIsSelf" }
+        ],
+        "effectIds": ["effect.creature.ice_harpy.chilling_precision.damage"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.ice_harpy.chilling_precision.damage",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "scalingCondition": "Chill",
+        "scalingConditionSubject": "EventTarget",
+        "conditionScalingCoefficient": 0.004,
+        "attackType": "None",
+        "damageType": "Magical",
+        "tags": ["Damage.Secondary"],
+        "conditions": [
+          {
+            "type": "HasCondition",
+            "subject": "EventTarget",
+            "condition": "Chill"
+          }
+        ],
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.ice_harpy"
+  },
+  {
+    "id": "ability.creature.shadow_harpy.shadow_dive",
+    "kind": "Active",
+    "name": "Shadow Dive",
+    "description": "Deal 190% Magical Damage to the target and gain Stealth for 3 seconds.",
+    "cooldownTicks": 140,
+    "tags": ["Magical", "Melee", "Stealth"],
+    "effects": [
+      {
+        "id": "effect.creature.shadow_harpy.shadow_dive.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.9,
+        "attackType": "Melee",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.shadow_harpy.shadow_dive.stealth",
+        "operation": "ApplyCondition",
+        "target": "Self",
+        "baseValue": 3,
+        "condition": "Stealth",
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.shadow_harpy"
+  },
+  {
+    "id": "ability.creature.shadow_harpy.midnight_shroud",
+    "kind": "Passive",
+    "name": "Midnight Shroud",
+    "description": "Increase Dodge Chance by 3%.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Buff", "Defensive"],
+    "effects": [
+      {
+        "id": "effect.creature.shadow_harpy.midnight_shroud.dodge",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "baseValue": 3,
+        "attribute": "DodgeChance",
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.shadow_harpy"
+  },
+  {
+    "id": "ability.creature.wind_harpy.gale_slash",
+    "kind": "Active",
+    "name": "Gale Slash",
+    "description": "Deal 200% Physical Damage to all enemies.",
+    "cooldownTicks": 180,
+    "tags": ["Physical", "Melee", "Area"],
+    "effects": [
+      {
+        "id": "effect.creature.wind_harpy.gale_slash.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.0,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.wind_harpy"
+  },
+  {
+    "id": "ability.creature.wind_harpy.sharp_feathers",
+    "kind": "Passive",
+    "name": "Sharp Feathers",
+    "description": "Basic attacks have a 15% chance to release sharp feathers at the target, dealing an additional 15% Physical Damage.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Physical", "Ranged", "Basic Attack"],
+    "triggers": [
+      {
+        "event": "OnBasicAttack",
+        "conditions": [
+          { "type": "EventSourceIsSelf" }
+        ],
+        "effectIds": ["effect.creature.wind_harpy.sharp_feathers.damage"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.wind_harpy.sharp_feathers.damage",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.15,
+        "chancePercent": 15,
+        "attackType": "Ranged",
+        "damageType": "Physical",
+        "tags": ["Damage.Secondary"],
+        "procCoefficient": 1
+      }
+    ],
+    "owningEssenceId": "essence.wind_harpy"
   }
 ]

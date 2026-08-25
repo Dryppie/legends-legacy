@@ -629,6 +629,56 @@
       "archetype": "Support",
       "damageProfile": "Magical",
       "defenseProfile": "MagicalTank"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000093",
+      "name": "Blood Harpy",
+      "imagePath": "blood_harpy",
+      "archetype": "DPS",
+      "damageProfile": "Physical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 60,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000094",
+      "name": "Flame Harpy",
+      "imagePath": "flame_harpy",
+      "archetype": "Balanced",
+      "damageProfile": "Hybrid",
+      "defenseProfile": "Balanced",
+      "baseLevel": 60,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000095",
+      "name": "Ice Harpy",
+      "imagePath": "ice_harpy",
+      "archetype": "Support",
+      "damageProfile": "Magical",
+      "defenseProfile": "MagicalTank",
+      "baseLevel": 60,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000096",
+      "name": "Shadow Harpy",
+      "imagePath": "shadow_harpy",
+      "archetype": "DPS",
+      "damageProfile": "Magical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 60,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000097",
+      "name": "Wind Harpy",
+      "imagePath": "wind_harpy",
+      "archetype": "DPS",
+      "damageProfile": "Physical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 60,
+      "tier": 2
     }
   ]
 }

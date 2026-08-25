@@ -149,6 +149,25 @@ public sealed class EssenceDefinitionValidatorTests
     }
 
     [Fact]
+    public void Validate_accepts_a_trigger_cooldown_description_placeholder_with_a_matching_trigger()
+    {
+        var definition = ValidDefinition();
+        definition.PassiveAbility.Description = "Can occur once every {triggerCooldown}.";
+        definition.PassiveAbility.Triggers =
+        [
+            new()
+            {
+                Event = AbilityTriggerEvent.OnDamageDealt,
+                InternalCooldownTicks = 30
+            }
+        ];
+
+        var errors = _validator.Validate([definition]);
+
+        Assert.DoesNotContain(errors, error => error.Contains("triggerCooldown", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void Authored_essence_json_passes_definition_validation()
     {
         var options = new JsonSerializerOptions
@@ -200,7 +219,7 @@ public sealed class EssenceDefinitionValidatorTests
             .Select(definition => definition.ActiveAbility.CooldownTicks)
             .ToArray();
 
-        Assert.Equal(70, cooldowns.Length);
+        Assert.Equal(75, cooldowns.Length);
         Assert.All(cooldowns, cooldown => Assert.InRange(cooldown, 75, 240));
         Assert.True(cooldowns.Distinct().Count() >= 10);
         Assert.Contains(cooldowns, cooldown => cooldown < 100);
@@ -241,7 +260,7 @@ public sealed class EssenceDefinitionValidatorTests
             .SelectMany(collection => collection.EssenceDefinitionIds)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        Assert.Equal(17, collections.Count);
+        Assert.Equal(18, collections.Count);
         Assert.All(collections, collection =>
         {
             Assert.InRange(collection.EssenceDefinitionIds.Count, 2, 6);
@@ -249,7 +268,7 @@ public sealed class EssenceDefinitionValidatorTests
         Assert.Equal(
             ["Creature Families", "Essence Affinities", "Regional Ecologies"],
             collections.Select(collection => collection.Category).Distinct().Order().ToArray());
-        Assert.Equal(70, regionOneEssences.Count);
+        Assert.Equal(75, regionOneEssences.Count);
         Assert.Equal(regionOneEssences.Order(StringComparer.OrdinalIgnoreCase), collectedEssences.Order(StringComparer.OrdinalIgnoreCase));
         var allowedBonusKinds = new HashSet<BonusKind>
         {

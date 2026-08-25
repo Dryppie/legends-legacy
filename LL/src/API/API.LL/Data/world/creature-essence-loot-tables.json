@@ -852,6 +852,56 @@
           }
         ]
       }
+    },
+    {
+      "id": "monster.blood_harpy",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.blood_harpy.rupturing_talons",
+        "variants": [
+          {"essenceDefinitionId": "essence.blood_harpy", "activeAbilityId": "ability.creature.blood_harpy.crimson_dive", "weight": 1}
+        ]
+      }
+    },
+    {
+      "id": "monster.flame_harpy",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.flame_harpy.fiery_shriek",
+        "variants": [
+          {"essenceDefinitionId": "essence.flame_harpy", "activeAbilityId": "ability.creature.flame_harpy.fire_claws", "weight": 1}
+        ]
+      }
+    },
+    {
+      "id": "monster.ice_harpy",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.ice_harpy.chilling_precision",
+        "variants": [
+          {"essenceDefinitionId": "essence.ice_harpy", "activeAbilityId": "ability.creature.ice_harpy.chilling_gust", "weight": 1}
+        ]
+      }
+    },
+    {
+      "id": "monster.shadow_harpy",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.shadow_harpy.midnight_shroud",
+        "variants": [
+          {"essenceDefinitionId": "essence.shadow_harpy", "activeAbilityId": "ability.creature.shadow_harpy.shadow_dive", "weight": 1}
+        ]
+      }
+    },
+    {
+      "id": "monster.wind_harpy",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.wind_harpy.sharp_feathers",
+        "variants": [
+          {"essenceDefinitionId": "essence.wind_harpy", "activeAbilityId": "ability.creature.wind_harpy.gale_slash", "weight": 1}
+        ]
+      }
     }
   ]
 }

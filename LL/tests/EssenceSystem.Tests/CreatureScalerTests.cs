@@ -42,6 +42,7 @@ public sealed class CreatureScalerTests
         var regionOneEnd = provider.GetScaling(new Area { Id = "region_01_area_07" });
         var regionTwoStart = provider.GetScaling(new Area { Id = "region_02_area_01" });
         var rotgraveFields = provider.GetScaling(new Area { Id = "region_02_area_02" });
+        var tempestAerie = provider.GetScaling(new Area { Id = "region_02_area_03" });
         var campaignEnd = provider.GetScaling(new Area { DifficultyTier = 100 });
         var unifiedCurve = provider.GetCatalog().Profiles.Single(profile =>
             profile.Id == "unified-global-v1");
@@ -61,6 +62,8 @@ public sealed class CreatureScalerTests
         Assert.Equal(8.93384064, regionOneEnd.OffenseMultiplier, 5);
         Assert.Equal(11, regionTwoStart.GlobalStep);
         Assert.Equal(12, rotgraveFields.GlobalStep);
+        Assert.Equal(13, tempestAerie.GlobalStep);
+        Assert.Equal(303, tempestAerie.RecommendedCombatRating);
         Assert.Equal(5.96, rotgraveFields.HealthMultiplier, 5);
         Assert.Equal(14.3, rotgraveFields.OffenseMultiplier, 5);
         Assert.Equal(2.73, rotgraveFields.DefenseMultiplier, 5);

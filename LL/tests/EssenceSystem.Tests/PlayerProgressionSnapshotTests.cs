@@ -14,8 +14,8 @@ public sealed class PlayerProgressionSnapshotTests
     {
         var report = CreateFactory().Generate();
 
-        Assert.Equal(4, report.Version);
-        Assert.Equal(14 * 3 * 3, report.Snapshots.Count);
+        Assert.Equal(5, report.Version);
+        Assert.Equal(15 * 3 * 3, report.Snapshots.Count);
         Assert.All(report.Snapshots, snapshot =>
         {
             Assert.Equal(
@@ -102,7 +102,7 @@ public sealed class PlayerProgressionSnapshotTests
     public void Manifest_covers_campaign_and_region_boundary_anchors()
     {
         var snapshots = CreateFactory().Generate().Snapshots;
-        int[] requiredPositions = [1, 2, 5, 10, 11, 12, 15, 20, 21, 30, 41, 50, 91, 100];
+        int[] requiredPositions = [1, 2, 5, 10, 11, 12, 13, 15, 20, 21, 30, 41, 50, 91, 100];
 
         Assert.Equal(
             requiredPositions,

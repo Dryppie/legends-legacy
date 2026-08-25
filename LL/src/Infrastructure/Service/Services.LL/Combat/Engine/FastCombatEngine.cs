@@ -5011,7 +5011,12 @@ public sealed class FastCombatEngine
                     + (combatEvent?.Magnitude ?? 0) * effect.EventMagnitudeCoefficient;
         if (effect.ScalingCondition is { } condition)
         {
-            value += source.GetConditionStacks(condition)
+            value += ResolveScalingSubject(
+                         effect.ScalingConditionSubject,
+                         source,
+                         target,
+                         combatEvent)
+                     .GetConditionStacks(condition)
                      * GetEffectivePower(source)
                      * effect.ConditionScalingCoefficient;
         }

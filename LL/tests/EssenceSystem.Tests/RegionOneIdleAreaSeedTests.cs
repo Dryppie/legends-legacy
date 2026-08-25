@@ -91,7 +91,7 @@ public sealed class RegionOneIdleAreaSeedTests
     }
 
     [Fact]
-    public async Task SeedCreaturesData_creates_the_first_two_Meran_areas_and_their_monsters()
+    public async Task SeedCreaturesData_creates_the_authored_Meran_areas_and_their_monsters()
     {
         await using var db = CreateDb();
 
@@ -108,8 +108,8 @@ public sealed class RegionOneIdleAreaSeedTests
             .SingleAsync(region => region.Name == "Meran");
         var areas = meran.Areas.OrderBy(area => area.DifficultyTier).ToArray();
 
-        Assert.Equal(["Warfang Frontier", "Rotgrave Fields"], areas.Select(area => area.Name));
-        Assert.Equal([50, 55], areas.Select(area => area.LevelRequirement));
+        Assert.Equal(["Warfang Frontier", "Rotgrave Fields", "Tempest Aerie"], areas.Select(area => area.Name));
+        Assert.Equal([50, 55, 60], areas.Select(area => area.LevelRequirement));
         Assert.All(areas, area => Assert.Equal(10, area.RequiredTowerFloor));
         Assert.Equal(
             ["Gnoll Pack Leader", "Gnoll Raider", "Gnoll Shaman", "Kobold Skirmisher", "Kobold Sorcerer"],
@@ -117,6 +117,9 @@ public sealed class RegionOneIdleAreaSeedTests
         Assert.Equal(
             ["Feral Ghoul", "Plague Ghoul", "Ravenous Ghoul", "Vampire Fledgeling", "Wandering Ghost"],
             areas[1].Creatures.Select(creature => creaturesById[creature.CreatureId]).OrderBy(name => name));
+        Assert.Equal(
+            ["Blood Harpy", "Flame Harpy", "Ice Harpy", "Shadow Harpy", "Wind Harpy"],
+            areas[2].Creatures.Select(creature => creaturesById[creature.CreatureId]).OrderBy(name => name));
         Assert.Equal(
             [GatheringType.Mining, GatheringType.Woodcutting, GatheringType.Skinning],
             areas[0].GatheringNodes.Select(node => node.Type).Order());
@@ -149,7 +152,7 @@ public sealed class RegionOneIdleAreaSeedTests
 
         Assert.True(changed);
         Assert.True(await db.Regions.AnyAsync(region => region.Name == "Meran"));
-        Assert.Equal(2, await db.Areas.CountAsync(area => area.Id.StartsWith("region_02_area_")));
+        Assert.Equal(3, await db.Areas.CountAsync(area => area.Id.StartsWith("region_02_area_")));
     }
 
     [Fact]

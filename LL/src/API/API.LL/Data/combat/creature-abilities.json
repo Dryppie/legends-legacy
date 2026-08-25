@@ -595,6 +595,41 @@
         "ability.creature.elder_treant.thornstorm",
         "ability.creature.elder_treant.ancient_essence"
       ]
+    },
+    {
+      "monsterId": "monster.blood_harpy",
+      "abilityIds": [
+        "ability.creature.blood_harpy.crimson_dive",
+        "ability.creature.blood_harpy.rupturing_talons"
+      ]
+    },
+    {
+      "monsterId": "monster.flame_harpy",
+      "abilityIds": [
+        "ability.creature.flame_harpy.fire_claws",
+        "ability.creature.flame_harpy.fiery_shriek"
+      ]
+    },
+    {
+      "monsterId": "monster.ice_harpy",
+      "abilityIds": [
+        "ability.creature.ice_harpy.chilling_gust",
+        "ability.creature.ice_harpy.chilling_precision"
+      ]
+    },
+    {
+      "monsterId": "monster.shadow_harpy",
+      "abilityIds": [
+        "ability.creature.shadow_harpy.shadow_dive",
+        "ability.creature.shadow_harpy.midnight_shroud"
+      ]
+    },
+    {
+      "monsterId": "monster.wind_harpy",
+      "abilityIds": [
+        "ability.creature.wind_harpy.gale_slash",
+        "ability.creature.wind_harpy.sharp_feathers"
+      ]
     }
   ]
 }

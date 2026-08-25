@@ -29,6 +29,7 @@ describe('RegionService', () => {
     expect(region.areas.map((area) => area.name)).toEqual([
       'Warfang Frontier',
       'Rotgrave Fields',
+      'Tempest Aerie',
     ]);
     expect(region.areas[0].creatures).toEqual([
       'Gnoll Pack Leader',
@@ -43,6 +44,16 @@ describe('RegionService', () => {
       GatheringType.Skinning,
     ]);
     expect(region.areas[1].gatheringTypes).toEqual([GatheringType.Mining]);
+    expect(region.areas[2].creatures).toEqual([
+      'Blood Harpy',
+      'Flame Harpy',
+      'Ice Harpy',
+      'Shadow Harpy',
+      'Wind Harpy',
+    ]);
+    expect(region.areas[2].gatheringTypes).toEqual([
+      GatheringType.Woodcutting,
+    ]);
   });
 
   it('resolves the parent region from an area id', () => {
@@ -50,6 +61,7 @@ describe('RegionService', () => {
 
     expect(service.getRegionNameByAreaId('region_01_area_01')).toBe('Shenic');
     expect(service.getRegionNameByAreaId('region_02_area_02')).toBe('Meran');
+    expect(service.getRegionNameByAreaId('region_02_area_03')).toBe('Meran');
     expect(service.getRegionNameByAreaId('unknown_area')).toBeNull();
   });
 

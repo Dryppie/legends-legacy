@@ -317,6 +317,25 @@
         "valuePerCollectionAscensionTier": 15,
         "description": "+0.75% Essence drop rate against focused monsters."
       }
+    },
+    {
+      "id": "codex.collection.meran.tempest-aerie-harpy-flock",
+      "title": "Harpy Flock of Tempest Aerie",
+      "description": "Archive the elemental harpies that rule the storm-lashed heights of Tempest Aerie.",
+      "category": "Creature Families",
+      "essenceDefinitionIds": [
+        "essence.blood_harpy",
+        "essence.flame_harpy",
+        "essence.ice_harpy",
+        "essence.shadow_harpy",
+        "essence.wind_harpy"
+      ],
+      "bonus": {
+        "kind": "EssenceDropRateRelativeBps",
+        "value": 75,
+        "valuePerCollectionAscensionTier": 15,
+        "description": "+0.75% Essence drop rate."
+      }
     }
   ]
 }

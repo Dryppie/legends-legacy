@@ -20,9 +20,9 @@ public sealed class EncounterCalibrationTests
         var catalog = context.EncounterFactory.CreateCatalog();
 
         Assert.Equal(11, catalog.Version);
-        Assert.Equal(24, catalog.Encounters.Count);
+        Assert.Equal(25, catalog.Encounters.Count);
         Assert.Equal(4, catalog.Encounters.Select(encounter => encounter.ContentType).Distinct().Count());
-        Assert.Equal(5, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Idle));
+        Assert.Equal(6, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Idle));
         Assert.Equal(8, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Dungeon));
         Assert.Equal(4, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Tower));
         Assert.Equal(7, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Raid));
@@ -143,7 +143,7 @@ public sealed class EncounterCalibrationTests
 
         var report = context.Runner.Run(catalog, players);
 
-        Assert.Equal(1_284, report.Results.Count);
+        Assert.Equal(1_332, report.Results.Count);
         Assert.All(report.Results, result =>
         {
             Assert.Equal(3, result.SampleCount);
@@ -161,9 +161,9 @@ public sealed class EncounterCalibrationTests
                 result.GearEnvelopeId == catalog.AssessmentGearEnvelopeId
                 && result.EssenceEnvelopeId == catalog.AssessmentEssenceEnvelopeId)
             .ToList();
-        Assert.Equal(107, expectedCohort.Count);
-        Assert.Equal(94, expectedCohort.Count(result => result.IncludedInRoleAssessment));
-        Assert.Equal(13, expectedCohort.Count(result => !result.IncludedInRoleAssessment));
+        Assert.Equal(111, expectedCohort.Count);
+        Assert.Equal(97, expectedCohort.Count(result => result.IncludedInRoleAssessment));
+        Assert.Equal(14, expectedCohort.Count(result => !result.IncludedInRoleAssessment));
         Assert.All(
             report.Results.Where(result =>
                 (result.ContentType == EncounterCalibrationContentType.Idle
@@ -262,9 +262,9 @@ public sealed class EncounterCalibrationTests
         var artifact = EncounterCalibrationReportRenderer.CreateArtifact(report, catalog);
         var markdown = EncounterCalibrationReportRenderer.RenderMarkdown(artifact);
         Assert.Equal(7, artifact.SchemaVersion);
-        Assert.Equal(1_284, artifact.Summary.ResultCount);
-        Assert.Equal(3_852, artifact.Summary.SeededSampleCount);
-        Assert.Equal(94, artifact.Summary.AssessedResultCount);
+        Assert.Equal(1_332, artifact.Summary.ResultCount);
+        Assert.Equal(3_996, artifact.Summary.SeededSampleCount);
+        Assert.Equal(97, artifact.Summary.AssessedResultCount);
         Assert.Equal(4, artifact.Summary.Content.Count);
         Assert.NotNull(artifact.SupportComparisons);
         Assert.Equal(11 * 3 * 4, artifact.SupportComparisons.Count);

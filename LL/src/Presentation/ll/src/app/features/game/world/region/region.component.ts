@@ -61,6 +61,10 @@ const PRE_IMPLEMENTATION_SIGIL_DROPS_BY_AREA: Readonly<
     { itemId: 'sigil_tangled_cave', name: 'Silkbound Sigil' },
     { itemId: 'sigil_great_tree', name: 'Heartwood Sigil' },
   ],
+  region_02_area_03: [
+    { itemId: 'sigil_tangled_cave', name: 'Silkbound Sigil' },
+    { itemId: 'sigil_great_tree', name: 'Heartwood Sigil' },
+  ],
 };
 
 @Component({

@@ -16,7 +16,7 @@ public sealed class EssenceCalibrationMatrixTests
 
         var scenarios = context.MatrixFactory.CreateScenarios();
 
-        Assert.Equal(9 * 3 * 4, scenarios.Count);
+        Assert.Equal(10 * 3 * 4, scenarios.Count);
         Assert.All(scenarios, scenario =>
         {
             Assert.False(string.IsNullOrWhiteSpace(scenario.SnapshotAnchorId));

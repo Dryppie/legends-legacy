@@ -272,6 +272,7 @@ public sealed class AbilityEffectSpec
     public float MaximumScalingCoefficient { get; set; }
     public float EventMagnitudeCoefficient { get; set; }
     public StandardConditionType? ScalingCondition { get; set; }
+    public AbilityConditionSubject ScalingConditionSubject { get; set; } = AbilityConditionSubject.Source;
     public float ConditionScalingCoefficient { get; set; }
     public string? ScalingStatusId { get; set; }
     public AbilityConditionSubject ScalingStatusSubject { get; set; } = AbilityConditionSubject.Source;

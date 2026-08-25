@@ -1,5 +1,5 @@
 {
-  "version": 10,
+  "version": 11,
   "fallbackProfileId": "content-foundation-v1",
   "foundation": {
     "areasPerRegion": 10,
@@ -175,14 +175,16 @@
       "profileId": "unified-global-v1",
       "startingGlobalStep": 11,
       "startingCombatRating": 200,
-      "endingCombatRating": 246,
+      "endingCombatRating": 303,
       "areaIds": [
         "region_02_area_01",
-        "region_02_area_02"
+        "region_02_area_02",
+        "region_02_area_03"
       ],
       "defaultBuildIds": [
         "t2-standard-common",
-        "t2-standard-uncommon"
+        "t2-standard-uncommon",
+        "t2-standard-rare"
       ]
     }
   ]

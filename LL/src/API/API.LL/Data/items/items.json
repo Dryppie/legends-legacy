@@ -2207,6 +2207,66 @@
     "gatheringType": null
   },
   {
+    "id": "item.essence.blood_harpy",
+    "name": "Unbound Blood Harpy Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "essenceDefinitionId": "essence.blood_harpy",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
+    "id": "item.essence.flame_harpy",
+    "name": "Unbound Flame Harpy Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "essenceDefinitionId": "essence.flame_harpy",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
+    "id": "item.essence.ice_harpy",
+    "name": "Unbound Ice Harpy Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "essenceDefinitionId": "essence.ice_harpy",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
+    "id": "item.essence.shadow_harpy",
+    "name": "Unbound Shadow Harpy Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "essenceDefinitionId": "essence.shadow_harpy",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
+    "id": "item.essence.wind_harpy",
+    "name": "Unbound Wind Harpy Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "essenceDefinitionId": "essence.wind_harpy",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
     "id": "blueprint_raidforged",
     "name": "Blueprint: Raidforged",
     "description": "Permanently teaches the Raidforged design for one compatible recipe.",

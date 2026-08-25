@@ -120,6 +120,37 @@ public sealed class EssenceAbilityDtoMappingTests
         Assert.Equal(scaled.Effects[3].DurationTicks / 10d, dto.Effects[3].DurationSeconds);
     }
 
+    [Theory]
+    [InlineData(0, "Can occur once every 3 seconds.")]
+    [InlineData(1, "Can occur once every 2.8 seconds.")]
+    [InlineData(2, "Can occur once every 2.7 seconds.")]
+    [InlineData(3, "Can occur once every 2.6 seconds.")]
+    public void Ability_mapping_resolves_the_ascension_scaled_trigger_cooldown_in_the_description(
+        int tier,
+        string expectedDescription)
+    {
+        var ability = new AbilitySpec
+        {
+            Id = "ability.trigger-cooldown-description",
+            Kind = AbilitySpecKind.Passive,
+            Name = "Trigger Cooldown Description",
+            Description = "Can occur once every {triggerCooldown}.",
+            Triggers =
+            [
+                new()
+                {
+                    Event = AbilityTriggerEvent.OnDamageDealt,
+                    InternalCooldownTicks = 30
+                }
+            ]
+        };
+
+        var scaled = EssenceAbilityProgressionScaler.Apply(ability, tier);
+        var dto = _mapper.Map<EssenceAbilityDto>(scaled);
+
+        Assert.Equal(expectedDescription, dto.Description);
+    }
+
     [Fact]
     public void Equipped_essence_definition_uses_the_players_ascension_tier()
     {

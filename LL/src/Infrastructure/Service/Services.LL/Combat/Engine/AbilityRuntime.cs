@@ -64,6 +64,7 @@ public sealed class CompiledEffect
     public float MaximumScalingCoefficient { get; init; }
     public float EventMagnitudeCoefficient { get; init; }
     public StandardConditionType? ScalingCondition { get; init; }
+    public AbilityConditionSubject ScalingConditionSubject { get; init; }
     public float ConditionScalingCoefficient { get; init; }
     public string? ScalingStatusId { get; init; }
     public AbilityConditionSubject ScalingStatusSubject { get; init; }

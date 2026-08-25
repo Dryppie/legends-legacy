@@ -1341,6 +1341,56 @@
       "activeAbilityId": "ability.creature.elder_treant.thornstorm",
       "passiveAbilityId": "ability.creature.elder_treant.ancient_essence",
       "evolution": {"id": "evolution.elder_treant_thornstorm", "name": "Awakened Elder Treant", "description": "The awakened form of Elder Treant Essence — Thornstorm.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.blood_harpy",
+      "sourceMonsterId": "monster.blood_harpy",
+      "name": "Blood Harpy Essence",
+      "description": "The combat essence of Blood Harpy, granting Crimson Dive and Rupturing Talons.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.blood_harpy.crimson_dive",
+      "passiveAbilityId": "ability.creature.blood_harpy.rupturing_talons",
+      "evolution": {"id": "evolution.blood_harpy", "name": "Awakened Blood Harpy", "description": "The awakened form of Blood Harpy Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.flame_harpy",
+      "sourceMonsterId": "monster.flame_harpy",
+      "name": "Flame Harpy Essence",
+      "description": "The combat essence of Flame Harpy, granting Fire Claws and Fiery Shriek.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.flame_harpy.fire_claws",
+      "passiveAbilityId": "ability.creature.flame_harpy.fiery_shriek",
+      "evolution": {"id": "evolution.flame_harpy", "name": "Awakened Flame Harpy", "description": "The awakened form of Flame Harpy Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.ice_harpy",
+      "sourceMonsterId": "monster.ice_harpy",
+      "name": "Ice Harpy Essence",
+      "description": "The combat essence of Ice Harpy, granting Chilling Gust and Chilling Precision.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.ice_harpy.chilling_gust",
+      "passiveAbilityId": "ability.creature.ice_harpy.chilling_precision",
+      "evolution": {"id": "evolution.ice_harpy", "name": "Awakened Ice Harpy", "description": "The awakened form of Ice Harpy Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.shadow_harpy",
+      "sourceMonsterId": "monster.shadow_harpy",
+      "name": "Shadow Harpy Essence",
+      "description": "The combat essence of Shadow Harpy, granting Shadow Dive and Midnight Shroud.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.shadow_harpy.shadow_dive",
+      "passiveAbilityId": "ability.creature.shadow_harpy.midnight_shroud",
+      "evolution": {"id": "evolution.shadow_harpy", "name": "Awakened Shadow Harpy", "description": "The awakened form of Shadow Harpy Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.wind_harpy",
+      "sourceMonsterId": "monster.wind_harpy",
+      "name": "Wind Harpy Essence",
+      "description": "The combat essence of Wind Harpy, granting Gale Slash and Sharp Feathers.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.wind_harpy.gale_slash",
+      "passiveAbilityId": "ability.creature.wind_harpy.sharp_feathers",
+      "evolution": {"id": "evolution.wind_harpy", "name": "Awakened Wind Harpy", "description": "The awakened form of Wind Harpy Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
     }
   ]
 }

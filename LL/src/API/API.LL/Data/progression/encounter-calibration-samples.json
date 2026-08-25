@@ -122,6 +122,19 @@
       "maxTicks": 900
     },
     {
+      "id": "idle.tempest-aerie.double",
+      "contentType": "Idle",
+      "difficultyRole": "Elite",
+      "bandId": "idle-double",
+      "snapshotAnchorId": "region-02-area-03",
+      "areaId": "region_02_area_03",
+      "creatureIds": [
+        "00000000-0000-0000-0000-000000000093",
+        "00000000-0000-0000-0000-000000000097"
+      ],
+      "maxTicks": 900
+    },
+    {
       "id": "dungeon.goblin-mines.room",
       "contentType": "Dungeon",
       "difficultyRole": "Room",

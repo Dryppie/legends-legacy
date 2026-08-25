@@ -61,6 +61,33 @@ describe('EssenceDescriptionFormatter magnitude coefficients', () => {
     expect(html).not.toContain('134.4%-134.4%');
   });
 
+  it('scales both damage magnitudes when a hybrid ability names each damage type', () => {
+    const damageEffect = (id: string) => ({
+      id,
+      type: 'Damage',
+      target: 'AllEnemies',
+      baseValue: 0,
+      currentValue: 0,
+      attribute: null,
+      status: null,
+      durationSeconds: null,
+      scaling: [{ attribute: 'Power', coefficient: 0.992 }],
+      nestedEffects: [],
+    });
+    const html = formatter.format(
+      'Deal 80% Magical Damage and 80% Physical Damage to all enemies.',
+      [
+        damageEffect('effect.thornstorm.magical'),
+        damageEffect('effect.thornstorm.physical'),
+      ],
+      () => 100,
+      'Thornstorm',
+    );
+
+    expect(html).toContain('>99.2% Magical Damage</span>');
+    expect(html).toContain('>99.2% Physical Damage</span>');
+  });
+
   it('describes conditional damage as an additional hit', () => {
     const damageEffect = (id: string) => ({
       id,

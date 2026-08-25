@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "combatLoadoutBudgetWeight": 8.0,
   "gearEnvelopes": [
     {
@@ -85,6 +85,7 @@
     { "id": "region-01-end", "progressionPosition": 10, "characterLevel": 45 },
     { "id": "region-02-entry", "progressionPosition": 11, "characterLevel": 50 },
     { "id": "region-02-area-02", "progressionPosition": 12, "characterLevel": 55 },
+    { "id": "region-02-area-03", "progressionPosition": 13, "characterLevel": 60 },
     { "id": "region-02-mid", "progressionPosition": 15, "characterLevel": 70 },
     { "id": "region-02-end", "progressionPosition": 20, "characterLevel": 95 },
     { "id": "region-03-entry", "progressionPosition": 21, "characterLevel": 100 },

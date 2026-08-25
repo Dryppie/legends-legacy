@@ -152,7 +152,9 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
             var kind = match.Groups["kind"].Value;
             var rawIndex = match.Groups["index"].Value;
             var index = string.IsNullOrEmpty(rawIndex) ? 1 : int.Parse(rawIndex);
-            var matchingEffectCount = CountPlaceholderEffects(ability.Effects, kind);
+            var matchingEffectCount = kind.Equals("triggerCooldown", StringComparison.OrdinalIgnoreCase)
+                ? ability.Triggers.Count(trigger => trigger.InternalCooldownTicks > 0)
+                : CountPlaceholderEffects(ability.Effects, kind);
 
             if (index < 1 || matchingEffectCount < index)
             {

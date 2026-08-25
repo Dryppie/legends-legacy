@@ -18,6 +18,7 @@ public sealed class IdleDungeonSigilDropPoolTests
 
         Assert.Equal(expectedSigilIds, provider.GetAdditionalSigilIds("region_02_area_01"));
         Assert.Equal(expectedSigilIds, provider.GetAdditionalSigilIds("region_02_area_02"));
+        Assert.Equal(expectedSigilIds, provider.GetAdditionalSigilIds("region_02_area_03"));
     }
 
     [Fact]

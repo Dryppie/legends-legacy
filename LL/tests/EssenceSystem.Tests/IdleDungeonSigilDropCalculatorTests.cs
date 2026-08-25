@@ -106,6 +106,8 @@ public sealed class IdleDungeonSigilDropCalculatorTests
     [InlineData("region_02_area_01", 0.999, "sigil_great_tree")]
     [InlineData("region_02_area_02", 0.0, "sigil_tangled_cave")]
     [InlineData("region_02_area_02", 0.999, "sigil_great_tree")]
+    [InlineData("region_02_area_03", 0.0, "sigil_tangled_cave")]
+    [InlineData("region_02_area_03", 0.999, "sigil_great_tree")]
     public async Task RollAsync_can_drop_future_Shenic_dungeon_sigils_in_each_Meran_area(
         string areaId,
         double selectionRoll,
@@ -116,7 +118,8 @@ public sealed class IdleDungeonSigilDropCalculatorTests
         var additionalDrops = new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase)
         {
             ["region_02_area_01"] = [tangledCaveSigil.Id, greatTreeSigil.Id],
-            ["region_02_area_02"] = [tangledCaveSigil.Id, greatTreeSigil.Id]
+            ["region_02_area_02"] = [tangledCaveSigil.Id, greatTreeSigil.Id],
+            ["region_02_area_03"] = [tangledCaveSigil.Id, greatTreeSigil.Id]
         };
         var calculator = new IdleDungeonSigilDropCalculator(
             new StaticDungeonDefinitions([]),

@@ -732,6 +732,67 @@
               "rewardTableId": "reward.gathering.warfang_frontier.beast_remains"
             }
           ]
+        },
+        {
+          "id": "region_02_area_03",
+          "name": "Tempest Aerie",
+          "levelRequirement": 60,
+          "difficultyTier": 13,
+          "requiredTowerFloor": 10,
+          "spawnProbabilities": [
+            0.03,
+            0.969,
+            0.001
+          ],
+          "creatures": [
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000093",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000094",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000095",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000096",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000097",
+              "weightedSpawnRate": 0.2
+            }
+          ],
+          "gatheringNodes": [
+            {
+              "id": "tempest_aerie_copper_outcrop",
+              "name": "Stormworn Copper Outcrop",
+              "type": "Mining",
+              "levelRequirement": 1,
+              "procChance": 0.0037,
+              "rewardTableId": "reward.gathering.warfang_frontier.copper_vein"
+            },
+            {
+              "id": "tempest_aerie_windswept_bloodwood",
+              "name": "Windswept Bloodwood",
+              "type": "Woodcutting",
+              "levelRequirement": 1,
+              "procChance": 0.0037,
+              "yieldBonusPercent": 50,
+              "rewardTableId": "reward.gathering.warfang_frontier.bloodwood_tree"
+            },
+            {
+              "id": "tempest_aerie_harpy_roost",
+              "name": "Abandoned Harpy Roost",
+              "type": "Skinning",
+              "levelRequirement": 1,
+              "procChance": 0.0037,
+              "rewardTableId": "reward.gathering.warfang_frontier.beast_remains"
+            }
+          ]
         }
       ]
     }

@@ -2,6 +2,7 @@ using Application.Interfaces.Services.LL.Essences;
 using AutoMapper;
 using Domain.Models.Attributes;
 using Domain.Models.Combat.Abilities;
+using Domain.Models.Damages;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
 using System.Globalization;
@@ -252,7 +253,7 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
             var nextEffect = next.Effects[index];
             var effectLabel = current.Effects.Count == 1
                 ? ability.Name
-                : $"{ability.Name} · {FormatDisplayName(currentEffect.Operation.ToString())}";
+                : $"{ability.Name} · {FormatEffectDisplayName(currentEffect)}";
 
             AddGrant(
                 grants,
@@ -360,6 +361,12 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
 
     private static string FormatDisplayName(string value) =>
         Regex.Replace(value, "(?<=[a-z0-9])(?=[A-Z])", " ");
+
+    private static string FormatEffectDisplayName(AbilityEffectSpec effect) =>
+        effect.Operation == AbilityEffectOperation.Damage
+        && effect.DamageType != DamageType.None
+            ? $"{FormatDisplayName(effect.DamageType.ToString())} {FormatDisplayName(effect.Operation.ToString())}"
+            : FormatDisplayName(effect.Operation.ToString());
 
     private static bool UsesPercentageBaseValue(AbilityEffectOperation operation) =>
         operation is AbilityEffectOperation.ModifyRegenerationRate

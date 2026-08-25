@@ -4144,18 +4144,19 @@ public sealed class AbilitySystemTests
             "poisonous_rat", "rotfly_toad", "brown_slime", "cave_bat", "giant_bat", "undead",
             "gnoll_pack_leader", "gnoll_raider", "gnoll_shaman", "kobold_skirmisher", "kobold_sorcerer",
             "feral_ghoul", "plague_ghoul", "ravenous_ghoul", "vampire_fledgeling", "wandering_ghost",
-            "web_weaver_spider", "spider_queen", "bark_golem", "treant_guardian", "elder_treant"
+            "web_weaver_spider", "spider_queen", "bark_golem", "treant_guardian", "elder_treant",
+            "blood_harpy", "flame_harpy", "ice_harpy", "shadow_harpy", "wind_harpy"
         };
 
         var allAbilityIds = monsterIds
             .Select(id => (MonsterId: $"monster.{id}", AbilityIds: profiles.GetAbilityIds($"monster.{id}")))
             .ToArray();
 
-        Assert.Equal(67, allAbilityIds.Length);
+        Assert.Equal(72, allAbilityIds.Length);
         Assert.All(allAbilityIds, profile =>
             Assert.Equal(profile.MonsterId is "monster.hobgoblin" or "monster.spider_queen" or "monster.elder_treant" ? 3 : 2, profile.AbilityIds.Count));
-        Assert.Equal(137, allAbilityIds.SelectMany(x => x.AbilityIds).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(192, catalog.AbilitiesById.Count);
+        Assert.Equal(147, allAbilityIds.SelectMany(x => x.AbilityIds).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(202, catalog.AbilitiesById.Count);
         Assert.Contains("ability.summon.shadow_image.shadow_strike", catalog.AbilitiesById.Keys);
         Assert.All(allAbilityIds.SelectMany(x => x.AbilityIds), abilityId =>
         {
@@ -4189,10 +4190,10 @@ public sealed class AbilitySystemTests
             item.TryGetProperty("itemType", out var itemType)
             && itemType.GetString()?.Equals("Essence", StringComparison.OrdinalIgnoreCase) == true).ToList();
 
-        Assert.Equal(70, allDefinitions.Count);
-        Assert.Equal(67, allDefinitions.Select(x => x.SourceMonsterId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(67, allLootTables.Count);
-        Assert.Equal(70, essenceItems.Count);
+        Assert.Equal(75, allDefinitions.Count);
+        Assert.Equal(72, allDefinitions.Select(x => x.SourceMonsterId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(72, allLootTables.Count);
+        Assert.Equal(75, essenceItems.Count);
         Assert.All(allDefinitions, definition =>
         {
             Assert.StartsWith("monster.", definition.SourceMonsterId, StringComparison.Ordinal);
@@ -5407,8 +5408,8 @@ public sealed class AbilitySystemTests
 
         Assert.True(report.IsComplete, string.Join(Environment.NewLine, report.Gaps.Select(x => $"{x.EssenceId} {x.Slot}: {x.Reason}")));
         Assert.Equal(report.RequiredSlotCount, report.CoveredSlotCount);
-        Assert.Equal(140, report.RequiredSlotCount);
-        Assert.Equal(70, report.EssenceCount);
+        Assert.Equal(150, report.RequiredSlotCount);
+        Assert.Equal(75, report.EssenceCount);
         Assert.Equal(report.EssenceCount, report.RuntimeLoadoutChecks.Count);
         Assert.All(report.RuntimeLoadoutChecks, check =>
         {
@@ -6840,6 +6841,105 @@ public sealed class AbilitySystemTests
         Assert.Equal(
             0.03f,
             ward.Attributes.Single(attribute => attribute.Attribute == AttributeType.MaxHealth).ScalingCoefficient);
+    }
+
+    [Fact]
+    public void Tempest_Aerie_catalog_authors_all_harpy_abilities()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+
+        var crimsonDive = catalog.AbilitiesById["ability.creature.blood_harpy.crimson_dive"];
+        var rupturingTalons = catalog.AbilitiesById["ability.creature.blood_harpy.rupturing_talons"];
+        var fireClaws = catalog.AbilitiesById["ability.creature.flame_harpy.fire_claws"];
+        var fieryShriek = catalog.AbilitiesById["ability.creature.flame_harpy.fiery_shriek"];
+        var chillingGust = catalog.AbilitiesById["ability.creature.ice_harpy.chilling_gust"];
+        var chillingPrecision = catalog.AbilitiesById["ability.creature.ice_harpy.chilling_precision"];
+        var shadowDive = catalog.AbilitiesById["ability.creature.shadow_harpy.shadow_dive"];
+        var midnightShroud = catalog.AbilitiesById["ability.creature.shadow_harpy.midnight_shroud"];
+        var galeSlash = catalog.AbilitiesById["ability.creature.wind_harpy.gale_slash"];
+        var sharpFeathers = catalog.AbilitiesById["ability.creature.wind_harpy.sharp_feathers"];
+
+        Assert.Equal(160, crimsonDive.CooldownTicks);
+        Assert.Equal(AbilityTargetSelector.LowestHealthEnemy, crimsonDive.Effects[0].Target);
+        Assert.Equal(1.75f, crimsonDive.Effects[0].ScalingCoefficient);
+        Assert.Equal(StandardConditionType.Bleed, crimsonDive.Effects[1].Condition);
+        Assert.Equal(AbilityTriggerEvent.OnMeleeAttack, Assert.Single(rupturingTalons.Triggers).Event);
+        Assert.Equal(StandardConditionType.Bleed, Assert.Single(rupturingTalons.Effects).Condition);
+
+        Assert.Equal(150, fireClaws.CooldownTicks);
+        Assert.Equal(StandardConditionType.Burn, fireClaws.Effects[1].Condition);
+        Assert.Equal(80, Assert.Single(fieryShriek.Triggers).InternalCooldownTicks);
+        Assert.Equal(AbilityTargetSelector.RandomEnemy, Assert.Single(fieryShriek.Effects).Target);
+
+        Assert.Equal(170, chillingGust.CooldownTicks);
+        Assert.All(chillingGust.Effects, effect => Assert.Equal(AbilityTargetSelector.AllEnemies, effect.Target));
+        var precisionDamage = Assert.Single(chillingPrecision.Effects);
+        Assert.Equal(StandardConditionType.Chill, precisionDamage.ScalingCondition);
+        Assert.Equal(AbilityConditionSubject.EventTarget, precisionDamage.ScalingConditionSubject);
+        Assert.Equal(0.004f, precisionDamage.ConditionScalingCoefficient);
+
+        Assert.Equal(140, shadowDive.CooldownTicks);
+        Assert.Equal(StandardConditionType.Stealth, shadowDive.Effects[1].Condition);
+        Assert.Equal(AttributeType.DodgeChance, Assert.Single(midnightShroud.Effects).Attribute);
+        Assert.Equal(3, Assert.Single(midnightShroud.Effects).BaseValue);
+
+        Assert.Equal(180, galeSlash.CooldownTicks);
+        Assert.Equal(AbilityTargetSelector.AllEnemies, Assert.Single(galeSlash.Effects).Target);
+        Assert.Equal(AbilityTriggerEvent.OnBasicAttack, Assert.Single(sharpFeathers.Triggers).Event);
+        Assert.Equal(15, Assert.Single(sharpFeathers.Effects).ChancePercent);
+        Assert.Equal(0.15f, Assert.Single(sharpFeathers.Effects).ScalingCoefficient);
+    }
+
+    [Fact]
+    public void Chilling_precision_scales_from_the_direct_hit_target_Chill_stacks()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var precision = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.ice_harpy.chilling_precision"]);
+        var setup = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.chilling_precision.setup",
+            Kind = AbilitySpecKind.Passive,
+            Name = "Chilling Precision Setup",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.chilling_precision.chill",
+                    Operation = AbilityEffectOperation.ApplyCondition,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    Condition = StandardConditionType.Chill,
+                    BaseValue = 5
+                },
+                new()
+                {
+                    Id = "effect.test.chilling_precision.hit",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 1,
+                    DamageType = DamageType.Physical
+                }
+            ]
+        });
+        var harpy = CreateCombatant("ice-harpy", CombatTeam.Friendly, [setup, precision]);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [], maxHealth: 1_000);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000));
+
+        var result = engine.Run([harpy], [enemy]);
+
+        Assert.Contains(result.EventLog, log =>
+            log.Source == "effect.creature.ice_harpy.chilling_precision.damage"
+            && log.EventType == EventType.Damage
+            && log.Magnitude == 1);
     }
 
     private static CombatResult RunBattle(

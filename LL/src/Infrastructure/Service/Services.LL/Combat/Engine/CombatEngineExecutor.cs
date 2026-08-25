@@ -925,6 +925,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             MaximumScalingCoefficient = effect.MaximumScalingCoefficient,
             EventMagnitudeCoefficient = effect.EventMagnitudeCoefficient,
             ScalingCondition = effect.ScalingCondition,
+            ScalingConditionSubject = effect.ScalingConditionSubject,
             ConditionScalingCoefficient = effect.ConditionScalingCoefficient,
             ScalingStatusId = effect.ScalingStatusId,
             ScalingStatusSubject = effect.ScalingStatusSubject,
