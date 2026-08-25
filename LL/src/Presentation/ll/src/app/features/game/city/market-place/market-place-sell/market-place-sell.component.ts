@@ -36,6 +36,7 @@ import { ItemQuality } from '../../../../../shared/models/enums/itemQuality';
 import { MarketCategoryId } from '../../../../../shared/models/market-category';
 import {
   isMarketplaceBlueprintResource,
+  isMarketplaceTradableItemBase,
   MARKETPLACE_CATALYST_ITEM_IDS,
   matchesMarketplaceResourceSubcategory,
 } from '../../../../../shared/utils/market-place/market-place-category.utils';
@@ -242,6 +243,8 @@ export class MarketPlaceSellComponent implements OnInit {
   });
 
   selectItem(item: InventoryItem) {
+    if (!isMarketplaceTradableItemBase(item.itemInstance.itemBase)) return;
+
     this.pendingItem.set(item);
     this.selectedItemId = item.itemInstance.id;
     this.priceCtrl.setValue(this.bestBuyOrderPrice(), { emitEvent: false });
@@ -281,10 +284,12 @@ export class MarketPlaceSellComponent implements OnInit {
   }
 
   canSellNow(): boolean {
+    const pending = this.pendingItem();
     const quantity = this.qtyCtrl.value ?? 0;
     const minimumPrice = this.priceCtrl.value ?? 0;
     if (
-      !this.pendingItem()?.itemInstance.itemBase.stackable ||
+      !pending?.itemInstance.itemBase.stackable ||
+      !isMarketplaceTradableItemBase(pending.itemInstance.itemBase) ||
       this.qtyCtrl.invalid ||
       this.priceCtrl.invalid
     )
@@ -297,8 +302,10 @@ export class MarketPlaceSellComponent implements OnInit {
   }
 
   canCreateListing(): boolean {
+    const pending = this.pendingItem();
     return (
-      !!this.pendingItem() &&
+      !!pending &&
+      isMarketplaceTradableItemBase(pending.itemInstance.itemBase) &&
       !this.hasOwnBuyOrderForPendingItem() &&
       !this.hasOwnSellListingForPendingItem() &&
       !this.priceCtrl.invalid &&
@@ -370,8 +377,10 @@ export class MarketPlaceSellComponent implements OnInit {
         break;
     }
 
-    return items.filter((item) =>
-      this.matchesSelectedCategory(item.itemInstance.itemBase),
+    return items.filter(
+      (item) =>
+        isMarketplaceTradableItemBase(item.itemInstance.itemBase) &&
+        this.matchesSelectedCategory(item.itemInstance.itemBase),
     );
   }
 

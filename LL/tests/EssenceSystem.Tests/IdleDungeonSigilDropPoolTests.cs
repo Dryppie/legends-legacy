@@ -38,6 +38,35 @@ public sealed class IdleDungeonSigilDropPoolTests
         Assert.Equal("Heartwood Sigil", items["sigil_great_tree"]);
     }
 
+    [Fact]
+    public void All_dungeon_sigil_item_definitions_are_bound()
+    {
+        var expectedSigilIds = new[]
+        {
+            "sigil_goblin_mines",
+            "sigil_forgotten_catacombs",
+            "sigil_hives_abyss",
+            "sigil_tangled_cave",
+            "sigil_great_tree"
+        };
+        var apiRoot = FindApiRoot();
+        using var document = JsonDocument.Parse(
+            File.ReadAllText(Path.Combine(apiRoot, "Data", "items", "items.json")));
+        var sigils = document.RootElement.EnumerateArray()
+            .Where(item => item.GetProperty("id").GetString()!
+                .StartsWith("sigil_", StringComparison.OrdinalIgnoreCase))
+            .ToDictionary(
+                item => item.GetProperty("id").GetString()!,
+                item => item,
+                StringComparer.OrdinalIgnoreCase);
+
+        Assert.Equal(expectedSigilIds.Order(), sigils.Keys.Order());
+        Assert.All(expectedSigilIds, sigilId =>
+            Assert.True(
+                sigils[sigilId].TryGetProperty("isBound", out var isBound) && isBound.GetBoolean(),
+                $"Dungeon Sigil '{sigilId}' must be bound."));
+    }
+
     private static string FindApiRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

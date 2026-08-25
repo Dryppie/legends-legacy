@@ -15,6 +15,7 @@ import {
 } from '../../components/custom-components/tooltips/tempering-bonus-tooltip/tempering-bonus-tooltip-panel.component';
 
 let nextTemperingBonusTooltipId = 1;
+const temperingBonusTooltipCloseDelayMs = 120;
 
 @Directive({
   selector: '[appTemperingBonusTooltip]',
@@ -38,10 +39,12 @@ export class TemperingBonusTooltipDirective implements OnDestroy {
   private overlayRef?: OverlayRef;
   private hovered = false;
   private focused = false;
+  private hideTimer?: ReturnType<typeof setTimeout>;
 
   @HostListener('mouseenter')
   onMouseEnter(): void {
     this.hovered = true;
+    this.clearHideTimer();
     this.show();
   }
 
@@ -54,6 +57,7 @@ export class TemperingBonusTooltipDirective implements OnDestroy {
   @HostListener('focusin')
   onFocusIn(): void {
     this.focused = true;
+    this.clearHideTimer();
     this.show();
   }
 
@@ -69,6 +73,7 @@ export class TemperingBonusTooltipDirective implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.clearHideTimer();
     this.hide();
   }
 
@@ -113,10 +118,29 @@ export class TemperingBonusTooltipDirective implements OnDestroy {
   }
 
   private hideWhenInactive(): void {
-    if (!this.hovered && !this.focused) this.hide();
+    if (this.hovered || this.focused) return;
+
+    this.clearHideTimer();
+    this.hideTimer = setTimeout(() => {
+      this.hideTimer = undefined;
+
+      if (this.host.nativeElement.matches(':hover')) {
+        this.hovered = true;
+        return;
+      }
+
+      if (!this.focused) this.hide();
+    }, temperingBonusTooltipCloseDelayMs);
+  }
+
+  private clearHideTimer(): void {
+    if (!this.hideTimer) return;
+    clearTimeout(this.hideTimer);
+    this.hideTimer = undefined;
   }
 
   private hide(): void {
+    this.clearHideTimer();
     this.overlayRef?.dispose();
     this.overlayRef = undefined;
     this.describedBy = null;

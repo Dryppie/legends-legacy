@@ -36,6 +36,10 @@ export const MARKETPLACE_CATALYST_ITEM_IDS: ReadonlySet<string> = new Set([
   'item.evolution_catalyst.boss_soul_core',
 ]);
 
+export function isMarketplaceTradableItemBase(base: ItemBase): boolean {
+  return base.isBound !== true;
+}
+
 export function isMarketplaceBlueprintResource(base: ItemBase): boolean {
   return (
     base.itemType === ItemType.Resource &&

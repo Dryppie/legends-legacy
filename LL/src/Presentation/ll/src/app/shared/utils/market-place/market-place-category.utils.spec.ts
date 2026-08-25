@@ -3,6 +3,7 @@ import { ItemBase } from '../../models/item';
 import {
   getMarketplaceResourceSortRank,
   isMarketplaceBlueprintResource,
+  isMarketplaceTradableItemBase,
   matchesMarketplaceResourceSubcategory,
 } from './market-place-category.utils';
 
@@ -68,6 +69,14 @@ describe('marketplace category matching', () => {
         resource('blueprint_aegis', 'Blueprint: Aegis'),
       ),
     ).toBeTrue();
+  });
+
+  it('allows unbound items and rejects bound items from marketplace actions', () => {
+    const unbound = resource('ore');
+    const bound = { ...resource('sigil_goblin_mines'), isBound: true };
+
+    expect(isMarketplaceTradableItemBase(unbound)).toBeTrue();
+    expect(isMarketplaceTradableItemBase(bound)).toBeFalse();
   });
 });
 

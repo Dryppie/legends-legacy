@@ -14,6 +14,40 @@ namespace EssenceSystem.Tests;
 public sealed class MarketPlaceServiceTests
 {
     [Fact]
+    public async Task CreateListing_RejectsBoundItemBeforeEscrow()
+    {
+        var characterId = Guid.NewGuid();
+        var boundResource = new ItemBase
+        {
+            Id = "bound_resource",
+            Name = "Bound Resource",
+            Stackable = true,
+            IsBound = true
+        };
+        var inventory = new FakeInventoryService(CreateInventoryItem(boundResource, 5));
+        var market = new FakeMarketRepository();
+        var service = CreateService(
+            market,
+            inventory,
+            [boundResource],
+            new Character { Id = characterId });
+
+        var result = await service.CreateMarketPlaceListingAsync(
+            characterId,
+            new MarketPlaceListing
+            {
+                ItemInstanceId = inventory.Item!.ItemInstanceId,
+                Quantity = 2,
+                UnitPrice = 10
+            },
+            CancellationToken.None);
+
+        Assert.Null(result);
+        Assert.Equal(0, inventory.RemoveForListingCalls);
+        Assert.Empty(market.Listings);
+    }
+
+    [Fact]
     public async Task CreateListing_RejectsMultiplayerRestrictedSellerBeforeEscrow()
     {
         var characterId = Guid.NewGuid();
@@ -598,6 +632,42 @@ public sealed class MarketPlaceServiceTests
                 Assert.Equal(11, trade.UnitPrice);
                 Assert.Equal(11, trade.TotalPrice);
             });
+    }
+
+    [Fact]
+    public async Task CreateBuyOrder_RejectsBoundItemWithoutEscrowingCinders()
+    {
+        var buyerId = Guid.NewGuid();
+        var boundResource = new ItemBase
+        {
+            Id = "bound_resource",
+            Name = "Bound Resource",
+            Stackable = true,
+            IsBound = true
+        };
+        var buyer = new Character { Id = buyerId, Cinders = 100 };
+        var market = new FakeMarketRepository();
+        var service = CreateService(
+            market,
+            new FakeInventoryService(null),
+            [boundResource],
+            buyer);
+
+        var result = await service.CreateMarketPlaceBuyOrderAsync(
+            buyerId,
+            new MarketPlaceBuyOrder
+            {
+                BuyerId = buyerId,
+                ItemBaseId = boundResource.Id,
+                Quantity = 2,
+                UnitPrice = 10
+            },
+            CancellationToken.None);
+
+        Assert.Null(result);
+        Assert.Equal(100, buyer.Cinders);
+        Assert.Empty(market.BuyOrders);
+        Assert.Empty(market.Orders);
     }
 
     [Fact]

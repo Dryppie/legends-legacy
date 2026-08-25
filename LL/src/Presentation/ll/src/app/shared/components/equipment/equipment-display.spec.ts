@@ -381,6 +381,12 @@ describe('EquipmentDisplayComponent', () => {
     expect(
       document.querySelector('.tempering-bonus-tooltip-panel')?.classList,
     ).toContain('pointer-events-none');
+
+    temperingBonus.dispatchEvent(new MouseEvent('mouseleave'));
+    fixture.detectChanges();
+
+    expect(document.getElementById(tooltipId ?? '')).not.toBeNull();
+    fixture.destroy();
   });
 
   it('renders tool affixes using the standard equipment attribute layout', async () => {
