@@ -75,10 +75,14 @@ public sealed class CompiledEffect
     public float MaximumHealingScalingCoefficient { get; init; }
     public AttributeType? Attribute { get; init; }
     public string? StatusId { get; init; }
+    public string? AlternativeStatusId { get; init; }
+    public string? AbilityId { get; init; }
     public StandardConditionType? Condition { get; init; }
     public StandardConditionType? AlternativeCondition { get; init; }
+    public StandardConditionType? TargetCondition { get; init; }
     public string? SummonId { get; init; }
     public bool CountAllOwnedSummons { get; init; }
+    public int MaximumCount { get; init; }
     public int RepeatCount { get; init; } = 1;
     public int HealthStepPercent { get; init; }
     public string? RepeatPerOwnedSummonId { get; init; }
@@ -94,6 +98,11 @@ public sealed class CompiledEffect
     public int IntervalTicks { get; init; }
     public int Uses { get; init; }
     public bool OncePerTarget { get; init; }
+    public bool ExcludeEventTarget { get; init; }
+    public bool IgnoreTaunt { get; init; }
+    public bool ExcludeSummons { get; init; }
+    public bool UseHealthPercentage { get; init; }
+    public bool RandomizeTies { get; init; }
     public bool GuaranteedConditionApplication { get; init; }
     public int StaggerPower { get; init; }
     public bool MaintainWhileConditionsMet { get; init; }
@@ -733,6 +742,7 @@ public sealed class RuntimeCombatant
     private float _healingReceivedPercent;
     private readonly Dictionary<DamageType, float> _damageDealtPercent = [];
     private readonly Dictionary<int, float> _damageDealtToLowHealthPercent = [];
+    private readonly Dictionary<StandardConditionType, float> _criticalDamageAgainstConditionPercent = [];
     private readonly Dictionary<DamageType, float> _damageTakenPercent = [];
     private readonly Dictionary<StandardConditionType, float> _damageTakenFromConditionPercent = [];
     private readonly Dictionary<string, (AttributeType Attribute, float Amount)> _synchronizedAttributeContributions =
@@ -1074,6 +1084,12 @@ public sealed class RuntimeCombatant
         _damageDealtToLowHealthPercent[healthThresholdPercent] =
             _damageDealtToLowHealthPercent.GetValueOrDefault(healthThresholdPercent) + percentagePoints;
 
+    public void AdjustCriticalDamageAgainstCondition(
+        StandardConditionType condition,
+        float percentagePoints) =>
+        _criticalDamageAgainstConditionPercent[condition] =
+            _criticalDamageAgainstConditionPercent.GetValueOrDefault(condition) + percentagePoints;
+
     public void AdjustDamageTaken(DamageType damageType, float percentagePoints) =>
         _damageTakenPercent[damageType] = _damageTakenPercent.GetValueOrDefault(damageType) + percentagePoints;
 
@@ -1095,6 +1111,11 @@ public sealed class RuntimeCombatant
             .Where(entry => target.Health * 100 <= maxHealth * entry.Key + float.Epsilon)
             .Sum(entry => entry.Value);
     }
+
+    public float GetCriticalDamageAgainstConditionPercent(RuntimeCombatant target) =>
+        _criticalDamageAgainstConditionPercent
+            .Where(entry => target.HasCondition(entry.Key))
+            .Sum(entry => entry.Value);
 
     public float GetDamageTakenPercent(DamageType damageType, RuntimeCombatant source)
     {
@@ -1136,6 +1157,17 @@ public sealed class RuntimeCombatant
     {
         foreach (var ability in Abilities)
             ability.ReduceCooldown(ticks);
+    }
+
+    public int ResetAbilityCooldown(string abilityId)
+    {
+        var ability = Abilities.FirstOrDefault(candidate =>
+            candidate.Definition.Id.Equals(abilityId, StringComparison.OrdinalIgnoreCase));
+        if (ability is null)
+            return 0;
+
+        ability.StartInitialCooldown(GetAttribute(AttributeType.Cooldown));
+        return ability.RemainingCooldownTicks;
     }
 
     public void Tick()

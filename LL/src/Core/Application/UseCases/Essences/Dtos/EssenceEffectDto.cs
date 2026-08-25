@@ -12,6 +12,8 @@ public sealed record EssenceEffectDto(
     double EventMagnitudeCoefficient,
     double ConditionScalingCoefficient,
     double StatusScalingCoefficient,
+    double SummonPowerMultiplier,
+    double SummonHealthMultiplier,
     IReadOnlyList<EssenceEffectScalingDto> Scaling,
     IReadOnlyList<EssenceEffectDto> NestedEffects);
 

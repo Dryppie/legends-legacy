@@ -45,4 +45,6 @@ public sealed record AbilityBalanceValidationResult(
     int Battles,
     double OriginalScore,
     double ReplacementScore,
-    double ScoreDelta);
+    double ScoreDelta,
+    int ContextCount = 1,
+    int ReplacementCount = 1);

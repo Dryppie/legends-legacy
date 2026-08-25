@@ -387,7 +387,35 @@ export class EssenceDescriptionFormatter {
         (effect) => (effect[coefficientField] ?? 0) !== 0,
       );
       const coefficient = matching[index - 1]?.[coefficientField];
-      return coefficient ? this.formatPercent(coefficient) : undefined;
+      return coefficient
+        ? this.formatPercent(Math.abs(coefficient))
+        : undefined;
+    }
+
+    if (normalizedKind === 'scaling') {
+      const matching = effects.filter(
+        (effect) => (effect.scaling?.[0]?.coefficient ?? 0) !== 0,
+      );
+      const coefficient = matching[index - 1]?.scaling?.[0]?.coefficient;
+      return coefficient
+        ? this.formatPercent(Math.abs(coefficient))
+        : undefined;
+    }
+
+    const summonMultiplierField =
+      normalizedKind === 'summonpower'
+        ? 'summonPowerMultiplier'
+        : normalizedKind === 'summonhealth'
+          ? 'summonHealthMultiplier'
+          : undefined;
+    if (summonMultiplierField) {
+      const matching = effects.filter(
+        (effect) =>
+          effect.type.toLowerCase() === 'summon' &&
+          (effect[summonMultiplierField] ?? 0) > 0,
+      );
+      const multiplier = matching[index - 1]?.[summonMultiplierField];
+      return multiplier ? this.formatPercent(multiplier) : undefined;
     }
 
     if (normalizedKind !== 'duration') return undefined;

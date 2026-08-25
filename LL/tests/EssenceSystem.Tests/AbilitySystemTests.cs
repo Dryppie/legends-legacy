@@ -4145,18 +4145,19 @@ public sealed class AbilitySystemTests
             "gnoll_pack_leader", "gnoll_raider", "gnoll_shaman", "kobold_skirmisher", "kobold_sorcerer",
             "feral_ghoul", "plague_ghoul", "ravenous_ghoul", "vampire_fledgeling", "wandering_ghost",
             "web_weaver_spider", "spider_queen", "bark_golem", "treant_guardian", "elder_treant",
-            "blood_harpy", "flame_harpy", "ice_harpy", "shadow_harpy", "wind_harpy"
+            "blood_harpy", "flame_harpy", "ice_harpy", "shadow_harpy", "wind_harpy",
+            "alpha_wolf", "dire_wolf", "horned_wolf", "bloodfang_wolf", "pack_howler"
         };
 
         var allAbilityIds = monsterIds
             .Select(id => (MonsterId: $"monster.{id}", AbilityIds: profiles.GetAbilityIds($"monster.{id}")))
             .ToArray();
 
-        Assert.Equal(72, allAbilityIds.Length);
+        Assert.Equal(77, allAbilityIds.Length);
         Assert.All(allAbilityIds, profile =>
             Assert.Equal(profile.MonsterId is "monster.hobgoblin" or "monster.spider_queen" or "monster.elder_treant" ? 3 : 2, profile.AbilityIds.Count));
-        Assert.Equal(147, allAbilityIds.SelectMany(x => x.AbilityIds).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(202, catalog.AbilitiesById.Count);
+        Assert.Equal(157, allAbilityIds.SelectMany(x => x.AbilityIds).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(232, catalog.AbilitiesById.Count);
         Assert.Contains("ability.summon.shadow_image.shadow_strike", catalog.AbilitiesById.Keys);
         Assert.All(allAbilityIds.SelectMany(x => x.AbilityIds), abilityId =>
         {
@@ -4190,10 +4191,10 @@ public sealed class AbilitySystemTests
             item.TryGetProperty("itemType", out var itemType)
             && itemType.GetString()?.Equals("Essence", StringComparison.OrdinalIgnoreCase) == true).ToList();
 
-        Assert.Equal(75, allDefinitions.Count);
-        Assert.Equal(72, allDefinitions.Select(x => x.SourceMonsterId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(72, allLootTables.Count);
-        Assert.Equal(75, essenceItems.Count);
+        Assert.Equal(80, allDefinitions.Count);
+        Assert.Equal(77, allDefinitions.Select(x => x.SourceMonsterId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(77, allLootTables.Count);
+        Assert.Equal(80, essenceItems.Count);
         Assert.All(allDefinitions, definition =>
         {
             Assert.StartsWith("monster.", definition.SourceMonsterId, StringComparison.Ordinal);
@@ -5048,10 +5049,17 @@ public sealed class AbilitySystemTests
             CreateConfig(),
             FindApiContentRoot(),
             CreateJsonOptions()).GetCatalog();
+        var barkskin = catalog.AbilitiesById["ability.creature.bark_golem.barkskin"];
+        var ascendedBarkskin = EssenceAbilityProgressionScaler.Apply(barkskin, ascensionTier: 1);
+
+        Assert.Equal(0.324f, ascendedBarkskin.Effects[0].ScalingCoefficient, precision: 3);
+        Assert.Equal(100, ascendedBarkskin.Effects[1].BaseValue);
+        Assert.False(ascendedBarkskin.Effects[1].ScalesWithAscension);
+
         var abilities = AbilityCompiler.CompileAbilities(
         [
             catalog.AbilitiesById["ability.creature.bark_golem.timber_slam"],
-            catalog.AbilitiesById["ability.creature.bark_golem.barkskin"]
+            barkskin
         ]);
 
         var golem = new RuntimeCombatant(
@@ -5092,10 +5100,16 @@ public sealed class AbilitySystemTests
             CreateConfig(),
             FindApiContentRoot(),
             CreateJsonOptions()).GetCatalog();
+        var forestVitality = catalog.AbilitiesById["ability.creature.treant_guardian.forest_vitality"];
+
+        Assert.Equal(
+            "Every {triggerCooldown}, increase Health Regeneration by 2%.",
+            forestVitality.Description);
+
         var abilities = AbilityCompiler.CompileAbilities(
         [
             catalog.AbilitiesById["ability.creature.treant_guardian.rootbound_shield"],
-            catalog.AbilitiesById["ability.creature.treant_guardian.forest_vitality"]
+            forestVitality
         ]);
         var guardian = CreateCombatant(
             "treant-guardian",
@@ -5238,6 +5252,1130 @@ public sealed class AbilitySystemTests
 
         Assert.Equal(catalog.Abilities.Count, compiledAbilities.Count);
         Assert.Equal(catalog.Statuses.Count, compiledStatuses.Count);
+    }
+
+    [Fact]
+    public void Json_catalog_serevin_kit_matches_the_floor_eleven_contract()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+
+        var blackAnnotation = catalog.AbilitiesById["ability.creature.serevin.black_annotation"];
+        var redacted = catalog.AbilitiesById["ability.creature.serevin.redacted"];
+        var spillingInk = catalog.AbilitiesById["ability.creature.serevin.spilling_ink"];
+        var unwrittenLaw = catalog.AbilitiesById["ability.creature.serevin.unwritten_law"];
+        var ink = catalog.StatusesById["status.serevin.ink"];
+
+        Assert.Equal(80, blackAnnotation.CooldownTicks);
+        var dispel = Assert.Single(blackAnnotation.Effects);
+        Assert.Equal(AbilityTargetSelector.AllEnemies, dispel.Target);
+        Assert.Equal(1, dispel.BaseValue);
+
+        Assert.Equal(150, redacted.CooldownTicks);
+        var redactedDamage = redacted.Effects.Single(x => x.Operation == AbilityEffectOperation.Damage);
+        Assert.Equal(AbilityTargetSelector.RandomEnemy, redactedDamage.Target);
+        Assert.Equal(DamageType.Magical, redactedDamage.DamageType);
+        Assert.Equal(2.5, redactedDamage.ScalingCoefficient);
+        var silence = redacted.Effects.Single(x => x.Condition == StandardConditionType.Silence);
+        Assert.Equal(15, silence.BaseValue);
+
+        Assert.Equal(170, spillingInk.CooldownTicks);
+        var spillingDamage = spillingInk.Effects.Single(x => x.Operation == AbilityEffectOperation.Damage);
+        Assert.Equal(AbilityTargetSelector.TwoRandomEnemies, spillingDamage.Target);
+        Assert.Equal(DamageType.Magical, spillingDamage.DamageType);
+        Assert.Equal("status.serevin.ink", spillingDamage.ScalingStatusId);
+        Assert.Equal(0.5, spillingDamage.StatusScalingCoefficient);
+        Assert.Contains(spillingInk.Effects, x => x.Operation == AbilityEffectOperation.RemoveStatus);
+
+        Assert.Equal(15, ink.MaxStacks);
+        Assert.Equal(AbilitySpecKind.Passive, unwrittenLaw.Kind);
+        Assert.Contains(unwrittenLaw.Triggers, x => x.Event == AbilityTriggerEvent.OnStaggerBroken);
+        var armorTradeoff = Assert.Single(unwrittenLaw.Effects, x =>
+            x.Operation == AbilityEffectOperation.SynchronizeAttributePerStatusStack
+            && x.Attribute == AttributeType.Armor);
+        var resistanceTradeoff = Assert.Single(unwrittenLaw.Effects, x =>
+            x.Operation == AbilityEffectOperation.SynchronizeAttributePerStatusStack
+            && x.Attribute == AttributeType.Resistance);
+        Assert.Equal(-0.02, armorTradeoff.ScalingCoefficient, 4);
+        Assert.Equal(-0.02, resistanceTradeoff.ScalingCoefficient, 4);
+    }
+
+    [Fact]
+    public void Json_catalog_volgrin_kit_matches_the_floor_twelve_contract()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+
+        var chainboundBolt = catalog.AbilitiesById["ability.creature.volgrin.chainbound_bolt"];
+        var shackledArc = catalog.AbilitiesById["ability.creature.volgrin.shackled_arc"];
+        var rattlingSky = catalog.AbilitiesById["ability.creature.volgrin.rattling_sky"];
+        var threeChains = catalog.AbilitiesById["ability.creature.volgrin.the_three_chains"];
+        var brokenChain = catalog.StatusesById["status.volgrin.broken_chain"];
+
+        Assert.Equal(90, chainboundBolt.CooldownTicks);
+        var boltDamage = Assert.Single(chainboundBolt.Effects);
+        Assert.Equal(AbilityTargetSelector.CurrentTarget, boltDamage.Target);
+        Assert.Equal(DamageType.Magical, boltDamage.DamageType);
+        Assert.Equal(2.2f, boltDamage.ScalingCoefficient);
+
+        Assert.Equal(140, shackledArc.CooldownTicks);
+        var arcDamage = shackledArc.Effects.Single(x => x.Operation == AbilityEffectOperation.Damage);
+        Assert.Equal(AbilityTargetSelector.TwoRandomEnemies, arcDamage.Target);
+        Assert.Equal(1.1f, arcDamage.ScalingCoefficient);
+        Assert.Contains(shackledArc.Triggers, trigger =>
+            trigger.Event == AbilityTriggerEvent.OnDamageDealt
+            && trigger.Conditions.Any(condition =>
+                condition.Type == AbilityConditionType.EventIdIs
+                && condition.StatusId == arcDamage.Id));
+
+        Assert.Equal(180, rattlingSky.CooldownTicks);
+        var skyDamage = Assert.Single(rattlingSky.Effects);
+        Assert.Equal(AbilityTargetSelector.AllEnemies, skyDamage.Target);
+        Assert.Equal(0.75f, skyDamage.ScalingCoefficient);
+        Assert.Equal("status.volgrin.broken_chain", skyDamage.ScalingStatusId);
+        Assert.Equal(0.35f, skyDamage.StatusScalingCoefficient);
+
+        Assert.Equal(3, brokenChain.MaxStacks);
+        Assert.Equal(3, threeChains.Triggers.Count(trigger =>
+            trigger.Event == AbilityTriggerEvent.OnHealthChanged));
+        var finalThunder = Assert.Single(threeChains.Effects, effect =>
+            effect.Id == "effect.creature.volgrin.the_three_chains.final_thunder");
+        Assert.Equal(AbilityTargetSelector.TwoRandomEnemies, finalThunder.Target);
+        Assert.True(finalThunder.ExcludeEventTarget);
+        Assert.Equal(0.35f, finalThunder.ScalingCoefficient);
+        Assert.Equal(DamageType.Magical, finalThunder.DamageType);
+    }
+
+    [Fact]
+    public void Json_catalog_nhalia_kit_matches_the_floor_thirteen_contract()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+
+        var constellation = catalog.AbilitiesById["ability.creature.nhalia.drowned_constellation"];
+        var moonfall = catalog.AbilitiesById["ability.creature.nhalia.moonfall"];
+        var turning = catalog.AbilitiesById["ability.creature.nhalia.turning_of_the_dead_moon"];
+        var undertow = catalog.AbilitiesById["ability.creature.nhalia.gravitational_undertow"];
+
+        Assert.Equal(110, constellation.CooldownTicks);
+        var constellationDamage = Assert.Single(constellation.Effects);
+        Assert.Equal(AbilityTargetSelector.AllEnemies, constellationDamage.Target);
+        Assert.Equal(1f, constellationDamage.ScalingCoefficient);
+        Assert.Equal(DamageType.Magical, constellationDamage.DamageType);
+
+        Assert.Equal(140, moonfall.CooldownTicks);
+        var moonfallDamage = Assert.Single(moonfall.Effects);
+        Assert.Equal(AbilityTargetSelector.HighestConditionStacksEnemy, moonfallDamage.Target);
+        Assert.Equal(StandardConditionType.Soaked, moonfallDamage.TargetCondition);
+        Assert.Equal(2.4f, moonfallDamage.ScalingCoefficient);
+        Assert.Equal(StandardConditionType.Soaked, moonfallDamage.ScalingCondition);
+        Assert.Equal(AbilityConditionSubject.Target, moonfallDamage.ScalingConditionSubject);
+        Assert.Equal(0.2f, moonfallDamage.ConditionScalingCoefficient);
+
+        Assert.Equal(200, turning.CooldownTicks);
+        var toggle = Assert.Single(turning.Effects, effect =>
+            effect.Operation == AbilityEffectOperation.ToggleStatus);
+        Assert.Equal("status.nhalia.high_tide", toggle.StatusId);
+        Assert.Equal("status.nhalia.low_tide", toggle.AlternativeStatusId);
+        var detonation = Assert.Single(turning.Effects, effect =>
+            effect.Operation == AbilityEffectOperation.ConsumeConditionStacks);
+        Assert.Equal(10, detonation.BaseValue);
+        Assert.Equal(StandardConditionType.Soaked, detonation.Condition);
+        Assert.Equal(0.4f, detonation.ScalingCoefficient);
+        Assert.Contains(turning.Triggers, trigger =>
+            trigger.Event == AbilityTriggerEvent.OnDamageDealt
+            && trigger.Conditions.Any(condition =>
+                condition.Type == AbilityConditionType.EventWasDirectHit));
+
+        Assert.Equal(AbilitySpecKind.Passive, undertow.Kind);
+        Assert.Contains(undertow.Triggers, trigger =>
+            trigger.Event == AbilityTriggerEvent.OnEnemyHealed);
+        var undertowHeal = Assert.Single(undertow.Effects);
+        Assert.Equal(0.2f, undertowHeal.EventMagnitudeCoefficient);
+        Assert.Equal(CritEligibility.Disallowed, undertowHeal.CritEligibility);
+    }
+
+    [Fact]
+    public void Json_catalog_caldris_kit_matches_the_floor_fourteen_contract()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+
+        var meteorHammer = catalog.AbilitiesById["ability.creature.caldris.meteor_hammer"];
+        var blackstarQuake = catalog.AbilitiesById["ability.creature.caldris.blackstar_quake"];
+        var reforge = catalog.AbilitiesById["ability.creature.caldris.reforge"];
+        var unlitForge = catalog.AbilitiesById["ability.creature.caldris.the_unlit_forge"];
+        var plates = catalog.StatusesById["status.caldris.star_iron_plate"];
+        var shatteredPlates = catalog.StatusesById["status.caldris.shattered_plate"];
+
+        Assert.Equal(100, meteorHammer.CooldownTicks);
+        var hammerDamage = Assert.Single(meteorHammer.Effects);
+        Assert.Equal(AbilityTargetSelector.CurrentTarget, hammerDamage.Target);
+        Assert.Equal(DamageType.Physical, hammerDamage.DamageType);
+        Assert.Equal(2.1f, hammerDamage.ScalingCoefficient);
+        Assert.Equal("status.caldris.shattered_plate", hammerDamage.ScalingStatusId);
+        Assert.Equal(0.35f, hammerDamage.StatusScalingCoefficient);
+
+        Assert.Equal(160, blackstarQuake.CooldownTicks);
+        var quakeDamage = Assert.Single(blackstarQuake.Effects);
+        Assert.Equal(AbilityTargetSelector.AllEnemies, quakeDamage.Target);
+        Assert.Equal(DamageType.Physical, quakeDamage.DamageType);
+        Assert.Equal(1f, quakeDamage.ScalingCoefficient);
+
+        Assert.Equal(200, reforge.CooldownTicks);
+        Assert.Contains(reforge.Triggers, trigger =>
+            trigger.Event == AbilityTriggerEvent.OnAbilityUsed
+            && trigger.Conditions.Any(condition =>
+                condition.Type == AbilityConditionType.HasStatus
+                && condition.StatusId == "status.caldris.shattered_plate"));
+
+        Assert.Equal(4, plates.MaxStacks);
+        Assert.Equal(4, shatteredPlates.MaxStacks);
+        Assert.DoesNotContain("Status.Buff", plates.Tags);
+        Assert.DoesNotContain("Status.Buff", shatteredPlates.Tags);
+        Assert.Equal(AbilitySpecKind.Passive, unlitForge.Kind);
+        Assert.Contains(unlitForge.Triggers, trigger => trigger.Event == AbilityTriggerEvent.OnStaggerBroken);
+        var reset = Assert.Single(unlitForge.Effects, effect =>
+            effect.Operation == AbilityEffectOperation.ResetAbilityCooldown);
+        Assert.Equal("ability.creature.caldris.reforge", reset.AbilityId);
+        var damageReduction = Assert.Single(unlitForge.Effects, effect =>
+            effect.Operation == AbilityEffectOperation.SynchronizeAttributePerStatusStack
+            && effect.Attribute == AttributeType.DamageReduction);
+        Assert.Equal(8, damageReduction.BaseValue);
+    }
+
+    [Fact]
+    public void Json_catalog_serath_kit_matches_the_floor_fifteen_contract()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+
+        var flesh = catalog.AbilitiesById["ability.creature.serath.weight_of_flesh"];
+        var spirit = catalog.AbilitiesById["ability.creature.serath.weight_of_spirit"];
+        var sentence = catalog.AbilitiesById["ability.creature.serath.sixfold_sentence"];
+        var scale = catalog.AbilitiesById["ability.creature.serath.the_living_scale"];
+        var doubt = catalog.StatusesById["status.serath.doubt"];
+        var conviction = catalog.StatusesById["status.serath.conviction"];
+
+        Assert.Equal(100, flesh.CooldownTicks);
+        var fleshDamage = Assert.Single(flesh.Effects);
+        Assert.Equal(AbilityTargetSelector.HighestHealthEnemy, fleshDamage.Target);
+        Assert.Equal(2.2f, fleshDamage.ScalingCoefficient);
+        Assert.Equal(DamageType.Physical, fleshDamage.DamageType);
+        Assert.True(fleshDamage.IgnoreTaunt);
+        Assert.True(fleshDamage.ExcludeSummons);
+        Assert.True(fleshDamage.UseHealthPercentage);
+        Assert.True(fleshDamage.RandomizeTies);
+
+        Assert.Equal(120, spirit.CooldownTicks);
+        var spiritDamage = spirit.Effects.Single(effect => effect.Operation == AbilityEffectOperation.Damage);
+        Assert.Equal(AbilityTargetSelector.LowestHealthEnemy, spiritDamage.Target);
+        Assert.Equal(1.9f, spiritDamage.ScalingCoefficient);
+        Assert.Equal(DamageType.Magical, spiritDamage.DamageType);
+        Assert.True(spiritDamage.IgnoreTaunt);
+        Assert.True(spiritDamage.ExcludeSummons);
+        Assert.True(spiritDamage.UseHealthPercentage);
+        Assert.True(spiritDamage.RandomizeTies);
+        var wound = spirit.Effects.Single(effect => effect.Condition == StandardConditionType.Wound);
+        Assert.Equal(8, wound.BaseValue);
+        Assert.False(wound.GuaranteedConditionApplication);
+        Assert.Contains(spirit.Triggers, trigger =>
+            trigger.Event == AbilityTriggerEvent.OnDamageDealt
+            && trigger.Conditions.Any(condition =>
+                condition.Type == AbilityConditionType.EventIdIs
+                && condition.StatusId == spiritDamage.Id));
+
+        Assert.Equal(170, sentence.CooldownTicks);
+        var sentenceDamage = sentence.Effects.Where(effect =>
+            effect.Operation == AbilityEffectOperation.Damage).ToArray();
+        Assert.Equal(2, sentenceDamage.Length);
+        Assert.All(sentenceDamage, effect =>
+        {
+            Assert.Equal(AbilityTargetSelector.ThreeRandomEnemies, effect.Target);
+            Assert.Equal(0.55f, effect.ScalingCoefficient);
+        });
+        Assert.Contains(sentenceDamage, effect => effect.DamageType == DamageType.Physical);
+        Assert.Contains(sentenceDamage, effect => effect.DamageType == DamageType.Magical);
+
+        Assert.Equal(AbilitySpecKind.Passive, scale.Kind);
+        var interval = Assert.Single(scale.Triggers);
+        Assert.Equal(AbilityTriggerEvent.OnInterval, interval.Event);
+        Assert.Equal(100, interval.InitialDelayTicks);
+        Assert.Equal(150, interval.InternalCooldownTicks);
+        Assert.Contains(scale.Effects.SelectMany(effect => effect.Conditions), condition =>
+            condition.Type == AbilityConditionType.NonSummonedEnemyHealthSpreadAtMostPercent
+            && condition.Value == 12);
+        Assert.Contains(scale.Effects.SelectMany(effect => effect.Conditions), condition =>
+            condition.Type == AbilityConditionType.NonSummonedEnemyHealthSpreadAbovePercent
+            && condition.Value == 12);
+        Assert.Equal(1, doubt.MaxStacks);
+        Assert.Equal(1, conviction.MaxStacks);
+        Assert.DoesNotContain("Status.Buff", doubt.Tags);
+        Assert.DoesNotContain("Status.Buff", conviction.Tags);
+    }
+
+    [Fact]
+    public void Serath_weights_use_health_percentage_ignore_taunt_exclude_summons_and_obey_ward()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var abilities = AbilityCompiler.CompileAbilities(
+        [
+            catalog.AbilitiesById["ability.creature.serath.weight_of_flesh"],
+            catalog.AbilitiesById["ability.creature.serath.weight_of_spirit"]
+        ]);
+        var serath = new RuntimeCombatant(
+            "serath",
+            "Serath",
+            CombatTeam.Friendly,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 100_000,
+                [AttributeType.Power] = 100,
+                [AttributeType.CritChance] = 0,
+                [AttributeType.CritDamage] = 100
+            },
+            abilities.Values,
+            canBasicAttack: false);
+        var highPercentage = CreateCombatant(
+            "high-percentage",
+            CombatTeam.Hostile,
+            [],
+            maxHealth: 100_000,
+            canBasicAttack: false);
+        highPercentage.SetHealth(90_000);
+        var lowPercentageTaunter = CreateCombatant(
+            "low-percentage-taunter",
+            CombatTeam.Hostile,
+            [],
+            maxHealth: 200_000,
+            canBasicAttack: false);
+        lowPercentageTaunter.SetHealth(100_000);
+        AddStandardCondition(lowPercentageTaunter, lowPercentageTaunter, StandardConditionType.Taunt);
+        AddStandardCondition(lowPercentageTaunter, lowPercentageTaunter, StandardConditionType.Ward);
+        var summon = new RuntimeCombatant(
+            "summon",
+            "Summon",
+            CombatTeam.Hostile,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 300_000,
+                [AttributeType.Power] = 0
+            },
+            [],
+            ["Summoned"],
+            isSummoned: true,
+            summonDurationTicks: 100,
+            canBasicAttack: false);
+        var result = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17))
+            .Run([serath], [highPercentage, lowPercentageTaunter, summon]);
+
+        Assert.Contains(result.EventLog, log =>
+            log.Source == "effect.creature.serath.weight_of_flesh.damage"
+            && log.TargetId == highPercentage.Id
+            && log.DamageType == DamageType.Physical);
+        Assert.Contains(result.EventLog, log =>
+            log.Source == "effect.creature.serath.weight_of_spirit.damage"
+            && log.TargetId == lowPercentageTaunter.Id
+            && log.DamageType == DamageType.Magical);
+        Assert.Equal(0, lowPercentageTaunter.GetConditionStacks(StandardConditionType.Wound));
+        Assert.False(summon.Health < summon.GetAttribute(AttributeType.MaxHealth));
+    }
+
+    [Fact]
+    public void Serath_health_percentage_ties_are_randomized()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var ability = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.serath.weight_of_flesh"]);
+        var selectedTargets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        for (var seed = 1; seed <= 24; seed++)
+        {
+            var serath = CreateCombatant(
+                $"serath-{seed}",
+                CombatTeam.Friendly,
+                [ability],
+                maxHealth: 10_000,
+                canBasicAttack: false);
+            var first = CreateCombatant("first", CombatTeam.Hostile, [], maxHealth: 10_000, canBasicAttack: false);
+            var second = CreateCombatant("second", CombatTeam.Hostile, [], maxHealth: 20_000, canBasicAttack: false);
+            var result = new FastCombatEngine(
+                new Dictionary<string, CompiledStatus>(),
+                new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: seed))
+                .Run([serath], [first, second]);
+            selectedTargets.Add(Assert.Single(result.EventLog, log =>
+                log.Source == "effect.creature.serath.weight_of_flesh.damage"
+                && log.EventType == EventType.Damage).TargetId!);
+        }
+
+        Assert.Equal(2, selectedTargets.Count);
+    }
+
+    [Fact]
+    public void Serath_living_scale_uses_the_inclusive_twelve_point_boundary_and_ignores_summons()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var scale = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.serath.the_living_scale"]);
+        var serath = new RuntimeCombatant(
+            "serath",
+            "Serath",
+            CombatTeam.Friendly,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 10_000,
+                [AttributeType.Power] = 100,
+                [AttributeType.AttackSpeed] = 0
+            },
+            [scale],
+            canBasicAttack: false);
+        var highest = CreateCombatant("highest", CombatTeam.Hostile, [], maxHealth: 1_000, canBasicAttack: false);
+        var lowest = CreateCombatant("lowest", CombatTeam.Hostile, [], maxHealth: 1_000, canBasicAttack: false);
+        lowest.SetHealth(880);
+        var summon = new RuntimeCombatant(
+            "summon",
+            "Summon",
+            CombatTeam.Hostile,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 1_000,
+                [AttributeType.Power] = 0
+            },
+            [],
+            ["Summoned"],
+            isSummoned: true,
+            summonDurationTicks: 1_000,
+            canBasicAttack: false);
+        summon.SetHealth(1);
+
+        new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 101, BasicAttackIntervalTicks: 1_000))
+            .Run([serath], [highest, lowest, summon]);
+
+        Assert.Equal(1, serath.GetStatusStacks("status.serath.doubt"));
+        Assert.Equal(0, serath.GetStatusStacks("status.serath.conviction"));
+        Assert.Equal(15f, serath.GetDamageTakenPercent(DamageType.Physical, highest));
+        Assert.Equal(100f, serath.GetAttribute(AttributeType.Power));
+        Assert.Equal(0f, serath.GetAttribute(AttributeType.AttackSpeed));
+    }
+
+    [Theory]
+    [InlineData(879, 2)]
+    [InlineData(1000, 1)]
+    public void Serath_living_scale_grants_conviction_for_a_wide_spread_or_one_remaining_enemy(
+        int lowerHealth,
+        int enemyCount)
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var scale = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.serath.the_living_scale"]);
+        var serath = new RuntimeCombatant(
+            "serath",
+            "Serath",
+            CombatTeam.Friendly,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 10_000,
+                [AttributeType.Power] = 100,
+                [AttributeType.AttackSpeed] = 0
+            },
+            [scale],
+            canBasicAttack: false);
+        var enemies = Enumerable.Range(1, enemyCount)
+            .Select(index => CreateCombatant(
+                $"enemy-{index}",
+                CombatTeam.Hostile,
+                [],
+                maxHealth: 1_000,
+                canBasicAttack: false))
+            .ToArray();
+        if (enemyCount > 1)
+            enemies[1].SetHealth(lowerHealth);
+
+        new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 101, BasicAttackIntervalTicks: 1_000))
+            .Run([serath], enemies);
+
+        Assert.Equal(0, serath.GetStatusStacks("status.serath.doubt"));
+        Assert.Equal(1, serath.GetStatusStacks("status.serath.conviction"));
+        Assert.Equal(0f, serath.GetDamageTakenPercent(DamageType.Physical, enemies[0]));
+        Assert.Equal(115f, serath.GetAttribute(AttributeType.Power));
+        Assert.Equal(15f, serath.GetAttribute(AttributeType.AttackSpeed));
+    }
+
+    [Fact]
+    public void Serath_sixfold_sentence_hits_three_enemies_with_each_independent_half_and_includes_summons()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var sentence = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.serath.sixfold_sentence"]);
+        var serath = CreateCombatant(
+            "serath",
+            CombatTeam.Friendly,
+            [sentence],
+            maxHealth: 10_000,
+            canBasicAttack: false);
+        var first = CreateCombatant("first", CombatTeam.Hostile, [], maxHealth: 10_000, canBasicAttack: false);
+        var second = CreateCombatant("second", CombatTeam.Hostile, [], maxHealth: 10_000, canBasicAttack: false);
+        var summon = new RuntimeCombatant(
+            "summon",
+            "Summon",
+            CombatTeam.Hostile,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 10_000,
+                [AttributeType.Power] = 0
+            },
+            [],
+            ["Summoned"],
+            isSummoned: true,
+            summonDurationTicks: 100,
+            canBasicAttack: false);
+        var result = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 7))
+            .Run([serath], [first, second, summon]);
+
+        var physicalTargets = result.EventLog.Where(log =>
+            log.Source == "effect.creature.serath.sixfold_sentence.physical_damage"
+            && log.EventType == EventType.Damage).Select(log => log.TargetId).ToArray();
+        var magicalTargets = result.EventLog.Where(log =>
+            log.Source == "effect.creature.serath.sixfold_sentence.magical_damage"
+            && log.EventType == EventType.Damage).Select(log => log.TargetId).ToArray();
+        Assert.Equal(3, physicalTargets.Length);
+        Assert.Equal(3, magicalTargets.Length);
+        Assert.Equal(3, physicalTargets.Distinct().Count());
+        Assert.Equal(3, magicalTargets.Distinct().Count());
+        Assert.Contains(summon.Id, physicalTargets);
+        Assert.Contains(summon.Id, magicalTargets);
+    }
+
+    [Fact]
+    public void Caldris_stagger_shatters_one_plate_and_resets_only_reforge()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var abilities = AbilityCompiler.CompileAbilities(
+        [
+            catalog.AbilitiesById["ability.creature.caldris.meteor_hammer"],
+            catalog.AbilitiesById["ability.creature.caldris.blackstar_quake"],
+            catalog.AbilitiesById["ability.creature.caldris.reforge"],
+            catalog.AbilitiesById["ability.creature.caldris.the_unlit_forge"]
+        ]);
+        var stagger = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.break_caldris",
+            Name = "Break Caldris",
+            Kind = AbilitySpecKind.Active,
+            CooldownTicks = 100,
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "effect.test.break_caldris",
+                    Operation = AbilityEffectOperation.ApplyCondition,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    Condition = StandardConditionType.Stun,
+                    BaseValue = 1,
+                    GuaranteedConditionApplication = true,
+                    StaggerPower = 100
+                }
+            ]
+        });
+        var challenger = CreateCombatant(
+            "challenger",
+            CombatTeam.Friendly,
+            [stagger],
+            canBasicAttack: false);
+        var caldris = new RuntimeCombatant(
+            "caldris",
+            "Caldris",
+            CombatTeam.Hostile,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 10_000,
+                [AttributeType.Power] = 100,
+                [AttributeType.DamageReduction] = 0,
+                [AttributeType.AttackSpeed] = 0,
+                [AttributeType.CritDamage] = 100
+            },
+            abilities.Values,
+            canBasicAttack: false,
+            staggerDefinition: new BossStaggerDefinition
+            {
+                Enabled = true,
+                BaseThreshold = 100,
+                BreakDurationTicks = 10,
+                RecoveryDurationTicks = 10
+            });
+        var engine = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000));
+
+        engine.Run([challenger], [caldris]);
+
+        Assert.Equal(3, caldris.GetStatusStacks("status.caldris.star_iron_plate"));
+        Assert.Equal(1, caldris.GetStatusStacks("status.caldris.shattered_plate"));
+        Assert.Equal(24f, caldris.GetAttribute(AttributeType.DamageReduction));
+        Assert.Equal(110f, caldris.GetAttribute(AttributeType.Power));
+        Assert.Equal(8f, caldris.GetAttribute(AttributeType.AttackSpeed));
+        Assert.Equal(199, caldris.Abilities.Single(ability =>
+            ability.Definition.Id == "ability.creature.caldris.reforge").RemainingCooldownTicks);
+        Assert.Equal(0, caldris.Abilities.Single(ability =>
+            ability.Definition.Id == "ability.creature.caldris.meteor_hammer").RemainingCooldownTicks);
+        Assert.Equal(0, caldris.Abilities.Single(ability =>
+            ability.Definition.Id == "ability.creature.caldris.blackstar_quake").RemainingCooldownTicks);
+    }
+
+    [Fact]
+    public void Caldris_reforge_restores_one_plate_and_reverses_its_offensive_stack()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var reforge = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.caldris.reforge"]);
+        var unlitForge = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.caldris.the_unlit_forge"]);
+        var setup = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.setup_caldris_reforge",
+            Name = "Setup Caldris Reforge",
+            Kind = AbilitySpecKind.Passive,
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "effect.test.setup_caldris_reforge.remove_plate",
+                    Operation = AbilityEffectOperation.ModifyStatusStacks,
+                    Target = AbilityTargetSelector.Self,
+                    StatusId = "status.caldris.star_iron_plate",
+                    BaseValue = -1
+                },
+                new AbilityEffectSpec
+                {
+                    Id = "effect.test.setup_caldris_reforge.add_shattered_plate",
+                    Operation = AbilityEffectOperation.ApplyStatus,
+                    Target = AbilityTargetSelector.Self,
+                    StatusId = "status.caldris.shattered_plate",
+                    BaseValue = 1
+                }
+            ]
+        });
+        var caldris = new RuntimeCombatant(
+            "caldris",
+            "Caldris",
+            CombatTeam.Friendly,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 10_000,
+                [AttributeType.Power] = 100,
+                [AttributeType.DamageReduction] = 0,
+                [AttributeType.AttackSpeed] = 0,
+                [AttributeType.CritDamage] = 100
+            },
+            [reforge, unlitForge, setup],
+            canBasicAttack: false);
+        var enemy = CreateCombatant(
+            "enemy",
+            CombatTeam.Hostile,
+            [],
+            maxHealth: 10_000,
+            canBasicAttack: false);
+        var engine = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000));
+
+        engine.Run([caldris], [enemy]);
+
+        Assert.Equal(4, caldris.GetStatusStacks("status.caldris.star_iron_plate"));
+        Assert.Equal(0, caldris.GetStatusStacks("status.caldris.shattered_plate"));
+        Assert.Equal(32f, caldris.GetAttribute(AttributeType.DamageReduction));
+        Assert.Equal(100f, caldris.GetAttribute(AttributeType.Power));
+        Assert.Equal(0f, caldris.GetAttribute(AttributeType.AttackSpeed));
+    }
+
+    [Fact]
+    public void Caldris_blackstar_quake_hits_all_enemies_including_summons()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var quake = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.caldris.blackstar_quake"]);
+        var caldris = CreateCombatant(
+            "caldris",
+            CombatTeam.Friendly,
+            [quake],
+            maxHealth: 10_000,
+            canBasicAttack: false);
+        var enemy = CreateCombatant(
+            "enemy",
+            CombatTeam.Hostile,
+            [],
+            maxHealth: 10_000,
+            canBasicAttack: false);
+        var summon = new RuntimeCombatant(
+            "summon",
+            "Summon",
+            CombatTeam.Hostile,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 10_000,
+                [AttributeType.Power] = 10
+            },
+            [],
+            ["Summoned"],
+            isSummoned: true,
+            summonDurationTicks: 100,
+            canBasicAttack: false);
+        var engine = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000));
+
+        var result = engine.Run([caldris], [enemy, summon]);
+
+        var damage = result.EventLog.Where(log =>
+            log.Source == "effect.creature.caldris.blackstar_quake.damage"
+            && log.EventType == EventType.Damage).ToArray();
+        Assert.Equal(2, damage.Length);
+        Assert.Equal(2, damage.Select(log => log.TargetId).Distinct().Count());
+    }
+
+    [Fact]
+    public void Nhalia_starts_in_high_tide_then_enters_low_tide_and_consumes_soaked_after_twenty_seconds()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var turning = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.nhalia.turning_of_the_dead_moon"]);
+        var nhalia = new RuntimeCombatant(
+            "nhalia",
+            "Nhalia",
+            CombatTeam.Friendly,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 10_000,
+                [AttributeType.Power] = 100,
+                [AttributeType.Armor] = 100,
+                [AttributeType.Resistance] = 100,
+                [AttributeType.CritChance] = 0,
+                [AttributeType.CritDamage] = 100
+            },
+            [turning],
+            canBasicAttack: false);
+        var enemy = CreateCombatant(
+            "enemy",
+            CombatTeam.Hostile,
+            [],
+            maxHealth: 10_000,
+            canBasicAttack: false);
+        enemy.Conditions.Add(new RuntimeCondition(
+            StandardConditionType.Soaked,
+            nhalia,
+            enemy,
+            value: 5,
+            durationTicks: 0,
+            powerSnapshot: 100,
+            applicationOrder: 1,
+            statsSource: "condition.soaked"));
+        var engine = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(
+                MaxTicks: 201,
+                BasicAttackIntervalTicks: 1_000,
+                StartActiveAbilitiesOnCooldown: true));
+
+        var result = engine.Run([nhalia], [enemy]);
+
+        Assert.Equal(0, nhalia.GetStatusStacks("status.nhalia.high_tide"));
+        Assert.Equal(1, nhalia.GetStatusStacks("status.nhalia.low_tide"));
+        Assert.Equal(100f, nhalia.GetAttribute(AttributeType.Armor));
+        Assert.Equal(150f, nhalia.GetAttribute(AttributeType.Resistance));
+        Assert.Equal(0, enemy.GetConditionStacks(StandardConditionType.Soaked));
+        Assert.Contains(result.EventLog, log =>
+            log.Source == "effect.creature.nhalia.turning.low_tide_detonation"
+            && log.EventType == EventType.Damage);
+    }
+
+    [Fact]
+    public void Volgrin_breaks_all_crossed_chain_thresholds_and_applies_the_permanent_tradeoff()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var threeChains = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.volgrin.the_three_chains"]);
+        var strike = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.break_volgrins_chains",
+            Name = "Break Volgrin's Chains",
+            Kind = AbilitySpecKind.Active,
+            CooldownTicks = 1_000,
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "effect.test.break_volgrins_chains.damage",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 1f,
+                    DamageType = DamageType.Magical
+                }
+            ]
+        });
+        var attacker = new RuntimeCombatant(
+            "attacker",
+            "Attacker",
+            CombatTeam.Friendly,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 10_000,
+                [AttributeType.Power] = 8_000,
+                [AttributeType.CritChance] = 0,
+                [AttributeType.CritDamage] = 100
+            },
+            [strike],
+            canBasicAttack: false);
+        var volgrin = new RuntimeCombatant(
+            "volgrin",
+            "Volgrin",
+            CombatTeam.Hostile,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 10_000,
+                [AttributeType.Power] = 100,
+                [AttributeType.Armor] = 100,
+                [AttributeType.Resistance] = 0,
+                [AttributeType.AttackSpeed] = 0,
+                [AttributeType.CritDamage] = 100
+            },
+            [threeChains],
+            canBasicAttack: false);
+        var engine = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000));
+
+        engine.Run([attacker], [volgrin]);
+
+        Assert.Equal(3, volgrin.GetStatusStacks("status.volgrin.broken_chain"));
+        Assert.Equal(100f, volgrin.GetAttribute(AttributeType.Armor));
+        Assert.Equal(0f, volgrin.GetAttribute(AttributeType.Resistance));
+        Assert.Equal(15f, volgrin.GetAttribute(AttributeType.AttackSpeed));
+    }
+
+    [Fact]
+    public void Volgrin_final_thunder_hits_exactly_two_enemies_other_than_the_basic_attack_target()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var setup = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.setup_broken_chains",
+            Name = "Setup Broken Chains",
+            Kind = AbilitySpecKind.Passive,
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "effect.test.setup_broken_chains",
+                    Operation = AbilityEffectOperation.ApplyStatus,
+                    Target = AbilityTargetSelector.Self,
+                    StatusId = "status.volgrin.broken_chain",
+                    BaseValue = 3
+                }
+            ]
+        });
+        var threeChains = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.volgrin.the_three_chains"]);
+        var volgrin = CreateCombatant(
+            "volgrin",
+            CombatTeam.Friendly,
+            [setup, threeChains],
+            maxHealth: 10_000);
+        var enemies = Enumerable.Range(1, 4)
+            .Select(index => CreateCombatant(
+                $"enemy-{index}",
+                CombatTeam.Hostile,
+                [],
+                maxHealth: 10_000,
+                canBasicAttack: false))
+            .ToArray();
+        var engine = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 2, BasicAttackIntervalTicks: 1, RandomSeed: 19));
+
+        var result = engine.Run([volgrin], enemies);
+
+        var basicAttack = Assert.Single(result.EventLog, log =>
+            log.ActorId == volgrin.Id
+            && log.Source == "Basic Attack"
+            && log.EventType == EventType.Damage);
+        var arcs = result.EventLog
+            .Where(log =>
+                log.ActorId == volgrin.Id
+                && log.Source == "effect.creature.volgrin.the_three_chains.final_thunder"
+                && log.EventType == EventType.Damage)
+            .ToArray();
+        Assert.Equal(2, arcs.Length);
+        Assert.Equal(2, arcs.Select(log => log.TargetId).Distinct().Count());
+        Assert.DoesNotContain(arcs, log => log.TargetId == basicAttack.TargetId);
+    }
+
+    [Fact]
+    public void Serevin_black_annotation_dispels_one_buff_from_every_enemy_including_summons()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var abilities = AbilityCompiler.CompileAbilities(
+        [
+            catalog.AbilitiesById["ability.creature.serevin.black_annotation"],
+            catalog.AbilitiesById["ability.creature.serevin.unwritten_law"]
+        ]);
+        var serevin = new RuntimeCombatant(
+            "serevin",
+            "Serevin",
+            CombatTeam.Friendly,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 10_000,
+                [AttributeType.Power] = 100,
+                [AttributeType.Armor] = 100,
+                [AttributeType.Resistance] = 100,
+                [AttributeType.CritDamage] = 100
+            },
+            abilities.Values,
+            canBasicAttack: false);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [], maxHealth: 10_000, canBasicAttack: false);
+        var summon = new RuntimeCombatant(
+            "summon",
+            "Summon",
+            CombatTeam.Hostile,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 10_000,
+                [AttributeType.Power] = 10
+            },
+            [],
+            ["Summoned"],
+            isSummoned: true,
+            summonDurationTicks: 100,
+            canBasicAttack: false);
+        AddStandardCondition(enemy, enemy, StandardConditionType.Empower);
+        AddStandardCondition(enemy, enemy, StandardConditionType.Haste);
+        AddStandardCondition(summon, summon, StandardConditionType.Empower);
+        AddStandardCondition(summon, summon, StandardConditionType.Haste);
+        var engine = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000));
+
+        engine.Run([serevin], [enemy, summon]);
+
+        Assert.Single(enemy.Conditions, x => x.Type is StandardConditionType.Empower or StandardConditionType.Haste);
+        Assert.Single(summon.Conditions, x => x.Type is StandardConditionType.Empower or StandardConditionType.Haste);
+        Assert.Equal(2, serevin.GetStatusStacks("status.serevin.ink"));
+        Assert.Equal(110f, serevin.GetAttribute(AttributeType.Power));
+        Assert.Equal(96f, serevin.GetAttribute(AttributeType.Armor));
+        Assert.Equal(96f, serevin.GetAttribute(AttributeType.Resistance));
+    }
+
+    [Fact]
+    public void Serevin_spilling_ink_hits_two_distinct_enemies_with_compounded_power_then_consumes_ink()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var setupInk = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.setup_spilling_ink",
+            Name = "Setup Spilling Ink",
+            Kind = AbilitySpecKind.Passive,
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "effect.test.setup_spilling_ink",
+                    Operation = AbilityEffectOperation.ApplyStatus,
+                    Target = AbilityTargetSelector.Self,
+                    StatusId = "status.serevin.ink",
+                    BaseValue = 3
+                }
+            ]
+        });
+        var spillingInk = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.serevin.spilling_ink"]);
+        var unwrittenLaw = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.serevin.unwritten_law"]);
+        var serevin = new RuntimeCombatant(
+            "serevin",
+            "Serevin",
+            CombatTeam.Friendly,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 10_000,
+                [AttributeType.Power] = 100,
+                [AttributeType.Armor] = 100,
+                [AttributeType.Resistance] = 100,
+                [AttributeType.CritChance] = 0,
+                [AttributeType.CritDamage] = 100
+            },
+            [setupInk, spillingInk, unwrittenLaw],
+            canBasicAttack: false);
+        var firstEnemy = CreateCombatant("enemy-1", CombatTeam.Hostile, [], maxHealth: 10_000, canBasicAttack: false);
+        var secondEnemy = CreateCombatant("enemy-2", CombatTeam.Hostile, [], maxHealth: 10_000, canBasicAttack: false);
+        var engine = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000));
+
+        var result = engine.Run([serevin], [firstEnemy, secondEnemy]);
+
+        var damage = result.EventLog
+            .Where(x => x.Source == "effect.creature.serevin.spilling_ink.damage")
+            .ToArray();
+        Assert.Equal(2, damage.Length);
+        Assert.Equal(2, damage.Select(x => x.TargetId).Distinct().Count());
+        Assert.All(damage, x => Assert.Equal(172, x.Magnitude));
+        Assert.Equal(0, serevin.GetStatusStacks("status.serevin.ink"));
+        Assert.Equal(100f, serevin.GetAttribute(AttributeType.Power));
+        Assert.Equal(100f, serevin.GetAttribute(AttributeType.Armor));
+        Assert.Equal(100f, serevin.GetAttribute(AttributeType.Resistance));
+    }
+
+    [Fact]
+    public void Serevin_stagger_halves_ink_rounded_down_and_resynchronizes_attributes()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var setupInk = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.setup_ink",
+            Name = "Setup Ink",
+            Kind = AbilitySpecKind.Passive,
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "effect.test.setup_ink",
+                    Operation = AbilityEffectOperation.ApplyStatus,
+                    Target = AbilityTargetSelector.Self,
+                    StatusId = "status.serevin.ink",
+                    BaseValue = 3
+                }
+            ]
+        });
+        var unwrittenLaw = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.serevin.unwritten_law"]);
+        var stagger = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.break_serevin",
+            Name = "Break Serevin",
+            Kind = AbilitySpecKind.Active,
+            CooldownTicks = 100,
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "effect.test.break_serevin",
+                    Operation = AbilityEffectOperation.ApplyCondition,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    Condition = StandardConditionType.Stun,
+                    BaseValue = 1,
+                    GuaranteedConditionApplication = true,
+                    StaggerPower = 100
+                }
+            ]
+        });
+        var serevin = new RuntimeCombatant(
+            "serevin",
+            "Serevin",
+            CombatTeam.Hostile,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 10_000,
+                [AttributeType.Power] = 100,
+                [AttributeType.Armor] = 100,
+                [AttributeType.Resistance] = 100
+            },
+            [setupInk, unwrittenLaw],
+            canBasicAttack: false,
+            staggerDefinition: new BossStaggerDefinition
+            {
+                Enabled = true,
+                BaseThreshold = 100,
+                BreakDurationTicks = 10,
+                RecoveryDurationTicks = 10
+            });
+        var challenger = CreateCombatant(
+            "challenger",
+            CombatTeam.Friendly,
+            [stagger],
+            canBasicAttack: false);
+        var engine = new FastCombatEngine(
+            statuses,
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000));
+
+        engine.Run([challenger], [serevin]);
+
+        Assert.Equal(1, serevin.GetStatusStacks("status.serevin.ink"));
+        Assert.Equal(105f, serevin.GetAttribute(AttributeType.Power));
+        Assert.Equal(98f, serevin.GetAttribute(AttributeType.Armor));
+        Assert.Equal(98f, serevin.GetAttribute(AttributeType.Resistance));
     }
 
     [Fact]
@@ -5408,8 +6546,8 @@ public sealed class AbilitySystemTests
 
         Assert.True(report.IsComplete, string.Join(Environment.NewLine, report.Gaps.Select(x => $"{x.EssenceId} {x.Slot}: {x.Reason}")));
         Assert.Equal(report.RequiredSlotCount, report.CoveredSlotCount);
-        Assert.Equal(150, report.RequiredSlotCount);
-        Assert.Equal(75, report.EssenceCount);
+        Assert.Equal(160, report.RequiredSlotCount);
+        Assert.Equal(80, report.EssenceCount);
         Assert.Equal(report.EssenceCount, report.RuntimeLoadoutChecks.Count);
         Assert.All(report.RuntimeLoadoutChecks, check =>
         {
@@ -6843,6 +7981,170 @@ public sealed class AbilitySystemTests
         Assert.Equal(
             0.03f,
             ward.Attributes.Single(attribute => attribute.Attribute == AttributeType.MaxHealth).ScalingCoefficient);
+    }
+
+    [Fact]
+    public void Outnumber_condition_applies_pack_bonus_only_with_more_living_non_summoned_combatants()
+    {
+        var instinct = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.ruthless-instinct",
+            Kind = AbilitySpecKind.Passive,
+            Name = "Ruthless Instinct",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.ruthless-instinct",
+                    Operation = AbilityEffectOperation.ModifyAttribute,
+                    Target = AbilityTargetSelector.Self,
+                    Attribute = AttributeType.CritDamage,
+                    BaseValue = 18,
+                    MaintainWhileConditionsMet = true,
+                    Conditions = [new() { Type = AbilityConditionType.OutnumbersEnemies }]
+                }
+            ]
+        });
+        var alpha = CreateCombatant("alpha", CombatTeam.Friendly, [instinct]);
+        var ally = CreateCombatant("ally", CombatTeam.Friendly, []);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, []);
+
+        new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000))
+            .Run([alpha, ally], [enemy]);
+
+        Assert.Equal(118, alpha.GetAttribute(AttributeType.CritDamage));
+    }
+
+    [Fact]
+    public void Living_ally_synchronization_caps_strength_of_the_pack_at_three_allies()
+    {
+        var strengthSpec = new AbilitySpec
+        {
+            Id = "ability.test.strength-of-the-pack",
+            Kind = AbilitySpecKind.Passive,
+            Name = "Strength of the Pack",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.strength-of-the-pack",
+                    Operation = AbilityEffectOperation.SynchronizeAttributePerLivingNonSummonedAlly,
+                    Target = AbilityTargetSelector.Self,
+                    Attribute = AttributeType.Power,
+                    ScalingCoefficient = 0.06f,
+                    MaximumCount = 3
+                }
+            ]
+        };
+        Assert.Equal(
+            3,
+            EssenceAbilityProgressionScaler.Apply(strengthSpec, ascensionTier: 1).Effects.Single().MaximumCount);
+        var strength = AbilityCompiler.CompileAbility(strengthSpec);
+        var howler = CreateCombatant("howler", CombatTeam.Friendly, [strength]);
+        var allies = Enumerable.Range(1, 4)
+            .Select(index => CreateCombatant($"ally-{index}", CombatTeam.Friendly, []))
+            .ToArray();
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, []);
+
+        new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000))
+            .Run([howler, .. allies], [enemy]);
+
+        Assert.Equal(59, howler.GetAttribute(AttributeType.Power));
+    }
+
+    [Fact]
+    public void Conditional_critical_damage_bonus_applies_only_against_matching_targets()
+    {
+        var cruelPrecision = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.cruel-precision",
+            Kind = AbilitySpecKind.Passive,
+            Name = "Cruel Precision",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.cruel-precision",
+                    Operation = AbilityEffectOperation.ModifyCriticalDamageAgainstCondition,
+                    Target = AbilityTargetSelector.Self,
+                    BaseValue = 18,
+                    Condition = StandardConditionType.Bleed
+                }
+            ]
+        });
+        var attack = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.cruel-precision.attack",
+            Kind = AbilitySpecKind.Active,
+            Name = "Attack",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.cruel-precision.attack",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.AllEnemies,
+                    BaseValue = 100,
+                    CritEligibility = CritEligibility.Allowed
+                }
+            ]
+        });
+        var bloodfang = CreateCombatant("bloodfang", CombatTeam.Friendly, [cruelPrecision, attack]);
+        bloodfang.AdjustAttribute(AttributeType.CritChance, 100);
+        var bleeding = CreateCombatant("bleeding", CombatTeam.Hostile, [], maxHealth: 1_000);
+        var healthy = CreateCombatant("healthy", CombatTeam.Hostile, [], maxHealth: 1_000);
+        AddStandardCondition(bleeding, bloodfang, StandardConditionType.Bleed);
+
+        var result = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000))
+            .Run([bloodfang], [bleeding, healthy]);
+
+        Assert.Contains(result.EventLog, log =>
+            log.Source == "effect.test.cruel-precision.attack"
+            && log.TargetId == "bleeding"
+            && log.Magnitude == 218);
+        Assert.Contains(result.EventLog, log =>
+            log.Source == "effect.test.cruel-precision.attack"
+            && log.TargetId == "healthy"
+            && log.Magnitude == 200);
+    }
+
+    [Fact]
+    public void Coordinated_attack_immediately_runs_each_non_summoned_ally_basic_attack_pipeline()
+    {
+        var coordinatedAttack = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.coordinated-attack",
+            Kind = AbilitySpecKind.Active,
+            Name = "Coordinated Attack",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.coordinated-attack",
+                    Operation = AbilityEffectOperation.PerformBasicAttack,
+                    Target = AbilityTargetSelector.NonSummonedAllies
+                }
+            ]
+        });
+        var howler = CreateCombatant("howler", CombatTeam.Friendly, [coordinatedAttack]);
+        var allyOne = CreateCombatant("ally-1", CombatTeam.Friendly, []);
+        var allyTwo = CreateCombatant("ally-2", CombatTeam.Friendly, []);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [], maxHealth: 1_000);
+
+        var result = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000))
+            .Run([howler, allyOne, allyTwo], [enemy]);
+
+        Assert.Equal(
+            3,
+            result.EventLog.Count(log => log.Source == "Basic Attack" && log.EventType == EventType.Damage));
     }
 
     [Fact]

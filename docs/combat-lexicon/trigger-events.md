@@ -15,6 +15,7 @@
 | `trigger.on-health-changed`       | `OnHealthChanged` | Implemented             | Only when health, not only Barrier, changes.           |
 | `trigger.on-healing-done`         | `OnHeal`          | Implemented             | After non-zero health restoration.                     |
 | `trigger.on-healing-received`     | `OnHealed`        | Implemented             | After `OnHeal`.                                        |
+| `trigger.on-enemy-healed`         | `OnEnemyHealed`   | Implemented             | After an opposing combatant actually restores Health. |
 | `trigger.on-lifesteal-heal`       | `OnLifestealHeal` | Implemented             | After lifesteal restores health.                       |
 | `trigger.on-dodge`                | `OnDodge`         | Implemented             | A dodge exits damage processing.                       |
 | `trigger.on-kill`                 | `OnKill`          | Implemented             | Before the victim's death event.                       |
@@ -30,9 +31,12 @@
 | `trigger.on-barrier-applied`      | `OnBarrierApplied` | Implemented            | After a grant is capped and its source contribution is recorded. |
 | `trigger.on-barrier-absorbed`     | `OnBarrierAbsorbed` | Implemented           | Once per consumed source contribution, after pool mutation. |
 | `trigger.on-barrier-broken`       | `OnBarrierBroken` | Implemented             | Once when a positive Barrier total reaches zero.       |
+| `trigger.on-stagger-broken`       | `OnStaggerBroken` | Implemented             | Immediately when a boss enters its Stagger break.      |
 | `trigger.on-combat-end`           | None              | Proposed                | Accepted tag only.                                     |
 
 Direct damage publishes `OnHit` after damage/Barrier mutation even when Barrier absorbs all damage. Periodic, stored, reflected, and self-damage do not publish direct-hit events. A dodge returns early and publishes only `OnDodge`. Death publishes `OnKill`, then `OnDeath`, then `OnEnemyDeath`; the enemy-death event exposes the dead enemy as `EventSource` and the killer as `EventTarget`.
+
+Healing events carry the amount of Health actually restored after modifiers and the maximum-Health cap. `OnEnemyHealed` is opponent-scoped by its healed event target, includes direct heals, periodic heals, Lifesteal, and Health Regeneration, and does not publish for zero effective healing. Revives and direct Health swaps are not healing events.
 
 ## Interval cadence
 
@@ -59,5 +63,7 @@ Triggers may define internal cooldowns and use limits. Non-qualifying events do 
 A failed Freeze or Stun landing roll does not publish `OnStatusApplied`; only successful state mutation publishes the event.
 
 Ward-blocked applications also do not publish `OnStatusApplied`. Ward consumes after immunity and landing checks but before condition state or application effects are created.
+
+`OnStaggerBroken` exposes the credited contributor as `EventSource` and the staggered boss as `EventTarget`. It is relevant to abilities owned by either combatant.
 
 Implementation: `LL/src/Core/Domain/Models/Combat/Abilities/AbilitySpec.cs`, `LL/src/Infrastructure/Service/Services.LL/Combat/Engine/FastCombatEngine.cs`, and `LL/src/Infrastructure/Service/Services.LL/Combat/Engine/AbilityRuntime.cs`.

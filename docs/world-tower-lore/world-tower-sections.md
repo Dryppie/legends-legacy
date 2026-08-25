@@ -51,7 +51,7 @@ Beyond the Mad King's throne lies a court caught within one dying moment. Its so
 
 Aevum stopped the kingdom's clock. The foretold destruction never arrived, but neither did another birth, dawn, decision, or possibility. The inhabitants survived only as prisoners repeating the final hour of their history.
 
-The section's guardians embody everything sacrificed to maintain that moment. Serevin erases names that might change history. Volgrin powers the frozen court while bound in chains. Nhalia drowns inconvenient prophecies beneath a dead moon. Caldris maintains the anchors holding the hour in place, and Vaska rewinds herself whenever death approaches.
+The section's guardians embody everything sacrificed to maintain that moment. Serevin erases names that might change history. Volgrin powers the frozen court while bound in chains. Nhalia drowns inconvenient prophecies beneath a dead moon. Caldris maintains the anchors holding the hour in place. Serath judges whether an entire company deserves to pass, and Vaska rewinds herself whenever death approaches.
 
 At the Throne of the Last Hour, Aevum finally confronts challengers who have arrived from the future the sovereign tried to abolish. Aevum's defeat restarts the court's clock. For the first time in centuries, its final hour is allowed to end.
 

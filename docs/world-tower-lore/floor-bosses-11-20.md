@@ -1,6 +1,6 @@
 # World Tower Floor Bosses: Floors 11–20
 
-> Status: Concept lore and encounter-design reference. These bosses and mechanics are not yet implemented.
+> Status: Floors 11–15 are implemented. Floors 16–20 remain concept lore and encounter-design reference.
 
 ## The Stolen Hours
 
@@ -15,6 +15,8 @@ The proposed encounter cadence follows the established Tower structure:
 - Floors 16–19: Standard guardians
 - Floor 20: Sovereign
 
+Floors 11–15 begin a substantially steeper progression band. Floor 11 is balanced around a full ten-character roster averaging Tier 2 Epic equipment of Exceptional quality, with seven equipped Essences per character. Its recommended Power Rating is 280. Floors 12–14 retain ten-character rosters and rise to 300, 325, and 350 recommended Power Rating; Floor 15 expands to fifteen characters and 400 recommended Power Rating.
+
 ## Floor 11 — The Hushed Archive
 
 ### Serevin, the Name-Eater
@@ -23,14 +25,14 @@ Serevin is a robed, faceless archivist who erases warriors from history. The she
 
 #### Encounter concept
 
-- **Redact the Mighty:** Removes a beneficial effect from the enemy with the most buffs and grants Serevin Ink.
-- **Black Annotation:** Marks the enemy with the highest Power. Repeated ability use builds Redaction before eventually causing damage and Silence.
-- **Spill the Margins:** Deals Magical Damage to all enemies, amplified by Serevin's Ink.
-- **Unwritten Law:** Every few buffs applied by the party grants Serevin Ink.
+- **Black Annotation (8s):** Erases one removable buff from every enemy, including summons. Serevin gains 1 Ink for each buff actually erased.
+- **Redacted (15s):** Deals 250% Magical Damage to a random enemy and attempts to Silence them for 15 seconds. The random target ignores Taunt, and Ward can negate the Silence.
+- **Spilling Ink (17s):** Deals 50% Magical Damage per Ink to two distinct random enemies, then consumes all Ink. Its random targets ignore Taunt.
+- **Unwritten Law:** Ink caps at 15. Each stack grants 5% of Serevin's initial Power but removes 2% of his initial Armor and Resistance. Staggering Serevin halves his Ink, rounded down.
 
 #### Encounter identity
 
-An anti-buff guardian that challenges buff-heavy parties without simply disabling their strategy. Cleansing, disciplined buff application, and less buff-dependent compositions provide counterplay.
+An anti-buff guardian whose growing damage also exposes him to retaliation. Disciplined buff use limits Ink, Ward protects a key active ability from Redacted, and well-timed Staggers cut both his stored burst and Power bonus while restoring part of his defenses.
 
 ## Floor 12 — The Hanging Tempest
 
@@ -40,10 +42,11 @@ Volgrin is a lightning titan suspended from the Tower's ceiling by colossal iron
 
 #### Encounter concept
 
-- Volgrin begins combat slow and heavily protected.
-- At 75%, 50%, and 25% Health, one of his chains breaks.
-- Each broken chain removes some of his defenses but permanently increases his Attack Speed and area damage.
-- **Final Thunder:** At low Health, Volgrin's basic attacks begin striking additional targets.
+- **Chainbound Bolt (9s):** Deals 220% Magical Damage to Volgrin's current target.
+- **Shackled Arc (14s):** Deals 110% Magical Damage and applies Chill(1) to two distinct random enemies.
+- **Rattling Sky (18s):** Deals 75% Magical Damage to all enemies, plus 35% for each Broken Chain.
+- **The Three Chains:** Volgrin begins combat with 45% more initial Armor and Resistance but 30 less Attack Speed. At 75%, 50%, and 25% Health, a chain permanently breaks, removing 15% of his initial Armor and Resistance and granting 15 Attack Speed.
+- **Final Thunder:** With all three chains broken, each Basic Attack deals 35% Magical Damage to exactly two other random enemies.
 
 #### Encounter identity
 
@@ -57,14 +60,15 @@ Nhalia was the court astrologer who first witnessed the sovereign's defeat writt
 
 #### Encounter concept
 
-- **High Tide:** Nhalia gains strong Physical resistance, and her attacks apply Soaked.
-- **Low Tide:** Nhalia gains strong Magical resistance, and existing Soaked stacks detonate.
-- **Moonfall:** Strikes the enemy carrying the most Soaked.
-- **Gravitational Undertow:** Causes a portion of the party's healing to also heal Nhalia.
+- **Drowned Constellation (11s):** Deals 100% Magical Damage to all enemies. During High Tide, each target also gains 1 Soaked.
+- **Moonfall (14s):** Deals 240% Magical Damage, plus 20% per Soaked, to the enemy carrying the most Soaked. Its selection ignores Taunt and includes summons.
+- **Turning of the Dead Moon (20s):** Nhalia begins in High Tide and alternates tides whenever this ability is used. High Tide grants 50% of her initial Armor and makes direct damaging attacks apply 1 Soaked. Low Tide grants 50% of her initial Resistance; entering it deals 40% Magical Damage per Soaked to every affected enemy and consumes all Soaked.
+- **Gravitational Undertow:** Whenever an enemy receives effective healing, Nhalia heals for 20% of the amount actually restored. Overhealing contributes nothing.
+- **Soaked:** A harmful condition with a shared maximum of 10 stacks. Ward blocks an application and Cleanse removes it.
 
 #### Encounter identity
 
-An alternating-phase guardian that rewards parties with a balance of Physical and Magical damage rather than a single dominant damage type.
+An alternating-phase guardian that rewards parties with a balance of Physical and Magical damage rather than a single dominant damage type. Healing discipline limits Undertow, while Cleanse and Ward control how much pressure is stored for Moonfall and the next Low Tide.
 
 ## Floor 14 — The Unlit Forge
 
@@ -74,11 +78,12 @@ Caldris is a blackened giant encased in armor forged from a dead star. He create
 
 #### Encounter concept
 
-- Caldris begins combat with several permanent **Star-Iron Plates** that provide significant damage reduction.
-- Staggering Caldris shatters one plate.
-- Every shattered plate lowers his defenses but permanently increases his Power and Attack Speed.
-- **Reforge:** If the party goes too long without staggering him, Caldris restores a plate.
-- **Meteor Hammer:** Grows stronger as more plates are destroyed.
+- **The Unlit Forge:** Caldris begins combat with 4 permanent **Star-Iron Plates**. Each plate grants 8% Damage Reduction.
+- Staggering Caldris shatters one plate. Each Shattered Plate grants 10% Power and 8 Attack Speed.
+- **Meteor Hammer:** Deal 210% Physical Damage to the current target, plus 35% for each Shattered Plate. Cooldown: 10 seconds.
+- **Blackstar Quake:** Deal 100% Physical Damage to all enemies. Cooldown: 16 seconds.
+- **Reforge:** Restore one shattered plate and remove its corresponding offensive stack. Cooldown: 20 seconds; being staggered resets the cooldown.
+- Active abilities begin combat on cooldown. Staggers remain possible after four total breaks so restored plates can be shattered again.
 
 #### Encounter identity
 
@@ -92,14 +97,14 @@ Serath is a six-armed judge carrying chains, blades, and a perfectly balanced sc
 
 #### Encounter concept
 
-- **Measure the Worthy:** Copies part of the strongest party member's Power.
-- **Burden of Excellence:** Repeatedly targets the character with the greatest offensive attributes.
-- **No Soul Above Another:** Damage exceeding a per-hit threshold is converted into Barrier for Serath.
-- **Final Accounting:** When a party member dies, Serath inherits a portion of that character's highest attribute.
+- **The Living Scale:** Beginning ten seconds into combat and every fifteen seconds thereafter, Serath compares the highest and lowest Health percentages among living non-summoned challengers. A difference of twelve percentage points or less gives Serath **Doubt**, causing him to take 15% increased damage until the next measurement. A wider difference gives him **Conviction**, granting 15% Power and 15 Attack Speed. If fewer than two eligible challengers remain, Serath automatically gains Conviction.
+- **Weight of Flesh:** Deals 220% Physical Damage to the living non-summoned challenger with the highest current Health percentage. It ignores Taunt, and ties are resolved randomly.
+- **Weight of Spirit:** Deals 190% Magical Damage to the living non-summoned challenger with the lowest current Health percentage and applies Wound for eight seconds. It ignores Taunt, and ties are resolved randomly. Ward can block the Wound.
+- **Sixfold Sentence:** Serath strikes three random enemies for 55% Physical Damage, then independently selects three random enemies for 55% Magical Damage. Summons can be selected, and the same challenger may be judged by both halves.
 
 #### Encounter identity
 
-An anti-carry Warden. Parties centered on one overwhelmingly powerful character struggle, while balanced rosters are rewarded. The First Warden tests target priority; the Second Warden tests party construction.
+A coordination Warden who judges the party's Health distribution. Keeping the company close together exposes Serath through Doubt, while uneven damage, deaths, or neglected allies strengthen him through Conviction. His paired single-target attacks pull against that goal by pressuring both ends of the party's Health range.
 
 ## Floor 16 — The Choir of Empty Masks
 
@@ -195,4 +200,3 @@ During the final phase, Aevum attempts **Sovereign Rewind**, which would restore
 #### Encounter identity
 
 A capstone encounter combining summons, stagger pressure, escalating danger, and a hard finale. Its phases bring the narrative of the Stolen Hours to a conclusion without relying exclusively on overwhelming statistics.
-

@@ -1391,6 +1391,56 @@
       "activeAbilityId": "ability.creature.wind_harpy.gale_slash",
       "passiveAbilityId": "ability.creature.wind_harpy.sharp_feathers",
       "evolution": {"id": "evolution.wind_harpy", "name": "Awakened Wind Harpy", "description": "The awakened form of Wind Harpy Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.alpha_wolf",
+      "sourceMonsterId": "monster.alpha_wolf",
+      "name": "Alpha Wolf Essence",
+      "description": "The combat essence of Alpha Wolf, granting Alpha Fangs and Ruthless Instinct.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.alpha_wolf.alpha_fangs",
+      "passiveAbilityId": "ability.creature.alpha_wolf.ruthless_instinct",
+      "evolution": {"id": "evolution.alpha_wolf", "name": "Awakened Alpha Wolf", "description": "The awakened form of Alpha Wolf Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.dire_wolf",
+      "sourceMonsterId": "monster.dire_wolf",
+      "name": "Dire Wolf Essence",
+      "description": "The combat essence of Dire Wolf, granting Dire Fangs and Hunting Instinct.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.dire_wolf.dire_fangs",
+      "passiveAbilityId": "ability.creature.dire_wolf.hunting_instinct",
+      "evolution": {"id": "evolution.dire_wolf", "name": "Awakened Dire Wolf", "description": "The awakened form of Dire Wolf Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.horned_wolf",
+      "sourceMonsterId": "monster.horned_wolf",
+      "name": "Horned Wolf Essence",
+      "description": "The combat essence of Horned Wolf, granting Piercing Horn and Protective Instinct.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.horned_wolf.piercing_horn",
+      "passiveAbilityId": "ability.creature.horned_wolf.protective_instinct",
+      "evolution": {"id": "evolution.horned_wolf", "name": "Awakened Horned Wolf", "description": "The awakened form of Horned Wolf Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.bloodfang_wolf",
+      "sourceMonsterId": "monster.bloodfang_wolf",
+      "name": "Bloodfang Wolf Essence",
+      "description": "The combat essence of Bloodfang Wolf, granting Bloodfang Bite and Cruel Precision.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.bloodfang_wolf.bloodfang_bite",
+      "passiveAbilityId": "ability.creature.bloodfang_wolf.cruel_precision",
+      "evolution": {"id": "evolution.bloodfang_wolf", "name": "Awakened Bloodfang Wolf", "description": "The awakened form of Bloodfang Wolf Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.pack_howler",
+      "sourceMonsterId": "monster.pack_howler",
+      "name": "Pack Howler Essence",
+      "description": "The combat essence of Pack Howler, granting Coordinated Attack and Strength of the Pack.",
+      "rarity": "Common", "tags": [], "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.pack_howler.coordinated_attack",
+      "passiveAbilityId": "ability.creature.pack_howler.strength_of_the_pack",
+      "evolution": {"id": "evolution.pack_howler", "name": "Awakened Pack Howler", "description": "The awakened form of Pack Howler Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
     }
   ]
 }

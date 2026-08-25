@@ -1,5 +1,6 @@
 using Application.UseCases.Essences.Dtos;
 using AutoMapper;
+using Domain.Models.Attributes;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
@@ -118,6 +119,63 @@ public sealed class EssenceAbilityDtoMappingTests
         Assert.Equal(scaled.Effects[1].ConditionScalingCoefficient, dto.Effects[1].ConditionScalingCoefficient, precision: 6);
         Assert.Equal(scaled.Effects[2].StatusScalingCoefficient, dto.Effects[2].StatusScalingCoefficient, precision: 6);
         Assert.Equal(scaled.Effects[3].DurationTicks / 10d, dto.Effects[3].DurationSeconds);
+    }
+
+    [Fact]
+    public void Ability_mapping_exposes_ascension_scaled_summon_stat_multipliers()
+    {
+        var ability = new AbilitySpec
+        {
+            Id = "ability.summon-description",
+            Kind = AbilitySpecKind.Active,
+            Name = "Summon Description",
+            CooldownTicks = 100,
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.summon",
+                    Operation = AbilityEffectOperation.Summon,
+                    SummonPowerMultiplier = 1,
+                    SummonHealthMultiplier = 1
+                }
+            ]
+        };
+
+        var scaled = EssenceAbilityProgressionScaler.Apply(ability, 1);
+        var dto = _mapper.Map<EssenceAbilityDto>(scaled);
+        var effect = Assert.Single(dto.Effects);
+
+        Assert.Equal(1.12, effect.SummonPowerMultiplier, precision: 3);
+        Assert.Equal(1.12, effect.SummonHealthMultiplier, precision: 3);
+    }
+
+    [Fact]
+    public void Ability_mapping_exposes_percentage_of_initial_attribute_scaling_for_descriptions()
+    {
+        var ability = new AbilitySpec
+        {
+            Id = "ability.initial-attribute-description",
+            Kind = AbilitySpecKind.Passive,
+            Name = "Initial Attribute Description",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.armor",
+                    Operation = AbilityEffectOperation.ModifyAttributePercentOfInitial,
+                    Attribute = AttributeType.Armor,
+                    ScalingCoefficient = 0.3f
+                }
+            ]
+        };
+
+        var scaled = EssenceAbilityProgressionScaler.Apply(ability, 1);
+        var dto = _mapper.Map<EssenceAbilityDto>(scaled);
+        var scaling = Assert.Single(Assert.Single(dto.Effects).Scaling);
+
+        Assert.Equal(AttributeType.Armor.ToString(), scaling.Attribute);
+        Assert.Equal(0.324, scaling.Coefficient, precision: 3);
     }
 
     [Theory]

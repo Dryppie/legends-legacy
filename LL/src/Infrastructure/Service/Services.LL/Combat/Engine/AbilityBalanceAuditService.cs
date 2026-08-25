@@ -12,6 +12,8 @@ namespace Services.LL.Combat.Engine;
 public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
 {
     private static readonly int[] DefaultSeeds = [1337, 2027, 9001];
+    private static readonly double[] ValidationContextTargets = [0.35d, 0.5d, 0.65d];
+    private const int ValidationReplacementCount = 3;
     private static readonly JsonSerializerOptions JsonOptions = CreateJsonOptions();
     private readonly IAbilityBalanceSimulator _simulator;
     private readonly IAbilityCatalogProvider _catalogProvider;
@@ -81,59 +83,90 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
         {
             cancellationToken.ThrowIfCancellationRequested();
             var flagged = flaggedEssences[validationIndex];
-            var representative = screenedCombinations
-                .Where(combination => GetEssenceIds(combination).Count(id =>
-                    id.Equals(flagged.EssenceId, StringComparison.OrdinalIgnoreCase)) == 1)
-                .OrderBy(combination => Math.Abs(CombinationScore(combination) - 0.5d))
-                .FirstOrDefault();
-            if (representative is null)
+            var representatives = SelectValidationContexts(
+                screenedCombinations,
+                flagged.EssenceId);
+            if (representatives.Count == 0)
                 continue;
 
-            var originalLoadout = ToLoadout(representative);
-            var teamEssenceIds = GetEssenceIds(representative)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-            var replacement = screeningEssenceResults
-                .Where(result => result.Classification == "Healthy"
-                    && !teamEssenceIds.Contains(result.EssenceId)
-                    && CanReplaceEssence(originalLoadout, flagged.EssenceId, result.EssenceId))
-                .OrderBy(result => Math.Abs(result.AdjustedScoreDelta))
-                .FirstOrDefault();
-            if (replacement is null)
+            long essenceValidationBattles = 0;
+            var weightedOriginalScore = 0d;
+            var weightedReplacementScore = 0d;
+            var testedContexts = 0;
+            var testedReplacements = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            for (var contextIndex = 0; contextIndex < representatives.Count; contextIndex++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var representative = representatives[contextIndex];
+                var originalLoadout = ToLoadout(representative);
+                var teamEssenceIds = GetEssenceIds(representative)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var replacements = screeningEssenceResults
+                    .Where(result => result.Classification == "Healthy"
+                        && !teamEssenceIds.Contains(result.EssenceId)
+                        && CanReplaceEssence(originalLoadout, flagged.EssenceId, result.EssenceId))
+                    .OrderBy(result => Math.Abs(result.AdjustedScoreDelta))
+                    .ThenBy(result => result.EssenceId, StringComparer.OrdinalIgnoreCase)
+                    .Take(ValidationReplacementCount)
+                    .ToList();
+                if (replacements.Count == 0)
+                    continue;
+
+                testedContexts++;
+                for (var replacementIndex = 0; replacementIndex < replacements.Count; replacementIndex++)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var replacement = replacements[replacementIndex];
+                    testedReplacements.TryAdd(replacement.EssenceId, replacement.DisplayName);
+                    var replacementLoadout = ReplaceEssence(
+                        originalLoadout,
+                        flagged.EssenceId,
+                        replacement.EssenceId);
+                    var seedIndex = (validationIndex + contextIndex + replacementIndex) % seeds.Count;
+                    var validationReport = _simulator.Run(
+                        new AbilityBalanceSimulationRequest(
+                            request.ValidationBattleCount,
+                            request.TeamSize,
+                            request.EssencesPerParticipant,
+                            unchecked(seeds[seedIndex]
+                                + 10_000
+                                + validationIndex * 100
+                                + contextIndex * 10
+                                + replacementIndex),
+                            2,
+                            request.CandidatePoolSize,
+                            [originalLoadout, replacementLoadout],
+                            request.EquipmentTier,
+                            request.EquipmentRarity,
+                            request.EquipmentProfile),
+                        cancellationToken);
+                    validationBattles += validationReport.BattlesRun;
+                    essenceValidationBattles += validationReport.BattlesRun;
+                    var originalResult = validationReport.RankedCombinations.Single(combination =>
+                        GetEssenceIds(combination).Contains(flagged.EssenceId, StringComparer.OrdinalIgnoreCase));
+                    var replacementResult = validationReport.RankedCombinations.Single(combination =>
+                        !GetEssenceIds(combination).Contains(flagged.EssenceId, StringComparer.OrdinalIgnoreCase));
+                    weightedOriginalScore += CombinationScore(originalResult) * validationReport.BattlesRun;
+                    weightedReplacementScore += CombinationScore(replacementResult) * validationReport.BattlesRun;
+                }
+            }
+
+            if (essenceValidationBattles == 0)
                 continue;
 
-            var replacementLoadout = ReplaceEssence(
-                originalLoadout,
-                flagged.EssenceId,
-                replacement.EssenceId);
-            var validationReport = _simulator.Run(
-                new AbilityBalanceSimulationRequest(
-                    request.ValidationBattleCount,
-                    request.TeamSize,
-                    request.EssencesPerParticipant,
-                    seeds[0] + 10_000 + validationIndex,
-                    2,
-                    request.CandidatePoolSize,
-                    [originalLoadout, replacementLoadout],
-                    request.EquipmentTier,
-                    request.EquipmentRarity,
-                    request.EquipmentProfile),
-                cancellationToken);
-            validationBattles += validationReport.BattlesRun;
-            var originalResult = validationReport.RankedCombinations.Single(combination =>
-                GetEssenceIds(combination).Contains(flagged.EssenceId, StringComparer.OrdinalIgnoreCase));
-            var replacementResult = validationReport.RankedCombinations.Single(combination =>
-                !GetEssenceIds(combination).Contains(flagged.EssenceId, StringComparer.OrdinalIgnoreCase));
-            var originalScore = CombinationScore(originalResult);
-            var replacementScore = CombinationScore(replacementResult);
+            var originalScore = weightedOriginalScore / essenceValidationBattles;
+            var replacementScore = weightedReplacementScore / essenceValidationBattles;
             validationResults.Add(new AbilityBalanceValidationResult(
                 flagged.EssenceId,
                 flagged.DisplayName,
-                replacement.EssenceId,
-                replacement.DisplayName,
-                validationReport.BattlesRun,
+                string.Join(" | ", testedReplacements.Keys),
+                string.Join(" / ", testedReplacements.Values),
+                checked((int)essenceValidationBattles),
                 originalScore,
                 replacementScore,
-                originalScore - replacementScore));
+                originalScore - replacementScore,
+                testedContexts,
+                testedReplacements.Count));
         }
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -231,6 +264,31 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
             selected.TryAdd(combination.Signature, combination);
             if (selected.Count >= count)
                 break;
+        }
+
+        return selected.Values.ToList();
+    }
+
+    private static IReadOnlyList<AbilityBalanceCombinationResult> SelectValidationContexts(
+        IReadOnlyList<AbilityBalanceCombinationResult> combinations,
+        string essenceId)
+    {
+        var candidates = combinations
+            .Where(combination => GetEssenceIds(combination).Count(id =>
+                id.Equals(essenceId, StringComparison.OrdinalIgnoreCase)) == 1)
+            .OrderBy(combination => combination.Signature, StringComparer.Ordinal)
+            .ToList();
+        var selected = new Dictionary<string, AbilityBalanceCombinationResult>(StringComparer.Ordinal);
+        foreach (var target in ValidationContextTargets)
+        {
+            var representative = candidates
+                .Where(candidate => !selected.ContainsKey(candidate.Signature))
+                .OrderBy(candidate => Math.Abs(CombinationScore(candidate) - target))
+                .ThenByDescending(candidate => candidate.Battles)
+                .ThenBy(candidate => candidate.Signature, StringComparer.Ordinal)
+                .FirstOrDefault();
+            if (representative is not null)
+                selected.Add(representative.Signature, representative);
         }
 
         return selected.Values.ToList();

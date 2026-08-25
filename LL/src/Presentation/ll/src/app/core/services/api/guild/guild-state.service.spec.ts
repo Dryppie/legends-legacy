@@ -354,7 +354,7 @@ describe('GuildStateService refreshes', () => {
     expect(guildService.getMyGuild).toHaveBeenCalledTimes(2);
   });
 
-  it('does not cascade a same-guild core refresh into every guild subresource', () => {
+  it('preserves the directory without cascading a same-guild core refresh', () => {
     TestBed.configureTestingModule({});
     const firstGuildRequest = new Subject<Guild | null>();
     const secondGuildRequest = new Subject<Guild | null>();
@@ -419,6 +419,16 @@ describe('GuildStateService refreshes', () => {
     expect(guildService.getMissions).toHaveBeenCalledTimes(1);
     expect(guildService.getShop).toHaveBeenCalledTimes(1);
 
+    state.setAllGuilds([
+      {
+        id: guild.id,
+        name: guild.name,
+        ownerName: 'Guild Owner',
+        memberCount: 1,
+        maxMembers: guild.maxMembers,
+        upgrades: 0,
+      },
+    ]);
     state.refresh();
     secondGuildRequest.next(guild);
     secondGuildRequest.complete();
@@ -426,6 +436,14 @@ describe('GuildStateService refreshes', () => {
     expect(guildService.getBuildings).toHaveBeenCalledTimes(1);
     expect(guildService.getMissions).toHaveBeenCalledTimes(1);
     expect(guildService.getShop).toHaveBeenCalledTimes(1);
+    expect(state.allGuilds()).toEqual([
+      jasmine.objectContaining({
+        id: guild.id,
+        ownerName: 'Guild Owner',
+        memberCount: 1,
+        maxMembers: guild.maxMembers,
+      }),
+    ]);
   });
 
   it('does not reload the shop when guild mission progress changes', () => {

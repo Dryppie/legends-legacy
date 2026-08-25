@@ -196,6 +196,15 @@ public static class AbilityCatalogValidator
         foreach (var status in statuses)
             ValidateStatusReferences(status.Id, status.Effects, status.Triggers.SelectMany(x => x.Conditions), knownStatusIds, errors);
 
+        var knownAbilitiesById = abilities
+            .Where(x => !string.IsNullOrWhiteSpace(x.Id))
+            .GroupBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+        foreach (var ability in abilities)
+            ValidateAbilityReferences(ability.Id, ability.Effects, knownAbilitiesById, errors);
+        foreach (var status in statuses)
+            ValidateAbilityReferences(status.Id, status.Effects, knownAbilitiesById, errors);
+
         var knownSummonIds = new HashSet<string>(summonSpecs.Select(x => x.Id), StringComparer.OrdinalIgnoreCase);
         foreach (var ability in abilities)
             ValidateSummonReferences(ability.Id, ability.Effects, knownSummonIds, errors);
@@ -256,6 +265,13 @@ public static class AbilityCatalogValidator
             if (effect.DurationTicks < 0 || effect.IntervalTicks < 0 || effect.Uses < 0)
                 errors.Add($"{label}: duration, interval, and uses cannot be negative.");
 
+            if (effect.ExcludeEventTarget
+                && effect.Target is not (AbilityTargetSelector.TwoRandomEnemies
+                    or AbilityTargetSelector.ThreeRandomEnemies))
+            {
+                errors.Add($"{label}: excludeEventTarget requires a random multi-enemy target selector.");
+            }
+
             if (effect.RefreshDuration
                 && (effect.DurationTicks <= 0 || !IsMaintainableModifierOperation(effect.Operation)))
             {
@@ -311,6 +327,9 @@ public static class AbilityCatalogValidator
             if (effect.LivingNonSummonedAllyDamagePercent < 0)
                 errors.Add($"{label}: livingNonSummonedAllyDamagePercent cannot be negative.");
 
+            if (effect.MaximumCount < 0)
+                errors.Add($"{label}: maximumCount cannot be negative.");
+
             if (effect.SubsequentTargetDamagePercent is <= 0 or > 100)
                 errors.Add($"{label}: subsequentTargetDamagePercent must be between 1 and 100.");
 
@@ -358,6 +377,7 @@ public static class AbilityCatalogValidator
                     or AbilityEffectOperation.ModifyAttributePercentOfInitial
                     or AbilityEffectOperation.TransferAttributePercent
                     or AbilityEffectOperation.SynchronizeAttributePerOwnedSummon
+                    or AbilityEffectOperation.SynchronizeAttributePerLivingNonSummonedAlly
                     or AbilityEffectOperation.SynchronizeAttributePerStatusStack
                     or AbilityEffectOperation.SynchronizeAttributePerMissingHealthStep
                 && effect.Attribute is null)
@@ -374,11 +394,37 @@ public static class AbilityCatalogValidator
 
             if ((effect.Operation == AbilityEffectOperation.ApplyStatus
                  || effect.Operation == AbilityEffectOperation.ModifyStatusStacks
+                 || effect.Operation == AbilityEffectOperation.ScaleStatusStacks
                  || effect.Operation == AbilityEffectOperation.RemoveStatus
+                 || effect.Operation == AbilityEffectOperation.ToggleStatus
                  || effect.Operation == AbilityEffectOperation.SynchronizeAttributePerStatusStack)
                 && string.IsNullOrWhiteSpace(effect.StatusId))
             {
                 errors.Add($"{label}: {effect.Operation} requires statusId.");
+            }
+
+            if (effect.Operation == AbilityEffectOperation.ToggleStatus
+                && string.IsNullOrWhiteSpace(effect.AlternativeStatusId))
+            {
+                errors.Add($"{label}: ToggleStatus requires alternativeStatusId.");
+            }
+
+            if (effect.Operation == AbilityEffectOperation.ResetAbilityCooldown
+                && string.IsNullOrWhiteSpace(effect.AbilityId))
+            {
+                errors.Add($"{label}: ResetAbilityCooldown requires abilityId.");
+            }
+
+            if (effect.Target == AbilityTargetSelector.HighestConditionStacksEnemy
+                && effect.TargetCondition is null)
+            {
+                errors.Add($"{label}: HighestConditionStacksEnemy requires targetCondition.");
+            }
+
+            if (effect.Operation == AbilityEffectOperation.ScaleStatusStacks
+                && effect.BaseValue is < 0 or > 100)
+            {
+                errors.Add($"{label}: ScaleStatusStacks requires baseValue between 0 and 100.");
             }
 
             if (effect.Operation == AbilityEffectOperation.Summon && string.IsNullOrWhiteSpace(effect.SummonId))
@@ -498,6 +544,18 @@ public static class AbilityCatalogValidator
                 errors.Add($"{label}: ModifyDamageTakenFromCondition requires condition.");
             }
 
+            if (effect.Operation == AbilityEffectOperation.ModifyCriticalDamageAgainstCondition
+                && (effect.Condition is null || effect.BaseValue <= 0))
+            {
+                errors.Add($"{label}: ModifyCriticalDamageAgainstCondition requires condition and a positive baseValue.");
+            }
+
+            if (effect.Operation == AbilityEffectOperation.SynchronizeAttributePerLivingNonSummonedAlly
+                && effect.MaximumCount <= 0)
+            {
+                errors.Add($"{label}: SynchronizeAttributePerLivingNonSummonedAlly requires a positive maximumCount.");
+            }
+
             if (effect.Operation == AbilityEffectOperation.ApplyCondition && effect.Condition is { } condition)
             {
                 if (condition == StandardConditionType.Thorns && effect.DurationTicks <= 0)
@@ -526,6 +584,13 @@ public static class AbilityCatalogValidator
                 && !statusIds.Contains(effect.StatusId))
             {
                 errors.Add($"{label}: references unknown status '{effect.StatusId}'.");
+            }
+
+            if (statusIds is not null
+                && !string.IsNullOrWhiteSpace(effect.AlternativeStatusId)
+                && !statusIds.Contains(effect.AlternativeStatusId))
+            {
+                errors.Add($"{label}: references unknown alternative status '{effect.AlternativeStatusId}'.");
             }
 
             ValidateConditions(label, effect.Conditions, errors);
@@ -624,6 +689,8 @@ public static class AbilityCatalogValidator
 
             if (condition.Type is AbilityConditionType.AnyEnemyHealthBelowPercent
                     or AbilityConditionType.NoEnemyHealthBelowPercent
+                    or AbilityConditionType.NonSummonedEnemyHealthSpreadAtMostPercent
+                    or AbilityConditionType.NonSummonedEnemyHealthSpreadAbovePercent
                 && condition.Value is < 0 or > 100)
             {
                 errors.Add($"{ownerId}: condition {condition.Type} requires value between 0 and 100.");
@@ -772,6 +839,34 @@ public static class AbilityCatalogValidator
             {
                 errors.Add(
                     $"{summonId}/Power: basic-attacking summons must scale positively from owner Power.");
+            }
+        }
+    }
+
+    private static void ValidateAbilityReferences(
+        string ownerId,
+        IEnumerable<AbilityEffectSpec> effects,
+        IReadOnlyDictionary<string, AbilitySpec> knownAbilitiesById,
+        ICollection<string> errors)
+    {
+        foreach (var effect in effects)
+        {
+            if (effect.Operation != AbilityEffectOperation.ResetAbilityCooldown
+                || string.IsNullOrWhiteSpace(effect.AbilityId))
+            {
+                continue;
+            }
+
+            if (!knownAbilitiesById.TryGetValue(effect.AbilityId, out var referencedAbility))
+            {
+                errors.Add($"{ownerId}/{effect.Id}: references unknown ability '{effect.AbilityId}'.");
+                continue;
+            }
+
+            if (referencedAbility.Kind != AbilitySpecKind.Active || referencedAbility.CooldownTicks <= 0)
+            {
+                errors.Add(
+                    $"{ownerId}/{effect.Id}: ResetAbilityCooldown requires an active ability with a positive cooldown.");
             }
         }
     }

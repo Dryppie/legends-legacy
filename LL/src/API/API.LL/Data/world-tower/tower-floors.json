@@ -1,5 +1,5 @@
 {
-  "releasedThroughFloor": 10,
+  "releasedThroughFloor": 15,
   "rewardCurve": {
     "baseReward": 100,
     "maximumFloor": 100,
@@ -360,6 +360,165 @@
           "description": "Tower Floors 11–20"
         }
       ]
+    },
+    {
+      "floorNumber": 11,
+      "name": "The Hushed Archive",
+      "type": "Standard",
+      "guardianCreatureId": "00000000-0000-0000-0000-000000000098",
+      "guardianName": "Serevin, the Name-Eater",
+      "guardianAbilityProfileId": "monster.serevin,_the_name-eater",
+      "requiredSlots": 10,
+      "recommendedPowerRating": 280,
+      "progressionPosition": 11,
+      "guardianScaling": {
+        "health": 1.75,
+        "offense": 1.67,
+        "defense": 3.25,
+        "resistance": 3.25,
+        "penetration": 1.0,
+        "regeneration": 1.0
+      },
+      "stagger": {
+        "enabled": true,
+        "baseThreshold": 250,
+        "referenceParticipantCount": 10,
+        "participantExponent": 0.85,
+        "breakDurationTicks": 30,
+        "recoveryDurationTicks": 20,
+        "damageTakenBonusPercent": 15,
+        "thresholdGrowthPercentPerBreak": 35,
+        "maximumBreaks": 4
+      },
+      "echoEnabledAfterClear": true,
+      "unlocks": []
+    },
+    {
+      "floorNumber": 12,
+      "name": "The Hanging Tempest",
+      "type": "Standard",
+      "guardianCreatureId": "00000000-0000-0000-0000-000000000099",
+      "guardianName": "Volgrin, the Shackled Storm",
+      "guardianAbilityProfileId": "monster.volgrin,_the_shackled_storm",
+      "requiredSlots": 10,
+      "recommendedPowerRating": 300,
+      "progressionPosition": 12,
+      "guardianScaling": {
+        "health": 1.90,
+        "offense": 1.74,
+        "defense": 2.80,
+        "resistance": 2.80,
+        "penetration": 1.0,
+        "regeneration": 1.0
+      },
+      "stagger": {
+        "enabled": true,
+        "baseThreshold": 250,
+        "referenceParticipantCount": 10,
+        "participantExponent": 0.85,
+        "breakDurationTicks": 30,
+        "recoveryDurationTicks": 20,
+        "damageTakenBonusPercent": 15,
+        "thresholdGrowthPercentPerBreak": 35,
+        "maximumBreaks": 4
+      },
+      "echoEnabledAfterClear": true,
+      "unlocks": []
+    },
+    {
+      "floorNumber": 13,
+      "name": "The Drowned Orrery",
+      "type": "Standard",
+      "guardianCreatureId": "00000000-0000-0000-0000-000000000100",
+      "guardianName": "Nhalia, the Moondrowned",
+      "guardianAbilityProfileId": "monster.nhalia,_the_moondrowned",
+      "requiredSlots": 10,
+      "recommendedPowerRating": 325,
+      "progressionPosition": 13,
+      "guardianScaling": {
+        "health": 2.05,
+        "offense": 1.85,
+        "defense": 3.00,
+        "resistance": 3.00,
+        "penetration": 1.0,
+        "regeneration": 1.0
+      },
+      "stagger": {
+        "enabled": true,
+        "baseThreshold": 250,
+        "referenceParticipantCount": 10,
+        "participantExponent": 0.85,
+        "breakDurationTicks": 30,
+        "recoveryDurationTicks": 20,
+        "damageTakenBonusPercent": 15,
+        "thresholdGrowthPercentPerBreak": 35,
+        "maximumBreaks": 4
+      },
+      "echoEnabledAfterClear": true,
+      "unlocks": []
+    },
+    {
+      "floorNumber": 14,
+      "name": "The Unlit Forge",
+      "type": "Standard",
+      "guardianCreatureId": "00000000-0000-0000-0000-000000000106",
+      "guardianName": "Caldris, Smith of the Fallen Star",
+      "guardianAbilityProfileId": "monster.caldris,_smith_of_the_fallen_star",
+      "requiredSlots": 10,
+      "recommendedPowerRating": 350,
+      "progressionPosition": 14,
+      "guardianScaling": {
+        "health": 2.25,
+        "offense": 1.92,
+        "defense": 2.90,
+        "resistance": 2.90,
+        "penetration": 1.0,
+        "regeneration": 1.0
+      },
+      "stagger": {
+        "enabled": true,
+        "baseThreshold": 250,
+        "referenceParticipantCount": 10,
+        "participantExponent": 0.85,
+        "breakDurationTicks": 30,
+        "recoveryDurationTicks": 20,
+        "damageTakenBonusPercent": 15,
+        "thresholdGrowthPercentPerBreak": 35
+      },
+      "echoEnabledAfterClear": true,
+      "unlocks": []
+    },
+    {
+      "floorNumber": 15,
+      "name": "The Warden's Measure",
+      "type": "Warden",
+      "guardianCreatureId": "00000000-0000-0000-0000-000000000107",
+      "guardianName": "Serath, the Second Warden",
+      "guardianAbilityProfileId": "monster.serath,_the_second_warden",
+      "requiredSlots": 15,
+      "recommendedPowerRating": 400,
+      "progressionPosition": 15,
+      "guardianScaling": {
+        "health": 3.40,
+        "offense": 2.05,
+        "defense": 3.30,
+        "resistance": 3.30,
+        "penetration": 1.0,
+        "regeneration": 1.0
+      },
+      "stagger": {
+        "enabled": true,
+        "baseThreshold": 375,
+        "referenceParticipantCount": 15,
+        "participantExponent": 0.85,
+        "breakDurationTicks": 30,
+        "recoveryDurationTicks": 20,
+        "damageTakenBonusPercent": 15,
+        "thresholdGrowthPercentPerBreak": 35,
+        "maximumBreaks": 4
+      },
+      "echoEnabledAfterClear": true,
+      "unlocks": []
     }
   ]
 }

@@ -56,7 +56,7 @@ public sealed class WorldTowerTests
     }
 
     [Fact]
-    public void CatalogReleasesTenContiguousFloorsUsingExistingCreatures()
+    public void CatalogReleasesFifteenContiguousFloorsUsingExistingCreatures()
     {
         var apiRoot = Environment.GetEnvironmentVariable("LL_TEST_API_ROOT")
             ?? TestContentPaths.FindApiRoot();
@@ -92,10 +92,10 @@ public sealed class WorldTowerTests
             apiRoot,
             options).GetCatalog();
 
-        Assert.Equal(Enumerable.Range(1, 10), floors.Select(x => x.FloorNumber));
-        Assert.Equal(Enumerable.Range(1, 10), floors.Select(x => x.ProgressionPosition));
-        Assert.Equal([5, 5, 5, 5, 10, 5, 5, 10, 10, 15], floors.Select(x => x.RequiredSlots));
-        Assert.Null(provider.GetFloor(11));
+        Assert.Equal(Enumerable.Range(1, 15), floors.Select(x => x.FloorNumber));
+        Assert.Equal(Enumerable.Range(1, 15), floors.Select(x => x.ProgressionPosition));
+        Assert.Equal([5, 5, 5, 5, 10, 5, 5, 10, 10, 15, 10, 10, 10, 10, 15], floors.Select(x => x.RequiredSlots));
+        Assert.Null(provider.GetFloor(16));
         Assert.All(floors, floor => Assert.Contains(floor.GuardianCreatureId, creatureIds));
         Assert.All(floors, floor => Assert.False(string.IsNullOrWhiteSpace(floor.GuardianAbilityProfileId)));
         Assert.All(floors, floor =>
@@ -136,6 +136,44 @@ public sealed class WorldTowerTests
         Assert.Equal(Guid.Parse("00000000-0000-0000-0000-000000000065"), floors[9].GuardianCreatureId);
         Assert.Equal("The Mad King", floors[9].GuardianName);
         Assert.Equal("monster.the_mad_king", floors[9].GuardianAbilityProfileId);
+        Assert.Equal(Guid.Parse("00000000-0000-0000-0000-000000000098"), floors[10].GuardianCreatureId);
+        Assert.Equal("Serevin, the Name-Eater", floors[10].GuardianName);
+        Assert.Equal("monster.serevin,_the_name-eater", floors[10].GuardianAbilityProfileId);
+        Assert.Equal(10, floors[10].RequiredSlots);
+        Assert.Equal(280, floors[10].RecommendedPowerRating);
+        Assert.Equal(10, floors[10].Stagger?.ReferenceParticipantCount);
+        Assert.True(floors[10].EchoEnabledAfterClear);
+        Assert.Equal(Guid.Parse("00000000-0000-0000-0000-000000000099"), floors[11].GuardianCreatureId);
+        Assert.Equal("Volgrin, the Shackled Storm", floors[11].GuardianName);
+        Assert.Equal("monster.volgrin,_the_shackled_storm", floors[11].GuardianAbilityProfileId);
+        Assert.Equal(10, floors[11].RequiredSlots);
+        Assert.Equal(300, floors[11].RecommendedPowerRating);
+        Assert.Equal(10, floors[11].Stagger?.ReferenceParticipantCount);
+        Assert.True(floors[11].EchoEnabledAfterClear);
+        Assert.Equal(Guid.Parse("00000000-0000-0000-0000-000000000100"), floors[12].GuardianCreatureId);
+        Assert.Equal("Nhalia, the Moondrowned", floors[12].GuardianName);
+        Assert.Equal("monster.nhalia,_the_moondrowned", floors[12].GuardianAbilityProfileId);
+        Assert.Equal(10, floors[12].RequiredSlots);
+        Assert.Equal(325, floors[12].RecommendedPowerRating);
+        Assert.Equal(10, floors[12].Stagger?.ReferenceParticipantCount);
+        Assert.True(floors[12].EchoEnabledAfterClear);
+        Assert.Equal(Guid.Parse("00000000-0000-0000-0000-000000000106"), floors[13].GuardianCreatureId);
+        Assert.Equal("Caldris, Smith of the Fallen Star", floors[13].GuardianName);
+        Assert.Equal("monster.caldris,_smith_of_the_fallen_star", floors[13].GuardianAbilityProfileId);
+        Assert.Equal(10, floors[13].RequiredSlots);
+        Assert.Equal(350, floors[13].RecommendedPowerRating);
+        Assert.Equal(10, floors[13].Stagger?.ReferenceParticipantCount);
+        Assert.Null(floors[13].Stagger?.MaximumBreaks);
+        Assert.True(floors[13].EchoEnabledAfterClear);
+        Assert.Equal(Guid.Parse("00000000-0000-0000-0000-000000000107"), floors[14].GuardianCreatureId);
+        Assert.Equal("Serath, the Second Warden", floors[14].GuardianName);
+        Assert.Equal("monster.serath,_the_second_warden", floors[14].GuardianAbilityProfileId);
+        Assert.Equal(TowerFloorType.Warden, floors[14].Type);
+        Assert.Equal(15, floors[14].RequiredSlots);
+        Assert.Equal(400, floors[14].RecommendedPowerRating);
+        Assert.Equal(15, floors[14].Stagger?.ReferenceParticipantCount);
+        Assert.Equal(4, floors[14].Stagger?.MaximumBreaks);
+        Assert.True(floors[14].EchoEnabledAfterClear);
         Assert.Contains(
             floors.Single(x => x.FloorNumber == 1).Unlocks,
             unlock => unlock.Key == "tower_echo_mode_unlock"

@@ -53,7 +53,7 @@ These decisions supersede conflicting details in the original proposal:
 | Hall of Fame UI           | **Shipped** | A full first-server-clear table is available.                                                                                                                                                                                                                                                                                                                            |
 | Server unlock effects     | **Partial** | Unlock keys are persisted, but most downstream game systems do not consume them yet.                                                                                                                                                                                                                                                                                     |
 | Rewards and prestige      | **Partial** | First-clear and Echo Tower Tokens are granted; titles, cosmetics, and other prestige rewards are not implemented.                                                                                                                                                                                                                                                       |
-| Guardian mechanics        | **Shipped** | Floors 1–10 have fully authored active/passive kits. Floor 10's Mad King combines repeated area strikes and damage-based healing, locked highest-Health targeting, a reversible timed damage tradeoff, and missing-Health-step Lifesteal. Monster artwork is intentionally excluded. |
+| Guardian mechanics        | **Shipped** | Floors 1–15 have fully authored active/passive kits. Floors 11–15 add buff erasure and Ink, chained lightning, alternating tides, stagger-shattered armor, and Serath's party Health-distribution judgment. Monster artwork is intentionally excluded. |
 | Hall combat statistics    | **Partial** | Battle reports contain combat data, but the Hall table does not surface richer performance metrics.                                                                                                                                                                                                                                                                      |
 | Automated coverage        | **Partial** | Catalog, domain invariants, application approval, realtime delivery, Expedition rules, combat outcomes, progression, Echo, Hall projection, controller dispatch, and indexes have focused tests; PostgreSQL concurrency, HTTP integration, and frontend flows need broader coverage.                                                                                     |
 | Frontend automated tests  | **Partial** | The Angular API client has route/payload mapping tests and the complete Angular development build passes; component, browser, and full-suite execution coverage remain.                                                                                                                                                                                                  |
@@ -247,7 +247,7 @@ These omissions avoid new reward models until concrete rewards and existing inte
 
 ### Guardian mechanics
 
-Guardian identity and abilities are data-driven, and combat uses existing creature definitions with configurable strength. Floors 1–10 have authored kits. Floor 3's Morrowmaw owns and consumes Broodlings; Floor 5's Kharad manages paired pillars and synchronized Resonance; Floor 6's Orsenn uses source-bound Cinder; Floor 7's Eydis gains permanent Abundance every ten seconds, scaling both Springtide and her periodic Max-Health healing; Floor 8's Kodoku maintains a capped Venomspawn brood; Floor 9's Ni summons nine inert copies and scales from their survival; and Floor 10's Mad King combines repeated area damage, damage-based healing, conditional highest-Health execution damage, a timed damage tradeoff, and missing-Health-step Lifesteal. Reusable effect repetition, status-stack and missing-Health-step attribute scaling, owned-summon scaling and targeting, capped-summon overflow healing, timed-modifier magnitude tracking, and Health-swap primitives support these kits and later content. Tags and scouting reveals communicate intended mechanics.
+Guardian identity and abilities are data-driven, and combat uses existing creature definitions with configurable strength. Floors 1–15 have authored kits. Floor 3's Morrowmaw owns and consumes Broodlings; Floor 5's Kharad manages paired pillars and synchronized Resonance; Floor 6's Orsenn uses source-bound Cinder; Floor 7's Eydis gains permanent Abundance every ten seconds; Floor 8's Kodoku maintains a capped Venomspawn brood; Floor 9's Ni summons nine inert copies; Floor 10's Mad King scales Lifesteal from missing Health; Floors 11–14 introduce Ink, Broken Chains, alternating tides, and stagger-shattered Star-Iron; and Floor 15's Serath measures the spread between the party's highest and lowest Health percentages. Floors 11–14 require ten-character rosters, Floor 15 requires fifteen, and the band is tuned from a Floor 11 baseline of Tier 2 Epic, Exceptional-quality equipment with seven Essences per character. Reusable effect repetition, status synchronization, owned-summon operations, targeting constraints, party Health-spread conditions, and timed maintained modifiers support these kits and later content. Tags and scouting reveals communicate intended mechanics.
 
 Ni's source design omitted active cooldowns, copy durability, Ninth Seal hit semantics, and ended the passive mid-sentence. The authored defaults are 8/16/20-second cooldowns, copies with 10% of Ni's Max Health and inherited Armor/Resistance, and one combined `20% × surviving copies` Ninth Seal hit. No behavior was invented for the unfinished passive clause; it remains a content-design follow-up if the missing text is recovered.
 
@@ -291,7 +291,7 @@ Focused tests currently cover:
 - combat failure reports and combat-exception persistence;
 - mixed Echo rosters rewarding only members who remain weekly-eligible;
 - supply, ward, and weak-point preparation values reaching the friendly and hostile combat runtimes;
-- authored Guardian catalog and runtime behavior through Floor 10, including Eydis's Abundance loop, Kodoku's capped acting summons and survivor scaling, Ni's relocated nine-copy mechanics, and the Mad King's complete kit;
+- authored Guardian catalog and runtime behavior through Floor 15, including Serath's Taunt-immune, non-summoned Health-percentage targeting and Living Scale state changes;
 - every controller endpoint dispatching the authenticated character and route/body payloads;
 - missing-character claim rejection and controller authorization metadata;
 - Angular API-client route and mutation payload mapping, including the absence of a minimum-power field.
@@ -444,6 +444,11 @@ The current status document itself should be updated whenever a Tower item moves
 | Tests              | `LL/tests/EssenceSystem.Tests/WorldTowerTests.cs`, `WorldTowerServiceTests.cs`, `WorldTowerControllerTests.cs`; Angular client `world-tower.service.spec.ts`                                                                                             |
 
 ## Change log
+
+### 2026-08-25
+
+- Released Floors 11–15, culminating in Serath, the Second Warden.
+- Added effect-local Health-extremum targeting constraints and non-summoned enemy Health-spread conditions for the Living Scale encounter.
 
 ### 2026-08-14
 

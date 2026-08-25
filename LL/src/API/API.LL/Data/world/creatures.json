@@ -679,6 +679,106 @@
       "defenseProfile": "Balanced",
       "baseLevel": 60,
       "tier": 2
-    }
-  ]
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000098",
+      "name": "Serevin, the Name-Eater",
+      "imagePath": "",
+      "archetype": "Balanced",
+      "damageProfile": "Magical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 55,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000099",
+      "name": "Volgrin, the Shackled Storm",
+      "imagePath": "",
+      "archetype": "Bruiser",
+      "damageProfile": "Magical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 57,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000100",
+      "name": "Nhalia, the Moondrowned",
+      "imagePath": "",
+      "archetype": "Balanced",
+      "damageProfile": "Magical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 59,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000101",
+      "name": "Alpha Wolf",
+      "imagePath": "alpha_wolf",
+      "archetype": "Bruiser",
+      "damageProfile": "Physical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 65,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000102",
+      "name": "Dire Wolf",
+      "imagePath": "dire_wolf",
+      "archetype": "DPS",
+      "damageProfile": "Physical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 65,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000103",
+      "name": "Horned Wolf",
+      "imagePath": "horned_wolf",
+      "archetype": "Tank",
+      "damageProfile": "Physical",
+      "defenseProfile": "PhysicalTank",
+      "baseLevel": 65,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000104",
+      "name": "Bloodfang Wolf",
+      "imagePath": "bloodfang_wolf",
+      "archetype": "DPS",
+      "damageProfile": "Physical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 65,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000105",
+      "name": "Pack Howler",
+      "imagePath": "pack_howler",
+      "archetype": "Support",
+      "damageProfile": "Physical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 65,
+      "tier": 2
+    },
+  {
+    "id": "00000000-0000-0000-0000-000000000106",
+      "name": "Caldris, Smith of the Fallen Star",
+      "imagePath": "",
+      "archetype": "Bruiser",
+      "damageProfile": "Physical",
+      "defenseProfile": "Balanced",
+    "baseLevel": 61,
+    "tier": 2
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000107",
+    "name": "Serath, the Second Warden",
+    "imagePath": "",
+    "archetype": "Bruiser",
+    "damageProfile": "Hybrid",
+    "defenseProfile": "Balanced",
+    "baseLevel": 63,
+    "tier": 2
+  }
+]
 }

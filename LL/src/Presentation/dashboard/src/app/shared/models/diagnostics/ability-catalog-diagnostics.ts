@@ -239,6 +239,8 @@ export interface AbilityBalanceValidationResult {
   originalScore: number;
   replacementScore: number;
   scoreDelta: number;
+  contextCount?: number;
+  replacementCount?: number;
 }
 
 export interface AbilityBalanceCombinationResult {

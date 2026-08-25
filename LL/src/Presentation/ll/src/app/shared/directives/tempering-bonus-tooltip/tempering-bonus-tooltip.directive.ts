@@ -101,7 +101,7 @@ export class TemperingBonusTooltipDirective implements OnDestroy {
       positionStrategy,
       scrollStrategy: this.overlay.scrollStrategies.reposition(),
       hasBackdrop: false,
-      panelClass: 'tempering-bonus-tooltip-panel',
+      panelClass: ['tempering-bonus-tooltip-panel', 'pointer-events-none'],
     });
 
     const componentRef = this.overlayRef.attach(

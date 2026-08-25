@@ -9,7 +9,12 @@ All selectors operate on living combatants unless noted.
 | `target.source`                  | `Source`                                                   | Effect source carried by context.                                       | Empty if absent/dead.                                                        |
 | `target.event-source`            | `EventSource`                                              | Living event source.                                                    | Empty if absent/dead.                                                        |
 | `target.event-target`            | `EventTarget`                                              | Living event target.                                                    | Empty if absent/dead.                                                        |
-| `target.random-enemy`            | `RandomEnemy`                                              | All living enemies.                                                      | Uniform engine RNG; empty if none.                                           |
+| `target.random-enemy`            | `RandomEnemy`                                              | All living enemies, including summons; ignores Threat and Taunt.         | Uniform engine RNG; empty if none.                                           |
+| `target.two-random-enemies`      | `TwoRandomEnemies`                                         | Two distinct living enemies, including summons; ignores Threat and Taunt. | Uniform engine RNG; returns fewer than two if needed.                        |
+| `target.three-random-enemies`    | `ThreeRandomEnemies`                                       | Three distinct living enemies, including summons; ignores Threat and Taunt. | Uniform engine RNG; returns fewer than three if needed.                      |
+| `target.highest-condition-stacks-enemy` | `HighestConditionStacksEnemy`                       | Living enemy, including summons, with the most stacks of the authored `targetCondition`; ignores Threat and Taunt. | Uniform engine RNG among ties, including the all-zero case; empty if none. |
+| `target.lowest-health-enemy`     | `LowestHealthEnemy`                                        | Living enemy with the lowest Health percentage by default. Hard Taunt may override it. | Encounter order by default; empty if none.                                   |
+| `target.highest-health-enemy`    | `HighestHealthEnemy`                                       | Living enemy with the highest raw current Health by default. Hard Taunt may override it. | Encounter order by default; empty if none.                                   |
 | `target.lowest-health-ally`      | `LowestHealthAlly`                                         | Living ally including self, ordered by raw current health.              | Encounter order; empty if none.                                              |
 | `target.all-enemies`             | `AllEnemies`                                               | Every living enemy.                                                     | Encounter order; empty collection if none.                                   |
 | `target.all-allies`              | `AllAllies`                                                | Every living ally including self.                                       | Encounter order.                                                             |
@@ -29,8 +34,12 @@ Other tie-breaking generally follows encounter insertion order. `ModifyThreat` g
 
 Dead units never qualify in current selectors. The engine has no separate untargetable or hidden state. Summons qualify unless a selector filters them.
 
-Canonically, basic attacks and effects using this selector share the same Threat-weighted roll. Taunt changes Threat rather than bypassing target selection. Area and multi-target selectors do not use Threat. See [Taunt](conditions/taunt.md).
+Canonically, basic attacks and effects using Threat-Weighted Enemy share the same weighted roll. Taunt changes Threat rather than bypassing target selection. Area, multi-target, `RandomEnemy`, `TwoRandomEnemies`, and `HighestConditionStacksEnemy` selectors do not use Threat. See [Taunt](conditions/taunt.md).
 
-Proposed identifiers such as `target.taunting-enemy`, `target.lowest-health-enemy`, `target.most-injured-ally`, and `target.chain-targets` have no current selector. Adjacency is intentionally absent because combat has no spatial model.
+An effect using `TwoRandomEnemies` or `ThreeRandomEnemies` may set `excludeEventTarget: true`. When its trigger carries an event target, that combatant is removed from the eligible pool before the random sample, allowing secondary arcs to guarantee “other” targets without a separate selector.
+
+Health-extremum effects may opt into additional reusable constraints. `useHealthPercentage: true` compares current Health divided by Max Health, `excludeSummons: true` removes summoned candidates, `ignoreTaunt: true` prevents hard Taunt from replacing the selected extremum, and `randomizeTies: true` uses uniform reservoir sampling among equal extrema. These options are effect-local so older authored abilities retain their established targeting behavior.
+
+Proposed identifiers such as `target.taunting-enemy`, `target.most-injured-ally`, and `target.chain-targets` have no current selector. Adjacency is intentionally absent because combat has no spatial model.
 
 Implementation: `LL/src/Core/Domain/Models/Combat/Abilities/AbilitySpec.cs` and `LL/src/Infrastructure/Service/Services.LL/Combat/Engine/FastCombatEngine.cs`.

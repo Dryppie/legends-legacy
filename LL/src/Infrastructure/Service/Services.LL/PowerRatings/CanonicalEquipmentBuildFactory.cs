@@ -75,8 +75,8 @@ public sealed class CanonicalEquipmentBuildFactory
             [CanonicalPartyProfile.Balanced] = Recipes(
                 "recipe.armor.chest.medium_mail",
                 "recipe.weapon.two_handed.greatsword",
-                "recipe.armor.head.medium_helm",
-                "recipe.armor.legs.medium_greaves"),
+                "recipe.armor.head.cloth_cowl",
+                "recipe.armor.legs.light_legwraps"),
             [CanonicalPartyProfile.Offense] = Recipes(
                 "recipe.armor.chest.light_vest",
                 "recipe.weapon.two_handed.gauntlets",

@@ -793,6 +793,67 @@
               "rewardTableId": "reward.gathering.warfang_frontier.beast_remains"
             }
           ]
+        },
+        {
+          "id": "region_02_area_04",
+          "name": "Wolfsbane Reach",
+          "levelRequirement": 65,
+          "difficultyTier": 14,
+          "requiredTowerFloor": 10,
+          "spawnProbabilities": [
+            0.03,
+            0.969,
+            0.001
+          ],
+          "creatures": [
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000101",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000102",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000103",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000104",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000105",
+              "weightedSpawnRate": 0.2
+            }
+          ],
+          "gatheringNodes": [
+            {
+              "id": "wolfsbane_reach_copper_outcrop",
+              "name": "Fangscar Copper Outcrop",
+              "type": "Mining",
+              "levelRequirement": 1,
+              "procChance": 0.0037,
+              "rewardTableId": "reward.gathering.warfang_frontier.copper_vein"
+            },
+            {
+              "id": "wolfsbane_reach_bloodwood",
+              "name": "Moonclaw Bloodwood",
+              "type": "Woodcutting",
+              "levelRequirement": 1,
+              "procChance": 0.0037,
+              "rewardTableId": "reward.gathering.warfang_frontier.bloodwood_tree"
+            },
+            {
+              "id": "wolfsbane_reach_wolf_remains",
+              "name": "Wolfsbane Pack Remains",
+              "type": "Skinning",
+              "levelRequirement": 1,
+              "procChance": 0.0037,
+              "yieldBonusPercent": 50,
+              "rewardTableId": "reward.gathering.warfang_frontier.beast_remains"
+            }
+          ]
         }
       ]
     }

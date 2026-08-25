@@ -50,6 +50,8 @@ export interface EssenceEffectDto {
   eventMagnitudeCoefficient?: number;
   conditionScalingCoefficient?: number;
   statusScalingCoefficient?: number;
+  summonPowerMultiplier?: number;
+  summonHealthMultiplier?: number;
   scaling?: EssenceEffectScalingDto[];
   nestedEffects?: EssenceEffectDto[];
 }

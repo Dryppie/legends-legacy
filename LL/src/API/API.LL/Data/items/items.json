@@ -2267,6 +2267,66 @@
     "gatheringType": null
   },
   {
+    "id": "item.essence.alpha_wolf",
+    "name": "Unbound Alpha Wolf Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "essenceDefinitionId": "essence.alpha_wolf",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
+    "id": "item.essence.dire_wolf",
+    "name": "Unbound Dire Wolf Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "essenceDefinitionId": "essence.dire_wolf",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
+    "id": "item.essence.horned_wolf",
+    "name": "Unbound Horned Wolf Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "essenceDefinitionId": "essence.horned_wolf",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
+    "id": "item.essence.bloodfang_wolf",
+    "name": "Unbound Bloodfang Wolf Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "essenceDefinitionId": "essence.bloodfang_wolf",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
+    "id": "item.essence.pack_howler",
+    "name": "Unbound Pack Howler Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "essenceDefinitionId": "essence.pack_howler",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
     "id": "blueprint_raidforged",
     "name": "Blueprint: Raidforged",
     "description": "Permanently teaches the Raidforged design for one compatible recipe.",

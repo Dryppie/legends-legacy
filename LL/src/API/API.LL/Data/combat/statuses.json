@@ -455,5 +455,93 @@
     "tags": ["Status.Buff", "Set.Fury", "Status.Stack"],
     "triggers": [],
     "effects": []
+  },
+  {
+    "id": "status.serevin.ink",
+    "name": "Ink",
+    "description": "Each stack empowers Serevin while eroding his Armor and Resistance. Maximum 15 stacks.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 15,
+    "durationTicks": 0,
+    "tags": ["Status.Buff", "Tower.Ink", "Pattern.StackingBuff"],
+    "triggers": [],
+    "effects": []
+  },
+  {
+    "id": "status.volgrin.broken_chain",
+    "name": "Broken Chain",
+    "description": "A permanent record of Volgrin's broken bindings. Maximum 3 stacks.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 3,
+    "durationTicks": 0,
+    "tags": ["Tower.BrokenChain", "Pattern.HealthThreshold"],
+    "triggers": [],
+    "effects": []
+  },
+  {
+    "id": "status.nhalia.high_tide",
+    "name": "High Tide",
+    "description": "Nhalia gains 50% of her initial Armor, and her direct damaging attacks apply Soaked.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 0,
+    "tags": ["Tower.Tide", "Tide.High", "Mechanic.Stance"],
+    "triggers": [],
+    "effects": []
+  },
+  {
+    "id": "status.nhalia.low_tide",
+    "name": "Low Tide",
+    "description": "Nhalia gains 50% of her initial Resistance. Entering Low Tide detonates and consumes Soaked.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 0,
+    "tags": ["Tower.Tide", "Tide.Low", "Mechanic.Stance"],
+    "triggers": [],
+    "effects": []
+  },
+  {
+    "id": "status.caldris.star_iron_plate",
+    "name": "Star-Iron Plate",
+    "description": "Each permanent plate grants Caldris 8% Damage Reduction. Maximum 4 stacks.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 4,
+    "durationTicks": 0,
+    "tags": ["Tower.StarIronPlate", "Mechanic.ArmorPlate", "Pattern.StackingBuff"],
+    "triggers": [],
+    "effects": []
+  },
+  {
+    "id": "status.caldris.shattered_plate",
+    "name": "Shattered Plate",
+    "description": "Each shattered plate permanently grants Caldris 10% Power and 8 Attack Speed. Maximum 4 stacks.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 4,
+    "durationTicks": 0,
+    "tags": ["Tower.ShatteredPlate", "Mechanic.ArmorPlate", "Pattern.StackingBuff"],
+    "triggers": [],
+    "effects": []
+  },
+  {
+    "id": "status.serath.doubt",
+    "name": "Doubt",
+    "description": "Serath takes 15% increased damage until the Living Scale is measured again.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 0,
+    "tags": ["Tower.LivingScale", "Scale.Doubt", "Mechanic.Stance"],
+    "triggers": [],
+    "effects": []
+  },
+  {
+    "id": "status.serath.conviction",
+    "name": "Conviction",
+    "description": "Serath gains 15% Power and 15 Attack Speed until the Living Scale is measured again.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 0,
+    "tags": ["Tower.LivingScale", "Scale.Conviction", "Mechanic.Stance"],
+    "triggers": [],
+    "effects": []
   }
 ]

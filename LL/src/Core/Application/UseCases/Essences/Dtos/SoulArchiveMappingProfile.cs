@@ -374,6 +374,7 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
             or AbilityEffectOperation.ModifyDamageDealt
             or AbilityEffectOperation.ModifyDamageTaken
             or AbilityEffectOperation.ModifyDamageTakenFromCondition
+            or AbilityEffectOperation.ModifyCriticalDamageAgainstCondition
             or AbilityEffectOperation.ModifyNextBasicAttackDamage
             or AbilityEffectOperation.ModifyNextBasicAttackArmorPenetration;
 }

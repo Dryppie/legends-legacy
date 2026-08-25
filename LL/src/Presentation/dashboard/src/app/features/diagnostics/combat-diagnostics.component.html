@@ -531,16 +531,18 @@
             <div class="border-b border-light_gray/40 bg-black/30 px-4 py-3 text-sm font-semibold text-light_gray">
               Matched Replacement Validation
             </div>
-            <div class="grid min-w-[65rem] grid-cols-[15rem_15rem_8rem_8rem_8rem_8rem] border-b border-light_gray/40 bg-black/20 px-4 py-2 text-xs font-semibold uppercase text-light_gray">
-              <div>Flagged Essence</div><div>Replacement</div><div>Original</div><div>Replacement</div><div>Difference</div><div>Battles</div>
+            <div class="grid min-w-[78rem] grid-cols-[15rem_20rem_8rem_8rem_8rem_8rem_6rem_7rem] border-b border-light_gray/40 bg-black/20 px-4 py-2 text-xs font-semibold uppercase text-light_gray">
+              <div>Flagged Essence</div><div>Replacements</div><div>Original</div><div>Replacement</div><div>Difference</div><div>Battles</div><div>Contexts</div><div>Replacements</div>
             </div>
-            <div *ngFor="let validation of report.validationResults" class="grid min-w-[65rem] grid-cols-[15rem_15rem_8rem_8rem_8rem_8rem] border-b border-light_gray/20 px-4 py-3 text-sm">
+            <div *ngFor="let validation of report.validationResults" class="grid min-w-[78rem] grid-cols-[15rem_20rem_8rem_8rem_8rem_8rem_6rem_7rem] border-b border-light_gray/20 px-4 py-3 text-sm">
               <div class="font-semibold text-white">{{ validation.displayName }}</div>
               <div class="text-light_gray">{{ validation.replacementDisplayName }}</div>
               <div class="text-primary">{{ formatPercent(validation.originalScore) }}</div>
               <div class="text-light_gray">{{ formatPercent(validation.replacementScore) }}</div>
               <div [ngClass]="validation.scoreDelta > 0 ? 'text-red-200' : 'text-sky-200'">{{ formatPercent(validation.scoreDelta) }}</div>
               <div class="text-light_gray">{{ validation.battles | number }}</div>
+              <div class="text-light_gray">{{ validation.contextCount || 1 }}</div>
+              <div class="text-light_gray">{{ validation.replacementCount || 1 }}</div>
             </div>
           </div>
         </ng-container>

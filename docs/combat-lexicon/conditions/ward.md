@@ -50,7 +50,7 @@ Ward cannot be Cleansed, Dispelled, expired, stolen, or explicitly removed. Char
 
 ## Interactions
 
-Ward negates the entire application: `Poison(3)`, `Chill(5)`, or `Corrosion(10)` each consumes one charge and applies zero stacks. Ward also blocks one Doom stack or one successful Freeze/Stun attempt. Unstoppable covers Control only and is checked before Ward so an already-immune application does not consume a charge.
+Ward negates the entire application: `Poison(3)`, `Chill(5)`, or `Corrosion(10)` each consumes one charge and applies zero stacks. Ward also blocks one Doom stack, one Silence application, or one successful Freeze/Stun attempt. Unstoppable covers Control only and is checked before Ward so an already-immune application does not consume a charge.
 
 ## Immunity and Resistance
 

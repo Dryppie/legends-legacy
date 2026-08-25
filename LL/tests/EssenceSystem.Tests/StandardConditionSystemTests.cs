@@ -252,6 +252,92 @@ public sealed class StandardConditionSystemTests
     }
 
     [Fact]
+    public void Silence_blocks_active_abilities_but_allows_basic_attacks_and_cooldowns_to_tick()
+    {
+        var active = new AbilitySpec
+        {
+            Id = "silenced.active",
+            Name = "Silenced Active",
+            Kind = AbilitySpecKind.Active,
+            CooldownTicks = 10,
+            Effects = [DamageEffect("silenced.active.damage", 500)]
+        };
+        var actor = Combatant(
+            "actor",
+            CombatTeam.Friendly,
+            [active],
+            power: 0,
+            weaponDamage: 10);
+        var enemy = Combatant(
+            "enemy",
+            CombatTeam.Hostile,
+            [],
+            basicAttackIntervalMultiplier: 1000);
+        actor.Conditions.Add(new RuntimeCondition(
+            StandardConditionType.Silence,
+            enemy,
+            actor,
+            1,
+            100,
+            0,
+            1,
+            "condition.silence"));
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(
+                MaxTicks: 5,
+                BasicAttackIntervalTicks: 1,
+                StartActiveAbilitiesOnCooldown: true));
+
+        var result = engine.Run([actor], [enemy]);
+
+        Assert.True(enemy.Health < enemy.GetAttribute(AttributeType.MaxHealth));
+        Assert.DoesNotContain(result.EventLog, x => x.Source == "Silenced Active");
+        Assert.Equal(5, Assert.Single(actor.Abilities).RemainingCooldownTicks);
+    }
+
+    [Fact]
+    public void Ward_blocks_silence_and_cleanse_removes_it()
+    {
+        var wardThenSilence = Passive(
+            "ward.silence",
+            ConditionEffect("ward", StandardConditionType.Ward, AbilityTargetSelector.CurrentTarget, 1),
+            ConditionEffect("silence", StandardConditionType.Silence, AbilityTargetSelector.CurrentTarget, 15));
+        var actor = Combatant("actor", CombatTeam.Friendly, [wardThenSilence]);
+        var enemy = Combatant("enemy", CombatTeam.Hostile, []);
+
+        Run([actor], [enemy], maxTicks: 1);
+
+        Assert.False(enemy.HasCondition(StandardConditionType.Ward));
+        Assert.False(enemy.HasCondition(StandardConditionType.Silence));
+
+        var silenceThenCleanse = Passive(
+            "cleanse.silence",
+            new AbilityEffectSpec
+            {
+                Id = "apply.silence",
+                Operation = AbilityEffectOperation.ApplyCondition,
+                Target = AbilityTargetSelector.Self,
+                Condition = StandardConditionType.Silence,
+                BaseValue = 15,
+                GuaranteedConditionApplication = true
+            },
+            new AbilityEffectSpec
+            {
+                Id = "cleanse.silence",
+                Operation = AbilityEffectOperation.Cleanse,
+                Target = AbilityTargetSelector.Self,
+                Condition = StandardConditionType.Silence
+            });
+        var cleansedActor = Combatant("cleansed.actor", CombatTeam.Friendly, [silenceThenCleanse]);
+        var secondEnemy = Combatant("second.enemy", CombatTeam.Hostile, []);
+
+        Run([cleansedActor], [secondEnemy], maxTicks: 1);
+
+        Assert.False(cleansedActor.HasCondition(StandardConditionType.Silence));
+    }
+
+    [Fact]
     public void Thorns_sums_independent_stacks_and_reflection_does_not_recurse()
     {
         var thorns = Passive(
@@ -780,6 +866,130 @@ public sealed class StandardConditionSystemTests
 
         Assert.Equal(1000, stealth.Health);
         Assert.InRange(1000 - visible.Health, 8, 12);
+    }
+
+    [Fact]
+    public void Soaked_caps_at_ten_and_is_blocked_by_ward_and_removed_by_cleanse()
+    {
+        var capped = Passive(
+            "soaked.cap",
+            ConditionEffect("soaked.first", StandardConditionType.Soaked, AbilityTargetSelector.Self, 8),
+            ConditionEffect("soaked.second", StandardConditionType.Soaked, AbilityTargetSelector.Self, 8));
+        var cappedActor = Combatant("capped", CombatTeam.Friendly, [capped]);
+        var enemy = Combatant("enemy", CombatTeam.Hostile, []);
+
+        Run([cappedActor], [enemy], maxTicks: 1);
+
+        Assert.Equal(10, cappedActor.GetConditionStacks(StandardConditionType.Soaked));
+
+        var warded = Passive(
+            "soaked.warded",
+            ConditionEffect("ward", StandardConditionType.Ward, AbilityTargetSelector.Self, 1),
+            ConditionEffect("soaked", StandardConditionType.Soaked, AbilityTargetSelector.Self, 1));
+        var wardedActor = Combatant("warded", CombatTeam.Friendly, [warded]);
+
+        Run([wardedActor], [enemy], maxTicks: 1);
+
+        Assert.False(wardedActor.HasCondition(StandardConditionType.Ward));
+        Assert.False(wardedActor.HasCondition(StandardConditionType.Soaked));
+
+        var cleansed = Passive(
+            "soaked.cleansed",
+            ConditionEffect("soaked", StandardConditionType.Soaked, AbilityTargetSelector.Self, 5),
+            new AbilityEffectSpec
+            {
+                Id = "cleanse",
+                Operation = AbilityEffectOperation.Cleanse,
+                Target = AbilityTargetSelector.Self,
+                Condition = StandardConditionType.Soaked
+            });
+        var cleansedActor = Combatant("cleansed", CombatTeam.Friendly, [cleansed]);
+
+        Run([cleansedActor], [enemy], maxTicks: 1);
+
+        Assert.False(cleansedActor.HasCondition(StandardConditionType.Soaked));
+    }
+
+    [Fact]
+    public void Highest_condition_stack_targeting_ignores_taunt_and_uses_the_authored_condition()
+    {
+        var strike = Active(
+            "highest.soaked.strike",
+            healthCost: 0,
+            new AbilityEffectSpec
+            {
+                Id = "highest.soaked.damage",
+                Operation = AbilityEffectOperation.Damage,
+                Target = AbilityTargetSelector.HighestConditionStacksEnemy,
+                TargetCondition = StandardConditionType.Soaked,
+                BaseValue = 100,
+                DamageType = DamageType.None,
+                CritEligibility = CritEligibility.Disallowed
+            });
+        var actor = Combatant("actor", CombatTeam.Friendly, [strike]);
+        var taunterSetup = Passive(
+            "taunter.setup",
+            ConditionEffect("taunt", StandardConditionType.Taunt, AbilityTargetSelector.Self, 10),
+            ConditionEffect("soaked", StandardConditionType.Soaked, AbilityTargetSelector.Self, 2));
+        var soakedSetup = Passive(
+            "soaked.setup",
+            ConditionEffect("soaked", StandardConditionType.Soaked, AbilityTargetSelector.Self, 5));
+        var taunter = Combatant("taunter", CombatTeam.Hostile, [taunterSetup]);
+        var mostSoaked = Combatant("most-soaked", CombatTeam.Hostile, [soakedSetup]);
+
+        Run([actor], [taunter, mostSoaked], maxTicks: 1);
+
+        Assert.Equal(1000, taunter.Health);
+        Assert.Equal(900, mostSoaked.Health);
+    }
+
+    [Fact]
+    public void On_enemy_healed_uses_effective_healing_and_does_not_recurse()
+    {
+        var undertow = new AbilitySpec
+        {
+            Id = "undertow",
+            Name = "Undertow",
+            Kind = AbilitySpecKind.Passive,
+            Triggers =
+            [
+                new AbilityTriggerSpec
+                {
+                    Event = AbilityTriggerEvent.OnEnemyHealed,
+                    EffectIds = ["undertow.heal"]
+                }
+            ],
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "undertow.heal",
+                    Operation = AbilityEffectOperation.Heal,
+                    Target = AbilityTargetSelector.Self,
+                    EventMagnitudeCoefficient = 0.2f,
+                    CritEligibility = CritEligibility.Disallowed
+                }
+            ]
+        };
+        var selfDamage = Passive(
+            "undertow.setup",
+            new AbilityEffectSpec
+            {
+                Id = "self.damage",
+                Operation = AbilityEffectOperation.Damage,
+                Target = AbilityTargetSelector.Self,
+                BaseValue = 100,
+                DamageType = DamageType.None,
+                CritEligibility = CritEligibility.Disallowed
+            });
+        var nhalia = Combatant("nhalia", CombatTeam.Friendly, [selfDamage, undertow]);
+        var enemyHeal = Active("enemy.heal", 100, HealEffect("enemy.heal.effect", 150));
+        var enemy = Combatant("enemy", CombatTeam.Hostile, [enemyHeal]);
+
+        Run([nhalia], [enemy], maxTicks: 1);
+
+        Assert.Equal(920, nhalia.Health);
+        Assert.Equal(1000, enemy.Health);
     }
 
     private static AbilitySpec Passive(string id, params AbilityEffectSpec[] effects) =>

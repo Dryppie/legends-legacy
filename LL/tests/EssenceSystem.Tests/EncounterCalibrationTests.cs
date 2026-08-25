@@ -20,9 +20,9 @@ public sealed class EncounterCalibrationTests
         var catalog = context.EncounterFactory.CreateCatalog();
 
         Assert.Equal(11, catalog.Version);
-        Assert.Equal(25, catalog.Encounters.Count);
+        Assert.Equal(26, catalog.Encounters.Count);
         Assert.Equal(4, catalog.Encounters.Select(encounter => encounter.ContentType).Distinct().Count());
-        Assert.Equal(6, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Idle));
+        Assert.Equal(7, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Idle));
         Assert.Equal(8, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Dungeon));
         Assert.Equal(4, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Tower));
         Assert.Equal(7, catalog.Encounters.Count(encounter => encounter.ContentType == EncounterCalibrationContentType.Raid));
@@ -143,7 +143,7 @@ public sealed class EncounterCalibrationTests
 
         var report = context.Runner.Run(catalog, players);
 
-        Assert.Equal(1_332, report.Results.Count);
+        Assert.Equal(1_380, report.Results.Count);
         Assert.All(report.Results, result =>
         {
             Assert.Equal(3, result.SampleCount);
@@ -161,9 +161,9 @@ public sealed class EncounterCalibrationTests
                 result.GearEnvelopeId == catalog.AssessmentGearEnvelopeId
                 && result.EssenceEnvelopeId == catalog.AssessmentEssenceEnvelopeId)
             .ToList();
-        Assert.Equal(111, expectedCohort.Count);
-        Assert.Equal(97, expectedCohort.Count(result => result.IncludedInRoleAssessment));
-        Assert.Equal(14, expectedCohort.Count(result => !result.IncludedInRoleAssessment));
+        Assert.Equal(115, expectedCohort.Count);
+        Assert.Equal(100, expectedCohort.Count(result => result.IncludedInRoleAssessment));
+        Assert.Equal(15, expectedCohort.Count(result => !result.IncludedInRoleAssessment));
         Assert.All(
             report.Results.Where(result =>
                 (result.ContentType == EncounterCalibrationContentType.Idle
@@ -250,7 +250,7 @@ public sealed class EncounterCalibrationTests
             && exception.BuildFamilyId == "offense-heavy"
             && exception.Classification == "UnexpectedSuccess"
             && exception.Metric == "WinRate");
-        Assert.Contains(report.Exceptions, exception =>
+        Assert.DoesNotContain(report.Exceptions, exception =>
             exception.EncounterId == "tower.floor-07.guardian"
             && exception.BuildFamilyId == "balanced"
             && exception.Classification == "UnexpectedSuccess"
@@ -262,9 +262,9 @@ public sealed class EncounterCalibrationTests
         var artifact = EncounterCalibrationReportRenderer.CreateArtifact(report, catalog);
         var markdown = EncounterCalibrationReportRenderer.RenderMarkdown(artifact);
         Assert.Equal(7, artifact.SchemaVersion);
-        Assert.Equal(1_332, artifact.Summary.ResultCount);
-        Assert.Equal(3_996, artifact.Summary.SeededSampleCount);
-        Assert.Equal(97, artifact.Summary.AssessedResultCount);
+        Assert.Equal(1_380, artifact.Summary.ResultCount);
+        Assert.Equal(4_140, artifact.Summary.SeededSampleCount);
+        Assert.Equal(100, artifact.Summary.AssessedResultCount);
         Assert.Equal(4, artifact.Summary.Content.Count);
         Assert.NotNull(artifact.SupportComparisons);
         Assert.Equal(11 * 3 * 4, artifact.SupportComparisons.Count);
@@ -288,12 +288,18 @@ public sealed class EncounterCalibrationTests
             && comparison.GearEnvelopeId == "expected"
             && comparison.EssenceEnvelopeId == "expected"
             && comparison.Classification == "UnnecessaryForCompletion");
-        Assert.All(
-            artifact.SupportComparisons.Where(comparison =>
-                comparison.EncounterId is "tower.floor-05.warden" or "tower.floor-07.guardian"
+        Assert.Equal(
+            "CompletionRegressed",
+            artifact.SupportComparisons.Single(comparison =>
+                comparison.EncounterId == "tower.floor-05.warden"
                 && comparison.GearEnvelopeId == "expected"
-                && comparison.EssenceEnvelopeId == "expected"),
-            comparison => Assert.Equal("CompletionRegressed", comparison.Classification));
+                && comparison.EssenceEnvelopeId == "expected").Classification);
+        Assert.Equal(
+            "HelpfulButInsufficient",
+            artifact.SupportComparisons.Single(comparison =>
+                comparison.EncounterId == "tower.floor-07.guardian"
+                && comparison.GearEnvelopeId == "expected"
+                && comparison.EssenceEnvelopeId == "expected").Classification);
         Assert.Contains("Expected-cohort encounter overview", markdown);
         Assert.Contains("Authored composition expectations", markdown);
         Assert.Contains("Failure diagnostics", markdown);

@@ -186,6 +186,50 @@ describe('EssenceDescriptionFormatter ascension-scaled placeholders', () => {
     expect(html).toBe('Heal for 5.5%; add 2.24%; then add 22.4%.');
   });
 
+  it('renders indexed effect scaling as an absolute percentage', () => {
+    const html = formatter.format(
+      'Gain {scaling}; lose {scaling2}.',
+      [
+        {
+          id: 'effect.gain',
+          type: 'ModifyAttribute',
+          target: 'Self',
+          currentValue: 0,
+          scaling: [{ attribute: 'Resistance', coefficient: 0.324 }],
+        },
+        {
+          id: 'effect.lose',
+          type: 'ModifyAttribute',
+          target: 'Self',
+          currentValue: 0,
+          scaling: [{ attribute: 'Resistance', coefficient: -0.162 }],
+        },
+      ],
+      () => 0,
+    );
+
+    expect(html).toBe('Gain 32.4%; lose 16.2%.');
+  });
+
+  it('renders ascension-scaled summon stat multipliers', () => {
+    const html = formatter.format(
+      'Summon a ward with {summonHealth} Health and {summonPower} Power.',
+      [
+        {
+          id: 'effect.summon',
+          type: 'Summon',
+          target: 'Self',
+          currentValue: 0,
+          summonHealthMultiplier: 1.12,
+          summonPowerMultiplier: 1.12,
+        },
+      ],
+      () => 0,
+    );
+
+    expect(html).toBe('Summon a ward with 112% Health and 112% Power.');
+  });
+
   it('renders the selected scaled duration with its unit', () => {
     const html = formatter.format(
       'Gain Armor for {duration2}.',

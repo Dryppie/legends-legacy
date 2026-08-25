@@ -378,6 +378,9 @@ describe('EquipmentDisplayComponent', () => {
     expect(tooltipText).toContain('Original 113');
     expect(tooltipText).toContain('Upgrade +10');
     expect(tooltipText).toContain('Final 123');
+    expect(
+      document.querySelector('.tempering-bonus-tooltip-panel')?.classList,
+    ).toContain('pointer-events-none');
   });
 
   it('renders tool affixes using the standard equipment attribute layout', async () => {

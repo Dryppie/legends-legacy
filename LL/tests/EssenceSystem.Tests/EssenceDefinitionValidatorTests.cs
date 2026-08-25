@@ -168,6 +168,35 @@ public sealed class EssenceDefinitionValidatorTests
     }
 
     [Fact]
+    public void Validate_accepts_scaling_and_summon_description_placeholders_with_matching_effects()
+    {
+        var definition = ValidDefinition();
+        definition.ActiveAbility.Description =
+            "Gain {scaling}; summon with {summonPower} Power and {summonHealth} Health.";
+        definition.ActiveAbility.Effects =
+        [
+            new()
+            {
+                Id = "effect.attribute",
+                Operation = AbilityEffectOperation.ModifyAttribute,
+                Attribute = AttributeType.Armor,
+                ScalingAttribute = AttributeType.Armor,
+                ScalingCoefficient = 0.1f
+            },
+            new()
+            {
+                Id = "effect.summon",
+                Operation = AbilityEffectOperation.Summon,
+                SummonId = "summon.test"
+            }
+        ];
+
+        var errors = _validator.Validate([definition]);
+
+        Assert.DoesNotContain(errors, error => error.Contains("placeholder", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public void Authored_essence_json_passes_definition_validation()
     {
         var options = new JsonSerializerOptions
@@ -219,7 +248,7 @@ public sealed class EssenceDefinitionValidatorTests
             .Select(definition => definition.ActiveAbility.CooldownTicks)
             .ToArray();
 
-        Assert.Equal(75, cooldowns.Length);
+        Assert.Equal(80, cooldowns.Length);
         Assert.All(cooldowns, cooldown => Assert.InRange(cooldown, 75, 240));
         Assert.True(cooldowns.Distinct().Count() >= 10);
         Assert.Contains(cooldowns, cooldown => cooldown < 100);
@@ -260,7 +289,7 @@ public sealed class EssenceDefinitionValidatorTests
             .SelectMany(collection => collection.EssenceDefinitionIds)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        Assert.Equal(18, collections.Count);
+        Assert.Equal(19, collections.Count);
         Assert.All(collections, collection =>
         {
             Assert.InRange(collection.EssenceDefinitionIds.Count, 2, 6);
@@ -268,7 +297,7 @@ public sealed class EssenceDefinitionValidatorTests
         Assert.Equal(
             ["Creature Families", "Essence Affinities", "Regional Ecologies"],
             collections.Select(collection => collection.Category).Distinct().Order().ToArray());
-        Assert.Equal(75, regionOneEssences.Count);
+        Assert.Equal(80, regionOneEssences.Count);
         Assert.Equal(regionOneEssences.Order(StringComparer.OrdinalIgnoreCase), collectedEssences.Order(StringComparer.OrdinalIgnoreCase));
         var allowedBonusKinds = new HashSet<BonusKind>
         {

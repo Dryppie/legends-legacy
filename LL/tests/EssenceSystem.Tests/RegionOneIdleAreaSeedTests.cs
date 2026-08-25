@@ -24,6 +24,11 @@ public sealed class RegionOneIdleAreaSeedTests
         "monster.eydis,_the_endless_spring",
         "monster.kodoku,_the_poisoned_vessel",
         "monster.ni,_the_ninefold",
+        "monster.serevin,_the_name-eater",
+        "monster.volgrin,_the_shackled_storm",
+        "monster.nhalia,_the_moondrowned",
+        "monster.caldris,_smith_of_the_fallen_star",
+        "monster.serath,_the_second_warden",
         "monster.ant_worker",
         "monster.fire_ant",
         "monster.queens_guard_ant",
@@ -108,8 +113,8 @@ public sealed class RegionOneIdleAreaSeedTests
             .SingleAsync(region => region.Name == "Meran");
         var areas = meran.Areas.OrderBy(area => area.DifficultyTier).ToArray();
 
-        Assert.Equal(["Warfang Frontier", "Rotgrave Fields", "Tempest Aerie"], areas.Select(area => area.Name));
-        Assert.Equal([50, 55, 60], areas.Select(area => area.LevelRequirement));
+        Assert.Equal(["Warfang Frontier", "Rotgrave Fields", "Tempest Aerie", "Wolfsbane Reach"], areas.Select(area => area.Name));
+        Assert.Equal([50, 55, 60, 65], areas.Select(area => area.LevelRequirement));
         Assert.All(areas, area => Assert.Equal(10, area.RequiredTowerFloor));
         Assert.Equal(
             ["Gnoll Pack Leader", "Gnoll Raider", "Gnoll Shaman", "Kobold Skirmisher", "Kobold Sorcerer"],
@@ -121,6 +126,9 @@ public sealed class RegionOneIdleAreaSeedTests
             ["Blood Harpy", "Flame Harpy", "Ice Harpy", "Shadow Harpy", "Wind Harpy"],
             areas[2].Creatures.Select(creature => creaturesById[creature.CreatureId]).OrderBy(name => name));
         Assert.Equal(
+            ["Alpha Wolf", "Bloodfang Wolf", "Dire Wolf", "Horned Wolf", "Pack Howler"],
+            areas[3].Creatures.Select(creature => creaturesById[creature.CreatureId]).OrderBy(name => name));
+        Assert.Equal(
             [GatheringType.Mining, GatheringType.Woodcutting, GatheringType.Skinning],
             areas[0].GatheringNodes.Select(node => node.Type).Order());
         Assert.Equal(
@@ -131,6 +139,11 @@ public sealed class RegionOneIdleAreaSeedTests
         Assert.Equal(
             [GatheringType.Mining],
             areas[1].GatheringNodes
+                .Where(node => node.YieldBonusPercent == AreaGatheringYieldBalance.AbundantBonusPercent)
+                .Select(node => node.Type));
+        Assert.Equal(
+            [GatheringType.Skinning],
+            areas[3].GatheringNodes
                 .Where(node => node.YieldBonusPercent == AreaGatheringYieldBalance.AbundantBonusPercent)
                 .Select(node => node.Type));
         Assert.All(areas.SelectMany(area => area.GatheringNodes), node =>
@@ -152,7 +165,7 @@ public sealed class RegionOneIdleAreaSeedTests
 
         Assert.True(changed);
         Assert.True(await db.Regions.AnyAsync(region => region.Name == "Meran"));
-        Assert.Equal(3, await db.Areas.CountAsync(area => area.Id.StartsWith("region_02_area_")));
+        Assert.Equal(4, await db.Areas.CountAsync(area => area.Id.StartsWith("region_02_area_")));
     }
 
     [Fact]

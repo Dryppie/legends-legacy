@@ -120,14 +120,19 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
             {
                 errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: scaling values cannot be negative.");
             }
-            if (effect.Operation == AbilityEffectOperation.ModifyAttribute && effect.Attribute is null)
-                errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: ModifyAttribute requires attribute.");
+            if (effect.Operation is AbilityEffectOperation.ModifyAttribute
+                    or AbilityEffectOperation.SynchronizeAttributePerLivingNonSummonedAlly
+                && effect.Attribute is null)
+                errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: {effect.Operation} requires attribute.");
             if (effect.Attribute is { } attribute && !AttributeCatalog.IsContentFacing(attribute))
                 errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: attribute '{effect.Attribute}' is runtime-only and cannot be authored.");
             if (effect.Operation == AbilityEffectOperation.ApplyStatus && string.IsNullOrWhiteSpace(effect.StatusId))
                 errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: ApplyStatus requires status.");
             if (effect.Operation == AbilityEffectOperation.ApplyCondition && effect.Condition is null)
                 errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: ApplyCondition requires condition.");
+            if (effect.Operation == AbilityEffectOperation.ModifyCriticalDamageAgainstCondition
+                && effect.Condition is null)
+                errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: ModifyCriticalDamageAgainstCondition requires condition.");
             if (effect.StaggerPower < 0)
                 errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: staggerPower cannot be negative.");
             if (effect.StaggerPower > 0
@@ -174,6 +179,13 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
             "eventscaling" => effects.Count(x => x.EventMagnitudeCoefficient != 0),
             "conditionscaling" => effects.Count(x => x.ConditionScalingCoefficient != 0),
             "statusscaling" => effects.Count(x => x.StatusScalingCoefficient != 0),
+            "scaling" => effects.Count(x =>
+                x.ScalingCoefficient != 0
+                && (x.ScalingAttribute is not null
+                    || x.Operation == AbilityEffectOperation.ModifyAttributePercentOfInitial
+                    && x.Attribute is not null)),
+            "summonpower" => effects.Count(x => x.Operation == AbilityEffectOperation.Summon),
+            "summonhealth" => effects.Count(x => x.Operation == AbilityEffectOperation.Summon),
             "duration" => effects.Count(x => x.DurationTicks > 0),
             "damage" => effects.Count(x => x.Operation == AbilityEffectOperation.Damage),
             "heal" => effects.Count(x => x.Operation == AbilityEffectOperation.Heal),
@@ -249,14 +261,19 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
         {
             errors.Add($"{essenceId}/{ownerId}: scaling values cannot be negative.");
         }
-        if (effect.Operation == AbilityEffectOperation.ModifyAttribute && effect.Attribute is null)
-            errors.Add($"{essenceId}/{ownerId}: ModifyAttribute requires attribute.");
+        if (effect.Operation is AbilityEffectOperation.ModifyAttribute
+                or AbilityEffectOperation.SynchronizeAttributePerLivingNonSummonedAlly
+            && effect.Attribute is null)
+            errors.Add($"{essenceId}/{ownerId}: {effect.Operation} requires attribute.");
         if (effect.Attribute is { } attribute && !AttributeCatalog.IsContentFacing(attribute))
             errors.Add($"{essenceId}/{ownerId}: attribute '{effect.Attribute}' is runtime-only and cannot be authored.");
         if (effect.Operation == AbilityEffectOperation.ApplyStatus && string.IsNullOrWhiteSpace(effect.StatusId))
             errors.Add($"{essenceId}/{ownerId}: ApplyStatus requires status.");
         if (effect.Operation == AbilityEffectOperation.ApplyCondition && effect.Condition is null)
             errors.Add($"{essenceId}/{ownerId}: ApplyCondition requires condition.");
+        if (effect.Operation == AbilityEffectOperation.ModifyCriticalDamageAgainstCondition
+            && effect.Condition is null)
+            errors.Add($"{essenceId}/{ownerId}: ModifyCriticalDamageAgainstCondition requires condition.");
         if (effect.StaggerPower < 0)
             errors.Add($"{essenceId}/{ownerId}: staggerPower cannot be negative.");
         if (effect.StaggerPower > 0
@@ -313,7 +330,8 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
             or AbilityEffectOperation.ModifyHealingReceived
             or AbilityEffectOperation.ModifyDamageDealt
             or AbilityEffectOperation.ModifyDamageTaken
-            or AbilityEffectOperation.ModifyDamageTakenFromCondition;
+            or AbilityEffectOperation.ModifyDamageTakenFromCondition
+            or AbilityEffectOperation.ModifyCriticalDamageAgainstCondition;
 
     private static void ValidateStandardConditionEffect(
         string essenceId,

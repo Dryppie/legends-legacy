@@ -1,7 +1,6 @@
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Components.Attributes;
 using Domain.Models.Attributes;
-using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Items;
@@ -267,9 +266,9 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
         var baseAttributes = build.Character.BaseAttributes.ToDictionary(
             attribute => attribute.AttributeType,
             attribute => attribute.Value);
-        var equipmentModifiers = build.Equipment
-            .SelectMany(equipment => equipment.AttributeModifiers)
-            .Cast<AttributeModifierBase>();
+        var equipmentModifiers = AttributeCalculator.ProjectEquipmentModifiers(
+            build.Equipment,
+            build.Character.Level);
 
         var participantAttributes = AttributeCalculator.CalculateProjectedAttributes(
             baseAttributes,
@@ -693,16 +692,16 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
             .Where(combination => combination.Battles > 0)
             .Select(combination => new
             {
-                EssenceIds = combination.Participants
+                EssenceCounts = combination.Participants
                     .SelectMany(participant => participant.EssenceIds)
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .ToArray(),
+                    .GroupBy(id => id, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(group => group.Key, group => group.Count(), StringComparer.OrdinalIgnoreCase),
                 Target = (combination.Wins + combination.Draws * 0.5d) / combination.Battles - 0.5d,
                 Weight = (double)combination.Battles
             })
             .ToList();
         var essenceIds = rows
-            .SelectMany(row => row.EssenceIds)
+            .SelectMany(row => row.EssenceCounts.Keys)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
             .ToList();
@@ -719,13 +718,14 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
                 var numerator = 0d;
                 var denominator = ridgePenalty;
                 foreach (var row in rows.Where(row =>
-                             row.EssenceIds.Contains(essenceId, StringComparer.OrdinalIgnoreCase)))
+                             row.EssenceCounts.ContainsKey(essenceId)))
                 {
-                    var otherContribution = row.EssenceIds
-                        .Where(id => !id.Equals(essenceId, StringComparison.OrdinalIgnoreCase))
-                        .Sum(id => coefficients[id]);
-                    numerator += row.Weight * (row.Target - otherContribution);
-                    denominator += row.Weight;
+                    var copyCount = row.EssenceCounts[essenceId];
+                    var otherContribution = row.EssenceCounts
+                        .Where(pair => !pair.Key.Equals(essenceId, StringComparison.OrdinalIgnoreCase))
+                        .Sum(pair => pair.Value * coefficients[pair.Key]);
+                    numerator += row.Weight * copyCount * (row.Target - otherContribution);
+                    denominator += row.Weight * copyCount * copyCount;
                 }
 
                 coefficients[essenceId] = Math.Clamp(numerator / denominator, -0.25d, 0.25d);

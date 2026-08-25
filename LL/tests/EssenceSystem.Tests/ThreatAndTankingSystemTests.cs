@@ -489,7 +489,6 @@ public sealed class ThreatAndTankingSystemTests
 
     [Theory]
     [InlineData(AbilityTargetSelector.CurrentTarget)]
-    [InlineData(AbilityTargetSelector.RandomEnemy)]
     [InlineData(AbilityTargetSelector.LowestHealthEnemy)]
     [InlineData(AbilityTargetSelector.HighestHealthEnemy)]
     [InlineData(AbilityTargetSelector.LowestCurrentHealthEnemy)]
@@ -539,6 +538,58 @@ public sealed class ThreatAndTankingSystemTests
         Assert.DoesNotContain(
             result.EntityStats,
             stats => stats.EntityId == ally.Id && stats.TargetedAttacks > 0);
+    }
+
+    [Theory]
+    [InlineData(AbilityTargetSelector.RandomEnemy)]
+    [InlineData(AbilityTargetSelector.TwoRandomEnemies)]
+    public void Random_enemy_selectors_ignore_hard_taunt(AbilityTargetSelector selector)
+    {
+        var attack = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = $"attack.{selector}",
+            Name = "Random Attack",
+            Kind = AbilitySpecKind.Active,
+            CooldownTicks = 1,
+            ThreatValue = 0,
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "damage",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = selector,
+                    BaseValue = 1,
+                    AttackType = AttackType.Ranged,
+                    DamageType = DamageType.Magical,
+                    CritEligibility = CritEligibility.Disallowed
+                }
+            ]
+        });
+        var taunter = Combatant("taunter", CombatTeam.Friendly, [], canBasicAttack: false);
+        var ally = Combatant("ally", CombatTeam.Friendly, [], canBasicAttack: false);
+        var secondAlly = Combatant("second-ally", CombatTeam.Friendly, [], canBasicAttack: false);
+        taunter.Conditions.Add(new RuntimeCondition(
+            StandardConditionType.Taunt,
+            taunter,
+            taunter,
+            1,
+            0,
+            0,
+            1,
+            "Taunt"));
+        var hostile = Combatant("hostile", CombatTeam.Hostile, [attack], canBasicAttack: false);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(
+                MaxTicks: 50,
+                BasicAttackIntervalTicks: 1_000,
+                RandomSeed: 73));
+
+        var result = engine.Run([taunter, ally, secondAlly], [hostile]);
+
+        Assert.True(result.EntityStats.Single(stats => stats.EntityId == ally.Id).TargetedAttacks > 0);
+        Assert.True(result.EntityStats.Single(stats => stats.EntityId == secondAlly.Id).TargetedAttacks > 0);
     }
 
     [Fact]

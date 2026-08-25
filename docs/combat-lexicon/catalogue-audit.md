@@ -41,7 +41,7 @@ The bullets below preserve the gaps found before the typed standard-condition im
 
 | Status                | Count |
 | --------------------- | ----: |
-| Implemented           |    26 |
+| Implemented           |    28 |
 | Partially Implemented |     0 |
 | Proposed              |     0 |
 | Deprecated            |     0 |
@@ -63,6 +63,6 @@ The bullets below preserve the gaps found before the typed standard-condition im
 The runtime now exposes typed `ApplyCondition`, `HasCondition`, and `ConditionStacksAtLeast` authoring primitives. `RuntimeCondition` supports shared intensity, charges, Unique refresh, and independent timers. Damage, healing, regeneration, Barrier, Threat selection, control prevention, Cleanse, and Dispel consume the shared condition state.
 
 Legacy `ApplyStatus` remains supported for bespoke authored mechanics. Standard Burn, Bleed,
-Poison, Chill, Freeze, Stun, Empower, Weaken, Vulnerable, Taunt, Decay, and Thorns content has been
+Poison, Chill, Freeze, Stun, Empower, Weaken, Vulnerable, Taunt, Decay, Thorns, and Soaked content has been
 migrated to typed `ApplyCondition`; obsolete duplicate definitions were removed from
 `statuses.json`.

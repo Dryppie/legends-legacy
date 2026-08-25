@@ -462,7 +462,6 @@ export class GuildStateService {
         guild.invites.filter((invite: GuildInvite) => !invite.isInvite).length,
       );
       this._invites.set([]);
-      this._allGuilds.set([]);
       if (guildIdentityChanged) {
         this.loadGuildBuildings(guild.id);
         if (

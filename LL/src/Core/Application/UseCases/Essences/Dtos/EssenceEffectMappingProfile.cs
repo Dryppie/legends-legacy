@@ -26,7 +26,9 @@ public sealed class AbilityEffectSpecConverter : ITypeConverter<AbilityEffectSpe
             source.EventMagnitudeCoefficient,
             source.ConditionScalingCoefficient,
             source.StatusScalingCoefficient,
-            source.ScalingAttribute is { } attribute
+            source.SummonPowerMultiplier,
+            source.SummonHealthMultiplier,
+            GetDescriptionScalingAttribute(source) is { } attribute
                 ? [new EssenceEffectScalingDto(
                     attribute.ToString(),
                     source.ScalingCoefficient,
@@ -35,4 +37,10 @@ public sealed class AbilityEffectSpecConverter : ITypeConverter<AbilityEffectSpe
                         : null)]
                 : [],
             []);
+
+    private static Domain.Models.Attributes.AttributeType? GetDescriptionScalingAttribute(AbilityEffectSpec source) =>
+        source.ScalingAttribute
+        ?? (source.Operation == AbilityEffectOperation.ModifyAttributePercentOfInitial
+            ? source.Attribute
+            : null);
 }

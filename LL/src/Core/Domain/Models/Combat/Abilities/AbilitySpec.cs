@@ -43,7 +43,9 @@ public enum AbilityTriggerEvent
     OnSummonGroupResolved = 29,
     OnStatusChanged = 30,
     OnEnemyDeath = 31,
-    OnDamageDealt = 32
+    OnDamageDealt = 32,
+    OnStaggerBroken = 33,
+    OnEnemyHealed = 34
 }
 
 public enum AbilityEffectOperation
@@ -81,7 +83,13 @@ public enum AbilityEffectOperation
     SwapHealth = 30,
     SynchronizeAttributePerMissingHealthStep = 31,
     GrantCover = 32,
-    ModifyDamageDealtToLowHealth = 33
+    ModifyDamageDealtToLowHealth = 33,
+    ScaleStatusStacks = 34,
+    ToggleStatus = 35,
+    SynchronizeAttributePerLivingNonSummonedAlly = 36,
+    ModifyCriticalDamageAgainstCondition = 37,
+    PerformBasicAttack = 38,
+    ResetAbilityCooldown = 39
 }
 
 public enum AbilityTargetSelector
@@ -111,7 +119,8 @@ public enum AbilityTargetSelector
     RandomAlly = 22,
     TwoRandomEnemies = 23,
     ThreeRandomEnemies = 24,
-    ThreeEnemies = 25
+    ThreeEnemies = 25,
+    HighestConditionStacksEnemy = 26
 }
 
 public enum AbilityConditionType
@@ -142,7 +151,11 @@ public enum AbilityConditionType
     AnyEnemyHasCondition = 23,
     NoEnemyHasCondition = 24,
     HasBarrier = 25,
-    EventTargetIsAlly = 26
+    EventTargetIsAlly = 26,
+    EventInstigatorIsSelf = 27,
+    OutnumbersEnemies = 28,
+    NonSummonedEnemyHealthSpreadAtMostPercent = 29,
+    NonSummonedEnemyHealthSpreadAbovePercent = 30
 }
 
 public enum StandardConditionType
@@ -171,7 +184,9 @@ public enum StandardConditionType
     Doom = 21,
     Thorns = 22,
     Mark = 23,
-    Cover = 24
+    Cover = 24,
+    Silence = 25,
+    Soaked = 26
 }
 
 public enum AbilityConditionSubject
@@ -263,6 +278,7 @@ public sealed class AbilityEffectSpec
     public string Id { get; set; } = string.Empty;
     public AbilityEffectOperation Operation { get; set; }
     public AbilityTargetSelector Target { get; set; } = AbilityTargetSelector.CurrentTarget;
+    public bool ScalesWithAscension { get; set; } = true;
     // Operation-specific parameter for percentages, stacks, charges, or counts.
     // Damage, Heal, and GrantBarrier must derive magnitude from scaling inputs instead.
     public int BaseValue { get; set; }
@@ -283,10 +299,14 @@ public sealed class AbilityEffectSpec
     public float MaximumHealingScalingCoefficient { get; set; }
     public AttributeType? Attribute { get; set; }
     public string? StatusId { get; set; }
+    public string? AlternativeStatusId { get; set; }
+    public string? AbilityId { get; set; }
     public StandardConditionType? Condition { get; set; }
     public StandardConditionType? AlternativeCondition { get; set; }
+    public StandardConditionType? TargetCondition { get; set; }
     public string? SummonId { get; set; }
     public bool CountAllOwnedSummons { get; set; }
+    public int MaximumCount { get; set; }
     public int RepeatCount { get; set; } = 1;
     public int HealthStepPercent { get; set; }
     public string? RepeatPerOwnedSummonId { get; set; }
@@ -302,6 +322,11 @@ public sealed class AbilityEffectSpec
     public int IntervalTicks { get; set; }
     public int Uses { get; set; }
     public bool OncePerTarget { get; set; }
+    public bool ExcludeEventTarget { get; set; }
+    public bool IgnoreTaunt { get; set; }
+    public bool ExcludeSummons { get; set; }
+    public bool UseHealthPercentage { get; set; }
+    public bool RandomizeTies { get; set; }
     public bool GuaranteedConditionApplication { get; set; }
     public int StaggerPower { get; set; }
     public bool MaintainWhileConditionsMet { get; set; }
@@ -657,7 +682,8 @@ public static class AbilityThreatRules
                 => AbilityThreatFunctionBand.HardControl,
             StandardConditionType.Slow or StandardConditionType.Weaken or StandardConditionType.Vulnerable
                 or StandardConditionType.Chill or StandardConditionType.Corrosion or StandardConditionType.Wound
-                or StandardConditionType.Decay or StandardConditionType.Doom when !targetsSelf && !targetsAllies
+                or StandardConditionType.Decay or StandardConditionType.Doom or StandardConditionType.Soaked
+                when !targetsSelf && !targetsAllies
                 => AbilityThreatFunctionBand.SoftControl,
             StandardConditionType.Poison or StandardConditionType.Burn or StandardConditionType.Bleed
                 when !targetsSelf && !targetsAllies => AbilityThreatFunctionBand.Damage,

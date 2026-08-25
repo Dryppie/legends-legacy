@@ -116,6 +116,7 @@ public static class EssenceProgressionConstants
             "GrantBarrier" => BarrierValueGrowthPerAscensionTier,
             "AbsorbDamage" => BarrierValueGrowthPerAscensionTier,
             "ModifyAttribute" => AttributeValueGrowthPerAscensionTier,
+            "ModifyAttributePercentOfInitial" => AttributeValueGrowthPerAscensionTier,
             "Taunt" => AttributeValueGrowthPerAscensionTier,
             "ModifyStatusStacks" => StatusStackValueGrowthPerAscensionTier,
             "ModifyStatusEffect" => StatusStackValueGrowthPerAscensionTier,

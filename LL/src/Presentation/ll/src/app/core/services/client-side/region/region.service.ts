@@ -273,6 +273,23 @@ export class RegionService {
           ],
           gatheringTypes: [GatheringType.Woodcutting],
         },
+        {
+          id: 'region_02_area_04',
+          name: 'Wolfsbane Reach',
+          levelRequirement: 65,
+          creatures: [
+            'Alpha Wolf',
+            'Dire Wolf',
+            'Horned Wolf',
+            'Bloodfang Wolf',
+            'Pack Howler',
+          ],
+          gatheringTypes: [
+            GatheringType.Mining,
+            GatheringType.Woodcutting,
+            GatheringType.Skinning,
+          ],
+        },
       ],
       dungeons: [],
       raids: [],

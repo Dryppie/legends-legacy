@@ -106,6 +106,40 @@ public sealed class EssenceAbilityProgressionScalerTests
     }
 
     [Fact]
+    public void Apply_improves_percentage_of_initial_attribute_bonuses_without_amplifying_fixed_drawbacks()
+    {
+        var ability = new AbilitySpec
+        {
+            Kind = AbilitySpecKind.Passive,
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.armor",
+                    Operation = AbilityEffectOperation.ModifyAttributePercentOfInitial,
+                    Attribute = AttributeType.Armor,
+                    ScalingCoefficient = 0.3f
+                },
+                new()
+                {
+                    Id = "effect.burn-drawback",
+                    Operation = AbilityEffectOperation.ModifyDamageTaken,
+                    BaseValue = 100,
+                    ScalesWithAscension = false
+                }
+            ]
+        };
+
+        var scaled = EssenceAbilityProgressionScaler.Apply(ability, ascensionTier: 1);
+
+        Assert.Equal(0.324f, scaled.Effects[0].ScalingCoefficient, precision: 3);
+        Assert.Equal(100, scaled.Effects[1].BaseValue);
+        Assert.False(scaled.Effects[1].ScalesWithAscension);
+        Assert.Equal(0.3f, ability.Effects[0].ScalingCoefficient);
+        Assert.Equal(100, ability.Effects[1].BaseValue);
+    }
+
+    [Fact]
     public void Apply_preserves_effect_behavior_fields_when_cloning_for_ascension()
     {
         var ability = new AbilitySpec

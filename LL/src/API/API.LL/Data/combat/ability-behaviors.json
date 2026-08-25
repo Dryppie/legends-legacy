@@ -1835,7 +1835,7 @@
   {"id": "behavior.creature.bark_golem.barkskin.applies_tradeoff", "abilityId": "ability.creature.bark_golem.barkskin", "friendlyAbilityIds": ["ability.creature.bark_golem.barkskin"], "maxTicks": 1, "expectedLogs": [{"source": "effect.creature.bark_golem.barkskin.armor", "eventType": "Buff", "minCount": 1}, {"source": "effect.creature.bark_golem.barkskin.burn_vulnerability", "eventType": "Debuff", "minCount": 1}]},
   {"id": "behavior.creature.treant_guardian.rootbound_shield.grants_barrier", "abilityId": "ability.creature.treant_guardian.rootbound_shield", "friendlyAbilityIds": ["ability.creature.treant_guardian.rootbound_shield"], "maxTicks": 1, "expectedLogs": [{"source": "effect.creature.treant_guardian.rootbound_shield.barrier", "eventType": "RestoreBarrier", "minCount": 1}]},
   {"id": "behavior.creature.treant_guardian.forest_vitality.grows_regeneration", "abilityId": "ability.creature.treant_guardian.forest_vitality", "friendlyAbilityIds": ["ability.creature.treant_guardian.forest_vitality"], "maxTicks": 101, "expectedLogs": [{"source": "effect.creature.treant_guardian.forest_vitality.regeneration", "eventType": "Buff", "minCount": 1}]},
-  {"id": "behavior.creature.elder_treant.ancient_sap.applies_doom", "abilityId": "ability.creature.elder_treant.ancient_sap", "friendlyAbilityIds": ["ability.creature.elder_treant.ancient_sap"], "hostileHealth": 10000, "maxTicks": 1, "expectedConditions": [{"combatantId": "hostile-1", "condition": "Doom", "minStacks": 410}], "expectedLogs": []},
+  {"id": "behavior.creature.elder_treant.ancient_sap.applies_doom", "abilityId": "ability.creature.elder_treant.ancient_sap", "friendlyAbilityIds": ["ability.creature.elder_treant.ancient_sap"], "hostileHealth": 10000, "maxTicks": 1, "expectedConditions": [{"combatantId": "hostile-1", "condition": "Doom", "minStacks": 380}], "expectedLogs": []},
   {"id": "behavior.creature.elder_treant.thornstorm.deals_mixed_damage", "abilityId": "ability.creature.elder_treant.thornstorm", "friendlyAbilityIds": ["ability.creature.elder_treant.thornstorm"], "hostileCount": 2, "hostileHealth": 1000, "maxTicks": 1, "expectedLogs": [{"source": "effect.creature.elder_treant.thornstorm.magical_damage", "eventType": "Damage", "minCount": 2}, {"source": "effect.creature.elder_treant.thornstorm.physical_damage", "eventType": "Damage", "minCount": 2}]},
   {"id": "behavior.creature.elder_treant.ancient_essence.catalog_only", "abilityId": "ability.creature.elder_treant.ancient_essence", "friendlyAbilityIds": ["ability.creature.elder_treant.ancient_essence"], "maxTicks": 1, "expectedLogs": []},
   {"id": "behavior.set.fury.unbound_fury.catalog_only", "abilityId": "ability.set.fury.unbound_fury", "friendlyAbilityIds": ["ability.set.fury.unbound_fury"], "maxTicks": 1, "expectedLogs": []},
@@ -1859,5 +1859,367 @@
   {"id": "behavior.creature.shadow_harpy.shadow_dive.executes", "abilityId": "ability.creature.shadow_harpy.shadow_dive", "friendlyAbilityIds": ["ability.creature.shadow_harpy.shadow_dive"], "maxTicks": 1, "expectedLogs": [{"source": "effect.creature.shadow_harpy.shadow_dive.damage", "eventType": "Damage", "minCount": 1}]},
   {"id": "behavior.creature.shadow_harpy.midnight_shroud.executes", "abilityId": "ability.creature.shadow_harpy.midnight_shroud", "friendlyAbilityIds": ["ability.creature.shadow_harpy.midnight_shroud"], "maxTicks": 1, "expectedLogs": [{"source": "effect.creature.shadow_harpy.midnight_shroud.dodge", "eventType": "Buff", "minCount": 1}]},
   {"id": "behavior.creature.wind_harpy.gale_slash.executes", "abilityId": "ability.creature.wind_harpy.gale_slash", "friendlyAbilityIds": ["ability.creature.wind_harpy.gale_slash"], "maxTicks": 1, "expectedLogs": [{"source": "effect.creature.wind_harpy.gale_slash.damage", "eventType": "Damage", "minCount": 1}]},
-  {"id": "behavior.creature.wind_harpy.sharp_feathers.catalog_only", "abilityId": "ability.creature.wind_harpy.sharp_feathers", "friendlyAbilityIds": ["ability.creature.wind_harpy.sharp_feathers"], "maxTicks": 1, "expectedLogs": []}
+  {"id": "behavior.creature.wind_harpy.sharp_feathers.catalog_only", "abilityId": "ability.creature.wind_harpy.sharp_feathers", "friendlyAbilityIds": ["ability.creature.wind_harpy.sharp_feathers"], "maxTicks": 1, "expectedLogs": []},
+  {
+    "id": "behavior.creature.serevin.black_annotation.dispels_all_enemies",
+    "abilityId": "ability.creature.serevin.black_annotation",
+    "friendlyAbilityIds": [
+      "ability.creature.serevin.black_annotation",
+      "ability.creature.serevin.unwritten_law"
+    ],
+    "hostileCount": 2,
+    "initialConditions": [
+      { "combatantId": "hostile-1", "condition": "Empower", "durationTicks": 100 },
+      { "combatantId": "hostile-2", "condition": "Haste", "durationTicks": 100 }
+    ],
+    "maxTicks": 1,
+    "expectedStatuses": [
+      { "combatantId": "friendly", "statusId": "status.serevin.ink", "minStacks": 2 }
+    ],
+    "expectedLogs": [
+      { "source": "effect.creature.serevin.black_annotation.dispel", "eventType": "StatusEffectDispelled", "minCount": 2 }
+    ]
+  },
+  {
+    "id": "behavior.creature.serevin.redacted.deals_magical_damage",
+    "abilityId": "ability.creature.serevin.redacted",
+    "friendlyAbilityIds": ["ability.creature.serevin.redacted"],
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedLogs": [
+      { "source": "effect.creature.serevin.redacted.damage", "eventType": "Damage", "minCount": 1 }
+    ]
+  },
+  {
+    "id": "behavior.creature.serevin.spilling_ink.hits_two_and_consumes_ink",
+    "abilityId": "ability.creature.serevin.spilling_ink",
+    "friendlyAbilityIds": [
+      "ability.creature.serevin.spilling_ink",
+      "ability.creature.serevin.unwritten_law"
+    ],
+    "hostileCount": 2,
+    "hostileHealth": 10000,
+    "initialStatuses": [
+      { "combatantId": "friendly", "statusId": "status.serevin.ink", "stacks": 3 }
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      { "source": "effect.creature.serevin.spilling_ink.damage", "eventType": "Damage", "minCount": 2 },
+      { "source": "effect.creature.serevin.spilling_ink.consume", "eventType": "StatusEffectRemoved", "minCount": 1 }
+    ]
+  },
+  {
+    "id": "behavior.creature.serevin.unwritten_law.gains_ink_from_dispel",
+    "abilityId": "ability.creature.serevin.unwritten_law",
+    "friendlyAbilityIds": [
+      "ability.creature.serevin.black_annotation",
+      "ability.creature.serevin.unwritten_law"
+    ],
+    "initialConditions": [
+      { "combatantId": "hostile-1", "condition": "Empower", "durationTicks": 100 }
+    ],
+    "maxTicks": 1,
+    "expectedStatuses": [
+      { "combatantId": "friendly", "statusId": "status.serevin.ink", "minStacks": 1 }
+    ],
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.volgrin.chainbound_bolt.deals_magical_damage",
+    "abilityId": "ability.creature.volgrin.chainbound_bolt",
+    "friendlyAbilityIds": ["ability.creature.volgrin.chainbound_bolt"],
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedLogs": [
+      { "source": "effect.creature.volgrin.chainbound_bolt.damage", "eventType": "Damage", "minCount": 1 }
+    ]
+  },
+  {
+    "id": "behavior.creature.volgrin.shackled_arc.chills_both_targets",
+    "abilityId": "ability.creature.volgrin.shackled_arc",
+    "friendlyAbilityIds": ["ability.creature.volgrin.shackled_arc"],
+    "hostileCount": 2,
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedConditions": [
+      { "combatantId": "hostile-1", "condition": "Chill", "minStacks": 1 },
+      { "combatantId": "hostile-2", "condition": "Chill", "minStacks": 1 }
+    ],
+    "expectedLogs": [
+      { "source": "effect.creature.volgrin.shackled_arc.damage", "eventType": "Damage", "minCount": 2 }
+    ]
+  },
+  {
+    "id": "behavior.creature.volgrin.rattling_sky.hits_all_enemies",
+    "abilityId": "ability.creature.volgrin.rattling_sky",
+    "friendlyAbilityIds": ["ability.creature.volgrin.rattling_sky"],
+    "hostileCount": 2,
+    "hostileHealth": 10000,
+    "initialStatuses": [
+      { "combatantId": "friendly", "statusId": "status.volgrin.broken_chain", "stacks": 3 }
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      { "source": "effect.creature.volgrin.rattling_sky.damage", "eventType": "Damage", "minCount": 2 }
+    ]
+  },
+  {
+    "id": "behavior.creature.volgrin.the_three_chains.applies_initial_tradeoff",
+    "abilityId": "ability.creature.volgrin.the_three_chains",
+    "friendlyAbilityIds": ["ability.creature.volgrin.the_three_chains"],
+    "maxTicks": 1,
+    "expectedLogs": [
+      { "source": "effect.creature.volgrin.the_three_chains.initial_armor", "eventType": "Buff", "minCount": 1 },
+      { "source": "effect.creature.volgrin.the_three_chains.initial_resistance", "eventType": "Buff", "minCount": 1 },
+      { "source": "effect.creature.volgrin.the_three_chains.initial_attack_speed", "eventType": "Debuff", "minCount": 1 }
+    ]
+  },
+  {
+    "id": "behavior.creature.nhalia.drowned_constellation.soaks_all_during_high_tide",
+    "abilityId": "ability.creature.nhalia.drowned_constellation",
+    "friendlyAbilityIds": [
+      "ability.creature.nhalia.drowned_constellation",
+      "ability.creature.nhalia.turning_of_the_dead_moon"
+    ],
+    "hostileCount": 2,
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedLogs": [
+      { "source": "effect.creature.nhalia.drowned_constellation.damage", "eventType": "Damage", "minCount": 2 },
+      { "source": "effect.creature.nhalia.turning.low_tide_detonation", "eventType": "Damage", "minCount": 2 }
+    ]
+  },
+  {
+    "id": "behavior.creature.nhalia.moonfall.targets_most_soaked",
+    "abilityId": "ability.creature.nhalia.moonfall",
+    "friendlyAbilityIds": ["ability.creature.nhalia.moonfall"],
+    "hostileCount": 2,
+    "hostileHealth": 10000,
+    "initialConditions": [
+      { "combatantId": "hostile-1", "condition": "Soaked", "stacks": 2 },
+      { "combatantId": "hostile-2", "condition": "Soaked", "stacks": 5 }
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.nhalia.moonfall.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-2",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.nhalia.turning_of_the_dead_moon.enters_low_and_detonates",
+    "abilityId": "ability.creature.nhalia.turning_of_the_dead_moon",
+    "friendlyAbilityIds": ["ability.creature.nhalia.turning_of_the_dead_moon"],
+    "hostileCount": 2,
+    "hostileHealth": 10000,
+    "initialConditions": [
+      { "combatantId": "hostile-1", "condition": "Soaked", "stacks": 2 },
+      { "combatantId": "hostile-2", "condition": "Soaked", "stacks": 3 }
+    ],
+    "maxTicks": 1,
+    "expectedStatuses": [
+      { "combatantId": "friendly", "statusId": "status.nhalia.low_tide", "minStacks": 1 }
+    ],
+    "expectedLogs": [
+      { "source": "effect.creature.nhalia.turning.low_tide_detonation", "eventType": "Damage", "minCount": 2 }
+    ]
+  },
+  {
+    "id": "behavior.creature.nhalia.gravitational_undertow.echoes_enemy_healing",
+    "abilityId": "ability.creature.nhalia.gravitational_undertow",
+    "friendlyAbilityIds": ["ability.creature.nhalia.gravitational_undertow"],
+    "hostileAbilityIds": ["ability.creature.treant_sapling.sprouting_surge"],
+    "friendlyHealth": 100,
+    "hostileHealth": 100,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.nhalia.gravitational_undertow.heal",
+        "eventType": "Heal",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.caldris.meteor_hammer.scales_with_shattered_plates",
+    "abilityId": "ability.creature.caldris.meteor_hammer",
+    "friendlyAbilityIds": ["ability.creature.caldris.meteor_hammer"],
+    "hostileHealth": 10000,
+    "initialStatuses": [
+      { "combatantId": "friendly", "statusId": "status.caldris.shattered_plate", "stacks": 2 }
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      { "source": "effect.creature.caldris.meteor_hammer.damage", "eventType": "Damage", "minCount": 1 }
+    ]
+  },
+  {
+    "id": "behavior.creature.caldris.blackstar_quake.hits_all_enemies",
+    "abilityId": "ability.creature.caldris.blackstar_quake",
+    "friendlyAbilityIds": ["ability.creature.caldris.blackstar_quake"],
+    "hostileCount": 2,
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedLogs": [
+      { "source": "effect.creature.caldris.blackstar_quake.damage", "eventType": "Damage", "minCount": 2 }
+    ]
+  },
+  {
+    "id": "behavior.creature.caldris.reforge.restores_one_plate",
+    "abilityId": "ability.creature.caldris.reforge",
+    "friendlyAbilityIds": ["ability.creature.caldris.reforge"],
+    "initialStatuses": [
+      { "combatantId": "friendly", "statusId": "status.caldris.star_iron_plate", "stacks": 3 },
+      { "combatantId": "friendly", "statusId": "status.caldris.shattered_plate", "stacks": 1 }
+    ],
+    "maxTicks": 1,
+    "expectedStatuses": [
+      { "combatantId": "friendly", "statusId": "status.caldris.star_iron_plate", "minStacks": 4 }
+    ],
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.caldris.the_unlit_forge.applies_four_plates",
+    "abilityId": "ability.creature.caldris.the_unlit_forge",
+    "friendlyAbilityIds": ["ability.creature.caldris.the_unlit_forge"],
+    "maxTicks": 1,
+    "expectedStatuses": [
+      { "combatantId": "friendly", "statusId": "status.caldris.star_iron_plate", "minStacks": 4 }
+    ],
+    "expectedLogs": [
+      { "source": "effect.creature.caldris.the_unlit_forge.damage_reduction", "eventType": "Buff", "minCount": 1 }
+    ]
+  },
+  {
+    "id": "behavior.creature.alpha_wolf.alpha_fangs.deals_damage",
+    "abilityId": "ability.creature.alpha_wolf.alpha_fangs",
+    "friendlyAbilityIds": ["ability.creature.alpha_wolf.alpha_fangs"],
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedLogs": [{ "source": "effect.creature.alpha_wolf.alpha_fangs.damage", "eventType": "Damage", "minCount": 1 }]
+  },
+  {
+    "id": "behavior.creature.alpha_wolf.ruthless_instinct.outnumbered_bonus",
+    "abilityId": "ability.creature.alpha_wolf.ruthless_instinct",
+    "friendlyAbilityIds": ["ability.creature.alpha_wolf.ruthless_instinct"],
+    "hostileCount": 1,
+    "maxTicks": 1,
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.dire_wolf.dire_fangs.bleeds_target",
+    "abilityId": "ability.creature.dire_wolf.dire_fangs",
+    "friendlyAbilityIds": ["ability.creature.dire_wolf.dire_fangs"],
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedConditions": [{ "combatantId": "hostile-1", "condition": "Bleed", "minStacks": 10 }],
+    "expectedLogs": [{ "source": "effect.creature.dire_wolf.dire_fangs.damage", "eventType": "Damage", "minCount": 1 }]
+  },
+  {
+    "id": "behavior.creature.dire_wolf.hunting_instinct.outnumbered_bonus",
+    "abilityId": "ability.creature.dire_wolf.hunting_instinct",
+    "friendlyAbilityIds": ["ability.creature.dire_wolf.hunting_instinct"],
+    "hostileCount": 1,
+    "maxTicks": 1,
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.horned_wolf.piercing_horn.deals_damage",
+    "abilityId": "ability.creature.horned_wolf.piercing_horn",
+    "friendlyAbilityIds": ["ability.creature.horned_wolf.piercing_horn"],
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedLogs": [{ "source": "effect.creature.horned_wolf.piercing_horn.damage", "eventType": "Damage", "minCount": 1 }]
+  },
+  {
+    "id": "behavior.creature.horned_wolf.protective_instinct.with_ally",
+    "abilityId": "ability.creature.horned_wolf.protective_instinct",
+    "friendlyAbilityIds": ["ability.creature.horned_wolf.protective_instinct"],
+    "maxTicks": 1,
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.bloodfang_wolf.bloodfang_bite.exploits_bleed",
+    "abilityId": "ability.creature.bloodfang_wolf.bloodfang_bite",
+    "friendlyAbilityIds": ["ability.creature.bloodfang_wolf.bloodfang_bite"],
+    "hostileHealth": 10000,
+    "initialConditions": [{ "combatantId": "hostile-1", "condition": "Bleed", "stacks": 1 }],
+    "maxTicks": 1,
+    "expectedLogs": [{ "source": "effect.creature.bloodfang_wolf.bloodfang_bite.bleeding_bonus", "eventType": "Damage", "minCount": 1 }]
+  },
+  {
+    "id": "behavior.creature.bloodfang_wolf.cruel_precision.passive",
+    "abilityId": "ability.creature.bloodfang_wolf.cruel_precision",
+    "friendlyAbilityIds": ["ability.creature.bloodfang_wolf.cruel_precision"],
+    "maxTicks": 1,
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.pack_howler.coordinated_attack.calls_pack",
+    "abilityId": "ability.creature.pack_howler.coordinated_attack",
+    "friendlyAbilityIds": ["ability.creature.pack_howler.coordinated_attack"],
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedLogs": [{ "source": "Basic Attack", "eventType": "Damage", "minCount": 1 }]
+  },
+  {
+    "id": "behavior.creature.pack_howler.strength_of_the_pack.three_allies",
+    "abilityId": "ability.creature.pack_howler.strength_of_the_pack",
+    "friendlyAbilityIds": ["ability.creature.pack_howler.strength_of_the_pack"],
+    "maxTicks": 1,
+    "expectedLogs": []
+  },
+  {
+    "id": "behavior.creature.serath.weight_of_flesh.targets_an_enemy",
+    "abilityId": "ability.creature.serath.weight_of_flesh",
+    "friendlyAbilityIds": ["ability.creature.serath.weight_of_flesh"],
+    "hostileCount": 2,
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedLogs": [
+      { "source": "effect.creature.serath.weight_of_flesh.damage", "eventType": "Damage", "minCount": 1 }
+    ]
+  },
+  {
+    "id": "behavior.creature.serath.weight_of_spirit.wounds_its_target",
+    "abilityId": "ability.creature.serath.weight_of_spirit",
+    "friendlyAbilityIds": ["ability.creature.serath.weight_of_spirit"],
+    "hostileCount": 2,
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedLogs": [
+      { "source": "effect.creature.serath.weight_of_spirit.damage", "eventType": "Damage", "minCount": 1 }
+    ]
+  },
+  {
+    "id": "behavior.creature.serath.sixfold_sentence.resolves_independent_groups",
+    "abilityId": "ability.creature.serath.sixfold_sentence",
+    "friendlyAbilityIds": ["ability.creature.serath.sixfold_sentence"],
+    "hostileCount": 3,
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedLogs": [
+      { "source": "effect.creature.serath.sixfold_sentence.physical_damage", "eventType": "Damage", "minCount": 3 },
+      { "source": "effect.creature.serath.sixfold_sentence.magical_damage", "eventType": "Damage", "minCount": 3 }
+    ]
+  },
+  {
+    "id": "behavior.creature.serath.the_living_scale.balanced_party_causes_doubt",
+    "abilityId": "ability.creature.serath.the_living_scale",
+    "friendlyAbilityIds": ["ability.creature.serath.the_living_scale"],
+    "hostileCount": 2,
+    "hostileHealth": 10000,
+    "maxTicks": 101,
+    "expectedStatuses": [
+      { "combatantId": "friendly", "statusId": "status.serath.doubt", "minStacks": 1 }
+    ],
+    "expectedLogs": [
+      { "source": "effect.creature.serath.the_living_scale.doubt_damage_taken", "eventType": "Debuff", "minCount": 1 }
+    ]
+  }
 ]

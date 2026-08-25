@@ -630,6 +630,86 @@
         "ability.creature.wind_harpy.gale_slash",
         "ability.creature.wind_harpy.sharp_feathers"
       ]
+    },
+    {
+      "monsterId": "monster.serevin,_the_name-eater",
+      "abilityIds": [
+        "ability.creature.serevin.black_annotation",
+        "ability.creature.serevin.redacted",
+        "ability.creature.serevin.spilling_ink",
+        "ability.creature.serevin.unwritten_law"
+      ]
+    },
+    {
+      "monsterId": "monster.volgrin,_the_shackled_storm",
+      "abilityIds": [
+        "ability.creature.volgrin.chainbound_bolt",
+        "ability.creature.volgrin.shackled_arc",
+        "ability.creature.volgrin.rattling_sky",
+        "ability.creature.volgrin.the_three_chains"
+      ]
+    },
+    {
+      "monsterId": "monster.nhalia,_the_moondrowned",
+      "abilityIds": [
+        "ability.creature.nhalia.drowned_constellation",
+        "ability.creature.nhalia.moonfall",
+        "ability.creature.nhalia.turning_of_the_dead_moon",
+        "ability.creature.nhalia.gravitational_undertow"
+      ]
+    },
+    {
+      "monsterId": "monster.caldris,_smith_of_the_fallen_star",
+      "abilityIds": [
+        "ability.creature.caldris.meteor_hammer",
+        "ability.creature.caldris.blackstar_quake",
+        "ability.creature.caldris.reforge",
+        "ability.creature.caldris.the_unlit_forge"
+      ]
+    },
+    {
+      "monsterId": "monster.alpha_wolf",
+      "abilityIds": [
+        "ability.creature.alpha_wolf.alpha_fangs",
+        "ability.creature.alpha_wolf.ruthless_instinct"
+      ]
+    },
+    {
+      "monsterId": "monster.dire_wolf",
+      "abilityIds": [
+        "ability.creature.dire_wolf.dire_fangs",
+        "ability.creature.dire_wolf.hunting_instinct"
+      ]
+    },
+    {
+      "monsterId": "monster.horned_wolf",
+      "abilityIds": [
+        "ability.creature.horned_wolf.piercing_horn",
+        "ability.creature.horned_wolf.protective_instinct"
+      ]
+    },
+    {
+      "monsterId": "monster.bloodfang_wolf",
+      "abilityIds": [
+        "ability.creature.bloodfang_wolf.bloodfang_bite",
+        "ability.creature.bloodfang_wolf.cruel_precision"
+      ]
+    },
+    {
+      "monsterId": "monster.pack_howler",
+      "abilityIds": [
+        "ability.creature.pack_howler.coordinated_attack",
+        "ability.creature.pack_howler.strength_of_the_pack"
+      ]
+    },
+    {
+      "monsterId": "monster.serath,_the_second_warden",
+      "abilityIds": [
+        "ability.creature.serath.weight_of_flesh",
+        "ability.creature.serath.weight_of_spirit",
+        "ability.creature.serath.sixfold_sentence",
+        "ability.creature.serath.the_living_scale"
+      ]
     }
   ]
 }

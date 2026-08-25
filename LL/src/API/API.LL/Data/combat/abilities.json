@@ -191,7 +191,7 @@
     "kind": "Active",
     "name": "Withering Petals",
     "description": "Deal 90% Magical Damage to a random enemy and apply Weaken.",
-    "cooldownTicks": 100,
+    "cooldownTicks": 120,
     "tags": ["Magical", "Ranged", "Debuff"],
     "effects": [
       {
@@ -219,7 +219,7 @@
     "id": "ability.creature.nightshade_blossom.midnight_bloom",
     "kind": "Passive",
     "name": "Midnight Bloom",
-    "description": "Every 12 seconds, heal yourself for 50% Power.",
+    "description": "Every {triggerCooldown}, heal yourself for 50% Power.",
     "cooldownTicks": 0,
     "tags": ["Healing", "Periodic"],
     "triggers": [
@@ -336,7 +336,7 @@
     "id": "ability.creature.lumo_wisp.lumo_barrier",
     "kind": "Passive",
     "name": "Lumo Barrier",
-    "description": "At combat start, gain Barrier equal to 9% Max Health.",
+    "description": "At combat start, gain Barrier equal to {scaling} Max Health.",
     "cooldownTicks": 0,
     "tags": ["Barrier", "Defensive"],
     "effects": [
@@ -376,7 +376,7 @@
     "id": "ability.creature.lumo_sentinel.cracked_core",
     "kind": "Passive",
     "name": "Cracked Core",
-    "description": "Gain 30% Magical Defense above 66% Health; lose 15% Magical Defense below 33% Health.",
+    "description": "Gain {scaling} Magical Defense above 66% Health; lose {scaling2} Magical Defense below 33% Health.",
     "cooldownTicks": 0,
     "tags": ["Buff", "Defensive"],
     "triggers": [
@@ -840,7 +840,7 @@
     "id": "ability.creature.blue_slime.protective_slime",
     "kind": "Passive",
     "name": "Protective Slime",
-    "description": "At combat start, grant all allies Barrier equal to 7% of your Max Health.",
+    "description": "At combat start, grant all allies Barrier equal to {scaling} of your Max Health.",
     "cooldownTicks": 0,
     "tags": ["Barrier", "Area"],
     "effects": [
@@ -859,7 +859,7 @@
     "id": "ability.creature.transparent_slime.transparent_engulf",
     "kind": "Active",
     "name": "Gelatinous Defiance",
-    "description": "Generate 100 threat and gain Guard(4).",
+    "description": "Generate 100 threat and gain Guard(5).",
     "cooldownTicks": 120,
     "threatValue": 100,
     "tags": ["Buff", "Defensive"],
@@ -868,7 +868,7 @@
         "id": "effect.creature.transparent_slime.transparent_engulf.guard",
         "operation": "ApplyCondition",
         "target": "Self",
-        "baseValue": 4,
+        "baseValue": 5,
         "condition": "Guard",
         "procCoefficient": 1
       }
@@ -879,7 +879,7 @@
     "id": "ability.creature.transparent_slime.reconstitute",
     "kind": "Passive",
     "name": "Reconstitute",
-    "description": "The first time you fall below 90% Health, heal 15% Max Health.",
+    "description": "The first time you fall below 80% Health, heal 15% Max Health.",
     "cooldownTicks": 0,
     "tags": ["Healing", "Defensive"],
     "triggers": [
@@ -893,7 +893,7 @@
           {
             "type": "HealthBelowPercent",
             "subject": "Source",
-            "value": 90
+            "value": 80
           }
         ]
       }
@@ -915,9 +915,9 @@
     "id": "ability.creature.moss_lizard.moss_camouflage",
     "kind": "Active",
     "name": "Moss Camouflage",
-    "description": "Deal 150% Physical Damage, shed 250 threat, and gain Stealth(2).",
+    "description": "Deal 150% Physical Damage, shed 100 threat, and gain Stealth(2).",
     "cooldownTicks": 140,
-    "threatValue": -250,
+    "threatValue": -100,
     "tags": ["Physical", "Melee", "Buff"],
     "effects": [
       {
@@ -1247,7 +1247,7 @@
     "id": "ability.creature.wood_nymph.bramble_shield",
     "kind": "Active",
     "name": "Bramble Shield",
-    "description": "Grant the highest-Max-Health ally Thorns(5), 50% Cover for 8 seconds, and Barrier equal to 200% Power.",
+    "description": "Grant the highest-Max-Health ally Thorns(5), 50% Cover for 8 seconds, and Barrier equal to {scaling} Power.",
     "cooldownTicks": 160,
     "tags": ["Barrier", "Buff", "Retaliation"],
     "effects": [
@@ -1331,7 +1331,7 @@
     "id": "ability.creature.rainbow_slime.colorful_shield",
     "kind": "Passive",
     "name": "Colorful Shield",
-    "description": "Whenever you use an ability, grant Barrier equal to 20% Power to the highest-Max-Health ally.",
+    "description": "Whenever you use an ability, grant Barrier equal to {scaling} Power to the highest-Max-Health ally.",
     "cooldownTicks": 0,
     "tags": ["Barrier", "Buff"],
     "triggers": [
@@ -1356,25 +1356,15 @@
     "id": "ability.creature.enchanted_fairy.faes_corrosion",
     "kind": "Active",
     "name": "Fae's Corrosion",
-    "description": "Deal 140% Magical Damage to a random enemy and apply Corrosion(8).",
+    "description": "Apply Corrosion(6) to a random enemy.",
     "cooldownTicks": 120,
     "tags": ["Magical", "Ranged", "Debuff"],
     "effects": [
       {
-        "id": "effect.creature.enchanted_fairy.faes_corrosion.damage",
-        "operation": "Damage",
-        "target": "RandomEnemy",
-        "scalingAttribute": "Power",
-        "scalingCoefficient": 1.4,
-        "attackType": "Ranged",
-        "damageType": "Magical",
-        "procCoefficient": 1
-      },
-      {
         "id": "effect.creature.enchanted_fairy.faes_corrosion.corrosion",
         "operation": "ApplyCondition",
         "target": "RandomEnemy",
-        "baseValue": 8,
+        "baseValue": 6,
         "condition": "Corrosion",
         "procCoefficient": 1
       }
@@ -1385,7 +1375,7 @@
     "id": "ability.creature.enchanted_fairy.faes_charm",
     "kind": "Passive",
     "name": "Fae's Charm",
-    "description": "Every 20 seconds, each enemy has an 80% chance to receive Stun(3).",
+    "description": "Every {triggerCooldown}, each enemy has an 80% chance to receive Stun(3).",
     "cooldownTicks": 0,
     "tags": ["Control", "Area"],
     "triggers": [
@@ -1443,7 +1433,7 @@
     "id": "ability.creature.illusion_fox.foxfire_wisp",
     "kind": "Passive",
     "name": "Foxfire Wisp",
-    "description": "Every 5 seconds gain a Foxfire stack, up to 3. When attacked, consume one to deal 35% Magical Damage per stack.",
+    "description": "Every {triggerCooldown} gain a Foxfire stack, up to 3. When attacked, consume one to deal 35% Magical Damage per stack.",
     "cooldownTicks": 0,
     "tags": ["Magical", "Retaliation"],
     "triggers": [
@@ -1918,7 +1908,7 @@
     "id": "ability.creature.giant_spider.thickened_carapace",
     "kind": "Passive",
     "name": "Thickened Carapace",
-    "description": "Increase Physical Armor by 15%.",
+    "description": "Increase Physical Armor by {scaling}.",
     "cooldownTicks": 0,
     "tags": ["Buff", "Defensive"],
     "effects": [
@@ -1938,7 +1928,7 @@
     "id": "ability.creature.venomous_spiderling.venom_web",
     "kind": "Active",
     "name": "Venom Web",
-    "description": "Deal 60% Magical Damage and apply Poison(20) and Slow.",
+    "description": "Deal 60% Magical Damage and apply Poison(16) and Slow.",
     "cooldownTicks": 90,
     "tags": ["Magical", "Ranged", "Poison", "Debuff"],
     "effects": [
@@ -1956,7 +1946,7 @@
         "id": "effect.creature.venomous_spiderling.venom_web.poison",
         "operation": "ApplyCondition",
         "target": "CurrentTarget",
-        "baseValue": 20,
+        "baseValue": 16,
         "condition": "Poison",
         "procCoefficient": 1
       },
@@ -2293,7 +2283,7 @@
     "id": "ability.creature.red_slime.recharging_core",
     "kind": "Passive",
     "name": "Recharging Core",
-    "description": "Every 12 seconds, gain 5% Critical Damage, up to 40%.",
+    "description": "Every {triggerCooldown}, gain 5% Critical Damage, up to 40%.",
     "cooldownTicks": 0,
     "tags": ["Buff"],
     "triggers": [
@@ -2380,7 +2370,7 @@
     "id": "ability.creature.bog_mite.infestation",
     "kind": "Active",
     "name": "Infestation",
-    "description": "Deal 140% Physical Damage and apply Wound(9).",
+    "description": "Deal 125% Physical Damage and apply Wound(7).",
     "cooldownTicks": 110,
     "tags": ["Physical", "Melee", "Debuff"],
     "effects": [
@@ -2389,7 +2379,7 @@
         "operation": "Damage",
         "target": "CurrentTarget",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 1.4,
+        "scalingCoefficient": 1.25,
         "attackType": "Melee",
         "damageType": "Physical",
         "procCoefficient": 1
@@ -2398,7 +2388,7 @@
         "id": "effect.creature.bog_mite.infestation.wound",
         "operation": "ApplyCondition",
         "target": "CurrentTarget",
-        "baseValue": 9,
+        "baseValue": 7,
         "condition": "Wound",
         "procCoefficient": 1
       }
@@ -2440,8 +2430,8 @@
     "id": "ability.creature.green_slime.acid_splash",
     "kind": "Active",
     "name": "Acid Splash",
-    "description": "Deal 60% Magical Damage and apply Poison(18) to all enemies.",
-    "cooldownTicks": 170,
+    "description": "Deal 60% Magical Damage and apply Poison(15) to all enemies.",
+    "cooldownTicks": 200,
     "tags": ["Magical", "Ranged", "Poison", "Area"],
     "effects": [
       {
@@ -2458,7 +2448,7 @@
         "id": "effect.creature.green_slime.acid_splash.poison",
         "operation": "ApplyCondition",
         "target": "AllEnemies",
-        "baseValue": 18,
+        "baseValue": 15,
         "condition": "Poison",
         "procCoefficient": 1
       }
@@ -2527,7 +2517,7 @@
     "id": "ability.creature.large_rat.big",
     "kind": "Passive",
     "name": "Big",
-    "description": "Increase Max Health by 10%.",
+    "description": "Increase Max Health by {scaling}.",
     "cooldownTicks": 0,
     "tags": ["Buff", "Defensive"],
     "effects": [
@@ -4504,7 +4494,7 @@
     "id": "ability.creature.gnoll_pack_leader.savage_leader",
     "kind": "Passive",
     "name": "Savage Leader",
-    "description": "Gain 5% of initial Power whenever an ally dies, up to 4 times.",
+    "description": "Gain {scaling} of initial Power whenever an ally dies, up to 4 times.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Power"],
     "triggers": [
@@ -4620,7 +4610,7 @@
     "id": "ability.creature.gnoll_shaman.totemic_ward",
     "kind": "Active",
     "name": "Totemic Ward",
-    "description": "Summon a Totemic Ward with 3% Max Health for 12 seconds. It grants all allies Barrier equal to 20% Power every 4 seconds.",
+    "description": "Summon a Totemic Ward for 12 seconds with {summonHealth} Health and {summonPower} Power. Every 4 seconds, it grants all allies Barrier equal to 20% of its Power.",
     "cooldownTicks": 180,
     "tags": ["Summon", "Barrier", "Support"],
     "effects": [
@@ -4719,7 +4709,7 @@
     "id": "ability.creature.kobold_sorcerer.focused_energy",
     "kind": "Passive",
     "name": "Focused Energy",
-    "description": "Every 3 seconds, gain 2% of initial Power. Being hit resets all stacks.",
+    "description": "Every {triggerCooldown}, gain 2% of initial Power. Being hit resets all stacks.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Power", "Periodic"],
     "triggers": [
@@ -4907,7 +4897,7 @@
     "id": "ability.creature.ravenous_ghoul.draining_claws",
     "kind": "Active",
     "name": "Draining Claws",
-    "description": "Deal 240% Physical Melee damage and apply Weaken.",
+    "description": "Deal 200% Physical Melee damage and apply Weaken.",
     "cooldownTicks": 130,
     "tags": ["Physical", "Melee", "Debuff"],
     "effects": [
@@ -4916,7 +4906,7 @@
         "operation": "Damage",
         "target": "CurrentTarget",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 2.4,
+        "scalingCoefficient": 2.0,
         "attackType": "Melee",
         "damageType": "Physical",
         "procCoefficient": 1
@@ -5321,7 +5311,7 @@
     "id": "ability.creature.bark_golem.timber_slam",
     "kind": "Active",
     "name": "Timber Slam",
-    "description": "Slam the ground with immense force, dealing 270% Physical Damage to all enemies.",
+    "description": "Slam the ground with immense force, dealing 250% Physical Damage to all enemies.",
     "cooldownTicks": 240,
     "tags": ["Physical", "Melee", "Area"],
     "effects": [
@@ -5330,7 +5320,7 @@
         "operation": "Damage",
         "target": "AllEnemies",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 2.7,
+        "scalingCoefficient": 2.5,
         "attackType": "Melee",
         "damageType": "Physical",
         "procCoefficient": 1
@@ -5342,7 +5332,7 @@
     "id": "ability.creature.bark_golem.barkskin",
     "kind": "Passive",
     "name": "Barkskin",
-    "description": "Increase Physical Defense by 30%, but Burn damage taken is doubled.",
+    "description": "Increase Physical Defense by {scaling}, but take 100% more Burn damage.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Buff", "Defensive", "Burn", "RiskReward"],
     "effects": [
@@ -5358,6 +5348,7 @@
         "id": "effect.creature.bark_golem.barkskin.burn_vulnerability",
         "operation": "ModifyDamageTaken",
         "target": "Self",
+        "scalesWithAscension": false,
         "baseValue": 100,
         "damageType": "Burn",
         "procCoefficient": 1
@@ -5369,7 +5360,7 @@
     "id": "ability.creature.treant_guardian.rootbound_shield",
     "kind": "Active",
     "name": "Rootbound Shield",
-    "description": "Plant yourself firmly in the ground, and gain Barrier equal to 200% Power.",
+    "description": "Plant yourself firmly in the ground, and gain Barrier equal to {scaling} Power.",
     "cooldownTicks": 180,
     "tags": ["Barrier", "Buff", "Defensive"],
     "effects": [
@@ -5388,7 +5379,7 @@
     "id": "ability.creature.treant_guardian.forest_vitality",
     "kind": "Passive",
     "name": "Forest Vitality",
-    "description": "Every 10 seconds, increase Health Regeneration by 2%.",
+    "description": "Every {triggerCooldown}, increase Health Regeneration by 2%.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Healing", "Regeneration", "Periodic"],
     "triggers": [
@@ -5396,7 +5387,9 @@
         "event": "OnInterval",
         "internalCooldownTicks": 100,
         "initialDelayTicks": 100,
-        "effectIds": ["effect.creature.treant_guardian.forest_vitality.regeneration"]
+        "effectIds": [
+          "effect.creature.treant_guardian.forest_vitality.regeneration"
+        ]
       }
     ],
     "effects": [
@@ -5414,7 +5407,7 @@
     "id": "ability.creature.elder_treant.ancient_sap",
     "kind": "Active",
     "name": "Ancient Sap",
-    "description": "Cover the target in enchanted sap. Apply Doom(410), and when Doom triggers, apply Weaken to the target.",
+    "description": "Cover the target in enchanted sap. Apply Doom(380), and when Doom triggers, apply Weaken to the target.",
     "cooldownTicks": 180,
     "tags": ["Magical", "Doom", "Weaken", "Debuff"],
     "triggers": [
@@ -5441,7 +5434,7 @@
         "id": "effect.creature.elder_treant.ancient_sap.doom",
         "operation": "ApplyCondition",
         "target": "CurrentTarget",
-        "baseValue": 410,
+        "baseValue": 380,
         "condition": "Doom",
         "procCoefficient": 1
       },
@@ -5460,7 +5453,7 @@
     "id": "ability.creature.elder_treant.thornstorm",
     "kind": "Active",
     "name": "Thornstorm",
-    "description": "Conjure a storm of enchanted thorns, dealing 80% Magical Damage and 80% Physical Damage to all enemies.",
+    "description": "Conjure a storm of enchanted thorns, dealing 70% Magical Damage and 70% Physical Damage to all enemies.",
     "cooldownTicks": 100,
     "tags": ["Magical", "Physical", "Ranged", "Area"],
     "effects": [
@@ -5469,7 +5462,7 @@
         "operation": "Damage",
         "target": "AllEnemies",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 0.8,
+        "scalingCoefficient": 0.7,
         "attackType": "Ranged",
         "damageType": "Magical",
         "procCoefficient": 1
@@ -5479,7 +5472,7 @@
         "operation": "Damage",
         "target": "AllEnemies",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 0.8,
+        "scalingCoefficient": 0.7,
         "attackType": "Ranged",
         "damageType": "Physical",
         "procCoefficient": 1
@@ -5651,12 +5644,30 @@
     "cooldownTicks": 0,
     "tags": ["Set", "Aegis", "Barrier", "Defensive"],
     "triggers": [
-      { "event": "OnCombatStart", "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"] },
-      { "event": "OnBarrierApplied", "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"] },
-      { "event": "OnBarrierAbsorbed", "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"] },
-      { "event": "OnBarrierBroken", "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"] },
-      { "event": "OnBarrierContributionBroken", "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"] },
-      { "event": "OnBarrierExpired", "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"] }
+      {
+        "event": "OnCombatStart",
+        "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"]
+      },
+      {
+        "event": "OnBarrierApplied",
+        "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"]
+      },
+      {
+        "event": "OnBarrierAbsorbed",
+        "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"]
+      },
+      {
+        "event": "OnBarrierBroken",
+        "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"]
+      },
+      {
+        "event": "OnBarrierContributionBroken",
+        "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"]
+      },
+      {
+        "event": "OnBarrierExpired",
+        "effectIds": ["effect.set.aegis.behind_the_shield.mitigation"]
+      }
     ],
     "effects": [
       {
@@ -5721,7 +5732,10 @@
     "cooldownTicks": 0,
     "tags": ["Set", "Phoenix", "Healing", "Recovery"],
     "triggers": [
-      { "event": "OnCombatStart", "effectIds": ["effect.set.phoenix.rising_flame.healing"] },
+      {
+        "event": "OnCombatStart",
+        "effectIds": ["effect.set.phoenix.rising_flame.healing"]
+      },
       {
         "event": "OnHealthChanged",
         "conditions": [{ "type": "EventSourceIsSelf" }],
@@ -5735,7 +5749,9 @@
         "target": "Self",
         "baseValue": 15,
         "maintainWhileConditionsMet": true,
-        "conditions": [{ "type": "HealthBelowPercent", "subject": "Source", "value": 50 }],
+        "conditions": [
+          { "type": "HealthBelowPercent", "subject": "Source", "value": 50 }
+        ],
         "procCoefficient": 1
       }
     ]
@@ -5853,9 +5869,7 @@
     "triggers": [
       {
         "event": "OnBasicAttack",
-        "conditions": [
-          { "type": "EventSourceIsSelf" }
-        ],
+        "conditions": [{ "type": "EventSourceIsSelf" }],
         "effectIds": ["effect.set.venom.venomous_assault.poison"]
       }
     ],
@@ -5930,15 +5944,13 @@
     "id": "ability.creature.blood_harpy.rupturing_talons",
     "kind": "Passive",
     "name": "Rupturing Talons",
-    "description": "Melee attacks against Bleeding targets apply Bleed(4).",
+    "description": "Melee attacks against Bleeding targets apply Bleed(3).",
     "cooldownTicks": 0,
     "tags": ["Passive", "Physical", "Melee", "Bleed"],
     "triggers": [
       {
         "event": "OnMeleeAttack",
-        "conditions": [
-          { "type": "EventSourceIsSelf" }
-        ],
+        "conditions": [{ "type": "EventSourceIsSelf" }],
         "effectIds": ["effect.creature.blood_harpy.rupturing_talons.bleed"]
       }
     ],
@@ -5947,7 +5959,7 @@
         "id": "effect.creature.blood_harpy.rupturing_talons.bleed",
         "operation": "ApplyCondition",
         "target": "EventTarget",
-        "baseValue": 4,
+        "baseValue": 3,
         "condition": "Bleed",
         "conditions": [
           {
@@ -5994,7 +6006,7 @@
     "id": "ability.creature.flame_harpy.fiery_shriek",
     "kind": "Passive",
     "name": "Fiery Shriek",
-    "description": "Every 8 seconds, release a fiery screech that applies Burn(16) to a random enemy.",
+    "description": "Every {triggerCooldown}, release a fiery screech that applies Burn(16) to a random enemy.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Burn", "Periodic", "Ranged"],
     "triggers": [
@@ -6050,7 +6062,7 @@
     "id": "ability.creature.ice_harpy.chilling_precision",
     "kind": "Passive",
     "name": "Chilling Precision",
-    "description": "Direct hits deal an additional 0.4% Magical Damage for every stack of Chill on the target.",
+    "description": "Direct hits deal an additional {conditionScaling} Magical Damage for every stack of Chill on the target.",
     "cooldownTicks": 0,
     "tags": ["Passive", "Magical", "Chill", "Direct Hit"],
     "triggers": [
@@ -6165,9 +6177,7 @@
     "triggers": [
       {
         "event": "OnBasicAttack",
-        "conditions": [
-          { "type": "EventSourceIsSelf" }
-        ],
+        "conditions": [{ "type": "EventSourceIsSelf" }],
         "effectIds": ["effect.creature.wind_harpy.sharp_feathers.damage"]
       }
     ],
@@ -6186,5 +6196,1400 @@
       }
     ],
     "owningEssenceId": "essence.wind_harpy"
+  },
+  {
+    "id": "ability.creature.serevin.black_annotation",
+    "kind": "Active",
+    "name": "Black Annotation",
+    "description": "Erase one removable buff from every enemy. Gain 1 Ink for each buff erased.",
+    "cooldownTicks": 80,
+    "tags": ["Magical", "Area", "Dispel", "Ink"],
+    "effects": [
+      {
+        "id": "effect.creature.serevin.black_annotation.dispel",
+        "operation": "Dispel",
+        "target": "AllEnemies",
+        "baseValue": 1,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.serevin.redacted",
+    "kind": "Active",
+    "name": "Redacted",
+    "description": "Deal 250% Magical Damage to a random enemy and Silence them for 15 seconds.",
+    "cooldownTicks": 150,
+    "tags": ["Magical", "Ranged", "Silence"],
+    "effects": [
+      {
+        "id": "effect.creature.serevin.redacted.damage",
+        "operation": "Damage",
+        "target": "RandomEnemy",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.5,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.serevin.redacted.silence",
+        "operation": "ApplyCondition",
+        "target": "RandomEnemy",
+        "baseValue": 15,
+        "condition": "Silence",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.serevin.spilling_ink",
+    "kind": "Active",
+    "name": "Spilling Ink",
+    "description": "Deal 50% Magical Damage per Ink to two random enemies, then consume all Ink.",
+    "cooldownTicks": 170,
+    "tags": ["Magical", "Ranged", "MultiTarget", "Ink"],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "conditions": [
+          {
+            "type": "HasStatus",
+            "subject": "Source",
+            "statusId": "status.serevin.ink"
+          }
+        ],
+        "effectIds": [
+          "effect.creature.serevin.spilling_ink.damage",
+          "effect.creature.serevin.spilling_ink.consume"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.serevin.spilling_ink.damage",
+        "operation": "Damage",
+        "target": "TwoRandomEnemies",
+        "scalingStatusId": "status.serevin.ink",
+        "statusScalingAttribute": "Power",
+        "statusScalingCoefficient": 0.5,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.serevin.spilling_ink.consume",
+        "operation": "RemoveStatus",
+        "target": "Self",
+        "statusId": "status.serevin.ink",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.serevin.unwritten_law",
+    "kind": "Passive",
+    "name": "Unwritten Law",
+    "description": "Each Ink grants 5% Power but reduces Armor and Resistance by 2%. Black Annotation grants Ink for each buff erased. Being Staggered halves Ink, rounded down.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Ink", "RiskReward", "Stagger"],
+    "triggers": [
+      {
+        "event": "OnStatusDispelled",
+        "conditions": [{ "type": "EventInstigatorIsSelf" }],
+        "effectIds": ["effect.creature.serevin.unwritten_law.gain_ink"]
+      },
+      {
+        "event": "OnStatusApplied",
+        "conditions": [
+          { "type": "EventIdIs", "statusId": "status.serevin.ink" }
+        ],
+        "effectIds": [
+          "effect.creature.serevin.unwritten_law.power",
+          "effect.creature.serevin.unwritten_law.armor",
+          "effect.creature.serevin.unwritten_law.resistance"
+        ]
+      },
+      {
+        "event": "OnStatusChanged",
+        "conditions": [
+          { "type": "EventIdIs", "statusId": "status.serevin.ink" }
+        ],
+        "effectIds": [
+          "effect.creature.serevin.unwritten_law.power",
+          "effect.creature.serevin.unwritten_law.armor",
+          "effect.creature.serevin.unwritten_law.resistance"
+        ]
+      },
+      {
+        "event": "OnStatusRemoved",
+        "conditions": [
+          { "type": "EventIdIs", "statusId": "status.serevin.ink" }
+        ],
+        "effectIds": [
+          "effect.creature.serevin.unwritten_law.power",
+          "effect.creature.serevin.unwritten_law.armor",
+          "effect.creature.serevin.unwritten_law.resistance"
+        ]
+      },
+      {
+        "event": "OnStaggerBroken",
+        "effectIds": ["effect.creature.serevin.unwritten_law.halve_ink"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.serevin.unwritten_law.gain_ink",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.serevin.ink",
+        "baseValue": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.serevin.unwritten_law.power",
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.serevin.ink",
+        "attribute": "Power",
+        "scalingCoefficient": 0.05,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.serevin.unwritten_law.armor",
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.serevin.ink",
+        "attribute": "Armor",
+        "scalingCoefficient": -0.02,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.serevin.unwritten_law.resistance",
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.serevin.ink",
+        "attribute": "Resistance",
+        "scalingCoefficient": -0.02,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.serevin.unwritten_law.halve_ink",
+        "operation": "ScaleStatusStacks",
+        "target": "Self",
+        "statusId": "status.serevin.ink",
+        "baseValue": 50,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.volgrin.chainbound_bolt",
+    "kind": "Active",
+    "name": "Chainbound Bolt",
+    "description": "Deal 220% Magical Damage to the current target.",
+    "cooldownTicks": 90,
+    "tags": ["Magical", "Ranged", "Lightning"],
+    "effects": [
+      {
+        "id": "effect.creature.volgrin.chainbound_bolt.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.2,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.volgrin.shackled_arc",
+    "kind": "Active",
+    "name": "Shackled Arc",
+    "description": "Deal 110% Magical Damage and apply Chill(1) to two random enemies.",
+    "cooldownTicks": 140,
+    "tags": ["Magical", "Ranged", "MultiTarget", "Lightning", "Chill"],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": ["effect.creature.volgrin.shackled_arc.damage"]
+      },
+      {
+        "event": "OnDamageDealt",
+        "conditions": [
+          { "type": "EventSourceIsSelf" },
+          {
+            "type": "EventIdIs",
+            "statusId": "effect.creature.volgrin.shackled_arc.damage"
+          }
+        ],
+        "effectIds": ["effect.creature.volgrin.shackled_arc.chill"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.volgrin.shackled_arc.damage",
+        "operation": "Damage",
+        "target": "TwoRandomEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.1,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.shackled_arc.chill",
+        "operation": "ApplyCondition",
+        "target": "EventTarget",
+        "baseValue": 1,
+        "condition": "Chill",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.volgrin.rattling_sky",
+    "kind": "Active",
+    "name": "Rattling Sky",
+    "description": "Deal 75% Magical Damage to all enemies, plus 35% for each Broken Chain.",
+    "cooldownTicks": 180,
+    "tags": ["Magical", "Ranged", "Area", "Lightning", "BrokenChain"],
+    "effects": [
+      {
+        "id": "effect.creature.volgrin.rattling_sky.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.75,
+        "scalingStatusId": "status.volgrin.broken_chain",
+        "statusScalingAttribute": "Power",
+        "statusScalingCoefficient": 0.35,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.volgrin.the_three_chains",
+    "kind": "Passive",
+    "name": "The Three Chains",
+    "description": "Begin combat with 45% more Armor and Resistance but 30 less Attack Speed. At 75%, 50%, and 25% Health, permanently lose 15% Armor and Resistance and gain 15 Attack Speed. With all three chains broken, Basic Attacks deal 35% Magical Damage to two other random enemies.",
+    "cooldownTicks": 0,
+    "tags": [
+      "Passive",
+      "HealthThreshold",
+      "BrokenChain",
+      "Lightning",
+      "RiskReward"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.creature.volgrin.the_three_chains.initial_armor",
+          "effect.creature.volgrin.the_three_chains.initial_resistance",
+          "effect.creature.volgrin.the_three_chains.initial_attack_speed"
+        ]
+      },
+      {
+        "event": "OnHealthChanged",
+        "conditions": [
+          { "type": "EventSourceIsSelf" },
+          { "type": "HealthAtOrBelowPercent", "subject": "Source", "value": 75 }
+        ],
+        "effectIds": [
+          "effect.creature.volgrin.the_three_chains.break_75",
+          "effect.creature.volgrin.the_three_chains.break_75_armor",
+          "effect.creature.volgrin.the_three_chains.break_75_resistance",
+          "effect.creature.volgrin.the_three_chains.break_75_attack_speed"
+        ]
+      },
+      {
+        "event": "OnHealthChanged",
+        "conditions": [
+          { "type": "EventSourceIsSelf" },
+          { "type": "HealthAtOrBelowPercent", "subject": "Source", "value": 50 }
+        ],
+        "effectIds": [
+          "effect.creature.volgrin.the_three_chains.break_50",
+          "effect.creature.volgrin.the_three_chains.break_50_armor",
+          "effect.creature.volgrin.the_three_chains.break_50_resistance",
+          "effect.creature.volgrin.the_three_chains.break_50_attack_speed"
+        ]
+      },
+      {
+        "event": "OnHealthChanged",
+        "conditions": [
+          { "type": "EventSourceIsSelf" },
+          { "type": "HealthAtOrBelowPercent", "subject": "Source", "value": 25 }
+        ],
+        "effectIds": [
+          "effect.creature.volgrin.the_three_chains.break_25",
+          "effect.creature.volgrin.the_three_chains.break_25_armor",
+          "effect.creature.volgrin.the_three_chains.break_25_resistance",
+          "effect.creature.volgrin.the_three_chains.break_25_attack_speed"
+        ]
+      },
+      {
+        "event": "OnBasicAttack",
+        "conditions": [
+          { "type": "EventSourceIsSelf" },
+          {
+            "type": "StatusStacksAtLeast",
+            "subject": "Source",
+            "statusId": "status.volgrin.broken_chain",
+            "value": 3
+          }
+        ],
+        "effectIds": ["effect.creature.volgrin.the_three_chains.final_thunder"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.volgrin.the_three_chains.initial_armor",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Armor",
+        "scalingCoefficient": 0.45,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.the_three_chains.initial_resistance",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Resistance",
+        "scalingCoefficient": 0.45,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.the_three_chains.initial_attack_speed",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "AttackSpeed",
+        "baseValue": -30,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.the_three_chains.break_75",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.volgrin.broken_chain",
+        "baseValue": 1,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.the_three_chains.break_75_armor",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Armor",
+        "scalingCoefficient": -0.15,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.the_three_chains.break_75_resistance",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Resistance",
+        "scalingCoefficient": -0.15,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.the_three_chains.break_75_attack_speed",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "AttackSpeed",
+        "baseValue": 15,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.the_three_chains.break_50",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.volgrin.broken_chain",
+        "baseValue": 1,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.the_three_chains.break_50_armor",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Armor",
+        "scalingCoefficient": -0.15,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.the_three_chains.break_50_resistance",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Resistance",
+        "scalingCoefficient": -0.15,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.the_three_chains.break_50_attack_speed",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "AttackSpeed",
+        "baseValue": 15,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.the_three_chains.break_25",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.volgrin.broken_chain",
+        "baseValue": 1,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.the_three_chains.break_25_armor",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Armor",
+        "scalingCoefficient": -0.15,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.the_three_chains.break_25_resistance",
+        "operation": "ModifyAttributePercentOfInitial",
+        "target": "Self",
+        "attribute": "Resistance",
+        "scalingCoefficient": -0.15,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.the_three_chains.break_25_attack_speed",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "AttackSpeed",
+        "baseValue": 15,
+        "uses": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.volgrin.the_three_chains.final_thunder",
+        "operation": "Damage",
+        "target": "TwoRandomEnemies",
+        "excludeEventTarget": true,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.35,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "tags": ["Damage.Secondary"],
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.nhalia.drowned_constellation",
+    "kind": "Active",
+    "name": "Drowned Constellation",
+    "description": "Deal 100% Magical Damage to all enemies. During High Tide, each target also gains 1 Soaked.",
+    "cooldownTicks": 110,
+    "tags": ["Magical", "Ranged", "Area", "Tide", "Soaked"],
+    "effects": [
+      {
+        "id": "effect.creature.nhalia.drowned_constellation.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.0,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.nhalia.moonfall",
+    "kind": "Active",
+    "name": "Moonfall",
+    "description": "Deal 240% Magical Damage, plus 20% for each Soaked, to the enemy with the most Soaked. Ignores Taunt.",
+    "cooldownTicks": 140,
+    "tags": ["Magical", "Ranged", "SingleTarget", "Tide", "Soaked"],
+    "effects": [
+      {
+        "id": "effect.creature.nhalia.moonfall.damage",
+        "operation": "Damage",
+        "target": "HighestConditionStacksEnemy",
+        "targetCondition": "Soaked",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.4,
+        "scalingCondition": "Soaked",
+        "scalingConditionSubject": "Target",
+        "conditionScalingCoefficient": 0.2,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.nhalia.turning_of_the_dead_moon",
+    "kind": "Active",
+    "name": "Turning of the Dead Moon",
+    "description": "Begin in High Tide and alternate tides every 20 seconds. High Tide grants 50% initial Armor and makes damaging attacks apply Soaked. Low Tide grants 50% initial Resistance and detonates every Soaked for 40% Magical Damage.",
+    "cooldownTicks": 200,
+    "tags": ["Magical", "Ranged", "Area", "Tide", "Soaked", "Stance"],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": ["effect.creature.nhalia.turning.apply_high_tide"]
+      },
+      {
+        "event": "OnAbilityUsed",
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "subject": "Source",
+            "statusId": "ability.creature.nhalia.turning_of_the_dead_moon"
+          }
+        ],
+        "effectIds": ["effect.creature.nhalia.turning.toggle_tide"]
+      },
+      {
+        "event": "OnDamageDealt",
+        "conditions": [
+          { "type": "EventSourceIsSelf" },
+          { "type": "EventWasDirectHit" },
+          {
+            "type": "HasStatus",
+            "subject": "Source",
+            "statusId": "status.nhalia.high_tide"
+          }
+        ],
+        "effectIds": ["effect.creature.nhalia.turning.apply_soaked"]
+      },
+      {
+        "event": "OnStatusApplied",
+        "conditions": [
+          { "type": "EventIdIs", "statusId": "status.nhalia.high_tide" }
+        ],
+        "effectIds": ["effect.creature.nhalia.turning.high_tide_armor"]
+      },
+      {
+        "event": "OnStatusRemoved",
+        "conditions": [
+          { "type": "EventIdIs", "statusId": "status.nhalia.high_tide" }
+        ],
+        "effectIds": ["effect.creature.nhalia.turning.high_tide_armor"]
+      },
+      {
+        "event": "OnStatusApplied",
+        "conditions": [
+          { "type": "EventIdIs", "statusId": "status.nhalia.low_tide" }
+        ],
+        "effectIds": [
+          "effect.creature.nhalia.turning.low_tide_resistance",
+          "effect.creature.nhalia.turning.low_tide_detonation"
+        ]
+      },
+      {
+        "event": "OnStatusRemoved",
+        "conditions": [
+          { "type": "EventIdIs", "statusId": "status.nhalia.low_tide" }
+        ],
+        "effectIds": ["effect.creature.nhalia.turning.low_tide_resistance"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.nhalia.turning.apply_high_tide",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.nhalia.high_tide",
+        "baseValue": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.nhalia.turning.toggle_tide",
+        "operation": "ToggleStatus",
+        "target": "Self",
+        "statusId": "status.nhalia.high_tide",
+        "alternativeStatusId": "status.nhalia.low_tide",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.nhalia.turning.high_tide_armor",
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.nhalia.high_tide",
+        "attribute": "Armor",
+        "scalingCoefficient": 0.5,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.nhalia.turning.low_tide_resistance",
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.nhalia.low_tide",
+        "attribute": "Resistance",
+        "scalingCoefficient": 0.5,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.nhalia.turning.low_tide_detonation",
+        "operation": "ConsumeConditionStacks",
+        "target": "AllEnemies",
+        "baseValue": 10,
+        "condition": "Soaked",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.4,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.nhalia.turning.apply_soaked",
+        "operation": "ApplyCondition",
+        "target": "EventTarget",
+        "baseValue": 1,
+        "condition": "Soaked",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.nhalia.gravitational_undertow",
+    "kind": "Passive",
+    "name": "Gravitational Undertow",
+    "description": "Whenever an enemy receives effective healing, Nhalia heals for 20% of the amount restored.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Healing", "Tide", "AntiSustain"],
+    "triggers": [
+      {
+        "event": "OnEnemyHealed",
+        "effectIds": ["effect.creature.nhalia.gravitational_undertow.heal"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.nhalia.gravitational_undertow.heal",
+        "operation": "Heal",
+        "target": "Self",
+        "eventMagnitudeCoefficient": 0.2,
+        "critEligibility": "Disallowed",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.caldris.meteor_hammer",
+    "kind": "Active",
+    "name": "Meteor Hammer",
+    "description": "Deal 210% Physical Damage to the current target, plus 35% for each Shattered Plate.",
+    "cooldownTicks": 100,
+    "tags": ["Physical", "Melee", "SingleTarget", "StarIron", "ShatteredPlate"],
+    "effects": [
+      {
+        "id": "effect.creature.caldris.meteor_hammer.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.1,
+        "scalingStatusId": "status.caldris.shattered_plate",
+        "statusScalingAttribute": "Power",
+        "statusScalingCoefficient": 0.35,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.caldris.blackstar_quake",
+    "kind": "Active",
+    "name": "Blackstar Quake",
+    "description": "Deal 100% Physical Damage to all enemies.",
+    "cooldownTicks": 160,
+    "tags": ["Physical", "Melee", "Area", "StarIron"],
+    "effects": [
+      {
+        "id": "effect.creature.caldris.blackstar_quake.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.0,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.caldris.reforge",
+    "kind": "Active",
+    "name": "Reforge",
+    "description": "Restore one shattered Star-Iron Plate and remove one corresponding offensive stack. Staggering Caldris resets this cooldown.",
+    "cooldownTicks": 200,
+    "tags": ["Defense", "StarIron", "Reforge"],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "conditions": [
+          {
+            "type": "HasStatus",
+            "subject": "Source",
+            "statusId": "status.caldris.shattered_plate"
+          }
+        ],
+        "effectIds": [
+          "effect.creature.caldris.reforge.restore_plate",
+          "effect.creature.caldris.reforge.remove_shattered_plate"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.caldris.reforge.restore_plate",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.caldris.star_iron_plate",
+        "baseValue": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.caldris.reforge.remove_shattered_plate",
+        "operation": "ModifyStatusStacks",
+        "target": "Self",
+        "statusId": "status.caldris.shattered_plate",
+        "baseValue": -1,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.caldris.the_unlit_forge",
+    "kind": "Passive",
+    "name": "The Unlit Forge",
+    "description": "Begin combat with 4 Star-Iron Plates, each granting 8% Damage Reduction. Staggering shatters one plate and resets Reforge. Each Shattered Plate grants 10% Power and 8 Attack Speed.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Stagger", "StarIron", "RiskReward", "Reforge"],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": ["effect.creature.caldris.the_unlit_forge.initial_plates"]
+      },
+      {
+        "event": "OnStatusApplied",
+        "conditions": [
+          { "type": "EventIdIs", "statusId": "status.caldris.star_iron_plate" }
+        ],
+        "effectIds": [
+          "effect.creature.caldris.the_unlit_forge.damage_reduction"
+        ]
+      },
+      {
+        "event": "OnStatusChanged",
+        "conditions": [
+          { "type": "EventIdIs", "statusId": "status.caldris.star_iron_plate" }
+        ],
+        "effectIds": [
+          "effect.creature.caldris.the_unlit_forge.damage_reduction"
+        ]
+      },
+      {
+        "event": "OnStatusRemoved",
+        "conditions": [
+          { "type": "EventIdIs", "statusId": "status.caldris.star_iron_plate" }
+        ],
+        "effectIds": [
+          "effect.creature.caldris.the_unlit_forge.damage_reduction"
+        ]
+      },
+      {
+        "event": "OnStatusApplied",
+        "conditions": [
+          { "type": "EventIdIs", "statusId": "status.caldris.shattered_plate" }
+        ],
+        "effectIds": [
+          "effect.creature.caldris.the_unlit_forge.power",
+          "effect.creature.caldris.the_unlit_forge.attack_speed"
+        ]
+      },
+      {
+        "event": "OnStatusChanged",
+        "conditions": [
+          { "type": "EventIdIs", "statusId": "status.caldris.shattered_plate" }
+        ],
+        "effectIds": [
+          "effect.creature.caldris.the_unlit_forge.power",
+          "effect.creature.caldris.the_unlit_forge.attack_speed"
+        ]
+      },
+      {
+        "event": "OnStatusRemoved",
+        "conditions": [
+          { "type": "EventIdIs", "statusId": "status.caldris.shattered_plate" }
+        ],
+        "effectIds": [
+          "effect.creature.caldris.the_unlit_forge.power",
+          "effect.creature.caldris.the_unlit_forge.attack_speed"
+        ]
+      },
+      {
+        "event": "OnStaggerBroken",
+        "effectIds": [
+          "effect.creature.caldris.the_unlit_forge.shatter_plate",
+          "effect.creature.caldris.the_unlit_forge.gain_shattered_plate",
+          "effect.creature.caldris.the_unlit_forge.reset_reforge"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.caldris.the_unlit_forge.initial_plates",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.caldris.star_iron_plate",
+        "baseValue": 4,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.caldris.the_unlit_forge.damage_reduction",
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.caldris.star_iron_plate",
+        "attribute": "DamageReduction",
+        "baseValue": 8,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.caldris.the_unlit_forge.power",
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.caldris.shattered_plate",
+        "attribute": "Power",
+        "scalingCoefficient": 0.1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.caldris.the_unlit_forge.attack_speed",
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.caldris.shattered_plate",
+        "attribute": "AttackSpeed",
+        "baseValue": 8,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.caldris.the_unlit_forge.shatter_plate",
+        "operation": "ModifyStatusStacks",
+        "target": "Self",
+        "statusId": "status.caldris.star_iron_plate",
+        "baseValue": -1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.caldris.the_unlit_forge.gain_shattered_plate",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.caldris.shattered_plate",
+        "baseValue": 1,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.caldris.the_unlit_forge.reset_reforge",
+        "operation": "ResetAbilityCooldown",
+        "target": "Self",
+        "abilityId": "ability.creature.caldris.reforge",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.alpha_wolf.alpha_fangs",
+    "kind": "Active",
+    "name": "Alpha Fangs",
+    "description": "Bite the target, dealing 240% Physical Damage.",
+    "cooldownTicks": 170,
+    "tags": ["Physical", "Melee"],
+    "owningEssenceId": "essence.alpha_wolf",
+    "effects": [
+      {
+        "id": "effect.creature.alpha_wolf.alpha_fangs.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.4,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.alpha_wolf.ruthless_instinct",
+    "kind": "Passive",
+    "name": "Ruthless Instinct",
+    "description": "Increase Critical Damage by 18% while you outnumber the opposing pack.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Physical", "Pack"],
+    "owningEssenceId": "essence.alpha_wolf",
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.creature.alpha_wolf.ruthless_instinct.crit_damage"
+        ]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": [
+          "effect.creature.alpha_wolf.ruthless_instinct.crit_damage"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.alpha_wolf.ruthless_instinct.crit_damage",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "baseValue": 18,
+        "attribute": "CritDamage",
+        "maintainWhileConditionsMet": true,
+        "conditions": [{ "type": "OutnumbersEnemies" }],
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.dire_wolf.dire_fangs",
+    "kind": "Active",
+    "name": "Dire Fangs",
+    "description": "Bite the target, dealing 110% Physical Damage and applying 10 Bleed.",
+    "cooldownTicks": 100,
+    "tags": ["Physical", "Melee", "Bleed"],
+    "owningEssenceId": "essence.dire_wolf",
+    "effects": [
+      {
+        "id": "effect.creature.dire_wolf.dire_fangs.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.1,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.dire_wolf.dire_fangs.bleed",
+        "operation": "ApplyCondition",
+        "target": "CurrentTarget",
+        "baseValue": 10,
+        "condition": "Bleed",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.dire_wolf.hunting_instinct",
+    "kind": "Passive",
+    "name": "Hunting Instinct",
+    "description": "Increase Critical Chance by 6% while you outnumber the opposing pack.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Physical", "Pack"],
+    "owningEssenceId": "essence.dire_wolf",
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": ["effect.creature.dire_wolf.hunting_instinct.crit_chance"]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": ["effect.creature.dire_wolf.hunting_instinct.crit_chance"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.dire_wolf.hunting_instinct.crit_chance",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "baseValue": 6,
+        "attribute": "CritChance",
+        "maintainWhileConditionsMet": true,
+        "conditions": [{ "type": "OutnumbersEnemies" }],
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.horned_wolf.piercing_horn",
+    "kind": "Active",
+    "name": "Piercing Horn",
+    "description": "Deal 165% Physical Damage and reduce the target's Physical Defense by {scaling2} for {duration}.",
+    "cooldownTicks": 130,
+    "tags": ["Physical", "Melee", "DefenseBreak"],
+    "owningEssenceId": "essence.horned_wolf",
+    "effects": [
+      {
+        "id": "effect.creature.horned_wolf.piercing_horn.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.65,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.horned_wolf.piercing_horn.armor_reduction",
+        "operation": "ModifyAttribute",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Armor",
+        "scalingAttributeSubject": "Target",
+        "scalingCoefficient": -0.08,
+        "attribute": "Armor",
+        "durationTicks": 80,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.horned_wolf.protective_instinct",
+    "kind": "Passive",
+    "name": "Protective Instinct",
+    "description": "While at least one non-summoned ally is alive, increase Armor Rating by 8%.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Defensive", "Pack"],
+    "owningEssenceId": "essence.horned_wolf",
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": ["effect.creature.horned_wolf.protective_instinct.armor"]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": ["effect.creature.horned_wolf.protective_instinct.armor"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.horned_wolf.protective_instinct.armor",
+        "operation": "SynchronizeAttributePerLivingNonSummonedAlly",
+        "target": "Self",
+        "attribute": "Armor",
+        "scalingCoefficient": 0.08,
+        "maximumCount": 1,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.bloodfang_wolf.bloodfang_bite",
+    "kind": "Active",
+    "name": "Bloodfang Bite",
+    "description": "Bite the target for 60% Physical Damage, then deal an additional 200% Physical Damage if it is Bleeding.",
+    "cooldownTicks": 120,
+    "tags": ["Physical", "Melee", "Bleed"],
+    "owningEssenceId": "essence.bloodfang_wolf",
+    "effects": [
+      {
+        "id": "effect.creature.bloodfang_wolf.bloodfang_bite.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.6,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.bloodfang_wolf.bloodfang_bite.bleeding_bonus",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.0,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "conditions": [
+          { "type": "HasCondition", "subject": "Target", "condition": "Bleed" }
+        ],
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.bloodfang_wolf.cruel_precision",
+    "kind": "Passive",
+    "name": "Cruel Precision",
+    "description": "Increase Critical Damage by 18% against Bleeding targets.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Physical", "Bleed"],
+    "owningEssenceId": "essence.bloodfang_wolf",
+    "effects": [
+      {
+        "id": "effect.creature.bloodfang_wolf.cruel_precision.crit_damage",
+        "operation": "ModifyCriticalDamageAgainstCondition",
+        "target": "Self",
+        "baseValue": 18,
+        "condition": "Bleed",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.pack_howler.coordinated_attack",
+    "kind": "Active",
+    "name": "Coordinated Attack",
+    "description": "You and your non-summoned allies immediately perform a basic attack.",
+    "cooldownTicks": 150,
+    "tags": ["Physical", "Melee", "Support", "Pack"],
+    "owningEssenceId": "essence.pack_howler",
+    "effects": [
+      {
+        "id": "effect.creature.pack_howler.coordinated_attack.basic_attacks",
+        "operation": "PerformBasicAttack",
+        "target": "NonSummonedAllies",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.pack_howler.strength_of_the_pack",
+    "kind": "Passive",
+    "name": "Strength of the Pack",
+    "description": "Increase Power by 6% for each living ally, up to 18%.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Physical", "Pack"],
+    "owningEssenceId": "essence.pack_howler",
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": ["effect.creature.pack_howler.strength_of_the_pack.power"]
+      },
+      {
+        "event": "OnHealthChanged",
+        "effectIds": ["effect.creature.pack_howler.strength_of_the_pack.power"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.pack_howler.strength_of_the_pack.power",
+        "operation": "SynchronizeAttributePerLivingNonSummonedAlly",
+        "target": "Self",
+        "attribute": "Power",
+        "scalingCoefficient": 0.06,
+        "maximumCount": 3,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.serath.weight_of_flesh",
+    "kind": "Active",
+    "name": "Weight of Flesh",
+    "description": "Deal 220% Physical Damage to the living non-summoned enemy with the highest current Health percentage. Ignores Taunt; ties are random.",
+    "cooldownTicks": 100,
+    "tags": ["Physical", "Melee", "SingleTarget", "LivingScale"],
+    "effects": [
+      {
+        "id": "effect.creature.serath.weight_of_flesh.damage",
+        "operation": "Damage",
+        "target": "HighestHealthEnemy",
+        "ignoreTaunt": true,
+        "excludeSummons": true,
+        "useHealthPercentage": true,
+        "randomizeTies": true,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.2,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.serath.weight_of_spirit",
+    "kind": "Active",
+    "name": "Weight of Spirit",
+    "description": "Deal 190% Magical Damage to the living non-summoned enemy with the lowest current Health percentage and apply Wound(8). Ignores Taunt; ties are random.",
+    "cooldownTicks": 120,
+    "tags": ["Magical", "Ranged", "SingleTarget", "Wound", "LivingScale"],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": ["effect.creature.serath.weight_of_spirit.damage"]
+      },
+      {
+        "event": "OnDamageDealt",
+        "conditions": [
+          { "type": "EventSourceIsSelf" },
+          {
+            "type": "EventIdIs",
+            "statusId": "effect.creature.serath.weight_of_spirit.damage"
+          }
+        ],
+        "effectIds": ["effect.creature.serath.weight_of_spirit.wound"]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.serath.weight_of_spirit.damage",
+        "operation": "Damage",
+        "target": "LowestHealthEnemy",
+        "ignoreTaunt": true,
+        "excludeSummons": true,
+        "useHealthPercentage": true,
+        "randomizeTies": true,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.9,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.serath.weight_of_spirit.wound",
+        "operation": "ApplyCondition",
+        "target": "EventTarget",
+        "baseValue": 8,
+        "condition": "Wound",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.serath.sixfold_sentence",
+    "kind": "Active",
+    "name": "Sixfold Sentence",
+    "description": "Deal 55% Physical Damage to three random enemies, then deal 55% Magical Damage to three independently selected random enemies.",
+    "cooldownTicks": 170,
+    "tags": ["Physical", "Magical", "Melee", "Ranged", "MultiTarget", "LivingScale"],
+    "effects": [
+      {
+        "id": "effect.creature.serath.sixfold_sentence.physical_damage",
+        "operation": "Damage",
+        "target": "ThreeRandomEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.55,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.serath.sixfold_sentence.magical_damage",
+        "operation": "Damage",
+        "target": "ThreeRandomEnemies",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.55,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.serath.the_living_scale",
+    "kind": "Passive",
+    "name": "The Living Scale",
+    "description": "Beginning 10 seconds into combat and every 15 seconds thereafter, compare the highest and lowest Health percentages among living non-summoned enemies. A spread of 12 percentage points or less gives Serath Doubt and 15% increased damage taken; a wider spread gives Conviction, 15% Power, and 15 Attack Speed. With fewer than two eligible enemies, Serath gains Conviction.",
+    "cooldownTicks": 0,
+    "tags": ["Passive", "Interval", "LivingScale", "RiskReward", "Warden"],
+    "triggers": [
+      {
+        "event": "OnInterval",
+        "initialDelayTicks": 100,
+        "internalCooldownTicks": 150,
+        "effectIds": [
+          "effect.creature.serath.the_living_scale.remove_conviction",
+          "effect.creature.serath.the_living_scale.apply_doubt",
+          "effect.creature.serath.the_living_scale.remove_doubt",
+          "effect.creature.serath.the_living_scale.apply_conviction",
+          "effect.creature.serath.the_living_scale.doubt_damage_taken",
+          "effect.creature.serath.the_living_scale.conviction_power",
+          "effect.creature.serath.the_living_scale.conviction_attack_speed"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.serath.the_living_scale.remove_conviction",
+        "operation": "RemoveStatus",
+        "target": "Self",
+        "statusId": "status.serath.conviction",
+        "conditions": [
+          { "type": "NonSummonedEnemyHealthSpreadAtMostPercent", "value": 12 }
+        ],
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.serath.the_living_scale.apply_doubt",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.serath.doubt",
+        "baseValue": 1,
+        "conditions": [
+          { "type": "NonSummonedEnemyHealthSpreadAtMostPercent", "value": 12 }
+        ],
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.serath.the_living_scale.remove_doubt",
+        "operation": "RemoveStatus",
+        "target": "Self",
+        "statusId": "status.serath.doubt",
+        "conditions": [
+          { "type": "NonSummonedEnemyHealthSpreadAbovePercent", "value": 12 }
+        ],
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.serath.the_living_scale.apply_conviction",
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.serath.conviction",
+        "baseValue": 1,
+        "conditions": [
+          { "type": "NonSummonedEnemyHealthSpreadAbovePercent", "value": 12 }
+        ],
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.serath.the_living_scale.doubt_damage_taken",
+        "operation": "ModifyDamageTaken",
+        "target": "Self",
+        "baseValue": 15,
+        "maintainWhileConditionsMet": true,
+        "conditions": [
+          {
+            "type": "HasStatus",
+            "subject": "Source",
+            "statusId": "status.serath.doubt"
+          }
+        ],
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.serath.the_living_scale.conviction_power",
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.serath.conviction",
+        "attribute": "Power",
+        "scalingCoefficient": 0.15,
+        "procCoefficient": 1
+      },
+      {
+        "id": "effect.creature.serath.the_living_scale.conviction_attack_speed",
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.serath.conviction",
+        "attribute": "AttackSpeed",
+        "baseValue": 15,
+        "procCoefficient": 1
+      }
+    ]
   }
 ]

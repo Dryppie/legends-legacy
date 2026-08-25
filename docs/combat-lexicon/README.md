@@ -36,6 +36,8 @@ When sources disagree, use this order:
 | [condition.burn](conditions/burn.md)                   | Burn          | Implemented | 1% Magical per stack, every 1s for 4s.                       |
 | [condition.bleed](conditions/bleed.md)                 | Bleed         | Implemented | 1% Physical per stack, every 2s for 8s.                      |
 | [condition.stun](conditions/stun.md)                   | Stun          | Implemented | 80% base chance for X seconds of hard control.               |
+| [condition.silence](conditions/silence.md)             | Silence       | Implemented | Blocks active abilities for X seconds; Ward can negate it.   |
+| [condition.soaked](conditions/soaked.md)               | Soaked        | Implemented | Permanent shared encounter stacks capped at 10.              |
 | [condition.taunt](conditions/taunt.md)                 | Taunt         | Implemented | Taunt(X) increases weighted Threat for X seconds.            |
 | [condition.stealth](conditions/stealth.md)             | Stealth       | Implemented | Stealth(X) overrides effective Threat to 1 for X seconds.    |
 | [condition.chill](conditions/chill.md)                 | Chill         | Implemented | Up to 20 stacks; each applies -1% Attack Speed for 10s.      |
@@ -45,7 +47,7 @@ When sources disagree, use this order:
 | [condition.thorns](conditions/thorns.md)               | Thorns        | Implemented | Independent timed reflection percentages sum.               |
 | [condition.lifesteal](conditions/lifesteal.md)         | Lifesteal     | Implemented | Eligible direct damage restores health within the 50% cap.   |
 
-Status totals: **26 Implemented**, **0 Partially Implemented**, **0 Proposed**, **0 Deprecated**, **0 Unknown**.
+Status totals: **28 Implemented**, **0 Partially Implemented**, **0 Proposed**, **0 Deprecated**, **0 Unknown**.
 
 ## Reference
 
@@ -68,6 +70,6 @@ Status totals: **26 Implemented**, **0 Partially Implemented**, **0 Proposed**, 
 ## Scope
 
 The standard-condition contracts are implemented by the typed ability and combat runtime. Authored
-Burn, Bleed, Poison, Chill, Freeze, Stun, Empower, Weaken, Vulnerable, Taunt, Decay, and Thorns
+Burn, Bleed, Poison, Chill, Freeze, Stun, Silence, Soaked, Empower, Weaken, Vulnerable, Taunt, Decay, and Thorns
 effects use `ApplyCondition`. Legacy `ApplyStatus` remains available only for bespoke status
 behaviour that has no standard-condition equivalent.

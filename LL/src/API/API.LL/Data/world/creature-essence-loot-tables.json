@@ -902,6 +902,26 @@
           {"essenceDefinitionId": "essence.wind_harpy", "activeAbilityId": "ability.creature.wind_harpy.gale_slash", "weight": 1}
         ]
       }
+    },
+    {
+      "id": "monster.alpha_wolf",
+      "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.alpha_wolf.ruthless_instinct", "variants": [{"essenceDefinitionId": "essence.alpha_wolf", "activeAbilityId": "ability.creature.alpha_wolf.alpha_fangs", "weight": 1}]}
+    },
+    {
+      "id": "monster.dire_wolf",
+      "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.dire_wolf.hunting_instinct", "variants": [{"essenceDefinitionId": "essence.dire_wolf", "activeAbilityId": "ability.creature.dire_wolf.dire_fangs", "weight": 1}]}
+    },
+    {
+      "id": "monster.horned_wolf",
+      "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.horned_wolf.protective_instinct", "variants": [{"essenceDefinitionId": "essence.horned_wolf", "activeAbilityId": "ability.creature.horned_wolf.piercing_horn", "weight": 1}]}
+    },
+    {
+      "id": "monster.bloodfang_wolf",
+      "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.bloodfang_wolf.cruel_precision", "variants": [{"essenceDefinitionId": "essence.bloodfang_wolf", "activeAbilityId": "ability.creature.bloodfang_wolf.bloodfang_bite", "weight": 1}]}
+    },
+    {
+      "id": "monster.pack_howler",
+      "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.pack_howler.strength_of_the_pack", "variants": [{"essenceDefinitionId": "essence.pack_howler", "activeAbilityId": "ability.creature.pack_howler.coordinated_attack", "weight": 1}]}
     }
   ]
 }

@@ -16,7 +16,7 @@ Abilities reference canonical conditions through the strongly typed `ApplyCondit
 
 `baseValue` is the player-facing X in `Condition(X)`:
 
-- stack count for Bleed, Burn, Poison, Chill, Corrosion, and Vulnerable;
+- stack count for Bleed, Burn, Poison, Chill, Corrosion, Vulnerable, and Soaked;
 - seconds for Freeze, Stun, Taunt, Stealth, Unstoppable, Wound, Recovery, Decay, and Renewal;
 - charges for Guard and Ward;
 - Power percentage for Doom;
@@ -55,9 +55,11 @@ Effects and triggers can use `HasCondition` or `ConditionStacksAtLeast`:
 }
 ```
 
+Encounter mechanics can compare the Health distribution of the opposing party with `NonSummonedEnemyHealthSpreadAtMostPercent` and `NonSummonedEnemyHealthSpreadAbovePercent`. Both ignore dead combatants and summons. The `AtMost` comparison is inclusive; when fewer than two eligible enemies remain it is false and `Above` is true, allowing encounter content to define an automatic fallback state.
+
 ## Cleanse and Dispel
 
-`Cleanse` removes harmful standard conditions; `Dispel` removes beneficial standard conditions. Set `condition` for targeted removal or omit it to process all eligible conditions according to each condition's removal contract.
+`Cleanse` removes harmful standard conditions; `Dispel` removes beneficial standard conditions. Set `condition` for targeted removal or omit it to process eligible conditions according to each condition's removal contract. For `Dispel`, a positive `baseValue` limits how many removable buffs are erased from each target; zero preserves remove-all behavior.
 
 ```json
 {
@@ -78,6 +80,10 @@ Guard and Ward cannot be removed. Independent Wound, Decay, Doom, Recovery, Rene
 - `ModifyRegenerationRate` adjusts Regeneration progress by percentage points.
 - `ModifyRegenerationInterval` adjusts the default 50-tick interval; negative values make Regeneration faster.
 - `ModifyAttribute` with `HealthRegeneration` changes the amount restored per trigger.
+- `ScaleStatusStacks` retains `floor(current stacks × baseValue / 100)` stacks and publishes the normal changed/removed lifecycle event. Author `baseValue` from 0 through 100.
+- `ToggleStatus` atomically removes `statusId` and applies `alternativeStatusId`, or performs the reverse when the alternative is active. If neither exists, it applies `statusId`.
+- `ResetAbilityCooldown` sets the named active `abilityId` to its full effective cooldown on the selected target. It respects that target's Cooldown Reduction and does not alter other active or trigger cooldowns.
+- `HighestConditionStacksEnemy` requires `targetCondition`; it ignores Threat and Taunt and randomly resolves equal stack counts.
 
 Timed modifier operations apply immediately and reverse their own value at expiration.
 

@@ -19,6 +19,9 @@ public static class EssenceAbilityProgressionScaler
 
         foreach (var effect in scaled.Effects)
         {
+            if (!effect.ScalesWithAscension)
+                continue;
+
             var valueMultiplier = EssenceProgressionConstants.ScaleAbilityValue(
                 1d,
                 ascensionTier,
@@ -91,6 +94,7 @@ public static class EssenceAbilityProgressionScaler
             or AbilityEffectOperation.ModifyDamageDealt
             or AbilityEffectOperation.ModifyDamageTaken
             or AbilityEffectOperation.ModifyDamageTakenFromCondition
+            or AbilityEffectOperation.ModifyCriticalDamageAgainstCondition
             or AbilityEffectOperation.ModifyNextBasicAttackDamage
             or AbilityEffectOperation.ModifyNextBasicAttackArmorPenetration;
 
@@ -195,6 +199,7 @@ public static class EssenceAbilityProgressionScaler
             Id = effect.Id,
             Operation = effect.Operation,
             Target = effect.Target,
+            ScalesWithAscension = effect.ScalesWithAscension,
             BaseValue = effect.BaseValue,
             ScalingAttribute = effect.ScalingAttribute,
             ScalingAttributeSubject = effect.ScalingAttributeSubject,
@@ -213,10 +218,14 @@ public static class EssenceAbilityProgressionScaler
             MaximumHealingScalingCoefficient = effect.MaximumHealingScalingCoefficient,
             Attribute = effect.Attribute,
             StatusId = effect.StatusId,
+            AlternativeStatusId = effect.AlternativeStatusId,
+            AbilityId = effect.AbilityId,
             Condition = effect.Condition,
             AlternativeCondition = effect.AlternativeCondition,
+            TargetCondition = effect.TargetCondition,
             SummonId = effect.SummonId,
             CountAllOwnedSummons = effect.CountAllOwnedSummons,
+            MaximumCount = effect.MaximumCount,
             RepeatCount = effect.RepeatCount,
             HealthStepPercent = effect.HealthStepPercent,
             RepeatPerOwnedSummonId = effect.RepeatPerOwnedSummonId,
@@ -232,6 +241,11 @@ public static class EssenceAbilityProgressionScaler
             IntervalTicks = effect.IntervalTicks,
             Uses = effect.Uses,
             OncePerTarget = effect.OncePerTarget,
+            ExcludeEventTarget = effect.ExcludeEventTarget,
+            IgnoreTaunt = effect.IgnoreTaunt,
+            ExcludeSummons = effect.ExcludeSummons,
+            UseHealthPercentage = effect.UseHealthPercentage,
+            RandomizeTies = effect.RandomizeTies,
             GuaranteedConditionApplication = effect.GuaranteedConditionApplication,
             StaggerPower = effect.StaggerPower,
             MaintainWhileConditionsMet = effect.MaintainWhileConditionsMet,

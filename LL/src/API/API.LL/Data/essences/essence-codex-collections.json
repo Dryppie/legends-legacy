@@ -336,6 +336,25 @@
         "valuePerCollectionAscensionTier": 15,
         "description": "+0.75% Essence drop rate."
       }
+    },
+    {
+      "id": "codex.collection.meran.wolfsbane-reach-pack",
+      "title": "Pack of Wolfsbane Reach",
+      "description": "Archive the rival hunters that survive Wolfsbane Reach through blood, horns, and pack discipline.",
+      "category": "Creature Families",
+      "essenceDefinitionIds": [
+        "essence.alpha_wolf",
+        "essence.dire_wolf",
+        "essence.horned_wolf",
+        "essence.bloodfang_wolf",
+        "essence.pack_howler"
+      ],
+      "bonus": {
+        "kind": "EssenceDropRateRelativeBps",
+        "value": 75,
+        "valuePerCollectionAscensionTier": 15,
+        "description": "+0.75% Essence drop rate."
+      }
     }
   ]
 }

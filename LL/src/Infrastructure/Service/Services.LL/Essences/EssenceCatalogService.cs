@@ -178,6 +178,7 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
             "region_02_area_01" => 1,
             "region_02_area_02" => 2,
             "region_02_area_03" => 3,
+            "region_02_area_04" => 4,
             _ => int.MaxValue
         };
 
@@ -267,6 +268,11 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
         new("region_02_area_03", "Tempest Aerie", "Idle Area", "T2", "Ice Harpy", "ice_harpy"),
         new("region_02_area_03", "Tempest Aerie", "Idle Area", "T2", "Shadow Harpy", "shadow_harpy"),
         new("region_02_area_03", "Tempest Aerie", "Idle Area", "T2", "Wind Harpy", "wind_harpy"),
+        new("region_02_area_04", "Wolfsbane Reach", "Idle Area", "T2", "Alpha Wolf", "alpha_wolf"),
+        new("region_02_area_04", "Wolfsbane Reach", "Idle Area", "T2", "Dire Wolf", "dire_wolf"),
+        new("region_02_area_04", "Wolfsbane Reach", "Idle Area", "T2", "Horned Wolf", "horned_wolf"),
+        new("region_02_area_04", "Wolfsbane Reach", "Idle Area", "T2", "Bloodfang Wolf", "bloodfang_wolf"),
+        new("region_02_area_04", "Wolfsbane Reach", "Idle Area", "T2", "Pack Howler", "pack_howler"),
         new("region_02_dungeon_tangled_cave", "Tangled Cave", "Dungeon", "T1-T3", "Web Weaver Spider", "web_weaver_spider"),
         new("region_02_dungeon_tangled_cave", "Tangled Cave", "Dungeon", "T1-T3", "Spider Queen", "spider_queen"),
         new("region_02_dungeon_great_tree", "The Great Tree", "Dungeon", "T1-T3", "Bark Golem", "bark_golem"),

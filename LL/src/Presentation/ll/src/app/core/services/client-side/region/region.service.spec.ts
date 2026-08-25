@@ -30,6 +30,7 @@ describe('RegionService', () => {
       'Warfang Frontier',
       'Rotgrave Fields',
       'Tempest Aerie',
+      'Wolfsbane Reach',
     ]);
     expect(region.areas[0].creatures).toEqual([
       'Gnoll Pack Leader',
@@ -54,6 +55,13 @@ describe('RegionService', () => {
     expect(region.areas[2].gatheringTypes).toEqual([
       GatheringType.Woodcutting,
     ]);
+    expect(region.areas[3].creatures).toEqual([
+      'Alpha Wolf',
+      'Dire Wolf',
+      'Horned Wolf',
+      'Bloodfang Wolf',
+      'Pack Howler',
+    ]);
   });
 
   it('resolves the parent region from an area id', () => {
@@ -62,6 +70,7 @@ describe('RegionService', () => {
     expect(service.getRegionNameByAreaId('region_01_area_01')).toBe('Shenic');
     expect(service.getRegionNameByAreaId('region_02_area_02')).toBe('Meran');
     expect(service.getRegionNameByAreaId('region_02_area_03')).toBe('Meran');
+    expect(service.getRegionNameByAreaId('region_02_area_04')).toBe('Meran');
     expect(service.getRegionNameByAreaId('unknown_area')).toBeNull();
   });
 

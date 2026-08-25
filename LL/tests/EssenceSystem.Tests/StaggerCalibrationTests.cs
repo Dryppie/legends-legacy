@@ -14,8 +14,8 @@ public sealed class StaggerCalibrationTests
 
         Assert.Equal(1, catalog.Version);
         Assert.Equal(1_800, catalog.EvaluationDurationTicks);
-        Assert.Equal(19, catalog.Encounters.Count);
-        Assert.Equal(10, catalog.Encounters.Count(encounter =>
+        Assert.Equal(24, catalog.Encounters.Count);
+        Assert.Equal(15, catalog.Encounters.Count(encounter =>
             encounter.ContentType == StaggerCalibrationContentType.Tower));
         Assert.Equal(5, catalog.Encounters.Count(encounter =>
             encounter.ContentType == StaggerCalibrationContentType.Raid));
@@ -51,14 +51,18 @@ public sealed class StaggerCalibrationTests
         var first = runner.Run(catalog);
         var second = runner.Run(catalog);
 
-        Assert.Equal(171, first.Results.Count);
-        Assert.Equal(2_736, first.Results.Sum(result => result.SampleCount));
+        Assert.Equal(216, first.Results.Count);
+        Assert.Equal(3_456, first.Results.Sum(result => result.SampleCount));
         Assert.Equal(
             JsonSerializer.Serialize(first),
             JsonSerializer.Serialize(second));
         Assert.All(first.Results, result =>
         {
-            Assert.InRange(result.AverageBreaks, 0, 4);
+            var maximumBreaks = catalog.Encounters.Single(encounter =>
+                encounter.Id == result.EncounterId).Definition.MaximumBreaks;
+            Assert.True(result.AverageBreaks >= 0);
+            if (maximumBreaks.HasValue)
+                Assert.True(result.AverageBreaks <= maximumBreaks.Value);
             Assert.InRange(result.AverageContributionEfficiencyPercent, 0, 100);
             Assert.InRange(result.AverageStaggerUptimePercent, 0, 100);
             Assert.InRange(result.BreakCapRate, 0, 1);

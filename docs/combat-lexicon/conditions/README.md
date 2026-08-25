@@ -22,6 +22,8 @@ Conditions use stable lowercase kebab-case IDs. Status reflects correspondence b
 | [Burn](burn.md)                   | Harmful, Damage over time | Implemented |
 | [Bleed](bleed.md)                 | Harmful, Damage over time | Implemented |
 | [Stun](stun.md)                   | Harmful, Control          | Implemented |
+| [Silence](silence.md)             | Harmful, Action denial    | Implemented |
+| [Soaked](soaked.md)               | Harmful, Encounter stack  | Implemented |
 | [Taunt](taunt.md)                 | Beneficial, Threat        | Implemented |
 | [Stealth](stealth.md)             | Beneficial, Threat        | Implemented |
 | [Chill](chill.md)                 | Harmful, Affliction       | Implemented |
@@ -31,6 +33,6 @@ Conditions use stable lowercase kebab-case IDs. Status reflects correspondence b
 | [Thorns](thorns.md)               | Beneficial, Reactive      | Implemented |
 | [Lifesteal](lifesteal.md)         | Beneficial, Sustain       | Implemented |
 
-Totals: **26 Implemented**, **0 Partially Implemented**, **0 Proposed**.
+Totals: **28 Implemented**, **0 Partially Implemented**, **0 Proposed**.
 
 See the [root catalogue](../README.md), [stacking rules](../stacking-and-duration.md), and [condition template](../templates/condition-template.md).
