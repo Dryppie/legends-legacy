@@ -110,23 +110,6 @@ export class ChatService {
     private gameEvents: GameRealtimeEventRegistry,
     private auth: AuthService,
   ) {
-    this.gameEvents
-      .eventEnvelope$('AchievementUnlocked')
-      .subscribe((envelope) => {
-        const payload = envelope?.payload;
-        if (!payload?.message) return;
-
-        this.addMessage({
-          id: envelope?.updateId ?? crypto.randomUUID(),
-          channelType: ChatChannelType.System,
-          contextKey: 'system',
-          senderId: this.systemSenderId,
-          senderName: payload.isGlobal ? 'World' : 'System',
-          body: payload.message,
-          sentAt: new Date(envelope?.occurredAt ?? Date.now()),
-        });
-      });
-
     this.gameEvents.eventEnvelope$('PlayerTransfer').subscribe((envelope) => {
       const payload = envelope?.payload;
       if (!payload?.message || !payload.messageId) return;

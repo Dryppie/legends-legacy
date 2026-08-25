@@ -1,10 +1,13 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.Prophecies;
 using Application.Interfaces.Services.LL.Rewards;
+using Application.UseCases.Prophecies.Events;
 using Domain.Models.Bonuses;
 using Domain.Models.Combat;
 using Domain.Models.Dungeons;
+using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities;
@@ -13,6 +16,7 @@ using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Rewards;
 using Microsoft.EntityFrameworkCore;
+using MediatR;
 using Persistence.LL;
 using Persistence.LL.Repositories.Items;
 using Services.LL.Combat.Layers.Rewards.Dungeon;
@@ -56,7 +60,8 @@ public sealed class DungeonEssenceRewardTests
             rewardRoller,
             new CapturingDungeonPendingRewardWriter(),
             new InventoryItemFactory(),
-            new NoOpDungeonMasteryService());
+            new NoOpDungeonMasteryService(),
+            new RecordingPublisher());
 
         await applier.ApplyAsync(run, CancellationToken.None);
 
@@ -102,7 +107,8 @@ public sealed class DungeonEssenceRewardTests
             rewardRoller,
             new CapturingDungeonPendingRewardWriter(),
             new InventoryItemFactory(),
-            new FixedDungeonMasteryService(previousLevel, awardedLevel, alreadyAwarded));
+            new FixedDungeonMasteryService(previousLevel, awardedLevel, alreadyAwarded),
+            new RecordingPublisher());
 
         await applier.ApplyAsync(run, CancellationToken.None);
 
@@ -132,7 +138,8 @@ public sealed class DungeonEssenceRewardTests
             new EmptyRewardRoller(),
             pendingRewards,
             new InventoryItemFactory(),
-            new NoOpDungeonMasteryService());
+            new NoOpDungeonMasteryService(),
+            new RecordingPublisher());
 
         await applier.ApplyAsync(new() { Id = Guid.NewGuid(), DungeonDefinitionId = "dungeon.tier_1" }, CancellationToken.None);
 
@@ -140,6 +147,78 @@ public sealed class DungeonEssenceRewardTests
         var reward = Assert.Single(batch.Loot);
         Assert.Equal("item.monster_core.lesser", reward.ItemInstance.ItemBaseId);
         Assert.InRange(reward.Quantity, 3, 6);
+    }
+
+    [Fact]
+    public async Task Dungeon_completion_items_publish_aggregated_treasure_prophecy_progress()
+    {
+        await using var db = CreateDb();
+        db.ItemBases.AddRange(
+            new ItemBase
+            {
+                Id = "completion_item",
+                Name = "Completion Item",
+                ItemType = ItemType.Resource,
+                Stackable = true
+            },
+            new ItemBase
+            {
+                Id = "item.monster_core.lesser",
+                Name = "Lesser Monster Core",
+                ItemType = ItemType.Resource,
+                Stackable = true
+            });
+        await db.SaveChangesAsync();
+
+        var run = new DungeonRun
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = Guid.NewGuid(),
+            DungeonDefinitionId = "completion_prophecy_dungeon",
+            CompletedAt = DateTimeOffset.UtcNow
+        };
+        var definition = new DungeonDefinition
+        {
+            Id = run.DungeonDefinitionId,
+            Tier = 1,
+            RewardTable = new DungeonRewardTable
+            {
+                CompletionRewards =
+                [
+                    new DungeonRewardGrant
+                    {
+                        ItemId = "completion_item",
+                        Chance = 1,
+                        MinAmount = 2,
+                        MaxAmount = 2
+                    }
+                ]
+            }
+        };
+        var pendingRewards = new CapturingDungeonPendingRewardWriter();
+        var publisher = new RecordingPublisher();
+        var applier = new DungeonCompletionRewardApplier(
+            new SingleDungeonDefinitions(definition),
+            new EmptyDungeonRunRepository(run),
+            new ItemBaseRepository(db),
+            new EmptyRewardRoller(),
+            pendingRewards,
+            new InventoryItemFactory(),
+            new NoOpDungeonMasteryService(),
+            publisher);
+
+        await applier.ApplyAsync(run, CancellationToken.None);
+
+        var expectedQuantity = pendingRewards.Batches
+            .SelectMany(batch => batch.Loot)
+            .Sum(item => Math.Max(1, item.Quantity));
+        var notification = Assert.IsType<ProphecyProgressNotification>(
+            Assert.Single(publisher.Notifications));
+        Assert.Equal(run.CharacterId, notification.ProgressEvent.CharacterId);
+        Assert.Equal(run.CompletedAt, notification.ProgressEvent.OccurredAt);
+        Assert.Equal(ProphecyProgressKind.TreasureProgress, notification.ProgressEvent.Kind);
+        Assert.Equal(expectedQuantity, notification.ProgressEvent.Amount);
+        Assert.True(expectedQuantity >= 5);
     }
 
     [Theory]
@@ -170,7 +249,8 @@ public sealed class DungeonEssenceRewardTests
             rewardRoller,
             new CapturingDungeonPendingRewardWriter(),
             new InventoryItemFactory(),
-            new NoOpDungeonMasteryService());
+            new NoOpDungeonMasteryService(),
+            new RecordingPublisher());
 
         await applier.ApplyAsync(run, CancellationToken.None);
 
@@ -269,6 +349,23 @@ public sealed class DungeonEssenceRewardTests
     }
 
     private sealed record CapturedLootBatch(string Source, IReadOnlyList<InventoryItem> Loot);
+
+    private sealed class RecordingPublisher : IPublisher
+    {
+        public List<object> Notifications { get; } = [];
+
+        public Task Publish(object notification, CancellationToken cancellationToken = default)
+        {
+            Notifications.Add(notification);
+            return Task.CompletedTask;
+        }
+
+        public Task Publish<TNotification>(
+            TNotification notification,
+            CancellationToken cancellationToken = default)
+            where TNotification : INotification =>
+            Publish((object)notification, cancellationToken);
+    }
 
     private sealed class EmptyDungeonRunRepository(
         DungeonRun? run = null,

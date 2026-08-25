@@ -110,6 +110,7 @@ public sealed class EquippedTitleDto : IMapFrom<TitleDefinition>
 
 public sealed class AchievementUnlockDto : IMapFrom<PlayerAchievementProgress>
 {
+    public Guid UnlockId { get; init; }
     public string AchievementKey { get; init; } = string.Empty;
     public string AchievementName { get; init; } = string.Empty;
     public int Points { get; init; }
@@ -122,6 +123,7 @@ public sealed class AchievementUnlockDto : IMapFrom<PlayerAchievementProgress>
     public void Mapping(Profile profile)
     {
         profile.CreateMap<PlayerAchievementProgress, AchievementUnlockDto>()
+            .ForMember(dest => dest.UnlockId, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.AchievementKey, opt => opt.MapFrom(src => src.AchievementDefinition.Key))
             .ForMember(dest => dest.AchievementName, opt => opt.MapFrom(src => src.AchievementDefinition.Name))
             .ForMember(dest => dest.Points, opt => opt.MapFrom(src => src.AchievementDefinition.Points))

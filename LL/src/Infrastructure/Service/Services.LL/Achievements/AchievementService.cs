@@ -1476,6 +1476,7 @@ public sealed class AchievementService : IAchievementService
 
         return new AchievementUnlockDto
         {
+            UnlockId = progress.Id,
             AchievementKey = definition.Key,
             AchievementName = definition.Name,
             Points = definition.Points,

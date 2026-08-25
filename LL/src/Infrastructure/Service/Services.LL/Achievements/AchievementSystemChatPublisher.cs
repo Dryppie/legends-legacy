@@ -1,4 +1,6 @@
 using System.Net.Http.Json;
+using System.Security.Cryptography;
+using System.Text;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.UseCases.Achievements.Dtos;
 using Microsoft.Extensions.Logging;
@@ -45,8 +47,9 @@ public sealed class AchievementSystemChatPublisher : IAchievementSystemChatPubli
                         IsGlobal: false,
                         TargetCharacterId: characterId,
                         SenderName: "System",
-                        MessageId: null,
-                        SentAt: DateTimeOffset.UtcNow),
+                        MessageId: CreateMessageId(unlock.UnlockId, "player"),
+                        SentAt: DateTimeOffset.UtcNow,
+                        Broadcast: true),
                     cancellationToken);
             }
 
@@ -58,8 +61,9 @@ public sealed class AchievementSystemChatPublisher : IAchievementSystemChatPubli
                         IsGlobal: true,
                         TargetCharacterId: null,
                         SenderName: "World",
-                        MessageId: null,
-                        SentAt: DateTimeOffset.UtcNow),
+                        MessageId: CreateMessageId(unlock.UnlockId, "global"),
+                        SentAt: DateTimeOffset.UtcNow,
+                        Broadcast: true),
                     cancellationToken);
             }
         }
@@ -103,11 +107,19 @@ public sealed class AchievementSystemChatPublisher : IAchievementSystemChatPubli
         return new Uri(new Uri(baseUrl), "api/v1/chat/System");
     }
 
+    private static Guid CreateMessageId(Guid unlockId, string audience)
+    {
+        var hash = SHA256.HashData(
+            Encoding.UTF8.GetBytes($"achievement:{unlockId:N}:{audience}"));
+        return new Guid(hash.AsSpan(0, 16));
+    }
+
     private sealed record SystemChatMessageRequest(
         string Body,
         bool IsGlobal,
         Guid? TargetCharacterId,
         string? SenderName,
         Guid? MessageId,
-        DateTimeOffset? SentAt);
+        DateTimeOffset? SentAt,
+        bool Broadcast);
 }
