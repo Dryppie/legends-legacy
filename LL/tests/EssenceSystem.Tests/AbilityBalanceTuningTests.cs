@@ -66,10 +66,12 @@ public sealed class AbilityBalanceTuningTests
             -100,
             catalog.AbilitiesById["ability.creature.moss_lizard.moss_camouflage"].ThreatValue);
 
-        var faesCorrosion = Assert.Single(
-            catalog.AbilitiesById["ability.creature.enchanted_fairy.faes_corrosion"].Effects);
-        Assert.Equal("effect.creature.enchanted_fairy.faes_corrosion.corrosion", faesCorrosion.Id);
-        Assert.Equal(6f, faesCorrosion.BaseValue);
+        Assert.Equal(
+            6f,
+            Effect(
+                catalog,
+                "ability.creature.enchanted_fairy.faes_corrosion",
+                "effect.creature.enchanted_fairy.faes_corrosion.corrosion").BaseValue);
         Assert.Equal(
             16f,
             Effect(
