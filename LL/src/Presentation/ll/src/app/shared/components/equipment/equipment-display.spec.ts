@@ -389,6 +389,55 @@ describe('EquipmentDisplayComponent', () => {
     fixture.destroy();
   });
 
+  it('opens the tempering breakdown from the bonused attribute name', async () => {
+    await TestBed.configureTestingModule({
+      imports: [EquipmentDisplayComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(EquipmentDisplayComponent);
+    const item = equipmentInstance(
+      'tempered-attribute-name-item',
+      AttributeType.MagicPenetration,
+      3.31,
+    );
+    item.rollRange = {
+      minimumPotential: 260,
+      maximumPotential: 380,
+      attributes: [
+        {
+          attributeType: AttributeType.MagicPenetration,
+          minimumAmount: 3.07,
+          maximumAmount: 3.65,
+          rarityBonusAmount: 2,
+          hasCraftedRange: true,
+        },
+      ],
+    };
+
+    fixture.componentRef.setInput('item', item);
+    fixture.detectChanges();
+
+    const attributeName: HTMLElement = fixture.nativeElement.querySelector(
+      '[data-testid="tempered-attribute-name"]',
+    );
+    attributeName.dispatchEvent(new MouseEvent('mouseenter'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const tooltipId = attributeName.getAttribute('aria-describedby');
+    const tooltipText = document
+      .getElementById(tooltipId ?? '')
+      ?.textContent?.replace(/\s+/g, ' ')
+      .trim();
+
+    expect(tooltipText).toContain('Tempered attribute');
+    expect(tooltipText).toContain('Magic Penetration');
+    expect(tooltipText).toContain('Original 1.31');
+    expect(tooltipText).toContain('Upgrade +2');
+    expect(tooltipText).toContain('Final 3.31');
+
+    fixture.destroy();
+  });
+
   it('renders tool affixes using the standard equipment attribute layout', async () => {
     await TestBed.configureTestingModule({
       imports: [EquipmentDisplayComponent],
@@ -565,7 +614,11 @@ describe('EquipmentDisplayComponent', () => {
       imports: [EquipmentDisplayComponent],
     }).compileComponents();
     const fixture = TestBed.createComponent(EquipmentDisplayComponent);
-    const selected = equipmentInstance('selected-set-item', AttributeType.Armor, 20);
+    const selected = equipmentInstance(
+      'selected-set-item',
+      AttributeType.Armor,
+      20,
+    );
     selected.equipmentSetId = 'set_warden';
     selected.equipmentSet = {
       id: 'set_warden',
@@ -598,7 +651,12 @@ describe('EquipmentDisplayComponent', () => {
 
     fixture.componentRef.setInput('item', selected);
     fixture.componentRef.setInput('embedded', true);
-    fixture.componentRef.setInput('equippedItems', [first, second, third, third]);
+    fixture.componentRef.setInput('equippedItems', [
+      first,
+      second,
+      third,
+      third,
+    ]);
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent;

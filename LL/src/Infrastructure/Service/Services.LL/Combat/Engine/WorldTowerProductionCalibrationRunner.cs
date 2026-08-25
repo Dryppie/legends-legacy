@@ -22,13 +22,15 @@ namespace Services.LL.Combat.Engine;
 
 public enum WorldTowerCalibrationCohort
 {
+    BelowRecommended,
+    Recommended,
     GearScore220,
     Tier2EpicExceptional,
     Stronger
 }
 
 public sealed record WorldTowerProductionCalibrationOptions(
-    int MinimumFloor = 11,
+    int MinimumFloor = 1,
     int MaximumFloor = 15,
     int SampleCount = 10,
     int UnderTargetPowerRating = 220);
@@ -66,6 +68,7 @@ public sealed record WorldTowerProductionCalibrationResult(
     int FloorNumber,
     WorldTowerCalibrationCohort Cohort,
     string EquipmentRungId,
+    int EssenceCount,
     int RosterSize,
     double AveragePowerRating,
     int SampleCount,
@@ -82,7 +85,7 @@ public sealed record WorldTowerProductionCalibrationReport(
     IReadOnlyList<WorldTowerProductionCalibrationResult> Results);
 
 /// <summary>
-/// Calibrates late World Tower floors through the production snapshot builder,
+/// Calibrates World Tower floors through the production snapshot builder,
 /// Tower runtime factory, WorldTower Essence loadout, and Tower playback executor.
 /// </summary>
 public sealed class WorldTowerProductionCalibrationRunner(
@@ -113,15 +116,6 @@ public sealed class WorldTowerProductionCalibrationRunner(
         if (floors.Count == 0)
             throw new InvalidOperationException("No World Tower floors matched the calibration range.");
 
-        var underTargetRung = FindClosestRung(options.UnderTargetPowerRating);
-        var targetRung = GetRung(2, Rarity.Epic, ItemQuality.Exceptional);
-        var strongerRung = GetRung(3, Rarity.Epic, ItemQuality.Exceptional);
-        var cohorts = new[]
-        {
-            (WorldTowerCalibrationCohort.GearScore220, underTargetRung),
-            (WorldTowerCalibrationCohort.Tier2EpicExceptional, targetRung),
-            (WorldTowerCalibrationCohort.Stronger, strongerRung)
-        };
         var results = new List<WorldTowerProductionCalibrationResult>();
 
         foreach (var floor in floors)
@@ -133,10 +127,12 @@ public sealed class WorldTowerProductionCalibrationRunner(
                 .SingleOrDefault()
                 ?? throw new InvalidOperationException(
                     $"Guardian creature '{floor.GuardianCreatureId}' was not found.");
+            var cohorts = CreateCohorts(floor.RequiredSlots, floor.FloorNumber,
+                floor.RecommendedPowerRating, options.UnderTargetPowerRating);
 
-            foreach (var (cohort, rung) in cohorts)
+            foreach (var (cohort, loadout) in cohorts)
             {
-                var builds = CreateRoster(floor.RequiredSlots, rung);
+                var builds = CreateRoster(floor.RequiredSlots, loadout);
                 var snapshots = builds.Select((entry, slotIndex) =>
                     CreateSnapshotRequest(entry, slotIndex)).ToArray();
                 var outcomes = new List<CombatResult>(options.SampleCount);
@@ -183,7 +179,8 @@ public sealed class WorldTowerProductionCalibrationRunner(
                 results.Add(new WorldTowerProductionCalibrationResult(
                     floor.FloorNumber,
                     cohort,
-                    rung.Id,
+                    loadout.Rung.Id,
+                    loadout.EssenceCount,
                     floor.RequiredSlots,
                     builds.Average(entry => CombatRatingDisplay.FromRaw(entry.Build.Rating.Overall)),
                     outcomes.Count,
@@ -204,37 +201,139 @@ public sealed class WorldTowerProductionCalibrationRunner(
 
     private IReadOnlyList<(CanonicalCooperativeRosterSlot Slot, CanonicalEquipmentBuild Build)> CreateRoster(
         int rosterSize,
-        CanonicalEquipmentProgressionRung rung) =>
+        CalibrationLoadout loadout) =>
         CanonicalCooperativeRosterCatalog.CreateParty(rosterSize)
             .Select(slot => (
                 slot,
                 canonicalBuilds.CreateBuild(
                     slot.Role,
-                    rung,
-                    CanonicalEquipmentBuildFactory.MaximumCanonicalEssenceCount)))
+                    loadout.Rung,
+                    loadout.EssenceCount)))
             .ToArray();
 
-    private CanonicalEquipmentProgressionRung FindClosestRung(int targetPowerRating)
+    private IReadOnlyList<(WorldTowerCalibrationCohort Cohort, CalibrationLoadout Loadout)>
+        CreateCohorts(
+            int rosterSize,
+            int floorNumber,
+            int recommendedPowerRating,
+            int underTargetPowerRating)
     {
-        var roles = CanonicalCooperativeRosterCatalog.CreateParty(10);
-        return canonicalBuilds.GetProgressionLadder()
-            .Where(rung => rung.Tier <= 2
-                           && !(rung.Tier == 2
-                                && rung.Rarity == Rarity.Epic
-                                && rung.Quality == ItemQuality.Exceptional))
-            .Select(rung => new
-            {
-                Rung = rung,
-                Average = roles.Average(slot => CombatRatingDisplay.FromRaw(canonicalBuilds.CreateBuild(
-                    slot.Role,
-                    rung,
-                    CanonicalEquipmentBuildFactory.MaximumCanonicalEssenceCount).Rating.Overall))
-            })
+        if (floorNumber >= 11)
+        {
+            return
+            [
+                (WorldTowerCalibrationCohort.GearScore220,
+                    FindClosestLoadout(rosterSize, underTargetPowerRating, maximumTier: 2)),
+                (WorldTowerCalibrationCohort.Tier2EpicExceptional,
+                    new CalibrationLoadout(
+                        GetRung(2, Rarity.Epic, ItemQuality.Exceptional),
+                        CanonicalEquipmentBuildFactory.MaximumCanonicalEssenceCount)),
+                (WorldTowerCalibrationCohort.Stronger,
+                    new CalibrationLoadout(
+                        GetRung(3, Rarity.Epic, ItemQuality.Exceptional),
+                        CanonicalEquipmentBuildFactory.MaximumCanonicalEssenceCount))
+            ];
+        }
+
+        var recommended = FindClosestLoadout(
+            rosterSize,
+            recommendedPowerRating,
+            maximumTier: 1,
+            requiredEssenceCount: floorNumber <= 3 ? 5 : floorNumber <= 6 ? 6 : 7);
+        var below = FindAdjacentLoadout(
+            rosterSize,
+            recommended,
+            minimumRatingDifference: 15,
+            below: true);
+        var stronger = FindAdjacentLoadout(
+            rosterSize,
+            recommended,
+            minimumRatingDifference: 15,
+            below: false);
+        return
+        [
+            (WorldTowerCalibrationCohort.BelowRecommended, below),
+            (WorldTowerCalibrationCohort.Recommended, recommended),
+            (WorldTowerCalibrationCohort.Stronger, stronger)
+        ];
+    }
+
+    private CalibrationLoadout FindClosestLoadout(
+        int rosterSize,
+        int targetPowerRating,
+        int maximumTier,
+        int? requiredEssenceCount = null)
+    {
+        var candidates = GetLoadoutCandidates(rosterSize, maximumTier)
+            .Where(candidate => requiredEssenceCount is null
+                                || candidate.Loadout.EssenceCount == requiredEssenceCount)
+            .ToArray();
+        return candidates
             .OrderBy(candidate => Math.Abs(candidate.Average - targetPowerRating))
             .ThenBy(candidate => candidate.Average > targetPowerRating)
-            .ThenBy(candidate => candidate.Rung.Index)
-            .First().Rung;
+            .ThenBy(candidate => candidate.Loadout.Rung.Index)
+            .ThenBy(candidate => candidate.Loadout.EssenceCount)
+            .First().Loadout;
     }
+
+    private CalibrationLoadout FindAdjacentLoadout(
+        int rosterSize,
+        CalibrationLoadout recommended,
+        int minimumRatingDifference,
+        bool below)
+    {
+        var adjacentEssenceCount = Math.Clamp(
+            recommended.EssenceCount + (below ? -2 : 2),
+            1,
+            CanonicalEquipmentBuildFactory.MaximumCanonicalEssenceCount);
+        if (adjacentEssenceCount != recommended.EssenceCount)
+            return recommended with { EssenceCount = adjacentEssenceCount };
+
+        var candidates = GetLoadoutCandidates(rosterSize, maximumTier: 1);
+        var recommendedRating = AverageRating(rosterSize, recommended);
+        var qualified = FilterAdjacent(candidates.Where(candidate =>
+            candidate.Loadout.EssenceCount == recommended.EssenceCount));
+        return (below
+                ? qualified.OrderByDescending(candidate => candidate.Average)
+                : qualified.OrderBy(candidate => candidate.Average))
+            .ThenBy(candidate => candidate.Loadout.Rung.Index)
+            .ThenBy(candidate => candidate.Loadout.EssenceCount)
+            .First().Loadout;
+
+        IEnumerable<CalibrationLoadoutCandidate> FilterAdjacent(
+            IEnumerable<CalibrationLoadoutCandidate> source) => below
+            ? source.Where(candidate =>
+                candidate.Average <= recommendedRating - minimumRatingDifference)
+            : source.Where(candidate =>
+                candidate.Average >= recommendedRating + minimumRatingDifference);
+    }
+
+    private IReadOnlyList<CalibrationLoadoutCandidate> GetLoadoutCandidates(
+        int rosterSize,
+        int maximumTier)
+    {
+        var roles = CanonicalCooperativeRosterCatalog.CreateParty(rosterSize);
+        return canonicalBuilds.GetProgressionLadder()
+            .Where(rung => rung.Tier <= maximumTier)
+            .SelectMany(rung => Enumerable.Range(
+                1,
+                CanonicalEquipmentBuildFactory.MaximumCanonicalEssenceCount),
+                (rung, essenceCount) => new CalibrationLoadout(rung, essenceCount))
+            .Select(loadout => new CalibrationLoadoutCandidate(
+                loadout,
+                roles.Average(slot => CombatRatingDisplay.FromRaw(canonicalBuilds.CreateBuild(
+                    slot.Role,
+                    loadout.Rung,
+                    loadout.EssenceCount).Rating.Overall))))
+            .ToArray();
+    }
+
+    private double AverageRating(int rosterSize, CalibrationLoadout loadout) =>
+        CanonicalCooperativeRosterCatalog.CreateParty(rosterSize)
+            .Average(slot => CombatRatingDisplay.FromRaw(canonicalBuilds.CreateBuild(
+                slot.Role,
+                loadout.Rung,
+                loadout.EssenceCount).Rating.Overall));
 
     private CanonicalEquipmentProgressionRung GetRung(
         int tier,
@@ -349,4 +448,12 @@ public sealed class WorldTowerProductionCalibrationRunner(
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(value));
         return new Guid(hash.AsSpan(0, 16));
     }
+
+    private sealed record CalibrationLoadout(
+        CanonicalEquipmentProgressionRung Rung,
+        int EssenceCount);
+
+    private sealed record CalibrationLoadoutCandidate(
+        CalibrationLoadout Loadout,
+        double Average);
 }

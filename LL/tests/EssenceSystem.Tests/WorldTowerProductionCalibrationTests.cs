@@ -25,7 +25,7 @@ namespace EssenceSystem.Tests;
 public sealed class WorldTowerProductionCalibrationTests
 {
     [Fact]
-    public async Task Floors_11_to_15_use_production_preparation_for_all_three_cohorts()
+    public async Task Floors_1_to_15_use_production_preparation_and_meet_calibration_bands()
     {
         var contentRoot = TestContentPaths.FindApiRoot();
         var configuration = new ConfigurationBuilder()
@@ -93,16 +93,18 @@ public sealed class WorldTowerProductionCalibrationTests
             essenceDefinitions);
 
         var report = await runner.RunAsync(new WorldTowerProductionCalibrationOptions(
-            MinimumFloor: 11,
-            MaximumFloor: 15,
             SampleCount: 10));
 
-        Assert.Equal(15, report.Results.Count);
+        Assert.Equal(45, report.Results.Count);
         Assert.All(report.Results, result => Assert.True(result.AbilitiesStartOnCooldown));
-        Assert.All(report.Results.Where(result => result.FloorNumber < 15), result =>
-            Assert.Equal(10, result.RosterSize));
-        Assert.All(report.Results.Where(result => result.FloorNumber == 15), result =>
-            Assert.Equal(15, result.RosterSize));
+        Assert.All(report.Results, result => Assert.Equal(
+            result.FloorNumber switch
+            {
+                5 or 8 or 9 or 11 or 12 or 13 or 14 => 10,
+                10 or 15 => 15,
+                _ => 5
+            },
+            result.RosterSize));
         Assert.All(report.Results, result =>
         {
             Assert.Equal(result.RosterSize, result.PreparedRoster.Count);
@@ -129,6 +131,40 @@ public sealed class WorldTowerProductionCalibrationTests
                 });
             });
         });
+        Assert.All(report.Results.Where(result => result.FloorNumber <= 10), result =>
+            Assert.Equal(1, result.PreparedRoster.SelectMany(combatant => combatant.Equipment)
+                .Select(item => item.Tier).Distinct().Single()));
+        Assert.All(report.Results.Where(result =>
+            result.FloorNumber <= 10
+            && result.Cohort == WorldTowerCalibrationCohort.Recommended), result =>
+        {
+            var floor = definitions.GetFloors().Single(candidate =>
+                candidate.FloorNumber == result.FloorNumber);
+            Assert.InRange(
+                result.AveragePowerRating,
+                floor.RecommendedPowerRating - 3,
+                floor.RecommendedPowerRating + 3);
+            Assert.Equal(result.FloorNumber <= 3 ? 5 : result.FloorNumber <= 6 ? 6 : 7,
+                result.EssenceCount);
+            Assert.All(result.PreparedRoster.SelectMany(combatant => combatant.Equipment), item =>
+                Assert.Equal(ItemQuality.Standard, item.Quality));
+        });
+        var earlyCalibrationFailures = report.Results
+            .Where(result => result.FloorNumber <= 10)
+            .Where(result => result.Cohort switch
+            {
+                WorldTowerCalibrationCohort.BelowRecommended => result.WinRate > 0.20,
+                WorldTowerCalibrationCohort.Recommended => result.WinRate < 0.80,
+                WorldTowerCalibrationCohort.Stronger => result.WinRate < 0.80,
+                _ => false
+            })
+            .ToArray();
+        Assert.True(earlyCalibrationFailures.Length == 0, string.Join(
+            Environment.NewLine,
+            earlyCalibrationFailures.Select(result =>
+                $"Floor {result.FloorNumber} {result.Cohort} " +
+                $"({result.EquipmentRungId}, {result.EssenceCount} Essences, " +
+                $"rating {result.AveragePowerRating:F1}) won {result.WinRate:P0}.")));
         Assert.All(report.Results.Where(result =>
             result.Cohort == WorldTowerCalibrationCohort.GearScore220), result =>
             Assert.InRange(result.WinRate, 0, 0.20));
@@ -157,13 +193,23 @@ public sealed class WorldTowerProductionCalibrationTests
             var creatures = entityIds.Select(id =>
             {
                 var floor = definitions.GetFloors().Single(candidate => candidate.GuardianCreatureId == id);
-                var (archetype, damageProfile) = floor.FloorNumber switch
+                var (archetype, damageProfile, baseLevel, tier) = floor.FloorNumber switch
                 {
-                    11 => (CreatureArchetype.Balanced, DamageProfile.Magical),
-                    12 => (CreatureArchetype.Bruiser, DamageProfile.Magical),
-                    13 => (CreatureArchetype.Balanced, DamageProfile.Magical),
-                    14 => (CreatureArchetype.Bruiser, DamageProfile.Physical),
-                    15 => (CreatureArchetype.Bruiser, DamageProfile.Hybrid),
+                    1 => (CreatureArchetype.Tank, DamageProfile.Hybrid, 30, 1),
+                    2 => (CreatureArchetype.Bruiser, DamageProfile.Physical, 32, 1),
+                    3 => (CreatureArchetype.Tank, DamageProfile.Magical, 34, 1),
+                    4 => (CreatureArchetype.Balanced, DamageProfile.Hybrid, 37, 1),
+                    5 => (CreatureArchetype.Tank, DamageProfile.Hybrid, 39, 1),
+                    6 => (CreatureArchetype.DPS, DamageProfile.Magical, 41, 1),
+                    7 => (CreatureArchetype.Support, DamageProfile.Magical, 43, 1),
+                    8 => (CreatureArchetype.Balanced, DamageProfile.Magical, 46, 1),
+                    9 => (CreatureArchetype.Balanced, DamageProfile.Hybrid, 48, 1),
+                    10 => (CreatureArchetype.Bruiser, DamageProfile.Physical, 50, 1),
+                    11 => (CreatureArchetype.Balanced, DamageProfile.Magical, 55, 2),
+                    12 => (CreatureArchetype.Bruiser, DamageProfile.Magical, 57, 2),
+                    13 => (CreatureArchetype.Balanced, DamageProfile.Magical, 59, 2),
+                    14 => (CreatureArchetype.Bruiser, DamageProfile.Physical, 61, 2),
+                    15 => (CreatureArchetype.Bruiser, DamageProfile.Hybrid, 63, 2),
                     _ => throw new InvalidOperationException()
                 };
                 return (Entity)new Creature
@@ -173,8 +219,8 @@ public sealed class WorldTowerProductionCalibrationTests
                     Archetype = archetype,
                     DamageProfile = damageProfile,
                     DefenseProfile = DefenseProfile.Balanced,
-                    BaseLevel = 33 + floor.ProgressionPosition * 2,
-                    Tier = 2
+                    BaseLevel = baseLevel,
+                    Tier = tier
                 };
             }).ToList();
             return Task.FromResult(creatures);

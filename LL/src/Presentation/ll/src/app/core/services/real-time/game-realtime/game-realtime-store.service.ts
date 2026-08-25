@@ -7,6 +7,7 @@ import { BusinessGrantDeduper } from './realtime-deduplication';
 @Injectable({ providedIn: 'root' })
 export class GameRealtimeStore {
   private readonly maxLootEntries = 50;
+  private readonly authoritativeLootMatchWindowMs = 60_000;
   private readonly _recentLoot = signal<LootHistoryEntry[]>([]);
   private readonly lootGrantDeduper = new BusinessGrantDeduper();
 
@@ -37,13 +38,34 @@ export class GameRealtimeStore {
     if (!items.length) return;
     if (!this.lootGrantDeduper.shouldApply(grantId)) return;
 
-    const entries = items.map((item, index) => ({
-      id: `live:${receivedAt}:${item.itemInstance.id}:${index}`,
-      item,
-      receivedAt,
-      source,
-      location,
-    }));
+    const authoritativeEntries = this._recentLoot().filter(
+      (entry) => !entry.id.startsWith('live:'),
+    );
+    const entries = items
+      .filter((item) => {
+        const matchIndex = authoritativeEntries.findIndex((entry) =>
+          this.matchesAuthoritativeEntry(
+            entry,
+            item,
+            receivedAt,
+            source,
+            location,
+          ),
+        );
+        if (matchIndex < 0) return true;
+
+        authoritativeEntries.splice(matchIndex, 1);
+        return false;
+      })
+      .map((item, index) => ({
+        id: `live:${receivedAt}:${item.itemInstance.id}:${index}`,
+        item,
+        receivedAt,
+        source,
+        location,
+      }));
+    if (!entries.length) return;
+
     this._recentLoot.update((current) =>
       [...entries, ...current].slice(0, this.maxLootEntries),
     );
@@ -56,5 +78,29 @@ export class GameRealtimeStore {
 
   clearLootHistory(): void {
     this._recentLoot.set([]);
+  }
+
+  private matchesAuthoritativeEntry(
+    entry: LootHistoryEntry,
+    item: InventoryItem,
+    receivedAt: string,
+    source: string,
+    location?: string | null,
+  ): boolean {
+    if (entry.item.itemInstance.id !== item.itemInstance.id) return false;
+    if (entry.item.quantity !== item.quantity) return false;
+    if (entry.source !== source) return false;
+    if ((entry.location?.trim() || null) !== (location?.trim() || null)) {
+      return false;
+    }
+
+    const authoritativeTime = Date.parse(entry.receivedAt);
+    const liveTime = Date.parse(receivedAt);
+    return (
+      Number.isFinite(authoritativeTime) &&
+      Number.isFinite(liveTime) &&
+      Math.abs(authoritativeTime - liveTime) <=
+        this.authoritativeLootMatchWindowMs
+    );
   }
 }

@@ -255,7 +255,7 @@ public sealed class EncounterCalibrationTests
             exception.EncounterId == "tower.floor-05.warden"
             && exception.BuildFamilyId == "sustain-heavy"
             && exception.Metric == "WinRate");
-        Assert.Contains(report.Exceptions, exception =>
+        Assert.DoesNotContain(report.Exceptions, exception =>
             exception.EncounterId == "tower.floor-05.warden"
             && exception.BuildFamilyId == "offense-heavy"
             && exception.Classification == "UnexpectedSuccess"
@@ -299,13 +299,13 @@ public sealed class EncounterCalibrationTests
             && comparison.EssenceEnvelopeId == "expected"
             && comparison.Classification == "UnnecessaryForCompletion");
         Assert.Equal(
-            "CompletionRegressed",
+            "Insufficient",
             artifact.SupportComparisons.Single(comparison =>
                 comparison.EncounterId == "tower.floor-05.warden"
                 && comparison.GearEnvelopeId == "expected"
                 && comparison.EssenceEnvelopeId == "expected").Classification);
         Assert.Equal(
-            "Insufficient",
+            "HelpfulButInsufficient",
             artifact.SupportComparisons.Single(comparison =>
                 comparison.EncounterId == "tower.floor-07.guardian"
                 && comparison.GearEnvelopeId == "expected"

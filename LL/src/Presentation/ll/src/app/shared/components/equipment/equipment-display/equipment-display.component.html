@@ -54,12 +54,37 @@
           <div
             class="grid min-h-6 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3"
           >
-            <span class="truncate text-secondary">
-              {{
-                comparison.attributeType
-                  | attributeTypeFormat: usesV16EquipmentPresentation(data)
-              }}
-            </span>
+            <ng-container
+              *ngIf="
+                temperingBonus(data, comparison.attributeType);
+                else hoveredAttributeName
+              "
+            >
+              <span
+                data-testid="tempered-attribute-name"
+                class="truncate text-secondary"
+                [appTemperingBonusTooltip]="
+                  temperingTooltipData(
+                    data,
+                    comparison.attributeType,
+                    comparison.hoveredAmount
+                  )
+                "
+              >
+                {{
+                  comparison.attributeType
+                    | attributeTypeFormat: usesV16EquipmentPresentation(data)
+                }}
+              </span>
+            </ng-container>
+            <ng-template #hoveredAttributeName>
+              <span class="truncate text-secondary">
+                {{
+                  comparison.attributeType
+                    | attributeTypeFormat: usesV16EquipmentPresentation(data)
+                }}
+              </span>
+            </ng-template>
             <span
               data-testid="hovered-attribute-value"
               class="equipment-roll-value tabular-nums"
@@ -196,13 +221,39 @@
           <div
             class="grid min-h-6 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3"
           >
-            <span class="truncate text-secondary">
-              {{
-                comparison.attributeType
-                  | attributeTypeFormat
-                    : usesV16EquipmentPresentation(equipped.data)
-              }}
-            </span>
+            <ng-container
+              *ngIf="
+                temperingBonus(equipped.data, comparison.attributeType);
+                else equippedAttributeName
+              "
+            >
+              <span
+                data-testid="tempered-attribute-name"
+                class="truncate text-secondary"
+                [appTemperingBonusTooltip]="
+                  temperingTooltipData(
+                    equipped.data,
+                    comparison.attributeType,
+                    equippedAmount(equipped, comparison.attributeType)
+                  )
+                "
+              >
+                {{
+                  comparison.attributeType
+                    | attributeTypeFormat
+                      : usesV16EquipmentPresentation(equipped.data)
+                }}
+              </span>
+            </ng-container>
+            <ng-template #equippedAttributeName>
+              <span class="truncate text-secondary">
+                {{
+                  comparison.attributeType
+                    | attributeTypeFormat
+                      : usesV16EquipmentPresentation(equipped.data)
+                }}
+              </span>
+            </ng-template>
             <span
               data-testid="equipped-attribute-value"
               class="equipment-roll-value tabular-nums text-white"
@@ -486,12 +537,37 @@
             class="equipment-design-row"
           >
             <div class="flex items-baseline justify-between gap-3 text-xs">
-              <span class="truncate text-white">
-                {{
-                  comparison.attributeType
-                    | attributeTypeFormat: usesV16EquipmentPresentation(data)
-                }}
-              </span>
+              <ng-container
+                *ngIf="
+                  temperingBonus(data, comparison.attributeType);
+                  else inlineAttributeName
+                "
+              >
+                <span
+                  data-testid="tempered-attribute-name"
+                  class="truncate text-white"
+                  [appTemperingBonusTooltip]="
+                    temperingTooltipData(
+                      data,
+                      comparison.attributeType,
+                      comparison.hoveredAmount
+                    )
+                  "
+                >
+                  {{
+                    comparison.attributeType
+                      | attributeTypeFormat: usesV16EquipmentPresentation(data)
+                  }}
+                </span>
+              </ng-container>
+              <ng-template #inlineAttributeName>
+                <span class="truncate text-white">
+                  {{
+                    comparison.attributeType
+                      | attributeTypeFormat: usesV16EquipmentPresentation(data)
+                  }}
+                </span>
+              </ng-template>
               <span class="equipment-roll-value tabular-nums">
                 <strong class="font-medium text-primary">
                   <ng-container
@@ -602,12 +678,33 @@
 
         <div *ngFor="let attr of data.attributes" class="equipment-design-row">
           <div class="flex items-baseline justify-between gap-3 text-xs">
-            <span class="truncate text-white" [appAttributeTooltip]="attr">
-              {{
-                attr.attributeType
-                  | attributeTypeFormat: usesV16EquipmentPresentation(data)
-              }}
-            </span>
+            <ng-container
+              *ngIf="
+                temperingBonus(data, attr.attributeType);
+                else attributeName
+              "
+            >
+              <span
+                data-testid="tempered-attribute-name"
+                class="truncate text-white"
+                [appTemperingBonusTooltip]="
+                  temperingTooltipData(data, attr.attributeType, attr.amount)
+                "
+              >
+                {{
+                  attr.attributeType
+                    | attributeTypeFormat: usesV16EquipmentPresentation(data)
+                }}
+              </span>
+            </ng-container>
+            <ng-template #attributeName>
+              <span class="truncate text-white" [appAttributeTooltip]="attr">
+                {{
+                  attr.attributeType
+                    | attributeTypeFormat: usesV16EquipmentPresentation(data)
+                }}
+              </span>
+            </ng-template>
             <span class="equipment-roll-value tabular-nums">
               <strong class="font-medium text-primary">
                 {{

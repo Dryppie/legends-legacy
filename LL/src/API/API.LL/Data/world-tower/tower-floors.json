@@ -156,8 +156,8 @@
       "recommendedPowerRating": 173,
       "progressionPosition": 5,
       "guardianScaling": {
-        "health": 0.70,
-        "offense": 1.25,
+        "health": 1.25,
+        "offense": 1.50,
         "defense": 2.65,
         "resistance": 2.65,
         "penetration": 1.0,
@@ -225,8 +225,8 @@
       "recommendedPowerRating": 185,
       "progressionPosition": 7,
       "guardianScaling": {
-        "health": 0.65,
-        "offense": 1.50,
+        "health": 1.15,
+        "offense": 1.80,
         "defense": 2.04,
         "resistance": 2.04,
         "penetration": 1.0,
@@ -262,8 +262,8 @@
       "recommendedPowerRating": 188,
       "progressionPosition": 8,
       "guardianScaling": {
-        "health": 1.22,
-        "offense": 1.32,
+        "health": 1.55,
+        "offense": 1.45,
         "defense": 2.61,
         "resistance": 2.61,
         "penetration": 1.0,
