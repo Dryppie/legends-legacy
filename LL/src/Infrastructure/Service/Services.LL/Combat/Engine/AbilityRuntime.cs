@@ -104,6 +104,7 @@ public sealed class CompiledEffect
     public int ChancePercent { get; init; }
     public AttackType AttackType { get; init; }
     public DamageType DamageType { get; init; }
+    public bool InheritEventDamageType { get; init; }
     public CritEligibility CritEligibility { get; init; }
     public float CritChanceBonus { get; init; }
     public float ArmorPenetrationBonus { get; init; }

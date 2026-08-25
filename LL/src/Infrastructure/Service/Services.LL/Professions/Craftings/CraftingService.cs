@@ -446,14 +446,24 @@ public class CraftingService : ICraftingService
         if (!removedMaterials) return Response<CraftItemsResult>.Fail("Not enough materials.");
 
         var mastery = await _progressionService.GetOrCreateRecipeMasteryAsync(characterId, recipe.Id, cancellationToken);
+        var blueprintFactors = await _bonusService.GetAggregatedAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
+        var blueprintProgressionGainBps = blueprintFactors.Get(BonusKind.BlueprintProgressionGainBps);
+        var xpGained = (craftQuantity * CraftingMasteryProgression.ExperiencePerCraft)
+            .ApplyPositiveBps(blueprintProgressionGainBps);
+        var startingMasteryExperience = mastery.Experience;
         var rng = Random.Shared;
         var created = new List<InventoryItem>();
         var qualityCounts = new Dictionary<ItemQuality, int>();
 
         for (var i = 0; i < craftQuantity; i++)
         {
-            var quality = _qualityRollService.RollQuality(recipe.Id, mastery.Level, rng);
-            var potential = _potentialService.CalculateStartingPotential(itemBase, targetTier, quality, mastery.Level, craftingLevel);
+            var masteryLevel = CraftingMasteryProgression.GetLevelBeforeBulkCraft(
+                startingMasteryExperience,
+                xpGained,
+                i,
+                craftQuantity);
+            var quality = _qualityRollService.RollQuality(recipe.Id, masteryLevel, rng);
+            var potential = _potentialService.CalculateStartingPotential(itemBase, targetTier, quality, masteryLevel, craftingLevel);
             qualityCounts[quality] = qualityCounts.GetValueOrDefault(quality) + 1;
 
             var equipmentInstance = new EquipmentInstance
@@ -501,11 +511,7 @@ public class CraftingService : ICraftingService
                 OccurredAt: craftedAt,
                 IdempotencyKey: $"craft-items:{characterId}:{recipe.Id}:{targetTier}:{created.Count}:{craftedAt:O}"),
             cancellationToken);
-        var blueprintFactors = await _bonusService.GetAggregatedAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
-        var blueprintProgressionGainBps = blueprintFactors.Get(BonusKind.BlueprintProgressionGainBps);
-        var xpGained = (craftQuantity * CraftingMasteryProgression.ExperiencePerCraft)
-            .ApplyPositiveBps(blueprintProgressionGainBps);
-        mastery.Experience += xpGained;
+        mastery.Experience = startingMasteryExperience + xpGained;
         mastery.Level = CraftingMasteryProgression.GetLevelForExperience(mastery.Experience);
         mastery.UpdatedAt = DateTimeOffset.UtcNow;
 

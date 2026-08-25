@@ -1376,12 +1376,15 @@ public sealed class FastCombatEngine
                     : ReferenceEquals(source, target)
                         ? DamageDelivery.Self
                         : DamageDelivery.Direct;
+                var damageType = effect.InheritEventDamageType
+                    ? combatEvent?.DamageType ?? effect.DamageType
+                    : effect.DamageType;
                 var healthDamage = ApplyDamage(
                     source,
                     target,
                     value,
                     effect.AttackType,
-                    effect.DamageType,
+                    damageType,
                     effect,
                     combatants,
                     effect.Id,

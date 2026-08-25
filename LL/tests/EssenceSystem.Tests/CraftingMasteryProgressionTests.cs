@@ -29,4 +29,41 @@ public sealed class CraftingMasteryProgressionTests
         Assert.Equal(25, progress.Experience);
         Assert.Equal(secondLevel, progress.ExperienceRequiredForNextLevel);
     }
+
+    [Fact]
+    public void GetLevelBeforeBulkCraft_UsesLevelsEarnedEarlierInTheBatch()
+    {
+        const int craftQuantity = 3;
+        var startingExperience = CraftingMasteryProgression.GetExperienceRequiredForNextLevel(0) -
+                                 CraftingMasteryProgression.ExperiencePerCraft;
+        var totalExperienceGained = craftQuantity * CraftingMasteryProgression.ExperiencePerCraft;
+
+        var levels = Enumerable.Range(0, craftQuantity)
+            .Select(index => CraftingMasteryProgression.GetLevelBeforeBulkCraft(
+                startingExperience,
+                totalExperienceGained,
+                index,
+                craftQuantity))
+            .ToList();
+
+        Assert.Equal([0, 1, 1], levels);
+    }
+
+    [Fact]
+    public void GetLevelBeforeBulkCraft_DistributesTheAwardedBatchExperienceWithoutLosingRemainders()
+    {
+        const int craftQuantity = 3;
+        const int totalExperienceGained = 80;
+        const int startingExperience = 147;
+
+        var levels = Enumerable.Range(0, craftQuantity)
+            .Select(index => CraftingMasteryProgression.GetLevelBeforeBulkCraft(
+                startingExperience,
+                totalExperienceGained,
+                index,
+                craftQuantity))
+            .ToList();
+
+        Assert.Equal([0, 0, 1], levels);
+    }
 }

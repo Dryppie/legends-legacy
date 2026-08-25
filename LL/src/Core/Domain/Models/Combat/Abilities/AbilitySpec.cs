@@ -310,6 +310,7 @@ public sealed class AbilityEffectSpec
     public int ChancePercent { get; set; } = 100;
     public AttackType AttackType { get; set; } = AttackType.None;
     public DamageType DamageType { get; set; } = DamageType.None;
+    public bool InheritEventDamageType { get; set; }
     public CritEligibility CritEligibility { get; set; } = CritEligibility.Default;
     public float CritChanceBonus { get; set; }
     public float ArmorPenetrationBonus { get; set; }

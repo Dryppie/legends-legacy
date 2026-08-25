@@ -5005,6 +5005,7 @@
         "oncePerTarget": true,
         "attackType": "None",
         "damageType": "None",
+        "inheritEventDamageType": true,
         "critEligibility": "Disallowed",
         "tags": ["Damage.Secondary"],
         "procCoefficient": 1

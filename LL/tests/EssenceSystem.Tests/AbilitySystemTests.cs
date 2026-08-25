@@ -6836,11 +6836,60 @@ public sealed class AbilitySystemTests
         Assert.Equal(150, feralPounce.CooldownTicks);
         Assert.Equal(1.5f, feralPounce.Effects.Single(effect => effect.Operation == AbilityEffectOperation.Damage).ScalingCoefficient);
         Assert.Equal(1.75f, Assert.Single(tasteOfBlood.Effects).ScalingCoefficient);
-        Assert.Equal(0.35f, Assert.Single(freshHunger.Effects).EventMagnitudeCoefficient);
+        var freshHungerDamage = Assert.Single(freshHunger.Effects);
+        Assert.Equal(0.35f, freshHungerDamage.EventMagnitudeCoefficient);
+        Assert.True(freshHungerDamage.InheritEventDamageType);
         Assert.Equal(140, spectralPassage.CooldownTicks);
         Assert.Equal(
             0.03f,
             ward.Attributes.Single(attribute => attribute.Attribute == AttributeType.MaxHealth).ScalingCoefficient);
+    }
+
+    [Fact]
+    public void Vampire_fledgeling_fresh_hunger_inherits_the_triggering_hits_damage_type()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var freshHunger = AbilityCompiler.CompileAbility(
+            catalog.AbilitiesById["ability.creature.vampire_fledgeling.fresh_hunger"]);
+        var shadowStrike = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.shadow_strike",
+            Kind = AbilitySpecKind.Active,
+            Name = "Shadow Strike",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.shadow_strike.damage",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = 100,
+                    DamageType = DamageType.Shadow
+                }
+            ]
+        });
+        var fledgeling = CreateCombatant(
+            "vampire-fledgeling",
+            CombatTeam.Friendly,
+            [freshHunger, shadowStrike]);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile, [], maxHealth: 1_000);
+        var engine = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000));
+
+        var result = engine.Run([fledgeling], [enemy]);
+
+        var freshHungerStats = Assert.Single(
+            result.EntityStats.Single(stats => stats.EntityId == fledgeling.Id).Abilities,
+            ability => ability.Name == "Fresh Hunger");
+        var damageByType = Assert.Single(freshHungerStats.DamageByType!);
+        Assert.Equal(DamageType.Shadow, damageByType.DamageType);
+        Assert.DoesNotContain(
+            freshHungerStats.DamageByType!,
+            damage => damage.DamageType == DamageType.None);
     }
 
     [Fact]

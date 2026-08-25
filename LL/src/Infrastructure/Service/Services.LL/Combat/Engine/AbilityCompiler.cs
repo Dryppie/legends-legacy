@@ -229,6 +229,7 @@ public static class AbilityCompiler
             ChancePercent = effect.ChancePercent,
             AttackType = effect.AttackType,
             DamageType = effect.DamageType,
+            InheritEventDamageType = effect.InheritEventDamageType,
             CritEligibility = effect.CritEligibility,
             CritChanceBonus = effect.CritChanceBonus,
             ArmorPenetrationBonus = effect.ArmorPenetrationBonus,
