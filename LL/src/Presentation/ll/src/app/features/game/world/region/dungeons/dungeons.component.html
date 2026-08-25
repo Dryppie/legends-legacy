@@ -121,7 +121,7 @@
     </ng-container>
 
     <ng-template #dungeonList>
-      <div *ngFor="let dungeon of dungeons()">
+      <div *ngFor="let dungeon of dungeons(); trackBy: trackDungeon">
         <app-dungeon-card
           [previewData]="dungeon"
           (recordsRequested)="openRecords($event)"

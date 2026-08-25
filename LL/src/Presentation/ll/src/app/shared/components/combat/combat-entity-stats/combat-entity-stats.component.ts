@@ -94,14 +94,6 @@ export class CombatEntityStatsComponent implements OnChanges {
   selectedEntityName: string = '';
   abilitySortColumn: AbilitySortColumn = 'damage';
   abilitySortDirection: SortDirection = 'desc';
-  readonly damageTypeLegend: readonly DamageType[] = [
-    'Physical',
-    'Magical',
-    'Burn',
-    'Bleed',
-    'Poison',
-  ];
-
   playerParticipants: StatsParticipant[] = [];
   enemyParticipants: StatsParticipant[] = [];
   participantGroups: StatsParticipantGroup[] = [];
@@ -352,6 +344,24 @@ export class CombatEntityStatsComponent implements OnChanges {
           (DAMAGE_TYPE_ORDER_INDEX.get(right.damageType) ??
             Number.MAX_SAFE_INTEGER),
       );
+  }
+
+  totalDamageByType(): AbilityDamageTypeStats[] {
+    const totals = new Map<DamageType, number>();
+
+    for (const ability of this.selectedStats?.abilities ?? []) {
+      for (const entry of ability.damageByType ?? []) {
+        totals.set(
+          entry.damageType,
+          (totals.get(entry.damageType) ?? 0) + entry.totalDamage,
+        );
+      }
+    }
+
+    return DAMAGE_TYPE_ORDER.map((damageType) => ({
+      damageType,
+      totalDamage: totals.get(damageType) ?? 0,
+    })).filter((entry) => entry.totalDamage > 0);
   }
 
   damageTypeBarPercentage(entry: AbilityDamageTypeStats): number {

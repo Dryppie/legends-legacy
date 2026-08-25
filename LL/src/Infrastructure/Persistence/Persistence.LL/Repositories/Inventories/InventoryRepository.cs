@@ -125,13 +125,26 @@ public class InventoryRepository : IInventoryRepository
 
         foreach (var (itemBaseId, group) in stackableGroups)
         {
-            var existing = existingStackables.FirstOrDefault(i => i.ItemInstance.ItemBaseId == itemBaseId) ??
-                       _context.InventoryItems.Local
-                           .FirstOrDefault(i => i.InventoryId == characterId && i.ItemInstance.ItemBaseId == itemBaseId);
+            var matchingStacks = existingStackables
+                .Where(item => item.ItemInstance.ItemBaseId == itemBaseId)
+                .ToList();
+            matchingStacks.AddRange(_context.InventoryItems.Local.Where(item =>
+                item.InventoryId == characterId
+                && item.ItemInstance.ItemBaseId == itemBaseId
+                && matchingStacks.All(existing => existing.ItemInstanceId != item.ItemInstanceId)));
+
+            var existing = matchingStacks.FirstOrDefault();
 
             if (existing != null)
             {
-                existing.Quantity += group.TotalQuantity;
+                existing.Quantity = checked(
+                    matchingStacks.Sum(item => item.Quantity) + group.TotalQuantity);
+                existing.IsFavorite = matchingStacks.Any(item => item.IsFavorite);
+                foreach (var duplicate in matchingStacks.Skip(1))
+                {
+                    _context.InventoryItems.Remove(duplicate);
+                }
+
                 AddAcquisitionLedgerEntry(
                     group.RepresentativeItem,
                     existing.ItemInstanceId,

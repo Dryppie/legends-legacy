@@ -120,8 +120,7 @@ export class DungeonsComponent implements OnInit {
         }
 
         const selectedDungeon = this.dungeons().find(
-          (dungeon) =>
-            (dungeon.familyId ?? dungeon.id) === selectedFamilyId,
+          (dungeon) => (dungeon.familyId ?? dungeon.id) === selectedFamilyId,
         );
         if (selectedDungeon) this.openRecords(selectedDungeon);
       },
@@ -152,7 +151,8 @@ export class DungeonsComponent implements OnInit {
       )
       .subscribe({
         next: (records) => {
-          if (requestId === this.recordsRequestId) this.recordsData.set(records);
+          if (requestId === this.recordsRequestId)
+            this.recordsData.set(records);
         },
         error: (e) => {
           if (requestId === this.recordsRequestId) {
@@ -259,6 +259,10 @@ export class DungeonsComponent implements OnInit {
 
   formatRecordDate(value: string | null | undefined): string {
     return formatLocalDate(value, 'mediumDate') ?? 'Never';
+  }
+
+  trackDungeon(_: number, dungeon: DungeonPreviewData): string {
+    return dungeon.familyId ?? dungeon.id;
   }
 
   private groupDifficultyVariants(

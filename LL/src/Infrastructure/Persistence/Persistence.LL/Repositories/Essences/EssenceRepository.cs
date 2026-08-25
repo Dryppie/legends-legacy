@@ -117,6 +117,17 @@ public sealed class EssenceRepository : IEssenceRepository
     public async Task<int> CountLoadoutsAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _context.EssenceLoadouts.CountAsync(x => x.CharacterId == characterId, cancellationToken);
 
+    public async Task<bool> HasLoadoutNameAsync(
+        Guid characterId,
+        string name,
+        Guid? excludingLoadoutId,
+        CancellationToken cancellationToken) =>
+        await _context.EssenceLoadouts.AnyAsync(
+            x => x.CharacterId == characterId
+                 && x.Name == name
+                 && (!excludingLoadoutId.HasValue || x.Id != excludingLoadoutId.Value),
+            cancellationToken);
+
     public async Task AddLoadoutAsync(EssenceLoadout loadout, CancellationToken cancellationToken) =>
         await _context.EssenceLoadouts.AddAsync(loadout, cancellationToken);
 

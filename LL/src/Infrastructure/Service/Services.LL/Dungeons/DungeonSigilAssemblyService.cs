@@ -22,8 +22,14 @@ public sealed class DungeonSigilAssemblyService(
     public async Task<DungeonSigilAssemblyOperationResult> AssembleAsync(
         Guid characterId,
         string dungeonId,
+        int quantity,
         CancellationToken cancellationToken)
     {
+        if (quantity < 1)
+        {
+            return DungeonSigilAssemblyOperationResult.Fail("Sigil quantity must be at least 1.");
+        }
+
         var settings = settingsProvider.GetSettings();
         if (!settings.Enabled)
         {
@@ -61,20 +67,26 @@ public sealed class DungeonSigilAssemblyService(
             return DungeonSigilAssemblyOperationResult.Fail("The dungeon sigil item definition could not be found.");
         }
 
-        var remainingFragments = character.SigilFragments < settings.FragmentCost
-            ? null
-            : await repository.TrySpendFragmentsAsync(characterId, settings.FragmentCost, cancellationToken);
-        if (remainingFragments is null)
-        {
-            return DungeonSigilAssemblyOperationResult.Fail(
-                $"Assembling this sigil requires {settings.FragmentCost} Sigil Fragments.");
-        }
-
         var ownedQuantity = await inventoryRepository.GetInventoryQuantityAsync(
             characterId,
             dungeon.SigilItemId,
             cancellationToken);
-        var assembledSigil = inventoryItemFactory.Create(sigilItemBase, 1, characterId);
+        if ((long)ownedQuantity + quantity > int.MaxValue)
+        {
+            return DungeonSigilAssemblyOperationResult.Fail("The resulting sigil quantity is too large.");
+        }
+
+        var fragmentCost = (long)settings.FragmentCost * quantity;
+        var remainingFragments = character.SigilFragments < fragmentCost
+            ? null
+            : await repository.TrySpendFragmentsAsync(characterId, fragmentCost, cancellationToken);
+        if (remainingFragments is null)
+        {
+            return DungeonSigilAssemblyOperationResult.Fail(
+                $"Assembling {quantity} {(quantity == 1 ? "sigil" : "sigils")} requires {fragmentCost} Sigil Fragments.");
+        }
+
+        var assembledSigil = inventoryItemFactory.Create(sigilItemBase, quantity, characterId);
         await inventory.AddItemsToInventory(
             characterId,
             [assembledSigil],
@@ -85,7 +97,8 @@ public sealed class DungeonSigilAssemblyService(
             dungeon.Id,
             dungeon.SigilItemId,
             sigilItemBase.Name,
-            ownedQuantity + 1,
+            quantity,
+            ownedQuantity + quantity,
             remainingFragments.Value));
     }
 }

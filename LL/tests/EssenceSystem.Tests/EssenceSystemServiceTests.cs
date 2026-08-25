@@ -172,14 +172,64 @@ public sealed class EssenceSystemServiceTests
         var absorbedId = await AddPlayerEssenceAsync(db, characterId);
         var service = CreateService(db);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.SaveLoadoutAsync(characterId, new SaveEssenceLoadoutRequest(null, "Bad", [new(0, Guid.NewGuid())]), CancellationToken.None));
+        var unabsorbed = await service.SaveLoadoutAsync(
+            characterId,
+            new SaveEssenceLoadoutRequest(null, "Bad", [new(0, Guid.NewGuid())]),
+            CancellationToken.None);
+        var duplicate = await service.SaveLoadoutAsync(
+            characterId,
+            new SaveEssenceLoadoutRequest(null, "Duplicate", [new(0, absorbedId), new(1, absorbedId)]),
+            CancellationToken.None);
+        var locked = await service.SaveLoadoutAsync(
+            characterId,
+            new SaveEssenceLoadoutRequest(null, "Locked", [new(1, absorbedId)]),
+            CancellationToken.None);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.SaveLoadoutAsync(characterId, new SaveEssenceLoadoutRequest(null, "Duplicate", [new(0, absorbedId), new(1, absorbedId)]), CancellationToken.None));
+        Assert.False(unabsorbed.Succeeded);
+        Assert.False(duplicate.Succeeded);
+        Assert.False(locked.Succeeded);
+        Assert.All(
+            new[] { unabsorbed, duplicate, locked },
+            result => Assert.Equal(SaveEssenceLoadoutFailure.Validation, result.Failure));
+    }
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.SaveLoadoutAsync(characterId, new SaveEssenceLoadoutRequest(null, "Locked", [new(1, absorbedId)]), CancellationToken.None));
+    [Fact]
+    public async Task SaveLoadout_rejects_another_loadout_name_but_allows_the_current_name()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var current = new EssenceLoadout
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            Name = "Current"
+        };
+        db.EssenceLoadouts.AddRange(
+            current,
+            new EssenceLoadout
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = characterId,
+                Name = "Existing"
+            });
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var unchangedName = await service.SaveLoadoutAsync(
+            characterId,
+            new SaveEssenceLoadoutRequest(current.Id, " Current ", []),
+            CancellationToken.None);
+        var conflictingName = await service.SaveLoadoutAsync(
+            characterId,
+            new SaveEssenceLoadoutRequest(current.Id, " Existing ", []),
+            CancellationToken.None);
+
+        Assert.True(unchangedName.Succeeded);
+        Assert.Equal("Current", unchangedName.Loadout!.Name);
+        Assert.False(conflictingName.Succeeded);
+        Assert.Equal(SaveEssenceLoadoutFailure.NameConflict, conflictingName.Failure);
+        Assert.Equal("Current", current.Name);
+        Assert.Equal(2, db.EssenceLoadouts.Count());
     }
 
     [Fact]
@@ -207,11 +257,10 @@ public sealed class EssenceSystemServiceTests
         ]);
         var service = CreateService(db, creatureEssenceLootTables: lootTables);
 
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.SaveLoadoutAsync(
-                characterId,
-                new SaveEssenceLoadoutRequest(null, "Same creature", [new(0, firstVariantId), new(1, secondVariantId)]),
-                CancellationToken.None));
+        var rejected = await service.SaveLoadoutAsync(
+            characterId,
+            new SaveEssenceLoadoutRequest(null, "Same creature", [new(0, firstVariantId), new(1, secondVariantId)]),
+            CancellationToken.None);
 
         var allowed = await service.SaveLoadoutAsync(
             characterId,
@@ -221,8 +270,9 @@ public sealed class EssenceSystemServiceTests
                 [new(0, firstVariantId), new(1, otherCreatureId)]),
             CancellationToken.None);
 
-        Assert.Contains("same creature", exception.Message, StringComparison.OrdinalIgnoreCase);
-        Assert.Equal(2, allowed.Slots.Count);
+        Assert.False(rejected.Succeeded);
+        Assert.Contains("same creature", rejected.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(2, allowed.Loadout!.Slots.Count);
     }
 
     [Fact]

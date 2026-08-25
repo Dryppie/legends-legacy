@@ -11,6 +11,7 @@ import {
 import { DungeonStateService } from '../../../../../../core/services/api/dungeon/dungeon-state.service';
 import { CombatStateService } from '../../../../../../core/state/combat-state/combat-state.service';
 import { InventoryItem } from '../../../../../../shared/models/inventoryItem';
+import { DungeonPreviewData } from '../../../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 import { DungeonPageComponent } from './dungeon-page.component';
 
 describe('DungeonPageComponent', () => {
@@ -22,9 +23,20 @@ describe('DungeonPageComponent', () => {
     activeDungeon.set(createRestSiteRun());
     dungeonState = jasmine.createSpyObj<DungeonStateService>(
       'DungeonStateService',
-      ['chooseRoute', 'fight', 'restAtSite', 'retreat', 'claimDungeonRewards'],
+      [
+        'chooseRoute',
+        'fight',
+        'restAtSite',
+        'retreat',
+        'claimDungeonRewards',
+        'dismissFailedDungeonRun',
+      ],
       {
         activeDungeon: activeDungeon.asReadonly(),
+        dungeons: signal([
+          { id: 'goblin_mines_Normal', region: 1 },
+          { id: 'hives_abyss_Normal', region: 2 },
+        ] as DungeonPreviewData[]).asReadonly(),
         loading: signal(false).asReadonly(),
         error: signal<string | null>(null).asReadonly(),
         message: signal<string | null>(null).asReadonly(),
@@ -238,6 +250,39 @@ describe('DungeonPageComponent', () => {
 
     expect(component.claimedRewardResult()).toBeNull();
     expect(router.navigate).toHaveBeenCalledOnceWith(['/game/world/shenic']);
+  });
+
+  it('returns to the region where the completed dungeon was started', () => {
+    const run = createRun(RoomType.Boss);
+    run.dungeonDefinitionId = 'hives_abyss_Normal';
+    run.status = DungeonRunStatus.Completed;
+    activeDungeon.set(run);
+    const component = TestBed.runInInjectionContext(
+      () => new DungeonPageComponent(),
+    );
+    component.claimedRewardResult.set({ run, claimedLoot: [] });
+
+    component.returnToWorldAfterClaim();
+
+    expect(router.navigate).toHaveBeenCalledOnceWith(['/game/world/meran']);
+  });
+
+  it('returns to the failed dungeon region after dismissing the run', () => {
+    const run = createRun(RoomType.Boss);
+    run.dungeonDefinitionId = 'hives_abyss_Normal';
+    run.status = DungeonRunStatus.Failed;
+    activeDungeon.set(run);
+    dungeonState.dismissFailedDungeonRun.and.callFake((onSuccess) => {
+      activeDungeon.set(null);
+      onSuccess?.();
+    });
+    const component = TestBed.runInInjectionContext(
+      () => new DungeonPageComponent(),
+    );
+
+    component.dismissFailedDungeonRun();
+
+    expect(router.navigate).toHaveBeenCalledOnceWith(['/game/world/meran']);
   });
 });
 

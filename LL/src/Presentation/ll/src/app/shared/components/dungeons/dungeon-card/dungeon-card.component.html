@@ -533,10 +533,10 @@
         </ng-template>
 
         <div *ngIf="shouldShowSigilAssembly()" class="ll-card mt-3 p-3">
-          <div class="ll-eyebrow">Create the missing key</div>
+          <div class="ll-eyebrow">Assemble Sigils</div>
           <p class="mt-2 text-xs leading-5 text-zinc-400">
-            Convert {{ dungeonState.sigilAssemblyCost() }} Sigil Fragments into
-            1 {{ selectedSigilRequirement()?.name }}.
+            Each {{ selectedSigilRequirement()?.name }} costs
+            {{ dungeonState.sigilAssemblyCost() }} Sigil Fragments.
           </p>
           <div class="my-3 flex items-center justify-between gap-3 text-xs">
             <span class="text-zinc-400">Fragments owned</span>
@@ -544,11 +544,41 @@
               {{ dungeonState.sigilFragments() }}
             </span>
           </div>
+          <div class="mb-3 block text-xs text-zinc-400">
+            <span class="flex items-center justify-between gap-3">
+              <span>Sigils to assemble</span>
+              <button
+                type="button"
+                class="text-primary hover:text-white disabled:text-zinc-600"
+                [disabled]="maximumSigilsAssemblable() < 1"
+                (click)="setMaximumSigilAssemblyQuantity()"
+              >
+                Max {{ maximumSigilsAssemblable() }}
+              </button>
+            </span>
+            <input
+              type="number"
+              class="ll-input no-spinner mt-1 w-full px-3 py-2 text-right text-sm text-white"
+              aria-label="Sigils to assemble"
+              inputmode="numeric"
+              min="1"
+              [max]="
+                maximumSigilsAssemblable() > 0 ? maximumSigilsAssemblable() : 1
+              "
+              step="1"
+              [value]="sigilAssemblyQuantity()"
+              (input)="
+                setSigilAssemblyQuantity($any($event.target).valueAsNumber)
+              "
+            />
+          </div>
           <app-regular-button
             [text]="
               'Convert ' +
-              dungeonState.sigilAssemblyCost() +
+              dungeonState.sigilAssemblyCost() * sigilAssemblyQuantity() +
               ' Fragments → ' +
+              sigilAssemblyQuantity() +
+              ' × ' +
               (selectedSigilRequirement()?.name ?? 'Sigil')
             "
             (pressed)="assembleSelectedSigil()"

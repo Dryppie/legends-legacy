@@ -216,6 +216,38 @@ describe('CombatEntityStatsComponent', () => {
     ).toBe(70);
   });
 
+  it('totals every damage type across the ability summary', () => {
+    component.playerTeam = [entity('player', 'Player', 100, 100)];
+    const playerStats = stats('player', 'Player', 100, 'Friendly');
+    playerStats.abilities = [
+      {
+        ...playerStats.abilities[0],
+        name: 'First attack',
+        damageByType: [
+          { damageType: 'Burn', totalDamage: 30 },
+          { damageType: 'Physical', totalDamage: 70 },
+        ],
+      },
+      {
+        ...playerStats.abilities[0],
+        name: 'Second attack',
+        damageByType: [
+          { damageType: 'Physical', totalDamage: 20 },
+          { damageType: 'Shadow', totalDamage: 10 },
+        ],
+      },
+    ];
+    component.entityStats = [playerStats];
+
+    refresh(component);
+
+    expect(component.totalDamageByType()).toEqual([
+      { damageType: 'Physical', totalDamage: 90 },
+      { damageType: 'Burn', totalDamage: 30 },
+      { damageType: 'Shadow', totalDamage: 10 },
+    ]);
+  });
+
   it('tracks updated ability snapshots by name', () => {
     const first = stats('player', 'Player', 10, 'Friendly').abilities[0];
     const updated = { ...first, totalDamage: 20 };

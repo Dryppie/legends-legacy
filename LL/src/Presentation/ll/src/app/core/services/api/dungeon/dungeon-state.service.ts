@@ -162,13 +162,13 @@ export class DungeonStateService {
     );
   }
 
-  assembleSigil(dungeonId: string): void {
+  assembleSigil(dungeonId: string, quantity: number): void {
     if (this._loading()) return;
 
     this._loading.set(true);
     this._error.set(null);
     this.service
-      .assembleSigil(dungeonId)
+      .assembleSigil(dungeonId, quantity)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (response) => {
@@ -178,8 +178,10 @@ export class DungeonStateService {
           this.inventoryState.applyVersionedInventory(response);
           this.characterState.applyVersionedCharacter(response);
           this.toast.showToast(
-            'Sigil assembled',
-            response.data.sigilName,
+            response.data.quantityAssembled === 1
+              ? 'Sigil assembled'
+              : 'Sigils assembled',
+            `${response.data.quantityAssembled} × ${response.data.sigilName}`,
             true,
           );
         },

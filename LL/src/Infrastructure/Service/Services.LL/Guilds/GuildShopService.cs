@@ -1,14 +1,13 @@
 using Application.Common.Interfaces;
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Guilds;
 using Domain.Models.Achievements;
-using Domain.Models.Economy;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Guilds;
 using Domain.Models.Guilds.Buildings;
 using Domain.Models.Guilds.Shop;
 using Domain.Models.Items;
 using Microsoft.EntityFrameworkCore;
-using Services.LL.Inventories;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Guilds;
@@ -20,34 +19,19 @@ public class GuildShopService : IGuildShopService
     private const string BlueprintRotationGroup = "rare-blueprints";
 
     private readonly IDbContext _context;
-    private readonly IEconomyLedgerRepository _economyLedger;
+    private readonly IInventoryService _inventory;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IReadOnlyList<GuildShopItemDefinition> _items;
 
     public GuildShopService(
         IDbContext context,
-        IEconomyLedgerRepository economyLedger)
-        : this(context, new DefaultGuildContentProvider(), new InventoryItemFactory(), economyLedger)
-    {
-    }
-
-    public GuildShopService(
-        IDbContext context,
-        IGuildContentProvider content,
-        IEconomyLedgerRepository economyLedger)
-        : this(context, content, new InventoryItemFactory(), economyLedger)
-    {
-    }
-
-    public GuildShopService(
-        IDbContext context,
         IGuildContentProvider content,
         IInventoryItemFactory inventoryItemFactory,
-        IEconomyLedgerRepository economyLedger)
+        IInventoryService inventory)
     {
         _context = context;
         _inventoryItemFactory = inventoryItemFactory;
-        _economyLedger = economyLedger;
+        _inventory = inventory;
         _items = content.ShopItems;
     }
 
@@ -302,24 +286,13 @@ public class GuildShopService : IGuildShopService
         CancellationToken cancellationToken)
     {
         var itemBase = await _context.ItemBases.FirstAsync(x => x.Id == reward.Key, cancellationToken);
-        var items = _inventoryItemFactory.CreateForQuantity(itemBase, checked((int)reward.Amount), characterId);
-        var acquiredAt = DateTimeOffset.UtcNow;
-        foreach (var item in items)
-        {
-            item.ItemInstance.AcquiredAtUtc = acquiredAt;
-            item.ItemInstance.AcquisitionSource = ItemAcquisitionSources.GuildShop;
-            if (_context.GetEntry(item.ItemInstance).State == EntityState.Detached)
-            {
-                await _context.ItemInstances.AddAsync(item.ItemInstance, cancellationToken);
-            }
-
-            await _context.InventoryItems.AddAsync(item, cancellationToken);
-        }
-        await _economyLedger.RecordItemAcquisitionsAsync(
+        var items = _inventoryItemFactory
+            .CreateForQuantity(itemBase, checked((int)reward.Amount), characterId)
+            .ToList();
+        await _inventory.AddItemsToInventory(
             characterId,
             items,
             ItemAcquisitionSources.GuildShop,
-            acquiredAt,
             cancellationToken);
 
         return items;

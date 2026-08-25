@@ -11,6 +11,7 @@ public sealed class DungeonSigilAssemblyResponseDto : IMapFrom<DungeonSigilAssem
     public string DungeonId { get; set; } = string.Empty;
     public string SigilItemId { get; set; } = string.Empty;
     public string SigilName { get; set; } = string.Empty;
+    public int QuantityAssembled { get; set; }
     public int InventoryQuantity { get; set; }
     public long SigilFragmentsRemaining { get; set; }
     public required DungeonHubDto Hub { get; init; }

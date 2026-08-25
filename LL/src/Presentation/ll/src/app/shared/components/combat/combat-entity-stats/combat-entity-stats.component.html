@@ -843,23 +843,38 @@
               <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
                 <span>Ability</span>
                 <span
+                  *ngIf="totalDamageByType().length"
                   class="flex flex-wrap items-center gap-x-3 gap-y-1 normal-case tracking-normal"
-                  aria-label="Damage type colors"
+                  aria-label="Total damage by type"
                 >
                   <span
                     class="text-[8px] uppercase tracking-[0.16em] text-light_gray"
-                    >Damage types</span
+                    >Total by type</span
                   >
                   <span
-                    *ngFor="let damageType of damageTypeLegend"
-                    class="inline-flex items-center gap-1.5 text-[9px] font-normal text-secondary"
+                    *ngFor="
+                      let entry of totalDamageByType();
+                      trackBy: trackDamageType
+                    "
+                    class="inline-flex items-center gap-1.5 text-[9px] font-normal"
+                    [style.color]="damageTypeColor(entry.damageType)"
+                    [attr.aria-label]="
+                      damageTypeLabel(entry.damageType) +
+                      ' total damage ' +
+                      entry.totalDamage
+                    "
                   >
                     <span
                       class="h-2 w-2 rounded-sm"
-                      [style.background-color]="damageTypeColor(damageType)"
+                      [style.background-color]="
+                        damageTypeColor(entry.damageType)
+                      "
                       aria-hidden="true"
                     ></span>
-                    {{ damageType }}
+                    {{ damageTypeLabel(entry.damageType) }}
+                    <strong class="font-semibold tabular-nums text-white">
+                      {{ entry.totalDamage | number }}
+                    </strong>
                   </span>
                 </span>
               </div>
@@ -1052,10 +1067,45 @@
         </div>
 
         <div class="lg:hidden" data-tour="current-combat-summary">
-          <div
-            class="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
-          >
-            Ability breakdown
+          <div class="mb-2 space-y-2">
+            <div
+              class="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
+            >
+              Ability breakdown
+            </div>
+            <div
+              *ngIf="totalDamageByType().length"
+              class="flex flex-wrap items-center gap-x-3 gap-y-1"
+              aria-label="Total damage by type"
+            >
+              <span
+                class="text-[8px] uppercase tracking-[0.16em] text-light_gray"
+                >Total by type</span
+              >
+              <span
+                *ngFor="
+                  let entry of totalDamageByType();
+                  trackBy: trackDamageType
+                "
+                class="inline-flex items-center gap-1.5 text-[10px]"
+                [style.color]="damageTypeColor(entry.damageType)"
+                [attr.aria-label]="
+                  damageTypeLabel(entry.damageType) +
+                  ' total damage ' +
+                  entry.totalDamage
+                "
+              >
+                <span
+                  class="h-2 w-2 rounded-sm"
+                  [style.background-color]="damageTypeColor(entry.damageType)"
+                  aria-hidden="true"
+                ></span>
+                {{ damageTypeLabel(entry.damageType) }}
+                <strong class="font-semibold tabular-nums text-white">
+                  {{ entry.totalDamage | number }}
+                </strong>
+              </span>
+            </div>
           </div>
 
           <div class="space-y-2">

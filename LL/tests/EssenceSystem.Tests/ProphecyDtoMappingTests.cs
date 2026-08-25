@@ -93,6 +93,7 @@ public sealed class ProphecyDtoMappingTests
             "goblin_mines.grade_1",
             "item.sigil.goblin",
             "Goblin Sigil",
+            2,
             3,
             75);
 
@@ -101,6 +102,7 @@ public sealed class ProphecyDtoMappingTests
         Assert.Equal(result.DungeonId, dto.DungeonId);
         Assert.Equal(result.SigilItemId, dto.SigilItemId);
         Assert.Equal(result.SigilName, dto.SigilName);
+        Assert.Equal(result.QuantityAssembled, dto.QuantityAssembled);
         Assert.Equal(result.InventoryQuantity, dto.InventoryQuantity);
         Assert.Equal(result.SigilFragmentsRemaining, dto.SigilFragmentsRemaining);
     }

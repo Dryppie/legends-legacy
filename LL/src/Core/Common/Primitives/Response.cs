@@ -7,6 +7,7 @@ public class Response<T>
     public T? Data { get; init; }
     public string ErrorMessage { get; init; } = string.Empty;
     public string ErrorCode { get; init; } = DefaultErrorCode;
+    public bool IsConflict { get; init; }
 
     public static Response<T> Success(T data) =>
         new() { IsSuccess = true, Data = data };
@@ -18,6 +19,17 @@ public class Response<T>
         new()
         {
             IsSuccess = false,
+            ErrorMessage = error,
+            ErrorCode = string.IsNullOrWhiteSpace(errorCode)
+                ? DefaultErrorCode
+                : errorCode
+        };
+
+    public static Response<T> Conflict(string error, string errorCode) =>
+        new()
+        {
+            IsSuccess = false,
+            IsConflict = true,
             ErrorMessage = error,
             ErrorCode = string.IsNullOrWhiteSpace(errorCode)
                 ? DefaultErrorCode

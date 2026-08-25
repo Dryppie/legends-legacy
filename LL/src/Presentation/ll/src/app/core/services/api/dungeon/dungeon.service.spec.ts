@@ -19,7 +19,7 @@ describe('DungeonService response ownership', () => {
       .subscribe();
     service.executeDungeonAction('run-1', { actionId: 'fight' }).subscribe();
     service.dismissFailedDungeonRun().subscribe();
-    service.assembleSigil('dungeon-1').subscribe();
+    service.assembleSigil('dungeon-1', 4).subscribe();
 
     expect(api.postVersioned.calls.argsFor(0)[2]).toEqual({
       stateSyncScopesHandledByResponse: ['dungeons', 'inventory'],
@@ -33,5 +33,6 @@ describe('DungeonService response ownership', () => {
     expect(api.postVersioned.calls.argsFor(3)[2]).toEqual({
       stateSyncScopesHandledByResponse: ['dungeons', 'inventory', 'character'],
     });
+    expect(api.postVersioned.calls.argsFor(3)[1]).toEqual({ quantity: 4 });
   });
 });

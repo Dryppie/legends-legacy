@@ -10,7 +10,13 @@ import { DungeonCardComponent } from './dungeon-card.component';
 
 describe('DungeonCardComponent', () => {
   function createComponent(): DungeonCardComponent {
-    return new DungeonCardComponent({} as DungeonStateService, {} as Router);
+    return new DungeonCardComponent(
+      {
+        sigilAssemblyCost: () => 10,
+        sigilFragments: () => 0,
+      } as unknown as DungeonStateService,
+      {} as Router,
+    );
   }
 
   function createComponentWithActiveDungeon(
@@ -123,6 +129,31 @@ describe('DungeonCardComponent', () => {
     component.ngOnChanges({});
 
     expect(component.difficulty()).toBe(DungeonDifficulty.Normal);
+  });
+
+  it('assembles the selected number of sigils in one request', () => {
+    const assembleSigil = jasmine.createSpy('assembleSigil');
+    const component = new DungeonCardComponent(
+      {
+        loading: () => false,
+        sigilAssemblyCost: () => 10,
+        sigilFragments: () => 85,
+        assembleSigil,
+      } as unknown as DungeonStateService,
+      {} as Router,
+    );
+    const preview = createPreview({}, [DungeonDifficulty.Normal]);
+    preview.canAssembleSigil = true;
+    preview.difficultyVariants![DungeonDifficulty.Normal]!.canAssembleSigil =
+      true;
+    component.previewData = preview;
+    component.ngOnChanges({});
+
+    component.setSigilAssemblyQuantity(6);
+    component.assembleSelectedSigil();
+
+    expect(component.maximumSigilsAssemblable()).toBe(8);
+    expect(assembleSigil).toHaveBeenCalledOnceWith(preview.id, 6);
   });
 
   it('reapplies the default when a different dungeon is bound', () => {

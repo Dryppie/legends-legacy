@@ -1255,7 +1255,17 @@
           >
             −
           </button>
-          <span class="text-sm text-primary">{{ quantity() }}</span>
+          <input
+            type="number"
+            class="no-spinner w-full min-w-0 self-center border-0 bg-transparent p-0 text-center text-sm text-primary focus:outline-none"
+            aria-label="Craft quantity"
+            inputmode="numeric"
+            min="1"
+            max="100"
+            step="1"
+            [value]="quantity()"
+            (input)="setQuantity($any($event.target).valueAsNumber)"
+          />
           <button
             type="button"
             class="h-full text-secondary transition-colors hover:text-white"

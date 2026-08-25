@@ -186,6 +186,7 @@ export interface DungeonSigilAssemblyResponse {
   dungeonId: string;
   sigilItemId: string;
   sigilName: string;
+  quantityAssembled: number;
   inventoryQuantity: number;
   sigilFragmentsRemaining: number;
   inventoryItems: InventoryItem[];
@@ -219,11 +220,12 @@ export class DungeonService {
 
   assembleSigil(
     dungeonId: string,
+    quantity: number,
   ): Observable<VersionedMutationResult<DungeonSigilAssemblyResponse>> {
     return this.api
       .postVersioned<DungeonSigilAssemblyResponse>(
         `dungeon/${encodeURIComponent(dungeonId)}/assemble-sigil`,
-        {},
+        { quantity },
         {
           stateSyncScopesHandledByResponse: [
             'dungeons',

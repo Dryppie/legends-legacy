@@ -14,7 +14,8 @@ namespace Application.UseCases.Dungeons.Commands.AssembleDungeonSigil;
 
 public sealed record AssembleDungeonSigilCommand(
     Guid CharacterId,
-    string DungeonId) : ICommand<Response<DungeonSigilAssemblyResponseDto>>;
+    string DungeonId,
+    int Quantity) : ICommand<Response<DungeonSigilAssemblyResponseDto>>;
 
 public sealed class AssembleDungeonSigilCommandHandler(
     IDungeonSigilAssemblyService assemblyService,
@@ -31,6 +32,7 @@ public sealed class AssembleDungeonSigilCommandHandler(
         var result = await assemblyService.AssembleAsync(
             request.CharacterId,
             request.DungeonId,
+            request.Quantity,
             cancellationToken);
 
         if (!result.Succeeded || result.Value is null)
@@ -49,6 +51,7 @@ public sealed class AssembleDungeonSigilCommandHandler(
             DungeonId = response.DungeonId,
             SigilItemId = response.SigilItemId,
             SigilName = response.SigilName,
+            QuantityAssembled = response.QuantityAssembled,
             InventoryQuantity = response.InventoryQuantity,
             SigilFragmentsRemaining = response.SigilFragmentsRemaining,
             InventoryItems = mapper.Map<List<InventoryItemDto>>(inventory.InventoryItems),

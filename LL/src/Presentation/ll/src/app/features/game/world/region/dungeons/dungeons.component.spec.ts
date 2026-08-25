@@ -2,6 +2,7 @@ import { CharacterStateService } from '../../../../../core/services/api/characte
 import { DungeonStateService } from '../../../../../core/services/api/dungeon/dungeon-state.service';
 import { DungeonsComponent } from './dungeons.component';
 import { TestBed } from '@angular/core/testing';
+import { DungeonPreviewData } from '../../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 
 describe('DungeonsComponent', () => {
   it('refreshes dungeon availability whenever the page is opened', () => {
@@ -20,5 +21,17 @@ describe('DungeonsComponent', () => {
     component.ngOnInit();
 
     expect(dungeonState.refresh).toHaveBeenCalledOnceWith();
+  });
+
+  it('tracks refreshed dungeon previews by family so card state is retained', () => {
+    const component = Object.create(
+      DungeonsComponent.prototype,
+    ) as DungeonsComponent;
+    const preview = {
+      id: 'goblin_mines_ii',
+      familyId: 'goblin_mines',
+    } as DungeonPreviewData;
+
+    expect(component.trackDungeon(0, preview)).toBe('goblin_mines');
   });
 });

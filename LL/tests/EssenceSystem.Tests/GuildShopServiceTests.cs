@@ -9,8 +9,9 @@ using Domain.Models.Items;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Persistence.LL;
-using Persistence.LL.Repositories.Economy;
+using Persistence.LL.Repositories.Inventories;
 using Services.LL.Guilds;
+using Services.LL.Inventories;
 
 namespace EssenceSystem.Tests;
 
@@ -163,6 +164,53 @@ public sealed class GuildShopServiceTests
     }
 
     [Fact]
+    public async Task Catalyst_cache_merges_into_an_existing_stack()
+    {
+        await using var db = CreateDbContext();
+        var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
+        var characterId = SeedGuild(db, now);
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
+        var catalystCache = overview!.Items.First(x =>
+            x.StockType == GuildShopStockType.Common
+            && x.Key.EndsWith("_catalyst_cache"));
+        var reward = Assert.Single(catalystCache.Rewards);
+        var itemBase = CreateResource(reward.Key!, reward.Name!);
+        db.ItemBases.Add(itemBase);
+        db.InventoryItems.Add(new InventoryItem
+        {
+            InventoryId = characterId,
+            ItemInstance = new ItemInstance
+            {
+                Id = Guid.NewGuid(),
+                ItemBaseId = itemBase.Id,
+                ItemBase = itemBase
+            },
+            Quantity = 3
+        });
+        await db.SaveChangesAsync();
+
+        var result = await service.PurchaseAsync(
+            characterId,
+            catalystCache.Key,
+            now,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.True(result.Succeeded);
+        var stored = await db.InventoryItems
+            .Include(item => item.ItemInstance)
+            .Where(item => item.InventoryId == characterId
+                           && item.ItemInstance.ItemBaseId == reward.Key)
+            .ToListAsync();
+        Assert.Single(stored);
+        Assert.Equal(5, stored[0].Quantity);
+        Assert.Equal(2, Assert.Single(result.Value!.InventoryItemsGranted).Quantity);
+    }
+
+    [Fact]
     public async Task Common_stock_offers_two_of_five_rotating_catalyst_caches()
     {
         await using var db = CreateDbContext();
@@ -212,7 +260,11 @@ public sealed class GuildShopServiceTests
     }
 
     private static GuildShopService CreateService(LLDbContext db) =>
-        new(db, new EconomyLedgerRepository(db));
+        new(
+            db,
+            new DefaultGuildContentProvider(),
+            new InventoryItemFactory(),
+            new InventoryService(new InventoryRepository(db)));
 
     private static ItemBase CreateResource(string id, string name) => new()
     {

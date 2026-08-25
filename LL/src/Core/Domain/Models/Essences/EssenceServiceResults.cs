@@ -87,6 +87,18 @@ public sealed record SaveEssenceLoadoutSlotRequest(
     int SlotIndex,
     Guid? PlayerEssenceId);
 
+public enum SaveEssenceLoadoutFailure
+{
+    Validation,
+    NameConflict
+}
+
+public sealed record SaveEssenceLoadoutResult(
+    bool Succeeded,
+    string Message,
+    EssenceLoadout? Loadout,
+    SaveEssenceLoadoutFailure? Failure = null);
+
 public sealed record EssenceOperationResult(
     bool Succeeded,
     string Message);

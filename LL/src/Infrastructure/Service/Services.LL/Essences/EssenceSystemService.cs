@@ -273,22 +273,38 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         return Ok("Essence evolved.");
     }
 
-    public async Task<EssenceLoadout> SaveLoadoutAsync(Guid characterId, SaveEssenceLoadoutRequest request, CancellationToken cancellationToken)
+    public async Task<SaveEssenceLoadoutResult> SaveLoadoutAsync(Guid characterId, SaveEssenceLoadoutRequest request, CancellationToken cancellationToken)
     {
+        var name = request.Name?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(name))
+            return LoadoutSaveFailed("Essence loadout name is required.");
+        if (name.Length > 80)
+            return LoadoutSaveFailed("Essence loadout name cannot exceed 80 characters.");
+
         var characterLevel = await GetCharacterLevelAsync(characterId, cancellationToken);
         var unlockedSlots = _slotUnlocks.GetUnlockedSlotCount(characterLevel);
         var normalizedSlots = request.Slots.Where(x => x.PlayerEssenceId.HasValue).ToList();
 
         if (normalizedSlots.Any(x => x.SlotIndex < 0 || x.SlotIndex >= unlockedSlots))
-            throw new InvalidOperationException("Loadout contains a locked Essence slot.");
+            return LoadoutSaveFailed("Loadout contains a locked Essence slot.");
         if (normalizedSlots.GroupBy(x => x.PlayerEssenceId).Any(x => x.Count() > 1))
-            throw new InvalidOperationException("A loadout cannot attune the same Essence twice.");
+            return LoadoutSaveFailed("A loadout cannot attune the same Essence twice.");
 
         var essenceIds = normalizedSlots.Select(x => x.PlayerEssenceId!.Value).ToList();
         var ownedCount = await _essences.CountOwnedPlayerEssencesAsync(characterId, essenceIds, cancellationToken);
-        if (ownedCount != essenceIds.Count) throw new InvalidOperationException("A loadout can only use absorbed Essences.");
+        if (ownedCount != essenceIds.Count)
+            return LoadoutSaveFailed("A loadout can only use absorbed Essences.");
         if (!await HasUniqueCreatureSourcesAsync(characterId, essenceIds, cancellationToken))
-            throw new InvalidOperationException("A loadout cannot attune more than one Essence from the same creature.");
+            return LoadoutSaveFailed("A loadout cannot attune more than one Essence from the same creature.");
+
+        if (await _essences.HasLoadoutNameAsync(characterId, name, request.Id, cancellationToken))
+        {
+            return new SaveEssenceLoadoutResult(
+                false,
+                $"An Essence loadout named '{name}' already exists.",
+                null,
+                SaveEssenceLoadoutFailure.NameConflict);
+        }
 
         EssenceLoadout? loadout = null;
         if (request.Id.HasValue)
@@ -297,12 +313,13 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         if (loadout is null)
         {
             var count = await _essences.CountLoadoutsAsync(characterId, cancellationToken);
-            if (count >= _loadoutLimits.GetLoadoutLimit(characterId)) throw new InvalidOperationException("Essence loadout limit reached.");
-            loadout = new EssenceLoadout { Id = Guid.NewGuid(), CharacterId = characterId, Name = request.Name.Trim(), CreatedAt = DateTimeOffset.UtcNow };
+            if (count >= _loadoutLimits.GetLoadoutLimit(characterId))
+                return LoadoutSaveFailed("Essence loadout limit reached.");
+            loadout = new EssenceLoadout { Id = Guid.NewGuid(), CharacterId = characterId, Name = name, CreatedAt = DateTimeOffset.UtcNow };
             await _essences.AddLoadoutAsync(loadout, cancellationToken);
         }
 
-        loadout.Name = request.Name.Trim();
+        loadout.Name = name;
         loadout.UpdatedAt = DateTimeOffset.UtcNow;
         await ReplaceLoadoutSlotsAsync(loadout, normalizedSlots, cancellationToken);
         await _outbox.EnqueueAsync(
@@ -316,8 +333,11 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             null,
             cancellationToken);
 
-        return loadout;
+        return new SaveEssenceLoadoutResult(true, "Essence loadout saved.", loadout);
     }
+
+    private static SaveEssenceLoadoutResult LoadoutSaveFailed(string message) =>
+        new(false, message, null, SaveEssenceLoadoutFailure.Validation);
 
     private async Task ReplaceLoadoutSlotsAsync(EssenceLoadout loadout, IReadOnlyCollection<SaveEssenceLoadoutSlotRequest> requestedSlots, CancellationToken cancellationToken)
     {

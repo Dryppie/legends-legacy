@@ -26,9 +26,19 @@ public class DungeonController : BaseController
     public async Task<ActionResult<DungeonHubDto>> GetAvailableDungeons() =>
         await Mediator.Send(new GetAvailableDungeonsQuery(CurrentCharacterGuid));
 
+    public sealed class AssembleDungeonSigilRequest
+    {
+        public int Quantity { get; set; } = 1;
+    }
+
     [HttpPost("{dungeonId}/assemble-sigil")]
-    public async Task<ActionResult<Response<DungeonSigilAssemblyResponseDto>>> AssembleSigil(string dungeonId) =>
-        await Mediator.Send(new AssembleDungeonSigilCommand(CurrentCharacterGuid, dungeonId));
+    public async Task<ActionResult<Response<DungeonSigilAssemblyResponseDto>>> AssembleSigil(
+        string dungeonId,
+        [FromBody] AssembleDungeonSigilRequest request) =>
+        await Mediator.Send(new AssembleDungeonSigilCommand(
+            CurrentCharacterGuid,
+            dungeonId,
+            request.Quantity));
 
     [HttpGet("GetDungeonRecords/{familyId}")]
     public async Task<ActionResult<DungeonRecordsDto>> GetDungeonRecords(string familyId) =>

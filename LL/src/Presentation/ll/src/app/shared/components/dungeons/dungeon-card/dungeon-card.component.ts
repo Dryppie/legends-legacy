@@ -81,6 +81,7 @@ export class DungeonCardComponent implements OnChanges {
   private difficultyChosenManually = false;
   private appliedDefaultForDungeonId: string | null = null;
   selectedTab = signal<DungeonDetailTab>('rewards');
+  readonly sigilAssemblyQuantity = signal(1);
   readonly selectedMasteryTooltipOpen = signal(false);
   readonly masteryTooltipPositions: ConnectedPosition[] = [
     {
@@ -131,12 +132,11 @@ export class DungeonCardComponent implements OnChanges {
 
     if (!this.difficultyChosenManually) {
       this.difficulty.set(this.defaultDifficulty());
-      return;
-    }
-
-    if (!this.isDifficultyUnlocked(this.difficulty())) {
+    } else if (!this.isDifficultyUnlocked(this.difficulty())) {
       this.difficulty.set(this.defaultDifficulty());
     }
+
+    this.setSigilAssemblyQuantity(this.sigilAssemblyQuantity());
   }
 
   /**
@@ -338,25 +338,38 @@ export class DungeonCardComponent implements OnChanges {
 
   shouldShowSigilAssembly(): boolean {
     const requirement = this.selectedSigilRequirement();
-    return (
-      this.dungeonState.sigilAssemblyEnabled() &&
-      !!requirement &&
-      requirement.ownedAmount < requirement.requiredAmount
-    );
+    return this.dungeonState.sigilAssemblyEnabled() && !!requirement;
+  }
+
+  maximumSigilsAssemblable(): number {
+    const cost = this.dungeonState.sigilAssemblyCost();
+    return cost > 0 ? Math.floor(this.dungeonState.sigilFragments() / cost) : 0;
+  }
+
+  setSigilAssemblyQuantity(value: number): void {
+    const maximum = Math.max(1, this.maximumSigilsAssemblable());
+    const normalized = Number.isFinite(value) ? Math.floor(value) : 1;
+    this.sigilAssemblyQuantity.set(Math.min(Math.max(normalized, 1), maximum));
+  }
+
+  setMaximumSigilAssemblyQuantity(): void {
+    this.setSigilAssemblyQuantity(this.maximumSigilsAssemblable());
   }
 
   canAssembleSelectedSigil(): boolean {
     return (
       !this.dungeonState.loading() &&
       !!this.selectedPreviewData().canAssembleSigil &&
-      this.dungeonState.sigilFragments() >=
-        this.dungeonState.sigilAssemblyCost()
+      this.sigilAssemblyQuantity() <= this.maximumSigilsAssemblable()
     );
   }
 
   assembleSelectedSigil(): void {
     if (!this.canAssembleSelectedSigil()) return;
-    this.dungeonState.assembleSigil(this.selectedPreviewData().id);
+    this.dungeonState.assembleSigil(
+      this.selectedPreviewData().id,
+      this.sigilAssemblyQuantity(),
+    );
   }
 
   sigilAssemblyBlockingMessage(): string {
@@ -367,7 +380,7 @@ export class DungeonCardComponent implements OnChanges {
     }
 
     const missing =
-      this.dungeonState.sigilAssemblyCost() -
+      this.dungeonState.sigilAssemblyCost() * this.sigilAssemblyQuantity() -
       this.dungeonState.sigilFragments();
     return missing > 0
       ? `Earn ${missing} more Sigil Fragments to assemble this sigil.`

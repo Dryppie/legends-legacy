@@ -55,16 +55,24 @@ public sealed class ResponseResultFilter : IAsyncResultFilter
         var code = (string)responseType
             .GetProperty(nameof(Response<int>.ErrorCode))!
             .GetValue(response)!;
+        var isConflict = (bool)responseType
+            .GetProperty(nameof(Response<int>.IsConflict))!
+            .GetValue(response)!;
+        var status = isConflict
+            ? StatusCodes.Status409Conflict
+            : StatusCodes.Status400BadRequest;
 
         return new ObjectResult(ApiErrorContract.Create(
             httpContext,
-            StatusCodes.Status400BadRequest,
-            "Action rejected",
+            status,
+            isConflict ? "Conflict" : "Action rejected",
             message,
             code,
-            ApiErrorContract.BusinessCategory))
+            isConflict
+                ? ApiErrorContract.ConflictCategory
+                : ApiErrorContract.BusinessCategory))
         {
-            StatusCode = StatusCodes.Status400BadRequest
+            StatusCode = status
         };
     }
 

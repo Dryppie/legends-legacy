@@ -69,6 +69,7 @@ builder.Services.AddProblemDetails(options =>
             context.HttpContext);
     };
 });
+builder.Services.AddExceptionHandler<DatabaseConflictExceptionHandler>();
 builder.Services.AddExceptionHandler<ConcurrencyExceptionHandler>();
 
 var signalR = builder.Services.AddSignalR()

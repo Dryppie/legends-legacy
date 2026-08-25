@@ -31,11 +31,20 @@ public class SaveEssenceLoadoutCommandHandler : IRequestHandler<SaveEssenceLoado
     {
         var saveRequest = _mapper.Map<SaveEssenceLoadoutRequest>(request.Request);
         var result = await _service.SaveLoadoutAsync(request.CharacterId, saveRequest, cancellationToken);
+        if (!result.Succeeded)
+        {
+            return result.Failure == SaveEssenceLoadoutFailure.NameConflict
+                ? Response<EssenceStateResponseDto>.Conflict(
+                    result.Message,
+                    "essence_loadout_name_conflict")
+                : Response<EssenceStateResponseDto>.Fail(result.Message);
+        }
+
         return Response<EssenceStateResponseDto>.Success(await _responses.CreateStateAsync(
             request.CharacterId,
             true,
-            "Essence loadout saved.",
+            result.Message,
             cancellationToken,
-            result));
+            result.Loadout));
     }
 }

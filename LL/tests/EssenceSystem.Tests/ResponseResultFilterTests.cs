@@ -92,4 +92,47 @@ public sealed class ResponseResultFilterTests
         var details = Assert.IsType<ProblemDetails>(result.Value);
         Assert.Equal("insufficient_materials", details.Extensions["code"]);
     }
+
+    [Fact]
+    public async Task Expected_conflict_returns_conflict_problem_details()
+    {
+        var filter = new ResponseResultFilter();
+        var httpContext = new DefaultHttpContext
+        {
+            TraceIdentifier = "request-conflict-409"
+        };
+        var actionContext = new ActionContext(
+            httpContext,
+            new RouteData(),
+            new ActionDescriptor());
+        var context = new ResultExecutingContext(
+            actionContext,
+            [],
+            new ObjectResult(Response<int>.Conflict(
+                "An Essence loadout with that name already exists.",
+                "essence_loadout_name_conflict")),
+            new object());
+
+        IActionResult? executedResult = null;
+        await filter.OnResultExecutionAsync(
+            context,
+            () =>
+            {
+                executedResult = context.Result;
+                return Task.FromResult(new ResultExecutedContext(
+                    actionContext,
+                    context.Filters,
+                    context.Result,
+                    context.Controller));
+            });
+
+        var result = Assert.IsType<ObjectResult>(executedResult);
+        Assert.Equal(StatusCodes.Status409Conflict, result.StatusCode);
+        var details = Assert.IsType<ProblemDetails>(result.Value);
+        Assert.Equal("Conflict", details.Title);
+        Assert.Equal("conflict", details.Extensions["category"]);
+        Assert.Equal(
+            "essence_loadout_name_conflict",
+            details.Extensions["code"]);
+    }
 }

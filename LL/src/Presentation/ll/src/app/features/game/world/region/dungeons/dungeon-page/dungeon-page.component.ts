@@ -604,14 +604,29 @@ export class DungeonPageComponent {
   }
 
   returnToWorldAfterClaim(): void {
+    const returnRoute = this.worldRouteForRun(
+      this.claimedRewardResult()?.run ?? null,
+    );
     this.claimedRewardResult.set(null);
-    void this.router.navigate(['/game/world/shenic']);
+    void this.router.navigate([returnRoute]);
   }
 
   dismissFailedDungeonRun(): void {
+    const returnRoute = this.worldRouteForRun(this.activeDungeon());
     this.dungeonState.dismissFailedDungeonRun(() => {
-      void this.router.navigate(['/game/world/shenic']);
+      void this.router.navigate([returnRoute]);
     });
+  }
+
+  worldRouteForRun(run: DungeonRun | null): string {
+    if (!run) return '/game/world/shenic';
+
+    const definitionId = run.dungeonDefinitionId.toLowerCase();
+    const region = this.dungeonState
+      .dungeons()
+      .find((dungeon) => dungeon.id.toLowerCase() === definitionId)?.region;
+
+    return region === 2 ? '/game/world/meran' : '/game/world/shenic';
   }
 
   refresh(): void {
