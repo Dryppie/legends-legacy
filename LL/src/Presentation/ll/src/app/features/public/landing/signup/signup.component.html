@@ -7,16 +7,18 @@
     style="background-image: url(&quot;landing/blur.svg&quot;)"
   >
     <div class="my-8 flex justify-center pt-8">
-      <img src="core/Logo.svg" alt="Logo" class="h-28 w-28 object-contain" />
+      <img
+        src="core/Logo.svg"
+        alt="Legends Legacy"
+        class="h-28 w-28 object-contain"
+      />
     </div>
     <div class="flex flex-col items-center justify-center space-y-2 pb-12">
-      <h2 class="primary-gradient">{{ headerText1 }}</h2>
-      <h2 class="primary-gradient">{{ headerText2 }}</h2>
-      <img
-        src="core/Divider.svg"
-        alt="Logo"
-        class="center w-60 object-contain"
-      />
+      <h1 class="primary-gradient text-center text-2xl">
+        {{ headerText1 }}
+        <span class="block">{{ headerText2 }}</span>
+      </h1>
+      <img src="core/Divider.svg" alt="" class="center w-60 object-contain" />
     </div>
     <form
       [formGroup]="registerForm"
@@ -24,87 +26,127 @@
       class="mt-2 flex flex-col justify-center"
     >
       <label
-        class="group relative flex h-12 w-full items-center border border-[#494949] bg-gray focus-within:border-[#B57D0B]"
+        class="group relative flex h-12 w-full items-center border border-[var(--ll-color-control-border)] bg-gray focus-within:border-[var(--ll-color-focus-ring)]"
         [ngClass]="{
-          'border-[#D72E34]': loginError || validateUsername(),
-          'border-[#494949]': !loginError,
+          'border-[var(--ll-color-danger)]': loginError || validateUsername(),
+          'border-[var(--ll-color-control-border)]': !loginError,
         }"
       >
-        <p class="cursor-text pl-3 text-[#D1D1D1]">{{ usernameLabel }}</p>
+        <span class="cursor-text pl-3 text-[var(--ll-color-text-secondary)]">
+          {{ usernameLabel }}
+        </span>
         <input
+          id="signup-username"
           matInput
           data-1p-ignore
           (input)="resetLoginError()"
           aria-label="Character name"
+          aria-describedby="signup-username-error signup-username-help"
+          [attr.aria-invalid]="validateUsername() ? 'true' : null"
           type="text"
           required
           class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
           formControlName="username"
         />
       </label>
-      <div *ngIf="validateUsername()" class="mt-1 text-sm text-[#D72E34]">
+      <div
+        *ngIf="validateUsername()"
+        id="signup-username-error"
+        class="mt-1 text-sm text-danger"
+        aria-live="polite"
+      >
         Character name is too long. Max 26 characters
       </div>
-      <div *ngIf="usernameHelp" class="mt-1 max-w-sm text-xs text-zinc-300">
+      <div
+        *ngIf="usernameHelp"
+        id="signup-username-help"
+        class="mt-1 max-w-sm text-xs text-zinc-300"
+      >
         {{ usernameHelp }}
       </div>
       <label
-        class="group relative mt-4 flex h-12 w-full items-center border border-[#494949] bg-gray focus-within:border-[#B57D0B]"
+        class="group relative mt-4 flex h-12 w-full items-center border border-[var(--ll-color-control-border)] bg-gray focus-within:border-[var(--ll-color-focus-ring)]"
         [ngClass]="{
-          'border-[#D72E34]': loginError || validateEmail(),
-          'border-[#494949]': !loginError,
+          'border-[var(--ll-color-danger)]': loginError || validateEmail(),
+          'border-[var(--ll-color-control-border)]': !loginError,
         }"
       >
-        <p class="cursor-text pl-3 text-[#D1D1D1]">Email</p>
+        <span class="cursor-text pl-3 text-[var(--ll-color-text-secondary)]">
+          Email
+        </span>
         <input
+          id="signup-email"
           matInput
           data-1p-ignore
           (input)="resetLoginError()"
           aria-label="Email address"
+          aria-describedby="signup-email-error"
+          [attr.aria-invalid]="validateEmail() ? 'true' : null"
           type="email"
           required
           class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
           formControlName="email"
         />
       </label>
-      <div *ngIf="validateEmail()" class="mt-1 text-sm text-[#D72E34]">
+      <div
+        *ngIf="validateEmail()"
+        id="signup-email-error"
+        class="mt-1 text-sm text-danger"
+        aria-live="polite"
+      >
         Incorrect Email format
       </div>
       <label
-        class="group relative mt-4 flex h-12 w-full items-center border bg-gray focus-within:border-[#B57D0B]"
+        class="group relative mt-4 flex h-12 w-full items-center border bg-gray focus-within:border-[var(--ll-color-focus-ring)]"
         [ngClass]="{
-          'border-[#D72E34]': loginError || validatePassword(),
-          'border-[#494949]': !loginError,
+          'border-[var(--ll-color-danger)]': loginError || validatePassword(),
+          'border-[var(--ll-color-control-border)]': !loginError,
         }"
       >
-        <p class="cursor-text pl-3 text-[#D1D1D1]">Password</p>
+        <span class="cursor-text pl-3 text-[var(--ll-color-text-secondary)]">
+          Password
+        </span>
         <input
+          id="signup-password"
           data-1p-ignore
           matInput
           (input)="resetLoginError()"
           aria-label="Password"
+          aria-describedby="signup-password-error"
+          [attr.aria-invalid]="validatePassword() ? 'true' : null"
           type="password"
           required
           class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
           formControlName="password"
         />
       </label>
-      <div *ngIf="validatePassword()" class="mt-1 text-sm text-[#D72E34]">
+      <div
+        *ngIf="validatePassword()"
+        id="signup-password-error"
+        class="mt-1 text-sm text-danger"
+        aria-live="polite"
+      >
         Incorrect Password format
       </div>
       <label
-        class="group relative mt-4 flex h-12 w-full items-center border bg-gray focus-within:border-[#B57D0B]"
+        class="group relative mt-4 flex h-12 w-full items-center border bg-gray focus-within:border-[var(--ll-color-focus-ring)]"
         [ngClass]="{
-          'border-[#D72E34]': loginError || validatePassword(),
-          'border-[#494949]': !loginError,
+          'border-[var(--ll-color-danger)]':
+            loginError || validateConfirmPassword(),
+          'border-[var(--ll-color-control-border)]': !loginError,
         }"
       >
-        <p class="cursor-text pl-3 text-[#D1D1D1]">Confirm Password</p>
+        <span class="cursor-text pl-3 text-[var(--ll-color-text-secondary)]">
+          Confirm Password
+        </span>
         <input
+          id="signup-confirm-password"
           data-1p-ignore
           matInput
           (input)="resetLoginError()"
-          aria-label="Password"
+          aria-label="Confirm password"
+          aria-describedby="signup-confirm-password-error"
+          [attr.aria-invalid]="validateConfirmPassword() ? 'true' : null"
           type="password"
           required
           class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
@@ -113,9 +155,18 @@
       </label>
       <div
         *ngIf="validateConfirmPassword()"
-        class="mt-1 text-sm text-[#D72E34]"
+        id="signup-confirm-password-error"
+        class="mt-1 text-sm text-danger"
+        aria-live="polite"
       >
         Password does not match
+      </div>
+      <div
+        *ngIf="loginError"
+        class="mt-3 max-w-sm text-sm text-danger"
+        role="alert"
+      >
+        Unable to create the account. Check your details and try again.
       </div>
       <div class="mt-12">
         <app-button
@@ -124,13 +175,13 @@
           [text]="convertAccount ? 'REGISTER NOW' : 'SIGN UP'"
         ></app-button>
       </div>
-      <button
+      <a
         *ngIf="!disableLoginLink"
         routerLink="/login"
-        class="my-8 w-full text-center text-primary underline focus:outline-none"
+        class="my-8 block w-full text-center text-primary underline"
       >
         Already have an account? Log In!
-      </button>
+      </a>
     </form>
   </div>
 </div>

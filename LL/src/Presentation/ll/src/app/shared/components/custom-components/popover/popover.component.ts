@@ -38,6 +38,7 @@ export class PopoverComponent implements AfterViewInit, OnDestroy {
   @Input({ required: true }) template!: TemplateRef<any>;
   @Input() trigger: TriggerType = 'click';
   @Input() disabled = false;
+  @Input() originFocusable = true;
   @Input() touchDisabled = false;
   @Input() originClass = 'relative inline-block';
   @Input() popoverClass =
@@ -72,7 +73,7 @@ export class PopoverComponent implements AfterViewInit, OnDestroy {
 
   // service handle
   private handleCtrl!: ReturnType<PopoverService['register']>;
-  private id = `popover-${_nextId++}`;
+  readonly id = `popover-${_nextId++}`;
 
   constructor(
     private overlay: Overlay,
@@ -169,6 +170,36 @@ export class PopoverComponent implements AfterViewInit, OnDestroy {
   onOriginLeave(event: PointerEvent) {
     if (this.trigger !== 'hover' || event.pointerType !== 'mouse') return;
     this.queueClose();
+  }
+
+  onOriginFocus(): void {
+    if (this.disabled || this.trigger !== 'hover') return;
+    this.clearCloseTimer();
+    this.hoverOpenTimer = setTimeout(
+      () => this.handleCtrl.requestOpen(),
+      this.openDelay,
+    );
+  }
+
+  onOriginBlur(): void {
+    if (this.trigger === 'hover') this.queueClose();
+  }
+
+  onOriginKeydown(event: KeyboardEvent): void {
+    if (this.disabled) return;
+
+    if (event.key === 'Escape') {
+      this.handleCtrl.requestClose();
+      return;
+    }
+
+    if (
+      this.trigger === 'click' &&
+      (event.key === 'Enter' || event.key === ' ')
+    ) {
+      event.preventDefault();
+      this.handleCtrl.requestToggle();
+    }
   }
 
   onPanelEnter() {

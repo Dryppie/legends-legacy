@@ -1,8 +1,15 @@
 <ng-container *ngIf="svc.combatSession() as combatSession">
   <div class="ll-modal-backdrop">
-    <div class="ll-modal-panel max-h-[90vh] max-w-md overflow-y-auto">
+    <div
+      appDialogFocus
+      class="ll-modal-panel max-h-[90vh] max-w-md overflow-y-auto"
+      aria-labelledby="combat-summary-title"
+      (dialogEscape)="svc.dismiss()"
+    >
       <div class="mb-4 text-center">
-        <h3 class="ll-heading text-xl">Combat Summary</h3>
+        <h3 id="combat-summary-title" class="ll-heading text-xl">
+          Combat Summary
+        </h3>
         <p class="ll-copy mt-1">
           You were gone for
           {{ getDuration(combatSession.from, combatSession.to) }} and performed
@@ -99,9 +106,16 @@
 </ng-container>
 <ng-container *ngIf="svc.temperingSession() as temperingSession">
   <div class="ll-modal-backdrop z-40">
-    <div class="ll-modal-panel max-w-md">
+    <div
+      appDialogFocus
+      class="ll-modal-panel max-w-md"
+      aria-labelledby="tempering-summary-title"
+      (dialogEscape)="svc.dismiss()"
+    >
       <div class="mb-4 text-center">
-        <h3 class="ll-heading text-xl">Tempering Summary</h3>
+        <h3 id="tempering-summary-title" class="ll-heading text-xl">
+          Tempering Summary
+        </h3>
         <p class="ll-copy mt-1">
           You were gone for
           {{ getDuration(temperingSession.from, temperingSession.to) }} and

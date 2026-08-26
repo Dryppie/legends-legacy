@@ -11,10 +11,11 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { QuestStateService } from '../../../core/services/api/quest/quest-state.service';
+import { DialogFocusDirective } from '../../../shared/directives/dialog-focus/dialog-focus.directive';
 
 @Component({
   selector: 'app-quest-tracker',
-  imports: [NgFor, NgIf],
+  imports: [NgFor, NgIf, DialogFocusDirective],
   templateUrl: './quest-tracker.component.html',
   styleUrl: './quest-tracker.component.scss',
 })

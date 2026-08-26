@@ -1,5 +1,7 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, computed, signal } from '@angular/core';
+import { HostListener } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
 import { EssenceStateService } from '../../../../../core/services/api/essences/essence-state.service';
 import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { EssenceDetailsComponent } from '../../../../../shared/components/essences/essence-details/essence-details.component';
@@ -17,11 +19,13 @@ type AbsorbSort = 'name' | 'quantity' | 'status';
     NgIf,
     RegularButtonComponent,
     EssenceDetailsComponent,
+    A11yModule,
   ],
   templateUrl: './essences-absorb.component.html',
   styleUrl: './essences-absorb.component.scss',
 })
 export class EssencesAbsorbComponent {
+  private modalTrigger: HTMLElement | null = null;
   showModal = false;
   shatterMode: 'single' | 'bulk' = 'single';
 
@@ -282,6 +286,7 @@ export class EssencesAbsorbComponent {
   }
 
   openModal(): void {
+    this.captureModalTrigger();
     this.setClampedSingleShatterQuantity(this.singleShatterQuantity());
     this.shatterMode = 'single';
     this.showModal = true;
@@ -289,12 +294,30 @@ export class EssencesAbsorbComponent {
 
   openBulkShatterModal(): void {
     if (this.selectedShatterCount() === 0) return;
+    this.captureModalTrigger();
     this.shatterMode = 'bulk';
     this.showModal = true;
   }
 
   closeModal(): void {
     this.showModal = false;
+    const target = this.modalTrigger;
+    this.modalTrigger = null;
+    queueMicrotask(() => target?.focus());
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  closeModalOnEscape(event: KeyboardEvent): void {
+    if (!this.showModal || this.shattering()) return;
+    event.preventDefault();
+    this.closeModal();
+  }
+
+  private captureModalTrigger(): void {
+    this.modalTrigger =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
   }
 
   private setClampedSingleShatterQuantity(quantity: number): void {

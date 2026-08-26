@@ -2,11 +2,12 @@ import { Component, computed, signal } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GuildStateService } from '../../../../../core/services/api/guild/guild-state.service';
+import { DialogFocusDirective } from '../../../../../shared/directives/dialog-focus/dialog-focus.directive';
 
 @Component({
-    selector: 'app-no-guild',
-    imports: [NgIf, NgFor, FormsModule],
-    templateUrl: './no-guild.component.html'
+  selector: 'app-no-guild',
+  imports: [NgIf, NgFor, FormsModule, DialogFocusDirective],
+  templateUrl: './no-guild.component.html',
 })
 export class NoGuildComponent {
   private readonly minimumGuildNameLength = 3;

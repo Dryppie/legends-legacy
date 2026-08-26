@@ -3,13 +3,16 @@
   [class.ll-sidebar-shell-compact]="sidebarLayout() === 'compact'"
 >
   <div class="ll-sidebar-panel bg-texture bg-auto">
-    <app-current-action
+    <button
       *ngIf="displayCurrentAction"
-      class="block w-full border-b border-primary/10 p-2"
-      [compact]="true"
+      type="button"
+      class="block w-full border-b border-primary/10 p-2 text-left"
       [class.ll-sidebar-detailed-only]="sidebarLayout() === 'compact'"
+      [attr.aria-label]="'Go to current action: ' + currentActionLabel()"
       (click)="navigateToAction(); toggleSidebar()"
-    ></app-current-action>
+    >
+      <app-current-action [compact]="true"></app-current-action>
+    </button>
 
     <div
       *ngIf="hasActiveDungeon()"
@@ -46,7 +49,6 @@
             <app-sidebar-item
               class="w-full text-light_gray"
               [item]="item"
-              [routerLink]="item.route"
               [isActive]="isItemActive(item.route)"
               [questAttention]="isQuestDestination(item)"
               [notificationCount]="getSidebarItemNotificationCount(item.id)"
@@ -90,12 +92,12 @@
             aria-hidden="true"
           ></span>
         </span>
-        <span class="text-[9px] uppercase tracking-[0.12em]">
+        <span class="text-xs uppercase tracking-[0.12em]">
           {{ currentActionLabel() }}
         </span>
         <span
           *ngIf="compactQueueDuration() as duration"
-          class="text-[9px] font-semibold leading-none tabular-nums text-secondary"
+          class="text-xs font-semibold tabular-nums leading-none text-secondary"
         >
           {{ duration }}
         </span>
@@ -123,7 +125,6 @@
           class="block w-full"
           [item]="item"
           [compact]="true"
-          [routerLink]="item.route"
           [isActive]="isItemActive(item.route)"
           [questAttention]="isQuestDestination(item)"
           [notificationCount]="getSidebarItemNotificationCount(item.id)"

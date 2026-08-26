@@ -63,7 +63,7 @@
   }
 
   .prophecy-weekly-favor-value span:last-child {
-    font-size: 0.65rem;
+    font-size: var(--ll-text-xs);
   }
 
   .prophecy-weekly-expiry {
@@ -74,7 +74,7 @@
 
   .prophecy-weekly-expiry .ll-badge {
     padding: 0.35rem 0.55rem;
-    font-size: 0.6rem;
+    font-size: var(--ll-text-xs);
     white-space: nowrap;
   }
 
@@ -101,7 +101,7 @@
   }
 
   .prophecy-weekly-track article > div:last-child {
-    font-size: 0.6rem;
+    font-size: var(--ll-text-xs);
   }
 
   .prophecy-scroll-content {
@@ -157,7 +157,7 @@
     height: auto;
     padding: 0 0 0 0.65rem;
     color: rgba(161, 161, 170, 0.7);
-    font-size: 0.58rem;
+    font-size: var(--ll-text-xs);
   }
 
   .prophecy-daily-grid {

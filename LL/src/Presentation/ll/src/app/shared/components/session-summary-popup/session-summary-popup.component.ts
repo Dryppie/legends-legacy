@@ -6,6 +6,7 @@ import { InventoryItem } from '../../models/inventoryItem';
 import { ItemInstance } from '../../models/item';
 import { Rarity } from '../../models/enums/rarity';
 import { ItemComponent } from '../item/item.component';
+import { DialogFocusDirective } from '../../directives/dialog-focus/dialog-focus.directive';
 
 interface LootSummaryItem {
   key: string;
@@ -29,7 +30,7 @@ interface RewardSection {
 
 @Component({
   selector: 'app-session-summary-popup',
-  imports: [NgIf, NgFor, ItemComponent],
+  imports: [NgIf, NgFor, ItemComponent, DialogFocusDirective],
   templateUrl: './session-summary-popup.component.html',
 })
 export class SessionSummaryPopupComponent {

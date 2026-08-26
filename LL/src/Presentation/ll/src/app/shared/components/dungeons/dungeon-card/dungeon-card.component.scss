@@ -47,7 +47,7 @@
 .reward-table-heading,
 .reward-section-title {
   color: rgb(161 161 170 / 80%);
-  font-size: 0.5625rem;
+  font-size: var(--ll-text-xs);
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;

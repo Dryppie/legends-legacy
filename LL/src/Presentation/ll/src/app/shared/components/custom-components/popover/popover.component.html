@@ -1,10 +1,19 @@
 <div
   [ngClass]="originClass"
   #origin
-  [attr.aria-haspopup]="disabled ? null : true"
-  [attr.aria-expanded]="overlayRef ? 'true' : 'false'"
+  [attr.role]="trigger === 'click' ? 'button' : null"
+  [attr.tabindex]="
+    disabled ? -1 : trigger === 'click' || originFocusable ? 0 : null
+  "
+  [attr.aria-haspopup]="!disabled && trigger === 'click' ? 'dialog' : null"
+  [attr.aria-expanded]="trigger === 'click' ? !!overlayRef : null"
+  [attr.aria-controls]="trigger === 'click' && overlayRef ? id : null"
+  [attr.aria-describedby]="trigger === 'hover' && overlayRef ? id : null"
   (pointerdown)="onOriginPointerDown($event)"
   (click)="onOriginClick($event)"
+  (focus)="onOriginFocus()"
+  (blur)="onOriginBlur()"
+  (keydown)="onOriginKeydown($event)"
   (pointerenter)="onOriginEnter($event)"
   (pointerleave)="onOriginLeave($event)"
 >
@@ -15,9 +24,10 @@
   <div
     class="relative max-h-[calc(100dvh-1rem)] max-w-[calc(100vw-1rem)] overflow-y-auto overscroll-contain"
     [ngClass]="popoverClass"
+    [id]="id"
     (mouseenter)="onPanelEnter()"
     (mouseleave)="onPanelLeave()"
-    role="dialog"
+    [attr.role]="trigger === 'hover' ? 'tooltip' : 'dialog'"
   >
     <button
       *ngIf="openedByTouch"

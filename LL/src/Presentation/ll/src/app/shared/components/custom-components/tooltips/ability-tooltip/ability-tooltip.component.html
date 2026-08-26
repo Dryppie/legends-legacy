@@ -31,12 +31,10 @@
         <div class="font-display text-3xl font-semibold text-primary">
           {{ displayedTotal }}
         </div>
-        <div
-          class="mt-0.5 text-[0.65rem] uppercase tracking-[0.2em] text-zinc-400"
-        >
+        <div class="mt-0.5 text-xs uppercase tracking-[0.2em] text-zinc-400">
           {{ data.resultLabel || data.unit }}
         </div>
-        <div *ngIf="hasBaseValue" class="mt-1 text-[0.65rem] text-zinc-500">
+        <div *ngIf="hasBaseValue" class="mt-1 text-xs text-zinc-500">
           Includes {{ data.base }} base {{ data.unit }}
         </div>
       </div>

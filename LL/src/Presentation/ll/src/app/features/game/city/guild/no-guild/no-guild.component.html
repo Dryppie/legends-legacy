@@ -51,10 +51,7 @@
           >
             <div class="break-words">
               {{ guild.name }}
-              <p
-                *ngIf="guild.description"
-                class="mt-1 text-xs text-white/60"
-              >
+              <p *ngIf="guild.description" class="mt-1 text-xs text-white/60">
                 {{ guild.description }}
               </p>
             </div>
@@ -90,8 +87,14 @@
     </p>
   </ng-template>
   <div *ngIf="showModal()" class="ll-modal-backdrop" (click)="closeModal()">
-    <div class="ll-modal-panel" (click)="$event.stopPropagation()">
-      <h3 class="ll-heading mb-4">Create Guild</h3>
+    <div
+      appDialogFocus
+      class="ll-modal-panel"
+      aria-labelledby="create-guild-title"
+      (dialogEscape)="closeModal()"
+      (click)="$event.stopPropagation()"
+    >
+      <h3 id="create-guild-title" class="ll-heading mb-4">Create Guild</h3>
       <label class="ll-field mb-4">
         <span class="ll-label">Guild name</span>
         <input

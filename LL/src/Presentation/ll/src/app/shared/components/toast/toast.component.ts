@@ -1,5 +1,5 @@
 import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 
 type ToastPosition = 't' | 'tl' | 'tr' | 'b' | 'bl' | 'br';
 
@@ -10,16 +10,19 @@ interface Toast {
   type: 'success' | 'warning' | 'error';
   progress: number;
   position: ToastPosition;
+  paused: boolean;
+  lastFrameTime?: number;
+  animationFrameId?: number;
 }
 
 @Component({
-    selector: 'app-toast',
-    imports: [NgClass, NgFor, NgStyle, NgIf],
-    templateUrl: './toast.component.html'
+  selector: 'app-toast',
+  imports: [NgClass, NgFor, NgStyle, NgIf],
+  templateUrl: './toast.component.html',
 })
-export class ToastComponent {
+export class ToastComponent implements OnDestroy {
   toasts: Toast[] = [];
-  private readonly duration = 3;
+  private readonly durationMs = 8000;
 
   addToast(
     title: string,
@@ -35,6 +38,7 @@ export class ToastComponent {
       type,
       progress: 100,
       position,
+      paused: false,
     };
     this.toasts.push(newToast);
 
@@ -42,26 +46,54 @@ export class ToastComponent {
   }
 
   private startToastTimer(toast: Toast): void {
-    const startTime = Date.now();
+    const updateProgress = (timestamp: number) => {
+      const previousTimestamp = toast.lastFrameTime ?? timestamp;
+      const elapsed = timestamp - previousTimestamp;
+      toast.lastFrameTime = timestamp;
 
-    const updateProgress = () => {
-      const elapsedTime = (Date.now() - startTime) / 1000;
-      const progress = Math.max(100 - (elapsedTime / this.duration) * 100, 0);
+      if (!toast.paused) {
+        toast.progress = Math.max(
+          toast.progress - (elapsed / this.durationMs) * 100,
+          0,
+        );
+      }
 
-      toast.progress = progress;
-
-      if (progress > 0) {
-        requestAnimationFrame(updateProgress);
+      if (toast.progress > 0) {
+        toast.animationFrameId = requestAnimationFrame(updateProgress);
       } else {
         this.removeToast(toast.id);
       }
     };
 
-    requestAnimationFrame(updateProgress);
+    toast.animationFrameId = requestAnimationFrame(updateProgress);
   }
 
-  removeToast(id: number) {
+  removeToast(id: number): void {
+    const toast = this.toasts.find((candidate) => candidate.id === id);
+    if (toast?.animationFrameId) cancelAnimationFrame(toast.animationFrameId);
     this.toasts = this.toasts.filter((toast) => toast.id !== id);
+  }
+
+  pauseToast(toast: Toast): void {
+    toast.paused = true;
+  }
+
+  resumeToast(toast: Toast): void {
+    toast.paused = false;
+  }
+
+  getLiveRole(type: Toast['type']): 'alert' | 'status' {
+    return type === 'error' ? 'alert' : 'status';
+  }
+
+  trackToast(_index: number, toast: Toast): number {
+    return toast.id;
+  }
+
+  ngOnDestroy(): void {
+    this.toasts.forEach((toast) => {
+      if (toast.animationFrameId) cancelAnimationFrame(toast.animationFrameId);
+    });
   }
 
   getPositionClass(position: ToastPosition): string {
@@ -86,13 +118,13 @@ export class ToastComponent {
   getProgressBarColor(type: 'success' | 'warning' | 'error'): string {
     switch (type) {
       case 'success':
-        return '#F9DCA0';
+        return 'var(--ll-color-success)';
       case 'warning':
-        return '#FFD21E';
+        return 'var(--ll-color-warning)';
       case 'error':
-        return '#D72E34';
+        return 'var(--ll-color-danger)';
       default:
-        return '#D72E34';
+        return 'var(--ll-color-primary)';
     }
   }
 }

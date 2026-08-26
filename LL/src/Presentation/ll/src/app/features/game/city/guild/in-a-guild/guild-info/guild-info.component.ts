@@ -22,6 +22,7 @@ import { GuildStateService } from '../../../../../../core/services/api/guild/gui
 import { CharacterTagComponent } from '../../../../../../shared/components/character/character-tag/character-tag.component';
 import { GuildRolePermission } from '../../../../../../shared/models/Dtos/guild/guildRolePermission';
 import { PresenceIndicatorComponent } from '../../../../../../shared/components/character/presence-indicator/presence-indicator.component';
+import { DialogFocusDirective } from '../../../../../../shared/directives/dialog-focus/dialog-focus.directive';
 
 @Component({
   selector: 'app-guild-info',
@@ -33,6 +34,7 @@ import { PresenceIndicatorComponent } from '../../../../../../shared/components/
     RegularButtonComponent,
     CharacterTagComponent,
     PresenceIndicatorComponent,
+    DialogFocusDirective,
   ],
   templateUrl: './guild-info.component.html',
 })

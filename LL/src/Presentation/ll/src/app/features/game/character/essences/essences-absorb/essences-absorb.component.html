@@ -367,9 +367,17 @@
   class="ll-modal-backdrop"
   (click)="shattering() ? null : closeModal()"
 >
-  <div class="ll-modal-panel" (click)="$event.stopPropagation()">
+  <div
+    class="ll-modal-panel"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="shatter-essence-title"
+    cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true"
+    (click)="$event.stopPropagation()"
+  >
     <div class="mb-4">
-      <h3 class="ll-heading">
+      <h3 id="shatter-essence-title" class="ll-heading">
         {{
           shatterMode === "bulk"
             ? "Shatter selected essences"

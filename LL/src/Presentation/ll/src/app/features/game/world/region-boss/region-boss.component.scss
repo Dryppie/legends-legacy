@@ -54,14 +54,14 @@ button:disabled {
 .result-badge,
 .scheduled-badge {
   color: var(--ll-color-text-muted);
-  font-size: 0.66rem;
+  font-size: var(--ll-text-xs);
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
 .section-label {
-  font-size: 0.62rem;
+  font-size: var(--ll-text-xs);
 }
 
 .feed-title-line {
@@ -145,7 +145,7 @@ button:disabled {
   padding: 0;
   background: transparent;
   color: var(--ll-color-primary);
-  font-size: 0.72rem;
+  font-size: var(--ll-text-xs);
 }
 
 .error {
@@ -164,7 +164,7 @@ button:disabled {
 .development-tools > summary {
   padding: 0.75rem 1rem;
   color: var(--ll-color-primary);
-  font-size: 0.7rem;
+  font-size: var(--ll-text-xs);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -187,7 +187,7 @@ button:disabled {
 .development-tools-body small,
 .development-tools-body label {
   color: var(--ll-color-text-muted);
-  font-size: 0.72rem;
+  font-size: var(--ll-text-xs);
 }
 
 .development-tools-body label {
@@ -233,7 +233,7 @@ button:disabled {
 
 .active-status-row > span {
   color: var(--ll-color-text-muted);
-  font-size: 0.75rem;
+  font-size: var(--ll-text-xs);
 }
 
 .live-status,
@@ -281,7 +281,7 @@ button:disabled {
 .past-result > span,
 .section-header > span {
   color: var(--ll-color-text-muted);
-  font-size: 0.75rem;
+  font-size: var(--ll-text-xs);
 }
 
 .active-title-row p {
@@ -305,7 +305,7 @@ button:disabled {
 .health-callout span {
   margin-top: 0.15rem;
   color: var(--ll-color-text-muted);
-  font-size: 0.65rem;
+  font-size: var(--ll-text-xs);
   letter-spacing: 0.15em;
   text-transform: uppercase;
 }
@@ -377,7 +377,7 @@ button:disabled {
   display: block;
   margin-top: 0.4rem;
   color: var(--ll-color-primary);
-  font-size: 0.72rem;
+  font-size: var(--ll-text-xs);
   font-weight: 500;
 }
 

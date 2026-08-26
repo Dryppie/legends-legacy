@@ -37,7 +37,7 @@
             <span class="block font-semibold text-white">
               Dungeon Records
             </span>
-            <span class="ll-copy block text-[10px]">Rankings</span>
+            <span class="ll-copy block text-xs">Rankings</span>
           </button>
         </div>
       </div>
@@ -98,7 +98,7 @@
             (detach)="selectedMasteryTooltipOpen.set(false)"
           >
             <div
-              class="pointer-events-none w-80 max-w-[calc(100vw-2rem)] rounded border border-primary/50 bg-black/95 px-3 py-2 text-left text-[11px] text-zinc-200 shadow-lg"
+              class="pointer-events-none w-80 max-w-[calc(100vw-2rem)] rounded border border-primary/50 bg-black/95 px-3 py-2 text-left text-[var(--ll-text-xs)] text-zinc-200 shadow-lg"
             >
               <ng-container
                 *ngTemplateOutlet="
@@ -146,7 +146,7 @@
                   >
                     <div class="min-w-0">
                       <h3 class="ll-heading text-xl text-white">Run Rewards</h3>
-                      <p class="ll-eyebrow mt-1 text-[9px] text-secondary">
+                      <p class="ll-eyebrow mt-1 text-xs text-secondary">
                         Per completed run · {{ difficultyLabel(difficulty()) }}
                       </p>
                     </div>
@@ -212,7 +212,7 @@
                             ></span>
                           </div>
                           <span
-                            class="w-11 shrink-0 text-right text-[10px] tabular-nums text-primary"
+                            class="w-11 shrink-0 text-right text-xs tabular-nums text-primary"
                           >
                             {{ rewardChanceValueLabel(reward) }}
                           </span>
@@ -259,7 +259,7 @@
                             ></span>
                           </div>
                           <span
-                            class="w-11 shrink-0 text-right text-[10px] tabular-nums text-primary"
+                            class="w-11 shrink-0 text-right text-xs tabular-nums text-primary"
                           >
                             {{ rewardChanceValueLabel(reward) }}
                           </span>
@@ -363,7 +363,7 @@
                       <app-item [item]="loot"></app-item>
                     </span>
                     <span
-                      class="flex shrink-0 flex-wrap justify-end gap-1 text-[10px]"
+                      class="flex shrink-0 flex-wrap justify-end gap-1 text-xs"
                     >
                       <span
                         class="ll-item-chip ll-item-chip-accent tabular-nums"
@@ -517,7 +517,7 @@
               <span class="block truncate">{{ requirement.name }}</span>
               <span
                 *ngIf="requirement.description"
-                class="mt-1 block text-[11px] leading-4 text-zinc-400"
+                class="mt-1 block leading-4 text-[var(--ll-text-xs)] text-zinc-400"
               >
                 {{ requirement.description }}
               </span>
@@ -627,13 +627,13 @@
 </div>
 
 <ng-template #masteryTooltip let-mastery let-xpLabel="xpLabel">
-  <span class="ll-eyebrow block text-[9px]">Mastery XP</span>
+  <span class="ll-eyebrow block text-xs">Mastery XP</span>
   <span class="mt-1 block font-serif text-sm text-primary">
     {{ xpLabel }}
   </span>
 
   <span class="my-2 block border-t border-white/10"></span>
-  <span class="ll-eyebrow block text-[9px]">Current Bonuses</span>
+  <span class="ll-eyebrow block text-xs">Current Bonuses</span>
   <span
     *ngIf="masteryCurrentBonuses(mastery).length; else noMasteryBonuses"
     class="mt-1 block space-y-1"
@@ -654,14 +654,14 @@
 
   <span class="my-2 block border-t border-white/10"></span>
   <ng-container *ngIf="masteryNextBenefit(mastery) as next; else masteryMaxed">
-    <span class="ll-eyebrow block text-[9px]">Next · Lv. {{ next.level }}</span>
+    <span class="ll-eyebrow block text-xs">Next · Lv. {{ next.level }}</span>
     <span class="mt-1 block text-white">{{ next.name }}</span>
     <span class="mt-0.5 block leading-4 text-zinc-300">
       {{ next.description }}
     </span>
   </ng-container>
   <ng-template #masteryMaxed>
-    <span class="ll-eyebrow block text-[9px]">Mastery Complete</span>
+    <span class="ll-eyebrow block text-xs">Mastery Complete</span>
     <span class="mt-1 block text-primary">All benefits unlocked.</span>
   </ng-template>
 </ng-template>

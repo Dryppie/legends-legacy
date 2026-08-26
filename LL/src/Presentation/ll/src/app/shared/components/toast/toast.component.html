@@ -1,26 +1,32 @@
 <div
-  *ngFor="let toast of toasts"
+  *ngFor="let toast of toasts; trackBy: trackToast"
   [ngClass]="getPositionClass(toast.position)"
-  (click)="removeToast(toast.id)"
-  class="ll-toast z-50 flex min-h-20 w-96 max-w-[calc(100vw-2rem)] items-start gap-4 p-3 transition-all hover:cursor-pointer"
+  [attr.role]="getLiveRole(toast.type)"
+  [attr.aria-live]="toast.type === 'error' ? 'assertive' : 'polite'"
+  aria-atomic="true"
+  (mouseenter)="pauseToast(toast)"
+  (mouseleave)="resumeToast(toast)"
+  (focusin)="pauseToast(toast)"
+  (focusout)="resumeToast(toast)"
+  class="ll-toast z-50 flex min-h-20 w-96 max-w-[calc(100vw-2rem)] items-start gap-4 p-3 transition-all"
 >
   <div class="flex-shrink-0">
     <img
       *ngIf="toast.type === 'error'"
       src="core/toast/error.svg"
-      alt="Error Icon"
+      alt=""
       class="h-8 w-8"
     />
     <img
       *ngIf="toast.type === 'warning'"
       src="core/toast/warning.svg"
-      alt="Info Icon"
+      alt=""
       class="h-8 w-8"
     />
     <img
       *ngIf="toast.type === 'success'"
       src="core/toast/success.svg"
-      alt="Success Icon"
+      alt=""
       class="h-8 w-8"
     />
   </div>
@@ -29,7 +35,7 @@
     <h4 class="ll-heading text-base">{{ toast.title }}</h4>
     <p class="ll-copy mt-1">{{ toast.message }}</p>
 
-    <div class="ll-progress-track relative mt-2 h-1">
+    <div class="ll-progress-track relative mt-2 h-1" aria-hidden="true">
       <div
         #progressBar
         class="absolute left-0 top-0 h-full rounded"
@@ -40,4 +46,13 @@
       ></div>
     </div>
   </div>
+
+  <button
+    type="button"
+    class="flex h-8 w-8 shrink-0 items-center justify-center rounded text-xl leading-none text-primary"
+    [attr.aria-label]="'Dismiss ' + toast.title + ' notification'"
+    (click)="removeToast(toast.id)"
+  >
+    &times;
+  </button>
 </div>

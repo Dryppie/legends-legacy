@@ -2,6 +2,7 @@
   display: block;
   min-height: 0;
   height: 100%;
+  container-type: inline-size;
 }
 
 .absorb-workspace {
@@ -64,7 +65,7 @@
   align-items: center;
   gap: 0.45rem;
   color: var(--ll-color-text-muted);
-  font-size: 0.6rem;
+  font-size: var(--ll-text-xs);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -87,7 +88,7 @@
   padding: 0.45rem 0.75rem;
   border-bottom: 1px solid var(--ll-color-border);
   color: var(--ll-color-text-muted);
-  font-size: 0.625rem;
+  font-size: var(--ll-text-xs);
 }
 
 .absorb-list-heading > :last-child {
@@ -169,7 +170,7 @@
   background: transparent;
   color: var(--ll-color-primary);
   cursor: pointer;
-  font-size: 0.7rem;
+  font-size: var(--ll-text-xs);
   line-height: 1;
 }
 
@@ -243,7 +244,7 @@
   margin-top: 0.2rem;
   overflow: hidden;
   color: var(--ll-color-text-muted);
-  font-size: 0.58rem;
+  font-size: var(--ll-text-xs);
   letter-spacing: 0.08em;
   text-overflow: ellipsis;
   text-transform: uppercase;
@@ -278,7 +279,7 @@
   padding: 0.6rem 0.75rem;
   border-top: 1px solid var(--ll-color-border-strong);
   color: var(--ll-color-text-muted);
-  font-size: 0.6rem;
+  font-size: var(--ll-text-xs);
 }
 
 .absorb-bulk-summary {
@@ -290,7 +291,7 @@
 
 .absorb-bulk-summary strong {
   color: var(--ll-color-text);
-  font-size: 0.68rem;
+  font-size: var(--ll-text-xs);
   font-weight: 600;
 }
 
@@ -321,7 +322,7 @@
   gap: 1rem;
   padding: 0.75rem 1rem;
   color: var(--ll-color-text-muted);
-  font-size: 0.7rem;
+  font-size: var(--ll-text-xs);
   text-align: center;
 }
 
@@ -347,12 +348,12 @@
 .absorb-shatter-copy {
   gap: 0.2rem;
   color: var(--ll-color-text-muted);
-  font-size: 0.625rem;
+  font-size: var(--ll-text-xs);
 }
 
 .absorb-shatter-copy strong {
   color: var(--ll-color-text);
-  font-size: 0.72rem;
+  font-size: var(--ll-text-xs);
   font-weight: 600;
 }
 
@@ -432,7 +433,7 @@
   justify-content: center;
 }
 
-@media (max-width: 64rem) {
+@container (max-width: 64rem) {
   .absorb-workspace {
     grid-template-columns: minmax(0, 1fr);
     align-content: start;
@@ -449,7 +450,7 @@
   }
 }
 
-@media (max-width: 39.999rem) {
+@container (max-width: 39.999rem) {
   :host,
   .absorb-workspace,
   .absorb-catalog {

@@ -10,25 +10,25 @@
         class="flex min-w-0 flex-1 items-center gap-2"
       >
         <span
-          class="shrink-0 rounded border border-[var(--ll-color-border)] bg-[var(--ll-color-primary-soft)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-primary"
+          class="shrink-0 rounded border border-[var(--ll-color-border)] bg-[var(--ll-color-primary-soft)] px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-primary"
         >
           {{ activeMobileRoomLabel }}
         </span>
-        <span class="truncate text-[10px] text-[var(--ll-color-text-muted)]">
+        <span class="truncate text-xs text-[var(--ll-color-text-muted)]">
           {{ onlinePlayerLabel }}
         </span>
       </div>
 
       <ng-template #collapsedMobileSummary>
         <span
-          class="shrink-0 rounded border border-[var(--ll-color-border)] bg-[var(--ll-color-primary-soft)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-primary"
+          class="shrink-0 rounded border border-[var(--ll-color-border)] bg-[var(--ll-color-primary-soft)] px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-primary"
         >
           {{ activeMobileRoomLabel }}
         </span>
 
         <p
           *ngIf="latestMobileMessage as message; else emptyMobileChat"
-          class="min-w-0 flex-1 truncate text-[11px]"
+          class="min-w-0 flex-1 truncate text-[var(--ll-text-xs)]"
         >
           <strong class="text-primary">{{ message.senderName }}:</strong>
           <span class="text-[var(--ll-color-text)]">
@@ -42,7 +42,7 @@
         </p>
         <ng-template #emptyMobileChat>
           <p
-            class="min-w-0 flex-1 truncate text-[10px] text-[var(--ll-color-text-muted)]"
+            class="min-w-0 flex-1 truncate text-xs text-[var(--ll-color-text-muted)]"
           >
             {{ onlinePlayerLabel }}
           </p>
@@ -80,7 +80,7 @@
         >
           <div
             *ngIf="startsNewDay(filteredMessages, messageIndex)"
-            class="flex items-center gap-2 py-1 text-[9px] uppercase tracking-wide text-[var(--ll-color-text-subtle)]"
+            class="flex items-center gap-2 py-1 text-xs uppercase tracking-wide text-[var(--ll-color-text-subtle)]"
           >
             <span class="h-px flex-1 bg-[var(--ll-color-border)]"></span>
             <time>{{ message.sentAt | localDate: "mediumDate" }}</time>
@@ -89,7 +89,7 @@
           <article
             class="rounded-sm border-l-2 border-l-[var(--ll-color-border-strong)] bg-[var(--ll-color-surface-soft)] px-2 py-1.5"
           >
-            <div class="flex min-w-0 items-baseline gap-1.5 text-[10px]">
+            <div class="flex min-w-0 items-baseline gap-1.5 text-xs">
               <time class="shrink-0 text-[var(--ll-color-text-subtle)]">
                 {{ message.sentAt | localDate: "shortTime" }}
               </time>
@@ -149,7 +149,7 @@
         <button
           *ngFor="let room of visibleRooms; trackBy: trackRoom"
           type="button"
-          class="shrink-0 whitespace-nowrap rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] px-2 py-0.5 text-[9px] tracking-wide text-[var(--ll-color-text-muted)] transition-colors"
+          class="shrink-0 whitespace-nowrap rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] px-2 py-0.5 text-xs tracking-wide text-[var(--ll-color-text-muted)] transition-colors"
           [ngClass]="{
             'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
               activeRoomKey === room.contextKey &&
@@ -192,9 +192,7 @@
               class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ll-color-success)]"
               aria-hidden="true"
             ></span>
-            <span
-              class="truncate text-[10px] text-[var(--ll-color-text-muted)]"
-            >
+            <span class="truncate text-xs text-[var(--ll-color-text-muted)]">
               {{ onlinePlayerLabel }}
             </span>
           </div>
@@ -302,7 +300,7 @@
           >
             <div
               *ngIf="startsNewDay(messages, messageIndex)"
-              class="flex items-center gap-2 px-2 py-1.5 text-[9px] uppercase tracking-wide text-[var(--ll-color-text-subtle)]"
+              class="flex items-center gap-2 px-2 py-1.5 text-xs uppercase tracking-wide text-[var(--ll-color-text-subtle)]"
               [class.mt-auto]="first"
             >
               <span class="h-px flex-1 bg-[var(--ll-color-border)]"></span>
@@ -329,13 +327,13 @@
                 [class.items-center]="!isInlineSystemNotice(m)"
               >
                 <time
-                  class="text-[10px] leading-4 text-[var(--ll-color-text-subtle)]"
+                  class="text-xs leading-4 text-[var(--ll-color-text-subtle)]"
                 >
                   {{ m.sentAt | localDate: "shortTime" }}
                 </time>
 
                 <span
-                  class="rounded border px-1.5 py-0.5 text-[9px] font-semibold uppercase leading-none tracking-normal"
+                  class="rounded border px-1.5 py-0.5 text-xs font-semibold uppercase leading-none tracking-normal"
                   [ngClass]="channelBadgeClasses(m)"
                 >
                   {{ channelLabel(m) }}
@@ -348,9 +346,7 @@
                     class="flex min-w-0 basis-full flex-wrap items-baseline gap-x-1 pl-0.5"
                   >
                     <ng-container
-                      *ngIf="
-                        m.channelType !== 'Raid' || !m.isSystemGenerated
-                      "
+                      *ngIf="m.channelType !== 'Raid' || !m.isSystemGenerated"
                     >
                       <app-character-tag
                         [id]="m.senderId"
@@ -396,7 +392,7 @@
                         *ngIf="m.channelType === 'Whisper'; else normalSender"
                       >
                         <span
-                          class="text-[10px] uppercase text-[var(--ll-color-text-subtle)]"
+                          class="text-xs uppercase text-[var(--ll-color-text-subtle)]"
                         >
                           {{ m.senderId === characterId() ? "to" : "from" }}
                         </span>
@@ -465,7 +461,7 @@
       >
         <div
           *ngIf="draft.length > 160"
-          class="absolute -top-6 right-3 text-[10px] text-[var(--ll-color-danger)]"
+          class="absolute -top-6 right-3 text-xs text-[var(--ll-color-danger)]"
         >
           {{ draft.length }}/200
         </div>
@@ -500,7 +496,7 @@
           <button
             *ngFor="let room of visibleRooms; trackBy: trackRoom"
             type="button"
-            class="shrink-0 whitespace-nowrap rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] px-2.5 py-1 text-[10px] tracking-wide text-[var(--ll-color-text-muted)] transition-colors hover:border-[var(--ll-color-border-strong)] hover:bg-[var(--ll-color-primary-soft)] hover:text-primary"
+            class="shrink-0 whitespace-nowrap rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] px-2.5 py-1 text-xs tracking-wide text-[var(--ll-color-text-muted)] transition-colors hover:border-[var(--ll-color-border-strong)] hover:bg-[var(--ll-color-primary-soft)] hover:text-primary"
             [ngClass]="{
               'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
                 activeRoomKey === room.contextKey &&
@@ -523,7 +519,7 @@
         </nav>
         <p
           *ngIf="isGuestAccount"
-          class="px-1 pt-2 text-[10px] text-[var(--ll-color-text-muted)]"
+          class="px-1 pt-2 text-xs text-[var(--ll-color-text-muted)]"
         >
           <a
             routerLink="/game/settings"
@@ -534,7 +530,7 @@
         </p>
         <p
           *ngIf="sendError"
-          class="px-1 pt-2 text-[10px] text-[var(--ll-color-danger)]"
+          class="px-1 pt-2 text-xs text-[var(--ll-color-danger)]"
         >
           {{ sendError }}
         </p>
@@ -564,7 +560,7 @@
             class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ll-color-success)]"
             aria-hidden="true"
           ></span>
-          <span class="truncate text-[10px] text-[var(--ll-color-text-muted)]">
+          <span class="truncate text-xs text-[var(--ll-color-text-muted)]">
             {{ onlinePlayerLabel }}
           </span>
         </span>

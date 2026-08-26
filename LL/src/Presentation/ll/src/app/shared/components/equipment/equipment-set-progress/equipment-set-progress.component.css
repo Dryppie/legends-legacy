@@ -25,7 +25,7 @@
   flex-direction: column;
   align-items: flex-end;
   color: var(--ll-color-info);
-  font-size: 0.68rem;
+  font-size: var(--ll-text-xs);
   letter-spacing: 0.08em;
   white-space: nowrap;
 }
@@ -33,7 +33,7 @@
 .equipment-set-description {
   margin-top: 0.2rem;
   color: var(--ll-color-info);
-  font-size: 0.72rem;
+  font-size: var(--ll-text-xs);
   line-height: 1.35;
 }
 
@@ -63,7 +63,7 @@
   justify-content: center;
   border: 1px solid var(--ll-color-border-strong);
   color: var(--ll-color-text-muted);
-  font-size: 0.7rem;
+  font-size: var(--ll-text-xs);
   font-variant-numeric: tabular-nums;
 }
 
@@ -76,14 +76,14 @@
 
 .equipment-set-bonus-description {
   color: var(--ll-color-text-muted);
-  font-size: 0.72rem;
+  font-size: var(--ll-text-xs);
   line-height: 1.35;
 }
 
 .equipment-set-bonus-state {
   margin-top: 0.25rem;
   color: var(--ll-color-info);
-  font-size: 0.58rem;
+  font-size: var(--ll-text-xs);
   font-weight: 700;
   letter-spacing: 0.16em;
   line-height: 1;

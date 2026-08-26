@@ -18,6 +18,8 @@ import {
   templateUrl: './hover-popover.component.html',
 })
 export class HoverPopoverComponent implements AfterViewInit, OnDestroy {
+  private static nextId = 1;
+
   /** Template to render inside the popover */
   @Input({ required: true }) template!: TemplateRef<any>;
 
@@ -44,6 +46,7 @@ export class HoverPopoverComponent implements AfterViewInit, OnDestroy {
   private popoverEl?: HTMLElement;
   private view?: EmbeddedViewRef<any>;
   private hideTimeout?: any;
+  readonly popoverId = `hover-popover-${HoverPopoverComponent.nextId++}`;
 
   constructor(
     private vcr: ViewContainerRef,
@@ -56,6 +59,7 @@ export class HoverPopoverComponent implements AfterViewInit, OnDestroy {
     trigger.addEventListener('mouseleave', this.onMouseLeave);
     trigger.addEventListener('focusin', this.onMouseEnter);
     trigger.addEventListener('focusout', this.onMouseLeave);
+    trigger.addEventListener('keydown', this.onKeydown);
   }
 
   ngOnDestroy(): void {
@@ -65,6 +69,7 @@ export class HoverPopoverComponent implements AfterViewInit, OnDestroy {
     trigger.removeEventListener('mouseleave', this.onMouseLeave);
     trigger.removeEventListener('focusin', this.onMouseEnter);
     trigger.removeEventListener('focusout', this.onMouseLeave);
+    trigger.removeEventListener('keydown', this.onKeydown);
   }
 
   private onMouseEnter = () => {
@@ -82,6 +87,12 @@ export class HoverPopoverComponent implements AfterViewInit, OnDestroy {
     this.hideTimeout = setTimeout(() => this.destroyPopover(), 100);
   };
 
+  private onKeydown = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape' || !this.popoverEl) return;
+    event.preventDefault();
+    this.destroyPopover();
+  };
+
   private createPopover(): void {
     const container = document.createElement('div');
     container.style.position = 'fixed';
@@ -89,12 +100,21 @@ export class HoverPopoverComponent implements AfterViewInit, OnDestroy {
     // from - including modal backdrops (--ll-z-modal).
     container.style.setProperty('z-index', 'var(--ll-z-popover-detached, 300)');
     container.className = this.popoverClass;
+    container.id = this.popoverId;
+    container.setAttribute('role', 'tooltip');
     document.body.appendChild(container);
 
     this.popoverEl = container;
+    this.triggerEl.nativeElement.setAttribute(
+      'aria-describedby',
+      this.popoverId,
+    );
 
     // Render Angular template
-    this.view = this.vcr.createEmbeddedView(this.template, this.templateContext);
+    this.view = this.vcr.createEmbeddedView(
+      this.template,
+      this.templateContext,
+    );
     this.view.detectChanges();
     this.view.rootNodes.forEach((n) => container.appendChild(n));
 
@@ -117,6 +137,7 @@ export class HoverPopoverComponent implements AfterViewInit, OnDestroy {
       this.popoverEl.remove();
       this.popoverEl = undefined;
     }
+    this.triggerEl?.nativeElement.removeAttribute('aria-describedby');
   }
 
   private positionPopover(): void {

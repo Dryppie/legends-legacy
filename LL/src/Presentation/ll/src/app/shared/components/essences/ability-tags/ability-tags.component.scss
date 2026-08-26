@@ -25,7 +25,7 @@
 
 .ability-tags-heading {
   color: var(--ll-color-text-muted);
-  font-size: 0.6rem;
+  font-size: var(--ll-text-xs);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -46,7 +46,7 @@
   border-radius: 0.3rem;
   background: rgba(249, 220, 160, 0.045);
   color: var(--ll-color-text);
-  font-size: 0.65rem;
+  font-size: var(--ll-text-xs);
   line-height: 1;
   white-space: nowrap;
 }

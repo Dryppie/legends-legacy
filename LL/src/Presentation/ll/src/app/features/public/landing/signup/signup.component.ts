@@ -19,18 +19,18 @@ import { ButtonComponent } from '../../../../shared/components/custom-components
 import { environment } from '../../../../../environments/environment';
 
 @Component({
-    selector: 'app-signup',
-    imports: [
-        RouterLink,
-        ReactiveFormsModule,
-        NgIf,
-        MatIconModule,
-        MatFormFieldModule,
-        MatInputModule,
-        NgClass,
-        ButtonComponent,
-    ],
-    templateUrl: './signup.component.html'
+  selector: 'app-signup',
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+    NgIf,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    NgClass,
+    ButtonComponent,
+  ],
+  templateUrl: './signup.component.html',
 })
 export class SignupComponent {
   @Input() convertAccount: boolean = false;
@@ -56,7 +56,9 @@ export class SignupComponent {
         passwordValidator(),
         Validators.minLength(8),
       ]),
-      confirmPassword: new FormControl(environment.isLocal ? 'Drypping' : ''),
+      confirmPassword: new FormControl(environment.isLocal ? 'Drypping' : '', [
+        Validators.required,
+      ]),
     },
     { validators: passwordMatchValidator() },
   );
@@ -117,14 +119,16 @@ export class SignupComponent {
       typeof email === 'string' &&
       typeof password === 'string'
     ) {
-      this.authService.convertGuestToUser(characterName, email, password).subscribe({
-        next: () => {
-          // window.location.reload();
-        },
-        error: () => {
-          this.loginError = true;
-        },
-      });
+      this.authService
+        .convertGuestToUser(characterName, email, password)
+        .subscribe({
+          next: () => {
+            // window.location.reload();
+          },
+          error: () => {
+            this.loginError = true;
+          },
+        });
     }
   }
 
@@ -145,7 +149,10 @@ export class SignupComponent {
   }
 
   validateConfirmPassword() {
-    return this.registerForm.hasError('passwordMismatch');
+    return (
+      this.validateField('confirmPassword') ||
+      this.registerForm.hasError('passwordMismatch')
+    );
   }
 
   private validateField(field: string) {

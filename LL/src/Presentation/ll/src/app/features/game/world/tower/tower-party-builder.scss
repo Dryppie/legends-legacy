@@ -72,7 +72,7 @@
 .open-party-slot small {
   margin-top: var(--ll-space-1);
   color: var(--ll-color-text-subtle);
-  font-size: 0.62rem;
+  font-size: var(--ll-text-xs);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -165,7 +165,7 @@
 
 .party-summary span {
   color: var(--ll-color-text-subtle);
-  font-size: 0.62rem;
+  font-size: var(--ll-text-xs);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }

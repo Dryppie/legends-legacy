@@ -12,7 +12,7 @@
     <div header-actions class="flex items-center gap-2">
       <button
         type="button"
-        class="ll-button px-3 py-2 text-[11px]"
+        class="ll-button px-3 py-2 text-[var(--ll-text-xs)]"
         [disabled]="questState.loading() || eventQuestState.loading()"
         (click)="questState.load(); eventQuestState.load()"
       >
@@ -20,7 +20,7 @@
       </button>
       <button
         type="button"
-        class="ll-button px-3 py-2 text-[11px]"
+        class="ll-button px-3 py-2 text-[var(--ll-text-xs)]"
         (click)="toggleSort()"
       >
         Sort: {{ sortMode() }}
@@ -55,7 +55,7 @@
           <button
             *ngFor="let tab of tabs"
             type="button"
-            class="min-w-max rounded px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-400 transition-colors"
+            class="min-w-max rounded px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-zinc-400 transition-colors"
             [ngClass]="{
               'bg-primary/10 text-primary': activeTab() === tab,
               'hover:text-zinc-200': activeTab() !== tab,
@@ -75,14 +75,14 @@
             class="mb-3"
           >
             <div
-              class="mb-2 px-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-primary"
+              class="mb-2 px-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary"
             >
               ● Server-wide
             </div>
 
             <div
               *ngIf="eventQuestState.loading() && !eventQuestState.loaded()"
-              class="ll-state mb-2 px-3 py-2 text-[10px]"
+              class="ll-state mb-2 px-3 py-2 text-xs"
             >
               Loading server event...
             </div>
@@ -111,12 +111,12 @@
                   {{ event.title }}
                 </span>
                 <span
-                  class="shrink-0 font-mono text-[10px] font-semibold text-primary"
+                  class="shrink-0 font-mono text-xs font-semibold text-primary"
                 >
                   {{ eventProgress(event) }}%
                 </span>
               </span>
-              <span class="mt-1 block truncate text-[10px] text-zinc-400">
+              <span class="mt-1 block truncate text-xs text-zinc-400">
                 Event · {{ formatAmount(event.myContribution) }} contributed ·
                 {{ eventTimeLabel(event).toLowerCase() }}
                 {{ eventTimeRemaining(event) }}
@@ -133,7 +133,7 @@
 
             <div
               *ngIf="visibleEvents().length"
-              class="mt-4 px-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-zinc-500"
+              class="mt-4 px-1 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500"
             >
               Active
             </div>
@@ -179,7 +179,7 @@
               >
                 {{ entry.title }}
               </span>
-              <span class="shrink-0 text-[10px] text-primary">
+              <span class="shrink-0 text-xs text-primary">
                 <ng-container *ngIf="entry.isChain; else objectiveCount">
                   {{ completedPartCount(entry) }} / {{ entry.totalParts }}
                 </ng-container>
@@ -191,7 +191,7 @@
             </span>
 
             <span
-              class="mt-1 flex min-w-0 items-center gap-2 text-[10px] text-zinc-400"
+              class="mt-1 flex min-w-0 items-center gap-2 text-xs text-zinc-400"
             >
               <span
                 class="rounded-sm bg-primary/10 px-1.5 py-0.5 font-semibold uppercase tracking-wider text-primary"
@@ -232,16 +232,16 @@
                 <div class="min-w-0 flex-1">
                   <div class="flex flex-wrap items-center gap-2">
                     <span
-                      class="rounded-sm bg-primary px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.15em] text-black"
+                      class="rounded-sm bg-primary px-2.5 py-1 text-xs font-bold uppercase tracking-[0.15em] text-black"
                     >
                       Server-wide
                     </span>
                     <span
-                      class="rounded-sm border border-primary/35 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.15em] text-primary"
+                      class="rounded-sm border border-primary/35 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-primary"
                     >
                       Event
                     </span>
-                    <span class="text-[11px] text-zinc-400">
+                    <span class="text-[var(--ll-text-xs)] text-zinc-400">
                       All players, one shared goal · no level requirement
                     </span>
                   </div>
@@ -253,7 +253,7 @@
                 </div>
                 <div class="shrink-0 text-right">
                   <div
-                    class="text-[9px] font-semibold uppercase tracking-[0.2em] text-zinc-500"
+                    class="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500"
                   >
                     {{ eventTimeLabel(event) }}
                   </div>
@@ -270,7 +270,7 @@
               >
                 “{{ event.summary }}”
                 <footer
-                  class="mt-3 font-sans text-[10px] uppercase not-italic tracking-[0.16em] text-zinc-500"
+                  class="mt-3 font-sans text-xs uppercase not-italic tracking-[0.16em] text-zinc-500"
                 >
                   — Realm chronicle
                 </footer>
@@ -278,7 +278,7 @@
 
               <section class="mt-5">
                 <div
-                  class="flex flex-wrap items-end justify-between gap-2 text-[10px] tracking-[0.16em] text-zinc-400"
+                  class="flex flex-wrap items-end justify-between gap-2 text-xs tracking-[0.16em] text-zinc-400"
                 >
                   <div>
                     <span class="uppercase">Realm progress</span>
@@ -313,7 +313,7 @@
                     class="absolute inset-y-0 left-3/4 w-px bg-black/50"
                   ></span>
                 </div>
-                <div class="relative mt-2 h-3 text-[9px] text-zinc-500">
+                <div class="relative mt-2 h-3 text-xs text-zinc-500">
                   <span
                     *ngFor="let marker of realmProgressMarkers"
                     class="absolute top-0 whitespace-nowrap"
@@ -336,7 +336,7 @@
                   class="rounded-lg border border-primary/20 bg-black/10 px-5 py-4"
                 >
                   <div
-                    class="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400"
+                    class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400"
                   >
                     Your contribution
                   </div>
@@ -370,7 +370,7 @@
                       "
                     ></span>
                   </span>
-                  <p class="mt-2 text-[11px] text-zinc-400">
+                  <p class="mt-2 text-[var(--ll-text-xs)] text-zinc-400">
                     <ng-container
                       *ngIf="
                         event.contributionToNextRank;
@@ -394,7 +394,7 @@
                   class="rounded-lg border border-primary/20 bg-black/10 px-5 py-4"
                 >
                   <div
-                    class="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400"
+                    class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400"
                   >
                     Top contributors
                   </div>
@@ -431,12 +431,12 @@
               <section *ngIf="event.personalMilestones.length" class="mt-6">
                 <div class="flex flex-wrap items-end justify-between gap-3">
                   <div
-                    class="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400"
+                    class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400"
                   >
                     Your milestones
                   </div>
                   <div
-                    class="flex items-center gap-3 text-[11px] text-zinc-400"
+                    class="flex items-center gap-3 text-[var(--ll-text-xs)] text-zinc-400"
                   >
                     <span>
                       {{ formatAmount(event.myContribution) }} contributed ·
@@ -446,7 +446,7 @@
                     <button
                       *ngIf="canClaimEventMilestones(event)"
                       type="button"
-                      class="ll-button px-3 py-1.5 text-[10px]"
+                      class="ll-button px-3 py-1.5 text-xs"
                       [disabled]="eventQuestState.loading()"
                       (click)="
                         eventQuestState.claimAllMilestones(event.eventQuestId)
@@ -475,14 +475,14 @@
                   >
                     <div class="flex items-center justify-between gap-3">
                       <span
-                        class="text-[9px] font-semibold uppercase tracking-[0.12em] text-primary"
+                        class="text-xs font-semibold uppercase tracking-[0.12em] text-primary"
                       >
                         {{ milestoneIndex(index) }} ·
                         {{ formatAmount(milestone.requiredContribution) }}
                         contribution
                       </span>
                       <span
-                        class="flex h-5 w-5 items-center justify-center rounded-full border text-[10px]"
+                        class="flex h-5 w-5 items-center justify-center rounded-full border text-xs"
                         [ngClass]="{
                           'border-primary/40 bg-primary/20 text-primary':
                             milestone.isClaimed,
@@ -529,7 +529,7 @@
                     </div>
                     <button
                       type="button"
-                      class="mt-auto pt-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em]"
+                      class="mt-auto pt-3 text-left text-xs font-semibold uppercase tracking-[0.12em]"
                       [ngClass]="{
                         'text-primary': canClaimEventMilestone(
                           event,
@@ -570,7 +570,7 @@
               >
                 <div>
                   <div
-                    class="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400"
+                    class="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400"
                   >
                     Community reward · {{ event.minimumContribution }} minimum
                     contribution
@@ -624,24 +624,24 @@
               <div>
                 <div class="flex flex-wrap items-center gap-2">
                   <span
-                    class="rounded-sm bg-primary/10 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-primary"
+                    class="rounded-sm bg-primary/10 px-2 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary"
                   >
                     {{ quest.category }}
                   </span>
                   <span
                     *ngIf="quest.isPinned"
-                    class="rounded-sm border border-primary/30 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-primary"
+                    class="rounded-sm border border-primary/30 px-2 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary"
                   >
                     Pinned
                   </span>
                   <span
                     *ngIf="quest.chain as chain"
-                    class="rounded-sm border border-primary/30 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-primary"
+                    class="rounded-sm border border-primary/30 px-2 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary"
                   >
                     {{ chain.title }} · Chain {{ chain.step }} of
                     {{ chain.totalSteps }}
                   </span>
-                  <span class="text-[10px] text-zinc-400">
+                  <span class="text-xs text-zinc-400">
                     {{ quest.status }} quest
                   </span>
                 </div>
@@ -662,7 +662,7 @@
                     >
                       <div>
                         <div
-                          class="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
+                          class="text-xs font-semibold uppercase tracking-[0.18em] text-primary"
                         >
                           {{ chain.title }}
                         </div>
@@ -670,7 +670,7 @@
                           {{ chain.description }}
                         </p>
                       </div>
-                      <span class="shrink-0 text-[10px] text-zinc-400">
+                      <span class="shrink-0 text-xs text-zinc-400">
                         {{ completedPartCount(entry) }} /
                         {{ entry.totalParts }} parts completed
                       </span>
@@ -709,7 +709,7 @@
                         (click)="selectChainStep(entry, chainStep)"
                       >
                         <span
-                          class="block text-[8px] font-semibold uppercase tracking-[0.12em] text-zinc-500"
+                          class="block text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500"
                         >
                           Part
                         </span>
@@ -733,7 +733,7 @@
                   class="mt-3 flex flex-wrap items-center gap-3"
                 >
                   <span
-                    class="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400"
+                    class="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400"
                   >
                     Progress
                   </span>
@@ -754,7 +754,7 @@
                       <span *ngIf="!last" class="h-px w-8 bg-primary/30"></span>
                     </ng-container>
                   </span>
-                  <span class="text-[10px] text-zinc-400">
+                  <span class="text-xs text-zinc-400">
                     {{ completedObjectiveCount(quest) }} of
                     {{ quest.objectives.length }} objectives
                   </span>
@@ -765,7 +765,7 @@
                 >
                   “{{ quest.summary }}”
                   <footer
-                    class="mt-3 text-[10px] uppercase not-italic tracking-[0.16em] text-zinc-500"
+                    class="mt-3 text-xs uppercase not-italic tracking-[0.16em] text-zinc-500"
                   >
                     — {{ quest.category }}
                   </footer>
@@ -777,7 +777,7 @@
                 class="mt-4"
               >
                 <div
-                  class="mb-2 flex items-center justify-between gap-4 text-[10px] font-semibold uppercase tracking-[0.16em]"
+                  class="mb-2 flex items-center justify-between gap-4 text-xs font-semibold uppercase tracking-[0.16em]"
                 >
                   <span class="flex items-center gap-2 text-zinc-400">
                     Objectives
@@ -811,7 +811,7 @@
                   >
                     <div class="flex min-w-0 items-center gap-3">
                       <span
-                        class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px]"
+                        class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-xs"
                         [ngClass]="{
                           'border-primary/40 bg-primary/20 text-primary':
                             objective.isCompleted,
@@ -839,7 +839,7 @@
                         {{ objective.description }}
                       </span>
                     </div>
-                    <span class="shrink-0 text-[10px] text-primary">
+                    <span class="shrink-0 text-xs text-primary">
                       {{ objective.currentAmount }} /
                       {{ objective.requiredAmount }}
                     </span>
@@ -850,7 +850,7 @@
               <ng-template #firstHuntChoice>
                 <section *ngIf="quest.choice as choice" class="mt-4">
                   <div class="mb-3">
-                    <div class="ll-eyebrow text-[10px]">First Hunts</div>
+                    <div class="ll-eyebrow text-xs">First Hunts</div>
                     <p class="mt-1 text-sm text-zinc-300">
                       {{ choice.selectionSummary }}
                     </p>
@@ -876,7 +876,7 @@
                             {{ option.creatureName }}
                           </span>
                           <span
-                            class="mt-1 block text-[11px] leading-4 text-zinc-400"
+                            class="mt-1 block leading-4 text-[var(--ll-text-xs)] text-zinc-400"
                           >
                             {{ option.summary }}
                           </span>
@@ -888,16 +888,14 @@
                           <div
                             class="rounded border border-light_gray/15 bg-white/[0.025] p-2.5"
                           >
-                            <div class="ll-eyebrow text-[9px]">
-                              Active Essence
-                            </div>
+                            <div class="ll-eyebrow text-xs">Active Essence</div>
                             <div
                               class="mt-1 text-xs font-semibold text-primary"
                             >
                               {{ essence.active.name }}
                             </div>
                             <app-essence-description
-                              class="mt-1 block text-[11px] leading-4 text-zinc-300"
+                              class="mt-1 block leading-4 text-[var(--ll-text-xs)] text-zinc-300"
                               [abilityName]="essence.active.name"
                               [description]="essence.active.description"
                               [effects]="essence.active.effects"
@@ -922,7 +920,7 @@
                           <div
                             class="rounded border border-light_gray/15 bg-white/[0.025] p-2.5"
                           >
-                            <div class="ll-eyebrow text-[9px]">
+                            <div class="ll-eyebrow text-xs">
                               Passive Essence
                             </div>
                             <div
@@ -931,7 +929,7 @@
                               {{ essence.passive.name }}
                             </div>
                             <app-essence-description
-                              class="mt-1 block text-[11px] leading-4 text-zinc-300"
+                              class="mt-1 block leading-4 text-[var(--ll-text-xs)] text-zinc-300"
                               [abilityName]="essence.passive.name"
                               [description]="essence.passive.description"
                               [effects]="essence.passive.effects"
@@ -956,9 +954,9 @@
                       </ng-container>
 
                       <span
-                        class="flex items-center gap-2 border-t border-light_gray/20 px-3 py-2.5 text-[11px] text-zinc-300"
+                        class="flex items-center gap-2 border-t border-light_gray/20 px-3 py-2.5 text-[var(--ll-text-xs)] text-zinc-300"
                       >
-                        <span class="ll-eyebrow text-[9px]">Guaranteed</span>
+                        <span class="ll-eyebrow text-xs">Guaranteed</span>
                         <app-base-item
                           *ngIf="option.rewardItemBase as rewardItem"
                           [item]="rewardItem"
@@ -997,7 +995,7 @@
               >
                 <div>
                   <div
-                    class="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400"
+                    class="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400"
                   >
                     Rewards
                   </div>

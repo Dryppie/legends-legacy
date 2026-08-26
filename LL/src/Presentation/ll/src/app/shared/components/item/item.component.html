@@ -2,6 +2,7 @@
   [template]="hoverTpl"
   trigger="hover"
   [touchDisabled]="popoverTouchDisabled"
+  [originFocusable]="popoverFocusable"
   originClass="relative inline-block max-w-full"
 >
   <div class="flex min-w-0 flex-col">
@@ -11,6 +12,13 @@
     >
       <span class="min-w-0 truncate">{{ displayName }}</span>
       <span
+        class="ll-item-rarity-code shrink-0"
+        [attr.aria-label]="rarity + ' rarity'"
+        [title]="rarity + ' rarity'"
+      >
+        {{ rarityCode }}
+      </span>
+      <span
         *ngIf="isFavorite"
         class="shrink-0 leading-none text-primary"
         aria-label="Favorite"
@@ -18,7 +26,7 @@
         >★</span
       >
     </div>
-    <span *ngIf="borrowedFromGuildName" class="text-[0.65rem] text-amber-300">
+    <span *ngIf="borrowedFromGuildName" class="text-xs text-amber-300">
       Borrowed from {{ borrowedFromGuildName }}
     </span>
   </div>

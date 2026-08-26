@@ -1,6 +1,6 @@
 <ng-template #materialSourceTooltip let-material>
   <span role="tooltip" class="block">
-    <span class="block text-[0.6rem] uppercase tracking-[0.18em] text-secondary"
+    <span class="block text-xs uppercase tracking-[0.18em] text-secondary"
       >Where to find</span
     >
     <span class="mt-1 block text-sm text-primary">{{ material.name }}</span>
@@ -350,7 +350,7 @@
         <section *ngIf="learnedBlueprints().length" class="space-y-2">
           <div class="flex items-center gap-3">
             <h3
-              class="shrink-0 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-secondary"
+              class="shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-secondary"
             >
               Learned
             </h3>
@@ -412,7 +412,7 @@
                 </span>
                 <div
                   *ngIf="!isBlueprintCraftable(blueprint)"
-                  class="mt-1 text-[0.65rem] text-secondary"
+                  class="mt-1 text-xs text-secondary"
                 >
                   {{ missingBlueprintMaterialsLabel(blueprint) }}
                 </div>
@@ -424,12 +424,12 @@
         <section *ngIf="readyToLearnBlueprints().length" class="space-y-2">
           <div class="flex items-center gap-3">
             <h3
-              class="shrink-0 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-primary"
+              class="shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-primary"
             >
               Ready to learn
             </h3>
             <div class="h-px flex-1 bg-primary/20"></div>
-            <span class="shrink-0 text-[0.65rem] text-secondary">
+            <span class="shrink-0 text-xs text-secondary">
               Blueprint available
             </span>
           </div>
@@ -483,7 +483,7 @@
                       : "Learn Blueprint"
                   }}
                 </button>
-                <div class="mt-1 text-[0.65rem] text-secondary">
+                <div class="mt-1 text-xs text-secondary">
                   {{ blueprintAvailabilityLabel(blueprint) }}
                 </div>
               </div>
@@ -494,12 +494,12 @@
         <section *ngIf="notOwnedBlueprints().length" class="space-y-2">
           <div class="flex items-center gap-3">
             <h3
-              class="shrink-0 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-zinc-500"
+              class="shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500"
             >
               Not owned
             </h3>
             <div class="h-px flex-1 bg-white/10"></div>
-            <span class="shrink-0 text-[0.65rem] text-zinc-600">
+            <span class="shrink-0 text-xs text-zinc-600">
               Find a blueprint to learn it
             </span>
           </div>
@@ -595,7 +595,7 @@
             </p>
             <p
               *ngIf="crafted.craftedCount > 1"
-              class="mt-1 text-[0.65rem] text-secondary"
+              class="mt-1 text-xs text-secondary"
             >
               Showing the latest of {{ crafted.craftedCount }} crafted items
             </p>
@@ -621,7 +621,7 @@
               <strong class="font-serif text-xl font-medium text-primary">
                 {{ crafted.equipment.potential ?? 0 }}
               </strong>
-              <span class="ml-1 text-[0.65rem] text-secondary">
+              <span class="ml-1 text-xs text-secondary">
                 of {{ crafted.itemPreview.minimumStartingPotential }}–{{
                   crafted.itemPreview.maximumStartingPotential
                 }}
@@ -667,7 +667,7 @@
                           )
                   }}
                 </strong>
-                <span class="ml-1 text-[0.65rem] text-secondary">
+                <span class="ml-1 text-xs text-secondary">
                   /
                   {{
                     attribute.minimumAmount
@@ -718,14 +718,14 @@
         <div class="grid grid-cols-2 gap-2">
           <button
             type="button"
-            class="ll-button min-h-10 whitespace-nowrap px-1 text-[0.7rem]"
+            class="ll-button min-h-10 whitespace-nowrap px-1 text-[var(--ll-text-xs)]"
             (click)="dismissCraftedItem()"
           >
             Back
           </button>
           <button
             type="button"
-            class="ll-button ll-button-primary min-h-10 whitespace-nowrap px-1 text-[0.7rem]"
+            class="ll-button ll-button-primary min-h-10 whitespace-nowrap px-1 text-[var(--ll-text-xs)]"
             [disabled]="!canCraftSelected() || isLoading()"
             (click)="craft()"
           >
@@ -777,7 +777,7 @@
                   <div class="ll-item-meta">Attributes</div>
                   <span
                     *ngIf="selectedBlueprint() as selectedBlueprint"
-                    class="text-[0.65rem] text-secondary"
+                    class="text-xs text-secondary"
                   >
                     Base +
                     {{
@@ -823,7 +823,7 @@
 
                   <div
                     *ngIf="attribute.hasBlueprintChange"
-                    class="mt-1 flex flex-wrap items-center justify-end gap-x-2 text-[0.65rem]"
+                    class="mt-1 flex flex-wrap items-center justify-end gap-x-2 text-xs"
                   >
                     <span class="text-secondary">
                       Base
@@ -1164,8 +1164,7 @@
         *ngIf="tierOptions().length > 1"
         class="mb-2 flex items-center gap-2 overflow-x-auto"
       >
-        <span
-          class="shrink-0 text-[0.6rem] uppercase tracking-[0.2em] text-secondary"
+        <span class="shrink-0 text-xs uppercase tracking-[0.2em] text-secondary"
           >Tier</span
         >
         <button
@@ -1181,7 +1180,7 @@
         </button>
       </div>
 
-      <div class="flex flex-wrap items-center gap-1.5 text-[0.65rem]">
+      <div class="flex flex-wrap items-center gap-1.5 text-xs">
         <span class="uppercase tracking-[0.18em] text-secondary">Requires</span>
         <app-hover-popover
           *ngFor="let material of recipe.materialCosts"
@@ -1317,7 +1316,7 @@
     <button
       type="button"
       data-tour="crafting-mobile-recipes"
-      class="flex flex-col items-center justify-center gap-1 rounded-lg text-[0.6rem] tracking-wider transition-colors"
+      class="flex flex-col items-center justify-center gap-1 rounded-lg text-xs tracking-wider transition-colors"
       [ngClass]="
         mobilePane() === 'recipes'
           ? 'bg-primary/10 text-primary'
@@ -1332,7 +1331,7 @@
     <button
       type="button"
       data-tour="crafting-mobile-blueprints"
-      class="flex flex-col items-center justify-center gap-1 rounded-lg text-[0.6rem] tracking-wider transition-colors"
+      class="flex flex-col items-center justify-center gap-1 rounded-lg text-xs tracking-wider transition-colors"
       [ngClass]="
         mobilePane() === 'blueprints'
           ? 'bg-primary/10 text-primary'
@@ -1346,7 +1345,7 @@
     </button>
     <button
       type="button"
-      class="flex flex-col items-center justify-center gap-1 rounded-lg text-[0.6rem] tracking-wider transition-colors"
+      class="flex flex-col items-center justify-center gap-1 rounded-lg text-xs tracking-wider transition-colors"
       [ngClass]="
         mobilePane() === 'preview'
           ? 'bg-primary/10 text-primary'

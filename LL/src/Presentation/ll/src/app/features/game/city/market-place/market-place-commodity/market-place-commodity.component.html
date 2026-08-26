@@ -74,9 +74,7 @@
         "
       >
         <span class="min-w-0">
-          <span
-            class="flex min-w-0 items-center gap-1 text-sm font-medium"
-          >
+          <span class="flex min-w-0 items-center gap-1 text-sm font-medium">
             <span
               class="truncate group-hover:text-primary"
               [class.text-primary]="
@@ -505,7 +503,7 @@
                   <span>{{ row.quantity | numberFormat }}</span>
                   <small
                     *ngIf="row.ownQuantity > 0"
-                    class="font-sans text-[0.65rem] text-zinc-500"
+                    class="font-sans text-xs text-zinc-500"
                   >
                     {{ row.ownQuantity | numberFormat }} yours
                   </small>
@@ -680,7 +678,7 @@
                   !hasOwnOrderForSelectedItem() ||
                   (ticketSide() === 'buy' && mobileOrderBook() === 'sell')
                 "
-                class="block text-[0.65rem] font-normal"
+                class="block text-xs font-normal"
               >
                 {{ ticketOrderValue() | numberFormat }}
                 Cinders

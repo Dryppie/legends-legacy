@@ -24,12 +24,19 @@ import { GameRealtimeEventRegistry } from '../../../../../core/services/real-tim
 import { RealtimeSignalDeduper } from '../../../../../core/services/real-time/game-realtime/realtime-deduplication';
 import { StateSyncCoordinator } from '../../../../../core/services/real-time/game-realtime/state-sync-coordinator.service';
 import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
+import { DialogFocusDirective } from '../../../../../shared/directives/dialog-focus/dialog-focus.directive';
 
 type TowerReadinessTab = 'scouting' | 'preparation';
 
 @Component({
   selector: 'app-tower-overview',
-  imports: [CommonModule, RouterLink, DefaultHeaderComponent, LocalDatePipe],
+  imports: [
+    CommonModule,
+    RouterLink,
+    DefaultHeaderComponent,
+    LocalDatePipe,
+    DialogFocusDirective,
+  ],
   templateUrl: './tower-overview.component.html',
   styleUrls: ['../tower-page.scss', './tower-overview.component.scss'],
 })
@@ -379,8 +386,7 @@ export class TowerOverviewComponent implements OnInit, OnDestroy {
 
     return forkJoin({
       overview: this.tower.getOverview(),
-      floor:
-        floorNumber === null ? of(null) : this.tower.getFloor(floorNumber),
+      floor: floorNumber === null ? of(null) : this.tower.getFloor(floorNumber),
     }).pipe(
       tap({
         next: ({ overview, floor }) => {

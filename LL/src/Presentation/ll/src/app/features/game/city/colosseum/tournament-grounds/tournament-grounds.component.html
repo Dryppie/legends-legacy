@@ -15,7 +15,7 @@
               <div class="flex flex-wrap items-center gap-2">
                 <p class="ll-stat-label">Weekly · 3v3 single elimination</p>
                 <span
-                  class="ll-badge py-1 text-[0.65rem]"
+                  class="ll-badge py-1 text-xs"
                   [class.ll-badge-success]="
                     tournament.status === 'RegistrationOpen' ||
                     tournament.status === 'InProgress'
@@ -79,7 +79,6 @@
                 </dd>
               </div>
             </dl>
-
           </div>
         </section>
 
@@ -88,7 +87,9 @@
             <div>
               <h3 class="ll-heading text-lg">
                 {{
-                  showingPreviousTournament() ? "Previous Tournament" : "Bracket"
+                  showingPreviousTournament()
+                    ? "Previous Tournament"
+                    : "Bracket"
                 }}
               </h3>
               <p
@@ -129,7 +130,7 @@
                   <span class="round-dot"></span>
                   <strong>{{ roundNavigationLabel(round) }}</strong>
                 </span>
-                <span class="mt-1 block text-[0.65rem] text-secondary">
+                <span class="mt-1 block text-xs text-secondary">
                   {{ round.matches.length }}
                   {{ round.matches.length === 1 ? "battle" : "battles" }} ·
                   {{ roundTimingLabel(round) }}
@@ -160,9 +161,7 @@
                       *ngIf="match.playerOne as team; else pendingPlayerOne"
                       type="button"
                       class="match-team-button truncate"
-                      [class.text-primary]="
-                        match.winnerTeamId === team.teamId
-                      "
+                      [class.text-primary]="match.winnerTeamId === team.teamId"
                       [attr.aria-expanded]="selectedTeamId() === team.teamId"
                       (click)="toggleSelectedTeam(team)"
                     >
@@ -189,9 +188,7 @@
                       *ngIf="match.playerTwo as team; else pendingPlayerTwo"
                       type="button"
                       class="match-team-button truncate"
-                      [class.text-primary]="
-                        match.winnerTeamId === team.teamId
-                      "
+                      [class.text-primary]="match.winnerTeamId === team.teamId"
                       [attr.aria-expanded]="selectedTeamId() === team.teamId"
                       (click)="toggleSelectedTeam(team)"
                     >
@@ -409,9 +406,7 @@
                       <span *ngIf="member.isTeamOwner"> · owner</span>
                     </p>
                   </div>
-                  <span
-                    class="ll-badge ll-badge-success px-2 py-1 text-[0.6rem]"
-                  >
+                  <span class="ll-badge ll-badge-success px-2 py-1 text-xs">
                     Ready
                   </span>
                   <button
@@ -543,9 +538,7 @@
               <h3 class="ll-heading text-lg">Rewards</h3>
               <div class="flex flex-col items-end gap-2">
                 <p class="ll-stat-label">
-                  {{
-                    unclaimedRewards().length > 0 ? "Claimable" : "Your run"
-                  }}
+                  {{ unclaimedRewards().length > 0 ? "Claimable" : "Your run" }}
                 </p>
                 <button
                   type="button"
@@ -580,9 +573,11 @@
                 <p class="text-xs text-white">
                   {{ rewardTierPlacementLabel(tier, index) }}
                 </p>
-                <p class="text-right text-[0.7rem] text-primary">
+                <p class="text-right text-[var(--ll-text-xs)] text-primary">
                   +{{ tier.arenaGlory }} Glory
-                  <span *ngIf="tier.cinders"> · +{{ tier.cinders }} Cinders</span>
+                  <span *ngIf="tier.cinders">
+                    · +{{ tier.cinders }} Cinders</span
+                  >
                   <span *ngIf="tier.soulstones">
                     · +{{ tier.soulstones }} Soulstones
                   </span>
@@ -777,13 +772,13 @@
         [attr.aria-expanded]="selectedTeamId() === team.teamId"
         (click)="toggleSelectedTeam(team)"
       >
-        <span class="text-[0.65rem] text-secondary">
+        <span class="text-xs text-secondary">
           {{ seedNumber(team.seed, index + 1) }}
         </span>
         <span class="truncate text-sm" [class.text-primary]="team.isPlayerTeam">
           {{ team.name }}
         </span>
-        <span class="ml-auto text-[0.65rem] text-secondary">
+        <span class="ml-auto text-xs text-secondary">
           {{ team.memberCount }}/3
         </span>
       </button>
@@ -799,9 +794,7 @@
       *ngFor="let slot of registrationOpenSlots()"
       class="seed-card border-dashed opacity-60"
     >
-      <span class="text-[0.65rem] text-secondary">{{
-        seedNumber(null, slot)
-      }}</span>
+      <span class="text-xs text-secondary">{{ seedNumber(null, slot) }}</span>
       <span class="text-sm text-secondary">Open</span>
     </article>
   </div>

@@ -354,7 +354,7 @@ h3 {
 .floor-identity small {
   margin-top: 0.2rem;
   color: var(--ll-color-text-subtle);
-  font-size: 0.58rem;
+  font-size: var(--ll-text-xs);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -369,7 +369,7 @@ h3 {
   background: var(--ll-color-surface-soft);
   padding: 0.125rem var(--ll-space-2);
   color: var(--ll-color-text-muted);
-  font-size: 0.65rem;
+  font-size: var(--ll-text-xs);
   font-weight: var(--ll-weight-semibold);
   line-height: var(--ll-leading-tight);
   text-transform: uppercase;
@@ -646,7 +646,7 @@ h3 {
 .tower-hero button.ll-button-primary,
 .tower-panel button.ll-button-primary {
   border-color: var(--ll-color-primary);
-  color: #080808;
+  color: var(--ll-color-on-primary);
   background: var(--ll-color-primary);
   font-weight: var(--ll-weight-semibold);
 }

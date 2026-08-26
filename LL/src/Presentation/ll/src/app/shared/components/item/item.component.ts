@@ -36,6 +36,7 @@ import { BlueprintAttributeSummaryComponent } from '../blueprint-attribute-summa
 export class ItemComponent {
   @Input() item!: ItemInstance;
   @Input() popoverTouchDisabled = false;
+  @Input() popoverFocusable = true;
   itemHovered: boolean = false;
   tooltipPosition = {};
 
@@ -131,7 +132,9 @@ export class ItemComponent {
   get equippedItems(): EquipmentInstance[] {
     return this.equipmentState
       .equipmentSlots()
-      .flatMap((slot) => (slot.equipmentInstance ? [slot.equipmentInstance] : []));
+      .flatMap((slot) =>
+        slot.equipmentInstance ? [slot.equipmentInstance] : [],
+      );
   }
 
   get rarityClasses() {
@@ -155,7 +158,7 @@ export class ItemComponent {
     }
   }
 
-  private get rarity(): Rarity {
+  get rarity(): Rarity {
     const equipmentInstance = this.item as EquipmentInstance;
 
     if (equipmentInstance && equipmentInstance.rarity !== undefined) {
@@ -163,6 +166,25 @@ export class ItemComponent {
     }
 
     return this.item.itemBase.rarity;
+  }
+
+  get rarityCode(): string {
+    switch (this.rarity) {
+      case Rarity.Common:
+        return 'C';
+      case Rarity.Uncommon:
+        return 'U';
+      case Rarity.Rare:
+        return 'R';
+      case Rarity.Epic:
+        return 'E';
+      case Rarity.Unique:
+        return 'UQ';
+      case Rarity.Legendary:
+        return 'L';
+      case Rarity.Legacy:
+        return 'LG';
+    }
   }
 
   private getToolDisplayName(baseName: string, rarity: Rarity): string {

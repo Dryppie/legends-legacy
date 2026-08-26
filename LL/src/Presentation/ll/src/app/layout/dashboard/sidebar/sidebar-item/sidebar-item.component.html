@@ -1,8 +1,10 @@
-<div
+<a
   class="ll-sidebar-nav-item group relative overflow-hidden"
+  [routerLink]="item.route"
   [class.ll-sidebar-nav-item-active]="isActive"
   [class.ll-sidebar-nav-item-compact]="compact"
   [class.ll-sidebar-nav-item-quest]="questAttention"
+  [attr.aria-current]="isActive ? 'page' : null"
 >
   <app-notification-indicator
     class="absolute z-20"
@@ -14,9 +16,7 @@
     *ngIf="questAttention"
     class="absolute z-20"
     [ngClass]="
-      compact
-        ? 'bottom-1 right-1'
-        : 'll-sidebar-quest-cue bottom-1.5 right-2'
+      compact ? 'bottom-1 right-1' : 'll-sidebar-quest-cue bottom-1.5 right-2'
     "
     aria-hidden="true"
   >
@@ -40,7 +40,7 @@
       class="ll-sidebar-nav-title truncate"
       [ngClass]="
         compact
-          ? 'w-full text-center text-[0.643rem] uppercase tracking-[0.08em]'
+          ? 'w-full text-center text-[0.7rem] uppercase tracking-[0.08em]'
           : 'text-start'
       "
     >
@@ -52,4 +52,4 @@
     <!-- Placeholder for additional content injected by child components -->
     <ng-content></ng-content>
   </div>
-</div>
+</a>

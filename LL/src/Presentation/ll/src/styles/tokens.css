@@ -38,7 +38,7 @@
   --ll-font-body: "Poppins", "Helvetica Neue", sans-serif;
   --ll-font-display: "Marcellus", "Helvetica Neue", serif;
 
-  --ll-text-xs: 0.714rem;
+  --ll-text-xs: 0.75rem;
   --ll-text-sm: 0.857rem;
   --ll-text-md: 1rem;
   --ll-text-lg: 1.143rem;
@@ -54,19 +54,29 @@
   --ll-weight-semibold: 600;
   --ll-weight-bold: 700;
 
+  --ll-color-canvas: #0e0f14;
   --ll-color-bg: #17171e;
   --ll-color-bg-deep: #0f1016;
   --ll-color-surface: rgba(16, 16, 20, 0.72);
-  --ll-color-surface-strong: rgba(0, 0, 0, 0.38);
+  --ll-color-surface-strong: rgba(11, 11, 15, 0.72);
   --ll-color-surface-soft: rgba(255, 255, 255, 0.04);
+  --ll-color-surface-elevated: #292830;
+  --ll-color-surface-hover: rgba(255, 255, 255, 0.08);
+  --ll-color-surface-selected: rgba(249, 220, 160, 0.12);
+  --ll-color-surface-neutral: #363636;
   --ll-color-text: #f6f0df;
+  --ll-color-text-secondary: #c3bec4;
   --ll-color-text-muted: #a9a9b2;
-  --ll-color-text-subtle: #71717a;
+  --ll-color-text-subtle: #9b9ba5;
+  --ll-color-text-disabled: #868690;
   --ll-color-primary: #f9dca0;
   --ll-color-primary-strong: #fcd587;
   --ll-color-primary-soft: rgba(249, 220, 160, 0.1);
+  --ll-color-on-primary: #080808;
   --ll-color-border: rgba(255, 255, 255, 0.12);
   --ll-color-border-strong: rgba(249, 220, 160, 0.32);
+  --ll-color-control-border: #77747e;
+  --ll-color-focus-ring: #fcd587;
   --ll-color-danger: #ff9aa2;
   --ll-color-danger-soft: rgba(127, 29, 29, 0.24);
   --ll-color-success: #41f1b6;
@@ -75,6 +85,19 @@
   --ll-color-warning-soft: rgba(245, 158, 11, 0.16);
   --ll-color-info: #8ecbff;
   --ll-color-info-soft: rgba(14, 165, 233, 0.14);
+
+  /* RGB channels let Tailwind preserve opacity modifiers such as /10. */
+  --ll-color-bg-rgb: 23 23 30;
+  --ll-color-surface-neutral-rgb: 54 54 54;
+  --ll-color-text-rgb: 246 240 223;
+  --ll-color-text-secondary-rgb: 195 190 196;
+  --ll-color-text-muted-rgb: 169 169 178;
+  --ll-color-text-disabled-rgb: 134 134 144;
+  --ll-color-primary-rgb: 249 220 160;
+  --ll-color-danger-rgb: 255 154 162;
+  --ll-color-success-rgb: 65 241 182;
+  --ll-color-warning-rgb: 255 187 85;
+  --ll-color-info-rgb: 142 203 255;
 
   --ll-damage-type-physical: #e6e2d9;
   --ll-damage-type-magical: #9d86ef;
@@ -108,7 +131,7 @@
 
   --ll-shadow-sm: 0 0 16px rgba(0, 0, 0, 0.24);
   --ll-shadow-md: 0 0 28px rgba(0, 0, 0, 0.28);
-  --ll-shadow-focus: 0 0 0 2px rgba(249, 220, 160, 0.36);
+  --ll-shadow-focus: 0 0 0 2px rgba(249, 220, 160, 0.24);
 
   --ll-z-overlay: 50;
   --ll-z-popover: 100;

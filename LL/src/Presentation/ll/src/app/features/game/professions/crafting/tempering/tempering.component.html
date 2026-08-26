@@ -433,15 +433,16 @@
                     class="min-w-0"
                     [item]="equipment"
                     [popoverTouchDisabled]="true"
+                    [popoverFocusable]="false"
                   ></app-item>
                   <span
                     *ngIf="item.isNew"
-                    class="ll-badge ll-badge-accent shrink-0 px-1.5 text-[0.625rem] tracking-[0.04em]"
+                    class="ll-badge ll-badge-accent shrink-0 px-1.5 text-xs tracking-[0.04em]"
                   >
                     New
                   </span>
                 </div>
-                <div class="mt-1 truncate text-[0.65rem] text-secondary">
+                <div class="mt-1 truncate text-xs text-secondary">
                   {{ equipment.equipmentBase.equipmentType }} ·
                   {{ equipment.quality }} · T{{ equipment.itemBudgetTier }}
                 </div>
@@ -452,7 +453,7 @@
                   {{ equipment.itemBudget | number: "1.0-2" }}
                 </strong>
                 <span
-                  class="block text-[0.6rem] uppercase tracking-[0.08em] text-secondary"
+                  class="block text-xs uppercase tracking-[0.08em] text-secondary"
                 >
                   Gear Pwr
                 </span>
@@ -463,7 +464,7 @@
                   {{ equipment.potential ?? 0 }}
                 </strong>
                 <span
-                  class="block text-[0.6rem] uppercase tracking-[0.08em] text-secondary"
+                  class="block text-xs uppercase tracking-[0.08em] text-secondary"
                 >
                   Pot
                 </span>
@@ -613,7 +614,7 @@
               ></app-item>
               <span
                 *ngIf="item.isNew"
-                class="ll-badge ll-badge-accent shrink-0 px-2 text-[0.625rem] tracking-[0.04em]"
+                class="ll-badge ll-badge-accent shrink-0 px-2 text-xs tracking-[0.04em]"
                 >New</span
               >
             </div>

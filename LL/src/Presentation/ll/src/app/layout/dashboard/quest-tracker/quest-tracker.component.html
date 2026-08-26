@@ -14,13 +14,13 @@
   <div class="min-w-0 flex-1">
     <div class="flex min-w-0 items-center gap-2">
       <span class="shrink-0 text-primary" aria-hidden="true">!</span>
-      <span class="ll-eyebrow shrink-0 text-[9px]">Quest</span>
-      <span class="shrink-0 text-[10px] font-semibold text-primary">
+      <span class="ll-eyebrow shrink-0 text-xs">Quest</span>
+      <span class="shrink-0 text-xs font-semibold text-primary">
         {{ activeQuest.title }}
       </span>
       <span
         *ngIf="activeQuest.chain as chain"
-        class="hidden shrink-0 rounded-sm border border-primary/25 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wider text-primary xl:inline"
+        class="hidden shrink-0 rounded-sm border border-primary/25 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-primary xl:inline"
       >
         Chain {{ chain.step }}/{{ chain.totalSteps }}
       </span>
@@ -58,7 +58,7 @@
           [style.width.%]="progressPercent()"
         ></div>
       </div>
-      <span class="shrink-0 text-[10px] text-zinc-400">
+      <span class="shrink-0 text-xs text-zinc-400">
         {{ currentObjective.currentAmount }} /
         {{ currentObjective.requiredAmount }}
       </span>
@@ -68,7 +68,7 @@
   <button
     *ngIf="requiresChoice() || objective()?.presentation?.destinationRoute"
     type="button"
-    class="ll-button shrink-0 px-2.5 py-1 text-[10px]"
+    class="ll-button shrink-0 px-2.5 py-1 text-xs"
     (click)="navigate()"
   >
     {{
@@ -84,7 +84,7 @@
   >
     <div class="flex items-center justify-between gap-4">
       <div class="min-w-0">
-        <div class="ll-eyebrow text-[9px]">Pinned quest</div>
+        <div class="ll-eyebrow text-xs">Pinned quest</div>
         <div
           class="truncate text-sm font-[var(--ll-font-display)] font-semibold text-primary"
         >
@@ -92,12 +92,12 @@
         </div>
         <div
           *ngIf="activeQuest.chain as chain"
-          class="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-primary/80"
+          class="mt-0.5 text-xs font-semibold uppercase tracking-[0.14em] text-primary/80"
         >
           {{ chain.title }} · Chain {{ chain.step }} of {{ chain.totalSteps }}
         </div>
       </div>
-      <span class="shrink-0 text-[10px] text-[var(--ll-color-text-muted)]">
+      <span class="shrink-0 text-xs text-[var(--ll-color-text-muted)]">
         {{ completedObjectiveCount() }} / {{ activeQuest.objectives.length }}
         objectives
       </span>
@@ -105,7 +105,7 @@
 
     <p
       *ngIf="activeQuest.chain as chain"
-      class="mt-2 text-[11px] leading-4 text-zinc-400"
+      class="mt-2 leading-4 text-[var(--ll-text-xs)] text-zinc-400"
     >
       {{ chain.description }}
     </p>
@@ -122,7 +122,7 @@
       >
         <div class="flex items-start gap-2">
           <span
-            class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[9px]"
+            class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-xs"
             [class.border-primary]="questObjective.isCompleted"
             [class.bg-primary]="questObjective.isCompleted"
             [class.text-black]="questObjective.isCompleted"
@@ -133,13 +133,13 @@
             {{ questObjective.isCompleted ? "✓" : index + 1 }}
           </span>
           <span
-            class="min-w-0 flex-1 text-[11px] leading-4 text-zinc-200"
+            class="min-w-0 flex-1 leading-4 text-[var(--ll-text-xs)] text-zinc-200"
             [class.line-through]="questObjective.isCompleted"
             [class.text-zinc-500]="questObjective.isCompleted"
           >
             {{ questObjective.description }}
           </span>
-          <span class="shrink-0 text-[10px] tabular-nums text-primary">
+          <span class="shrink-0 text-xs tabular-nums text-primary">
             {{ questObjective.currentAmount }} /
             {{ questObjective.requiredAmount }}
           </span>
@@ -168,14 +168,14 @@
   >
     <section
       #welcomePanel
+      appDialogFocus
       class="ll-modal-panel quest-welcome-panel overflow-hidden p-0"
-      role="dialog"
-      aria-modal="true"
+      [dialogEscapeDisabled]="true"
       aria-labelledby="quest-welcome-title"
       aria-describedby="quest-welcome-description"
     >
       <div class="border-b border-primary/20 px-5 py-4 text-center">
-        <div class="ll-eyebrow text-[10px]">Welcome to Legends Legacy</div>
+        <div class="ll-eyebrow text-xs">Welcome to Legends Legacy</div>
         <h2
           id="quest-welcome-title"
           class="mt-1 text-2xl text-primary [font-family:var(--ll-font-display)]"

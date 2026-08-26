@@ -103,7 +103,10 @@ describe('EssenceDescriptionFormatter magnitude coefficients', () => {
     });
     const html = formatter.format(
       'Deal 80% Physical Damage. If the target is Slowed, deal another 80% Physical Damage.',
-      [damageEffect('effect.grasp.damage'), damageEffect('effect.grasp.slowed-damage')],
+      [
+        damageEffect('effect.grasp.damage'),
+        damageEffect('effect.grasp.slowed-damage'),
+      ],
       () => 100,
       "Weaver's Grasp",
     );
@@ -227,7 +230,8 @@ describe('EssenceDescriptionFormatter ascension-scaled placeholders', () => {
       () => 0,
     );
 
-    expect(html).toBe('Summon a ward with 112% Health and 112% Power.');
+    expect(html).toContain('with 112% Health and 112% Power.');
+    expect(html).toContain('data-title="Ward"');
   });
 
   it('renders the selected scaled duration with its unit', () => {

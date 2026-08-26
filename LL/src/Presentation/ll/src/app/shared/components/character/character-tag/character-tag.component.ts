@@ -1,12 +1,12 @@
 import { Component, Input } from '@angular/core';
-import { ClickPopoverComponent } from '../../custom-components/popovers/click-popover/click-popover.component';
+import { PopoverComponent } from '../../custom-components/popover/popover.component';
 import { Router } from '@angular/router';
 import { ChatService } from '../../../../core/services/ll-chat/chat-service/chat.service';
 
 @Component({
-    selector: 'app-character-tag',
-    imports: [ClickPopoverComponent],
-    templateUrl: './character-tag.component.html'
+  selector: 'app-character-tag',
+  imports: [PopoverComponent],
+  templateUrl: './character-tag.component.html',
 })
 export class CharacterTagComponent {
   @Input() id!: string;

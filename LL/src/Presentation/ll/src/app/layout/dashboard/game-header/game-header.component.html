@@ -19,7 +19,7 @@
         {{ activePageTitle }}
       </strong>
       <span
-        class="mt-1 block truncate text-[9px] uppercase tracking-[0.14em] text-[var(--ll-color-text-muted)]"
+        class="mt-1 block truncate text-xs uppercase tracking-[0.14em] text-[var(--ll-color-text-muted)]"
       >
         {{ activeSectionLabel || character.name }}
       </span>
@@ -33,7 +33,7 @@
       {{ character.name }}
     </strong>
     <span
-      class="shrink-0 text-[10px] uppercase tracking-wide text-[var(--ll-color-text-muted)]"
+      class="shrink-0 text-xs uppercase tracking-wide text-[var(--ll-color-text-muted)]"
     >
       Lv. {{ character.level }}
     </span>
@@ -44,7 +44,7 @@
   >
     <button
       type="button"
-      class="ll-currency-pill h-7 min-h-0 max-w-[6.5rem] px-2 text-[10px] sm:max-w-[11rem] sm:px-2.5 sm:text-xs"
+      class="ll-currency-pill h-7 min-h-0 max-w-[6.5rem] px-2 text-xs sm:max-w-[11rem] sm:px-2.5 sm:text-xs"
       title="Toggle abbreviated currency values"
       aria-label="Toggle Cinders number format"
       (click)="toggleFormat()"
@@ -66,7 +66,7 @@
 
     <button
       type="button"
-      class="ll-currency-pill h-7 min-h-0 max-w-[6.5rem] px-2 text-[10px] sm:max-w-[11rem] sm:px-2.5 sm:text-xs"
+      class="ll-currency-pill h-7 min-h-0 max-w-[6.5rem] px-2 text-xs sm:max-w-[11rem] sm:px-2.5 sm:text-xs"
       title="Toggle abbreviated currency values"
       aria-label="Toggle Soulstones number format"
       (click)="toggleFormat()"

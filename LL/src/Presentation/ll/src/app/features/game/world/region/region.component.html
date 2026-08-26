@@ -41,7 +41,7 @@
           ></span>
 
           <span
-            class="hidden shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[var(--ll-color-text-muted)] sm:inline"
+            class="hidden shrink-0 text-xs font-semibold uppercase tracking-wide text-[var(--ll-color-text-muted)] sm:inline"
           >
             In battle
           </span>
@@ -255,9 +255,7 @@
                 (click)="selectDungeon(dungeon.id)"
               >
                 <span class="activity-name">{{ dungeon.title }}</span>
-                <span
-                  *ngIf="dungeon.requiredTowerFloor"
-                  class="activity-level"
+                <span *ngIf="dungeon.requiredTowerFloor" class="activity-level"
                   >Tower {{ dungeon.requiredTowerFloor }}</span
                 >
                 <span class="activity-meta">

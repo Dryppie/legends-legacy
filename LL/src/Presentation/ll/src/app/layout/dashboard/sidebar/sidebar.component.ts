@@ -9,7 +9,7 @@ import {
   Output,
   untracked,
 } from '@angular/core';
-import { Router, RouterLink, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { filter, Subject, takeUntil } from 'rxjs';
 import { SidebarItemComponent } from './sidebar-item/sidebar-item.component';
 import { SidebarService } from '../../../core/services/client-side/sidebar/sidebar.service';
@@ -41,7 +41,6 @@ import { getEstimatedTemperingQueueDuration } from '../../../shared/utils/temper
     NgFor,
     NgIf,
     SidebarItemComponent,
-    RouterLink,
     CurrentActionComponent,
     CurrentDungeonComponent,
     CurrentRaidComponent,

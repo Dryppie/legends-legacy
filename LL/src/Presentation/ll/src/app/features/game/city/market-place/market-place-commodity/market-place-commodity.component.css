@@ -91,7 +91,7 @@
 }
 
 .market-stats .ll-label {
-  font-size: 0.55rem;
+  font-size: var(--ll-text-xs);
   white-space: nowrap;
 }
 

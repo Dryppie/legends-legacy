@@ -24,6 +24,8 @@ export class ProgressBarComponent implements OnDestroy {
   progressBar!: ElementRef<HTMLDivElement>;
   @Output() remainingTimeChange = new EventEmitter<string>();
   @Input() vertical = false;
+  @Input() accessibleLabel = 'Action progress';
+  progress = 0;
 
   private animationFrameId: number = 0;
   private actionSubscription: Subscription | null = null;
@@ -126,6 +128,7 @@ export class ProgressBarComponent implements OnDestroy {
   }
 
   private setProgress(element: HTMLDivElement, progress: number): void {
+    this.progress = Math.round(progress);
     if (this.vertical) {
       element.style.width = '100%';
       element.style.height = '100%';

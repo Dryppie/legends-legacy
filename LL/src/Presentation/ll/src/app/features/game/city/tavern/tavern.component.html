@@ -157,7 +157,7 @@
               id="leaderboard-participant-search"
               type="search"
               maxlength="80"
-              class="placeholder:text-gray-500 min-w-0 flex-1 rounded border border-white/15 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-primary sm:w-64"
+              class="min-w-0 flex-1 rounded border border-white/15 bg-black/30 px-3 py-2 text-sm text-white outline-none placeholder:text-secondary focus:border-primary sm:w-64"
               [value]="board.searchQuery ?? ''"
               [placeholder]="'Find ' + board.participantLabel.toLowerCase()"
             />
@@ -243,7 +243,7 @@
 
               <div class="w-full min-w-0">
                 <p
-                  class="text-[0.65rem] font-semibold uppercase tracking-[0.18em]"
+                  class="text-xs font-semibold uppercase tracking-[0.18em]"
                   [ngClass]="{
                     'text-[#ffe7a3]': podiumIndex === 0,
                     'text-[#c7cbd4]': podiumIndex === 1,
@@ -280,7 +280,7 @@
                 class="mt-4 w-full rounded border border-white/10 bg-black/25 px-3 py-2.5"
               >
                 <p
-                  class="text-gray-400 text-[0.65rem] font-semibold uppercase tracking-wider"
+                  class="text-gray-400 text-xs font-semibold uppercase tracking-wider"
                 >
                   {{ board.metricLabel }}
                 </p>
@@ -315,13 +315,13 @@
               >
                 <span
                   *ngIf="isViewer(entry.participantId)"
-                  class="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-primary"
+                  class="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-primary"
                 >
                   You
                 </span>
                 <span
                   *ngIf="isSearchMatch(entry.participantId)"
-                  class="rounded-full border border-sky-300/30 bg-sky-300/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-sky-200"
+                  class="rounded-full border border-sky-300/30 bg-sky-300/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-sky-200"
                 >
                   Search match
                 </span>

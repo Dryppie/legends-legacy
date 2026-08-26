@@ -1,4 +1,9 @@
 <div
+  role="progressbar"
+  aria-valuemin="0"
+  aria-valuemax="100"
+  [attr.aria-valuenow]="progress"
+  [attr.aria-label]="accessibleLabel"
   [class]="
     vertical
       ? 'relative h-full w-full overflow-hidden'

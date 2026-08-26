@@ -4,7 +4,7 @@
 
 LegendsLegacy already has a recognizable visual identity: dark, textured fantasy surfaces with parchment-gold highlights. The recommended direction is an evolution of that system, not a redesign.
 
-The biggest accessibility risks are structural rather than stylistic:
+The biggest accessibility risks identified at audit time were structural rather than stylistic:
 
 - Global CSS suppresses visible keyboard focus.
 - Primary sidebar navigation uses focusable custom elements rather than native links or buttons.
@@ -21,7 +21,7 @@ Overall assessment:
 - **WCAG 2.2 AA readiness:** Not yet conformant, primarily because of focus, semantics, scaling, and overlay behavior.
 - **Color-system maturity:** Intermediate. Good tokens and primitives exist, but enforcement and role discipline are missing.
 
-This was an analysis-only audit. No repository changes were made as part of the audit itself.
+This document began as an analysis-only audit. An implementation pass was applied on 26 August 2026; see section 11 for its exact scope and remaining work.
 
 ## 2. Existing visual and accessibility system
 
@@ -53,21 +53,21 @@ The audit uses WCAG 2.2 Level AA as its reference point. A complete conformance 
 
 A static scan found approximately 155 literal hex occurrences representing 88 distinct values across 47 frontend source files. This excludes some image assets and runtime compositing.
 
-| Role | Current examples | Assessment |
-| --- | --- | --- |
-| Canvas/background | `#17171e`, `#0f1016`, index fallback `#171717` | Consistent dark foundation |
-| Surfaces | Translucent near-black, white at 4% | Surface levels are too visually similar |
-| Primary text | `#f6f0df` | Excellent contrast and on-brand |
-| Muted text | `#a9a9b2` | Generally safe |
-| Subtle text | `#71717a`, Tailwind `#6d6d6d`, Zinc 500 | Frequently too weak for small text |
-| Primary accent | `#f9dca0`, strong `#fcd587` | Strong identity; over-applied |
-| Danger | Token `#ff9aa2`, Tailwind `#ff7782`, legacy `#d72e34` | Fragmented; legacy value fails in common contexts |
-| Success | `#41f1b6` | Strong contrast |
-| Warning | `#ffbb55` | Strong contrast |
-| Information | `#8ecbff` | Strong contrast |
-| Rarity | Common through legacy, seven token colors | Good semantic registry, but compact views sometimes rely heavily on color |
-| Combat damage | Physical, magical, bleed, burn, poison, shadow, untyped | Recent centralization is a good direction |
-| Legacy/lore colors | Royal, ancient, blood, assorted component literals | Naming mixes appearance, lore, and functional roles |
+| Role               | Current examples                                        | Assessment                                                                |
+| ------------------ | ------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Canvas/background  | `#17171e`, `#0f1016`, index fallback `#171717`          | Consistent dark foundation                                                |
+| Surfaces           | Translucent near-black, white at 4%                     | Surface levels are too visually similar                                   |
+| Primary text       | `#f6f0df`                                               | Excellent contrast and on-brand                                           |
+| Muted text         | `#a9a9b2`                                               | Generally safe                                                            |
+| Subtle text        | `#71717a`, Tailwind `#6d6d6d`, Zinc 500                 | Frequently too weak for small text                                        |
+| Primary accent     | `#f9dca0`, strong `#fcd587`                             | Strong identity; over-applied                                             |
+| Danger             | Token `#ff9aa2`, Tailwind `#ff7782`, legacy `#d72e34`   | Fragmented; legacy value fails in common contexts                         |
+| Success            | `#41f1b6`                                               | Strong contrast                                                           |
+| Warning            | `#ffbb55`                                               | Strong contrast                                                           |
+| Information        | `#8ecbff`                                               | Strong contrast                                                           |
+| Rarity             | Common through legacy, seven token colors               | Good semantic registry, but compact views sometimes rely heavily on color |
+| Combat damage      | Physical, magical, bleed, burn, poison, shadow, untyped | Recent centralization is a good direction                                 |
+| Legacy/lore colors | Royal, ancient, blood, assorted component literals      | Naming mixes appearance, lore, and functional roles                       |
 
 Calculated contrast against `#17171e`:
 
@@ -173,16 +173,16 @@ Foundation: neutral charcoal, subtly violet elevated surfaces, and a light laven
 
 ## 7. High-impact component examples
 
-| Component | Current issue | Recommended treatment |
-| --- | --- | --- |
-| Global styles | `focus:outline-none` and cleared `:focus-visible` styling suppress keyboard focus | Add one highly visible shared focus-ring token; remove blanket suppression |
-| Viewport configuration | `maximum-scale=1.0, user-scalable=0` prevents pinch zoom | Use a normal responsive viewport without disabling scaling |
-| Sidebar navigation | Custom focusable hosts are rendered as generic elements, not links/buttons | Make `app-sidebar-item` render a native `<a>` for routes and `<button>` for actions |
-| Shared modal | Dialog lacks an accessible name and evident shared focus containment/restoration | Add `aria-labelledby`, initial focus, focus trap, Escape, and trigger-focus restoration |
-| Inventory item and popover | Clickable item container and hover-triggered details are incomplete for keyboard users | Use a button/link trigger; support focus and Escape; use tooltip versus dialog semantics according to content |
-| Authentication button | `disabled` and `type` passed to the component host are not reliably reflected on the inner button | Bind native attributes to the actual `<button>` and expose loading/disabled states programmatically |
-| Toast | Clickable `div`, no live-region role, fixed short timeout | Add `status`/`alert`, native dismiss button, and pause or extend timeout |
-| Combat/health progress | Visible values are good, but some bars lack `progressbar` semantics | Add accessible names and `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` where the bar conveys state |
+| Component                  | Current issue                                                                                     | Recommended treatment                                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Global styles              | `focus:outline-none` and cleared `:focus-visible` styling suppress keyboard focus                 | Add one highly visible shared focus-ring token; remove blanket suppression                                    |
+| Viewport configuration     | `maximum-scale=1.0, user-scalable=0` prevents pinch zoom                                          | Use a normal responsive viewport without disabling scaling                                                    |
+| Sidebar navigation         | Custom focusable hosts are rendered as generic elements, not links/buttons                        | Make `app-sidebar-item` render a native `<a>` for routes and `<button>` for actions                           |
+| Shared modal               | Dialog lacks an accessible name and evident shared focus containment/restoration                  | Add `aria-labelledby`, initial focus, focus trap, Escape, and trigger-focus restoration                       |
+| Inventory item and popover | Clickable item container and hover-triggered details are incomplete for keyboard users            | Use a button/link trigger; support focus and Escape; use tooltip versus dialog semantics according to content |
+| Authentication button      | `disabled` and `type` passed to the component host are not reliably reflected on the inner button | Bind native attributes to the actual `<button>` and expose loading/disabled states programmatically           |
+| Toast                      | Clickable `div`, no live-region role, fixed short timeout                                         | Add `status`/`alert`, native dismiss button, and pause or extend timeout                                      |
+| Combat/health progress     | Visible values are good, but some bars lack `progressbar` semantics                               | Add accessible names and `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` where the bar conveys state    |
 
 ## 8. WCAG and interaction recommendations
 
@@ -325,6 +325,64 @@ Implementation guidance:
 
 ### Repository impact
 
-- No application files were changed by the audit.
-- Existing user-owned working-tree changes were preserved.
-- No migrations, configuration changes, dependency changes, deployment steps, or external environment changes are required.
+- The audit itself did not change application files.
+- The later implementation pass changed frontend source, shared styles, tests, and npm validation scripts as detailed below.
+- No migrations, dependencies, deployment steps, or external environment changes are required.
+
+## 11. Implementation status — 26 August 2026
+
+### Completed
+
+- Replaced blanket focus suppression with a shared, high-visibility `:focus-visible` treatment.
+- Removed the mobile viewport zoom restriction and global text-selection lock.
+- Converted primary sidebar destinations to native links with `aria-current`; converted the current-action surface to a native button.
+- Added shared modal naming, automatic focus capture, Escape handling, and trigger-focus restoration.
+- Added focus containment, Escape handling, and focus restoration to the Settings and Essence Shatter dialogs.
+- Added a reusable dialog-focus lifecycle and applied it to the guild creation, invitation, applications, confirmation, session-summary, quest-welcome, and Tower Shop overlays. The mandatory quest welcome traps focus but intentionally has no dismiss action.
+- Added keyboard opening/closing and appropriate tooltip/dialog relationships to the shared popover components.
+- Converted inventory rows and character-tag actions to native controls.
+- Forwarded `type` and `disabled` inputs to the real authentication button and marked its ornamental images decorative.
+- Reworked login and signup headings, navigation links, field errors, server errors, descriptions, and confirm-password labeling.
+- Replaced the inactive password-recovery placeholder button with non-interactive explanatory text.
+- Added live-region roles, an explicit dismiss button, an eight-second timeout, and pause-on-hover/focus behavior to toasts.
+- Added programmatic values and labels to the shared action progress bar.
+- Added visible rarity abbreviations so compact item rarity does not depend on color alone.
+- Added missing decorative-image alternatives and connected the combat-area drop tooltip to its trigger.
+- Added clearer canvas/surface/text/focus tokens and moved primary Tailwind colors onto token-backed RGB channels.
+- Replaced the active legacy danger color and remapped weak `light_gray`/Zinc 500 text to the accessible muted-text token.
+- Tokenized disabled text, text shown on gold, and character-presence status; removed unused legacy Tailwind palette entries.
+- Replaced active sub-11px fixed text with the scalable compact-text token, added a shared-button minimum height, and converted the Loot History header into separate native controls.
+- Added a global reduced-motion fallback for non-essential animation and transition effects.
+- Removed unused Mulish and Roboto font requests.
+- Added `validate:accessibility`, which prevents zoom blocking, global focus suppression, token divergence, fixed sub-token text, and known low-contrast legacy colors from returning to active app code.
+- Added unit coverage for button attribute forwarding, popover keyboard behavior, toast live-region/dismiss behavior, and the reusable dialog focus lifecycle.
+- Restored the complete Karma pipeline by implementing the missing attribute-grouping pipe, aligning the stale blueprint fixture, and adding a headless-safe CI launcher.
+- Fixed the World Tower overview cascade at the 58rem container breakpoint so the expedition workspace and readiness panels no longer overlap when navigation and chat are both docked.
+- Made the Essence Absorb workspace respond to its actual game-pane width instead of the browser viewport, preventing its filters and sort control from colliding in the three-pane layout.
+
+### Partially completed or intentionally deferred
+
+- All bespoke overlays identified in this audit now use either the shared modal implementation or the reusable focus lifecycle. Future feature overlays should use one of those two paths.
+- Structural and semantic colors now share the main token path, but legacy one-off component literals and gradients remain. They should be migrated feature by feature rather than through an unsafe bulk replacement.
+- Compact rarity has a redundant visible label. Other color-coded game states should be reviewed as their related components are touched.
+- Global reduced motion now provides a safe baseline; individual animations can still be redesigned with more purposeful static alternatives.
+- Active fixed text below the scalable compact baseline has been removed. Shared buttons now have a 28px default minimum at the normal reading size, and sampled explicit icon controls meet the WCAG 2.2 24px minimum; authenticated route-by-route target-spacing QA remains useful.
+- Authenticated samples now confirm that the semantic gold, surface, focus, danger, and status treatments remain visually coherent. A full route-by-route art-direction pass and color-vision simulation remain separate design QA work.
+
+### Implementation verification
+
+- `npm run build:development`: passed.
+- `npm run validate:accessibility`: passed.
+- `npm run test:ci`: passed, 601 specifications.
+- Authenticated browser verification ran against the local Angular app and local Development API. The database was already current, so API startup applied no migrations.
+- Normal Development workers processed the signed-in account's existing offline/active game actions while the API was running, so local gameplay state advanced during QA; no shared environment was contacted.
+- Rendered desktop checks covered Character Overview, Settings, Guild, World Tower, and Soul Archive/Absorb with navigation and chat docked. The World Tower and Essence Absorb width defects found during this pass were fixed and visually retested.
+- Keyboard checks confirmed named dialog/alertdialog roles, initial focus, Escape dismissal, and trigger-focus restoration for Settings rename, Guild invite, Tower Shop, and Essence Shatter. The automatically opened offline-combat summary was also confirmed as a named dialog with a dismiss action; it has no originating trigger to restore.
+- A full axe/Lighthouse crawl, assistive-technology session, browser 200% zoom sweep, and color-vision simulation remain outstanding.
+- `git diff --check`: passed.
+
+### Deployment implications
+
+- No database migration or backend deployment is required.
+- No dependencies were added.
+- The npm build and CI-test workflows now run the accessibility baseline validator before Angular compilation; Karma uses the new `ChromeHeadlessCI` launcher for sandboxed Windows execution.

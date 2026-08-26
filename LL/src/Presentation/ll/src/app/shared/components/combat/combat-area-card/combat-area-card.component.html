@@ -7,13 +7,9 @@
   [class.grayscale]="isLocked"
   [attr.aria-label]="isActiveBattle ? area.name + ', in battle now' : null"
   [attr.data-tour]="trainingAreaTourId()"
-  [style.background-image]="
-    'url(&quot;cards/optimized/combatArea.webp&quot;)'
-  "
+  [style.background-image]="'url(&quot;cards/optimized/combatArea.webp&quot;)'"
   [style.border-color]="isActiveBattle ? 'var(--ll-color-primary)' : null"
-  [style.box-shadow]="
-    '0 6px 6px -3px rgba(0, 0, 0, 0.4)'
-  "
+  [style.box-shadow]="'0 6px 6px -3px rgba(0, 0, 0, 0.4)'"
 >
   <div
     *ngIf="area.essenceProgress as essenceProgress"
@@ -26,29 +22,25 @@
       ' area Essences archived'
     "
   >
-    <span
-      class="area-essence-counter-diamond"
-      aria-hidden="true"
-    ></span>
+    <span class="area-essence-counter-diamond" aria-hidden="true"></span>
     <span class="area-essence-counter-value">
       {{ essenceProgress.collected }}/{{ essenceProgress.total }}
     </span>
   </div>
 
-  <div
-    *ngIf="area.possibleDrops?.length"
-    class="absolute z-30 w-full p-3"
-  >
+  <div *ngIf="area.possibleDrops?.length" class="absolute z-30 w-full p-3">
     <div class="group relative flex sm:inline-block">
       <button
         type="button"
         class="border-none bg-transparent p-0"
         [attr.aria-label]="'Show possible drops for ' + area.name"
+        [attr.aria-describedby]="'possible-drops-' + area.id"
       >
-        <img src="icons/Info.svg" class="size-6" />
+        <img src="icons/Info.svg" alt="" class="size-6" />
       </button>
       <div
-        class="ll-card absolute top-0 hidden bg-texture p-3 text-sm text-white shadow group-hover:block group-focus-within:block sm:w-56"
+        [id]="'possible-drops-' + area.id"
+        class="ll-card absolute top-0 hidden bg-texture p-3 text-sm text-white shadow group-focus-within:block group-hover:block sm:w-56"
         [ngClass]="{
           'ml-8': !isLastInRow,
           'right-full mr-2': isLastInRow,
@@ -86,7 +78,7 @@
         #gatheringTooltipOrigin="cdkOverlayOrigin"
         cdkOverlayOrigin
         type="button"
-        class="absolute inset-0 flex rotate-45 items-center justify-center rounded-md border shadow-md backdrop-blur-sm transition duration-150 group-hover/node:-translate-y-0.5 group-hover/node:shadow-lg group-focus-within/node:-translate-y-0.5"
+        class="absolute inset-0 flex rotate-45 items-center justify-center rounded-md border shadow-md backdrop-blur-sm transition duration-150 group-focus-within/node:-translate-y-0.5 group-hover/node:-translate-y-0.5 group-hover/node:shadow-lg"
         [ngClass]="{
           'border-slate-300/80 bg-slate-800/90 text-slate-100':
             node.type === GatheringType.Mining,
@@ -110,10 +102,7 @@
         (focusin)="showGatheringTooltip(node.id)"
         (focusout)="hideGatheringTooltip(node.id)"
       >
-        <span
-          class="-rotate-45 text-[0.65rem] font-semibold"
-          aria-hidden="true"
-        >
+        <span class="-rotate-45 text-xs font-semibold" aria-hidden="true">
           {{ gatheringTypeInitial(node.type) }}
         </span>
       </button>
@@ -129,18 +118,17 @@
       >
         <div
           [id]="gatheringTooltipId(node)"
-          class="pointer-events-none whitespace-nowrap rounded border border-[var(--ll-color-border-strong)] bg-zinc-950/95 px-2 py-1 text-[0.65rem] font-medium text-white shadow-xl"
+          class="pointer-events-none whitespace-nowrap rounded border border-[var(--ll-color-border-strong)] bg-zinc-950/95 px-2 py-1 text-xs font-medium text-white shadow-xl"
           role="tooltip"
         >
           <span class="block">
-            Proc chance: {{ procChancePercent(node) | number: '1.0-2' }}%
+            Proc chance: {{ procChancePercent(node) | number: "1.0-2" }}%
           </span>
           <span class="block">
             Successful drop: {{ successfulDropQuantity(node) }}
           </span>
           <span class="block text-emerald-300">
-            Includes +{{ node.yieldBonusPercent | number: '1.0-0' }}%
-            abundance
+            Includes +{{ node.yieldBonusPercent | number: "1.0-0" }}% abundance
           </span>
           <span
             *ngIf="incorrectToolMessage(node) as toolMessage"
@@ -171,7 +159,10 @@
         <div class="flex items-center justify-between">
           <h3 class="ll-heading text-lg">{{ area.name }}</h3>
         </div>
-        <small *ngIf="isActiveBattle; else levelRequirement" class="text-danger">
+        <small
+          *ngIf="isActiveBattle; else levelRequirement"
+          class="text-danger"
+        >
           In battle now
         </small>
         <ng-template #levelRequirement>
@@ -181,7 +172,7 @@
             </small>
             <span
               *ngIf="isEssenceCollectionCompleted()"
-              class="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-primary"
+              class="text-xs font-semibold uppercase tracking-[0.12em] text-primary"
             >
               Completed
             </span>

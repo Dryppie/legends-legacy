@@ -5,6 +5,7 @@ describe('PopoverComponent pointer triggers', () => {
     const component = new PopoverComponent(null!, null!, null!, null!, null!);
     const handleCtrl = jasmine.createSpyObj('handleCtrl', [
       'requestToggle',
+      'requestOpen',
       'requestClose',
     ]);
     (component as any).handleCtrl = handleCtrl;
@@ -47,6 +48,26 @@ describe('PopoverComponent pointer triggers', () => {
     const { component, handleCtrl } = createComponent();
 
     component.close();
+
+    expect(handleCtrl.requestClose).toHaveBeenCalledOnceWith();
+  });
+
+  it('toggles a click popover from the keyboard', () => {
+    const { component, handleCtrl } = createComponent();
+    component.trigger = 'click';
+    const event = new KeyboardEvent('keydown', { key: 'Enter' });
+    spyOn(event, 'preventDefault');
+
+    component.onOriginKeydown(event);
+
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(handleCtrl.requestToggle).toHaveBeenCalledOnceWith();
+  });
+
+  it('closes an open popover when Escape is pressed', () => {
+    const { component, handleCtrl } = createComponent();
+
+    component.onOriginKeydown(new KeyboardEvent('keydown', { key: 'Escape' }));
 
     expect(handleCtrl.requestClose).toHaveBeenCalledOnceWith();
   });

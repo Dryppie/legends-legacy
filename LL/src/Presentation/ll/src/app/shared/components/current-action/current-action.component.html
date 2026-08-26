@@ -3,7 +3,7 @@
   class="ll-panel flex w-full flex-col gap-2 px-3 py-2.5 text-white"
 >
   <div
-    class="flex min-w-0 items-center justify-between gap-3 text-[10px] font-semibold uppercase tracking-wide"
+    class="flex min-w-0 items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide"
   >
     <span class="truncate text-primary">{{ performingAction }}</span>
     <span class="flex shrink-0 items-center gap-2">
@@ -42,10 +42,7 @@
         >
         </app-progress-bar>
       </div>
-      <label
-        *ngIf="queueDuration"
-        class="text-nowrap text-xs text-secondary"
-      >
+      <label *ngIf="queueDuration" class="text-nowrap text-xs text-secondary">
         Queue {{ queueDuration }}
       </label>
       <label class="cursor-pointer text-nowrap text-primary underline"

@@ -93,7 +93,7 @@
             }}
           </p>
           <p
-            class="truncate text-[0.65rem] text-secondary sm:text-xs"
+            class="truncate text-xs text-secondary sm:text-xs"
             *ngIf="state.status()?.dailyFirstWinAvailable"
           >
             +{{ state.status()?.dailyFirstWinBonusGlory ?? 20 }} Glory
@@ -142,7 +142,10 @@
                 Defenses always affect rating
                 <span *ngIf="state.status()?.defenseStatus?.updatedAt">
                   · Updated
-                  {{ state.status()?.defenseStatus?.updatedAt | localDate: "short" }}
+                  {{
+                    state.status()?.defenseStatus?.updatedAt
+                      | localDate: "short"
+                  }}
                 </span>
               </p>
             </div>

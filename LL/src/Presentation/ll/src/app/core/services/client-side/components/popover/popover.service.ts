@@ -20,7 +20,7 @@ export class PopoverService {
 
   constructor(router: Router) {
     // Close all on route change
-    router.events.subscribe((e) => {
+    router.events?.subscribe((e) => {
       if (e instanceof NavigationStart) {
         this.currentHover?.close();
         this.currentClick?.close();

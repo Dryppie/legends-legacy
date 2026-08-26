@@ -1,4 +1,5 @@
-import { Component, effect } from '@angular/core';
+import { Component, effect, HostListener } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
 import { CommonModule } from '@angular/common';
 import { UserInfoDto } from '../../../shared/models/Dtos/userInfoDto';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
@@ -33,10 +34,12 @@ import {
     RegularButtonComponent,
     DefaultHeaderComponent,
     GoogleSignInButtonComponent,
+    A11yModule,
   ],
   templateUrl: './settings.component.html',
 })
 export class SettingsComponent {
+  private modalTrigger: HTMLElement | null = null;
   userInfo: UserInfoDto | null = null; // Initialize it to null first
   character: CharacterDto | null = null; // Initialize it to null first
 
@@ -140,10 +143,12 @@ export class SettingsComponent {
   }
 
   convertToRegistered() {
+    this.captureModalTrigger();
     this.showBindEmailModal = true;
   }
 
   editName() {
+    this.captureModalTrigger();
     this.newCharacterName = this.currentCharacter()?.name ?? '';
     this.showNameModal = true;
   }
@@ -154,7 +159,7 @@ export class SettingsComponent {
     this.characterService
       .renameCharacter(this.newCharacterName)
       .subscribe(() => {
-        this.showNameModal = false;
+        this.closeNameModal();
         if (this.character) {
           this.character.name = this.newCharacterName;
         }
@@ -163,10 +168,36 @@ export class SettingsComponent {
 
   closeEmailModal() {
     this.showBindEmailModal = false;
+    this.restoreModalTrigger();
   }
 
   closeNameModal() {
     this.showNameModal = false;
+    this.restoreModalTrigger();
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  closeOpenModal(event: KeyboardEvent): void {
+    if (this.showNameModal) {
+      event.preventDefault();
+      this.closeNameModal();
+    } else if (this.showBindEmailModal) {
+      event.preventDefault();
+      this.closeEmailModal();
+    }
+  }
+
+  private captureModalTrigger(): void {
+    this.modalTrigger =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+  }
+
+  private restoreModalTrigger(): void {
+    const target = this.modalTrigger;
+    this.modalTrigger = null;
+    queueMicrotask(() => target?.focus());
   }
 
   changeCredentials() {}

@@ -213,7 +213,7 @@
 
 .dungeon-result__facts span {
   color: var(--ll-color-text-subtle);
-  font-size: 0.64rem;
+  font-size: var(--ll-text-xs);
   text-transform: uppercase;
 }
 
@@ -440,7 +440,7 @@
   margin-top: var(--ll-space-1);
   overflow: hidden;
   color: var(--ll-color-text-muted);
-  font-size: 0.68rem;
+  font-size: var(--ll-text-xs);
   line-height: var(--ll-leading-tight);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -449,7 +449,7 @@
 .dungeon-node__route-cost {
   margin-top: 0.15rem;
   color: var(--ll-color-warning);
-  font-size: 0.62rem;
+  font-size: var(--ll-text-xs);
   font-weight: var(--ll-weight-semibold);
   line-height: var(--ll-leading-tight);
 }
@@ -571,7 +571,7 @@
   gap: var(--ll-space-4);
   padding: 0 var(--ll-space-4);
   color: var(--ll-color-text-muted);
-  font-size: 0.68rem;
+  font-size: var(--ll-text-xs);
   border-top: 1px solid var(--ll-color-border);
   background: var(--ll-color-surface-strong);
 }
@@ -808,7 +808,7 @@
   overflow: hidden;
   max-width: 100%;
   color: var(--ll-color-text-muted);
-  font-size: 0.6rem;
+  font-size: var(--ll-text-xs);
   text-overflow: ellipsis;
   text-transform: uppercase;
 }
@@ -848,7 +848,7 @@
 
 .dungeon-item-list small {
   color: var(--ll-color-text-subtle);
-  font-size: 0.65rem;
+  font-size: var(--ll-text-xs);
 }
 
 .dungeon-item-list b {

@@ -375,9 +375,9 @@ describe('EquipmentDisplayComponent', () => {
 
     expect(tooltipText).toContain('Tempered attribute');
     expect(tooltipText).toContain('Max Health');
-    expect(tooltipText).toContain('Original 113');
-    expect(tooltipText).toContain('Upgrade +10');
-    expect(tooltipText).toContain('Final 123');
+    expect(tooltipText?.replace(/\s+/g, '')).toContain('Original113');
+    expect(tooltipText?.replace(/\s+/g, '')).toContain('Upgrade+10');
+    expect(tooltipText?.replace(/\s+/g, '')).toContain('Final123');
     expect(
       document.querySelector('.tempering-bonus-tooltip-panel')?.classList,
     ).toContain('pointer-events-none');
@@ -431,9 +431,9 @@ describe('EquipmentDisplayComponent', () => {
 
     expect(tooltipText).toContain('Tempered attribute');
     expect(tooltipText).toContain('Magic Penetration');
-    expect(tooltipText).toContain('Original 1.31');
-    expect(tooltipText).toContain('Upgrade +2');
-    expect(tooltipText).toContain('Final 3.31');
+    expect(tooltipText?.replace(/\s+/g, '')).toContain('Original1.31');
+    expect(tooltipText?.replace(/\s+/g, '')).toContain('Upgrade+2');
+    expect(tooltipText?.replace(/\s+/g, '')).toContain('Final3.31');
 
     fixture.destroy();
   });

@@ -15,7 +15,7 @@
       <span class="ll-eyebrow block">Character</span>
       <strong class="ll-heading block truncate text-xl">Soul Archive</strong>
     </span>
-    <span class="shrink-0 text-right text-[10px] text-zinc-400">
+    <span class="shrink-0 text-right text-xs text-zinc-400">
       <span class="block">
         {{ essenceState.archive()?.essences?.length ?? 0 }} archived
       </span>
@@ -587,7 +587,7 @@
                   essenceState.draftLoadoutName()
               }}
             </strong>
-            <span class="text-[10px] text-zinc-400">
+            <span class="text-xs text-zinc-400">
               {{ draftSlotsFilled() }} / {{ essenceState.slotIndexes().length }}
               slots filled
             </span>

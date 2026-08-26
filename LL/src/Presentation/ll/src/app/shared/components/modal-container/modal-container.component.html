@@ -12,6 +12,9 @@
     "
     role="dialog"
     aria-modal="true"
+    [attr.aria-label]="modalLabel"
+    cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true"
     (click)="$event.stopPropagation()"
   >
     <app-essence-modal

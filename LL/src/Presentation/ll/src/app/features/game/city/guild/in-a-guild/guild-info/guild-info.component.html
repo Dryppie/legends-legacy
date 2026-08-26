@@ -194,8 +194,16 @@
 </div>
 
 <div *ngIf="showModal" class="ll-modal-backdrop" (click)="closeModal()">
-  <div class="ll-modal-panel" (click)="$event.stopPropagation()">
-    <h3 class="ll-heading mb-4">Invite Character</h3>
+  <div
+    appDialogFocus
+    class="ll-modal-panel"
+    aria-labelledby="invite-character-title"
+    (dialogEscape)="closeModal()"
+    (click)="$event.stopPropagation()"
+  >
+    <h3 id="invite-character-title" class="ll-heading mb-4">
+      Invite Character
+    </h3>
     <label class="ll-field mb-4">
       <span class="ll-label">Character name</span>
       <input
@@ -220,10 +228,22 @@
   (click)="closeApplicationsModal()"
 >
   <div
+    appDialogFocus
     class="ll-modal-panel flex max-h-full flex-col"
+    aria-labelledby="guild-applications-title"
+    (dialogEscape)="closeApplicationsModal()"
     (click)="$event.stopPropagation()"
   >
-    <h3 class="ll-heading mb-4">Applications</h3>
+    <div class="mb-4 flex items-center justify-between gap-4">
+      <h3 id="guild-applications-title" class="ll-heading">Applications</h3>
+      <button
+        type="button"
+        class="ll-button"
+        (click)="closeApplicationsModal()"
+      >
+        Close
+      </button>
+    </div>
     <div class="flex h-full flex-col overflow-y-auto">
       <ng-container *ngIf="guild.invites.length > 0; else noApplications">
         <div
@@ -265,11 +285,21 @@
   class="ll-modal-backdrop"
   (click)="closeConfirmModal()"
 >
-  <div class="ll-modal-panel" (click)="$event.stopPropagation()">
-    <h3 class="ll-heading mb-4">
+  <div
+    appDialogFocus
+    dialogRole="alertdialog"
+    class="ll-modal-panel"
+    aria-labelledby="guild-confirm-title"
+    aria-describedby="guild-confirm-message"
+    (dialogEscape)="closeConfirmModal()"
+    (click)="$event.stopPropagation()"
+  >
+    <h3 id="guild-confirm-title" class="ll-heading mb-4">
       {{ confirmTitle }}
     </h3>
-    <p class="ll-copy mb-6">{{ confirmMessage }}</p>
+    <p id="guild-confirm-message" class="ll-copy mb-6">
+      {{ confirmMessage }}
+    </p>
     <div class="flex justify-end gap-2">
       <app-regular-button (pressed)="closeConfirmModal()">
         Cancel

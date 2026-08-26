@@ -709,10 +709,10 @@
 
     <div class="tower-shop-backdrop" *ngIf="shopOpen()" (click)="closeShop()">
       <section
+        appDialogFocus
         class="tower-shop ll-panel"
-        role="dialog"
-        aria-modal="true"
         aria-labelledby="tower-shop-title"
+        (dialogEscape)="closeShop()"
         (click)="$event.stopPropagation()"
       >
         <header>

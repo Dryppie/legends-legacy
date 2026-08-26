@@ -1,18 +1,23 @@
-<button class="relative h-[51px] w-80">
+<button
+  [type]="type"
+  [disabled]="disabled"
+  class="relative h-[51px] w-80 disabled:cursor-not-allowed disabled:opacity-60"
+>
   <div
-    class="h-full w-full rounded-[3px] border border-[#F9DCA0] bg-[#363636] shadow-[inset_0_0_8px_0px_#FF9B2570] after:inset-0 after:content-['']"
+    class="h-full w-full rounded-[3px] border border-primary bg-gray shadow-[inset_0_0_8px_0px_rgba(255,155,37,0.44)] after:inset-0 after:content-['']"
+    aria-hidden="true"
   ></div>
   <div
     class="absolute inset-0 flex h-[51px] w-full items-center justify-between"
   >
     <div>
-      <img src="core/button/Left.svg" class="left-0 h-full" />
+      <img src="core/button/Left.svg" alt="" class="left-0 h-full" />
     </div>
-    <p class="primary-gradient">
+    <span class="primary-gradient">
       {{ text }}
-    </p>
+    </span>
     <div>
-      <img src="core/button/Right.svg" class="right-0 h-full" />
+      <img src="core/button/Right.svg" alt="" class="right-0 h-full" />
     </div>
   </div>
 </button>

@@ -185,9 +185,9 @@
 
               <div class="mt-1 w-full min-w-0">
                 <div
-                  class="truncate text-[11px] font-semibold uppercase text-primary"
+                  class="truncate font-semibold uppercase text-[var(--ll-text-xs)] text-primary"
                 ></div>
-                <div class="text-[11px] text-zinc-400">
+                <div class="text-[var(--ll-text-xs)] text-zinc-400">
                   <ng-container
                     *ngIf="milestone.isClaimed; else milestoneState"
                   >
@@ -223,7 +223,7 @@
             class="prophecy-daily-controls flex flex-wrap divide-x divide-primary/20 overflow-hidden rounded border border-primary/25 bg-black/20"
           >
             <div
-              class="prophecy-fate-echo flex h-8 items-center gap-2 whitespace-nowrap px-3 text-[11px] font-semibold uppercase tracking-wide text-zinc-400"
+              class="prophecy-fate-echo flex h-8 items-center gap-2 whitespace-nowrap px-3 font-semibold uppercase tracking-wide text-[var(--ll-text-xs)] text-zinc-400"
             >
               <span>Fate Echo</span>
               <span class="text-primary">{{ data.fateEcho }}</span>
@@ -231,14 +231,14 @@
             <button
               *ngIf="canReroll()"
               type="button"
-              class="prophecy-reroll h-8 whitespace-nowrap bg-primary/10 px-3 text-[11px] font-semibold uppercase tracking-wide text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-45"
+              class="prophecy-reroll h-8 whitespace-nowrap bg-primary/10 px-3 font-semibold uppercase tracking-wide text-[var(--ll-text-xs)] text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-45"
               (click)="rerollDailyProphecies()"
               [disabled]="loading() || !canAffordReroll()"
             >
               {{ rerollButtonLabel() }}
             </button>
             <div
-              class="prophecy-daily-reset flex h-8 items-center whitespace-nowrap px-3 text-[11px] font-semibold uppercase tracking-wide text-zinc-400"
+              class="prophecy-daily-reset flex h-8 items-center whitespace-nowrap px-3 font-semibold uppercase tracking-wide text-[var(--ll-text-xs)] text-zinc-400"
             >
               Resets in {{ dailyResetText() }}
             </div>
@@ -299,7 +299,7 @@
                       let reward of rewardPreview(prophecy.reward);
                       trackBy: trackRewardItem
                     "
-                    class="rounded border border-primary/20 bg-primary/10 px-2 py-1 text-[11px] text-zinc-200"
+                    class="rounded border border-primary/20 bg-primary/10 px-2 py-1 text-[var(--ll-text-xs)] text-zinc-200"
                   >
                     {{ reward.amount }} {{ reward.label }}
                   </span>
@@ -307,7 +307,7 @@
                     *ngIf="rewardOverflowCount(prophecy.reward) > 0"
                     #rewardOverflowOrigin="cdkOverlayOrigin"
                     cdkOverlayOrigin
-                    class="rounded border border-zinc-700 bg-black/20 px-2 py-1 text-[11px] text-zinc-400"
+                    class="rounded border border-zinc-700 bg-black/20 px-2 py-1 text-[var(--ll-text-xs)] text-zinc-400"
                     (mouseenter)="showRewardOverflow(prophecy.id)"
                     (mouseleave)="hideRewardOverflow(prophecy.id)"
                   >
@@ -478,7 +478,7 @@
                     let reward of cacheContents(cache);
                     trackBy: trackByLabel
                   "
-                  class="rounded border border-primary/15 bg-primary/10 px-2 py-1 text-[11px] text-zinc-300"
+                  class="rounded border border-primary/15 bg-primary/10 px-2 py-1 text-[var(--ll-text-xs)] text-zinc-300"
                 >
                   {{ reward }}
                 </span>
@@ -544,7 +544,7 @@
                       let reward of rewardPreview(greater.reward, 5);
                       trackBy: trackRewardItem
                     "
-                    class="rounded border border-primary/20 bg-primary/10 px-2 py-1 text-[11px] text-zinc-200"
+                    class="rounded border border-primary/20 bg-primary/10 px-2 py-1 text-[var(--ll-text-xs)] text-zinc-200"
                   >
                     {{ reward.amount }} {{ reward.label }}
                   </span>
@@ -552,7 +552,7 @@
                     *ngIf="rewardOverflowCount(greater.reward, 5) > 0"
                     #greaterRewardOverflowOrigin="cdkOverlayOrigin"
                     cdkOverlayOrigin
-                    class="rounded border border-zinc-700 bg-black/20 px-2 py-1 text-[11px] text-zinc-400"
+                    class="rounded border border-zinc-700 bg-black/20 px-2 py-1 text-[var(--ll-text-xs)] text-zinc-400"
                     (mouseenter)="showRewardOverflow(greater.id)"
                     (mouseleave)="hideRewardOverflow(greater.id)"
                   >

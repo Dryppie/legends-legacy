@@ -858,7 +858,6 @@ function inventoryBlueprint(id: string): InventoryItem {
   item.itemInstance.itemBase.blueprint = {
     blueprintId: 'blueprint.endurance',
     name: 'Endurance',
-    description: 'A sturdy equipment design.',
     bonusStatProfile: {},
     requiredRecipeTags: [],
     anyRecipeTags: [],

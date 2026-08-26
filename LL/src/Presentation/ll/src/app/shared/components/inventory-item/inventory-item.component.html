@@ -1,4 +1,4 @@
-<div class="ll-item-row" (click)="openModal()">
+<div class="ll-item-row w-full cursor-default text-left">
   <div class="min-w-0 flex-1">
     <app-item [item]="inventoryItem.itemInstance"></app-item>
   </div>
@@ -6,4 +6,15 @@
   <div *ngIf="!isEquipment" class="ll-item-chip">
     x{{ inventoryItem.quantity }}
   </div>
+
+  <button
+    type="button"
+    class="ll-button shrink-0 px-2 py-1"
+    [attr.aria-label]="
+      'Open details for ' + inventoryItem.itemInstance.itemBase.name
+    "
+    (click)="openModal()"
+  >
+    Details
+  </button>
 </div>
