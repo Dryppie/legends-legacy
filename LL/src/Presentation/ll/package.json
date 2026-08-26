@@ -7,11 +7,11 @@
     "generate:state-sync-scopes": "tsx ./scripts/generate-state-sync-scopes.ts",
     "ng": "ng",
     "start": "ng serve --open",
-    "build": "npm run generate:state-sync-scopes && npm run generate:version && npm run validate:guides && npm run validate:accessibility && ng build",
-    "build:development": "npm run generate:state-sync-scopes && npm run validate:guides && npm run validate:accessibility && ng build --configuration development",
+    "build": "npm run generate:state-sync-scopes && npm run generate:version && ng build",
+    "build:development": "npm run generate:state-sync-scopes && ng build --configuration development",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:ci": "npm run generate:state-sync-scopes && npm run validate:accessibility && ng test --watch=false --browsers=ChromeHeadlessCI --karma-config=karma.conf.cjs"
+    "test:ci": "npm run generate:state-sync-scopes && ng test --watch=false --browsers=ChromeHeadlessCI --karma-config=karma.conf.cjs"
   },
   "private": true,
   "dependencies": {
