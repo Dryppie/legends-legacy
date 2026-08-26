@@ -1113,21 +1113,6 @@
     color: var(--ll-rarity-legacy);
   }
 
-  .ll-item-rarity-code {
-    display: inline-flex;
-    min-width: 1.15rem;
-    min-height: 1.15rem;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid currentColor;
-    border-radius: var(--ll-radius-sm);
-    padding: 0 0.2rem;
-    font-size: var(--ll-text-xs);
-    font-weight: var(--ll-weight-bold);
-    line-height: 1;
-    letter-spacing: 0.02em;
-  }
-
   .ll-item-name {
     min-width: 0;
     font-family: var(--ll-font-display);
