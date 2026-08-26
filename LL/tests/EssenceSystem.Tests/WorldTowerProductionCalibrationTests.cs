@@ -112,21 +112,29 @@ public sealed class WorldTowerProductionCalibrationTests
             Assert.NotEmpty(result.PreparedGuardian.AbilityIds);
         });
         Assert.All(report.Results.Where(result =>
-            result.Cohort == WorldTowerCalibrationCohort.Tier2EpicExceptional), result =>
+            result.FloorNumber >= 11
+            && result.Cohort == WorldTowerCalibrationCohort.Recommended), result =>
         {
-            Assert.Equal("t2-exceptional-epic", result.EquipmentRungId);
+            var requirement = WorldTowerEquipmentRequirementCurve.Get(result.FloorNumber);
+            var floor = definitions.GetFloors().Single(candidate =>
+                candidate.FloorNumber == result.FloorNumber);
+            Assert.InRange(
+                result.AveragePowerRating,
+                floor.RecommendedPowerRating - 1,
+                floor.RecommendedPowerRating + 1);
+            Assert.Equal(requirement.EssenceCount, result.EssenceCount);
             Assert.All(result.PreparedRoster, combatant =>
             {
                 Assert.Equal(7, combatant.Equipment.Count);
-                Assert.Equal(7, combatant.EssenceIds.Count);
+                Assert.Equal(requirement.EssenceCount, combatant.EssenceIds.Count);
                 Assert.True(combatant.Level > 1);
                 Assert.NotEmpty(combatant.FinalAttributes);
                 Assert.NotEmpty(combatant.AbilityIds);
                 Assert.All(combatant.Equipment, item =>
                 {
-                    Assert.Equal(2, item.Tier);
-                    Assert.Equal(Rarity.Epic, item.Rarity);
-                    Assert.Equal(ItemQuality.Exceptional, item.Quality);
+                    Assert.Equal(requirement.Tier, item.Tier);
+                    Assert.Equal(requirement.Rarity, item.Rarity);
+                    Assert.Equal(requirement.Quality, item.Quality);
                     Assert.NotEmpty(item.Modifiers);
                 });
             });
@@ -165,20 +173,25 @@ public sealed class WorldTowerProductionCalibrationTests
                 $"Floor {result.FloorNumber} {result.Cohort} " +
                 $"({result.EquipmentRungId}, {result.EssenceCount} Essences, " +
                 $"rating {result.AveragePowerRating:F1}) won {result.WinRate:P0}.")));
+        var lateCalibrationFailures = report.Results
+            .Where(result => result.FloorNumber >= 11)
+            .Where(result => result.Cohort switch
+            {
+                WorldTowerCalibrationCohort.BelowRecommended => result.WinRate > 0.20,
+                WorldTowerCalibrationCohort.Recommended => result.WinRate is < 0.40 or > 0.70,
+                WorldTowerCalibrationCohort.Stronger => result.WinRate < 0.60,
+                _ => false
+            })
+            .ToArray();
+        Assert.True(lateCalibrationFailures.Length == 0, string.Join(
+            Environment.NewLine,
+            lateCalibrationFailures.Select(result =>
+                $"Floor {result.FloorNumber} {result.Cohort} " +
+                $"({result.EquipmentRungId}, {result.EssenceCount} Essences, " +
+                $"rating {result.AveragePowerRating:F1}) won {result.WinRate:P0}.")));
         Assert.All(report.Results.Where(result =>
-            result.Cohort == WorldTowerCalibrationCohort.GearScore220), result =>
-            Assert.InRange(result.WinRate, 0, 0.20));
-        Assert.InRange(report.Results.Single(result =>
-            result.FloorNumber == 11
-            && result.Cohort == WorldTowerCalibrationCohort.Tier2EpicExceptional).WinRate,
-            0.80,
-            1.00);
-        Assert.All(report.Results.Where(result =>
-            result.FloorNumber >= 12
-            && result.Cohort == WorldTowerCalibrationCohort.Tier2EpicExceptional), result =>
-            Assert.InRange(result.WinRate, 0, 0.20));
-        Assert.All(report.Results.Where(result =>
-            result.Cohort == WorldTowerCalibrationCohort.Stronger), result =>
+            result.FloorNumber <= 10
+            && result.Cohort == WorldTowerCalibrationCohort.Stronger), result =>
             Assert.InRange(result.WinRate, 0.80, 1.00));
     }
 

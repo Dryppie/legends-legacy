@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.PowerRatings;
 using Domain.Components.Attributes;
 using Domain.Models.Attributes;
 using Domain.Models.Items;
@@ -27,7 +28,45 @@ namespace EssenceSystem.Tests;
 public sealed class CanonicalEquipmentBuildFactoryTests
 {
     [Fact]
-    public void Tier_two_epic_exceptional_build_materializes_seven_real_essences()
+    public void Late_tower_requirement_curve_is_monotonic_and_matches_both_anchors()
+    {
+        var services = CreateServices();
+        var roles = CanonicalCooperativeRosterCatalog.CreateParty(10);
+        var requirements = Enumerable.Range(11, 10)
+            .Select(WorldTowerEquipmentRequirementCurve.Get)
+            .ToArray();
+        var ratings = requirements.Select(requirement =>
+            {
+                var rung = services.Factory.GetProgressionLadder().Single(candidate =>
+                    candidate.Tier == requirement.Tier
+                    && candidate.Rarity == requirement.Rarity
+                    && candidate.Quality == requirement.Quality);
+                return roles.Average(role => CombatRatingDisplay.FromRaw(
+                    services.Factory.CreateBuild(
+                        role.Role,
+                        rung,
+                        requirement.EssenceCount).Rating.Overall));
+            })
+            .ToArray();
+
+        Assert.Equal(
+            new WorldTowerEquipmentRequirement(11, 2, Rarity.Epic, ItemQuality.Fine, 7),
+            requirements[0]);
+        Assert.Equal(
+            new WorldTowerEquipmentRequirement(
+                20,
+                2,
+                Rarity.Legendary,
+                ItemQuality.Exceptional,
+                10),
+            requirements[^1]);
+        Assert.All(ratings.Zip(ratings.Skip(1)), pair =>
+            Assert.True(pair.Second > pair.First,
+                $"Late Tower rating regressed from {pair.First:F1} to {pair.Second:F1}."));
+    }
+
+    [Fact]
+    public void Tier_two_epic_exceptional_build_materializes_ten_real_essences()
     {
         var services = CreateServices();
         var rung = services.Factory.GetProgressionLadder().Single(candidate =>
@@ -42,7 +81,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
 
         Assert.Equal("t2-exceptional-epic", rung.Id);
         Assert.Equal(7, build.Equipment.Count);
-        Assert.Equal(7, build.EquippedEssences.Count);
+        Assert.Equal(10, build.EquippedEssences.Count);
         Assert.All(build.Equipment, item =>
         {
             Assert.Equal(2, item.Tier);
@@ -50,10 +89,24 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             Assert.Equal(ItemQuality.Exceptional, item.Quality);
             Assert.NotEmpty(item.InstanceModifiers);
         });
-        Assert.Equal(7, build.EquippedEssences
+        Assert.Equal(10, build.EquippedEssences
             .Select(essence => essence.EssenceDefinitionId)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Count());
+    }
+
+    [Fact]
+    public void Fine_quality_is_available_to_canonical_calibration_builds()
+    {
+        var services = CreateServices();
+        var rung = services.Factory.GetProgressionLadder().Single(candidate =>
+            candidate.Tier == 2
+            && candidate.Rarity == Rarity.Epic
+            && candidate.Quality == ItemQuality.Fine);
+        var build = services.Factory.CreateBuild(CanonicalCooperativeRole.Guardian, rung, 7);
+
+        Assert.Equal("t2-fine-epic", rung.Id);
+        Assert.All(build.Equipment, item => Assert.Equal(ItemQuality.Fine, item.Quality));
     }
 
     [Fact]

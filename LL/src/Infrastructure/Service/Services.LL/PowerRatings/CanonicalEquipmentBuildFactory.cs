@@ -52,7 +52,7 @@ public sealed class CanonicalEquipmentBuildFactory
 {
     public const string TutorialStarterBuildId = "tutorial-starter";
     private const int PositiveTemperingAttemptsPerRarity = 10;
-    public const int MaximumCanonicalEssenceCount = 7;
+    public const int MaximumCanonicalEssenceCount = 10;
     private const int MaximumCalibrationEquipmentTier = 100;
 
     // Stable slot order keeps every full-set matrix build deterministic.
@@ -110,7 +110,10 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.glade_panther",
                 "essence.green_slime",
                 "essence.flame_imp",
-                "essence.raven"
+                "essence.raven",
+                "essence.lumo_wisp",
+                "essence.frost_imp",
+                "essence.nightshade_blossom"
             ],
             [CanonicalPartyProfile.Offense] =
             [
@@ -120,7 +123,10 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.giant_bat",
                 "essence.rotfly_toad",
                 "essence.poisonous_rat",
-                "essence.venomous_snake"
+                "essence.venomous_snake",
+                "essence.blood_harpy",
+                "essence.flame_harpy",
+                "essence.wind_harpy"
             ],
             [CanonicalPartyProfile.Sustain] =
             [
@@ -130,7 +136,10 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.flame_imp",
                 "essence.vampire_bat",
                 "essence.goblin_warrior",
-                "essence.forest_spirit"
+                "essence.forest_spirit",
+                "essence.blue_slime",
+                "essence.lumo_wisp",
+                "essence.treant_guardian"
             ],
             [CanonicalPartyProfile.Defensive] =
             [
@@ -140,7 +149,10 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.flame_imp",
                 "essence.green_slime",
                 "essence.illusion_fox",
-                "essence.hobgoblin"
+                "essence.hobgoblin",
+                "essence.transparent_slime",
+                "essence.wood_nymph",
+                "essence.thornback_boar"
             ],
             [CanonicalPartyProfile.Area] =
             [
@@ -150,7 +162,10 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.shadow_imp",
                 "essence.goblin_shaman",
                 "essence.rainbow_slime",
-                "essence.crystal_wisp"
+                "essence.crystal_wisp",
+                "essence.blood_harpy",
+                "essence.flame_harpy",
+                "essence.ice_harpy"
             ]
         };
 
@@ -165,7 +180,10 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.hobgoblin",
                 "essence.cinder_beetle",
                 "essence.red_slime",
-                "essence.lumo_sentinel"
+                "essence.lumo_sentinel",
+                "essence.bark_golem",
+                "essence.treant_guardian",
+                "essence.thornback_boar"
             ],
             [CanonicalCooperativeRole.Restorer] =
             [
@@ -175,7 +193,10 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.lumo_wisp",
                 "essence.treant_sapling",
                 "essence.wood_nymph",
-                "essence.crystal_wisp"
+                "essence.crystal_wisp",
+                "essence.nightshade_blossom",
+                "essence.gnoll_shaman",
+                "essence.elder_treant"
             ],
             [CanonicalCooperativeRole.Striker] =
             [
@@ -189,7 +210,10 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.giant_bat",
                 "essence.hollow_stag",
                 "essence.rainbow_slime",
-                "essence.goblin_shaman"
+                "essence.goblin_shaman",
+                "essence.shadow_harpy",
+                "essence.ice_harpy",
+                "essence.wandering_ghost"
             ],
             [CanonicalCooperativeRole.AreaSpecialist] =
             [
@@ -203,7 +227,10 @@ public sealed class CanonicalEquipmentBuildFactory
                 "essence.blood_zombie",
                 "essence.lumo_sentinel",
                 "essence.cinder_beetle",
-                "essence.hobgoblin"
+                "essence.hobgoblin",
+                "essence.bark_golem",
+                "essence.thornback_boar",
+                "essence.treant_guardian"
             ]
         };
 
@@ -230,6 +257,7 @@ public sealed class CanonicalEquipmentBuildFactory
     private static readonly ItemQuality[] CalibrationQualities =
     [
         ItemQuality.Standard,
+        ItemQuality.Fine,
         ItemQuality.Exceptional
     ];
 

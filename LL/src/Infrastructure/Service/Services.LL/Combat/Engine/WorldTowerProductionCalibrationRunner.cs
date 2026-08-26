@@ -24,16 +24,44 @@ public enum WorldTowerCalibrationCohort
 {
     BelowRecommended,
     Recommended,
-    GearScore220,
-    Tier2EpicExceptional,
     Stronger
 }
 
 public sealed record WorldTowerProductionCalibrationOptions(
     int MinimumFloor = 1,
     int MaximumFloor = 15,
-    int SampleCount = 10,
-    int UnderTargetPowerRating = 220);
+    int SampleCount = 10);
+
+public sealed record WorldTowerEquipmentRequirement(
+    int FloorNumber,
+    int Tier,
+    Rarity Rarity,
+    ItemQuality Quality,
+    int EssenceCount);
+
+public static class WorldTowerEquipmentRequirementCurve
+{
+    public const int FirstFloor = 11;
+    public const int FinalFloor = 20;
+
+    public static WorldTowerEquipmentRequirement Get(int floorNumber) => floorNumber switch
+    {
+        11 => new(floorNumber, 2, Rarity.Epic, ItemQuality.Fine, 7),
+        12 => new(floorNumber, 2, Rarity.Unique, ItemQuality.Fine, 7),
+        13 => new(floorNumber, 2, Rarity.Unique, ItemQuality.Fine, 8),
+        14 => new(floorNumber, 2, Rarity.Legendary, ItemQuality.Fine, 8),
+        15 => new(floorNumber, 2, Rarity.Legendary, ItemQuality.Fine, 9),
+        16 => new(floorNumber, 2, Rarity.Unique, ItemQuality.Exceptional, 9),
+        17 => new(floorNumber, 2, Rarity.Legendary, ItemQuality.Fine, 10),
+        18 => new(floorNumber, 2, Rarity.Epic, ItemQuality.Exceptional, 10),
+        19 => new(floorNumber, 2, Rarity.Unique, ItemQuality.Exceptional, 10),
+        20 => new(floorNumber, 2, Rarity.Legendary, ItemQuality.Exceptional, 10),
+        _ => throw new ArgumentOutOfRangeException(
+            nameof(floorNumber),
+            floorNumber,
+            $"Late World Tower equipment requirements cover Floors {FirstFloor}–{FinalFloor}.")
+    };
+}
 
 public sealed record WorldTowerPreparedEquipmentModifier(
     AttributeType Attribute,
@@ -127,8 +155,10 @@ public sealed class WorldTowerProductionCalibrationRunner(
                 .SingleOrDefault()
                 ?? throw new InvalidOperationException(
                     $"Guardian creature '{floor.GuardianCreatureId}' was not found.");
-            var cohorts = CreateCohorts(floor.RequiredSlots, floor.FloorNumber,
-                floor.RecommendedPowerRating, options.UnderTargetPowerRating);
+            var cohorts = CreateCohorts(
+                floor.RequiredSlots,
+                floor.FloorNumber,
+                floor.RecommendedPowerRating);
 
             foreach (var (cohort, loadout) in cohorts)
             {
@@ -215,23 +245,24 @@ public sealed class WorldTowerProductionCalibrationRunner(
         CreateCohorts(
             int rosterSize,
             int floorNumber,
-            int recommendedPowerRating,
-            int underTargetPowerRating)
+            int recommendedPowerRating)
     {
         if (floorNumber >= 11)
         {
+            var lateRecommended = CreateLoadout(
+                WorldTowerEquipmentRequirementCurve.Get(floorNumber));
+            var lateBelow = floorNumber == WorldTowerEquipmentRequirementCurve.FirstFloor
+                ? new CalibrationLoadout(
+                    GetRung(2, Rarity.Epic, ItemQuality.Standard),
+                    EssenceCount: 7)
+                : CreateLoadout(WorldTowerEquipmentRequirementCurve.Get(floorNumber - 1));
+            var lateStronger = CreateLoadout(WorldTowerEquipmentRequirementCurve.Get(
+                Math.Min(WorldTowerEquipmentRequirementCurve.FinalFloor, floorNumber + 1)));
             return
             [
-                (WorldTowerCalibrationCohort.GearScore220,
-                    FindClosestLoadout(rosterSize, underTargetPowerRating, maximumTier: 2)),
-                (WorldTowerCalibrationCohort.Tier2EpicExceptional,
-                    new CalibrationLoadout(
-                        GetRung(2, Rarity.Epic, ItemQuality.Exceptional),
-                        CanonicalEquipmentBuildFactory.MaximumCanonicalEssenceCount)),
-                (WorldTowerCalibrationCohort.Stronger,
-                    new CalibrationLoadout(
-                        GetRung(3, Rarity.Epic, ItemQuality.Exceptional),
-                        CanonicalEquipmentBuildFactory.MaximumCanonicalEssenceCount))
+                (WorldTowerCalibrationCohort.BelowRecommended, lateBelow),
+                (WorldTowerCalibrationCohort.Recommended, lateRecommended),
+                (WorldTowerCalibrationCohort.Stronger, lateStronger)
             ];
         }
 
@@ -239,16 +270,19 @@ public sealed class WorldTowerProductionCalibrationRunner(
             rosterSize,
             recommendedPowerRating,
             maximumTier: 1,
-            requiredEssenceCount: floorNumber <= 3 ? 5 : floorNumber <= 6 ? 6 : 7);
+            requiredEssenceCount: floorNumber <= 3 ? 5 : floorNumber <= 6 ? 6 : 7,
+            requiredQuality: ItemQuality.Standard);
         var below = FindAdjacentLoadout(
             rosterSize,
             recommended,
             minimumRatingDifference: 15,
+            maximumEssenceCount: 7,
             below: true);
         var stronger = FindAdjacentLoadout(
             rosterSize,
             recommended,
             minimumRatingDifference: 15,
+            maximumEssenceCount: 7,
             below: false);
         return
         [
@@ -262,11 +296,14 @@ public sealed class WorldTowerProductionCalibrationRunner(
         int rosterSize,
         int targetPowerRating,
         int maximumTier,
-        int? requiredEssenceCount = null)
+        int? requiredEssenceCount = null,
+        ItemQuality? requiredQuality = null)
     {
         var candidates = GetLoadoutCandidates(rosterSize, maximumTier)
             .Where(candidate => requiredEssenceCount is null
                                 || candidate.Loadout.EssenceCount == requiredEssenceCount)
+            .Where(candidate => requiredQuality is null
+                                || candidate.Loadout.Rung.Quality == requiredQuality)
             .ToArray();
         return candidates
             .OrderBy(candidate => Math.Abs(candidate.Average - targetPowerRating))
@@ -280,12 +317,13 @@ public sealed class WorldTowerProductionCalibrationRunner(
         int rosterSize,
         CalibrationLoadout recommended,
         int minimumRatingDifference,
+        int maximumEssenceCount,
         bool below)
     {
         var adjacentEssenceCount = Math.Clamp(
             recommended.EssenceCount + (below ? -2 : 2),
             1,
-            CanonicalEquipmentBuildFactory.MaximumCanonicalEssenceCount);
+            maximumEssenceCount);
         if (adjacentEssenceCount != recommended.EssenceCount)
             return recommended with { EssenceCount = adjacentEssenceCount };
 
@@ -341,6 +379,11 @@ public sealed class WorldTowerProductionCalibrationRunner(
         ItemQuality quality) =>
         canonicalBuilds.GetProgressionLadder().Single(rung =>
             rung.Tier == tier && rung.Rarity == rarity && rung.Quality == quality);
+
+    private CalibrationLoadout CreateLoadout(WorldTowerEquipmentRequirement requirement) =>
+        new(
+            GetRung(requirement.Tier, requirement.Rarity, requirement.Quality),
+            requirement.EssenceCount);
 
     private SnapshotCombatantRequest CreateSnapshotRequest(
         (CanonicalCooperativeRosterSlot Slot, CanonicalEquipmentBuild Build) entry,

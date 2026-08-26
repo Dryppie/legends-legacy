@@ -15,7 +15,22 @@ The proposed encounter cadence follows the established Tower structure:
 - Floors 16–19: Standard guardians
 - Floor 20: Sovereign
 
-Floors 11–15 begin a substantially steeper progression band. Floor 11 is balanced around a full ten-character roster averaging Tier 2 Epic equipment of Exceptional quality, with seven equipped Essences per character. Its recommended Power Rating is 280. Floors 12–14 retain ten-character rosters and rise to 300, 325, and 350 recommended Power Rating; Floor 15 expands to fifteen characters and 400 recommended Power Rating.
+Floors 11–20 use one explicit Tier 2 power curve. Floor 11 begins with a full ten-character roster in Epic, Fine-quality equipment and seven equipped Essences per character. Every next guardian rejects the preceding floor's calibrated roster in production-parity simulations. Floor 20 ends at approximately full Tier 2 Legendary, Exceptional-quality equipment with all ten Essence slots.
+
+| Floor | Representative full-set requirement | Essences | Approx. Power Rating |
+| ---: | --- | ---: | ---: |
+| 11 | Tier 2 Epic, Fine | 7 | 233 |
+| 12 | Tier 2 Unique, Fine | 7 | 241 |
+| 13 | Tier 2 Unique, Fine | 8 | 251 |
+| 14 | Tier 2 Legendary, Fine | 8 | 260 |
+| 15 | Tier 2 Legendary, Fine | 9 | 269 |
+| 16 | Tier 2 Unique, Exceptional | 9 | 277 |
+| 17 | Tier 2 Legendary, Fine | 10 | 278 |
+| 18 | Tier 2 Epic, Exceptional | 10 | 279 |
+| 19 | Tier 2 Unique, Exceptional | 10 | 286 |
+| 20 | Tier 2 Legendary, Exceptional | 10 | 295 |
+
+The equipment labels are deterministic representative cohorts, not hard gates. Their prepared combat attributes and displayed ratings are what define the monotonic power curve; ordinary roll quality and build synergy can move a real roster around those approximations. Floors 11–14 retain ten-character rosters, while Floor 15 expands to fifteen characters. Floors 16–20 remain encounter concepts, but their target cohorts are already defined for future calibration.
 
 ## Floor 11 — The Hushed Archive
 
