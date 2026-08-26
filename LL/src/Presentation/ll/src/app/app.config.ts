@@ -6,7 +6,6 @@ import {
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideAnimations } from '@angular/platform-browser/animations';
 import {
   HTTP_INTERCEPTORS,
   provideHttpClient,
@@ -47,7 +46,6 @@ export const appConfig: ApplicationConfig = {
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: StateSyncInterceptor, multi: true },
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideAnimations(),
     provideHttpClient(withInterceptorsFromDi()),
     provideAnimationsAsync(),
     AuthService,
