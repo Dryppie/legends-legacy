@@ -5,8 +5,6 @@
   "scripts": {
     "generate:version": "tsx ./scripts/write-build-version.ts",
     "generate:state-sync-scopes": "tsx ./scripts/generate-state-sync-scopes.ts",
-    "validate:guides": "tsx ./scripts/validate-guides.ts",
-    "validate:accessibility": "tsx ./scripts/validate-accessibility-baseline.ts",
     "ng": "ng",
     "start": "ng serve --open",
     "build": "npm run generate:state-sync-scopes && npm run generate:version && npm run validate:guides && npm run validate:accessibility && ng build",
