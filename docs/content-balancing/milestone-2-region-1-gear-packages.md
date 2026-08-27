@@ -50,4 +50,4 @@ Automated coverage verifies:
 - a higher raw Combat Rating for the Epic end package than the Rare start package;
 - JSON and Markdown report integration, including immutable historical package output.
 
-This milestone does not define the final World Tower power curve. Milestone 3 must add legal 4-slot and 6-slot Essence builds before the two anchors represent their complete intended player progression states.
+This milestone does not define the final World Tower power curve. Milestone 3 adds legal 4-slot and 6-slot Essence builds to represent the intended player progression states at these anchors, plus a 5-slot intermediate sampling profile.

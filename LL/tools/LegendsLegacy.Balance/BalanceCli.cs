@@ -21,7 +21,8 @@ public static class BalanceCli
             var runner = ProductionBalanceComposition.Create(contentRoot);
             var report = runner.Run(new BalanceRunRequest(
                 options.Seed,
-                GitCommitReader.TryRead(repositoryRoot)));
+                GitCommitReader.TryRead(repositoryRoot),
+                options.EssenceBuildsPerProfile));
             var paths = new BalanceReportWriter().Write(report, outputRoot);
 
             Console.WriteLine($"Balance run {report.Metadata.RunId} completed.");
@@ -33,9 +34,17 @@ public static class BalanceCli
                     $"Gear: {gearPackage.Definition.ProgressionAnchor} = {gearPackage.Definition.Id} " +
                     $"(CR {gearPackage.CombatRating.DisplayOverall})");
             }
+            Console.WriteLine(
+                $"Essence builds: {report.EssenceBuilds.Count} " +
+                $"({options.EssenceBuildsPerProfile} per profile)");
+            Console.WriteLine(
+                $"PvE benchmarks: {report.Benchmarks.Builds.Count} builds x " +
+                $"{report.Benchmarks.Scenarios.Count} scenarios");
             Console.WriteLine($"Markdown: {paths.LatestMarkdownPath}");
             Console.WriteLine($"JSON: {paths.LatestJsonPath}");
             Console.WriteLine($"Gear packages: {paths.LatestGearPackagesJsonPath}");
+            Console.WriteLine($"Essence builds: {paths.LatestEssenceBuildsJsonPath}");
+            Console.WriteLine($"PvE benchmarks: {paths.LatestBenchmarksJsonPath}");
             return 0;
         }
         catch (BalanceCommandException exception)

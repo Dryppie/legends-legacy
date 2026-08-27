@@ -86,28 +86,9 @@ public sealed class GearPackageFactory(CanonicalEquipmentBuildFactory canonicalB
 
     public GearPackageSnapshot Create(GearPackageDefinition definition)
     {
-        ArgumentNullException.ThrowIfNull(definition);
-        var rung = canonicalBuilds.GetProgressionLadder().SingleOrDefault(candidate =>
-            candidate.Tier == definition.Tier
-            && candidate.Rarity == definition.Rarity
-            && candidate.Quality == definition.Quality)
-            ?? throw new InvalidOperationException(
-                $"No canonical equipment rung matches Gear Package '{definition.Id}'.");
-        var profile = definition.Archetype switch
-        {
-            GearPackageArchetype.Balanced => CanonicalPartyProfile.Balanced,
-            GearPackageArchetype.Offensive => CanonicalPartyProfile.Offense,
-            GearPackageArchetype.Defensive => CanonicalPartyProfile.Defensive,
-            _ => throw new ArgumentOutOfRangeException(
-                nameof(definition),
-                definition.Archetype,
-                "Unsupported Gear Package archetype.")
-        };
-
         // Gear Packages intentionally exclude Essences so equipment and Essence
         // progression remain independently measurable inputs.
-        var build = canonicalBuilds.CreateBuild(profile, rung, Array.Empty<string>());
-        ValidateBuild(definition, build);
+        var build = CreateCanonicalBuild(definition, Array.Empty<string>());
         var projectedAttributes = CombatRatingCalculator.ProjectDirectAttributes(
             build.Character.BaseAttributes,
             AttributeCalculator.ProjectEquipmentModifiers(
@@ -119,17 +100,7 @@ public sealed class GearPackageFactory(CanonicalEquipmentBuildFactory canonicalB
             definition,
             build.Character.Level,
             build.EquipmentBalanceVersion,
-            new GearPackageCombatRatingSnapshot(
-                PowerRatingAlgorithm.Version,
-                CombatRatingCalculator.DefinitionVersion,
-                CombatRatingDisplay.FromRaw(rating.Overall),
-                rating.Overall,
-                rating.SingleTargetOffense,
-                rating.MultiTargetOffense,
-                rating.PhysicalDurability,
-                rating.MagicalDurability,
-                rating.Sustain,
-                rating.ControlUtility),
+            CreateRatingSnapshot(rating),
             projectedAttributes
                 .OrderBy(attribute => attribute.Key)
                 .ToDictionary(
@@ -158,12 +129,66 @@ public sealed class GearPackageFactory(CanonicalEquipmentBuildFactory canonicalB
                 .ToArray());
     }
 
+    internal CanonicalEquipmentBuild CreateCanonicalBuild(
+        GearPackageDefinition definition,
+        IReadOnlyList<string> essenceIds)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+        ArgumentNullException.ThrowIfNull(essenceIds);
+        var rung = canonicalBuilds.GetProgressionLadder().SingleOrDefault(candidate =>
+            candidate.Tier == definition.Tier
+            && candidate.Rarity == definition.Rarity
+            && candidate.Quality == definition.Quality)
+            ?? throw new InvalidOperationException(
+                $"No canonical equipment rung matches Gear Package '{definition.Id}'.");
+        var profile = definition.Archetype switch
+        {
+            GearPackageArchetype.Balanced => CanonicalPartyProfile.Balanced,
+            GearPackageArchetype.Offensive => CanonicalPartyProfile.Offense,
+            GearPackageArchetype.Defensive => CanonicalPartyProfile.Defensive,
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(definition),
+                definition.Archetype,
+                "Unsupported Gear Package archetype.")
+        };
+        var build = canonicalBuilds.CreateBuild(profile, rung, essenceIds);
+        ValidateBuild(definition, build, essenceIds.Count);
+        return build;
+    }
+
+    internal static GearPackageCombatRatingSnapshot CreateRatingSnapshot(CombatRatingBreakdown rating) =>
+        new(
+            PowerRatingAlgorithm.Version,
+            CombatRatingCalculator.DefinitionVersion,
+            CombatRatingDisplay.FromRaw(rating.Overall),
+            rating.Overall,
+            rating.SingleTargetOffense,
+            rating.MultiTargetOffense,
+            rating.PhysicalDurability,
+            rating.MagicalDurability,
+            rating.Sustain,
+            rating.ControlUtility);
+
+    internal static IReadOnlyDictionary<Domain.Models.Attributes.AttributeType, float> ProjectAttributes(
+        CanonicalEquipmentBuild build) =>
+        AttributeCalculator.CalculateProjectedAttributes(
+            build.Character.BaseAttributes.ToDictionary(
+                attribute => attribute.AttributeType,
+                attribute => attribute.Value),
+            AttributeCalculator.ProjectEquipmentModifiers(
+                build.Equipment,
+                build.Character.Level));
+
     private static void ValidateBuild(
         GearPackageDefinition definition,
-        CanonicalEquipmentBuild build)
+        CanonicalEquipmentBuild build,
+        int expectedEssenceCount)
     {
-        if (build.EquippedEssences.Count != 0)
-            throw new InvalidOperationException($"Gear Package '{definition.Id}' unexpectedly contains Essences.");
+        if (build.EquippedEssences.Count != expectedEssenceCount)
+        {
+            throw new InvalidOperationException(
+                $"Gear Package '{definition.Id}' materialized an unexpected Essence count.");
+        }
         if (build.Equipment.Count == 0)
             throw new InvalidOperationException($"Gear Package '{definition.Id}' contains no equipment.");
         if (build.Equipment.Any(item =>
@@ -177,30 +202,39 @@ public sealed class GearPackageFactory(CanonicalEquipmentBuildFactory canonicalB
     }
 }
 
-public sealed class EquipmentOnlyEssenceLoadoutResolver : IEssenceCombatLoadoutResolver
+public sealed class CatalogEssenceLoadoutResolver(
+    IEssenceDefinitionRepository essenceDefinitions) : IEssenceCombatLoadoutResolver
 {
     public Task<EssenceCombatLoadout> ResolveAsync(
         Guid characterId,
-        CancellationToken cancellationToken) =>
-        Task.FromResult(CreateEmpty(characterId));
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(Resolve(characterId, Array.Empty<PlayerEssence>()));
+    }
 
     public EssenceCombatLoadout Resolve(
         Guid characterId,
         IEnumerable<PlayerEssence> equippedEssences)
     {
-        if (equippedEssences.Any())
+        var essences = equippedEssences.ToArray();
+        var tags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var essence in essences)
         {
-            throw new InvalidOperationException(
-                "The equipment-only Gear Package boundary cannot resolve Essences.");
+            var definition = essenceDefinitions.GetById(essence.EssenceDefinitionId)
+                ?? throw new InvalidOperationException(
+                    $"Essence '{essence.EssenceDefinitionId}' was not found while materializing a balance character.");
+            tags.UnionWith(definition.Tags);
+            if (essence.IsEvolved)
+                tags.UnionWith(definition.Evolution.AddsTags);
         }
 
-        return CreateEmpty(characterId);
-    }
-
-    private static EssenceCombatLoadout CreateEmpty(Guid characterId) =>
-        new(
+        // The production CR contract currently excludes Essence abilities and
+        // Essence definitions no longer contribute direct attribute modifiers.
+        return new EssenceCombatLoadout(
             characterId,
-            Array.Empty<PlayerEssence>(),
+            essences,
             Array.Empty<AttributeModifierBase>(),
-            new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+            tags);
+    }
 }

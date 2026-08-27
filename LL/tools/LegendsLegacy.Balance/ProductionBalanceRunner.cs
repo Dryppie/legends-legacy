@@ -9,9 +9,11 @@ public sealed class ProductionBalanceRunner(
     IEssenceDefinitionRepository essenceDefinitions,
     IAbilityBalanceSimulator simulator,
     GearPackageFactory gearPackages,
+    EssenceBuildGenerator essenceBuilds,
+    PveBenchmarkRunner benchmarks,
     TimeProvider timeProvider)
 {
-    public const int BalanceSchemaVersion = 2;
+    public const int BalanceSchemaVersion = 4;
     public const string SmokeScenarioId = "production-essence-smoke-1v1";
 
     public BalanceRunReport Run(BalanceRunRequest request)
@@ -44,6 +46,10 @@ public sealed class ProductionBalanceRunner(
             ]));
         var battle = simulation.BattleSummaries.Single();
         var regionOneGearPackages = gearPackages.CreateRegionOneAnchors();
+        var generatedEssenceBuilds = essenceBuilds.GenerateInitialProfiles(
+            simulation.RandomSeed,
+            request.EssenceBuildsPerProfile);
+        var benchmarkSuite = benchmarks.Run(generatedEssenceBuilds, simulation.RandomSeed);
         var createdAtUtc = timeProvider.GetUtcNow();
         var runId = CreateRunId(createdAtUtc);
         var engineVersion = typeof(FastCombatEngine).Assembly.GetName().Version?.ToString() ?? "unknown";
@@ -74,20 +80,27 @@ public sealed class ProductionBalanceRunner(
                 battle.FriendlyDamageTaken,
                 battle.HostileDamageDone,
                 battle.HostileDamageTaken),
-            regionOneGearPackages);
+            regionOneGearPackages,
+            generatedEssenceBuilds,
+            benchmarkSuite);
     }
 
     private static string CreateRunId(DateTimeOffset createdAtUtc) =>
         $"{createdAtUtc.ToUniversalTime().ToString("yyyyMMddTHHmmssfff'Z'", CultureInfo.InvariantCulture)}-{Guid.NewGuid():N}"[..28];
 }
 
-public sealed record BalanceRunRequest(int Seed, string? GitCommitHash = null);
+public sealed record BalanceRunRequest(
+    int Seed,
+    string? GitCommitHash = null,
+    int EssenceBuildsPerProfile = 10);
 
 public sealed record BalanceRunReport(
     BalanceRunMetadata Metadata,
     BalanceContentSummary Content,
     BalanceSimulationSummary Simulation,
-    IReadOnlyList<GearPackageSnapshot> GearPackages);
+    IReadOnlyList<GearPackageSnapshot> GearPackages,
+    IReadOnlyList<EssenceBuildSnapshot> EssenceBuilds,
+    PveBenchmarkSuiteSnapshot Benchmarks);
 
 public sealed record BalanceRunMetadata(
     string RunId,

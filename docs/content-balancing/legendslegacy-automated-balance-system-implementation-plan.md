@@ -2065,6 +2065,8 @@ Start with only the progression states immediately required for the World Tower 
 
 ## Milestone 3 — Random Essence Builds
 
+**Status: Complete.** See [Milestone 3 Random Essence Builds](milestone-3-random-essence-builds.md) for the implemented profiles, legality rules, output contract, and current CR interpretation.
+
 Implement:
 
 ```text
@@ -2088,6 +2090,8 @@ Benchmark performance spread
 
 ## Milestone 4 — PvE Benchmark Suite
 
+**Status: Complete.** See [Milestone 4 PvE Benchmark Suite](milestone-4-pve-benchmark-suite.md) for the implemented scenarios, scoring model, measured sample ranges, and report contract.
+
 Implement the first small benchmark suite:
 
 ```text
@@ -2110,6 +2114,8 @@ Aggregate benchmark score
 ---
 
 ## Milestone 5 — Combat Rating Validation
+
+**Status: In progress.** The statistical and reporting contract is documented in [Milestone 5 Combat Rating Validation](milestone-5-combat-rating-validation.md).
 
 Implement:
 

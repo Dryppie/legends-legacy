@@ -14,6 +14,7 @@ Supported options:
 
 ```text
 --seed <number>         Deterministic simulation seed.
+--build-count <number>  Random builds per 4/5/6-slot Essence profile (default: 10).
 --content-root <path>   API.LL directory containing the production Data folder.
 --output <path>         Override the report root.
 --full                  Run the currently implemented pipeline.
@@ -30,16 +31,20 @@ Each invocation generates:
 balance-output/
 ├── latest/
 │   ├── gear-packages.json
+│   ├── essence-builds.json
+│   ├── benchmarks.json
 │   ├── summary.json
 │   └── summary.md
 └── history/
     └── <run-id>/
         ├── gear-packages.json
+        ├── essence-builds.json
+        ├── benchmarks.json
         ├── summary.json
         └── summary.md
 ```
 
-History directories are immutable. A report records its run ID, UTC timestamp, seed, balance schema version, simulator algorithm version, combat-engine assembly version, Git commit when available, production catalog counts, and combat result. Milestone 2 extended the output with `gear-packages.json` and a Gear Package summary.
+History directories are immutable. A report records its run ID, UTC timestamp, seed, balance schema version, simulator algorithm version, combat-engine assembly version, Git commit when available, production catalog counts, and combat result. Milestone 2 extended the output with `gear-packages.json`; Milestone 3 added `essence-builds.json`; Milestone 4 added `benchmarks.json` and performance summaries.
 
 Generated reports are ignored by Git.
 
@@ -47,7 +52,7 @@ Generated reports are ignored by Git.
 
 The runner loads the production ability, status, summon, and Essence JSON catalogs and executes the existing `AbilityBalanceSimulator`, which uses `FastCombatEngine`. No copied or simplified combat model was introduced.
 
-The current `production-essence-smoke-1v1` scenario is deliberately a foundation check, not a balance benchmark. Gear packages, legal multi-Essence build generation, PvE benchmarks, power scoring, and World Tower calibration belong to later milestones.
+The `production-essence-smoke-1v1` scenario remains a foundation check rather than a balance benchmark. Gear packages, legal multi-Essence generation, and the first PvE benchmark suite are now implemented. Combat Rating analysis and World Tower calibration belong to later milestones.
 
 ## Verification
 

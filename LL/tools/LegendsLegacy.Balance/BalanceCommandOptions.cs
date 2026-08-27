@@ -4,6 +4,7 @@ namespace LegendsLegacy.Balance;
 
 public sealed record BalanceCommandOptions(
     int Seed,
+    int EssenceBuildsPerProfile,
     string? ContentRoot,
     string? OutputRoot,
     bool ShowHelp)
@@ -18,6 +19,7 @@ public sealed record BalanceCommandOptions(
 
         Options:
           --seed <number>         Deterministic simulation seed (default: 1337).
+          --build-count <number>  Random builds per 4/5/6-slot profile (default: 10).
           --content-root <path>   API.LL directory containing the production Data folder.
           --output <path>         Report root (default: <repository>/balance-output).
           --full                  Run the currently implemented balance pipeline.
@@ -27,6 +29,7 @@ public sealed record BalanceCommandOptions(
     public static BalanceCommandOptions Parse(IReadOnlyList<string> args)
     {
         var seed = DefaultSeed;
+        var essenceBuildsPerProfile = 10;
         string? contentRoot = null;
         string? outputRoot = null;
         var showHelp = false;
@@ -50,6 +53,19 @@ public sealed record BalanceCommandOptions(
                 case "--content-root":
                     contentRoot = ReadValue(args, ref index, argument);
                     break;
+                case "--build-count":
+                    var buildCountValue = ReadValue(args, ref index, argument);
+                    if (!int.TryParse(
+                            buildCountValue,
+                            NumberStyles.Integer,
+                            CultureInfo.InvariantCulture,
+                            out essenceBuildsPerProfile)
+                        || essenceBuildsPerProfile is < 1 or > 1_000)
+                    {
+                        throw new BalanceCommandException(
+                            $"Invalid build count '{buildCountValue}'. Expected a number from 1 to 1,000.");
+                    }
+                    break;
                 case "--output":
                     outputRoot = ReadValue(args, ref index, argument);
                     break;
@@ -58,7 +74,7 @@ public sealed record BalanceCommandOptions(
             }
         }
 
-        return new BalanceCommandOptions(seed, contentRoot, outputRoot, showHelp);
+        return new BalanceCommandOptions(seed, essenceBuildsPerProfile, contentRoot, outputRoot, showHelp);
     }
 
     private static string ReadValue(IReadOnlyList<string> args, ref int index, string argument)

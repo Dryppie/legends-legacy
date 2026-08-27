@@ -33,19 +33,27 @@ public static class ProductionBalanceComposition
             jsonOptions,
             new EssenceDefinitionValidator());
         IAbilityBalanceSimulator simulator = new AbilityBalanceSimulator(catalog, essences);
+        var essenceLoadouts = new CatalogEssenceLoadoutResolver(essences);
         var canonicalBuilds = new CanonicalEquipmentBuildFactory(
             new JsonCraftingDefinitionProvider(configuration, contentRoot, jsonOptions),
             new ItemStatRollService(),
             new TemperingMechanicsService(),
             new ItemPotentialService(),
-            new EquipmentOnlyEssenceLoadoutResolver(),
+            essenceLoadouts,
             essences);
+        var gearPackages = new GearPackageFactory(canonicalBuilds);
+        var essenceBuildGenerator = new EssenceBuildGenerator(
+            essences,
+            gearPackages,
+            new EssenceSlotUnlockService());
 
         return new ProductionBalanceRunner(
             catalog,
             essences,
             simulator,
-            new GearPackageFactory(canonicalBuilds),
+            gearPackages,
+            essenceBuildGenerator,
+            new PveBenchmarkRunner(catalog, essences, gearPackages),
             timeProvider ?? TimeProvider.System);
     }
 
