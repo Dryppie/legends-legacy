@@ -4,6 +4,8 @@
 
 # 0. Remove Existing Balance/Test Infrastructure Before Implementation
 
+**Status: Complete.** See [P0 Balance Infrastructure Cleanup](p0-cleanup-summary.md) for the audit classification, removals, preserved systems, and verification boundary.
+
 Before implementing the system described in this document, first inspect the repository for the existing combat balancing, simulation, benchmark, character-generation, and automated balance-testing infrastructure.
 
 The intention is to **replace the existing balance-testing system rather than extend it**.

@@ -8,7 +8,6 @@ using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.CharacterActions;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Combat;
-using Application.Interfaces.Services.LL.CombatProfiles;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
@@ -54,7 +53,6 @@ using Services.LL.Combat.Layers.Rewards.Idle;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Combat.Stats;
 using Services.LL.Combat.Engine;
-using Services.LL.Combat.Profiles;
 using Services.LL.Quests.Events;
 using Services.LL.Dungeons;
 using Services.LL.Entities;
@@ -425,22 +423,6 @@ public static class DependencyInjection
         services.AddScoped<IAbilityCatalogDiagnostics, AbilityCatalogDiagnostics>();
         services.AddScoped<IAbilityBalanceSimulator, AbilityBalanceSimulator>();
         services.AddScoped<IAbilityBalanceAuditService, AbilityBalanceAuditService>();
-        services.AddScoped<CombatCharacterProfileMaterializer>();
-        services.AddScoped<IWorldTowerProfileCandidateQualifier, WorldTowerProfileCandidateQualifier>();
-        services.AddScoped<ICombatCharacterProfileService, CombatCharacterProfileService>();
-        services.AddScoped<ICombatCharacterProfileCatalogService>(sp =>
-            new JsonCombatCharacterProfileCatalogService(
-                Path.Combine(
-                    contentRootPath,
-                    config["Content:Root"] ?? "Data",
-                    "combat",
-                    "combat-character-profiles.json"),
-                sp.GetRequiredService<JsonSerializerOptions>(),
-                sp.GetRequiredService<CanonicalEquipmentBuildFactory>(),
-                sp.GetRequiredService<CombatCharacterProfileMaterializer>(),
-                sp.GetRequiredService<IEssenceDefinitionRepository>(),
-                sp.GetRequiredService<IAbilityCatalogProvider>()));
-        services.AddScoped<ICombatCharacterProfileBatchService, CombatCharacterProfileBatchService>();
         services.AddScoped<IAbilityCatalogBehaviorDiagnostics>(sp =>
             new AbilityCatalogBehaviorDiagnostics(
                 sp.GetRequiredService<IAbilityCatalogProvider>(),
@@ -522,14 +504,6 @@ public static class DependencyInjection
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IWorldTowerService, WorldTowerService>();
         services.AddScoped<IWorldTowerCombatRuntimeFactory, WorldTowerCombatRuntimeFactory>();
-        services.AddScoped<WorldTowerProductionCalibrationRunner>();
-        services.AddScoped<IWorldTowerProductionCalibrationRunner>(sp =>
-            sp.GetRequiredService<WorldTowerProductionCalibrationRunner>());
-        services.AddScoped<WorldTowerProfileShadowCalibrationRunner>();
-        services.AddScoped<IWorldTowerProfileShadowCalibrationRunner>(sp =>
-            sp.GetRequiredService<WorldTowerProfileShadowCalibrationRunner>());
-        services.AddScoped<IWorldTowerCalibrationCertificationRunner,
-            WorldTowerCalibrationCertificationRunner>();
         services.AddScoped<IWorldTowerWorkLeaseService, WorldTowerWorkLeaseService>();
         services.AddOptions<RaidOptions>()
             .Bind(config.GetSection(RaidOptions.SectionName))

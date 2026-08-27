@@ -42,7 +42,7 @@ public sealed class AbilitySystemTests
 
         var report = simulator.Run(new AbilityBalanceSimulationRequest(
             BattleCount: 20,
-            TeamSize: 2,
+            TeamSize: 3,
             EssencesPerParticipant: 2,
             RandomSeed: 123,
             TopResults: 10,
@@ -57,7 +57,7 @@ public sealed class AbilitySystemTests
         Assert.All(report.RankedCombinations, combination =>
         {
             Assert.InRange(combination.WinRate, 0, 1);
-            Assert.Equal(2, combination.Participants.Count);
+            Assert.Equal(3, combination.Participants.Count);
             Assert.All(combination.Participants, participant => Assert.Equal(2, participant.EssenceIds.Count));
         });
     }
@@ -6442,123 +6442,6 @@ public sealed class AbilitySystemTests
         Assert.True(report.HasFullAbilityCoverage, string.Join(Environment.NewLine, report.MissingAbilityIds));
         Assert.Equal(report.AbilityCount, report.CoveredAbilityCount);
         Assert.Empty(report.MissingAbilityIds);
-    }
-
-    [Fact]
-    public void Essence_progression_calibration_compares_attribute_only_expected_and_optimized_envelopes()
-    {
-        var contentRoot = FindApiContentRoot();
-        var options = CreateJsonOptions();
-        var config = CreateConfig();
-        var catalogProvider = new JsonAbilityCatalogProvider(config, contentRoot, options);
-        var essenceRepository = new JsonEssenceDefinitionRepository(
-            config,
-            contentRoot,
-            options,
-            new EssenceDefinitionValidator());
-        var slotUnlocks = new EssenceSlotUnlockService();
-        var runner = new EssenceProgressionCalibrationRunner(
-            catalogProvider,
-            essenceRepository,
-            slotUnlocks);
-        string[] offensiveEssences =
-        [
-            "essence.goblin",
-            "essence.raven",
-            "essence.venomous_snake",
-            "essence.goblin_archer",
-            "essence.frost_imp",
-            "essence.crystal_wisp",
-            "essence.grave_hound",
-            "essence.skeleton",
-            "essence.glade_panther",
-            "essence.flame_imp"
-        ];
-        int[] anchors = [1, 10, 30, 90];
-        var scenarios = anchors.Select(level =>
-        {
-            var slots = slotUnlocks.GetUnlockedSlotCount(level);
-            var expectedCount = Math.Max(1, (int)Math.Ceiling(slots * 0.6));
-            var playerHealth = 140 + 20 * (level - 1);
-            var playerPower = 10 + 0.25f * (level - 1);
-            return new EssenceProgressionCalibrationScenario(
-                $"anchor-{level}",
-                ProgressionPosition: Math.Max(1, level / 5),
-                CharacterLevel: level,
-                PlayerAttributes: new Dictionary<AttributeType, float>
-                {
-                    [AttributeType.MaxHealth] = playerHealth,
-                    [AttributeType.Power] = playerPower,
-                    [AttributeType.CritChance] = 5,
-                    [AttributeType.CritDamage] = 100
-                },
-                TargetAttributes: new Dictionary<AttributeType, float>
-                {
-                    [AttributeType.MaxHealth] = 100_000_000,
-                    [AttributeType.Power] = 0,
-                    [AttributeType.DodgeChance] = 0
-                },
-                Envelopes:
-                [
-                    new("attributes-only", []),
-                    new("minimum", [new(offensiveEssences[0], 0)]),
-                    new("expected", offensiveEssences.Take(expectedCount)
-                        .Select(id => new EssenceProgressionCalibrationEssence(id, 1)).ToList()),
-                    new("optimized", offensiveEssences.Take(slots)
-                        .Select(id => new EssenceProgressionCalibrationEssence(id, 3)).ToList())
-                ],
-                RandomSeeds: [17, 29, 43],
-                MaxTicks: 300);
-        }).ToList();
-
-        var first = runner.Run(scenarios);
-        var second = runner.Run(scenarios);
-
-        Assert.Equal(anchors.Length * 4, first.Results.Count);
-        Assert.Equal(first.Results, second.Results);
-        Assert.All(anchors, level =>
-        {
-            var scenarioId = $"anchor-{level}";
-            var baseline = first.Results.Single(result =>
-                result.ScenarioId == scenarioId && result.EnvelopeId == "attributes-only");
-            var optimized = first.Results.Single(result =>
-                result.ScenarioId == scenarioId && result.EnvelopeId == "optimized");
-            Assert.True(
-                optimized.AverageDamageDone > baseline.AverageDamageDone,
-                $"{scenarioId}: optimized Essence envelope should exceed attribute-only damage.");
-        });
-    }
-
-    [Fact]
-    public void Essence_progression_calibration_rejects_loadouts_above_the_level_slot_limit()
-    {
-        var contentRoot = FindApiContentRoot();
-        var options = CreateJsonOptions();
-        var config = CreateConfig();
-        var runner = new EssenceProgressionCalibrationRunner(
-            new JsonAbilityCatalogProvider(config, contentRoot, options),
-            new JsonEssenceDefinitionRepository(
-                config,
-                contentRoot,
-                options,
-                new EssenceDefinitionValidator()),
-            new EssenceSlotUnlockService());
-        var scenario = new EssenceProgressionCalibrationScenario(
-            "slot-limit",
-            1,
-            1,
-            new Dictionary<AttributeType, float> { [AttributeType.MaxHealth] = 140 },
-            new Dictionary<AttributeType, float> { [AttributeType.MaxHealth] = 1_000 },
-            [
-                new("attributes-only", []),
-                new("invalid", [new("essence.goblin", 0), new("essence.raven", 0)])
-            ],
-            [17]);
-
-        var exception = Assert.Throws<InvalidOperationException>(() => runner.Run([scenario]));
-
-        Assert.Contains("exceed", exception.Message, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("slots", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

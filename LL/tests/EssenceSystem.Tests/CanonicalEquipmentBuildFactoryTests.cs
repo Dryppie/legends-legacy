@@ -28,44 +28,6 @@ namespace EssenceSystem.Tests;
 public sealed class CanonicalEquipmentBuildFactoryTests
 {
     [Fact]
-    public void Late_tower_requirement_curve_is_monotonic_and_matches_both_anchors()
-    {
-        var services = CreateServices();
-        var roles = CanonicalCooperativeRosterCatalog.CreateParty(10);
-        var requirements = Enumerable.Range(11, 10)
-            .Select(WorldTowerEquipmentRequirementCurve.Get)
-            .ToArray();
-        var ratings = requirements.Select(requirement =>
-            {
-                var rung = services.Factory.GetProgressionLadder().Single(candidate =>
-                    candidate.Tier == requirement.Tier
-                    && candidate.Rarity == requirement.Rarity
-                    && candidate.Quality == requirement.Quality);
-                return roles.Average(role => CombatRatingDisplay.FromRaw(
-                    services.Factory.CreateBuild(
-                        role.Role,
-                        rung,
-                        requirement.EssenceCount).Rating.Overall));
-            })
-            .ToArray();
-
-        Assert.Equal(
-            new WorldTowerEquipmentRequirement(11, 2, Rarity.Epic, ItemQuality.Fine, 7),
-            requirements[0]);
-        Assert.Equal(
-            new WorldTowerEquipmentRequirement(
-                20,
-                2,
-                Rarity.Legendary,
-                ItemQuality.Exceptional,
-                10),
-            requirements[^1]);
-        Assert.All(ratings.Zip(ratings.Skip(1)), pair =>
-            Assert.True(pair.Second > pair.First,
-                $"Late Tower rating regressed from {pair.First:F1} to {pair.Second:F1}."));
-    }
-
-    [Fact]
     public void Tier_two_epic_exceptional_build_materializes_ten_real_essences()
     {
         var services = CreateServices();
