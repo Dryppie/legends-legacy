@@ -592,13 +592,13 @@ public sealed record GearPackageDefinition
 Example IDs:
 
 ```text
-T1_Common_Fine_Balanced
-T1_Common_Fine_Offensive
-T1_Common_Fine_Defensive
-
 T1_Rare_Exceptional_Balanced
 T1_Rare_Exceptional_Offensive
 T1_Rare_Exceptional_Defensive
+
+T1_Epic_Exceptional_Balanced
+T1_Epic_Exceptional_Offensive
+T1_Epic_Exceptional_Defensive
 ```
 
 ---
@@ -1080,8 +1080,8 @@ worldTowerBands:
     startAnchor:
       gear:
         tier: 1
-        rarity: Common
-        quality: Fine
+        rarity: Rare
+        quality: Exceptional
 
       essences:
         slots: 4
@@ -1090,7 +1090,7 @@ worldTowerBands:
     endAnchor:
       gear:
         tier: 1
-        rarity: Rare
+        rarity: Epic
         quality: Exceptional
 
       essences:
@@ -1105,10 +1105,10 @@ This means:
 
 ```text
 Floor 1
-≈ T1 Common Fine + competent 4-Essence build
+≈ T1 Rare Exceptional + competent 4-Essence build
 
 Floor 10
-≈ T1 Rare Exceptional + competent 6-Essence build
+≈ T1 Epic Exceptional + competent 6-Essence build
 ```
 
 Floors 2-9 do not require manually maintained character profiles.
@@ -2022,6 +2022,8 @@ Deliver the cleanup summary before continuing.
 
 ## Milestone 1 — Balance Runner
 
+**Status: Complete.** See [Milestone 1 Balance Runner](milestone-1-balance-runner.md) for its command, architecture boundary, outputs, and verification.
+
 Implement:
 
 ```text
@@ -2043,6 +2045,8 @@ and save a report.
 ---
 
 ## Milestone 2 — Gear Packages
+
+**Status: Complete.** See [Milestone 2 Region 1 Gear Packages](milestone-2-region-1-gear-packages.md) for the implemented anchors, production construction path, report contract, and verification.
 
 Implement:
 
@@ -2164,7 +2168,7 @@ Initial World Tower proof of concept:
 Region 1 Start
 
 Gear:
-T1 Common Fine
+T1 Rare Exceptional
 
 Essences:
 4 slots / P75
@@ -2176,7 +2180,7 @@ and:
 Region 1 End
 
 Gear:
-T1 Rare Exceptional
+T1 Epic Exceptional
 
 Essences:
 6 slots / P75
@@ -2356,8 +2360,8 @@ Target:
 3. Create the Balance Runner.
 4. Add deterministic simulations.
 5. Create two Region 1 Gear Packages:
-   - T1 Common Fine
    - T1 Rare Exceptional
+   - T1 Epic Exceptional
 6. Generate legal 4-Essence and 6-Essence builds.
 7. Add a small PvE benchmark suite.
 8. Calculate benchmark performance.
@@ -2382,13 +2386,13 @@ Design intent:
 ```text
 Floor 1:
 Tier 1 gear
-Common rarity
-Fine quality
+Rare rarity
+Exceptional quality
 4 Essences
 
 Floor 10:
 Tier 1 gear
-Rare rarity
+Epic rarity
 Exceptional quality
 6 Essences
 ```
@@ -2405,7 +2409,7 @@ The balance system constructs:
 START ANCHOR
 
 Gear Package:
-T1_Common_Fine
+T1_Rare_Exceptional
 
 Essence Profile:
 E4_P75
@@ -2417,7 +2421,7 @@ and:
 END ANCHOR
 
 Gear Package:
-T1_Rare_Exceptional
+T1_Epic_Exceptional
 
 Essence Profile:
 E6_P75
@@ -2644,12 +2648,12 @@ The system is successful when a developer can define something as simple as:
 World Tower Region 1
 
 Floor 1 expectation:
-T1 Common Fine
+T1 Rare Exceptional
 4 Essences
 P75 build quality
 
 Floor 10 expectation:
-T1 Rare Exceptional
+T1 Epic Exceptional
 6 Essences
 P75 build quality
 ```

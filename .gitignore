@@ -245,3 +245,6 @@ paket-files/
 *.sln.iml
 # Local database fixture used by the guarded idle-combat performance benchmark.
 /LL/legends_legacy_idle_benchmark.sql
+
+# Generated automated balance reports.
+/balance-output/
