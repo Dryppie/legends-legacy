@@ -49,6 +49,8 @@ Balance regressions
 
 # 1. Preliminary Cleanup — Remove Existing Balance Infrastructure
 
+**Status: Complete.** See [P0 Balance Infrastructure Cleanup](p0-cleanup-summary.md) for the audit classification, removals, preserved systems, and verification boundary.
+
 Before implementing the system described in this document, inspect the repository for existing combat balancing, simulation, benchmark, generated-character, and automated balance-testing infrastructure.
 
 The intention is to **replace the existing balance-testing architecture rather than extend it**.
@@ -2000,6 +2002,8 @@ Do not implement the entire system at once.
 ---
 
 ## Milestone 0 — Cleanup
+
+**Status: Complete.**
 
 Implement:
 

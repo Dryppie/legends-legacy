@@ -355,4 +355,4 @@ These coefficients are an initial deterministic calibration. They should be adju
 
 The former Essence progression matrix, generated player snapshots, authored-encounter calibration, and repeatable calibration report tooling were retired during P0 of the automated balance-system replacement.
 
-The production scaling rules above remain authoritative for live content. New offline balance analysis must be implemented through the architecture described in `docs/content-balancing/automated-balance-content-calibration-implementation-plan.md`; production encounters must not adapt dynamically to a player's equipped Essences.
+The production scaling rules above remain authoritative for live content. New offline balance analysis must be implemented through the architecture described in `docs/content-balancing/legendslegacy-automated-balance-system-implementation-plan.md`; production encounters must not adapt dynamically to a player's equipped Essences.
