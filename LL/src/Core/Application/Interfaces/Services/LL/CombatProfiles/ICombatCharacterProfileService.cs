@@ -77,15 +77,20 @@ public sealed record CombatCharacterProfileScenario(
         string equipmentRarity,
         string equipmentQuality,
         string auditEquipmentProfile,
-        int essencesPerParticipant) => string.Join('.',
-        "scenario",
-        Normalize(contentType),
-        $"team-{teamSize}",
-        $"tier-{equipmentTier}",
-        Normalize(equipmentRarity),
-        Normalize(equipmentQuality),
-        Normalize(auditEquipmentProfile),
-        $"essences-{essencesPerParticipant}");
+        int essencesPerParticipant,
+        int? floorNumber = null)
+    {
+        var baseId = string.Join('.',
+            "scenario",
+            Normalize(contentType),
+            $"team-{teamSize}",
+            $"tier-{equipmentTier}",
+            Normalize(equipmentRarity),
+            Normalize(equipmentQuality),
+            Normalize(auditEquipmentProfile),
+            $"essences-{essencesPerParticipant}");
+        return floorNumber.HasValue ? $"{baseId}.floor-{floorNumber.Value}" : baseId;
+    }
 
     private static string Normalize(string value) =>
         new(value.Trim().ToLowerInvariant()

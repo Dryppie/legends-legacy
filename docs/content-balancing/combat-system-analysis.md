@@ -338,17 +338,17 @@ The new [`WorldTowerProfileShadowCalibrationRunner.cs`](../../LL/src/Infrastruct
 
 World Tower Essence discovery uses reusable five-character parties with the canonical Guardian, Restorer, Striker, Striker, and Controller roles and role-specific discovery attributes. Before profile families are selected, every eligible finalist is materialized at the exact target equipment rung and receives ten deterministic battles on every target floor through the production guardian, scaling, stagger, cooldown, runtime, and playback paths. Profile materialization then creates exact 5/10/15-character expeditions with explicit party assignments. The pass remains intentionally non-authoritative: invalid catalogs fail closed, missing or malformed qualification coverage is reported, and no runner can update floor definitions or player-facing recommendations.
 
-Generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` is the current pull-request-scale evidence. It confirms every apparent qualifying hit with 100 battles from the same fixed seed manifest used by certification, and it passed all profile and canonical gates with zero issues. Its catalog is still a candidate until human review and source-control promotion.
+Generator-23 campaign `c27ad5ef-8483-4b30-b413-62e92f0443a1` is the latest completed pull-request-scale evidence. It contains 15 floor-specific sets and 75 teams, confirms every selected team with 100 battles from the fixed certification seed manifest, and passes contract 4 with zero issues. Every selected team is below 20%, every floor has at least one strict `>5%` and `<20%` anchor, and the largest estimate is 19%. Its catalog is ready for human review but is not yet the source-controlled approved catalog.
 
 Remaining limitations:
 
 - The legacy smoke calibration still uses ten implicitly seeded samples per floor/cohort. At a measured 50% win rate, ten Bernoulli samples have a very wide 95% interval of roughly 24%–76%; a one-battle change moves the estimate by ten percentage points. The new certification path defaults to 100 samples and supports 1,000.
 - Legacy shadow and smoke runs preserve their historical encounter-derived seeds. Certification instead injects one explicit, versioned seed manifest into every below/recommended/stronger cohort and profile team, providing common random numbers without changing ordinary smoke-test baselines.
-- The authoritative canonical pass still uses one deterministic canonical roster and one deterministic roll per progression rung. The shadow pass samples approved Meta, Typical, specialist, weak, budget, counter, adversarial, and No-Essence profiles, but it cannot cover a floor until an exact-size approved portfolio exists.
+- The authoritative canonical pass still uses one deterministic canonical roster and one deterministic roll per progression rung. For World Tower, the current candidate shadow pass samples four floor-specific `CalibrationTeam` expeditions and one No-Essence control. The legacy profile machinery can still represent Meta, Typical, specialist, weak, budget, counter, and adversarial families for other contexts, but the approved-catalog shadow cannot cover a Tower floor until its floor-specific portfolio is promoted.
 - Calibration and finalist qualification load the same persisted guardian source used by production. Fingerprint contract 3 includes exact Tower definitions, guardian combat fields, native creature abilities, guardian Essence loot mappings, and region scaling so these changes invalidate stale profile reuse.
 - Preparation contribution bonuses are fixed at zero. This is a reasonable unprepared baseline, but the recommendation is not labelled with that assumption.
 - Early floors require at least 80% wins at recommendation while later floors require 40%–70%. The player-facing meaning of “recommended” therefore changes by floor.
-- Legacy smoke tests still use point estimates. The certification runner uses Wilson confidence bounds for canonical cohorts, common seeds, monotonic canonical checks, timeout limits, exact scenario coverage, and an any-one-team profile contract with a fixed inclusive 5%–20% point-estimate band. Profile confidence width, population weighting, and profile spread are diagnostic only.
+- Legacy smoke tests still use point estimates. The certification runner uses Wilson confidence bounds for canonical cohorts, common seeds, monotonic canonical checks, timeout limits, exact scenario coverage, a strict point-estimate cap below 20% for every selected profile team, and a requirement that at least one team per floor be strictly above 5% and below 20%. Profile confidence width, population weighting, and profile spread are diagnostic only.
 - Certification records rating, rules, preparation, equipment, roster, generator, runtime, build, seed, catalog, and content fingerprints. A headless CI/release policy that requires a current approved artifact is still missing.
 
 During this audit, the same World Tower calibration passed in Release but one below-recommended cohort produced 30% wins against a 20% ceiling in an existing Debug build. Release is the repository's required test configuration and passed repeatedly, but this demonstrates that ten-sample boundary assertions are sensitive enough that build/runtime provenance should be recorded and cross-configuration determinism should be investigated.
@@ -414,7 +414,7 @@ Recommended solution:
 
 One deterministic roster can validate that roster, not the player population represented by the same average rating.
 
-Recommended solution: sample multiple legal equipment rolls, weapon families, blueprints, equipment sets, Essence loadouts and ascension tiers, role compositions, and intra-party power distributions. Include adversarial equal-rating builds to expose rating ambiguity, but certify the profile requirement when any one exact-context legal team independently records a 5%–20% estimated win rate and meets the sample, timeout, and runtime contract.
+Recommended solution: sample multiple legal equipment rolls, weapon families, blueprints, equipment sets, Essence loadouts and ascension tiers, role compositions, and intra-party power distributions. Include adversarial equal-rating builds to expose rating ambiguity. Certify the profile requirement only when every selected exact-context legal team remains strictly below a 20% estimated win rate and at least one team is strictly above 5% and below 20%, with the sample, timeout, and runtime contract satisfied.
 
 #### P1 — Calibration provenance is incomplete outside the World Tower certification path
 
@@ -451,7 +451,7 @@ A player-facing recommendation should be considered trustworthy only when all of
 3. Every authored recommendation has below/at/above cohorts with an explicit success contract.
 4. All unapproved calibration exceptions fail CI.
 5. Confidence-based sample thresholds and monotonic cohort checks pass.
-6. At least one exact-context legal team independently records an inclusive 5%–20% estimated win rate and meets the sample, timeout, and production-runtime contract; all other team outcomes and cross-team spread remain visible diagnostics.
+6. Every selected exact-context legal team records an estimated win rate strictly below 20%, and at least one independently records a rate strictly above 5% and below 20%, while meeting the sample, timeout, and production-runtime contract; confidence intervals, weighting, and cross-team spread remain visible diagnostics.
 7. The report carries complete version/content provenance.
 8. Live aggregate outcomes remain within the predicted confidence band.
 

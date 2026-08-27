@@ -53,6 +53,7 @@ public sealed record WorldTowerCalibrationProfileTeamCertification(
     double TimeoutRate,
     bool HasMinimumSamples,
     bool EstimateWithinTarget,
+    bool EstimateBelowMaximum,
     bool TimeoutWithinLimit,
     bool ProductionContractSatisfied,
     bool Passed);
@@ -67,6 +68,7 @@ public sealed record WorldTowerCalibrationPopulationCertification(
     double? WinRateSpread,
     double? WeightedTimeoutRate,
     bool HasQualifyingTeam,
+    bool AllTeamsBelowMaximum,
     bool Passed);
 
 public sealed record WorldTowerCalibrationFloorCertification(
@@ -140,8 +142,8 @@ public sealed class WorldTowerCalibrationCertificationRunner(
     IWorldTowerProfileShadowCalibrationRunner shadowRunner)
     : IWorldTowerCalibrationCertificationRunner
 {
-    public const int ContractVersion = 3;
-    public const int ReportSchemaVersion = 3;
+    public const int ContractVersion = 4;
+    public const int ReportSchemaVersion = 4;
     private const double Z95 = 1.959963984540054d;
 
     public async Task<WorldTowerCalibrationCertificationReport> RunAsync(
@@ -412,6 +414,7 @@ public sealed class WorldTowerCalibrationCertificationRunner(
                 null,
                 null,
                 false,
+                false,
                 false);
         }
 
@@ -422,6 +425,7 @@ public sealed class WorldTowerCalibrationCertificationRunner(
                 var confidence = Wilson(result.WinRate, result.SampleCount);
                 var samplesPass = result.SampleCount >= options.MinimumSampleCount;
                 var estimatePass = WorldTowerProfileTargetContract.Contains(result.WinRate);
+                var estimateBelowMaximum = WorldTowerProfileTargetContract.IsBelowMaximum(result.WinRate);
                 var timeoutPass = result.TimeoutRate <= options.MaximumTimeoutRate;
                 var productionPass = result.UsesProductionRuntime && result.AbilitiesStartOnCooldown;
                 return new WorldTowerCalibrationProfileTeamCertification(
@@ -432,6 +436,7 @@ public sealed class WorldTowerCalibrationCertificationRunner(
                     result.TimeoutRate,
                     samplesPass,
                     estimatePass,
+                    estimateBelowMaximum,
                     timeoutPass,
                     productionPass,
                     samplesPass && estimatePass && timeoutPass && productionPass);
@@ -455,9 +460,25 @@ public sealed class WorldTowerCalibrationCertificationRunner(
                 "NoProfileTeamMeetsTarget",
                 floorNumber,
                 $"None of the {teamAssessments.Length} exact-context profile teams independently satisfied the "
-                + $"{target.Minimum:P0}–{target.Maximum:P0} estimated win-rate target, "
+                + $"strict >{target.Minimum:P0} and <{target.Maximum:P0} estimated win-rate target, "
                 + $"{options.MinimumSampleCount}-sample minimum, {options.MaximumTimeoutRate:P0} timeout limit, "
                 + "and production-runtime contract."));
+        }
+
+        var teamsAtOrAboveMaximum = teamAssessments
+            .Where(team => !team.EstimateBelowMaximum)
+            .ToArray();
+        if (teamsAtOrAboveMaximum.Length > 0)
+        {
+            issues.Add(new(
+                "Error",
+                "ProfileTeamAtOrAboveMaximum",
+                floorNumber,
+                $"{teamsAtOrAboveMaximum.Length} of {teamAssessments.Length} exact-context profile teams had an "
+                + $"estimated win rate at or above the strict {target.Maximum:P0} maximum: "
+                + string.Join(", ", teamsAtOrAboveMaximum.Select(team =>
+                    $"{team.Family} ({team.Confidence.Estimate:P0})"))
+                + "."));
         }
 
         var weighted = results.Where(result => result.NormalizedPopulationWeight > 0d).ToArray();
@@ -487,7 +508,8 @@ public sealed class WorldTowerCalibrationCertificationRunner(
             spread,
             weightedTimeout,
             qualifying.Length > 0,
-            qualifying.Length > 0);
+            teamsAtOrAboveMaximum.Length == 0,
+            qualifying.Length > 0 && teamsAtOrAboveMaximum.Length == 0);
     }
 
     private static (double Minimum, double Maximum) Target(
@@ -521,7 +543,8 @@ public sealed class WorldTowerCalibrationCertificationRunner(
                 equipment.Rarity.ToString(),
                 equipment.Quality.ToString(),
                 "Balanced",
-                recommended.EssenceCount);
+                recommended.EssenceCount,
+                recommended.FloorNumber);
     }
 
     private static WorldTowerCalibrationConfidenceInterval Wilson(double estimate, double samples)

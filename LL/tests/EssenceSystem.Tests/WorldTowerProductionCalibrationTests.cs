@@ -111,15 +111,18 @@ public sealed class WorldTowerProductionCalibrationTests
         Assert.Equal(
             Enumerable.Range(1, 15),
             profileRequirements.SelectMany(requirement => requirement.FloorNumbers).Order());
+        Assert.Equal(15, profileRequirements.Count);
         Assert.Equal(
             profileRequirements.Count,
             profileRequirements.Select(requirement => requirement.ScenarioId).Distinct().Count());
         Assert.All(profileRequirements, requirement =>
         {
             Assert.Contains(requirement.TeamSize, new[] { 5, 10, 15 });
+            var floorNumber = Assert.Single(requirement.FloorNumbers);
             Assert.Equal("Balanced", requirement.AuditEquipmentProfile);
             Assert.Contains($"team-{requirement.TeamSize}", requirement.ScenarioId);
             Assert.Contains($"essences-{requirement.EssencesPerParticipant}", requirement.ScenarioId);
+            Assert.EndsWith($".floor-{floorNumber}", requirement.ScenarioId);
         });
         Assert.All(report.Results, result => Assert.True(result.AbilitiesStartOnCooldown));
         Assert.All(report.Results, result => Assert.Equal(

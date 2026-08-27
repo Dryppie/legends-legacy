@@ -647,6 +647,7 @@ export interface WorldTowerCalibrationPopulationCertification {
   winRateSpread: number | null;
   weightedTimeoutRate: number | null;
   hasQualifyingTeam: boolean;
+  allTeamsBelowMaximum: boolean;
   passed: boolean;
 }
 
@@ -658,6 +659,7 @@ export interface WorldTowerCalibrationProfileTeamCertification {
   timeoutRate: number;
   hasMinimumSamples: boolean;
   estimateWithinTarget: boolean;
+  estimateBelowMaximum: boolean;
   timeoutWithinLimit: boolean;
   productionContractSatisfied: boolean;
   passed: boolean;

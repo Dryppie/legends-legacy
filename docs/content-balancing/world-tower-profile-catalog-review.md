@@ -1,6 +1,6 @@
 # Historical World Tower Character Profile catalog review
 
-> This file reviews schema-3 campaign `e283b6e9-0463-497e-8ff3-3536ba1fd1b7`. Its detailed tables remain useful historical evidence, but neither this catalog nor the later pre-role-aware schema-4 catalog is eligible for promotion under current profile schema/generator 7/13 and fingerprint contract 3. Generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` is the current passing candidate; see [`combat-calibration-current-state-and-gaps.md`](combat-calibration-current-state-and-gaps.md).
+> This file reviews schema-3 campaign `e283b6e9-0463-497e-8ff3-3536ba1fd1b7`. Its detailed tables remain useful historical evidence, but neither this catalog nor the later pre-role-aware schema-4 catalog is eligible for promotion under current profile schema/generator 7/23 and fingerprint contract 3. Generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` also fails corrected certification contract 4; generator-23 campaign `c27ad5ef-8483-4b30-b413-62e92f0443a1` is the current passing candidate. See [`combat-calibration-current-state-and-gaps.md`](combat-calibration-current-state-and-gaps.md).
 
 ## Review decision
 
@@ -13,12 +13,12 @@ The later schema-4 campaign `6339d840-f00a-4630-a869-d5ad862a3bd1` did run candi
 The historical recommendation was therefore:
 
 1. Start a fresh fingerprint-contract-3 one-click run across floors 1–15; all five role-aware discovery audits must regenerate.
-2. Confirm that every selected non-control party carries complete ten-sample production screening for its exact floors and that every apparent 5%–20% hit is confirmed with 100 samples.
+2. Confirm that every selected non-control party carries complete ten-sample production screening for its exact floors and that every apparent strict `>5%` and `<20%` hit is confirmed with 100 samples.
 3. Review the automatically persisted smoke and 100-sample certification reports.
 4. Resolve actual outcome, spread, timeout, or scenario-selection failures; increase samples when only confidence ambiguity remains.
 5. Promote the normalized catalog only after all automated gates pass and human review accepts the evidence.
 
-That fresh generator-7 run completed and failed its then-current certification with 27 issues. Subsequent contract and generator iterations culminated in generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492`, which passes smoke and fixed-seed 100-sample certification with zero issues. See [`world-tower-contract-v3-campaign-review.md`](world-tower-contract-v3-campaign-review.md) for the progression and current decision.
+That fresh generator-7 run completed and failed its then-current certification with 27 issues. Subsequent iterations culminated in generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492`, which passed smoke and the obsolete contract-3 certification interpretation. Corrected contract 4 rejects all 15 floors because every floor contains at least one selected team at or above 20%; floor 1 also lacks a strict-band anchor. See [`world-tower-contract-v3-campaign-review.md`](world-tower-contract-v3-campaign-review.md) for the progression and current decision.
 
 ## Evidence reviewed
 
@@ -162,7 +162,7 @@ Persist per-seed matchup results, not only aggregate pair results. Counter, Coun
 
 ### Historical P2 — Population weights are policy assumptions
 
-The default shadow policy assigns 25% Meta, 40% Typical, 20% specialist, and 15% resilience. Budget, Weak, Counter, Countered, and adversarial teams share the Resilience bucket. These weights are not inferred from player telemetry and must be labelled assumptions in certification output.
+The reviewed schema-3 shadow policy assigned 25% Meta, 40% Typical, 20% specialist, and 15% resilience. Budget, Weak, Counter, Countered, and adversarial teams shared the Resilience bucket. Those weights were not inferred from player telemetry and remain historical policy assumptions rather than the current floor-specific Tower selection model.
 
 Run sensitivity variants before approval, for example:
 
@@ -175,7 +175,7 @@ A recommendation should not be trusted if a modest, plausible weight change move
 
 ## Historical candidate checklist
 
-| Gate | Current status |
+| Gate | Status in the reviewed schema-3 campaign |
 | --- | --- |
 | Campaign complete and reproducible | Pass |
 | Catalog structurally valid | Pass |
@@ -201,4 +201,4 @@ Role-aware discovery, production finalist qualification, candidate shadow calibr
 4. Address the remaining Meta allocation and per-seed direct-matchup provenance concerns if the new evidence shows they materially affect the selected portfolio.
 5. Approve and commit only a candidate whose full 100-sample report passes; archive 500–1,000-sample evidence for release.
 
-The historical campaign ran and failed its automated balance gates. The current generator-13 candidate passes those gates; current work is human catalog review and commit, headless CI enforcement, and a 500–1,000-sample release archive. Follow [`world-tower-contract-v3-campaign-review.md`](world-tower-contract-v3-campaign-review.md), not this historical launch checklist.
+The historical campaign ran and failed its automated balance gates. Generator 13 later passed only the obsolete contract-3 interpretation and is rejected by corrected contract 4. Generator 23 now creates a separate five-team portfolio for every exact floor and enforces the universal cap during selection. Campaign `c27ad5ef-8483-4b30-b413-62e92f0443a1` passes those automated gates and now requires human catalog review before promotion, CI enforcement, and release-scale evidence. Follow [`world-tower-contract-v3-campaign-review.md`](world-tower-contract-v3-campaign-review.md), not this historical launch checklist.

@@ -17,9 +17,9 @@ The Character Profile and World Tower calibration infrastructure is also impleme
 
 The first fingerprint-contract-3 campaign, `e6b1d2a5-3f66-4b19-85ff-cde9e53af32e`, completed all five fresh role-aware audits, production finalist qualification, catalog generation, smoke, and 100-sample certification on 2026-08-27. It retained 380,760 discovery battles and produced all 13 exact Tower scenarios under profile schema/generator 7. Its original certification-contract-1 report blocked promotion with 27 findings.
 
-Certification contract 3 reflects the current product rule: any one exact-context legal team may satisfy the profile gate when its estimated win rate is inclusively between 5% and 20%, regardless of family or population weight. A team below 5% or above 20% does not qualify. Confidence intervals, every team's outcome, the weighted population, and cross-team spread remain visible diagnostics but do not gate the profile decision. Re-evaluation campaign `72d8c717-7b5e-4b02-8dc9-eb59d5785094` found qualifying teams on floors 3, 9, 11, 12, and 15, nine canonical findings, and ten floors without an in-band team. Generator 8 then made exact-floor qualification a hard selection constraint by adding diagnostic-weight `CalibrationAnchor` expeditions. Campaign `08e3c381-ad73-41a1-8f07-7b099154a14d` reused all five audits and failed closed at floor 4 because its finalist pool could not supply a selectable in-band anchor. See [`world-tower-contract-v3-campaign-review.md`](world-tower-contract-v3-campaign-review.md).
+Certification contract 4 reflects the current product rule. Every selected exact-context legal team must have an estimated win rate strictly below 20%, regardless of family or population weight, and at least one selected team per floor must be strictly above 5% and below 20%. Exactly 5% does not satisfy the anchor requirement; exactly 20% fails the universal cap. Confidence intervals, the weighted population, and cross-team spread remain visible diagnostics but do not replace those point-estimate gates. Contract 3 used an obsolete inclusive any-one-team interpretation. See [`world-tower-contract-v3-campaign-review.md`](world-tower-contract-v3-campaign-review.md).
 
-Generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` is the current result. It uses a fixed certification seed manifest for both 100-sample anchor confirmation and campaign certification, counts final homogeneous families before adding anchors, and keeps a bounded direct-search reserve so profile allocation cannot consume the only apparent in-band source. It completed with 13 valid profile sets, passing smoke, all 15 floors profile-covered, all canonical confidence gates passing, zero certification issues, and `isPromotionReady: true`. This is candidate evidence only; the source-controlled approved catalog still requires human review and commit.
+Generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` is historical evidence only. Generator 23 applies contract 4 during selection, creates a distinct scenario for every floor, and combines exact-floor-qualified discovery finalists with a bounded direct-search reserve. Campaign `c27ad5ef-8483-4b30-b413-62e92f0443a1` passed with 15 sets, 75 teams, and zero certification issues. Every team was below 20%, every floor had at least one strict anchor, and the largest estimate was 19%. The source-controlled approved catalog remains unchanged pending explicit review and promotion.
 
 Therefore:
 
@@ -29,16 +29,16 @@ Therefore:
 
 ## World Tower campaign snapshot
 
-Status captured on 2026-08-27 after completing the passing generator-13 campaign:
+Status captured on 2026-08-27 after completing the first generator-23 contract-4 campaign:
 
 | Field | Current value |
 | --- | --- |
-| Current evidence campaign | `66368b83-07c1-4a7a-baf6-487c65fc8492` |
+| Current evidence campaign | `c27ad5ef-8483-4b30-b413-62e92f0443a1` |
 | First fingerprint-contract-3 campaign | `e6b1d2a5-3f66-4b19-85ff-cde9e53af32e`; historical generator-7 failure |
 | Contract-2 re-evaluation | `db118f5e-e968-4113-be25-3f17e6cdc53d` |
 | Contract-3 re-evaluation | `72d8c717-7b5e-4b02-8dc9-eb59d5785094` |
 | Generator-8 anchor campaign | `08e3c381-ad73-41a1-8f07-7b099154a14d`; failed at floor 4 |
-| Generator-13 passing campaign | `66368b83-07c1-4a7a-baf6-487c65fc8492`; passed with zero issues |
+| Generator-13 historical campaign | `66368b83-07c1-4a7a-baf6-487c65fc8492`; obsolete contract-3 pass, contract-4 fail on all floors |
 | Floor coverage | 1–15 |
 | Status | `Completed` |
 | Completed audits | 5 of 5; 380,760 battles preserved |
@@ -48,23 +48,24 @@ Status captured on 2026-08-27 after completing the passing generator-13 campaign
 | Screening battles | 10,000 per seed |
 | Seeds | 1,337; 2,027; 9,001 |
 | Finalist matchup sampling | 34 fights × 3 seeds = 102 direct battles |
-| Catalog generated | Yes; 13 profile sets and 142 teams |
+| Catalog generated | Yes; 15 profile sets and 75 teams |
 | Catalog valid | Yes; zero validation issues |
 | Historical campaign profile schema / generator | 7 / 7 |
-| Current implementation profile schema / generator | 7 / 13 |
-| Exact roster distribution | Five 5-slot, six 10-slot, two 15-slot scenarios |
-| Candidate smoke | Completed |
+| Current implementation profile schema / generator | 7 / 23 |
+| Exact roster distribution | Six 5-slot, seven 10-slot, and two 15-slot floor scenarios |
+| Candidate smoke | Passed |
+| Generator-23 certification | Passed; 15 of 15 floors, zero issues, maximum team estimate 19% |
 | Original contract-1 certification | Failed; 27 issues |
 | Contract-2 re-evaluation | Failed; 15 issues (11 canonical, 4 floors without a qualifying team) |
 | Contract-3 re-evaluation | Failed; 19 issues (9 canonical, 10 floors without a qualifying team) |
-| Promotion ready | Yes for generator-13 human review; approved source catalog unchanged |
+| Promotion ready | Yes as a candidate; source-control review is still required |
 | Campaign error | None |
 
 The earlier thirteen-audit campaign remains preserved separately as diagnostic and equipment-sensitivity evidence. Its 10/15-character simulations did not assign production party boundaries and must not be used as production profile evidence.
 
 Campaign state is persisted outside the repository at:
 
-`%LOCALAPPDATA%\LegendsLegacy\AdminDashboard\combat-audit-campaigns\66368b8307c14a7abaf6487c65fc8492\campaign.json`
+`%LOCALAPPDATA%\LegendsLegacy\AdminDashboard\combat-audit-campaigns\c27ad5ef84834b30b41362e92f0443a1\campaign.json`
 
 The earlier schema-2 and schema-3 campaigns remain preserved as historical diagnostic evidence. They must not be retried or promoted under the current role-aware discovery and Tower-qualification contract.
 
@@ -87,16 +88,15 @@ The earlier schema-2 and schema-3 campaigns remain preserved as historical diagn
 - Profiles use real equipment, Essences, canonical roles, snapshots, and production preparation.
 - Expanded portfolios include Meta, Typical, Weak-but-Legal, Budget, Counter/Countered, Equal-Power Adversarial, Role Specialist, and No-Essence control families.
 - Evidence gates include minimum battles, Wilson confidence width, cross-seed stability, direct matchup evidence, and Essence-overlap limits.
-- Exact scenario identity includes content, roster size, equipment tier, rarity, quality, equipment profile, and Essence count.
+- Exact Tower scenario identity includes floor number, content, roster size, equipment tier, rarity, quality, equipment profile, and Essence count.
 - World Tower discovery is constrained to five-character parties, while target expedition size and equipment are supplied separately.
 - Tower discovery assigns the canonical Guardian, Restorer, Striker, Striker, and Controller roles before simulation and gives each role its actual canonical discovery-equipment attributes and role tag.
 - Legacy non-role-aware audit signatures remain stable; role-aware signatures include role identity so saved candidates cannot be confused across the two contracts.
-- Before Tower profile selection, every eligible finalist is materialized at the exact scenario equipment rung and screened on every target floor with ten deterministic production-runtime samples. Apparent 5%–20% hits are requalified with 100 samples before selection.
-- Generator 13 builds a bounded partial reserve from up to 500 additional legal parties for every scenario, then checks coverage only after homogeneous core-family selection. Selected direct anchors keep PvP evidence neutral and carry only the exact-context Tower evidence they actually earned. Every calibration anchor records overlap without making ordinary portfolio diversity a prerequisite for the any-one-team rule.
+- Before Tower profile selection, every eligible finalist is materialized at the exact floor equipment rung and qualified through deterministic production-runtime samples. Selected teams carry 100-sample certification-manifest evidence.
+- Generator 23 combines legal qualified finalists with a bounded reserve of up to 500 additional parties, reserves strict anchor coverage first, and fills the remaining four CalibrationTeam slots only from teams below the cap. All teams, including the No-Essence control, remain subject to the absolute below-20% gate.
 - Qualification evidence records exact outcomes, timeout rate, duration, floor/team identity, seed-manifest provenance, cooldown policy, and production-runtime usage in each selected party.
-- Meta/Budget prioritize worst-floor and average Tower performance; Typical targets the scenario success band; Weak-but-Legal uses the weakest Tower-qualified candidate. PvP discovery score is secondary when Tower evidence exists.
 - Five-, ten-, and fifteen-slot generated expeditions carry one, two, and three explicit party records, and party numbers survive catalog reconstruction and runtime creation.
-- Expanded World Tower scenarios generate ten deterministic expedition profiles, including Meta/Typical and role-specialist mixtures. Each party retains independent statistical evidence; composed expeditions do not claim unobserved team-level audit results.
+- Expanded World Tower scenarios generate five deterministic expedition profiles: four exact-floor CalibrationTeams and one No-Essence control. Historical PvP family labels remain available to other profile modes but are not used to justify Tower legality.
 - Catalog validation detects stale content, invalid loadouts, version drift, Power Rating drift, preparation drift, incomplete controls, and duplicate identities.
 - Generated catalogs are review artifacts; the Admin Dashboard does not silently overwrite source-controlled approved content.
 
@@ -107,7 +107,7 @@ The earlier schema-2 and schema-3 campaigns remain preserved as historical diagn
 - The profile shadow runner compares approved profile populations with canonical cohorts without changing recommendations.
 - Exact roster-size and scenario matching fail closed; smaller or differently equipped teams are not extrapolated.
 - Certification uses one fixed common deterministic seed manifest for canonical cohorts, profile teams, anchor confirmation, and repeated campaigns; campaign IDs do not alter the measured cohort.
-- Certification checks minimum samples, Wilson 95% intervals and monotonicity for canonical cohorts, the fixed 5%–20% point-estimate band for individual profile teams, timeout rates, production-runtime evidence, and exact scenario coverage. Profile confidence width, weighting, and spread are diagnostic.
+- Certification checks minimum samples, Wilson 95% intervals and monotonicity for canonical cohorts, an absolute strict-below-20% point-estimate cap for every selected profile team, at least one strict `>5%` and `<20%` anchor per floor, timeout rates, production-runtime evidence, and exact scenario coverage. Profile confidence width, weighting, and spread are diagnostic.
 - Certification artifacts include deterministic fingerprints and versions for the catalog, inputs, seed manifest, preparation, rating, combat rules, equipment, roster, generator, runtime, architecture, and build configuration.
 - The Admin-only audit campaign can run the five prerequisite party audits sequentially, persist evidence, recover after interruption, materialize every exact floor scenario, generate the Expanded catalog, and validate it.
 - Current campaigns fingerprint complete Essence definitions, every canonical role discovery/materialization build, exact Tower definitions, guardian combat definitions, native abilities, Essence loot mappings, region scaling, and the qualification contract. They reject stale retry/resume attempts, reuse only compatible artifacts, and automatically run candidate smoke plus certification.
@@ -125,13 +125,13 @@ The approved catalog at [`LL/src/API/API.LL/Data/combat/combat-character-profile
 }
 ```
 
-This empty catalog is deliberate. It prevents unfinished or unreviewed audit results from becoming official calibration inputs. Approved-catalog World Tower runs therefore still report coverage gaps; the separate in-memory candidate path has passed for generator-13 and remains pending human promotion.
+This empty catalog is deliberate. It prevents unfinished or unreviewed audit results from becoming official calibration inputs. Approved-catalog World Tower runs therefore still report coverage gaps; the latest in-memory generator-13 candidate is rejected by corrected contract 4 and is not pending promotion.
 
 ## Confidence by content type
 
 | Content | Current calibration state | Current confidence | Main missing proof |
 | --- | --- | --- | --- |
-| World Tower | High-fidelity canonical production calibration plus implemented profile shadow/certification tooling | Medium | Approved profiles and passing 100/500–1,000-sample certification |
+| World Tower | High-fidelity canonical production calibration plus a passing 100-sample candidate certification | Medium-high for the candidate | Human promotion into the approved catalog, CI enforcement, and 500–1,000-sample release certification |
 | Raid | Authored recommendations and a high-fidelity roster-specific Battle Plan preview | Low for static recommendations | Production calibration of every wing objective and full Raid outcome |
 | Dungeon | Representative synthetic progression diagnostics | Not established for a displayed recommendation | Production-path recommendation runner and explicit success contract |
 | Idle | Representative synthetic progression diagnostics | Not established for a displayed recommendation | Production-path recommendation runner and explicit success contract |
@@ -142,17 +142,17 @@ This empty catalog is deliberate. It prevents unfinished or unreviewed audit res
 
 ## What is still missing
 
-### 1. Review and promote the passing World Tower candidate
+### 1. Review and promote the World Tower candidate
 
-The automated pull-request-scale evidence now passes. Review the generator-13 catalog families and exact loadouts, export the normalized candidate, and commit it through ordinary source control only if the human review accepts it. After approval, archive a 500–1,000-sample release certification report using the same fixed manifest.
+Generator-23 campaign `c27ad5ef-8483-4b30-b413-62e92f0443a1` is the zero-issue corrected-contract candidate. Review its 15 floor-specific sets, 75 selected teams, exact-context evidence, and machine-readable certification report. If accepted, export the normalized catalog and commit it through the normal source-control review path. The Admin workflow does not modify the approved catalog automatically.
 
-### 2. Run and approve World Tower certification
+### 2. Archive release-scale World Tower certification
 
-After the catalog is committed:
+After the catalog is reviewed and committed:
 
-- Run the certification suite with at least 100 samples per canonical cohort and profile team for pull-request evidence.
+- Preserve the passing 100-sample campaign report as the pull-request-scale evidence.
 - Require every floor to have exact scenario coverage and a passing result.
-- Require at least one team per floor to satisfy the inclusive 5%–20% point-estimate, sample-count, timeout, and production-runtime contract; preserve confidence intervals and the other team outcomes as diagnostics.
+- Require every selected team per floor to have a point estimate strictly below 20%, and at least one team per floor to be strictly above 5% and below 20%, while satisfying the sample-count, timeout, and production-runtime contract; preserve confidence intervals and population summaries as diagnostics.
 - Run 500–1,000 samples for release certification.
 - Archive the machine-readable certification artifact with the build/content fingerprints that produced it.
 
@@ -246,7 +246,7 @@ A player-facing recommended power value should be considered release-grade only 
 3. Below, recommended, and stronger cohorts exist for every authored recommendation.
 4. The recommendation has a documented outcome contract.
 5. Approved profiles represent strong, typical, specialist, imperfect, and adversarial legal builds.
-6. Exact scenario coverage, canonical confidence and monotonicity, and the fixed 5%–20% any-one-team profile gate pass; all profile confidence intervals, population outcomes, and spread are retained diagnostically.
+6. Exact scenario coverage, canonical confidence and monotonicity, the universal strict-below-20% profile cap, and the at-least-one strict `>5%` and `<20%` anchor gate pass; all profile confidence intervals, population outcomes, and spread are retained diagnostically.
 7. Pull-request certification uses at least 100 samples and release certification uses 500–1,000.
 8. Complete version and content provenance is recorded.
 9. Unapproved calibration exceptions fail CI.
@@ -254,7 +254,7 @@ A player-facing recommended power value should be considered release-grade only 
 
 ## Recommended execution order
 
-1. Review and commit the passing generator-13 World Tower profile catalog.
+1. Review and explicitly promote the contract-4-compliant generator-23 floor-specific profile catalog.
 2. Add the headless CI certification gate.
 3. Run and archive 500–1,000-sample release certification.
 4. Complete displayed readiness Power Rating parity with the exact activity snapshot.
@@ -267,4 +267,4 @@ A player-facing recommended power value should be considered release-grade only 
 
 The shared combat architecture and World Tower certification machinery are in place. What is missing is primarily approved evidence, automated enforcement, activity-specific rating parity, cross-content production calibration, and real-world validation.
 
-Generator-13 pull-request-scale evidence now passes all automated World Tower gates. Cross-team divergence and profile confidence width remain diagnostic, and final promotion remains a human source-control decision. The next actions are catalog review/commit, a headless CI gate, and a 500–1,000-sample release archive—not further floor tuning under the current 100-sample contract.
+Generator-13 evidence does not pass the corrected World Tower contract. Generator 23 now enforces the absolute cap during floor-specific selection, and campaign `c27ad5ef-8483-4b30-b413-62e92f0443a1` passes it. Cross-team spread and profile confidence width remain diagnostic. The next actions are catalog review and promotion, CI enforcement, and release-scale evidence.

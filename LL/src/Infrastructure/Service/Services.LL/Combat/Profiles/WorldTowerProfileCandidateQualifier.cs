@@ -53,7 +53,8 @@ public sealed class WorldTowerProfileCandidateQualifier(
     IWorldTowerCombatRuntimeFactory runtimeFactory,
     ICombatEngineExecutor combatEngine) : IWorldTowerProfileCandidateQualifier
 {
-    public const int ContractVersion = 4;
+    public const int ContractVersion = 10;
+    public const int CalibrationPortfolioTeamCount = 4;
     private const int PlaybackCheckpointIntervalTicks = 10;
     private const int AnchorCandidatePoolSize = 500;
     private const int AnchorQualificationBatchSize = 20;
@@ -237,8 +238,9 @@ public sealed class WorldTowerProfileCandidateQualifier(
         ArgumentNullException.ThrowIfNull(floorNumbers);
         ArgumentNullException.ThrowIfNull(excludedSignatures);
 
-        var remainingFloors = floorNumbers.Distinct().Order().ToHashSet();
-        if (remainingFloors.Count == 0)
+        var requiredFloors = floorNumbers.Distinct().Order().ToArray();
+        var uncoveredFloors = requiredFloors.ToHashSet();
+        if (requiredFloors.Length == 0)
         {
             return new WorldTowerCalibrationAnchorSearchResult(
                 [],
@@ -257,7 +259,9 @@ public sealed class WorldTowerProfileCandidateQualifier(
             StringComparer.Ordinal);
         var rejectedSignatures = new HashSet<string>(StringComparer.Ordinal);
 
-        for (var offset = 0; offset < candidates.Length && remainingFloors.Count > 0;
+        for (var offset = 0;
+             offset < candidates.Length
+             && (selected.Count < CalibrationPortfolioTeamCount || uncoveredFloors.Count > 0);
              offset += AnchorQualificationBatchSize)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -269,33 +273,37 @@ public sealed class WorldTowerProfileCandidateQualifier(
                 baseRandomSeed,
                 cancellationToken);
 
-            while (remainingFloors.Count > 0)
+            var matches = batch
+                .Where(candidate => !rejectedSignatures.Contains(candidate.Signature))
+                .Select(candidate => new
+                {
+                    Candidate = candidate,
+                    Evidence = evidence.GetValueOrDefault(candidate.Signature) ?? [],
+                })
+                .Select(candidate => new
+                {
+                    candidate.Candidate,
+                    candidate.Evidence,
+                    Floors = candidate.Evidence
+                        .Where(item => requiredFloors.Contains(item.FloorNumber)
+                                       && WorldTowerProfileTargetContract.Contains(item.WinRate))
+                        .Select(item => item.FloorNumber)
+                        .Distinct()
+                        .Order()
+                        .ToArray()
+                })
+                .Where(candidate => requiredFloors.All(floorNumber =>
+                    candidate.Evidence.Any(item => item.FloorNumber == floorNumber
+                                                   && WorldTowerProfileTargetContract.IsBelowMaximum(item.WinRate))))
+                .OrderByDescending(candidate => candidate.Floors.Count(uncoveredFloors.Contains))
+                .ThenBy(candidate => candidate.Floors.Length == 0
+                    ? double.MaxValue
+                    : TargetDistance(candidate.Evidence, candidate.Floors))
+                .ThenBy(candidate => candidate.Candidate.Signature, StringComparer.Ordinal)
+                .ToArray();
+            foreach (var match in matches)
             {
-                var match = batch
-                    .Where(candidate => !rejectedSignatures.Contains(candidate.Signature))
-                    .Select(candidate => new
-                    {
-                        Candidate = candidate,
-                        Evidence = evidence.GetValueOrDefault(candidate.Signature) ?? [],
-                    })
-                    .Select(candidate => new
-                    {
-                        candidate.Candidate,
-                        candidate.Evidence,
-                        Floors = candidate.Evidence
-                            .Where(item => remainingFloors.Contains(item.FloorNumber)
-                                           && WorldTowerProfileTargetContract.Contains(item.WinRate))
-                            .Select(item => item.FloorNumber)
-                            .Distinct()
-                            .Order()
-                            .ToArray()
-                    })
-                    .Where(candidate => candidate.Floors.Length > 0)
-                    .OrderByDescending(candidate => candidate.Floors.Length)
-                    .ThenBy(candidate => TargetDistance(candidate.Evidence, candidate.Floors))
-                    .ThenBy(candidate => candidate.Candidate.Signature, StringComparer.Ordinal)
-                    .FirstOrDefault();
-                if (match is null)
+                if (selected.Count >= CalibrationPortfolioTeamCount && uncoveredFloors.Count == 0)
                     break;
 
                 var confirmed = await QualifyAsync(
@@ -306,22 +314,28 @@ public sealed class WorldTowerProfileCandidateQualifier(
                     cancellationToken);
                 var confirmedEvidence = confirmed[match.Candidate.Signature];
                 var confirmedFloors = confirmedEvidence
-                    .Where(item => remainingFloors.Contains(item.FloorNumber)
+                    .Where(item => requiredFloors.Contains(item.FloorNumber)
                                    && WorldTowerProfileTargetContract.Contains(item.WinRate))
                     .Select(item => item.FloorNumber)
                     .Distinct()
                     .Order()
                     .ToArray();
-                if (confirmedFloors.Length == 0)
+                var allFloorsBelowMaximum = requiredFloors.All(floorNumber =>
+                    confirmedEvidence.Any(item => item.FloorNumber == floorNumber
+                                                  && WorldTowerProfileTargetContract.IsBelowMaximum(item.WinRate)));
+                if (!allFloorsBelowMaximum)
                 {
                     rejectedSignatures.Add(match.Candidate.Signature);
                     continue;
                 }
+                if (selected.Count >= CalibrationPortfolioTeamCount
+                    && !confirmedFloors.Any(uncoveredFloors.Contains))
+                    continue;
 
                 selected.Add(match.Candidate);
                 selectedEvidence.Add(match.Candidate.Signature, confirmedEvidence);
                 foreach (var floorNumber in confirmedFloors)
-                    remainingFloors.Remove(floorNumber);
+                    uncoveredFloors.Remove(floorNumber);
             }
         }
 

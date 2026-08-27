@@ -2,15 +2,24 @@
 
 ## Current decision
 
-Generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` is the current candidate. It passes catalog validation, production smoke, and fixed-seed 100-sample certification with zero issues, and is ready for human promotion review. The approved catalog and Tower recommendations remain unchanged until that review and a separate source-control commit.
+Generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` is **not eligible for promotion**. It passed catalog validation, production smoke, and the obsolete certification-contract-3 interpretation, but that interpretation did not enforce the intended universal 20% cap.
 
-The sections below retain the failed generator-7 evidence because it explains the certification-contract changes, anchor design, reserve search, and authored floor adjustments. Instructions not to export apply to those historical generator-7 catalogs, not to the passing generator-13 candidate.
+Certification contract 4 is the current rule:
+
+- Every selected exact-context legal team must have an estimated win rate strictly below 20%. One team at exactly 20% or above fails the floor, regardless of family or population weight.
+- At least one selected team per floor must have an estimated win rate strictly above 5% and strictly below 20%.
+- A team at exactly 5% does not provide the required anchor.
+- Wilson intervals, population weights, weighted means, and cross-team spread remain visible diagnostics; the two gates above use point estimates.
+
+Reassessment of the generator-13 report under this corrected rule fails all 15 floors. Generator 23 replaces the grouped, legacy-family portfolio with floor-specific CalibrationTeams and enforces the corrected rule before catalog emission. Campaign `c27ad5ef-8483-4b30-b413-62e92f0443a1` is the first complete passing candidate; the approved catalog and Tower recommendations remain unchanged until it is reviewed and explicitly promoted.
+
+The sections below retain the earlier evidence because it explains the certification-contract changes, anchor design, reserve search, and authored floor adjustments. Any previous statement that generator 13 was passing is historical contract-3 evidence only.
 
 ## Historical generator-7 decision
 
 Campaign `e6b1d2a5-3f66-4b19-85ff-cde9e53af32e` is the first complete role-aware, production-qualified World Tower campaign under fingerprint contract 3 and historical profile schema/generator 7/7. Later generators supersede its catalog selection behavior with target-aware anchors and bounded reserve search.
 
-The campaign proves that the current orchestration, discovery, qualification, catalog generation, smoke, and certification paths execute successfully. Its original certification-contract-1 report failed with 27 issues. Certification contract 2 removed population averages and profile spread as promotion gates. Certification contract 3 now applies the final clarified profile rule: any one team's estimated win rate must be inclusively between 5% and 20%. Campaign `72d8c717-7b5e-4b02-8dc9-eb59d5785094` re-evaluated the same discovery/catalog evidence and remains **not eligible for promotion** with nineteen issues.
+The campaign proves that the orchestration, discovery, qualification, catalog generation, smoke, and certification paths execute successfully. Its original certification-contract-1 report failed with 27 issues. Certification contract 2 removed population averages and profile spread as promotion gates. Certification contract 3 historically applied an inclusive any-one-team 5%–20% rule; contract 4 supersedes it with the universal strict-below-20% cap and strict `>5%` anchor described above. Campaign `72d8c717-7b5e-4b02-8dc9-eb59d5785094` re-evaluated the same discovery/catalog evidence under contract 3 and remained **not eligible for promotion** with nineteen issues.
 
 Do not export this historical catalog into the approved source-controlled catalog.
 
@@ -125,11 +134,11 @@ Campaign `72d8c717-7b5e-4b02-8dc9-eb59d5785094` reused all five compatible audit
 
 Floors 1, 2, 4–8, 10, 13, and 14 have no team whose estimate is between 5% and 20%. The report therefore contains ten `NoProfileTeamMeetsTarget` findings and nine `CanonicalConfidenceOutsideTarget` findings. Floors 3 and 9 pass both the profile and canonical gates; floors 11, 12, and 15 have a qualifying profile team but remain blocked by canonical evidence.
 
-## Generator-13 passing campaign
+## Generator-13 historical contract-3 result
 
-Campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` reused the five role-aware audits and completed on 2026-08-27 with profile schema/generator 7/13. It generated 13 valid profile sets and 142 teams, produced zero catalog issues, passed production smoke, and passed fixed-seed 100-sample certification with zero issues. The seed manifest is `world-tower-certification-v1`, shared by anchor confirmation and certification rather than derived from campaign identity.
+Campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` reused the five role-aware audits and completed on 2026-08-27 with profile schema/generator 7/13. It generated 13 valid profile sets and 142 teams, produced zero catalog issues, passed production smoke, and passed fixed-seed 100-sample certification under contract 3. The seed manifest is `world-tower-certification-v1`, shared by anchor confirmation and certification rather than derived from campaign identity. This result is not a pass under contract 4.
 
-The passing candidate includes these authored floor-definition adjustments from the pre-tuning baseline:
+The historical candidate includes these authored floor-definition adjustments from the pre-tuning baseline:
 
 | Floor | Adjustment |
 | ---: | --- |
@@ -162,4 +171,28 @@ These values are supported by the campaign evidence below. They are not an instr
 | 14 | 12% / 50% / 94% | Calibration Anchor | 19% |
 | 15 | 4% / 60% / 70% | Calibration Anchor | 18% |
 
-The candidate is now ready for human promotion review. Review and commit the normalized catalog separately; then add a headless CI gate and archive 500–1,000-sample release evidence. The campaign itself does not modify the approved catalog or Tower recommendations.
+### Contract-4 reassessment
+
+The archived 100-sample team results show why the contract correction is material:
+
+| Floor | Selected teams | Strict anchors (`>5%`, `<20%`) | Teams at or above 20% | Highest estimate | Highest family |
+| ---: | ---: | ---: | ---: | ---: | --- |
+| 1 | 11 | 0 | 9 | 100% | Countered |
+| 2 | 11 | 1 | 8 | 100% | Budget |
+| 3 | 11 | 1 | 8 | 100% | Equal-Power Adversarial |
+| 4 | 11 | 2 | 6 | 100% | Meta |
+| 5 | 11 | 1 | 9 | 100% | Equal-Power Adversarial |
+| 6 | 11 | 2 | 8 | 100% | Equal-Power Adversarial |
+| 7 | 11 | 1 | 7 | 100% | Meta |
+| 8 | 11 | 1 | 9 | 100% | Budget |
+| 9 | 11 | 1 | 7 | 100% | Budget |
+| 10 | 11 | 1 | 5 | 100% | Typical |
+| 11 | 11 | 3 | 7 | 100% | Mixed Role Specialist |
+| 12 | 10 | 1 | 4 | 91% | Meta |
+| 13 | 11 | 1 | 4 | 99% | Mixed Meta/Typical |
+| 14 | 11 | 1 | 4 | 99% | Mixed Meta/Typical |
+| 15 | 11 | 1 | 6 | 95% | Mixed Meta/Typical |
+
+All 15 floors in the generator-13 catalog fail because each has at least one selected team at or above 20%. Floor 1 additionally fails the anchor requirement: its former 5% result lies exactly on the now-exclusive lower boundary. That catalog must not be exported or promoted, and the campaign did not modify the approved catalog or Tower recommendations.
+
+Generator-23 campaign `c27ad5ef-8483-4b30-b413-62e92f0443a1` supplies the superseding evidence: 15 floor-specific sets, 75 teams, zero validation or certification issues, every team below 20%, and at least one strict-band anchor on every floor. Its maximum estimate is 19% on floor 11. It is ready for human catalog review, not automatic promotion.

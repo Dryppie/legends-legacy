@@ -218,31 +218,20 @@ public sealed class WorldTowerProductionCalibrationRunner(
                     recommended.Rung.Rarity.ToString(),
                     recommended.Rung.Quality.ToString(),
                     CanonicalPartyProfile.Balanced.ToString(),
-                    recommended.EssenceCount);
-                return new
-                {
-                    Floor = floor,
-                    Loadout = recommended,
-                    ScenarioId = scenarioId,
-                    AveragePower = AverageRating(floor.RequiredSlots, recommended)
-                };
-            })
-            .GroupBy(entry => entry.ScenarioId, StringComparer.Ordinal)
-            .Select(group =>
-            {
-                var first = group.First();
+                    recommended.EssenceCount,
+                    floor.FloorNumber);
                 return new WorldTowerProfileScenarioRequirement(
-                    group.Key,
-                    group.Select(entry => entry.Floor.FloorNumber).Order().ToArray(),
-                    first.Floor.RequiredSlots,
-                    first.Loadout.Rung.Tier,
-                    first.Loadout.Rung.Rarity.ToString(),
-                    first.Loadout.Rung.Quality.ToString(),
+                    scenarioId,
+                    [floor.FloorNumber],
+                    floor.RequiredSlots,
+                    recommended.Rung.Tier,
+                    recommended.Rung.Rarity.ToString(),
+                    recommended.Rung.Quality.ToString(),
                     CanonicalPartyProfile.Balanced.ToString(),
-                    first.Loadout.EssenceCount,
-                    first.AveragePower,
-                    group.Min(entry => entry.Floor.RecommendedPowerRating),
-                    group.Max(entry => entry.Floor.RecommendedPowerRating));
+                    recommended.EssenceCount,
+                    AverageRating(floor.RequiredSlots, recommended),
+                    floor.RecommendedPowerRating,
+                    floor.RecommendedPowerRating);
             })
             .OrderBy(requirement => requirement.FloorNumbers[0])
             .ToArray();

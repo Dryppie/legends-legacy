@@ -311,6 +311,7 @@ public sealed class WorldTowerProfileShadowCalibrationRunner(
             var matchingSets = profileSets
                 .Where(set => set.Teams.Count > 0)
                 .Where(set => set.Teams.All(team => team.Profiles.Count == floor.RequiredSlots))
+                .Where(set => (set.Scenario?.FloorNumbers ?? []).Contains(floor.FloorNumber))
                 .ToArray();
             var canonicalRecommended = canonical.Results.Single(result =>
                 result.FloorNumber == floor.FloorNumber
@@ -321,7 +322,7 @@ public sealed class WorldTowerProfileShadowCalibrationRunner(
                     "Warning",
                     "RosterSizeNotCovered",
                     floor.FloorNumber,
-                    $"Floor {floor.FloorNumber} requires {floor.RequiredSlots} profiles, but no approved profile set has that exact roster size."));
+                    $"Floor {floor.FloorNumber} requires an exact covering profile set with {floor.RequiredSlots} profiles, but none was found."));
                 summaries.Add(new WorldTowerProfileShadowFloorSummary(
                     floor.FloorNumber,
                     floor.RequiredSlots,

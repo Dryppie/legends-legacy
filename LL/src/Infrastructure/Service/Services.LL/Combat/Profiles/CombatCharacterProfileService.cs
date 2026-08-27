@@ -19,7 +19,7 @@ public sealed class CombatCharacterProfileService(
     IWorldTowerProfileCandidateQualifier? worldTowerQualifier = null) : ICombatCharacterProfileService
 {
     public const int SchemaVersion = 7;
-    public const int GeneratorVersion = 13;
+    public const int GeneratorVersion = 23;
 
     public async Task<CombatCharacterProfileGenerationReport> GenerateAsync(
         CombatCharacterProfileGenerationRequest request,
@@ -72,6 +72,19 @@ public sealed class CombatCharacterProfileService(
             directAnchorCandidates.AddRange(search.Candidates);
             foreach (var pair in search.ContextEvidence)
                 contextEvidence.Add(pair.Key, pair.Value);
+
+            if (normalized.PortfolioMode == ProfilePortfolioMode.Expanded)
+            {
+                var noEssence = CreateNoEssenceCombination(normalized.DiscoveryTeamSize, 0);
+                var noEssenceEvidence = await worldTowerQualifier.QualifyAsync(
+                    [noEssence],
+                    normalized.Scenario,
+                    WorldTowerProfileTargetContract.SelectionConfirmationSampleCount,
+                    normalized.RandomSeed,
+                    cancellationToken);
+                foreach (var pair in noEssenceEvidence)
+                    contextEvidence[pair.Key] = pair.Value;
+            }
         }
         var selected = SelectTeams(normalized, candidates, directAnchorCandidates, contextEvidence);
         var expeditions = ComposeExpeditions(normalized, selected);
@@ -297,6 +310,12 @@ public sealed class CombatCharacterProfileService(
                     new SelectedExpedition(party.Family, [party], party.SelectionReason)).ToArray();
             }
 
+            if (IsCalibrationOnlyPortfolio())
+            {
+                return selected.Select(party =>
+                    new SelectedExpedition(party.Family, [party], party.SelectionReason)).ToArray();
+            }
+
             var singlePartyPortfolio = new List<SelectedTeam>
             {
                 Single("Meta"),
@@ -320,6 +339,15 @@ public sealed class CombatCharacterProfileService(
                 party.Family,
                 Repeat(party),
                 $"Homogeneous {party.Family} expedition composed from {request.PartyCount} independently bounded parties."))
+                .ToArray();
+        }
+
+        if (IsCalibrationOnlyPortfolio())
+        {
+            return selected.Select(party => new SelectedExpedition(
+                    party.Family,
+                    Enumerable.Repeat(party, request.PartyCount).ToArray(),
+                    party.SelectionReason))
                 .ToArray();
         }
 
@@ -382,6 +410,9 @@ public sealed class CombatCharacterProfileService(
 
         IEnumerable<SelectedTeam> Many(string family) => selected.Where(party =>
             string.Equals(party.Family, family, StringComparison.OrdinalIgnoreCase));
+
+        bool IsCalibrationOnlyPortfolio() => selected.Count > 0
+            && selected.All(party => party.Family is "CalibrationAnchor" or "CalibrationTeam" or "NoEssence");
     }
 
     private NormalizedRequest Normalize(CombatCharacterProfileGenerationRequest request)
@@ -495,7 +526,10 @@ public sealed class CombatCharacterProfileService(
                 rung.Rarity.ToString(),
                 rung.Quality.ToString(),
                 auditEquipmentProfile.ToString(),
-                essenceCounts[0]),
+                essenceCounts[0],
+                contentType == CombatContentType.WorldTower && floorNumbers.Length == 1
+                    ? floorNumbers[0]
+                    : null),
             teamSize,
             rung.Tier,
             rung.Rarity.ToString(),
@@ -558,12 +592,32 @@ public sealed class CombatCharacterProfileService(
         IReadOnlyDictionary<string, IReadOnlyList<CombatCharacterProfileContextEvidence>> contextEvidence)
     {
 
+        var selectionCandidates = request.ParsedContentType == CombatContentType.WorldTower
+                                  && request.FloorNumbers.Count > 0
+            ? candidates.Where(IsBelowMaximumOnEveryFloor).ToArray()
+            : candidates;
         var selected = new List<SelectedTeam>();
         var usedSources = new HashSet<string>(StringComparer.Ordinal);
         var standardRoles = CanonicalCooperativeRosterCatalog.CreateParty(request.PartySize)
             .Select(slot => slot.Role)
             .ToArray();
-        var sortedScores = candidates.Select(CombinationScore).Order().ToArray();
+        if (request.PortfolioMode == ProfilePortfolioMode.Expanded
+            && request.ParsedContentType == CombatContentType.WorldTower
+            && request.FloorNumbers.Count > 0)
+        {
+            AddWorldTowerCalibrationPortfolio();
+            return FinalizeSelections();
+        }
+
+        if (selectionCandidates.Count < request.TeamsPerFamily * 3)
+        {
+            throw new InvalidOperationException(
+                $"Only {selectionCandidates.Count} finalist teams remain strictly below "
+                + $"{WorldTowerProfileTargetContract.MaximumWinRate:P0} on every target floor; at least "
+                + $"{request.TeamsPerFamily * 3} are required for the core profile families.");
+        }
+
+        var sortedScores = selectionCandidates.Select(CombinationScore).Order().ToArray();
         var median = sortedScores.Length % 2 == 0
             ? (sortedScores[sortedScores.Length / 2 - 1] + sortedScores[sortedScores.Length / 2]) / 2d
             : sortedScores[sortedScores.Length / 2];
@@ -578,7 +632,7 @@ public sealed class CombatCharacterProfileService(
         // the only evidence-qualified source needed by the expanded portfolio.
         AddFamily(
             "Budget",
-            candidates.Where(IsBudgetCombination)
+            selectionCandidates.Where(IsBudgetCombination)
                 .OrderByDescending(ContextMinimumScore)
                 .ThenByDescending(ContextAverageScore)
                 .ThenByDescending(CombinationScore)
@@ -586,8 +640,8 @@ public sealed class CombatCharacterProfileService(
             standardRoles,
             "Strongest stable finalist composed entirely of Common Essences.");
 
-        AddCounterFamilies(candidates, standardRoles, request, selected, usedSources);
-        AddEqualPowerAdversarialFamilies(candidates, standardRoles, request, selected, usedSources);
+        AddCounterFamilies(selectionCandidates, standardRoles, request, selected, usedSources);
+        AddEqualPowerAdversarialFamilies(selectionCandidates, standardRoles, request, selected, usedSources);
         AddCoreFamilies();
         AddWorldTowerCalibrationAnchors();
 
@@ -595,7 +649,7 @@ public sealed class CombatCharacterProfileService(
         {
             AddFamily(
                 $"RoleSpecialist.{role}",
-                candidates.OrderByDescending(CombinationScore)
+                selectionCandidates.OrderByDescending(CombinationScore)
                     .ThenBy(candidate => StableTieBreaker($"{role}:{candidate.Signature}", request.RandomSeed)),
                 Enumerable.Repeat(role, request.PartySize).ToArray(),
                 $"Stable Essence team materialized as an all-{role} specialist control.");
@@ -636,7 +690,7 @@ public sealed class CombatCharacterProfileService(
         {
             AddFamily(
                 "Meta",
-                candidates.OrderByDescending(ContextMinimumScore)
+                selectionCandidates.OrderByDescending(ContextMinimumScore)
                     .ThenByDescending(ContextAverageScore)
                     .ThenByDescending(CombinationScore)
                     .ThenBy(candidate => StableTieBreaker(candidate.Signature, request.RandomSeed)),
@@ -644,7 +698,7 @@ public sealed class CombatCharacterProfileService(
                 "Highest remaining evidence-qualified aggregate score within the portfolio constraints.");
             AddFamily(
                 "Typical",
-                candidates.OrderBy(candidate => Math.Abs(
+                selectionCandidates.OrderBy(candidate => Math.Abs(
                         ContextAverageScore(candidate) - TargetContextScore()))
                     .ThenBy(candidate => Math.Abs(CombinationScore(candidate) - median))
                     .ThenBy(candidate => StableTieBreaker(candidate.Signature, request.RandomSeed)),
@@ -652,11 +706,121 @@ public sealed class CombatCharacterProfileService(
                 "Closest remaining evidence-qualified result to the finalist median within the portfolio constraints.");
             AddFamily(
                 "WeakButLegal",
-                candidates.OrderBy(ContextAverageScore)
+                selectionCandidates.OrderBy(ContextAverageScore)
                     .ThenBy(CombinationScore)
                     .ThenBy(candidate => StableTieBreaker(candidate.Signature, request.RandomSeed)),
                 standardRoles,
                 "Lowest remaining evidence-qualified legal finalist score within the portfolio constraints.");
+        }
+
+        void AddWorldTowerCalibrationPortfolio()
+        {
+            // Every discovery finalist has already been qualified against this exact scenario above.
+            // Keep those legal teams in the calibration pool and use the direct search as a supplement;
+            // otherwise a valid floor anchor can be discarded merely because it came from discovery.
+            var available = selectionCandidates
+                .Concat(directAnchorCandidates)
+                .DistinctBy(candidate => candidate.Signature, StringComparer.Ordinal)
+                .Where(IsBelowMaximumOnEveryFloor)
+                .OrderBy(candidate => ContextEvidenceFor(candidate).Average(evidence => Math.Abs(
+                    evidence.WinRate
+                    - (WorldTowerProfileTargetContract.MinimumWinRate
+                       + WorldTowerProfileTargetContract.MaximumWinRate) / 2d)))
+                .ThenBy(candidate => candidate.Signature, StringComparer.Ordinal)
+                .ToArray();
+            if (available.Length < WorldTowerProfileCandidateQualifier.CalibrationPortfolioTeamCount)
+            {
+                throw new InvalidOperationException(
+                    $"World Tower profile generation found only {available.Length} legal exact-context calibration "
+                    + $"teams that stay below {WorldTowerProfileTargetContract.MaximumWinRate:P0} on every target floor; "
+                    + $"{WorldTowerProfileCandidateQualifier.CalibrationPortfolioTeamCount} are required for floor(s) "
+                    + $"{string.Join(", ", request.FloorNumbers)}.");
+            }
+
+            var calibrationTeams = new List<AbilityBalanceCombinationResult>();
+            var uncoveredFloors = request.FloorNumbers.ToHashSet();
+            while (uncoveredFloors.Count > 0)
+            {
+                var anchor = available
+                    .Where(candidate => !calibrationTeams.Contains(candidate))
+                    .Select(candidate => new
+                    {
+                        Candidate = candidate,
+                        Floors = ContextEvidenceFor(candidate)
+                            .Where(evidence => uncoveredFloors.Contains(evidence.FloorNumber)
+                                               && WorldTowerProfileTargetContract.Contains(evidence.WinRate))
+                            .Select(evidence => evidence.FloorNumber)
+                            .Distinct()
+                            .ToArray()
+                    })
+                    .Where(candidate => candidate.Floors.Length > 0)
+                    .OrderByDescending(candidate => candidate.Floors.Length)
+                    .ThenBy(candidate => candidate.Candidate.Signature, StringComparer.Ordinal)
+                    .FirstOrDefault();
+                if (anchor is null)
+                {
+                    throw new InvalidOperationException(
+                        "World Tower calibration portfolio has no strict >5% and <20% team for floor(s) "
+                        + $"{string.Join(", ", uncoveredFloors.Order())}.");
+                }
+                calibrationTeams.Add(anchor.Candidate);
+                foreach (var floorNumber in anchor.Floors)
+                    uncoveredFloors.Remove(floorNumber);
+            }
+            calibrationTeams.AddRange(available
+                .Where(candidate => !calibrationTeams.Contains(candidate))
+                .Take(WorldTowerProfileCandidateQualifier.CalibrationPortfolioTeamCount - calibrationTeams.Count));
+
+            foreach (var calibrationTeam in calibrationTeams)
+            {
+                var evidence = ContextEvidenceFor(calibrationTeam);
+                var rates = evidence
+                    .OrderBy(evidence => evidence.FloorNumber)
+                    .Select(evidence => FormattableString.Invariant(
+                        $"floor {evidence.FloorNumber} ({evidence.WinRate * 100d:0}%)"));
+                var qualifyingFloors = evidence
+                    .Where(result => WorldTowerProfileTargetContract.Contains(result.WinRate))
+                    .Select(result => result.FloorNumber)
+                    .Order()
+                    .ToArray();
+                var anchorDescription = qualifyingFloors.Length == 0
+                    ? "It remains below the lower anchor boundary on every target floor."
+                    : $"It supplies the strict >5% and <20% anchor on floor(s) {string.Join(", ", qualifyingFloors)}.";
+                AddSelection(
+                    "CalibrationTeam",
+                    calibrationTeam,
+                    standardRoles,
+                    "Exact 100-sample production qualification selected this legal calibration team below the cap on every target floor: "
+                    + $"{string.Join(", ", rates)}. {anchorDescription}",
+                    false,
+                    null,
+                    null,
+                    selected,
+                    usedSources,
+                    request.MaximumEssenceOverlap,
+                    enforceDiversity: false,
+                    usesDirectContextEvidence: true);
+            }
+
+            var noEssence = CreateNoEssenceCombination(request.PartySize, 0);
+            if (!IsBelowMaximumOnEveryFloor(noEssence))
+            {
+                throw new InvalidOperationException(
+                    $"The exact-context NoEssence control did not remain strictly below "
+                    + $"{WorldTowerProfileTargetContract.MaximumWinRate:P0} on every target floor.");
+            }
+            AddSelection(
+                "NoEssence",
+                noEssence,
+                standardRoles,
+                "Synthetic legal control with canonical equipment and no equipped Essences.",
+                true,
+                null,
+                null,
+                selected,
+                usedSources,
+                request.MaximumEssenceOverlap,
+                enforceDiversity: false);
         }
 
         void AddWorldTowerCalibrationAnchors()
@@ -679,8 +843,9 @@ public sealed class CombatCharacterProfileService(
                 .ToHashSet();
             while (uncoveredFloors.Count > 0)
             {
-                var anchor = candidates.Concat(directAnchorCandidates)
+                var anchor = selectionCandidates.Concat(directAnchorCandidates)
                     .Where(candidate => !usedSources.Contains(candidate.Signature))
+                    .Where(IsBelowMaximumOnEveryFloor)
                     .Select(candidate => new
                     {
                         Candidate = candidate,
@@ -698,7 +863,7 @@ public sealed class CombatCharacterProfileService(
                     throw new InvalidOperationException(
                         "World Tower profile generation could not select a legal calibration team with an "
                         + FormattableString.Invariant(
-                            $"estimated win rate between {WorldTowerProfileTargetContract.MinimumWinRate * 100d:0}% and {WorldTowerProfileTargetContract.MaximumWinRate * 100d:0}% for floor(s) ")
+                            $"estimated win rate strictly above {WorldTowerProfileTargetContract.MinimumWinRate * 100d:0}% and below {WorldTowerProfileTargetContract.MaximumWinRate * 100d:0}% for floor(s) ")
                         + $"{string.Join(", ", uncoveredFloors.Order())}.");
                 }
 
@@ -712,7 +877,7 @@ public sealed class CombatCharacterProfileService(
                     "CalibrationAnchor",
                     anchor.Candidate,
                     standardRoles,
-                    "Exact production qualification selected this legal expedition as the 5%–20% calibration anchor for "
+                    "Exact production qualification selected this legal expedition as the >5% and <20% calibration anchor for "
                     + $"{string.Join(", ", rates)}.",
                     false,
                     null,
@@ -779,6 +944,21 @@ public sealed class CombatCharacterProfileService(
             ? median
             : request.FloorNumbers.Average(floorNumber => floorNumber <= 10 ? 0.90d : 0.55d);
 
+        bool IsBelowMaximumOnEveryFloor(AbilityBalanceCombinationResult candidate)
+        {
+            var evidence = ContextEvidenceFor(candidate);
+            return request.FloorNumbers.All(floorNumber => evidence.Any(result =>
+                result.FloorNumber == floorNumber
+                && result.SampleCount >= request.ContextQualificationSampleCount
+                && result.UsesProductionRuntime
+                && result.AbilitiesStartOnCooldown
+                && WorldTowerProfileTargetContract.IsBelowMaximum(result.WinRate)));
+        }
+
+        IReadOnlyList<CombatCharacterProfileContextEvidence> ContextEvidenceFor(
+            AbilityBalanceCombinationResult candidate) =>
+            contextEvidence.GetValueOrDefault(candidate.Signature) ?? [];
+
         void AddFamily(
             string family,
             IEnumerable<AbilityBalanceCombinationResult> ordered,
@@ -811,6 +991,7 @@ public sealed class CombatCharacterProfileService(
         "Countered" => 5,
         "EqualPowerAdversarial" => 6,
         "CalibrationAnchor" => 7,
+        "CalibrationTeam" => 7,
         "NoEssence" => 8,
         _ when family.StartsWith("RoleSpecialist.", StringComparison.OrdinalIgnoreCase) => 7,
         _ => 9
@@ -992,7 +1173,9 @@ public sealed class CombatCharacterProfileService(
         new(
             $"synthetic:no-essence:{teamSize}:{index}",
             "No Essence control",
-            Enumerable.Range(0, teamSize).Select(_ => new AbilityBalanceParticipantLoadout([])).ToArray(),
+            CanonicalCooperativeRosterCatalog.CreateParty(teamSize)
+                .Select(slot => new AbilityBalanceParticipantLoadout([], slot.Role.ToString()))
+                .ToArray(),
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     private static double NearestOverlap(

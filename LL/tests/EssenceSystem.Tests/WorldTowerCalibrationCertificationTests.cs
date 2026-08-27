@@ -29,7 +29,7 @@ public sealed class WorldTowerCalibrationCertificationTests
                 belowWinRate: 0d,
                 recommendedWinRate: 0.55d,
                 strongerWinRate: 1d,
-                profileWinRates: [0.10d, 0.20d]));
+                profileWinRates: [0.10d, 0.19d]));
 
         Assert.True(report.IsCertified);
         Assert.Equal(WorldTowerCalibrationCertificationStatus.Passed, report.Status);
@@ -37,6 +37,7 @@ public sealed class WorldTowerCalibrationCertificationTests
         var floor = Assert.Single(report.Floors);
         Assert.True(floor.IsCertified);
         Assert.Equal(2, floor.Profiles.QualifyingTeamCount);
+        Assert.True(floor.Profiles.AllTeamsBelowMaximum);
         Assert.All(floor.Profiles.Teams, team => Assert.True(team.Passed));
         Assert.NotEmpty(report.Provenance.InputFingerprint);
         Assert.Equal(
@@ -47,7 +48,7 @@ public sealed class WorldTowerCalibrationCertificationTests
     }
 
     [Fact]
-    public void One_qualifying_profile_is_enough_and_spread_is_diagnostic()
+    public void One_qualifying_profile_cannot_hide_a_team_at_or_above_the_maximum()
     {
         var report = WorldTowerCalibrationCertificationRunner.Evaluate(
             Options(),
@@ -58,13 +59,15 @@ public sealed class WorldTowerCalibrationCertificationTests
                 strongerWinRate: 1d,
                 profileWinRates: [0.10d, 0.95d]));
 
-        Assert.True(report.IsCertified);
-        Assert.Equal(WorldTowerCalibrationCertificationStatus.Passed, report.Status);
+        Assert.False(report.IsCertified);
+        Assert.Equal(WorldTowerCalibrationCertificationStatus.Failed, report.Status);
         var profiles = Assert.Single(report.Floors).Profiles;
         Assert.NotNull(profiles.WinRateSpread);
         Assert.Equal(0.85d, profiles.WinRateSpread.Value, 10);
         Assert.Equal(1, profiles.QualifyingTeamCount);
+        Assert.False(profiles.AllTeamsBelowMaximum);
         Assert.DoesNotContain(report.Issues, issue => issue.Code.Contains("Spread", StringComparison.Ordinal));
+        Assert.Contains(report.Issues, issue => issue.Code == "ProfileTeamAtOrAboveMaximum");
     }
 
     [Fact]
@@ -77,12 +80,14 @@ public sealed class WorldTowerCalibrationCertificationTests
                 belowWinRate: 0d,
                 recommendedWinRate: 0.55d,
                 strongerWinRate: 1d,
-                profileWinRates: [0.21d, 0.95d]));
+                profileWinRates: [0.10d, 0.21d]));
 
         Assert.False(report.IsCertified);
         Assert.Equal(WorldTowerCalibrationCertificationStatus.Failed, report.Status);
-        Assert.Equal(0, Assert.Single(report.Floors).Profiles.QualifyingTeamCount);
-        Assert.Contains(report.Issues, issue => issue.Code == "NoProfileTeamMeetsTarget");
+        var profiles = Assert.Single(report.Floors).Profiles;
+        Assert.Equal(1, profiles.QualifyingTeamCount);
+        Assert.False(profiles.AllTeamsBelowMaximum);
+        Assert.Contains(report.Issues, issue => issue.Code == "ProfileTeamAtOrAboveMaximum");
     }
 
     [Fact]
@@ -103,9 +108,9 @@ public sealed class WorldTowerCalibrationCertificationTests
     }
 
     [Theory]
-    [InlineData(0.05d)]
-    [InlineData(0.20d)]
-    public void Profile_target_boundaries_are_inclusive(double winRate)
+    [InlineData(0.05d, true)]
+    [InlineData(0.20d, false)]
+    public void Profile_target_boundaries_are_strict(double winRate, bool allTeamsBelowMaximum)
     {
         var report = WorldTowerCalibrationCertificationRunner.Evaluate(
             Options(),
@@ -116,10 +121,12 @@ public sealed class WorldTowerCalibrationCertificationTests
                 strongerWinRate: 1d,
                 profileWinRates: [winRate]));
 
-        Assert.True(report.IsCertified);
+        Assert.False(report.IsCertified);
         var team = Assert.Single(Assert.Single(report.Floors).Profiles.Teams);
-        Assert.True(team.EstimateWithinTarget);
-        Assert.True(team.Passed);
+        Assert.False(team.EstimateWithinTarget);
+        Assert.False(team.Passed);
+        Assert.Equal(allTeamsBelowMaximum, team.EstimateBelowMaximum);
+        Assert.Equal(allTeamsBelowMaximum, Assert.Single(report.Floors).Profiles.AllTeamsBelowMaximum);
     }
 
     [Fact]
@@ -130,7 +137,7 @@ public sealed class WorldTowerCalibrationCertificationTests
             belowWinRate: 0d,
             recommendedWinRate: 0.55d,
             strongerWinRate: 1d,
-            profileWinRates: [0.95d, 0.10d]);
+            profileWinRates: [0.04d, 0.10d]);
         shadow = shadow with
         {
             ProfileResults =
@@ -151,6 +158,36 @@ public sealed class WorldTowerCalibrationCertificationTests
         var profiles = Assert.Single(report.Floors).Profiles;
         var qualifying = Assert.Single(profiles.Teams, team => team.Passed);
         Assert.Equal("NoEssence", qualifying.Family);
+    }
+
+    [Fact]
+    public void Zero_weight_diagnostic_team_at_or_above_twenty_percent_fails_certification()
+    {
+        var shadow = Shadow(
+            sampleCount: 100,
+            belowWinRate: 0d,
+            recommendedWinRate: 0.55d,
+            strongerWinRate: 1d,
+            profileWinRates: [0.10d, 0.20d]);
+        shadow = shadow with
+        {
+            ProfileResults =
+            [
+                shadow.ProfileResults[0],
+                shadow.ProfileResults[1] with
+                {
+                    Family = "CalibrationAnchor",
+                    WeightBucket = WorldTowerProfileWeightBucket.Diagnostic,
+                    NormalizedPopulationWeight = 0d
+                }
+            ]
+        };
+
+        var report = WorldTowerCalibrationCertificationRunner.Evaluate(Options(), shadow);
+
+        Assert.False(report.IsCertified);
+        Assert.False(Assert.Single(report.Floors).Profiles.AllTeamsBelowMaximum);
+        Assert.Contains(report.Issues, issue => issue.Code == "ProfileTeamAtOrAboveMaximum");
     }
 
     [Fact]
@@ -244,7 +281,7 @@ public sealed class WorldTowerCalibrationCertificationTests
             11,
             "audit",
             "content",
-            "scenario.worldtower.team-10.tier-2.epic.fine.balanced.essences-7",
+            "scenario.worldtower.team-10.tier-2.epic.fine.balanced.essences-7.floor-11",
             3,
             3,
             1,
@@ -285,7 +322,7 @@ public sealed class WorldTowerCalibrationCertificationTests
                 10,
                 100,
                 "audit",
-                "scenario.worldtower.team-10.tier-2.epic.fine.balanced.essences-7",
+                "scenario.worldtower.team-10.tier-2.epic.fine.balanced.essences-7.floor-11",
                 100d,
                 profiles.Length,
                 0,

@@ -222,9 +222,17 @@ public sealed class JsonCombatCharacterProfileCatalogService(
         if (suppliedTeams.Any(team => team is null))
             issues.Add(Issue("Error", "TeamNull", $"{path}.teams", "Teams cannot contain null entries."));
         var teams = suppliedTeams.Where(team => team is not null).ToArray();
+        var isWorldTowerCalibrationPortfolio = contentType == CombatContentType.WorldTower
+            && teams.Any(team => IsDirectContextFamily(team.Family))
+            && teams.All(team => IsDirectContextFamily(team.Family)
+                               || string.Equals(
+                                   team.Family,
+                                   "NoEssence",
+                                   StringComparison.OrdinalIgnoreCase));
         var requiredFamilies = new[] { "Meta", "Typical", "WeakButLegal" };
         foreach (var family in requiredFamilies.Where(family =>
-                     teams.All(team => !string.Equals(team.Family, family, StringComparison.OrdinalIgnoreCase))))
+                     !isWorldTowerCalibrationPortfolio
+                     && teams.All(team => !string.Equals(team.Family, family, StringComparison.OrdinalIgnoreCase))))
         {
             issues.Add(Issue(
                 "Error",
@@ -265,7 +273,8 @@ public sealed class JsonCombatCharacterProfileCatalogService(
                     .. Enum.GetNames<CanonicalCooperativeRole>().Select(role => $"RoleSpecialist.{role}")
                 ];
             foreach (var family in expandedFamilies.Where(family =>
-                         teams.All(team => !string.Equals(team.Family, family, StringComparison.OrdinalIgnoreCase))))
+                         !isWorldTowerCalibrationPortfolio
+                         && teams.All(team => !string.Equals(team.Family, family, StringComparison.OrdinalIgnoreCase))))
             {
                 issues.Add(Issue(
                     "Error",
@@ -425,7 +434,10 @@ public sealed class JsonCombatCharacterProfileCatalogService(
             rarity.ToString(),
             quality.ToString(),
             auditProfile.ToString(),
-            scenario.EssencesPerParticipant);
+            scenario.EssencesPerParticipant,
+            contentType == CombatContentType.WorldTower && (scenario.FloorNumbers ?? []).Count == 1
+                ? scenario.FloorNumbers![0]
+                : null);
         if (!string.Equals(scenario.Id, expectedId, StringComparison.Ordinal))
         {
             issues.Add(Issue(
@@ -571,7 +583,7 @@ public sealed class JsonCombatCharacterProfileCatalogService(
                     "Synthetic controls cannot claim source battle outcomes."));
             }
         }
-        else if (IsDirectContextAnchor(team))
+        else if (IsDirectContextTeam(team))
         {
             if (team.SourceWins != 0
                 || team.SourceLosses != 0
@@ -667,7 +679,7 @@ public sealed class JsonCombatCharacterProfileCatalogService(
             if (team.NearestSelectedEssenceOverlap is null
                 || !double.IsFinite(team.NearestSelectedEssenceOverlap.Value)
                 || team.NearestSelectedEssenceOverlap is < 0d or > 1d
-                || (!string.Equals(team.Family, "CalibrationAnchor", StringComparison.OrdinalIgnoreCase)
+                || (!IsDirectContextFamily(team.Family)
                     && team.NearestSelectedEssenceOverlap > profileSet.MaximumEssenceOverlap))
             {
                 issues.Add(Issue(
@@ -750,12 +762,16 @@ public sealed class JsonCombatCharacterProfileCatalogService(
         }
     }
 
-    private static bool IsDirectContextAnchor(CombatCharacterProfileTeam team) =>
-        string.Equals(team.Family, "CalibrationAnchor", StringComparison.OrdinalIgnoreCase)
+    private static bool IsDirectContextTeam(CombatCharacterProfileTeam team) =>
+        IsDirectContextFamily(team.Family)
         && team.SourceBattles == 0
         && (team.Parties ?? []).Count == 1
         && team.Parties![0].Evidence is { SourceBattles: 0 }
         && (team.Parties[0].Evidence.ContextEvidence?.Count ?? 0) > 0;
+
+    private static bool IsDirectContextFamily(string family) =>
+        string.Equals(family, "CalibrationAnchor", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(family, "CalibrationTeam", StringComparison.OrdinalIgnoreCase);
 
     private void ValidateFamilySemantics(
         CombatCharacterProfileTeam team,
@@ -1190,13 +1206,14 @@ public sealed class JsonCombatCharacterProfileCatalogService(
             return;
         }
 
-        var isDirectContextAnchor = string.Equals(
-                                        evidence.Family,
-                                        "CalibrationAnchor",
-                                        StringComparison.OrdinalIgnoreCase)
-                                    && evidence.SourceBattles == 0;
-        if (isDirectContextAnchor)
+        var isDirectContextTeam = IsDirectContextFamily(evidence.Family)
+                                  && evidence.SourceBattles == 0;
+        if (isDirectContextTeam)
         {
+            var requiresAnchorResult = string.Equals(
+                evidence.Family,
+                "CalibrationAnchor",
+                StringComparison.OrdinalIgnoreCase);
             if (evidence.SourceWins != 0
                 || evidence.SourceLosses != 0
                 || evidence.SourceDraws != 0
@@ -1210,14 +1227,17 @@ public sealed class JsonCombatCharacterProfileCatalogService(
                 || evidence.AdversaryScore is not null
                 || evidence.AdversaryConfidenceLower95 is not null
                 || evidence.AdversaryConfidenceUpper95 is not null
-                || !contextEvidence.Any(context =>
-                    WorldTowerProfileTargetContract.Contains(context.WinRate)))
+                || requiresAnchorResult
+                && !contextEvidence.Any(context =>
+                    WorldTowerProfileTargetContract.Contains(context.WinRate))
+                || contextEvidence.Any(context =>
+                    !WorldTowerProfileTargetContract.IsBelowMaximum(context.WinRate)))
             {
                 issues.Add(Issue(
                     "Error",
-                    "PartyDirectContextAnchorEvidenceInvalid",
+                    "PartyDirectContextTeamEvidenceInvalid",
                     $"{path}.evidence",
-                    "A direct Tower calibration anchor requires neutral PvP fields and at least one exact-context 5%–20% result."));
+                    "A direct Tower calibration team requires neutral PvP fields and no exact-context estimate at or above 20%; an anchor family also requires at least one strict >5% and <20% result."));
             }
             if (!double.IsFinite(evidence.NearestSelectedEssenceOverlap)
                 || evidence.NearestSelectedEssenceOverlap is < 0d or > 1d)
@@ -1288,7 +1308,7 @@ public sealed class JsonCombatCharacterProfileCatalogService(
         }
         if (!double.IsFinite(evidence.NearestSelectedEssenceOverlap)
             || evidence.NearestSelectedEssenceOverlap is < 0d or > 1d
-            || (!string.Equals(evidence.Family, "CalibrationAnchor", StringComparison.OrdinalIgnoreCase)
+            || (!IsDirectContextFamily(evidence.Family)
                 && evidence.NearestSelectedEssenceOverlap > profileSet.MaximumEssenceOverlap))
         {
             issues.Add(Issue(

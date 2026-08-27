@@ -9,7 +9,7 @@ One click can:
 1. Capture separate discovery and Tower-qualification/materialization fingerprints.
 2. Discover Essence teams as real five-character parties with the canonical Guardian, Restorer, Striker, Striker, and Controller roles and role-specific equipment attributes.
 3. Reuse completed discovery audits only when their request and actual role-aware discovery-build fingerprint are unchanged.
-4. Screen each eligible finalist against the exact target Tower floors with a bounded ten-sample production-runtime pass, then confirm every apparent 5%–20% hit with 100 samples before choosing it as coverage.
+4. Screen each eligible finalist against the exact target Tower floors with a bounded ten-sample production-runtime pass, then confirm every apparent strict `>5%` and `<20%` hit with 100 samples before choosing it as coverage.
 5. Rebuild the 13 exact Tower profile scenarios when target equipment, Tower, guardian, or materialization inputs changed.
 6. Reuse an already validated profile catalog only when both discovery and qualification/materialization inputs are identical.
 7. Validate the candidate catalog in memory without modifying the approved source-controlled catalog.
@@ -60,12 +60,12 @@ Before profile families are selected, every evidence-eligible audit finalist rec
 - Materializes the finalist with the scenario's exact equipment tier, rarity, quality, roster size, party numbers, and canonical roles.
 - Uses the production snapshot preparation pipeline, World Tower runtime factory, guardian scaling, stagger rules, cooldown policy, and playback executor.
 - Runs ten deterministic samples from a persisted seed manifest.
-- Rechecks every apparent 5%–20% finalist result with 100 deterministic samples before it can satisfy a floor.
+- Rechecks every apparent strict `>5%` and `<20%` finalist result with 100 deterministic samples before it can satisfy a floor.
 - Records wins, losses, draws/timeouts, duration, runtime flags, and seed-manifest provenance in each selected party's catalog evidence.
 
-Generator 13 also builds a deterministic fallback reserve over as many as 500 additional legal five-character parties for every scenario. It screens those candidates in bounded batches, confirms apparent hits with 100 samples, and stores only exact-context Tower evidence for a reserve that is actually selected; it does not manufacture PvP audit statistics for a party that discovery never tested. The reserve may be partial because an audited finalist can still cover a floor. Final selection remains the fail-closed authority when neither the completed homogeneous portfolio nor the reserve contains a 5%–20% team.
+Generator 23 builds a deterministic fallback reserve over as many as 500 additional legal five-character parties for every exact floor. It combines that reserve with exact-floor-qualified discovery finalists, confirms selected teams with 100 samples, and stores only the Tower evidence actually earned. Final selection fails closed unless all four CalibrationTeams and the No-Essence control remain below 20% and at least one team is strictly above 5% and below 20%.
 
-Meta and Budget selection prioritize the best worst-floor and average Tower results. Typical selection targets the scenario's intended success band. Weak-but-Legal selects the lowest qualified result. PvP audit score remains a deterministic secondary signal. Role-specialist and no-Essence controls do not claim qualification earned by a differently composed party. Direct-search parties are eligible only for the diagnostic-weight `CalibrationAnchor` family. Their Essence overlap is recorded but does not gate the any-one-team outcome rule; every ordinary portfolio family still obeys the configured diversity limit.
+Generator 23 no longer assigns the historical Meta, Typical, Budget, specialist, counter, adversarial, or `CalibrationAnchor` families to exact-floor Tower teams. It reserves at least one strict-band candidate, then fills the four `CalibrationTeam` slots from candidates that pass the universal cap; PvP audit score is only a deterministic secondary signal. The No-Essence control is evaluated under the same below-20% cap and cannot satisfy the strict-band anchor requirement.
 
 Candidate shadow and certification accept a validated in-memory catalog and record `Candidate` plus the campaign identity in report provenance. They do not read or write the approved catalog.
 
@@ -76,15 +76,15 @@ Default campaign verification is:
 - Exact floors 1–15, exact roster sizes, and Expanded portfolios.
 - Shared deterministic seed manifests for canonical and profile cohorts.
 - One fixed certification seed manifest across campaigns; campaign identity remains provenance and no longer changes the sampled battles.
-- Canonical confidence and monotonicity gates, exact scenario coverage, and an any-one-team profile gate requiring an individual team's estimated win rate to be inclusively between 5% and 20% while satisfying the sample, timeout, and production-runtime contract. Per-team confidence intervals, population weighting, and cross-team spread remain diagnostic output.
+- Canonical confidence and monotonicity gates, exact scenario coverage, an absolute profile cap requiring every selected team's estimated win rate to be strictly below 20%, and an anchor requirement that at least one selected team per floor be strictly above 5% and below 20% while satisfying the sample, timeout, and production-runtime contract. Per-team confidence intervals, population weighting, and cross-team spread remain diagnostic output.
 
 A structurally completed campaign can still be promotion-blocked. `isPromotionReady` is true only when the catalog is valid, candidate smoke completed, certification completed, and certification passed.
 
 ## Expected runtime
 
-The expensive global search remains five role-aware five-character discovery audits. With the default 24 finalists and floors 1–15, initial preselection screening adds about `24 × 15 × 10 = 3,600` production Tower battles across the 13 scenario generations. Every apparent in-band result then receives 100-sample confirmation. Generator 13 also prepares a deterministic reserve for every scenario and may screen up to 500 additional legal parties per floor context at ten samples, or at most `500 × 15 × 10 = 75,000` reserve-screening battles across floors 1–15. Batched search stops when coverage is available, so normal work is lower; only apparent hits receive the 100-sample confirmation. The flow does not repeat the global PvP Essence audit for every floor.
+The expensive global search remains five role-aware five-character discovery audits. The 15 floor-specific generations reuse those audits, then qualify the default 24 finalists and a bounded deterministic reserve through exact production Tower combat. Batched search stops after seven below-cap teams and strict anchor coverage are confirmed. The flow does not repeat the global PvP Essence audit for every floor.
 
-After catalog generation, the default Expanded portfolio has ten core teams per exact scenario plus as many as two diagnostic `CalibrationAnchor` teams. Smoke uses ten samples and certification uses 100 samples per selected team/cohort. These gates intentionally test the much smaller selected population rather than every discovered combination. The passing generator-13 catalog contains 142 teams across 13 exact scenario sets.
+After catalog generation, the default Expanded Tower portfolio has five teams per exact floor: four `CalibrationTeam` expeditions and one No-Essence control. Across 15 floors this is 75 teams. Smoke uses ten samples and certification uses 100 samples per selected team/cohort. These gates intentionally test the selected population rather than every discovered combination. The historical generator-13 catalog contains 142 teams across 13 grouped scenario sets and is not promotable under contract 4.
 
 ## Stored artifacts
 
@@ -110,8 +110,10 @@ The evidence export includes every artifact. Reused audits identify their source
 7. Export the certified candidate only when the dashboard reports **Ready for human promotion review**.
 8. Commit the reviewed JSON through normal source control. No database or deployment action is performed by this tool.
 
-Fingerprint-contract-v2 and older campaigns remain historical evidence. Because role-aware discovery and Tower-context qualification changed the evidence meaning, the first run under fingerprint contract v3 must regenerate discovery and build a new catalog.
+Fingerprint-contract-v2 and older campaigns remain historical evidence. Fingerprint contract 3 permits reuse only when the discovery and target-materialization dependencies still match; otherwise the campaign regenerates the affected audits or catalog. The current generator-23 pass reused five compatible role-aware discovery audits and a newly materialized floor-specific catalog.
 
-## Last verified passing campaign
+## Last completed campaign and corrected-contract status
 
-Campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` completed on 2026-08-27 with profile schema/generator 7/13. It reused five compatible role-aware audits containing 380,760 discovery battles, generated 13 valid scenario sets and 142 teams, passed production smoke, and passed fixed-seed 100-sample certification with zero issues. Every floor had at least one exact-context legal team with an inclusive 5%–20% estimated win rate, all canonical confidence gates passed, and `isPromotionReady` was true. The approved catalog remains unchanged pending human review and source-control commit.
+Campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` remains historical generator-13 evidence and is rejected by contract 4. Generator 23 replaces grouped equipment scenarios with 15 floor-specific scenarios; the approved catalog remains unchanged until the passing candidate is explicitly reviewed and promoted.
+
+Generator-23 campaign `c27ad5ef-8483-4b30-b413-62e92f0443a1` is the first corrected-contract pass. It reused five discovery audits and the generator-23 catalog from campaign `0e79fe0c-f179-41f9-a58e-fa0def6d7962`, retained 15 valid sets and 75 teams, passed smoke, and passed 100-sample certification with zero issues. It is promotion-ready; promotion remains an explicit source-control review step.

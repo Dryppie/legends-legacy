@@ -287,16 +287,17 @@
           </div>
 
           <div *ngIf="certification.floors.length" class="mt-4 overflow-auto rounded border border-light_gray/30">
-            <div class="grid min-w-[86rem] grid-cols-[5rem_7rem_8rem_9rem_1fr_9rem_11rem_9rem_9rem] border-b border-light_gray/40 bg-black/30 px-4 py-2 text-xs font-semibold uppercase text-light_gray">
-              <div>Floor</div><div>Decision</div><div>Scenario</div><div>Monotonic</div><div>Canonical 95% Intervals</div><div>Qualifying</div><div>Weighted 95%</div><div>Spread</div><div>Weighted Timeout</div>
+            <div class="grid min-w-[94rem] grid-cols-[5rem_7rem_8rem_9rem_1fr_9rem_9rem_11rem_9rem_9rem] border-b border-light_gray/40 bg-black/30 px-4 py-2 text-xs font-semibold uppercase text-light_gray">
+              <div>Floor</div><div>Decision</div><div>Scenario</div><div>Monotonic</div><div>Canonical 95% Intervals</div><div>Qualifying</div><div>All &lt;20%</div><div>Weighted 95%</div><div>Spread</div><div>Weighted Timeout</div>
             </div>
-            <div *ngFor="let floor of certification.floors" class="grid min-w-[86rem] grid-cols-[5rem_7rem_8rem_9rem_1fr_9rem_11rem_9rem_9rem] border-b border-light_gray/20 px-4 py-3 text-sm">
+            <div *ngFor="let floor of certification.floors" class="grid min-w-[94rem] grid-cols-[5rem_7rem_8rem_9rem_1fr_9rem_9rem_11rem_9rem_9rem] border-b border-light_gray/20 px-4 py-3 text-sm">
               <div class="font-semibold text-white">{{ floor.floorNumber }}</div>
               <div [ngClass]="floor.isCertified ? 'text-emerald-200' : 'text-red-200'">{{ floor.isCertified ? 'Pass' : 'Fail' }}</div>
               <div [ngClass]="floor.scenarioMatchesProductionRequirement ? 'text-emerald-200' : 'text-red-200'" [title]="floor.selectedScenarioId || ''">{{ floor.scenarioMatchesProductionRequirement ? 'Exact' : 'Mismatch' }}</div>
               <div [ngClass]="floor.canonicalMonotonic ? 'text-emerald-200' : 'text-red-200'">{{ floor.canonicalMonotonic ? 'Pass' : 'Fail' }}</div>
               <div class="flex flex-wrap gap-2 text-xs text-light_gray"><span *ngFor="let cohort of floor.canonicalCohorts" [ngClass]="cohort.passed ? 'text-emerald-200' : 'text-red-200'">{{ cohort.cohort }} {{ formatPercent(cohort.confidence.lower95) }}–{{ formatPercent(cohort.confidence.upper95) }}</span></div>
               <div [ngClass]="floor.profiles.hasQualifyingTeam ? 'text-emerald-200' : 'text-red-200'">{{ floor.profiles.qualifyingTeamCount }} / {{ floor.profiles.teamCount }}</div>
+              <div [ngClass]="floor.profiles.allTeamsBelowMaximum ? 'text-emerald-200' : 'text-red-200'">{{ floor.profiles.allTeamsBelowMaximum ? 'Pass' : 'Fail' }}</div>
               <div class="text-light_gray">{{ floor.profiles.weightedConfidence ? formatPercent(floor.profiles.weightedConfidence.lower95) + '–' + formatPercent(floor.profiles.weightedConfidence.upper95) : '—' }}</div>
               <div class="text-light_gray">{{ formatOptionalPercent(floor.profiles.winRateSpread) }}</div>
               <div class="text-light_gray">{{ formatOptionalPercent(floor.profiles.weightedTimeoutRate) }}</div>

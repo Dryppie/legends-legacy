@@ -308,8 +308,8 @@ public sealed class CombatCharacterProfileServiceTests
         var qualifier = new StubWorldTowerProfileCandidateQualifier(new Dictionary<string, double>
         {
             ["party-meta"] = 0.10,
-            ["party-typical"] = 0.50,
-            ["party-weak"] = 1.00
+            ["party-typical"] = 0.15,
+            ["party-weak"] = 0.01
         });
         var generator = new CombatCharacterProfileService(
             services.Factory,
@@ -348,11 +348,11 @@ public sealed class CombatCharacterProfileServiceTests
             qualifier.SampleCount);
         Assert.Equal([1], qualifier.Scenario!.FloorNumbers);
         var meta = Assert.Single(report.Teams, team => team.Family == "Meta");
-        Assert.Equal("party-weak", meta.SourceSignature);
+        Assert.Equal("party-typical", meta.SourceSignature);
         var evidence = Assert.Single(Assert.Single(meta.Parties!).Evidence.ContextEvidence!);
         Assert.Equal(1, evidence.FloorNumber);
-        Assert.Equal(7, evidence.SampleCount);
-        Assert.Equal(1d, evidence.WinRate);
+        Assert.Equal(WorldTowerProfileTargetContract.SelectionConfirmationSampleCount, evidence.SampleCount);
+        Assert.Equal(0.15d, evidence.WinRate);
         Assert.True(evidence.UsesProductionRuntime);
         Assert.True(evidence.AbilitiesStartOnCooldown);
 
@@ -409,9 +409,9 @@ public sealed class CombatCharacterProfileServiceTests
             (signature, floorNumber) switch
             {
                 ("expanded-party-16", 8) => 0.10d,
-                ("expanded-party-17", 9) => 0.20d,
-                _ => 0.50d
-            });
+                ("expanded-party-17", 9) => 0.19d,
+                _ => 0d
+            }, (_, floorNumber) => floorNumber == 9 ? 0.19d : 0.10d);
         var generator = new CombatCharacterProfileService(
             services.Factory,
             materializer,
@@ -446,12 +446,12 @@ public sealed class CombatCharacterProfileServiceTests
 
         Assert.Equal(CombatCharacterProfileService.GeneratorVersion, report.GeneratorVersion);
         var anchors = report.Teams
-            .Where(team => team.Family == "CalibrationAnchor")
+            .Where(team => team.Family == "CalibrationTeam")
             .ToArray();
         Assert.All(anchors, anchor =>
         {
             Assert.True(anchor.IsComposedExpedition);
-            Assert.Contains("5%–20% calibration anchor", anchor.SelectionReason);
+            Assert.Contains("below the cap on every target floor", anchor.SelectionReason);
         });
         var qualifyingEvidence = report.Teams
             .SelectMany(team => team.Parties ?? [])
@@ -539,7 +539,7 @@ public sealed class CombatCharacterProfileServiceTests
                 ContextQualificationSampleCount: 10),
             CancellationToken.None));
 
-        Assert.Contains("between 5% and 20%", exception.Message);
+        Assert.Contains("no strict >5% and <20% team", exception.Message);
         Assert.Contains("floor(s) 8", exception.Message);
     }
 
@@ -595,9 +595,10 @@ public sealed class CombatCharacterProfileServiceTests
                 ContextQualificationSampleCount: 10),
             CancellationToken.None);
 
-        var anchor = Assert.Single(report.Teams, team => team.Family == "CalibrationAnchor");
-        Assert.True(anchor.IsComposedExpedition);
-        Assert.All(anchor.Parties!, party =>
+        var anchors = report.Teams.Where(team => team.Family == "CalibrationTeam").ToArray();
+        Assert.Equal(WorldTowerProfileCandidateQualifier.CalibrationPortfolioTeamCount, anchors.Length);
+        Assert.All(anchors, anchor => Assert.True(anchor.IsComposedExpedition));
+        Assert.All(anchors.SelectMany(anchor => anchor.Parties!), party =>
         {
             Assert.Equal(0, party.Evidence.SourceBattles);
             Assert.Null(party.Evidence.SeedScoreMinimum);
@@ -1472,51 +1473,53 @@ public sealed class CombatCharacterProfileServiceTests
                         StringComparer.Ordinal)));
             }
 
-            var source = _lastCandidates[^1];
-            var direct = source with
-            {
-                Signature = "tower-anchor:test-direct",
-                DisplayName = "Direct Tower test anchor",
-                Battles = 0,
-                Wins = 0,
-                Losses = 0,
-                Draws = 0,
-                WinRate = 0,
-                LossRate = 0,
-                DrawRate = 0,
-                SeedResults = []
-            };
             var confirmationSampleCount =
                 WorldTowerProfileTargetContract.SelectionConfirmationSampleCount;
-            var evidence = (scenario.FloorNumbers ?? [])
-                .Select(floorNumber =>
+            var directCandidates = Enumerable.Range(
+                    0,
+                    WorldTowerProfileCandidateQualifier.CalibrationPortfolioTeamCount)
+                .Select(index => _lastCandidates[index % _lastCandidates.Count] with
                 {
-                    var wins = (int)Math.Round(
-                        _directScoreFor(direct.Signature, floorNumber) * confirmationSampleCount);
-                    return new CombatCharacterProfileContextEvidence(
-                        scenario.Id,
-                        floorNumber,
-                        scenario.TeamSize,
-                        confirmationSampleCount,
-                        wins,
-                        confirmationSampleCount - wins,
-                        0,
-                        wins / (double)confirmationSampleCount,
-                        0,
-                        100,
-                        WorldTowerProfileTargetContract.CertificationSeedManifestId,
-                        new string('b', 64),
-                        true,
-                        true);
+                    Signature = $"tower-anchor:test-direct-{index}",
+                    DisplayName = $"Direct Tower test anchor {index + 1}",
+                    Battles = 0,
+                    Wins = 0,
+                    Losses = 0,
+                    Draws = 0,
+                    WinRate = 0,
+                    LossRate = 0,
+                    DrawRate = 0,
+                    SeedResults = []
                 })
                 .ToArray();
+            var evidenceByCandidate = directCandidates.ToDictionary(
+                direct => direct.Signature,
+                direct => (IReadOnlyList<CombatCharacterProfileContextEvidence>)(scenario.FloorNumbers ?? [])
+                    .Select(floorNumber =>
+                    {
+                        var wins = (int)Math.Round(
+                            _directScoreFor(direct.Signature, floorNumber) * confirmationSampleCount);
+                        return new CombatCharacterProfileContextEvidence(
+                            scenario.Id,
+                            floorNumber,
+                            scenario.TeamSize,
+                            confirmationSampleCount,
+                            wins,
+                            confirmationSampleCount - wins,
+                            0,
+                            wins / (double)confirmationSampleCount,
+                            0,
+                            100,
+                            WorldTowerProfileTargetContract.CertificationSeedManifestId,
+                            new string('b', 64),
+                            true,
+                            true);
+                    })
+                    .ToArray(),
+                StringComparer.Ordinal);
             return Task.FromResult(new WorldTowerCalibrationAnchorSearchResult(
-                [direct],
-                new Dictionary<string, IReadOnlyList<CombatCharacterProfileContextEvidence>>(
-                    StringComparer.Ordinal)
-                {
-                    [direct.Signature] = evidence
-                }));
+                directCandidates,
+                evidenceByCandidate));
         }
     }
 }
