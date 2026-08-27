@@ -19,7 +19,7 @@ public sealed class CombatCharacterProfileService(
     IWorldTowerProfileCandidateQualifier? worldTowerQualifier = null) : ICombatCharacterProfileService
 {
     public const int SchemaVersion = 7;
-    public const int GeneratorVersion = 7;
+    public const int GeneratorVersion = 13;
 
     public async Task<CombatCharacterProfileGenerationReport> GenerateAsync(
         CombatCharacterProfileGenerationRequest request,
@@ -27,21 +27,53 @@ public sealed class CombatCharacterProfileService(
     {
         var normalized = Normalize(request);
         var candidates = GetEligibleCandidates(normalized);
-        IReadOnlyDictionary<string, IReadOnlyList<CombatCharacterProfileContextEvidence>> contextEvidence =
+        var directAnchorCandidates = new List<AbilityBalanceCombinationResult>();
+        var contextEvidence =
             new Dictionary<string, IReadOnlyList<CombatCharacterProfileContextEvidence>>(StringComparer.Ordinal);
         if (normalized.ParsedContentType == CombatContentType.WorldTower
             && normalized.FloorNumbers.Count > 0)
         {
             if (worldTowerQualifier is null)
                 throw new InvalidOperationException("World Tower profile generation requires candidate qualification.");
-            contextEvidence = await worldTowerQualifier.QualifyAsync(
+            var finalistEvidence = await worldTowerQualifier.QualifyAsync(
                 candidates,
                 normalized.Scenario,
                 normalized.ContextQualificationSampleCount,
                 normalized.RandomSeed,
                 cancellationToken);
+            foreach (var pair in finalistEvidence)
+                contextEvidence.Add(pair.Key, pair.Value);
+
+            var targetCandidateSignatures = candidates
+                .Where(candidate => finalistEvidence.GetValueOrDefault(candidate.Signature)?.Any(evidence =>
+                    WorldTowerProfileTargetContract.Contains(evidence.WinRate)) == true)
+                .Select(candidate => candidate.Signature)
+                .ToHashSet(StringComparer.Ordinal);
+            if (targetCandidateSignatures.Count > 0)
+            {
+                var confirmedEvidence = await worldTowerQualifier.QualifyAsync(
+                    candidates.Where(candidate => targetCandidateSignatures.Contains(candidate.Signature)).ToArray(),
+                    normalized.Scenario,
+                    WorldTowerProfileTargetContract.SelectionConfirmationSampleCount,
+                    normalized.RandomSeed,
+                    cancellationToken);
+                foreach (var pair in confirmedEvidence)
+                    contextEvidence[pair.Key] = pair.Value;
+            }
+
+            var search = await worldTowerQualifier.SearchCalibrationAnchorsAsync(
+                normalized.Audit.EssenceResults,
+                normalized.Scenario,
+                normalized.FloorNumbers,
+                normalized.ContextQualificationSampleCount,
+                normalized.RandomSeed,
+                candidates.Select(candidate => candidate.Signature).ToHashSet(StringComparer.Ordinal),
+                cancellationToken);
+            directAnchorCandidates.AddRange(search.Candidates);
+            foreach (var pair in search.ContextEvidence)
+                contextEvidence.Add(pair.Key, pair.Value);
         }
-        var selected = SelectTeams(normalized, candidates, contextEvidence);
+        var selected = SelectTeams(normalized, candidates, directAnchorCandidates, contextEvidence);
         var expeditions = ComposeExpeditions(normalized, selected);
         var teams = new List<CombatCharacterProfileTeam>(expeditions.Count);
 
@@ -133,6 +165,7 @@ public sealed class CombatCharacterProfileService(
         var source = direct.Source;
         var evidence = CreatePartyEvidence(direct);
         var compositionSignature = $"composition:{expedition.Family}:{string.Join('|', sourceSignatures)}";
+        var claimsAuditedSource = !isComposed && !direct.UsesDirectContextEvidence;
 
         return new CombatCharacterProfileTeam(
             teamId,
@@ -141,24 +174,24 @@ public sealed class CombatCharacterProfileService(
             isComposed
                 ? string.Join(" + ", expedition.Parties.Select(party => party.Source.DisplayName))
                 : source.DisplayName,
-            isComposed ? 0 : source.Battles,
-            isComposed ? 0 : source.Wins,
-            isComposed ? 0 : source.Losses,
-            isComposed ? 0 : source.Draws,
-            isComposed ? 0d : evidence.SourceScore,
-            isComposed ? 0d : evidence.ConfidenceLower95,
-            isComposed ? 1d : evidence.ConfidenceUpper95,
+            claimsAuditedSource ? source.Battles : 0,
+            claimsAuditedSource ? source.Wins : 0,
+            claimsAuditedSource ? source.Losses : 0,
+            claimsAuditedSource ? source.Draws : 0,
+            claimsAuditedSource ? evidence.SourceScore : 0d,
+            claimsAuditedSource ? evidence.ConfidenceLower95 : 0d,
+            claimsAuditedSource ? evidence.ConfidenceUpper95 : 1d,
             profiles,
             expedition.SelectionReason,
             expedition.Parties.All(party => party.IsSyntheticControl),
-            isComposed ? null : direct.AdversarySourceSignature,
-            isComposed ? null : evidence.SeedScoreMinimum,
-            isComposed ? null : evidence.SeedScoreMaximum,
+            claimsAuditedSource ? direct.AdversarySourceSignature : null,
+            claimsAuditedSource ? evidence.SeedScoreMinimum : null,
+            claimsAuditedSource ? evidence.SeedScoreMaximum : null,
             isComposed ? null : direct.NearestSelectedEssenceOverlap,
-            isComposed ? null : direct.AdversaryEvidence?.Battles,
-            isComposed ? null : direct.AdversaryEvidence?.Score,
-            isComposed ? null : direct.AdversaryEvidence?.ConfidenceLower95,
-            isComposed ? null : direct.AdversaryEvidence?.ConfidenceUpper95,
+            claimsAuditedSource ? direct.AdversaryEvidence?.Battles : null,
+            claimsAuditedSource ? direct.AdversaryEvidence?.Score : null,
+            claimsAuditedSource ? direct.AdversaryEvidence?.ConfidenceLower95 : null,
+            claimsAuditedSource ? direct.AdversaryEvidence?.ConfidenceUpper95 : null,
             parties,
             isComposed);
     }
@@ -213,7 +246,7 @@ public sealed class CombatCharacterProfileService(
     private static CombatCharacterProfilePartyEvidence CreatePartyEvidence(SelectedTeam party)
     {
         var score = CombinationScore(party.Source);
-        var confidence = party.IsSyntheticControl
+        var confidence = party.IsSyntheticControl || party.UsesDirectContextEvidence
             ? (Lower: 0d, Upper: 1d)
             : WilsonInterval(score, party.Source.Battles);
         var seedScores = party.Source.SeedResults?
@@ -224,18 +257,18 @@ public sealed class CombatCharacterProfileService(
             party.Family,
             party.Source.Signature,
             party.Source.DisplayName,
-            party.Source.Battles,
-            party.Source.Wins,
-            party.Source.Losses,
-            party.Source.Draws,
-            score,
+            party.UsesDirectContextEvidence ? 0 : party.Source.Battles,
+            party.UsesDirectContextEvidence ? 0 : party.Source.Wins,
+            party.UsesDirectContextEvidence ? 0 : party.Source.Losses,
+            party.UsesDirectContextEvidence ? 0 : party.Source.Draws,
+            party.UsesDirectContextEvidence ? 0d : score,
             confidence.Lower,
             confidence.Upper,
             party.SelectionReason,
             party.IsSyntheticControl,
             party.AdversarySourceSignature,
-            seedScores.Length == 0 ? null : seedScores.Min(),
-            seedScores.Length == 0 ? null : seedScores.Max(),
+            party.UsesDirectContextEvidence || seedScores.Length == 0 ? null : seedScores.Min(),
+            party.UsesDirectContextEvidence || seedScores.Length == 0 ? null : seedScores.Max(),
             party.NearestSelectedEssenceOverlap,
             party.AdversaryEvidence?.Battles,
             party.AdversaryEvidence?.Score,
@@ -276,6 +309,7 @@ public sealed class CombatCharacterProfileService(
             singlePartyPortfolio.AddRange(Many("EqualPowerAdversarial").Take(2));
             singlePartyPortfolio.Add(Many("RoleSpecialist.Controller").First());
             singlePartyPortfolio.Add(Single("NoEssence"));
+            singlePartyPortfolio.AddRange(Many("CalibrationAnchor"));
             return singlePartyPortfolio.Select(party =>
                 new SelectedExpedition(party.Family, [party], party.SelectionReason)).ToArray();
         }
@@ -302,8 +336,8 @@ public sealed class CombatCharacterProfileService(
             .ToArray();
         var noEssence = Single("NoEssence");
 
-        return
-        [
+        var portfolio = new List<SelectedExpedition>
+        {
             Homogeneous("Meta", meta),
             Homogeneous("Typical", typical),
             Mixed("Mixed.MetaTypical", [meta, typical],
@@ -317,7 +351,13 @@ public sealed class CombatCharacterProfileService(
             Mixed("EqualPowerAdversarial", adversarial,
                 "Alternating equal-power adversarial party profiles preserves both audited sides of the matchup."),
             Homogeneous("NoEssence", noEssence)
-        ];
+        };
+        portfolio.AddRange(Many("CalibrationAnchor")
+            .Select(anchor => new SelectedExpedition(
+                "CalibrationAnchor",
+                Repeat(anchor),
+                anchor.SelectionReason)));
+        return portfolio;
 
         SelectedExpedition Homogeneous(string family, SelectedTeam party) => new(
             family,
@@ -514,6 +554,7 @@ public sealed class CombatCharacterProfileService(
     private IReadOnlyList<SelectedTeam> SelectTeams(
         NormalizedRequest request,
         IReadOnlyList<AbilityBalanceCombinationResult> candidates,
+        IReadOnlyList<AbilityBalanceCombinationResult> directAnchorCandidates,
         IReadOnlyDictionary<string, IReadOnlyList<CombatCharacterProfileContextEvidence>> contextEvidence)
     {
 
@@ -548,6 +589,7 @@ public sealed class CombatCharacterProfileService(
         AddCounterFamilies(candidates, standardRoles, request, selected, usedSources);
         AddEqualPowerAdversarialFamilies(candidates, standardRoles, request, selected, usedSources);
         AddCoreFamilies();
+        AddWorldTowerCalibrationAnchors();
 
         foreach (var role in Enum.GetValues<CanonicalCooperativeRole>())
         {
@@ -617,6 +659,111 @@ public sealed class CombatCharacterProfileService(
                 "Lowest remaining evidence-qualified legal finalist score within the portfolio constraints.");
         }
 
+        void AddWorldTowerCalibrationAnchors()
+        {
+            if (request.ParsedContentType != CombatContentType.WorldTower
+                || request.FloorNumbers.Count == 0)
+            {
+                return;
+            }
+
+            var coveredFloors = new HashSet<int>();
+            foreach (var selection in selected.Where(IsFinalHomogeneousExpedition))
+            {
+                foreach (var floorNumber in QualifiedFloors(selection.Source))
+                    coveredFloors.Add(floorNumber);
+            }
+
+            var uncoveredFloors = request.FloorNumbers
+                .Where(floorNumber => !coveredFloors.Contains(floorNumber))
+                .ToHashSet();
+            while (uncoveredFloors.Count > 0)
+            {
+                var anchor = candidates.Concat(directAnchorCandidates)
+                    .Where(candidate => !usedSources.Contains(candidate.Signature))
+                    .Select(candidate => new
+                    {
+                        Candidate = candidate,
+                        Floors = QualifiedFloors(candidate)
+                            .Where(uncoveredFloors.Contains)
+                            .ToArray()
+                    })
+                    .Where(candidate => candidate.Floors.Length > 0)
+                    .OrderByDescending(candidate => candidate.Floors.Length)
+                    .ThenBy(candidate => TargetDistance(candidate.Candidate, candidate.Floors))
+                    .ThenBy(candidate => StableTieBreaker(candidate.Candidate.Signature, request.RandomSeed))
+                    .FirstOrDefault();
+                if (anchor is null)
+                {
+                    throw new InvalidOperationException(
+                        "World Tower profile generation could not select a legal calibration team with an "
+                        + $"estimated win rate between {WorldTowerProfileTargetContract.MinimumWinRate:P0} and "
+                        + $"{WorldTowerProfileTargetContract.MaximumWinRate:P0} for floor(s) "
+                        + $"{string.Join(", ", uncoveredFloors.Order())}.");
+                }
+
+                var rates = EvidenceFor(anchor.Candidate)
+                    .Where(evidence => anchor.Floors.Contains(evidence.FloorNumber))
+                    .OrderBy(evidence => evidence.FloorNumber)
+                    .Select(evidence => $"floor {evidence.FloorNumber} ({evidence.WinRate:P0})");
+                var usesDirectContextEvidence = IsDirectAnchor(anchor.Candidate);
+                AddSelection(
+                    "CalibrationAnchor",
+                    anchor.Candidate,
+                    standardRoles,
+                    "Exact production qualification selected this legal expedition as the 5%–20% calibration anchor for "
+                    + $"{string.Join(", ", rates)}.",
+                    false,
+                    null,
+                    null,
+                    selected,
+                    usedSources,
+                    request.MaximumEssenceOverlap,
+                    enforceDiversity: false,
+                    usesDirectContextEvidence: usesDirectContextEvidence);
+                foreach (var floorNumber in anchor.Floors)
+                    uncoveredFloors.Remove(floorNumber);
+            }
+
+            bool IsFinalHomogeneousExpedition(SelectedTeam selection) =>
+                selection.Family is "Meta" or "Typical" or "WeakButLegal"
+                    or "Budget" or "Counter" or "Countered" or "CalibrationAnchor"
+                || request.PartyCount == 1
+                && string.Equals(
+                    selection.Family,
+                    "EqualPowerAdversarial",
+                    StringComparison.OrdinalIgnoreCase);
+
+            IReadOnlyList<int> QualifiedFloors(AbilityBalanceCombinationResult candidate) =>
+                EvidenceFor(candidate)
+                    .Where(evidence => evidence.SampleCount >= request.ContextQualificationSampleCount
+                        && evidence.UsesProductionRuntime
+                        && evidence.AbilitiesStartOnCooldown
+                        && WorldTowerProfileTargetContract.Contains(evidence.WinRate))
+                    .Select(evidence => evidence.FloorNumber)
+                    .Distinct()
+                    .ToArray();
+
+            IReadOnlyList<CombatCharacterProfileContextEvidence> EvidenceFor(
+                AbilityBalanceCombinationResult candidate) =>
+                contextEvidence.GetValueOrDefault(candidate.Signature) ?? [];
+
+            bool IsDirectAnchor(AbilityBalanceCombinationResult candidate) =>
+                directAnchorCandidates.Any(direct =>
+                    direct.Signature.Equals(candidate.Signature, StringComparison.Ordinal));
+
+            double TargetDistance(
+                AbilityBalanceCombinationResult candidate,
+                IReadOnlyCollection<int> floors)
+            {
+                var midpoint = (WorldTowerProfileTargetContract.MinimumWinRate
+                    + WorldTowerProfileTargetContract.MaximumWinRate) / 2d;
+                return EvidenceFor(candidate)
+                    .Where(evidence => floors.Contains(evidence.FloorNumber))
+                    .Average(evidence => Math.Abs(evidence.WinRate - midpoint));
+            }
+        }
+
         double ContextAverageScore(AbilityBalanceCombinationResult candidate) =>
             contextEvidence.TryGetValue(candidate.Signature, out var evidence) && evidence.Count > 0
                 ? evidence.Average(result => result.WinRate)
@@ -662,6 +809,7 @@ public sealed class CombatCharacterProfileService(
         "Counter" => 4,
         "Countered" => 5,
         "EqualPowerAdversarial" => 6,
+        "CalibrationAnchor" => 7,
         "NoEssence" => 8,
         _ when family.StartsWith("RoleSpecialist.", StringComparison.OrdinalIgnoreCase) => 7,
         _ => 9
@@ -768,13 +916,15 @@ public sealed class CombatCharacterProfileService(
         ICollection<SelectedTeam> selected,
         ISet<string> usedSources,
         double maximumEssenceOverlap,
-        bool enforceDiversity)
+        bool enforceDiversity,
+        bool usesDirectContextEvidence = false)
     {
         var nearestOverlap = NearestOverlap(source, selected);
         if (enforceDiversity && nearestOverlap > maximumEssenceOverlap)
             throw new InvalidOperationException($"Profile '{source.Signature}' exceeds the configured Essence-overlap limit.");
         selected.Add(new SelectedTeam(family, source, roles, reason, isSyntheticControl,
-            adversarySourceSignature, nearestOverlap, adversaryEvidence));
+            adversarySourceSignature, nearestOverlap, adversaryEvidence,
+            UsesDirectContextEvidence: usesDirectContextEvidence));
         usedSources.Add(source.Signature);
     }
 
@@ -913,7 +1063,8 @@ public sealed class CombatCharacterProfileService(
         string? AdversarySourceSignature,
         double NearestSelectedEssenceOverlap,
         MatchupEvidence? AdversaryEvidence,
-        IReadOnlyList<CombatCharacterProfileContextEvidence>? ContextEvidence = null);
+        IReadOnlyList<CombatCharacterProfileContextEvidence>? ContextEvidence = null,
+        bool UsesDirectContextEvidence = false);
 
     private sealed record SelectedExpedition(
         string Family,

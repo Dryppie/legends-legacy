@@ -346,7 +346,7 @@ Remaining limitations:
 - Calibration and finalist qualification load the same persisted guardian source used by production. Fingerprint contract 3 includes exact Tower definitions, guardian combat fields, native creature abilities, guardian Essence loot mappings, and region scaling so these changes invalidate stale profile reuse.
 - Preparation contribution bonuses are fixed at zero. This is a reasonable unprepared baseline, but the recommendation is not labelled with that assumption.
 - Early floors require at least 80% wins at recommendation while later floors require 40%–70%. The player-facing meaning of “recommended” therefore changes by floor.
-- Legacy smoke tests still use point estimates. The certification runner uses Wilson confidence bounds, common seeds, monotonic canonical checks, profile-spread limits, timeout limits, and exact scenario coverage.
+- Legacy smoke tests still use point estimates. The certification runner uses Wilson confidence bounds for canonical cohorts, common seeds, monotonic canonical checks, timeout limits, exact scenario coverage, and an any-one-team profile contract with a fixed inclusive 5%–20% point-estimate band. Profile confidence width, population weighting, and profile spread are diagnostic only.
 - Certification records rating, rules, preparation, equipment, roster, generator, runtime, build, seed, catalog, and content fingerprints. A headless CI/release policy that requires a current approved artifact is still missing.
 
 During this audit, the same World Tower calibration passed in Release but one below-recommended cohort produced 30% wins against a 20% ceiling in an existing Debug build. Release is the repository's required test configuration and passed repeatedly, but this demonstrates that ten-sample boundary assertions are sensitive enough that build/runtime provenance should be recorded and cross-configuration determinism should be investigated.
@@ -412,7 +412,7 @@ Recommended solution:
 
 One deterministic roster can validate that roster, not the player population represented by the same average rating.
 
-Recommended solution: sample multiple legal equipment rolls, weapon families, blueprints, equipment sets, Essence loadouts and ascension tiers, role compositions, and intra-party power distributions. Include adversarial equal-rating builds so the maximum win-rate spread at a given rating becomes a release gate.
+Recommended solution: sample multiple legal equipment rolls, weapon families, blueprints, equipment sets, Essence loadouts and ascension tiers, role compositions, and intra-party power distributions. Include adversarial equal-rating builds to expose rating ambiguity, but certify the profile requirement when any one exact-context legal team independently records a 5%–20% estimated win rate and meets the sample, timeout, and runtime contract.
 
 #### P1 — Calibration provenance is incomplete outside the World Tower certification path
 

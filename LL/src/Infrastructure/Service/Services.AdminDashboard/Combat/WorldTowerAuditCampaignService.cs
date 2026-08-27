@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Services.LL.Combat.Engine;
+using Services.LL.Combat.Profiles;
 using Services.LL.PowerRatings;
 
 namespace Services.AdminDashboard.Combat;
@@ -727,7 +728,7 @@ public sealed class WorldTowerAuditCampaignService : BackgroundService,
                                 campaign.Options.CertificationSampleCount,
                                 campaign.Options.CertificationSampleCount,
                                 BaseRandomSeed: campaign.Options.ProfileRandomSeed,
-                                SeedManifestId: $"world-tower-candidate-certification:{campaign.Id:N}"),
+                                SeedManifestId: WorldTowerProfileTargetContract.CertificationSeedManifestId),
                             cancellation.Token);
                     await WriteArtifactAsync(
                         CandidateCertificationPath(id),

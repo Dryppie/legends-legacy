@@ -30,12 +30,14 @@ The first implementation slice is complete:
 - Campaign defaults are 500 candidates, 10,000 screening battles per seed, 24 finalists, 34 finalist battles per pairing and seed, and 100 replacement-validation battles. With three seeds, every finalist matchup therefore contains 102 direct battles and satisfies the separate 100-matchup evidence gate.
 - The previous thirteen-audit campaign was cancelled after four completed audits. Its artifacts remain preserved as legacy diagnostic evidence, and its automatic monitor is paused.
 
-The mixed-expedition implementation is also complete. Profile schema and generator version 7 record audited evidence independently on every constituent party and mark multi-party teams as composed expeditions, preventing an assembled expedition from falsely claiming it was directly observed during discovery. Direct matchup evidence has a separate minimum sample requirement and a recorded Wilson 95% confidence interval. Every Expanded World Tower scenario generates exactly ten bounded profiles: Meta, Typical, Meta/Typical mix, role-specialist mix, Weak-but-Legal, Budget, Counter, Countered, Equal-Power Adversarial, and No-Essence diagnostic. Population weighting recognizes the two mixed families, and catalog validation rebuilds every character while independently validating each party's source, confidence, seed stability, diversity, adversary evidence, roles, ordered membership, and production Tower qualification.
+The mixed-expedition implementation is also complete. Profile schema/generator version 7/13 records audited evidence independently on every constituent party and marks multi-party teams as composed expeditions, preventing an assembled expedition from falsely claiming it was directly observed during discovery. Direct matchup evidence has a separate minimum sample requirement and a recorded Wilson 95% confidence interval. Every Expanded World Tower scenario retains ten bounded baseline profiles—Meta, Typical, Meta/Typical mix, role-specialist mix, Weak-but-Legal, Budget, Counter, Countered, Equal-Power Adversarial, and No-Essence diagnostic—and adds up to two exact-context `CalibrationAnchor` expeditions where the baseline constrained families do not already cover each scenario floor's 5%–20% band. Population weighting treats anchors as diagnostic, and catalog validation rebuilds every character while independently validating each party's source, confidence, seed stability, diversity, adversary evidence, roles, ordered membership, and production Tower qualification.
 
 The accuracy follow-up is now implemented as well:
 
 - All five discovery contexts use the canonical Guardian, Restorer, Striker, Striker, and Controller roles with role-specific discovery-equipment attributes instead of five identical balanced participants.
 - Each eligible finalist is qualified with ten deterministic production battles on every exact floor served by the scenario before profile families are selected.
+- Every apparent 5%–20% result is confirmed with 100 production battles before selection; a ten-sample false positive cannot become a calibration anchor.
+- Generator 13 deterministically builds a partial fallback reserve from up to 500 additional legal parties for every scenario, so an in-band finalist consumed by another final family cannot create a false coverage gap. It records neutral PvP fields plus exact Tower evidence for any selected direct-search anchor. Every calibration anchor records overlap but is not rejected by the ordinary portfolio-diversity limit because it exists solely to prove the any-one-team outcome rule.
 - Qualification materializes the exact target roster and equipment, preserves one/two/three party assignments, and uses the production Tower guardian, scaling, stagger, cooldown, runtime, and playback paths.
 - Selected parties persist exact floor outcomes and seed-manifest provenance; the catalog rejects incomplete, mathematically inconsistent, non-production, or malformed qualification evidence.
 - Fingerprint contract 3 invalidates reuse when discovery roles/builds, target equipment, Tower definitions, guardians, creature abilities, guardian Essence loot, region scaling, or the qualification contract changes.
@@ -44,7 +46,11 @@ The first five-audit campaign completed all 281,400 discovery battles but correc
 
 Replacement schema-3 campaign `e283b6e9-0463-497e-8ff3-3536ba1fd1b7` completed all five audits and 380,760 battles. Its first catalog pass found a numerical boundary defect at perfect 102–0 matchups: Wilson interval rounding produced an upper endpoint just below 1.0 and a reversed lower endpoint just above 0.0. Interval construction now guarantees that the observed score lies inside its interval. Retrying generated a structurally valid version-6 catalog with 13 profile sets and 130 teams. This remains historical evidence.
 
-The first schema-4 campaign, `6339d840-f00a-4630-a869-d5ad862a3bd1`, subsequently completed candidate smoke and 100-sample certification. Promotion was correctly blocked by 29 confidence and profile-spread findings. Investigation showed that the then-current five-person discovery still used identical balanced participant attributes and that finalist selection had no production-floor evidence. Those discrepancies are corrected by version 7 and fingerprint contract 3. No current-contract campaign has run yet, and the source-controlled approved catalog remains empty.
+The first schema-4 campaign, `6339d840-f00a-4630-a869-d5ad862a3bd1`, subsequently completed candidate smoke and 100-sample certification. Promotion was correctly blocked by 29 confidence and profile-spread findings. Investigation showed that the then-current five-person discovery still used identical balanced participant attributes and that finalist selection had no production-floor evidence. Those discrepancies are corrected by version 7 and fingerprint contract 3.
+
+Current-contract campaign `e6b1d2a5-3f66-4b19-85ff-cde9e53af32e` completed on 2026-08-27 with five fresh role-aware audits, exact-floor qualification, 13 valid profile sets, passing smoke, and failed 100-sample certification. Its 27 issues are now the current balance evidence; see [`world-tower-contract-v3-campaign-review.md`](world-tower-contract-v3-campaign-review.md). The source-controlled approved catalog remains empty.
+
+Generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` supersedes that result. It reused the five audits, rebuilt all context evidence under the fixed certification manifest, produced 13 valid sets, passed smoke, and passed 100-sample certification with zero issues. It is ready for human promotion review; the approved catalog remains unchanged until separately reviewed and committed.
 
 ## Confirmed production behavior
 
@@ -108,7 +114,7 @@ The approximate cost per completed audit is:
 
 The finalist stage is quadratic. One hundred finalists produce 4,950 distinct pairings before seeds and repeated battles are applied.
 
-The retired thirteen-context campaign therefore approached 3.37 million discovery battles. The current flow performs five discovery audits, then approximately 3,600 bounded production qualification battles with the default 24 finalists, 15 floors, and ten qualification samples.
+The retired thirteen-context campaign therefore approached 3.37 million discovery battles. The current flow performs five discovery audits, then approximately 3,600 initial production screening battles with the default 24 finalists, 15 floors, and ten samples. Apparent 5%–20% hits receive 100-sample confirmation, and an uncovered floor may invoke a bounded direct search over as many as 500 legal parties.
 
 ## Evidence for sharing Essence discovery
 
@@ -147,7 +153,7 @@ Discovery uses a declared reference equipment context. The source audit retains 
 
 ### Stage 2: Qualify and select a diversified party library
 
-For each Essence-slot count, the current flow qualifies every evidence-eligible finalist against all exact target floors with ten common deterministic samples, then selects ten bounded five-character party/expedition families. The library represents more than maximum observed PvP win rate.
+For each Essence-slot count, the current flow screens every evidence-eligible finalist against all exact target floors with ten common deterministic samples, confirms apparent in-band hits with 100 samples, builds a bounded direct-candidate reserve, selects the ten bounded baseline party/expedition families, and adds anchors only until every scenario floor has a confirmed 5%–20% final team. Generator 13 treats final selection—not preselection candidate existence—as the coverage authority. The library represents more than maximum observed PvP win rate.
 
 Recommended party families include:
 
@@ -240,8 +246,8 @@ Certification should continue to require:
 - Exact target equipment scenario.
 - Wilson 95% confidence intervals.
 - Below/recommended/stronger monotonicity.
-- Bounded equal-rating expedition spread.
-- Bounded timeout rate.
+- At least one exact-context expedition whose estimated win rate is inclusively between 5% and 20%, whose sample minimum is met, and whose timeout rate is bounded.
+- Diagnostic reporting of the weighted population, every family outcome, and equal-rating expedition spread without requiring all teams to perform similarly.
 - Complete content, rules, rating, preparation, generator, and seed provenance.
 
 ### Stage 6: Probe equipment sensitivity cheaply
@@ -391,11 +397,11 @@ The retired thirteen-context campaign's completed artifacts remain useful diagno
 
 They should not become the final approved World Tower profile source because the 10/15-person audit model does not reproduce production party-local allied targeting.
 
-That legacy campaign was cancelled after four completed audits; its artifacts were retained and its monitor was paused. The later schema-3 and pre-role-aware schema-4 campaigns are also historical. The required operational action now is a fresh fingerprint-contract-3 campaign, followed by review and source-controlled promotion only if certification passes.
+That legacy campaign was cancelled after four completed audits; its artifacts were retained and its monitor was paused. The later schema-3 and pre-role-aware schema-4 campaigns are also historical. The fresh fingerprint-contract-3 campaign is now complete and promotion-blocked by its certification evidence.
 
 ## Acceptance criteria and current status
 
-The architecture satisfies criteria 1–7 below. Criteria 8–11 still require a fresh current-contract evidence run:
+The current campaign satisfies criteria 1–9 and measured criterion 11. Criterion 10 remains blocked by balance failures:
 
 1. No World Tower Essence discovery audit contains more than five characters.
 2. Every currently required Essence count has one reusable, evidence-backed party library.
@@ -404,10 +410,10 @@ The architecture satisfies criteria 1–7 below. Criteria 8–11 still require a
 5. Production party numbers are preserved through materialization, validation, and execution.
 6. Allied effects cannot cross party boundaries in profile certification.
 7. All parties still interact correctly with the shared guardian, stagger, threat, and outcome.
-8. **Pending evidence:** every floor has five to ten diversified complete expedition profiles.
-9. **Pending evidence:** the complete catalog passes stale-content, legality, identity, preparation, Power Rating, context-qualification, and coverage validation.
-10. **Pending evidence:** the 100-sample certification passes before approval, and release evidence uses 500–1,000 samples.
-11. **Pending measurement:** a full role-aware discovery, qualification, and pull-request certification round completes within an operationally acceptable time budget.
+8. Every floor has ten diversified complete expedition profiles.
+9. The complete catalog passes stale-content, legality, identity, preparation, Power Rating, context-qualification, and coverage validation.
+10. **Blocked by balance:** the 100-sample certification must pass before approval, and release evidence must use 500–1,000 samples.
+11. A full role-aware discovery, qualification, and pull-request certification round completed successfully as one resumable campaign.
 
 ## Conclusion
 

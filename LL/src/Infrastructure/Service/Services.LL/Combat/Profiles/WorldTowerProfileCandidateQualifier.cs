@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Application.Interfaces.Services.LL.CombatProfiles;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
@@ -22,7 +24,20 @@ public interface IWorldTowerProfileCandidateQualifier
             int sampleCount,
             int baseRandomSeed,
             CancellationToken cancellationToken);
+
+    Task<WorldTowerCalibrationAnchorSearchResult> SearchCalibrationAnchorsAsync(
+        IReadOnlyList<AbilityBalanceEssenceResult> essenceResults,
+        CombatCharacterProfileScenario scenario,
+        IReadOnlyList<int> floorNumbers,
+        int sampleCount,
+        int baseRandomSeed,
+        IReadOnlySet<string> excludedSignatures,
+        CancellationToken cancellationToken);
 }
+
+public sealed record WorldTowerCalibrationAnchorSearchResult(
+    IReadOnlyList<AbilityBalanceCombinationResult> Candidates,
+    IReadOnlyDictionary<string, IReadOnlyList<CombatCharacterProfileContextEvidence>> ContextEvidence);
 
 /// <summary>
 /// Qualifies generic Essence finalists against the exact authored Tower floors through
@@ -32,13 +47,16 @@ public interface IWorldTowerProfileCandidateQualifier
 public sealed class WorldTowerProfileCandidateQualifier(
     CombatCharacterProfileMaterializer materializer,
     CanonicalEquipmentBuildFactory canonicalBuilds,
+    IEssenceDefinitionRepository essenceDefinitions,
     Application.Interfaces.Services.LL.WorldTower.IWorldTowerDefinitionProvider towerDefinitions,
     IEntityService entities,
     IWorldTowerCombatRuntimeFactory runtimeFactory,
     ICombatEngineExecutor combatEngine) : IWorldTowerProfileCandidateQualifier
 {
-    public const int ContractVersion = 1;
+    public const int ContractVersion = 4;
     private const int PlaybackCheckpointIntervalTicks = 10;
+    private const int AnchorCandidatePoolSize = 500;
+    private const int AnchorQualificationBatchSize = 20;
 
     public async Task<IReadOnlyDictionary<string, IReadOnlyList<CombatCharacterProfileContextEvidence>>>
         QualifyAsync(
@@ -86,7 +104,9 @@ public sealed class WorldTowerProfileCandidateQualifier(
         var manifests = floors.ToDictionary(
             floor => floor.FloorNumber,
             floor => WorldTowerCalibrationSeedManifest.Create(
-                $"world-tower-profile-qualification-v{ContractVersion}:{scenario.Id}:floor-{floor.FloorNumber}",
+                sampleCount == WorldTowerProfileTargetContract.SelectionConfirmationSampleCount
+                    ? WorldTowerProfileTargetContract.CertificationSeedManifestId
+                    : $"world-tower-profile-qualification-v{ContractVersion}:{scenario.Id}:floor-{floor.FloorNumber}",
                 baseRandomSeed,
                 sampleCount));
         var results = new Dictionary<string, IReadOnlyList<CombatCharacterProfileContextEvidence>>(
@@ -202,4 +222,207 @@ public sealed class WorldTowerProfileCandidateQualifier(
 
         return results;
     }
+
+    public async Task<WorldTowerCalibrationAnchorSearchResult> SearchCalibrationAnchorsAsync(
+        IReadOnlyList<AbilityBalanceEssenceResult> essenceResults,
+        CombatCharacterProfileScenario scenario,
+        IReadOnlyList<int> floorNumbers,
+        int sampleCount,
+        int baseRandomSeed,
+        IReadOnlySet<string> excludedSignatures,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(essenceResults);
+        ArgumentNullException.ThrowIfNull(scenario);
+        ArgumentNullException.ThrowIfNull(floorNumbers);
+        ArgumentNullException.ThrowIfNull(excludedSignatures);
+
+        var remainingFloors = floorNumbers.Distinct().Order().ToHashSet();
+        if (remainingFloors.Count == 0)
+        {
+            return new WorldTowerCalibrationAnchorSearchResult(
+                [],
+                new Dictionary<string, IReadOnlyList<CombatCharacterProfileContextEvidence>>(
+                    StringComparer.Ordinal));
+        }
+
+        var candidates = CreateAnchorCandidates(
+                essenceResults,
+                scenario,
+                baseRandomSeed)
+            .Where(candidate => !excludedSignatures.Contains(candidate.Signature))
+            .ToArray();
+        var selected = new List<AbilityBalanceCombinationResult>();
+        var selectedEvidence = new Dictionary<string, IReadOnlyList<CombatCharacterProfileContextEvidence>>(
+            StringComparer.Ordinal);
+        var rejectedSignatures = new HashSet<string>(StringComparer.Ordinal);
+
+        for (var offset = 0; offset < candidates.Length && remainingFloors.Count > 0;
+             offset += AnchorQualificationBatchSize)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var batch = candidates.Skip(offset).Take(AnchorQualificationBatchSize).ToArray();
+            var evidence = await QualifyAsync(
+                batch,
+                scenario,
+                sampleCount,
+                baseRandomSeed,
+                cancellationToken);
+
+            while (remainingFloors.Count > 0)
+            {
+                var match = batch
+                    .Where(candidate => !rejectedSignatures.Contains(candidate.Signature))
+                    .Select(candidate => new
+                    {
+                        Candidate = candidate,
+                        Evidence = evidence.GetValueOrDefault(candidate.Signature) ?? [],
+                    })
+                    .Select(candidate => new
+                    {
+                        candidate.Candidate,
+                        candidate.Evidence,
+                        Floors = candidate.Evidence
+                            .Where(item => remainingFloors.Contains(item.FloorNumber)
+                                           && WorldTowerProfileTargetContract.Contains(item.WinRate))
+                            .Select(item => item.FloorNumber)
+                            .Distinct()
+                            .Order()
+                            .ToArray()
+                    })
+                    .Where(candidate => candidate.Floors.Length > 0)
+                    .OrderByDescending(candidate => candidate.Floors.Length)
+                    .ThenBy(candidate => TargetDistance(candidate.Evidence, candidate.Floors))
+                    .ThenBy(candidate => candidate.Candidate.Signature, StringComparer.Ordinal)
+                    .FirstOrDefault();
+                if (match is null)
+                    break;
+
+                var confirmed = await QualifyAsync(
+                    [match.Candidate],
+                    scenario,
+                    WorldTowerProfileTargetContract.SelectionConfirmationSampleCount,
+                    baseRandomSeed,
+                    cancellationToken);
+                var confirmedEvidence = confirmed[match.Candidate.Signature];
+                var confirmedFloors = confirmedEvidence
+                    .Where(item => remainingFloors.Contains(item.FloorNumber)
+                                   && WorldTowerProfileTargetContract.Contains(item.WinRate))
+                    .Select(item => item.FloorNumber)
+                    .Distinct()
+                    .Order()
+                    .ToArray();
+                if (confirmedFloors.Length == 0)
+                {
+                    rejectedSignatures.Add(match.Candidate.Signature);
+                    continue;
+                }
+
+                selected.Add(match.Candidate);
+                selectedEvidence.Add(match.Candidate.Signature, confirmedEvidence);
+                foreach (var floorNumber in confirmedFloors)
+                    remainingFloors.Remove(floorNumber);
+            }
+        }
+
+        return new WorldTowerCalibrationAnchorSearchResult(selected, selectedEvidence);
+    }
+
+    private IReadOnlyList<AbilityBalanceCombinationResult> CreateAnchorCandidates(
+        IReadOnlyList<AbilityBalanceEssenceResult> essenceResults,
+        CombatCharacterProfileScenario scenario,
+        int baseRandomSeed)
+    {
+        var scores = essenceResults
+            .GroupBy(result => result.EssenceId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                group => group.Key,
+                group => group.First().AdjustedScoreDelta,
+                StringComparer.OrdinalIgnoreCase);
+        var families = essenceDefinitions.GetAll()
+            .Where(definition => !string.IsNullOrWhiteSpace(definition.Id)
+                                 && !string.IsNullOrWhiteSpace(definition.SourceMonsterId)
+                                 && !definition.Id.Equals("essence.training", StringComparison.OrdinalIgnoreCase))
+            .GroupBy(definition => definition.SourceMonsterId, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group
+                .OrderBy(definition => scores.GetValueOrDefault(definition.Id))
+                .ThenBy(definition => definition.Id, StringComparer.OrdinalIgnoreCase)
+                .ToArray())
+            .Where(group => group.Length > 0)
+            .OrderBy(group => group.Average(definition => scores.GetValueOrDefault(definition.Id)))
+            .ThenBy(group => group[0].SourceMonsterId, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        if (families.Length < scenario.EssencesPerParticipant)
+        {
+            throw new InvalidOperationException(
+                $"World Tower direct anchor search requires {scenario.EssencesPerParticipant} distinct Essence "
+                + $"sources per participant, but only {families.Length} are available.");
+        }
+
+        var roles = CanonicalCooperativeRosterCatalog.CreateParty(scenario.DiscoveryTeamSize)
+            .Select(slot => slot.Role.ToString())
+            .ToArray();
+        var candidates = new List<AbilityBalanceCombinationResult>(AnchorCandidatePoolSize);
+        var signatures = new HashSet<string>(StringComparer.Ordinal);
+        for (var candidateIndex = 0; candidateIndex < AnchorCandidatePoolSize; candidateIndex++)
+        {
+            var participants = roles.Select((role, participantIndex) =>
+            {
+                var seed = StableSeed(
+                    $"{ContractVersion}:{scenario.Id}:{baseRandomSeed}:{candidateIndex}:{participantIndex}");
+                var random = new Random(seed);
+                var bandSize = Math.Clamp(
+                    scenario.EssencesPerParticipant + candidateIndex / 25,
+                    scenario.EssencesPerParticipant,
+                    families.Length);
+                var eligibleFamilies = candidateIndex < 250
+                    ? families.Take(bandSize).ToArray()
+                    : families;
+                var selectedFamilies = eligibleFamilies
+                    .OrderBy(_ => random.Next())
+                    .Take(scenario.EssencesPerParticipant)
+                    .ToArray();
+                var ids = selectedFamilies
+                    .Select(family => family[random.Next(family.Length)].Id)
+                    .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+                return new AbilityBalanceParticipantLoadout(ids, role);
+            }).ToArray();
+            var canonical = string.Join('|', participants.Select(participant =>
+                $"{participant.Role}:{string.Join(',', participant.EssenceIds)}"));
+            var signature = $"tower-anchor:v{ContractVersion}:{Convert.ToHexString(
+                SHA256.HashData(Encoding.UTF8.GetBytes(canonical))).ToLowerInvariant()[..24]}";
+            if (!signatures.Add(signature))
+                continue;
+            candidates.Add(new AbilityBalanceCombinationResult(
+                signature,
+                $"Direct Tower anchor candidate {candidateIndex + 1}",
+                participants,
+                0,
+                0,
+                0,
+                0,
+                0d,
+                0d,
+                0d,
+                0d,
+                0d,
+                0d,
+                []));
+        }
+        return candidates;
+    }
+
+    private static double TargetDistance(
+        IReadOnlyList<CombatCharacterProfileContextEvidence> evidence,
+        IReadOnlyCollection<int> floors)
+    {
+        var midpoint = (WorldTowerProfileTargetContract.MinimumWinRate
+                        + WorldTowerProfileTargetContract.MaximumWinRate) / 2d;
+        return evidence.Where(item => floors.Contains(item.FloorNumber))
+            .Average(item => Math.Abs(item.WinRate - midpoint));
+    }
+
+    private static int StableSeed(string value) => BitConverter.ToInt32(
+        SHA256.HashData(Encoding.UTF8.GetBytes(value)));
 }

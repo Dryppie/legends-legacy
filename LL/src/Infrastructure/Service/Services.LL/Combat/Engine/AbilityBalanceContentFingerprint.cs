@@ -131,6 +131,7 @@ public static class AbilityBalanceContentFingerprint
             Combat = CreateCombatProjection(catalogProvider, essenceDefinitions),
             ProfileSchemaVersion = CombatCharacterProfileService.SchemaVersion,
             ProfileGeneratorVersion = CombatCharacterProfileService.GeneratorVersion,
+            ProfileTargetContractVersion = WorldTowerProfileTargetContract.Version,
             TowerQualificationContractVersion = WorldTowerProfileCandidateQualifier.ContractVersion,
             TowerQualificationSampleCount = 10,
             PowerRatingVersion = PowerRatingAlgorithm.Version,

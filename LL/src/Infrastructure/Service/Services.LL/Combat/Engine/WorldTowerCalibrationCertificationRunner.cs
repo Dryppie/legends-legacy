@@ -24,12 +24,11 @@ public sealed record WorldTowerCalibrationCertificationOptions(
     int SampleCount = 100,
     int MinimumSampleCount = 100,
     double MonotonicTolerance = 0.02d,
-    double MaximumProfileWinRateSpread = 0.25d,
     double MaximumTimeoutRate = 0.05d,
     bool RequireExpandedPortfolio = true,
     WorldTowerProfileWeightPolicy? WeightPolicy = null,
     int BaseRandomSeed = 1337,
-    string SeedManifestId = "world-tower-certification-v1");
+    string SeedManifestId = WorldTowerProfileTargetContract.CertificationSeedManifestId);
 
 public sealed record WorldTowerCalibrationConfidenceInterval(
     double Estimate,
@@ -46,17 +45,28 @@ public sealed record WorldTowerCalibrationCohortCertification(
     bool ConfidenceWithinTarget,
     bool Passed);
 
+public sealed record WorldTowerCalibrationProfileTeamCertification(
+    string TeamId,
+    string Family,
+    WorldTowerProfileWeightBucket WeightBucket,
+    WorldTowerCalibrationConfidenceInterval Confidence,
+    double TimeoutRate,
+    bool HasMinimumSamples,
+    bool EstimateWithinTarget,
+    bool TimeoutWithinLimit,
+    bool ProductionContractSatisfied,
+    bool Passed);
+
 public sealed record WorldTowerCalibrationPopulationCertification(
     double TargetMinimumWinRate,
     double TargetMaximumWinRate,
-    WorldTowerCalibrationConfidenceInterval? Confidence,
+    WorldTowerCalibrationConfidenceInterval? WeightedConfidence,
     int TeamCount,
+    int QualifyingTeamCount,
+    IReadOnlyList<WorldTowerCalibrationProfileTeamCertification> Teams,
     double? WinRateSpread,
-    double? TimeoutRate,
-    bool HasMinimumSamples,
-    bool ConfidenceWithinTarget,
-    bool SpreadWithinLimit,
-    bool TimeoutWithinLimit,
+    double? WeightedTimeoutRate,
+    bool HasQualifyingTeam,
     bool Passed);
 
 public sealed record WorldTowerCalibrationFloorCertification(
@@ -81,6 +91,7 @@ public sealed record WorldTowerCalibrationCertificationProvenance(
     string ProfileInputHash,
     string CatalogContentHash,
     int CatalogVersion,
+    int CertificationContractVersion,
     WorldTowerCalibrationSeedManifest? SeedManifest,
     int PreparationSchemaVersion,
     int PowerRatingAlgorithmVersion,
@@ -129,6 +140,8 @@ public sealed class WorldTowerCalibrationCertificationRunner(
     IWorldTowerProfileShadowCalibrationRunner shadowRunner)
     : IWorldTowerCalibrationCertificationRunner
 {
+    public const int ContractVersion = 3;
+    public const int ReportSchemaVersion = 3;
     private const double Z95 = 1.959963984540054d;
 
     public async Task<WorldTowerCalibrationCertificationReport> RunAsync(
@@ -302,7 +315,7 @@ public sealed class WorldTowerCalibrationCertificationRunner(
                 ? WorldTowerCalibrationCertificationStatus.Passed
                 : WorldTowerCalibrationCertificationStatus.Failed;
         return new WorldTowerCalibrationCertificationReport(
-            SchemaVersion: 1,
+            SchemaVersion: ReportSchemaVersion,
             status,
             certified,
             RecommendationsChanged: false,
@@ -378,92 +391,103 @@ public sealed class WorldTowerCalibrationCertificationRunner(
         ICollection<WorldTowerCalibrationCertificationIssue> issues,
         ref bool structuralFailure)
     {
-        var target = Target(floorNumber, WorldTowerCalibrationCohort.Recommended);
-        var weighted = results.Where(result => result.NormalizedPopulationWeight > 0d).ToArray();
-        if (weighted.Length == 0)
+        var target = (
+            Minimum: WorldTowerProfileTargetContract.MinimumWinRate,
+            Maximum: WorldTowerProfileTargetContract.MaximumWinRate);
+        if (results.Count == 0)
         {
             structuralFailure = true;
             issues.Add(new(
                 "Error",
                 "ProfilePopulationMissing",
                 floorNumber,
-                "No weighted approved profile teams were available."));
+                "No exact-context profile teams were available."));
             return new(
                 target.Minimum,
                 target.Maximum,
                 null,
                 0,
+                0,
+                [],
                 null,
                 null,
-                false,
-                false,
-                false,
                 false,
                 false);
         }
 
-        var totalWeight = weighted.Sum(result => result.NormalizedPopulationWeight);
-        var normalized = weighted.Select(result => (
-            Result: result,
-            Weight: result.NormalizedPopulationWeight / totalWeight)).ToArray();
-        var estimate = normalized.Sum(entry => entry.Weight * entry.Result.WinRate);
-        var effectiveSamples = 1d / normalized.Sum(entry =>
-            entry.Weight * entry.Weight / entry.Result.SampleCount);
-        var confidence = Wilson(estimate, effectiveSamples);
-        var spread = weighted.Max(result => result.WinRate) - weighted.Min(result => result.WinRate);
-        var timeout = normalized.Sum(entry => entry.Weight * entry.Result.TimeoutRate);
-        var samplesPass = weighted.All(result => result.SampleCount >= options.MinimumSampleCount);
-        var confidencePass = confidence.Lower95 >= target.Minimum
-            && confidence.Upper95 <= target.Maximum;
-        var spreadPass = spread <= options.MaximumProfileWinRateSpread;
-        var timeoutPass = timeout <= options.MaximumTimeoutRate;
-
-        if (!samplesPass)
+        var teamAssessments = results
+            .OrderBy(result => result.TeamId, StringComparer.Ordinal)
+            .Select(result =>
+            {
+                var confidence = Wilson(result.WinRate, result.SampleCount);
+                var samplesPass = result.SampleCount >= options.MinimumSampleCount;
+                var estimatePass = WorldTowerProfileTargetContract.Contains(result.WinRate);
+                var timeoutPass = result.TimeoutRate <= options.MaximumTimeoutRate;
+                var productionPass = result.UsesProductionRuntime && result.AbilitiesStartOnCooldown;
+                return new WorldTowerCalibrationProfileTeamCertification(
+                    result.TeamId,
+                    result.Family,
+                    result.WeightBucket,
+                    confidence,
+                    result.TimeoutRate,
+                    samplesPass,
+                    estimatePass,
+                    timeoutPass,
+                    productionPass,
+                    samplesPass && estimatePass && timeoutPass && productionPass);
+            })
+            .ToArray();
+        var qualifying = teamAssessments.Where(team => team.Passed).ToArray();
+        var anySamplesPass = teamAssessments.Any(team => team.HasMinimumSamples);
+        if (!anySamplesPass)
         {
             structuralFailure = true;
             issues.Add(new(
                 "Error",
                 "ProfileSampleCountInsufficient",
                 floorNumber,
-                $"Every weighted profile team requires at least {options.MinimumSampleCount} samples."));
+                $"At least one exact-context profile team requires {options.MinimumSampleCount} samples."));
         }
-        if (!confidencePass)
+        else if (qualifying.Length == 0)
         {
             issues.Add(new(
                 "Error",
-                "ProfileConfidenceOutsideTarget",
+                "NoProfileTeamMeetsTarget",
                 floorNumber,
-                $"Weighted profile 95% interval {confidence.Lower95:P1}–{confidence.Upper95:P1} is outside the required {target.Minimum:P0}–{target.Maximum:P0} band."));
+                $"None of the {teamAssessments.Length} exact-context profile teams independently satisfied the "
+                + $"{target.Minimum:P0}–{target.Maximum:P0} estimated win-rate target, "
+                + $"{options.MinimumSampleCount}-sample minimum, {options.MaximumTimeoutRate:P0} timeout limit, "
+                + "and production-runtime contract."));
         }
-        if (!spreadPass)
+
+        var weighted = results.Where(result => result.NormalizedPopulationWeight > 0d).ToArray();
+        WorldTowerCalibrationConfidenceInterval? weightedConfidence = null;
+        double? weightedTimeout = null;
+        if (weighted.Length > 0)
         {
-            issues.Add(new(
-                "Error",
-                "ProfileOutcomeSpreadTooWide",
-                floorNumber,
-                $"Equal-context profile win-rate spread is {spread:P1}; the limit is {options.MaximumProfileWinRateSpread:P0}."));
+            var totalWeight = weighted.Sum(result => result.NormalizedPopulationWeight);
+            var normalized = weighted.Select(result => (
+                Result: result,
+                Weight: result.NormalizedPopulationWeight / totalWeight)).ToArray();
+            var estimate = normalized.Sum(entry => entry.Weight * entry.Result.WinRate);
+            var effectiveSamples = 1d / normalized.Sum(entry =>
+                entry.Weight * entry.Weight / entry.Result.SampleCount);
+            weightedConfidence = Wilson(estimate, effectiveSamples);
+            weightedTimeout = normalized.Sum(entry => entry.Weight * entry.Result.TimeoutRate);
         }
-        if (!timeoutPass)
-        {
-            issues.Add(new(
-                "Error",
-                "ProfileTimeoutRateTooHigh",
-                floorNumber,
-                $"Weighted profile timeout rate is {timeout:P1}; the limit is {options.MaximumTimeoutRate:P0}."));
-        }
+        var spread = results.Max(result => result.WinRate) - results.Min(result => result.WinRate);
 
         return new(
             target.Minimum,
             target.Maximum,
-            confidence,
-            weighted.Length,
+            weightedConfidence,
+            results.Count,
+            qualifying.Length,
+            teamAssessments,
             spread,
-            timeout,
-            samplesPass,
-            confidencePass,
-            spreadPass,
-            timeoutPass,
-            samplesPass && confidencePass && spreadPass && timeoutPass);
+            weightedTimeout,
+            qualifying.Length > 0,
+            qualifying.Length > 0);
     }
 
     private static (double Minimum, double Maximum) Target(
@@ -560,6 +584,7 @@ public sealed class WorldTowerCalibrationCertificationRunner(
         }));
         var inputFingerprint = Hash(new
         {
+            CertificationContractVersion = ContractVersion,
             options,
             shadow.CatalogContentHash,
             shadow.CatalogVersion,
@@ -580,6 +605,7 @@ public sealed class WorldTowerCalibrationCertificationRunner(
             profileInputHash,
             shadow.CatalogContentHash,
             shadow.CatalogVersion,
+            ContractVersion,
             shadow.CanonicalCalibration.SeedManifest,
             CombatPreparationPipeline.SchemaVersion,
             PowerRatingAlgorithm.Version,
@@ -622,9 +648,6 @@ public sealed class WorldTowerCalibrationCertificationRunner(
             throw new ArgumentOutOfRangeException(nameof(options));
         if (!double.IsFinite(options.MonotonicTolerance)
             || options.MonotonicTolerance is < 0d or > 1d)
-            throw new ArgumentOutOfRangeException(nameof(options));
-        if (!double.IsFinite(options.MaximumProfileWinRateSpread)
-            || options.MaximumProfileWinRateSpread is < 0d or > 1d)
             throw new ArgumentOutOfRangeException(nameof(options));
         if (!double.IsFinite(options.MaximumTimeoutRate)
             || options.MaximumTimeoutRate is < 0d or > 1d)

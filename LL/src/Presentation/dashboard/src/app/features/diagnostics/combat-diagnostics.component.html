@@ -228,7 +228,7 @@
           <div>
             <h3 class="text-base font-semibold text-emerald-200">World Tower Calibration Certification</h3>
             <p class="mt-1 max-w-4xl text-sm text-light_gray">
-              Runs a release-grade diagnostic with one explicit seed manifest shared by below, recommended, stronger, and profile populations. Certification requires complete profile coverage, minimum samples, Wilson 95% intervals inside the authored success bands, monotonic canonical cohorts, bounded profile spread, and bounded timeouts. It never changes recommendations.
+              Runs a release-grade diagnostic with one explicit seed manifest shared by below, recommended, stronger, and every profile team. Certification requires complete profile coverage, monotonic canonical cohorts, and at least one exact-context team whose estimated win rate is 5%–20% and whose sample count, timeout rate, and production-runtime evidence pass. Confidence intervals, weighted population results, and profile spread remain diagnostics. It never changes recommendations.
             </p>
           </div>
           <div class="flex gap-2">
@@ -247,13 +247,12 @@
           </div>
         </div>
 
-        <div class="mt-4 grid gap-3 md:grid-cols-4 xl:grid-cols-7">
+        <div class="mt-4 grid gap-3 md:grid-cols-4 xl:grid-cols-6">
           <label class="grid gap-1 text-xs text-light_gray"><span>First Floor</span><input type="number" min="1" max="20" class="rounded border border-light_gray/40 bg-black/40 px-2 py-2 text-white" [(ngModel)]="worldTowerCertificationSettings.minimumFloor" /></label>
           <label class="grid gap-1 text-xs text-light_gray"><span>Last Floor</span><input type="number" min="1" max="20" class="rounded border border-light_gray/40 bg-black/40 px-2 py-2 text-white" [(ngModel)]="worldTowerCertificationSettings.maximumFloor" /></label>
           <label class="grid gap-1 text-xs text-light_gray"><span>Battles / Team</span><input type="number" min="1" max="1000" class="rounded border border-light_gray/40 bg-black/40 px-2 py-2 text-white" [(ngModel)]="worldTowerCertificationSettings.sampleCount" /></label>
           <label class="grid gap-1 text-xs text-light_gray"><span>Required Samples</span><input type="number" min="1" max="1000" class="rounded border border-light_gray/40 bg-black/40 px-2 py-2 text-white" [(ngModel)]="worldTowerCertificationSettings.minimumSampleCount" /></label>
           <label class="grid gap-1 text-xs text-light_gray"><span>Monotonic Tolerance</span><input type="number" min="0" max="1" step="0.01" class="rounded border border-light_gray/40 bg-black/40 px-2 py-2 text-white" [(ngModel)]="worldTowerCertificationSettings.monotonicTolerance" /></label>
-          <label class="grid gap-1 text-xs text-light_gray"><span>Max Profile Spread</span><input type="number" min="0" max="1" step="0.05" class="rounded border border-light_gray/40 bg-black/40 px-2 py-2 text-white" [(ngModel)]="worldTowerCertificationSettings.maximumProfileWinRateSpread" /></label>
           <label class="grid gap-1 text-xs text-light_gray"><span>Max Timeout Rate</span><input type="number" min="0" max="1" step="0.01" class="rounded border border-light_gray/40 bg-black/40 px-2 py-2 text-white" [(ngModel)]="worldTowerCertificationSettings.maximumTimeoutRate" /></label>
           <label class="grid gap-1 text-xs text-light_gray"><span>Base Seed</span><input type="number" class="rounded border border-light_gray/40 bg-black/40 px-2 py-2 text-white" [(ngModel)]="worldTowerCertificationSettings.baseRandomSeed" /></label>
           <label class="grid gap-1 text-xs text-light_gray md:col-span-2"><span>Seed Manifest ID</span><input type="text" class="rounded border border-light_gray/40 bg-black/40 px-2 py-2 text-white" [(ngModel)]="worldTowerCertificationSettings.seedManifestId" /></label>
@@ -288,18 +287,19 @@
           </div>
 
           <div *ngIf="certification.floors.length" class="mt-4 overflow-auto rounded border border-light_gray/30">
-            <div class="grid min-w-[76rem] grid-cols-[5rem_7rem_8rem_9rem_1fr_10rem_9rem_8rem] border-b border-light_gray/40 bg-black/30 px-4 py-2 text-xs font-semibold uppercase text-light_gray">
-              <div>Floor</div><div>Decision</div><div>Scenario</div><div>Monotonic</div><div>Canonical 95% Intervals</div><div>Profile 95%</div><div>Profile Spread</div><div>Timeout</div>
+            <div class="grid min-w-[86rem] grid-cols-[5rem_7rem_8rem_9rem_1fr_9rem_11rem_9rem_9rem] border-b border-light_gray/40 bg-black/30 px-4 py-2 text-xs font-semibold uppercase text-light_gray">
+              <div>Floor</div><div>Decision</div><div>Scenario</div><div>Monotonic</div><div>Canonical 95% Intervals</div><div>Qualifying</div><div>Weighted 95%</div><div>Spread</div><div>Weighted Timeout</div>
             </div>
-            <div *ngFor="let floor of certification.floors" class="grid min-w-[76rem] grid-cols-[5rem_7rem_8rem_9rem_1fr_10rem_9rem_8rem] border-b border-light_gray/20 px-4 py-3 text-sm">
+            <div *ngFor="let floor of certification.floors" class="grid min-w-[86rem] grid-cols-[5rem_7rem_8rem_9rem_1fr_9rem_11rem_9rem_9rem] border-b border-light_gray/20 px-4 py-3 text-sm">
               <div class="font-semibold text-white">{{ floor.floorNumber }}</div>
               <div [ngClass]="floor.isCertified ? 'text-emerald-200' : 'text-red-200'">{{ floor.isCertified ? 'Pass' : 'Fail' }}</div>
               <div [ngClass]="floor.scenarioMatchesProductionRequirement ? 'text-emerald-200' : 'text-red-200'" [title]="floor.selectedScenarioId || ''">{{ floor.scenarioMatchesProductionRequirement ? 'Exact' : 'Mismatch' }}</div>
               <div [ngClass]="floor.canonicalMonotonic ? 'text-emerald-200' : 'text-red-200'">{{ floor.canonicalMonotonic ? 'Pass' : 'Fail' }}</div>
               <div class="flex flex-wrap gap-2 text-xs text-light_gray"><span *ngFor="let cohort of floor.canonicalCohorts" [ngClass]="cohort.passed ? 'text-emerald-200' : 'text-red-200'">{{ cohort.cohort }} {{ formatPercent(cohort.confidence.lower95) }}–{{ formatPercent(cohort.confidence.upper95) }}</span></div>
-              <div class="text-light_gray">{{ floor.profiles.confidence ? formatPercent(floor.profiles.confidence.lower95) + '–' + formatPercent(floor.profiles.confidence.upper95) : '—' }}</div>
-              <div [ngClass]="floor.profiles.spreadWithinLimit ? 'text-emerald-200' : 'text-red-200'">{{ formatOptionalPercent(floor.profiles.winRateSpread) }}</div>
-              <div [ngClass]="floor.profiles.timeoutWithinLimit ? 'text-emerald-200' : 'text-red-200'">{{ formatOptionalPercent(floor.profiles.timeoutRate) }}</div>
+              <div [ngClass]="floor.profiles.hasQualifyingTeam ? 'text-emerald-200' : 'text-red-200'">{{ floor.profiles.qualifyingTeamCount }} / {{ floor.profiles.teamCount }}</div>
+              <div class="text-light_gray">{{ floor.profiles.weightedConfidence ? formatPercent(floor.profiles.weightedConfidence.lower95) + '–' + formatPercent(floor.profiles.weightedConfidence.upper95) : '—' }}</div>
+              <div class="text-light_gray">{{ formatOptionalPercent(floor.profiles.winRateSpread) }}</div>
+              <div class="text-light_gray">{{ formatOptionalPercent(floor.profiles.weightedTimeoutRate) }}</div>
             </div>
           </div>
         </ng-container>

@@ -13,6 +13,7 @@ using Persistence.LL;
 using Services.LL.Combat;
 using Services.LL.Combat.Engine;
 using Services.LL.Combat.Layers.Resolution;
+using Services.LL.Combat.Profiles;
 using Services.LL.Entities.Creatures;
 using Services.LL.Essences;
 using Services.LL.PowerRatings;
@@ -96,11 +97,16 @@ public sealed class WorldTowerProductionCalibrationTests
             abilityCatalog);
 
         var report = await runner.RunAsync(new WorldTowerProductionCalibrationOptions(
-            SampleCount: 10));
+            SampleCount: 100,
+            SeedManifestId: WorldTowerProfileTargetContract.CertificationSeedManifestId,
+            UseSharedCohortSeeds: true));
         var profileRequirements = runner.GetProfileScenarioRequirements(1, 15);
 
         Assert.Equal(45, report.Results.Count);
-        Assert.Null(report.SeedManifest);
+        Assert.Equal(
+            WorldTowerProfileTargetContract.CertificationSeedManifestId,
+            report.SeedManifest?.Id);
+        Assert.True(report.SeedManifest?.SharedAcrossCohorts);
         Assert.Equal(64, report.InputFingerprint.Length);
         Assert.Equal(
             Enumerable.Range(1, 15),

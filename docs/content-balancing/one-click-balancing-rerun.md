@@ -9,7 +9,7 @@ One click can:
 1. Capture separate discovery and Tower-qualification/materialization fingerprints.
 2. Discover Essence teams as real five-character parties with the canonical Guardian, Restorer, Striker, Striker, and Controller roles and role-specific equipment attributes.
 3. Reuse completed discovery audits only when their request and actual role-aware discovery-build fingerprint are unchanged.
-4. Qualify each eligible finalist against the exact target Tower floors with a bounded ten-sample production-runtime pass before choosing profile families.
+4. Screen each eligible finalist against the exact target Tower floors with a bounded ten-sample production-runtime pass, then confirm every apparent 5%–20% hit with 100 samples before choosing it as coverage.
 5. Rebuild the 13 exact Tower profile scenarios when target equipment, Tower, guardian, or materialization inputs changed.
 6. Reuse an already validated profile catalog only when both discovery and qualification/materialization inputs are identical.
 7. Validate the candidate catalog in memory without modifying the approved source-controlled catalog.
@@ -51,7 +51,7 @@ The materialization fingerprint contains:
 - Exact requested Tower definitions, guardian combat definitions, guardian-native abilities, guardian Essence loot mappings, and region creature-scaling content.
 - The bounded Tower-qualification contract and sample count.
 
-Fingerprints are checked again before every new audit and before catalog generation. A process restart after edited content therefore fails the old run closed instead of mixing old and new evidence. Retry is refused when either fingerprint changed; a new one-click run must be created so the dependency planner can make a safe reuse decision.
+Fingerprints are checked again before every new audit and before catalog generation. A process restart after edited content therefore fails the old run closed instead of mixing old and new evidence. Retry is refused when either fingerprint changed; a new one-click run must be created so the dependency planner can make a safe reuse decision. Certification uses the fixed `world-tower-certification-v1` seed manifest rather than a campaign-ID-derived manifest, so two campaigns over identical inputs measure the same cohort instead of silently sampling different battles.
 
 ## Candidate verification
 
@@ -60,9 +60,12 @@ Before profile families are selected, every evidence-eligible audit finalist rec
 - Materializes the finalist with the scenario's exact equipment tier, rarity, quality, roster size, party numbers, and canonical roles.
 - Uses the production snapshot preparation pipeline, World Tower runtime factory, guardian scaling, stagger rules, cooldown policy, and playback executor.
 - Runs ten deterministic samples from a persisted seed manifest.
+- Rechecks every apparent 5%–20% finalist result with 100 deterministic samples before it can satisfy a floor.
 - Records wins, losses, draws/timeouts, duration, runtime flags, and seed-manifest provenance in each selected party's catalog evidence.
 
-Meta and Budget selection prioritize the best worst-floor and average Tower results. Typical selection targets the scenario's intended success band. Weak-but-Legal selects the lowest qualified result. PvP audit score remains a deterministic secondary signal. Role-specialist and no-Essence controls do not claim qualification earned by a differently composed party.
+Generator 13 also builds a deterministic fallback reserve over as many as 500 additional legal five-character parties for every scenario. It screens those candidates in bounded batches, confirms apparent hits with 100 samples, and stores only exact-context Tower evidence for a reserve that is actually selected; it does not manufacture PvP audit statistics for a party that discovery never tested. The reserve may be partial because an audited finalist can still cover a floor. Final selection remains the fail-closed authority when neither the completed homogeneous portfolio nor the reserve contains a 5%–20% team.
+
+Meta and Budget selection prioritize the best worst-floor and average Tower results. Typical selection targets the scenario's intended success band. Weak-but-Legal selects the lowest qualified result. PvP audit score remains a deterministic secondary signal. Role-specialist and no-Essence controls do not claim qualification earned by a differently composed party. Direct-search parties are eligible only for the diagnostic-weight `CalibrationAnchor` family. Their Essence overlap is recorded but does not gate the any-one-team outcome rule; every ordinary portfolio family still obeys the configured diversity limit.
 
 Candidate shadow and certification accept a validated in-memory catalog and record `Candidate` plus the campaign identity in report provenance. They do not read or write the approved catalog.
 
@@ -72,13 +75,14 @@ Default campaign verification is:
 - 100 samples per team/cohort for certification.
 - Exact floors 1–15, exact roster sizes, and Expanded portfolios.
 - Shared deterministic seed manifests for canonical and profile cohorts.
-- Existing confidence, monotonicity, spread, timeout, and scenario gates.
+- One fixed certification seed manifest across campaigns; campaign identity remains provenance and no longer changes the sampled battles.
+- Canonical confidence and monotonicity gates, exact scenario coverage, and an any-one-team profile gate requiring an individual team's estimated win rate to be inclusively between 5% and 20% while satisfying the sample, timeout, and production-runtime contract. Per-team confidence intervals, population weighting, and cross-team spread remain diagnostic output.
 
 A structurally completed campaign can still be promotion-blocked. `isPromotionReady` is true only when the catalog is valid, candidate smoke completed, certification completed, and certification passed.
 
 ## Expected runtime
 
-The expensive global search remains five role-aware five-character discovery audits. With the default 24 finalists and floors 1–15, preselection qualification adds about `24 × 15 × 10 = 3,600` production Tower battles across the 13 scenario generations. It does not repeat global Essence discovery for every floor.
+The expensive global search remains five role-aware five-character discovery audits. With the default 24 finalists and floors 1–15, initial preselection screening adds about `24 × 15 × 10 = 3,600` production Tower battles across the 13 scenario generations. Every apparent in-band result then receives 100-sample confirmation. A missing floor can add a bounded direct search of up to 500 legal parties, screened at ten samples and confirmed at 100 only when it appears in band. The flow does not repeat the global PvP Essence audit for every floor.
 
 After catalog generation, the default Expanded portfolio has ten teams per exact floor. Smoke uses ten samples and certification uses 100 samples per selected team/cohort. These gates intentionally test the much smaller selected population rather than every discovered combination.
 

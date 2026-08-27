@@ -1,4 +1,5 @@
 using Services.LL.Combat.Engine;
+using Services.LL.Combat.Profiles;
 using Domain.Models.Attributes;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -7,6 +8,16 @@ namespace EssenceSystem.Tests;
 
 public sealed class WorldTowerCalibrationCertificationTests
 {
+    [Fact]
+    public void Default_options_use_the_stable_profile_confirmation_seed_manifest()
+    {
+        var options = new WorldTowerCalibrationCertificationOptions();
+
+        Assert.Equal(
+            WorldTowerProfileTargetContract.CertificationSeedManifestId,
+            options.SeedManifestId);
+    }
+
     [Fact]
     public void Complete_shared_seed_evidence_inside_confidence_bands_is_certified()
     {
@@ -18,19 +29,25 @@ public sealed class WorldTowerCalibrationCertificationTests
                 belowWinRate: 0d,
                 recommendedWinRate: 0.55d,
                 strongerWinRate: 1d,
-                profileWinRates: [0.55d, 0.55d]));
+                profileWinRates: [0.10d, 0.20d]));
 
         Assert.True(report.IsCertified);
         Assert.Equal(WorldTowerCalibrationCertificationStatus.Passed, report.Status);
         Assert.False(report.RecommendationsChanged);
-        Assert.True(Assert.Single(report.Floors).IsCertified);
+        var floor = Assert.Single(report.Floors);
+        Assert.True(floor.IsCertified);
+        Assert.Equal(2, floor.Profiles.QualifyingTeamCount);
+        Assert.All(floor.Profiles.Teams, team => Assert.True(team.Passed));
         Assert.NotEmpty(report.Provenance.InputFingerprint);
+        Assert.Equal(
+            WorldTowerCalibrationCertificationRunner.ContractVersion,
+            report.Provenance.CertificationContractVersion);
         Assert.True(report.Provenance.SeedManifest?.SharedAcrossCohorts);
         Assert.Contains(report.Provenance.BuildConfiguration, new[] { "Debug", "Release" });
     }
 
     [Fact]
-    public void Excessive_equal_context_profile_spread_fails_certification()
+    public void One_qualifying_profile_is_enough_and_spread_is_diagnostic()
     {
         var report = WorldTowerCalibrationCertificationRunner.Evaluate(
             Options(),
@@ -39,11 +56,101 @@ public sealed class WorldTowerCalibrationCertificationTests
                 belowWinRate: 0d,
                 recommendedWinRate: 0.55d,
                 strongerWinRate: 1d,
-                profileWinRates: [0.40d, 0.70d]));
+                profileWinRates: [0.10d, 0.95d]));
+
+        Assert.True(report.IsCertified);
+        Assert.Equal(WorldTowerCalibrationCertificationStatus.Passed, report.Status);
+        var profiles = Assert.Single(report.Floors).Profiles;
+        Assert.NotNull(profiles.WinRateSpread);
+        Assert.Equal(0.85d, profiles.WinRateSpread.Value, 10);
+        Assert.Equal(1, profiles.QualifyingTeamCount);
+        Assert.DoesNotContain(report.Issues, issue => issue.Code.Contains("Spread", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Profiles_above_twenty_percent_fail_certification()
+    {
+        var report = WorldTowerCalibrationCertificationRunner.Evaluate(
+            Options(),
+            Shadow(
+                sampleCount: 100,
+                belowWinRate: 0d,
+                recommendedWinRate: 0.55d,
+                strongerWinRate: 1d,
+                profileWinRates: [0.21d, 0.95d]));
 
         Assert.False(report.IsCertified);
         Assert.Equal(WorldTowerCalibrationCertificationStatus.Failed, report.Status);
-        Assert.Contains(report.Issues, issue => issue.Code == "ProfileOutcomeSpreadTooWide");
+        Assert.Equal(0, Assert.Single(report.Floors).Profiles.QualifyingTeamCount);
+        Assert.Contains(report.Issues, issue => issue.Code == "NoProfileTeamMeetsTarget");
+    }
+
+    [Fact]
+    public void Profiles_below_five_percent_fail_certification()
+    {
+        var report = WorldTowerCalibrationCertificationRunner.Evaluate(
+            Options(),
+            Shadow(
+                sampleCount: 100,
+                belowWinRate: 0d,
+                recommendedWinRate: 0.55d,
+                strongerWinRate: 1d,
+                profileWinRates: [0d, 0.04d]));
+
+        Assert.False(report.IsCertified);
+        Assert.Equal(0, Assert.Single(report.Floors).Profiles.QualifyingTeamCount);
+        Assert.Contains(report.Issues, issue => issue.Code == "NoProfileTeamMeetsTarget");
+    }
+
+    [Theory]
+    [InlineData(0.05d)]
+    [InlineData(0.20d)]
+    public void Profile_target_boundaries_are_inclusive(double winRate)
+    {
+        var report = WorldTowerCalibrationCertificationRunner.Evaluate(
+            Options(),
+            Shadow(
+                sampleCount: 100,
+                belowWinRate: 0d,
+                recommendedWinRate: 0.55d,
+                strongerWinRate: 1d,
+                profileWinRates: [winRate]));
+
+        Assert.True(report.IsCertified);
+        var team = Assert.Single(Assert.Single(report.Floors).Profiles.Teams);
+        Assert.True(team.EstimateWithinTarget);
+        Assert.True(team.Passed);
+    }
+
+    [Fact]
+    public void Zero_weight_diagnostic_team_can_satisfy_the_any_team_contract()
+    {
+        var shadow = Shadow(
+            sampleCount: 100,
+            belowWinRate: 0d,
+            recommendedWinRate: 0.55d,
+            strongerWinRate: 1d,
+            profileWinRates: [0.95d, 0.10d]);
+        shadow = shadow with
+        {
+            ProfileResults =
+            [
+                shadow.ProfileResults[0],
+                shadow.ProfileResults[1] with
+                {
+                    Family = "NoEssence",
+                    WeightBucket = WorldTowerProfileWeightBucket.Diagnostic,
+                    NormalizedPopulationWeight = 0d
+                }
+            ]
+        };
+
+        var report = WorldTowerCalibrationCertificationRunner.Evaluate(Options(), shadow);
+
+        Assert.True(report.IsCertified);
+        var profiles = Assert.Single(report.Floors).Profiles;
+        var qualifying = Assert.Single(profiles.Teams, team => team.Passed);
+        Assert.Equal("NoEssence", qualifying.Family);
     }
 
     [Fact]
@@ -56,7 +163,7 @@ public sealed class WorldTowerCalibrationCertificationTests
                 belowWinRate: 0d,
                 recommendedWinRate: 0.50d,
                 strongerWinRate: 1d,
-                profileWinRates: [0.50d]));
+                profileWinRates: [0.10d]));
 
         Assert.False(report.IsCertified);
         Assert.Equal(WorldTowerCalibrationCertificationStatus.NotCertifiable, report.Status);
@@ -72,7 +179,7 @@ public sealed class WorldTowerCalibrationCertificationTests
             belowWinRate: 0d,
             recommendedWinRate: 0.55d,
             strongerWinRate: 1d,
-            profileWinRates: [0.55d]);
+            profileWinRates: [0.10d]);
         shadow = shadow with
         {
             FloorSummaries =
@@ -112,7 +219,6 @@ public sealed class WorldTowerCalibrationCertificationTests
         MaximumFloor: 11,
         SampleCount: 100,
         MinimumSampleCount: 100,
-        MaximumProfileWinRateSpread: 0.25d,
         MaximumTimeoutRate: 0.05d,
         SeedManifestId: "release-v1");
 

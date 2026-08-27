@@ -56,7 +56,7 @@
       "progressionPosition": 2,
       "guardianScaling": {
         "health": 1.45,
-        "offense": 1.44,
+        "offense": 1.38,
         "defense": 1.29,
         "resistance": 1.29,
         "penetration": 1.0,
@@ -120,7 +120,7 @@
       "progressionPosition": 4,
       "guardianScaling": {
         "health": 1.11,
-        "offense": 1.59,
+        "offense": 2.4,
         "defense": 2.33,
         "resistance": 2.33,
         "penetration": 1.0,
@@ -157,7 +157,7 @@
       "progressionPosition": 5,
       "guardianScaling": {
         "health": 1.25,
-        "offense": 1.50,
+        "offense": 1.58,
         "defense": 2.65,
         "resistance": 2.65,
         "penetration": 1.0,
@@ -373,7 +373,7 @@
       "progressionPosition": 11,
       "guardianScaling": {
         "health": 2.90,
-        "offense": 3.50,
+        "offense": 3.72,
         "defense": 3.25,
         "resistance": 3.25,
         "penetration": 1.0,
@@ -404,8 +404,8 @@
       "recommendedPowerRating": 241,
       "progressionPosition": 12,
       "guardianScaling": {
-        "health": 2.80,
-        "offense": 3.20,
+        "health": 2.65,
+        "offense": 3.40,
         "defense": 2.80,
         "resistance": 2.80,
         "penetration": 1.0,
@@ -437,7 +437,7 @@
       "progressionPosition": 13,
       "guardianScaling": {
         "health": 3.45,
-        "offense": 3.40,
+        "offense": 3.36,
         "defense": 3.00,
         "resistance": 3.00,
         "penetration": 1.0,
@@ -468,8 +468,8 @@
       "recommendedPowerRating": 260,
       "progressionPosition": 14,
       "guardianScaling": {
-        "health": 3.85,
-        "offense": 3.40,
+        "health": 3.98,
+        "offense": 3.43,
         "defense": 2.90,
         "resistance": 2.90,
         "penetration": 1.0,
@@ -477,7 +477,7 @@
       },
       "stagger": {
         "enabled": true,
-        "baseThreshold": 250,
+        "baseThreshold": 300,
         "referenceParticipantCount": 10,
         "participantExponent": 0.85,
         "breakDurationTicks": 30,
@@ -500,7 +500,7 @@
       "progressionPosition": 15,
       "guardianScaling": {
         "health": 5.20,
-        "offense": 3.30,
+        "offense": 3.50,
         "defense": 3.30,
         "resistance": 3.30,
         "penetration": 1.0,

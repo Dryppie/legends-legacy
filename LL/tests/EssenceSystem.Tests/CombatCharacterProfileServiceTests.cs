@@ -343,7 +343,9 @@ public sealed class CombatCharacterProfileServiceTests
             CancellationToken.None);
 
         Assert.Equal([1], report.Scenario!.FloorNumbers);
-        Assert.Equal(7, qualifier.SampleCount);
+        Assert.Equal(
+            WorldTowerProfileTargetContract.SelectionConfirmationSampleCount,
+            qualifier.SampleCount);
         Assert.Equal([1], qualifier.Scenario!.FloorNumbers);
         var meta = Assert.Single(report.Teams, team => team.Family == "Meta");
         Assert.Equal("party-weak", meta.SourceSignature);
@@ -384,6 +386,243 @@ public sealed class CombatCharacterProfileServiceTests
             CancellationToken.None);
         Assert.False(invalid.IsValid);
         Assert.Contains(invalid.Issues, issue => issue.Code == "PartyContextEvidenceInvalid");
+    }
+
+    [Fact]
+    public async Task Expanded_world_tower_generation_retains_a_confirmed_exact_context_team_for_every_floor()
+    {
+        var services = CreateServices();
+        await using var db = CreateDbContext();
+        db.ItemBases.AddRange(services.CraftingDefinitions.GetEquipmentBases().Values);
+        await db.SaveChangesAsync();
+        var setup = new CombatSetupService(
+            null!,
+            services.EssenceResolver,
+            services.EssenceDefinitions,
+            services.CreatureEssences,
+            craftingDefinitions: services.CraftingDefinitions);
+        var materializer = new CombatCharacterProfileMaterializer(
+            services.Factory,
+            new CombatPreparationPipeline(new SnapshotCombatantBuilder(db, setup), setup),
+            services.EssenceDefinitions);
+        var qualifier = new StubWorldTowerProfileCandidateQualifier((signature, floorNumber) =>
+            (signature, floorNumber) switch
+            {
+                ("expanded-party-16", 8) => 0.10d,
+                ("expanded-party-17", 9) => 0.20d,
+                _ => 0.50d
+            });
+        var generator = new CombatCharacterProfileService(
+            services.Factory,
+            materializer,
+            services.EssenceDefinitions,
+            services.AbilityCatalog,
+            qualifier);
+        var contentHash = AbilityBalanceContentFingerprint.Create(
+            services.AbilityCatalog,
+            services.EssenceDefinitions);
+
+        var report = await generator.GenerateAsync(
+            new CombatCharacterProfileGenerationRequest(
+                "tower-target-anchor-audit",
+                CreateExpandedPartyAudit(contentHash, services.EssenceDefinitions),
+                ContentType: "WorldTower",
+                EquipmentQuality: "Standard",
+                TeamsPerFamily: 1,
+                RandomSeed: 8471,
+                PortfolioMode: "Expanded",
+                MinimumSourceBattles: 100,
+                MinimumMatchupBattles: 100,
+                MaximumConfidenceWidth95: 0.25,
+                MaximumSeedScoreSpread: 0.15,
+                MaximumEssenceOverlap: 0.20,
+                RequireMultiSeedStability: true,
+                TargetTeamSize: 10,
+                TargetEquipmentTier: 1,
+                TargetEquipmentRarity: "Epic",
+                TargetFloorNumbers: [8, 9],
+                ContextQualificationSampleCount: 10),
+            CancellationToken.None);
+
+        Assert.Equal(CombatCharacterProfileService.GeneratorVersion, report.GeneratorVersion);
+        var anchors = report.Teams
+            .Where(team => team.Family == "CalibrationAnchor")
+            .ToArray();
+        Assert.All(anchors, anchor =>
+        {
+            Assert.True(anchor.IsComposedExpedition);
+            Assert.Contains("5%–20% calibration anchor", anchor.SelectionReason);
+        });
+        var qualifyingEvidence = report.Teams
+            .SelectMany(team => team.Parties ?? [])
+            .SelectMany(party => party.Evidence.ContextEvidence ?? [])
+            .Where(evidence => WorldTowerProfileTargetContract.Contains(evidence.WinRate))
+            .ToArray();
+        var coveredFloors = qualifyingEvidence
+            .Select(evidence => evidence.FloorNumber)
+            .Distinct()
+            .Order()
+            .ToArray();
+        Assert.Equal([8, 9], coveredFloors);
+        Assert.All(
+            qualifyingEvidence,
+            evidence => Assert.Equal(
+                WorldTowerProfileTargetContract.SelectionConfirmationSampleCount,
+                evidence.SampleCount));
+        Assert.All(
+            qualifyingEvidence,
+            evidence => Assert.Equal(
+                WorldTowerProfileTargetContract.CertificationSeedManifestId,
+                evidence.SeedManifestId));
+
+        var catalogService = new JsonCombatCharacterProfileCatalogService(
+            Path.Combine(FindApiContentRoot(), "Data", "combat", "combat-character-profiles.json"),
+            services.JsonOptions,
+            services.Factory,
+            materializer,
+            services.EssenceDefinitions,
+            services.AbilityCatalog);
+        var validation = await catalogService.ValidateAsync(
+            new CombatCharacterProfileCatalogDocument(1, 1, [report]),
+            CancellationToken.None);
+        Assert.True(
+            validation.IsValid,
+            string.Join(Environment.NewLine, validation.Issues.Select(issue => $"{issue.Code}: {issue.Message}")));
+    }
+
+    [Fact]
+    public async Task Expanded_world_tower_generation_fails_when_no_legal_candidate_reaches_target_band()
+    {
+        var services = CreateServices();
+        await using var db = CreateDbContext();
+        db.ItemBases.AddRange(services.CraftingDefinitions.GetEquipmentBases().Values);
+        await db.SaveChangesAsync();
+        var setup = new CombatSetupService(
+            null!,
+            services.EssenceResolver,
+            services.EssenceDefinitions,
+            services.CreatureEssences,
+            craftingDefinitions: services.CraftingDefinitions);
+        var materializer = new CombatCharacterProfileMaterializer(
+            services.Factory,
+            new CombatPreparationPipeline(new SnapshotCombatantBuilder(db, setup), setup),
+            services.EssenceDefinitions);
+        var generator = new CombatCharacterProfileService(
+            services.Factory,
+            materializer,
+            services.EssenceDefinitions,
+            services.AbilityCatalog,
+            new StubWorldTowerProfileCandidateQualifier((_, _) => 0d));
+        var contentHash = AbilityBalanceContentFingerprint.Create(
+            services.AbilityCatalog,
+            services.EssenceDefinitions);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => generator.GenerateAsync(
+            new CombatCharacterProfileGenerationRequest(
+                "tower-missing-target-anchor-audit",
+                CreateExpandedPartyAudit(contentHash, services.EssenceDefinitions),
+                ContentType: "WorldTower",
+                EquipmentQuality: "Standard",
+                TeamsPerFamily: 1,
+                RandomSeed: 8471,
+                PortfolioMode: "Expanded",
+                MinimumSourceBattles: 100,
+                MinimumMatchupBattles: 100,
+                MaximumConfidenceWidth95: 0.25,
+                MaximumSeedScoreSpread: 0.15,
+                MaximumEssenceOverlap: 0.20,
+                RequireMultiSeedStability: true,
+                TargetTeamSize: 10,
+                TargetEquipmentTier: 1,
+                TargetEquipmentRarity: "Epic",
+                TargetFloorNumbers: [8],
+                ContextQualificationSampleCount: 10),
+            CancellationToken.None));
+
+        Assert.Contains("between 5% and 20%", exception.Message);
+        Assert.Contains("floor(s) 8", exception.Message);
+    }
+
+    [Fact]
+    public async Task Expanded_world_tower_generation_accepts_direct_context_anchor_without_pvp_evidence()
+    {
+        var services = CreateServices();
+        await using var db = CreateDbContext();
+        db.ItemBases.AddRange(services.CraftingDefinitions.GetEquipmentBases().Values);
+        await db.SaveChangesAsync();
+        var setup = new CombatSetupService(
+            null!,
+            services.EssenceResolver,
+            services.EssenceDefinitions,
+            services.CreatureEssences,
+            craftingDefinitions: services.CraftingDefinitions);
+        var materializer = new CombatCharacterProfileMaterializer(
+            services.Factory,
+            new CombatPreparationPipeline(new SnapshotCombatantBuilder(db, setup), setup),
+            services.EssenceDefinitions);
+        var qualifier = new StubWorldTowerProfileCandidateQualifier(
+            (_, _) => 0d,
+            directScoreFor: (_, _) => 0.10d);
+        var generator = new CombatCharacterProfileService(
+            services.Factory,
+            materializer,
+            services.EssenceDefinitions,
+            services.AbilityCatalog,
+            qualifier);
+        var contentHash = AbilityBalanceContentFingerprint.Create(
+            services.AbilityCatalog,
+            services.EssenceDefinitions);
+
+        var report = await generator.GenerateAsync(
+            new CombatCharacterProfileGenerationRequest(
+                "tower-direct-target-anchor-audit",
+                CreateExpandedPartyAudit(contentHash, services.EssenceDefinitions),
+                ContentType: "WorldTower",
+                EquipmentQuality: "Standard",
+                TeamsPerFamily: 1,
+                RandomSeed: 8471,
+                PortfolioMode: "Expanded",
+                MinimumSourceBattles: 100,
+                MinimumMatchupBattles: 100,
+                MaximumConfidenceWidth95: 0.25,
+                MaximumSeedScoreSpread: 0.15,
+                MaximumEssenceOverlap: 0.20,
+                RequireMultiSeedStability: true,
+                TargetTeamSize: 10,
+                TargetEquipmentTier: 1,
+                TargetEquipmentRarity: "Epic",
+                TargetFloorNumbers: [8],
+                ContextQualificationSampleCount: 10),
+            CancellationToken.None);
+
+        var anchor = Assert.Single(report.Teams, team => team.Family == "CalibrationAnchor");
+        Assert.True(anchor.IsComposedExpedition);
+        Assert.All(anchor.Parties!, party =>
+        {
+            Assert.Equal(0, party.Evidence.SourceBattles);
+            Assert.Null(party.Evidence.SeedScoreMinimum);
+            Assert.Contains(party.Evidence.ContextEvidence!, evidence =>
+                evidence.FloorNumber == 8
+                && evidence.WinRate == 0.10d
+                && evidence.SampleCount
+                    == WorldTowerProfileTargetContract.SelectionConfirmationSampleCount
+                && evidence.SeedManifestId
+                    == WorldTowerProfileTargetContract.CertificationSeedManifestId);
+        });
+
+        var catalogService = new JsonCombatCharacterProfileCatalogService(
+            Path.Combine(FindApiContentRoot(), "Data", "combat", "combat-character-profiles.json"),
+            services.JsonOptions,
+            services.Factory,
+            materializer,
+            services.EssenceDefinitions,
+            services.AbilityCatalog);
+        var validation = await catalogService.ValidateAsync(
+            new CombatCharacterProfileCatalogDocument(1, 1, [report]),
+            CancellationToken.None);
+        Assert.True(
+            validation.IsValid,
+            string.Join(Environment.NewLine, validation.Issues.Select(issue => $"{issue.Code}: {issue.Message}")));
     }
 
     [Fact]
@@ -1148,9 +1387,25 @@ public sealed class CombatCharacterProfileServiceTests
         CanonicalEquipmentBuildFactory Factory,
         JsonAbilityCatalogProvider AbilityCatalog);
 
-    private sealed class StubWorldTowerProfileCandidateQualifier(
-        IReadOnlyDictionary<string, double> scores) : IWorldTowerProfileCandidateQualifier
+    private sealed class StubWorldTowerProfileCandidateQualifier : IWorldTowerProfileCandidateQualifier
     {
+        private readonly Func<string, int, double> _scoreFor;
+        private readonly Func<string, int, double>? _directScoreFor;
+        private IReadOnlyList<AbilityBalanceCombinationResult> _lastCandidates = [];
+
+        public StubWorldTowerProfileCandidateQualifier(IReadOnlyDictionary<string, double> scores)
+            : this((signature, _) => scores[signature])
+        {
+        }
+
+        public StubWorldTowerProfileCandidateQualifier(
+            Func<string, int, double> scoreFor,
+            Func<string, int, double>? directScoreFor = null)
+        {
+            _scoreFor = scoreFor;
+            _directScoreFor = directScoreFor;
+        }
+
         public CombatCharacterProfileScenario? Scenario { get; private set; }
         public int SampleCount { get; private set; }
 
@@ -1164,23 +1419,24 @@ public sealed class CombatCharacterProfileServiceTests
         {
             Scenario = scenario;
             SampleCount = sampleCount;
+            _lastCandidates = candidates;
             var result = candidates.ToDictionary(
                 candidate => candidate.Signature,
-                candidate => (IReadOnlyList<CombatCharacterProfileContextEvidence>)
-                [
-                    CreateEvidence(candidate)
-                ],
+                candidate => (IReadOnlyList<CombatCharacterProfileContextEvidence>)(scenario.FloorNumbers ?? [])
+                    .Select(floorNumber => CreateEvidence(candidate, floorNumber))
+                    .ToArray(),
                 StringComparer.Ordinal);
             return Task.FromResult<IReadOnlyDictionary<string, IReadOnlyList<CombatCharacterProfileContextEvidence>>>(
                 result);
 
             CombatCharacterProfileContextEvidence CreateEvidence(
-                AbilityBalanceCombinationResult candidate)
+                AbilityBalanceCombinationResult candidate,
+                int floorNumber)
             {
-                var wins = (int)Math.Round(scores[candidate.Signature] * sampleCount);
+                var wins = (int)Math.Round(_scoreFor(candidate.Signature, floorNumber) * sampleCount);
                 return new(
                         scenario.Id,
-                        scenario.FloorNumbers!.Single(),
+                        floorNumber,
                         scenario.TeamSize,
                         sampleCount,
                         Wins: wins,
@@ -1189,11 +1445,78 @@ public sealed class CombatCharacterProfileServiceTests
                         WinRate: wins / (double)sampleCount,
                         TimeoutRate: 0,
                         AverageDurationTicks: 100,
-                        SeedManifestId: $"test:{baseRandomSeed}",
+                        SeedManifestId: sampleCount
+                            == WorldTowerProfileTargetContract.SelectionConfirmationSampleCount
+                                ? WorldTowerProfileTargetContract.CertificationSeedManifestId
+                                : $"test:{baseRandomSeed}",
                         SeedManifestHash: new string('a', 64),
                         UsesProductionRuntime: true,
                         AbilitiesStartOnCooldown: true);
             }
+        }
+
+        public Task<WorldTowerCalibrationAnchorSearchResult> SearchCalibrationAnchorsAsync(
+            IReadOnlyList<AbilityBalanceEssenceResult> essenceResults,
+            CombatCharacterProfileScenario scenario,
+            IReadOnlyList<int> floorNumbers,
+            int sampleCount,
+            int baseRandomSeed,
+            IReadOnlySet<string> excludedSignatures,
+            CancellationToken cancellationToken)
+        {
+            if (_directScoreFor is null || _lastCandidates.Count == 0)
+            {
+                return Task.FromResult(new WorldTowerCalibrationAnchorSearchResult(
+                    [],
+                    new Dictionary<string, IReadOnlyList<CombatCharacterProfileContextEvidence>>(
+                        StringComparer.Ordinal)));
+            }
+
+            var source = _lastCandidates[^1];
+            var direct = source with
+            {
+                Signature = "tower-anchor:test-direct",
+                DisplayName = "Direct Tower test anchor",
+                Battles = 0,
+                Wins = 0,
+                Losses = 0,
+                Draws = 0,
+                WinRate = 0,
+                LossRate = 0,
+                DrawRate = 0,
+                SeedResults = []
+            };
+            var confirmationSampleCount =
+                WorldTowerProfileTargetContract.SelectionConfirmationSampleCount;
+            var evidence = (scenario.FloorNumbers ?? [])
+                .Select(floorNumber =>
+                {
+                    var wins = (int)Math.Round(
+                        _directScoreFor(direct.Signature, floorNumber) * confirmationSampleCount);
+                    return new CombatCharacterProfileContextEvidence(
+                        scenario.Id,
+                        floorNumber,
+                        scenario.TeamSize,
+                        confirmationSampleCount,
+                        wins,
+                        confirmationSampleCount - wins,
+                        0,
+                        wins / (double)confirmationSampleCount,
+                        0,
+                        100,
+                        WorldTowerProfileTargetContract.CertificationSeedManifestId,
+                        new string('b', 64),
+                        true,
+                        true);
+                })
+                .ToArray();
+            return Task.FromResult(new WorldTowerCalibrationAnchorSearchResult(
+                [direct],
+                new Dictionary<string, IReadOnlyList<CombatCharacterProfileContextEvidence>>(
+                    StringComparer.Ordinal)
+                {
+                    [direct.Signature] = evidence
+                }));
         }
     }
 }

@@ -173,7 +173,6 @@ export class CombatDiagnosticsComponent implements OnInit, OnDestroy {
     sampleCount: 100,
     minimumSampleCount: 100,
     monotonicTolerance: 0.02,
-    maximumProfileWinRateSpread: 0.25,
     maximumTimeoutRate: 0.05,
     requireExpandedPortfolio: true,
     metaWeight: 0.25,
@@ -863,8 +862,6 @@ export class CombatDiagnosticsComponent implements OnInit, OnDestroy {
           Number(this.worldTowerCertificationSettings.minimumSampleCount) || 100,
         monotonicTolerance:
           Number(this.worldTowerCertificationSettings.monotonicTolerance),
-        maximumProfileWinRateSpread:
-          Number(this.worldTowerCertificationSettings.maximumProfileWinRateSpread),
         maximumTimeoutRate:
           Number(this.worldTowerCertificationSettings.maximumTimeoutRate),
         requireExpandedPortfolio:

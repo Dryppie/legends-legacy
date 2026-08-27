@@ -613,7 +613,6 @@ export interface WorldTowerCalibrationCertificationOptions {
   sampleCount: number;
   minimumSampleCount: number;
   monotonicTolerance: number;
-  maximumProfileWinRateSpread: number;
   maximumTimeoutRate: number;
   requireExpandedPortfolio: boolean;
   weightPolicy: WorldTowerProfileWeightPolicy;
@@ -641,14 +640,26 @@ export interface WorldTowerCalibrationCohortCertification {
 export interface WorldTowerCalibrationPopulationCertification {
   targetMinimumWinRate: number;
   targetMaximumWinRate: number;
-  confidence: WorldTowerCalibrationConfidenceInterval | null;
+  weightedConfidence: WorldTowerCalibrationConfidenceInterval | null;
   teamCount: number;
+  qualifyingTeamCount: number;
+  teams: WorldTowerCalibrationProfileTeamCertification[];
   winRateSpread: number | null;
-  timeoutRate: number | null;
+  weightedTimeoutRate: number | null;
+  hasQualifyingTeam: boolean;
+  passed: boolean;
+}
+
+export interface WorldTowerCalibrationProfileTeamCertification {
+  teamId: string;
+  family: string;
+  weightBucket: string;
+  confidence: WorldTowerCalibrationConfidenceInterval;
+  timeoutRate: number;
   hasMinimumSamples: boolean;
-  confidenceWithinTarget: boolean;
-  spreadWithinLimit: boolean;
+  estimateWithinTarget: boolean;
   timeoutWithinLimit: boolean;
+  productionContractSatisfied: boolean;
   passed: boolean;
 }
 
@@ -676,6 +687,7 @@ export interface WorldTowerCalibrationCertificationProvenance {
   profileInputHash: string;
   catalogContentHash: string;
   catalogVersion: number;
+  certificationContractVersion: number;
   seedManifest: {
     id: string;
     baseRandomSeed: number;

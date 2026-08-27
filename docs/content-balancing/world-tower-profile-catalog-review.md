@@ -1,6 +1,6 @@
 # Historical World Tower Character Profile catalog review
 
-> This file reviews schema-3 campaign `e283b6e9-0463-497e-8ff3-3536ba1fd1b7`. Its detailed tables remain useful historical evidence, but neither this catalog nor the later pre-role-aware schema-4 catalog is eligible for promotion under profile schema/generator 7 and fingerprint contract 3. See [`combat-calibration-current-state-and-gaps.md`](combat-calibration-current-state-and-gaps.md) for the current operational state.
+> This file reviews schema-3 campaign `e283b6e9-0463-497e-8ff3-3536ba1fd1b7`. Its detailed tables remain useful historical evidence, but neither this catalog nor the later pre-role-aware schema-4 catalog is eligible for promotion under current profile schema/generator 7/8 and fingerprint contract 3. See [`combat-calibration-current-state-and-gaps.md`](combat-calibration-current-state-and-gaps.md) for the current operational state.
 
 ## Review decision
 
@@ -10,13 +10,15 @@ The candidate is complete, reproducible, diverse, production-preparable, and int
 
 The later schema-4 campaign `6339d840-f00a-4630-a869-d5ad862a3bd1` did run candidate smoke and 100-sample certification, but promotion was blocked by 29 confidence and profile-spread findings. Investigation of that report led to canonical-role discovery, exact-floor production qualification, profile schema/generator 7, and fingerprint contract 3.
 
-The immediate recommendation is therefore:
+The historical recommendation was therefore:
 
 1. Start a fresh fingerprint-contract-3 one-click run across floors 1–15; all five role-aware discovery audits must regenerate.
 2. Confirm that every selected non-control party carries complete ten-sample production qualification for its exact floors.
 3. Review the automatically persisted smoke and 100-sample certification reports.
 4. Resolve actual outcome, spread, timeout, or scenario-selection failures; increase samples when only confidence ambiguity remains.
 5. Promote the normalized catalog only after all automated gates pass and human review accepts the evidence.
+
+That fresh run is now complete. Campaign `e6b1d2a5-3f66-4b19-85ff-cde9e53af32e` failed current certification with 27 issues. See [`world-tower-contract-v3-campaign-review.md`](world-tower-contract-v3-campaign-review.md) for the active decision and next action.
 
 ## Evidence reviewed
 
@@ -189,12 +191,14 @@ A recommendation should not be trusted if a modest, plausible weight change move
 | Source-controlled approval | On hold |
 | Production certification | Not run |
 
-## Current next action
+## Superseded next action
 
-Role-aware discovery, production finalist qualification, candidate shadow calibration, and guarded orchestration are implemented. The next operational steps are:
+Role-aware discovery, production finalist qualification, candidate shadow calibration, and guarded orchestration are implemented. The following steps led to the current-contract campaign and are retained as historical context:
 
 1. Start a fresh fingerprint-contract-3 campaign; the old audits cannot be reused because their participant preparation differs.
 2. Review qualified Meta, Typical, Weak, Budget, and adversarial selection on every floor.
 3. Review all family outcome spreads, timeouts, confidence intervals, and differences from the canonical recommended cohort.
 4. Address the remaining Meta allocation and per-seed direct-matchup provenance concerns if the new evidence shows they materially affect the selected portfolio.
 5. Approve and commit only a candidate whose full 100-sample report passes; archive 500–1,000-sample evidence for release.
+
+The campaign has now run and failed its automated balance gates. Current work should follow [`world-tower-contract-v3-campaign-review.md`](world-tower-contract-v3-campaign-review.md), not repeat this historical launch checklist.

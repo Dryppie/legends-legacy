@@ -273,13 +273,13 @@ public sealed class JsonCombatCharacterProfileCatalogService(
                     $"{path}.teams",
                     $"The expanded portfolio does not contain the {family} family."));
             }
-            if (contentType == CombatContentType.WorldTower && teams.Length is < 5 or > 10)
+            if (contentType == CombatContentType.WorldTower && teams.Length is < 5 or > 12)
             {
                 issues.Add(Issue(
                     "Error",
                     "WorldTowerPortfolioSizeInvalid",
                     $"{path}.teams",
-                    "An expanded World Tower scenario must contain between five and ten bounded expedition profiles."));
+                    "An expanded World Tower scenario must contain between five and twelve bounded expedition profiles."));
             }
         }
 
@@ -571,6 +571,38 @@ public sealed class JsonCombatCharacterProfileCatalogService(
                     "Synthetic controls cannot claim source battle outcomes."));
             }
         }
+        else if (IsDirectContextAnchor(team))
+        {
+            if (team.SourceWins != 0
+                || team.SourceLosses != 0
+                || team.SourceDraws != 0
+                || team.SourceScore != 0d
+                || team.ConfidenceLower95 != 0d
+                || team.ConfidenceUpper95 != 1d
+                || team.SeedScoreMinimum is not null
+                || team.SeedScoreMaximum is not null
+                || team.AdversaryBattles is not null
+                || team.AdversaryScore is not null
+                || team.AdversaryConfidenceLower95 is not null
+                || team.AdversaryConfidenceUpper95 is not null)
+            {
+                issues.Add(Issue(
+                    "Error",
+                    "DirectContextAnchorClaimsAuditEvidence",
+                    path,
+                    "A direct Tower calibration anchor must keep PvP audit evidence neutral; its evidence belongs to the exact Tower context."));
+            }
+            if (team.NearestSelectedEssenceOverlap is null
+                || !double.IsFinite(team.NearestSelectedEssenceOverlap.Value)
+                || team.NearestSelectedEssenceOverlap is < 0d or > 1d)
+            {
+                issues.Add(Issue(
+                    "Error",
+                    "EssenceDiversityInvalid",
+                    path,
+                    "The direct Tower anchor's recorded Essence overlap is invalid."));
+            }
+        }
         else if (team.SourceBattles <= 0
             || team.SourceWins < 0
             || team.SourceLosses < 0
@@ -635,7 +667,8 @@ public sealed class JsonCombatCharacterProfileCatalogService(
             if (team.NearestSelectedEssenceOverlap is null
                 || !double.IsFinite(team.NearestSelectedEssenceOverlap.Value)
                 || team.NearestSelectedEssenceOverlap is < 0d or > 1d
-                || team.NearestSelectedEssenceOverlap > profileSet.MaximumEssenceOverlap)
+                || (!string.Equals(team.Family, "CalibrationAnchor", StringComparison.OrdinalIgnoreCase)
+                    && team.NearestSelectedEssenceOverlap > profileSet.MaximumEssenceOverlap))
             {
                 issues.Add(Issue(
                     "Error",
@@ -716,6 +749,13 @@ public sealed class JsonCombatCharacterProfileCatalogService(
             return team;
         }
     }
+
+    private static bool IsDirectContextAnchor(CombatCharacterProfileTeam team) =>
+        string.Equals(team.Family, "CalibrationAnchor", StringComparison.OrdinalIgnoreCase)
+        && team.SourceBattles == 0
+        && (team.Parties ?? []).Count == 1
+        && team.Parties![0].Evidence is { SourceBattles: 0 }
+        && (team.Parties[0].Evidence.ContextEvidence?.Count ?? 0) > 0;
 
     private void ValidateFamilySemantics(
         CombatCharacterProfileTeam team,
@@ -1150,6 +1190,47 @@ public sealed class JsonCombatCharacterProfileCatalogService(
             return;
         }
 
+        var isDirectContextAnchor = string.Equals(
+                                        evidence.Family,
+                                        "CalibrationAnchor",
+                                        StringComparison.OrdinalIgnoreCase)
+                                    && evidence.SourceBattles == 0;
+        if (isDirectContextAnchor)
+        {
+            if (evidence.SourceWins != 0
+                || evidence.SourceLosses != 0
+                || evidence.SourceDraws != 0
+                || evidence.SourceScore != 0d
+                || evidence.ConfidenceLower95 != 0d
+                || evidence.ConfidenceUpper95 != 1d
+                || evidence.SeedScoreMinimum is not null
+                || evidence.SeedScoreMaximum is not null
+                || evidence.AdversarySourceSignature is not null
+                || evidence.AdversaryBattles is not null
+                || evidence.AdversaryScore is not null
+                || evidence.AdversaryConfidenceLower95 is not null
+                || evidence.AdversaryConfidenceUpper95 is not null
+                || !contextEvidence.Any(context =>
+                    WorldTowerProfileTargetContract.Contains(context.WinRate)))
+            {
+                issues.Add(Issue(
+                    "Error",
+                    "PartyDirectContextAnchorEvidenceInvalid",
+                    $"{path}.evidence",
+                    "A direct Tower calibration anchor requires neutral PvP fields and at least one exact-context 5%–20% result."));
+            }
+            if (!double.IsFinite(evidence.NearestSelectedEssenceOverlap)
+                || evidence.NearestSelectedEssenceOverlap is < 0d or > 1d)
+            {
+                issues.Add(Issue(
+                    "Error",
+                    "PartyEssenceDiversityInvalid",
+                    $"{path}.evidence",
+                    "The direct Tower anchor's recorded Essence overlap is invalid."));
+            }
+            return;
+        }
+
         if (evidence.SourceBattles <= 0
             || evidence.SourceWins < 0
             || evidence.SourceLosses < 0
@@ -1207,7 +1288,8 @@ public sealed class JsonCombatCharacterProfileCatalogService(
         }
         if (!double.IsFinite(evidence.NearestSelectedEssenceOverlap)
             || evidence.NearestSelectedEssenceOverlap is < 0d or > 1d
-            || evidence.NearestSelectedEssenceOverlap > profileSet.MaximumEssenceOverlap)
+            || (!string.Equals(evidence.Family, "CalibrationAnchor", StringComparison.OrdinalIgnoreCase)
+                && evidence.NearestSelectedEssenceOverlap > profileSet.MaximumEssenceOverlap))
         {
             issues.Add(Issue(
                 "Error",

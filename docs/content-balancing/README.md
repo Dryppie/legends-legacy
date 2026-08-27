@@ -9,8 +9,9 @@ This folder contains the combat architecture, Character Profile, and recommendat
 3. [`world-tower-party-profile-calibration-redesign.md`](world-tower-party-profile-calibration-redesign.md) — implemented five-character role-aware discovery, finalist qualification, and exact 5/10/15-character Tower expeditions.
 4. [`combat-calibration-current-state-and-gaps.md`](combat-calibration-current-state-and-gaps.md) — implemented state, remaining proof, and recommended priorities.
 5. [`world-tower-profile-catalog-review.md`](world-tower-profile-catalog-review.md) — historical schema-3 catalog review and lessons that still affect approval.
-6. [`one-click-balancing-rerun.md`](one-click-balancing-rerun.md) — current fingerprint-contract-3 rerun orchestration, dependency-aware reuse, production qualification, candidate certification, and promotion rules.
+6. [`world-tower-contract-v3-campaign-review.md`](world-tower-contract-v3-campaign-review.md) — first current-contract campaign result, certification failures, and the resulting decision point.
+7. [`one-click-balancing-rerun.md`](one-click-balancing-rerun.md) — current fingerprint-contract-3 rerun orchestration, dependency-aware reuse, production qualification, candidate certification, and promotion rules.
 
 The source-controlled approved Character Profile catalog remains at [`combat-character-profiles.json`](../../LL/src/API/API.LL/Data/combat/combat-character-profiles.json).
 
-Current operational status: earlier schema-3 and pre-role-aware schema-4 campaigns are historical evidence only. The next promotable artifact must come from a fresh role-aware, Tower-qualified campaign under profile schema/generator 7 and fingerprint contract 3.
+Current operational status: generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` reused all five role-aware discovery audits, generated and validated 13 exact-scenario profile sets, passed production smoke, and passed fixed-seed 100-sample certification with zero issues on 2026-08-27. Every floor has at least one exact-context team at an inclusive 5%–20% estimated win rate, and every canonical cohort confidence gate passes. The campaign is ready for human promotion review; the source-controlled approved catalog remains deliberately unchanged.
