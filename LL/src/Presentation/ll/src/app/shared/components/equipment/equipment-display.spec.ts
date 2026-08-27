@@ -287,13 +287,17 @@ describe('EquipmentDisplayComponent', () => {
 
     const temperingBonus: HTMLElement | null =
       fixture.nativeElement.querySelector('[data-testid="tempering-bonus"]');
+    const temperedAttributeRow: HTMLElement | null =
+      fixture.nativeElement.querySelector(
+        '[data-testid="tempered-attribute-row"]',
+      );
 
     expect(text).toContain('/ 103–134');
     expect(text).not.toContain('Rarity +10');
     expect(temperingBonus?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
       '✦ +10',
     );
-    expect(temperingBonus?.getAttribute('aria-label')).toBe(
+    expect(temperedAttributeRow?.getAttribute('aria-label')).toBe(
       'Max Health tempered by +10',
     );
     expect(Number.parseFloat(fill?.style.width ?? '')).toBeCloseTo(64.52, 1);
@@ -360,19 +364,25 @@ describe('EquipmentDisplayComponent', () => {
     fixture.componentRef.setInput('item', item);
     fixture.detectChanges();
 
-    const temperingBonus: HTMLElement = fixture.nativeElement.querySelector(
-      '[data-testid="tempering-bonus"]',
+    const temperedAttributeRow: HTMLElement =
+      fixture.nativeElement.querySelector(
+        '[data-testid="tempered-attribute-row"]',
+      );
+    temperedAttributeRow.dispatchEvent(new PointerEvent('pointerenter'));
+
+    const tooltip: HTMLElement | null = document.querySelector(
+      '.tempering-bonus-tooltip-panel [role="tooltip"]',
     );
-    temperingBonus.dispatchEvent(new MouseEvent('mouseenter'));
+    const tooltipText = tooltip?.textContent?.replace(/\s+/g, ' ').trim();
+
+    expect(tooltip).not.toBeNull();
+
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const tooltipId = temperingBonus.getAttribute('aria-describedby');
-    const tooltipText = document
-      .getElementById(tooltipId ?? '')
-      ?.textContent?.replace(/\s+/g, ' ')
-      .trim();
+    const tooltipId = temperedAttributeRow.getAttribute('aria-describedby');
 
+    expect(tooltipId).toBe(tooltip?.id ?? null);
     expect(tooltipText).toContain('Tempered attribute');
     expect(tooltipText).toContain('Max Health');
     expect(tooltipText?.replace(/\s+/g, '')).toContain('Original113');
@@ -382,14 +392,14 @@ describe('EquipmentDisplayComponent', () => {
       document.querySelector('.tempering-bonus-tooltip-panel')?.classList,
     ).toContain('pointer-events-none');
 
-    temperingBonus.dispatchEvent(new MouseEvent('mouseleave'));
+    temperedAttributeRow.dispatchEvent(new PointerEvent('pointerleave'));
     fixture.detectChanges();
 
     expect(document.getElementById(tooltipId ?? '')).not.toBeNull();
     fixture.destroy();
   });
 
-  it('opens the tempering breakdown from the bonused attribute name', async () => {
+  it('opens the tempering breakdown from a mouse entering the attribute row', async () => {
     await TestBed.configureTestingModule({
       imports: [EquipmentDisplayComponent],
     }).compileComponents();
@@ -416,25 +426,86 @@ describe('EquipmentDisplayComponent', () => {
     fixture.componentRef.setInput('item', item);
     fixture.detectChanges();
 
-    const attributeName: HTMLElement = fixture.nativeElement.querySelector(
-      '[data-testid="tempered-attribute-name"]',
+    const temperedAttributeRow: HTMLElement =
+      fixture.nativeElement.querySelector(
+        '[data-testid="tempered-attribute-row"]',
+      );
+    temperedAttributeRow.dispatchEvent(new MouseEvent('mouseenter'));
+
+    const tooltip: HTMLElement | null = document.querySelector(
+      '.tempering-bonus-tooltip-panel [role="tooltip"]',
     );
-    attributeName.dispatchEvent(new MouseEvent('mouseenter'));
+    const tooltipText = tooltip?.textContent?.replace(/\s+/g, ' ').trim();
+
+    expect(tooltip).not.toBeNull();
+
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const tooltipId = attributeName.getAttribute('aria-describedby');
-    const tooltipText = document
-      .getElementById(tooltipId ?? '')
-      ?.textContent?.replace(/\s+/g, ' ')
-      .trim();
+    const tooltipId = temperedAttributeRow.getAttribute('aria-describedby');
 
+    expect(tooltipId).toBe(tooltip?.id ?? null);
     expect(tooltipText).toContain('Tempered attribute');
     expect(tooltipText).toContain('Magic Penetration');
     expect(tooltipText?.replace(/\s+/g, '')).toContain('Original1.31');
     expect(tooltipText?.replace(/\s+/g, '')).toContain('Upgrade+2');
     expect(tooltipText?.replace(/\s+/g, '')).toContain('Final3.31');
 
+    fixture.destroy();
+  });
+
+  it('opens the inventory tempering overlay without an equipped comparison', async () => {
+    await TestBed.configureTestingModule({
+      imports: [EquipmentDisplayComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(EquipmentDisplayComponent);
+    const item = equipmentInstance(
+      'inventory-tempering-tooltip-item',
+      AttributeType.Power,
+      7.33,
+    );
+    item.rollRange = {
+      minimumPotential: 260,
+      maximumPotential: 380,
+      attributes: [
+        {
+          attributeType: AttributeType.Power,
+          minimumAmount: 6.32,
+          maximumAmount: 9.23,
+          rarityBonusAmount: 1,
+          hasCraftedRange: true,
+        },
+      ],
+    };
+
+    fixture.componentRef.setInput('item', item);
+    fixture.componentRef.setInput('inlineComparison', true);
+    fixture.detectChanges();
+
+    const temperedAttributeRow: HTMLElement =
+      fixture.nativeElement.querySelector(
+        '[data-testid="tempered-attribute-row"]',
+      );
+    temperedAttributeRow.dispatchEvent(new MouseEvent('mouseenter'));
+    fixture.detectChanges();
+
+    const tooltipId = temperedAttributeRow.getAttribute('aria-describedby');
+    const tooltipText = document
+      .getElementById(tooltipId ?? '')
+      ?.textContent?.replace(/\s+/g, ' ')
+      .trim();
+
+    expect(tooltipId).toMatch(/^inventory-tempering-tooltip-/);
+    expect(tooltipText).toContain('Tempered attribute');
+    expect(tooltipText).toContain('Power');
+    expect(tooltipText?.replace(/\s+/g, '')).toContain('Original6.33');
+    expect(tooltipText?.replace(/\s+/g, '')).toContain('Upgrade+1');
+    expect(tooltipText?.replace(/\s+/g, '')).toContain('Final7.33');
+
+    temperedAttributeRow.dispatchEvent(new MouseEvent('mouseleave'));
+    fixture.detectChanges();
+
+    expect(document.getElementById(tooltipId ?? '')).toBeNull();
     fixture.destroy();
   });
 

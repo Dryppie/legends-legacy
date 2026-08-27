@@ -97,7 +97,8 @@ public class GuildVaultService : IGuildVaultService
         {
             InventoryId = characterId,
             ItemInstanceId = vaultItem.EquipmentInstanceId,
-            Quantity = 1
+            Quantity = 1,
+            SeenAtUtc = DateTimeOffset.UtcNow
         });
         await _economyLedger.RecordGuildVaultMovementAsync(
             EconomyEventType.GuildVaultBorrow,
@@ -208,12 +209,14 @@ public class GuildVaultService : IGuildVaultService
             {
                 InventoryId = characterId,
                 ItemInstanceId = vaultItem.EquipmentInstanceId,
-                Quantity = 1
+                Quantity = 1,
+                SeenAtUtc = DateTimeOffset.UtcNow
             });
         }
         else
         {
             withdrawingCharacterItem.Quantity = 1;
+            withdrawingCharacterItem.SeenAtUtc ??= DateTimeOffset.UtcNow;
         }
 
         _context.GuildVaultItems.Remove(vaultItem);

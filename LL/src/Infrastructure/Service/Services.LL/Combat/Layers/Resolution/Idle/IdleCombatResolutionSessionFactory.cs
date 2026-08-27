@@ -1,10 +1,6 @@
 ﻿using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
-using Domain.Models.Entities.Characters;
-using Domain.Models.Entities.Creatures;
-using Domain.Models.Essences;
-using Domain.Models.Regions.Areas;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
@@ -17,19 +13,19 @@ namespace Services.LL.Combat.Layers.Resolution.Idle;
 public sealed class IdleCombatResolutionSessionFactory : IIdleCombatResolutionSessionFactory
 {
     private readonly IEntityService _entityService;
-    private readonly ICombatSetupService _combatSetupService;
+    private readonly ICombatPreparationPipeline _combatPreparation;
     private readonly ICombatEngineExecutor _engineExecutor;
     private readonly ICombatEncounterResultFactory _resultFactory;
     private HostileTemplateCache? _hostileCache;
 
     public IdleCombatResolutionSessionFactory(
         IEntityService entityService,
-        ICombatSetupService combatSetupService,
+        ICombatPreparationPipeline combatPreparation,
         ICombatEngineExecutor engineExecutor,
         ICombatEncounterResultFactory resultFactory)
     {
         _entityService = entityService;
-        _combatSetupService = combatSetupService;
+        _combatPreparation = combatPreparation;
         _engineExecutor = engineExecutor;
         _resultFactory = resultFactory;
     }
@@ -71,10 +67,11 @@ public sealed class IdleCombatResolutionSessionFactory : IIdleCombatResolutionSe
                 sourceEntitiesById[id] = source;
             }
 
-            friendlyTemplates = BuildFriendlyTemplates(playerIds, sourceEntitiesById);
-            await _combatSetupService.PrepareEntitiesForCombat(
-                [.. friendlyTemplates.Values],
-                EssenceCombatActivity.IdleCombat);
+            var friendly = await _combatPreparation.PrepareAsync(
+                CombatContentType.Idle,
+                CreateFriendlyRequests(playerIds, sourceEntitiesById),
+                cancellationToken);
+            friendlyTemplates = friendly.ToDictionary(x => x.Slot.SourceEntityId, x => x.Combatant);
         }
         else
         {
@@ -88,11 +85,24 @@ public sealed class IdleCombatResolutionSessionFactory : IIdleCombatResolutionSe
             sourceEntitiesById = entities.ToDictionary(x => x.Id);
             EnsureAllLoaded(allSourceIds, sourceEntitiesById);
 
-            friendlyTemplates = BuildFriendlyTemplates(playerIds, sourceEntitiesById);
-            var builtHostileTemplates = BuildHostileTemplates(hostileIds, sourceEntitiesById, plan.Area);
-            await _combatSetupService.PrepareEntitiesForCombat(
-                [.. friendlyTemplates.Values, .. builtHostileTemplates.Values],
-                EssenceCombatActivity.IdleCombat);
+            var prepared = await _combatPreparation.PrepareAsync(
+                CombatContentType.Idle,
+                [
+                    .. CreateFriendlyRequests(playerIds, sourceEntitiesById),
+                    .. hostileIds.Select(hostileId => new CombatantPreparationRequest(
+                        new CombatParticipantSlot(
+                            $"idle-template-hostile-{hostileId:N}",
+                            hostileId,
+                            CombatSide.Hostile),
+                        new LiveCombatantPreparationSource(sourceEntitiesById[hostileId], plan.Area)))
+                ],
+                cancellationToken);
+            friendlyTemplates = prepared
+                .Where(x => x.Slot.Side == CombatSide.Friendly)
+                .ToDictionary(x => x.Slot.SourceEntityId, x => x.Combatant);
+            var builtHostileTemplates = prepared
+                .Where(x => x.Slot.Side == CombatSide.Hostile)
+                .ToDictionary(x => x.Slot.SourceEntityId, x => x.Combatant);
 
             hostileSources = hostileIds.ToDictionary(id => id, id => sourceEntitiesById[id]);
             hostileTemplates = builtHostileTemplates;
@@ -136,54 +146,15 @@ public sealed class IdleCombatResolutionSessionFactory : IIdleCombatResolutionSe
         }
     }
 
-    private Dictionary<Guid, CombatEntity> BuildFriendlyTemplates(
+    private static CombatantPreparationRequest[] CreateFriendlyRequests(
         IReadOnlyCollection<Guid> playerIds,
         Dictionary<Guid, Entity> sourceEntitiesById)
-    {
-        var templates = new Dictionary<Guid, CombatEntity>();
-
-        foreach (var playerId in playerIds)
-        {
-            if (sourceEntitiesById[playerId] is not Character character)
-            {
-                throw new InvalidOperationException(
-                    $"Idle combat player source entity '{playerId}' is not a Character.");
-            }
-
-            var template = _combatSetupService
-                .CreatePlayerCombatEntities([character])
-                .Single();
-
-            templates.Add(playerId, template);
-        }
-
-        return templates;
-    }
-
-    private Dictionary<Guid, CombatEntity> BuildHostileTemplates(
-        IReadOnlyCollection<Guid> hostileIds,
-        Dictionary<Guid, Entity> sourceEntitiesById,
-        Area area)
-    {
-        var templates = new Dictionary<Guid, CombatEntity>();
-
-        foreach (var hostileId in hostileIds)
-        {
-            if (sourceEntitiesById[hostileId] is not Creature creature)
-            {
-                throw new InvalidOperationException(
-                    $"Idle combat hostile source entity '{hostileId}' is not a Creature.");
-            }
-
-            var template = _combatSetupService
-                .CreateCreatureCombatEntities([creature], area)
-                .Single();
-
-            templates.Add(hostileId, template);
-        }
-
-        return templates;
-    }
+        => playerIds.Select(playerId => new CombatantPreparationRequest(
+            new CombatParticipantSlot(
+                $"idle-template-friendly-{playerId:N}",
+                playerId,
+                CombatSide.Friendly),
+            new LiveCombatantPreparationSource(sourceEntitiesById[playerId]))).ToArray();
 
     private sealed record HostileTemplateCache(
         string AreaId,

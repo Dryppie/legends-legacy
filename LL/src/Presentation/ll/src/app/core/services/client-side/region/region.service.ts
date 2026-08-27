@@ -11,6 +11,14 @@ import { GatheringType } from '../../../../shared/models/enums/gatheringType';
   providedIn: 'root',
 })
 export class RegionService {
+  private readonly firstRegionId = 'shenic';
+  private readonly regionIdByAreaId: ReadonlyMap<string, string> = new Map([
+    ...this.getShenicRegion().areas.map((area) => [area.id, 'shenic'] as const),
+    ...this.getMeranRegion().areas.map((area) => [area.id, 'meran'] as const),
+  ]);
+  private readonly regionIds: ReadonlySet<string> = new Set(
+    this.regionIdByAreaId.values(),
+  );
   private readonly regionNameByAreaId: ReadonlyMap<string, string> = new Map(
     [this.getShenicRegion(), this.getMeranRegion()].flatMap((region) =>
       region.areas.map((area) => [area.id, region.name]),
@@ -18,6 +26,18 @@ export class RegionService {
   );
 
   constructor(private apiService: ApiService) {}
+
+  public getFirstRegionId(): string {
+    return this.firstRegionId;
+  }
+
+  public getRegionIdByAreaId(areaId: string): string | null {
+    return this.regionIdByAreaId.get(areaId) ?? null;
+  }
+
+  public isRegionId(regionId: string): boolean {
+    return this.regionIds.has(regionId);
+  }
 
   public getRegionNameByAreaId(areaId: string): string | null {
     return this.regionNameByAreaId.get(areaId) ?? null;

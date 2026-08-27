@@ -9,11 +9,13 @@ using Application.Interfaces.WebSockets;
 using Application.UseCases.Outbox;
 using Application.UseCases.RegionBosses.Dtos;
 using Application.WebSockets.Contracts;
+using Domain.Models.Essences;
 using Domain.Models.RegionBosses;
 using Domain.Models.Quests;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Services.LL.Interfaces;
 
 namespace Services.LL.RegionBosses;
 
@@ -21,6 +23,7 @@ public sealed class RegionBossService(
     IDbContext db,
     IRegionBossDefinitionProvider definitions,
     IPowerRatingService powerRatings,
+    ICharacterSnapshotService snapshots,
     IRegionBossCombatResolver combatResolver,
     IRegionBossPlaybackBundleBuilder playbackBundles,
     IGameRealtimeBroadcaster realtime,
@@ -453,6 +456,7 @@ public sealed class RegionBossService(
                 else
                 {
                     await RefreshPowerRatingsAsync(item.Signups, cancellationToken);
+                    await EnsureCombatSnapshotsAsync(item.Signups, cancellationToken);
                     var assignments = CreateRuns(item);
                     if (assignments.Count > 0)
                     {
@@ -641,7 +645,19 @@ public sealed class RegionBossService(
         {
             await db.AcquireRegionBossRunLockAsync(runId, cancellationToken);
             db.ClearTrackedEntities();
-            run = await db.RegionBossRuns.Include(x => x.Event).Include(x => x.Members)
+            run = await db.RegionBossRuns
+                .AsSplitQuery()
+                .Include(x => x.Event)
+                .Include(x => x.Members)
+                    .ThenInclude(x => x.CharacterSnapshot)
+                        .ThenInclude(x => x!.BaseAttributes)
+                .Include(x => x.Members)
+                    .ThenInclude(x => x.CharacterSnapshot)
+                        .ThenInclude(x => x!.Equipment)
+                            .ThenInclude(x => x.InstanceModifiers)
+                .Include(x => x.Members)
+                    .ThenInclude(x => x.CharacterSnapshot)
+                        .ThenInclude(x => x!.EquippedEssences)
                 .SingleAsync(x => x.Id == runId, cancellationToken);
             var claimedAt = timeProvider.GetUtcNow();
             var canClaim = run.Event.Status == RegionBossEventStatus.Resolving
@@ -651,6 +667,7 @@ public sealed class RegionBossService(
                         && (!run.SimulationLeaseUntil.HasValue || run.SimulationLeaseUntil <= claimedAt)));
             if (!canClaim)
                 return;
+            await EnsureCombatSnapshotsAsync(run.Members, cancellationToken);
             run.Status = RegionBossRunStatus.Resolving;
             run.StartedAtUtc ??= claimedAt;
             run.SimulationAttempts++;
@@ -751,6 +768,21 @@ public sealed class RegionBossService(
             var rating = await powerRatings.GetCharacterRatingAsync(signup.CharacterId, cancellationToken);
             signup.PowerRating = rating.Overall;
             signup.PowerRatingAlgorithmVersion = rating.AlgorithmVersion;
+        }
+    }
+
+    private async Task EnsureCombatSnapshotsAsync(
+        IEnumerable<RegionBossSignup> signups,
+        CancellationToken cancellationToken)
+    {
+        foreach (var signup in signups.Where(x => x.CharacterSnapshotId is null))
+        {
+            var snapshot = await snapshots.CreateAsync(
+                signup.CharacterId,
+                EssenceCombatActivity.RegionBoss,
+                cancellationToken);
+            signup.CharacterSnapshotId = snapshot.Id;
+            signup.CharacterSnapshot = snapshot;
         }
     }
 

@@ -17,6 +17,7 @@ export interface CharacterActionDto {
   revision: string;
   isDeleted: boolean;
   autoResumedFromTempering?: boolean;
+  returnToCombatAreaId?: string | null;
   temperingSession?: TemperingSessionDto;
   combatSession?: CombatSessionDto;
   craftingActionDetails?: CraftingActionDetails;

@@ -339,6 +339,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             ItemInstanceId = item.Id,
             ItemInstance = item,
             Quantity = 1,
+            SeenAtUtc = DateTimeOffset.UtcNow,
             IsFavorite = item.IsFavorite
         });
     }

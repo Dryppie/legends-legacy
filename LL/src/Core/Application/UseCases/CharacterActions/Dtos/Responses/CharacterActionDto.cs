@@ -18,6 +18,7 @@ public class CharacterActionDto : IMapFrom<CharacterAction>
     public int? ResolutionIntervalMs { get; set; }
     public bool IsDeleted { get; set; }
     public bool AutoResumedFromTempering { get; set; }
+    public string? ReturnToCombatAreaId { get; set; }
     public CombatSessionDto? CombatSession { get; set; }
     public TemperingSessionDto? TemperingSession { get; set; }
     public CombatActionDetails? CombatActionDetails { get; set; }

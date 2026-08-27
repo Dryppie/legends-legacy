@@ -4686,6 +4686,9 @@ namespace Persistence.LL.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<Guid?>("CharacterSnapshotId")
+                        .HasColumnType("uuid");
+
                     b.Property<int?>("PartySlot")
                         .HasColumnType("integer");
 
@@ -4707,6 +4710,8 @@ namespace Persistence.LL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CharacterId");
+
+                    b.HasIndex("CharacterSnapshotId");
 
                     b.HasIndex("RegionBossEventId", "AccountId")
                         .IsUnique();
@@ -4841,6 +4846,10 @@ namespace Persistence.LL.Migrations
 
                     b.Property<Guid>("CharacterId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("Level")
                         .HasColumnType("integer");
@@ -6824,6 +6833,11 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.RegionBosses.RegionBossSignup", b =>
                 {
+                    b.HasOne("Domain.Models.Snapshots.CharacterSnapshot", "CharacterSnapshot")
+                        .WithMany()
+                        .HasForeignKey("CharacterSnapshotId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Domain.Models.RegionBosses.RegionBossEvent", "Event")
                         .WithMany("Signups")
                         .HasForeignKey("RegionBossEventId")
@@ -6834,6 +6848,8 @@ namespace Persistence.LL.Migrations
                         .WithMany("Members")
                         .HasForeignKey("RegionBossRunId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CharacterSnapshot");
 
                     b.Navigation("Event");
 

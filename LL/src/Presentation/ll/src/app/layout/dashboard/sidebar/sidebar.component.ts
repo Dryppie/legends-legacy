@@ -34,6 +34,7 @@ import { QuestStateService } from '../../../core/services/api/quest/quest-state.
 import { QuestPresenterService } from '../../../core/services/api/quest/quest-presenter.service';
 import { ProgressBarComponent } from '../../../shared/components/progress-bar/progress-bar.component';
 import { getEstimatedTemperingQueueDuration } from '../../../shared/utils/tempering/tempering-duration.utils';
+import { RegionService } from '../../../core/services/client-side/region/region.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -95,6 +96,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly questState: QuestStateService,
     private readonly questPresenter: QuestPresenterService,
+    private readonly regionService: RegionService,
     dungeonState: DungeonStateService,
     raidService: RaidService,
   ) {
@@ -163,6 +165,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   isItemActive(route: string[], exact = false): boolean {
+    if (route.length === 1 && route[0] === 'world') {
+      const match = /^\/(?:game\/)?world\/([^/]+)\/?$/.exec(
+        this.routePath(this.activeUrl),
+      );
+      return !!match && this.regionService.isRegionId(match[1]);
+    }
+
     return this.sidebarService.isRouteActive(route, exact);
   }
 

@@ -34,6 +34,7 @@ public sealed class RegionBossSignupConfiguration : IEntityTypeConfiguration<Reg
         builder.HasIndex(x => new { x.RegionBossEventId, x.AccountId }).IsUnique();
         builder.HasIndex(x => new { x.RegionBossRunId, x.PartySlot }).IsUnique();
         builder.HasIndex(x => x.CharacterId);
+        builder.HasOne(x => x.CharacterSnapshot).WithMany().HasForeignKey(x => x.CharacterSnapshotId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(x => x.Run).WithMany(x => x.Members).HasForeignKey(x => x.RegionBossRunId).OnDelete(DeleteBehavior.SetNull);
     }
 }

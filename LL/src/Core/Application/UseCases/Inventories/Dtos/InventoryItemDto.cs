@@ -11,8 +11,8 @@ public class InventoryItemDto : IMapFrom<InventoryItem>
     public bool IsFavorite { get; set; }
 
     /// <summary>
-    /// Projected from <see cref="InventoryItem.IsNew"/>: a crafted item the owner has not
-    /// inspected yet. Never stored, so there is one source of truth for the rule.
+    /// Projected from <see cref="InventoryItem.IsNew"/>: eligible newly acquired equipment
+    /// the owner has not inspected yet. Never stored, so there is one source of truth for the rule.
     /// </summary>
     public bool IsNew { get; set; }
 

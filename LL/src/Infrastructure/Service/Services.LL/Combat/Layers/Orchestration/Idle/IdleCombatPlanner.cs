@@ -133,6 +133,7 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
                 Area: plan.Area,
                 EncounterCadence: plan.EncounterCadence))
         {
+            ContentType = CombatContentType.Idle,
             RandomSeed = randomSeed,
             // A safety-limited batch may be the last batch in this API call
             // without being the last due encounter. Do not log that historical

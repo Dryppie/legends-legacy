@@ -6,6 +6,7 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Regions.Areas;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Idle;
+using Services.LL.Combat.Layers.Resolution;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
@@ -23,7 +24,7 @@ public sealed class IdleCombatResolutionSessionFactoryTests
         var setup = new RecordingCombatSetupService();
         var factory = new IdleCombatResolutionSessionFactory(
             entities,
-            setup,
+            new CombatPreparationPipeline(new UnusedSnapshotCombatantBuilder(), setup),
             new UnusedCombatEngineExecutor(),
             new UnusedCombatEncounterResultFactory());
         var area = new Area
@@ -97,11 +98,24 @@ public sealed class IdleCombatResolutionSessionFactoryTests
         public Task PrepareEntitiesForCombat(List<CombatEntity> entities)
         {
             PreparedEntityCounts.Add(entities.Count);
+            foreach (var entity in entities)
+            {
+                entity.BaseCombatAttributes[Domain.Models.Attributes.AttributeType.MaxHealth] = 1;
+                entity.CombatAttributes[Domain.Models.Attributes.AttributeType.MaxHealth] = 1;
+                entity.SyncCurrentHealthToMax();
+            }
             return Task.CompletedTask;
         }
 
         public List<SimpleCombatEntity> CreateSimpleCombatEntities(List<CombatEntity> combatEntities) =>
             throw new NotSupportedException();
+    }
+
+    private sealed class UnusedSnapshotCombatantBuilder : ISnapshotCombatantBuilder
+    {
+        public Task<IReadOnlyList<CombatRuntimeParticipant>> BuildAsync(
+            IReadOnlyList<SnapshotCombatantRequest> requests,
+            CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 
     private sealed class UnusedCombatEngineExecutor : ICombatEngineExecutor

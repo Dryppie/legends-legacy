@@ -11,4 +11,9 @@ public sealed record CombatEncounterResolutionResult(
     BattleOutcome Outcome,
     CombatResult CombatResult,
     IReadOnlyList<SimpleCombatEntity> FriendlyPostState,
-    IReadOnlyList<SimpleCombatEntity> HostilePostState);
+    IReadOnlyList<SimpleCombatEntity> HostilePostState)
+{
+    public required CombatContentType ContentType { get; init; }
+    public BattleOutcome EngineOutcome => CombatResult.EngineOutcome;
+    public BattleOutcome ContentOutcome => CombatResult.ContentOutcome;
+}

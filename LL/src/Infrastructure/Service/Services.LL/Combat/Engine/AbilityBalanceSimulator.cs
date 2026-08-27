@@ -11,6 +11,7 @@ namespace Services.LL.Combat.Engine;
 
 public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
 {
+    public const int AlgorithmVersion = 2;
     private const string TrainingEssenceId = "essence.training";
     private const int DefaultMaxTicks = 6000;
     private const int BattleSummaryLimit = 250;
@@ -53,14 +54,17 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
         var compiledStatuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
         var compiledSummons = AbilityCompiler.CompileSummons(catalog.Summons);
         var participantAttributes = CreateParticipantAttributes(normalized);
+        var participantAttributesByRole = CreateParticipantAttributesByRole(normalized);
         var savedCandidates = NormalizeCandidateTeams(
                 normalized.CandidateTeams,
                 normalized.TeamSize,
                 normalized.EssencesPerParticipant,
-                balanceEssences)
+                balanceEssences,
+                normalized.UseCanonicalRoles)
             .ToList();
         var mode = savedCandidates.Count > 0 ? "SavedRoundRobin" : "RandomPool";
         var results = new Dictionary<string, TeamAccumulator>(StringComparer.Ordinal);
+        var matchups = new Dictionary<string, MatchupAccumulator>(StringComparer.Ordinal);
         var battleSummaries = new List<AbilityBalanceBattleSummary>();
         var battleIndex = 0;
         var candidateTeamCount = savedCandidates.Count;
@@ -97,12 +101,12 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
                         compiledAbilitiesByEssenceId,
                         compiledStatuses,
                         compiledSummons,
-                        participantAttributes);
+                        participantAttributesByRole);
                 });
 
             foreach (var execution in executions)
             {
-                AccumulateBattle(execution, essenceNames, results, battleSummaries);
+                AccumulateBattle(execution, essenceNames, results, matchups, battleSummaries);
                 ReportProgress(
                     progress,
                     execution.BattleIndex + 1,
@@ -153,7 +157,8 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
                 essenceFamilies,
                 normalized.TeamSize,
                 normalized.EssencesPerParticipant,
-                normalized.CandidatePoolSize);
+                normalized.CandidatePoolSize,
+                normalized.UseCanonicalRoles);
             candidateTeamCount = randomCandidates.Count;
 
             for (var run = 0; run < normalized.BattleCount; run++)
@@ -210,7 +215,18 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
                 .ToList(),
             ranked,
             essenceResults,
-            battleSummaries);
+            battleSummaries,
+            matchups.Values
+                .Select(matchup => matchup.ToResult())
+                .OrderBy(matchup => matchup.FirstSignature, StringComparer.Ordinal)
+                .ThenBy(matchup => matchup.SecondSignature, StringComparer.Ordinal)
+                .ToArray(),
+            participantAttributesByRole.ToDictionary(
+                pair => pair.Key,
+                pair => (IReadOnlyDictionary<string, float>)pair.Value.ToDictionary(
+                    attribute => attribute.Key.ToString(),
+                    attribute => attribute.Value),
+                StringComparer.OrdinalIgnoreCase));
     }
 
     private static AbilityBalanceSimulationRequest NormalizeRequest(
@@ -218,7 +234,7 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
         int availableEssenceCount,
         int availableCreatureCount)
     {
-        var teamSize = Math.Clamp(request.TeamSize <= 0 ? 1 : request.TeamSize, 1, 10);
+        var teamSize = Math.Clamp(request.TeamSize <= 0 ? 1 : request.TeamSize, 1, 15);
         var maxEssenceCount = Math.Max(1, Math.Min(10, availableCreatureCount));
         var essenceCount = Math.Clamp(request.EssencesPerParticipant <= 0 ? 1 : request.EssencesPerParticipant, 1, maxEssenceCount);
         var battleCount = Math.Max(request.BattleCount <= 0 ? 100 : request.BattleCount, 1);
@@ -277,6 +293,48 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
         return participantAttributes;
     }
 
+    private IReadOnlyDictionary<string, IReadOnlyDictionary<AttributeType, float>>
+        CreateParticipantAttributesByRole(AbilityBalanceSimulationRequest request)
+    {
+        if (!request.UseCanonicalRoles)
+        {
+            return new Dictionary<string, IReadOnlyDictionary<AttributeType, float>>(
+                StringComparer.OrdinalIgnoreCase)
+            {
+                ["Balance"] = CreateParticipantAttributes(request)
+            };
+        }
+
+        if (_canonicalBuilds is null)
+            throw new InvalidOperationException("Canonical role discovery requires canonical equipment builds.");
+
+        var rarity = Enum.Parse<Rarity>(request.EquipmentRarity, true);
+        var rung = _canonicalBuilds.GetProgressionLadder().Single(candidate =>
+            candidate.Tier == request.EquipmentTier
+            && candidate.Rarity == rarity
+            && candidate.Quality == ItemQuality.Standard);
+        return CanonicalCooperativeRosterCatalog.CreateParty(request.TeamSize)
+            .Select(slot => slot.Role)
+            .Distinct()
+            .ToDictionary(
+                role => role.ToString(),
+                role => (IReadOnlyDictionary<AttributeType, float>)ProjectAttributes(
+                    _canonicalBuilds.CreateBuild(role, rung, essenceCount: 0)),
+                StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static IReadOnlyDictionary<AttributeType, float> ProjectAttributes(
+        CanonicalEquipmentBuild build)
+    {
+        var baseAttributes = build.Character.BaseAttributes.ToDictionary(
+            attribute => attribute.AttributeType,
+            attribute => attribute.Value);
+        var equipmentModifiers = AttributeCalculator.ProjectEquipmentModifiers(
+            build.Equipment,
+            build.Character.Level);
+        return AttributeCalculator.CalculateProjectedAttributes(baseAttributes, equipmentModifiers);
+    }
+
     private static void ReportProgress(
         Action<AbilityBalanceSimulationProgress>? progress,
         long completed,
@@ -291,13 +349,19 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
         IReadOnlyList<AbilityBalanceTeamLoadout>? candidates,
         int fallbackTeamSize,
         int fallbackEssenceCount,
-        IReadOnlyDictionary<string, BalanceEssence> balanceEssences)
+        IReadOnlyDictionary<string, BalanceEssence> balanceEssences,
+        bool useCanonicalRoles)
     {
         if (candidates is null)
             yield break;
 
         foreach (var candidate in candidates)
         {
+            var roles = useCanonicalRoles
+                ? CanonicalCooperativeRosterCatalog.CreateParty(fallbackTeamSize)
+                    .Select(slot => slot.Role.ToString())
+                    .ToArray()
+                : Enumerable.Repeat("Balance", fallbackTeamSize).ToArray();
             var participants = candidate.Participants
                 .Where(x => x.EssenceIds.Count > 0)
                 .Take(fallbackTeamSize)
@@ -312,7 +376,7 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
                     var essenceIds = requestedEssenceIds
                         .Take(fallbackEssenceCount)
                         .ToList();
-                    return new AbilityBalanceParticipantLoadout(essenceIds);
+                    return new AbilityBalanceParticipantLoadout(essenceIds, roles[participantIndex]);
                 })
                 .Where(x => x.EssenceIds.Count > 0)
                 .ToList();
@@ -326,9 +390,15 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
         Random random,
         IReadOnlyList<BalanceEssenceFamily> essenceFamilies,
         int teamSize,
-        int essencesPerParticipant)
+        int essencesPerParticipant,
+        bool useCanonicalRoles)
     {
         var participants = new List<AbilityBalanceParticipantLoadout>(teamSize);
+        var roles = useCanonicalRoles
+            ? CanonicalCooperativeRosterCatalog.CreateParty(teamSize)
+                .Select(slot => slot.Role.ToString())
+                .ToArray()
+            : Enumerable.Repeat("Balance", teamSize).ToArray();
         for (var index = 0; index < teamSize; index++)
         {
             var essenceIds = essenceFamilies
@@ -337,7 +407,7 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
                 .Select(family => family.EssenceIds[random.Next(family.EssenceIds.Count)])
                 .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
                 .ToList();
-            participants.Add(new AbilityBalanceParticipantLoadout(essenceIds));
+            participants.Add(new AbilityBalanceParticipantLoadout(essenceIds, roles[index]));
         }
 
         return NormalizeTeam(new AbilityBalanceTeamLoadout(participants));
@@ -348,7 +418,8 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
         IReadOnlyList<BalanceEssenceFamily> essenceFamilies,
         int teamSize,
         int essencesPerParticipant,
-        int candidatePoolSize)
+        int candidatePoolSize,
+        bool useCanonicalRoles)
     {
         var candidates = new List<AbilityBalanceTeamLoadout>(candidatePoolSize);
         var signatures = new HashSet<string>(StringComparer.Ordinal);
@@ -357,13 +428,23 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
 
         while (candidates.Count < candidatePoolSize && attempts++ < maxAttempts)
         {
-            var candidate = CreateRandomTeam(random, essenceFamilies, teamSize, essencesPerParticipant);
+            var candidate = CreateRandomTeam(
+                random,
+                essenceFamilies,
+                teamSize,
+                essencesPerParticipant,
+                useCanonicalRoles);
             if (signatures.Add(CreateTeamSignature(candidate)))
                 candidates.Add(candidate);
         }
 
         if (candidates.Count == 0)
-            candidates.Add(CreateRandomTeam(random, essenceFamilies, teamSize, essencesPerParticipant));
+            candidates.Add(CreateRandomTeam(
+                random,
+                essenceFamilies,
+                teamSize,
+                essencesPerParticipant,
+                useCanonicalRoles));
 
         return candidates;
     }
@@ -383,20 +464,20 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
         IReadOnlyDictionary<string, IReadOnlyList<CompiledAbility>> compiledAbilitiesByEssenceId,
         IReadOnlyDictionary<string, CompiledStatus> compiledStatuses,
         IReadOnlyDictionary<string, CompiledSummon> compiledSummons,
-        IReadOnlyDictionary<AttributeType, float> participantAttributes)
+        IReadOnlyDictionary<string, IReadOnlyDictionary<AttributeType, float>> participantAttributesByRole)
     {
         var friendly = CreateCombatants(
             "friendly",
             CombatTeam.Friendly,
             friendlyLoadout,
             compiledAbilitiesByEssenceId,
-            participantAttributes);
+            participantAttributesByRole);
         var hostile = CreateCombatants(
             "hostile",
             CombatTeam.Hostile,
             hostileLoadout,
             compiledAbilitiesByEssenceId,
-            participantAttributes);
+            participantAttributesByRole);
         var engine = new FastCombatEngine(
             compiledStatuses,
             compiledSummons,
@@ -441,6 +522,7 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
         BalanceBattleExecutionResult execution,
         IReadOnlyDictionary<string, string> essenceNames,
         IDictionary<string, TeamAccumulator> results,
+        IDictionary<string, MatchupAccumulator> matchups,
         ICollection<AbilityBalanceBattleSummary> battleSummaries)
     {
         var friendlySignature = CreateTeamSignature(execution.FriendlyLoadout);
@@ -461,6 +543,11 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
             execution.Duration,
             execution.HostileDamageDone,
             execution.HostileDamageTaken);
+        AddMatchupResult(
+            matchups,
+            friendlySignature,
+            hostileSignature,
+            execution.Outcome);
 
         if (battleSummaries.Count < BattleSummaryLimit)
         {
@@ -479,21 +566,60 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
         }
     }
 
+    private static void AddMatchupResult(
+        IDictionary<string, MatchupAccumulator> matchups,
+        string friendlySignature,
+        string hostileSignature,
+        BattleOutcome outcome)
+    {
+        var friendlyIsFirst = string.CompareOrdinal(friendlySignature, hostileSignature) <= 0;
+        var firstSignature = friendlyIsFirst ? friendlySignature : hostileSignature;
+        var secondSignature = friendlyIsFirst ? hostileSignature : friendlySignature;
+        var key = $"{firstSignature}\u001f{secondSignature}";
+        if (!matchups.TryGetValue(key, out var accumulator))
+        {
+            accumulator = new MatchupAccumulator(firstSignature, secondSignature);
+            matchups.Add(key, accumulator);
+        }
+
+        accumulator.Battles++;
+        var friendlyWon = outcome == BattleOutcome.Victory;
+        var hostileWon = outcome == BattleOutcome.Defeat;
+        if (!friendlyWon && !hostileWon)
+            accumulator.Draws++;
+        else if (friendlyIsFirst == friendlyWon)
+            accumulator.FirstWins++;
+        else
+            accumulator.SecondWins++;
+    }
+
     private static List<RuntimeCombatant> CreateCombatants(
         string idPrefix,
         CombatTeam team,
         AbilityBalanceTeamLoadout loadout,
         IReadOnlyDictionary<string, IReadOnlyList<CompiledAbility>> compiledAbilitiesByEssenceId,
-        IReadOnlyDictionary<AttributeType, float> participantAttributes)
+        IReadOnlyDictionary<string, IReadOnlyDictionary<AttributeType, float>> participantAttributesByRole)
     {
         return loadout.Participants
-            .Select((participant, index) => new RuntimeCombatant(
-                $"{idPrefix}-{index + 1}",
-                $"{idPrefix} {index + 1}",
-                team,
-                participantAttributes.ToDictionary(pair => pair.Key, pair => pair.Value),
-                SelectAbilities(participant, compiledAbilitiesByEssenceId),
-                ["Role.Balance"]))
+            .Select((participant, index) =>
+            {
+                var role = string.IsNullOrWhiteSpace(participant.Role)
+                    ? "Balance"
+                    : participant.Role.Trim();
+                if (!participantAttributesByRole.TryGetValue(role, out var attributes))
+                {
+                    throw new InvalidOperationException(
+                        $"No discovery attributes are configured for participant role '{role}'.");
+                }
+
+                return new RuntimeCombatant(
+                    $"{idPrefix}-{index + 1}",
+                    $"{idPrefix} {index + 1}",
+                    team,
+                    attributes.ToDictionary(pair => pair.Key, pair => pair.Value),
+                    SelectAbilities(participant, compiledAbilitiesByEssenceId),
+                    [$"Role.{role}"]);
+            })
             .ToList();
     }
 
@@ -625,24 +751,66 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
             .Where(x => x.Team.Equals(team, StringComparison.OrdinalIgnoreCase))
             .Sum(selector);
 
-    private static AbilityBalanceTeamLoadout NormalizeTeam(AbilityBalanceTeamLoadout team) =>
-        new(team.Participants
-            .Select(x => new AbilityBalanceParticipantLoadout(
-                x.EssenceIds
+    private static AbilityBalanceTeamLoadout NormalizeTeam(AbilityBalanceTeamLoadout team)
+    {
+        var normalized = team.Participants
+            .Select(participant => new AbilityBalanceParticipantLoadout(
+                participant.EssenceIds
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
-                    .ToList()))
-            .OrderBy(x => string.Join("+", x.EssenceIds), StringComparer.Ordinal)
-            .ToList());
+                    .ToList(),
+                string.IsNullOrWhiteSpace(participant.Role) ? "Balance" : participant.Role.Trim()))
+            .ToArray();
+        if (normalized.All(participant => participant.Role.Equals(
+                "Balance",
+                StringComparison.OrdinalIgnoreCase)))
+        {
+            return new AbilityBalanceTeamLoadout(normalized
+                .OrderBy(participant => string.Join("+", participant.EssenceIds), StringComparer.Ordinal)
+                .ToArray());
+        }
 
-    private static string CreateTeamSignature(AbilityBalanceTeamLoadout team) =>
-        string.Join(" | ", NormalizeTeam(team).Participants.Select(x => string.Join("+", x.EssenceIds)));
+        var byRole = normalized
+            .GroupBy(participant => participant.Role, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                group => group.Key,
+                group => new Queue<AbilityBalanceParticipantLoadout>(group.OrderBy(
+                    participant => string.Join("+", participant.EssenceIds),
+                    StringComparer.Ordinal)),
+                StringComparer.OrdinalIgnoreCase);
+        return new AbilityBalanceTeamLoadout(normalized
+            .Select(participant => byRole[participant.Role].Dequeue())
+            .ToArray());
+    }
+
+    private static string CreateTeamSignature(AbilityBalanceTeamLoadout team)
+    {
+        var participants = NormalizeTeam(team).Participants;
+        var usesLegacyBalanceRole = participants.All(participant => participant.Role.Equals(
+            "Balance",
+            StringComparison.OrdinalIgnoreCase));
+        return string.Join(" | ", participants.Select(participant =>
+            usesLegacyBalanceRole
+                ? string.Join("+", participant.EssenceIds)
+                : $"{participant.Role}={string.Join("+", participant.EssenceIds)}"));
+    }
 
     private static string CreateTeamDisplayName(
         AbilityBalanceTeamLoadout team,
-        IReadOnlyDictionary<string, string> essenceNames) =>
-        string.Join(" / ", NormalizeTeam(team).Participants.Select(participant =>
-            string.Join(" + ", participant.EssenceIds.Select(essenceId => GetEssenceDisplayName(essenceId, essenceNames)))));
+        IReadOnlyDictionary<string, string> essenceNames)
+    {
+        var participants = NormalizeTeam(team).Participants;
+        var usesLegacyBalanceRole = participants.All(participant => participant.Role.Equals(
+            "Balance",
+            StringComparison.OrdinalIgnoreCase));
+        return string.Join(" / ", participants.Select(participant =>
+        {
+            var names = string.Join(
+                " + ",
+                participant.EssenceIds.Select(essenceId => GetEssenceDisplayName(essenceId, essenceNames)));
+            return usesLegacyBalanceRole ? names : $"{participant.Role}: {names}";
+        }));
+    }
 
     private static IReadOnlyList<AbilityBalanceEssenceResult> CreateEssenceResults(
         IReadOnlyList<AbilityBalanceCombinationResult> combinations,
@@ -835,6 +1003,24 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
                 Battles == 0 ? 0 : TotalDuration / Battles,
                 Battles == 0 ? 0 : TotalDamageDone / Battles,
                 Battles == 0 ? 0 : TotalDamageTaken / Battles);
+    }
+
+    private sealed class MatchupAccumulator(string firstSignature, string secondSignature)
+    {
+        public int Battles { get; set; }
+        public int FirstWins { get; set; }
+        public int SecondWins { get; set; }
+        public int Draws { get; set; }
+
+        public AbilityBalanceMatchupResult ToResult() =>
+            new(
+                firstSignature,
+                secondSignature,
+                Battles,
+                FirstWins,
+                SecondWins,
+                Draws,
+                Battles == 0 ? 0d : (FirstWins + Draws * 0.5d) / Battles);
     }
 
     private sealed class EssenceAccumulator

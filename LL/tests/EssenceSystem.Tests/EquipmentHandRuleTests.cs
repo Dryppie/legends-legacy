@@ -179,6 +179,36 @@ public sealed class EquipmentHandRuleTests
     }
 
     [Fact]
+    public async Task UnequippingCraftedEquipmentDoesNotMarkItAsNewAgain()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var sword = Equipment("crafted-sword", EquipmentType.OneHanded);
+        sword.AcquisitionSource = ItemAcquisitionSources.Crafting;
+        var character = CharacterWithHands(characterId, null, null, [sword]);
+        db.Characters.Add(character);
+        await db.SaveChangesAsync();
+        var repository = new EquipmentSlotRepository(db);
+
+        Assert.True((await repository.EquipEquipmentAsync(
+            characterId,
+            sword.Id,
+            EquipmentSlotType.MainHand,
+            CancellationToken.None)).Succeeded);
+        Assert.True(await repository.UnequipEquipmentAsync(
+            characterId,
+            EquipmentSlotType.MainHand,
+            CancellationToken.None));
+        await db.SaveChangesAsync();
+
+        var returned = await db.InventoryItems
+            .Include(item => item.ItemInstance)
+            .SingleAsync(item => item.InventoryId == characterId && item.ItemInstanceId == sword.Id);
+        Assert.NotNull(returned.SeenAtUtc);
+        Assert.False(returned.IsNew);
+    }
+
+    [Fact]
     public async Task EquippedFavoriteCanOnlyBeChangedByItsOwner()
     {
         await using var db = CreateDb();

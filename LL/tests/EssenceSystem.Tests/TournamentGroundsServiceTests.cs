@@ -2,7 +2,6 @@ using Application.BackgroundJobs;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Colosseum;
-using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.WebSockets;
 using Application.MediatR.Attributes;
 using Application.UseCases.Colosseum.Tournaments.Commands;
@@ -10,6 +9,7 @@ using Application.UseCases.Colosseum.Tournaments;
 using Application.UseCases.Inventories.SelectionCrates;
 using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
+using Common.Randomness;
 using Domain.Models.Colosseum;
 using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Combat;
@@ -33,6 +33,7 @@ using Persistence.LL.BackgroundJobs;
 using Persistence.LL.Repositories.Colosseum;
 using Services.LL.Colosseum.Tournaments;
 using Services.LL.Combat.Layers.Orchestration.Models;
+using Services.LL.Combat.Layers.Resolution;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
@@ -237,7 +238,6 @@ public sealed class TournamentGroundsServiceTests
         };
         var service = CreateService(
             db,
-            entityService: new DbEntityService(db),
             combatSetupService: new SimpleCombatSetupService(),
             combatEngineExecutor: combatExecutor,
             combatEncounterResultFactory: new PassthroughCombatEncounterResultFactory(),
@@ -1131,7 +1131,6 @@ public sealed class TournamentGroundsServiceTests
         var clock = new MutableTimeProvider(Now);
         var service = CreateService(
             db,
-            entityService: new DbEntityService(db),
             combatSetupService: new SimpleCombatSetupService(),
             combatEngineExecutor: combatExecutor,
             combatEncounterResultFactory: new PassthroughCombatEncounterResultFactory(),
@@ -1163,6 +1162,23 @@ public sealed class TournamentGroundsServiceTests
         Assert.Equal(TournamentStatus.BracketGenerated, tournament.Status);
         Assert.Equal(2, combatExecutor.ExecutionCount);
         Assert.Equal(2, await db.TournamentCombatReplays.CountAsync());
+        var replays = await db.TournamentCombatReplays.ToListAsync();
+        Assert.All(replays, replay => Assert.Equal(
+            StableRandom.Guid(
+                "tournament-battle-v1",
+                tournament.Id.ToString("N"),
+                replay.MatchId.ToString("N")),
+            replay.CombatSessionId));
+        Assert.All(combatExecutor.Plans, plan =>
+        {
+            var source = Assert.IsType<PvpEncounterSourceContext>(plan.SourceContext);
+            Assert.Equal(
+                StableRandom.Seed(
+                    "tournament-combat-v1",
+                    tournament.Id.ToString("N"),
+                    source.MatchId.ToString("N")),
+                plan.RandomSeed);
+        });
         var semifinalMatches = await db.TournamentMatches
             .Where(match => match.RoundNumber == 1)
             .OrderBy(match => match.MatchNumber)
@@ -1221,7 +1237,6 @@ public sealed class TournamentGroundsServiceTests
         var service = CreateService(
             db,
             realtime,
-            entityService: new DbEntityService(db),
             combatSetupService: new SimpleCombatSetupService(),
             combatEngineExecutor: combatExecutor,
             combatEncounterResultFactory: new PassthroughCombatEncounterResultFactory(),
@@ -1493,7 +1508,6 @@ public sealed class TournamentGroundsServiceTests
         var clock = new MutableTimeProvider(Now);
         var service = CreateService(
             db,
-            entityService: new DbEntityService(db),
             combatSetupService: new SimpleCombatSetupService(),
             combatEngineExecutor: new DrawDamageCombatEngineExecutor(friendlyDamage, hostileDamage),
             combatEncounterResultFactory: new PassthroughCombatEncounterResultFactory(),
@@ -1607,7 +1621,6 @@ public sealed class TournamentGroundsServiceTests
                 var service = CreateService(
                     db,
                     realtime,
-                    entityService: new DbEntityService(db),
                     combatSetupService: new SimpleCombatSetupService(),
                     combatEngineExecutor: combatExecutor,
                     combatEncounterResultFactory: new PassthroughCombatEncounterResultFactory(),
@@ -1807,7 +1820,6 @@ public sealed class TournamentGroundsServiceTests
     private static TournamentGroundsService CreateService(
         LLDbContext db,
         CapturingGameRealtimeBroadcaster? realtime = null,
-        IEntityService? entityService = null,
         ICombatSetupService? combatSetupService = null,
         ICharacterSnapshotService? characterSnapshotService = null,
         ICombatEngineExecutor? combatEngineExecutor = null,
@@ -1830,11 +1842,13 @@ public sealed class TournamentGroundsServiceTests
         };
         var realtimeBroadcaster = realtime ?? new CapturingGameRealtimeBroadcaster();
         var clock = timeProvider ?? new FixedTimeProvider(Now);
+        var combatSetup = combatSetupService ?? new NoOpCombatSetupService();
 
         return new TournamentGroundsService(
             tournaments,
-            entityService ?? new NoOpEntityService(),
-            combatSetupService ?? new NoOpCombatSetupService(),
+            new CombatPreparationPipeline(
+                new SnapshotCombatantBuilder(db, combatSetup),
+                combatSetup),
             characterSnapshotService ?? new DbCharacterSnapshotService(db),
             itemBaseRepository ?? new NoOpItemBaseRepository(),
             inventoryService ?? new RecordingInventoryService(),
@@ -1849,7 +1863,7 @@ public sealed class TournamentGroundsServiceTests
             clock,
             Options.Create(tournamentOptions),
             achievementService: null,
-            outbox);
+            outbox: outbox);
     }
 
     private static TournamentGroundsProgressionJob CreateProgressionJob(
@@ -2195,30 +2209,6 @@ public sealed class TournamentGroundsServiceTests
             => Task.FromResult<Domain.Models.Snapshots.CharacterSnapshot?>(null);
     }
 
-    private sealed class NoOpEntityService : IEntityService
-    {
-        public Task<List<Entity>> GetEntitiesByIdsForCombatAsync(List<Guid> entityIds, CancellationToken cancellationToken)
-            => Task.FromResult<List<Entity>>([]);
-
-        public void UpdateEntities(List<Entity> playerCharacters)
-        {
-        }
-    }
-
-    private sealed class DbEntityService(LLDbContext db) : IEntityService
-    {
-        public async Task<List<Entity>> GetEntitiesByIdsForCombatAsync(List<Guid> entityIds, CancellationToken cancellationToken)
-        {
-            return [.. await db.Characters
-                .Where(c => entityIds.Contains(c.Id))
-                .ToListAsync(cancellationToken)];
-        }
-
-        public void UpdateEntities(List<Entity> playerCharacters)
-        {
-        }
-    }
-
     private sealed class NoOpCombatSetupService : ICombatSetupService
     {
         public List<CombatEntity> CreatePlayerCombatEntities(List<Entity> entities) => [];
@@ -2245,7 +2235,16 @@ public sealed class TournamentGroundsServiceTests
         {
         }
 
-        public Task PrepareEntitiesForCombat(List<CombatEntity> entities) => Task.CompletedTask;
+        public Task PrepareEntitiesForCombat(List<CombatEntity> entities)
+        {
+            foreach (var entity in entities)
+            {
+                entity.BaseCombatAttributes[Domain.Models.Attributes.AttributeType.MaxHealth] = 100;
+                entity.CombatAttributes[Domain.Models.Attributes.AttributeType.MaxHealth] = 100;
+                entity.SyncCurrentHealthToMax();
+            }
+            return Task.CompletedTask;
+        }
 
         public List<SimpleCombatEntity> CreateSimpleCombatEntities(List<CombatEntity> combatEntities)
             => combatEntities.Select(entity => new SimpleCombatEntity(entity.Id, entity.Name, entity.ImagePath, 1, 0)).ToList();
@@ -2332,10 +2331,12 @@ public sealed class TournamentGroundsServiceTests
         }
 
         public int ExecutionCount { get; private set; }
+        public List<CombatEncounterPlan> Plans { get; } = [];
 
         public Task<CombatResult> ExecuteAsync(CombatEncounterRuntime runtime, CancellationToken cancellationToken)
         {
             ExecutionCount++;
+            Plans.Add(runtime.Plan);
             var outcome = _outcomes.Count > 0 ? _outcomes.Dequeue() : BattleOutcome.Draw;
             return Task.FromResult(new CombatResult
             {
@@ -2462,7 +2463,10 @@ public sealed class TournamentGroundsServiceTests
                 combatResult.Outcome,
                 combatResult,
                 combatResult.PlayerTeam,
-                combatResult.EnemyTeam);
+                combatResult.EnemyTeam)
+            {
+                ContentType = runtime.Plan.ContentType
+            };
     }
 
     private sealed class RecordingGameEventOutbox : IGameEventOutbox

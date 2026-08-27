@@ -12,6 +12,13 @@ public sealed class CombatEncounterRuntime
         IReadOnlyList<IReadOnlyList<CombatRuntimeParticipant>>? hostileReinforcementWaves = null,
         Func<int, IReadOnlyList<CombatRuntimeParticipant>?>? hostileWaveFactory = null)
     {
+        var expectedMode = plan.ContentType.ToCombatMode();
+        if (plan.Mode != expectedMode)
+        {
+            throw new InvalidOperationException(
+                $"Combat content type '{plan.ContentType}' requires mode '{expectedMode}', not '{plan.Mode}'.");
+        }
+
         Plan = plan;
         FriendlyParticipants = friendlyParticipants;
         HostileParticipants = hostileParticipants;

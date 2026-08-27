@@ -110,6 +110,39 @@ public sealed class CanonicalEquipmentBuildFactoryTests
     }
 
     [Fact]
+    public void Explicit_essence_build_preserves_the_requested_legal_combination()
+    {
+        var services = CreateServices();
+        var rung = GetTierOneEpicRung(services.Factory);
+        string[] requested = ["essence.raven", "essence.green_slime"];
+
+        var first = services.Factory.CreateBuild(CanonicalPartyProfile.Balanced, rung, requested);
+        var second = services.Factory.CreateBuild(CanonicalPartyProfile.Balanced, rung, requested);
+
+        Assert.Equal(requested, first.EquippedEssences.Select(essence => essence.EssenceDefinitionId));
+        Assert.Equal(
+            first.EquippedEssences.Select(essence => essence.Id),
+            second.EquippedEssences.Select(essence => essence.Id));
+        Assert.Equal(first.Rating, second.Rating);
+    }
+
+    [Fact]
+    public void Explicit_no_essence_build_is_a_complete_legal_control()
+    {
+        var services = CreateServices();
+        var rung = GetTierOneEpicRung(services.Factory);
+
+        var build = services.Factory.CreateBuild(
+            CanonicalPartyProfile.Balanced,
+            rung,
+            Array.Empty<string>());
+
+        Assert.Empty(build.EquippedEssences);
+        Assert.Equal(7, build.Equipment.Count);
+        Assert.True(build.Rating.Overall > 0);
+    }
+
+    [Fact]
     public async Task Persisted_snapshot_rehydration_matches_direct_canonical_world_tower_preparation()
     {
         var services = CreateServices();
@@ -121,6 +154,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             CanonicalCooperativeRole.Guardian,
             rung,
             CanonicalEquipmentBuildFactory.MaximumCanonicalEssenceCount);
+        build.Character.ImagePath = "images/snapshots/guardian.webp";
         build.Character.EquipmentSlots = build.Equipment.Select(item => new EquipmentSlot
         {
             EntityId = build.Character.Id,
@@ -138,6 +172,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             Id = snapshotId,
             CharacterId = build.Character.Id,
             Name = build.Character.Name,
+            ImagePath = build.Character.ImagePath,
             Level = build.Character.Level,
             BaseAttributes = build.Character.BaseAttributes.Select(attribute =>
                 new EntityAttributeSnapshot
@@ -173,7 +208,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         direct.HasEquippedEssenceSnapshot = true;
         await setup.PrepareEntitiesForCombat([direct], EssenceCombatActivity.WorldTower);
 
-        var rehydrated = (await new SnapshotCombatantBuilder(db, setup).BuildAsync(
+        var rehydratedParticipant = (await new SnapshotCombatantBuilder(db, setup).BuildAsync(
             [new SnapshotCombatantRequest(
                 persisted,
                 new CombatParticipantSlot(
@@ -181,9 +216,11 @@ public sealed class CanonicalEquipmentBuildFactoryTests
                     build.Character.Id,
                     CombatSide.Friendly,
                     PartyNumber: 1))],
-            CancellationToken.None)).Single().Combatant;
+            CancellationToken.None)).Single();
+        var rehydrated = rehydratedParticipant.Combatant;
         await setup.PrepareEntitiesForCombat([rehydrated], EssenceCombatActivity.WorldTower);
 
+        Assert.Equal(build.Character.ImagePath, rehydratedParticipant.SourceEntity.ImagePath);
         Assert.Equal(direct.Level, rehydrated.Level);
         Assert.Equal(direct.CombatAttributes, rehydrated.CombatAttributes);
         Assert.Equivalent(EquipmentSignature(direct), EquipmentSignature(rehydrated), strict: true);

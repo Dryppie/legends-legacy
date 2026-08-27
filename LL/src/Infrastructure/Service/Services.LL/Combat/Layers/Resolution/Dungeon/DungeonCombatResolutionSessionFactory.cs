@@ -1,11 +1,7 @@
 ﻿using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
-using Domain.Models.Entities.Characters;
-using Domain.Models.Entities.Creatures;
 using Domain.Models.Regions.Areas;
-using Domain.Models.Snapshots;
-using Domain.Models.Essences;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
@@ -17,18 +13,18 @@ namespace Services.LL.Combat.Layers.Resolution.Dungeon;
 public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolutionSessionFactory
 {
     private readonly IEntityService _entityService;
-    private readonly ICombatSetupService _combatSetupService;
+    private readonly ICombatPreparationPipeline _combatPreparation;
     private readonly ICombatEngineExecutor _engineExecutor;
     private readonly ICombatEncounterResultFactory _resultFactory;
 
     public DungeonCombatResolutionSessionFactory(
         IEntityService entityService,
-        ICombatSetupService combatSetupService,
+        ICombatPreparationPipeline combatPreparation,
         ICombatEngineExecutor engineExecutor,
         ICombatEncounterResultFactory resultFactory)
     {
         _entityService = entityService;
-        _combatSetupService = combatSetupService;
+        _combatPreparation = combatPreparation;
         _engineExecutor = engineExecutor;
         _resultFactory = resultFactory;
     }
@@ -44,18 +40,14 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
         var hostileIds = plan.EnemySourceEntityIds
             .ToArray();
 
-        var allSourceIds = playerIds
-            .Concat(hostileIds)
-            .Distinct()
-            .ToArray();
-
         var entities = await _entityService.GetEntitiesByIdsForCombatAsync(
-            [.. allSourceIds],
+            [.. hostileIds.Distinct()],
             cancellationToken);
 
         var sourceEntitiesById = entities.ToDictionary(x => x.Id);
 
-        var missingIds = allSourceIds
+        var missingIds = hostileIds
+            .Distinct()
             .Where(id => !sourceEntitiesById.ContainsKey(id))
             .ToArray();
 
@@ -65,23 +57,54 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
                 $"Failed to preload idle combat source entities. Missing: {string.Join(", ", missingIds)}");
         }
 
-        var friendlyTemplates = BuildFriendlyTemplates(
-            playerIds,
-            sourceEntitiesById,
-            plan.CharacterSnapshot,
-            plan.RunAttributeModifiers,
-            plan.RunAbilityModifiers);
-        var hostileTemplates = BuildHostileTemplates(
-            hostileIds,
-            sourceEntitiesById,
-            plan.DungeonTier,
-            plan.DungeonRegion,
-            plan.EnemyAttributeModifiers,
-            plan.EnemyStrengthMultiplier);
+        var mismatchedPlayerIds = playerIds.Where(x => x != plan.CharacterSnapshot.CharacterId).ToArray();
+        if (mismatchedPlayerIds.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"Dungeon snapshot '{plan.CharacterSnapshot.Id}' belongs to character '{plan.CharacterSnapshot.CharacterId}', "
+                + $"not: {string.Join(", ", mismatchedPlayerIds)}.");
+        }
 
-        await _combatSetupService.PrepareEntitiesForCombat(
-            [.. friendlyTemplates.Values, .. hostileTemplates.Values],
-            EssenceCombatActivity.Dungeon);
+        var creatureArea = new Area
+        {
+            DifficultyTier = DungeonEnemyDifficultyScaling.GetProgressionPosition(
+                plan.DungeonTier,
+                plan.DungeonRegion)
+        };
+        var prepared = await _combatPreparation.PrepareAsync(
+            CombatContentType.Dungeon,
+            [
+                .. playerIds.Select(playerId => new CombatantPreparationRequest(
+                    new CombatParticipantSlot(
+                        $"dungeon-template-{playerId:N}",
+                        playerId,
+                        CombatSide.Friendly),
+                    new SnapshotCombatantPreparationSource(plan.CharacterSnapshot),
+                    combatant => ApplyFriendlyModifiers(
+                        combatant,
+                        plan.RunAttributeModifiers,
+                        plan.RunAbilityModifiers))),
+                .. hostileIds.Distinct().Select(hostileId => new CombatantPreparationRequest(
+                    new CombatParticipantSlot(
+                        $"dungeon-template-hostile-{hostileId:N}",
+                        hostileId,
+                        CombatSide.Hostile),
+                    new LiveCombatantPreparationSource(sourceEntitiesById[hostileId], creatureArea),
+                    combatant => ApplyHostileModifiers(
+                        combatant,
+                        plan.DungeonTier,
+                        plan.EnemyAttributeModifiers,
+                        plan.EnemyStrengthMultiplier)))
+            ],
+            cancellationToken);
+        foreach (var participant in prepared)
+            sourceEntitiesById[participant.Slot.SourceEntityId] = participant.SourceEntity;
+        var friendlyTemplates = prepared
+            .Where(x => x.Slot.Side == CombatSide.Friendly)
+            .ToDictionary(x => x.Slot.SourceEntityId, x => x.Combatant);
+        var hostileTemplates = prepared
+            .Where(x => x.Slot.Side == CombatSide.Hostile)
+            .ToDictionary(x => x.Slot.SourceEntityId, x => x.Combatant);
 
         var catalog = new DungeonCombatTemplateCatalog(
             sourceEntitiesById,
@@ -94,103 +117,41 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
         { Catalog = catalog };
     }
 
-    private Dictionary<Guid, CombatEntity> BuildFriendlyTemplates(
-        IReadOnlyCollection<Guid> playerIds,
-        Dictionary<Guid, Entity> sourceEntitiesById,
-        CharacterSnapshot snapshot,
+    private static void ApplyFriendlyModifiers(
+        CombatEntity combatant,
         IReadOnlyList<Domain.Models.Attributes.Modifiers.AttributeModifierBase> runAttributeModifiers,
         IReadOnlyList<Domain.Models.Essences.Definitions.EssenceAbilityModifierDefinition> runAbilityModifiers)
     {
-        var templates = new Dictionary<Guid, CombatEntity>();
-
-        foreach (var playerId in playerIds)
-        {
-            if (sourceEntitiesById[playerId] is not Character character)
-            {
-                throw new InvalidOperationException(
-                    $"Dungeon combat player source entity '{playerId}' is not a Character.");
-            }
-
-            var template = _combatSetupService
-                .CreatePlayerCombatEntities([character])
-                .Single();
-
-            template.EquippedEssences = snapshot.EquippedEssences
-                .OrderBy(x => x.SlotIndex)
-                .Select(x => x.ToPlayerEssence(snapshot.CharacterId))
-                .ToList();
-            template.HasEquippedEssenceSnapshot = true;
-
-            foreach (var modifier in runAttributeModifiers)
-            {
-                if (template.BaseAttributes.All(x => x.AttributeType != modifier.AttributeType))
-                {
-                    template.BaseAttributes.Add(new Domain.Models.Attributes.EntityAttribute
-                    {
-                        AttributeType = modifier.AttributeType,
-                        Value = 0
-                    });
-                }
-
-                template.TemporaryModifiers.Add(modifier);
-            }
-
-            template.TemporaryAbilityModifiers.AddRange(runAbilityModifiers);
-
-            templates.Add(playerId, template);
-        }
-
-        return templates;
+        AddAttributeModifiers(combatant, runAttributeModifiers);
+        combatant.TemporaryAbilityModifiers.AddRange(runAbilityModifiers);
     }
 
-    private Dictionary<Guid, CombatEntity> BuildHostileTemplates(
-        IReadOnlyCollection<Guid> hostileIds,
-        Dictionary<Guid, Entity> sourceEntitiesById,
+    private static void ApplyHostileModifiers(
+        CombatEntity combatant,
         int dungeonTier,
-        int dungeonRegion,
         IReadOnlyList<Domain.Models.Attributes.Modifiers.AttributeModifierBase> enemyAttributeModifiers,
         float? enemyStrengthMultiplier)
     {
-        var templates = new Dictionary<Guid, CombatEntity>();
+        DungeonEnemyDifficultyScaling.Apply(combatant, dungeonTier, enemyStrengthMultiplier);
+        AddAttributeModifiers(combatant, enemyAttributeModifiers);
+    }
 
-        foreach (var hostileId in hostileIds.Distinct())
+    private static void AddAttributeModifiers(
+        CombatEntity combatant,
+        IReadOnlyList<Domain.Models.Attributes.Modifiers.AttributeModifierBase> modifiers)
+    {
+        foreach (var modifier in modifiers)
         {
-            if (sourceEntitiesById[hostileId] is not Creature creature)
+            if (combatant.BaseAttributes.All(x => x.AttributeType != modifier.AttributeType))
             {
-                throw new InvalidOperationException(
-                    $"Dungeon combat hostile source entity '{hostileId}' is not a Creature.");
-            }
-
-            var template = _combatSetupService
-                .CreateCreatureCombatEntities(
-                    [creature],
-                    new Area
-                    {
-                        DifficultyTier = DungeonEnemyDifficultyScaling.GetProgressionPosition(
-                            dungeonTier,
-                            dungeonRegion)
-                    })
-                .Single();
-
-            DungeonEnemyDifficultyScaling.Apply(template, dungeonTier, enemyStrengthMultiplier);
-
-            foreach (var modifier in enemyAttributeModifiers)
-            {
-                if (template.BaseAttributes.All(x => x.AttributeType != modifier.AttributeType))
+                combatant.BaseAttributes.Add(new Domain.Models.Attributes.EntityAttribute
                 {
-                    template.BaseAttributes.Add(new Domain.Models.Attributes.EntityAttribute
-                    {
-                        AttributeType = modifier.AttributeType,
-                        Value = 0
-                    });
-                }
-
-                template.TemporaryModifiers.Add(modifier);
+                    AttributeType = modifier.AttributeType,
+                    Value = 0
+                });
             }
 
-            templates.Add(hostileId, template);
+            combatant.TemporaryModifiers.Add(modifier);
         }
-
-        return templates;
     }
 }

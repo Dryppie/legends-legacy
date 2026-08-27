@@ -52,6 +52,7 @@ public sealed class SnapshotCombatantBuilder(
         {
             Id = snapshot.CharacterId,
             Name = snapshot.Name,
+            ImagePath = snapshot.ImagePath,
             Level = snapshot.Level,
             BaseAttributes = snapshot.BaseAttributes.Select(x => new EntityAttribute
             {

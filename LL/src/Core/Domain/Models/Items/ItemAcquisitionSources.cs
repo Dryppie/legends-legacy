@@ -7,6 +7,7 @@ public static class ItemAcquisitionSources
     public const string CombatReward = "combat-reward";
     public const string DungeonReward = "dungeon-reward";
     public const string Crafting = "crafting";
+    public const string Marketplace = "marketplace";
     public const string ProphecyReward = "prophecy-reward";
     public const string ChampionMarket = "champion-market";
     public const string TournamentReward = "tournament-reward";

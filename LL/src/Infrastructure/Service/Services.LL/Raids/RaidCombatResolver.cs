@@ -6,10 +6,10 @@ using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences.Definitions;
-using Domain.Models.Essences;
 using Domain.Models.Raids;
 using Domain.Models.Regions.Areas;
 using Services.LL.Combat.Layers.Orchestration.Models;
+using Services.LL.Combat.Layers.Resolution;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
@@ -46,9 +46,8 @@ public sealed record RaidLanePlaybackCapture(
     IReadOnlyList<CombatCheckpoint> Checkpoints);
 
 public sealed class RaidCombatResolver(
-    ISnapshotCombatantBuilder snapshotCombatants,
     IEntityService entities,
-    ICombatSetupService combatSetup,
+    ICombatPreparationPipeline combatPreparation,
     ICombatEngineExecutor combatEngine,
     TimeProvider timeProvider) : IRaidCombatResolver
 {
@@ -220,12 +219,8 @@ public sealed class RaidCombatResolver(
             [objectiveEntry, .. tier.Vanguard.Escorts],
             "vanguard",
             seed,
-            cancellationToken)).ToList();
-        hostile[0].Combatant.Id = "raid-guardian";
-        hostile[0] = new CombatRuntimeParticipant(
-            hostile[0].Slot with { SlotId = "raid-guardian" },
-            hostile[0].SourceEntity,
-            hostile[0].Combatant);
+            cancellationToken,
+            ordinal => ordinal == 0 ? "raid-guardian" : $"vanguard-{ordinal}")).ToList();
         var execution = await ExecuteAsync(
             run.Id,
             RaidLane.Vanguard,
@@ -244,8 +239,10 @@ public sealed class RaidCombatResolver(
             (decimal)(healthRemoved + barrierAbsorbed) / Math.Max(1, objective.MaxHealth),
             0m,
             1m);
-        if (guardianBreak >= 1m)
-            result.Outcome = BattleOutcome.Victory;
+        result.ApplyContentOutcome(CombatObjectiveEvaluator.Evaluate(
+            CombatObjectivePolicy.ObjectiveCompletion,
+            result.EngineOutcome,
+            guardianBreak >= 1m));
         var hostileMax = Math.Max(1L, result.EnemyTeam.Sum(x => (long)x.MaxHealth));
         var hostileRemaining = result.EnemyTeam.Sum(x => Math.Max(0L, x.Health));
         return new VanguardResolution(
@@ -285,12 +282,8 @@ public sealed class RaidCombatResolver(
             [projectionEntry],
             "main-guard-projection",
             seed,
-            cancellationToken)).ToList();
-        hostile[0].Combatant.Id = "boss-projection";
-        hostile[0] = new CombatRuntimeParticipant(
-            hostile[0].Slot with { SlotId = "boss-projection" },
-            hostile[0].SourceEntity,
-            hostile[0].Combatant);
+            cancellationToken,
+            _ => "boss-projection")).ToList();
         var execution = await ExecuteAsync(
             run.Id,
             RaidLane.MainGuard,
@@ -301,7 +294,7 @@ public sealed class RaidCombatResolver(
             capturePlayback,
             cancellationToken);
         var result = execution.Result;
-        var survivedPercent = result.Outcome == BattleOutcome.Victory
+        var survivedPercent = result.EngineOutcome == BattleOutcome.Victory
             ? 100m
             : Math.Clamp(100m * result.Duration / Math.Max(1, tier.TickBudget.MainGuard), 0m, 100m);
         var thresholdsReached = tier.MainGuard.SurvivalThresholdsPercent.Count(
@@ -309,8 +302,10 @@ public sealed class RaidCombatResolver(
         var disruption = tier.MainGuard.SurvivalThresholdsPercent.Count == 0
             ? survivedPercent / 100m
             : thresholdsReached / (decimal)tier.MainGuard.SurvivalThresholdsPercent.Count;
-        if (disruption >= 1m)
-            result.Outcome = BattleOutcome.Victory;
+        result.ApplyContentOutcome(CombatObjectiveEvaluator.Evaluate(
+            CombatObjectivePolicy.Survival,
+            result.EngineOutcome,
+            disruption >= 1m));
         var hostileMax = Math.Max(1L, result.EnemyTeam.Sum(x => (long)x.MaxHealth));
         var hostileRemaining = result.EnemyTeam.Sum(x => Math.Max(0L, x.Health));
         return new MainGuardResolution(
@@ -349,50 +344,48 @@ public sealed class RaidCombatResolver(
             Count = 1,
             Scaling = x.Scaling
         }).ToArray();
+        var defenceReduction = -(guardianBreak * tier.Boss.MaxGuardianBreakPercent);
+        var cooldownDelay = (double)(signatureDisruption * tier.Boss.MaxSignatureCooldownDelayPercent / 100m);
         var hostile = (await CreateCreatureGroupAsync(
             [bossEntry, .. survivorEntries],
             "final-assault",
             seed,
-            cancellationToken)).ToList();
-        hostile[0].Combatant.Id = "raid-boss";
-        hostile[0] = new CombatRuntimeParticipant(
-            hostile[0].Slot with { SlotId = "raid-boss" },
-            hostile[0].SourceEntity,
-            hostile[0].Combatant);
-        hostile[0].Combatant.StaggerDefinition = tier.Boss.Stagger;
-        hostile[0].Combatant.StaggerParticipantCount = friendly.Count;
-        var defenceReduction = -(guardianBreak * tier.Boss.MaxGuardianBreakPercent);
-        RaidCombatScaling.AddPercent(hostile[0].Combatant, AttributeType.Armor, defenceReduction);
-        RaidCombatScaling.AddPercent(hostile[0].Combatant, AttributeType.Resistance, defenceReduction);
-        RaidCombatScaling.AddPercent(hostile[0].Combatant, AttributeType.DamageReduction, defenceReduction);
-        RaidCombatScaling.AddPercent(
-            hostile[0].Combatant,
-            AttributeType.Power,
-            -(signatureDisruption * tier.Boss.MaxSignaturePowerReductionPercent));
-        var cooldownDelay = (double)(signatureDisruption * tier.Boss.MaxSignatureCooldownDelayPercent / 100m);
-        hostile[0].Combatant.TemporaryAbilityModifiers.AddRange(
-            hostile[0].Combatant.NativeAbilityIds.Select(abilityId => new EssenceAbilityModifierDefinition
+            cancellationToken,
+            ordinal => ordinal == 0 ? "raid-boss" : $"final-assault-{ordinal}",
+            (entryIndex, combatant) =>
             {
-                Target = abilityId,
-                Operation = "DelayCooldowns",
-                Value = cooldownDelay
-            }));
-        await combatSetup.PrepareEntitiesForCombat(
-            hostile.Select(x => x.Combatant).ToList(),
-            EssenceCombatActivity.Raid);
+                if (entryIndex != 0)
+                    return;
+
+                combatant.StaggerDefinition = tier.Boss.Stagger;
+                combatant.StaggerParticipantCount = friendly.Count;
+                RaidCombatScaling.AddPercent(combatant, AttributeType.Armor, defenceReduction);
+                RaidCombatScaling.AddPercent(combatant, AttributeType.Resistance, defenceReduction);
+                RaidCombatScaling.AddPercent(combatant, AttributeType.DamageReduction, defenceReduction);
+                RaidCombatScaling.AddPercent(
+                    combatant,
+                    AttributeType.Power,
+                    -(signatureDisruption * tier.Boss.MaxSignaturePowerReductionPercent));
+                combatant.TemporaryAbilityModifiers.AddRange(
+                    combatant.NativeAbilityIds.Select(abilityId => new EssenceAbilityModifierDefinition
+                    {
+                        Target = abilityId,
+                        Operation = "DelayCooldowns",
+                        Value = cooldownDelay
+                    }));
+            })).ToList();
         for (var i = 1; i < hostile.Count; i++)
         {
             var remainingFraction = rearguard.Survivors[i - 1].HealthFraction;
             hostile[i].Combatant.SetCurrentHealth(
                 hostile[i].Combatant.GetAttributeValue(AttributeType.MaxHealth) * (float)remainingFraction);
         }
-        await PrepareFriendlyAsync(friendly);
         var execution = await ExecutePreparedAsync(
             run.Id,
             RaidLane.FinalAssault,
             friendly,
             hostile,
-            new CombatSimulationOptions(
+            new CombatRuleset(
                 seed,
                 tier.TickBudget.FinalAssault,
                 OvertimeStartsAtTick: tier.Boss.OvertimeStartsAtTick,
@@ -448,7 +441,12 @@ public sealed class RaidCombatResolver(
                     CombatSide.Friendly,
                     RaidParties.FormationNumber(lane))))
             .ToArray();
-        return await snapshotCombatants.BuildAsync(requests, cancellationToken);
+        return await combatPreparation.PrepareAsync(
+            CombatContentType.Raid,
+            requests.Select(request => new CombatantPreparationRequest(
+                request.Slot,
+                new SnapshotCombatantPreparationSource(request.Snapshot))).ToArray(),
+            cancellationToken);
     }
 
     private async Task<IReadOnlyList<CombatRuntimeParticipant>> CreateAllFriendlyAsync(
@@ -469,21 +467,27 @@ public sealed class RaidCombatResolver(
                     CombatSide.Friendly,
                     RaidParties.FormationNumber(x.Lane!.Value))))
             .ToArray();
-        return await snapshotCombatants.BuildAsync(requests, cancellationToken);
+        return await combatPreparation.PrepareAsync(
+            CombatContentType.Raid,
+            requests.Select(request => new CombatantPreparationRequest(
+                request.Slot,
+                new SnapshotCombatantPreparationSource(request.Snapshot))).ToArray(),
+            cancellationToken);
     }
 
     private async Task<IReadOnlyList<CombatRuntimeParticipant>> CreateCreatureGroupAsync(
         IReadOnlyList<RaidCreatureGroupEntry> entries,
         string slotPrefix,
         int seed,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Func<int, string>? slotIdFactory = null,
+        Action<int, CombatEntity>? configureTemplate = null)
     {
         var ids = entries.Select(x => x.CreatureId).Distinct().ToArray();
         var sources = (await entities.GetEntitiesByIdsForCombatAsync(ids.ToList(), cancellationToken))
             .OfType<Creature>()
             .ToDictionary(x => x.Id);
-        var output = new List<CombatRuntimeParticipant>();
-        var ordinal = 0;
+        var spawnedEntries = new List<(int EntryIndex, RaidCreatureGroupEntry Entry, Creature Source)>();
         for (var entryIndex = 0; entryIndex < entries.Count; entryIndex++)
         {
             var entry = entries[entryIndex];
@@ -491,18 +495,42 @@ public sealed class RaidCombatResolver(
                 throw new InvalidOperationException($"Raid creature '{entry.CreatureId}' was not found.");
             if (!ShouldSpawn(seed, $"{slotPrefix}:{entryIndex}:{entry.CreatureId:N}", entry.SpawnChancePercent))
                 continue;
-            var template = combatSetup.CreateCreatureCombatEntities([source], new Area { DifficultyTier = 1 }).Single();
-            RaidCombatScaling.Apply(template, entry.Scaling);
-            for (var i = 0; i < entry.Count; i++)
+            spawnedEntries.Add((entryIndex, entry, source));
+        }
+
+        var preparedTemplates = await combatPreparation.PrepareAsync(
+            CombatContentType.Raid,
+            spawnedEntries.Select(spawned => new CombatantPreparationRequest(
+                new CombatParticipantSlot(
+                    $"{slotPrefix}-template-{spawned.EntryIndex}",
+                    spawned.Entry.CreatureId,
+                    CombatSide.Hostile),
+                new LiveCombatantPreparationSource(
+                    spawned.Source,
+                    new Area { DifficultyTier = 1 }),
+                combatant =>
+                {
+                    RaidCombatScaling.Apply(combatant, spawned.Entry.Scaling);
+                    configureTemplate?.Invoke(spawned.EntryIndex, combatant);
+                })).ToArray(),
+            cancellationToken);
+
+        var output = new List<CombatRuntimeParticipant>();
+        var ordinal = 0;
+        for (var templateIndex = 0; templateIndex < preparedTemplates.Count; templateIndex++)
+        {
+            var preparedTemplate = preparedTemplates[templateIndex];
+            var spawned = spawnedEntries[templateIndex];
+            var template = preparedTemplate.Combatant;
+            for (var i = 0; i < spawned.Entry.Count; i++)
             {
-                var combatant = i == 0 ? template : template.DeepCloneForEncounter();
-                var slot = new CombatParticipantSlot(
-                    $"{slotPrefix}-{ordinal++}",
-                    entry.CreatureId,
-                    CombatSide.Hostile);
+                var slotId = slotIdFactory?.Invoke(ordinal) ?? $"{slotPrefix}-{ordinal}";
+                var slot = new CombatParticipantSlot(slotId, spawned.Entry.CreatureId, CombatSide.Hostile);
+                var combatant = template.DeepCloneForEncounter();
                 combatant.Id = slot.SlotId;
-                combatant.OriginalId = entry.CreatureId;
-                output.Add(new CombatRuntimeParticipant(slot, source, combatant));
+                combatant.OriginalId = slot.SourceEntityId;
+                output.Add(new CombatRuntimeParticipant(slot, spawned.Source, combatant));
+                ordinal++;
             }
         }
         return output;
@@ -555,35 +583,23 @@ public sealed class RaidCombatResolver(
         CancellationToken cancellationToken,
         IReadOnlyList<IReadOnlyList<CombatRuntimeParticipant>>? hostileReinforcementWaves = null)
     {
-        await PrepareFriendlyAsync(friendly);
-        var allHostile = hostile
-            .Concat((hostileReinforcementWaves ?? []).SelectMany(x => x))
-            .ToList();
-        await combatSetup.PrepareEntitiesForCombat(
-            allHostile.Select(x => x.Combatant).ToList(),
-            EssenceCombatActivity.Raid);
         return await ExecutePreparedAsync(
             raidRunId,
             lane,
             friendly,
             hostile,
-            new CombatSimulationOptions(seed, maxTicks, CaptureEventLog: false),
+            new CombatRuleset(seed, maxTicks, CaptureEventLog: false),
             capturePlayback,
             cancellationToken,
             hostileReinforcementWaves);
     }
-
-    private Task PrepareFriendlyAsync(IReadOnlyList<CombatRuntimeParticipant> friendly) =>
-        combatSetup.PrepareEntitiesForCombat(
-            friendly.Select(x => x.Combatant).ToList(),
-            EssenceCombatActivity.Raid);
 
     private async Task<RaidLaneCombatExecution> ExecutePreparedAsync(
         Guid raidRunId,
         RaidLane lane,
         IReadOnlyList<CombatRuntimeParticipant> friendly,
         IReadOnlyList<CombatRuntimeParticipant> hostile,
-        CombatSimulationOptions options,
+        CombatRuleset options,
         bool capturePlayback,
         CancellationToken cancellationToken,
         IReadOnlyList<IReadOnlyList<CombatRuntimeParticipant>>? hostileReinforcementWaves = null)
@@ -597,6 +613,7 @@ public sealed class RaidCombatResolver(
             [.. friendly.Select(x => x.Slot), .. allHostile.Select(x => x.Slot)],
             new RaidEncounterSourceContext(raidRunId, (int)lane, lane.ToString().ToLowerInvariant()))
         {
+            ContentType = CombatContentType.Raid,
             RandomSeed = options.RandomSeed,
             CaptureEventLog = false
         };

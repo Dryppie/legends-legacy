@@ -1965,8 +1965,9 @@ public sealed class WorldTowerServiceTests
             entities ?? new ThrowingEntityService(),
             combatEngine ?? new ThrowingCombatEngineExecutor(),
             new WorldTowerCombatRuntimeFactory(
-                new SnapshotCombatantBuilder(db, resolvedCombatSetup),
-                resolvedCombatSetup),
+                new CombatPreparationPipeline(
+                    new SnapshotCombatantBuilder(db, resolvedCombatSetup),
+                    resolvedCombatSetup)),
             new FixedCreatureAbilityDefinitionProvider(),
             new FixedAbilityCatalogProvider(),
             resultFactory ?? new ThrowingCombatEncounterResultFactory(),
@@ -2383,7 +2384,16 @@ public sealed class WorldTowerServiceTests
         {
         }
 
-        public Task PrepareEntitiesForCombat(List<CombatEntity> entities) => Task.CompletedTask;
+        public Task PrepareEntitiesForCombat(List<CombatEntity> entities)
+        {
+            foreach (var entity in entities)
+            {
+                entity.BaseCombatAttributes[AttributeType.MaxHealth] = 100;
+                entity.CombatAttributes[AttributeType.MaxHealth] = 100;
+                entity.SyncCurrentHealthToMax();
+            }
+            return Task.CompletedTask;
+        }
 
         public List<SimpleCombatEntity> CreateSimpleCombatEntities(List<CombatEntity> combatEntities) =>
             combatEntities
@@ -2498,6 +2508,9 @@ public sealed class WorldTowerServiceTests
                 combatResult.Outcome,
                 combatResult,
                 combatResult.PlayerTeam,
-                combatResult.EnemyTeam);
+                combatResult.EnemyTeam)
+            {
+                ContentType = runtime.Plan.ContentType
+            };
     }
 }

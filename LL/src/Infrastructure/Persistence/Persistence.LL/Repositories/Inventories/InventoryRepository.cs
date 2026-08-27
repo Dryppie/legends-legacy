@@ -403,7 +403,8 @@ public class InventoryRepository : IInventoryRepository
             InventoryId = characterId,
             ItemInstanceId = itemInstance.Id,
             ItemInstance = itemInstance,
-            Quantity = 1
+            Quantity = 1,
+            SeenAtUtc = DateTimeOffset.UtcNow
         };
 
         if (itemInstance is EquipmentInstance eq)
@@ -639,7 +640,8 @@ public class InventoryRepository : IInventoryRepository
                     InventoryId = recipientCharacterId,
                     ItemInstanceId = senderItem.ItemInstanceId,
                     ItemInstance = senderItem.ItemInstance,
-                    Quantity = quantity
+                    Quantity = quantity,
+                    SeenAtUtc = DateTimeOffset.UtcNow
                 };
                 await _context.InventoryItems.AddAsync(recipientItem, cancellationToken);
             }
@@ -651,7 +653,8 @@ public class InventoryRepository : IInventoryRepository
                 InventoryId = recipientCharacterId,
                 ItemInstanceId = senderItem.ItemInstanceId,
                 ItemInstance = senderItem.ItemInstance,
-                Quantity = 1
+                Quantity = 1,
+                SeenAtUtc = DateTimeOffset.UtcNow
             };
             await _context.InventoryItems.AddAsync(recipientItem, cancellationToken);
         }

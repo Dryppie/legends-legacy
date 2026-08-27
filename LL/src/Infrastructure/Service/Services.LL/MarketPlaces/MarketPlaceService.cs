@@ -190,7 +190,8 @@ public class MarketPlaceService : IMarketPlaceService
                     InventoryId = characterId,
                     ItemInstanceId = inventoryItem.ItemInstanceId,
                     ItemInstance = inventoryItem.ItemInstance,
-                    Quantity = requestedQuantity
+                    Quantity = requestedQuantity,
+                    SeenAtUtc = now
                 }, cancellationToken);
                 return null;
             }
@@ -215,9 +216,10 @@ public class MarketPlaceService : IMarketPlaceService
                 ItemInstanceId = inventoryItem.ItemInstanceId,
                 ItemInstance = inventoryItem.ItemInstance
             };
-            await _inventoryService.AddItemToInventoryFromMarketPlace(
+            await AddMarketplacePurchaseAsync(
                 order.BuyerId,
                 purchasedItem,
+                now,
                 cancellationToken);
 
             order.Quantity -= fillQuantity;
@@ -413,9 +415,10 @@ public class MarketPlaceService : IMarketPlaceService
                 ItemInstanceId = listing.ItemInstanceId,
                 ItemInstance = listing.ItemInstance,
             };
-            await _inventoryService.AddItemToInventoryFromMarketPlace(
+            await AddMarketplacePurchaseAsync(
                 characterId,
                 purchasedItem,
+                now,
                 cancellationToken);
 
             listing.Quantity -= fillQuantity;
@@ -500,7 +503,7 @@ public class MarketPlaceService : IMarketPlaceService
             ItemInstance = listing.ItemInstance,
         };
 
-        await _inventoryService.AddItemToInventoryFromMarketPlace(characterId, inventoryItem, cancellationToken);
+        await AddMarketplacePurchaseAsync(characterId, inventoryItem, now, cancellationToken);
 
         listing.Quantity -= quantity;
         if (listing.Quantity == 0)
@@ -627,9 +630,10 @@ public class MarketPlaceService : IMarketPlaceService
                 ItemInstanceId = listing.ItemInstanceId,
                 ItemInstance = listing.ItemInstance,
             };
-            await _inventoryService.AddItemToInventoryFromMarketPlace(
+            await AddMarketplacePurchaseAsync(
                 characterId,
                 purchasedItem,
+                now,
                 cancellationToken);
 
             listing.Quantity -= fillQuantity;
@@ -719,7 +723,7 @@ public class MarketPlaceService : IMarketPlaceService
             ItemInstance = sellerInventoryItem.ItemInstance,
         };
 
-        await _inventoryService.AddItemToInventoryFromMarketPlace(buyOrder.BuyerId, purchasedItem, cancellationToken);
+        await AddMarketplacePurchaseAsync(buyOrder.BuyerId, purchasedItem, now, cancellationToken);
 
         buyOrder.Quantity -= quantity;
         if (buyOrder.Quantity == 0)
@@ -862,9 +866,10 @@ public class MarketPlaceService : IMarketPlaceService
                 ItemInstanceId = inventoryItem.ItemInstanceId,
                 ItemInstance = inventoryItem.ItemInstance,
             };
-            await _inventoryService.AddItemToInventoryFromMarketPlace(
+            await AddMarketplacePurchaseAsync(
                 order.BuyerId,
                 purchasedItem,
+                now,
                 cancellationToken);
 
             order.Quantity -= fillQuantity;
@@ -939,6 +944,7 @@ public class MarketPlaceService : IMarketPlaceService
             Quantity = listing.Quantity,
             ItemInstanceId = listing.ItemInstanceId,
             ItemInstance = listing.ItemInstance,
+            SeenAtUtc = _timeProvider.GetUtcNow()
         };
 
         await _inventoryService.AddItemToInventoryFromMarketPlace(characterId, inventoryItem, cancellationToken);
@@ -987,7 +993,8 @@ public class MarketPlaceService : IMarketPlaceService
                 InventoryId = listing.SellerId,
                 Quantity = listing.Quantity,
                 ItemInstanceId = listing.ItemInstanceId,
-                ItemInstance = listing.ItemInstance
+                ItemInstance = listing.ItemInstance,
+                SeenAtUtc = now
             }, cancellationToken);
 
             _marketPlaceRepository.RemoveListingAsync(listing);
@@ -1053,6 +1060,21 @@ public class MarketPlaceService : IMarketPlaceService
             totalPrice * (decimal)_options.SellerFeeBasisPoints / 10_000m);
         return Math.Min(totalPrice, Math.Max(_options.MinimumSellerFee, proportionalFee));
     }
+
+    private async Task AddMarketplacePurchaseAsync(
+        Guid buyerId,
+        InventoryItem purchasedItem,
+        DateTimeOffset purchasedAt,
+        CancellationToken cancellationToken)
+    {
+        purchasedItem.ItemInstance.AcquisitionSource = ItemAcquisitionSources.Marketplace;
+        purchasedItem.ItemInstance.AcquiredAtUtc = purchasedAt;
+        await _inventoryService.AddItemToInventoryFromMarketPlace(
+            buyerId,
+            purchasedItem,
+            cancellationToken);
+    }
+
     private async Task RecordMarketplaceSaleAsync(Guid sellerId, CancellationToken cancellationToken)
     {
         if (_achievementService is not null)

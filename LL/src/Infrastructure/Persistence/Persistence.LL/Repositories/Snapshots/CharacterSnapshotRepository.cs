@@ -56,6 +56,7 @@ public class CharacterSnapshotRepository : ICharacterSnapshotRepository
             Id = snapshotId,
             CharacterId = character.Id,
             Name = character.Name,
+            ImagePath = character.ImagePath,
             Level = character.Level,
             BaseAttributes = [.. baseAttrs],
             Equipment = equipment,

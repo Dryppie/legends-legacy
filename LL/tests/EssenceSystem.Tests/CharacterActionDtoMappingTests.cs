@@ -23,6 +23,7 @@ public sealed class CharacterActionDtoMappingTests
         {
             CharacterId = Guid.NewGuid(),
             ActionDetails = new CombatActionDetails(),
+            ReturnToCombatAreaId = "region_02_area_03",
             UpdatedAt = DateTimeOffset.Parse("2026-08-17T12:00:00Z"),
             NextResolutionAtUtc = DateTimeOffset.Parse("2026-08-17T12:00:10Z"),
             HasMoreDueWork = true,
@@ -36,6 +37,7 @@ public sealed class CharacterActionDtoMappingTests
         Assert.Equal(action.NextResolutionAtUtc, dto.NextResolutionAtUtc);
         Assert.Equal(100, dto.ProcessedCount);
         Assert.Equal(10_000, dto.ResolutionIntervalMs);
+        Assert.Equal("region_02_area_03", dto.ReturnToCombatAreaId);
     }
 
     [Fact]
@@ -72,6 +74,7 @@ public sealed class CharacterActionDtoMappingTests
 
         Assert.True(contract.TryGetProperty("nextResolutionAtUtc", out _));
         Assert.True(contract.TryGetProperty("hasMoreDueWork", out _));
+        Assert.True(contract.TryGetProperty("returnToCombatAreaId", out _));
         Assert.False(contract.TryGetProperty("nextResolutionAt", out _));
         Assert.False(contract.TryGetProperty("hasPendingCombatResolution", out _));
     }

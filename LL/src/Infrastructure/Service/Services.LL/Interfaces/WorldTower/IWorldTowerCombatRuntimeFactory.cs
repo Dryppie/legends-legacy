@@ -14,7 +14,8 @@ public sealed record WorldTowerCombatRuntimeRequest(
     decimal PlayerDamagePercent,
     decimal WeakPointPercent,
     decimal GuardianDamageReductionPercent,
-    DateTimeOffset StartsAt);
+    DateTimeOffset StartsAt,
+    int? RandomSeed = null);
 
 public interface IWorldTowerCombatRuntimeFactory
 {

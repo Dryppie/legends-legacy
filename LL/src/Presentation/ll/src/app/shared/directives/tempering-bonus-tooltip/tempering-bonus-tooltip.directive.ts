@@ -7,6 +7,7 @@ import {
   HostListener,
   Input,
   OnDestroy,
+  ViewContainerRef,
   inject,
 } from '@angular/core';
 import {
@@ -22,10 +23,18 @@ const temperingBonusTooltipCloseDelayMs = 120;
   standalone: true,
 })
 export class TemperingBonusTooltipDirective implements OnDestroy {
-  @Input('appTemperingBonusTooltip') data!: TemperingBonusTooltipData;
+  @Input('appTemperingBonusTooltip') data: TemperingBonusTooltipData | null =
+    null;
 
-  @HostBinding('class.cursor-help') readonly cursorClass = true;
-  @HostBinding('attr.tabindex') readonly tabindex = '0';
+  @HostBinding('class.cursor-help')
+  get cursorClass(): boolean {
+    return this.data !== null;
+  }
+
+  @HostBinding('attr.tabindex')
+  get tabindex(): string | null {
+    return this.data ? '0' : null;
+  }
   @HostBinding('attr.aria-describedby') describedBy: string | null = null;
   @HostBinding('attr.aria-label')
   get ariaLabel(): string | null {
@@ -35,6 +44,7 @@ export class TemperingBonusTooltipDirective implements OnDestroy {
 
   private readonly overlay = inject(Overlay);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly tooltipId = `tempering-bonus-tooltip-${nextTemperingBonusTooltipId++}`;
   private overlayRef?: OverlayRef;
   private hovered = false;
@@ -43,6 +53,12 @@ export class TemperingBonusTooltipDirective implements OnDestroy {
 
   @HostListener('mouseenter')
   onMouseEnter(): void {
+    this.onPointerEnter();
+  }
+
+  @HostListener('pointerenter')
+  onPointerEnter(): void {
+    if (!this.data) return;
     this.hovered = true;
     this.clearHideTimer();
     this.show();
@@ -50,6 +66,11 @@ export class TemperingBonusTooltipDirective implements OnDestroy {
 
   @HostListener('mouseleave')
   onMouseLeave(): void {
+    this.onPointerLeave();
+  }
+
+  @HostListener('pointerleave')
+  onPointerLeave(): void {
     this.hovered = false;
     this.hideWhenInactive();
   }
@@ -110,10 +131,15 @@ export class TemperingBonusTooltipDirective implements OnDestroy {
     });
 
     const componentRef = this.overlayRef.attach(
-      new ComponentPortal(TemperingBonusTooltipPanelComponent),
+      new ComponentPortal(
+        TemperingBonusTooltipPanelComponent,
+        this.viewContainerRef,
+      ),
     );
     componentRef.setInput('data', this.data);
     componentRef.setInput('tooltipId', this.tooltipId);
+    componentRef.changeDetectorRef.detectChanges();
+    this.overlayRef.updatePosition();
     this.describedBy = this.tooltipId;
   }
 

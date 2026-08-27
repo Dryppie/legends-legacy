@@ -50,7 +50,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
     {
         var execution = await ExecuteCoreAsync(
             runtime,
-            new CombatSimulationOptions(
+            new CombatRuleset(
                 ResolveRandomSeed(runtime),
                 6000,
                 StartActiveAbilitiesOnCooldown: true),
@@ -58,6 +58,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             captureEventLog: captureEventLog);
         SyncCombatEntityState(runtime.FriendlyParticipants, execution.Friendly);
         SyncCombatEntityState(runtime.AllHostileParticipants, execution.Hostile);
+        PopulatePostCombatTeams(execution.Result, execution.Friendly, execution.Hostile);
         execution.Result.StartedAt = runtime.Plan.StartsAt;
         return execution.Result;
     }
@@ -70,7 +71,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         var checkpoints = new List<CombatCheckpoint>();
         var execution = await ExecuteCoreAsync(
             runtime,
-            new CombatSimulationOptions(
+            new CombatRuleset(
                 ResolveRandomSeed(runtime),
                 6000,
                 StartActiveAbilitiesOnCooldown: true),
@@ -79,6 +80,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             checkpointIntervalTicks);
         SyncCombatEntityState(runtime.FriendlyParticipants, execution.Friendly);
         SyncCombatEntityState(runtime.AllHostileParticipants, execution.Hostile);
+        PopulatePostCombatTeams(execution.Result, execution.Friendly, execution.Hostile);
         execution.Result.StartedAt = runtime.Plan.StartsAt;
         return new CombatExecutionWithCheckpoints(execution.Result, checkpoints);
     }
@@ -96,19 +98,23 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         => await ExecuteCompactPlaybackCoreAsync(
             runtime,
             checkpointIntervalTicks,
-            6000,
+            new CombatRuleset(
+                ResolveRandomSeed(runtime),
+                6000,
+                StartActiveAbilitiesOnCooldown: true,
+                CaptureEventLog: false),
             cancellationToken);
 
     public async Task<CombatExecutionWithCheckpoints> ExecuteRaidPlaybackAsync(
         CombatEncounterRuntime runtime,
         int checkpointIntervalTicks,
-        CombatSimulationOptions options,
+        CombatRuleset ruleset,
         CancellationToken cancellationToken)
     {
         var checkpoints = new List<CombatCheckpoint>();
         var execution = await ExecuteCoreAsync(
             runtime,
-            options with { CaptureEventLog = false },
+            ruleset with { CaptureEventLog = false },
             cancellationToken,
             checkpoint => checkpoints.Add(checkpoint),
             checkpointIntervalTicks,
@@ -123,56 +129,45 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
     public async Task<CombatExecutionWithCheckpoints> ExecuteTournamentPlaybackAsync(
         CombatEncounterRuntime runtime,
         int checkpointIntervalTicks,
-        TournamentCombatSimulationOptions options,
+        CombatRuleset ruleset,
         CancellationToken cancellationToken)
         => await ExecuteCompactPlaybackCoreAsync(
             runtime,
             checkpointIntervalTicks,
-            checked(options.RegulationTicks + options.OvertimeTicks),
-            cancellationToken,
-            options.RegulationTicks,
-            options.OvertimePowerIncreaseIntervalTicks,
-            options.OvertimePowerIncreasePercent);
+            ruleset,
+            cancellationToken);
 
     private async Task<CombatExecutionWithCheckpoints> ExecuteCompactPlaybackCoreAsync(
         CombatEncounterRuntime runtime,
         int checkpointIntervalTicks,
-        int maximumTicks,
-        CancellationToken cancellationToken,
-        int? overtimeStartsAtTick = null,
-        int overtimePowerIncreaseIntervalTicks = 0,
-        float overtimePowerIncreasePercent = 0)
+        CombatRuleset ruleset,
+        CancellationToken cancellationToken)
     {
         var checkpoints = new List<CombatCheckpoint>();
         var execution = await ExecuteCoreAsync(
             runtime,
-            new CombatSimulationOptions(
-                ResolveRandomSeed(runtime),
-                maximumTicks,
-                StartActiveAbilitiesOnCooldown: true,
-                OvertimeStartsAtTick: overtimeStartsAtTick,
-                OvertimePowerIncreaseIntervalTicks: overtimePowerIncreaseIntervalTicks,
-                OvertimePowerIncreasePercent: overtimePowerIncreasePercent),
+            ruleset,
             cancellationToken,
             checkpoint => checkpoints.Add(checkpoint),
             checkpointIntervalTicks,
             captureEventLog: false);
         SyncCombatEntityState(runtime.FriendlyParticipants, execution.Friendly);
         SyncCombatEntityState(runtime.AllHostileParticipants, execution.Hostile);
+        PopulatePostCombatTeams(execution.Result, execution.Friendly, execution.Hostile);
         execution.Result.StartedAt = runtime.Plan.StartsAt;
         return new CombatExecutionWithCheckpoints(execution.Result, checkpoints);
     }
 
     public async Task<CombatResult> ExecuteSimulationAsync(
         CombatEncounterRuntime runtime,
-        CombatSimulationOptions options,
+        CombatRuleset ruleset,
         CancellationToken cancellationToken)
     {
         var execution = await ExecuteCoreAsync(
             runtime,
-            options,
+            ruleset,
             cancellationToken,
-            captureEventLog: options.CaptureEventLog);
+            captureEventLog: ruleset.CaptureEventLog);
         PopulatePostCombatTeams(execution.Result, execution.Friendly, execution.Hostile);
         execution.Result.StartedAt = runtime.Plan.StartsAt;
         return execution.Result;
@@ -207,7 +202,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 
     private Task<ExecutionResult> ExecuteCoreAsync(
         CombatEncounterRuntime runtime,
-        CombatSimulationOptions options,
+        CombatRuleset options,
         CancellationToken cancellationToken,
         Action<CombatCheckpoint>? checkpointObserver = null,
         int checkpointIntervalTicks = 0,

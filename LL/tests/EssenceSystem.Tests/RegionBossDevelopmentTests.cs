@@ -15,8 +15,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Persistence.LL;
+using Persistence.LL.Repositories.Snapshots;
 using Services.LL.Interfaces;
 using Services.LL.RegionBosses;
+using Services.LL.Snapshots;
 
 namespace EssenceSystem.Tests;
 
@@ -744,6 +746,7 @@ public sealed class RegionBossDevelopmentTests
             Assert.NotNull(signup.RegionBossRunId);
             Assert.Contains(signup.RegionBossRunId.Value, runIds);
             Assert.NotNull(signup.PartySlot);
+            Assert.NotNull(signup.CharacterSnapshotId);
         });
         Assert.True(saveOrderGuard.RunOnlySaveObserved);
     }
@@ -762,6 +765,7 @@ public sealed class RegionBossDevelopmentTests
             db,
             new FixedDefinitionProvider(),
             new FixedPowerRatingService(now),
+            new CharacterSnapshotService(new CharacterSnapshotRepository(db)),
             combatResolver!,
             playbackBundles!,
             realtime ?? new NoopRealtimeBroadcaster(),

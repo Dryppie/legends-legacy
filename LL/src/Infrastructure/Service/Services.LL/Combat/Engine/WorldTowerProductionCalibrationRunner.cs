@@ -1,6 +1,9 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using Common.Randomness;
 using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.CombatProfiles;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Services.LL.WorldTower;
@@ -14,6 +17,7 @@ using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Professions.Crafting.V2;
 using Domain.Models.Snapshots;
 using Services.LL.Combat.Layers.Orchestration.Models;
+using Services.LL.Combat.Layers.Resolution;
 using Services.LL.Interfaces.Combat.Resolution;
 using Services.LL.Interfaces.WorldTower;
 using Services.LL.PowerRatings;
@@ -30,7 +34,48 @@ public enum WorldTowerCalibrationCohort
 public sealed record WorldTowerProductionCalibrationOptions(
     int MinimumFloor = 1,
     int MaximumFloor = 15,
-    int SampleCount = 10);
+    int SampleCount = 10,
+    int BaseRandomSeed = 1337,
+    string SeedManifestId = "world-tower-common-v1",
+    bool UseSharedCohortSeeds = false);
+
+public sealed record WorldTowerCalibrationSeedManifest(
+    string Id,
+    int BaseRandomSeed,
+    IReadOnlyList<int> Seeds,
+    string Hash,
+    bool SharedAcrossCohorts)
+{
+    public static WorldTowerCalibrationSeedManifest Create(
+        string id,
+        int baseRandomSeed,
+        int sampleCount)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+            throw new ArgumentException("A seed manifest ID is required.", nameof(id));
+        if (sampleCount is < 1 or > 1_000)
+            throw new ArgumentOutOfRangeException(nameof(sampleCount));
+
+        var normalizedId = id.Trim();
+        var seeds = Enumerable.Range(0, sampleCount)
+            .Select(sample => StableRandom.Seed(
+                "world-tower-calibration-seed-v1",
+                normalizedId,
+                baseRandomSeed.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                sample.ToString(System.Globalization.CultureInfo.InvariantCulture)))
+            .ToArray();
+        var canonical = string.Join(',', seeds);
+        var hash = Convert.ToHexString(SHA256.HashData(
+                Encoding.UTF8.GetBytes($"{normalizedId}:{baseRandomSeed}:{canonical}")))
+            .ToLowerInvariant();
+        return new WorldTowerCalibrationSeedManifest(
+            normalizedId,
+            baseRandomSeed,
+            seeds,
+            hash,
+            SharedAcrossCohorts: true);
+    }
+}
 
 public sealed record WorldTowerEquipmentRequirement(
     int FloorNumber,
@@ -110,7 +155,29 @@ public sealed record WorldTowerProductionCalibrationResult(
 public sealed record WorldTowerProductionCalibrationReport(
     int SchemaVersion,
     int CanonicalRosterVersion,
-    IReadOnlyList<WorldTowerProductionCalibrationResult> Results);
+    IReadOnlyList<WorldTowerProductionCalibrationResult> Results,
+    WorldTowerCalibrationSeedManifest? SeedManifest = null,
+    string InputFingerprint = "");
+
+public sealed record WorldTowerProfileScenarioRequirement(
+    string ScenarioId,
+    IReadOnlyList<int> FloorNumbers,
+    int TeamSize,
+    int EquipmentTier,
+    string EquipmentRarity,
+    string EquipmentQuality,
+    string AuditEquipmentProfile,
+    int EssencesPerParticipant,
+    double AveragePowerRating,
+    int MinimumRecommendedPowerRating,
+    int MaximumRecommendedPowerRating);
+
+public interface IWorldTowerProductionCalibrationRunner
+{
+    Task<WorldTowerProductionCalibrationReport> RunAsync(
+        WorldTowerProductionCalibrationOptions? options = null,
+        CancellationToken cancellationToken = default);
+}
 
 /// <summary>
 /// Calibrates World Tower floors through the production snapshot builder,
@@ -122,9 +189,64 @@ public sealed class WorldTowerProductionCalibrationRunner(
     IWorldTowerCombatRuntimeFactory runtimeFactory,
     ICombatEngineExecutor combatEngine,
     CanonicalEquipmentBuildFactory canonicalBuilds,
-    IEssenceDefinitionRepository essenceDefinitions)
+    IEssenceDefinitionRepository essenceDefinitions,
+    IAbilityCatalogProvider abilityCatalog) : IWorldTowerProductionCalibrationRunner
 {
     private const int PlaybackCheckpointIntervalTicks = 10;
+
+    public IReadOnlyList<WorldTowerProfileScenarioRequirement> GetProfileScenarioRequirements(
+        int minimumFloor = 1,
+        int maximumFloor = 15)
+    {
+        if (minimumFloor is < 1 || maximumFloor < minimumFloor)
+            throw new ArgumentOutOfRangeException(nameof(minimumFloor));
+
+        return towerDefinitions.GetFloors()
+            .Where(floor => floor.FloorNumber >= minimumFloor && floor.FloorNumber <= maximumFloor)
+            .Select(floor =>
+            {
+                var recommended = CreateCohorts(
+                        floor.RequiredSlots,
+                        floor.FloorNumber,
+                        floor.RecommendedPowerRating)
+                    .Single(candidate => candidate.Cohort == WorldTowerCalibrationCohort.Recommended)
+                    .Loadout;
+                var scenarioId = CombatCharacterProfileScenario.CreateId(
+                    CombatContentType.WorldTower.ToString(),
+                    floor.RequiredSlots,
+                    recommended.Rung.Tier,
+                    recommended.Rung.Rarity.ToString(),
+                    recommended.Rung.Quality.ToString(),
+                    CanonicalPartyProfile.Balanced.ToString(),
+                    recommended.EssenceCount);
+                return new
+                {
+                    Floor = floor,
+                    Loadout = recommended,
+                    ScenarioId = scenarioId,
+                    AveragePower = AverageRating(floor.RequiredSlots, recommended)
+                };
+            })
+            .GroupBy(entry => entry.ScenarioId, StringComparer.Ordinal)
+            .Select(group =>
+            {
+                var first = group.First();
+                return new WorldTowerProfileScenarioRequirement(
+                    group.Key,
+                    group.Select(entry => entry.Floor.FloorNumber).Order().ToArray(),
+                    first.Floor.RequiredSlots,
+                    first.Loadout.Rung.Tier,
+                    first.Loadout.Rung.Rarity.ToString(),
+                    first.Loadout.Rung.Quality.ToString(),
+                    CanonicalPartyProfile.Balanced.ToString(),
+                    first.Loadout.EssenceCount,
+                    first.AveragePower,
+                    group.Min(entry => entry.Floor.RecommendedPowerRating),
+                    group.Max(entry => entry.Floor.RecommendedPowerRating));
+            })
+            .OrderBy(requirement => requirement.FloorNumbers[0])
+            .ToArray();
+    }
 
     public async Task<WorldTowerProductionCalibrationReport> RunAsync(
         WorldTowerProductionCalibrationOptions? options = null,
@@ -134,6 +256,8 @@ public sealed class WorldTowerProductionCalibrationRunner(
         if (options.MinimumFloor is < 1 || options.MaximumFloor < options.MinimumFloor)
             throw new ArgumentOutOfRangeException(nameof(options));
         if (options.SampleCount is < 1 or > 1_000)
+            throw new ArgumentOutOfRangeException(nameof(options));
+        if (string.IsNullOrWhiteSpace(options.SeedManifestId))
             throw new ArgumentOutOfRangeException(nameof(options));
 
         var floors = towerDefinitions.GetFloors()
@@ -145,6 +269,12 @@ public sealed class WorldTowerProductionCalibrationRunner(
             throw new InvalidOperationException("No World Tower floors matched the calibration range.");
 
         var results = new List<WorldTowerProductionCalibrationResult>();
+        var seedManifest = options.UseSharedCohortSeeds
+            ? WorldTowerCalibrationSeedManifest.Create(
+                options.SeedManifestId,
+                options.BaseRandomSeed,
+                options.SampleCount)
+            : null;
 
         foreach (var floor in floors)
         {
@@ -183,7 +313,8 @@ public sealed class WorldTowerProductionCalibrationRunner(
                             PlayerDamagePercent: 0,
                             WeakPointPercent: 0,
                             GuardianDamageReductionPercent: 0,
-                            StartsAt: DateTimeOffset.UnixEpoch),
+                            StartsAt: DateTimeOffset.UnixEpoch,
+                            RandomSeed: seedManifest?.Seeds[sample]),
                         cancellationToken);
 
                     if (preparedRoster is null)
@@ -226,7 +357,41 @@ public sealed class WorldTowerProductionCalibrationRunner(
         return new WorldTowerProductionCalibrationReport(
             SchemaVersion: 1,
             CanonicalCooperativeRosterCatalog.Version,
-            results);
+            results,
+            seedManifest,
+            CreateInputFingerprint(floors, results));
+    }
+
+    private string CreateInputFingerprint(
+        IReadOnlyList<Domain.Models.WorldTower.TowerFloorDefinition> floors,
+        IReadOnlyList<WorldTowerProductionCalibrationResult> results)
+    {
+        var input = JsonSerializer.Serialize(new
+        {
+            CombatContentHash = AbilityBalanceContentFingerprint.Create(
+                abilityCatalog,
+                essenceDefinitions),
+            PreparationSchemaVersion = CombatPreparationPipeline.SchemaVersion,
+            PowerRatingAlgorithmVersion = PowerRatingAlgorithm.Version,
+            CombatRulesVersion = PowerRatingAlgorithm.CombatRulesVersion,
+            EquipmentBalanceVersion = EquipmentStatBudgetCatalog.BalanceVersion,
+            CanonicalRosterVersion = CanonicalCooperativeRosterCatalog.Version,
+            Floors = floors,
+            PreparedCohorts = results.Select(result => new
+            {
+                result.FloorNumber,
+                result.Cohort,
+                result.EquipmentRungId,
+                result.EssenceCount,
+                result.RosterSize,
+                result.AveragePowerRating,
+                result.AbilitiesStartOnCooldown,
+                result.PreparedRoster,
+                result.PreparedGuardian
+            })
+        }, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(input)))
+            .ToLowerInvariant();
     }
 
     private IReadOnlyList<(CanonicalCooperativeRosterSlot Slot, CanonicalEquipmentBuild Build)> CreateRoster(

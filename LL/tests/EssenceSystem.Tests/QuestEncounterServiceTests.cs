@@ -11,6 +11,7 @@ using Domain.Models.Items;
 using Domain.Models.Quests;
 using Domain.Models.Regions.Areas;
 using Services.LL.Combat.Layers.Resolution.Models;
+using Services.LL.Combat.Layers.Resolution;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
 using Services.LL.Quests;
@@ -49,10 +50,11 @@ public sealed class QuestEncounterServiceTests
             EncounterKey = "training"
         };
         var executor = new CapturingCombatEngineExecutor();
+        var setup = new FixedCombatSetupService();
         var service = new QuestEncounterService(
             new FixedEntityService(character, creature),
             new FixedAreaService(),
-            new FixedCombatSetupService(),
+            new CombatPreparationPipeline(new UnusedSnapshotCombatantBuilder(), setup),
             executor,
             new PassthroughCombatEncounterResultFactory(),
             new AllowedCombatAreaAccessService(),
@@ -71,6 +73,13 @@ public sealed class QuestEncounterServiceTests
         Assert.Equal(10, enemy.GetAttributeValue(AttributeType.MaxHealth));
         Assert.Equal(10, enemy.GetCurrentHealthValue());
         Assert.Equal(96, creature.BaseAttributesDict[AttributeType.MaxHealth]);
+    }
+
+    private sealed class UnusedSnapshotCombatantBuilder : ISnapshotCombatantBuilder
+    {
+        public Task<IReadOnlyList<CombatRuntimeParticipant>> BuildAsync(
+            IReadOnlyList<SnapshotCombatantRequest> requests,
+            CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 
     private sealed class FixedEntityService(params Entity[] entities) : IEntityService
@@ -176,7 +185,10 @@ public sealed class QuestEncounterServiceTests
                 combatResult.Outcome,
                 combatResult,
                 combatResult.PlayerTeam,
-                combatResult.EnemyTeam);
+                combatResult.EnemyTeam)
+            {
+                ContentType = runtime.Plan.ContentType
+            };
     }
 
     private sealed class AllowedCombatAreaAccessService : ICombatAreaAccessService

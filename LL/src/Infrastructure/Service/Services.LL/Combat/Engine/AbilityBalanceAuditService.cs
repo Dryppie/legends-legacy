@@ -1,7 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Items;
 using Domain.Models.Professions.Crafting.V2;
@@ -11,10 +7,10 @@ namespace Services.LL.Combat.Engine;
 
 public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
 {
+    public const int AlgorithmVersion = 3;
     private static readonly int[] DefaultSeeds = [1337, 2027, 9001];
     private static readonly double[] ValidationContextTargets = [0.35d, 0.5d, 0.65d];
     private const int ValidationReplacementCount = 3;
-    private static readonly JsonSerializerOptions JsonOptions = CreateJsonOptions();
     private readonly IAbilityBalanceSimulator _simulator;
     private readonly IAbilityCatalogProvider _catalogProvider;
     private readonly IEssenceDefinitionRepository? _essenceDefinitions;
@@ -50,7 +46,8 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
                     null,
                     request.EquipmentTier,
                     request.EquipmentRarity,
-                    request.EquipmentProfile),
+                    request.EquipmentProfile,
+                    request.UseCanonicalRoles),
                 cancellationToken);
             screeningReports.Add(report);
         }
@@ -138,7 +135,8 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
                             [originalLoadout, replacementLoadout],
                             request.EquipmentTier,
                             request.EquipmentRarity,
-                            request.EquipmentProfile),
+                            request.EquipmentProfile,
+                            request.UseCanonicalRoles),
                         cancellationToken);
                     validationBattles += validationReport.BattlesRun;
                     essenceValidationBattles += validationReport.BattlesRun;
@@ -169,23 +167,29 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
                 testedReplacements.Count));
         }
 
-        cancellationToken.ThrowIfCancellationRequested();
-        var finalistReport = _simulator.Run(
-            new AbilityBalanceSimulationRequest(
-                request.FinalistBattleCount,
-                request.TeamSize,
-                request.EssencesPerParticipant,
-                seeds[0],
-                request.FinalistCount,
-                request.CandidatePoolSize,
-                finalistCandidates.Select(ToLoadout).ToList(),
-                request.EquipmentTier,
-                request.EquipmentRarity,
-                request.EquipmentProfile),
-            cancellationToken);
+        var finalistReports = new List<AbilityBalanceSimulationReport>(seeds.Count);
+        foreach (var seed in seeds)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            finalistReports.Add(_simulator.Run(
+                new AbilityBalanceSimulationRequest(
+                    request.FinalistBattleCount,
+                    request.TeamSize,
+                    request.EssencesPerParticipant,
+                    seed,
+                    request.FinalistCount,
+                    request.CandidatePoolSize,
+                    finalistCandidates.Select(ToLoadout).ToList(),
+                    request.EquipmentTier,
+                    request.EquipmentRarity,
+                    request.EquipmentProfile,
+                    request.UseCanonicalRoles),
+                cancellationToken));
+        }
 
         var screeningBattles = screeningReports.Sum(report => (long)report.BattlesRun);
-        var finalistBattles = (long)finalistReport.BattlesRun;
+        var finalistBattles = finalistReports.Sum(report => (long)report.BattlesRun);
+        var representativeFinalistReport = finalistReports[0];
         return new AbilityBalanceAuditReport(
             CreateContentHash(),
             screeningBattles,
@@ -193,15 +197,18 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
             finalistBattles,
             screeningBattles + validationBattles + finalistBattles,
             screenedCombinations.Count,
-            finalistReport.CandidateTeamCount,
-            finalistReport.EquipmentTier,
-            finalistReport.EquipmentRarity,
-            finalistReport.EquipmentProfile,
-            finalistReport.ParticipantAttributes,
+            representativeFinalistReport.CandidateTeamCount,
+            representativeFinalistReport.EquipmentTier,
+            representativeFinalistReport.EquipmentRarity,
+            representativeFinalistReport.EquipmentProfile,
+            representativeFinalistReport.ParticipantAttributes,
             screeningEssenceResults,
-            finalistReport.EssenceResults,
+            MergeEssenceResults(finalistReports.SelectMany(report => report.EssenceResults)),
             validationResults,
-            finalistReport.RankedCombinations);
+            MergeCombinationResults(finalistReports),
+            seeds,
+            MergeMatchupResults(finalistReports),
+            representativeFinalistReport.ParticipantAttributesByRole);
     }
 
     private static AbilityBalanceAuditRequest Normalize(AbilityBalanceAuditRequest request)
@@ -223,7 +230,7 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
 
         return request with
         {
-            TeamSize = Math.Clamp(request.TeamSize, 1, 10),
+            TeamSize = Math.Clamp(request.TeamSize, 1, 15),
             EssencesPerParticipant = Math.Clamp(request.EssencesPerParticipant, 1, 10),
             CandidatePoolSize = Math.Clamp(request.CandidatePoolSize, 2, 1_000),
             ScreeningBattleCount = Math.Max(1, request.ScreeningBattleCount),
@@ -240,11 +247,15 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
         };
     }
 
-    private static IReadOnlyList<AbilityBalanceCombinationResult> SelectDiverseFinalists(
+    private IReadOnlyList<AbilityBalanceCombinationResult> SelectDiverseFinalists(
         IReadOnlyList<AbilityBalanceCombinationResult> ranked,
         int count)
     {
         var selected = new Dictionary<string, AbilityBalanceCombinationResult>(StringComparer.Ordinal);
+        const int budgetReserveCount = 3;
+        foreach (var candidate in ranked.Where(IsBudgetCombination).Take(Math.Min(budgetReserveCount, count)))
+            selected.TryAdd(candidate.Signature, candidate);
+
         var essenceIds = ranked
             .SelectMany(GetEssenceIds)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -268,6 +279,12 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
 
         return selected.Values.ToList();
     }
+
+    private bool IsBudgetCombination(AbilityBalanceCombinationResult combination) =>
+        _essenceDefinitions is not null
+        && combination.Participants
+            .SelectMany(participant => participant.EssenceIds)
+            .All(essenceId => _essenceDefinitions.GetById(essenceId)?.Rarity == Rarity.Common);
 
     private static IReadOnlyList<AbilityBalanceCombinationResult> SelectValidationContexts(
         IReadOnlyList<AbilityBalanceCombinationResult> combinations,
@@ -299,7 +316,7 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
 
     private static AbilityBalanceTeamLoadout ToLoadout(AbilityBalanceCombinationResult result) =>
         new(result.Participants.Select(participant =>
-            new AbilityBalanceParticipantLoadout([.. participant.EssenceIds])).ToList());
+            new AbilityBalanceParticipantLoadout([.. participant.EssenceIds], participant.Role)).ToList());
 
     private static AbilityBalanceTeamLoadout ReplaceEssence(
         AbilityBalanceTeamLoadout loadout,
@@ -308,18 +325,20 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
     {
         var replaced = false;
         return new AbilityBalanceTeamLoadout(loadout.Participants
-            .Select(participant => new AbilityBalanceParticipantLoadout(participant.EssenceIds
-                .Select(candidate =>
-                {
-                    if (!replaced && candidate.Equals(essenceId, StringComparison.OrdinalIgnoreCase))
+            .Select(participant => new AbilityBalanceParticipantLoadout(
+                participant.EssenceIds
+                    .Select(candidate =>
                     {
-                        replaced = true;
-                        return replacementEssenceId;
-                    }
+                        if (!replaced && candidate.Equals(essenceId, StringComparison.OrdinalIgnoreCase))
+                        {
+                            replaced = true;
+                            return replacementEssenceId;
+                        }
 
-                    return candidate;
-                })
-                .ToList()))
+                        return candidate;
+                    })
+                    .ToList(),
+                participant.Role))
             .ToList());
     }
 
@@ -356,6 +375,85 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
             .OrderByDescending(result => result.AdjustedScoreDelta)
             .ThenByDescending(result => result.Battles)
             .ToList();
+
+    private static IReadOnlyList<AbilityBalanceCombinationResult> MergeCombinationResults(
+        IReadOnlyList<AbilityBalanceSimulationReport> reports) =>
+        reports
+            .SelectMany(report => report.RankedCombinations.Select(combination =>
+                (report.RandomSeed, Combination: combination)))
+            .GroupBy(entry => entry.Combination.Signature, StringComparer.Ordinal)
+            .Select(group =>
+            {
+                var entries = group.ToArray();
+                var first = entries[0].Combination;
+                var battles = entries.Sum(entry => entry.Combination.Battles);
+                var wins = entries.Sum(entry => entry.Combination.Wins);
+                var losses = entries.Sum(entry => entry.Combination.Losses);
+                var draws = entries.Sum(entry => entry.Combination.Draws);
+                return new AbilityBalanceCombinationResult(
+                    first.Signature,
+                    first.DisplayName,
+                    first.Participants,
+                    battles,
+                    wins,
+                    losses,
+                    draws,
+                    battles == 0 ? 0d : wins / (double)battles,
+                    battles == 0 ? 0d : losses / (double)battles,
+                    battles == 0 ? 0d : draws / (double)battles,
+                    WeightedAverage(entries, entry => entry.Combination.AverageDuration),
+                    WeightedAverage(entries, entry => entry.Combination.AverageDamageDone),
+                    WeightedAverage(entries, entry => entry.Combination.AverageDamageTaken),
+                    entries
+                        .OrderBy(entry => entry.RandomSeed)
+                        .Select(entry => new AbilityBalanceSeedResult(
+                            entry.RandomSeed,
+                            entry.Combination.Battles,
+                            CombinationScore(entry.Combination)))
+                        .ToArray());
+            })
+            .OrderByDescending(CombinationScore)
+            .ThenByDescending(combination => combination.Battles)
+            .ThenBy(combination => combination.Signature, StringComparer.Ordinal)
+            .ToArray();
+
+    private static IReadOnlyList<AbilityBalanceMatchupResult> MergeMatchupResults(
+        IReadOnlyList<AbilityBalanceSimulationReport> reports) =>
+        reports
+            .SelectMany(report => report.MatchupResults ?? [])
+            .GroupBy(
+                matchup => $"{matchup.FirstSignature}\u001f{matchup.SecondSignature}",
+                StringComparer.Ordinal)
+            .Select(group =>
+            {
+                var entries = group.ToArray();
+                var first = entries[0];
+                var battles = entries.Sum(entry => entry.Battles);
+                var firstWins = entries.Sum(entry => entry.FirstWins);
+                var secondWins = entries.Sum(entry => entry.SecondWins);
+                var draws = entries.Sum(entry => entry.Draws);
+                return new AbilityBalanceMatchupResult(
+                    first.FirstSignature,
+                    first.SecondSignature,
+                    battles,
+                    firstWins,
+                    secondWins,
+                    draws,
+                    battles == 0 ? 0d : (firstWins + draws * 0.5d) / battles);
+            })
+            .OrderBy(matchup => matchup.FirstSignature, StringComparer.Ordinal)
+            .ThenBy(matchup => matchup.SecondSignature, StringComparer.Ordinal)
+            .ToArray();
+
+    private static double WeightedAverage(
+        IReadOnlyList<(int RandomSeed, AbilityBalanceCombinationResult Combination)> entries,
+        Func<(int RandomSeed, AbilityBalanceCombinationResult Combination), double> selector)
+    {
+        var battles = entries.Sum(entry => entry.Combination.Battles);
+        return battles == 0
+            ? 0d
+            : entries.Sum(entry => selector(entry) * entry.Combination.Battles) / battles;
+    }
 
     private static AbilityBalanceEssenceResult MergeEssenceResult(
         string essenceId,
@@ -414,34 +512,12 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
         var center = (score + z * z / (2d * battles)) / denominator;
         var margin = z * Math.Sqrt(
             (score * (1d - score) + z * z / (4d * battles)) / battles) / denominator;
-        return (Math.Max(0d, center - margin), Math.Min(1d, center + margin));
+        var lower = Math.Max(0d, center - margin);
+        var upper = Math.Min(1d, center + margin);
+        return (Math.Min(score, lower), Math.Max(score, upper));
     }
 
-    private string CreateContentHash()
-    {
-        var catalog = _catalogProvider.GetCatalog();
-        var content = JsonSerializer.Serialize(new
-        {
-            catalog.Abilities,
-            catalog.Statuses,
-            catalog.Summons,
-            catalog.AbilityIdsByOwningEssence,
-            Essences = _essenceDefinitions?.GetAll().Select(definition => new
-            {
-                definition.Id,
-                definition.SourceMonsterId,
-                definition.ActiveAbilityId,
-                definition.PassiveAbilityId
-            }),
-            EquipmentStatBudgetCatalog.BalanceVersion
-        }, JsonOptions);
-        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(content))).ToLowerInvariant();
-    }
+    private string CreateContentHash() =>
+        AbilityBalanceContentFingerprint.Create(_catalogProvider, _essenceDefinitions);
 
-    private static JsonSerializerOptions CreateJsonOptions()
-    {
-        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-        options.Converters.Add(new JsonStringEnumConverter());
-        return options;
-    }
 }

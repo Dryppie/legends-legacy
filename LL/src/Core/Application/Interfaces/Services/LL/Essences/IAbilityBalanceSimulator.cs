@@ -20,13 +20,15 @@ public sealed record AbilityBalanceSimulationRequest(
     IReadOnlyList<AbilityBalanceTeamLoadout>? CandidateTeams,
     int EquipmentTier = 10,
     string EquipmentRarity = "Epic",
-    string EquipmentProfile = "Balanced");
+    string EquipmentProfile = "Balanced",
+    bool UseCanonicalRoles = false);
 
 public sealed record AbilityBalanceTeamLoadout(
     IReadOnlyList<AbilityBalanceParticipantLoadout> Participants);
 
 public sealed record AbilityBalanceParticipantLoadout(
-    IReadOnlyList<string> EssenceIds);
+    IReadOnlyList<string> EssenceIds,
+    string Role = "Balance");
 
 public sealed record AbilityBalanceSimulationReport(
     string Mode,
@@ -45,7 +47,9 @@ public sealed record AbilityBalanceSimulationReport(
     IReadOnlyList<AbilityBalanceEssenceDefinition> AvailableEssences,
     IReadOnlyList<AbilityBalanceCombinationResult> RankedCombinations,
     IReadOnlyList<AbilityBalanceEssenceResult> EssenceResults,
-    IReadOnlyList<AbilityBalanceBattleSummary> BattleSummaries);
+    IReadOnlyList<AbilityBalanceBattleSummary> BattleSummaries,
+    IReadOnlyList<AbilityBalanceMatchupResult>? MatchupResults = null,
+    IReadOnlyDictionary<string, IReadOnlyDictionary<string, float>>? ParticipantAttributesByRole = null);
 
 public sealed record AbilityBalanceEssenceDefinition(
     string EssenceId,
@@ -65,7 +69,22 @@ public sealed record AbilityBalanceCombinationResult(
     double DrawRate,
     double AverageDuration,
     double AverageDamageDone,
-    double AverageDamageTaken);
+    double AverageDamageTaken,
+    IReadOnlyList<AbilityBalanceSeedResult>? SeedResults = null);
+
+public sealed record AbilityBalanceSeedResult(
+    int RandomSeed,
+    int Battles,
+    double Score);
+
+public sealed record AbilityBalanceMatchupResult(
+    string FirstSignature,
+    string SecondSignature,
+    int Battles,
+    int FirstWins,
+    int SecondWins,
+    int Draws,
+    double FirstScore);
 
 public sealed record AbilityBalanceEssenceResult(
     string EssenceId,

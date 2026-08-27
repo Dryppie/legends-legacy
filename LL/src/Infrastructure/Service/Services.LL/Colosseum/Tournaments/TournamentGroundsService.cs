@@ -3,16 +3,15 @@ using Application.Interfaces.WebSockets;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Achievements;
-using Application.Interfaces.Services.LL.Entities;
 using Application.UseCases.Outbox;
 using Application.UseCases.Colosseum.Tournaments;
 using Application.UseCases.Inventories.SelectionCrates;
+using Common.Randomness;
 using Domain.Models.Colosseum;
 using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Items;
-using Domain.Models.Items.Equipments;
 using Domain.Models.Snapshots;
 using Domain.Models.Essences;
 using Domain.Models.Administration;
@@ -59,8 +58,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     };
 
     private readonly ITournamentGroundsRepository _tournaments;
-    private readonly IEntityService _entityService;
-    private readonly ICombatSetupService _combatSetupService;
+    private readonly ICombatPreparationPipeline _combatPreparation;
     private readonly ICharacterSnapshotService _characterSnapshotService;
     private readonly IItemBaseRepository _itemBaseRepository;
     private readonly IInventoryService _inventoryService;
@@ -77,8 +75,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     public TournamentGroundsService(
         ITournamentGroundsRepository tournaments,
-        IEntityService entityService,
-        ICombatSetupService combatSetupService,
+        ICombatPreparationPipeline combatPreparation,
         ICharacterSnapshotService characterSnapshotService,
         IItemBaseRepository itemBaseRepository,
         IInventoryService inventoryService,
@@ -94,8 +91,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         IGameEventOutbox? outbox = null)
     {
         _tournaments = tournaments;
-        _entityService = entityService;
-        _combatSetupService = combatSetupService;
+        _combatPreparation = combatPreparation;
         _characterSnapshotService = characterSnapshotService;
         _itemBaseRepository = itemBaseRepository;
         _inventoryService = inventoryService;
@@ -2599,15 +2595,14 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var playerOneMembers = await GetTeamMembersAsync(playerOne.Id, cancellationToken);
         var playerTwoMembers = await GetTeamMembersAsync(playerTwo.Id, cancellationToken);
         var allMembers = playerOneMembers.Concat(playerTwoMembers).ToArray();
-        var characterIds = allMembers.Select(participant => participant.CharacterId).ToList();
-        var entities = await _entityService.GetEntitiesByIdsForCombatAsync(characterIds, cancellationToken);
-        if (entities.Count < characterIds.Count)
-        {
-            var fallback = CreateFallbackCombatResult(BattleOutcome.Draw, now);
-            return (Guid.NewGuid(), CreateFallbackExecution(fallback));
-        }
-
-        var sourceById = entities.Cast<Character>().ToDictionary(e => e.Id);
+        var battleId = StableRandom.Guid(
+            "tournament-battle-v1",
+            tournamentId.ToString("N"),
+            matchId.ToString("N"));
+        var randomSeed = StableRandom.Seed(
+            "tournament-combat-v1",
+            tournamentId.ToString("N"),
+            matchId.ToString("N"));
         var snapshotIds = allMembers.Select(participant => participant.SnapshotId).ToArray();
         var snapshotQuery = _tournaments.CombatSnapshots
             .Where(snapshot => snapshotIds.Contains(snapshot.Id))
@@ -2630,56 +2625,43 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         if (snapshots.Count < snapshotIds.Length)
         {
             var fallback = CreateFallbackCombatResult(BattleOutcome.Draw, now);
-            return (Guid.NewGuid(), CreateFallbackExecution(fallback));
+            return (battleId, CreateFallbackExecution(fallback));
         }
 
-        var itemBases = await _itemBaseRepository.GetItemBasesByIdsAsync(
-            snapshots.Values
-                .SelectMany(snapshot => snapshot.Equipment)
-                .Select(equipment => equipment.ItemBaseId)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToArray(),
-            cancellationToken);
-        var friendlyRuntime = new List<CombatRuntimeParticipant>();
-        var hostileRuntime = new List<CombatRuntimeParticipant>();
-        var slots = new List<CombatParticipantSlot>();
-        var combatEntities = new List<CombatEntity>();
+        var requests = playerOneMembers.Select((participant, index) => new CombatantPreparationRequest(
+                new CombatParticipantSlot(
+                    $"tournament-friendly-{index}-{participant.CharacterId:N}",
+                    participant.CharacterId,
+                    CombatSide.Friendly),
+                new SnapshotCombatantPreparationSource(snapshots[participant.SnapshotId])))
+            .Concat(playerTwoMembers.Select((participant, index) => new CombatantPreparationRequest(
+                new CombatParticipantSlot(
+                    $"tournament-hostile-{index}-{participant.CharacterId:N}",
+                    participant.CharacterId,
+                    CombatSide.Hostile),
+                new SnapshotCombatantPreparationSource(snapshots[participant.SnapshotId]))))
+            .ToArray();
 
-        foreach (var participant in playerOneMembers)
-        {
-            var snapshot = snapshots[participant.SnapshotId];
-            var source = sourceById[participant.CharacterId];
-            var combat = CreateSnapshotCombatEntity(source, snapshot, itemBases);
-            combatEntities.Add(combat);
-            var slot = new CombatParticipantSlot(participant.CharacterId.ToString(), participant.CharacterId, CombatSide.Friendly);
-            slots.Add(slot);
-            friendlyRuntime.Add(new CombatRuntimeParticipant(slot, source, combat));
-        }
-
-        foreach (var participant in playerTwoMembers)
-        {
-            var snapshot = snapshots[participant.SnapshotId];
-            var source = sourceById[participant.CharacterId];
-            var combat = CreateSnapshotCombatEntity(source, snapshot, itemBases);
-            combatEntities.Add(combat);
-            var slot = new CombatParticipantSlot(participant.CharacterId.ToString(), participant.CharacterId, CombatSide.Hostile);
-            slots.Add(slot);
-            hostileRuntime.Add(new CombatRuntimeParticipant(slot, source, combat));
-        }
-
-        await _combatSetupService.PrepareEntitiesForCombat(combatEntities, EssenceCombatActivity.Tournament);
-
-        var battleId = Guid.NewGuid();
         var encounterPlan = new CombatEncounterPlan(
             EncounterId: battleId,
             Mode: CombatMode.Pvp,
             Sequence: 1,
             StartsAt: now,
-            Participants: slots,
+            Participants: requests.Select(x => x.Slot).ToArray(),
             SourceContext: new PvpEncounterSourceContext(
                 matchId,
                 playerOneMembers[0].CharacterId,
-                playerTwoMembers[0].CharacterId));
+                playerTwoMembers[0].CharacterId))
+        {
+            ContentType = CombatContentType.Tournament,
+            RandomSeed = randomSeed
+        };
+        var runtimeParticipants = await _combatPreparation.PrepareAsync(
+            encounterPlan.ContentType,
+            requests,
+            cancellationToken);
+        var friendlyRuntime = runtimeParticipants.Where(x => x.Slot.Side == CombatSide.Friendly).ToArray();
+        var hostileRuntime = runtimeParticipants.Where(x => x.Slot.Side == CombatSide.Hostile).ToArray();
 
         var runtime = new CombatEncounterRuntime(
             encounterPlan,
@@ -2691,17 +2673,23 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var execution = await _combatEngineExecutor.ExecuteTournamentPlaybackAsync(
             runtime,
             _options.CombatTicksPerFrame,
-            new TournamentCombatSimulationOptions(
-                GetCombatDurationTicks(
+            new CombatRuleset(
+                randomSeed,
+                checked(
+                    GetCombatDurationTicks(
+                        _options.RegulationDurationMinutes,
+                        Services.LL.Combat.Engine.FastCombatEngine.TicksPerSecond)
+                    + GetCombatDurationTicks(
+                        _options.OvertimeDurationMinutes,
+                        Services.LL.Combat.Engine.FastCombatEngine.TicksPerSecond)),
+                OvertimeStartsAtTick: GetCombatDurationTicks(
                     _options.RegulationDurationMinutes,
                     Services.LL.Combat.Engine.FastCombatEngine.TicksPerSecond),
-                GetCombatDurationTicks(
-                    _options.OvertimeDurationMinutes,
-                    Services.LL.Combat.Engine.FastCombatEngine.TicksPerSecond),
-                checked(
+                OvertimePowerIncreaseIntervalTicks: checked(
                     _options.OvertimePowerIncreaseIntervalSeconds
                     * Services.LL.Combat.Engine.FastCombatEngine.TicksPerSecond),
-                _options.OvertimePowerIncreasePercent),
+                OvertimePowerIncreasePercent: _options.OvertimePowerIncreasePercent,
+                CaptureEventLog: false),
             cancellationToken);
         var elapsedMilliseconds = _timeProvider.GetElapsedTime(engineStartedAt).TotalMilliseconds;
         var allocatedBytes = Math.Max(
@@ -2732,55 +2720,6 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             StartedAt = now,
             Duration = 1
         };
-    }
-
-    private CombatEntity CreateSnapshotCombatEntity(
-        Character sourceCharacter,
-        CharacterSnapshot snapshot,
-        IReadOnlyDictionary<string, ItemBase> itemBases)
-    {
-        var template = _combatSetupService.CreatePlayerCombatEntities([sourceCharacter]).Single();
-        template.Name = snapshot.Name;
-        template.Level = snapshot.Level;
-        template.BaseAttributes = snapshot.BaseAttributes
-            .Select(x => new Domain.Models.Attributes.EntityAttribute
-            {
-                EntityId = snapshot.CharacterId,
-                AttributeType = x.AttributeType,
-                Value = x.Value
-            })
-            .ToList();
-        template.EquippedEssences = snapshot.EquippedEssences
-            .OrderBy(x => x.SlotIndex)
-            .Select(x => x.ToPlayerEssence(snapshot.CharacterId))
-            .ToList();
-        template.HasEquippedEssenceSnapshot = true;
-
-        template.Equipment = snapshot.Equipment
-            .OrderBy(x => x.Slot)
-            .Where(x => itemBases.ContainsKey(x.ItemBaseId))
-            .Select(x => new EquipmentInstance
-            {
-                Id = x.EquipmentInstanceId,
-                ItemBaseId = x.ItemBaseId,
-                ItemBase = itemBases[x.ItemBaseId],
-                BaseRecipeId = x.BaseRecipeId,
-                EquipmentSetId = x.EquipmentSetId,
-                Rarity = x.Rarity,
-                Quality = x.Quality,
-                Tier = x.Tier,
-                StatModelVersion = x.StatModelVersion,
-                Potential = x.Potential,
-                ItemXp = x.ItemXp,
-                IsMasterpiece = x.IsMasterpiece,
-                IsLevelingItem = x.IsLevelingItem,
-                InstanceModifiers = x.InstanceModifiers
-                    .Select(modifier => modifier.ToInstanceModifier(x.EquipmentInstanceId))
-                    .ToList()
-            })
-            .ToList();
-
-        return template;
     }
 
     private async Task CompleteTournamentAsync(TournamentInstance tournament, Guid championTeamId, DateTimeOffset now, CancellationToken cancellationToken)

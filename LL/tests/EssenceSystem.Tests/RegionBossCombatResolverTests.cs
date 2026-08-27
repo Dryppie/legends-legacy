@@ -6,9 +6,11 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.RegionBosses;
 using Domain.Models.Regions.Areas;
+using Domain.Models.Snapshots;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
 using Services.LL.Combat.Layers.Resolution.Models;
+using Services.LL.Combat.Layers.Resolution;
 using Services.LL.RegionBosses;
 
 namespace EssenceSystem.Tests;
@@ -16,17 +18,19 @@ namespace EssenceSystem.Tests;
 public sealed class RegionBossCombatResolverTests
 {
     [Fact]
-    public async Task Resolve_builds_participants_from_their_current_characters()
+    public async Task Resolve_builds_participants_from_their_signup_snapshots()
     {
-        var character = new Character
+        var characterId = Guid.NewGuid();
+        var snapshot = new CharacterSnapshot
         {
             Id = Guid.NewGuid(),
-            Name = "Current build",
+            CharacterId = characterId,
+            Name = "Locked build",
             Level = 37,
             BaseAttributes =
             [
-                new EntityAttribute { AttributeType = AttributeType.MaxHealth, Value = 1_457 },
-                new EntityAttribute { AttributeType = AttributeType.Power, Value = 321 }
+                new EntityAttributeSnapshot { AttributeType = AttributeType.MaxHealth, Value = 1_457 },
+                new EntityAttributeSnapshot { AttributeType = AttributeType.Power, Value = 321 }
             ]
         };
         var creature = new Creature
@@ -39,12 +43,12 @@ public sealed class RegionBossCombatResolverTests
                 [AttributeType.Power] = 100
             }
         };
-        var entities = new FixedEntityService(character, creature);
+        var entities = new FixedEntityService(creature);
         var setup = new FixedCombatSetupService();
         var engine = new RecordingCombatEngineExecutor();
         var resolver = new RegionBossCombatResolver(
             entities,
-            setup,
+            new CombatPreparationPipeline(new FixedSnapshotCombatantBuilder(setup), setup),
             engine,
             new FixedTimeProvider(new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero)));
         var run = new RegionBossRun
@@ -55,8 +59,10 @@ public sealed class RegionBossCombatResolverTests
             [
                 new RegionBossSignup
                 {
-                    CharacterId = character.Id,
-                    CharacterName = character.Name,
+                    CharacterId = characterId,
+                    CharacterName = snapshot.Name,
+                    CharacterSnapshotId = snapshot.Id,
+                    CharacterSnapshot = snapshot,
                     PartySlot = 0
                 }
             ]
@@ -70,11 +76,40 @@ public sealed class RegionBossCombatResolverTests
         await resolver.ResolveAsync(run, definition, CancellationToken.None);
 
         var participant = Assert.Single(engine.Runtime!.FriendlyParticipants);
-        Assert.Same(character, participant.SourceEntity);
+        var source = Assert.IsType<Character>(participant.SourceEntity);
+        Assert.Equal("Locked build", source.Name);
         Assert.Equal(1_457, participant.Combatant.GetAttributeValue(AttributeType.MaxHealth));
         Assert.Equal(321, participant.Combatant.GetAttributeValue(AttributeType.Power));
         Assert.Equal(37, participant.Combatant.Level);
-        Assert.Equal([character.Id, creature.Id], entities.RequestedIds);
+        Assert.Equal([creature.Id], entities.RequestedIds);
+    }
+
+    private sealed class FixedSnapshotCombatantBuilder(ICombatSetupService setup) : ISnapshotCombatantBuilder
+    {
+        public Task<IReadOnlyList<CombatRuntimeParticipant>> BuildAsync(
+            IReadOnlyList<SnapshotCombatantRequest> requests,
+            CancellationToken cancellationToken)
+        {
+            IReadOnlyList<CombatRuntimeParticipant> participants = requests.Select(request =>
+            {
+                var source = new Character
+                {
+                    Id = request.Snapshot.CharacterId,
+                    Name = request.Snapshot.Name,
+                    Level = request.Snapshot.Level,
+                    BaseAttributes = request.Snapshot.BaseAttributes.Select(x => new EntityAttribute
+                    {
+                        AttributeType = x.AttributeType,
+                        Value = x.Value
+                    }).ToList()
+                };
+                var combatant = setup.CreatePlayerCombatEntities([source]).Single();
+                combatant.Id = request.Slot.SlotId;
+                combatant.OriginalId = request.Slot.SourceEntityId;
+                return new CombatRuntimeParticipant(request.Slot, source, combatant);
+            }).ToArray();
+            return Task.FromResult(participants);
+        }
     }
 
     private sealed class FixedEntityService(params Entity[] sourceEntities) : IEntityService
@@ -145,7 +180,7 @@ public sealed class RegionBossCombatResolverTests
         public Task<CombatExecutionWithCheckpoints> ExecuteRaidPlaybackAsync(
             CombatEncounterRuntime runtime,
             int checkpointIntervalTicks,
-            CombatSimulationOptions options,
+            CombatRuleset options,
             CancellationToken cancellationToken)
         {
             Runtime = runtime;

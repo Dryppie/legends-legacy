@@ -193,7 +193,10 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
                 new CombatParticipantSlot("friendly", friendlyCharacter.Id, CombatSide.Friendly),
                 .. hostileParticipants.Select(item => new CombatParticipantSlot(item.Combatant.Id, item.Character.Id, CombatSide.Hostile))
             ],
-            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)));
+            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)))
+        {
+            ContentType = CombatContentType.Idle
+        };
         var runtime = new CombatEncounterRuntime(
             plan,
             [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), friendlyCharacter, friendlyCombatant)],
@@ -201,7 +204,7 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
         var executor = new CombatEngineExecutor(_catalogProvider, _essenceDefinitions);
         var result = executor.ExecuteSimulationAsync(
                 runtime,
-                new CombatSimulationOptions(
+                new CombatRuleset(
                     scenario.RandomSeed,
                     MaxTicks: 6000,
                     StartActiveAbilitiesOnCooldown: true),

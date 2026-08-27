@@ -4,7 +4,6 @@ using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Quests;
-using Domain.Models.Essences;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
@@ -15,7 +14,7 @@ namespace Services.LL.Quests;
 public sealed class QuestEncounterService(
     IEntityService entityService,
     IAreaService areaService,
-    ICombatSetupService combatSetupService,
+    ICombatPreparationPipeline combatPreparation,
     ICombatEngineExecutor combatEngineExecutor,
     ICombatEncounterResultFactory combatEncounterResultFactory,
     ICombatAreaAccessService accessService,
@@ -96,13 +95,6 @@ public sealed class QuestEncounterService(
             return null;
         }
 
-        var combatPlayers = combatSetupService.CreatePlayerCombatEntities(playerTeam);
-        var combatEnemies = combatSetupService.CreateCreatureCombatEntities(enemyTeam, area);
-        await combatSetupService.PrepareEntitiesForCombat(
-            [.. combatPlayers, .. combatEnemies],
-            EssenceCombatActivity.IdleCombat);
-        SetTrainingEnemyHealth(combatEnemies.Single());
-
         var startsAt = DateTimeOffset.UtcNow;
         var encounterId = Guid.NewGuid();
         var plan = new CombatEncounterPlan(
@@ -118,11 +110,26 @@ public sealed class QuestEncounterService(
             SourceContext: new IdleEncounterSourceContext(
                 characterId,
                 area,
-                TrainingEncounterCadence));
+                TrainingEncounterCadence))
+        {
+            ContentType = CombatContentType.QuestTraining
+        };
+        var participants = await combatPreparation.PrepareAsync(
+            plan.ContentType,
+            [
+                new CombatantPreparationRequest(
+                    plan.FriendlyParticipants.Single(),
+                    new LiveCombatantPreparationSource(playerTeam.Single())),
+                new CombatantPreparationRequest(
+                    plan.HostileParticipants.Single(),
+                    new LiveCombatantPreparationSource(enemyTeam.Single(), area),
+                    ConfigureAfterPreparation: SetTrainingEnemyHealth)
+            ],
+            cancellationToken);
         var runtime = new CombatEncounterRuntime(
             plan,
-            [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), playerTeam.Single(), combatPlayers.Single())],
-            [new CombatRuntimeParticipant(plan.HostileParticipants.Single(), enemyTeam.Single(), combatEnemies.Single())]);
+            participants.Where(x => x.Slot.Side == CombatSide.Friendly).ToArray(),
+            participants.Where(x => x.Slot.Side == CombatSide.Hostile).ToArray());
 
         var result = await combatEngineExecutor.ExecuteAsync(runtime, cancellationToken);
         result = combatEncounterResultFactory.Create(runtime, result).CombatResult;

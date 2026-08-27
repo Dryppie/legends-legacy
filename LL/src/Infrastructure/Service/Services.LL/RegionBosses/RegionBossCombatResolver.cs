@@ -1,10 +1,7 @@
 using Application.Interfaces.Services.LL.Entities;
-using Domain.Models.Attributes;
 using Domain.Models.Combat;
-using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.RegionBosses;
-using Domain.Models.Essences;
 using Services.LL.Combat.Engine;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
@@ -33,7 +30,7 @@ public sealed record RegionBossCombatResolution(
 
 public sealed class RegionBossCombatResolver(
     IEntityService entities,
-    ICombatSetupService combatSetup,
+    ICombatPreparationPipeline combatPreparation,
     ICombatEngineExecutor combatEngine,
     TimeProvider timeProvider) : IRegionBossCombatResolver
 {
@@ -46,40 +43,43 @@ public sealed class RegionBossCombatResolver(
         if (members.Length == 0)
             throw new InvalidOperationException("A Region Boss run cannot resolve without party members.");
 
-        var characterIds = members.Select(x => x.CharacterId).ToList();
-        var characters = (await entities.GetEntitiesByIdsForCombatAsync(characterIds, cancellationToken))
-            .OfType<Character>()
-            .ToDictionary(x => x.Id);
-        var missingCharacterIds = characterIds.Where(x => !characters.ContainsKey(x)).ToArray();
-        if (missingCharacterIds.Length > 0)
+        var missingSnapshotCharacterIds = members
+            .Where(x => x.CharacterSnapshot is null)
+            .Select(x => x.CharacterId)
+            .ToArray();
+        if (missingSnapshotCharacterIds.Length > 0)
         {
             throw new InvalidOperationException(
-                $"Region Boss participants could not be loaded as characters: {string.Join(", ", missingCharacterIds)}.");
+                $"Region Boss participants do not have combat snapshots: {string.Join(", ", missingSnapshotCharacterIds)}.");
         }
-
-        var friendly = members.Select(member =>
-        {
-            var source = characters[member.CharacterId];
-            var combatant = combatSetup.CreatePlayerCombatEntities([source]).Single();
-            var slot = new CombatParticipantSlot(
-                member.CharacterId.ToString("N"),
-                member.CharacterId,
-                CombatSide.Friendly,
-                1);
-            combatant.Id = slot.SlotId;
-            combatant.OriginalId = member.CharacterId;
-            return new CombatRuntimeParticipant(slot, source, combatant);
-        }).ToArray();
-        await combatSetup.PrepareEntitiesForCombat(
-            friendly.Select(x => x.Combatant).ToList(),
-            EssenceCombatActivity.RegionBoss);
 
         var source = (await entities.GetEntitiesByIdsForCombatAsync([definition.CreatureId], cancellationToken))
             .OfType<Creature>()
             .SingleOrDefault()
             ?? throw new InvalidOperationException($"Region Boss creature '{definition.CreatureId}' was not found.");
-        var template = combatSetup.CreateCreatureCombatEntities([source], new Domain.Models.Regions.Areas.Area { DifficultyTier = 1 }).Single();
-        await combatSetup.PrepareEntitiesForCombat([template], EssenceCombatActivity.RegionBoss);
+        var templateSlot = new CombatParticipantSlot(
+            "region-boss-template",
+            definition.CreatureId,
+            CombatSide.Hostile);
+        var preparedParticipants = await combatPreparation.PrepareAsync(
+            CombatContentType.RegionBoss,
+            [
+                .. members.Select(member => new CombatantPreparationRequest(
+                    new CombatParticipantSlot(
+                        member.CharacterId.ToString("N"),
+                        member.CharacterId,
+                        CombatSide.Friendly,
+                        1),
+                    new SnapshotCombatantPreparationSource(member.CharacterSnapshot!))),
+                new CombatantPreparationRequest(
+                    templateSlot,
+                    new LiveCombatantPreparationSource(
+                        source,
+                        new Domain.Models.Regions.Areas.Area { DifficultyTier = 1 }))
+            ],
+            cancellationToken);
+        var friendly = preparedParticipants.Where(x => x.Slot.Side == CombatSide.Friendly).ToArray();
+        var template = preparedParticipants.Single(x => x.Slot == templateSlot).Combatant;
 
         CombatRuntimeParticipant CreateBoss(int level)
         {
@@ -101,6 +101,7 @@ public sealed class RegionBossCombatResolver(
             [.. friendly.Select(x => x.Slot), firstBoss.Slot],
             new RegionBossEncounterSourceContext(run.Id))
         {
+            ContentType = CombatContentType.RegionBoss,
             RandomSeed = run.RandomSeed,
             CaptureEventLog = false
         };
@@ -109,7 +110,7 @@ public sealed class RegionBossCombatResolver(
             friendly,
             [firstBoss],
             hostileWaveFactory: level => [CreateBoss(level)]);
-        var options = new CombatSimulationOptions(
+        var options = new CombatRuleset(
             run.RandomSeed,
             RegionBossRules.EncounterTicks,
             StartActiveAbilitiesOnCooldown: true,

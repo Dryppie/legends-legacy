@@ -1,6 +1,7 @@
 using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Repositories.Inventories;
@@ -10,12 +11,12 @@ namespace EssenceSystem.Tests;
 public sealed class InventoryNewItemTests
 {
     [Fact]
-    public async Task Crafted_items_are_new_until_the_owner_inspects_them()
+    public async Task Crafted_equipment_is_new_until_the_owner_inspects_it()
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
         AddInventory(db, characterId);
-        var item = BuildItem(characterId, "iron_sword");
+        var item = BuildEquipment(characterId, "iron_sword", EquipmentType.OneHanded);
         await db.SaveChangesAsync();
 
         var repository = new InventoryRepository(db);
@@ -40,6 +41,33 @@ public sealed class InventoryNewItemTests
         Assert.NotNull(stored.SeenAtUtc);
         Assert.InRange(stored.SeenAtUtc!.Value, before, DateTimeOffset.UtcNow);
         Assert.False(stored.IsNew);
+    }
+
+    [Theory]
+    [InlineData(ItemAcquisitionSources.Crafting, EquipmentType.OneHanded, true)]
+    [InlineData(ItemAcquisitionSources.Marketplace, EquipmentType.OneHanded, true)]
+    [InlineData(ItemAcquisitionSources.Marketplace, EquipmentType.Tool, true)]
+    [InlineData(ItemAcquisitionSources.DungeonReward, EquipmentType.Tool, true)]
+    [InlineData(ItemAcquisitionSources.DungeonReward, EquipmentType.OneHanded, false)]
+    [InlineData(ItemAcquisitionSources.QuestReward, EquipmentType.Tool, false)]
+    public void Only_eligible_equipment_acquisitions_are_new(
+        string acquisitionSource,
+        EquipmentType equipmentType,
+        bool expected)
+    {
+        var item = BuildEquipment(Guid.NewGuid(), "eligibility_test", equipmentType);
+        item.ItemInstance.AcquisitionSource = acquisitionSource;
+
+        Assert.Equal(expected, item.IsNew);
+    }
+
+    [Fact]
+    public void Crafted_non_equipment_is_not_new()
+    {
+        var item = BuildItem(Guid.NewGuid(), "crafted_resource");
+        item.ItemInstance.AcquisitionSource = ItemAcquisitionSources.Crafting;
+
+        Assert.False(item.IsNew);
     }
 
     [Fact]
@@ -103,7 +131,7 @@ public sealed class InventoryNewItemTests
         var ownerId = Guid.NewGuid();
         var strangerId = Guid.NewGuid();
         AddInventory(db, ownerId, strangerId);
-        var item = BuildItem(ownerId, "iron_sword");
+        var item = BuildEquipment(ownerId, "iron_sword", EquipmentType.OneHanded);
         await db.SaveChangesAsync();
 
         var repository = new InventoryRepository(db);
@@ -206,6 +234,34 @@ public sealed class InventoryNewItemTests
             Stackable = false
         };
         var itemInstance = new ItemInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = itemBase.Id,
+            ItemBase = itemBase
+        };
+
+        return new InventoryItem
+        {
+            InventoryId = ownerId,
+            ItemInstanceId = itemInstance.Id,
+            ItemInstance = itemInstance,
+            Quantity = 1
+        };
+    }
+
+    private static InventoryItem BuildEquipment(
+        Guid ownerId,
+        string itemBaseId,
+        EquipmentType equipmentType)
+    {
+        var itemBase = new EquipmentBase
+        {
+            Id = itemBaseId,
+            Name = itemBaseId,
+            Description = "New-marker test equipment.",
+            EquipmentType = equipmentType
+        };
+        var itemInstance = new EquipmentInstance
         {
             Id = Guid.NewGuid(),
             ItemBaseId = itemBase.Id,

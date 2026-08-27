@@ -67,6 +67,16 @@ describe('RegionService', () => {
   it('resolves the parent region from an area id', () => {
     const service = createService();
 
+    expect(service.getFirstRegionId()).toBe('shenic');
+    expect(service.getRegionIdByAreaId('tutorial_area_training_grounds')).toBe(
+      'shenic',
+    );
+    expect(service.getRegionIdByAreaId('region_01_area_01')).toBe('shenic');
+    expect(service.getRegionIdByAreaId('region_02_area_02')).toBe('meran');
+    expect(service.getRegionIdByAreaId('unknown_area')).toBeNull();
+    expect(service.isRegionId('shenic')).toBeTrue();
+    expect(service.isRegionId('meran')).toBeTrue();
+    expect(service.isRegionId('tower')).toBeFalse();
     expect(service.getRegionNameByAreaId('region_01_area_01')).toBe('Shenic');
     expect(service.getRegionNameByAreaId('region_02_area_02')).toBe('Meran');
     expect(service.getRegionNameByAreaId('region_02_area_03')).toBe('Meran');

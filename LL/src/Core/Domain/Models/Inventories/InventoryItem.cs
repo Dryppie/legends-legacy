@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
 
 namespace Domain.Models.Inventories;
 public class InventoryItem
@@ -15,7 +16,7 @@ public class InventoryItem
     /// <summary>
     /// When the owning character first inspected this item in the inventory.
     /// Null until then. Lives on the inventory row rather than the item instance so it scopes
-    /// to the owner and resets naturally when an item changes hands.
+    /// to the owner; each acquisition or movement workflow decides whether a new row starts seen.
     /// </summary>
     public DateTimeOffset? SeenAtUtc { get; set; }
 
@@ -27,15 +28,26 @@ public class InventoryItem
     public bool IsFavorite { get; set; }
 
     /// <summary>
-    /// True while this is a crafted item the owner has not inspected yet.
-    /// Widening the feature to other acquisition sources is a change to this predicate alone.
+    /// True while this is an eligible equipment acquisition the owner has not inspected yet.
+    /// Eligible acquisitions are crafted equipment, marketplace equipment purchases, and
+    /// gathering tools dropped by dungeons.
     /// </summary>
     [NotMapped]
     public bool IsNew =>
         SeenAtUtc is null
-        && ItemInstance is not null
-        && string.Equals(
-            ItemInstance.AcquisitionSource,
-            ItemAcquisitionSources.Crafting,
-            StringComparison.Ordinal);
+        && ItemInstance is EquipmentInstance equipment
+        && equipment.ItemBase is EquipmentBase equipmentBase
+        && (string.Equals(
+                equipment.AcquisitionSource,
+                ItemAcquisitionSources.Crafting,
+                StringComparison.Ordinal)
+            || string.Equals(
+                equipment.AcquisitionSource,
+                ItemAcquisitionSources.Marketplace,
+                StringComparison.Ordinal)
+            || equipmentBase.EquipmentType == EquipmentType.Tool
+                && string.Equals(
+                    equipment.AcquisitionSource,
+                    ItemAcquisitionSources.DungeonReward,
+                    StringComparison.Ordinal));
 }

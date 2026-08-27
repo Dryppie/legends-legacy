@@ -6,7 +6,6 @@ using Domain.Models.Colosseum;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Items;
-using Domain.Models.Items.Equipments;
 using Domain.Models.Leaderboards;
 using Domain.Models.Snapshots;
 using Domain.Models.Essences;
@@ -25,7 +24,7 @@ public class ColosseumService : IColosseumService
 
     private readonly IEntityService _entityService;
     private readonly ICharacterService _characterService;
-    private readonly ICombatSetupService _combatSetupService;
+    private readonly ICombatPreparationPipeline _combatPreparation;
     private readonly IColosseumRepository _colosseumRepository;
     private readonly ICombatEngineExecutor _combatEngineExecutor;
     private readonly ICombatEncounterResultFactory _combatEncounterResultFactory;
@@ -40,7 +39,7 @@ public class ColosseumService : IColosseumService
     public ColosseumService(
         IEntityService es,
         ICharacterService cs,
-        ICombatSetupService css,
+        ICombatPreparationPipeline combatPreparation,
         IColosseumRepository cr,
         ICombatEngineExecutor combatEngineExecutor,
         ICombatEncounterResultFactory combatEncounterResultFactory,
@@ -54,7 +53,7 @@ public class ColosseumService : IColosseumService
     {
         _entityService = es;
         _characterService = cs;
-        _combatSetupService = css;
+        _combatPreparation = combatPreparation;
         _colosseumRepository = cr;
         _combatEngineExecutor = combatEngineExecutor;
         _combatEncounterResultFactory = combatEncounterResultFactory;
@@ -88,36 +87,44 @@ public class ColosseumService : IColosseumService
 
         var playerTeam = await _entityService.GetEntitiesByIdsForCombatAsync([characterId], cancellationToken);
         if (playerTeam.Count == 0) return null;
-        var enemyTeam = await _entityService.GetEntitiesByIdsForCombatAsync([enemyId], cancellationToken);
-        if (enemyTeam.Count == 0) return null;
-
-        var combatPlayerEntities = _combatSetupService.CreatePlayerCombatEntities(playerTeam);
-        var combatEnemyEntities = await CreateDefenderCombatEntitiesAsync(enemyTeam, defenderSnapshot, cancellationToken);
-        await _combatSetupService.PrepareEntitiesForCombat(
-            [.. combatPlayerEntities, .. combatEnemyEntities],
-            EssenceCombatActivity.Arena);
 
         var encounterPlan = CreateArenaEncounterPlan(
             characterId,
             enemyId,
             now);
+        CombatantPreparationSource hostileSource;
+        if (defenderSnapshot is { IsValid: true, IsOutdated: false })
+        {
+            hostileSource = new SnapshotCombatantPreparationSource(defenderSnapshot.CharacterSnapshot);
+        }
+        else
+        {
+            var enemyTeam = await _entityService.GetEntitiesByIdsForCombatAsync([enemyId], cancellationToken);
+            if (enemyTeam.Count == 0) return null;
+            hostileSource = new LiveCombatantPreparationSource(enemyTeam.Single());
+        }
+
+        var participants = await _combatPreparation.PrepareAsync(
+            encounterPlan.ContentType,
+            [
+                new CombatantPreparationRequest(
+                    encounterPlan.FriendlyParticipants.Single(),
+                    new LiveCombatantPreparationSource(playerTeam.Single())),
+                new CombatantPreparationRequest(
+                    encounterPlan.HostileParticipants.Single(),
+                    hostileSource)
+            ],
+            cancellationToken);
+        var friendlyParticipant = participants.Single(x => x.Slot.Side == CombatSide.Friendly);
+        var hostileParticipant = participants.Single(x => x.Slot.Side == CombatSide.Hostile);
+
         arenaTicketStatus.CurrentTickets--;
         _colosseumRepository.UpdateArenaTicketStatus(arenaTicketStatus);
 
         var runtime = new CombatEncounterRuntime(
             encounterPlan,
-            [
-                new CombatRuntimeParticipant(
-                    encounterPlan.FriendlyParticipants.Single(),
-                    playerTeam.Single(),
-                    combatPlayerEntities.Single())
-            ],
-            [
-                new CombatRuntimeParticipant(
-                    encounterPlan.HostileParticipants.Single(),
-                    enemyTeam.Single(),
-                    combatEnemyEntities.Single())
-            ]);
+            [friendlyParticipant],
+            [hostileParticipant]);
 
         var combatResult = await _combatEngineExecutor.ExecuteAsync(runtime, cancellationToken);
         combatResult = _combatEncounterResultFactory.Create(runtime, combatResult).CombatResult;
@@ -178,75 +185,6 @@ public class ColosseumService : IColosseumService
             0,
             streakBefore,
             attackerArena.CurrentAttackWinStreak);
-    }
-
-    private async Task<CombatEntity> CreateSnapshotCombatEntityAsync(Character sourceCharacter, CharacterSnapshot snapshot, CancellationToken cancellationToken)
-    {
-        var template = _combatSetupService.CreatePlayerCombatEntities([sourceCharacter]).Single();
-        template.Name = snapshot.Name;
-        template.Level = snapshot.Level;
-        template.BaseAttributes = snapshot.BaseAttributes
-            .Select(x => new Domain.Models.Attributes.EntityAttribute
-            {
-                EntityId = snapshot.CharacterId,
-                AttributeType = x.AttributeType,
-                Value = x.Value
-            })
-            .ToList();
-        template.EquippedEssences = snapshot.EquippedEssences
-            .OrderBy(x => x.SlotIndex)
-            .Select(x => x.ToPlayerEssence(snapshot.CharacterId))
-            .ToList();
-        template.HasEquippedEssenceSnapshot = true;
-
-        var itemBases = await _itemBaseRepository.GetItemBasesByIdsAsync(
-            snapshot.Equipment.Select(x => x.ItemBaseId).Distinct().ToArray(),
-            cancellationToken);
-
-        template.Equipment = snapshot.Equipment
-            .OrderBy(x => x.Slot)
-            .Where(x => itemBases.ContainsKey(x.ItemBaseId))
-            .Select(x => new EquipmentInstance
-            {
-                Id = x.EquipmentInstanceId,
-                ItemBaseId = x.ItemBaseId,
-                ItemBase = itemBases[x.ItemBaseId],
-                BaseRecipeId = x.BaseRecipeId,
-                EquipmentSetId = x.EquipmentSetId,
-                Rarity = x.Rarity,
-                Quality = x.Quality,
-                Tier = x.Tier,
-                StatModelVersion = x.StatModelVersion,
-                Potential = x.Potential,
-                ItemXp = x.ItemXp,
-                IsMasterpiece = x.IsMasterpiece,
-                IsLevelingItem = x.IsLevelingItem,
-                InstanceModifiers = x.InstanceModifiers
-                    .Select(modifier => modifier.ToInstanceModifier(x.EquipmentInstanceId))
-                    .ToList()
-            })
-            .ToList();
-
-        return template;
-    }
-
-    private async Task<List<CombatEntity>> CreateDefenderCombatEntitiesAsync(
-        List<Domain.Models.Entities.Entity> enemyTeam,
-        ArenaDefenseSnapshot? defenderSnapshot,
-        CancellationToken cancellationToken)
-    {
-        if (defenderSnapshot is { IsValid: true, IsOutdated: false })
-        {
-            return
-            [
-                await CreateSnapshotCombatEntityAsync(
-                    (Character)enemyTeam.Single(),
-                    defenderSnapshot.CharacterSnapshot,
-                    cancellationToken)
-            ];
-        }
-
-        return _combatSetupService.CreatePlayerCombatEntities(enemyTeam);
     }
 
     private ColosseumRatingResult ApplyRatings(Character attacker, Character defender, BattleOutcome outcome)
@@ -357,7 +295,10 @@ public class ColosseumService : IColosseumService
                 new CombatParticipantSlot(characterId.ToString(), characterId, CombatSide.Friendly),
                 new CombatParticipantSlot(enemyId.ToString(), enemyId, CombatSide.Hostile)
             ],
-            SourceContext: new PvpEncounterSourceContext(matchId, characterId, enemyId));
+            SourceContext: new PvpEncounterSourceContext(matchId, characterId, enemyId))
+        {
+            ContentType = CombatContentType.Arena
+        };
     }
 
     /// <summary>
@@ -392,12 +333,6 @@ public class ColosseumService : IColosseumService
     {
         var character = await _colosseumRepository.GetArenaCharacterAsync(characterId, cancellationToken);
         if (character is null) return null;
-
-        var team = await _entityService.GetEntitiesByIdsForCombatAsync([characterId], cancellationToken);
-        if (team.Count == 0) return null;
-
-        var combatEntities = _combatSetupService.CreatePlayerCombatEntities(team);
-        await _combatSetupService.PrepareEntitiesForCombat(combatEntities, EssenceCombatActivity.Arena);
 
         var snapshot = await _characterSnapshotService.CreateAsync(characterId, EssenceCombatActivity.Arena, cancellationToken);
         var now = DateTimeOffset.UtcNow;

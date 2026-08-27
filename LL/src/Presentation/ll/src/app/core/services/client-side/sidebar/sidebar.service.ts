@@ -96,7 +96,7 @@ function getSidebarSections(): SidebarSection[] {
       items: [
         {
           id: 'world',
-          route: ['world', 'shenic'],
+          route: ['world'],
           icon: 'sidebar/world/world-map',
           title: 'World Map',
           description: 'Travel and explore',

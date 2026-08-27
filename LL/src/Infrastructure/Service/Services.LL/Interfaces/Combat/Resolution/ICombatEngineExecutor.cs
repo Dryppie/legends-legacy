@@ -61,20 +61,20 @@ public interface ICombatEngineExecutor
     Task<CombatExecutionWithCheckpoints> ExecuteRaidPlaybackAsync(
         CombatEncounterRuntime runtime,
         int checkpointIntervalTicks,
-        CombatSimulationOptions options,
+        CombatRuleset ruleset,
         CancellationToken cancellationToken) =>
         ExecuteCompactPlaybackAsync(runtime, checkpointIntervalTicks, cancellationToken);
 
     Task<CombatExecutionWithCheckpoints> ExecuteTournamentPlaybackAsync(
         CombatEncounterRuntime runtime,
         int checkpointIntervalTicks,
-        TournamentCombatSimulationOptions options,
+        CombatRuleset ruleset,
         CancellationToken cancellationToken) =>
         ExecuteCompactPlaybackAsync(runtime, checkpointIntervalTicks, cancellationToken);
 
     Task<CombatResult> ExecuteSimulationAsync(
         CombatEncounterRuntime runtime,
-        CombatSimulationOptions options,
+        CombatRuleset ruleset,
         CancellationToken cancellationToken) =>
         throw new NotSupportedException("This combat executor does not support isolated simulation.");
 
@@ -90,7 +90,7 @@ public interface ICombatEngineExecutor
     };
 }
 
-public sealed record CombatSimulationOptions(
+public sealed record CombatRuleset(
     int RandomSeed,
     int MaxTicks = 1800,
     bool StartActiveAbilitiesOnCooldown = true,
@@ -118,9 +118,3 @@ public sealed record CombatHostileFuryOptions(
     int IntervalTicks,
     float PowerPercentPerStack,
     float AttackSpeedPercentPerStack);
-
-public sealed record TournamentCombatSimulationOptions(
-    int RegulationTicks,
-    int OvertimeTicks,
-    int OvertimePowerIncreaseIntervalTicks,
-    float OvertimePowerIncreasePercent);

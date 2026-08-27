@@ -458,6 +458,57 @@ public sealed class MarketPlaceServiceTests
     }
 
     [Fact]
+    public async Task BuyoutEquipment_MarksThePurchaseAsNewMarketplaceEquipment()
+    {
+        var buyerId = Guid.NewGuid();
+        var sellerId = Guid.NewGuid();
+        var equipmentBase = new EquipmentBase
+        {
+            Id = "marketplace_sword",
+            Name = "Marketplace Sword",
+            EquipmentType = EquipmentType.OneHanded
+        };
+        var equipment = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = equipmentBase.Id,
+            ItemBase = equipmentBase,
+            AcquisitionSource = ItemAcquisitionSources.Crafting
+        };
+        var listing = new MarketPlaceListing
+        {
+            Id = Guid.NewGuid(),
+            SellerId = sellerId,
+            ItemInstanceId = equipment.Id,
+            ItemInstance = equipment,
+            Quantity = 1,
+            UnitPrice = 100,
+            CreatedAt = DateTimeOffset.UtcNow,
+            ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)
+        };
+        var market = new FakeMarketRepository();
+        market.Listings.Add(listing);
+        var inventory = new FakeInventoryService(null);
+        var service = CreateService(
+            market,
+            inventory,
+            [equipmentBase],
+            new Character { Id = buyerId, Cinders = 100 },
+            new Character { Id = sellerId });
+
+        var result = await service.BuyoutMarketPlaceListingAsync(
+            buyerId,
+            listing.Id,
+            1,
+            CancellationToken.None);
+
+        Assert.NotNull(result);
+        var purchased = Assert.Single(inventory.MarketPurchases);
+        Assert.Equal(ItemAcquisitionSources.Marketplace, purchased.ItemInstance.AcquisitionSource);
+        Assert.True(purchased.IsNew);
+    }
+
+    [Fact]
     public async Task BuyCommodity_MixedOwnershipAtOnePrice_SkipsOwnQuantity()
     {
         var buyerId = Guid.NewGuid();

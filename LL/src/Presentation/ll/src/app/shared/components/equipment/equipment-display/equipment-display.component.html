@@ -50,6 +50,18 @@
         <div
           *ngFor="let comparison of comparisonAttributeRows"
           class="border-b border-white/5 py-1.5 last:border-b-0"
+          [attr.data-testid]="
+            temperingBonus(data, comparison.attributeType)
+              ? 'tempered-attribute-row'
+              : null
+          "
+          [appTemperingBonusTooltip]="
+            temperingTooltipDataOrNull(
+              data,
+              comparison.attributeType,
+              comparison.hoveredAmount
+            )
+          "
         >
           <div
             class="grid min-h-6 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3"
@@ -63,13 +75,6 @@
               <span
                 data-testid="tempered-attribute-name"
                 class="truncate text-secondary"
-                [appTemperingBonusTooltip]="
-                  temperingTooltipData(
-                    data,
-                    comparison.attributeType,
-                    comparison.hoveredAmount
-                  )
-                "
               >
                 {{
                   comparison.attributeType
@@ -124,13 +129,6 @@
                   *ngIf="temperingBonus(data, comparison.attributeType)"
                   data-testid="tempering-bonus"
                   class="equipment-tempering-bonus"
-                  [appTemperingBonusTooltip]="
-                    temperingTooltipData(
-                      data,
-                      comparison.attributeType,
-                      comparison.hoveredAmount
-                    )
-                  "
                 >
                   <span aria-hidden="true">✦</span>
                   {{ formatTemperingBonus(data, comparison.attributeType) }}
@@ -217,6 +215,18 @@
         <div
           *ngFor="let comparison of comparisonAttributeRows"
           class="border-b border-white/5 py-1.5 last:border-b-0"
+          [attr.data-testid]="
+            temperingBonus(equipped.data, comparison.attributeType)
+              ? 'tempered-attribute-row'
+              : null
+          "
+          [appTemperingBonusTooltip]="
+            temperingTooltipDataOrNull(
+              equipped.data,
+              comparison.attributeType,
+              equippedAmount(equipped, comparison.attributeType)
+            )
+          "
         >
           <div
             class="grid min-h-6 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3"
@@ -230,13 +240,6 @@
               <span
                 data-testid="tempered-attribute-name"
                 class="truncate text-secondary"
-                [appTemperingBonusTooltip]="
-                  temperingTooltipData(
-                    equipped.data,
-                    comparison.attributeType,
-                    equippedAmount(equipped, comparison.attributeType)
-                  )
-                "
               >
                 {{
                   comparison.attributeType
@@ -290,13 +293,6 @@
                   "
                   data-testid="tempering-bonus"
                   class="equipment-tempering-bonus"
-                  [appTemperingBonusTooltip]="
-                    temperingTooltipData(
-                      equipped.data,
-                      comparison.attributeType,
-                      equippedAmount(equipped, comparison.attributeType)
-                    )
-                  "
                 >
                   <span aria-hidden="true">✦</span>
                   {{
@@ -535,6 +531,18 @@
           <div
             *ngFor="let comparison of comparisonRows"
             class="equipment-design-row"
+            [attr.data-testid]="
+              temperingBonus(data, comparison.attributeType)
+                ? 'tempered-attribute-row'
+                : null
+            "
+            [appInventoryTemperingBonusTooltip]="
+              temperingTooltipDataOrNull(
+                data,
+                comparison.attributeType,
+                comparison.hoveredAmount
+              )
+            "
           >
             <div class="flex items-baseline justify-between gap-3 text-xs">
               <ng-container
@@ -546,13 +554,6 @@
                 <span
                   data-testid="tempered-attribute-name"
                   class="truncate text-white"
-                  [appTemperingBonusTooltip]="
-                    temperingTooltipData(
-                      data,
-                      comparison.attributeType,
-                      comparison.hoveredAmount
-                    )
-                  "
                 >
                   {{
                     comparison.attributeType
@@ -601,13 +602,6 @@
                   *ngIf="temperingBonus(data, comparison.attributeType)"
                   data-testid="tempering-bonus"
                   class="equipment-tempering-bonus"
-                  [appTemperingBonusTooltip]="
-                    temperingTooltipData(
-                      data,
-                      comparison.attributeType,
-                      comparison.hoveredAmount
-                    )
-                  "
                 >
                   <span aria-hidden="true">✦</span>
                   {{ formatTemperingBonus(data, comparison.attributeType) }}
@@ -676,7 +670,59 @@
           <span class="text-primary">{{ formatToolBonusAmount(bonus) }}</span>
         </div>
 
-        <div *ngFor="let attr of data.attributes" class="equipment-design-row">
+        <ng-container *ngFor="let attr of data.attributes">
+          <ng-container *ngIf="inlineComparison; else temperingAttributeRow">
+            <div
+              class="equipment-design-row"
+              [attr.data-testid]="
+                temperingBonus(data, attr.attributeType)
+                  ? 'tempered-attribute-row'
+                  : null
+              "
+              [appInventoryTemperingBonusTooltip]="
+                temperingTooltipDataOrNull(
+                  data,
+                  attr.attributeType,
+                  attr.amount
+                )
+              "
+            >
+              <ng-container
+                *ngTemplateOutlet="
+                  standardAttributeRowContent;
+                  context: { $implicit: attr }
+                "
+              />
+            </div>
+          </ng-container>
+
+          <ng-template #temperingAttributeRow>
+            <div
+              class="equipment-design-row"
+              [attr.data-testid]="
+                temperingBonus(data, attr.attributeType)
+                  ? 'tempered-attribute-row'
+                  : null
+              "
+              [appTemperingBonusTooltip]="
+                temperingTooltipDataOrNull(
+                  data,
+                  attr.attributeType,
+                  attr.amount
+                )
+              "
+            >
+              <ng-container
+                *ngTemplateOutlet="
+                  standardAttributeRowContent;
+                  context: { $implicit: attr }
+                "
+              />
+            </div>
+          </ng-template>
+        </ng-container>
+
+        <ng-template #standardAttributeRowContent let-attr>
           <div class="flex items-baseline justify-between gap-3 text-xs">
             <ng-container
               *ngIf="
@@ -687,9 +733,6 @@
               <span
                 data-testid="tempered-attribute-name"
                 class="truncate text-white"
-                [appTemperingBonusTooltip]="
-                  temperingTooltipData(data, attr.attributeType, attr.amount)
-                "
               >
                 {{
                   attr.attributeType
@@ -730,9 +773,6 @@
                 *ngIf="temperingBonus(data, attr.attributeType)"
                 data-testid="tempering-bonus"
                 class="equipment-tempering-bonus"
-                [appTemperingBonusTooltip]="
-                  temperingTooltipData(data, attr.attributeType, attr.amount)
-                "
               >
                 <span aria-hidden="true">✦</span>
                 {{ formatTemperingBonus(data, attr.attributeType) }}
@@ -754,7 +794,7 @@
               "
             ></span>
           </div>
-        </div>
+        </ng-template>
       </ng-template>
     </div>
 

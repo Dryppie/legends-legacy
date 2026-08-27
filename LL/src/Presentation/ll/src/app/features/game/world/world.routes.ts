@@ -10,6 +10,7 @@ import { TowerPersonalExpeditionsComponent } from './tower/personal-expeditions/
 import { RaidPageComponent } from './raid/raid-page.component';
 import { raidFeatureGuard } from '../../../core/guards/raid-feature.guard';
 import { RegionBossComponent } from './region-boss/region-boss.component';
+import { worldMapRegionGuard } from '../../../core/guards/world-map-region.guard';
 
 export const WORLD_ROUTES: Routes = [
   {
@@ -59,6 +60,7 @@ export const WORLD_ROUTES: Routes = [
       },
       {
         path: '',
+        canMatch: [worldMapRegionGuard],
         redirectTo: 'shenic',
         pathMatch: 'full',
       },

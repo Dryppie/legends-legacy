@@ -1,3 +1,5 @@
+using Domain.Models.Snapshots;
+
 namespace Domain.Models.RegionBosses;
 
 public enum RegionBossEventStatus
@@ -70,6 +72,8 @@ public sealed class RegionBossSignup
     public string CharacterName { get; set; } = string.Empty;
     public int PowerRating { get; set; }
     public int PowerRatingAlgorithmVersion { get; set; }
+    public Guid? CharacterSnapshotId { get; set; }
+    public CharacterSnapshot? CharacterSnapshot { get; set; }
     public Guid? RegionBossRunId { get; set; }
     public RegionBossRun? Run { get; set; }
     public int? PartySlot { get; set; }

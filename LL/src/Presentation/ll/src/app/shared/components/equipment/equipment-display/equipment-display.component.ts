@@ -1,4 +1,10 @@
-import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
+import {
+  DecimalPipe,
+  NgClass,
+  NgFor,
+  NgIf,
+  NgTemplateOutlet,
+} from '@angular/common';
 import { Component, Input } from '@angular/core';
 import {
   AttributeTypeFormatPipe,
@@ -40,6 +46,7 @@ import { TemperingBonusTooltipDirective } from '../../../directives/tempering-bo
 import { TemperingBonusTooltipData } from '../../custom-components/tooltips/tempering-bonus-tooltip/tempering-bonus-tooltip-panel.component';
 import { toolBonusDisplayLabel } from '../../custom-components/tooltips/tool-bonus-tooltip/tool-bonus-tooltip';
 import { EquipmentSetProgressComponent } from '../equipment-set-progress/equipment-set-progress.component';
+import { InventoryTemperingBonusTooltipComponent } from './inventory-tempering-bonus-tooltip.component';
 
 interface EquipmentComparisonView {
   slotType: EquipmentSlotType | null;
@@ -54,11 +61,13 @@ interface EquipmentComparisonView {
     NgIf,
     NgFor,
     NgClass,
+    NgTemplateOutlet,
     AttributeTypeFormatPipe,
     AttributeValueFormatPipe,
     AttributeTooltipDirective,
     ToolBonusTooltipDirective,
     TemperingBonusTooltipDirective,
+    InventoryTemperingBonusTooltipComponent,
     EquipmentSetProgressComponent,
     DecimalPipe,
   ],
@@ -288,6 +297,16 @@ export class EquipmentDisplayComponent {
         equipmentRating,
       ),
     };
+  }
+
+  temperingTooltipDataOrNull(
+    item: EquipmentDisplay,
+    attributeType: AttributeType,
+    finalAmount: number,
+  ): TemperingBonusTooltipData | null {
+    return this.temperingBonus(item, attributeType)
+      ? this.temperingTooltipData(item, attributeType, finalAmount)
+      : null;
   }
 
   rollPercentage(value: number, minimum: number, maximum: number): number {

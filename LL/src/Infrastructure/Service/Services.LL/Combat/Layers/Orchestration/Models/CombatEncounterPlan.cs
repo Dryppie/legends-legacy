@@ -8,6 +8,7 @@ public sealed record CombatEncounterPlan(
     IReadOnlyList<CombatParticipantSlot> Participants,
     CombatEncounterSourceContext SourceContext)
 {
+    public required CombatContentType ContentType { get; init; }
     public int? RandomSeed { get; init; }
     public bool CaptureEventLog { get; init; } = true;
 

@@ -301,10 +301,41 @@ public sealed class CanonicalEquipmentBuildFactory
         CreateBuildCore(profile, rung, essenceCount);
 
     public CanonicalEquipmentBuild CreateBuild(
+        CanonicalPartyProfile profile,
+        CanonicalEquipmentProgressionRung rung,
+        IReadOnlyList<string> essenceIds)
+    {
+        var normalizedEssenceIds = ValidateExplicitEssences(essenceIds);
+        var build = CreateBuildCore(profile, rung, normalizedEssenceIds.Count);
+        var identity = $"{profile}:explicit:{string.Join(':', normalizedEssenceIds)}";
+        var essences = CreateEssences(
+            normalizedEssenceIds,
+            identity,
+            build.Character.Id,
+            normalizedEssenceIds.Count);
+        return build with
+        {
+            EquippedEssences = essences,
+            Rating = CalculateRating(build.Character, build.Equipment, essences)
+        };
+    }
+
+    public CanonicalEquipmentBuild CreateBuild(
         CanonicalCooperativeRole role,
         CanonicalEquipmentProgressionRung rung,
         int essenceCount) =>
         CreateRoleBuildCore(role, rung, essenceCount);
+
+    public CanonicalEquipmentBuild CreateBuild(
+        CanonicalCooperativeRole role,
+        CanonicalEquipmentProgressionRung rung,
+        IReadOnlyList<string> essenceIds)
+    {
+        var profile = CanonicalCooperativeRosterCatalog.EquipmentProfileFor(role);
+        var build = CreateBuild(profile, rung, essenceIds);
+        build.Character.Name = $"Canonical {role} - {rung.Id}";
+        return build;
+    }
 
     public CanonicalEquipmentBuild CreateBuildForDungeonTier(
         CanonicalPartyProfile profile,
@@ -415,7 +446,7 @@ public sealed class CanonicalEquipmentBuildFactory
             throw new ArgumentException(
                 "The progression rung does not belong to the active canonical ladder.",
                 nameof(rung));
-        if (essenceCount is < 1 or > MaximumCanonicalEssenceCount)
+        if (essenceCount is < 0 or > MaximumCanonicalEssenceCount)
             throw new ArgumentOutOfRangeException(nameof(essenceCount));
 
         var character = new Character
@@ -625,6 +656,39 @@ public sealed class CanonicalEquipmentBuildFactory
                 UpdatedAt = DateTimeOffset.UnixEpoch
             })
             .ToList();
+
+    private IReadOnlyList<string> ValidateExplicitEssences(IReadOnlyList<string> essenceIds)
+    {
+        ArgumentNullException.ThrowIfNull(essenceIds);
+        if (essenceIds.Count > MaximumCanonicalEssenceCount)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(essenceIds),
+                essenceIds.Count,
+                $"Canonical builds require between zero and {MaximumCanonicalEssenceCount} Essences.");
+        }
+
+        var normalized = essenceIds
+            .Select(id => id?.Trim() ?? string.Empty)
+            .ToArray();
+        if (normalized.Any(string.IsNullOrWhiteSpace))
+            throw new ArgumentException("Canonical Essence IDs cannot be empty.", nameof(essenceIds));
+        if (normalized.Distinct(StringComparer.OrdinalIgnoreCase).Count() != normalized.Length)
+            throw new ArgumentException("Canonical builds cannot contain duplicate Essences.", nameof(essenceIds));
+
+        var definitions = normalized.Select(id => _essenceDefinitions.GetById(id)
+            ?? throw new InvalidOperationException($"Canonical Essence '{id}' was not found.")).ToArray();
+        var duplicateSource = definitions
+            .GroupBy(definition => definition.SourceMonsterId, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault(group => group.Count() > 1);
+        if (duplicateSource is not null)
+        {
+            throw new InvalidOperationException(
+                $"Canonical builds cannot equip multiple Essences from '{duplicateSource.Key}'.");
+        }
+
+        return normalized;
+    }
 
     private IReadOnlyList<CanonicalEquipmentProgressionRung> CreateLadder()
     {

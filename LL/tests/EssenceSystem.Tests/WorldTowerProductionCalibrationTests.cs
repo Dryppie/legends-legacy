@@ -81,21 +81,40 @@ public sealed class WorldTowerProductionCalibrationTests
         var definitions = new JsonWorldTowerDefinitionProvider(
             Path.Combine(contentRoot, "Data", "world-tower", "tower-floors.json"),
             jsonOptions);
+        var abilityCatalog = new JsonAbilityCatalogProvider(configuration, contentRoot, jsonOptions);
         var runner = new WorldTowerProductionCalibrationRunner(
             definitions,
             new CalibrationGuardianEntityService(definitions),
-            new WorldTowerCombatRuntimeFactory(new SnapshotCombatantBuilder(db, setup), setup),
+            new WorldTowerCombatRuntimeFactory(
+                new CombatPreparationPipeline(new SnapshotCombatantBuilder(db, setup), setup)),
             new CombatEngineExecutor(
-                new JsonAbilityCatalogProvider(configuration, contentRoot, jsonOptions),
+                abilityCatalog,
                 essenceDefinitions,
                 crafting),
             canonical,
-            essenceDefinitions);
+            essenceDefinitions,
+            abilityCatalog);
 
         var report = await runner.RunAsync(new WorldTowerProductionCalibrationOptions(
             SampleCount: 10));
+        var profileRequirements = runner.GetProfileScenarioRequirements(1, 15);
 
         Assert.Equal(45, report.Results.Count);
+        Assert.Null(report.SeedManifest);
+        Assert.Equal(64, report.InputFingerprint.Length);
+        Assert.Equal(
+            Enumerable.Range(1, 15),
+            profileRequirements.SelectMany(requirement => requirement.FloorNumbers).Order());
+        Assert.Equal(
+            profileRequirements.Count,
+            profileRequirements.Select(requirement => requirement.ScenarioId).Distinct().Count());
+        Assert.All(profileRequirements, requirement =>
+        {
+            Assert.Contains(requirement.TeamSize, new[] { 5, 10, 15 });
+            Assert.Equal("Balanced", requirement.AuditEquipmentProfile);
+            Assert.Contains($"team-{requirement.TeamSize}", requirement.ScenarioId);
+            Assert.Contains($"essences-{requirement.EssencesPerParticipant}", requirement.ScenarioId);
+        });
         Assert.All(report.Results, result => Assert.True(result.AbilitiesStartOnCooldown));
         Assert.All(report.Results, result => Assert.Equal(
             result.FloorNumber switch

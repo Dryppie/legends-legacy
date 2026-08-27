@@ -2,7 +2,6 @@ using Application.Interfaces.Services.LL.Combat;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
-using Domain.Models.Essences;
 using Domain.Models.Regions.Areas;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
@@ -18,8 +17,7 @@ namespace Services.LL.WorldTower;
 /// identity, and encounter metadata must remain identical for both callers.
 /// </summary>
 public sealed class WorldTowerCombatRuntimeFactory(
-    ISnapshotCombatantBuilder snapshotCombatants,
-    ICombatSetupService combatSetup) : IWorldTowerCombatRuntimeFactory
+    ICombatPreparationPipeline combatPreparation) : IWorldTowerCombatRuntimeFactory
 {
     public async Task<CombatEncounterRuntime> CreateAsync(
         WorldTowerCombatRuntimeRequest request,
@@ -27,51 +25,54 @@ public sealed class WorldTowerCombatRuntimeFactory(
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var friendly = (await snapshotCombatants.BuildAsync(
-            request.FriendlyCombatants,
-            cancellationToken)).ToList();
-        foreach (var participant in friendly)
-        {
-            AddPercentModifier(
-                participant.Combatant,
-                AttributeType.Power,
-                request.PlayerDamagePercent);
-            AddPercentModifier(
-                participant.Combatant,
-                AttributeType.ArmorPenetration,
-                request.WeakPointPercent);
-            AddPercentModifier(
-                participant.Combatant,
-                AttributeType.MagicPenetration,
-                request.WeakPointPercent);
-        }
-
-        var guardian = combatSetup.CreateCreatureCombatEntities(
-            [request.GuardianSource],
-            new Area { DifficultyTier = request.Definition.ProgressionPosition }).Single();
-        WorldTowerGuardianScaling.Apply(
-            guardian,
-            request.Definition.GuardianScaling,
-            request.Definition.RequiredSlots);
-        guardian.StaggerDefinition = request.Definition.Stagger;
-        guardian.StaggerParticipantCount = friendly.Count;
-        AddPercentModifier(
-            guardian,
-            AttributeType.Power,
-            -request.GuardianDamageReductionPercent);
-
         var hostileSlot = new CombatParticipantSlot(
             request.Definition.GuardianCreatureId.ToString(),
             request.Definition.GuardianCreatureId,
             CombatSide.Hostile);
-        var hostile = new CombatRuntimeParticipant(
-            hostileSlot,
-            request.GuardianSource,
-            guardian);
-
-        await combatSetup.PrepareEntitiesForCombat(
-            [.. friendly.Select(x => x.Combatant), guardian],
-            EssenceCombatActivity.WorldTower);
+        var preparationRequests = request.FriendlyCombatants
+            .Select(snapshotRequest => new CombatantPreparationRequest(
+                snapshotRequest.Slot,
+                new SnapshotCombatantPreparationSource(snapshotRequest.Snapshot),
+                combatant =>
+                {
+                    AddPercentModifier(
+                        combatant,
+                        AttributeType.Power,
+                        request.PlayerDamagePercent);
+                    AddPercentModifier(
+                        combatant,
+                        AttributeType.ArmorPenetration,
+                        request.WeakPointPercent);
+                    AddPercentModifier(
+                        combatant,
+                        AttributeType.MagicPenetration,
+                        request.WeakPointPercent);
+                }))
+            .Append(new CombatantPreparationRequest(
+                hostileSlot,
+                new LiveCombatantPreparationSource(
+                    request.GuardianSource,
+                    new Area { DifficultyTier = request.Definition.ProgressionPosition }),
+                combatant =>
+                {
+                    WorldTowerGuardianScaling.Apply(
+                        combatant,
+                        request.Definition.GuardianScaling,
+                        request.Definition.RequiredSlots);
+                    combatant.StaggerDefinition = request.Definition.Stagger;
+                    combatant.StaggerParticipantCount = request.FriendlyCombatants.Count;
+                    AddPercentModifier(
+                        combatant,
+                        AttributeType.Power,
+                        -request.GuardianDamageReductionPercent);
+                }))
+            .ToArray();
+        var participants = await combatPreparation.PrepareAsync(
+            CombatContentType.WorldTower,
+            preparationRequests,
+            cancellationToken);
+        var friendly = participants.Where(x => x.Slot.Side == CombatSide.Friendly).ToList();
+        var hostile = participants.Single(x => x.Slot.Side == CombatSide.Hostile);
 
         var plan = new CombatEncounterPlan(
             request.EncounterId,
@@ -82,7 +83,11 @@ public sealed class WorldTowerCombatRuntimeFactory(
             new RaidEncounterSourceContext(
                 request.RallyId,
                 1,
-                $"tower-floor-{request.Definition.FloorNumber}"));
+                $"tower-floor-{request.Definition.FloorNumber}"))
+        {
+            ContentType = CombatContentType.WorldTower,
+            RandomSeed = request.RandomSeed
+        };
         return new CombatEncounterRuntime(plan, friendly, [hostile]);
     }
 

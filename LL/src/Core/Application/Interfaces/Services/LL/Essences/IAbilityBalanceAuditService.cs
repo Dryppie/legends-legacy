@@ -18,7 +18,8 @@ public sealed record AbilityBalanceAuditRequest(
     IReadOnlyList<int>? RandomSeeds = null,
     int EquipmentTier = 10,
     string EquipmentRarity = "Epic",
-    string EquipmentProfile = "Balanced");
+    string EquipmentProfile = "Balanced",
+    bool UseCanonicalRoles = false);
 
 public sealed record AbilityBalanceAuditReport(
     string ContentHash,
@@ -35,7 +36,10 @@ public sealed record AbilityBalanceAuditReport(
     IReadOnlyList<AbilityBalanceEssenceResult> EssenceResults,
     IReadOnlyList<AbilityBalanceEssenceResult> FinalistEssenceResults,
     IReadOnlyList<AbilityBalanceValidationResult> ValidationResults,
-    IReadOnlyList<AbilityBalanceCombinationResult> Finalists);
+    IReadOnlyList<AbilityBalanceCombinationResult> Finalists,
+    IReadOnlyList<int>? RandomSeeds = null,
+    IReadOnlyList<AbilityBalanceMatchupResult>? FinalistMatchups = null,
+    IReadOnlyDictionary<string, IReadOnlyDictionary<string, float>>? ParticipantAttributesByRole = null);
 
 public sealed record AbilityBalanceValidationResult(
     string EssenceId,

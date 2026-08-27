@@ -63,6 +63,31 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Balance_simulator_supports_fifteen_member_tower_teams()
+    {
+        var simulator = new AbilityBalanceSimulator(
+            new JsonAbilityCatalogProvider(CreateConfig(), FindApiContentRoot(), CreateJsonOptions()),
+            new JsonEssenceDefinitionRepository(
+                CreateConfig(),
+                FindApiContentRoot(),
+                CreateJsonOptions(),
+                new EssenceDefinitionValidator()));
+
+        var report = simulator.Run(new AbilityBalanceSimulationRequest(
+            BattleCount: 1,
+            TeamSize: 99,
+            EssencesPerParticipant: 1,
+            RandomSeed: 321,
+            TopResults: 2,
+            CandidatePoolSize: 2,
+            CandidateTeams: null));
+
+        Assert.Equal(15, report.TeamSize);
+        Assert.All(report.RankedCombinations, combination =>
+            Assert.Equal(15, combination.Participants.Count));
+    }
+
+    [Fact]
     public void Balance_simulator_runs_saved_combinations_as_round_robin()
     {
         var provider = new JsonAbilityCatalogProvider(
@@ -94,6 +119,13 @@ public sealed class AbilitySystemTests
         Assert.Equal(2, report.CandidateTeamCount);
         Assert.Equal(2, report.RankedCombinations.Count);
         Assert.All(report.RankedCombinations, combination => Assert.Equal(6, combination.Battles));
+        var matchup = Assert.Single(report.MatchupResults!);
+        Assert.Equal(6, matchup.Battles);
+        Assert.Equal(matchup.Battles, matchup.FirstWins + matchup.SecondWins + matchup.Draws);
+        Assert.Equal(
+            (matchup.FirstWins + matchup.Draws * 0.5d) / matchup.Battles,
+            matchup.FirstScore,
+            precision: 10);
     }
 
     [Fact]
@@ -6581,7 +6613,10 @@ public sealed class AbilitySystemTests
                 new CombatParticipantSlot("friendly-slot", friendlyCharacter.Id, CombatSide.Friendly),
                 new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
             ],
-            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)));
+            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)))
+        {
+            ContentType = CombatContentType.Idle
+        };
         var runtime = new CombatEncounterRuntime(
             plan,
             [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), friendlyCharacter, friendlyCombatant)],
@@ -6719,7 +6754,10 @@ public sealed class AbilitySystemTests
                 new CombatParticipantSlot("friendly-slot", friendlyCharacter.Id, CombatSide.Friendly),
                 new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
             ],
-            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)));
+            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)))
+        {
+            ContentType = CombatContentType.Idle
+        };
         var runtime = new CombatEncounterRuntime(
             plan,
             [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), friendlyCharacter, friendlyCombatant)],
@@ -6813,7 +6851,10 @@ public sealed class AbilitySystemTests
                 new CombatParticipantSlot("friendly-slot", friendlyCharacter.Id, CombatSide.Friendly),
                 new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
             ],
-            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)));
+            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)))
+        {
+            ContentType = CombatContentType.Idle
+        };
         var runtime = new CombatEncounterRuntime(
             plan,
             [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), friendlyCharacter, friendlyCombatant)],
@@ -6871,7 +6912,10 @@ public sealed class AbilitySystemTests
                 new CombatParticipantSlot("friendly-slot", friendlyCharacter.Id, CombatSide.Friendly),
                 new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
             ],
-            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)));
+            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)))
+        {
+            ContentType = CombatContentType.Idle
+        };
         var runtime = new CombatEncounterRuntime(
             plan,
             [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), friendlyCharacter, friendlyCombatant)],
@@ -6955,7 +6999,10 @@ public sealed class AbilitySystemTests
                 new CombatParticipantSlot("friendly-slot", friendlyCharacter.Id, CombatSide.Friendly),
                 new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
             ],
-            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)));
+            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)))
+        {
+            ContentType = CombatContentType.Idle
+        };
         var runtime = new CombatEncounterRuntime(
             plan,
             [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), friendlyCharacter, friendlyCombatant)],
@@ -7035,7 +7082,10 @@ public sealed class AbilitySystemTests
                 new CombatParticipantSlot("friendly-slot", friendlyCharacter.Id, CombatSide.Friendly),
                 new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
             ],
-            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)));
+            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)))
+        {
+            ContentType = CombatContentType.Idle
+        };
         var runtime = new CombatEncounterRuntime(
             plan,
             [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), friendlyCharacter, friendlyCombatant)],
@@ -7075,7 +7125,10 @@ public sealed class AbilitySystemTests
                 new CombatParticipantSlot("fox-slot", foxCharacter.Id, CombatSide.Friendly),
                 new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
             ],
-            new IdleEncounterSourceContext(foxCharacter.Id, new Area(), TimeSpan.FromSeconds(1)));
+            new IdleEncounterSourceContext(foxCharacter.Id, new Area(), TimeSpan.FromSeconds(1)))
+        {
+            ContentType = CombatContentType.Idle
+        };
         var runtime = new CombatEncounterRuntime(
             plan,
             [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), foxCharacter, foxCombatant)],
@@ -7128,7 +7181,7 @@ public sealed class AbilitySystemTests
 
         var result = await executor.ExecuteSimulationAsync(
             runtime,
-            new CombatSimulationOptions(
+            new CombatRuleset(
                 RandomSeed: 1337,
                 MaxTicks: 300,
                 StartActiveAbilitiesOnCooldown: true,
@@ -7590,6 +7643,127 @@ public sealed class AbilitySystemTests
 
         Assert.Equal(lastHostileSnapshot.Health, runtime.HostileParticipants.Single().Combatant.GetCurrentHealthValue());
         Assert.Equal(lastHostileSnapshot.Barrier, runtime.HostileParticipants.Single().Combatant.GetCurrentBarrierValue());
+        Assert.Equal("friendly-slot", Assert.Single(result.PlayerTeam).Id);
+        Assert.Equal("hostile-slot", Assert.Single(result.EnemyTeam).Id);
+        Assert.True(result.PlayerTeam[0].Threat > 0);
+    }
+
+    [Theory]
+    [InlineData(CombatContentType.Idle, CombatMode.Idle, EssenceCombatActivity.IdleCombat)]
+    [InlineData(CombatContentType.Dungeon, CombatMode.Dungeon, EssenceCombatActivity.Dungeon)]
+    [InlineData(CombatContentType.Arena, CombatMode.Pvp, EssenceCombatActivity.Arena)]
+    [InlineData(CombatContentType.Tournament, CombatMode.Pvp, EssenceCombatActivity.Tournament)]
+    [InlineData(CombatContentType.Raid, CombatMode.Raid, EssenceCombatActivity.Raid)]
+    [InlineData(CombatContentType.WorldTower, CombatMode.Raid, EssenceCombatActivity.WorldTower)]
+    [InlineData(CombatContentType.RegionBoss, CombatMode.RegionBoss, EssenceCombatActivity.RegionBoss)]
+    [InlineData(CombatContentType.QuestTraining, CombatMode.Idle, EssenceCombatActivity.IdleCombat)]
+    public void Combat_content_type_maps_to_mechanics_and_essence_activity(
+        CombatContentType contentType,
+        CombatMode expectedMode,
+        EssenceCombatActivity expectedActivity)
+    {
+        Assert.Equal(expectedMode, contentType.ToCombatMode());
+        Assert.Equal(expectedActivity, contentType.ToEssenceActivity());
+    }
+
+    [Fact]
+    public void Combat_runtime_rejects_content_and_mode_mismatch()
+    {
+        var plan = new CombatEncounterPlan(
+            Guid.NewGuid(),
+            CombatMode.Pvp,
+            1,
+            DateTimeOffset.UtcNow,
+            [],
+            new PvpEncounterSourceContext(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()))
+        {
+            ContentType = CombatContentType.WorldTower
+        };
+
+        var exception = Assert.Throws<InvalidOperationException>(() => new CombatEncounterRuntime(plan, [], []));
+
+        Assert.Contains(nameof(CombatContentType.WorldTower), exception.Message);
+        Assert.Contains(nameof(CombatMode.Raid), exception.Message);
+    }
+
+    [Fact]
+    public void Content_objective_can_override_result_without_losing_engine_outcome()
+    {
+        var result = new CombatResult { Outcome = BattleOutcome.Draw };
+
+        result.ApplyContentOutcome(CombatObjectiveEvaluator.Evaluate(
+            CombatObjectivePolicy.ObjectiveCompletion,
+            result.EngineOutcome,
+            objectiveSatisfied: true));
+
+        Assert.Equal(BattleOutcome.Draw, result.EngineOutcome);
+        Assert.Equal(BattleOutcome.Victory, result.ContentOutcome);
+        Assert.Equal(BattleOutcome.Victory, result.Outcome);
+    }
+
+    [Fact]
+    public void Combat_result_outcomes_round_trip_and_accept_legacy_outcome_json()
+    {
+        var replayOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter() }
+        };
+        var result = new CombatResult { Outcome = BattleOutcome.Draw };
+        result.ApplyContentOutcome(BattleOutcome.Victory);
+
+        var roundTrip = JsonSerializer.Deserialize<CombatResult>(
+            JsonSerializer.Serialize(result, replayOptions),
+            replayOptions);
+        var legacy = JsonSerializer.Deserialize<CombatResult>("{\"outcome\":\"Draw\"}", replayOptions);
+        var reordered = JsonSerializer.Deserialize<CombatResult>(
+            "{\"EngineOutcome\":2,\"ContentOutcome\":0,\"Outcome\":0}");
+
+        Assert.NotNull(roundTrip);
+        Assert.Equal(BattleOutcome.Draw, roundTrip.EngineOutcome);
+        Assert.Equal(BattleOutcome.Victory, roundTrip.ContentOutcome);
+        Assert.Equal(BattleOutcome.Victory, roundTrip.Outcome);
+        Assert.NotNull(legacy);
+        Assert.Equal(BattleOutcome.Draw, legacy.EngineOutcome);
+        Assert.Equal(BattleOutcome.Draw, legacy.ContentOutcome);
+        Assert.NotNull(reordered);
+        Assert.Equal(BattleOutcome.Draw, reordered.EngineOutcome);
+        Assert.Equal(BattleOutcome.Victory, reordered.ContentOutcome);
+    }
+
+    [Fact]
+    public void Combat_result_factory_preserves_authoritative_engine_teams()
+    {
+        var runtime = CreateTrainingEncounterRuntime(out _, out _);
+        var friendly = new SimpleCombatEntity
+        {
+            Id = "friendly-slot",
+            Threat = 321,
+            PartyNumber = 7
+        };
+        var hostile = new SimpleCombatEntity
+        {
+            Id = "reinforcement-slot",
+            Threat = 654,
+            PartyNumber = 9
+        };
+        var combatResult = new CombatResult
+        {
+            Outcome = BattleOutcome.Victory,
+            PlayerTeam = [friendly],
+            EnemyTeam = [hostile]
+        };
+
+        var resolution = new CombatEncounterResultFactory().Create(runtime, combatResult);
+
+        Assert.Same(combatResult.PlayerTeam, resolution.FriendlyPostState);
+        Assert.Same(combatResult.EnemyTeam, resolution.HostilePostState);
+        Assert.Same(friendly, Assert.Single(resolution.FriendlyPostState));
+        Assert.Same(hostile, Assert.Single(resolution.HostilePostState));
+        Assert.Equal(321, resolution.FriendlyPostState[0].Threat);
+        Assert.Equal(7, resolution.FriendlyPostState[0].PartyNumber);
+        Assert.Equal("reinforcement-slot", resolution.HostilePostState[0].Id);
+        Assert.Equal(runtime.Plan.ContentType, resolution.ContentType);
     }
 
     [Fact]
@@ -7604,7 +7778,7 @@ public sealed class AbilitySystemTests
 
         var result = await executor.ExecuteSimulationAsync(
             runtime,
-            new CombatSimulationOptions(1337, 6000),
+            new CombatRuleset(1337, 6000),
             CancellationToken.None);
 
         var friendly = Assert.Single(result.PlayerTeam);
@@ -7630,7 +7804,7 @@ public sealed class AbilitySystemTests
         var execution = await executor.ExecuteRaidPlaybackAsync(
             runtime,
             checkpointIntervalTicks: 10,
-            new CombatSimulationOptions(1337, 6000),
+            new CombatRuleset(1337, 6000),
             CancellationToken.None);
 
         var friendly = Assert.Single(execution.Result.PlayerTeam);
@@ -7696,7 +7870,7 @@ public sealed class AbilitySystemTests
 
         var result = await executor.ExecuteSimulationAsync(
             runtime,
-            new CombatSimulationOptions(
+            new CombatRuleset(
                 RandomSeed: 123,
                 MaxTicks: 10,
                 StartActiveAbilitiesOnCooldown: false,
@@ -8334,7 +8508,10 @@ public sealed class AbilitySystemTests
                 new CombatParticipantSlot("friendly-slot", friendlyCharacter.Id, CombatSide.Friendly),
                 new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
             ],
-            CreateSourceContext(mode, friendlyCharacter.Id, hostileCharacter.Id));
+            CreateSourceContext(mode, friendlyCharacter.Id, hostileCharacter.Id))
+        {
+            ContentType = CreateContentType(mode)
+        };
 
         return new CombatEncounterRuntime(
             plan,
@@ -8362,7 +8539,10 @@ public sealed class AbilitySystemTests
                 new CombatParticipantSlot("friendly-slot", friendlyCharacter.Id, CombatSide.Friendly),
                 new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
             ],
-            CreateSourceContext(mode, friendlyCharacter.Id, hostileCharacter.Id));
+            CreateSourceContext(mode, friendlyCharacter.Id, hostileCharacter.Id))
+        {
+            ContentType = CreateContentType(mode)
+        };
 
         return new CombatEncounterRuntime(
             plan,
@@ -8381,6 +8561,17 @@ public sealed class AbilitySystemTests
             CombatMode.Raid => new RaidEncounterSourceContext(Guid.NewGuid(), PhaseIndex: 1, StageKey: "test-stage"),
             CombatMode.RegionBoss => new RegionBossEncounterSourceContext(Guid.NewGuid()),
             _ => new IdleEncounterSourceContext(friendlyCharacterId, new Area(), TimeSpan.FromSeconds(1))
+        };
+
+    private static CombatContentType CreateContentType(CombatMode mode) =>
+        mode switch
+        {
+            CombatMode.Idle => CombatContentType.Idle,
+            CombatMode.Dungeon => CombatContentType.Dungeon,
+            CombatMode.Pvp => CombatContentType.Arena,
+            CombatMode.Raid => CombatContentType.Raid,
+            CombatMode.RegionBoss => CombatContentType.RegionBoss,
+            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
         };
 
     private static RuntimeCombatant CreateCombatant(
