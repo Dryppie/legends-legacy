@@ -697,15 +697,16 @@ public sealed class CombatCharacterProfileService(
                 {
                     throw new InvalidOperationException(
                         "World Tower profile generation could not select a legal calibration team with an "
-                        + $"estimated win rate between {WorldTowerProfileTargetContract.MinimumWinRate:P0} and "
-                        + $"{WorldTowerProfileTargetContract.MaximumWinRate:P0} for floor(s) "
+                        + FormattableString.Invariant(
+                            $"estimated win rate between {WorldTowerProfileTargetContract.MinimumWinRate * 100d:0}% and {WorldTowerProfileTargetContract.MaximumWinRate * 100d:0}% for floor(s) ")
                         + $"{string.Join(", ", uncoveredFloors.Order())}.");
                 }
 
                 var rates = EvidenceFor(anchor.Candidate)
                     .Where(evidence => anchor.Floors.Contains(evidence.FloorNumber))
                     .OrderBy(evidence => evidence.FloorNumber)
-                    .Select(evidence => $"floor {evidence.FloorNumber} ({evidence.WinRate:P0})");
+                    .Select(evidence => FormattableString.Invariant(
+                        $"floor {evidence.FloorNumber} ({evidence.WinRate * 100d:0}%)"));
                 var usesDirectContextEvidence = IsDirectAnchor(anchor.Candidate);
                 AddSelection(
                     "CalibrationAnchor",

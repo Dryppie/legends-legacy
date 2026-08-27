@@ -17,7 +17,7 @@ The Character Profile and World Tower calibration infrastructure is also impleme
 
 The first fingerprint-contract-3 campaign, `e6b1d2a5-3f66-4b19-85ff-cde9e53af32e`, completed all five fresh role-aware audits, production finalist qualification, catalog generation, smoke, and 100-sample certification on 2026-08-27. It retained 380,760 discovery battles and produced all 13 exact Tower scenarios under profile schema/generator 7. Its original certification-contract-1 report blocked promotion with 27 findings.
 
-Certification contract 3 reflects the current product rule: any one exact-context legal team may satisfy the profile gate when its estimated win rate is inclusively between 5% and 20%, regardless of family or population weight. A team below 5% or above 20% does not qualify. Confidence intervals, every team's outcome, the weighted population, and cross-team spread remain visible diagnostics but do not gate the profile decision. Re-evaluation campaign `72d8c717-7b5e-4b02-8dc9-eb59d5785094` found qualifying teams on floors 3, 9, 11, 12, and 15, nine canonical findings, and ten floors without an in-band team. Generator 8 now turns exact-floor qualification into a hard selection constraint by adding diagnostic-weight `CalibrationAnchor` expeditions. Campaign `08e3c381-ad73-41a1-8f07-7b099154a14d` reused all five audits and failed closed at floor 4 because the current finalist pool cannot supply a selectable in-band anchor. See [`world-tower-contract-v3-campaign-review.md`](world-tower-contract-v3-campaign-review.md).
+Certification contract 3 reflects the current product rule: any one exact-context legal team may satisfy the profile gate when its estimated win rate is inclusively between 5% and 20%, regardless of family or population weight. A team below 5% or above 20% does not qualify. Confidence intervals, every team's outcome, the weighted population, and cross-team spread remain visible diagnostics but do not gate the profile decision. Re-evaluation campaign `72d8c717-7b5e-4b02-8dc9-eb59d5785094` found qualifying teams on floors 3, 9, 11, 12, and 15, nine canonical findings, and ten floors without an in-band team. Generator 8 then made exact-floor qualification a hard selection constraint by adding diagnostic-weight `CalibrationAnchor` expeditions. Campaign `08e3c381-ad73-41a1-8f07-7b099154a14d` reused all five audits and failed closed at floor 4 because its finalist pool could not supply a selectable in-band anchor. See [`world-tower-contract-v3-campaign-review.md`](world-tower-contract-v3-campaign-review.md).
 
 Generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` is the current result. It uses a fixed certification seed manifest for both 100-sample anchor confirmation and campaign certification, counts final homogeneous families before adding anchors, and keeps a bounded direct-search reserve so profile allocation cannot consume the only apparent in-band source. It completed with 13 valid profile sets, passing smoke, all 15 floors profile-covered, all canonical confidence gates passing, zero certification issues, and `isPromotionReady: true`. This is candidate evidence only; the source-controlled approved catalog still requires human review and commit.
 
@@ -29,11 +29,12 @@ Therefore:
 
 ## World Tower campaign snapshot
 
-Status captured on 2026-08-27 after completing the first fingerprint-contract-3 campaign:
+Status captured on 2026-08-27 after completing the passing generator-13 campaign:
 
 | Field | Current value |
 | --- | --- |
-| Evidence campaign | `e6b1d2a5-3f66-4b19-85ff-cde9e53af32e` |
+| Current evidence campaign | `66368b83-07c1-4a7a-baf6-487c65fc8492` |
+| First fingerprint-contract-3 campaign | `e6b1d2a5-3f66-4b19-85ff-cde9e53af32e`; historical generator-7 failure |
 | Contract-2 re-evaluation | `db118f5e-e968-4113-be25-3f17e6cdc53d` |
 | Contract-3 re-evaluation | `72d8c717-7b5e-4b02-8dc9-eb59d5785094` |
 | Generator-8 anchor campaign | `08e3c381-ad73-41a1-8f07-7b099154a14d`; failed at floor 4 |
@@ -47,7 +48,7 @@ Status captured on 2026-08-27 after completing the first fingerprint-contract-3 
 | Screening battles | 10,000 per seed |
 | Seeds | 1,337; 2,027; 9,001 |
 | Finalist matchup sampling | 34 fights × 3 seeds = 102 direct battles |
-| Catalog generated | Yes; 13 profile sets and 130 teams |
+| Catalog generated | Yes; 13 profile sets and 142 teams |
 | Catalog valid | Yes; zero validation issues |
 | Historical campaign profile schema / generator | 7 / 7 |
 | Current implementation profile schema / generator | 7 / 13 |
@@ -63,7 +64,7 @@ The earlier thirteen-audit campaign remains preserved separately as diagnostic a
 
 Campaign state is persisted outside the repository at:
 
-`%LOCALAPPDATA%\LegendsLegacy\AdminDashboard\combat-audit-campaigns\e6b1d2a53f664b1985ffcde9e53af32e\campaign.json`
+`%LOCALAPPDATA%\LegendsLegacy\AdminDashboard\combat-audit-campaigns\66368b8307c14a7abaf6487c65fc8492\campaign.json`
 
 The earlier schema-2 and schema-3 campaigns remain preserved as historical diagnostic evidence. They must not be retried or promoted under the current role-aware discovery and Tower-qualification contract.
 
@@ -124,7 +125,7 @@ The approved catalog at [`LL/src/API/API.LL/Data/combat/combat-character-profile
 }
 ```
 
-This empty catalog is deliberate. It prevents unfinished or unreviewed audit results from becoming official calibration inputs. It also means that profile-based World Tower coverage and certification cannot currently pass.
+This empty catalog is deliberate. It prevents unfinished or unreviewed audit results from becoming official calibration inputs. Approved-catalog World Tower runs therefore still report coverage gaps; the separate in-memory candidate path has passed for generator-13 and remains pending human promotion.
 
 ## Confidence by content type
 

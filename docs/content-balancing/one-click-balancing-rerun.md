@@ -82,9 +82,9 @@ A structurally completed campaign can still be promotion-blocked. `isPromotionRe
 
 ## Expected runtime
 
-The expensive global search remains five role-aware five-character discovery audits. With the default 24 finalists and floors 1–15, initial preselection screening adds about `24 × 15 × 10 = 3,600` production Tower battles across the 13 scenario generations. Every apparent in-band result then receives 100-sample confirmation. A missing floor can add a bounded direct search of up to 500 legal parties, screened at ten samples and confirmed at 100 only when it appears in band. The flow does not repeat the global PvP Essence audit for every floor.
+The expensive global search remains five role-aware five-character discovery audits. With the default 24 finalists and floors 1–15, initial preselection screening adds about `24 × 15 × 10 = 3,600` production Tower battles across the 13 scenario generations. Every apparent in-band result then receives 100-sample confirmation. Generator 13 also prepares a deterministic reserve for every scenario and may screen up to 500 additional legal parties per floor context at ten samples, or at most `500 × 15 × 10 = 75,000` reserve-screening battles across floors 1–15. Batched search stops when coverage is available, so normal work is lower; only apparent hits receive the 100-sample confirmation. The flow does not repeat the global PvP Essence audit for every floor.
 
-After catalog generation, the default Expanded portfolio has ten teams per exact floor. Smoke uses ten samples and certification uses 100 samples per selected team/cohort. These gates intentionally test the much smaller selected population rather than every discovered combination.
+After catalog generation, the default Expanded portfolio has ten core teams per exact scenario plus as many as two diagnostic `CalibrationAnchor` teams. Smoke uses ten samples and certification uses 100 samples per selected team/cohort. These gates intentionally test the much smaller selected population rather than every discovered combination. The passing generator-13 catalog contains 142 teams across 13 exact scenario sets.
 
 ## Stored artifacts
 
@@ -111,3 +111,7 @@ The evidence export includes every artifact. Reused audits identify their source
 8. Commit the reviewed JSON through normal source control. No database or deployment action is performed by this tool.
 
 Fingerprint-contract-v2 and older campaigns remain historical evidence. Because role-aware discovery and Tower-context qualification changed the evidence meaning, the first run under fingerprint contract v3 must regenerate discovery and build a new catalog.
+
+## Last verified passing campaign
+
+Campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` completed on 2026-08-27 with profile schema/generator 7/13. It reused five compatible role-aware audits containing 380,760 discovery battles, generated 13 valid scenario sets and 142 teams, passed production smoke, and passed fixed-seed 100-sample certification with zero issues. Every floor had at least one exact-context legal team with an inclusive 5%–20% estimated win rate, all canonical confidence gates passed, and `isPromotionReady` was true. The approved catalog remains unchanged pending human review and source-control commit.

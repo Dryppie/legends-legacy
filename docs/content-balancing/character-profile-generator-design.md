@@ -60,8 +60,8 @@ Remaining follow-up work:
 
 - Direct consumption of approved profiles by Raid, Dungeon, and other production calibration runners. World Tower consumption now exists in shadow mode.
 - Review and source-control promotion of the first fully passing generator-13 catalog candidate.
-- Population of the bootstrap catalog using a completed, passing, and reviewed current-contract campaign. The committed catalog deliberately remains empty until that evidence exists.
-- Approved World Tower portfolios for every required scenario. Until they are committed, the shadow report will deliberately show coverage gaps instead of extrapolating smaller or differently equipped teams.
+- Population of the bootstrap catalog using the completed and passing generator-13 campaign after human review. The committed catalog deliberately remains empty until the reviewed candidate is promoted.
+- Approved World Tower portfolios for every required scenario. Until the passing candidate is reviewed and committed, the approved-catalog shadow report will deliberately show coverage gaps instead of extrapolating smaller or differently equipped teams.
 - Optional tier- and equipment-context stability evidence. Current stability is measured across the finalist audit's configured random seeds; separate audits are still required to compare progression contexts.
 - A release certification run after the approved catalog is populated. Pull-request evidence should use at least 100 samples per team; release evidence should raise this to 500–1,000.
 

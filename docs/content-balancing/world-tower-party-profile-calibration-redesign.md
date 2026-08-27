@@ -18,7 +18,7 @@ This redesign supplements:
 - [`character-profile-generator-design.md`](character-profile-generator-design.md)
 - [`combat-calibration-current-state-and-gaps.md`](combat-calibration-current-state-and-gaps.md)
 
-## Implementation status — 2026-08-26
+## Implementation status — 2026-08-27
 
 The first implementation slice is complete:
 
@@ -48,7 +48,7 @@ Replacement schema-3 campaign `e283b6e9-0463-497e-8ff3-3536ba1fd1b7` completed a
 
 The first schema-4 campaign, `6339d840-f00a-4630-a869-d5ad862a3bd1`, subsequently completed candidate smoke and 100-sample certification. Promotion was correctly blocked by 29 confidence and profile-spread findings. Investigation showed that the then-current five-person discovery still used identical balanced participant attributes and that finalist selection had no production-floor evidence. Those discrepancies are corrected by version 7 and fingerprint contract 3.
 
-Current-contract campaign `e6b1d2a5-3f66-4b19-85ff-cde9e53af32e` completed on 2026-08-27 with five fresh role-aware audits, exact-floor qualification, 13 valid profile sets, passing smoke, and failed 100-sample certification. Its 27 issues are now the current balance evidence; see [`world-tower-contract-v3-campaign-review.md`](world-tower-contract-v3-campaign-review.md). The source-controlled approved catalog remains empty.
+Historical generator-7 campaign `e6b1d2a5-3f66-4b19-85ff-cde9e53af32e` completed on 2026-08-27 with five fresh role-aware audits, exact-floor qualification, 13 valid profile sets, passing smoke, and failed 100-sample certification. Its findings drove the final any-one-team contract, direct anchors, fixed seed manifest, reserve search, and floor tuning documented in [`world-tower-contract-v3-campaign-review.md`](world-tower-contract-v3-campaign-review.md).
 
 Generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` supersedes that result. It reused the five audits, rebuilt all context evidence under the fixed certification manifest, produced 13 valid sets, passed smoke, and passed 100-sample certification with zero issues. It is ready for human promotion review; the approved catalog remains unchanged until separately reviewed and committed.
 
@@ -397,11 +397,11 @@ The retired thirteen-context campaign's completed artifacts remain useful diagno
 
 They should not become the final approved World Tower profile source because the 10/15-person audit model does not reproduce production party-local allied targeting.
 
-That legacy campaign was cancelled after four completed audits; its artifacts were retained and its monitor was paused. The later schema-3 and pre-role-aware schema-4 campaigns are also historical. The fresh fingerprint-contract-3 campaign is now complete and promotion-blocked by its certification evidence.
+That legacy campaign was cancelled after four completed audits; its artifacts were retained and its monitor was paused. The later schema-3, pre-role-aware schema-4, and generator-7/8 campaigns are also historical. Generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` is the current evidence and passes the pull-request-scale contract with zero issues.
 
 ## Acceptance criteria and current status
 
-The current campaign satisfies criteria 1–9 and measured criterion 11. Criterion 10 remains blocked by balance failures:
+The generator-13 campaign satisfies criteria 1–9 and 11, and the pull-request-scale portion of criterion 10. Release-scale evidence remains to be archived:
 
 1. No World Tower Essence discovery audit contains more than five characters.
 2. Every currently required Essence count has one reusable, evidence-backed party library.
@@ -412,7 +412,7 @@ The current campaign satisfies criteria 1–9 and measured criterion 11. Criteri
 7. All parties still interact correctly with the shared guardian, stagger, threat, and outcome.
 8. Every floor has ten diversified complete expedition profiles.
 9. The complete catalog passes stale-content, legality, identity, preparation, Power Rating, context-qualification, and coverage validation.
-10. **Blocked by balance:** the 100-sample certification must pass before approval, and release evidence must use 500–1,000 samples.
+10. **Pull-request pass:** the fixed-seed 100-sample certification passes with zero issues; release evidence must still use 500–1,000 samples.
 11. A full role-aware discovery, qualification, and pull-request certification round completed successfully as one resumable campaign.
 
 ## Conclusion

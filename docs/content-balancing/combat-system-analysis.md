@@ -338,6 +338,8 @@ The new [`WorldTowerProfileShadowCalibrationRunner.cs`](../../LL/src/Infrastruct
 
 World Tower Essence discovery uses reusable five-character parties with the canonical Guardian, Restorer, Striker, Striker, and Controller roles and role-specific discovery attributes. Before profile families are selected, every eligible finalist is materialized at the exact target equipment rung and receives ten deterministic battles on every target floor through the production guardian, scaling, stagger, cooldown, runtime, and playback paths. Profile materialization then creates exact 5/10/15-character expeditions with explicit party assignments. The pass remains intentionally non-authoritative: invalid catalogs fail closed, missing or malformed qualification coverage is reported, and no runner can update floor definitions or player-facing recommendations.
 
+Generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` is the current pull-request-scale evidence. It confirms every apparent qualifying hit with 100 battles from the same fixed seed manifest used by certification, and it passed all profile and canonical gates with zero issues. Its catalog is still a candidate until human review and source-control promotion.
+
 Remaining limitations:
 
 - The legacy smoke calibration still uses ten implicitly seeded samples per floor/cohort. At a measured 50% win rate, ten Bernoulli samples have a very wide 95% interval of roughly 24%–76%; a one-battle change moves the estimate by ten percentage points. The new certification path defaults to 100 samples and supports 1,000.
@@ -449,7 +451,7 @@ A player-facing recommendation should be considered trustworthy only when all of
 3. Every authored recommendation has below/at/above cohorts with an explicit success contract.
 4. All unapproved calibration exceptions fail CI.
 5. Confidence-based sample thresholds and monotonic cohort checks pass.
-6. Multiple legal builds and party compositions at the same rating stay within an approved outcome spread.
+6. At least one exact-context legal team independently records an inclusive 5%–20% estimated win rate and meets the sample, timeout, and production-runtime contract; all other team outcomes and cross-team spread remain visible diagnostics.
 7. The report carries complete version/content provenance.
 8. Live aggregate outcomes remain within the predicted confidence band.
 

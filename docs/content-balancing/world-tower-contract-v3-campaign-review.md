@@ -1,14 +1,20 @@
 # World Tower fingerprint-contract-3 campaign review
 
-## Review decision
+## Current decision
 
-Campaign `e6b1d2a5-3f66-4b19-85ff-cde9e53af32e` is the first complete role-aware, production-qualified World Tower campaign under fingerprint contract 3 and historical profile schema/generator 7/7. Generator 8 now supersedes its catalog selection behavior with target-aware anchors.
+Generator-13 campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` is the current candidate. It passes catalog validation, production smoke, and fixed-seed 100-sample certification with zero issues, and is ready for human promotion review. The approved catalog and Tower recommendations remain unchanged until that review and a separate source-control commit.
+
+The sections below retain the failed generator-7 evidence because it explains the certification-contract changes, anchor design, reserve search, and authored floor adjustments. Instructions not to export apply to those historical generator-7 catalogs, not to the passing generator-13 candidate.
+
+## Historical generator-7 decision
+
+Campaign `e6b1d2a5-3f66-4b19-85ff-cde9e53af32e` is the first complete role-aware, production-qualified World Tower campaign under fingerprint contract 3 and historical profile schema/generator 7/7. Later generators supersede its catalog selection behavior with target-aware anchors and bounded reserve search.
 
 The campaign proves that the current orchestration, discovery, qualification, catalog generation, smoke, and certification paths execute successfully. Its original certification-contract-1 report failed with 27 issues. Certification contract 2 removed population averages and profile spread as promotion gates. Certification contract 3 now applies the final clarified profile rule: any one team's estimated win rate must be inclusively between 5% and 20%. Campaign `72d8c717-7b5e-4b02-8dc9-eb59d5785094` re-evaluated the same discovery/catalog evidence and remains **not eligible for promotion** with nineteen issues.
 
-Do not export this catalog into the approved source-controlled catalog and do not run release-scale certification yet.
+Do not export this historical catalog into the approved source-controlled catalog.
 
-## Campaign facts
+## Historical campaign facts
 
 | Property | Result |
 | --- | --- |
@@ -121,7 +127,22 @@ Floors 1, 2, 4–8, 10, 13, and 14 have no team whose estimate is between 5% and
 
 ## Generator-13 passing campaign
 
-Campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` reused the five role-aware audits and completed on 2026-08-27 with profile schema/generator 7/13. It generated 13 valid profile sets, produced zero catalog issues, passed production smoke, and passed fixed-seed 100-sample certification with zero issues. The seed manifest is `world-tower-certification-v1`, shared by anchor confirmation and certification rather than derived from campaign identity.
+Campaign `66368b83-07c1-4a7a-baf6-487c65fc8492` reused the five role-aware audits and completed on 2026-08-27 with profile schema/generator 7/13. It generated 13 valid profile sets and 142 teams, produced zero catalog issues, passed production smoke, and passed fixed-seed 100-sample certification with zero issues. The seed manifest is `world-tower-certification-v1`, shared by anchor confirmation and certification rather than derived from campaign identity.
+
+The passing candidate includes these authored floor-definition adjustments from the pre-tuning baseline:
+
+| Floor | Adjustment |
+| ---: | --- |
+| 2 | Guardian offense multiplier `1.44 → 1.38` |
+| 4 | Guardian offense multiplier `1.59 → 2.40` |
+| 5 | Guardian offense multiplier `1.50 → 1.58` |
+| 11 | Guardian offense multiplier `3.50 → 3.72` |
+| 12 | Guardian health multiplier `2.80 → 2.65`; offense multiplier `3.20 → 3.40` |
+| 13 | Guardian offense multiplier `3.40 → 3.36` |
+| 14 | Guardian health multiplier `3.85 → 3.98`; offense multiplier `3.40 → 3.43`; stagger threshold `250 → 300` |
+| 15 | Guardian offense multiplier `3.30 → 3.50` |
+
+These values are supported by the campaign evidence below. They are not an instruction to mutate recommendations during a rerun; content changes remain ordinary reviewed source changes and invalidate the relevant campaign fingerprints.
 
 | Floor | Canonical below / recommended / stronger | Example qualifying family | Estimated win rate |
 | ---: | --- | --- | ---: |
